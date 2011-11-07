@@ -9,4 +9,4 @@ setparam poller_tags=ARG1 from poller where poller_name=ARG1
 getdirective modules from arbiter where arbiter_name=Arbiter-Master
 setparam modules=LAST, HackPollerTagByMacros from arbiter where arbiter_name=Arbiter-Master
 writeconfig
-synch
+#synch

@@ -26,6 +26,7 @@ def usage():
     print "skonf.py -a action -f configfile -o objecttype -d directive -v value -r directive=value,directive=value"
     print ""
     print " * actions:"
+    print "   - sync : deploy shinken-specific on all satellites"
     print "   - macros : execute macros file"
     print "   - addobject : add a shinken object to the shinken configuration file"
     print "   - delobject : remove a shinken object from the shinken configuration file"
@@ -57,7 +58,7 @@ def main():
         sys.exit(2)
     for o, a in opts:
         if o == "-a":
-            actions=["setparam","showconfig","addobject","getdirective","getaddresses","delobject","cloneobject","macros"]
+            actions=["setparam","showconfig","addobject","getdirective","getaddresses","delobject","cloneobject","macros","sync"]
             if a in actions:
                 action=a
             else:
@@ -91,7 +92,7 @@ def main():
         usage()
         sys.exit(2)
     
-    if objectype == "" and action != "getaddresses" and action != "showconfig" and action != "macros":
+    if objectype == "" and action != "getaddresses" and action != "showconfig" and action != "macros" and action != "sync":
         print "object type is mandatory"
         usage()
         sys.exit(2)
@@ -139,6 +140,16 @@ def main():
             result,content = domacros(configfile,directive.split(','))
         else:
             result,content = domacros(configfile)
+        if not result:
+            print content
+            sys.exit(2)
+        else:
+            sys.exit(0)
+    elif action == "sync":
+        if directive == "":
+            print "You must specify the authentication file with -d option"
+            sys.exit(2)
+        result,content = sync(config,configfile,directive)
         if not result:
             print content
             sys.exit(2)
@@ -236,7 +247,7 @@ def domacros(configfile,args=[]):
             "setparam":r"(?P<directive>\w+)=(?P<value>.*) from (?P<object>\w+) where (?P<clauses>.*)",
             "getdirective":r"(?P<directives>\w+) from (?P<object>\w+) where (?P<clauses>.*)",
             "writeconfig":r"",
-            "synch":r""
+            "sync":r""
             }
 
     """ Compile regexp """
@@ -288,8 +299,8 @@ def domacros(configfile,args=[]):
                         code,message = writeconfig(config,configfile)    
                         if not code:
                             return (code,message)
-                    if command == "synch":
-                        code,message = synch(config,configfile)
+                    if command == "sync":
+                        code,message = sync(config,configfile)
                 matched=True
         if not matched:
             if not line == "":
@@ -407,23 +418,70 @@ def showconfig(config,objectype,filters=""):
         print "Unknown object type %s" % (o)
     return config        
 
-def sync(config,configfile):
-    """ detect local adresses """
-    import socket
-    local = socket.gethostbyname(socket.gethostname())
-    print local
-    return (True,"")
-    """ get all adresses defined in configuration """
+
+def sync(config,configfile,authfile):
+    import netifaces
+    import re
+    import paramiko
+    import string
+
     allowed = [ 'poller', 'arbiter', 'scheduler', 'broker', 'receiver', 'reactionner' ]
+    protocols = [ 'pyro','ssh' ]
     addresses=[]
+    local=[]
+
+    """ detect local adresses """
+    for ifname in netifaces.interfaces():
+        for t in netifaces.ifaddresses(ifname).items():
+            for e in t[1]:
+                if e.has_key('addr'):
+                    if re.match(r"[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}",e['addr']):
+                        if e['addr'] != "127.0.0.1":
+                            local.append(e['addr'])
+
+    """ get all adresses defined in configuration """
     for (ot,oc) in config.items():
         if ot in allowed:
             for o in oc:
                 for (d,v) in o.items():
                     if d == "address" and v != "localhost" and v != "127.0.01" :
-                        if not v in addresses:
+                        if not v in local and not v in addresses:
                             addresses.append(v)
 
+    """ load authentication data """
+    auth={}
+    creg=re.compile(r"^(?P<address>.*):(?P<login>.*):(?P<password>.*)")
+    try:
+        fd = open(authfile,'r')
+        data = map(string.strip, fd.readlines())
+        fd.close()
+
+        for line in data:
+            result = creg.match(line)
+            if result == None:
+                return "There was an error in the authentication file at line : %s" % (line)
+            auth[result.group("address")]={"login":result.group("login"),"password":result.group("password")}
+    except:
+        return (False,"Error while loading authentication data")
+
+    """ now push configuration to each satellite """
+    try:
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        for address in addresses:
+            print "Synch with : %s" % (address)
+            if not auth.has_key(address):
+                return (False,"Auth informations for %s does not exist in authfile" % (address))
+            else:
+                ssh.connect(address,username=auth[address]["login"],password=auth[address]["password"])
+                ftp = ssh.open_sftp()
+                ftp.put(configfile,configfile)
+                ftp.close()
+                ssh.close()
+    except:
+        return (False,"There was an error trying to push configuration to %s" % (address))
+
+    return (True,addresses)
 
 def writeconfig(config,configfile):
     bck="%s.%d" % (configfile,time.time())
