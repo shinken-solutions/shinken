@@ -31,10 +31,15 @@ class DataManager(object):
     def load(self, rg):
         self.rg = rg
 
+    # Ui will launch us names in str, we got unicode
+    # in our rg, so we must manage it here
     def get_host(self, hname):
+        hname = hname.decode('utf8', 'ignore')
         return self.rg.hosts.find_by_name(hname)
 
     def get_service(self, hname, sdesc):
+        hname = hname.decode('utf8', 'ignore')
+        sdesc = sdesc.decode('utf8', 'ignore')
         return self.rg.services.find_srv_by_name_and_hostname(hname, sdesc)
 
     def get_all_hosts_and_services(self):
@@ -46,6 +51,7 @@ class DataManager(object):
 
 
     def get_contact(self, name):
+        name = name.decode('utf8', 'ignore')
         return self.rg.contacts.find_by_name(name)
 
     def get_contacts(self):
