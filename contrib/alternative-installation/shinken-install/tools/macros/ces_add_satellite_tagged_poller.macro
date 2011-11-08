@@ -1,0 +1,12 @@
+# macro for adding a shinken satellite with a tagged poller also deploy config on satellites
+# Arguments are :
+# ARG1 : new poller name
+# ARG2 : new poller address
+# ARG3 : existing poller name that will be used as model for the new poller
+setconfigfile /opt/shinken/etc/shinken-specific.cfg
+clone poller set poller_name=ARG1,address=ARG2 where poller_name=ARG3
+setparam poller_tags=ARG1 from poller where poller_name=ARG1
+getdirective modules from arbiter where arbiter_name=Arbiter-Master
+setparam modules=LAST, HackPollerTagByMacros from arbiter where arbiter_name=Arbiter-Master
+writeconfig
+sync /root/shinken/contrib/alternative-installation/shinken-install/tools/macros/auth

@@ -43,6 +43,7 @@ from shinken.misc.regenerator import Regenerator
 from shinken.log import logger
 from shinken.modulesmanager import ModulesManager
 from shinken.daemon import Daemon
+from shinken.util import safe_print, to_bool
 
 #Local import
 from datamanager import datamgr
@@ -75,6 +76,7 @@ class Webui_broker(BaseModule, Daemon):
         self.auth_secret = getattr(modconf, 'auth_secret').encode('utf8', 'replace')
         self.http_backend = getattr(modconf, 'http_backend', 'auto')
         self.login_text = getattr(modconf, 'login_text', None)
+        self.allow_html_output = to_bool(getattr(modconf, 'allow_html_output', '0'))
 
         # Load the photo dir and make it a absolute path
         self.photo_dir = getattr(modconf, 'photo_dir', 'photos')
@@ -400,13 +402,13 @@ class Webui_broker(BaseModule, Daemon):
 
     # Try to got for an element the graphs uris from modules
     def get_graph_uris(self, elt, graphstart, graphend):
-        print "Checking graph uris ", elt.get_full_name()
+        safe_print("Checking graph uris ", elt.get_full_name())
 
         uris = []
         for mod in self.modules_manager.get_internal_instances():
             try:
                 f = getattr(mod, 'get_graph_uris', None)
-                print "Get graph uris ", f, "from", mod.get_name()
+                safe_print("Get graph uris ", f, "from", mod.get_name())
                 if f and callable(f):
                     r = f(elt, graphstart, graphend)
                     uris.extend(r)
@@ -417,6 +419,6 @@ class Webui_broker(BaseModule, Daemon):
                 logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)        
 
-        print "Will return", uris
+        safe_print("Will return", uris)
         # Ok if we got a real contact, and if a module auth it
         return uris

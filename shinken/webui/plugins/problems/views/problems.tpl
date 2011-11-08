@@ -215,9 +215,17 @@ document.addEvent('domready', function() {
 		<td title='{{helper.print_date(pb.last_state_change)}}' class="tdBorderTop tdBorderLeft tdCriticity" style="width:50px;">{{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}</td>
 		%# "We put a title (so a tip) on the output onlly if need"
 		%if len(pb.output) > 55:
-		   <td title="{{pb.output}}" class="tdBorderTop tdBorderLeft tdCriticity" style="width:350px;"> {{pb.output[:55]}}</td>
+		   %if app.allow_html_output:
+		      <td title="{{pb.output}}" class="tdBorderTop tdBorderLeft tdCriticity" style="width:350px;"> {{!helper.strip_html_output(pb.output[:55])}}</td>
+		   %else:
+		      <td title="{{pb.output}}" class="tdBorderTop tdBorderLeft tdCriticity" style="width:350px;"> {{pb.output[:55]}}
+		   %end
 		%else:
-		   <td class="tdBorderTop tdBorderLeft tdCriticity" style="width:350px;"> {{pb.output}}</td>
+		   %if app.allow_html_output:
+                      <td class="tdBorderTop tdBorderLeft tdCriticity" style="width:350px;"> {{!helper.strip_html_output(pb.output)}}</td>
+		   %else:
+		      <td class="tdBorderTop tdBorderLeft tdCriticity" style="width:350px;"> {{pb.output}} </td>
+                   %end
 		%end
 		<td class="perfometer">
 		  {{!helper.get_perfometer(pb)}}

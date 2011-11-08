@@ -26,6 +26,7 @@ app = None
 import time
 
 from shinken.webui.bottle import redirect
+from shinken.util import safe_print
 
 # Main impacts view
 #@route('/host')
