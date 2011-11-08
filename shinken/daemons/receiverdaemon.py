@@ -169,7 +169,7 @@ class Receiver(BaseSatellite):
         # Set our giving timezone from arbiter
         use_timezone = conf['global']['use_timezone']
         if use_timezone != 'NOTSET':
-            logger.log("[%s] Setting our timezone to" % (self.name, use_timezone))
+            logger.log("[%s] Setting our timezone to %s" % (self.name, use_timezone))
             os.environ['TZ'] = use_timezone
             time.tzset()
         
