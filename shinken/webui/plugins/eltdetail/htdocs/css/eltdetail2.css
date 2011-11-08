@@ -217,3 +217,7 @@ div.content {
 	border-bottom: 4px solid #787878;
 	padding-bottom: 0;
 }
+
+#messagebox {
+    margin-top:15px;
+}
