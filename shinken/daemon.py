@@ -29,7 +29,18 @@ import select
 import random 
 import ConfigParser
 
-from multiprocessing import active_children
+# Try to see if we are in an android device or not
+is_android = True
+try:
+   import android
+except ImportError:
+   is_android = False
+
+
+if not is_android:
+   from multiprocessing import Queue, Manager, active_children, cpu_count
+else:
+    from multiprocessing import active_children
 
 import shinken.pyro_wrapper as pyro
 from shinken.pyro_wrapper import InvalidWorkDir, Pyro
@@ -55,12 +66,6 @@ except ImportError, exp: # Like in nt system or Android
     def get_cur_group():
         return "shinken"
 
-# Try to see if we are in an android device or not
-is_android = True
-try:
-   import android
-except ImportError:
-   is_android = False
 
 
 ##########################   DAEMON PART    ###############################
@@ -171,7 +176,10 @@ class Daemon(object):
         # when we will be in daemon
         self.debug_output = []
 
-        
+        # We will inialize the Manager() when we will load modules
+        # and will be really forked()
+        self.manager = None
+
         self.modules_manager = ModulesManager(name, self.find_modules_path(), [])
 
         os.umask(UMASK)
@@ -458,6 +466,16 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
             self.daemonize(skip_close_fds=socket_fds)
         else:
             self.write_pid()
+
+        # Now we can start our Manager
+        # interprocess things. It's important!
+        if is_android:
+            self.manager = None
+        else:
+           self.manager = Manager()
+        # And make the module manager know it
+        self.modules_manager.load_manager(self.manager)
+           
 
 
     def setup_pyro_daemon(self):

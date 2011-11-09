@@ -115,6 +115,7 @@ class Webui_broker(BaseModule, Daemon):
         
         # Daemon like init
         self.debug_output = []
+
         self.modules_manager = ModulesManager('webui', self.find_modules_path(), [])
         self.modules_manager.set_modules(self.modules)
         # We can now output some previouly silented debug ouput

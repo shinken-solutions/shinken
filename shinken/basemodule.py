@@ -96,20 +96,31 @@ Example of task that a shinken module can do:
 Like just open necessaries file(s), database(s), or whatever the module will need. """
         pass
 
-    def create_queues(self):
+    # The manager is None on android, but a true Manager() elsewhere
+    def create_queues(self, manager):
         """ Create the shared queues that will be used by shinken daemon process and this module process.
 But clear queues if they were already set before recreating new one.  """
-        self.clear_queues()
-        self.from_q = Queue()
-        self.to_q = Queue()
+        self.clear_queues(manager)
+        # If no Manager() object, go with classic Queue()
+        if not manager:
+            self.from_q = Queue()
+            self.to_q = Queue()
+        else:
+            self.from_q = manager.Queue()
+            self.to_q = manager.Queue()
 
 
-    def clear_queues(self):
+    def clear_queues(self, manager):
         """ Release the resources associated with the queues of this instance """
         for q in (self.to_q, self.from_q):
             if q is None: continue
-            q.close()
-            q.join_thread()
+            # If we gotno manager, we direct call the clean
+            if not manager:
+                q.close()
+                q.join_thread()
+#            else:
+#                q._callmethod('close')
+#                q._callmethod('join_thread')
         self.to_q = self.from_q = None
 
 

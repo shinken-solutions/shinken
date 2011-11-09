@@ -89,10 +89,14 @@ class Worker:
         # We can just terminate process, not threads
         if not is_android:
             self._process.terminate()
-        self._c.close()
-        self._c.join_thread()
-        self.input_queue.close()
-        self.input_queue.join_thread()
+        # Is we are with a Manager() way
+        # there should be not such functions
+        if hasattr(self._c, 'close'):
+           self._c.close()
+           self._c.join_thread()
+        if hasattr(self.input_queue, 'close'):
+           self.input_queue.close()
+           self.input_queue.join_thread()
 
 
     def join(self, timeout=None):
