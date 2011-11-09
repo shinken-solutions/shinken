@@ -541,6 +541,12 @@ class Helper(object):
 
 
 
+    # TODO: Will look at the string s, and return a clean output without
+    # danger for the browser
+    def strip_html_output(self, s):
+        return s
+
+
 
 
 

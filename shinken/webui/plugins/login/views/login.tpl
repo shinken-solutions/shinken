@@ -1,35 +1,28 @@
-
 %rebase layout title='Shinken UI login', print_menu=False
 
 <script type="text/javascript">
-	function submitform()
-	{
-	document.forms["loginform"].submit();
+	function submitform() {
+		document.forms["loginform"].submit();
 	}
 	
 	/* Catch the key ENTER and launch the form 
 	 Will be link in the password field
 	*/
-	function submitenter(myfield,e){
+	function submitenter(myfield,e) {
 	  var keycode;
 	  if (window.event) keycode = window.event.keyCode;
 	  else if (e) keycode = e.which;
 	  else return true;
 	
-	
-	  if (keycode == 13){
+	  if (keycode == 13) {
 	    submitform();
 	    return false;
-	  }else
+	  } else
 	   return true;
 	}
 </script>
 
-
-<div id="login-container" class="prefix_custom_2">
-%if error:
-<span id="login-error"> {{error}}</span>
-%end
+<div id="login_container" class="prefix_custom_2">
   
 %if login_text:
 <p><span id="login-text"> {{login_text}}</span></p>
@@ -39,6 +32,9 @@
 	</div>
 
 	<div id="login-form" class="grid_7">
+	%if error:
+		<span id="login-error"> {{error}}</span>
+	%end
 		<form method="post" id="loginform" action="/user/auth">			
 			<div class="text-field">
 			  <label for="login">Login:</label>

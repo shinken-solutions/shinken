@@ -43,7 +43,7 @@ from shinken.misc.regenerator import Regenerator
 from shinken.log import logger
 from shinken.modulesmanager import ModulesManager
 from shinken.daemon import Daemon
-from shinken.util import safe_print
+from shinken.util import safe_print, to_bool
 
 #Local import
 from datamanager import datamgr
@@ -76,6 +76,7 @@ class Webui_broker(BaseModule, Daemon):
         self.auth_secret = getattr(modconf, 'auth_secret').encode('utf8', 'replace')
         self.http_backend = getattr(modconf, 'http_backend', 'auto')
         self.login_text = getattr(modconf, 'login_text', None)
+        self.allow_html_output = to_bool(getattr(modconf, 'allow_html_output', '0'))
 
         # Load the photo dir and make it a absolute path
         self.photo_dir = getattr(modconf, 'photo_dir', 'photos')
