@@ -250,8 +250,10 @@ def domacros(configfile,args=[]):
     allowed = [ "arbiter", "scheduler", "poller", "broker", "reactionner", "receiver" ]
 
     commands={
+            "onerror":r"(?P<action>\w+)",
             "setconfigfile":r"(?P<configfile>.*)",
             "clone":r"(?P<object>\w+) set (?P<directives>.*) where (?P<clauses>.*)",
+            "delete":r"(?P<object>\w+) where (?P<clauses>.*)",
             "showconfig":r"(?P<object>\w+)",
             "setparam":r"(?P<directive>\w+)=(?P<value>.*) from (?P<object>\w+) where (?P<clauses>.*)",
             "getdirective":r"(?P<directives>\w+) from (?P<object>\w+) where (?P<clauses>.*)",
@@ -272,6 +274,7 @@ def domacros(configfile,args=[]):
 
     """ macros execution """
     for line in data:
+        maction="stop"
         matched=False
         if last != False:
             line = line.replace("LAST",last)
@@ -288,16 +291,25 @@ def domacros(configfile,args=[]):
                         if not code:
                             return (code,config)
                         configfile=result.group('configfile')
+                    elif command == "delete":
+                        code,message = delobject(config,result.group('object'),result.group('clauses'))
+                        if not code:
+                            if maction == "stop": return (code,message)
+                    elif command == "onerror":
+                        if result.group('action') in ('continue','stop'):
+                            maction = result.group('action')
+                        else:
+                            return  (False,"Unknown action on error %s" % (result.group('action')))
                     elif command == "clone":
                         code,message = cloneobject(config,result.group('object'),result.group('directives'),result.group('clauses'))
                         if not code:
-                            return (code,message)
+                            if maction == "stop": return (code,message)
                     elif command == "showconfig":
                         dumpconfig(result.group('object'),config,allowed)
                     elif command == "sync":
                         code,message = sync(config,configfile,result.group('authfile'))
                         if not code:
-                            return (code,message)
+                            if maction == "stop" :return (code,message)
                     elif command == "getdirective":
                         code,last = getdirective(config,result.group('object'),result.group('directives'),result.group('clauses'))
                         if not code:
@@ -306,12 +318,12 @@ def domacros(configfile,args=[]):
                     elif command == "setparam":
                         code,message = setparam(config,result.group('object'),result.group('directive'),result.group('value'),result.group('clauses'))
                         if not code:
-                            return (code,message)
+                            if maction == "stop" :return (code,message)
                 else:
                     if command == "writeconfig":
                         code,message = writeconfig(config,configfile)    
                         if not code:
-                            return (code,message)
+                            if maction == "stop" :return (code,message)
                 matched=True
         if not matched:
             if not line == "":
@@ -330,21 +342,21 @@ def delobject(config,objectype,filters):
     else:
         return (False,"Filter is mandatory")
 
-    if self.config.has_key(objectype):
+    if config.has_key(objectype):
         filterok=0
-        max=len(self.config[objectype])
+        max=len(config[objectype])
         removed=0
         for i in range(max):
             filterok=0
             for (d,v) in dfilters.items():
                 filterok=filterok+1    
-                if self.config[objectype][i].has_key(d):
-                    if self.config[objectype][i][d] != v:
+                if config[objectype][i].has_key(d):
+                    if config[objectype][i][d] != v:
                         filterok=filterok-1    
                 else:
                     filterok=filterok-1    
             if filterok == len(dfilters):
-                self.config[objectype].pop(i)
+                config[objectype].pop(i)
                 removed = removed+1
         if removed == 0:
             return (False,"Filter did not return any result")
