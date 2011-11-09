@@ -97,7 +97,7 @@ Like just open necessaries file(s), database(s), or whatever the module will nee
         pass
 
     # The manager is None on android, but a true Manager() elsewhere
-    def create_queues(self, manager):
+    def create_queues(self, manager=None):
         """ Create the shared queues that will be used by shinken daemon process and this module process.
 But clear queues if they were already set before recreating new one.  """
         self.clear_queues(manager)
