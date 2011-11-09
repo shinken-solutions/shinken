@@ -79,7 +79,7 @@ class TestParsePerfdata(ShinkenTest):
 
         self.assert_(len(p) == 3)
 
-
+        
 
 
 if __name__ == '__main__':
