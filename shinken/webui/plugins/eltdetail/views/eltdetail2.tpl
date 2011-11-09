@@ -62,8 +62,8 @@ Invalid element name
          	<dd> {{elt.host.host_name}}</dd>
     	%end 
 		</dl>
-		<dl class="grid_4">
-					<dt>Members of:</dt>
+		<dl class="grid_5">
+			<dt>Members of:</dt>
 			%if len(elt.hostgroups) > 0:	
 			<dd>{{','.join([hg.get_name() for hg in elt.hostgroups])}}</dd>
 			%else:
@@ -80,10 +80,13 @@ Invalid element name
 			<dt>Importence:</dt>
 			<dd>{{!helper.get_business_impact_text(elt)}}</dd>
 		</dl>
-		<div class="grid_8">
+		<div class="grid_7">
 		    %#   " If the elements is a root problem with a huge impact and not ack, ask to ack it!"
 		    %if elt.is_problem and elt.business_impact > 2 and not elt.problem_has_been_acknowledged:
-			<p class="error">This element has got an important impact on your business, please fix it or acknowledge it.</p>
+			<div id="messagebox" class="gradient_alert">
+				<img src="/static/images/icons/alert.png" alt="some_text" style="height: 40px; width: 40px" class="grid_4"/> 
+				<p>This element has got an important impact on your business, please <b>fix it</b> or <b>acknowledge it</b>.</p>
+			</div>
 		    %# "end of the 'SOLVE THIS' highlight box"
 		    %end
 		</div>				
@@ -343,10 +346,8 @@ Invalid element name
 						    </div>
 						</div>
 	</div>
-
 </div>
 %#  "Content Container End"
-
 
 %#End of the Host Exist or not case
 %end

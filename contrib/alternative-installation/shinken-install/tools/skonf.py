@@ -26,15 +26,14 @@ def usage():
     print "skonf.py -a action -f configfile -o objecttype -d directive -v value -r directive=value,directive=value"
     print ""
     print " * actions:"
+    print "   - control (control action is specified with -d [stop|start|restart]). Apply action on all satellites"
     print "   - sync : deploy shinken-specific on all satellites"
     print "   - macros : execute macros file"
-    print "   - addobject : add a shinken object to the shinken configuration file"
     print "   - delobject : remove a shinken object from the shinken configuration file"
     print "   - cloneobject : clone an object (currently only pollers are suported" 
     print "   - showconfig : display configuration of object"
     print "   - setparam : set directive value for an object"
     print "   - getdirective : get a directive value from an object"
-    print "   - getaddresses : list the IP addresses involved in the shinken configuration"
     print " * configfile : full path to the shinken-specific.cfg file"
     print " * objectype : configuration object type on which the action apply"
     print " * directive : the directive name of a configuration object"
@@ -58,7 +57,7 @@ def main():
         sys.exit(2)
     for o, a in opts:
         if o == "-a":
-            actions=["setparam","showconfig","addobject","getdirective","getaddresses","delobject","cloneobject","macros","sync"]
+            actions=["setparam","showconfig","addobject","getdirective","getaddresses","delobject","cloneobject","macros","sync","control"]
             if a in actions:
                 action=a
             else:
@@ -87,12 +86,12 @@ def main():
         usage()
         sys.exit(2)
 
-    if configfile == "":
+    if configfile == "" and action != "control":
         print "config file is mandatory"
         usage()
         sys.exit(2)
     
-    if objectype == "" and action != "getaddresses" and action != "showconfig" and action != "macros" and action != "sync":
+    if objectype == "" and action != "getaddresses" and action != "showconfig" and action != "macros" and action != "sync" and action != "control":
         print "object type is mandatory"
         usage()
         sys.exit(2)
@@ -111,7 +110,7 @@ def main():
         usage()
         sys.exit(2)
 
-    if action != "macros":
+    if action != "macros" and action != "control":
         result,config = loadconfig([configfile])
         if not result:
             print config
@@ -150,6 +149,16 @@ def main():
             print "You must specify the authentication file with -d option"
             sys.exit(2)
         result,content = sync(config,configfile,directive)
+        if not result:
+            print content
+            sys.exit(2)
+        else:
+            sys.exit(0)
+    elif action == "control":
+        if directive == "":
+            print "You must specify the authentication file with -d option"
+            sys.exit(2)
+        result,content = control(config,directive)
         if not result:
             print content
             sys.exit(2)
@@ -420,15 +429,10 @@ def showconfig(config,objectype,filters=""):
         print "Unknown object type %s" % (o)
     return config        
 
-
-def sync(config,configfile,authfile):
+def getsatellitesaddresses(config):
     import netifaces
     import re
-    import paramiko
-    import string
-
     allowed = [ 'poller', 'arbiter', 'scheduler', 'broker', 'receiver', 'reactionner' ]
-    protocols = [ 'pyro','ssh' ]
     addresses=[]
     local=[]
 
@@ -450,6 +454,11 @@ def sync(config,configfile,authfile):
                         if not v in local and not v in addresses:
                             addresses.append(v)
 
+    return (True,addresses)
+
+def getauthdata(authfile):
+    import re
+    import string
     """ load authentication data """
     auth={}
     creg=re.compile(r"^(?P<address>.*):(?P<login>.*):(?P<password>.*)")
@@ -459,12 +468,26 @@ def sync(config,configfile,authfile):
         fd.close()
 
         for line in data:
-            result = creg.match(line)
-            if result == None:
-                return "There was an error in the authentication file at line : %s" % (line)
-            auth[result.group("address")]={"login":result.group("login"),"password":result.group("password")}
+            if line != "":
+                result = creg.match(line)
+                if result == None:
+                    return "There was an error in the authentication file at line : %s" % (line)
+                auth[result.group("address")]={"login":result.group("login"),"password":result.group("password")}
+        return (True,auth)
     except:
         return (False,"Error while loading authentication data")
+
+
+def sync(config,configfile,authfile):
+    import re
+    import paramiko
+    import string
+
+    code,addresses = getsatellitesaddresses(config)
+
+    code,auth = getauthdata(authfile)
+    if not code :
+        return (False,auth)
 
     """ now push configuration to each satellite """
     try:
@@ -482,6 +505,39 @@ def sync(config,configfile,authfile):
                 ssh.close()
     except:
         return (False,"There was an error trying to push configuration to %s" % (address))
+
+    return (True,addresses)
+
+def control(config,action):
+    import re
+    import paramiko
+    import string
+
+    code,addresses = getsatellitesaddresses(config)
+
+    code,auth = getauthdata(authfile)
+    if not code :
+        return (False,auth)
+
+    """ which command for an action """
+    commands = { "stop":"service shinken stop","start":"service shinken start","restart":"service shinken restart"}
+    if not commands.has_key(command):
+        return (False,"Unknown action command")
+
+    """ now apply control action to all elements """
+    try:
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        for address in addresses:
+            print "control %s : %s" % (action,address)
+            if not auth.has_key(address):
+                return (False,"Auth informations for %s does not exist in authfile" % (address))
+            else:
+                ssh.connect(address,username=auth[address]["login"],password=auth[address]["password"])
+                ssh.exec_command("service shinken restart")
+                ssh.close()
+    except:
+        return (False,"There was an error trying to control shinken on %s" % (address))
 
     return (True,addresses)
 
