@@ -44,7 +44,11 @@ class ModulesManager(object):
         self.instances = []
         self.to_restart = []
         self.max_queue_size = 0
+        self.manager = None
 
+
+    def load_manager(self, manager):
+        self.manager = manager
 
 
     def set_modules(self, modules):
@@ -125,7 +129,7 @@ Returns: True on successfull init. False if instance init method raised any Exce
 
             # If it's an external, create/update Queues()
             if inst.is_external:
-                inst.create_queues()
+                inst.create_queues(self.manager)
 
             inst.init()
         except Exception, e:
@@ -212,7 +216,7 @@ If instance is external also shutdown it cleanly """
             inst.stop_process()
             print "Stop process done"
         
-        inst.clear_queues()
+        inst.clear_queues(self.manager)
 
         # Then do not listen anymore about it
         self.instances.remove(inst)
@@ -226,25 +230,25 @@ If instance is external also shutdown it cleanly """
                     logger.log("Error : the external module %s goes down unexpectly!" % inst.get_name())
                     logger.log("Setting the module %s to restart" % inst.get_name())
                     # We clean its queues, they are no more useful
-                    inst.clear_queues()
+                    inst.clear_queues(self.manager)
                     self.to_restart.append(inst)
                     # Ok, no need to look at queue size now
                     continue
 
                 # Maybe the thread's queue of the module got a problem
                 # if so, restart this module
-                if inst.to_q is not None:
-                    thr = inst.to_q._thread
-                    if thr is not None and not thr.is_alive():
+#                if inst.to_q is not None:
+#                    thr = inst.to_q._thread
+#                    if thr is not None and not thr.is_alive():
                         # Ok, it's nevera good idea to call a _function, especially
                         # this one. But we must be sure we do not let the die thread
-                        try:
-                            thr._jointhread()
-                        except Exception, exp:
-                            print "_jointhread exception :", exp
+#                        try:
+#                            thr._jointhread()
+#                        except Exception, exp:
+#                            print "_jointhread exception :", exp
                         # Set this queue to start a new thread
-                        logger.log("Error : the external module %s got a Thread/queue problem!" % inst.get_name())
-                        inst.to_q._thread = None
+#                        logger.log("Error : the external module %s got a Thread/queue problem!" % inst.get_name())
+#                        inst.to_q._thread = None
                         
 
 #                        logger.log("Error : the external module %s got a Thread/queue problem!" % inst.get_name())
@@ -256,18 +260,18 @@ If instance is external also shutdown it cleanly """
 #                        continue
 
                 # Same for from_q
-                if inst.from_q is not None:
-                    thr = inst.from_q._thread
-                    if thr is not None and not thr.is_alive():
+#                if inst.from_q is not None:
+#                    thr = inst.from_q._thread
+#                    if thr is not None and not thr.is_alive():
                         # Ok, it's nevera good idea to call a _function, especially
                         # this one. But we must be sure we do not let the die thread
-                        try:
-                            thr._jointhread()
-                        except Exception, exp:
-                            print "_jointhread exception :", exp
+#                        try:
+#                            thr._jointhread()
+#                        except Exception, exp:
+#                            print "_jointhread exception :", exp
                         # Set this queue to start a new thread
-                        logger.log("Error : the external module %s got a Thread/queue problem!" % inst.get_name())
-                        inst.from_q._thread = None
+#                        logger.log("Error : the external module %s got a Thread/queue problem!" % inst.get_name())
+#                        inst.from_q._thread = None
 #                        logger.log("Error : the external module %s got a Thread/queue problem!" % inst.get_name())
 #                        logger.log("Setting the module %s to restart" % inst.get_name())
 #                        # We clean its queues, they are no more useful
@@ -292,7 +296,7 @@ If instance is external also shutdown it cleanly """
                     logger.log("Error : the external module %s got a too high brok queue size (%s > %s)!" % (inst.get_name()), queue_size, self.max_queue_size)
                     logger.log("Setting the module %s to restart" % inst.get_name())
                     # We clean its queues, they are no more useful
-                    inst.clear_queues()
+                    inst.clear_queues(self.manager)
                     self.to_restart.append(inst)
 
 

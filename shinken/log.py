@@ -55,11 +55,12 @@ class Log:
             except UnicodeEncodeError:
                 print message.encode('ascii', 'ignore')
 
+        # We format the log in UTF-8
+        if isinstance(message, str):
+            message = message.decode('UTF-8', 'replace')
+
         if format is None:
             if name is None:
-                # We format the log in UTF-8
-                if isinstance(message, str):
-                    message = message.decode('UTF-8', 'replace')
                 if human_timestamp_log:
                     s = u'[%s] %s\n' % (time.asctime(time.localtime(time.time())), message)
                 else:

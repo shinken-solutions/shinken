@@ -207,7 +207,7 @@ class Satellite(BaseSatellite):
         self.uri2 = None
         self.uri3 = None
         self.s = None
-        self.manager = None
+
         self.returns_queue = None
         self.q_by_mod = {}
 
@@ -330,6 +330,7 @@ class Satellite(BaseSatellite):
                 except AttributeError , exp: # the scheduler must  not be initialized
                     print exp
                 except Exception , exp:
+                    print "Unknown exception", exp
                     if PYRO_VERSION < "4.0":
                         print ''.join(Pyro.util.getPyroTraceback(exp))
                     else:
@@ -369,7 +370,10 @@ class Satellite(BaseSatellite):
     def create_and_launch_worker(self, module_name='fork', mortal=True):
         # ceate the input queue of this worker
         try:
-            q = Queue()
+           if is_android:
+              q = Queue()
+           else:
+              q = self.manager.Queue()
         # If we got no /dev/shm on linux, we can got problem here. 
         # Must raise with a good message
         except OSError, exp:
@@ -757,12 +761,10 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
         # so use standard Queue threads things
         # but in multiprocess, we are also using a Queue(). It's just
         # not the same
-        self.returns_queue = Queue()
-#        if not is_android:
-#            self.manager = Manager()
-#            self.returns_queue = self.manager.list()
-#        else:
-#            self.returns_queue = Queue()
+        if is_android:
+           self.returns_queue = Queue()
+        else:
+           self.returns_queue = self.manager.Queue()
 
         # For multiprocess things, we should not have
         # sockettimeouts. will be set explicitly in Pyro calls

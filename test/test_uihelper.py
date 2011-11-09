@@ -199,6 +199,7 @@ class TestUIHelper(ShinkenTest):
         self.assert_(res == g)
 
 
+
 if __name__ == '__main__':
     unittest.main()
 

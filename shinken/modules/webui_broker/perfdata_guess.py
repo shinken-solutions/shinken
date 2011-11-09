@@ -21,6 +21,8 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+import math
+
 from shinken.util import safe_print
 from shinken.misc.perfdata import PerfDatas
 
@@ -45,7 +47,8 @@ def get_perfometer_table_values(elt):
     if f:
         return f(elt)
 
-    return None
+    r = manage_unknown_command(elt)
+    return r
 
 
 
@@ -62,16 +65,18 @@ def manage_check_http_command(elt):
         print "No value, I bailout"
         return None
 
-    # Pourcent of ok should be time/10s
-    pct = 100 * (v / 10)
-    # go to int
-    pct = int(pct)
-    # But at least 1%
-    pct = max(1, pct)
-    #And max to 100%
-    pct = min(pct, 100)
+    # Pourcent of ok should be time/1s
+    pct = get_logarithmic(v, 1)
+    # Now get the color
+    # OK : #6f2 (102,255,34) green
+    # Warning : #f60 (255,102,0) orange
+    # Crit : #ff0033 (255,0,51)
+    base_color = {0 : (102,255,34), 1 : (255,102,0), 2 : (255,0,51)}
+    state_id = get_stateid(elt)
+    color = base_color.get(state_id, (179,196,255))
+    s_color = 'RGB(%d,%d,%d)' % color    
     lnk = '#'
-    metrics = [('#68f', pct), ('white', 100-pct)]
+    metrics = [(s_color, pct), ('white', 100-pct)]
     title = '%ss' % v
     print "HTTP: return", {'lnk' : lnk, 'metrics' : metrics, 'title' : title}
     return {'lnk' : lnk, 'metrics' : metrics, 'title' : title}
@@ -92,16 +97,19 @@ def manage_check_ping_command(elt):
         print "No value, I bailout"
         return None
 
-    # Pourcent of ok should be time/10s
-    pct = 100 * (v / crit)
-    # go to int
-    pct = int(pct)
-    # But at least 1%
-    pct = max(1, pct)
-    #And max to 100%
-    pct = min(pct, 100)
+    # Pourcent of ok should be the log of time versus max/2
+    pct = get_logarithmic(v, crit/2)
+    # Now get the color
+    # OK : #6f2 (102,255,34) green
+    # Warning : #f60 (255,102,0) orange
+    # Crit : #ff0033 (255,0,51)
+    base_color = {0 : (102,255,34), 1 : (255,102,0), 2 : (255,0,51)}
+    state_id = get_stateid(elt)
+    color = base_color.get(state_id, (179,196,255))
+    s_color = 'RGB(%d,%d,%d)' % color    
+
     lnk = '#'
-    metrics = [('#68f', pct), ('white', 100-pct)]
+    metrics = [(s_color, pct), ('white', 100-pct)]
     title = '%sms' % v
     print "HTTP: return", {'lnk' : lnk, 'metrics' : metrics, 'title' : title}
     return {'lnk' : lnk, 'metrics' : metrics, 'title' : title}
@@ -123,8 +131,60 @@ def manage_check_tcp_command(elt):
         print "No value, I bailout"
         return None
 
+    # Pourcent of ok should be the log of time versus m.max / 2
+    pct = get_logarithmic(v, m.max/2)
+
+    # Now get the color
+    # OK : #6f2 (102,255,34) green
+    # Warning : #f60 (255,102,0) orange
+    # Crit : #ff0033 (255,0,51)
+    base_color = {0 : (102,255,34), 1 : (255,102,0), 2 : (255,0,51)}
+    state_id = get_stateid(elt)
+    color = base_color.get(state_id, (179,196,255))
+    s_color = 'RGB(%d,%d,%d)' % color    
+
+    #pct = 100 * (v / m.max)
+    # go to int
+    #pct = int(pct)
+    # But at least 1%
+    #pct = max(1, pct)
+    #And max to 100%
+    #pct = min(pct, 100)
+    lnk = '#'
+    metrics = [(s_color, pct), ('white', 100-pct)]
+    title = '%ss' % v
+    print "HTTP: return", {'lnk' : lnk, 'metrics' : metrics, 'title' : title}
+    return {'lnk' : lnk, 'metrics' : metrics, 'title' : title}
+
+
+
+
+def manage_unknown_command(elt):
+    safe_print('Get an unmanaged command perfdata of', elt.get_full_name())
+    p = PerfDatas(elt.perf_data)
+    if len(p) == 0:
+        return None
+
+    m = None
+    # Got some overrire name we know to be ok for printing
+    if 'time' in p:
+        m = p['time']
+    else:
+        for v in p:
+            print "Look for", v
+            if v.name is not None and v.value is not None:
+                m = v
+                break
+        
+    prop = m.name
+    print "Got a property", prop, "and a value", m
+    v = m.value
+    if not v:
+        print "No value, I bailout"
+        return None
+
     # Pourcent of ok should be time/10s
-    pct = 100 * (v / m.max)
+    pct = 100 * (v / 10)
     # go to int
     pct = int(pct)
     # But at least 1%
@@ -132,7 +192,63 @@ def manage_check_tcp_command(elt):
     #And max to 100%
     pct = min(pct, 100)
     lnk = '#'
-    metrics = [('#68f', pct), ('white', 100-pct)]
-    title = '%ss' % v
+
+    color = get_linear_color(elt, prop)
+    s_color = 'RGB(%d,%d,%d)' % color
+    metrics = [(s_color, pct), ('white', 100-pct)]
+    uom = '' or m.uom
+    title = '%s%s' % (v, uom)
     print "HTTP: return", {'lnk' : lnk, 'metrics' : metrics, 'title' : title}
     return {'lnk' : lnk, 'metrics' : metrics, 'title' : title}
+
+
+# Get a linear color by looking at the command name
+# and teh elt status to get a uniq value
+def get_linear_color(elt, name):
+    # base colors are 
+    #  #6688ff (102,136,255) light blue for OK
+    #  #ffdd65 (255,221,101) ligth wellow for warning
+    #  #ff6587 (191,75,101) light red for critical
+    #  #b3c4ff (179,196,255) very light blue for unknown
+    base = {0 : (102,136,255), 1 : (255,221,101), 2 : (191,75,101)}
+    state_id = get_stateid(elt)
+    
+    c = base.get(state_id, (179,196,255))
+    
+    # Get a "hash" of the metric name
+    h = hash(name) % 25
+    print "H", h
+    # Most value are high in red, so to do not overlap, go down
+    red = (c[0] - h) % 256
+    green = (c[1] - h) % 256
+    blue = (c[2] - h) % 256
+    color = (red, green, blue)
+    print "Get color", color
+    return color
+
+
+
+def get_stateid(elt):
+    state_id = elt.state_id
+
+    # For host, make DOWN as critical
+    if state_id == 1 and elt.__class__.my_type == 'host':
+        state_id = 2
+
+    return state_id
+
+
+
+def get_logarithmic(value, half):
+    l_half = math.log(half, 10)
+    print 'Half is', l_half
+    l_value = math.log(value, 10)
+    print "l value is", l_value
+    # Get the percent of our value for what we asked for
+    r = 50 + 10.0 * (l_value - l_half)
+    # Make it an int between 1 and 100
+    r = int(r)
+    r = max(1, r)
+    r = min(r, 100)
+
+    return r

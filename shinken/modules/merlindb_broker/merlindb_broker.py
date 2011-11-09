@@ -45,6 +45,8 @@ def list_to_comma(lst):
     #For ['d', 'r', 'u'] will return d,r,u
     return ','.join(lst)
 
+def last_hard_state_to_int(lst):
+    return 1
 
 #Class for the Merlindb Broker
 #Get broks and puts them in merlin database
@@ -74,6 +76,8 @@ class Merlindb_broker(BaseModule):
                 'alias': {'transform' : None},
                 'display_name': {'transform' : None},
                 'address': {'transform' : None},
+                'contact_groups': {'transform' : None},
+                'contacts': {'transform' : None},
                 'initial_state': {'transform' : None},
                 'max_check_attempts': {'transform' : None},
                 'check_interval': {'transform' : None},
@@ -104,7 +108,7 @@ class Merlindb_broker(BaseModule):
                 'last_state_id' :  {'transform' : None, 'name' : 'last_state'},
                 'last_state_change' :  {'transform' : None},
                 'last_hard_state_change' :  {'transform' : None},
-                'last_hard_state' :  {'transform' : None},
+                'last_hard_state' :  {'transform' : last_hard_state_to_int},
                 'is_flapping' : {'transform' : None},
                 'flapping_comment_id' : {'transform' : None},
                 'percent_state_change' : {'transform' : None},
@@ -160,7 +164,7 @@ class Merlindb_broker(BaseModule):
                 'last_state_id' :  {'transform' : None, 'name' : 'last_state'},
                 'last_state_change' :  {'transform' : None},
                 'last_hard_state_change' :  {'transform' : None},
-                'last_hard_state' :  {'transform' : None},
+                'last_hard_state' :  {'transform' : last_hard_state_to_int},
                 'is_flapping' : {'transform' : None},
                 'flapping_comment_id' : {'transform' : None},
                 'percent_state_change' : {'transform' : None},
@@ -244,7 +248,7 @@ class Merlindb_broker(BaseModule):
                 'last_state_id' :  {'transform' : None, 'name' : 'last_state'},
                 'last_state_change' :  {'transform' : None},
                 'last_hard_state_change' :  {'transform' : None},
-                'last_hard_state' :  {'transform' : None},
+                'last_hard_state' :  {'transform' : last_hard_state_to_int},
                 'state_type_id' : {'transform' : None, 'name' : 'state_type'},
                 'is_flapping' : {'transform' : None},
                 'flapping_comment_id' : {'transform' : None},
@@ -300,7 +304,7 @@ class Merlindb_broker(BaseModule):
                 'last_state_id' :  {'transform' : None, 'name' : 'last_state'},
                 'last_state_change' :  {'transform' : None},
                 'last_hard_state_change' :  {'transform' : None},
-                'last_hard_state' :  {'transform' : None},
+                'last_hard_state' :  {'transform' : last_hard_state_to_int},
                 'state_type_id' : {'transform' : None, 'name' : 'current_state'},
                 'is_flapping' : {'transform' : None},
                 'flapping_comment_id' : {'transform' : None},
@@ -556,8 +560,18 @@ class Merlindb_broker(BaseModule):
     #A host have just be create, database is clean, we INSERT it
     def manage_initial_host_status_brok(self, b):
         b.data['last_update'] = time.time()
-        query = self.db_backend.create_insert_query('host', b.data)
-        return [query]
+        tmp_data = copy.copy(b.data)
+        del tmp_data['contacts']
+        del tmp_data['contact_groups']
+        query = self.db_backend.create_insert_query('host', tmp_data)
+        res = [query]
+
+        for cg_name in b.data['contact_groups'].split(','):
+          q_del = "DELETE FROM host_contactgroup WHERE host = '%s' and contactgroup = (SELECT id FROM contactgroup WHERE contactgroup_name = '%s')" % (b.data['id'], cg_name)
+          res.append(q_del)
+          q = "INSERT INTO host_contactgroup (host, contactgroup) VALUES ('%s', (SELECT id FROM contactgroup WHERE contactgroup_name = '%s'))" % (b.data['id'], cg_name)
+          res.append(q)
+        return res
 
 
     #A new host group? Insert it

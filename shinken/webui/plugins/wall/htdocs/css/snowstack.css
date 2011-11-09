@@ -4,6 +4,7 @@
     Copyright (C) 2009 Charles Ying. All Rights Reserved.
 */
 
+
 .view
 {
 	position: absolute;
@@ -18,6 +19,7 @@ div.page
     height: 100%;
 	margin: 0 auto;
 	text-align: center;
+
 }
 
 div.origin

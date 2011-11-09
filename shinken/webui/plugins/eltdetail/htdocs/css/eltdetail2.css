@@ -110,6 +110,11 @@ li.tab.active {
     font-weight: bold;
 }
 
+li.tab span{
+        padding-bottom: 10px;
+        vertical-align:middle;
+} 
+
 div.content {
     margin: 0 0 1em 0;
     padding: .4em;
@@ -220,4 +225,9 @@ div.content {
 
 #messagebox {
     margin-top:15px;
+}
+
+#overview_container dd img {
+	vertical-align: -2px;
+	margin-left:2px;
 }

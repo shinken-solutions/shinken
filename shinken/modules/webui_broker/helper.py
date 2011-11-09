@@ -521,19 +521,19 @@ class Helper(object):
             metrics = r['metrics']
             title = r['title']
             s = '<a href="%s">' % lnk
-            s += '''<div class="content">
+            s += '''<div class="graph">
                        <table>
                           <tbody>
                             <tr>\n'''
 
             for (color, pct) in metrics:
-                s += '            <td class="inner" style="background-color: %s; width: %s%%;"></td>\n' % (color, pct)
+                s += '            <td style="background-color: %s; width: %s%%;"></td>\n' % (color, pct)
 
             s += '''        </tr>
                          </tbody>
                       </table>
                     </div>
-                    <div class="title">%s</div>
+                    <div class="text">%s</div>
                     <img class="glow" src="/static/images/glow.png"/>
                  </a>\n''' % title
             return s
