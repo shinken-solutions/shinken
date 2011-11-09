@@ -1,10 +1,10 @@
 
 td.perfometer {
-    padding: 1px 1px 1px 0px;
+    padding: 0;
     width: 120px;
     min-width : 120px;
     text-align: center;
-
+    border: none;
 }
 
 
@@ -12,7 +12,7 @@ td.perfometer img.glow {
     position: relative;
     top: 1px;
     width: 120px;
-    height: 22px;
+    height: 25px;
     z-index: 2;
 
 }
@@ -36,16 +36,20 @@ td.perfometer div.graph {
 
 
 td.perfometer table{
-    padding: 0;
+    padding-top: 2px;
     width: 120px;
-    border: none;/*1px solid #AAA;*/
-    height: 22px;
+    border: none;
+    height: 28px;
     border-radius: 3px;
 }
 
+td.perfometer tbody{
+    border: none;
+    padding-top: 1px;
+}
 
 td.perfometer td {
     padding: 0;
     border: none;
-    height: 22px;
+    height: 28px;
 }

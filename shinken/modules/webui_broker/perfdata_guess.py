@@ -67,8 +67,16 @@ def manage_check_http_command(elt):
 
     # Pourcent of ok should be time/1s
     pct = get_logarithmic(v, 1)
+    # Now get the color
+    # OK : #6f2 (102,255,34) green
+    # Warning : #f60 (255,102,0) orange
+    # Crit : #ff0033 (255,0,51)
+    base_color = {0 : (102,255,34), 1 : (255,102,0), 2 : (255,0,51)}
+    state_id = get_stateid(elt)
+    color = base_color.get(state_id, (179,196,255))
+    s_color = 'RGB(%d,%d,%d)' % color    
     lnk = '#'
-    metrics = [('#68f', pct), ('white', 100-pct)]
+    metrics = [(s_color, pct), ('white', 100-pct)]
     title = '%ss' % v
     print "HTTP: return", {'lnk' : lnk, 'metrics' : metrics, 'title' : title}
     return {'lnk' : lnk, 'metrics' : metrics, 'title' : title}
@@ -91,8 +99,17 @@ def manage_check_ping_command(elt):
 
     # Pourcent of ok should be the log of time versus max/2
     pct = get_logarithmic(v, crit/2)
+    # Now get the color
+    # OK : #6f2 (102,255,34) green
+    # Warning : #f60 (255,102,0) orange
+    # Crit : #ff0033 (255,0,51)
+    base_color = {0 : (102,255,34), 1 : (255,102,0), 2 : (255,0,51)}
+    state_id = get_stateid(elt)
+    color = base_color.get(state_id, (179,196,255))
+    s_color = 'RGB(%d,%d,%d)' % color    
+
     lnk = '#'
-    metrics = [('#68f', pct), ('white', 100-pct)]
+    metrics = [(s_color, pct), ('white', 100-pct)]
     title = '%sms' % v
     print "HTTP: return", {'lnk' : lnk, 'metrics' : metrics, 'title' : title}
     return {'lnk' : lnk, 'metrics' : metrics, 'title' : title}
