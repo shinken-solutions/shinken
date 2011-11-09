@@ -5,6 +5,7 @@ import sys
 import time
 import datetime
 import copy
+import socket
 
 try:
     from shinken.bin import VERSION
@@ -224,6 +225,8 @@ def domacros(configfile,args=[]):
     except:
         return (False,"Error while reading macros file")
 
+    authfile=""
+
     """ remove comments lines """
     index_line = 0
     cleandata=[]
@@ -246,19 +249,20 @@ def domacros(configfile,args=[]):
                 index_args += 1
             index_line += 1
 
-
     allowed = [ "arbiter", "scheduler", "poller", "broker", "reactionner", "receiver" ]
 
     commands={
             "onerror":r"(?P<action>\w+)",
             "setconfigfile":r"(?P<configfile>.*)",
+            "setauthfile":r"(?P<authfile>.*)",
             "clone":r"(?P<object>\w+) set (?P<directives>.*) where (?P<clauses>.*)",
             "delete":r"(?P<object>\w+) where (?P<clauses>.*)",
             "showconfig":r"(?P<object>\w+)",
             "setparam":r"(?P<directive>\w+)=(?P<value>.*) from (?P<object>\w+) where (?P<clauses>.*)",
             "getdirective":r"(?P<directives>\w+) from (?P<object>\w+) where (?P<clauses>.*)",
+            "control":r"(?P<action>\w+)",
             "writeconfig":r"",
-            "sync":r"(?P<authfile>.*)"
+            "sync":r""
             }
 
     """ Compile regexp """
@@ -291,8 +295,14 @@ def domacros(configfile,args=[]):
                         if not code:
                             return (code,config)
                         configfile=result.group('configfile')
+                    if command == "setauthfile":
+                        authfile=result.group('authfile')
                     elif command == "delete":
                         code,message = delobject(config,result.group('object'),result.group('clauses'))
+                        if not code:
+                            if maction == "stop": return (code,message)
+                    elif command == "control":
+                        code,message = control(authfile,result.group('action'))
                         if not code:
                             if maction == "stop": return (code,message)
                     elif command == "onerror":
@@ -306,10 +316,6 @@ def domacros(configfile,args=[]):
                             if maction == "stop": return (code,message)
                     elif command == "showconfig":
                         dumpconfig(result.group('object'),config,allowed)
-                    elif command == "sync":
-                        code,message = sync(config,configfile,result.group('authfile'))
-                        if not code:
-                            if maction == "stop" :return (code,message)
                     elif command == "getdirective":
                         code,last = getdirective(config,result.group('object'),result.group('directives'),result.group('clauses'))
                         if not code:
@@ -322,6 +328,10 @@ def domacros(configfile,args=[]):
                 else:
                     if command == "writeconfig":
                         code,message = writeconfig(config,configfile)    
+                        if not code:
+                            if maction == "stop" :return (code,message)
+                    elif command == "sync":
+                        code,message = sync(config,configfile,authfile)
                         if not code:
                             if maction == "stop" :return (code,message)
                 matched=True
@@ -520,12 +530,10 @@ def sync(config,configfile,authfile):
 
     return (True,addresses)
 
-def control(config,action):
+def control(authfile,action):
     import re
     import paramiko
     import string
-
-    code,addresses = getsatellitesaddresses(config)
 
     code,auth = getauthdata(authfile)
     if not code :
@@ -533,25 +541,36 @@ def control(config,action):
 
     """ which command for an action """
     commands = { "stop":"service shinken stop","start":"service shinken start","restart":"service shinken restart"}
-    if not commands.has_key(command):
+    if not commands.has_key(action):
         return (False,"Unknown action command")
 
     """ now apply control action to all elements """
-    try:
-        ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        for address in addresses:
-            print "control %s : %s" % (action,address)
-            if not auth.has_key(address):
-                return (False,"Auth informations for %s does not exist in authfile" % (address))
-            else:
-                ssh.connect(address,username=auth[address]["login"],password=auth[address]["password"])
-                ssh.exec_command("service shinken restart")
-                ssh.close()
-    except:
-        return (False,"There was an error trying to control shinken on %s" % (address))
 
-    return (True,addresses)
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    for address,authdata in auth.items():
+        try:
+            ssh.connect(address,username=authdata["login"],password=authdata["password"])
+            ssh.exec_command("service shinken %s" % (action))
+            ssh.close()
+        except socket.error:
+            return (False,"socket error (%s)" % (address))
+        except paramiko.BadAuthenticationType:
+            return (False,"BadAuthenticationType (%s)" % (address))
+        except paramiko.BadHostKeyException:
+            return (False,"BadHostKeyException (%s)" % (address))
+        except paramiko.ChannelException:
+            return (False,"ChannelException (%s)" % (address))
+        except paramiko.ChannelException:
+            return (False,"ChannelException (%s)" % (address))
+        except paramiko.PasswordRequiredException:
+            return (False,"PasswordRequiredException (%s)" % (address))
+        except paramiko.SSHException:
+            return (False,"SSHException (%s)" % (address))
+        except paramiko.AuthenticationException:
+            return (False,"AuthenticationException (%s)" % (address))
+
+    return (True,"Action completed")
 
 def writeconfig(config,configfile):
     bck="%s.%d" % (configfile,time.time())
