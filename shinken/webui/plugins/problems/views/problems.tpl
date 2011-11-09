@@ -189,7 +189,7 @@ document.addEvent('domready', function() {
        <div>
       %end
 
-	  <div style="margin-left: 20px; width: 70%; float:left;">
+	  <div style="margin-left: 20px; width: 95%; float:left;">
 	    <table class="tableCriticity" style="width: 100%; margin-bottom:3px;">
 	      <tr class="tabledesc">
 	        <td class="tdBorderLeft tdCriticity" style="width:20px; background:none;"> <img src="/static/images/untick.png" alt="untick" /style="cursor:pointer;" onclick="add_remove_elements('{{pb.get_full_name()}}')" id="selector-{{pb.get_full_name()}}" > </td>
@@ -214,17 +214,17 @@ document.addEvent('domready', function() {
 		<td class="tdBorderTop tdBorderLeft tdCriticity" style="width:50px;"> {{pb.state}}</td>
 		<td title='{{helper.print_date(pb.last_state_change)}}' class="tdBorderTop tdBorderLeft tdCriticity" style="width:50px;">{{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}</td>
 		%# "We put a title (so a tip) on the output onlly if need"
-		%if len(pb.output) > 55:
+		%if len(pb.output) > 100:
 		   %if app.allow_html_output:
-		      <td title="{{pb.output}}" class="tdBorderTop tdBorderLeft tdCriticity" style="width:350px;"> {{!helper.strip_html_output(pb.output[:55])}}</td>
+		      <td title="{{pb.output}}" class="tdBorderTop tdBorderLeft tdCriticity" style="width:450px;"> {{!helper.strip_html_output(pb.output[:100])}}</td>
 		   %else:
-		      <td title="{{pb.output}}" class="tdBorderTop tdBorderLeft tdCriticity" style="width:350px;"> {{pb.output[:55]}}
+		      <td title="{{pb.output}}" class="tdBorderTop tdBorderLeft tdCriticity" style="width:450px;"> {{pb.output[:100]}}
 		   %end
 		%else:
 		   %if app.allow_html_output:
-                      <td class="tdBorderTop tdBorderLeft tdCriticity" style="width:350px;"> {{!helper.strip_html_output(pb.output)}}</td>
+                      <td class="tdBorderTop tdBorderLeft tdCriticity" style="width:450px;"> {{!helper.strip_html_output(pb.output)}}</td>
 		   %else:
-		      <td class="tdBorderTop tdBorderLeft tdCriticity" style="width:350px;"> {{pb.output}} </td>
+		      <td class="tdBorderTop tdBorderLeft tdCriticity" style="width:450px;"> {{pb.output}} </td>
                    %end
 		%end
 		<td class="perfometer">
@@ -237,17 +237,17 @@ document.addEvent('domready', function() {
              </table>
 	  </div>  
 	  %# " We put actions buttons with a opacity hover effect, so they won't be too visible"
-	  <div class="opacity_hover" >
-	    <div style="float:right;">
-	      <a href="#" onclick="try_to_fix('{{pb.get_full_name()}}')">{{!helper.get_button('Fix!', img='/static/images/enabled.png')}}</a>
-	    </div>
-	    <div style="float:right;">
-	      <a href="#" onclick="acknowledge('{{pb.get_full_name()}}')">{{!helper.get_button('Ack', img='/static/images/wrench.png')}}</a>
-	    </div>
-	    <div style="float:right;">
-	      <a href="#" onclick="recheck_now('{{pb.get_full_name()}}')">{{!helper.get_button('Recheck', img='/static/images/delay.gif')}}</a>
-	    </div>
-	  </div>
+%#	  <div class="opacity_hover" >
+%#	    <div style="float:right;">
+%#	      <a href="#" onclick="try_to_fix('{{pb.get_full_name()}}')">{{!helper.get_button('Fix!', img='/static/images/enabled.png')}}</a>
+%#	    </div>
+%#	    <div style="float:right;">
+%#	      <a href="#" onclick="acknowledge('{{pb.get_full_name()}}')">{{!helper.get_button('Ack', img='/static/images/wrench.png')}}</a>
+%#	    </div>
+%#	    <div style="float:right;">
+%#	      <a href="#" onclick="recheck_now('{{pb.get_full_name()}}')">{{!helper.get_button('Recheck', img='/static/images/delay.gif')}}</a>
+%#	    </div>
+%#	  </div>
 	</div>
 
     %# "This div is need so the element will came back in the center of the previous div"

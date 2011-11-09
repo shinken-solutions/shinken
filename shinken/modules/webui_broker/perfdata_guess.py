@@ -21,6 +21,8 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+import math
+
 from shinken.util import safe_print
 from shinken.misc.perfdata import PerfDatas
 
@@ -63,14 +65,8 @@ def manage_check_http_command(elt):
         print "No value, I bailout"
         return None
 
-    # Pourcent of ok should be time/10s
-    pct = 100 * (v / 10)
-    # go to int
-    pct = int(pct)
-    # But at least 1%
-    pct = max(1, pct)
-    #And max to 100%
-    pct = min(pct, 100)
+    # Pourcent of ok should be time/1s
+    pct = get_logarithmic(v, 1)
     lnk = '#'
     metrics = [('#68f', pct), ('white', 100-pct)]
     title = '%ss' % v
@@ -93,14 +89,8 @@ def manage_check_ping_command(elt):
         print "No value, I bailout"
         return None
 
-    # Pourcent of ok should be time/10s
-    pct = 100 * (v / crit)
-    # go to int
-    pct = int(pct)
-    # But at least 1%
-    pct = max(1, pct)
-    #And max to 100%
-    pct = min(pct, 100)
+    # Pourcent of ok should be the log of time versus max/2
+    pct = get_logarithmic(v, crit/2)
     lnk = '#'
     metrics = [('#68f', pct), ('white', 100-pct)]
     title = '%sms' % v
@@ -124,16 +114,27 @@ def manage_check_tcp_command(elt):
         print "No value, I bailout"
         return None
 
-    # Pourcent of ok should be time/10s
-    pct = 100 * (v / m.max)
+    # Pourcent of ok should be the log of time versus m.max / 2
+    pct = get_logarithmic(v, m.max/2)
+
+    # Now get the color
+    # OK : #6f2 (102,255,34) green
+    # Warning : #f60 (255,102,0) orange
+    # Crit : #ff0033 (255,0,51)
+    base_color = {0 : (102,255,34), 1 : (255,102,0), 2 : (255,0,51)}
+    state_id = get_stateid(elt)
+    color = base_color.get(state_id, (179,196,255))
+    s_color = 'RGB(%d,%d,%d)' % color    
+
+    #pct = 100 * (v / m.max)
     # go to int
-    pct = int(pct)
+    #pct = int(pct)
     # But at least 1%
-    pct = max(1, pct)
+    #pct = max(1, pct)
     #And max to 100%
-    pct = min(pct, 100)
+    #pct = min(pct, 100)
     lnk = '#'
-    metrics = [('#68f', pct), ('white', 100-pct)]
+    metrics = [(s_color, pct), ('white', 100-pct)]
     title = '%ss' % v
     print "HTTP: return", {'lnk' : lnk, 'metrics' : metrics, 'title' : title}
     return {'lnk' : lnk, 'metrics' : metrics, 'title' : title}
@@ -218,3 +219,19 @@ def get_stateid(elt):
         state_id = 2
 
     return state_id
+
+
+
+def get_logarithmic(value, half):
+    l_half = math.log(half, 10)
+    print 'Half is', l_half
+    l_value = math.log(value, 10)
+    print "l value is", l_value
+    # Get the percent of our value for what we asked for
+    r = 50 + 10.0 * (l_value - l_half)
+    # Make it an int between 1 and 100
+    r = int(r)
+    r = max(1, r)
+    r = min(r, 100)
+
+    return r

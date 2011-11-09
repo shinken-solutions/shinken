@@ -369,7 +369,10 @@ class Satellite(BaseSatellite):
     def create_and_launch_worker(self, module_name='fork', mortal=True):
         # ceate the input queue of this worker
         try:
-            q = Queue()
+           if is_android:
+              q = Queue()
+           else:
+              q = self.mgr.Queue()
         # If we got no /dev/shm on linux, we can got problem here. 
         # Must raise with a good message
         except OSError, exp:
@@ -760,8 +763,8 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
         if is_android:
            self.returns_queue = Queue()
         else:
-           mgr = Manager()
-           self.returns_queue = mgr.Queue()
+           self.mgr = Manager()
+           self.returns_queue = self.mgr.Queue()
 
         # For multiprocess things, we should not have
         # sockettimeouts. will be set explicitly in Pyro calls
