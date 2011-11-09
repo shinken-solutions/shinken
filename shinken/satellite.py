@@ -757,12 +757,11 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
         # so use standard Queue threads things
         # but in multiprocess, we are also using a Queue(). It's just
         # not the same
-        self.returns_queue = Queue()
-#        if not is_android:
-#            self.manager = Manager()
-#            self.returns_queue = self.manager.list()
-#        else:
-#            self.returns_queue = Queue()
+        if is_android:
+           self.returns_queue = Queue()
+        else:
+           mgr = Manager()
+           self.returns_queue = mgr.Queue()
 
         # For multiprocess things, we should not have
         # sockettimeouts. will be set explicitly in Pyro calls
