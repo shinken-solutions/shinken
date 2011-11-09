@@ -687,11 +687,11 @@ class Config(Item):
         #link timeperiods with timeperiods (exclude part)
         self.timeperiods.linkify()
 
-        #print "Servicedependancy"
+        #print "Servicedependency"
         self.servicedependencies.linkify(self.hosts, self.services,
                                          self.timeperiods)
 
-        #print "Hostdependancy"
+        #print "Hostdependency"
         self.hostdependencies.linkify(self.hosts, self.timeperiods)
 
         #print "Resultmodulations"
@@ -810,7 +810,7 @@ class Config(Item):
 
         self.hostdependencies.explode(self.hostgroups)
 
-        #print "Servicedependancy"
+        #print "Servicedependency"
         self.servicedependencies.explode(self.hostgroups)
 
         #Serviceescalations hostescalations will create new escalations
@@ -835,9 +835,9 @@ class Config(Item):
 
     #Dependancies are importants for scheduling
     #This function create dependencies linked between elements.
-    def apply_dependancies(self):
-        self.hosts.apply_dependancies()
-        self.services.apply_dependancies()
+    def apply_dependencies(self):
+        self.hosts.apply_dependencies()
+        self.services.apply_dependencies()
 
 
     #Use to apply inheritance (template and implicit ones)

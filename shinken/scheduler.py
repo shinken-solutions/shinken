@@ -71,7 +71,7 @@ class Scheduler:
         self.recurrent_works = {
             0 : ('update_downtimes_and_comments', self.update_downtimes_and_comments, 1),
             1 : ('schedule', self.schedule, 1), # just schedule
-            2 : ('consume_results', self.consume_results , 1), # incorpore checks and dependancies
+            2 : ('consume_results', self.consume_results , 1), # incorpore checks and dependencies
             3 : ('get_new_actions', self.get_new_actions, 1), # now get the news actions (checks, notif) raised
             4 : ('get_new_broks', self.get_new_broks, 1), # and broks
             5 : ('delete_zombie_checks', self.delete_zombie_checks, 1),

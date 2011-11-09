@@ -205,7 +205,7 @@ class Hot_dependencies_arbiter(BaseModule):
                     if not son.is_linked_with_host(father):
                         self.debug("Doing simple link between %s and %s" % (son.get_name(), father.get_name()))
                         # Add a dep link between the son and the father
-                        son.add_host_act_dependancy(father, ['w', 'u', 'd'], None, True)
+                        son.add_host_act_dependency(father, ['w', 'u', 'd'], None, True)
                 else:
                     self.debug("Missing one of %s %s" % (son_name, father_name))
 

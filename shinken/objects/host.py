@@ -469,7 +469,7 @@ class Host(SchedulingItem):
 
 
     # Delete all links in the act_depend_of list of self and other
-    def del_host_act_dependancy(self, other):
+    def del_host_act_dependency(self, other):
         to_del = []
         # First we remove in my list
         for (h, status, type, timeperiod, inherits_parent) in self.act_depend_of:
@@ -493,9 +493,9 @@ class Host(SchedulingItem):
         self.parent_dependencies.remove(other)
 
 
-    # Add a dependancy for action event handler, notification, etc)
+    # Add a dependency for action event handler, notification, etc)
     # and add ourself in it's dep list
-    def add_host_act_dependancy(self, h, status, timeperiod, inherits_parent):
+    def add_host_act_dependency(self, h, status, timeperiod, inherits_parent):
         # I add him in MY list
         self.act_depend_of.append( (h, status, 'logic_dep', timeperiod, inherits_parent) )
         # And I add me in it's list
@@ -505,12 +505,12 @@ class Host(SchedulingItem):
         h.register_son_in_parent_child_dependencies(self)
 
 
-    # Register the dependancy between 2 service for action (notification etc)
+    # Register the dependency between 2 service for action (notification etc)
     # but based on a BUSINESS rule, so on fact:
     # ERP depend on database, so we fill just database.act_depend_of_me
     # because we will want ERP mails to go on! So call this
     # on the database service with the srv=ERP service
-    def add_business_rule_act_dependancy(self, h, status, timeperiod, inherits_parent):
+    def add_business_rule_act_dependency(self, h, status, timeperiod, inherits_parent):
         # first I add the other the I depend on in MY list
         # I only register so he know that I WILL be a inpact
         self.act_depend_of_me.append( (h, status, 'business_dep',
@@ -520,8 +520,8 @@ class Host(SchedulingItem):
         self.register_son_in_parent_child_dependencies(h)
 
 
-    # Add a dependancy for check (so before launch)
-    def add_host_chk_dependancy(self, h, status, timeperiod, inherits_parent):
+    # Add a dependency for check (so before launch)
+    def add_host_chk_dependency(self, h, status, timeperiod, inherits_parent):
         # I add him in MY list
         self.chk_depend_of.append( (h, status, 'logic_dep', timeperiod, inherits_parent) )
         # And I add me in it's list
@@ -755,7 +755,7 @@ class Host(SchedulingItem):
 
     #fill act_depend_of with my parents (so network dep)
     #and say parents they impact me, no timeperiod and follow parents of course
-    def fill_parents_dependancie(self):
+    def fill_parents_dependency(self):
         for parent in self.parents:
             if parent is not None:
                 #I add my parent in my list
@@ -1058,9 +1058,9 @@ class Hosts(Items):
 
     # Create depenancies:
     # Depencies at the host level: host parent
-    def apply_dependancies(self):
+    def apply_dependencies(self):
         for h in self:
-            h.fill_parents_dependancie()
+            h.fill_parents_dependency()
 
 
     # Parent graph: use to find quickly relations between all host, and loop
