@@ -355,7 +355,7 @@ class SchedulingItem(Item):
     # action can be raise or not by viewing dep status
     # network_dep have to be all raise to be no action
     # logic_dep : just one is enouth
-    def is_no_action_dependant(self):
+    def is_no_action_dependent(self):
         # Use to know if notif is raise or not
         # no_action = False
         parent_is_down = []
@@ -434,7 +434,7 @@ class SchedulingItem(Item):
 
     # Use to know if my dep force me not to be checked
     # So check the chk_depend_of if they raise me
-    def is_no_check_dependant(self):
+    def is_no_check_dependent(self):
         now = time.time()
         for (dep, status, type, tp, inh_parent) in self.chk_depend_of:
             if tp is None or tp.is_time_valid(now):
@@ -772,7 +772,7 @@ class SchedulingItem(Item):
             else:
                 c.status = 'zombie'
             # Check deps
-            no_action = self.is_no_action_dependant()
+            no_action = self.is_no_action_dependent()
             # We recheck just for network_dep. Maybe we are just unreachable
             # and we need to overide the state_id
             self.check_and_set_unreachability()
@@ -1203,7 +1203,7 @@ class SchedulingItem(Item):
             c_in_progress.depend_on_me.append(ref_check)
             return c_in_progress.id
 
-        if force or (not self.is_no_check_dependant()):
+        if force or (not self.is_no_check_dependent()):
             # Get the command to launch
             m = MacroResolver()
             data = self.get_data_for_checks()

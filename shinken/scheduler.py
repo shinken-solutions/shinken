@@ -310,10 +310,10 @@ class Scheduler:
                 elt = c.ref
                 # First remove the link in host/service
                 elt.remove_in_progress_check(c)
-                # Then in dependant checks (I depend on, or check
+                # Then in dependent checks (I depend on, or check
                 # depend on me)
-                for dependant_checks in c.depend_on_me:
-                    dependant_checks.depend_on.remove(c.id)
+                for dependent_checks in c.depend_on_me:
+                    dependent_checks.depend_on.remove(c.id)
                 for c_temp in c.depend_on:
                     c_temp.depen_on_me.remove(c)
                 del self.checks[i] # Final Bye bye ...
@@ -1131,9 +1131,9 @@ class Scheduler:
         # All 'finished' checks (no more dep) raise checks they depends on
         for c in self.checks.values():
             if c.status == 'havetoresolvedep':
-                for dependant_checks in c.depend_on_me:
-                    # Ok, now dependant will no more wait c
-                    dependant_checks.depend_on.remove(c.id)
+                for dependent_checks in c.depend_on_me:
+                    # Ok, now dependent will no more wait c
+                    dependent_checks.depend_on.remove(c.id)
                 # REMOVE OLD DEP CHECL -> zombie
                 c.status = 'zombie'
 
