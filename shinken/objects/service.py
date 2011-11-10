@@ -409,7 +409,7 @@ class Service(SchedulingItem):
 
     # The service is dependent of his father dep
     # Must be AFTER linkify
-    def fill_daddy_dependancy(self):
+    def fill_daddy_dependency(self):
         #  Depend of host, all status, is a networkdep
         # and do not have timeperiod, and follow parents dep
         if self.host is not None:
@@ -428,8 +428,8 @@ class Service(SchedulingItem):
             self.host.register_son_in_parent_child_dependencies(self)
 
 
-    # Register the dependancy between 2 service for action (notification etc)
-    def add_service_act_dependancy(self, srv, status, timeperiod, inherits_parent):
+    # Register the dependency between 2 service for action (notification etc)
+    def add_service_act_dependency(self, srv, status, timeperiod, inherits_parent):
         # first I add the other the I depend on in MY list
         self.act_depend_of.append( (srv, status, 'logic_dep',
                                     timeperiod, inherits_parent) )
@@ -442,12 +442,12 @@ class Service(SchedulingItem):
 
 
 
-    # Register the dependancy between 2 service for action (notification etc)
+    # Register the dependency between 2 service for action (notification etc)
     # but based on a BUSINESS rule, so on fact:
     # ERP depend on database, so we fill just database.act_depend_of_me
     # because we will want ERP mails to go on! So call this
     # on the database service with the srv=ERP service
-    def add_business_rule_act_dependancy(self, srv, status, timeperiod, inherits_parent):
+    def add_business_rule_act_dependency(self, srv, status, timeperiod, inherits_parent):
         # I only register so he know that I WILL be a inpact
         self.act_depend_of_me.append( (srv, status, 'business_dep',
                                       timeperiod, inherits_parent) )
@@ -457,8 +457,8 @@ class Service(SchedulingItem):
 
 
 
-    # Register the dependancy between 2 service for checks
-    def add_service_chk_dependancy(self, srv, status, timeperiod, inherits_parent):
+    # Register the dependency between 2 service for checks
+    def add_service_chk_dependency(self, srv, status, timeperiod, inherits_parent):
         # first I add the other the I depend on in MY list
         self.chk_depend_of.append( (srv, status, 'logic_dep',
                                     timeperiod, inherits_parent) )
@@ -1083,10 +1083,10 @@ class Services(Items):
             s.get_customs_properties_by_inheritance(self)
 
 
-    # Create dependancies for services (daddy ones)
-    def apply_dependancies(self):
+    # Create dependencies for services (daddy ones)
+    def apply_dependencies(self):
         for s in self:
-            s.fill_daddy_dependancy()
+            s.fill_daddy_dependency()
 
 
     # Add in our queue a service create from another. Special case :

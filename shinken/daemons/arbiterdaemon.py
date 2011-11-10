@@ -333,8 +333,8 @@ class Arbiter(Daemon):
         # Linkify objects each others
         self.conf.linkify()
 
-        # applying dependancies
-        self.conf.apply_dependancies()
+        # applying dependencies
+        self.conf.apply_dependencies()
 
         # Hacking some global parameter inherited from Nagios to create
         # on the fly some Broker modules like for status.dat parameters
