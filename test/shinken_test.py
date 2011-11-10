@@ -127,7 +127,7 @@ class ShinkenTest(unittest.TestCase):
         self.conf.create_reversed_list()
         self.conf.pythonize()
         self.conf.linkify()
-        self.conf.apply_dependancies()
+        self.conf.apply_dependencies()
         self.conf.explode_global_conf()
         self.conf.propagate_timezone_option()
         self.conf.create_business_rules()

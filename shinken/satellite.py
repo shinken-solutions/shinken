@@ -330,6 +330,7 @@ class Satellite(BaseSatellite):
                 except AttributeError , exp: # the scheduler must  not be initialized
                     print exp
                 except Exception , exp:
+                    print "Unknown exception", exp
                     if PYRO_VERSION < "4.0":
                         print ''.join(Pyro.util.getPyroTraceback(exp))
                     else:
