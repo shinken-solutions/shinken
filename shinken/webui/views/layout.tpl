@@ -55,7 +55,7 @@
       <script type="text/javascript" src="/static/js/multibox.js"></script>
       <script type="text/javascript" src="/static/js/deptree.js"></script>
 
-      %if user is not None:
+      %if user is not None and print_header:
         <script type="text/javascript" src="/static/js/userinfo.js"></script>
       %end
 

@@ -1,5 +1,5 @@
 window.addEvent('domready', function(){
-	
+    
 	$('userinfo').setStyle('height','auto');
 	var mySlide = new Fx.Slide('userinfo').hide();
 

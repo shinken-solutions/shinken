@@ -1,25 +1,25 @@
-<!DOCTYPE html>
-<html>
-<head>
+%#<!DOCTYPE html>
+%#<html>
+%#<head>
 
 <!--
     Copyright (C) 2009 Charles Ying. All Rights Reserved.
     This source code is available under Apache License 2.0.
 -->
+%rebase layout css=['wall/css/snowstack.css', 'wall/css/wall.css'], title='Wall view', js=['wall/js/snowstack.js', 'wall/js/wall.js'], refresh=True, user=user, print_menu=False, print_header=True
 
-<title>Snow Stack - WebKit 3D CSS Visual Effects</title>
-<meta name="Description" content="Snow Stack is a demo of WebKit CSS 3D visual effects with latest WebKit nightly on Mac OS X Snow Leopard" />
 
-<link rel="stylesheet" type="text/css" href="/static/wall/css/snowstack.css">
-<link rel="stylesheet" type="text/css" href="/static/wall/css/wall.css">
+%#<title>Snow Stack - WebKit 3D CSS Visual Effects</title>
+%#<meta name="Description" content="Snow Stack is a demo of WebKit CSS 3D visual effects with latest WebKit nightly on Mac OS X Snow Leopard" />
+
+%#<link rel="stylesheet" type="text/css" href="/static/wall/css/snowstack.css">
+%#<link rel="stylesheet" type="text/css" href="/static/wall/css/wall.css">
 
 <style type="text/css">
 
 body
 {
 	font-family: 'Helvetica Neue Light', 'HelveticaNeue-Light', sans-serif;
-	background-color: black;
-	color: white;
 	margin: 0;
 	padding: 0;
 }
@@ -44,9 +44,9 @@ body
 
 </style>
 
-</head>
+%#</head>
 
-<body>
+%#<body>
 
 <div class="page view">
     <div class="origin view">
@@ -58,10 +58,10 @@ body
 	snow stack / webkit css visual effects demo &mdash; arrow keys to move, space toggles magnify
 </div>
 
-<script type="text/javascript" src="/static/wall/js/snowstack.js"></script>
+%#<script type="text/javascript" src="/static/wall/js/snowstack.js"></script>
 %#<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
-<script type="text/javascript" src="/static/js/mootools.js"></script>
-<script type="text/javascript" src="/static/js/mootools-more.js"></script>
+%#<script type="text/javascript" src="/static/js/mootools.js"></script>
+%#<script type="text/javascript" src="/static/js/mootools-more.js"></script>
 
 <script type="text/javascript">
 
@@ -117,15 +117,9 @@ function init_pageimages(options)
 
 var images = {{!impacts}};
 
-
-
-window.addEvent('domready', function(){
-	snowstack_init(images);
-});
-
 </script>
 
 
-</body>
+%#</body>
 
-</html>
+%#</html>
