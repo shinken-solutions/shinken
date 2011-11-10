@@ -51,6 +51,7 @@ try:
 
     PYRO_VERSION = Pyro.constants.VERSION
     Pyro.errors.CommunicationError = Pyro.errors.ProtocolError
+    Pyro.errors.TimeoutError = Pyro.errors.ProtocolError
     
     class Pyro3Daemon(Pyro.core.Daemon):
         pyro_version = 3

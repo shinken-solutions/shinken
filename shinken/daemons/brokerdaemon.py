@@ -43,7 +43,7 @@ from shinken.external_command import ExternalCommand
 # Pack of common Pyro exceptions
 Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
                     Pyro.errors.CommunicationError, \
-                    Pyro.errors.DaemonError)
+                    Pyro.errors.DaemonError, Pyro.errors.TimeoutError)
 
 
 # Our main APP class
@@ -192,7 +192,7 @@ class Broker(BaseSatellite):
 
 
         try:
-                # intial ping must be quick
+            # intial ping must be quick
             pyro.set_timeout(links[id]['con'], 5)
             links[id]['con'].ping()
             new_run_id = links[id]['con'].get_running_id()
@@ -212,14 +212,14 @@ class Broker(BaseSatellite):
             # else:
             #     print "I do nto ask for brok generation"
             links[id]['running_id'] = new_run_id
-        except (Pyro.errors.ProtocolError, Pyro.errors.CommunicationError), exp:
+        except Pyro_exp_pack, exp:
             logger.log("[%s] Connection problem to the %s %s : %s" % (self.name, type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
-        except Pyro.errors.NamingError, exp:
-            logger.log("[%s] the %s '%s' is not initilised : %s" % (self.name, type, links[id]['name'], str(exp)))
-            links[id]['con'] = None
-            return
+#        except Pyro.errors.NamingError, exp:
+#            logger.log("[%s] the %s '%s' is not initilised : %s" % (self.name, type, links[id]['name'], str(exp)))
+#            links[id]['con'] = None
+#            return
         except KeyError , exp:
             logger.log("[%s] the %s '%s' is not initilised : %s" % (self.name, type, links[id]['name'], str(exp)))
             links[id]['con'] = None
@@ -312,7 +312,7 @@ class Broker(BaseSatellite):
             # scheduler must not have checks
             except Pyro.errors.NamingError , exp:
                 logger.log("[%s] The %s %s should not be initialized : %s" % (self.name, type, links[sched_id]['name'], str(exp)))
-            except Pyro.errors.ConnectionClosedError , exp:
+            except (Pyro.errors.ConnectionClosedError, Pyro.errors.TimeoutError), exp:
                 logger.log("[%s] Connection problem to the %s %s : %s" % (self.name, type, links[sched_id]['name'], str(exp)))
                 links[sched_id]['con'] = None
             #  What the F**k? We do not know what happenned,
