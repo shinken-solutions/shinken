@@ -164,7 +164,14 @@ class Webui_broker(BaseModule, Daemon):
         self.set_exit_handler()
         print "Go run"
 
+        # We ill protect the operations on
+        # the non read+write with a lock and
+        # 2 int
         self.global_lock = threading.RLock()
+        self.nb_readers = 0
+        self.nb_writers = 0
+
+        
         self.data_thread = None
 
         # Check if the view dir really exist
@@ -208,10 +215,9 @@ class Webui_broker(BaseModule, Daemon):
         print "Data thread started"
         while True:
            b = self.to_q.get()
-           #print "Got a brok"
            # For updating, we cannot do it while
-           # answer queries, so lock it
-           self.global_lock.acquire()
+           # answer queries, so wait for no readers
+           self.wait_for_no_readers()
            try:
                #print "Got data lock, manage brok"
                self.rg.manage_brok(b)
@@ -232,7 +238,11 @@ class Webui_broker(BaseModule, Daemon):
                # No need to raise here, we are in a thread, exit!
                os._exit(2)
            finally:
-               #print "Release data lock"
+               # We can remove us as a writer from now. It's NOT an atomic operation
+               # so we REALLY not need a lock here (yes, I try without and I got
+               # a not so accurate value there....)
+               self.global_lock.acquire()
+               self.nb_writers -= 1
                self.global_lock.release()
 
 
@@ -315,18 +325,65 @@ class Webui_broker(BaseModule, Daemon):
         route(static_route, callback=plugin_static)
 
 
+    # It will say if we can launch a page rendering or not.
+    # We can only if there is no writer running from now
+    def wait_for_no_writers(self):
+        can_run = False
+        while True:
+            self.global_lock.acquire()
+            # We will be able to run
+            if self.nb_writers == 0:
+                # Ok, we can run, register us as readers
+                self.nb_readers += 1
+                self.global_lock.release()
+                break
+            # Oups, a writer is in progress. We must wait a bit
+            self.global_lock.release()
+            # Before checking again, we should wait a bit
+            # like 1ms
+            time.sleep(0.001)
+
+
+    # It will say if we can launch a brok management or not
+    # We can only if there is no readers running from now
+    def wait_for_no_readers(self):
+        start = time.time()
+        while True:
+            self.global_lock.acquire()
+            # We will be able to run
+            if self.nb_readers == 0:
+                # Ok, we can run, register us as writers
+                self.nb_writers += 1
+                self.global_lock.release()
+                break
+            # Ok, we cannot run now, wait a bit
+            self.global_lock.release()
+            # Before checking again, we should wait a bit
+            # like 1ms
+            time.sleep(0.001)
+            # We should warn if we cannot update broks
+            # for more than 30s because it can be not good
+            if time.time() - start > 30:
+                print "WARNING: we are in lock/read since more than 30s!"
+                start = time.time()
+
+        
+
     # We want a lock manager version of the plugin fucntions
     def lockable_function(self, f):
         print "We create a lock verion of", f
         def lock_version(**args):
+            self.wait_for_no_writers()
             t = time.time()
-            print "Got HTTP lock for f", f
-            self.global_lock.acquire()
             try:
                 return f(**args)
             finally:
-                print "Release HTTP lock for f", f
-                print "in", time.time() - t
+                print "rendered in", time.time() - t
+                # We can remove us as a reader from now. It's NOT an atomic operation
+                # so we REALLY not need a lock here (yes, I try without and I got
+                # a not so accurate value there....)
+                self.global_lock.acquire()
+                self.nb_readers -= 1
                 self.global_lock.release()
         print "The lock version is", lock_version
         return lock_version
