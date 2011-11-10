@@ -24,7 +24,7 @@
 """ Config is the class to read, load and manipulate the user
  configuration. It read a main cfg (nagios.cfg) and get all informations
  from it. It create objects, make link between them, clean them, and cut
- them into independant parts. The main user of this is Arbiter, but schedulers
+ them into independent parts. The main user of this is Arbiter, but schedulers
  use it too (but far less)"""
 
 import re
@@ -687,11 +687,11 @@ class Config(Item):
         #link timeperiods with timeperiods (exclude part)
         self.timeperiods.linkify()
 
-        #print "Servicedependancy"
+        #print "Servicedependency"
         self.servicedependencies.linkify(self.hosts, self.services,
                                          self.timeperiods)
 
-        #print "Hostdependancy"
+        #print "Hostdependency"
         self.hostdependencies.linkify(self.hosts, self.timeperiods)
 
         #print "Resultmodulations"
@@ -810,7 +810,7 @@ class Config(Item):
 
         self.hostdependencies.explode(self.hostgroups)
 
-        #print "Servicedependancy"
+        #print "Servicedependency"
         self.servicedependencies.explode(self.hostgroups)
 
         #Serviceescalations hostescalations will create new escalations
@@ -835,9 +835,9 @@ class Config(Item):
 
     #Dependancies are importants for scheduling
     #This function create dependencies linked between elements.
-    def apply_dependancies(self):
-        self.hosts.apply_dependancies()
-        self.services.apply_dependancies()
+    def apply_dependencies(self):
+        self.hosts.apply_dependencies()
+        self.services.apply_dependencies()
 
 
     #Use to apply inheritance (template and implicit ones)
@@ -1511,7 +1511,7 @@ class Config(Item):
 
     # Use the self.conf and make nb_parts new confs.
     # nbparts is equal to the number of schedulerlink
-    # New confs are independant whith checks. The only communication
+    # New confs are independent whith checks. The only communication
     # That can be need is macro in commands
     def cut_into_parts(self):
         #print "Scheduler configurated :", self.schedulerlinks

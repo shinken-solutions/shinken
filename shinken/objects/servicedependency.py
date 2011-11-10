@@ -177,8 +177,8 @@ class Servicedependencies(Items):
             sdval = sd.service_description
             if dsc is not None and sdval is not None:
                 dp = getattr(sd, 'dependency_period', None)
-                dsc.add_service_act_dependancy(sdval, sd.notification_failure_criteria, dp, sd.inherits_parent)
-                dsc.add_service_chk_dependancy(sdval, sd.execution_failure_criteria, dp, sd.inherits_parent)
+                dsc.add_service_act_dependency(sdval, sd.notification_failure_criteria, dp, sd.inherits_parent)
+                dsc.add_service_chk_dependency(sdval, sd.execution_failure_criteria, dp, sd.inherits_parent)
 
 
     #Apply inheritance for all properties

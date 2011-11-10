@@ -678,7 +678,7 @@ class Items(object):
         # we are ok at the begining. Hope we still ok at the end...
         r = True
         # Some class do not have twins, because they do not have names
-        # like servicedependancies
+        # like servicedependencies
         twins = getattr(self, 'twins', None)
         if twins is not None:
             # Ok, look at no twins (it's bad!)
