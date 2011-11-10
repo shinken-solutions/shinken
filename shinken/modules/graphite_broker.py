@@ -55,7 +55,7 @@ class Graphite_broker(BaseModule):
     #TODO : add conf param to get pass with init
     #Conf from arbiter!
     def init(self):
-        print "[%s] I init the graphite server connexion to %s:%s" % (self.get_name(), self.host, self.port) 
+        print "[%s] I init the graphite server connection to %s:%s" % (self.get_name(), self.host, self.port) 
         self.con = socket()
         self.con.connect( (self.host, self.port))
 

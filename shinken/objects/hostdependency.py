@@ -152,8 +152,8 @@ class Hostdependencies(Items):
             # Ok, link!
             depdt_hname = hd.dependent_host_name
             dp = getattr(hd, 'dependency_period', None)
-            depdt_hname.add_host_act_dependancy(hd.host_name, hd.notification_failure_criteria, dp, hd.inherits_parent)
-            depdt_hname.add_host_chk_dependancy(hd.host_name, hd.execution_failure_criteria, dp, hd.inherits_parent)
+            depdt_hname.add_host_act_dependency(hd.host_name, hd.notification_failure_criteria, dp, hd.inherits_parent)
+            depdt_hname.add_host_chk_dependency(hd.host_name, hd.execution_failure_criteria, dp, hd.inherits_parent)
 
 
     #Apply inheritance for all properties
