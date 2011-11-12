@@ -121,11 +121,11 @@ Invalid element name
 
 		<div id="demo" class="grid_16">
 						    <ul class="tabs">
-						        <li class="tab icon_summary">Summary</li>
-						        <li class="tab icon_service">Services</li>
-						        <li class="tab icon_comment">Comments/Downtimes</li>
-						        <li class="tab icon_dependency ">Dependency Cloud</li>
-						        <li class="tab icon_graph">Graphs</li>
+						        <li class="tab icon_summary"><span>Summary</span></li>
+						        <li class="tab icon_service"><span>Services</span></li>
+						        <li class="tab icon_comment"><span>Comments/Downtimes</span></li>
+						        <li class="tab icon_dependency"><span>Dependency Cloud</span></li>
+						        <li class="tab icon_graph"><span>Graphs</span></li>
 						    </ul>
 						    <div class="content">
 						   <div id="elt_summary">
