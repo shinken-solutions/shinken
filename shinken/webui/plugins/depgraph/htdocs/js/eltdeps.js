@@ -97,7 +97,6 @@ window.onload = function init(){
     // Main printing loop for particules, graph is print only when need, 
     // but particules are print each loop
     function loop() {
-	
 	for (i = 0, len = particles.length; i < len; i++) {
 	    var particle = particles[i];
 
@@ -254,21 +253,27 @@ window.onload = function init(){
 	    'custom': {
 		'render': function(node, canvas) {
 
-		    // Look if we really need to render this node
-		    if(!should_be_print(node)){
-			// Remeber to clean the particule if need
-			clean_particule(node.id);
-			return;
-		    }
-
-
-		    //alert('Rendering node '+node.id);
 		    /*First we need to know where the node is, so we can draw 
 		     in the correct place for the GLOBAL canvas*/
 		    var pos = node.getPos().getc();
 		    var size = 24;
 
 		    var ctx = canvas.getCtx();
+
+		    // Look if we really need to render this node
+		    if(!should_be_print(node)){
+			var color = node.data.circle;
+			// Remeber to clean the particule if need
+			clean_particule(node.id);
+			ctx.beginPath();
+			ctx.fillStyle = color;//'rgba(0,0,255,0.8)';
+			ctx.arc(pos.x, pos.y, 1,  0, Math.PI*(2), true);
+			ctx.fill();
+			return;
+		    }
+
+
+		    //alert('Rendering node '+node.id);
 		    // save it
 		    context = ctx;
 		    img = new Image();
@@ -373,9 +378,9 @@ window.onload = function init(){
 		dst = adj.nodeTo;
 
 		// If one of the line border is a no print node
-		// do not print this line
+		// print this line in very few pixels
 		if(!should_be_print(src) || !should_be_print(dst)){
-		    adj.data.$lineWidth = 0.0001;
+		    adj.data.$lineWidth = 0.3;
 		}else{
 		    adj.data.$lineWidth = 2;
 		}
