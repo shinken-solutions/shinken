@@ -42,14 +42,17 @@ class Service_perfdata_broker(BaseModule):
         self.template = self.template.replace(r'\t', '\t')
         self.template = self.template.replace(r'\n', '\n')
 
+        self.buffer = []
+
 
     #Called by Broker so we can do init stuff
     #TODO : add conf param to get pass with init
     #Conf from arbiter!
     def init(self):
         print "[%s] I open the service-perfdata file '%s'" % (self.name, self.path)
+        #Try to open the file to be sure we can
         self.file = codecs.open( self.path, self.mode, "utf-8" )
-
+        self.file.close()
 
     #We've got a 0, 1, 2 or 3 (or something else? ->3
     #And want a real OK, WARNING, CRITICAL, etc...
@@ -82,5 +85,21 @@ class Service_perfdata_broker(BaseModule):
         #s = "%s\t%s\t%s\t%s\t%s\t%s\n" % (int(data['last_chk']),data['host_name'], \
         #                                  data['service_description'], data['output'], \
         #                                  current_state, data['perf_data'] )
-        self.file.write(s)
-        self.file.flush()
+        self.buffer.append(s)
+
+
+    # Each second the broker say it's a new second. Let use this to
+    # dump to the file
+    def hook_tick(self, brok):
+        #Go to write it :)
+        buf = self.buffer
+        self.buffer = []
+        try:
+            self.file = codecs.open(self.path, self.mode, "utf-8")
+            for s in buf:
+                self.file.write(s)
+            self.file.flush()
+            self.file.close()
+        except IOError, exp: # Maybe another tool is just getting it, pass
+            pass
+            

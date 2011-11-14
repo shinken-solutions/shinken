@@ -13,8 +13,8 @@
 .actions {}
 
 
-.dockContainer { position: fixed; bottom: 12px; height: 120px; padding: 50px 0 0; text-align: center; -webkit-border-radius: 6px; -moz-border-radius: 6px; width: 100%; line-height: 1; z-index: 100; opacity:0;}
-.dockWrapper { width: auto; display: inline-block; position: relative; border-bottom: solid 2px rgba(255,255,255,.35); line-height: 0; }
+.dockContainer { position: fixed; bottom: 12px; height: 120px; text-align: center; -webkit-border-radius: 6px; -moz-border-radius: 6px; width: 100%; line-height: 1; z-index: 1; opacity:1; width: auto; left:50%;}
+.dockWrapper { width: auto; display: inline-block; position: relative; border-bottom: solid 2px rgba(255,255,255,.35); line-height: 0;  opacity:0; display:none; z-index: 1}
 
 
 div.cap.left {

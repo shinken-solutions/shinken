@@ -1,7 +1,7 @@
 #!/bin/bash  
 
 # environnement
-myscripts=$(readlink -f $(dirname $0))
+export myscripts=$(readlink -f $(dirname $0))
 src=$(readlink -f "$myscripts/../../..")
 . $myscripts/shinken.conf
 
@@ -201,24 +201,6 @@ cline ()
         fi
         return
 }
-######################################################################
-#   AUTHOR: Joe Negron - LOGIC Wizards ~ NYC
-#  LICENSE: BuyMe-a-Drinkware: Dual BSD or GPL (pick one)
-#    USAGE: byteMe (bytes)
-# ABSTRACT: Converts a numeric parameter to a human readable format.
-######################################################################
-function byteMe() { # Divides by 2^10 until < 1024 and then append metric suffix
-	declare -a METRIC=(' Bytes' 'KB' 'MB' 'GB' 'TB' 'XB' 'PB') # Array of suffixes
-	MAGNITUDE=0  # magnitude of 2^10
-	PRECISION="scale=1" # change this numeric value to inrease decimal precision
-	UNITS=`echo $1 | tr -d ‘,’`  # numeric arg val (in bytes) to be converted
-	while [ ${UNITS/.*} -ge 1024 ] # compares integers (b/c no floats in bash)
-	  do
-	   UNITS=`echo "$PRECISION; $UNITS/1024" | bc` # floating point math via `bc`
-	   ((MAGNITUDE++)) # increments counter for array pointer
-	  done
-	echo="$UNITS${METRIC[$MAGNITUDE]}"
-}
 
 function cadre(){
 	cecho "+--------------------------------------------------------------------------------" $2
@@ -250,6 +232,8 @@ function check_distro(){
 	if [ ! -e /usr/bin/lsb_release ]
 	then	
 		cecho " > No compatible distribution found" red
+		cecho " > maybe the lsb_release utility is not found" red
+		cecho " > on redhat like distro you should try yum install redhat-lsb"
 		exit 2
 	fi
 
@@ -268,6 +252,7 @@ function check_distro(){
 		version=$(echo $d | awk -F: '{print $2}')
 		if [ "$CODE" = "$distro" ]
 		then
+			cecho " > Found $CODE" green
 			if [ "$version" = "" ]
 			then
 				cecho " > Version checking for $DIST is not needed" green
@@ -278,8 +263,8 @@ function check_distro(){
 				then
 					versionok=1
 					return
-				else
-					versionok=0
+				#else
+				#	versionok=0
 				fi		
 			fi
 		fi
@@ -334,23 +319,15 @@ function purgeSQLITE(){
 		cecho " > Livestatus db not found " yellow
 		exit 1
 	fi
-#	val=$(ls -la /opt/shinken/var/livestatus.db | awk '{print $5}')
-#	size1=$(byteMe $val)
-#	cecho " > Original size : $size1 " green
 	skill > /dev/null 2>&1
 	cecho " > we keep $KEEPDAYSLOG days of logs" green
 	sqlite3 $TARGET/var/livestatus.db "delete from logs where time < strftime('%s', 'now') - 3600*24*$KEEPDAYSLOG"
 	cecho " > Vaccum the sqlite DB" green
 	sqlite3 $TARGET/var/livestatus.db VACUUM
-#	val=$(ls -la /opt/shinken/var/livestatus.db | awk '{print $5}')
-#	size2=$(byteMe $val)
-#	cecho " > New size : $size1 " green
 }
 
 function skill(){
-	#cecho "Try to stop shinken the right way" green
 	/etc/init.d/shinken stop > /dev/null 2>&1
-	#cecho "Killing shinken" green
 	pc=$(ps -aef | grep "$TARGET" | grep -v "grep" | wc -l )
 	if [ $pc -ne 0 ]
 	then	
@@ -425,7 +402,19 @@ function relocate(){
 	then
 		if [ "$VERS" = "5" ]
 		then
-			for fic in $(find $TARGET | grep "\.py$"); do sed -i "s#/usr/bin/env python#/usr/bin/python26#g" $fic; done
+			cecho " > translating python version to python26" green
+			for fic in $(find $TARGET | grep "\.py$") 
+			do
+				sed -i "s#/usr/bin/env python#/usr/bin/python26#g" $fic
+			done
+			# also try to translate python script without py extension
+			for fic in $(find $TARGET/bin)
+			do
+				if [ ! -z "$(file $fic | grep "python")" ]
+				then
+					sed -i "s#/usr/bin/env python#/usr/bin/python26#g" $fic
+				fi
+			done
 		fi
 	fi
 
@@ -440,7 +429,7 @@ function relocate(){
 	done
 	# relocate default file
 	cd $TARGET/bin/default
-	cat $TARGET/bin/default/shinken.in | sed -e 's#RUN\=\(.*\)$#RUN='$TARGET'/var#g' -e  's#ETC\=\(.*\)$#ETC='$TARGET'/etc#g' -e  's#VAR\=\(.*\)$#VAR='$TARGET'/var#g' -e  's#BIN\=\(.*\)$#BIN='$TARGET'/bin#g' > $TARGET/bin/default/shinken
+	cat $TARGET/bin/default/shinken.in | sed  -e 's#LOG\=\(.*\)$#LOG='$TARGET'/var#g' -e 's#RUN\=\(.*\)$#RUN='$TARGET'/var#g' -e  's#ETC\=\(.*\)$#ETC='$TARGET'/etc#g' -e  's#VAR\=\(.*\)$#VAR='$TARGET'/var#g' -e  's#BIN\=\(.*\)$#BIN='$TARGET'/bin#g' > $TARGET/bin/default/shinken
 	# relocate init file
 	cd $TARGET/bin/init.d
 	mv shinken shinken.in
@@ -454,6 +443,7 @@ function fix(){
 	chmod +x /etc/default/shinken
 	chmod +x $TARGET/bin/init.d/shinken
 	chown -R $SKUSER:$SKGROUP $TARGET
+	chmod -R g+w $TARGET
 	# remove tests directory
 	rm -Rf $TARGET/test
 }
@@ -488,6 +478,11 @@ function sinstall(){
 	cp $TARGET/bin/init.d/shinken* /etc/init.d/
 	mkdir -p $TARGET/var/archives
 	fix
+	cecho "+------------------------------------------------------------------------------" green
+	cecho "| shinken is now installed on your server " green
+	cecho "| You can start it with /etc/init.d/shinken start " green
+	cecho "| The Web Interface is available at : http://localhost:7767" green
+	cecho "+------------------------------------------------------------------------------" green
 }
 
 function rheldvd(){
@@ -707,7 +702,7 @@ function prerequisites(){
 					if [ $? -ne 0 ]
 					then
 						cecho " > Installing $EPELPKG" yellow
-						wget $EPEL  > /dev/null 2>&1 
+						wget $WGETPROXY $EPEL  > /dev/null 2>&1 
 						if [ $? -ne 0 ]
 						then
 							cecho " > Error while trying to download EPEL repositories" red 
@@ -758,8 +753,13 @@ function prerequisites(){
 				# install setup tools for python 26
 				export PY="python26"
 				export PYEI="easy_install-2.6"
-				wget $RHELSETUPTOOLS > /dev/null 2>&1
-				tar zxvf setuptools-$SETUPTOOLSVERS.tar.gz > /dev/null 2>&1
+				if [ ! -d "setuptools-$SETUPTOOLSVERS" ]
+				then
+					cecho " > Downloading setuptoos for python 2.6" green
+					wget $WGETPROXY $RHELSETUPTOOLS > /dev/null 2>&1
+					tar zxvf setuptools-$SETUPTOOLSVERS.tar.gz > /dev/null 2>&1
+				fi
+				cecho " > installing setuptoos for python 2.6" green
 				cd setuptools-$SETUPTOOLSVERS > /dev/null 2>&1
 				python26 setup.py install > /dev/null 2>&1
 				PYLIBS=$PYLIBSRHEL
@@ -779,7 +779,7 @@ function prerequisites(){
 			if [ $? -eq 2 ]
 			then
 				cecho " > Module $module ($import) not found. Installing..." yellow
-				$PYEI $module #> /dev/null 2>&1
+				$PYEI $module > /dev/null 2>&1
 			else
 				cecho " > Module $module found." green 
 			fi
@@ -815,73 +815,234 @@ function shelp(){
 	cat $myscripts/README
 }
 
-function setprofile(){
-	case $1 in
-		poller)
-			setpoller 
-			exit 0
-			;;
-		*)
-			cecho " > Unknown profil" red
-			exit 2
-			;;
-	esac
-}
-
-question(){
-	variable=$1
-	question=$2
-	default=$3
-	
-	echo -ne " > "$variable : $question" ["$default"] : "
-	read response 
-	if [ ! -z $response ]
+function cleanconf(){
+	if [ -z "$myscripts" ]
 	then
-		eval "$variable=$response"
+		cecho " > Files/Folders list not found" yellow
+		exit 2
+	else
+		for f in $(cat $myscripts/config.files)
+		do
+			cecho " > removing $TARGET/etc/$f" green
+			rm -Rf $TARGET/etc/$f
+		done
 	fi
 }
 
-
-setpoller(){
-	# default values
-	processes_by_worker=256	   #; optional : each workers manage 256 checks
-	polling_interval=1       #; optional : take jobs from schedulers each 1 second
-	timeout=3	      #; 'ping' timeout 
-	data_timeout=120 #	      ; 'data send' timeout
-	check_interval=60 #   ; ping it every minute
-	max_check_attempts=3 #    ;  if at least max_check_attempts ping failed, the node is DEAD
-       #optional
-       
-       # advanced features
-       #modules		NrpeBooster
-       #poller_tags	None
-       #realm		All
-
-	declare -a config=("spare|0|Is this poller a spare ?" 
-		"poller_name|$(hostname -s)|What is the poller name ?" 
-		"address|$(hostname)|What is the poller address ?" 
-		"port|7771|What is the poller port ?" 
-		"manage_sub_realms|0|Manage sub realms (Does this poller take jobs from schedulers or sub realms) ?" 
-		"min_workers|4|Min workers (Starts with N processes workers. 0 means number of cpus) ?" 
-		"max_workers|4|Max workers (no more than N processes workers. 0 means : number of cpus) ?" )
-
-	for line in ${config[@]}
-	do
-		echo $line
-#		value=$(echo $line | awk -F\| '{print $0}')
-#		default=$(echo $line | awk -F\| '{print $1}')
-#		ask=$(echo $line | awk -F\| '{print $2}')
-#		question "$value" "$ask" "$default" 	
-	done
-
-
+function fixsudoers(){
+	cecho " > Fix /etc/sudoers file for shinken integration" green
+	cp /etc/sudoers /etc/sudoers.$(date +%Y%m%d%H%M%S)
+	cat $myscripts/sudoers.centreon | sed -e 's#TARGET#'$TARGET'#g' >> /etc/sudoers
 }
 
+function fixcentreondb(){
+	cecho " > Fix centreon database path for shinken integration" green
+
+	# get existing db access
+	host=$(cat /etc/centreon/conf.pm | grep "mysql_host" | awk '{print $3}' | sed -e "s/\"//g" -e "s/;//g")
+	user=$(cat /etc/centreon/conf.pm | grep "mysql_user" | awk '{print $3}' | sed -e "s/\"//g" -e "s/;//g")
+	pass=$(cat /etc/centreon/conf.pm | grep "mysql_passwd" | awk '{print $3}' | sed -e "s/\"//g" -e "s/;//g")
+	db=$(cat /etc/centreon/conf.pm | grep "mysql_database_oreon" | awk '{print $3}' | sed -e "s/\"//g" -e "s/;//g")
+
+	cat $myscripts/centreon.sql | sed -e 's#TARGET#'$TARGET'#g' > /tmp/centreon.sql
+
+	mysql -h $host -u $user -p$pass $db < /tmp/centreon.sql
+}
+
+function pythonver(){
+	versions="2.4 2.5 2.6 2.7"
+        LASTFOUND=""
+        # is there any python here ?
+        for v in $versions
+        do
+                which python$v > /dev/null 2>&1
+                if [ $? -eq 0 ]
+                then
+                        LASTFOUND="python$v"
+                fi
+        done
+        if [ -z "$LASTFOUND" ]
+        then
+                # finaly try to find a default python
+                which python > /dev/null 2>&1
+                if [ $? -ne 0 ]
+                then
+                        echo "No python interpreter found !"
+                        exit 2
+                else
+                        echo "python found"
+                        LASTFOUND=$(which python)
+                fi
+        fi
+        PY=$LASTFOUND
+	echo $PY
+}
+
+function enablendodb(){
+	cecho " > FIX shinken ndo configuration" green
+	# get existing db access
+	host=$(cat /etc/centreon/conf.pm | grep "mysql_host" | awk '{print $3}' | sed -e "s/\"//g" -e "s/;//g")
+	user=$(cat /etc/centreon/conf.pm | grep "mysql_user" | awk '{print $3}' | sed -e "s/\"//g" -e "s/;//g")
+	pass=$(cat /etc/centreon/conf.pm | grep "mysql_passwd" | awk '{print $3}' | sed -e "s/\"//g" -e "s/;//g")
+	db="centreon_status"
+	# add ndo module to broker
+	# first get existing broker modules
+	export PYTHONPATH=$TARGET
+	export PY="$(pythonver)"
+	result=$($PY $myscripts/tools/skonf.py -a macros -f $myscripts/tools/macros/ces_enable_ndo.macro -d $host,$db,$user,$pass)
+    if [ $? -ne 0 ]
+    then
+        cecho $result red
+        exit 2
+    fi
+}
+
+function enableretention(){
+
+	cecho " > Enable retention for broker scheduler and arbiter" green
+
+	export PYTHONPATH=$TARGET
+	export PY="$(pythonver)"
+	result=$($PY $myscripts/tools/skonf.py -a macros -f $myscripts/tools/macros/ces_enable_retention.macro)	
+    if [ $? -ne 0 ]
+    then
+        cecho $result red
+        exit 2
+    fi
+#	cecho " > Getting existing scheduler modules list" green
+#	modules=$($PY $myscripts/tools/skonf.py -a getdirective -f $TARGET/etc/shinken-specific.cfg -o scheduler -d modules)	
+#	if [ -z "$modules" ]
+#	then	
+#		modules="PickleRetention"
+#	else
+#		modules="$modules ,PickleRetention"
+#	fi
+#	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o scheduler -d modules -v "$modules")
+#	cecho " > $result" green
+#
+#	cecho " > Getting existing broker modules list" green
+#	modules=$($PY $myscripts/tools/skonf.py -a getdirective -f $TARGET/etc/shinken-specific.cfg -o broker -d modules)	
+#	if [ -z "$modules" ]
+#	then
+#		modules="PickleRetentionBroker"
+#	else	
+#		modules="$modules ,PickleRetentionBroker"
+#	fi
+#	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o broker -d modules -v "$modules")
+#	cecho " > $result" green
+#
+#	cecho " > Getting existing arbiter modules list" green
+#	modules=$($PY $myscripts/tools/skonf.py -a getdirective -f $TARGET/etc/shinken-specific.cfg -o arbiter -d modules)	
+#	if [ -z "$modules" ]
+#	then
+#		modules="PickleRetentionArbiter"
+#	else	
+#		modules=$modules" ,PickleRetentionArbiter"
+#	fi
+#	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o arbiter -d modules -v "$modules")
+#	cecho " > $result" green
+}
+
+function enableperfdata(){
+
+	cecho " > Enable perfdata " green
+
+	export PYTHONPATH=$TARGET
+	export PY="$(pythonver)"
+	cecho " > Getting existing broker modules list" green
+	modules=$($PY $myscripts/tools/skonf.py -a getdirective -f $TARGET/etc/shinken-specific.cfg -o broker -d modules)	
+	if [ -z "$modules" ]
+	then	
+		modules="Service-Perfdata, Host-Perfdata"
+	else
+		modules=$modules", Service-Perfdata, Host-Perfdata"
+	fi
+	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o broker -d modules -v "$modules")
+	cecho " > $result" green
+}
+
+function setdaemonsaddresses(){
+	export PYTHONPATH=$TARGET
+	export PY="$(pythonver)"
+    localip=$(ifconfig $IF | grep "^ *inet adr:" | awk -F : '{print $2}' | awk '{print $1}')
+	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o arbiter -d address -v "$localip")
+    cecho " > $result" green    
+	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o scheduler -d address -v "$localip")
+    cecho " > $result" green    
+	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o reactionner -d address -v "$localip")
+    cecho " > $result" green    
+	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o receiver -d address -v "$localip")
+    cecho " > $result" green    
+	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o poller -d address -v "$localip" -r "poller_name=poller-1")
+    cecho " > $result" green    
+}
+
+#function addCESPollers(){
+#    if [ ! -z "ADDPOLLERS" ]
+#    then
+#        for p in $ADDPOLLERS
+#        do
+#            pollname=$(echo $p | awk -F = '{print $1}')
+#            pollip=$(echo $p | awk -F = '{print $2}')
+#            result=$($PY $myscripts/tools/skonf.py -q -f /opt/shinken/etc/shinken-specific.cfg -a addobject -o poller -d "poller_name=$pollname,data_timeout=120,check_interval=60,poller_tags=$pollname,polling_interval=1,address=$pollip,port=7771,max_workers=4,check_interval=60,polling_interval=1,max_checl_attempts=3,min_workers=4,processes_by_worker=256")
+#            if [ $? -eq 0 ]
+#            then
+#                color="green"
+#            else
+#                color="red"
+#            fi
+#            cecho " > $result" $color 
+#        done
+#    fi
+#}
+
+function enableCESCentralDaemons(){
+    setdaemons "arbiter reactionner receiver scheduler broker poller"  
+}
+
+function enableCESPollerDaemons(){
+    setdaemons "poller"  
+}
+
+function disablenagios(){
+	chkconfig nagios off
+	chkconfig ndo2db off
+	/etc/init.d/nagios stop > /dev/null 2>&1
+	/etc/init.d/ndo2db stop > /dev/null 2>&1
+}
+
+function setdaemons(){
+    daemons="$(echo $1)"
+    avail="AVAIL_MODULES=\"$daemons\""
+    cecho " > Enabling the followings daemons : $daemons" green
+    sed -i "s/^AVAIL_MODULES=.*$/$avail/g" /etc/init.d/shinken
+}
+
+#function addpoller(){
+#    args=$1
+#    result=$($PY $myscripts/tools/skonf.py -f /opt/shinken/etc/shinken-specific.cfg -a addobject -o poller -d "poller_name=$pollname,data_timeout=120,check_interval=60,poller_tags=$pollname,polling_interval=1,address=$pollip,port=7771,max_workers=4,check_interval=60,polling_interval=1,max_checl_attempts=3,min_workers=4,processes_by_worker=256")
+#    if [ $? -eq 0 ]
+#    then
+#        color="green"
+#    else
+#        color="red"
+#    fi
+#    cecho " > $result" $color 
+#}
+
+function fixHtpasswdPath(){
+	export PYTHONPATH=$TARGET
+	export PY="$(pythonver)"
+    # fix the htpasswd.users file path for WEBUI authentication
+    result=$($PY $myscripts/tools/skonf.py -f $TARGET/etc/shinken-specific.cfg -a setparam -o module -r "module_name=Apache_passwd" -d "passwd" -v "$TARGET/etc/htpasswd.users")
+    cecho " > $result" green    
+}
 
 function usage(){
-echo "Usage : shinken -k | -i | -d | -u | -b | -r | -l | -c | -h | -a | -p poller 
+echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z [poller|centreon] | -e daemons | -j pollername=polleraddress
 	-k	Kill shinken
-	-i	Install shinken 
+	-i	Install shinken
+	-w	Remove demo configuration 
 	-d 	Remove shinken
 	-u	Update an existing shinken installation
 	-v	purge livestatus sqlite db and shrink sqlite db
@@ -889,7 +1050,9 @@ echo "Usage : shinken -k | -i | -d | -u | -b | -r | -l | -c | -h | -a | -p polle
 	-r 	Restore shinken configuration plugins and data
 	-l	List shinken backups
 	-c	Compress rotated logs
-	-p	Set profile for this installation [currently only setting poller profile is supported]
+    -e  which daemons to keep enabled at boot time
+	-z 	This is a really special usecase that allow to install shinken on Centreon Enterprise Server in place of nagios
+    -j  Add a poller to the shinken configuration. 
 	-h	Show help
 "
 
@@ -902,19 +1065,46 @@ then
         cecho "You should start the script with sudo!" red
         exit 1
 fi
-while getopts "kidubcr:lzhsvp:" opt; do
+
+if [ ! -z "$PROXY" ]
+then
+	export http_proxy=$PROXY
+	export https_proxy=$PROXY
+	export WGETPROXY=" -Y on "
+fi
+
+while getopts "kidubcr:lz:hsvp:we:j:" opt; do
         case $opt in
-		a)
-			case $OPTARG in
-				thruk)
-					install_thruk
-					exit 0
-					;;
-				*)
-					cecho "Invalid addon ($OPTARG)"
-					exit 2
-					;;
-			esac
+        j)
+            addpoller "$OPTARG"
+            exit 0
+            ;;
+        e)
+            setdaemons "$OPTARG"
+            exit 0
+            ;;
+		w)
+			cleanconf	
+			exit 0
+			;;
+		z)
+            mode=$OPTARG
+			cleanconf
+			disablenagios
+			fixsudoers
+            if [ "$mode" = "centreon" ]
+            then
+                fixcentreondb
+                enablendodb
+                enableretention
+                enableperfdata
+                setdaemonsaddresses
+                enableCESCentralDaemons
+                #fixHtpasswdPath
+                #addCESPollers
+            else
+                enableCESPollerDaemons
+            fi
 			exit 0
 			;;
 		s)
@@ -929,39 +1119,36 @@ while getopts "kidubcr:lzhsvp:" opt; do
 			check_distro
 			exit 0
 			;;
-                k)
-                        skill
-                        exit 0
-                        ;;
-                i)
-			FROMSRC=1
-                       	sinstall 
-                        exit 0
-                        ;;
-                d)
-                       	remove 
-                        exit 0
-                        ;;
-                u)
-                       	supdate 
-                        exit 0
-                        ;;
-                b)
-                       	backup 
-                        exit 0
-                        ;;
-                r)
-                       	restore $OPTARG 
-                        exit 0
-                        ;;
-                p)
-                       	setprofile $OPTARG 
-                        exit 0
-                        ;;
-                l)
-                       	backuplist 
-                        exit 0
-                        ;;
+        k)
+            skill
+            exit 0
+            ;;
+        i)
+            FROMSRC=1
+            sinstall 
+            fixHtpasswdPath
+            exit 0
+            ;;
+        d)
+            remove 
+            exit 0
+            ;;
+        u)
+            supdate 
+            exit 0
+            ;;
+        b)
+            backup 
+            exit 0
+            ;;
+        r)
+            restore $OPTARG 
+            exit 0
+            ;;
+        l)
+            backuplist 
+            exit 0
+            ;;
 		c)
 			compresslogs
 			exit 0
@@ -970,7 +1157,7 @@ while getopts "kidubcr:lzhsvp:" opt; do
 			shelp	
 			exit 0
 			;;
-        esac
+    esac
 done
 usage
 exit 0

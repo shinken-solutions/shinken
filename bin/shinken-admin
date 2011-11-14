@@ -229,45 +229,46 @@ class ShinkenAdmin(cmd.Cmd):
 		# get properties from link classes
 		if type == 'arbiter': 
 			o = ArbiterLink()
+                        cfglink = 'arbiterlinks'
 		elif type =='scheduler': 
 			o = SchedulerLink()
+                        cfglink = 'schedulerlinks'
 		elif type =='poller': 
 			o = PollerLink()
+                        cfglink = 'pollers'
 		elif type =='broker': 
 			o = BrokerLink()
+                        cfglink = 'brokers'
 		elif type =='reactionner': 
 			o = ReactionnerLink()
+                        cfglink = 'reactionners'
 		elif type =='receiver': 
 			o = ReceiverLink()
+                        cfglink = 'receivers'
 		else: 
 			print "Unknown object type : %s" % (type)
 			return False
 
-		# load config
-		cfg=Config()
-		buf = cfg.read_config(["/opt/shinken/etc/shinken-specific.cfg"])
-		raw_objects = cfg.read_config_buf(buf)
+                cfg = self.arb.get_config()
+                dlinks = getattr(cfg,cfglink)
 		
-		if not raw_objects.has_key(type):
-			print "Unknow object type %s" % (type)
-		else:
+                for d in dlinks:
 			print "+--------------------------------------------------------------------------------------+"
 			print "| Config for : {0:71} |".format(type)
 			print "+--------------------------------------------------------------------------------------+"
 			print "| {0:8} | {1:30} | {2:40} |".format("Default","Directive","Value" )
 			print "+--------------------------------------------------------------------------------------+"
 			
-			for e in raw_objects[type]:
-				for key in o.properties.keys():
-					if e.has_key(key):
-						print "| {0:8} | {1:30} | {2:40} |".format(" ",key,e[key] )
-					else:
-						print "| {0:8} | {1:30} | {2:40} |".format("D",key,o.properties[key].default)
-				print "+--------------------------------------------------------------------------------------+"
+			for key in o.properties.keys():
+				if hasattr(d,key):
+					print "| {0:8} | {1:30} | {2:40} |".format(" ",key,getattr(d,key))
+				else:
+					print "| {0:8} | {1:30} | {2:40} |".format("D",key,o.properties[key].default)
+			print "+--------------------------------------------------------------------------------------+"
 
 
 
-intro = 'Available functions :\n# connect [localhost:7770] \n# status\n# gethostname\n# help [function]\n#showconfig [daemon type]\n# quit'
+intro = 'Available functions :\n# connect [localhost:7770] \n# status\n# gethostname\n# help [function]\n# showconfig [daemon type]\n# quit'
 
 if __name__ == "__main__": 
     ShinkenAdmin().cmdloop(intro)

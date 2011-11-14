@@ -37,15 +37,36 @@ body {
 /* ----------------------------------------------------------------
  *  Header
  * ----------------------------------------------------------------*/
+#header{
+	margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+}
 
 #header h1 {
 	font-weight:normal;
 	text-align:left;
-	background: -webkit-gradient(linear, 0 0, 0 100%, from(#2F5F8F), to(#005086));
-	background: -moz-linear-gradient(top, #2F5F8F, #005086);
 	padding:.3em 1em;
 	margin-bottom:0;
 	color: #FFFFFF;
+	background-color: #2F5F8F;
+	background-image: -webkit-gradient(linear, left top, left bottom, from(#2F5F8F), to(#005086)); /* Saf4+, Chrome */
+	background-image: -webkit-linear-gradient(top, #2F5F8F, #005086); /* Chrome 10+, Saf5.1+ */
+	background-image:    -moz-linear-gradient(top, #2F5F8F, #005086); /* FF3.6 */
+	background-image:     -ms-linear-gradient(top, #2F5F8F, #005086); /* IE10 */
+	background-image:      -o-linear-gradient(top, #2F5F8F, #005086); /* Opera 11.10+ */
+	background-image:         linear-gradient(top, #2F5F8F, #005086);
+            filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#2F5F8F', EndColorStr='#005086'); /* IE6â��IE9 */
+}
+
+/* ----------------------------------------------------------------
+ *  Navigation container
+ * ----------------------------------------------------------------*/
+
+#navigation {
+	margin-left: 0;
+    margin-right: 0;
+    width: 100%;
 }
 
 /* ----------------------------------------------------------------
@@ -55,6 +76,9 @@ body {
 #main_container{
 	background: #FFFFFF;
 	min-height: 700px;
+	margin-left: 0;
+    margin-right: 0;
+    width: 100%;
 }
 
 /* ----------------------------------------------------------------
@@ -74,6 +98,9 @@ body {
 #footer {
 	background: #787878;
 	height: 20px;
+	margin-left: 0;
+    margin-right: 0;
+    width: 100%;
 }
 
 /* ----------------------------------------------------------------
@@ -339,6 +366,41 @@ td.actions a {
     padding-left: 24px;
 }
 
+
+.icon_comment {
+    background: url("/static/images/icons/comment_64.png") no-repeat scroll transparent;
+    background-position: 4px;
+    padding-left: 24px;
+    background-size: 17px 17px;
+}
+
+.icon_summary {
+    background: url("/static/images/icons/sum_64.png") no-repeat scroll transparent;
+    background-position: 4px;
+    padding-left: 24px;
+    background-size: 17px 17px;
+}
+
+.icon_dependency {
+    background: url("/static/images/icons/globe_64.png") no-repeat scroll transparent;
+    background-position: 4px;
+	padding-left: 24px;
+    background-size: 17px 17px;
+} 
+
+.icon_service {
+    background: url("/static/images/icons/flag_64.png") no-repeat scroll transparent;
+    background-position: 4px;
+	padding-left: 24px;
+    background-size: 17px 17px;
+} 
+
+.icon_graph {
+    background: url("/static/images/icons/chart_area_64.png") no-repeat scroll transparent;
+    background-position: 4px;
+	padding-left: 24px;
+    background-size: 17px 17px;
+} 
 .state_ok {
 	color: #7AB317;
 	font-weight: bold;
@@ -369,27 +431,79 @@ td.actions a {
         font-weight: bold;
 }
 
+#messagebox p {
+    text-align:center;
+    vertical-align: middle;
+    line-height: 40px;
+    margin-bottom:0;
+}
+
+.gradient_alert {
+    color: #FFFFFF;
+    background-color: #e10000;
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#e10000), to(#bd0000)); /* Saf4+, Chrome */
+    background-image: -webkit-linear-gradient(top, #e10000, #bd0000); /* Chrome 10+, Saf5.1+, iOS 5+ */
+    background-image:    -moz-linear-gradient(top, #e10000, #bd0000); /* FF3.6 */
+    background-image:     -ms-linear-gradient(top, #e10000, #bd0000); /* IE10 */
+    background-image:      -o-linear-gradient(top, #e10000, #bd0000); /* Opera 11.10+ */
+    background-image:         linear-gradient(top, #e10000, #bd0000);
+            filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#e10000', EndColorStr='#bd0000'); /* IE6-IE9 */
+}
+
+.gradient_warn {
+    color: #FFFFFF;
+    background-color: #71DB65;
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#FF9900), to(#ff5f00)); /* Saf4+, Chrome */
+    background-image: -webkit-linear-gradient(top, #FF9900, #ff5f00); /* Chrome 10+, Saf5.1+, iOS 5+ */
+    background-image:    -moz-linear-gradient(top, #FF9900, #ff5f00); /* FF3.6 */
+    background-image:     -ms-linear-gradient(top, #FF9900, #ff5f00); /* IE10 */
+    background-image:      -o-linear-gradient(top, #FF9900, #ff5f00); /* Opera 11.10+ */
+    background-image:         linear-gradient(top, #FF9900, #ff5f00);
+            filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#FF9900', EndColorStr='#ff5f00'); /* IE6-IE9 */
+}
+
+.gradient_info {
+    color: #FFFFFF;
+    background-color: #71DB65;
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#71DB65), to(#7AB317)); /* Saf4+, Chrome */
+    background-image: -webkit-linear-gradient(top, #71DB65, #7AB317); /* Chrome 10+, Saf5.1+, iOS 5+ */
+    background-image:    -moz-linear-gradient(top, #71DB65, #7AB317); /* FF3.6 */
+    background-image:     -ms-linear-gradient(top, #71DB65, #7AB317); /* IE10 */
+    background-image:      -o-linear-gradient(top, #71DB65, #7AB317); /* Opera 11.10+ */
+    background-image:         linear-gradient(top, #71DB65, #7AB317);
+            filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#71DB65', EndColorStr='#7AB317'); /* IE6-IE9 */
+}
+
 /*
  * Dummy elements
  * 
  */
  
-#dummy_box {
-	height: 100px;
-}
-
 .prefix_custom_2 {
-	margin-left: 25%;
+	margin-left: 23%;
 }
 
-#login-container {
+
+#login-error {
+    color: red;
+    font-weight: bold;
+    margin: 0.5em;
+}
+
+
+#login-text {
+    font-weight: bold;
+}
+
+
+#login_container {
     float: left;
     position: relative;
 	height: 228px;
     position: relative;
     z-index: 200;
 	padding: 15px;
-	top: 200px;
+	top: 150px;
 }
 
 #login-container h1 {
@@ -888,3 +1002,103 @@ a.down-big {
   -webkit-border-radius: 5px;
   -moz-border-radius: 5px;  
 }
+
+
+/* ************************************
+
+Dep tree list display, with icons
+
+***************************************
+*/
+
+
+/*             Some small LI state, with icon   */
+li.ok{
+/* font-family: Arial, sans-serif;
+ font-size: 100%;
+ color: black;*/
+ list-style-type: none;
+ background-image: url(/static/images/tick.png);
+ background-repeat: no-repeat;
+ background-position: 0 0.16em;
+ padding-left: 20px;
+}
+
+li.up{
+/* font-family: Arial, sans-serif;
+ font-size: 100%;
+ color: black;*/
+ list-style-type: none;
+ background-image: url(/static/images/tick.png);
+ background-repeat: no-repeat;
+ background-position: 0 0.16em;
+ padding-left: 20px;
+}
+
+
+li.unknown{
+/* font-family: Arial, sans-serif;
+ font-size: 100%;
+ color: black;*/
+ list-style-type: none;
+ background-image: url(/static/images/unknown.png);
+ background-repeat: no-repeat;
+ background-position: 0 0.16em;
+ padding-left: 20px;
+}
+
+li.ack{
+/* font-family: Arial, sans-serif;
+ font-size: 100%;
+ color: black;*/
+ list-style-type: none;
+ background-image: url(/static/images/ack.png);
+ background-repeat: no-repeat;
+ background-position: 0 0.16em;
+ padding-left: 20px;
+}
+
+li.down{
+/* font-family: Arial, sans-serif;
+ font-size: 100%;
+ color: black;*/
+ list-style-type: none;
+ background-image: url(/static/images/down.png);
+ background-repeat: no-repeat;
+ background-position: 0 0.16em;
+ padding-left: 20px;
+}
+
+li.unreachable{
+/* font-family: Arial, sans-serif;
+ font-size: 100%;
+ color: black;*/
+ list-style-type: none;
+ background-image: url(/static/images/unreachable.png);
+ background-repeat: no-repeat;
+ background-position: 0 0.16em;
+ padding-left: 20px;
+}
+
+li.warning{
+/* font-family: Arial, sans-serif;
+ font-size: 100%;
+ color: black;*/
+ list-style-type: none;
+ background-image: url(/static/images/warning.png);
+ background-repeat: no-repeat;
+ background-position: 0 0.16em;
+ padding-left: 20px;
+}
+
+li.critical{
+/* font-family: Arial, sans-serif;
+ font-size: 100%;
+ color: black;*/
+ list-style-type: none;
+ background-image: url(/static/images/down.png);
+ background-repeat: no-repeat;
+ background-position: 0 0.16em;
+ padding-left: 20px;
+}
+

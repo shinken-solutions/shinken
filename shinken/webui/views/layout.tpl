@@ -35,10 +35,16 @@
         <link rel="stylesheet" type="text/css" href="/static/css/userinfo.css" media="screen"/>
       %end
 
+      %# And now for css files
+      %for p in css:
+		<link rel="stylesheet" type="text/css" href="/static/{{p}}">
+      %end
+
       <script type="text/javascript" src="/static/js/mootools.js"></script>
       <script type="text/javascript" src="/static/js/mootools-more.js"></script>
       <script type="text/javascript" src="/static/js/mootools-message.js"></script>
       
+      <script type="text/javascript" src="/static/js/UvumiDropdown.js"></script>
       <script type="text/javascript" src="/static/js/rotater.js"></script>
       <script type="text/javascript" src="/static/js/tabs.js"></script>
       <script type="text/javascript" src="/static/js/top_right_banner.js"></script>
@@ -47,25 +53,22 @@
       <script type="text/javascript" src="/static/js/action.js"></script>
       <script type="text/javascript" src="/static/js/opacity.js"></script>
       <script type="text/javascript" src="/static/js/multibox.js"></script>
+      <script type="text/javascript" src="/static/js/deptree.js"></script>
 
-      %if user is not None:
+      %if user is not None and print_header:
         <script type="text/javascript" src="/static/js/userinfo.js"></script>
       %end
 
       %if refresh:
 		<script type="text/javascript" src="/static/js/reload.js"></script>
       %end
-    
+
       %# End of classic js import. Now call for specific ones
       %for p in js:
 		<script type="text/javascript" src="/static/{{p}}"></script>
       %end
 
 
-      %# And now for css files
-      %for p in css:
-		<link rel="stylesheet" type="text/css" href="/static/{{p}}">
-      %end
     </head>
     
 	<body class="main">
@@ -74,14 +77,14 @@
     <!-- Userinfo -->
 	<div id="userinfo">
     	<div class="userinfoContent">
-	  <img src='/static/images/cut_honeycomb.png' style="width:200px; height:108px;position: absolute;top: 0;left: 0px;border: 0;">
-	  <div class="left"> <img style="width:60px; height:80px;" src='/static/photos/{{user.get_name()}}'> </div>
+	  <img src='/static/images/cut_honeycomb.png' alt="" style="width:200px; height:108px;position: absolute;top: 0;left: 0px;border: 0;">
+	  <div class="left"> <img style="width:60px; height:80px;" src='/static/photos/{{user.get_name()}}' alt=""> </div>
 	  <div>
 	    <p>Name : {{user.get_name()}}</p>
 	    <p>Email : {{user.email}}</p>
 	  </div>
 	  
-	  <div class="userinfoClose"> <a href="#" id="closeUserinfo"><img style="width: 16px;height: 16px;" src="/static/images/disabled.png" title="">Close</a> </div>
+	  <div class="userinfoClose"> <a href="#" id="closeUserinfo"><img style="width: 16px;height: 16px;" src="/static/images/disabled.png" alt="" title="">Close</a> </div>
       	</div>
       <!-- /userinfo -->
 

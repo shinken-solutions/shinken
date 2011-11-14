@@ -35,6 +35,10 @@ except ImportError:
         print "Error : you need the json or simplejson module"
         raise
 
+from shinken.util import safe_print
+from shinken.misc.perfdata import PerfDatas
+#TODO : manage it in a clean way.
+from shinken.modules.webui_broker.perfdata_guess import get_perfometer_table_values
 
 
 # Sort hosts and services by impact, states and co
@@ -188,11 +192,11 @@ class Helper(object):
         print "We got all our elements"
         dicts = []
         for i in all_elts:
-            print "Elt", i.get_dbg_name()
+            safe_print("Elt", i.get_dbg_name())
             d = self.get_dep_graph_struct(i)
             dicts.append(d)
         j = json.dumps(dicts)
-        print "Create json", j
+        safe_print("Create json", j)
         print "create_json_dep_graph::Json creation time", time.time() - t0
         return j
 
@@ -230,12 +234,17 @@ class Helper(object):
         d['data']['infos'] = r'''%s <h2 class="%s"><img style="width : 64px; height:64px" src="%s"/> %s: %s</h2>
 		       <p>since %s</p>
 		       <div style="float:right;"> <a href="%s">%s</a></div>'''  % (
-            '<img src="/static/images/star.png">' * (elt.business_impact - 2),
+            '<img src="/static/images/star.png" alt="star">' * (elt.business_impact - 2),
             elt.state.lower(), self.get_icon_state(elt), elt.state, elt.get_full_name(),
             self.print_duration(elt.last_state_change, just_duration=True, x_elts=2),
             self.get_link_dest(elt), self.get_button('Go to details', img='/static/images/search.png'))
+                       
 
-        print "ELT:%s is %s" % (elt.get_full_name(), elt.state)
+        d['data']['elt_type'] = elt.__class__.my_type
+        d['data']['is_problem'] = elt.is_problem
+        d['data']['state_id'] = elt.state_id
+
+        safe_print("ELT:%s is %s" % (elt.get_full_name(), elt.state))
         if elt.state in ['OK', 'UP', 'PENDING']:
             d['data']['circle'] = 'none'
         elif elt.state in ['DOWN', 'CRITICAL']:
@@ -282,7 +291,7 @@ class Helper(object):
             for c in par_elts:
                 my.add(c)
             
-        print "get_all_linked_elts::Give elements", my
+        safe_print("get_all_linked_elts::Give elements", my)
         return my
 
 
@@ -324,7 +333,7 @@ class Helper(object):
 
 
     def print_business_rules(self, tree, level=0):
-        print "Should print tree", tree
+        safe_print("Should print tree", tree)
         node = tree['node']
         name = node.get_full_name()
         fathers = tree['fathers']
@@ -335,7 +344,7 @@ class Helper(object):
 
         # If we got no parents, no need to print the expand icon
         if len(fathers) > 0:
-            # We look ifthe below tree is goodor not
+            # We look if the below tree is goodor not
             tree_is_good = (node.state_id == 0)
             
             # If the tree is good, we will use an expand image
@@ -349,7 +358,7 @@ class Helper(object):
 
             # If we are the root, we already got this
             if level != 0:
-                s += """<a id="togglelink-%s" href="javascript:toggleBusinessElt('%s')"><img id="business-parents-img-%s" src="/static/images/%s"> </a> \n""" % (name, name, name, img)
+                s += """<a id="togglelink-%s" href="javascript:toggleBusinessElt('%s')"><img id="business-parents-img-%s" src="/static/images/%s" alt=""> </a> \n""" % (name, name, name, img)
                 
             s += """<ul id="business-parents-%s" style="display: %s; ">""" % (name, display)
         
@@ -358,7 +367,7 @@ class Helper(object):
                 sub_s = self.print_business_rules(n, level=level+1)
                 s += '<li class="%s">%s</li>' % (self.get_small_icon_state(sub_node), sub_s)
             s += "</ul>"
-        print "Returing s:", s
+        safe_print("Returing s:", s)
         return s
 
 
@@ -399,7 +408,7 @@ class Helper(object):
         txts = {0 : 'None', 1 : 'Low', 2: 'Normal',
                 3 : 'High', 4 : 'Very important', 5 : 'Top for business'}
         nb_stars = max(0, obj.business_impact - 2)
-        stars = '<img src="/static/images/star.png">\n' * nb_stars
+        stars = '<img src="/static/images/star.png" alt="star">\n' * nb_stars
         
         res = "%s %s" % (txts.get(obj.business_impact, 'Unknown'), stars)
         return res
@@ -479,6 +488,10 @@ class Helper(object):
             print "Doing PAGE", i
             is_current = (i == current_page)
             start = int(i*step)
+            # Maybe we are generating a page too high, bail out
+            if start > total:
+                continue
+
             end = int((i+1) * step)
             res.append(('%d' % (i+1), start, end, is_current))
 
@@ -495,6 +508,51 @@ class Helper(object):
 
         return res
 
+
+    # Get a perfometer part for html printing
+    def get_perfometer(self, elt):
+        if elt.perf_data != '':
+            r = get_perfometer_table_values(elt)
+            #If the perfmeter are not good, bail out
+            if r is None:
+                return '\n'
+
+            lnk = r['lnk']
+            metrics = r['metrics']
+            title = r['title']
+            s = '<a href="%s">' % lnk
+            s += '''<div class="graph">
+                       <table>
+                          <tbody>
+                            <tr>\n'''
+
+            for (color, pct) in metrics:
+                s += '            <td style="background-color: %s; width: %s%%;"></td>\n' % (color, pct)
+
+            s += '''        </tr>
+                         </tbody>
+                      </table>
+                    </div>
+                    <div class="text">%s</div>
+                    <img class="glow" src="/static/images/glow.png"/>
+                 </a>\n''' % title
+            return s
+        return '\n'
+
+
+
+    # TODO: Will look at the string s, and return a clean output without
+    # danger for the browser
+    def strip_html_output(self, s):
+        return s
+
+
+
+
+
+
+
+    
     
 
 helper = Helper()

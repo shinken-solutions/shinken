@@ -51,6 +51,7 @@ try:
 
     PYRO_VERSION = Pyro.constants.VERSION
     Pyro.errors.CommunicationError = Pyro.errors.ProtocolError
+    Pyro.errors.TimeoutError = Pyro.errors.ProtocolError
     
     class Pyro3Daemon(Pyro.core.Daemon):
         pyro_version = 3
@@ -130,6 +131,9 @@ except AttributeError, exp:
     Pyro.core.ObjBase = dict
     Pyro.errors.URIError = Pyro.errors.ProtocolError
     Pyro.core.getProxyForURI = Pyro.core.Proxy
+    Pyro.config.HMAC_KEY = "NOTSET"
+
+    old_versions = ["4.1", "4.2", "4.3", "4.4"]
     
     # Hack for Pyro 4 : with it, there is
     # no more way to send huge packet!
@@ -140,22 +144,31 @@ except AttributeError, exp:
     class Pyro4Daemon(Pyro.core.Daemon):
         pyro_version = 4
         protocol = 'PYRO'
+
         
         def __init__(self, host, port, use_ssl=False):
             # Pyro 4 i by default thread, should do select
             # (I hate threads!)
-            # And of course teh name changed since 4.5...
-            if PYRO_VERSION < "4.5":
+            # And of course the name changed since 4.5...
+            # Since them, we got a better sock reuse, so
+            # before 4.5 we must wait 35 s for the port to stop
+            # and in >=4.5 we can use REUSE socket :)
+            max_try = 35
+            if PYRO_VERSION in old_versions:
                 Pyro.config.SERVERTYPE = "select"
             else:
                 Pyro.config.SERVERTYPE = "multiplex"
+                # For Pyro >4.X hash
+                Pyro.config.SOCK_REUSE = True
+                max_try = 1
             nb_try = 0
             is_good = False
             # Ok, Pyro4 do not close sockets like it should,
             # so we got TIME_WAIT socket :(
             # so we allow to retry during 35 sec (30 sec is the default
             # timewait for close sockets)
-            while nb_try <= 35:
+            while nb_try < max_try:
+                nb_try += 1
                 print "Initializing Pyro connection with host:%s port:%s ssl:%s" % (host, port, use_ssl)
                 # And port already use now raise an exception
                 try:
@@ -165,7 +178,7 @@ except AttributeError, exp:
                 except socket.error, exp:
                     msg = "Sorry, the port %d is not free : %s" % (port, str(exp))
                     # At 35 (or over), we are very not happy
-                    if nb_try >= 35:
+                    if nb_try >= max_try:
                         raise PortNotFree(msg)
                     print msg, "but we try another time in 1 sec"
                     time.sleep(1)
@@ -173,16 +186,19 @@ except AttributeError, exp:
                     # must be problem with pyro workdir :
                     raise InvalidWorkDir(e)
 
-        ## same than this super class so no need:
-        # def register(self, obj, name):
-        # def unregister(self, obj, name):
-    
 
         def get_sockets(self):
-            return self.sockets()
+            if PYRO_VERSION in old_versions:
+                return self.sockets()
+            else:
+                return self.sockets
     
+        
         def handleRequests(self, s):
-            Pyro.core.Daemon.handleRequests(self, [s])
+            if PYRO_VERSION in old_versions:
+                Pyro.core.Daemon.handleRequests(self, [s])
+            else:
+                Pyro.core.Daemon.events(self, [s])
     
     
     def create_uri(address, port, obj_name, use_ssl=False):

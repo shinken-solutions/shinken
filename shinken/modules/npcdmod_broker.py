@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 #Copyright (C) 2009 Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -28,6 +29,7 @@ import shutil
 import os
 import time
 import re
+import codecs
 
 
 from shinken.basemodule import BaseModule
@@ -71,16 +73,16 @@ class Npcd_broker(BaseModule):
 
         if self.config_file and not self.process_config_file():
             print "npcdmod: An error occurred process your config file. Check your perfdata_file or perfdata_spool_dir"
-            raise
+            raise BaseException('npcdmod: An error occurred process your config file. Check your perfdata_file or perfdata_spool_dir')
         if not self.perfdata_spool_dir and not self.perfdata_file:
             print "npcdmod: An error occurred while attempting to process module arguments"
-            raise
+            raise BaseException('npcdmod: An error occurred while attempting to process module arguments')
         try:
             # We open the file with line buffering, so we can better watch it with tail -f
-            self.logfile = open(self.perfdata_file, 'a', 1)
+            self.logfile = codecs.open(self.perfdata_file, 'a','utf-8','replace', 1)
         except:
             print "could not open file %s" % self.perfdata_file
-            raise
+            raise BaseException('could not open file %s" % self.perfdata_file')
         # use so we do nto ask a reinit ofan instance too quickly
         self.last_need_data_send = time.time()
 
@@ -197,7 +199,7 @@ class Npcd_broker(BaseModule):
             if os.path.exists(self.perfdata_file) and os.path.getsize(self.perfdata_file) > 0:
                 print "moving perfdata_file %s (%d lines) to %s" % (self.perfdata_file, self.processed_lines, target)
                 shutil.move(self.perfdata_file, target)
-            self.logfile = open(self.perfdata_file, 'a', 1)
+            self.logfile = codecs.open(self.perfdata_file, 'a','utf-8','replace', 1)
         except OSError:
             print "could not rotate perfdata_file to %s" % target
             raise

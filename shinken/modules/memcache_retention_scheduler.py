@@ -67,10 +67,11 @@ class Memcache_retention_scheduler(BaseModule):
         services = all_data['services']
 
 
-        #Now the flat file method
+        # Now the flat file method
         for h_name in hosts:
             h = hosts[h_name]
             key = "HOST-%s" % h_name
+            key = key.encode('utf8', 'ignore')
             val = cPickle.dumps(h)
             self.mc.set(key, val)
 
@@ -79,6 +80,7 @@ class Memcache_retention_scheduler(BaseModule):
             s = services[(h_name, s_desc)]
             #space are not allowed in memcache key.. so change it by SPACE token
             key = key.replace(' ', 'SPACE')
+            key = key.encode('utf8', 'ignore')
             #print "Using key", key
             val = cPickle.dumps(s)
             self.mc.set(key, val)
@@ -101,6 +103,7 @@ class Memcache_retention_scheduler(BaseModule):
         #Now the flat file method
         for h in daemon.hosts:
             key = "HOST-%s" % h.host_name
+            key = key.encode('utf8', 'ignore')
             val = self.mc.get(key)
             if val is not None:
                 val = cPickle.loads(val)
@@ -110,6 +113,7 @@ class Memcache_retention_scheduler(BaseModule):
             key = "SERVICE-%s,%s" % (s.host.host_name, s.service_description)
             #space are not allowed in memcache key.. so change it by SPACE token
             key = key.replace(' ', 'SPACE')
+            key = key.encode('utf8', 'ignore')
             val = self.mc.get(key)
             if val is not None:
                 val = cPickle.loads(val)

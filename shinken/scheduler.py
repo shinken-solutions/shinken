@@ -71,7 +71,7 @@ class Scheduler:
         self.recurrent_works = {
             0 : ('update_downtimes_and_comments', self.update_downtimes_and_comments, 1),
             1 : ('schedule', self.schedule, 1), # just schedule
-            2 : ('consume_results', self.consume_results , 1), # incorpore checks and dependancies
+            2 : ('consume_results', self.consume_results , 1), # incorpore checks and dependencies
             3 : ('get_new_actions', self.get_new_actions, 1), # now get the news actions (checks, notif) raised
             4 : ('get_new_broks', self.get_new_broks, 1), # and broks
             5 : ('delete_zombie_checks', self.delete_zombie_checks, 1),
@@ -93,6 +93,8 @@ class Scheduler:
             14 : ('clean_queues', self.clean_queues, 1),
             # Look for new business_impact change by modulation every minute
             15 : ('update_business_values', self.update_business_values, 60),
+            # Reset the topology change flag if need
+            16 : ('reset_topology_change_flag', self.reset_topology_change_flag, 1),
         }
 
         # stats part
@@ -308,10 +310,10 @@ class Scheduler:
                 elt = c.ref
                 # First remove the link in host/service
                 elt.remove_in_progress_check(c)
-                # Then in dependant checks (I depend on, or check
+                # Then in dependent checks (I depend on, or check
                 # depend on me)
-                for dependant_checks in c.depend_on_me:
-                    dependant_checks.depend_on.remove(c.id)
+                for dependent_checks in c.depend_on_me:
+                    dependent_checks.depend_on.remove(c.id)
                 for c_temp in c.depend_on:
                     c_temp.depen_on_me.remove(c)
                 del self.checks[i] # Final Bye bye ...
@@ -478,6 +480,7 @@ class Scheduler:
                                 self.add(c) # this will send a brok
                                 new_c = c.copy_shell()
                                 res.append(new_c)
+
 
                         # If we have notification_interval then schedule the next notification (problems only)
                         if a.type == 'PROBLEM':
@@ -833,6 +836,16 @@ class Scheduler:
         self.broks = {}
         return res
 
+    # An element can have its topology changed by an external command
+    # if so a brok will be generated with this flag. Now need to reset all of
+    # them.
+    def reset_topology_change_flag(self):
+        for i in self.hosts:
+            i.topology_change = False
+        for i in  self.services:
+            i.topology_change = False
+
+
 
     # Update the retention file and give it all of ours data in
     # a dict so read can pickup what it wants
@@ -1118,9 +1131,9 @@ class Scheduler:
         # All 'finished' checks (no more dep) raise checks they depends on
         for c in self.checks.values():
             if c.status == 'havetoresolvedep':
-                for dependant_checks in c.depend_on_me:
-                    # Ok, now dependant will no more wait c
-                    dependant_checks.depend_on.remove(c.id)
+                for dependent_checks in c.depend_on_me:
+                    # Ok, now dependent will no more wait c
+                    dependent_checks.depend_on.remove(c.id)
                 # REMOVE OLD DEP CHECL -> zombie
                 c.status = 'zombie'
 

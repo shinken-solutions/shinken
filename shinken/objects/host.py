@@ -228,10 +228,10 @@ class Host(SchedulingItem):
         # Here it's the elements we are depending on
         # so our parents as network relation, or a host
         # we are depending in a hostdependency
-        # or even if we are businesss based.
+        # or even if we are business based.
         'parent_dependencies' : StringProp(brok_transformation=to_svc_hst_distinct_lists, default=set(), fill_brok=['full_status']),
-        # Here it's the guys taht depend on us. So it's the total
-        # oposite of the parent_dependencies 
+        # Here it's the guys that depend on us. So it's the total
+        # opposite of the parent_dependencies 
         'child_dependencies':   StringProp(
             brok_transformation=to_svc_hst_distinct_lists,
             default=set(),
@@ -264,11 +264,14 @@ class Host(SchedulingItem):
         # Our Dependency node for the business rule
         'business_rule' : StringProp(default=None),
         
-        # Manage the unkown/unreach during hard state
+        # Manage the unknown/unreach during hard state
         # From now its not really used
         'in_hard_unknown_reach_phase' : BoolProp(default=False, retention=True),
         'was_in_hard_unknown_reach_phase' : BoolProp(default=False, retention=True),
         'state_before_hard_unknown_reach_phase' : StringProp(default='UP', retention=True),
+
+        # Set if the element just change its father/son topology
+        'topology_change' : BoolProp(default=False, fill_brok=['full_status']),
 
     })
 
@@ -362,6 +365,8 @@ class Host(SchedulingItem):
         state = True #guilty or not? :)
         cls = self.__class__
 
+        source = getattr(self, 'imported_from', 'unknown')
+
         special_properties = ['check_period', 'notification_interval', 'check_period',
                               'notification_period']
         for prop, entry in cls.properties.items():
@@ -381,7 +386,7 @@ class Host(SchedulingItem):
 
         # Ok now we manage special cases...
         if self.notifications_enabled and self.contacts == []:
-            logger.log("Waring : the host %s do not have contacts nor contact_groups" % self.get_name())
+            logger.log("Waring : the host %s do not have contacts nor contact_groups in (%s)" % (self.get_name(), source))
         
         if getattr(self, 'check_command', None) is None:
             logger.log("%s : I've got no check_command" % self.get_name())
@@ -464,7 +469,7 @@ class Host(SchedulingItem):
 
 
     # Delete all links in the act_depend_of list of self and other
-    def del_host_act_dependancy(self, other):
+    def del_host_act_dependency(self, other):
         to_del = []
         # First we remove in my list
         for (h, status, type, timeperiod, inherits_parent) in self.act_depend_of:
@@ -480,11 +485,17 @@ class Host(SchedulingItem):
                 to_del.append( (h, status, type, timeperiod, inherits_parent) )
         for t in to_del:
             other.act_depend_of_me.remove(t)
-        
 
-    # Add a dependancy for action event handler, notification, etc)
+        # Remove in child/parents deps too
+        # Me in father list
+        other.child_dependencies.remove(self)
+        # and father list in mine
+        self.parent_dependencies.remove(other)
+
+
+    # Add a dependency for action event handler, notification, etc)
     # and add ourself in it's dep list
-    def add_host_act_dependancy(self, h, status, timeperiod, inherits_parent):
+    def add_host_act_dependency(self, h, status, timeperiod, inherits_parent):
         # I add him in MY list
         self.act_depend_of.append( (h, status, 'logic_dep', timeperiod, inherits_parent) )
         # And I add me in it's list
@@ -494,12 +505,12 @@ class Host(SchedulingItem):
         h.register_son_in_parent_child_dependencies(self)
 
 
-    # Register the dependancy between 2 service for action (notification etc)
+    # Register the dependency between 2 service for action (notification etc)
     # but based on a BUSINESS rule, so on fact:
     # ERP depend on database, so we fill just database.act_depend_of_me
     # because we will want ERP mails to go on! So call this
     # on the database service with the srv=ERP service
-    def add_business_rule_act_dependancy(self, h, status, timeperiod, inherits_parent):
+    def add_business_rule_act_dependency(self, h, status, timeperiod, inherits_parent):
         # first I add the other the I depend on in MY list
         # I only register so he know that I WILL be a inpact
         self.act_depend_of_me.append( (h, status, 'business_dep',
@@ -509,8 +520,8 @@ class Host(SchedulingItem):
         self.register_son_in_parent_child_dependencies(h)
 
 
-    # Add a dependancy for check (so before launch)
-    def add_host_chk_dependancy(self, h, status, timeperiod, inherits_parent):
+    # Add a dependency for check (so before launch)
+    def add_host_chk_dependency(self, h, status, timeperiod, inherits_parent):
         # I add him in MY list
         self.chk_depend_of.append( (h, status, 'logic_dep', timeperiod, inherits_parent) )
         # And I add me in it's list
@@ -744,7 +755,7 @@ class Host(SchedulingItem):
 
     #fill act_depend_of with my parents (so network dep)
     #and say parents they impact me, no timeperiod and follow parents of course
-    def fill_parents_dependancie(self):
+    def fill_parents_dependency(self):
         for parent in self.parents:
             if parent is not None:
                 #I add my parent in my list
@@ -1047,9 +1058,9 @@ class Hosts(Items):
 
     # Create depenancies:
     # Depencies at the host level: host parent
-    def apply_dependancies(self):
+    def apply_dependencies(self):
         for h in self:
-            h.fill_parents_dependancie()
+            h.fill_parents_dependency()
 
 
     # Parent graph: use to find quickly relations between all host, and loop

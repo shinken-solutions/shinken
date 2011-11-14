@@ -96,20 +96,33 @@ Example of task that a shinken module can do:
 Like just open necessaries file(s), database(s), or whatever the module will need. """
         pass
 
-    def create_queues(self):
+    # The manager is None on android, but a true Manager() elsewhere
+    def create_queues(self, manager=None):
         """ Create the shared queues that will be used by shinken daemon process and this module process.
 But clear queues if they were already set before recreating new one.  """
-        self.clear_queues()
-        self.from_q = Queue()
-        self.to_q = Queue()
+        self.clear_queues(manager)
+        # If no Manager() object, go with classic Queue()
+        if not manager:
+            self.from_q = Queue()
+            self.to_q = Queue()
+        else:
+            self.from_q = manager.Queue()
+            self.to_q = manager.Queue()
 
-    def clear_queues(self):
+
+    def clear_queues(self, manager):
         """ Release the resources associated with the queues of this instance """
         for q in (self.to_q, self.from_q):
             if q is None: continue
-            q.close()
-            q.join_thread()
+            # If we gotno manager, we direct call the clean
+            if not manager:
+                q.close()
+                q.join_thread()
+#            else:
+#                q._callmethod('close')
+#                q._callmethod('join_thread')
         self.to_q = self.from_q = None
+
 
     def start(self):
         """ Start this module process if it's external. if not -> donothing """
@@ -117,9 +130,20 @@ But clear queues if they were already set before recreating new one.  """
             return
         self.stop_process()
         logger.log("Starting external process for instance %s" % (self.name))
-        p = self.process = Process(target=self.main, args=())
-        self.properties['process'] = p  ## TODO: temporary
+        p = Process(target=self.main, args=())
+
+        # Under windows we should not call a start on an object that got
+        # it's process as object, so we remove it it we set it in a earlier
+        # start
+        try:
+          del self.properties['process']
+        except:
+          pass
+
         p.start()
+        # We save the process data AFTER the fork()
+        self.process = p
+        self.properties['process'] = p  ## TODO: temporary
         logger.log("%s is now started ; pid=%d" % (self.name, p.pid))
 
 

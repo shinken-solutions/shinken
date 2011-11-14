@@ -30,7 +30,7 @@ from copy import copy
 from shinken.commandcall import CommandCall
 from shinken.property import StringProp, ListProp
 from shinken.brok import Brok
-from shinken.util import strip_and_uniq
+from shinken.util import strip_and_uniq, safe_print
 from shinken.acknowledge import Acknowledge
 from shinken.comment import Comment
 from shinken.log import logger
@@ -189,6 +189,9 @@ Like temporary attributes such as "imported_from", etc.. """
                 #print "Missing prop value", exp
                 err = "ERROR : the property '%s' of '%s' do not have value" % (prop, self.get_name())
                 self.configuration_errors.append(err)
+            except ValueError, exp:
+                err = "ERROR : incorrect type for property '%s' of '%s'" % (prop, self.get_name())
+                self.configuration_errors.append(err)
 
 
     def get_templates(self):
@@ -206,29 +209,71 @@ Like temporary attributes such as "imported_from", etc.. """
             value = getattr(self, prop)
             # Maybe this value is 'null'. If so, we should NOT inherit
             # and just delete this entry, and hope of course.
-            if value == 'null':
-                delattr(self, prop)
-                return None
+            # Keep "null" values, because in "inheritance chaining" they must 
+            # be passed from one level to the next.
+            #if value == 'null':
+            #    delattr(self, prop)
+            #    return None
             # Manage the additive inheritance for the property,
             # if property is in plus, add or replace it
+            # Template should keep the '+' at the begining of the chain
             if self.has_plus(prop):
-                value += ',' + self.get_plus_and_delete(prop)
+                value = self.get_plus_and_delete(prop) + ',' + value
+                if self.is_tpl():
+                    value = '+' + value
             return value
-        #Ok, I do not have prop, Maybe my templates do?
+        # Ok, I do not have prop, Maybe my templates do?
         # Same story for plus
         for i in self.templates:
             value = i.get_property_by_inheritance(items, prop)
+
             if value is not None:
-                if self.has_plus(prop):
-                    value += ','+self.get_plus_and_delete(prop)
+                # If our template give us a '+' value, we should continue to loop
+                still_loop = False
+                if value.startswith('+'):
+                    value = value[1:]
+                    still_loop = True
+
+                # Maybe in the prvious loop, we set a value, use it too
+                if hasattr(self, prop):
+                    value = ','.join([getattr(self, prop), value])
+
+                # Ok, we can set it
                 setattr(self, prop, value)
-                return value
-        # I do not have prop, my templates too... Maybe a plus?
+
+                # If we only got some '+' values, we must still loop
+                # for an end value without it
+                if not still_loop:
+                    # And set my own value in the end if need
+                    if self.has_plus(prop):
+                        value = ','.join([getattr(self, prop), self.get_plus_and_delete(prop)])
+                        # Template should keep their '+'
+                        if self.is_tpl():
+                            value = '+' + value
+                    return value
+
+        # Maybe templates only give us + values, so we didn't quit, but we already got a
+        # self.prop value after all
+        template_with_only_plus = hasattr(self, prop)
+        
+        # I do not have endingprop, my templates too... Maybe a plus?
+        # warning : ifall my templates gave me '+' values, do not forgot to
+        # add the already set self.prop value
         if self.has_plus(prop):
-            value = self.get_plus_and_delete(prop)
+            if template_with_only_plus:
+                value = ','.join([getattr(self, prop), self.get_plus_and_delete(prop)])
+            else:
+                value = self.get_plus_and_delete(prop)
+            # Template should keep their '+' chain
+            # We must say it's a '+' value, so our son will now that it must
+            # still loop
+            if self.is_tpl():
+                value = '+'+value
             setattr(self, prop, value)
+
             return value
-        # Not event a plus... so None :)
+
+        # Not even a plus... so None :)
         return None
 
 
@@ -243,12 +288,12 @@ Like temporary attributes such as "imported_from", etc.. """
                     else:
                         value = self.customs[prop]
                     if self.has_plus(prop):
-                        value = value+self.get_plus_and_delete(prop)
+                        value = self.get_plus_and_delete(prop) + ',' + value
                     self.customs[prop] = value
         for prop in self.customs:
             value = self.customs[prop]
             if self.has_plus(prop):
-                value = value = value+','+self.get_plus_and_delete(prop)
+                value = self.get_plus_and_delete(prop) + ',' + value
                 self.customs[prop] = value
         # We can get custom properties in plus, we need to get all
         # entires and put
@@ -295,7 +340,7 @@ Like temporary attributes such as "imported_from", etc.. """
 
         for prop, entry in properties.items():
             if not hasattr(self, prop) and entry.required:
-                print self.get_name(), "missing property :", prop
+                safe_print(self.get_name(), "missing property :", prop)
                 state = False
                 
         return state
@@ -305,7 +350,7 @@ Like temporary attributes such as "imported_from", etc.. """
     # to transform Nagios2 parameters to Nagios3
     # ones, like normal_check_interval to
     # check_interval. There is a old_parameters tab
-    # in Classes taht give such modifications to do.
+    # in Classes that give such modifications to do.
     def old_properties_names_to_new(self):
         old_properties = self.__class__.old_properties
         for old_name, new_name in old_properties.items():
@@ -369,7 +414,7 @@ Like temporary attributes such as "imported_from", etc.. """
     #  but do not remove the associated comment.
     def unacknowledge_problem(self):
         if self.problem_has_been_acknowledged:
-            print "Deleting acknowledged of", self.get_dbg_name()
+            safe_print("Deleting acknowledged of", self.get_dbg_name())
             self.problem_has_been_acknowledged = False
             # Should not be deleted, a None is Good
             self.acknowledgement = None
@@ -437,7 +482,6 @@ Like temporary attributes such as "imported_from", etc.. """
         # Now config properties
         for prop, entry in cls.properties.items():
             # Is this property intended for brokking?
-#            if 'fill_brok' in cls.properties[prop]:
             if brok_type in entry.fill_brok:
                 data[prop] = self.get_property_value_for_brok(prop, cls.properties)
 
@@ -624,7 +668,7 @@ class Items(object):
                 if t is not None:
                     new_tpls.append(t)
                 else: # not find? not good!
-                    err = "ERROR: the template '%s' defined for '%s' is unkown" % (tpl, i.get_name())
+                    err = "ERROR: the template '%s' defined for '%s' is unknown" % (tpl, i.get_name())
                     i.configuration_errors.append(err)
             i.templates = new_tpls
 
@@ -634,13 +678,13 @@ class Items(object):
         # we are ok at the begining. Hope we still ok at the end...
         r = True
         # Some class do not have twins, because they do not have names
-        # like servicedependancies
+        # like servicedependencies
         twins = getattr(self, 'twins', None)
         if twins is not None:
             # Ok, look at no twins (it's bad!)
             for id in twins:
                 i = self.items[id]
-                print "Error: the", i.__class__.my_type, i.get_name(), "is duplicated from", i.imported_from
+                safe_print("Error: the", i.__class__.my_type, i.get_name(), "is duplicated from", i.imported_from)
                 r = False
 
         # Then look if we have some errors in the conf
@@ -656,7 +700,7 @@ class Items(object):
         for i in self:
             if not i.is_correct():
                 n = getattr(i, 'imported_from', "unknown")
-                print "Error: In", i.get_name(), "is incorrect ; from", n
+                safe_print("Error: In", i.get_name(), "is incorrect ; from", n)
                 r = False        
         
         return r
@@ -694,6 +738,13 @@ class Items(object):
     def apply_partial_inheritance(self, prop):
         for i in self:
             i.get_property_by_inheritance(self, prop)
+            if not i.is_tpl():
+                # If a "null" attribute was inherited, delete it
+                try:
+                    if getattr(i, prop) == 'null':
+                        delattr(i, prop)
+                except:
+                    pass
 
 
     def apply_inheritance(self):
@@ -720,7 +771,7 @@ class Items(object):
         for id in self.twins:
             i = self.items[id]
             type = i.__class__.my_type
-            print 'Warning: the', type, i.get_name(), 'is already defined.'
+            safe_print('Warning: the', type, i.get_name(), 'is already defined.')
             del self.items[id] # bye bye
         # do not remove twins, we should look in it, but just void it
         self.twins = []
@@ -744,7 +795,7 @@ class Items(object):
                         # Else : Add in the errors tab.
                         # will be raised at is_correct
                         else:
-                            err = "ERROR: the contact '%s' defined for '%s' is unkown" % (c_name, i.get_name())
+                            err = "ERROR: the contact '%s' defined for '%s' is unknown" % (c_name, i.get_name())
                             i.configuration_errors.append(err)
                 # Get the list, but first make elements uniq
                 i.contacts = list(set(new_contacts))
@@ -832,7 +883,7 @@ class Items(object):
                 for cgname in cgnames:
                     cg = contactgroups.find_by_name(cgname)
                     if cg is None:
-                        err = "The contact group '%s'defined on the %s '%s' do not exist" % (cgname, i.__class__.my_type, i.get_name())
+                        err = "The contact group '%s' defined on the %s '%s' do not exist" % (cgname, i.__class__.my_type, i.get_name())
                         i.configuration_errors.append(err)
                         continue
                     cnames = contactgroups.get_members_by_name(cgname)

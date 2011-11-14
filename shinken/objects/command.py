@@ -111,6 +111,44 @@ class Command(Item):
 
 
 
+    #Call by picle for dataify the coment
+    #because we DO NOT WANT REF in this pickleisation!
+    def __getstate__(self):
+        cls = self.__class__
+        # id is not in *_properties
+        res = {'id' : self.id}
+        for prop in cls.properties:
+            if hasattr(self, prop):
+                res[prop] = getattr(self, prop)
+
+        return res
+
+
+    # Inversed funtion of getstate
+    def __setstate__(self, state):
+        cls = self.__class__
+        # We move during 1.0 to a dict state
+        # but retention file from 0.8 was tuple
+        if isinstance(state, tuple):
+            self.__setstate_pre_1_0__(state)
+            return
+        self.id = state['id']
+        for prop in cls.properties:
+            if prop in state:
+                setattr(self, prop, state[prop])
+
+
+    # In 1.0 we move to a dict save. Before, it was
+    # a tuple save, like
+    # ({'id': 11}, {'poller_tag': 'None', 'reactionner_tag': 'None',
+    # 'command_line': u'/usr/local/nagios/bin/rss-multiuser',
+    # 'module_type': 'fork', 'command_name': u'notify-by-rss'})
+    def __setstate_pre_1_0__(self, state):
+        for d in state:
+            for k,v in d.items():
+                setattr(self, k, v)
+
+
 class Commands(Items):
 
     inner_class = Command

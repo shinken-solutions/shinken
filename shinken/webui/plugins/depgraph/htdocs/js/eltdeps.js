@@ -97,10 +97,14 @@ window.onload = function init(){
     // Main printing loop for particules, graph is print only when need, 
     // but particules are print each loop
     function loop() {
-	
 	for (i = 0, len = particles.length; i < len; i++) {
 	    var particle = particles[i];
-	    
+
+	    // If the particule is disabled, bail out
+	    if(!particle.active){
+		continue;
+	    }
+
 	    var lp = { x: particle.position.x, y: particle.position.y };
 	    
 	    // Offset the angle to keep the spin going
@@ -110,27 +114,61 @@ window.onload = function init(){
 	    particle.position.x = particle.shift.x + Math.cos(i + particle.angle) * (particle.orbit);
 	    particle.position.y = particle.shift.y + Math.sin(i + particle.angle) * (particle.orbit);
 
+	    pos2_x = particle.shift.x + Math.cos(i + particle.angle + 2*Math.PI/3) * (particle.orbit);
+	    pos2_y = particle.shift.y + Math.sin(i + particle.angle + 2*Math.PI/3 ) * (particle.orbit);
+
+	    pos3_x = particle.shift.x + Math.cos(i + particle.angle + 4*Math.PI/3) * (particle.orbit);
+	    pos3_y = particle.shift.y + Math.sin(i + particle.angle + 4*Math.PI/3 ) * (particle.orbit);
+
+
 	    // Compute the position of the cleaning arc
-	    var anti_x = particle.shift.x + Math.cos(i + particle.angle + Math.PI/2) * (particle.orbit);
-	    var anti_y = particle.shift.y + Math.sin(i + particle.angle + Math.PI/2) * (particle.orbit);
+	    var anti_x = particle.shift.x + Math.cos(i + particle.angle + Math.PI/3) * (particle.orbit);
+	    var anti_y = particle.shift.y + Math.sin(i + particle.angle + Math.PI/3) * (particle.orbit);
+
+	    // Compute the position of the cleaning arc
+	    var anti2_x = particle.shift.x + Math.cos(i + particle.angle + 3*Math.PI/3) * (particle.orbit);
+	    var anti2_y = particle.shift.y + Math.sin(i + particle.angle + 3*Math.PI/3) * (particle.orbit);
+
+
+	    var anti3_x = particle.shift.x + Math.cos(i + particle.angle + 5*Math.PI/3) * (particle.orbit);
+	    var anti3_y = particle.shift.y + Math.sin(i + particle.angle + 5*Math.PI/3) * (particle.orbit);
+
 	    
 	    // Compute a local size to make a up/down size effect
 	    var local_size = (Math.cos(particle.angle) - Math.sin(particle.angle) + 2 * particle.size) / 2;
 	    local_size = particle.size;
 
-	    // Draw the color spiner
-	    context.beginPath();
-	    context.fillStyle = particle.fillColor;
-	    context.arc(particle.position.x, particle.position.y, local_size/2, 0, Math.PI*2, true);
-	    context.fill();
 
-	    
-	    // And clean the counter part, with an alpha WAY :)
-	    context.beginPath();
-	    context.fillStyle = 'rgba(255,255,255,0.8)';
-	    context.arc(anti_x, anti_y, 4,  0, Math.PI*(2), true);
-	    context.fill();
+	    // Number of cut we want in our orbital spinner
+	    var NB_PART=3;
+	    for(var j = 0; j < 2*NB_PART; j++){
 
+		pos_x = particle.shift.x + Math.cos(i + particle.angle + j*Math.PI/NB_PART) * (particle.orbit);
+		pos_y = particle.shift.y + Math.sin(i + particle.angle + j*Math.PI/NB_PART) * (particle.orbit);
+
+		// If it's a odd value, print a color one
+		if(j % 2 == 0){
+		    // Draw the color spiner
+		    context.beginPath();
+		    context.fillStyle = particle.fillColor;
+		    context.arc(pos_x, pos_y, local_size/2, 0, Math.PI*2, true);
+		    context.fill();
+		}else{ // print a cleaning particule
+		    context.beginPath();
+		    context.fillStyle = 'rgba(255,255,255,0.8)';
+		    context.arc(pos_x, pos_y, 4,  0, Math.PI*(2), true);
+		    context.fill();
+		}
+	    }
+
+	}
+    }
+
+
+    function clean_particule(name){
+	if (particules_by_name.has(name)){
+	    p = particules_by_name[name];
+            p.active = false;
 	}
     }
 
@@ -144,6 +182,7 @@ window.onload = function init(){
 	    p.shift = {x: x, y: y};
 	    p.angle = 0;
 	    p.size = 1 * (1 + (size - 2 / 5));
+	    p.active = true;
 	}else{ // New particule :) 
 	    var color_code = 'gray';
 	    if(color == 'red'){
@@ -154,6 +193,7 @@ window.onload = function init(){
 	    }
 
 	    var particle = {
+		active : true,
 		// position to print
 		position: { x: x, y: y },
 		// position of the center
@@ -171,18 +211,69 @@ window.onload = function init(){
     }
 
 
+    // A node shouldbe print if it's a important one
+    // like an host, or a service near or with a huge business
+    // impact, or a root problem.
+    function should_be_print(node){
+	var b = true;
+	var elt_type = 'service';
+	var business_impact = 2;
+	var state_id = 0;
+	var is_problem = false;
+	/* We can have some missing data, so just add dummy info */
+	if (typeof(node.data.elt_type) != 'undefined'){
+	    elt_type = node.data.elt_type;
+	    business_impact = node.data.business_impact;
+	    state_id = node.data.state_id;
+	    is_problem = node.data.is_problem;
+	}
+
+	// For distant service, we should tag them with no label
+	// but important one should be still tags of course.
+	// should saw root problem too
+	if (node._depth == 0) { 
+	} else if(node._depth == 1 ){
+	}else if(node._depth >= 2){  
+	    if (elt_type == 'service' && business_impact <= 2 ){
+		if(state_id == 0 || !is_problem){
+		    b = false;
+		}
+	    }
+	}
+//	alert('Should be print '+node.id+ ' '+b);
+	return b;
+	
+    }
+
+
     //init nodetypes
     //Here we implement custom node rendering types for the RGraph
     //Using this feature requires some javascript and canvas experience.
     $jit.RGraph.Plot.NodeTypes.implement({
 	    'custom': {
 		'render': function(node, canvas) {
+
 		    /*First we need to know where the node is, so we can draw 
 		     in the correct place for the GLOBAL canvas*/
 		    var pos = node.getPos().getc();
 		    var size = 24;
 
 		    var ctx = canvas.getCtx();
+
+		    // Look if we really need to render this node
+		    if(!should_be_print(node)){
+			var color = node.data.circle;
+			// Remeber to clean the particule if need
+			clean_particule(node.id);
+			ctx.beginPath();
+			ctx.fillStyle = color;//'rgba(0,0,255,0.8)';
+			ctx.arc(pos.x, pos.y, 1,  0, Math.PI*(2), true);
+			ctx.fill();
+			return;
+		    }
+
+
+		    //alert('Rendering node '+node.id);
 		    // save it
 		    context = ctx;
 		    img = new Image();
@@ -194,12 +285,17 @@ window.onload = function init(){
 			img.src = node.data.img_src;
 			size = size * (1 + (node.data.business_impact - 2)/3);
 		    }
+		    
+		    var elt_type = 'service';
+		    /* We can have some missing data, so just add dummy info */
+                    if (typeof(node.data.elt_type) != 'undefined'){
+                        elt_type = node.data.elt_type;
+                    }
+
 		    /* We scale the image. Thanks html5 canvas.*/
 		    img.width = size;
 		    img.height = size;
-
 		    
-
 		    /* If we got a value for the circle */
 		    if (typeof(node.data.img_src) != 'undefined'){
 			color = node.data.circle;
@@ -213,7 +309,7 @@ window.onload = function init(){
 			    if(node.id == rgraph.root){
 				create_or_update_particule('graphrootforwebui', pos.x, pos.y, 'gray', node.data.business_impact - 1);
 			    }
-			}   
+			}
 		    }
 		    
 		    //Ok, we draw the image, and we set it in the middle ofthe node :)
@@ -254,6 +350,15 @@ window.onload = function init(){
 		'overridable': true,
 	    },
 	
+	    //Add tooltips
+	    Tips: {
+		enable: true,
+		onShow: function(tip, node) {
+		    var html = "<div class=\"tip-title border\">" + node.data.infos + "</div>";
+		    tip.innerHTML = html;
+		}
+	    },
+	    
 	    //Set polar interpolation.
 	    //Default's linear.
 	    interpolation: 'polar',
@@ -269,22 +374,24 @@ window.onload = function init(){
 	    //an edge. This method is useful to change edge styles
 	    //individually.
 	    onBeforePlotLine: function(adj){
-		//Add some random lineWidth to each edge.
-		if (!adj.data.$lineWidth)
+		src = adj.nodeFrom;
+		dst = adj.nodeTo;
+
+		// If one of the line border is a no print node
+		// print this line in very few pixels
+		if(!should_be_print(src) || !should_be_print(dst)){
+		    adj.data.$lineWidth = 0.3;
+		}else{
 		    adj.data.$lineWidth = 2;
+		}
 	    },
 
 	    onBeforeCompute: function(node){
 		Log.write("Focusing on " + node.name + "...");
-		
-		// Clear the circles
-		//alert("clean");		alert("clean");
-		//particles.length=0;
 
-		//Make right column relations list.
-		var html = "<h4>" + node.name + "</h4><b>Connections:</b>";
-		html += "<ul>";
-		html = node.data.infos;
+		
+		// Make right column relations list.
+		var html = node.data.infos;
 		$jit.id('inner-details').innerHTML = html;
 	    },
 	    //Add node click handler and some styles.
@@ -312,31 +419,27 @@ window.onload = function init(){
 		var left = parseInt(style.left);
 		var w = domElement.offsetWidth;
 		style.left = (left - w / 2) + 'px';
-		if (node._depth == 0) {  
-		    //style.fontSize = "100%";
-//		    style.color = "#ddd";  
-  
-		} else if(node._depth == 1 ){
-		    //style.fontSize = "80%";
-		}else if(node._depth == 2){  
-//		    style.fontSize = "0.7em";  
-//		    style.color = "#555";  
-  
-		} else {  
-//		    style.display = 'none';  
-		}  
+
+		// If the node should not be print
+		// do not print it :)
+		if(!should_be_print(node)){
+		    style.display = 'none';
+		}
 	    }
 	});
     //load graph.
     /*alert('Loading graph'+json_graph);*/
     rgraph.loadJSON(json_graph, 1);
     rgraph.root =  graph_root;
+
+
     //compute positions and plot
     rgraph.refresh();
+    rgraph.controller.onBeforeCompute(rgraph.graph.getNode(rgraph.root));
     //end
     //alert('Roto is'+rgraph.root);
     //rgraph.root =  graph.get('localhost');
-    rgraph.controller.onBeforeCompute(rgraph.graph.getNode(rgraph.root));
+
     Log.write('');
 
     

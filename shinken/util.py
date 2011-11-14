@@ -52,7 +52,7 @@ def safe_print(*args):
         # utf8, go in ascii mode
         if isinstance(e, str):
             if safe_stdout:
-                s = unicode(e, 'utf8')
+                s = unicode(e, 'utf8', errors='ignore')
             else:
                 s = e.decode('ascii', 'replace').encode('ascii', 'replace').decode('ascii', 'replace')
             l.append(s)
@@ -133,6 +133,15 @@ def to_split(val):
     if val == ['']:
         val = []
     return val
+
+def to_best_int_float(val):
+    i = int(float(val))
+    f = float(val)
+    # If the f is a .0 value,
+    # best match is int
+    if i == f:
+        return i
+    return f
 
 #bool('0') = true, so...
 def to_bool(val):

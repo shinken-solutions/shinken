@@ -23,6 +23,7 @@
 import os
 import time
 import traceback
+import sys
 
 from multiprocessing import active_children
 from Queue import Empty
@@ -168,14 +169,16 @@ class Receiver(BaseSatellite):
         # Set our giving timezone from arbiter
         use_timezone = conf['global']['use_timezone']
         if use_timezone != 'NOTSET':
-            logger.log("[%s] Setting our timezone to" % (self.name, use_timezone))
+            logger.log("[%s] Setting our timezone to %s" % (self.name, use_timezone))
             os.environ['TZ'] = use_timezone
             time.tzset()
         
         
 
     def do_loop_turn(self):
-        print "."
+        sys.stdout.write(".")
+        sys.stdout.flush()
+
         # Begin to clean modules
         self.check_and_del_zombie_modules()
 
@@ -280,8 +283,8 @@ class Receiver(BaseSatellite):
             self.do_mainloop()
 
         except Exception, exp:
-            logger.log("CRITICAL ERROR : I got an non recovarable error. I must exit")
-            logger.log("You can log a bug ticket at https://sourceforge.net/apps/trac/shinken/newticket for geting help")
+            logger.log("CRITICAL ERROR: I got an unrecoverable error. I have to exit")
+            logger.log("You can log a bug ticket at https://sourceforge.net/apps/trac/shinken/newticket to get help")
             logger.log("Back trace of it: %s" % (traceback.format_exc()))
             raise
 

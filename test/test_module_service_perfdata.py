@@ -70,6 +70,8 @@ class TestConfig(ShinkenTest):
                 sl.manage_brok(b)
         self.sched.broks = {}
         sl.file.close() # the sl has also an open (writing) file handle
+        #Ok, go for writing
+        sl.hook_tick(None)
 
         fd = open(mod.path)
         buf = fd.readline()
@@ -94,13 +96,16 @@ class TestConfig(ShinkenTest):
             if b.type == 'service_check_result':
                 sl2.manage_brok(b)
         sl2.file.close()
+        #Ok, go for writing
+        sl2.hook_tick(None)
 
         fd = open(mod.path)
         buf = fd.readline().decode('utf8')
-        #print "BUF:", buf, type(buf)
+        print fd.read()
+
         
         comparison = u'%d\t%s\t%s\t%s\t%s\t%s\n' % (t, "test_host_0", "test_ok_0", 'BAD ', ' value1=0 value2=0'+u'\xf6', 'CRITICAL')
-        #print "Comparison:", comparison, type(comparison)
+
         self.assert_(buf == comparison)
         fd.close()
         os.unlink(mod.path)

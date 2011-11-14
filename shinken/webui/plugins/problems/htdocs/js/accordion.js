@@ -53,6 +53,7 @@ function add_element(name){
     selected_elements.push(name);
     var selector = $('selector-'+name);
     selector.src = '/static/images/tick.png';
+    $('actions').style.display = 'inline-block';
     $('actions').fade('in');
     /* The user will ask something, so it's good to reinit
      the refresh time so he got time to launch its action,
@@ -65,6 +66,7 @@ function remove_element(name){
     selected_elements.erase(name);
     if(selected_elements.length == 0){
 	$('actions').fade('out');
+	$('actions').style.display = 'none';
     }
     var selector = $('selector-'+name);
     selector.src = '/static/images/untick.png';
@@ -101,10 +103,10 @@ function try_to_fix_all(){
 }
 
 
-function acknoledge_all(){
+function acknowledge_all(){
     selected_elements.each(function(name){
 			       ackno_element = name;
-			       do_acknoledge('Acknoledge from WebUI.');
+			       do_acknowledge('Acknowledge from WebUI.');
 			   });
     flush_selected_elements();
 }

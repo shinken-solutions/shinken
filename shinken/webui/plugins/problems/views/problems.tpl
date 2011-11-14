@@ -5,7 +5,7 @@
 %top_right_banner_state = datamgr.get_overall_state()
 
 
-%rebase layout title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/accordion.js', 'problems/js/autocompleter.js', 'problems/js/autocompleter.Request.js', 'problems/js/autocompleterObserver.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css', 'problems/css/autocompleter.css'], refresh=True, menu_part='/problems', user=user
+%rebase layout title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/accordion.js', 'problems/js/autocompleter.js', 'problems/js/autocompleter.Request.js', 'problems/js/autocompleterObserver.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css', 'problems/css/autocompleter.css', 'problems/css/perfometer.css'], refresh=True, menu_part='/'+page, user=user
 
 
 %# " If the auth got problem, we bail out"
@@ -36,7 +36,7 @@ document.addEvent('domready', function() {
 <script type="text/javascript">
 	function submitform()
 	{
-	document.forms["searchform"].submit();
+	document.forms["search_form"].submit();
 	}
 	
 	/* Catch the key ENTER and launch the form 
@@ -59,57 +59,60 @@ document.addEvent('domready', function() {
 
 
 	 
-<div id="left_container" class="grid_2">
+<div id="left_container" class="grid_3">
 
   <div id="nav_left">
     <ul>
-      <li><a href="/problems">All problems</a></li>
-      <li><a href="#">Overview</a></li>
+      <li class="left_title"><a href="#">Overview</a></li>
       <li>
-	<center>
-	  <table cellspacing="2" cellpadding="0">
-	    <tbody>
-	      <tr>
-		<th>Problems</th><th>Unhandled</th><th>All</th>
-	      </tr>
-	      
-	      <tr>
-		<td>
-		  <a href="/problems" style="padding-top:0;">{{app.datamgr.get_nb_all_problems()}}</a>
-		</td>
-		<td>
-		  <a href="/problems" style="padding-top:0;">{{app.datamgr.get_nb_problems()}}</a>
-		</td>
-                <td><a href="/problems" style="padding-top:0;">{{app.datamgr.get_nb_elements()}}</a></td>
-              </tr>
-	    </tbody>
-	  </table>
-	</center>
+					<div class="tac_header">
+						<div class="tac_col_1">
+							Problems
+						</div>
+						<div class="tac_col_2">
+							Unhandled
+						</div>
+						<div class="tac_col_3">
+							All
+						</div>
+					</div>
+					<div class="tac_content">
+						<div class="tac_col_1">
+							<a href="/problems" style="padding-top:0;">{{app.datamgr.get_nb_all_problems()}}</a>
+						</div>
+						<div class="tac_col_2">
+							<a href="/problems" style="padding-top:0;">{{app.datamgr.get_nb_problems()}}</a>
+						</div>
+						<div class="tac_col_3">
+							<a href="/all" style="padding-top:0;">{{app.datamgr.get_nb_elements()}}</a>
+						</div>
+					</div>
       </li>
 
-      <li><a href="#">Search</a></li>
-      
+      <li class="left_title"><a href="#">Search</a></li>
       <li>
-      	<form method="get" id="searchform" action="/problems">			
-	  <div class="text-field">
-	    <label for="search">Name:</label>
-	    <input name="search" type="text" tabindex="1" size="30" value="{{search}}" id="search_input">
-	  </div>
-	  <center>
-	    <div class="buttons">
-	      <a style="padding:8px;" tabindex="4" class="button" href="javascript: submitform()"><img src="/static/images/search.png" alt="search"> Search</a>
-	    </div>
-	  </center>
-	</form>
+				<form method="get" id="search_form" action="/{{page}}">
+					<span class="table">
+						<span class="row">
+							<span class="cell">
+								<input name="search" type="text" tabindex="1" value="{{search}}" id="search_input"/>
+							</span>
+							<span class="cell">
+								<a tabindex="4" href="javascript: submitform()">
+								<img src="/static/images/search.png" alt="search"/>
+								</a>
+							</span>
+						</span>
+					</span>
+				</form>
       </li>
-
     </ul>
   </div>
 </div>
 
 %# "We set the actions div that will be show/hide if we select elements"
-<div class="dockContainer" id="actions">
-  <div class="dockWrapper">
+<div class="dockContainer">
+  <div class="dockWrapper" id="actions">
     <div class="cap left"></div>
     <ul class="dock">
       <li class="active">
@@ -121,8 +124,8 @@ document.addEvent('domready', function() {
 	<a href="#" onclick="recheck_now_all()"><img src="/static/images/big_refresh.png" alt="refresh"/></a>
       </li>
       <li>
-	<span>Acknoledge</span>
-	<a href="#" onclick="acknoledge_all()"><img src="/static/images/big_ack.png" alt="acknowledge"/></a>
+	<span>Acknowledge</span>
+	<a href="#" onclick="acknowledge_all()"><img src="/static/images/big_ack.png" alt="acknowledge"/></a>
       </li>
       
     </ul>
@@ -139,7 +142,7 @@ document.addEvent('domready', function() {
 	     %elif start == None or end == None:
 		<span class='extend'>...</span>
              %else:
-		<a href='/problems?start={{start}}&end={{end}}' class='page larger'>{{name}}</a>
+		<a href='/{{page}}?start={{start}}&end={{end}}' class='page larger'>{{name}}</a>
 	     %end
           %end
 	</div>
@@ -155,6 +158,11 @@ document.addEvent('domready', function() {
 
     %# " We remember the last hname so see if we print or not the host for a 2nd service"
     %last_hname = ''
+
+    %# " We try to make only importants things shown on same output "
+    %last_output = ''
+    %nb_same_output = 0
+
     %for pb in pbs:
 
       <div class="clear"></div>      
@@ -162,11 +170,26 @@ document.addEvent('domready', function() {
        <h2> Business impact : {{!helper.get_business_impact_text(pb)}} </h2>
        %# "We reset the last_hname so we won't overlap this feature across tables"
        %last_hname = ''
+       %last_output = ''
+       %nb_same_output = 0
       %end
       %imp_level = pb.business_impact
 
-	<div> 
-	  <div style="margin-left: 20px; width: 70%; float:left;">
+      %# " We check for the same output and the same host. If we got more than 3 of same, make them opacity effect"
+      %if pb.output == last_output and pb.host_name == last_hname:
+          %nb_same_output += 1
+      %else:
+          %nb_same_output = 0
+      %end
+      %last_output = pb.output
+
+      %if nb_same_output > 3:
+       <div class='opacity_hover'>
+      %else:
+       <div>
+      %end
+
+	  <div style="margin-left: 20px; width: 95%; float:left;">
 	    <table class="tableCriticity" style="width: 100%; margin-bottom:3px;">
 	      <tr class="tabledesc">
 	        <td class="tdBorderLeft tdCriticity" style="width:20px; background:none;"> <img src="/static/images/untick.png" alt="untick" /style="cursor:pointer;" onclick="add_remove_elements('{{pb.get_full_name()}}')" id="selector-{{pb.get_full_name()}}" > </td>
@@ -191,27 +214,40 @@ document.addEvent('domready', function() {
 		<td class="tdBorderTop tdBorderLeft tdCriticity" style="width:50px;"> {{pb.state}}</td>
 		<td title='{{helper.print_date(pb.last_state_change)}}' class="tdBorderTop tdBorderLeft tdCriticity" style="width:50px;">{{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}</td>
 		%# "We put a title (so a tip) on the output onlly if need"
-		%if len(pb.output) > 55:
-		   <td title="{{pb.output}}" class="tdBorderTop tdBorderLeft tdCriticity" style="width:350px;"> {{pb.output[:55]}}</td>
+		%if len(pb.output) > 100:
+		   %if app.allow_html_output:
+		      <td title="{{pb.output}}" class="tdBorderTop tdBorderLeft tdCriticity" style="width:450px;"> {{!helper.strip_html_output(pb.output[:100])}}</td>
+		   %else:
+		      <td title="{{pb.output}}" class="tdBorderTop tdBorderLeft tdCriticity" style="width:450px;"> {{pb.output[:100]}}
+		   %end
 		%else:
-		   <td class="tdBorderTop tdBorderLeft tdCriticity" style="width:350px;"> {{pb.output}}</td>
+		   %if app.allow_html_output:
+                      <td class="tdBorderTop tdBorderLeft tdCriticity" style="width:450px;"> {{!helper.strip_html_output(pb.output)}}</td>
+		   %else:
+		      <td class="tdBorderTop tdBorderLeft tdCriticity" style="width:450px;"> {{pb.output}} </td>
+                   %end
 		%end
+		<td class="perfometer">
+		  {{!helper.get_perfometer(pb)}}
+		</td>
 		<td class="tdBorderLeft tdCriticity opacity_hover shortdesc" style="max-width:20px;" onclick="show_detail('{{pb.get_full_name()}}')"> <img src="/static/images/expand.png" alt="expand" /> </td>
+		
 		</tr>
+	      
              </table>
 	  </div>  
 	  %# " We put actions buttons with a opacity hover effect, so they won't be too visible"
-	  <div class="opacity_hover">
-	    <div style="float:right;">
-	      <a href="#" onclick="try_to_fix('{{pb.get_full_name()}}')">{{!helper.get_button('Fix!', img='/static/images/enabled.png')}}</a>
-	    </div>
-	    <div style="float:right;">
-	      <a href="#" onclick="acknoledge('{{pb.get_full_name()}}')">{{!helper.get_button('Ack', img='/static/images/wrench.png')}}</a>
-	    </div>
-	    <div style="float:right;">
-	      <a href="#" onclick="recheck_now('{{pb.get_full_name()}}')">{{!helper.get_button('Recheck', img='/static/images/delay.gif')}}</a>
-	    </div>
-	  </div>
+%#	  <div class="opacity_hover" >
+%#	    <div style="float:right;">
+%#	      <a href="#" onclick="try_to_fix('{{pb.get_full_name()}}')">{{!helper.get_button('Fix!', img='/static/images/enabled.png')}}</a>
+%#	    </div>
+%#	    <div style="float:right;">
+%#	      <a href="#" onclick="acknowledge('{{pb.get_full_name()}}')">{{!helper.get_button('Ack', img='/static/images/wrench.png')}}</a>
+%#	    </div>
+%#	    <div style="float:right;">
+%#	      <a href="#" onclick="recheck_now('{{pb.get_full_name()}}')">{{!helper.get_button('Recheck', img='/static/images/delay.gif')}}</a>
+%#	    </div>
+%#	  </div>
 	</div>
 
     %# "This div is need so the element will came back in the center of the previous div"
@@ -276,7 +312,7 @@ document.addEvent('domready', function() {
 	     %elif start == None or end == None:
 		<span class='extend'>...</span>
              %else:
-		<a href='/problems?start={{start}}&end={{end}}' class='page larger'>{{name}}</a>
+		<a href='/{{page}}?start={{start}}&end={{end}}' class='page larger'>{{name}}</a>
 	     %end
           %end
 	</div>

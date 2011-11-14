@@ -170,6 +170,10 @@ Columns: time type options state host_name"""
 
 
     def test_split_database(self):
+        #
+        # after daylight-saving time has begun or ended, 
+        # this test may fail for some days
+        #
         #os.removedirs("var/archives")
         self.print_header()
         host = self.sched.hosts.find_by_name("test_host_0")

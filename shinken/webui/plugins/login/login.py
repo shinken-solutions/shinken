@@ -30,15 +30,22 @@ app = None
 def get_page():
     return user_login()
 
+
 def user_login():
     user = app.get_user_auth()
     if user:
         redirect("/problems")
-    return {}
+
+    err = app.request.GET.get('error', None)
+    login_text = app.login_text
+
+    return {'error': err, 'login_text' : login_text}
+
 
 def user_login_redirect():
     redirect("/user/login")
     return {}
+
 
 def user_logout():
     # To delete it, send the same, with different date
@@ -50,6 +57,7 @@ def user_logout():
     redirect("/user/login")
     return {}
 
+
 def user_auth():
     print "Got forms"
     login = app.request.forms.get('login', '')
@@ -60,7 +68,7 @@ def user_auth():
         app.response.set_cookie('user', login, secret=app.auth_secret, path='/')
         redirect("/problems")
     else:
-        redirect("/user/login")
+        redirect("/user/login?error=Invalid user or Password")
 
     return {'app' : app, 'is_auth' : is_auth}
 

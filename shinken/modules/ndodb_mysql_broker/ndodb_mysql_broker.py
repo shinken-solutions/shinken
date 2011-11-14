@@ -807,7 +807,6 @@ class Ndodb_Mysql_broker(BaseModule):
         return res
 
 
-
     #A notification have just be created, we INSERT it
     def manage_notification_raise_brok(self, b):
 

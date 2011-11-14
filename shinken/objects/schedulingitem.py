@@ -338,7 +338,7 @@ class SchedulingItem(Item):
     def deregister_a_problem(self, pb):
         self.source_problems.remove(pb)
 
-        # For know if we are still an impact, maybe our dependancies
+        # For know if we are still an impact, maybe our dependencies
         # are not aware of the remove of the impact state because it's not ordered
         # so we can just look at if we still have some problem in our list
         if len(self.source_problems) == 0:
@@ -355,7 +355,7 @@ class SchedulingItem(Item):
     # action can be raise or not by viewing dep status
     # network_dep have to be all raise to be no action
     # logic_dep : just one is enouth
-    def is_no_action_dependant(self):
+    def is_no_action_dependent(self):
         # Use to know if notif is raise or not
         # no_action = False
         parent_is_down = []
@@ -400,7 +400,8 @@ class SchedulingItem(Item):
                 parent_is_down.append(p_is_down)
 
         # if a parent is not down, no dep can explain the pb
-        if False in parent_is_down:
+        # or if we do'nt have any parents
+        if len(parent_is_down) == 0 or False in parent_is_down:
             return
         else:# every parents are dead, so... It's not my fault :)
             self.set_unreachable()
@@ -433,7 +434,7 @@ class SchedulingItem(Item):
 
     # Use to know if my dep force me not to be checked
     # So check the chk_depend_of if they raise me
-    def is_no_check_dependant(self):
+    def is_no_check_dependent(self):
         now = time.time()
         for (dep, status, type, tp, inh_parent) in self.chk_depend_of:
             if tp is None or tp.is_time_valid(now):
@@ -444,7 +445,7 @@ class SchedulingItem(Item):
 
     # call by a bad consume check where item see that he have dep
     # and maybe he is not in real fault.
-    def raise_dependancies_check(self, ref_check):
+    def raise_dependencies_check(self, ref_check):
         now = time.time()
         cls = self.__class__
         checks = []
@@ -599,7 +600,8 @@ class SchedulingItem(Item):
             return
         
         # If we do not force and we are in downtime, bailout
-        if not externalcmd and self.in_scheduled_downtime:
+        # if the no_event_handlers_during_downtimes is 1 in conf
+        if cls.no_event_handlers_during_downtimes and not externalcmd and self.in_scheduled_downtime:
             return
 
         m = MacroResolver()
@@ -682,12 +684,15 @@ class SchedulingItem(Item):
 
         # Same for current output
         # TODO : remove in future version, this is need only for
-        # migration from old shinken version, that got outpout as str
+        # migration from old shinken version, that got output as str
         # and not unicode
         # if str, go in unicode
         if isinstance(self.output, str):
             self.output = self.output.decode('utf8', 'ignore')
             self.long_output = self.long_output.decode('utf8', 'ignore')
+
+        if isinstance(c.perf_data, str):
+            c.perf_data = c.perf_data.decode('utf8', 'ignore')
 
         # We check for stalking if necessery
         # so if check is here
@@ -728,8 +733,8 @@ class SchedulingItem(Item):
         if c.exit_status != 0 and c.status == 'waitconsume' and len(self.act_depend_of) != 0:
             c.status = 'waitdep'
             # Make sure the check know about his dep
-            # C is my check, and he wants dependancies
-            checks_id = self.raise_dependancies_check(c)
+            # C is my check, and he wants dependencies
+            checks_id = self.raise_dependencies_check(c)
             for check_id in checks_id:
                 # Get checks_id of dep
                 c.depend_on.append(check_id)
@@ -753,7 +758,7 @@ class SchedulingItem(Item):
             c.status = 'havetoresolvedep'
 
         # if finish, check need to be set to a zombie state to be removed
-        # it can be change if necessery before return, like for dependancies
+        # it can be change if necessery before return, like for dependencies
         if c.status == 'waitconsume' and c.depend_on_me == []:
             c.status = 'zombie'
 
@@ -767,7 +772,7 @@ class SchedulingItem(Item):
             else:
                 c.status = 'zombie'
             # Check deps
-            no_action = self.is_no_action_dependant()
+            no_action = self.is_no_action_dependent()
             # We recheck just for network_dep. Maybe we are just unreachable
             # and we need to overide the state_id
             self.check_and_set_unreachability()
@@ -776,7 +781,7 @@ class SchedulingItem(Item):
         if c.exit_status == 0 and self.last_state in (OK_UP, 'PENDING'):
             #print "Case 1 (OK following a previous OK) : code:%s last_state:%s" % (c.exit_status, self.last_state)
             self.unacknowledge_problem()
-            # action in return can be notification or other checks (dependancies)
+            # action in return can be notification or other checks (dependencies)
             if (self.state_type == 'SOFT') and self.last_state != 'PENDING':
                 if self.is_max_attempts() and self.state_type == 'SOFT':
                     self.state_type = 'HARD'
@@ -1018,7 +1023,6 @@ class SchedulingItem(Item):
 
         # We search since when we are in notification for escalations
         # that are based on time
-        in_notif_time = cls.interval_length * self.first_notification_delay + (n.notif_nb-1) * self.notification_interval
         in_notif_time = time.time() - n.creation_time
 
         # Check is an escalation match the current_notification_number
@@ -1164,7 +1168,7 @@ class SchedulingItem(Item):
                 rt = cmd.reactionner_tag
                 child_n = Notification(n.type, 'scheduled', 'VOID', cmd, self,
                     contact, n.t_to_go, timeout=cls.notification_timeout,
-                    notif_nb=n.notif_nb, reactionner_tag=rt )
+                    notif_nb=n.notif_nb, reactionner_tag=rt, module_type=cmd.module_type )
                 if not self.notification_is_blocked_by_contact(child_n, contact):
                     # Update the notification with fresh status information
                     # of the item. Example: during the notification_delay
@@ -1189,7 +1193,7 @@ class SchedulingItem(Item):
         cls = self.__class__
 
         # if I'm already in checking, Why launch a new check?
-        # If ref_check_id is not None , this is a dependancy_ check
+        # If ref_check_id is not None , this is a dependency_ check
         # If none, it might be a forced check, so OK, I do a new
         if not force and (self.in_checking and ref_check is not None):
             now = time.time()
@@ -1199,7 +1203,7 @@ class SchedulingItem(Item):
             c_in_progress.depend_on_me.append(ref_check)
             return c_in_progress.id
 
-        if force or (not self.is_no_check_dependant()):
+        if force or (not self.is_no_check_dependent()):
             # Get the command to launch
             m = MacroResolver()
             data = self.get_data_for_checks()
@@ -1308,7 +1312,7 @@ class SchedulingItem(Item):
             for e in elts:
                 #print "I register to the element", e.get_name()
                 # all states, every timeperiod, and inherit parents
-                e.add_business_rule_act_dependancy(self, ['d', 'u', 's', 'f', 'c', 'w'], None, True)
+                e.add_business_rule_act_dependency(self, ['d', 'u', 's', 'f', 'c', 'w'], None, True)
 
 
     def rebuild_ref(self):

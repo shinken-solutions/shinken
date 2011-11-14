@@ -1,5 +1,3 @@
-
-
 %# " We should limit the number of impacts to show here. Too much is just useless "
 %max_impacts = 200
 
@@ -8,18 +6,9 @@
 
 %# If got no Elt, bailout
 %if not elt:
-%rebase layou title='Invalid name'
+%rebase layout title='Invalid name'
 
 Invalid element name
-
-
-%# " If the auth got problem, we are here and bailout"
-%if not valid_user:
-<script type="text/javascript">
-  window.location.replace("/login");
-</script>
-%# " And if the javascript is not followed? not a problem, we gave no data here." 
-%end
 
 
 %else:
@@ -32,11 +21,10 @@ Invalid element name
 %top_right_banner_state = datamgr.get_overall_state()
 
 
-%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/domtab.js','eltdetail/js/dollar.js', 'eltdetail/js/gesture.js', 'eltdetail/js/hide.js', 'eltdetail/js/switchbuttons.js', 'eltdetail/js/multi.js'],  css=['eltdetail/css/tabs.css', 'eltdetail/css/eltdetail.css', 'eltdetail/css/switchbuttons.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
+%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/graphs.js', 'eltdetail/js/domtab.js','eltdetail/js/dollar.js', 'eltdetail/js/gesture.js', 'eltdetail/js/hide.js', 'eltdetail/js/switchbuttons.js', 'eltdetail/js/multi.js'],  css=['eltdetail/css/tabs.css', 'eltdetail/css/eltdetail.css', 'eltdetail/css/switchbuttons.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
 
 
-%#  "This is the background canvas for all gesture detection things " 
-<canvas id="canvas"></canvas>
+
 %# " We will save our element name so gesture functions will be able to call for the good elements."
 <script type="text/javascript">var elt_name = '{{elt.get_full_name()}}';</script>
 
@@ -86,12 +74,16 @@ Invalid element name
       </li>
     </ul>
 	<div class="opacity_hover">
+	%#  "This is the background canvas for all gesture detection things " 
+	%# " Don't ask me why, but the size must be included in the
+	%# canvas line here or we got problem!"
+	<center><canvas id="canvas" width="200" height="200"  style="border: 1px solid black;"></canvas></center>
+
 	  <br>
-	  <img title="By keeping a left click pressed and drawing a check, you will launch an acknoledgement." src="/static/eltdetail/images/gesture-check.png"/> Acknoledge<br>
+	  <img title="By keeping a left click pressed and drawing a check, you will launch an acknowledgement." src="/static/eltdetail/images/gesture-check.png"/> Acknowledge<br>
 	  <img title="By keeping a left click pressed and drawing a check, you will launch an recheck." src="/static/eltdetail/images/gesture-circle.png"/> Recheck<br>
 	  <img title="By keeping a left click pressed and drawing a check, you will launch a try to fix command." src="/static/eltdetail/images/gesture-zigzag.png"/> Fix<br>
 	</div>
-
   </div>
 </div>
 <div class="grid_12">
@@ -103,6 +95,9 @@ Invalid element name
       %if elt_type=='host':
          <dt>Alias:</dt>
          <dd>{{elt.alias}}</dd>
+
+			<dt>Address:</dt>
+			<dd>{{elt.address}}</dd>
 
          <dt>Parents:</dt>
 	 %if len(elt.parents) > 0:
@@ -146,7 +141,7 @@ Invalid element name
       <table>
 	<th scope="row" class="column1"><img src="/static/images/errorMedium.png"></th>
 	<td>
-	  This element got an important impact on your business, please fix it or acknoledge it.
+	  This element has got an important impact on your business, please fix it or acknowledge it.
       </td></table>
     </div>
     %# "end of the 'SOLVE THIS' highlight box"
@@ -246,7 +241,7 @@ Invalid element name
 
       <div id="box_commannd">
 	<a href="#" onclick="try_to_fix('{{elt.get_full_name()}}')">{{!helper.get_button('Try to fix it!', img='/static/images/enabled.png')}}</a>
-	<a href="#" onclick="acknoledge('{{elt.get_full_name()}}')">{{!helper.get_button('Acknowledge it', img='/static/images/wrench.png')}}</a>
+	<a href="#" onclick="acknowledge('{{elt.get_full_name()}}')">{{!helper.get_button('Acknowledge it', img='/static/images/wrench.png')}}</a>
 	<a href="#" onclick="recheck_now('{{elt.get_full_name()}}')">{{!helper.get_button('Recheck now', img='/static/images/delay.gif')}}</a>
 	<a href="/depgraph/{{elt.get_full_name()}}" class="mb" title="Impact map of {{elt.get_full_name()}}">{{!helper.get_button('Show impact map', img='/static/images/state_ok.png')}}</a>
 	{{!helper.get_button('Submit Check Result', img='/static/images/passiveonly.gif')}}
@@ -345,13 +340,45 @@ Invalid element name
     
     <div class="domtab">
 		<ul class="domtabs">
+			<li class="box_gradient_vertical"><a href="#graph">Graphs</a></li>
 			<li class="box_gradient_vertical"><a href="#comment">Comments</a></li>
 			<li class="box_gradient_vertical"><a href="#downtime">Downtimes</a></li>
 		</ul>
+
+		<div class="tabcontent">
+			<h2 style="display: none"><a name="graphs" id="graph">Graphs</a></h2>
+			%uris = app.get_graph_uris(elt, graphstart, graphend)
+			%if len(uris) == 0:
+			  <p>No graphs</p>
+			%else:
+			<ul class="tabmenu">
+			  %now = int(time.time())
+			  %fourhours = now - 3600*4
+			  %lastday = now - 86400
+			  %lastweek = now - 86400*7
+			  %lastmonth = now - 86400*31
+			  %lastyear = now - 86400*365
+			  <li><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{fourhours}}&graphend={{now}}#graphs" class="">4 hours</a></li>
+			  <li><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{lastday}}&graphend={{now}}#graphs" class="">Day</a></li>
+			  <li><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{lastweek}}&graphend={{now}}#graphs" class="">Week</a></li>
+			  <li><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{lastmonth}}&graphend={{now}}#graphs" class="">Month</a></li>
+			  <li><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{lastyear}}&graphend={{now}}#graphs" class="">Year</a></li>
+			</ul>
+			%end
+			
+			%img_id = 0
+			%for g in uris:
+			   %img_id += 1
+			   %img_src = g['img_src']
+			   %link = g['link']
+			<p><a href="{{link}}"><img src="{{img_src}}" class="graphimg" id="graphimg-{{img_id}}"></img></a></p>
+			%end
+		</div>
+
 		<div class="tabcontent">
 			<h2 style="display: none"><a name="comment" id="comment">Comments</a></h2>
 				<ul class="tabmenu">
-					<li>
+				  <li>
 						<a href="#" class="">Add Comments</a>
 					</li>
 					<li>

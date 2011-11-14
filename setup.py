@@ -468,7 +468,7 @@ if __name__ == "__main__":
         },
       
         name = "Shinken",
-        version = "0.6",
+        version = "0.8",
         packages = find_packages(),
         package_data = {'' : package_data},
         description = "Shinken is a monitoring tool compatible with Nagios configuration and plugins",
@@ -503,6 +503,7 @@ if __name__ == "__main__":
                 [ # other configs
                     'etc/commands.cfg',
                     'etc/contactgroups.cfg',
+                    'etc/contacts.cfg',
                     'etc/dependencies.cfg',
                     'etc/escalations.cfg',
                     'etc/hostgroups.cfg',
@@ -517,16 +518,12 @@ if __name__ == "__main__":
             ),
 
             ( 
-                os.path.join(default_paths['etc'], 'objects', 'hosts' ),
-                glob('etc/objects/hosts/[!_]*.cfg')
+                os.path.join(default_paths['etc'], 'hosts' ),
+                glob('etc/hosts/[!_]*.cfg')
             ),
             (
-                os.path.join(default_paths['etc'], 'objects', 'services'),
-                glob('etc/objects/services/[!_]*.cfg')
-            ),
-            (
-                os.path.join(default_paths['etc'], 'objects', 'contacts'),
-                glob('etc/objects/contacts/[!_]*.cfg')
+                os.path.join(default_paths['etc'], 'services'),
+                glob('etc/services/[!_]*.cfg')
             ),
             
             (   os.path.join(default_paths['etc'], 'objects', 'discovery'), tuple() ), 
