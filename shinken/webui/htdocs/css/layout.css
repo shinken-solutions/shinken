@@ -732,6 +732,9 @@ overall status */
 /***                 OPACITY        ******/
 #opacity_hover { opacity : 0.5;}
 
+.opacity_hover {
+        text-align: center;
+}
 
 form {
     clear: both;
