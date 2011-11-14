@@ -656,7 +656,13 @@ line-height: 180px;
     color:#fff;
 }
 
-
+.gesture_button {
+        text-align: center;
+        padding-top: 10px;
+}
+.gesture_button img {
+        vertical-align: middle;
+}
 
 /*    ************* TIP       ************* */
 /* The following is the only rule you need to customize your tip look */
