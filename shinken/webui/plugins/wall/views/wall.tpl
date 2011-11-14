@@ -24,23 +24,6 @@ body
 	padding: 0;
 }
 
-#caption
-{
-	position: absolute;
-	bottom: 0; right: 0; left: 0;
-	font-size: 15pt;
-	text-overflow: ellipsis; overflow: hidden; white-space: nowrap;
-	padding: 10pt 10pt 10pt 20pt;
-	-webkit-transform: translate3d(0, 0, 2000px);
-	background-color: rgba(0, 0, 0, 0.5);
-	-webkit-transition-property: opacity;
-	-webkit-transition-duration: 550ms;
-}
-
-#caption.hide
-{
-    opacity: 0;
-}
 
 </style>
 
@@ -54,9 +37,9 @@ body
     </div>
 </div>
 
-<div id="caption" class="caption">
-	snow stack / webkit css visual effects demo &mdash; arrow keys to move, space toggles magnify
-</div>
+%#<div id="caption" class="caption">
+%#	snow stack / webkit css visual effects demo &mdash; arrow keys to move, space toggles magnify
+%#</div>
 
 %#<script type="text/javascript" src="/static/wall/js/snowstack.js"></script>
 %#<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>

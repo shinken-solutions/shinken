@@ -1,4 +1,13 @@
+.item-button{
+    margin-top : 10px;
+    margin-right : 10px;
+    float:right;
+}
 
+
+.item-text{
+    font-size : 150%;
+}
 
 /* The same stars, but in the proble panel */
 .criticity-inpb-icon-1 {

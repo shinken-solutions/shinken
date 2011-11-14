@@ -28,10 +28,11 @@ def get_div(elt):
     s = """
         %s
 	<img style="width: 64px;height: 64px;" src="%s">
-	<span class="state_%s">%s : %s</span>
-	<div style="float:right;">
+	<div class="item-button">
 	<a href="%s">%s</a>
-        """ % (stars, icon, elt.state.lower(), elt.state, elt.get_full_name(), lnk, button)
+        </div>
+	<span class="state_%s item-text">%s : %s</span>
+        """ % (stars, icon, lnk, button, elt.state.lower(), elt.state, elt.get_full_name())
     s = s.encode('utf8', 'ignore')
     return s
 
