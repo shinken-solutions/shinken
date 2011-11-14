@@ -62,7 +62,6 @@ var cells = [];
 
 var dolly;
 var camera;
-/*var caption;*/
 
 var cellstack;
 
@@ -103,59 +102,6 @@ function layoutElement(elem, iwidth, iheight)
     elem.style.top = Math.round((CHEIGHT - iheight) / 2) + "px";
 }
 
-//////////////////////
-
-var currentVideo = null;
-
-function play_video(newVideo)
-{
-    if (currentVideo && !currentVideo.isPaused())
-    {
-	//		currentVideo.pause();
-	currentVideo.setMuted(true);
-    }
-    
-    currentVideo = newVideo;
-    
-    currentVideo.setMuted(false);
-    currentVideo.play();
-}
-
-//////////////////////
-
-function html5video(elem, cell)
-{
-    var video = vfx.elem("video", { "class": "media" });
-
-    var videolayout = function (e)
-    {
-	layoutElement(video, video.videoWidth, video.videoHeight);
-	elem.parentNode.appendChild(video);
-	elem.parentNode.removeChild(elem);
-	return false;
-    };
-
-    var playstarter = function (e)
-    {
-	play_video(cell.video);	
-	return false;
-    };
-
-    video.addEventListener("loadedmetadata", videolayout, false);
-    video.addEventListener("canplay", playstarter, false);
-    video.src = cell.info.video;
-    video.load();
-
-    cell.video = {
-	play: function () { video.play(); },
-	pause: function () { video.pause(); },
-	isPaused: function () { return video.paused; },
-	setMuted: function (muted) { video.muted = muted; },
-	isMuted: function () { return video.muted; }
-    };
-}
-
-//////////////////////
 
 function refreshImage(elem, cell)
 {
@@ -164,18 +110,10 @@ function refreshImage(elem, cell)
 	clearTimeout(zoomTimer);
     }
     
-    if (cell.video)
-    {
-	if (cell.video.isPaused() || cell.video.isMuted())
-	{
-	    play_video(cell.video);
-	}
-	return;
-    }
 
     zoomTimer = setTimeout(function ()
 			   {
-			       if (cell.info.zoom && !cell.video)
+			       if (cell.info.zoom)
 			       {
 				   elem.src = cell.info.zoom;
 			       }
@@ -191,29 +129,7 @@ function setcellclass(c, name)
 
 function snowstack_togglemedia(index)
 {
-    var cell = cells[index];
-    
-    if (cell.video)
-    {
-	if (cell.video.isPaused())
-	{
-	    play_video(cell.video);
-	}
-	else
-	{
-	    cell.video.pause();
-	}
-	return;
-    }
-    
-    if (cell.info.videoloader)
-    {
-	cell.info.videoloader(cell.divimage, cell);
-    }
-    else if (cell.info.video)
-    {
-	html5video(cell.divimage, cell);
-    }
+    var cell = cells[index];    
 }
 
 function snowstack_update(newIndex, newmagnifymode)
@@ -259,12 +175,6 @@ function snowstack_update(newIndex, newmagnifymode)
     {
 	setcellclass(cell, "cell selected");
     }
-
-    // Show the photo caption
-/*    if (snowstack_options.captions && !newbieUser)
-    {
-	caption.innerText = cell.info.title;
-    }*/
 
     dolly.style.webkitTransform = cameraTransformForCell(newIndex);
     
@@ -346,38 +256,6 @@ function snowstack_addimage(info)
 
 }
 
-function snowstack_sort(sortkey)
-{
-    var sortfunc;
-    if (sortkey == 'date') 
-    {
-	sortfunc = function(a, b) 
-	{
-	    var adate = new Date('1 ' + a.info.date);
-	    var bdate = new Date('1 ' + b.info.date);
-	    return bdate - adate;
-	};
-    } 
-    else 
-    {
-	sortfunc = function(a, b) 
-	{
-	    var aval = a.info[sortkey];
-	    var bval = b.info[sortkey];
-	    return aval > bval ? 1 : aval < bval ? -1 : 0;
-	};
-    }
-
-    cells.sort(sortfunc);
-
-    for (var i = 0; i < cells.length; ++i) 
-    {
-	// down then across
-	var x = Math.floor(i / snowstack_options.rows);
-	var y = i - x * snowstack_options.rows;
-	cells[i].div.style.webkitTransform = vfx.translate3d(x * CXSPACING, y * CYSPACING, 0);
-    }
-}
 
 function snowstack_startsearch()
 {
@@ -555,11 +433,6 @@ global.snowstack_init = function (imagefun, options)
 				{
 				    /* Magnify toggle with spacebar */
 				    snowstack_update(currentCellIndex, !magnifyMode);
-				}
-				else if (e.keyCode == 13)
-				{
-				    /* Toggle video playback */
-				    snowstack_togglemedia(currentCellIndex);
 				}
 				else
 				{
