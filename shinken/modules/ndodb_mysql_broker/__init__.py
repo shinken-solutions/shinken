@@ -20,7 +20,7 @@
 import sys
 
 from ndodb_mysql_broker import Ndodb_Mysql_broker, properties
-
+from ndodb_mysql_broker_sync import Ndodb_Mysql_broker_sync, properties
 
 #called by the plugin manager to get a instance
 def get_instance(mod_conf):
@@ -37,7 +37,12 @@ def get_instance(mod_conf):
     if not hasattr( mod_conf, 'character_set'):
         mod_conf.character_set = 'utf8'
     if not hasattr(mod_conf, 'synchronise_database_id'):
-        #TODO : Use a Boolean?
+        #TODO : Use a Boolean  ?
         mod_conf.synchronise_database_id = '0'
-    instance = Ndodb_Mysql_broker(mod_conf)
+        instance = Ndodb_Mysql_broker(mod_conf)
+    elif mod_conf.synchronise_database_id == 'O' :
+        instance = Ndodb_Mysql_broker(mod_conf)
+    else :
+        instance = Ndodb_Mysql_broker_sync(mod_conf)
+        print("Running synchro module")
     return instance
