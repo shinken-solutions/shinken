@@ -1,5 +1,10 @@
-#!/usr/bin/python
-#Copyright (C) 2009 Gabes Jean, naparuba@gmail.com
+#!/usr/bin/env python
+#Copyright (C) 2009-2011 :
+#    Gabes Jean, naparuba@gmail.com
+#    Gerhard Lausser, Gerhard.Lausser@consol.de
+#    Gregory Starck, g.starck@gmail.com
+#    Hartmut Goebel, h.goebel@goebel-consult.de
+#    Andreas Karfusehr, andreas@karfusehr.de
 #
 #This file is part of Shinken.
 #
@@ -15,13 +20,6 @@
 #
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
-
-
-#This Class is a plugin for the Shinken Broker. It is in charge
-#to brok information into the merlin database. for the moment
-#only Mysql is supported. This code is __imported__ from Broker.
-#The managed_brok function is called by Broker for manage the broks. It calls
-#the manage_*_brok functions that create queries, and then run queries.
 
 
 import copy
@@ -123,7 +121,7 @@ class Merlindb_broker(BaseModule):
                 'last_notification' : {'transform' : None},
                 'current_notification_number' : {'transform' : None},
                 'current_notification_id' : {'transform' : None},
-                'check_flapping_recovery_notification' : {'transform' : None, 'name' : 'check_flapping_recovery_notifi'},
+                'check_flapping_recovery_notification' : {'transform' : None},
                 'scheduled_downtime_depth' : {'transform' : None},
                 'pending_flex_downtime' : {'transform' : None},
                 },
@@ -179,7 +177,7 @@ class Merlindb_broker(BaseModule):
                 'last_notification' : {'transform' : None},
                 'current_notification_number' : {'transform' : None},
                 'current_notification_id' : {'transform' : None},
-                'check_flapping_recovery_notification' : {'transform' : None , 'name' : 'check_flapping_recovery_notifi'},
+                'check_flapping_recovery_notification' : {'transform' : None},
                 'scheduled_downtime_depth' : {'transform' : None},
                 'pending_flex_downtime' : {'transform' : None},
                 },
@@ -264,7 +262,7 @@ class Merlindb_broker(BaseModule):
                 'last_notification' : {'transform' : None},
                 'current_notification_number' : {'transform' : None},
                 'current_notification_id' : {'transform' : None},
-                'check_flapping_recovery_notification' : {'transform' : None, 'name' : 'check_flapping_recovery_notifi'},
+                'check_flapping_recovery_notification' : {'transform' : None},
                 'scheduled_downtime_depth' : {'transform' : None},
                 'pending_flex_downtime' : {'transform' : None},
                 },
@@ -320,7 +318,7 @@ class Merlindb_broker(BaseModule):
                 'last_notification' : {'transform' : None},
                 'current_notification_number' : {'transform' : None},
                 'current_notification_id' : {'transform' : None},
-                'check_flapping_recovery_notification' : {'transform' : None , 'name' : 'check_flapping_recovery_notifi'},
+                'check_flapping_recovery_notification' : {'transform' : None},
                 'scheduled_downtime_depth' : {'transform' : None},
                 'pending_flex_downtime' : {'transform' : None},
                 },
