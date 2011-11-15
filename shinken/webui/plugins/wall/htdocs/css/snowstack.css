@@ -61,6 +61,8 @@ div.cell
 div.cell .media
 {
 	display: block;
+	width: 250px; 
+	height: 150px;
 /*	position: absolute;*/
 
 	-webkit-transition-property: -webkit-transform;

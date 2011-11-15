@@ -1,12 +1,40 @@
 .item-button{
-    margin-top : 10px;
-    margin-right : 10px;
+    top: 15px;
+    left: 220px;
     float:right;
+    position: absolute;
 }
 
 
 .item-text{
     font-size : 150%;
+    top: 50px;
+    left: 10px;
+    position: relative;
+}
+
+
+/* We override some properties of the classic pulse
+ for huge size of wall icons */
+.wall-pulse {
+    width: 64px;
+    height: 64px;
+    top: 10px;
+    left: 27px;
+}
+
+.item-icon{
+    width: 64px;
+    height: 64px;
+    top: 10px;
+    left: 30px;
+    position: relative;
+    float : left;
+}
+
+.wall-icon{
+    width: 64px;
+    height: 64px;
 }
 
 /* The same stars, but in the proble panel */
@@ -18,6 +46,7 @@
     z-index: 1;
     outline: none;
     left: 20px;
+    top : 10px;
 }
 
 
@@ -30,6 +59,7 @@
     z-index: 1;
     outline: none;
     left: 20px;
+    top : 10px;
 }
 
 
@@ -42,4 +72,5 @@
     z-index: 1;
     outline: none;
     left: 20px;
+    top : 10px;
 }

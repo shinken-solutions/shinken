@@ -25,14 +25,23 @@ def get_div(elt):
               </div>''' % (i-1)
     lnk = app.helper.get_link_dest(elt)
     button = app.helper.get_button('', img='/static/images/search.png')
+    pulse = ''
+    if elt.is_problem or (elt.state_id != 0 and elt.business_impact > 2):
+        pulse = '<span class="wall-pulse pulse" title=""></span>'
     s = """
         %s
-	<img style="width: 64px;height: 64px;" src="%s">
+          %s
+        <div class="item-icon">
+	  <img class="wall-icon" src="%s"></img>
+        </div>
+        <div class="item-text">
+          <span class="state_%s">%s <br/> %s</span>
+        </div>
 	<div class="item-button">
 	<a href="%s">%s</a>
         </div>
-	<span class="state_%s item-text">%s : %s</span>
-        """ % (stars, icon, lnk, button, elt.state.lower(), elt.state, elt.get_full_name())
+
+        """ % (stars, pulse, icon,  elt.state.lower(), elt.state, elt.get_full_name(), lnk, button)#stars, button)
     s = s.encode('utf8', 'ignore')
     return s
 

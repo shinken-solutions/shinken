@@ -4,7 +4,7 @@ var ctx;
 var _r = new DollarRecognizer();
 var _points = [];
 var isMouseDown = false; // mouse only bool
-var threshold = 10; // number of pixels required to be moved for a movement to count
+var threshold = 3; // number of pixels required to be moved for a movement to count
 
 
 window.addEvent('domready',function(){
