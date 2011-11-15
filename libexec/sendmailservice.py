@@ -10,7 +10,7 @@ import smtplib
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hnsHariot:v", ["help", "notification=", "servicedesc", "hostname", "hostaddress", "servicestate", "shortdatetime", "output", "to" ])
+        opts, args = getopt.getopt(sys.argv[1:], "hnsHariotS:v", ["help", "notification=", "servicedesc", "hostname", "hostaddress", "servicestate", "shortdatetime", "output", "to", "sender" ])
     except getopt.GetoptError, err:
         # print help information and exit:
         print str(err) 
@@ -40,6 +40,8 @@ def main():
             serviceoutput = a
         elif o in ("-t", "--to"):
             to = a
+        elif o in ("-S", "--sender"):
+            to = a
         else:
             assert False, "unhandled option"
 
@@ -54,6 +56,7 @@ def usage():
     print '-i --shortdatetime : date'
     print '-o --output : service output'
     print '-t --to : email send to'
+    print '-S --sender : email from'
 
 if __name__ == "__main__":
     main()
