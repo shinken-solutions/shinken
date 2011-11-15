@@ -1,6 +1,8 @@
 ### Will be populated by the UI with it's own value
 app = None
 
+import time
+
 from shinken.webui.bottle import redirect
 from shinken.modules.webui_broker.helper import hst_srv_sort
 from shinken.util import safe_print
@@ -14,6 +16,16 @@ except ImportError:
     except ImportError:
         print "Error : you need the json or simplejson module"
         raise
+
+
+
+# Sort hosts and services by impact, states and co
+def sort_by_last_state_change(s1, s2):
+    if s1.last_state_change > s2.last_state_change:
+        return -1
+    else:
+        return 1
+
 
 # Get the div for each element
 def get_div(elt):
@@ -74,8 +86,14 @@ def get_page():
     # Got in json format
     #j_impacts = json.dumps(impacts)
 #    print "Return impact in json", j_impacts
+    all_pbs = app.datamgr.get_all_problems()
+    now = time.time()
+    # Get only the last 10min errors
+    all_pbs = [pb for pb in all_pbs if pb.last_state_change > now - 600]
+    # And sort it
+    all_pbs.sort(hst_srv_sort)#sort_by_last_state_change)
 
-    return {'app' : app, 'user' : user, 'impacts' : impacts}
+    return {'app' : app, 'user' : user, 'impacts' : impacts, 'problems' : all_pbs}
 
 
 pages = {get_page : { 'routes' : ['/wall/'], 'view' : 'wall', 'static' : True}}

@@ -74,3 +74,29 @@
     left: 20px;
     top : 10px;
 }
+
+
+
+
+.last_errors{
+    border-color : black;
+    border : 1px;
+    top : 450px;
+    position: relative;
+}
+
+
+.wall-aroundpulse{
+    margin : 0;
+    width: 32px;
+    height: 32px;
+
+}
+
+.wall-problems-text{
+    position: relative;
+    top : -25px;
+    left: 40px;
+}
+
+.sliding{}
