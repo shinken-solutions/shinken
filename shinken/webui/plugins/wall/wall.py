@@ -1,6 +1,8 @@
 ### Will be populated by the UI with it's own value
 app = None
 
+import time
+
 from shinken.webui.bottle import redirect
 from shinken.modules.webui_broker.helper import hst_srv_sort
 from shinken.util import safe_print
@@ -15,6 +17,16 @@ except ImportError:
         print "Error : you need the json or simplejson module"
         raise
 
+
+
+# Sort hosts and services by impact, states and co
+def sort_by_last_state_change(s1, s2):
+    if s1.last_state_change > s2.last_state_change:
+        return -1
+    else:
+        return 1
+
+
 # Get the div for each element
 def get_div(elt):
     icon = app.helper.get_icon_state(elt)
@@ -25,14 +37,23 @@ def get_div(elt):
               </div>''' % (i-1)
     lnk = app.helper.get_link_dest(elt)
     button = app.helper.get_button('', img='/static/images/search.png')
+    pulse = ''
+    if elt.is_problem or (elt.state_id != 0 and elt.business_impact > 2):
+        pulse = '<span class="wall-pulse pulse" title=""></span>'
     s = """
         %s
-	<img style="width: 64px;height: 64px;" src="%s">
+          %s
+        <div class="item-icon">
+	  <img class="wall-icon" src="%s"></img>
+        </div>
+        <div class="item-text">
+          <span class="state_%s">%s <br/> %s</span>
+        </div>
 	<div class="item-button">
 	<a href="%s">%s</a>
         </div>
-	<span class="state_%s item-text">%s : %s</span>
-        """ % (stars, icon, lnk, button, elt.state.lower(), elt.state, elt.get_full_name())
+
+        """ % (stars, pulse, icon,  elt.state.lower(), elt.state, elt.get_full_name(), lnk, button)#stars, button)
     s = s.encode('utf8', 'ignore')
     return s
 
@@ -47,8 +68,12 @@ def get_page():
         redirect("/user/login")
     
 
-    all_imp_impacts = app.datamgr.get_services()#important_elements()
+    all_imp_impacts = app.datamgr.get_important_elements()
+    all_imp_impacts.sort(hst_srv_sort)
     #all_imp_impacts.sort(hst_srv_sort)
+
+    #all_imp_impacts = app.datamgr.get_services()#important_elements()
+
 
     impacts = []
     for imp in all_imp_impacts:
@@ -61,8 +86,14 @@ def get_page():
     # Got in json format
     #j_impacts = json.dumps(impacts)
 #    print "Return impact in json", j_impacts
+    all_pbs = app.datamgr.get_all_problems()
+    now = time.time()
+    # Get only the last 10min errors
+    all_pbs = [pb for pb in all_pbs if pb.last_state_change > now - 600]
+    # And sort it
+    all_pbs.sort(hst_srv_sort)#sort_by_last_state_change)
 
-    return {'app' : app, 'user' : user, 'impacts' : impacts}
+    return {'app' : app, 'user' : user, 'impacts' : impacts, 'problems' : all_pbs}
 
 
 pages = {get_page : { 'routes' : ['/wall/'], 'view' : 'wall', 'static' : True}}

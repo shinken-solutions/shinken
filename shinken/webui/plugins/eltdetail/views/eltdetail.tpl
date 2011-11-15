@@ -79,10 +79,15 @@ Invalid element name
 	%# canvas line here or we got problem!"
 	<center><canvas id="canvas" width="200" height="200"  style="border: 1px solid black;"></canvas></center>
 
-	  <br>
-	  <img title="By keeping a left click pressed and drawing a check, you will launch an acknowledgement." src="/static/eltdetail/images/gesture-check.png"/> Acknowledge<br>
-	  <img title="By keeping a left click pressed and drawing a check, you will launch an recheck." src="/static/eltdetail/images/gesture-circle.png"/> Recheck<br>
-	  <img title="By keeping a left click pressed and drawing a check, you will launch a try to fix command." src="/static/eltdetail/images/gesture-zigzag.png"/> Fix<br>
+		<div class="gesture_button">
+          	<img title="By keeping a left click pressed and drawing a check, you will launch an acknowledgement." src="/static/eltdetail/images/gesture-check.png"/> Acknowledge
+		</div>
+		<div class="gesture_button">
+          	<img title="By keeping a left click pressed and drawing a check, you will launch an recheck." src="/static/eltdetail/images/gesture-circle.png"/> Recheck
+		</div>
+		<div class="gesture_button">
+          	<img title="By keeping a left click pressed and drawing a check, you will launch a try to fix command." src="/static/eltdetail/images/gesture-zigzag.png"/> Fix
+		</div>
 	</div>
   </div>
 </div>

@@ -22,7 +22,43 @@
 */
 
 
-
+/* We will initialize the WALL panel with our data*/
 window.addEvent('domready', function(){
-	snowstack_init(images);
+    options = {'autoslide' : true};
+    snowstack_init(images, options);
+});
+
+
+function translate_problem(){
+    var to_slide = $$('.sliding');
+    to_slide.each(function(el){
+	var pos = el.getPosition();
+	var new_pos = pos.x - 400;
+	
+	var myeffect  = new Fx.Elements(el);//$$('a'));
+
+	myeffect.start({
+	    '0': {
+		'left': [pos.x,new_pos]
+	    }
+	});
+	
+    });
+
+}
+
+/* And we will initialise the slide of our problems too*/
+window.addEvent('domready', function(){
+    var nb_elements = $$('.sliding').length;
+    // If there is not enough elements, don't even slide
+    // So we print in each page 12 elements. No need to slide if lower
+    if(nb_elements > 12){
+	var nb_slides = nb_elements / 4;
+	var slide_interval = 60/nb_slides;
+	//alert('interval'+slide_interval);
+
+	slide_interval = Math.max(slide_interval, 10000);
+	setInterval( translate_problem, slide_interval);//10000);
+    }
+
 });

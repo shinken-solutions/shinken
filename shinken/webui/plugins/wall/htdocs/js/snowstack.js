@@ -12,14 +12,15 @@ var global = this;
 
 var CWIDTH;
 var CHEIGHT;
-var CGAP = 10;
+var CGAP = 20;
 var CXSPACING;
 var CYSPACING;
 
 var snowstack_options = {
     rows: 2,
     refreshzoom: true,
-    captions: false
+    captions: false,
+    autoslide: false
 };
 
 var vfx = {
@@ -355,6 +356,24 @@ global.snowstack_init = function (imagefun, options)
 
     var keytimer = null;
     var keydelay = 330;
+
+    function go_right(){
+	var newCellIndex = currentCellIndex;
+	/* Right Arrow */
+	if ((newCellIndex + snowstack_options.rows) < cells.length)
+	{
+	    newCellIndex += snowstack_options.rows;
+	}else{
+	    newCellIndex = 1;
+	}
+	snowstack_update(newCellIndex, magnifyMode);
+    }
+
+    //Each 10s, go right
+    if(snowstack_options.autoslide){
+	setInterval( go_right, 10000 );
+    }
+
 
     function updatekeys()
     {

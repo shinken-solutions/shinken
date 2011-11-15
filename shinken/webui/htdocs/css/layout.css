@@ -310,10 +310,11 @@ td.actions a {
  *  Classes: Images
  * ----------------------------------------------------------------*/
 
-.host_img_80 {
-	height: 80px;
-	width: 80px;
-	float: right;
+.host_img_25 {
+	height: 25px;
+	width: 25px;
+	margin-right: 2px;
+    vertical-align: -3px;
 }
  
 .img_stars {
@@ -656,7 +657,13 @@ line-height: 180px;
     color:#fff;
 }
 
-
+.gesture_button {
+        text-align: center;
+        padding-top: 10px;
+}
+.gesture_button img {
+        vertical-align: middle;
+}
 
 /*    ************* TIP       ************* */
 /* The following is the only rule you need to customize your tip look */
@@ -725,9 +732,6 @@ overall status */
     right: 0;
     border: 0;
 }
-
-
-
 
 /***                 OPACITY        ******/
 #opacity_hover { opacity : 0.5;}
@@ -1101,4 +1105,3 @@ li.critical{
  background-position: 0 0.16em;
  padding-left: 20px;
 }
-

@@ -10,7 +10,6 @@
 
 Invalid element name
 
-
 %else:
 
 %helper = app.helper
@@ -20,9 +19,7 @@ Invalid element name
 
 %top_right_banner_state = datamgr.get_overall_state()
 
-
-%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/graphs.js','eltdetail/js/TabPane.js', 'eltdetail/js/gesture.js'],  css=['eltdetail/css/eltdetail2.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
-
+%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/switchbuttons.js', 'eltdetail/js/graphs.js','eltdetail/js/TabPane.js', 'eltdetail/js/gesture.js'],  css=['eltdetail/css/eltdetail2.css', 'eltdetail/css/gesture.css', 'eltdetail/css/switchbuttons.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
 
 %#  "This is the background canvas for all gesture detection things " 
 <canvas id="canvas"></canvas>
@@ -38,7 +35,7 @@ Invalid element name
 
 %#  "Content Container Start"
 <div id="content_container" class="grid_13">
-	<h1 class="grid_16 state_{{elt.state.lower()}} icon_down">{{elt.state}}: {{elt.get_full_name()}}</h1>
+	<h1 class="grid_16 state_{{elt.state.lower()}} icon_down"><img class="host_img_25" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h1>
 	<div id="overview_container" class="grid_16">
 		<dl class="grid_4">
 		%#Alias, Parents and Hostgroups are for host only
