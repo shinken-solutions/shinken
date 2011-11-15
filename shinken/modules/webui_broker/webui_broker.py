@@ -413,7 +413,7 @@ class Webui_broker(BaseModule, Daemon):
 
 
     def check_auth(self, user, password):
-        print "Checking auth of", user, password
+        print "Checking auth of", user #, password
         c = self.datamgr.get_contact(user)
         print "Got", c
         if not c:

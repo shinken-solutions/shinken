@@ -24,5 +24,6 @@
 
 
 window.addEvent('domready', function(){
-	snowstack_init(images);
+    options = {'autoslide' : true};
+    snowstack_init(images, options);
 });
