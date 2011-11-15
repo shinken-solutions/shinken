@@ -29,6 +29,7 @@ def usage():
     print " * actions:"
     print "   - control (control action is specified with -d [stop|start|restart]). Apply action on all satellites"
     print "   - sync : deploy shinken-specific on all satellites"
+    print "   - deploy deploy shinken on hosts defined in authfile (-f path/to/auth)"
     print "   - macros : execute macros file"
     print "   - delobject : remove a shinken object from the shinken configuration file"
     print "   - cloneobject : clone an object (currently only pollers are suported" 
@@ -58,7 +59,7 @@ def main():
         sys.exit(2)
     for o, a in opts:
         if o == "-a":
-            actions=["setparam","showconfig","addobject","getdirective","getaddresses","delobject","cloneobject","macros","sync","control"]
+            actions=["setparam","showconfig","addobject","getdirective","getaddresses","delobject","cloneobject","macros","sync","control","deploy"]
             if a in actions:
                 action=a
             else:
@@ -92,7 +93,7 @@ def main():
         usage()
         sys.exit(2)
     
-    if objectype == "" and action != "getaddresses" and action != "showconfig" and action != "macros" and action != "sync" and action != "control":
+    if objectype == "" and action != "getaddresses" and action != "showconfig" and action != "macros" and action != "sync" and action != "control" and action != "deploy":
         print "object type is mandatory"
         usage()
         sys.exit(2)
@@ -111,7 +112,7 @@ def main():
         usage()
         sys.exit(2)
 
-    if action != "macros" and action != "control":
+    if action != "macros" and action != "control" and action != "deploy":
         result,config = loadconfig([configfile])
         if not result:
             print config
@@ -199,7 +200,14 @@ def main():
                 sys.exit(2)
             else:
                 sys.exit(0)
-            
+    elif action == "deploy":
+        """ deploy shinken on remote hosts """
+        result,content = deploy(configfile)
+        if not result:
+            print content 
+            sys.exit(2)
+        else:
+            print "Deploy ok"
     elif action == "getdirective":
         result,content = getdirective(config,objectype,directive,filters)
         if not result:
@@ -529,6 +537,54 @@ def sync(config,configfile,authfile):
         return (False,"There was an error trying to push configuration to %s" % (address))
 
     return (True,addresses)
+def deploy(authfile):
+    import paramiko
+    import tarfile
+
+    code,auths = getauthdata(authfile)
+
+    if not code:
+        return (False,auths)
+
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    
+    """ current user """
+    user=os.getlogin()
+    
+    """ define home """
+    if user == "root":
+        home="/root"
+    else:
+        home="/home/%s" % (user)
+
+    """ compress shinken in tar gz format """
+    print "Make archive"
+    source = os.path.abspath(os.getcwd()+'/../../../../')
+    tar = tarfile.open('/tmp/shinken.tar.gz','w:gz')
+    tar.add(source)
+    tar.close()
+
+    """ upload shinken archive to remote server """
+    for address,auth in auths.items():
+        print "Upload archive on %s"
+        ssh.connect(address,username=auth["login"],password=auth["password"])
+        ftp = ssh.open_sftp()
+        ftp.put('/tmp/shinken.tar.gz',os.path.abspath('/tmp/shinken.tar.gz'))
+        ftp.close()
+        print "Extract archive"
+        stdin,stdout,stderr = ssh.exec_command('cd /tmp && tar zxvf shinken.tar.gz && rm -Rf %s/shinken && mv %s/shinken %s/' % (home,user,home))
+        out = stdout.read()
+        err = stderr.read()
+        print "Launch installation"
+        stdin,stdout,stderr = ssh.exec_command('cd %s/shinken/contrib/alternative-installation/shinken-install/ && ./shinken.sh -d && ./shinken.sh -i' % (home))
+        out = stdout.read()
+        err = stderr.read()
+        print out
+        print err
+        ssh.close()
+
+    return (True,"OK")
 
 def control(authfile,action):
     import re
@@ -744,6 +800,7 @@ def setparam(config,objectype,directive,value,filters):
                     else:
                         config[objectype][i][directive]=value
                         message =  "updated configuration of %s[%d] %s=%s" % (objectype,i,directive,value)
+                print message
                 return (True,message)
     else:
         return (False, "Unknown object type %s" % (o))
