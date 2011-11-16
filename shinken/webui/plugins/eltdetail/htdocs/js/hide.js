@@ -137,11 +137,22 @@ window.addEvent('domready', function(){
     /* make it happen! */
     var fades = $$('.fadein');
 
-    var doFadeIn = function(e) {
+    // The function that really remvoe fade
+    function remove_fade(){
+	fades.fade('in');
+    }
+
+    // The function that will eat the event
+    function remove_fade_event(e){
 	if(!e.key || e.key == 'tab') {
-	    fades.fade('in');
-	}
-    };
-    $(document.body).oneEvent('mousemove',doFadeIn);
+	    remove_fade();
+        }
+    }
+
+    // We link our one time event
+    $(document.body).oneEvent('mousemove', remove_fade_event);
+
+    // Or just launch it after 5s
+    setTimeout(remove_fade, 5000);
 
 });
