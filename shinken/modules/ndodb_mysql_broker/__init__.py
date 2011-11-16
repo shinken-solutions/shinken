@@ -40,7 +40,7 @@ def get_instance(mod_conf):
         #TODO : Use a Boolean  ?
         mod_conf.synchronise_database_id = '0'
         instance = Ndodb_Mysql_broker(mod_conf)
-    elif mod_conf.synchronise_database_id == 'O' :
+    elif mod_conf.synchronise_database_id == '0' :
         instance = Ndodb_Mysql_broker(mod_conf)
     else :
         instance = Ndodb_Mysql_broker_sync(mod_conf)
