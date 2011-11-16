@@ -29,7 +29,7 @@ Invalid element name
 <script type="text/javascript">var elt_name = '{{elt.get_full_name()}}';</script>
 
 
-<div id="left_container" class="grid_3">
+<div id="left_container" class="grid_3 fadein">
   <div id="dummy_box" class="box_gradient_horizontal"> 
   </div>
   <div id="nav_left">
@@ -206,7 +206,7 @@ Invalid element name
 	  </tr>
 	  <tr id="hidden_info_button" class="opacity_hover">
 	    <th></th>
-	    <td>
+	    <td class="fadein">
 	      <div style="float:left;" id="hidden_info_button"><a href="javascript:show_hidden_info()"> {{!helper.get_button('More', img='/static/images/expand.png')}}</a>
 	      </div>
 	      <div class="clear"></div>
@@ -215,7 +215,7 @@ Invalid element name
 
 	</tbody>
 	<tbody class="switches">
-	  <tr class="odd">
+	  <tr class="odd fadein">
 	    <th scope="row" class="column1">Active/passive Checks</th>
 	    %if elt_type=='host':
 	       %title = 'This will also enable/disable this host services'
@@ -224,15 +224,15 @@ Invalid element name
 	    %end
 	    <td title="{{title}}" onclick="toggle_checks('{{elt.get_full_name()}}' , '{{elt.active_checks_enabled|elt.passive_checks_enabled}}')"> {{!helper.get_input_bool(elt.active_checks_enabled|elt.passive_checks_enabled)}}</td>
 	  </tr>	
-	  <tr>
+	  <tr class="fadein">
 	    <th scope="row" class="column1">Notifications</th>
 	    <td onclick="toggle_notifications('{{elt.get_full_name()}}' , '{{elt.notifications_enabled}}')"> {{!helper.get_input_bool(elt.notifications_enabled)}}</td>
 	  </tr>
-	  <tr>
+	  <tr class="fadein">
 	    <th scope="row" class="column1">Event Handler</th>
 	    <td onclick="toggle_event_handlers('{{elt.get_full_name()}}' , '{{elt.event_handler_enabled}}')" > {{!helper.get_input_bool(elt.event_handler_enabled)}}</td>
 	  </tr>
-	  <tr>
+	  <tr class="fadein">
 	    <th scope="row" class="column1">Flap Detection</th>
 	    <td onclick="toggle_flap_detection('{{elt.get_full_name()}}' , '{{elt.flap_detection_enabled}}')" > {{!helper.get_input_bool(elt.flap_detection_enabled)}}</td>
 	  </tr>
@@ -244,7 +244,7 @@ Invalid element name
     <dl class="grid_10 box_shadow">
 
 
-      <div id="box_commannd">
+      <div id="box_commannd" class="fadein">
 	<a href="#" onclick="try_to_fix('{{elt.get_full_name()}}')">{{!helper.get_button('Try to fix it!', img='/static/images/enabled.png')}}</a>
 	<a href="#" onclick="acknowledge('{{elt.get_full_name()}}')">{{!helper.get_button('Acknowledge it', img='/static/images/wrench.png')}}</a>
 	<a href="#" onclick="recheck_now('{{elt.get_full_name()}}')">{{!helper.get_button('Recheck now', img='/static/images/delay.gif')}}</a>
@@ -343,7 +343,7 @@ Invalid element name
 		document.write('/s'+'tyle>');    
     </script>
     
-    <div class="domtab">
+    <div class="domtab fadein">
 		<ul class="domtabs">
 			<li class="box_gradient_vertical"><a href="#graph">Graphs</a></li>
 			<li class="box_gradient_vertical"><a href="#comment">Comments</a></li>

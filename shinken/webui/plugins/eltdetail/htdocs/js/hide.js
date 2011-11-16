@@ -115,3 +115,44 @@ function show_hidden_info() {
     var button = $('hidden_info_button');
     button.style.display = 'none';
 }
+
+
+
+
+/* Make a lot of elements not show by default, and make them visible
+   when the user move the mouse */
+window.addEvent('domready', function(){
+    /* via @appden, Scott Kyle, http://appden.com/javascript/fun-with-custom-events-on-elements-in-mootools/ */
+    // We make the event show up only once, because when it pop up, we
+    // unregister it
+    Native.implement([Element, Window, Document, Events], {
+	oneEvent: function(type, fn) {
+	    return this.addEvent(type, function() {
+		this.removeEvent(type, arguments.callee);
+		return fn.apply(this, arguments);
+	    });
+	}
+    });
+
+    /* make it happen! */
+    var fades = $$('.fadein');
+
+    // The function that really remvoe fade
+    function remove_fade(){
+	fades.fade('in');
+    }
+
+    // The function that will eat the event
+    function remove_fade_event(e){
+	if(!e.key || e.key == 'tab') {
+	    remove_fade();
+        }
+    }
+
+    // We link our one time event
+    $(document.body).oneEvent('mousemove', remove_fade_event);
+
+    // Or just launch it after 5s
+    setTimeout(remove_fade, 5000);
+
+});

@@ -1,11 +1,13 @@
 
+%import time
+%now = time.time()
 %helper = app.helper
 %datamgr = app.datamgr
 
 %top_right_banner_state = datamgr.get_overall_state()
 
 
-%rebase layout title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/accordion.js', 'problems/js/autocompleter.js', 'problems/js/autocompleter.Request.js', 'problems/js/autocompleterObserver.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css', 'problems/css/autocompleter.css', 'problems/css/perfometer.css'], refresh=True, menu_part='/'+page, user=user
+%rebase layout title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/img_hovering.js', 'problems/js/accordion.js', 'problems/js/autocompleter.js', 'problems/js/autocompleter.Request.js', 'problems/js/autocompleterObserver.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css', 'problems/css/autocompleter.css', 'problems/css/perfometer.css', 'problems/css/img_hovering.css'], refresh=True, menu_part='/'+page, user=user
 
 
 %# " If the auth got problem, we bail out"
@@ -227,7 +229,12 @@ document.addEvent('domready', function() {
 		      <td class="tdBorderTop tdBorderLeft tdCriticity" style="width:450px;"> {{pb.output}} </td>
                    %end
 		%end
-		<td class="perfometer">
+		%graphs = app.get_graph_uris(pb, now- 4*3600 , now)
+		%onmouse_code = ''
+		%if len(graphs) > 0:
+		      %onmouse_code = 'onmouseover="display_hover_img(\'%s\',\'\');" onmouseout="hide_hover_img();" ' % graphs[0]['img_src']
+		%end
+		<td class="perfometer" {{!onmouse_code}}>
 		  {{!helper.get_perfometer(pb)}}
 		</td>
 		<td class="tdBorderLeft tdCriticity opacity_hover shortdesc" style="max-width:20px;" onclick="show_detail('{{pb.get_full_name()}}')"> <img src="/static/images/expand.png" alt="expand" /> </td>
@@ -324,3 +331,6 @@ document.addEvent('domready', function() {
 </div>
 
 <div class="clear"></div>
+
+%# """ This div is an image container and will move hover the perfometer with mouse hovering """
+<div id="img_hover"></div>
