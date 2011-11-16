@@ -55,6 +55,12 @@ from distutils.util import change_root
 from distutils.errors import DistutilsOptionError
 
 
+# Utility function to read the README file. This was directly taken from:
+# http://packages.python.org/an_example_pypi_project/setuptools.html
+def read(fname):
+    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+
+
 class build(_build):
     sub_commands = _build.sub_commands + [
         ('build_config', None),
@@ -472,7 +478,7 @@ if __name__ == "__main__":
         packages = find_packages(),
         package_data = {'' : package_data},
         description = "Shinken is a monitoring tool compatible with Nagios configuration and plugins",
-        long_description=open('README').read(),
+        long_description=read('README'),
         author = "Gabes Jean",
         author_email = "naparuba@gmail.com",
         license = "GNU Affero General Public License",
