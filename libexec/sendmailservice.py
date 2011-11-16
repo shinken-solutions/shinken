@@ -70,6 +70,7 @@ if __name__ == "__main__":
     parser.add_argument('-i', '--shortdatetime')
     parser.add_argument('-o', '--output')
     parser.add_argument('-t', '--to')
+    parser.add_argument('-S', '--sender')
     args = parser.parse_args()
 
     notify = args.notification
@@ -80,8 +81,7 @@ if __name__ == "__main__":
     datetime = args.shortdatetime 
     output = args.output
     to = args.to
-
-    sender = 'shinken@localhost'   
+    sender = args.sender
 
     subject = "** " + notify + " alert - " + hostname + "/" + desc + " is " + state + " **"
 
