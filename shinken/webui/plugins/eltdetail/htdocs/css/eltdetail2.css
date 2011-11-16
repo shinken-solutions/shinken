@@ -77,6 +77,10 @@
 	border: none;	
 }
 
+#item_information dd{
+	margin-left: 20em;
+}
+
 .column1 {
 	width: 15%;
 }

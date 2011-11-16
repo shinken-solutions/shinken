@@ -132,64 +132,46 @@ Invalid element name
 						   <div id="elt_summary">
 								<div id="item_information">
 									<h2>Host/Service Information</h2>
-									<table>
-										<tbody>
-											<tr>
-												<th scope="row" class="column1">{{elt_type.capitalize()}} Status</th>
-												<td><span class="state_{{elt.state.lower()}}">{{elt.state}}</span> (since {{helper.print_duration(elt.last_state_change, just_duration=True, x_elts=2)}}) </td>
-											</tr>
-											<tr class="odd">
-												<th scope="row" class="column1">Status Information</th>
-												<td>{{elt.output}}</td>
-											</tr>
-											<tr>
-												<th scope="row" class="column1">Performance Data</th>
-												<td>{{elt.perf_data}}</td>
-											</tr>
-											<tr class="odd">
-												<th scope="row" class="column1">Current Attempt</th>
-												<td>{{elt.attempt}}/{{elt.max_check_attempts}} ({{elt.state_type}} state)</td>
-											</tr>
-											<tr>
-												<th scope="row" class="column1">Last Check Time</th>
-												<td title='Last check was at {{time.asctime(time.localtime(elt.last_chk))}}'>was {{helper.print_duration(elt.last_chk)}}</td>
-											</tr>
-				
-											<tr class="odd">
-												<th scope="row" class="column1">Next Scheduled Active Check</th>
-												<td title='Next active check at {{time.asctime(time.localtime(elt.next_chk))}}'>{{helper.print_duration(elt.next_chk)}}</td>
-											</tr>
-											<tr>
-												<th scope="row" class="column1">Last State Change</th>
-												<td>{{time.asctime(time.localtime(elt.last_state_change))}}</td>
-											</tr>
-										</tbody>
-									</table>
+									<dl>
+										<dt scope="row" class="column1">{{elt_type.capitalize()}} Status</dt>
+											<dd><span class="state_{{elt.state.lower()}}">{{elt.state}}</span> (since {{helper.print_duration(elt.last_state_change, just_duration=True, x_elts=2)}}) </dd>
+
+										<dt scope="row" class="column1">Status Information</dt>
+										<dd>{{elt.output}}</dd>
+
+										<dt scope="row" class="column1">Performance Data</dt>
+										<td>{{elt.perf_data}}</dd>
+
+										<dt scope="row" class="column1">Current Attempt</dt>
+										<dd>{{elt.attempt}}/{{elt.max_check_attempts}} ({{elt.state_type}} state)</dd>
+
+										<dt scope="row" class="column1">Last Check Time</dt>
+										<dd title='Last check was at {{time.asctime(time.localtime(elt.last_chk))}}'>was {{helper.print_duration(elt.last_chk)}}</dd>
+
+										<dt scope="row" class="column1">Next Scheduled Active Check</dt>
+										<dd title='Next active check at {{time.asctime(time.localtime(elt.next_chk))}}'>{{helper.print_duration(elt.next_chk)}}</dd>
+
+										<dt scope="row" class="column1">Last State Change</dt>
+										<dd>{{time.asctime(time.localtime(elt.last_state_change))}}</dd>
+									</dl>
 								</div>
 								<hr />
 								<div id="item_information">
 								<h2>Additonal Informations</h2>
-									<table>
-										<tbody>
-											<tr>
-												<th scope="row" class="column1">Last Notification</th>
-												<td>{{helper.print_date(elt.last_notification)}} (notification {{elt.current_notification_number}})</td>
-											</tr>
-											<tr>
-												<th scope="row" class="column1">Check Latency / Duration</th>
-												<td>{{'%.2f' % elt.latency}} / {{'%.2f' % elt.execution_time}} seconds</td>
-											</tr>
-											<tr>
-												<th scope="row" class="column1">Is This Host Flapping?</th>
-												<td>{{helper.yes_no(elt.is_flapping)}} ({{helper.print_float(elt.percent_state_change)}}% state change)</td>
-											</tr>
-											<tr>
-												<th scope="row" class="column1">In Scheduled Downtime?</th>
-												<td>{{helper.yes_no(elt.in_scheduled_downtime)}}</td>
-											</tr>
-											
-										</tbody>
-									</table>
+									<dl>
+
+										<dt scope="row" class="column1">Last Notification</dt>
+										<dd>{{helper.print_date(elt.last_notification)}} (notification {{elt.current_notification_number}})</dd>
+
+										<dt scope="row" class="column1">Check Latency / Duration</dt>
+										<dd>{{'%.2f' % elt.latency}} / {{'%.2f' % elt.execution_time}} seconds</dd>
+
+										<dt scope="row" class="column1">Is This Host Flapping?</dt>
+										<dd>{{helper.yes_no(elt.is_flapping)}} ({{helper.print_float(elt.percent_state_change)}}% state change)</dd>
+
+										<dt scope="row" class="column1">In Scheduled Downtime?</dt>
+										<dd>{{helper.yes_no(elt.in_scheduled_downtime)}}</dd>
+									</dl>
 								</div>
 							</div>
 		
