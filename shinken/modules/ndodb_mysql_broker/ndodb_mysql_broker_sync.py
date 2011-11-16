@@ -84,7 +84,9 @@ class Ndodb_Mysql_broker_sync(BaseModule):
         self.database_id_cache={}
         
 
-        
+        #Mapping service_id in Shinken and in database
+        #Because can't acces host_name from a service everytime :(
+        self.mapping_service_id = {}
 
         #Todo list to manage brok
         self.todo=[]
@@ -231,6 +233,17 @@ class Ndodb_Mysql_broker_sync(BaseModule):
             return row[0]
 
 
+    def get_hostgroup_id_by_id_sync(self, hostgp_obj_id, instance_id):
+ 
+        query = u"SELECT hostgroup_id from nagios_hostgroups where hostgroup_object_id='%s' and instance_id='%s'" % (hostgp_obj_id,instance_id)
+        self.db.execute_query(query)
+        row = self.db.fetchone ()
+        if row is None or len(row) < 1:
+            return 0
+        else:
+            return row[0]
+
+
     def get_service_object_id_by_name_sync(self, host_name, service_description, instance_id):
 
         
@@ -260,6 +273,17 @@ class Ndodb_Mysql_broker_sync(BaseModule):
             return 0
         else:
             return row[0]
+    
+    
+    def get_servicegroup_id_by_id_sync(self, svcgp_obj_id, instance_id):
+ 
+        query = u"SELECT servicegroup_id from nagios_servicegroups where servicegroup_object_id='%s' and instance_id='%s'" % (svcgp_obj_id,instance_id)
+        self.db.execute_query(query)
+        row = self.db.fetchone ()
+        if row is None or len(row) < 1:
+            return 0
+        else:
+            return row[0]
 
         
     def get_contactgroup_object_id_by_name_sync(self, contactgroup_name, instance_id):
@@ -273,6 +297,15 @@ class Ndodb_Mysql_broker_sync(BaseModule):
         else:
             return row[0]
 
+    def get_contactgroup_id_by_id_sync(self, ctcgp_obj_id, instance_id):
+ 
+        query = u"SELECT contactgroup_id from nagios_contactgroups where contactgroup_object_id='%s' and instance_id='%s'" % (ctcgp_obj_id,instance_id)
+        self.db.execute_query(query)
+        row = self.db.fetchone ()
+        if row is None or len(row) < 1:
+            return 0
+        else:
+            return row[0]
 
 
 
@@ -441,6 +474,10 @@ class Ndodb_Mysql_broker_sync(BaseModule):
 
         host_id = self.get_host_object_id_by_name_sync(data['host_name'],data['instance_id'])
         service_id = self.get_service_object_id_by_name_sync(data['host_name'], data['service_description'],data['instance_id'])
+        
+        #TODO : Include with the service cache.
+        self.mapping_service_id[data['id']] = service_id
+        
 
         #print "DATA:", data
         #print "HOST ID:", host_id
@@ -502,11 +539,9 @@ class Ndodb_Mysql_broker_sync(BaseModule):
                         }
         object_query = self.db.create_insert_query('objects', objects_data)
         self.db.execute_query(object_query)
-        if self.synchronise_database_id != 1:
-            hostgroup_id = self.get_hostgroup_object_id_by_name(data['hostgroup_name'])
-        else :
-            hostgroup_id = self.get_hostgroup_object_id_by_name_sync(data['hostgroup_name'],data['instance_id'])
-        
+
+        hostgroup_id = self.get_hostgroup_object_id_by_name_sync(data['hostgroup_name'],data['instance_id'])
+        hostgp_id = self.get_hostgroup_id_by_id_sync(hostgroup_id,data['instance_id'])
 
         hostgroups_data = { 'instance_id' :  data['instance_id'],
                            'config_type' : 0, 'hostgroup_object_id' : hostgroup_id,
@@ -521,7 +556,7 @@ class Ndodb_Mysql_broker_sync(BaseModule):
         for (h_id, h_name) in b.data['members']:
             host_id = self.get_host_object_id_by_name_sync(h_name,data['instance_id'])
 
-            hostgroup_members_data = {'instance_id' : data['instance_id'],
+            hostgroup_members_data = {'instance_id' : data['instance_id'], 'hostgroup_id' : hostgp_id,
                                       'host_object_id' : host_id}
             q = self.db.create_insert_query('hostgroup_members', hostgroup_members_data)
             res.append(q)
@@ -529,9 +564,9 @@ class Ndodb_Mysql_broker_sync(BaseModule):
 
 
 
-    #A new host group? Insert it
-    #We need to do something for the members prop (host.id, host_name)
-    #They are for host_hostgroup table, with just host.id hostgroup.id
+    #A new service group? Insert it
+    #We need to do something for the members prop (serv.id, service_name)
+    #They are for service_hostgroup table, with just service.id servicegroup.id
     def manage_initial_servicegroup_status_brok(self, b):
         data = b.data
 
@@ -543,7 +578,7 @@ class Ndodb_Mysql_broker_sync(BaseModule):
         self.db.execute_query(object_query)
 
         servicegroup_id = self.get_servicegroup_object_id_by_name_sync(data['servicegroup_name'],data['instance_id'])
-
+        svcgp_id = self.get_servicegroup_id_by_id_sync(servicegroup_id,data['instance_id'])
         
 
 
@@ -554,12 +589,16 @@ class Ndodb_Mysql_broker_sync(BaseModule):
 
         query = self.db.create_insert_query('servicegroups', servicegroups_data)
         res = [query]
-
-        #Ok, the hostgroups table is uptodate, now we add relations
-        #between hosts and hostgroups
+        
+        
+        
+        #Ok, the servicegroups table is up to date, now we add relations
+        #between service and servicegroups
         for (s_id, s_name) in b.data['members']:
-            servicegroup_members_data = {'instance_id' : data['instance_id'],
-                                         'service_object_id' : s_id}
+            #TODO : Include with the service cache.
+            service_id = self.mapping_service_id[s_id]
+            servicegroup_members_data = {'instance_id' : data['instance_id'], 'servicegroup_id' : svcgp_id,
+                                         'service_object_id' : service_id}
             q = self.db.create_insert_query('servicegroup_members', servicegroup_members_data)
             res.append(q)
         return res
@@ -612,12 +651,13 @@ class Ndodb_Mysql_broker_sync(BaseModule):
         return [hoststatus_query]
 
 
-    #Same than service result, but for host result
+    #Same than host result, but for service result
     def manage_service_check_result_brok(self, b):
         data = b.data
         #print "DATA", data
         service_id = self.get_service_object_id_by_name_sync(data['host_name'], data['service_description'],data['instance_id'])
-
+        
+        
         #Only the service is impacted
         where_clause = {'service_object_id' : service_id}
         service_check_data = {'instance_id' : data['instance_id'],
@@ -650,7 +690,8 @@ class Ndodb_Mysql_broker_sync(BaseModule):
         data = b.data
         #print "DATA", data
         service_id = self.get_service_object_id_by_name_sync(data['host_name'], data['service_description'],data['instance_id'])
-
+        
+        
         #Only the service is impacted
         where_clause = {'service_object_id' : service_id}
 
@@ -716,7 +757,6 @@ class Ndodb_Mysql_broker_sync(BaseModule):
         data = b.data
 
         service_id = self.get_service_object_id_by_name_sync(data['host_name'], data['service_description'],data['instance_id'])
-
 
 
         services_data = {'instance_id' : data['instance_id'],
@@ -811,9 +851,11 @@ class Ndodb_Mysql_broker_sync(BaseModule):
         self.db.execute_query(object_query)
 
         contactgroup_id = self.get_contactgroup_object_id_by_name_sync(data['contactgroup_name'],data['instance_id'])
+        ctcgp_id = self.get_contactgroup_id_by_id_sync(contactgroup_id, data['instance_id'])
 
         contactgroups_data = { 'instance_id' :  data['instance_id'],
-                           'config_type' : 0, 'contactgroup_object_id' : contactgroup_id,
+                           'config_type' : 0,
+                           'contactgroup_object_id' : contactgroup_id,
                            'alias' : data['alias']
             }
 
@@ -827,6 +869,7 @@ class Ndodb_Mysql_broker_sync(BaseModule):
             contact_obj_id = self.get_contact_object_id_by_name_sync(c_name,data['instance_id'])
             
             contactgroup_members_data = {'instance_id' : data['instance_id'],
+                                         'contactgroup_id' : ctcgp_id,
                                          'contact_object_id' : contact_obj_id}
             q = self.db.create_insert_query('contactgroup_members', contactgroup_members_data)
             res.append(q)
