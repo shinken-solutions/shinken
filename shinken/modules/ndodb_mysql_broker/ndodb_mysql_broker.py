@@ -96,36 +96,10 @@ class Ndodb_Mysql_broker(BaseModule):
         new_b = copy.deepcopy(b)
     
         if 'instance_id' in new_b.data:
+            # We've got problem with instance_id == 0 so we add 1 every where
+            new_b.data['instance_id'] = new_b.data['instance_id'] + 1
             
-            if self.synchronise_database_id != 1:
-                # We've got problem with instance_id == 0 so we add 1 every where
-                new_b.data['instance_id'] = new_b.data['instance_id'] + 1
-            
-            #We have to synchronise database id
-            #so we wait for the instance name
-            elif 'instance_name' not in new_b.data :
-                self.todo.append(new_b)
-                #print("No instance name for %s : " % new_b.data)
-                return  
-                  
-            #We convert the id to write properly in the base using the 
-            #instance_name to reuse the instance_id in the base.
-            else:
-                new_b.data['instance_id'] = self.convert_id(new_b.data['instance_id'],new_b.data['instance_name'])
-                self.todo.append(new_b)
-                for brok in self.todo :
-                    #We have to put the good instance ID to all brok waiting
-                    #in the list then execute the query
-                    brok.data['instance_id']=new_b.data['instance_id']
-                    queries = BaseModule.manage_brok(self, brok)
-                    if queries is not None:
-                        for q in queries :
-                            self.db.execute_query(q)
 
-                self.todo=[]
-                return
-
-        #Executed if we don't synchronise or there is no instance_id
         queries = BaseModule.manage_brok(self,new_b)
         
         if queries is not None:

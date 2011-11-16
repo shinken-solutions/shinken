@@ -23,6 +23,12 @@
 #The managed_brok function is called by Broker for manage the broks. It calls
 #the manage_*_brok functions that create queries, and then run queries.
 
+#This Class is pretty much a copy from the Ndodb_Mysql_broker one.
+#It has been done to able multiple supervision process to write in the same
+#MySQL database. If your Shinken is alone this class won't be loaded at runtime.
+#This class is a bit more cpu consuming than the previous one, but cache are here to prevent
+#Shinken from querying the MySQL database too much ;)
+
 
 import copy
 import time
@@ -37,7 +43,7 @@ properties = {
 
 from shinken.db_mysql import DBMysql
 from shinken.basemodule import BaseModule
-#Do we need?	 	
+
 import _mysql_exceptions
 
 def de_unixify(t):
@@ -136,7 +142,7 @@ class Ndodb_Mysql_broker_sync(BaseModule):
 
 
     #Create the database connection
-    #TODO : finish (begin :) ) error catch and conf parameters...
+    #TODO : Choose a behavior when exception is catch
     def connect_database(self):
     
         try :
@@ -150,7 +156,7 @@ class Ndodb_Mysql_broker_sync(BaseModule):
 
             print "[MysqlDB] Module raise an exception : %s . Please check the arguments!" % exp
             #Do we need?
-            #exit 
+            #sys.exit(2) 
 
 
     def get_instance_id(self,name):
@@ -233,9 +239,9 @@ class Ndodb_Mysql_broker_sync(BaseModule):
             return row[0]
 
 
-    def get_hostgroup_id_by_id_sync(self, hostgp_obj_id, instance_id):
+    def get_max_hostgroup_id_sync(self):
  
-        query = u"SELECT hostgroup_id from nagios_hostgroups where hostgroup_object_id='%s' and instance_id='%s'" % (hostgp_obj_id,instance_id)
+        query = u"SELECT max(hostgroup_id) + 1 from nagios_hostgroups"
         self.db.execute_query(query)
         row = self.db.fetchone ()
         if row is None or len(row) < 1:
@@ -275,9 +281,9 @@ class Ndodb_Mysql_broker_sync(BaseModule):
             return row[0]
     
     
-    def get_servicegroup_id_by_id_sync(self, svcgp_obj_id, instance_id):
+    def get_max_servicegroup_id_sync(self):
  
-        query = u"SELECT servicegroup_id from nagios_servicegroups where servicegroup_object_id='%s' and instance_id='%s'" % (svcgp_obj_id,instance_id)
+        query = u"SELECT max(servicegroup_id) + 1 from nagios_servicegroups"
         self.db.execute_query(query)
         row = self.db.fetchone ()
         if row is None or len(row) < 1:
@@ -297,9 +303,9 @@ class Ndodb_Mysql_broker_sync(BaseModule):
         else:
             return row[0]
 
-    def get_contactgroup_id_by_id_sync(self, ctcgp_obj_id, instance_id):
+    def get_max_contactgroup_id_sync(self):
  
-        query = u"SELECT contactgroup_id from nagios_contactgroups where contactgroup_object_id='%s' and instance_id='%s'" % (ctcgp_obj_id,instance_id)
+        query = u"SELECT max(contactgroup_id) + 1 from nagios_contactgroups"
         self.db.execute_query(query)
         row = self.db.fetchone ()
         if row is None or len(row) < 1:
@@ -460,7 +466,7 @@ class Ndodb_Mysql_broker_sync(BaseModule):
         return [query, hoststatus_query]
 
 
-    #A host have just be create, database is clean, we INSERT it
+    #A service have just been created, database is clean, we INSERT it
     def manage_initial_service_status_brok(self, b):
         #new_b = copy.deepcopy(b)
 
@@ -541,9 +547,12 @@ class Ndodb_Mysql_broker_sync(BaseModule):
         self.db.execute_query(object_query)
 
         hostgroup_id = self.get_hostgroup_object_id_by_name_sync(data['hostgroup_name'],data['instance_id'])
-        hostgp_id = self.get_hostgroup_id_by_id_sync(hostgroup_id,data['instance_id'])
+        
+        #We can't get the id of the hostgroup in the base because we don't have inserted it yet!
+        #So we get a suitable id in this table an fix it for the hostgroup and hostgroup_member
+        hostgp_id = self.get_max_hostgroup_id_sync()
 
-        hostgroups_data = { 'instance_id' :  data['instance_id'],
+        hostgroups_data = { 'hostgroup_id' : hostgp_id, 'instance_id' :  data['instance_id'],
                            'config_type' : 0, 'hostgroup_object_id' : hostgroup_id,
                            'alias' : data['alias']
             }
@@ -578,11 +587,11 @@ class Ndodb_Mysql_broker_sync(BaseModule):
         self.db.execute_query(object_query)
 
         servicegroup_id = self.get_servicegroup_object_id_by_name_sync(data['servicegroup_name'],data['instance_id'])
-        svcgp_id = self.get_servicegroup_id_by_id_sync(servicegroup_id,data['instance_id'])
+        svcgp_id = self.get_max_servicegroup_id_sync()
         
 
 
-        servicegroups_data = {'instance_id' :  data['instance_id'],
+        servicegroups_data = {'servicegroup_id' : svcgp_id, 'instance_id' :  data['instance_id'],
                            'config_type' : 0, 'servicegroup_object_id' : servicegroup_id,
                            'alias' : data['alias']
             }
@@ -752,7 +761,7 @@ class Ndodb_Mysql_broker_sync(BaseModule):
         return [query, hoststatus_query]
 
 
-    #Ok the host is updated
+    #Ok the service is updated
     def manage_update_service_status_brok(self, b):
         data = b.data
 
@@ -837,9 +846,7 @@ class Ndodb_Mysql_broker_sync(BaseModule):
 
 
 
-    #A new host group? Insert it
-    #We need to do something for the members prop (host.id, host_name)
-    #They are for host_hostgroup table, with just host.id hostgroup.id
+    #A new contact group? Insert it
     def manage_initial_contactgroup_status_brok(self, b):
         data = b.data
 
@@ -851,9 +858,9 @@ class Ndodb_Mysql_broker_sync(BaseModule):
         self.db.execute_query(object_query)
 
         contactgroup_id = self.get_contactgroup_object_id_by_name_sync(data['contactgroup_name'],data['instance_id'])
-        ctcgp_id = self.get_contactgroup_id_by_id_sync(contactgroup_id, data['instance_id'])
+        ctcgp_id = self.get_max_contactgroup_id_sync()
 
-        contactgroups_data = { 'instance_id' :  data['instance_id'],
+        contactgroups_data = {'contactgroup_id' : ctcgp_id, 'instance_id' :  data['instance_id'],
                            'config_type' : 0,
                            'contactgroup_object_id' : contactgroup_id,
                            'alias' : data['alias']
