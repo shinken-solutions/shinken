@@ -401,7 +401,15 @@ td.actions a {
     background-position: 4px;
 	padding-left: 24px;
     background-size: 17px 17px;
-} 
+}
+
+.icon_delete {
+    background: url("/static/images/icons/delete_64.png") no-repeat scroll transparent;
+    background-position: 4px;
+	padding-left: 24px;
+    background-size: 15px 15px;
+}
+
 .state_ok {
 	color: #7AB317;
 	font-weight: bold;

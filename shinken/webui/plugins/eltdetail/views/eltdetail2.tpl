@@ -132,9 +132,9 @@ Invalid element name
 						   <div id="elt_summary">
 								<div id="item_information">
 									<h2>Host/Service Information</h2>
-									<dl>
+									<dl class="grid_10">
 										<dt scope="row" class="column1">{{elt_type.capitalize()}} Status</dt>
-											<dd><span class="state_{{elt.state.lower()}}">{{elt.state}}</span> (since {{helper.print_duration(elt.last_state_change, just_duration=True, x_elts=2)}}) </dd>
+										<dd><span class="state_{{elt.state.lower()}}">{{elt.state}}</span> (since {{helper.print_duration(elt.last_state_change, just_duration=True, x_elts=2)}}) </dd>
 
 										<dt scope="row" class="column1">Status Information</dt>
 										<dd>{{elt.output}}</dd>
@@ -154,6 +154,15 @@ Invalid element name
 										<dt scope="row" class="column1">Last State Change</dt>
 										<dd>{{time.asctime(time.localtime(elt.last_state_change))}}</dd>
 									</dl>
+									<div class="grid_6">
+										<a href="#" onclick="try_to_fix('{{elt.get_full_name()}}')">{{!helper.get_button('Try to fix it!', img='/static/images/enabled.png')}}</a>
+										<a href="#" onclick="acknowledge('{{elt.get_full_name()}}')">{{!helper.get_button('Acknowledge it', img='/static/images/wrench.png')}}</a>
+										<a href="#" onclick="recheck_now('{{elt.get_full_name()}}')">{{!helper.get_button('Recheck now', img='/static/images/delay.gif')}}</a>
+										<a href="/depgraph/{{elt.get_full_name()}}" class="mb" title="Impact map of {{elt.get_full_name()}}">{{!helper.get_button('Show impact map', img='/static/images/state_ok.png')}}</a>
+										{{!helper.get_button('Submit Check Result', img='/static/images/passiveonly.gif')}}
+										{{!helper.get_button('Send Custom Notification', img='/static/images/notification.png')}}
+										{{!helper.get_button('Schedule Downtime', img='/static/images/downtime.png')}}
+									</div>
 								</div>
 								<hr />
 								<div id="item_information">
@@ -177,7 +186,6 @@ Invalid element name
 		
 						    </div>
 						    <div class="content">
-						     
 	   
 								%#    Now print the dependencies if we got somes
 								%if len(elt.parent_dependencies) > 0:
@@ -224,8 +232,7 @@ Invalid element name
 									%# End of this service
 									%end
 								</div>
-							     	%end #of the only host part
-							
+							     	%end #of the only host part			
 							
 								%if elt.is_problem and len(elt.impacts) != 0:
 								<div class='host-services'>
@@ -255,8 +262,7 @@ Invalid element name
 								</div>
 							%# end of the 'is problem' if
 							%end
-							
-							
+									
 						    </div>
 						    <div class="content">
 						       	<div class="tabcontent">
@@ -273,7 +279,7 @@ Invalid element name
 										</div>
 									  	<div class="clear"></div>
 									  
-									  	<div id="log_container" class="grid_16">
+									  	<div id="log_container">
 											
 											%if len(elt.comments) > 0:
 											<ol>

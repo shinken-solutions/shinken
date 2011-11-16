@@ -305,10 +305,3 @@ div.content {
 .row_alt {
 	background: #FFFFFF !important;
 }
-
-.icon_delete {
-    background: url("../../htdocs/images/icons/delete_64.png") no-repeat scroll transparent;
-    background-position: 4px;
-	padding-left: 24px;
-    background-size: 15px 15px;
-}
