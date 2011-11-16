@@ -212,7 +212,6 @@ div.content {
 	display: inline;
 }
 
-
 #minimenu ul li a{
 	float: left;
 	color: #787878;
@@ -228,7 +227,8 @@ div.content {
 }
 
 #messagebox {
-    margin-top:15px;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 #overview_container dd img {
