@@ -21,6 +21,7 @@ Invalid element name
 
 %rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/switchbuttons.js', 'eltdetail/js/graphs.js','eltdetail/js/TabPane.js', 'eltdetail/js/gesture.js'],  css=['eltdetail/css/eltdetail2.css', 'eltdetail/css/gesture.css', 'eltdetail/css/switchbuttons.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
 
+
 %#  "This is the background canvas for all gesture detection things " 
 <canvas id="canvas"></canvas>
 %# " We will save our element name so gesture functions will be able to call for the good elements."
@@ -28,7 +29,6 @@ Invalid element name
 
 %#  "Left Container Start"
 <div id="left_container" class="grid_3">
-  
 
 </div>
 %#  "Left Container End"
@@ -88,6 +88,10 @@ Invalid element name
 		    %end
 		</div>				
 	</div>
+	<!-- Switch Start-->
+
+    <!-- Switch End-->
+      
 		<div id="elt_container">
 
 		<script type="text/javascript">
@@ -285,29 +289,26 @@ Invalid element name
 												</li>
 											</ul>
 										</div>
-									  <div class="clear"></div>
-									%if len(elt.comments) > 0:
-									  <table>
-									    <tr>
-									      <td class="tdBorderLeft tdCriticity" style="width:30px;"><b>Author</b></td>
-									      <td class="tdBorderLeft tdCriticity" style="width:350px;"><b>Comment</b></td>
-									      <td class="tdBorderLeft tdCriticity" style="width:100px;"><b>Creation</b></td>
-									      <td class="tdBorderLeft tdCriticity" style="width:100px;"><b>Expire</b></td>
-									      <td class="tdBorderLeft tdCriticity" style="width:100px;"><b>Delete</b></td>
-									    </tr>
-									    %for c in elt.comments:
-									    <tr>
-									      <td class="tdBorderTop tdCriticity" >{{c.author}}</td>
-									      <td class="tdBorderTop tdBorderLeft tdBorderLeft tdCriticity" >{{c.comment}}</td>
-									      <td class="tdBorderTop tdBorderLeft tdCriticity">{{helper.print_date(c.entry_time)}}</td>
-									      <td class="tdBorderTop tdBorderLeft tdCriticity">{{helper.print_date(c.expire_time)}}</td>
-									      <td class="tdBorderTop tdBorderLeft tdCriticity"><a href="#" onclick="delete_comment('{{elt.get_full_name()}}', '{{c.id}}')"><img src="/static/images/delete.png"/></a></td>
-									    </tr>
-									    %end
-									  </table>
-									%else:
-									  <p>No comments available</p>
-									%end
+									  	<div class="clear"></div>
+									  
+									  	<div id="log_container" class="grid_16">
+											
+											%if len(elt.comments) > 0:
+											<ol>
+												%for c in elt.comments:
+												<li>
+													<div class="left">
+														<p class="comment-text">{{c.comment}}</p>
+														<div class="comment-meta"><span><b>Author:</b> {{c.author}}</span> <span><b>Creation:</b> {{helper.print_date(c.entry_time)}}</span> <span><b>Expire:</b>{{helper.print_date(c.expire_time)}}</span></div>
+													</div>
+													<div class="right comment-action"><a class="icon_delete" href="#">Delete</a></div>
+												</li>
+												%end
+											</ol>
+											%else:
+												<p>No comments available</p>
+											%end
+										</div>
 								</div>
 						    </div>
 						    <div class="content">
