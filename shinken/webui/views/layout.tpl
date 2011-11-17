@@ -20,6 +20,7 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
       <title>{{title or 'No title'}}</title>
       
       <link rel="stylesheet" type="text/css" href="/static/css/nav.css"/>

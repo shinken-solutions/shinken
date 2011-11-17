@@ -477,7 +477,8 @@ global.snowstack_init = function (imagefun, options)
     
     target.addEventListener('touchstart', function (e)
 			    {
-				startX = event.touches[0].pageX;
+				//alert('bla');
+				startX = e.touches[0].pageX;
 				lastX = startX;
 				e.preventDefault();
 				return false;
@@ -486,19 +487,30 @@ global.snowstack_init = function (imagefun, options)
     target.addEventListener('touchmove', function (e)
 			    {
 				lastX = event.touches[0].pageX;
-				var dx = lastX - startX;
-				keys.left = (dx > 20);
-				keys.right = (dx < 20);
-				updatekeys();
-				startX = lastX;
+				//var dx = lastX - startX;
+				//alert(dx);
+				//keys.left = (dx > 10);
+				//keys.right = (dx < 10);
+				//updatekeys();
+				//startX = lastX;
 				e.preventDefault();
 				return false;
 			    }, true);
     
     target.addEventListener('touchend', function (e)
 			    {
-				keys.left = false;
-				keys.right = false;
+				//alert('bla');
+				//lastX = e.touches[0].pageX;
+				var dx = lastX - startX;
+				//alert(dx);
+				keys.left = (dx > 10);
+				keys.right = (dx < 10);
+				//alert(keys.left);
+				updatekeys();
+
+				//alert(dx);
+				/*keys.left = false;
+				keys.right = false;*/
 				e.preventDefault();
 				return false;
 			    }, true);
