@@ -46,3 +46,5 @@ To Bruno Clermont for the fix in bottle call and the typos
 To Stéphane Duchesneau for his work on the setup.py file and log/run driectories.
 To grim for his bug report about disabling flapping options
 To peter woodman for his bug report about timezone override crash
+To Laurent Ollagnier for his bug report and patch about notification commands
+
