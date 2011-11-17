@@ -1,0 +1,102 @@
+.item-button{
+    top: 15px;
+    left: 220px;
+    float:right;
+    position: absolute;
+}
+
+
+.item-text{
+    font-size : 150%;
+    top: 50px;
+    left: 10px;
+    position: relative;
+}
+
+
+/* We override some properties of the classic pulse
+ for huge size of wall icons */
+.wall-pulse {
+    width: 64px;
+    height: 64px;
+    top: 10px;
+    left: 27px;
+}
+
+.item-icon{
+    width: 64px;
+    height: 64px;
+    top: 10px;
+    left: 30px;
+    position: relative;
+    float : left;
+}
+
+.wall-icon{
+    width: 64px;
+    height: 64px;
+}
+
+/* The same stars, but in the proble panel */
+.criticity-inpb-icon-1 {
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    margin-left: 80px;
+    z-index: 1;
+    outline: none;
+    left: 20px;
+    top : 10px;
+}
+
+
+/* The show problem image, on the right of the impact*/
+.criticity-inpb-icon-2 {
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    margin-left: 92px;
+    z-index: 1;
+    outline: none;
+    left: 20px;
+    top : 10px;
+}
+
+
+/* The show problem image, on the right of the impact*/
+.criticity-inpb-icon-3 {
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    margin-left: 104px;
+    z-index: 1;
+    outline: none;
+    left: 20px;
+    top : 10px;
+}
+
+
+
+
+.last_errors{
+    border-color : black;
+    border : 1px;
+    top : 450px;
+    position: relative;
+}
+
+
+.wall-aroundpulse{
+    margin : 0;
+    width: 32px;
+    height: 32px;
+
+}
+
+.wall-problems-text{
+    position: relative;
+    top : -25px;
+    left: 40px;
+}
+
+.sliding{}
