@@ -8,6 +8,7 @@ To Luke L for reading and correcting the website and the documentation :p
 To Nicolas DUPEUX for his patch about typos, adn the NSCA daemon
 To Grégory Starck for his patch about worker typo, and pyro hooks
 To David GUÉNAULT for his patch about stoping (all) brokers, and design advices
+To David Hannequin for his bug reports and his packages :)
 To Danijel Tasov for his repositiry cosmetics patch
 To Zoran Zaric for his help on website corrections and for help file typos
 To Gilles Seban for is bug report about commands that look like shells
