@@ -29,6 +29,9 @@
 var mouse_abs_x = 0;
 var mouse_abs_y = 0;
 
+var mouse_rel_x = 0;
+var mouse_rel_y = 0;
+
 function create_img(src, alt){
     var img = document.createElement("img");
 
@@ -67,7 +70,7 @@ function display_hover_img(src, alt){
     var pos_y = mouse_abs_y + 20;
 
     // If too low, go higher. We use the relative y position here
-    if(pagehigth - event.clientY < 200){
+    if(pagehigth - mouse_rel_y < 200){
         pos_y = pos_y - 300;
     }
 
@@ -88,10 +91,15 @@ function hide_hover_img(){
     div.fade('out');
 }
 
-// When we move, we save our mouse position
+// When we move, we save our mouse position, both
+// absolute and relative
 window.addEvent('domready', function(){
     document.onmousemove = function(e){
 	mouse_abs_x = e.pageX;
 	mouse_abs_y = e.pageY;
+	
+	mouse_rel_x = e.clientX;
+	mouse_rel_y = e.clientY;
+
     };
 });
