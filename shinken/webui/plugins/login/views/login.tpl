@@ -1,4 +1,4 @@
-%rebase layout title='Shinken UI login', print_menu=False
+%rebase layout title='Shinken UI login', print_menu=False, js=['login/js/pass_shark.js']
 
 <script type="text/javascript">
 	function submitform() {
@@ -20,6 +20,17 @@
 	  } else
 	   return true;
 	}
+
+	// Add a iphone like password show/hide 
+	window.addEvent('domready', function(){
+	  new PassShark('password',{
+            interval: 300,
+	    duration: 1500,
+	    replacement: '%u25CF',
+	    debug: false
+	  });
+	});
+
 </script>
 
 <div id="login_container" class="prefix_custom_2">
@@ -42,7 +53,7 @@
 			</div>
 			<div class="text-field">
 				<label for="password">Password:</label>
-				<input name="password" type="password" tabindex="2" size="30" onKeyPress="return submitenter(this,event)">
+				<input id="password" name="password" type="password" tabindex="2" size="30" onKeyPress="return submitenter(this,event)">
 			</div>
 			<input type="hidden" value="0" name="remember_me">
 				<div class="check-field">

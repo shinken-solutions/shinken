@@ -84,12 +84,12 @@ def get_root():
         
 
 pages = { user_login : { 'routes' : ['/user/login', '/user/login/'], 
-                         'view' : 'login'},
-          user_login_redirect : { 'routes' : ['/login'] },
+                         'view' : 'login', 'static' : True},
+          user_login_redirect : { 'routes' : ['/login'] , 'static' : True},
           user_auth : { 'routes' : ['/user/auth'], 
                         'view' : 'auth', 
-                        'method' : 'POST'},
-          user_logout : { 'routes' : ['/user/logout', '/logout'] },
-          get_root : {'routes' : ['/']},
+                        'method' : 'POST', 'static' : True},
+          user_logout : { 'routes' : ['/user/logout', '/logout'] , 'static' : True},
+          get_root : {'routes' : ['/'], 'static' : True},
           }
 
