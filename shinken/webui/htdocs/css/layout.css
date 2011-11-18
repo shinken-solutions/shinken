@@ -809,6 +809,10 @@ input, textarea {
     padding: 1%;
     width:98%;
 }
+input:focus{
+    outline : 1px solid orange;
+    outline-offset: 0px;
+}
 select {
     clear: both;
     font-size: 120%;
