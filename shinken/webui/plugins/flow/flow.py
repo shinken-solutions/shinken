@@ -30,6 +30,7 @@ def get_div(elt):
     lnk = app.helper.get_link_dest(elt)
     button = app.helper.get_button('', img='/static/images/search.png')
     button_recheck = '''<a href="#" onclick="recheck_now('%s')">%s</a>''' % (elt.get_full_name(), app.helper.get_button('Recheck', img='/static/images/delay.gif'))
+    button_ack = '''<a href="#" onclick="acknowledge('%s')">%s</a>''' % (elt.get_full_name(), app.helper.get_button('Ack', img='/static/images/wrench.png'))
     pulse = ''
     if elt.is_problem or (elt.state_id != 0 and elt.business_impact > 2):
         pulse = '<span class="wall-pulse pulse" title=""></span>'
@@ -51,7 +52,7 @@ def get_div(elt):
         <div class="ack-button">
            %s
         </div>
-        """ % (stars, pulse, icon,  elt.state.lower(), elt.state, elt.get_full_name(), lnk, button, button_recheck, button_recheck)
+        """ % (stars, pulse, icon,  elt.state.lower(), elt.state, elt.get_full_name(), lnk, button, button_recheck, button_ack)
     s = s.encode('utf8', 'ignore')
     return s
 
