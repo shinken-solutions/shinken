@@ -51,9 +51,9 @@ function translate_problem(){
 window.addEvent('domready', function(){
     var nb_elements = $$('.sliding').length;
     // If there is not enough elements, don't even slide
-    // So we print in each page 12 elements. No need to slide if lower
-    if(nb_elements > 12){
-	var nb_slides = nb_elements / 4;
+    // So we print in each page 9 elements. No need to slide if lower
+    if(nb_elements > 9){
+	var nb_slides = nb_elements / 9;
 	var slide_interval = 60/nb_slides;
 	//alert('interval'+slide_interval);
 

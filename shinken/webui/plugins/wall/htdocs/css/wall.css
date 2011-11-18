@@ -81,8 +81,10 @@
 .last_errors{
     border-color : black;
     border : 1px;
-    top : 450px;
-    position: relative;
+    top : 55%;
+    position: absolute;
+    min-height : 500px;
+    width: 100%;
 }
 
 
@@ -99,4 +101,40 @@
     left: 40px;
 }
 
-.sliding{}
+.sliding{
+    min-width: 250px;
+}
+
+
+/* We override some properties of the classic pulse
+ for huge size of wall icons */
+.wall-small-pulse {
+    width: 32px;
+    height: 32px;
+    top: 0px;
+    left: 0px;
+}
+
+
+.next-icon{
+    width: 64px;
+    height: 64px;
+    position: absolute;
+    /*margin-left: 104px;*/
+    z-index: 100;
+    outline: none;
+    right: 20px;
+    top : 50%;/*10px;*/
+}
+
+.previous-icon{
+    width: 64px;
+    height: 64px;
+    position: absolute;
+    /*margin-left: 104px;*/
+    z-index: 100;
+    outline: none;
+    left: 20px;
+    top : 50%;/*10px;*/
+    
+}

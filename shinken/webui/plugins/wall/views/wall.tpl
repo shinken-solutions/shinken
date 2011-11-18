@@ -5,6 +5,8 @@
 
 
 <div class="page view">
+  <img src="/static/images/next.png" class="next-icon" onclick="go_right();"/>
+  <img src="/static/images/previous.png" class="previous-icon" onclick="go_left();"/>
     <div class="origin view">
         <div id="camera" class="camera view"></div>
     </div>
@@ -26,11 +28,11 @@ var images = {{!impacts}};
 %ind = -1
 %for pb in problems:
    %ind += 1
-   %x,y = divmod(ind, 4)
+   %x,y = divmod(ind, 3)
        <div class="divstate{{pb.state_id}} sliding" style="left:{{x * 400}}px; position: absolute; top:{{ y * 50 + 50}}px; i:{{ind}} {{x}} {{y}}">
 	 <div class="wall-aroundpulse aroundpulse">
 	 %if pb.business_impact > 2:
-	   <span class="pulse" title=""></span>
+	   <span class="wall-small-pulse pulse" title=""></span>
 	 %end
 	   <img style="width : 32px; height:32px" src="{{helper.get_icon_state(pb)}}">
 	 </div>
