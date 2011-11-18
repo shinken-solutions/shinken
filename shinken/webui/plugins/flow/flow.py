@@ -19,14 +19,6 @@ except ImportError:
 
 
 
-# Sort hosts and services by impact, states and co
-def sort_by_last_state_change(s1, s2):
-    if s1.last_state_change > s2.last_state_change:
-        return -1
-    else:
-        return 1
-
-
 # Get the div for each element
 def get_div(elt):
     icon = app.helper.get_icon_state(elt)
@@ -37,6 +29,7 @@ def get_div(elt):
               </div>''' % (i-1)
     lnk = app.helper.get_link_dest(elt)
     button = app.helper.get_button('', img='/static/images/search.png')
+    button_recheck = '''<a href="#" onclick="recheck_now('%s')">%s</a>''' % (elt.get_full_name(), app.helper.get_button('Recheck', img='/static/images/delay.gif'))
     pulse = ''
     if elt.is_problem or (elt.state_id != 0 and elt.business_impact > 2):
         pulse = '<span class="wall-pulse pulse" title=""></span>'
@@ -47,13 +40,18 @@ def get_div(elt):
 	  <img class="wall-icon" src="%s"></img>
         </div>
         <div class="item-text">
-          <span class="state_%s">%s <br/> %s</span>
+          <span class="state_%s">%s %s</span>
         </div>
 	<div class="item-button">
-	<a href="%s">%s</a>
+	   <a href="%s">%s</a>
         </div>
-
-        """ % (stars, pulse, icon,  elt.state.lower(), elt.state, elt.get_full_name(), lnk, button)#stars, button)
+        <div class="recheck-button">
+           %s
+        </div>
+        <div class="ack-button">
+           %s
+        </div>
+        """ % (stars, pulse, icon,  elt.state.lower(), elt.state, elt.get_full_name(), lnk, button, button_recheck, button_recheck)
     s = s.encode('utf8', 'ignore')
     return s
 

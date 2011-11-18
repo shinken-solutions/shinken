@@ -50,10 +50,6 @@
     -webkit-transition-timing-function: ease-out;
 }
 
-.zflow div.cell img
-{
-    position: absolute;
-}
 
 .zflow div.cell canvas
 {

@@ -96,7 +96,7 @@ div.selected /* img, div.magnify img, div.selected video, div.magnify video*/
     -moz-border-radius: 3px;
     -moz-border-image: url(/static/depgraph/images/border-image.png) 5 5 5 5 stretch;
     -webkit-border-image: url(/static/depgraph/images/border-image.png) 5 5 5 5 stretch;
-}
+
 }
 
 

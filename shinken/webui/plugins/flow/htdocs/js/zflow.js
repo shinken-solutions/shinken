@@ -12,33 +12,27 @@
 
     var global = this;
 
-/*
-    Utilities (avoid jQuery dependencies)
-*/
 
-    function utils_extend(obj, dict)
-    {
-	for (var key in dict)
-	{
+    function utils_extend(obj, dict){
+	for (var key in dict){
             obj[key] = dict[key];
 	}
     }
 
-    function utils_setsize(elem, w, h)
-    {
+    function utils_setsize(elem, w, h){
 	elem.style.width = w.toString() + "px";
 	elem.style.height = h.toString() + "px";
     }
 
-    function utils_setxy(elem, x, y)
-    {
+    function utils_setxy(elem, x, y){
 	elem.style.left = Math.round(x).toString() + "px";
 	elem.style.top = Math.round(y).toString() + "px";
     }
 
-/*
-    TrayController is a horizontal touch event controller that tracks cumulative offsets and passes events to a delegate. 
-*/
+    /*
+      TrayController is a horizontal touch event controller that 
+      tracks cumulative offsets and passes events to a delegate. 
+    */
 
     TrayController = function ()
     {
@@ -80,15 +74,15 @@
 
 	if (this.touchMoved)
 	{
-        /* Approximate some inertia -- the transition function takes care of the decay over 0.4s for us, but we need to amplify the last movement */
+            /* Approximate some inertia -- the transition function takes care of the decay over 0.4s for us, but we need to amplify the last movement */
             var delta = this.currentX - this.lastX;
             var dt = (new Date()) - this.lastMoveTime + 1;
-        /* dx * 400 / dt */
+            /* dx * 400 / dt */
 
             this.currentX = this.currentX + delta * 200 / dt;
             this.delegate.updateTouchEnd(this);
 	}
-    else
+	else
 	{
             this.delegate.clicked(this.currentX);
 	}
@@ -100,11 +94,11 @@
 	event.preventDefault();
     }
 
-/*
-    These variables define how the zflow presentation is made.
-*/
+    /*
+      These variables define how the zflow presentation is made.
+    */
 
-    const CSIZE = 150;
+    const CSIZE = 200;
     const CGAP = CSIZE / 2;
 
     const FLOW_ANGLE = 70;
@@ -131,7 +125,7 @@
     {
 	this.lastFocus = undefined;
 
-    // Snap to nearest position
+	// Snap to nearest position
 	var i = this.getFocusedCell(controller.currentX);
 
 	controller.currentX = - i * CGAP;
@@ -147,10 +141,10 @@
 
 	if ((this.lastFocus == undefined) || this.lastFocus != i)
 	{
-            transform += " translate3d(0, 0, 150px) rotateY(180deg)";
+            transform += " translate3d(0, 0, 200px) rotateY(180deg)";
             this.lastFocus = i;
 	}
-    else
+	else
 	{
             this.lastFocus = undefined;
 	}
@@ -160,35 +154,35 @@
 
     FlowDelegate.prototype.getFocusedCell = function (currentX)
     {
-    // Snap to nearest position
+	// Snap to nearest position
 	var i = - Math.round(currentX / CGAP);
 
-    // Clamp to cells array boundary
+	// Clamp to cells array boundary
 	return Math.min(Math.max(i, 0), this.cells.length - 1);
     }
 
     FlowDelegate.prototype.transformForCell = function (cell, i, offset)
     {
-    /* 
-        This function needs to be fast, so we avoid function calls, divides, Math.round,
-        and precalculate any invariants we can.
-    */
+	/* 
+           This function needs to be fast, so we avoid function calls, divides, Math.round,
+           and precalculate any invariants we can.
+	*/
 	var x = (i * CGAP);
 	var ix = x + offset;
 
 	if ((ix < FLOW_THRESHOLD) && (ix >= -FLOW_THRESHOLD))
 	{
-        // yangle = 0, zpos = FLOW_ZFOCUS
+            // yangle = 0, zpos = FLOW_ZFOCUS
             return T_ZFOCUS + " translate3d(" + x + "px, 0, 0)";
 	}
 	else if (ix > 0)
 	{
-        // yangle = -FLOW_ANGLE, x + FLOW_XGAP
+            // yangle = -FLOW_ANGLE, x + FLOW_XGAP
             return "translate3d(" + (x + FLOW_XGAP) + "px, 0, 0) " + T_NEG_ANGLE;
 	}
-    else
+	else
 	{
-        // yangle = FLOW_ANGLE, x - FLOW_XGAP
+            // yangle = FLOW_ANGLE, x - FLOW_XGAP
             return "translate3d(" + (x - FLOW_XGAP) + "px, 0, 0) " + T_ANGLE;
 	}
     }
@@ -197,8 +191,8 @@
     {
 	if (this.transforms[i] != transform)
 	{
-            cell.style.webkitTransform = transform;
-            this.transforms[i] = transform;
+	    cell.style.webkitTransform = transform;
+	    this.transforms[i] = transform;
 	}
     }
 
@@ -206,15 +200,29 @@
     {
 	this.elem.style.webkitTransform = "translate3d(" + (currentX) + "px, 0, 0)";
 
-    /*
-        It would be nice if we only updated dirty cells... for now, we use a cache
-    */
+	/*
+          It would be nice if we only updated dirty cells... for now, we use a cache
+	*/
+
 	for (var i in this.cells)
 	{
             var cell = this.cells[i];
-            this.setTransformForCell(cell, i, this.transformForCell(cell, i, currentX));
-            i += 1;
+	    // I don't know why, but we can have a FUNCTION as cell?
+            // TODO: find why, and fix this strange thing :)
+	    if(cell.style){
+		this.setTransformForCell(cell, i, this.transformForCell(cell, i, currentX));
+		cell.removeClass('selected');
+	    }
 	}
+
+	var focused_cell_idx = this.getFocusedCell(currentX);
+	var focused_cell = this.cells[focused_cell_idx];
+	
+	/* We make the focus cell apears in a clear way */
+	//alert(focusedCellidx);
+	focused_cell.addClass('selected');
+
+
     }
 
     global.zflow = function (images, selector)
@@ -229,7 +237,8 @@
 	controller.delegate = delegate;
 
 	var imagesLeft = images.length;
-    
+	//alert('images left'+imagesLeft);
+	
 	var cellCSS = {
             top: Math.round(-CSIZE * 0.65) + "px",
             left: Math.round(-CSIZE / 2) + "px",
@@ -238,54 +247,57 @@
             opacity: 0,
 	}
 
-	images.forEach(function (url, i)
+
+	images.forEach(function (bloc, i)
 		       {
 			   var cell = document.createElement("div");
 			   var image = document.createElement("img");
-			   var canvas = document.createElement("canvas");
+			   //var canvas = document.createElement("canvas");
 
 			   cell.className = "cell";
 			   cell.appendChild(image);
-			   cell.appendChild(canvas);
+			   //cell.appendChild(canvas);
+			   //alert(bloc.html);
+			   cell.innerHTML = bloc.html;
+			   //alert('loading'+url)
+			   image.src = '/static/images/sets/database/state_critical.png';//url;
 
-			   image.src = url;
+			   /*image.addEventListener("load", function ()
+			     {*/
+			   imagesLeft -= 1;
+			   
+			   var iwidth = 200;//image.width;
+			   var iheight = 150;//image.height;
+			   
+			   var ratio = Math.min(CSIZE / iheight, CSIZE / iwidth);
+			   
+			   iwidth *= ratio;
+			   iheight *= ratio;
 
-			   image.addEventListener("load", function ()
-						  {
-						      imagesLeft -= 1;
+			   utils_setsize(image, iwidth, iheight);
 
-						      var iwidth = image.width;
-						      var iheight = image.height;
-            
-						      var ratio = Math.min(CSIZE / iheight, CSIZE / iwidth);
-            
-						      iwidth *= ratio;
-						      iheight *= ratio;
+			   utils_extend(cell.style, cellCSS);
 
-						      utils_setsize(image, iwidth, iheight);
+			   utils_setxy(image, (CSIZE - iwidth) / 2, CSIZE - iheight);
 
-						      utils_extend(cell.style, cellCSS);
+			   delegate.setTransformForCell(cell, delegate.cells.length, delegate.transformForCell(cell, delegate.cells.length, controller.currentX));
+			   delegate.cells.push(cell);
 
-						      utils_setxy(image, (CSIZE - iwidth) / 2, CSIZE - iheight);
-						      utils_setxy(canvas, (CSIZE - iwidth) / 2, CSIZE);
+			   // Start at 0 opacity
+			   tray.appendChild(cell);
 
-						      reflect(image, iwidth, iheight, canvas);
+			   // Set to 1 to fade element in.
+			   cell.style.opacity = 1.0;
 
-						      delegate.setTransformForCell(cell, delegate.cells.length, delegate.transformForCell(cell, delegate.cells.length, controller.currentX));
-						      delegate.cells.push(cell);
-
-            // Start at 0 opacity
-						      tray.appendChild(cell);
-
-            // Set to 1 to fade element in.
-						      cell.style.opacity = 1.0;
-
-						      if (imagesLeft == 0)
-						      {
-							  window.setTimeout( function() { window.scrollTo(0, 0); }, 100 );
-						      }
-						  });
+			   if (imagesLeft == 0)
+			   {
+			       window.setTimeout( function() { window.scrollTo(0, 0); }, 100 );
+			   }
+			   /*});*/
 		       });
+
+	// On the init, make the selected class on the first cell
+	delegate.update(0);
 
 	tray.addEventListener('touchstart', controller, false);
 
@@ -307,29 +319,5 @@
 				});
     }
 
-    function reflect(image, iwidth, iheight, canvas)
-    {
-	canvas.width = iwidth;
-	canvas.height = iheight / 2;
-
-	var ctx = canvas.getContext("2d");
-
-	ctx.save();
-
-	ctx.translate(0, iheight - 1);
-	ctx.scale(1, -1);
-	ctx.drawImage(image, 0, 0, iwidth, iheight);
-
-	ctx.restore();
-
-	ctx.globalCompositeOperation = "destination-out";
-
-	var gradient = ctx.createLinearGradient(0, 0, 0, iheight / 2);
-	gradient.addColorStop(1, "rgba(255, 255, 255, 1.0)");
-	gradient.addColorStop(0, "rgba(255, 255, 255, 0.5)");
-    
-	ctx.fillStyle = gradient;
-	ctx.fillRect(0, 0, iwidth, iheight / 2);
-    }
 
 })();

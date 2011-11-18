@@ -1,6 +1,20 @@
 .item-button{
-    top: 15px;
-    left: 220px;
+    top: 150px;
+    left: 0px;
+    float:right;
+    position: absolute;
+}
+
+.recheck-button{
+    top: 150px;
+    left: 50px;
+    float:right;
+    position: absolute;
+}
+
+.ack-button{
+    top: 150px;
+    left: 100px;
     float:right;
     position: absolute;
 }
@@ -8,7 +22,7 @@
 
 .item-text{
     font-size : 150%;
-    top: 50px;
+    top: 100px;
     left: 10px;
     position: relative;
 }
@@ -100,3 +114,11 @@
 }
 
 .sliding{}
+
+.selected{
+    border: 5px solid #FEB515;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    -moz-border-image: url(/static/depgraph/images/border-image.png) 5 5 5 5 stretch;
+    -webkit-border-image: url(/static/depgraph/images/border-image.png) 5 5 5 5 stretch;
+}
