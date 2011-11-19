@@ -524,6 +524,9 @@ line-height: 180px;
 
 #login-form {
 	border-left: 1px solid #ccc;
+	min-height: 270px;
+    padding-left: 10px;
+    padding-top: 35px;
 }
 
 .form button {
