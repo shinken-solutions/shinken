@@ -281,6 +281,7 @@ div.content {
     margin: 15px 0 0;
     padding: 5px 8px;
     text-shadow: 0 1px #FFFFFF;
+	width: 81.333%;
 }
 
 #log_container  ol {
@@ -291,6 +292,7 @@ div.content {
     border-style: none solid solid;
     border-width: medium 1px 1px;
     list-style-type: none;
+    width: 81.333%;
 }
 
 #log_container  li {
