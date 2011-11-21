@@ -50,7 +50,7 @@ class PNP_Webui(BaseModule):
         self.password = getattr(modconf, 'password', '')
         
         if not self.uri:
-            raise BaseException('The WebUI PNP module is missing uri parameter.')
+            raise Exception('The WebUI PNP module is missing uri parameter.')
 
         self.uri = self.uri.strip()
         if not self.uri.endswith('/'):

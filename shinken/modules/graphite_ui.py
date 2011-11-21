@@ -49,7 +49,7 @@ class Graphite_Webui(BaseModule):
         self.uri = getattr(modconf, 'uri', None)
         
         if not self.uri:
-            raise BaseException('The WebUI Graphite module is missing uri parameter.')
+            raise Exception('The WebUI Graphite module is missing uri parameter.')
 
         self.uri = self.uri.strip()
         if not self.uri.endswith('/'):
