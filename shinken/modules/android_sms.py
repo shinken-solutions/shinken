@@ -38,6 +38,8 @@ properties = {
     'daemons' : ['reactionner'],
     'type' : 'android_sms',
     'external' : False,
+    # To be a real worker module, you must set this
+    'worker_capable' : True,
 }
 
 

@@ -33,7 +33,8 @@ properties = {
     'daemons' : ['poller'],
     'type' : 'dummy_poller',
     'external' : False,
-    'phases' : ['worker'],
+    # To be a real worker module, you must set this
+    'worker_capable' : True,
 }
 
 

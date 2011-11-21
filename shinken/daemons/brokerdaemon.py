@@ -275,6 +275,7 @@ class Broker(BaseSatellite):
                 except Empty :
                     full_queue = False
 
+
     # We get new broks from schedulers
     # REF: doc/broker-modules.png (2)
     def get_new_broks(self, type='scheduler'):

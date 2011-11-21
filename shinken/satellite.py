@@ -41,6 +41,8 @@ try:
 except ImportError:
    is_android = False
 
+from Queue import Empty
+
 if not is_android:
    from multiprocessing import Queue, Manager, active_children, cpu_count
 else:
@@ -77,6 +79,12 @@ from shinken.external_command import ExternalCommand
 Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
                     Pyro.errors.CommunicationError, \
                     Pyro.errors.DaemonError)
+
+
+# Class for say we are facing a non worker module
+# but a standard one
+class NotWorkerMod(BaseException):
+   pass
 
 
 # Interface for Arbiter, our big MASTER
@@ -248,7 +256,7 @@ class Satellite(BaseSatellite):
         try:
             pyro.set_timeout(sch_con, 5)
             new_run_id = sch_con.get_running_id()
-        except (Pyro.errors.ProtocolError, Pyro.errors.NamingError, cPickle.PicklingError, KeyError, Pyro.errors.CommunicationError) , exp:
+        except (Pyro.errors.ProtocolError, Pyro.errors.NamingError, cPickle.PicklingError, KeyError, Pyro.errors.CommunicationError, Pyro.errors.DaemonError) , exp:
             logger.log("[%s] Scheduler %s is not initilised or got network problem: %s" % (self.name, sname, str(exp)))
             sched['con'] = None
             return
@@ -390,7 +398,10 @@ class Satellite(BaseSatellite):
         else:
             for module in self.modules_manager.instances:
                 if module.properties['type'] == module_name:
-                    target = module.work
+                   # First to see if the module is a 'worker' one or not
+                   if not module.properties.get('worker_capable', False):
+                      raise NotWorkerMod
+                   target = module.work
             if target is None:
                 return
         w = Worker(1, q, self.returns_queue, self.processes_by_worker, \
@@ -569,14 +580,7 @@ class Satellite(BaseSatellite):
     # REF: doc/shinken-action-queues.png (1)
     def get_new_actions(self):
         now = time.time()
-        # HACK
-        #r = []
-        #for i in xrange(1, 1500):#750):
-        #    c = Check('scheduled', '/bin/ping localhost -p 1 -c 1', None, now)
-        #    r.append(c)
-        #self.add_actions(r, 0)
-        #return
-        
+
         # Here are the differences between a
         # poller and a reactionner:
         # Poller will only do checks,
@@ -625,16 +629,28 @@ class Satellite(BaseSatellite):
 
     # In android we got a Queue, and a manager list for others
     def get_returns_queue_len(self):
-#        if not is_android:
-#            return len(self.returns_queue)
         return self.returns_queue.qsize()
         
         
     # In android we got a Queue, and a manager list for others
     def get_returns_queue_item(self):
-#        if not is_android:
-#            return self.returns_queue.pop()
         return self.returns_queue.get()
+
+
+    # Get 'objects' from external modules
+    # from now nobody use it, but it can be useful
+    # for a moduel like livestatus to raise external
+    # commandsfor example
+    def get_objects_from_from_queues(self):
+        for f in self.modules_manager.get_external_from_queues():
+            full_queue = True
+            while full_queue:
+                try:
+                    o = f.get(block=False)
+                    self.add(o)
+                except Empty :
+                    full_queue = False
+
 
 
     # An arbiter ask us to wait a new conf, so we must clean
@@ -740,6 +756,9 @@ class Satellite(BaseSatellite):
             # We send all finished checks
             # REF: doc/shinken-action-queues.png (6)
             self.manage_returns()
+
+        # Get objects from our modules that are not wroker based
+        self.get_objects_from_from_queues()
 
         # Say to modules it's a new tick :)
         self.hook_point('tick')
@@ -908,8 +927,19 @@ we must register our interfaces for 3 possible callers: arbiter, schedulers or b
 
             # Allocate Mortal Threads
             for _ in xrange(1, self.min_workers):
-                for mod in self.q_by_mod:
-                    self.create_and_launch_worker(module_name=mod)
+               to_del = []
+               for mod in self.q_by_mod:
+                  try:
+                     self.create_and_launch_worker(module_name=mod)
+                  # Maybe this modules is not a true worker one.
+                  # if so, just delete if from q_by_mod
+                  except NotWorkerMod:
+                     to_del.append(mod)
+
+               for mod in to_del:
+                  print 'The module %s is not a worker one, I remove it from the worker list' % mod
+                  del self.q_by_mod[mod]
+                     
 
             # Now main loop
             self.do_mainloop()
