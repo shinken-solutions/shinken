@@ -26,7 +26,7 @@ To Kristoffer Moegle for this patch on arbiter configuration module
 To Eric Beaulieu for his help on the ssl certificates, adn for the Windows installation script :)
 To Laurent Guyon, our best bug hunter :)
 To Alan Brenner for his SSL core for the NRPE module
-To Venelin Petkov for this bug report about missing customs on services
+To Venelin Petkov for this bug report about missing customs on services, and the 'print' in name bug problem :)
 To Papp Tamas for his bug report of bad python version under ubuntu (and debian)
 To Rémi BUISSON for his bug report about bad etc/default/shinken file :)
 To Julien Toscano for his bug report about bad launch_all.sh launch.

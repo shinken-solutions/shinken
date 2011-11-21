@@ -972,10 +972,14 @@ class Items(object):
         
         str_setexpr = hg_name_rebuild_str(ctxres.full_res)
         
+        # We must protect the eval() against some names that will be match as
+        # Python things like - or print and not real names. So we "change" them with __OTHERNAME__
+        # values in the HostGroup_Name_Parse_Ctx class.
         groupsname2hostsnames = hg_name_get_groupnames(ctxres.full_res, hosts, hostgroups)
         newgroupname2hostnames = {}
         for gn, val in groupsname2hostsnames.items():
             gn = gn.replace('-', HostGroup_Name_Parse_Ctx.minus_sign_in_name)
+            gn = gn.replace('print', HostGroup_Name_Parse_Ctx.print_in_name)
             newgroupname2hostnames[gn] = val
         
         set_res = []
@@ -989,7 +993,7 @@ class Items(object):
             err = "There is an unknown name in '%s' (names=%s), err=%s" % (expr, groupsname2hostsnames, e)
             self.configuration_errors.append(err)
             print err
-        
+
         return list(set_res)
 
 
@@ -1045,7 +1049,8 @@ class HostGroup_Name_Parse_Ctx(object):
     space_chars = ( ' ', '\t', )
     # no group should be named like that :
     catch_all_name = "__ALLELEMENTS__"
-    minus_sign_in_name = "__MINUSSIGN_IN_NAME__"   
+    minus_sign_in_name = "__MINUSSIGN_IN_NAME__"
+    print_in_name = "__PRINT_IN_NAME__"
        
     
     # flags:
@@ -1358,10 +1363,14 @@ def hg_name_rebuild_str(parse_res):
 parse_res must be the 'full_res' attribute of a 'HostGroup_Name_Parse_Ctx' object. """
     # trivial case:
     if isinstance(parse_res, (str, unicode)):
+        # It's where we protect our token that got 'python' strings that will put
+        # an eval() call with problems of syntax
         if parse_res != "-":
             parse_res = parse_res.replace('-', HostGroup_Name_Parse_Ctx.minus_sign_in_name)
         if parse_res == '*':
             parse_res = HostGroup_Name_Parse_Ctx.catch_all_name
+        if 'print' in parse_res:
+            parse_res = parse_res.replace('print', HostGroup_Name_Parse_Ctx.print_in_name)
         return parse_res
     
     # nearly trivial case, parse_res is here a list of objects:
