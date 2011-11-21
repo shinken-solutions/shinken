@@ -684,7 +684,7 @@ class Items(object):
             # Ok, look at no twins (it's bad!)
             for id in twins:
                 i = self.items[id]
-                safe_print("Error: the", i.__class__.my_type, i.get_name(), "is duplicated from", i.imported_from)
+                safe_print("Error: the", i.__class__.my_type, i.get_name(), "is duplicated from", getattr(i, 'imported_from', "unknown source"))
                 r = False
 
         # Then look if we have some errors in the conf
@@ -699,7 +699,7 @@ class Items(object):
         # Then look for individual ok
         for i in self:
             if not i.is_correct():
-                n = getattr(i, 'imported_from', "unknown")
+                n = getattr(i, 'imported_from', "unknown source")
                 safe_print("Error: In", i.get_name(), "is incorrect ; from", n)
                 r = False        
         
