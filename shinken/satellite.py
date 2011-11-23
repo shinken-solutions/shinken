@@ -83,7 +83,7 @@ Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
 
 # Class for say we are facing a non worker module
 # but a standard one
-class NotWorkerMod(BaseException):
+class NotWorkerMod(Exception):
    pass
 
 
