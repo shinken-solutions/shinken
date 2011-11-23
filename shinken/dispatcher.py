@@ -366,7 +366,7 @@ class Dispatcher:
                             logger.log('[%s] WARNING : configuration dispatching error for scheduler %s' %(r.get_name(), sched.get_name()))
                             continue
                         
-                        logger.log('[%s] Dispatch OK of for conf in scheduler %s' % (r.get_name(), sched.get_name()))
+                        logger.log('[%s] Dispatch OK of conf in scheduler %s' % (r.get_name(), sched.get_name()))
 
                         sched.conf = conf
                         sched.need_conf = False
@@ -472,25 +472,25 @@ class Dispatcher:
 
                                     if is_sent:
                                         satellite.active = True
-                                        logger.log('[%s] Dispatch OK of for configuration %s to %s %s' %(r.get_name(), cfg_id, kind, satellite.get_name()))
+                                        logger.log('[%s] Dispatch OK of configuration %s to %s %s' %(r.get_name(), cfg_id, kind, satellite.get_name()))
                                         # We change the satellite configuration, update our data
                                         satellite.known_conf_managed_push(cfg_id)
 
                                         nb_cfg_sent += 1
                                         r.to_satellites_managed_by[kind][cfg_id].append(satellite)
                                     
-                                        # If we got a broker, the conf_id must be send to only ONE
+                                        # If we got a broker, the conf_id must be sent to only ONE
                                         # broker, so here it's done, we are happy.
                                         if kind == "broker":
                                             break
                             # else:
-                            #    #I've got enouth satellite, the next one are spare for me
+                            #    #I've got enough satellite, the next one are spare for me
                             if nb_cfg_sent == r.get_nb_of_must_have_satellites(kind):
                                 logger.log("[%s] OK, no more %s sent need" % (r.get_name(), kind))
                                 r.to_satellites_need_dispatch[kind][cfg_id]  = False
 
 
-            # And now we dispatch receivers. It's mroe easy, they need ONE conf
+            # And now we dispatch receivers. It's easier, they need ONE conf
             # in all their life :)
             for r in self.realms:
                 for rec in r.receivers:
@@ -500,7 +500,7 @@ class Dispatcher:
                         if is_sent:
                             rec.active = True
                             rec.need_conf = False
-                            logger.log('[%s] Dispatch OK of for configuration to receiver %s' %(r.get_name(), rec.get_name()))
+                            logger.log('[%s] Dispatch OK of configuration to receiver %s' %(r.get_name(), rec.get_name()))
                         else:
                             logger.log('[%s] WARNING : dispatching failed for receiver %s' %(r.get_name(), rec.get_name()))
                             
