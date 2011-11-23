@@ -386,7 +386,7 @@ class Host(SchedulingItem):
 
         # Ok now we manage special cases...
         if self.notifications_enabled and self.contacts == []:
-            logger.log("Waring : the host %s do not have contacts nor contact_groups in (%s)" % (self.get_name(), source))
+            logger.log("Warning : the host %s has no contacts nor contact_groups in (%s)" % (self.get_name(), source))
         
         if getattr(self, 'check_command', None) is None:
             logger.log("%s : I've got no check_command" % self.get_name())
