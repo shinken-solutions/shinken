@@ -145,6 +145,16 @@ class Dispatcher:
                         sched.conf.assigned_to = None
                         sched.conf.is_assigned = False
                         sched.conf = None
+                    # Maybe the scheduler restart, so is alive but without the conf we think he was managing
+                    # so ask him what it is really managing, and if not, put the conf unassigned
+                    if not sched.do_i_manage(cfg_id):
+                        self.dispatch_ok = False #so we ask a new dispatching
+                        logger.log("Warning : Scheduler %s did not managed its configuration %d,I am not happy." % (sched.get_name(), cfg_id))
+                        if sched.conf:
+                            sched.conf.assigned_to = None
+                            sched.conf.is_assigned = False
+                        sched.need_conf = True
+                        sched.conf = None
                     # Else: ok the conf is managed by a living scheduler
 
         # Maybe satelite are alive, but do not still have a cfg but
@@ -362,6 +372,9 @@ class Dispatcher:
                         sched.need_conf = False
                         conf.is_assigned = True
                         conf.assigned_to = sched
+
+                        # We update all data for this scheduler
+                        sched.managed_confs = [conf.id]
                         
                         # Now we generate the conf for satellites:
                         cfg_id = conf.id

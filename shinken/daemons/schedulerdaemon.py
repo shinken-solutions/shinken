@@ -346,6 +346,10 @@ class Shinken(BaseSatellite):
         #External command need the sched because he can raise checks
         e.load_scheduler(self.sched)
 
+        # We clear our schedulers managed (it's us :) )
+        # and set ourself in it
+        self.schedulers = {self.conf.instance_id : self.sched}
+
 
     # our main function, launch after the init
     def main(self):
