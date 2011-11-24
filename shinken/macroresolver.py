@@ -111,6 +111,7 @@ class MacroResolver(Borg):
                 macros[elt] = {'val' : '', 'type' : 'unknown'}
 
         #self.cache[s] = macros
+        del(macros[''])
         return macros
 
 
@@ -218,8 +219,12 @@ class MacroResolver(Borg):
             for macro in macros:
                 c_line = c_line.replace('$'+macro+'$', macros[macro]['val'])
 
+            c_line = c_line.replace("$$", "DOUBLEDOLLAR")
+
             if nb_loop > 32: #too mouch loop, we exit
                 still_got_macros = False
+
+        c_line = c_line.replace("DOUBLEDOLLAR", "$")
 
         #print "Retuning c_line", c_line.strip()
         return c_line.strip()
