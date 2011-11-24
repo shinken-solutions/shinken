@@ -111,7 +111,8 @@ class MacroResolver(Borg):
                 macros[elt] = {'val' : '', 'type' : 'unknown'}
 
         #self.cache[s] = macros
-        del(macros[''])
+        if '' in macros:
+            del macros['']
         return macros
 
 
