@@ -62,6 +62,7 @@ except ImportError:
     sys.exit("Shinken require the Python Pyro module. Please install it.")
 
 Pyro = pyro.Pyro
+PYRO_VERSION = pyro.PYRO_VERSION
 
 
 from shinken.message import Message
@@ -338,12 +339,16 @@ class Satellite(BaseSatellite):
                 except AttributeError , exp: # the scheduler must  not be initialized
                     print exp
                 except Exception , exp:
-                    print "Unknown exception", exp
-                    if PYRO_VERSION < "4.0":
-                        print ''.join(Pyro.util.getPyroTraceback(exp))
-                    else:
-                        print ''.join(Pyro.util.getPyroTraceback())
-                    sys.exit(0)
+                    print "Unknown exception", exp, type(exp)
+                    try:
+                       if PYRO_VERSION < "4.0":
+                          print ''.join(Pyro.util.getPyroTraceback(exp))
+                       else:
+                          print ''.join(Pyro.util.getPyroTraceback())
+                    except:
+                       pass
+                    raise
+
 
             # We clean ONLY if the send is OK
             if send_ok :
@@ -623,8 +628,13 @@ class Satellite(BaseSatellite):
             # What the F**k? We do not know what happenned,
             # so.. bye bye :)
             except Exception , exp:
-                print ''.join(Pyro.util.getPyroTraceback(exp))
-                sys.exit(0)
+               print "Unknown exception", exp
+               try:
+                  print ''.join(Pyro.util.getPyroTraceback(exp))
+               except:
+                  pass
+               raise
+
 
 
     # In android we got a Queue, and a manager list for others
@@ -658,7 +668,7 @@ class Satellite(BaseSatellite):
     def clean_previous_run(self):
         # Clean all lists
         self.schedulers.clear()
-        self.broks = self.broks[:]
+        self.broks.clear()
         self.external_commands = self.external_commands[:]
 
 
@@ -720,14 +730,14 @@ class Satellite(BaseSatellite):
         for mod in self.q_by_mod:
             for q in self.q_by_mod[mod].values():
                 total_q += q.qsize()
-        if total_q != 0 and wait_ratio < 5*self.polling_interval:
+        if total_q != 0 and wait_ratio < 2*self.polling_interval:
             print "I decide to up wait ratio"
             self.wait_ratio.update_load(wait_ratio * 2)
             #self.wait_ratio.update_load(self.polling_interval)
         else:
             # Go to self.polling_interval on normal run, if wait_ratio
-            # was >5*self.polling_interval,
-            # it make it come near 5 because if < 5, go up :)
+            # was >2*self.polling_interval,
+            # it make it come near 2 because if < 2, go up :)
             self.wait_ratio.update_load(self.polling_interval)
         wait_ratio = self.wait_ratio.get_load()
         print "Wait ratio:", wait_ratio

@@ -361,6 +361,7 @@ class Dispatcher:
                         #print "Want to give a satellites pack for the scheduler", satellites_for_sched
                         conf_package = (conf, override_conf, sched.modules, satellites_for_sched)
                         #print "Try to put the conf", conf_package
+                        
                         is_sent = sched.put_conf(conf_package)
                         if not is_sent:
                             logger.log('[%s] WARNING : configuration dispatching error for scheduler %s' %(r.get_name(), sched.get_name()))

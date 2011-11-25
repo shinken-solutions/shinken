@@ -438,5 +438,7 @@ if __name__ == "__main__":
     #print "Result", r
 
     cp = LSConnectionPool(['tcp:localhost:50000', 'tcp:localhost:50000'])
-    r = cp.launch_raw_query('GET hosts\nColumns name\n')
+    r = cp.launch_raw_query('GET hosts\nColumns name last_check\n')
     print "Result", r
+    import time
+    print int(time.time())

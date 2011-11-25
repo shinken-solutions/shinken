@@ -293,7 +293,7 @@ If instance is external also shutdown it cleanly """
                 except Exception, exp:
                     pass
                 if queue_size > self.max_queue_size:
-                    logger.log("Error : the external module %s got a too high brok queue size (%s > %s)!" % (inst.get_name()), queue_size, self.max_queue_size)
+                    logger.log("Error : the external module %s got a too high brok queue size (%s > %s)!" % (inst.get_name(), queue_size, self.max_queue_size))
                     logger.log("Setting the module %s to restart" % inst.get_name())
                     # We clean its queues, they are no more useful
                     inst.clear_queues(self.manager)
