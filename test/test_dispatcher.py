@@ -296,10 +296,10 @@ class TestDispatcher(ShinkenTest):
 
         # Now we really dispatch them!
         self.dispatcher.dispatch()
-        self.assert_(self.any_log_match('Dispatch OK of for conf in scheduler scheduler-all-1'))
-        self.assert_(self.any_log_match('Dispatch OK of for configuration 0 to reactionner reactionner-all-1'))
-        self.assert_(self.any_log_match('Dispatch OK of for configuration 0 to poller poller-all-1'))
-        self.assert_(self.any_log_match('Dispatch OK of for configuration 0 to broker broker-all-1'))
+        self.assert_(self.any_log_match('Dispatch OK of conf in scheduler scheduler-all-1'))
+        self.assert_(self.any_log_match('Dispatch OK of configuration 0 to reactionner reactionner-all-1'))
+        self.assert_(self.any_log_match('Dispatch OK of configuration 0 to poller poller-all-1'))
+        self.assert_(self.any_log_match('Dispatch OK of configuration 0 to broker broker-all-1'))
         self.clear_logs()
 
         # And look if we really dispatch conf as we should
@@ -490,12 +490,12 @@ class TestDispatcherMultiBroker(ShinkenTest):
 
         # Now we really dispatch them!
         self.dispatcher.dispatch()
-        self.assert_(self.any_log_match('Dispatch OK of for conf in scheduler scheduler-all-1'))
-        self.assert_(self.any_log_match('Dispatch OK of for configuration 0 to reactionner reactionner-all-1'))
-        self.assert_(self.any_log_match('Dispatch OK of for configuration 0 to poller poller-all-1'))
+        self.assert_(self.any_log_match('Dispatch OK of conf in scheduler scheduler-all-1'))
+        self.assert_(self.any_log_match('Dispatch OK of configuration 0 to reactionner reactionner-all-1'))
+        self.assert_(self.any_log_match('Dispatch OK of configuration 0 to poller poller-all-1'))
         
-        self.assert_(self.any_log_match('Dispatch OK of for configuration 1 to broker broker-all-1'))
-        self.assert_(self.any_log_match('Dispatch OK of for configuration 0 to broker broker-all-2'))
+        self.assert_(self.any_log_match('Dispatch OK of configuration 1 to broker broker-all-1'))
+        self.assert_(self.any_log_match('Dispatch OK of configuration 0 to broker broker-all-2'))
         self.clear_logs()
 
 
