@@ -1,6 +1,6 @@
-use centreon; 
+use CENTREON; 
 
-update centreon.cfg_nagios set 
+update CENTREON.cfg_nagios set 
 	log_file='TARGET/var/nagios.log',
 	cfg_dir='TARGET/etc/',
 	temp_file='TARGET/var/nagios.tmp',
@@ -14,18 +14,18 @@ update centreon.cfg_nagios set
 where 
 nagios_id = '1';
 
-update centreon.nagios_server set 
+update CENTREON.nagios_server set 
 	nagios_bin='TARGET/bin/nagios', 
 	init_script='/etc/init.d/shinken', 
 	nagios_perfdata='TARGET/var/service-perfdata' 
 where 
 id = '1';
 
-update centreon.options set value='TARGET' where `key`='nagios_path';
+update CENTREON.options set value='TARGET' where `key`='nagios_path';
 
-update centreon.options set value='TARGET/bin/nagios' where `key`='nagios_path_bin';
+update CENTREON.options set value='TARGET/bin/nagios' where `key`='nagios_path_bin';
 
-update centreon.options set value='/etc/init.d/shinken' where `key`='nagios_init_script';
+update CENTREON.options set value='/etc/init.d/shinken' where `key`='nagios_init_script';
 
-update centreon.cfg_cgi set main_config_file='TARGET/etc/nagios.cfg' where cgi_id=10;
+update CENTREON.cfg_cgi set main_config_file='TARGET/etc/nagios.cfg' where cgi_id=10;
 

@@ -844,9 +844,24 @@ function fixcentreondb(){
 	pass=$(cat /etc/centreon/conf.pm | grep "mysql_passwd" | awk '{print $3}' | sed -e "s/\"//g" -e "s/;//g")
 	db=$(cat /etc/centreon/conf.pm | grep "mysql_database_oreon" | awk '{print $3}' | sed -e "s/\"//g" -e "s/;//g")
 
-	cat $myscripts/centreon.sql | sed -e 's#TARGET#'$TARGET'#g' > /tmp/centreon.sql
+	cp $myscripts/centreon.sql /tmp/centreon.sql
+	sed -i 's#TARGET#'$TARGET'#g' /tmp/centreon.sql
+	sed -i 's#CENTREON#'$db'#g' /tmp/centreon.sql
 
-	mysql -h $host -u $user -p$pass $db < /tmp/centreon.sql
+	if [ -z "$pass" ]
+	then
+		mysql -h $host -u $user $db < /tmp/centreon.sql
+	else
+		mysql -h $host -u $user -p$pass $db < /tmp/centreon.sql
+	fi
+}
+
+function fixforfan(){
+	if [ ! -z "cat /etc/issue | grep FAN" ]
+	then
+		chown -R apache:nagios $TARGET/etc
+		chmod -R g+rw $TARGET/etc/*
+	fi
 }
 
 function pythonver(){
@@ -1095,6 +1110,7 @@ while getopts "kidubcr:lz:hsvp:we:j:" opt; do
             if [ "$mode" = "centreon" ]
             then
                 fixcentreondb
+		fixforfan
                 enablendodb
                 enableretention
                 enableperfdata
