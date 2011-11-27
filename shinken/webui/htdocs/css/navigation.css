@@ -1,0 +1,25 @@
+#mainmenu{
+	margin: 0;
+	padding: 0;
+	float: left;
+	width: 100%;
+	overflow: hidden;
+	background: #222222;
+}
+
+#mainmenu li{
+	display: inline;
+}
+
+#mainmenu li a{
+	float: left;
+	color: #636363;
+	padding: 9px 11px;
+	text-decoration: none;
+	font-size: 14px;
+}
+
+#mainmenu li a:hover, #mainmenu li .current{
+	color: white;
+	background: transparent url(/static/images/pointer.gif) bottom center no-repeat;
+}
