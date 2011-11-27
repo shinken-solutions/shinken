@@ -255,6 +255,14 @@ td.actions a {
  *  Classes: General
  * ----------------------------------------------------------------*/
 
+.left {
+	float:left;
+}
+
+.right {
+	float:right;
+}
+
 .box_gradient_vertical {
 	background-color: #DDE1EC;
 	background-image: -webkit-gradient(linear, left top, left bottom, from(#DDE1EC), to(#FFFFFF)); /* Saf4+, Chrome */
