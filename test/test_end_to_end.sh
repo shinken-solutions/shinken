@@ -316,7 +316,7 @@ print_date
 #First we look is the arbiter saw the scheduler as dead
 string_in_file "Warning : Scheduler scheduler-Master had the configuration 0 but is dead, I am not happy." $VAR/nagios.log
 #Then we look if the scheduler-spare got a conf from arbiter (here, view from the arbiter)
-string_in_file "Dispatch OK of for conf in scheduler scheduler-Spare" $VAR/nagios.log
+string_in_file "Dispatch OK of conf in scheduler scheduler-Spare" $VAR/nagios.log
 
 #then is the broker know it and try to connect to the new scheduler-spare
 string_in_file "\[broker-Master\] Connection OK to the scheduler scheduler-Spare" $VAR/nagios.log
@@ -332,7 +332,7 @@ print_date
 #The master should be look dead
 string_in_file "Warning : The poller poller-Master seems to be down, I must re-dispatch its role to someone else." $VAR/nagios.log
 #The spare should got the conf
-string_in_file "\[All\] Dispatch OK of for configuration 0 to poller poller-Slave" $VAR/nagios.log
+string_in_file "\[All\] Dispatch OK of configuration 0 to poller poller-Slave" $VAR/nagios.log
 #And he should got the scheduler link (the sapre one)
 string_in_file "\[poller-Slave\] Connection OK with scheduler scheduler-Spare" $VAR/nagios.log
 
@@ -346,7 +346,7 @@ print_date
 #The master should be look dead
 string_in_file "\[All\] Warning : The reactionner reactionner-Master seems to be down, I must re-dispatch its role to someone else." $VAR/nagios.log
 #The spare should got the conf
-string_in_file "\[All\] Dispatch OK of for configuration 0 to reactionner reactionner-Spare" $VAR/nagios.log
+string_in_file "\[All\] Dispatch OK of configuration 0 to reactionner reactionner-Spare" $VAR/nagios.log
 #And he should got the scheduler link (the sapre one)
 string_in_file "\[reactionner-Spare\] Connection OK with scheduler scheduler-Spare" $VAR/nagios.log
 
@@ -360,7 +360,7 @@ print_date
 #The master should be look dead
 string_in_file "\[All\] Warning : The broker broker-Master seems to be down, I must re-dispatch its role to someone else." $VAR/nagios.log
 #The spare should got the conf
-string_in_file "\[All\] Dispatch OK of for configuration 0 to broker broker-Slave" $VAR/nagios.log
+string_in_file "\[All\] Dispatch OK of configuration 0 to broker broker-Slave" $VAR/nagios.log
 #And he should got the scheduler link (the spare one)
 string_in_file "\[broker-Slave\] Connection OK to the scheduler scheduler-Spare" $VAR/nagios.log
 #And to other satellites
@@ -414,8 +414,8 @@ echo "All launch of LB daemons is OK"
 
 
 #Now look if it's also good in the log file too
-string_in_file "Dispatch OK of for conf in scheduler scheduler-Master-2" $VAR/nagios.log
-string_in_file "Dispatch OK of for conf in scheduler scheduler-Master-1" $VAR/nagios.log
+string_in_file "Dispatch OK of conf in scheduler scheduler-Master-2" $VAR/nagios.log
+string_in_file "Dispatch OK of conf in scheduler scheduler-Master-1" $VAR/nagios.log
 string_in_file "OK, no more reactionner sent need" $VAR/nagios.log
 string_in_file "OK, no more poller sent need" $VAR/nagios.log
 string_in_file "OK, no more broker sent need" $VAR/nagios.log
@@ -465,8 +465,8 @@ echo "All launch of LB daemons is OK"
 
 
 #Now look if it's also good in the log file too
-string_in_file "Dispatch OK of for conf in scheduler scheduler-Master-2" $VAR/nagios.log
-string_in_file "Dispatch OK of for conf in scheduler scheduler-Master-1" $VAR/nagios.log
+string_in_file "Dispatch OK of conf in scheduler scheduler-Master-2" $VAR/nagios.log
+string_in_file "Dispatch OK of conf in scheduler scheduler-Master-1" $VAR/nagios.log
 string_in_file "OK, no more reactionner sent need" $VAR/nagios.log
 string_in_file "OK, no more poller sent need" $VAR/nagios.log
 string_in_file "OK, no more broker sent need" $VAR/nagios.log
@@ -519,7 +519,7 @@ echo "All launch of LB daemons is OK"
 
 
 #Now look if it's also good in the log file too
-string_in_file "Dispatch OK of for conf in scheduler scheduler-1" $VAR/nagios.log
+string_in_file "Dispatch OK of conf in scheduler scheduler-1" $VAR/nagios.log
 string_in_file "OK, no more reactionner sent need" $VAR/nagios.log
 string_in_file "OK, no more poller sent need" $VAR/nagios.log
 string_in_file "OK, no more broker sent need" $VAR/nagios.log
@@ -536,7 +536,7 @@ sleep 120
 
 
 string_in_file "Warning : Scheduler scheduler-1 did not managed its configuration 0,I am not happy." $VAR/nagios.log
-string_in_file "Dispatch OK of for conf in scheduler scheduler-1" $VAR/nagios.log
+string_in_file "Dispatch OK of conf in scheduler scheduler-1" $VAR/nagios.log
 string_in_file "We already got the conf 0 (scheduler-1)" $VAR/nagios.log
 
 echo "Now we clean it"
