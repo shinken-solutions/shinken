@@ -10,7 +10,7 @@ import smtplib
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hnsHariotS:v", ["help", "notification=", "servicedesc", "hostname", "hostaddress", "servicestate", "shortdatetime", "output", "to", "sender" ])
+        opts, args = getopt.getopt(sys.argv[1:], "hnsHariotS:v", ["help", "notification", "servicedesc", "hostname", "hostaddress", "servicestate", "shortdatetime", "output", "to", "sender" ])
     except getopt.GetoptError, err:
         # print help information and exit:
         print str(err) 
