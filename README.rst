@@ -61,12 +61,22 @@ If you want to remove shinken, just run :
 
   shinken.sh -d
 
+
+How to update
+=========================
+If you used the setup.py way, launch :
+    sudo python setup.py update --install-scripts=/usr/bin/
+
+If you used the shinken.sh way :
+   shinken.sh -u
+
+
 Requirements
 =========================
 
 `shinken` requires
 
-* `Python`__ 2.4 or higher (Python 2.6 or higher is recommended)
+* `Python`__ 2.4 or higher (Python 2.6 or higher is recommended if you want to use the Web interface)
 * `setuptools`__ or `distribute`__ for installation (see below).
 * `Pyro`__
 * `multiprocessing` Python package when using Python 2.4 or 2.5
@@ -76,7 +86,7 @@ __ http://www.python.org/download/
 __ pyro
 __ http://pypi.python.org/pypi/multiprocessing/
 
-If (and only if) you plan to use the `livestatus` module, I'll also
+If (and only if) you plan to use the `livestatus` module or the web interface, I'll also
 need
 
 * `simplejson`__ 
