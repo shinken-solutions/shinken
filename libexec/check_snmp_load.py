@@ -25,8 +25,7 @@ from time import time
 def usage():
     print 'Usage :'
     print sys.argv[0] + ' -H <hostaddress> -C <community> -w <load1,load5,load15> -c <load1,load5,load15>'
-#    print '-p --port : snmp port by default 161' 
-
+    print '-p --port : snmp port by default 161' 
 #
 # Main
 #
@@ -34,7 +33,7 @@ def usage():
 def main():
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hHCwcp:v", ["help", "hostaddress", "community", "warning", "critical", "port" ])
+        opts, args = getopt.getopt(sys.argv[1:], "hHCwcpt:v", ["help", "hostaddress", "community", "warning", "critical", "port", "timeout" ])
     except getopt.GetoptError, err:
         # print help information and exit:
         print str(err) 
@@ -59,10 +58,10 @@ def main():
             notification = a
         elif o in ("-p", "--port"):
             notification = a
+        elif o in ("-t", "--timeout"):
+            notification = a
 	else :
 	    assert False , "unknown options"
-
-
 
 if __name__ == "__main__":
     main()
@@ -71,17 +70,18 @@ if __name__ == "__main__":
     parser.add_argument('-C', '--community')
     parser.add_argument('-w', '--warning')
     parser.add_argument('-c', '--critical')
-    parser.add_argument('-p', '--port')
+    parser.add_argument('-p', '--port', default = 161)
+    parser.add_argument('-t', '--timeout', default = 5)
     args = parser.parse_args()
 
     hostaddress = args.hostaddress
     community = args.community
     warning = args.warning
     critical = args.critical
-	
-#    port = int(args.port[1:-1])
-    port = 161	
 
+    port = int(args.port)
+    timeout = int(args.timeout)
+    	 
     # Protocol version to use
     pMod = api.protoModules[api.protoVersion1]
     
@@ -101,7 +101,7 @@ if __name__ == "__main__":
     pMod.apiMessage.setPDU(reqMsg, reqPDU)
     
     def cbTimerFun(timeNow, startedAt=time()):
-        if timeNow - startedAt > 5 :
+        if timeNow - startedAt > timeout :
             raise "Request timed out"
         
     def cbRecvFun(transportDispatcher, transportDomain, transportAddress,
@@ -116,11 +116,15 @@ if __name__ == "__main__":
                 if errorStatus:
                     print errorStatus.prettyPrint()
                 else:
+                    #for oid, val in pMod.apiPDU.getVarBinds(rspPDU):
+                    #    print 'Load : %s' % (val.prettyPrint()) 
                     for oid, val in pMod.apiPDU.getVarBinds(rspPDU):
                         print 'Load : %s' % (val.prettyPrint()) 
+			
                 transportDispatcher.jobFinished(1)
-        return wholeMsg
+        return wholeMsg 
     
+
     transportDispatcher = AsynsockDispatcher()
     transportDispatcher.registerTransport(
         udp.domainName, udp.UdpSocketTransport().openClientMode()
@@ -133,4 +137,4 @@ if __name__ == "__main__":
     transportDispatcher.jobStarted(1)
     transportDispatcher.runDispatcher()
     transportDispatcher.closeDispatcher()
-
+    
