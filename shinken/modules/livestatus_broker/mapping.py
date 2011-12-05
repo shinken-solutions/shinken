@@ -8,6 +8,39 @@ from shinken.util import from_bool_to_int, from_float_to_int, to_int, to_split, 
 
 
 
+def join_with_separators(prop, ref, request, *args):
+    if request.response.outputformat == 'csv':
+        return request.response.separators[3].join([str(arg) for arg in args])
+    elif request.response.outputformat == 'json' or request.response.outputformat == 'python':
+        return args
+    else:
+        return None
+    pass
+
+
+def worst_host_state(state_1, state_2):
+    """Return the worst of two host states."""
+    #lambda x: reduce(lambda g, c: c if g == 0 else (c if c == 1 else g), (y.state_id for y in x), 0),
+    if state_2 == 0:
+        return state_1
+    if state_1 == 1:
+        return state_1
+    return state_2
+
+
+def worst_service_state(state_1, state_2):
+    """Return the worst of two service states."""
+    #reduce(lambda g, c: c if g == 0 else (c if c == 2 else (c if (c == 3 and g != 2) else g)), (z.state_id for y in x for z in y.services if z.state_type_id == 1), 0),
+    if state_2 == 0:
+        return state_1
+    if state_1 == 2:
+        return state_1
+    if state_1 == 3 and state_2 != 2:
+        return state_1
+    return state_2
+
+
+
 def find_pnp_perfdata_xml(name, ref, request):
     """Check if a pnp xml file exists for a given host or service name."""
     if request.pnp_path_readable:
@@ -528,12 +561,16 @@ out_map = {
                 'type' : 'int',
             },
             'worst_service_hard_state' : {
+                'depythonize' : lambda y: reduce(worst_service_state, (z.state_id for z in y if z.state_type_id == 1), 0),
                 'description' : 'The worst hard state of all of the host\'s services (OK <= WARN <= UNKNOWN <= CRIT)',
-                'type' : 'list',
+                'prop' : 'services',
+                'type' : 'int',
             },
             'worst_service_state' : {
+                'depythonize' : lambda y: reduce(worst_service_state, (z.state_id for z in y), 0),
                 'description' : 'The worst soft state of all of the host\'s services (OK <= WARN <= UNKNOWN <= CRIT)',
-                'type' : 'list',
+                'prop' : 'services',
+                'type' : 'int',
             },
             'x_3d' : {
                 'description' : '3D-Coordinates: X',
