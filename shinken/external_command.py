@@ -290,7 +290,19 @@ class ExternalCommandManager:
         #Only log if we are in the Arbiter
         if self.mode == 'dispatcher' and self.conf.log_external_commands:
             logger.log('EXTERNAL COMMAND: '+command.rstrip())
-        self.get_command_and_args(command)
+        r = self.get_command_and_args(command)
+        if r is not None:
+            is_global = r['global']
+            if not is_global:
+                c_name = r['c_name']
+                args = r['args']
+                print "Got commands", c_name, args
+                f = getattr(self, c_name)
+                apply(f, args)
+            else:
+                command = r['command']
+                self.dispatch_global_command(command)
+
 
 
     #Ok the command is not for every one, so we search
@@ -306,7 +318,8 @@ class ExternalCommandManager:
                     host_found = True
                     sched = cfg.assigned_to
                     safe_print("Sending command to the scheduler", sched.get_name())
-                    sched.run_external_command(command)
+                    #sched.run_external_command(command)
+                    sched.external_commands.append(command)
                     break
                 else:
                     print "Problem: a configuration is found, but is not assigned!"
@@ -315,29 +328,30 @@ class ExternalCommandManager:
                 #print "Sorry but the host", host_name, "was not found"
 
 
-    #The command is global, so sent it to every schedulers
+    # The command is global, so sent it to every schedulers
     def dispatch_global_command(self, command):
         for sched in self.conf.schedulerlinks:
             safe_print("Sending a command", command, 'to scheduler', sched)
-            if sched.alive:
-                sched.run_external_command(command)
+            if sched.alive:                
+                #sched.run_external_command(command)
+                sched.external_commands.append(command)
 
 
     #We need to get the first part, the command name
     def get_command_and_args(self, command):
-        safe_print("Trying to resolve", command)
+        #safe_print("Trying to resolve", command)
         command = command.rstrip()
         elts = command.split(';') # danger!!! passive checkresults with perfdata
         part1 = elts[0]
 
         elts2 = part1.split(' ')
-        print "Elts2:", elts2
+        #print "Elts2:", elts2
         if len(elts2) != 2:
             safe_print("Malformed command", command)
             return None
         c_name = elts2[1]
 
-        safe_print("Get command name", c_name)
+        #safe_print("Get command name", c_name)
         if c_name not in ExternalCommandManager.commands:
             print "This command is not recognized, sorry"
             return None
@@ -361,12 +375,12 @@ class ExternalCommandManager:
         if self.mode == 'dispatcher' and entry['global']:
             if not internal:
                 print "This command is a global one, we resent it to all schedulers"
-                self.dispatch_global_command(command)
-                return None
+                return {'global' : True, 'cmd' : command}
+        
 
-        print "Is global?", c_name, entry['global']
-        print "Mode:", self.mode
-        print "This command have arguments:", entry['args'], len(entry['args'])
+        #print "Is global?", c_name, entry['global']
+        #print "Mode:", self.mode
+        #print "This command have arguments:", entry['args'], len(entry['args'])
 
         args = []
         i = 1
@@ -374,16 +388,16 @@ class ExternalCommandManager:
         tmp_host = ''
         try:
             for elt in elts[1:]:
-                safe_print("Searching for a new arg:", elt, i)
+                #safe_print("Searching for a new arg:", elt, i)
                 val = elt.strip()
                 if val[-1] == '\n':
                     val = val[:-1]
 
-                safe_print("For command arg", val)
+                #safe_print("For command arg", val)
 
                 if not in_service:
                     type_searched = entry['args'][i-1]
-                    safe_print("Search for a arg", type_searched)
+                    #safe_print("Search for a arg", type_searched)
 
                     if type_searched == 'host':
                         if self.mode == 'dispatcher':
@@ -439,7 +453,7 @@ class ExternalCommandManager:
                     elif type_searched == 'service':
                         in_service = True
                         tmp_host = elt.strip()
-                        safe_print("TMP HOST", tmp_host)
+                        #safe_print("TMP HOST", tmp_host)
                         if tmp_host[-1] == '\n':
                             tmp_host = tmp_host[:-1]
                             #If
@@ -453,7 +467,7 @@ class ExternalCommandManager:
                     srv_name = elt
                     if srv_name[-1] == '\n':
                         srv_name = srv_name[:-1]
-                    safe_print("Got service full", tmp_host, srv_name)
+                    #safe_print("Got service full", tmp_host, srv_name)
                     s = self.services.find_srv_by_name_and_hostname(tmp_host, srv_name)
                     if s is not None:
                         args.append(s)
@@ -465,11 +479,13 @@ class ExternalCommandManager:
             return None
         safe_print('Finally got ARGS:', args)
         if len(args) == len(entry['args']):
-            safe_print("OK, we can call the command", c_name, "with", args)
-            f = getattr(self, c_name)
-            apply(f, args)
+            #safe_print("OK, we can call the command", c_name, "with", args)
+            return {'global' : False, 'c_name' : c_name, 'args' : args}
+            #f = getattr(self, c_name)
+            #apply(f, args)
         else:
             safe_print("Sorry, the arguments are not corrects", args)
+            return None
 
 
 

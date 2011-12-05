@@ -486,13 +486,13 @@ class SchedulingItem(Item):
         if (not self.active_checks_enabled or not cls.execute_checks) and not force:
             return None
 
-        # If the check_interval is 0, we should not add it for a service
-        # but suppoe a 5min sched for hosts
+        # If check_interval is 0, we should not add it for a service
+        # but suppose a 5min sched for hosts
         if self.check_interval == 0 and not force:
             if cls.my_type == 'service':
                 return None
             else: # host
-                self.check_interval = 5
+                self.check_interval = 300 / cls.interval_length
 
         # Interval change is in a HARD state or not
         # If the retry is 0, take the normal value

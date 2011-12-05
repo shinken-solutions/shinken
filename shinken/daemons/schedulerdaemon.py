@@ -96,8 +96,8 @@ HE got user entry, so we must listen him carefully and give information he want,
 
     #arbiter is send us a external coomand.
     #it can send us global command, or specific ones
-    def run_external_command(self, command):
-        self.app.sched.run_external_command(command)
+    def run_external_commands(self, cmds):
+        self.app.sched.run_external_commands(cmds)
 
     def put_conf(self, conf):
         self.app.sched.die()

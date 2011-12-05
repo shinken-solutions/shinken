@@ -34,7 +34,7 @@ from shinken.daemon import Daemon, Interface
 from shinken.log import logger
 from shinken.brok import Brok
 from shinken.external_command import ExternalCommand
-
+from shinken.util import safe_print
 
 # Interface for the other Arbiter
 # It connects, and together we decide who's the Master and who's the Slave, etc.
@@ -539,6 +539,23 @@ class Arbiter(Daemon):
                 self.must_run = True
                 break
 
+    # Take all external commands, make packs and send them to
+    # the schedulers
+    def push_external_commands_to_schedulers(self):
+        # Now get all external commands and put them into the
+        # good schedulers
+        for ext_cmd in self.external_commands:
+            self.external_command.resolve_command(ext_cmd)
+
+        # Now for all alive schedulers, send the commands
+        for sched in self.conf.schedulerlinks:
+            cmds = sched.external_commands
+            if len(cmds) > 0 and sched.alive:
+                safe_print("Sending %d commands" % len(cmds), 'to scheduler', sched.get_name())
+                sched.run_external_commands(cmds)
+            # clean them
+            sched.external_commands = []
+
 
     # Main function
     def run(self):
@@ -628,9 +645,8 @@ class Arbiter(Daemon):
                 print "Nb Broks send:", self.nb_broks_send
             self.nb_broks_send = 0
 
-            # Now send all external commands to schedulers
-            for ext_cmd in self.external_commands:
-                self.external_command.resolve_command(ext_cmd)
+            self.push_external_commands_to_schedulers()
+
             # It's send, do not keep them
             # TODO: check if really send. Queue by scheduler?
             self.external_commands = []
