@@ -46,6 +46,7 @@ class SchedulerLink(SatelliteLink):
     running_properties.update({
         'conf':      StringProp(default=None),
         'need_conf': StringProp(default=True),
+        'external_commands' : StringProp(default=[]),
     })
 
 
@@ -53,14 +54,14 @@ class SchedulerLink(SatelliteLink):
         return self.scheduler_name
 
 
-    def run_external_command(self, command):
+    def run_external_commands(self, commands):
         if self.con is None:
             self.create_connection()
         if not self.alive:
             return None
-        safe_print("Send command", command)
+        safe_print("Send %d commands", len(commands))
         try:
-            self.con.run_external_command(command)
+            self.con.run_external_commands(commands)
         except Pyro.errors.URIError , exp:
             self.con = None
             return False

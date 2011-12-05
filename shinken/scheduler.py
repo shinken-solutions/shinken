@@ -195,6 +195,10 @@ class Scheduler:
 
 
     # We've got activity in the fifo, we get and run commands
+    def run_external_commands(self, cmds):
+        for command in cmds:
+            self.run_external_command(command)
+
     def run_external_command(self, command):
         safe_print("scheduler resolves command", command)
         ext_cmd = ExternalCommand(command)
