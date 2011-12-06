@@ -19,8 +19,8 @@ def usage():
     print 'Usage :'
     print sys.argv[0] + ' -w <load1,load5,load15> -c <load1,load5,load15>'
     print '-p --port : snmp port by default 161' 
-    print '   -c (--critical)      Three critical tresholds (defaults : 2,4,6)\n';
-    print '   -w (--warning)       Three warning tresholds (defaults : 1,3,5)\n';
+    print '   -c (--critical)      Three critical tresholds (defaults : 4,3,2)\n';
+    print '   -w (--warning)       Three warning tresholds (defaults : 3,2,1)\n';
     print '   -h (--help)          Usage help\n';
 #
 # Main
