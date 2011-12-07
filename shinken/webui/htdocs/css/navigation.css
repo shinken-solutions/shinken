@@ -8,15 +8,15 @@
     padding-bottom: 1px
 }
 
-#menu {
+#menu, #dropmenu {
 	list-style:none;
 	margin:0px auto 0px auto;
 	height:43px;
-	padding:0px 20px 0px 20px;
+	padding:0px;
 	background: #222222;
 }
 
-#menu li {
+#menu li, #dropmenu li {
 	float:left;
 	text-align:center;
 	position:relative;
@@ -25,8 +25,11 @@
 	margin-top:7px;
 	border:none;
 }
-
-#menu li:hover  {
+#menu li a:hover, #menu li .selected{
+	color: white;
+	background: transparent url(/static/images/pointer.gif) bottom center no-repeat;
+}
+#dropmenu li:hover  {
 	border: 1px solid #777777;
 	padding: 4px 9px 4px 9px;
 	
@@ -43,8 +46,7 @@
 	border-radius: 5px 5px 0px 0px;
 }
 
-#menu li a {
-	font-family:Arial, Helvetica, sans-serif;
+#menu li a, #dropmenu li a {
 	font-size:14px;
 	color: #EEEEEE;
 	display:block;
@@ -52,15 +54,15 @@
 	text-decoration:none;
 }
 
-#menu li:hover a {
+#dropmenu li:hover a {
 	color:#161616;
 	text-shadow: 1px 1px 1px #FFFFFF;
 }
-#menu li .drop {
+#dropmenu li .drop {
 	padding-right:21px;
 	background:url("/static/images/icons/drop2.png") no-repeat right 8px;
 }
-#menu li:hover .drop {
+#dropmenu li:hover .drop {
 	background:url("/static/images/icons/drop.png") no-repeat right 7px;
 }
 
@@ -97,11 +99,11 @@
 .dropdown_4columns {width: 560px;}
 .dropdown_5columns {width: 700px;}
 
-#menu li:hover .dropdown_1column,
-#menu li:hover .dropdown_2columns,
-#menu li:hover .dropdown_3columns,
-#menu li:hover .dropdown_4columns,
-#menu li:hover .dropdown_5columns {
+#dropmenu li:hover .dropdown_1column,
+#dropmenu li:hover .dropdown_2columns,
+#dropmenu li:hover .dropdown_3columns,
+#dropmenu li:hover .dropdown_4columns,
+#dropmenu li:hover .dropdown_5columns {
 	left:-1px;
     top:auto;
 }
@@ -127,17 +129,17 @@
 
 /* Right alignment */
 
-#menu .menu_right {
+#dropmenu .menu_right {
 	float:right;
 	margin-right:0px;
 }
-#menu li .align_right {
+#dropmenu li .align_right {
 	/* Rounded Corners */
 	-moz-border-radius: 5px 0px 5px 5px;
     -webkit-border-radius: 5px 0px 5px 5px;
     border-radius: 5px 0px 5px 5px;
 }
-#menu li:hover .align_right {
+#dropmenu li:hover .align_right {
 	left:auto;
 	right:-1px;
 	top:auto;

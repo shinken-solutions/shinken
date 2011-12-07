@@ -1,20 +1,18 @@
 %if not 'app' in locals() : app = None
+<div id="navigation">
+	<ul id="menu" class="grid_12">
+		%menu = [ ('/', 'Dashboard'), ('/impacts','Impacts'), ('/problems','IT problems'), ('/all', 'All'), ('/system', 'System') ]
+	    	%for (key, value) in menu:
+	        %# Check for the selected element, if there is one
+		        %if menu_part == key:
+				 	<li><a href="{{key}}" id="selected">{{value}}</a></li>
+			     %else:
+			        <li class="normal"><a href="{{key}}">{{value}}</a></li>
+			    %end
+	        %end
+	</ul>
 
-<ul id="menu">
-
-                %menu = [ ('/', 'Dashboard'), ('/impacts','Impacts'), ('/problems','IT problems'), ('/all', 'All'), ('/system', 'System') ]
-                %for (key, value) in menu:
-
-                            %# Check for the selected element, if there is one
-                                %if menu_part == key:
-                                        <li><a href="{{key}}" id="selected">{{value}}</a></li>
-                                        %else:
-                                                <li class="normal"><a href="{{key}}">{{value}}</a></li>
-                                        %end
-                                %end
-
-
-
+<ul id="dropmenu" class="grid_4">
     <li class="menu_right"><a href="#" class="drop">Impacts <span class="tac_impacts">1 / 2 /3</span></a><!-- Begin 3 columns Item -->
 
         <div class="dropdown_3columns align_right"><!-- Begin 3 columns container -->
@@ -76,4 +74,5 @@
     </li><!-- End 3 columns Item -->
 
 </ul>
+</div>
 <div class="clear"></div>
