@@ -2,10 +2,16 @@
 	background: #FFFFFF;
 	color: #777777;
     border-radius: 8px 8px 8px 8px;
+    -moz-border-radius: 8px;
     border-top: 1px solid #CCCCCC;
     padding-left: 5px;
     padding-right: 5px;
     padding-bottom: 1px
+}
+
+#navigation {
+	height:43px;
+	background: #222222;
 }
 
 #menu, #dropmenu {
@@ -25,7 +31,7 @@
 	margin-top:7px;
 	border:none;
 }
-#menu li a:hover, #menu li .selected{
+#menu li a:hover, #menu li a .selected {
 	color: white;
 	background: transparent url(/static/images/pointer.gif) bottom center no-repeat;
 }

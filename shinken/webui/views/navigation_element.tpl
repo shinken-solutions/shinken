@@ -7,12 +7,12 @@
 		        %if menu_part == key:
 				 	<li><a href="{{key}}" id="selected">{{value}}</a></li>
 			     %else:
-			        <li class="normal"><a href="{{key}}">{{value}}</a></li>
+			        <li><a href="{{key}}">{{value}}</a></li>
 			    %end
 	        %end
 	</ul>
 
-<ul id="dropmenu" class="grid_4">
+<ul id="dropmenu" class="grid_4 right">
     <li class="menu_right"><a href="#" class="drop">Impacts <span class="tac_impacts">1 / 2 /3</span></a><!-- Begin 3 columns Item -->
 
         <div class="dropdown_3columns align_right"><!-- Begin 3 columns container -->
