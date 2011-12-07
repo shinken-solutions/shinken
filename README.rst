@@ -68,7 +68,11 @@ If you used the setup.py way, launch :
     sudo python setup.py update --install-scripts=/usr/bin/
 
 If you used the shinken.sh way :
-   shinken.sh -u
+there is curently no simple way to do this :
+1 - backup the var etc and plugins folder 
+2 - remove shinken (shinken -d)
+3 - install shinken (shinken -i)
+4 - restore the backups
 
 
 Requirements
