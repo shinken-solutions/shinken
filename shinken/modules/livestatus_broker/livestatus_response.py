@@ -68,6 +68,8 @@ class LiveStatusResponse:
         showheader = False
         #print "my result is", result
         print "outputformat", self.outputformat
+        stdout_encoding = sys.getdefaultencoding()
+        #stdout_encoding = "UTF-8"
         if self.outputformat == 'csv':
             if len(columns) == 0:
                 # There is no pre-selected list of columns. In this case
@@ -78,6 +80,8 @@ class LiveStatusResponse:
                     for x in [object[c] for c in sorted(object.keys())]:
                         if isinstance(x, list):
                             l.append(self.separators[2].join(str(y) for y in x))
+                        elif isinstance(x, basestring):
+                            l.append(x.encode(stdout_encoding, 'replace'))
                         else:
                             l.append(str(x))
                     lines.append(self.separators[1].join(l))
@@ -88,6 +92,8 @@ class LiveStatusResponse:
                     for x in [object[c] for c in columns]:
                         if isinstance(x, list):
                             l.append(self.separators[2].join(str(y) for y in x))
+                        elif isinstance(x, basestring):
+                            l.append(x.encode(stdout_encoding, 'replace'))
                         else:
                             l.append(str(x))
                     lines.append(self.separators[1].join(l))
