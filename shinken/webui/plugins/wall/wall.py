@@ -75,13 +75,13 @@ def get_page():
     #all_imp_impacts = app.datamgr.get_services()#important_elements()
 
 
-    impacts = []
-    for imp in all_imp_impacts:
-        safe_print("FIND A BAD SERVICE IN IMPACTS", imp.get_dbg_name())
-        d = {'name' : imp.get_full_name().encode('utf8', 'ignore'),
-             "title": "My Image 3", "thumb": "/static/images/state_flapping.png", "zoom": "/static/images/state_flapping.png",
-             "html" : get_div(imp)}
-        impacts.append(d)
+    impacts = all_imp_impacts
+#    for imp in all_imp_impacts:
+#        safe_print("FIND A BAD SERVICE IN IMPACTS", imp.get_dbg_name())
+#        d = {'name' : imp.get_full_name().encode('utf8', 'ignore'),
+#             "title": "My Image 3", "thumb": "/static/images/state_flapping.png", "zoom": "/static/images/state_flapping.png",
+#             "html" : get_div(imp)}
+#        impacts.append(d)
     
     # Got in json format
     #j_impacts = json.dumps(impacts)

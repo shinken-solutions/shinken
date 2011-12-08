@@ -58,7 +58,7 @@ div.cell
 	-webkit-transform: translate3d(0, 0, 0);
 }
 
-div.cell .media
+.media
 {
 	display: block;
 	width: 250px; 
