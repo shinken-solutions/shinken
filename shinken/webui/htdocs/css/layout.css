@@ -65,8 +65,8 @@ body {
 
 #navigation {
 	margin-left: 0;
-    margin-right: 0;
-    width: 100%;
+    	margin-right: 0;
+    	width: 100%;
 }
 
 /* ----------------------------------------------------------------
@@ -77,8 +77,8 @@ body {
 	background: #FFFFFF;
 	min-height: 700px;
 	margin-left: 0;
-    margin-right: 0;
-    width: 100%;
+    	margin-right: 0;
+    	width: 100%;
 }
 
 /* ----------------------------------------------------------------
@@ -99,8 +99,8 @@ body {
 	background: #787878;
 	height: 20px;
 	margin-left: 0;
-    margin-right: 0;
-    width: 100%;
+   	 margin-right: 0;
+    	width: 100%;
 }
 
 /* ----------------------------------------------------------------
@@ -196,7 +196,7 @@ table {
 	clear: both;
 	color: #787878;
 	margin-bottom: 10px;
-	width: 80%;
+	width: 100%;
 }
 
 tbody {
