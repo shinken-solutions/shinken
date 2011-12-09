@@ -40,6 +40,7 @@ class DependencyNode(object):
         self.of_values = (0,0,0)
         self.is_of_mul = False
         self.configuration_errors = []
+        self.not_value = False
 
     def __str__(self):
         return "Op:'%s' Val:'%s' Sons:'[%s]'" % (self.operand, self.of_values, ','.join([str(s) for s in self.sons]))
@@ -58,6 +59,19 @@ class DependencyNode(object):
             # Make DOWN look as CRITICAL (2 instead of 1)
             if self.operand == 'host' and state == 1:
                 state = 2
+            # Maybe we are a NOT node, so manage this
+            if self.not_value:
+                # We inverse our states
+                if self.operand == 'host' and state == 1:
+                    return 0
+                if self.operand == 'host' and state == 0:
+                    return 1
+                #Critical -> OK
+                if self.operand == 'service' and state == 2:
+                    return 0
+                #OK -> CRITICAL (warning is untouched)
+                if self.operand == 'service' and state == 0:
+                    return 2
             return state
 
         # First we get the state of all our sons
@@ -220,6 +234,11 @@ class DependencyNodeFactory(object):
         # if it's a single host/service
         if not complex_node:
             #print "Try to find?", patern
+            # If it's a not value, tag the node and find
+            # the namewithout this ! operator
+            if patern.startswith('!'):
+                node.not_value = True
+                patern = patern[1:]
             node.operand = 'object'
             obj, error = self.find_object(patern, hosts, services)
             if obj is not None:
