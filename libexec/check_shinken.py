@@ -28,6 +28,8 @@
 ################################################
 
 import os
+import sys
+import socket
 
 # Exit statuses recognized by Nagios and thus by Shinken
 OK = 0
@@ -39,6 +41,8 @@ UNKNOWN = 3
 PYRO_OBJECT = 'ForArbiter'
 daemon_types = ['arbiter', 'broker', 'scheduler', 'poller', 'reactionner']
 
+
+# Try to import all Shinken stuff
 try:
     import shinken
 except ImportError:
@@ -55,8 +59,8 @@ try:
     import shinken.pyro_wrapper as pyro
     from shinken.pyro_wrapper import Pyro
 except ImportError, exp:
-    print 'CRITICAL : check_shinken requires the Python Pyro and the shinken.pyro_wrapper module. Please install it. (%s)' % exp
-    raise SystemExit, CRITICAL
+    print 'CRITICAL : check_shinken requires the Python Pyro module. Please install it. (%s)' % exp
+    sys.exit(CRITICAL)
 
 
 def check_deamons_numbers(result, target):
@@ -80,6 +84,7 @@ def check_deamons_numbers(result, target):
         print "OK - %d/%d %s(s) UP, with %d/%d spare(s) UP" % (alive_number, total_number, target, alive_spare_number, total_spare_number)
         raise SystemExit, OK
 
+    
 # Adding options. None are required, check_shinken will use shinken defaults
 #TODO : Add more control in args problem and usage than the default OptionParser one
 parser = OptionParser()
@@ -93,6 +98,7 @@ parser.add_option('-d', '--daemonname', dest='daemon', default='')
 parser.add_option('-w','--warning', dest='warning', default = 1)
 #If no deamon is left, display a critical (but shinken will be probably dead already)
 parser.add_option('-c', '--critical', dest='critical', default = 0)
+parser.add_option('-T', '--timeout', dest='timeout', default = 10)
 
 #Retrieving options
 options, args = parser.parse_args()
@@ -110,14 +116,27 @@ elif options.target not in daemon_types:
     raise SystemExit, CRITICAL
 
 uri = pyro.create_uri(options.hostname, options.portnum, PYRO_OBJECT , options.ssl)
+
+# Set the default socekt connexion to the timeout, by default it's 10s
+socket.setdefaulttimeout(float(options.timeout))
+
+con = None
+try:
+    con = Pyro.core.getProxyForURI(uri)
+    pyro.set_timeout(con, float(options.timeout))
+except Exception, exp:
+    print "CRITICAL : the Arbiter is not reachable : (%s)." % exp
+    sys.exit(CRITICAL)
+
+
     
 if options.daemon:
     # We just want a check for a single satellite daemon
     # Only OK or CRITICAL here
     daemon_name = options.daemon
     try:
-        result = Pyro.core.getProxyForURI(uri).get_satellite_status(options.target, daemon_name)
-    except Pyro.errors.ProtocolError, exp:
+        result = con.get_satellite_status(options.target, daemon_name)
+    except Exception, exp:
         print "CRITICAL : the Arbiter is not reachable : (%s)." % exp
         raise SystemExit, CRITICAL
     
@@ -130,22 +149,22 @@ if options.daemon:
             raise SystemExit, CRITICAL
     else:
         print 'UNKNOWN - %s status could not be retrieved' % daemon_name
-        raise SystemExit, UNKNOWN
+        sys.exit(UNKNOWN)
 else:
     # If no daemonname is specified, we want a general overview of the "target" daemons
     result = {}
 
     try:
-        daemon_list = Pyro.core.getProxyForURI(uri).get_satellite_list(options.target)
-    except Pyro.errors.ProtocolError, exp:
+        daemon_list = con.get_satellite_list(options.target)
+    except Exception, exp:
         print "CRITICAL : the Arbiter is not reachable : (%s)." % exp
         raise SystemExit, CRITICAL
 
     for daemon_name in daemon_list:
         # Getting individual daemon and putting status info in the result dictionnary
         try:
-            result[daemon_name] = Pyro.core.getProxyForURI(uri).get_satellite_status(options.target, daemon_name)
-        except Pyro.errors.ProtocolError, exp:
+            result[daemon_name] = con.get_satellite_status(options.target, daemon_name)
+        except Exception, exp:
             print "CRITICAL : the Arbiter is not reachable : (%s)." % exp
             raise SystemExit, CRITICAL
 
