@@ -963,9 +963,10 @@ class Thrift_broker(BaseModule):
     def manage_broks(self,*args):
         while True:
             try:
-                b = self.to_q.get(True, .01)
-                print b
-                self.manage_brok(b)
+                l = self.to_q.get(True, .01)
+                for b in l:
+                    print b
+                    self.manage_brok(b)
             except Queue.Empty:
                 pass
             except IOError, e:

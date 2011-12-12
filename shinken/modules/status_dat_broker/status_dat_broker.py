@@ -398,8 +398,9 @@ class Status_dat_broker(BaseModule):
 
         while not self.interrupted:
             try:
-                b = self.to_q.get(True, 5)
-                self.manage_brok(b)
+                l = self.to_q.get(True, 5)
+                for b in l:
+                    self.manage_brok(b)
             except IOError, e:
                 if e.errno != os.errno.EINTR:
                     raise

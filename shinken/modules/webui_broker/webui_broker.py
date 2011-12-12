@@ -214,36 +214,38 @@ class Webui_broker(BaseModule, Daemon):
     def manage_brok_thread(self):
         print "Data thread started"
         while True:
-           b = self.to_q.get()
-           # For updating, we cannot do it while
-           # answer queries, so wait for no readers
-           self.wait_for_no_readers()
-           try:
+           l = self.to_q.get()
+           
+           for b in l:
+              # For updating, we cannot do it while
+              # answer queries, so wait for no readers
+              self.wait_for_no_readers()
+              try:
                #print "Got data lock, manage brok"
-               self.rg.manage_brok(b)
-               for mod in self.modules_manager.get_internal_instances():
-                   try:
-                       mod.manage_brok(b)
-                   except Exception , exp:
-                       print exp.__dict__
-                       logger.log("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
-                       logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
-                       logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
-                       self.modules_manager.set_to_restart(mod)
-           except Exception, exp:            
-               msg = Message(id=0, type='ICrash', data={'name' : self.get_name(), 'exception' : exp, 'trace' : traceback.format_exc()})
-               self.from_q.put(msg)
-               # wait 2 sec so we know that the broker got our message, and die
-               time.sleep(2)
-               # No need to raise here, we are in a thread, exit!
-               os._exit(2)
-           finally:
-               # We can remove us as a writer from now. It's NOT an atomic operation
-               # so we REALLY not need a lock here (yes, I try without and I got
-               # a not so accurate value there....)
-               self.global_lock.acquire()
-               self.nb_writers -= 1
-               self.global_lock.release()
+                  self.rg.manage_brok(b)
+                  for mod in self.modules_manager.get_internal_instances():
+                      try:
+                          mod.manage_brok(b)
+                      except Exception , exp:
+                          print exp.__dict__
+                          logger.log("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
+                          logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
+                          logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
+                          self.modules_manager.set_to_restart(mod)
+              except Exception, exp:            
+                  msg = Message(id=0, type='ICrash', data={'name' : self.get_name(), 'exception' : exp, 'trace' : traceback.format_exc()})
+                  self.from_q.put(msg)
+                  # wait 2 sec so we know that the broker got our message, and die
+                  time.sleep(2)
+                  # No need to raise here, we are in a thread, exit!
+                  os._exit(2)
+              finally:
+                  # We can remove us as a writer from now. It's NOT an atomic operation
+                  # so we REALLY not need a lock here (yes, I try without and I got
+                  # a not so accurate value there....)
+                  self.global_lock.acquire()
+                  self.nb_writers -= 1
+                  self.global_lock.release()
 
 
     # Here we will load all plugins (pages) under the webui/plugins

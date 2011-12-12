@@ -832,8 +832,9 @@ class Livestatus_broker(BaseModule):
  
         while not self.interrupted:
             try:
-                b = self.to_q.get(True, .01)  # do not block indefinitely
-                self.manage_brok(b)
+                l = self.to_q.get(True, .01)
+                for b in l:
+                    self.manage_brok(b)
             #We do not ware about Empty queue
             except Queue.Empty:
                 pass

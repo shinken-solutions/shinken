@@ -214,8 +214,9 @@ class Npcd_broker(BaseModule):
         self.rotate()
         last_rotated = time.time()
         while not self.interrupted:
-            b = self.to_q.get() # can block here :)
-            self.manage_brok(b)
+            l = self.to_q.get() # can block here :)
+            for b in l:
+                self.manage_brok(b)
             if time.time() - last_rotated > self.sleep_time:
                 self.rotate()
                 last_rotated = time.time()

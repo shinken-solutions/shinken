@@ -556,12 +556,18 @@ class Broker(BaseSatellite):
         # and for external queues
         # REF: doc/broker-modules.png (3)
         # We put to external queues broks that was not already send
+        t0 = time.time()
+        # We are sending broks are a biglist, most efficient than one by one
         queues = self.modules_manager.get_external_to_queues()
-        for b in (b for b in self.broks if getattr(b, 'need_send_to_ext', True)):
-            # if b.type != 'log':
-            for q in queues:
-                q.put(b)
-                b.need_send_to_ext = False
+        to_send = [b for b in self.broks if getattr(b, 'need_send_to_ext', True)]
+
+        for q in queues:
+            q.put(to_send)
+
+        # No more need to send them
+        for b in to_send:
+            b.need_send_to_ext = False
+        print "DBG: Time to send %s broks" % len(self.broks), time.time() - t0
 
         # We must had new broks at the end of the list, so we reverse the list
         self.broks.reverse()
