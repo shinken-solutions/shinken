@@ -50,6 +50,8 @@ class ExternalCommandManager:
         'ADD_HOST_COMMENT' : {'global' : False, 'args' : ['host', 'to_bool', 'author', None]},
         'ACKNOWLEDGE_SVC_PROBLEM' : {'global' : False, 'args' : ['service' , 'to_int', 'to_bool', 'to_bool', 'author', None]},
         'ACKNOWLEDGE_HOST_PROBLEM' : {'global' : False, 'args' : ['host', 'to_int', 'to_bool', 'to_bool', 'author', None]},
+        'ACKNOWLEDGE_SVC_PROBLEM_EXPIRE' : {'global' : False, 'args' : ['service' , 'to_int', 'to_bool', 'to_bool', 'to_int', 'author', None]},
+        'ACKNOWLEDGE_HOST_PROBLEM_EXPIRE' : {'global' : False, 'args' : ['host', 'to_int', 'to_bool', 'to_bool', 'to_int', 'author', None]},
         'CHANGE_CONTACT_SVC_NOTIFICATION_TIMEPERIOD' : {'global' : True, 'args' : ['contact', 'time_period']},
         'CHANGE_CUSTOM_CONTACT_VAR' : {'global' : True, 'args' : ['contact', None,None]},
         'CHANGE_CUSTOM_HOST_VAR' : {'global' : False, 'args' : ['host', None,None]},
@@ -526,6 +528,15 @@ class ExternalCommandManager:
     #TODO : add a better ACK management
     def ACKNOWLEDGE_HOST_PROBLEM(self, host, sticky, notify, persistent, author, comment):
         host.acknowledge_problem(sticky, notify, persistent, author, comment)
+
+    #ACKNOWLEDGE_SVC_PROBLEM_EXPIRE;<host_name>;<service_description>;<sticky>;<notify>;<persistent>;<end_time>;<author>;<comment>
+    def ACKNOWLEDGE_SVC_PROBLEM_EXPIRE(self, service, sticky, notify, persistent, end_time, author, comment):
+        service.acknowledge_problem(sticky, notify, persistent, author, comment, end_time=end_time)
+
+    #ACKNOWLEDGE_HOST_PROBLEM_EXPIRE;<host_name>;<sticky>;<notify>;<persistent>;<end_time>;<author>;<comment>
+    #TODO : add a better ACK management
+    def ACKNOWLEDGE_HOST_PROBLEM_EXPIRE(self, host, sticky, notify, persistent, end_time, author, comment):
+        host.acknowledge_problem(sticky, notify, persistent, author, comment, end_time=end_time)
 
     #CHANGE_CONTACT_SVC_NOTIFICATION_TIMEPERIOD;<contact_name>;<notification_timeperiod>
     def CHANGE_CONTACT_SVC_NOTIFICATION_TIMEPERIOD(self, contact, notification_timeperiod):

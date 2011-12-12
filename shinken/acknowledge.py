@@ -34,6 +34,7 @@ class Acknowledge:
         'id' : None,
         'sticky' : None,
         'notify' : None,
+        'end_time' : None,
         'author' : None,
         'comment' : None,
         }
@@ -55,12 +56,13 @@ class Acknowledge:
     # next time Nagios restarts. "persistent" not only means "survive
     # restarts", but also
     #
-    def __init__(self, ref, sticky, notify, persistent, author, comment):
+    def __init__(self, ref, sticky, notify, persistent, author, comment, end_time=0):
         self.id = self.__class__.id
         self.__class__.id += 1
         self.ref = ref # pointer to srv or host we are apply
         self.sticky = sticky
         self.notify = notify
+        self.end_time = end_time
         self.author = author
         self.comment = comment
 
@@ -84,3 +86,6 @@ class Acknowledge:
         for prop in cls.properties:
             if prop in state:
                 setattr(self, prop, state[prop])
+        # If load a old ack, set the end_time to 0 so it's infinite
+        if not hasattr(self, 'end_time'):
+            self.end_time = 0

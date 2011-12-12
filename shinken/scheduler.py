@@ -95,6 +95,7 @@ class Scheduler:
             15 : ('update_business_values', self.update_business_values, 60),
             # Reset the topology change flag if need
             16 : ('reset_topology_change_flag', self.reset_topology_change_flag, 1),
+            17 : ('check_for_expire_acknowledge', self.check_for_expire_acknowledge, 1),
         }
 
         # stats part
@@ -390,6 +391,14 @@ class Scheduler:
         if c_id in self.comments:
             self.comments[c_id].ref.del_comment(c_id)
             del self.comments[c_id]
+
+
+    # We are looking for outdated ack, and if so, remove them
+    def check_for_expire_acknowledge(self):
+        for t in [self.hosts, self.services]:
+            for i in t:
+                i.check_for_expire_acknowledge()
+
 
     # We update all business_impact for looking at new modulation
     # start for impacts, and so update broks status and

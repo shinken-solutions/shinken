@@ -26,7 +26,7 @@
 #It's ugly I know....
 from shinken_test import *
 
-class TestConfig(ShinkenTest):
+class TestAcks(ShinkenTest):
 
     def test_ack_soft_service(self):
         self.print_header()
@@ -719,6 +719,9 @@ class TestConfig(ShinkenTest):
 # service is warning
 # notification is sent
 # acknowledgement and comments have disappeared
+
+
+
 
 
 if __name__ == '__main__':

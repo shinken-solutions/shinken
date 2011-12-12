@@ -24,7 +24,7 @@
 """ This class is a base class for nearly all configuration
  elements like service, hosts or contacts.
 """
-
+import time
 from copy import copy
 
 from shinken.commandcall import CommandCall
@@ -389,7 +389,7 @@ Like temporary attributes such as "imported_from", etc.. """
             self.comments.remove(c_to_del)
 
 
-    def acknowledge_problem(self, sticky, notify, persistent, author, comment):
+    def acknowledge_problem(self, sticky, notify, persistent, author, comment, end_time=0):
         if self.state != self.ok_up:
             if notify:
                 self.create_notifications('ACKNOWLEDGEMENT')
@@ -398,7 +398,7 @@ Like temporary attributes such as "imported_from", etc.. """
                 sticky = True
             else:
                 sticky = False
-            a = Acknowledge(self, sticky, notify, persistent, author, comment)
+            a = Acknowledge(self, sticky, notify, persistent, author, comment, end_time=end_time)
             self.acknowledgement = a
             if self.my_type == 'host':
                 comment_type = 1
@@ -408,6 +408,13 @@ Like temporary attributes such as "imported_from", etc.. """
                         comment_type, 4, 0, False, 0)
             self.add_comment(c)
             self.broks.append(self.get_update_status_brok())
+
+
+    # Look if we got an ack that is too old with an expire date and should
+    # be delete
+    def check_for_expire_acknowledge(self):
+        if self.acknowledgement and self.acknowledgement.end_time < time.time():
+            self.unacknowledge_problem()
 
 
     #  Delete the acknowledgement object and reset the flag
