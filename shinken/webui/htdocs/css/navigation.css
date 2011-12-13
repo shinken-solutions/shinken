@@ -9,6 +9,41 @@
     padding-bottom: 1px
 }
 
+.tac_col1 {
+	width: 20px;
+}
+
+.tac_  {
+	margin-bottom:20px;
+	background-color: #CCCCCC;
+    border-radius: 5px 5px 5px 5px;
+	list-style: none;
+	position: relative;
+	width: auto;
+}
+
+.tac_  li {
+
+	border-left: 1px solid;
+    float: left !important;
+    list-style: none outside none;
+    overflow: hidden;
+    padding-bottom: 2px;
+    text-align: center !important;
+	display: inline;
+	margin-right: 5px !important;
+}
+
+.tac_ li span {
+    background-color: #DDDDDD;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    display: block;
+    font-size: 200%;
+    line-height: 145%;
+    padding: 2px;
+}
+
 #navigation {
 	height:40px;
 	background: #222222;
@@ -94,11 +129,12 @@
 	padding:10px 5px 10px 5px;
 	border:1px solid #777777;
 	border-top:none;
-
+	
+	background: #FAFAFA;
 	/* Gradient background */
-	background:#F4F4F4;
+	/*background:#F4F4F4;
 	background: -moz-linear-gradient(top, #EEEEEE, #BBBBBB);
-	background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#EEEEEE), to(#BBBBBB));
+	background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#EEEEEE), to(#BBBBBB));*/
 
 	/* Rounded Corners */
 	-moz-border-radius: 0px 5px 5px 5px;
@@ -160,22 +196,21 @@
 
 /* Drop Down Content Stylings */
 
-#menu p, #menu h2, #menu h3, #menu ul li {
-	font-family:Arial, Helvetica, sans-serif;
-	line-height:21px;
+#dropmenu p, #dropmenu h2, #dropmenu h3, #dropmenu ul li {
+	/*line-height:21px;*/
 	font-size:12px;
 	text-align:left;
 	text-shadow: 1px 1px 1px #FFFFFF;
 }
-#menu h2 {
-	font-size:21px;
+#dropmenu h2 {
+	font-size:14px;
 	font-weight:400;
 	letter-spacing:-1px;
 	margin:7px 0 14px 0;
-	padding-bottom:14px;
+	
 	border-bottom:1px solid #666666;
 }
-#menu h3 {
+#dropmenu h3 {
 	font-size:14px;
 	margin:7px 0 14px 0;
 	padding-bottom:7px;
@@ -224,29 +259,30 @@
 	-moz-box-shadow:inset 0 0 3px #000000;
 	box-shadow:inset 0 0 3px #000000;
 }
-#menu li ul {
+#dropmenu li ul {
 	list-style:none;
 	padding:0;
 	margin:0 0 12px 0;
 }
-#menu li ul li {
+
+#dropmenu li ul li {
 	font-size:12px;
 	line-height:24px;
 	position:relative;
-	text-shadow: 1px 1px 1px #ffffff;
+/*	text-shadow: 1px 1px 1px #ffffff;*/
 	padding:0;
 	margin:0;
 	float:none;
 	text-align:left;
-	width:130px;
+/*	width:130px;*/
 }
-#menu li ul li:hover {
+#dropmenu li ul li:hover {
 	background:none;
 	border:none;
 	padding:0;
 	margin:0;
 }
-#menu li .greybox li {
+#dropmenu li .greybox li {
 	background:#F4F4F4;
 	border:1px solid #bbbbbb;
 	margin:0px 0px 4px 0px;
@@ -258,7 +294,7 @@
 	-webkit-border-radius: 5px;
 	border-radius: 5px;
 }
-#menu li .greybox li:hover {
+#dropmenu li .greybox li:hover {
 	background:#ffffff;
 	border:1px solid #aaaaaa;
 	padding:4px 6px 4px 6px;
