@@ -1,0 +1,9 @@
+.impacts{
+    positon : absolute;
+}
+
+.impact{
+    width: 250px; 
+    height: 150px;
+    position : absolute;
+}

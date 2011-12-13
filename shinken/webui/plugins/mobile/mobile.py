@@ -44,5 +44,22 @@ def main():
     return {'app' : app, 'user' : user, 'impacts' : all_imp_impacts, 'problems' : all_pbs}
 
 
-pages = {main : { 'routes' : ['/mobile/main'], 'view' : 'mobile_main', 'static' : True}}
+def impacts():
+    # First we look for the user sid
+    # so we bail out if it's a false one
+    user = app.get_user_auth()
+
+    if not user:
+        redirect("/mobile/")
+        return
+
+
+    all_imp_impacts = app.datamgr.get_important_elements()
+    
+    return {'app' : app, 'user' : user, 'impacts' : all_imp_impacts}
+
+
+pages = {main : { 'routes' : ['/mobile/main'], 'view' : 'mobile_main', 'static' : True},
+         impacts : { 'routes' : ['/mobile/impacts'], 'view' : 'mobile_impacts', 'static' : True},
+         }
 

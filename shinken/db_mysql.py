@@ -30,13 +30,14 @@ from MySQLdb import ProgrammingError
 
 
 class DBMysql(DB):
-    def __init__(self, host, user, password, database, character_set, table_prefix = ''):
+    def __init__(self, host, user, password, database, character_set, table_prefix = '', port=3306):
         self.host = host
         self.user = user
         self.password = password
         self.database = database
         self.character_set = character_set
         self.table_prefix = table_prefix
+        self.port = port
 
 
     #Create the database connection
@@ -44,7 +45,8 @@ class DBMysql(DB):
     def connect_database(self):
         #self.db = MySQLdb.connect (host = "localhost", user = "root", passwd = "root", db = "merlin")
         self.db = MySQLdb.connect (host = self.host, user = self.user, \
-                                       passwd = self.password, db = self.database)
+                                       passwd = self.password, db = self.database,
+                                   port = self.port)
         self.db.set_character_set(self.character_set)
         self.db_cursor = self.db.cursor ()
         self.db_cursor.execute('SET NAMES %s;' % self.character_set)

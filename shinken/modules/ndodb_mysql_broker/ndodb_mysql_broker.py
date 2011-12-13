@@ -63,6 +63,7 @@ class Ndodb_Mysql_broker(BaseModule):
         self.database = conf.database
         self.character_set = conf.character_set
         self.nagios_mix_offset = int(conf.nagios_mix_offset)
+        self.port = int(getattr(conf, 'port', '3306'))
 
 
     #Called by Broker so we can do init stuff
@@ -70,7 +71,7 @@ class Ndodb_Mysql_broker(BaseModule):
     #Conf from arbiter!
     def init(self):
         print "I connect to NDO database"
-        self.db = DBMysql(self.host, self.user, self.password, self.database, self.character_set, table_prefix='nagios_')
+        self.db = DBMysql(self.host, self.user, self.password, self.database, self.character_set, table_prefix='nagios_', port=self.port)
         self.connect_database()
 
         #Cache for hosts and services
