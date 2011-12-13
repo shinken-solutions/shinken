@@ -1,3 +1,9 @@
+
+.contains{
+    positon : absolute;
+    left : 150px;
+}
+
 .impacts{
     positon : absolute;
 }
