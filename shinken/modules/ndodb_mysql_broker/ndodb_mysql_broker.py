@@ -64,6 +64,8 @@ class Ndodb_Mysql_broker(BaseModule):
         self.character_set = conf.character_set
         self.nagios_mix_offset = int(conf.nagios_mix_offset)
         self.port = int(getattr(conf, 'port', '3306'))
+        # Centreon ndo add some fields like long_output that are not in the vanilla ndo
+        self.centreon_version = False
 
 
     #Called by Broker so we can do init stuff
@@ -74,11 +76,21 @@ class Ndodb_Mysql_broker(BaseModule):
         self.db = DBMysql(self.host, self.user, self.password, self.database, self.character_set, table_prefix='nagios_', port=self.port)
         self.connect_database()
 
-        #Cache for hosts and services
-        #will be flushed when we got a net instance id
-        #or something like that
+        # Cache for hosts and services
+        # will be flushed when we got a net instance id
+        # or something like that
         self.services_cache = {}
         self.hosts_cache = {}
+
+        # We need to search for centreon_specific fields, like long_output
+        query = u"select TABLE_NAME from information_schema.columns where TABLE_SCHEMA='ndo' and TABLE_NAME='nagios_servicestatus' and COLUMN_NAME='long_output';"
+        self.db.execute_query(query)
+        row = self.db.fetchone ()
+        if row is None or len(row) < 1:
+            self.centreon_version = False
+        else:
+            self.centreon_version = True
+            print "NDO/Mysql : using the centreon version"
 
 
     #Get a brok, parse it, and put in in database
@@ -103,8 +115,8 @@ class Ndodb_Mysql_broker(BaseModule):
         #print "(ndodb)I don't manage this brok type", b
 
 
-    #Create the database connection
-    #TODO : finish (begin :) ) error catch and conf parameters...
+    # Create the database connection
+    # TODO : finish (begin :) ) error catch and conf parameters...
     def connect_database(self):
         self.db.connect_database()
 
@@ -329,6 +341,10 @@ class Ndodb_Mysql_broker(BaseModule):
                            'has_been_checked' : 1, 'percent_state_change' : data['percent_state_change'], 'is_flapping' : data['is_flapping'],
                            'flap_detection_enabled' : data['flap_detection_enabled'],
                            }
+        # Centreon add some fields
+        if self.centreon_version:
+            hoststatus_data['long_output'] = data['long_output']
+
         hoststatus_query = self.db.create_insert_query('hoststatus' , hoststatus_data)
 
         return [query, hoststatus_query]
@@ -391,6 +407,10 @@ class Ndodb_Mysql_broker(BaseModule):
                               'has_been_checked' : 1, 'percent_state_change' : data['percent_state_change'], 'is_flapping' : data['is_flapping'],
                               'flap_detection_enabled' : data['flap_detection_enabled'],
                               }
+        # Centreon add some fields
+        if self.centreon_version:
+            servicestatus_data['long_output'] = data['long_output']
+
         servicestatus_query = self.db.create_insert_query('servicestatus' , servicestatus_data)
 
         return [query, servicestatus_query]
@@ -481,6 +501,10 @@ class Ndodb_Mysql_broker(BaseModule):
                            'return_code' : data['return_code'], 'output' : data['output'],
                            'perfdata' : data['perf_data']
         }
+        # Centreon add some fields
+        if self.centreon_version:
+            host_check_data['long_output'] = data['long_output']
+
         query = self.db.create_update_query('hostchecks', host_check_data, where_clause)
 
         #Now servicestatus
@@ -491,6 +515,10 @@ class Ndodb_Mysql_broker(BaseModule):
                            'output' : data['output'], 'perfdata' : data['perf_data'], 'last_check' : de_unixify(data['last_chk']),
                            'percent_state_change' : data['percent_state_change'],
         }
+        # Centreon add some fields
+        if self.centreon_version:
+            hoststatus_data['long_output'] = data['long_output']
+
         hoststatus_query = self.db.create_update_query('hoststatus' , hoststatus_data, where_clause)
 
         return [query, hoststatus_query]
@@ -526,6 +554,10 @@ class Ndodb_Mysql_broker(BaseModule):
                            'return_code' : data['return_code'], 'output' : data['output'],
                            'perfdata' : data['perf_data']
         }
+        # Centreon add some fields
+        if self.centreon_version:
+            service_check_data['long_output'] = data['long_output']
+
         query = self.db.create_update_query('servicechecks', service_check_data, where_clause)
 
         #Now servicestatus
@@ -536,6 +568,9 @@ class Ndodb_Mysql_broker(BaseModule):
                               'output' : data['output'], 'perfdata' : data['perf_data'], 'last_check' : de_unixify(data['last_chk']),
                               'percent_state_change' : data['percent_state_change'],
         }
+        # Centreon add some fields
+        if self.centreon_version:
+            servicestatus_data['long_output'] = data['long_output']
 
         servicestatus_query = self.db.create_update_query('servicestatus' , servicestatus_data, where_clause)
 
@@ -602,6 +637,10 @@ class Ndodb_Mysql_broker(BaseModule):
                            'has_been_checked' : 1, 'is_flapping' : data['is_flapping'], 'percent_state_change' : data['percent_state_change'], 
                            'flap_detection_enabled' : data['flap_detection_enabled'],
                            }
+        # Centreon add some fields
+        if self.centreon_version:
+            hoststatus_data['long_output'] = data['long_output']
+
         hoststatus_query = self.db.create_update_query('hoststatus' , hoststatus_data, where_clause)
 
         return [query, hoststatus_query]
@@ -655,6 +694,9 @@ class Ndodb_Mysql_broker(BaseModule):
                               'has_been_checked' : 1, 'is_flapping' : data['is_flapping'], 'percent_state_change' : data['percent_state_change'],
                               'flap_detection_enabled' : data['flap_detection_enabled'],
                               }
+        # Centreon add some fields
+        if self.centreon_version:
+            servicestatus_data['long_output'] = data['long_output']
 
         where_clause = {'service_object_id' : service_id}
         servicestatus_query = self.db.create_update_query('servicestatus' , servicestatus_data, where_clause)

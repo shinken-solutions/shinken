@@ -27,6 +27,7 @@ var offset = 100;
 var nb_impacts = 0;
 var current_idx = 0;
 
+
 function focus_on(idx){
     
 

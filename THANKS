@@ -48,4 +48,4 @@ To Stéphane Duchesneau for his work on the setup.py file and log/run driectorie
 To grim for his bug report about disabling flapping options
 To peter woodman for his bug report about timezone override crash
 To Laurent Ollagnier for his bug report and patch about notification commands
-
+To sprudhomme for his feature request about long_output in Centreon/Ndo
