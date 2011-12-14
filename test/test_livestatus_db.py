@@ -416,8 +416,7 @@ class TestConfigBig(TestConfig):
 
     def init_livestatus(self):
         self.livelogs = 'tmp/livelogs.db' + self.testid
-        self.db_archives = os.path.join(os.path.dirname(self.livelogs), 'archive
-s')
+        self.db_archives = os.path.join(os.path.dirname(self.livelogs), 'archives')
         self.pnp4nagios = 'tmp/pnp4nagios_test' + self.testid
         self.livestatus_broker = Livestatus_broker(livestatus_modconf, '127.0.0.1', str(50000 + os.getpid()), 'live', [], self.livelogs, self.db_archives, 365, self.pnp4nagios)
         self.livestatus_broker.create_queues()
@@ -450,7 +449,7 @@ s')
         self.livestatus_broker = None
 
 
-    def test_a_long_history(self):
+    def x_test_a_long_history(self):
         test_host_005 = self.sched.hosts.find_by_name("test_host_005")
         test_host_099 = self.sched.hosts.find_by_name("test_host_099")
         test_ok_00 = self.sched.services.find_srv_by_name_and_hostname("test_host_005", "test_ok_00")
