@@ -96,5 +96,49 @@ class TestConfig(ShinkenTest):
         self.assert_(self.count_actions() == 0)
 
 
+    def test_multiline_perfdata(self):
+        self.print_header()
+
+        #We want an eventhandelr (the perfdata command) to be put in the actions dict
+        #after we got a service check
+        now = time.time()
+        host = self.sched.hosts.find_by_name("test_host_0")
+        host.checks_in_progress = []
+        host.act_depend_of = [] # ignore the router
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        svc.checks_in_progress = []
+        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        #--------------------------------------------------------------
+        # initialize host/service state
+        #--------------------------------------------------------------
+        print "Service perfdata command", svc.__class__.perfdata_command, type(svc.__class__.perfdata_command)
+        #We do not want to be just a string but a real command
+        self.assert_(not isinstance(svc.__class__.perfdata_command, str))
+        print svc.__class__.perfdata_command.__class__.my_type
+        self.assert_(svc.__class__.perfdata_command.__class__.my_type == 'CommandCall')
+        output = """DISK OK - free space: / 3326 MB (56%); | /=2643MB;5948;5958;0;5968
+/ 15272 MB (77%);
+/boot 68 MB (69%);
+/home 69357 MB (27%);
+/var/log 819 MB (84%); | /boot=68MB;88;93;0;98
+/home=69357MB;253404;253409;0;253414
+/var/log=818MB;970;975;0;980
+        """
+        self.scheduler_loop(1, [[svc, 0, output]])
+        print "Actions", self.sched.actions
+        print 'Output',svc.output
+        print 'long', svc.long_output
+        print 'perf', svc.perf_data
+
+        self.assert_(svc.output.strip() == 'DISK OK - free space: / 3326 MB (56%);')
+        self.assert_(svc.perf_data.strip() == u'/=2643MB;5948;5958;0;5968 /boot=68MB;88;93;0;98 /home=69357MB;253404;253409;0;253414 /var/log=818MB;970;975;0;980')
+        print svc.long_output.split('\n')
+        self.assert_(svc.long_output == u"""/ 15272 MB (77%);
+/boot 68 MB (69%);
+/home 69357 MB (27%);
+/var/log 819 MB (84%);""")
+
+
+
 if __name__ == '__main__':
     unittest.main()

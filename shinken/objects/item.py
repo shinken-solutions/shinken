@@ -413,7 +413,7 @@ Like temporary attributes such as "imported_from", etc.. """
     # Look if we got an ack that is too old with an expire date and should
     # be delete
     def check_for_expire_acknowledge(self):
-        if self.acknowledgement and self.acknowledgement.end_time < time.time():
+        if self.acknowledgement and self.acknowledgement.end_time != 0 and self.acknowledgement.end_time < time.time():
             self.unacknowledge_problem()
 
 

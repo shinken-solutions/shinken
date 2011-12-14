@@ -179,14 +179,7 @@ class ShinkenTest(unittest.TestCase):
         # is a valid value in the future
         ref.next_chk = now - 0.5
 
-        elts_line1 = output.split('|')
-        #First line before | is output
-        check.output = elts_line1[0]
-        #After | is perfdata
-        if len(elts_line1) > 1:
-            check.perf_data = elts_line1[1]
-        else:
-            check.perf_data = ''
+        check.get_outputs(output, 9000)
         check.exit_status = exit_status
         check.execution_time = 0.001
         check.status = 'waitconsume'
