@@ -51,6 +51,7 @@ class LiveStatusDb(object):
         # Get no problem for utf8 insert
         self.dbconn.text_factory = str
         self.dbcursor = self.dbconn.cursor()
+        #self.execute("PRAGMA cache_size = 200000")
         # Create db file and tables if not existing
         self.prepare_log_db_table()
         # Start with commit and rotate immediately so the interval timers

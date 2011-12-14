@@ -1946,6 +1946,43 @@ test_host_0;test_ok_0;CUSTNAME;custvalue
 """)
 
 
+    def test_multisite_hostgroup_alias(self):
+        self.print_header()
+        self.update_broker()
+        a_h0 = self.sched.hosts.find_by_name("test_host_0")
+        a_hg01 = self.sched.hostgroups.find_by_name("hostgroup_01")
+        b_hg01 = self.livestatus_broker.hostgroups["hostgroup_01"]
+        # must have hostgroup_alias_01
+        print a_hg01.hostgroup_name, a_hg01.alias
+        print b_hg01.hostgroup_name, b_hg01.alias
+        self.assert_(a_hg01.hostgroup_name == b_hg01.hostgroup_name)
+        self.assert_(a_hg01.alias == b_hg01.alias)
+        request = """GET hostsbygroup
+Columns: host_name host_alias hostgroup_name hostgroup_alias
+Filter: host_name = test_host_0
+OutputFormat: csv
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        self.assert_(response == """test_host_0;up_0;allhosts;All Hosts
+test_host_0;up_0;hostgroup_01;hostgroup_alias_01
+test_host_0;up_0;up;All Up Hosts
+""")
+
+        request = """GET hostsbygroup
+Columns: host_name hostgroup_name host_services_with_state host_services
+Filter: host_name = test_host_0
+OutputFormat: csv
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        self.assert_(response == """test_host_0;allhosts;test_ok_0|0|0;test_ok_0
+test_host_0;hostgroup_01;test_ok_0|0|0;test_ok_0
+test_host_0;up;test_ok_0|0|0;test_ok_0
+""")
+
+
+
     def test_multisite_in_check_period(self):
         self.print_header()
         self.update_broker()
