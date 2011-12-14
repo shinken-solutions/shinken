@@ -540,6 +540,18 @@ out_map = {
                 'description' : 'The number of downtimes this host is currently in',
                 'type' : 'int',
             },
+            'services' : {
+                'depythonize' : lambda x: [y.get_name() for y in x],
+                'description' : 'A list of all services of the host',
+                'prop' : 'services',
+                'type' : 'list',
+            },
+            'services_with_state' : {
+                'fulldepythonize' : lambda p, e, r: join_with_separators(p, e, r, p.get_name(), p.state_id, p.has_been_checked),
+                'description' : 'A list of all services of the host together with state and has_been_checked',
+                'prop' : 'services',
+                'type' : 'list',
+            },
             'state' : {
                 'converter' : int,
                 'description' : 'The current state of the host (0: up, 1: down, 2: unreachable)',
@@ -3941,7 +3953,7 @@ out_map = {
                 'type' : 'string',
             },
             'hostgroup_alias' : {
-                'depythonize' : lambda x: getattr(x, 'hostgroup_alias', ''),
+                'depythonize' : lambda x: getattr(x, 'alias', ''),
                 'description' : 'An alias of the hostgroup',
                 'prop' : 'hostgroup',
                 'type' : 'string',
