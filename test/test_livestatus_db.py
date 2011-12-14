@@ -450,6 +450,7 @@ class TestConfigBig(TestConfig):
 
 
     def x_test_a_long_history(self):
+        return
         test_host_005 = self.sched.hosts.find_by_name("test_host_005")
         test_host_099 = self.sched.hosts.find_by_name("test_host_099")
         test_ok_00 = self.sched.services.find_srv_by_name_and_hostname("test_host_005", "test_ok_00")
