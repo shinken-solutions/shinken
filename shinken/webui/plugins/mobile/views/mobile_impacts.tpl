@@ -19,8 +19,6 @@
 <div class="impacts">
   %for impact in impacts:
     <div class="impact" id="impact-{{i}}" style="left:{{i*250}}px;">
-      <p class="{{impact.state.lower()}}">{{impact.get_full_name()}} is {{impact.state}}</p>
-
       %for j in range(2, impact.business_impact):
       <div class="criticity-inpb-icon-{{j-1}}">
 	<img src="/static/images/star.png">
