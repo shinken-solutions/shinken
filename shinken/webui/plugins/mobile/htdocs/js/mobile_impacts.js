@@ -39,16 +39,21 @@ function focus_on(idx){
     // And make others nearly disapears
     for(var j=0;j<nb_impacts;j++){
 	var impact = $('impact-'+j);
+	old_pos = impact.style.left.substring(0, impact.style.left.length-2);
+	new_pos = 0;
 	if(j == idx){
 	    impact.style.opacity = '1';
-	    impact.style.left = ''+offset+'px';
+	    new_pos = offset;
 	}else if(j == idx-1 || j == idx+1){
 	    impact.style.opacity = '0.7';
-	    impact.style.left = ''+((j-idx)*250+offset)+'px';
+	    new_pos = ((j-idx)*250+offset);
 	}else{
 	    impact.style.opacity = '0.1';
-	    impact.style.left = ''+((j-idx)*250+offset)+'px';
+	    new_pos = ((j-idx)*250+offset);
 	}
+	var move = new Fx.Tween(impact, {property: 'left', duration : 200});
+	move.start(old_pos, new_pos); // and by moving now
+
     }
     
 }
