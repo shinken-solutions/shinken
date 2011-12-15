@@ -167,6 +167,11 @@ class NSCA_arbiter(BaseModule):
                 else:
                     # handle all other sockets
                     data = s.recv(size)
+                    if len(data) == 0:
+                        # Closed socket
+                        s.close()
+                        input.remove(s)
+                        continue
                     if s in databuffer:
                         databuffer[s] += data
                     else:
