@@ -76,7 +76,7 @@ class TestConfig(ShinkenTest):
         fd = open(mod.path)
         buf = fd.readline()
         #print "BUF:", buf
-        comparison = '%d\t%s\t%s\t%s\t%s\t%s\n' % (t, "test_host_0", "test_ok_0", 'BAD ', 'CRITICAL', ' value1=0 value2=0')
+        comparison = '%d\t%s\t%s\t%s\t%s\t%s\n' % (t, "test_host_0", "test_ok_0", 'BAD', 'CRITICAL', 'value1=0 value2=0')
         #print "Comparison:", comparison
         self.assert_(buf == comparison)
         fd.close()
@@ -104,7 +104,7 @@ class TestConfig(ShinkenTest):
         print fd.read()
 
         
-        comparison = u'%d\t%s\t%s\t%s\t%s\t%s\n' % (t, "test_host_0", "test_ok_0", 'BAD ', ' value1=0 value2=0'+u'\xf6', 'CRITICAL')
+        comparison = u'%d\t%s\t%s\t%s\t%s\t%s\n' % (t, "test_host_0", "test_ok_0", 'BAD', 'value1=0 value2=0'+u'\xf6', 'CRITICAL')
 
         self.assert_(buf == comparison)
         fd.close()
