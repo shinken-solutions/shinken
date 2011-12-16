@@ -299,6 +299,9 @@ class Arbiter(Daemon):
         # Change Nagios2 names to Nagios3 ones
         self.conf.old_properties_names_to_new()
 
+        # Manage all post-conf modules
+        self.hook_point('early_configuration')
+
         # Create Template links
         self.conf.linkify_templates()
 
