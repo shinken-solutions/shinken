@@ -69,7 +69,7 @@ properties = {
 #Class for the Livestatus Broker
 #Get broks and listen to livestatus query language requests
 class Livestatus_broker(BaseModule):
-    def __init__(self, mod_conf, host, port, socket, allowed_hosts, database_file, archive_path, max_logs_age, pnp_path, debug=None, debug_queries=False):
+    def __init__(self, mod_conf, host, port, socket, allowed_hosts, database_file, archive_path, max_logs_age, pnp_path, use_aggressive_sql=False, debug=None, debug_queries=False):
         BaseModule.__init__(self, mod_conf)
         self.host = host
         self.port = port
@@ -79,6 +79,7 @@ class Livestatus_broker(BaseModule):
         self.archive_path = archive_path
         self.max_logs_age = max_logs_age
         self.pnp_path = pnp_path
+        self.use_aggressive_sql = use_aggressive_sql
         self.debug = debug
         self.debug_queries = debug_queries
 
@@ -804,7 +805,7 @@ class Livestatus_broker(BaseModule):
         self.db.log_db_do_archive()
 
         # This is the main object of this broker where the action takes place
-        self.livestatus = LiveStatus(self.configs, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.db, self.pnp_path, self.from_q)
+        self.livestatus = LiveStatus(self.configs, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.db, self.use_aggressive_sql, self.pnp_path, self.from_q)
 
         last_number_of_objects = 0
         backlog = 5

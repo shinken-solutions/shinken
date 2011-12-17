@@ -28,7 +28,7 @@ class LiveStatusRequest:
    
     """A class describing a livestatus request."""
     
-    def __init__(self, data, configs, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, schedulers, pollers, reactionners, brokers, db, pnp_path, return_queue, counters):
+    def __init__(self, data, configs, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, schedulers, pollers, reactionners, brokers, db, use_aggressive_sql, pnp_path, return_queue, counters):
         self.data = data
         # Runtime data form the global LiveStatus object
         self.configs = configs
@@ -45,6 +45,7 @@ class LiveStatusRequest:
         self.reactionners = reactionners
         self.brokers = brokers
         self.db = db
+        self.use_aggressive_sql = use_aggressive_sql
         self.pnp_path = pnp_path
         self.return_queue = return_queue
         self.counters = counters
@@ -92,7 +93,7 @@ class LiveStatusRequest:
             query.parse_input('\n'.join(wait_cmds))
             self.queries.append(query)
         if len(query_cmds) > 0:
-            query = LiveStatusQuery(self.configs, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.db, self.pnp_path, self.return_queue, self.counters)
+            query = LiveStatusQuery(self.configs, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.db, self.use_aggressive_sql, self.pnp_path, self.return_queue, self.counters)
             query.parse_input('\n'.join(query_cmds))
             self.queries.append(query)
 
