@@ -50,3 +50,4 @@ To grim for his bug report about disabling flapping options
 To peter woodman for his bug report about timezone override crash
 To Laurent Ollagnier for his bug report and patch about notification commands
 To sprudhomme for his feature request about long_output in Centreon/Ndo
+To Gabor Varga for his patch about the "sc" command for windowns setup :)
