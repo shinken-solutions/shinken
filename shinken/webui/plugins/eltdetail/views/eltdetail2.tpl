@@ -164,6 +164,7 @@ Invalid element name
 										{{!helper.get_button('Schedule Downtime', img='/static/images/downtime.png')}}
 									</div>
 								</div>
+								<br>
 								<hr />
 								<div id="item_information">
 								<h2>Additonal Informations</h2>
