@@ -333,6 +333,7 @@ class Host(SchedulingItem):
         'normal_check_interval' : 'check_interval',
         'retry_check_interval'  : 'retry_interval',
         'criticity'             : 'business_impact',
+        'hostgroup'             : 'hostgroups',
 #        'criticitymodulations'  : 'business_impact_modulations',
         
     }
