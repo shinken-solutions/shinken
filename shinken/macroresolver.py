@@ -246,13 +246,13 @@ class MacroResolver(Borg):
     #the service Load of host srv-1
     def get_type_of_macro(self, macros, clss):
         for macro in macros:
-            #ARGN Macros
+            # ARGN Macros
             if re.match('ARG\d', macro):
                 macros[macro]['type'] = 'ARGN'
                 continue
-            #USERN macros
-            #are managed in the Config class, so no
-            #need to look that here
+            # USERN macros
+            # are managed in the Config class, so no
+            # need to look that here
             elif re.match('_HOST\w', macro):
                 macros[macro]['type'] = 'CUSTOM'
                 macros[macro]['class'] = 'HOST'
@@ -260,17 +260,17 @@ class MacroResolver(Borg):
             elif re.match('_SERVICE\w', macro):
                 macros[macro]['type'] = 'CUSTOM'
                 macros[macro]['class'] = 'SERVICE'
-                #value of macro : re.split('_HOST', '_HOSTMAC_ADDRESS')[1]
+                # value of macro : re.split('_HOST', '_HOSTMAC_ADDRESS')[1]
                 continue
             elif re.match('_CONTACT\w', macro):
                 macros[macro]['type'] = 'CUSTOM'
                 macros[macro]['class'] = 'CONTACT'
                 continue
-            #On demand macro
+            # On demand macro
             elif len(macro.split(':')) > 1:
                 macros[macro]['type'] = 'ONDEMAND'
                 continue
-            #OK, classical macro...
+            # OK, classical macro...
             for cls in clss:
                 if macro in cls.macros:
                     macros[macro]['type'] = 'class'
@@ -317,12 +317,12 @@ class MacroResolver(Borg):
                 val = self.get_value_from_element(s, prop)
                 #print "Got val:", val
                 return val
-        #Ok, service was easy, now hard part
+        # Ok, service was easy, now hard part
         else:
             val = ''
             elt_name = elts[1]
-            #Special case : elt_name can be void
-            #so it's the host where it apply
+            # Special case : elt_name can be void
+            # so it's the host where it apply
             if elt_name == '':
                 for elt in data:
                     if elt is not None and elt.__class__ == self.host_class:
