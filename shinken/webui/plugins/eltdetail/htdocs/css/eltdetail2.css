@@ -52,6 +52,7 @@
 
 #elt_container h2 {
 	font-size: 15px;
+	margin-bottom: 5px;
 }
 
 #elt_container p {
@@ -64,7 +65,6 @@
 }
 
 #elt_summary {
-	margin-bottom: 20px;
 	padding: 15px;
 	width: 96%;
 }
@@ -77,7 +77,11 @@
 	border: none;	
 }
 
-#item_information dd{
+#item_information {
+	margin-bottom: 20px;
+}
+
+#item_information dd {
 	margin-left: 20em;
 }
 
