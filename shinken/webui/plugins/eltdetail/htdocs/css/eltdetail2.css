@@ -72,6 +72,7 @@
 #elt_summary table {
 	width: 100%;
 }
+
 #elt_summary table, #elt_summary tr, #elt_summary th, #elt_summary td, #elt_summary tbody{
 	background: none !important;
 	border: none;	
@@ -305,4 +306,12 @@ div.content {
 
 .row_alt {
 	background: #FFFFFF !important;
+}
+
+.switches ul li {
+	display: inline;
+}
+
+.switches ul li div{
+	float: left;
 }
