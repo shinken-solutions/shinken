@@ -101,17 +101,17 @@ Invalid element name
 		</div>				
 	</div>
 	<!-- Switch Start-->
-	<div class="switches grid_16">
-		<ul>
+	<div class="switches">
+		<ul class="grid_16">
 		    %if elt_type=='host':
 		       %title = 'This will also enable/disable this host services'
 		    %else:
 		       %title = ''
 		    %end
-			<li title="{{title}}" onclick="toggle_checks('{{elt.get_full_name()}}' , '{{elt.active_checks_enabled|elt.passive_checks_enabled}}')">Active/passive Checks {{!helper.get_input_bool(elt.active_checks_enabled|elt.passive_checks_enabled)}}
-			<li onclick="toggle_notifications('{{elt.get_full_name()}}' , '{{elt.notifications_enabled}}')">Notifications {{!helper.get_input_bool(elt.notifications_enabled)}} </li>
-			<li onclick="toggle_event_handlers('{{elt.get_full_name()}}' , '{{elt.event_handler_enabled}}')" >Event Handler {{!helper.get_input_bool(elt.event_handler_enabled)}} </li>
-			<li onclick="toggle_flap_detection('{{elt.get_full_name()}}' , '{{elt.flap_detection_enabled}}')" >Flap Detection {{!helper.get_input_bool(elt.flap_detection_enabled)}} </li>	
+			<li class="grid_4" title="{{title}}" onclick="toggle_checks('{{elt.get_full_name()}}' , '{{elt.active_checks_enabled|elt.passive_checks_enabled}}')"><span>Active/passive Checks</span> {{!helper.get_input_bool(elt.active_checks_enabled|elt.passive_checks_enabled)}}
+			<li class="grid_4" onclick="toggle_notifications('{{elt.get_full_name()}}' , '{{elt.notifications_enabled}}')"><span>Notifications</span> {{!helper.get_input_bool(elt.notifications_enabled)}} </li>
+			<li class="grid_4" onclick="toggle_event_handlers('{{elt.get_full_name()}}' , '{{elt.event_handler_enabled}}')" ><span>Event Handler</span> {{!helper.get_input_bool(elt.event_handler_enabled)}} </li>
+			<li class="grid_4" onclick="toggle_flap_detection('{{elt.get_full_name()}}' , '{{elt.flap_detection_enabled}}')" ><span>Flap Detection</span> {{!helper.get_input_bool(elt.flap_detection_enabled)}} </li>	
 		</ul>	
 	</div>
     <!-- Switch End-->
