@@ -19,8 +19,7 @@ Invalid element name
 
 %top_right_banner_state = datamgr.get_overall_state()
 
-%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/graphs.js', 'eltdetail/js/domtab.js','eltdetail/js/dollar.js','eltdetail/js/TabPane.js', 'eltdetail/js/gesture.js', 'eltdetail/js/hide.js', 'eltdetail/js/switchbuttons.js', 'eltdetail/js/multi.js'],  css=['eltdetail/css/eltdetail2.css', 'eltdetail/css/switchbuttons.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
-%# %rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/switchbuttons.js', 'eltdetail/js/graphs.js','eltdetail/js/TabPane.js', 'eltdetail/js/gesture.js'],  css=['eltdetail/css/eltdetail2.css', 'eltdetail/css/gesture.css', 'eltdetail/css/switchbuttons.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
+%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/graphs.js', 'eltdetail/js/dollar.js','eltdetail/js/TabPane.js', 'eltdetail/js/gesture.js', 'eltdetail/js/hide.js', 'eltdetail/js/switchbuttons.js', 'eltdetail/js/multi.js'],  css=['eltdetail/css/eltdetail2.css', 'eltdetail/css/switchbuttons.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
 
 %# " We will save our element name so gesture functions will be able to call for the good elements."
 <script type="text/javascript">var elt_name = '{{elt.get_full_name()}}';</script>
@@ -118,18 +117,6 @@ Invalid element name
 			     tabPane.closeTab(index);
 			   });
 					
-			    $('new-tab').addEvent('click', function() {
-			       var title = $('new-tab-title').get('value');
-			       var content = $('new-tab-content').get('value');
-				
-			       if (!title || !content) {
-				       window.alert('Title or content text empty, please fill in some text.');
-				       return;
-				   }
-					
-				 $('demo').getElement('ul').adopt(new Element('li', {'class': 'tab', text: title}).adopt(new Element('span', {'class': 'remove', html: '&times'})));
-				 $('demo').adopt(new Element('div', {'class': 'content', text: content}).setStyle('display', 'none'));
-				});
 		     });
 		</script>
 
@@ -177,6 +164,7 @@ Invalid element name
 										{{!helper.get_button('Schedule Downtime', img='/static/images/downtime.png')}}
 									</div>
 								</div>
+								<br>
 								<hr />
 								<div id="item_information">
 								<h2>Additonal Informations</h2>
