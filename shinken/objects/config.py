@@ -483,8 +483,12 @@ class Config(Item):
             if line.startswith("# IMPORTEDFROM="):
                 filefrom = line.split('=')[1]
                 continue
+            # Protect \; to be considered as commetns
+            line = line.replace('\;', '__ANTI-VIRG__')
             line = line.split(';')[0].strip()
-            #A backslash means, there is more to come
+            # Now we removed real comments, replace them with just ;
+            line = line.replace('__ANTI-VIRG__', ';')
+            # A backslash means, there is more to come
             if re.search("\\\s*$", line):
                 continuation_line = True
                 line = re.sub("\\\s*$", "", line)
@@ -492,7 +496,7 @@ class Config(Item):
                 tmp_line += line
                 continue
             elif continuation_line:
-                #Now the continuation line is complete
+                # Now the continuation line is complete
                 line = re.sub("^\s+", "", line)
                 line = tmp_line + line
                 tmp_line = ''
@@ -502,8 +506,8 @@ class Config(Item):
             if re.search("^\s*\t*#|^\s*$|^\s*}", line):
                 pass
 
-            #A define must be catch and the type save
-            #The old entry must be save before
+            # A define must be catch and the type save
+            # The old entry must be save before
             elif re.search("^define", line):
                 in_define = True
                 if tmp_type not in objectscfg:
@@ -511,7 +515,7 @@ class Config(Item):
                 objectscfg[tmp_type].append(tmp)
                 tmp = []
                 tmp.append("imported_from "+ filefrom)
-                #Get new type
+                # Get new type
                 elts = re.split('\s', line)
                 tmp_type = elts[1]
                 tmp_type = tmp_type.split('{')[0]
@@ -521,7 +525,7 @@ class Config(Item):
                 else:
                     params.append(line)
 
-        #Maybe the type of the last element is unknown, declare it
+        # Maybe the type of the last element is unknown, declare it
         if not tmp_type in objectscfg:
             objectscfg[tmp_type] = []
 
@@ -530,7 +534,7 @@ class Config(Item):
 
         #print "Params", params
         self.load_params(params)
-        #And then update our MACRO dict
+        # And then update our MACRO dict
         self.fill_resource_macros_names_macros()
 
         for type in objectscfg:
