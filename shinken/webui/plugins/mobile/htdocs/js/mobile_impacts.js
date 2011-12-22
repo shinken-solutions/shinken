@@ -39,19 +39,36 @@ function focus_on(idx){
     // And make others nearly disapears
     for(var j=0;j<nb_impacts;j++){
 	var impact = $('impact-'+j);
+	old_pos = impact.style.left.substring(0, impact.style.left.length-2);
+	new_pos = 0;
 	if(j == idx){
 	    impact.style.opacity = '1';
-	    impact.style.left = ''+offset+'px';
+	    new_pos = offset;
 	}else if(j == idx-1 || j == idx+1){
 	    impact.style.opacity = '0.7';
-	    impact.style.left = ''+((j-idx)*250+offset)+'px';
+	    new_pos = ((j-idx)*250+offset);
 	}else{
 	    impact.style.opacity = '0.1';
-	    impact.style.left = ''+((j-idx)*250+offset)+'px';
+	    new_pos = ((j-idx)*250+offset);
 	}
+	var move = new Fx.Tween(impact, {property: 'left', duration : 200});
+	move.start(old_pos, new_pos); // and by moving now
+
     }
     
 }
+
+function go_to_pos_x(pos_x){
+    pos_x = -pos_x;
+    var idx=3;
+    alert(pos_x);
+    n = (pos_x - Math.floor(pos_x)%250)/250;
+    n = Math.ceil(n);
+    n = Math.abs(n);
+    alert('N'+n);
+    focus_on(n);    
+}
+
 
 
 function go_left(){
@@ -68,6 +85,11 @@ function go_right(){
     }
 }
 
+function limit_it(v){
+    v = Math.min(v, 250*nb_impacts);
+    v = Math.max(v, 0);
+    return v;
+}
 
 window.addEvent('domready', function(){
 
@@ -76,4 +98,50 @@ window.addEvent('domready', function(){
     nb_impacts = all_impacts.length;
 
     focus_on(0);
+    var currentX = 0;
+    var startX = 0;
+    var touchMoved = false;
+    var lastMoveTime = 0;
+
+    window.addEventListener("touchstart", function (event){
+	startX = event.touches[0].pageX - currentX;
+	touchMoved = false;
+
+	event.preventDefault();
+    }, false);
+
+    window.addEventListener("touchmove", function (e){
+	touchMoved = true;
+	lastX = currentX;
+	lastMoveTime = new Date();
+	currentX = event.touches[0].pageX - startX;
+	currentX = limit_it(currentX);
+	e.preventDefault();
+    }, false);
+
+    window.addEventListener('touchend', function (e){
+	if (touchMoved)
+	{
+            /* Approximate some inertia -- the transition function takes care of the decay over 0.4s for us, but we need to amplify the last movement */
+            var delta = currentX - lastX;
+            var dt = (new Date()) - lastMoveTime + 1;
+            /* dx * 400 / dt */
+	    alert('delta'+delta+'dt'+dt);
+            currentX = currentX + delta * 200 / dt;
+	    currentX = limit_it(currentX);
+	    go_to_pos_x(currentX);
+            //this.delegate.updateTouchEnd(this);
+	    //alert(currentX);
+
+
+	}
+	else
+	{
+            //this.delegate.clicked(this.currentX);
+	}
+	alert('CurrentX'+currentx);
+	e.preventDefault();
+    }, false);
+
+
 });

@@ -23,7 +23,6 @@
 }
 
 .tac_  li {
-
 	border-left: 1px solid;
     float: left !important;
     list-style: none outside none;
@@ -39,7 +38,7 @@
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
     display: block;
-    font-size: 200%;
+    font-size: 145%;
     line-height: 145%;
     padding: 2px;
 }
@@ -67,10 +66,12 @@
 	margin-top:7px;
 	border:none;
 }
+
 #menu li:hover, #menu li a .selected {
 	color: #FFFFFF;
 	background: transparent url(/static/images/pointer.gif) bottom center no-repeat;
 }
+
 #dropmenu li:hover  {
 	border: 1px solid #777777;
 	padding: 4px 9px 4px 9px;
@@ -202,6 +203,7 @@
 	text-align:left;
 	text-shadow: 1px 1px 1px #FFFFFF;
 }
+
 #dropmenu h2 {
 	font-size:14px;
 	font-weight:400;
@@ -210,12 +212,14 @@
 	
 	border-bottom:1px solid #666666;
 }
+
 #dropmenu h3 {
 	font-size:14px;
 	margin:7px 0 14px 0;
 	padding-bottom:7px;
 	border-bottom:1px solid #888888;
 }
+
 #menu p {
 	line-height:18px;
 	margin:0 0 10px 0;

@@ -99,10 +99,11 @@ def get_instance(plugin):
     else:
         pnp_path = ''
 
+    use_aggressive_sql = getattr(plugin, 'use_aggressive_sql', True)
     debug = getattr(plugin, 'debug', None)
     debug_queries = (getattr(plugin, 'debug_queries', '0') == '1')
 
-    instance = Livestatus_broker(plugin, host, port, socket, allowed_hosts, database_file, archive_path, max_logs_age, pnp_path, debug, debug_queries)
+    instance = Livestatus_broker(plugin, host, port, socket, allowed_hosts, database_file, archive_path, max_logs_age, pnp_path, use_aggressive_sql, debug, debug_queries)
     return instance
 
 

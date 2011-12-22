@@ -63,7 +63,7 @@ if 'update' in sys.argv:
     sys.argv.insert(1, 'install')
     is_update = True
 
-# If we install/update, for the force option to always overrite the
+# If we install/update, for the force option to always overwrite the
 # shinken lib and scripts
 if 'install' in sys.argv and not '-f' in sys.argv:
     sys.argv.append('-f')
@@ -193,6 +193,7 @@ class build_config(Command):
         if not is_update:
             self.generate_default_shinken_file()
             self.update_configfiles()
+            self.copy_objects_file()
         
     def generate_default_shinken_file(self):
         # The default file must have good values for the directories:
@@ -217,6 +218,19 @@ class build_config(Command):
             f = open(outfile, "w")
             f.write(buf)
             f.close()
+
+    def copy_objects_file(self):
+        for name in config_objects_file:
+            inname = os.path.join('etc', name)
+            outname = os.path.join(self.build_dir, name)
+            log.info('Copying data files in : %s out : %s' % (inname,outname))
+            append_file_with(inname, outname,"")
+        #Creating some needed directories
+        discovery_dir = os.path.join(self.build_dir + "/objects/discovery")
+        for dirname in [self.var_path,self.run_path,self.log_path,discovery_dir]:
+            if not os.path.exists(dirname):
+                os.makedirs(dirname)
+
 
     def update_configfiles(self):
         # Here, even with --root we should change the file with good values
@@ -276,6 +290,7 @@ local_log=%s/arbiterd.log
                                     "%s/nagios.log" % self.log_path)
 
 
+
 class install_config(Command):
     description = "install the shinken config files"
 
@@ -320,7 +335,7 @@ class install_config(Command):
         )
 
     def run(self):
-        # If we are just doing an upadte, pass this
+        # If we are just doing an update, pass this
         if is_update:
             return
         #log.warn('>>> %s', self.lib)
@@ -378,11 +393,16 @@ class install_config(Command):
                                        "Maybe you should create this group"
                                        % group_name)
 
+def ensure_dir_exist(f):
+    dirname = os.path.dirname(f)
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
 
 def append_file_with(infilename, outfilename, append_string):
     f = open(infilename)
     buf = f.read()
     f.close()
+    ensure_dir_exist(outfilename)
     f = open(outfilename, "w")
     f.write(buf)
     f.write(append_string)
@@ -454,6 +474,26 @@ additionnal_config_files = ('shinken-specific.cfg',
                             'shinken-specific-load-balanced-only.cfg'
                             )
 
+config_objects_file = (
+                        'discovery_runs.cfg',
+                        'templates.cfg',
+                        'dependencies.cfg',
+                        'timeperiods.cfg',
+                        'contacts.cfg',
+                        'discovery_rules.cfg',
+                        'hosts/localhost.cfg',
+                        'services/linux_local.cfg',
+                        'contactgroups.cfg',
+                        'escalations.cfg',
+                        'commands.cfg',
+                        'discovery.cfg',
+                        'servicegroups.cfg',
+                        'hostgroups.cfg',
+                        'certs/server.pem',
+                        'certs/client.pem',
+                        'certs/ca.pem'
+)
+
 # daemon configs
 daemon_ini_files = (('broker', 'brokerd.ini'),
                     ('broker', 'brokerd-windows.ini'),
@@ -466,6 +506,8 @@ daemon_ini_files = (('broker', 'brokerd.ini'),
                     ('scheduler', 'schedulerd.ini'),
                     ('scheduler', 'schedulerd-windows.ini'),
                     )
+
+
 
 resource_cfg_files = ('resource.cfg', )
 
@@ -495,19 +537,6 @@ data_files = [
          ]
         ),
     (
-        default_paths['var'], 
-        [ 'var/void_for_git' ]
-        ),
-    (
-        default_paths['run'],
-        [ 'var/void_for_git' ]
-        ),
-    (
-        default_paths['log'],
-        [ 'var/void_for_git' ]
-        )
-    ,
-    (
         default_paths['libexec'], ['libexec/check.sh']
         )
     ]
@@ -517,40 +546,9 @@ data_files = [
 if not is_update:
                 
     data_files.append(
-        (os.path.join(default_paths['etc'], 'hosts' ),
-         glob('etc/hosts/[!_]*.cfg')))
-    data_files.append(
-        (os.path.join(default_paths['etc'], 'services'),
-         glob('etc/services/[!_]*.cfg')))
-    data_files.append(
-        (os.path.join(default_paths['etc'], 'objects', 'discovery'), 
-         tuple() ))
-    data_files.append(
-        (os.path.join(default_paths['etc'], 'certs') ,
-         glob('etc/certs/[!_]*.pem')))
-    data_files.append(
-        (default_paths['etc'],
-         [ # other configs
-                'etc/commands.cfg',
-                'etc/contactgroups.cfg',
-                'etc/contacts.cfg',
-                'etc/dependencies.cfg',
-                'etc/escalations.cfg',
-                'etc/hostgroups.cfg',
-                #'etc/resource.cfg', # see above
-                'etc/servicegroups.cfg',
-                'etc/templates.cfg',
-                'etc/timeperiods.cfg',
-                'etc/discovery.cfg',
-                'etc/discovery_rules.cfg',
-                'etc/discovery_runs.cfg',
-                ]
-         ))
-    data_files.append(
         (os.path.join(etc_root, 'default',),
          ['build/bin/default/shinken' ]
          ))
-
 
     
 print "All package _data"

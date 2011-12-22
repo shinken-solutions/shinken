@@ -51,7 +51,7 @@ class LiveStatusQuery(Hooker):
 
     my_type = 'query'
 
-    def __init__(self, configs, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, schedulers, pollers, reactionners, brokers, db, pnp_path, return_queue, counters):
+    def __init__(self, configs, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, schedulers, pollers, reactionners, brokers, db, use_aggressive_sql, pnp_path, return_queue, counters):
         # Runtime data form the global LiveStatus object
         self.configs = configs
         self.hosts = hosts
@@ -67,6 +67,7 @@ class LiveStatusQuery(Hooker):
         self.reactionners = reactionners
         self.brokers = brokers
         self.db = db
+        self.use_aggressive_sql = use_aggressive_sql
         self.pnp_path = pnp_path
         self.return_queue = return_queue
         self.counters = counters
@@ -87,8 +88,13 @@ class LiveStatusQuery(Hooker):
         # Initialize the stacks which are needed for the Filter: and Stats:
         # filter- and count-operations
         self.filter_stack = LiveStatusStack()
+        # This stack is used to create a full-blown select-statement
         self.sql_filter_stack = LiveStatusStack()
         self.sql_filter_stack.type = 'sql'
+        # This stack is used to create a minimal select-statement which
+        # selects only by time >= and time <=
+        self.sql_time_filter_stack = LiveStatusStack()
+        self.sql_time_filter_stack.type = 'sql'
         self.stats_filter_stack = LiveStatusStack()
         self.stats_postprocess_stack = LiveStatusStack()
         self.stats_request = False
@@ -262,7 +268,8 @@ class LiveStatusQuery(Hooker):
                     self.filter_stack.put(self.make_filter(operator, attribute, reference))
                     if self.table == 'log':
                         if attribute == 'time':
-                            self.sql_filter_stack.put(self.make_sql_filter(operator, attribute, reference))
+                            self.sql_time_filter_stack.put(self.make_sql_filter(operator, attribute, reference))
+                        self.sql_filter_stack.put(self.make_sql_filter(operator, attribute, reference))
                 else:
                     print "illegal operation", operator
                     pass # illegal operation
@@ -272,12 +279,18 @@ class LiveStatusQuery(Hooker):
                 # Construct a new function which makes a logical and
                 # Put the function back onto the stack
                 self.filter_stack.and_elements(andnum)
+                if self.table == 'log':
+                    #self.sql_time_filter_stack.and_elements(andnum)
+                    self.sql_filter_stack.and_elements(andnum)
             elif keyword == 'Or':
                 cmd, ornum = self.split_option(line)
                 # Take the last ornum functions from the stack
                 # Construct a new function which makes a logical or
                 # Put the function back onto the stack
                 self.filter_stack.or_elements(ornum)
+                if self.table == 'log':
+                    #self.sql_time_filter_stack.or_elements(ornum)
+                    self.sql_filter_stack.or_elements(ornum)
             elif keyword == 'StatsGroupBy':
                 cmd, stats_group_by = self.split_option_with_columns(line)
                 self.filtercolumns.extend(stats_group_by)
@@ -364,6 +377,7 @@ class LiveStatusQuery(Hooker):
             # But we need to ask now, because get_live_data() will empty the stack
             num_stats_filters = self.stats_filter_stack.qsize()
             if self.table == 'log':
+                self.sql_time_filter_stack.and_elements(self.sql_time_filter_stack.qsize())
                 self.sql_filter_stack.and_elements(self.sql_filter_stack.qsize())
                 result = self.get_live_data_log()
             else:
@@ -638,7 +652,17 @@ member_key: the key to be used to sort each resulting element of a group member.
     def get_live_data_log(self):
         """Like get_live_data, but for log objects"""
         filter_func = self.filter_stack.get_stack()
-        sql_filter_func = self.sql_filter_stack.get_stack()
+        if self.use_aggressive_sql:
+            # Be aggressive, get preselected data from sqlite and do less
+            # filtering in python. But: only a subset of Filter:-attributes
+            # can be mapped to columns in the logs-table, for the others
+            # we must use "always-true"-clauses. This can result in
+            # funny and potentially ineffective sql-statements
+            sql_filter_func = self.sql_filter_stack.get_stack()
+        else:
+            # Be conservative, get everything from the database between
+            # two dates and apply the Filter:-clauses in python
+            sql_filter_func = self.sql_time_filter_stack.get_stack()
         out_map = self.out_map[self.out_map_name]
         filter_map = dict([(k, out_map.get(k)) for k in self.filtercolumns])
         output_map = dict([(k, out_map.get(k)) for k in self.columns]) or out_map
@@ -669,6 +693,7 @@ member_key: the key to be used to sort each resulting element of a group member.
             totime = int(lepat.group(3))
         # now find the list of datafiles
         filtresult = []
+        #print filter_clause, filter_values
         for dateobj, handle, archive, fromtime, totime in self.db.log_db_relevant_files(fromtime, totime):
             dbresult = self.select_live_data_log(filter_clause, filter_values, handle, archive, fromtime, totime)
             prefiltresult = [y for y in (x.fill(self.hosts, self.services, set(self.columns + self.filtercolumns)) for x in dbresult) if (without_filter or filter_func(self.create_output(filter_map, y)))]
@@ -930,6 +955,10 @@ member_key: the key to be used to sort each resulting element of a group member.
     def make_sql_filter(self, operator, attribute, reference):
         # The filters are text fragments which are put together to form a sql where-condition finally.
         # Add parameter Class (Host, Service), lookup datatype (default string), convert reference
+        # which attributes are suitable for a sql statement
+        good_attributes = ['time', 'attempt', 'class', 'command_name', 'comment', 'contact_name', 'host_name', 'plugin_output', 'service_description', 'state', 'state_type', 'type']
+        good_operators = ['=', '!=']
+
         def eq_filter():
             if reference == '':
                 return ['%s IS NULL' % attribute, ()]
@@ -950,6 +979,10 @@ member_key: the key to be used to sort each resulting element of a group member.
             return ['%s <= ?' % attribute, (reference, )]
         def match_filter():
             return ['%s LIKE ?' % attribute, ('%'+reference+'%', )]
+        def no_filter():
+            return ['1 = 1', ()]
+        if attribute not in good_attributes:
+            return no_filter
         if operator == '=':
             return eq_filter
         if operator == '>':

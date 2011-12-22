@@ -75,6 +75,8 @@ class __Action(object):
         elts_line1 = elts[0].split('|')
         # First line before | is output, and strip it
         self.output = elts_line1[0].strip()
+        # Init perfdata as void
+        self.perf_data = ''
         # After | is perfdata, and strip it
         if len(elts_line1) > 1:
             self.perf_data = elts_line1[1].strip()

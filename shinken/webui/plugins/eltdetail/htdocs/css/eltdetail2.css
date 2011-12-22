@@ -52,6 +52,7 @@
 
 #elt_container h2 {
 	font-size: 15px;
+	margin-bottom: 5px;
 }
 
 #elt_container p {
@@ -64,7 +65,6 @@
 }
 
 #elt_summary {
-	margin-bottom: 20px;
 	padding: 15px;
 	width: 96%;
 }
@@ -72,12 +72,17 @@
 #elt_summary table {
 	width: 100%;
 }
+
 #elt_summary table, #elt_summary tr, #elt_summary th, #elt_summary td, #elt_summary tbody{
 	background: none !important;
 	border: none;	
 }
 
-#item_information dd{
+#item_information {
+	margin-bottom: 20px;
+}
+
+#item_information dd {
 	margin-left: 20em;
 }
 
@@ -222,7 +227,7 @@ div.content {
 #minimenu ul li a:hover{
 	color: #787878;
 	background-color: #F3F3F3;
-	border-bottom: 4px solid #787878;
+	border-bottom: 3px solid #787878;
 	padding-bottom: 0;
 }
 
@@ -262,13 +267,6 @@ div.content {
 	line-height: 35px;
 }
 
-.left {
-	float:left;
-}
-
-.right {
-	float:right;
-}
 #log_container {}
 
 #log_container  h2{
@@ -278,8 +276,8 @@ div.content {
     border-top-right-radius: 4px;
     color: #3A505B;
     font-size: 13px;
-    margin: 15px 0 0;
-    padding: 5px 8px;
+    margin: 0;
+    padding-top: 5px;
     text-shadow: 0 1px #FFFFFF;
 	width: 81.333%;
 }
@@ -287,8 +285,10 @@ div.content {
 #log_container  ol {
     border-bottom-left-radius: 4px;
     border-bottom-right-radius: 4px;
-    border-color: -moz-use-text-color #E3E3E5 #E3E3E5;
+    border-color: -moz-use-text-color #E3E3E5;
     border-right: 1px solid #E3E3E5;
+    border-left: 1px solid #E3E3E5;
+    border-bottom: 1px solid #E3E3E5;
     border-style: none solid solid;
     border-width: medium 1px 1px;
     list-style-type: none;
@@ -306,4 +306,12 @@ div.content {
 
 .row_alt {
 	background: #FFFFFF !important;
+}
+
+.switches ul li {
+	display: inline;
+}
+
+.switches ul li div{
+	float: left;
 }

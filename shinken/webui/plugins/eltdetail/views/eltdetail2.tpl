@@ -19,8 +19,7 @@ Invalid element name
 
 %top_right_banner_state = datamgr.get_overall_state()
 
-%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/graphs.js', 'eltdetail/js/domtab.js','eltdetail/js/dollar.js','eltdetail/js/TabPane.js', 'eltdetail/js/gesture.js', 'eltdetail/js/hide.js', 'eltdetail/js/switchbuttons.js', 'eltdetail/js/multi.js'],  css=['eltdetail/css/eltdetail2.css', 'eltdetail/css/switchbuttons.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
-%# %rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/switchbuttons.js', 'eltdetail/js/graphs.js','eltdetail/js/TabPane.js', 'eltdetail/js/gesture.js'],  css=['eltdetail/css/eltdetail2.css', 'eltdetail/css/gesture.css', 'eltdetail/css/switchbuttons.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
+%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/graphs.js', 'eltdetail/js/dollar.js','eltdetail/js/TabPane.js', 'eltdetail/js/gesture.js', 'eltdetail/js/hide.js', 'eltdetail/js/switchbuttons.js', 'eltdetail/js/multi.js'],  css=['eltdetail/css/eltdetail2.css', 'eltdetail/css/switchbuttons.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
 
 %# " We will save our element name so gesture functions will be able to call for the good elements."
 <script type="text/javascript">var elt_name = '{{elt.get_full_name()}}';</script>
@@ -102,7 +101,19 @@ Invalid element name
 		</div>				
 	</div>
 	<!-- Switch Start-->
-
+	<div class="switches">
+		<ul class="grid_16">
+		    %if elt_type=='host':
+		       %title = 'This will also enable/disable this host services'
+		    %else:
+		       %title = ''
+		    %end
+			<li class="grid_4" title="{{title}}" onclick="toggle_checks('{{elt.get_full_name()}}' , '{{elt.active_checks_enabled|elt.passive_checks_enabled}}')"><span>Active/passive Checks</span> {{!helper.get_input_bool(elt.active_checks_enabled|elt.passive_checks_enabled)}}
+			<li class="grid_4" onclick="toggle_notifications('{{elt.get_full_name()}}' , '{{elt.notifications_enabled}}')"><span>Notifications</span> {{!helper.get_input_bool(elt.notifications_enabled)}} </li>
+			<li class="grid_4" onclick="toggle_event_handlers('{{elt.get_full_name()}}' , '{{elt.event_handler_enabled}}')" ><span>Event Handler</span> {{!helper.get_input_bool(elt.event_handler_enabled)}} </li>
+			<li class="grid_4" onclick="toggle_flap_detection('{{elt.get_full_name()}}' , '{{elt.flap_detection_enabled}}')" ><span>Flap Detection</span> {{!helper.get_input_bool(elt.flap_detection_enabled)}} </li>	
+		</ul>	
+	</div>
     <!-- Switch End-->
       
 		<div id="elt_container">
@@ -118,18 +129,6 @@ Invalid element name
 			     tabPane.closeTab(index);
 			   });
 					
-			    $('new-tab').addEvent('click', function() {
-			       var title = $('new-tab-title').get('value');
-			       var content = $('new-tab-content').get('value');
-				
-			       if (!title || !content) {
-				       window.alert('Title or content text empty, please fill in some text.');
-				       return;
-				   }
-					
-				 $('demo').getElement('ul').adopt(new Element('li', {'class': 'tab', text: title}).adopt(new Element('span', {'class': 'remove', html: '&times'})));
-				 $('demo').adopt(new Element('div', {'class': 'content', text: content}).setStyle('display', 'none'));
-				});
 		     });
 		</script>
 
@@ -145,7 +144,7 @@ Invalid element name
 						   <div id="elt_summary">
 								<div id="item_information">
 									<h2>Host/Service Information</h2>
-									<dl class="grid_10">
+									<dl>
 										<dt scope="row" class="column1">{{elt_type.capitalize()}} Status</dt>
 										<dd><span class="state_{{elt.state.lower()}}">{{elt.state}}</span> (since {{helper.print_duration(elt.last_state_change, just_duration=True, x_elts=2)}}) </dd>
 
@@ -167,7 +166,7 @@ Invalid element name
 										<dt scope="row" class="column1">Last State Change</dt>
 										<dd>{{time.asctime(time.localtime(elt.last_state_change))}}</dd>
 									</dl>
-									<div class="grid_6">
+									<div>
 										<a href="#" onclick="try_to_fix('{{elt.get_full_name()}}')">{{!helper.get_button('Try to fix it!', img='/static/images/enabled.png')}}</a>
 										<a href="#" onclick="acknowledge('{{elt.get_full_name()}}')">{{!helper.get_button('Acknowledge it', img='/static/images/wrench.png')}}</a>
 										<a href="#" onclick="recheck_now('{{elt.get_full_name()}}')">{{!helper.get_button('Recheck now', img='/static/images/delay.gif')}}</a>
@@ -181,7 +180,6 @@ Invalid element name
 								<div id="item_information">
 								<h2>Additonal Informations</h2>
 									<dl>
-
 										<dt scope="row" class="column1">Last Notification</dt>
 										<dd>{{helper.print_date(elt.last_notification)}} (notification {{elt.current_notification_number}})</dd>
 
@@ -199,11 +197,9 @@ Invalid element name
 		
 						    </div>
 						    <div class="content">
-	   
 								%#    Now print the dependencies if we got somes
 								%if len(elt.parent_dependencies) > 0:
 									<a id="togglelink-{{elt.get_dbg_name()}}" href="javascript:toggleBusinessElt('{{elt.get_dbg_name()}}')"> {{!helper.get_button('Show dependency tree', img='/static/images/expand.png')}}</a>
-							      
 							      		{{!helper.print_business_rules(datamgr.get_business_parents(elt))}}
 								%end
 							

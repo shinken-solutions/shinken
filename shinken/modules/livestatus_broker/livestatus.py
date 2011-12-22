@@ -41,7 +41,7 @@ class LiveStatus(object, Hooker):
     # Use out_map from the mapping.py file
     out_map = out_map
 
-    def __init__(self, configs, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, schedulers, pollers, reactionners, brokers, db, pnp_path, return_queue):
+    def __init__(self, configs, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, schedulers, pollers, reactionners, brokers, db, use_aggressive_sql, pnp_path, return_queue):
         self.configs = configs
         self.hosts = hosts
         self.services = services
@@ -56,6 +56,7 @@ class LiveStatus(object, Hooker):
         self.reactionners = reactionners
         self.brokers = brokers
         self.db = db
+        self.use_aggressive_sql = use_aggressive_sql
         LiveStatus.pnp_path = pnp_path
         self.debuglevel = 2
         self.return_queue = return_queue
@@ -83,7 +84,7 @@ class LiveStatus(object, Hooker):
         """
         request = LiveStatusRequest(data, self.configs, self.hosts, self.services, 
             self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, 
-            self.schedulers, self.pollers, self.reactionners, self.brokers, self.db, self.pnp_path, self.return_queue, self.counters)
+            self.schedulers, self.pollers, self.reactionners, self.brokers, self.db, self.use_aggressive_sql, self.pnp_path, self.return_queue, self.counters)
         request.parse_input(data)
         #print "REQUEST\n%s\n" % data
         to_del = []

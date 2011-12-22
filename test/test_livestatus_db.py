@@ -93,6 +93,8 @@ class TestConfigSmall(TestConfig):
         self.livestatus_broker.db.close()
         if os.path.exists(self.livelogs):
             os.remove(self.livelogs)
+        if os.path.exists(self.livelogs+"-journal"):
+            os.remove(self.livelogs+"-journal")
         if os.path.exists(self.pnp4nagios):
             shutil.rmtree(self.pnp4nagios)
         if os.path.exists('var/nagios.log'):
@@ -415,7 +417,8 @@ class TestConfigBig(TestConfig):
 
 
     def init_livestatus(self):
-        self.livelogs = 'tmp/livelogs.db' + self.testid
+        #self.livelogs = 'tmp/livelogs.db' + self.testid
+        self.livelogs = 'tmp/livelogs.db' + "wrumm"
         self.db_archives = os.path.join(os.path.dirname(self.livelogs), 'archives')
         self.pnp4nagios = 'tmp/pnp4nagios_test' + self.testid
         self.livestatus_broker = Livestatus_broker(livestatus_modconf, '127.0.0.1', str(50000 + os.getpid()), 'live', [], self.livelogs, self.db_archives, 365, self.pnp4nagios)
@@ -428,29 +431,12 @@ class TestConfigBig(TestConfig):
         self.livestatus_broker.init()
         self.livestatus_broker.db = LiveStatusDb(self.livestatus_broker.database_file, self.livestatus_broker.archive_path, self.livestatus_broker.max_logs_age)
 
-        self.livestatus_broker.livestatus = LiveStatus(self.livestatus_broker.configs, self.livestatus_broker.hosts, self.livestatus_broker.services, self.livestatus_broker.contacts, self.livestatus_broker.hostgroups, self.livestatus_broker.servicegroups, self.livestatus_broker.contactgroups, self.livestatus_broker.timeperiods, self.livestatus_broker.commands, self.livestatus_broker.schedulers, self.livestatus_broker.pollers, self.livestatus_broker.reactionners, self.livestatus_broker.brokers, self.livestatus_broker.db, self.livestatus_broker.pnp_path, self.livestatus_broker.from_q)
+        self.livestatus_broker.livestatus = LiveStatus(self.livestatus_broker.configs, self.livestatus_broker.hosts, self.livestatus_broker.services, self.livestatus_broker.contacts, self.livestatus_broker.hostgroups, self.livestatus_broker.servicegroups, self.livestatus_broker.contactgroups, self.livestatus_broker.timeperiods, self.livestatus_broker.commands, self.livestatus_broker.schedulers, self.livestatus_broker.pollers, self.livestatus_broker.reactionners, self.livestatus_broker.brokers, self.livestatus_broker.db, self.livestatus_broker.use_aggressive_sql, self.livestatus_broker.pnp_path, self.livestatus_broker.from_q)
 
 
 
-    def tearDown(self):
-        self.livestatus_broker.db.commit()
-        self.livestatus_broker.db.close()
-        if os.path.exists(self.pnp4nagios):
-            shutil.rmtree(self.pnp4nagios)
-        if os.path.exists('var/nagios.log'):
-            os.remove('var/nagios.log')
-        if os.path.exists('var/retention.dat'):
-            os.remove('var/retention.dat')
-        if os.path.exists('var/status.dat'):
-            os.remove('var/status.dat')
-        to_del = [attr for attr in self.livestatus_broker.livestatus.__class__.out_map['Host'].keys() if attr.startswith('host_')]
-        for attr in to_del:
-            del self.livestatus_broker.livestatus.__class__.out_map['Host'][attr]
-        self.livestatus_broker = None
-
-
-    def x_test_a_long_history(self):
-        return
+    def test_a_long_history(self):
+        #return
         test_host_005 = self.sched.hosts.find_by_name("test_host_005")
         test_host_099 = self.sched.hosts.find_by_name("test_host_099")
         test_ok_00 = self.sched.services.find_srv_by_name_and_hostname("test_host_005", "test_ok_00")
@@ -459,76 +445,93 @@ class TestConfigBig(TestConfig):
         test_ok_16 = self.sched.services.find_srv_by_name_and_hostname("test_host_005", "test_ok_16")
         test_ok_99 = self.sched.services.find_srv_by_name_and_hostname("test_host_099", "test_ok_01")
         starttime = time.time()
-        # run silently
-        old_stdout = sys.stdout
-        sys.stdout = open(os.devnull, "w")
-        self.scheduler_loop(2, [
-            [test_ok_00, 0, "OK"],
-            [test_ok_01, 0, "OK"],
-            [test_ok_04, 0, "OK"],
-            [test_ok_16, 0, "OK"],
-            [test_ok_99, 0, "OK"],
-        ])
-        self.update_broker()
-        should_be = 0
-        #for i in xrange(3600 * 24 * 7):
-        for i in xrange(100000): 
-            if i % 399 == 0:
-                self.scheduler_loop(3, [
-                    [test_ok_00, 1, "WARN"],
-                    [test_ok_01, 2, "CRIT"],
-                    [test_ok_04, 3, "UNKN"],
-                    [test_ok_16, 1, "WARN"],
-                    [test_ok_99, 2, "CRIT"],
-                ])
-                should_be += 3
-            time.sleep(62)
-            if i % 399 == 0:
-                self.scheduler_loop(1, [
-                    [test_ok_00, 0, "OK"],
-                    [test_ok_01, 0, "OK"],
-                    [test_ok_04, 0, "OK"],
-                    [test_ok_16, 0, "OK"],
-                    [test_ok_99, 0, "OK"],
-                ])
-                should_be += 1
-            time.sleep(2)
-            if i % 199 == 0:
-                self.scheduler_loop(3, [
-                    [test_ok_00, 1, "WARN"],
-                    [test_ok_01, 2, "CRIT"],
-                ])
-            time.sleep(62)
-            if i % 199 == 0:
-                self.scheduler_loop(1, [
-                    [test_ok_00, 0, "OK"],
-                    [test_ok_01, 0, "OK"],
-                ])
-            time.sleep(2)
-            if i % 299 == 0:
-                self.scheduler_loop(3, [
-                    [test_host_005, 2, "DOWN"],
-                ])
-            if i % 19 == 0:
-                self.scheduler_loop(3, [
-                    [test_host_099, 2, "DOWN"],
-                ])
-            time.sleep(62)
-            if i % 299 == 0:
-                self.scheduler_loop(3, [
-                    [test_host_005, 0, "UP"],
-                ])
-            if i % 19 == 0:
-                self.scheduler_loop(3, [
-                    [test_host_099, 0, "UP"],
-                ])
-            time.sleep(2)
-        self.update_broker()
-        endtime = time.time()
-        sys.stdout.close()
-        sys.stdout = old_stdout
+        numlogs = self.livestatus_broker.db.execute("SELECT COUNT(*) FROM logs")
+        if numlogs[0][0] == 0:
+            # run silently
+            old_stdout = sys.stdout
+            sys.stdout = open(os.devnull, "w")
+            self.scheduler_loop(2, [
+                [test_ok_00, 0, "OK"],
+                [test_ok_01, 0, "OK"],
+                [test_ok_04, 0, "OK"],
+                [test_ok_16, 0, "OK"],
+                [test_ok_99, 0, "OK"],
+            ])
+            self.update_broker()
+            should_be = 0
+            #for i in xrange(3600 * 24 * 7):
+            for i in xrange(10000): 
+                if i % 10000 == 0:
+                    sys.stderr.write(str(i))
+                if i % 399 == 0:
+                    self.scheduler_loop(3, [
+                        [test_ok_00, 1, "WARN"],
+                        [test_ok_01, 2, "CRIT"],
+                        [test_ok_04, 3, "UNKN"],
+                        [test_ok_16, 1, "WARN"],
+                        [test_ok_99, 2, "CRIT"],
+                    ])
+                    should_be += 3
+                time.sleep(62)
+                if i % 399 == 0:
+                    self.scheduler_loop(1, [
+                        [test_ok_00, 0, "OK"],
+                        [test_ok_01, 0, "OK"],
+                        [test_ok_04, 0, "OK"],
+                        [test_ok_16, 0, "OK"],
+                        [test_ok_99, 0, "OK"],
+                    ])
+                    should_be += 1
+                time.sleep(2)
+                if i % 199 == 0:
+                    self.scheduler_loop(3, [
+                        [test_ok_00, 1, "WARN"],
+                        [test_ok_01, 2, "CRIT"],
+                    ])
+                time.sleep(62)
+                if i % 199 == 0:
+                    self.scheduler_loop(1, [
+                        [test_ok_00, 0, "OK"],
+                        [test_ok_01, 0, "OK"],
+                    ])
+                time.sleep(2)
+                if i % 299 == 0:
+                    self.scheduler_loop(3, [
+                        [test_host_005, 2, "DOWN"],
+                    ])
+                if i % 19 == 0:
+                    self.scheduler_loop(3, [
+                        [test_host_099, 2, "DOWN"],
+                    ])
+                time.sleep(62)
+                if i % 299 == 0:
+                    self.scheduler_loop(3, [
+                        [test_host_005, 0, "UP"],
+                    ])
+                if i % 19 == 0:
+                    self.scheduler_loop(3, [
+                        [test_host_099, 0, "UP"],
+                    ])
+                time.sleep(2)
+                self.update_broker()
+                if i % 1000 == 0:
+                    self.livestatus_broker.db.commit()
+            endtime = time.time()
+            sys.stdout.close()
+            sys.stdout = old_stdout
+            self.livestatus_broker.db.commit()
+        else:
+            should_be = numlogs[0][0]
+            xxx = self.livestatus_broker.db.execute("SELECT min(time), max(time) FROM logs")
+            print xxx
+            starttime, endtime = [self.livestatus_broker.db.execute("SELECT min(time), max(time) FROM logs")][0][0]
+            
+        
         # now we have a lot of events
         # find type = HOST ALERT for test_host_005
+        q = int((endtime - starttime) / 8)
+        starttime += q
+        endtime -= q
         request = """GET log
 Columns: class time type state host_name service_description plugin_output message options contact_name command_name state_type current_host_groups current_service_groups
 Filter: time >= """ + str(int(starttime)) + """
@@ -548,18 +551,56 @@ Filter: host_name = test_host_099
 Filter: service_description = test_ok_01
 And: 5
 OutputFormat: json"""
+        # switch back to realtime. we want to know how long it takes
+        fake_time_time = time.time
+        fake_time_sleep = time.sleep
         time.time = original_time_time
         time.sleep = original_time_sleep
+        print request
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
         print "number of records", len(pyresponse)
         print "should be", should_be
         numlogs = self.livestatus_broker.db.execute("SELECT min(time), max(time) FROM logs")
         print starttime, endtime, numlogs
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        self.livestatus_broker.livestatus.use_aggressive_sql = True
+        print "aggrosql", self.livestatus_broker.livestatus.use_aggressive_sql
+        response2, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        self.assert_(response2 == response)
+        print "aggrosql", self.livestatus_broker.livestatus.use_aggressive_sql
+        response2, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        self.assert_(response2 == response)
+        self.livestatus_broker.livestatus.use_aggressive_sql = False
+        print "aggrosql", self.livestatus_broker.livestatus.use_aggressive_sql
+        response2, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        self.assert_(response2 == response)
+        print "aggrosql", self.livestatus_broker.livestatus.use_aggressive_sql
+        response2, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        self.assert_(response2 == response)
+        # back to fake time for the other tests can run faster
+        time.time = fake_time_time
+        time.sleep = fake_time_sleep
+
+
+    def tearDown(self):
+        self.livestatus_broker.db.commit()
+        self.livestatus_broker.db.close()
+        if os.path.exists(self.livelogs):
+            os.remove(self.livelogs)
+        if os.path.exists(self.livelogs+"-journal"):
+            os.remove(self.livelogs+"-journal")
+        if os.path.exists(self.pnp4nagios):
+            shutil.rmtree(self.pnp4nagios)
+        if os.path.exists('var/nagios.log'):
+            os.remove('var/nagios.log')
+        if os.path.exists('var/retention.dat'):
+            os.remove('var/retention.dat')
+        if os.path.exists('var/status.dat'):
+            os.remove('var/status.dat')
+        to_del = [attr for attr in self.livestatus_broker.livestatus.__class__.out_map['Host'].keys() if attr.startswith('host_')]
+        for attr in to_del:
+            del self.livestatus_broker.livestatus.__class__.out_map['Host'][attr]
+        self.livestatus_broker = None
 
 
 

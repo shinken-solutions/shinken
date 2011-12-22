@@ -31,7 +31,7 @@ rm -f .coverage
 function launch_and_assert {
     SCRIPT=$1
 #    nosetests -v -s --with-xunit --with-coverage ./$SCRIPT
-    ./$SCRIPT
+    python ./$SCRIPT
     if [ $? != 0 ]
 	then
 	echo "Error : the test $SCRIPT failed"
@@ -129,6 +129,8 @@ launch_and_assert test_inheritance_and_plus.py
 launch_and_assert test_livestatus_db.py
 launch_and_assert test_parse_perfdata.py
 launch_and_assert test_service_template_inheritance.py
+launch_and_assert test_module_ip_tag.py
+launch_and_assert test_dot_virg_in_command.py
 
 launch_and_assert test_maintenance_period.py
 #Live status is a bit longer than the previous, so we put it at the end.

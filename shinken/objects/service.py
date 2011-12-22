@@ -299,6 +299,8 @@ class Service(SchedulingItem):
         'normal_check_interval':    'check_interval',
         'retry_check_interval' :    'retry_interval',
         'criticity'            :    'business_impact',
+        'hostgroup'            :    'hostgroup_name',
+        'hostgroups'            :    'hostgroup_name',
 #        'criticitymodulations' :    'business_impact_modulations',
     }
 

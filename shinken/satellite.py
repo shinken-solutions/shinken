@@ -79,7 +79,7 @@ from shinken.external_command import ExternalCommand
 # Pack of common Pyro exceptions
 Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
                     Pyro.errors.CommunicationError, \
-                    Pyro.errors.DaemonError)
+                    Pyro.errors.DaemonError, Pyro.errors.ConnectionClosedError)
 
 
 # Class for say we are facing a non worker module
@@ -332,13 +332,13 @@ class Satellite(BaseSatellite):
                     if con is not None: # None = not initialized
                         send_ok = con.put_results(ret)
                 # Not connected or sched is gone
-                except (Pyro.errors.ProtocolError, KeyError) , exp:
+                except (Pyro_exp_pack, KeyError) , exp:
                     print exp
                     self.pynag_con_init(sched_id)
                     return
                 except AttributeError , exp: # the scheduler must  not be initialized
                     print exp
-                except Exception , exp:
+                except Exception, exp:
                     print "Unknown exception", exp, type(exp)
                     try:
                        if PYRO_VERSION < "4.0":

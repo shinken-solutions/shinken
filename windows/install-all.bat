@@ -76,12 +76,12 @@ move /Y %PATH_BIN%\shinken-arbiter %PATH_BIN%\shinken-arbiter.py
 move /Y %PATH_BIN%\shinken-broker %PATH_BIN%\shinken-broker.py
 move /Y %PATH_BIN%\shinken-receiver %PATH_BIN%\shinken-receiver.py
 
-%PATH_INSTSRV%\instsrv.exe "Shinken-Arbiter" %PATH_INSTSRV%"\srvany.exe"
-%PATH_INSTSRV%\instsrv.exe "Shinken-Scheduler" %PATH_INSTSRV%"\srvany.exe"
-%PATH_INSTSRV%\instsrv.exe "Shinken-Poller" %PATH_INSTSRV%"\srvany.exe"
-%PATH_INSTSRV%\instsrv.exe "Shinken-Reactionner" %PATH_INSTSRV%"\srvany.exe"
-%PATH_INSTSRV%\instsrv.exe "Shinken-Broker" %PATH_INSTSRV%"\srvany.exe"
-%PATH_INSTSRV%\instsrv.exe "Shinken-Receiver" %PATH_INSTSRV%"\srvany.exe"
+sc create Shinken-Arbiter binPath= %PATH_INSTSRV%"\srvany.exe" DisplayName= "Shinken-Arbiter"
+sc create Shinken-Scheduler binPath= %PATH_INSTSRV%"\srvany.exe" DisplayName= "Shinken-Scheduler"
+sc create Shinken-Poller binPath= %PATH_INSTSRV%"\srvany.exe" DisplayName= "Shinken-Poller"
+sc create Shinken-Reactionner binPath= %PATH_INSTSRV%"\srvany.exe" DisplayName= "Shinken-Reactionner"
+sc create Shinken-Broker binPath= %PATH_INSTSRV%"\srvany.exe" DisplayName= "Shinken-Broker"
+sc create Shinken-Receiver binPath= %PATH_INSTSRV%"\srvany.exe"  DisplayName= "Shinken-Receiver"
 
 echo Windows Registry Editor Version 5.00  > %tmp%\Shinken_registry.reg
 echo. >> %tmp%\Shinken_registry.reg

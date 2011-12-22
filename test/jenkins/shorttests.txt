@@ -91,4 +91,6 @@ test_livestatus.py
 test_service_template_inheritance.py
 test_spaces_in_commands.py
 test_inheritance_and_plus.py
+test_module_ip_tag.py
+test_dot_virg_in_command.py
 test_parse_perfdata.py

@@ -307,6 +307,8 @@ class TestConfigSmall(TestConfig):
         self.livestatus_broker.db.close()
         if os.path.exists(self.livelogs):
             os.remove(self.livelogs)
+        if os.path.exists(self.livelogs+"-journal"):
+            os.remove(self.livelogs+"-journal")
         if os.path.exists(self.pnp4nagios):
             shutil.rmtree(self.pnp4nagios)
         if os.path.exists('var/nagios.log'):
@@ -2277,6 +2279,8 @@ class TestConfigBig(TestConfig):
         self.livestatus_broker.db.close()
         if os.path.exists(self.livelogs):
             os.remove(self.livelogs)
+        if os.path.exists(self.livelogs+"-journal"):
+            os.remove(self.livelogs+"-journal")
         if os.path.exists(self.pnp4nagios):
             shutil.rmtree(self.pnp4nagios)
         if os.path.exists('var/nagios.log'):
@@ -3282,6 +3286,8 @@ class TestConfigComplex(TestConfig):
         self.livestatus_broker.db.close()
         if os.path.exists(self.livelogs):
             os.remove(self.livelogs)
+        if os.path.exists(self.livelogs+"-journal"):
+            os.remove(self.livelogs+"-journal")
         if os.path.exists(self.pnp4nagios):
             shutil.rmtree(self.pnp4nagios)
         to_del = [attr for attr in self.livestatus_broker.livestatus.__class__.out_map['Host'].keys() if attr.startswith('host_')]
@@ -3350,6 +3356,8 @@ class TestConfigCrazy(TestConfig):
         self.livestatus_broker.db.close()
         if os.path.exists(self.livelogs):
             os.remove(self.livelogs)
+        if os.path.exists(self.livelogs+"-journal"):
+            os.remove(self.livelogs+"-journal")
         if os.path.exists(self.pnp4nagios):
             shutil.rmtree(self.pnp4nagios)
         to_del = [attr for attr in self.livestatus_broker.livestatus.__class__.out_map['Host'].keys() if attr.startswith('host_')]

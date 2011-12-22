@@ -58,9 +58,10 @@ class TestNrpePoller(ShinkenTest):
         sl.id = 1
         sl.i_am_dying = False
 
-        to_queue = Queue()
+
         manager = Manager()
-        from_queue = manager.list()
+        to_queue = manager.Queue()
+        from_queue = manager.Queue()#list()
         control_queue = Queue()
 
         # We prepare a check in the to_queue
@@ -89,15 +90,15 @@ class TestNrpePoller(ShinkenTest):
         control_queue.put(msg2)
         sl.work(to_queue, from_queue, control_queue)
 
-        o = from_queue.pop()
+        o = from_queue.get()#pop()
         print "O", o
         
         print o.__dict__
         self.assert_(o.status == 'done')
         self.assert_(o.exit_status == 2)
 
-        to_queue.close()
-        control_queue.close()
+        #to_queue.close()
+        #control_queue.close()
         
 
 
