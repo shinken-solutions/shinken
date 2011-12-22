@@ -1005,7 +1005,7 @@ echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z 
 	-c	Compress rotated logs
     -e  which daemons to keep enabled at boot time
 	-z 	This is a really special usecase that allow to install shinken on Centreon Enterprise Server in place of nagios
-	-p  Install plugins (args should be one of the following : check_esx3)
+	-p  Install plugins (args should be one of the following : check_esx3|nagios-plugins)
 	-h	Show help
 "
 
