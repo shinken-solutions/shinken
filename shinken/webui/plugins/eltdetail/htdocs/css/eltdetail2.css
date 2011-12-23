@@ -315,3 +315,9 @@ div.content {
 .switches ul li div{
 	float: left;
 }
+
+.switches span{
+	/*float: left;*/
+	line-height: 27px;
+	margin-left: 5px;
+}
