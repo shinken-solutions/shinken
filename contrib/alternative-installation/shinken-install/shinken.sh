@@ -673,6 +673,7 @@ function installpkg(){
 	return 0
 }
 
+
 function prerequisites(){
 	cadre "Checking prerequisite" green
 	# common prereq
@@ -924,38 +925,6 @@ function enableretention(){
         cecho $result red
         exit 2
     fi
-#	cecho " > Getting existing scheduler modules list" green
-#	modules=$($PY $myscripts/tools/skonf.py -a getdirective -f $TARGET/etc/shinken-specific.cfg -o scheduler -d modules)	
-#	if [ -z "$modules" ]
-#	then	
-#		modules="PickleRetention"
-#	else
-#		modules="$modules ,PickleRetention"
-#	fi
-#	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o scheduler -d modules -v "$modules")
-#	cecho " > $result" green
-#
-#	cecho " > Getting existing broker modules list" green
-#	modules=$($PY $myscripts/tools/skonf.py -a getdirective -f $TARGET/etc/shinken-specific.cfg -o broker -d modules)	
-#	if [ -z "$modules" ]
-#	then
-#		modules="PickleRetentionBroker"
-#	else	
-#		modules="$modules ,PickleRetentionBroker"
-#	fi
-#	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o broker -d modules -v "$modules")
-#	cecho " > $result" green
-#
-#	cecho " > Getting existing arbiter modules list" green
-#	modules=$($PY $myscripts/tools/skonf.py -a getdirective -f $TARGET/etc/shinken-specific.cfg -o arbiter -d modules)	
-#	if [ -z "$modules" ]
-#	then
-#		modules="PickleRetentionArbiter"
-#	else	
-#		modules=$modules" ,PickleRetentionArbiter"
-#	fi
-#	result=$($PY $myscripts/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o arbiter -d modules -v "$modules")
-#	cecho " > $result" green
 }
 
 function enableperfdata(){
@@ -992,25 +961,6 @@ function setdaemonsaddresses(){
     cecho " > $result" green    
 }
 
-#function addCESPollers(){
-#    if [ ! -z "ADDPOLLERS" ]
-#    then
-#        for p in $ADDPOLLERS
-#        do
-#            pollname=$(echo $p | awk -F = '{print $1}')
-#            pollip=$(echo $p | awk -F = '{print $2}')
-#            result=$($PY $myscripts/tools/skonf.py -q -f /opt/shinken/etc/shinken-specific.cfg -a addobject -o poller -d "poller_name=$pollname,data_timeout=120,check_interval=60,poller_tags=$pollname,polling_interval=1,address=$pollip,port=7771,max_workers=4,check_interval=60,polling_interval=1,max_checl_attempts=3,min_workers=4,processes_by_worker=256")
-#            if [ $? -eq 0 ]
-#            then
-#                color="green"
-#            else
-#                color="red"
-#            fi
-#            cecho " > $result" $color 
-#        done
-#    fi
-#}
-
 function enableCESCentralDaemons(){
     setdaemons "arbiter reactionner receiver scheduler broker poller"  
 }
@@ -1033,18 +983,6 @@ function setdaemons(){
     sed -i "s/^AVAIL_MODULES=.*$/$avail/g" /etc/init.d/shinken
 }
 
-#function addpoller(){
-#    args=$1
-#    result=$($PY $myscripts/tools/skonf.py -f /opt/shinken/etc/shinken-specific.cfg -a addobject -o poller -d "poller_name=$pollname,data_timeout=120,check_interval=60,poller_tags=$pollname,polling_interval=1,address=$pollip,port=7771,max_workers=4,check_interval=60,polling_interval=1,max_checl_attempts=3,min_workers=4,processes_by_worker=256")
-#    if [ $? -eq 0 ]
-#    then
-#        color="green"
-#    else
-#        color="red"
-#    fi
-#    cecho " > $result" $color 
-#}
-
 function fixHtpasswdPath(){
 	export PYTHONPATH=$TARGET
 	export PY="$(pythonver)"
@@ -1054,7 +992,7 @@ function fixHtpasswdPath(){
 }
 
 function usage(){
-echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z [poller|centreon] | -e daemons | -j pollername=polleraddress
+echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z [poller|centreon] | -e daemons | -j pollername=polleraddress | -p plugins [plugname]
 	-k	Kill shinken
 	-i	Install shinken
 	-w	Remove demo configuration 
@@ -1067,10 +1005,85 @@ echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z 
 	-c	Compress rotated logs
     -e  which daemons to keep enabled at boot time
 	-z 	This is a really special usecase that allow to install shinken on Centreon Enterprise Server in place of nagios
-    -j  Add a poller to the shinken configuration. 
+	-p  Install plugins (args should be one of the following : check_esx3|nagios-plugins)
 	-h	Show help
 "
 
+}
+# plugins installation part
+
+# check_esx3
+
+function install_check_esx3(){
+
+	cadre "Install check_esx3 plugin from op5" green
+
+	if [ "$CODE" == "REDHAT" ]
+	then
+		cecho " > Unsuported" red
+	else
+		cecho " > installing prerequisites" green 
+		sudo apt-get -y install $VSPHERESDKAPTPKGS > /dev/null 2>&1
+	fi
+	cd /tmp
+
+	if [ ! -f "/tmp/VMware-vSphere-SDK-for-Perl-$VSPHERESDKVER.$ARCH.tar.gz" ]
+	then
+		wget $VSPHERESDK > /dev/null 2>&1	
+		if [ $? -ne 0 ]
+		then
+			cecho " > Error while downloading vsphere sdk for perl" red
+			exit 2
+		fi
+	fi
+
+	cecho " > Extracting vsphere sdk for perl" green
+	tar zxvf VMware-vSphere-SDK-for-Perl-$VSPHERESDKVER.$ARCH.tar.gz  > /dev/null 2>&1
+	cd vmware-vsphere-cli-distrib 
+	cecho " > Building vsphere sdk for perl" green
+	perl Makefile.PL > /dev/null 2>&1
+	make > /dev/null 2>&1
+	cecho " > Installing vsphere sdk for perl" green
+	make install > /dev/null 2>&1
+
+	cd /tmp
+	cecho " > Getting check_esx3 plugin from op5" green
+	wget $CHECK_ESX3_SCRIPT -O check_esx3.pl > /dev/null 2>&1
+	mv check_esx3.pl $TARGET/libexec/check_esx3.pl
+	chmod +x $TARGET/libexec/check_esx3.pl	
+	chown $SKUSER:$SKGROUP $TARGET/libexec/check_esx3.pl
+		
+}
+
+# nagios-plugins
+
+function install_nagios-plugins(){
+	cadre "Install nagios plugins" green
+
+	if [ "$CODE" == "REDHAT" ]
+	then
+		cecho " > Unsuported" red
+	else
+		cecho " > installing prerequisites" green 
+		sudo apt-get -y install $NAGPLUGAPTPKG > /dev/null 2>&1
+	fi
+	cd /tmp
+	if [ ! -f "nagios-plugins-$NAGPLUGVERS.tar.gz" ]
+	then
+		cecho " > getting nagios-plugins archive" green
+		wget $NAGPLUGBASEURI > /dev/null 2>&1
+	fi
+	cecho " > Extract archive content " green
+	rm -Rf nagios-plugins-$NAGPLUGVERS
+	tar zxvf nagios-plugins-$NAGPLUGVERS.tar.gz > /dev/null 2>&1
+	cd nagios-plugins-$NAGPLUGVERS
+	cecho " > Configure source tree" green
+	./configure --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP --enable-libtap --enable-extra-opts --prefix=$TARGET > /dev/null 2>&1
+	cecho " > Building ...." green
+	make > /dev/null 2>&1
+	cecho " > Installing" green
+	make install > /dev/null 2>&1
+	
 }
 
 
@@ -1088,8 +1101,21 @@ then
 	export WGETPROXY=" -Y on "
 fi
 
-while getopts "kidubcr:lz:hsvp:we:j:" opt; do
-        case $opt in
+while getopts "kidubcr:lz:hsvp:we:" opt; do
+	case $opt in
+		p)
+			if [ "$OPTARG" == "check_esx3" ]
+			then
+				install_check_esx3
+				exit 0
+			elif [ "$OPTARG" == "nagios-plugins" ]
+			then
+				install_nagios-plugins
+				exit 0
+			else
+				cecho " > Unknown plugin $OPTARG" red
+			fi
+			;;
         j)
             addpoller "$OPTARG"
             exit 0
@@ -1107,10 +1133,10 @@ while getopts "kidubcr:lz:hsvp:we:j:" opt; do
 			cleanconf
 			disablenagios
 			fixsudoers
-            if [ "$mode" = "centreon" ]
+			if [ "$mode" = "centreon" ]
             then
                 fixcentreondb
-		fixforfan
+				fixforfan
                 enablendodb
                 enableretention
                 enableperfdata
