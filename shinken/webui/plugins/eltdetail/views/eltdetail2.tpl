@@ -156,7 +156,7 @@ Invalid element name
 										<dd>{{elt.output}}</dd>
 
 										<dt scope="row" class="column1">Performance Data</dt>
-										<td>{{elt.perf_data}}</dd>
+										<dd>{{elt.perf_data}}</dd>
 
 										<dt scope="row" class="column1">Current Attempt</dt>
 										<dd>{{elt.attempt}}/{{elt.max_check_attempts}} ({{elt.state_type}} state)</dd>
