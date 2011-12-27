@@ -385,6 +385,13 @@ function relocate(){
 	cadre "Relocate source tree to $TARGET" green
 	# relocate source tree
 	cd $TARGET
+	
+	# relocate macros
+	for f in $(find $TARGET/contrib/alternative-installation/shinken-install/tools/macros | grep "\.macro$")
+	do
+		cecho " > relocating macro $f" green
+		sed -i "s#__PREFIX__#$TARGET#g" $f
+	done
 
 	# relocate nagios plugin path
 	sed -i "s#/usr/lib/nagios/plugins#$TARGET/libexec#g" ./etc/resource.cfg
@@ -1006,12 +1013,84 @@ echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z 
 	-c	Compress rotated logs
     -e  which daemons to keep enabled at boot time
 	-z 	This is a really special usecase that allow to install shinken on Centreon Enterprise Server in place of nagios
-	-p  Install plugins (args should be one of the following : check_esx3|nagios-plugins|check_oracle_health)
-	-h	Show help
-"
-
+	-p  Install plugins or addons (args should be one of the following : check_esx3|nagios-plugins|check_oracle_health|capture_plugin|pnp4nagios)
+	-h	Show help"
 }
+
+# addons installation
+
+# pnp4nagios
+function install_pnp4nagios(){
+	if [ "$CODE" == "REDHAT" ]
+	then
+		cecho " > Unsuported" red
+		exit 2
+	fi
+	cadre "Install pnp4nagios addon" green
+	cd /tmp
+	cecho " > Installing prerequisites" green
+	for p in $PNPAPTPKG
+	do
+		cecho " -> Installing $p" green
+		apt-get install -y $p > /dev/null 2>&1
+	done
+
+	filename=$(echo $PNPURI | awk -F"/" '{print $NF}')
+	folder=$(echo $filename | sed -e "s/\.tar\.gz//g")
+
+	if [ -z "$filename" ]
+	then 
+		cecho " > Getting pnp4nagios archive" green
+		wget $PNPURI > /dev/null 2>&1
+	fi
+	
+	cecho " > Extracting archive" green
+	if [ -d "$folder" ]
+	then 
+		rm -Rf $folder
+	fi 
+	tar zxvf $filename > /dev/null 2>&1
+	cd $folder
+	cecho " > Enable mod rewrite for apache" green 
+	a2enmod rewrite > /dev/null 2>&1
+	/etc/init.d/apache2 restart > /dev/null 2>&1
+	cecho " > Configuring source tree" green
+	./configure --prefix=$PNPPREFIX --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP > /dev/null 2>&1	
+	cecho " > Building ...." green
+	make all > /dev/null 2>&1
+	cecho " > Installing" green
+	make fullinstall > /dev/null 2>&1
+	rm -f $PNPPREFIX/share/install.php
+	/etc/init.d/apache2 restart > /dev/null 2>&1
+	cecho " > Enable npcdmod" green
+	do_skmacro enable_npcd.macro $PNPPREFIX/etc/npcd.cfg
+}
+
+
+function do_skmacro(){
+	macro=$1
+	args=$2
+	export PYTHONPATH="$TARGET"
+	export SHINKEN="$PYTHONPATH"
+	export SKTOOLS="$PYTHONPATH/contrib/alternative-installation/shinken-install/tools"
+	$SKTOOLS/skonf.py -a macros -f $SKTOOLS/macros/$macro -d $args > /dev/null 2>&1
+}
+
+
+
 # plugins installation part
+
+# capture_plugin
+function install_capture_plugin(){
+	cadre "Install capture_plugin" green
+	cd /tmp
+	cecho " > Getting capture_plugin" green
+	wget http://www.waggy.at/nagios/capture_plugin.txt > /dev/null 2>&1
+	cecho " > Installing capture_plugin" green
+	mv capture_plugin.txt $TARGET/libexec/capture_plugin
+	chmod +x $TARGET/libexec/capture_plugin	
+	chown $SKUSER:$SKGROUP $TARGET/libexec/capture_plugin
+}
 
 # check_esx3
 
@@ -1197,6 +1276,14 @@ while getopts "kidubcr:lz:hsvp:we:" opt; do
 			elif [ "$OPTARG" == "check_oracle_health" ]
 			then
 				install_check_oracle_health
+				exit 0
+			elif [ "$OPTARG" == "capture_plugin" ]
+			then
+				install_capture_plugin
+				exit 0
+			elif [ "$OPTARG" == "pnp4nagios" ]
+			then
+				install_pnp4nagios
 				exit 0
 			else
 				cecho " > Unknown plugin $OPTARG" red
