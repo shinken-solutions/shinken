@@ -245,27 +245,32 @@ div.content {
  *  Comments
  */
 
-.comment-text {
+.log-text {
 	margin-bottom: 5px;
 	width: 100%;
 	
 }
 
-.comment-meta {
+.log-meta {
 	width: 100%;
 	color: #999999;
 }
 
-.comment-meta span{
+.log-meta span{
 	margin-right:10px;
 }
 
-.comment-action a{
+.log-action a{
 	color: #e10000;
 	width: 5%;
 	text-decoration:none;
 	line-height: 35px;
 }
+
+.log-action a:hover {
+	font-weight:bold;
+}
+
 
 #log_container {}
 
@@ -304,8 +309,9 @@ div.content {
 	min-height:35px;
 }
 
-.row_alt {
-	background: #FFFFFF !important;
+#log_container  li:nth-child(2n) {
+  background:#FFFFFF;
+  font-style:italic;
 }
 
 .switches ul li {

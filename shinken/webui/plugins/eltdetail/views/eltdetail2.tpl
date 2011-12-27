@@ -295,10 +295,10 @@ Invalid element name
 												%for c in elt.comments:
 												<li>
 													<div class="left">
-														<p class="comment-text">{{c.comment}}</p>
-														<div class="comment-meta"><span><b>Author:</b> {{c.author}}</span> <span><b>Creation:</b> {{helper.print_date(c.entry_time)}}</span> <span><b>Expire:</b>{{helper.print_date(c.expire_time)}}</span></div>
+														<p class="log-text">{{c.comment}}</p>
+														<div class="log-meta"><span><b>Author:</b> {{c.author}}</span> <span><b>Creation:</b> {{helper.print_date(c.entry_time)}}</span> <span><b>Expire:</b>{{helper.print_date(c.expire_time)}}</span></div>
 													</div>
-													<div class="right comment-action"><a class="icon_delete" href="#">Delete</a></div>
+													<div class="right log-action"><a class="icon_delete" href="#">Delete</a></div>
 												</li>
 												%end
 											</ol>
