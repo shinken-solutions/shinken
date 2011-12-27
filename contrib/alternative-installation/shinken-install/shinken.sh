@@ -619,7 +619,7 @@ function create_user(){
 	then
 		cecho " > User $SKUSER allready exist" yellow 
 	else
-	    	useradd -s /bin/bash $SKUSER 
+	    	useradd -s /bin/bash $SKUSER -m -d /home/$SKUSER 
 	fi
     	usermod -G $SKGROUP $SKUSER 
 }
