@@ -1086,6 +1086,87 @@ function install_nagios-plugins(){
 	
 }
 
+# check_oracle_health
+
+function install_check_oracle_health(){
+	cadre "Install nagios plugins" green
+
+	cadre "WARNING YOU SHOULD INSTALL ORACLE INSTANT CLIENT FIRST !!!!" yellow
+	cecho " > Download the oracle instant client there (basic AND sdk AND sqlplus) : " yellow
+	cecho " > 64 bits : http://www.oracle.com/technetwork/topics/linuxx86-64soft-092277.html" yellow
+	cecho " > 32 bits : http://www.oracle.com/technetwork/topics/linuxsoft-082809.html" yellow
+	cecho " > Set the ORACLE_HOME environment variable (better to set it in the bashrc)" yellow
+	cecho " > Set LD_LIBRARY_PATH to ORACLE_HOME (or better create a config file in /etc/ld.so.conf) then run ldconfig" yellow
+	cecho " > press ENTER to continue or CTRL+C to abort" yellow
+	read taste
+
+	if [ -z "$ORACLE_HOME" ]
+	then
+		cecho " > you must set the ORACLE_HOME environment variable !" red
+		exit 2
+	fi
+
+	if [ "$CODE" == "REDHAT" ]
+	then
+		cecho " > Unsuported" red
+	else
+		cecho " > installing prerequisites" green 
+		sudo apt-get -y install $CHECKORACLEHEALTHAPTPKG > /dev/null 2>&1
+		cecho " > installing cpan prerequisites" green
+		cd /tmp
+		for m in $CHECKORACLEHEALTHCPAN
+		do
+			filename=$(echo $m | awk -F"/" '{print $NF}')
+			if [ ! -f "$filename" ]
+			then
+				wget $m > /dev/null 2>&1
+				if [ $? -ne 0 ]
+				then
+					cecho " > Error while downloading $m" red
+					exit 2
+				fi
+			fi	
+			tar zxvf $filename  > /dev/null 2>&1
+			cd $(echo $filename | sed -e "s/\.tar\.gz//g")
+			perl Makefile.PL > /dev/null 2>&1
+			make > /dev/null 2>&1
+			if [ $? -ne 0 ]
+			then
+				cecho " > There was an error building module" red
+				exit 2
+			fi
+			make install  > /dev/null 2>&1
+		done
+		cd /tmp
+		cecho " > Downloading check_oracle_health" green
+		wget $CHECKORACLEHEALTH > /dev/null 2>&1
+		if [ $? -ne 0 ]
+		then
+			cecho " > Error while downloading $filename" red
+			exit 2
+		fi
+		cecho " > Extracting archive " green
+		filename=$(echo $CHECKORACLEHEALTH | awk -F"/" '{print $NF}')
+		tar zxvf $filename > /dev/null 2>&1
+		cd $(echo $filename | sed -e "s/\.tar\.gz//g")
+		./configure --prefix=$TARGET --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP --with-mymodules-dir=$TARGET/libexec --with-mymodules-dyn-dir=$TARGET/libexec --with-statefiles-dir=$TARGET/var/tmp > /dev/null 2>&1
+		cecho " > Building plugin" green
+		make > /dev/null 2>&1
+		if [ $? -ne 0 ] 
+		then
+			cecho " > Error while building check_oracle_health module" red
+			exit 2
+		fi
+		make check > /dev/null 2>&1	
+		if [ $? -ne 0 ]
+		then
+			cecho " > Error while building check_oracle_health module" red
+			exit 2
+		fi
+		cecho " > Installing plugin" green
+		make install > /dev/null 2>&1
+	fi
+}
 
 # Check if we launch the script with root privileges (aka sudo)
 if [ "$UID" != "0" ]
@@ -1111,6 +1192,10 @@ while getopts "kidubcr:lz:hsvp:we:" opt; do
 			elif [ "$OPTARG" == "nagios-plugins" ]
 			then
 				install_nagios-plugins
+				exit 0
+			elif [ "$OPTARG" == "check_oracle_health" ]
+			then
+				install_check_oracle_health
 				exit 0
 			else
 				cecho " > Unknown plugin $OPTARG" red
