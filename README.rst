@@ -1,5 +1,5 @@
 ===================================
-Presentation Of the Shinken project
+Presentation of the Shinken project
 ===================================
 
 Welcome in the Shinken project.

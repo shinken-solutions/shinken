@@ -10,29 +10,35 @@ Contact
 You can contact me at dguenault at monitoring-fr dot org if you find a bug
 or you can write an issue in the github interface
 
+if you find and fix a bug just send me the patch and i will apply it (and add credit for the patch in the README file)
+
 Minimal requirements
 ~~~~~~~~~~~~~~~~~~~~
 
 For RedHat/CentOs you will need redhat-lsb (and git for cloning this repository)
+For Debian based distro you will need also redhat-lsb
 
 Usage
 ~~~~~
 
 This is a really simple script allowing to install a fully fonctionnal shinken in seconds !
-Curently only tested with Ubuntu/Debian and RHEL/CentOS 5/6 distros. 
+Curently only tested with Ubuntu/Linux Mint/Debian and RHEL/CentOS 5/6 distros. 
 
-  Usage : shinken -k | -i | -d | -u | -b | -r | -l | -c 
-  -k	Kill shinken
-  -i	Install shinken
-  -d 	Remove shinken
-  -u	Update an existing shinken installation
-  -v	purge livestatus sqlite db and shrink sqlite db
-  -b	Backup shinken configuration plugins and data
-  -r 	Restore shinken configuration plugins and data
-  -l	List shinken backups
-  -c	Compress rotated logs
-  -a 	install addon (curently thruk). THIS ONE IS NIT USABLE AT THE MOMENT !!!!!!
-  -h	Show help
+Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z [poller|centreon] | -e daemons | -p plugins [plugname]
+	-k	Kill shinken
+	-i	Install shinken
+	-w	Remove demo configuration 
+	-d 	Remove shinken
+	-u	Update an existing shinken installation
+	-v	purge livestatus sqlite db and shrink sqlite db
+	-b	Backup shinken configuration plugins and data
+	-r 	Restore shinken configuration plugins and data
+	-l	List shinken backups
+	-c	Compress rotated logs
+    -e  which daemons to keep enabled at boot time
+	-z 	This is a really special usecase that allow to install shinken on Centreon Enterprise Server in place of nagios
+	-p  Install plugins (args should be one of the following : check_esx3|nagios-plugins|check_oracle_health)
+	-h	Show help
 
 configuration file
 ~~~~~~~~~~~~~~~~~~

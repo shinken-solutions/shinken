@@ -7,15 +7,15 @@ import datetime
 import copy
 import socket
 
-try:
-    from shinken.bin import VERSION
-    import shinken
-except ImportError:
-    # If importing shinken fails, try to load from current directory
-    # or parent directory to support running without installation.
-    # Submodules will then be loaded from there, too.
-    import imp
-    imp.load_module('shinken', *imp.find_module('shinken', [os.path.realpath("."), os.path.realpath(".."), os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "..")]))
+#try:
+#    from shinken.bin import VERSION
+#    import shinken
+#except ImportError:
+#    # If importing shinken fails, try to load from current directory
+#    # or parent directory to support running without installation.
+#    # Submodules will then be loaded from there, too.
+#    import imp
+#    imp.load_module('shinken', *imp.find_module('shinken', [os.path.realpath("."), os.path.realpath(".."), os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "..")]))
 
 
 from shinken.bin import VERSION

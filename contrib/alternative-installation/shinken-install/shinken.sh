@@ -385,9 +385,17 @@ function relocate(){
 	cadre "Relocate source tree to $TARGET" green
 	# relocate source tree
 	cd $TARGET
+	
+	# relocate macros
+	for f in $(find $TARGET/contrib/alternative-installation/shinken-install/tools/macros | grep "\.macro$")
+	do
+		cecho " > relocating macro $f" green
+		sed -i "s#__PREFIX__#$TARGET#g" $f
+	done
 
 	# relocate nagios plugin path
-	sed -i "#/usr/lib/nagios/plugins#$TARGET/libexec#g" ./etc/resource.cfg
+	sed -i "s#/usr/lib/nagios/plugins#$TARGET/libexec#g" ./etc/resource.cfg
+	sed -i "s#/usr/local/shinken/libexec#$TARGET/libexec#g" ./etc/resource.cfg
 	# relocate default /usr/local/shinken path
 	for fic in $(find . | grep -v "shinken-install" | grep -v "\.pyc$" | xargs grep -snH "/usr/local/shinken" --color | cut -f1 -d' ' | awk -F : '{print $1}' | sort | uniq)
 	do 
@@ -618,7 +626,7 @@ function create_user(){
 	then
 		cecho " > User $SKUSER allready exist" yellow 
 	else
-	    	useradd -s /bin/bash $SKUSER 
+	    	useradd -s /bin/bash $SKUSER -m -d /home/$SKUSER 
 	fi
     	usermod -G $SKGROUP $SKUSER 
 }
@@ -992,7 +1000,7 @@ function fixHtpasswdPath(){
 }
 
 function usage(){
-echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z [poller|centreon] | -e daemons | -j pollername=polleraddress | -p plugins [plugname]
+echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z [poller|centreon] | -e daemons | -p plugins [plugname]
 	-k	Kill shinken
 	-i	Install shinken
 	-w	Remove demo configuration 
@@ -1005,12 +1013,84 @@ echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z 
 	-c	Compress rotated logs
     -e  which daemons to keep enabled at boot time
 	-z 	This is a really special usecase that allow to install shinken on Centreon Enterprise Server in place of nagios
-	-p  Install plugins (args should be one of the following : check_esx3|nagios-plugins)
-	-h	Show help
-"
-
+	-p  Install plugins or addons (args should be one of the following : check_esx3|nagios-plugins|check_oracle_health|capture_plugin|pnp4nagios)
+	-h	Show help"
 }
+
+# addons installation
+
+# pnp4nagios
+function install_pnp4nagios(){
+	if [ "$CODE" == "REDHAT" ]
+	then
+		cecho " > Unsuported" red
+		exit 2
+	fi
+	cadre "Install pnp4nagios addon" green
+	cd /tmp
+	cecho " > Installing prerequisites" green
+	for p in $PNPAPTPKG
+	do
+		cecho " -> Installing $p" green
+		apt-get install -y $p > /dev/null 2>&1
+	done
+
+	filename=$(echo $PNPURI | awk -F"/" '{print $NF}')
+	folder=$(echo $filename | sed -e "s/\.tar\.gz//g")
+
+	if [ -z "$filename" ]
+	then 
+		cecho " > Getting pnp4nagios archive" green
+		wget $PNPURI > /dev/null 2>&1
+	fi
+	
+	cecho " > Extracting archive" green
+	if [ -d "$folder" ]
+	then 
+		rm -Rf $folder
+	fi 
+	tar zxvf $filename > /dev/null 2>&1
+	cd $folder
+	cecho " > Enable mod rewrite for apache" green 
+	a2enmod rewrite > /dev/null 2>&1
+	/etc/init.d/apache2 restart > /dev/null 2>&1
+	cecho " > Configuring source tree" green
+	./configure --prefix=$PNPPREFIX --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP > /dev/null 2>&1	
+	cecho " > Building ...." green
+	make all > /dev/null 2>&1
+	cecho " > Installing" green
+	make fullinstall > /dev/null 2>&1
+	rm -f $PNPPREFIX/share/install.php
+	/etc/init.d/apache2 restart > /dev/null 2>&1
+	cecho " > Enable npcdmod" green
+	do_skmacro enable_npcd.macro $PNPPREFIX/etc/npcd.cfg
+}
+
+
+function do_skmacro(){
+	macro=$1
+	args=$2
+	export PYTHONPATH="$TARGET"
+	export SHINKEN="$PYTHONPATH"
+	export SKTOOLS="$PYTHONPATH/contrib/alternative-installation/shinken-install/tools"
+	$SKTOOLS/skonf.py -a macros -f $SKTOOLS/macros/$macro -d $args > /dev/null 2>&1
+}
+
+
+
 # plugins installation part
+
+# capture_plugin
+function install_capture_plugin(){
+	cadre "Install capture_plugin" green
+	cd /tmp
+	cecho " > Getting capture_plugin" green
+	wget http://www.waggy.at/nagios/capture_plugin.txt > /dev/null 2>&1
+	cecho " > Installing capture_plugin" green
+	mv capture_plugin.txt $TARGET/libexec/capture_plugin
+	chmod +x $TARGET/libexec/capture_plugin	
+	chown $SKUSER:$SKGROUP $TARGET/libexec/capture_plugin
+}
 
 # check_esx3
 
@@ -1086,6 +1166,87 @@ function install_nagios-plugins(){
 	
 }
 
+# check_oracle_health
+
+function install_check_oracle_health(){
+	cadre "Install nagios plugins" green
+
+	cadre "WARNING YOU SHOULD INSTALL ORACLE INSTANT CLIENT FIRST !!!!" yellow
+	cecho " > Download the oracle instant client there (basic AND sdk AND sqlplus) : " yellow
+	cecho " > 64 bits : http://www.oracle.com/technetwork/topics/linuxx86-64soft-092277.html" yellow
+	cecho " > 32 bits : http://www.oracle.com/technetwork/topics/linuxsoft-082809.html" yellow
+	cecho " > Set the ORACLE_HOME environment variable (better to set it in the bashrc)" yellow
+	cecho " > Set LD_LIBRARY_PATH to ORACLE_HOME (or better create a config file in /etc/ld.so.conf) then run ldconfig" yellow
+	cecho " > press ENTER to continue or CTRL+C to abort" yellow
+	read taste
+
+	if [ -z "$ORACLE_HOME" ]
+	then
+		cecho " > you must set the ORACLE_HOME environment variable !" red
+		exit 2
+	fi
+
+	if [ "$CODE" == "REDHAT" ]
+	then
+		cecho " > Unsuported" red
+	else
+		cecho " > installing prerequisites" green 
+		sudo apt-get -y install $CHECKORACLEHEALTHAPTPKG > /dev/null 2>&1
+		cecho " > installing cpan prerequisites" green
+		cd /tmp
+		for m in $CHECKORACLEHEALTHCPAN
+		do
+			filename=$(echo $m | awk -F"/" '{print $NF}')
+			if [ ! -f "$filename" ]
+			then
+				wget $m > /dev/null 2>&1
+				if [ $? -ne 0 ]
+				then
+					cecho " > Error while downloading $m" red
+					exit 2
+				fi
+			fi	
+			tar zxvf $filename  > /dev/null 2>&1
+			cd $(echo $filename | sed -e "s/\.tar\.gz//g")
+			perl Makefile.PL > /dev/null 2>&1
+			make > /dev/null 2>&1
+			if [ $? -ne 0 ]
+			then
+				cecho " > There was an error building module" red
+				exit 2
+			fi
+			make install  > /dev/null 2>&1
+		done
+		cd /tmp
+		cecho " > Downloading check_oracle_health" green
+		wget $CHECKORACLEHEALTH > /dev/null 2>&1
+		if [ $? -ne 0 ]
+		then
+			cecho " > Error while downloading $filename" red
+			exit 2
+		fi
+		cecho " > Extracting archive " green
+		filename=$(echo $CHECKORACLEHEALTH | awk -F"/" '{print $NF}')
+		tar zxvf $filename > /dev/null 2>&1
+		cd $(echo $filename | sed -e "s/\.tar\.gz//g")
+		./configure --prefix=$TARGET --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP --with-mymodules-dir=$TARGET/libexec --with-mymodules-dyn-dir=$TARGET/libexec --with-statefiles-dir=$TARGET/var/tmp > /dev/null 2>&1
+		cecho " > Building plugin" green
+		make > /dev/null 2>&1
+		if [ $? -ne 0 ] 
+		then
+			cecho " > Error while building check_oracle_health module" red
+			exit 2
+		fi
+		make check > /dev/null 2>&1	
+		if [ $? -ne 0 ]
+		then
+			cecho " > Error while building check_oracle_health module" red
+			exit 2
+		fi
+		cecho " > Installing plugin" green
+		make install > /dev/null 2>&1
+	fi
+}
 
 # Check if we launch the script with root privileges (aka sudo)
 if [ "$UID" != "0" ]
@@ -1111,6 +1272,18 @@ while getopts "kidubcr:lz:hsvp:we:" opt; do
 			elif [ "$OPTARG" == "nagios-plugins" ]
 			then
 				install_nagios-plugins
+				exit 0
+			elif [ "$OPTARG" == "check_oracle_health" ]
+			then
+				install_check_oracle_health
+				exit 0
+			elif [ "$OPTARG" == "capture_plugin" ]
+			then
+				install_capture_plugin
+				exit 0
+			elif [ "$OPTARG" == "pnp4nagios" ]
+			then
+				install_pnp4nagios
 				exit 0
 			else
 				cecho " > Unknown plugin $OPTARG" red
