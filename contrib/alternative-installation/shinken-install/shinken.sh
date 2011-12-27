@@ -387,7 +387,8 @@ function relocate(){
 	cd $TARGET
 
 	# relocate nagios plugin path
-	sed -i "#/usr/lib/nagios/plugins#$TARGET/libexec#g" ./etc/resource.cfg
+	sed -i "s#/usr/lib/nagios/plugins#$TARGET/libexec#g" ./etc/resource.cfg
+	sed -i "s#/usr/local/shinken/libexec#$TARGET/libexec#g" ./etc/resource.cfg
 	# relocate default /usr/local/shinken path
 	for fic in $(find . | grep -v "shinken-install" | grep -v "\.pyc$" | xargs grep -snH "/usr/local/shinken" --color | cut -f1 -d' ' | awk -F : '{print $1}' | sort | uniq)
 	do 
