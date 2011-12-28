@@ -49,46 +49,50 @@ Invalid element name
 <div id="content_container" class="grid_13">
 	<h1 class="grid_16 state_{{elt.state.lower()}} icon_down"><img class="host_img_25" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h1>
 	<div id="overview_container" class="grid_16">
-		<dl class="grid_4">
-		%#Alias, Parents and Hostgroups are for host only
-      	%if elt_type=='host':
-			<dt>Alias:</dt>
-			<dd>{{elt.alias}}</dd>
-	
+	    <dl class="grid_5">
+	      %#Alias, apretns and hostgroups arefor host only
+	      %if elt_type=='host':
+	      	<dt>Alias:</dt>
+	     	<dd>{{elt.alias}}</dd>
 			<dt>Address:</dt>
-			<dd>{{elt.address}}</dd>				
-			
-			<dt>Parents:</dt>
-			%if len(elt.parents) > 0:
-			<dd>{{','.join([h.get_name() for h in elt.parents])}}</dd>
-			%else:
-			<dd>No Parents</dd>
+			<dd>{{elt.address}}</dd>
+			<dt>Importance</dt>
+	     	<dd>{{!helper.get_business_impact_text(elt)}}</dd>
+	      
+	
+	    </dl>
+	    <dl class="grid_4">
+	    	<dt>Parents:</dt>
+			 %if len(elt.parents) > 0:
+		         <dd> {{','.join([h.get_name() for h in elt.parents])}}</dd>
+			 %else:
+		         <dd> No parents </dd>
+			 %end
+		         <dt>Members of:</dt>
+			 %if len(elt.hostgroups) > 0:
+		         <dd> {{','.join([hg.get_name() for hg in elt.hostgroups])}}</dd>
+			 %else:
+		         <dd> No groups </dd>
+			 %end
+		    %# End of the host only case, so now service
+		    %else:
+			 	<dt>Host:</dt>
+		         <dd> {{elt.host.host_name}}</dd>
+		         <dt>Members of:</dt>
+		         %if len(elt.servicegroups) > 0:
+		         <dd> {{','.join([sg.get_name() for sg in elt.servicegroups])}}</dd>
+		         %else:
+		         <dd> No groups </dd>
+		         %end
 			%end
-			
-			%# End of the host only case, so now service
-    		%else:
-	 		<dt>Host:</dt>
-         	<dd> {{elt.host.host_name}}</dd>
-    	%end 
-		</dl>
-		<dl class="grid_5">
-			<dt>Members of:</dt>
-			%if len(elt.hostgroups) > 0:	
-			<dd>{{','.join([hg.get_name() for hg in elt.hostgroups])}}</dd>
-			%else:
-			<dd>No Hostgroups</dd>
-			%end
-			
-			<dt>Notes:</dt>
-			%if elt.notes != '':
-      		<dd>{{elt.notes}}</dd>
-      		%else:
-      		<dd>(none)</dd>
-      		%end
-					
-			<dt>Importence:</dt>
-			<dd>{{!helper.get_business_impact_text(elt)}}</dd>
-		</dl>
+	    	<dt>Notes:</dt>
+	    	%if elt.notes != '':
+	    	<dd>{{elt.notes}}</dd>
+	    	%else:
+	      	<dd>(none)</dd>
+	      %end
+
+	    </dl>
 		<div class="grid_7">
 		    %#   " If the elements is a root problem with a huge impact and not ack, ask to ack it!"
 		    %if elt.is_problem and elt.business_impact > 2 and not elt.problem_has_been_acknowledged:
@@ -152,7 +156,7 @@ Invalid element name
 										<dd>{{elt.output}}</dd>
 
 										<dt scope="row" class="column1">Performance Data</dt>
-										<td>{{elt.perf_data}}</dd>
+										<dd>{{elt.perf_data}}</dd>
 
 										<dt scope="row" class="column1">Current Attempt</dt>
 										<dd>{{elt.attempt}}/{{elt.max_check_attempts}} ({{elt.state_type}} state)</dd>
@@ -295,10 +299,10 @@ Invalid element name
 												%for c in elt.comments:
 												<li>
 													<div class="left">
-														<p class="comment-text">{{c.comment}}</p>
-														<div class="comment-meta"><span><b>Author:</b> {{c.author}}</span> <span><b>Creation:</b> {{helper.print_date(c.entry_time)}}</span> <span><b>Expire:</b>{{helper.print_date(c.expire_time)}}</span></div>
+														<p class="log-text">{{c.comment}}</p>
+														<div class="log-meta"><span><b>Author:</b> {{c.author}}</span> <span><b>Creation:</b> {{helper.print_date(c.entry_time)}}</span> <span><b>Expire:</b>{{helper.print_date(c.expire_time)}}</span></div>
 													</div>
-													<div class="right comment-action"><a class="icon_delete" href="#">Delete</a></div>
+													<div class="right log-action"><a class="icon_delete" href="#">Delete</a></div>
 												</li>
 												%end
 											</ol>
