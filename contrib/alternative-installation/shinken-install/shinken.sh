@@ -1037,8 +1037,7 @@ function install_pnp4nagios(){
 
 	filename=$(echo $PNPURI | awk -F"/" '{print $NF}')
 	folder=$(echo $filename | sed -e "s/\.tar\.gz//g")
-
-	if [ -z "$filename" ]
+	if [ ! -f "$filename" ]
 	then 
 		cecho " > Getting pnp4nagios archive" green
 		wget $PNPURI > /dev/null 2>&1
@@ -1063,7 +1062,9 @@ function install_pnp4nagios(){
 	rm -f $PNPPREFIX/share/install.php
 	/etc/init.d/apache2 restart > /dev/null 2>&1
 	cecho " > Enable npcdmod" green
-	do_skmacro enable_npcd.macro $PNPPREFIX/etc/npcd.cfg
+
+	ip=$(ifconfig | grep "inet adr" | grep -v 127.0.0.1 | awk '{print $2}' | awk -F : '{print $2}' | head -n 1)
+	do_skmacro enable_npcd.macro $PNPPREFIX/etc/npcd.cfg,$ip 
 }
 
 
