@@ -1018,6 +1018,51 @@ echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z 
 }
 
 # addons installation
+# mk multisite
+
+function install_multisite(){
+	if [ "$CODE" == "REDHAT" ]
+	then
+		cecho " > Unsuported" red
+		exit 2
+	fi
+	cadre "Install check_mk addon" green
+	cecho " > configure response file" green
+	cp check_mk_setup.conf.in $HOME/.check_mk_setup.conf
+	sed -i "s#__PNPPREFIX__#$PNPPREFIX#g" $HOME/.check_mk_setup.conf
+	sed -i "s#__MKPREFIX__#$MKPREFIX#g" $HOME/.check_mk_setup.conf
+	sed -i "s#__SKPREFIX__#$TARGET#g" $HOME/.check_mk_setup.conf
+	sed -i "s#__SKUSER__#$SKUSER#g" $HOME/.check_mk_setup.conf
+	sed -i "s#__SKGROUP__#$SKGROUP#g" $HOME/.check_mk_setup.conf
+	sed -i "s#__HTTPUSER__#www-data#g" $HOME/.check_mk_setup.conf
+	sed -i "s#__HTTPGROUP__#www-data#g" $HOME/.check_mk_setup.conf
+	sed -i "s#__HTTPD__#/etc/apache2#g" $HOME/.check_mk_setup.conf
+	sed -i "s#__HTTPD__#/etc/apache2#g" $HOME/.check_mk_setup.conf
+	cd /tmp
+	cecho " > Installing prerequisites" green
+	for p in $MKAPTPKG
+	do
+		cecho " -> Installing $p" green
+		apt-get --force-yes -y install $p # > /dev/null 2>&1
+	done
+
+	filename=$(echo $MKURI | awk -F"/" '{print $NF}')
+	folder=$(echo $filename | sed -e "s/\.tar\.gz//g")
+	if [ ! -f "$filename" ]
+	then 
+		cecho " > Getting check_mk archive" green
+		wget $MKURI > /dev/null 2>&1
+	fi
+	
+	cecho " > Extracting archive" green
+	if [ -d "$folder" ]
+	then 
+		rm -Rf $folder
+	fi 
+	tar zxvf $filename > /dev/null 2>&1
+	cd $folder
+	cecho " > install multisite"
+}
 
 # pnp4nagios
 function install_pnp4nagios(){
@@ -1287,6 +1332,10 @@ while getopts "kidubcr:lz:hsvp:we:" opt; do
 			elif [ "$OPTARG" == "pnp4nagios" ]
 			then
 				install_pnp4nagios
+				exit 0
+			elif [ "$OPTARG" == "multisite" ]
+			then
+				install_multisite
 				exit 0
 			else
 				cecho " > Unknown plugin $OPTARG" red
