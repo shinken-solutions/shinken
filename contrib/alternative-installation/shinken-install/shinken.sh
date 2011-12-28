@@ -1061,7 +1061,17 @@ function install_multisite(){
 	fi 
 	tar zxvf $filename > /dev/null 2>&1
 	cd $folder
-	cecho " > install multisite"
+	cecho " > install multisite" green
+	./setup.sh --yes
+	cecho " > default configuration for multisite" green
+	echo 'sites = {' >> $MKPREFIX/etc/multisite.mk
+	echo '   "default": {' >> $MKPREFIX/etc/multisite.mk
+	echo '	"alias":          "default",' >> $MKPREFIX/etc/multisite.mk
+	echo '	"socket":         "tcp:127.0.0.1:50000",' >> $MKPREFIX/etc/multisite.mk
+	echo '	"url_prefix":     "/",' >> $MKPREFIX/etc/multisite.mk
+	echo '   },' >> $MKPREFIX/etc/multisite.mk
+	echo ' }' >> $MKPREFIX/etc/multisite.mk
+	service apache2 restart
 }
 
 # pnp4nagios
