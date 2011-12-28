@@ -1018,6 +1018,61 @@ echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z 
 }
 
 # addons installation
+# mk multisite
+
+function install_multisite(){
+	if [ "$CODE" == "REDHAT" ]
+	then
+		cecho " > Unsuported" red
+		exit 2
+	fi
+	cadre "Install check_mk addon" green
+	cecho " > configure response file" green
+	cp check_mk_setup.conf.in $HOME/.check_mk_setup.conf
+	sed -i "s#__PNPPREFIX__#$PNPPREFIX#g" $HOME/.check_mk_setup.conf
+	sed -i "s#__MKPREFIX__#$MKPREFIX#g" $HOME/.check_mk_setup.conf
+	sed -i "s#__SKPREFIX__#$TARGET#g" $HOME/.check_mk_setup.conf
+	sed -i "s#__SKUSER__#$SKUSER#g" $HOME/.check_mk_setup.conf
+	sed -i "s#__SKGROUP__#$SKGROUP#g" $HOME/.check_mk_setup.conf
+	sed -i "s#__HTTPUSER__#www-data#g" $HOME/.check_mk_setup.conf
+	sed -i "s#__HTTPGROUP__#www-data#g" $HOME/.check_mk_setup.conf
+	sed -i "s#__HTTPD__#/etc/apache2#g" $HOME/.check_mk_setup.conf
+	sed -i "s#__HTTPD__#/etc/apache2#g" $HOME/.check_mk_setup.conf
+	cd /tmp
+	cecho " > Installing prerequisites" green
+	for p in $MKAPTPKG
+	do
+		cecho " -> Installing $p" green
+		apt-get --force-yes -y install $p # > /dev/null 2>&1
+	done
+
+	filename=$(echo $MKURI | awk -F"/" '{print $NF}')
+	folder=$(echo $filename | sed -e "s/\.tar\.gz//g")
+	if [ ! -f "$filename" ]
+	then 
+		cecho " > Getting check_mk archive" green
+		wget $MKURI > /dev/null 2>&1
+	fi
+	
+	cecho " > Extracting archive" green
+	if [ -d "$folder" ]
+	then 
+		rm -Rf $folder
+	fi 
+	tar zxvf $filename > /dev/null 2>&1
+	cd $folder
+	cecho " > install multisite" green
+	./setup.sh --yes
+	cecho " > default configuration for multisite" green
+	echo 'sites = {' >> $MKPREFIX/etc/multisite.mk
+	echo '   "default": {' >> $MKPREFIX/etc/multisite.mk
+	echo '	"alias":          "default",' >> $MKPREFIX/etc/multisite.mk
+	echo '	"socket":         "tcp:127.0.0.1:50000",' >> $MKPREFIX/etc/multisite.mk
+	echo '	"url_prefix":     "/",' >> $MKPREFIX/etc/multisite.mk
+	echo '   },' >> $MKPREFIX/etc/multisite.mk
+	echo ' }' >> $MKPREFIX/etc/multisite.mk
+	service apache2 restart
+}
 
 # pnp4nagios
 function install_pnp4nagios(){
@@ -1037,8 +1092,7 @@ function install_pnp4nagios(){
 
 	filename=$(echo $PNPURI | awk -F"/" '{print $NF}')
 	folder=$(echo $filename | sed -e "s/\.tar\.gz//g")
-
-	if [ -z "$filename" ]
+	if [ ! -f "$filename" ]
 	then 
 		cecho " > Getting pnp4nagios archive" green
 		wget $PNPURI > /dev/null 2>&1
@@ -1061,9 +1115,13 @@ function install_pnp4nagios(){
 	cecho " > Installing" green
 	make fullinstall > /dev/null 2>&1
 	rm -f $PNPPREFIX/share/install.php
+        cecho " > fix htpasswd.users path" green
+        sed -i "s#/usr/local/nagios/etc/htpasswd.users#$TARGET/etc/htpasswd.users#g" /etc/apache2/conf.d/pnp4nagios.conf 
 	/etc/init.d/apache2 restart > /dev/null 2>&1
 	cecho " > Enable npcdmod" green
-	do_skmacro enable_npcd.macro $PNPPREFIX/etc/npcd.cfg
+
+	ip=$(ifconfig | grep "inet adr" | grep -v 127.0.0.1 | awk '{print $2}' | awk -F : '{print $2}' | head -n 1)
+	do_skmacro enable_npcd.macro $PNPPREFIX/etc/npcd.cfg,$ip 
 }
 
 
@@ -1284,6 +1342,10 @@ while getopts "kidubcr:lz:hsvp:we:" opt; do
 			elif [ "$OPTARG" == "pnp4nagios" ]
 			then
 				install_pnp4nagios
+				exit 0
+			elif [ "$OPTARG" == "multisite" ]
+			then
+				install_multisite
 				exit 0
 			else
 				cecho " > Unknown plugin $OPTARG" red

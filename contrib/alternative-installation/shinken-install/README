@@ -16,7 +16,7 @@ Minimal requirements
 ~~~~~~~~~~~~~~~~~~~~
 
 For RedHat/CentOs you will need redhat-lsb (and git for cloning this repository)
-For Debian based distro you will need also redhat-lsb
+For Debian based distro you will need lsb-release 
 
 Usage
 ~~~~~
