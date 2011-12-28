@@ -1060,6 +1060,8 @@ function install_pnp4nagios(){
 	cecho " > Installing" green
 	make fullinstall > /dev/null 2>&1
 	rm -f $PNPPREFIX/share/install.php
+        cecho " > fix htpasswd.users path" green
+        sed -i "s#/usr/local/nagios/etc/htpasswd.users#$TARGET/etc/htpasswd.users#g" /etc/apache2/conf.d/pnp4nagios.conf 
 	/etc/init.d/apache2 restart > /dev/null 2>&1
 	cecho " > Enable npcdmod" green
 
