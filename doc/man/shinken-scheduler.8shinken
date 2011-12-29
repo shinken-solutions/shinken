@@ -1,14 +1,24 @@
-.TH shinken-scheduler 8 "September 14, 2011" "Shinken User Manuals"
+.TH shinken-scheduler 8 "December 29, 2011" "Shinken User Manuals"
 .SH NAME
 .PP
-shinken-scheduler - Shinken scheduler command.
+shinken-scheduler - Shinken scheduler daemon
 .SH SYNOPSIS
 .PP
-shinken-scheduler [\f[I]options\f[]] \&...
+shinken-scheduler [-dr] [-c \f[I]CONFIGFILE\f[]] [\[em]debugfile
+\f[I]DEBUGFILE\f[]]
 .SH DESCRIPTION
 .PP
-Shinken scheduler daemon.
+Shinken scheduler daemon
+.PP
+The shinken-scheduler manages the dispatching of checks and actions sent
+to shinken-reactionner and shinken-poller based on configuration sent to
+it by shinken-arbiter.
 .SH OPTIONS
+.TP
+.B --version
+Show version number and exit
+.RS
+.RE
 .TP
 .B -c \f[I]CONFIGFILE\f[], --config \f[I]CONFIGFILE\f[]
 Config file
@@ -30,8 +40,8 @@ Print detailed help screen.
 .RS
 .RE
 .TP
-.B --debug \f[I]FILE\f[]
-Debug File.
+.B --debugfile \f[I]DEBUGFILE\f[]
+Enable debug logging to \f[I]DEBUGFILE\f[]
 .RS
 .RE
 .SH AUTHORS

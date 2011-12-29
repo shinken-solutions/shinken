@@ -1,7 +1,6 @@
 % shinken-admin(8) Shinken User Manuals
 % David Hannequin
-% October 12, 2011
-
+% December 29, 2011
 
 # NAME
 
@@ -13,6 +12,6 @@ shinken-admin
 
 # DESCRIPTION
 
-Shinken admin shell.
+Shinken admin shell
 
 Invokes a simple shell interface for interacting with shinken-arbiter

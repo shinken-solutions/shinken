@@ -1,4 +1,4 @@
-.TH shinken-admin 8 "October 12, 2011" "Shinken User Manuals"
+.TH shinken-admin 8 "December 29, 2011" "Shinken User Manuals"
 .SH NAME
 .PP
 shinken-admin - Shinken admin shell
@@ -7,7 +7,7 @@ shinken-admin - Shinken admin shell
 shinken-admin
 .SH DESCRIPTION
 .PP
-Shinken admin shell.
+Shinken admin shell
 .PP
 Invokes a simple shell interface for interacting with shinken-arbiter
 .SH AUTHORS

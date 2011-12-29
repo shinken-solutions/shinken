@@ -1,54 +1,58 @@
-.TH shinken-discovery 8 "September 14, 2011" "Shinken User Manuals"
+.TH shinken-discovery 8 "December 29, 2011" "Shinken User Manuals"
 .SH NAME
 .PP
-shinken-discovery - Shinken discovery command.
+shinken-discovery - Shinken discovery command
 .SH SYNOPSIS
 .PP
-shinken-discovery [\f[I]options\f[]] \&...
+shinken-discovery [-w] [-c \f[I]CONFIGFILE\f[]] [-o
+\f[I]OUTPUT_PATH\f[]] [-r \f[I]RUNNER\f[][,\f[I]RUNNER,\&...]]
+[-m\f[]MACRO* [\f[I]MACRO\f[] \&...]]
 .SH DESCRIPTION
 .PP
-Shinken discovery daemon.
+Shinken discovery command
 .PP
-Until now, there are two discovery modules : * Standard network one,
-that uses the nmap tool * VMware one, that uses the
+There are two discovery modules included: * Standard network discovery
+which uses the nmap tool * VMware discovery which uses the
 \f[I]check_esx3.pl\f[] script and a vcenter installation.
 .PP
-It's better to do the whole discovery in one pass, because one module
-can use data from the other.
+It is best to do the whole discovery in one pass because one module can
+use data from the other.
 .SH OPTIONS
 .TP
-.B -c \f[I]CONFIGFILE\f[], --cfg-config \f[I]CONFIGGILE\f[]
-Configuration file.
+.B -- version
+Show the version and exit
 .RS
 .RE
 .TP
-.B -o \f[I]DIRECTORY\f[], --dir-output \f[I]DIRECTORY\f[]
-output directory.
+.B -c \f[I]CONFIGFILE\f[], --cfg-input \f[I]CONFIGGILE\f[]
+Discovery configuration file
 .RS
 .RE
 .TP
-.B -w, --overwrite
-Allow overwriting existing files.
+.B -o \f[I]OUTPUT_PATH\f[], --dir-output \f[I]OUTPUT_PATH\f[]
+Directory output for results
 .RS
 .RE
 .TP
-.B -r \f[I]PATH\f[]
-Indicate path to the nmap binary.
+.B -w, --overright
+Allow overwriting existing files (disabled by default)
 .RS
 .RE
 .TP
-.B -m \f[I]NETWORK\f[]
-Indicate lan to scan.
+.B -r \f[I]RUNNERS\f[]
+Comma-separated list of discovery runner modules to use
+.RS
+.RE
+.TP
+.B -m \f[I]MACROS\f[]
+List of macros to pass to discovery runner modules.
+Must be the last argument.
+Ex: NMAPTARGETS=192.168.0.0/24
 .RS
 .RE
 .TP
 .B -h, --help
 Print detailed help screen.
-.RS
-.RE
-.TP
-.B --debug \f[I]FILE\f[]
-Debug File.
 .RS
 .RE
 .SH AUTHORS

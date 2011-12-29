@@ -1,37 +1,47 @@
 % shinken-broker(8) Shinken User Manuals
 % Arthur Gautier
-% September 14, 2011
+% December 29, 2011
 
 # NAME
 
-shinken-broker - Shinken broker command.
+shinken-broker - Shinken broker daemon
 
 # SYNOPSIS
 
-shinken-broker  [*options*] ...
+shinken-broker [-dr] [-c *CONFIGFILE*] [--debugfile *DEBUGFILE*]
 
 # DESCRIPTION
 
-Shinken receiver daemon.
+Shinken broker daemon.
 
-Its role is to get data from schedulers (like status) and manage it (like
-storing it in database). The management itself is done by modules.
-Different modules exists : export into ndo database (MySQL and Oracle
-backend), export to merlin database (MySQL), service-perfdata export and a
-couchdb export, or a mix of them (why not?).
+The shinken-broker's role is to export and manage data from schedulers (such as status).
+The management itself is done by modules.
+
+The following management modules are included:
+ * export into an NDO (Nagios Data Out) database (MySQL or Oracle backend)
+ * export to MERLIN (Module for Effortless Redundancy and Loadbalancing In Nagios) database
+   (MySQL backend)
+ * service-perfdata export
+ * export to CouchDB
+
+Multiple modules can be enabled simultaneously
 
 # OPTIONS
+
+\--version
+:   Show version number and exit
 
 -c *CONFIGFILE*, \--config *CONFIGFILE*
 :   Config file
 
 -d, \--daemon
-:   Run in daemon mode.
+:   Run in daemon mode
+
+-r, \--replace
+:   Replace previously running broker
 
 -h, \--help
-:   Print detailed help screen.
+:   Print detailed help screen
 
-\--debug *FILE*
-:   Debug File.
-
-
+\--debugfile *DEBUGFILE*
+:   Enable debug logging to *DEBUGFILE*

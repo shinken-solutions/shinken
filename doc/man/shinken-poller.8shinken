@@ -1,15 +1,22 @@
-.TH shinken-poller 8 "September 14, 2011" "Shinken User Manuals"
+.TH shinken-poller 8 "December 29, 2011" "Shinken User Manuals"
 .SH NAME
 .PP
-shinken-poller - Shinken poller command.
+shinken-poller - Shinken poller daemon
 .SH SYNOPSIS
 .PP
-shinken-poller [\f[I]options\f[]] \&...
+shinken-poller [-dr] [-c \f[I]CONFIGFILE\f[]] [\[em]debugfile
+\f[I]DEBUGFILE\f[]]
 .SH DESCRIPTION
 .PP
-Daemon in charge of launching plugins as requested by schedulers.
+The shinken-poller daemon is in charge of launching plugins as requested
+by schedulers.
 When the check is finished it returns the result to the schedulers.
 .SH OPTIONS
+.TP
+.B --version
+Show version number and exit
+.RS
+.RE
 .TP
 .B -c \f[I]CONFIGFILE\f[], --config \f[I]CONFIGFILE\f[]
 Config file
@@ -31,8 +38,8 @@ Print detailed help screen.
 .RS
 .RE
 .TP
-.B --debug \f[I]FILE\f[]
-Debug File.
+.B --debugfile \f[I]DEBUGFILE\f[]
+Enable debug logging to \f[I]DEBUGFILE\f[]
 .RS
 .RE
 .SH AUTHORS

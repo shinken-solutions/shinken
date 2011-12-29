@@ -1,21 +1,24 @@
 % shinken-poller(8) Shinken User Manuals
 % Arthur Gautier
-% September 14, 2011
+% December 29, 2011
 
 # NAME
 
-shinken-poller - Shinken poller command.
+shinken-poller - Shinken poller daemon
 
 # SYNOPSIS
 
-shinken-poller [*options*] ...
+shinken-poller [-dr] [-c *CONFIGFILE*] [--debugfile *DEBUGFILE*]
 
 # DESCRIPTION
 
-Daemon in charge of launching plugins as requested by schedulers. When the
-check is finished it returns the result to the schedulers.
+The shinken-poller daemon is in charge of launching plugins as requested by
+schedulers. When the check is finished it returns the result to the schedulers.
 
 # OPTIONS
+
+\--version
+:   Show version number and exit
 
 -c *CONFIGFILE*, \--config *CONFIGFILE*
 :   Config file
@@ -29,7 +32,5 @@ check is finished it returns the result to the schedulers.
 -h, \--help
 :   Print detailed help screen.
 
-\--debug *FILE*
-:   Debug File.
-
-
+\--debugfile *DEBUGFILE*
+:   Enable debug logging to *DEBUGFILE*
