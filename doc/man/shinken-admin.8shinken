@@ -1,27 +1,14 @@
-=head1 SHINKEN-ADMIN                                                                  
-
-Command - Shinken admin command.
-
-=head1 SYNOPSIS
-
-/usr/sbin/shinken-admin 
-
-=head1 DESCRIPTION
-
-Shinken Admin 
-
-=head1 OPTIONS
-
-=over 8
-
-=head1 BUGS
-
-This command has absolutely no bugs, as I have written it. Also, as it has no bugs, there is no need for a bug tracker.
-
-=head1 AUTHORS
-
-Bshinken-arbiter was written by Jean Gabes <naparuba@gmail.com>. This manual page was written by David Hannequin <david.hannequin@gmail.com>.
-
-Both are released under the GNU Affero General Public License, version 3 or later.
-
-=cut
+.TH shinken-admin 8 "October 12, 2011" "Shinken User Manuals"
+.SH NAME
+.PP
+shinken-admin - Shinken admin shell
+.SH SYNOPSIS
+.PP
+shinken-admin
+.SH DESCRIPTION
+.PP
+Shinken admin shell.
+.PP
+Invokes a simple shell interface for interacting with shinken-arbiter
+.SH AUTHORS
+David Hannequin.
