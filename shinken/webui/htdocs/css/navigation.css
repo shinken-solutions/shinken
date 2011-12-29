@@ -130,6 +130,7 @@
 	padding:10px 5px 10px 5px;
 	border:1px solid #777777;
 	border-top:none;
+	z-index: 999;
 	
 	background: #FAFAFA;
 	/* Gradient background */

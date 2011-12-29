@@ -131,6 +131,7 @@ launch_and_assert test_parse_perfdata.py
 launch_and_assert test_service_template_inheritance.py
 launch_and_assert test_module_ip_tag.py
 launch_and_assert test_dot_virg_in_command.py
+launch_and_assert test_bad_escalation_on_groups.py
 
 launch_and_assert test_maintenance_period.py
 #Live status is a bit longer than the previous, so we put it at the end.

@@ -403,7 +403,14 @@ td.actions a {
     background-position: 4px;
 	padding-left: 24px;
     background-size: 17px 17px;
-} 
+}
+
+/*.icon_service:hover {
+    background: url("/static/images/icons/flag_64.png") no-repeat scroll transparent;
+    background-position: 4px;
+	padding-left: 24px;
+    background-size: 17px 17px;
+} */
 
 .icon_graph {
     background: url("/static/images/icons/chart_area_64.png") no-repeat scroll transparent;
