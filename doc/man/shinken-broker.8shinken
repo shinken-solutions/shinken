@@ -1,49 +1,40 @@
-=head1 SHINKEN-BROKER
-
-Command - Shinken broker command.
-
-=head1 SYNOPSIS
-
-/usr/sbin/shinken-broker  [options...]
-
-=head1 DESCRIPTION
-
-Shinken broker Daemon 
-
-=head1 OPTIONS
-
-=over 8
-
-=item B<-c|--config>
-
-Config file. Multiple -c can be used, it will be like if all files was just one.
-
-=item B<-d|--daemon>
-
+.TH shinken-broker 8 "September 14, 2011" "Shinken User Manuals"
+.SH NAME
+.PP
+shinken-broker - Shinken broker command.
+.SH SYNOPSIS
+.PP
+shinken-broker [\f[I]options\f[]] \&...
+.SH DESCRIPTION
+.PP
+Shinken receiver daemon.
+.PP
+Its role is to get data from schedulers (like status) and manage it
+(like storing it in database).
+The management itself is done by modules.
+Different modules exists : export into ndo database (MySQL and Oracle
+backend), export to merlin database (MySQL), service-perfdata export and
+a couchdb export, or a mix of them (why not?).
+.SH OPTIONS
+.TP
+.B -c \f[I]CONFIGFILE\f[], --config \f[I]CONFIGFILE\f[]
+Config file
+.RS
+.RE
+.TP
+.B -d, --daemon
 Run in daemon mode.
-
-=item B<-r|--replace>
-
-Replace previous running scheduler.
-
-=item B<-h|--help>
-
+.RS
+.RE
+.TP
+.B -h, --help
 Print detailed help screen.
-
-=item B<--debug>
-
-Debug File. Default : no use (why debug a bug free program? :) ).
-
-Displays information about the currently installed version and exists.
-
-=head1 BUGS
-
-This command has absolutely no bugs, as I have written it. Also, as it has no bugs, there is no need for a bug tracker.
-
-=head1 AUTHORS
-
-Bshinken-broker was written by Jean Gabes <naparuba@gmail.com>. This manual page was written by David Hannequin <david.hannequin@gmail.com>.
-
-Both are released under the GNU Affero General Public License, version 3 or later.
-
-=cut
+.RS
+.RE
+.TP
+.B --debug \f[I]FILE\f[]
+Debug File.
+.RS
+.RE
+.SH AUTHORS
+Arthur Gautier.

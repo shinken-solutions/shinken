@@ -1,49 +1,55 @@
-=head1 SHINKEN-DISCOVERY                                                                   
-
-Command - Shinken discovery command.
-
-=head1 SYNOPSIS
-
-/usr/sbin/shinken-discovery  [options...]
-
-=head1 DESCRIPTION
-
-Shinken discovery command
-
-=head1 OPTIONS
-
-=over 8
-
-=item B<-o|--output>
-
-ouput file.
-
-=item B<-r>
-
-Indicate where nmap binary.
-
-=item B<-m>
-
+.TH shinken-discovery 8 "September 14, 2011" "Shinken User Manuals"
+.SH NAME
+.PP
+shinken-discovery - Shinken discovery command.
+.SH SYNOPSIS
+.PP
+shinken-discovery [\f[I]options\f[]] \&...
+.SH DESCRIPTION
+.PP
+Shinken discovery daemon.
+.PP
+Until now, there are two discovery modules : * Standard network one,
+that uses the nmap tool * VMware one, that uses the
+\f[I]check_esx3.pl\f[] script and a vcenter installation.
+.PP
+It's better to do the whole discovery in one pass, because one module
+can use data from the other.
+.SH OPTIONS
+.TP
+.B -c \f[I]CONFIGFILE\f[], --cfg-config \f[I]CONFIGGILE\f[]
+Configuration file.
+.RS
+.RE
+.TP
+.B -o \f[I]DIRECTORY\f[], --dir-output \f[I]DIRECTORY\f[]
+output directory.
+.RS
+.RE
+.TP
+.B -w, --overwrite
+Allow overwriting existing files.
+.RS
+.RE
+.TP
+.B -r \f[I]PATH\f[]
+Indicate path to the nmap binary.
+.RS
+.RE
+.TP
+.B -m \f[I]NETWORK\f[]
 Indicate lan to scan.
-
-=item B<-h|--help>
-
+.RS
+.RE
+.TP
+.B -h, --help
 Print detailed help screen.
-
-=item B<--debug>
-
-Debug File. Default : no use (why debug a bug free program? :) ).
-
-Displays information about the currently installed version and exists.
-
-=head1 BUGS
-
-This command has absolutely no bugs, as I have written it. Also, as it has no bugs, there is no need for a bug tracker.
-
-=head1 AUTHORS
-
-Bshinken-poller was written by Jean Gabes <naparuba@gmail.com>. This manual page was written by David Hannequin <david.hannequin@gmail.com>.
-
-Both are released under the GNU Affero General Public License, version 3 or later.
-
-=cut
+.RS
+.RE
+.TP
+.B --debug \f[I]FILE\f[]
+Debug File.
+.RS
+.RE
+.SH AUTHORS
+Arthur Gautier.

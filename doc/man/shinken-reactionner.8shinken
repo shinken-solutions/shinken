@@ -1,49 +1,38 @@
-=head1 SHINKEN-REACTIONNER
-
-Command - Shinken reactionner command.
-
-=head1 SYNOPSIS
-
-/usr/sbin/shinken-reactionner  [options...]
-
-=head1 DESCRIPTION
-
-Shinken reactionner Daemon 
-
-=head1 OPTIONS
-
-=over 8
-
-=item B<-c|--config>
-
-Config file. Multiple -c can be used, it will be like if all files was just one.
-
-=item B<-d|--daemon>
-
+.TH shinken-reactionner 8 "September 14, 2011" "Shinken User Manuals"
+.SH NAME
+.PP
+shinken-reactionner - Shinken reactionner command.
+.SH SYNOPSIS
+.PP
+shinken-reactionner [\f[I]options\f[]] \&...
+.SH DESCRIPTION
+.PP
+Shinken reactionner Daemon.
+.SH OPTIONS
+.TP
+.B -c \f[I]CONFIGFILE\f[], --config \f[I]CONFIGFILE\f[]
+Config file
+.RS
+.RE
+.TP
+.B -d, --daemon
 Run in daemon mode.
-
-=item B<-r|--replace>
-
-Replace previous running scheduler.
-
-=item B<-h|--help>
-
+.RS
+.RE
+.TP
+.B -r, --replace
+Replace previous running arbiter.
+.RS
+.RE
+.TP
+.B -h, --help
 Print detailed help screen.
-
-=item B<--debug>
-
-Debug File. Default : no use (why debug a bug free program? :) ).
-
-Displays information about the currently installed version and exists.
-
-=head1 BUGS
-
-This command has absolutely no bugs, as I have written it. Also, as it has no bugs, there is no need for a bug tracker.
-
-=head1 AUTHORS
-
-Bshinken-reactionner was written by Jean Gabes <naparuba@gmail.com>. This manual page was written by David Hannequin <david.hannequin@gmail.com>.
-
-Both are released under the GNU Affero General Public License, version 3 or later.
-
-=cut
+.RS
+.RE
+.TP
+.B --debug \f[I]FILE\f[]
+Debug File.
+.RS
+.RE
+.SH AUTHORS
+Arthur Gautier.
