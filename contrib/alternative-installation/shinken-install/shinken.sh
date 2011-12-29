@@ -1074,7 +1074,16 @@ function install_multisite(){
 	rm -Rf $TARGET/etc/check_mk.d/*
 	cecho " > Fix www-data group" green
 	usermod -a -G $SKGROUP www-data 
-	service apache2 restart
+	chown -R $SKUSER:$SKGROUP $TARGET/etc/check_mk.d
+	chmod -R g+rwx $TARGET/etc/check_mk.d
+	chown -R $SKUSER:$SKGROUP $MKPREFIX/etc/conf.d
+	chmod -R g+rwx $MKPREFIX/etc/conf.d
+	service apache2 restart > /dev/null 2>&1
+	cecho " > Enable sudoers commands for check_mk" green
+	echo "# Needed for WATO - the Check_MK Web Administration Tool" >> /etc/sudoers
+	echo "Defaults:www-data !requiretty" >> /etc/sudoers
+	echo "www-data ALL = (root) NOPASSWD: $MKTARGET/check_mk --automation *" >> /etc/sudoers
+	/etc/init.d/sudo restart
 }
 
 # pnp4nagios
