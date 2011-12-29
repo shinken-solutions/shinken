@@ -27,6 +27,7 @@
 import copy
 import time
 import sys
+import _mysql_exceptions
 
 properties = {
     'daemons' : ['broker'],
@@ -37,6 +38,8 @@ properties = {
 
 from shinken.db_mysql import DBMysql
 from shinken.basemodule import BaseModule
+
+
 
 def de_unixify(t):
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(t))
@@ -62,10 +65,10 @@ class Ndodb_Mysql_broker(BaseModule):
         self.password = conf.password
         self.database = conf.database
         self.character_set = conf.character_set
-        self.nagios_mix_offset = int(conf.nagios_mix_offset)
         self.port = int(getattr(conf, 'port', '3306'))
         # Centreon ndo add some fields like long_output that are not in the vanilla ndo
         self.centreon_version = False
+        self.synchronise_database_id = int(conf.synchronise_database_id)
 
 
     #Called by Broker so we can do init stuff
@@ -76,11 +79,9 @@ class Ndodb_Mysql_broker(BaseModule):
         self.db = DBMysql(self.host, self.user, self.password, self.database, self.character_set, table_prefix='nagios_', port=self.port)
         self.connect_database()
 
-        # Cache for hosts and services
-        # will be flushed when we got a net instance id
-        # or something like that
-        self.services_cache = {}
-        self.hosts_cache = {}
+        #Cache for hosts and services when sync is active
+        self.services_cache_sync = {}
+        self.hosts_cache_sync = {}
 
         # We need to search for centreon_specific fields, like long_output
         query = u"select TABLE_NAME from information_schema.columns where TABLE_SCHEMA='ndo' and TABLE_NAME='nagios_servicestatus' and COLUMN_NAME='long_output';"
@@ -92,64 +93,134 @@ class Ndodb_Mysql_broker(BaseModule):
             self.centreon_version = True
             print "NDO/Mysql : using the centreon version"
 
+        # Cache for database id
+        # In order not to query the database every time
+        self.database_id_cache = {}
 
-    #Get a brok, parse it, and put in in database
-    #We call functions like manage_ TYPEOFBROK _brok that return us queries
+        # Mapping service_id in Shinken and in database
+        # Because can't acces host_name from a service everytime :(
+        self.mapping_service_id = {}
+
+        # Todo list to manage brok
+        self.todo = []
+
+
+    # Get a brok, parse it, and put in in database
+    # We call functions like manage_ TYPEOFBROK _brok that return us queries
     def manage_brok(self, b):
         # We need to do some brok mod, so we copy it
         new_b = copy.deepcopy(b)
-
-        # We've got problem with instance_id == 0 so we add 1 every where
-        if 'instance_id' in new_b.data:
-            #For nagios mix install, move more than 1
-            if self.nagios_mix_offset != 0:
-                new_b.data['instance_id'] = new_b.data['instance_id'] + self.nagios_mix_offset
+    
+        # If we syncronize, must look for id change
+        if self.synchronise_database_id != '0' and 'instance_id' in new_b.data:
+            # If we use database sync, we have to synchronise database id
+            # so we wait for the instance name
+            if 'instance_name' not in new_b.data :
+                self.todo.append(new_b)
+                return  
+                  
+            # We convert the id to write properly in the base using the 
+            # instance_name to reuse the instance_id in the base.
             else:
-                new_b.data['instance_id'] = new_b.data['instance_id'] + 1
+                new_b.data['instance_id'] = self.convert_id(new_b.data['instance_id'], new_b.data['instance_name'])
+                self.todo.append(new_b)
+                for brok in self.todo :
+                    # We have to put the good instance ID to all brok waiting
+                    # in the list then execute the query
+                    brok.data['instance_id'] = new_b.data['instance_id']
+                    queries = BaseModule.manage_brok(self, brok)
+                    if queries is not None:
+                        for q in queries :
+                            self.db.execute_query(q)
+                # We finished to manage the todo, so we void it
+                self.todo = []
+                return
 
-        queries = BaseModule.manage_brok(self, new_b)
+        # Executed if we don't synchronise or there is no instance_id
+        queries = BaseModule.manage_brok(self,new_b)
+        
         if queries is not None:
             for q in queries :
                 self.db.execute_query(q)
             return
-        #print "(ndodb)I don't manage this brok type", b
+
 
 
     # Create the database connection
-    # TODO : finish (begin :) ) error catch and conf parameters...
-    def connect_database(self):
-        self.db.connect_database()
+    # TODO : Choose a behavior when exception is catch
+    def connect_database(self):    
+        try :
+            self.db.connect_database()
+        except _mysql_exceptions.OperationalError as exp:
+            print "[MysqlDB] Module raise an exception : %s . Please check the arguments!" % exp
+            raise
 
 
-    def get_host_object_id_by_name(self, host_name):
+    # 
+    def get_instance_id(self,name):
+        query1 = u"SELECT  max(instance_id) + 1 from nagios_instances"
+        query2 = u"SELECT instance_id from nagios_instances where instance_name = '%s';" % name
+
+        self.db.execute_query(query1)
+        row1  = self.db.fetchone()
+
+        self.db.execute_query(query2)
+        row2 = self.db.fetchone()
+
+        if len(row1)<1 :
+            return -1
+        #We are the first process writing in base      
+        elif row1[0] is None:
+            return 1
+        #No previous instance found return max
+        elif row2 is None :
+            return row1[0]
+        #Return the previous instance
+        else:
+            return row2[0]
+
+
+
+    def convert_id(self, id, name):
+        #Look if we have already encountered this id
+        if id in self.database_id_cache :
+            return self.database_id_cache[id]
+        else :
+            data_id = 1
+            # If we disable the database sync, we are using the in-brok instance_id
+            if self.synchronise_database_id == '0':
+                data_id = id
+            # Else : we are quering the database and get a new one
+            else:
+                data_id = self.get_instance_id(name)
+            # cache this!
+            self.database_id_cache[id] = data_id                
+            return data_id
+
+
+    def get_host_object_id_by_name_sync(self, host_name, instance_id):
         #First look in cache.
-        if host_name in self.hosts_cache:
-            return self.hosts_cache[host_name]
+        if instance_id in self.hosts_cache_sync:
+            if host_name in self.hosts_cache_sync[instance_id]:
+                return self.hosts_cache_sync[instance_id][host_name]
 
         #Not in cache, not good
-        query = u"SELECT object_id from nagios_objects where name1='%s' and objecttype_id='1'" % host_name
+        query = u"SELECT object_id from nagios_objects where name1='%s' and objecttype_id='1' and instance_id='%s'" % (host_name,instance_id)
         self.db.execute_query(query)
         row = self.db.fetchone ()
         if row is None or len(row) < 1:
             return 0
         else:
-            self.hosts_cache[host_name] = row[0]
+            if instance_id not in self.hosts_cache_sync:
+                self.hosts_cache_sync[instance_id] = {}
+            self.hosts_cache_sync[instance_id][host_name] = row[0]
             return row[0]
 
-    def get_contact_object_id_by_name(self, contact_name):
-        #Not in cache, not good
-        query = u"SELECT object_id from nagios_objects where name1='%s' and objecttype_id='10'" % contact_name
-        self.db.execute_query(query)
-        row = self.db.fetchone ()
-        if row is None or len(row) < 1:
-            return 0
-        else:
-            return row[0]
-
-
-
-    def get_hostgroup_object_id_by_name(self, hostgroup_name):
-        query = u"SELECT object_id from nagios_objects where name1='%s' and objecttype_id='3'" % hostgroup_name
+    def get_contact_object_id_by_name_sync(self, contact_name,instance_id):
+        
+        
+             
+        query = u"SELECT object_id from nagios_objects where name1='%s' and objecttype_id='10' and instance_id='%s'" % (contact_name,instance_id)
         self.db.execute_query(query)
         row = self.db.fetchone ()
         if row is None or len(row) < 1:
@@ -158,24 +229,63 @@ class Ndodb_Mysql_broker(BaseModule):
             return row[0]
 
 
-    def get_service_object_id_by_name(self, host_name, service_description):
-        #first look in cache
-        if (host_name, service_description) in self.services_cache:
-            return self.services_cache[(host_name, service_description)]
+
+    def get_hostgroup_object_id_by_name_sync(self, hostgroup_name, instance_id):
+
+        query = u"SELECT object_id from nagios_objects where name1='%s' and objecttype_id='3' and instance_id='%s'" % (hostgroup_name,instance_id)
+        self.db.execute_query(query)
+        row = self.db.fetchone ()
+        if row is None or len(row) < 1:
+            return 0
+        else:
+            return row[0]
+
+
+    def get_max_hostgroup_id_sync(self):
+ 
+        query = u"SELECT max(hostgroup_id) + 1 from nagios_hostgroups"
+        self.db.execute_query(query)
+        row = self.db.fetchone ()
+        if row is None or len(row) < 1:
+            return 0
+        else:
+            return row[0]
+
+
+    def get_service_object_id_by_name_sync(self, host_name, service_description, instance_id):
+
+        
+        if instance_id in self.services_cache_sync:
+            if (host_name, service_description) in self.services_cache_sync[instance_id]:
+                return self.services_cache_sync[(host_name, service_description)]
 
         #else; not in cache :(
-        query = u"SELECT object_id from nagios_objects where name1='%s' and name2='%s' and objecttype_id='2'" % (host_name, service_description)
+        query = u"SELECT object_id from nagios_objects where name1='%s' and name2='%s' and objecttype_id='2' and instance_id='%s'" % (host_name, service_description,instance_id)
         self.db.execute_query(query)
         row = self.db.fetchone ()
         if row is None or len(row) < 1:
             return 0
         else:
-            self.services_cache[(host_name, service_description)] = row[0]
+            if instance_id not in self.services_cache_sync:
+                self.services_cache_sync[instance_id] = {}
+            self.services_cache_sync[(host_name, service_description)] = row[0]
             return row[0]
 
 
-    def get_servicegroup_object_id_by_name(self, servicegroup_name):
-        query = u"SELECT object_id from nagios_objects where name1='%s' and objecttype_id='4'" % servicegroup_name
+    def get_servicegroup_object_id_by_name_sync(self, servicegroup_name, instance_id):
+ 
+        query = u"SELECT object_id from nagios_objects where name1='%s' and objecttype_id='4' and instance_id='%s'" % (servicegroup_name,instance_id)
+        self.db.execute_query(query)
+        row = self.db.fetchone ()
+        if row is None or len(row) < 1:
+            return 0
+        else:
+            return row[0]
+    
+    
+    def get_max_servicegroup_id_sync(self):
+ 
+        query = u"SELECT max(servicegroup_id) + 1 from nagios_servicegroups"
         self.db.execute_query(query)
         row = self.db.fetchone ()
         if row is None or len(row) < 1:
@@ -184,8 +294,20 @@ class Ndodb_Mysql_broker(BaseModule):
             return row[0]
 
         
-    def get_contactgroup_object_id_by_name(self, contactgroup_name):
-        query = u"SELECT object_id from nagios_objects where name1='%s' and objecttype_id='11'" % contactgroup_name
+    def get_contactgroup_object_id_by_name_sync(self, contactgroup_name, instance_id):
+
+              
+        query = u"SELECT object_id from nagios_objects where name1='%s' and objecttype_id='11'and instance_id='%s'" % (contactgroup_name,instance_id)
+        self.db.execute_query(query)
+        row = self.db.fetchone ()
+        if row is None or len(row) < 1:
+            return 0
+        else:
+            return row[0]
+
+    def get_max_contactgroup_id_sync(self):
+ 
+        query = u"SELECT max(contactgroup_id) + 1 from nagios_contactgroups"
         self.db.execute_query(query)
         row = self.db.fetchone ()
         if row is None or len(row) < 1:
@@ -215,8 +337,8 @@ class Ndodb_Mysql_broker(BaseModule):
 
         #We also clean cache, because we are not sure about this data now
         print "[MySQL/NDO] Flushing caches (clean from instance %d)" % instance_id
-        self.services_cache = {}
-        self.hosts_cache = {}
+        self.services_cache_sync = {}
+        self.hosts_cache_sync = {}
 
         return res
 
@@ -300,10 +422,10 @@ class Ndodb_Mysql_broker(BaseModule):
         object_query = self.db.create_insert_query('objects', objects_data)
         self.db.execute_query(object_query)
 
-        host_id = self.get_host_object_id_by_name(data['host_name'])
+        host_id = self.get_host_object_id_by_name_sync(data['host_name'],data['instance_id'])
 
         #print "DATA:", data
-        hosts_data = {'host_id' : data['id'], 'instance_id' : data['instance_id'],
+        hosts_data = { 'instance_id' : data['instance_id'],
                       'host_object_id' : host_id, 'alias' : data['alias'],
                       'display_name' : data['display_name'], 'address' : data['address'],
                       'failure_prediction_options' : '0', 'check_interval' : data['check_interval'],
@@ -341,6 +463,7 @@ class Ndodb_Mysql_broker(BaseModule):
                            'has_been_checked' : 1, 'percent_state_change' : data['percent_state_change'], 'is_flapping' : data['is_flapping'],
                            'flap_detection_enabled' : data['flap_detection_enabled'],
                            }
+
         # Centreon add some fields
         if self.centreon_version:
             hoststatus_data['long_output'] = data['long_output']
@@ -350,7 +473,7 @@ class Ndodb_Mysql_broker(BaseModule):
         return [query, hoststatus_query]
 
 
-    #A host have just be create, database is clean, we INSERT it
+    #A service have just been created, database is clean, we INSERT it
     def manage_initial_service_status_brok(self, b):
         #new_b = copy.deepcopy(b)
 
@@ -362,13 +485,17 @@ class Ndodb_Mysql_broker(BaseModule):
         object_query = self.db.create_insert_query('objects', objects_data)
         self.db.execute_query(object_query)
 
-        host_id = self.get_host_object_id_by_name(data['host_name'])
-        service_id = self.get_service_object_id_by_name(data['host_name'], data['service_description'])
+        host_id = self.get_host_object_id_by_name_sync(data['host_name'],data['instance_id'])
+        service_id = self.get_service_object_id_by_name_sync(data['host_name'], data['service_description'],data['instance_id'])
+        
+        #TODO : Include with the service cache.
+        self.mapping_service_id[data['id']] = service_id
+        
 
         #print "DATA:", data
         #print "HOST ID:", host_id
         #print "SERVICE ID:", service_id
-        services_data = {'service_id' : data['id'], 'instance_id' : data['instance_id'],
+        services_data = { 'instance_id' : data['instance_id'],
                       'service_object_id' : service_id, 'host_object_id' : host_id,
                       'display_name' : data['display_name'],
                       'failure_prediction_options' : '0', 'check_interval' : data['check_interval'],
@@ -407,6 +534,7 @@ class Ndodb_Mysql_broker(BaseModule):
                               'has_been_checked' : 1, 'percent_state_change' : data['percent_state_change'], 'is_flapping' : data['is_flapping'],
                               'flap_detection_enabled' : data['flap_detection_enabled'],
                               }
+
         # Centreon add some fields
         if self.centreon_version:
             servicestatus_data['long_output'] = data['long_output']
@@ -430,9 +558,13 @@ class Ndodb_Mysql_broker(BaseModule):
         object_query = self.db.create_insert_query('objects', objects_data)
         self.db.execute_query(object_query)
 
-        hostgroup_id = self.get_hostgroup_object_id_by_name(data['hostgroup_name'])
+        hostgroup_id = self.get_hostgroup_object_id_by_name_sync(data['hostgroup_name'],data['instance_id'])
+        
+        #We can't get the id of the hostgroup in the base because we don't have inserted it yet!
+        #So we get a suitable id in this table an fix it for the hostgroup and hostgroup_member
+        hostgp_id = self.get_max_hostgroup_id_sync()
 
-        hostgroups_data = {'hostgroup_id' : data['id'], 'instance_id' :  data['instance_id'],
+        hostgroups_data = { 'hostgroup_id' : hostgp_id, 'instance_id' :  data['instance_id'],
                            'config_type' : 0, 'hostgroup_object_id' : hostgroup_id,
                            'alias' : data['alias']
             }
@@ -443,8 +575,9 @@ class Ndodb_Mysql_broker(BaseModule):
         #Ok, the hostgroups table is uptodate, now we add relations
         #between hosts and hostgroups
         for (h_id, h_name) in b.data['members']:
-            host_id = self.get_host_object_id_by_name(h_name)
-            hostgroup_members_data = {'instance_id' : data['instance_id'], 'hostgroup_id' : data['id'],
+            host_id = self.get_host_object_id_by_name_sync(h_name,data['instance_id'])
+
+            hostgroup_members_data = {'instance_id' : data['instance_id'], 'hostgroup_id' : hostgp_id,
                                       'host_object_id' : host_id}
             q = self.db.create_insert_query('hostgroup_members', hostgroup_members_data)
             res.append(q)
@@ -452,9 +585,9 @@ class Ndodb_Mysql_broker(BaseModule):
 
 
 
-    #A new host group? Insert it
-    #We need to do something for the members prop (host.id, host_name)
-    #They are for host_hostgroup table, with just host.id hostgroup.id
+    #A new service group? Insert it
+    #We need to do something for the members prop (serv.id, service_name)
+    #They are for service_hostgroup table, with just service.id servicegroup.id
     def manage_initial_servicegroup_status_brok(self, b):
         data = b.data
 
@@ -465,22 +598,28 @@ class Ndodb_Mysql_broker(BaseModule):
         object_query = self.db.create_insert_query('objects', objects_data)
         self.db.execute_query(object_query)
 
-        servicegroup_id = self.get_servicegroup_object_id_by_name(data['servicegroup_name'])
+        servicegroup_id = self.get_servicegroup_object_id_by_name_sync(data['servicegroup_name'],data['instance_id'])
+        svcgp_id = self.get_max_servicegroup_id_sync()
+        
 
 
-        servicegroups_data = {'servicegroup_id' : data['id'], 'instance_id' :  data['instance_id'],
+        servicegroups_data = {'servicegroup_id' : svcgp_id, 'instance_id' :  data['instance_id'],
                            'config_type' : 0, 'servicegroup_object_id' : servicegroup_id,
                            'alias' : data['alias']
             }
 
         query = self.db.create_insert_query('servicegroups', servicegroups_data)
         res = [query]
-
-        #Ok, the hostgroups table is uptodate, now we add relations
-        #between hosts and hostgroups
+        
+        
+        
+        #Ok, the servicegroups table is up to date, now we add relations
+        #between service and servicegroups
         for (s_id, s_name) in b.data['members']:
-            servicegroup_members_data = {'instance_id' : data['instance_id'], 'servicegroup_id' : data['id'],
-                                         'service_object_id' : s_id}
+            #TODO : Include with the service cache.
+            service_id = self.mapping_service_id[s_id]
+            servicegroup_members_data = {'instance_id' : data['instance_id'], 'servicegroup_id' : svcgp_id,
+                                         'service_object_id' : service_id}
             q = self.db.create_insert_query('servicegroup_members', servicegroup_members_data)
             res.append(q)
         return res
@@ -490,7 +629,8 @@ class Ndodb_Mysql_broker(BaseModule):
     def manage_host_check_result_brok(self, b):
         data = b.data
         #print "DATA", data
-        host_id = self.get_host_object_id_by_name(data['host_name'])
+        host_id = self.get_host_object_id_by_name_sync(data['host_name'],data['instance_id'])
+
         #Only the host is impacted
         where_clause = {'host_object_id' : host_id}
         host_check_data = {'instance_id' : data['instance_id'],
@@ -527,23 +667,26 @@ class Ndodb_Mysql_broker(BaseModule):
     #next_check with it
     def manage_host_next_schedule_brok(self, b):
         data = b.data
-        host_id = self.get_host_object_id_by_name(data['host_name'])
+        
+        host_id = self.get_host_object_id_by_name_sync(data['host_name'],data['instance_id'])
+
         #Only the host is impacted
         where_clause = {'host_object_id' : host_id}
 
-        #Just update the host status
+        #Just update teh host status
         hoststatus_data = {'next_check' : de_unixify(data['next_chk'])}
         hoststatus_query = self.db.create_update_query('hoststatus' , hoststatus_data, where_clause)
 
         return [hoststatus_query]
 
 
-    #Same than service result, but for host result
+    #Same than host result, but for service result
     def manage_service_check_result_brok(self, b):
         data = b.data
         #print "DATA", data
-        service_id = self.get_service_object_id_by_name(data['host_name'], data['service_description'])
-
+        service_id = self.get_service_object_id_by_name_sync(data['host_name'], data['service_description'],data['instance_id'])
+        
+        
         #Only the service is impacted
         where_clause = {'service_object_id' : service_id}
         service_check_data = {'instance_id' : data['instance_id'],
@@ -554,6 +697,7 @@ class Ndodb_Mysql_broker(BaseModule):
                            'return_code' : data['return_code'], 'output' : data['output'],
                            'perfdata' : data['perf_data']
         }
+
         # Centreon add some fields
         if self.centreon_version:
             service_check_data['long_output'] = data['long_output']
@@ -568,6 +712,7 @@ class Ndodb_Mysql_broker(BaseModule):
                               'output' : data['output'], 'perfdata' : data['perf_data'], 'last_check' : de_unixify(data['last_chk']),
                               'percent_state_change' : data['percent_state_change'],
         }
+
         # Centreon add some fields
         if self.centreon_version:
             servicestatus_data['long_output'] = data['long_output']
@@ -582,8 +727,9 @@ class Ndodb_Mysql_broker(BaseModule):
     def manage_service_next_schedule_brok(self, b):
         data = b.data
         #print "DATA", data
-        service_id = self.get_service_object_id_by_name(data['host_name'], data['service_description'])
-
+        service_id = self.get_service_object_id_by_name_sync(data['host_name'], data['service_description'],data['instance_id'])
+        
+        
         #Only the service is impacted
         where_clause = {'service_object_id' : service_id}
 
@@ -598,7 +744,9 @@ class Ndodb_Mysql_broker(BaseModule):
     #Ok the host is updated
     def manage_update_host_status_brok(self, b):
         data = b.data
-        host_id = self.get_host_object_id_by_name(data['host_name'])
+        
+        host_id = self.get_host_object_id_by_name_sync(data['host_name'],data['instance_id'])
+            
 
         hosts_data = {'instance_id' : data['instance_id'],
                       'failure_prediction_options' : '0', 'check_interval' : data['check_interval'],
@@ -637,6 +785,7 @@ class Ndodb_Mysql_broker(BaseModule):
                            'has_been_checked' : 1, 'is_flapping' : data['is_flapping'], 'percent_state_change' : data['percent_state_change'], 
                            'flap_detection_enabled' : data['flap_detection_enabled'],
                            }
+
         # Centreon add some fields
         if self.centreon_version:
             hoststatus_data['long_output'] = data['long_output']
@@ -646,12 +795,11 @@ class Ndodb_Mysql_broker(BaseModule):
         return [query, hoststatus_query]
 
 
-    #Ok the host is updated
+    #Ok the service is updated
     def manage_update_service_status_brok(self, b):
         data = b.data
 
-        service_id = self.get_service_object_id_by_name(data['host_name'], data['service_description'])
-
+        service_id = self.get_service_object_id_by_name_sync(data['host_name'], data['service_description'],data['instance_id'])
 
 
         services_data = {'instance_id' : data['instance_id'],
@@ -668,7 +816,7 @@ class Ndodb_Mysql_broker(BaseModule):
             }
 
         #Only the service is impacted
-        where_clause = {'service_object_id' : service_id, 'service_id' : data['id']}
+        where_clause = {'service_object_id' : service_id, 'instance_id' : data['instance_id']}
         #where_clause = {'host_name' : data['host_name']}
         query = self.db.create_update_query('services', services_data, where_clause)
 
@@ -694,6 +842,7 @@ class Ndodb_Mysql_broker(BaseModule):
                               'has_been_checked' : 1, 'is_flapping' : data['is_flapping'], 'percent_state_change' : data['percent_state_change'],
                               'flap_detection_enabled' : data['flap_detection_enabled'],
                               }
+
         # Centreon add some fields
         if self.centreon_version:
             servicestatus_data['long_output'] = data['long_output']
@@ -718,9 +867,10 @@ class Ndodb_Mysql_broker(BaseModule):
         object_query = self.db.create_insert_query('objects', objects_data)
         self.db.execute_query(object_query)
 
-        contact_obj_id = self.get_contact_object_id_by_name(data['contact_name'])
+        contact_obj_id = self.get_contact_object_id_by_name_sync(data['contact_name'],data['instance_id'])
+        #contact_id = self.get_contact_id(data['id'])
 
-        contacts_data = {'contact_id' : data['id'], 'instance_id' : data['instance_id'],
+        contacts_data = {'instance_id' : data['instance_id'],
                       'contact_object_id' : contact_obj_id,
                       'alias' : data['alias'],
                       'email_address' : data['email'], 'pager_address' : data['pager'],
@@ -734,9 +884,7 @@ class Ndodb_Mysql_broker(BaseModule):
 
 
 
-    #A new host group? Insert it
-    #We need to do something for the members prop (host.id, host_name)
-    #They are for host_hostgroup table, with just host.id hostgroup.id
+    #A new contact group? Insert it
     def manage_initial_contactgroup_status_brok(self, b):
         data = b.data
 
@@ -747,10 +895,12 @@ class Ndodb_Mysql_broker(BaseModule):
         object_query = self.db.create_insert_query('objects', objects_data)
         self.db.execute_query(object_query)
 
-        contactgroup_id = self.get_contactgroup_object_id_by_name(data['contactgroup_name'])
+        contactgroup_id = self.get_contactgroup_object_id_by_name_sync(data['contactgroup_name'],data['instance_id'])
+        ctcgp_id = self.get_max_contactgroup_id_sync()
 
-        contactgroups_data = {'contactgroup_id' : data['id'], 'instance_id' :  data['instance_id'],
-                           'config_type' : 0, 'contactgroup_object_id' : contactgroup_id,
+        contactgroups_data = {'contactgroup_id' : ctcgp_id, 'instance_id' :  data['instance_id'],
+                           'config_type' : 0,
+                           'contactgroup_object_id' : contactgroup_id,
                            'alias' : data['alias']
             }
 
@@ -761,12 +911,15 @@ class Ndodb_Mysql_broker(BaseModule):
         #between hosts and hostgroups
         for (c_id, c_name) in b.data['members']:
             #print c_name
-            contact_obj_id = self.get_contact_object_id_by_name(c_name)
-            contactgroup_members_data = {'instance_id' : data['instance_id'], 'contactgroup_id' : data['id'],
+            contact_obj_id = self.get_contact_object_id_by_name_sync(c_name,data['instance_id'])
+            
+            contactgroup_members_data = {'instance_id' : data['instance_id'],
+                                         'contactgroup_id' : ctcgp_id,
                                          'contact_object_id' : contact_obj_id}
             q = self.db.create_insert_query('contactgroup_members', contactgroup_members_data)
             res.append(q)
         return res
+
 
 
     #A notification have just be created, we INSERT it
@@ -775,11 +928,11 @@ class Ndodb_Mysql_broker(BaseModule):
         data = b.data
         print "CREATING A NOTIFICATION", data
         if data['service_description'] != '':
-            object_id = self.get_service_object_id_by_name(data['host_name'], data['service_description'])
+             service_id = self.get_service_object_id_by_name_sync(data['host_name'], data['service_description'],data['instance_id'])
         else:
-            object_id = self.get_host_object_id_by_name(data['host_name'])
+             host_id = self.get_host_object_id_by_name_sync(data['host_name'],data['instance_id'])
 
-        notification_data = {'notification_id' : data['id'], 'instance_id' :  data['instance_id'],
+        notification_data = {'instance_id' :  data['instance_id'],
                              'start_time' : de_unixify(data['start_time']),
                              'end_time' : de_unixify(data['end_time']),
                              'state' : data['state']                             
