@@ -1013,7 +1013,7 @@ echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z 
 	-c	Compress rotated logs
     -e  which daemons to keep enabled at boot time
 	-z 	This is a really special usecase that allow to install shinken on Centreon Enterprise Server in place of nagios
-	-p  Install plugins or addons (args should be one of the following : check_esx3|nagios-plugins|check_oracle_health|capture_plugin|pnp4nagios)
+	-p  Install plugins or addons (args should be one of the following : check_esx3|nagios-plugins|check_oracle_health|capture_plugin|pnp4nagios|multisite)
 	-h	Show help"
 }
 
@@ -1043,7 +1043,7 @@ function install_multisite(){
 	for p in $MKAPTPKG
 	do
 		cecho " -> Installing $p" green
-		apt-get --force-yes -y install $p # > /dev/null 2>&1
+		apt-get --force-yes -y install $p > /dev/null 2>&1
 	done
 
 	filename=$(echo $MKURI | awk -F"/" '{print $NF}')
@@ -1062,7 +1062,7 @@ function install_multisite(){
 	tar zxvf $filename > /dev/null 2>&1
 	cd $folder
 	cecho " > install multisite" green
-	./setup.sh --yes
+	./setup.sh --yes > /dev/null 2>&1
 	cecho " > default configuration for multisite" green
 	echo 'sites = {' >> $MKPREFIX/etc/multisite.mk
 	echo '   "default": {' >> $MKPREFIX/etc/multisite.mk
@@ -1071,6 +1071,9 @@ function install_multisite(){
 	echo '	"url_prefix":     "/",' >> $MKPREFIX/etc/multisite.mk
 	echo '   },' >> $MKPREFIX/etc/multisite.mk
 	echo ' }' >> $MKPREFIX/etc/multisite.mk
+	rm -Rf $TARGET/etc/check_mk.d/*
+	cecho " > Fix www-data group" green
+	usermod -a -G $SKGROUP www-data 
 	service apache2 restart
 }
 
