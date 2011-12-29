@@ -68,7 +68,7 @@ class LiveStatusWaitQuery(LiveStatusQuery):
                 # It's like Filter: name = %s
                 # Only for services it's host<blank>servicedesc
                 if self.table == 'services':
-                    host_name, service_description = object.split(' ', 1)
+                    host_name, service_description = object.split(';', 1)
                     self.filtercolumns.append('host_name')
                     self.prefiltercolumns.append('host_name')
                     self.filter_stack.put(self.make_filter('=', 'host_name', host_name))
