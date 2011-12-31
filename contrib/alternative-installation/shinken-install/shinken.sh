@@ -474,7 +474,7 @@ function enable(){
 }
 
 function sinstall(){
-	trap 'trap_handler ${LINENO} $? install' ERR
+	#trap 'trap_handler ${LINENO} $? install' ERR
 	#cecho "Installing shinken" green
 	check_distro
 	check_exist
@@ -485,6 +485,7 @@ function sinstall(){
 	ln -s $TARGET/bin/default/shinken /etc/default/shinken
 	cp $TARGET/bin/init.d/shinken* /etc/init.d/
 	mkdir -p $TARGET/var/archives
+	#enableretention
 	fix
 	cecho "+------------------------------------------------------------------------------" green
 	cecho "| shinken is now installed on your server " green
@@ -921,13 +922,27 @@ function enablendodb(){
     fi
 }
 
+#function enableretention(){
+#
+#	cecho " > Enable retention for broker scheduler and arbiter" green
+#
+#	export PYTHONPATH=$TARGET
+#	export PY="$(pythonver)"
+#	result=$($PY $myscripts/tools/skonf.py -a macros -f $myscripts/tools/macros/ces_enable_retention.macro)	
+#    if [ $? -ne 0 ]
+#    then
+#        cecho $result red
+#        exit 2
+#    fi
+#}
+
 function enableretention(){
 
 	cecho " > Enable retention for broker scheduler and arbiter" green
 
 	export PYTHONPATH=$TARGET
 	export PY="$(pythonver)"
-	result=$($PY $myscripts/tools/skonf.py -a macros -f $myscripts/tools/macros/ces_enable_retention.macro)	
+	result=$($PY $myscripts/tools/skonf.py -a macros -f $myscripts/tools/macros/enable_retention.macro)	
     if [ $? -ne 0 ]
     then
         cecho $result red
@@ -1429,7 +1444,7 @@ while getopts "kidubcr:lz:hsvp:we:" opt; do
                 fixcentreondb
 				fixforfan
                 enablendodb
-                enableretention
+                #enableretention
                 enableperfdata
                 setdaemonsaddresses
                 enableCESCentralDaemons
