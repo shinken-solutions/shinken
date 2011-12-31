@@ -1026,9 +1026,16 @@ echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z 
 	-r 	Restore shinken configuration plugins and data
 	-l	List shinken backups
 	-c	Compress rotated logs
-    -e  which daemons to keep enabled at boot time
+        -e      Which daemons to keep enabled at boot time
 	-z 	This is a really special usecase that allow to install shinken on Centreon Enterprise Server in place of nagios
-	-p  Install plugins or addons (args should be one of the following : check_esx3|nagios-plugins|check_oracle_health|check_mysql_health|capture_plugin|pnp4nagios|multisite)
+	-p      Install plugins or addons (args should be one of the following : 
+                     check_esx3
+                     nagios-plugins
+                     check_oracle_health
+                     check_mysql_health
+                     capture_plugin
+                     pnp4nagios
+                     multisite
 	-h	Show help"
 }
 
