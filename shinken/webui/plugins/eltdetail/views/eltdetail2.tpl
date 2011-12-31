@@ -38,26 +38,22 @@ Invalid element name
 	    <strong>status</strong>: <span id="vertical_status">open</span>
 	</div>
 	
-	<div id="vertical_slide">
-	    Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-	</div>
-	
-	<div class="opacity_hover">
+	<div id="vertical_slide" class="opacity_hover">
 	%#  "This is the background canvas for all gesture detection things " 
 	%# " Don't ask me why, but the size must be included in the
 	%# canvas line here or we got problem!"
-	<center><canvas id="canvas" width="200" height="200"  style="border: 1px solid black;"></canvas></center>
-
+		<center><canvas id="canvas" width="200" height="200"  style="border: 1px solid black;"></canvas></center>
 		<div class="gesture_button">
-          	<img title="By keeping a left click pressed and drawing a check, you will launch an acknowledgement." src="/static/eltdetail/images/gesture-check.png"/> Acknowledge
+	       	<img title="By keeping a left click pressed and drawing a check, you will launch an acknowledgement." src="/static/eltdetail/images/gesture-check.png"/> Acknowledge
 		</div>
 		<div class="gesture_button">
-          	<img title="By keeping a left click pressed and drawing a check, you will launch an recheck." src="/static/eltdetail/images/gesture-circle.png"/> Recheck
+	       	<img title="By keeping a left click pressed and drawing a check, you will launch an recheck." src="/static/eltdetail/images/gesture-circle.png"/> Recheck
 		</div>
 		<div class="gesture_button">
-          	<img title="By keeping a left click pressed and drawing a check, you will launch a try to fix command." src="/static/eltdetail/images/gesture-zigzag.png"/> Fix
+	       	<img title="By keeping a left click pressed and drawing a check, you will launch a try to fix command." src="/static/eltdetail/images/gesture-zigzag.png"/> Fix
 		</div>
-	</div>
+	</div>	    
+	
 </div>
 %#  "Left Container End"
 

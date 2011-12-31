@@ -30,7 +30,7 @@ window.addEvent('domready', function() {
         'false': 'close'
     };
     // -- vertical
-    var myVerticalSlide = new Fx.Slide('vertical_slide');
+    var myVerticalSlide = new Fx.Slide('vertical_slide').hide();
 
     $('v_toggle').addEvent('click', function(event){
         event.stop();
