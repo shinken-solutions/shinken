@@ -1,3 +1,45 @@
+/* ----------------------------------------------------------------
+ *  Side navigation
+ * ----------------------------------------------------------------*/
+
+#nav_left {
+	border-top: 1px solid #E3E3E5;
+}
+#nav_left li{
+	margin-left: 0;
+/*	border-bottom: 1px solid #E3E3E5;*/
+/*	height: 45px;*/
+	text-align: center;
+	background-color:#FFFFFF
+}
+
+#nav_left ul{
+	padding: 0;
+	margin: 0;
+	list-style-type: none;
+/*	background-color:#E3E3E5*/
+}
+
+#nav_left a{
+	display: block;
+	text-decoration: none;
+	color: #787878;
+	font-size: 13px;
+	padding-top:10px;
+	padding-bottom:10px;
+/*	padding-top: 14px;*/
+	
+}
+
+#nav_left li:hover{
+	font-weight: bold;
+}
+
+#nav_left li.left_title{
+	background-color: #F1F1F1;
+}
+
+
 .tac_impacts {
 	background: #FFFFFF;
 	color: #777777;

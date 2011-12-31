@@ -19,13 +19,29 @@ Invalid element name
 
 %top_right_banner_state = datamgr.get_overall_state()
 
-%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/graphs.js', 'eltdetail/js/dollar.js','eltdetail/js/TabPane.js', 'eltdetail/js/gesture.js', 'eltdetail/js/hide.js', 'eltdetail/js/switchbuttons.js', 'eltdetail/js/multi.js'],  css=['eltdetail/css/eltdetail2.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
+%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/functions.js','eltdetail/js/graphs.js', 'eltdetail/js/dollar.js','eltdetail/js/TabPane.js', 'eltdetail/js/gesture.js', 'eltdetail/js/hide.js', 'eltdetail/js/switchbuttons.js', 'eltdetail/js/multi.js'],  css=['eltdetail/css/eltdetail2.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
 
 %# " We will save our element name so gesture functions will be able to call for the good elements."
 <script type="text/javascript">var elt_name = '{{elt.get_full_name()}}';</script>
 
 %#  "Left Container Start"
-<div id="left_container" class="grid_3">
+<div id="left_container" class="grid_2">
+	<div id="nav_left">
+		<ul>
+			<li><a href="#">Overview</a></li>
+			<li><a href="#">Overview</a></li>
+		</ul>
+	</div>
+	
+	<div class="marginbottom">
+	    <a id="v_toggle" href="#">toggle</a> |
+	    <strong>status</strong>: <span id="vertical_status">open</span>
+	</div>
+	
+	<div id="vertical_slide">
+	    Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+	</div>
+	
 	<div class="opacity_hover">
 	%#  "This is the background canvas for all gesture detection things " 
 	%# " Don't ask me why, but the size must be included in the
@@ -46,7 +62,7 @@ Invalid element name
 %#  "Left Container End"
 
 %#  "Content Container Start"
-<div id="content_container" class="grid_13">
+<div id="content_container" class="grid_14">
 	<h1 class="grid_16 state_{{elt.state.lower()}} icon_down"><img class="host_img_25" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h1>
 	<div id="overview_container" class="grid_16">
 	    <dl class="grid_5">
