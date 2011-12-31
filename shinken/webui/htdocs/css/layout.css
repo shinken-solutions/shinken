@@ -264,6 +264,13 @@ td.actions a {
 	float:right;
 }
 
+.no_border {
+    border-top: 0px;
+    border-left: 0px;
+    border-bottom: 0px;
+    border-right: 0px;
+}
+
 .box_gradient_vertical {
 	background-color: #DDE1EC;
 	background-image: -webkit-gradient(linear, left top, left bottom, from(#DDE1EC), to(#FFFFFF)); /* Saf4+, Chrome */

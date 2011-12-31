@@ -51,3 +51,5 @@ To peter woodman for his bug report about timezone override crash
 To Laurent Ollagnier for his bug report and patch about notification commands
 To sprudhomme for his feature request about long_output in Centreon/Ndo
 To Gabor Varga for his patch about the "sc" command for windowns setup :)
+To foobar1111 for his ask about fqdn and arbiter matching for hostname
+To twellspring for hs bug report about escalation and templates

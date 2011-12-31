@@ -35,7 +35,7 @@ class Hostescalation(Item):
         'hostgroup_name':        StringProp (),
         'first_notification':    IntegerProp(),
         'last_notification':     IntegerProp(),
-        'notification_interval': IntegerProp(),
+        'notification_interval': IntegerProp(default='30'), # like Nagios value
         'escalation_period':     StringProp (default=''),
         'escalation_options':    ListProp   (default='d,u,r,w,c'),
         'contacts':              StringProp (),

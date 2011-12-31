@@ -865,6 +865,11 @@ class Config(Item):
         #Also "Serviceextinfo"
         self.servicesextinfo.apply_inheritance()
 
+        # Now escalations too
+        self.serviceescalations.apply_inheritance()
+        self.hostescalations.apply_inheritance()
+        self.escalations.apply_inheritance()
+
 
     #Use to apply implicit inheritance
     def apply_implicit_inheritance(self):
@@ -872,7 +877,7 @@ class Config(Item):
         self.services.apply_implicit_inheritance(self.hosts)
 
 
-    #will fill properties for elements so they will have all theirs properties
+    # will fill properties for elements so they will have all theirs properties
     def fill_default(self):
         #Fill default for config (self)
         super(Config, self).fill_default()
@@ -887,6 +892,9 @@ class Config(Item):
         self.businessimpactmodulations.fill_default()
         self.hostsextinfo.fill_default()
         self.servicesextinfo.fill_default()
+
+        # Now escalations
+        self.escalations.fill_default()
 
         #Also fill default of host/servicedep objects
         self.servicedependencies.fill_default()
@@ -1191,6 +1199,10 @@ class Config(Item):
         self.timeperiods.linkify_templates()
         self.hostsextinfo.linkify_templates()
         self.servicesextinfo.linkify_templates()
+        self.escalations.linkify_templates()
+        # But also old srv and host escalations
+        self.serviceescalations.linkify_templates()
+        self.hostescalations.linkify_templates()
 
 
 

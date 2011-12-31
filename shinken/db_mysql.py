@@ -28,6 +28,8 @@ import MySQLdb
 from MySQLdb import IntegrityError
 from MySQLdb import ProgrammingError
 
+#Do we need?
+import _mysql_exceptions
 
 class DBMysql(DB):
     def __init__(self, host, user, password, database, character_set, table_prefix = '', port=3306):
@@ -42,6 +44,7 @@ class DBMysql(DB):
 
     #Create the database connection
     #TODO : finish (begin :) ) error catch and conf parameters...
+    #Import to catch exception
     def connect_database(self):
         #self.db = MySQLdb.connect (host = "localhost", user = "root", passwd = "root", db = "merlin")
         self.db = MySQLdb.connect (host = self.host, user = self.user, \

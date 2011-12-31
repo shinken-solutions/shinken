@@ -474,7 +474,7 @@ function enable(){
 }
 
 function sinstall(){
-	trap 'trap_handler ${LINENO} $? install' ERR
+	#trap 'trap_handler ${LINENO} $? install' ERR
 	#cecho "Installing shinken" green
 	check_distro
 	check_exist
@@ -485,6 +485,7 @@ function sinstall(){
 	ln -s $TARGET/bin/default/shinken /etc/default/shinken
 	cp $TARGET/bin/init.d/shinken* /etc/init.d/
 	mkdir -p $TARGET/var/archives
+	#enableretention
 	fix
 	cecho "+------------------------------------------------------------------------------" green
 	cecho "| shinken is now installed on your server " green
@@ -921,13 +922,27 @@ function enablendodb(){
     fi
 }
 
+#function enableretention(){
+#
+#	cecho " > Enable retention for broker scheduler and arbiter" green
+#
+#	export PYTHONPATH=$TARGET
+#	export PY="$(pythonver)"
+#	result=$($PY $myscripts/tools/skonf.py -a macros -f $myscripts/tools/macros/ces_enable_retention.macro)	
+#    if [ $? -ne 0 ]
+#    then
+#        cecho $result red
+#        exit 2
+#    fi
+#}
+
 function enableretention(){
 
 	cecho " > Enable retention for broker scheduler and arbiter" green
 
 	export PYTHONPATH=$TARGET
 	export PY="$(pythonver)"
-	result=$($PY $myscripts/tools/skonf.py -a macros -f $myscripts/tools/macros/ces_enable_retention.macro)	
+	result=$($PY $myscripts/tools/skonf.py -a macros -f $myscripts/tools/macros/enable_retention.macro)	
     if [ $? -ne 0 ]
     then
         cecho $result red
@@ -1011,9 +1026,16 @@ echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z 
 	-r 	Restore shinken configuration plugins and data
 	-l	List shinken backups
 	-c	Compress rotated logs
-    -e  which daemons to keep enabled at boot time
+        -e      Which daemons to keep enabled at boot time
 	-z 	This is a really special usecase that allow to install shinken on Centreon Enterprise Server in place of nagios
-	-p  Install plugins or addons (args should be one of the following : check_esx3|nagios-plugins|check_oracle_health|capture_plugin|pnp4nagios)
+	-p      Install plugins or addons (args should be one of the following : 
+                     check_esx3
+                     nagios-plugins
+                     check_oracle_health
+                     check_mysql_health
+                     capture_plugin
+                     pnp4nagios
+                     multisite
 	-h	Show help"
 }
 
@@ -1043,7 +1065,7 @@ function install_multisite(){
 	for p in $MKAPTPKG
 	do
 		cecho " -> Installing $p" green
-		apt-get --force-yes -y install $p # > /dev/null 2>&1
+		apt-get --force-yes -y install $p > /dev/null 2>&1
 	done
 
 	filename=$(echo $MKURI | awk -F"/" '{print $NF}')
@@ -1062,7 +1084,7 @@ function install_multisite(){
 	tar zxvf $filename > /dev/null 2>&1
 	cd $folder
 	cecho " > install multisite" green
-	./setup.sh --yes
+	./setup.sh --yes > /dev/null 2>&1
 	cecho " > default configuration for multisite" green
 	echo 'sites = {' >> $MKPREFIX/etc/multisite.mk
 	echo '   "default": {' >> $MKPREFIX/etc/multisite.mk
@@ -1071,7 +1093,19 @@ function install_multisite(){
 	echo '	"url_prefix":     "/",' >> $MKPREFIX/etc/multisite.mk
 	echo '   },' >> $MKPREFIX/etc/multisite.mk
 	echo ' }' >> $MKPREFIX/etc/multisite.mk
-	service apache2 restart
+	rm -Rf $TARGET/etc/check_mk.d/*
+	cecho " > Fix www-data group" green
+	usermod -a -G $SKGROUP www-data 
+	chown -R $SKUSER:$SKGROUP $TARGET/etc/check_mk.d
+	chmod -R g+rwx $TARGET/etc/check_mk.d
+	chown -R $SKUSER:$SKGROUP $MKPREFIX/etc/conf.d
+	chmod -R g+rwx $MKPREFIX/etc/conf.d
+	service apache2 restart > /dev/null 2>&1
+	cecho " > Enable sudoers commands for check_mk" green
+	echo "# Needed for WATO - the Check_MK Web Administration Tool" >> /etc/sudoers
+	echo "Defaults:www-data !requiretty" >> /etc/sudoers
+	echo "www-data ALL = (root) NOPASSWD: $MKTARGET/check_mk --automation *" >> /etc/sudoers
+	/etc/init.d/sudo restart
 }
 
 # pnp4nagios
@@ -1306,6 +1340,46 @@ function install_check_oracle_health(){
 	fi
 }
 
+# check_mysql_health
+
+function install_check_mysql_health(){
+	cadre "Install check_mysql_health" green
+
+	if [ "$CODE" == "REDHAT" ]
+	then
+		cecho " > Unsuported" red
+	else
+		cd /tmp
+		cecho " > Downloading check_mysql_health" green
+		wget $CHECKMYSQLHEALTH > /dev/null 2>&1
+		if [ $? -ne 0 ]
+		then
+			cecho " > Error while downloading $filename" red
+			exit 2
+		fi
+		cecho " > Extracting archive " green
+		filename=$(echo $CHECKMYSQLHEALTH | awk -F"/" '{print $NF}')
+		tar zxvf $filename > /dev/null 2>&1
+		cd $(echo $filename | sed -e "s/\.tar\.gz//g")
+		./configure --prefix=$TARGET --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP --with-mymodules-dir=$TARGET/libexec --with-mymodules-dyn-dir=$TARGET/libexec --with-statefiles-dir=$TARGET/var/tmp > /dev/null 2>&1
+		cecho " > Building plugin" green
+		make > /dev/null 2>&1
+		if [ $? -ne 0 ] 
+		then
+			cecho " > Error while building check_mysql_health module" red
+			exit 2
+		fi
+		make check > /dev/null 2>&1	
+		if [ $? -ne 0 ]
+		then
+			cecho " > Error while building check_mysql_health module" red
+			exit 2
+		fi
+		cecho " > Installing plugin" green
+		make install > /dev/null 2>&1
+	fi
+}
+
 # Check if we launch the script with root privileges (aka sudo)
 if [ "$UID" != "0" ]
 then
@@ -1334,6 +1408,10 @@ while getopts "kidubcr:lz:hsvp:we:" opt; do
 			elif [ "$OPTARG" == "check_oracle_health" ]
 			then
 				install_check_oracle_health
+				exit 0
+			elif [ "$OPTARG" == "check_mysql_health" ]
+			then
+				install_check_mysql_health
 				exit 0
 			elif [ "$OPTARG" == "capture_plugin" ]
 			then
@@ -1373,7 +1451,7 @@ while getopts "kidubcr:lz:hsvp:we:" opt; do
                 fixcentreondb
 				fixforfan
                 enablendodb
-                enableretention
+                #enableretention
                 enableperfdata
                 setdaemonsaddresses
                 enableCESCentralDaemons

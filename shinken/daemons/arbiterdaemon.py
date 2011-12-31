@@ -452,7 +452,7 @@ class Arbiter(Daemon):
             sys.exit(exp.code)
         except Exception, exp:
             logger.log("CRITICAL ERROR: I got an unrecoverable error. I have to exit")
-            logger.log("You can log a bug ticket at https://sourceforge.net/apps/trac/shinken/newticket to get help")
+            logger.log("You can log a bug ticket at https://github.com/naparuba/shinken/issues/new to get help")
             logger.log("Back trace of it: %s" % (traceback.format_exc()))
             raise
 

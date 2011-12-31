@@ -194,39 +194,39 @@ document.addEvent('domready', function() {
 	  <div style="margin-left: 20px; width: 95%; float:left;">
 	    <table class="tableCriticity" style="width: 100%; margin-bottom:3px;">
 	      <tr class="tabledesc">
-	        <td class="tdBorderLeft tdCriticity" style="width:20px; background:none;"> <img src="/static/images/untick.png" alt="untick" /style="cursor:pointer;" onclick="add_remove_elements('{{pb.get_full_name()}}')" id="selector-{{pb.get_full_name()}}" > </td>
-	        <td class="tdBorderLeft tdCriticity" style="width:20px;"> <div class="aroundpulse">
+	        <td class="no_border" style="width:20px; background:none;"> <img src="/static/images/untick.png" alt="untick" /style="cursor:pointer;" onclick="add_remove_elements('{{pb.get_full_name()}}')" id="selector-{{pb.get_full_name()}}" > </td>
+	        <td class="no_border" style="width:20px;"> <div class="aroundpulse">
 		    %# " We put a 'pulse' around the elements if it's an important one "
 		    %if pb.business_impact > 2 and pb.state_id in [1, 2, 3]:
 		    <span class="pulse"></span>
 		    %end
 		    <img style="width: 16px; height : 16px;" src="{{helper.get_icon_state(pb)}}" /></div> </td>
 		%if pb.host_name == last_hname:
-		   <td class="tdBorderLeft tdCriticity" style="width: 120px;"> </td>
+		   <td class="no_border" style="width: 120px;"> </td>
 		%else:
-		    <td class="tdBorderLeft tdCriticity" style="width: 120px;"> {{!helper.get_host_link(pb)}}</td>
+		    <td class="no_border" style="width: 120px;"> {{!helper.get_host_link(pb)}}</td>
 		%end
 		%last_hname = pb.host_name
 
 		%if pb.__class__.my_type == 'service':
-		  <td	class="tdBorderTop tdBorderLeft tdCriticity" style="width:120px;">{{!helper.get_link(pb, short=True)}}</td>
+		  <td	class=" no_border" style="width:120px;">{{!helper.get_link(pb, short=True)}}</td>
 		%else:
-                  <td   class="tdBorderTop tdBorderLeft tdCriticity" style="width:120px;"></td>
+                  <td   class=" no_border" style="width:120px;"></td>
                 %end
-		<td class="tdBorderTop tdBorderLeft tdCriticity" style="width:50px;"> {{pb.state}}</td>
-		<td title='{{helper.print_date(pb.last_state_change)}}' class="tdBorderTop tdBorderLeft tdCriticity" style="width:50px;">{{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}</td>
+		<td class=" no_border" style="width:50px;"> {{pb.state}}</td>
+		<td title='{{helper.print_date(pb.last_state_change)}}' class=" no_border" style="width:50px;">{{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}</td>
 		%# "We put a title (so a tip) on the output onlly if need"
 		%if len(pb.output) > 100:
 		   %if app.allow_html_output:
-		      <td title="{{pb.output}}" class="tdBorderTop tdBorderLeft tdCriticity" style="width:450px;"> {{!helper.strip_html_output(pb.output[:100])}}</td>
+		      <td title="{{pb.output}}" class=" no_border" style="width:450px;"> {{!helper.strip_html_output(pb.output[:100])}}</td>
 		   %else:
-		      <td title="{{pb.output}}" class="tdBorderTop tdBorderLeft tdCriticity" style="width:450px;"> {{pb.output[:100]}}
+		      <td title="{{pb.output}}" class=" no_border" style="width:450px;"> {{pb.output[:100]}}
 		   %end
 		%else:
 		   %if app.allow_html_output:
-                      <td class="tdBorderTop tdBorderLeft tdCriticity" style="width:450px;"> {{!helper.strip_html_output(pb.output)}}</td>
+                      <td class=" no_border" style="width:450px;"> {{!helper.strip_html_output(pb.output)}}</td>
 		   %else:
-		      <td class="tdBorderTop tdBorderLeft tdCriticity" style="width:450px;"> {{pb.output}} </td>
+		      <td class=" no_border" style="width:450px;"> {{pb.output}} </td>
                    %end
 		%end
 		%graphs = app.get_graph_uris(pb, now- 4*3600 , now)
@@ -237,7 +237,7 @@ document.addEvent('domready', function() {
 		<td class="perfometer" {{!onmouse_code}}>
 		  {{!helper.get_perfometer(pb)}}
 		</td>
-		<td class="tdBorderLeft tdCriticity opacity_hover shortdesc" style="max-width:20px;" onclick="show_detail('{{pb.get_full_name()}}')"> <img src="/static/images/expand.png" alt="expand" /> </td>
+		<td class="no_border opacity_hover shortdesc" style="max-width:20px;" onclick="show_detail('{{pb.get_full_name()}}')"> <img src="/static/images/expand.png" alt="expand" /> </td>
 		
 		</tr>
 	      
@@ -262,13 +262,13 @@ document.addEvent('domready', function() {
       <div id="{{pb.get_full_name()}}" class="detail">
 	<table class="tableCriticity">
 	  <tr>
-	    <td class="tdBorderLeft tdCriticity" style="width:20px;"><b>Host</b></td>
+	    <td style="width:20px;"><b>Host</b></td>
 	    %if pb.__class__.my_type == 'service':
 	    <td class="tdCriticity" style="width:20px;"><b>Service</b></td>
 	    %end
-	    <td class="tdBorderLeft tdCriticity" style="width:20px;"><b>Realm</b></td>
-	    <td class="tdBorderLeft tdCriticity" style="width:20px;"><b>Last check</b></td>
-	    <td class="tdBorderLeft tdCriticity" style="width:20px;"><b>Next check</b></td>
+	    <td style="width:20px;"><b>Realm</b></td>
+	    <td style="width:20px;"><b>Last check</b></td>
+	    <td style="width:20px;"><b>Next check</b></td>
 	    <td class="tdCriticity" style="width:20px;"><b>Actions</b></td>
 	    <td class="tdCriticity" style="width:40px;">	<div style="float:right;">
 		<a href="#">{{!helper.get_button('Add to fav', img='/static/images/heart_add.png')}}</a>
@@ -276,13 +276,13 @@ document.addEvent('domready', function() {
 	    </td>
 	  </tr>
 	  <tr>
-	    <td class="tdBorderTop tdCriticity" style="width:20px;">{{pb.host_name}}</td>
+	    <td class=" tdCriticity" style="width:20px;">{{pb.host_name}}</td>
 	    %if pb.__class__.my_type == 'service':
-	    <td class="tdBorderTop tdBorderLeft tdCriticity" style="width:20px;">{{pb.service_description}}</td>
+	    <td  style="width:20px;">{{pb.service_description}}</td>
 	    %end
-	    <td class="tdBorderTop tdBorderLeft tdBorderLeft tdCriticity" style="width:20px;">{{pb.get_realm()}}</td>
-	    <td class="tdBorderTop tdBorderLeft tdCriticity" style="width:20px;">{{helper.print_duration(pb.last_chk, just_duration=True, x_elts=2)}} ago</td>
-	    <td class="tdBorderTop tdBorderLeft tdCriticity" style="width:20px;">in {{helper.print_duration(pb.next_chk, just_duration=True, x_elts=2)}}</td>
+	    <td class=" tdBorderLeft" style="width:20px;">{{pb.get_realm()}}</td>
+	    <td  style="width:20px;">{{helper.print_duration(pb.last_chk, just_duration=True, x_elts=2)}} ago</td>
+	    <td  style="width:20px;">in {{helper.print_duration(pb.next_chk, just_duration=True, x_elts=2)}}</td>
 	    
 	    <td class="tdCriticity" style="width:20px;"></td>
 	    <td class="tdCriticity" style="width:20px;"><div style="float:right;"> <a href="{{!helper.get_link_dest(pb)}}">{{!helper.get_button('Go to details', img='/static/images/search.png')}}</a>
