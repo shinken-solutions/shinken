@@ -1033,6 +1033,7 @@ echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z 
                      nagios-plugins
                      check_oracle_health
                      check_mysql_health
+		     check_wmi_plus
                      capture_plugin
                      pnp4nagios
                      multisite
@@ -1258,6 +1259,68 @@ function install_nagios-plugins(){
 	
 }
 
+# check_wmi_plus
+function install_check_wmi_plus(){
+	cadre "Install check_wmi_plus" green
+
+	if [ "$CODE" == "REDHAT" ]
+	then
+		cecho " > Unsuported" red
+	else
+		cecho " > installing prerequisites" green 
+		sudo apt-get -y install $WMICAPTPKG > /dev/null 2>&1
+		cd /tmp
+		cecho " > Downloading wmic" green
+		filename=$(echo $WMIC | awk -F"/" '{print $NF}')
+		if [ ! -f $(echo $filename | sed -e "s/\.bz2//g") ]
+		then
+			wget $WMIC > /dev/null 2>&1
+			bunzip2 $filename
+		else
+			rm -Rf $(echo $filename | sed -e "s/\.tar//g")
+		fi
+		if [ $? -ne 0 ]
+		then
+			cecho " > Error while downloading $filename" red
+			exit 2
+		fi
+		cecho " > Extracting archive " green
+		tar xvf $(echo $filename| sed -e "s/\.bz2//g") > /dev/null 2>&1
+		cd $(echo $filename | sed -e "s/\.tar\.bz2//g")
+		cecho " > Building wmic" green
+		make > /dev/null 2>&1
+		if [ $? -ne 0 ] 
+		then
+			cecho " > Error while building wmic" red
+			exit 2
+		fi
+		cecho " > Installing wmic" green
+		cp Samba/source/bin/wmic $TARGET/libexec/
+		chown $SKUSER:$SKGROUP Samba/source/bin/wmic
+		cd /tmp
+		cecho " > Downloading check_wmi_plus" green
+		filename=$(echo $CHECKWMIPLUS | awk -F"/" '{print $NF}')
+		folder=$(echo $filename | sed -e "s/\.tar\.gz//g")
+		if [ ! -f "$filename" ]
+		then
+			wget $CHECKWMIPLUS > /dev/null 2>&1 
+		fi
+		cecho " > Extracting archive" green
+		tar zxvf $filename > /dev/null 2>&1
+		cecho " > Installing plugin" green
+		cp check_wmi_plus.conf.sample $TARGET/libexec/check_wmi_plus.conf 
+		cp check_wmi_plus.pl $TARGET/libexec/check_wmi_plus.pl
+		cp -R /tmp/check_wmi_plus.d $TARGET/libexec/
+		chown $SKUSER:$SKGROUP $TARGET/libexec/check_wmi_plus* 
+		cecho " > configuring plugin" green
+		sed -i "s#/usr/lib/nagios/plugins#"$TARGET"/libexec#g" $TARGET/libexec/check_wmi_plus.conf
+		sed -i "s#/bin/wmic#"$TARGET"/libexec/wmic#g" $TARGET/libexec/check_wmi_plus.conf
+		sed -i "s#/opt/nagios/bin/plugins#"$TARGET"/libexec#g" $TARGET/libexec/check_wmi_plus.pl
+		sed -i "s#/usr/lib/nagios/plugins#"$TARGET"/libexec#g" $TARGET/libexec/check_wmi_plus.pl
+		
+	fi
+}
+
 # check_oracle_health
 
 function install_check_oracle_health(){
@@ -1416,6 +1479,10 @@ while getopts "kidubcr:lz:hsvp:we:" opt; do
 			elif [ "$OPTARG" == "capture_plugin" ]
 			then
 				install_capture_plugin
+				exit 0
+			elif [ "$OPTARG" == "check_wmi_plus" ]
+			then
+				install_check_wmi_plus
 				exit 0
 			elif [ "$OPTARG" == "pnp4nagios" ]
 			then
