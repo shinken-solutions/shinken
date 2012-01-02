@@ -19,34 +19,46 @@ Invalid element name
 
 %top_right_banner_state = datamgr.get_overall_state()
 
-%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/graphs.js', 'eltdetail/js/dollar.js','eltdetail/js/TabPane.js', 'eltdetail/js/gesture.js', 'eltdetail/js/hide.js', 'eltdetail/js/switchbuttons.js', 'eltdetail/js/multi.js'],  css=['eltdetail/css/eltdetail2.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
+%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/functions.js','eltdetail/js/graphs.js', 'eltdetail/js/dollar.js','eltdetail/js/TabPane.js', 'eltdetail/js/gesture.js', 'eltdetail/js/hide.js', 'eltdetail/js/switchbuttons.js', 'eltdetail/js/multi.js'],  css=['eltdetail/css/eltdetail2.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
 
 %# " We will save our element name so gesture functions will be able to call for the good elements."
 <script type="text/javascript">var elt_name = '{{elt.get_full_name()}}';</script>
 
 %#  "Left Container Start"
-<div id="left_container" class="grid_3">
-	<div class="opacity_hover">
+<div id="left_container" class="grid_2">
+	<div id="nav_left">
+		<ul>
+			<li><a href="#">Overview</a></li>
+			<li><a href="#">Overview</a></li>
+		</ul>
+	</div>
+	
+	<div class="marginbottom">
+	    <a id="v_toggle" href="#">toggle</a> |
+	    <strong>status</strong>: <span id="vertical_status">open</span>
+	</div>
+	
+	<div id="vertical_slide" class="opacity_hover">
 	%#  "This is the background canvas for all gesture detection things " 
 	%# " Don't ask me why, but the size must be included in the
 	%# canvas line here or we got problem!"
-	<center><canvas id="canvas" width="200" height="200"  style="border: 1px solid black;"></canvas></center>
-
+		<center><canvas id="canvas" width="200" height="200"  style="border: 1px solid black;"></canvas></center>
 		<div class="gesture_button">
-          	<img title="By keeping a left click pressed and drawing a check, you will launch an acknowledgement." src="/static/eltdetail/images/gesture-check.png"/> Acknowledge
+	       	<img title="By keeping a left click pressed and drawing a check, you will launch an acknowledgement." src="/static/eltdetail/images/gesture-check.png"/> Acknowledge
 		</div>
 		<div class="gesture_button">
-          	<img title="By keeping a left click pressed and drawing a check, you will launch an recheck." src="/static/eltdetail/images/gesture-circle.png"/> Recheck
+	       	<img title="By keeping a left click pressed and drawing a check, you will launch an recheck." src="/static/eltdetail/images/gesture-circle.png"/> Recheck
 		</div>
 		<div class="gesture_button">
-          	<img title="By keeping a left click pressed and drawing a check, you will launch a try to fix command." src="/static/eltdetail/images/gesture-zigzag.png"/> Fix
+	       	<img title="By keeping a left click pressed and drawing a check, you will launch a try to fix command." src="/static/eltdetail/images/gesture-zigzag.png"/> Fix
 		</div>
-	</div>
+	</div>	    
+	
 </div>
 %#  "Left Container End"
 
 %#  "Content Container Start"
-<div id="content_container" class="grid_13">
+<div id="content_container" class="grid_14">
 	<h1 class="grid_16 state_{{elt.state.lower()}} icon_down"><img class="host_img_25" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h1>
 	<div id="overview_container" class="grid_16">
 	    <dl class="grid_5">

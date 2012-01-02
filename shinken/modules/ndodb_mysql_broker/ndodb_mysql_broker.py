@@ -79,7 +79,9 @@ class Ndodb_Mysql_broker(BaseModule):
         self.db = DBMysql(self.host, self.user, self.password, self.database, self.character_set, table_prefix='nagios_', port=self.port)
         self.connect_database()
 
-        #Cache for hosts and services when sync is active
+        #Cache for hosts and services
+        # The structure is as follow:
+        # First the instance id then the host / (host,service desc) to access the wanted data
         self.services_cache_sync = {}
         self.hosts_cache_sync = {}
 
@@ -147,7 +149,7 @@ class Ndodb_Mysql_broker(BaseModule):
 
 
     # Create the database connection
-    # TODO : Choose a behavior when exception is catch
+    # Exception is raised if a arg is bad.
     def connect_database(self):    
         try :
             self.db.connect_database()
@@ -156,7 +158,7 @@ class Ndodb_Mysql_broker(BaseModule):
             raise
 
 
-    # 
+    # Query the database to get the proper instance_id
     def get_instance_id(self,name):
         query1 = u"SELECT  max(instance_id) + 1 from nagios_instances"
         query2 = u"SELECT instance_id from nagios_instances where instance_name = '%s';" % name
@@ -257,7 +259,7 @@ class Ndodb_Mysql_broker(BaseModule):
         
         if instance_id in self.services_cache_sync:
             if (host_name, service_description) in self.services_cache_sync[instance_id]:
-                return self.services_cache_sync[(host_name, service_description)]
+                return self.services_cache_sync[instance_id][(host_name, service_description)]
 
         #else; not in cache :(
         query = u"SELECT object_id from nagios_objects where name1='%s' and name2='%s' and objecttype_id='2' and instance_id='%s'" % (host_name, service_description,instance_id)
@@ -268,7 +270,7 @@ class Ndodb_Mysql_broker(BaseModule):
         else:
             if instance_id not in self.services_cache_sync:
                 self.services_cache_sync[instance_id] = {}
-            self.services_cache_sync[(host_name, service_description)] = row[0]
+            self.services_cache_sync[instance_id][(host_name, service_description)] = row[0]
             return row[0]
 
 

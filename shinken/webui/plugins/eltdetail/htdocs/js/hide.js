@@ -37,7 +37,7 @@ window.addEvent('domready', function(){
 
     // And on leaving, hide them with opacity -> 0
     switches.addEvent('mouseleave', function(){
-	    new Fx.Tween(switches, {property: 'opacity'}).start(0.5);
+	    new Fx.Tween(switches, {property: 'opacity'}).start(0.7);
     });
 
     // Now All Services
@@ -54,11 +54,6 @@ window.addEvent('domready', function(){
     }
 
 });
-
-
-
-
-
 
 /* Important_impact_div */
 window.addEvent('domready', function(){
@@ -79,9 +74,6 @@ window.addEvent('domready', function(){
 			      ); //Will fade the Element out and in twice.
 	}
     });
-
-
-
 
 /* When he user ask for show all impacts ro services, we display them */
 function show_hidden_impacts_or_services() {

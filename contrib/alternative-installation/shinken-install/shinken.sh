@@ -1,4 +1,24 @@
 #!/bin/bash  
+#Copyright (C) 2009-2012 :
+#    Gabes Jean, naparuba@gmail.com
+#    Gerhard Lausser, Gerhard.Lausser@consol.de
+#    David GUENAULT, dguenault@monitoring-fr.org
+#
+#This file is part of Shinken.
+#
+#Shinken is free software: you can redistribute it and/or modify
+#it under the terms of the GNU Affero General Public License as published by
+#the Free Software Foundation, either version 3 of the License, or
+#(at your option) any later version.
+#
+#Shinken is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU Affero General Public License for more details.
+#
+#You should have received a copy of the GNU Affero General Public License
+#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+
 
 # environnement
 export myscripts=$(readlink -f $(dirname $0))
@@ -474,7 +494,7 @@ function enable(){
 }
 
 function sinstall(){
-	trap 'trap_handler ${LINENO} $? install' ERR
+	#trap 'trap_handler ${LINENO} $? install' ERR
 	#cecho "Installing shinken" green
 	check_distro
 	check_exist
@@ -485,6 +505,7 @@ function sinstall(){
 	ln -s $TARGET/bin/default/shinken /etc/default/shinken
 	cp $TARGET/bin/init.d/shinken* /etc/init.d/
 	mkdir -p $TARGET/var/archives
+	#enableretention
 	fix
 	cecho "+------------------------------------------------------------------------------" green
 	cecho "| shinken is now installed on your server " green
@@ -921,13 +942,27 @@ function enablendodb(){
     fi
 }
 
+#function enableretention(){
+#
+#	cecho " > Enable retention for broker scheduler and arbiter" green
+#
+#	export PYTHONPATH=$TARGET
+#	export PY="$(pythonver)"
+#	result=$($PY $myscripts/tools/skonf.py -a macros -f $myscripts/tools/macros/ces_enable_retention.macro)	
+#    if [ $? -ne 0 ]
+#    then
+#        cecho $result red
+#        exit 2
+#    fi
+#}
+
 function enableretention(){
 
 	cecho " > Enable retention for broker scheduler and arbiter" green
 
 	export PYTHONPATH=$TARGET
 	export PY="$(pythonver)"
-	result=$($PY $myscripts/tools/skonf.py -a macros -f $myscripts/tools/macros/ces_enable_retention.macro)	
+	result=$($PY $myscripts/tools/skonf.py -a macros -f $myscripts/tools/macros/enable_retention.macro)	
     if [ $? -ne 0 ]
     then
         cecho $result red
@@ -1011,9 +1046,17 @@ echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z 
 	-r 	Restore shinken configuration plugins and data
 	-l	List shinken backups
 	-c	Compress rotated logs
-    -e  which daemons to keep enabled at boot time
+        -e      Which daemons to keep enabled at boot time
 	-z 	This is a really special usecase that allow to install shinken on Centreon Enterprise Server in place of nagios
-	-p  Install plugins or addons (args should be one of the following : check_esx3|nagios-plugins|check_oracle_health|capture_plugin|pnp4nagios|multisite)
+	-p      Install plugins or addons (args should be one of the following : 
+                     check_esx3
+                     nagios-plugins
+                     check_oracle_health
+                     check_mysql_health
+		     check_wmi_plus
+                     capture_plugin
+                     pnp4nagios
+                     multisite
 	-h	Show help"
 }
 
@@ -1051,7 +1094,7 @@ function install_multisite(){
 	if [ ! -f "$filename" ]
 	then 
 		cecho " > Getting check_mk archive" green
-		wget $MKURI > /dev/null 2>&1
+		wget $WGETPROXY $MKURI > /dev/null 2>&1
 	fi
 	
 	cecho " > Extracting archive" green
@@ -1107,7 +1150,7 @@ function install_pnp4nagios(){
 	if [ ! -f "$filename" ]
 	then 
 		cecho " > Getting pnp4nagios archive" green
-		wget $PNPURI > /dev/null 2>&1
+		wget $WGETPROXY $PNPURI > /dev/null 2>&1
 	fi
 	
 	cecho " > Extracting archive" green
@@ -1155,7 +1198,7 @@ function install_capture_plugin(){
 	cadre "Install capture_plugin" green
 	cd /tmp
 	cecho " > Getting capture_plugin" green
-	wget http://www.waggy.at/nagios/capture_plugin.txt > /dev/null 2>&1
+	wget $WGETPROXY http://www.waggy.at/nagios/capture_plugin.txt > /dev/null 2>&1
 	cecho " > Installing capture_plugin" green
 	mv capture_plugin.txt $TARGET/libexec/capture_plugin
 	chmod +x $TARGET/libexec/capture_plugin	
@@ -1179,7 +1222,7 @@ function install_check_esx3(){
 
 	if [ ! -f "/tmp/VMware-vSphere-SDK-for-Perl-$VSPHERESDKVER.$ARCH.tar.gz" ]
 	then
-		wget $VSPHERESDK > /dev/null 2>&1	
+		wget $WGETPROXY $VSPHERESDK > /dev/null 2>&1	
 		if [ $? -ne 0 ]
 		then
 			cecho " > Error while downloading vsphere sdk for perl" red
@@ -1198,7 +1241,7 @@ function install_check_esx3(){
 
 	cd /tmp
 	cecho " > Getting check_esx3 plugin from op5" green
-	wget $CHECK_ESX3_SCRIPT -O check_esx3.pl > /dev/null 2>&1
+	wget $WGETPROXY $CHECK_ESX3_SCRIPT -O check_esx3.pl > /dev/null 2>&1
 	mv check_esx3.pl $TARGET/libexec/check_esx3.pl
 	chmod +x $TARGET/libexec/check_esx3.pl	
 	chown $SKUSER:$SKGROUP $TARGET/libexec/check_esx3.pl
@@ -1221,7 +1264,7 @@ function install_nagios-plugins(){
 	if [ ! -f "nagios-plugins-$NAGPLUGVERS.tar.gz" ]
 	then
 		cecho " > getting nagios-plugins archive" green
-		wget $NAGPLUGBASEURI > /dev/null 2>&1
+		wget $WGETPROXY $NAGPLUGBASEURI > /dev/null 2>&1
 	fi
 	cecho " > Extract archive content " green
 	rm -Rf nagios-plugins-$NAGPLUGVERS
@@ -1234,6 +1277,68 @@ function install_nagios-plugins(){
 	cecho " > Installing" green
 	make install > /dev/null 2>&1
 	
+}
+
+# check_wmi_plus
+function install_check_wmi_plus(){
+	cadre "Install check_wmi_plus" green
+
+	if [ "$CODE" == "REDHAT" ]
+	then
+		cecho " > Unsuported" red
+	else
+		cecho " > installing prerequisites" green 
+		sudo apt-get -y install $WMICAPTPKG > /dev/null 2>&1
+		cd /tmp
+		cecho " > Downloading wmic" green
+		filename=$(echo $WMIC | awk -F"/" '{print $NF}')
+		if [ ! -f $(echo $filename | sed -e "s/\.bz2//g") ]
+		then
+			wget $WGETPROXY $WMIC > /dev/null 2>&1
+			bunzip2 $filename
+		else
+			rm -Rf $(echo $filename | sed -e "s/\.tar//g")
+		fi
+		if [ $? -ne 0 ]
+		then
+			cecho " > Error while downloading $filename" red
+			exit 2
+		fi
+		cecho " > Extracting archive " green
+		tar xvf $(echo $filename| sed -e "s/\.bz2//g") > /dev/null 2>&1
+		cd $(echo $filename | sed -e "s/\.tar\.bz2//g")
+		cecho " > Building wmic" green
+		make > /dev/null 2>&1
+		if [ $? -ne 0 ] 
+		then
+			cecho " > Error while building wmic" red
+			exit 2
+		fi
+		cecho " > Installing wmic" green
+		cp Samba/source/bin/wmic $TARGET/libexec/
+		chown $SKUSER:$SKGROUP Samba/source/bin/wmic
+		cd /tmp
+		cecho " > Downloading check_wmi_plus" green
+		filename=$(echo $CHECKWMIPLUS | awk -F"/" '{print $NF}')
+		folder=$(echo $filename | sed -e "s/\.tar\.gz//g")
+		if [ ! -f "$filename" ]
+		then
+			wget $WGETPROXY $CHECKWMIPLUS > /dev/null 2>&1 
+		fi
+		cecho " > Extracting archive" green
+		tar zxvf $filename > /dev/null 2>&1
+		cecho " > Installing plugin" green
+		cp check_wmi_plus.conf.sample $TARGET/libexec/check_wmi_plus.conf 
+		cp check_wmi_plus.pl $TARGET/libexec/check_wmi_plus.pl
+		cp -R /tmp/check_wmi_plus.d $TARGET/libexec/
+		chown $SKUSER:$SKGROUP $TARGET/libexec/check_wmi_plus* 
+		cecho " > configuring plugin" green
+		sed -i "s#/usr/lib/nagios/plugins#"$TARGET"/libexec#g" $TARGET/libexec/check_wmi_plus.conf
+		sed -i "s#/bin/wmic#"$TARGET"/libexec/wmic#g" $TARGET/libexec/check_wmi_plus.conf
+		sed -i "s#/opt/nagios/bin/plugins#"$TARGET"/libexec#g" $TARGET/libexec/check_wmi_plus.pl
+		sed -i "s#/usr/lib/nagios/plugins#"$TARGET"/libexec#g" $TARGET/libexec/check_wmi_plus.pl
+		
+	fi
 }
 
 # check_oracle_health
@@ -1269,7 +1374,7 @@ function install_check_oracle_health(){
 			filename=$(echo $m | awk -F"/" '{print $NF}')
 			if [ ! -f "$filename" ]
 			then
-				wget $m > /dev/null 2>&1
+				wget $WGETPROXY $m > /dev/null 2>&1
 				if [ $? -ne 0 ]
 				then
 					cecho " > Error while downloading $m" red
@@ -1289,7 +1394,7 @@ function install_check_oracle_health(){
 		done
 		cd /tmp
 		cecho " > Downloading check_oracle_health" green
-		wget $CHECKORACLEHEALTH > /dev/null 2>&1
+		wget $WGETPROXY $CHECKORACLEHEALTH > /dev/null 2>&1
 		if [ $? -ne 0 ]
 		then
 			cecho " > Error while downloading $filename" red
@@ -1311,6 +1416,46 @@ function install_check_oracle_health(){
 		if [ $? -ne 0 ]
 		then
 			cecho " > Error while building check_oracle_health module" red
+			exit 2
+		fi
+		cecho " > Installing plugin" green
+		make install > /dev/null 2>&1
+	fi
+}
+
+# check_mysql_health
+
+function install_check_mysql_health(){
+	cadre "Install check_mysql_health" green
+
+	if [ "$CODE" == "REDHAT" ]
+	then
+		cecho " > Unsuported" red
+	else
+		cd /tmp
+		cecho " > Downloading check_mysql_health" green
+		wget $WGETPROXY $CHECKMYSQLHEALTH > /dev/null 2>&1
+		if [ $? -ne 0 ]
+		then
+			cecho " > Error while downloading $filename" red
+			exit 2
+		fi
+		cecho " > Extracting archive " green
+		filename=$(echo $CHECKMYSQLHEALTH | awk -F"/" '{print $NF}')
+		tar zxvf $filename > /dev/null 2>&1
+		cd $(echo $filename | sed -e "s/\.tar\.gz//g")
+		./configure --prefix=$TARGET --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP --with-mymodules-dir=$TARGET/libexec --with-mymodules-dyn-dir=$TARGET/libexec --with-statefiles-dir=$TARGET/var/tmp > /dev/null 2>&1
+		cecho " > Building plugin" green
+		make > /dev/null 2>&1
+		if [ $? -ne 0 ] 
+		then
+			cecho " > Error while building check_mysql_health module" red
+			exit 2
+		fi
+		make check > /dev/null 2>&1	
+		if [ $? -ne 0 ]
+		then
+			cecho " > Error while building check_mysql_health module" red
 			exit 2
 		fi
 		cecho " > Installing plugin" green
@@ -1347,9 +1492,17 @@ while getopts "kidubcr:lz:hsvp:we:" opt; do
 			then
 				install_check_oracle_health
 				exit 0
+			elif [ "$OPTARG" == "check_mysql_health" ]
+			then
+				install_check_mysql_health
+				exit 0
 			elif [ "$OPTARG" == "capture_plugin" ]
 			then
 				install_capture_plugin
+				exit 0
+			elif [ "$OPTARG" == "check_wmi_plus" ]
+			then
+				install_check_wmi_plus
 				exit 0
 			elif [ "$OPTARG" == "pnp4nagios" ]
 			then
@@ -1385,7 +1538,7 @@ while getopts "kidubcr:lz:hsvp:we:" opt; do
                 fixcentreondb
 				fixforfan
                 enablendodb
-                enableretention
+                #enableretention
                 enableperfdata
                 setdaemonsaddresses
                 enableCESCentralDaemons

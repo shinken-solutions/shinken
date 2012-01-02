@@ -21,7 +21,7 @@ td.perfometer img.glow {
 
 td.perfometer div.text {
     position: relative;
-    top: 5px;
+    top: 4px;
     width: 120px;
     height: 0px;
     z-index: 3;
@@ -39,17 +39,19 @@ td.perfometer table{
     padding-top: 2px;
     width: 120px;
     border: none;
-    height: 28px;
+    height: 22px;
     border-radius: 3px;
 }
 
 td.perfometer tbody{
     border: none;
-    padding-top: 1px;
+    padding-top: 20px;
 }
 
 td.perfometer td {
     padding: 0;
     border: none;
-    height: 28px;
+    border-bottom : none;
+    border-right : none;
+    height: 22px;
 }
