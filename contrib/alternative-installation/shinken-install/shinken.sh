@@ -19,6 +19,7 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+
 # environnement
 export myscripts=$(readlink -f $(dirname $0))
 src=$(readlink -f "$myscripts/../../..")
@@ -1093,7 +1094,7 @@ function install_multisite(){
 	if [ ! -f "$filename" ]
 	then 
 		cecho " > Getting check_mk archive" green
-		wget $MKURI > /dev/null 2>&1
+		wget $WGETPROXY $MKURI > /dev/null 2>&1
 	fi
 	
 	cecho " > Extracting archive" green
@@ -1149,7 +1150,7 @@ function install_pnp4nagios(){
 	if [ ! -f "$filename" ]
 	then 
 		cecho " > Getting pnp4nagios archive" green
-		wget $PNPURI > /dev/null 2>&1
+		wget $WGETPROXY $PNPURI > /dev/null 2>&1
 	fi
 	
 	cecho " > Extracting archive" green
@@ -1197,7 +1198,7 @@ function install_capture_plugin(){
 	cadre "Install capture_plugin" green
 	cd /tmp
 	cecho " > Getting capture_plugin" green
-	wget http://www.waggy.at/nagios/capture_plugin.txt > /dev/null 2>&1
+	wget $WGETPROXY http://www.waggy.at/nagios/capture_plugin.txt > /dev/null 2>&1
 	cecho " > Installing capture_plugin" green
 	mv capture_plugin.txt $TARGET/libexec/capture_plugin
 	chmod +x $TARGET/libexec/capture_plugin	
@@ -1221,7 +1222,7 @@ function install_check_esx3(){
 
 	if [ ! -f "/tmp/VMware-vSphere-SDK-for-Perl-$VSPHERESDKVER.$ARCH.tar.gz" ]
 	then
-		wget $VSPHERESDK > /dev/null 2>&1	
+		wget $WGETPROXY $VSPHERESDK > /dev/null 2>&1	
 		if [ $? -ne 0 ]
 		then
 			cecho " > Error while downloading vsphere sdk for perl" red
@@ -1240,7 +1241,7 @@ function install_check_esx3(){
 
 	cd /tmp
 	cecho " > Getting check_esx3 plugin from op5" green
-	wget $CHECK_ESX3_SCRIPT -O check_esx3.pl > /dev/null 2>&1
+	wget $WGETPROXY $CHECK_ESX3_SCRIPT -O check_esx3.pl > /dev/null 2>&1
 	mv check_esx3.pl $TARGET/libexec/check_esx3.pl
 	chmod +x $TARGET/libexec/check_esx3.pl	
 	chown $SKUSER:$SKGROUP $TARGET/libexec/check_esx3.pl
@@ -1263,7 +1264,7 @@ function install_nagios-plugins(){
 	if [ ! -f "nagios-plugins-$NAGPLUGVERS.tar.gz" ]
 	then
 		cecho " > getting nagios-plugins archive" green
-		wget $NAGPLUGBASEURI > /dev/null 2>&1
+		wget $WGETPROXY $NAGPLUGBASEURI > /dev/null 2>&1
 	fi
 	cecho " > Extract archive content " green
 	rm -Rf nagios-plugins-$NAGPLUGVERS
@@ -1293,7 +1294,7 @@ function install_check_wmi_plus(){
 		filename=$(echo $WMIC | awk -F"/" '{print $NF}')
 		if [ ! -f $(echo $filename | sed -e "s/\.bz2//g") ]
 		then
-			wget $WMIC > /dev/null 2>&1
+			wget $WGETPROXY $WMIC > /dev/null 2>&1
 			bunzip2 $filename
 		else
 			rm -Rf $(echo $filename | sed -e "s/\.tar//g")
@@ -1322,7 +1323,7 @@ function install_check_wmi_plus(){
 		folder=$(echo $filename | sed -e "s/\.tar\.gz//g")
 		if [ ! -f "$filename" ]
 		then
-			wget $CHECKWMIPLUS > /dev/null 2>&1 
+			wget $WGETPROXY $CHECKWMIPLUS > /dev/null 2>&1 
 		fi
 		cecho " > Extracting archive" green
 		tar zxvf $filename > /dev/null 2>&1
@@ -1373,7 +1374,7 @@ function install_check_oracle_health(){
 			filename=$(echo $m | awk -F"/" '{print $NF}')
 			if [ ! -f "$filename" ]
 			then
-				wget $m > /dev/null 2>&1
+				wget $WGETPROXY $m > /dev/null 2>&1
 				if [ $? -ne 0 ]
 				then
 					cecho " > Error while downloading $m" red
@@ -1393,7 +1394,7 @@ function install_check_oracle_health(){
 		done
 		cd /tmp
 		cecho " > Downloading check_oracle_health" green
-		wget $CHECKORACLEHEALTH > /dev/null 2>&1
+		wget $WGETPROXY $CHECKORACLEHEALTH > /dev/null 2>&1
 		if [ $? -ne 0 ]
 		then
 			cecho " > Error while downloading $filename" red
@@ -1433,7 +1434,7 @@ function install_check_mysql_health(){
 	else
 		cd /tmp
 		cecho " > Downloading check_mysql_health" green
-		wget $CHECKMYSQLHEALTH > /dev/null 2>&1
+		wget $WGETPROXY $CHECKMYSQLHEALTH > /dev/null 2>&1
 		if [ $? -ne 0 ]
 		then
 			cecho " > Error while downloading $filename" red
