@@ -1,49 +1,48 @@
-=head1 SHINKEN-REACTIONNER
-
-Command - Shinken reactionner command.
-
-=head1 SYNOPSIS
-
-/usr/sbin/shinken-reactionner  [options...]
-
-=head1 DESCRIPTION
-
-Shinken reactionner Daemon 
-
-=head1 OPTIONS
-
-=over 8
-
-=item B<-c|--config>
-
-Config file. Multiple -c can be used, it will be like if all files was just one.
-
-=item B<-d|--daemon>
-
-Run in daemon mode.
-
-=item B<-r|--replace>
-
-Replace previous running scheduler.
-
-=item B<-h|--help>
-
-Print detailed help screen.
-
-=item B<--debug>
-
-Debug File. Default : no use (why debug a bug free program? :) ).
-
-Displays information about the currently installed version and exists.
-
-=head1 BUGS
-
-This command has absolutely no bugs, as I have written it. Also, as it has no bugs, there is no need for a bug tracker.
-
-=head1 AUTHORS
-
-Bshinken-reactionner was written by Jean Gabes <naparuba@gmail.com>. This manual page was written by David Hannequin <david.hannequin@gmail.com>.
-
-Both are released under the GNU Affero General Public License, version 3 or later.
-
-=cut
+.TH shinken-reactionner 8 "December 29, 2011" "Shinken User Manuals"
+.SH NAME
+.PP
+shinken-reactionner - Shinken reactionner daemon
+.SH SYNOPSIS
+.PP
+shinken-reactionner [-dr] [-c \f[I]CONFIGFILE\f[]] [\[em]debugfile
+\f[I]DEBUGFILE\f[]]
+.SH DESCRIPTION
+.PP
+Shinken reactionner daemon
+.PP
+The shinken-reactionner is similar to shinken-poller but handles actions
+such as notifications and event-handlers from the schedulers rather than
+checks.
+.SH OPTIONS
+.TP
+.B --version
+Show version number and exit
+.RS
+.RE
+.TP
+.B -c \f[I]CONFIGFILE\f[], --config \f[I]CONFIGFILE\f[]
+Config file
+.RS
+.RE
+.TP
+.B -d, --daemon
+Run in daemon mode
+.RS
+.RE
+.TP
+.B -r, --replace
+Replace previous running reactionner
+.RS
+.RE
+.TP
+.B -h, --help
+Print detailed help screen
+.RS
+.RE
+.TP
+.B --debugfile \f[I]DEBUGFILE\f[]
+Enable debug logging to \f[I]DEBUGFILE\f[]
+.RS
+.RE
+.SH AUTHORS
+Arthur Gautier.

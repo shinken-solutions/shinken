@@ -1,48 +1,45 @@
 % shinken-discovery(8) Shinken User Manuals
 % Arthur Gautier
-% September 14, 2011
-
+% December 29, 2011
 
 # NAME
 
-shinken-discovery - Shinken discovery command.
+shinken-discovery - Shinken discovery command
 
 # SYNOPSIS
 
-shinken-discovery [*options*] ...
+shinken-discovery [-w] [-c *CONFIGFILE*] [-o *OUTPUT_PATH*] [-r *RUNNER*[,*RUNNER,...]] [-m *MACRO* [*MACRO* ...]]
 
 # DESCRIPTION
 
-Shinken discovery daemon.
+Shinken discovery command
 
-Until now, there are two discovery modules :
- * Standard network one, that uses the nmap tool
- * VMware one, that uses the *check_esx3.pl* script and a vcenter installation.
+There are two discovery modules included:
+ * Standard network discovery which uses the nmap tool
+ * VMware discovery which uses the *check_esx3.pl* script and a vcenter installation.
 
-It's better to do the whole discovery in one pass, because one module can
+It is best to do the whole discovery in one pass because one module can
 use data from the other.
 
 # OPTIONS
+\-- version
+:   Show the version and exit
 
--c *CONFIGFILE*, \--cfg-config *CONFIGGILE*
-:   Configuration file.
+-c *CONFIGFILE*, \--cfg-input *CONFIGGILE*
+:   Discovery configuration file
 
--o *DIRECTORY*, \--dir-output *DIRECTORY*
-:   output directory.
+-o *OUTPUT_PATH*, \--dir-output *OUTPUT_PATH*
+:   Directory output for results
 
--w, \--overwrite
-:   Allow overwriting existing files.
+-w, \--overright
+:   Allow overwriting existing files (disabled by default)
 
--r *PATH*
-:   Indicate path to the nmap binary.
+-r *RUNNERS*
+:   Comma-separated list of discovery runner modules to use
 
--m *NETWORK*
-:   Indicate lan to scan.
+-m *MACROS*
+:   List of macros to pass to discovery runner modules. Must be the last
+    argument. Ex: NMAPTARGETS=192.168.0.0/24
 
 -h, \--help
 :   Print detailed help screen.
-
-\--debug *FILE*
-:   Debug File.
-
-
