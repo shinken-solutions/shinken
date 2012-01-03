@@ -1,5 +1,7 @@
 % shinken-receiver(8) Shinken User Manuals
+% David Hannequin
 % Arthur Gautier
+% Michael Leinartas
 % December 29, 2011
 
 # NAME

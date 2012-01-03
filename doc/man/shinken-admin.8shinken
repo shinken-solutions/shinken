@@ -12,3 +12,4 @@ Shinken admin shell
 Invokes a simple shell interface for interacting with shinken-arbiter
 .SH AUTHORS
 David Hannequin.
+Michael Leinartas.

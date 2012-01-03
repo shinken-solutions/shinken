@@ -56,4 +56,6 @@ Verify config file and exit
 .RS
 .RE
 .SH AUTHORS
+David Hannequin.
 Arthur Gautier.
+Michael Leinartas.
