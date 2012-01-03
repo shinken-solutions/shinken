@@ -77,6 +77,8 @@ class Webui_broker(BaseModule, Daemon):
         self.http_backend = getattr(modconf, 'http_backend', 'auto')
         self.login_text = getattr(modconf, 'login_text', None)
         self.allow_html_output = to_bool(getattr(modconf, 'allow_html_output', '0'))
+        self.remote_user_enable = getattr(modconf, 'remote_user_enable', '0')
+        self.remote_user_variable = getattr(modconf, 'remote_user_variable', 'X_REMOTE_USER')
 
         # Load the photo dir and make it a absolute path
         self.photo_dir = getattr(modconf, 'photo_dir', 'photos')

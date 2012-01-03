@@ -83,6 +83,16 @@ def get_root():
     user = app.request.get_cookie("user", secret=app.auth_secret)
     if user:
         redirect("/problems")
+    elif app.remote_user_variable in app.request.headers and app.remote_user_enable == '1':
+        user_name = app.request.headers[app.remote_user_variable]
+        c = app.datamgr.get_contact(user_name)
+        print "Got", c
+        if not c:
+            print "Warning: You need to have a contact having the same name as your user %s" % user_name
+            redirect("/user/login")
+        else:
+            app.response.set_cookie('user', user_name, secret=app.auth_secret, path='/')
+            redirect("/problems")
     else:
         redirect("/user/login")
 
