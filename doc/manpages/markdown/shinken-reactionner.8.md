@@ -1,35 +1,38 @@
 % shinken-reactionner(8) Shinken User Manuals
 % Arthur Gautier
-% September 14, 2011
-
+% December 29, 2011
 
 # NAME
 
-shinken-reactionner - Shinken reactionner command.
+shinken-reactionner - Shinken reactionner daemon
 
 # SYNOPSIS
 
-shinken-reactionner [*options*] ...
+shinken-reactionner [-dr] [-c *CONFIGFILE*] [--debugfile *DEBUGFILE*]
 
 # DESCRIPTION
 
-Shinken reactionner Daemon.
+Shinken reactionner daemon
+
+The shinken-reactionner is similar to shinken-poller but handles actions such
+as notifications and event-handlers from the schedulers rather than checks.
 
 # OPTIONS
+
+\--version
+:   Show version number and exit
 
 -c *CONFIGFILE*, \--config *CONFIGFILE*
 :   Config file
 
 -d, \--daemon
-:   Run in daemon mode.
+:   Run in daemon mode
 
 -r, \--replace
-:   Replace previous running arbiter.
+:   Replace previous running reactionner
 
 -h, \--help
-:   Print detailed help screen.
+:   Print detailed help screen
 
-\--debug *FILE*
-:   Debug File.
-
-
+\--debugfile *DEBUGFILE*
+:   Enable debug logging to *DEBUGFILE*

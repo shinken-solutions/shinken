@@ -1,20 +1,27 @@
 % shinken-scheduler(8) Shinken User Manuals
 % Arthur Gautier
-% September 14, 2011
+% December 29, 2011
 
 # NAME
 
-shinken-scheduler - Shinken scheduler command.
+shinken-scheduler - Shinken scheduler daemon
 
 # SYNOPSIS
 
-shinken-scheduler [*options*] ...
+shinken-scheduler [-dr] [-c *CONFIGFILE*] [--debugfile *DEBUGFILE*]
 
 # DESCRIPTION
 
-Shinken scheduler daemon.
+Shinken scheduler daemon
+
+The shinken-scheduler manages the dispatching of checks and actions sent to
+shinken-reactionner and shinken-poller based on configuration sent to it by
+shinken-arbiter.
 
 # OPTIONS
+
+\--version
+:   Show version number and exit
 
 -c *CONFIGFILE*, \--config *CONFIGFILE*
 :   Config file
@@ -28,7 +35,5 @@ Shinken scheduler daemon.
 -h, \--help
 :   Print detailed help screen.
 
-\--debug *FILE*
-:   Debug File.
-
-
+\--debugfile *DEBUGFILE*
+:   Enable debug logging to *DEBUGFILE*

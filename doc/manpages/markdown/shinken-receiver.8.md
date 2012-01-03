@@ -1,10 +1,10 @@
 % shinken-receiver(8) Shinken User Manuals
 % Arthur Gautier
-% September 14, 2011
+% December 29, 2011
 
 # NAME
 
-shinken-receiver - Shinken receiver command.
+shinken-receiver - Shinken receiver daemon
 
 # SYNOPSIS
 
@@ -14,7 +14,13 @@ shinken-receiver  [*options*] ...
 
 Shinken receiver daemon
 
+The shinken-receiver daemon manages passive information and serves as a buffer
+that will be read from by the shinken-arbiter to dispatch data.
+
 # OPTIONS
+
+\--version
+:   Show version number and exit
 
 -c *CONFIGFILE*, \--config *CONFIGFILE*
 :   Config file
@@ -22,10 +28,11 @@ Shinken receiver daemon
 -d, \--daemon
 :   Run in daemon mode.
 
+-r, \--replace
+:   Replace previous running arbiter.
+
 -h, \--help
 :   Print detailed help screen.
 
-\--debug *FILE*
-:   Debug File.
-
-
+\--debugfile *FILE*
+:   Enable debug logging to *FILE*
