@@ -3,7 +3,7 @@ Shinken ChangeLog
 #######################
 
 	
-0.8 - 17/10/2001
+0.8 - 17/10/2011
 ------------------
 	CORE ENHANCEMENTS
 	* Add : WebUI broker module. More info in the UI changelog part.
@@ -26,7 +26,7 @@ Shinken ChangeLog
 	CORE FIXES
 	* Fix : BugFix Pyro4 compatibility
 	* fix : try to fix bad notification output make scehduler crash.
-	* Fix : (SebSolon) catch incomplet service group members
+	* Fix : (Seb-Solon) catch incomplet service group members
 	* Fix : bad message for arbiter in HA without host_name value.
 	* Fix : (reported by: fraggod): inline comment in boolean cause an arbiter crash when lookup conf.
 	* Fix : (reported by titilambert) bug about linkify and templates, so need to clean search lists after remove templates.
@@ -41,17 +41,17 @@ Shinken ChangeLog
 	* Fix : (reported by : Michael Grundmann) a service for a void hostgroup and a host exclusion was reporting a bad conf instead if forgot this service.
 	* Fix : (Reported by : Dirk Hallanzy) was not launching under XP due to some pid file creation bad mode.
 	* Fix : (reported by : Vincent Riquer) now a spare broker can be send to sleep again by the arbiter. It will clean its queues and stop modules.
-	* Fix: arbiter crash with a spare and the new smoothing wat i managed behavior.
+	* Fix : arbiter crash with a spare and the new smoothing wat i managed behavior.
 	* Fix : Change default check/eventhandler/notification timeouts and flap thresholds to make nagios more compatible to shinken.
 	* fix : Better handling of check timeouts (there was an empty output)
 	* fix : Log notification and eventhandler timeouts
-	* Fix: (reported by : Denis GERMAIN) service with no description cause an host problem in linking phase. 
+	* Fix : (reported by : Denis GERMAIN) service with no description cause an host problem in linking phase. 
 	* Fix : (reported by : Seb-Solon) manage utf8 in host and service perfdata.
-	* Fix: protect broker agains module taht ask for full instance init about unknown scheduler.
+	* Fix : protect broker agains module taht ask for full instance init about unknown scheduler.
 	* Fix : (reported by Markus Elger) add next schedule date in the retention data.
-	* Fix: (reported by : Olivier Hanesse) bad realm configuration was not detected for satellites.
-	* Fix: (reported by :Markus Elger) bad host count in realms.
-	* Fix: (reported by :Markus Elger) bad host reaml conf were not detected.
+	* Fix : (reported by : Olivier Hanesse) bad realm configuration was not detected for satellites.
+	* Fix : (reported by :Markus Elger) bad host count in realms.
+	* Fix : (reported by :Markus Elger) bad host reaml conf were not detected.
 
 	
 	MODULES ENHANCEMENTS
@@ -70,7 +70,7 @@ Shinken ChangeLog
 	* LIVESTATUS :
 	* Add : Derive the archives filenames from the main livestatus db
 	* Add : Rewrite the livestatus sqlite code. Now there is one database file with logging events for each day.
-	* !! : If you have a huge livestatus.db it is recommended to stop shinken and run the script contrib/livestatus/splitlivelogs.py
+	* !!  : If you have a huge livestatus.db it is recommended to stop shinken and run the script contrib/livestatus/splitlivelogs.py
 	* Add : the livestatus sqlite db will now be opened in do_start() instead of init(). Now only the livestatus process has an open filehandle. (the main broker process had one too)
 	* Add : Make the livestatus socket world read/writable
 	* Add : the REUSEADDR flag to livestatus's socket. Thanks Olivier Hanesse
@@ -84,7 +84,7 @@ Shinken ChangeLog
 	* Fix : string comparison for livestatus. None is equivalent to empty string
 	* Fix : collumn name change in merlin ds.
 	* Fix : (reported by: Seb-Solon) bad contact group insert in objects in NDO
-	* Fix : (reported by: seb-colon) bad contact group id in NDO
+	* Fix : (reported by: seb-solon) bad contact group id in NDO
 	* Fix : (seb-solon) ndo contacts were not registered with the good id.
 	* Fix : add the flap_detection_enabled in the ndo status tables too. (I love duplicate data...)
 	* Fix : the ndo module with is_flapping value for update states.
@@ -162,9 +162,9 @@ FIXES
 	* Fix : (reported by : Raynald de Lahondès) for python2.7, if shell launch, do not go in shlex split pass.
 	* Fix : catch an exception when deregistering Pyro. (When the scheduler was started as the only process and no communication happened
 	* Fix : Add the path of the current script (ex: bin/shinken-arbiter) and ".." to the list of paths where Python looks for shinken modules.
-	* Fix: default config had duplicate command name define: check_http
+	* Fix : default config had duplicate command name define: check_http
 	* Fix : clean Command(s) now subclass Item(s) as any "shinken.objects"
-	* Fix : (reported by Raynald de Lahondès) if a hostgroup member got no host defined, create a dummy service for no host, so failed.
+	* Fix : (reported by : Raynald de Lahondès) if a hostgroup member got no host defined, create a dummy service for no host, so failed.
 	* Fix : bad UTC hour for scheduler.
 	* Fix : in a rare case, the picle need to call the __init__ of notification before the __get_state__, but it will call it without args.
 	* Fix : (reported by : Raynald de Lahondès) bad hostdep definition (link host) was badly detected.
@@ -172,7 +172,7 @@ FIXES
 	* Fix : the * member was wrong in service calling hostgroup of this kind.
 	* Fix : the schedule immediate check now work without having to force it.
 	* Fix : correct the check launch under python2.7 with utf8 char.
-	* Fix : (reported by Denis GERMAIN) set by default retention update inverval to 60 minutes.
+	* Fix : (reported by : Denis GERMAIN) set by default retention update inverval to 60 minutes.
 	* Fix : bad sys.path management for ndo module
 	* Fix : too much loop in daemons! do_loop_tunr must WAIT a little! To managed in the main_loop part I think.
 	* Fix : if the scheduler gotthe same conf but got a wait a new one before, it do a zombie scheduler then....
@@ -182,10 +182,10 @@ FIXES
 	* Fix : Nagios allow elements without contacts. Do alike.
 	* Fix : add protection against adding again and again the same actions ifthe scheduler ask it, like for orphaned checks.
 	* Fix : sys.path management, not far more clear and error proof
-	* Fix : (reported by capibaru) add a strip pass before loading cfg files.
+	* Fix : (reported by : capibaru) add a strip pass before loading cfg files.
 	* Fix : raise only one log for orphaned instead of xK useless logs.
 	* Fix : (Venelin Petkov) missing customs on services copy of a based one (multiple hosts, hostgroups, etc)
-	* Fix : (reported by Ronny Lindner) manage the not host expressions for services.
+	* Fix : (reported by : Ronny Lindner) manage the not host expressions for services.
 
 
 0.5.1 - 19/01/2011
