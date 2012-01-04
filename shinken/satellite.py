@@ -618,7 +618,7 @@ class Satellite(BaseSatellite):
                     self.pynag_con_init(sched_id)
             # Ok, con is not know, so we create it
             # Or maybe is the connection lost, we recreate it
-            except (KeyError, Pyro.errors.ProtocolError, Pyro.errors.ConnectionClosedError) , exp:
+            except (Pyro_exp_pack, KeyError) , exp:
                 print exp
                 self.pynag_con_init(sched_id)
             # scheduler must not be initialized
@@ -628,9 +628,12 @@ class Satellite(BaseSatellite):
             # What the F**k? We do not know what happenned,
             # so.. bye bye :)
             except Exception , exp:
-               print "Unknown exception", exp
+               print "Unknown exception", exp, type(exp)
                try:
-                  print ''.join(Pyro.util.getPyroTraceback(exp))
+                  if PYRO_VERSION < "4.0":
+                      print ''.join(Pyro.util.getPyroTraceback(exp))
+                  else:
+                      print ''.join(Pyro.util.getPyroTraceback())
                except:
                   pass
                raise
