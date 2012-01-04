@@ -494,6 +494,17 @@ config_objects_file = (
                         'certs/ca.pem'
 )
 
+# Now service packs files
+srv_pack_files = gen_data_files('etc/packs')
+# We must remove the etc from the paths
+srv_pack_files = [s.replace('etc/', '') for s in srv_pack_files]
+#print "SRV PACK FILES", srv_pack_files
+config_objects_file_extended = list(config_objects_file)
+config_objects_file_extended.extend(srv_pack_files)
+config_objects_file = tuple(config_objects_file_extended)
+print config_objects_file
+
+
 # daemon configs
 daemon_ini_files = (('broker', 'brokerd.ini'),
                     ('broker', 'brokerd-windows.ini'),
@@ -517,7 +528,6 @@ resource_cfg_files = ('resource.cfg', )
 # so : sorry for the replace, really... I HATE SETUP()!
 full_path_webui_files = gen_data_files('shinken/webui')
 webui_files = [s.replace('shinken/webui/', 'webui/') for s in full_path_webui_files]
-
 
 package_data = ['*.py','modules/*.py','modules/*/*.py']
 package_data.extend(webui_files)
@@ -550,6 +560,8 @@ if not is_update:
          ['build/bin/default/shinken' ]
          ))
 
+
+#print "DATA", data_files
     
 print "All package _data"
 if __name__ == "__main__":
