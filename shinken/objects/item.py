@@ -27,6 +27,7 @@
 import time
 from copy import copy
 
+from shinken.graph import Graph
 from shinken.commandcall import CommandCall
 from shinken.property import StringProp, ListProp
 from shinken.brok import Brok
@@ -572,7 +573,8 @@ class Items(object):
         for i in items:
             self.items[i.id] = i
         self.templates = {}
-
+        # We should keep a graph of templates relations
+        self.templates_graph = Graph()
 
 
     def __iter__(self):
@@ -657,13 +659,14 @@ class Items(object):
 
 
     def find_tpl_by_name(self, name):
-        for id in self.templates:
-            i = self.items[id]
+        for i in self.templates.values():
             if hasattr(i, 'name') and i.name == name:
                 return i
         return None
 
 
+    # We will link all templates, and create the template
+    # graph too
     def linkify_templates(self):
         # First we create a list of all templates
         self.create_tpl_list()
@@ -672,13 +675,24 @@ class Items(object):
             new_tpls = []
             for tpl in tpls:
                 t = self.find_tpl_by_name(tpl.strip())
+                # If it's ok, add the template and update the
+                # template graph too
                 if t is not None:
+                    # add the template object to us
                     new_tpls.append(t)
                 else: # not find? not good!
                     err = "ERROR: the template '%s' defined for '%s' is unknown" % (tpl, i.get_name())
                     i.configuration_errors.append(err)
             i.templates = new_tpls
 
+        # Now we will create the template graph, so
+        # we look only for templates here. First we sould declare our nodes
+        for tpl in self.templates.values():
+            self.templates_graph.add_node(tpl)
+        # And then really create our edge
+        for tpl in self.templates.values():
+            for father in tpl.templates:
+                self.templates_graph.add_edge(father, tpl)
 
 
     def is_correct(self):
@@ -719,6 +733,7 @@ class Items(object):
         for i in tpls:
             del self.items[i.id]
         del self.templates
+        del self.templates_graph
 
 
     def clean(self):
@@ -967,7 +982,7 @@ class Items(object):
                 setattr(i, prop, com_list)
 
 
-    def evaluate_hostgroup_expression(self, expr, hosts, hostgroups):
+    def evaluate_hostgroup_expression(self, expr, hosts, hostgroups, look_in='hostgroups'):
         begin = 0
         end = len(expr)
         ctxres = hg_name_parse_EXPR(expr, begin, end) 
@@ -978,11 +993,10 @@ class Items(object):
             return []
         
         str_setexpr = hg_name_rebuild_str(ctxres.full_res)
-        
         # We must protect the eval() against some names that will be match as
         # Python things like - or print and not real names. So we "change" them with __OTHERNAME__
         # values in the HostGroup_Name_Parse_Ctx class.
-        groupsname2hostsnames = hg_name_get_groupnames(ctxres.full_res, hosts, hostgroups)
+        groupsname2hostsnames = hg_name_get_groupnames(ctxres.full_res, hosts, hostgroups, look_in=look_in)
         newgroupname2hostnames = {}
         for gn, val in groupsname2hostsnames.items():
             gn = gn.replace('-', HostGroup_Name_Parse_Ctx.minus_sign_in_name)
@@ -1316,17 +1330,19 @@ def get_all_host_names_set(hosts):
     )
 
 
-def hg_name_get_groupnames(all_res, hosts, hostgroups, res=None):
+# Get the groups (or templates) that match this. We can look for hostgroups
+# or templates.
+def hg_name_get_groupnames(all_res, hosts, hostgroups, res=None, look_in='hostgroups'):
     if res is None:
         res = {}
 
     for tok in all_res:
         if isinstance(tok, tuple):
-            hg_name_get_groupnames(tok[0], hosts, hostgroups, res)
-            hg_name_get_groupnames(tok[1], hosts, hostgroups, res)
+            hg_name_get_groupnames(tok[0], hosts, hostgroups, res, look_in)
+            hg_name_get_groupnames(tok[1], hosts, hostgroups, res, look_in)
             continue
         if isinstance(tok, list):
-            hg_name_get_groupnames(tok, hosts, hostgroups, res)
+            hg_name_get_groupnames(tok, hosts, hostgroups, res, look_in)
             continue
         
         save_tok = tok
@@ -1341,8 +1357,17 @@ def hg_name_get_groupnames(all_res, hosts, hostgroups, res=None):
         if save_tok == '*':
             elts = get_all_host_names_set(hosts)
         else:
-            # we got a group name :
-            members = hostgroups.get_members_by_name(tok)
+            members = []
+            # We got 2 possibilities : hostgroups or templates
+            if look_in == 'hostgroups':
+                # we got a group name :
+                members = hostgroups.get_members_by_name(tok)
+            else:  # == templates
+                # It's a dict of template.
+                # So first find the template, and then get all it's
+                # hosts
+                members = hosts.find_hosts_that_use_template(tok)
+                print "GOT COMPLEX HOST MEMBERS", members
             # TODO: check why:
             # sometimes we get a list, sometimes we get a string of hosts name which are ',' separated..
             if isinstance(members, list):

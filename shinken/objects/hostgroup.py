@@ -63,22 +63,23 @@ class Hostgroup(Itemgroup):
             return []
 
 
-    #We fillfull properties with template ones if need
-    #Because hostgroup we call may not have it's members
-    #we call get_hosts_by_explosion on it
+    # We fillfull properties with template ones if need
+    # Because hostgroup we call may not have it's members
+    # we call get_hosts_by_explosion on it
     def get_hosts_by_explosion(self, hostgroups):
-        #First we tag the hg so it will not be explode
-        #if a son of it already call it
+        # First we tag the hg so it will not be explode
+        # if a son of it already call it
         self.already_explode = True
 
-        #Now the recursiv part
-        #rec_tag is set to False avery HG we explode
-        #so if True here, it must be a loop in HG
-        #calls... not GOOD!
+        # Now the recursiv part
+        # rec_tag is set to False avery HG we explode
+        # so if True here, it must be a loop in HG
+        # calls... not GOOD!
         if self.rec_tag:
             print "Error : we've got a loop in hostgroup definition", self.get_name()
             return self.get_hosts()
-        #Ok, not a loop, we tag it and continue
+
+        # Ok, not a loop, we tag it and continue
         self.rec_tag = True
 
         hg_mbrs = self.get_hostgroup_members()
