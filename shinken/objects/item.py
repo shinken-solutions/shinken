@@ -27,6 +27,7 @@
 import time
 from copy import copy
 
+from shinken.graph import Graph
 from shinken.commandcall import CommandCall
 from shinken.property import StringProp, ListProp
 from shinken.brok import Brok
@@ -572,7 +573,8 @@ class Items(object):
         for i in items:
             self.items[i.id] = i
         self.templates = {}
-
+        # We should keep a graph of templates relations
+        self.templates_graph = Graph()
 
 
     def __iter__(self):
@@ -657,13 +659,14 @@ class Items(object):
 
 
     def find_tpl_by_name(self, name):
-        for id in self.templates:
-            i = self.items[id]
+        for i in self.templates.values():
             if hasattr(i, 'name') and i.name == name:
                 return i
         return None
 
 
+    # We will link all templates, and create the template
+    # graph too
     def linkify_templates(self):
         # First we create a list of all templates
         self.create_tpl_list()
@@ -672,13 +675,24 @@ class Items(object):
             new_tpls = []
             for tpl in tpls:
                 t = self.find_tpl_by_name(tpl.strip())
+                # If it's ok, add the template and update the
+                # template graph too
                 if t is not None:
+                    # add the template object to us
                     new_tpls.append(t)
                 else: # not find? not good!
                     err = "ERROR: the template '%s' defined for '%s' is unknown" % (tpl, i.get_name())
                     i.configuration_errors.append(err)
             i.templates = new_tpls
 
+        # Now we will create the template graph, so
+        # we look only for templates here. First we sould declare our nodes
+        for tpl in self.templates.values():
+            self.templates_graph.add_node(tpl)
+        # And then really create our edge
+        for tpl in self.templates.values():
+            for father in tpl.templates:
+                self.templates_graph.add_edge(father, tpl)
 
 
     def is_correct(self):
@@ -719,6 +733,7 @@ class Items(object):
         for i in tpls:
             del self.items[i.id]
         del self.templates
+        del self.templates_graph
 
 
     def clean(self):

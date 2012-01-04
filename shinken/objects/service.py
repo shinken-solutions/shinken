@@ -1100,11 +1100,10 @@ class Services(Items):
         # because they are our final host_name after all
         if not s.is_tpl():
             for_hosts_to_create.append(hname)
-
-        # But for template it's more tricky : it's a template name
-        # we've got, not a real host_name/ So we must get a list of host_name
-        # that use this template
         else:
+            # But for template it's more tricky : it's a template name
+            # we've got, not a real host_name/ So we must get a list of host_name
+            # that use this template
             hosts_from_tpl = hosts.find_hosts_that_use_template(hname.strip())
 
             # And now copy our real services

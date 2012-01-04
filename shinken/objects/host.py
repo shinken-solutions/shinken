@@ -1096,26 +1096,46 @@ class Hosts(Items):
 
 
     # Return a list of the host_name of the hosts
-    # that gotthe template with name=tpl_name
+    # that got the template with name=tpl_name or inherit from
+    # a template that use it
     def find_hosts_that_use_template(self, tpl_name):
-        res = []
-        # first find the template
+        res = set()
+
+        # First find the template
         tpl = None
         for h in self:
             # Look for template with the good name
             if h.is_tpl() and hasattr(h, 'name') and h.name.strip() == tpl_name.strip():
                 tpl = h
 
-        # If we find noone, we return nothing (easy case:) )
+        # If we find none, we return nothing (easy case:) )
         if tpl is None:
             return []
 
-        # Ok, we find the tpl
-        for h in self:
-            if tpl in h.templates and hasattr(h, 'host_name'):
-                res.append(h.host_name)
+        # Ok, we find the tpl. We should find its father template too
+        for t in self.templates.values():
+            t.dfs_loop_status = 'DFS_UNCHECKED'
+        all_tpl_searched = self.templates_graph.dfs_get_all_childs(tpl)
+        # Clean the search tag
+        # TODO : better way?
+        for t in self.templates.values():
+            del t.dfs_loop_status
 
-        return res
+        # Now we got all the templates we are looking for (so the template
+        # and all its own templates too, we search for the hosts that are
+        # using them
+        for h in self:
+            # If the host is a not valid one, skip it
+            if not hasattr(h, 'host_name'):
+                continue
+            # look if there is a match between host templates
+            # and the ones we are looking for
+            for t in h.templates:
+                if t in all_tpl_searched:
+                    res.add(h.host_name)
+                    continue
+
+        return list(res)
 
 
     # Will create all business tree for the
