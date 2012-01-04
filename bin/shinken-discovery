@@ -578,7 +578,20 @@ class DiscoveryMerger:
         # now merge them
         d = {'host_name' : host}
         for r in host_rules:
-            d.update(r.writing_properties)
+            for k,v in r.writing_properties.iteritems():
+                # If it's a + (add) property, add with a ,
+                if k.startswith('+'):
+                    prop = k[1:]
+                    # If the d do not already have this prop,
+                    # just push it
+                    if not prop in d:
+                        d[prop] = v
+                    # oh, must add with a , so
+                    else:
+                        d[prop] = d[prop] + ',' + v
+                else:
+                    d[k] = v
+            print "current D", d
         print "Will generate", d
         self.write_host_config_to_file(host, d)
 

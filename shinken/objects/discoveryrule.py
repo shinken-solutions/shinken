@@ -82,9 +82,12 @@ class Discoveryrule(Item):
         # if not, in matches or not match (if key starts
         # with a !, it's a not rule)
         # -> in self.matches or self.not_matches
+        # in writing properties if start with + (means 'add this')
         for key in params:
             # Some key are quite special
             if key in ['use']:
+                self.writing_properties[key] = params[key]
+            elif key.startswith('+'):
                 self.writing_properties[key] = params[key]
             elif key in cls.properties:
                 setattr(self, key, params[key])

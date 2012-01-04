@@ -50,7 +50,6 @@ class TestDiscoveryConf(ShinkenTest):
         value = '80'
         self.assert_(genhttp.is_matching(key, value) == True)
         
-        
         # Low look for a list of matchings
         l = [('openports', '80'), ('os', 'windows')]
         # should match this
@@ -89,7 +88,7 @@ class TestDiscoveryConf(ShinkenTest):
 
 
 
-    #Look for good definition and call of a discoveryrun
+    # Look for good definition and call of a discoveryrun
     def test_look_for_discorun(self):
         nmap = self.sched.conf.discoveryruns.find_by_name('nmap')
         self.assert_(nmap != None)
@@ -106,6 +105,38 @@ class TestDiscoveryConf(ShinkenTest):
         print "Exit status", nmap.current_launch.exit_status
         print "Output", nmap.current_launch.output
         print "LongOutput", nmap.current_launch.long_output
+
+
+    #Change ME :)
+    def test_look_for_host_discorule(self):
+        genhttp = self.sched.conf.discoveryrules.find_by_name('GenHttpHost')
+        self.assert_(genhttp != None)
+        self.assert_(genhttp.creation_type == 'host')
+        self.assert_(genhttp.matches['openports'] == '^80$')
+        
+        key = 'osversion'
+        value = '2003'
+        # Should not match this
+        self.assert_(genhttp.is_matching(key, value) == False)
+        # But should match this one
+        key = 'openports'
+        value = '80'
+        self.assert_(genhttp.is_matching(key, value) == True)
+        
+        # Low look for a list of matchings
+        l = [('openports', '80'), ('os', 'windows')]
+        # should match this
+        self.assert_(genhttp.is_matching_disco_datas(l) == True)
+        # Match this one too
+        l = [('openports', '80'), ('os', 'windows'), ('super', 'man')]
+        self.assert_(genhttp.is_matching_disco_datas(l) == True)
+        # And this last one
+        l = [('openports', '80')]
+        self.assert_(genhttp.is_matching_disco_datas(l) == True)
+
+        print "Writing properties"
+        print genhttp.writing_properties
+
 
 if __name__ == '__main__':
     unittest.main()
