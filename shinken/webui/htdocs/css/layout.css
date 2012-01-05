@@ -482,6 +482,18 @@ td.actions a {
             filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#e10000', EndColorStr='#bd0000'); /* IE6-IE9 */
 }
 
+.gradient_ok {
+    color: #FFFFFF;
+    background-color: #7AB317;
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#7AB317), to(#669900)); /* Saf4+, Chrome */
+    background-image: -webkit-linear-gradient(top, #7AB317, #669900); /* Chrome 10+, Saf5.1+, iOS 5+ */
+    background-image:    -moz-linear-gradient(top, #7AB317, #669900); /* FF3.6 */
+    background-image:     -ms-linear-gradient(top, #7AB317, #669900); /* IE10 */
+    background-image:      -o-linear-gradient(top, #7AB317, #669900); /* Opera 11.10+ */
+    background-image:         linear-gradient(top, #7AB317, #669900);
+            filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#e10000', EndColorStr='#669900'); /* IE6-IE9 */
+}
+
 .gradient_warn {
     color: #FFFFFF;
     background-color: #71DB65;
