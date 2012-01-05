@@ -43,11 +43,21 @@ parser.add_option('-t', '--targets', dest="targets",
                   help="NMap scanning targets.")
 parser.add_option('-v', '--verbose', dest="verbose", action='store_true',
                   help="Verbose output.")
+parser.add_option('-s', '--simulate', dest="simulate", 
+                  help="Silulate a launch by reading an nmap XML output instead of launching a new one.")
 
 targets = []
 opts, args = parser.parse_args()
-if not opts.targets:
-    parser.error("Requires at least one nmap target for scanning (option -t/--targets")
+
+if not opts.simulate:
+    simulate = None
+    targets = ''
+else:
+    simulate = opts.simulate
+
+
+if not opts.simulate and not opts.targets:
+    parser.error("Requires at least one nmap target for scanning (option -t/--targets)")
 else:
     targets.append(opts.targets)
 
@@ -55,6 +65,7 @@ if not opts.verbose:
     verbose = False
 else:
     verbose = True
+
 
 if args:
     targets.extend(args)
@@ -194,14 +205,6 @@ class DetectedHost:
         
         self.os_name = map[self.os]
         self.os_version = self.os[1]
-#        self.templates.append(t)
-#
-#        # Look for VMWare VM or hosts
-#        if self.h.is_vmware_vm():
-#            self.templates.append('vmware-vm')
-#        # Now is an host?
-#        if self.h.is_vmware_esx():
-#            self.templates.append('vmware-host')
 
 
     # Return the string of the 'discovery' items
@@ -255,31 +258,34 @@ class DetectedHost:
         return '%s::ip=%s' % (self.get_name(), self.ip)
 
 
-(_, tmppath) = tempfile.mkstemp()
+if not simulate:
+    (_, tmppath) = tempfile.mkstemp()
 
-print "propose a tmppath", tmppath
+    print "propose a tmppath", tmppath
 
-cmd = "sudo nmap %s -T4 -O --traceroute -oX %s" % (' '.join(targets) , tmppath)
-print "Launching command,", cmd
-try:
-    nmap_process = subprocess.Popen(
-        cmd,
-        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-        close_fds=True, shell=True)
-except OSError , exp:
-    print "Debug : Error in launching command:", cmd, exp
-    sys.exit(2)
+    cmd = "sudo nmap %s -T4 -O --traceroute -oX %s" % (' '.join(targets) , tmppath)
+    print "Launching command,", cmd
+    try:
+        nmap_process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            close_fds=True, shell=True)
+    except OSError , exp:
+        print "Debug : Error in launching command:", cmd, exp
+        sys.exit(2)
     
-print "Try to communicate"
-(stdoutdata, stderrdata) = nmap_process.communicate()
+    print "Try to communicate"
+    (stdoutdata, stderrdata) = nmap_process.communicate()
 
-if nmap_process.returncode != 0:
-    print "Error : the nmap return an error : '%s'" % stderrdata
-    sys.exit(2)
+    if nmap_process.returncode != 0:
+        print "Error : the nmap return an error : '%s'" % stderrdata
+        sys.exit(2)
 
-print "Got it", (stdoutdata, stderrdata)
+    print "Got it", (stdoutdata, stderrdata)
 
-xml_input = tmppath
+    xml_input = tmppath
+else: # simulate mode
+    xml_input = simulate
 
 tree = ElementTree()
 try:
