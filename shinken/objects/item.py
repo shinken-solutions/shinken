@@ -681,8 +681,8 @@ class Items(object):
                     # add the template object to us
                     new_tpls.append(t)
                 else: # not find? not good!
-                    err = "ERROR: the template '%s' defined for '%s' is unknown" % (tpl, i.get_name())
-                    i.configuration_errors.append(err)
+                    err = "WARNING: the template '%s' defined for '%s' is unknown" % (tpl, i.get_name())
+                    i.configuration_warnings.append(err)
             i.templates = new_tpls
 
         # Now we will create the template graph, so

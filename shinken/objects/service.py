@@ -363,6 +363,11 @@ class Service(SchedulingItem):
                     logger.log("Error : the service %s on host '%s' do not have %s" % (desc, hname, prop))
                     state = False # Bad boy...
 
+        # Then look if we have some errors in the conf
+        # Juts print warnings, but raise errors
+        for err in self.configuration_warnings:
+            print err
+
         # Raised all previously saw errors like unknown contacts and co
         if self.configuration_errors != []:
             state = False
