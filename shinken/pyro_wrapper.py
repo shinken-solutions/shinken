@@ -233,3 +233,12 @@ class ShinkenPyroDaemon(PyroClass):
                 return []
             raise
         return ins
+
+
+
+
+# Common exceptions to be catch
+Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
+                    Pyro.errors.CommunicationError, \
+                    Pyro.errors.DaemonError, Pyro.errors.ConnectionClosedError, \
+                    Pyro.errors.TimeoutError)

@@ -41,10 +41,11 @@ from shinken.pyro_wrapper import Pyro
 from shinken.external_command import ExternalCommand
 
 # Pack of common Pyro exceptions
-Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
-                    Pyro.errors.CommunicationError, \
-                    Pyro.errors.DaemonError, Pyro.errors.TimeoutError)
+#Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
+#                    Pyro.errors.CommunicationError, \
+#                    Pyro.errors.DaemonError, Pyro.errors.TimeoutError)
 
+from shinken.pyro_wrapper import Pyro_exp_pack
 
 # Our main APP class
 class Broker(BaseSatellite):
