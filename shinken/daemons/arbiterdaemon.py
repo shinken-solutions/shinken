@@ -182,8 +182,9 @@ class Arbiter(Daemon):
 
     # Our links to satellites can raise broks. We must send them
     def get_broks_from_satellitelinks(self):
-        tabs = [self.conf.brokers, self.conf.schedulerlinks, \
-                    self.conf.pollers, self.conf.reactionners]
+        tabs = [self.conf.brokers, self.conf.schedulerlinks,
+                    self.conf.pollers, self.conf.reactionners,
+                self.conf.receivers]
         for tab in tabs:
             for s in tab:
                 new_broks = s.get_all_broks()
@@ -193,8 +194,9 @@ class Arbiter(Daemon):
 
     # Our links to satellites can raise broks. We must send them
     def get_initial_broks_from_satellitelinks(self):
-        tabs = [self.conf.brokers, self.conf.schedulerlinks, \
-                    self.conf.pollers, self.conf.reactionners]
+        tabs = [self.conf.brokers, self.conf.schedulerlinks,
+                self.conf.pollers, self.conf.reactionners,
+                self.conf.receivers]
         for tab in tabs:
             for s in tab:
                 b  = s.get_initial_status_brok()
