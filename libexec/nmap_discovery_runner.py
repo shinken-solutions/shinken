@@ -136,8 +136,8 @@ class DetectedHost:
 
 
     # Fill the different os possibilities
-    def add_os_possibility(self, os, osgen, accuracy):
-        self.os_possibilities.append( (os, osgen, accuracy) )
+    def add_os_possibility(self, os, osgen, accuracy, os_type, vendor):
+        self.os_possibilities.append( (os, osgen, accuracy, os_type, vendor) )
 
 
     # We search if our potential parent is present in the
@@ -163,48 +163,35 @@ class DetectedHost:
     def compute_os(self):
         self.os_name = 'Unknown OS'
         self.os_version = 'Unknown Version'
+        self.os_type = 'Unknown Type'
+        self.os_vendor = 'Unknown Vendor'
 
-        # bailout if we got no os :(
+        # Bailout if we got no os :(
         if len(self.os_possibilities) == 0:
             return
 
         max_accuracy = 0
-        for (os, osgen, accuracy) in self.os_possibilities:
+        for (os, osgen, accuracy , os_type, vendor) in self.os_possibilities:
             if accuracy > max_accuracy:
                 max_accuracy = accuracy
 
-        # now get the entry with the max value
-        for (os, osgen, accuracy) in self.os_possibilities:
-            print "Can be", (os, osgen, accuracy)
+        # now get the entry with the max value, the first one
+        for (os, osgen, accuracy, os_type, vendor) in self.os_possibilities:
+            print "Can be", (os, osgen, accuracy, os_type, vendor)
             if accuracy == max_accuracy:
-                self.os = (os, osgen)
+                self.os = (os, osgen, os_type, vendor)
+                break
 
-        print "Try to match", self.os
+        print "Will dump", self.os
 
-        #Ok, unknown os... not good
-        if self.os == ('', ''):
-            return
-
-        map = {('Windows', '2000') : 'windows',
-               ('Windows', '2003') : 'windows',
-               ('Windows', '7') : 'windows',
-               ('Windows', 'XP') : 'windows',
-               # ME? you are a stupid moron!
-               ('Windows', 'Me') : 'windows',
-               ('Windows', '2008') : 'windows',
-               # that's a good boy :)
-               ('Linux', '2.6.X') : 'linux',
-               ('Linux', '2.4.X') : 'linux',
-               # HPUX? I think you didn't choose...
-               ('HP-UX', '11.X') : 'hpux',
-               ('HP-UX', '10.X') : 'hpux',
-               }
-
-        if self.os not in map:
+        # Ok, unknown os... not good
+        if self.os == ('', '', '', ''):
             return
         
-        self.os_name = map[self.os]
-        self.os_version = self.os[1]
+        self.os_name = self.os[0].lower()
+        self.os_version = self.os[1].lower()
+        self.os_type = self.os[2].lower()
+        self.os_vendor = self.os[3].lower()
 
 
     # Return the string of the 'discovery' items
@@ -231,7 +218,9 @@ class DetectedHost:
     # for system output
     def get_discovery_system(self):
         r = '%s::os=%s' % (self.get_name(), self.os_name)+'\n'
-        r += '%s::osversion=%s' % (self.get_name(), self.os_version)
+        r += '%s::osversion=%s' % (self.get_name(), self.os_version)+'\n'
+        r += '%s::ostype=%s' % (self.get_name(), self.os_type)+'\n'
+        r += '%s::osvendor=%s' % (self.get_name(), self.os_vendor)
         return r
         
     def get_discovery_macvendor(self):
@@ -318,7 +307,7 @@ for h in hosts:
             dh.ip = addr.attrib['addr']
         if addrtype == "mac":
             if 'vendor' in addr.attrib:
-                dh.mac_vendor = addr.attrib['vendor']
+                dh.mac_vendor = addr.attrib['vendor'].lower()
 
 
     # Now we've got the hostnames
@@ -361,12 +350,11 @@ for h in hosts:
         #print "Class", c.__dict__
         family = c.attrib['osfamily']
         accuracy = c.attrib['accuracy']
-        if 'osgen' in c.attrib:
-            osgen = c.attrib['osgen']
-        else:
-            osgen = None
+        osgen = c.attrib.get('osgen', '')
+        os_type = c.attrib.get('type', '')
+        vendor = c.attrib.get('vendor', '')
         #print "Type:", family, osgen, accuracy
-        dh.add_os_possibility(family, osgen, accuracy)
+        dh.add_os_possibility(family, osgen, accuracy, os_type, vendor)
     # Ok we can compute our OS now :)
     dh.compute_os()
 
