@@ -724,7 +724,7 @@ function prerequisites(){
 	case $CODE in
 		REDHAT)
 			case $VERS in
-				5)
+				[5-6])
 					PACKAGES=$YUMPKGS
 					QUERY="rpm -q "
 					cd $TMP
@@ -743,10 +743,10 @@ function prerequisites(){
 						cecho " > $EPELPKG allready installed" green 
 					fi
 					;;
-				6)
-					PACKAGES=$YUMPKGS
-					QUERY="rpm -q "
-					;;
+#				6)
+#					PACKAGES=$YUMPKGS
+#					QUERY="rpm -q "
+#					;;
 				*)
 					cecho " > Unsupported RedHat/CentOs version" red
 					exit 2
@@ -1255,7 +1255,8 @@ function install_nagios-plugins(){
 
 	if [ "$CODE" == "REDHAT" ]
 	then
-		cecho " > Unsuported" red
+		cecho " > installing prerequisites" green
+		yum install -yq $NAGPLUGYUMPKG  > /dev/null 2>&1
 	else
 		cecho " > installing prerequisites" green 
 		sudo apt-get -y install $NAGPLUGAPTPKG > /dev/null 2>&1
@@ -1271,6 +1272,7 @@ function install_nagios-plugins(){
 	tar zxvf nagios-plugins-$NAGPLUGVERS.tar.gz > /dev/null 2>&1
 	cd nagios-plugins-$NAGPLUGVERS
 	cecho " > Configure source tree" green
+	echo "./configure --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP --enable-libtap --enable-extra-opts --prefix=$TARGET" > /dev/null 2>&1
 	./configure --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP --enable-libtap --enable-extra-opts --prefix=$TARGET > /dev/null 2>&1
 	cecho " > Building ...." green
 	make > /dev/null 2>&1
