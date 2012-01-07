@@ -94,4 +94,5 @@ test_inheritance_and_plus.py
 test_module_ip_tag.py
 test_dot_virg_in_command.py
 test_bad_escalation_on_groups.py
+test_no_host_template.py
 test_parse_perfdata.py

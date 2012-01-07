@@ -267,6 +267,9 @@ class ObjectsCacheFile:
                                     ['%s' % x for x in value if not isinstance(x, list)])
                             else:
                                 #ok not a direct function, maybe a functin provided by value...
+                                # DBG : lmimoza
+                                if not hasattr(value, f):
+                                    print "DBG"*10, "object", value, type(value), 'is missing', f
                                 f = getattr(value, f)
                                 if callable(f):
                                     value = f()

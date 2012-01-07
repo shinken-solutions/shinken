@@ -77,9 +77,7 @@ from shinken.eventhandler import EventHandler
 from shinken.external_command import ExternalCommand
 
 # Pack of common Pyro exceptions
-Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
-                    Pyro.errors.CommunicationError, \
-                    Pyro.errors.DaemonError, Pyro.errors.ConnectionClosedError)
+from shinken.pyro_wrapper import Pyro_exp_pack
 
 
 # Class for say we are facing a non worker module

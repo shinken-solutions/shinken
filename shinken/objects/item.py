@@ -681,8 +681,8 @@ class Items(object):
                     # add the template object to us
                     new_tpls.append(t)
                 else: # not find? not good!
-                    err = "ERROR: the template '%s' defined for '%s' is unknown" % (tpl, i.get_name())
-                    i.configuration_errors.append(err)
+                    err = "WARNING: the template '%s' defined for '%s' is unknown" % (tpl, i.get_name())
+                    i.configuration_warnings.append(err)
             i.templates = new_tpls
 
         # Now we will create the template graph, so
@@ -1367,7 +1367,6 @@ def hg_name_get_groupnames(all_res, hosts, hostgroups, res=None, look_in='hostgr
                 # So first find the template, and then get all it's
                 # hosts
                 members = hosts.find_hosts_that_use_template(tok)
-                print "GOT COMPLEX HOST MEMBERS", members
             # TODO: check why:
             # sometimes we get a list, sometimes we get a string of hosts name which are ',' separated..
             if isinstance(members, list):
