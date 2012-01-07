@@ -132,7 +132,6 @@ class Webui_broker(BaseModule, Daemon):
             print s
         del self.debug_output
 
-        self.log = logger
         self.check_photo_dir()
         self.rg = Regenerator()
         self.datamgr = datamgr
