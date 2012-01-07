@@ -1,4 +1,4 @@
-/*Copyright (C) 2009-2011 :
+/*Copyright (C) 2009-2012 :
      Gabes Jean, naparuba@gmail.com
      Gerhard Lausser, Gerhard.Lausser@consol.de
      Gregory Starck, g.starck@gmail.com
@@ -30,7 +30,7 @@ window.addEvent('domready', function() {
         'false': 'close'
     };
     // -- vertical
-    var myVerticalSlide = new Fx.Slide('vertical_slide').hide();
+    var myVerticalSlide = new Fx.Slide('gesture_slide').hide();
 
     $('v_toggle').addEvent('click', function(event){
         event.stop();
