@@ -171,7 +171,7 @@ Known bugs
 None we know :)
 
 If you find one, please post it in our trac site:
-https://sourceforge.net/apps/trac/shinken/report/2
+https://github.com/naparuba/shinken/issues
 
 
 How to run uninstall Shinken
