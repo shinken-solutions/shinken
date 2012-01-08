@@ -358,7 +358,7 @@ class Helper(object):
 
             # If we are the root, we already got this
             if level != 0:
-                s += """<a id="togglelink-%s" href="javascript:toggleBusinessElt('%s')"><img id="business-parents-img-%s" src="/static/images/%s" alt=""> </a> \n""" % (name, name, name, img)
+                s += """<a id="togglelink-%s" href="javascript:toggleBusinessElt('%s')"><img id="business-parents-img-%s" src="/static/images/%s" alt="toggle"> </a> \n""" % (name, name, name, img)
                 
             s += """<ul id="business-parents-%s" style="display: %s; ">""" % (name, display)
         
@@ -370,6 +370,47 @@ class Helper(object):
         safe_print("Returing s:", s)
         return s
 
+    # Mockup helper
+    # User: Frescha
+    # Date: 08.01.2012
+    
+    def print_business_tree(self, tree, level=0):
+        safe_print("Should print tree", tree)
+        node = tree['node']
+        name = node.get_full_name()
+        fathers = tree['fathers']
+        s = ''
+        # Do not print the node if it's the root one, we already know its state!
+        if level != 0:
+            s += "%s is %s since %s\n" % (self.get_link(node), node.state, self.print_duration(node.last_state_change, just_duration=True))
+
+        # If we got no parents, no need to print the expand icon
+        if len(fathers) > 0:
+            # We look if the below tree is goodor not
+            tree_is_good = (node.state_id == 0)
+            
+            # If the tree is good, we will use an expand image
+            # and hide the tree
+            if tree_is_good:
+                display = 'none'
+                img = 'expand.png'
+            else: # we will already show the tree, and use a reduce image
+                display = 'block'
+                img = 'reduce.png'
+
+            # If we are the root, we already got this
+            if level != 0:
+                s += """<a id="togglelink-%s" href="javascript:toggleBusinessElt('%s')"><img id="business-parents-img-%s" src="/static/images/%s" alt="toggle"> </a> \n""" % (name, name, name, img)
+                
+            s += """<ul id="business-parents-%s" class="treeview" style="display: %s; ">""" % (name, display)
+        
+            for n in fathers:
+                sub_node = n['node']
+                sub_s = self.print_business_rules(n, level=level+1)
+                s += '<li class="%s">%s</li>' % (self.get_small_icon_state(sub_node), sub_s)
+            s += "</ul>"
+        safe_print("Returing s:", s)
+        return s    
 
     # Get the small state for host/service icons
     # and satellites ones

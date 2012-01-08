@@ -364,3 +364,38 @@
 	padding:4px 6px 4px 6px;
 	margin:0px 0px 4px 0px;
 }
+
+/* ----------------------------------------------------------------
+ *  Tree menu
+ * ----------------------------------------------------------------*/
+.treeview {
+	margin-top: 15px;
+	color: #787878;
+}
+
+.treeview ul{ /*CSS for Simple Tree Menu*/
+	margin: 0;
+	padding: 0;
+}
+
+.treeview li{ /*Style for LI elements in general (excludes an LI that contains sub lists)*/
+	background: white url(list.gif) no-repeat left center;
+	list-style-type: none;
+	padding-left: 22px;
+	margin-bottom: 3px;
+}
+
+.treeview li.submenu{ /* Style for LI that contains sub lists (other ULs). */
+	background: white url(closed.gif) no-repeat left 1px;
+	cursor: hand !important;
+	cursor: pointer !important;
+}
+
+
+.treeview li.submenu ul{ /*Style for ULs that are children of LIs (submenu) */
+	display: none; /*Hide them by default. Don't delete. */
+}
+
+.treeview .submenu ul li{ /*Style for LIs of ULs that are children of LIs (submenu) */
+	cursor: default;
+}

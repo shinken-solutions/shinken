@@ -264,6 +264,10 @@ td.actions a {
 	float:right;
 }
 
+.link {
+	border-bottom: 1px dotted #787878;
+}
+
 .no_border {
     border-top: 0px;
     border-left: 0px;

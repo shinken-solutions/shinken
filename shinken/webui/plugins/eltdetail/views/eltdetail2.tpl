@@ -88,7 +88,7 @@ Invalid element name
 		    %# End of the host only case, so now service
 		    %else:
 			 	<dt>Host:</dt>
-		         <dd><a href="/host/{{elt.host.host_name}}">{{elt.host.host_name}}</a></dd>
+		         <dd><a href="/host/{{elt.host.host_name}}" class="link">{{elt.host.host_name}}</a></dd>
 		         <dt>Members of:</dt>
 		         %if len(elt.servicegroups) > 0:
 		         <dd> {{','.join([sg.get_name() for sg in elt.servicegroups])}}</dd>
@@ -326,8 +326,8 @@ Invalid element name
 						    <div class="content">
 						    	%#    Now print the dependencies if we got somes
 								%if len(elt.parent_dependencies) > 0:
-									<a id="togglelink-{{elt.get_dbg_name()}}" href="javascript:toggleBusinessElt('{{elt.get_dbg_name()}}')"> {{!helper.get_button('Show dependency tree', img='/static/images/expand.png')}}</a>
-							      		{{!helper.print_business_rules(datamgr.get_business_parents(elt))}}
+									<!--<a id="togglelink-{{elt.get_dbg_name()}}" href="javascript:toggleBusinessElt('{{elt.get_dbg_name()}}')"> {{!helper.get_button('Show dependency tree', img='/static/images/expand.png')}}</a>-->
+							      		{{!helper.print_business_tree(datamgr.get_business_parents(elt))}}
 								%end
 						    </div>
 						    <div class="content">
