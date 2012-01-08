@@ -1312,60 +1312,60 @@ function install_check_wmi_plus(){
 
 	if [ "$CODE" == "REDHAT" ]
 	then
-		cecho " > Unsuported" red
+		cecho " > installing prerequisites" green 
+		yum -yq install $WMICYUMPKG >> /tmp/shinken.install.log 2>&1 
 	else
 		cecho " > installing prerequisites" green 
-		sudo apt-get -y install $WMICAPTPKG >> /tmp/shinken.install.log 2>&1 
-		cd /tmp
-		cecho " > Downloading wmic" green
-		filename=$(echo $WMIC | awk -F"/" '{print $NF}')
-		if [ ! -f $(echo $filename | sed -e "s/\.bz2//g") ]
-		then
-			wget $WGETPROXY $WMIC >> /tmp/shinken.install.log 2>&1 
-			bunzip2 $filename
-		else
-			rm -Rf $(echo $filename | sed -e "s/\.tar//g")
-		fi
-		if [ $? -ne 0 ]
-		then
-			cecho " > Error while downloading $filename" red
-			exit 2
-		fi
-		cecho " > Extracting archive " green
-		tar xvf $(echo $filename| sed -e "s/\.bz2//g") >> /tmp/shinken.install.log 2>&1 
-		cd $(echo $filename | sed -e "s/\.tar\.bz2//g")
-		cecho " > Building wmic" green
-		make >> /tmp/shinken.install.log 2>&1 
-		if [ $? -ne 0 ] 
-		then
-			cecho " > Error while building wmic" red
-			exit 2
-		fi
-		cecho " > Installing wmic" green
-		cp Samba/source/bin/wmic $TARGET/libexec/
-		chown $SKUSER:$SKGROUP Samba/source/bin/wmic
-		cd /tmp
-		cecho " > Downloading check_wmi_plus" green
-		filename=$(echo $CHECKWMIPLUS | awk -F"/" '{print $NF}')
-		folder=$(echo $filename | sed -e "s/\.tar\.gz//g")
-		if [ ! -f "$filename" ]
-		then
-			wget $WGETPROXY $CHECKWMIPLUS >> /tmp/shinken.install.log 2>&1  
-		fi
-		cecho " > Extracting archive" green
-		tar zxvf $filename >> /tmp/shinken.install.log 2>&1 
-		cecho " > Installing plugin" green
-		cp check_wmi_plus.conf.sample $TARGET/libexec/check_wmi_plus.conf 
-		cp check_wmi_plus.pl $TARGET/libexec/check_wmi_plus.pl
-		cp -R /tmp/check_wmi_plus.d $TARGET/libexec/
-		chown $SKUSER:$SKGROUP $TARGET/libexec/check_wmi_plus* 
-		cecho " > configuring plugin" green
-		sed -i "s#/usr/lib/nagios/plugins#"$TARGET"/libexec#g" $TARGET/libexec/check_wmi_plus.conf
-		sed -i "s#/bin/wmic#"$TARGET"/libexec/wmic#g" $TARGET/libexec/check_wmi_plus.conf
-		sed -i "s#/opt/nagios/bin/plugins#"$TARGET"/libexec#g" $TARGET/libexec/check_wmi_plus.pl
-		sed -i "s#/usr/lib/nagios/plugins#"$TARGET"/libexec#g" $TARGET/libexec/check_wmi_plus.pl
-		
+		sudo apt-get -y install $WMICAPTPKG >> /tmp/shinken.install.log 2>&1
+	fi 
+	cd /tmp
+	cecho " > Downloading wmic" green
+	filename=$(echo $WMIC | awk -F"/" '{print $NF}')
+	if [ ! -f $(echo $filename | sed -e "s/\.bz2//g") ]
+	then
+		wget $WGETPROXY $WMIC >> /tmp/shinken.install.log 2>&1 
+		bunzip2 $filename
+	else
+		rm -Rf $(echo $filename | sed -e "s/\.tar//g")
 	fi
+	if [ $? -ne 0 ]
+	then
+		cecho " > Error while downloading $filename" red
+		exit 2
+	fi
+	cecho " > Extracting archive " green
+	tar xvf $(echo $filename| sed -e "s/\.bz2//g") >> /tmp/shinken.install.log 2>&1 
+	cd $(echo $filename | sed -e "s/\.tar\.bz2//g")
+	cecho " > Building wmic" green
+	make >> /tmp/shinken.install.log 2>&1 
+	if [ $? -ne 0 ] 
+	then
+		cecho " > Error while building wmic" red
+		exit 2
+	fi
+	cecho " > Installing wmic" green
+	cp Samba/source/bin/wmic $TARGET/libexec/
+	chown $SKUSER:$SKGROUP Samba/source/bin/wmic
+	cd /tmp
+	cecho " > Downloading check_wmi_plus" green
+	filename=$(echo $CHECKWMIPLUS | awk -F"/" '{print $NF}')
+	folder=$(echo $filename | sed -e "s/\.tar\.gz//g")
+	if [ ! -f "$filename" ]
+	then
+		wget $WGETPROXY $CHECKWMIPLUS >> /tmp/shinken.install.log 2>&1  
+	fi
+	cecho " > Extracting archive" green
+	tar zxvf $filename >> /tmp/shinken.install.log 2>&1 
+	cecho " > Installing plugin" green
+	cp check_wmi_plus.conf.sample $TARGET/libexec/check_wmi_plus.conf 
+	cp check_wmi_plus.pl $TARGET/libexec/check_wmi_plus.pl
+	cp -R /tmp/check_wmi_plus.d $TARGET/libexec/
+	chown $SKUSER:$SKGROUP $TARGET/libexec/check_wmi_plus* 
+	cecho " > configuring plugin" green
+	sed -i "s#/usr/lib/nagios/plugins#"$TARGET"/libexec#g" $TARGET/libexec/check_wmi_plus.conf
+	sed -i "s#/bin/wmic#"$TARGET"/libexec/wmic#g" $TARGET/libexec/check_wmi_plus.conf
+	sed -i "s#/opt/nagios/bin/plugins#"$TARGET"/libexec#g" $TARGET/libexec/check_wmi_plus.pl
+	sed -i "s#/usr/lib/nagios/plugins#"$TARGET"/libexec#g" $TARGET/libexec/check_wmi_plus.pl
 }
 
 # check_oracle_health
