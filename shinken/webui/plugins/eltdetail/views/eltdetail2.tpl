@@ -34,24 +34,23 @@ Invalid element name
 	</div>
 	
 	<div class="marginbottom">
-	    <a id="v_toggle" href="#">toggle</a> |
-	    <strong>status</strong>: <span id="vertical_status">open</span>
+	    <a id="v_toggle" href="#">toggle</a>
 	</div>
 	
-	<div id="vertical_slide" class="opacity_hover">
+	<div id="gesture_slide" class="grid_16 opacity_hover">
 	%#  "This is the background canvas for all gesture detection things " 
 	%# " Don't ask me why, but the size must be included in the
 	%# canvas line here or we got problem!"
-		<center><canvas id="canvas" width="200" height="200"  style="border: 1px solid black;"></canvas></center>
-		<div class="gesture_button">
+		<canvas id="canvas" class="grid_10" style="border: 1px solid black; width: 100%;"></canvas>
+		<li class="gesture_button">
 	       	<img title="By keeping a left click pressed and drawing a check, you will launch an acknowledgement." src="/static/eltdetail/images/gesture-check.png"/> Acknowledge
-		</div>
-		<div class="gesture_button">
+		</li>
+		<li class="gesture_button">
 	       	<img title="By keeping a left click pressed and drawing a check, you will launch an recheck." src="/static/eltdetail/images/gesture-circle.png"/> Recheck
-		</div>
-		<div class="gesture_button">
+		</li>
+		<li class="gesture_button">
 	       	<img title="By keeping a left click pressed and drawing a check, you will launch a try to fix command." src="/static/eltdetail/images/gesture-zigzag.png"/> Fix
-		</div>
+		</li>
 	</div>	    
 	
 </div>
@@ -89,7 +88,7 @@ Invalid element name
 		    %# End of the host only case, so now service
 		    %else:
 			 	<dt>Host:</dt>
-		         <dd> {{elt.host.host_name}}</dd>
+		         <dd><a href="/host/{{elt.host.host_name}}">{{elt.host.host_name}}</a></dd>
 		         <dt>Members of:</dt>
 		         %if len(elt.servicegroups) > 0:
 		         <dd> {{','.join([sg.get_name() for sg in elt.servicegroups])}}</dd>
@@ -151,7 +150,9 @@ Invalid element name
 		<div id="demo" class="grid_16">
 						    <ul class="tabs">
 						        <li class="tab icon_summary"><span>Summary</span></li>
+						        %if elt_type=='host':
 						        <li class="tab icon_service"><span>Services</span></li>
+						        %end
 						        <li class="tab icon_comment"><span>Comments/Downtimes</span></li>
 						        <li class="tab icon_dependency"><span>Dependency Cloud</span></li>
 						        <li class="tab icon_graph"><span>Graphs</span></li>
@@ -212,13 +213,8 @@ Invalid element name
 							</div>
 		
 						    </div>
+							%if elt_type=='host':
 						    <div class="content">
-								%#    Now print the dependencies if we got somes
-								%if len(elt.parent_dependencies) > 0:
-									<a id="togglelink-{{elt.get_dbg_name()}}" href="javascript:toggleBusinessElt('{{elt.get_dbg_name()}}')"> {{!helper.get_button('Show dependency tree', img='/static/images/expand.png')}}</a>
-							      		{{!helper.print_business_rules(datamgr.get_business_parents(elt))}}
-								%end
-							
 								%# " Only print host service if elt is an host of course"
 								%# " If the host is a problem, services will be print in the impacts, so don't"
 								%# " print twice "
@@ -226,7 +222,8 @@ Invalid element name
 								%if elt_type=='host' and not elt.is_problem:
 							        <hr>
 							
-							        <div class='host-services'>
+							        <!--<div class='host-services'>-->
+									<div>
 									<h3> Services </h3>
 									%nb = 0
 									%for s in helper.get_host_services_sorted(elt):
@@ -257,10 +254,12 @@ Invalid element name
 									%# End of this service
 									%end
 								</div>
-							     	%end #of the only host part			
+							    
+							    %end #of the only host part			
 							
 								%if elt.is_problem and len(elt.impacts) != 0:
-								<div class='host-services'>
+								<div>
+								<!--<div class='host-services'>-->
 									<h4 style="margin-bottom: 5px;"> Impacts </h4>
 								%nb = 0
 								%for i in helper.get_impacts_sorted(elt):
@@ -287,8 +286,8 @@ Invalid element name
 								</div>
 							%# end of the 'is problem' if
 							%end
-									
 						    </div>
+						    %end
 						    <div class="content">
 						       	<div class="tabcontent">
 									<h2 style="display: none"><a name="comment" id="comment">Comments</a></h2>
@@ -325,7 +324,11 @@ Invalid element name
 								</div>
 						    </div>
 						    <div class="content">
-						        Lorem Ipsum ....
+						    	%#    Now print the dependencies if we got somes
+								%if len(elt.parent_dependencies) > 0:
+									<a id="togglelink-{{elt.get_dbg_name()}}" href="javascript:toggleBusinessElt('{{elt.get_dbg_name()}}')"> {{!helper.get_button('Show dependency tree', img='/static/images/expand.png')}}</a>
+							      		{{!helper.print_business_rules(datamgr.get_business_parents(elt))}}
+								%end
 						    </div>
 						    <div class="content">
 						    	<h2 style="display: none"><a name="graphs" id="graph">Graphs</a></h2>

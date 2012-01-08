@@ -39,7 +39,7 @@ properties = {
 
 from shinken.db_mysql import DBMysql
 from shinken.basemodule import BaseModule
-
+from shinken.log import logger
 
 
 def de_unixify(t):
@@ -78,7 +78,7 @@ class Ndodb_Mysql_broker(BaseModule):
     # TODO : add conf param to get pass with init
     # Conf from arbiter!
     def init(self):
-        print "I connect to NDO database"
+        logger.log("I connect to NDO database")
         self.db = DBMysql(self.host, self.user, self.password, self.database, 
                           self.character_set, table_prefix='nagios_', port=self.port)
         self.connect_database()
@@ -97,7 +97,7 @@ class Ndodb_Mysql_broker(BaseModule):
             self.centreon_version = False
         else:
             self.centreon_version = True
-            print "NDO/Mysql : using the centreon version"
+            logger.log("[MySQL/NDO] Using the centreon version")
 
         # Cache for database id
         # In order not to query the database every time
@@ -158,7 +158,7 @@ class Ndodb_Mysql_broker(BaseModule):
         try :
             self.db.connect_database()
         except _mysql_exceptions.OperationalError as exp:
-            print "[MysqlDB] Module raise an exception : %s . Please check the arguments!" % exp
+            logger.log( "[MySQL/NDO] Module raise an exception : %s . Please check the arguments!" % exp)
             raise
 
 
@@ -340,7 +340,7 @@ class Ndodb_Mysql_broker(BaseModule):
             res.append(q)
 
         # We also clean cache, because we are not sure about this data now
-        print "[MySQL/NDO] Flushing caches (clean from instance %d)" % instance_id
+        logger.log("[MySQL/NDO] Flushing caches (clean from instance %d)" % instance_id)
         self.services_cache_sync = {}
         self.hosts_cache_sync = {}
 
@@ -935,7 +935,7 @@ class Ndodb_Mysql_broker(BaseModule):
     def manage_notification_raise_brok(self, b):
 
         data = b.data
-        print "CREATING A NOTIFICATION", data
+        #print "CREATING A NOTIFICATION", data
         if data['service_description'] != '':
              service_id = self.get_service_object_id_by_name_sync(data['host_name'], data['service_description'],data['instance_id'])
         else:
