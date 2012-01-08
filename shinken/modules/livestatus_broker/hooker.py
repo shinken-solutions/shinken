@@ -27,6 +27,7 @@ class Hooker:
     def make_hook(self, hook, prop, default, func, as_prop):
 
         def hook_get_prop(elt):
+            print "i return prop %s from %s %s is %s" % (prop, type(elt), elt, getattr(elt, prop, default))
             return getattr(elt, prop, default)
 
 

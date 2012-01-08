@@ -40,7 +40,7 @@ from shinken.util import safe_print
 
 # Class for a Regenerator. It will get broks, and "regenerate" real obejcts
 # from them :)
-class Regenerator:
+class Regenerator(object):
     def __init__(self):
 
         # Our Real datas
