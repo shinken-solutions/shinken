@@ -1459,37 +1459,40 @@ function install_check_mysql_health(){
 
 	if [ "$CODE" == "REDHAT" ]
 	then
-		cecho " > Unsuported" red
+		cecho " > Installing prerequisites" green
+		yum -yq install $CHECKMYSQLHEALTHYUMPKG >> /tmp/shinken.install.log
 	else
-		cd /tmp
-		cecho " > Downloading check_mysql_health" green
-		wget $WGETPROXY $CHECKMYSQLHEALTH >> /tmp/shinken.install.log 2>&1 
-		if [ $? -ne 0 ]
-		then
-			cecho " > Error while downloading $filename" red
-			exit 2
-		fi
-		cecho " > Extracting archive " green
-		filename=$(echo $CHECKMYSQLHEALTH | awk -F"/" '{print $NF}')
-		tar zxvf $filename >> /tmp/shinken.install.log 2>&1 
-		cd $(echo $filename | sed -e "s/\.tar\.gz//g")
-		./configure --prefix=$TARGET --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP --with-mymodules-dir=$TARGET/libexec --with-mymodules-dyn-dir=$TARGET/libexec --with-statefiles-dir=$TARGET/var/tmp >> /tmp/shinken.install.log 2>&1 
-		cecho " > Building plugin" green
-		make >> /tmp/shinken.install.log 2>&1 
-		if [ $? -ne 0 ] 
-		then
-			cecho " > Error while building check_mysql_health module" red
-			exit 2
-		fi
-		make check >> /tmp/shinken.install.log 2>&1 	
-		if [ $? -ne 0 ]
-		then
-			cecho " > Error while building check_mysql_health module" red
-			exit 2
-		fi
-		cecho " > Installing plugin" green
-		make install >> /tmp/shinken.install.log 2>&1 
+		cecho " > Installing prerequisites" green
+		yum -yq install $CHECKMYSQLHEALTHAPTPKG >> /tmp/shinken.install.log
 	fi
+	cd /tmp
+	cecho " > Downloading check_mysql_health" green
+	wget $WGETPROXY $CHECKMYSQLHEALTH >> /tmp/shinken.install.log 2>&1 
+	if [ $? -ne 0 ]
+	then
+		cecho " > Error while downloading $filename" red
+		exit 2
+	fi
+	cecho " > Extracting archive " green
+	filename=$(echo $CHECKMYSQLHEALTH | awk -F"/" '{print $NF}')
+	tar zxvf $filename >> /tmp/shinken.install.log 2>&1 
+	cd $(echo $filename | sed -e "s/\.tar\.gz//g")
+	./configure --prefix=$TARGET --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP --with-mymodules-dir=$TARGET/libexec --with-mymodules-dyn-dir=$TARGET/libexec --with-statefiles-dir=$TARGET/var/tmp >> /tmp/shinken.install.log 2>&1 
+	cecho " > Building plugin" green
+	make >> /tmp/shinken.install.log 2>&1 
+	if [ $? -ne 0 ] 
+	then
+		cecho " > Error while building check_mysql_health module" red
+		exit 2
+	fi
+	make check >> /tmp/shinken.install.log 2>&1 	
+	if [ $? -ne 0 ]
+	then
+		cecho " > Error while building check_mysql_health module" red
+		exit 2
+	fi
+	cecho " > Installing plugin" green
+	make install >> /tmp/shinken.install.log 2>&1 
 }
 
 # Check if we launch the script with root privileges (aka sudo)
