@@ -1390,64 +1390,66 @@ function install_check_oracle_health(){
 
 	if [ "$CODE" == "REDHAT" ]
 	then
-		cecho " > Unsuported" red
+		cecho " > installing prerequisites" green 
+		sudo apt-get -y install $CHECKORACLEHEALTHYUMPKG >> /tmp/shinken.install.log 2>&1 
 	else
 		cecho " > installing prerequisites" green 
 		sudo apt-get -y install $CHECKORACLEHEALTHAPTPKG >> /tmp/shinken.install.log 2>&1 
-		cecho " > installing cpan prerequisites" green
-		cd /tmp
-		for m in $CHECKORACLEHEALTHCPAN
-		do
-			filename=$(echo $m | awk -F"/" '{print $NF}')
-			if [ ! -f "$filename" ]
-			then
-				wget $WGETPROXY $m >> /tmp/shinken.install.log 2>&1 
-				if [ $? -ne 0 ]
-				then
-					cecho " > Error while downloading $m" red
-					exit 2
-				fi
-			fi	
-			tar zxvf $filename  >> /tmp/shinken.install.log 2>&1 
-			cd $(echo $filename | sed -e "s/\.tar\.gz//g")
-			perl Makefile.PL >> /tmp/shinken.install.log 2>&1 
-			make >> /tmp/shinken.install.log 2>&1 
+	fi
+	cecho " > installing cpan prerequisites" green
+	cd /tmp
+	for m in $CHECKORACLEHEALTHCPAN
+	do
+		filename=$(echo $m | awk -F"/" '{print $NF}')
+		if [ ! -f "$filename" ]
+		then
+			wget $WGETPROXY $m >> /tmp/shinken.install.log 2>&1 
 			if [ $? -ne 0 ]
 			then
-				cecho " > There was an error building module" red
+				cecho " > Error while downloading $m" red
 				exit 2
 			fi
-			make install  >> /tmp/shinken.install.log 2>&1 
-		done
-		cd /tmp
-		cecho " > Downloading check_oracle_health" green
-		wget $WGETPROXY $CHECKORACLEHEALTH >> /tmp/shinken.install.log 2>&1 
-		if [ $? -ne 0 ]
-		then
-			cecho " > Error while downloading $filename" red
-			exit 2
-		fi
-		cecho " > Extracting archive " green
-		filename=$(echo $CHECKORACLEHEALTH | awk -F"/" '{print $NF}')
-		tar zxvf $filename >> /tmp/shinken.install.log 2>&1 
+		fi	
+		tar zxvf $filename  >> /tmp/shinken.install.log 2>&1 
 		cd $(echo $filename | sed -e "s/\.tar\.gz//g")
-		./configure --prefix=$TARGET --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP --with-mymodules-dir=$TARGET/libexec --with-mymodules-dyn-dir=$TARGET/libexec --with-statefiles-dir=$TARGET/var/tmp >> /tmp/shinken.install.log 2>&1 
-		cecho " > Building plugin" green
+		perl Makefile.PL >> /tmp/shinken.install.log 2>&1 
 		make >> /tmp/shinken.install.log 2>&1 
-		if [ $? -ne 0 ] 
-		then
-			cecho " > Error while building check_oracle_health module" red
-			exit 2
-		fi
-		make check >> /tmp/shinken.install.log 2>&1 	
 		if [ $? -ne 0 ]
 		then
-			cecho " > Error while building check_oracle_health module" red
+			cecho " > There was an error building module" red
 			exit 2
 		fi
-		cecho " > Installing plugin" green
-		make install >> /tmp/shinken.install.log 2>&1 
+		make install  >> /tmp/shinken.install.log 2>&1 
+	done
+	cd /tmp
+	cecho " > Downloading check_oracle_health" green
+	wget $WGETPROXY $CHECKORACLEHEALTH >> /tmp/shinken.install.log 2>&1 
+	if [ $? -ne 0 ]
+	then
+		cecho " > Error while downloading $filename" red
+		exit 2
 	fi
+	cecho " > Extracting archive " green
+	filename=$(echo $CHECKORACLEHEALTH | awk -F"/" '{print $NF}')
+	tar zxvf $filename >> /tmp/shinken.install.log 2>&1 
+	cd $(echo $filename | sed -e "s/\.tar\.gz//g")
+	./configure --prefix=$TARGET --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP --with-mymodules-dir=$TARGET/libexec --with-mymodules-dyn-dir=$TARGET/libexec --with-statefiles-dir=$TARGET/var/tmp >> /tmp/shinken.install.log 2>&1 
+	cecho " > Building plugin" green
+	make >> /tmp/shinken.install.log 2>&1 
+	if [ $? -ne 0 ] 
+	then
+		cecho " > Error while building check_oracle_health module" red
+		exit 2
+	fi
+	make check >> /tmp/shinken.install.log 2>&1 	
+	if [ $? -ne 0 ]
+	then
+		cecho " > Error while building check_oracle_health module" red
+		exit 2
+	fi
+	cecho " > Installing plugin" green
+	make install >> /tmp/shinken.install.log 2>&1
+	mkdir -p $TARGET/var/tmp >> /tmp/shinke.install.log 2>&1 
 }
 
 # check_mysql_health
