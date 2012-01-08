@@ -682,7 +682,7 @@ class Livestatus_broker(BaseModule):
             try:
                 if logclass != LOGCLASS_INVALID:
                     self.db.execute('INSERT INTO LOGS VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', values)
-            except LivestatusDbEerror, e:
+            except LiveStatusDbEerror, e:
                 print "An error occurred:", e.args[0]
                 print "DATABASE ERROR!!!!!!!!!!!!!!!!!"
         self.livestatus.count_event('log_message')
