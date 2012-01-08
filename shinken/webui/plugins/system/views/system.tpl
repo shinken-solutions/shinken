@@ -3,7 +3,18 @@
 %from shinken.bin import VERSION
 %helper = app.helper
 
-<div id="system_overview" class="grid_16 item">
+%#  "Left Container Start"
+<div id="left_container" class="grid_2">
+	<div id="nav_left">
+		<ul>
+			<li><a href="/system">System</a></li>
+			<li><a href="/system/log">Log</a></li>
+		</ul>
+	</div>
+</div>
+%#  "Left Container End"
+
+<div id="system_overview" class="grid_14 item">
 	<h2>System Overview</h2>
 	<!-- stats overview start -->
 		<table style="width: 100%">
@@ -19,27 +30,13 @@
 			</tbody>
 		</table> 
 	<!-- stats overview end -->
-	<!--
-	<ul>
-		<li> <a href="#">Arbiter</a></li>
-		<li> <a href="#">State</a> </li>
-		<li> <a href="#">Name</a> </li>
-		<li> <a href="#">Alive</a> </li>
-		<li> <a href="#">Attempts</a> </li>
-		<li> <a href="#">Last Check</a> </li>
-		<li> <a href="#">Realm</a> </li>
-	</ul>
-	-->
 </div>
-
-
 
 <!-- System Detail START -->
 
-<div id="system_detail" class="grid_16">
-
+<div id="system_detail" class="grid_14">
 	<ul>
-		%types = [ ('scheduler', schedulers), ('poller', pollers), ('broker', brokers), ('reactionner', reactionners), ('receiver', receivers)]
+	%types = [ ('scheduler', schedulers), ('poller', pollers), ('broker', brokers), ('reactionner', reactionners), ('receiver', receivers)]
 	%for (sat_type, sats) in types:
 		<li class="grid_3">
 		<a  class="box_round_small">
@@ -70,8 +67,7 @@
  				%end
 		</a>
 		</li>
-			%# end of this satellite type
+		%# end of this satellite type
  	%end
 	</ul>
-
 </div>	
