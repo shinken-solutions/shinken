@@ -1135,19 +1135,16 @@ function install_multisite(){
 
 # pnp4nagios
 function install_pnp4nagios(){
+	cadre "Install pnp4nagios addon" green
 	if [ "$CODE" == "REDHAT" ]
 	then
-		cecho " > Unsuported" red
-		exit 2
+		cecho " > Installing prerequisites" green
+		yum -yq install $PNPYUMPKG >> /tmp/shinken.install.log 2>&1
+	else
+		cecho " > Installing prerequisites" green
+		apt-get -y install $PNPAPTPKG >> /tmp/shinken.install.log 2>&1
 	fi
-	cadre "Install pnp4nagios addon" green
 	cd /tmp
-	cecho " > Installing prerequisites" green
-	for p in $PNPAPTPKG
-	do
-		cecho " -> Installing $p" green
-		apt-get install -y $p >> /tmp/shinken.install.log 2>&1 
-	done
 
 	filename=$(echo $PNPURI | awk -F"/" '{print $NF}')
 	folder=$(echo $filename | sed -e "s/\.tar\.gz//g")
@@ -1164,9 +1161,14 @@ function install_pnp4nagios(){
 	fi 
 	tar zxvf $filename >> /tmp/shinken.install.log 2>&1 
 	cd $folder
-	cecho " > Enable mod rewrite for apache" green 
-	a2enmod rewrite >> /tmp/shinken.install.log 2>&1 
-	/etc/init.d/apache2 restart >> /tmp/shinken.install.log 2>&1 
+	#cecho " > Enable mod rewrite for apache" green 
+	#a2enmod rewrite >> /tmp/shinken.install.log 2>&1
+	if [ "$CODE" == "REDHAT" ]
+	then
+		/etc/init.d/httpd restart >> /tmp/shinken.install.log 2>&1
+	else
+		/etc/init.d/apache2 restart >> /tmp/shinken.install.log 2>&1 
+	fi
 	cecho " > Configuring source tree" green
 	./configure --prefix=$PNPPREFIX --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP >> /tmp/shinken.install.log 2>&1 	
 	cecho " > Building ...." green
@@ -1174,11 +1176,17 @@ function install_pnp4nagios(){
 	cecho " > Installing" green
 	make fullinstall >> /tmp/shinken.install.log 2>&1 
 	rm -f $PNPPREFIX/share/install.php
-        cecho " > fix htpasswd.users path" green
-        sed -i "s#/usr/local/nagios/etc/htpasswd.users#$TARGET/etc/htpasswd.users#g" /etc/apache2/conf.d/pnp4nagios.conf 
-	/etc/init.d/apache2 restart >> /tmp/shinken.install.log 2>&1 
+	if [ "$CODE" == "REDHAT" ]
+	then
+		cecho " > fix htpasswd.users path" green
+		sed -i "s#/usr/local/nagios/etc/htpasswd.users#$TARGET/etc/htpasswd.users#g" /etc/httpd/conf.d/pnp4nagios.conf 
+		/etc/init.d/apache2 restart >> /tmp/shinken.install.log 2>&1 
+	else
+		cecho " > fix htpasswd.users path" green
+		sed -i "s#/usr/local/nagios/etc/htpasswd.users#$TARGET/etc/htpasswd.users#g" /etc/apache2/conf.d/pnp4nagios.conf 
+		/etc/init.d/apache2 restart >> /tmp/shinken.install.log 2>&1 
+	fi
 	cecho " > Enable npcdmod" green
-
 	ip=$(ifconfig | grep "inet adr" | grep -v 127.0.0.1 | awk '{print $2}' | awk -F : '{print $2}' | head -n 1)
 	do_skmacro enable_npcd.macro $PNPPREFIX/etc/npcd.cfg,$ip 
 }
