@@ -73,6 +73,8 @@ class Discoveryrun(Item):
     def get_output(self):
         return '\n'.join([self.current_launch.output, self.current_launch.long_output])
 
+        
+
 
 class Discoveryruns(Items):
     name_property = "discoveryrun_name"
