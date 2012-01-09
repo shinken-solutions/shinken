@@ -550,8 +550,16 @@ class DiscoveryMerger:
 
 
     def get_runners_outputs(self):
+        for r in self.allowed_runners():
+            if r.is_finished():
+                print r.discoveryrun_name, r.current_launch
+                if r.current_launch.exit_status != 0:
+                    print "Error on run"
         self.raw_disco_data = '\n'.join(r.get_output() for r in self.allowed_runners() if r.is_finished())
-        print "Got Raw disco data", self.raw_disco_data
+        if len(self.raw_disco_data) != 0:
+            print "Got Raw disco data", self.raw_disco_data
+        else:
+            print "Got no data!"
 
 
     # Write all configuration we've got

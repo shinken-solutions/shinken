@@ -51,7 +51,6 @@ opts, args = parser.parse_args()
 
 if not opts.simulate:
     simulate = None
-    targets = ''
 else:
     simulate = opts.simulate
 
