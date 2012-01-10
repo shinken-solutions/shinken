@@ -302,7 +302,7 @@ class ExternalCommandManager:
                 f = getattr(self, c_name)
                 apply(f, args)
             else:
-                command = r['command']
+                command = r['cmd']
                 self.dispatch_global_command(command)
 
 
