@@ -1,6 +1,7 @@
 
 
 import os
+import time
 
 from shinken.bin import VERSION
 from shinken.macroresolver import MacroResolver
