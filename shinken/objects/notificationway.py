@@ -67,8 +67,13 @@ class NotificationWay(Item):
 
     #Search for notification_options with state and if t is
     #in service_notification_period
-    def want_service_notification(self, t, state, type, business_impact):
+    def want_service_notification(self, t, state, type, business_impact, cmd):
         if not self.service_notifications_enabled:
+            return False
+
+        # Maybe the command we ask for are not for us, but for another notification ways
+        # on the same contact. If so, bail out
+        if not cmd in self.service_notification_commands:
             return False
 
         # If the business_impact is not high enough, we bail out
@@ -100,12 +105,17 @@ class NotificationWay(Item):
 
     #Search for notification_options with state and if t is in
     #host_notification_period
-    def want_host_notification(self, t, state, type, business_impact):
+    def want_host_notification(self, t, state, type, business_impact, cmd):
         if not self.host_notifications_enabled:
             return False
 
         # If the business_impact is not high enough, we bail out
         if business_impact < self.min_business_impact:
+            return False
+
+        # Maybe the command we ask for are not for us, but for another notification ways
+        # on the same contact. If so, bail out
+        if not cmd in self.host_notification_commands:
             return False
 
         b = self.host_notification_period.is_time_valid(t)

@@ -105,9 +105,9 @@ class Contact(Item):
         return self.contact_name
 
 
-    #Search for notification_options with state and if t is
-    #in service_notification_period
-    def want_service_notification(self, t, state, type, business_impact):
+    # Search for notification_options with state and if t is
+    # in service_notification_period
+    def want_service_notification(self, t, state, type, business_impact, cmd):
         if not self.service_notifications_enabled:
             return False
 
@@ -116,9 +116,10 @@ class Contact(Item):
             if dt.is_in_effect:
                 return False
 
-        #Now the rest is for sub notificationways. If one is OK, we are ok
+        # Now the rest is for sub notificationways. If one is OK, we are ok
+        # We will filter in another phase
         for nw in self.notificationways:
-            nw_b = nw.want_service_notification(t, state, type, business_impact)
+            nw_b = nw.want_service_notification(t, state, type, business_impact, cmd)
             if nw_b:
                 return True
 
@@ -128,7 +129,7 @@ class Contact(Item):
 
     #Search for notification_options with state and if t is in
     #host_notification_period
-    def want_host_notification(self, t, state, type, business_impact):
+    def want_host_notification(self, t, state, type, business_impact, cmd):
         if not self.host_notifications_enabled:
             return False
 
@@ -137,9 +138,10 @@ class Contact(Item):
             if dt.is_in_effect:
                 return False
 
-        #Now it's all for sub notificationways. If one is OK, we are OK
+        # Now it's all for sub notificationways. If one is OK, we are OK
+        # We will filter in another phase
         for nw in self.notificationways:
-            nw_b = nw.want_host_notification(t, state, type, business_impact)
+            nw_b = nw.want_host_notification(t, state, type, business_impact, cmd)
             if nw_b:
                 return True
 
@@ -150,7 +152,7 @@ class Contact(Item):
     #Call to get our commands to launch a Notification
     def get_notification_commands(self, type):
         r = []
-        #service_notification_commands for service
+        # service_notification_commands for service
         notif_commands_prop = type+'_notification_commands'
         for nw in self.notificationways:
             r.extend(getattr(nw, notif_commands_prop))
