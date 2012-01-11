@@ -60,7 +60,7 @@ class Hostdependency(Item):
 class Hostdependencies(Items):
     def delete_hostsdep_by_id(self, ids):
         for id in ids:
-            del self.items[id]
+            del self[id]
 
 
     # We create new hostdep if necessery (host groups and co)

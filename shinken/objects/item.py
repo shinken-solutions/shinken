@@ -731,7 +731,7 @@ class Items(object):
         """ Remove useless templates (& properties) of our items ; otherwise we could get errors on config.is_correct() """
         tpls = [ i for i in self if i.is_tpl() ]
         for i in tpls:
-            del self.items[i.id]
+            del self[i.id]
         del self.templates
         del self.templates_graph
 
@@ -794,7 +794,7 @@ class Items(object):
             i = self.items[id]
             type = i.__class__.my_type
             safe_print('Warning: the', type, i.get_name(), 'is already defined.')
-            del self.items[id] # bye bye
+            del self[id] # bye bye
         # do not remove twins, we should look in it, but just void it
         self.twins = []
         #del self.twins #no more need

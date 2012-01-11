@@ -63,7 +63,7 @@ class Servicedependency(Item):
 class Servicedependencies(Items):
     def delete_servicesdep_by_id(self, ids):
         for id in ids:
-            del self.items[id]
+            del self[id]
 
 
     #Add a simple service dep from another (dep -> par)

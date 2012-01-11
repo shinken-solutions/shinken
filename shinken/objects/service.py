@@ -1059,7 +1059,7 @@ class Services(Items):
     # Delete services by ids
     def delete_services_by_id(self, ids):
         for id in ids:
-            del self.items[id]
+            del self[id]
 
 
     # Apply implicit inheritance for special properties:
