@@ -1,10 +1,32 @@
 #!/bin/bash
 
+# Copyright (C) 2009-2011 :
+#    Gabes Jean, naparuba@gmail.com
+#    Gerhard Lausser, Gerhard.Lausser@consol.de
+#    Gregory Starck, g.starck@gmail.com
+#    Hartmut Goebel, h.goebel@goebel-consult.de
+#
+# This file is part of Shinken.
+#
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+
+
 DIR=$(cd $(dirname "$0"); pwd)
 BIN=$DIR"/../bin"
 ETC=$DIR"/../etc"
 
 # needed because arbiter doesn't have a default 'workdir' "properties" attribute:
 cd "$DIR/../var"
-echo "Launching Arbiter (that reads the configuration and dispatches it)"
+echo "Launching Arbiter (which reads configuration and dispatches it)"
 $BIN/shinken-arbiter -d -c $ETC/nagios.cfg -c $ETC/shinken-specific.cfg

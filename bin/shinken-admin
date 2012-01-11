@@ -1,24 +1,26 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2011 :
+
+# Copyright (C) 2009-2011 :
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
 #    Hartmut Goebel, h.goebel@goebel-consult.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+
 
 import os
 import cmd 
@@ -71,7 +73,7 @@ class ShinkenAdmin(cmd.Cmd):
         cmd.Cmd.__init__(self)
         self.arb = None
     
-    # If we got no connexions, connect with a standard localhost one
+    # If we got no connections, connect with a standard localhost one
     def look_connexion(self):
         if not self.arb:
             self.do_connect('')
@@ -90,7 +92,7 @@ class ShinkenAdmin(cmd.Cmd):
         > connect
         '''
         line = line.strip()
-      	tokens = line.split(':')
+        tokens = line.split(':')
         if line == '':
             addr = 'localhost'
             port = '7770'
@@ -124,54 +126,54 @@ class ShinkenAdmin(cmd.Cmd):
         
         arbs = data['arbiter']
 
-	print "+-----------------------------------------------------------------+"
+        print "+-----------------------------------------------------------------+"
         print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} |".format("Arbiter", "address", "port", "alive", "reachable", "last_check")
-	print "+-----------------------------------------------------------------+"
+        print "+-----------------------------------------------------------------+"
         for a in arbs:
             print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} |".format(a.arbiter_name, a.address, a.port,
-									a.alive, a.reachable, get_since(a.last_check))
-	print "+-----------------------------------------------------------------+"
+                                    a.alive, a.reachable, get_since(a.last_check))
+        print "+-----------------------------------------------------------------+"
 
-	print "+-------------------------------------------------------------------------------+"
+        print "+-------------------------------------------------------------------------------+"
         print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} | {5:11} |".format("Scheduler", "address", "port", "alive", "reachable", "last_check")
-	print "+-------------------------------------------------------------------------------+"
+        print "+-------------------------------------------------------------------------------+"
         for s in data['scheduler']:
             print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} | {5:11} |".format(s.scheduler_name, s.address, s.port,
-									s.alive, s.reachable, get_since(s.last_check))
-	print "+-------------------------------------------------------------------------------+"
+                                    s.alive, s.reachable, get_since(s.last_check))
+        print "+-------------------------------------------------------------------------------+"
        
-	print "+-------------------------------------------------------------------------------+"
+        print "+-------------------------------------------------------------------------------+"
         print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} | {5:11} |".format("Poller", "address", "port", "alive", "reachable", "last_check")
-	print "+-------------------------------------------------------------------------------+"
+        print "+-------------------------------------------------------------------------------+"
         for s in data['poller']:
             print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} | {5:11} |".format(s.poller_name, s.address, s.port,
-                                                			s.alive, s.reachable, get_since(s.last_check))
-	print "+-------------------------------------------------------------------------------+"
+                                                            s.alive, s.reachable, get_since(s.last_check))
+        print "+-------------------------------------------------------------------------------+"
 
             
-	print "+-------------------------------------------------------------------------------+"
+        print "+-------------------------------------------------------------------------------+"
         print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} | {5:11} |".format("Reactionner", "address", "port", "alive", "reachable", "last_check")
-	print "+-------------------------------------------------------------------------------+"
+        print "+-------------------------------------------------------------------------------+"
         for s in data['reactionner']:
             print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} | {5:11} |".format(s.reactionner_name, s.address, s.port,
-                                                			s.alive, s.reachable, get_since(s.last_check))
-	print "+-------------------------------------------------------------------------------+"
+                                                            s.alive, s.reachable, get_since(s.last_check))
+        print "+-------------------------------------------------------------------------------+"
 
-	print "+-------------------------------------------------------------------------------+"
+        print "+-------------------------------------------------------------------------------+"
         print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} | {5:11} |".format("Broker", "address", "port", "alive", "reachable", "last_check")
-	print "+-------------------------------------------------------------------------------+"
+        print "+-------------------------------------------------------------------------------+"
         for s in data['broker']:
             print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} | {5:11} |".format(s.broker_name, s.address, s.port,
-									s.alive, s.reachable, get_since(s.last_check))
-	print "+-------------------------------------------------------------------------------+"
+                                    s.alive, s.reachable, get_since(s.last_check))
+        print "+-------------------------------------------------------------------------------+"
 
-	print "+-------------------------------------------------------------------------------+"
+        print "+-------------------------------------------------------------------------------+"
         print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} | {5:11} |".format("Receiver", "address", "port", "alive", "reachable", "last_check")
-	print "+-------------------------------------------------------------------------------+"
+        print "+-------------------------------------------------------------------------------+"
         for s in data['receiver']:
             print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} | {5:11} |".format(s.receiver_name, s.address, s.port,
-									s.alive, s.reachable, get_since(s.last_check))
-	print "+-------------------------------------------------------------------------------+"
+                                    s.alive, s.reachable, get_since(s.last_check))
+        print "+-------------------------------------------------------------------------------+"
 
         
 
@@ -204,67 +206,67 @@ class ShinkenAdmin(cmd.Cmd):
             f()
 
     def do_showconfig(self, line):
-	'''
-	Display daemon configuration
-	The column Default show that we are using default values when D is present 
-	Ex : show config poller will display configuration for all pollers
-	'''
-	from shinken.objects import Config
+        '''
+        Display daemon configuration
+        The column Default show that we are using default values when D is present 
+        Ex : show config poller will display configuration for all pollers
+        '''
+        from shinken.objects import Config
 
-	from shinken.arbiterlink import ArbiterLink
-	from shinken.schedulerlink import SchedulerLink 
-	from shinken.pollerlink import PollerLink 
-	from shinken.reactionnerlink import ReactionnerLink 
-	from shinken.brokerlink import BrokerLink 
-	from shinken.receiverlink import ReceiverLink 
+        from shinken.arbiterlink import ArbiterLink
+        from shinken.schedulerlink import SchedulerLink 
+        from shinken.pollerlink import PollerLink 
+        from shinken.reactionnerlink import ReactionnerLink 
+        from shinken.brokerlink import BrokerLink 
+        from shinken.receiverlink import ReceiverLink 
 
 
-	if line == "help" or line == "":
-		print "Usage : showconfig objecttype [objectname]"
-		print "Exemple : showconfig poller poller-1"
-	else:
-		type=line
-		self.look_connexion()
+        if line == "help" or line == "":
+            print "Usage : showconfig objecttype [objectname]"
+            print "Exemple : showconfig poller poller-1"
+        else:
+            type=line
+            self.look_connexion()
 
-		# get properties from link classes
-		if type == 'arbiter': 
-			o = ArbiterLink()
-                        cfglink = 'arbiterlinks'
-		elif type =='scheduler': 
-			o = SchedulerLink()
-                        cfglink = 'schedulerlinks'
-		elif type =='poller': 
-			o = PollerLink()
-                        cfglink = 'pollers'
-		elif type =='broker': 
-			o = BrokerLink()
-                        cfglink = 'brokers'
-		elif type =='reactionner': 
-			o = ReactionnerLink()
-                        cfglink = 'reactionners'
-		elif type =='receiver': 
-			o = ReceiverLink()
-                        cfglink = 'receivers'
-		else: 
-			print "Unknown object type : %s" % (type)
-			return False
+            # get properties from link classes
+            if type == 'arbiter': 
+                o = ArbiterLink()
+                cfglink = 'arbiterlinks'
+            elif type =='scheduler': 
+                o = SchedulerLink()
+                cfglink = 'schedulerlinks'
+            elif type =='poller': 
+                o = PollerLink()
+                cfglink = 'pollers'
+            elif type =='broker': 
+                o = BrokerLink()
+                cfglink = 'brokers'
+            elif type =='reactionner': 
+                o = ReactionnerLink()
+                cfglink = 'reactionners'
+            elif type =='receiver': 
+                o = ReceiverLink()
+                cfglink = 'receivers'
+            else: 
+                print "Unknown object type : %s" % (type)
+                return False
 
-                cfg = self.arb.get_config()
-                dlinks = getattr(cfg,cfglink)
-		
-                for d in dlinks:
-			print "+--------------------------------------------------------------------------------------+"
-			print "| Config for : {0:71} |".format(type)
-			print "+--------------------------------------------------------------------------------------+"
-			print "| {0:8} | {1:30} | {2:40} |".format("Default","Directive","Value" )
-			print "+--------------------------------------------------------------------------------------+"
-			
-			for key in o.properties.keys():
-				if hasattr(d,key):
-					print "| {0:8} | {1:30} | {2:40} |".format(" ",key,getattr(d,key))
-				else:
-					print "| {0:8} | {1:30} | {2:40} |".format("D",key,o.properties[key].default)
-			print "+--------------------------------------------------------------------------------------+"
+            cfg = self.arb.get_config()
+            dlinks = getattr(cfg,cfglink)
+            
+            for d in dlinks:
+                print "+--------------------------------------------------------------------------------------+"
+                print "| Config for : {0:71} |".format(type)
+                print "+--------------------------------------------------------------------------------------+"
+                print "| {0:8} | {1:30} | {2:40} |".format("Default","Directive","Value" )
+                print "+--------------------------------------------------------------------------------------+"
+                
+                for key in o.properties.keys():
+                    if hasattr(d,key):
+                        print "| {0:8} | {1:30} | {2:40} |".format(" ",key,getattr(d,key))
+                    else:
+                        print "| {0:8} | {1:30} | {2:40} |".format("D",key,o.properties[key].default)
+                print "+--------------------------------------------------------------------------------------+"
 
 
 
