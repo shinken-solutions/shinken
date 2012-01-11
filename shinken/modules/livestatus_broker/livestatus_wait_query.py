@@ -66,9 +66,12 @@ class LiveStatusWaitQuery(LiveStatusQuery):
             elif keyword == 'WaitObject': # Pick a specific object by name
                 cmd, object = self.split_option(line)
                 # It's like Filter: name = %s
-                # Only for services it's host<blank>servicedesc
+                # Only for services it's host<blank>servicedesc, or host;servicedesc
                 if self.table == 'services':
-                    host_name, service_description = object.split(';', 1)
+                    if ';' in object:
+                        host_name, service_description = object.split(';', 1)
+                    else:
+                        host_name, service_description = object.split(' ', 1)
                     self.filtercolumns.append('host_name')
                     self.prefiltercolumns.append('host_name')
                     self.filter_stack.put(self.make_filter('=', 'host_name', host_name))
