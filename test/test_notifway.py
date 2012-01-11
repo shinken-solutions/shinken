@@ -48,11 +48,18 @@ class TestConfig(ShinkenTest):
         for nw in self.sched.notificationways:
             print "\t", nw.notificationway_name
 
+
+
         email_in_day = self.sched.notificationways.find_by_name('email_in_day')
         self.assert_(email_in_day in contact.notificationways)
+        email_s_cmd = email_in_day.service_notification_commands.pop()
+        email_h_cmd = email_in_day.host_notification_commands.pop()
+        
 
         sms_the_night = self.sched.notificationways.find_by_name('sms_the_night')
         self.assert_(sms_the_night in contact.notificationways)
+        sms_s_cmd = sms_the_night.service_notification_commands.pop()
+        sms_h_cmd = sms_the_night.host_notification_commands.pop()
         
         # And check the criticity values
         self.assert_(email_in_day.min_business_impact == 0)
@@ -62,35 +69,40 @@ class TestConfig(ShinkenTest):
         print "Contact notification way(s) :"
         for nw in contact.notificationways:
             print "\t", nw.notificationway_name
+            for c in nw.service_notification_commands:
+                print "\t\t", c.get_name()
+
 
         contact_simple = self.sched.contacts.find_by_name("test_contact_simple")
-        #It's the created notifway for this simple contact
+        # It's the created notifway for this simple contact
         test_contact_simple_inner_notificationway = self.sched.notificationways.find_by_name("test_contact_simple_inner_notificationway")
         print "Simple contact"
         for nw in contact_simple.notificationways:
             print "\t", nw.notificationway_name
+            for c in nw.service_notification_commands:
+                print "\t\t", c.get_name()
         self.assert_(test_contact_simple_inner_notificationway in contact_simple.notificationways)
 
         # we take as criticity a huge value from now
         huge_criticity = 5
 
-        #Now all want* functions
-        #First is ok with warning alerts
+        # Now all want* functions
+        # First is ok with warning alerts
         self.assert_(email_in_day.want_service_notification(now, 'WARNING', 'PROBLEM', huge_criticity) == True)
 
-        #But a SMS is now WAY for warning. When we sleep, we wake up for critical only guy!
+        # But a SMS is now WAY for warning. When we sleep, we wake up for critical only guy!
         self.assert_(sms_the_night.want_service_notification(now, 'WARNING', 'PROBLEM', huge_criticity) == False)
 
-        #Same with contacts now
-        #First is ok for warning in the email_in_day nw
+        # Same with contacts now
+        # First is ok for warning in the email_in_day nw
         self.assert_(contact.want_service_notification(now, 'WARNING', 'PROBLEM', huge_criticity) == True)
-        #Simple is not ok for it
+        # Simple is not ok for it
         self.assert_(contact_simple.want_service_notification(now, 'WARNING', 'PROBLEM', huge_criticity) == False)
 
-        #Then for host notification
-        #First is ok for warning in the email_in_day nw
+        # Then for host notification
+        # First is ok for warning in the email_in_day nw
         self.assert_(contact.want_host_notification(now, 'FLAPPING', 'PROBLEM', huge_criticity) == True)
-        #Simple is not ok for it
+        # Simple is not ok for it
         self.assert_(contact_simple.want_host_notification(now, 'FLAPPING', 'PROBLEM', huge_criticity) == False)
 
         # And now we check that we refuse SMS for a low level criticity

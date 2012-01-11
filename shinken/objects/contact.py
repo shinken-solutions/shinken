@@ -107,7 +107,7 @@ class Contact(Item):
 
     # Search for notification_options with state and if t is
     # in service_notification_period
-    def want_service_notification(self, t, state, type, business_impact, cmd):
+    def want_service_notification(self, t, state, type, business_impact, cmd=None):
         if not self.service_notifications_enabled:
             return False
 
@@ -123,13 +123,13 @@ class Contact(Item):
             if nw_b:
                 return True
 
-        #Oh... no one is ok for it? so no, sorry
+        # Oh... no one is ok for it? so no, sorry
         return False
 
 
     #Search for notification_options with state and if t is in
     #host_notification_period
-    def want_host_notification(self, t, state, type, business_impact, cmd):
+    def want_host_notification(self, t, state, type, business_impact, cmd=None):
         if not self.host_notifications_enabled:
             return False
 
