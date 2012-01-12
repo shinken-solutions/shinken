@@ -44,22 +44,31 @@ class Ip_Tag_Arbiter(BaseModule):
     def hook_early_configuration(self, arb):
         logger.log("[IpTag] in hook late config")
         for h in arb.conf.hosts:
-            if not hasattr(h, 'address'):
+            if not hasattr(h, 'address') and not hasattr(h, 'host_name'):
                 continue
+            # The address to resolve
+            addr = None
+            
+            #By default take the address, if not, take host_name
+            if not hasattr(h, 'address'):
+                addr = h.host_name
+            else:
+                addr = h.address
+                
             print "Looking for h", h.get_name()
-            print h.address
+            print addr
             h_ip = None
             try:
-                IP(h.address)
+                IP(addr)
                 # If we reach here, it's it was a real IP :)
-                h_ip = h.address
+                h_ip = addr
             except:
                 pass
 
             # Ok, try again with name resolution
             if not h_ip:
                 try:
-                    h_ip = socket.gethostbyname(h.address)
+                    h_ip = socket.gethostbyname(addr)
                 except:
                     pass
 

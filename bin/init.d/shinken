@@ -219,7 +219,7 @@ getpidfile() {
     then
         echo "$pidfile"
     else
-        echo "$VAR/${mod}d.pid"
+        echo "$RUN/${mod}d.pid"
     fi
 }
 

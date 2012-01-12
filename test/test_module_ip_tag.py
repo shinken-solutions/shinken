@@ -70,12 +70,13 @@ class TestIpTag(ShinkenTest):
 
 
     #Change ME :)
-    def test_hack_cmd_poller_tag(self):
+    def test_hack_cmd_grp(self):
         modconf = self.conf.modules.find_by_name('IpTagAppend')
 
         # look for a objects that use it
         h1 = self.sched.hosts.find_by_name("test_host_0")
         h2 = self.sched.hosts.find_by_name("test_router_0")
+        h3 = self.sched.hosts.find_by_name("127.0.0.1")
 
         #get our modules
         mod = get_instance(modconf)
@@ -86,6 +87,7 @@ class TestIpTag(ShinkenTest):
         # and find a better way to manage this in tests
         h1.hostgroups = 'linux,windows'
         h2.hostgroups = 'linux,windows'
+        h3.hostgroups = 'linux,windows'
         
         # Calls the mod with our config
         mod.hook_early_configuration(self)
@@ -94,9 +96,13 @@ class TestIpTag(ShinkenTest):
         print "H1", h1.hostgroups
         self.assert_('newgroup' not in h1.hostgroups)
 
-        print"H2", h2.hostgroups
+        print "H2", h2.hostgroups
         self.assert_('newgroup' in h2.hostgroups)
         
+        print "H3", h3.hostgroups
+        self.assert_('newgroup' in h3.hostgroups)
+
+
 
 if __name__ == '__main__':
     unittest.main()
