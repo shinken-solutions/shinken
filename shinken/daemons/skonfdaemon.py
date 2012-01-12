@@ -396,6 +396,19 @@ class Skonf(Daemon):
 
 
 
+
+    # We check if the photo directory exists. If not, try to create it
+    def check_photo_dir(self):
+        print "Checking photo path", self.photo_dir
+        if not os.path.exists(self.photo_dir):
+            print "Truing to create photo dir", self.photo_dir
+            try:
+                os.mkdir(self.photo_dir)
+            except Exception, exp:
+                print "Photo dir creation failed", exp
+
+
+
     # Main loop function
     def main(self):
         try:
@@ -543,6 +556,152 @@ class Skonf(Daemon):
         if self.conf.human_timestamp_log:
             logger.set_human_format()
         
+        # Ok start to work :)
+        self.check_photo_dir()
+
+        self.request = request
+        self.response = response
+
+        self.load_plugins()
+
+        # Declare the whole app static files AFTER the plugin ones
+        self.declare_common_static()
+
+        print "Starting Skonf application"
+        srv = run(host=self.http_host, port=self.http_port, server=self.http_backend)
+        
+        
+
+
+    # Here we will load all plugins (pages) under the webui/plugins
+    # directory. Each one can have a page, views and htdocs dir that we must
+    # route correctly
+    def load_plugins(self):
+        from shinken.webui import plugins_skonf as plugins
+        plugin_dir = os.path.abspath(os.path.dirname(plugins.__file__))
+        print "Loading plugin directory : %s" % plugin_dir
+        
+        # Load plugin directories
+        plugin_dirs = [ fname for fname in os.listdir(plugin_dir)
+                        if os.path.isdir(os.path.join(plugin_dir, fname)) ]
+
+        print "Plugin dirs", plugin_dirs
+        sys.path.append(plugin_dir)
+        # We try to import them, but we keep only the one of
+        # our type
+        for fdir in plugin_dirs:
+            print "Try to load", fdir
+            mod_path = 'shinken.webui.plugins_skonf.%s.%s' % (fdir, fdir)
+            print "MOD PATH", mod_path
+            try:
+                m = __import__(mod_path, fromlist=[mod_path])
+                m_dir = os.path.abspath(os.path.dirname(m.__file__))
+                sys.path.append(m_dir)
+
+                #print "Loaded module m", m
+                print m.__file__
+                pages = m.pages
+                print "Try to load pages", pages
+                for (f, entry) in pages.items():
+                    routes = entry.get('routes', None)
+                    v = entry.get('view', None)
+                    static = entry.get('static', False)
+
+                    # IMPORTANT : apply VIEW BEFORE route!
+                    if v:
+                        #print "Link function", f, "and view", v
+                        f = view(v)(f)
+
+                    # Maybe there is no route to link, so pass
+                    if routes:
+                        for r in routes:
+                            method = entry.get('method', 'GET')
+                            print "link function", f, "and route", r, "method", method
+                            
+                            # Ok, we will just use the lock for all
+                            # plugin page, but not for static objects
+                            # so we set the lock at the function level.
+                            lock_version = self.lockable_function(f)
+                            f = route(r, callback=lock_version, method=method)
+                            
+                    # If the plugin declare a static entry, register it
+                    # and remeber : really static! because there is no lock
+                    # for them!
+                    if static:
+                        self.add_static(fdir, m_dir)
+
+                # And we add the views dir of this plugin in our TEMPLATE
+                # PATH
+                bottle.TEMPLATE_PATH.append(os.path.join(m_dir, 'views'))
+
+                # And finally register me so the pages can get data and other
+                # useful stuff
+                m.app = self
+                        
+                        
+            except Exception, exp:
+                logger.log("Warning in loading plugins : %s" % exp)
+
+
+
+
+
+    def add_static(self, fdir, m_dir):
+        static_route = '/static/'+fdir+'/:path#.+#'
+        #print "Declaring static route", static_route
+        def plugin_static(path):
+            print "Ask %s and give %s" % (path, os.path.join(m_dir, 'htdocs'))
+            return static_file(path, root=os.path.join(m_dir, 'htdocs'))
+        route(static_route, callback=plugin_static)
+
+
+
+
+    # We want a lock manager version of the plugin fucntions
+    def lockable_function(self, f):
+        #print "We create a lock verion of", f
+        def lock_version(**args):
+            #self.wait_for_no_writers()
+            t = time.time()
+            try:
+                return f(**args)
+            finally:
+                print "rendered in", time.time() - t
+                # We can remove us as a reader from now. It's NOT an atomic operation
+                # so we REALLY not need a lock here (yes, I try without and I got
+                # a not so accurate value there....)
+                #self.global_lock.acquire()
+                #self.nb_readers -= 1
+                #self.global_lock.release()
+        #print "The lock version is", lock_version
+        return lock_version
+
+
+    def declare_common_static(self):
+        @route('/static/photos/:path#.+#')
+        def give_photo(path):
+            # If the file really exist, give it. If not, give a dummy image.
+            if os.path.exists(os.path.join(self.photo_dir, path+'.jpg')):
+                return static_file(path+'.jpg', root=self.photo_dir)
+            else:
+                return static_file('images/user.png', root=os.path.join(bottle_dir, 'htdocs'))
+
+        # Route static files css files
+        @route('/static/:path#.+#')
+        def server_static(path):
+            return static_file(path, root=os.path.join(bottle_dir, 'htdocs'))
+
+        # And add the favicon ico too
+        @route('/favicon.ico')
+        def give_favicon():
+            return static_file('favicon.ico', root=os.path.join(bottle_dir, 'htdocs', 'images'))
+
+
+
+
+
+
+    def old_run(self):
         suppl_socks = None
 
         # Now create the external commander. It's just here to dispatch
@@ -623,3 +782,16 @@ class Skonf(Daemon):
         self.broks.update(broks)
         self.external_commands.extend(external_commands)
 
+
+
+    def get_user_auth(self):
+        # First we look for the user sid
+        # so we bail out if it's a false one
+        user_name = self.request.get_cookie("user", secret=self.auth_secret)
+
+        # If we cannot check the cookie, bailout
+        if not user_name:
+            return None
+
+        #c = self.datamgr.get_contact(user_name)
+        return user_name
