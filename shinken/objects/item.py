@@ -599,6 +599,10 @@ class Items(object):
         return self.items[key]
 
 
+    def __contains__(self, key):
+        return key in self.items
+
+
     # We create the reversed list so search will be faster
     # We also create a twins list with id of twins (not the original
     # just the others, higher twins)
