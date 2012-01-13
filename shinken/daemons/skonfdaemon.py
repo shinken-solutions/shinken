@@ -20,10 +20,19 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+# Try to see if we are in an android device or not
+is_android = True
+try:
+   import android
+except ImportError:
+   is_android = False
+
+
 import sys
 import os
 import time
 import traceback
+import threading
 from Queue import Empty
 import socket
 
@@ -35,7 +44,7 @@ from shinken.log import logger
 from shinken.brok import Brok
 from shinken.external_command import ExternalCommand
 from shinken.util import safe_print
-
+from shinken.skonfuiworker import SkonfUIWorker
 
 # Now the bottle HTTP part :)
 from shinken.webui.bottle import Bottle, run, static_file, view, route, request, response
@@ -155,6 +164,8 @@ class Skonf(Daemon):
 
         self.interface = IForArbiter(self)
         self.conf = Config()
+
+        self.workers = {}   # dict of active workers
 
 
     # Use for adding things like broks
@@ -422,6 +433,20 @@ class Skonf(Daemon):
             self.do_daemon_init_and_start()
             self.uri_arb = self.pyro_daemon.register(self.interface, "ForArbiter")
 
+            # Under Android, we do not have multiprocessing lib
+            # so use standard Queue threads things
+            # but in multiprocess, we are also using a Queue(). It's just
+            # not the same
+            if is_android:
+                self.returns_queue = Queue()
+            else:
+                self.returns_queue = self.manager.Queue()
+                
+            # For multiprocess things, we should not have
+            # sockettimeouts. will be set explicitly in Pyro calls
+            import socket
+            socket.setdefaulttimeout(None)
+
             # ok we are now fully daemon (if requested)
             # now we can start our "external" modules (if any) :
             self.modules_manager.start_external_instances()
@@ -566,11 +591,24 @@ class Skonf(Daemon):
 
         # Declare the whole app static files AFTER the plugin ones
         self.declare_common_static()
+        
+        # Start sub workers
+        for i in xrange(1, 3):
+            self.create_and_launch_worker()
 
-        print "Starting Skonf application"
+        # Launch the data thread"
+        self.workersmanager_thread = threading.Thread(None, self.workersmanager, 'httpthread')
+        self.workersmanager_thread.start()
+        # TODO : look for alive and killing
+
+        print "Starting SkonfUI app"
         srv = run(host=self.http_host, port=self.http_port, server=self.http_backend)
-        
-        
+
+
+    def workersmanager(self):
+        while True:
+            print "Workers manager thread"
+            time.sleep(1)
 
 
     # Here we will load all plugins (pages) under the webui/plugins
@@ -795,3 +833,35 @@ class Skonf(Daemon):
 
         #c = self.datamgr.get_contact(user_name)
         return user_name
+
+
+
+
+
+    # Create and launch a new worker, and put it into self.workers
+    def create_and_launch_worker(self):
+        # ceate the input queue of this worker
+        try:
+           if is_android:
+              q = Queue()
+           else:
+              q = self.manager.Queue()
+        # If we got no /dev/shm on linux, we can got problem here. 
+        # Must raise with a good message
+        except OSError, exp:
+            # We look for the "Function not implemented" under Linux
+            if exp.errno == 38 and os.name == 'posix':
+                logger.log("ERROR : get an exception (%s). If you are under Linux, please check that your /dev/shm directory exists." % (str(exp)))
+            raise
+            
+
+        w = SkonfUIWorker(1, q, self.returns_queue, 1, mortal=False, max_plugins_output_length = 1, target=None)
+        w.module_name = 'skonfuiworker'
+
+        # save this worker
+        self.workers[w.id] = w
+        
+        logger.log("[%s] Allocating new %s Worker : %s" % (self.name, w.module_name, w.id))
+        
+        # Ok, all is good. Start it!
+        w.start()

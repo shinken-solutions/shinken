@@ -23,7 +23,7 @@
 
 
 from shinken.webui.bottle import redirect
-from shinken.utils import to_bool
+from shinken.util import to_bool
 
 ### Will be populated by the UI with it's own value
 app = None
