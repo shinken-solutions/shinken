@@ -172,13 +172,18 @@ if os.name != 'nt':
                 cmd = self.command.encode('utf8', 'ignore')    
             else:
                 cmd = shlex.split(self.command.encode('utf8', 'ignore'))
+
 #            safe_print("Launching", cmd)
 #            safe_print("With env", self.local_env)
+
             # Now : GO for launch!
+            # The preexec_fn=os.setsid is set to give sons a same process group
+            # CF http://www.doughellmann.com/PyMOTW/subprocess/ for detail about this
             try:
                 self.process = subprocess.Popen(cmd,
                         stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                        close_fds=True, shell=force_shell, env=self.local_env)
+                        close_fds=True, shell=force_shell, env=self.local_env,
+                        preexec_fn=os.setsid)
             except OSError , exp:
                 print "Debug : Error in launching command:", self.command, exp, force_shell
                 # Maybe it's just a shell we try to exec. So we must retry
@@ -194,7 +199,9 @@ if os.name != 'nt':
                     return 'toomanyopenfiles'
 
         def kill__(self):
-            os.kill(self.process.pid, 9)
+            # We kill a process group because we launched them with preexec_fn=os.setsid and
+            # so we can launch a whole kill tree instead of just the first one
+            os.killpg(self.process.pid, 9)
   
 else:
 
