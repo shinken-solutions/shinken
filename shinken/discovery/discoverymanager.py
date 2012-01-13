@@ -26,18 +26,25 @@ import os
 import re
 import time
 
+try:
+    from pymongo.connection import Connection
+except ImportError:
+    Connection = None
+
 from shinken.log import logger
 from shinken.objects import *
 from shinken.macroresolver import MacroResolver
 
 
 class DiscoveryManager:
-    def __init__(self, path, output_dir, macros, overwrite, runners):
+    def __init__(self, path, macros, overwrite, runners, output_dir=None, dbmod='', db_direct_insert=False):
         # i am arbiter-like
         self.log = logger
         self.overwrite = overwrite
         self.runners = runners
         self.output_dir = output_dir
+        self.dbmod = dbmod
+        self.db_direct_insert = db_direct_insert
         self.log.load_obj(self)
         self.config_files = [path]
         self.conf = Config()
@@ -78,9 +85,34 @@ class DiscoveryManager:
         # Hash = name, and in it rules that apply
         self.disco_matches = {}
 
+        self.init_database()
+
 
     def add(self, obj):
         pass
+
+    # We try to init the database connection
+    def init_database(self):
+        self.dbconnection = None
+        self.db = None
+
+        if self.dbmod == '':
+            return
+
+        for mod in self.conf.modules:
+            if getattr(mod, 'module_name', '') == self.dbmod:
+                if Connection is None:
+                    print "ERROR : cannot use Mongodb database : please install the pymongo librairy"
+                    break
+                # Now try to connect
+                try:
+                    server = mod.server
+                    database = mod.database
+                    self.dbconnection = Connection(server)
+                    self.db = getattr(self.dbconnection, 'database')
+                    print "Connection to Mongodb:%s:%s is OK" % (server, database)
+                except Exception, exp:
+                    logger.log('Error in database init : %s' % exp)
 
     # Look if the name is a IPV4 address or not
     def is_ipv4_addr(self, name):
@@ -108,26 +140,25 @@ class DiscoveryManager:
             if self.conf.strip_idname_fqdn:
                 if not self.is_ipv4_addr(name):
                     name = name.split('.', 1)[0]
-
+            
             data = '::'.join(elts[1:])
-
-            #print "Name", name
-            #print "data", data
+            
             # Register the name
             if not name in self.disco_data:
-                self.disco_data[name] = []
+                self.disco_data[name] = {}
+
             # Now get key,values
             if not '=' in data:
-                #print "Bad discovery data"
                 continue
+
             elts = data.split('=')
             if len(elts) <= 1:
-                #print "Bad discovery data"
                 continue
+
             key = elts[0].strip()
             value = elts[1].strip()
             print "-->", name, key, value
-            self.disco_data[name].append((key, value))
+            self.disco_data[name][key] = value
 
 
     def match_rules(self):
@@ -235,10 +266,17 @@ class DiscoveryManager:
                         d[prop] = d[prop] + ',' + v
                 else:
                     d[k] = v
-            print "current D", d
-        print "Will generate", d
-        self.write_host_config_to_file(host, d)
+        print "Will generate an host", d
+        
+        # Maybe we do not got a directory output, but
+        # a bdd one.
+        if self.output_dir:
+            self.write_host_config_to_file(host, d)
 
+        # Maybe we want a database insert
+        if self.db:
+            self.write_host_config_to_db(host, d)
+            
         
     # Will wrote all properties/values of d for the host
     # in the file
@@ -291,7 +329,11 @@ class DiscoveryManager:
             for r in rules:
                 d.update(r.writing_properties)
             print "Generating", desc, d
-            self.write_service_config_to_file(host, desc, d)
+
+            # Maybe we do not got a directory output, but
+            # a bdd one.
+            if self.output_dir:
+                self.write_service_config_to_file(host, desc, d)
 
 
     # Will wrote all properties/values of d for the host
@@ -331,3 +373,24 @@ class DiscoveryManager:
         return '\n'.join(tab)
         
 
+
+    # Will wrote all properties/values of d for the host
+    # in the database
+    def write_host_config_to_db(self, host, d):
+        table = None
+        # Maybe we directly insert/enable the hosts,
+        # or in the SkonfUI we want to go with an intermediate
+        # table to select/enable only some
+        if self.db_direct_insert:
+            table = self.db.hosts
+        else:
+            table = self.db.discovered_hosts
+        cur = table.find({'host_name': host})
+        exists = cur.count() > 0
+        if exists and not self.overwrite:
+            print "The host '%s' already exists in the database table %s" % (host, table)
+            return
+
+        print "Saving in database", d
+        table.save(d)
+        print "saved"

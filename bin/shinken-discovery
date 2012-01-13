@@ -41,7 +41,7 @@ except ImportError:
 from shinken.discovery.discoverymanager import DiscoveryManager
 
 
-VERSION = '0.1'
+VERSION = '0.8.5+'
 if os.name != 'nt': 
     DEFAULT_CFG = '/etc/shinken/discovery.cfg'
 else:
@@ -61,6 +61,8 @@ parser.add_option('-r', '--runners', dest="runners",
                   help="List of runners you allow to run, (like nmap,vsphere)")
 parser.add_option('-m', '--macros', dest="macros",
                   help="List of macros (like NMAPTARGETS=192.168.0.0/24). Should be the last argument")
+parser.add_option('--db', dest="dbmod",
+                  help="Optionnal : Name of the database module to use.")
 
 
 
@@ -71,21 +73,26 @@ macros=[]
 
 if not opts.cfg_input:
     if not os.path.exists(DEFAULT_CFG):
-        parser.error("Requires a discovery configuration file, discovery.cfg (option -c/--cfg-input")
+        parser.error("Requires a discovery configuration file, discovery.cfg (option -c/--cfg-input)")
     else : # take the default file
         opts.cfg_input = DEFAULT_CFG
-if not opts.output_dir:
-    parser.error("Requires one output directory (option -o/--dir-output")
+
+if not opts.output_dir and not opts.dbmod:
+    parser.error("Requires one output directory (option -o/--dir-output) or database output (option --db)")
+
 if not opts.overwrite:
     overwrite = False
 else:
     overwrite = opts.overwrite
+
 if not opts.runners:
     runners = ['*']
 else:
     runners = opts.runners.split(',')
+
 if opts.macros:
     raw_macros.append(opts.macros)
+
 if args:
     raw_macros.extend(args)
 
@@ -116,25 +123,26 @@ print "Got macros", macros
 #                self.parents.append(h.get_name())
         
 
-        
-
-        
-
-
 cfg_input = opts.cfg_input
 output_dir = opts.output_dir
 overwrite = opts.overwrite
-d = DiscoveryManager(cfg_input, output_dir, macros, overwrite, runners)
+dbmod = opts.dbmod
 
+# Get the Manager for all of the discovery thing
+d = DiscoveryManager(cfg_input, macros, overwrite, runners, output_dir=output_dir, dbmod=dbmod)
+
+# #Ok, let start the plugins that will give us the data
 d.launch_runners()
-
 d.wait_for_runners_ends()
 
+# We get the results, now we can reap the data
 d.get_runners_outputs()
 
+# and parse them
 d.read_disco_buf()
 
 # Now look for rules
 d.match_rules()
 
+# Ok, we know what to create, now do it!
 d.write_config()
