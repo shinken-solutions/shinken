@@ -25,6 +25,8 @@
 from shinken.webui.bottle import redirect
 from shinken.util import to_bool
 
+
+
 ### Will be populated by the UI with it's own value
 app = None
 
@@ -65,6 +67,12 @@ def get_scans():
     print "Got scans"
     return {'app' : app}
 
+def get_results():
+    print "Looking for hosts in pending aprouval"
+    cur = app.db.discovered_hosts.find({})
+    pending_hosts = [h for h in cur]
+    return {'app' : app, 'pending_hosts' : pending_hosts}
+
 
 # This is the dict teh webui will try to "load".
 #  *here we register one page with both adresses /dummy/:arg1 and /dummy/, both addresses
@@ -77,5 +85,6 @@ def get_scans():
 pages = {get_newhosts : { 'routes' : ['/newhosts'], 'view' : 'newhosts', 'static' : True},
          get_launch : { 'routes' : ['/newhosts/launch'], 'view' : 'newhosts_launch', 'static' : True, 'method' : 'POST'},
          get_scans : { 'routes' : ['/newhosts/scans'], 'view' : 'newhosts_scans', 'static' : True},
+         get_results : { 'routes' : ['/newhosts/results'], 'view' : 'newhosts_results', 'static' : True},
          }
 

@@ -109,7 +109,7 @@ class DiscoveryManager:
                     server = mod.server
                     database = mod.database
                     self.dbconnection = Connection(server)
-                    self.db = getattr(self.dbconnection, 'database')
+                    self.db = getattr(self.dbconnection, database)
                     print "Connection to Mongodb:%s:%s is OK" % (server, database)
                 except Exception, exp:
                     logger.log('Error in database init : %s' % exp)
@@ -392,5 +392,7 @@ class DiscoveryManager:
             return
 
         print "Saving in database", d
+        d['_id'] = host
         table.save(d)
         print "saved"
+        del d['_id']

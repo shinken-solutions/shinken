@@ -60,6 +60,11 @@ sys.path.insert(0, bottle_dir)
 bottle.TEMPLATE_PATH.append(os.path.join(bottle_dir, 'views'))
 bottle.TEMPLATE_PATH.append(bottle_dir)
 
+try:
+    from pymongo.connection import Connection
+except ImportError:
+    Connection = None
+
 
 
 # Interface for the other Arbiter
@@ -514,6 +519,7 @@ class Skonf(Daemon):
                     logger.log("Warning : an external module queue got a problem '%s'" % str(exp))
                     break
 
+
     # We wait (block) for arbiter to send us something
     def wait_for_master_death(self):
         logger.log("Waiting for master death")
@@ -526,7 +532,6 @@ class Skonf(Daemon):
             if not arb.spare:
                 master_timeout = arb.check_interval * arb.max_check_attempts
         logger.log("I'll wait master for %d seconds" % master_timeout)
-
         
         while not self.interrupted:
             elapsed, _, tcdiff = self.handleRequests(timeout)
@@ -595,6 +600,8 @@ class Skonf(Daemon):
         # Start sub workers
         for i in xrange(1, 3):
             self.create_and_launch_worker()
+
+        self.init_db()
 
         # Launch the data thread"
         self.workersmanager_thread = threading.Thread(None, self.workersmanager, 'httpthread')
@@ -865,3 +872,18 @@ class Skonf(Daemon):
         
         # Ok, all is good. Start it!
         w.start()
+
+
+    # TODO : fix hard coded server/database
+    def init_db(self):
+       if not Connection:
+          logger.log('ERROR : you need the pymongo lib for running skonfui. Please install it')
+          sys.exit(2)
+
+       con = Connection('localhost')
+       self.db = con.shinken
+
+
+    # TODO : code this!
+    def check_auth(self, login, password):
+       return True
