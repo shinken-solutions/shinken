@@ -23,7 +23,7 @@
 
       <title>{{title or 'No title'}}</title>
       
-      <link rel="stylesheet" type="text/css" href="/static/css/nav.css"/>
+      <link rel="stylesheet" type="text/css" href="/static/css/navigation.css" media="screen"/>
       <link rel="stylesheet" type="text/css" href="/static/css/reset.css" media="screen"/>
       <link rel="stylesheet" type="text/css" href="/static/css/text.css" media="screen"/>
       <link rel="stylesheet" type="text/css" href="/static/css/grid.css" media="screen"/>
@@ -45,7 +45,7 @@
       <script type="text/javascript" src="/static/js/mootools-more.js"></script>
       <script type="text/javascript" src="/static/js/mootools-message.js"></script>
       
-      <script type="text/javascript" src="/static/js/UvumiDropdown.js"></script>
+      <script type="text/javascript" src="/static/js/simpletreemenu.js"></script>
       <script type="text/javascript" src="/static/js/rotater.js"></script>
       <script type="text/javascript" src="/static/js/tabs.js"></script>
       <script type="text/javascript" src="/static/js/top_right_banner.js"></script>
@@ -98,7 +98,7 @@
 			%include header_element globals()
 		%end
 		%if print_menu:
-			%include nav_element globals()
+			%include navigation_element globals()
 		%end
 		<div id="main_container" class="grid_16">
 			%include

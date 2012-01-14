@@ -11,7 +11,7 @@
 			    %end
 	        %end
 	</ul>
-
+<!--
 <ul id="dropmenu" class="grid_4 right">
     <li class="menu_right"><a href="#" class="drop">Impacts <span class="tac_impacts">1 / 2 /3</span></a><!-- Begin 3 columns Item -->
         <div class="dropdown_3columns align_right"><!-- Begin 3 columns container -->
@@ -41,5 +41,6 @@
     </li><!-- End 3 columns Item -->
 
 </ul>
+-->
 </div>
 <div class="clear"></div>
