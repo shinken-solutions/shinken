@@ -984,10 +984,27 @@ a.supersize {
     font-size: 20px;
     padding: 15px 20px;
 }
+
 a.save {
-    background: url(sprite.png) 10px 7px no-repeat #f3f3f3;
+    background: url("/static/images/icons/gear_64.png") 10px 7px no-repeat #f3f3f3;
     padding-left: 30px;
 }
+
+a.gear {
+    background: url("/static/images/icons/gear_64.png") no-repeat scroll transparent;
+	background-position: 4px;
+	padding-left: 24px;
+    background-size: 17px 17px;
+}
+
+a.pointer_down {
+    background: url("/static/images/icons/gear_pointer_down.png") no-repeat scroll transparent;
+	background-position: right 10px;
+	padding-right: 32px;
+    background-size: 25px 17px;	
+	margin: 5px;
+}
+
 a.add {
     background: url(sprite.png)  10px -27px no-repeat #f3f3f3;
     padding-left: 30px;

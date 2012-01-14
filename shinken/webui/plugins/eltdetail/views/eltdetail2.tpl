@@ -29,12 +29,8 @@ Invalid element name
 	<div id="nav_left">
 		<ul>
 			<li><a href="#">Overview</a></li>
-			<li><a href="#">Overview</a></li>
+			<li><a class="pointer_down" id="v_toggle" href="#"">Gesture</a></li>
 		</ul>
-	</div>
-	
-	<div class="marginbottom">
-	    <a id="v_toggle" href="#">toggle</a>
 	</div>
 	
 	<div id="gesture_slide" class="grid_16 opacity_hover">
