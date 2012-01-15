@@ -1060,6 +1060,7 @@ echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z 
         check_wmi_plus
         check_mongodb
         check_emc_clariion
+        check_nwc_health
         capture_plugin
         pnp4nagios
         multisite
@@ -1258,6 +1259,125 @@ function install_check_mongodb(){
 	chmod +x $TARGET/libexec/check_mongodb.py	
 	chown $SKUSER:$SKGROUP $TARGET/libexec/check_mongodb.py
 		
+}
+
+# check_nwc_health
+
+function install_check_nwc_health(){
+
+	cadre "Install check_nwc_health plugin" green
+
+	if [ "$CODE" == "REDHAT" ]
+	then
+        if [ ! -z "$CHECKNWCYUMPKG" ]
+        then 
+            cecho " > installing prerequisites" green 
+            yum install -yq $CHECKNWCYUMPKG  >> /tmp/shinken.install.log 2>&1 
+        fi
+	else
+        if [ ! -z "$CHECKNWCAPTPKG" ]
+        then 
+            cecho " > installing prerequisites" green 
+            apt-get -y install $CHECKNWCAPTPKG >> /tmp/shinken.install.log 2>&1 
+        fi
+	fi
+
+    if [ $? -ne 0 ]
+    then
+        cecho " > Error while installing prerequisites" red
+        exit 2
+    fi
+
+	cd /tmp
+
+	if [ ! -f "/tmp/master" ]
+	then
+		cecho " > Downloading check_nwc_health" green
+		wget $WGETPROXY $CHECKNWC -O check_nwc_health.tar.gz  >> /tmp/shinken.install.log 2>&1 	
+		if [ $? -ne 0 ]
+		then
+			cecho " > Error while downloading check_wc" red
+			exit 2
+		fi
+	fi
+    cecho " > Extract check_nwc_health" green
+    folder=$(ls -1 | grep "^lausser-check_nwc_health")
+    if [ ! -z "$folder" ]
+    then
+        rm -Rf lausser-check_nwc_health* >> /tmp/shinken.install.log 2>&1
+    fi
+    tar zxvf check_nwc_health.tar.gz >> /tmp/shinken.install.log 2>&1
+    folder=$(ls -1 | grep "^lausser-check_nwc_health")
+    cd $folder 
+    cecho " > Build check_nwc_health.pl" green 
+    autoreconf >> /tmp/shinken.install.log 2>&1
+    ./configure --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP --enable-perfdata --enable-extendedinfo --prefix=$TARGET >> /tmp/shinken.install.log 2>&1
+    make >> /tmp/shinken.install.log 2>&1
+    cecho " > Install check_nwc_health.pl" green 
+    make install >> /tmp/shinken.install.log 2>&1
+}
+# check_emc_clariion
+
+function install_check_emc_clariion(){
+
+	cadre "Install check_emc_clariion plugin from netways" green
+
+    cecho " You will need the DELL/EMC Navisphere agent in order to use this
+plugin. Ask your vendor to know how to get it." yellow
+    cecho " You should also customize the navisphere agent path in the plugin" yellow
+    read taste
+
+	if [ "$CODE" == "REDHAT" ]
+	then
+        if [ ! -z "$CHECKEMCYUMPKG" ]
+        then 
+            cecho " > installing prerequisites" green 
+            yum install -yq $CHECKEMCYUMPKG  >> /tmp/shinken.install.log 2>&1 
+        fi
+	else
+        if [ ! -z "$CHECKEMCAPTPKG" ]
+        then 
+            cecho " > installing prerequisites" green 
+            apt-get -y install $CHECKEMCAPTPKG >> /tmp/shinken.install.log 2>&1 
+        fi
+	fi
+
+    if [ $? -ne 0 ]
+    then
+        cecho " > Error while installing prerequisites" red
+        exit 2
+    fi
+
+	cd /tmp
+
+	if [ ! -f "/tmp/check_emc.zip" ]
+	then
+		cecho " > Downloading check_emc.zip" green
+		wget $WGETPROXY $CHECKEMC  >> /tmp/shinken.install.log 2>&1 	
+		if [ $? -ne 0 ]
+		then
+			cecho " > Error while downloading check_emc.zip" red
+			exit 2
+		fi
+	fi
+
+    cecho " > Extract check_emc.zip" green
+    if [ -d check_emc ] 
+    then 
+        rm -Rf check_emc
+    fi
+    unzip check_emc.zip >> /tmp/shinken.install.log 2>&1
+    if [ $? -ne 0 ]
+    then
+        cecho " > Error while trying to extract check_emc.zip" red
+        exit 2
+    fi
+  
+    cecho " > Install check_emc_clariion.pl" green 
+    cd check_emc 
+	mv check_emc_clariion.pl $TARGET/libexec/
+	chmod +x $TARGET/libexec/check_emc_clariion.pl	
+	chown $SKUSER:$SKGROUP $TARGET/libexec/check_emc_clariion.pl
 }
 
 # check_emc_clariion
@@ -1658,6 +1778,10 @@ while getopts "kidubcr:lz:hsvp:we:" opt; do
 			elif [ "$OPTARG" == "check_emc_clariion" ]
 			then
 				install_check_emc_clariion
+				exit 0
+			elif [ "$OPTARG" == "check_nwc_health" ]
+			then
+				install_check_nwc_health
 				exit 0
 			elif [ "$OPTARG" == "pnp4nagios" ]
 			then
