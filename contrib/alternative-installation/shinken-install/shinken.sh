@@ -1040,28 +1040,29 @@ function fixHtpasswdPath(){
 
 function usage(){
 echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z [poller|centreon] | -e daemons | -p plugins [plugname]
-	-k	Kill shinken
-	-i	Install shinken
-	-w	Remove demo configuration 
-	-d 	Remove shinken
-	-u	Update an existing shinken installation
-	-v	purge livestatus sqlite db and shrink sqlite db
-	-b	Backup shinken configuration plugins and data
-	-r 	Restore shinken configuration plugins and data
-	-l	List shinken backups
-	-c	Compress rotated logs
-        -e      Which daemons to keep enabled at boot time
-	-z 	This is a really special usecase that allow to install shinken on Centreon Enterprise Server in place of nagios
-	-p      Install plugins or addons (args should be one of the following : 
-                     check_esx3
-                     nagios-plugins
-                     check_oracle_health
-                     check_mysql_health
-		     check_wmi_plus
-                     capture_plugin
-                     pnp4nagios
-                     multisite
-	-h	Show help"
+    -k	Kill shinken
+    -i	Install shinken
+    -w	Remove demo configuration 
+    -d 	Remove shinken
+    -u	Update an existing shinken installation
+    -v	purge livestatus sqlite db and shrink sqlite db
+    -b	Backup shinken configuration plugins and data
+    -r 	Restore shinken configuration plugins and data
+    -l	List shinken backups
+    -c	Compress rotated logs
+    -e  Which daemons to keep enabled at boot time
+    -z 	This is a really special usecase that allow to install shinken on Centreon Enterprise Server in place of nagios
+    -p  Install plugins or addons (args should be one of the following : 
+        check_esx3
+        nagios-plugins
+        check_oracle_health
+        check_mysql_health
+        check_wmi_plus
+        check_mongodb
+        capture_plugin
+        pnp4nagios
+        multisite
+    -h	Show help"
 }
 
 # addons installation
@@ -1217,6 +1218,45 @@ function install_capture_plugin(){
 	chown $SKUSER:$SKGROUP $TARGET/libexec/capture_plugin
 }
 
+# check_mongodb
+
+function install_check_mongodb(){
+
+	cadre "Install check_mongodb plugin from Mike Zupan" green
+
+	if [ "$CODE" == "REDHAT" ]
+	then
+		cecho " > installing prerequisites" green 
+		yum install -yq $CHECKMONGOYUMPKG  >> /tmp/shinken.install.log 2>&1 
+	else
+		cecho " > installing prerequisites" green 
+		apt-get -y install $CHECKMONGOAPTPKG >> /tmp/shinken.install.log 2>&1 
+	fi
+
+    if [ $? -ne 0 ]
+    then
+        cecho " > Error while installing prerequisites" red
+        exit 2
+    fi
+
+	cd /tmp
+
+	if [ ! -f "/tmp/check_mongodb.py" ]
+	then
+		cecho " > Downloading check_mongodb.py" green
+		wget $WGETPROXY $CHECKMONGO  >> /tmp/shinken.install.log 2>&1 	
+		if [ $? -ne 0 ]
+		then
+			cecho " > Error while downloading check_mongodb.py" red
+			exit 2
+		fi
+	fi
+
+	mv check_mongodb.py $TARGET/libexec/check_mongodb.py
+	chmod +x $TARGET/libexec/check_mongodb.py	
+	chown $SKUSER:$SKGROUP $TARGET/libexec/check_mongodb.py
+		
+}
 # check_esx3
 
 function install_check_esx3(){
@@ -1243,7 +1283,7 @@ function install_check_esx3(){
 		yum install -yq $VSPHERESDKYUMPKGS  >> /tmp/shinken.install.log 2>&1 
 	else
 		cecho " > installing prerequisites" green 
-		sudo apt-get -y install $VSPHERESDKAPTPKGS >> /tmp/shinken.install.log 2>&1 
+		apt-get -y install $VSPHERESDKAPTPKGS >> /tmp/shinken.install.log 2>&1 
 	fi
 	cd /tmp
 
@@ -1292,7 +1332,7 @@ function install_nagios-plugins(){
 		yum install -yq $NAGPLUGYUMPKG  >> /tmp/shinken.install.log 2>&1 
 	else
 		cecho " > installing prerequisites" green 
-		sudo apt-get -y install $NAGPLUGAPTPKG >> /tmp/shinken.install.log 2>&1 
+		apt-get -y install $NAGPLUGAPTPKG >> /tmp/shinken.install.log 2>&1 
 	fi
 	cd /tmp
 	if [ ! -f "nagios-plugins-$NAGPLUGVERS.tar.gz" ]
@@ -1324,7 +1364,7 @@ function install_check_wmi_plus(){
 		yum -yq install $WMICYUMPKG >> /tmp/shinken.install.log 2>&1 
 	else
 		cecho " > installing prerequisites" green 
-		sudo apt-get -y install $WMICAPTPKG >> /tmp/shinken.install.log 2>&1
+		apt-get -y install $WMICAPTPKG >> /tmp/shinken.install.log 2>&1
 	fi 
 	cd /tmp
 	cecho " > Downloading wmic" green
@@ -1399,10 +1439,10 @@ function install_check_oracle_health(){
 	if [ "$CODE" == "REDHAT" ]
 	then
 		cecho " > installing prerequisites" green 
-		sudo apt-get -y install $CHECKORACLEHEALTHYUMPKG >> /tmp/shinken.install.log 2>&1 
+		apt-get -y install $CHECKORACLEHEALTHYUMPKG >> /tmp/shinken.install.log 2>&1 
 	else
 		cecho " > installing prerequisites" green 
-		sudo apt-get -y install $CHECKORACLEHEALTHAPTPKG >> /tmp/shinken.install.log 2>&1 
+		apt-get -y install $CHECKORACLEHEALTHAPTPKG >> /tmp/shinken.install.log 2>&1 
 	fi
 	cecho " > installing cpan prerequisites" green
 	cd /tmp
@@ -1543,6 +1583,10 @@ while getopts "kidubcr:lz:hsvp:we:" opt; do
 			elif [ "$OPTARG" == "check_wmi_plus" ]
 			then
 				install_check_wmi_plus
+				exit 0
+			elif [ "$OPTARG" == "check_mongodb" ]
+			then
+				install_check_mongodb
 				exit 0
 			elif [ "$OPTARG" == "pnp4nagios" ]
 			then
