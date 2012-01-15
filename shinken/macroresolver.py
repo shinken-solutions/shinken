@@ -342,7 +342,7 @@ class MacroResolver(Borg):
 
     #Get Fri 15 May 11:42:39 CEST 2009
     def get_long_date_time(self):
-        return time.strftime("%a %d %b %H:%M:%S %Z %Y", time.localtime())
+        return time.strftime("%a %d %b %H:%M:%S %Z %Y", time.localtime()).decode('UTF-8', 'ignore')
 
 
     #Get 10-13-2000 00:30:28
