@@ -1273,11 +1273,17 @@ plugin. Ask your vendor to know how to get it." yellow
 
 	if [ "$CODE" == "REDHAT" ]
 	then
-		cecho " > installing prerequisites" green 
-		yum install -yq $CHECKEMCYUMPKG  >> /tmp/shinken.install.log 2>&1 
+        if [ ! -z "$CHECKEMCYUMPKG" ]
+        then 
+            cecho " > installing prerequisites" green 
+            yum install -yq $CHECKEMCYUMPKG  >> /tmp/shinken.install.log 2>&1 
+        fi
 	else
-		cecho " > installing prerequisites" green 
-		apt-get -y install $CHECKEMCAPTPKG >> /tmp/shinken.install.log 2>&1 
+        if [ ! -z "$CHECKEMCAPTPKG" ]
+        then 
+            cecho " > installing prerequisites" green 
+            apt-get -y install $CHECKEMCAPTPKG >> /tmp/shinken.install.log 2>&1 
+        fi
 	fi
 
     if [ $? -ne 0 ]
