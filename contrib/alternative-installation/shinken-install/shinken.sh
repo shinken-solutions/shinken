@@ -1059,6 +1059,7 @@ echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z 
         check_mysql_health
         check_wmi_plus
         check_mongodb
+        check_emc_clariion
         capture_plugin
         pnp4nagios
         multisite
@@ -1252,11 +1253,71 @@ function install_check_mongodb(){
 		fi
 	fi
 
+    cecho " > Installing check_mongodb.py" green
 	mv check_mongodb.py $TARGET/libexec/check_mongodb.py
 	chmod +x $TARGET/libexec/check_mongodb.py	
 	chown $SKUSER:$SKGROUP $TARGET/libexec/check_mongodb.py
 		
 }
+
+# check_emc_clariion
+
+function install_check_emc_clariion(){
+
+	cadre "Install check_emc_clariion plugin from netways" green
+
+    cecho " You will need the DELL/EMC Navisphere agent in order to use this
+plugin. Ask your vendor to know how to get it." yellow
+    cecho " You should also customize the navisphere agent path in the plugin" yellow
+    read taste
+
+	if [ "$CODE" == "REDHAT" ]
+	then
+		cecho " > installing prerequisites" green 
+		yum install -yq $CHECKEMCYUMPKG  >> /tmp/shinken.install.log 2>&1 
+	else
+		cecho " > installing prerequisites" green 
+		apt-get -y install $CHECKEMCAPTPKG >> /tmp/shinken.install.log 2>&1 
+	fi
+
+    if [ $? -ne 0 ]
+    then
+        cecho " > Error while installing prerequisites" red
+        exit 2
+    fi
+
+	cd /tmp
+
+	if [ ! -f "/tmp/check_emc.zip" ]
+	then
+		cecho " > Downloading check_emc.zip" green
+		wget $WGETPROXY $CHECKEMC  >> /tmp/shinken.install.log 2>&1 	
+		if [ $? -ne 0 ]
+		then
+			cecho " > Error while downloading check_emc.zip" red
+			exit 2
+		fi
+	fi
+
+    cecho " > Extract check_emc.zip" green
+    if [ -d check_emc ] 
+    then 
+        rm -Rf check_emc
+    fi
+    unzip check_emc.zip >> /tmp/shinken.install.log 2>&1
+    if [ $? -ne 0 ]
+    then
+        cecho " > Error while trying to extract check_emc.zip" red
+        exit 2
+    fi
+  
+    cecho " > Install check_emc_clariion.pl" green 
+    cd check_emc 
+	mv check_emc_clariion.pl $TARGET/libexec/
+	chmod +x $TARGET/libexec/check_emc_clariion.pl	
+	chown $SKUSER:$SKGROUP $TARGET/libexec/check_emc_clariion.pl
+}
+
 # check_esx3
 
 function install_check_esx3(){
@@ -1587,6 +1648,10 @@ while getopts "kidubcr:lz:hsvp:we:" opt; do
 			elif [ "$OPTARG" == "check_mongodb" ]
 			then
 				install_check_mongodb
+				exit 0
+			elif [ "$OPTARG" == "check_emc_clariion" ]
+			then
+				install_check_emc_clariion
 				exit 0
 			elif [ "$OPTARG" == "pnp4nagios" ]
 			then
