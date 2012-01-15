@@ -67,7 +67,7 @@
  				%end
 		</a>
 		</li>
-		%# end of this satellite type
+	%# end of this satellite type
  	%end
 	</ul>
 </div>	
