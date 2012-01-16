@@ -1,24 +1,24 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 :
+# Copyright (C) 2009-2010 :
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
 #    Hartmut Goebel, h.goebel@goebel-consult.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 from shinken.util import safe_print
 from helper import hst_srv_sort
@@ -31,7 +31,7 @@ class DataManager(object):
     def load(self, rg):
         self.rg = rg
 
-    # Ui will launch us names in str, we got unicode
+    # UI will launch us names in str, we got unicode
     # in our rg, so we must manage it here
     def get_host(self, hname):
         hname = hname.decode('utf8', 'ignore')
@@ -126,13 +126,11 @@ class DataManager(object):
                     res.append(h)
         return res
 
-
-
     # Return the number of problems
     def get_nb_problems(self):
         return len(self.get_all_problems())
 
-    # Get the number of all problems, enven the ack ones
+    # Get the number of all problems, even the ack ones
     def get_nb_all_problems(self):
         res = []
         res.extend([s for s in self.rg.services if s.state not in ['OK', 'PENDING'] and not s.is_impact])
@@ -147,7 +145,6 @@ class DataManager(object):
 
     def get_nb_elements(self):
         return len(self.rg.services) + len(self.rg.hosts)
-
 
 
     def get_important_elements(self):
@@ -179,6 +176,7 @@ class DataManager(object):
         # Ok, now return the max of hosts and services states
         return max(h_state, s_state)
 
+
     # Return a tree of {'elt' : Host, 'fathers' : [{}, {}]}
     def get_business_parents(self, obj, levels=3):
         res = {'node' : obj, 'fathers' : []}
@@ -197,7 +195,7 @@ class DataManager(object):
 
 
     # Ok, we do not have true root problems, but we can try to guess isn't it?
-    #We can just guess for services with the same services of this host in fact
+    # We can just guess for services with the same services of this host in fact
     def guess_root_problems(self, obj):
         if obj.__class__.my_type != 'service':
             return []
