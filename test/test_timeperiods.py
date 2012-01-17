@@ -55,6 +55,42 @@ class TestTimeperiods(ShinkenTest):
         self.assert_(t_next == "Tue Jul 13 16:30:00 2010")
 
 
+    def test_simple_with_multiple_time(self):
+        self.print_header()
+        t = Timeperiod()
+        now = time.time()
+        #Get the 12 of july 2010 at 15:00, monday
+        july_the_12 = time.mktime(time.strptime("12 Jul 2010 15:00:00", "%d %b %Y %H:%M:%S"))
+        print july_the_12
+
+        #First a false test, no results
+        t = Timeperiod()
+        t.timeperiod_name = ''
+        t.resolve_daterange(t.dateranges, '1999-01-28  00:00-07:00,21:30-24:00')
+        t_next = t.get_next_valid_time_from_t(now)
+        self.assert_(t_next is None)
+
+        #Then a simple same day
+        t = Timeperiod()
+        t.timeperiod_name = ''
+        t.resolve_daterange(t.dateranges, 'tuesday 00:00-07:00,21:30-24:00')
+        t_next = t.get_next_valid_time_from_t(july_the_12)
+        t_next = time.asctime(time.localtime(t_next))
+        print "RES:", t_next
+        self.assert_(t_next == "Tue Jul 13 00:00:00 2010")
+
+        # Now ask about at 00:00 time?
+        july_the_12 = time.mktime(time.strptime("12 Jul 2010 00:00:00", "%d %b %Y %H:%M:%S"))
+        #Then a simple same day
+        t = Timeperiod()
+        t.timeperiod_name = ''
+        t.resolve_daterange(t.dateranges, 'tuesday 00:00-07:00,21:30-24:00')
+        t_next = t.get_next_valid_time_from_t(july_the_12)
+        t_next = time.asctime(time.localtime(t_next))
+        print "Next?", t_next
+        self.assert_(t_next == "Tue Jul 13 00:00:00 2010")
+
+
 
 
     def test_simple_timeperiod_with_exclude(self):

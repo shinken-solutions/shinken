@@ -163,10 +163,10 @@ class Timeperiod(Item):
             return None
 
 
-    #clean the get_next_valid_time_from_t cache
-    #The entries are a dict on t. t < now are useless
-    #Because we do not care about past anymore.
-    #If not, it's not important, it's just a cache after all :)
+    # clean the get_next_valid_time_from_t cache
+    # The entries are a dict on t. t < now are useless
+    # Because we do not care about past anymore.
+    # If not, it's not important, it's just a cache after all :)
     def clean_cache(self):
         now = int(time.time())
         t_to_del = []

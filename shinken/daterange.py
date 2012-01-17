@@ -238,6 +238,7 @@ class Daterange:
 
 
     def get_next_future_timerange_valid(self, t):
+        #print "Look for get_next_future_timerange_valid for t", t, time.asctime(time.localtime(t))
         sec_from_morning = get_sec_from_morning(t)
         starts = []
         for tr in self.timeranges:
@@ -294,7 +295,7 @@ class Daterange:
 
 
     def get_next_valid_time_from_t(self, t):
-        #print "DR Get next valid from:", time.asctime(time.localtime(t))
+        #print "\tDR Get next valid from:", time.asctime(time.localtime(t))
         #print "DR Get next valid from:", t
         if self.is_time_valid(t):
             return t
@@ -306,25 +307,18 @@ class Daterange:
 
         #print "Search for t", time.asctime(time.localtime(t))
         #print "DR: next day", time.asctime(time.localtime(t_day))
-        #print "DR: sec from morning", time.asctime(time.localtime(sec_from_morning))
+        #print "DR: sec from morning", sec_from_morning
 
         #We search for the min of all tr.start > sec_from_morning
-        starts = []
-        for tr in self.timeranges:
-            tr_start = tr.hstart * 3600 + tr.mstart * 3600
-            if tr_start >= sec_from_morning:
-                starts.append(tr_start)
-
-        #tr can't be valid, or it will be return at the begining
-        sec_from_morning = self.get_next_future_timerange_valid(t)
-        #print "DR: sec from morning", time.asctime(time.localtime(sec_from_morning))
+        sec_from_morning = self.get_next_future_timerange_valid(t_day)
+        #print "DR: sec from morning", sec_from_morning
         #print "Sec from morning", t_day
         if sec_from_morning is not None:
             if t_day is not None and sec_from_morning is not None:
                 return t_day + sec_from_morning
 
-        #Then we search for the next day of t
-        #The sec will be the min of the day
+        # Then we search for the next day of t
+        # The sec will be the min of the day
         t = get_day(t)+86400
         t_day2 = self.get_next_valid_day(t)
         sec_from_morning = self.get_next_future_timerange_valid(t_day2)
