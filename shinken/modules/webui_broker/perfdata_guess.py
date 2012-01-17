@@ -1,25 +1,26 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#Copyright (C) 2009-2010 :
+# Copyright (C) 2009-2012 :
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
 #    Hartmut Goebel, h.goebel@goebel-consult.de
+#	 Andreas Karfusehr, andreas@karfusehr.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import math
 
@@ -65,7 +66,7 @@ def manage_check_http_command(elt):
         print "No value, I bailout"
         return None
 
-    # Pourcent of ok should be time/1s
+    # Percent of ok should be time/1s
     pct = get_logarithmic(v, 1)
     # Now get the color
     # OK : #6f2 (102,255,34) green
@@ -97,7 +98,7 @@ def manage_check_ping_command(elt):
         print "No value, I bailout"
         return None
 
-    # Pourcent of ok should be the log of time versus max/2
+    # Percent of ok should be the log of time versus max/2
     pct = get_logarithmic(v, crit/2)
     # Now get the color
     # OK : #6f2 (102,255,34) green
@@ -131,7 +132,7 @@ def manage_check_tcp_command(elt):
         print "No value, I bailout"
         return None
 
-    # Pourcent of ok should be the log of time versus m.max / 2
+    # Percent of ok should be the log of time versus m.max / 2
     pct = get_logarithmic(v, m.max/2)
 
     # Now get the color
@@ -166,7 +167,7 @@ def manage_unknown_command(elt):
         return None
 
     m = None
-    # Got some overrire name we know to be ok for printing
+    # Got some override name we know to be ok for printing
     if 'time' in p:
         m = p['time']
     else:
@@ -183,7 +184,7 @@ def manage_unknown_command(elt):
         print "No value, I bailout"
         return None
 
-    # Pourcent of ok should be time/10s
+    # Percent of ok should be time/10s
     pct = 100 * (v / 10)
     # go to int
     pct = int(pct)
@@ -203,7 +204,7 @@ def manage_unknown_command(elt):
 
 
 # Get a linear color by looking at the command name
-# and teh elt status to get a uniq value
+# and the elt status to get a unique value
 def get_linear_color(elt, name):
     # base colors are 
     #  #6688ff (102,136,255) light blue for OK
