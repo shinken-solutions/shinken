@@ -180,5 +180,5 @@ class NSCA_client():
 
 
 
-nsca = NSCA_client('localhost', 5667, 1, 'toto')
+nsca = NSCA_client('localhost', 5667, 1, 'helloworld')
 nsca.main()

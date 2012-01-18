@@ -196,7 +196,13 @@ class DiscoveryManager:
 
 
     def launch_runners(self):
-        for r in self.allowed_runners():
+        allowed_runners = self.allowed_runners()
+
+        if len(allowed_runners) == 0:
+            print "ERROR : there is no matching runners selected!"
+            return
+
+        for r in allowed_runners:
             print "I'm launching", r.get_name(), "with a %d seconds timeout" % self.conf.runners_timeout
             r.launch(timeout=self.conf.runners_timeout)
 
@@ -227,6 +233,8 @@ class DiscoveryManager:
             print "Got Raw disco data", self.raw_disco_data
         else:
             print "Got no data!"
+            for r in self.allowed_runners():
+                print "DBG", r.current_launch
 
 
     # Write all configuration we've got

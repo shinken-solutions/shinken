@@ -128,6 +128,8 @@ output_dir = opts.output_dir
 overwrite = opts.overwrite
 dbmod = opts.dbmod
 
+
+
 # Get the Manager for all of the discovery thing
 d = DiscoveryManager(cfg_input, macros, overwrite, runners, output_dir=output_dir, dbmod=dbmod)
 

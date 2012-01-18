@@ -44,7 +44,8 @@ parser.add_option('-t', '--targets', dest="targets",
 parser.add_option('-v', '--verbose', dest="verbose", action='store_true',
                   help="Verbose output.")
 parser.add_option('-s', '--simulate', dest="simulate", 
-                  help="Silulate a launch by reading an nmap XML output instead of launching a new one.")
+                  help="Simulate a launch by reading an nmap XML output instead of launching a new one.")
+
 
 targets = []
 opts, args = parser.parse_args()
@@ -64,7 +65,6 @@ if not opts.verbose:
     verbose = False
 else:
     verbose = True
-
 
 if args:
     targets.extend(args)

@@ -21,10 +21,15 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+import time
+import random
 
 from shinken.webui.bottle import redirect
 from shinken.util import to_bool
 
+
+# Ask for a random init
+random.seed(time.time())
 
 
 ### Will be populated by the UI with it's own value
@@ -59,6 +64,15 @@ def get_launch():
     print 'nmap?', use_nmap
     print 'vmware?', use_vmware
 
+    # We are putting a ask ask in the database
+    i = random.randint(1, 65535)
+    scan_ask = {'_id' : i, 'names' : names, 'use_nmap' : use_nmap, 'use_vmware' : use_vmware, 'state' : 'pending', 'creation' : int(time.time())}
+    print "Saving", scan_ask, "in", app.db.scans
+    r = app.db.scans.save(scan_ask)
+    # We just want the id as string, not the object
+    print "We create the scan", i
+    app.ask_new_scan(i)
+
     return {'app' : app}
 
 
@@ -67,11 +81,19 @@ def get_scans():
     print "Got scans"
     return {'app' : app}
 
+
 def get_results():
     print "Looking for hosts in pending aprouval"
     cur = app.db.discovered_hosts.find({})
     pending_hosts = [h for h in cur]
-    return {'app' : app, 'pending_hosts' : pending_hosts}
+
+    print "And in progress scans"
+    cur = app.db.scans.find({})
+    scans = [s for s in cur]
+    for s in scans:
+        print "SCAN", s
+
+    return {'app' : app, 'pending_hosts' : pending_hosts, 'scans' : scans}
 
 
 # This is the dict teh webui will try to "load".

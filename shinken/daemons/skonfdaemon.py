@@ -45,6 +45,8 @@ from shinken.brok import Brok
 from shinken.external_command import ExternalCommand
 from shinken.util import safe_print
 from shinken.skonfuiworker import SkonfUIWorker
+from shinken.message import Message
+
 
 # Now the bottle HTTP part :)
 from shinken.webui.bottle import Bottle, run, static_file, view, route, request, response
@@ -171,6 +173,7 @@ class Skonf(Daemon):
         self.conf = Config()
 
         self.workers = {}   # dict of active workers
+
 
 
     # Use for adding things like broks
@@ -446,6 +449,22 @@ class Skonf(Daemon):
                 self.returns_queue = Queue()
             else:
                 self.returns_queue = self.manager.Queue()
+
+            # create the input queue of all workers
+            try:
+               if is_android:
+                  self.workers_queue = Queue()
+               else:
+                  self.workers_queue = self.manager.Queue()
+            # If we got no /dev/shm on linux, we can got problem here. 
+            # Must raise with a good message
+            except OSError, exp:
+               # We look for the "Function not implemented" under Linux
+               if exp.errno == 38 and os.name == 'posix':
+                  logger.log("ERROR : get an exception (%s). If you are under Linux, please check that your /dev/shm directory exists." % (str(exp)))
+                  raise
+
+
                 
             # For multiprocess things, we should not have
             # sockettimeouts. will be set explicitly in Pyro calls
@@ -847,23 +866,9 @@ class Skonf(Daemon):
 
     # Create and launch a new worker, and put it into self.workers
     def create_and_launch_worker(self):
-        # ceate the input queue of this worker
-        try:
-           if is_android:
-              q = Queue()
-           else:
-              q = self.manager.Queue()
-        # If we got no /dev/shm on linux, we can got problem here. 
-        # Must raise with a good message
-        except OSError, exp:
-            # We look for the "Function not implemented" under Linux
-            if exp.errno == 38 and os.name == 'posix':
-                logger.log("ERROR : get an exception (%s). If you are under Linux, please check that your /dev/shm directory exists." % (str(exp)))
-            raise
-            
-
-        w = SkonfUIWorker(1, q, self.returns_queue, 1, mortal=False, max_plugins_output_length = 1, target=None)
+        w = SkonfUIWorker(1, self.workers_queue, self.returns_queue, 1, mortal=False, max_plugins_output_length = 1, target=None)
         w.module_name = 'skonfuiworker'
+        w.add_database_data('localhost')
 
         # save this worker
         self.workers[w.id] = w
@@ -887,3 +892,9 @@ class Skonf(Daemon):
     # TODO : code this!
     def check_auth(self, login, password):
        return True
+
+    # We are asking to a worker .. to work :)
+    def ask_new_scan(self, id):
+       msg = Message(id=0, type='ScanAsk', data={'scan_id' : id})
+       print "Creating a Message for ScanAsk", msg
+       self.workers_queue.put(msg)
