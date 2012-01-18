@@ -174,6 +174,8 @@ class Skonf(Daemon):
 
         self.workers = {}   # dict of active workers
 
+        self.host_templates = None
+
 
 
     # Use for adding things like broks
@@ -295,6 +297,9 @@ class Skonf(Daemon):
         self.conf.fill_default()
         
         # Remove templates from config
+        # SAVE TEMPLATES
+        self.host_templates = self.conf.hosts.templates
+        # Then clean for other parts
         self.conf.remove_templates()
 
         # We removed templates, and so we must recompute the
@@ -329,7 +334,6 @@ class Skonf(Daemon):
         self.conf.create_business_rules()
         # And link them
         self.conf.create_business_rules_dependencies()
-
 
         # Warn about useless parameters in Shinken
         if self.verify_only:

@@ -31,6 +31,7 @@
       <link rel="stylesheet" type="text/css" href="/static/css/message.css" media="screen"/>
       <link rel="stylesheet" type="text/css" href="/static/css/multibox.css" media="screen"/>
       <link rel="stylesheet" type="text/css" href="/static/css/pulse.css" media="screen"/>
+      <link rel="stylesheet" type="text/css" href="/static/css/autocompleter.css" media="screen"/>
 
       %if user is not None:
         <link rel="stylesheet" type="text/css" href="/static/css/userinfo.css" media="screen"/>
@@ -55,6 +56,13 @@
       <script type="text/javascript" src="/static/js/opacity.js"></script>
       <script type="text/javascript" src="/static/js/multibox.js"></script>
       <script type="text/javascript" src="/static/js/deptree.js"></script>
+
+      %# Auto completer part
+      <script type="text/javascript" src="/static/js/autocompleter.js"></script>
+      <script type="text/javascript" src="/static/js/autocompleter.Request.js"></script>
+      <script type="text/javascript" src="/static/js/autocompleterObserver.js"></script>
+
+
 
       %if user is not None and print_header:
         <script type="text/javascript" src="/static/js/userinfo.js"></script>
