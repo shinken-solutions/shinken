@@ -163,10 +163,15 @@ Invalid element name
 
 										<dt scope="row" class="column1">Status Information</dt>
 										<dd>{{elt.output}}</dd>
-
+										
 										<dt scope="row" class="column1">Performance Data</dt>
+										%# "If there any perf data?"
+										%if len(elt.perf_data) > 0:
 										<dd>{{elt.perf_data}}</dd>
-
+										%else:
+										<dd>&nbsp;</dd>
+										%end
+										
 										<dt scope="row" class="column1">Current Attempt</dt>
 										<dd>{{elt.attempt}}/{{elt.max_check_attempts}} ({{elt.state_type}} state)</dd>
 

@@ -1,25 +1,26 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#Copyright (C) 2009-2010 :
+# Copyright (C) 2009-2012 :
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
 #    Hartmut Goebel, h.goebel@goebel-consult.de
+#	 Andreas Karfusehr, andreas@karfusehr.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
 import copy
@@ -37,7 +38,7 @@ except ImportError:
 
 from shinken.util import safe_print
 from shinken.misc.perfdata import PerfDatas
-#TODO : manage it in a clean way.
+# TODO : manage it in a clean way.
 from shinken.modules.webui_broker.perfdata_guess import get_perfometer_table_values
 
 
@@ -217,6 +218,7 @@ class Helper(object):
     #                      ]
     #              }
     # But as a python dict
+
     def get_dep_graph_struct(self, elt, levels=3):
         t = elt.__class__.my_type
         # We set the values for webui/plugins/depgraph/htdocs/js/eltdeps.js
@@ -485,7 +487,7 @@ class Helper(object):
     def get_link_dest(self, obj):
         return "/%s/%s" % (obj.__class__.my_type, obj.get_full_name())
 
-    # For an host, give it's own link, for a servie, give the link of its host
+    # For an host, give it's own link, for a servies, give the link of its host
     def get_host_link(self, obj):
         if obj.__class__.my_type == 'service':
             return self.get_link(obj.host)
