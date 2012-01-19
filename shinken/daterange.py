@@ -303,16 +303,17 @@ class Daterange:
         #print "DR Get next valid from:", time.asctime(time.localtime(t))
         #First we search fot the day of t
         t_day = self.get_next_valid_day(t)
-        sec_from_morning = self.get_min_sec_from_morning()
 
-        #print "Search for t", time.asctime(time.localtime(t))
-        #print "DR: next day", time.asctime(time.localtime(t_day))
+        #print "DR: T next valid day", time.asctime(time.localtime(t_day))
+
+        # We search for the min of all tr.start > sec_from_morning
+        # if it's the next day, use a start of the day search for timerange
+        if t < t_day:
+            sec_from_morning = self.get_next_future_timerange_valid(t_day)
+        else: # t is in this day, so look from t (can be in the evening or so)
+            sec_from_morning = self.get_next_future_timerange_valid(t)
         #print "DR: sec from morning", sec_from_morning
 
-        #We search for the min of all tr.start > sec_from_morning
-        sec_from_morning = self.get_next_future_timerange_valid(t_day)
-        #print "DR: sec from morning", sec_from_morning
-        #print "Sec from morning", t_day
         if sec_from_morning is not None:
             if t_day is not None and sec_from_morning is not None:
                 return t_day + sec_from_morning

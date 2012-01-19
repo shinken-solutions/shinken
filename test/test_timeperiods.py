@@ -1,5 +1,5 @@
 #!/usr/bin/env python2.6
-#Copyright (C) 2009-2010 :
+#Copyright (C) 2009-2012 :
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
@@ -71,6 +71,7 @@ class TestTimeperiods(ShinkenTest):
         self.assert_(t_next is None)
 
         #Then a simple same day
+        print "Cheking validity for", time.asctime(time.localtime(july_the_12))
         t = Timeperiod()
         t.timeperiod_name = ''
         t.resolve_daterange(t.dateranges, 'tuesday 00:00-07:00,21:30-24:00')
@@ -89,6 +90,49 @@ class TestTimeperiods(ShinkenTest):
         t_next = time.asctime(time.localtime(t_next))
         print "Next?", t_next
         self.assert_(t_next == "Tue Jul 13 00:00:00 2010")
+
+
+
+    def test_simple_with_multiple_time_mutltiple_days(self):
+        self.print_header()
+        t = Timeperiod()
+        now = time.time()
+        # Get the 12 of july 2010 at 15:00, monday
+        july_the_12 = time.mktime(time.strptime("12 Jul 2010 15:00:00", "%d %b %Y %H:%M:%S"))
+        print july_the_12
+
+        # First a false test, no results
+        t = Timeperiod()
+        t.timeperiod_name = ''
+        t.resolve_daterange(t.dateranges, '1999-01-28  00:00-07:00,21:30-24:00')
+        t_next = t.get_next_valid_time_from_t(now)
+        self.assert_(t_next is None)
+
+        # Then a simple same day
+        t = Timeperiod()
+        t.timeperiod_name = ''
+        #monday          00:00-07:00,21:30-24:00
+        #tuesday         00:00-07:00,21:30-24:00
+        print "Cheking validity for", time.asctime(time.localtime(july_the_12))
+        t.resolve_daterange(t.dateranges, 'monday 00:00-07:00,21:30-24:00')
+        t.resolve_daterange(t.dateranges, 'tuesday 00:00-07:00,21:30-24:00')
+        t_next = t.get_next_valid_time_from_t(july_the_12)
+        t_next = time.asctime(time.localtime(t_next))
+        print "RES:", t_next
+        self.assert_(t_next == "Mon Jul 12 21:30:00 2010")
+
+        # Now ask about at 00:00 time?
+        july_the_12 = time.mktime(time.strptime("12 Jul 2010 00:00:00", "%d %b %Y %H:%M:%S"))
+        print "Cheking validity for", time.asctime(time.localtime(july_the_12))
+        # Then a simple same day
+        t = Timeperiod()
+        t.timeperiod_name = ''
+        t.resolve_daterange(t.dateranges, 'monday 00:00-07:00,21:30-24:00')
+        t.resolve_daterange(t.dateranges, 'tuesday 00:00-07:00,21:30-24:00')
+        t_next = t.get_next_valid_time_from_t(july_the_12)
+        t_next = time.asctime(time.localtime(t_next))
+        print "Next?", t_next
+        self.assert_(t_next == "Mon Jul 12 00:00:00 2010")
 
 
 
