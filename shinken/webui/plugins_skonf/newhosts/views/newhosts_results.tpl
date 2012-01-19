@@ -1,5 +1,5 @@
 
-%rebase layout_skonf globals(), title="Discovery scan results", css=['newhosts/css/results.css']
+%rebase layout_skonf globals(), title="Discovery scan results", css=['newhosts/css/results.css'], js=['newhosts/js/results.js']
 
 <div> <h1> Discover your new hosts </h1> </div>
 

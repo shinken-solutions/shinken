@@ -96,6 +96,30 @@ def get_results():
     return {'app' : app, 'pending_hosts' : pending_hosts, 'scans' : scans}
 
 
+
+def post_validatehost():
+    print "Got forms in /newhosts/validatehost call"
+    _id = app.request.forms.get('_id', 'unknown-host')
+    tags = app.request.forms.get('tags', '')
+    host_name = app.request.forms.get('host_name', 'unamed')
+
+    print "DUMP FORMS", app.request.forms
+    print "Got in request form", _id, host_name, tags
+
+    host = {'_id' : _id, 'host_name' : host_name, 'use' : tags}
+    print "Saving", host, "in", app.db.hosts
+    r = app.db.hosts.save(host)
+    print "result", r
+
+    # Now we can remove the one in the discovered part
+    print "And deleting the discovered host"
+    r = app.db.discovered_hosts.remove({'_id' : _id})
+    print "result", r
+
+    return None#{'app' : app}
+
+
+
 # This is the dict teh webui will try to "load".
 #  *here we register one page with both adresses /dummy/:arg1 and /dummy/, both addresses
 #   will call the function get_page.
@@ -108,5 +132,6 @@ pages = {get_newhosts : { 'routes' : ['/newhosts'], 'view' : 'newhosts', 'static
          get_launch : { 'routes' : ['/newhosts/launch'], 'view' : 'newhosts_launch', 'static' : True, 'method' : 'POST'},
          get_scans : { 'routes' : ['/newhosts/scans'], 'view' : 'newhosts_scans', 'static' : True},
          get_results : { 'routes' : ['/newhosts/results'], 'view' : 'newhosts_results', 'static' : True},
+         post_validatehost : { 'routes' : ['/newhosts/validatehost'], 'view' : None, 'method' : 'POST'},
          }
 
