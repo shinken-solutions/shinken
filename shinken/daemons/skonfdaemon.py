@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 :
+#Copyright (C) 2009-2012 :
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com

@@ -1,5 +1,5 @@
 
-%rebase layout_skonf globals()
+%rebase layout_skonf globals(), title="Discovery scan results", css=['newhosts/css/results.css']
 
 <div> <h1> Discover your new hosts </h1> </div>
 
@@ -11,16 +11,23 @@
 <p>Here are the results :</p>
 
 %for h in pending_hosts:
+     <div id="host-{{h['host_name']}}" class="grid_10 discovered_host">
      <br/>{{h}}
-     <form method="get" id="host-{{h['host_name']}}" action="/add">
+     <form method="post" id="form-{{h['host_name']}}" action="/newhosts/validatehost">
        <span class="table">
 	 <span class="row">
+	   <input name="_id" type="hidden" value="{{h['_id']}}"/>
 	   <span class="cell">
-	     <input name="tags" type="text" tabindex="1" value="{{h['use']}}" id="use-{{h['host_name']}}"/>
+             <label for="hostname">Hostname:</label>
+             <input name="hostname" type="text" tabindex="1" value="{{h['host_name']}}" id="form-host_name-{{h['host_name']}}"/>
+           </span>
+	   <span class="cell">
+	     <label for="tags">Tags:</label>
+	     <input name="tags" type="text" tabindex="2" value="{{h['use']}}" id="form-use-{{h['host_name']}}"/>
 	   </span>
 	   <span class="cell">
-	     <a tabindex="4" href="javascript: submitform()">
-	       <img src="/static/images/search.png" alt="search"/>
+	     <a tabindex="4" href='javascript: validatehostform("form-{{h['host_name']}}")'>
+	       <img class='form_button_image' src="/static/images/big_ack.png" alt="Validate"/>
 	     </a>
 	   </span>
 	 </span>
@@ -30,7 +37,7 @@
      %# " Add the auto copleter in the search input form"
      <script type="text/javascript">
        document.addEvent('domready', function() {
-         var tags = $("use-{{h['host_name']}}");
+         var tags = $("form-use-{{h['host_name']}}");
  
          // Our instance for the element with id "use-"
          new Autocompleter.Request.JSON(tags, '/lookup/tag', {
@@ -41,6 +48,7 @@
        
        });
      </script>
+     </div>
 
 
 %end
