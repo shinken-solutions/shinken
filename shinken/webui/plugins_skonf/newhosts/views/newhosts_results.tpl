@@ -18,8 +18,8 @@
 	 <span class="row">
 	   <input name="_id" type="hidden" value="{{h['_id']}}"/>
 	   <span class="cell">
-             <label for="hostname">Hostname:</label>
-             <input name="hostname" type="text" tabindex="1" value="{{h['host_name']}}" id="form-host_name-{{h['host_name']}}"/>
+             <label for="host_name">Hostname:</label>
+             <input name="host_name" type="text" tabindex="1" value="{{h['host_name']}}" id="form-host_name-{{h['host_name']}}"/>
            </span>
 	   <span class="cell">
 	     <label for="tags">Tags:</label>

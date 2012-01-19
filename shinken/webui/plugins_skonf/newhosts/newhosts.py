@@ -101,10 +101,13 @@ def post_validatehost():
     print "Got forms in /newhosts/validatehost call"
     _id = app.request.forms.get('_id', 'unknown-host')
     tags = app.request.forms.get('tags', '')
-    host_name = app.request.forms.get('host_name', 'unamed')
+    host_name = app.request.forms.get('host_name', None)
 
     print "DUMP FORMS", app.request.forms
     print "Got in request form", _id, host_name, tags
+    if not host_name:
+        print "BAD HOST NAME for post_validatehost bail out"
+        return None
 
     host = {'_id' : _id, 'host_name' : host_name, 'use' : tags}
     print "Saving", host, "in", app.db.hosts
@@ -116,7 +119,7 @@ def post_validatehost():
     r = app.db.discovered_hosts.remove({'_id' : _id})
     print "result", r
 
-    return None#{'app' : app}
+    return None
 
 
 
