@@ -1,27 +1,29 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 :
-#    Gabes Jean, naparuba@gmail.com
-#    Gerhard Lausser, Gerhard.Lausser@consol.de
-#    Gregory Starck, g.starck@gmail.com
-#    Hartmut Goebel, h.goebel@goebel-consult.de
+
+# Copyright (C) 2009-2011 :
+#     Gabes Jean, naparuba@gmail.com
+#     Gerhard Lausser, Gerhard.Lausser@consol.de
+#     Gregory Starck, g.starck@gmail.com
+#     Hartmut Goebel, h.goebel@goebel-consult.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#DBMysql is a MySQL access database class
+
+
 from shinken.db import DB
 
 connect_function = None
@@ -43,6 +45,7 @@ from cx_Oracle import DataError as DataError_exp
 from cx_Oracle import OperationalError as OperationalError_exp
 
 
+""" TODO : Add some comment about this class for the doc"""
 class DBOracle(DB):
     def __init__(self, user, password, database, table_prefix = ''):
         self.user = user
@@ -51,8 +54,8 @@ class DBOracle(DB):
         self.table_prefix = table_prefix
 
 
-    #Create the database connection
-    #TODO : finish (begin :) ) error catch and conf parameters...
+    # Create the database connection
+    # TODO : finish (begin :) ) error catch and conf parameters...
     def connect_database(self):
         connstr='%s/%s@%s' % (self.user, self.password, self.database)
 
@@ -61,8 +64,8 @@ class DBOracle(DB):
         self.db_cursor.arraysize=50
 
 
-    #Just run the query
-    #TODO: finish catch
+    # Just run the query
+    # TODO: finish catch
     def execute_query(self, query):
         print "[DBOracle] I run Oracle query", query, "\n"
         try:

@@ -1,24 +1,29 @@
 #!/usr/bin/env python
-#Copyright (C) 2010 Gabes Jean, naparuba@gmail.com
-#
-#This file is part of Shinken.
-#
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
-#
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
-#
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+# Copyright (C) 2009-2011 :
+#     Gabes Jean, naparuba@gmail.com
+#     Gerhard Lausser, Gerhard.Lausser@consol.de
+#     Gregory Starck, g.starck@gmail.com
+#     Hartmut Goebel, h.goebel@goebel-consult.de
+#
+# This file is part of Shinken.
+#
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
 
+""" TODO : Add some comment about this class for the doc"""
 class Comment:
     id = 1
 
@@ -33,6 +38,7 @@ class Comment:
         'expires':      None,
         'expire_time':  None,
         'can_be_deleted': None,
+
 # TODO: find a very good way to handle the downtime "ref"
 # ref must effectively not be in properties because it points onto a real object.
 #        'ref':  None
@@ -41,10 +47,10 @@ class Comment:
 
 
 
-    #Adds a comment to a particular service. If the "persistent" field
-    #is set to zero (0), the comment will be deleted the next time
-    #Nagios is restarted. Otherwise, the comment will persist
-    #across program restarts until it is deleted manually.
+    # Adds a comment to a particular service. If the "persistent" field
+    # is set to zero (0), the comment will be deleted the next time
+    # Shinken is restarted. Otherwise, the comment will persist
+    # across program restarts until it is deleted manually.
     def __init__(self, ref, persistent, author, comment, comment_type, entry_type, source, expires, expire_time):
         self.id = self.__class__.id
         self.__class__.id += 1
@@ -69,8 +75,8 @@ class Comment:
         return "Comment id=%d %s" % (self.id, self.comment)
 
 
-    #Call by picle for dataify the ackn
-    #because we DO NOT WANT REF in this pickleisation!
+    # Call by pickle for dataify the ackn
+    # because we DO NOT WANT REF in this pickleisation!
     def __getstate__(self):
         cls = self.__class__
         # id is not in *_properties
@@ -81,7 +87,7 @@ class Comment:
         return res
 
 
-    #Inversed funtion of getstate
+    # Inverted funtion of getstate
     def __setstate__(self, state):
         cls = self.__class__
         
@@ -96,17 +102,17 @@ class Comment:
             if prop in state:
                 setattr(self, prop, state[prop])
 
-        # to prevent duplicate id in comments:
+        # to prevent from duplicating id in comments:
         if self.id >= cls.id:
             cls.id = self.id + 1
 
-    # Theses 2 functions are DEPRECATED and will be removed in a future version of
-    # Shinken. They should not be useful any more after a first load/save pass.
 
-    #Inversed funtion of getstate
+    # This function is DEPRECATED and will be removed in a future version of
+    # Shinken. It should not be useful any more after a first load/save pass.
+    # Inverted funtion of getstate
     def __setstate_deprecated__(self, state):
         cls = self.__class__
-        #Check if the len of this state is like the previous,
+        # Check if the len of this state is like the previous,
         # if not, we will do errors!
         # -1 because of the 'id' prop
         if len(cls.properties) != (len(state) - 1):

@@ -1,24 +1,26 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 :
-#    Gabes Jean, naparuba@gmail.com
-#    Gerhard Lausser, Gerhard.Lausser@consol.de
-#    Gregory Starck, g.starck@gmail.com
-#    Hartmut Goebel, h.goebel@goebel-consult.de
+
+# Copyright (C) 2009-2011 :
+#     Gabes Jean, naparuba@gmail.com
+#     Gerhard Lausser, Gerhard.Lausser@consol.de
+#     Gregory Starck, g.starck@gmail.com
+#     Hartmut Goebel, h.goebel@goebel-consult.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+
 
 
 #DBMysql is a MySQL access database class
@@ -28,9 +30,10 @@ import MySQLdb
 from MySQLdb import IntegrityError
 from MySQLdb import ProgrammingError
 
-#Do we need?
+
 import _mysql_exceptions
 
+""" TODO : Add some comment about this class for the doc"""
 class DBMysql(DB):
     def __init__(self, host, user, password, database, character_set, table_prefix = '', port=3306):
         self.host = host
@@ -42,9 +45,9 @@ class DBMysql(DB):
         self.port = port
 
 
-    #Create the database connection
-    #TODO : finish (begin :) ) error catch and conf parameters...
-    #Import to catch exception
+    # Create the database connection
+    # TODO : finish (begin :) ) error catch and conf parameters...
+    # Import to catch exception
     def connect_database(self):
         #self.db = MySQLdb.connect (host = "localhost", user = "root", passwd = "root", db = "merlin")
         self.db = MySQLdb.connect (host = self.host, user = self.user, \
@@ -58,8 +61,8 @@ class DBMysql(DB):
         #Thanks http://www.dasprids.de/blog/2007/12/17/python-mysqldb-and-utf-8 for utf8 code :)
 
 
-    #Just run the query
-    #TODO: finish catch
+    # Just run the query
+    # TODO: finish catch
     def execute_query(self, query):
         #print "[MysqlDB]I run query", query, "\n"
         try:
