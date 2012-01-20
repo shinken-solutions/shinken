@@ -1,9 +1,10 @@
 #!/usr/bin/env python
-# Copyright (C) 2009-2010 :
-#    Gabes Jean, naparuba@gmail.com
-#    Gerhard Lausser, Gerhard.Lausser@consol.de
-#    Gregory Starck, g.starck@gmail.com
-#    Hartmut Goebel, h.goebel@goebel-consult.de
+
+# Copyright (C) 2009-2011 :
+#     Gabes Jean, naparuba@gmail.com
+#     Gerhard Lausser, Gerhard.Lausser@consol.de
+#     Gregory Starck, g.starck@gmail.com
+#     Hartmut Goebel, h.goebel@goebel-consult.de
 #
 # This file is part of Shinken.
 #
@@ -25,6 +26,7 @@ from shinken.action import Action
 from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 from shinken.autoslots import AutoSlots
 
+""" TODO : Add some comment about this class for the doc"""
 class Check(Action):
     # AutoSlots create the __slots__ with properties and
     # running_properties names
@@ -57,7 +59,7 @@ class Check(Action):
         'worker':       StringProp(default='none'),
     }
 
-    #id = 0 #Is common to Actions
+    
     def __init__(self, status, command, ref, t_to_go, dep_check=None, id=None, timeout=10,\
                      poller_tag='None', reactionner_tag='None', env={}, module_type='fork'):
 
@@ -97,10 +99,10 @@ class Check(Action):
             self.internal = False
 
 
-    #return a copy of the check but just what is important for execution
-    #So we remove the ref and all
+    # return a copy of the check but just what is important for execution
+    # So we remove the ref and all
     def copy_shell(self):
-        #We create a dummy check with nothing in it, just defaults values
+        # We create a dummy check with nothing in it, just defaults values
         return self.copy_shell__( Check('', '', '', '', '', id=self.id) )
 
 
