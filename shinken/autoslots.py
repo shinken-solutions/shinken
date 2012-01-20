@@ -1,6 +1,7 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
-# Copyright (C) 2009-2010 :
+# Copyright (C) 2009-2011 :
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -21,7 +22,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-"""The AutoSlots Class is a MetaClass : it manage how other classes
+"""The AutoSlots Class is a MetaClass : it manages how other classes
  are created (Classes, not instances of theses classes).
  Here it's role is to create the __slots__ list of the class with
  all properties of Class.properties and Class.running_properties
@@ -32,10 +33,10 @@ class AutoSlots(type):
     # new is call when we create a new Class
     # that have metaclass = AutoSlots
     # CLS is AutoSlots
-    # name is s tring of the Class (like Service)
+    # name is string of the Class (like Service)
     # bases are the Classes of which Class inherits (like SchedulingItem)
     # dct is the new Class dict (like all method of Service)
-    # Some properties name are not alowed in __slots__ like 2d_coords of
+    # Some properties names are not allowed in __slots__ like 2d_coords of
     # Host, so we must tag them in properties with no_slots
     def __new__(cls, name, bases, dct):
         # Thanks to Bertrand Mathieu to the set idea
