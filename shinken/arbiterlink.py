@@ -1,24 +1,25 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 :
+
+# Copyright (C) 2009-2011 :
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
 #    Hartmut Goebel, h.goebel@goebel-consult.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import socket
 
@@ -29,6 +30,8 @@ Pyro = pyro.Pyro
 
 from shinken.log import logger
 
+
+""" TODO : Add some comment about this class for the doc"""
 class ArbiterLink(SatelliteLink):
     id = 0
     my_type = 'arbiter'
@@ -47,14 +50,16 @@ class ArbiterLink(SatelliteLink):
         return self.con.get_config()
 
 
-    #Check is required prop are set:
-    #contacts OR contactgroups is need
+    # Check is required when prop are set:
+    # contacts OR contactgroups is need
     def is_correct(self):
         state = True #guilty or not? :)
         cls = self.__class__
 
         for prop, entry in cls.properties.items():
             if not hasattr(self, prop) and entry.required:
+                # This sould raise an error afterwards?
+                # If so, logger.log it !
                 print self.get_name(), " : I do not have", prop
                 state = False #Bad boy...
         return state
@@ -131,7 +136,7 @@ class ArbiterLinks(SatelliteLinks):
     inner_class = ArbiterLink
 
 
-    #We must have a realm property, so we find our realm
+    # We must have a realm property, so we find our realm
     def linkify(self, modules):
         self.linkify_s_by_plug(modules)
 

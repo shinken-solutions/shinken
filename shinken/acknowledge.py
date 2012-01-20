@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-# Copyright (C) 2009-2010 :
+
+# Copyright (C) 2009-2011 :
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -20,6 +21,7 @@
 # You should have received a copy of the GNU Affero General Public
 # License along with Shinken. If not, see <http://www.gnu.org/licenses/>.
 #
+
 """
 Allows you to acknowledge the current problem for the specified service.
 By acknowledging the current problem, future notifications (for the same
@@ -28,8 +30,8 @@ servicestate) are disabled.
 class Acknowledge:
     id = 1
 
-    #Just to list the properties we will send as pickle
-    #so to others daemons, so all but NOT REF
+    # Just to list the properties we will send as pickle
+    # so to others daemons, all but NOT REF
     properties = {
         'id' : None,
         'sticky' : None,
@@ -50,16 +52,20 @@ class Acknowledge:
     # sent out to contacts indicating that the current service problem
     # has been acknowledged.
     #
+    # <WTF??> 
     # If the "persistent" option is set to one (1), the comment
     # associated with the acknowledgement will survive across restarts
     # of the Shinken process. If not, the comment will be deleted the
-    # next time Nagios restarts. "persistent" not only means "survive
-    # restarts", but also
-    #
+    # next time Shinken restarts. "persistent" not only means "survive
+    # restarts", but also 
+    # 
+    # => End of comment Missing !!
+    # </WTF??>
+    
     def __init__(self, ref, sticky, notify, persistent, author, comment, end_time=0):
         self.id = self.__class__.id
         self.__class__.id += 1
-        self.ref = ref # pointer to srv or host we are apply
+        self.ref = ref # pointer to srv or host we are applied
         self.sticky = sticky
         self.notify = notify
         self.end_time = end_time
@@ -67,8 +73,8 @@ class Acknowledge:
         self.comment = comment
 
 
-    #Call by picle for dataify the ackn
-    #because we DO NOT WANT REF in this pickleisation!
+    # Call by pickle for dataify the ackn
+    # because we DO NOT WANT REF in this pickleisation!
     def __getstate__(self):
         cls = self.__class__
         # id is not in *_properties
@@ -79,13 +85,13 @@ class Acknowledge:
         return res
 
 
-    #Inversed funtion of getstate
+    # Inversed funtion of getstate
     def __setstate__(self, state):
         cls = self.__class__
         self.id = state['id']
         for prop in cls.properties:
             if prop in state:
                 setattr(self, prop, state[prop])
-        # If load a old ack, set the end_time to 0 so it's infinite
+        # If load a old ack, set the end_time to 0 which refers to infinite
         if not hasattr(self, 'end_time'):
             self.end_time = 0
