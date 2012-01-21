@@ -1,0 +1,24 @@
+/* ----------------------------------------------------------------
+ *  Header
+ * ----------------------------------------------------------------*/
+#header{
+	margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+}
+
+#header h1 {
+	font-weight:normal;
+	text-align:left;
+	padding:.3em 1em;
+	margin-bottom:0;
+	color: #FFFFFF;
+	background-color: #2F5F8F;
+	background-image: -webkit-gradient(linear, left top, left bottom, from(#2F5F8F), to(#005086)); /* Saf4+, Chrome */
+	background-image: -webkit-linear-gradient(top, #2F5F8F, #005086); /* Chrome 10+, Saf5.1+ */
+	background-image:    -moz-linear-gradient(top, #2F5F8F, #005086); /* FF3.6 */
+	background-image:     -ms-linear-gradient(top, #2F5F8F, #005086); /* IE10 */
+	background-image:      -o-linear-gradient(top, #2F5F8F, #005086); /* Opera 11.10+ */
+	background-image:         linear-gradient(top, #2F5F8F, #005086);
+            filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#2F5F8F', EndColorStr='#005086'); /* IE6â��IE9 */
+}

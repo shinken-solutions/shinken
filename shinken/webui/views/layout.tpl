@@ -24,6 +24,8 @@
       
 		<link type="text/css" href="/static/css/custom-theme/jquery-ui-1.8.16.custom.css" rel="stylesheet" />
 		<link href="/static/css/grid.css" rel="stylesheet">
+		<link href="/static/css/layout.css" rel="stylesheet">
+		<link href="/static/css/navigation.css" rel="stylesheet" type="text/css" />
 		<link href="/static/bootstrap/bootstrap.css" rel="stylesheet">
 
 	    %if user is not None:
@@ -35,22 +37,28 @@
 		<link rel="stylesheet" type="text/css" href="/static/{{p}}">
       %end
   
-	<script type="text/javascript" src="/staticjs/jquery-1.6.2.min.js"></script>
-    <script type="text/javascript" src="/staticjs/jquery-ui-1.8.16.custom.min.js"></script>
+        <!--scripts-->
+
+        <script type="text/javascript" src="/static/js/jquery-1.6.2.min.js"></script>
+        <script type="text/javascript" src="/static/js/jquery-ui-1.8.16.custom.min.js"></script>
+        
+        <!--daterangepicker-->
+        <script type="text/javascript" src="/static/third-party/jQuery-UI-Date-Range-Picker/js/date.js"></script>
+        <script type="text/javascript" src="/static/third-party/jQuery-UI-Date-Range-Picker/js/daterangepicker.jQuery.js"></script>
+
+        <!--wijmo-->
+        <script src="/static/third-party/wijmo/jquery.mousewheel.min.js" type="text/javascript"></script>
+        <script src="/static/third-party/wijmo/jquery.bgiframe-2.1.3-pre.js" type="text/javascript"></script>
+        <script src="/static/third-party/wijmo/jquery.wijmo-open.1.5.0.min.js" type="text/javascript"></script>
+
+        <!-- FileInput -->
+        <script src="/static/third-party/jQuery-UI-FileInput/js/enhance.min.js" type="text/javascript"></script>
+        <script src="/static/third-party/jQuery-UI-FileInput/js/fileinput.jquery.js" type="text/javascript"></script>
+
+
+        <!--init for this page-->
+        <script type="text/javascript" src="/static/js/demo.js"></script>
       
-      %# Auto completer part
-      <script type="text/javascript" src="/static/js/autocompleter.js"></script>
-      <script type="text/javascript" src="/static/js/autocompleter.Request.js"></script>
-      <script type="text/javascript" src="/static/js/autocompleterObserver.js"></script>
-
-      %if user is not None and print_header:
-        <script type="text/javascript" src="/static/js/userinfo.js"></script>
-      %end
-
-      %if refresh:
-		<script type="text/javascript" src="/static/js/reload.js"></script>
-      %end
-
       %# End of classic js import. Now call for specific ones
       %for p in js:
 		<script type="text/javascript" src="/static/{{p}}"></script>
