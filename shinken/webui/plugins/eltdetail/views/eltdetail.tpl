@@ -154,6 +154,7 @@ Invalid element name
 	            <li><a href="#comments">Comments/Downtimes</a></li>  Graphs
 				<li><a href="#graphs">Graphs</a></li>
 			</ul>
+			
 			<!-- Tab Summary Start-->
 	        <div id="summary">
 				<div id="item_information">
@@ -234,12 +235,67 @@ Invalid element name
 	        <!-- Tab Service End -->
 
 	        <!-- Tab Comments Start -->
-	        <div id="comments">Nam dui erat, auctor a, dignissim quis, sollicitudin eu, felis. Pellentesque nisi urna, interdum eget, sagittis et, consequat vestibulum, lacus. Mauris porttitor ullamcorper augue.
+	        <div id="comments">
+				<h2 style="display: none"><a name="comment" id="comment">Comments</a></h2>
+				<div id="minimenu">
+					<ul>
+						<li> <a href="#" class="">Add Comments</a> </li>
+						<li> <a onclick="delete_all_comments('{{elt.get_full_name()}}')" href="#" class="">Delete Comments</a> </li>
+					</ul>
+				</div>
+			  	<div class="clear"></div>
+									  
+			 	<div id="log_container">
+					%if len(elt.comments) > 0:
+					<h2></h2>
+					<ol>
+						%for c in elt.comments:
+						<li>
+							<div class="left">
+								<p class="log-text">{{c.comment}}</p>
+								<div class="log-meta"> <span><b>Author:</b> {{c.author}}</span> <span><b>Creation:</b> {{helper.print_date(c.entry_time)}}</span> <span>	<b>Expire:</b>{{helper.print_date(c.expire_time)}}</span>
+								</div>
+							</div>
+							<div class="right log-action"><a class="icon_delete" href="#">Delete</a></div>
+						</li>
+						%end
+					</ol>
+					%else:
+						<p>No comments available</p>
+					%end
+				</div>
 	        </div>
 	        <!-- Tab Comments End -->
 
 	        <!-- Tab Graph Start -->
-	        <div id="graph">Nam dui erat, auctor a, dignissim quis, sollicitudin eu, felis. Pellentesque nisi urna, interdum eget, sagittis et, consequat vestibulum, lacus. Mauris porttitor ullamcorper augue.
+	        <div id="graph">
+	           	<h2 style="display: none"><a name="graphs" id="graph">Graphs</a></h2>
+	       		%uris = app.get_graph_uris(elt, graphstart, graphend)
+	      		%if len(uris) == 0:
+	      			<p>No graphs, sorry</p>
+				%else:
+					<ul class="tabmenu">
+						%now = int(time.time())
+						%fourhours = now - 3600*4
+						%lastday = now - 86400
+						%lastweek = now - 86400*7
+						%lastmonth = now - 86400*31
+						%lastyear = now - 86400*365
+						
+						<li><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{fourhours}}&graphend={{now}}#graphs" class="">4 hours</a></li>
+						<li><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{lastday}}&graphend={{now}}#graphs" class="">Day</a></li>
+						<li><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{lastweek}}&graphend={{now}}#graphs" class="">Week</a></li>
+						<li><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{lastmonth}}&graphend={{now}}#graphs" class="">Month</a></li>
+						<li><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{lastyear}}&graphend={{now}}#graphs" class="">Year</a></li>
+					</ul>
+				%end
+								
+				%for g in uris:
+				%img_src = g['img_src']
+				%link = g['link']
+				<p><a href="{{link}}"><img src="{{img_src}}" class="graphimg"></img></a></p>
+				moncul
+				%end
 	        </div>
 	        <!-- Tab Graph End -->
 		</div>
