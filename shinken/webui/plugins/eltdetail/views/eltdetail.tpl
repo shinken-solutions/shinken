@@ -150,8 +150,9 @@ Invalid element name
 		<div id="tabs">
 			<ul>
 	        	<li><a href="#summary">Summary</a></li>
-	            <li><a href="#tabs-2">Second</a></li>
-	            <li><a href="#tabs-3">Third</a></li>
+	            <li><a href="#services">Services</a></li>
+	            <li><a href="#comments">Comments/Downtimes</a></li>  Graphs
+				<li><a href="#graphs">Graphs</a></li>
 			</ul>
 			<!-- Tab Summary Start-->
 	        <div id="summary">
@@ -162,12 +163,10 @@ Invalid element name
 							<td scope="row" class="column1">{{elt_type.capitalize()}} Status</td>
 							<td><span class="state_{{elt.state.lower()}}">{{elt.state}}</span> (since {{helper.print_duration(elt.last_state_change, just_duration=True, x_elts=2)}}) </td>
 						</tr
-			
 						<tr>
 							<td scope="row" class="column1">Status Information</td>
 							<td>{{elt.output}}</td>
 						</tr>
-					
 						<tr>
 							<td scope="row" class="column1">Performance Data</td>
 							%# "If there any perf data?"
@@ -177,22 +176,18 @@ Invalid element name
 							<td>&nbsp;</td>
 							%end
 						</tr>	
-			
 						<tr>										
 							<td scope="row" class="column1">Current Attempt</td>
 							<td>{{elt.attempt}}/{{elt.max_check_attempts}} ({{elt.state_type}} state)</td>
 						</tr>
-					
 						<tr>		
 							<td scope="row" class="column1">Last Check Time</td>
 							<td title='Last check was at {{time.asctime(time.localtime(elt.last_chk))}}'>was {{helper.print_duration(elt.last_chk)}}</td>
 						</tr>
-			
 						<tr>		
 							<td scope="row" class="column1">Next Scheduled Active Check</td>
 							<td title='Next active check at {{time.asctime(time.localtime(elt.next_chk))}}'>{{helper.print_duration(elt.next_chk)}}</td>
 						</tr>
-			
 						<tr>		
 							<td scope="row" class="column1">Last State Change</td>
 							<td>{{time.asctime(time.localtime(elt.last_state_change))}}</td>
@@ -216,17 +211,14 @@ Invalid element name
 							<td scope="row" class="column1">Last Notification</td>
 							<td>{{helper.print_date(elt.last_notification)}} (notification {{elt.current_notification_number}})</dd>
 						</tr>
-			
 						<tr>			
 							<td scope="row" class="column1">Check Latency / Duration</td>
 							<td>{{'%.2f' % elt.latency}} / {{'%.2f' % elt.execution_time}} seconds</td>
 						</tr>
-			
 						<tr>
 							<td scope="row" class="column1">Is This Host Flapping?</td>
 							<td>{{helper.yes_no(elt.is_flapping)}} ({{helper.print_float(elt.percent_state_change)}}% state change)</td>
 						</tr>
-						
 						<tr>
 							<td scope="row" class="column1">In Scheduled Downtime?</td>
 							<td>{{helper.yes_no(elt.in_scheduled_downtime)}}</td>
@@ -236,8 +228,20 @@ Invalid element name
 	        </div>
 	        <!-- Tab Summary End-->
 	        
-	        <div id="tabs-2">Phasellus mattis tincidunt nibh. Cras orci urna, blandit id, pretium vel, aliquet ornare, felis. Maecenas scelerisque sem non nisl. Fusce sed lorem in enim dictum bibendum.</div>
-	        <div id="tabs-3">Nam dui erat, auctor a, dignissim quis, sollicitudin eu, felis. Pellentesque nisi urna, interdum eget, sagittis et, consequat vestibulum, lacus. Mauris porttitor ullamcorper augue.</div>
+	        <!-- Tab Service Start -->
+	        <div id="services">Phasellus mattis tincidunt nibh. Cras orci urna, blandit id, pretium vel, aliquet ornare, felis. Maecenas scelerisque sem non nisl. Fusce sed lorem in enim dictum bibendum.
+	        </div>
+	        <!-- Tab Service End -->
+
+	        <!-- Tab Comments Start -->
+	        <div id="tabs-3">Nam dui erat, auctor a, dignissim quis, sollicitudin eu, felis. Pellentesque nisi urna, interdum eget, sagittis et, consequat vestibulum, lacus. Mauris porttitor ullamcorper augue.
+	        </div>
+	        <!-- Tab Comments End -->
+
+	        <!-- Tab Graph Start -->
+	        <div id="tabs-3">Nam dui erat, auctor a, dignissim quis, sollicitudin eu, felis. Pellentesque nisi urna, interdum eget, sagittis et, consequat vestibulum, lacus. Mauris porttitor ullamcorper augue.
+	        </div>
+	        <!-- Tab Graph End -->
 		</div>
         <!--end tabs-->
 
