@@ -83,7 +83,7 @@ class InvalidPidFile(Exception): pass
 
 """ Interface for pyro communications """
 class Interface(Pyro.core.ObjBase, object):
-    #'app´ is to be set to the owner of this interface.
+    #  'app' is to be set to the owner of this interface.
     def __init__(self, app):
 
         Pyro.core.ObjBase.__init__(self)
