@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2011 :
@@ -92,7 +91,8 @@ class BaseModule(object):
         self.modules = getattr(mod_conf, 'modules', [])
         self.props = mod_conf.properties.copy()
         # TODO: choose between 'props' or 'properties'..
-        self.interrupted = Falseself.properties = self.props 
+        self.interrupted = False
+        self.properties = self.props 
         self.is_external = self.props.get('external', False)
         # though a module defined with no phase is quite useless .
         self.phases = self.props.get('phases', []) 
