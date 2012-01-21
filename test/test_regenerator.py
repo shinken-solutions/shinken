@@ -24,6 +24,7 @@
 
 #It's ugly I know....
 from shinken_test import *
+from shinken.misc.regenerator import Regenerator
 
 
 class TestRegenerator(ShinkenTest):
