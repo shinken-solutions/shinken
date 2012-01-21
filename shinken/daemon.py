@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2011 :
 #     Gabes Jean, naparuba@gmail.com
