@@ -29,7 +29,7 @@ Invalid element name
 	<div id="nav_left">
 		<ul>
 			<li><a href="#">Overview</a></li>
-			<li><a class="pointer_down" id="v_toggle" href="#"">Gesture</a></li>
+			<li><a class="pointer_down" id="v_toggle" href="#">Gesture</a></li>
 		</ul>
 	</div>
 	
@@ -234,12 +234,12 @@ Invalid element name
 	        <!-- Tab Service End -->
 
 	        <!-- Tab Comments Start -->
-	        <div id="tabs-3">Nam dui erat, auctor a, dignissim quis, sollicitudin eu, felis. Pellentesque nisi urna, interdum eget, sagittis et, consequat vestibulum, lacus. Mauris porttitor ullamcorper augue.
+	        <div id="comments">Nam dui erat, auctor a, dignissim quis, sollicitudin eu, felis. Pellentesque nisi urna, interdum eget, sagittis et, consequat vestibulum, lacus. Mauris porttitor ullamcorper augue.
 	        </div>
 	        <!-- Tab Comments End -->
 
 	        <!-- Tab Graph Start -->
-	        <div id="tabs-3">Nam dui erat, auctor a, dignissim quis, sollicitudin eu, felis. Pellentesque nisi urna, interdum eget, sagittis et, consequat vestibulum, lacus. Mauris porttitor ullamcorper augue.
+	        <div id="graph">Nam dui erat, auctor a, dignissim quis, sollicitudin eu, felis. Pellentesque nisi urna, interdum eget, sagittis et, consequat vestibulum, lacus. Mauris porttitor ullamcorper augue.
 	        </div>
 	        <!-- Tab Graph End -->
 		</div>
