@@ -90,7 +90,7 @@ class LiveStatus_broker(BaseModule, Daemon):
         }
 
     def add_compatibility_sqlite_module(self):
-        if len([m for m in self.modules_manager.instances if m.module_type.startswith('logstore_')]) == 0:
+        if len([m for m in self.modules_manager.instances if m.properties['type'].startswith('logstore_')]) == 0:
             #  this shinken-specific.cfg does not use the new submodules
             for k in self.compat_sqlite.keys():
                 if self.compat_sqlite[k] == None:
@@ -349,6 +349,7 @@ class LiveStatus_broker(BaseModule, Daemon):
             server.bind((self.host, self.port))
             server.listen(backlog)
             self.listeners.append(server)
+            print "listening on tcp port", self.port
         if self.socket:
             if os.path.exists(self.socket):
                 os.remove(self.socket)
@@ -358,6 +359,7 @@ class LiveStatus_broker(BaseModule, Daemon):
             sock.bind(self.socket)
             sock.listen(backlog)
             self.listeners.append(sock)
+            print "listening on unix socket", self.socket
         self.input = self.listeners[:]
         open_connections = {}
 

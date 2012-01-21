@@ -752,6 +752,7 @@ class TestConfigNoLogstore(TestConfig):
         #--- livestatus_broker.do_main
 
     def test_has_implicit_module(self):
+        self.assert_(self.livestatus_broker.modules_manager.instances[0].properties['type'] == 'logstore_sqlite')
         self.assert_(self.livestatus_broker.modules_manager.instances[0].__class__.__name__ == 'LiveStatusLogStoreSqlite')
 
 
