@@ -42,6 +42,7 @@ from shinken.basemodule import BaseModule
 from shinken.message import Message
 from shinken.log import logger
 from shinken.modulesmanager import ModulesManager
+from shinken.objects.module import Module
 from shinken.daemon import Daemon
 from shinken.misc.datamanager import datamgr
 #Local import
@@ -77,16 +78,22 @@ class LiveStatus_broker(BaseModule, Daemon):
             'module_name': 'LogStore',
             'module_type': 'logstore_sqlite',
             'use_aggressive_sql': "0",
-            'database_file': getattr(modconf, 'database_file', os.path.join(os.path.abspath('.'), 'var', 'livestatus.db')),
-            'archive_path': getattr(modconf, 'archive_path', os.path.join(os.path.dirname(self.database_file), 'archives')),
-            'max_logs_age': getattr(modconf, 'max_logs_age', '365'),
+            'database_file': getattr(modconf, 'database_file', None),
+            'archive_path': getattr(modconf, 'archive_path', None),
+            'max_logs_age': getattr(modconf, 'max_logs_age', None),
         }
 
-    def add_compatibility_sqlite_module(self)
+    def add_compatibility_sqlite_module(self):
         if len([m for m in self.modules_manager.instances if m.module_type.startswith('logstore_')]) == 0:
             #  this shinken-specific.cfg does not use the new submodules
-            dbmodconf = Module(self.compat_sqlite)
-            self.modules.append(dbmodconf)
+            for k in self.compat_sqlite.keys():
+                if self.compat_sqlite[k] == None:
+                    del self.compat_sqlite[k]
+            dbmod = Module(self.compat_sqlite)
+            self.modules_manager.set_modules([dbmod])
+            self.modules_manager.load_and_init()
+            
+            
 
 
 

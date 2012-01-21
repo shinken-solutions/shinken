@@ -52,8 +52,7 @@ from shinken.modules import livestatus_broker
 from shinken.modules.livestatus_broker import LiveStatus_broker
 from shinken.modules.livestatus_broker.livestatus import LiveStatus
 from shinken.modules.livestatus_broker.livestatus_regenerator import LiveStatusRegenerator
-from shinken.modules.livestatus_broker.datamanager import datamgr
-from shinken.modules.livestatus_broker.helper import helper
+from shinken.misc.datamanager import datamgr
 
 livestatus_modconf = Module()
 livestatus_modconf.module_name = "livestatus"
@@ -405,7 +404,6 @@ class ShinkenTest(unittest.TestCase):
         self.livestatus_broker.rg = LiveStatusRegenerator()
         self.livestatus_broker.datamgr = datamgr
         datamgr.load(self.livestatus_broker.rg)
-        self.livestatus_broker.helper = helper
         #--- livestatus_broker.main
 
         self.livestatus_broker.init()

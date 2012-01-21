@@ -224,6 +224,13 @@ def get_obj_name_two_args_and_void(obj, value):
     except AttributeError:
         return ''
 
+# Get the full name if there is one
+def get_obj_full_name(obj):
+    try:
+        return obj.get_full_name()
+    except Exception:
+        return obj.get_name()
+
 # return the list of keys of the custom dict
 # but without the _ before
 def get_customs_keys(d):

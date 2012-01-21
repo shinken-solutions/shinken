@@ -34,6 +34,7 @@ import shutil
 import time
 import random
 import copy
+import unittest
 
 from shinken.brok import Brok
 from shinken.objects.timeperiod import Timeperiod
@@ -43,12 +44,21 @@ from shinken.modules.livestatus_broker.mapping import Logline
 from shinken.modules.logstore_sqlite import LiveStatusLogStoreSqlite
 from shinken.comment import Comment
 
+try:
+    import pymongo
+    has_pymongo = True
+except Exception:
+    has_pymongo = False
+
+
 sys.setcheckinterval(10000)
 
 
 class TestConfig(ShinkenTest):
 
     def tearDown(self):
+        if not has_pymongo:
+            return
         self.shutdown_livestatus()
         if os.path.exists(self.livelogs):
             os.remove(self.livelogs)
@@ -80,8 +90,7 @@ class TestConfig(ShinkenTest):
 
         dbmodconf = Module({'module_name' : 'LogStore',
             'module_type': 'logstore_mongodb',
-            #'mongodb_uri': "mongodb://127.0.0.1:27017",
-            'mongodb_uri': "mongodb://10.0.12.51:27017",
+            'mongodb_uri': "mongodb://127.0.0.1:27017",
             'database': 'testtest'+self.testid,
         })
         modconf.modules = [dbmodconf]
@@ -109,10 +118,11 @@ class TestConfig(ShinkenTest):
         self.livestatus_broker.rg = LiveStatusRegenerator()
         self.livestatus_broker.datamgr = datamgr
         datamgr.load(self.livestatus_broker.rg)
-        self.livestatus_broker.helper = helper
         #--- livestatus_broker.main
 
         self.livestatus_broker.init()
+        for i in self.livestatus_broker.modules_manager.instances:
+            print "instance", i
         self.livestatus_broker.db = self.livestatus_broker.modules_manager.instances[0]
         self.livestatus_broker.livestatus = LiveStatus(self.livestatus_broker.datamgr, self.livestatus_broker.db, self.livestatus_broker.pnp_path, self.livestatus_broker.from_q)
 
@@ -152,6 +162,8 @@ class TestConfig(ShinkenTest):
 
 class TestConfigSmall(TestConfig):
     def setUp(self):
+        if not has_pymongo:
+            return
         self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
         Comment.id = 1
         self.testid = str(os.getpid() + random.randint(1, 1000))
@@ -184,6 +196,8 @@ class TestConfigSmall(TestConfig):
 
 
     def test_hostsbygroup(self):
+        if not has_pymongo:
+            return
         self.print_header()
         now = time.time()
         objlist = []
@@ -210,6 +224,8 @@ ResponseHeader: fixed16
         print response
 
     def test_one_log(self):
+        if not has_pymongo:
+            return
         self.print_header()
         host = self.sched.hosts.find_by_name("test_host_0")
         now = time.time()
@@ -246,6 +262,8 @@ Columns: time type options state host_name"""
 
 class TestConfigBig(TestConfig):
     def setUp(self):
+        if not has_pymongo:
+            return
         start_setUp = time.time()
         self.setup_with_file('etc/nagios_5r_100h_2000s.cfg')
         Comment.id = 1
@@ -261,7 +279,7 @@ class TestConfigBig(TestConfig):
         host.__class__.use_aggressive_host_checking = 1
 
 
-    def init_livestatus(self):
+    def xinit_livestatus(self):
         self.livelogs = 'tmp/livelogs.db' + "wrumm"
         modconf = Module({'module_name' : 'LiveStatus',
             'module_type' : 'livestatus',
@@ -274,8 +292,7 @@ class TestConfigBig(TestConfig):
 
         dbmodconf = Module({'module_name' : 'LogStore',
             'module_type' : 'logstore_mongodb',
-            'mongodb_uri' : "mongodb://10.0.12.51:27017",
-            #'mongodb_uri' : "mongodb://127.0.0.1:27017",
+            'mongodb_uri' : "mongodb://127.0.0.1:27017",
         })
         modconf.modules = [dbmodconf]
         self.livestatus_broker = LiveStatus_broker(modconf)
@@ -302,7 +319,6 @@ class TestConfigBig(TestConfig):
         self.livestatus_broker.rg = LiveStatusRegenerator()
         self.livestatus_broker.datamgr = datamgr
         datamgr.load(self.livestatus_broker.rg)
-        self.livestatus_broker.helper = helper
         #--- livestatus_broker.main
 
         self.livestatus_broker.init()
@@ -318,7 +334,8 @@ class TestConfigBig(TestConfig):
 
 
     def test_a_long_history(self):
-        #return
+        if not has_pymongo:
+            return
         test_host_005 = self.sched.hosts.find_by_name("test_host_005")
         test_host_099 = self.sched.hosts.find_by_name("test_host_099")
         test_ok_00 = self.sched.services.find_srv_by_name_and_hostname("test_host_005", "test_ok_00")
