@@ -38,6 +38,9 @@ import copy
 from shinken.brok import Brok
 from shinken.objects.timeperiod import Timeperiod
 from shinken.objects.module import Module
+from shinken.objects.service import Service
+from shinken.modules.livestatus_broker.mapping import Logline
+from shinken.modules.logstore_sqlite import LiveStatusLogStoreSqlite
 from shinken.comment import Comment
 
 sys.setcheckinterval(10000)
@@ -91,21 +94,16 @@ class TestConfigSmall(TestConfig):
     def tearDown(self):
         self.livestatus_broker.db.commit()
         self.livestatus_broker.db.close()
-        if os.path.exists(self.livelogs):
-            os.remove(self.livelogs)
-        if os.path.exists(self.livelogs+"-journal"):
-            os.remove(self.livelogs+"-journal")
-        if os.path.exists(self.pnp4nagios):
-            shutil.rmtree(self.pnp4nagios)
+        #if os.path.exists(self.livelogs):
+        #    os.remove(self.livelogs)
+        #if os.path.exists(self.livelogs+"-journal"):
+        #    os.remove(self.livelogs+"-journal")
         if os.path.exists('var/nagios.log'):
             os.remove('var/nagios.log')
         if os.path.exists('var/retention.dat'):
             os.remove('var/retention.dat')
         if os.path.exists('var/status.dat'):
             os.remove('var/status.dat')
-        to_del = [attr for attr in self.livestatus_broker.livestatus.__class__.out_map['Host'].keys() if attr.startswith('host_')]
-        for attr in to_del:
-            del self.livestatus_broker.livestatus.__class__.out_map['Host'][attr]
         self.livestatus_broker = None
 
         if os.path.exists("tmp/archives"):
@@ -128,6 +126,76 @@ class TestConfigSmall(TestConfig):
             self.update_broker()
 
 
+    def test_hostsbygroup(self):
+        self.print_header()
+        now = time.time()
+        objlist = []
+        print "-------------------------------------------"
+        print "Service.lsm_host_name", Service.lsm_host_name
+        print "Logline.lsm_current_host_name", Logline.lsm_current_host_name
+        print "-------------------------------------------"
+        for host in self.sched.hosts:
+            objlist.append([host, 0, 'UP'])
+        for service in self.sched.services:
+            objlist.append([service, 0, 'OK'])
+        self.scheduler_loop(1, objlist)
+        self.update_broker()
+        request = """GET hostsbygroup
+ColumnHeaders: on
+Columns: host_name hostgroup_name
+Filter: groups >= allhosts
+OutputFormat: csv
+KeepAlive: on
+ResponseHeader: fixed16
+"""
+
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+
+    def test_one_log(self):
+        self.print_header()
+        host = self.sched.hosts.find_by_name("test_host_0")
+        now = time.time()
+        time_warp(-3600)
+        num_logs = 0
+	host.state = 'DOWN'
+	host.state_type = 'SOFT'
+	host.attempt = 1
+	host.output = "i am down"
+	host.raise_alert_log_entry()
+	time.sleep(3600)
+	host.state = 'UP'
+	host.state_type = 'HARD'
+	host.attempt = 1
+	host.output = "i am up"
+	host.raise_alert_log_entry()
+	time.sleep(3600)
+        self.update_broker()
+        print "-------------------------------------------"
+        print "Service.lsm_host_name", Service.lsm_host_name
+        print "Logline.lsm_current_host_name", Logline.lsm_current_host_name
+        print "-------------------------------------------"
+
+        self.livestatus_broker.db.log_db_do_archive()
+        print "request logs from", int(now - 3600), int(now + 3600)
+        print "request logs from", time.asctime(time.localtime(int(now - 3600))), time.asctime(time.localtime(int(now + 3600)))
+        request = """GET log
+Filter: time >= """ + str(int(now - 3600)) + """
+Filter: time <= """ + str(int(now + 3600)) + """
+Columns: time type options state host_name"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        print "next next_log_db_rotate", time.asctime(time.localtime(self.livestatus_broker.db.next_log_db_rotate))
+        result = self.livestatus_broker.db.log_db_historic_contents()
+        for day in result:
+            print "file is", day[0]
+            print "start is", time.asctime(time.localtime(day[3]))
+            print "stop  is", time.asctime(time.localtime(day[4]))
+            print "archive is", day[2]
+            print "handle is", day[1]
+        print self.livestatus_broker.db.log_db_relevant_files(now - 3600, now +  3600 )
+            
+
     def test_num_logs(self):
         self.print_header()
         host = self.sched.hosts.find_by_name("test_host_0")
@@ -145,7 +213,7 @@ class TestConfigSmall(TestConfig):
             host.state = 'UP'
             host.state_type = 'HARD'
             host.attempt = 1
-            host.output = "i am down"
+            host.output = "i am up"
             host.raise_alert_log_entry()
             num_logs += 1
             time.sleep(3600)
@@ -239,20 +307,27 @@ Columns: time type options state host_name"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         pyresponse = eval(response)
-        self.assert_(len(pyresponse) == logs)
         print "pyresponse", len(pyresponse)
         print "expect", logs
+        self.assert_(len(pyresponse) == logs)
 
         self.livestatus_broker.db.log_db_do_archive()
         self.assert_(os.path.exists("tmp/archives"))
         self.assert_(len([d for d in os.listdir("tmp/archives") if not d.endswith("journal")]) == 4)
         lengths = []
         for db in sorted([d for d in os.listdir("tmp/archives") if not d.endswith("journal")]):
-            dbh = LiveStatusDb("tmp/archives/" + db, "tmp", 3600)
-            numlogs = dbh.execute("SELECT COUNT(*) FROM logs")
+            dbmodconf = Module({'module_name' : 'LogStore',
+                'module_type' : 'logstore_sqlite',
+                'use_aggressive_sql' : '0',
+                'database_file' : "tmp/archives/" + db,
+                'max_logs_age' : '0',
+            })
+            tmpconn = LiveStatusLogStoreSqlite(dbmodconf)
+            tmpconn.open()
+            numlogs = tmpconn.execute("SELECT COUNT(*) FROM logs")
             lengths.append(numlogs[0][0])
             print "db entries", db, numlogs
-            dbh.close()
+            tmpconn.close()
         print "lengths is", lengths
         self.assert_(lengths == [6,14,22,30])
 
@@ -355,11 +430,18 @@ Columns: time type options state host_name"""
         self.assert_(len([d for d in os.listdir("tmp/archives") if not d.endswith("journal")]) == 4)
         lengths = []
         for db in sorted([d for d in os.listdir("tmp/archives") if not d.endswith("journal")]):
-            dbh = LiveStatusDb("tmp/archives/" + db, "tmp", 3600)
-            numlogs = dbh.execute("SELECT COUNT(*) FROM logs")
+            dbmodconf = Module({'module_name' : 'LogStore',
+                'module_type' : 'logstore_sqlite',
+                'use_aggressive_sql' : '0',
+                'database_file' : "tmp/archives/" + db,
+                'max_logs_age' : '0',
+            })
+            tmpconn = LiveStatusLogStoreSqlite(dbmodconf)
+            tmpconn.open()
+            numlogs = tmpconn.execute("SELECT COUNT(*) FROM logs")
             lengths.append(numlogs[0][0])
             print "db entries", db, numlogs
-            dbh.close()
+            tmpconn.close()
         print "lengths is", lengths
         self.assert_(lengths == [12,28,44,60])
 
@@ -417,21 +499,57 @@ class TestConfigBig(TestConfig):
 
 
     def init_livestatus(self):
-        #self.livelogs = 'tmp/livelogs.db' + self.testid
         self.livelogs = 'tmp/livelogs.db' + "wrumm"
-        self.db_archives = os.path.join(os.path.dirname(self.livelogs), 'archives')
-        self.pnp4nagios = 'tmp/pnp4nagios_test' + self.testid
-        self.livestatus_broker = Livestatus_broker(livestatus_modconf, '127.0.0.1', str(50000 + os.getpid()), 'live', [], self.livelogs, self.db_archives, 365, self.pnp4nagios)
-        self.livestatus_broker.create_queues()
-        #self.livestatus_broker.properties = {
-        #    'to_queue' : 0,
-        #    'from_queue' : 0
-        #
-        #    }
-        self.livestatus_broker.init()
-        self.livestatus_broker.db = LiveStatusDb(self.livestatus_broker.database_file, self.livestatus_broker.archive_path, self.livestatus_broker.max_logs_age)
+        modconf = Module({'module_name' : 'LiveStatus',
+            'module_type' : 'livestatus',
+            'port' : str(50000 + os.getpid()),
+            'pnp_path' : 'tmp/livestatus_broker.pnp_path_test' + self.testid,
+            'host' : '127.0.0.1',
+            'socket' : 'live',
+            'name' : 'test', #?
+        })
 
-        self.livestatus_broker.livestatus = LiveStatus(self.livestatus_broker.configs, self.livestatus_broker.hosts, self.livestatus_broker.services, self.livestatus_broker.contacts, self.livestatus_broker.hostgroups, self.livestatus_broker.servicegroups, self.livestatus_broker.contactgroups, self.livestatus_broker.timeperiods, self.livestatus_broker.commands, self.livestatus_broker.schedulers, self.livestatus_broker.pollers, self.livestatus_broker.reactionners, self.livestatus_broker.brokers, self.livestatus_broker.db, self.livestatus_broker.use_aggressive_sql, self.livestatus_broker.pnp_path, self.livestatus_broker.from_q)
+        dbmodconf = Module({'module_name' : 'LogStore',
+            'module_type' : 'logstore_sqlite',
+            'use_aggressive_sql' : "0",
+            'database_file' : self.livelogs,
+            'archive_path' : os.path.join(os.path.dirname(self.livelogs), 'archives'),
+        })
+        modconf.modules = [dbmodconf]
+        self.livestatus_broker = LiveStatus_broker(modconf)
+        self.livestatus_broker.create_queues()
+
+        #--- livestatus_broker.main
+        self.livestatus_broker.log = logger
+        # this seems to damage the logger so that the scheduler can't use it
+        #self.livestatus_broker.log.load_obj(self.livestatus_broker)
+        self.livestatus_broker.debug_output = []
+        self.livestatus_broker.modules_manager = ModulesManager('livestatus', self.livestatus_broker.find_modules_path(), [])
+        self.livestatus_broker.modules_manager.set_modules(self.livestatus_broker.modules)
+        # We can now output some previouly silented debug ouput
+        self.livestatus_broker.do_load_modules()
+        for inst in self.livestatus_broker.modules_manager.instances:
+            if inst.properties["type"].startswith('logstore'):
+                f = getattr(inst, 'load', None)
+                if f and callable(f):
+                    f(self.livestatus_broker) #!!! NOT self here !!!!
+                break
+        for s in self.livestatus_broker.debug_output:
+            print "errors during load", s
+        del self.livestatus_broker.debug_output
+        self.livestatus_broker.rg = LiveStatusRegenerator()
+        self.livestatus_broker.datamgr = datamgr
+        datamgr.load(self.livestatus_broker.rg)
+        self.livestatus_broker.helper = helper
+        #--- livestatus_broker.main
+
+        self.livestatus_broker.init()
+        self.livestatus_broker.db = self.livestatus_broker.modules_manager.instances[0]
+        self.livestatus_broker.livestatus = LiveStatus(self.livestatus_broker.datamgr, self.livestatus_broker.db, self.livestatus_broker.pnp_path, self.livestatus_broker.from_q)
+
+        #--- livestatus_broker.do_main
+        self.livestatus_broker.db.open()
+        #--- livestatus_broker.do_main
 
 
 
@@ -589,17 +707,14 @@ OutputFormat: json"""
             os.remove(self.livelogs)
         if os.path.exists(self.livelogs+"-journal"):
             os.remove(self.livelogs+"-journal")
-        if os.path.exists(self.pnp4nagios):
-            shutil.rmtree(self.pnp4nagios)
+        if os.path.exists(self.livestatus_broker.pnp_path):
+            shutil.rmtree(self.livestatus_broker.pnp_path)
         if os.path.exists('var/nagios.log'):
             os.remove('var/nagios.log')
         if os.path.exists('var/retention.dat'):
             os.remove('var/retention.dat')
         if os.path.exists('var/status.dat'):
             os.remove('var/status.dat')
-        to_del = [attr for attr in self.livestatus_broker.livestatus.__class__.out_map['Host'].keys() if attr.startswith('host_')]
-        for attr in to_del:
-            del self.livestatus_broker.livestatus.__class__.out_map['Host'][attr]
         self.livestatus_broker = None
 
 

@@ -914,9 +914,8 @@ OutputFormat: json
 ResponseHeader: fixed16
 """),
         }
-        last_host = None
-        for h in self.livestatus_broker.hosts.values():
-            last_host = h
+        last_host = reduce(lambda x,y:y,self.livestatus_broker.datamgr.rg.hosts) 
+        #last_service = reduce(lambda x,y:y,self.livestatus_broker.datamgr.rg.services) 
 
         elapsed = {}
         for page in pages:
