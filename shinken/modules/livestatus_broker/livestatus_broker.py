@@ -61,8 +61,14 @@ class LiveStatus_broker(BaseModule, Daemon):
         self.host = getattr(modconf, 'host', '127.0.0.1')
         if self.host == '*':
             self.host = '0.0.0.0'
-        self.port = int(getattr(modconf, 'port', None))
+        self.port = getattr(modconf, 'port', None)
         self.socket = getattr(modconf, 'socket', None)
+        if self.port == 'none':
+            self.port = None
+        if self.port:
+            self.port = int(self.port)
+        if self.socket == 'none':
+            self.socket = None
         self.allowed_hosts = getattr(modconf, 'allowed_hosts', '')
         ips = [ip.strip() for ip in self.allowed_hosts.split(',') if ip]
         self.allowed_hosts = [ip for ip in ips if re.match(r'^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$', ip)]
