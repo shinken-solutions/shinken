@@ -1,4 +1,4 @@
-%rebase layout title='Shinken UI login', print_menu=False, js=['login/js/pass_shark.js']
+%rebase layout title='Shinken UI login', print_menu=False, js=['login/js/pass_shark.js'], css=['login/css/login.css']
 
 <script type="text/javascript">
 	function submitform() {
@@ -33,16 +33,16 @@
 
 </script>
 
-<div id="login_container" class="prefix_custom_2">
+<div id="login_container" class="grid_16">
   
 %if login_text:
 <p><span id="login-text"> {{login_text}}</span></p>
 %end
-	<div class="grid_8">
+	<div class="grid_4">
 		<img src="/static/images/robot_rouge_alpha.png" alt="Shinken Login">
 	</div>
 
-	<div id="login-form" class="grid_7">
+	<div id="login-form" class="grid_4">
 	%if error:
 		<span id="login-error"> {{error}}</span>
 	%end
@@ -60,7 +60,7 @@
 					<input type="checkbox" id="remember_me" tabindex="3" name="remember_me"> <label for="remember_me">Don't forget me</label>
 				</div>
 				<div class="buttons">
-					<a tabindex="4" class="button" href="javascript: submitform()">Login</a>
+					<a tabindex="4" class="button ui-button ui-widget ui-state-default ui-corner-all" href="javascript: submitform()">Login</a>
 				</div>
 		</form>
 	</div>

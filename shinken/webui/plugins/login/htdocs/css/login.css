@@ -1,0 +1,50 @@
+#main_container {
+	position: fixed;
+	top: 35%;
+	left: 40%;
+	margin-top: -50px;
+  	margin-left: -20%;
+}
+
+#login-error {
+    color: red;
+    font-weight: bold;
+    margin: 0.5em;
+}
+
+#login-text {
+    font-weight: bold;
+}
+
+#login_container {
+    float: left;
+    position: relative;
+	height: 228px;
+    z-index: 200;
+	padding: 15px;
+}
+
+#login-container h1 {
+	height: 180px;
+	line-height: 180px;
+    min-height: 180px;
+}
+
+#login-form {
+	border-left: 1px solid #ccc;
+	min-height: 270px;
+    padding-left: 10px;
+    padding-top: 35px;
+	float:left;
+}
+
+#loginform{
+	margin-top: 50px;
+}
+/* ----------------------------------------------------------------
+ * Login Footer
+ * ----------------------------------------------------------------*/
+
+#footer {
+	display: none !important;
+}

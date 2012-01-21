@@ -604,8 +604,10 @@ form .clearfix:before, form .clearfix:after {
 form .clearfix:after {
   clear: both;
 }
-
 /*
+ *  war deaktiviert, ka warum start
+ */
+
 label,
 input,
 select,
@@ -623,6 +625,7 @@ label {
   width: 130px;
   text-align: right;
   color: #404040;
+  margin-right: 10px;
 }
 form .input {
   margin-left: 150px;
@@ -679,7 +682,11 @@ select, input[type=file] {
   *margin-top: 4px;
 
 }
-*/
+
+/*
+ * ende 
+ */
+
 select[multiple] {
   height: inherit;
   background-color: #ffffff;
