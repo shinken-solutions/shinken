@@ -462,10 +462,6 @@ class LiveStatusQuery(object):
 
 
     def get_status_livedata(self, cs):
-        print "now get conf----------------------------------"
-        print "configs is", self.datamgr.rg.configs
-        for conf in self.datamgr.rg.configs.values():
-            print  "conf is", conf
         return [c for c in self.datamgr.rg.configs.values()]
 
 
