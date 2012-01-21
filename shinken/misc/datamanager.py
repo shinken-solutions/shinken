@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2009-2010 :
+# Copyright (C) 2009-2012 :
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -21,7 +21,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 from shinken.util import safe_print
-from helper import hst_srv_sort
+from shinken.misc.sorter import hst_srv_sort
 
 
 class DataManager(object):

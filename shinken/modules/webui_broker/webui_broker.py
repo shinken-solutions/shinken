@@ -46,7 +46,7 @@ from shinken.daemon import Daemon
 from shinken.util import safe_print, to_bool
 
 #Local import
-from datamanager import datamgr
+from shinken.misc.datamanager import datamgr
 from helper import helper
 
 # Debug
