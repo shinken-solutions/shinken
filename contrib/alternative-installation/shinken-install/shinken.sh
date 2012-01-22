@@ -25,7 +25,10 @@ then
     rm -f /tmp/shinken.install.log    
 fi 
 
-# environnement
+#####################
+### ENVIRONNEMENT ###
+#####################
+
 export myscripts=$(readlink -f $(dirname $0))
 src=$(readlink -f "$myscripts/../../..")
 . $myscripts/shinken.conf
@@ -45,7 +48,10 @@ function trap_handler()
         exit 2
 }
 
-### colorisation de texte dans un script bash ###
+###################################
+### TEXT PRESENTATION FUNCTIONS ### 
+###################################
+
 cecho ()                    
 {
 
@@ -120,189 +126,15 @@ cecho ()
         return
 }
 
-readresponse(){
-        case "$2" in
-                "black")
-                        fcolor='30'
-                        ;;
-                "red")
-                        fcolor='31'
-                        ;;
-                "green")
-                        fcolor='32'
-                        ;;
-                "yellow")
-                        fcolor='33'
-                        ;;
-                "blue")
-                        fcolor='34'
-                        ;;
-                "magenta")
-                        fcolor='35'
-                        ;;
-                "cyan")
-                        fcolor='36'
-                        ;;
-                "white")
-                        fcolor='37'
-                        ;;
-                *)
-                        fcolor=''
-        esac
-    echo -ne "\E["$fcolor"m"$1
-    read response
-    echo -ne "\n"
-        tput sgr0
-}
-
-cline ()                    
-{
-
-        # Argument $1 = message
-        # Argument $2 = foreground color
-        # Argument $3 = background color
-
-        case "$2" in
-                "black")
-                        fcolor='30'
-                        ;;
-                "red")
-                        fcolor='31'
-                        ;;
-                "green")
-                        fcolor='32'
-                        ;;
-                "yellow")
-                        fcolor='33'
-                        ;;
-                "blue")
-                        fcolor='34'
-                        ;;
-                "magenta")
-                        fcolor='35'
-                        ;;
-                "cyan")
-                        fcolor='36'
-                        ;;
-                "white")
-                        fcolor='37'
-                        ;;
-                *)
-                        fcolor=''
-        esac
-        case "$3" in
-                "black")
-                        bcolor='40'
-                        ;;
-               "red")
-                        bcolor='41'
-                        ;;
-                "green")
-                        bcolor='42'
-                        ;;
-                "yellow")
-                        bcolor='43'
-                        ;;
-                "blue")
-                        bcolor='44'
-                        ;;
-                "magenta")
-                        bcolor='45'
-                        ;;
-                "cyan")
-                        bcolor='46'
-                        ;;
-                "white")
-                        bcolor='47'
-                        ;;
-                *)
-                        bcolor=""
-        esac
-        if [ -z $bcolor ]
-        then
-                echo -ne "\E["$fcolor"m"$1 
-        else
-                echo -ne "\E["$fcolor";"$bcolor"m"$1  
-        fi
-        return
-}
-
 function cadre(){
+    # display a colored enclosure
+    # $1 => text
+    # $2 => color
     cecho "+--------------------------------------------------------------------------------" $2
     cecho "| $1" $2
     cecho "+--------------------------------------------------------------------------------" $2
 }
 
-function mcadre(){
-
-    if [ "$1" = "mcline" ]
-    then
-        cecho "+--------------------------------------------------------------------------------" $2
-        return
-    fi
-
-    OLDIFS=$IFS
-    IFS=$'\n'
-    for l in $1
-    do
-        cecho "| $l" $2
-    done
-    IFS=OLDIFS
-}
-
-function check_distro(){
-    trap 'trap_handler ${LINENO} $? check_distro' ERR
-    cadre "Verifying compatible distros" green
-
-    if [ ! -e /usr/bin/lsb_release ]
-    then    
-        cecho " > No compatible distribution found" red
-        cecho " > maybe the lsb_release utility is not found" red
-        cecho " > on redhat like distro you should try yum install redhat-lsb"
-        exit 2
-    fi
-
-    if [ -z "$CODE" ]
-    then
-        cecho " > $DIST is not suported" red
-        exit 2
-    fi
-
-    versionok=0
-    distrook=0
-
-    for d in $DISTROS
-    do
-        distro=$(echo $d | awk -F: '{print $1}')
-        version=$(echo $d | awk -F: '{print $2}')
-        if [ "$CODE" = "$distro" ]
-        then
-            cecho " > Found $CODE" green
-            if [ "$version" = "" ]
-            then
-                cecho " > Version checking for $DIST is not needed" green
-                versionok=1
-                return
-            else
-                if [ "$VERS" = "$version" ]
-                then
-                    versionok=1
-                    return
-                #else
-                #    versionok=0
-                fi        
-            fi
-        fi
-    done
-
-    if [ $versionok -ne 1 ]
-    then    
-        cecho " > $DIST $VERS is not supported" red
-        exit 2
-    fi
-
-    cecho " > Found $DIST $VERS" yellow 
-}
 
 function remove(){
     trap 'trap_handler ${LINENO} $? remove' ERR
@@ -370,22 +202,6 @@ function skill(){
     rm -Rf $TARGET/var/*.pid
 }
 
-function get_from_git(){
-    trap 'trap_handler ${LINENO} $? get_from_git' ERR
-    cadre "Getting shinken" green
-    cd $TMP
-    if [ -e "shinken" ]
-    then
-        rm -Rf shinken
-    fi
-    env GIT_SSL_NO_VERIFY=true git clone $GIT >> /tmp/shinken.install.log 2>&1 
-    cd shinken
-    cecho " > Switching to version $VERSION" green
-    git checkout $VERSION >> /tmp/shinken.install.log 2>&1 
-    export src=$TMP/shinken
-    # clean up .git folder
-    rm -Rf .git
-}
 
 function setdirectives(){
     trap 'trap_handler ${LINENO} $? setdirectives' ERR
@@ -405,245 +221,9 @@ function setdirectives(){
     done
 }
 
-function relocate(){
-    trap 'trap_handler ${LINENO} $? relocate' ERR
-    cadre "Relocate source tree to $TARGET" green
-    # relocate source tree
-    cd $TARGET
-    
-    # relocate macros
-    for f in $(find $TARGET/contrib/alternative-installation/shinken-install/tools/macros | grep "\.macro$")
-    do
-        cecho " > relocating macro $f" green
-        sed -i "s#__PREFIX__#$TARGET#g" $f
-    done
-
-    # relocate nagios plugin path
-    sed -i "s#/usr/lib/nagios/plugins#$TARGET/libexec#g" ./etc/resource.cfg
-    sed -i "s#/usr/local/shinken/libexec#$TARGET/libexec#g" ./etc/resource.cfg
-    # relocate default /usr/local/shinken path
-    for fic in $(find . | grep -v "shinken-install" | grep -v "\.pyc$" | xargs grep -snH "/usr/local/shinken" --color | cut -f1 -d' ' | awk -F : '{print $1}' | sort | uniq)
-    do 
-        cecho " > Processing $fic" green
-        cp "$fic" "$fic.orig" 
-        #sed -i 's#/opt/shinken#'$TARGET'#g' $fic 
-        sed -i 's#/usr/local/shinken#'$TARGET'#g' "$fic"
-    done
-
-    # when read hat 5 try to use python26
-    if [ "$CODE" = "REDHAT" ]
-    then
-        if [ "$VERS" = "5" ]
-        then
-            cecho " > translating python version to python26" green
-            for fic in $(find $TARGET | grep "\.py$") 
-            do
-                sed -i "s#/usr/bin/env python#/usr/bin/python26#g" $fic
-            done
-            # also try to translate python script without py extension
-            for fic in $(find $TARGET/bin)
-            do
-                if [ ! -z "$(file $fic | grep "python")" ]
-                then
-                    sed -i "s#/usr/bin/env python#/usr/bin/python26#g" $fic
-                fi
-            done
-        fi
-    fi
-
-    # set some directives 
-    cadre "Set some configuration directives" green
-    directives="workdir=$TARGET/var user=$SKUSER group=$SKGROUP"
-    for fic in $(ls -1 etc/*.ini)
-    do 
-        cecho " > Processing $fic" green;
-        setdirectives "$directives" $fic $TARGET
-        #cp -f $fic $TARGET/etc/; 
-    done
-    # relocate default file
-    cd $TARGET/bin/default
-    cat $TARGET/bin/default/shinken.in | sed  -e 's#LOG\=\(.*\)$#LOG='$TARGET'/var#g' -e 's#RUN\=\(.*\)$#RUN='$TARGET'/var#g' -e  's#ETC\=\(.*\)$#ETC='$TARGET'/etc#g' -e  's#VAR\=\(.*\)$#VAR='$TARGET'/var#g' -e  's#BIN\=\(.*\)$#BIN='$TARGET'/bin#g' > $TARGET/bin/default/shinken
-    # relocate init file
-    cd $TARGET/bin/init.d
-    mv shinken shinken.in
-    cat shinken.in | sed -e "s#\#export PYTHONPATH=.*#export PYTHONPATH="$TARGET"#g" > $TARGET/bin/init.d/shinken
-}
-
-function fix(){
-    trap 'trap_handler ${LINENO} $? fix' ERR
-    cadre "Applying various fixes" green
-    chmod +x /etc/init.d/shinken
-    chmod +x /etc/default/shinken
-    chmod +x $TARGET/bin/init.d/shinken
-    chown -R $SKUSER:$SKGROUP $TARGET
-    chmod -R g+w $TARGET
-    # remove tests directory
-    rm -Rf $TARGET/test
-}
-
-function enable(){
-    trap 'trap_handler ${LINENO} $? enable' ERR
-    cadre "Enabling startup scripts" green
-    cp $TARGET/bin/init.d/shinken* /etc/init.d/
-    case $DISTRO in
-        REDHAT)
-            cecho " > Enabling $DIST startup script" green
-            chkconfig --add shinken
-            chkconfig shinken on
-            ;;
-        DEBIAN)
-            cecho " > Enabling $DIST startup script" green
-            update-rc.d shinken defaults >> /tmp/shinken.install.log 2>&1 
-            ;;
-    esac    
-}
-
-function sinstall(){
-    #trap 'trap_handler ${LINENO} $? install' ERR
-    #cecho "Installing shinken" green
-    check_distro
-    check_exist
-    prerequisites
-    create_user
-    cp -Rf $src $TARGET
-    relocate
-    ln -s $TARGET/bin/default/shinken /etc/default/shinken
-    cp $TARGET/bin/init.d/shinken* /etc/init.d/
-    mkdir -p $TARGET/var/archives
-    enableretention
-    fix
-    cecho "+------------------------------------------------------------------------------" green
-    cecho "| shinken is now installed on your server " green
-    cecho "| You can start it with /etc/init.d/shinken start " green
-    cecho "| The Web Interface is available at : http://localhost:7767" green
-    cecho "+------------------------------------------------------------------------------" green
-}
-
-function rheldvd(){
-    # this is only for my personal needs
-    # dvd mounted ?
-    if [ "$CODE" != "REDHAT" ]
-    then
-        cecho " > Only for REDHAT" red
-        exit 2
-    fi
-    cadre "Setup rhel dvd for yum (this is only for my development purpose)" green
-    dvdm=$(cat /proc/mounts | grep "^\/dev\/cdrom")
-    if [ -z "$dvdm" ]
-    then
-        if [ ! -d "/media/cdrom" ]
-        then
-            mkdir -p "/media/cdrom"
-        fi
-        cecho " > Insert RHEL/CENTOS DVD and press ENTER" yellow
-        read -p " > ENTER when ready "
-        mount -t iso9660 -o ro /dev/cdrom /media/cdrom >> /tmp/shinken.install.log 2>&1 
-        if [ $? -eq 0 ]
-        then
-            dvdm=$(cat /proc/mounts | grep "^\/dev\/cdrom")
-            if [ -z "$dvdm" ]
-            then
-                cecho " > Unable to mount RHEL/CENTOS DVD !" red
-                exit 2
-            else
-                if [ ! -d "/media/cdrom/Server" ]
-                then
-                    cecho "Invalid DVD" red
-                    exit 2
-                else
-                    if [ ! -f "/etc/yum.repos.d/rheldvd.repo" ]
-                    then
-                        echo "[dvd]" > /etc/yum.repos.d/rheldvd.repo
-                        echo "name=rhel dvd" >> /etc/yum.repos.d/rheldvd.repo
-                        echo "baseurl=file:///media/cdrom/Server" >> /etc/yum.repos.d/rheldvd.repo
-                        echo "enabled=1" >> /etc/yum.repos.d/rheldvd.repo
-                        echo "gpgcheck=0" >> /etc/yum.repos.d/rheldvd.repo
-                    fi
-                fi
-            fi
-        else 
-            cecho " > Error while mounting DVD" red
-        fi    
-    fi    
-}
-
-function backup(){
-    trap 'trap_handler ${LINENO} $? backup' ERR
-    cadre "Backup shinken configuration, plugins and data" green
-    skill
-    if [ ! -e $BACKUPDIR ]
-    then
-        mkdir $BACKUPDIR
-    fi
-    mkdir -p $BACKUPDIR/bck-shinken.$DATE
-    cp -Rfp $TARGET/etc $BACKUPDIR/bck-shinken.$DATE/
-    cp -Rfp $TARGET/libexec $BACKUPDIR/bck-shinken.$DATE/
-    cp -Rfp $TARGET/var $BACKUPDIR/bck-shinken.$DATE/
-    cecho " > Backup done. Id is $DATE"
-}
-
-function backuplist(){
-    trap 'trap_handler ${LINENO} $? backuplist' ERR
-    cadre "List of available backups in $BACKUPDIR" green
-    for d in $(ls -1 $BACKUPDIR | grep "bck-shinken" | awk -F. '{print $2}')
-    do
-        cecho " > $d" green
-    done
-
-}
-
-function restore(){
-    trap 'trap_handler ${LINENO} $? restore' ERR
-    cadre "Restore shinken configuration, plugins and data" green
-    skill
-    if [ ! -e $BACKUPDIR ]
-    then
-        cecho " > Backup folder not found" red
-        exit 2
-    fi
-    if [ -z $1 ]
-    then
-        cecho " > No backup timestamp specified" red
-        backuplist
-        exit 2
-    fi
-    if [ ! -e $BACKUPDIR/bck-shinken.$1 ]
-    then
-        cecho " > Backup not found : $BACKUPDIR/bck-shinken.$1 " red
-        backuplist
-        exit 2
-    fi
-    rm -Rf $TARGET/etc
-    rm -Rf $TARGET/libexec 
-    rm -Rf $TARGET/var 
-    cp -Rfp $BACKUPDIR/bck-shinken.$1/* $TARGET/
-    cecho " > Restauration done" green
-}
-
-function supdate(){
-    trap 'trap_handler ${LINENO} $? update' ERR
-
-    curpath=$(pwd)
-    if [ "$src" == "$TARGET" ]
-    then
-        cecho "You should use the source tree for update not the target folder !!!!!" red
-        exit 2
-    fi
-
-    cadre "Updating shinken" green
-    
-    skill
-    backup
-    remove
-    get_from_git
-    cp -Rf $src $TARGET
-    relocate
-    ln -s $TARGET/bin/default/shinken /etc/default/shinken
-    cp $TARGET/bin/init.d/shinken* /etc/init.d/
-    mkdir -p $TARGET/var/archives
-    fix
-    restore $DATE
-}
+##############################
+### INSTALLATION FUNCTIONS ###
+##############################
 
 function create_user(){
     trap 'trap_handler ${LINENO} $? create_user' ERR
@@ -824,6 +404,362 @@ function prerequisites(){
     
 }
 
+function check_distro(){
+    trap 'trap_handler ${LINENO} $? check_distro' ERR
+    cadre "Verifying compatible distros" green
+
+    if [ ! -e /usr/bin/lsb_release ]
+    then    
+        cecho " > No compatible distribution found" red
+        cecho " > maybe the lsb_release utility is not found" red
+        cecho " > on redhat like distro you should try yum install redhat-lsb"
+        exit 2
+    fi
+
+    if [ -z "$CODE" ]
+    then
+        cecho " > $DIST is not suported" red
+        exit 2
+    fi
+
+    versionok=0
+    distrook=0
+
+    for d in $DISTROS
+    do
+        distro=$(echo $d | awk -F: '{print $1}')
+        version=$(echo $d | awk -F: '{print $2}')
+        if [ "$CODE" = "$distro" ]
+        then
+            cecho " > Found $CODE" green
+            if [ "$version" = "" ]
+            then
+                cecho " > Version checking for $DIST is not needed" green
+                versionok=1
+                return
+            else
+                if [ "$VERS" = "$version" ]
+                then
+                    versionok=1
+                    return
+                #else
+                #    versionok=0
+                fi        
+            fi
+        fi
+    done
+
+    if [ $versionok -ne 1 ]
+    then    
+        cecho " > $DIST $VERS is not supported" red
+        exit 2
+    fi
+
+    cecho " > Found $DIST $VERS" yellow 
+}
+
+function get_from_git(){
+    trap 'trap_handler ${LINENO} $? get_from_git' ERR
+    cadre "Getting shinken" green
+    cd $TMP
+    if [ -e "shinken" ]
+    then
+        rm -Rf shinken
+    fi
+    env GIT_SSL_NO_VERIFY=true git clone $GIT >> /tmp/shinken.install.log 2>&1 
+    cd shinken
+    cecho " > Switching to version $VERSION" green
+    git checkout $VERSION >> /tmp/shinken.install.log 2>&1 
+    export src=$TMP/shinken
+    # clean up .git folder
+    rm -Rf .git
+}
+
+function relocate(){
+    trap 'trap_handler ${LINENO} $? relocate' ERR
+    cadre "Relocate source tree to $TARGET" green
+    # relocate source tree
+    cd $TARGET
+    
+    # relocate macros
+    for f in $(find $TARGET/contrib/alternative-installation/shinken-install/tools/macros | grep "\.macro$")
+    do
+        cecho " > relocating macro $f" green
+        sed -i "s#__PREFIX__#$TARGET#g" $f
+    done
+
+    # relocate nagios plugin path
+    sed -i "s#/usr/lib/nagios/plugins#$TARGET/libexec#g" ./etc/resource.cfg
+    sed -i "s#/usr/local/shinken/libexec#$TARGET/libexec#g" ./etc/resource.cfg
+    # relocate default /usr/local/shinken path
+    for fic in $(find . | grep -v "shinken-install" | grep -v "\.pyc$" | xargs grep -snH "/usr/local/shinken" --color | cut -f1 -d' ' | awk -F : '{print $1}' | sort | uniq)
+    do 
+        cecho " > Processing $fic" green
+        cp "$fic" "$fic.orig" 
+        #sed -i 's#/opt/shinken#'$TARGET'#g' $fic 
+        sed -i 's#/usr/local/shinken#'$TARGET'#g' "$fic"
+    done
+
+    # when read hat 5 try to use python26
+    if [ "$CODE" = "REDHAT" ]
+    then
+        if [ "$VERS" = "5" ]
+        then
+            cecho " > translating python version to python26" green
+            for fic in $(find $TARGET | grep "\.py$") 
+            do
+                sed -i "s#/usr/bin/env python#/usr/bin/python26#g" $fic
+            done
+            # also try to translate python script without py extension
+            for fic in $(find $TARGET/bin)
+            do
+                if [ ! -z "$(file $fic | grep "python")" ]
+                then
+                    sed -i "s#/usr/bin/env python#/usr/bin/python26#g" $fic
+                fi
+            done
+        fi
+    fi
+
+    # set some directives 
+    cadre "Set some configuration directives" green
+    directives="workdir=$TARGET/var user=$SKUSER group=$SKGROUP"
+    for fic in $(ls -1 etc/*.ini)
+    do 
+        cecho " > Processing $fic" green;
+        setdirectives "$directives" $fic $TARGET
+        #cp -f $fic $TARGET/etc/; 
+    done
+    # relocate default file
+    cd $TARGET/bin/default
+    cat $TARGET/bin/default/shinken.in | sed  -e 's#LOG\=\(.*\)$#LOG='$TARGET'/var#g' -e 's#RUN\=\(.*\)$#RUN='$TARGET'/var#g' -e  's#ETC\=\(.*\)$#ETC='$TARGET'/etc#g' -e  's#VAR\=\(.*\)$#VAR='$TARGET'/var#g' -e  's#BIN\=\(.*\)$#BIN='$TARGET'/bin#g' > $TARGET/bin/default/shinken
+    # relocate init file
+    cd $TARGET/bin/init.d
+    mv shinken shinken.in
+    cat shinken.in | sed -e "s#\#export PYTHONPATH=.*#export PYTHONPATH="$TARGET"#g" > $TARGET/bin/init.d/shinken
+}
+
+function fix(){
+    trap 'trap_handler ${LINENO} $? fix' ERR
+    cadre "Applying various fixes" green
+    chmod +x /etc/init.d/shinken
+    chmod +x /etc/default/shinken
+    chmod +x $TARGET/bin/init.d/shinken
+    chown -R $SKUSER:$SKGROUP $TARGET
+    chmod -R g+w $TARGET
+    # remove tests directory
+    rm -Rf $TARGET/test
+}
+
+function enable(){
+    trap 'trap_handler ${LINENO} $? enable' ERR
+    cadre "Enabling startup scripts" green
+    cp $TARGET/bin/init.d/shinken* /etc/init.d/
+    case $DISTRO in
+        REDHAT)
+            cecho " > Enabling $DIST startup script" green
+            chkconfig --add shinken
+            chkconfig shinken on
+            ;;
+        DEBIAN)
+            cecho " > Enabling $DIST startup script" green
+            update-rc.d shinken defaults >> /tmp/shinken.install.log 2>&1 
+            ;;
+    esac    
+}
+
+function sinstall(){
+    #trap 'trap_handler ${LINENO} $? install' ERR
+    #cecho "Installing shinken" green
+    check_distro
+    check_exist
+    prerequisites
+    create_user
+    cp -Rf $src $TARGET
+    relocate
+    ln -s $TARGET/bin/default/shinken /etc/default/shinken
+    cp $TARGET/bin/init.d/shinken* /etc/init.d/
+    mkdir -p $TARGET/var/archives
+    enableretention
+    fix
+    cecho "+------------------------------------------------------------------------------" green
+    cecho "| shinken is now installed on your server " green
+    cecho "| You can start it with /etc/init.d/shinken start " green
+    cecho "| The Web Interface is available at : http://localhost:7767" green
+    cecho "+------------------------------------------------------------------------------" green
+}
+
+######################
+### MISC FUNCTIONS ###
+######################
+
+function pythonver(){
+    versions="2.4 2.5 2.6 2.7"
+        LASTFOUND=""
+        # is there any python here ?
+        for v in $versions
+        do
+                which python$v >> /tmp/shinken.install.log 2>&1 
+                if [ $? -eq 0 ]
+                then
+                        LASTFOUND="python$v"
+                fi
+        done
+        if [ -z "$LASTFOUND" ]
+        then
+                # finaly try to find a default python
+                which python >> /tmp/shinken.install.log 2>&1 
+                if [ $? -ne 0 ]
+                then
+                        echo "No python interpreter found !"
+                        exit 2
+                else
+                        echo "python found"
+                        LASTFOUND=$(which python)
+                fi
+        fi
+        PY=$LASTFOUND
+    echo $PY
+}
+
+function rheldvd(){
+    # this is only for my personal needs
+    # dvd mounted ?
+    if [ "$CODE" != "REDHAT" ]
+    then
+        cecho " > Only for REDHAT" red
+        exit 2
+    fi
+    cadre "Setup rhel dvd for yum (this is only for my development purpose)" green
+    dvdm=$(cat /proc/mounts | grep "^\/dev\/cdrom")
+    if [ -z "$dvdm" ]
+    then
+        if [ ! -d "/media/cdrom" ]
+        then
+            mkdir -p "/media/cdrom"
+        fi
+        cecho " > Insert RHEL/CENTOS DVD and press ENTER" yellow
+        read -p " > ENTER when ready "
+        mount -t iso9660 -o ro /dev/cdrom /media/cdrom >> /tmp/shinken.install.log 2>&1 
+        if [ $? -eq 0 ]
+        then
+            dvdm=$(cat /proc/mounts | grep "^\/dev\/cdrom")
+            if [ -z "$dvdm" ]
+            then
+                cecho " > Unable to mount RHEL/CENTOS DVD !" red
+                exit 2
+            else
+                if [ ! -d "/media/cdrom/Server" ]
+                then
+                    cecho "Invalid DVD" red
+                    exit 2
+                else
+                    if [ ! -f "/etc/yum.repos.d/rheldvd.repo" ]
+                    then
+                        echo "[dvd]" > /etc/yum.repos.d/rheldvd.repo
+                        echo "name=rhel dvd" >> /etc/yum.repos.d/rheldvd.repo
+                        echo "baseurl=file:///media/cdrom/Server" >> /etc/yum.repos.d/rheldvd.repo
+                        echo "enabled=1" >> /etc/yum.repos.d/rheldvd.repo
+                        echo "gpgcheck=0" >> /etc/yum.repos.d/rheldvd.repo
+                    fi
+                fi
+            fi
+        else 
+            cecho " > Error while mounting DVD" red
+        fi    
+    fi    
+}
+
+########################
+### BACKUP FUNCTIONS ###
+########################
+
+function backup(){
+    trap 'trap_handler ${LINENO} $? backup' ERR
+    cadre "Backup shinken configuration, plugins and data" green
+    skill
+    if [ ! -e $BACKUPDIR ]
+    then
+        mkdir $BACKUPDIR
+    fi
+    mkdir -p $BACKUPDIR/bck-shinken.$DATE
+    cp -Rfp $TARGET/etc $BACKUPDIR/bck-shinken.$DATE/
+    cp -Rfp $TARGET/libexec $BACKUPDIR/bck-shinken.$DATE/
+    cp -Rfp $TARGET/var $BACKUPDIR/bck-shinken.$DATE/
+    cecho " > Backup done. Id is $DATE"
+}
+
+function backuplist(){
+    trap 'trap_handler ${LINENO} $? backuplist' ERR
+    cadre "List of available backups in $BACKUPDIR" green
+    for d in $(ls -1 $BACKUPDIR | grep "bck-shinken" | awk -F. '{print $2}')
+    do
+        cecho " > $d" green
+    done
+
+}
+
+function restore(){
+    trap 'trap_handler ${LINENO} $? restore' ERR
+    cadre "Restore shinken configuration, plugins and data" green
+    skill
+    if [ ! -e $BACKUPDIR ]
+    then
+        cecho " > Backup folder not found" red
+        exit 2
+    fi
+    if [ -z $1 ]
+    then
+        cecho " > No backup timestamp specified" red
+        backuplist
+        exit 2
+    fi
+    if [ ! -e $BACKUPDIR/bck-shinken.$1 ]
+    then
+        cecho " > Backup not found : $BACKUPDIR/bck-shinken.$1 " red
+        backuplist
+        exit 2
+    fi
+    rm -Rf $TARGET/etc
+    rm -Rf $TARGET/libexec 
+    rm -Rf $TARGET/var 
+    cp -Rfp $BACKUPDIR/bck-shinken.$1/* $TARGET/
+    cecho " > Restauration done" green
+}
+
+########################
+### UPDATE FUNCTIONS ###
+########################
+
+function supdate(){
+    trap 'trap_handler ${LINENO} $? update' ERR
+
+    curpath=$(pwd)
+    if [ "$src" == "$TARGET" ]
+    then
+        cecho "You should use the source tree for update not the target folder !!!!!" red
+        exit 2
+    fi
+
+    cadre "Updating shinken" green
+    
+    skill
+    backup
+    remove
+    get_from_git
+    cp -Rf $src $TARGET
+    relocate
+    ln -s $TARGET/bin/default/shinken /etc/default/shinken
+    cp $TARGET/bin/init.d/shinken* /etc/init.d/
+    mkdir -p $TARGET/var/archives
+    fix
+    restore $DATE
+}
+
+##############################
+### EXPLOITATION FUNCTIONS ###
+##############################
+
 function compresslogs(){
     trap 'trap_handler ${LINENO} $? compresslogs' ERR
     cadre "Compress rotated logs" green
@@ -848,6 +784,10 @@ function compresslogs(){
 function shelp(){
     cat $myscripts/README
 }
+
+########################
+### CONFIG FUNCTIONS ###
+########################
 
 function cleanconf(){
     if [ -z "$myscripts" ]
@@ -898,34 +838,6 @@ function fixforfan(){
     fi
 }
 
-function pythonver(){
-    versions="2.4 2.5 2.6 2.7"
-        LASTFOUND=""
-        # is there any python here ?
-        for v in $versions
-        do
-                which python$v >> /tmp/shinken.install.log 2>&1 
-                if [ $? -eq 0 ]
-                then
-                        LASTFOUND="python$v"
-                fi
-        done
-        if [ -z "$LASTFOUND" ]
-        then
-                # finaly try to find a default python
-                which python >> /tmp/shinken.install.log 2>&1 
-                if [ $? -ne 0 ]
-                then
-                        echo "No python interpreter found !"
-                        exit 2
-                else
-                        echo "python found"
-                        LASTFOUND=$(which python)
-                fi
-        fi
-        PY=$LASTFOUND
-    echo $PY
-}
 
 function enablendodb(){
     cecho " > FIX shinken ndo configuration" green
@@ -1037,34 +949,6 @@ function fixHtpasswdPath(){
     cecho " > $result" green    
 }
 
-function usage(){
-echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z [poller|centreon] | -e daemons | -p plugins [plugname]
-    -k    Kill shinken
-    -i    Install shinken
-    -w    Remove demo configuration 
-    -d     Remove shinken
-    -u    Update an existing shinken installation
-    -v    purge livestatus sqlite db and shrink sqlite db
-    -b    Backup shinken configuration plugins and data
-    -r     Restore shinken configuration plugins and data
-    -l    List shinken backups
-    -c    Compress rotated logs
-    -e  Which daemons to keep enabled at boot time
-    -z     This is a really special usecase that allow to install shinken on Centreon Enterprise Server in place of nagios
-    -p  Install plugins or addons (args should be one of the following : 
-        check_esx3
-        nagios-plugins
-        check_oracle_health
-        check_mysql_health
-        check_wmi_plus
-        check_mongodb
-        check_emc_clariion
-        check_nwc_health
-        capture_plugin
-        pnp4nagios
-        multisite
-    -h    Show help"
-}
 
 # addons installation
 # mk multisite
@@ -1204,10 +1088,11 @@ function do_skmacro(){
 }
 
 
+#################################
+### PLUGINS INSTALLATION PART ###
+#################################
 
-# plugins installation part
-
-# capture_plugin
+# CAPTURE_PLUGIN
 function install_capture_plugin(){
     cadre "Install capture_plugin" green
     cd /tmp
@@ -1219,8 +1104,67 @@ function install_capture_plugin(){
     chown $SKUSER:$SKGROUP $TARGET/libexec/capture_plugin
 }
 
-# check_mongodb
+# CHECK_HPASM
+function install_check_hpasm(){
 
+    cadre "Install check_hpasm plugin from consol.de" green
+    cecho "You must install hpasm and or hp snmp agents on the monitored servers" yellow
+    read taste
+
+    if [ "$CODE" == "REDHAT" ]
+    then
+        cecho " > installing prerequisites" green 
+        yum install -yq $CHECKHPASMYUMPKGS  >> /tmp/shinken.install.log 2>&1 
+    else
+        cecho " > installing prerequisites" green 
+        apt-get -y install $CHECKHPASMAPTPKGS >> /tmp/shinken.install.log 2>&1 
+    fi
+
+    if [ $? -ne 0 ]
+    then
+        cecho " > Error while installing prerequisites" red
+        exit 2
+    fi
+
+    cd /tmp
+
+    archive=$(echo $CHECKHPASM | awk -F/ '{print $NF}')
+    folder=$(echo $archive | sed -e 's/\.tar\.gz//g')
+
+    if [ ! -f "/tmp/$archive" ]
+    then
+        cecho " > Downloading check_hpasm" green
+        wget $WGETPROXY $CHECKHPASM  >> /tmp/shinken.install.log 2>&1     
+        if [ $? -ne 0 ]
+        then
+            cecho " > Error while downloading check_hpasm" red
+            exit 2
+        fi
+    fi
+    cecho " > Extract archive content" green
+    tar zxvf $archive >> /tmp/shinken.install.log 2>&1
+    cd $folder
+    cecho " > Configure source tree" green
+    ./configure >> /tmp/shinken.install.log 2>&1
+    if [ $? -ne 0 ]
+    then
+        cecho " > Error while configuring source tree" red
+        exit 2
+    fi
+    cecho " > Build" green
+    make  >> /tmp/shinken.install.log 2>&1
+    if [ $? -ne 0 ]
+    then
+        cecho " > Error while building" red
+        exit 2
+    fi
+    cecho " > Installing check_hpasm" green
+    cp plugins-scripts/check_hpasm $TARGET/libexec/ >> /tmp/shinken.install.log 2>&1
+    chmod +x $TARGET/libexec/check_hpasm  >> /tmp/shinken.install.log 2>&1   
+    chown $SKUSER:$SKGROUP $TARGET/libexec/check_hpasm >> /tmp/shinken.install.log 2>&1
+}
+
+# CHECK_MONGODB
 function install_check_mongodb(){
 
     cadre "Install check_mongodb plugin from Mike Zupan" green
@@ -1260,8 +1204,7 @@ function install_check_mongodb(){
         
 }
 
-# check_nwc_health
-
+# CHECK_NWC_HEALTH
 function install_check_nwc_health(){
 
     cadre "Install check_nwc_health plugin" green
@@ -1315,8 +1258,8 @@ function install_check_nwc_health(){
     cecho " > Install check_nwc_health.pl" green 
     make install >> /tmp/shinken.install.log 2>&1
 }
-# check_emc_clariion
 
+# CHECK_EMC_CLARIION
 function install_check_emc_clariion(){
 
     cadre "Install check_emc_clariion plugin from netways" green
@@ -1379,72 +1322,7 @@ plugin. Ask your vendor to know how to get it." yellow
     chown $SKUSER:$SKGROUP $TARGET/libexec/check_emc_clariion.pl
 }
 
-# check_emc_clariion
-
-function install_check_emc_clariion(){
-
-    cadre "Install check_emc_clariion plugin from netways" green
-
-    cecho " You will need the DELL/EMC Navisphere agent in order to use this
-plugin. Ask your vendor to know how to get it." yellow
-    cecho " You should also customize the navisphere agent path in the plugin" yellow
-    read taste
-
-    if [ "$CODE" == "REDHAT" ]
-    then
-        if [ ! -z "$CHECKEMCYUMPKG" ]
-        then 
-            cecho " > installing prerequisites" green 
-            yum install -yq $CHECKEMCYUMPKG  >> /tmp/shinken.install.log 2>&1 
-        fi
-    else
-        if [ ! -z "$CHECKEMCAPTPKG" ]
-        then 
-            cecho " > installing prerequisites" green 
-            apt-get -y install $CHECKEMCAPTPKG >> /tmp/shinken.install.log 2>&1 
-        fi
-    fi
-
-    if [ $? -ne 0 ]
-    then
-        cecho " > Error while installing prerequisites" red
-        exit 2
-    fi
-
-    cd /tmp
-
-    if [ ! -f "/tmp/check_emc.zip" ]
-    then
-        cecho " > Downloading check_emc.zip" green
-        wget $WGETPROXY $CHECKEMC  >> /tmp/shinken.install.log 2>&1     
-        if [ $? -ne 0 ]
-        then
-            cecho " > Error while downloading check_emc.zip" red
-            exit 2
-        fi
-    fi
-
-    cecho " > Extract check_emc.zip" green
-    if [ -d check_emc ] 
-    then 
-        rm -Rf check_emc
-    fi
-    unzip check_emc.zip >> /tmp/shinken.install.log 2>&1
-    if [ $? -ne 0 ]
-    then
-        cecho " > Error while trying to extract check_emc.zip" red
-        exit 2
-    fi
-  
-    cecho " > Install check_emc_clariion.pl" green 
-    cd check_emc 
-    mv check_emc_clariion.pl $TARGET/libexec/
-    chmod +x $TARGET/libexec/check_emc_clariion.pl    
-    chown $SKUSER:$SKGROUP $TARGET/libexec/check_emc_clariion.pl
-}
-
-# check_esx3
-
+# CHECK_ESX3
 function install_check_esx3(){
 
     cadre "Install check_esx3 plugin from op5" green
@@ -1507,8 +1385,7 @@ function install_check_esx3(){
         
 }
 
-# nagios-plugins
-
+# NAGIOS-PLUGINS
 function install_nagios-plugins(){
     cadre "Install nagios plugins" green
 
@@ -1540,7 +1417,7 @@ function install_nagios-plugins(){
     
 }
 
-# check_wmi_plus
+# CHECK_WMI_PLUS
 function install_check_wmi_plus(){
     cadre "Install check_wmi_plus" green
 
@@ -1602,8 +1479,7 @@ function install_check_wmi_plus(){
     sed -i "s#/usr/lib/nagios/plugins#"$TARGET"/libexec#g" $TARGET/libexec/check_wmi_plus.pl
 }
 
-# check_oracle_health
-
+# CHECK_ORACLE_HEALTH
 function install_check_oracle_health(){
     cadre "Install nagios plugins" green
 
@@ -1686,8 +1562,7 @@ function install_check_oracle_health(){
     mkdir -p $TARGET/var/tmp >> /tmp/shinke.install.log 2>&1 
 }
 
-# check_mysql_health
-
+# CHECK_MYSQL_HEALTH
 function install_check_mysql_health(){
     cadre "Install check_mysql_health" green
 
@@ -1727,6 +1602,36 @@ function install_check_mysql_health(){
     fi
     cecho " > Installing plugin" green
     make install >> /tmp/shinken.install.log 2>&1 
+}
+
+
+function usage(){
+echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z [poller|centreon] | -e daemons | -p plugins [plugname]
+    -k  Kill shinken
+    -i  Install shinken
+    -w  Remove demo configuration 
+    -d  Remove shinken
+    -u  Update an existing shinken installation
+    -v  purge livestatus sqlite db and shrink sqlite db
+    -b  Backup shinken configuration plugins and data
+    -r  Restore shinken configuration plugins and data
+    -l  List shinken backups
+    -c  Compress rotated logs
+    -e  Which daemons to keep enabled at boot time
+    -z  This is a really special usecase that allow to install shinken on Centreon Enterprise Server in place of nagios
+    -p  Install plugins or addons (args should be one of the following : 
+        check_esx3
+        nagios-plugins
+        check_oracle_health
+        check_mysql_health
+        check_wmi_plus
+        check_mongodb
+        check_emc_clariion
+        check_nwc_health
+        capture_plugin
+        pnp4nagios
+        multisite
+    -h  Show help"
 }
 
 # Check if we launch the script with root privileges (aka sudo)
@@ -1781,6 +1686,10 @@ while getopts "kidubcr:lz:hsvp:we:" opt; do
             elif [ "$OPTARG" == "check_nwc_health" ]
             then
                 install_check_nwc_health
+                exit 0
+            elif [ "$OPTARG" == "check_hpasm" ]
+            then
+                install_check_hpasm
                 exit 0
             elif [ "$OPTARG" == "pnp4nagios" ]
             then
