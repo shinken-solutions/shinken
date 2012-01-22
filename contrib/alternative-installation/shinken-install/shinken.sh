@@ -1,4 +1,5 @@
-#!/bin/bash  
+#!/bin/bash 
+#set -x 
 #Copyright (C) 2009-2012 :
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
@@ -729,12 +730,6 @@ function prerequisites(){
             case $VERS in
                 [5-6])
                     PACKAGES=$YUMPKGS
-                    if [ $ENABLEOPTPKGS -eq 1 ]
-                    then
-                        OPTPACKAGES=$YUMOPTPKGS
-                    else
-                        OPTPACKAGES=""
-                    fi
                     QUERY="rpm -q "
                     cd $TMP
                     $QUERY $EPELNAME >> /tmp/shinken.install.log 2>&1 
@@ -814,7 +809,7 @@ function prerequisites(){
             module=$(echo $p | awk -F: '{print $1'})
             import=$(echo $p | awk -F: '{print $2'})
 
-            $PY $TARGET/contrib/alternative-installation/shinken-install/tools/checkmodule.py -m $import >> /tmp/shinken.install.log 2>&1 
+            $PY $myscripts/tools/checkmodule.py -m $import  >> /tmp/shinken.install.log 2>&1 
             if [ $? -eq 2 ]
             then
                 cecho " > Module $module ($import) not found. Installing..." yellow
