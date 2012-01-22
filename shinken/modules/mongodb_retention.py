@@ -149,6 +149,6 @@ class Mongodb_retention_scheduler(BaseModule):
         # Ok, now comme load them scheduler :)
         daemon.restore_retention_data(all_data)
 
-        log_mgr.log("[MongodbRetention] OK we've load data from redis server")
+        log_mgr.log("[MongodbRetention] OK we've load data from Mongodb server")
 
         return True
