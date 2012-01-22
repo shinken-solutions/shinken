@@ -1628,6 +1628,7 @@ echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z 
         check_mongodb
         check_emc_clariion
         check_nwc_health
+        check_hpasm
         capture_plugin
         pnp4nagios
         multisite
