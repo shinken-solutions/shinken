@@ -699,25 +699,28 @@ class TestConfigNoLogstore(TestConfig):
     def init_livestatus(self):
         self.livelogs = 'tmp/livelogs.db' + self.testid
         modconf = Module({'module_name' : 'LiveStatus',
-            'module_type' : 'livestatus',
-            'port' : str(50000 + os.getpid()),
-            'pnp_path' : 'tmp/pnp4nagios_test' + self.testid,
-            'host' : '127.0.0.1',
-            'socket' : 'live',
-            'name' : 'test', #?
+            'module_type': 'livestatus',
+            'port': str(50000 + os.getpid()),
+            'pnp_path': 'tmp/pnp4nagios_test' + self.testid,
+            'host': '127.0.0.1',
+            'socket': 'live',
+            'name': 'test', #?
+            'database_file': self.livelogs,
         })
 
         dbmodconf = Module({'module_name' : 'LogStore',
-            'module_type' : 'logstore_sqlite',
-            'use_aggressive_sql' : "0",
-            'database_file' : self.livelogs,
-            'archive_path' : os.path.join(os.path.dirname(self.livelogs), 'archives'),
+            'module_type': 'logstore_sqlite',
+            'use_aggressive_sql': "0",
+            'database_file': self.livelogs,
+            'archive_path': os.path.join(os.path.dirname(self.livelogs), 'archives'),
         })
         ####################################
         # !NOT! modconf.modules = [dbmodconf]
         ####################################
         self.livestatus_broker = LiveStatus_broker(modconf)
         self.livestatus_broker.create_queues()
+
+        self.livestatus_broker.init()
 
         #--- livestatus_broker.main
         self.livestatus_broker.log = logger
@@ -743,17 +746,20 @@ class TestConfigNoLogstore(TestConfig):
         datamgr.load(self.livestatus_broker.rg)
         #--- livestatus_broker.main
 
-        self.livestatus_broker.init()
-        self.livestatus_broker.db = self.livestatus_broker.modules_manager.instances[0]
-        self.livestatus_broker.livestatus = LiveStatus(self.livestatus_broker.datamgr, self.livestatus_broker.db, self.livestatus_broker.pnp_path, self.livestatus_broker.from_q)
-
         #--- livestatus_broker.do_main
+        self.livestatus_broker.db = self.livestatus_broker.modules_manager.instances[0]
         self.livestatus_broker.db.open()
         #--- livestatus_broker.do_main
+
+        #--- livestatus_broker.manage_lql_thread
+        self.livestatus_broker.livestatus = LiveStatus(self.livestatus_broker.datamgr, self.livestatus_broker.db, self.livestatus_broker.pnp_path, self.livestatus_broker.from_q)
+        #--- livestatus_broker.manage_lql_thread
+
 
     def test_has_implicit_module(self):
         self.assert_(self.livestatus_broker.modules_manager.instances[0].properties['type'] == 'logstore_sqlite')
         self.assert_(self.livestatus_broker.modules_manager.instances[0].__class__.__name__ == 'LiveStatusLogStoreSqlite')
+        self.assert_(self.livestatus_broker.db.database_file == self.livelogs)
 
 
 if __name__ == '__main__':

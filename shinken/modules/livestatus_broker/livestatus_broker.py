@@ -80,6 +80,8 @@ class LiveStatus_broker(BaseModule, Daemon):
         self.debug = getattr(modconf, 'debug', None)
         self.debug_queries = (getattr(modconf, 'debug_queries', '0') == '1')
 
+        #  This is an "artificial" module which is used when an old-style
+        #  shinken-specific.cfg without a separate logstore-module is found.
         self.compat_sqlite = {
             'module_name': 'LogStore',
             'module_type': 'logstore_sqlite',
@@ -98,10 +100,7 @@ class LiveStatus_broker(BaseModule, Daemon):
             dbmod = Module(self.compat_sqlite)
             self.modules_manager.set_modules([dbmod])
             self.modules_manager.load_and_init()
-            
-            
-
-
+            self.modules_manager.instances[0].load(self)
 
     # Called by Broker so we can do init stuff
     # TODO : add conf param to get pass with init
