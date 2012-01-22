@@ -92,6 +92,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
         try:
             self.conn = pymongo.Connection(self.mongodb_uri, fsync=True)
             self.db = self.conn[self.database]
+            
             self.is_connected = True
         except AutoReconnect, exp:
             # now what, ha?
@@ -121,7 +122,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
             print "Unexpected error:", exp
         try:
             if logline.logclass != LOGCLASS_INVALID:
-                self.db.logs.insert(values)
+                self.db.logs.insert(values, safe=True)
         except Exception, exp:
             print "An error occurred:", exp
             print "DATABASE ERROR!!!!!!!!!!!!!!!!!"
