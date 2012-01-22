@@ -159,9 +159,9 @@ Invalid element name
 			
 			<!-- Tab Summary Start-->
 	        <div id="summary">
-				<div id="item_information">
+				<div id="item_information" class="grid_16">
 					<h2>Host/Service Information</h2>
-					<table>
+					<table class="grid_6">
 						<tr>
 							<td class="column1">{{elt_type.capitalize()}} Status</td>
 							<td><span class="state_{{elt.state.lower()}}">{{elt.state}}</span> (since {{helper.print_duration(elt.last_state_change, just_duration=True, x_elts=2)}}) </td>
@@ -196,7 +196,7 @@ Invalid element name
 							<td>{{time.asctime(time.localtime(elt.last_state_change))}}</td>
 						</tr>
 					</table>
-					<div>
+					<div class="grid_6">
 						<a href="#" onclick="try_to_fix('{{elt.get_full_name()}}')">{{!helper.get_button('Try to fix it!', img='/static/images/enabled.png')}}</a>
 						<a href="#" onclick="acknowledge('{{elt.get_full_name()}}')">{{!helper.get_button('Acknowledge it', img='/static/images/wrench.png')}}</a>
 						<a href="#" onclick="recheck_now('{{elt.get_full_name()}}')">{{!helper.get_button('Recheck now', img='/static/images/delay.gif')}}</a>
@@ -207,7 +207,7 @@ Invalid element name
 					</div>
 				</div>
 				<hr />
-				<div id="item_information">
+				<div id="item_information" class="grid_16">
 					<h2>Additonal Informations</h2>
 					<table>
 						<tr>
@@ -232,7 +232,8 @@ Invalid element name
 	        <!-- Tab Summary End-->
 	        
 	        <!-- Tab Service Start -->
-	        <div id="services">Phasellus mattis tincidunt nibh. Cras orci urna, blandit id, pretium vel, aliquet ornare, felis. Maecenas scelerisque sem non nisl. Fusce sed lorem in enim dictum bibendum.
+	        <div id="services">
+	        
 	        </div>
 	        <!-- Tab Service End -->
 
