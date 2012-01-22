@@ -53,6 +53,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
         # mongodb://host1,host2,host3/?safe=true;w=2;wtimeoutMS=2000
         self.mongodb_uri = getattr(modconf, 'mongodb_uri', None)
         self.database = getattr(modconf, 'database', 'logs')
+        self.collection = getattr(modconf, 'collection', 'logs')
         self.use_aggressive_sql = True
         max_logs_age = getattr(modconf, 'max_logs_age', '365')
         maxmatch = re.match(r'^(\d+)([dwm]*)$', max_logs_age)
@@ -92,7 +93,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
         try:
             self.conn = pymongo.Connection(self.mongodb_uri, fsync=True)
             self.db = self.conn[self.database]
-            
+            self.db[self.collection].ensure_index([('time', pymongo.ASCENDING), ('lineno', pymongo.ASCENDING)], name='time_idx')
             self.is_connected = True
         except AutoReconnect, exp:
             # now what, ha?
@@ -122,7 +123,10 @@ class LiveStatusLogStoreMongoDB(BaseModule):
             print "Unexpected error:", exp
         try:
             if logline.logclass != LOGCLASS_INVALID:
-                self.db.logs.insert(values, safe=True)
+                self.db[self.collection].insert(values, safe=True)
+            else:
+                print "This line is invalid", line
+
         except Exception, exp:
             print "An error occurred:", exp
             print "DATABASE ERROR!!!!!!!!!!!!!!!!!"
@@ -162,15 +166,15 @@ class LiveStatusLogStoreMongoDB(BaseModule):
         # We can apply the filterstack here as well. we have columns and filtercolumns.
         # the only additional step is to enrich log lines with host/service-attributes
         # A timerange can be useful for a faster preselection of lines
-        filter_element = eval(mongo_filter)
-        print "mongo filter iis", type(filter_element)
-        print "mongo filter iis", filter_element
+        filter_element = eval('{ '+mongo_filter+' }')
+        print "mongo filter is", filter_element
         dbresult = []
         columns = ['logobject', 'attempt', 'logclass', 'command_name', 'comment', 'contact_name', 'host_name', 'lineno', 'message', 'options', 'plugin_output', 'service_description', 'state', 'state_type', 'time', 'type']
         if not self.is_connected:
             print "sorry, not connected"
         else:
-            dbresult = [Logline([(c, ) for c in columns], [x[col] for col in columns]) for x in self.db.logs.find(filter_element)]
+            dbresult = [Logline([(c, ) for c in columns], [x[col] for col in columns]) for x in self.db[self.collection].find(filter_element).sort([(u'time', pymongo.ASCENDING), (u'lineno', pymongo.ASCENDING)])]
+        print "i count", self.db[self.collection].find(filter_element).count()
         return dbresult
 
     def make_mongo_filter(self, operator, attribute, reference):
@@ -180,8 +184,9 @@ class LiveStatusLogStoreMongoDB(BaseModule):
         good_attributes = ['time', 'attempt', 'class', 'command_name', 'comment', 'contact_name', 'host_name', 'plugin_output', 'service_description', 'state', 'state_type', 'type']
         good_operators = ['=', '!=']
         #  put strings in '' for the query
-        if attribute in ['command_name', 'comment', 'contact_name', 'host_name', 'plugin_output', 'service_description', 'state_type', 'type']:
-            attribute = "'%s'" % attribute
+        string_attributes = ['command_name', 'comment', 'contact_name', 'host_name', 'plugin_output', 'service_description', 'state_type', 'type']
+        if attribute in string_attributes:
+            reference = "'%s'" % reference
 
         def eq_filter():
             if reference == '':
@@ -202,9 +207,9 @@ class LiveStatusLogStoreMongoDB(BaseModule):
         def le_filter():
             return '\'%s\' : { \'$lte\' : %s }' % (attribute, reference)
         def match_filter():
-            return '\'%s\' : { \'$regex\' : \'%s\' }' % (attribute, reference)
+            return '\'%s\' : { \'$regex\' : %s }' % (attribute, reference)
         def no_filter():
-            return '{}'
+            return '\'%s\' : { \'$exists\' : true }' % (attribute,)
         if attribute not in good_attributes:
             return no_filter
         if operator == '=':
@@ -256,7 +261,7 @@ class LiveStatusMongoStack(LiveStatusStack):
             # Make a combined anded function
             # Put it on the stack
             print "filter is", filters
-            and_clause = lambda: '{\'$and\' : [%s]}' % ', '.join('{ ' + x() + ' }' for x in filters)
+            and_clause = lambda: '\'$and\' : [%s]' % ', '.join('{ ' + x() + ' }' for x in filters)
             print "and_elements", and_clause
             self.put_stack(and_clause)
 
@@ -266,7 +271,7 @@ class LiveStatusMongoStack(LiveStatusStack):
             filters = []
             for _ in range(num):
                 filters.append(self.get_stack())
-            or_clause = lambda: '{\'$or\' : [%s]}' % ', '.join('{ ' + x() + ' }' for x in filters)
+            or_clause = lambda: '\'$or\' : [%s]' % ', '.join('{ ' + x() + ' }' for x in filters)
             print "or_elements", or_clause
             self.put_stack(or_clause)
 

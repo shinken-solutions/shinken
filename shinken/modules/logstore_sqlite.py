@@ -380,9 +380,8 @@ class LiveStatusLogStoreSqlite(BaseModule):
         #FIXME need access to this#self.livestatus.count_event('log_message')
 
     def add_filter(self, operator, attribute, reference):
-        print "isql add", operator, attribute, reference
 	if attribute == 'time':
-	    #self.sql_time_filter_stack.put_stack(self.make_sql_filter(operator, attribute, reference))
+	    self.sql_time_filter_stack.put_stack(self.make_sql_filter(operator, attribute, reference))
             pass
 	self.sql_filter_stack.put_stack(self.make_sql_filter(operator, attribute, reference))
 
@@ -526,7 +525,6 @@ class LiveStatusSqlStack(LiveStatusStack):
             filters = []
             for _ in range(num):
                 filters.append(self.get_stack())
-            print "now i and", [x() for x in filters]
             # Take from the stack:
             # Make a combined anded function
             # Put it on the stack

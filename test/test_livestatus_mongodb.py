@@ -279,8 +279,8 @@ class TestConfigBig(TestConfig):
         host.__class__.use_aggressive_host_checking = 1
 
 
-    def xinit_livestatus(self):
-        self.livelogs = 'tmp/livelogs.db' + "wrumm"
+    def init_livestatus(self):
+        self.livelogs = "bigbigbig"
         modconf = Module({'module_name' : 'LiveStatus',
             'module_type' : 'livestatus',
             'port' : str(50000 + os.getpid()),
@@ -292,6 +292,7 @@ class TestConfigBig(TestConfig):
 
         dbmodconf = Module({'module_name' : 'LogStore',
             'module_type' : 'logstore_mongodb',
+            'database' : 'bigbigbig',
             'mongodb_uri' : "mongodb://127.0.0.1:27017",
         })
         modconf.modules = [dbmodconf]
@@ -346,7 +347,11 @@ class TestConfigBig(TestConfig):
         starttime = time.time()
 
         num_log_broks = 0
-        if True:
+        try:
+            numlogs = self.livestatus_broker.db.conn.bigbigbig.find().count()
+        except Exception:
+            numlogs = 0
+        if numlogs == 0:
             # run silently
             old_stdout = sys.stdout
             sys.stdout = open(os.devnull, "w")
@@ -360,6 +365,8 @@ class TestConfigBig(TestConfig):
             num_log_broks += self.count_log_broks()
             self.update_broker()
             should_be = 0
+            should_be_huhu = 0
+            huhuhus = []
             #for i in xrange(3600 * 24 * 7):
             for i in xrange(10000): 
                 if i % 1000 == 0:
@@ -370,9 +377,11 @@ class TestConfigBig(TestConfig):
                         [test_ok_01, 2, "CRIT"],
                         [test_ok_04, 3, "UNKN"],
                         [test_ok_16, 1, "WARN"],
-                        [test_ok_99, 2, "CRIT"],
+                        [test_ok_99, 2, "HUHU"+str(i)],
                     ])
                     should_be += 3
+                    should_be_huhu += 3
+                    huhuhus.append(i)
                 time.sleep(62)
                 if i % 399 == 0:
                     self.scheduler_loop(1, [
@@ -423,11 +432,15 @@ class TestConfigBig(TestConfig):
             sys.stdout = old_stdout
             self.livestatus_broker.db.commit()
         else:
-            should_be = numlogs[0][0]
-            xxx = self.livestatus_broker.db.execute("SELECT min(time), max(time) FROM logs")
-            print xxx
-            starttime, endtime = [self.livestatus_broker.db.execute("SELECT min(time), max(time) FROM logs")][0][0]
-            
+            should_be = numlogs
+            starttime = int(time.time())
+            endtime = 0
+            for doc in self.livestatus_broker.db.conn.bigbigbig.logs.find():
+                if doc['time'] < starttime:
+                    starttime = doc['time']
+                if doc['time'] > endtime:
+                    endtime = doc['time']
+            print "starttime, endtime", starttime, endtime
         
         # now we have a lot of events
         # find type = HOST ALERT for test_host_005
@@ -452,6 +465,7 @@ Or: 8
 Filter: host_name = test_host_099
 Filter: service_description = test_ok_01
 And: 5
+Filter: plugin_output ~ HUHU
 OutputFormat: json"""
         # switch back to realtime. we want to know how long it takes
         fake_time_time = time.time
@@ -461,13 +475,20 @@ OutputFormat: json"""
         print request
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
-        print "sent records", num_log_broks
-        print "number of records", len(pyresponse)
+        print "number of all documents", self.livestatus_broker.db.conn.bigbigbig.logs.find().count()
+        print "number of log broks sent", num_log_broks
+        print "number of lines in the response", len(pyresponse)
         print "should be", should_be
         time.time = fake_time_time
         time.sleep = fake_time_sleep
-
-
+        hosts = set([h[4] for h in pyresponse])
+        services = set([h[5] for h in pyresponse])
+        print "found hosts", hosts
+        print "found services", services
+        alldocs = [d for d in self.livestatus_broker.db.conn.bigbigbig.logs.find()]
+        clientselected = [d for d in alldocs if (d['time'] >= int(starttime) and d['time'] <= int(endtime) and d['host_name'] == 'test_host_099' and d['service_description'] == 'test_ok_01' and 'HUHU' in d['plugin_output'])]
+        print "clientselected", len(clientselected)
+        self.assert_(len(pyresponse) == len(clientselected))
 
 
 if __name__ == '__main__':

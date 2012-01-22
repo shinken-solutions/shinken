@@ -623,23 +623,6 @@ OutputFormat: json"""
         pyresponse = eval(response)
         print "number of records", len(pyresponse)
         print "should be", should_be
-        numlogs = self.livestatus_broker.db.execute("SELECT min(time), max(time) FROM logs")
-        print starttime, endtime, numlogs
-        self.livestatus_broker.livestatus.use_aggressive_sql = True
-        print "aggrosql", self.livestatus_broker.livestatus.use_aggressive_sql
-        response2, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        self.assert_(response2 == response)
-        print "aggrosql", self.livestatus_broker.livestatus.use_aggressive_sql
-        response2, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        self.assert_(response2 == response)
-        self.livestatus_broker.livestatus.use_aggressive_sql = False
-        print "aggrosql", self.livestatus_broker.livestatus.use_aggressive_sql
-        response2, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        self.assert_(response2 == response)
-        print "aggrosql", self.livestatus_broker.livestatus.use_aggressive_sql
-        response2, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        self.assert_(response2 == response)
-        # back to fake time for the other tests can run faster
         time.time = fake_time_time
         time.sleep = fake_time_sleep
 
