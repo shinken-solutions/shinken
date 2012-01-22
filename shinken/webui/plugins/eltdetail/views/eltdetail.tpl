@@ -233,7 +233,77 @@ Invalid element name
 	        
 	        <!-- Tab Service Start -->
 	        <div id="services">
-	        
+	        								%# " Only print host service if elt is an host of course"
+								%# " If the host is a problem, services will be print in the impacts, so don't"
+								%# " print twice "
+								
+								%if elt_type=='host' and not elt.is_problem:
+							        <hr>
+							
+							        <!--<div class='host-services'>-->
+									<div>
+									<h3> Services </h3>
+									%nb = 0
+									%for s in helper.get_host_services_sorted(elt):
+									%nb += 1
+							
+									%# " We put a max imapct to print, bacuse too high is just useless"
+									%if nb > max_impacts:
+									%   break 
+									%end
+							
+									%if nb == 8:
+										<div style="float:right;" id="hidden_impacts_or_services_button"><a href="javascript:show_hidden_impacts_or_services()"> {{!helper.get_button('Show all services', img='/static/images/expand.png')}}</a></div>
+									%end
+									
+									%if nb < 8:
+									<div class="service">
+									%else:
+									<div class="service hidden_impacts_services">
+									%end
+									      	<div class="divstate{{s.state_id}}">
+										%for i in range(0, s.business_impact-2):
+											<img src='/static/images/star.png'>
+										%end
+											<img style="width : 16px; height:16px" src="{{helper.get_icon_state(s)}}">
+											<span style="font-size:110%">{{!helper.get_link(s, short=True)}}</span> is <span style="font-size:110%">{{s.state}}</span> since {{helper.print_duration(s.last_state_change, just_duration=True, x_elts=2)}}
+										</div>
+									</div>
+									%# End of this service
+									%end
+									</div>
+							    
+							    %end #of the only host part			
+							
+								%if elt.is_problem and len(elt.impacts) != 0:
+								<div>
+								<!--<div class='host-services'>-->
+									<h4 style="margin-bottom: 5px;"> Impacts </h4>
+								%nb = 0
+								%for i in helper.get_impacts_sorted(elt):
+								%nb += 1
+								%if nb == 8:	
+									<div style="float:right;" id="hidden_impacts_or_services_button"><a href="javascript:show_hidden_impacts_or_services()"> {{!helper.get_button('Show all impacts', img='/static/images/expand.png')}}</a></div>
+								%end
+								%if nb < 8:
+							      	<div class="service">
+								%else:
+								<div class="service hidden_impacts_services">
+								%end
+							        
+									<div class="divstate{{i.state_id}}">
+									%for j in range(0, i.business_impact-2):
+										<img src='/static/images/star.png'>
+									%end
+										<img style="width : 16px; height:16px" src="{{helper.get_icon_state(i)}}">
+										<span style="font-size:110%">{{!helper.get_link(i)}}</span> is <span style="font-size:110%">{{i.state}}</span> since {{helper.print_duration(i.last_state_change, just_duration=True, x_elts=2)}}
+									</div>
+							        </div>
+							        %# End of this impact
+							        %end
+								</div>
+							%# end of the 'is problem' if
+							%end
 	        </div>
 	        <!-- Tab Service End -->
 
