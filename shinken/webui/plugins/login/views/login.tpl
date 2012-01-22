@@ -42,25 +42,25 @@
 		<img src="/static/images/robot_rouge_alpha.png" alt="Shinken Login">
 	</div>
 
-	<div id="login-form" class="grid_4">
+	<div id="login-form" class="grid_6">
 	%if error:
 		<span id="login-error"> {{error}}</span>
 	%end
 		<form method="post" id="loginform" action="/user/auth">			
-			<div class="text-field">
+			<div class="text-field push_top1">
 			  <label for="login">Login:</label>
 				<input name="login" type="text" tabindex="1" size="30">
 			</div>
-			<div class="text-field">
+			<div class="text-field push_top1">
 				<label for="password">Password:</label>
 				<input id="password" name="password" type="password" tabindex="2" size="30" onKeyPress="return submitenter(this,event)">
 			</div>
 			<input type="hidden" value="0" name="remember_me">
-				<div class="check-field">
+				<div class="push_top1 check-field">
 					<input type="checkbox" id="remember_me" tabindex="3" name="remember_me"> <label for="remember_me">Don't forget me</label>
 				</div>
 				<div class="buttons">
-					<a tabindex="4" class="button ui-button ui-widget ui-state-default ui-corner-all" href="javascript: submitform()">Login</a>
+					<a tabindex="4" class="push_top1 button ui-button ui-widget ui-state-default ui-corner-all" href="javascript: submitform()">Login</a>
 				</div>
 		</form>
 	</div>
