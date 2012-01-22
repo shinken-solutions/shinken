@@ -255,6 +255,11 @@ div.content {
 	margin-left:2px;
 }
 
+#overview_container td, #item_information td {
+	border-top: none;
+}
+
+
 /*
  *  Comments
  */
