@@ -107,6 +107,10 @@ class LiveStatusLogStoreMongoDB(BaseModule):
     def commit(self):
         pass
 
+    def commit_and_rotate_log_db(self):
+        """ Not necessary for a MongoDB."""
+        pass
+
     def do_i_need_this_manage_brok(self, brok):
         """ Look for a manager function for a brok, and call it """
         manage = getattr(self, 'manage_' + brok.type + '_brok', None)
