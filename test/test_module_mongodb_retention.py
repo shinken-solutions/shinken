@@ -35,7 +35,7 @@ from shinken.modules.mongodb_retention import get_instance
 
 modconf = Module()
 modconf.module_name = "MongodbRetention"
-modconf.server = 'localhost'
+modconf.uri = 'mongodb://127.0.0.1:27017'
 modconf.database = 'test'
 modconf.module_type = mongodb_retention.properties['type']
 modconf.properties = mongodb_retention.properties.copy()

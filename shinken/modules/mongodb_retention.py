@@ -39,25 +39,25 @@ properties = {
 # Called by the plugin manager to get a broker
 def get_instance(plugin):
     print "Get a Mongodb retention scheduler module for plugin %s" % plugin.get_name()
-    server = plugin.server
+    uri = plugin.uri
     database = plugin.database
-    instance = Mongodb_retention_scheduler(plugin, server, database)
+    instance = Mongodb_retention_scheduler(plugin, uri, database)
     return instance
 
 
 
 # Just print some stuff
 class Mongodb_retention_scheduler(BaseModule):
-    def __init__(self, modconf, server, database):
+    def __init__(self, modconf, uri, database):
         BaseModule.__init__(self, modconf)
-        self.server = server
+        self.uri = uri
         self.database = database
 
 
     # Called by Scheduler to say 'let's prepare yourself guy'
     def init(self):
         print "Initilisation of the mongodb module"
-        self.con = Connection(self.server)
+        self.con = Connection(self.uri)
         # Open a gridfs connection
         self.db = getattr(self.con, self.database)
         self.hosts_fs = GridFS(self.db, collection='retention_hosts')
@@ -110,7 +110,7 @@ class Mongodb_retention_scheduler(BaseModule):
         # Now the new redis way :)
         log_mgr.log("MongodbRetention] asking me to load the retention objects")
 
-        #We got list of loaded data from retention server
+        #We got list of loaded data from retention uri
         ret_hosts = {}
         ret_services = {}
 
