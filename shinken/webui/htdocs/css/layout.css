@@ -22,3 +22,114 @@
 	background-image:         linear-gradient(top, #2F5F8F, #005086);
             filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#2F5F8F', EndColorStr='#005086'); /* IE6â��IE9 */
 }
+
+/* ----------------------------------------------------------------
+ *  Classes: Images
+ * ----------------------------------------------------------------*/
+
+.host_img_25 {
+	height: 25px;
+	width: 25px;
+	margin-right: 2px;
+    vertical-align: -3px;
+}
+ 
+.img_stars {
+	height: 11px;
+	margin-top: 2px;
+	margin-right: 4px;
+} 
+
+.img_stars_header {
+	height: 16px;
+	margin-top: 2px;
+	margin-left: 25px;
+	margin-right: 4px;
+}
+
+.icon_warning {
+	background: url("/static/images/warning.png") no-repeat scroll transparent;
+	background-position: 4px;
+    padding-left: 24px;
+} 
+
+.icon_tick {
+	background: url("/static/images/tick.png") no-repeat scroll transparent;
+	background-position: 4px;
+    padding-left: 24px;
+} 
+
+.icon_cross {
+	background: url("/static/images/cross.png") no-repeat scroll transparent;
+	background-position: 4px;
+    padding-left: 24px;
+}
+
+.icon_ok {
+	background: url("/static/images/state_ok.png") no-repeat scroll transparent;
+	background-position: 4px;
+    padding-left: 24px;
+}
+
+.icon_up {
+	background: url("/static/images/state_ok.png") no-repeat scroll transparent;
+	background-position: 4px;
+    padding-left: 24px;
+}
+
+
+.icon_unreachable {
+	background: url("/static/images/state_unreachable.png") no-repeat scroll transparent;
+	background-position: 4px;
+    padding-left: 24px;
+}
+
+
+.icon_comment {
+    background: url("/static/images/icons/comment_64.png") no-repeat scroll transparent;
+    background-position: 4px;
+    padding-left: 24px;
+    background-size: 17px 17px;
+}
+
+.icon_summary {
+    background: url("/static/images/icons/sum_64.png") no-repeat scroll transparent;
+    background-position: 4px;
+    padding-left: 24px;
+    background-size: 17px 17px;
+}
+
+.icon_dependency {
+    background: url("/static/images/icons/globe_64.png") no-repeat scroll transparent;
+    background-position: 4px;
+	padding-left: 24px;
+    background-size: 17px 17px;
+} 
+
+.icon_service {
+    background: url("/static/images/icons/flag_64.png") no-repeat scroll transparent;
+    background-position: 4px;
+	padding-left: 24px;
+    background-size: 17px 17px;
+}
+
+/*.icon_service:hover {
+    background: url("/static/images/icons/flag_64.png") no-repeat scroll transparent;
+    background-position: 4px;
+	padding-left: 24px;
+    background-size: 17px 17px;
+} */
+
+.icon_graph {
+    background: url("/static/images/icons/chart_area_64.png") no-repeat scroll transparent;
+    background-position: 4px;
+	padding-left: 24px;
+    background-size: 17px 17px;
+}
+
+.icon_delete {
+    background: url("/static/images/icons/delete_64.png") no-repeat scroll transparent;
+    background-position: 4px;
+	padding-left: 24px;
+    background-size: 15px 15px;
+}

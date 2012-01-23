@@ -25,7 +25,7 @@
 		<link type="text/css" href="/static/css/custom-theme/jquery-ui-1.8.16.custom.css" rel="stylesheet" />
 		<link href="/static/css/grid.css" rel="stylesheet">
 		<link href="/static/css/layout.css" rel="stylesheet">
-		<link href="/static/css/navigation.css" rel="stylesheet" type="text/css" />
+		<link href="/static/css/elements/navigation.css" rel="stylesheet" type="text/css" />
 		<link href="/static/bootstrap/bootstrap.css" rel="stylesheet">
 
 	    %if user is not None:
