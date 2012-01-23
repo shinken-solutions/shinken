@@ -1,24 +1,27 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 :
-#    Gabes Jean, naparuba@gmail.com
-#    Gerhard Lausser, Gerhard.Lausser@consol.de
-#    Gregory Starck, g.starck@gmail.com
-#    Hartmut Goebel, h.goebel@goebel-consult.de
+
+# -*- coding: utf-8 -*-
+
+# Copyright (C) 2009-2011 :
+#     Gabes Jean, naparuba@gmail.com
+#     Gerhard Lausser, Gerhard.Lausser@consol.de
+#     Gregory Starck, g.starck@gmail.com
+#     Hartmut Goebel, h.goebel@goebel-consult.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
 import os
@@ -33,12 +36,14 @@ from shinken.log import logger
 from shinken.pollerlink import PollerLink
 
 
+""" TODO : Add some comment about this class for the doc"""
 class ExternalCommand:
     my_type = 'externalcommand'
     def __init__(self, cmd_line):
         self.cmd_line = cmd_line
 
 
+""" TODO : Add some comment about this class for the doc"""
 class ExternalCommandManager:
 
     commands = {
@@ -239,7 +244,7 @@ class ExternalCommandManager:
 
 
     def open(self):
-        #At the first open del and create the fifo
+        # At the first open del and create the fifo
         if self.fifo is None:
             if os.path.exists(self.pipe_path):
                 os.unlink(self.pipe_path)
@@ -307,9 +312,9 @@ class ExternalCommandManager:
 
 
 
-    #Ok the command is not for every one, so we search
-    #by the hostname which scheduler have the host. Then send
-    #it the command
+    # Ok the command is not for every one, so we search
+    # by the hostname which scheduler have the host. Then send
+    # the command
     def search_host_and_dispatch(self, host_name, command):
         safe_print("Calling search_host_and_dispatch", 'for', host_name)
         host_found = False
@@ -339,7 +344,7 @@ class ExternalCommandManager:
                 sched.external_commands.append(command)
 
 
-    #We need to get the first part, the command name
+    # We need to get the first part, the command name
     def get_command_and_args(self, command):
         #safe_print("Trying to resolve", command)
         command = command.rstrip()
@@ -363,7 +368,7 @@ class ExternalCommandManager:
         # passive check results.
         entry = ExternalCommandManager.commands[c_name]
         
-        #Look if the command is purely internal or not
+        # Look if the command is purely internal or not
         internal = False
         if 'internal' in entry and entry['internal']:
             internal = True
@@ -431,9 +436,10 @@ class ExternalCommandManager:
                     elif type_searched == 'command':
                         c = self.commands.find_by_name(val)
                         if c is not None:
-                            args.append(val)#the find will be redone by
-                            #the commandCall creation, but != None
-                            #is usefull so a bad command will be catch
+                            # the find will be redone by
+                            # the commandCall creation, but != None
+                            # is usefull so a bad command will be catch
+                            args.append(val)
 
                     elif type_searched == 'host_group':
                         hg = self.hostgroups.find_by_name(val)
@@ -450,15 +456,14 @@ class ExternalCommandManager:
                         if cg is not None:
                             args.append(cg)
 
-                    #special case: service are TWO args host;service, so one more loop
-                    #to get the two parts
+                    # special case: service are TWO args host;service, so one more loop
+                    # to get the two parts
                     elif type_searched == 'service':
                         in_service = True
                         tmp_host = elt.strip()
                         #safe_print("TMP HOST", tmp_host)
                         if tmp_host[-1] == '\n':
                             tmp_host = tmp_host[:-1]
-                            #If
                         if self.mode == 'dispatcher':
                             self.search_host_and_dispatch(tmp_host, command)
                             return None
@@ -491,19 +496,19 @@ class ExternalCommandManager:
 
 
 
-    #CHANGE_CONTACT_MODSATTR;<contact_name>;<value>
+    # CHANGE_CONTACT_MODSATTR;<contact_name>;<value>
     def CHANGE_CONTACT_MODSATTR(self, contact, value):
         pass
 
-    #CHANGE_CONTACT_MODHATTR;<contact_name>;<value>
+    # CHANGE_CONTACT_MODHATTR;<contact_name>;<value>
     def CHANGE_CONTACT_MODHATTR(self, contact, value):
         pass
 
-    #CHANGE_CONTACT_MODATTR;<contact_name>;<value>
+    # CHANGE_CONTACT_MODATTR;<contact_name>;<value>
     def CHANGE_CONTACT_MODATTR(self, contact, value):
         pass
 
-    #CHANGE_CONTACT_HOST_NOTIFICATION_TIMEPERIOD;<contact_name>;<notification_timeperiod>
+    # CHANGE_CONTACT_HOST_NOTIFICATION_TIMEPERIOD;<contact_name>;<notification_timeperiod>
     def CHANGE_CONTACT_HOST_NOTIFICATION_TIMEPERIOD(self, contact, notification_timeperiod):
         contact.host_notification_period = notification_timeperiod
         self.sched.get_and_register_status_brok(contact)
@@ -538,597 +543,597 @@ class ExternalCommandManager:
     def ACKNOWLEDGE_HOST_PROBLEM_EXPIRE(self, host, sticky, notify, persistent, end_time, author, comment):
         host.acknowledge_problem(sticky, notify, persistent, author, comment, end_time=end_time)
 
-    #CHANGE_CONTACT_SVC_NOTIFICATION_TIMEPERIOD;<contact_name>;<notification_timeperiod>
+    # CHANGE_CONTACT_SVC_NOTIFICATION_TIMEPERIOD;<contact_name>;<notification_timeperiod>
     def CHANGE_CONTACT_SVC_NOTIFICATION_TIMEPERIOD(self, contact, notification_timeperiod):
         contact.service_notification_period = notification_timeperiod
         self.sched.get_and_register_status_brok(contact)
 
-    #CHANGE_CUSTOM_CONTACT_VAR;<contact_name>;<varname>;<varvalue>
+    # CHANGE_CUSTOM_CONTACT_VAR;<contact_name>;<varname>;<varvalue>
     def CHANGE_CUSTOM_CONTACT_VAR(self, contact, varname, varvalue):
         contact.customs[varname.upper()] = varvalue
 
-    #CHANGE_CUSTOM_HOST_VAR;<host_name>;<varname>;<varvalue>
+    # CHANGE_CUSTOM_HOST_VAR;<host_name>;<varname>;<varvalue>
     def CHANGE_CUSTOM_HOST_VAR(self, host, varname, varvalue):
         host.customs[varname.upper()] = varvalue
 
-    #CHANGE_CUSTOM_SVC_VAR;<host_name>;<service_description>;<varname>;<varvalue>
+    # CHANGE_CUSTOM_SVC_VAR;<host_name>;<service_description>;<varname>;<varvalue>
     def CHANGE_CUSTOM_SVC_VAR(self, service, varname, varvalue):
         service.customs[varname.upper()] = varvalue
 
-    #CHANGE_GLOBAL_HOST_EVENT_HANDLER;<event_handler_command>
+    # CHANGE_GLOBAL_HOST_EVENT_HANDLER;<event_handler_command>
     def CHANGE_GLOBAL_HOST_EVENT_HANDLER(self, event_handler_command):
         pass
 
-    #CHANGE_GLOBAL_SVC_EVENT_HANDLER;<event_handler_command>
+    # CHANGE_GLOBAL_SVC_EVENT_HANDLER;<event_handler_command>
     def CHANGE_GLOBAL_SVC_EVENT_HANDLER(self, event_handler_command):
         pass
 
-    #CHANGE_HOST_CHECK_COMMAND;<host_name>;<check_command>
+    # CHANGE_HOST_CHECK_COMMAND;<host_name>;<check_command>
     def CHANGE_HOST_CHECK_COMMAND(self, host, check_command):
         host.check_command = CommandCall(self.commands, check_command, poller_tag=host.poller_tag)
         self.sched.get_and_register_status_brok(host)
 
-    #CHANGE_HOST_CHECK_TIMEPERIOD;<host_name>;<timeperiod>
+    # CHANGE_HOST_CHECK_TIMEPERIOD;<host_name>;<timeperiod>
     def CHANGE_HOST_CHECK_TIMEPERIOD(self, host, timeperiod):
         host.check_period = timeperiod
         self.sched.get_and_register_status_brok(service)
 
-    #CHANGE_HOST_EVENT_HANDLER;<host_name>;<event_handler_command>
+    # CHANGE_HOST_EVENT_HANDLER;<host_name>;<event_handler_command>
     def CHANGE_HOST_EVENT_HANDLER(self, host, event_handler_command):
         host.event_handler = CommandCall(self.commands, event_handler_command)
         self.sched.get_and_register_status_brok(host)
 
-    #CHANGE_HOST_MODATTR;<host_name>;<value>
+    # CHANGE_HOST_MODATTR;<host_name>;<value>
     def CHANGE_HOST_MODATTR(self, host, value):
         pass
 
-    #CHANGE_MAX_HOST_CHECK_ATTEMPTS;<host_name>;<check_attempts>
+    # CHANGE_MAX_HOST_CHECK_ATTEMPTS;<host_name>;<check_attempts>
     def CHANGE_MAX_HOST_CHECK_ATTEMPTS(self, host, check_attempts):
         host.max_check_attempts = check_attempts
         self.sched.get_and_register_status_brok(host)
 
-    #CHANGE_MAX_SVC_CHECK_ATTEMPTS;<host_name>;<service_description>;<check_attempts>
+    # CHANGE_MAX_SVC_CHECK_ATTEMPTS;<host_name>;<service_description>;<check_attempts>
     def CHANGE_MAX_SVC_CHECK_ATTEMPTS(self, service, check_attempts):
         service.max_check_attempts = check_attempts
         self.sched.get_and_register_status_brok(service)
 
-    #CHANGE_NORMAL_HOST_CHECK_INTERVAL;<host_name>;<check_interval>
+    # CHANGE_NORMAL_HOST_CHECK_INTERVAL;<host_name>;<check_interval>
     def CHANGE_NORMAL_HOST_CHECK_INTERVAL(self, host, check_interval):
         host.check_interval = check_interval
         self.sched.get_and_register_status_brok(host)
 
-    #CHANGE_NORMAL_SVC_CHECK_INTERVAL;<host_name>;<service_description>;<check_interval>
+    # CHANGE_NORMAL_SVC_CHECK_INTERVAL;<host_name>;<service_description>;<check_interval>
     def CHANGE_NORMAL_SVC_CHECK_INTERVAL(self, service, check_interval):
         service.check_interval = check_interval
         self.sched.get_and_register_status_brok(service)
 
-    #CHANGE_RETRY_HOST_CHECK_INTERVAL;<host_name>;<service_description>;<check_interval>
+    # CHANGE_RETRY_HOST_CHECK_INTERVAL;<host_name>;<service_description>;<check_interval>
     def CHANGE_RETRY_HOST_CHECK_INTERVAL(self, host, check_interval):
         host.retry_interval = check_interval
         self.sched.get_and_register_status_brok(host)
 
-    #CHANGE_RETRY_SVC_CHECK_INTERVAL;<host_name>;<service_description>;<check_interval>
+    # CHANGE_RETRY_SVC_CHECK_INTERVAL;<host_name>;<service_description>;<check_interval>
     def CHANGE_RETRY_SVC_CHECK_INTERVAL(self, service, check_interval):
         service.retry_interval = check_interval
         self.sched.get_and_register_status_brok(service)
 
-    #CHANGE_SVC_CHECK_COMMAND;<host_name>;<service_description>;<check_command>
+    # CHANGE_SVC_CHECK_COMMAND;<host_name>;<service_description>;<check_command>
     def CHANGE_SVC_CHECK_COMMAND(self, service, check_command):
         service.check_command = CommandCall(self.commands, check_command, poller_tag=service.poller_tag)
         self.sched.get_and_register_status_brok(service)
 
-    #CHANGE_SVC_CHECK_TIMEPERIOD;<host_name>;<service_description>;<check_timeperiod>
+    # CHANGE_SVC_CHECK_TIMEPERIOD;<host_name>;<service_description>;<check_timeperiod>
     def CHANGE_SVC_CHECK_TIMEPERIOD(self, service, check_timeperiod):
         service.check_period = check_timeperiod
         self.sched.get_and_register_status_brok(service)
 
-    #CHANGE_SVC_EVENT_HANDLER;<host_name>;<service_description>;<event_handler_command>
+    # CHANGE_SVC_EVENT_HANDLER;<host_name>;<service_description>;<event_handler_command>
     def CHANGE_SVC_EVENT_HANDLER(self, service, event_handler_command):
         service.event_handler = CommandCall(self.commands, event_handler_command)
         self.sched.get_and_register_status_brok(service)
 
-    #CHANGE_SVC_MODATTR;<host_name>;<service_description>;<value>
+    # CHANGE_SVC_MODATTR;<host_name>;<service_description>;<value>
     def CHANGE_SVC_MODATTR(self, service, value):
         pass
 
-    #CHANGE_SVC_NOTIFICATION_TIMEPERIOD;<host_name>;<service_description>;<notification_timeperiod>
+    # CHANGE_SVC_NOTIFICATION_TIMEPERIOD;<host_name>;<service_description>;<notification_timeperiod>
     def CHANGE_SVC_NOTIFICATION_TIMEPERIOD(self, service, notification_timeperiod):
         service.notification_period = notification_timeperiod
         self.sched.get_and_register_status_brok(service)
 
-    #DELAY_HOST_NOTIFICATION;<host_name>;<notification_time>
+    # DELAY_HOST_NOTIFICATION;<host_name>;<notification_time>
     def DELAY_HOST_NOTIFICATION(self, host, notification_time):
         host.first_notification_delay = notification_time
         self.sched.get_and_register_status_brok(host)
 
-    #DELAY_SVC_NOTIFICATION;<host_name>;<service_description>;<notification_time>
+    # DELAY_SVC_NOTIFICATION;<host_name>;<service_description>;<notification_time>
     def DELAY_SVC_NOTIFICATION(self, service, notification_time):
         service.first_notification_delay = notification_time
         self.sched.get_and_register_status_brok(service)
 
-    #DEL_ALL_HOST_COMMENTS;<host_name>
+    # DEL_ALL_HOST_COMMENTS;<host_name>
     def DEL_ALL_HOST_COMMENTS(self, host):
         for c in host.comments:
             self.DEL_HOST_COMMENT(c.id)
 
-    #DEL_ALL_HOST_COMMENTS;<host_name>
+    # DEL_ALL_HOST_COMMENTS;<host_name>
     def DEL_ALL_HOST_DOWNTIMES(self, host):
         for dt in host.downtimes:
             self.DEL_HOST_DOWNTIME(dt.id)
 
-    #DEL_ALL_SVC_COMMENTS;<host_name>;<service_description>
+    # DEL_ALL_SVC_COMMENTS;<host_name>;<service_description>
     def DEL_ALL_SVC_COMMENTS(self, service):
         for c in service.comments:
             self.DEL_SVC_COMMENT(c.id)
 
-    #DEL_ALL_SVC_COMMENTS;<host_name>;<service_description>
+    # DEL_ALL_SVC_COMMENTS;<host_name>;<service_description>
     def DEL_ALL_SVC_DOWNTIMES(self, service):
         for dt in service.downtimes:
             self.DEL_SVC_DOWNTIME(dt.id)
 
-    #DEL_CONTACT_DOWNTIME;<downtime_id>
+    # DEL_CONTACT_DOWNTIME;<downtime_id>
     def DEL_CONTACT_DOWNTIME(self, downtime_id):
         if downtime_id in self.sched.contact_downtimes:
             self.sched.contact_downtimes[downtime_id].cancel()
 
 
-    #DEL_HOST_COMMENT;<comment_id>
+    # DEL_HOST_COMMENT;<comment_id>
     def DEL_HOST_COMMENT(self, comment_id):
         if comment_id in self.sched.comments:
             self.sched.comments[comment_id].can_be_deleted = True
 
-    #DEL_HOST_DOWNTIME;<downtime_id>
+    # DEL_HOST_DOWNTIME;<downtime_id>
     def DEL_HOST_DOWNTIME(self, downtime_id):
         if downtime_id in self.sched.downtimes:
             self.sched.downtimes[downtime_id].cancel()
 
-    #DEL_SVC_COMMENT;<comment_id>
+    # DEL_SVC_COMMENT;<comment_id>
     def DEL_SVC_COMMENT(self, comment_id):
         if comment_id in self.sched.comments:
             self.sched.comments[comment_id].can_be_deleted = True
 
-    #DEL_SVC_DOWNTIME;<downtime_id>
+    # DEL_SVC_DOWNTIME;<downtime_id>
     def DEL_SVC_DOWNTIME(self, downtime_id):
         if downtime_id in self.sched.downtimes:
             self.sched.downtimes[downtime_id].cancel()
 
-    #DISABLE_ALL_NOTIFICATIONS_BEYOND_HOST;<host_name>
+    # DISABLE_ALL_NOTIFICATIONS_BEYOND_HOST;<host_name>
     def DISABLE_ALL_NOTIFICATIONS_BEYOND_HOST(self, host):
         pass
 
-    #DISABLE_CONTACTGROUP_HOST_NOTIFICATIONS;<contactgroup_name>
+    # DISABLE_CONTACTGROUP_HOST_NOTIFICATIONS;<contactgroup_name>
     def DISABLE_CONTACTGROUP_HOST_NOTIFICATIONS(self, contactgroup):
         for contact in contactgroup:
             self.DISABLE_CONTACT_HOST_NOTIFICATIONS(contact)
 
-    #DISABLE_CONTACTGROUP_SVC_NOTIFICATIONS;<contactgroup_name>
+    # DISABLE_CONTACTGROUP_SVC_NOTIFICATIONS;<contactgroup_name>
     def DISABLE_CONTACTGROUP_SVC_NOTIFICATIONS(self, contactgroup):
         for contact in contactgroup:
             self.DISABLE_CONTACT_SVC_NOTIFICATIONS(contact)
 
-    #DISABLE_CONTACT_HOST_NOTIFICATIONS;<contact_name>
+    # DISABLE_CONTACT_HOST_NOTIFICATIONS;<contact_name>
     def DISABLE_CONTACT_HOST_NOTIFICATIONS(self, contact):
         contact.host_notifications_enabled = False
         self.sched.get_and_register_status_brok(contact)
 
-    #DISABLE_CONTACT_SVC_NOTIFICATIONS;<contact_name>
+    # DISABLE_CONTACT_SVC_NOTIFICATIONS;<contact_name>
     def DISABLE_CONTACT_SVC_NOTIFICATIONS(self, contact):
         contact.service_notifications_enabled = False
         self.sched.get_and_register_status_brok(contact)
 
-    #DISABLE_EVENT_HANDLERS
+    # DISABLE_EVENT_HANDLERS
     def DISABLE_EVENT_HANDLERS(self):
         self.conf.enable_event_handlers = False
         self.conf.explode_global_conf()
         self.sched.get_and_register_update_program_status_brok()
 
-    #DISABLE_FAILURE_PREDICTION
+    # DISABLE_FAILURE_PREDICTION
     def DISABLE_FAILURE_PREDICTION(self):
         self.conf.enable_failure_prediction = False
         self.conf.explode_global_conf()
         self.sched.get_and_register_update_program_status_brok()
 
-    #DISABLE_FLAP_DETECTION
+    # DISABLE_FLAP_DETECTION
     def DISABLE_FLAP_DETECTION(self):
         self.conf.enable_flap_detection = False
         self.conf.explode_global_conf()
         self.sched.get_and_register_update_program_status_brok()
 
-    #DISABLE_HOSTGROUP_HOST_CHECKS;<hostgroup_name>
+    # DISABLE_HOSTGROUP_HOST_CHECKS;<hostgroup_name>
     def DISABLE_HOSTGROUP_HOST_CHECKS(self, hostgroup):
         for host in hostgroup:
             self.DISABLE_HOST_CHECK(host)
 
-    #DISABLE_HOSTGROUP_HOST_NOTIFICATIONS;<hostgroup_name>
+    # DISABLE_HOSTGROUP_HOST_NOTIFICATIONS;<hostgroup_name>
     def DISABLE_HOSTGROUP_HOST_NOTIFICATIONS(self, hostgroup):
         for host in hostgroup:
             self.DISABLE_HOST_NOTIFICATIONS(host)
 
-    #DISABLE_HOSTGROUP_PASSIVE_HOST_CHECKS;<hostgroup_name>
+    # DISABLE_HOSTGROUP_PASSIVE_HOST_CHECKS;<hostgroup_name>
     def DISABLE_HOSTGROUP_PASSIVE_HOST_CHECKS(self, hostgroup):
         for host in hostgroup:
             self.DISABLE_PASSIVE_HOST_CHECKS(host)
 
-    #DISABLE_HOSTGROUP_PASSIVE_SVC_CHECKS;<hostgroup_name>
+    # DISABLE_HOSTGROUP_PASSIVE_SVC_CHECKS;<hostgroup_name>
     def DISABLE_HOSTGROUP_PASSIVE_SVC_CHECKS(self, hostgroup):
         for host in hostgroup:
             for service in host.services:
                 self.DISABLE_PASSIVE_SVC_CHECKS(service)
 
-    #DISABLE_HOSTGROUP_SVC_CHECKS;<hostgroup_name>
+    # DISABLE_HOSTGROUP_SVC_CHECKS;<hostgroup_name>
     def DISABLE_HOSTGROUP_SVC_CHECKS(self, hostgroup):
         for host in hostgroup:
             for service in host.services:
                 self.DISABLE_SVC_CHECK(service)
 
-    #DISABLE_HOSTGROUP_SVC_NOTIFICATIONS;<hostgroup_name>
+    # DISABLE_HOSTGROUP_SVC_NOTIFICATIONS;<hostgroup_name>
     def DISABLE_HOSTGROUP_SVC_NOTIFICATIONS(self, hostgroup):
         for host in hostgroup:
             for service in host.services:
                 self.DISABLE_SVC_NOTIFICATIONS(service)
 
-    #DISABLE_HOST_AND_CHILD_NOTIFICATIONS;<host_name>
+    # DISABLE_HOST_AND_CHILD_NOTIFICATIONS;<host_name>
     def DISABLE_HOST_AND_CHILD_NOTIFICATIONS(self, host):
         pass
 
-    #DISABLE_HOST_CHECK;<host_name>
+    # DISABLE_HOST_CHECK;<host_name>
     def DISABLE_HOST_CHECK(self, host):
         host.disable_active_checks()
         self.sched.get_and_register_status_brok(host)
 
-    #DISABLE_HOST_EVENT_HANDLER;<host_name>
+    # DISABLE_HOST_EVENT_HANDLER;<host_name>
     def DISABLE_HOST_EVENT_HANDLER(self, host):
         host.event_handler_enabled = False
         self.sched.get_and_register_status_brok(host)
 
-    #DISABLE_HOST_FLAP_DETECTION;<host_name>
+    # DISABLE_HOST_FLAP_DETECTION;<host_name>
     def DISABLE_HOST_FLAP_DETECTION(self, host):
         host.flap_detection_enabled = False
         self.sched.get_and_register_status_brok(host)
 
-    #DISABLE_HOST_FRESHNESS_CHECKS
+    # DISABLE_HOST_FRESHNESS_CHECKS
     def DISABLE_HOST_FRESHNESS_CHECKS(self, host):
         host.check_freshness = False
         self.sched.get_and_register_status_brok(host)
 
-    #DISABLE_HOST_NOTIFICATIONS;<host_name>
+    # DISABLE_HOST_NOTIFICATIONS;<host_name>
     def DISABLE_HOST_NOTIFICATIONS(self, host):
         host.notifications_enabled = False
         self.sched.get_and_register_status_brok(host)
 
-    #DISABLE_HOST_SVC_CHECKS;<host_name>
+    # DISABLE_HOST_SVC_CHECKS;<host_name>
     def DISABLE_HOST_SVC_CHECKS(self, host):
         for s in host.services:
             self.DISABLE_SVC_CHECK(s)
             self.sched.get_and_register_status_brok(s)
 
-    #DISABLE_HOST_SVC_NOTIFICATIONS;<host_name>
+    # DISABLE_HOST_SVC_NOTIFICATIONS;<host_name>
     def DISABLE_HOST_SVC_NOTIFICATIONS(self, host):
         for s in host.services:
             self.DISABLE_SVC_NOTIFICATIONS(s)
             self.sched.get_and_register_status_brok(s)
 
-    #DISABLE_NOTIFICATIONS
+    # DISABLE_NOTIFICATIONS
     def DISABLE_NOTIFICATIONS(self):
         self.conf.enable_notifications = False
         self.conf.explode_global_conf()
         self.sched.get_and_register_update_program_status_brok()
 
-    #DISABLE_PASSIVE_HOST_CHECKS;<host_name>
+    # DISABLE_PASSIVE_HOST_CHECKS;<host_name>
     def DISABLE_PASSIVE_HOST_CHECKS(self, host):
         host.passive_checks_enabled = False
         self.sched.get_and_register_status_brok(host)
 
-    #DISABLE_PASSIVE_SVC_CHECKS;<host_name>;<service_description>
+    # DISABLE_PASSIVE_SVC_CHECKS;<host_name>;<service_description>
     def DISABLE_PASSIVE_SVC_CHECKS(self, service):
         service.passive_checks_enabled = False
         self.sched.get_and_register_status_brok(service)
 
-    #DISABLE_PERFORMANCE_DATA
+    # DISABLE_PERFORMANCE_DATA
     def DISABLE_PERFORMANCE_DATA(self):
         self.conf.process_performance_data = False
         self.conf.explode_global_conf()
         self.sched.get_and_register_update_program_status_brok()
 
-    #DISABLE_SERVICEGROUP_HOST_CHECKS;<servicegroup_name>
+    # DISABLE_SERVICEGROUP_HOST_CHECKS;<servicegroup_name>
     def DISABLE_SERVICEGROUP_HOST_CHECKS(self, servicegroup):
         for service in servicegroup:
             self.DISABLE_HOST_CHECK(service.host)
 
-    #DISABLE_SERVICEGROUP_HOST_NOTIFICATIONS;<servicegroup_name>
+    # DISABLE_SERVICEGROUP_HOST_NOTIFICATIONS;<servicegroup_name>
     def DISABLE_SERVICEGROUP_HOST_NOTIFICATIONS(self, servicegroup):
         for service in servicegroup:
             self.DISABLE_HOST_NOTIFICATIONS(service.host)
 
-    #DISABLE_SERVICEGROUP_PASSIVE_HOST_CHECKS;<servicegroup_name>
+    # DISABLE_SERVICEGROUP_PASSIVE_HOST_CHECKS;<servicegroup_name>
     def DISABLE_SERVICEGROUP_PASSIVE_HOST_CHECKS(self, servicegroup):
         for service in servicegroup:
             self.DISABLE_PASSIVE_HOST_CHECKS(service.host)
 
-    #DISABLE_SERVICEGROUP_PASSIVE_SVC_CHECKS;<servicegroup_name>
+    # DISABLE_SERVICEGROUP_PASSIVE_SVC_CHECKS;<servicegroup_name>
     def DISABLE_SERVICEGROUP_PASSIVE_SVC_CHECKS(self, servicegroup):
         for service in servicegroup:
             self.DISABLE_PASSIVE_SVC_CHECKS(service)
 
-    #DISABLE_SERVICEGROUP_SVC_CHECKS;<servicegroup_name>
+    # DISABLE_SERVICEGROUP_SVC_CHECKS;<servicegroup_name>
     def DISABLE_SERVICEGROUP_SVC_CHECKS(self, servicegroup):
         for service in servicegroup:
             self.DISABLE_SVC_CHECK(service)
 
-    #DISABLE_SERVICEGROUP_SVC_NOTIFICATIONS;<servicegroup_name>
+    # DISABLE_SERVICEGROUP_SVC_NOTIFICATIONS;<servicegroup_name>
     def DISABLE_SERVICEGROUP_SVC_NOTIFICATIONS(self, servicegroup):
         for service in servicegroup:
             self.DISABLE_SVC_NOTIFICATIONS(service)
 
-    #DISABLE_SERVICE_FLAP_DETECTION;<host_name>;<service_description>
+    # DISABLE_SERVICE_FLAP_DETECTION;<host_name>;<service_description>
     def DISABLE_SERVICE_FLAP_DETECTION(self, service):
         service.flap_detection_enabled = False
         self.sched.get_and_register_status_brok(service)
 
-    #DISABLE_SERVICE_FRESHNESS_CHECKS
+    # DISABLE_SERVICE_FRESHNESS_CHECKS
     def DISABLE_SERVICE_FRESHNESS_CHECKS(self):
         self.conf.check_service_freshness = False
         self.conf.explode_global_conf()
         self.sched.get_and_register_update_program_status_brok()
 
-    #DISABLE_SVC_CHECK;<host_name>;<service_description>
+    # DISABLE_SVC_CHECK;<host_name>;<service_description>
     def DISABLE_SVC_CHECK(self, service):
         service.disable_active_checks()
         self.sched.get_and_register_status_brok(service)
 
-    #DISABLE_SVC_EVENT_HANDLER;<host_name>;<service_description>
+    # DISABLE_SVC_EVENT_HANDLER;<host_name>;<service_description>
     def DISABLE_SVC_EVENT_HANDLER(self, service):
         service.event_handler_enabled = False
         self.sched.get_and_register_status_brok(service)
 
-    #DISABLE_SVC_FLAP_DETECTION;<host_name>;<service_description>
+    # DISABLE_SVC_FLAP_DETECTION;<host_name>;<service_description>
     def DISABLE_SVC_FLAP_DETECTION(self, service):
         service.flap_detection_enabled = False
         self.sched.get_and_register_status_brok(service)
 
-    #DISABLE_SVC_NOTIFICATIONS;<host_name>;<service_description>
+    # DISABLE_SVC_NOTIFICATIONS;<host_name>;<service_description>
     def DISABLE_SVC_NOTIFICATIONS(self, service):
         service.notifications_enabled = False
         self.sched.get_and_register_status_brok(service)
 
-    #ENABLE_ALL_NOTIFICATIONS_BEYOND_HOST;<host_name>
+    # ENABLE_ALL_NOTIFICATIONS_BEYOND_HOST;<host_name>
     def ENABLE_ALL_NOTIFICATIONS_BEYOND_HOST(self, host):
         pass
 
-    #ENABLE_CONTACTGROUP_HOST_NOTIFICATIONS;<contactgroup_name>
+    # ENABLE_CONTACTGROUP_HOST_NOTIFICATIONS;<contactgroup_name>
     def ENABLE_CONTACTGROUP_HOST_NOTIFICATIONS(self, contactgroup):
         for contact in contactgroup:
             self.ENABLE_CONTACT_HOST_NOTIFICATIONS(contact)
 
-    #ENABLE_CONTACTGROUP_SVC_NOTIFICATIONS;<contactgroup_name>
+    # ENABLE_CONTACTGROUP_SVC_NOTIFICATIONS;<contactgroup_name>
     def ENABLE_CONTACTGROUP_SVC_NOTIFICATIONS(self, contactgroup):
         for contact in contactgroup:
             self.ENABLE_CONTACT_SVC_NOTIFICATIONS(contact)
 
-    #ENABLE_CONTACT_HOST_NOTIFICATIONS;<contact_name>
+    # ENABLE_CONTACT_HOST_NOTIFICATIONS;<contact_name>
     def ENABLE_CONTACT_HOST_NOTIFICATIONS(self, contact):
         contact.host_notifications_enabled = True
         self.sched.get_and_register_status_brok(contact)
 
-    #ENABLE_CONTACT_SVC_NOTIFICATIONS;<contact_name>
+    # ENABLE_CONTACT_SVC_NOTIFICATIONS;<contact_name>
     def ENABLE_CONTACT_SVC_NOTIFICATIONS(self, contact):
         contact.service_notifications_enabled = True
         self.sched.get_and_register_status_brok(contact)
 
-    #ENABLE_EVENT_HANDLERS
+    # ENABLE_EVENT_HANDLERS
     def ENABLE_EVENT_HANDLERS(self):
         self.conf.enable_event_handlers = True
         self.conf.explode_global_conf()
         self.sched.get_and_register_update_program_status_brok()
 
-    #ENABLE_FAILURE_PREDICTION
+    # ENABLE_FAILURE_PREDICTION
     def ENABLE_FAILURE_PREDICTION(self):
         self.conf.enable_failure_prediction = True
         self.conf.explode_global_conf()
         self.sched.get_and_register_update_program_status_brok()
 
-    #ENABLE_FLAP_DETECTION
+    # ENABLE_FLAP_DETECTION
     def ENABLE_FLAP_DETECTION(self):
         self.conf.enable_flap_detection = True
         self.conf.explode_global_conf()
         self.sched.get_and_register_update_program_status_brok()
 
-    #ENABLE_HOSTGROUP_HOST_CHECKS;<hostgroup_name>
+    # ENABLE_HOSTGROUP_HOST_CHECKS;<hostgroup_name>
     def ENABLE_HOSTGROUP_HOST_CHECKS(self, hostgroup):
         for host in hostgroup:
             self.ENABLE_HOST_CHECK(host)
 
-    #ENABLE_HOSTGROUP_HOST_NOTIFICATIONS;<hostgroup_name>
+    # ENABLE_HOSTGROUP_HOST_NOTIFICATIONS;<hostgroup_name>
     def ENABLE_HOSTGROUP_HOST_NOTIFICATIONS(self, hostgroup):
         for host in hostgroup:
             self.ENABLE_HOST_NOTIFICATIONS(host)
 
-    #ENABLE_HOSTGROUP_PASSIVE_HOST_CHECKS;<hostgroup_name>
+    # ENABLE_HOSTGROUP_PASSIVE_HOST_CHECKS;<hostgroup_name>
     def ENABLE_HOSTGROUP_PASSIVE_HOST_CHECKS(self, hostgroup):
         for host in hostgroup:
             self.ENABLE_PASSIVE_HOST_CHECKS(host)
 
-    #ENABLE_HOSTGROUP_PASSIVE_SVC_CHECKS;<hostgroup_name>
+    # ENABLE_HOSTGROUP_PASSIVE_SVC_CHECKS;<hostgroup_name>
     def ENABLE_HOSTGROUP_PASSIVE_SVC_CHECKS(self, hostgroup):
         for host in hostgroup:
             for service in host.services:
                 self.ENABLE_PASSIVE_SVC_CHECKS(service)
 
-    #ENABLE_HOSTGROUP_SVC_CHECKS;<hostgroup_name>
+    # ENABLE_HOSTGROUP_SVC_CHECKS;<hostgroup_name>
     def ENABLE_HOSTGROUP_SVC_CHECKS(self, hostgroup):
         for host in hostgroup:
             for service in host.services:
                 self.ENABLE_SVC_CHECK(service)
 
-    #ENABLE_HOSTGROUP_SVC_NOTIFICATIONS;<hostgroup_name>
+    # ENABLE_HOSTGROUP_SVC_NOTIFICATIONS;<hostgroup_name>
     def ENABLE_HOSTGROUP_SVC_NOTIFICATIONS(self, hostgroup):
         for host in hostgroup:
             for service in host.services:
                 self.ENABLE_SVC_NOTIFICATIONS(service)
 
-    #ENABLE_HOST_AND_CHILD_NOTIFICATIONS;<host_name>
+    # ENABLE_HOST_AND_CHILD_NOTIFICATIONS;<host_name>
     def ENABLE_HOST_AND_CHILD_NOTIFICATIONS(self, host):
         pass
 
-    #ENABLE_HOST_CHECK;<host_name>
+    # ENABLE_HOST_CHECK;<host_name>
     def ENABLE_HOST_CHECK(self, host):
         host.active_checks_enabled = True
         self.sched.get_and_register_status_brok(host)
 
-    #ENABLE_HOST_EVENT_HANDLER;<host_name>
+    # ENABLE_HOST_EVENT_HANDLER;<host_name>
     def ENABLE_HOST_EVENT_HANDLER(self, host):
         host.event_handler_enabled = True
         self.sched.get_and_register_status_brok(host)
 
-    #ENABLE_HOST_FLAP_DETECTION;<host_name>
+    # ENABLE_HOST_FLAP_DETECTION;<host_name>
     def ENABLE_HOST_FLAP_DETECTION(self, host):
         host.flap_detection_enabled = True
         self.sched.get_and_register_status_brok(host)
 
-    #ENABLE_HOST_FRESHNESS_CHECKS
+    # ENABLE_HOST_FRESHNESS_CHECKS
     def ENABLE_HOST_FRESHNESS_CHECKS(self):
         self.conf.check_host_freshness = True
         self.conf.explode_global_conf()
         self.sched.get_and_register_update_program_status_brok()
 
-    #ENABLE_HOST_NOTIFICATIONS;<host_name>
+    # ENABLE_HOST_NOTIFICATIONS;<host_name>
     def ENABLE_HOST_NOTIFICATIONS(self, host):
         host.notifications_enabled = True
         self.sched.get_and_register_status_brok(host)
 
-    #ENABLE_HOST_SVC_CHECKS;<host_name>
+    # ENABLE_HOST_SVC_CHECKS;<host_name>
     def ENABLE_HOST_SVC_CHECKS(self, host):
         for s in host.services:
             self.ENABLE_SVC_CHECK(s)
             self.sched.get_and_register_status_brok(s)
 
-    #ENABLE_HOST_SVC_NOTIFICATIONS;<host_name>
+    # ENABLE_HOST_SVC_NOTIFICATIONS;<host_name>
     def ENABLE_HOST_SVC_NOTIFICATIONS(self, host):
         for s in host.services:
             self.ENABLE_SVC_NOTIFICATIONS(s)
             self.sched.get_and_register_status_brok(s)
 
-    #ENABLE_NOTIFICATIONS
+    # ENABLE_NOTIFICATIONS
     def ENABLE_NOTIFICATIONS(self):
         self.conf.enable_notifications = True
         self.conf.explode_global_conf()
         self.sched.get_and_register_update_program_status_brok()
 
-    #ENABLE_PASSIVE_HOST_CHECKS;<host_name>
+    # ENABLE_PASSIVE_HOST_CHECKS;<host_name>
     def ENABLE_PASSIVE_HOST_CHECKS(self, host):
         host.passive_checks_enabled = True
         self.sched.get_and_register_status_brok(host)
 
-    #ENABLE_PASSIVE_SVC_CHECKS;<host_name>;<service_description>
+    # ENABLE_PASSIVE_SVC_CHECKS;<host_name>;<service_description>
     def ENABLE_PASSIVE_SVC_CHECKS(self, service):
         service.passive_checks_enabled = True
         self.sched.get_and_register_status_brok(service)
 
-    #ENABLE_PERFORMANCE_DATA
+    # ENABLE_PERFORMANCE_DATA
     def ENABLE_PERFORMANCE_DATA(self):
         self.conf.process_performance_data = True
         self.conf.explode_global_conf()
         self.sched.get_and_register_update_program_status_brok()
 
-    #ENABLE_SERVICEGROUP_HOST_CHECKS;<servicegroup_name>
+    # ENABLE_SERVICEGROUP_HOST_CHECKS;<servicegroup_name>
     def ENABLE_SERVICEGROUP_HOST_CHECKS(self, servicegroup):
         for service in servicegroup:
             self.ENABLE_HOST_CHECK(service.host)
 
-    #ENABLE_SERVICEGROUP_HOST_NOTIFICATIONS;<servicegroup_name>
+    # ENABLE_SERVICEGROUP_HOST_NOTIFICATIONS;<servicegroup_name>
     def ENABLE_SERVICEGROUP_HOST_NOTIFICATIONS(self, servicegroup):
         for service in servicegroup:
             self.ENABLE_HOST_NOTIFICATIONS(service.host)
 
-    #ENABLE_SERVICEGROUP_PASSIVE_HOST_CHECKS;<servicegroup_name>
+    # ENABLE_SERVICEGROUP_PASSIVE_HOST_CHECKS;<servicegroup_name>
     def ENABLE_SERVICEGROUP_PASSIVE_HOST_CHECKS(self, servicegroup):
         for service in servicegroup:
             self.ENABLE_PASSIVE_HOST_CHECKS(service.host)
 
-    #ENABLE_SERVICEGROUP_PASSIVE_SVC_CHECKS;<servicegroup_name>
+    # ENABLE_SERVICEGROUP_PASSIVE_SVC_CHECKS;<servicegroup_name>
     def ENABLE_SERVICEGROUP_PASSIVE_SVC_CHECKS(self, servicegroup):
         for service in servicegroup:
             self.ENABLE_PASSIVE_SVC_CHECKS(service)
 
-    #ENABLE_SERVICEGROUP_SVC_CHECKS;<servicegroup_name>
+    # ENABLE_SERVICEGROUP_SVC_CHECKS;<servicegroup_name>
     def ENABLE_SERVICEGROUP_SVC_CHECKS(self, servicegroup):
         for service in servicegroup:
             self.ENABLE_SVC_CHECK(service)
 
-    #ENABLE_SERVICEGROUP_SVC_NOTIFICATIONS;<servicegroup_name>
+    # ENABLE_SERVICEGROUP_SVC_NOTIFICATIONS;<servicegroup_name>
     def ENABLE_SERVICEGROUP_SVC_NOTIFICATIONS(self, servicegroup):
         for service in servicegroup:
             self.ENABLE_SVC_NOTIFICATIONS(service)
 
-    #ENABLE_SERVICE_FRESHNESS_CHECKS
+    # ENABLE_SERVICE_FRESHNESS_CHECKS
     def ENABLE_SERVICE_FRESHNESS_CHECKS(self):
         self.conf.check_service_freshness = True
         self.conf.explode_global_conf()
         self.sched.get_and_register_update_program_status_brok()
 
-    #ENABLE_SVC_CHECK;<host_name>;<service_description>
+    # ENABLE_SVC_CHECK;<host_name>;<service_description>
     def ENABLE_SVC_CHECK(self, service):
         service.active_checks_enabled = True
         self.sched.get_and_register_status_brok(service)
 
-    #ENABLE_SVC_EVENT_HANDLER;<host_name>;<service_description>
+    # ENABLE_SVC_EVENT_HANDLER;<host_name>;<service_description>
     def ENABLE_SVC_EVENT_HANDLER(self, service):
         service.event_handler_enabled = True
         self.sched.get_and_register_status_brok(service)
 
-    #ENABLE_SVC_FLAP_DETECTION;<host_name>;<service_description>
+    # ENABLE_SVC_FLAP_DETECTION;<host_name>;<service_description>
     def ENABLE_SVC_FLAP_DETECTION(self, service):
         service.flap_detection_enabled = True
         self.sched.get_and_register_status_brok(service)
 
-    #ENABLE_SVC_NOTIFICATIONS;<host_name>;<service_description>
+    # ENABLE_SVC_NOTIFICATIONS;<host_name>;<service_description>
     def ENABLE_SVC_NOTIFICATIONS(self, service):
         service.notifications_enabled = True
         self.sched.get_and_register_status_brok(service)
 
-    #PROCESS_FILE;<file_name>;<delete>
+    # PROCESS_FILE;<file_name>;<delete>
     def PROCESS_FILE(self, file_name, delete):
         pass
 
-    #TODO : say that check is PASSIVE
-    #PROCESS_HOST_CHECK_RESULT;<host_name>;<status_code>;<plugin_output>
+    # TODO : say that check is PASSIVE
+    # PROCESS_HOST_CHECK_RESULT;<host_name>;<status_code>;<plugin_output>
     def PROCESS_HOST_CHECK_RESULT(self, host, status_code, plugin_output):
         #raise a PASSIVE check only if needed
         if self.conf.log_passive_checks:
             logger.log('PASSIVE HOST CHECK: %s;%d;%s' % (host.get_name(), status_code, plugin_output))
         now = time.time()
         cls = host.__class__
-        #If globally disable OR locally, do not launch
+        # If globally disable OR locally, do not launch
         if cls.accept_passive_checks and host.passive_checks_enabled:
             i = host.launch_check(now, force=True)
             for chk in host.actions:
                 if chk.id == i:
                     c = chk
-            #Now we 'transform the check into a result'
-            #So exit_status, output and status is eaten by the host
+            # Now we 'transform the check into a result'
+            # So exit_status, output and status is eaten by the host
             c.exit_status = status_code
             c.get_outputs(plugin_output, host.max_plugins_output_length)
             c.status = 'waitconsume'
             c.check_time = now
             self.sched.nb_check_received += 1
-            #Ok now this result will be reap by scheduler the next loop
+            # Ok now this result will be read by scheduler the next loop
 
 
-    #PROCESS_SERVICE_CHECK_RESULT;<host_name>;<service_description>;<return_code>;<plugin_output>
+    # PROCESS_SERVICE_CHECK_RESULT;<host_name>;<service_description>;<return_code>;<plugin_output>
     def PROCESS_SERVICE_CHECK_RESULT(self, service, return_code, plugin_output):
-        #raise a PASSIVE check only if needed
+        # raise a PASSIVE check only if needed
         if self.conf.log_passive_checks:
             logger.log('PASSIVE SERVICE CHECK: %s;%s;%d;%s' % (service.host.get_name(), service.get_name(), return_code, plugin_output))
         now = time.time()
         cls = service.__class__
-        #If globally disable OR locally, do not launch
+        # If globally disable OR locally, do not launch
         if cls.accept_passive_checks and service.passive_checks_enabled:
             i = service.launch_check(now, force=True)
             for chk in service.actions:
                 if chk.id == i:
                     c = chk
-            #Now we 'transform the check into a result'
-            #So exit_status, output and status is eaten by the service
+            # Now we 'transform the check into a result'
+            # So exit_status, output and status is eaten by the service
             c.exit_status = return_code
             c.get_outputs(plugin_output, service.max_plugins_output_length)
             c.status = 'waitconsume'
@@ -1137,71 +1142,71 @@ class ExternalCommandManager:
             #Ok now this result will be reap by scheduler the next loop
 
 
-    #READ_STATE_INFORMATION
+    # READ_STATE_INFORMATION
     def READ_STATE_INFORMATION(self):
         pass
 
-    #REMOVE_HOST_ACKNOWLEDGEMENT;<host_name>
+    # REMOVE_HOST_ACKNOWLEDGEMENT;<host_name>
     def REMOVE_HOST_ACKNOWLEDGEMENT(self, host):
         host.unacknowledge_problem()
 
-    #REMOVE_SVC_ACKNOWLEDGEMENT;<host_name>;<service_description>
+    # REMOVE_SVC_ACKNOWLEDGEMENT;<host_name>;<service_description>
     def REMOVE_SVC_ACKNOWLEDGEMENT(self, service):
         service.unacknowledge_problem()
 
-    #RESTART_PROGRAM
+    # RESTART_PROGRAM
     def RESTART_PROGRAM(self):
         pass
 
-    #SAVE_STATE_INFORMATION
+    # SAVE_STATE_INFORMATION
     def SAVE_STATE_INFORMATION(self):
         pass
 
-    #SCHEDULE_AND_PROPAGATE_HOST_DOWNTIME;<host_name>;<start_time>;<end_time>;<fixed>;<trigger_id>;<duration>;<author>;<comment>
+    # SCHEDULE_AND_PROPAGATE_HOST_DOWNTIME;<host_name>;<start_time>;<end_time>;<fixed>;<trigger_id>;<duration>;<author>;<comment>
     def SCHEDULE_AND_PROPAGATE_HOST_DOWNTIME(self, host, start_time, end_time, fixed, trigger_id, duration, author, comment):
         pass
 
-    #SCHEDULE_AND_PROPAGATE_TRIGGERED_HOST_DOWNTIME;<host_name>;<start_time>;<end_time>;<fixed>;<trigger_id>;<duration>;<author>;<comment>
+    # SCHEDULE_AND_PROPAGATE_TRIGGERED_HOST_DOWNTIME;<host_name>;<start_time>;<end_time>;<fixed>;<trigger_id>;<duration>;<author>;<comment>
     def SCHEDULE_AND_PROPAGATE_TRIGGERED_HOST_DOWNTIME(self, host, start_time, end_time, fixed, trigger_id, duration, author, comment):
         pass
 
-    #SCHEDULE_CONTACT_DOWNTIME;<contact_name>;<start_time>;<end_time>;<author>;<comment>
+    # SCHEDULE_CONTACT_DOWNTIME;<contact_name>;<start_time>;<end_time>;<author>;<comment>
     def SCHEDULE_CONTACT_DOWNTIME(self, contact, start_time, end_time, author, comment):
         dt = ContactDowntime(contact, start_time, end_time, author, comment)
         contact.add_downtime(dt)
         self.sched.add(dt)
         self.sched.get_and_register_status_brok(contact)
 
-    #SCHEDULE_FORCED_HOST_CHECK;<host_name>;<check_time>
+    # SCHEDULE_FORCED_HOST_CHECK;<host_name>;<check_time>
     def SCHEDULE_FORCED_HOST_CHECK(self, host, check_time):
         host.schedule(force=True, force_time=check_time)
         self.sched.get_and_register_status_brok(host)
 
-    #SCHEDULE_FORCED_HOST_SVC_CHECKS;<host_name>;<check_time>
+    # SCHEDULE_FORCED_HOST_SVC_CHECKS;<host_name>;<check_time>
     def SCHEDULE_FORCED_HOST_SVC_CHECKS(self, host, check_time):
         for s in host.services:
             self.SCHEDULE_FORCED_SVC_CHECK(s, check_time)
             self.sched.get_and_register_status_brok(s)
 
-    #SCHEDULE_FORCED_SVC_CHECK;<host_name>;<service_description>;<check_time>
+    # SCHEDULE_FORCED_SVC_CHECK;<host_name>;<service_description>;<check_time>
     def SCHEDULE_FORCED_SVC_CHECK(self, service, check_time):
         service.schedule(force=True, force_time=check_time)
         self.sched.get_and_register_status_brok(service)
 
-    #SCHEDULE_HOSTGROUP_HOST_DOWNTIME;<hostgroup_name>;<start_time>;<end_time>;<fixed>;<trigger_id>;<duration>;<author>;<comment>
+    # SCHEDULE_HOSTGROUP_HOST_DOWNTIME;<hostgroup_name>;<start_time>;<end_time>;<fixed>;<trigger_id>;<duration>;<author>;<comment>
     def SCHEDULE_HOSTGROUP_HOST_DOWNTIME(self, hostgroup, start_time, end_time, fixed, trigger_id, duration, author, comment):
         pass
 
-    #SCHEDULE_HOSTGROUP_SVC_DOWNTIME;<hostgroup_name>;<start_time>;<end_time>;<fixed>;<trigger_id>;<duration>;<author>;<comment>
+    # SCHEDULE_HOSTGROUP_SVC_DOWNTIME;<hostgroup_name>;<start_time>;<end_time>;<fixed>;<trigger_id>;<duration>;<author>;<comment>
     def SCHEDULE_HOSTGROUP_SVC_DOWNTIME(self, hostgroup, start_time, end_time, fixed, trigger_id, duration, author, comment):
         pass
 
-    #SCHEDULE_HOST_CHECK;<host_name>;<check_time>
+    # SCHEDULE_HOST_CHECK;<host_name>;<check_time>
     def SCHEDULE_HOST_CHECK(self, host, check_time):
         host.schedule(force=False, force_time=check_time)
         self.sched.get_and_register_status_brok(host)
 
-    #SCHEDULE_HOST_DOWNTIME;<host_name>;<start_time>;<end_time>;<fixed>;<trigger_id>;<duration>;<author>;<comment>
+    # SCHEDULE_HOST_DOWNTIME;<host_name>;<start_time>;<end_time>;<fixed>;<trigger_id>;<duration>;<author>;<comment>
     def SCHEDULE_HOST_DOWNTIME(self, host, start_time, end_time, fixed, trigger_id, duration, author, comment):
         dt = Downtime(host, start_time, end_time, fixed, trigger_id, duration, author, comment)
         host.add_downtime(dt)
@@ -1210,33 +1215,33 @@ class ExternalCommandManager:
         if trigger_id != 0 and trigger_id in self.sched.downtimes:
             self.sched.downtimes[trigger_id].trigger_me(dt)
 
-    #SCHEDULE_HOST_SVC_CHECKS;<host_name>;<check_time>
+    # SCHEDULE_HOST_SVC_CHECKS;<host_name>;<check_time>
     def SCHEDULE_HOST_SVC_CHECKS(self, host, check_time):
         for s in host.services:
             self.SCHEDULE_SVC_CHECK(s, check_time)
             self.sched.get_and_register_status_brok(s)
 
-    #SCHEDULE_HOST_SVC_DOWNTIME;<host_name>;<start_time>;<end_time>;<fixed>;<trigger_id>;<duration>;<author>;<comment>
+    # SCHEDULE_HOST_SVC_DOWNTIME;<host_name>;<start_time>;<end_time>;<fixed>;<trigger_id>;<duration>;<author>;<comment>
     def SCHEDULE_HOST_SVC_DOWNTIME(self, host, start_time, end_time, fixed, trigger_id, duration, author, comment):
         for s in host.services:
             self.SCHEDULE_SVC_DOWNTIME(s, start_time, end_time, fixed, trigger_id, duration, author, comment)
 
-    #SCHEDULE_SERVICEGROUP_HOST_DOWNTIME;<servicegroup_name>;<start_time>;<end_time>;<fixed>;<trigger_id>;<duration>;<author>;<comment>
+    # SCHEDULE_SERVICEGROUP_HOST_DOWNTIME;<servicegroup_name>;<start_time>;<end_time>;<fixed>;<trigger_id>;<duration>;<author>;<comment>
     def SCHEDULE_SERVICEGROUP_HOST_DOWNTIME(self, servicegroup, start_time, end_time, fixed, trigger_id, duration, author, comment):
         for h in [s.host for s in servicegroup.get_services()]:
             self.SCHEDULE_HOST_DOWNTIME(h, start_time, end_time, fixed, trigger_id, duration, author, comment)
 
-    #SCHEDULE_SERVICEGROUP_SVC_DOWNTIME;<servicegroup_name>;<start_time>;<end_time>;<fixed>;<trigger_id>;<duration>;<author>;<comment>
+    # SCHEDULE_SERVICEGROUP_SVC_DOWNTIME;<servicegroup_name>;<start_time>;<end_time>;<fixed>;<trigger_id>;<duration>;<author>;<comment>
     def SCHEDULE_SERVICEGROUP_SVC_DOWNTIME(self, servicegroup, start_time, end_time, fixed, trigger_id, duration, author, comment):
         for s in servicegroup.get_services():
             self.SCHEDULE_SVC_DOWNTIME(s, start_time, end_time, fixed, trigger_id, duration, author, comment)
 
-    #SCHEDULE_SVC_CHECK;<host_name>;<service_description>;<check_time>
+    # SCHEDULE_SVC_CHECK;<host_name>;<service_description>;<check_time>
     def SCHEDULE_SVC_CHECK(self, service, check_time):
         service.schedule(force=False, force_time=check_time)
         self.sched.get_and_register_status_brok(service)
 
-    #SCHEDULE_SVC_DOWNTIME;<host_name>;<service_desription><start_time>;<end_time>;<fixed>;<trigger_id>;<duration>;<author>;<comment>
+    # SCHEDULE_SVC_DOWNTIME;<host_name>;<service_desription><start_time>;<end_time>;<fixed>;<trigger_id>;<duration>;<author>;<comment>
     def SCHEDULE_SVC_DOWNTIME(self, service, start_time, end_time, fixed, trigger_id, duration, author, comment):
         dt = Downtime(service, start_time, end_time, fixed, trigger_id, duration, author, comment)
         service.add_downtime(dt)
@@ -1245,112 +1250,112 @@ class ExternalCommandManager:
         if trigger_id != 0 and trigger_id in self.sched.downtimes:
             self.sched.downtimes[trigger_id].trigger_me(dt)
 
-    #SEND_CUSTOM_HOST_NOTIFICATION;<host_name>;<options>;<author>;<comment>
+    # SEND_CUSTOM_HOST_NOTIFICATION;<host_name>;<options>;<author>;<comment>
     def SEND_CUSTOM_HOST_NOTIFICATION(self, host, options, author, comment):
         pass
 
-    #SEND_CUSTOM_SVC_NOTIFICATION;<host_name>;<service_description>;<options>;<author>;<comment>
+    # SEND_CUSTOM_SVC_NOTIFICATION;<host_name>;<service_description>;<options>;<author>;<comment>
     def SEND_CUSTOM_SVC_NOTIFICATION(self, service, options, author, comment):
         pass
 
-    #SET_HOST_NOTIFICATION_NUMBER;<host_name>;<notification_number>
+    # SET_HOST_NOTIFICATION_NUMBER;<host_name>;<notification_number>
     def SET_HOST_NOTIFICATION_NUMBER(self, host, notification_number):
         pass
 
-    #SET_SVC_NOTIFICATION_NUMBER;<host_name>;<service_description>;<notification_number>
+    # SET_SVC_NOTIFICATION_NUMBER;<host_name>;<service_description>;<notification_number>
     def SET_SVC_NOTIFICATION_NUMBER(self, service, notification_number):
         pass
 
-    #SHUTDOWN_PROGRAM
+    # SHUTDOWN_PROGRAM
     def SHUTDOWN_PROGRAM(self):
         pass
 
-    #START_ACCEPTING_PASSIVE_HOST_CHECKS
+    # START_ACCEPTING_PASSIVE_HOST_CHECKS
     def START_ACCEPTING_PASSIVE_HOST_CHECKS(self):
         self.conf.accept_passive_host_checks = True
         self.conf.explode_global_conf()
         self.sched.get_and_register_update_program_status_brok()
 
-    #START_ACCEPTING_PASSIVE_SVC_CHECKS
+    # START_ACCEPTING_PASSIVE_SVC_CHECKS
     def START_ACCEPTING_PASSIVE_SVC_CHECKS(self):
         self.conf.accept_passive_service_checks = True
         self.conf.explode_global_conf()
         self.sched.get_and_register_update_program_status_brok()
 
-    #START_EXECUTING_HOST_CHECKS
+    # START_EXECUTING_HOST_CHECKS
     def START_EXECUTING_HOST_CHECKS(self):
         self.conf.execute_host_checks = True
         self.conf.explode_global_conf()
         self.sched.get_and_register_update_program_status_brok()
 
-    #START_EXECUTING_SVC_CHECKS
+    # START_EXECUTING_SVC_CHECKS
     def START_EXECUTING_SVC_CHECKS(self):
         self.conf.execute_service_checks = True
         self.conf.explode_global_conf()
         self.sched.get_and_register_update_program_status_brok()
 
-    #START_OBSESSING_OVER_HOST;<host_name>
+    # START_OBSESSING_OVER_HOST;<host_name>
     def START_OBSESSING_OVER_HOST(self, host):
         host.obsess_over_host = True
         self.sched.get_and_register_status_brok(host)
 
-    #START_OBSESSING_OVER_HOST_CHECKS
+    # START_OBSESSING_OVER_HOST_CHECKS
     def START_OBSESSING_OVER_HOST_CHECKS(self):
         self.conf.obsess_over_hosts = True
         self.conf.explode_global_conf()
 
-    #START_OBSESSING_OVER_SVC;<host_name>;<service_description>
+    # START_OBSESSING_OVER_SVC;<host_name>;<service_description>
     def START_OBSESSING_OVER_SVC(self, service):
         service.obsess_over_service = True
         self.sched.get_and_register_status_brok(service)
 
-    #START_OBSESSING_OVER_SVC_CHECKS
+    # START_OBSESSING_OVER_SVC_CHECKS
     def START_OBSESSING_OVER_SVC_CHECKS(self):
         self.conf.obsess_over_services = True
         self.conf.explode_global_conf()
         self.sched.get_and_register_update_program_status_brok()
 
-    #STOP_ACCEPTING_PASSIVE_HOST_CHECKS
+    # STOP_ACCEPTING_PASSIVE_HOST_CHECKS
     def STOP_ACCEPTING_PASSIVE_HOST_CHECKS(self):
         self.accept_passive_host_checks = False
         self.conf.explode_global_conf()
         self.sched.get_and_register_update_program_status_brok()
 
-    #STOP_ACCEPTING_PASSIVE_SVC_CHECKS
+    # STOP_ACCEPTING_PASSIVE_SVC_CHECKS
     def STOP_ACCEPTING_PASSIVE_SVC_CHECKS(self):
         self.accept_passive_service_checks = False
         self.conf.explode_global_conf()
         self.sched.get_and_register_update_program_status_brok()
 
-    #STOP_EXECUTING_HOST_CHECKS
+    # STOP_EXECUTING_HOST_CHECKS
     def STOP_EXECUTING_HOST_CHECKS(self):
         self.conf.execute_host_checks = False
         self.conf.explode_global_conf()
         self.sched.get_and_register_update_program_status_brok()
 
-    #STOP_EXECUTING_SVC_CHECKS
+    # STOP_EXECUTING_SVC_CHECKS
     def STOP_EXECUTING_SVC_CHECKS(self):
         self.conf.execute_service_checks = False
         self.conf.explode_global_conf()
         self.sched.get_and_register_update_program_status_brok()
 
-    #STOP_OBSESSING_OVER_HOST;<host_name>
+    # STOP_OBSESSING_OVER_HOST;<host_name>
     def STOP_OBSESSING_OVER_HOST(self, host):
         host.obsess_over_host = False
         self.sched.get_and_register_status_brok(host)
 
-    #STOP_OBSESSING_OVER_HOST_CHECKS
+    # STOP_OBSESSING_OVER_HOST_CHECKS
     def STOP_OBSESSING_OVER_HOST_CHECKS(self):
         self.conf.obsess_over_hosts = False
         self.conf.explode_global_conf()
         self.sched.get_and_register_update_program_status_brok()
 
-    #STOP_OBSESSING_OVER_SVC;<host_name>;<service_description>
+    # STOP_OBSESSING_OVER_SVC;<host_name>;<service_description>
     def STOP_OBSESSING_OVER_SVC(self, service):
         service.obsess_over_service = False
         self.sched.get_and_register_status_brok(service)
 
-    #STOP_OBSESSING_OVER_SVC_CHECKS
+    # STOP_OBSESSING_OVER_SVC_CHECKS
     def STOP_OBSESSING_OVER_SVC_CHECKS(self):
         self.conf.obsess_over_services = False
         self.conf.explode_global_conf()
@@ -1358,17 +1363,17 @@ class ExternalCommandManager:
 
 
     ### Now the shinken specific ones
-    #LAUNCH_SVC_EVENT_HANDLER;<host_name>;<service_description>
+    # LAUNCH_SVC_EVENT_HANDLER;<host_name>;<service_description>
     def LAUNCH_SVC_EVENT_HANDLER(self, service):
         service.get_event_handlers(externalcmd=True)
 
 
-    #LAUNCH_SVC_EVENT_HANDLER;<host_name>;<service_description>
+    # LAUNCH_SVC_EVENT_HANDLER;<host_name>;<service_description>
     def LAUNCH_HOST_EVENT_HANDLER(self, host):
         host.get_event_handlers(externalcmd=True)
 
 
-    #ADD_SIMPLE_HOST_DEPENDENCY;<host_name>;<host_name>
+    # ADD_SIMPLE_HOST_DEPENDENCY;<host_name>;<host_name>
     def ADD_SIMPLE_HOST_DEPENDENCY(self, son, father):
         if not son.is_linked_with_host(father):
             print "Doing simple link between", son.get_name(), 'and', father.get_name()
@@ -1383,7 +1388,7 @@ class ExternalCommandManager:
             self.sched.get_and_register_status_brok(father)
         
 
-    #ADD_SIMPLE_HOST_DEPENDENCY;<host_name>;<host_name>
+    # ADD_SIMPLE_HOST_DEPENDENCY;<host_name>;<host_name>
     def DEL_HOST_DEPENDENCY(self, son, father):
         if son.is_linked_with_host(father):
             print "removing simple link between", son.get_name(), 'and', father.get_name()
@@ -1397,7 +1402,7 @@ class ExternalCommandManager:
             self.sched.get_and_register_status_brok(father)
 
 
-    #ADD_SIMPLE_POLLER;realm_name;poller_name;address;port
+    # ADD_SIMPLE_POLLER;realm_name;poller_name;address;port
     def ADD_SIMPLE_POLLER(self, realm_name, poller_name, address, port):
         print "I need to add the poller", realm_name, poller_name, address, port
 
