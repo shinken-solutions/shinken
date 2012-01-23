@@ -2193,7 +2193,7 @@ livestatus_attribute_map = {
         },
         'is_service': {
             'description': '0, if this entry is for a host, 1 if it is for a service',
-            'function': lambda item, req: getattr(item, 'service_description'),
+            'function': lambda item, req: hasattr(item.ref, 'service_description'),
             'datatype': bool,
         },
         'service_accept_passive_checks': {
@@ -2393,7 +2393,7 @@ livestatus_attribute_map = {
         },
         'start_time': {
             'description': 'The start time of the downtime as UNIX timestamp',
-            'function': lambda item, req: item.None,  # REPAIRME
+            'function': lambda item, req: item.start_time,
             'datatype': int,
         },
         'triggered_by': {

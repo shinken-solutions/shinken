@@ -147,5 +147,5 @@ try:
 except AttributeError:
     # Ptyhon 2.4 and 2.5 do not have it.
     # Use our own implementation.
-    TopBaseLiveStatusStack.__bases__ = (object, MyLifoQueue, )
+    TopBaseLiveStatusStack.__bases__ = (MyLifoQueue, object)
     #LiveStatusStack.__bases__ += (MyLifoQueue, )
