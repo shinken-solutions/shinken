@@ -1583,58 +1583,58 @@ livestatus_attribute_map = {
         },
         'num_services': {
             'description': 'The total number of services in the group',
-            'function': lambda item, req: "",  # REPAIRME
-            'datatype': list,
+            'function': lambda item, req: len(item.members),
+            'datatype': int,
         },
         'num_services_crit': {
             'description': 'The number of services in the group that are CRIT',
-            'function': lambda item, req: "",  # REPAIRME
-            'datatype': list,
+            'function': lambda item, req: len([x for x in item.members if x.state_id == 2]),
+            'datatype': int,
         },
         'num_services_hard_crit': {
             'description': 'The number of services in the group that are CRIT',
-            'function': lambda item, req: "",  # REPAIRME
-            'datatype': list,
+            'function': lambda item, req: len([x for x in item.members if x.state_id == 2 and x.state_type_id == 1]),
+            'datatype': int,
         },
         'num_services_hard_ok': {
             'description': 'The number of services in the group that are OK',
-            'function': lambda item, req: "",  # REPAIRME
-            'datatype': list,
+            'function': lambda item, req: len([x for x in item.members if x.state_id == 0 and x.state_type_id == 1]),
+            'datatype': int,
         },
         'num_services_hard_unknown': {
             'description': 'The number of services in the group that are UNKNOWN',
-            'function': lambda item, req: "",  # REPAIRME
-            'datatype': list,
+            'function': lambda item, req: len([x for x in item.members if x.state_id == 3 and x.state_type_id == 1]),
+            'datatype': int,
         },
         'num_services_hard_warn': {
             'description': 'The number of services in the group that are WARN',
-            'function': lambda item, req: "",  # REPAIRME
-            'datatype': list,
+            'function': lambda item, req: len([x for x in item.members if x.state_id == 1 and x.state_type_id == 1]),
+            'datatype': int,
         },
         'num_services_ok': {
             'description': 'The number of services in the group that are OK',
-            'function': lambda item, req: "",  # REPAIRME
-            'datatype': list,
+            'function': lambda item, req: len([x for x in item.members if x.state_id == 0]),
+            'datatype': int,
         },
         'num_services_pending': {
             'description': 'The number of services in the group that are PENDING',
-            'function': lambda item, req: "",  # REPAIRME
-            'datatype': list,
+            'function': lambda item, req: len([x for x in item.members if x.has_been_checked == 0]),
+            'datatype': int,
         },
         'num_services_unknown': {
             'description': 'The number of services in the group that are UNKNOWN',
-            'function': lambda item, req: "",  # REPAIRME
-            'datatype': list,
+            'function': lambda item, req: len([x for x in item.members if x.state_id == 3]),
+            'datatype': int,
         },
         'num_services_warn': {
             'description': 'The number of services in the group that are WARN',
-            'function': lambda item, req: "",  # REPAIRME
-            'datatype': list,
+            'function': lambda item, req: len([x for x in item.members if x.state_id == 1]),
+            'datatype': int,
         },
         'worst_service_state': {
             'description': 'The worst soft state of all of the groups services (OK <= WARN <= UNKNOWN <= CRIT)',
-            'function': lambda item, req: "",  # REPAIRME
-            'datatype': list,
+            'function': lambda item, req: reduce(worst_service_state, (x.state_id for x in item.members), 0),
+            'datatype': int,
         },
     },
     'Contact': {
@@ -4691,6 +4691,12 @@ for objtype in ['Host', 'Service']:
             setattr(cls, 'lsm_servicegroup_'+attribute, servicegroup_redirect_factory('lsm_'+attribute.replace('servicegroup_', '')))
             getattr(cls, 'lsm_servicegroup_'+attribute).im_func.description = getattr(Servicegroup, 'lsm_'+attribute).im_func.description
             getattr(cls, 'lsm_servicegroup_'+attribute).im_func.datatype = getattr(Servicegroup, 'lsm_'+attribute).im_func.datatype
+        # in LivestatusQuery.get_service_by_hostgroup, (copied) Service objects get an extra "hostgroup" attribute
+        # and Service objects get an extra "servicegroup" attribute. Here we set the lsm-attributes for them
+        for attribute in livestatus_attribute_map['Hostgroup']:
+            setattr(cls, 'lsm_hostgroup_'+attribute, hostgroup_redirect_factory('lsm_'+attribute.replace('hostgroup_', '')))
+            getattr(cls, 'lsm_hostgroup_'+attribute).im_func.description = getattr(Hostgroup, 'lsm_'+attribute).im_func.description
+            getattr(cls, 'lsm_hostgroup_'+attribute).im_func.datatype = getattr(Hostgroup, 'lsm_'+attribute).im_func.datatype
 
 # Finally set some default values for the different datatypes
 for objtype in ['Host', 'Service', 'Contact', 'Command', 'Timeperiod', 'Downtime', 'Comment', 'Hostgroup', 'Servicegroup', 'Contactgroup', 'SchedulerLink', 'PollerLink', 'ReactionnerLink', 'BrokerLink', 'Problem', 'Logline', 'Config']:

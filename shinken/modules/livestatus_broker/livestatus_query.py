@@ -513,11 +513,11 @@ class LiveStatusQuery(object):
                                 # ([host, host, ...], hostgroup), ([host, host, host, ...], hostgroup), ...  sorted by host_name
                                 (sorted(hg1.members, key = lambda k: k.host_name), hg1) for hg1 in   # ([host, host], hg), ([host], hg),... hostgroup.members->explode->sort
                                     # hostgroups, sorted by hostgroup_name
-                                    sorted([hg0 for hg0 in self.hostgroups.values() if hg0.members], key = lambda k: k.hostgroup_name)
+                                    sorted([hg0 for hg0 in self.datamgr.rg.hostgroups if hg0.members], key = lambda k: k.hostgroup_name)
                             ) for item0 in inner_list0[0] if item0.services
                         ) for item1 in inner_list1[0]
                     )
-                ) if (cs.without_filter or cs.filter_func(self.create_output(cs.filter_map, svc)))
+                ) if (cs.without_filter or cs.filter_func(svc))
             )]
         return res
 
