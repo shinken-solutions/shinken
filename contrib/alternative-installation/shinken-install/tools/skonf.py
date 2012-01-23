@@ -55,6 +55,7 @@ def usage():
     print "   - cloneobject : clone an object (currently only pollers are suported" 
     print "   - showconfig : display configuration of object"
     print "   - setparam : set directive value for an object"
+    print "   - delparam : remove directive for an object"
     print "   - getdirective : get a directive value from an object"
     print " * configfile : full path to the shinken-specific.cfg file"
     print " * objectype : configuration object type on which the action apply"
@@ -79,7 +80,7 @@ def main():
         sys.exit(2)
     for o, a in opts:
         if o == "-a":
-            actions=["setparam","showconfig","addobject","getdirective","getaddresses","delobject","cloneobject","macros","sync","control","deploy"]
+            actions=["setparam","delparam","showconfig","addobject","getdirective","getaddresses","delobject","cloneobject","macros","sync","control","deploy"]
             if a in actions:
                 action=a
             else:
@@ -146,6 +147,18 @@ def main():
 
     if action == "setparam":
         result,content = setparam(config,objectype,directive,value,filters)
+        print content
+        if not result:
+            print content 
+            sys.exit(2)
+        else:
+            result,content = writeconfig(config,configfile)
+            if not result:
+                sys.exit(2)
+            else:
+                sys.exit(0)
+    if action == "delparam":
+        result,content = delparam(config,objectype,directive,filters)
         print content
         if not result:
             print content 
@@ -287,6 +300,7 @@ def domacros(configfile,args=[]):
             "delete":r"(?P<object>\w+) where (?P<clauses>.*)",
             "showconfig":r"(?P<object>\w+)",
             "setparam":r"(?P<directive>\w+)=(?P<value>.*) from (?P<object>\w+) where (?P<clauses>.*)",
+            "delparam":r"(?P<directive>\w+)=(?P<value>.*) from (?P<object>\w+) where (?P<clauses>.*)",
             "getdirective":r"(?P<directives>\w+) from (?P<object>\w+) where (?P<clauses>.*)",
             "control":r"(?P<action>\w+)",
             "writeconfig":r"",
@@ -351,6 +365,10 @@ def domacros(configfile,args=[]):
                             #return (code,last)
                     elif command == "setparam":
                         code,message = setparam(config,result.group('object'),result.group('directive'),result.group('value'),result.group('clauses'))
+                        if not code:
+                            if maction == "stop" :return (code,message)
+                    elif command == "delparam":
+                        code,message = delparam(config,result.group('object'),result.group('directive'),result.group('clauses'))
                         if not code:
                             if maction == "stop" :return (code,message)
                 else:
@@ -824,6 +842,41 @@ def setparam(config,objectype,directive,value,filters):
                 return (True,message)
     else:
         return (False, "Unknown object type %s" % (o))
+
+def delparam(config,objectype,directive,filters):
+    import re
+    dfilters={}
+    if len(filters) > 0:
+        t=filters.split(',')
+        for i in range(len(t)):
+            (k,v)=t[i].split('=')
+            dfilters[k]=v
+
+    if config.has_key(objectype):
+        max=len(config[objectype])
+        filterok=0
+        for i in range(max):
+            filterok=0
+            for (d,v) in dfilters.items():
+                filterok=filterok+1    
+                if config[objectype][i].has_key(d):
+                    if config[objectype][i][d] != v:
+                        filterok=filterok-1    
+                else:
+                    filterok=filterok-1    
+            if filterok == len(dfilters):
+                """ if directive exist remove it ! """
+                if config[objectype][i].has_key(directive):
+                    """ config[objectype][i][directive]=value"""
+                    config[objectype][i].pop(directive)
+                    print config[objectype][i]
+                    message = "Removed directive %s from %s" % (directive,objectype)
+                else:
+                    message = "Nothing to remove"
+                return (True,message)
+    else:
+        return (False, "Unknown object type %s" % (o))
+
 def loadconfig(configfile):
     try:
         c=Config()

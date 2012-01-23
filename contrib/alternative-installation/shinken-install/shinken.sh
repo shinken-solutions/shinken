@@ -581,6 +581,10 @@ function sinstall(){
     cp $TARGET/bin/init.d/shinken* /etc/init.d/
     mkdir -p $TARGET/var/archives
     enableretention
+    if [ "$LOGSTORE" == "mongo" ]
+    then
+        enablemongologs 
+    fi
     fix
     cecho "+------------------------------------------------------------------------------" green
     cecho "| shinken is now installed on your server " green
@@ -838,6 +842,18 @@ function fixforfan(){
     fi
 }
 
+# ENABLE MONGO STORAGE FOR LOGS
+function enablemongologs(){
+    cecho " > Enable mongodb log storage" green
+    export PYTHONPATH=$TARGET
+    export PY="$(pythonver)"
+    result=$($PY $TARGET/contrib/alternative-installation/shinken-install/tools/skonf.py -a macros -f $TARGET/contrib/alternative-installation/shinken-install/tools/macros/enable_log_mongo.macro -d $MONGOSERVER)    
+    if [ $? -ne 0 ]
+    then
+        cecho " > There was an error while trying to enable mongo log storage ($result)" red
+        exit 2
+    fi
+}
 
 function enablendodb(){
     cecho " > FIX shinken ndo configuration" green

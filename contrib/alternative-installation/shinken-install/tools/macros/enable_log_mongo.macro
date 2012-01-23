@@ -1,0 +1,7 @@
+# Enable log storage to mongodb 
+# ARG1 : mongodb server FQDN or IP address
+setconfigfile __PREFIX__/etc/shinken-specific.cfg
+delparam database_file from modules where module_name=Livestatus
+setparam modules=mongologs from modules where module_name=Livestatus
+setparam mongodb_uri=mongodb://__ARG1__:27017 from modules where module_name=mongologs
+writeconfig
