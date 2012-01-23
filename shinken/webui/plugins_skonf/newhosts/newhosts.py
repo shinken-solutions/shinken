@@ -43,8 +43,9 @@ def get_newhosts():
     user = app.get_user_auth()
 
     if not user:
-        redirect("/user/login")
-        return
+        pass
+        #redirect("/user/login")
+        #return
 
     # we return values for the template (view). But beware, theses values are the
     # only one the tempalte will have, so we must give it an app link and the

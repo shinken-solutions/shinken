@@ -106,11 +106,11 @@ class DiscoveryManager:
                     break
                 # Now try to connect
                 try:
-                    server = mod.server
+                    uri = mod.uri
                     database = mod.database
-                    self.dbconnection = Connection(server)
+                    self.dbconnection = Connection(uri)
                     self.db = getattr(self.dbconnection, database)
-                    print "Connection to Mongodb:%s:%s is OK" % (server, database)
+                    print "Connection to Mongodb:%s:%s is OK" % (uri, database)
                 except Exception, exp:
                     logger.log('Error in database init : %s' % exp)
 
