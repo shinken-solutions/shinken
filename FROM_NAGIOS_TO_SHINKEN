@@ -3,17 +3,17 @@
 Not 100%, and it will never be. Some Nagios features are just useless in a Shiken architecture. For theses differences, you can look at the Shinken website :
 http://www.shinken-monitoring.org/what-is-in-shinken-not-in-nagios-and-vice-versa/
 
-== I need to change something ? ==
+== Do I need to change something ? ==
 
 No.
 
-There are differences between some nagios parameters and shinken way of doing :
-status_file and log_file parameters are no more useful in the nagios.cfg file for Shinken. Theses things are now managed as "modules" by the Brokers, and are in the shinken-specific.cfg file (look at Simple-log and Status-Dat modules, and put your paths on it).
+There are differences between some nagios parameters and the shinken way of doing things :
+status_file and log_file parameters are no longer required in the nagios.cfg file for Shinken. External data interfaces are now managed as "modules" by the Brokers, and are in the shinken-specific.cfg file (look at Simple-log and Status-Dat modules, and put your paths on it).
 
-But hopefuly, Shinken can detect you put such parameters and will autogenerate the modules for you. (But if you can take them in the shinken-specific.cfg file, it's better...)
+Shinken will try to detect this and will autogenerate the modules for you. (But if you can move  the configuration to the shinken-specific.cfg file, it's better...)
 
 
-== Ok, but how do I launch my Nagios conf with Shinken ? ==
+== Now, how do I launch Shinken with my nagios.cfg? ==
 
 It's simple, after launching scheduler, poller, reactionner and broker daemons (see README), you just need
 to launch the Arbiter daemon with your Nagios configuration :
@@ -24,6 +24,6 @@ $ /usr/local/shinken/src/shinken-arbiter.py -c /usr/local/nagios/etc/nagios.cfg 
 
 And that's all :)
 
-Shinken arbiter can take multiples configuration file, so classic Nagios things are called by nagios.cfg, all specific things (like daemons connections or realms) are in shinken-specific.cfg.
+The Shinken arbiter can take multiple configuration files, so classic Nagios parameters are defined in nagios.cfg, all specific things (like daemons connections or realms) are in shinken-specific.cfg.
 
 
