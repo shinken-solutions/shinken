@@ -115,8 +115,8 @@ class Itemgroup(Item):
         except ValueError:
             pass
 
-    #a item group is correct if all members actually exists,
-    #so if unknown_members is still []
+    # a item group is correct if all members actually exists,
+    # so if unknown_members is still []
     def is_correct(self):
         res = True
 
