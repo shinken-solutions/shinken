@@ -78,7 +78,8 @@ from item import Item, Items
 from shinken.daterange import Daterange, CalendarDaterange, StandardDaterange, MonthWeekDayDaterange
 from shinken.daterange import MonthDateDaterange, WeekDayDaterange, MonthDayDaterange
 from shinken.brok import Brok
-from shinken.property import IntegerProp, StringProp, ListProp
+from shinken.property import IntegerProp, StringProp, ListProp, BoolProp
+from shinken.log import logger
 
 
 class Timeperiod(Item):
@@ -95,6 +96,7 @@ class Timeperiod(Item):
         # These are needed if a broker module calls methods on timeperiod objects
         'dateranges':       ListProp   (fill_brok=['full_status'], default=[]),
         'exclude':          ListProp   (fill_brok=['full_status'], default=[]),
+        'is_active':        BoolProp   (default='0')
     })
 
 
@@ -116,10 +118,12 @@ class Timeperiod(Item):
         self.cache = {} #For tunning purpose only
         self.configuration_errors = []
         self.configuration_warnings = []
+        # By default the tp is None so we know we just start
+        self.is_active = None
 
 
     def get_name(self):
-        return self.timeperiod_name
+        return getattr(self, 'timeperiod_name', 'unknown_timeperiod')
 
 
     #We fillfull properties with template ones if need
@@ -162,6 +166,31 @@ class Timeperiod(Item):
         except KeyError:
             return None
 
+    # will look for active/un-active change. And log it
+    # [1327392000] TIMEPERIOD TRANSITION: <name>;<from>;<to>
+    # from is -1 on startup.  to is 1 if the timeperiod starts 
+    # and 0 if it ends.
+    def check_and_log_activation_change(self):
+        now = int(time.time())
+        
+        was_active = self.is_active
+        self.is_active = self.is_time_valid(now)
+        
+        # If we got a change, log it!
+        if self.is_active != was_active:
+            _from = 0
+            _to = 0
+            # If it's the start, get a special value for was
+            if was_active is None:
+                _from = -1
+            if was_active:
+                _from = 1
+            if self.is_active:
+                _to = 1
+
+            # Now raise the log
+            logger.log('TIMEPERIOD TRANSITION: %s;%d;%d' % (self.get_name(), _from, _to))
+        
 
     # clean the get_next_valid_time_from_t cache
     # The entries are a dict on t. t < now are useless

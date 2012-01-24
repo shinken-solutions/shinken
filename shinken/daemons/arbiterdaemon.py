@@ -562,6 +562,13 @@ class Arbiter(Daemon):
             sched.external_commands = []
 
 
+    # We will log if there are timeperiods activation
+    # change as NOTICE in logs.
+    def check_and_log_tp_activation_change(self):
+        for tp in self.conf.timeperiods:
+            tp.check_and_log_activation_change()
+
+
     # Main function
     def run(self):
         # Before running, I must be sure who am I
@@ -627,6 +634,10 @@ class Arbiter(Daemon):
             # Call modules that manage a starting tick pass
             self.hook_point('tick')
             
+            # Look for logging timeperiods activation change (active/inactive)
+            self.check_and_log_tp_activation_change()
+
+            # Now the dispatcher job
             self.dispatcher.check_alive()
             self.dispatcher.check_dispatch()
             # REF: doc/shinken-conf-dispatching.png (3)
