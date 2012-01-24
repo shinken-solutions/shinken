@@ -2,13 +2,13 @@
 Presentation of the Shinken project
 ===================================
 
-Welcome in the Shinken project.
+Welcome to the Shinken project.
 
 Shinken is a new, Nagios compatible monitoring tool, written in
-Python. The main goal of Shinken is to allow users to have a fully
-flexible architecture for their monitoring system that can easily
-scale to large environments. It’s as simple as in all the marketing
-“cloud computing” slides, but here, it’s real!
+Python. Its main goal is to give users a flexible architecture for
+their monitoring system that is designed to scale to large environments.
+It’s as simple as in all the marketing “cloud computing” slides, but here,
+it’s real!
 
 Shinken is backwards-compatible with the Nagios configuration standard
 and plug-ins. It works on any operating system and architecture that
@@ -121,7 +121,7 @@ And if you do not find it, you can install it from PyPI::
 
   easy_install pyro
 
-And that all folks :)
+And that's all folks :)
 
 
 Where is the configuration?
@@ -131,16 +131,17 @@ The configuration is where you put the etc directory (in
 `/usr/local/shinken/etc` for a quick and dirty install, `/etc/shinken`
 for a clean one).
 
-The `nagios.cfg` file is meant ot be shared with Nagios. All Shinken
-specific objects (like link to daemons or realms) are in the file
+The `nagios.cfg` file is meant to be shared with Nagios. All Shinken
+specific objects (like links to daemons or realms) are in the file
 `shinken-specific.cfg`.
 
 
-I need to change my existing Nagios configuration?
+Do I need to change my existing Nagios configuration?
 ===================================================
 
 No, there is no need to change the existing configuration - unless
-you want to add some new hosts and services.
+you want to add some new hosts and services. Once you are comfortable
+with Shinken you can start to use its unique and powerful features.
 
 
 How to run Shinken
@@ -168,9 +169,9 @@ The `setup.py` installes some `init.d` scripts, let's use them::
 Known bugs
 ================================
 
-None we know :)
+None that we know of. :)
 
-If you find one, please post it in our trac site:
+If you find one, please post it to the bug and issue tracker :
 https://github.com/naparuba/shinken/issues
 
 
@@ -180,5 +181,5 @@ How to run uninstall Shinken
 Clean all :)
 ~~~~~~~~~~~~~~~~~~~~
 
-There a script call clean.sh on the source directory for this :)
+There is a script called clean.sh in the source directory for this task.
 Beware, it will supress all Shinken related files!
