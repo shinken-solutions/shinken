@@ -96,7 +96,7 @@ class IForArbiter(Interface):
         return None
 
 
-    # Dummy call. We are a master, we managed what we want
+    # Dummy call. We are the master, we manage what we want
     def what_i_managed(self):
         return []
 
@@ -133,7 +133,7 @@ class Arbiter(Daemon):
 
         self.fifo = None
 
-        # Use to know if we must still be alive or not
+        # Used to work out if we must still be alive or not
         self.must_run = True
 
         self.interface = IForArbiter(self)
@@ -152,8 +152,8 @@ class Arbiter(Daemon):
             
     # We must push our broks to the broker
     # because it's stupid to make a crossing connection
-    # so we find the broker responbile for our broks,
-    # and we send him it
+    # so we find the broker responsible for our broks,
+    # and we send it to him
     # TODO : better find the broker, here it can be dead?
     # or not the good one?
     def push_broks_to_broker(self):
@@ -210,7 +210,7 @@ class Arbiter(Daemon):
 
 
     def get_daemon_links(self, daemon_type):
-        #the attribute name to get those differs for schedulers and arbiters
+        #the attribute name to get these differs for schedulers and arbiters
         if (daemon_type == 'scheduler' or daemon_type == 'arbiter'):
             daemon_links = daemon_type+'links'
         else:
@@ -227,14 +227,14 @@ class Arbiter(Daemon):
         print "Opening local log file"
 
 
-        # First we need to get arbiters and modules first
-        # so we can ask them some objects too
+        # First we need to get arbiters and modules
+        # so we can ask them for objects
         self.conf.create_objects_for_type(raw_objects, 'arbiter')
         self.conf.create_objects_for_type(raw_objects, 'module')
 
         self.conf.early_arbiter_linking()
 
-        # Search wich Arbiterlink I am
+        # Search which Arbiterlink I am
         for arb in self.conf.arbiterlinks:
             if arb.is_me():
                 arb.need_conf = False
@@ -260,7 +260,7 @@ class Arbiter(Daemon):
         logger.log("My own modules : " + ','.join([m.get_name() for m in self.me.modules]))
 
         # we request the instances without them being *started* 
-        # (for these that are concerned ("external" modules):
+        # (for those that are concerned ("external" modules):
         # we will *start* these instances after we have been daemonized (if requested)
         self.modules_manager.set_modules(self.me.modules)
         self.do_load_modules()
@@ -283,7 +283,7 @@ class Arbiter(Daemon):
                     (cls, clss, prop) = types_creations[k]
                     if prop in r:
                         for x in r[prop]:
-                            # test if raw_objects[k] is already set - if not, add empty array
+                            # test if raw_objects[k] are already set - if not, add empty array
                             if not k in raw_objects:
                                 raw_objects[k] = []
                             # now append the object
@@ -335,25 +335,25 @@ class Arbiter(Daemon):
         # Pythonize values
         self.conf.pythonize()
 
-        # Linkify objects each others
+        # Linkify objects to each other
         self.conf.linkify()
 
         # applying dependencies
         self.conf.apply_dependencies()
 
-        # Hacking some global parameter inherited from Nagios to create
+        # Hacking some global parameters inherited from Nagios to create
         # on the fly some Broker modules like for status.dat parameters
-        # or nagios.log one if there are no already available
+        # or nagios.log one if there are none already available
         self.conf.hack_old_nagios_parameters()
 
-        # Raise warning about curently unmanaged parameters
+        # Raise warning about currently unmanaged parameters
         if self.verify_only:
             self.conf.warn_about_unmanaged_parameters()
 
-        # Exlode global conf parameters into Classes
+        # Explode global conf parameters into Classes
         self.conf.explode_global_conf()
 
-        # set ourown timezone and propagate it to other satellites
+        # set our own timezone and propagate it to other satellites
         self.conf.propagate_timezone_option()
 
         # Look for business rules, and create the dep tree
@@ -388,7 +388,7 @@ class Arbiter(Daemon):
 
         logger.log('Things look okay - No serious problems were detected during the pre-flight check')
 
-        # Now clean objects of temporary/unecessary attributes for live work:
+        # Clean objects of temporary/unecessary attributes for live work:
         self.conf.clean()
 
         # Exit if we are just here for config checking
@@ -409,7 +409,7 @@ class Arbiter(Daemon):
         self.user = self.conf.shinken_user
         self.group = self.conf.shinken_group
         
-        # If the user set a workdir, let use it. If not, use the
+        # If the user sets a workdir, lets use it. If not, use the
         # pidfile directory
         if self.conf.workdir == '':
             self.workdir = os.path.abspath(os.path.dirname(self.pidfile))
@@ -439,7 +439,7 @@ class Arbiter(Daemon):
             self.do_daemon_init_and_start()
             self.uri_arb = self.pyro_daemon.register(self.interface, "ForArbiter")
 
-            # ok we are now fully daemon (if requested)
+            # ok we are now fully daemonized (if requested)
             # now we can start our "external" modules (if any) :
             self.modules_manager.start_external_instances()
             
@@ -475,7 +475,7 @@ class Arbiter(Daemon):
 
     def do_loop_turn(self):
         # If I am a spare, I wait for the master arbiter to send me
-        # true conf. When
+        # true conf.
         if self.me.spare:
             self.wait_for_initial_conf()
             if not self.new_conf:
@@ -490,7 +490,7 @@ class Arbiter(Daemon):
 
 
     # Get 'objects' from external modules
-    # It can be used for get external commands for example
+    # It can be used to get external commands for example
     def get_objects_from_from_queues(self):
         for f in self.modules_manager.get_external_from_queues():
             #print "Groking from module instance %s" % f
@@ -500,7 +500,7 @@ class Arbiter(Daemon):
                     self.add(o)
                 except Empty:
                     break
-                # Maybe the queue got problem
+                # Maybe the queue had problems
                 # log it and quit it
                 except (IOError, EOFError), exp:
                     logger.log("Warning : an external module queue got a problem '%s'" % str(exp))
@@ -562,7 +562,7 @@ class Arbiter(Daemon):
             sched.external_commands = []
 
 
-    # We will log if there are timeperiods activation
+    # We will log if there are time period activations
     # change as NOTICE in logs.
     def check_and_log_tp_activation_change(self):
         for tp in self.conf.timeperiods:
@@ -572,7 +572,7 @@ class Arbiter(Daemon):
     # Main function
     def run(self):
         # Before running, I must be sure who am I
-        # The arbiters change, so we must refound the new self.me
+        # The arbiters change, so we must re-discover the new self.me
         for arb in self.conf.arbiterlinks:
             if arb.is_me():
                 self.me = arb
@@ -663,11 +663,11 @@ class Arbiter(Daemon):
 
             self.push_external_commands_to_schedulers()
 
-            # It's send, do not keep them
-            # TODO: check if really send. Queue by scheduler?
+            # It's sent, do not keep them
+            # TODO: check if really sent. Queue by scheduler?
             self.external_commands = []
 
-            # If ask me to dump my memory, I do it
+            # If asked to dump my memory, I will do it
             if self.need_dump_memory:
                 self.dump_memory()
                 self.need_dump_memory = False
@@ -683,7 +683,7 @@ class Arbiter(Daemon):
         else:
             daemon_links = daemon_type+'s'
 
-        # shouldn't the 'daemon_links' (whetever it is above) be always present ?
+        # shouldn't the 'daemon_links' (whatever it is above) be always present ?
         return getattr(self.conf, daemon_links, None)
 
     # Helper functions for retention modules
