@@ -260,7 +260,7 @@ livestatus_attribute_map = {
         },
         'contact_groups': {
             'description': 'A list of all contact groups this host is in',
-            'function': lambda item, req: [x.get_name() for x in item.contact_groups],  # CONTROLME2
+            'function': lambda item, req: [x for x in item.contact_groups],  # CONTROLME2
             'datatype': list,
         },
         'criticity': {
@@ -4462,6 +4462,8 @@ for objtype in ['Host', 'Service', 'Contact', 'Command', 'Timeperiod', 'Downtime
             getattr(cls, 'lsm_'+attribute).im_func.default = ''
         elif getattr(cls, 'lsm_'+attribute).im_func.datatype == list:
             getattr(cls, 'lsm_'+attribute).im_func.default = []
+        elif getattr(cls, 'lsm_'+attribute).im_func.datatype == bool:
+            getattr(cls, 'lsm_'+attribute).im_func.default = False
 
 for objtype in ['Host', 'Service', 'Contact', 'Command', 'Timeperiod', 'Downtime', 'Comment', 'Hostgroup', 'Servicegroup', 'Contactgroup', 'SchedulerLink', 'PollerLink', 'ReactionnerLink', 'BrokerLink', 'Problem', 'Logline', 'Config']:
     cls = [t[1] for t in table_class_map.values() if t[0] == objtype][0]
