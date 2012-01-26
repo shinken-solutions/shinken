@@ -1279,7 +1279,7 @@ class SchedulingItem(Item):
             rule = ''
             if len(elts) >= 2:
                 rule = '!'.join(elts[1:])
-                print "Got rules", rule
+
             fact = DependencyNodeFactory()
             node = fact.eval_cor_patern(rule, hosts, services)
             #print "got node", node

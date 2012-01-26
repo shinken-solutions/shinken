@@ -63,7 +63,7 @@ def show_impacts():
 
     imp_id = 0
     for imp in all_imp_impacts:
-        safe_print("FIND A BAD SERVICE IN IMPACTS", imp.get_dbg_name())
+#        safe_print("FIND A BAD SERVICE IN IMPACTS", imp.get_dbg_name())
         imp_id += 1
         impacts[imp_id] = imp
 

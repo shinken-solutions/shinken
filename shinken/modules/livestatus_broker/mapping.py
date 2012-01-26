@@ -4619,7 +4619,7 @@ def catchall_factory(name, req):
     return method
     
 
-print "FINISHING THE ATTRIBUTE MAPPING>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+#print "FINISHING THE ATTRIBUTE MAPPING>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
 for objtype in ['Host', 'Service', 'Contact', 'Command', 'Timeperiod', 'Downtime', 'Comment', 'Hostgroup', 'Servicegroup', 'Contactgroup', 'SchedulerLink', 'PollerLink', 'ReactionnerLink', 'BrokerLink', 'Problem', 'Logline', 'Config']:
     cls = [t[1] for t in table_class_map.values() if t[0] == objtype][0]
     setattr(cls, 'livestatus_attributes', [])
@@ -4720,7 +4720,7 @@ for objtype in ['Host', 'Service', 'Contact', 'Command', 'Timeperiod', 'Downtime
     for attribute in sorted([x for x in livestatus_attribute_map[objtype]]):
         cls.lsm_columns.append(attribute)
     
-print "FINISHED THE ATTRIBUTE MAPPING<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+#print "FINISHED THE ATTRIBUTE MAPPING<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
      
 
 

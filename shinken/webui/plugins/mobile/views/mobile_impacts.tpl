@@ -2,7 +2,7 @@
 %helper = app.helper
 %datamgr = app.datamgr
 
-%rebase layout globals(), title="Tactical view", js=['mobile/js/mobile_main.js', 'mobile/js/mobile_impacts.js'], css=['mobile/css/main.css', 'mobile/css/impacts.css']
+%rebase layout_mobile globals(), title="Tactical view", js=['mobile/js/mobile_main.js', 'mobile/js/mobile_impacts.js'], css=['mobile/css/main.css', 'mobile/css/impacts.css']
 
 <div id="all">
 <div> <h1> Shinken business apps</h1> </div>

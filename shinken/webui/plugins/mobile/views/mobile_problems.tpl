@@ -2,9 +2,9 @@
 %helper = app.helper
 %datamgr = app.datamgr
 
-%rebase layout globals(), title="IT problems", js=['mobile/js/mobile_main.js'], css=['mobile/css/main.css', 'mobile/css/problems.css']
+%rebase layout_mobile globals(), title="IT problems", js=['mobile/js/mobile_main.js', 'mobile/js/mobile_problems.js'], css=['mobile/css/main.css', 'mobile/css/problems.css']
 
-<div id="all">
+<div>
 
 <h2>IT Problems</h2>
 
@@ -18,11 +18,25 @@
 	<img src="/static/images/star.png">
       %end
 
-<img style="width : 20px; height:20px" src="{{helper.get_icon_state(pb)}}" />{{pb.state}}: {{pb.get_full_name()}}</h2>
+	<img style="width : 20px; height:20px" src="{{helper.get_icon_state(pb)}}" />
+	{{pb.state}}: {{pb.get_full_name()}}
+	<a href="#" onclick="show_detail('{{pb.get_full_name()}}')"><img style="width : 20px; height:20px" src="/static/images/expand.png" /></a>
+      </h2>
 		
-   
+   <div class='detail' id="{{pb.get_full_name()}}">
+     <p>Output : 
+       %if app.allow_html_output:
+       {{!helper.strip_html_output(pb.output)}}
+       %else:
+       {{pb.output}}
+       %end
+     </p>
+
+     <p>Since : {{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}</p>
+     <p>Last check : {{helper.print_duration(pb.last_chk, just_duration=True, x_elts=2)}} ago</p>
+     <p>Next check : in {{helper.print_duration(pb.next_chk, just_duration=True, x_elts=2)}}</p>
     %if len([imp for imp in pb.impacts if imp.business_impact > 2]) > 0:
-      <p>Important impacts</p>
+     <h4>Important impacts</h4>
       <div class="impacts">
 	%for imp in [imp for imp in pb.impacts if imp.business_impact > 2]:
 	<div class="impact">
@@ -33,6 +47,7 @@
 	%end
       </div>
     %end
+   </div>
 
 
     </div>

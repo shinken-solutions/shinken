@@ -1,5 +1,5 @@
 
-%rebase layout globals(), title="Tactical view", js=['mobile/js/mobile_main.js'], css=['mobile/css/main.css']
+%rebase layout_mobile globals(), title="Tactical view", js=['mobile/js/mobile_main.js'], css=['mobile/css/main.css']
 
 <div id="all">
 <div> <h1> Shinken </h1> </div>
