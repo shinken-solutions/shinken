@@ -1557,7 +1557,7 @@ livestatus_attribute_map = {
         },
         'alias': {
             'description': 'An alias of the service group',
-            'function': lambda item, req: getattr(item, 'alias', 'will_be_fixed_soon'),  # REPAIRME in test_livestatus there is an alias. in multisite there is none (Service has no attr. alias. hahaha liar)
+            'function': lambda item, req: item.alias,
         },
         'members': {
             'description': 'A list of all members of the service group as host/service pairs',
