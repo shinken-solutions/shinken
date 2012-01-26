@@ -38,6 +38,7 @@ LOG=$LOG$
 
 ### ARBITER PART ###
 # location of the nagios configuration file
+# Please update $ETC$ instead of this one.
 SHINKENCFG="$ETC/nagios.cfg"
 
 # We got 2 configs because tools like Centreon don't generate all 
