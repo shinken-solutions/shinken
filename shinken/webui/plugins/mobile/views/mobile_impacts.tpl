@@ -4,11 +4,8 @@
 
 %rebase layout_mobile globals(), title="Tactical view", js=['mobile/js/mobile_main.js', 'mobile/js/mobile_impacts.js'], css=['mobile/css/main.css', 'mobile/css/impacts.css']
 
-<div id="all">
-<div> <h1> Shinken business apps</h1> </div>
-
-<h2>End users apps</h2>
-
+<div>
+<div> <h1> End users apps</h1> </div>
 
 
 <a href="#" onclick="go_left();"><img src="/static/images/previous.png"/></a>

@@ -5,7 +5,7 @@ position : absolute;
 
 #main_container {
     background: white;
-    /*min-height: 700px;*/
+    min-height: 900px;
     margin-left: 0;
     margin-right: 0;
     width: 100%;
