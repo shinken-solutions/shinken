@@ -4,10 +4,12 @@
 %helper = app.helper
 %datamgr = app.datamgr
 
+%title = {'problems' : 'All problems', 'all' : 'All elements'}.get(page, 'Unknown page')
+
 %top_right_banner_state = datamgr.get_overall_state()
 
 
-%rebase layout title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/img_hovering.js', 'problems/js/accordion.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css', 'problems/css/perfometer.css', 'problems/css/img_hovering.css'], refresh=True, menu_part='/'+page, user=user
+%rebase layout title=title, top_right_banner_state=top_right_banner_state, js=['problems/js/img_hovering.js', 'problems/js/accordion.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css', 'problems/css/perfometer.css', 'problems/css/img_hovering.css'], refresh=True, menu_part='/'+page, user=user
 
 
 %# " If the auth got problem, we bail out"
