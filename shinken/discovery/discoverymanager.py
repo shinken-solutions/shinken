@@ -48,7 +48,7 @@ class DiscoveryManager:
         self.log.load_obj(self)
         self.config_files = [path]
         self.conf = Config()
-        self.conf.read_config(self.config_files)
+
         buf = self.conf.read_config(self.config_files)
         
         # Add macros on the end of the buf so they will

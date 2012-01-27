@@ -77,6 +77,7 @@ class Service_perfdata_broker(BaseModule):
             '$SERVICEOUTPUT$' : data['output'],
             '$SERVICESTATE$' : current_state,
             '$SERVICEPERFDATA$' : data['perf_data'],
+            '$LASTSERVICESTATE$' : data['last_state']
             }
         s = self.template
         for m in macros:

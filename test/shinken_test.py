@@ -110,7 +110,6 @@ class ShinkenTest(unittest.TestCase):
         self.log.load_obj(self)
         self.config_files = [path]
         self.conf = Config()
-        self.conf.read_config(self.config_files)
         buf = self.conf.read_config(self.config_files)
         raw_objects = self.conf.read_config_buf(buf)
         self.conf.create_objects_for_type(raw_objects, 'arbiter')
