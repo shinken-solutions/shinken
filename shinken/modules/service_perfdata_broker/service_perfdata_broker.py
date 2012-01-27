@@ -38,9 +38,13 @@ class Service_perfdata_broker(BaseModule):
         self.mode = mode
         self.template = template
 
-        #Make some raw change
+        # Make some raw change
         self.template = self.template.replace(r'\t', '\t')
         self.template = self.template.replace(r'\n', '\n')
+
+        # In Nagios it's said to force a return in line
+        if not self.template.endswith('\n'):
+            self.template += '\n'
 
         self.buffer = []
 
@@ -77,7 +81,7 @@ class Service_perfdata_broker(BaseModule):
             '$SERVICEOUTPUT$' : data['output'],
             '$SERVICESTATE$' : current_state,
             '$SERVICEPERFDATA$' : data['perf_data'],
-            '$LASTSERVICESTATE$' : data['last_state']
+            '$LASTSERVICESTATE$' : data['last_state'],
             }
         s = self.template
         for m in macros:
