@@ -15,7 +15,7 @@ from shinken.objects.service import Service
 from livestatus_broker.livestatus_stack import LiveStatusStack
 from livestatus_broker.mapping import LOGCLASS_ALERT, LOGCLASS_PROGRAM, LOGCLASS_NOTIFICATION, LOGCLASS_PASSIVECHECK, LOGCLASS_COMMAND, LOGCLASS_STATE, LOGCLASS_INVALID, LOGOBJECT_INFO, LOGOBJECT_HOST, LOGOBJECT_SERVICE, Logline
 
-from pymongo import Connection, ReplicaSetConnection
+from pymongo import Connection, ReplicaSetConnection, ReadPreference
 from pymongo.errors import AutoReconnect
 
 
@@ -96,16 +96,24 @@ class LiveStatusLogStoreMongoDB(BaseModule):
         pass
 
     def open(self):
-        print "open LiveStatusLogStoreMongoDB ok"
         try:
-            self.conn = pymongo.Connection(self.mongodb_uri, fsync=True)
+            if self.replica_set:
+                self.conn = pymongo.ReplicaSetConnection(self.mongodb_uri, replicaSet=self.replica_set, fsync=True)
+            else:
+                self.conn = pymongo.Connection(self.mongodb_uri, fsync=True)
             self.db = self.conn[self.database]
             self.db[self.collection].ensure_index([('time', pymongo.ASCENDING), ('lineno', pymongo.ASCENDING)], name='time_idx')
+            if self.replica_set:
+                pass
+                # This might be a future option prefer_secondary
+                #self.db.read_preference = ReadPreference.SECONDARY
             self.is_connected = CONNECTED
+            self.next_log_db_rotate = time.time()
         except AutoReconnect, exp:
             # now what, ha?
             print "LiveStatusLogStoreMongoDB.AutoReconnect", exp
-            raise
+            # The mongodb is hopefully available until this module is restarted
+            raise LiveStatusLogStoreError
             pass
 
     def close(self):
@@ -115,8 +123,23 @@ class LiveStatusLogStoreMongoDB(BaseModule):
         pass
 
     def commit_and_rotate_log_db(self):
-        """ Not necessary for a MongoDB."""
-        pass
+        """For a MongoDB there is no rotate, but we will delete old contents."""
+        now = time.time()
+        if self.next_log_db_rotate <= now:
+            today = datetime.date.today()
+            today0000 = datetime.datetime(today.year, today.month, today.day, 0, 0, 0)
+            today0005 = datetime.datetime(today.year, today.month, today.day, 0, 5, 0)
+            oldest = today0000 - datetime.timedelta(days=self.max_logs_age)
+            self.db[self.collection].remove({ u'time' : { '$lt' : time.mktime(oldest.timetuple()) }}, safe=True)
+
+            if now < time.mktime(today0005.timetuple()):
+                nextrotation = today0005
+            else:
+                nextrotation = today0005 + datetime.timedelta(days=1)
+
+            # See you tomorrow
+            self.next_log_db_rotate = time.mktime(nextrotation.timetuple())
+            print "next rotation at %s " % time.asctime(time.localtime(self.next_log_db_rotate))
 
     def do_i_need_this_manage_brok(self, brok):
         """ Look for a manager function for a brok, and call it """
@@ -160,6 +183,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
             # After 5 seconds we either have a successful write
             # or another exception which means, we are disconnected
         except Exception, exp:
+            self.is_connected = DISCONNECTED
             print "An error occurred:", exp
             print "DATABASE ERROR!!!!!!!!!!!!!!!!!"
         #FIXME need access to this#self.livestatus.count_event('log_message')
