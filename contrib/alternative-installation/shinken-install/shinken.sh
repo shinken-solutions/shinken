@@ -48,94 +48,6 @@ function trap_handler()
         exit 2
 }
 
-###################################
-### TEXT PRESENTATION FUNCTIONS ### 
-###################################
-
-cecho ()                    
-{
-
-        # Argument $1 = message
-        # Argument $2 = foreground color
-        # Argument $3 = background color
-
-        case "$2" in
-                "black")
-                        fcolor='30'
-                        ;;
-                "red")
-                        fcolor='31'
-                        ;;
-                "green")
-                        fcolor='32'
-                        ;;
-                "yellow")
-                        fcolor='33'
-                        ;;
-                "blue")
-                        fcolor='34'
-                        ;;
-                "magenta")
-                        fcolor='35'
-                        ;;
-                "cyan")
-                        fcolor='36'
-                        ;;
-                "white")
-                        fcolor='37'
-                        ;;
-                *)
-                        fcolor=''
-        esac
-        case "$3" in
-                "black")
-                        bcolor='40'
-                        ;;
-               "red")
-                        bcolor='41'
-                        ;;
-                "green")
-                        bcolor='42'
-                        ;;
-                "yellow")
-                        bcolor='43'
-                        ;;
-                "blue")
-                        bcolor='44'
-                        ;;
-                "magenta")
-                        bcolor='45'
-                        ;;
-                "cyan")
-                        bcolor='46'
-                        ;;
-                "white")
-                        bcolor='47'
-                        ;;
-                *)
-                        bcolor=""
-        esac
-
-        if [ -z $bcolor ]
-        then
-                echo -ne "\E["$fcolor"m"$1"\n"
-        else
-                echo -ne "\E["$fcolor";"$bcolor"m"$1"\n"
-        fi
-        tput sgr0
-        return
-}
-
-function cadre(){
-    # display a colored enclosure
-    # $1 => text
-    # $2 => color
-    cecho "+--------------------------------------------------------------------------------" $2
-    cecho "| $1" $2
-    cecho "+--------------------------------------------------------------------------------" $2
-}
-
-
 function remove(){
     trap 'trap_handler ${LINENO} $? remove' ERR
     cadre "Removing shinken" green
@@ -277,7 +189,7 @@ function installpkg(){
             fi
             ;;
         DEBIAN)
-            apt-get install -y $package >> /tmp/shinken.install.log 2>&1 
+            apt-get install -y $package  >> /tmp/shinken.install.log 2>&1 
             if [ $? -ne 0 ]
             then
                 return 2
@@ -285,6 +197,16 @@ function installpkg(){
             ;;
     esac    
     return 0
+}
+
+function debinstalled(){
+    package=$1
+    if [ -z $(dpkg -l $package | grep "^ii") ]
+    then
+        return 1
+    else
+        return 0
+    fi
 }
 
 function prerequisites(){
@@ -340,7 +262,7 @@ function prerequisites(){
 
         DEBIAN)
             PACKAGES=$APTPKGS
-            QUERY="dpkg -l "
+            QUERY="debinstalled "
             ;;
     esac
     for p in $PACKAGES
@@ -399,7 +321,28 @@ function prerequisites(){
             fi
 
             
-        done    
+        done
+    elif [ "$CODE" == "DEBIAN" ]
+    then    
+        export PY="python"
+        export PYEI="easy_install"
+        PYLIBS=$PYLIBSDEB
+        for p in $PYLIBS
+        do
+            module=$(echo $p | awk -F: '{print $1'})
+            import=$(echo $p | awk -F: '{print $2'})
+
+            $PY $myscripts/tools/checkmodule.py -m $import  >> /tmp/shinken.install.log 2>&1 
+            if [ $? -eq 2 ]
+            then
+                cecho " > Module $module ($import) not found. Installing..." yellow
+                $PYEI $module >> /tmp/shinken.install.log 2>&1 
+            else
+                cecho " > Module $module found." green 
+            fi
+
+            
+        done
     fi
     
 }
@@ -593,86 +536,6 @@ function sinstall(){
     cecho "+------------------------------------------------------------------------------" green
 }
 
-######################
-### MISC FUNCTIONS ###
-######################
-
-function pythonver(){
-    versions="2.4 2.5 2.6 2.7"
-        LASTFOUND=""
-        # is there any python here ?
-        for v in $versions
-        do
-                which python$v >> /tmp/shinken.install.log 2>&1 
-                if [ $? -eq 0 ]
-                then
-                        LASTFOUND="python$v"
-                fi
-        done
-        if [ -z "$LASTFOUND" ]
-        then
-                # finaly try to find a default python
-                which python >> /tmp/shinken.install.log 2>&1 
-                if [ $? -ne 0 ]
-                then
-                        echo "No python interpreter found !"
-                        exit 2
-                else
-                        echo "python found"
-                        LASTFOUND=$(which python)
-                fi
-        fi
-        PY=$LASTFOUND
-    echo $PY
-}
-
-function rheldvd(){
-    # this is only for my personal needs
-    # dvd mounted ?
-    if [ "$CODE" != "REDHAT" ]
-    then
-        cecho " > Only for REDHAT" red
-        exit 2
-    fi
-    cadre "Setup rhel dvd for yum (this is only for my development purpose)" green
-    dvdm=$(cat /proc/mounts | grep "^\/dev\/cdrom")
-    if [ -z "$dvdm" ]
-    then
-        if [ ! -d "/media/cdrom" ]
-        then
-            mkdir -p "/media/cdrom"
-        fi
-        cecho " > Insert RHEL/CENTOS DVD and press ENTER" yellow
-        read -p " > ENTER when ready "
-        mount -t iso9660 -o ro /dev/cdrom /media/cdrom >> /tmp/shinken.install.log 2>&1 
-        if [ $? -eq 0 ]
-        then
-            dvdm=$(cat /proc/mounts | grep "^\/dev\/cdrom")
-            if [ -z "$dvdm" ]
-            then
-                cecho " > Unable to mount RHEL/CENTOS DVD !" red
-                exit 2
-            else
-                if [ ! -d "/media/cdrom/Server" ]
-                then
-                    cecho "Invalid DVD" red
-                    exit 2
-                else
-                    if [ ! -f "/etc/yum.repos.d/rheldvd.repo" ]
-                    then
-                        echo "[dvd]" > /etc/yum.repos.d/rheldvd.repo
-                        echo "name=rhel dvd" >> /etc/yum.repos.d/rheldvd.repo
-                        echo "baseurl=file:///media/cdrom/Server" >> /etc/yum.repos.d/rheldvd.repo
-                        echo "enabled=1" >> /etc/yum.repos.d/rheldvd.repo
-                        echo "gpgcheck=0" >> /etc/yum.repos.d/rheldvd.repo
-                    fi
-                fi
-            fi
-        else 
-            cecho " > Error while mounting DVD" red
-        fi    
-    fi    
-}
 
 ########################
 ### BACKUP FUNCTIONS ###
