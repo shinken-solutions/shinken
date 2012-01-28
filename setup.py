@@ -288,7 +288,8 @@ local_log=%s/arbiterd.log
             update_file_with_string(inname, outname,
                                     "nagios.log",
                                     "%s/nagios.log" % self.log_path)
-
+            update_file_with_string(inname, outname,
+                                    "/usr/local/shinken/var",self.var_path)
 
 
 class install_config(Command):

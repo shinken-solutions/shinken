@@ -1,24 +1,27 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 :
-#    Gabes Jean, naparuba@gmail.com
-#    Gerhard Lausser, Gerhard.Lausser@consol.de
-#    Gregory Starck, g.starck@gmail.com
-#    Hartmut Goebel, h.goebel@goebel-consult.de
+
+# -*- coding: utf-8 -*-
+
+# Copyright (C) 2009-2011 :
+#     Gabes Jean, naparuba@gmail.com
+#     Gerhard Lausser, Gerhard.Lausser@consol.de
+#     Gregory Starck, g.starck@gmail.com
+#     Hartmut Goebel, h.goebel@goebel-consult.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
 import logging
@@ -32,6 +35,10 @@ local_log = None
 human_timestamp_log = False
 
 class Log:
+    """Please Add a Docstring to describe the class here"""
+    
+    
+    
     # We load the object where we will put log broks
     # with the 'add' method
     def load_obj(self, object, name_ = None):
@@ -39,6 +46,7 @@ class Log:
         global name
         obj = object
         name = name_
+
 
     # We enter a log message, we format it, and we add the log brok
     def log(self, message, format = None, print_it=True):
@@ -48,8 +56,8 @@ class Log:
         global human_timestamp_log
 
         if print_it:
-            # If the daemon is launch with a non UTF8 shell
-            # we can habe problem in printing
+            # If the daemon is launched with a non UTF8 shell
+            # we can have problems in printing
             try:
                 print message
             except UnicodeEncodeError:
@@ -82,8 +90,8 @@ class Log:
             logging.info(s)
 
 
-    # The log can also write to a local file if need
-    # and return the filedecriptor so we can avoid to
+    # The log can also write to a local file if needed
+    # and return the file descriptor so we can avoid to
     # close it
     def register_local_log(self, path):
         global local_log
@@ -103,7 +111,7 @@ class Log:
         return basic_log_handler.stream.fileno()
         
 
-    # Clsoe the local log file at program exit
+    # Close the local log file at program exit
     def quit(self):
         global local_log
         if local_log:

@@ -418,7 +418,8 @@ class Config(Item):
                     cfg_file_name = cfg_file_name.strip()
                     try:
                         fd = open(cfg_file_name, 'rU')
-                        logger.log("Processing object config file '%s'" % cfg_file_name)
+                        if self.read_config_silent == 0:
+                            logger.log("Processing object config file '%s'" % cfg_file_name)
                         res.write(os.linesep + '# IMPORTEDFROM=%s' % (cfg_file_name) + os.linesep)
                         res.write(fd.read().decode('utf8', 'replace'))
                         #Be sure to add a line return so we won't mix files
@@ -442,7 +443,8 @@ class Config(Item):
                     for root, dirs, files in os.walk(cfg_dir_name):
                         for file in files:
                             if re.search("\.cfg$", file):
-                                logger.log("Processing object config file '%s'" % os.path.join(root, file))
+                                if self.read_config_silent == 0:
+                                    logger.log("Processing object config file '%s'" % os.path.join(root, file))
                                 try:
                                     res.write(os.linesep + '# IMPORTEDFROM=%s' % (os.path.join(root, file)) + os.linesep)
                                     fd = open(os.path.join(root, file), 'rU')
@@ -1259,7 +1261,8 @@ class Config(Item):
         r = self.conf_is_correct
 
         # Globally unamanged parameters
-        logger.log('Checking global parameters...')
+        if self.read_config_silent == 0:
+            logger.log('Checking global parameters...')
         if not self.check_error_on_hard_unmanaged_parameters():
             r = False
             logger.log("check global parameters failed")
@@ -1267,12 +1270,14 @@ class Config(Item):
         for x in ('hosts', 'hostgroups', 'contacts', 'contactgroups', 'notificationways',
                   'escalations', 'services', 'servicegroups', 'timeperiods', 'commands',
                   'hostsextinfo','servicesextinfo'):
-            logger.log('Checking %s...' % (x))
+            if self.read_config_silent == 0:
+                logger.log('Checking %s...' % (x))
             cur = getattr(self, x)
             if not cur.is_correct():
                 r = False
                 logger.log("\t%s conf incorrect !!" % (x))
-            logger.log('\tChecked %d %s' % (len(cur), x))
+            if self.read_config_silent == 0:
+                logger.log('\tChecked %d %s' % (len(cur), x))
 
         # Hosts got a special check for loops
         if not self.hosts.no_loop_in_parents():
@@ -1284,11 +1289,13 @@ class Config(Item):
                    'discoveryrules', 'discoveryruns', 'businessimpactmodulations'):
             try: cur = getattr(self, x)
             except: continue
-            logger.log('Checking %s...' % (x))
+            if self.read_config_silent == 0:
+                logger.log('Checking %s...' % (x))
             if not cur.is_correct():
                 r = False
                 logger.log("\t%s conf incorrect !!" % (x))
-            logger.log('\tChecked %d %s' % (len(cur), x))
+            if self.read_config_silent == 0:
+                logger.log('\tChecked %d %s' % (len(cur), x))
 
         # Look that all scheduler got a broker that will take brok.
         # If there are no, raiea Warning

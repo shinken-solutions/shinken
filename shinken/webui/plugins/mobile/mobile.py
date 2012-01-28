@@ -23,6 +23,7 @@
 
 
 from shinken.webui.bottle import redirect
+from shinken.misc.sorter import worse_first
 
 ### Will be populated by the UI with it's own value
 app = None
@@ -55,6 +56,8 @@ def impacts():
 
 
     all_imp_impacts = app.datamgr.get_important_elements()
+    all_imp_impacts.sort(worse_first)
+    
     
     return {'app' : app, 'user' : user, 'impacts' : all_imp_impacts}
 

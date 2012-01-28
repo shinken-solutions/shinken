@@ -48,7 +48,7 @@ class NotificationWay(Item):
         'min_business_impact':                IntegerProp(default = '0', fill_brok=['full_status']),
     })
     
-    running_properties = {}
+    running_properties = Item.running_properties.copy()
 
     # This tab is used to transform old parameters name into new ones
     # so from Nagios2 format, to Nagios3 ones.

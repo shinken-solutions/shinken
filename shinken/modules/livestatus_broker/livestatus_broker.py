@@ -352,6 +352,9 @@ class LiveStatus_broker(BaseModule, Daemon):
         if self.socket:
             if os.path.exists(self.socket):
                 os.remove(self.socket)
+            # I f the socket dir is not existing, create it
+            if not os.path.exists(os.path.dirname(self.socket)):
+                os.mkdir(os.path.dirname(self.socket))
             os.umask(0)
             sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             sock.setblocking(0)

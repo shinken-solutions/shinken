@@ -51,3 +51,33 @@ def hst_srv_sort(s1, s2):
     # Ok, so by name...
     return s1.get_full_name() > s2.get_full_name()
 
+
+
+# Sort hosts and services by impact, states and co
+def worse_first(s1, s2):
+    # Ok, we compute a importance value so
+    # For host, the order is UP, UNREACH, DOWN
+    # For service : OK, UNKNOWN, WARNING, CRIT
+    # And DOWN is before CRITICAL (potential more impact)
+    tab = {'host' : { 0 : 0, 1: 4, 2 : 1},
+           'service' : {0 : 0, 1 : 2, 2 : 3, 3 : 1}
+           }
+    state1 = tab[s1.__class__.my_type].get(s1.state_id ,0)
+    state2 = tab[s2.__class__.my_type].get(s2.state_id ,0)
+
+    # ok, here, same business_impact
+    # Compare warn and crit state
+    if state1 > state2:
+        return -1
+    if state2 > state1:
+        return 1
+
+    # Same? ok by business impact
+    if s1.business_impact > s2.business_impact:
+        return -1
+    if s2.business_impact > s1.business_impact:
+        return 1
+    
+    # Ok, so by name...
+    return s1.get_full_name() > s2.get_full_name()
+

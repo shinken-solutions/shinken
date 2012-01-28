@@ -52,7 +52,7 @@ class Problem:
         self.impacts = impacts
 
 
-def join_with_separators(ref, request, *args):
+def join_with_separators(request, *args):
     if request.response.outputformat == 'csv':
         try:
             return request.response.separators[3].join([str(arg) for arg in args])
@@ -197,7 +197,12 @@ livestatus_attribute_map = {
         },
         'check_command': {
             'description': 'Nagios command for active host check of this host',
-            'function': lambda item, req: "",  # REPAIRME
+            'function': lambda item, req: item.check_command.get_name(),
+        },
+        'check_flapping_recovery_notification': {
+            'description': 'Whether to check to send a recovery notification when flapping stops (0/1)',
+            'function': lambda item, req: item.check_flapping_recovery_notification,  # REPAIRME WTF
+            'datatype': int,
         },
         'check_freshness': {
             'description': 'Whether freshness checks are activated (0/1)',
@@ -245,12 +250,17 @@ livestatus_attribute_map = {
         },
         'comments_with_info': {
             'description': 'A list of the ids of all comments of this host with id, author and comment',
-            'function': lambda item, req: [join_with_separators(item, req, str(x.id), x.author, x.comment) for x in item.comments],  # REPAIRME MAYBE
+            'function': lambda item, req: [join_with_separators(req, str(x.id), x.author, x.comment) for x in item.comments],  # REPAIRME MAYBE
             'datatype': list,
         },
         'contacts': {
             'description': 'A list of all contacts of this host, either direct or via a contact group',
             'function': lambda item, req: [x.contact_name for x in item.contacts],
+            'datatype': list,
+        },
+        'contact_groups': {
+            'description': 'A list of all contact groups this host is in',
+            'function': lambda item, req: [x for x in item.contact_groups],  # CONTROLME2
             'datatype': list,
         },
         'criticity': {
@@ -278,6 +288,11 @@ livestatus_attribute_map = {
             'function': lambda item, req: get_customs_values(item.customs),
             'datatype': list,
         },
+        'custom_variables': {
+            'description': 'A dictionary of the custom variables',
+            'function': lambda item, req: [join_with_separators(req, k[1:], v) for k, v in item.customs.iteritems()],
+            'datatype': list,
+        },
         'display_name': {
             'description': 'Optional display name of the host - not used by Nagios\' web interface',
             'function': lambda item, req: item.host_name,
@@ -287,6 +302,13 @@ livestatus_attribute_map = {
             'function': lambda item, req: [x.id for x in item.downtimes],
             'datatype': list,
         },
+        'downtimes_with_info': {
+            'description': 'A list of the all scheduled downtimes of the host with id, author and comment',
+            'function': lambda item, req: [join_with_separators(req, str(x.id), x.author, x.comment) for x in item.downtimes],  # REPAIRME MAYBE
+            'datatype': list,
+            # 2|omdadmin|hdodo = id|author|comment
+        },
+
         'event_handler_enabled': {
             'description': 'Whether event handling is enabled (0/1)',
             'function': lambda item, req: item.event_handler_enabled,
@@ -296,6 +318,11 @@ livestatus_attribute_map = {
             'description': 'Time the host check needed for execution',
             'function': lambda item, req: item.execution_time,
             'datatype': float,
+        },
+        'filename': {
+            'description': 'The value of the custom variable FILENAME',
+            'function': lambda item, req: '',  # REPAIRME
+            'datatype': str,
         },
         'first_notification_delay': {
             'description': 'Delay before the first notification',
@@ -414,6 +441,21 @@ livestatus_attribute_map = {
             'function': lambda item, req: int(item.last_state_change),
             'datatype': int,
         },
+        'last_time_down': {
+            'description': 'The last time the host was DOWN (Unix timestamp)',
+            'function': lambda item, req: item.last_time_down,  # REPAIRME
+            'datatype': int,
+        },
+        'last_time_unreachable': {
+            'description': 'The last time the host was UNREACHABLE (Unix timestamp)',
+            'function': lambda item, req: item.last_time_unreachable,  # REPAIRME
+            'datatype': int,
+        },
+        'last_time_up': {
+            'description': 'The last time the host was UP (Unix timestamp)',
+            'function': lambda item, req: item.last_time_up,  # REPAIRME
+            'datatype': int,
+        },
         'latency': {
             'description': 'Time difference between scheduled check time and actual check time',
             'function': lambda item, req: item.latency,
@@ -432,6 +474,16 @@ livestatus_attribute_map = {
             'description': 'Max check attempts for active host checks',
             'function': lambda item, req: item.max_check_attempts,
             'datatype': int,
+        },
+        'modified_attributes': {
+            'description': 'A bitmask specifying which attributes have been modified',
+            'function': lambda item, req: item.modified_attributes,  # CONTROLME INSORTME
+            'datatype': int,
+        },
+        'modified_attributes_list': {
+            'description': 'A list of all modified attributes',
+            'function': lambda item, req: item.modified_attributes_list,  # CONTROLME
+            'datatype': list,
         },
         'name': {
             'description': 'Host name',
@@ -475,6 +527,11 @@ livestatus_attribute_map = {
         'notifications_enabled': {
             'description': 'Whether notifications of the host are enabled (0/1)',
             'function': lambda item, req: item.notifications_enabled,
+            'datatype': bool,
+        },
+        'no_more_notifications': {
+            'description': 'Whether to stop sending notifications (0/1)',
+            'function': lambda item, req: item.no_more_notifications,  # REPAIRME, maybe ask both instance and class
             'datatype': bool,
         },
         'num_services': {
@@ -575,9 +632,15 @@ livestatus_attribute_map = {
             'function': lambda item, req: [x.get_name() for x in item.services],
             'datatype': list,
         },
+        'services_with_info': {
+            'description': 'A list of all services including detailed information about each service',
+            'function': lambda item, req: item.services_with_info,  # REPAIRME
+            'datatype': list,
+            # Dummy Service|0|1|Please remove this service later,Deppen Service|2|1|depp
+        },
         'services_with_state': {
             'description': 'A list of all services of the host together with state and has_been_checked',
-            'function': lambda item, req: [join_with_separators(item, req, x.get_name(), x.state_id, x.has_been_checked) for x in item.services],
+            'function': lambda item, req: [join_with_separators(req, x.get_name(), x.state_id, x.has_been_checked) for x in item.services],
             'datatype': list,
         },
         'source_problems': {
@@ -630,72 +693,6 @@ livestatus_attribute_map = {
             'function': lambda item, req: "",  # REPAIRME
             'datatype': float,
         },
-
-        'modified_attributes': {
-            'description': 'A bitmask specifying which attributes have been modified',
-            'function': lambda item, req: item.modified_attributes,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'custom_variables': {
-            'description': 'A dictionary of the custom variables',
-            'function': lambda item, req: item.custom_variables,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'comments_with_info': {
-            'description': 'A list of all comments of the host with id, author and comment',
-            'function': lambda item, req: item.comments_with_info,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'contact_groups': {
-            'description': 'A list of all contact groups this host is in',
-            'function': lambda item, req: [x.get_name() for x in item.contact_groups],  # CONTROLME2 INSORTME
-            'datatype': list,
-        },
-        'modified_attributes_list': {
-            'description': 'A list of all modified attributes',
-            'function': lambda item, req: item.modified_attributes_list,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'services_with_info': {
-            'description': 'A list of all services including detailed information about each service',
-            'function': lambda item, req: item.services_with_info,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'downtimes_with_info': {
-            'description': 'A list of the all scheduled downtimes of the host with id, author and comment',
-            'function': lambda item, req: item.downtimes_with_info,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'last_time_down': {
-            'description': 'The last time the host was DOWN (Unix timestamp)',
-            'function': lambda item, req: item.last_time_down,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'last_time_unreachable': {
-            'description': 'The last time the host was UNREACHABLE (Unix timestamp)',
-            'function': lambda item, req: item.last_time_unreachable,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'last_time_up': {
-            'description': 'The last time the host was UP (Unix timestamp)',
-            'function': lambda item, req: item.last_time_up,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'filename': {
-            'description': 'The value of the custom variable FILENAME',
-            'function': lambda item, req: item.filename,  # CONTROLME INSORTME
-            'datatype': str,
-        },
-        'check_flapping_recovery_notification': {
-            'description': 'Whether to check to send a recovery notification when flapping stops (0/1)',
-            'function': lambda item, req: item.check_flapping_recovery_notification,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'no_more_notifications': {
-            'description': 'Whether to stop sending notifications (0/1)',
-            'function': lambda item, req: item.no_more_notifications,  # CONTROLME INSORTME
-            'datatype': int,
-        },
     },
     'Service': {
         'accept_passive_checks': {
@@ -733,7 +730,7 @@ livestatus_attribute_map = {
         },
         'check_command': {
             'description': 'Nagios command used for active checks',
-            'function': lambda item, req: "",  # REPAIRME
+            'function': lambda item, req: item.check_command.get_name(),
         },
         'check_interval': {
             'description': 'Number of basic interval lengths between two scheduled checks of the service',
@@ -771,12 +768,18 @@ livestatus_attribute_map = {
         },
         'comments_with_info': {
             'description': 'A list of the ids of all comments of this service with id, author and comment',
-            'function': lambda item, req: "",  # REPAIRME
+            'function': lambda item, req: [join_with_separators(req, str(x.id), x.author, x.comment) for x in item.comments],  # REPAIRME MAYBE
             'datatype': list,
         },
         'contacts': {
             'description': 'A list of all contacts of the service, either direct or via a contact group',
-            'function': lambda item, req: [x.contact_name for x in item.contacts],
+            'function': lambda item, req: [x.contact_name for x in item.contacts], # CONTROLME c1 is in group cg1, c2 is in no group. svc has cg1,c2. only c2 is shown here
+            'datatype': list,
+        },
+        'contact_groups': {
+            'description': 'A list of all contact groups this service is in',
+            #'function': lambda item, req: [x for x in item.contact_groups],  # CONTROLME2
+            'function': lambda item, req: item.contact_groups,  # CONTROLME2 there is no list
             'datatype': list,
         },
         'criticity': {
@@ -793,6 +796,11 @@ livestatus_attribute_map = {
             'description': 'The number of the current notification',
             'function': lambda item, req: item.current_notification_number,
             'datatype': int,
+        },
+        'custom_variables': {
+            'description': 'A dictorionary of the custom variables',
+            'function': lambda item, req: [join_with_separators(req, k[1:], v) for k, v in item.customs.iteritems()],
+            'datatype': list,
         },
         'custom_variable_names': {
             'description': 'A list of the names of all custom variables of the service',
@@ -815,6 +823,11 @@ livestatus_attribute_map = {
         'downtimes': {
             'description': 'A list of all downtime ids of the service',
             'function': lambda item, req: [x.id for x in item.downtimes],
+            'datatype': list,
+        },
+        'downtimes_with_info': {
+            'description': 'A list of all downtimes of the service with id, author and comment',
+            'function': lambda item, req: [join_with_separators(req, str(x.id), x.author, x.comment) for x in item.downtimes],  # REPAIRME MAYBE
             'datatype': list,
         },
         'event_handler': {
@@ -888,6 +901,9 @@ livestatus_attribute_map = {
         'host_check_command': {
             'description': 'Nagios command for active host check of this host',
         },
+        'host_check_flapping_recovery_notification': {
+            'description': 'Whether to check to send a recovery notification when flapping stops (0/1)',
+        },
         'host_check_freshness': {
             'description': 'Whether freshness checks are activated (0/1)',
         },
@@ -918,11 +934,17 @@ livestatus_attribute_map = {
         'host_contacts': {
             'description': 'A list of all contacts of this host, either direct or via a contact group',
         },
+        'host_contact_groups': {
+            'description': 'A list of all contact groups this host is in',
+        },
         'host_current_attempt': {
             'description': 'Number of the current check attempts',
         },
         'host_current_notification_number': {
             'description': 'Number of the current notification',
+        },
+        'host_custom_variables': {
+            'description': 'A dictionary of the custom variables',
         },
         'host_custom_variable_names': {
             'description': 'A list of the names of all custom variables',
@@ -936,11 +958,17 @@ livestatus_attribute_map = {
         'host_downtimes': {
             'description': 'A list of the ids of all scheduled downtimes of this host',
         },
+        'host_downtimes_with_info': {
+            'description': 'A list of the all scheduled downtimes of the host with id, author and comment',
+        },
         'host_event_handler_enabled': {
             'description': 'Whether event handling is enabled (0/1)',
         },
         'host_execution_time': {
             'description': 'Time the host check needed for execution',
+        },
+        'host_filename': {
+            'description': 'The value of the custom variable FILENAME',
         },
         'host_first_notification_delay': {
             'description': 'Delay before the first notification',
@@ -1002,6 +1030,15 @@ livestatus_attribute_map = {
         'host_last_state_change': {
             'description': 'Time of the last state change - soft or hard (Unix timestamp)',
         },
+        'host_last_time_down': {
+            'description': 'The last time the host was DOWN (Unix timestamp)',
+        },
+        'host_last_time_unreachable': {
+            'description': 'The last time the host was UNREACHABLE (Unix timestamp)',
+        },
+        'host_last_time_up': {
+            'description': 'The last time the host was UP (Unix timestamp)',
+        },
         'host_latency': {
             'description': 'Time difference between scheduled check time and actual check time',
         },
@@ -1013,6 +1050,12 @@ livestatus_attribute_map = {
         },
         'host_max_check_attempts': {
             'description': 'Max check attempts for active host checks',
+        },
+        'host_modified_attributes': {
+            'description': 'A bitmask specifying which attributes have been modified',
+        },
+        'host_modified_attributes_list': {
+            'description': 'A list of all modified attributes',
         },
         'host_name': {
             'description': 'Host name',
@@ -1043,6 +1086,9 @@ livestatus_attribute_map = {
         },
         'host_notifications_enabled': {
             'description': 'Whether notifications of the host are enabled (0/1)',
+        },
+        'host_no_more_notifications': {
+            'description': 'Whether to stop sending notifications (0/1)',
         },
         'host_num_services': {
             'description': 'The total number of services of the host',
@@ -1092,6 +1138,9 @@ livestatus_attribute_map = {
         'host_plugin_output': {
             'description': 'Output of the last host check',
         },
+        'host_pnpgraph_present': {
+            'description': 'Whether there is a PNP4Nagios graph present for this host (0/1)',
+        },
         'host_process_performance_data': {
             'description': 'Whether processing of performance data is enabled (0/1)',
         },
@@ -1100,6 +1149,15 @@ livestatus_attribute_map = {
         },
         'host_scheduled_downtime_depth': {
             'description': 'The number of downtimes this host is currently in',
+        },
+        'host_services_with_info': {
+            'description': 'A list of all services including detailed information about each service',
+        },
+        'host_services': {
+            'description': 'A list of all services of the host',
+        },
+        'host_services_with_state': {
+            'description': 'A list of all services of the host together with state and has_been_checked',
         },
         'host_state': {
             'description': 'The current state of the host (0: up, 1: down, 2: unreachable)',
@@ -1181,6 +1239,11 @@ livestatus_attribute_map = {
             'function': lambda item, req: item.is_problem,
             'datatype': bool,
         },
+        'latency': {
+            'description': 'Time difference between scheduled check time and actual check time',
+            'function': lambda item, req: item.latency,  # CONTROLME INSORTME
+            'datatype': float,
+        },
         'last_check': {
             'description': 'The time of the last check (Unix timestamp)',
             'function': lambda item, req: int(item.last_chk),
@@ -1211,6 +1274,26 @@ livestatus_attribute_map = {
             'function': lambda item, req: int(item.last_state_change),
             'datatype': int,
         },
+        'last_time_critical': {
+            'description': 'The last time the service was CRITICAL (Unix timestamp)',
+            'function': lambda item, req: item.last_time_critical,  # CONTROLME INSORTME
+            'datatype': int,
+        },
+        'last_time_warning': {
+            'description': 'The last time the service was in WARNING state (Unix timestamp)',
+            'function': lambda item, req: item.last_time_warning,  # CONTROLME INSORTME
+            'datatype': int,
+        },
+        'last_time_ok': {
+            'description': 'The last time the service was OK (Unix timestamp)',
+            'function': lambda item, req: item.last_time_ok,  # CONTROLME INSORTME
+            'datatype': int,
+        },
+        'last_time_unknown': {
+            'description': 'The last time the service was UNKNOWN (Unix timestamp)',
+            'function': lambda item, req: item.last_time_unknown,  # CONTROLME INSORTME
+            'datatype': int,
+        },
         'latency': {
             'description': 'Time difference between scheduled check time and actual check time',
             'function': lambda item, req: int(item.latency),
@@ -1229,6 +1312,16 @@ livestatus_attribute_map = {
             'description': 'The maximum number of check attempts',
             'function': lambda item, req: item.max_check_attempts,
             'datatype': int,
+        },
+        'modified_attributes': {
+            'description': 'A bitmask specifying which attributes have been modified',
+            'function': lambda item, req: item.modified_attributes,  # REPAIRME
+            'datatype': int,
+        },
+        'modified_attributes_list': {
+            'description': 'A list of all modified attributes',
+            'function': lambda item, req: item.modified_attributes_list,  # REPAIRME
+            'datatype': list,
         },
         'next_check': {
             'description': 'The scheduled time of the next check (Unix timestamp)',
@@ -1268,6 +1361,11 @@ livestatus_attribute_map = {
         'notifications_enabled': {
             'description': 'Whether notifications are enabled for the service (0/1)',
             'function': lambda item, req: item.notifications_enabled,
+            'datatype': bool,
+        },
+        'no_more_notifications': {
+            'description': 'Whether to stop sending notifications (0/1)',
+            'function': lambda item, req: item.no_more_notifications,  # CONTROLME INSORTME
             'datatype': bool,
         },
         'obsess_over_service': {
@@ -1328,120 +1426,6 @@ livestatus_attribute_map = {
             'function': lambda item, req: item.state_type_id,
             'datatype': int,
         },
-
-        'host_modified_attributes': {
-            'description': 'A bitmask specifying which attributes have been modified',
-        },
-        'modified_attributes': {
-            'description': 'A bitmask specifying which attributes have been modified',
-            'function': lambda item, req: item.modified_attributes,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'host_custom_variables': {
-            'description': 'A dictionary of the custom variables',
-        },
-        'custom_variables': {
-            'description': 'A dictorionary of the custom variables',
-            'function': lambda item, req: item.custom_variables,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'host_comments_with_info': {
-            'description': 'A list of all comments of the host with id, author and comment',
-        },
-        'comments_with_info': {
-            'description': 'A list of all comments of the service with id, author and comment',
-            'function': lambda item, req: item.comments_with_info,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'host_contact_groups': {
-            'description': 'A list of all contact groups this host is in',
-        },
-        'contact_groups': {
-            'description': 'A list of all contact groups this service is in',
-            'function': lambda item, req: item.contact_groups,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'downtimes_with_info': {
-            'description': 'A list of all downtimes of the service with id, author and comment',
-            'function': lambda item, req: item.downtimes_with_info,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'host_modified_attributes_list': {
-            'description': 'A list of all modified attributes',
-        },
-        'modified_attributes_list': {
-            'description': 'A list of all modified attributes',
-            'function': lambda item, req: item.modified_attributes_list,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'host_services_with_info': {
-            'description': 'A list of all services including detailed information about each service',
-        },
-        'host_services': {
-            'description': 'A list of all services of the host',
-        },
-        'host_services_with_state': {
-            'description': 'A list of all services of the host together with state and has_been_checked',
-        },
-        'host_downtimes_with_info': {
-            'description': 'A list of the all scheduled downtimes of the host with id, author and comment',
-        },
-        'host_last_time_down': {
-            'description': 'The last time the host was DOWN (Unix timestamp)',
-        },
-        'host_last_time_unreachable': {
-            'description': 'The last time the host was UNREACHABLE (Unix timestamp)',
-        },
-        'host_last_time_up': {
-            'description': 'The last time the host was UP (Unix timestamp)',
-        },
-        'last_time_critical': {
-            'description': 'The last time the service was CRITICAL (Unix timestamp)',
-            'function': lambda item, req: item.last_time_critical,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'last_time_warning': {
-            'description': 'The last time the service was in WARNING state (Unix timestamp)',
-            'function': lambda item, req: item.last_time_warning,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'last_time_ok': {
-            'description': 'The last time the service was OK (Unix timestamp)',
-            'function': lambda item, req: item.last_time_ok,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'last_time_unknown': {
-            'description': 'The last time the service was UNKNOWN (Unix timestamp)',
-            'function': lambda item, req: item.last_time_unknown,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'host_filename': {
-            'description': 'The value of the custom variable FILENAME',
-        },
-        'latency': {
-            'description': 'Time difference between scheduled check time and actual check time',
-            'function': lambda item, req: item.latency,  # CONTROLME INSORTME
-            'datatype': float,
-        },
-        'execution_time': {
-            'description': 'Time the service check needed for execution',
-            'function': lambda item, req: item.execution_time,  # CONTROLME INSORTME
-            'datatype': float,
-        },
-        'host_pnpgraph_present': {
-            'description': 'Whether there is a PNP4Nagios graph present for this host (0/1)',
-        },
-        'host_check_flapping_recovery_notification': {
-            'description': 'Whether to check to send a recovery notification when flapping stops (0/1)',
-        },
-        'host_no_more_notifications': {
-            'description': 'Whether to stop sending notifications (0/1)',
-        },
-        'no_more_notifications': {
-            'description': 'Whether to stop sending notifications (0/1)',
-            'function': lambda item, req: item.no_more_notifications,  # CONTROLME INSORTME
-            'datatype': int,
-        },
     },
     'Hostgroup': {
         'action_url': {
@@ -1459,7 +1443,7 @@ livestatus_attribute_map = {
         },
         'members_with_state': {
             'description': 'A list of all host names that are members of the hostgroup together with state and has_been_checked',
-            'function': lambda item, req: item.members_with_state,  # CONTROLME
+            'function': lambda item, req: [join_with_separators(req, x.get_name(), x.state_id, x.has_been_checked) for x in item.members],
             'datatype': list,
         },
         'name': {
@@ -1566,7 +1550,7 @@ livestatus_attribute_map = {
         },
         'members_with_state': {
             'description': 'A list of all members of the service group with state and has_been_checked',
-            'function': lambda item, req: item.members_with_state,  # CONTROLME
+            'function': lambda item, req: [join_with_separators(req, x.host_name, x.service_description, x.state_id, x.has_been_checked) for x in sorted(item.members, key=lambda y: y.get_full_name())],
             'datatype': list,
         },
         'name': {
@@ -1583,58 +1567,58 @@ livestatus_attribute_map = {
         },
         'num_services': {
             'description': 'The total number of services in the group',
-            'function': lambda item, req: "",  # REPAIRME
-            'datatype': list,
+            'function': lambda item, req: len(item.members),
+            'datatype': int,
         },
         'num_services_crit': {
             'description': 'The number of services in the group that are CRIT',
-            'function': lambda item, req: "",  # REPAIRME
-            'datatype': list,
+            'function': lambda item, req: len([x for x in item.members if x.state_id == 2]),
+            'datatype': int,
         },
         'num_services_hard_crit': {
             'description': 'The number of services in the group that are CRIT',
-            'function': lambda item, req: "",  # REPAIRME
-            'datatype': list,
+            'function': lambda item, req: len([x for x in item.members if x.state_id == 2 and x.state_type_id == 1]),
+            'datatype': int,
         },
         'num_services_hard_ok': {
             'description': 'The number of services in the group that are OK',
-            'function': lambda item, req: "",  # REPAIRME
-            'datatype': list,
+            'function': lambda item, req: len([x for x in item.members if x.state_id == 0 and x.state_type_id == 1]),
+            'datatype': int,
         },
         'num_services_hard_unknown': {
             'description': 'The number of services in the group that are UNKNOWN',
-            'function': lambda item, req: "",  # REPAIRME
-            'datatype': list,
+            'function': lambda item, req: len([x for x in item.members if x.state_id == 3 and x.state_type_id == 1]),
+            'datatype': int,
         },
         'num_services_hard_warn': {
             'description': 'The number of services in the group that are WARN',
-            'function': lambda item, req: "",  # REPAIRME
-            'datatype': list,
+            'function': lambda item, req: len([x for x in item.members if x.state_id == 1 and x.state_type_id == 1]),
+            'datatype': int,
         },
         'num_services_ok': {
             'description': 'The number of services in the group that are OK',
-            'function': lambda item, req: "",  # REPAIRME
-            'datatype': list,
+            'function': lambda item, req: len([x for x in item.members if x.state_id == 0]),
+            'datatype': int,
         },
         'num_services_pending': {
             'description': 'The number of services in the group that are PENDING',
-            'function': lambda item, req: "",  # REPAIRME
-            'datatype': list,
+            'function': lambda item, req: len([x for x in item.members if x.has_been_checked == 0]),
+            'datatype': int,
         },
         'num_services_unknown': {
             'description': 'The number of services in the group that are UNKNOWN',
-            'function': lambda item, req: "",  # REPAIRME
-            'datatype': list,
+            'function': lambda item, req: len([x for x in item.members if x.state_id == 3]),
+            'datatype': int,
         },
         'num_services_warn': {
             'description': 'The number of services in the group that are WARN',
-            'function': lambda item, req: "",  # REPAIRME
-            'datatype': list,
+            'function': lambda item, req: len([x for x in item.members if x.state_id == 1]),
+            'datatype': int,
         },
         'worst_service_state': {
             'description': 'The worst soft state of all of the groups services (OK <= WARN <= UNKNOWN <= CRIT)',
-            'function': lambda item, req: "",  # REPAIRME
-            'datatype': list,
+            'function': lambda item, req: reduce(worst_service_state, (x.state_id for x in item.members), 0),
+            'datatype': int,
         },
     },
     'Contact': {
@@ -1673,7 +1657,7 @@ livestatus_attribute_map = {
         },
         'custom_variables': {
             'description': 'A dictionary of the custom variables',
-            'function': lambda item, req: item.custom_variables,  # CONTROLME
+            'function': lambda item, req: [join_with_separators(req, k[1:], v) for k, v in item.customs.iteritems()],
             'datatype': list,
         },
         'custom_variable_names': {
@@ -1949,6 +1933,9 @@ livestatus_attribute_map = {
         'host_check_command': {
             'description': 'Nagios command for active host check of this host',
         },
+        'host_check_flapping_recovery_notification': {
+            'description': 'Whether to check to send a recovery notification when flapping stops (0/1)',
+        },
         'host_check_freshness': {
             'description': 'Whether freshness checks are activated (0/1)',
         },
@@ -1973,14 +1960,23 @@ livestatus_attribute_map = {
         'host_comments': {
             'description': 'A list of the ids of all comments of this host',
         },
+        'host_comments_with_info': {
+            'description': 'A list of all comments of the host with id, author and comment',
+        },
         'host_contacts': {
             'description': 'A list of all contacts of this host, either direct or via a contact group',
+        },
+        'host_contact_groups': {
+            'description': 'A list of all contact groups this host is in',
         },
         'host_current_attempt': {
             'description': 'Number of the current check attempts',
         },
         'host_current_notification_number': {
             'description': 'Number of the current notification',
+        },
+        'host_custom_variables': {
+            'description': 'A dictionary of the custom variables',
         },
         'host_custom_variable_names': {
             'description': 'A list of the names of all custom variables',
@@ -1994,11 +1990,17 @@ livestatus_attribute_map = {
         'host_downtimes': {
             'description': 'A list of the ids of all scheduled downtimes of this host',
         },
+        'host_downtimes_with_info': {
+            'description': 'A list of the all scheduled downtimes of the host with id, author and comment',
+        },
         'host_event_handler_enabled': {
             'description': 'Whether event handling is enabled (0/1)',
         },
         'host_execution_time': {
             'description': 'Time the host check needed for execution',
+        },
+        'host_filename': {
+            'description': 'The value of the custom variable FILENAME',
         },
         'host_first_notification_delay': {
             'description': 'Delay before the first notification',
@@ -2060,6 +2062,15 @@ livestatus_attribute_map = {
         'host_last_state_change': {
             'description': 'Time of the last state change - soft or hard (Unix timestamp)',
         },
+        'host_last_time_down': {
+            'description': 'The last time the host was DOWN (Unix timestamp)',
+        },
+        'host_last_time_unreachable': {
+            'description': 'The last time the host was UNREACHABLE (Unix timestamp)',
+        },
+        'host_last_time_up': {
+            'description': 'The last time the host was UP (Unix timestamp)',
+        },
         'host_latency': {
             'description': 'Time difference between scheduled check time and actual check time',
         },
@@ -2071,6 +2082,12 @@ livestatus_attribute_map = {
         },
         'host_max_check_attempts': {
             'description': 'Max check attempts for active host checks',
+        },
+        'host_modified_attributes': {
+            'description': 'A bitmask specifying which attributes have been modified',
+        },
+        'host_modified_attributes_list': {
+            'description': 'A list of all modified attributes',
         },
         'host_name': {
             'description': 'Host name',
@@ -2101,6 +2118,9 @@ livestatus_attribute_map = {
         },
         'host_notifications_enabled': {
             'description': 'Whether notifications of the host are enabled (0/1)',
+        },
+        'host_no_more_notifications': {
+            'description': 'Whether to stop sending notifications (0/1)',
         },
         'host_num_services': {
             'description': 'The total number of services of the host',
@@ -2150,6 +2170,9 @@ livestatus_attribute_map = {
         'host_plugin_output': {
             'description': 'Output of the last host check',
         },
+        'host_pnpgraph_present': {
+            'description': 'Whether there is a PNP4Nagios graph present for this host (0/1)',
+        },
         'host_process_performance_data': {
             'description': 'Whether processing of performance data is enabled (0/1)',
         },
@@ -2158,6 +2181,15 @@ livestatus_attribute_map = {
         },
         'host_scheduled_downtime_depth': {
             'description': 'The number of downtimes this host is currently in',
+        },
+        'host_services_with_info': {
+            'description': 'A list of all services including detailed information about each service',
+        },
+        'host_services': {
+            'description': 'A list of all services of the host',
+        },
+        'host_services_with_state': {
+            'description': 'A list of all services of the host together with state and has_been_checked',
         },
         'host_state': {
             'description': 'The current state of the host (0: up, 1: down, 2: unreachable)',
@@ -2235,14 +2267,23 @@ livestatus_attribute_map = {
         'service_comments': {
             'description': 'A list of all comment ids of the service',
         },
+        'service_comments_with_info': {
+            'description': 'A list of all comments of the service with id, author and comment',
+        },
         'service_contacts': {
             'description': 'A list of all contacts of the service, either direct or via a contact group',
+        },
+        'service_contact_groups': {
+            'description': 'A list of all contact groups this service is in',
         },
         'service_current_attempt': {
             'description': 'The number of the current check attempt',
         },
         'service_current_notification_number': {
             'description': 'The number of the current notification',
+        },
+        'service_custom_variables': {
+            'description': 'A dictorionary of the custom variables',
         },
         'service_custom_variable_names': {
             'description': 'A list of the names of all custom variables of the service',
@@ -2258,6 +2299,9 @@ livestatus_attribute_map = {
         },
         'service_downtimes': {
             'description': 'A list of all downtime ids of the service',
+        },
+        'service_downtimes_with_info': {
+            'description': 'A list of all downtimes of the service with id, author and comment',
         },
         'service_event_handler': {
             'description': 'Nagios command used as event handler',
@@ -2325,6 +2369,18 @@ livestatus_attribute_map = {
         'service_last_state_change': {
             'description': 'The time of the last state change (Unix timestamp)',
         },
+        'service_last_time_critical': {
+            'description': 'The last time the service was CRITICAL (Unix timestamp)',
+        },
+        'service_last_time_ok': {
+            'description': 'The last time the service was OK (Unix timestamp)',
+        },
+        'service_last_time_warning': {
+            'description': 'The last time the service was in WARNING state (Unix timestamp)',
+        },
+        'service_last_time_unknown': {
+            'description': 'The last time the service was UNKNOWN (Unix timestamp)',
+        },
         'service_latency': {
             'description': 'Time difference between scheduled check time and actual check time',
         },
@@ -2336,6 +2392,12 @@ livestatus_attribute_map = {
         },
         'service_max_check_attempts': {
             'description': 'The maximum number of check attempts',
+        },
+        'service_modified_attributes': {
+            'description': 'A bitmask specifying which attributes have been modified',
+        },
+        'service_modified_attributes_list': {
+            'description': 'A list of all modified attributes',
         },
         'service_next_check': {
             'description': 'The scheduled time of the next check (Unix timestamp)',
@@ -2364,6 +2426,9 @@ livestatus_attribute_map = {
         'service_notifications_enabled': {
             'description': 'Whether notifications are enabled for the service (0/1)',
         },
+        'service_no_more_notifications': {
+            'description': 'Whether to stop sending notifications (0/1)',
+        },
         'service_obsess_over_service': {
             'description': 'Whether \'obsess_over_service\' is enabled for the service (0/1)',
         },
@@ -2375,6 +2440,9 @@ livestatus_attribute_map = {
         },
         'service_plugin_output': {
             'description': 'Output of the last check plugin',
+        },
+        'service_pnpgraph_present': {
+            'description': 'Whether there is a PNP4Nagios graph present for this service (0/1)',
         },
         'service_process_performance_data': {
             'description': 'Whether processing of performance data is enabled for the service (0/1)',
@@ -2404,157 +2472,6 @@ livestatus_attribute_map = {
         'type': {
             'description': 'The type of the downtime: 0 if it is active, 1 if it is pending',
             'function': lambda item, req: {True: 0, False: 1}[item.is_in_effect],
-            'datatype': int,
-        },
-
-        'host_modified_attributes': {
-            'description': 'A bitmask specifying which attributes have been modified',
-            'function': lambda item, req: item.host_modified_attributes,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'service_modified_attributes': {
-            'description': 'A bitmask specifying which attributes have been modified',
-            'function': lambda item, req: item.service_modified_attributes,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'host_custom_variables': {
-            'description': 'A dictionary of the custom variables',
-            'function': lambda item, req: item.host_custom_variables,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'service_custom_variables': {
-            'description': 'A dictorionary of the custom variables',
-            'function': lambda item, req: item.service_custom_variables,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'host_comments_with_info': {
-            'description': 'A list of all comments of the host with id, author and comment',
-            'function': lambda item, req: item.host_comments_with_info,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'service_comments_with_info': {
-            'description': 'A list of all comments of the service with id, author and comment',
-            'function': lambda item, req: item.service_comments_with_info,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'host_contact_groups': {
-            'description': 'A list of all contact groups this host is in',
-            'function': lambda item, req: item.host_contact_groups,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'service_contact_groups': {
-            'description': 'A list of all contact groups this service is in',
-            'function': lambda item, req: item.service_contact_groups,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'service_downtimes_with_info': {
-            'description': 'A list of all downtimes of the service with id, author and comment',
-            'function': lambda item, req: item.service_downtimes_with_info,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'host_modified_attributes_list': {
-            'description': 'A list of all modified attributes',
-            'function': lambda item, req: item.host_modified_attributes_list,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'service_modified_attributes_list': {
-            'description': 'A list of all modified attributes',
-            'function': lambda item, req: item.service_modified_attributes_list,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'host_services_with_info': {
-            'description': 'A list of all services including detailed information about each service',
-            'function': lambda item, req: item.host_services_with_info,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'host_services': {
-            'description': 'A list of all services of the host',
-            'function': lambda item, req: item.host_services,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'host_services_with_state': {
-            'description': 'A list of all services of the host together with state and has_been_checked',
-            'function': lambda item, req: item.host_services_with_state,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'host_downtimes_with_info': {
-            'description': 'A list of the all scheduled downtimes of the host with id, author and comment',
-            'function': lambda item, req: item.host_downtimes_with_info,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'host_last_time_down': {
-            'description': 'The last time the host was DOWN (Unix timestamp)',
-            'function': lambda item, req: item.host_last_time_down,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'host_last_time_unreachable': {
-            'description': 'The last time the host was UNREACHABLE (Unix timestamp)',
-            'function': lambda item, req: item.host_last_time_unreachable,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'host_last_time_up': {
-            'description': 'The last time the host was UP (Unix timestamp)',
-            'function': lambda item, req: item.host_last_time_up,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'service_last_time_critical': {
-            'description': 'The last time the service was CRITICAL (Unix timestamp)',
-            'function': lambda item, req: item.service_last_time_critical,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'service_last_time_warning': {
-            'description': 'The last time the service was in WARNING state (Unix timestamp)',
-            'function': lambda item, req: item.service_last_time_warning,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'service_last_time_ok': {
-            'description': 'The last time the service was OK (Unix timestamp)',
-            'function': lambda item, req: item.service_last_time_ok,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'service_last_time_unknown': {
-            'description': 'The last time the service was UNKNOWN (Unix timestamp)',
-            'function': lambda item, req: item.service_last_time_unknown,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'host_filename': {
-            'description': 'The value of the custom variable FILENAME',
-            'function': lambda item, req: item.host_filename,  # CONTROLME INSORTME
-            'datatype': str,
-        },
-        'service_latency': {
-            'description': 'Time difference between scheduled check time and actual check time',
-            'function': lambda item, req: item.service_latency,  # CONTROLME INSORTME
-            'datatype': float,
-        },
-        'service_execution_time': {
-            'description': 'Time the service check needed for execution',
-            'function': lambda item, req: item.service_execution_time,  # CONTROLME INSORTME
-            'datatype': float,
-        },
-        'host_pnpgraph_present': {
-            'description': 'Whether there is a PNP4Nagios graph present for this host (0/1)',
-            'function': lambda item, req: item.host_pnpgraph_present,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'service_pnpgraph_present': {
-            'description': 'Whether there is a PNP4Nagios graph present for this service (0/1)',
-            'function': lambda item, req: item.service_pnpgraph_present,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'host_check_flapping_recovery_notification': {
-            'description': 'Whether to check to send a recovery notification when flapping stops (0/1)',
-            'function': lambda item, req: item.host_check_flapping_recovery_notification,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'host_no_more_notifications': {
-            'description': 'Whether to stop sending notifications (0/1)',
-            'function': lambda item, req: item.host_no_more_notifications,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'service_no_more_notifications': {
-            'description': 'Whether to stop sending notifications (0/1)',
-            'function': lambda item, req: item.service_no_more_notifications,  # CONTROLME INSORTME
             'datatype': int,
         },
     },
@@ -2614,6 +2531,9 @@ livestatus_attribute_map = {
         'host_check_command': {
             'description': 'Nagios command for active host check of this host',
         },
+        'host_check_flapping_recovery_notification': {
+            'description': 'Whether to check to send a recovery notification when flapping stops (0/1)',
+        },
         'host_check_freshness': {
             'description': 'Whether freshness checks are activated (0/1)',
         },
@@ -2638,14 +2558,23 @@ livestatus_attribute_map = {
         'host_comments': {
             'description': 'A list of the ids of all comments of this host',
         },
+        'host_comments_with_info': {
+            'description': 'A list of all comments of the host with id, author and comment',
+        },
         'host_contacts': {
             'description': 'A list of all contacts of this host, either direct or via a contact group',
+        },
+        'host_contact_groups': {
+            'description': 'A list of all contact groups this host is in',
         },
         'host_current_attempt': {
             'description': 'Number of the current check attempts',
         },
         'host_current_notification_number': {
             'description': 'Number of the current notification',
+        },
+        'host_custom_variables': {
+            'description': 'A dictionary of the custom variables'
         },
         'host_custom_variable_names': {
             'description': 'A list of the names of all custom variables',
@@ -2659,11 +2588,17 @@ livestatus_attribute_map = {
         'host_downtimes': {
             'description': 'A list of the ids of all scheduled downtimes of this host',
         },
+        'host_downtimes_with_info': {
+            'description': 'A list of the all scheduled downtimes of the host with id, author and comment',
+        },
         'host_event_handler_enabled': {
             'description': 'Whether event handling is enabled (0/1)',
         },
         'host_execution_time': {
             'description': 'Time the host check needed for execution',
+        },
+        'host_filename': {
+            'description': 'The value of the custom variable FILENAME',
         },
         'host_first_notification_delay': {
             'description': 'Delay before the first notification',
@@ -2725,6 +2660,15 @@ livestatus_attribute_map = {
         'host_last_state_change': {
             'description': 'Time of the last state change - soft or hard (Unix timestamp)',
         },
+        'host_last_time_down': {
+            'description': 'The last time the host was DOWN (Unix timestamp)',
+        },
+        'host_last_time_unreachable': {
+            'description': 'The last time the host was UNREACHABLE (Unix timestamp)',
+        },
+        'host_last_time_up': {
+            'description': 'The last time the host was UP (Unix timestamp)',
+        },
         'host_latency': {
             'description': 'Time difference between scheduled check time and actual check time',
         },
@@ -2737,6 +2681,12 @@ livestatus_attribute_map = {
         'host_max_check_attempts': {
             'description': 'Max check attempts for active host checks',
         },
+        'host_modified_attributes': {
+            'description': 'A bitmask specifying which attributes have been modified',
+        },
+        'host_modified_attributes_list': {
+            'description': 'A list of all modified attributes',
+        },
         'host_name': {
             'description': 'Host name',
         },
@@ -2745,6 +2695,9 @@ livestatus_attribute_map = {
         },
         'host_next_notification': {
             'description': 'Time of the next notification (Unix timestamp)',
+        },
+        'host_no_more_notifications': {
+            'description': 'Whether to stop sending notifications (0/1)',
         },
         'host_notes': {
             'description': 'Optional notes for this host',
@@ -2815,6 +2768,9 @@ livestatus_attribute_map = {
         'host_plugin_output': {
             'description': 'Output of the last host check',
         },
+        'host_pnpgraph_present': {
+            'description': 'Whether there is a PNP4Nagios graph present for this host (0/1)',
+        },
         'host_process_performance_data': {
             'description': 'Whether processing of performance data is enabled (0/1)',
         },
@@ -2823,6 +2779,15 @@ livestatus_attribute_map = {
         },
         'host_scheduled_downtime_depth': {
             'description': 'The number of downtimes this host is currently in',
+        },
+        'host_services': {
+            'description': 'A list of all services of the host',
+        },
+        'host_services_with_info': {
+            'description': 'A list of all services including detailed information about each service',
+        },
+        'host_services_with_state': {
+            'description': 'A list of all services of the host together with state and has_been_checked',
         },
         'host_state': {
             'description': 'The current state of the host (0: up, 1: down, 2: unreachable)',
@@ -2905,6 +2870,12 @@ livestatus_attribute_map = {
         'service_comments': {
             'description': 'A list of all comment ids of the service',
         },
+        'service_comments_with_info': {
+            'description': 'A list of all comments of the service with id, author and comment',
+        },
+        'service_contact_groups': {
+            'description': 'A list of all contact groups this service is in',
+        },
         'service_contacts': {
             'description': 'A list of all contacts of the service, either direct or via a contact group',
         },
@@ -2920,6 +2891,9 @@ livestatus_attribute_map = {
         'service_custom_variable_values': {
             'description': 'A list of the values of all custom variable of the service',
         },
+        'service_custom_variables': {
+            'description': 'A dictorionary of the custom variables',
+        },
         'service_description': {
             'description': 'Description of the service (also used as key)',
         },
@@ -2928,6 +2902,9 @@ livestatus_attribute_map = {
         },
         'service_downtimes': {
             'description': 'A list of all downtime ids of the service',
+        },
+        'service_downtimes_with_info': {
+            'description': 'A list of all downtimes of the service with id, author and comment',
         },
         'service_event_handler': {
             'description': 'Nagios command used as event handler',
@@ -2995,6 +2972,18 @@ livestatus_attribute_map = {
         'service_last_state_change': {
             'description': 'The time of the last state change (Unix timestamp)',
         },
+        'service_last_time_critical': {
+            'description': 'The last time the service was CRITICAL (Unix timestamp)',
+        },
+        'service_last_time_ok': {
+            'description': 'The last time the service was OK (Unix timestamp)',
+        },
+        'service_last_time_warning': {
+            'description': 'The last time the service was in WARNING state (Unix timestamp)',
+        },
+        'service_last_time_unknown': {
+            'description': 'The last time the service was UNKNOWN (Unix timestamp)',
+        },
         'service_latency': {
             'description': 'Time difference between scheduled check time and actual check time',
         },
@@ -3007,11 +2996,20 @@ livestatus_attribute_map = {
         'service_max_check_attempts': {
             'description': 'The maximum number of check attempts',
         },
+        'service_modified_attributes': {
+            'description': 'A bitmask specifying which attributes have been modified',
+        },
+        'service_modified_attributes_list': {
+            'description': 'A list of all modified attributes',
+        },
         'service_next_check': {
             'description': 'The scheduled time of the next check (Unix timestamp)',
         },
         'service_next_notification': {
             'description': 'The time of the next notification (Unix timestamp)',
+        },
+        'service_no_more_notifications': {
+            'description': 'Whether to stop sending notifications (0/1)',
         },
         'service_notes': {
             'description': 'Optional notes about the service',
@@ -3046,6 +3044,9 @@ livestatus_attribute_map = {
         'service_plugin_output': {
             'description': 'Output of the last check plugin',
         },
+        'service_pnpgraph_present': {
+            'description': 'Whether there is a PNP4Nagios graph present for this service (0/1)',
+        },
         'service_process_performance_data': {
             'description': 'Whether processing of performance data is enabled for the service (0/1)',
         },
@@ -3069,158 +3070,6 @@ livestatus_attribute_map = {
         'type': {
             'description': 'The type of the comment: 1 is host, 2 is service',
             'function': lambda item, req: item.comment_type,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-
-
-        'host_modified_attributes': {
-            'description': 'A bitmask specifying which attributes have been modified',
-            'function': lambda item, req: item.host_modified_attributes,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'service_modified_attributes': {
-            'description': 'A bitmask specifying which attributes have been modified',
-            'function': lambda item, req: item.service_modified_attributes,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'host_custom_variables': {
-            'description': 'A dictionary of the custom variables',
-            'function': lambda item, req: item.host_custom_variables,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'service_custom_variables': {
-            'description': 'A dictorionary of the custom variables',
-            'function': lambda item, req: item.service_custom_variables,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'host_comments_with_info': {
-            'description': 'A list of all comments of the host with id, author and comment',
-            'function': lambda item, req: item.host_comments_with_info,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'service_comments_with_info': {
-            'description': 'A list of all comments of the service with id, author and comment',
-            'function': lambda item, req: item.service_comments_with_info,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'host_contact_groups': {
-            'description': 'A list of all contact groups this host is in',
-            'function': lambda item, req: item.host_contact_groups,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'service_contact_groups': {
-            'description': 'A list of all contact groups this service is in',
-            'function': lambda item, req: item.service_contact_groups,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'service_downtimes_with_info': {
-            'description': 'A list of all downtimes of the service with id, author and comment',
-            'function': lambda item, req: item.service_downtimes_with_info,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'host_modified_attributes_list': {
-            'description': 'A list of all modified attributes',
-            'function': lambda item, req: item.host_modified_attributes_list,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'service_modified_attributes_list': {
-            'description': 'A list of all modified attributes',
-            'function': lambda item, req: item.service_modified_attributes_list,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'host_services_with_info': {
-            'description': 'A list of all services including detailed information about each service',
-            'function': lambda item, req: item.host_services_with_info,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'host_services': {
-            'description': 'A list of all services of the host',
-            'function': lambda item, req: item.host_services,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'host_services_with_state': {
-            'description': 'A list of all services of the host together with state and has_been_checked',
-            'function': lambda item, req: item.host_services_with_state,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'host_downtimes_with_info': {
-            'description': 'A list of the all scheduled downtimes of the host with id, author and comment',
-            'function': lambda item, req: item.host_downtimes_with_info,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'host_last_time_down': {
-            'description': 'The last time the host was DOWN (Unix timestamp)',
-            'function': lambda item, req: item.host_last_time_down,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'host_last_time_unreachable': {
-            'description': 'The last time the host was UNREACHABLE (Unix timestamp)',
-            'function': lambda item, req: item.host_last_time_unreachable,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'host_last_time_up': {
-            'description': 'The last time the host was UP (Unix timestamp)',
-            'function': lambda item, req: item.host_last_time_up,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'service_last_time_critical': {
-            'description': 'The last time the service was CRITICAL (Unix timestamp)',
-            'function': lambda item, req: item.service_last_time_critical,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'service_last_time_warning': {
-            'description': 'The last time the service was in WARNING state (Unix timestamp)',
-            'function': lambda item, req: item.service_last_time_warning,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'service_last_time_ok': {
-            'description': 'The last time the service was OK (Unix timestamp)',
-            'function': lambda item, req: item.service_last_time_ok,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'service_last_time_unknown': {
-            'description': 'The last time the service was UNKNOWN (Unix timestamp)',
-            'function': lambda item, req: item.service_last_time_unknown,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'host_filename': {
-            'description': 'The value of the custom variable FILENAME',
-            'function': lambda item, req: item.host_filename,  # CONTROLME INSORTME
-            'datatype': str,
-        },
-        'service_latency': {
-            'description': 'Time difference between scheduled check time and actual check time',
-            'function': lambda item, req: item.service_latency,  # CONTROLME INSORTME
-            'datatype': float,
-        },
-        'service_execution_time': {
-            'description': 'Time the service check needed for execution',
-            'function': lambda item, req: item.service_execution_time,  # CONTROLME INSORTME
-            'datatype': float,
-        },
-        'host_pnpgraph_present': {
-            'description': 'Whether there is a PNP4Nagios graph present for this host (0/1)',
-            'function': lambda item, req: item.host_pnpgraph_present,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'service_pnpgraph_present': {
-            'description': 'Whether there is a PNP4Nagios graph present for this service (0/1)',
-            'function': lambda item, req: item.service_pnpgraph_present,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'host_check_flapping_recovery_notification': {
-            'description': 'Whether to check to send a recovery notification when flapping stops (0/1)',
-            'function': lambda item, req: item.host_check_flapping_recovery_notification,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'host_no_more_notifications': {
-            'description': 'Whether to stop sending notifications (0/1)',
-            'function': lambda item, req: item.host_no_more_notifications,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'service_no_more_notifications': {
-            'description': 'Whether to stop sending notifications (0/1)',
-            'function': lambda item, req: item.service_no_more_notifications,  # CONTROLME INSORTME
             'datatype': int,
         },
     },
@@ -3816,6 +3665,9 @@ livestatus_attribute_map = {
         'current_contact_custom_variable_values': {
             'description': 'A list of the values of all custom variables of the contact',
         },
+        'current_contact_custom_variables': {
+            'description': 'A dictionary of the custom variables',
+        },
         'current_contact_email': {
             'description': 'The email address of the contact',
         },
@@ -3830,6 +3682,12 @@ livestatus_attribute_map = {
         },
         'current_contact_in_service_notification_period': {
             'description': 'Whether the contact is currently in his/her service notification period (0/1)',
+        },
+        'current_contact_modified_attributes': {
+            'description': 'A bitmask specifying which attributes have been modified',
+        },
+        'current_contact_modified_attributes_list': {
+            'description': 'A list of all modified attributes',
         },
         'current_contact_name': {
             'description': 'The login name of the contact person',
@@ -3870,6 +3728,9 @@ livestatus_attribute_map = {
         'current_host_check_command': {
             'description': 'Nagios command for active host check of this host',
         },
+        'current_host_check_flapping_recovery_notification': {
+            'description': 'Whether to check to send a recovery notification when flapping stops (0/1)',
+        },
         'current_host_check_freshness': {
             'description': 'Whether freshness checks are activated (0/1)',
         },
@@ -3894,6 +3755,12 @@ livestatus_attribute_map = {
         'current_host_comments': {
             'description': 'A list of the ids of all comments of this host',
         },
+        'current_host_comments_with_info': {
+            'description': 'A list of all comments of the host with id, author and comment',
+        },
+        'current_host_contact_groups': {
+            'description': 'A list of all contact groups this host is in',
+        },
         'current_host_contacts': {
             'description': 'A list of all contacts of this host, either direct or via a contact group',
         },
@@ -3909,17 +3776,26 @@ livestatus_attribute_map = {
         'current_host_custom_variable_values': {
             'description': 'A list of the values of the custom variables',
         },
+        'current_host_custom_variables': {
+            'description': 'A dictionary of the custom variables',
+        },
         'current_host_display_name': {
             'description': 'Optional display name of the host - not used by Nagios\' web interface',
         },
         'current_host_downtimes': {
             'description': 'A list of the ids of all scheduled downtimes of this host',
         },
+        'current_host_downtimes_with_info': {
+            'description': 'A list of the all scheduled downtimes of the host with id, author and comment',
+        },
         'current_host_event_handler_enabled': {
             'description': 'Whether event handling is enabled (0/1)',
         },
         'current_host_execution_time': {
             'description': 'Time the host check needed for execution',
+        },
+        'current_host_filename': {
+            'description': 'The value of the custom variable FILENAME',
         },
         'current_host_first_notification_delay': {
             'description': 'Delay before the first notification',
@@ -3981,6 +3857,15 @@ livestatus_attribute_map = {
         'current_host_last_state_change': {
             'description': 'Time of the last state change - soft or hard (Unix timestamp)',
         },
+        'current_host_last_time_down': {
+            'description': 'The last time the host was DOWN (Unix timestamp)',
+        },
+        'current_host_last_time_unreachable': {
+            'description': 'The last time the host was UNREACHABLE (Unix timestamp)',
+        },
+        'current_host_last_time_up': {
+            'description': 'The last time the host was UP (Unix timestamp)',
+        },
         'current_host_latency': {
             'description': 'Time difference between scheduled check time and actual check time',
         },
@@ -3993,6 +3878,12 @@ livestatus_attribute_map = {
         'current_host_max_check_attempts': {
             'description': 'Max check attempts for active host checks',
         },
+        'current_host_modified_attributes': {
+            'description': 'A bitmask specifying which attributes have been modified',
+        },
+        'current_host_modified_attributes_list': {
+            'description': 'A list of all modified attributes',
+        },
         'current_host_name': {
             'description': 'Host name',
         },
@@ -4001,6 +3892,9 @@ livestatus_attribute_map = {
         },
         'current_host_next_notification': {
             'description': 'Time of the next notification (Unix timestamp)',
+        },
+        'current_host_no_more_notifications': {
+            'description': 'Whether to stop sending notifications (0/1)',
         },
         'current_host_notes': {
             'description': 'Optional notes for this host',
@@ -4071,6 +3965,9 @@ livestatus_attribute_map = {
         'current_host_plugin_output': {
             'description': 'Output of the last host check',
         },
+        'current_host_pnpgraph_present': {
+            'description': 'Whether there is a PNP4Nagios graph present for this host (0/1)',
+        },
         'current_host_process_performance_data': {
             'description': 'Whether processing of performance data is enabled (0/1)',
         },
@@ -4079,6 +3976,15 @@ livestatus_attribute_map = {
         },
         'current_host_scheduled_downtime_depth': {
             'description': 'The number of downtimes this host is currently in',
+        },
+        'current_host_services_with_info': {
+            'description': 'A list of all services including detailed information about each service',
+        },
+        'current_host_services': {
+            'description': 'A list of all services of the host',
+        },
+        'current_host_services_with_state': {
+            'description': 'A list of all services of the host together with state and has_been_checked',
         },
         'current_host_state': {
             'description': 'The current state of the host (0: up, 1: down, 2: unreachable)',
@@ -4146,6 +4052,12 @@ livestatus_attribute_map = {
         'current_service_comments': {
             'description': 'A list of all comment ids of the service',
         },
+        'current_service_comments_with_info': {
+            'description': 'A list of all comments of the service with id, author and comment',
+        },
+        'current_service_contact_groups': {
+            'description': 'A list of all contact groups this service is in',
+        },
         'current_service_contacts': {
             'description': 'A list of all contacts of the service, either direct or via a contact group',
         },
@@ -4158,6 +4070,9 @@ livestatus_attribute_map = {
         'current_service_custom_variable_names': {
             'description': 'A list of the names of all custom variables of the service',
         },
+        'current_service_custom_variables': {
+            'description': 'A dictorionary of the custom variables',
+        },
         'current_service_custom_variable_values': {
             'description': 'A list of the values of all custom variable of the service',
         },
@@ -4169,6 +4084,9 @@ livestatus_attribute_map = {
         },
         'current_service_downtimes': {
             'description': 'A list of all downtime ids of the service',
+        },
+        'current_service_downtimes_with_info': {
+            'description': 'A list of all downtimes of the service with id, author and comment',
         },
         'current_service_event_handler': {
             'description': 'Nagios command used as event handler',
@@ -4236,6 +4154,18 @@ livestatus_attribute_map = {
         'current_service_last_state_change': {
             'description': 'The time of the last state change (Unix timestamp)',
         },
+        'current_service_last_time_critical': {
+            'description': 'The last time the service was CRITICAL (Unix timestamp)',
+        },
+        'current_service_last_time_ok': {
+            'description': 'The last time the service was OK (Unix timestamp)',
+        },
+        'current_service_last_time_unknown': {
+            'description': 'The last time the service was UNKNOWN (Unix timestamp)',
+        },
+        'current_service_last_time_warning': {
+            'description': 'The last time the service was in WARNING state (Unix timestamp)',
+        },
         'current_service_latency': {
             'description': 'Time difference between scheduled check time and actual check time',
         },
@@ -4248,11 +4178,20 @@ livestatus_attribute_map = {
         'current_service_max_check_attempts': {
             'description': 'The maximum number of check attempts',
         },
+        'current_service_modified_attributes': {
+            'description': 'A bitmask specifying which attributes have been modified',
+        },
+        'current_service_modified_attributes_list': {
+            'description': 'A list of all modified attributes',
+        },
         'current_service_next_check': {
             'description': 'The scheduled time of the next check (Unix timestamp)',
         },
         'current_service_next_notification': {
             'description': 'The time of the next notification (Unix timestamp)',
+        },
+        'current_service_no_more_notifications': {
+            'description': 'Whether to stop sending notifications (0/1)',
         },
         'current_service_notes': {
             'description': 'Optional notes about the service',
@@ -4286,6 +4225,9 @@ livestatus_attribute_map = {
         },
         'current_service_plugin_output': {
             'description': 'Output of the last check plugin',
+        },
+        'current_service_pnpgraph_present': {
+            'description': 'Whether there is a PNP4Nagios graph present for this service (0/1)',
         },
         'current_service_process_performance_data': {
             'description': 'Whether processing of performance data is enabled for the service (0/1)',
@@ -4345,199 +4287,6 @@ livestatus_attribute_map = {
             'description': 'The type of the message (text before the colon), the message itself for info messages',
             'function': lambda item, req: item.type,  # REPAIRME
         },
-
-
-        'current_contact_modified_attributes': {
-            'description': 'A bitmask specifying which attributes have been modified',
-            'function': lambda item, req: item.current_contact_modified_attributes,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'current_host_modified_attributes': {
-            'description': 'A bitmask specifying which attributes have been modified',
-            'function': lambda item, req: item.current_host_modified_attributes,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'current_service_modified_attributes': {
-            'description': 'A bitmask specifying which attributes have been modified',
-            'function': lambda item, req: item.current_service_modified_attributes,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'current_contact_custom_variables': {
-            'description': 'A dictionary of the custom variables',
-            'function': lambda item, req: item.current_contact_custom_variables,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'current_host_custom_variables': {
-            'description': 'A dictionary of the custom variables',
-            'function': lambda item, req: item.current_host_custom_variables,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'current_service_custom_variables': {
-            'description': 'A dictorionary of the custom variables',
-            'function': lambda item, req: item.current_service_custom_variables,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'current_host_comments_with_info': {
-            'description': 'A list of all comments of the host with id, author and comment',
-            'function': lambda item, req: item.current_host_comments_with_info,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'current_service_comments_with_info': {
-            'description': 'A list of all comments of the service with id, author and comment',
-            'function': lambda item, req: item.current_service_comments_with_info,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'current_host_contact_groups': {
-            'description': 'A list of all contact groups this host is in',
-            'function': lambda item, req: item.current_host_contact_groups,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'current_service_contact_groups': {
-            'description': 'A list of all contact groups this service is in',
-            'function': lambda item, req: item.current_service_contact_groups,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'current_service_downtimes_with_info': {
-            'description': 'A list of all downtimes of the service with id, author and comment',
-            'function': lambda item, req: item.current_service_downtimes_with_info,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'current_contact_modified_attributes_list': {
-            'description': 'A list of all modified attributes',
-            'function': lambda item, req: item.current_contact_modified_attributes_list,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'current_host_modified_attributes_list': {
-            'description': 'A list of all modified attributes',
-            'function': lambda item, req: item.current_host_modified_attributes_list,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'current_service_modified_attributes_list': {
-            'description': 'A list of all modified attributes',
-            'function': lambda item, req: item.current_service_modified_attributes_list,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'current_host_services_with_info': {
-            'description': 'A list of all services including detailed information about each service',
-            'function': lambda item, req: item.current_host_services_with_info,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'current_host_services': {
-            'description': 'A list of all services of the host',
-            'function': lambda item, req: item.current_host_services,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'current_host_services_with_state': {
-            'description': 'A list of all services of the host together with state and has_been_checked',
-            'function': lambda item, req: item.current_host_services_with_state,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'current_host_downtimes_with_info': {
-            'description': 'A list of the all scheduled downtimes of the host with id, author and comment',
-            'function': lambda item, req: item.current_host_downtimes_with_info,  # CONTROLME INSORTME
-            'datatype': list,
-        },
-        'current_host_last_time_down': {
-            'description': 'The last time the host was DOWN (Unix timestamp)',
-            'function': lambda item, req: item.current_host_last_time_down,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'current_host_last_time_unreachable': {
-            'description': 'The last time the host was UNREACHABLE (Unix timestamp)',
-            'function': lambda item, req: item.current_host_last_time_unreachable,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'current_host_last_time_up': {
-            'description': 'The last time the host was UP (Unix timestamp)',
-            'function': lambda item, req: item.current_host_last_time_up,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'current_service_last_time_critical': {
-            'description': 'The last time the service was CRITICAL (Unix timestamp)',
-            'function': lambda item, req: item.current_service_last_time_critical,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'current_service_last_time_warning': {
-            'description': 'The last time the service was in WARNING state (Unix timestamp)',
-            'function': lambda item, req: item.current_service_last_time_warning,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'current_service_last_time_ok': {
-            'description': 'The last time the service was OK (Unix timestamp)',
-            'function': lambda item, req: item.current_service_last_time_ok,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'current_service_last_time_unknown': {
-            'description': 'The last time the service was UNKNOWN (Unix timestamp)',
-            'function': lambda item, req: item.current_service_last_time_unknown,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'current_host_filename': {
-            'description': 'The value of the custom variable FILENAME',
-            'function': lambda item, req: item.current_host_filename,  # CONTROLME INSORTME
-            'datatype': str,
-        },
-        'current_service_latency': {
-            'description': 'Time difference between scheduled check time and actual check time',
-            'function': lambda item, req: item.current_service_latency,  # CONTROLME INSORTME
-            'datatype': float,
-        },
-        'current_service_execution_time': {
-            'description': 'Time the service check needed for execution',
-            'function': lambda item, req: item.current_service_execution_time,  # CONTROLME INSORTME
-            'datatype': float,
-        },
-        'current_contact_can_submit_commands': {
-            'description': 'Wether the contact is allowed to submit commands (0/1)',
-            'function': lambda item, req: item.current_contact_can_submit_commands,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'current_contact_in_host_notification_period': {
-            'description': 'Wether the contact is currently in his/her host notification period (0/1)',
-            'function': lambda item, req: item.current_contact_in_host_notification_period,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'current_contact_in_service_notification_period': {
-            'description': 'Wether the contact is currently in his/her service notification period (0/1)',
-            'function': lambda item, req: item.current_contact_in_service_notification_period,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'current_contact_host_notifications_enabled': {
-            'description': 'Wether the contact will be notified about host problems in general (0/1)',
-            'function': lambda item, req: item.current_contact_host_notifications_enabled,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'current_contact_service_notifications_enabled': {
-            'description': 'Wether the contact will be notified about service problems in general (0/1)',
-            'function': lambda item, req: item.current_contact_service_notifications_enabled,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'current_host_pnpgraph_present': {
-            'description': 'Whether there is a PNP4Nagios graph present for this host (0/1)',
-            'function': lambda item, req: item.current_host_pnpgraph_present,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'current_service_pnpgraph_present': {
-            'description': 'Whether there is a PNP4Nagios graph present for this service (0/1)',
-            'function': lambda item, req: item.current_service_pnpgraph_present,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'current_host_check_flapping_recovery_notification': {
-            'description': 'Whether to check to send a recovery notification when flapping stops (0/1)',
-            'function': lambda item, req: item.current_host_check_flapping_recovery_notification,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'current_host_no_more_notifications': {
-            'description': 'Whether to stop sending notifications (0/1)',
-            'function': lambda item, req: item.current_host_no_more_notifications,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-        'current_service_no_more_notifications': {
-            'description': 'Whether to stop sending notifications (0/1)',
-            'function': lambda item, req: item.current_service_no_more_notifications,  # CONTROLME INSORTME
-            'datatype': int,
-        },
-
     },
 }
 
@@ -4619,7 +4368,7 @@ def catchall_factory(name, req):
     return method
     
 
-print "FINISHING THE ATTRIBUTE MAPPING>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+#print "FINISHING THE ATTRIBUTE MAPPING>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
 for objtype in ['Host', 'Service', 'Contact', 'Command', 'Timeperiod', 'Downtime', 'Comment', 'Hostgroup', 'Servicegroup', 'Contactgroup', 'SchedulerLink', 'PollerLink', 'ReactionnerLink', 'BrokerLink', 'Problem', 'Logline', 'Config']:
     cls = [t[1] for t in table_class_map.values() if t[0] == objtype][0]
     setattr(cls, 'livestatus_attributes', [])
@@ -4691,6 +4440,12 @@ for objtype in ['Host', 'Service']:
             setattr(cls, 'lsm_servicegroup_'+attribute, servicegroup_redirect_factory('lsm_'+attribute.replace('servicegroup_', '')))
             getattr(cls, 'lsm_servicegroup_'+attribute).im_func.description = getattr(Servicegroup, 'lsm_'+attribute).im_func.description
             getattr(cls, 'lsm_servicegroup_'+attribute).im_func.datatype = getattr(Servicegroup, 'lsm_'+attribute).im_func.datatype
+        # in LivestatusQuery.get_service_by_hostgroup, (copied) Service objects get an extra "hostgroup" attribute
+        # and Service objects get an extra "servicegroup" attribute. Here we set the lsm-attributes for them
+        for attribute in livestatus_attribute_map['Hostgroup']:
+            setattr(cls, 'lsm_hostgroup_'+attribute, hostgroup_redirect_factory('lsm_'+attribute.replace('hostgroup_', '')))
+            getattr(cls, 'lsm_hostgroup_'+attribute).im_func.description = getattr(Hostgroup, 'lsm_'+attribute).im_func.description
+            getattr(cls, 'lsm_hostgroup_'+attribute).im_func.datatype = getattr(Hostgroup, 'lsm_'+attribute).im_func.datatype
 
 # Finally set some default values for the different datatypes
 for objtype in ['Host', 'Service', 'Contact', 'Command', 'Timeperiod', 'Downtime', 'Comment', 'Hostgroup', 'Servicegroup', 'Contactgroup', 'SchedulerLink', 'PollerLink', 'ReactionnerLink', 'BrokerLink', 'Problem', 'Logline', 'Config']:
@@ -4707,6 +4462,8 @@ for objtype in ['Host', 'Service', 'Contact', 'Command', 'Timeperiod', 'Downtime
             getattr(cls, 'lsm_'+attribute).im_func.default = ''
         elif getattr(cls, 'lsm_'+attribute).im_func.datatype == list:
             getattr(cls, 'lsm_'+attribute).im_func.default = []
+        elif getattr(cls, 'lsm_'+attribute).im_func.datatype == bool:
+            getattr(cls, 'lsm_'+attribute).im_func.default = False
 
 for objtype in ['Host', 'Service', 'Contact', 'Command', 'Timeperiod', 'Downtime', 'Comment', 'Hostgroup', 'Servicegroup', 'Contactgroup', 'SchedulerLink', 'PollerLink', 'ReactionnerLink', 'BrokerLink', 'Problem', 'Logline', 'Config']:
     cls = [t[1] for t in table_class_map.values() if t[0] == objtype][0]
@@ -4714,7 +4471,7 @@ for objtype in ['Host', 'Service', 'Contact', 'Command', 'Timeperiod', 'Downtime
     for attribute in sorted([x for x in livestatus_attribute_map[objtype]]):
         cls.lsm_columns.append(attribute)
     
-print "FINISHED THE ATTRIBUTE MAPPING<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+#print "FINISHED THE ATTRIBUTE MAPPING<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
      
 
 

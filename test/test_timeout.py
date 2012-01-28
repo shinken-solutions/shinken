@@ -104,7 +104,7 @@ class TestTimeout(ShinkenTest):
         # Now look what the scheduler says to all this
         self.sched.actions[n.id] = n
         self.sched.put_results(o)
-        self.assert_(self.any_log_match("Warning: Contact mr.schinken service notification command 'libexec/sleep_command.sh 7 ' timed out after 2 seconds"))
+        self.assert_(self.any_log_match("Warning : Contact mr.schinken service notification command 'libexec/sleep_command.sh 7 ' timed out after 2 seconds"))
 
 
 if __name__ == '__main__':

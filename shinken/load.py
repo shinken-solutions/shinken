@@ -1,60 +1,59 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 :
-#    Gabes Jean, naparuba@gmail.com
-#    Gerhard Lausser, Gerhard.Lausser@consol.de
-#    Gregory Starck, g.starck@gmail.com
-#    Hartmut Goebel, h.goebel@goebel-consult.de
+
+# -*- coding: utf-8 -*-
+
+# Copyright (C) 2009-2011 :
+#     Gabes Jean, naparuba@gmail.com
+#     Gerhard Lausser, Gerhard.Lausser@consol.de
+#     Gregory Starck, g.starck@gmail.com
+#     Hartmut Goebel, h.goebel@goebel-consult.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
 import time
 import math
 
-#EXP_1=1/math.exp(5/60.0)
-#EXP_5=1/math.exp(5/(5*60.0))
-#EXP_15=1/math.exp(5/(15*60.0))
-
-#From advance load average's code (another of my projects :) )
+# From advanced load average's code (another of my projects :) )
 #def calc_load_load(load, exp,n):
 #        load = n + exp*(load - n)
 #        return (load, exp)
 
 
-#This class if for having a easy Load calculation
-#without having to send value at regular interval
-#(but it's more efficient if you do this :) ) and not
-#having a list and all. Just an object, an update and a get
-#You can define m : the average is for m minutes. The val is
-#the initial value. It's better if it's 0 but you can choice.
-
 
 class Load:
-    #m = number of minutes for the average
-    #val = initial_value
+    """This class is for having a easy Load calculation
+    without having to send value at regular interval
+    (but it's more efficient if you do this :) ) and without 
+    having a list or other stuff. It's just an object, an update and a get
+    You can define m : the average for m minutes. The val is
+    the initial value. It's better if it's 0 but you can choose.
+
+    """
+    
     def __init__(self, m=1, initial_value=0):
-        self.exp = 0 #first exp
-        self.m = m #Number of minute of the avg
-        self.last_update = 0 #last update of the value
-        self.val = initial_value #first value
+        self.exp = 0 # first exp
+        self.m = m # Number of minute of the avg
+        self.last_update = 0 # last update of the value
+        self.val = initial_value # first value
 
 
     def update_load(self, new_val):
-        #The first call do not change the value, just tag
-        #the begining of last_update
+        # The first call do not change the value, just tag
+        # the begining of last_update
         if self.last_update == 0:
             self.last_update = time.time()
             return
