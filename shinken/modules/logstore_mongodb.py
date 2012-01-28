@@ -15,7 +15,7 @@ from shinken.objects.service import Service
 from livestatus_broker.livestatus_stack import LiveStatusStack
 from livestatus_broker.mapping import LOGCLASS_ALERT, LOGCLASS_PROGRAM, LOGCLASS_NOTIFICATION, LOGCLASS_PASSIVECHECK, LOGCLASS_COMMAND, LOGCLASS_STATE, LOGCLASS_INVALID, LOGOBJECT_INFO, LOGOBJECT_HOST, LOGOBJECT_SERVICE, Logline
 
-from pymongo import Connection
+from pymongo import Connection, ReplicaSetConnection
 from pymongo.errors import AutoReconnect
 
 
@@ -41,6 +41,11 @@ def row_factory(cursor, row):
     return Logline(cursor.description, row)
 
 
+CONNECTED = 1
+DISCONNECTED = 2
+SWITCHING = 3
+
+
 class LiveStatusLogStoreError(Exception):
     pass
 
@@ -52,6 +57,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
         self.plugins = []
         # mongodb://host1,host2,host3/?safe=true;w=2;wtimeoutMS=2000
         self.mongodb_uri = getattr(modconf, 'mongodb_uri', None)
+        self.replica_set = getattr(modconf, 'replica_set', None)
         self.database = getattr(modconf, 'database', 'logs')
         self.collection = getattr(modconf, 'collection', 'logs')
         self.use_aggressive_sql = True
@@ -77,7 +83,8 @@ class LiveStatusLogStoreMongoDB(BaseModule):
         # This stack is used to create a minimal select-statement which
         # selects only by time >= and time <=
         self.mongo_time_filter_stack = LiveStatusMongoStack()
-        self.is_connected = False
+        self.is_connected = DISCONNECTED
+        self.backlog = []
         # Now sleep one second, so that won't get lineno collisions with the last second
         time.sleep(1)
         self.lineno = 0
@@ -94,7 +101,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
             self.conn = pymongo.Connection(self.mongodb_uri, fsync=True)
             self.db = self.conn[self.database]
             self.db[self.collection].ensure_index([('time', pymongo.ASCENDING), ('lineno', pymongo.ASCENDING)], name='time_idx')
-            self.is_connected = True
+            self.is_connected = CONNECTED
         except AutoReconnect, exp:
             # now what, ha?
             print "LiveStatusLogStoreMongoDB.AutoReconnect", exp
@@ -128,9 +135,30 @@ class LiveStatusLogStoreMongoDB(BaseModule):
         try:
             if logline.logclass != LOGCLASS_INVALID:
                 self.db[self.collection].insert(values, safe=True)
+                self.is_connected = CONNECTED
+                # If we have a backlog from an outage, we flush these lines
+                for oldvalues in self.backlog[:]:
+                    try:
+                        self.db[self.collection].insert(oldvalues, safe=True)
+                        self.backlog.delete(oldvalues)
+                    except Autoreconnect, exp:
+                        self.is_connected = SWITCHING
+                        pass
+                        # increment some counter
+                        # sleep
+                    except Exception, exp:
+                        pass
+                    
             else:
                 print "This line is invalid", line
 
+        except AutoReconnect, exp:
+            self.backlog.append(values)
+            self.is_connected = SWITCHING
+            time.sleep(5)
+            # At this point we must save the logline for a later attempt
+            # After 5 seconds we either have a successful write
+            # or another exception which means, we are disconnected
         except Exception, exp:
             print "An error occurred:", exp
             print "DATABASE ERROR!!!!!!!!!!!!!!!!!"
@@ -174,7 +202,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
         print "mongo filter is", filter_element
         dbresult = []
         columns = ['logobject', 'attempt', 'logclass', 'command_name', 'comment', 'contact_name', 'host_name', 'lineno', 'message', 'options', 'plugin_output', 'service_description', 'state', 'state_type', 'time', 'type']
-        if not self.is_connected:
+        if not self.is_connected == CONNECTED:
             print "sorry, not connected"
         else:
             dbresult = [Logline([(c, ) for c in columns], [x[col] for col in columns]) for x in self.db[self.collection].find(filter_element).sort([(u'time', pymongo.ASCENDING), (u'lineno', pymongo.ASCENDING)])]
