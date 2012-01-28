@@ -361,6 +361,42 @@ ResponseHeader: fixed16
             print nagresponse
             self.assert_(self.lines_equal(response, nagresponse))
 
+    def test_bad_column(self):
+        self.print_header()
+        now = time.time()
+        objlist = []
+        for host in self.sched.hosts:
+            objlist.append([host, 0, 'UP'])
+        for service in self.sched.services:
+            objlist.append([service, 0, 'OK'])
+        self.scheduler_loop(1, objlist)
+        self.update_broker()
+        request = """GET services
+Columns: host_name wrdlbrmpft description 
+Filter: host_name = test_host_0
+OutputFormat: csv
+KeepAlive: on
+ResponseHeader: off
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        good_response = """test_host_0;;test_ok_0
+"""
+        self.assert_(response == good_response)
+        request = """GET services
+Columns: host_name wrdlbrmpft description 
+Filter: host_name = test_host_0
+OutputFormat: python
+KeepAlive: on
+ResponseHeader: off
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        good_response = """[[u'test_host_0', u'', u'test_ok_0']]
+"""
+        self.assert_(response == good_response)
+
+
 
 
     def test_servicesbyhostgroup(self):

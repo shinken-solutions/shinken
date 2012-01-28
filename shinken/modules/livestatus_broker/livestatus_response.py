@@ -114,21 +114,22 @@ class LiveStatusResponse:
                         if hasattr(item, attribute):
                             value = getattr(item.__class__, attribute).im_func.default
                         else:
-                            value = getattr(item.__class__, attribute).im_func.default
+                            # If nothing else helps, leave the column blank
+                            value = ''
                     if isinstance(value, list):
                         l.append(self.separators[2].join(str(x) for x in value))
                     elif isinstance(value, bool):
                         if value == True:
-                            l.append("1")
+                            l.append('1')
                         else:
-                            l.append("0")
+                            l.append('0')
                     else:
                         try:
                             l.append(str(value))
                         except UnicodeEncodeError:
-                            l.append(value.encode("utf-8", "replace"))
+                            l.append(value.encode('utf-8', 'replace'))
                         except Exception:
-                            l.append("")
+                            l.append('')
                 lines.append(self.separators[1].join(l))
             if len(lines) > 0:
                 if self.columnheaders != 'off' or not query_with_columns:
@@ -161,14 +162,19 @@ class LiveStatusResponse:
                             #print "FALLBACK: %s.%s" % (type(item), attribute)
                             value = getattr(item.__class__, attribute).im_func.default
                         else:
-                            value = getattr(item.__class__, attribute).im_func.default
+                            value = ''
                     if isinstance(value, bool):
                         if value == True:
                             rows.append(1)
                         else:
                             rows.append(0)
                     else:
-                        rows.append(value)
+                        try:
+                            rows.append(value)
+                        except UnicodeEncodeError:
+                            rows.append(value.encode('utf-8', 'replace'))
+                        except Exception:
+                            rows.append('')
                 lines.append(rows)
             if self.columnheaders == 'on':
                 if len(aliases) > 0:
