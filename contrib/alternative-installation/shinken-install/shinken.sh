@@ -49,7 +49,6 @@ function trap_handler()
 }
 
 function remove(){
-    trap 'trap_handler ${LINENO} $? remove' ERR
     cadre "Removing shinken" green
     skill
     
@@ -77,6 +76,29 @@ function remove(){
                 esac    
         fi
     rm -f /etc/init.d/shinken*
+
+    if [ -d "$PNPPREFIX" ]
+    then
+        cecho " > Removing pnp4nagios" green
+        rm -Rf $PNPPREFIX
+        case $CODE in
+                REDHAT)
+                        /etc/init.d/npcd stop
+                        chkconfig npcd off
+                        chkconfig --del npcd 
+                        rm -f /etc/init.d/npcd
+                        rm -f /etc/httpd/conf.d/pnp4nagios
+                        /etc/init.d/httpd restart
+                        ;;
+                DEBIAN)
+                        /etc/init.d/npcd stop
+                        update-rc.d -f npcd remove >> /tmp/shinken.install.log 2>&1 
+                        rm -f /etc/init.d/npcd
+                        rm -f /etc/apache2/conf.d/pnp4nagios
+                        /etc/init.d/apache2 restart
+                        ;;
+        esac    
+    fi
 
     return 0
 }
