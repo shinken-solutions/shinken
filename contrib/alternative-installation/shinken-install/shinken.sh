@@ -201,7 +201,7 @@ function installpkg(){
 
 function debinstalled(){
     package=$1
-    if [ -z $(dpkg -l $package | grep "^ii") ]
+    if [ -z "$(dpkg -l $package | grep "^ii")" ]
     then
         return 1
     else
@@ -216,7 +216,7 @@ function prerequisites(){
 
     for b in $bins
     do
-        rb=$(which $b >> /tmp/shinken.install.log 2>&1 )
+        rb=$(which $b)
         if [ $? -eq 0 ]
         then
             cecho " > Checking for $b : OK" green 
@@ -963,7 +963,7 @@ function do_skmacro(){
     export PYTHONPATH="$TARGET"
     export SHINKEN="$PYTHONPATH"
     export SKTOOLS="$PYTHONPATH/contrib/alternative-installation/shinken-install/tools"
-    $SKTOOLS/skonf.py -a macros -f $SKTOOLS/macros/$macro -d $args >> /tmp/shinken.install.log 2>&1 
+    $PY $SKTOOLS/skonf.py -a macros -f $SKTOOLS/macros/$macro -d $args >> /tmp/shinken.install.log 2>&1 
 }
 
 
