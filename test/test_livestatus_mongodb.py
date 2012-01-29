@@ -293,9 +293,9 @@ class TestConfigBig(TestConfig):
         dbmodconf = Module({'module_name' : 'LogStore',
             'module_type' : 'logstore_mongodb',
             'database' : 'bigbigbig',
-            #'mongodb_uri' : "mongodb://127.0.0.1:27017",
-            'mongodb_uri' : "mongodb://10.0.12.50:27017",
-            'replica_set' : 'livestatus',
+            'mongodb_uri' : "mongodb://127.0.0.1:27017",
+            #'mongodb_uri' : "mongodb://10.0.12.50:27017,10.0.12.51:27017",
+        #    'replica_set' : 'livestatus',
             'max_logs_age' : '14',
         })
         modconf.modules = [dbmodconf]
@@ -528,8 +528,11 @@ OutputFormat: json"""
             print "day -%02d %d..%d - %d" % (day, one_day_earlier, now, numlogs)
             now = one_day_earlier
         numlogs = self.livestatus_broker.db.conn.bigbigbig.logs.find().count()
-        print numlogs, sum(daycount[:14]), daycount[:14]
-        self.assert_(numlogs == sum(daycount[:14]))
+        # simply an estimation. the cleanup-routine in the mongodb logstore
+        # cuts off the old data at midnight, but here in the test we have
+        # only accuracy of a day.
+        self.assert_(numlogs >= sum(daycount[:14]))
+        self.assert_(numlogs <= sum(daycount[:15]))
 
 
 if __name__ == '__main__':
