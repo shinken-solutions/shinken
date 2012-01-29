@@ -1,24 +1,27 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 :
-#    Gabes Jean, naparuba@gmail.com
-#    Gerhard Lausser, Gerhard.Lausser@consol.de
-#    Gregory Starck, g.starck@gmail.com
-#    Hartmut Goebel, h.goebel@goebel-consult.de
+
+# -*- coding: utf-8 -*-
+
+# Copyright (C) 2009-2011 :
+#     Gabes Jean, naparuba@gmail.com
+#     Gerhard Lausser, Gerhard.Lausser@consol.de
+#     Gregory Starck, g.starck@gmail.com
+#     Hartmut Goebel, h.goebel@goebel-consult.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
 import re
@@ -35,12 +38,9 @@ try:
     stdout_encoding = sys.stdout.encoding
     safe_stdout = (stdout_encoding == 'UTF-8')
 except Exception, exp:
-    print "Encoding detection error", exp
+    print "Error : Encoding detection error", exp
     safe_stdout = False
-#import locale
-#print locale.getdefaultlocale()
-#utf8_safe = (locale.getdefaultlocale() == ('en_US','UTF8'))
-#local_encoding = locale.getdefaultlocale()[1]
+
 
 ########### Strings #############
 # Try to print strings, but if there is an utf8 error, go in simple ascii mode
@@ -71,24 +71,24 @@ def safe_print(*args):
 
 
 ################################### TIME ##################################
-#@memoized
+# @memoized
 def get_end_of_day(year, month_id, day):
     end_time = (year, month_id, day, 23, 59, 59, 0, 0, -1)
     end_time_epoch = time.mktime(end_time)
     return end_time_epoch
 
 
-#@memoized
+# @memoized
 def print_date(t):
     return time.asctime(time.localtime(t))
 
 
-#@memoized
+# @memoized
 def get_day(t):
     return int(t - get_sec_from_morning(t))
 
 
-#@memoized
+# @memoized
 def get_sec_from_morning(t):
     t_lt = time.localtime(t)
     h = t_lt.tm_hour
@@ -97,7 +97,7 @@ def get_sec_from_morning(t):
     return h * 3600 + m * 60 + s
 
 
-#@memoized
+# @memoized
 def get_start_of_day(year, month_id, day):
     start_time = (year, month_id, day, 00, 00, 00, 0, 0, -1)
     try:
@@ -108,7 +108,7 @@ def get_start_of_day(year, month_id, day):
     return start_time_epoch
 
 
-#change a time in seconds like 3600 into a format : 0d 1h 0m 0s
+# change a time in seconds like 3600 into a format : 0d 1h 0m 0s
 def format_t_into_dhms_format(t):
     s = t
     m,s=divmod(s,60)
@@ -118,7 +118,7 @@ def format_t_into_dhms_format(t):
 
 
 ################################# Pythonization ###########################
-#first change to foat so manage for example 25.0 to 25
+#first change to float so manage for example 25.0 to 25
 def to_int(val):
     return int(float(val))
 
@@ -205,7 +205,7 @@ def to_svc_hst_distinct_lists(ref, tab):
     return r
 
 
-# Will expaand the value with macros from the
+# Will expand the value with macros from the
 # host/service ref before brok it
 def expand_with_macros(ref, value):
     return MacroResolver().resolve_simple_macros_in_string(value, ref.get_data_for_checks())
@@ -217,7 +217,7 @@ def get_obj_name(obj):
     return obj.get_name()
 
 # Same as before, but call with object,prop instead of just value
-# But if we got a 
+# But if we got an attribute error, return ''
 def get_obj_name_two_args_and_void(obj, value):
     try:
         return value.get_name()
@@ -324,7 +324,7 @@ def strip_and_uniq(tab):
 
 
 
-#################### Patern change application (mainly for host) #######
+#################### Pattern change application (mainly for host) #######
 
 def expand_xy_patern(pattern):
     ns = NodeSet(str(pattern))
@@ -338,13 +338,13 @@ def expand_xy_patern(pattern):
 
 
 
-#This function is used to generate all patern change as
-#recursive list.
-#for example, for a [(1,3),(1,4),(1,5)] xy_couples,
-#it will generate a 60 item list with:
-#Rule: [1, '[1-5]', [1, '[1-4]', [1, '[1-3]', []]]]
-#Rule: [1, '[1-5]', [1, '[1-4]', [2, '[1-3]', []]]]
-#...
+# This function is used to generate all pattern change as
+# recursive list.
+# for example, for a [(1,3),(1,4),(1,5)] xy_couples,
+# it will generate a 60 item list with:
+# Rule: [1, '[1-5]', [1, '[1-4]', [1, '[1-3]', []]]]
+# Rule: [1, '[1-5]', [1, '[1-4]', [2, '[1-3]', []]]]
+# ...
 def got_generation_rule_patern_change(xy_couples):
     res = []
     xy_cpl = xy_couples
@@ -361,14 +361,14 @@ def got_generation_rule_patern_change(xy_couples):
     return res
 
 
-#this fuction apply a recursive patern change
-#generate by the got_generation_rule_patern_change
-#function.
-#It take one entry of this list, and apply
-#recursivly the change to s like :
-#s = "Unit [1-3] Port [1-4] Admin [1-5]"
-#rule = [1, '[1-5]', [2, '[1-4]', [3, '[1-3]', []]]]
-#output = Unit 3 Port 2 Admin 1
+# this fuction apply a recursive pattern change
+# generate by the got_generation_rule_patern_change
+# function.
+# It take one entry of this list, and apply
+# recursivly the change to s like :
+# s = "Unit [1-3] Port [1-4] Admin [1-5]"
+# rule = [1, '[1-5]', [2, '[1-4]', [3, '[1-3]', []]]]
+# output = Unit 3 Port 2 Admin 1
 def apply_change_recursive_patern_change(s, rule):
     #print "Try to change %s" % s, 'with', rule
     new_s = s
@@ -381,11 +381,11 @@ def apply_change_recursive_patern_change(s, rule):
     return apply_change_recursive_patern_change(s, t)
 
 
-#For service generator, get dict from a _custom properties
-#as _disks   C$(80%!90%),D$(80%!90%)$,E$(80%!90%)$
+# For service generator, get dict from a _custom properties
+# as _disks   C$(80%!90%),D$(80%!90%)$,E$(80%!90%)$
 #return {'C' : '80%!90%', 'D' : '80%!90%', 'E' : '80%!90%'}
-#And if we have a key that look like [X-Y] we will expand it
-#into Y-X+1 keys
+# And if we have a key that look like [X-Y] we will expand it
+# into Y-X+1 keys
 GET_KEY_VALUE_SEQUENCE_ERROR_NOERROR = 0
 GET_KEY_VALUE_SEQUENCE_ERROR_SYNTAX = 1
 GET_KEY_VALUE_SEQUENCE_ERROR_NODEFAULT = 2
@@ -439,14 +439,12 @@ def get_key_value_sequence(entry, default_value=None):
                 r['VALUE1'] = default_value
         r['VALUE'] = r['VALUE1']
 
-    #Now create new one but for [X-Y] matchs
-    # array1 holds the original entries. Some of the keys may contain wildcards
-    # array2 is filled with originals and inflated wildcards
-    #import time
-    #t0 = time.time()
-    #NodeSet = None
+    # Now create new one but for [X-Y] matchs
+    #  array1 holds the original entries. Some of the keys may contain wildcards
+    #  array2 is filled with originals and inflated wildcards
+    
     if NodeSet is None:
-        #The patern that will say if we have a [X-Y] key.
+        # The pattern that will say if we have a [X-Y] key.
         pat = re.compile('\[(\d*)-(\d*)\]')
 
     for r in array1:
@@ -454,28 +452,28 @@ def get_key_value_sequence(entry, default_value=None):
         key = r['KEY']
         orig_key = r['KEY']
 
-        #We have no choice, we cannot use NodeSet, so we use the
-        #simple regexp
+        # We have no choice, we cannot use NodeSet, so we use the
+        # simple regexp
         if NodeSet is None:
             m = pat.search(key)
             got_xy = (m is not None)
         else: # Try to look with a nodeset check directly
             try:
                 ns = NodeSet(str(key))
-                #If we have more than 1 element, we have a xy thing
+                # If we have more than 1 element, we have a xy thing
                 got_xy = (len(ns) != 1)
             except NodeSetParseRangeError:
                 return (None, GET_KEY_VALUE_SEQUENCE_ERROR_NODE)
                 pass # go in the next key
 
-        #Now we've got our couples of X-Y. If no void,
-        #we were with a "key generator"
+        # Now we've got our couples of X-Y. If no void,
+        # we were with a "key generator"
 
         if got_xy:
-            #Ok 2 cases : we have the NodeSet lib or not.
-            #if not, we use the dumb algo (quick, but manage less
-            #cases like /N or , in paterns)
-            if NodeSet is None: #us the old algo
+            # Ok 2 cases : we have the NodeSet lib or not.
+            # if not, we use the dumb algo (quick, but manage less
+            # cases like /N or , in patterns)
+            if NodeSet is None: # us the old algo
                 still_loop = True
                 xy_couples = [] # will get all X-Y couples
                 while still_loop:
@@ -484,18 +482,18 @@ def get_key_value_sequence(entry, default_value=None):
                         (x,y) = m.groups()
                         (x,y) = (int(x), int(y))
                         xy_couples.append((x,y))
-                        #We must search if we've gotother X-Y, so
-                        #we delete this one, and loop
+                        # We must search if we've gotother X-Y, so
+                        # we delete this one, and loop
                         key = key.replace('[%d-%d]' % (x,y), 'Z'*10)
                     else:#no more X-Y in it
                         still_loop = False
 
-                #Now we have our xy_couples, we can manage them
+                # Now we have our xy_couples, we can manage them
 
-                #We search all patern change rules
+                # We search all pattern change rules
                 rules = got_generation_rule_patern_change(xy_couples)
 
-                #Then we apply them all to get ours final keys
+                # Then we apply them all to get ours final keys
                 for rule in rules:
                     res = apply_change_recursive_patern_change(orig_key, rule)
                     new_r = {}
@@ -505,10 +503,10 @@ def get_key_value_sequence(entry, default_value=None):
                     array2.append(new_r)
 
             else:
-                #The key was just a generator, we can remove it
-                #keys_to_del.append(orig_key)
+                # The key was just a generator, we can remove it
+                # keys_to_del.append(orig_key)
 
-                #We search all patern change rules
+                # We search all pattern change rules
                 #rules = got_generation_rule_patern_change(xy_couples)
                 nodes_set = expand_xy_patern(orig_key)
                 new_keys = list(nodes_set)
