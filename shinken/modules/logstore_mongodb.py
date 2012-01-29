@@ -10,12 +10,13 @@ import os
 import time
 import datetime
 import re
+import sys
 import pymongo
 from shinken.objects.service import Service
 from livestatus_broker.livestatus_stack import LiveStatusStack
 from livestatus_broker.mapping import LOGCLASS_ALERT, LOGCLASS_PROGRAM, LOGCLASS_NOTIFICATION, LOGCLASS_PASSIVECHECK, LOGCLASS_COMMAND, LOGCLASS_STATE, LOGCLASS_INVALID, LOGOBJECT_INFO, LOGOBJECT_HOST, LOGOBJECT_SERVICE, Logline
 
-from pymongo import Connection, ReplicaSetConnection
+from pymongo import Connection, ReplicaSetConnection, ReadPreference
 from pymongo.errors import AutoReconnect
 
 
@@ -96,17 +97,30 @@ class LiveStatusLogStoreMongoDB(BaseModule):
         pass
 
     def open(self):
-        print "open LiveStatusLogStoreMongoDB ok"
         try:
-            self.conn = pymongo.Connection(self.mongodb_uri, fsync=True)
+            if self.replica_set:
+                self.conn = pymongo.ReplicaSetConnection(self.mongodb_uri, replicaSet=self.replica_set, fsync=True)
+            else:
+                self.conn = pymongo.Connection(self.mongodb_uri, fsync=True)
             self.db = self.conn[self.database]
             self.db[self.collection].ensure_index([('time', pymongo.ASCENDING), ('lineno', pymongo.ASCENDING)], name='time_idx')
+            if self.replica_set:
+                pass
+                # This might be a future option prefer_secondary
+                #self.db.read_preference = ReadPreference.SECONDARY
             self.is_connected = CONNECTED
+            self.next_log_db_rotate = time.time()
         except AutoReconnect, exp:
             # now what, ha?
             print "LiveStatusLogStoreMongoDB.AutoReconnect", exp
-            raise
-            pass
+            # The mongodb is hopefully available until this module is restarted
+            raise LiveStatusLogStoreError
+        except Exception, exp:
+            # If there is a replica_set, but the host is a simple standalone one
+            # we get a "No suitable hosts found" here.
+            # But other reasons are possible too. 
+            print "Could not open the database", exp
+            raise LiveStatusLogStoreError
 
     def close(self):
         self.conn.disconnect()
@@ -115,8 +129,23 @@ class LiveStatusLogStoreMongoDB(BaseModule):
         pass
 
     def commit_and_rotate_log_db(self):
-        """ Not necessary for a MongoDB."""
-        pass
+        """For a MongoDB there is no rotate, but we will delete old contents."""
+        now = time.time()
+        if self.next_log_db_rotate <= now:
+            today = datetime.date.today()
+            today0000 = datetime.datetime(today.year, today.month, today.day, 0, 0, 0)
+            today0005 = datetime.datetime(today.year, today.month, today.day, 0, 5, 0)
+            oldest = today0000 - datetime.timedelta(days=self.max_logs_age)
+            self.db[self.collection].remove({ u'time' : { '$lt' : time.mktime(oldest.timetuple()) }}, safe=True)
+
+            if now < time.mktime(today0005.timetuple()):
+                nextrotation = today0005
+            else:
+                nextrotation = today0005 + datetime.timedelta(days=1)
+
+            # See you tomorrow
+            self.next_log_db_rotate = time.mktime(nextrotation.timetuple())
+            print "next rotation at %s " % time.asctime(time.localtime(self.next_log_db_rotate))
 
     def do_i_need_this_manage_brok(self, brok):
         """ Look for a manager function for a brok, and call it """
@@ -127,42 +156,44 @@ class LiveStatusLogStoreMongoDB(BaseModule):
     def manage_log_brok(self, b):
         data = b.data
         line = data['log']
-        try:
-            logline = Logline(line=line)
-            values = logline.as_dict()
-        except Exception, exp:
-            print "Unexpected error:", exp
-        try:
-            if logline.logclass != LOGCLASS_INVALID:
+        logline = Logline(line=line)
+        values = logline.as_dict()
+        if logline.logclass != LOGCLASS_INVALID:
+            try:
                 self.db[self.collection].insert(values, safe=True)
                 self.is_connected = CONNECTED
                 # If we have a backlog from an outage, we flush these lines
-                for oldvalues in self.backlog[:]:
+                # First we make a copy, so we can delete elements from
+                # the original self.backlog
+                backloglines = [bl for bl in self.backlog]
+                for backlogline in backloglines:
                     try:
-                        self.db[self.collection].insert(oldvalues, safe=True)
-                        self.backlog.delete(oldvalues)
+                        self.db[self.collection].insert(backlogline, safe=True)
+                        self.backlog.remove(backlogline)
                     except Autoreconnect, exp:
                         self.is_connected = SWITCHING
-                        pass
-                        # increment some counter
-                        # sleep
                     except Exception, exp:
-                        pass
-                    
-            else:
-                print "This line is invalid", line
-
-        except AutoReconnect, exp:
-            self.backlog.append(values)
-            self.is_connected = SWITCHING
-            time.sleep(5)
-            # At this point we must save the logline for a later attempt
-            # After 5 seconds we either have a successful write
-            # or another exception which means, we are disconnected
-        except Exception, exp:
-            print "An error occurred:", exp
-            print "DATABASE ERROR!!!!!!!!!!!!!!!!!"
-        #FIXME need access to this#self.livestatus.count_event('log_message')
+                        print "Got an exception inserting the backlog", str(exp)
+            except AutoReconnect, exp:
+                if self.is_connected != SWITCHING:
+                    self.is_connected = SWITCHING
+                    time.sleep(5)
+                    # Under normal circumstances after these 5 seconds
+                    # we should have a new primary node
+                else:
+                    # Not yet? Wait, but try harder.
+                    time.sleep(0.1)
+                # At this point we must save the logline for a later attempt
+                # After 5 seconds we either have a successful write
+                # or another exception which means, we are disconnected
+                self.backlog.append(values)
+            except Exception, exp:
+                self.is_connected = DISCONNECTED
+                print "An error occurred:", exp
+                print "DATABASE ERROR!!!!!!!!!!!!!!!!!"
+            #FIXME need access to this#self.livestatus.count_event('log_message')
+        else:
+            print "This line is invalid", line
 
     def add_filter(self, operator, attribute, reference):
 	if attribute == 'time':
@@ -206,7 +237,6 @@ class LiveStatusLogStoreMongoDB(BaseModule):
             print "sorry, not connected"
         else:
             dbresult = [Logline([(c, ) for c in columns], [x[col] for col in columns]) for x in self.db[self.collection].find(filter_element).sort([(u'time', pymongo.ASCENDING), (u'lineno', pymongo.ASCENDING)])]
-        print "i count", self.db[self.collection].find(filter_element).count()
         return dbresult
 
     def make_mongo_filter(self, operator, attribute, reference):

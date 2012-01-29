@@ -294,6 +294,9 @@ class TestConfigBig(TestConfig):
             'module_type' : 'logstore_mongodb',
             'database' : 'bigbigbig',
             'mongodb_uri' : "mongodb://127.0.0.1:27017",
+            #'mongodb_uri' : "mongodb://10.0.12.50:27017,10.0.12.51:27017",
+        #    'replica_set' : 'livestatus',
+            'max_logs_age' : '14',
         })
         modconf.modules = [dbmodconf]
         self.livestatus_broker = LiveStatus_broker(modconf)
@@ -489,6 +492,47 @@ OutputFormat: json"""
         clientselected = [d for d in alldocs if (d['time'] >= int(starttime) and d['time'] <= int(endtime) and d['host_name'] == 'test_host_099' and d['service_description'] == 'test_ok_01' and 'HUHU' in d['plugin_output'])]
         print "clientselected", len(clientselected)
         self.assert_(len(pyresponse) == len(clientselected))
+
+        # now delete too old entries from the database (> 14days)
+        # that's the job of commit_and_rotate_log_db()
+        #
+        numlogs = self.livestatus_broker.db.conn.bigbigbig.logs.find().count()
+        times = [x['time'] for x in self.livestatus_broker.db.conn.bigbigbig.logs.find()]
+        print "whole database", numlogs, min(times), max(times)
+        numlogs = self.livestatus_broker.db.conn.bigbigbig.logs.find({
+            '$and' : [
+                {'time' : { '$gt' : min(times)} },
+                {'time' : { '$lte' : max(times)} }
+            ]}).count()
+        now = max(times)
+        daycount = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        for day in xrange(25):
+            one_day_earlier = now - 3600*24
+            numlogs = self.livestatus_broker.db.conn.bigbigbig.logs.find({
+                '$and' : [
+                    {'time' : { '$gt' : one_day_earlier} },
+                    {'time' : { '$lte' : now} }
+                ]}).count()
+            daycount[day] = numlogs
+            print "day -%02d %d..%d - %d" % (day, one_day_earlier, now, numlogs)
+            now = one_day_earlier
+        self.livestatus_broker.db.commit_and_rotate_log_db()
+        now = max(times)
+        for day in xrange(25):
+            one_day_earlier = now - 3600*24
+            numlogs = self.livestatus_broker.db.conn.bigbigbig.logs.find({
+                '$and' : [
+                    {'time' : { '$gt' : one_day_earlier} },
+                    {'time' : { '$lte' : now} }
+                ]}).count()
+            print "day -%02d %d..%d - %d" % (day, one_day_earlier, now, numlogs)
+            now = one_day_earlier
+        numlogs = self.livestatus_broker.db.conn.bigbigbig.logs.find().count()
+        # simply an estimation. the cleanup-routine in the mongodb logstore
+        # cuts off the old data at midnight, but here in the test we have
+        # only accuracy of a day.
+        self.assert_(numlogs >= sum(daycount[:14]))
+        self.assert_(numlogs <= sum(daycount[:15]))
 
 
 if __name__ == '__main__':

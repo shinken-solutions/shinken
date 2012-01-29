@@ -1,36 +1,33 @@
 #!/usr/bin/env python
-# Copyright (C) 2009-2012 :
+
+# -*- coding: utf-8 -*-
+
+# Copyright (C) 2009-2011 :
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
 #     Hartmut Goebel, h.goebel@goebel-consult.de
-#     Andreas Karfusehr, andreas@karfusehr.de
-# 
+#
 # This file is part of Shinken.
-# 
+#
 # Shinken is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # Shinken is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Affero General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-# This class is used for poller and reactionner to work.
-# The worker is a process launch by theses process and read Message in a Queue
-# (self.s) (slave)
-# They launch the Check and then send the result in the Queue self.m (master)
-# they can die if they do not do anything (param timeout)
 
 from Queue import Empty
 
-# In android, we sould use threads, not process
+# In android, we sgould use threads, not process
 is_android = True
 try:
    import android
@@ -56,9 +53,13 @@ import signal
 from shinken.worker import Worker
 
 
-# SkonfuiWorker class is a sub one for the Worker one of the poller/reactionners
-# it just take it's jobs from the mongodb, instead of the queues()
+
 class SkonfUIWorker(Worker):
+    """SkonfuiWorker class is a sub one for the Worker one of the poller/reactionners
+     it just take it's jobs from the mongodb, instead of the queues()
+    
+    """
+    
     id = 0
     _process = None
     _mortal = None
@@ -76,7 +77,7 @@ class SkonfUIWorker(Worker):
 
 
     def get_scan_data(self):
-       print "I ask for a scan with the id", self.scan_asked
+       print "Info : I ask for a scan with the id", self.scan_asked
        scan_id = self.scan_asked.get('scan_id')
        # I search the scan entry in the asked_scans table
        cur = self.db.scans.find({'_id' : scan_id})
@@ -87,13 +88,13 @@ class SkonfUIWorker(Worker):
        
 
     def launch_scan(self):
-       print "I try to launch scan", self.scan
+       print "Info : I try to launch scan", self.scan
        scan_id = self.scan.get('_id')
        nmap = self.scan.get('use_nmap')
        vmware = self.scan.get('use_vmware')
        names = self.scan.get('names')
        state = self.scan.get('state')
-       print "IN SCAN WORKER:",nmap, vmware, names, state
+       print "Info : IN SCAN WORKER:",nmap, vmware, names, state
        
        # Updating the scan entry state
        self.db.scans.update({'_id' : scan_id}, { '$set': { 'state' : 'preparing' }})
@@ -102,7 +103,7 @@ class SkonfUIWorker(Worker):
        
        elts = names.splitlines()
        targets = ' '.join(elts)
-       print "Launching Nmap with targets", targets
+       print "Info : Launching Nmap with targets", targets
        macros = [('NMAPTARGETS', targets)]
        overwrite = False
        runners = ['nmap']
@@ -170,26 +171,26 @@ class SkonfUIWorker(Worker):
                try:
                 #print "I", self.id, "wait for a message"
                   msg = self.s.get(block=False)
-                  print "I", self.id, "I've got a message!", msg                  
+                  print "Info : I", self.id, "I've got a message!", msg                  
                   if msg is not None and msg.get_type() == 'ScanAsk':
                      self.scan_asked = msg.get_data()
                      self.get_scan_data()
                      self.launch_scan()
                except Empty , exp:
-                  print "UI worker go to sleep", self.id
+                  print "Info : UI worker go to sleep", self.id
                   time.sleep(1)
 
             # Now get order from master
             try:
                cmsg = c.get(block=False)
                if cmsg.get_type() == 'Die':
-                  print "[%d]Dad say we are dying..." % self.id
+                  print "Info : [%d]Dad say we are dying..." % self.id
                   break
                
             except :
                 pass
 
-            # Manage a possible time change (our avant will be change with the diff)
+            # Manage a possible time change (our evant will be change with the diff)
             diff = self.check_for_system_time_change()
             begin += diff
 
