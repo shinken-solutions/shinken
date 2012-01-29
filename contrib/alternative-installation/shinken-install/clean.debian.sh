@@ -57,14 +57,21 @@ do
     fi
     
 done
-APTLIST="$APTHPKGS $VSPHERESDKAPTPKGS $NAGPLUGAPTPK $CHECKORACLEHEALTHAPTPKG $CHECKMONGOAPTPKG $CHECKEMCAPTPKG $CHECKNWCAPTPKG $PNPAPTPKG $MKAPTPKG $WMICAPTPKG $CHECKHPASMAPTPKGS"
+APTLIST="$APTPKGS $VSPHERESDKAPTPKGS $NAGPLUGAPTPK $CHECKORACLEHEALTHAPTPKG $CHECKMONGOAPTPKG $CHECKEMCAPTPKG $CHECKNWCAPTPKG $PNPAPTPKG $MKAPTPKG $WMICAPTPKG $CHECKHPASMAPTPKGS"
 for l in $APTLIST
 do
     for p in $l
     do
         cecho " > remove $p" yellow
-        apt-get purge $p
+        apt-get purge $p 
     done
 done
 apt-get autoremove
 
+rm -Rf $PNPPREFIX
+rm -Rf $MKPREFIX
+
+rm -f /etc/apache2/conf.d/zzz_check_mk.conf
+rm -f /etc/apache2/conf.d/pnp4nagios.conf
+
+/etc/init.d/apache2 restart
