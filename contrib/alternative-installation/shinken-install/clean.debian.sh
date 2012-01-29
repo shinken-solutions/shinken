@@ -68,3 +68,10 @@ do
 done
 apt-get autoremove
 
+rm -Rf $PNPPREFIX
+rm -Rf $MKPREFIX
+
+rm -f /etc/apache2/conf.d/zzz_check_mk.conf
+rm -f /etc/apache2/conf.d/pnp4nagios.conf
+
+/etc/init.d/apache2 restart
