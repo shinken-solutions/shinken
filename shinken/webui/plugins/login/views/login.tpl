@@ -1,4 +1,4 @@
-%rebase layout title='Shinken UI login', print_menu=False, js=['login/js/pass_shark.js']
+%rebase layout title='Shinken UI login', print_menu=False, js=['login/js/pass_shark.js'], css=['login/css/login.css']
 
 <script type="text/javascript">
 	function submitform() {
@@ -8,6 +8,7 @@
 	/* Catch the key ENTER and launch the form 
 	 Will be link in the password field
 	*/
+	
 	function submitenter(myfield,e) {
 	  var keycode;
 	  if (window.event) keycode = window.event.keyCode;
@@ -38,8 +39,8 @@
 %if login_text:
 <p><span id="login-text"> {{login_text}}</span></p>
 %end
-	<div class="grid_8">
-		<img src="/static/images/robot_rouge_alpha.png" alt="Shinken Login">
+	<div class="div_logo grid_8">
+		<img class='img_logo' src="/static/images/logo.png" alt="Shinken Login">
 	</div>
 
 	<div id="login-form" class="grid_7">
