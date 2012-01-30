@@ -5,9 +5,8 @@
 setconfigfile __PREFIX__/etc/shinken-specific.cfg
 setauthfile __PREFIX__/contrib/alternative-installation/shinken-install/tools/macros/auth
 setparam config_file=ARG1 from module where module_type=npcdmod
+setparam uri=http://ARG2/pnp4nagios from module where module_name=PNP_UI
 getdirective modules from broker where broker_name=broker-1
 setparam modules=LAST,NPCDMOD from broker where broker_name=broker-1
-setparam uri=http://ARG2/pnp4nagios from module where module_name=PNP_UI
-getdirective modules from module where module_name=WebUI
-setparam modules=LAST,PNP_UI from module where module_name=WebUI
+setparam modules=Apache_passwd,ActiveDir_UI,Cfg_password,PNP_UI from module where module_type=webui
 writeconfig
