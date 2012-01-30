@@ -122,7 +122,7 @@ Invalid element name
 		<div class="grid_7">
 		    %#   " If the elements is a root problem with a huge impact and not ack, ask to ack it!"
 		    %if elt.is_problem and elt.business_impact > 2 and not elt.problem_has_been_acknowledged:
-			<div class="ui-state-error ui-corner-all push_top2">
+			<div class="ui-state-error ui-corner-all push_top1 pull_bottom1">
 				<p><span style="float: left; margin-right: 0.3em;" class="ui-icon ui-icon-info"></span>	This element has got an important impact on your business, please <b>fix it</b> or <b>acknowledge it</b>.</p>
 			</div>
 		    %# "end of the 'SOLVE THIS' highlight box"

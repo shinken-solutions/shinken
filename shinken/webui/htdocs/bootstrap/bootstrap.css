@@ -395,6 +395,14 @@ a:hover {
 .push_top2 {
   margin-top: 20px;
 }
+
+.pull_bottom1 {
+  margin-bottom: 10px;
+}
+
+.pull_bottom2 {
+  margin-bottom: 20px;
+}
 /* Typography.less
  * Headings, body text, lists, code, and more for a versatile and durable typography system
  * ---------------------------------------------------------------------------------------- */
@@ -1128,7 +1136,7 @@ table {
   border-collapse: collapse;
 }
 table th, table td {
-  padding: 5px 10px 5px;
+  padding: 2px 10px 2px;
   line-height: 18px;
   text-align: left;
 }

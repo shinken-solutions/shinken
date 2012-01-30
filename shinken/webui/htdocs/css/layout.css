@@ -136,5 +136,9 @@
 
 
 #content_container h1 {
-	font-size: 25px
+	font-size: 25px;
+}
+
+#content_container table {
+	margin-bottom: 8px;
 }
