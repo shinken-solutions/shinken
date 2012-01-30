@@ -41,6 +41,11 @@ from shinken.comment import Comment
 
 sys.setcheckinterval(10000)
 
+# we have an external process, so we must un-fake time functions
+time.time = original_time_time
+time.sleep = original_time_sleep
+
+
 
 class TestConfig(ShinkenTest):
     def contains_line(self, text, pattern):
@@ -297,21 +302,18 @@ class TestConfigSmall(TestConfig):
 
     def tearDown(self):
         self.stop_nagios()
-        self.livestatus_broker.dbconn.commit()
-        self.livestatus_broker.dbconn.close()
+        self.livestatus_broker.db.commit()
+        self.livestatus_broker.db.close()
         if os.path.exists(self.livelogs):
             os.remove(self.livelogs)
-        if os.path.exists(self.pnp4nagios):
-            shutil.rmtree(self.pnp4nagios)
+        if os.path.exists(self.livestatus_broker.pnp_path):
+            shutil.rmtree(self.livestatus_broker.pnp_path)
         if os.path.exists('var/nagios.log'):
             os.remove('var/nagios.log')
         if os.path.exists('var/retention.dat'):
             os.remove('var/retention.dat')
         if os.path.exists('var/status.dat'):
             os.remove('var/status.dat')
-        to_del = [attr for attr in self.livestatus_broker.livestatus.__class__.out_map['Host'].keys() if attr.startswith('host_')]
-        for attr in to_del:
-            del self.livestatus_broker.livestatus.__class__.out_map['Host'][attr]
         self.livestatus_broker = None
 
 
@@ -394,12 +396,9 @@ ColumnHeaders: off
         # launch the query, which must return an empty result
         query = [q for q in response if q.my_type == "query"][0]
         wait = [q for q in response if q.my_type == "wait"][0]
-        result = wait.launch_query()
-        response = wait.response
-        print response
-        response.format_live_data(result, wait.columns, wait.aliases)
-        output, keepalive = response.respond()
-        self.assert_(not output.strip())
+        result = wait.condition_fulfilled()
+        # not yet...the plugin must run first
+        self.assert_(not result)
 
         #result = query.launch_query()
         #response = query.response
@@ -414,39 +413,18 @@ ColumnHeaders: off
         self.scheduler_loop(3, [[host, 2, 'DOWN']])
         self.update_broker(True)
 
-        print wait.filter_stack.qsize()
-        result = wait.launch_query()
-        response = wait.response
+        result = wait.condition_fulfilled()
+        # not yet...the plugin must run first
+        self.assert_(not result)
+
+        result = query.launch_query()
+        response = query.response
         response.columnheaders = "on"
         print response
-        response.format_live_data(result, wait.columns, wait.aliases)
+        response.format_live_data(result, query.columns, query.aliases)
         output, keepalive = response.respond()
         print "output of the wait is (%s)" % output
         self.assert_(output.strip())
-
-
-
-
-
-
-        query = """
-COMMAND [1303116582] SCHEDULE_FORCED_SVC_CHECK;test_host_0;test_ok_0;1303116582
-
-GET services
-WaitObject: test_host_0 test_ok_0
-WaitCondition: last_check >= 1303116582
-WaitTimeout: 10000
-WaitTrigger: check
-Columns: last_check state plugin_output
-Filter: host_name = test_host_0
-Filter: service_description = test_ok_0
-Localtime: 1303116582
-OutputFormat: python
-KeepAlive: on
-ResponseHeader: fixed16
-ColumnHeaders: off
-"""
-
 
     def test_multiple_externals(self):
         self.print_header()
