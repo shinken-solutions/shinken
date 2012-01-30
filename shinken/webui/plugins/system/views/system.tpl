@@ -8,7 +8,7 @@
 	<div id="nav_left">
 		<ul>
 			<li><a href="/system">System</a></li>
-			<li><a href="/system/log">Log</a></li>
+			%#<li><a href="/system/log">Log</a></li>
 		</ul>
 	</div>
 </div>

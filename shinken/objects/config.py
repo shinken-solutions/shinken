@@ -519,8 +519,10 @@ class Config(Item):
                 tmp.append("imported_from "+ filefrom)
                 # Get new type
                 elts = re.split('\s', line)
-                tmp_type = elts[1]
-                tmp_type = tmp_type.split('{')[0]
+                # Maybe there was space before and after the type
+                # so we must get all and strip it
+                tmp_type = ' '.join(elts[1:]).strip()
+                tmp_type = tmp_type.split('{')[0].strip()
             else:
                 if in_define:
                     tmp.append(line)
