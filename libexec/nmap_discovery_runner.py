@@ -19,7 +19,7 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-#sudo nmap 192.168.0.1 -T4 -O --traceroute -oX toto.xml
+#sudo nmap 192.168.0.1 -sU -sT -T4 -O --traceroute -oX toto.xml
 
 import optparse
 import sys
@@ -251,7 +251,7 @@ if not simulate:
 
     print "propose a tmppath", tmppath
 
-    cmd = "sudo nmap %s -T4 -O --traceroute -oX %s" % (' '.join(targets) , tmppath)
+    cmd = "sudo nmap %s -sU -sT -T4 -O --traceroute -oX %s" % (' '.join(targets) , tmppath)
     print "Launching command,", cmd
     try:
         nmap_process = subprocess.Popen(

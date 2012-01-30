@@ -62,7 +62,7 @@ class Property(object):
                      
         """
         `default`: default value to be used if this property is not set.
-                   If default is None, this property is requied.
+                   If default is None, this property is required.
 
         `class_inherit`: List of 2-tuples, (Service, 'blabla') : must
                    set this property to the Service class with name
@@ -84,12 +84,12 @@ class Property(object):
                      be send like that.
 
         brok_transformation: if set, will call the function with the
-                     value of the property the major times it will be
-                     to flatten the data (like realm_name instead of
+                     value of the property when flattening 
+                     data is necessary (like realm_name instead of
                      the realm object).
 
         override : for scheduler, if the property must override the
-                     value of the configuration we send
+                     value of the configuration we send it
 
         managed : property that is managed in Nagios but not in Shinken
 
@@ -116,7 +116,7 @@ class UnusedProp(Property):
     """A unused Property. These are typically used by Nagios but
     no longer usefull/used by Shinken.
 
-    This is just to warn the user that the option he use is no more used
+    This is just to warn the user that the option he uses is no more used
     in Shinken.
     
     """

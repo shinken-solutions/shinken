@@ -1,28 +1,30 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 :
-#    Gabes Jean, naparuba@gmail.com
-#    Gerhard Lausser, Gerhard.Lausser@consol.de
-#    Gregory Starck, g.starck@gmail.com
-#    Hartmut Goebel, h.goebel@goebel-consult.de
+
+# -*- coding: utf-8 -*-
+
+# Copyright (C) 2009-2011 :
+#     Gabes Jean, naparuba@gmail.com
+#     Gerhard Lausser, Gerhard.Lausser@consol.de
+#     Gregory Starck, g.starck@gmail.com
+#     Hartmut Goebel, h.goebel@goebel-consult.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#SatelliteLink is a common Class for link to satellite for
-#Arbiter with Conf Dispatcher.
+
 
 import time
 import socket
@@ -41,6 +43,11 @@ Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
                     Pyro.errors.DaemonError)
 
 class SatelliteLink(Item):
+    """SatelliteLink is a common Class for link to satellite for
+    Arbiter with Conf Dispatcher.
+    
+    """
+
     #id = 0 each Class will have it's own id
 
     properties = Item.properties.copy()
@@ -110,15 +117,15 @@ class SatelliteLink(Item):
             return False
 
 
-    #Get and clean all of our broks
+    # Get and clean all of our broks
     def get_all_broks(self):
         res = self.broks
         self.broks = []
         return res
 
 
-    #Set alive, reachable, and reset attemps.
-    #If we change state, raise a status brok update
+    # Set alive, reachable, and reset attemps.
+    # If we change state, raise a status brok update
     def set_alive(self):
         was_alive = self.alive
         self.alive = True
@@ -137,10 +144,10 @@ class SatelliteLink(Item):
         self.alive = False
         self.con = None
 
-        #We are dead now. Must raise
-        #a brok to say it
+        # We are dead now. Must raise
+        # a brok to say it
         if was_alive:
-            logger.log("WARNING : Setting the satellite %s to a dead state." % self.get_name())
+            logger.log("Warning : Setting the satellite %s to a dead state." % self.get_name())
             b = self.get_update_status_brok()
             self.broks.append(b)
 
@@ -153,7 +160,7 @@ class SatelliteLink(Item):
         self.attempt = min(self.attempt, self.max_check_attempts)
         # Don't need to warn again and again if the satellite is already dead
         if self.alive:
-            s = "Add failed attempt to %s (%d/%d) %s" % (self.get_name(), self.attempt, self.max_check_attempts, reason)
+            s = "Info : Add failed attempt to %s (%d/%d) %s" % (self.get_name(), self.attempt, self.max_check_attempts, reason)
             logger.log(s)
         # check when we just go HARD (dead)
         if self.attempt == self.max_check_attempts:
@@ -161,7 +168,7 @@ class SatelliteLink(Item):
 
 
     # Update satellite info each self.check_interval seconds
-    # so we smooth arbtier actions for just useful actions
+    # so we smooth arbiter actions for just useful actions
     # and not cry for a little timeout
     def update_infos(self):
         # First look if it's not too early to ping
@@ -172,7 +179,7 @@ class SatelliteLink(Item):
 
         self.last_check = now
 
-        #We ping and update the managed list
+        # We ping and update the managed list
         self.ping()
         self.update_managed_list()
         
@@ -183,7 +190,7 @@ class SatelliteLink(Item):
 
 
     # The elements just got a new conf_id, we put it in our list
-    # because maybe the satellite is too buzy to answer from now
+    # because maybe the satellite is too busy to answer now
     def known_conf_managed_push(self, i):
         self.managed_confs.append(i)
         # unique the list
@@ -196,7 +203,7 @@ class SatelliteLink(Item):
             if self.con is None:
                 self.create_connection()
 
-            # If the connection failed to initialize, bailout
+            # If the connection failed to initialize, bail out
             if self.con is None:
                 self.add_failed_check_attempt()
                 return
@@ -230,7 +237,7 @@ class SatelliteLink(Item):
         if self.con is None:
             self.create_connection()
 
-        # If the connection failed to initialize, bailout
+        # If the connection failed to initialize, bail out
         if self.con is None:
             return False
 
@@ -254,7 +261,7 @@ class SatelliteLink(Item):
         if self.con is None:
             self.create_connection()
 
-        # If the connection failed to initialize, bailout
+        # If the connection failed to initialize, bail out
         if self.con is None:
             return False
 
@@ -274,7 +281,7 @@ class SatelliteLink(Item):
         if self.con is None:
             self.create_connection()
 
-        # If the connection failed to initialize, bailout
+        # If the connection failed to initialize, bail out
         if self.con is None:
             return
 
@@ -290,7 +297,7 @@ class SatelliteLink(Item):
         if self.con is None:
             self.create_connection()
 
-        # If the connection failed to initialize, bailout
+        # If the connection failed to initialize, bail out
         if self.con is None:
             self.managed_confs = []
             return
@@ -323,7 +330,7 @@ class SatelliteLink(Item):
         if self.con is None:
             self.create_connection()
 
-        # If the connection failed to initialize, bailout
+        # If the connection failed to initialize, bail out
         if self.con is None:
             return False
 
@@ -339,7 +346,7 @@ class SatelliteLink(Item):
         if self.con is None:
             self.create_connection()
 
-        # If the connection failed to initialize, bailout
+        # If the connection failed to initialize, bail out
         if self.con is None:
             return []
 
@@ -381,14 +388,14 @@ class SatelliteLink(Item):
         return self.__class__.my_type
 
 
-    #Here for poller and reactionner. Scheduler have it's own function
+    # Here for poller and reactionner. Scheduler have its own function
     def give_satellite_cfg(self):
         return {'port' : self.port, 'address' : self.address, 'name' : self.get_name(), 'instance_id' : self.id, 'active' : True, 'passive' : self.passive, 'poller_tags' : getattr(self, 'poller_tags', []), 'reactionner_tags' : getattr(self, 'reactionner_tags', [])}
 
 
 
-    #Call by picle for dataify the downtime
-    #because we DO NOT WANT REF in this pickleisation!
+    # Call by pickle for dataify the downtime
+    # because we DO NOT WANT REF in this pickleisation!
     def __getstate__(self):
         cls = self.__class__
         # id is not in *_properties
@@ -404,7 +411,7 @@ class SatelliteLink(Item):
         return res
 
 
-    #Inversed funtion of getstate
+    # Inverted function of getstate
     def __setstate__(self, state):
         cls = self.__class__
         
@@ -421,10 +428,12 @@ class SatelliteLink(Item):
 
 
 class SatelliteLinks(Items):
+    """Please Add a Docstring to describe the class here"""
+    
     #name_property = "name"
     #inner_class = SchedulerLink
 
-    #We must have a realm property, so we find our realm
+    # We must have a realm property, so we find our realm
     def linkify(self, realms, modules):
         self.linkify_s_by_p(realms)
         self.linkify_s_by_plug(modules)
