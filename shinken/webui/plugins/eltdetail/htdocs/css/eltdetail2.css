@@ -240,8 +240,7 @@ div.content {
 
 #minimenu ul li a:hover{
 	color: #787878;
-	background-color: #F3F3F3;
-	border-bottom: 3px solid #787878;
+	border-bottom: 2px solid #787878;
 	padding-bottom: 0;
 }
 
