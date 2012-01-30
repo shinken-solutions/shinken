@@ -53,6 +53,56 @@
  *  Tactical Mockup
  * ----------------------------------------------------------------*/
 
+/* THIS PART IS IMPORTED FROM nav.css for the 1.0 feature freeze. It should be look for merging with nav.css
+for the 1.2 release :)
+*/
+div.tac_content{
+	width:95%;
+	height:20px;
+	border-bottom:1px solid #E3E3E5;
+	border-right:1px solid #E3E3E5;
+	margin-left:5px;
+	margin-right:5px;
+	margin-bottom:15px;
+}
+
+div.tac_header{
+	width:95%;
+	height:20px;
+	border-top:1px solid #E3E3E5;
+	border-bottom:1px solid #E3E3E5;
+	border-right:1px solid #E3E3E5;
+	margin-left:5px;
+	margin-right:5px;
+	margin-top:15px;
+}
+
+div div.tac_col_1{
+	border-left: 1px solid #E3E3E5; ;
+	width:33%;
+	height:20px;
+	float:left;
+	font-weight:bold;
+	font-color:#787878;
+}
+div div.tac_col_2{
+	border-left: 1px solid #E3E3E5; ;
+	width:33%;
+	height:20px;
+	float:left;
+	font-weight:bold;
+	font-color:#787878;
+}
+div div.tac_col_3{
+	border-left: 1px solid #E3E3E5; ;
+	width:32%;
+	height:20px;
+	float:left;
+	font-weight:bold;
+	font-color:#787878;
+}
+/*   END IMPORT FOR nav.css */
+
 .tac_impacts {
 	background: #FFFFFF;
 	color: #777777;
