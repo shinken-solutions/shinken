@@ -162,7 +162,7 @@ class LiveStatusResponse:
                             #print "FALLBACK: %s.%s" % (type(item), attribute)
                             value = getattr(item.__class__, attribute).im_func.default
                         else:
-                            value = ''
+                            value = u''
                     if isinstance(value, bool):
                         if value == True:
                             rows.append(1)
@@ -174,7 +174,7 @@ class LiveStatusResponse:
                         except UnicodeEncodeError:
                             rows.append(value.encode('utf-8', 'replace'))
                         except Exception:
-                            rows.append('')
+                            rows.append(u'')
                 lines.append(rows)
             if self.columnheaders == 'on':
                 if len(aliases) > 0:
@@ -184,7 +184,6 @@ class LiveStatusResponse:
             if self.outputformat == 'json':
                 self.output = json.dumps(lines, separators=(',', ':'))
             else:
-                print "type is ", type(self)
                 self.output = str(json.loads(json.dumps(lines, separators=(',', ':'))))
 
     def format_live_data_stats(self, result, columns, aliases):

@@ -386,13 +386,13 @@ ResponseHeader: off
         request = """GET services
 Columns: host_name wrdlbrmpft description 
 Filter: host_name = test_host_0
-OutputFormat: python
+OutputFormat: json
 KeepAlive: on
 ResponseHeader: off
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        good_response = """[[u'test_host_0', u'', u'test_ok_0']]
+        good_response = """[["test_host_0","","test_ok_0"]]
 """
         self.assert_(response == good_response)
 
