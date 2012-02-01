@@ -55,3 +55,4 @@ To foobar1111 for his ask about fqdn and arbiter matching for hostname
 To twellspring for hs bug report about escalation and templates
 To Michael Leinartas for his patch about man pages
 To Nelson Pascoal for his patch about typos in daemons
+To Steve Kieu for his bug report about missing name in Config object

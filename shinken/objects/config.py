@@ -341,6 +341,9 @@ class Config(Item):
         self.configuration_errors = []
 
 
+    def get_name(self):
+        return 'global configuration file'
+
     # We've got macro in the resource file and we want
     # to update our MACRO dict with it
     def fill_resource_macros_names_macros(self):
