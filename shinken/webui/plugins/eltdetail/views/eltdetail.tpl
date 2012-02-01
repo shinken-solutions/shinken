@@ -126,6 +126,7 @@ Invalid element name
 				<p><span style="float: left; margin-right: 0.3em;" class="ui-icon ui-icon-info"></span>	This element has got an important impact on your business, please <b>fix it</b> or <b>acknowledge it</b>.</p>
 		    %# "end of the 'SOLVE THIS' highlight box"
 		    %end
+		    </div>
 		</div>				
 	</div>
 	
@@ -153,7 +154,7 @@ Invalid element name
 	        	<li><a href="#summary">Summary</a></li>
 	            <li><a href="#services">Services</a></li>
 	            <li><a href="#comments">Comments/Downtimes</a>
-<div id="Badger" class="badger-outter"><div class="badger-inner"><p id="Badge" class="badger-badge badger-number">4</p></div></div>
+				<!-- <div id="Badger" class="badger-outter"><div class="badger-inner"><p id="Badge" class="badger-badge badger-number">14</p></div></div> -->
 	            </li>
 				<li><a href="#graphs">Graphs</a></li>
 			</ul>
