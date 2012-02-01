@@ -58,7 +58,7 @@ Invalid element name
 <div id="content_container" class="grid_14">
 
 	<h1 class="grid_16 state_{{elt.state.lower()}} icon_down"><img class="host_img_25" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h1>
-	
+
 	<div id="overview_container" class="grid_16">	   
 		<table class="grid_5">
 		%#Alias, apretns and hostgroups arefor host only
@@ -124,7 +124,6 @@ Invalid element name
 		    %if elt.is_problem and elt.business_impact > 2 and not elt.problem_has_been_acknowledged:
 			<div class="ui-state-error ui-corner-all push_top1 pull_bottom1">
 				<p><span style="float: left; margin-right: 0.3em;" class="ui-icon ui-icon-info"></span>	This element has got an important impact on your business, please <b>fix it</b> or <b>acknowledge it</b>.</p>
-			</div>
 		    %# "end of the 'SOLVE THIS' highlight box"
 		    %end
 		</div>				
@@ -153,7 +152,9 @@ Invalid element name
 			<ul>
 	        	<li><a href="#summary">Summary</a></li>
 	            <li><a href="#services">Services</a></li>
-	            <li><a href="#comments">Comments/Downtimes</a></li>
+	            <li><a href="#comments">Comments/Downtimes</a>
+<div id="Badger" class="badger-outter"><div class="badger-inner"><p id="Badge" class="badger-badge badger-number">4</p></div></div>
+	            </li>
 				<li><a href="#graphs">Graphs</a></li>
 			</ul>
 			

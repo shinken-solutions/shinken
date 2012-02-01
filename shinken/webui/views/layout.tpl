@@ -27,7 +27,8 @@
 		<link href="/static/css/layout.css" rel="stylesheet">
 		<link href="/static/css/elements/navigation.css" rel="stylesheet" type="text/css" />
 		<link href="/static/bootstrap/bootstrap.css" rel="stylesheet">
-
+		<link href="/static/css/elements/badger.css" rel="stylesheet">
+	    
 	    %if user is not None:
 	    <link rel="stylesheet" type="text/css" href="/static/css/userinfo.css" media="screen"/>
 	    %end
