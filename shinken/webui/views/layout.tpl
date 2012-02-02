@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 %#Set default values
 %if not 'js' in locals() : js = []
 %if not 'title' in locals() : title = 'No title'
@@ -16,69 +15,67 @@
 %# For the menu selection
 %if not 'menu_part' in locals() : menu_part = ''
 
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Bootstrap, from Twitter</title>
 
-<html>
-	<head>
-    	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    	<title>{{title or 'No title'}}</title>
-      
-		<link type="text/css" href="/static/css/custom-theme/jquery-ui-1.8.16.custom.css" rel="stylesheet" />
-		<link href="/static/css/grid.css" rel="stylesheet">
-		<link href="/static/css/layout.css" rel="stylesheet">
-		<link href="/static/css/elements/navigation.css" rel="stylesheet" type="text/css" />
-		<link href="/static/bootstrap/bootstrap.css" rel="stylesheet">
-		<link href="/static/css/elements/badger.css" rel="stylesheet">
-	    
-	    %if user is not None:
-	    <link rel="stylesheet" type="text/css" href="/static/css/userinfo.css" media="screen"/>
-	    %end
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
 
-      %# And now for css files
-      %for p in css:
-		<link rel="stylesheet" type="text/css" href="/static/{{p}}">
-      %end
-  
-        <!--scripts-->
+    <!-- Le styles -->
+    <link href="/static/css/bootstrap.css" rel="stylesheet">
+    <style type="text/css">
+      body {
+        padding-top: 60px;
+        padding-bottom: 40px;
+      }
+      .sidebar-nav {
+        padding: 9px 0;
+      }
+    </style>
+    <link href="/static/css/bootstrap-responsive.css" rel="stylesheet">
 
-        <script type="text/javascript" src="/static/js/jquery-1.6.2.min.js"></script>
-        <script type="text/javascript" src="/static/js/jquery-ui-1.8.16.custom.min.js"></script>
-        
-        <!--daterangepicker-->
-        <script type="text/javascript" src="/static/third-party/jQuery-UI-Date-Range-Picker/js/date.js"></script>
-        <script type="text/javascript" src="/static/third-party/jQuery-UI-Date-Range-Picker/js/daterangepicker.jQuery.js"></script>
+    <!-- Le fav and touch icons -->
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  </head>
 
-        <!--wijmo-->
-        <script src="/static/third-party/wijmo/jquery.mousewheel.min.js" type="text/javascript"></script>
-        <script src="/static/third-party/wijmo/jquery.bgiframe-2.1.3-pre.js" type="text/javascript"></script>
-        <script src="/static/third-party/wijmo/jquery.wijmo-open.1.5.0.min.js" type="text/javascript"></script>
+<body>
 
-        <!-- FileInput -->
-        <script src="/static/third-party/jQuery-UI-FileInput/js/enhance.min.js" type="text/javascript"></script>
-        <script src="/static/third-party/jQuery-UI-FileInput/js/fileinput.jquery.js" type="text/javascript"></script>
+	%if print_header:
+		%include header_element globals()
+	%end
 
-
-        <!--init for this page-->
-        <script type="text/javascript" src="/static/js/demo.js"></script>
-      
-      %# End of classic js import. Now call for specific ones
-      %for p in js:
-		<script type="text/javascript" src="/static/{{p}}"></script>
-      %end
-	</head>
-    
-	<body class="main">
-		<div class="container_16">
-			%if print_header:
-				%include header_element globals()
-			%end
+    <div class="container-fluid">
+      <div class="row-fluid">
+        <div class="span2">
 			%if print_menu:
 				%include navigation_element globals()
 			%end
-			<div id="main_container" class="grid_16">
-				%include
-			</div>
-			<div class="clear"></div>
-				%include footer_element
-		</div>
-	</body>
+        </div><!--/span-->
+        <div class="span10">
+			%include
+        </div><!--/span-->
+      </div><!--/row-->
+
+      <hr>
+
+		%include footer_element
+
+    </div><!--/.fluid-container-->
+
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="../assets/js/tests/vendor/jquery.js"></script>
+    <script src="../assets/js/bootstrap-transition.js"></script>
+    <script src="../assets/js/bootstrap-collapse.js"></script>
+
+  </body>
 </html>
