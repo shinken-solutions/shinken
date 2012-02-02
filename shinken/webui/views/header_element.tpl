@@ -18,7 +18,7 @@
               %end
             </ul>
             %if user is not None:
-            <p class="navbar-text pull-right">Logged in as <a href="#">{{user}}</a></p>
+            <p class="navbar-text pull-right">Logged in as <a href="#"><!-- {{user}} --></a></p>
             %end
           </div><!--/.nav-collapse -->
         </div>
