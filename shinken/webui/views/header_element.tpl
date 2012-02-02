@@ -11,11 +11,15 @@
           <a class="brand" href="#">Shinken</a>
           <div class="nav-collapse">
             <ul class="nav">
+              %if user is not None:
               <li class="active"><a href="#">Dashboard</a></li>
               <li><a href="#">Shinken UI</a></li>
               <li><a href="#">Sknonf UI</a></li>
+              %end
             </ul>
-            <p class="navbar-text pull-right">Logged in as <a href="#">username</a></p>
+            %if user is not None:
+            <p class="navbar-text pull-right">Logged in as <a href="#">{{user}}</a></p>
+            %end
           </div><!--/.nav-collapse -->
         </div>
       </div>
