@@ -33,35 +33,35 @@
 
 </script>
 
-<div id="login_container" class="grid_16">
+<div id="login_container" style="margin-left: 40.425531911%">
   
 %if login_text:
 <p><span id="login-text"> {{login_text}}</span></p>
 %end
-	<div class="grid_4">
-		<img src="/static/images/robot_rouge_alpha.png" alt="Shinken Login">
-	</div>
-
-	<div id="login-form" class="grid_6">
+	<div id="login-form">
 	%if error:
 		<span id="login-error"> {{error}}</span>
 	%end
-		<form method="post" id="loginform" action="/user/auth">			
-			<div class="text-field push_top1">
-			  <label for="login">Login:</label>
-				<input name="login" type="text" tabindex="1" size="30">
+		<form method="post" id="loginform" action="/user/auth">
+		<fieldset>		
+			<div class="text-field">
+			  	<label class="pull-left span2" for="login">Login:</label>
+			  	<div class="input"> <input name="login" type="text" tabindex="1" size="30"> </div>
 			</div>
-			<div class="text-field push_top1">
-				<label for="password">Password:</label>
+			<div class="text-field">
+				<label class="pull-left span2" for="password">Password:</label>
 				<input id="password" name="password" type="password" tabindex="2" size="30" onKeyPress="return submitenter(this,event)">
 			</div>
-			<input type="hidden" value="0" name="remember_me">
-				<div class="push_top1 check-field">
-					<input type="checkbox" id="remember_me" tabindex="3" name="remember_me"> <label for="remember_me">Don't forget me</label>
-				</div>
-				<div class="buttons">
-					<a tabindex="4" class="push_top1 button ui-button ui-widget ui-state-default ui-corner-all" href="javascript: submitform()">Login</a>
-				</div>
+			<!--
+			<div>			
+				<label>Don't forget me! </label>
+				<input class="pull-left span2" type="checkbox" name="dontforget" value="option1">
+			</div>
+			-->
+			<div>
+				<a tabindex="4" class="btn offset1" href="javascript: submitform()">Login</a>
+			</div>
+        </fieldset>
 		</form>
 	</div>
 </div>
