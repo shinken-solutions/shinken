@@ -18,7 +18,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Bootstrap, from Twitter</title>
+    <title>{{title or 'No title'}}</title>
 
     <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
     <!--[if lt IE 9]>
@@ -27,6 +27,7 @@
 
     <!-- Le styles -->
     <link href="/static/css/bootstrap.css" rel="stylesheet">
+    <link href="/static/css/custom/layout.css" rel="stylesheet">
     <style type="text/css">
       body {
         padding-top: 60px;
@@ -51,7 +52,7 @@
 		%include header_element globals()
 	%end
 
-    <div class="container-fluid">
+    <div class="container-fluid no-padding">
       <div class="row-fluid">
         <div class="span2">
 			%if print_menu:
