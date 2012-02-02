@@ -46,15 +46,15 @@
 	</div>
 	<div class="row well">
     <div class="span5">
-      <p>place</p>
+    	<img src="/static/img/logo.png">
     </div>
     <div class="span6">
       <form method="post" id="loginform" action="/user/auth">
         <label>Name</label>
-        <input class="span5" name="login" type="text">
+        <input class="span6" name="login" type="text">
 
         <label>Password</label>
-        <input class="span5" id="password" name="password" type="password">
+        <input class="span6" id="password" name="password" type="password">
 
         <label class="checkbox">
           <input type="checkbox"> Don't forget me!
