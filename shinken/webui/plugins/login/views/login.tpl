@@ -33,7 +33,7 @@
 
 </script>
 
-<div id="login_container" style="margin-left: 40.425531911%">
+<div id="login_container" style="margin-left:15%">
   
 %if login_text:
 <p><span id="login-text"> {{login_text}}</span></p>
@@ -42,26 +42,25 @@
 	%if error:
 		<span id="login-error"> {{error}}</span>
 	%end
-		<form method="post" id="loginform" action="/user/auth">
-		<fieldset>		
-			<div class="text-field">
-			  	<label class="pull-left span2" for="login">Login:</label>
-			  	<div class="input"> <input name="login" type="text" tabindex="1" size="30"> </div>
-			</div>
-			<div class="text-field">
-				<label class="pull-left span2" for="password">Password:</label>
-				<input id="password" name="password" type="password" tabindex="2" size="30" onKeyPress="return submitenter(this,event)">
-			</div>
-			<!--
-			<div>			
-				<label>Don't forget me! </label>
-				<input class="pull-left span2" type="checkbox" name="dontforget" value="option1">
-			</div>
-			-->
-			<div>
-				<a tabindex="4" class="btn offset1" href="javascript: submitform()">Login</a>
-			</div>
-        </fieldset>
-		</form>
+
 	</div>
+	<div class="row well">
+    <div class="span5">
+      <p>place</p>
+    </div>
+    <div class="span6">
+      <form method="post" id="loginform" action="/user/auth">
+        <label>Name</label>
+        <input class="span5" name="login" type="text">
+
+        <label>Password</label>
+        <input class="span5" id="password" name="password" type="password">
+
+        <label class="checkbox">
+          <input type="checkbox"> Don't forget me!
+        </label>
+        <button class="btn" type="submit" href="javascript: submitform()">Login</button>
+      </form>
+    </div>
+  </div>
 </div>
