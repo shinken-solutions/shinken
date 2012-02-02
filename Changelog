@@ -3,6 +3,124 @@ Shinken ChangeLog
 #######################
 
 	
+1.0 - X/02/2012
+------------------
+	CORE ENHANCEMENTS
+	* Add : shinken.sh script and skonf.py with LOT of features for setup and configuration management
+	* Add : better logging for warning in host/service conf, and npcd configuration too.
+	* Add : by default the poller will use all the CPUs available.
+	* Add : Brok Queue watchdog for satellites, activate for Broker by default at 100000 broks to kill/restart the module..
+	* Add : if the run/var dir are missing, try to create them in the init.d script.
+	* Add : reactionner can run under android.
+	* Add : android SMS module.
+	* Add : Try to check for dead queue threads. If so, give a change for the tread to restart.
+	* Add : mail python script
+	* Add : better error text when the pickle load got an error.
+	* Add : manage connexion timeout in broker and Pyro4.
+	* Add : poller can now load a standard external modules like the namedPipe one, and get external commands from it
+	* Add : $$ are now interpreted as $ in macro solving.
+	* Add : (reported by : sduchesneau) check_shinken.py is now with a timeout by default at 10s.
+	* Add : NOT operand rule in the business rules.
+	* Add : send broks in external modules as a biglist instead of n broks. It's more efficient (X3 perf for this, can be huge time for huge conf)	
+	* Add : lot of ready to run service packs
+	* Add : manage \; to be change in ; without cut teh rest of the line to be removed as a comment.
+	* Add : (reported by : foobar1111) arbiter match only hostname, and not fqdn. Now it try fqdn, and then hostname.
+	* Add : Now retention is enabled by default at installation time (Pickle)
+	* Add : (From Michael Leinartas) Man pages updates
+	* Add : '+' in discovery rule management, so you can 'add' something, like a template.
+	* Add : the complex group management but for srv templates on host template. Should rename the complex expression functions name now it manage hostgroups AND templates :p
+	* Add : do not have a template is no more a critical error, jsut a warning. So the user can just 'tag' hosts without fearing to manage conf first. this can be done after.
+	* Add : lot of code review by Sebastien Coavoux!
+	* Add : lot of English style corrections by xkilian :)
+	* Add : first attempt for the skonf daemon. Don't loose your time in running it, it doesn't work from now :)
+	* Add : mongodb insert capabilities for the discovery.
+	* Add : TIMEPERIOD TRANSITION logs from the Arbiter to get timeperiods transition output 
+	* Add : is_admin property for contacts
+	* Add : make the nmap discovery do tcp and udp scan.
+	
+	CORE FIXES
+	* Fix : use StringIO to read configuration files into a string (much faster with lots of config files)
+	* Fix : (reported by : lminoza) bug in inheritance if templates give only a + elements, should continue to loop and not stop here.
+	* Fix : keep multiple spaces in config files. (check_command!"args   " were stripped)
+	* Fix : pyro 4.10 management.
+	* Fix : (reported by : MINOZA, Landy) multi-layer management for serice template on host template. So if you apply a service on layer 3 and your host inherit from layer1->layer2
+	* Fix : (reported by : Thibaut Notteboom) catch ConnectionClosedError on poller/reactionner connections
+	* Fix : A better safe_print
+	* Fix : lot of encoding stuff!
+	* FIX : proxy support and python-setuptools installation on RHEL/CENTOS 6
+	* Fix : (reproted by : darkweaver87) somethimes we got a bad formed external command. If so, bailout and warn in debug mode.
+	* Fix : when there is a dispatching problem, the arbiter send and send again the same configuration to satellites.
+	* Fix : crash bug when timezone set in config file
+	* Fix : make all log pass the utf8 management.
+	* Fix : use auto-generated, absolute path for README (Daniel Widerin)
+	* Fix: last line of email notification must finish by a \n otherwise it will not be sent (Laurent Ollagnier)
+	* Fix: (from rootix2) catch case where service do not have imported_from from modules.
+	* Fix : (reported by : Venelin Petkov) print in hostgroup names was a problem.
+	* Fix : if a scheduler restart, we got problem because the arbiter did't resend it the configuration.
+	* Fix : "host_notification_period" and "service_notification_period" defined twice in the contact definition (Fournet Matthieu)
+	* Fix : (reported by : Httqm) default notification_interval was one minute, 1hour is better.
+	* Fix : (reported by : sprudhomme) longoutput parsing and perfdata did not follow nagios way.
+	* Fix : change sourceforgetrac with github in tracebacks.
+	* Fix : (reported by : lminoza) too much notifications for a contact with multiple notification ways, all where send when just a part of them was able to pass filter.
+	* Fix : (reported by : puisea) kill all sub process action tree on unix.
+	* Fix : flaw on multiple date and multiple timerange.
+	* Fix : if missing alias in objects, put the name if available.
+	* Fix : (reported by : denetariko) manage spaces before and after type name in define line.
+	* Fix : (reported by: Steve Kieu) missing get_name() method for config
+	
+	
+
+	
+	MODULES ENHANCEMENTS
+	* Add : Rewrite the LiveStatus module, perf boost and simpler. Thanks Gerhard for this huge work!
+	* Add : two new modules for storing livestatus logs. sqlite and mongodb
+	* Add : Graphite broker backend to export perfdata.
+	* Add : module to deal with flat file dependencies
+	* Add : mongodb module for the arbiter, to load hosts object from it.
+	* Add : mongodb retention module.
+	* Add : the Service-perfdata module now open/close the perfdata file each second. So it's compatible with tools like Centreon that move it
+	* Add : macros support for skonf. Fix lot of bugs
+	* Add : Makes merlindb insert host_contactgroups
+	* Add : NDO Nagios/Shinken mix in database
+	* Add : port option for the mysql connexion with NDO
+	* Add : ip_tag module for change property by looking at the hostip range.
+	* Add : simulate mode for the nmap disco wrapper, so we can ask xml outputs to users, and then simulate it easily.
+	* Add : new way for nmap discovery output. Now there is no more a big mapping pass. It will output what it can, and it's for the discovery_rule do do this job now, it's far morea BIG thanks to all folks that send me sample xml output :)
+
+	MODULES FIXES
+	* Fix : useless and dangerous str in redis module.
+	* FIX : htpasswd.users file not correctly updated at installation
+	* Fix : (reported by : DGuenault) hack_poller_tag_by_macros was not applying poller_tag to commands, only root objects
+	* Fix : memcache and redis retention modules. They were loading notifications->contacts->commands but this class got slots but no __getstate__
+	* Fix : (reported by : sprudhomme): long_output in ndo for 1.4b9 version
+	* Fix : NSCA, a loop when the client initiate the socket closing
+
+	UI
+	* Add : now page rendering can be launch in parallel, and so page can now call 'long' queries without breacking all. But during a long query, we still cannot eat broks.
+	* Fix : the WebUI now exit when the brok thread got a problem.
+	* Add : UI PNP module.
+	* Add : if contact is not is_admin, then the /problems view only show its related elements (if he is a contact of the elemetn, of an impact or a source problems one).
+	* Add : add graph time selection in the detail page.
+	* Add : Graphite graph backend.
+	* Add : /mobile part
+	* Add : External Authentification for WebUI (SSO) (olivierHa)
+	* Add : tips on the eltgraph view.
+	* Fix : acknowledge typo
+	* Fix : Change the scale of the impact view divs
+	* Fix : UI page navigation should not propose page too high if not need.
+	* Add : gesture canvas as smaller and visible.
+	* Add : address to the eltdetail.tpl
+	* Fix : utf8 names in the UI
+	* Add : allow_html_output parameter for the WebUI
+	* Add : generic perfometer manager for the UI
+	* Fix : search button (Thanx to pydubreucq)
+	* Add : make all nodes apears in the dep graph, but hidden one in very smalls.
+	* Add : perfometer image hovering with the graph module like PNP.
+	* Add : password iphone like in the login screen.
+	* Add : an orange outline to see where the focus is on input.
+	
+	
+	
 0.8 - 17/10/2011
 ------------------
 	CORE ENHANCEMENTS
