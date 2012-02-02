@@ -81,11 +81,12 @@ Shinken ChangeLog
 	* Add : the Service-perfdata module now open/close the perfdata file each second. So it's compatible with tools like Centreon that move it
 	* Add : macros support for skonf. Fix lot of bugs
 	* Add : Makes merlindb insert host_contactgroups
-	* Add : NDO Nagios/Shinken mix in database
+	* Add : NDO Nagios/Shinken mix in database (Sebastien Coavoux)
 	* Add : port option for the mysql connexion with NDO
 	* Add : ip_tag module for change property by looking at the hostip range.
 	* Add : simulate mode for the nmap disco wrapper, so we can ask xml outputs to users, and then simulate it easily.
 	* Add : new way for nmap discovery output. Now there is no more a big mapping pass. It will output what it can, and it's for the discovery_rule do do this job now, it's far morea BIG thanks to all folks that send me sample xml output :)
+	* Add : enhanced capabilities for the mysql import module (OlivierHa)
 
 	MODULES FIXES
 	* Fix : useless and dangerous str in redis module.
