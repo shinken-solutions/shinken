@@ -104,7 +104,7 @@ Invalid element name
 	
 	<!-- Switch Start -->
 	<div class="switches span12">
-		<ul class="grid_16">
+		<ul>
 		    %if elt_type=='host':
 		       %title = 'This will also enable/disable this host services'
 		    %else:
@@ -117,173 +117,152 @@ Invalid element name
 		</ul>	
 	</div>
     <!-- Switch End-->
-    
-    <!-- elt Container Start-->
-	<div id="elt_container" class="grid_16">
-		<!-- Tabs -->
-		<div id="tabs">
-			<ul>
-	        	<li><a href="#summary">Summary</a></li>
-	            <li><a href="#services">Services</a></li>
-	            <li><a href="#comments">Comments/Downtimes</a>
-				<!-- <div id="Badger" class="badger-outter"><div class="badger-inner"><p id="Badge" class="badger-badge badger-number">14</p></div></div> -->
-	            </li>
-				<li><a href="#graphs">Graphs</a></li>
-			</ul>
-			
-			<!-- Tab Summary Start-->
-	        <div id="summary">
-				<div id="item_information" class="grid_16">
-					<h2>Host/Service Information</h2>
-					<table class="grid_6">
-						<tr>
-							<td class="column1">{{elt_type.capitalize()}} Status</td>
-							<td><span class="state_{{elt.state.lower()}}">{{elt.state}}</span> (since {{helper.print_duration(elt.last_state_change, just_duration=True, x_elts=2)}}) </td>
-						</tr>
-						<tr>
-							<td class="column1">Status Information</td>
-							<td>{{elt.output}}</td>
-						</tr>
-						<tr>
-							<td class="column1">Performance Data</td>
+
+    <div class="tabbable">
+	    <ul class="nav nav-tabs">
+	    	<li class="active"><a href="#1" data-toggle="tab">Summary</a></li>
+	    	<li><a href="#2" data-toggle="tab">Services</a></li>
+	    	<li><a href="#3" data-toggle="tab">Comments / Downtimes</a></li>
+	    	<li><a href="#4" data-toggle="tab">GRaph</a></li>
+	    </ul>
+	    <div class="tab-content">
+	    	<!-- Tab Summary Start-->
+		    <div class="tab-pane active" id="1">
+		    	<h2>Host/Service Information</h2>
+		    	<table class="table table-condensed">
+					<tr>
+						<td class="column1">{{elt_type.capitalize()}} Status</td>
+						<td><span class="state_{{elt.state.lower()}}">{{elt.state}}</span> (since {{helper.print_duration(elt.last_state_change, just_duration=True, x_elts=2)}}) </td>
+					</tr>
+					<tr>
+						<td class="column1">Status Information</td>
+						<td>{{elt.output}}</td>
+					</tr>
+					<tr>
+						<td class="column1">Performance Data</td>
 							%# "If there any perf data?"
 							%if len(elt.perf_data) > 0:
-							<td>{{elt.perf_data}}</td>
+						<td>{{elt.perf_data}}</td>
 							%else:
-							<td>&nbsp;</td>
+						<td>&nbsp;</td>
 							%end
-						</tr>	
-						<tr>										
-							<td class="column1">Current Attempt</td>
-							<td>{{elt.attempt}}/{{elt.max_check_attempts}} ({{elt.state_type}} state)</td>
-						</tr>
-						<tr>		
-							<td class="column1">Last Check Time</td>
-							<td title='Last check was at {{time.asctime(time.localtime(elt.last_chk))}}'>was {{helper.print_duration(elt.last_chk)}}</td>
-						</tr>
-						<tr>		
-							<td class="column1">Next Scheduled Active Check</td>
-							<td title='Next active check at {{time.asctime(time.localtime(elt.next_chk))}}'>{{helper.print_duration(elt.next_chk)}}</td>
-						</tr>
-						<tr>		
-							<td class="column1">Last State Change</td>
-							<td>{{time.asctime(time.localtime(elt.last_state_change))}}</td>
-						</tr>
-					</table>
-					<div class="grid_6">
-						<a href="#" onclick="try_to_fix('{{elt.get_full_name()}}')">{{!helper.get_button('Try to fix it!', img='/static/images/enabled.png')}}</a>
-						<a href="#" onclick="acknowledge('{{elt.get_full_name()}}')">{{!helper.get_button('Acknowledge it', img='/static/images/wrench.png')}}</a>
-						<a href="#" onclick="recheck_now('{{elt.get_full_name()}}')">{{!helper.get_button('Recheck now', img='/static/images/delay.gif')}}</a>
-						<a href="/depgraph/{{elt.get_full_name()}}" class="mb" title="Impact map of {{elt.get_full_name()}}">{{!helper.get_button('Show impact map', img='/static/images/state_ok.png')}}</a>
-						{{!helper.get_button('Submit Check Result', img='/static/images/passiveonly.gif')}}
-						{{!helper.get_button('Send Custom Notification', img='/static/images/notification.png')}}
-						{{!helper.get_button('Schedule Downtime', img='/static/images/downtime.png')}}
-					</div>
-				</div>
-				<hr />
-				<div id="item_information" class="grid_16">
-					<h2>Additonal Informations</h2>
-					<table>
-						<tr>
-							<td class="column1">Last Notification</td>
-							<td>{{helper.print_date(elt.last_notification)}} (notification {{elt.current_notification_number}})</td>
-						</tr>
-						<tr>			
-							<td class="column1">Check Latency / Duration</td>
-							<td>{{'%.2f' % elt.latency}} / {{'%.2f' % elt.execution_time}} seconds</td>
-						</tr>
-						<tr>
-							<td class="column1">Is This Host Flapping?</td>
-							<td>{{helper.yes_no(elt.is_flapping)}} ({{helper.print_float(elt.percent_state_change)}}% state change)</td>
-						</tr>
-						<tr>
-							<td class="column1">In Scheduled Downtime?</td>
-							<td>{{helper.yes_no(elt.in_scheduled_downtime)}}</td>
-						</tr>
-					</table>
-				</div>
-	        </div>
-	        <!-- Tab Summary End-->
-	        
-	        <!-- Tab Service Start -->
-	        <div id="services">
-	        								%# " Only print host service if elt is an host of course"
-								%# " If the host is a problem, services will be print in the impacts, so don't"
-								%# " print twice "
-								
-								%if elt_type=='host' and not elt.is_problem:
-							        <hr>
-							
-							        <!--<div class='host-services'>-->
-									<div>
-									<h3> Services </h3>
-									%nb = 0
-									%for s in helper.get_host_services_sorted(elt):
-									%nb += 1
-							
-									%# " We put a max imapct to print, bacuse too high is just useless"
-									%if nb > max_impacts:
-									%   break 
-									%end
-							
-									%if nb == 8:
-										<div style="float:right;" id="hidden_impacts_or_services_button"><a href="javascript:show_hidden_impacts_or_services()"> {{!helper.get_button('Show all services', img='/static/images/expand.png')}}</a></div>
-									%end
-									
-									%if nb < 8:
-									<div class="service">
-									%else:
-									<div class="service hidden_impacts_services">
-									%end
-									      	<div class="divstate{{s.state_id}}">
-										%for i in range(0, s.business_impact-2):
-											<img src='/static/images/star.png'>
-										%end
-											<img style="width : 16px; height:16px" src="{{helper.get_icon_state(s)}}">
-											<span style="font-size:110%">{{!helper.get_link(s, short=True)}}</span> is <span style="font-size:110%">{{s.state}}</span> since {{helper.print_duration(s.last_state_change, just_duration=True, x_elts=2)}}
-										</div>
-									</div>
-									%# End of this service
-									%end
-									</div>
-							    
-							    %end #of the only host part			
-							
-								%if elt.is_problem and len(elt.impacts) != 0:
-								<div>
-								<!--<div class='host-services'>-->
-									<h4 style="margin-bottom: 5px;"> Impacts </h4>
-								%nb = 0
-								%for i in helper.get_impacts_sorted(elt):
-								%nb += 1
-								%if nb == 8:	
-									<div style="float:right;" id="hidden_impacts_or_services_button"><a href="javascript:show_hidden_impacts_or_services()"> {{!helper.get_button('Show all impacts', img='/static/images/expand.png')}}</a></div>
-								%end
-								%if nb < 8:
-							      	<div class="service">
-								%else:
-								<div class="service hidden_impacts_services">
-								%end
-							        
-									<div class="divstate{{i.state_id}}">
-									%for j in range(0, i.business_impact-2):
-										<img src='/static/images/star.png'>
-									%end
-										<img style="width : 16px; height:16px" src="{{helper.get_icon_state(i)}}">
-										<span style="font-size:110%">{{!helper.get_link(i)}}</span> is <span style="font-size:110%">{{i.state}}</span> since {{helper.print_duration(i.last_state_change, just_duration=True, x_elts=2)}}
-									</div>
-							        </div>
-							        %# End of this impact
-							        %end
-								</div>
-							%# end of the 'is problem' if
-							%end
-	        </div>
-	        <!-- Tab Service End -->
+					</tr>	
+					<tr>										
+						<td class="column1">Current Attempt</td>
+						<td>{{elt.attempt}}/{{elt.max_check_attempts}} ({{elt.state_type}} state)</td>
+					</tr>
+					<tr>		
+						<td class="column1">Last Check Time</td>
+						<td title='Last check was at {{time.asctime(time.localtime(elt.last_chk))}}'>was {{helper.print_duration(elt.last_chk)}}</td>
+					</tr>
+					<tr>		
+						<td class="column1">Next Scheduled Active Check</td>
+						<td title='Next active check at {{time.asctime(time.localtime(elt.next_chk))}}'>{{helper.print_duration(elt.next_chk)}}</td>
+					</tr>
+					<tr>		
+						<td class="column1">Last State Change</td>
+						<td>{{time.asctime(time.localtime(elt.last_state_change))}}</td>
+					</tr>
+				</table>
+				<hr>
+				<h2>Additonal Informations</h2>
+				<table class="table table-condensed">
+					<tr>
+						<td class="column1">Last Notification</td>
+						<td>{{helper.print_date(elt.last_notification)}} (notification {{elt.current_notification_number}})</td>
+					</tr>
+					<tr>			
+						<td class="column1">Check Latency / Duration</td>
+						<td>{{'%.2f' % elt.latency}} / {{'%.2f' % elt.execution_time}} seconds</td>
+					</tr>
+					<tr>
+						<td class="column1">Is This Host Flapping?</td>
+						<td>{{helper.yes_no(elt.is_flapping)}} ({{helper.print_float(elt.percent_state_change)}}% state change)</td>
+					</tr>
+					<tr>
+						<td class="column1">In Scheduled Downtime?</td>
+						<td>{{helper.yes_no(elt.in_scheduled_downtime)}}</td>
+					</tr>
+				</table>
+		    </div>
+		    <!-- Tab Summary End-->
 
-	        <!-- Tab Comments Start -->
-	        <div id="comments">
-				<h2>Comments</h2>
+		    <!-- Tab Service Start -->
+		    <div class="tab-pane" id="2">
+	        	%# " Only print host service if elt is an host of course"
+				%# " If the host is a problem, services will be print in the impacts, so don't"
+				%# " print twice "
+								
+				%if elt_type=='host' and not elt.is_problem:
+				<hr>
+							
+				<h3> Services </h3>
+				%nb = 0
+				%for s in helper.get_host_services_sorted(elt):
+				%nb += 1
+							
+				%# " We put a max imapct to print, bacuse too high is just useless"
+				%if nb > max_impacts:
+				%break 
+				%end
+							
+				%if nb == 8:
+					<div style="float:right;" id="hidden_impacts_or_services_button"><a href="javascript:show_hidden_impacts_or_services()"> {{!helper.get_button('Show all services', img='/static/images/expand.png')}}</a></div>
+				%end
+									
+				%if nb < 8:
+					<div class="service">
+				%else:
+					<div class="service hidden_impacts_services">
+				%end
+					<div class="divstate{{s.state_id}}">
+					%for i in range(0, s.business_impact-2):
+						<img src='/static/images/star.png'>
+					%end
+						<img style="width : 16px; height:16px" src="{{helper.get_icon_state(s)}}">
+						<span style="font-size:110%">{{!helper.get_link(s, short=True)}}</span> is <span style="font-size:110%">{{s.state}}</span> since {{helper.print_duration(s.last_state_change, just_duration=True, x_elts=2)}}
+					</div>
+						</div>
+						%# End of this service
+						%end
+					</div>
+							    
+					%end #of the only host part			
+							
+					%if elt.is_problem and len(elt.impacts) != 0:
+					<div>
+								
+					<h4 style="margin-bottom: 5px;"> Impacts </h4>
+						%nb = 0
+						%for i in helper.get_impacts_sorted(elt):
+						%nb += 1
+						%if nb == 8:	
+							<div style="float:right;" id="hidden_impacts_or_services_button"><a href="javascript:show_hidden_impacts_or_services()"> {{!helper.get_button('Show all impacts', img='/static/images/expand.png')}}</a></div>
+						%end
+						%if nb < 8:
+						 	<div class="service">
+						%else:
+							<div class="service hidden_impacts_services">
+						%end
+							        
+							<div class="divstate{{i.state_id}}">
+								%for j in range(0, i.business_impact-2):
+									<img src='/static/images/star.png'>
+								%end
+									<img style="width : 16px; height:16px" src="{{helper.get_icon_state(i)}}">
+									<span style="font-size:110%">{{!helper.get_link(i)}}</span> is <span style="font-size:110%">{{i.state}}</span> since {{helper.print_duration(i.last_state_change, just_duration=True, x_elts=2)}}
+								</div>
+							    </div>
+							    %# End of this impact
+							    %end
+							</div>
+						%# end of the 'is problem' if
+						%end
+		    </div>
+		    <!-- Tab Service End -->
+
+		    <!-- Tab Comments and Downtimes Start -->
+		    <div class="tab-pane" id="3">
 				<div id="minimenu">
 					<ul>
 						<li> <a href="#" class="">Add Comments</a> </li>
@@ -311,11 +290,11 @@ Invalid element name
 						<p>No comments available</p>
 					%end
 				</div>
-	        </div>
-	        <!-- Tab Comments End -->
+			</div>
+			<!-- Tab Comments and Downtimes End -->
 
-	        <!-- Tab Graph Start -->
-	        <div id="graphs">
+			<!-- Tab Graph Start -->
+			<div class="tab-pane" id="4">
 	           	<h2>Graphs</h2>
 	       		%uris = app.get_graph_uris(elt, graphstart, graphend)
 	      		%if len(uris) == 0:
@@ -343,12 +322,11 @@ Invalid element name
 				<p><a href="{{link}}"><img src="{{img_src}}" class="graphimg"></img></a></p>
 				moncul
 				%end
-	        </div>
-	        <!-- Tab Graph End -->
-		</div>
-        <!--end tabs-->
-</div>
-%#  "Content Container End"
+			</div>
+			<!-- Tab Graph End -->
+	    </div>
+	   
+    </div>
 
 %#End of the Host Exist or not case
 %end
