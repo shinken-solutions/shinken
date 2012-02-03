@@ -123,13 +123,13 @@ Invalid element name
 	    	<li class="active"><a href="#1" data-toggle="tab">Summary</a></li>
 	    	<li><a href="#2" data-toggle="tab">Services</a></li>
 	    	<li><a href="#3" data-toggle="tab">Comments / Downtimes</a></li>
-	    	<li><a href="#4" data-toggle="tab">GRaph</a></li>
+	    	<li><a href="#4" data-toggle="tab">Graph</a></li>
 	    </ul>
 	    <div class="tab-content">
 	    	<!-- Tab Summary Start-->
 		    <div class="tab-pane active" id="1">
-		    	<h2>Host/Service Information</h2>
-		    	<table class="table table-condensed">
+		    	<h2 class="span12">Host/Service Information</h2>
+		    	<table class="span6 table table-striped table-bordered table-condensed">
 					<tr>
 						<td class="column1">{{elt_type.capitalize()}} Status</td>
 						<td><span class="state_{{elt.state.lower()}}">{{elt.state}}</span> (since {{helper.print_duration(elt.last_state_change, just_duration=True, x_elts=2)}}) </td>
@@ -164,9 +164,9 @@ Invalid element name
 						<td>{{time.asctime(time.localtime(elt.last_state_change))}}</td>
 					</tr>
 				</table>
-				<hr>
-				<h2>Additonal Informations</h2>
-				<table class="table table-condensed">
+				
+				<h2 class="span12">Additonal Informations</h2>
+				<table class="span6 table table-striped table-bordered table-condensed">
 					<tr>
 						<td class="column1">Last Notification</td>
 						<td>{{helper.print_date(elt.last_notification)}} (notification {{elt.current_notification_number}})</td>
