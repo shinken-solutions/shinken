@@ -26,3 +26,15 @@
   border-color: #ddd;
   border-color: rgba(0, 0, 0, 0.15);
 }
+
+.alert-critical {
+    color: #FFFFFF;
+    background-color: #e10000;
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#e10000), to(#bd0000)); /* Saf4+, Chrome */
+    background-image: -webkit-linear-gradient(top, #e10000, #bd0000); /* Chrome 10+, Saf5.1+, iOS 5+ */
+    background-image:    -moz-linear-gradient(top, #e10000, #bd0000); /* FF3.6 */
+    background-image:     -ms-linear-gradient(top, #e10000, #bd0000); /* IE10 */
+    background-image:      -o-linear-gradient(top, #e10000, #bd0000); /* Opera 11.10+ */
+    background-image:         linear-gradient(top, #e10000, #bd0000);
+            filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#e10000', EndColorStr='#bd0000'); /* IE6-IE9 */
+}
