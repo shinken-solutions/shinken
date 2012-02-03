@@ -77,9 +77,9 @@
     <!-- Le javascript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="../assets/js/tests/vendor/jquery.js"></script>
-    <script src="../assets/js/bootstrap-transition.js"></script>
-    <script src="../assets/js/bootstrap-collapse.js"></script>
+    <script src="/static/js/jquery.js"></script>
+    <script src="/static/js/bootstrap-collapse.js"></script>
+    <script src="/static/js/bootstrap-tab.js"></script>
 
   </body>
 </html>
