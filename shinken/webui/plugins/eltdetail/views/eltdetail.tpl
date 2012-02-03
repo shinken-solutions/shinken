@@ -19,48 +19,20 @@ Invalid element name
 
 %top_right_banner_state = datamgr.get_overall_state()
 
-%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/functions.js','eltdetail/js/graphs.js', 'eltdetail/js/dollar.js','eltdetail/js/TabPane.js', 'eltdetail/js/gesture.js', 'eltdetail/js/hide.js', 'eltdetail/js/switchbuttons.js', 'eltdetail/js/multi.js'],  css=['eltdetail/css/eltdetail2.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
+%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/functions.js','eltdetail/js/graphs.js', 'eltdetail/js/dollar.js','eltdetail/js/TabPane.js', 'eltdetail/js/gesture.js', 'eltdetail/js/hide.js', 'eltdetail/js/switchbuttons.js', 'eltdetail/js/multi.js'],  css=['eltdetail/css/eltdetail.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
 
 %# " We will save our element name so gesture functions will be able to call for the good elements."
 <script type="text/javascript">var elt_name = '{{elt.get_full_name()}}';</script>
 
-%#  "Left Container Start"
-<div id="left_container" class="grid_2">
-	<div id="nav_left">
-		<ul>
-			<li><a href="#">Overview</a></li>
-			<li><a class="pointer_down" id="v_toggle" href="#">Gesture</a></li>
-		</ul>
-	</div>
-	
-	<div id="gesture_slide" class="grid_16 opacity_hover">
-	%#  "This is the background canvas for all gesture detection things " 
-	%# " Don't ask me why, but the size must be included in the
-	%# canvas line here or we got problem!"
-		<canvas id="canvas" class="grid_10" style="border: 1px solid black; width: 100%;"></canvas>
-		<ul>
-			<li class="gesture_button">
-		       	<img title="By keeping a left click pressed and drawing a check, you will launch an acknowledgement." src="/static/eltdetail/images/gesture-check.png"/> Acknowledge
-			</li>
-			<li class="gesture_button">
-		       	<img title="By keeping a left click pressed and drawing a check, you will launch an recheck." src="/static/eltdetail/images/gesture-circle.png"/> Recheck
-			</li>
-			<li class="gesture_button">
-		       	<img title="By keeping a left click pressed and drawing a check, you will launch a try to fix command." src="/static/eltdetail/images/gesture-zigzag.png"/> Fix
-			</li>
-		</ul>
-	</div>	    
-	
-</div>
-%#  "Left Container End"
+
 
 %#  "Content Container Start"
-<div id="content_container" class="grid_14">
+<div id="content_container" class="span12 no-leftmargin">
 
 	<h1 class="grid_16 state_{{elt.state.lower()}} icon_down"><img class="host_img_25" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h1>
 
-	<div id="overview_container" class="grid_16">	   
-		<table class="grid_5">
+	<div class="span12 no-leftmargin box">	   
+		<table class="span4 no-leftmargin">
 		%#Alias, apretns and hostgroups arefor host only
 		%if elt_type=='host':
 			<tr>
@@ -77,7 +49,7 @@ Invalid element name
 			</tr>
 		</table>
 		
-		<table class="grid_4">
+		<table class="span3">
 			<tr>
 		    	<td>Parents:</td>
 		    	%if len(elt.parents) > 0:
@@ -119,11 +91,11 @@ Invalid element name
 			</tr>
 		</table>	    
 
-		<div class="grid_7">
+		<div class="span4">
 		    %#   " If the elements is a root problem with a huge impact and not ack, ask to ack it!"
 		    %if elt.is_problem and elt.business_impact > 2 and not elt.problem_has_been_acknowledged:
-			<div class="ui-state-error ui-corner-all push_top1 pull_bottom1">
-				<p><span style="float: left; margin-right: 0.3em;" class="ui-icon ui-icon-info"></span>	This element has got an important impact on your business, please <b>fix it</b> or <b>acknowledge it</b>.</p>
+			<div class="alert alert-error">
+				<p>This element has got an important impact on your business, please <b>fix it</b> or <b>acknowledge it</b>.</p>
 		    %# "end of the 'SOLVE THIS' highlight box"
 		    %end
 		    </div>
@@ -131,7 +103,7 @@ Invalid element name
 	</div>
 	
 	<!-- Switch Start -->
-	<div class="switches">
+	<div class="switches span12">
 		<ul class="grid_16">
 		    %if elt_type=='host':
 		       %title = 'This will also enable/disable this host services'

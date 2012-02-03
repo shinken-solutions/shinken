@@ -54,7 +54,7 @@
 		%include header_element globals()
 	%end
 
-    <div class="container-fluid no-padding">
+    <div class="container-fluid no-leftpadding">
       <div class="row-fluid">
         <div class="span2">
 			%if print_menu:
