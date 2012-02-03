@@ -182,9 +182,13 @@ class Daterange:
 
 
     def is_time_valid(self, t):
+        #print "****Look for time valid for", time.asctime(time.localtime(t))
         if self.is_time_day_valid(t):
+            #print "is time day valid"
             for tr in self.timeranges:
+                #print tr, "is valid?", tr.is_time_valid(t)
                 if tr.is_time_valid(t):
+                    #print "return True"
                     return True
         return False
 
@@ -318,8 +322,10 @@ class Daterange:
 
 
     def get_next_invalid_day(self, t):
+        #print "Look in", self.__dict__
         #print 'DR: get_next_invalid_day for', time.asctime(time.localtime(t))
         if self.is_time_day_invalid(t):
+            #print "EARLEY RETURN"
             return t
 
         next_future_timerange_invalid = self.get_next_future_timerange_invalid(t)
@@ -334,6 +340,9 @@ class Daterange:
             #print 'DR: get_next_future_timerange_invalid is', time.asctime(time.localtime(next_future_timerange_invalid))
             (start_time, end_time) = self.get_start_and_end_time(t)
 
+        #(start_time, end_time) = self.get_start_and_end_time(t)
+
+        #print "START", time.asctime(time.localtime(start_time)), "END", time.asctime(time.localtime(end_time))
         # The next invalid day can be t day if there a possible
         # invalid time range (timerange is not 00->24
         if next_future_timerange_invalid is not None:
@@ -341,6 +350,7 @@ class Daterange:
                 #print "Early Return next invalid day:", time.asctime(time.localtime(get_day(t)))
                 return get_day(t)
             if start_time >= t :
+                #print "start_time >= t :", time.asctime(time.localtime(get_day(start_time)))
                 return get_day(start_time)
         else:#Else, there is no possibility than in our start_time<->end_time we got
             #any invalid time (full period out). So it's end_time+1 sec (tomorow of end_time)
@@ -351,17 +361,23 @@ class Daterange:
 
 
     def get_next_invalid_time_from_t(self, t):
-        #print 'DR:get_next_invalid_time_from_t', time.asctime(time.localtime(t))
         if not self.is_time_valid(t):
-            #print "DR: cool, t is invalid",  time.asctime(time.localtime(t))
             return t
-
 
         # First we search fot the day of t
         t_day = self.get_next_invalid_day(t)
+        #print "FUCK NEXT DAY", time.asctime(time.localtime(t_day))
+
+        # We search for the min of all tr.start > sec_from_morning
+        # if it's the next day, use a start of the day search for timerange
+        if t < t_day:
+            sec_from_morning = self.get_next_future_timerange_invalid(t_day)
+        else: # t is in this day, so look from t (can be in the evening or so)
+            sec_from_morning = self.get_next_future_timerange_invalid(t)
+        #print "DR: sec from morning", sec_from_morning
 
         # tr can't be valid, or it will be return at the begining
-        sec_from_morning = self.get_next_future_timerange_invalid(t)
+        #sec_from_morning = self.get_next_future_timerange_invalid(t)
         
         # Ok we've got a next invalid day and a invalid possibility in
         # timerange, so the next invalid is this day+sec_from_morning
@@ -370,7 +386,7 @@ class Daterange:
             return t_day + sec_from_morning + 1
 
         # We've got a day but no sec_from_morning : the timerange is full (0->24h)
-        # so the next invalid is this day at the day_start
+        # so the next invalid is this day at the day_start 
         if t_day is not None and sec_from_morning is None:
             return t_day
 

@@ -105,6 +105,7 @@ def get_start_of_day(year, month_id, day):
     except OverflowError:
         # Windows mktime sometimes crashes on (1970, 1, 1, ...)
         start_time_epoch = 0.0
+
     return start_time_epoch
 
 

@@ -1067,8 +1067,8 @@ class Services(Items):
     # So service will take info from host if necessery
     def apply_implicit_inheritance(self, hosts):
         for prop in ( 'contacts', 'contact_groups', 'notification_interval',
-                         'notification_period', 'resultmodulations', 'business_impact_modulations', 'escalations',
-                         'poller_tag', 'reactionner_tag', 'check_period', 'business_impact' ):
+                      'notification_period', 'resultmodulations', 'business_impact_modulations', 'escalations',
+                      'poller_tag', 'reactionner_tag', 'check_period', 'business_impact', 'maintenance_period' ):
             for s in self:
                 if not s.is_tpl():
                     if not hasattr(s, prop) and hasattr(s, 'host_name'):

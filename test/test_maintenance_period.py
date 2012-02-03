@@ -29,7 +29,7 @@ from shinken_test import *
 from shinken.objects.timeperiod import Timeperiod
 
 
-class TestConfig(ShinkenTest):
+class TestMaintPeriod(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_maintenance_period.cfg')
 
@@ -50,12 +50,11 @@ class TestConfig(ShinkenTest):
         self.assert_(test_host_0.maintenance_period is None)
         self.assert_(test_nobody.maintenance_period is None)
 
-        #Now inplicit inheritance
-        #This one is defined in the service conf
+        # Now inplicit inheritance
+        # This one is defined in the service conf
         self.assert_(svc1.maintenance_period == a_24_7)
-        #This one is empty, because maintenance_period are not inherited from the
-        #host like check/notification_periods
-        self.assert_(svc2.maintenance_period is None)
+        # And others are implicitly inherited
+        self.assert_(svc2.maintenance_period is a_24_7)
         #This one got nothing :)
         self.assert_(svc3.maintenance_period is None)
 
