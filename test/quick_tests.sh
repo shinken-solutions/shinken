@@ -137,6 +137,7 @@ launch_and_assert test_groups_with_no_alias.py
 launch_and_assert test_notif_too_much.py
 launch_and_assert test_timeperiods_state_logs.py
 launch_and_assert test_define_with_space.py
+launch_and_assert test_objects_and_notifways.py
 
 launch_and_assert test_maintenance_period.py
 #Live status is a bit longer than the previous, so we put it at the end.

@@ -124,6 +124,9 @@ class TestRegenerator(ShinkenTest):
 
         self.look_for_same_values()
 
+        
+
+        
 
 if __name__ == '__main__':
     unittest.main()

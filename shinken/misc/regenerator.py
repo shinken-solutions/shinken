@@ -265,7 +265,7 @@ class Regenerator(object):
             new_exclude = []
             for ex in tp.exclude:
                 exname = ex.timeperiod_name
-                t = self.timeperiods(exname)
+                t = self.timeperiods.find_by_name(exname)
                 if t:
                     new_exclude.append(t)
             tp.exclude = new_exclude
