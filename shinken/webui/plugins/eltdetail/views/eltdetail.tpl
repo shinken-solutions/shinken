@@ -94,7 +94,7 @@ Invalid element name
 		<div class="span4">
 		    %#   " If the elements is a root problem with a huge impact and not ack, ask to ack it!"
 		    %if elt.is_problem and elt.business_impact > 2 and not elt.problem_has_been_acknowledged:
-			<div class="alert alert-error">
+			<div class="alert alert-error no-bottommargin">
 				<p>This element has got an important impact on your business, please <b>fix it</b> or <b>acknowledge it</b>.</p>
 		    %# "end of the 'SOLVE THIS' highlight box"
 		    %end
