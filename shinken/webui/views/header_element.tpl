@@ -19,6 +19,9 @@
             </ul>
             %if user is not None:
             <p class="navbar-text pull-right">Logged in as <a href="#"><!-- {{user}} --></a></p>
+            <form class="navbar-search pull-right">
+              <input type="text" class="search-query" placeholder="Search">
+            </form>
             %end
           </div><!--/.nav-collapse -->
         </div>
