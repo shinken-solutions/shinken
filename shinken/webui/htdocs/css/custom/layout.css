@@ -38,3 +38,7 @@
     background-image:         linear-gradient(top, #e10000, #bd0000);
             filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#e10000', EndColorStr='#bd0000'); /* IE6-IE9 */
 }
+
+.label-help {
+    background-color: #3A87AD;
+}
