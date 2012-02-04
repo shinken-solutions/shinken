@@ -19,7 +19,7 @@ Invalid element name
 
 %top_right_banner_state = datamgr.get_overall_state()
 
-%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/functions.js','eltdetail/js/graphs.js', 'eltdetail/js/dollar.js','eltdetail/js/TabPane.js', 'eltdetail/js/gesture.js', 'eltdetail/js/hide.js', 'eltdetail/js/switchbuttons.js', 'eltdetail/js/multi.js'],  css=['eltdetail/css/eltdetail.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
+%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/functions.js','eltdetail/js/graphs.js', 'eltdetail/js/dollar.js'],  css=['eltdetail/css/eltdetail.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
 
 %# " We will save our element name so gesture functions will be able to call for the good elements."
 <script type="text/javascript">var elt_name = '{{elt.get_full_name()}}';</script>
@@ -101,9 +101,12 @@ Invalid element name
 		    </div>
 		</div>				
 	</div>
-	
+	<!-- jQuery Switch -->
+
+	<!-- jQuery Switch end-->
+
 	<!-- Switch Start -->
-	<div class="switches span12">
+	<div class="switches span12">		
 		<ul>
 		    %if elt_type=='host':
 		       %title = 'This will also enable/disable this host services'
@@ -128,7 +131,7 @@ Invalid element name
 	    <div class="tab-content">
 	    	<!-- Tab Summary Start-->
 		    <div class="tab-pane active" id="1">
-		    	<h2 class="span12">Host/Service Information</h2>
+		    	<h3 class="span12">Host/Service Information</h3>
 		    	<table class="span6 table table-striped table-bordered table-condensed">
 					<tr>
 						<td class="column1">{{elt_type.capitalize()}} Status</td>
@@ -164,8 +167,19 @@ Invalid element name
 						<td>{{time.asctime(time.localtime(elt.last_state_change))}}</td>
 					</tr>
 				</table>
-				
-				<h2 class="span12">Additonal Informations</h2>
+
+			    <div class="btn-group span5">
+			    	<a class="btn dropdown-toggle span12" data-toggle="dropdown" href="#">Action <span class="caret pull-right"></span></a>
+				    <ul class="dropdown-menu span12">
+				    	<li><a href="#">Action</a></li>
+				    	<li><a href="#">Another action</a></li>
+				    	<li><a href="#">Something else here</a></li>
+				    	<li class="divider"></li>
+				    	<li><a href="#">Separated link</a></li>
+				    </ul>
+			    </div>
+
+				<h3 class="span12">Additonal Informations</h3>
 				<table class="span6 table table-striped table-bordered table-condensed">
 					<tr>
 						<td class="column1">Last Notification</td>
