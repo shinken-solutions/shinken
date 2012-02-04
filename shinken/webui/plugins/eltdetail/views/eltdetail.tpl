@@ -277,9 +277,9 @@ Invalid element name
 
 		    <!-- Tab Comments and Downtimes Start -->
 		    <div class="tab-pane" id="3">
-				<div id="minimenu">
-					<ul>
-						<li> <a href="#" class="">Add Comments</a> </li>
+				<div>
+					<ul class="nav nav-pills">
+						<li class="active"> <a href="#" class="">Add Comments</a> </li>
 						<li> <a onclick="delete_all_comments('{{elt.get_full_name()}}')" href="#" class="">Delete Comments</a> </li>
 					</ul>
 				</div>
