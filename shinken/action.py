@@ -228,7 +228,14 @@ else:
             if sys.version_info < (2, 7):
                 cmd = self.command
             else:
-                cmd = shlex.split(self.command.encode('utf8', 'ignore'))
+                try:
+                    cmd = shlex.split(self.command.encode('utf8', 'ignore'))
+                except Exception, exp:
+                    self.output = 'Not a valid shell command: ' + exp.__str__()
+                    self.exit_status = 3
+                    self.status = 'done'
+                    self.execution_time = time.time() - self.check_time
+                    return
 
             try:
                 self.process = subprocess.Popen(cmd,
