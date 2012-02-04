@@ -101,9 +101,6 @@ Invalid element name
 		    </div>
 		</div>				
 	</div>
-	<!-- jQuery Switch -->
-
-	<!-- jQuery Switch end-->
 
 	<!-- Switch Start -->
 	<div class="switches span12">		
@@ -169,8 +166,12 @@ Invalid element name
 				</table>
 
 			    <div class="btn-group span5">
-			    	<a class="btn dropdown-toggle span12" data-toggle="dropdown" href="#">Action <span class="caret pull-right"></span></a>
-				    <ul class="dropdown-menu span12">
+			    %if elt_type=='host':
+			    	<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">Host Action <span class="caret"></span></a>
+			    %else:
+			    <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">Service Action <span class="caret"></span></a>
+			    %end:
+				    <ul class="dropdown-menu">
 				    	<li><a href="#">Action</a></li>
 				    	<li><a href="#">Another action</a></li>
 				    	<li><a href="#">Something else here</a></li>
