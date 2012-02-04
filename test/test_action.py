@@ -139,6 +139,23 @@ class TestAction(ShinkenTest):
         self.assert_(a.status == 'done')
 
 
+    def test_got_unclosed_quote(self):
+        # https://github.com/naparuba/shinken/issues/155
+        a = Action()
+        a.timeout = 10
+        a.command = "libexec/dummy_command_nobang.sh -a 'wwwwzzzzeeee"
+        a.env = {}
+        if os.name == 'nt':
+            return
+        a.execute()
+
+        self.assert_(a.status == 'done')
+        self.wait_finished(a)
+        print "FUck", a.status, a.output
+        self.assert_(a.exit_status == 3)
+        self.assert_(a.output == 'Not a valid shell command: No closing quotation')
+
+
 if __name__ == '__main__':
     import sys
    
