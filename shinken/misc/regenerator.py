@@ -417,6 +417,14 @@ class Regenerator(object):
 
 ############### Brok management part
 
+    def before_after_hook(self, brok, obj):
+        """
+        This can be used by derived classes to compare the data in the brok
+        with the object which will be updated by these data. For example,
+        it is possible to find out in this method whether the state of a
+        host or service has changed.
+        """
+        pass
 
 ####### INITIAL PART
 
@@ -876,6 +884,7 @@ class Regenerator(object):
         h = self.hosts.find_by_name(hname)
 
         if h:
+            self.before_after_hook(b, h)
             self.update_element(h, data)
 
             # We can have some change in our impacts and source problems.
@@ -919,6 +928,7 @@ class Regenerator(object):
         sdesc = data['service_description']
         s = self.services.find_srv_by_name_and_hostname(hname, sdesc)
         if s:
+            self.before_after_hook(b, s)
             self.update_element(s, data)
 
             # We can have some change in our impacts and source problems.
@@ -996,6 +1006,7 @@ class Regenerator(object):
 
         h = self.hosts.find_by_name(hname)
         if h:
+            self.before_after_hook(b, h)
             self.update_element(h, data)
 
 
@@ -1011,6 +1022,7 @@ class Regenerator(object):
         sdesc = data['service_description']
         s = self.services.find_srv_by_name_and_hostname(hname, sdesc)
         if s:
+            self.before_after_hook(b, s)
             self.update_element(s, data)
 
 
