@@ -14,14 +14,14 @@
               %if user is not None:
               <li class="active"><a href="#">Dashboard</a></li>
               <li><a href="#">Shinken UI</a></li>
-              <li><a href="#">Sknonf UI</a></li>
+              <li><a href="#">Skonf UI</a></li>
               %end
             </ul>
             %if user is not None:
-            <p class="navbar-text pull-right">Logged in as <a href="#"><!-- {{user}} --></a></p>
-            <form class="navbar-search pull-right">
+            <p class="navbar-text pull-right">Logged in as <a href="#"> Dummy<!-- {{user}} --></a></p>
+            <!--<form class="navbar-search pull-right">
               <input type="text" class="search-query" placeholder="Search">
-            </form>
+            </form>-->
             %end
           </div><!--/.nav-collapse -->
         </div>

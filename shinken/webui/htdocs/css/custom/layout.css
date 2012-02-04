@@ -10,6 +10,10 @@
 	margin-bottom: 0 !important;
 }
 
+.no-maxwidth{
+  max-width: 0; 
+}
+
 .box {
   min-height: 20px;
   padding: 10px 0px 10px 5px;

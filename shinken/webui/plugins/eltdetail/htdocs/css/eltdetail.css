@@ -80,9 +80,6 @@
 	margin-left: 20em;
 }
 
-.column1 {
-	width: 15%;
-}
 
 /*
 *
@@ -206,37 +203,6 @@ div.content {
     width: 25px;
 }*/
 
-#minimenu{
-	margin: 0;
-	padding: 0;
-}
-
-#minimenu ul{
-	margin: 0;
-	margin-bottom: 1em;
-	padding-left: 0;
-	float: left;
-	font-weight: bold;
-	width: 100%;
-	border-width: 1px 0;
-}
-
-#minimenu ul li{
-	display: inline;
-}
-
-#minimenu ul li a{
-	float: left;
-	color: #787878;
-	padding: 2px 6px 4px 6px;
-	text-decoration: none;
-}
-
-#minimenu ul li a:hover{
-	color: #787878;
-	border-bottom: 2px solid #787878;
-	padding-bottom: 0;
-}
 
 #messagebox {
     margin-top: 10px;
