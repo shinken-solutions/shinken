@@ -30,6 +30,11 @@
     <link href="/static/css/custom/layout.css" rel="stylesheet">
     <link href="/static/css/custom/badger.css" rel="stylesheet">
     <link href="/static/css/custom/engage.itoggle.css" rel="stylesheet">
+
+    %# And now for css files
+      %for p in css:
+    <link rel="stylesheet" type="text/css" href="/static/{{p}}">
+      %end
     
     <style type="text/css">
       body {
@@ -40,14 +45,7 @@
         padding: 9px 0;
       }
     </style>
-    <!--
-    <link href="/static/css/bootstrap-responsive.css" rel="stylesheet">
-    -->
-    <!-- Le fav and touch icons -->
-    <link rel="shortcut icon" href="images/favicon.ico">
-    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
-    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+
   </head>
 
 <body>
@@ -84,6 +82,11 @@
     <script src="/static/js/bootstrap-tab.js"></script>
     <script src="/static/js/bootstrap-button.js"></script>
     <script src="/static/js/bootstrap-dropdown.js"></script>
+
+    %# End of classic js import. Now call for specific ones
+      %for p in js:
+    <script type="text/javascript" src="/static/{{p}}"></script>
+      %end
 
   </body>
 </html>
