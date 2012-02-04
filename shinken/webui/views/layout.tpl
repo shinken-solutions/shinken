@@ -77,6 +77,7 @@
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="/static/js/jquery.js"></script>
+    <script src="/static/js/jquery-ui-1.8.17.custom.min.js"></script>
     <script src="/static/js/shinkenui.js"></script>
     <script src="/static/js/bootstrap-collapse.js"></script>
     <script src="/static/js/bootstrap-tab.js"></script>

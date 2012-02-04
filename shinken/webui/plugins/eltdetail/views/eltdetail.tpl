@@ -19,7 +19,7 @@ Invalid element name
 
 %top_right_banner_state = datamgr.get_overall_state()
 
-%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(),  js=['eltdetail/js/functions.js','eltdetail/js/graphs.js', 'eltdetail/js/dollar.js'],  css=['eltdetail/css/eltdetail.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
+%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(), css=['eltdetail/css/eltdetail.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
 
 %# " We will save our element name so gesture functions will be able to call for the good elements."
 <script type="text/javascript">var elt_name = '{{elt.get_full_name()}}';</script>
@@ -94,7 +94,7 @@ Invalid element name
 		<div class="span4">
 		    %#   " If the elements is a root problem with a huge impact and not ack, ask to ack it!"
 		    %if elt.is_problem and elt.business_impact > 2 and not elt.problem_has_been_acknowledged:
-			<div class="alert alert-critical no-bottommargin">
+			<div class="alert alert-critical no-bottommargin pulsate">
 				<p>This element has got an important impact on your business, please <b>fix it</b> or <b>acknowledge it</b>.</p>
 		    %# "end of the 'SOLVE THIS' highlight box"
 		    %end
@@ -128,7 +128,12 @@ Invalid element name
 	    <div class="tab-content">
 	    	<!-- Tab Summary Start-->
 		    <div class="tab-pane active" id="1">
-		    	<h3 class="span12">Host/Service Information</h3>
+		    	%if elt_type=='host':
+			   	<h3 class="span12">Host Information:</h3>
+			    %else:
+			    <h3 class="span12">Service Information:</h3>
+			    %end:
+		    	
 		    	<table class="span6 table table-striped table-bordered table-condensed">
 					<tr>
 						<td class="column1">{{elt_type.capitalize()}} Status</td>
@@ -164,14 +169,15 @@ Invalid element name
 						<td>{{time.asctime(time.localtime(elt.last_state_change))}}</td>
 					</tr>
 				</table>
+				
 
 			    <div class="btn-group span5">
 			    %if elt_type=='host':
-			    	<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">Host Action <span class="caret"></span></a>
+			    	<a class="btn dropdown-toggle span12" data-toggle="dropdown" href="#">Host Action <span class="caret pull-right"></span></a>
 			    %else:
-			    <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">Service Action <span class="caret"></span></a>
+			    	<a class="btn dropdown-toggle span12" data-toggle="dropdown" href="#">Service Action <span class="caret pull-right"></span></a>
 			    %end:
-				    <ul class="dropdown-menu">
+				    <ul class="dropdown-menu span12 no-maxwidth">
 				    	<li><a href="#">Action</a></li>
 				    	<li><a href="#">Another action</a></li>
 				    	<li><a href="#">Something else here</a></li>
@@ -180,7 +186,7 @@ Invalid element name
 				    </ul>
 			    </div>
 
-				<h3 class="span12">Additonal Informations</h3>
+				<h3 class="span12">Additonal Informations:</h3>
 				<table class="span6 table table-striped table-bordered table-condensed">
 					<tr>
 						<td class="column1">Last Notification</td>
