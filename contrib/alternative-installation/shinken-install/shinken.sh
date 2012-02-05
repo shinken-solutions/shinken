@@ -54,12 +54,12 @@ function remove(){
     
     if [ -d "$TARGET" ]
     then 
-        cecho " > removing $TARGET" green
+        cecho " > Removing $TARGET" green
         rm -Rf $TARGET
     fi
     if [ -h "/etc/default/shinken" ]
     then 
-        cecho " > removing defaults" green
+        cecho " > Removing defaults" green
         rm -Rf /etc/default/shinken 
     fi
     if [ -f "/etc/init.d/shinken" ]
@@ -111,7 +111,7 @@ function purgeSQLITE(){
         exit 1
     fi
     skill >> /tmp/shinken.install.log 2>&1 
-    cecho " > we keep $KEEPDAYSLOG days of logs" green
+    cecho " > We keep $KEEPDAYSLOG days of logs" green
     sqlite3 $TARGET/var/livestatus.db "delete from logs where time < strftime('%s', 'now') - 3600*24*$KEEPDAYSLOG"
     cecho " > Vaccum the sqlite DB" green
     sqlite3 $TARGET/var/livestatus.db VACUUM
@@ -126,7 +126,7 @@ function skill(){
         IFS=$'\n'
         for p in $(ps -aef | grep "$TARGET" | grep -v "grep" | awk '{print $2}')
         do
-            cecho " > killing $p " green
+            cecho " > Killing $p " green
             kill -9 $p
         done
 
@@ -143,14 +143,14 @@ function setdirectives(){
     fic=$2
     mpath=$3
     
-    cecho "    > going to $mpath" green
+    cecho "    > Going to $mpath" green
     cd $mpath
 
     for pair in $directives
     do
         directive=$(echo $pair | awk -F= '{print $1}')
         value=$(echo $pair | awk -F= '{print $2}')
-        cecho "       > setting $directive to $value in $fic" green
+        cecho "       > Setting $directive to $value in $fic" green
         sed -i 's#^\# \?'$directive'=\(.*\)$#'$directive'='$value'#g' $mpath/etc/$(basename $fic)
     done
 }
@@ -164,7 +164,7 @@ function create_user(){
     cadre "Creating user" green
     if [ ! -z "$(cat /etc/passwd | grep $SKUSER)" ] 
     then
-        cecho " > User $SKUSER allready exist" yellow 
+        cecho " > User $SKUSER already exists" yellow 
     else
             useradd -s /bin/bash $SKUSER -m -d /home/$SKUSER 
     fi
@@ -176,17 +176,17 @@ function check_exist(){
     cadre "Checking for existing installation" green
     if [ -d "$TARGET" ]
     then
-        cecho " > Target folder allready exist" red
+        cecho " > Target folder already exists" red
         exit 2
     fi
     if [ -e "/etc/init.d/shinken" ]
     then
-        cecho " > Init scripts allready exist" red
+        cecho " > Init scripts already exists" red
         exit 2
     fi
     if [ -L "/etc/default/shinken" ]
     then
-        cecho " > shinken default allready exist" red
+        cecho " > Shinken default already exists" red
         exit 2
     fi
 
@@ -232,7 +232,7 @@ function debinstalled(){
 }
 
 function prerequisites(){
-    cadre "Checking prerequisite" green
+    cadre "Checking prerequisites" green
     # common prereq
     bins="wget sed awk grep python bash"
 
@@ -268,7 +268,7 @@ function prerequisites(){
                         fi
                         rpm -Uvh ./$EPELPKG >> /tmp/shinken.install.log 2>&1 
                     else
-                        cecho " > $EPELPKG allready installed" green 
+                        cecho " > $EPELPKG already installed" green 
                     fi
                     ;;
 #                6)
@@ -300,7 +300,7 @@ function prerequisites(){
                 exit 2     
             fi
         else
-            cecho " > Package $p allready installed " green 
+            cecho " > Package $p already installed " green 
         fi
     done
     # python prereq
@@ -313,11 +313,11 @@ function prerequisites(){
                 export PYEI="easy_install-2.6"
                 if [ ! -d "setuptools-$SETUPTOOLSVERS" ]
                 then
-                    cecho " > Downloading setuptoos for python 2.6" green
+                    cecho " > Downloading setuptools for python 2.6" green
                     wget $WGETPROXY $RHELSETUPTOOLS >> /tmp/shinken.install.log 2>&1 
                     tar zxvf setuptools-$SETUPTOOLSVERS.tar.gz >> /tmp/shinken.install.log 2>&1 
                 fi
-                cecho " > installing setuptoos for python 2.6" green
+                cecho " > Installing setuptools for python 2.6" green
                 cd setuptools-$SETUPTOOLSVERS >> /tmp/shinken.install.log 2>&1 
                 python26 setup.py install >> /tmp/shinken.install.log 2>&1 
                 PYLIBS=$PYLIBSRHEL
@@ -383,7 +383,7 @@ function check_distro(){
 
     if [ -z "$CODE" ]
     then
-        cecho " > $DIST is not suported" red
+        cecho " > $DIST is not supported" red
         exit 2
     fi
 
@@ -470,7 +470,7 @@ function relocate(){
     then
         if [ "$VERS" = "5" ]
         then
-            cecho " > translating python version to python26" green
+            cecho " > Translating python version to python26" green
             for fic in $(find $TARGET | grep "\.py$") 
             do
                 sed -i "s#/usr/bin/env python#/usr/bin/python26#g" $fic
@@ -552,7 +552,7 @@ function sinstall(){
     fi
     fix
     cecho "+------------------------------------------------------------------------------" green
-    cecho "| shinken is now installed on your server " green
+    cecho "| Shinken is now installed on your server " green
     cecho "| You can start it with /etc/init.d/shinken start " green
     cecho "| The Web Interface is available at : http://localhost:7767" green
     cecho "+------------------------------------------------------------------------------" green
@@ -572,6 +572,8 @@ function backup(){
         mkdir $BACKUPDIR
     fi
     mkdir -p $BACKUPDIR/bck-shinken.$DATE
+    # Sugg :
+    # Add : cp -Rfp $TARGET/bin $BACKUPDIR/bck-shinken.$DATE/ line to backup bin
     cp -Rfp $TARGET/etc $BACKUPDIR/bck-shinken.$DATE/
     cp -Rfp $TARGET/libexec $BACKUPDIR/bck-shinken.$DATE/
     cp -Rfp $TARGET/var $BACKUPDIR/bck-shinken.$DATE/
@@ -613,7 +615,7 @@ function restore(){
     rm -Rf $TARGET/libexec 
     rm -Rf $TARGET/var 
     cp -Rfp $BACKUPDIR/bck-shinken.$1/* $TARGET/
-    cecho " > Restauration done" green
+    cecho " > Restoration done" green
 }
 
 ########################
@@ -626,7 +628,7 @@ function supdate(){
     curpath=$(pwd)
     if [ "$src" == "$TARGET" ]
     then
-        cecho "You should use the source tree for update not the target folder !!!!!" red
+        cecho "You should use the source tree to update and not use the target folder !!!!!" red
         exit 2
     fi
 
@@ -638,6 +640,8 @@ function supdate(){
     get_from_git
     cp -Rf $src $TARGET
     relocate
+    # Sugg :
+    # Do a ln -sf to force 
     ln -s $TARGET/bin/default/shinken /etc/default/shinken
     cp $TARGET/bin/init.d/shinken* /etc/init.d/
     mkdir -p $TARGET/var/archives
@@ -686,7 +690,7 @@ function cleanconf(){
     else
         for f in $(cat $myscripts/config.files)
         do
-            cecho " > removing $TARGET/etc/$f" green
+            cecho " > Removing $TARGET/etc/$f" green
             rm -Rf $TARGET/etc/$f
         done
     fi
@@ -857,11 +861,11 @@ function fixHtpasswdPath(){
 function install_multisite(){
     if [ "$CODE" == "REDHAT" ]
     then
-        cecho " > Unsuported" red
+        cecho " > Unsupported" red
         exit 2
     fi
     cadre "Install check_mk addon" green
-    cecho " > configure response file" green
+    cecho " > Configure response file" green
     cp check_mk_setup.conf.in $HOME/.check_mk_setup.conf
     sed -i "s#__PNPPREFIX__#$PNPPREFIX#g" $HOME/.check_mk_setup.conf
     sed -i "s#__MKPREFIX__#$MKPREFIX#g" $HOME/.check_mk_setup.conf
@@ -895,9 +899,9 @@ function install_multisite(){
     fi 
     tar zxvf $filename >> /tmp/shinken.install.log 2>&1 
     cd $folder
-    cecho " > install multisite" green
+    cecho " > Install multisite" green
     ./setup.sh --yes >> /tmp/shinken.install.log 2>&1 
-    cecho " > default configuration for multisite" green
+    cecho " > Default configuration for multisite" green
     echo 'sites = {' >> $MKPREFIX/etc/multisite.mk
     echo '   "default": {' >> $MKPREFIX/etc/multisite.mk
     echo '    "alias":          "default",' >> $MKPREFIX/etc/multisite.mk
@@ -965,11 +969,11 @@ function install_pnp4nagios(){
     rm -f $PNPPREFIX/share/install.php
     if [ "$CODE" == "REDHAT" ]
     then
-        cecho " > fix htpasswd.users path" green
+        cecho " > Fix htpasswd.users path" green
         sed -i "s#/usr/local/nagios/etc/htpasswd.users#$TARGET/etc/htpasswd.users#g" /etc/httpd/conf.d/pnp4nagios.conf 
         /etc/init.d/apache2 restart >> /tmp/shinken.install.log 2>&1 
     else
-        cecho " > fix htpasswd.users path" green
+        cecho " > Fix htpasswd.users path" green
         sed -i "s#/usr/local/nagios/etc/htpasswd.users#$TARGET/etc/htpasswd.users#g" /etc/apache2/conf.d/pnp4nagios.conf 
         /etc/init.d/apache2 restart >> /tmp/shinken.install.log 2>&1 
     fi
@@ -1014,10 +1018,10 @@ function install_check_hpasm(){
 
     if [ "$CODE" == "REDHAT" ]
     then
-        cecho " > installing prerequisites" green 
+        cecho " > Installing prerequisites" green 
         yum install -yq $CHECKHPASMYUMPKGS  >> /tmp/shinken.install.log 2>&1 
     else
-        cecho " > installing prerequisites" green 
+        cecho " > Installing prerequisites" green 
         apt-get -y install $CHECKHPASMAPTPKGS >> /tmp/shinken.install.log 2>&1 
     fi
 
@@ -1072,10 +1076,10 @@ function install_check_mongodb(){
 
     if [ "$CODE" == "REDHAT" ]
     then
-        cecho " > installing prerequisites" green 
+        cecho " > Installing prerequisites" green 
         yum install -yq $CHECKMONGOYUMPKG  >> /tmp/shinken.install.log 2>&1 
     else
-        cecho " > installing prerequisites" green 
+        cecho " > Installing prerequisites" green 
         apt-get -y install $CHECKMONGOAPTPKG >> /tmp/shinken.install.log 2>&1 
     fi
 
@@ -1114,13 +1118,13 @@ function install_check_nwc_health(){
     then
         if [ ! -z "$CHECKNWCYUMPKG" ]
         then 
-            cecho " > installing prerequisites" green 
+            cecho " > Installing prerequisites" green 
             yum install -yq $CHECKNWCYUMPKG  >> /tmp/shinken.install.log 2>&1 
         fi
     else
         if [ ! -z "$CHECKNWCAPTPKG" ]
         then 
-            cecho " > installing prerequisites" green 
+            cecho " > Installing prerequisites" green 
             apt-get -y install $CHECKNWCAPTPKG >> /tmp/shinken.install.log 2>&1 
         fi
     fi
@@ -1174,13 +1178,13 @@ plugin. Ask your vendor to know how to get it." yellow
     then
         if [ ! -z "$CHECKEMCYUMPKG" ]
         then 
-            cecho " > installing prerequisites" green 
+            cecho " > Installing prerequisites" green 
             yum install -yq $CHECKEMCYUMPKG  >> /tmp/shinken.install.log 2>&1 
         fi
     else
         if [ ! -z "$CHECKEMCAPTPKG" ]
         then 
-            cecho " > installing prerequisites" green 
+            cecho " > Installing prerequisites" green 
             apt-get -y install $CHECKEMCAPTPKG >> /tmp/shinken.install.log 2>&1 
         fi
     fi
@@ -1230,7 +1234,7 @@ function install_check_esx3(){
 
     if [ "$CODE" == "REDHAT" ]
     then
-        cecho " > installing prerequisites" green 
+        cecho " > Installing prerequisites" green 
         # because redhat package nagios-plugins-perl does not ship all files from Nagios::plugins
         yum install -yq $NAGPLUGYUMPKGS  >> /tmp/shinken.install.log 2>&1 
         cd /tmp
@@ -1247,7 +1251,7 @@ function install_check_esx3(){
         make install >> /tmp/shinken.install.log 2>&1
         yum install -yq $VSPHERESDKYUMPKGS  >> /tmp/shinken.install.log 2>&1 
     else
-        cecho " > installing prerequisites" green 
+        cecho " > Installing prerequisites" green 
         apt-get -y install $VSPHERESDKAPTPKGS >> /tmp/shinken.install.log 2>&1 
     fi
     cd /tmp
@@ -1292,16 +1296,16 @@ function install_nagios-plugins(){
 
     if [ "$CODE" == "REDHAT" ]
     then
-        cecho " > installing prerequisites" green
+        cecho " > Installing prerequisites" green
         yum install -yq $NAGPLUGYUMPKG  >> /tmp/shinken.install.log 2>&1 
     else
-        cecho " > installing prerequisites" green 
+        cecho " > Installing prerequisites" green 
         apt-get -y install $NAGPLUGAPTPKG >> /tmp/shinken.install.log 2>&1 
     fi
     cd /tmp
     if [ ! -f "nagios-plugins-$NAGPLUGVERS.tar.gz" ]
     then
-        cecho " > getting nagios-plugins archive" green
+        cecho " > Getting nagios-plugins archive" green
         wget $WGETPROXY $NAGPLUGBASEURI >> /tmp/shinken.install.log 2>&1 
     fi
     cecho " > Extract archive content " green
@@ -1324,10 +1328,10 @@ function install_check_wmi_plus(){
 
     if [ "$CODE" == "REDHAT" ]
     then
-        cecho " > installing prerequisites" green 
+        cecho " > Installing prerequisites" green 
         yum -yq install $WMICYUMPKG >> /tmp/shinken.install.log 2>&1 
     else
-        cecho " > installing prerequisites" green 
+        cecho " > Installing prerequisites" green 
         apt-get -y install $WMICAPTPKG >> /tmp/shinken.install.log 2>&1
     fi 
     cd /tmp
@@ -1384,6 +1388,10 @@ function install_check_wmi_plus(){
 function install_check_oracle_health(){
     cadre "Install nagios plugins" green
 
+
+    # Sugg : 
+    # Is the warning show everytime we want to install the plugin?
+    # Maybe add a condition here, the user may have already installed the oracle client :)
     cadre "WARNING YOU SHOULD INSTALL ORACLE INSTANT CLIENT FIRST !!!!" yellow
     cecho " > Download the oracle instant client there (basic AND sdk AND sqlplus) : " yellow
     cecho " > 64 bits : http://www.oracle.com/technetwork/topics/linuxx86-64soft-092277.html" yellow
@@ -1395,19 +1403,19 @@ function install_check_oracle_health(){
 
     if [ -z "$ORACLE_HOME" ]
     then
-        cecho " > you must set the ORACLE_HOME environment variable !" red
+        cecho " > You must set the ORACLE_HOME environment variable !" red
         exit 2
     fi
 
     if [ "$CODE" == "REDHAT" ]
     then
-        cecho " > installing prerequisites" green 
+        cecho " > Installing prerequisites" green 
         apt-get -y install $CHECKORACLEHEALTHYUMPKG >> /tmp/shinken.install.log 2>&1 
     else
-        cecho " > installing prerequisites" green 
+        cecho " > Installing prerequisites" green 
         apt-get -y install $CHECKORACLEHEALTHAPTPKG >> /tmp/shinken.install.log 2>&1 
     fi
-    cecho " > installing cpan prerequisites" green
+    cecho " > Installing cpan prerequisites" green
     cd /tmp
     for m in $CHECKORACLEHEALTHCPAN
     do
@@ -1646,6 +1654,10 @@ while getopts "kidubcr:lz:hsvp:we:" opt; do
             purgeSQLITE    
             exit 0
             ;;
+
+        # Sugg :
+        # Code never reached, case already done above.
+        # Remove this?
         z)
             check_distro
             exit 0
