@@ -155,7 +155,7 @@ class LiveStatus_broker(BaseModule, Daemon):
         self.datamgr = datamgr
         datamgr.load(self.rg)
         self.query_cache = LiveStatusQueryCache()
-        if not use_query_cache:
+        if not self.use_query_cache:
             self.query_cache.disable()
         self.rg.register_cache(self.query_cache)
 
