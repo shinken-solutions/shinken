@@ -123,8 +123,8 @@ class __Action(object):
                 return
             return
         # Get standards outputs
-        self.exit_status = self.process.returncode
         (stdoutdata, stderrdata) = self.process.communicate()
+        self.exit_status = self.process.returncode
 
         # we should not keep the process now
         del self.process
@@ -133,6 +133,12 @@ class __Action(object):
         # TODO : Anormal should be logged properly no?
         if self.exit_status not in valid_exit_status:
             stdoutdata = stdoutdata + stderrdata
+        elif 'sh: -c: line 0: unexpected EOF while looking for matching' in stderrdata:
+            # Very, very ugly. But subprocess._handle_exitstatus does not see
+            # a difference between a regular "exit 1" and a bailing out shell.
+            # Strange, because strace clearly shows a difference. (exit_group(1) vs. exit_group(257))
+            stdoutdata = stdoutdata + stderrdata
+            self.exit_status = 3
         # Now grep what we want in the output
         self.get_outputs(stdoutdata, max_plugins_output_length)
 

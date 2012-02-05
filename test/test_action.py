@@ -23,6 +23,7 @@
 #
 
 import os
+import sys
 
 #It's ugly I know....
 from shinken_test import *
@@ -152,8 +153,12 @@ class TestAction(ShinkenTest):
         self.assert_(a.status == 'done')
         self.wait_finished(a)
         print "FUck", a.status, a.output
-        self.assert_(a.exit_status == 3)
-        self.assert_(a.output == 'Not a valid shell command: No closing quotation')
+        if sys.version_info < (2, 7):
+            self.assert_('sh: -c: line 0: unexpected EOF while looking for matching' in a.output)
+            self.assert_(a.exit_status == 3)
+        else:
+            self.assert_(a.output == 'Not a valid shell command: No closing quotation')
+            self.assert_(a.exit_status == 3)
 
 
 if __name__ == '__main__':
