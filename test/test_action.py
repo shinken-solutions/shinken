@@ -150,8 +150,8 @@ class TestAction(ShinkenTest):
             return
         a.execute()
 
-        self.assert_(a.status == 'done')
         self.wait_finished(a)
+        self.assert_(a.status == 'done')
         print "FUck", a.status, a.output
         if sys.version_info < (2, 7):
             self.assert_('sh: -c: line 0: unexpected EOF while looking for matching' in a.output)
