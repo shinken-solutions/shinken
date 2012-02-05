@@ -48,6 +48,8 @@ from shinken.misc.datamanager import datamgr
 #Local import
 from livestatus import LiveStatus
 from livestatus_regenerator import LiveStatusRegenerator
+from livestatus_query_cache import LiveStatusQueryCache
+
 
 
 # Class for the LiveStatus Broker
