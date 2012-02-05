@@ -3,42 +3,31 @@
 %from shinken.bin import VERSION
 %helper = app.helper
 
-%#  "Left Container Start"
-<div id="left_container" class="grid_2">
-	<div id="nav_left">
-		<ul>
-			<li><a href="/system">System</a></li>
-			<li><a href="/system/log">Log</a></li>
-		</ul>
-	</div>
-</div>
-%#  "Left Container End"
-
-<div id="system_overview" class="grid_14 item">
+<div id="system_overview">
 	<h2>System Overview</h2>
 	<!-- stats overview start -->
-		<table style="width: 100%">
+		<table class="table table-condensed">
 			<tbody>
-				<tr class="grid_16">
-					<th class="grid_4">Program Version</th>
-					<th class="grid_4">Program Start Time</th>
+				<tr>
+					<th>Program Version</th>
+					<th>Program Start Time</th>
 				</tr>							
-				<tr class="grid_16">
-				  <td class="grid_4"> {{VERSION}}</td>
-				  <td title="{{helper.print_date(app.datamgr.get_program_start())}}" class="grid_4"> {{helper.print_duration(app.datamgr.get_program_start())}}</td>
+				<tr>
+				  <td><a class="quickinfo" href="#">{{VERSION}}</a></td>
+				  <td> <a href="#" class="quickinfo" data-original-title="{{helper.print_date(app.datamgr.get_program_start())}}">{{helper.print_duration(app.datamgr.get_program_start())}}</a></td>
 				</tr>							
 			</tbody>
-		</table> 
+		</table>
 	<!-- stats overview end -->
 </div>
 
 <!-- System Detail START -->
 
-<div id="system_detail" class="grid_14">
+<div id="system_detail">
 	<ul>
 	%types = [ ('scheduler', schedulers), ('poller', pollers), ('broker', brokers), ('reactionner', reactionners), ('receiver', receivers)]
 	%for (sat_type, sats) in types:
-		<li class="grid_3">
+		<li class="span2">
 		<a  class="box_round_small">
 			<div class="modul_name box_halfround_small"><h3>{{sat_type.capitalize()}} :</h3></div>
 				%for s in sats:

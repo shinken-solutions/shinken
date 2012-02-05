@@ -83,6 +83,7 @@
     <script src="/static/js/bootstrap-tab.js"></script>
     <script src="/static/js/bootstrap-button.js"></script>
     <script src="/static/js/bootstrap-dropdown.js"></script>
+    <script src="/static/js/bootstrap-tooltip.js"></script>
 
     %# End of classic js import. Now call for specific ones
       %for p in js:

@@ -14,6 +14,9 @@
   max-width: 0; 
 }
 
+.quickinfo{
+  text-decoration: none !important;
+}
 .box {
   min-height: 20px;
   padding: 10px 0px 10px 5px;
