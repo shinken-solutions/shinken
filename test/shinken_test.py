@@ -52,6 +52,7 @@ from shinken.modules import livestatus_broker
 from shinken.modules.livestatus_broker import LiveStatus_broker
 from shinken.modules.livestatus_broker.livestatus import LiveStatus
 from shinken.modules.livestatus_broker.livestatus_regenerator import LiveStatusRegenerator
+from shinken.modules.livestatus_broker.livestatus_query_cache import LiveStatusQueryCache
 from shinken.misc.datamanager import datamgr
 
 livestatus_modconf = Module()
@@ -403,11 +404,14 @@ class ShinkenTest(unittest.TestCase):
         self.livestatus_broker.rg = LiveStatusRegenerator()
         self.livestatus_broker.datamgr = datamgr
         datamgr.load(self.livestatus_broker.rg)
+        self.livestatus_broker.query_cache = LiveStatusQueryCache()
+        self.livestatus_broker.query_cache.disable()
+        self.livestatus_broker.rg.register_cache(self.livestatus_broker.query_cache)
         #--- livestatus_broker.main
 
         self.livestatus_broker.init()
         self.livestatus_broker.db = self.livestatus_broker.modules_manager.instances[0]
-        self.livestatus_broker.livestatus = LiveStatus(self.livestatus_broker.datamgr, self.livestatus_broker.db, self.livestatus_broker.pnp_path, self.livestatus_broker.from_q)
+        self.livestatus_broker.livestatus = LiveStatus(self.livestatus_broker.datamgr, self.livestatus_broker.query_cache, self.livestatus_broker.db, self.livestatus_broker.pnp_path, self.livestatus_broker.from_q)
 
         #--- livestatus_broker.do_main
         self.livestatus_broker.db.open()

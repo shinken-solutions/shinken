@@ -64,6 +64,9 @@ class LiveStatusRegenerator(Regenerator):
         setattr(self.hostgroups, '__itersorted__', types.MethodType(itersorted, self.hostgroups))
         setattr(self.contactgroups, '__itersorted__', types.MethodType(itersorted, self.contactgroups))
 
+        # Everything is new now. We should clean the cache
+        self.cache.wipeout()
+
 
     def manage_initial_contact_status_brok(self, b):
         """overwrite it, because the original method deletes some values"""
@@ -114,5 +117,13 @@ class LiveStatusRegenerator(Regenerator):
         # And notif ways too
         self.contacts.create_reversed_list()
         self.notificationways.create_reversed_list()
+
+    def register_cache(self, cache):
+        self.cache = cache
+
+    def before_after_hook(self, brok, obj):
+        self.cache.judge_situation(brok, obj)
+
+
 
 

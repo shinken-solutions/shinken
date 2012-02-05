@@ -727,6 +727,9 @@ class TestConfigNoLogstore(TestConfig):
         self.livestatus_broker.rg = LiveStatusRegenerator()
         self.livestatus_broker.datamgr = datamgr
         datamgr.load(self.livestatus_broker.rg)
+        self.livestatus_broker.query_cache = LiveStatusQueryCache()
+        self.livestatus_broker.query_cache.disable()
+        self.livestatus_broker.rg.register_cache(self.livestatus_broker.query_cache)
         #--- livestatus_broker.main
 
         #--- livestatus_broker.do_main
@@ -735,7 +738,7 @@ class TestConfigNoLogstore(TestConfig):
         #--- livestatus_broker.do_main
 
         #--- livestatus_broker.manage_lql_thread
-        self.livestatus_broker.livestatus = LiveStatus(self.livestatus_broker.datamgr, self.livestatus_broker.db, self.livestatus_broker.pnp_path, self.livestatus_broker.from_q)
+        self.livestatus_broker.livestatus = LiveStatus(self.livestatus_broker.datamgr, self.livestatus_broker.query_cache, self.livestatus_broker.db, self.livestatus_broker.pnp_path, self.livestatus_broker.from_q)
         #--- livestatus_broker.manage_lql_thread
 
 

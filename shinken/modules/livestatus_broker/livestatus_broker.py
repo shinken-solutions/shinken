@@ -79,6 +79,7 @@ class LiveStatus_broker(BaseModule, Daemon):
         self.pnp_path = getattr(modconf, 'pnp_path', '')
         self.debug = getattr(modconf, 'debug', None)
         self.debug_queries = (getattr(modconf, 'debug_queries', '0') == '1')
+        self.use_query_cache = (getattr(modconf, 'query_cache', '0') == '1')
 
         #  This is an "artificial" module which is used when an old-style
         #  shinken-specific.cfg without a separate logstore-module is found.
@@ -151,6 +152,10 @@ class LiveStatus_broker(BaseModule, Daemon):
         self.rg = LiveStatusRegenerator()
         self.datamgr = datamgr
         datamgr.load(self.rg)
+        self.query_cache = LiveStatusQueryCache()
+        if not use_query_cache:
+            self.query_cache.disable()
+        self.rg.register_cache(self.query_cache)
 
         try:
             #import cProfile
@@ -336,7 +341,7 @@ class LiveStatus_broker(BaseModule, Daemon):
     def manage_lql_thread(self):
         print "Livestatus query thread started"
         # This is the main object of this broker where the action takes place
-        self.livestatus = LiveStatus(self.datamgr, self.db, self.pnp_path, self.from_q)
+        self.livestatus = LiveStatus(self.datamgr, self.query_cache, self.db, self.pnp_path, self.from_q)
 
         backlog = 5
         size = 8192

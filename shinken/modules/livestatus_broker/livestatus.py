@@ -31,8 +31,9 @@ class LiveStatus(object):
     """A class that represents the status of all objects in the broker
 
     """
-    def __init__(self, datamgr, db, pnp_path, return_queue):
+    def __init__(self, datamgr, query_cache, db, pnp_path, return_queue):
         self.datamgr = datamgr
+        self.query_cache = query_cache
         self.db = db
         self.pnp_path = pnp_path
         self.return_queue = return_queue
@@ -45,7 +46,7 @@ class LiveStatus(object):
         handles the execution of the request and formatting of the result.
 
         """
-        request = LiveStatusRequest(data, self.datamgr, self.db, self.pnp_path, self.return_queue, self.counters)
+        request = LiveStatusRequest(data, self.datamgr, self.query_cache, self.db, self.pnp_path, self.return_queue, self.counters)
         request.parse_input(data)
         if sorted([q.my_type for q in request.queries]) == ['command', 'query', 'wait']:
             # The Multisite way

@@ -36,9 +36,10 @@ class LiveStatusQuery(object):
 
     my_type = 'query'
 
-    def __init__(self, datamgr, db, pnp_path, return_queue, counters):
+    def __init__(self, datamgr, query_cache, db, pnp_path, return_queue, counters):
         # Runtime data form the global LiveStatus object
         self.datamgr = datamgr
+        self.query_cache = query_cache
         self.db = db
         self.pnp_path = pnp_path
         self.return_queue = return_queue
@@ -46,6 +47,7 @@ class LiveStatusQuery(object):
 
         # Private attributes for this specific request
         self.response = LiveStatusResponse()
+        self.raw_data = ''
         self.table = None
         self.columns = []
         self.filtercolumns = []
@@ -85,7 +87,6 @@ class LiveStatusQuery(object):
 
     def split_option(self, line, splits=1):
         """Like split_commands, but converts numbers to int data type"""
-        #x = [int(i) if i.isdigit() else i for i in [token.strip() for token in re.split(r"[\s]+", line, splits)]]
         x = map (lambda i: (i.isdigit() and int(i)) or i, [token.strip() for token in re.split(r"[\s]+", line, splits)])
         return x
 
@@ -111,6 +112,7 @@ class LiveStatusQuery(object):
         sets the attributes of the request object
         
         """
+        self.raw_data = data
         for line in data.splitlines():
             line = line.strip()
             # Tools like NagVis send KEYWORK:option, and we prefer to have
@@ -241,6 +243,12 @@ class LiveStatusQuery(object):
         if not self.table:
             return []
 
+        # Ask the cache if this request was already answered under the same
+        # circumstances.
+        cacheable, cached_response = self.query_cache.get_cached_query(self.raw_data)
+        if cached_response:
+            return cached_response
+
         # Make columns unique
         self.filtercolumns = list(set(self.filtercolumns))
         self.prefiltercolumns = list(set(self.prefiltercolumns))
@@ -311,7 +319,12 @@ class LiveStatusQuery(object):
             traceback.print_exc(32) 
             print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
             result = []
-        
+
+        if cacheable:
+            # We cannot cache generators, so we must first read them into a list
+            result = [r for r in result]
+            self.query_cache.cache_query(self.raw_data, result)
+            
         return result
 
     
