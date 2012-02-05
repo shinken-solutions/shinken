@@ -133,7 +133,7 @@ class __Action(object):
         # TODO : Anormal should be logged properly no?
         if self.exit_status not in valid_exit_status:
             stdoutdata = stdoutdata + stderrdata
-        elif 'sh: -c: line 0: unexpected EOF while looking for matching' in stderrdata:
+        elif 'sh: -c: line 0: unexpected EOF while looking for matching' in stderrdata or 'sh: Syntax error: Unterminated quoted string' in stderrdata:
             # Very, very ugly. But subprocess._handle_exitstatus does not see
             # a difference between a regular "exit 1" and a bailing out shell.
             # Strange, because strace clearly shows a difference. (exit_group(1) vs. exit_group(257))
