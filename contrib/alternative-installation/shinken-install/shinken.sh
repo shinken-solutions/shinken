@@ -1517,7 +1517,7 @@ function install_check_mysql_health(){
         yum -yq install $CHECKMYSQLHEALTHYUMPKG >> /tmp/shinken.install.log
     else
         cecho " > Installing prerequisites" green
-        yum -yq install $CHECKMYSQLHEALTHAPTPKG >> /tmp/shinken.install.log
+        apt-get -y install $CHECKMYSQLHEALTHAPTPKG >> /tmp/shinken.install.log
     fi
     cd /tmp
     cecho " > Downloading check_mysql_health" green
