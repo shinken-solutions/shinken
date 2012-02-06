@@ -63,41 +63,48 @@ function remove(){
         rm -Rf /etc/default/shinken 
     fi
     if [ -f "/etc/init.d/shinken" ]
-        then
+    then
         cecho " > Removing startup scripts" green
-                case $CODE in
-                        REDHAT)
-                                chkconfig shinken off
-                                chkconfig --del shinken
-                                ;;
-                        DEBIAN)
-                                update-rc.d -f shinken remove >> /tmp/shinken.install.log 2>&1 
-                                ;;
-                esac    
-        fi
+        case $CODE in
+            REDHAT)
+                chkconfig shinken off
+                chkconfig --del shinken
+                ;;
+            DEBIAN)
+                update-rc.d -f shinken remove >> /tmp/shinken.install.log 2>&1 
+                ;;
+            esac    
+    fi
     rm -f /etc/init.d/shinken*
 
     if [ -d "$PNPPREFIX" ]
     then
-        cecho " > Removing pnp4nagios" green
-        rm -Rf $PNPPREFIX
-        case $CODE in
-                REDHAT)
-                        /etc/init.d/npcd stop
-                        chkconfig npcd off
-                        chkconfig --del npcd 
-                        rm -f /etc/init.d/npcd
-                        rm -f /etc/httpd/conf.d/pnp4nagios
-                        /etc/init.d/httpd restart
-                        ;;
-                DEBIAN)
-                        /etc/init.d/npcd stop
-                        update-rc.d -f npcd remove >> /tmp/shinken.install.log 2>&1 
-                        rm -f /etc/init.d/npcd
-                        rm -f /etc/apache2/conf.d/pnp4nagios
-                        /etc/init.d/apache2 restart
-                        ;;
-        esac    
+        doremove="n"
+        cread " > found a pnp4nagios installation : do you want to remove it ? (y|N) =>  " yellow "n" "y n" 
+        if [ "$readvalue" == "y" ]
+        then
+            cecho " > Removing pnp4nagios" green
+            rm -Rf $PNPPREFIX
+            case $CODE in
+                    REDHAT)
+                            /etc/init.d/npcd stop >> /tmp/shinken.install.log 2>&1
+                            chkconfig npcd off >> /tmp/shinken.install.log 2>&1
+                            chkconfig --del npcd  >> /tmp/shinken.install.log 2>&1
+                            rm -f /etc/init.d/npcd >> /tmp/shinken.install.log 2>&1
+                            rm -f /etc/httpd/conf.d/pnp4nagios >> /tmp/shinken.install.log 2>&1
+                            /etc/init.d/httpd restart >> /tmp/shinken.install.log 2>&1
+                            ;;
+                    DEBIAN)
+                            /etc/init.d/npcd stop >> /tmp/shinken.install.log 2>&1
+                            update-rc.d -f npcd remove >> /tmp/shinken.install.log 2>&1 
+                            rm -f /etc/init.d/npcd >> /tmp/shinken.install.log 2>&1
+                            rm -f /etc/apache2/conf.d/pnp4nagios >> /tmp/shinken.install.log 2>&1
+                            /etc/init.d/apache2 restart >> /tmp/shinken.install.log 2>&1
+                            ;;
+            esac   
+        else 
+            cecho " > Aborting uninstallation of pnp4nagios" yellow
+        fi
     fi
 
     return 0
