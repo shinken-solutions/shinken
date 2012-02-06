@@ -23,6 +23,7 @@ class TestConfigBig(TestConfig):
         self.setup_with_file('etc/nagios_5r_100h_2000s.cfg')
         self.testid = str(os.getpid() + random.randint(1, 1000))
         self.init_livestatus()
+        self.livestatus_broker.query_cache.enabled = True
         print "Cleaning old broks?"
         self.sched.fill_initial_broks()
         self.update_broker()

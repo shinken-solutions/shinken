@@ -122,8 +122,4 @@ class LiveStatusRegenerator(Regenerator):
         self.cache = cache
 
     def before_after_hook(self, brok, obj):
-        self.cache.judge_situation(brok, obj)
-
-
-
-
+        self.cache.impact_assessment(brok, obj)
