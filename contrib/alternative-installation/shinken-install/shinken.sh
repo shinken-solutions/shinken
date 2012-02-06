@@ -91,14 +91,14 @@ function remove(){
                             chkconfig npcd off >> /tmp/shinken.install.log 2>&1
                             chkconfig --del npcd  >> /tmp/shinken.install.log 2>&1
                             rm -f /etc/init.d/npcd >> /tmp/shinken.install.log 2>&1
-                            rm -f /etc/httpd/conf.d/pnp4nagios >> /tmp/shinken.install.log 2>&1
+                            rm -f /etc/httpd/conf.d/pnp4nagios.conf >> /tmp/shinken.install.log 2>&1
                             /etc/init.d/httpd restart >> /tmp/shinken.install.log 2>&1
                             ;;
                     DEBIAN)
                             /etc/init.d/npcd stop >> /tmp/shinken.install.log 2>&1
                             update-rc.d -f npcd remove >> /tmp/shinken.install.log 2>&1 
                             rm -f /etc/init.d/npcd >> /tmp/shinken.install.log 2>&1
-                            rm -f /etc/apache2/conf.d/pnp4nagios >> /tmp/shinken.install.log 2>&1
+                            rm -f /etc/apache2/conf.d/pnp4nagios.conf >> /tmp/shinken.install.log 2>&1
                             /etc/init.d/apache2 restart >> /tmp/shinken.install.log 2>&1
                             ;;
             esac   
