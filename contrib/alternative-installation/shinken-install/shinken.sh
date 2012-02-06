@@ -115,6 +115,10 @@ function remove(){
         then
             cecho " > Removing check_mk multisite" green
             rm -Rf $MKPREFIX
+            if [ -d $PNPPREFIX.MK ]
+            then
+                rm -Rf $PNPPREFIX.MK
+            fi
             case $CODE in
                     REDHAT)
                             rm -f /etc/httpd/conf.d/zzz_check_mk.conf >> /tmp/shinken.install.log 2>&1
@@ -929,6 +933,14 @@ function install_multisite(){
     fi 
     tar zxvf $filename >> /tmp/shinken.install.log 2>&1 
     cd $folder
+
+    # check if pnp4nagios is here if not move the resulting folder 
+    movepnp=0
+    if [ ! -d "$PNPPREFIX" ]
+    then
+        movepnp=1
+    fi
+
     cecho " > Install multisite" green
     ./setup.sh --yes >> /tmp/shinken.install.log 2>&1 
     cecho " > Default configuration for multisite" green
@@ -951,7 +963,10 @@ function install_multisite(){
     echo "# Needed for WATO - the Check_MK Web Administration Tool" >> /etc/sudoers
     echo "Defaults:www-data !requiretty" >> /etc/sudoers
     echo "www-data ALL = (root) NOPASSWD: $MKTARGET/check_mk --automation *" >> /etc/sudoers
-    /etc/init.d/sudo restart
+    if [ $movepnp -eq 1 ]
+    then 
+        mv $PNPPREFIX $PNPPREFIX.MK
+    fi
 }
 
 # pnp4nagios
