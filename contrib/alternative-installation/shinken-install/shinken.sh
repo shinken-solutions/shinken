@@ -1433,22 +1433,15 @@ function install_check_wmi_plus(){
 function install_check_oracle_health(){
     cadre "Install nagios plugins" green
 
-
-    # Sugg : 
-    # Is the warning show everytime we want to install the plugin?
-    # Maybe add a condition here, the user may have already installed the oracle client :)
-    cadre "WARNING YOU SHOULD INSTALL ORACLE INSTANT CLIENT FIRST !!!!" yellow
-    cecho " > Download the oracle instant client there (basic AND sdk AND sqlplus) : " yellow
-    cecho " > 64 bits : http://www.oracle.com/technetwork/topics/linuxx86-64soft-092277.html" yellow
-    cecho " > 32 bits : http://www.oracle.com/technetwork/topics/linuxsoft-082809.html" yellow
-    cecho " > Set the ORACLE_HOME environment variable (better to set it in the bashrc)" yellow
-    cecho " > Set LD_LIBRARY_PATH to ORACLE_HOME (or better create a config file in /etc/ld.so.conf) then run ldconfig" yellow
-    cecho " > press ENTER to continue or CTRL+C to abort" yellow
-    read taste
-
     if [ -z "$ORACLE_HOME" ]
     then
-        cecho " > You must set the ORACLE_HOME environment variable !" red
+        cadre "WARNING YOU SHOULD INSTALL ORACLE INSTANT CLIENT FIRST !!!!" yellow
+        cecho " > Download the oracle instant client there (basic AND sdk AND sqlplus) : " yellow
+        cecho " > 64 bits : http://www.oracle.com/technetwork/topics/linuxx86-64soft-092277.html" yellow
+        cecho " > 32 bits : http://www.oracle.com/technetwork/topics/linuxsoft-082809.html" yellow
+        cecho " > Set the ORACLE_HOME environment variable (better to set it in the bashrc)" yellow
+        cecho " > Set LD_LIBRARY_PATH to ORACLE_HOME (or better create a config file in /etc/ld.so.conf) then run ldconfig" yellow
+        cecho " > press ENTER to continue or CTRL+C to abort" yellow
         exit 2
     fi
 
