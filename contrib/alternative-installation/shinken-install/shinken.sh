@@ -107,6 +107,29 @@ function remove(){
         fi
     fi
 
+    if [ -d "$MKPREFIX" ]
+    then
+        doremove="n"
+        cread " > found a check_mk multisite installation : do you want to remove it ? (y|N) =>  " yellow "n" "y n" 
+        if [ "$readvalue" == "y" ]
+        then
+            cecho " > Removing check_mk multisite" green
+            rm -Rf $MKPREFIX
+            case $CODE in
+                    REDHAT)
+                            rm -f /etc/httpd/conf.d/zzz_check_mk.conf >> /tmp/shinken.install.log 2>&1
+                            /etc/init.d/httpd restart >> /tmp/shinken.install.log 2>&1
+                            ;;
+                    DEBIAN)
+                            rm -f /etc/apache2/conf.d/zzz_check_mk.conf >> /tmp/shinken.install.log 2>&1
+                            /etc/init.d/apache2 restart >> /tmp/shinken.install.log 2>&1
+                            ;;
+            esac   
+        else 
+            cecho " > Aborting uninstallation of check_mk multisite" yellow
+        fi
+    fi
+
     return 0
 }
 
