@@ -25,8 +25,6 @@
 import time
 import re
 import collections
-import functools
-from itertools import ifilterfalse
 from heapq import nsmallest
 from operator import itemgetter
 
