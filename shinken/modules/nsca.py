@@ -65,20 +65,25 @@ def get_instance(plugin):
         password = plugin.password
     else:
         password = ""
+    if hasattr(plugin, 'max_packet_age'):
+        max_packet_age = min(plugin.max_packet_age,900)
+    else:
+        max_packet_age = 30
 
-    instance = NSCA_arbiter(plugin, host, port, encryption_method, password)
+    instance = NSCA_arbiter(plugin, host, port, encryption_method, password, max_packet_age)
     return instance
 
 
 #Just print some stuff
 class NSCA_arbiter(BaseModule):
-    def __init__(self, modconf, host, port, encryption_method, password):
+    def __init__(self, modconf, host, port, encryption_method, password, max_packet_age):
         BaseModule.__init__(self, modconf)
         self.host = host
         self.port = port
         self.encryption_method = encryption_method
         self.password = password
         self.rng = random.Random(password)
+        self.max_packet_age = max_packet_age
 
 
     #Ok, main function that is called in the CONFIGURATION phase
@@ -181,7 +186,14 @@ class NSCA_arbiter(BaseModule):
                         (timestamp, rc, hostname, service, output)=self.read_check_result(databuffer[s],IVs[s])
                         del databuffer[s]
                         del IVs[s]
-                        self.post_command(timestamp,rc,hostname,service,output)
+                        current_time = time.time()
+                        check_result_age = current_time - timestamp
+                        if timestamp > current_time:
+                            print "Dropping packet with future timestamp."
+                        elif check_result_age > self.max_packet_age:
+                            print "Dropping packet with stale timestamp - packet was %s seconds old." % check_result_age
+                        else:
+                            self.post_command(timestamp,rc,hostname,service,output)
                         try:
                             s.shutdown(2)
                         except Exception , exp:
