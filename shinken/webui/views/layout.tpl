@@ -29,7 +29,7 @@
     <link href="/static/css/bootstrap.css" rel="stylesheet">
     <link href="/static/css/custom/layout.css" rel="stylesheet">
     <link href="/static/css/custom/badger.css" rel="stylesheet">
-    <link href="/static/css/custom/engage.itoggle.css" rel="stylesheet">
+    <link href="/static/css/elements/jquery.meow.css" rel="stylesheet">
 
     %# And now for css files
       %for p in css:
@@ -84,6 +84,7 @@
     <script src="/static/js/bootstrap-button.js"></script>
     <script src="/static/js/bootstrap-dropdown.js"></script>
     <script src="/static/js/bootstrap-tooltip.js"></script>
+    <script src="/static/js/jquery.meow.js"></script>
 
     %# End of classic js import. Now call for specific ones
       %for p in js:

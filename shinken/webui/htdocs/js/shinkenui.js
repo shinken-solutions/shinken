@@ -24,6 +24,7 @@
 /***************************************************************************/
 
 
+
 /**
  * Description:
  * Example: <div class="pulsate"> <p> Example DIV </p> </div>
@@ -54,3 +55,4 @@ $(function(){
 $(function(){
     $(".quickinfo").tooltip({placement: 'bottom'});
 });
+
