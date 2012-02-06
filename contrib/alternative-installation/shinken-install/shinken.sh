@@ -674,9 +674,7 @@ function supdate(){
     get_from_git
     cp -Rf $src $TARGET
     relocate
-    # Sugg :
-    # Do a ln -sf to force 
-    ln -s $TARGET/bin/default/shinken /etc/default/shinken
+    ln -sf $TARGET/bin/default/shinken /etc/default/shinken
     cp $TARGET/bin/init.d/shinken* /etc/init.d/
     mkdir -p $TARGET/var/archives
     fix
