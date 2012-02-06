@@ -146,6 +146,17 @@ class NSCA_arbiter(BaseModule):
         e = ExternalCommand(extcmd)
         self.from_q.put(e)
 
+    def process_check_result(self, databuffer, IV):
+        (timestamp, rc, hostname, service, output)=self.read_check_result(databuffer,IV)
+        current_time = time.time()
+        check_result_age = current_time - timestamp
+        if timestamp > current_time:
+            print "Dropping packet with future timestamp."
+        elif check_result_age > self.max_packet_age:
+            print "Dropping packet with stale timestamp - packet was %s seconds old." % check_result_age
+        else:
+            self.post_command(timestamp,rc,hostname,service,output)
+
 
     # When you are in "external" mode, that is the main loop of your process
     def main(self):
@@ -174,6 +185,8 @@ class NSCA_arbiter(BaseModule):
                     data = s.recv(size)
                     if len(data) == 0:
                         # Closed socket
+                        del databuffer[s]
+                        del IVs[s]
                         s.close()
                         input.remove(s)
                         continue
@@ -181,22 +194,7 @@ class NSCA_arbiter(BaseModule):
                         databuffer[s] += data
                     else:
                         databuffer[s] = data
-                    if len(databuffer[s]) == 720:
+                    while len(databuffer[s]) >= 720:
                         # end-of-transmission or an empty line was received
-                        (timestamp, rc, hostname, service, output)=self.read_check_result(databuffer[s],IVs[s])
-                        del databuffer[s]
-                        del IVs[s]
-                        current_time = time.time()
-                        check_result_age = current_time - timestamp
-                        if timestamp > current_time:
-                            print "Dropping packet with future timestamp."
-                        elif check_result_age > self.max_packet_age:
-                            print "Dropping packet with stale timestamp - packet was %s seconds old." % check_result_age
-                        else:
-                            self.post_command(timestamp,rc,hostname,service,output)
-                        try:
-                            s.shutdown(2)
-                        except Exception , exp:
-                            print exp
-                        s.close()
-                        input.remove(s)
+                        self.process_check_result(databuffer[s][0:720],IVs[s])
+                        databuffer[s] = databuffer[s][720:]
