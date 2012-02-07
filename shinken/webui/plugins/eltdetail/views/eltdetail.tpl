@@ -173,16 +173,23 @@ Invalid element name
 
 			    <div class="btn-group span5">
 			    %if elt_type=='host':
-			    	<a class="btn dropdown-toggle span6" data-toggle="dropdown" href="#">Host Commands <span class="caret pull-right"></span></a>
+			    	<a class="btn dropdown-toggle span6" data-toggle="dropdown" href="#"><span class="pull-left"><i class="icon-cog"></i> Host Commands</span> <span class="caret pull-right"></span></a>
 			    %else:
-			    	<a class="btn dropdown-toggle span6" data-toggle="dropdown" href="#">Service Commands <span class="caret pull-right"></span></a>
+			    	<a class="btn dropdown-toggle span6" data-toggle="dropdown" href="#"><span class="pull-left"><i class="icon-cog"></i>Service Commands</span> <span class="caret pull-right"></span></a>
 			    %end:
 				    <ul class="dropdown-menu plus6 no-maxwidth">
-				    	<li><a href="#">Action</a></li>
-				    	<li><a href="#">Another action</a></li>
-				    	<li><a href="#">Something else here</a></li>
+				    	<li><a href="#"><i class="icon-pencil"></i> Try to fix it!</a></li>
+				    	<li><a href="#"><i class="icon-ok"></i>Acknowledge it!</a></li>
+				    	<li><a href="#"><i class="icon-repeat"></i> Recheck now</a></li>
+				    	<li><a href="#"><i class="icon-share-alt"></i> Submit Check Result</a></li>
+				    	<li><a href="#"><i class="icon-comment"></i> Send Custom Notification</a></li>
+				    	<li><a href="#"><i class="icon-fire"></i> Schedule Downtime</a></li>
 				    	<li class="divider"></li>
-				    	<li><a href="#">Separated link</a></li>
+					    %if elt_type=='host':
+					    	<li><a href="#"><i class="icon-pencil"></i> Edit Host</a></li>
+					    %else:
+					    	<li><a href="#"><i class="icon-edit"></i> Edit Service</a></li>
+					    %end:
 				    </ul>
 			    </div>
 
