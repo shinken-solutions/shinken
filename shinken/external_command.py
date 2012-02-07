@@ -1317,13 +1317,13 @@ class ExternalCommandManager:
 
     # STOP_ACCEPTING_PASSIVE_HOST_CHECKS
     def STOP_ACCEPTING_PASSIVE_HOST_CHECKS(self):
-        self.accept_passive_host_checks = False
+        self.conf.accept_passive_host_checks = False
         self.conf.explode_global_conf()
         self.sched.get_and_register_update_program_status_brok()
 
     # STOP_ACCEPTING_PASSIVE_SVC_CHECKS
     def STOP_ACCEPTING_PASSIVE_SVC_CHECKS(self):
-        self.accept_passive_service_checks = False
+        self.conf.accept_passive_service_checks = False
         self.conf.explode_global_conf()
         self.sched.get_and_register_update_program_status_brok()
 
