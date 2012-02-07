@@ -22,16 +22,10 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import time
 import re
-import collections
+import time
 from heapq import nsmallest
 from operator import itemgetter
-
-
-from livestatus_query import LiveStatusQuery
-from livestatus_wait_query import LiveStatusWaitQuery
-from livestatus_command_query import LiveStatusCommandQuery
 
 """
 There are several categories for queries. Their main difference is the kind
@@ -77,17 +71,27 @@ def has_not_more_than(list1, list2):
     return len(set(list1).difference(set(list2))) == 0
 
 class Counter(dict):
-    'Mapping where default values are zero'
+    """
+    This is a special kind of dictionary. It is used to store the usage number
+    for each key. For non-existing keys it simply returns 0.
+    """
     def __missing__(self, key):
         return 0
 
 class LFU(object):
+    """
+    This class implements a dictionary which has a limited number of elements.
+    Whenever the maximum number of elements is reached during a write operation
+    the element which was read least times is deleted.
+    It was inspired by 
+    http://code.activestate.com/recipes/498245-lru-and-lfu-cache-decorators/
+    but LFU is much more simpler.
+    """
     def __init__(self, maxsize=100):
         self.storage = {}
         self.maxsize = maxsize
         self.hits = self.misses = 0
         self.use_count = Counter()           # times each key has been accessed
-        self.kwd_mark = object()             # separate positional and keyword args
 
     def clear(self):
         self.storage = {}
@@ -107,11 +111,19 @@ class LFU(object):
     def put(self, key, data):
         self.storage[key] = data
         if len(self.storage) > self.maxsize:
-            for key, _ in nsmallest(maxsize // 10, self.use_count.iteritems(), key=itemgetter(1)):
+            for key, _ in nsmallest(self.maxsize // 10, self.use_count.iteritems(), key=itemgetter(1)):
                 del self.storage[key], self.use_count[key]
         pass
 
 class QueryData(object):
+    """
+    This class implements a more "machine-readable" form of a livestatus query.
+    The lines of a query text are split up in a list of tuples,
+    where the first element is the lql statement and the remaining elements 
+    are columns, attributes, operators etc.
+    It's main purpose is to provide methods which are used to rank the query
+    in specific categories.
+    """
     def __init__(self, data):
         self.data = data
         self.category = CACHE_IMPOSSIBLE
@@ -119,8 +131,9 @@ class QueryData(object):
         self.structure(data)
         self.key = hash(str(self.structured_data))
         self.is_stats = self.keyword_counter['Stats'] > 0
+        self.client_localtime = int(time.time())
         self.stats_columns = [f[1] for f in self.structured_data if f[0] == 'Stats']
-        self.filter_columns = [item for sublist in [f[1] for f in self.structured_data if f[0] == 'Filter'] for item in sublist]
+        self.filter_columns = [f[1] for f in self.structured_data if f[0] == 'Filter']
         self.categorize()
         print self
         print self.category
@@ -208,7 +221,7 @@ class QueryData(object):
                 _, sep1, sep2, sep3, sep4 = line.split(' ', 5)
                 self.structured_data.append((keyword, sep1, sep2, sep3, sep4))
             elif keyword == 'Localtime':
-                _, client_localtime = self.split_option(line)
+                _, self.client_localtime = self.split_option(line)
                 # NO # self.structured_data.append((keyword, client_localtime))
             else:
                 print "Received a line of input which i can't handle : '%s'" % line
@@ -245,13 +258,25 @@ class QueryData(object):
             return set([])
 
     def is_a_closed_chapter(self):
-        if self.keyword_counter['Filter'] == 2:
-            pass
-            # there must be a >/>= and a </<= and the interval must be 
-            # in the past
+        """
+        When the query is asking for log events from a time interval in the
+        past, we can assume that the response will be a good candidate for
+        caching. A precondition is, that only attributes are involved, which
+        can not change over time. (ex. current_host_num_critical_services)
+        """
+        logline_elements = ['attempt', 'class', 'command_name', 'comment', 'contact_name', 'host_name', 'message', 'options', 'plugin_output', 'service_description', 'state', 'state_type', 'time', 'type']
+        if self.table == 'log':
+            limits = sorted([(f[2], f[3]) for f in self.structured_data if f[0] == 'Filter' and f[1] == 'time'], key=lambda x: x[1])
+            if len(limits) == 2 and limits[1][1] <= int(time.time()) and limits[0][0].startswith('>') and limits[1][0].startswith('<'):
+                if has_not_more_than(self.columns, logline_elements):
+                    return True
         return False
 
     def categorize(self):
+        """
+        Analyze the formalized query (which table, which columns, which
+        filters, stats or not,...) and find a suitable category.
+        """
         # self.table, self.structured_data
         if self.table == 'status' and has_not_more_than(self.columns, ['livestatus_version', 'program_version', 'program_start']):
             self.category = CACHE_PROGRAM_STATIC
@@ -263,18 +288,18 @@ class QueryData(object):
         elif self.table == 'services' and self.is_stats and has_not_more_than(self.stats_columns, ['state']):
             # and only 1 timefilter which is >=
             self.category = CACHE_GLOBAL_STATS
-            
-        # if log and <> time is an interval in the past
-        # and we have the usual alert history columns
-        # then we can cache it, global and for specific host/service
-        elif self.table == 'log' and self.is_a_closed_chapter() and has_not_more_than(self.columns, 'class time type state host_name service_description plugin_output message options contact_name command_name state_type current_host_groups current_service_groups'.split(' ')):
-            category = CACHE_IRREVERSIBLE_HISTORY
+        elif self.is_a_closed_chapter():
+            self.category = CACHE_IRREVERSIBLE_HISTORY
 
 
 
 class LiveStatusQueryCache(object):
-
-    """A class describing a livestatus query cache."""
+    """
+    A class describing a collection of livestatus query caches.
+    As we have several categories of queries, we also have several caches.
+    The validity of each of it can be influenced by different changes through
+    update broks.
+    """
 
     def __init__(self):
         self.categories = []
@@ -319,19 +344,6 @@ class LiveStatusQueryCache(object):
         if self.categories[query.category].get(query.key):
             print "CACHE HIT"
         return (query.category != CACHE_IMPOSSIBLE, self.categories[query.category].get(query.key))
-
-
-
-            
-
-    def find_query(self, data):
-        pass
-
-    def query_hash(self, data):
-        pass
-
-    def query_hash_with_time(self, data):
-        pass
 
     def cache_query(self, data, result):
         """Puts the result of a livestatus query into the cache."""
