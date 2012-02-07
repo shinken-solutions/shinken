@@ -11,12 +11,17 @@
 }
 
 .no-maxwidth{
-  max-width: 0; 
+  max-width: none !important; 
 }
 
 .quickinfo{
   text-decoration: none !important;
 }
+
+.plus6 {
+  width: 52.6%;
+}
+
 .box {
   min-height: 20px;
   padding: 10px 0px 10px 5px;

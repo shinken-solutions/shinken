@@ -173,11 +173,11 @@ Invalid element name
 
 			    <div class="btn-group span5">
 			    %if elt_type=='host':
-			    	<a class="btn dropdown-toggle span12" data-toggle="dropdown" href="#">Host Action <span class="caret pull-right"></span></a>
+			    	<a class="btn dropdown-toggle span6" data-toggle="dropdown" href="#">Host Commands <span class="caret pull-right"></span></a>
 			    %else:
-			    	<a class="btn dropdown-toggle span12" data-toggle="dropdown" href="#">Service Action <span class="caret pull-right"></span></a>
+			    	<a class="btn dropdown-toggle span6" data-toggle="dropdown" href="#">Service Commands <span class="caret pull-right"></span></a>
 			    %end:
-				    <ul class="dropdown-menu span12 no-maxwidth">
+				    <ul class="dropdown-menu plus6 no-maxwidth">
 				    	<li><a href="#">Action</a></li>
 				    	<li><a href="#">Another action</a></li>
 				    	<li><a href="#">Something else here</a></li>
