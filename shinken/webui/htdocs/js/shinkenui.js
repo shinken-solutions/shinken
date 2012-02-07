@@ -55,4 +55,3 @@ $(function(){
 $(function(){
     $(".quickinfo").tooltip({placement: 'bottom'});
 });
-

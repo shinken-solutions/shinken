@@ -158,11 +158,11 @@ Invalid element name
 					</tr>
 					<tr>		
 						<td class="column1">Last Check Time</td>
-						<td title='Last check was at {{time.asctime(time.localtime(elt.last_chk))}}'>was {{helper.print_duration(elt.last_chk)}}</td>
+						<td><span class="quickinfo" data-original-title='Last check was at {{time.asctime(time.localtime(elt.last_chk))}}'>was {{helper.print_duration(elt.last_chk)}}</span></td>
 					</tr>
 					<tr>		
 						<td class="column1">Next Scheduled Active Check</td>
-						<td title='Next active check at {{time.asctime(time.localtime(elt.next_chk))}}'>{{helper.print_duration(elt.next_chk)}}</td>
+						<td><span class="quickinfo" data-original-title='Next active check at {{time.asctime(time.localtime(elt.next_chk))}}'>{{helper.print_duration(elt.next_chk)}}</span></td>
 					</tr>
 					<tr>		
 						<td class="column1">Last State Change</td>
