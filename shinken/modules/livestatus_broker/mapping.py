@@ -2482,7 +2482,7 @@ livestatus_attribute_map = {
         },
         'comment': {
             'description': 'A comment text',
-            'function': lambda item, req: item.description,
+            'function': lambda item, req: item.comment,
         },
         'entry_time': {
             'description': 'The time the entry was made as UNIX timestamp',
