@@ -1343,7 +1343,7 @@ function install_nagios-plugins(){
         yum install -yq $NAGPLUGYUMPKG  >> /tmp/shinken.install.log 2>&1 
     else
         cecho " > Installing prerequisites" green 
-        apt-get -y install $NAGPLUGAPTPKG >> /tmp/shinken.install.log 2>&1 
+        DEBIAN_FRONTEND=noninteractive apt-get -y install $NAGPLUGAPTPKG #>> /tmp/shinken.install.log 2>&1 
     fi
     cd /tmp
     if [ ! -f "nagios-plugins-$NAGPLUGVERS.tar.gz" ]
@@ -1363,6 +1363,51 @@ function install_nagios-plugins(){
     cecho " > Installing" green
     make install >> /tmp/shinken.install.log 2>&1 
     
+}
+
+# MANUBULON SNMP PLUGINS 
+function install_manubulon(){
+    cadre "Install manubulon plugins" green
+
+    if [ "$CODE" == "REDHAT" ]
+    then
+        cecho " > Installing prerequisites" green
+        yum install -yq $MANUBULONYUMPKG  >> /tmp/shinken.install.log 2>&1 
+    else
+        cecho " > Installing prerequisites" green 
+        apt-get -y install $MANUBULONAPTPKG >> /tmp/shinken.install.log 2>&1 
+    fi
+    cd /tmp
+
+    # check if utils.pm is there
+    if [ ! -f $TARGET/libexec/utils.pm ]
+    then
+        cecho " > Unable to find utils.pm. You should install nagios-plugins first (./shinken.sh -p nagios-plugins)" red
+        exit 2
+    fi
+
+    archive=$(echo $MANUBULON | awk -F/ '{print $NF}')
+    folder=nagios_plugins
+    if [ ! -f "$archive" ]
+    then
+        cecho " > Getting manubulon archive" green
+        wget $WGETPROXY $MANUBULON >> /tmp/shinken.install.log 2>&1 
+    fi
+    cecho " > Extract archive content " green
+    if [ -d $folder ]
+    then
+        rm -Rf $folder 
+    fi
+    tar zxvf $archive >> /tmp/shinken.install.log 2>&1 
+    cd $folder 
+    cecho " > Relocate libs" green
+    for s in $(ls -1 /tmp/$folder/*.pl)
+    do
+        cecho " => Processing $s" green
+        sed -i "s#/usr/local/nagios/libexec#"$TARGET"/libexec#g" $s
+        cecho " => Installing $s" green
+        cp $s $TARGET/libexec
+    done
 }
 
 # CHECK_WMI_PLUS
@@ -1574,6 +1619,7 @@ echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z 
         check_emc_clariion
         check_nwc_health
         check_hpasm
+        manubulon (snmp plugins)
         capture_plugin
         pnp4nagios
         multisite
@@ -1632,6 +1678,10 @@ while getopts "kidubcr:lz:hsvp:we:" opt; do
             elif [ "$OPTARG" == "check_nwc_health" ]
             then
                 install_check_nwc_health
+                exit 0
+            elif [ "$OPTARG" == "manubulon" ]
+            then
+                install_manubulon
                 exit 0
             elif [ "$OPTARG" == "check_hpasm" ]
             then
