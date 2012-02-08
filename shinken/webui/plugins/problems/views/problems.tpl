@@ -59,59 +59,6 @@ document.addEvent('domready', function() {
 	}
 </script>
 
-
-	 
-<div id="left_container" class="grid_3">
-
-  <div id="nav_left">
-    <ul>
-      <li class="left_title"><a href="#">Overview</a></li>
-      <li>
-					<div class="tac_header">
-						<div class="tac_col_1">
-							Problems
-						</div>
-						<div class="tac_col_2">
-							Unhandled
-						</div>
-						<div class="tac_col_3">
-							All
-						</div>
-					</div>
-					<div class="tac_content">
-						<div class="tac_col_1">
-							<a href="/problems" style="padding-top:0;">{{app.datamgr.get_nb_all_problems()}}</a>
-						</div>
-						<div class="tac_col_2">
-							<a href="/problems" style="padding-top:0;">{{app.datamgr.get_nb_problems()}}</a>
-						</div>
-						<div class="tac_col_3">
-							<a href="/all" style="padding-top:0;">{{app.datamgr.get_nb_elements()}}</a>
-						</div>
-					</div>
-      </li>
-
-      <li class="left_title"><a href="#">Search</a></li>
-      <li>
-				<form method="get" id="search_form" action="/{{page}}">
-					<span class="table">
-						<span class="row">
-							<span class="cell">
-								<input name="search" type="text" tabindex="1" value="{{search}}" id="search_input"/>
-							</span>
-							<span class="cell">
-								<a tabindex="4" href="javascript: submitform()">
-								<img src="/static/images/search.png" alt="search"/>
-								</a>
-							</span>
-						</span>
-					</span>
-				</form>
-      </li>
-    </ul>
-  </div>
-</div>
-
 %# "We set the actions div that will be show/hide if we select elements"
 <div class="dockContainer">
   <div class="dockWrapper" id="actions">
@@ -133,24 +80,25 @@ document.addEvent('domready', function() {
     </ul>
   </div>
 </div>
-<div class="grid_13">
 
-  %if navi is not None:
-      <div id="pagination">
-	<div class='pagenavi'>
-	  %for name, start, end, is_current in navi:
-	     %if is_current:
-	        <span class='current'>{{name}}</span>
-	     %elif start == None or end == None:
-		<span class='extend'>...</span>
-             %else:
-		<a href='/{{page}}?start={{start}}&end={{end}}' class='page larger'>{{name}}</a>
-	     %end
-          %end
-	</div>
-      </div>
-  %# end of the navi part
-  %end
+<div class="span12">
+
+  	%if navi is not None:
+    <div class="pagination span12">
+	    <ul class="pull-right">
+	    %for name, start, end, is_current in navi:
+	    	%if is_current:
+	    	<li class="active"><a href="#">{{name}}</a></li>
+	    	%elif start == None or end == None:
+	    	<li class="disabled"> <a href="#">...</a> </li>
+	    	%else:
+			<li><a href='/{{page}}?start={{start}}&end={{end}}' class='page larger'>{{name}}</a></li>
+	    	%end
+	    %end
+	    </ul>
+    </div>
+  	%# end of the navi part
+  	%end
 
 
 
@@ -310,23 +258,22 @@ document.addEvent('domready', function() {
     %end
   </div>
 
-  %if navi is not None:
-      <div id="pagination">
-	<div class='pagenavi'>
-	  %for name, start, end, is_current in navi:
-	     %if is_current:
-	        <span class='current'>{{name}}</span>
-	     %elif start == None or end == None:
-		<span class='extend'>...</span>
-             %else:
-		<a href='/{{page}}?start={{start}}&end={{end}}' class='page larger'>{{name}}</a>
-	     %end
-          %end
+	%if navi is not None:
+	<div class="pagination span12">
+		<ul class="pull-right">
+		%for name, start, end, is_current in navi:
+		   	%if is_current:
+		   	<li class="active"><a href="#">{{name}}</a></li>
+		   	%elif start == None or end == None:
+		   	<li class="disabled"> <a href="#">...</a> </li>
+		   	%else:
+			<li><a href='/{{page}}?start={{start}}&end={{end}}' class='page larger'>{{name}}</a></li>
+		   	%end
+		    %end
+		</ul>
 	</div>
-      </div>
-  %# end of the navi part
-  %end
-
+	%# end of the navi part
+	%end
       
 </div>
 
