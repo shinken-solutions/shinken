@@ -16,7 +16,7 @@ Minimal requirements
 ~~~~~~~~~~~~~~~~~~~~
 
 For RedHat/CentOs you will need redhat-lsb (and git for cloning this repository)
-For Debian based distro you will need lsb-release 
+For Debian based distro you will need lsb_release 
 
 Usage
 ~~~~~
@@ -24,38 +24,49 @@ Usage
 This is a really simple script allowing to install a fully fonctionnal shinken in seconds !
 Curently only tested with Ubuntu/Linux Mint/Debian and RHEL/CentOS 5/6 distros. 
 
+
 Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z [poller|centreon] | -e daemons | -p plugins [plugname]
-	-k	Kill shinken
-	-i	Install shinken
-	-w	Remove demo configuration 
-	-d 	Remove shinken
-	-u	Update an existing shinken installation
-	-v	purge livestatus sqlite db and shrink sqlite db
-	-b	Backup shinken configuration plugins and data
-	-r 	Restore shinken configuration plugins and data
-	-l	List shinken backups
-	-c	Compress rotated logs
-    -e  which daemons to keep enabled at boot time
-	-z 	This is a really special usecase that allow to install shinken on Centreon Enterprise Server in place of nagios
-	-p      Install plugins or addons (args should be one of the following : 
-                     check_esx3
-                     nagios-plugins
-                     check_oracle_health
-                     check_mysql_health
-		     check_wmi_plus
-                     capture_plugin
-                     pnp4nagios
-                     multisite
-	-h	Show help
+    -k  Kill shinken
+    -i  Install shinken
+    -w  Remove demo configuration 
+    -d  Remove shinken
+    -u  Update an existing shinken installation
+    -v  purge livestatus sqlite db and shrink sqlite db
+    -b  Backup shinken configuration plugins and data
+    -r  Restore shinken configuration plugins and data
+    -l  List shinken backups
+    -c  Compress rotated logs
+    -e  Which daemons to keep enabled at boot time
+    -z  This is a really special usecase that allow to install shinken on Centreon Enterprise Server in place of nagios
+    -p  Install plugins or addons (args should be one of the following : 
+        check_esx3
+        nagios-plugins
+        check_oracle_health
+        check_mysql_health
+        check_wmi_plus
+        check_mongodb
+        check_emc_clariion
+        check_nwc_health
+        check_hpasm
+        manubulon (snmp plugins)
+        capture_plugin
+        pnp4nagios
+        multisite
+    -h  Show help"
 
 configuration file
 ~~~~~~~~~~~~~~~~~~
 
-You can modify the target folder, version, backup folder or user/group  by editing the shinken.conf file 
+You can modify the target folder, version, backup folder or user/group the following way :
 
-  export TMP=/tmp
-  export VERSION="master"
-  export TARGET=/opt/shinken
-  export BACKUPDIR="/opt/backup"
-  export SKUSER=shinken
-  export SKGROUP=shinken
+  TARGET=/usr/local/nagios SKUSER=toto SKGROUP=titi ./shinken.sh -i
+
+allowed values are :
+
+  TMP           temporary folder
+  TARGET        where to put shinken
+  BACKUPDIR     where to put backups
+  SKUSER        shinken user
+  SKGROUP       shinken group
+
+Others configuration values are stored in shinken.conf. You can try to modify them, but never forget to test it before using them in production.
