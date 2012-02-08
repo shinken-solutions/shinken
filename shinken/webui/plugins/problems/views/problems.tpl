@@ -81,7 +81,7 @@ document.addEvent('domready', function() {
   </div>
 </div>
 
-<div class="span12">
+<div>
 
   	%if navi is not None:
     <div class="pagination span12">
@@ -100,9 +100,7 @@ document.addEvent('domready', function() {
   	%# end of the navi part
   	%end
 
-
-
-  <div id="accordion">
+  <div id="accordion" class="span12">
     %# " We will print Business impact level of course"
     %imp_level = 10
 
@@ -114,8 +112,7 @@ document.addEvent('domready', function() {
     %nb_same_output = 0
 
     %for pb in pbs:
-
-      <div class="clear"></div>      
+     
       %if pb.business_impact != imp_level:
        <h2> Business impact : {{!helper.get_business_impact_text(pb)}} </h2>
        %# "We reset the last_hname so we won't overlap this feature across tables"
@@ -139,42 +136,43 @@ document.addEvent('domready', function() {
        <div>
       %end
 
-	  <div style="margin-left: 20px; width: 95%; float:left;">
-	    <table class="tableCriticity" style="width: 100%; margin-bottom:3px;">
-	      <tr class="tabledesc">
-	        <td class="no_border" style="width:20px; background:none;"> <img src="/static/images/untick.png" alt="untick" /style="cursor:pointer;" onclick="add_remove_elements('{{pb.get_full_name()}}')" id="selector-{{pb.get_full_name()}}" > </td>
-	        <td class="no_border" style="width:20px;"> <div class="aroundpulse">
-		    %# " We put a 'pulse' around the elements if it's an important one "
-		    %if pb.business_impact > 2 and pb.state_id in [1, 2, 3]:
-		    <span class="pulse"></span>
-		    %end
-		    <img style="width: 16px; height : 16px;" src="{{helper.get_icon_state(pb)}}" /></div> </td>
+	  <div>
+	    <table class="tableCriticity">
+	      <tr>
+	        <td> <img src="/static/images/untick.png" alt="untick" /style="cursor:pointer;" onclick="add_remove_elements('{{pb.get_full_name()}}')" id="selector-{{pb.get_full_name()}}" > </td>
+		        <td> <div class="aroundpulse">
+			    %# " We put a 'pulse' around the elements if it's an important one "
+			    %if pb.business_impact > 2 and pb.state_id in [1, 2, 3]:
+			    <span class="pulse"></span>
+			    %end
+			    <img style="width: 16px; height : 16px;" src="{{helper.get_icon_state(pb)}}" /></div>
+		    </td>
 		%if pb.host_name == last_hname:
-		   <td class="no_border" style="width: 120px;"> </td>
+		   <td> </td>
 		%else:
-		    <td class="no_border" style="width: 120px;"> {{!helper.get_host_link(pb)}}</td>
+		    <td> {{!helper.get_host_link(pb)}}</td>
 		%end
 		%last_hname = pb.host_name
 
 		%if pb.__class__.my_type == 'service':
-		  <td	class=" no_border" style="width:120px;">{{!helper.get_link(pb, short=True)}}</td>
+		  <td>{{!helper.get_link(pb, short=True)}}</td>
 		%else:
-                  <td   class=" no_border" style="width:120px;"></td>
+                  <td></td>
                 %end
-		<td class=" no_border" style="width:50px;"> {{pb.state}}</td>
-		<td title='{{helper.print_date(pb.last_state_change)}}' class=" no_border" style="width:50px;">{{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}</td>
+		<td> {{pb.state}}</td>
+		<td title='{{helper.print_date(pb.last_state_change)}}'>{{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}</td>
 		%# "We put a title (so a tip) on the output onlly if need"
 		%if len(pb.output) > 100:
 		   %if app.allow_html_output:
-		      <td title="{{pb.output}}" class=" no_border" style="width:450px;"> {{!helper.strip_html_output(pb.output[:100])}}</td>
+		      <td title="{{pb.output}}"> {{!helper.strip_html_output(pb.output[:100])}}</td>
 		   %else:
-		      <td title="{{pb.output}}" class=" no_border" style="width:450px;"> {{pb.output[:100]}}
+		      <td title="{{pb.output}}"> {{pb.output[:100]}}
 		   %end
 		%else:
 		   %if app.allow_html_output:
-                      <td class=" no_border" style="width:450px;"> {{!helper.strip_html_output(pb.output)}}</td>
+                      <td> {{!helper.strip_html_output(pb.output)}}</td>
 		   %else:
-		      <td class=" no_border" style="width:450px;"> {{pb.output}} </td>
+		      <td> {{pb.output}} </td>
                    %end
 		%end
 		%graphs = app.get_graph_uris(pb, now- 4*3600 , now)
@@ -219,7 +217,7 @@ document.addEvent('domready', function() {
 	    <td style="width:20px;"><b>Next check</b></td>
 	    <td class="tdCriticity" style="width:20px;"><b>Actions</b></td>
 	    <td class="tdCriticity" style="width:40px;">	<div style="float:right;">
-		<a href="#">{{!helper.get_button('Add to fav', img='/static/images/heart_add.png')}}</a>
+		
 	      </div>
 	    </td>
 	  </tr>
