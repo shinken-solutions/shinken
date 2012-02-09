@@ -439,7 +439,7 @@ if 'win' in sys.platform:
                      'run':      "c:\\shinken\\var",
                      'libexec':  "c:\\shinken\\libexec",
                      }
-elif 'linux' in sys.platform:
+elif 'linux' in sys.platform or 'sunos5' in sys.platform:
     default_paths = {'var': "/var/lib/shinken/",
                      'etc': "/etc/shinken",
                      'run': "/var/run/shinken",
