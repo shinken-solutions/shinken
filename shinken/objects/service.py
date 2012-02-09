@@ -888,7 +888,7 @@ class Service(SchedulingItem):
             return True
 
         # Block if flapping
-        if self.is_flapping:
+        if self.is_flapping and type not in ('FLAPPINGSTART', 'FLAPPINGSTOP', 'FLAPPINGDISABLED'):
             return True
 
         # Block if host is down

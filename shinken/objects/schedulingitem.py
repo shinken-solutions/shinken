@@ -148,6 +148,9 @@ class SchedulingItem(Item):
             self.is_flapping = False
             # We also raise a log entry
             self.raise_flapping_stop_log_entry(r, low_flap_threshold)
+            # and a notification
+            self.remove_in_progress_notifications()
+            self.create_notifications('FLAPPINGSTOP')
             # And update our status for modules
             b = self.get_update_status_brok()
             self.broks.append(b)
@@ -156,6 +159,9 @@ class SchedulingItem(Item):
             self.is_flapping = True
             # We also raise a log entry
             self.raise_flapping_start_log_entry(r, high_flap_threshold)
+            # and a notification
+            self.remove_in_progress_notifications()
+            self.create_notifications('FLAPPINGSTART')
             # And update our status for modules
             b = self.get_update_status_brok()
             self.broks.append(b)

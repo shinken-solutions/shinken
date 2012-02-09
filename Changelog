@@ -38,6 +38,7 @@ Shinken ChangeLog
 	* Add : TIMEPERIOD TRANSITION logs from the Arbiter to get timeperiods transition output 
 	* Add : is_admin property is now available for contacts
 	* Add : make the nmap discovery do tcp and udp scan
+	* Add : (Victor Igumnov) installation for Solaris
 	
 	CORE FIXES
 	* Fix : use StringIO to read configuration files into a string (much faster with lots of config files)
@@ -68,6 +69,7 @@ Shinken ChangeLog
 	* Fix : if missing alias in objects, put the name if available
 	* Fix : (reported by : denetariko) manage spaces before and after type name in define line
 	* Fix : (reported by: Steve Kieu) missing get_name() method for config
+	* Fix : (reported by : Mihai Efrim) flapping notifications
 	
 	
 

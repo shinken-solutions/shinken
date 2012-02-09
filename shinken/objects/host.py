@@ -812,8 +812,8 @@ class Host(SchedulingItem):
         return "%02dh %02dm %02ds" % (h, m, s)
 
 
-    #Check if a notification for this host is suppressed at this time
-    #This is a check at the host level. Do not look at contacts here
+    # Check if a notification for this host is suppressed at this time
+    # This is a check at the host level. Do not look at contacts here
     def notification_is_blocked_by_item(self, type, t_wished = None):
         if t_wished is None:
             t_wished = time.time()
@@ -881,7 +881,7 @@ class Host(SchedulingItem):
             return True
 
         # Block if flapping
-        if self.is_flapping:
+        if self.is_flapping and type not in ('FLAPPINGSTART', 'FLAPPINGSTOP', 'FLAPPINGDISABLED'):
             return True
 
         return False

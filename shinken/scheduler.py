@@ -490,6 +490,7 @@ class Scheduler:
                         # notification_commands) which are executed in the reactionner.
                         item = a.ref
                         childnotifications = []
+
                         if not item.notification_is_blocked_by_item(a.type, now):
                             # If it is possible to send notifications of this type at the current time, then create
                             # a single notification for each contact of this item.
