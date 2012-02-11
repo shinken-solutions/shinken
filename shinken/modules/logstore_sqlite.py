@@ -413,8 +413,6 @@ class LiveStatusLogStoreSqlite(BaseModule):
         # We can apply the filterstack here as well. we have columns and filtercolumns.
         # the only additional step is to enrich log lines with host/service-attributes
         # A timerange can be useful for a faster preselection of lines
-        x = sql_filter_func
-        print "x is", x
         filter_clause, filter_values = sql_filter_func()
         full_filter_clause = filter_clause
         matchcount = 0
@@ -515,12 +513,10 @@ class LiveStatusSqlStack(LiveStatusStack):
         negate_clause = '(NOT ' + top_filter()[0] + ')'
         negate_values = top_filter()[1]
         negate_filter = lambda: [negate_clause, negate_values]
-        print "not_element", negate_clause
         self.put_stack(negate_filter)
 
     def and_elements(self, num):
         """Take num filters from the stack, and them and put the result back"""
-        print "this is sql and_elements", num, self.qsize()
         if num > 1:
             filters = []
             for _ in range(num):

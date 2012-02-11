@@ -134,14 +134,14 @@ class QueryData(object):
         self.client_localtime = int(time.time())
         self.stats_columns = [f[1] for f in self.structured_data if f[0] == 'Stats']
         self.filter_columns = [f[1] for f in self.structured_data if f[0] == 'Filter']
+        self.columns = [f[1] for f in self.structured_data if f[0] == 'Columns'][0]
         self.categorize()
-        print self
-        print self.category
 
     def __str__(self):
         text = "table %s\n" % self.table
         text += "columns %s\n" % self.columns
         text += "stats_columns %s\n" % self.stats_columns
+        text += "filter_columns %s\n" % self.filter_columns
         text += "is_stats %s\n" % self.is_stats
         text += "is_cacheable %s\n" % str(self.category != CACHE_IMPOSSIBLE)
         return text
@@ -265,8 +265,10 @@ class QueryData(object):
         can not change over time. (ex. current_host_num_critical_services)
         """
         logline_elements = ['attempt', 'class', 'command_name', 'comment', 'contact_name', 'host_name', 'message', 'options', 'plugin_output', 'service_description', 'state', 'state_type', 'time', 'type']
+        logline_elements.extend(['current_host_groups', 'current_service_groups'])
         if self.table == 'log':
-            limits = sorted([(f[2], f[3]) for f in self.structured_data if f[0] == 'Filter' and f[1] == 'time'], key=lambda x: x[1])
+            limits = sorted([(f[2], int(f[3])) for f in self.structured_data if f[0] == 'Filter' and f[1] == 'time'], key=lambda x: x[1])
+             
             if len(limits) == 2 and limits[1][1] <= int(time.time()) and limits[0][0].startswith('>') and limits[1][0].startswith('<'):
                 if has_not_more_than(self.columns, logline_elements):
                     return True
@@ -339,8 +341,8 @@ class LiveStatusQueryCache(object):
     def get_cached_query(self, data):
         if not self.enabled:
             return (False, [])
-        print "I SEARCH THE CACHE FOR", data
         query = QueryData(data)
+        print "I SEARCH THE CACHE FOR", query.category, query.key, data
         if self.categories[query.category].get(query.key):
             print "CACHE HIT"
         return (query.category != CACHE_IMPOSSIBLE, self.categories[query.category].get(query.key))
@@ -351,7 +353,7 @@ class LiveStatusQueryCache(object):
         if not self.enabled:
             return
         query = QueryData(data)
-        print "I PUT IN THE CACHE FOR", query.key
+        print "I PUT IN THE CACHE FOR", query.category, query.key
         self.categories[query.category].put(query.key, result)
 
     def impact_assessment(self, brok, obj):
