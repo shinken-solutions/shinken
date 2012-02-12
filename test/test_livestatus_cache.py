@@ -1,4 +1,10 @@
 from shinken_test import *
+import datetime
+
+def set_to_midnight(dt): 
+    midnight = datetime.time(0) 
+    return datetime.datetime.combine(dt.date(), midnight) 
+
 
 class TestConfig(ShinkenTest):
     def update_broker(self, dodeepcopy=False):
@@ -40,6 +46,8 @@ class TestConfigBig(TestConfig):
             os.remove(self.livelogs)
         if os.path.exists(self.livelogs+"-journal"):
             os.remove(self.livelogs+"-journal")
+        for arch in os.listdir('tmp/archives'):
+            os.remove('tmp/archives/' + arch)
         if os.path.exists(self.livestatus_broker.pnp_path):
             shutil.rmtree(self.livestatus_broker.pnp_path)
         if os.path.exists('var/nagios.log'):
@@ -84,54 +92,36 @@ Columns: host_name description state state_type"""
         self.scheduler_loop(1, [[svc1, 1, 'W'], [svc2, 1, 'W'], [svc3, 1, 'W'], [svc4, 2, 'C'], [svc5, 3, 'U'], [svc6, 2, 'C'], [svc7, 2, 'C']])
         self.update_broker()
         # 1993O, 3xW, 3xC, 1xU
-        request = """GET services
+        statsrequest = """GET services
 Filter: contacts >= test_contact
 Stats: state != 9999
 Stats: state = 0
 Stats: state = 1
 Stats: state = 2
 Stats: state = 3"""
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print 'query_6_______________\n%s\n%s\n' % (request, response)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(statsrequest)
+        print 'query_6_______________\n%s\n%s\n' % (statsrequest, response)
         self.assert_(response == '2000;1993;3;3;1\n')
 
         # Now we play with the cache
-        request = """GET services
-Filter: description = test_ok_11
-Filter: host_name = test_host_007
-Columns: host_name description state state_type"""
         afterresponse, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print "after", afterresponse
         self.assert_(beforeresponse != afterresponse)
-        request = """GET services
-Filter: description = test_ok_11
-Filter: host_name = test_host_007
-Columns: host_name description state state_type"""
         repeatedresponse, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print "repeated", repeatedresponse
         self.assert_(afterresponse == repeatedresponse)
+
         self.scheduler_loop(2, [[svc5, 2, 'C']])
         self.update_broker()
-        request = """GET services
-Filter: description = test_ok_11
-Filter: host_name = test_host_007
-Columns: host_name description state state_type"""
         notcachedresponse, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print "notcached", notcachedresponse
+
         self.scheduler_loop(2, [[svc5, 0, 'O']])
         self.update_broker()
         # 1994O, 3xW, 3xC, 0xU
-        request = """GET services
-Filter: description = test_ok_11
-Filter: host_name = test_host_007
-Columns: host_name description state state_type"""
         againnotcachedresponse, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print "againnotcached", againnotcachedresponse
         self.assert_(notcachedresponse != againnotcachedresponse)
-        request = """GET services
-Filter: description = test_ok_11
-Filter: host_name = test_host_007
-Columns: host_name description state state_type"""
         finallycachedresponse, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print "finallycached", finallycachedresponse
         self.assert_(againnotcachedresponse == finallycachedresponse)
@@ -143,12 +133,16 @@ Stats: state = 0
 Stats: state = 1
 Stats: state = 2
 Stats: state = 3"""
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print 'query_6_______________\n%s\n%s\n' % (request, response)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(statsrequest)
+        print 'query_6_______________\n%s\n%s\n' % (statsrequest, response)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(statsrequest)
+        print 'query_6_______________\n%s\n%s\n' % (statsrequest, response)
         self.assert_(response == '2000;1994;3;3;0\n')
 
     def test_a_long_history(self):
         #return
+        print datetime.datetime.now()
+        print datetime.datetime.today()
         test_host_005 = self.sched.hosts.find_by_name("test_host_005")
         test_host_099 = self.sched.hosts.find_by_name("test_host_099")
         test_ok_00 = self.sched.services.find_srv_by_name_and_hostname("test_host_005", "test_ok_00")
@@ -156,13 +150,42 @@ Stats: state = 3"""
         test_ok_04 = self.sched.services.find_srv_by_name_and_hostname("test_host_005", "test_ok_04")
         test_ok_16 = self.sched.services.find_srv_by_name_and_hostname("test_host_005", "test_ok_16")
         test_ok_99 = self.sched.services.find_srv_by_name_and_hostname("test_host_099", "test_ok_01")
-        time_warp(-1 * 20 * 24 * 3600)
-        starttime = time.time()
-        numlogs = self.livestatus_broker.db.execute("SELECT COUNT(*) FROM logs")
-        if numlogs[0][0] == 0:
-            # run silently
-            old_stdout = sys.stdout
-            sys.stdout = open(os.devnull, "w")
+        days = 4
+
+        etime = time.time()
+        print "now it is", time.ctime(etime)
+        print "now it is", time.gmtime(etime)
+        etime_midnight = (etime - (etime % 86400)) + time.altzone
+        print "midnight was", time.ctime(etime_midnight)
+        print "midnight was", time.gmtime(etime_midnight)
+        query_start = etime_midnight - (days - 1) * 86400
+        query_end = etime_midnight
+        print "query_start", time.ctime(query_start)
+        print "query_end ", time.ctime(query_end)
+
+        # |----------|----------|----------|----------|----------|---x
+        #                                                            etime
+        #                                                        etime_midnight
+        #             ---x------
+        #                etime -  4 days
+        #                       |---
+        #                       query_start
+        #                      
+        #                ............................................
+        #                events in the log database ranging till now
+        #
+        #                       |________________________________|
+        #                       events which will be read from db
+        #
+        loops = int(86400 / 192)
+        time_warp(-1 * days * 86400)
+        print "warp back to", time.ctime(time.time())
+        # run silently
+        old_stdout = sys.stdout
+        sys.stdout = open(os.devnull, "w")
+        should_be = 0
+        for day in xrange(days):
+            sys.stderr.write("day %d now it is %s i run %d loops\n" % (day, time.ctime(time.time()), loops))
             self.scheduler_loop(2, [
                 [test_ok_00, 0, "OK"],
                 [test_ok_01, 0, "OK"],
@@ -171,9 +194,8 @@ Stats: state = 3"""
                 [test_ok_99, 0, "OK"],
             ])
             self.update_broker()
-            should_be = 0
             #for i in xrange(3600 * 24 * 7):
-            for i in xrange(10000):
+            for i in xrange(loops):
                 if i % 10000 == 0:
                     sys.stderr.write(str(i))
                 if i % 399 == 0:
@@ -184,7 +206,9 @@ Stats: state = 3"""
                         [test_ok_16, 1, "WARN"],
                         [test_ok_99, 2, "CRIT"],
                     ])
-                    should_be += 3
+                    if int(time.time()) >= query_start and int(time.time()) <= query_end:
+                        should_be += 3
+                        sys.stderr.write("now it should be %s\n" % should_be)
                 time.sleep(62)
                 if i % 399 == 0:
                     self.scheduler_loop(1, [
@@ -194,34 +218,37 @@ Stats: state = 3"""
                         [test_ok_16, 0, "OK"],
                         [test_ok_99, 0, "OK"],
                     ])
-                    should_be += 1
+                    if int(time.time()) >= query_start and int(time.time()) <= query_end:
+                        should_be += 1
+                        sys.stderr.write("now it should be %s\n" % should_be)
                 time.sleep(2)
-                if i % 199 == 0:
+                if i % 9 == 0:
                     self.scheduler_loop(3, [
                         [test_ok_00, 1, "WARN"],
                         [test_ok_01, 2, "CRIT"],
                     ])
+    
                 time.sleep(62)
-                if i % 199 == 0:
+                if i % 9 == 0:
                     self.scheduler_loop(1, [
                         [test_ok_00, 0, "OK"],
                         [test_ok_01, 0, "OK"],
                     ])
                 time.sleep(2)
-                if i % 299 == 0:
+                if i % 9 == 0:
                     self.scheduler_loop(3, [
                         [test_host_005, 2, "DOWN"],
                     ])
-                if i % 19 == 0:
+                if i % 2 == 0:
                     self.scheduler_loop(3, [
                         [test_host_099, 2, "DOWN"],
                     ])
                 time.sleep(62)
-                if i % 299 == 0:
+                if i % 9 == 0:
                     self.scheduler_loop(3, [
                         [test_host_005, 0, "UP"],
                     ])
-                if i % 19 == 0:
+                if i % 2 == 0:
                     self.scheduler_loop(3, [
                         [test_host_099, 0, "UP"],
                     ])
@@ -230,25 +257,21 @@ Stats: state = 3"""
                 if i % 1000 == 0:
                     self.livestatus_broker.db.commit()
             endtime = time.time()
-            sys.stdout.close()
-            sys.stdout = old_stdout
             self.livestatus_broker.db.commit()
-        else:
-            should_be = numlogs[0][0]
-            xxx = self.livestatus_broker.db.execute("SELECT min(time), max(time) FROM logs")
-            print xxx
-            starttime, endtime = [self.livestatus_broker.db.execute("SELECT min(time), max(time) FROM logs")][0][0]
+            sys.stderr.write("day %d end it is %s\n" % (day, time.ctime(time.time())))
+        sys.stdout.close()
+        sys.stdout = old_stdout
+        self.livestatus_broker.db.commit_and_rotate_log_db()
+        numlogs = self.livestatus_broker.db.execute("SELECT count(*) FROM logs")
+        print "numlogs is", numlogs
 
 
         # now we have a lot of events
         # find type = HOST ALERT for test_host_005
-        q = int((endtime - starttime) / 8)
-        starttime += q
-        endtime -= q
         request = """GET log
 Columns: class time type state host_name service_description plugin_output message options contact_name command_name state_type current_host_groups current_service_groups
-Filter: time >= """ + str(int(starttime)) + """
-Filter: time <= """ + str(int(endtime)) + """
+Filter: time >= """ + str(int(query_start)) + """
+Filter: time <= """ + str(int(query_end)) + """
 Filter: type = SERVICE ALERT
 And: 1
 Filter: type = HOST ALERT
@@ -269,18 +292,54 @@ OutputFormat: json"""
         fake_time_sleep = time.sleep
         time.time = original_time_time
         time.sleep = original_time_sleep
+        print self.livestatus_broker.db.database_file
         print request
+        print "query 1 --------------------------------------------------"
+        tic = time.time()
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        tac = time.time()
+        elapsed1 = tac - tic
         pyresponse = eval(response)
-        print "number of records", len(pyresponse)
+        print "pyresponse", len(pyresponse)
         print "should be", should_be
-        print "now with cache"
+        self.assert_(len(pyresponse) == should_be)
+        print "query 2 cache---------------------------------------------"
+        tic = time.time()
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        tac = time.time()
+        elapsed2 = tac - tic
         pyresponse = eval(response)
-        print "number of records", len(pyresponse)
-        print "should be", should_be
-        time.time = fake_time_time
-        time.sleep = fake_time_sleep
+        self.assert_(len(pyresponse) == should_be)
+        print "clear the cache"
+        print "use aggressive sql"
+        print "query 3 --------------------------------------------------"
+        self.livestatus_broker.query_cache.wipeout()
+        self.livestatus_broker.db.use_aggressive_sql = True
+        tic = time.time()
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        tac = time.time()
+        elapsed3 = tac - tic
+        pyresponse = eval(response)
+        self.assert_(len(pyresponse) == should_be)
+        print "query 4 cache---------------------------------------------"
+        tic = time.time()
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        tac = time.time()
+        elapsed4 = tac - tic
+        pyresponse = eval(response)
+        self.assert_(len(pyresponse) == should_be)
+        print "elapsed1", elapsed1
+        print "elapsed2", elapsed2
+        print "elapsed3", elapsed3
+        print "elapsed4", elapsed4
+        self.assert_(elapsed2 < elapsed1 / 10)
+        self.assert_(elapsed3 < elapsed1)
+        self.assert_(elapsed4 < elapsed3 / 2)
+
+        #time.time = fake_time_time
+        #time.sleep = fake_time_sleep
+
+       
 
 if __name__ == '__main__':
     #import cProfile

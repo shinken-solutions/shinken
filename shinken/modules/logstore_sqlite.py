@@ -397,7 +397,6 @@ class LiveStatusLogStoreSqlite(BaseModule):
         # finalize the filter stacks
 	#self.sql_time_filter_stack.and_elements(self.sql_time_filter_stack.qsize())
 	self.sql_filter_stack.and_elements(self.sql_filter_stack.qsize())
-        self.use_aggressive_sql = True
         if self.use_aggressive_sql:
             # Be aggressive, get preselected data from sqlite and do less
             # filtering in python. But: only a subset of Filter:-attributes
