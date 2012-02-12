@@ -1441,8 +1441,7 @@ function install_nagios-plugins(){
     tar zxvf nagios-plugins-$NAGPLUGVERS.tar.gz >> /tmp/shinken.install.log 2>&1 
     cd nagios-plugins-$NAGPLUGVERS
     cecho " > Configure source tree" green
-    echo "./configure --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP --enable-libtap --enable-extra-opts --prefix=$TARGET" >> /tmp/shinken.install.log 2>&1 
-    ./configure --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP --enable-libtap --enable-extra-opts --prefix=$TARGET >> /tmp/shinken.install.log 2>&1 
+    ./configure --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP --enable-libtap --enable-extra-opts --prefix=$TARGET --enable-perl-modules >> /tmp/shinken.install.log 2>&1 
     cecho " > Building ...." green
     make >> /tmp/shinken.install.log >> /tmp/shinken.install.log  2>&1 
     cecho " > Installing" green
@@ -1638,6 +1637,35 @@ function install_check_oracle_health(){
     make install >> /tmp/shinken.install.log 2>&1
     mkdir -p $TARGET/var/tmp >> /tmp/shinke.install.log 2>&1 
 }
+# CHECK_NETAPP2
+
+function install_check_netapp2(){
+    cadre "Install check_netapp2" green
+
+    if [ "$CODE" == "REDHAT" ]
+    then
+        cecho " > Installing prerequisites" green
+        yum -yq install $CHECKNETAPP2YUMPKGS >> /tmp/shinken.install.log
+    else
+        cecho " > Installing prerequisites" green
+        apt-get -y install $CHECKNETAPP2APTPKGS >> /tmp/shinken.install.log
+    fi
+    cd /tmp
+    cecho " > Downloading check_netapp2" green
+    wget $WGETPROXY -O check_netapp2 $CHECKNETAPP2 >> /tmp/shinken.install.log 2>&1 
+    if [ $? -ne 0 ]
+    then
+        cecho " > Error while downloading check_netapp2" red
+        exit 2
+    fi
+    cecho " > Installing plugin" green
+    # fuckin assholes that upload perl scripts edited with notepad or so
+    perl -p -e 's/\r$//' < check_netapp2 > check_netapp2.pl
+    chmod +x check_netapp2.pl >> /tmp/shinken.install.log 2>&1
+    chown $SKUSER:$SKGROUP check_netapp2.pl >> /tmp/shinken.install.log 2>&1
+    cp -p check_netapp2.pl $TARGET/libexec/check_netapp2 >> /tmp/shinken.install.log 2>&1 
+    sed -i "s#/usr/local/nagios/libexec#"$TARGET"/libexec#g" $TARGET/libexec/check_netapp2 >> /tmp/shinken.install.log 2>&1
+}
 
 # CHECK_MYSQL_HEALTH
 function install_check_mysql_health(){
@@ -1773,6 +1801,10 @@ while getopts "kidubcr:lz:hsvp:we:" opt; do
             elif [ "$OPTARG" == "check_hpasm" ]
             then
                 install_check_hpasm
+                exit 0
+            elif [ "$OPTARG" == "check_netapp2" ]
+            then
+                install_check_netapp2
                 exit 0
             elif [ "$OPTARG" == "pnp4nagios" ]
             then
