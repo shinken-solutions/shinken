@@ -134,6 +134,29 @@ function remove(){
         fi
     fi
 
+    if [ -d "$NAGVISPREFIX" ]
+    then
+        doremove="n"
+        cread " > found a nagvis installation : do you want to remove it ? (y|N) =>  " yellow "n" "y n" 
+        if [ "$readvalue" == "y" ]
+        then
+            cecho " > Removing nagvis" green
+            rm -Rf $NAGVISPREFIX
+            case $CODE in
+                    REDHAT)
+                            rm -f /etc/httpd/conf.d/nagvis.conf >> /tmp/shinken.install.log 2>&1
+                            /etc/init.d/httpd restart >> /tmp/shinken.install.log 2>&1
+                            ;;
+                    DEBIAN)
+                            rm -f /etc/apache2/conf.d/nagvis.conf >> /tmp/shinken.install.log 2>&1
+                            /etc/init.d/apache2 restart >> /tmp/shinken.install.log 2>&1
+                            ;;
+            esac   
+        else 
+            cecho " > Aborting uninstallation of nagvis" yellow
+        fi
+    fi
+
     return 0
 }
 
@@ -888,6 +911,68 @@ function fixHtpasswdPath(){
 
 
 # addons installation
+
+# nagvis
+
+function install_nagvis(){
+
+    cadre "Install pnp4nagios addon" green
+    case $CODE in
+        REDHAT)
+            cecho " > Unsupported" red
+            exit 2
+            ;;
+        DEBIAN)
+            cecho " > Installing prerequisites" green
+            DEBIAN_FRONTEND=noninteractive apt-get install -y $NAGVISAPTPKGS >> /tmp/shinken.install.log 2>&1
+            HTTPDUSER="www-data"
+            HTTPDGROUP="www-data"
+            HTTPDCONF="/etc/apache2/conf.d"
+            ;;
+        *)
+            cecho " > Unknown distribution : $DIST" red
+            exit 2
+            ;;
+    esac
+            
+    
+    filename=$(echo $NAGVIS | awk -F"/" '{print $NF}')
+    folder=$(echo $filename | sed -e "s/\.tar\.gz//g")
+
+    cd /tmp
+
+    if [ -d /tmp/$folder ]
+    then 
+        rm -Rf $folder
+    fi
+
+    if [ ! -f /tmp/$filename ]
+    then
+        cecho " > Download $filename" green
+        wget $WGETPROXY $NAGVIS >> /tmp/shinken.install.log 2>&1
+        if [ $? -ne 0 ]
+        then
+            cecho " > Error while downloading $NAGVIS" red
+            exit 2
+        fi
+    fi
+    cecho " > Extract archive content" green
+    tar zxvf $filename >> /tmp/shinken.install.log 2>&1
+    cd $folder
+    cecho " > Install nagvis" green
+    ./install.sh -a y -q -F -l "tcp:localhost:50000" -i mklivestatus -n $TARGET -p $NAGVISPREFIX -u $HTTPDUSER -g $HTTPDGROUP -w $HTTPDCONF 
+    if [ -d $MKPREFIX ]
+    then
+        cread " > Found a check_mk multisite installation. Do you want to modify the nagvis url so links redirect to multisite ?" yellow "y" "y n"
+        if [ "$readvalue" == "y" ]
+        then
+            cecho " > Patching links for multisite use" green
+            cd $NAGVISPREFIX/etc
+            patch < $myscripts/nagvis.multisite.uri.patch
+        fi
+    fi  
+}
+
 # mk multisite
 
 function install_multisite(){
@@ -1694,6 +1779,10 @@ while getopts "kidubcr:lz:hsvp:we:" opt; do
             elif [ "$OPTARG" == "multisite" ]
             then
                 install_multisite
+                exit 0
+            elif [ "$OPTARG" == "nagvis" ]
+            then
+                install_nagvis
                 exit 0
             else
                 cecho " > Unknown plugin $OPTARG" red
