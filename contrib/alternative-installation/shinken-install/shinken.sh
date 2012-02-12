@@ -1444,10 +1444,12 @@ function install_nagios-plugins(){
     echo "./configure --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP --enable-libtap --enable-extra-opts --prefix=$TARGET" >> /tmp/shinken.install.log 2>&1 
     ./configure --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP --enable-libtap --enable-extra-opts --prefix=$TARGET >> /tmp/shinken.install.log 2>&1 
     cecho " > Building ...." green
-    make >> /tmp/shinken.install.log 2>&1 
+    make >> /tmp/shinken.install.log >> /tmp/shinken.install.log  2>&1 
     cecho " > Installing" green
-    make install >> /tmp/shinken.install.log 2>&1 
-    
+    make install >> /tmp/shinken.install.log >> /tmp/shinken.install.log  2>&1 
+    cp contrib/check_mem.pl $TARGET/libexec >> /tmp/shinken.install.log  2>&1 
+    chmod +x $TARGET/libexec/check_mem.pl >> /tmp/shinken.install.log  2>&1
+    chown $SKUSER:$SKGROUP $TARGET/libexec/check_mem.pl >> /tmp/shinken.install.log 2>&1
 }
 
 # MANUBULON SNMP PLUGINS 
