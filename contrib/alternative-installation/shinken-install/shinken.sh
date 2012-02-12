@@ -134,6 +134,29 @@ function remove(){
         fi
     fi
 
+    if [ -d "$NAGVISPREFIX" ]
+    then
+        doremove="n"
+        cread " > found a nagvis installation : do you want to remove it ? (y|N) =>  " yellow "n" "y n" 
+        if [ "$readvalue" == "y" ]
+        then
+            cecho " > Removing nagvis" green
+            rm -Rf $NAGVISPREFIX
+            case $CODE in
+                    REDHAT)
+                            rm -f /etc/httpd/conf.d/nagvis.conf >> /tmp/shinken.install.log 2>&1
+                            /etc/init.d/httpd restart >> /tmp/shinken.install.log 2>&1
+                            ;;
+                    DEBIAN)
+                            rm -f /etc/apache2/conf.d/nagvis.conf >> /tmp/shinken.install.log 2>&1
+                            /etc/init.d/apache2 restart >> /tmp/shinken.install.log 2>&1
+                            ;;
+            esac   
+        else 
+            cecho " > Aborting uninstallation of nagvis" yellow
+        fi
+    fi
+
     return 0
 }
 
@@ -888,6 +911,68 @@ function fixHtpasswdPath(){
 
 
 # addons installation
+
+# nagvis
+
+function install_nagvis(){
+
+    cadre "Install pnp4nagios addon" green
+    case $CODE in
+        REDHAT)
+            cecho " > Unsupported" red
+            exit 2
+            ;;
+        DEBIAN)
+            cecho " > Installing prerequisites" green
+            DEBIAN_FRONTEND=noninteractive apt-get install -y $NAGVISAPTPKGS >> /tmp/shinken.install.log 2>&1
+            HTTPDUSER="www-data"
+            HTTPDGROUP="www-data"
+            HTTPDCONF="/etc/apache2/conf.d"
+            ;;
+        *)
+            cecho " > Unknown distribution : $DIST" red
+            exit 2
+            ;;
+    esac
+            
+    
+    filename=$(echo $NAGVIS | awk -F"/" '{print $NF}')
+    folder=$(echo $filename | sed -e "s/\.tar\.gz//g")
+
+    cd /tmp
+
+    if [ -d /tmp/$folder ]
+    then 
+        rm -Rf $folder
+    fi
+
+    if [ ! -f /tmp/$filename ]
+    then
+        cecho " > Download $filename" green
+        wget $WGETPROXY $NAGVIS >> /tmp/shinken.install.log 2>&1
+        if [ $? -ne 0 ]
+        then
+            cecho " > Error while downloading $NAGVIS" red
+            exit 2
+        fi
+    fi
+    cecho " > Extract archive content" green
+    tar zxvf $filename >> /tmp/shinken.install.log 2>&1
+    cd $folder
+    cecho " > Install nagvis" green
+    ./install.sh -a y -q -F -l "tcp:localhost:50000" -i mklivestatus -n $TARGET -p $NAGVISPREFIX -u $HTTPDUSER -g $HTTPDGROUP -w $HTTPDCONF 
+    if [ -d $MKPREFIX ]
+    then
+        cread " > Found a check_mk multisite installation. Do you want to modify the nagvis url so links redirect to multisite ?" yellow "y" "y n"
+        if [ "$readvalue" == "y" ]
+        then
+            cecho " > Patching links for multisite use" green
+            cd $NAGVISPREFIX/etc
+            patch < $myscripts/nagvis.multisite.uri.patch
+        fi
+    fi  
+}
+
 # mk multisite
 
 function install_multisite(){
@@ -1343,7 +1428,7 @@ function install_nagios-plugins(){
         yum install -yq $NAGPLUGYUMPKG  >> /tmp/shinken.install.log 2>&1 
     else
         cecho " > Installing prerequisites" green 
-        DEBIAN_FRONTEND=noninteractive apt-get -y install $NAGPLUGAPTPKG #>> /tmp/shinken.install.log 2>&1 
+        DEBIAN_FRONTEND=noninteractive apt-get -y install $NAGPLUGAPTPKG >> /tmp/shinken.install.log 2>&1 
     fi
     cd /tmp
     if [ ! -f "nagios-plugins-$NAGPLUGVERS.tar.gz" ]
@@ -1356,13 +1441,14 @@ function install_nagios-plugins(){
     tar zxvf nagios-plugins-$NAGPLUGVERS.tar.gz >> /tmp/shinken.install.log 2>&1 
     cd nagios-plugins-$NAGPLUGVERS
     cecho " > Configure source tree" green
-    echo "./configure --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP --enable-libtap --enable-extra-opts --prefix=$TARGET" >> /tmp/shinken.install.log 2>&1 
-    ./configure --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP --enable-libtap --enable-extra-opts --prefix=$TARGET >> /tmp/shinken.install.log 2>&1 
+    ./configure --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP --enable-libtap --enable-extra-opts --prefix=$TARGET --enable-perl-modules >> /tmp/shinken.install.log 2>&1 
     cecho " > Building ...." green
-    make >> /tmp/shinken.install.log 2>&1 
+    make >> /tmp/shinken.install.log >> /tmp/shinken.install.log  2>&1 
     cecho " > Installing" green
-    make install >> /tmp/shinken.install.log 2>&1 
-    
+    make install >> /tmp/shinken.install.log >> /tmp/shinken.install.log  2>&1 
+    cp contrib/check_mem.pl $TARGET/libexec >> /tmp/shinken.install.log  2>&1 
+    chmod +x $TARGET/libexec/check_mem.pl >> /tmp/shinken.install.log  2>&1
+    chown $SKUSER:$SKGROUP $TARGET/libexec/check_mem.pl >> /tmp/shinken.install.log 2>&1
 }
 
 # MANUBULON SNMP PLUGINS 
@@ -1551,6 +1637,35 @@ function install_check_oracle_health(){
     make install >> /tmp/shinken.install.log 2>&1
     mkdir -p $TARGET/var/tmp >> /tmp/shinke.install.log 2>&1 
 }
+# CHECK_NETAPP2
+
+function install_check_netapp2(){
+    cadre "Install check_netapp2" green
+
+    if [ "$CODE" == "REDHAT" ]
+    then
+        cecho " > Installing prerequisites" green
+        yum -yq install $CHECKNETAPP2YUMPKGS >> /tmp/shinken.install.log
+    else
+        cecho " > Installing prerequisites" green
+        apt-get -y install $CHECKNETAPP2APTPKGS >> /tmp/shinken.install.log
+    fi
+    cd /tmp
+    cecho " > Downloading check_netapp2" green
+    wget $WGETPROXY -O check_netapp2 $CHECKNETAPP2 >> /tmp/shinken.install.log 2>&1 
+    if [ $? -ne 0 ]
+    then
+        cecho " > Error while downloading check_netapp2" red
+        exit 2
+    fi
+    cecho " > Installing plugin" green
+    # fuckin assholes that upload perl scripts edited with notepad or so
+    perl -p -e 's/\r$//' < check_netapp2 > check_netapp2.pl
+    chmod +x check_netapp2.pl >> /tmp/shinken.install.log 2>&1
+    chown $SKUSER:$SKGROUP check_netapp2.pl >> /tmp/shinken.install.log 2>&1
+    cp -p check_netapp2.pl $TARGET/libexec/check_netapp2 >> /tmp/shinken.install.log 2>&1 
+    sed -i "s#/usr/local/nagios/libexec#"$TARGET"/libexec#g" $TARGET/libexec/check_netapp2 >> /tmp/shinken.install.log 2>&1
+}
 
 # CHECK_MYSQL_HEALTH
 function install_check_mysql_health(){
@@ -1687,6 +1802,10 @@ while getopts "kidubcr:lz:hsvp:we:" opt; do
             then
                 install_check_hpasm
                 exit 0
+            elif [ "$OPTARG" == "check_netapp2" ]
+            then
+                install_check_netapp2
+                exit 0
             elif [ "$OPTARG" == "pnp4nagios" ]
             then
                 install_pnp4nagios
@@ -1694,6 +1813,10 @@ while getopts "kidubcr:lz:hsvp:we:" opt; do
             elif [ "$OPTARG" == "multisite" ]
             then
                 install_multisite
+                exit 0
+            elif [ "$OPTARG" == "nagvis" ]
+            then
+                install_nagvis
                 exit 0
             else
                 cecho " > Unknown plugin $OPTARG" red
