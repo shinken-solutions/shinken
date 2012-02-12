@@ -360,7 +360,7 @@ class LiveStatusQueryCache(object):
 
     def get_cached_query(self, data):
         if not self.enabled:
-            return (False, [])
+            return (False, False, [])
         query = QueryData(data)
         #print "I SEARCH THE CACHE FOR", query.category, query.key, data
         try:
