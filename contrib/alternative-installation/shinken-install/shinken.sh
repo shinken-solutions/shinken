@@ -1428,7 +1428,7 @@ function install_nagios-plugins(){
         yum install -yq $NAGPLUGYUMPKG  >> /tmp/shinken.install.log 2>&1 
     else
         cecho " > Installing prerequisites" green 
-        DEBIAN_FRONTEND=noninteractive apt-get -y install $NAGPLUGAPTPKG #>> /tmp/shinken.install.log 2>&1 
+        DEBIAN_FRONTEND=noninteractive apt-get -y install $NAGPLUGAPTPKG >> /tmp/shinken.install.log 2>&1 
     fi
     cd /tmp
     if [ ! -f "nagios-plugins-$NAGPLUGVERS.tar.gz" ]
