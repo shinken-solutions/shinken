@@ -245,9 +245,11 @@ class LiveStatusQuery(object):
 
         # Ask the cache if this request was already answered under the same
         # circumstances.
-        cacheable, cached_response = self.query_cache.get_cached_query(self.raw_data)
-        if cached_response:
-            return cached_response
+        cacheable, cache_hit, cached_response = self.query_cache.get_cached_query(self.raw_data)
+        if cache_hit:
+            self.columns = cached_response['columns']
+            self.response.columnheaders = cached_response['columnheaders']
+            return cached_response['result']
 
         # Make columns unique
         self.filtercolumns = list(set(self.filtercolumns))
@@ -320,10 +322,16 @@ class LiveStatusQuery(object):
             print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
             result = []
 
-        if cacheable:
+        if cacheable and not cache_hit:
             # We cannot cache generators, so we must first read them into a list
             result = [r for r in result]
-            self.query_cache.cache_query(self.raw_data, result)
+            # Especially for stats requests also the columns and headers
+            # are modified, so we need to save them too.
+            self.query_cache.cache_query(self.raw_data, {
+                'result': result,
+                'columns': self.columns,
+                'columnheaders': self.response.columnheaders,
+            })
             
         return result
 

@@ -78,6 +78,9 @@ class Counter(dict):
     def __missing__(self, key):
         return 0
 
+class LFUCacheMiss(Exception):
+    pass
+
 class LFU(object):
     """
     This class implements a dictionary which has a limited number of elements.
@@ -102,10 +105,12 @@ class LFU(object):
         self.use_count[key] += 1
         try:
             result = self.storage[key]
+            print "CACHE HIT"
             self.hits += 1
         except KeyError:
             result = []
             self.misses += 1
+            raise LFUCacheMiss
         return result
 
     def put(self, key, data):
@@ -114,6 +119,17 @@ class LFU(object):
             for key, _ in nsmallest(self.maxsize // 10, self.use_count.iteritems(), key=itemgetter(1)):
                 del self.storage[key], self.use_count[key]
         pass
+
+    def __str__(self):
+        text = 'LFU-------------------\n'
+        try:
+            text += 'hit rate %.2f%%\n' % (100 * self.hits / (self.hits + self.misses))
+        except ZeroDivisionError:
+            text += 'hit rate 0%\n'
+        for k in self.storage:
+            text += 'key %10s (%d used)\n' % (str(k), self.use_count[k])
+        return text
+        
 
 class QueryData(object):
     """
@@ -134,14 +150,14 @@ class QueryData(object):
         self.client_localtime = int(time.time())
         self.stats_columns = [f[1] for f in self.structured_data if f[0] == 'Stats']
         self.filter_columns = [f[1] for f in self.structured_data if f[0] == 'Filter']
+        self.columns = [x for f in self.structured_data if f[0] == 'Columns' for x in f[1]]
         self.categorize()
-        print self
-        print self.category
 
     def __str__(self):
         text = "table %s\n" % self.table
         text += "columns %s\n" % self.columns
         text += "stats_columns %s\n" % self.stats_columns
+        text += "filter_columns %s\n" % self.filter_columns
         text += "is_stats %s\n" % self.is_stats
         text += "is_cacheable %s\n" % str(self.category != CACHE_IMPOSSIBLE)
         return text
@@ -265,8 +281,10 @@ class QueryData(object):
         can not change over time. (ex. current_host_num_critical_services)
         """
         logline_elements = ['attempt', 'class', 'command_name', 'comment', 'contact_name', 'host_name', 'message', 'options', 'plugin_output', 'service_description', 'state', 'state_type', 'time', 'type']
+        logline_elements.extend(['current_host_groups', 'current_service_groups'])
         if self.table == 'log':
-            limits = sorted([(f[2], f[3]) for f in self.structured_data if f[0] == 'Filter' and f[1] == 'time'], key=lambda x: x[1])
+            limits = sorted([(f[2], int(f[3])) for f in self.structured_data if f[0] == 'Filter' and f[1] == 'time'], key=lambda x: x[1])
+             
             if len(limits) == 2 and limits[1][1] <= int(time.time()) and limits[0][0].startswith('>') and limits[1][0].startswith('<'):
                 if has_not_more_than(self.columns, logline_elements):
                     return True
@@ -290,6 +308,11 @@ class QueryData(object):
             self.category = CACHE_GLOBAL_STATS
         elif self.is_a_closed_chapter():
             self.category = CACHE_IRREVERSIBLE_HISTORY
+        elif self.table == 'services' and not self.is_stats and has_not_more_than(self.columns, ['host_name', 'description', 'state', 'state_type']):
+            self.category = CACHE_SERVICE_STATS
+        else:
+            pass
+            print "i cannot cache this", self
 
 
 
@@ -324,7 +347,7 @@ class LiveStatusQueryCache(object):
         the data for the tactical overview.
         """
         try:
-            print "i wipe sub-cache", category
+            #print "i wipe sub-cache", category
             self.categories[category].clear()
         except Exception:
             pass
@@ -333,17 +356,17 @@ class LiveStatusQueryCache(object):
         if not self.enabled:
             return
         for cat in range(len(self.categories)):
-            print "WIPEOUT CAT", cat
             self.categories[cat].clear()
 
     def get_cached_query(self, data):
         if not self.enabled:
             return (False, [])
-        print "I SEARCH THE CACHE FOR", data
         query = QueryData(data)
-        if self.categories[query.category].get(query.key):
-            print "CACHE HIT"
-        return (query.category != CACHE_IMPOSSIBLE, self.categories[query.category].get(query.key))
+        #print "I SEARCH THE CACHE FOR", query.category, query.key, data
+        try:
+            return (query.category != CACHE_IMPOSSIBLE, True, self.categories[query.category].get(query.key))
+        except LFUCacheMiss:
+            return (query.category != CACHE_IMPOSSIBLE, False, [])
 
     def cache_query(self, data, result):
         """Puts the result of a livestatus query into the cache."""
@@ -351,7 +374,7 @@ class LiveStatusQueryCache(object):
         if not self.enabled:
             return
         query = QueryData(data)
-        print "I PUT IN THE CACHE FOR", query.key
+        #print "I PUT IN THE CACHE FOR", query.category, query.key
         self.categories[query.category].put(query.key, result)
 
     def impact_assessment(self, brok, obj):
@@ -365,9 +388,11 @@ class LiveStatusQueryCache(object):
             if brok.data['state_id'] != obj.state_id:
                 print "DETECTED STATECHANGE", obj
                 self.invalidate_category(CACHE_GLOBAL_STATS)
+                self.invalidate_category(CACHE_SERVICE_STATS)
             if brok.data['state_type_id'] != obj.state_type_id:
                 print "DETECTED STATETYPECHANGE", obj
                 self.invalidate_category(CACHE_GLOBAL_STATS_WITH_STATETYPE)
+                self.invalidate_category(CACHE_SERVICE_STATS)
             print obj.state_id, obj.state_type_id, brok.data['state_id'], brok.data['state_type_id']
         except Exception:
             pass
