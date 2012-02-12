@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.6
+    #!/usr/bin/env python2.6
 # -*- coding: utf-8 -*-
 
 #Copyright (C) 2009-2010 :
@@ -69,6 +69,29 @@ class TestConfig(ShinkenTest):
             self.livestatus_broker.manage_brok(brok)
         self.sched.broks = {}
 
+    def tearDown(self):
+        self.livestatus_broker.db.commit()
+        self.livestatus_broker.db.close()
+        if os.path.exists(self.livelogs):
+            os.remove(self.livelogs)
+        if os.path.exists(self.livelogs+"-journal"):
+            os.remove(self.livelogs+"-journal")
+        print "i clean up"
+        print "i clean up"
+        print "i clean up"
+        print "i clean up"
+        if os.path.exists("tmp/archives"):
+            for db in os.listdir("tmp/archives"):
+                print "cleanup", db
+                os.remove(os.path.join("tmp/archives", db))
+        if os.path.exists('var/nagios.log'):
+            os.remove('var/nagios.log')
+        if os.path.exists('var/retention.dat'):
+            os.remove('var/retention.dat')
+        if os.path.exists('var/status.dat'):
+            os.remove('var/status.dat')
+        self.livestatus_broker = None
+
 
 
 class TestConfigSmall(TestConfig):
@@ -87,29 +110,6 @@ class TestConfigSmall(TestConfig):
         # but still get DOWN state
         host = self.sched.hosts.find_by_name("test_host_0")
         host.__class__.use_aggressive_host_checking = 1
-
-
-
-
-    def tearDown(self):
-        self.livestatus_broker.db.commit()
-        self.livestatus_broker.db.close()
-        #if os.path.exists(self.livelogs):
-        #    os.remove(self.livelogs)
-        #if os.path.exists(self.livelogs+"-journal"):
-        #    os.remove(self.livelogs+"-journal")
-        if os.path.exists('var/nagios.log'):
-            os.remove('var/nagios.log')
-        if os.path.exists('var/retention.dat'):
-            os.remove('var/retention.dat')
-        if os.path.exists('var/status.dat'):
-            os.remove('var/status.dat')
-        self.livestatus_broker = None
-
-        if os.path.exists("tmp/archives"):
-            for db in os.listdir("tmp/archives"):
-                os.remove(os.path.join("tmp/archives", db))
-
 
     def write_logs(self, host, loops=0):
         for loop in range(0, loops):
@@ -506,12 +506,42 @@ class TestConfigBig(TestConfig):
         test_ok_04 = self.sched.services.find_srv_by_name_and_hostname("test_host_005", "test_ok_04")
         test_ok_16 = self.sched.services.find_srv_by_name_and_hostname("test_host_005", "test_ok_16")
         test_ok_99 = self.sched.services.find_srv_by_name_and_hostname("test_host_099", "test_ok_01")
-        starttime = time.time()
-        numlogs = self.livestatus_broker.db.execute("SELECT COUNT(*) FROM logs")
-        if numlogs[0][0] == 0:
-            # run silently
-            old_stdout = sys.stdout
-            sys.stdout = open(os.devnull, "w")
+
+        days = 4
+        etime = time.time()
+        print "now it is", time.ctime(etime)
+        print "now it is", time.gmtime(etime)
+        etime_midnight = (etime - (etime % 86400)) + time.altzone
+        print "midnight was", time.ctime(etime_midnight)
+        print "midnight was", time.gmtime(etime_midnight)
+        query_start = etime_midnight - (days - 1) * 86400
+        query_end = etime_midnight
+        print "query_start", time.ctime(query_start)
+        print "query_end ", time.ctime(query_end)
+
+        # |----------|----------|----------|----------|----------|---x
+        #                                                            etime
+        #                                                        etime_midnight
+        #             ---x------
+        #                etime -  4 days
+        #                       |---
+        #                       query_start
+        #
+        #                ............................................
+        #                events in the log database ranging till now
+        #
+        #                       |________________________________|
+        #                       events which will be read from db
+        #
+        loops = int(86400 / 192)
+        time_warp(-1 * days * 86400)
+        print "warp back to", time.ctime(time.time())
+        # run silently
+        old_stdout = sys.stdout
+        sys.stdout = open(os.devnull, "w")
+        should_be = 0
+        for day in xrange(days):
+            sys.stderr.write("day %d now it is %s i run %d loops\n" % (day, time.ctime(time.time()), loops))
             self.scheduler_loop(2, [
                 [test_ok_00, 0, "OK"],
                 [test_ok_01, 0, "OK"],
@@ -520,9 +550,8 @@ class TestConfigBig(TestConfig):
                 [test_ok_99, 0, "OK"],
             ])
             self.update_broker()
-            should_be = 0
             #for i in xrange(3600 * 24 * 7):
-            for i in xrange(10000): 
+            for i in xrange(loops):
                 if i % 10000 == 0:
                     sys.stderr.write(str(i))
                 if i % 399 == 0:
@@ -533,7 +562,9 @@ class TestConfigBig(TestConfig):
                         [test_ok_16, 1, "WARN"],
                         [test_ok_99, 2, "CRIT"],
                     ])
-                    should_be += 3
+                    if int(time.time()) >= query_start and int(time.time()) <= query_end:
+                        should_be += 3
+                        sys.stderr.write("now it should be %s\n" % should_be)
                 time.sleep(62)
                 if i % 399 == 0:
                     self.scheduler_loop(1, [
@@ -543,34 +574,37 @@ class TestConfigBig(TestConfig):
                         [test_ok_16, 0, "OK"],
                         [test_ok_99, 0, "OK"],
                     ])
-                    should_be += 1
+                    if int(time.time()) >= query_start and int(time.time()) <= query_end:
+                        should_be += 1
+                        sys.stderr.write("now it should be %s\n" % should_be)
                 time.sleep(2)
-                if i % 199 == 0:
+                if i % 17 == 0:
                     self.scheduler_loop(3, [
                         [test_ok_00, 1, "WARN"],
                         [test_ok_01, 2, "CRIT"],
                     ])
+
                 time.sleep(62)
-                if i % 199 == 0:
+                if i % 17 == 0:
                     self.scheduler_loop(1, [
                         [test_ok_00, 0, "OK"],
                         [test_ok_01, 0, "OK"],
                     ])
                 time.sleep(2)
-                if i % 299 == 0:
+                if i % 14 == 0:
                     self.scheduler_loop(3, [
                         [test_host_005, 2, "DOWN"],
                     ])
-                if i % 19 == 0:
+                if i % 12 == 0:
                     self.scheduler_loop(3, [
                         [test_host_099, 2, "DOWN"],
                     ])
                 time.sleep(62)
-                if i % 299 == 0:
+                if i % 14 == 0:
                     self.scheduler_loop(3, [
                         [test_host_005, 0, "UP"],
                     ])
-                if i % 19 == 0:
+                if i % 12 == 0:
                     self.scheduler_loop(3, [
                         [test_host_099, 0, "UP"],
                     ])
@@ -579,25 +613,20 @@ class TestConfigBig(TestConfig):
                 if i % 1000 == 0:
                     self.livestatus_broker.db.commit()
             endtime = time.time()
-            sys.stdout.close()
-            sys.stdout = old_stdout
             self.livestatus_broker.db.commit()
-        else:
-            should_be = numlogs[0][0]
-            xxx = self.livestatus_broker.db.execute("SELECT min(time), max(time) FROM logs")
-            print xxx
-            starttime, endtime = [self.livestatus_broker.db.execute("SELECT min(time), max(time) FROM logs")][0][0]
-            
-        
+            sys.stderr.write("day %d end it is %s\n" % (day, time.ctime(time.time())))
+        sys.stdout.close()
+        sys.stdout = old_stdout
+        self.livestatus_broker.db.commit_and_rotate_log_db()
+        numlogs = self.livestatus_broker.db.execute("SELECT COUNT(*) FROM logs")
+        print "numlogs is", numlogs
+
         # now we have a lot of events
         # find type = HOST ALERT for test_host_005
-        q = int((endtime - starttime) / 8)
-        starttime += q
-        endtime -= q
         request = """GET log
 Columns: class time type state host_name service_description plugin_output message options contact_name command_name state_type current_host_groups current_service_groups
-Filter: time >= """ + str(int(starttime)) + """
-Filter: time <= """ + str(int(endtime)) + """
+Filter: time >= """ + str(int(query_start)) + """
+Filter: time <= """ + str(int(query_end)) + """
 Filter: type = SERVICE ALERT
 And: 1
 Filter: type = HOST ALERT
@@ -619,30 +648,67 @@ OutputFormat: json"""
         time.time = original_time_time
         time.sleep = original_time_sleep
         print request
+        print "query 1 --------------------------------------------------"
+        tic = time.time()
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        tac = time.time()
         pyresponse = eval(response)
-        print "number of records", len(pyresponse)
-        print "should be", should_be
+        print "number of records with test_ok_01", len(pyresponse)
+        self.assert_(len(pyresponse) == should_be)
+
+        # and now test Negate:
+        request = """GET log
+Filter: time >= """ + str(int(query_start)) + """
+Filter: time <= """ + str(int(query_end)) + """
+Filter: type = SERVICE ALERT
+And: 1
+Filter: type = HOST ALERT
+And: 1
+Filter: type = SERVICE FLAPPING ALERT
+Filter: type = HOST FLAPPING ALERT
+Filter: type = SERVICE DOWNTIME ALERT
+Filter: type = HOST DOWNTIME ALERT
+Filter: type ~ starting...
+Filter: type ~ shutting down...
+Or: 8
+Filter: host_name = test_host_099
+Filter: service_description = test_ok_01
+And: 2
+Negate:
+And: 2
+OutputFormat: json"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print "got response with true instead of negate"
+        notpyresponse = eval(response)
+        print "number of records without test_ok_01", len(notpyresponse)
+
+        request = """GET log
+Filter: time >= """ + str(int(query_start)) + """
+Filter: time <= """ + str(int(query_end)) + """
+Filter: type = SERVICE ALERT
+And: 1
+Filter: type = HOST ALERT
+And: 1
+Filter: type = SERVICE FLAPPING ALERT
+Filter: type = HOST FLAPPING ALERT
+Filter: type = SERVICE DOWNTIME ALERT
+Filter: type = HOST DOWNTIME ALERT
+Filter: type ~ starting...
+Filter: type ~ shutting down...
+Or: 8
+OutputFormat: json"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        allpyresponse = eval(response)
+        print "all records", len(allpyresponse)
+        self.assert_(len(allpyresponse) == len(notpyresponse) + len(pyresponse))
+        # the numlogs above only counts records in the currently attached db
+        numlogs = self.livestatus_broker.db.execute("SELECT COUNT(*) FROM logs WHERE time >= %d AND time <= %d" %(int(query_start), int(query_end)))
+        print "numlogs is", numlogs
+
         time.time = fake_time_time
         time.sleep = fake_time_sleep
 
 
-    def tearDown(self):
-        self.livestatus_broker.db.commit()
-        self.livestatus_broker.db.close()
-        if os.path.exists(self.livelogs):
-            os.remove(self.livelogs)
-        if os.path.exists(self.livelogs+"-journal"):
-            os.remove(self.livelogs+"-journal")
-        if os.path.exists(self.livestatus_broker.pnp_path):
-            shutil.rmtree(self.livestatus_broker.pnp_path)
-        if os.path.exists('var/nagios.log'):
-            os.remove('var/nagios.log')
-        if os.path.exists('var/retention.dat'):
-            os.remove('var/retention.dat')
-        if os.path.exists('var/status.dat'):
-            os.remove('var/status.dat')
-        self.livestatus_broker = None
 
 
 class TestConfigNoLogstore(TestConfig):

@@ -2377,6 +2377,62 @@ class TestConfigBig(TestConfig):
         self.livestatus_broker = None
 
 
+    def test_negate(self):
+        # test_host_005 is in hostgroup_01
+        # 20 services   from  400 services
+        hostgroup_01 = self.sched.hostgroups.find_by_name("hostgroup_01")
+        host_005 = self.sched.hosts.find_by_name("test_host_005")
+        test_ok_00 = self.sched.services.find_srv_by_name_and_hostname("test_host_005", "test_ok_00")
+        query = """GET services
+Columns: host_name description
+Filter: host_name = test_host_005
+Filter: description = test_ok_00
+OutputFormat: python
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(query)
+        pyresponse = eval(response)
+        print len(pyresponse)
+        query = """GET services
+Columns: host_name description
+OutputFormat: python
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(query)
+        allpyresponse = eval(response)
+        print len(allpyresponse)
+        query = """GET services
+Columns: host_name description
+Filter: host_name = test_host_005
+Filter: description = test_ok_00
+And: 2
+Negate:
+OutputFormat: python
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(query)
+        negpyresponse = eval(response)
+        print len(negpyresponse)
+        # only test_ok_00 + without test_ok_00 must be all services
+        self.assert_(len(allpyresponse) == len(pyresponse) + len(negpyresponse))
+
+        query = """GET hosts
+Columns: host_name num_services
+Filter: host_name = test_host_005
+OutputFormat: python
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(query)
+        numsvc = eval(response)
+        print response, numsvc
+
+        query = """GET services
+Columns: host_name description
+Filter: host_name = test_host_005
+Filter: description = test_ok_00
+Negate:
+OutputFormat: python
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(query)
+        numsvcwithout = eval(response)
+        self.assert_(numsvc[0][1] - 1 == len(numsvcwithout))
+
     def test_worst_service_state(self):
         # test_host_005 is in hostgroup_01
         # 20 services   from  400 services

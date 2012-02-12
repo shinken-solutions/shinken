@@ -176,6 +176,10 @@ class LiveStatusQuery(object):
                 self.filter_stack.or_elements(ornum)
                 if self.table == 'log':
                     self.db.add_filter_or(ornum)
+            elif keyword == 'Negate':
+                self.filter_stack.not_elements()
+                if self.table == 'log':
+                    self.db.add_filter_not()
             elif keyword == 'StatsGroupBy':
                 _, stats_group_by = self.split_option_with_columns(line)
                 self.filtercolumns.extend(stats_group_by)

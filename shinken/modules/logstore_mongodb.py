@@ -78,7 +78,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
                 self.max_logs_age = int(maxmatch.group(1)) * 31
             elif maxmatch.group(2) == 'y':
                 self.max_logs_age = int(maxmatch.group(1)) * 365
-
+        self.use_aggressive_sql = (getattr(modconf, 'use_aggressive_sql', '1') == '1')
         # This stack is used to create a full-blown select-statement
         self.mongo_filter_stack = LiveStatusMongoStack()
         # This stack is used to create a minimal select-statement which
@@ -206,12 +206,14 @@ class LiveStatusLogStoreMongoDB(BaseModule):
     def add_filter_or(self, ornum):
 	self.mongo_filter_stack.or_elements(ornum)
 
+    def add_filter_not(self):
+	self.mongo_filter_stack.not_elements()
+
     def get_live_data_log(self):
         """Like get_live_data, but for log objects"""
         # finalize the filter stacks
 	self.mongo_time_filter_stack.and_elements(self.mongo_time_filter_stack.qsize())
 	self.mongo_filter_stack.and_elements(self.mongo_filter_stack.qsize())
-        self.use_aggressive_sql = True
         if self.use_aggressive_sql:
             # Be aggressive, get preselected data from sqlite and do less
             # filtering in python. But: only a subset of Filter:-attributes
@@ -271,7 +273,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
         def match_filter():
             return '\'%s\' : { \'$regex\' : %s }' % (attribute, reference)
         def no_filter():
-            return '\'%s\' : { \'$exists\' : true }' % (attribute,)
+            return '\'time\' : { \'$exists\' : True }' 
         if attribute not in good_attributes:
             return no_filter
         if operator == '=':
@@ -312,6 +314,19 @@ class LiveStatusMongoStack(LiveStatusStack):
     def __init__(self, *args, **kw):
         self.type = 'mongo'
         self.__class__.__bases__[0].__init__(self, *args, **kw)
+
+    def not_elements(self):
+        top_filter = self.get_stack()
+        #negate_filter = lambda: '\'$not\' : { %s }' % top_filter()
+        # mongodb doesn't have the not-operator like sql, which can negate
+        # a complete expression. Mongodb $not can only reverse one operator
+        # at a time. This qould require rewriting of the whole expression.
+        # So instead of deciding whether a record can pass the filter or not,
+        # we let it pass in any case. That's no problem, because the result
+        # of the database query will have to go through the in-memory-objects 
+        # filter too.
+        negate_filter = lambda: '\'time\' : { \'$exists\' : True }'
+        self.put_stack(negate_filter)
 
     def and_elements(self, num):
         """Take num filters from the stack, and them and put the result back"""

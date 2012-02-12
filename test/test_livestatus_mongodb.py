@@ -296,7 +296,7 @@ class TestConfigBig(TestConfig):
             'mongodb_uri' : "mongodb://127.0.0.1:27017",
             #'mongodb_uri' : "mongodb://10.0.12.50:27017,10.0.12.51:27017",
         #    'replica_set' : 'livestatus',
-            'max_logs_age' : '14',
+            'max_logs_age' : '7',
         })
         modconf.modules = [dbmodconf]
         self.livestatus_broker = LiveStatus_broker(modconf)
@@ -323,11 +323,14 @@ class TestConfigBig(TestConfig):
         self.livestatus_broker.rg = LiveStatusRegenerator()
         self.livestatus_broker.datamgr = datamgr
         datamgr.load(self.livestatus_broker.rg)
+        self.livestatus_broker.query_cache = LiveStatusQueryCache()
+        self.livestatus_broker.query_cache.disable()
+        self.livestatus_broker.rg.register_cache(self.livestatus_broker.query_cache)
         #--- livestatus_broker.main
 
         self.livestatus_broker.init()
         self.livestatus_broker.db = self.livestatus_broker.modules_manager.instances[0]
-        self.livestatus_broker.livestatus = LiveStatus(self.livestatus_broker.datamgr, self.livestatus_broker.db, self.livestatus_broker.pnp_path, self.livestatus_broker.from_q)
+        self.livestatus_broker.livestatus = LiveStatus(self.livestatus_broker.datamgr, self.livestatus_broker.query_cache, self.livestatus_broker.db, self.livestatus_broker.pnp_path, self.livestatus_broker.from_q)
 
         #--- livestatus_broker.do_main
         self.livestatus_broker.db.open()
@@ -340,6 +343,7 @@ class TestConfigBig(TestConfig):
     def test_a_long_history(self):
         if not has_pymongo:
             return
+        # copied from test_livestatus_cache
         test_host_005 = self.sched.hosts.find_by_name("test_host_005")
         test_host_099 = self.sched.hosts.find_by_name("test_host_099")
         test_ok_00 = self.sched.services.find_srv_by_name_and_hostname("test_host_005", "test_ok_00")
@@ -347,17 +351,42 @@ class TestConfigBig(TestConfig):
         test_ok_04 = self.sched.services.find_srv_by_name_and_hostname("test_host_005", "test_ok_04")
         test_ok_16 = self.sched.services.find_srv_by_name_and_hostname("test_host_005", "test_ok_16")
         test_ok_99 = self.sched.services.find_srv_by_name_and_hostname("test_host_099", "test_ok_01")
-        starttime = time.time()
 
-        num_log_broks = 0
-        try:
-            numlogs = self.livestatus_broker.db.conn.bigbigbig.find().count()
-        except Exception:
-            numlogs = 0
-        if numlogs == 0:
-            # run silently
-            old_stdout = sys.stdout
-            sys.stdout = open(os.devnull, "w")
+        days = 4
+        etime = time.time()
+        print "now it is", time.ctime(etime)
+        print "now it is", time.gmtime(etime)
+        etime_midnight = (etime - (etime % 86400)) + time.altzone
+        print "midnight was", time.ctime(etime_midnight)
+        print "midnight was", time.gmtime(etime_midnight)
+        query_start = etime_midnight - (days - 1) * 86400
+        query_end = etime_midnight
+        print "query_start", time.ctime(query_start)
+        print "query_end ", time.ctime(query_end)
+
+        # |----------|----------|----------|----------|----------|---x
+        #                                                            etime
+        #                                                        etime_midnight
+        #             ---x------
+        #                etime -  4 days
+        #                       |---
+        #                       query_start
+        #
+        #                ............................................
+        #                events in the log database ranging till now
+        #
+        #                       |________________________________|
+        #                       events which will be read from db
+        #
+        loops = int(86400 / 192)
+        time_warp(-1 * days * 86400)
+        print "warp back to", time.ctime(time.time())
+        # run silently
+        old_stdout = sys.stdout
+        sys.stdout = open(os.devnull, "w")
+        should_be = 0
+        for day in xrange(days):
+            sys.stderr.write("day %d now it is %s i run %d loops\n" % (day, time.ctime(time.time()), loops))
             self.scheduler_loop(2, [
                 [test_ok_00, 0, "OK"],
                 [test_ok_01, 0, "OK"],
@@ -365,26 +394,22 @@ class TestConfigBig(TestConfig):
                 [test_ok_16, 0, "OK"],
                 [test_ok_99, 0, "OK"],
             ])
-            num_log_broks += self.count_log_broks()
             self.update_broker()
-            should_be = 0
-            should_be_huhu = 0
-            huhuhus = []
             #for i in xrange(3600 * 24 * 7):
-            for i in xrange(10000): 
-                if i % 1000 == 0:
-                    sys.stderr.write("loop "+str(i))
+            for i in xrange(loops):
+                if i % 10000 == 0:
+                    sys.stderr.write(str(i))
                 if i % 399 == 0:
                     self.scheduler_loop(3, [
                         [test_ok_00, 1, "WARN"],
                         [test_ok_01, 2, "CRIT"],
                         [test_ok_04, 3, "UNKN"],
                         [test_ok_16, 1, "WARN"],
-                        [test_ok_99, 2, "HUHU"+str(i)],
+                        [test_ok_99, 2, "CRIT"],
                     ])
-                    should_be += 3
-                    should_be_huhu += 3
-                    huhuhus.append(i)
+                    if int(time.time()) >= query_start and int(time.time()) <= query_end:
+                        should_be += 3
+                        sys.stderr.write("now it should be %s\n" % should_be)
                 time.sleep(62)
                 if i % 399 == 0:
                     self.scheduler_loop(1, [
@@ -394,66 +419,59 @@ class TestConfigBig(TestConfig):
                         [test_ok_16, 0, "OK"],
                         [test_ok_99, 0, "OK"],
                     ])
-                    should_be += 1
+                    if int(time.time()) >= query_start and int(time.time()) <= query_end:
+                        should_be += 1
+                        sys.stderr.write("now it should be %s\n" % should_be)
                 time.sleep(2)
-                if i % 199 == 0:
+                if i % 17 == 0:
                     self.scheduler_loop(3, [
                         [test_ok_00, 1, "WARN"],
                         [test_ok_01, 2, "CRIT"],
                     ])
+
                 time.sleep(62)
-                if i % 199 == 0:
+                if i % 17 == 0:
                     self.scheduler_loop(1, [
                         [test_ok_00, 0, "OK"],
                         [test_ok_01, 0, "OK"],
                     ])
                 time.sleep(2)
-                if i % 299 == 0:
+                if i % 14 == 0:
                     self.scheduler_loop(3, [
                         [test_host_005, 2, "DOWN"],
                     ])
-                if i % 19 == 0:
+                if i % 12 == 0:
                     self.scheduler_loop(3, [
                         [test_host_099, 2, "DOWN"],
                     ])
                 time.sleep(62)
-                if i % 299 == 0:
+                if i % 14 == 0:
                     self.scheduler_loop(3, [
                         [test_host_005, 0, "UP"],
                     ])
-                if i % 19 == 0:
+                if i % 12 == 0:
                     self.scheduler_loop(3, [
                         [test_host_099, 0, "UP"],
                     ])
                 time.sleep(2)
-                num_log_broks += self.count_log_broks()
                 self.update_broker()
                 if i % 1000 == 0:
                     self.livestatus_broker.db.commit()
             endtime = time.time()
-            sys.stdout.close()
-            sys.stdout = old_stdout
             self.livestatus_broker.db.commit()
-        else:
-            should_be = numlogs
-            starttime = int(time.time())
-            endtime = 0
-            for doc in self.livestatus_broker.db.conn.bigbigbig.logs.find():
-                if doc['time'] < starttime:
-                    starttime = doc['time']
-                if doc['time'] > endtime:
-                    endtime = doc['time']
-            print "starttime, endtime", starttime, endtime
-        
+            sys.stderr.write("day %d end it is %s\n" % (day, time.ctime(time.time())))
+        sys.stdout.close()
+        sys.stdout = old_stdout
+        self.livestatus_broker.db.commit_and_rotate_log_db()
+        numlogs = self.livestatus_broker.db.conn.bigbigbig.logs.find().count()
+        print "numlogs is", numlogs
+
         # now we have a lot of events
         # find type = HOST ALERT for test_host_005
-        q = int((endtime - starttime) / 8)
-        starttime += q
-        endtime -= q
         request = """GET log
 Columns: class time type state host_name service_description plugin_output message options contact_name command_name state_type current_host_groups current_service_groups
-Filter: time >= """ + str(int(starttime)) + """
-Filter: time <= """ + str(int(endtime)) + """
+Filter: time >= """ + str(int(query_start)) + """
+Filter: time <= """ + str(int(query_end)) + """
 Filter: type = SERVICE ALERT
 And: 1
 Filter: type = HOST ALERT
@@ -468,7 +486,6 @@ Or: 8
 Filter: host_name = test_host_099
 Filter: service_description = test_ok_01
 And: 5
-Filter: plugin_output ~ HUHU
 OutputFormat: json"""
         # switch back to realtime. we want to know how long it takes
         fake_time_time = time.time
@@ -476,22 +493,58 @@ OutputFormat: json"""
         time.time = original_time_time
         time.sleep = original_time_sleep
         print request
+        print "query 1 --------------------------------------------------"
+        tic = time.time()
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        tac = time.time()
         pyresponse = eval(response)
-        print "number of all documents", self.livestatus_broker.db.conn.bigbigbig.logs.find().count()
-        print "number of log broks sent", num_log_broks
-        print "number of lines in the response", len(pyresponse)
-        print "should be", should_be
-        time.time = fake_time_time
-        time.sleep = fake_time_sleep
-        hosts = set([h[4] for h in pyresponse])
-        services = set([h[5] for h in pyresponse])
-        print "found hosts", hosts
-        print "found services", services
-        alldocs = [d for d in self.livestatus_broker.db.conn.bigbigbig.logs.find()]
-        clientselected = [d for d in alldocs if (d['time'] >= int(starttime) and d['time'] <= int(endtime) and d['host_name'] == 'test_host_099' and d['service_description'] == 'test_ok_01' and 'HUHU' in d['plugin_output'])]
-        print "clientselected", len(clientselected)
-        self.assert_(len(pyresponse) == len(clientselected))
+        print "number of records with test_ok_01", len(pyresponse)
+        self.assert_(len(pyresponse) == should_be)
+
+        # and now test Negate:
+        request = """GET log
+Filter: time >= """ + str(int(query_start)) + """
+Filter: time <= """ + str(int(query_end)) + """
+Filter: type = SERVICE ALERT
+And: 1
+Filter: type = HOST ALERT
+And: 1
+Filter: type = SERVICE FLAPPING ALERT
+Filter: type = HOST FLAPPING ALERT
+Filter: type = SERVICE DOWNTIME ALERT
+Filter: type = HOST DOWNTIME ALERT
+Filter: type ~ starting...
+Filter: type ~ shutting down...
+Or: 8
+Filter: host_name = test_host_099
+Filter: service_description = test_ok_01
+And: 2
+Negate:
+And: 2
+OutputFormat: json"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        notpyresponse = eval(response)
+        print "number of records without test_ok_01", len(notpyresponse)
+
+        request = """GET log
+Filter: time >= """ + str(int(query_start)) + """
+Filter: time <= """ + str(int(query_end)) + """
+Filter: type = SERVICE ALERT
+And: 1
+Filter: type = HOST ALERT
+And: 1
+Filter: type = SERVICE FLAPPING ALERT
+Filter: type = HOST FLAPPING ALERT
+Filter: type = SERVICE DOWNTIME ALERT
+Filter: type = HOST DOWNTIME ALERT
+Filter: type ~ starting...
+Filter: type ~ shutting down...
+Or: 8
+OutputFormat: json"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        allpyresponse = eval(response)
+        print "all records", len(allpyresponse)
+        self.assert_(len(allpyresponse) == len(notpyresponse) + len(pyresponse))
 
         # now delete too old entries from the database (> 14days)
         # that's the job of commit_and_rotate_log_db()
@@ -531,8 +584,11 @@ OutputFormat: json"""
         # simply an estimation. the cleanup-routine in the mongodb logstore
         # cuts off the old data at midnight, but here in the test we have
         # only accuracy of a day.
-        self.assert_(numlogs >= sum(daycount[:14]))
-        self.assert_(numlogs <= sum(daycount[:15]))
+        self.assert_(numlogs >= sum(daycount[:7]))
+        self.assert_(numlogs <= sum(daycount[:8]))
+
+        time.time = fake_time_time
+        time.sleep = fake_time_sleep
 
 
 if __name__ == '__main__':

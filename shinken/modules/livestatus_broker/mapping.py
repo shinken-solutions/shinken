@@ -89,7 +89,6 @@ def worst_service_state(state_1, state_2):
 
 def find_pnp_perfdata_xml(name, request):
     """Check if a pnp xml file exists for a given host or service name."""
-    print "find_pnp_perfdata_xml", name
     if request.pnp_path_readable:
         if '/' in name:
             # It is a service

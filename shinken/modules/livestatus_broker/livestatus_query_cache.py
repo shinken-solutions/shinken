@@ -210,6 +210,8 @@ class QueryData(object):
             elif keyword == 'Or':
                 _, ornum = self.split_option(line)
                 self.structured_data.append((keyword, ornum))
+            elif keyword == 'Negate':
+                self.structured_data.append((keyword, ))
             elif keyword == 'StatsGroupBy':
                 _, columns = self.split_option_with_columns(line)
                 self.structured_data.append((keyword, columns))

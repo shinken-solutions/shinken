@@ -391,6 +391,9 @@ class LiveStatusLogStoreSqlite(BaseModule):
     def add_filter_or(self, ornum):
 	self.sql_filter_stack.or_elements(ornum)
 
+    def add_filter_not(self):
+	self.sql_filter_stack.not_elements()
+
 
     def get_live_data_log(self):
         """Like get_live_data, but for log objects"""
