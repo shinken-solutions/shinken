@@ -1114,7 +1114,7 @@ class ExternalCommandManager:
 
     # ENABLE_SVC_NOTIFICATIONS;<host_name>;<service_description>
     def ENABLE_SVC_NOTIFICATIONS(self, service):
-        if not service.notifications_enables:
+        if not service.notifications_enabled:
             service.notifications_enabled = True
             service.modified_attributes |= MODATTR_NOTIFICATIONS_ENABLED
             self.sched.get_and_register_status_brok(service)
