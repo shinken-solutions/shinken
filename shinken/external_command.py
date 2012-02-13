@@ -35,6 +35,26 @@ from shinken.commandcall import CommandCall
 from shinken.log import logger
 from shinken.pollerlink import PollerLink
 
+MODATTR_NONE = 0
+MODATTR_NOTIFICATIONS_ENABLED = 1
+MODATTR_ACTIVE_CHECKS_ENABLED = 2
+MODATTR_PASSIVE_CHECKS_ENABLED = 4
+MODATTR_EVENT_HANDLER_ENABLED = 8
+MODATTR_FLAP_DETECTION_ENABLED = 16
+MODATTR_FAILURE_PREDICTION_ENABLED = 32
+MODATTR_PERFORMANCE_DATA_ENABLED = 64
+MODATTR_OBSESSIVE_HANDLER_ENABLED = 128
+MODATTR_EVENT_HANDLER_COMMAND = 256
+MODATTR_CHECK_COMMAND = 512
+MODATTR_NORMAL_CHECK_INTERVAL = 1024
+MODATTR_RETRY_CHECK_INTERVAL = 2048
+MODATTR_MAX_CHECK_ATTEMPTS = 4096
+MODATTR_FRESHNESS_CHECKS_ENABLED = 8192
+MODATTR_CHECK_TIMEPERIOD = 16384
+MODATTR_CUSTOM_VARIABLE = 32768
+MODATTR_NOTIFICATION_TIMEPERIOD = 65536
+
+
 
 """ TODO : Add some comment about this class for the doc"""
 class ExternalCommand:
@@ -878,8 +898,10 @@ class ExternalCommandManager:
 
     # DISABLE_SVC_CHECK;<host_name>;<service_description>
     def DISABLE_SVC_CHECK(self, service):
-        service.disable_active_checks()
-        self.sched.get_and_register_status_brok(service)
+        if service.active_checks_enabled:
+            service.disable_active_checks()
+            service.modified_attributes |= MODATTR_ACTIVE_CHECKS_ENABLED
+            self.sched.get_and_register_status_brok(service)
 
     # DISABLE_SVC_EVENT_HANDLER;<host_name>;<service_description>
     def DISABLE_SVC_EVENT_HANDLER(self, service):
@@ -893,8 +915,10 @@ class ExternalCommandManager:
 
     # DISABLE_SVC_NOTIFICATIONS;<host_name>;<service_description>
     def DISABLE_SVC_NOTIFICATIONS(self, service):
-        service.notifications_enabled = False
-        self.sched.get_and_register_status_brok(service)
+        if service.notifications_enabled:
+            service.notifications_enabled = False
+            service.modified_attributes |= MODATTR_NOTIFICATIONS_ENABLED
+            self.sched.get_and_register_status_brok(service)
 
     # ENABLE_ALL_NOTIFICATIONS_BEYOND_HOST;<host_name>
     def ENABLE_ALL_NOTIFICATIONS_BEYOND_HOST(self, host):
@@ -1073,8 +1097,10 @@ class ExternalCommandManager:
 
     # ENABLE_SVC_CHECK;<host_name>;<service_description>
     def ENABLE_SVC_CHECK(self, service):
-        service.active_checks_enabled = True
-        self.sched.get_and_register_status_brok(service)
+        if not service.active_checks_enabled:
+            service.active_checks_enabled = True
+            service.modified_attributes |= MODATTR_ACTIVE_CHECKS_ENABLED
+            self.sched.get_and_register_status_brok(service)
 
     # ENABLE_SVC_EVENT_HANDLER;<host_name>;<service_description>
     def ENABLE_SVC_EVENT_HANDLER(self, service):
@@ -1088,8 +1114,10 @@ class ExternalCommandManager:
 
     # ENABLE_SVC_NOTIFICATIONS;<host_name>;<service_description>
     def ENABLE_SVC_NOTIFICATIONS(self, service):
-        service.notifications_enabled = True
-        self.sched.get_and_register_status_brok(service)
+        if not service.notifications_enables:
+            service.notifications_enabled = True
+            service.modified_attributes |= MODATTR_NOTIFICATIONS_ENABLED
+            self.sched.get_and_register_status_brok(service)
 
     # PROCESS_FILE;<file_name>;<delete>
     def PROCESS_FILE(self, file_name, delete):
