@@ -1,6 +1,7 @@
 # Written by setup of check_mk 1.1.12p6 at Wed Dec 28 09:33:23 CET 2011
 bindir='__MKPREFIX__'
 confdir='__MKPREFIX__/etc'
+sharedir='__MKPREFIX__/share'
 checksdir='__MKPREFIX__/share/checks'
 modulesdir='__MKPREFIX__/share/modules'
 web_dir='__MKPREFIX__/share/web'
