@@ -1738,6 +1738,7 @@ echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z 
         capture_plugin
         pnp4nagios
         multisite
+        nagvis
     -h  Show help"
 }
 
