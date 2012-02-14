@@ -1012,7 +1012,7 @@ class Items(object):
             gn = gn.replace('-', HostGroup_Name_Parse_Ctx.minus_sign_in_name)
             gn = gn.replace('print', HostGroup_Name_Parse_Ctx.print_in_name)
             newgroupname2hostnames[gn] = val
-        
+
         set_res = []
         try:
             set_res = set(eval(str_setexpr, newgroupname2hostnames, {}))
@@ -1336,7 +1336,7 @@ def get_all_host_names_set(hosts):
     return set(
         h.host_name
         for h in hosts.items.values()
-        if getattr(h, 'host_name', '') != ''
+        if getattr(h, 'host_name', '') != '' and not h.is_tpl()
     )
 
 
