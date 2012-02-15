@@ -93,6 +93,7 @@ test_timeperiods_state_logs.py
 test_groups_with_no_alias.py
 test_define_with_space.py
 test_objects_and_notifways.py
+test_star_in_hostgroups.py
 test_parse_perfdata.py
 
 # takes long
