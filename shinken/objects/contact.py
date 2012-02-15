@@ -103,7 +103,10 @@ class Contact(Item):
 
     #For debugging purpose only (nice name)
     def get_name(self):
-        return self.contact_name
+        try:
+            return self.contact_name
+        except AttributeError:
+            return 'UnnamedContact'
 
 
     # Search for notification_options with state and if t is
