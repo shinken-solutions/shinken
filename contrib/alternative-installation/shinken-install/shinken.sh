@@ -709,7 +709,6 @@ function supdate(){
 ##############################
 
 function compresslogs(){
-    trap 'trap_handler ${LINENO} $? compresslogs' ERR
     cadre "Compress rotated logs" green
     if [ ! -d $TARGET/var/archives ]
     then
@@ -717,16 +716,19 @@ function compresslogs(){
         exit 0
     fi
     cd $TARGET/var/archives
-    for l in $(ls -1 ./*.log)
-    do
-        file=$(basename $l)
-        if [ -e $file ]
-        then
-            cecho " > Processing $file" green
-            tar czf $file.tar.gz $file
-            rm -f $file
-        fi
-    done
+    if [ ! -z "$(ls)" ]
+    then
+        for l in $(ls ./*.log)
+        do
+            file=$(basename $l)
+            if [ -e $file ]
+            then
+                cecho " > Processing $file" green
+                tar czf $file.tar.gz $file
+                rm -f $file
+            fi
+        done
+    fi
 }
 
 function shelp(){
