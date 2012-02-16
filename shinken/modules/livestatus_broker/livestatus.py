@@ -47,7 +47,11 @@ class LiveStatus(object):
 
         """
         request = LiveStatusRequest(data, self.datamgr, self.query_cache, self.db, self.pnp_path, self.return_queue, self.counters)
-        request.parse_input(data)
+        try:
+            request.parse_input(data)
+        except:
+            print "THIS QUERY IS INVALID", data
+            return '', False
         if sorted([q.my_type for q in request.queries]) == ['command', 'query', 'wait']:
             # The Multisite way
             for query in [q for q in request.queries if q.my_type == 'command']:

@@ -361,6 +361,24 @@ ResponseHeader: fixed16
             print nagresponse
             self.assert_(self.lines_equal(response, nagresponse))
 
+    def test_nonsense(self):
+        self.print_header()
+        now = time.time()
+        objlist = []
+        for host in self.sched.hosts:
+            objlist.append([host, 0, 'UP'])
+        for service in self.sched.services:
+            objlist.append([service, 0, 'OK'])
+        self.scheduler_loop(1, objlist)
+        self.update_broker()
+        request = """GET hosts
+Columns: name state
+Filter: localhost
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        self.assert_(response == '')
+
     def test_bad_column(self):
         self.print_header()
         now = time.time()
