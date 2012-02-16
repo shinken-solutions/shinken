@@ -90,19 +90,6 @@ class NSCA_arbiter(BaseModule):
         self.rng = random.Random(password)
         self.max_packet_age = max_packet_age
 
-
-    #Ok, main function that is called in the CONFIGURATION phase
-    def get_objects(self):
-        print "[Dummy] ask me for objects to return"
-        r = {'hosts' : []}
-        h = {'name' : 'dummy host from dummy arbiter module',
-             'register' : '0',
-             }
-
-        r['hosts'].append(h)
-        print "[Dummy] Returning to Arbiter the hosts:", r
-        return r
-
     def send_init_packet(self, socket):
         '''
         Build an init packet
