@@ -30,7 +30,7 @@ Shinken.
 
 import sys
 
-VERSION = "0.8"
+VERSION = "1.0rc1"
 
 # Make sure people are using Python 2.4 or higher
 if sys.version_info < (2,4):
