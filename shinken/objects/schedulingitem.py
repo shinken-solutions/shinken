@@ -188,7 +188,7 @@ class SchedulingItem(Item):
         # Then check if item whant fressness, then check fressness
         cls = self.__class__
         if not self.in_checking:
-            if cls.check_freshness:
+            if cls.global_check_freshness:
                 if self.check_freshness and self.freshness_threshold != 0:
                     if self.last_state_update < now - (self.freshness_threshold + cls.additional_freshness_latency):
                         # Raise a log

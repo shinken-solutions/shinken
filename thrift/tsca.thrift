@@ -23,7 +23,7 @@ enum ReturnCode {
 }
 
 struct State {
-  1: i32 timestamp,
+  1: i64 timestamp,
   2: string hostname,
   3: string serv,
   4: string output,
