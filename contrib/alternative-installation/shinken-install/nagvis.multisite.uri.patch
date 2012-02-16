@@ -14,7 +14,7 @@
 +hostgroupurl="/check_mk/view.py?view_name=hostgroup&hostgroup=[hostgroup_name]"
  ; URL template for service object links
 -;serviceurl="[htmlcgi]/extinfo.cgi?type=2&host=[host_name]&service=[service_description]"
-+serviceurl="view.py?view_name=service&site=default&service=[service_description]&host=[host_name]"
++serviceurl="/check_mk/view.py?view_name=service&site=default&service=[service_description]&host=[host_name]"
  ; URL template for servicegroup object links
 -;servicegroupurl="[htmlcgi]/status.cgi?servicegroup=[servicegroup_name]&style=detail"
 +servicegroupurl="/check_mk/view.py?view_name=servicegroup&servicegroup=[servicegroup_name]"

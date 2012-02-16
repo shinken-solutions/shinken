@@ -916,11 +916,14 @@ function fixHtpasswdPath(){
 
 function install_nagvis(){
 
-    cadre "Install pnp4nagios addon" green
+    cadre "Install nagvis addon" green
     case $CODE in
         REDHAT)
-            cecho " > Unsupported" red
-            exit 2
+            yum install -y $NAGVISYUMPKGS >> /tmp/shinken.install.log 2>&1
+            HTTPDUSER="apache"
+            HTTPDGROUP="apache"
+            HTTPDCONF="/etc/httpd/conf.d"
+            HTTPDINIT="/etc/init.d/httpd"
             ;;
         DEBIAN)
             cecho " > Installing prerequisites" green
@@ -928,6 +931,7 @@ function install_nagvis(){
             HTTPDUSER="www-data"
             HTTPDGROUP="www-data"
             HTTPDCONF="/etc/apache2/conf.d"
+            HTTPDINIT="/etc/init.d/apache2"
             ;;
         *)
             cecho " > Unknown distribution : $DIST" red
@@ -970,7 +974,9 @@ function install_nagvis(){
             cd $NAGVISPREFIX/etc
             patch < $myscripts/nagvis.multisite.uri.patch
         fi
-    fi  
+    fi 
+    cecho " > Restart Apache " green
+    $HTTPDINIT restart >> /tmp/shinken.install.log 2>&1 
 }
 
 # mk multisite
