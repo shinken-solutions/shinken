@@ -517,19 +517,20 @@ class ExternalCommandManager:
 
 
     # CHANGE_CONTACT_MODSATTR;<contact_name>;<value>
-    def CHANGE_CONTACT_MODSATTR(self, contact, value):
-        pass
+    def CHANGE_CONTACT_MODSATTR(self, contact, value): # TODO
+        contact.modified_service_attributes = long(value)
 
     # CHANGE_CONTACT_MODHATTR;<contact_name>;<value>
-    def CHANGE_CONTACT_MODHATTR(self, contact, value):
-        pass
+    def CHANGE_CONTACT_MODHATTR(self, contact, value): # TODO
+        contact.modified_host_attributes = long(value)
 
     # CHANGE_CONTACT_MODATTR;<contact_name>;<value>
     def CHANGE_CONTACT_MODATTR(self, contact, value):
-        pass
+        contact.modified_attributes = long(value)
 
     # CHANGE_CONTACT_HOST_NOTIFICATION_TIMEPERIOD;<contact_name>;<notification_timeperiod>
     def CHANGE_CONTACT_HOST_NOTIFICATION_TIMEPERIOD(self, contact, notification_timeperiod):
+        contact.modified_host_attributes |= MODATTR_NOTIFICATION_TIMEPERIOD
         contact.host_notification_period = notification_timeperiod
         self.sched.get_and_register_status_brok(contact)
 
@@ -565,99 +566,130 @@ class ExternalCommandManager:
 
     # CHANGE_CONTACT_SVC_NOTIFICATION_TIMEPERIOD;<contact_name>;<notification_timeperiod>
     def CHANGE_CONTACT_SVC_NOTIFICATION_TIMEPERIOD(self, contact, notification_timeperiod):
+        contact.modified_service_attributes |= MODATTR_NOTIFICATION_TIMEPERIOD
         contact.service_notification_period = notification_timeperiod
         self.sched.get_and_register_status_brok(contact)
 
     # CHANGE_CUSTOM_CONTACT_VAR;<contact_name>;<varname>;<varvalue>
     def CHANGE_CUSTOM_CONTACT_VAR(self, contact, varname, varvalue):
+        contact.modified_attributes |= MODATTR_CUSTOM_VARIABLE
         contact.customs[varname.upper()] = varvalue
 
     # CHANGE_CUSTOM_HOST_VAR;<host_name>;<varname>;<varvalue>
     def CHANGE_CUSTOM_HOST_VAR(self, host, varname, varvalue):
+        host.modified_attributes |= MODATTR_CUSTOM_VARIABLE
         host.customs[varname.upper()] = varvalue
 
     # CHANGE_CUSTOM_SVC_VAR;<host_name>;<service_description>;<varname>;<varvalue>
     def CHANGE_CUSTOM_SVC_VAR(self, service, varname, varvalue):
+        service.modified_attributes |= MODATTR_CUSTOM_VARIABLE
         service.customs[varname.upper()] = varvalue
 
-    # CHANGE_GLOBAL_HOST_EVENT_HANDLER;<event_handler_command>
+    # CHANGE_GLOBAL_HOST_EVENT_HANDLER;<event_handler_command> # TODO
     def CHANGE_GLOBAL_HOST_EVENT_HANDLER(self, event_handler_command):
         pass
 
-    # CHANGE_GLOBAL_SVC_EVENT_HANDLER;<event_handler_command>
+    # CHANGE_GLOBAL_SVC_EVENT_HANDLER;<event_handler_command> # TODO
     def CHANGE_GLOBAL_SVC_EVENT_HANDLER(self, event_handler_command):
         pass
 
     # CHANGE_HOST_CHECK_COMMAND;<host_name>;<check_command>
     def CHANGE_HOST_CHECK_COMMAND(self, host, check_command):
+        host.modified_attributes |= MODATTR_CHECK_COMMAND
         host.check_command = CommandCall(self.commands, check_command, poller_tag=host.poller_tag)
         self.sched.get_and_register_status_brok(host)
 
     # CHANGE_HOST_CHECK_TIMEPERIOD;<host_name>;<timeperiod>
-    def CHANGE_HOST_CHECK_TIMEPERIOD(self, host, timeperiod):
+    def CHANGE_HOST_CHECK_TIMEPERIOD(self, host, timeperiod): # TODO is timeperiod a string or a Timeperiod object?
+        host.modified_attributes |= MODATTR_CHECK_TIMEPERIOD
         host.check_period = timeperiod
         self.sched.get_and_register_status_brok(service)
 
     # CHANGE_HOST_EVENT_HANDLER;<host_name>;<event_handler_command>
     def CHANGE_HOST_EVENT_HANDLER(self, host, event_handler_command):
+        host.modified_attributes |= MODATTR_EVENT_HANDLER_COMMAND
         host.event_handler = CommandCall(self.commands, event_handler_command)
         self.sched.get_and_register_status_brok(host)
 
     # CHANGE_HOST_MODATTR;<host_name>;<value>
     def CHANGE_HOST_MODATTR(self, host, value):
-        pass
+        host.modified_attributes = long(value)
 
     # CHANGE_MAX_HOST_CHECK_ATTEMPTS;<host_name>;<check_attempts>
     def CHANGE_MAX_HOST_CHECK_ATTEMPTS(self, host, check_attempts):
         host.max_check_attempts = check_attempts
+        host.modified_attributes |= MODATTR_MAX_CHECK_ATTEMPTS
+        if host.state_type == 'HARD' and host.state == 'UP' and host.attempt > 1:
+            host.attempt = host.max_check_attempts
         self.sched.get_and_register_status_brok(host)
 
     # CHANGE_MAX_SVC_CHECK_ATTEMPTS;<host_name>;<service_description>;<check_attempts>
     def CHANGE_MAX_SVC_CHECK_ATTEMPTS(self, service, check_attempts):
         service.max_check_attempts = check_attempts
+        service.modified_attributes |= MODATTR_MAX_CHECK_ATTEMPTS
+        if service.state_type == 'HARD' and service.state == 'OK' and service.attempt > 1:
+            service.attempt = service.max_check_attempts
         self.sched.get_and_register_status_brok(service)
 
     # CHANGE_NORMAL_HOST_CHECK_INTERVAL;<host_name>;<check_interval>
     def CHANGE_NORMAL_HOST_CHECK_INTERVAL(self, host, check_interval):
+        old_interval = host.check_interval
         host.check_interval = check_interval
+        host.modified_attributes |= MODATTR_NORMAL_CHECK_INTERVAL
+        # If there were no regular checks (interval=0), then schedule
+        # a check immediately.
+        if old_interval == 0 and host.checks_enabled:
+            host.schedule(force=False, force_time=int(time.time())
         self.sched.get_and_register_status_brok(host)
 
     # CHANGE_NORMAL_SVC_CHECK_INTERVAL;<host_name>;<service_description>;<check_interval>
-    def CHANGE_NORMAL_SVC_CHECK_INTERVAL(self, service, check_interval):
+    def CHANGE_NORMAL_HOST_CHECK_INTERVAL(self, service, check_interval):
+        old_interval = service.check_interval
         service.check_interval = check_interval
+        service.modified_attributes |= MODATTR_NORMAL_CHECK_INTERVAL
+        # If there were no regular checks (interval=0), then schedule
+        # a check immediately.
+        if old_interval == 0 and service.checks_enabled:
+            service.schedule(force=False, force_time=int(time.time())
         self.sched.get_and_register_status_brok(service)
 
-    # CHANGE_RETRY_HOST_CHECK_INTERVAL;<host_name>;<service_description>;<check_interval>
+    # CHANGE_RETRY_HOST_CHECK_INTERVAL;<host_name>;<check_interval>
     def CHANGE_RETRY_HOST_CHECK_INTERVAL(self, host, check_interval):
         host.retry_interval = check_interval
+        host.modified_attributes |= MODATTR_RETRY_CHECK_INTERVAL
         self.sched.get_and_register_status_brok(host)
 
     # CHANGE_RETRY_SVC_CHECK_INTERVAL;<host_name>;<service_description>;<check_interval>
     def CHANGE_RETRY_SVC_CHECK_INTERVAL(self, service, check_interval):
         service.retry_interval = check_interval
+        service.modified_attributes |= MODATTR_RETRY_CHECK_INTERVAL
         self.sched.get_and_register_status_brok(service)
 
     # CHANGE_SVC_CHECK_COMMAND;<host_name>;<service_description>;<check_command>
     def CHANGE_SVC_CHECK_COMMAND(self, service, check_command):
+        service.modified_attributes |= MODATTR_CHECK_COMMAND
         service.check_command = CommandCall(self.commands, check_command, poller_tag=service.poller_tag)
         self.sched.get_and_register_status_brok(service)
 
     # CHANGE_SVC_CHECK_TIMEPERIOD;<host_name>;<service_description>;<check_timeperiod>
     def CHANGE_SVC_CHECK_TIMEPERIOD(self, service, check_timeperiod):
+        service.modified_attributes |= MODATTR_CHECK_TIMEPERIOD
         service.check_period = check_timeperiod
         self.sched.get_and_register_status_brok(service)
 
     # CHANGE_SVC_EVENT_HANDLER;<host_name>;<service_description>;<event_handler_command>
     def CHANGE_SVC_EVENT_HANDLER(self, service, event_handler_command):
+        service.modified_attributes |= MODATTR_EVENT_HANDLER_COMMAND
         service.event_handler = CommandCall(self.commands, event_handler_command)
         self.sched.get_and_register_status_brok(service)
 
     # CHANGE_SVC_MODATTR;<host_name>;<service_description>;<value>
     def CHANGE_SVC_MODATTR(self, service, value):
-        pass
+        service.modified_attributes = long(value)
 
     # CHANGE_SVC_NOTIFICATION_TIMEPERIOD;<host_name>;<service_description>;<notification_timeperiod>
     def CHANGE_SVC_NOTIFICATION_TIMEPERIOD(self, service, notification_timeperiod):
+        service.modified_attributes |= MODATTR_NOTIFICATION_TIMEPERIOD
         service.notification_period = notification_timeperiod
         self.sched.get_and_register_status_brok(service)
 
@@ -798,13 +830,17 @@ class ExternalCommandManager:
 
     # DISABLE_HOST_CHECK;<host_name>
     def DISABLE_HOST_CHECK(self, host):
-        host.disable_active_checks()
-        self.sched.get_and_register_status_brok(host)
+        if host.active_checks_enabled:
+            host.modified_attributes |= MODATTR_ACTIVE_CHECKS_ENABLED
+            host.disable_active_checks()
+            self.sched.get_and_register_status_brok(host)
 
     # DISABLE_HOST_EVENT_HANDLER;<host_name>
     def DISABLE_HOST_EVENT_HANDLER(self, host):
-        host.event_handler_enabled = False
-        self.sched.get_and_register_status_brok(host)
+        if host.event_handler_enabled:
+            host.modified_attributes |= MODATTR_EVENT_HANDLER_ENABLED
+            host.event_handler_enabled = False
+            self.sched.get_and_register_status_brok(host)
 
     # DISABLE_HOST_FLAP_DETECTION;<host_name>
     def DISABLE_HOST_FLAP_DETECTION(self, host):
@@ -825,7 +861,6 @@ class ExternalCommandManager:
     def DISABLE_HOST_SVC_CHECKS(self, host):
         for s in host.services:
             self.DISABLE_SVC_CHECK(s)
-            self.sched.get_and_register_status_brok(s)
 
     # DISABLE_HOST_SVC_NOTIFICATIONS;<host_name>
     def DISABLE_HOST_SVC_NOTIFICATIONS(self, host):
@@ -841,8 +876,10 @@ class ExternalCommandManager:
 
     # DISABLE_PASSIVE_HOST_CHECKS;<host_name>
     def DISABLE_PASSIVE_HOST_CHECKS(self, host):
-        host.passive_checks_enabled = False
-        self.sched.get_and_register_status_brok(host)
+        if host.passive_checks_enabled:
+            host.modified_attributes |= MODATTR_PASSIVE_CHECKS_ENABLED
+            host.passive_checks_enabled = False
+            self.sched.get_and_register_status_brok(host)
 
     # DISABLE_PASSIVE_SVC_CHECKS;<host_name>;<service_description>
     def DISABLE_PASSIVE_SVC_CHECKS(self, service):
@@ -1001,13 +1038,17 @@ class ExternalCommandManager:
 
     # ENABLE_HOST_CHECK;<host_name>
     def ENABLE_HOST_CHECK(self, host):
-        host.active_checks_enabled = True
-        self.sched.get_and_register_status_brok(host)
+        if not host.active_checks_enabled:
+            host.active_checks_enabled = True
+            host.modified_attributes |= MODATTR_ACTIVE_CHECKS_ENABLED
+            self.sched.get_and_register_status_brok(host)
 
     # ENABLE_HOST_EVENT_HANDLER;<host_name>
     def ENABLE_HOST_EVENT_HANDLER(self, host):
-        host.event_handler_enabled = True
-        self.sched.get_and_register_status_brok(host)
+        if not host.event_handler_enabled:
+            host.modified_attributes |= MODATTR_EVENT_HANDLER_ENABLED
+            host.event_handler_enabled = True
+            self.sched.get_and_register_status_brok(host)
 
     # ENABLE_HOST_FLAP_DETECTION;<host_name>
     def ENABLE_HOST_FLAP_DETECTION(self, host):
@@ -1029,7 +1070,6 @@ class ExternalCommandManager:
     def ENABLE_HOST_SVC_CHECKS(self, host):
         for s in host.services:
             self.ENABLE_SVC_CHECK(s)
-            self.sched.get_and_register_status_brok(s)
 
     # ENABLE_HOST_SVC_NOTIFICATIONS;<host_name>
     def ENABLE_HOST_SVC_NOTIFICATIONS(self, host):
@@ -1045,8 +1085,10 @@ class ExternalCommandManager:
 
     # ENABLE_PASSIVE_HOST_CHECKS;<host_name>
     def ENABLE_PASSIVE_HOST_CHECKS(self, host):
-        host.passive_checks_enabled = True
-        self.sched.get_and_register_status_brok(host)
+        if not host.passive_checks_enabled:
+            host.modified_attributes |= MODATTR_PASSIVE_CHECKS_ENABLED
+            host.passive_checks_enabled = True
+            self.sched.get_and_register_status_brok(host)
 
     # ENABLE_PASSIVE_SVC_CHECKS;<host_name>;<service_description>
     def ENABLE_PASSIVE_SVC_CHECKS(self, service):
@@ -1114,7 +1156,7 @@ class ExternalCommandManager:
 
     # ENABLE_SVC_NOTIFICATIONS;<host_name>;<service_description>
     def ENABLE_SVC_NOTIFICATIONS(self, service):
-        if not service.notifications_enables:
+        if not service.notifications_enabled:
             service.notifications_enabled = True
             service.modified_attributes |= MODATTR_NOTIFICATIONS_ENABLED
             self.sched.get_and_register_status_brok(service)
@@ -1324,8 +1366,10 @@ class ExternalCommandManager:
 
     # START_OBSESSING_OVER_HOST;<host_name>
     def START_OBSESSING_OVER_HOST(self, host):
-        host.obsess_over_host = True
-        self.sched.get_and_register_status_brok(host)
+        if not host.obsess_over_host:
+            host.modified_attributes |= MODATTR_OBSESSIVE_HANDLER_ENABLED
+            host.obsess_over_host = True
+            self.sched.get_and_register_status_brok(host)
 
     # START_OBSESSING_OVER_HOST_CHECKS
     def START_OBSESSING_OVER_HOST_CHECKS(self):
@@ -1369,8 +1413,10 @@ class ExternalCommandManager:
 
     # STOP_OBSESSING_OVER_HOST;<host_name>
     def STOP_OBSESSING_OVER_HOST(self, host):
-        host.obsess_over_host = False
-        self.sched.get_and_register_status_brok(host)
+        if host.obsess_over_host:
+            host.modified_attributes |= MODATTR_OBSESSIVE_HANDLER_ENABLED
+            host.obsess_over_host = False
+            self.sched.get_and_register_status_brok(host)
 
     # STOP_OBSESSING_OVER_HOST_CHECKS
     def STOP_OBSESSING_OVER_HOST_CHECKS(self):
