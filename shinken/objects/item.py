@@ -142,18 +142,18 @@ Like temporary attributes such as "imported_from", etc.. """
                 setattr(self, prop, entry.default)
 
 
-    # We load every usefull parameter so no need to access global conf later
-    # Must be called after a change in a gloabl conf parameter
+    # We load every useful parameter so no need to access global conf later
+    # Must be called after a change in a global conf parameter
     def load_global_conf(cls, conf):
         """ Used to put global values in the sub Class like
-        hosts ro services """
+        hosts or services """
         # conf have properties, if 'enable_notifications' :
         # { [...] 'class_inherit' : [(Host, None), (Service, None),
         #  (Contact, None)]}
         # get the name and put the value if None, put the Name
         # (not None) if not (not clear ?)
         for prop, entry in conf.properties.items():
-            # If we have a class_inherit, and the arbtier really send us it
+            # If we have a class_inherit, and the arbiter really send us it
             # if 'class_inherit' in entry and hasattr(conf, prop):
             if hasattr(conf, prop):
                 for (cls_dest, change_name) in entry.class_inherit:
