@@ -976,12 +976,48 @@ function install_nagvis(){
 # mk multisite
 
 function install_multisite(){
+    cadre "Install check_mk addon" green
+    cecho " > Installing prerequisites" green
     if [ "$CODE" == "REDHAT" ]
     then
+        HTTPDUSER="apache"
+        HTTPDGROUP="apache"
+        HTTPDINIT="/etc/init.d/httpd"
+        HTTPDCONF="/etc/httpd"
+        for p in $MKYUMPKG
+        do
+            cecho " -> Installing $p" green
+            yum -y install $p >> /tmp/shinken.install.log 2>&1 
+        done
+
+        if [ -f /etc/selinux/config ]
+        then
+            if [ ! -z "$(cat /etc/selinux/config | grep "SELINUX=enforcing")" ]
+            then
+                cecho " > WARNING : selinux is enabled with enforcing state. You should create a rule or disable selinux" yellow
+            fi
+        fi
+    elif [ "$CODE" == "DEBIAN" ]
+    then
+        HTTPDUSER="www-data"
+        HTTPDGROUP="www-data"
+        HTTPDINIT="/etc/init.d/apache2"
+        HTTPDCONF="/etc/apache2"
+        for p in $MKAPTPKG
+        do
+            cecho " -> Installing $p" green
+            apt-get --force-yes -y install $p >> /tmp/shinken.install.log 2>&1 
+        done
+    else
         cecho " > Unsupported" red
         exit 2
     fi
-    cadre "Install check_mk addon" green
+
+
+    usermod -s /bin/bash $HTTPDUSER >> /tmp/shinken.install.log 2>&1
+    usermod -a -G $HTTPDGROUP $SKUSER >> /tmp/shinken.install.log 2>&1
+    usermod -a -G $SKGROUP $HTTPDUSER >> /tmp/shinken.install.log 2>&1
+
     cecho " > Configure response file" green
     cp check_mk_setup.conf.in $HOME/.check_mk_setup.conf
     sed -i "s#__PNPPREFIX__#$PNPPREFIX#g" $HOME/.check_mk_setup.conf
@@ -989,17 +1025,11 @@ function install_multisite(){
     sed -i "s#__SKPREFIX__#$TARGET#g" $HOME/.check_mk_setup.conf
     sed -i "s#__SKUSER__#$SKUSER#g" $HOME/.check_mk_setup.conf
     sed -i "s#__SKGROUP__#$SKGROUP#g" $HOME/.check_mk_setup.conf
-    sed -i "s#__HTTPUSER__#www-data#g" $HOME/.check_mk_setup.conf
-    sed -i "s#__HTTPGROUP__#www-data#g" $HOME/.check_mk_setup.conf
-    sed -i "s#__HTTPD__#/etc/apache2#g" $HOME/.check_mk_setup.conf
-    sed -i "s#__HTTPD__#/etc/apache2#g" $HOME/.check_mk_setup.conf
+    sed -i "s#__HTTPUSER__#"$HTTPDUSER"#g" $HOME/.check_mk_setup.conf
+    sed -i "s#__HTTPGROUP__#"$HTTPDGROUP"#g" $HOME/.check_mk_setup.conf
+    sed -i "s#__HTTPD__#/"$HTTPDCONF"#g" $HOME/.check_mk_setup.conf
+
     cd /tmp
-    cecho " > Installing prerequisites" green
-    for p in $MKAPTPKG
-    do
-        cecho " -> Installing $p" green
-        apt-get --force-yes -y install $p >> /tmp/shinken.install.log 2>&1 
-    done
 
     filename=$(echo $MKURI | awk -F"/" '{print $NF}')
     folder=$(echo $filename | sed -e "s/\.tar\.gz//g")
@@ -1025,7 +1055,7 @@ function install_multisite(){
     fi
 
     cecho " > Install multisite" green
-    ./setup.sh --yes >> /tmp/shinken.install.log 2>&1 
+    ./setup.sh --yes #>> /tmp/shinken.install.log 2>&1 
     cecho " > Default configuration for multisite" green
     echo 'sites = {' >> $MKPREFIX/etc/multisite.mk
     echo '   "default": {' >> $MKPREFIX/etc/multisite.mk
@@ -1035,17 +1065,15 @@ function install_multisite(){
     echo '   },' >> $MKPREFIX/etc/multisite.mk
     echo ' }' >> $MKPREFIX/etc/multisite.mk
     rm -Rf $TARGET/etc/check_mk.d/*
-    cecho " > Fix www-data group" green
-    usermod -a -G $SKGROUP www-data 
     chown -R $SKUSER:$SKGROUP $TARGET/etc/check_mk.d
     chmod -R g+rwx $TARGET/etc/check_mk.d
     chown -R $SKUSER:$SKGROUP $MKPREFIX/etc/conf.d
     chmod -R g+rwx $MKPREFIX/etc/conf.d
-    service apache2 restart >> /tmp/shinken.install.log 2>&1 
+    $HTTPDINIT restart >> /tmp/shinken.install.log 2>&1 
     cecho " > Enable sudoers commands for check_mk" green
     echo "# Needed for WATO - the Check_MK Web Administration Tool" >> /etc/sudoers
-    echo "Defaults:www-data !requiretty" >> /etc/sudoers
-    echo "www-data ALL = (root) NOPASSWD: $MKTARGET/check_mk --automation *" >> /etc/sudoers
+    echo "Defaults:$HTTPDUSER !requiretty" >> /etc/sudoers
+    echo "$HTTPDUSER ALL = (root) NOPASSWD: $MKPREFIX/check_mk --automation *" >> /etc/sudoers
     if [ $movepnp -eq 1 ]
     then 
         mv $PNPPREFIX $PNPPREFIX.MK
