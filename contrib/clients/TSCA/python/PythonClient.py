@@ -61,7 +61,7 @@ try:
     cr = csv.reader(open(sys.argv[1],"rb"))
     for elt in cr :
         trace = State()
-        trace.timestamp = int(round(time.time()))
+        trace.timestamp = long(round(time.time()))
         trace.hostname = elt[0]
         trace.serv = elt[1]
         trace.output = elt[2]
