@@ -49,6 +49,9 @@ class TestFlapping(ShinkenTest):
         self.assert_(host.state_type == 'HARD')
         self.assert_(svc.flap_detection_enabled)
 
+        print 'A'*41, svc.low_flap_threshold
+        self.assert_(svc.low_flap_threshold == -1)
+
         # Now 1 test with a bad state
         self.scheduler_loop(1, [[svc, 2, 'Crit']])
         print "******* Current flap change lsit", svc.flapping_changes

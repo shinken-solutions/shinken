@@ -137,10 +137,10 @@ class SchedulingItem(Item):
         (low_flap_threshold, high_flap_threshold) = (self.low_flap_threshold, self.high_flap_threshold)
         if low_flap_threshold == -1:
             cls = self.__class__
-            low_flap_threshold = cls.low_flap_threshold
+            low_flap_threshold = cls.global_low_flap_threshold
         if high_flap_threshold  == -1:
             cls = self.__class__
-            high_flap_threshold = cls.high_flap_threshold
+            high_flap_threshold = cls.global_high_flap_threshold
 
         # Now we check is flapping change, but only if we got enouth
         # states to llok at the value accurancy
