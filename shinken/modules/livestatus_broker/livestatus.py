@@ -25,6 +25,8 @@
 import time
 from livestatus_counters import LiveStatusCounters
 from livestatus_request import LiveStatusRequest
+from livestatus_response import LiveStatusResponse
+from livestatus_query import LiveStatusQueryError
 
 
 class LiveStatus(object):
@@ -40,6 +42,27 @@ class LiveStatus(object):
         self.counters = LiveStatusCounters()
 
     def handle_request(self, data):
+        try:
+            return self.handle_request_and_fail(data)
+        except LiveStatusQueryError, exp:
+            # LiveStatusQueryError(404, table)
+            # LiveStatusQueryError(450, column)
+            code, detail = exp.args
+            response = LiveStatusResponse()
+            response.output = LiveStatusQueryError.messages[code] % detail
+            response.statuscode = code
+            if 'fixed16' in data:
+                response.responseheader = 'fixed16'
+            return response.respond()
+        except Exception, exp:
+            response = LiveStatusResponse()
+            response.output = LiveStatusQueryError.messages[452] % data
+            response.statuscode = 452
+            if 'fixed16' in data:
+                response.responseheader = 'fixed16'
+            return response.respond()
+
+    def handle_request_and_fail(self, data):
         """Execute the livestatus request.
 
         This function creates a LiveStatusRequest method, calls the parser,
@@ -47,11 +70,7 @@ class LiveStatus(object):
 
         """
         request = LiveStatusRequest(data, self.datamgr, self.query_cache, self.db, self.pnp_path, self.return_queue, self.counters)
-        try:
-            request.parse_input(data)
-        except:
-            print "THIS QUERY IS INVALID", data
-            return '', False
+        request.parse_input(data)
         if sorted([q.my_type for q in request.queries]) == ['command', 'query', 'wait']:
             # The Multisite way
             for query in [q for q in request.queries if q.my_type == 'command']:

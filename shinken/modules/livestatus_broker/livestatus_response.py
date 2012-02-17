@@ -70,6 +70,7 @@ class LiveStatusResponse:
         self.keepalive = keepalive
         self.columnheaders = columnheaders
         self.separators = separators
+        self.statuscode = 200
         self.output = ''
         pass
 
@@ -86,9 +87,8 @@ class LiveStatusResponse:
     def respond(self):
         self.output += '\n'
         if self.responseheader == 'fixed16':
-            statuscode = 200 
             responselength = len(self.output)
-            self.output = '%3d %11d\n' % (statuscode, responselength) + self.output
+            self.output = '%3d %11d\n' % (self.statuscode, responselength) + self.output
 
         return self.output, self.keepalive
 

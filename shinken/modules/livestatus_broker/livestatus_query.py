@@ -32,6 +32,15 @@ from livestatus_stack import LiveStatusStack
 from livestatus_constraints import LiveStatusConstraints
 
 
+class LiveStatusQueryError(Exception):
+    messages = {
+        200: 'OK',
+        404: 'Invalid GET request, no such table \'%s\'',
+        450: 'Invalid GET request, no such column \'%s\'',
+        452: 'Completely invalid GET request \'%s\'',
+    }
+    pass
+
 class LiveStatusQuery(object):
 
     my_type = 'query'
@@ -122,6 +131,8 @@ class LiveStatusQuery(object):
             keyword = line.split(' ')[0].rstrip(':')
             if keyword == 'GET': # Get the name of the base table
                 _, self.table = self.split_command(line)
+                if self.table not in table_class_map.keys():
+                    raise LiveStatusQueryError(404, self.table)
             elif keyword == 'Columns': # Get the names of the desired columns
                 _, self.columns = self.split_option_with_columns(line)
                 self.response.columnheaders = 'off'
@@ -743,7 +754,7 @@ class LiveStatusQuery(object):
                 if hasattr(item, attribute):
                     return getattr(item.__class__, attribute).im_func.default == reference
                 else:
-                    return getattr(item.__class__, attribute).im_func.default == reference
+                    raise LiveStatusQueryError(450, attribute.replace('lsm_', ''))
 
         def eq_nocase_filter(item):
             return getattr(item, attribute)(self).lower() == reference.lower()
@@ -756,7 +767,7 @@ class LiveStatusQuery(object):
                 if hasattr(item, attribute):
                     return getattr(item.__class__, attribute).im_func.default != reference
                 else:
-                    return getattr(item.__class__, attribute).im_func.default != reference
+                    raise LiveStatusQueryError(450, attribute.replace('lsm_', ''))
 
         def gt_filter(item):
             try:
@@ -765,7 +776,7 @@ class LiveStatusQuery(object):
                 if hasattr(item, attribute):
                     return getattr(item.__class__, attribute).im_func.default > reference
                 else:
-                    return getattr(item.__class__, attribute).im_func.default > reference
+                    raise LiveStatusQueryError(450, attribute.replace('lsm_', ''))
 
         def ge_filter(item):
             try:
@@ -774,7 +785,7 @@ class LiveStatusQuery(object):
                 if hasattr(item, attribute):
                     return getattr(item.__class__, attribute).im_func.default >= reference
                 else:
-                    return getattr(item.__class__, attribute).im_func.default >= reference
+                    raise LiveStatusQueryError(450, attribute.replace('lsm_', ''))
 
         def lt_filter(item):
             try:
@@ -783,7 +794,7 @@ class LiveStatusQuery(object):
                 if hasattr(item, attribute):
                     return getattr(item.__class__, attribute).im_func.default < reference
                 else:
-                    return getattr(item.__class__, attribute).im_func.default < reference
+                    raise LiveStatusQueryError(450, attribute.replace('lsm_', ''))
 
         def le_filter(item):
             try:
@@ -792,7 +803,7 @@ class LiveStatusQuery(object):
                 if hasattr(item, attribute):
                     return getattr(item.__class__, attribute).im_func.default <= reference
                 else:
-                    return getattr(item.__class__, attribute).im_func.default <= reference
+                    raise LiveStatusQueryError(450, attribute.replace('lsm_', ''))
 
         def match_filter(item):
             #print "ma_filter %s %s(%s) ~ %s(%s)" % (attribute, type(getattr(item, attribute)(self)), getattr(item, attribute)(self), type(reference), reference)
@@ -800,7 +811,7 @@ class LiveStatusQuery(object):
                 p = re.compile(reference)
                 return p.search(getattr(item, attribute)(self))
             except Exception:
-                return False
+                raise LiveStatusQueryError(450, attribute.replace('lsm_', ''))
 
         def match_nocase_filter(item):
             p = re.compile(reference, re.I)

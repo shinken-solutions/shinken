@@ -371,13 +371,59 @@ ResponseHeader: fixed16
             objlist.append([service, 0, 'OK'])
         self.scheduler_loop(1, objlist)
         self.update_broker()
+
+        # non-existing filter-column
+        request = """GET hosts
+Columns: name state
+Filter: serialnumber = localhost
+"""
+        goodresponse = """Invalid GET request, no such column 'serialnumber'
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print "response", response
+        self.assert_(response == goodresponse)
+
+        # this time as fixed16
+        request = """GET hosts
+Columns: name state
+Filter: serialnumber = localhost
+ResponseHeader: fixed16
+"""
+        goodresponse = """450          51
+Invalid GET request, no such column 'serialnumber'
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print "response", response
+        self.assert_(response == goodresponse)
+
+        # invalid filter-clause. attribute, operator missing
         request = """GET hosts
 Columns: name state
 Filter: localhost
+ResponseHeader: fixed16
+"""
+        goodresponse = """452         106
+Completely invalid GET request 'GET hosts
+Columns: name state
+Filter: localhost
+ResponseHeader: fixed16
+'
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        self.assert_(response == '')
+        self.assert_(response == goodresponse)
+
+        # non-existing table
+        request = """GET hostshundsglumpvarreckts
+Columns: name state
+ResponseHeader: fixed16
+"""
+        goodresponse = """404          62
+Invalid GET request, no such table 'hostshundsglumpvarreckts'
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        self.assert_(response == goodresponse)
 
     def test_bad_column(self):
         self.print_header()
