@@ -639,7 +639,7 @@ class ExternalCommandManager:
         # If there were no regular checks (interval=0), then schedule
         # a check immediately.
         if old_interval == 0 and host.checks_enabled:
-            host.schedule(force=False, force_time=int(time.time())
+            host.schedule(force=False, force_time=int(time.time()))
         self.sched.get_and_register_status_brok(host)
 
     # CHANGE_NORMAL_SVC_CHECK_INTERVAL;<host_name>;<service_description>;<check_interval>
@@ -650,7 +650,7 @@ class ExternalCommandManager:
         # If there were no regular checks (interval=0), then schedule
         # a check immediately.
         if old_interval == 0 and service.checks_enabled:
-            service.schedule(force=False, force_time=int(time.time())
+            service.schedule(force=False, force_time=int(time.time()))
         self.sched.get_and_register_status_brok(service)
 
     # CHANGE_RETRY_HOST_CHECK_INTERVAL;<host_name>;<check_interval>

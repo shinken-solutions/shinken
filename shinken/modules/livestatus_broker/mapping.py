@@ -73,17 +73,10 @@ def modified_attributes_names(self):
         MODATTR_CUSTOM_VARIABLE: 'custom_variable',
         MODATTR_NOTIFICATION_TIMEPERIOD: 'notification_timeperiod',
     }
-    for attr in [MODATTR_NONE, MODATTR_NOTIFICATIONS_ENABLED
-, MODATTR_ACTIVE_CHECKS_ENABLED, MODATTR_PASSIVE_CHECKS_ENABLED, MODATTR_EVENT_H
-ANDLER_ENABLED, MODATTR_FLAP_DETECTION_ENABLED, MODATTR_FAILURE_PREDICTION_ENABL
-ED, MODATTR_PERFORMANCE_DATA_ENABLED, MODATTR_OBSESSIVE_HANDLER_ENABLED, MODATTR
-_EVENT_HANDLER_COMMAND, MODATTR_CHECK_COMMAND, MODATTR_NORMAL_CHECK_INTERVAL, MO
-DATTR_RETRY_CHECK_INTERVAL, MODATTR_MAX_CHECK_ATTEMPTS, MODATTR_FRESHNESS_CHECKS
-_ENABLED, MODATTR_CHECK_TIMEPERIOD, MODATTR_CUSTOM_VARIABLE, MODATTR_NOTIFICATIO
-N_TIMEPERIOD]:
+    for attr in [MODATTR_NONE, MODATTR_NOTIFICATIONS_ENABLED, MODATTR_ACTIVE_CHECKS_ENABLED, MODATTR_PASSIVE_CHECKS_ENABLED, MODATTR_EVENT_HANDLER_ENABLED, MODATTR_FLAP_DETECTION_ENABLED, MODATTR_FAILURE_PREDICTION_ENABLED, MODATTR_PERFORMANCE_DATA_ENABLED, MODATTR_OBSESSIVE_HANDLER_ENABLED, MODATTR_EVENT_HANDLER_COMMAND, MODATTR_CHECK_COMMAND, MODATTR_NORMAL_CHECK_INTERVAL, MODATTR_RETRY_CHECK_INTERVAL, MODATTR_MAX_CHECK_ATTEMPTS, MODATTR_FRESHNESS_CHECKS_ENABLED, MODATTR_CHECK_TIMEPERIOD, MODATTR_CUSTOM_VARIABLE, MODATTR_NOTIFICATION_TIMEPERIOD]:
         if self.modified_attributes & attr:
             names_list.append(names[attr])
-    return ','.join(names_list)
+    return names_list
 
 def join_with_separators(request, *args):
     if request.response.outputformat == 'csv':
@@ -509,12 +502,12 @@ livestatus_attribute_map = {
         },
         'modified_attributes': {
             'description': 'A bitmask specifying which attributes have been modified',
-            'function': lambda item, req: item.modified_attributes,  # CONTROLME INSORTME
+            'function': lambda item, req: item.modified_attributes,  # CONTROLME 
             'datatype': int,
         },
         'modified_attributes_list': {
             'description': 'A list of all modified attributes',
-            'function': lambda item, req: item.modified_attributes_list,  # CONTROLME
+            'function': lambda item, req: modified_attributes_names(self),  # CONTROLME
             'datatype': list,
         },
         'name': {
@@ -1347,12 +1340,12 @@ livestatus_attribute_map = {
         },
         'modified_attributes': {
             'description': 'A bitmask specifying which attributes have been modified',
-            'function': lambda item, req: item.modified_attributes,  # REPAIRME
+            'function': lambda item, req: item.modified_attributes,
             'datatype': int,
         },
         'modified_attributes_list': {
             'description': 'A list of all modified attributes',
-            'function': lambda item, req: item.modified_attributes_list,  # REPAIRME
+            'function': lambda item, req: modified_attributes_names(item),
             'datatype': list,
         },
         'next_check': {
@@ -1732,7 +1725,7 @@ livestatus_attribute_map = {
         },
         'modified_attributes_list': {
             'description': 'A list of all modified attributes',
-            'function': lambda item, req: item.modified_attributes_list,  # CONTROLME
+            'function': lambda item, req: modified_attributes_names(item),
             'datatype': list,
         },
         'name': {

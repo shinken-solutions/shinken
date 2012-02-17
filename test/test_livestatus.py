@@ -650,13 +650,13 @@ Filter: host_state != 0
         self.update_broker()
         
         request = """GET services
-Columns: host_name description modified_attributes
+Columns: host_name description modified_attributes modified_attributes_list
 Filter: host_name = test_host_0
 Filter: description = test_ok_0
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print "response1", response
-        self.assert_(response == "test_host_0;test_ok_0;0\n")
+        self.assert_(response == "test_host_0;test_ok_0;0;\n")
 
         now = time.time()
         cmd = "[%lu] DISABLE_SVC_CHECK;test_host_0;test_ok_0" % now
@@ -666,7 +666,7 @@ Filter: description = test_ok_0
         self.update_broker()
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print "response2", response
-        self.assert_(response == 'test_host_0;test_ok_0;2\n')
+        self.assert_(response == 'test_host_0;test_ok_0;2;active_checks_enabled\n')
         lssvc = self.livestatus_broker.datamgr.get_service("test_host_0", "test_ok_0")
         print "ma", lssvc.modified_attributes
         now = time.time()
@@ -676,9 +676,9 @@ Filter: description = test_ok_0
         self.scheduler_loop(2, [[host, 0, 'UP'], [svc, 0, 'OK']])
         self.update_broker()
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        self.assert_(response == 'test_host_0;test_ok_0;3\n')
+        print "response3", response
+        self.assert_(response == 'test_host_0;test_ok_0;3;notifications_enabled,active_checks_enabled\n')
         print "ma", lssvc.modified_attributes
-
 
 
     def test_json(self):
