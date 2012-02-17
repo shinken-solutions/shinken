@@ -483,6 +483,12 @@ class LiveStatusLogStoreSqlite(BaseModule):
         def le_filter():
             return ['%s <= ?' % attribute, (reference, )]
         def match_filter():
+            # sqlite matches case-insensitive by default. We make
+            # no difference between case-sensitive and case-insensitive
+            # here. The python filters will care for the correct
+            # matching later.
+            return ['%s LIKE ?' % attribute, ('%'+reference+'%', )]
+        def match_nocase_filter():
             return ['%s LIKE ?' % attribute, ('%'+reference+'%', )]
         def no_filter():
             return ['1 = 1', ()]
@@ -502,6 +508,8 @@ class LiveStatusLogStoreSqlite(BaseModule):
             return ne_filter
         if operator == '~':
             return match_filter
+        if operator == '~~':
+            return match_nocase_filter
 
 
 class LiveStatusSqlStack(LiveStatusStack):

@@ -272,6 +272,8 @@ class LiveStatusLogStoreMongoDB(BaseModule):
             return '\'%s\' : { \'$lte\' : %s }' % (attribute, reference)
         def match_filter():
             return '\'%s\' : { \'$regex\' : %s }' % (attribute, reference)
+        def match_nocase_filter():
+            return '\'%s\' : { \'$regex\' : %s, $options: 'i' }' % (attribute, reference)
         def no_filter():
             return '\'time\' : { \'$exists\' : True }' 
         if attribute not in good_attributes:
@@ -290,6 +292,8 @@ class LiveStatusLogStoreMongoDB(BaseModule):
             return ne_filter
         if operator == '~':
             return match_filter
+        if operator == '~~':
+            return match_nocase_filter
 
 
 class LiveStatusMongoStack(LiveStatusStack):
