@@ -35,6 +35,7 @@ from shinken.pollerlink import PollerLink, PollerLinks
 from shinken.brokerlink import BrokerLink, BrokerLinks
 from shinken.receiverlink import ReceiverLink, ReceiverLinks
 from shinken.util import safe_print
+from shinken.message import Message
 
 
 
