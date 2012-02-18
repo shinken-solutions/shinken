@@ -747,7 +747,6 @@ class LiveStatusQuery(object):
         # The filters are closures.
         # Add parameter Class (Host, Service), lookup datatype (default string), convert reference
         def eq_filter(item):
-            #print "eq_filter %s %s(%s) == %s(%s)" % (attribute, type(getattr(item, attribute)(self)), getattr(item, attribute)(self), type(reference), reference)
             try:
                 return getattr(item, attribute)(self) == reference
             except Exception:
@@ -756,16 +755,32 @@ class LiveStatusQuery(object):
                 else:
                     raise LiveStatusQueryError(450, attribute.replace('lsm_', ''))
 
-        def eq_nocase_filter(item):
-            return getattr(item, attribute)(self).lower() == reference.lower()
-
-        def ne_filter(item):
-            #print "ne_filter %s %s(%s) != %s(%s)" % (attribute, type(getattr(item, attribute)(self)), getattr(item, attribute)(self), type(reference), reference)
+        def match_filter(item):
             try:
-                return getattr(item, attribute)(self) != reference
+                p = re.compile(reference)
+                return p.search(getattr(item, attribute)(self))
+            except Exception:
+                raise LiveStatusQueryError(450, attribute.replace('lsm_', ''))
+
+        def eq_nocase_filter(item):
+            try:
+                return getattr(item, attribute)(self).lower() == reference.lower()
             except Exception:
                 if hasattr(item, attribute):
-                    return getattr(item.__class__, attribute).im_func.default != reference
+                    return getattr(item.__class__, attribute).im_func.default == reference
+                else:
+                    raise LiveStatusQueryError(450, attribute.replace('lsm_', ''))
+
+        def match_nocase_filter(item):
+            p = re.compile(reference, re.I)
+            return p.search(getattr(item, attribute)(self))
+
+        def lt_filter(item):
+            try:
+                return getattr(item, attribute)(self) < reference
+            except Exception:
+                if hasattr(item, attribute):
+                    return getattr(item.__class__, attribute).im_func.default < reference
                 else:
                     raise LiveStatusQueryError(450, attribute.replace('lsm_', ''))
 
@@ -778,24 +793,6 @@ class LiveStatusQuery(object):
                 else:
                     raise LiveStatusQueryError(450, attribute.replace('lsm_', ''))
 
-        def ge_filter(item):
-            try:
-                return getattr(item, attribute)(self) >= reference
-            except Exception:
-                if hasattr(item, attribute):
-                    return getattr(item.__class__, attribute).im_func.default >= reference
-                else:
-                    raise LiveStatusQueryError(450, attribute.replace('lsm_', ''))
-
-        def lt_filter(item):
-            try:
-                return getattr(item, attribute)(self) < reference
-            except Exception:
-                if hasattr(item, attribute):
-                    return getattr(item.__class__, attribute).im_func.default < reference
-                else:
-                    raise LiveStatusQueryError(450, attribute.replace('lsm_', ''))
-
         def le_filter(item):
             try:
                 return getattr(item, attribute)(self) <= reference
@@ -805,23 +802,35 @@ class LiveStatusQuery(object):
                 else:
                     raise LiveStatusQueryError(450, attribute.replace('lsm_', ''))
 
-        def match_filter(item):
-            #print "ma_filter %s %s(%s) ~ %s(%s)" % (attribute, type(getattr(item, attribute)(self)), getattr(item, attribute)(self), type(reference), reference)
-            try:
-                p = re.compile(reference)
-                return p.search(getattr(item, attribute)(self))
-            except Exception:
-                raise LiveStatusQueryError(450, attribute.replace('lsm_', ''))
-
-        def match_nocase_filter(item):
-            p = re.compile(reference, re.I)
-            return p.search(getattr(item, attribute)(self))
-
         def ge_contains_filter(item):
-            if getattr(item, attribute).im_func.datatype == list:
-                return reference in getattr(item, attribute)(self)
-            else:
-                return getattr(item, attribute)(self) >= reference
+            try:
+                if getattr(item, attribute).im_func.datatype == list:
+                    return reference in getattr(item, attribute)(self)
+                else:
+                    return getattr(item, attribute)(self) >= reference
+            except Exception:
+                if hasattr(item, attribute):
+                    return getattr(item.__class__, attribute).im_func.default >= reference
+                else:
+                    raise LiveStatusQueryError(450, attribute.replace('lsm_', ''))
+
+        def ne_filter(item):
+            try:
+                return getattr(item, attribute)(self) != reference
+            except Exception:
+                if hasattr(item, attribute):
+                    return getattr(item.__class__, attribute).im_func.default != reference
+                else:
+                    raise LiveStatusQueryError(450, attribute.replace('lsm_', ''))
+
+        def not_match_filter(item):
+            return not match_filter(item)
+
+        def not_eq_nocase_filter(item):
+            return eq_nocase_filter(item)
+
+        def not_match_nocase_filter(item):
+            return not match_nocase_filter(item)
 
         def dummy_filter(item):
             return True
@@ -855,22 +864,28 @@ class LiveStatusQuery(object):
 
         if operator == '=':
             return eq_filter
-        elif operator == '!=':
-            return ne_filter
-        elif operator == '>':
-            return gt_filter
-        elif operator == '>=':
-            return ge_contains_filter
-        elif operator == '<':
-            return lt_filter
-        elif operator == '<=':
-            return le_filter
-        elif operator == '=~':
-            return eq_nocase_filter
         elif operator == '~':
             return match_filter
+        elif operator == '=~':
+            return eq_nocase_filter
         elif operator == '~~':
             return match_nocase_filter
+        elif operator == '<':
+            return lt_filter
+        elif operator == '>':
+            return gt_filter
+        elif operator == '<=':
+            return le_filter
+        elif operator == '>=':
+            return ge_contains_filter
+        elif operator == '!=':
+            return ne_filter
+        elif operator == '!~':
+            return not_match_filter
+        elif operator == '!=~':
+            return ne_nocase_filter
+        elif operator == '!~~':
+            return not_match_nocase_filter
         elif operator == 'dummy':
             return dummy_filter
         elif operator == 'sum':
