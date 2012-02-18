@@ -2,6 +2,13 @@
 	padding-left: 0;
 }
 
+.leftpadding1 {
+  padding-left: 10px;
+}
+
+.leftpadding2 {
+  padding-left: 20px;
+}
 .no-leftmargin {
 	margin-left: 0 !important;
 }
