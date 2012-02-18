@@ -103,6 +103,14 @@ Invalid element name
 	</div>
 
 	<!-- Switch Start -->
+	<div class="btn-group span12 no-leftmargin bottommargin" data-toggle="buttons-checkbox">
+		<button class="btn">Active/passive Checks</button>
+		<button class="btn">Notifications</button>
+		<button class="btn">Event Handler</button>
+		<button class="btn">Flap Detection</button>
+	</div>
+	
+	<!--
 	<div class="switches span12">		
 		<ul>
 		    %if elt_type=='host':
@@ -116,6 +124,7 @@ Invalid element name
 			<li class="grid_4" onclick="toggle_flap_detection('{{elt.get_full_name()}}' , '{{elt.flap_detection_enabled}}')" ><span>Flap Detection</span> {{!helper.get_input_bool(elt.flap_detection_enabled)}} </li>	
 		</ul>	
 	</div>
+	-->
     <!-- Switch End-->
 
     <div class="tabbable">
@@ -186,7 +195,7 @@ Invalid element name
 				    	<li><a href="#"><i class="icon-fire"></i> Schedule Downtime</a></li>
 				    	<li class="divider"></li>
 					    %if elt_type=='host':
-					    	<li><a href="#"><i class="icon-pencil"></i> Edit Host</a></li>
+					    	<li><a href="#"><i class="icon-edit"></i> Edit Host</a></li>
 					    %else:
 					    	<li><a href="#"><i class="icon-edit"></i> Edit Service</a></li>
 					    %end:

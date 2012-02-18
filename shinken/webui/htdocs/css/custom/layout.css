@@ -1,3 +1,6 @@
+.min-height {
+  min-height: 600px;
+}
 .no-leftpadding {
 	padding-left: 0;
 }
@@ -15,6 +18,10 @@
 
 .no-bottommargin {
 	margin-bottom: 0 !important;
+}
+
+.bottommargin {
+  margin-bottom: 20px;
 }
 
 .no-maxwidth{
