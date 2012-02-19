@@ -119,6 +119,9 @@ function remove(){
             then
                 rm -Rf $PNPPREFIX.MK
             fi
+            cecho " > Remove sudoers configuration" green
+            sed -i "/^# Needed for  WATO/,+2d" /etc/sudoers
+            cecho " > Remove apache configuration" green
             case $CODE in
                     REDHAT)
                             rm -f /etc/httpd/conf.d/zzz_check_mk.conf >> /tmp/shinken.install.log 2>&1
@@ -247,6 +250,17 @@ function check_exist(){
         exit 2
     fi
 
+}
+
+function shinken_exist(){
+    if [ -d $TARGET ]
+    then
+        echo 1
+        return 1
+    else
+        echo 0
+        return 0
+    fi
 }
 
 function installpkg(){
@@ -1814,6 +1828,13 @@ fi
 while getopts "kidubcr:lz:hsvp:we:" opt; do
     case $opt in
         p)
+
+            if [ $(shinken_exist) -eq 0 ]
+            then
+                cecho " > You should install shinken first ! " red
+                exit 2
+            fi
+
             if [ "$OPTARG" == "check_esx3" ]
             then
                 install_check_esx3
