@@ -57,13 +57,23 @@ read taste
 #    fi
 #    
 #done
-YUMLIST="$YUMPKGS $VSPHERESDKYUMPKGS $NAGPLUGYUMPK $CHECKORACLEHEALTHYUMPKG $CHECKMONGOYUMPKG $CHECKEMCYUMPKG $CHECKNWCYUMPKG $PNPYUMPKG $MKYUMPKG $WMICYUMPKG $CHECKHPASMYUMPKGS"
+#YUMLIST="$YUMPKGS $VSPHERESDKYUMPKGS $NAGPLUGYUMPK $CHECKORACLEHEALTHYUMPKG $CHECKMONGOYUMPKG $CHECKEMCYUMPKG $CHECKNWCYUMPKG $PNPYUMPKG $MKYUMPKG $WMICYUMPKG $CHECKHPASMYUMPKGS"
+YUMLIST="$YUMPKGS"
+PRESERVE="python"
 for l in $YUMLIST
 do
     for p in $l
     do
-        cecho " > remove $p" yellow
-        yum remove $p 
+        for pp in $PRESERVE
+        do
+            if [ $p == $pp ]
+            then
+                cecho " > preserve $p" yellow
+            else
+                cecho " > remove $p" yellow
+                yum -y remove $p
+            fi 
+        done 
     done
 done
 yum clean all
