@@ -1818,10 +1818,8 @@ then
         exit 1
 fi
 
-if [ ! -z "$PROXY" ]
+if [ $USEPROXY -eq 1 ]
 then
-    export http_proxy=$PROXY
-    export https_proxy=$PROXY
     export WGETPROXY=" -Y on "
 fi
 
