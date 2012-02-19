@@ -132,6 +132,7 @@ class Host(SchedulingItem):
     # retention : save/load this property from retention
     running_properties = SchedulingItem.running_properties.copy()
     running_properties.update({
+        'modified_attributes':  IntegerProp(default=0L, fill_brok=['full_status'], retention=True),
         'last_chk':             IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'next_chk':             IntegerProp(default=0, fill_brok=['full_status', 'next_schedule'], retention=True),
         'in_checking':          BoolProp(default=False, fill_brok=['full_status', 'check_result', 'next_schedule']),
