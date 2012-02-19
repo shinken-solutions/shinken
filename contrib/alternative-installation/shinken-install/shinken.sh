@@ -1063,7 +1063,22 @@ function install_multisite(){
     fi
 
     cecho " > Install multisite" green
-    ./setup.sh --yes #>> /tmp/shinken.install.log 2>&1 
+    ./setup.sh --yes >> /tmp/shinken.install.log 2>&1 
+
+#    cread " > [ALPHA] Do you want to enable html form authentication for multisite ? (y|N) =>  "  yellow "n" "y n"
+#    if [ "$readvalue" == "y" ]
+#    then
+#        cecho " > Enable html form authentication " green
+#        sed -i "/.*AuthType.*$/d" $HTTPDCONF/zzz_check_mk.conf > /tmp/shinken.install.log 2>&1
+#    fi
+
+    # include check_mk configuration folder in nagios.cfg
+    exist=$(cat $TARGET/etc/nagios.cfg | grep check_mk.d)
+    if [ -z "$exist" ]
+    then 
+        echo "cfg_dir=$TARGET/etc/check_mk.d" >> $TARGET/etc/nagios.cfg 
+    fi
+   
     cecho " > Default configuration for multisite" green
     echo 'sites = {' >> $MKPREFIX/etc/multisite.mk
     echo '   "default": {' >> $MKPREFIX/etc/multisite.mk
@@ -1078,10 +1093,14 @@ function install_multisite(){
     chown -R $SKUSER:$SKGROUP $MKPREFIX/etc/conf.d
     chmod -R g+rwx $MKPREFIX/etc/conf.d
     $HTTPDINIT restart >> /tmp/shinken.install.log 2>&1 
-    cecho " > Enable sudoers commands for check_mk" green
-    echo "# Needed for WATO - the Check_MK Web Administration Tool" >> /etc/sudoers
-    echo "Defaults:$HTTPDUSER !requiretty" >> /etc/sudoers
-    echo "$HTTPDUSER ALL = (root) NOPASSWD: $MKPREFIX/check_mk --automation *" >> /etc/sudoers
+    exist=$(cat /etc/sudoers | grep "WATO")
+    if [ -z "$exist" ]
+    then
+        cecho " > Enable sudoers commands for check_mk" green
+        echo "# Needed for WATO - the Check_MK Web Administration Tool" >> /etc/sudoers
+        echo "Defaults:$HTTPDUSER !requiretty" >> /etc/sudoers
+        echo "$HTTPDUSER ALL = (root) NOPASSWD: $MKPREFIX/check_mk --automation *" >> /etc/sudoers
+    fi
     if [ $movepnp -eq 1 ]
     then 
         mv $PNPPREFIX $PNPPREFIX.MK
