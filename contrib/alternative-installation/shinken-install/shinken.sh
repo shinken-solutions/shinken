@@ -330,14 +330,19 @@ function prerequisites(){
                     $QUERY $EPELNAME >> $TMP/shinken.install.log 2>&1 
                     if [ $? -ne 0 ]
                     then
-                        cecho " > Installing $EPELPKG" yellow
-                        wget $WGETPROXY $EPEL  >> $TMP/shinken.install.log 2>&1  
-                        if [ $? -ne 0 ]
+                        if [ $SKIPPREREQUISITES -eq 1 ]
                         then
-                            cecho " > Error while trying to download EPEL repositories" red 
-                            exit 2
+                            cecho " SKIPPREREQUISITES enabled : won't install $EPEL" red
+                        else
+                            cecho " > Installing $EPELPKG" yellow
+                            wget $WGETPROXY $EPEL  >> $TMP/shinken.install.log 2>&1  
+                            if [ $? -ne 0 ]
+                            then
+                                cecho " > Error while trying to download EPEL repositories" red 
+                                exit 2
+                            fi
+                            rpm -Uvh ./$EPELPKG >> $TMP/shinken.install.log 2>&1 
                         fi
-                        rpm -Uvh ./$EPELPKG >> $TMP/shinken.install.log 2>&1 
                     else
                         cecho " > $EPELPKG already installed" green 
                     fi
@@ -363,12 +368,17 @@ function prerequisites(){
         $QUERY $p >> $TMP/shinken.install.log 2>&1 
         if [ $? -ne 0 ]
         then
-            cecho " > Installing $p " yellow
-            installpkg pkg $p 
-            if [ $? -ne 0 ]
-            then 
-                cecho " > Error while trying to install $p" red 
-                exit 2     
+            if [ $SKIPPREREQUISITES -eq 1 ]
+            then
+                cecho " > SKIPPREQUISITES enabled : won't install $p" red
+            else
+                cecho " > Installing $p " yellow
+                installpkg pkg $p 
+                if [ $? -ne 0 ]
+                then 
+                    cecho " > Error while trying to install $p" red 
+                    exit 2     
+                fi
             fi
         else
             cecho " > Package $p already installed " green 
@@ -379,18 +389,23 @@ function prerequisites(){
     then
         case $VERS in
             5)
-                # install setup tools for python 26
-                export PY="python26"
-                export PYEI="easy_install-2.6"
-                if [ ! -d "setuptools-$SETUPTOOLSVERS" ]
+                if [ $SKIPPREREQUISITES -eq 1 ]
                 then
-                    cecho " > Downloading setuptools for python 2.6" green
-                    wget $WGETPROXY $RHELSETUPTOOLS >> $TMP/shinken.install.log 2>&1 
-                    tar zxvf setuptools-$SETUPTOOLSVERS.tar.gz >> $TMP/shinken.install.log 2>&1 
+                    cecho " > SKIPPREQUISITES enabled : won't install $RHELSETUPTOOLS " red
+                else
+                    # install setup tools for python 26
+                    export PY="python26"
+                    export PYEI="easy_install-2.6"
+                    if [ ! -d "setuptools-$SETUPTOOLSVERS" ]
+                    then
+                        cecho " > Downloading setuptools for python 2.6" green
+                        wget $WGETPROXY $RHELSETUPTOOLS >> $TMP/shinken.install.log 2>&1 
+                        tar zxvf setuptools-$SETUPTOOLSVERS.tar.gz >> $TMP/shinken.install.log 2>&1 
+                    fi
+                    cecho " > Installing setuptools for python 2.6" green
+                    cd setuptools-$SETUPTOOLSVERS >> $TMP/shinken.install.log 2>&1 
+                    python26 setup.py install >> $TMP/shinken.install.log 2>&1 
                 fi
-                cecho " > Installing setuptools for python 2.6" green
-                cd setuptools-$SETUPTOOLSVERS >> $TMP/shinken.install.log 2>&1 
-                python26 setup.py install >> $TMP/shinken.install.log 2>&1 
                 PYLIBS=$PYLIBSRHEL
                 ;;
             6)
@@ -407,8 +422,13 @@ function prerequisites(){
             $PY $myscripts/tools/checkmodule.py -m $import  >> $TMP/shinken.install.log 2>&1 
             if [ $? -eq 2 ]
             then
-                cecho " > Module $module ($import) not found. Installing..." yellow
-                $PYEI $module >> $TMP/shinken.install.log 2>&1 
+                if [ $SKIPPREREQUISITES -eq 1 ]
+                then
+                    cecho " > SKIPPREQUISITES enabled : won't install $p " red
+                else
+                    cecho " > Module $module ($import) not found. Installing..." yellow
+                    $PYEI $module >> $TMP/shinken.install.log 2>&1
+                fi 
             else
                 cecho " > Module $module found." green 
             fi
@@ -428,13 +448,16 @@ function prerequisites(){
             $PY $myscripts/tools/checkmodule.py -m $import  >> $TMP/shinken.install.log 2>&1 
             if [ $? -eq 2 ]
             then
-                cecho " > Module $module ($import) not found. Installing..." yellow
-                $PYEI $module >> $TMP/shinken.install.log 2>&1 
+                if [ $SKIPPREREQUISITES -eq 1 ]
+                then
+                    cecho " > SKIPPREQUISITES enabled : won't install $p " red
+                else
+                    cecho " > Module $module ($import) not found. Installing..." yellow
+                    $PYEI $module >> $TMP/shinken.install.log 2>&1 
+                fi
             else
                 cecho " > Module $module found." green 
             fi
-
-            
         done
     fi
     
