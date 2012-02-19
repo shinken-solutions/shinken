@@ -309,7 +309,7 @@ function prerequisites(){
 
     for b in $bins
     do
-        rb=$(which $b)
+        rb=$(which $b >> $TMP/shinken.install.log 2>&1)
         if [ $? -eq 0 ]
         then
             cecho " > Checking for $b : OK" green 
