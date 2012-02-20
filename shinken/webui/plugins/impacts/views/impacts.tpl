@@ -39,7 +39,7 @@
 		    </script>
 	  	%end
 	  	
-	    <div class="impact pblink service_{{impact.state_id}}" id="{{imp_id}}">
+	    <div class="impact pblink" id="{{imp_id}}">
 			<div class="show-problem" id="show-problem-{{imp_id}}">
 				<img src="static/images/trig_right.png" id="show-problem-img-{{imp_id}}">
 			</div>
