@@ -1180,3 +1180,19 @@ li.critical{
  background-position: 0 0.16em;
  padding-left: 20px;
 }
+
+.host_1, .service_2{
+ background-color: #FF858B;
+}
+
+.service_1{
+ background-color: #E3B778;
+}
+
+.service_0, .host_0{
+ background-color: #8EE378;
+}
+
+.service_3{
+ background-color: #78CCE3;
+}

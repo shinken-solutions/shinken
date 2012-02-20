@@ -1,4 +1,3 @@
-
 %import time
 %now = time.time()
 %helper = app.helper
@@ -215,7 +214,7 @@ document.addEvent('domready', function() {
 		%else:
                   <td   class=" no_border" style="width:120px;"></td>
                 %end
-		<td class=" no_border" style="width:50px;"> {{pb.state}}</td>
+		<td class=" no_border {{pb.__class__.my_type}}_{{pb.state_id}}" style="width:50px;"> {{pb.state}}</td>
 		<td title='{{helper.print_date(pb.last_state_change)}}' class=" no_border" style="width:50px;">{{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}</td>
 		%# "We put a title (so a tip) on the output onlly if need"
 		%if len(pb.output) > 100:
