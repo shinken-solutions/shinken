@@ -142,7 +142,7 @@ class Service(SchedulingItem):
         'last_state':         StringProp (default='PENDING', fill_brok=['full_status', 'check_result'], retention=True),
         'last_state_type':    StringProp (default='HARD', fill_brok=['full_status', 'check_result'], retention=True),
         'last_state_id':      IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
-        'last_state_change':  FloatProp (default=time.time(), fill_brok=['full_status'], retention=True),
+        'last_state_change':  FloatProp (default=time.time(), fill_brok=['full_status', 'check_result'], retention=True),
         'last_hard_state_change': FloatProp(default=time.time(), fill_brok=['full_status', 'check_result'], retention=True),
         'last_hard_state':    StringProp (default='PENDING', fill_brok=['full_status'], retention=True),
         'last_hard_state_id': IntegerProp(default=0, fill_brok=['full_status'], retention=True),
