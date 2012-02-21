@@ -66,7 +66,10 @@ def hst_srv_sort(s1, s2):
         return 1
     
     # Ok, so by name...
-    return s1.get_full_name() > s2.get_full_name()
+    if s1.get_full_name() > s2.get_full_name():
+        return -1
+    else:
+        return 1
 
 
 
