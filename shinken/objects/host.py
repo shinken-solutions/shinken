@@ -66,7 +66,7 @@ class Host(SchedulingItem):
     properties.update({
         'host_name':            StringProp(fill_brok=['full_status', 'check_result', 'next_schedule']),
         'alias':                StringProp(fill_brok=['full_status']),
-        'display_name':         StringProp(default='none', fill_brok=['full_status']),
+        'display_name':         StringProp(default='', fill_brok=['full_status']),
         'address':              StringProp(fill_brok=['full_status']),
         'parents':              ListProp(brok_transformation=to_hostnames_list, default='', fill_brok=['full_status']),
         'hostgroups':           StringProp(brok_transformation=to_list_string_of_names, default='', fill_brok=['full_status']),

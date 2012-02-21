@@ -383,6 +383,10 @@ class Service(SchedulingItem):
         if self.notifications_enabled and self.contacts == []:
             logger.log("Warning The service '%s' in the host '%s' do not have contacts nor contact_groups in '%s'" % (desc, hname, source))
 
+        # Set display_name if need
+        if getattr(self, 'display_name', '') == '':
+            self.display_name = getattr(self, 'service_description', '')
+
         if not hasattr(self, 'check_command'):
             logger.log("%s : I've got no check_command" % self.get_name())
             state = False
