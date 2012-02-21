@@ -264,6 +264,8 @@ document.addEvent('domready', function() {
 		   	<li class="active"><a href="#">{{name}}</a></li>
 		   	%elif start == None or end == None:
 		   	<li class="disabled"> <a href="#">...</a> </li>
+			%elif search:
+			<a href='/{{page}}?start={{start}}&end={{end}}&search={{search}}' class='page larger'>{{name}}</a>
 		   	%else:
 			<li><a href='/{{page}}?start={{start}}&end={{end}}' class='page larger'>{{name}}</a></li>
 		   	%end
