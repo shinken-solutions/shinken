@@ -1,4 +1,3 @@
-
 %import time
 %now = time.time()
 %helper = app.helper
@@ -145,6 +144,8 @@ document.addEvent('domready', function() {
 	        <span class='current'>{{name}}</span>
 	     %elif start == None or end == None:
 		<span class='extend'>...</span>
+	     %elif search:
+                <a href='/{{page}}?start={{start}}&end={{end}}&search={{search}}' class='page larger'>{{name}}</a>
              %else:
 		<a href='/{{page}}?start={{start}}&end={{end}}' class='page larger'>{{name}}</a>
 	     %end
