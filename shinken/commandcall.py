@@ -62,9 +62,11 @@ class CommandCall(DummyCommandCall):
         self.id = self.__class__.id
         self.__class__.id += 1
         self.call = call
-        tab = call.split('!')
-        self.command = tab[0]
-        self.args = tab[1:]
+        # Now split by ! and get command and args
+        self.get_command_and_args()
+        #tab = call.split('!')
+        #self.command = tab[0]
+        #self.args = tab[1:]
         self.command = commands.find_by_name(self.command.strip())
         if self.command is not None:
             self.valid = True
@@ -83,6 +85,17 @@ class CommandCall(DummyCommandCall):
             if self.valid and reactionner_tag is 'None':
                 self.reactionner_tag = self.command.reactionner_tag #from command if not set
 
+    # We want to get the command and the args with ! splitting.
+    # but don't forget to protect against the \! to do not split them
+    def get_command_and_args(self):
+        # first protect
+        p_call = self.call.replace('\!', '___PROTECT_ESCLAMATION___')
+        tab = p_call.split('!')
+        self.command = tab[0]
+        # Reverse the protection
+        self.args = [s.replace('___PROTECT_ESCLAMATION___', '!') for s in tab[1:]]
+        
+        
 
 
     def is_valid(self):
