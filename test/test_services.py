@@ -105,6 +105,17 @@ class TestService(ShinkenTest):
         self.assert_(svc.state == ori_state)
         self.assert_(svc.state_id == ori_state_id)
 
+
+
+    # Look for display name setting
+    def test_display_name(self):
+        svc = self.get_svc()
+        print 'Display name', svc.display_name, 'toto'
+        print 'Full name', svc.get_full_name()
+        self.assert_(svc.display_name == 'test_ok_0')
+        
+
+
     def test_set_state_from_exit_status(self):
         svc = self.get_svc()
         #First OK
