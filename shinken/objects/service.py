@@ -82,7 +82,7 @@ class Service(SchedulingItem):
         'passive_checks_enabled': BoolProp   (default='1', fill_brok=['full_status'], retention=True),
         'check_period':           StringProp (fill_brok= ['full_status']),
         'obsess_over_service':    BoolProp   (default='0', fill_brok=['full_status'], retention=True),
-        'check_freshness':        BoolProp   (default='0', fill_brok=['full_status'], retention=True),
+        'check_freshness':        BoolProp   (default='0', fill_brok=['full_status']),
         'freshness_threshold':    IntegerProp(default='0', fill_brok=['full_status']),
         'event_handler':          StringProp (default='', fill_brok=['full_status']),
         'event_handler_enabled':  BoolProp   (default='0',fill_brok=['full_status'], retention=True),
