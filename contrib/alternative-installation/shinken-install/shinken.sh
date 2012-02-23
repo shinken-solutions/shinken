@@ -464,7 +464,6 @@ function prerequisites(){
 }
 
 function check_distro(){
-    trap 'trap_handler ${LINENO} $? check_distro' ERR
     cadre "Verifying compatible distros" green
 
     if [ ! -e /usr/bin/lsb_release ]
@@ -490,19 +489,18 @@ function check_distro(){
         version=$(echo $d | awk -F: '{print $2}')
         if [ "$CODE" = "$distro" ]
         then
-            cecho " > Found $CODE" green
             if [ "$version" = "" ]
             then
+                cecho " > Found $CODE ($DIST $VERS)" green
                 cecho " > Version checking for $DIST is not needed" green
                 versionok=1
                 return
             else
                 if [ "$VERS" = "$version" ]
                 then
+                    cecho " > Found $CODE ($DIST $VERS)" green
                     versionok=1
                     return
-                #else
-                #    versionok=0
                 fi        
             fi
         fi
@@ -513,8 +511,6 @@ function check_distro(){
         cecho " > $DIST $VERS is not supported" red
         exit 2
     fi
-
-    cecho " > Found $DIST $VERS" yellow 
 }
 
 function get_from_git(){
@@ -1806,16 +1802,16 @@ function usage(){
 echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z [poller|centreon] | -e daemons | -p plugins [plugname]
     -k  Kill shinken
     -i  Install shinken
-    -w  Remove demo configuration 
+    -w  Remove demo configuration (DEPRECATED)
     -d  Remove shinken
-    -u  Update an existing shinken installation
+    -u  Update an existing shinken installation (DEPRECATED)
     -v  purge livestatus sqlite db and shrink sqlite db
     -b  Backup shinken configuration plugins and data
     -r  Restore shinken configuration plugins and data
     -l  List shinken backups
     -c  Compress rotated logs
     -e  Which daemons to keep enabled at boot time
-    -z  This is a really special usecase that allow to install shinken on Centreon Enterprise Server in place of nagios
+    -z  This is a really special usecase that allow to install shinken on Centreon Enterprise Server in place of nagios (DEPRECATED)
     -p  Install plugins or addons (args should be one of the following : 
         check_esx3
         nagios-plugins
@@ -1959,14 +1955,6 @@ while getopts "kidubcr:lz:hsvp:we:" opt; do
             ;;
         v)
             purgeSQLITE    
-            exit 0
-            ;;
-
-        # Sugg :
-        # Code never reached, case already done above.
-        # Remove this?
-        z)
-            check_distro
             exit 0
             ;;
         k)
