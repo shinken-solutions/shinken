@@ -72,7 +72,6 @@ class CommandCall(DummyCommandCall):
             self.valid = True
         else:
             self.valid = False
-            self.command = tab[0]
         if self.valid:
             # If the host/service do not give an override poller_tag, take
             # the one of the command
