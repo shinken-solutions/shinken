@@ -222,6 +222,7 @@ class Config(Item):
         'debug_level':          UnusedProp(text=None),
         'debug_verbosity':      UnusedProp(text=None),
         'max_debug_file_size':  UnusedProp(text=None),
+        'modified_attributes':  IntegerProp(default=0L),
         #'$USERn$ : {'required':False, 'default':''} # Add at run in __init__
 
         # SHINKEN SPECIFIC
