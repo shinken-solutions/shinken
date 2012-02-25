@@ -87,7 +87,6 @@ function remove(){
                             /etc/init.d/apache2 restart >> $TMP/shinken.install.log 2>&1
                             ;;
             esac   
-            /etc/init.d/npcd start
         else 
             cecho " > Aborting uninstallation of pnp4nagios" yellow
         fi
@@ -619,6 +618,7 @@ function sinstall(){
         enablemongologs 
     fi
     fix
+    /etc/init.d/shinken start 
     cecho "+------------------------------------------------------------------------------" green
     cecho "| Shinken is now installed on your server " green
     cecho "| You can start it with /etc/init.d/shinken start " green
@@ -1169,7 +1169,9 @@ function install_pnp4nagios(){
     fi
     cecho " > Enable npcdmod" green
     ip=$(ifconfig | grep "inet adr" | grep -v 127.0.0.1 | awk '{print $2}' | awk -F : '{print $2}' | head -n 1)
-    do_skmacro enable_npcd.macro $PNPPREFIX/etc/npcd.cfg,$ip 
+    do_skmacro enable_npcd.macro $PNPPREFIX/etc/npcd.cfg,$ip
+    cecho " > Starting npcd" green 
+    /etc/init.d/npcd start >> $TMP/shinken.install.log 2>&1 
 }
 
 
