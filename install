@@ -26,9 +26,8 @@
 #####################
 
 export myscripts=$(readlink -f $(dirname $0))
-src=$(readlink -f "$myscripts/../../..")
-. $myscripts/shinken.conf
-
+src=$myscripts
+. $myscripts/install.d/shinken.conf
 if [ -f $TMP/shinken.install.log ]
 then
     rm -f $TMP/shinken.install.log    
@@ -402,7 +401,7 @@ function prerequisites(){
             module=$(echo $p | awk -F: '{print $1'})
             import=$(echo $p | awk -F: '{print $2'})
 
-            $PY $myscripts/tools/checkmodule.py -m $import  >> $TMP/shinken.install.log 2>&1 
+            $PY $myscripts/install.d/tools/checkmodule.py -m $import  >> $TMP/shinken.install.log 2>&1 
             if [ $? -eq 2 ]
             then
                 if [ $SKIPPREREQUISITES -eq 1 ]
@@ -428,7 +427,7 @@ function prerequisites(){
             module=$(echo $p | awk -F: '{print $1'})
             import=$(echo $p | awk -F: '{print $2'})
 
-            $PY $myscripts/tools/checkmodule.py -m $import  >> $TMP/shinken.install.log 2>&1 
+            $PY $myscripts/install.d/tools/checkmodule.py -m $import  >> $TMP/shinken.install.log 2>&1 
             if [ $? -eq 2 ]
             then
                 if [ $SKIPPREREQUISITES -eq 1 ]
@@ -518,7 +517,7 @@ function relocate(){
     cd $TARGET
     
     # relocate macros
-    for f in $(find $TARGET/contrib/alternative-installation/shinken-install/tools/macros | grep "\.macro$")
+    for f in $(find $TARGET/install.d/tools/macros | grep "\.macro$")
     do
         cecho " > relocating macro $f" green
         sed -i "s#__PREFIX__#$TARGET#g" $f
@@ -739,7 +738,7 @@ function compresslogs(){
 }
 
 function shelp(){
-    cat $myscripts/README
+    cat $myscripts/install.d/README
 }
 
 ########################
@@ -752,7 +751,7 @@ function cleanconf(){
         cecho " > Files/Folders list not found" yellow
         exit 2
     else
-        for f in $(cat $myscripts/config.files)
+        for f in $(cat $myscripts/install.d/config.files)
         do
             cecho " > Removing $TARGET/etc/$f" green
             rm -Rf $TARGET/etc/$f
@@ -763,7 +762,7 @@ function cleanconf(){
 function fixsudoers(){
     cecho " > Fix /etc/sudoers file for shinken integration" green
     cp /etc/sudoers /etc/sudoers.$(date +%Y%m%d%H%M%S)
-    cat $myscripts/sudoers.centreon | sed -e 's#TARGET#'$TARGET'#g' >> /etc/sudoers
+    cat $myscripts/install.d/sudoers.centreon | sed -e 's#TARGET#'$TARGET'#g' >> /etc/sudoers
 }
 
 function fixcentreondb(){
@@ -775,7 +774,7 @@ function fixcentreondb(){
     pass=$(cat /etc/centreon/conf.pm | grep "mysql_passwd" | awk '{print $3}' | sed -e "s/\"//g" -e "s/;//g")
     db=$(cat /etc/centreon/conf.pm | grep "mysql_database_oreon" | awk '{print $3}' | sed -e "s/\"//g" -e "s/;//g")
 
-    cp $myscripts/centreon.sql $TMP/centreon.sql
+    cp $myscripts/install.d/centreon.sql $TMP/centreon.sql
     sed -i 's#TARGET#'$TARGET'#g' $TMP/centreon.sql
     sed -i 's#CENTREON#'$db'#g' $TMP/centreon.sql
 
@@ -800,7 +799,7 @@ function enablemongologs(){
     cecho " > Enable mongodb log storage" green
     export PYTHONPATH=$TARGET
     export PY="$(pythonver)"
-    result=$($PY $TARGET/contrib/alternative-installation/shinken-install/tools/skonf.py -a macros -f $TARGET/contrib/alternative-installation/shinken-install/tools/macros/enable_log_mongo.macro -d $MONGOSERVER)    
+    result=$($PY $TARGET/install.d/tools/skonf.py -a macros -f $TARGET/install.d/tools/macros/enable_log_mongo.macro -d $MONGOSERVER)    
     if [ $? -ne 0 ]
     then
         cecho " > There was an error while trying to enable mongo log storage ($result)" red
@@ -819,7 +818,7 @@ function enablendodb(){
     # first get existing broker modules
     export PYTHONPATH=$TARGET
     export PY="$(pythonver)"
-    result=$($PY $TARGET/contrib/alternative-installation/shinken-install/tools/skonf.py -a macros -f $TARGET/contrib/alternative-installation/shinken-install/tools/macros/ces_enable_ndo.macro -d $host,$db,$user,$pass)
+    result=$($PY $TARGET/install.d/tools/skonf.py -a macros -f $TARGET/install.d/tools/macros/ces_enable_ndo.macro -d $host,$db,$user,$pass)
     if [ $? -ne 0 ]
     then
         cecho $result red
@@ -836,7 +835,7 @@ function enableretention(){
         export PYTHONPATH=$TARGET
         export PY="$(pythonver)"
 
-        result=$($PY $TARGET/contrib/alternative-installation/shinken-install/tools/skonf.py -a macros -f $TARGET/contrib/alternative-installation/shinken-install/tools/macros/enable_retention_mongo.macro)    
+        result=$($PY $TARGET/install.d/tools/skonf.py -a macros -f $TARGET/install.d/tools/macros/enable_retention_mongo.macro)    
         if [ $? -ne 0 ]
         then
             cecho $result red
@@ -845,7 +844,7 @@ function enableretention(){
     else
         export PYTHONPATH=$TARGET
         export PY="$(pythonver)"
-        result=$($PY $TARGET/contrib/alternative-installation/shinken-install/tools/skonf.py -a macros -f $TARGET/contrib/alternative-installation/shinken-install/tools/macros/enable_retention.macro)    
+        result=$($PY $TARGET/install.d/tools/skonf.py -a macros -f $TARGET/install.d/tools/macros/enable_retention.macro)    
         if [ $? -ne 0 ]
         then
             cecho $result red
@@ -861,14 +860,14 @@ function enableperfdata(){
     export PYTHONPATH=$TARGET
     export PY="$(pythonver)"
     cecho " > Getting existing broker modules list" green
-    modules=$($PY $TARGET/contrib/alternative-installation/shinken-install/tools/skonf.py -a getdirective -f $TARGET/etc/shinken-specific.cfg -o broker -d modules)    
+    modules=$($PY $TARGET/install.d/tools/skonf.py -a getdirective -f $TARGET/etc/shinken-specific.cfg -o broker -d modules)    
     if [ -z "$modules" ]
     then    
         modules="Service-Perfdata, Host-Perfdata"
     else
         modules=$modules", Service-Perfdata, Host-Perfdata"
     fi
-    result=$($PY $TARGET/contrib/alternative-installation/shinken-install/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o broker -d modules -v "$modules")
+    result=$($PY $TARGET/install.d/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o broker -d modules -v "$modules")
     cecho " > $result" green
 }
 
@@ -876,15 +875,15 @@ function setdaemonsaddresses(){
     export PYTHONPATH=$TARGET
     export PY="$(pythonver)"
     localip=$(ifconfig $IF | grep "^ *inet adr:" | awk -F : '{print $2}' | awk '{print $1}')
-    result=$($PY $TARGET/contrib/alternative-installation/shinken-install/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o arbiter -d address -v "$localip")
+    result=$($PY $TARGET/install.d/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o arbiter -d address -v "$localip")
     cecho " > $result" green    
-    result=$($PY $TARGET/contrib/alternative-installation/shinken-install/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o scheduler -d address -v "$localip")
+    result=$($PY $TARGET/install.d/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o scheduler -d address -v "$localip")
     cecho " > $result" green    
-    result=$($PY $TARGET/contrib/alternative-installation/shinken-install/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o reactionner -d address -v "$localip")
+    result=$($PY $TARGET/install.d/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o reactionner -d address -v "$localip")
     cecho " > $result" green    
-    result=$($PY $TARGET/contrib/alternative-installation/shinken-install/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o receiver -d address -v "$localip")
+    result=$($PY $TARGET/install.d/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o receiver -d address -v "$localip")
     cecho " > $result" green    
-    result=$($PY $TARGET/contrib/alternative-installation/shinken-install/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o poller -d address -v "$localip" -r "poller_name=poller-1")
+    result=$($PY $TARGET/install.d/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o poller -d address -v "$localip" -r "poller_name=poller-1")
     cecho " > $result" green    
 }
 
@@ -914,7 +913,7 @@ function fixHtpasswdPath(){
     export PYTHONPATH=$TARGET
     export PY="$(pythonver)"
     # fix the htpasswd.users file path for WEBUI authentication
-    result=$($PY $TARGET/contrib/alternative-installation/shinken-install/tools/skonf.py -f $TARGET/etc/shinken-specific.cfg -a setparam -o module -r "module_name=Apache_passwd" -d "passwd" -v "$TARGET/etc/htpasswd.users")
+    result=$($PY $TARGET/install.d/tools/skonf.py -f $TARGET/etc/shinken-specific.cfg -a setparam -o module -r "module_name=Apache_passwd" -d "passwd" -v "$TARGET/etc/htpasswd.users")
     cecho " > $result" green    
 }
 
@@ -981,7 +980,7 @@ function install_nagvis(){
         then
             cecho " > Patching links for multisite use" green
             cd $NAGVISPREFIX/etc
-            patch < $myscripts/nagvis.multisite.uri.patch
+            patch < $myscripts/install.d/nagvis.multisite.uri.patch
         fi
     fi 
     cecho " > Restart Apache " green
@@ -1034,7 +1033,7 @@ function install_multisite(){
     usermod -a -G $SKGROUP $HTTPDUSER >> $TMP/shinken.install.log 2>&1
 
     cecho " > Configure response file" green
-    cp check_mk_setup.conf.in $HOME/.check_mk_setup.conf
+    cp install.d/check_mk_setup.conf.in $HOME/.check_mk_setup.conf
     sed -i "s#__PNPPREFIX__#$PNPPREFIX#g" $HOME/.check_mk_setup.conf
     sed -i "s#__MKPREFIX__#$MKPREFIX#g" $HOME/.check_mk_setup.conf
     sed -i "s#__SKPREFIX__#$TARGET#g" $HOME/.check_mk_setup.conf
@@ -1178,7 +1177,7 @@ function do_skmacro(){
     args=$2
     export PYTHONPATH="$TARGET"
     export SHINKEN="$PYTHONPATH"
-    export SKTOOLS="$PYTHONPATH/contrib/alternative-installation/shinken-install/tools"
+    export SKTOOLS="$PYTHONPATH/install.d/tools"
     $PY $SKTOOLS/skonf.py -a macros -f $SKTOOLS/macros/$macro -d $args >> $TMP/shinken.install.log 2>&1 
 }
 
