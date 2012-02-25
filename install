@@ -982,7 +982,7 @@ function install_nagvis(){
         then
             cecho " > Patching links for multisite use" green
             cd $NAGVISPREFIX/etc
-            patch < $myscripts/install.d/nagvis.multisite.uri.patch
+            patch < $myscripts/install.d/nagvis.multisite.uri.patch >> /tmp/shinken.install.log 2>&1
         fi
     fi 
     cecho " > Restart Apache " green
