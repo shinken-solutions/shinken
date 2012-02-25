@@ -87,6 +87,7 @@ function remove(){
                             /etc/init.d/apache2 restart >> $TMP/shinken.install.log 2>&1
                             ;;
             esac   
+            /etc/init.d/npcd start
         else 
             cecho " > Aborting uninstallation of pnp4nagios" yellow
         fi
