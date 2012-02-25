@@ -922,6 +922,41 @@ function fixHtpasswdPath(){
 
 # addons installation
 
+# mongodb
+function install_mongodb(){
+    cadre "Install mongodb server" green
+    case $CODE in
+        REDHAT)
+            if [ ! -f "/etc/yum.repos.d/10gen.repo" ]
+            then
+                cp install.d/10gen.repo.in /etc/yum.repos.d/10gen.repo
+                sed -i "s/__ARCH__/"$ARCH"/g" /etc/yum.repos.d/10gen.repo
+                yum clean all >> $TMP/shinken.install.log 2>&1
+                yum -y install mongo-10gen mongo-10gen-server >> $TMP/shinken.install.log 2>&1
+                chkconfig --add mongod >> $TMP/shinken.install.log 2>&1
+                chkconfig mongod on >> $TMP/shinken.install.log 2>&1
+                cecho " > Start mongodb server"
+                /etc/init.d/mongod start >> $TMP/shinken.install.log 2>&1
+            else
+                cecho "Allready installed" red
+                exit 2
+            fi
+            ;;
+        DEBIAN)
+#            apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10
+#            echo "deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen" > /etc/apt/sources.list.d/10gen.repo
+#            apt-get update
+#            apt-get -y install 
+            cecho " > Unsuported" red
+            exit 2
+            ;;
+        *)
+            cecho " > Unknown distribution : $DIST" red
+            exit 2
+            ;;
+    esac
+}
+
 # nagvis
 
 function install_nagvis(){
@@ -1810,6 +1845,7 @@ echo "Usage : install -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z 
         pnp4nagios
         multisite
         nagvis
+        mongodb
     -h  Show help"
 }
 
@@ -1895,10 +1931,15 @@ while getopts "kidubcr:lz:hsvp:we:" opt; do
             then
                 install_nagvis
                 exit 0
+            elif [ "$OPTARG" == "mongodb" ]
+            then
+                install_mongodb
+                exit 0
             else
                 cecho " > Unknown plugin $OPTARG" red
             fi
             ;;
+        
         j)
             addpoller "$OPTARG"
             exit 0
