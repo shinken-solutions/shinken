@@ -1160,7 +1160,7 @@ function install_pnp4nagios(){
     then
         cecho " > Fix htpasswd.users path" green
         sed -i "s#/usr/local/nagios/etc/htpasswd.users#$TARGET/etc/htpasswd.users#g" /etc/httpd/conf.d/pnp4nagios.conf 
-        /etc/init.d/apache2 restart >> $TMP/shinken.install.log 2>&1 
+        /etc/init.d/httpd restart >> $TMP/shinken.install.log 2>&1 
     else
         cecho " > Fix htpasswd.users path" green
         sed -i "s#/usr/local/nagios/etc/htpasswd.users#$TARGET/etc/htpasswd.users#g" /etc/apache2/conf.d/pnp4nagios.conf 
