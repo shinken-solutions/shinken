@@ -618,6 +618,7 @@ function sinstall(){
         enablemongologs 
     fi
     fix
+    cecho " > Starting shinken" green
     /etc/init.d/shinken start 
     cecho "+------------------------------------------------------------------------------" green
     cecho "| Shinken is now installed on your server " green
