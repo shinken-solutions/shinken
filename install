@@ -1269,11 +1269,17 @@ function install_check_mongodb(){
 
     if [ "$CODE" == "REDHAT" ]
     then
-        cecho " > Installing prerequisites" green 
-        yum install -yq $CHECKMONGOYUMPKG  >> $TMP/shinken.install.log 2>&1 
+        if [ ! -z "$CHECKMONGOYUMPKG" ]
+        then
+            cecho " > Installing prerequisites" green 
+            yum install -yq $CHECKMONGOYUMPKG  >> $TMP/shinken.install.log 2>&1 
+        fi
     else
-        cecho " > Installing prerequisites" green 
-        apt-get -y install $CHECKMONGOAPTPKG >> $TMP/shinken.install.log 2>&1 
+        if [ ! -z "$CHECKMONGOAPTPKG" ]
+        then
+            cecho " > Installing prerequisites" green 
+            apt-get -y install $CHECKMONGOAPTPKG >> $TMP/shinken.install.log 2>&1 
+        fi
     fi
 
     if [ $? -ne 0 ]
