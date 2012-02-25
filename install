@@ -1772,7 +1772,7 @@ function install_check_mysql_health(){
 
 
 function usage(){
-echo "Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z [poller|centreon] | -e daemons | -p plugins [plugname]
+echo "Usage : install -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z [poller|centreon] | -e daemons | -p plugins [plugname]
     -k  Kill shinken
     -i  Install shinken
     -w  Remove demo configuration (DEPRECATED)
