@@ -52,6 +52,7 @@ Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z [polle
         pnp4nagios
         multisite
         nagvis
+        mongodb
     -h  Show help
 
 configuration file
