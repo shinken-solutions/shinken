@@ -1623,23 +1623,25 @@ function install_check_wmi_plus(){
         apt-get -y install $WMICAPTPKG >> $TMP/shinken.install.log 2>&1
     fi 
     cd $TMP
-    cecho " > Downloading wmic" green
     filename=$(echo $WMIC | awk -F"/" '{print $NF}')
-    if [ ! -f $(echo $filename | sed -e "s/\.bz2//g") ]
+    folder=$(echo $filename | sed -e "s/\.tar\.gz//g")
+    if [ ! -f $filename ]
     then
-        wget $WGETPROXY $WMIC >> $TMP/shinken.install.log 2>&1 
-        bunzip2 $filename
-    else
-        rm -Rf $(echo $filename | sed -e "s/\.tar//g")
+        cecho " > Downloading wmic" green
+        wget $WGETPROXY $WMIC >> $TMP/shinken.install.log 2>&1
+        if [ $? -ne 0 ]
+        then
+            cecho " > Error while downloading $VMIC" red
+            exit 2
+        fi 
     fi
-    if [ $? -ne 0 ]
-    then
-        cecho " > Error while downloading $filename" red
-        exit 2
+    if [ -d $folder ]
+    then 
+        rm -Rf $folder
     fi
     cecho " > Extracting archive " green
-    tar xvf $(echo $filename| sed -e "s/\.bz2//g") >> $TMP/shinken.install.log 2>&1 
-    cd $(echo $filename | sed -e "s/\.tar\.bz2//g")
+    tar zxvf $filename >> $TMP/shinken.install.log 2>&1
+    cd $folder
     cecho " > Building wmic" green
     make >> $TMP/shinken.install.log 2>&1 
     if [ $? -ne 0 ] 
