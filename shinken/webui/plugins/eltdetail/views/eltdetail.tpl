@@ -29,7 +29,7 @@ Invalid element name
 %#  "Content Container Start"
 <div id="content_container" class="span12 no-leftmargin">
 
-	<h1 class="grid_16 state_{{elt.state.lower()}} icon_down"><img class="host_img_25" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h1>
+	<h1 class="grid_16 state_{{elt.state.lower()}} icon_down"> <img class="imgsize3" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h1>
 
 	<div class="span12 no-leftmargin box">	   
 		<table class="span4 no-leftmargin">
@@ -109,7 +109,7 @@ Invalid element name
 		<button class="btn">Event Handler</button>
 		<button class="btn">Flap Detection</button>
 	</div>
-	
+
 	<!--
 	<div class="switches span12">		
 		<ul>
@@ -248,9 +248,9 @@ Invalid element name
 				%end
 									
 				%if nb < 8:
-					<div class="service">
+					<div class="service span3 box">
 				%else:
-					<div class="service hidden_impacts_services">
+					<div class="service hidden_impacts_services span4 box">
 				%end
 					<div class="divstate{{s.state_id}}">
 					%for i in range(0, s.business_impact-2):
@@ -269,7 +269,7 @@ Invalid element name
 					%if elt.is_problem and len(elt.impacts) != 0:
 					<div>
 								
-					<h4 style="margin-bottom: 5px;"> Impacts </h4>
+					<h4> Impacts </h4>
 						%nb = 0
 						%for i in helper.get_impacts_sorted(elt):
 						%nb += 1
@@ -277,11 +277,14 @@ Invalid element name
 							<div style="float:right;" id="hidden_impacts_or_services_button"><a href="javascript:show_hidden_impacts_or_services()"> {{!helper.get_button('Show all impacts', img='/static/images/expand.png')}}</a></div>
 						%end
 						%if nb < 8:
-						 	<div class="service">
+						 	<div class="service span3 box">
 						%else:
-							<div class="service hidden_impacts_services">
+							<div class="service hidden_impacts_services span3 box">
 						%end
-							        
+							    <div>
+							    	<h3>ololol</h3>
+							    	 
+							    </div>	   
 							<div class="divstate{{i.state_id}}">
 								%for j in range(0, i.business_impact-2):
 									<img src='/static/images/star.png'>
@@ -289,6 +292,7 @@ Invalid element name
 									<img style="width : 16px; height:16px" src="{{helper.get_icon_state(i)}}">
 									<span style="font-size:110%">{{!helper.get_link(i)}}</span> is <span style="font-size:110%">{{i.state}}</span> since {{helper.print_duration(i.last_state_change, just_duration=True, x_elts=2)}}
 								</div>
+								<span class="pull-right" style="bottom: 0;"><i class="icon-retweet"></i></span>
 							    </div>
 							    %# End of this impact
 							    %end

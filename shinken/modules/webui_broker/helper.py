@@ -486,7 +486,7 @@ class Helper(object):
         # if not service, host
         return '<a href="/host/%s"> %s </a>' % (obj.get_full_name(), obj.get_full_name())
     
-    #Give only the /service/blabla or /hsot blabla string, like for buttons inclusion
+    #Give only the /service/blabla or /host blabla string, like for buttons inclusion
     def get_link_dest(self, obj):
         return "/%s/%s" % (obj.__class__.my_type, obj.get_full_name())
 
@@ -503,11 +503,8 @@ class Helper(object):
         if getattr(obj, 'icon_set', '') != '':
             return '/static/images/sets/%s/state_%s.png' % (obj.icon_set, ico)
         else:
-            return '/static/images/state_%s.png' % ico
+            return '/static/img/icons/state_%s.png' % ico
         
-
-
-
     # Get 
     def get_navi(self, total, pos, step=30):
         step = float(step)

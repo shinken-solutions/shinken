@@ -36,6 +36,27 @@
   width: 52.6%;
 }
 
+.imgsize1 {
+  height: 12px;
+  width: 12px;
+  margin-right: 2px;
+  vertical-align:
+}
+
+.imgsize2 {
+  height: 16px;
+  width: 16px;
+  margin-right: 2px;
+  vertical-align:
+}
+
+.imgsize3 {
+  height: 25px;
+  width: 25px;
+  margin-right: 2px;
+  vertical-align: -3px; 
+}
+
 .box {
   min-height: 20px;
   padding: 10px 0px 10px 5px;
@@ -66,7 +87,7 @@
 }
 
 .label-help {
-    background-color: #3A87AD;
+  background-color: #3A87AD;
 }
 
 .navbar-inner {
@@ -78,4 +99,8 @@
   background-image:      -o-linear-gradient(top, #2F5F8F, #005086); /* Opera 11.10+ */
   background-image:         linear-gradient(top, #2F5F8F, #005086);
             filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#2F5F8F', EndColorStr='#005086'); /* IE6â��IE9 */
+}
+
+h1 {
+  font-size: 26px;
 }
