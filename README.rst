@@ -49,17 +49,17 @@ compilation!
 Third way: install script
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You can use the shinken.sh utility script located at : shinken/contrib/alternative-installation/shinken-install
+You can use the install utility script located at the root of the shinken sources.
 The script create the user and group, install all dependencies and then install shinken. It is compatible with Debian, Ubuntu, Centos/Redhat 5.x and 6.x
 The only requirement is an internet connection for the server on which you want to install shinken. It also allow to modify the installation folder in a configuration file.
 
 If you want shinken installed in seconds in /opt/shinken, just run :
 
-  shinken.sh -i
+  install -i
 
 If you want to remove shinken, just run :
 
-  shinken.sh -d
+  install -d
 
 
 How to update
@@ -67,15 +67,15 @@ How to update
 If you used the setup.py way, launch :
     sudo python setup.py update --install-scripts=/usr/bin/
 
-If you used the shinken.sh way :
+If you used the install script way :
 
 there is curently no simple way to do this :
 
 1 - backup the var etc and plugins folder 
 
-2 - remove shinken (shinken -d)
+2 - remove shinken (install -d)
 
-3 - install shinken (shinken -i)
+3 - install shinken (install -i)
 
 4 - restore the backups
 
