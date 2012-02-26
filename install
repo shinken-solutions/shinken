@@ -951,12 +951,10 @@ function install_mongodb(){
             fi
             ;;
         DEBIAN)
-#            apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10
-#            echo "deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen" > /etc/apt/sources.list.d/10gen.repo
-#            apt-get update
-#            apt-get -y install 
-            cecho " > Unsuported" red
-            exit 2
+            apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10
+            echo "deb http://downloads-distro.mongodb.org/repo/debian-sysvinit dist 10gen" > /etc/apt/sources.list.d/10gen.list
+            apt-get update
+            apt-get install -y mongodb-10gen
             ;;
         *)
             cecho " > Unknown distribution : $DIST" red
