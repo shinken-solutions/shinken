@@ -473,14 +473,14 @@ function check_distro(){
         then
             if [ "$version" = "" ]
             then
-                cecho " > Found $CODE ($DIST $VERS)" green
+                cecho " > Found $CODE ($DIST $VERS $ARCH)" green
                 cecho " > Version checking for $DIST is not needed" green
                 versionok=1
                 return
             else
                 if [ "$VERS" = "$version" ]
                 then
-                    cecho " > Found $CODE ($DIST $VERS)" green
+                    cecho " > Found $CODE ($DIST $VERS $ARCH)" green
                     versionok=1
                     return
                 fi        
