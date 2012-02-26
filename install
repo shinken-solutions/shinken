@@ -930,12 +930,20 @@ function install_mongodb(){
             if [ ! -f "/etc/yum.repos.d/10gen.repo" ]
             then
                 cp install.d/10gen.repo.in /etc/yum.repos.d/10gen.repo
-                sed -i "s/__ARCH__/"$ARCH"/g" /etc/yum.repos.d/10gen.repo
+                case $ARCH in
+                    i386)
+                        MARCH=i686
+                        ;;
+                    *)
+                        MARCH=$ARCH
+                        ;;
+                esac
+                sed -i "s/__ARCH__/"$MARCH"/g" /etc/yum.repos.d/10gen.repo
                 yum clean all >> $TMP/shinken.install.log 2>&1
                 yum -y install mongo-10gen mongo-10gen-server >> $TMP/shinken.install.log 2>&1
                 chkconfig --add mongod >> $TMP/shinken.install.log 2>&1
                 chkconfig mongod on >> $TMP/shinken.install.log 2>&1
-                cecho " > Start mongodb server"
+                cecho " > Start mongodb server" green
                 /etc/init.d/mongod start >> $TMP/shinken.install.log 2>&1
             else
                 cecho "Allready installed" red
