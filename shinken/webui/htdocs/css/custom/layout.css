@@ -101,6 +101,14 @@
             filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#2F5F8F', EndColorStr='#005086'); /* IE6â��IE9 */
 }
 
+.navbar .nav > li > a {
+    color: #FFFFFF;
+}
+
+.navbar .navbar-text {
+    color: #FFFFFF;
+}
+
 h1 {
   font-size: 26px;
 }
