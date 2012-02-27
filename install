@@ -1872,13 +1872,14 @@ fi
 while getopts "kidubcr:lz:hsvp:we:" opt; do
     case $opt in
         p)
-
-            if [ $(shinken_exist) -eq 0 ]
+            if [ ! "$OPTARG" in "mongodb" ]
             then
-                cecho " > You should install shinken first ! " red
-                exit 2
+                if [ $(shinken_exist) -eq 0 ]
+                then
+                    cecho " > You should install shinken first ! " red
+                    exit 2
+                fi
             fi
-
             if [ "$OPTARG" == "check_esx3" ]
             then
                 install_check_esx3
