@@ -24,6 +24,7 @@ print "Detected module : TSCA module for Arbiter/receiver"
 
 import os
 import sys
+import time
 
 #Thrift Specificities
 sys.path.append(os.path.abspath(__file__).rsplit("/",3)[0]+"/thrift/gen-py")
@@ -58,8 +59,12 @@ def get_instance(plugin):
         port = int(plugin.port)
     else:
         port = 9090
+    if hasattr(plugin, 'max_packet_age'):
+        max_packet_age = min(plugin.max_packet_age,900)
+    else:
+        max_packet_age = 30
 
-    instance = TSCA_arbiter(plugin, host, port)
+    instance = TSCA_arbiter(plugin, host, port, max_packet_age)
     return instance
 
 #Used by Thrift to handle client
@@ -82,17 +87,24 @@ class StateServiceHandler:
         if (self.currentlySendingData == False) :
             self.currentlySendingData = True
             while self.state_list:
-                (timestamp, rc, hostname, service, output)=self.tsca_arbiter.read_check_result(self.state_list[0])
-                self.tsca_arbiter.post_command(timestamp,rc,hostname,service,output)
+		check_result = self.tsca_arbiter.read_check_result(self.state_list[0])
+		if check_result is not None :			
+                	(timestamp, rc, hostname, service, output) = check_result
+			try:
+                		self.tsca_arbiter.post_command(timestamp,rc,hostname,service,output)
+			except:
+				print "Error while sending a check result command to the arbiter"
+				pass
                 self.state_list.pop(0)
             self.currentlySendingData = False
 
 #Just print some stuff
 class TSCA_arbiter(BaseModule):
-    def __init__(self, modconf, host, port):
+    def __init__(self, modconf, host, port, max_packet_age):
         BaseModule.__init__(self, modconf)
         self.host = host
         self.port = port
+	self.max_packet_age = max_packet_age
 
 
     #Ok, main function that is called in the CONFIGURATION phase
@@ -122,7 +134,16 @@ class TSCA_arbiter(BaseModule):
         service = state.serv
         rc = state.rc
         output = state.output
-        return (timestamp, rc, hostname, service, output)
+
+	current_time = time.time()
+        check_result_age = current_time - timestamp
+        if timestamp > current_time:
+            print "Dropping packet with future timestamp." 
+        elif check_result_age > self.max_packet_age:
+            print "Dropping packet with stale timestamp - packet was %s seconds old." % check_result_age
+        else:
+            return (timestamp, rc, hostname, service, output)
+        
 
     def post_command(self, timestamp, rc, hostname, service, output):
         '''
@@ -140,12 +161,14 @@ class TSCA_arbiter(BaseModule):
     # When you are in "external" mode, that is the main loop of your process
     def main(self):
         self.set_exit_handler()
-
-        handler = StateServiceHandler(self)
-        processor = StateService.Processor(handler)
-        transport = TSocket.TServerSocket("0.0.0.0",9090)
-        tfactory = TTransport.TBufferedTransportFactory()
-        pfactory = TBinaryProtocol.TBinaryProtocolFactory()
-        # In order to accept multiple simultaneous clients, we use TThreadedServer
-        server = TServer.TThreadedServer(processor, transport, tfactory, pfactory)
-        server.serve()
+	try:
+		handler = StateServiceHandler(self)
+		processor = StateService.Processor(handler)
+		transport = TSocket.TServerSocket("0.0.0.0",9090)
+		tfactory = TTransport.TBufferedTransportFactory()
+		pfactory = TBinaryProtocol.TBinaryProtocolFactory()
+		# In order to accept multiple simultaneous clients, we use TThreadedServer
+		server = TServer.TThreadedServer(processor, transport, tfactory, pfactory)
+		server.serve()
+	except:
+		print "Error while trying to launch TSCA module"
