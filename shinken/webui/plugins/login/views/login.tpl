@@ -1,7 +1,7 @@
 %rebase layout title='Shinken UI login', print_menu=False, js=['login/js/jQuery.dPassword.js', 'login/js/iPhonePassword.js'], css=['login/css/login.css']
 
 
-<div id="login_container" style="margin-left:15%">
+<div id="login_container" class="span9">
   
 %if login_text:
 <p><span id="login-text"> {{login_text}}</span></p>
