@@ -285,7 +285,7 @@ livestatus_attribute_map = {
         },
         'contact_groups': {
             'description': 'A list of all contact groups this host is in',
-            'function': lambda item, req: [x for x in item.contact_groups],  # CONTROLME2
+            'function': lambda item, req: item.contact_groups.split(','),
             'datatype': list,
         },
         'criticity': {
@@ -803,8 +803,7 @@ livestatus_attribute_map = {
         },
         'contact_groups': {
             'description': 'A list of all contact groups this service is in',
-            #'function': lambda item, req: [x for x in item.contact_groups],  # CONTROLME2
-            'function': lambda item, req: item.contact_groups,  # CONTROLME2 there is no list
+            'function': lambda item, req: item.contact_groups.split(','),
             'datatype': list,
         },
         'criticity': {
