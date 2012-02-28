@@ -74,6 +74,7 @@ class Contact(Item):
 
     running_properties = Item.running_properties.copy()
     running_properties.update({
+        'modified_attributes': IntegerProp(default=0L, fill_brok=['full_status'], retention=True),
         'downtimes':        StringProp(default=[], fill_brok=['full_status'], retention=True),
     })
 

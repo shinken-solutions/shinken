@@ -3,7 +3,7 @@ Shinken ChangeLog
 #######################
 
 	
-1.0 - X/02/2012
+1.0 - 28/02/2012
 ------------------
 	CORE ENHANCEMENTS
 	* Add : shinken.sh script and skonf.py with a LOT of features for setup and configuration management.

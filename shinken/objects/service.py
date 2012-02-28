@@ -82,7 +82,7 @@ class Service(SchedulingItem):
         'passive_checks_enabled': BoolProp   (default='1', fill_brok=['full_status'], retention=True),
         'check_period':           StringProp (fill_brok= ['full_status']),
         'obsess_over_service':    BoolProp   (default='0', fill_brok=['full_status'], retention=True),
-        'check_freshness':        BoolProp   (default='0', fill_brok=['full_status'], retention=True),
+        'check_freshness':        BoolProp   (default='0', fill_brok=['full_status']),
         'freshness_threshold':    IntegerProp(default='0', fill_brok=['full_status']),
         'event_handler':          StringProp (default='', fill_brok=['full_status']),
         'event_handler_enabled':  BoolProp   (default='0',fill_brok=['full_status'], retention=True),
@@ -129,6 +129,7 @@ class Service(SchedulingItem):
     # properties used in the running state
     running_properties = SchedulingItem.running_properties.copy()
     running_properties.update({
+        'modified_attributes': IntegerProp(default=0L, fill_brok=['full_status'], retention=True),
         'last_chk':           IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'next_chk':           IntegerProp(default=0, fill_brok=['full_status', 'next_schedule'], retention=True),
         'in_checking':        BoolProp   (default=False, fill_brok=['full_status', 'check_result', 'next_schedule'], retention=True),
@@ -141,7 +142,7 @@ class Service(SchedulingItem):
         'last_state':         StringProp (default='PENDING', fill_brok=['full_status', 'check_result'], retention=True),
         'last_state_type':    StringProp (default='HARD', fill_brok=['full_status', 'check_result'], retention=True),
         'last_state_id':      IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
-        'last_state_change':  FloatProp (default=time.time(), fill_brok=['full_status'], retention=True),
+        'last_state_change':  FloatProp (default=time.time(), fill_brok=['full_status', 'check_result'], retention=True),
         'last_hard_state_change': FloatProp(default=time.time(), fill_brok=['full_status', 'check_result'], retention=True),
         'last_hard_state':    StringProp (default='PENDING', fill_brok=['full_status'], retention=True),
         'last_hard_state_id': IntegerProp(default=0, fill_brok=['full_status'], retention=True),
@@ -381,6 +382,10 @@ class Service(SchedulingItem):
         # Ok now we manage special cases...
         if self.notifications_enabled and self.contacts == []:
             logger.log("Warning The service '%s' in the host '%s' do not have contacts nor contact_groups in '%s'" % (desc, hname, source))
+
+        # Set display_name if need
+        if getattr(self, 'display_name', '') == '':
+            self.display_name = getattr(self, 'service_description', '')
 
         if not hasattr(self, 'check_command'):
             logger.log("%s : I've got no check_command" % self.get_name())

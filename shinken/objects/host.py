@@ -66,7 +66,7 @@ class Host(SchedulingItem):
     properties.update({
         'host_name':            StringProp(fill_brok=['full_status', 'check_result', 'next_schedule']),
         'alias':                StringProp(fill_brok=['full_status']),
-        'display_name':         StringProp(default='none', fill_brok=['full_status']),
+        'display_name':         StringProp(default='', fill_brok=['full_status']),
         'address':              StringProp(fill_brok=['full_status']),
         'parents':              ListProp(brok_transformation=to_hostnames_list, default='', fill_brok=['full_status']),
         'hostgroups':           StringProp(brok_transformation=to_list_string_of_names, default='', fill_brok=['full_status']),
@@ -79,7 +79,7 @@ class Host(SchedulingItem):
         'passive_checks_enabled': BoolProp(default='1', fill_brok=['full_status'], retention=True),
         'check_period':         StringProp(fill_brok=['full_status']),
         'obsess_over_host':     BoolProp(default='0', fill_brok=['full_status'], retention=True),
-        'check_freshness':      BoolProp(default='0', fill_brok=['full_status'], retention=True),
+        'check_freshness':      BoolProp(default='0', fill_brok=['full_status']),
         'freshness_threshold':  IntegerProp(default='0', fill_brok=['full_status']),
         'event_handler':        StringProp(default='', fill_brok=['full_status']),
         'event_handler_enabled': BoolProp(default='0', fill_brok=['full_status']),
@@ -132,6 +132,7 @@ class Host(SchedulingItem):
     # retention : save/load this property from retention
     running_properties = SchedulingItem.running_properties.copy()
     running_properties.update({
+        'modified_attributes':  IntegerProp(default=0L, fill_brok=['full_status'], retention=True),
         'last_chk':             IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'next_chk':             IntegerProp(default=0, fill_brok=['full_status', 'next_schedule'], retention=True),
         'in_checking':          BoolProp(default=False, fill_brok=['full_status', 'check_result', 'next_schedule']),
@@ -146,7 +147,7 @@ class Host(SchedulingItem):
         'last_state':           StringProp(default='PENDING', fill_brok=['full_status', 'check_result'], retention=True),
         'last_state_id':        IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'last_state_type' :     StringProp(default='HARD', fill_brok=['full_status', 'check_result'],  retention=True),
-        'last_state_change':    FloatProp(default=time.time(), fill_brok=['full_status'], retention=True),
+        'last_state_change':    FloatProp(default=time.time(), fill_brok=['full_status', 'check_result'], retention=True),
         'last_hard_state_change': FloatProp(default=time.time(), fill_brok=['full_status', 'check_result'], retention=True),
         'last_hard_state':      StringProp(default='PENDING', fill_brok=['full_status'], retention=True),
         'last_hard_state_id' :  IntegerProp(default=0, fill_brok=['full_status'], retention=True),

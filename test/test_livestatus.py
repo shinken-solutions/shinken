@@ -65,7 +65,7 @@ class TestConfig(ShinkenTest):
             brok = self.sched.broks[brok_id]
             #print "Managing a brok type", brok.type, "of id", brok_id
             #if brok.type == 'update_service_status':
-            #    print "Problem?", brok.data['is_problem']
+            #    print "Problem?", brok.data
             if dodeepcopy:
                 brok = copy.deepcopy(brok)
             self.livestatus_broker.manage_brok(brok)
@@ -711,6 +711,45 @@ Filter: host_state != 0
             print nagresponse
             # TODO looks like a timing problem with nagios
             #self.assert_(self.lines_equal(response, nagresponse))
+
+    def test_modified_attributes(self):
+        host = self.sched.hosts.find_by_name("test_host_0")
+        host.checks_in_progress = []
+        host.act_depend_of = [] # ignore the router
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        self.scheduler_loop(2, [[host, 0, 'UP'], [svc, 0, 'OK']])
+        self.update_broker()
+        
+        request = """GET services
+Columns: host_name description modified_attributes modified_attributes_list
+Filter: host_name = test_host_0
+Filter: description = test_ok_0
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print "response1", response
+        self.assert_(response == "test_host_0;test_ok_0;0;\n")
+
+        now = time.time()
+        cmd = "[%lu] DISABLE_SVC_CHECK;test_host_0;test_ok_0" % now
+        self.sched.run_external_command(cmd)
+        self.sched.get_new_actions()
+        self.scheduler_loop(2, [[host, 0, 'UP'], [svc, 0, 'OK']])
+        self.update_broker()
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print "response2", response
+        self.assert_(response == 'test_host_0;test_ok_0;2;active_checks_enabled\n')
+        lssvc = self.livestatus_broker.datamgr.get_service("test_host_0", "test_ok_0")
+        print "ma", lssvc.modified_attributes
+        now = time.time()
+        cmd = "[%lu] DISABLE_SVC_NOTIFICATIONS;test_host_0;test_ok_0" % now
+        self.sched.run_external_command(cmd)
+        self.sched.get_new_actions()
+        self.scheduler_loop(2, [[host, 0, 'UP'], [svc, 0, 'OK']])
+        self.update_broker()
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print "response3", response
+        self.assert_(response == 'test_host_0;test_ok_0;3;notifications_enabled,active_checks_enabled\n')
+        print "ma", lssvc.modified_attributes
 
 
     def test_json(self):
@@ -1636,14 +1675,27 @@ othernode;0;broker-2;7772;1
         self.update_broker()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        # We need the dependency here, so comment it out!!!!!!
+        #host.act_depend_of = [] # ignore the router
         router = self.sched.hosts.find_by_name("test_router_0")
         router.checks_in_progress = []
-        router.act_depend_of = [] # ignore the router
+        #router.act_depend_of = [] # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
         svc.act_depend_of = [] # no hostchecks on critical checkresults
+
+        lshost = self.livestatus_broker.rg.hosts.find_by_name("test_host_0")
+        lsrouter = self.livestatus_broker.rg.hosts.find_by_name("test_router_0")
+        lssvc = self.livestatus_broker.rg.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        print "       scheduler   livestatus"
+        print "host   %9s   %s" % (host.is_problem, lshost.is_problem)
+        print "router %9s   %s" % (router.is_problem, lsrouter.is_problem)
+        print "svc    %9s   %s" % (svc.is_problem, lssvc.is_problem)
         self.scheduler_loop(4, [[host, 2, 'DOWN'], [router, 2, 'DOWN'], [svc, 2, 'BAD']])
+        print "       scheduler   livestatus"
+        print "host   %9s   %s" % (host.is_problem, lshost.is_problem)
+        print "router %9s   %s" % (router.is_problem, lsrouter.is_problem)
+        print "svc    %9s   %s" % (svc.is_problem, lssvc.is_problem)
         print "Is router a problem?", router.is_problem, router.state, router.state_type
         print "Is host a problem?", host.is_problem, host.state, host.state_type
         print "Is service a problem?", svc.is_problem, svc.state, svc.state_type
@@ -1652,6 +1704,10 @@ othernode;0;broker-2;7772;1
         for h in self.livestatus_broker.datamgr.rg.hosts:
             print h.get_dbg_name(), h.is_problem
 
+        print "       scheduler   livestatus"
+        print "host   %9s   %s" % (host.is_problem, lshost.is_problem)
+        print "router %9s   %s" % (router.is_problem, lsrouter.is_problem)
+        print "svc    %9s   %s" % (svc.is_problem, lssvc.is_problem)
         #---------------------------------------------------------------
         # get the columns meta-table
         #---------------------------------------------------------------

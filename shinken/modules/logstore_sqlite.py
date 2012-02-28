@@ -469,39 +469,84 @@ class LiveStatusLogStoreSqlite(BaseModule):
                 return ['%s IS NULL' % attribute, ()]
             else:
                 return ['%s = ?' % attribute, (reference, )]
+
+        def match_filter():
+            # sqlite matches case-insensitive by default. We make
+            # no difference between case-sensitive and case-insensitive
+            # here. The python filters will care for the correct
+            # matching later.
+            return ['%s LIKE ?' % attribute, ('%'+reference+'%', )]
+
+        def eq_nocase_filter():
+            if reference == '':
+                return ['%s IS NULL' % attribute, ()]
+            else:
+                return ['%s = ?' % attribute.lower(), (reference.lower(), )]
+
+        def match_nocase_filter():
+            return ['%s LIKE ?' % attribute, ('%'+reference+'%', )]
+
+        def lt_filter():
+            return ['%s < ?' % attribute, (reference, )]
+
+        def gt_filter():
+            return ['%s > ?' % attribute, (reference, )]
+
+        def le_filter():
+            return ['%s <= ?' % attribute, (reference, )]
+
+        def ge_filter():
+            return ['%s >= ?' % attribute, (reference, )]
+
         def ne_filter():
             if reference == '':
                 return ['%s IS NOT NULL' % attribute, ()]
             else:
                 return ['%s != ?' % attribute, (reference, )]
-        def gt_filter():
-            return ['%s > ?' % attribute, (reference, )]
-        def ge_filter():
-            return ['%s >= ?' % attribute, (reference, )]
-        def lt_filter():
-            return ['%s < ?' % attribute, (reference, )]
-        def le_filter():
-            return ['%s <= ?' % attribute, (reference, )]
-        def match_filter():
-            return ['%s LIKE ?' % attribute, ('%'+reference+'%', )]
+
+        def not_match_filter():
+            return ['NOT %s LIKE ?' % attribute, ('%'+reference+'%', )]
+
+        def ne_nocase_filter():
+            if reference == '':
+                return ['NOT %s IS NULL' % attribute, ()]
+            else:
+                return ['NOT %s = ?' % attribute.lower(), (reference.lower(), )]
+
+        def not_match_nocase_filter():
+            return ['NOT %s LIKE ?' % attribute, ('%'+reference+'%', )]
+
         def no_filter():
             return ['1 = 1', ()]
+
         if attribute not in good_attributes:
             return no_filter
         if operator == '=':
             return eq_filter
-        if operator == '>':
-            return gt_filter
-        if operator == '>=':
-            return ge_filter
-        if operator == '<':
-            return lt_filter
-        if operator == '<=':
-            return le_filter
-        if operator == '!=':
-            return ne_filter
-        if operator == '~':
+        elif operator == '~':
             return match_filter
+        elif operator == '=~':
+            return eq_nocase_filter
+        elif operator == '~~':
+            return match_nocase_filter
+        elif operator == '<':
+            return lt_filter
+        elif operator == '>':
+            return gt_filter
+        elif operator == '<=':
+            return le_filter
+        elif operator == '>=':
+            return ge_filter
+        elif operator == '!=':
+            return ne_filter
+        elif operator == '!~':
+            return not_match_filter
+        elif operator == '!=~':
+            return ne_nocase_filter
+        elif operator == '!~~':
+            return not_match_nocase_filter
+
+
 
 
 class LiveStatusSqlStack(LiveStatusStack):

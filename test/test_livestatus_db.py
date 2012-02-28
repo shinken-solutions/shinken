@@ -475,6 +475,64 @@ Columns: time type options state host_name"""
         archives_path = os.path.join(os.path.dirname(database_file), 'archives')
         print "archive is", archives_path
 
+    def test_sven(self):
+        self.print_header()
+        host = self.sched.hosts.find_by_name("test_host_0")
+        now = time.time()
+        num_logs = 0
+	host.state = 'DOWN'
+	host.state_type = 'SOFT'
+	host.attempt = 1
+	host.output = "i am down"
+	host.raise_alert_log_entry()
+	time.sleep(60)
+	host.state = 'UP'
+	host.state_type = 'HARD'
+	host.attempt = 1
+	host.output = "i am up"
+	host.raise_alert_log_entry()
+	time.sleep(60)
+        self.show_logs()
+        self.update_broker()
+        self.livestatus_broker.db.log_db_do_archive()
+        query_end = time.time() + 3600
+        query_start = query_end - 3600 * 24 * 21
+        request = """GET log
+Columns: class time type state host_name service_description plugin_output message options contact_name command_name state_type current_host_groups current_service_groups
+Filter: time >= """ + str(int(query_start)) + """
+Filter: time <= """ + str(int(query_end)) + """
+And: 2
+Filter: host_name = test_host_0
+Filter: type = HOST ALERT
+Filter: options ~ ;HARD;
+Filter: type = INITIAL HOST STATE
+Filter: options ~ ;HARD;
+Filter: type = CURRENT HOST STATE
+Filter: options ~ ;HARD;
+Filter: type = HOST DOWNTIME ALERT
+Or: 7
+And: 2
+Filter: host_name = test_host_0
+Filter: type = SERVICE ALERT
+Filter: options ~ ;HARD;
+Filter: type = INITIAL SERVICE STATE
+Filter: options ~ ;HARD;
+Filter: type = CURRENT SERVICE STATE
+Filter: options ~ ;HARD;
+Filter: type = SERVICE DOWNTIME ALERT
+Or: 7
+And: 2
+Filter: class = 2
+Filter: type ~~ TIMEPERIOD TRANSITION
+Or: 4
+OutputFormat: json
+ResponseHeader: fixed16
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print request
+        print response
+        pyresponse = eval(response.splitlines()[1])
+        self.assert_(len(pyresponse) == 2)
 
 class TestConfigBig(TestConfig):
 
@@ -703,169 +761,6 @@ OutputFormat: json"""
 
         time.time = fake_time_time
         time.sleep = fake_time_sleep
-
-    def test_a_matching_query(self):
-        #return
-        test_host_005 = self.sched.hosts.find_by_name("test_host_005")
-        test_host_099 = self.sched.hosts.find_by_name("test_host_099")
-        test_ok_00 = self.sched.services.find_srv_by_name_and_hostname("test_host_005", "test_ok_00")
-        test_ok_01 = self.sched.services.find_srv_by_name_and_hostname("test_host_005", "test_ok_01")
-        test_ok_04 = self.sched.services.find_srv_by_name_and_hostname("test_host_005", "test_ok_04")
-        test_ok_16 = self.sched.services.find_srv_by_name_and_hostname("test_host_005", "test_ok_16")
-        test_ok_99 = self.sched.services.find_srv_by_name_and_hostname("test_host_099", "test_ok_01")
-
-        days = 4
-        etime = time.time()
-        print "now it is", time.ctime(etime)
-        print "now it is", time.gmtime(etime)
-        etime_midnight = (etime - (etime % 86400)) + time.altzone
-        print "midnight was", time.ctime(etime_midnight)
-        print "midnight was", time.gmtime(etime_midnight)
-        query_start = etime_midnight - (days - 1) * 86400
-        query_end = etime_midnight
-        print "query_start", time.ctime(query_start)
-        print "query_end ", time.ctime(query_end)
-
-        # |----------|----------|----------|----------|----------|---x
-        #                                                            etime
-        #                                                        etime_midnight
-        #             ---x------
-        #                etime -  4 days
-        #                       |---
-        #                       query_start
-        #
-        #                ............................................
-        #                events in the log database ranging till now
-        #
-        #                       |________________________________|
-        #                       events which will be read from db
-        #
-        loops = int(86400 / 192)
-        time_warp(-1 * days * 86400)
-        print "warp back to", time.ctime(time.time())
-        # run silently
-        old_stdout = sys.stdout
-        sys.stdout = open(os.devnull, "w")
-        should_be = 0
-        for day in xrange(days):
-            sys.stderr.write("day %d now it is %s i run %d loops\n" % (day, time.ctime(time.time()), loops))
-            self.scheduler_loop(2, [
-                [test_ok_00, 0, "OK"],
-                [test_ok_01, 0, "OK"],
-                [test_ok_04, 0, "OK"],
-                [test_ok_16, 0, "OK"],
-                [test_ok_99, 0, "OK"],
-            ])
-            self.update_broker()
-            #for i in xrange(3600 * 24 * 7):
-            for i in xrange(loops):
-                if i % 10000 == 0:
-                    sys.stderr.write(str(i))
-                if i % 399 == 0:
-                    self.scheduler_loop(3, [
-                        [test_ok_00, 1, "WARN"],
-                        [test_ok_01, 2, "CRIT"],
-                        [test_ok_04, 3, "UNKN"],
-                        [test_ok_16, 1, "WARN"],
-                        [test_ok_99, 2, "CRIT"],
-                    ])
-                    if int(time.time()) >= query_start and int(time.time()) <= query_end:
-                        should_be += 3
-                        sys.stderr.write("now it should be %s\n" % should_be)
-                time.sleep(62)
-                if i % 399 == 0:
-                    self.scheduler_loop(1, [
-                        [test_ok_00, 0, "OK"],
-                        [test_ok_01, 0, "OK"],
-                        [test_ok_04, 0, "OK"],
-                        [test_ok_16, 0, "OK"],
-                        [test_ok_99, 0, "OK"],
-                    ])
-                    if int(time.time()) >= query_start and int(time.time()) <= query_end:
-                        should_be += 1
-                        sys.stderr.write("now it should be %s\n" % should_be)
-                time.sleep(2)
-                if i % 17 == 0:
-                    self.scheduler_loop(3, [
-                        [test_ok_00, 1, "WARN"],
-                        [test_ok_01, 2, "CRIT"],
-                    ])
-
-                time.sleep(62)
-                if i % 17 == 0:
-                    self.scheduler_loop(1, [
-                        [test_ok_00, 0, "OK"],
-                        [test_ok_01, 0, "OK"],
-                    ])
-                time.sleep(2)
-                if i % 14 == 0:
-                    self.scheduler_loop(3, [
-                        [test_host_005, 2, "DOWN"],
-                    ])
-                if i % 12 == 0:
-                    self.scheduler_loop(3, [
-                        [test_host_099, 2, "DOWN"],
-                    ])
-                time.sleep(62)
-                if i % 14 == 0:
-                    self.scheduler_loop(3, [
-                        [test_host_005, 0, "UP"],
-                    ])
-                if i % 12 == 0:
-                    self.scheduler_loop(3, [
-                        [test_host_099, 0, "UP"],
-                    ])
-                time.sleep(2)
-                self.update_broker()
-                if i % 1000 == 0:
-                    self.livestatus_broker.db.commit()
-            endtime = time.time()
-            self.livestatus_broker.db.commit()
-            sys.stderr.write("day %d end it is %s\n" % (day, time.ctime(time.time())))
-        sys.stdout.close()
-        sys.stdout = old_stdout
-        self.livestatus_broker.db.commit_and_rotate_log_db()
-        numlogs = self.livestatus_broker.db.execute("SELECT COUNT(*) FROM logs")
-        print "numlogs is", numlogs
-
-        # now we have a lot of events
-        # find type = HOST ALERT for test_host_005
-        query_end = endtime
-        query_start = query_end - 3600 * 24 * 21
-        request = """GET log
-Columns: class time type state host_name service_description plugin_output message options contact_name command_name state_type current_host_groups current_service_groups
-Filter: time >= """ + str(int(query_start)) + """
-Filter: time <= """ + str(int(query_end)) + """
-And: 2
-Filter: host_name = omd-testsite
-Filter: type = HOST ALERT
-Filter: options ~ ;HARD;
-Filter: type = INITIAL HOST STATE
-Filter: options ~ ;HARD;
-Filter: type = CURRENT HOST STATE
-Filter: options ~ ;HARD;
-Filter: type = HOST DOWNTIME ALERT
-Or: 7
-And: 2
-Filter: host_name = omd-testsite
-Filter: type = SERVICE ALERT
-Filter: options ~ ;HARD;
-Filter: type = INITIAL SERVICE STATE
-Filter: options ~ ;HARD;
-Filter: type = CURRENT SERVICE STATE
-Filter: options ~ ;HARD;
-Filter: type = SERVICE DOWNTIME ALERT
-Or: 7
-And: 2
-Filter: class = 2
-Filter: type ~~ TIMEPERIOD TRANSITION
-Or: 4
-OutputFormat: json
-ResponseHeader: fixed16
-"""
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print response
-
 
 
 class TestConfigNoLogstore(TestConfig):

@@ -95,6 +95,7 @@ test_define_with_space.py
 test_objects_and_notifways.py
 test_star_in_hostgroups.py
 test_freshness.py
+test_protect_esclamation_point.py
 test_parse_perfdata.py
 
 # takes long

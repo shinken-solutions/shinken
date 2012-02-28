@@ -257,39 +257,80 @@ class LiveStatusLogStoreMongoDB(BaseModule):
                 return '\'%s\' : \'\'' % (attribute,)
             else:
                 return '\'%s\' : %s' % (attribute, reference)
+
+        def match_filter():
+            return '\'%s\' : { \'$regex\' : %s }' % (attribute, reference)
+
+        def eq_nocase_filter():
+            if reference == '':
+                return '\'%s\' : \'\'' % (attribute,)
+            else:
+                return '\'%s\' : { \'$regex\' : %s, \'$options\' : \'i\' }' % (attribute, '^'+reference+'$')
+
+        def match_nocase_filter():
+            return '\'%s\' : { \'$regex\' : %s, \'$options\' : \'i\' }' % (attribute, reference)
+
+        def lt_filter():
+            return '\'%s\' : { \'$lt\' : %s }' % (attribute, reference)
+
+        def gt_filter():
+            return '\'%s\' : { \'$gt\' : %s }' % (attribute, reference)
+
+        def le_filter():
+            return '\'%s\' : { \'$lte\' : %s }' % (attribute, reference)
+
+        def ge_filter():
+            return '\'%s\' : { \'$gte\' : %s }' % (attribute, reference)
+
         def ne_filter():
             if reference == '':
                 return '\'%s\' : { \'$ne\' : '' }' % (attribute,)
             else:
                 return '\'%s\' : { \'$ne\' : %s }' % (attribute, reference)
-        def gt_filter():
-            return '\'%s\' : { \'$gt\' : %s }' % (attribute, reference)
-        def ge_filter():
-            return '\'%s\' : { \'$gte\' : %s }' % (attribute, reference)
-        def lt_filter():
-            return '\'%s\' : { \'$lt\' : %s }' % (attribute, reference)
-        def le_filter():
-            return '\'%s\' : { \'$lte\' : %s }' % (attribute, reference)
-        def match_filter():
-            return '\'%s\' : { \'$regex\' : %s }' % (attribute, reference)
+
+        def not_match_filter():
+            # http://myadventuresincoding.wordpress.com/2011/05/19/mongodb-negative-regex-query-in-mongo-shell/
+            return '\'%s\' : { \'$regex\' : %s }' % (attribute, '^((?!'+reference+').)')
+
+        def ne_nocase_filter():
+            if reference == '':
+                return '\'%s\' : \'\'' % (attribute,)
+            else:
+                return '\'%s\' : { \'$regex\' : %s, \'$options\' : \'i\' }' % (attribute, '^((?!'+reference+').)')
+
+        def not_match_nocase_filter():
+            return '\'%s\' : { \'$regex\' : %s, \'$options\' : \'i\' }' % (attribute, '^((?!'+reference+').)')
+
         def no_filter():
             return '\'time\' : { \'$exists\' : True }' 
+
         if attribute not in good_attributes:
             return no_filter
         if operator == '=':
             return eq_filter
-        if operator == '>':
-            return gt_filter
-        if operator == '>=':
-            return ge_filter
-        if operator == '<':
-            return lt_filter
-        if operator == '<=':
-            return le_filter
-        if operator == '!=':
-            return ne_filter
-        if operator == '~':
+        elif operator == '~':
             return match_filter
+        elif operator == '=~':
+            return eq_nocase_filter
+        elif operator == '~~':
+            return match_nocase_filter
+        elif operator == '<':
+            return lt_filter
+        elif operator == '>':
+            return gt_filter
+        elif operator == '<=':
+            return le_filter
+        elif operator == '>=':
+            return ge_filter
+        elif operator == '!=':
+            return ne_filter
+        elif operator == '!~':
+            return not_match_filter
+        elif operator == '!=~':
+            return not_eq_nocase_filter
+        elif operator == '!~~':
+            return not_match_nocase_filter
+
 
 
 class LiveStatusMongoStack(LiveStatusStack):
