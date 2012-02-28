@@ -62,7 +62,7 @@ class Glpidb_broker(BaseModule):
            #Service
            'service_check_result' : {
                'plugin_monitoring_services_id' : {'transform' : None},
-               'plugin_monitoring_businessapplications_id' : {'transform' : None},
+               'plugin_monitoring_servicescatalogs_id' : {'transform' : None},
                'event' : {'transform' : None},
                'perf_data' : {'transform' : None},
                'output' : {'transform' : None},
@@ -109,7 +109,7 @@ class Glpidb_broker(BaseModule):
                 s = brok.data['service_description'].split('-')
                 try:
                     if 'businessrules' in s[2]:
-                        new_brok.data['plugin_monitoring_businessapplications_id'] = s[1]
+                        new_brok.data['plugin_monitoring_servicescatalogs_id'] = s[1]
                 except:
                     new_brok.data['plugin_monitoring_services_id'] = s[1]
                     new_brok.data['event'] = brok.data['output']
@@ -204,7 +204,7 @@ class Glpidb_broker(BaseModule):
     def manage_service_check_result_brok(self, b):
         #logger.log("GLPI : data in DB %s " % b)
         try:
-            b.data['plugin_monitoring_businessapplications_id']
+            b.data['plugin_monitoring_servicescatalogs_id']
             return ''
         except:
             b.data['date'] = time.strftime('%Y-%m-%d %H:%M:%S')
@@ -223,9 +223,9 @@ class Glpidb_broker(BaseModule):
         del new_data['latency']
         del new_data['execution_time']
         try:
-            new_data['id'] = b.data['plugin_monitoring_businessapplications_id']
-            del new_data['plugin_monitoring_businessapplications_id']
-            table = 'glpi_plugin_monitoring_businessapplications'
+            new_data['id'] = b.data['plugin_monitoring_servicescatalogs_id']
+            del new_data['plugin_monitoring_servicescatalogs_id']
+            table = 'glpi_plugin_monitoring_servicescatalogs'
         except:
             new_data['id'] = b.data['plugin_monitoring_services_id']
             del new_data['plugin_monitoring_services_id']
