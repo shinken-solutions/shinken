@@ -1,8 +1,8 @@
 recursive-include shinken *.* 
 recursive-include shinken/webui *.* 
-recursive-include etc *.cfg *.ini
+recursive-include etc *.cfg *.ini *.pem
 recursive-include windows .bat .reg
-recursive-include bin *.* *-*
+recursive-include bin *.* *-* shinken
 recursive-include libexec *.*
 include test *.py *.txt
 recursive-include doc *.html *.png *.txt *.css *.jpg *.xml *.tpl *.gif *.js
