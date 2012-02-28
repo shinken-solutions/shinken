@@ -10,5 +10,5 @@ global-exclude .git *.pyc *.pyo
 global-exclude .debug .pid .exe *~
 include var/void_for_git
 include MANIFEST.in FROM_NAGIOS_TO_SHINKEN Changelog
-include COPYING THANKS README
+include COPYING THANKS README README.rst
 exclude doc/dvi doc/html/ etc.orig/ etc/bench/ test/my/
