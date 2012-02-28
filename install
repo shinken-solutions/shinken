@@ -342,6 +342,7 @@ function prerequisites(){
 
         DEBIAN)
             PACKAGES=$APTPKGS
+            apt-get update >> $TMP/shinken.install.log 2>&1
             QUERY="debinstalled "
             ;;
     esac
@@ -978,6 +979,7 @@ function install_nagvis(){
             ;;
         DEBIAN)
             cecho " > Installing prerequisites" green
+            apt-get update >> $TMP/shinken.install.log 2>&1
             DEBIAN_FRONTEND=noninteractive apt-get install -y $NAGVISAPTPKGS >> $TMP/shinken.install.log 2>&1
             HTTPDUSER="www-data"
             HTTPDGROUP="www-data"
@@ -1063,6 +1065,7 @@ function install_multisite(){
         for p in $MKAPTPKG
         do
             cecho " -> Installing $p" green
+            apt-get update >> $TMP/shinken.install.log 2>&1
             apt-get --force-yes -y install $p >> $TMP/shinken.install.log 2>&1 
         done
     else
@@ -1165,6 +1168,7 @@ function install_pnp4nagios(){
         yum -yq install $PNPYUMPKG >> $TMP/shinken.install.log 2>&1
     else
         cecho " > Installing prerequisites" green
+        apt-get update >> $TMP/shinken.install.log 2>&1
         apt-get -y install $PNPAPTPKG >> $TMP/shinken.install.log 2>&1
     fi
     cd $TMP
@@ -1256,6 +1260,7 @@ function install_check_hpasm(){
         yum install -yq $CHECKHPASMYUMPKGS  >> $TMP/shinken.install.log 2>&1 
     else
         cecho " > Installing prerequisites" green 
+        apt-get update >> $TMP/shinken.install.log 2>&1
         apt-get -y install $CHECKHPASMAPTPKGS >> $TMP/shinken.install.log 2>&1 
     fi
 
@@ -1319,6 +1324,7 @@ function install_check_mongodb(){
         if [ ! -z "$CHECKMONGOAPTPKG" ]
         then
             cecho " > Installing prerequisites" green 
+            apt-get update >> $TMP/shinken.install.log 2>&1
             apt-get -y install $CHECKMONGOAPTPKG >> $TMP/shinken.install.log 2>&1 
         fi
     fi
@@ -1365,6 +1371,7 @@ function install_check_nwc_health(){
         if [ ! -z "$CHECKNWCAPTPKG" ]
         then 
             cecho " > Installing prerequisites" green 
+            apt-get update >> $TMP/shinken.install.log 2>&1
             apt-get -y install $CHECKNWCAPTPKG >> $TMP/shinken.install.log 2>&1 
         fi
     fi
@@ -1425,6 +1432,7 @@ plugin. Ask your vendor to know how to get it." yellow
         if [ ! -z "$CHECKEMCAPTPKG" ]
         then 
             cecho " > Installing prerequisites" green 
+            apt-get update >> $TMP/shinken.install.log 2>&1
             apt-get -y install $CHECKEMCAPTPKG >> $TMP/shinken.install.log 2>&1 
         fi
     fi
@@ -1492,6 +1500,7 @@ function install_check_esx3(){
         yum install -yq $VSPHERESDKYUMPKGS  >> $TMP/shinken.install.log 2>&1 
     else
         cecho " > Installing prerequisites" green 
+        apt-get update >> $TMP/shinken.install.log 2>&1
         apt-get -y install $VSPHERESDKAPTPKGS >> $TMP/shinken.install.log 2>&1 
     fi
     cd $TMP
@@ -1540,6 +1549,7 @@ function install_nagios-plugins(){
         yum install -yq $NAGPLUGYUMPKG  >> $TMP/shinken.install.log 2>&1 
     else
         cecho " > Installing prerequisites" green 
+        apt-get update >> $TMP/shinken.install.log 2>&1
         DEBIAN_FRONTEND=noninteractive apt-get -y install $NAGPLUGAPTPKG >> $TMP/shinken.install.log 2>&1 
     fi
     cd $TMP
@@ -1573,6 +1583,7 @@ function install_manubulon(){
         yum install -yq $MANUBULONYUMPKG  >> $TMP/shinken.install.log 2>&1 
     else
         cecho " > Installing prerequisites" green 
+        apt-get update >> $TMP/shinken.install.log 2>&1
         apt-get -y install $MANUBULONAPTPKG >> $TMP/shinken.install.log 2>&1 
     fi
     cd $TMP
@@ -1618,6 +1629,7 @@ function install_check_wmi_plus(){
         yum -yq install $WMICYUMPKG >> $TMP/shinken.install.log 2>&1 
     else
         cecho " > Installing prerequisites" green 
+        apt-get update >> $TMP/shinken.install.log 2>&1
         apt-get -y install $WMICAPTPKG >> $TMP/shinken.install.log 2>&1
     fi 
     cd $TMP
@@ -1691,9 +1703,11 @@ function install_check_oracle_health(){
     if [ "$CODE" == "REDHAT" ]
     then
         cecho " > Installing prerequisites" green 
+        apt-get update >> $TMP/shinken.install.log 2>&1
         apt-get -y install $CHECKORACLEHEALTHYUMPKG >> $TMP/shinken.install.log 2>&1 
     else
         cecho " > Installing prerequisites" green 
+        apt-get update >> $TMP/shinken.install.log 2>&1
         apt-get -y install $CHECKORACLEHEALTHAPTPKG >> $TMP/shinken.install.log 2>&1 
     fi
     cecho " > Installing cpan prerequisites" green
@@ -1762,6 +1776,7 @@ function install_check_netapp2(){
         yum -yq install $CHECKNETAPP2YUMPKGS >> $TMP/shinken.install.log
     else
         cecho " > Installing prerequisites" green
+        apt-get update >> $TMP/shinken.install.log 2>&1
         apt-get -y install $CHECKNETAPP2APTPKGS >> $TMP/shinken.install.log
     fi
     cd $TMP
@@ -1791,6 +1806,7 @@ function install_check_mysql_health(){
         yum -yq install $CHECKMYSQLHEALTHYUMPKG >> $TMP/shinken.install.log
     else
         cecho " > Installing prerequisites" green
+        apt-get update >> $TMP/shinken.install.log 2>&1
         apt-get -y install $CHECKMYSQLHEALTHAPTPKG >> $TMP/shinken.install.log
     fi
     cd $TMP
