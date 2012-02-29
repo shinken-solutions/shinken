@@ -602,6 +602,32 @@ function enable(){
     esac    
 }
 
+function cleanuptarget(){
+    # clean up unnecessary files and folders
+    if [ "$TARGET" == "/" ] 
+    then 
+        cecho " > Invalid target folder" red
+        exit 2
+    fi
+    if [ -z "$TARGET" ] 
+    then 
+        cecho " > Invalid target folder" red
+        exit 2
+    fi
+
+    cd $TARGET
+    rm -Rf test
+    rm -Rf windows
+    rm -Rf clean.sh
+    rm -Rf for_fedora
+    rm -Rf for_packages
+#    rm -Rf install install.d 
+    rm -Rf MANIFEST.in setup.py 
+    rm -Rf etc/*windows*
+
+    cp etc/shinken-specific.cfg etc/shinken-specific.cfg.orig
+}
+
 function sinstall(){
     #cecho "Installing shinken" green
     check_distro
@@ -609,6 +635,7 @@ function sinstall(){
     prerequisites
     create_user
     cp -Rf $src $TARGET
+    cleanuptarget
     relocate
     ln -s $TARGET/bin/default/shinken /etc/default/shinken
     cp $TARGET/bin/init.d/shinken* /etc/init.d/
