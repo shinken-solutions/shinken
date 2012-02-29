@@ -86,6 +86,9 @@
     <script src="/static/js/bootstrap-tooltip.js"></script>
     <script src="/static/js/jquery.meow.js"></script>
 
+    <!--Shinken ones-->
+    <script src="/static/js/deptree.js"></script>
+
     %# End of classic js import. Now call for specific ones
       %for p in js:
     <script type="text/javascript" src="/static/{{p}}"></script>

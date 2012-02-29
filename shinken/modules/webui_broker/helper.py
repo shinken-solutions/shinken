@@ -302,20 +302,22 @@ class Helper(object):
 
     # Return a button with text, image, id and class (if need)
     def get_button(self, text, img=None, id=None, cls=None):
-        s = '<div class="buttons">\n'
+        #s = '<div class="buttons">\n'
+        s = '<div class="btn">\n'
         if cls and not id:
-            s += '<button class="%s">\n' % cls
+            s += '<div class="%s">\n' % cls
         elif id and not cls:
-            s += '<button id="%s">\n' % id
+            s += '<div id="%s">\n' % id
         elif id and cls:
-            s += '<button class="%s" id="%s">\n' % (cls, id)
+            s += '<div class="%s" id="%s">\n' % (cls, id)
         else:
-            s += '<button>\n'
+            s += '<div>\n'
         if img:
             s += '<img src="%s" alt=""/>\n' % img
         s += "%s" % text
-        s+= ''' </button>
+        s+= ''' </div>
             </div>\n'''
+
         return s
 
 
