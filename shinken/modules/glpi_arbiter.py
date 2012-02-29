@@ -41,18 +41,20 @@ def get_instance(plugin):
     uri = plugin.uri
     login_name = plugin.login_name
     login_password = plugin.login_password
-    instance = Glpi_arbiter(plugin, uri, login_name, login_password)
+    tag = plugin.tag
+    instance = Glpi_arbiter(plugin, uri, login_name, login_password, tag)
     return instance
 
 
 
 #Just get hostname from a GLPI webservices
 class Glpi_arbiter(BaseModule):
-    def __init__(self, mod_conf, uri, login_name, login_password):
+    def __init__(self, mod_conf, uri, login_name, login_password, tag):
         BaseModule.__init__(self, mod_conf)
         self.uri = uri
         self.login_name = login_name
         self.login_password = login_password
+        self.tag = tag
 
     #Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
@@ -73,7 +75,8 @@ class Glpi_arbiter(BaseModule):
              'hosts' : [],
              'services' : [],
              'contacts' : []}
-        arg = {'session' : self.session}
+        arg = {'session' : self.session,
+               'tag' : self.tag}
 
         # Get commands
         all_commands = self.con.monitoring.shinkenCommands(arg)
