@@ -342,7 +342,10 @@ function prerequisites(){
 
         DEBIAN)
             PACKAGES=$APTPKGS
-            apt-get update >> $TMP/shinken.install.log 2>&1
+	    if [ $SKIPPREREQUISITES -ne 1 ]
+            then
+                apt-get update >> $TMP/shinken.install.log 2>&1
+            fi
             QUERY="debinstalled "
             ;;
     esac
@@ -650,7 +653,8 @@ function sinstall(){
     /etc/init.d/shinken start 
     cecho "+------------------------------------------------------------------------------" green
     cecho "| Shinken is now installed on your server " green
-    cecho "| You can start it with /etc/init.d/shinken start " green
+    cecho "| The install location is : $TARGET" green
+    cecho "| " green
     cecho "| The Web Interface is available at : http://localhost:7767" green
     cecho "| The default credentials for the webui are admin/admin" green
     cecho "+------------------------------------------------------------------------------" green
