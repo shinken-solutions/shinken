@@ -161,7 +161,7 @@ class Ndodb_Mysql_broker(BaseModule):
     def connect_database(self):    
         try :
             self.db.connect_database()
-        except _mysql_exceptions.OperationalError as exp:
+        except _mysql_exceptions.OperationalError, exp:
             logger.log( "[MySQL/NDO] Module raise an exception : %s . Please check the arguments!" % exp)
             raise
 
