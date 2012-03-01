@@ -21,15 +21,15 @@
 
 %# " Add the auto copleter in the search input form"
 <script type="text/javascript">
-document.addEvent('domready', function() {
+$(document).ready(function() {
  
-  var inputWord = $('search_input');
+  var inputWord = $('#search_input');
  
   // Our instance for the element with id "search_input"
-  new Autocompleter.Request.JSON(inputWord, '/lookup', {
+/*  new Autocompleter.Request.JSON(inputWord, '/lookup', {
        'indicatorClass': 'autocompleter-loading',
        'minLength': 3
-  });
+  });*/
 
 });
 </script>
@@ -139,7 +139,7 @@ document.addEvent('domready', function() {
 	  <div>
 	    <table class="tableCriticity">
 	      <tr>
-	        <td> <img src="/static/images/untick.png" alt="untick" /style="cursor:pointer;" onclick="add_remove_elements('{{pb.get_full_name()}}')" id="selector-{{pb.get_full_name()}}" > </td>
+	        <td> <img src="/static/images/untick.png" alt="untick" /style="cursor:pointer;" onclick="add_remove_elements('{{helper.get_html_id(pb)}}')" id="selector-{{helper.get_html_id(pb)}}" > </td>
 		        <td> <div class="aroundpulse">
 			    %# " We put a 'pulse' around the elements if it's an important one "
 			    %if pb.business_impact > 2 and pb.state_id in [1, 2, 3]:
@@ -183,7 +183,7 @@ document.addEvent('domready', function() {
 		<td class="perfometer" {{!onmouse_code}}>
 		  {{!helper.get_perfometer(pb)}}
 		</td>
-		<td class="no_border opacity_hover shortdesc" style="max-width:20px;" onclick="show_detail('{{pb.get_full_name()}}')"> <img src="/static/images/expand.png" alt="expand" /> </td>
+		<td class="no_border opacity_hover shortdesc" style="max-width:20px;" onclick="show_detail('{{helper.get_html_id(pb)}}')"> <img src="/static/images/expand.png" alt="expand" /> </td>
 		
 		</tr>
 	      
@@ -205,7 +205,7 @@ document.addEvent('domready', function() {
 
     %# "This div is need so the element will came back in the center of the previous div"
     <div class="clear"></div>
-      <div id="{{pb.get_full_name()}}" class="detail">
+      <div id="{{helper.get_html_id(pb)}}" class="detail">
 	<table class="tableCriticity">
 	  <tr>
 	    <td style="width:20px;"><b>Host</b></td>

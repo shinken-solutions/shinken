@@ -47,6 +47,33 @@
       }
     </style>
 
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- WAS Placed at the end of the document so the pages load faster -->
+    <!-- but then we a't call $ in our html page. So we will loose a bit loading speed (just
+	 for the first launch, not a big deal) but then we can call jquery in our page -->
+    <script src="/static/js/jquery.js"></script>
+    <script src="/static/js/jquery-ui-1.8.17.custom.min.js"></script>
+    <script src="/static/js/shinkenui.js"></script>
+    <script src="/static/js/bootstrap-collapse.js"></script>
+    <script src="/static/js/bootstrap-tab.js"></script>
+    <script src="/static/js/bootstrap-button.js"></script>
+    <script src="/static/js/bootstrap-dropdown.js"></script>
+    <script src="/static/js/bootstrap-tooltip.js"></script>
+    <script src="/static/js/jquery.meow.js"></script>
+
+    <!--Shinken ones-->
+    <script src="/static/js/shinken-refresh.js"></script>
+    <script src="/static/js/shinken-actions.js"></script>
+    <script src="/static/js/shinken-deptree.js"></script>
+
+    %# End of classic js import. Now call for specific ones
+      %for p in js:
+    <script type="text/javascript" src="/static/{{p}}"></script>
+      %end
+
+
   </head>
 
 <body>
@@ -74,26 +101,6 @@
     </div><!--/.fluid-container-->
 
 
-    <!-- Le javascript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="/static/js/jquery.js"></script>
-    <script src="/static/js/jquery-ui-1.8.17.custom.min.js"></script>
-    <script src="/static/js/shinkenui.js"></script>
-    <script src="/static/js/bootstrap-collapse.js"></script>
-    <script src="/static/js/bootstrap-tab.js"></script>
-    <script src="/static/js/bootstrap-button.js"></script>
-    <script src="/static/js/bootstrap-dropdown.js"></script>
-    <script src="/static/js/bootstrap-tooltip.js"></script>
-    <script src="/static/js/jquery.meow.js"></script>
-
-    <!--Shinken ones-->
-    <script src="/static/js/deptree.js"></script>
-
-    %# End of classic js import. Now call for specific ones
-      %for p in js:
-    <script type="text/javascript" src="/static/{{p}}"></script>
-      %end
 
   </body>
 </html>

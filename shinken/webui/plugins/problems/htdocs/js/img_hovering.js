@@ -93,7 +93,8 @@ function hide_hover_img(){
 
 // When we move, we save our mouse position, both
 // absolute and relative
-window.addEvent('domready', function(){
+//window.addEvent('domready', function(){
+$(document).ready(function(){
     document.onmousemove = function(e){
 	mouse_abs_x = e.pageX;
 	mouse_abs_y = e.pageY;

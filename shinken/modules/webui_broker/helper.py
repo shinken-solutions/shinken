@@ -592,8 +592,11 @@ class Helper(object):
         return s
 
 
-
-
+    # We want the html id of an hostor a service. It's basically
+    # the full_name with / changed as -- (because in html, / is not valid :) )
+    def get_html_id(self, elt):
+        return elt.get_full_name().replace('/','--')
+        
 
 
 
