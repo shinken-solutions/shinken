@@ -75,6 +75,9 @@ class Notification(Action):
         'worker':              StringProp (default='none'),
         'reactionner_tag':     StringProp (default='None'),
         'creation_time':       IntegerProp(default=0),
+        # Keep a lsit of currently active escalations
+        'already_start_escalations':  StringProp(default=set()),
+
     }
 
     macros = {
@@ -148,7 +151,8 @@ class Notification(Action):
         self.creation_time = time.time()
         self.worker = 'none'
         self.reactionner_tag = reactionner_tag
-
+        self.already_start_escalations = set()
+        
 
     # return a copy of the check but just what is important for execution
     # So we remove the ref and all
@@ -232,4 +236,5 @@ class Notification(Action):
             self.worker = 'none'
         if not getattr(self, 'module_type', None):
             self.module_type = 'fork'
-    
+        if not hasattr(self, 'active_escalations'):
+            self.already_start_escalations = set()

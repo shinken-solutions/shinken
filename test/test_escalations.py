@@ -27,6 +27,8 @@
 #It's ugly I know....
 from shinken_test import *
 
+#time.time = original_time_time
+#time.sleep = original_time_sleep
 
 class TestEscalations(ShinkenTest):
     def setUp(self):
@@ -337,7 +339,9 @@ class TestEscalations(ShinkenTest):
         #--------------------------------------------------------------
         print "- 1 x BAD get hard -------------------------------------"
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
-        
+
+
+        print "  ** LEVEL1 ** "* 20
         # We check if we really notify the level1
         self.assert_(self.any_log_match('SERVICE NOTIFICATION: level1.*;CRITICAL;'))
         self.show_and_clear_logs()
@@ -364,7 +368,7 @@ class TestEscalations(ShinkenTest):
         # to level2 is asking for it. If it don't, the standard was 1 day!
         for n in svc.notifications_in_progress.values():
             next = svc.get_next_notification_time(n)
-            print next - now
+            print abs(next - now)
             # Check if we find the next notification for the next hour,
             # and not for the next day like we ask before
             self.assert_(abs(next - now - 3600) < 10) 
@@ -373,6 +377,9 @@ class TestEscalations(ShinkenTest):
         for n in svc.notifications_in_progress.values():
             n.t_to_go = time.time()
             n.creation_time -= 3600
+
+        print "  ** LEVEL2 ** "* 20
+
 
         # We go in trouble too
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.001)
@@ -419,6 +426,22 @@ class TestEscalations(ShinkenTest):
             self.assert_(self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;'))
             self.show_and_clear_logs()
 
+
+
+        # Ok now we get the normal stuff, we do NOT want to raise so soon a 
+        # notification.
+        self.scheduler_loop(2, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
+        self.show_actions()
+        print svc.notifications_in_progress
+        # Should be far away
+        for n in svc.notifications_in_progress.values():
+            print n, n.t_to_go, time.time(), n.t_to_go - time.time()
+            # Should be "near" one day now, so 84000s
+            self.assert_( 8300 < abs(n.t_to_go - time.time()) < 85000)
+        # And so no notification
+        self.assert_(not self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;'))
+        
+
         # Now we recover, it will be fun because all of level{1,2,3} must be send a
         # recovery notif
         self.scheduler_loop(2, [[svc, 0, 'OK']], do_sleep=True, sleep_time=0.1)
@@ -427,7 +450,6 @@ class TestEscalations(ShinkenTest):
         self.assert_(self.any_log_match('SERVICE NOTIFICATION: level2.*;OK;'))
         self.assert_(self.any_log_match('SERVICE NOTIFICATION: level3.*;OK;'))
         self.show_and_clear_logs()
-
 
 
 if __name__ == '__main__':

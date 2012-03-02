@@ -246,7 +246,7 @@ class Service(SchedulingItem):
 
         # Set if the element just change its father/son topology
         'topology_change' : BoolProp(default=False, fill_brok=['full_status']),
-        
+
     })
 
     # Mapping between Macros and properties (can be prop or a function)

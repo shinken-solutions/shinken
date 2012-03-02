@@ -315,7 +315,7 @@ class Scheduler:
             to_del_checks = [c for c in self.checks.values() if c.id < id_max - max_checks]
             nb_checks_drops = len(to_del_checks)
             if nb_checks_drops > 0:
-                print "Info : I have to del some checks..., sorry", to_del_checks
+                log.logger("Info : I have to del some checks (%d)..., sorry" % nb_checks_drops)
             for c in to_del_checks:
                 i = c.id
                 elt = c.ref
@@ -513,7 +513,6 @@ class Scheduler:
                             if item.notification_interval != 0 and a.t_to_go is not None:
                                 # We must continue to send notifications.
                                 # Just leave it in the actions list and set it to "scheduled" and it will be found again later
-                                #a.t_to_go = a.t_to_go + item.notification_interval * item.__class__.interval_length
                                 # Ask the service/host to compute the next notif time. It can be just
                                 # a.t_to_go + item.notification_interval * item.__class__.interval_length
                                 # or maybe before because we have an escalation that need to raise up before
