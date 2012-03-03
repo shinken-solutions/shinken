@@ -777,11 +777,18 @@ function sinstall(){
 ########################
 
 function backup(){
-    cadre "Backup shinken configuration, plugins and data" green
+    cadre "Backup shinken platform" green
 
-    manageparameters "quiet"
+    manageparameters "quiet" > /dev/null 2>&1
 
+    cecho " > Stop shinken" green
     skill
+    if [ -f /etc/init.d/npcd ]
+    then
+        cecho " > Stop npcd" green
+        /etc/init.d/npcd stop > /dev/null 2>&1
+    fi
+
     if [ ! -e $BACKUPDIR ]
     then
         mkdir $BACKUPDIR
@@ -791,10 +798,54 @@ function backup(){
     mkdir -p $BACKUPDIR/bck-shinken.$DATE/var
     # Sugg :
     # Add : cp -Rfp $TARGET/bin $BACKUPDIR/bck-shinken.$DATE/ line to backup bin
+    cecho " > Backup shinken" green
+    cecho " --> Backup shinken/etc" green
     cp -Rfp $ETC/* $BACKUPDIR/bck-shinken.$DATE/etc
+    cecho " --> Backup shinken/libexec" green
     cp -Rfp $TARGET/libexec/* $BACKUPDIR/bck-shinken.$DATE/libexec
+    cecho " --> Backup shinken/var" green
     cp -Rfp $TARGET/var/* $BACKUPDIR/bck-shinken.$DATE/var
-    cecho " > Backup done. Id is $DATE" green
+
+    if [ -d $NAGVISPREFIX ]
+    then
+        cecho " > Backup nagvis" green
+        mkdir -p $BACKUPDIR/bck-shinken.$DATE/nagvis
+        cecho " --> Backup nagvis/share/userfiles" green
+        cp -Rfp $NAGVISPREFIX/share/userfiles $BACKUPDIR/bck-shinken.$DATE/nagvis/
+        cecho " --> Backup nagvis/etc" green
+        cp -Rfp $NAGVISPREFIX/etc $BACKUPDIR/bck-shinken.$DATE/nagvis/
+    fi
+
+    if [ -d $MKPREFIX ]
+    then
+        mkdir -p $BACKUPDIR/bck-shinken.$DATE/check_mk
+        cecho " > Backup check_mk" green
+        cecho " --> Backup check_mk/etc" green
+        cp -Rfp $MKPREFIX/etc $BACKUPDIR/bck-shinken.$DATE/check_mk/
+    fi
+
+    if [ -d $PNPPREFIX ]
+    then
+        mkdir -p $BACKUPDIR/bck-shinken.$DATE/pnp4nagios
+        cecho " > Backup pnp4nagios" green
+        cecho " --> Backup pnp4nagios/etc" green
+        cp -Rfp $PNPPREFIX/etc $BACKUPDIR/bck-shinken.$DATE/pnp4nagios/
+        cecho " --> Backup pnp4nagios/var" green
+        cp -Rfp $PNPPREFIX/var $BACKUPDIR/bck-shinken.$DATE/pnp4nagios/
+        cecho " --> Backup pnp4nagios/share/templates" green
+        cp -Rfp $PNPPREFIX/share/templates $BACKUPDIR/bck-shinken.$DATE/pnp4nagios/
+    fi
+
+
+    cecho " > Start shinken" green
+    skill
+    if [ -f /etc/init.d/npcd ]
+    then
+        cecho " > Start npcd" green
+        /etc/init.d/npcd stop > /dev/null 2>&1
+    fi
+
+    cadre " > Backup done. Id is $DATE" green
 }
 
 function backuplist(){
