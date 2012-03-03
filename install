@@ -717,13 +717,15 @@ function backup(){
     then
         mkdir $BACKUPDIR
     fi
-    mkdir -p $BACKUPDIR/bck-shinken.$DATE
+    mkdir -p $BACKUPDIR/bck-shinken.$DATE/etc
+    mkdir -p $BACKUPDIR/bck-shinken.$DATE/libexec
+    mkdir -p $BACKUPDIR/bck-shinken.$DATE/var
     # Sugg :
     # Add : cp -Rfp $TARGET/bin $BACKUPDIR/bck-shinken.$DATE/ line to backup bin
-    cp -Rfp $ETC $BACKUPDIR/bck-shinken.$DATE/
-    cp -Rfp $TARGET/libexec $BACKUPDIR/bck-shinken.$DATE/
-    cp -Rfp $TARGET/var $BACKUPDIR/bck-shinken.$DATE/
-    cecho " > Backup done. Id is $DATE"
+    cp -Rfp $ETC/* $BACKUPDIR/bck-shinken.$DATE/etc
+    cp -Rfp $TARGET/libexec/* $BACKUPDIR/bck-shinken.$DATE/libexec
+    cp -Rfp $TARGET/var/* $BACKUPDIR/bck-shinken.$DATE/var
+    cecho " > Backup done. Id is $DATE" green
 }
 
 function backuplist(){
@@ -755,10 +757,12 @@ function restore(){
         backuplist
         exit 2
     fi
-    rm -Rf $ETC
-    rm -Rf $TARGET/libexec 
-    rm -Rf $TARGET/var 
-    cp -Rfp $BACKUPDIR/bck-shinken.$1/* $TARGET/
+    rm -Rf $ETC/*
+    rm -Rf $TARGET/libexec/* 
+    rm -Rf $TARGET/var/* 
+    cp -Rfp $BACKUPDIR/bck-shinken.$1/etc/* $ETC/
+    cp -Rfp $BACKUPDIR/bck-shinken.$1/var/* $VAR/
+    cp -Rfp $BACKUPDIR/bck-shinken.$1/libexec/* $LIBEXEC/
     cecho " > Restoration done" green
 }
 
