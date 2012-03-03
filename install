@@ -36,6 +36,8 @@ fi
 function remove(){
     cadre "Removing shinken" green
     skill
+
+    manageparameters "quiet"
     
     if [ -d "$TARGET" ]
     then 
@@ -548,16 +550,19 @@ function relocate(){
         sed -i 's#/usr/local/shinken#'$TARGET'#g' "$fic"
     done
 
-    # do the same for etc dir
-    cd $ETC
-    for fic in $(find . | grep -v "shinken-install" | grep -v "\.pyc$" | xargs grep -snH "/usr/local/shinken" --color | cut -f1 -d' ' | awk -F : '{print $1}' | sort | uniq)
-    do 
-        cecho " > Processing $fic" green
-        cp "$fic" "$fic.orig" 
-        #sed -i 's#/opt/shinken#'$TARGET'#g' $fic 
-        sed -i 's#/usr/local/shinken#'$TARGET'#g' "$fic"
-    done
-    cd $TARGET
+    if [ "$TARGET/etc" != "$ETC" ]
+    then
+        # do the same for etc dir if etc dir does not reside beside target
+        cd $ETC
+        for fic in $(find . | grep -v "shinken-install" | grep -v "\.pyc$" | xargs grep -snH "/usr/local/shinken" --color | cut -f1 -d' ' | awk -F : '{print $1}' | sort | uniq)
+        do 
+            cecho " > Processing $fic" green
+            cp "$fic" "$fic.orig" 
+            #sed -i 's#/opt/shinken#'$TARGET'#g' $fic 
+            sed -i 's#/usr/local/shinken#'$TARGET'#g' "$fic"
+        done
+        cd $TARGET
+    fi
 
     # when read hat 5 try to use python26
     if [ "$CODE" = "REDHAT" ]
@@ -650,8 +655,60 @@ function cleanuptarget(){
     cp $ETC/shinken-specific.cfg $ETC/shinken-specific.cfg.orig
 }
 
+function manageparameters(){
+
+    if [ ! -f "$HOME/.shinken" ]
+    then
+        touch $HOME/.shinken
+        chmod +x $HOME/.shinken
+        
+        if [ "$1" != "quiet" ]
+        then
+            echo "ETC=$ETC" >> $HOME/.shinken
+            echo "VAR=$VAR" >> $HOME/.shinken
+            echo "LIBEXEC=$LIBEXEC" >> $HOME/.shinken
+            echo "TARGET=$TARGET" >> $HOME/.shinken
+        fi
+    else
+        OLDIFS=$IFS
+        IFS=$'\n'
+        cecho " > Found installation parameters" yellow
+        for l in $(cat $HOME/.shinken)
+        do
+            cecho " --> $l" yellow
+        done 
+        IFS=$OLDIFS
+        if [ "$1" != "quiet" ]
+        then
+            cread " > Do you want to reuse those parameters ? " "yellow" "y" "y n"
+        else
+            readvalue="y"
+        fi
+        if [ "$readvalue" == "y" ]
+        then
+            for l in $(cat $HOME/.shinken)
+            do
+                export $l
+            done
+        else
+            rm -f $HOME/.shinken
+            touch $HOME/.shinken
+            chmod +x $HOME/.shinken
+            echo "ETC=$ETC" >> $HOME/.shinken
+            echo "VAR=$VAR" >> $HOME/.shinken
+            echo "LIBEXEC=$LIBEXEC" >> $HOME/.shinken
+            echo "TARGET=$TARGET" >> $HOME/.shinken
+        fi
+    fi
+}
+
+
+
 function sinstall(){
     #cecho "Installing shinken" green
+
+    manageparameters
+    
     check_distro
     check_exist
     prerequisites
@@ -670,17 +727,21 @@ function sinstall(){
         mkdir -p $ETC
     fi
 
-    cp -Rf $src $TARGET
+    cp -Rf $src/* $TARGET/
+
     if [ "$TARGET" == "/" ] || [ -z "$TARGET" ]
     then
         cecho " ALERT ! TARGET should not be empty or /" red
         exit 2
     else
-        rm -Rf $TARGET/etc
+        if [ "$TARGET/etc" != "$ETC" ]
+        then
+            rm -Rf $TARGET/etc
+            cp -Rf $src/etc/* $ETC/
+        fi
     fi
-    cp -Rf $src/etc/* $ETC/
 
-    cleanuptarget
+    #cleanuptarget
     relocate
     ln -s $TARGET/bin/default/shinken /etc/default/shinken
     cp $TARGET/bin/init.d/shinken* /etc/init.d/
