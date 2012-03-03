@@ -664,9 +664,12 @@ function sinstall(){
     cecho "+------------------------------------------------------------------------------" green
     cecho "| Shinken is now installed on your server " green
     cecho "| The install location is : $TARGET" green
+    cecho "| The configuration folder is : $TARGET/etc" green
     cecho "| " green
     cecho "| The Web Interface is available at : http://localhost:7767" green
     cecho "| The default credentials for the webui are admin/admin" green
+    cecho "| " green
+    cecho "| You can now learn how to configure shinken at : http://www.shinken-monitoring.org/wiki" green
     cecho "+------------------------------------------------------------------------------" green
 }
 
