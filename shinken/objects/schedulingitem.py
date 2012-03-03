@@ -36,7 +36,7 @@ from shinken.notification import Notification
 from shinken.macroresolver import MacroResolver
 from shinken.eventhandler import EventHandler
 from shinken.dependencynode import DependencyNodeFactory
-
+from shinken.util import safe_print
 
 # on system time change just reevaluate the following attributes :
 on_time_change_update = ( 'last_notification', 'last_state_change', 'last_hard_state_change' )
@@ -1042,27 +1042,28 @@ class SchedulingItem(Item):
     # by taking the standard notification_interval or ask for
     # our escalation if one of them need a smaller value to escalade
     def get_next_notification_time(self, n):
-        t = []
+        res = None
         now = time.time()
         cls = self.__class__
 
         # Get the standard time like if we got no escalations
         std_time = n.t_to_go + self.notification_interval * cls.interval_length
-
         # standard time is a good one
-        t.append(std_time)
+        res = std_time
         
         creation_time = n.creation_time
         in_notif_time = now - n.creation_time
 
         for es in self.escalations:
-            r = es.get_next_notif_time(std_time, self.state, creation_time, cls.interval_length)
-            # If we got a real result (time base escalation), we add it
-            if r is not None:
-                t.append(r)
+            # If the escalation was alrady raised, we do not look for a new "early start"
+            if es.get_name() not in n.already_start_escalations:
+                r = es.get_next_notif_time(std_time, self.state, creation_time, cls.interval_length)
+                # If we got a real result (time base escalation), we add it
+                if r is not None and r < res:
+                    res = r
 
-        #And we take the minimum of this result. Can be standard or escalation asked
-        return min(t)
+        # And we take the minimum of this result. Can be standard or escalation asked
+        return res
 
 
     # Get all contacts (uniq) from eligible escalations
@@ -1077,6 +1078,9 @@ class SchedulingItem(Item):
         for es in self.escalations:
             if es.is_eligible(n.t_to_go, self.state, n.notif_nb, in_notif_time, cls.interval_length):
                 contacts.update(es.contacts)
+                # And we tag this escalations as started now
+                n.already_start_escalations.add(es.get_name())
+
         return list(contacts)
 
 
@@ -1159,8 +1163,8 @@ class SchedulingItem(Item):
             self.notified_contacts.clear()
         else:
             # Check is an escalation match. If yes, get all contacts from escalations
-            if self.is_escalable(n):#.t_to_go, n.notif_nb):
-                contacts = self.get_escalable_contacts(n)#.t_to_go, n.notif_nb)
+            if self.is_escalable(n):
+                contacts = self.get_escalable_contacts(n)
             # else take normal contacts
             else:
                 contacts = self.contacts
