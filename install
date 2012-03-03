@@ -1190,6 +1190,7 @@ function install_nagvis(){
 
 function install_multisite(){
     cadre "Install check_mk addon" green
+    manageparameters "quiet"
     cecho " > Installing prerequisites" green
     if [ "$CODE" == "REDHAT" ]
     then
@@ -1237,6 +1238,7 @@ function install_multisite(){
     sed -i "s#__PNPPREFIX__#$PNPPREFIX#g" $HOME/.check_mk_setup.conf
     sed -i "s#__MKPREFIX__#$MKPREFIX#g" $HOME/.check_mk_setup.conf
     sed -i "s#__SKPREFIX__#$TARGET#g" $HOME/.check_mk_setup.conf
+    sed -i "s#__SKPREFIXETC__#$ETC#g" $HOME/.check_mk_setup.conf
     sed -i "s#__SKUSER__#$SKUSER#g" $HOME/.check_mk_setup.conf
     sed -i "s#__SKGROUP__#$SKGROUP#g" $HOME/.check_mk_setup.conf
     sed -i "s#__HTTPUSER__#"$HTTPDUSER"#g" $HOME/.check_mk_setup.conf
@@ -1316,6 +1318,7 @@ function install_multisite(){
 # pnp4nagios
 function install_pnp4nagios(){
     cadre "Install pnp4nagios addon" green
+    manageparameters "quiet"
     if [ "$CODE" == "REDHAT" ]
     then
         cecho " > Installing prerequisites" green
