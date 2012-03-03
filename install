@@ -1121,8 +1121,8 @@ function install_mongodb(){
 # nagvis
 
 function install_nagvis(){
-
     cadre "Install nagvis addon" green
+    manageparameters "quiet"
     case $CODE in
         REDHAT)
             yum install -y $NAGVISYUMPKGS >> $TMP/shinken.install.log 2>&1
@@ -1288,13 +1288,16 @@ function install_multisite(){
     fi
    
     cecho " > Default configuration for multisite" green
-    echo 'sites = {' >> $MKPREFIX/etc/multisite.mk
-    echo '   "default": {' >> $MKPREFIX/etc/multisite.mk
-    echo '    "alias":          "default",' >> $MKPREFIX/etc/multisite.mk
-    echo '    "socket":         "tcp:127.0.0.1:50000",' >> $MKPREFIX/etc/multisite.mk
-    echo '    "url_prefix":     "/",' >> $MKPREFIX/etc/multisite.mk
-    echo '   },' >> $MKPREFIX/etc/multisite.mk
-    echo ' }' >> $MKPREFIX/etc/multisite.mk
+#    echo 'sites = {' >> $MKPREFIX/etc/multisite.mk
+#    echo '   "default": {' >> $MKPREFIX/etc/multisite.mk
+#    echo '    "alias":          "default",' >> $MKPREFIX/etc/multisite.mk
+#    echo '    "socket":         "tcp:127.0.0.1:50000",' >> $MKPREFIX/etc/multisite.mk
+#    echo '    "url_prefix":     "/",' >> $MKPREFIX/etc/multisite.mk
+#    echo '   },' >> $MKPREFIX/etc/multisite.mk
+#    echo ' }' >> $MKPREFIX/etc/multisite.mk
+    cp $src/install.d/multisite.mk $MKPREFIX/etc/
+    ip=$(ifconfig | grep "inet adr" | grep -v 127.0.0.1 | awk '{print $2}' | awk -F : '{print $2}' | head -n 1)
+    sed -i "s#__HOSTADDRESS__#"$ip"#g" $MKPREFIX/etc/multisite.mk
     rm -Rf $ETC/check_mk.d/*
     chown -R $SKUSER:$SKGROUP $ETC/check_mk.d
     chmod -R g+rwx $ETC/check_mk.d
