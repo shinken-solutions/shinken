@@ -637,6 +637,16 @@ function sinstall(){
     check_exist
     prerequisites
     create_user
+
+    # control if target parent folder exist
+    
+    parent=$(echo $TARGET | sed -e "s#"$(echo $TARGET | awk -F/ '{print $NF}')"##g")
+
+    if [ ! -d $parent ]
+    then
+        mkdir -p $parent
+    fi
+
     cp -Rf $src $TARGET
     cleanuptarget
     relocate
