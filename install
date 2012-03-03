@@ -1716,7 +1716,22 @@ function install_check_esx3(){
     fi
     cd $TMP
 
-    if [ ! -f "$TMP/VMware-vSphere-SDK-for-Perl-$VSPHERESDKVER.$ARCH.tar.gz" ]
+    # workaround arch naming
+    case $ARCH in
+        i686)
+            MARCH=i386
+            ;;
+        i586)
+            MARCH=i386
+            ;;
+        *)
+            MARCH=$ARCH
+            ;;
+    esac
+
+    VSPHERESDK=$(echo $VSPHERESDK | sed -e "s/$ARCH/$MARCH/g")
+
+    if [ ! -f "$TMP/VMware-vSphere-SDK-for-Perl-$VSPHERESDKVER.$MARCH.tar.gz" ]
     then
         cecho " > Downloading VSPHERE SPHERE SDK FOR PERL" green
         wget $WGETPROXY $VSPHERESDK  >> $TMP/shinken.install.log 2>&1     
@@ -1733,7 +1748,7 @@ function install_check_esx3(){
         cecho " > Removing old building folder" green
         rm -Rf vmware-vsphere-cli-distrib
     fi
-    tar zxvf VMware-vSphere-SDK-for-Perl-$VSPHERESDKVER.$ARCH.tar.gz  >> $TMP/shinken.install.log 2>&1 
+    tar zxvf VMware-vSphere-SDK-for-Perl-$VSPHERESDKVER.$MARCH.tar.gz  >> $TMP/shinken.install.log 2>&1 
     cd vmware-vsphere-cli-distrib 
     cecho " > Building vsphere sdk for perl" green
     perl Makefile.PL >> $TMP/shinken.install.log 2>&1 
