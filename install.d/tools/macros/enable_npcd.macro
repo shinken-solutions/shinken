@@ -2,8 +2,8 @@
 # Arguments are :
 # ARG1 : npcd.cfg path
 # ARG2 : ip address of the pnp4nagios server 
-setconfigfile __PREFIX__/etc/shinken-specific.cfg
-setauthfile __PREFIX__/contrib/alternative-installation/shinken-install/tools/macros/auth
+setconfigfile __ETC__/shinken-specific.cfg
+setauthfile __PREFIX__/install.d/tools/macros/auth
 setparam config_file=ARG1 from module where module_type=npcdmod
 setparam uri=http://ARG2/pnp4nagios from module where module_name=PNP_UI
 getdirective modules from broker where broker_name=broker-1

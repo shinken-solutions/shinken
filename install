@@ -42,6 +42,14 @@ function remove(){
         cecho " > Removing $TARGET" green
         rm -Rf $TARGET
     fi
+
+    
+    if [ -d "$ETC" ]
+    then 
+        cecho " > Removing $ETC" green
+        rm -Rf $ETC
+    fi
+
     if [ -h "/etc/default/shinken" ]
     then 
         cecho " > Removing defaults" green
@@ -195,7 +203,7 @@ function setdirectives(){
         directive=$(echo $pair | awk -F= '{print $1}')
         value=$(echo $pair | awk -F= '{print $2}')
         cecho "       > Setting $directive to $value in $fic" green
-        sed -i 's#^\# \?'$directive'=\(.*\)$#'$directive'='$value'#g' $mpath/etc/$(basename $fic)
+        sed -i 's#^\# \?'$directive'=\(.*\)$#'$directive'='$value'#g' $ETC/$(basename $fic)
     done
 }
 
@@ -525,11 +533,12 @@ function relocate(){
     do
         cecho " > relocating macro $f" green
         sed -i "s#__PREFIX__#$TARGET#g" $f
+        sed -i "s#__ETC__#$ETC#g" $f
     done
 
     # relocate nagios plugin path
-    sed -i "s#/usr/lib/nagios/plugins#$TARGET/libexec#g" ./etc/resource.cfg
-    sed -i "s#/usr/local/shinken/libexec#$TARGET/libexec#g" ./etc/resource.cfg
+    sed -i "s#/usr/lib/nagios/plugins#$TARGET/libexec#g" $ETC/resource.cfg
+    sed -i "s#/usr/local/shinken/libexec#$TARGET/libexec#g" $ETC/resource.cfg
     # relocate default /usr/local/shinken path
     for fic in $(find . | grep -v "shinken-install" | grep -v "\.pyc$" | xargs grep -snH "/usr/local/shinken" --color | cut -f1 -d' ' | awk -F : '{print $1}' | sort | uniq)
     do 
@@ -538,6 +547,17 @@ function relocate(){
         #sed -i 's#/opt/shinken#'$TARGET'#g' $fic 
         sed -i 's#/usr/local/shinken#'$TARGET'#g' "$fic"
     done
+
+    # do the same for etc dir
+    cd $ETC
+    for fic in $(find . | grep -v "shinken-install" | grep -v "\.pyc$" | xargs grep -snH "/usr/local/shinken" --color | cut -f1 -d' ' | awk -F : '{print $1}' | sort | uniq)
+    do 
+        cecho " > Processing $fic" green
+        cp "$fic" "$fic.orig" 
+        #sed -i 's#/opt/shinken#'$TARGET'#g' $fic 
+        sed -i 's#/usr/local/shinken#'$TARGET'#g' "$fic"
+    done
+    cd $TARGET
 
     # when read hat 5 try to use python26
     if [ "$CODE" = "REDHAT" ]
@@ -563,15 +583,14 @@ function relocate(){
     # set some directives 
     cadre "Set some configuration directives" green
     directives="workdir=$TARGET/var user=$SKUSER group=$SKGROUP"
-    for fic in $(ls -1 etc/*.ini)
+    for fic in $(ls -1 $ETC/*.ini)
     do 
         cecho " > Processing $fic" green;
         setdirectives "$directives" $fic $TARGET
-        #cp -f $fic $TARGET/etc/; 
     done
     # relocate default file
     cd $TARGET/bin/default
-    cat $TARGET/bin/default/shinken.in | sed  -e 's#LOG\=\(.*\)$#LOG='$TARGET'/var#g' -e 's#RUN\=\(.*\)$#RUN='$TARGET'/var#g' -e  's#ETC\=\(.*\)$#ETC='$TARGET'/etc#g' -e  's#VAR\=\(.*\)$#VAR='$TARGET'/var#g' -e  's#BIN\=\(.*\)$#BIN='$TARGET'/bin#g' > $TARGET/bin/default/shinken
+    cat $TARGET/bin/default/shinken.in | sed  -e 's#LOG\=\(.*\)$#LOG='$TARGET'/var#g' -e 's#RUN\=\(.*\)$#RUN='$TARGET'/var#g' -e  's#ETC\=\(.*\)$#ETC='$ETC'#g' -e  's#VAR\=\(.*\)$#VAR='$TARGET'/var#g' -e  's#BIN\=\(.*\)$#BIN='$TARGET'/bin#g' > $TARGET/bin/default/shinken
     # relocate init file
     cd $TARGET/bin/init.d
     mv shinken shinken.in
@@ -584,9 +603,9 @@ function fix(){
     chmod +x /etc/default/shinken
     chmod +x $TARGET/bin/init.d/shinken
     chown -R $SKUSER:$SKGROUP $TARGET
+    chown -R $SKUSER:$SKGROUP $ETC
     chmod -R g+w $TARGET
-    # remove tests directory
-    rm -Rf $TARGET/test
+    chmod -R g+w $ETC
 }
 
 function enable(){
@@ -626,9 +645,9 @@ function cleanuptarget(){
     rm -Rf for_packages
 #    rm -Rf install install.d 
     rm -Rf MANIFEST.in setup.py 
-    rm -Rf etc/*windows*
+    rm -Rf $ETC/*windows*
 
-    cp etc/shinken-specific.cfg etc/shinken-specific.cfg.orig
+    cp $ETC/shinken-specific.cfg $ETC/shinken-specific.cfg.orig
 }
 
 function sinstall(){
@@ -639,7 +658,6 @@ function sinstall(){
     create_user
 
     # control if target parent folder exist
-    
     parent=$(echo $TARGET | sed -e "s#"$(echo $TARGET | awk -F/ '{print $NF}')"##g")
 
     if [ ! -d $parent ]
@@ -647,7 +665,21 @@ function sinstall(){
         mkdir -p $parent
     fi
 
+    if [ ! -d $ETC ]
+    then
+        mkdir -p $ETC
+    fi
+
     cp -Rf $src $TARGET
+    if [ "$TARGET" == "/" ] || [ -z "$TARGET" ]
+    then
+        cecho " ALERT ! TARGET should not be empty or /" red
+        exit 2
+    else
+        rm -Rf $TARGET/etc
+    fi
+    cp -Rf $src/etc/* $ETC/
+
     cleanuptarget
     relocate
     ln -s $TARGET/bin/default/shinken /etc/default/shinken
@@ -660,11 +692,11 @@ function sinstall(){
     fi
     fix
     cecho " > Starting shinken" green
-    /etc/init.d/shinken start 
+    #/etc/init.d/shinken start 
     cecho "+------------------------------------------------------------------------------" green
     cecho "| Shinken is now installed on your server " green
     cecho "| The install location is : $TARGET" green
-    cecho "| The configuration folder is : $TARGET/etc" green
+    cecho "| The configuration folder is : $ETC" green
     cecho "| " green
     cecho "| The Web Interface is available at : http://localhost:7767" green
     cecho "| The default credentials for the webui are admin/admin" green
@@ -688,7 +720,7 @@ function backup(){
     mkdir -p $BACKUPDIR/bck-shinken.$DATE
     # Sugg :
     # Add : cp -Rfp $TARGET/bin $BACKUPDIR/bck-shinken.$DATE/ line to backup bin
-    cp -Rfp $TARGET/etc $BACKUPDIR/bck-shinken.$DATE/
+    cp -Rfp $ETC $BACKUPDIR/bck-shinken.$DATE/
     cp -Rfp $TARGET/libexec $BACKUPDIR/bck-shinken.$DATE/
     cp -Rfp $TARGET/var $BACKUPDIR/bck-shinken.$DATE/
     cecho " > Backup done. Id is $DATE"
@@ -723,7 +755,7 @@ function restore(){
         backuplist
         exit 2
     fi
-    rm -Rf $TARGET/etc
+    rm -Rf $ETC
     rm -Rf $TARGET/libexec 
     rm -Rf $TARGET/var 
     cp -Rfp $BACKUPDIR/bck-shinken.$1/* $TARGET/
@@ -801,8 +833,8 @@ function cleanconf(){
     else
         for f in $(cat $myscripts/install.d/config.files)
         do
-            cecho " > Removing $TARGET/etc/$f" green
-            rm -Rf $TARGET/etc/$f
+            cecho " > Removing $ETC/$f" green
+            rm -Rf $ETC/$f
         done
     fi
 }
@@ -837,8 +869,8 @@ function fixcentreondb(){
 function fixforfan(){
     if [ ! -z "cat /etc/issue | grep FAN" ]
     then
-        chown -R apache:nagios $TARGET/etc
-        chmod -R g+rw $TARGET/etc/*
+        chown -R apache:nagios $ETC
+        chmod -R g+rw $ETC/*
     fi
 }
 
@@ -908,14 +940,14 @@ function enableperfdata(){
     export PYTHONPATH=$TARGET
     export PY="$(pythonver)"
     cecho " > Getting existing broker modules list" green
-    modules=$($PY $TARGET/install.d/tools/skonf.py -a getdirective -f $TARGET/etc/shinken-specific.cfg -o broker -d modules)    
+    modules=$($PY $TARGET/install.d/tools/skonf.py -a getdirective -f $ETC/shinken-specific.cfg -o broker -d modules)    
     if [ -z "$modules" ]
     then    
         modules="Service-Perfdata, Host-Perfdata"
     else
         modules=$modules", Service-Perfdata, Host-Perfdata"
     fi
-    result=$($PY $TARGET/install.d/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o broker -d modules -v "$modules")
+    result=$($PY $TARGET/install.d/tools/skonf.py -q -a setparam -f $ETC/shinken-specific.cfg -o broker -d modules -v "$modules")
     cecho " > $result" green
 }
 
@@ -923,15 +955,15 @@ function setdaemonsaddresses(){
     export PYTHONPATH=$TARGET
     export PY="$(pythonver)"
     localip=$(ifconfig $IF | grep "^ *inet adr:" | awk -F : '{print $2}' | awk '{print $1}')
-    result=$($PY $TARGET/install.d/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o arbiter -d address -v "$localip")
+    result=$($PY $TARGET/install.d/tools/skonf.py -q -a setparam -f $ETC/shinken-specific.cfg -o arbiter -d address -v "$localip")
     cecho " > $result" green    
-    result=$($PY $TARGET/install.d/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o scheduler -d address -v "$localip")
+    result=$($PY $TARGET/install.d/tools/skonf.py -q -a setparam -f $ETC/shinken-specific.cfg -o scheduler -d address -v "$localip")
     cecho " > $result" green    
-    result=$($PY $TARGET/install.d/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o reactionner -d address -v "$localip")
+    result=$($PY $TARGET/install.d/tools/skonf.py -q -a setparam -f $ETC/shinken-specific.cfg -o reactionner -d address -v "$localip")
     cecho " > $result" green    
-    result=$($PY $TARGET/install.d/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o receiver -d address -v "$localip")
+    result=$($PY $TARGET/install.d/tools/skonf.py -q -a setparam -f $ETC/shinken-specific.cfg -o receiver -d address -v "$localip")
     cecho " > $result" green    
-    result=$($PY $TARGET/install.d/tools/skonf.py -q -a setparam -f $TARGET/etc/shinken-specific.cfg -o poller -d address -v "$localip" -r "poller_name=poller-1")
+    result=$($PY $TARGET/install.d/tools/skonf.py -q -a setparam -f $ETC/shinken-specific.cfg -o poller -d address -v "$localip" -r "poller_name=poller-1")
     cecho " > $result" green    
 }
 
@@ -961,7 +993,7 @@ function fixHtpasswdPath(){
     export PYTHONPATH=$TARGET
     export PY="$(pythonver)"
     # fix the htpasswd.users file path for WEBUI authentication
-    result=$($PY $TARGET/install.d/tools/skonf.py -f $TARGET/etc/shinken-specific.cfg -a setparam -o module -r "module_name=Apache_passwd" -d "passwd" -v "$TARGET/etc/htpasswd.users")
+    result=$($PY $TARGET/install.d/tools/skonf.py -f $ETC/shinken-specific.cfg -a setparam -o module -r "module_name=Apache_passwd" -d "passwd" -v "$ETC/htpasswd.users")
     cecho " > $result" green    
 }
 
@@ -1170,10 +1202,10 @@ function install_multisite(){
 #    fi
 
     # include check_mk configuration folder in nagios.cfg
-    exist=$(cat $TARGET/etc/nagios.cfg | grep check_mk.d)
+    exist=$(cat $ETC/nagios.cfg | grep check_mk.d)
     if [ -z "$exist" ]
     then 
-        echo "cfg_dir=$TARGET/etc/check_mk.d" >> $TARGET/etc/nagios.cfg 
+        echo "cfg_dir=$ETC/check_mk.d" >> $ETC/nagios.cfg 
     fi
    
     cecho " > Default configuration for multisite" green
@@ -1184,9 +1216,9 @@ function install_multisite(){
     echo '    "url_prefix":     "/",' >> $MKPREFIX/etc/multisite.mk
     echo '   },' >> $MKPREFIX/etc/multisite.mk
     echo ' }' >> $MKPREFIX/etc/multisite.mk
-    rm -Rf $TARGET/etc/check_mk.d/*
-    chown -R $SKUSER:$SKGROUP $TARGET/etc/check_mk.d
-    chmod -R g+rwx $TARGET/etc/check_mk.d
+    rm -Rf $ETC/check_mk.d/*
+    chown -R $SKUSER:$SKGROUP $ETC/check_mk.d
+    chmod -R g+rwx $ETC/check_mk.d
     chown -R $SKUSER:$SKGROUP $MKPREFIX/etc/conf.d
     chmod -R g+rwx $MKPREFIX/etc/conf.d
     $HTTPDINIT restart >> $TMP/shinken.install.log 2>&1 
@@ -1251,11 +1283,11 @@ function install_pnp4nagios(){
     if [ "$CODE" == "REDHAT" ]
     then
         cecho " > Fix htpasswd.users path" green
-        sed -i "s#/usr/local/nagios/etc/htpasswd.users#$TARGET/etc/htpasswd.users#g" /etc/httpd/conf.d/pnp4nagios.conf 
+        sed -i "s#/usr/local/nagios/etc/htpasswd.users#$ETC/htpasswd.users#g" /etc/httpd/conf.d/pnp4nagios.conf 
         /etc/init.d/httpd restart >> $TMP/shinken.install.log 2>&1 
     else
         cecho " > Fix htpasswd.users path" green
-        sed -i "s#/usr/local/nagios/etc/htpasswd.users#$TARGET/etc/htpasswd.users#g" /etc/apache2/conf.d/pnp4nagios.conf 
+        sed -i "s#/usr/local/nagios/etc/htpasswd.users#$ETC/htpasswd.users#g" /etc/apache2/conf.d/pnp4nagios.conf 
         /etc/init.d/apache2 restart >> $TMP/shinken.install.log 2>&1 
     fi
     cecho " > Enable npcdmod" green
