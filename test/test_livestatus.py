@@ -698,6 +698,17 @@ Filter: host_state != 0
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print 'query_6_______________\n%s\n%s\n' % (request, response)
         self.assert_(response == '0;0;1;0\n')
+
+        # service-contact_groups
+        request = 'GET services\nFilter: description = test_ok_0\nFilter: host_name = test_host_0\nColumns: contacts contact_groups\nOutputFormat: python\n'
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print 'query_contact_groups_______________\n%s\n%s\n' % (request, response)
+        pyresponse = eval(response)
+        self.assert_(isinstance(pyresponse[0][0], list))
+        self.assert_(isinstance(pyresponse[0][1], list))
+        self.assert_(isinstance(pyresponse[0][0][0], basestring))
+        self.assert_(isinstance(pyresponse[0][1][0], basestring))
+
         if self.nagios_installed():
             nagresponse = self.ask_nagios(request)
             print "nagresponse----------------------------------------------"

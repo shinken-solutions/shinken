@@ -228,6 +228,8 @@ class build_config(Command):
         #Creating some needed directories
         discovery_dir = os.path.join(self.build_dir + "/objects/discovery")
         for dirname in [self.var_path,self.run_path,self.log_path,discovery_dir]:
+            if self.build_base:
+                dirname = self.build_base +"/"+ dirname
             if not os.path.exists(dirname):
                 os.makedirs(dirname)
 
@@ -576,7 +578,7 @@ if __name__ == "__main__":
         },
       
         name = "Shinken",
-        version = "0.8",
+        version = "1.0",
         packages = find_packages(),
         package_data = {'' : package_data},
         description = "Shinken is a monitoring tool compatible with Nagios configuration and plugins",
