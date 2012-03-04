@@ -18,7 +18,8 @@
               %end
             </ul>
             %if user is not None:
-            <p class="navbar-text pull-right">Logged in as <a href="#"> Dummy<!-- {{user}} --></a></p>
+            <div class="pull-right"> <div id="text-box"></div><p class="navbar-text"><a href="#"> Dummy<!-- {{user}} --></a></p></div>
+            
             <!--<form class="navbar-search pull-right">
               <input type="text" class="search-query" placeholder="Search">
             </form>-->
