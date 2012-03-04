@@ -2022,6 +2022,34 @@ function install_check_netapp2(){
     sed -i "s#/usr/local/nagios/libexec#"$TARGET"/libexec#g" $TARGET/libexec/check_netapp2 >> $TMP/shinken.install.log 2>&1
 }
 
+# CHECK_MEM
+function install_check_mem(){
+    cadre "Install check_mem" green
+    cd $TMP
+    if [ ! -f $TMP/check_mem.tar.gz ]
+    then
+        cecho " > Downloading check_mem" green
+        wget -O check_mem.tar.gz $WGETPROXY $CHECKMEM >> $TMP/shinken.install.log 2>&1
+        if [ $? -ne 0 ]
+        then
+            cecho " > Error while downloading $filename" red
+            exit 2
+        fi
+    else
+        for f in $(ls -1 | grep "^justintime")
+        do
+            rm -Rf $f >> $TMP/shinken.install.log 2>&1
+        done 
+    fi 
+    cecho " > Extracting archive " green
+    tar zxvf check_mem.tar.gz >> $TMP/shinken.install.log 2>&1
+    cecho " > Installing plugin" green
+    folder=$(ls -1 | grep "^justintime")
+    cp -f $folder/check_mem/check_mem.pl $TARGET/libexec/ >> $TMP/shinken.install.log 2>&1
+    chmod +x $TARGET/libexec/check_mem.pl >> $TMP/shinken.install.log 2>&1
+    chown $SKUSER:$SKGROUP $TARGET/libexec/check_mem.pl >> $TMP/shinken.install.log 2>&1
+}
+
 # CHECK_MYSQL_HEALTH
 function install_check_mysql_health(){
     cadre "Install check_mysql_health" green
@@ -2091,6 +2119,7 @@ echo "Usage : install -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z 
         check_nwc_health
         check_hpasm
         manubulon (snmp plugins)
+        check_mem (local enhanced memory check plugin)
         capture_plugin
         pnp4nagios
         multisite
@@ -2129,6 +2158,10 @@ while getopts "kidubcr:lz:hsvp:we:" opt; do
             elif [ "$OPTARG" == "nagios-plugins" ]
             then
                 install_nagios-plugins
+                exit 0
+            elif [ "$OPTARG" == "check_mem" ]
+            then
+                install_check_mem
                 exit 0
             elif [ "$OPTARG" == "check_oracle_health" ]
             then
