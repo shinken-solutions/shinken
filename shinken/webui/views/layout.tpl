@@ -67,6 +67,7 @@
     <script src="/static/js/shinken-refresh.js"></script>
     <script src="/static/js/shinken-actions.js"></script>
     <script src="/static/js/shinken-deptree.js"></script>
+    <script src="/static/js/shinken-greeting.js"></script>
 
     %# End of classic js import. Now call for specific ones
       %for p in js:

@@ -1,39 +1,29 @@
-    $(document).ready( function() {
-        var textArray = [
-            'Hi,',
-            'Hello, ',
-            'Howdy, ',
-            'Hallo, ',
-            'Salut, ',
-            'Ciao, ',
-            '你好, ',
-            'алло́,  ',
-            'Hola, ',
-            '???'  /**/
-        ];
-        $('#text-box').randomText( textArray, 0, "El Randomizah!" ); // ( array, interval, ["reload text or html"] )
-    });
-    // custom jquery plugin loadText()
-    $.fn.randomText = function( textArray, interval, randomEle, prevText ) {
-        var obj = $(this);
-        if( $('#text-content').length == 0 ){ obj.append('<div id="text-content">'); }
-        var textCont = $('#text-content');
-        if( typeof randomEle != 'undefined' ){ if( $('#randomizer').length == 0 ){ obj.append('<a href="javascript:;" id="randomizer"><em>' + randomEle ); } }
-        textCont.fadeOut( 'slow', function() {
-            var chosenText = random_array( textArray );
-            while( chosenText == prevText ) { chosenText = random_array( textArray ); }
-            textCont.empty().html( chosenText );
-            textCont.fadeIn( 'slow' );
-            sendText = chosenText;
-        });
-        timeOut = setTimeout( function(){ obj.randomText( textArray, interval, randomEle, sendText ); }, interval );
-        $("#randomizer").click( function(){
-            if( !textCont.is(':animated') ) { clearTimeout( timeOut ); obj.randomText( textArray, interval, randomEle, sendText );} // animation check prevents "too much recursion" error in jQuery
-        });
-    }
-    //public function
-    function random_array( aArray ) {
-        var rand = Math.floor( Math.random() * aArray.length + aArray.length );
-        var randArray = aArray[ rand - aArray.length ];
-        return randArray;
-    }
+/*Copyright (C) 2009-2012 :
+     Gabes Jean, naparuba@gmail.com
+     Gerhard Lausser, Gerhard.Lausser@consol.de
+     Gregory Starck, g.starck@gmail.com
+     Hartmut Goebel, h.goebel@goebel-consult.de
+     Andreas Karfusehr, andreas@karfusehr.de
+ 
+ This file is part of Shinken.
+ 
+ Shinken is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Affero General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ Shinken is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Affero General Public License for more details.
+ 
+ You should have received a copy of the GNU Affero General Public License
+ along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+$(document).ready(function () {
+  var greetings = ["Howdy, ", "Hello, ", "Ciao, ", "Hola, ", "Salut, "],
+      greeting = greetings[Math.floor(Math.random() * greetings.length)];
+  $("#greeting").text(greeting);
+});
