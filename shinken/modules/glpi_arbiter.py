@@ -92,34 +92,18 @@ class Glpi_arbiter(BaseModule):
         # Get timeperiods
         all_timeperiods = self.con.monitoring.shinkenTimeperiods(arg)
         print "Get all timeperiods", all_timeperiods
+        attributs = {'timeperiod_name', 'alias', 'sunday', 
+                     'monday', 'tuesday', 'wednesday',
+                     'thursday', 'friday', 'saturday'}
         for timeperiod_info in all_timeperiods:
             print "\n\n"
             print "Timeperiod info in GLPI", timeperiod_info
-            h = {'timeperiod_name' : timeperiod_info['timeperiod_name'],
-                 'alias' : timeperiod_info['alias']};
-
-            if timeperiod_info['sunday']:
-                h['sunday'] = timeperiod_info['sunday']
-
-            if timeperiod_info['monday']:
-                h['monday'] = timeperiod_info['monday']
-
-            if timeperiod_info['tuesday']:
-                h['tuesday'] = timeperiod_info['tuesday']
-
-            if timeperiod_info['wednesday']:
-                h['wednesday'] = timeperiod_info['wednesday']
-
-            if timeperiod_info['thursday']:
-                h['thursday'] = timeperiod_info['thursday']
-
-            if timeperiod_info['friday']:
-                h['friday'] = timeperiod_info['friday']
-
-            if timeperiod_info['saturday']:
-                h['saturday'] = timeperiod_info['saturday']
-
-            #print "Returning to Arbiter the timeperiods:", h
+            h = {}
+            for attribut in attributs:
+                if timeperiod_info[attribut]:
+                    h[attribut] = timeperiod_info[attribut]
+            
+            #print "\nReturning to Arbiter the timeperiods:", h
             r['timeperiods'].append(h)
 
         # Get hosts
@@ -147,175 +131,45 @@ class Glpi_arbiter(BaseModule):
 	# Get templates
         all_templates = self.con.monitoring.shinkenTemplates(arg)
         print "Get all templates", all_templates
+        attributs = {'name', 'check_interval', 'retry_interval',
+                     'max_check_attempts','check_period','notification_interval',
+                     'notification_period','notification_options','active_checks_enabled',
+                     'process_perf_data','active_checks_enabled','passive_checks_enabled',
+                     'parallelize_check','obsess_over_service','check_freshness',
+                     'freshness_threshold','notifications_enabled','event_handler_enabled',
+                     'event_handler','flap_detection_enabled','failure_prediction_enabled',
+                     'retain_status_information','retain_nonstatus_information','is_volatile',
+                     '_httpstink'}
         for template_info in all_templates:
             print "\n\n"
             print "Template info in GLPI", template_info
-            h = {'name' : template_info['name'],
-		 'register' : '0'};
-
-            if 'check_interval' in template_info:
-                h['check_interval'] = template_info['check_interval']
-
-            if 'retry_interval' in template_info:
-                h['retry_interval'] = template_info['retry_interval']
-
-            if 'max_check_attempts' in template_info:
-                h['max_check_attempts'] = template_info['max_check_attempts']
-
-            if 'check_period' in template_info:
-                h['check_period'] = template_info['check_period']
-
-            if 'notification_interval' in template_info:
-                h['notification_interval'] = template_info['notification_interval']
-
-            if 'notification_period' in template_info:
-                h['notification_period'] = template_info['notification_period']
-
-            if 'notification_options' in template_info:
-                h['notification_options'] = template_info['notification_options']
-
-            if 'active_checks_enabled' in template_info:
-                h['active_checks_enabled'] = template_info['active_checks_enabled']
-
-            if 'process_perf_data' in template_info:
-                h['process_perf_data'] = template_info['process_perf_data']
-
-            if 'active_checks_enabled' in template_info:
-                h['active_checks_enabled'] = template_info['active_checks_enabled']
-
-            if 'passive_checks_enabled' in template_info:
-                h['passive_checks_enabled'] = template_info['passive_checks_enabled']
-
-            if 'parallelize_check' in template_info:
-                h['parallelize_check'] = template_info['parallelize_check']
-
-            if 'obsess_over_service' in template_info:
-                h['obsess_over_service'] = template_info['obsess_over_service']
-
-            if 'check_freshness' in template_info:
-                h['check_freshness'] = template_info['check_freshness']
-
-            if 'freshness_threshold' in template_info:
-                h['freshness_threshold'] = template_info['freshness_threshold']
-
-            if 'notifications_enabled' in template_info:
-                h['notifications_enabled'] = template_info['notifications_enabled']
-
-            if 'event_handler_enabled' in template_info:
-                h['event_handler_enabled'] = template_info['event_handler_enabled']
-
-            if 'event_handler' in template_info:
-                h['event_handler'] = template_info['event_handler']
-
-            if 'flap_detection_enabled' in template_info:
-                h['flap_detection_enabled'] = template_info['flap_detection_enabled']
-
-            if 'failure_prediction_enabled' in template_info:
-                h['failure_prediction_enabled'] = template_info['failure_prediction_enabled']
-
-            if 'retain_status_information' in template_info:
-                h['retain_status_information'] = template_info['retain_status_information']
-
-            if 'retain_nonstatus_information' in template_info:
-                h['retain_nonstatus_information'] = template_info['retain_nonstatus_information']
-
-            if 'is_volatile' in template_info:
-                h['is_volatile'] = template_info['is_volatile']
-
-            if '_httpstink' in template_info:
-                h['_httpstink'] = template_info['_httpstink']
+            h = {'register' : '0'};
+            for attribut in attributs:
+                if attribut in template_info:
+                    h[attribut] = template_info[attribut]
 
             r['services'].append(h)
 
         # Get services
         all_services = self.con.monitoring.shinkenServices(arg)
         print "Get all services", all_services
+        attributs = {'host_name', 'service_description', 'use',
+                     'check_command', 'check_interval', 'retry_interval',
+                     'max_check_attempts', 'check_period', 'contacts',
+                     'notification_interval', 'notification_period', 'notification_options',
+                     'active_checks_enabled', 'process_perf_data',
+                     'passive_checks_enabled', 'parallelize_check', 'obsess_over_service',
+                     'check_freshness', 'freshness_threshold', 'notifications_enabled',
+                     'event_handler_enabled', 'event_handler', 'flap_detection_enabled',
+                     'failure_prediction_enabled', 'retain_status_information', 'retain_nonstatus_information',
+                     'is_volatile', '_httpstink'}
         for service_info in all_services:
             print "\n\n"
             print "Service info in GLPI", service_info
-            h = {'host_name' : service_info['host_name'],
-                 'service_description' : service_info['service_description']};
-
-            if 'use' in service_info:
-                h['use'] = service_info['use']
-
-            if 'check_command' in service_info:
-                h['check_command'] = service_info['check_command']
-
-            if 'check_interval' in service_info:
-                h['check_interval'] = service_info['check_interval']
-
-            if 'retry_interval' in service_info:
-                h['retry_interval'] = service_info['retry_interval']
-
-            if 'max_check_attempts' in service_info:
-                h['max_check_attempts'] = service_info['max_check_attempts']
-
-            if 'check_period' in service_info:
-                h['check_period'] = service_info['check_period']
-
-            if 'contacts' in service_info:
-                h['contacts'] = service_info['contacts']
-
-            if 'notification_interval' in service_info:
-                h['notification_interval'] = service_info['notification_interval']
-
-            if 'notification_period' in service_info:
-                h['notification_period'] = service_info['notification_period']
-
-            if 'notification_options' in service_info:
-                h['notification_options'] = service_info['notification_options']
-
-            if 'active_checks_enabled' in service_info:
-                h['active_checks_enabled'] = service_info['active_checks_enabled']
-
-            if 'process_perf_data' in service_info:
-                h['process_perf_data'] = service_info['process_perf_data']
-
-            if 'active_checks_enabled' in service_info:
-                h['active_checks_enabled'] = service_info['active_checks_enabled']
-
-            if 'passive_checks_enabled' in service_info:
-                h['passive_checks_enabled'] = service_info['passive_checks_enabled']
-
-            if 'parallelize_check' in service_info:
-                h['parallelize_check'] = service_info['parallelize_check']
-
-            if 'obsess_over_service' in service_info:
-                h['obsess_over_service'] = service_info['obsess_over_service']
-
-            if 'check_freshness' in service_info:
-                h['check_freshness'] = service_info['check_freshness']
-
-            if 'freshness_threshold' in service_info:
-                h['freshness_threshold'] = service_info['freshness_threshold']
-
-            if 'notifications_enabled' in service_info:
-                h['notifications_enabled'] = service_info['notifications_enabled']
-
-            if 'event_handler_enabled' in service_info:
-                h['event_handler_enabled'] = service_info['event_handler_enabled']
-
-            if 'event_handler' in service_info:
-                h['event_handler'] = service_info['event_handler']
-
-            if 'flap_detection_enabled' in service_info:
-                h['flap_detection_enabled'] = service_info['flap_detection_enabled']
-
-            if 'failure_prediction_enabled' in service_info:
-                h['failure_prediction_enabled'] = service_info['failure_prediction_enabled']
-
-            if 'retain_status_information' in service_info:
-                h['retain_status_information'] = service_info['retain_status_information']
-
-            if 'retain_nonstatus_information' in service_info:
-                h['retain_nonstatus_information'] = service_info['retain_nonstatus_information']
-
-            if 'is_volatile' in service_info:
-                h['is_volatile'] = service_info['is_volatile']
-
-            if '_httpstink' in service_info:
-                h['_httpstink'] = service_info['_httpstink']
+            h = {};
+            for attribut in attributs:
+                if attribut in service_info:
+                    h[attribut] = service_info[attribut]
 
             r['services'].append(h)
 
