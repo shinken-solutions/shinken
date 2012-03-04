@@ -23,6 +23,20 @@
 
 /***************************************************************************/
 
+/**
+ * Description: Add a remvoe finction to the lists....
+ *  WTF javascript don't have this? Please guys, at least good 
+ *  list and dict functions.... you want us to manage memory soon?
+ * Example: lst.remove(value)
+ */
+Array.prototype.remove=function(s){
+    var index = this.indexOf(s);
+    while(this.indexOf(s) != -1){
+	this.splice(index, 1);
+	index = this.indexOf(s);
+    }
+}
+
 
 
 /**

@@ -22,16 +22,18 @@
 
 
 /* We Hide all detail elements */
-window.addEvent('domready', function(){
-	 var details = $$('.detail');
-	 details.each(function(el){
-		  new Fx.Slide(el).hide();
-		      });
-		});
+$(document).ready(function(){
+    var details = $('.detail');
+    details.hide();
+});
 
 /* And if the user lick on the good image, we untoggle them. */
 function show_detail(name){
-    var myFx = new Fx.Slide(name).toggle();
+
+    var elt = $('#'+name);
+    alert('untoggle'+name+elt);
+    alert(elt.length);
+    var myFx = $('#'+name).slideToggle();//new Fx.Slide(name).toggle();
 }
 
 
@@ -40,7 +42,8 @@ var selected_elements = [];
 
 
 function add_remove_elements(name){
-    if( selected_elements.contains(name)){
+    //alert(selected_elements.indexOf(name));
+    if( selected_elements.indexOf(name) != -1 ){
 	remove_element(name);
     }else{
 	add_element(name);
@@ -51,10 +54,11 @@ function add_remove_elements(name){
 /* function when we add an element*/
 function add_element(name){
     selected_elements.push(name);
-    var selector = $('selector-'+name);
-    selector.src = '/static/images/tick.png';
-    $('actions').style.display = 'inline-block';
-    $('actions').fade('in');
+    var selector = $('#selector-'+name);
+    selector.attr('src', '/static/images/tick.png');
+    
+    $('#actions').css('display', 'inline-block');
+    $('#actions').animate({opacity:1});
     /* The user will ask something, so it's good to reinit
      the refresh time so he got time to launch its action,
     see reload.js for this function */
@@ -63,50 +67,50 @@ function add_element(name){
 
 /* And or course when we remove it... */
 function remove_element(name){
-    selected_elements.erase(name);
+    selected_elements.remove(name);
     if(selected_elements.length == 0){
-	$('actions').fade('out');
-	$('actions').style.display = 'none';
+	$('#actions').animate({opacity:0});
+	$('#actions').css('display', 'none');
     }
-    var selector = $('selector-'+name);
-    selector.src = '/static/images/untick.png';
+    var selector = $('#selector-'+name);
+    selector.attr('src', '/static/images/untick.png');
 }
 
 
 /* Flush selected elements, so clean the list
 but also untick thems in the UI */
 function flush_selected_elements(){
-    /* We must copy the lsit so we can parse it in a clean way 
+    /* We must copy the list so we can parse it in a clean way 
      without fearing some bugs */
     var cpy = Array.clone(selected_elements);
-    cpy.each(function(name){
-		 remove_element(name);
-	     });
+    $.each(cpy, function(idx, name) {
+	remove_element(name);
+    });
 }
 
 
 /* Now actions buttons : */
 function recheck_now_all(){
-    selected_elements.each(function(name){
-			       recheck_now(name);
-			   });
+    $.each(selected_elements,function(idx, name){
+	recheck_now(name);
+    });
     flush_selected_elements();
 }
 
 
 /* Now actions buttons : */
 function try_to_fix_all(){
-    selected_elements.each(function(name){
-                               try_to_fix(name);
-                           });
+    $.each(selected_elements, function(idx, name){
+        try_to_fix(name);
+    });
     flush_selected_elements();
 }
 
 
 function acknowledge_all(){
-    selected_elements.each(function(name){
-			       ackno_element = name;
-			       do_acknowledge('Acknowledge from WebUI.');
-			   });
+    $.each(selected_elements, function(idx, name){
+	ackno_element = name;
+	do_acknowledge('Acknowledge from WebUI.');
+    });
     flush_selected_elements();
 }

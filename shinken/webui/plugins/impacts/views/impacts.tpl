@@ -1,6 +1,7 @@
 %helper = app.helper
 %datamgr = app.datamgr
 
+
 %rebase layout js=['impacts/js/impacts.js', 'impacts/js/multi.js'], title='All critical impacts for your business', css=['impacts/css/impacts.css'], refresh=True, menu_part = '/impacts', user=user
 
 %# " If the auth succeed, we go in the /problems page "
