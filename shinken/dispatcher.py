@@ -473,8 +473,15 @@ class Dispatcher:
                                     if kind == "broker":
                                         r.fill_broker_with_poller_reactionner_links(satellite)
                                     
-                                    logger.log('[%s] Trying to send configuration to %s %s' %(r.get_name(), kind, satellite.get_name()))
-                                    is_sent = satellite.put_conf(satellite.cfg)
+                                    is_sent = False
+                                    # Maybe this satellite already got this configuration, so avoid to resend it
+                                    if not satellite.do_i_manage(cfg_id):
+                                        logger.log('[%s] Trying to send configuration to %s %s' %(r.get_name(), kind, satellite.get_name()))
+                                        is_sent = satellite.put_conf(satellite.cfg)
+                                    else: # already got, log it.
+                                        logger.log('[%s] %s %s already got this configuration' %(r.get_name(), kind, satellite.get_name()))
+                                        is_sent = True
+                                        
 
                                     if is_sent:
                                         satellite.active = True
