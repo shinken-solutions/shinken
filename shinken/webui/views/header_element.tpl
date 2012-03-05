@@ -12,8 +12,8 @@
       <div class="nav-collapse">
         <ul class="nav">
           %if user is not None:
-          <li class="active"><a href="#">Dashboard</a></li>
-          <li><a href="#">Shinken UI</a></li>
+          <li><a href="#">Dashboard</a></li>
+          <li class="active"><a href="#">Shinken UI</a></li>
           <li><a href="#">Skonf UI</a></li>
           %end
         </ul>

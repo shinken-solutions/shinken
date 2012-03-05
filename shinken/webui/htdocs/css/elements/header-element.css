@@ -6,7 +6,12 @@
 } 
 
 .nav-controll > .nav > li > a { 
-        /*background: #FF0000;*/ 
-        padding-top: 6px; 
-        padding-bottom: 4px; 
+ padding-top: 6px; 
+ padding-bottom: 4px; 
+}
+
+.navbar .nav .active > a, .navbar .nav .active > a:hover {
+  background: transparent url(/static/images/pointer.gif) bottom center no-repeat !important;;
+  color: #FFFFFF;
+  text-decoration: none;
 }
