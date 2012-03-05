@@ -100,7 +100,7 @@ class Glpi_arbiter(BaseModule):
             print "Timeperiod info in GLPI", timeperiod_info
             h = {}
             for attribut in attributs:
-                if timeperiod_info[attribut]:
+                if attribut in timeperiod_info:
                     h[attribut] = timeperiod_info[attribut]
             
             #print "\nReturning to Arbiter the timeperiods:", h
