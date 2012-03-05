@@ -23,7 +23,7 @@
 
 
 $(document).ready(function () {
-  var greetings = ["Howdy, ", "Hello, ", "Ciao, ", "Hola, ", "Salut, "],
+  var greetings = ["Howdy, ", "Hello, ", "Ciao, ", "Hola, ", "Salut, ", "Welcome, ", "приве́тствие, "],
       greeting = greetings[Math.floor(Math.random() * greetings.length)];
   $("#greeting").text(greeting);
 });

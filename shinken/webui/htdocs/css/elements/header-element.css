@@ -1,0 +1,12 @@
+.icon-computer  { 
+  background-image: url("../computer.png"); 
+  background-position: center; 
+  height: 25px; 
+  width: 30px; 
+} 
+
+.nav-controll > .nav > li > a { 
+        /*background: #FF0000;*/ 
+        padding-top: 6px; 
+        padding-bottom: 4px; 
+}
