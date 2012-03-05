@@ -159,6 +159,11 @@ class __Action(object):
         # have the fcntl module (Windows, and maybe some special unix like AIX)
         if not fcntl:
             (self.stdoutdata, self.stderrdata) = self.process.communicate()
+        else: # maybe the command was too quick and finish before we an poll it
+              # so we finish the read
+            self.stdoutdata += no_block_read(self.process.stdout)
+            self.stderrdata += no_block_read(self.process.stderr)
+
         self.exit_status = self.process.returncode
 
         # we should not keep the process now

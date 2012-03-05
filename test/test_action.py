@@ -70,6 +70,7 @@ class TestAction(ShinkenTest):
         self.wait_finished(a)
         self.assert_(a.exit_status == 0)
         self.assert_(a.status == 'done')
+        print a.output
         self.assert_(a.output == "Hi, I'm for testing only. Please do not use me directly, really")
         self.assert_(a.perf_data == "Hip=99% Bob=34mm")
 
