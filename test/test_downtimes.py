@@ -24,7 +24,11 @@
 
 from shinken_test import *
 
-class TestConfig(ShinkenTest):
+time.time = original_time_time
+time.sleep = original_time_sleep
+
+
+class TestDowntime(ShinkenTest):
 
     def test_schedule_fixed_svc_downtime(self):
         self.print_header()
