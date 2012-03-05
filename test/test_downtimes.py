@@ -24,8 +24,8 @@
 
 from shinken_test import *
 
-time.time = original_time_time
-time.sleep = original_time_sleep
+#time.time = original_time_time
+#time.sleep = original_time_sleep
 
 
 class TestDowntime(ShinkenTest):
