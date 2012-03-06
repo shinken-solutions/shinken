@@ -251,6 +251,7 @@ Like temporary attributes such as "imported_from", etc.. """
                         # Template should keep their '+'
                         if self.is_tpl():
                             value = '+' + value
+                        setattr(self, prop, value)
                     return value
 
         # Maybe templates only give us + values, so we didn't quit, but we already got a
