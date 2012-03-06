@@ -173,14 +173,6 @@ Like temporary attributes such as "imported_from", etc.. """
         cls = self.__class__
         for prop, tab in cls.properties.items():
             try:
-#                if isinstance(tab, dict):
-#                    if 'pythonize' in tab:
-#                        f = tab['pythonize']
-#                        old_val = getattr(self, prop)
-#                        new_val = f(old_val)
-#                        #print "Changing ", old_val, "by", new_val
-#                        setattr(self, prop, new_val)
-#                else: #new style for service
                 new_val = tab.pythonize(getattr(self, prop))
                 setattr(self, prop, new_val)
             except AttributeError, exp:
@@ -259,7 +251,7 @@ Like temporary attributes such as "imported_from", etc.. """
         template_with_only_plus = hasattr(self, prop)
         
         # I do not have endingprop, my templates too... Maybe a plus?
-        # warning : ifall my templates gave me '+' values, do not forgot to
+        # warning : if all my templates gave me '+' values, do not forgot to
         # add the already set self.prop value
         if self.has_plus(prop):
             if template_with_only_plus:

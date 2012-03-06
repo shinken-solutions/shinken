@@ -25,20 +25,25 @@
 
 from shinken_test import *
 
-class TestConfig(ShinkenTest):
+class TestPlusInInheritance(ShinkenTest):
     #Uncomment this is you want to use a specific configuration
     #for your test
     def setUp(self):
         self.setup_with_file('etc/nagios_contactgroups_plus_inheritance.cfg')
     
     #Change ME :)
-    def test_action_url(self):
+    def test_contactgroups_plus_inheritance(self):
         host1 = self.sched.hosts.find_by_name("test_host_0")
-        #HOST 1 should have 2 group of contacts
-        for cg in host1.contact_groups:
-            print cg
-        self.assert_("test_contact_1" in host1.contact_groups)
-        self.assert_("test_contact_2" in host1.contact_groups)
+        # HOST 1 should have 2 group of contacts
+        # WARNING, it's a string, not the real objects!
+        print host1.contact_groups
+
+        for c in host1.contacts:
+            print c.get_name()
+
+        self.assert_("test_contact_1" in [c .get_name() for c in host1.contacts])
+        self.assert_("test_contact_2" in [c .get_name() for c in host1.contacts])
+        
 
 if __name__ == '__main__':
     unittest.main()
