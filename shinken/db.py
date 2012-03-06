@@ -22,31 +22,29 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
-"""DB is a generic class for SQL Database"""
 class DB(object):
-    def __init__(self, table_prefix = ''):
+    """DB is a generic class for SQL Database"""
+    def __init__(self, table_prefix=''):
         self.table_prefix = table_prefix
 
-    # Get a unicode from a value
     def stringify(self, val):
+        """Get a unicode from a value"""
         # If raw string, go in unicode
         if isinstance(val, str):
             val = val.decode('utf8', 'ignore').replace("'", "''")
         elif isinstance(val, unicode):
             val = val.replace("'", "''")
-        else: # other type, we can str
+        else:  # other type, we can str
             val = unicode(str(val))
             val = val.replace("'", "''")
         return val
 
-
-    # Create a INSERT query in table with all data of data (a dict)
     def create_insert_query(self, table, data):
+        """Create a INSERT query in table with all data of data (a dict)"""
         query = u"INSERT INTO %s " % (self.table_prefix + table)
         props_str = u' ('
         values_str = u' ('
-        i = 0 #f or the ',' problem... look like C here...
+        i = 0  # f or the ',' problem... look like C here...
         for prop in data:
             i += 1
             val = data[prop]
@@ -73,15 +71,15 @@ class DB(object):
         query = query + props_str + u' VALUES' + values_str
         return query
 
-
-    # Create a update query of table with data, and use where data for
-    # the WHERE clause
     def create_update_query(self, table, data, where_data):
+        """Create a update query of table with data, and use where data for
+        the WHERE clause
+        """
         query = u"UPDATE %s set " % (self.table_prefix + table)
 
         # First data manage
         query_follow = ''
-        i = 0 # for the , problem...
+        i = 0  # for the , problem...
         for prop in data:
             # Do not need to update a property that is in where
             # it is even dangerous, will raise a warning
@@ -105,7 +103,7 @@ class DB(object):
 
         # Ok for data, now WHERE, same things
         where_clause = u" WHERE "
-        i = 0 # For the 'and' problem
+        i = 0  # For the 'and' problem
         for prop in where_data:
             i += 1
             val = where_data[prop]
@@ -115,7 +113,6 @@ class DB(object):
                     val = 1
                 else:
                     val = 0
-
 
             # Get a string of the value
             val = self.stringify(val)
@@ -128,7 +125,6 @@ class DB(object):
         query = query + query_follow + where_clause
         return query
 
-
-    # Just get an entry
     def fetchone(self):
+        """Just get an entry"""
         return self.db_cursor.fetchone()
