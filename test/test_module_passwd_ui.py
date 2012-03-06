@@ -33,10 +33,11 @@ from shinken.modules import passwd_ui
 from shinken.modules.passwd_ui import get_instance 
 
 
-modconf = Module()
-modconf.module_name = "PasswdUI"
-modconf.module_type = passwd_ui.properties['type']
-modconf.properties = passwd_ui.properties.copy()
+if sys.version_info > (2, 5) :
+    modconf = Module()
+    modconf.module_name = "PasswdUI"
+    modconf.module_type = passwd_ui.properties['type']
+    modconf.properties = passwd_ui.properties.copy()
 
 
 class TestConfig(ShinkenTest):
@@ -68,5 +69,6 @@ class TestConfig(ShinkenTest):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    if sys.version_info > (2, 5) :
+        unittest.main()
 
