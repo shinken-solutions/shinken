@@ -20,12 +20,14 @@
         
         %if user is not None:
         <div class="nav-controll"> 
+          <ul class="nav pull-right"> 
+            <li class="divider-vertical"></li>
+            <li><a href="/user/logout"><i class="icon-settings"></i></a></li>
+            <li><a href="/user/logout"><i class="icon-logout"></i></a></li>
+          </ul>           
           <div class="pull-right"> 
             <p class="navbar-text"><span id="greeting"></span> <span><a href="#"> Dummy<!-- {{user}} --></a></span>!</p> 
           </div> 
-          <ul class="nav"> 
-            <li><a href="./shinken-webui.html"><i class="icon-computer"></i></a></li> 
-          </ul> 
         </div>
         <!--<form class="navbar-search pull-right">
           <input type="text" class="search-query" placeholder="Search">
