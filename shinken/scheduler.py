@@ -127,6 +127,9 @@ class Scheduler:
         self.has_full_broks = False # have a initial_broks in broks queue?
         self.need_dump_memory = False # set by signal 1
 
+        # And a dummy push flavor
+        self.push_flavor = 0
+
 
     def reset(self):
         self.must_run = True
@@ -167,12 +170,15 @@ class Scheduler:
                                             # schedulers
         # self for instance_name
         self.instance_name = conf.instance_name
+        # and push flavor
+        self.push_flavor = conf.push_flavor
 
         # Now we can updte our 'ticks' for special calls
         # like the retention one, etc
         self.update_recurrent_works_tick('update_retention_file', self.conf.retention_update_interval * 60)
         self.update_recurrent_works_tick('clean_queues', self.conf.cleaning_queues_interval)
-        
+
+
 
     # Update the 'tick' for a function call in our
     # recurrent work

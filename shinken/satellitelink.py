@@ -74,7 +74,7 @@ class SatelliteLink(Item):
         'attempt':              StringProp(default=0, fill_brok=['full_status']), # the number of failed attempt
         'reachable':            StringProp(default=False, fill_brok=['full_status']), # can be network ask or not (dead or check in timeout or error)
         'last_check':           IntegerProp(default=0, fill_brok=['full_status']),
-        'managed_confs':        StringProp(default=[]),
+        'managed_confs':        StringProp(default={}),
     })
 
 
@@ -191,10 +191,8 @@ class SatelliteLink(Item):
 
     # The elements just got a new conf_id, we put it in our list
     # because maybe the satellite is too busy to answer now
-    def known_conf_managed_push(self, i):
-        self.managed_confs.append(i)
-        # unique the list
-        self.managed_confs = list(set(self.managed_confs))
+    def known_conf_managed_push(self, cfg_id, push_flavor):
+        self.managed_confs[cfg_id] = push_flavor
 
 
     def ping(self):        
@@ -299,16 +297,16 @@ class SatelliteLink(Item):
 
         # If the connection failed to initialize, bail out
         if self.con is None:
-            self.managed_confs = []
+            self.managed_confs = {}
             return
 
         try:
             tab = self.con.what_i_managed()
             #print "[%s]What i managed raw value is %s" % (self.get_name(), tab)
             # Protect against bad Pyro return
-            if not isinstance(tab, list):
+            if not isinstance(tab, dict):
                 self.con = None
-                self.managed_confs = []
+                self.managed_confs = {}
             # We can update our list now
             self.managed_confs = tab
         except Pyro_exp_pack , exp:
@@ -317,13 +315,17 @@ class SatelliteLink(Item):
                 return
             self.con = None
             #print "[%s]What i managed : Got exception : %s %s %s" % (self.get_name(), exp, type(exp), exp.__dict__)
-            self.managed_confs = []
+            self.managed_confs = {}
 
 
     # Return True if the satelltie said to managed a configuration
-    def do_i_manage(self, i):
-        return i in self.managed_confs
-        
+    def do_i_manage(self, cfg_id, push_flavor):
+        # If not even the cfg_id in the managed_conf, baid out
+        if not cfg_id in self.managed_confs:
+            return False
+
+        # maybe it's in but with a false push_flavor. check it :)
+        return self.managed_confs[cfg_id] == push_flavor
 
 
     def push_broks(self, broks):

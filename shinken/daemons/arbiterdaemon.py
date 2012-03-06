@@ -98,7 +98,7 @@ class IForArbiter(Interface):
 
     # Dummy call. We are the master, we manage what we want
     def what_i_managed(self):
-        return []
+        return {}
 
 
     def get_all_states(self):
