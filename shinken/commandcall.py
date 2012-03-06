@@ -25,19 +25,18 @@ from shinken.autoslots import AutoSlots
 from shinken.property import StringProp, BoolProp
 
 
-"""Ok, slots are fun : you cannot set the __autoslots__
- on the same class you use, fun isn't it? So we define*
- a dummy useless class to get such :)
-
-"""
 class DummyCommandCall(object):
+    """Ok, slots are fun : you cannot set the __autoslots__
+     on the same class you use, fun isn't it? So we define*
+     a dummy useless class to get such :)
+    """
     pass
 
-"""This class is use when a service, contact or host define
-a command with args.
 
-"""
 class CommandCall(DummyCommandCall):
+    """This class is use when a service, contact or host define
+    a command with args.
+    """
     # AutoSlots create the __slots__ with properties and
     # running_properties names
     __metaclass__ = AutoSlots
@@ -53,12 +52,12 @@ class CommandCall(DummyCommandCall):
         'poller_tag':      StringProp(default='None'),
         'reactionner_tag': StringProp(default='None'),
         'module_type':     StringProp(default='fork'),
-        'valid' :          BoolProp(default=False),
-        'args' :           StringProp(default=[]),
+        'valid':           BoolProp(default=False),
+        'args':            StringProp(default=[]),
     }
 
-
-    def __init__(self, commands, call, poller_tag='None', reactionner_tag='None'):
+    def __init__(self, commands, call, poller_tag='None',
+                 reactionner_tag='None'):
         self.id = self.__class__.id
         self.__class__.id += 1
         self.call = call
@@ -75,56 +74,54 @@ class CommandCall(DummyCommandCall):
         if self.valid:
             # If the host/service do not give an override poller_tag, take
             # the one of the command
-            self.poller_tag = poller_tag #from host/service
+            self.poller_tag = poller_tag  # from host/service
             self.reactionner_tag = reactionner_tag
             self.module_type = self.command.module_type
             if self.valid and poller_tag is 'None':
-                self.poller_tag = self.command.poller_tag #from command if not set
+                # from command if not set
+                self.poller_tag = self.command.poller_tag
             # Same for reactionner tag
             if self.valid and reactionner_tag is 'None':
-                self.reactionner_tag = self.command.reactionner_tag #from command if not set
+                # from command if not set
+                self.reactionner_tag = self.command.reactionner_tag
 
-    # We want to get the command and the args with ! splitting.
-    # but don't forget to protect against the \! to do not split them
     def get_command_and_args(self):
+        """We want to get the command and the args with ! splitting.
+        but don't forget to protect against the \! to do not split them
+        """
+
         # first protect
         p_call = self.call.replace('\!', '___PROTECT_ESCLAMATION___')
         tab = p_call.split('!')
         self.command = tab[0]
         # Reverse the protection
-        self.args = [s.replace('___PROTECT_ESCLAMATION___', '!') for s in tab[1:]]
-        
-        
-
+        self.args = [s.replace('___PROTECT_ESCLAMATION___', '!')
+                     for s in tab[1:]]
 
     def is_valid(self):
         return self.valid
 
-
     def __str__(self):
         return str(self.__dict__)
-
 
     def get_name(self):
         return self.call
 
-
-
-    # Call by pickle for dataify the coment
-    # because we DO NOT WANT REF in this pickleisation!
     def __getstate__(self):
+        """Call by pickle for dataify the coment
+        because we DO NOT WANT REF in this pickleisation!
+        """
         cls = self.__class__
         # id is not in *_properties
-        res = {'id' : self.id}
+        res = {'id': self.id}
         for prop in cls.properties:
             if hasattr(self, prop):
                 res[prop] = getattr(self, prop)
 
         return res
 
-
-    # Inverted funtion of getstate
     def __setstate__(self, state):
+        """Inverted funtion of getstate"""
         cls = self.__class__
         # We move during 1.0 to a dict state
         # but retention file from 0.8 was tuple
@@ -137,13 +134,13 @@ class CommandCall(DummyCommandCall):
             if prop in state:
                 setattr(self, prop, state[prop])
 
-
-    # In 1.0 we move to a dict save. Before, it was
-    # a tuple save, like
-    # ({'id': 11}, {'poller_tag': 'None', 'reactionner_tag': 'None',
-    # 'command_line': u'/usr/local/nagios/bin/rss-multiuser',
-    # 'module_type': 'fork', 'command_name': u'notify-by-rss'})
     def __setstate_pre_1_0__(self, state):
+        """In 1.0 we move to a dict save. Before, it was
+        a tuple save, like
+        ({'id': 11}, {'poller_tag': 'None', 'reactionner_tag': 'None',
+        'command_line': u'/usr/local/nagios/bin/rss-multiuser',
+        'module_type': 'fork', 'command_name': u'notify-by-rss'})
+        """
         for d in state:
-            for k,v in d.items():
+            for k, v in d.items():
                 setattr(self, k, v)
