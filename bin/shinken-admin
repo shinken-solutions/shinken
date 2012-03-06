@@ -182,6 +182,24 @@ class ShinkenAdmin(cmd.Cmd):
         print "+-------------------------------------------------------------------------------+"
 
         
+    def do_getconf(self, line):
+        '''
+        Get the data in the arbiter for a table and some properties
+        like hosts  host_name realm
+        '''
+        self.look_connexion()
+        if not self.arb.reachable:
+            print "Cannot connect to the arbiter, bail out"
+            return
+
+        data = self.arb.get_objects_properties('hosts', 'host_name', 'check_interval')
+        
+        for l in data:
+            print ' '.join(['%s' % i for i in l])
+
+        
+
+
 
     def do_gethostname(self, line):
         '''

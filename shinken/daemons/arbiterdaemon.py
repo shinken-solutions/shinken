@@ -111,6 +111,24 @@ class IForArbiter(Interface):
         return res
 
 
+    # Try to give some properties of our objects
+    def get_objects_properties(self, table, *properties):
+        print 'ASK::', table
+        print 'ASK:', properties
+        objs = getattr(self.app.conf, table, None)
+        print "OBJS", objs
+        if not objs :
+            return ''
+        res = []
+        for obj in objs:
+            l = []
+            for prop in properties:
+                v = getattr(obj, prop, '')
+                l.append(v)
+            res.append(l)
+        return res
+
+
 # Main Arbiter Class
 class Arbiter(Daemon):
 
