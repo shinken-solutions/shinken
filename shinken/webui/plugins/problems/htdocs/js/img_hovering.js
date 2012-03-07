@@ -83,9 +83,8 @@ function display_hover_img(src, alt){
     
     // And add our image, then make the div appears
     // magically
-    //alert('Add img'+img);
     div.append(img);
-    div.fadeIn();
+    div.css('opacity', 1.0);
     
 }
 
@@ -93,7 +92,7 @@ function display_hover_img(src, alt){
 // img div, and remove the image in it
 function hide_hover_img(){
     var div = $('#img_hover');
-    div.fadeOut();
+    div.css('opacity', 0);
 }
 
 // When we move, we save our mouse position, both

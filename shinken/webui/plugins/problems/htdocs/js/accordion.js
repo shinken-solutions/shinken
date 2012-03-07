@@ -31,9 +31,7 @@ $(document).ready(function(){
 function show_detail(name){
 
     var elt = $('#'+name);
-    alert('untoggle'+name+elt);
-    alert(elt.length);
-    var myFx = $('#'+name).slideToggle();//new Fx.Slide(name).toggle();
+    var myFx = $('#'+name).slideToggle();
 }
 
 

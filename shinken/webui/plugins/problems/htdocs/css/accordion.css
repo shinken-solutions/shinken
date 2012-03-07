@@ -123,7 +123,9 @@ ul.dock li:hover span { display: block; }
 
 .tableCriticity .img_status{
     width:20px;
+
 }
+
 .tableCriticity .hostname{
     width: 120px;
 }
@@ -145,6 +147,16 @@ ul.dock li:hover span { display: block; }
     max-width: 20px;
 }
 
+.tableCriticity .expand img{
+    max-width: 20px;
+}
+
+
+/*
+
+States
+
+*/
 
 
 .state_down, .state_critical{
