@@ -8,3 +8,4 @@ dist
 *.pid
 *.log*
 *.db*
+*.DS_Store
