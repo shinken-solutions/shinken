@@ -33,7 +33,7 @@ import sys
 VERSION = "1.0"
 
 # Make sure people are using Python 2.4 or higher
-if sys.version_info < (2,4):
+if sys.version_info < (2, 4):
     sys.exit("Shinken requires as a minimum Python 2.4.x, sorry")
 elif sys.version_info >= (3,):
     sys.exit("Shinken is not yet compatible with Python 3.x, sorry")

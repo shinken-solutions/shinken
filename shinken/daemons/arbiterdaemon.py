@@ -98,7 +98,7 @@ class IForArbiter(Interface):
 
     # Dummy call. We are the master, we manage what we want
     def what_i_managed(self):
-        return []
+        return {}
 
 
     def get_all_states(self):
@@ -108,6 +108,24 @@ class IForArbiter(Interface):
                'reactionner' : self.app.conf.reactionners,
                'receiver' : self.app.conf.receivers,
                'broker' : self.app.conf.brokers}
+        return res
+
+
+    # Try to give some properties of our objects
+    def get_objects_properties(self, table, *properties):
+        print 'ASK::', table
+        print 'ASK:', properties
+        objs = getattr(self.app.conf, table, None)
+        print "OBJS", objs
+        if not objs :
+            return ''
+        res = []
+        for obj in objs:
+            l = []
+            for prop in properties:
+                v = getattr(obj, prop, '')
+                l.append(v)
+            res.append(l)
         return res
 
 

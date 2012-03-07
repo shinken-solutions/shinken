@@ -100,11 +100,13 @@ class IForArbiter(Interface):
         except KeyError:
             pass
 
+
     # Arbiter ask me which sched_id I manage, If it is not ok with it
     # It will ask me to remove one or more sched_id
     def what_i_managed(self):
-        print "%s DBG: the arbiter ask me what I manage. It's %s" % (int(time.time()), self.app.schedulers.keys())
-        return self.app.schedulers.keys()
+        print "%s DBG: the arbiter ask me what I manage. It's %s" % (int(time.time()), self.app.what_i_managed())
+        return self.app.what_i_managed()#self.app.schedulers.keys()
+
 
     # Call by arbiter if it thinks we are running but we must do not (like
     # if I was a spare that take a conf but the master returns, I must die
@@ -127,6 +129,7 @@ class IForArbiter(Interface):
     def push_broks(self, broks):
         self.app.add_broks_to_queue(broks.values())
         return True
+
 
     # The arbiter ask us our external commands in queue
     def get_external_commands(self):
@@ -202,6 +205,16 @@ class BaseSatellite(Daemon):
             self.pyro_daemon.unregister(self.interface)
         super(BaseSatellite, self).do_stop()
 
+
+
+    # Give the arbiter the data about what I manage
+    # for me it's the ids of my schedulers
+    def what_i_managed(self):
+       r = {}
+       for (k,v) in self.schedulers.iteritems():
+          r[k] = v['push_flavor']
+       return r
+        
 
 
 class Satellite(BaseSatellite):
@@ -926,6 +939,7 @@ class Satellite(BaseSatellite):
                 self.modules_manager.modules.append(module)
                 logger.log("[%s] Got module : %s " % (self.name, module.module_type))
                 self.q_by_mod[module.module_type] = {}
+
 
 
     def main(self):

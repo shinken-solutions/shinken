@@ -265,6 +265,7 @@ class Config(Item):
         'webui_lock_file'   :    StringProp(default='webui.pid'),
         'webui_port'        :    IntegerProp(default='8080'),
         'webui_host'        :    StringProp(default='0.0.0.0'),
+
    }
 
     macros = {

@@ -21,20 +21,20 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-"""A Brok is a piece of information exported by Shinken to the Broker.
-Broker can do whatever he wants with it.
 
-"""
 class Brok:
+    """A Brok is a piece of information exported by Shinken to the Broker.
+    Broker can do whatever he wants with it.
+    """
     __slots__ = ('__dict__', 'id', 'type', 'data')
     id = 0
     my_type = 'brok'
+
     def __init__(self, type, data):
         self.type = type
         self.id = self.__class__.id
         self.__class__.id += 1
         self.data = data
 
-
     def __str__(self):
-        return str(self.__dict__)+'\n'
+        return str(self.__dict__) + '\n'

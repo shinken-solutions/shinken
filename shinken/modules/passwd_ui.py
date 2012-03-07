@@ -23,7 +23,11 @@ for auth
 """
 
 import os
-import crypt
+try:
+    import crypt
+except ImportError:
+    # There is no crypt module on Windows systems
+    import fcrypt as crypt
 
 from shinken.basemodule import BaseModule
 

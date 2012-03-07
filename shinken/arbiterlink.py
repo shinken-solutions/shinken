@@ -128,6 +128,19 @@ class ArbiterLink(SatelliteLink):
             self.con = None
             return None
 
+    def get_objects_properties(self, table, *properties):
+        if self.con is None:
+            self.create_connection()
+        try:
+            r = self.con.get_objects_properties(table, *properties)
+            return r
+        except Pyro.errors.URIError , exp:
+            self.con = None
+            return None
+        except Pyro.errors.ProtocolError , exp:
+            self.con = None
+            return None
+
 
 
 

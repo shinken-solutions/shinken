@@ -27,6 +27,13 @@ import copy
 import shlex
 import sys
 import subprocess
+# We will try to read in a non blocking mode
+# work only on Unix systems from now
+try:
+    import fcntl
+except ImportError:
+    fcntl = None
+
 
 from shinken.util import safe_print
 from shinken.log import logger
@@ -39,6 +46,18 @@ only_copy_prop = ('id', 'status', 'command', 't_to_go', 'timeout', 'env', 'modul
 
 shellchars = ( '!', '$', '^', '&', '*', '(', ')', '~', '[', ']',
                    '|', '{', '}', ';', '<', '>', '?', '`')
+
+
+# Trry to read a fd in a non blocking mode
+def no_block_read(output):
+    fd = output.fileno()
+    fl = fcntl.fcntl(fd, fcntl.F_GETFL)
+    fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
+    try:
+        return output.read()
+    except:
+        return ''
+
 
 
 """ This abstract class is used just for having a common id between actions and checks """
@@ -64,12 +83,16 @@ class __Action(object):
         # Get a local env variables with our additionnal values
         self.local_env = self.get_local_environnement()
 
+        # Initialize stdout and stderr. we will read them in small parts
+        # if the fcntl is available
+        self.stdoutdata = ''
+        self.stderrdata = ''
+
         return self.execute__()  ## OS specific part
 
 
     def get_outputs(self, out, max_plugins_output_length):
         #print "Get only," , max_plugins_output_length, "bytes"
-        # <TMI!!>
         # Squize all output after max_plugins_output_length
         out = out[:max_plugins_output_length]
         # Then cuts by lines
@@ -100,7 +123,6 @@ class __Action(object):
                     self.perf_data += ' ' + elts[1].strip()
         # long_output is all non output and perfline, join with \n
         self.long_output = '\n'.join(long_output)
-        # </TMI!!>
 
 
 
@@ -110,10 +132,20 @@ class __Action(object):
         # than a long ping. So we do like TCP : slow start with *2
         # but do not wait more than 0.1s.
         self.last_poll = time.time()
+
         if self.process.poll() is None:
             self.wait_time = min(self.wait_time*2, 0.1)
             #time.sleep(wait_time)
             now = time.time()
+
+            # If the fcntl is available (unix) we try to read in a
+            # asyncronous mode, so we won't block the PIPE at 64K buffer
+            # (deadlock...)
+            if fcntl:
+                self.stdoutdata += no_block_read(self.process.stdout)
+                self.stderrdata += no_block_read(self.process.stderr)
+
+            
             if (now - self.check_time) > self.timeout:
                 self.kill__()
                 #print "Kill for timeout", self.process.pid, self.command, now - self.check_time
@@ -122,8 +154,16 @@ class __Action(object):
                 self.exit_status = 3
                 return
             return
-        # Get standards outputs
-        (stdoutdata, stderrdata) = self.process.communicate()
+
+        # Get standards outputs from the communicate function if we do not
+        # have the fcntl module (Windows, and maybe some special unix like AIX)
+        if not fcntl:
+            (self.stdoutdata, self.stderrdata) = self.process.communicate()
+        else: # maybe the command was too quick and finish before we an poll it
+              # so we finish the read
+            self.stdoutdata += no_block_read(self.process.stdout)
+            self.stderrdata += no_block_read(self.process.stderr)
+
         self.exit_status = self.process.returncode
 
         # we should not keep the process now
@@ -132,15 +172,19 @@ class __Action(object):
         # if the exit status is anormal, we add stderr to the output
         # TODO : Anormal should be logged properly no?
         if self.exit_status not in valid_exit_status:
-            stdoutdata = stdoutdata + stderrdata
-        elif 'sh: -c: line 0: unexpected EOF while looking for matching' in stderrdata or 'sh: Syntax error: Unterminated quoted string' in stderrdata:
+            self.stdoutdata = self.stdoutdata + self.stderrdata
+        elif 'sh: -c: line 0: unexpected EOF while looking for matching' in self.stderrdata or 'sh: Syntax error: Unterminated quoted string' in self.stderrdata:
             # Very, very ugly. But subprocess._handle_exitstatus does not see
             # a difference between a regular "exit 1" and a bailing out shell.
             # Strange, because strace clearly shows a difference. (exit_group(1) vs. exit_group(257))
-            stdoutdata = stdoutdata + stderrdata
+            self.stdoutdata = self.stdoutdata + self.stderrdata
             self.exit_status = 3
         # Now grep what we want in the output
-        self.get_outputs(stdoutdata, max_plugins_output_length)
+        self.get_outputs(self.stdoutdata, max_plugins_output_length)
+
+        # We can clean the useless properties now
+        del self.stdoutdata
+        del self.stderrdata
 
         self.status = 'done'
         self.execution_time = time.time() - self.check_time
@@ -174,7 +218,6 @@ if os.name != 'nt':
             # If the command line got shell characters, we should go in a shell
             # mode. So look at theses parameters
             force_shell |= self.got_shell_characters()
-            #force_shell = False
             
             # 2.7 and higer Python version need a list of args for cmd
             # and if not force shell (if, it's useless, even dangerous)
@@ -199,10 +242,10 @@ if os.name != 'nt':
             # The preexec_fn=os.setsid is set to give sons a same process group
             # CF http://www.doughellmann.com/PyMOTW/subprocess/ for detail about this
             try:
-                self.process = subprocess.Popen(cmd,
-                        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                        close_fds=True, shell=force_shell, env=self.local_env,
-                        preexec_fn=os.setsid)
+                self.process = subprocess.Popen(
+                    cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                    close_fds=True, shell=force_shell, env=self.local_env,
+                    preexec_fn=os.setsid)
             except OSError , exp:
                 logger.log("Debug : Error in launching command: %s %s %s" % (self.command, exp, force_shell))
                 # Maybe it's just a shell we try to exec. So we must retry
@@ -216,6 +259,7 @@ if os.name != 'nt':
                 # Maybe we run out of file descriptor. It's not good at all!
                 if exp.errno == 24 and exp.strerror == 'Too many open files':
                     return 'toomanyopenfiles'
+
 
         def kill__(self):
             # We kill a process group because we launched them with preexec_fn=os.setsid and

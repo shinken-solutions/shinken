@@ -23,15 +23,16 @@
 
 
 from shinken.action import Action
-from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
+from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp
+from shinken.property import CharProp, StringProp, ListProp
 from shinken.autoslots import AutoSlots
 
-""" TODO : Add some comment about this class for the doc"""
+
 class Check(Action):
+    """ ODO : Add some comment about this class for the doc"""
     # AutoSlots create the __slots__ with properties and
     # running_properties names
     __metaclass__ = AutoSlots
-
 
     my_type = 'check'
 
@@ -39,8 +40,8 @@ class Check(Action):
         'is_a':         StringProp(default='check'),
         'type':         StringProp(default=''),
         '_in_timeout':  BoolProp(default=False),
-        'status' :      StringProp(default=''),
-        'exit_status' : IntegerProp(default=3),
+        'status':       StringProp(default=''),
+        'exit_status':  IntegerProp(default=3),
         'state':        IntegerProp(default=0),
         'output':       StringProp(default=''),
         'long_output':  StringProp(default=''),
@@ -59,13 +60,13 @@ class Check(Action):
         'worker':       StringProp(default='none'),
     }
 
-    
-    def __init__(self, status, command, ref, t_to_go, dep_check=None, id=None, timeout=10,\
-                     poller_tag='None', reactionner_tag='None', env={}, module_type='fork'):
+    def __init__(self, status, command, ref, t_to_go, dep_check=None, id=None,
+                 timeout=10, poller_tag='None', reactionner_tag='None',
+                 env={}, module_type='fork'):
 
         self.is_a = 'check'
         self.type = ''
-        if id is None: #id != None is for copy call only
+        if id is None:  # id != None is for copy call only
             self.id = Action.id
             Action.id += 1
         self._in_timeout = False
@@ -98,30 +99,28 @@ class Check(Action):
         else:
             self.internal = False
 
-
-    # return a copy of the check but just what is important for execution
-    # So we remove the ref and all
     def copy_shell(self):
-        # We create a dummy check with nothing in it, just defaults values
-        return self.copy_shell__( Check('', '', '', '', '', id=self.id) )
+        """return a copy of the check but just what is important for execution
+        So we remove the ref and all
+        """
 
+        # We create a dummy check with nothing in it, just defaults values
+        return self.copy_shell__(Check('', '', '', '', '', id=self.id))
 
     def get_return_from(self, c):
-        self.exit_status  = c.exit_status
+        self.exit_status = c.exit_status
         self.output = c.output
         self.long_output = c.long_output
         self.check_time = c.check_time
         self.execution_time = c.execution_time
         self.perf_data = c.perf_data
 
-
     def is_launchable(self, t):
         return t > self.t_to_go
 
-
     def __str__(self):
-        return "Check %d status:%s command:%s ref:%s" % (self.id, self.status, self.command, self.ref)
-
+        return "Check %d status:%s command:%s ref:%s" % \
+               (self.id, self.status, self.command, self.ref)
 
     def get_id(self):
         return self.id
