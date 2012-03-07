@@ -39,7 +39,7 @@
 }
 
 .navbar .nav .active > a, .navbar .nav .active > a:hover {
-  background: transparent url(/static/images/pointer.gif) bottom center no-repeat !important;
+  background: transparent url(/static/img/icons/pointer.gif) bottom center no-repeat !important;
   color: #FFFFFF;
   font-weight: bold;
   text-decoration: none;
@@ -62,5 +62,4 @@
   margin: 0 9px;
   overflow: hidden;
   background-color: #FFFFFF;
-/*  border-right: 1px solid #333333;*/
 }
