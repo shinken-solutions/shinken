@@ -24,6 +24,7 @@
 #
 
 import os
+import sys
 
 from shinken_test import unittest, ShinkenTest
 
