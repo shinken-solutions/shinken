@@ -22,7 +22,11 @@
         <div class="nav-controll"> 
           <ul class="nav pull-right"> 
             <li class="divider-vertical"></li>
-            <li><a href="#" class="quickinfo" data-original-title='Impacts'><i class="icon-impact"></i><span class="pulsate badger badger-critical">42</span> </a></li>
+            %if app.datamgr.get_nb_problems() > 10:
+            <li><a href="#" class="quickinfo" data-original-title='Impacts'><i class="icon-impact"></i><span class="pulsate badger badger-critical">{{app.datamgr.get_nb_problems()}}</span> </a></li>
+            %else:
+            <li><a href="#" class="quickinfo" data-original-title='Impacts'><i class="icon-impact"></i><span class="pulsate badger badger-warning">{{app.datamgr.get_nb_problems()}}</span> </a></li>
+            %end
            <!-- <li><a href="#" class="quickinfo" data-original-title='Settings'><i class="icon-setting"></i></a></li>-->
             <li><a href="/user/logout" class="quickinfo" data-original-title='Logout'><i class="icon-logout"></i></a></li>
           </ul>           

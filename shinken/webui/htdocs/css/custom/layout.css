@@ -144,6 +144,13 @@
   color: #FFFFFF;
 }
 
+.badger-warning {
+  /*background-color: #e10000;*/
+  background-color: rgb(255,153,0); opacity: 0.85;
+  border-radius: 3px 3px 3px 3px;
+  color: #FFFFFF;
+}
+
 h1 {
   font-size: 26px;
 }
