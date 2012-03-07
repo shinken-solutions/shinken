@@ -139,40 +139,40 @@ $(document).ready(function() {
 	  <div>
 	    <table class="tableCriticity">
 	      <tr>
-	        <td> <img src="/static/images/untick.png" alt="untick" /style="cursor:pointer;" onclick="add_remove_elements('{{helper.get_html_id(pb)}}')" id="selector-{{helper.get_html_id(pb)}}" > </td>
-		        <td> <div class="aroundpulse">
-			    %# " We put a 'pulse' around the elements if it's an important one "
-			    %if pb.business_impact > 2 and pb.state_id in [1, 2, 3]:
-			    <span class="pulse"></span>
-			    %end
-			    <img style="width: 16px; height : 16px;" src="{{helper.get_icon_state(pb)}}" /></div>
-		    </td>
+	        <td class='tick'> <img src="/static/images/untick.png" alt="untick" /style="cursor:pointer;" onclick="add_remove_elements('{{helper.get_html_id(pb)}}')" id="selector-{{helper.get_html_id(pb)}}" > </td>
+		<td class='img_status'> <div class="aroundpulse">
+		    %# " We put a 'pulse' around the elements if it's an important one "
+		    %if pb.business_impact > 2 and pb.state_id in [1, 2, 3]:
+		         <span class="pulse"></span>
+		      %end
+		        <img style="width: 16px; height : 16px;" src="{{helper.get_icon_state(pb)}}" /></div>
+		</td>
 		%if pb.host_name == last_hname:
-		   <td> </td>
+		   <td class="hostname"> </td>
 		%else:
-		    <td> {{!helper.get_host_link(pb)}}</td>
+		    <td class="hostname"> {{!helper.get_host_link(pb)}}</td>
 		%end
 		%last_hname = pb.host_name
 
 		%if pb.__class__.my_type == 'service':
-		  <td>{{!helper.get_link(pb, short=True)}}</td>
+		  <td class="srvdescription">{{!helper.get_link(pb, short=True)}}</td>
 		%else:
-                  <td></td>
+                  <td class="srvdescription"></td>
                 %end
-		<td> {{pb.state}}</td>
-		<td title='{{helper.print_date(pb.last_state_change)}}'>{{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}</td>
+		<td class='txt_status state_{{pb.state.lower()}}'> {{pb.state}}</td>
+		<td class='duration' title='{{helper.print_date(pb.last_state_change)}}'>{{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}</td>
 		%# "We put a title (so a tip) on the output onlly if need"
 		%if len(pb.output) > 100:
 		   %if app.allow_html_output:
-		      <td title="{{pb.output}}"> {{!helper.strip_html_output(pb.output[:100])}}</td>
+		      <td class='output' title="{{pb.output}}"> {{!helper.strip_html_output(pb.output[:100])}}</td>
 		   %else:
-		      <td title="{{pb.output}}"> {{pb.output[:100]}}
+		      <td class='output' title="{{pb.output}}"> {{pb.output[:100]}}
 		   %end
 		%else:
 		   %if app.allow_html_output:
-                      <td> {{!helper.strip_html_output(pb.output)}}</td>
+                      <td class='output'> {{!helper.strip_html_output(pb.output)}}</td>
 		   %else:
-		      <td> {{pb.output}} </td>
+		      <td class='output'> {{pb.output}} </td>
                    %end
 		%end
 		%graphs = app.get_graph_uris(pb, now- 4*3600 , now)
@@ -183,7 +183,7 @@ $(document).ready(function() {
 		<td class="perfometer" {{!onmouse_code}}>
 		  {{!helper.get_perfometer(pb)}}
 		</td>
-		<td class="no_border opacity_hover shortdesc" style="max-width:20px;" onclick="show_detail('{{helper.get_html_id(pb)}}')"> <img src="/static/images/expand.png" alt="expand" /> </td>
+		<td class="no_border opacity_hover shortdesc expand" style="max-width:20px;" onclick="show_detail('{{helper.get_html_id(pb)}}')"> <img src="/static/images/expand.png" alt="expand" /> </td>
 		
 		</tr>
 	      

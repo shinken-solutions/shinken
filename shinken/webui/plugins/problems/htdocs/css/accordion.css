@@ -9,6 +9,24 @@
 .detail {margin-left: 30px;}
 
 
+.tableCriticity{
+    padding: 4px;
+    margin-bottom: 3px;
+    color: #787878;
+
+    border-top: 1px solid #E3E3E5;
+    /*border-left: 1px solid #E3E3E5;
+    border-bottom: 1px solid #E3E3E5;*/
+}
+.tableCriticity:hover   {background:#ddd; }
+.tableCriticity tr{
+    height : 30px;
+}
+
+.tableCriticity a{
+    color: #787878;
+    text-decoration: none;
+}
 
 .actions {}
 
@@ -97,3 +115,50 @@ ul.dock li span {
     color: #fff; 
 }
 ul.dock li:hover span { display: block; }
+
+
+.tableCriticity .tick{
+    width:20px; background:none;
+}
+
+.tableCriticity .img_status{
+    width:20px;
+}
+.tableCriticity .hostname{
+    width: 120px;
+}
+.tableCriticity .srvdescription{
+    width: 120px;
+}
+.tableCriticity .txt_status{
+    width:60px;
+    text-align:center
+}
+.tableCriticity .duration{
+    width:50px;
+    text-align:center
+}
+.tableCriticity .output{
+    width:450px;
+}
+.tableCriticity .expand{
+    max-width: 20px;
+}
+
+
+
+.state_down, .state_critical{
+ background-color: #FF858B;
+}
+
+.state_warning{
+ background-color: #E3B778;
+}
+
+.state_ok, .state_up{
+ background-color: #8EE378;
+}
+
+.state_unknown, .state_unreachable{
+ background-color: #78CCE3;
+}

@@ -92,7 +92,7 @@ function display_hover_img(src, alt){
 // when we go out the hover item, we must hide the
 // img div, and remove the image in it
 function hide_hover_img(){
-    var div = $('img_hover');
+    var div = $('#img_hover');
     div.fadeOut();
 }
 
