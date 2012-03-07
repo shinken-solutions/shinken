@@ -50,13 +50,13 @@ function create_img(src, alt){
 // the image, and we set it in the good place
 function display_hover_img(src, alt){
     var img = create_img(src, alt);
-    var div = $('img_hover');
+    var div = $('#img_hover');
 
     var pagesize = document.documentElement.clientWidth;
     var pagehigth = document.documentElement.clientHeight;
 
     // We remove the previous image in it
-    div.innerHTML = '';
+    div.empty();//innerHTML = '';
 
     // If we are too much on the left, put the image a bit
     // before so we are sure it fill on the page without
@@ -74,21 +74,26 @@ function display_hover_img(src, alt){
         pos_y = pos_y - 300;
     }
 
+    
+
     // Ok, let apply our positions!
-    div.style.left = pos_x +'px';
-    div.style.top = pos_y +'px';
+    //alert('Set div'+div+'to'+pos_x +'px');
+    div.css('left', pos_x +'px');
+    div.css('top', pos_y +'px');
     
     // And add our image, then make the div appears
     // magically
-    div.appendChild(img);
-    div.fade('in');
+    //alert('Add img'+img);
+    div.append(img);
+    div.fadeIn();
+    
 }
 
 // when we go out the hover item, we must hide the
 // img div, and remove the image in it
 function hide_hover_img(){
     var div = $('img_hover');
-    div.fade('out');
+    div.fadeOut();
 }
 
 // When we move, we save our mouse position, both
