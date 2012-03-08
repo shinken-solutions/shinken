@@ -59,17 +59,14 @@ $(document).ready(function(){
 /* When he user ask for show all impacts ro services, we display them */
 function show_hidden_impacts_or_services() {
 
-    var imp_srv_s = $$('.hidden_impacts_services');
+    var imp_srv_s = $('.hidden_impacts_services');
     
-    imp_srv_s.each(function(el) {
-	    el.style.display = 'block';
-	    var fx = new Fx.Tween(el, {property: 'opacity'});
-	    fx.start(1);
-	});
+    imp_srv_s.css('display','block');
+    imp_srv_s.animate({'opacity' : 1});
 
     /* An we can delete the button that toggle us */
-    var button = $('hidden_impacts_or_services_button');
-    button.style.display = 'none';
+    var button = $('#hidden_impacts_or_services_button');
+    button.css('display', 'none');
 }
 
 
