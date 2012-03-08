@@ -9,6 +9,9 @@
 %if not 'user' in locals() : user = None
 %if not 'app' in locals() : app = None
 
+
+%print "APP is", app
+
 %# If not need, disable the top right banner
 %if not 'top_right_banner_state' in locals() : top_right_banner_state = 0
 
