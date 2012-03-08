@@ -87,18 +87,11 @@ class Ip_Tag_Arbiter(BaseModule):
                     new_v = ','.join([orig_v, self.value])
                     print "Newv", new_v
                     setattr(h, self.property, new_v)
-                    # If it's a poller_tag, remember to also tag commands!
-                    if(self.property == 'poller_tag'):
-                        h.check_command.poller_tag = self.value
 
                 if self.method == 'replace':
                     if not hasattr(h, self.property):
-
                         # Ok, set the value!
                         setattr(h, self.property, self.value)
-                        # If it's a poller_tag, remember to also tag commands!
-                        if(self.property == 'poller_tag'):
-                            h.check_command.poller_tag = self.value
                     
                 
                 
