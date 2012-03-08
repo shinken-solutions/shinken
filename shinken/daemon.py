@@ -1,24 +1,26 @@
 # -*- coding: utf-8 -*-
-#Copyright (C) 2009-2010 :
-#    Gabes Jean, naparuba@gmail.com
-#    Gerhard Lausser, Gerhard.Lausser@consol.de
-#    Gregory Starck, g.starck@gmail.com
-#    Hartmut Goebel, h.goebel@goebel-consult.de
+
+# Copyright (C) 2009-2011 :
+#     Gabes Jean, naparuba@gmail.com
+#     Gerhard Lausser, Gerhard.Lausser@consol.de
+#     Gregory Starck, g.starck@gmail.com
+#     Hartmut Goebel, h.goebel@goebel-consult.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+
 
 import os
 import errno
@@ -75,16 +77,14 @@ REDIRECT_TO = getattr(os, "devnull", "/dev/null")
 UMASK = 027
 from shinken.bin import VERSION
 
-
+""" TODO : Add some comment about this class for the doc"""
 class InvalidPidFile(Exception): pass
 
 
-
+""" Interface for pyro communications """
 class Interface(Pyro.core.ObjBase, object):
-    """ Interface for pyro communications """
-    
+    #  'app' is to be set to the owner of this interface.
     def __init__(self, app):
-        """ 'app´ is to be set to the owner of this interface. """
 
         Pyro.core.ObjBase.__init__(self)
         
@@ -169,15 +169,15 @@ class Daemon(object):
         # Flag to know if we need to dump memory or not
         self.need_dump_memory = False
 
-        #Keep a trace of the local_log file desc if need
+        # Keep a trace of the local_log file desc if needed
         self.local_log_fd = None
 
         # Put in queue some debug output we will raise
         # when we will be in daemon
         self.debug_output = []
 
-        # We will inialize the Manager() when we will load modules
-        # and will be really forked()
+        # We will inialize the Manager() when we load modules
+        # and be really forked()
         self.manager = None
 
         self.modules_manager = ModulesManager(name, self.find_modules_path(), [])
@@ -187,24 +187,24 @@ class Daemon(object):
 
 
 
-    # At least, lose the local log file if need
+    # At least, lose the local log file if needed
     def do_stop(self):
         if self.modules_manager:
             # We save what we can but NOT for the scheduler
             # because the current sched object is a dummy one
-            # and the old one aleady do it!
+            # and the old one has already done it!
             if not hasattr(self, 'sched'):
                 self.hook_point('save_retention')
             # And we quit
             logger.log('Stopping all modules')
             self.modules_manager.stop_all()
         if self.pyro_daemon:
-            pyro.shutdown(self.pyro_daemon)#.shutdown(True)
+            pyro.shutdown(self.pyro_daemon)
         logger.quit()
         
 
     def request_stop(self):
-        self.unlink()  ## unlink first
+        self.unlink() 
         self.do_stop()
         print("Exiting")
         sys.exit(0)
@@ -230,9 +230,8 @@ class Daemon(object):
         self.modules_manager.load_and_init()
         self.log.log("I correctly loaded the modules : [%s]" % (','.join([inst.get_name() for inst in self.modules_manager.instances])))
  
- 
+    # Dummy method for adding broker to this daemon
     def add(self, elt):
-        """ Dummy method for adding broker to this daemon """
         pass
 
     def dump_memory(self):
@@ -262,61 +261,60 @@ class Daemon(object):
             os.chdir(self.workdir)
         except Exception, e:
             raise InvalidWorkDir(e)
-        print("Successfully changed to workdir: %s" % (self.workdir))
+        print("Info : Successfully changed to workdir: %s" % (self.workdir))
 
 
     def unlink(self):
-        print "Unlinking", self.pidfile
+        print "Info : Unlinking", self.pidfile
         try:
             os.unlink(self.pidfile)
         except Exception, e:
-            print("Got an error unlinking our pidfile: %s" % (e))
+            logger.log("Error : Got an error unlinking our pidfile: %s" % (e))
 
     # Look if we need a local log or not
     def register_local_log(self):
-        # The arbiter don't have such an attribute
+        # The arbiter doesn't have such attribute
         if hasattr(self, 'use_local_log') and self.use_local_log:
             try:
                 self.local_log_fd = self.log.register_local_log(self.local_log)
             except IOError, exp:
-                print "Error : opening the log file '%s' failed with '%s'" % (self.local_log, exp)
+                logger.log("Error : opening the log file '%s' failed with '%s'" % (self.local_log, exp))
                 sys.exit(2)
             logger.log("Using the local log file '%s'" % self.local_log)
 
-
+    # Only on linux: Check for /dev/shm write access
     def check_shm(self):
-        """ Only on linux: Check for /dev/shm write access """
         import stat
         shm_path = '/dev/shm'
         if os.name == 'posix' and os.path.exists(shm_path):
             # We get the access rights, and we check them
             mode = stat.S_IMODE(os.lstat(shm_path)[stat.ST_MODE])
             if not mode & stat.S_IWUSR or not mode & stat.S_IRUSR:
-                print("The directory %s is not writable or readable. Please launch as root chmod 777 %s" % (shm_path, shm_path))
+                logger.log("The directory %s is not writable or readable. Please launch as root chmod 777 %s" % (shm_path, shm_path))
                 sys.exit(2)   
 
     def __open_pidfile(self, write=False):
-        ## if problem on open or creating file it'll be raised to the caller:
+        ## if problem on opening or creating file it'll be raised to the caller:
         try:
             p = os.path.abspath(self.pidfile)
-            print "opening pid file:", self.pidfile, p
-            # Windows do not manage arw+ mode, so we must open in read mode first, then reopen it write mode...
+            print "Info : opening pid file:", self.pidfile, p
+            # Windows do not manage the rw+ mode, so we must open in read mode first, then reopen it write mode...
             if not write and os.path.exists(p):
                self.fpid = open(p, 'r+')
-            else: # If do not exist too, we create it as void
+            else: # If it doesnt exist too, we create it as void
                self.fpid = open(p, 'w+')
         except Exception, e:
             raise InvalidPidFile(e)     
 
 
+    # Check (in pidfile) if there isn't already a daemon running. If yes and do_replace: kill it.
+    # Keep in self.fpid the File object to the pidfile. Will be used by writepid.
     def check_parallel_run(self):
-        """ Check (in pidfile) if there isn't already a daemon running. If yes and do_replace: kill it.
-Keep in self.fpid the File object to the pidfile. Will be used by writepid.
-"""
+
 
         # TODO: other daemon run on nt
         if os.name == 'nt':
-            print("Sorry, the parallel daemon check is not available on nt")
+            logger.log("Warning : the parallel daemon check is not available on nt")
             self.__open_pidfile(write=True)
             return
 
@@ -325,25 +323,25 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         try:
             pid = int(self.fpid.read())
         except:
-            print "stale pidfile exists (no or invalid or unreadable content).  reusing it."
+            logger.log("Warning : stale pidfile exists (no or invalid or unreadable content). Reusing it.")
             return
         
         try:
             os.kill(pid, 0)
         except OverflowError, e:
             ## pid is too long for "kill" : so bad content:
-            print("stale pidfile exists: pid=%d is too long" % (pid))
+            logger.log("Error : stale pidfile exists: pid=%d is too long" % (pid))
             return
         except os.error, e:
             if e.errno == errno.ESRCH:
-                print("stale pidfile exists (pid=%d not exists).  reusing it." % (pid))
+                logger.log("Warning : stale pidfile exists (pid=%d not exists). Reusing it." % (pid))
                 return
             raise
             
         if not self.do_replace:
             raise SystemExit, "valid pidfile exists and not forced to replace.  Exiting."
         
-        print "Replacing previous instance ", pid
+        print "Info : Replacing previous instance ", pid
         try:
             os.kill(pid, 3)
         except os.error, e:
@@ -354,7 +352,7 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         ## TODO: give some time to wait that previous instance finishes ?
         time.sleep(1)
         # we must also reopen the pid file in write mode 
-        # because cause the previous instance will normally have deleted it !!
+        # because the previous instance should have deleted it !!
         self.__open_pidfile(write=True)
 
 
@@ -367,11 +365,11 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         self.fpid.close()
         del self.fpid ## no longer needed
 
-
+    # Close all the process file descriptors. Skip the descriptors 
+    # present in the skip_close_fds list
     def close_fds(self, skip_close_fds):
-        """ Close all the process file descriptors. Skip the descriptors present in the skip_close_fds list """
-        #First we manage the file descriptor, because debug file can be
-        #relative to pwd
+        # First we manage the file descriptor, because debug file can be
+        # relative to pwd
         import resource
         maxfd = resource.getrlimit(resource.RLIMIT_NOFILE)[1]
         if (maxfd == resource.RLIM_INFINITY):
@@ -385,14 +383,14 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
             except OSError:# ERROR, fd wasn't open to begin with (ignored)
                 pass
 
-
+    # Go in "daemon" mode: close unused fds, redirect stdout/err, 
+    # chdir, umask, fork-setsid-fork-writepid
     def daemonize(self, skip_close_fds=None):
-        """ Go in "daemon" mode: close unused fds, redirect stdout/err, chdir, umask, fork-setsid-fork-writepid """
         
         if skip_close_fds is None:
             skip_close_fds = tuple()
 
-        print("Redirecting stdout and stderr as necessary..")
+        print("Info : Redirecting stdout and stderr as necessary..")
         if self.debug:
             fdtemp = os.open(self.debug_file, os.O_CREAT | os.O_WRONLY | os.O_TRUNC)
         else:
@@ -410,19 +408,19 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         except OSError, e:
             raise Exception, "%s [%d]" % (e.strerror, e.errno)
         if pid != 0:
-            # In the father ; we check if our child exit correctly 
-            # it has effectively to write the pid of our futur little child..
+            # In the father : we check if our child exit correctly 
+            # it has to write the pid of our futur little child..
             def do_exit(sig, frame):
-                print("timeout waiting child while it should have quickly returned ; something weird happened")
+                logger.log("Error : Timeout waiting child while it should have quickly returned ; something wierd happened")
                 os.kill(pid, 9)
                 sys.exit(1)
             # wait the child process to check its return status:
             signal.signal(signal.SIGALRM, do_exit)
             signal.alarm(3)  # forking & writing a pid in a file should be rather quick..
-            # if it's not then somewthing wrong can already be on the way so let's wait max 3 secs here. 
+            # if it's not then something wrong can already be on the way so let's wait max 3 secs here. 
             pid, status = os.waitpid(pid, 0)
             if status != 0:
-                print("something weird happened with/during second fork : status=", status)
+                logger.log("Error : something wierd happened with/during second fork : status=", status)
             os._exit(status != 0)
 
         # halfway to daemonize..
@@ -440,7 +438,7 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         self.fpid.close()
         del self.fpid
         self.pid = os.getpid()
-        print("We are now fully daemonized :) pid=%d" % (self.pid))
+        print("Info : We are now fully daemonized :) pid=%d" % (self.pid))
         # We can now output some previouly silented debug ouput
         for s in self.debug_output:
             print s
@@ -488,11 +486,11 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         # The SSL part
         if ssl_conf.use_ssl:
             Pyro.config.PYROSSL_CERTDIR = os.path.abspath(ssl_conf.certs_dir)
-            print "Using ssl certificate directory : %s" % Pyro.config.PYROSSL_CERTDIR
+            print "Info : Using ssl certificate directory : %s" % Pyro.config.PYROSSL_CERTDIR
             Pyro.config.PYROSSL_CA_CERT = os.path.abspath(ssl_conf.ca_cert)
-            print "Using ssl ca cert file : %s" % Pyro.config.PYROSSL_CA_CERT
+            print "Info : Using ssl ca cert file : %s" % Pyro.config.PYROSSL_CA_CERT
             Pyro.config.PYROSSL_CERT = os.path.abspath(ssl_conf.server_cert)
-            print"Using ssl server cert file : %s" % Pyro.config.PYROSSL_CERT
+            print "Info : Using ssl server cert file : %s" % Pyro.config.PYROSSL_CERT
             if self.hard_ssl_name_check:
                 Pyro.config.PYROSSL_POSTCONNCHECK=1
             else:
@@ -520,20 +518,19 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
             raise
         return ins
 
-
+    # Find the absolute path of the shinken module directory and returns it.
     def find_modules_path(self):
-        """ Find the absolute path of the shinken module directory and returns it.  """
         import shinken
         
         # BEWARE: this way of finding path is good if we still
-        # DO NOT HAVE CHANGE PWD!!!
+        # DO NOT HAVE CHANGED PWD!!!
         # Now get the module path. It's in fact the directory modules
         # inside the shinken directory. So let's find it.
 
         self.debug_output.append("modulemanager file %s" % shinken.modulesmanager.__file__)
         modulespath = os.path.abspath(shinken.modulesmanager.__file__)
         self.debug_output.append("modulemanager absolute file %s" % modulespath)
-        # We got one of the files of
+        # We got one of the files
         parent_path = os.path.dirname(os.path.dirname(modulespath))
         modulespath = os.path.join(parent_path, 'shinken', 'modules')
         self.debug_output.append("Using modules path : %s" % (modulespath))
@@ -555,83 +552,81 @@ Keep in self.fpid the File object to the pidfile. Will be used by writepid.
         try:
             return getpwnam(self.user)[2]
         except KeyError , exp:
-            print "Error: the user", self.user, "is unknown"
+            logger.log("Error : the user %s is unknown" % self.user)
             return None
 
 
-    #Just give the gid of a group by looking at it's name
+    #Just give the gid of a group by looking at its name
     def find_gid_from_name(self):
         try:
             return getgrnam(self.group)[2]
         except KeyError , exp:
-            print "Error: the group", self.group, "is unknown"
+            logger.log("Error : the group %s is unknown" % self.group )
             return None
 
-
+    # Change user of the running program. Just insult the admin 
+    # if he wants root run (it can override). If change failed we sys.exit(2)
     def change_to_user_group(self, insane=None):
-        """ Change user of the running program. Just insult the admin if he wants root run (it can override).
-If change failed we sys.exit(2) """
         if insane is None:
             insane = not self.idontcareaboutsecurity
 
         if is_android:
-           print "Sorry, you can't change user on this system"
-           return
+            logger.log("Warning : you can't change user on this system")
+            return
 
         # TODO: change user on nt
         if os.name == 'nt':
-            print("Sorry, you can't change user on this system")
+            logger.log("Warning : you can't change user on this system")
             return
 
         if (self.user == 'root' or self.group == 'root') and not insane:
-            print "What's ??? You want the application run under the root account?"
-            print "I am not agree with it. If you really want it, put :"
-            print "idontcareaboutsecurity=yes"
-            print "in the config file"
-            print "Exiting"
+            logger.log("Error :  You want the application run under the root account?")
+            logger.log("I am not agree with it. If you really want it, put :")
+            logger.log("idontcareaboutsecurity=yes")
+            logger.log("in the config file")
+            logger.log("Exiting")
             sys.exit(2)
 
         uid = self.find_uid_from_name()
         gid = self.find_gid_from_name()
         if uid is None or gid is None:
-            print "Exiting"
+            logger.log("Error : uid or gid is none : Exiting")
             sys.exit(2)
         try:
             # First group, then user :)
             os.setregid(gid, gid)
             os.setreuid(uid, uid)
         except OSError, e:
-            print "Error : cannot change user/group to %s/%s (%s [%d])" % (self.user, self.group, e.strerror, e.errno)
-            print "Exiting"
+            logger.log("Error : cannot change user/group to %s/%s (%s [%d])" % (self.user, self.group, e.strerror, e.errno))
+            logger.log("Exiting")
             sys.exit(2)
 
-
+    # Parse self.config_file and get all properties in it.
+    # If some properties need a pythonization, we do it.
+    # Also put default value in the properties if some are missing in the config_file 
     def parse_config_file(self):
-        """ Parse self.config_file and get all properties in it.
-If some properties need a pythonization, we do it.
-Also put default value in the properties if some are missing in the config_file """
         properties = self.__class__.properties
         if self.config_file is not None:
             config = ConfigParser.ConfigParser()
             config.read(self.config_file)
             if config._sections == {}:
-                print "Bad or missing config file : %s " % self.config_file
+                logger.log("Error : Bad or missing config file : %s " % self.config_file)
                 sys.exit(2)
             for (key, value) in config.items('daemon'):
                 if key in properties:
                     value = properties[key].pythonize(value)
                 setattr(self, key, value)
         else:
-            print "No config file specified, use defaults parameters"
-        #Now fill all defaults where missing parameters
+            logger.log("Warning : No config file specified, use defaults parameters")
+        # Now fill all defaults where missing parameters
         for prop, entry in properties.items():
             if not hasattr(self, prop):
                 value = entry.pythonize(entry.default)
                 setattr(self, prop, value)
 
 
-    #Some paths can be relatives. We must have a full path by taking
-    #the config file by reference
+    # Some paths can be relatives. We must have a full path by taking
+    # the config file by reference
     def relative_paths_to_full(self, reference_path):
         #print "Create relative paths with", reference_path
         properties = self.__class__.properties
@@ -640,14 +635,14 @@ Also put default value in the properties if some are missing in the config_file 
                 path = getattr(self, prop)
                 if not os.path.isabs(path):
                     new_path = os.path.join(reference_path, path)
-                    print "DBG: changing", entry, "from", path, "to", new_path
+                    #print "DBG: changing", entry, "from", path, "to", new_path
                     path = new_path
                 setattr(self, prop, path)
                 #print "Setting %s for %s" % (path, prop)
 
 
     def manage_signal(self, sig, frame):
-        print("I'm process %d and I received signal %s" % (os.getpid(), str(sig)))
+        print("Info : I'm process %d and I received signal %s" % (os.getpid(), str(sig)))
         if sig == 10: # if USR1, ask a memory dump
             self.need_dump_memory = True
         else: #Ok, really ask us to die :)
@@ -673,23 +668,26 @@ Also put default value in the properties if some are missing in the config_file 
                 "Copyright (c) 2009-2011 :",
                 "Gabes Jean (naparuba@gmail.com)",
                 "Gerhard Lausser, Gerhard.Lausser@consol.de",
-	        "Gregory Starck, g.starck@gmail.com",
+                "Gregory Starck, g.starck@gmail.com",
                 "Hartmut Goebel, h.goebel@goebel-consult.de",
                 "License: AGPL"]
 
     def print_header(self):
         for line in self.get_header():
             print line
-
+            
+            
+        
+# Wait up to timeout to handle the pyro daemon requests.
+# If suppl_socks is given it also looks for activity on that list of fd.
+# Returns a 3-tuple:
+# If timeout: first arg is 0, second is [], third is possible system time change value
+# If not timeout (== some fd got activity): 
+#  - first arg is elapsed time since wait, 
+#  - second arg is sublist of suppl_socks that got activity.
+#  - third arg is possible system time change value, or 0 if no change. 
     def handleRequests(self, timeout, suppl_socks=None):
-        """ Wait up to timeout to handle the pyro daemon requests.
-If suppl_socks is given it also looks for activity on that list of fd.
-Returns a 3-tuple:
-If timeout: first arg is 0, second is [], third is possible system time change value
-If not timeout (== some fd got activity): 
- - first arg is elapsed time since wait, 
- - second arg is sublist of suppl_socks that got activity.
- - third arg is possible system time change value, or 0 if no change. """
+
         if suppl_socks is None:
             suppl_socks = []
         before = time.time()
@@ -699,7 +697,7 @@ If not timeout (== some fd got activity):
         ins = self.get_socks_activity(socks, timeout)
         tcdiff = self.check_for_system_time_change()
         before += tcdiff
-        #Increase our sleep time for the time go in select
+        # Increase our sleep time for the time go in select
         self.sleep_time += time.time() - before
         if len(ins) == 0: # trivial case: no fd activity:
             return 0, [], tcdiff
@@ -713,12 +711,12 @@ If not timeout (== some fd got activity):
             elapsed = 0.01  # but we absolutely need to return != 0 to indicate that we got activity
         return elapsed, ins, tcdiff
         
-
+    # Check for a possible system time change and act correspondingly.
+    # If such a change is detected then we return the number of seconds that changed. 0 if no time change was detected.
+    # Time change can be positive or negative: 
+    # positive when we have been sent in the futur and negative if we have been sent in the past. 
     def check_for_system_time_change(self):
-        """ Check for a possible system time change and act correspondingly.
-If such a change is detected then we returns the number of seconds that changed. 0 if no time change was detected.
-Time change can be positive or negative: 
-positive when we have been sent in the futur and negative if we have been sent in the past. """
+
         now = time.time()
         difference = now - self.t_each_loop
         
@@ -732,8 +730,8 @@ positive when we have been sent in the futur and negative if we have been sent i
         
         return difference
         
+    # Default action for system time change. Actually a log is done       
     def compensate_system_time_change(self, difference):
-        """ Default action for system time change. Actually a log is done """
         logger.log('Warning: A system time change of %s has been detected.  Compensating...' % difference)
 
 

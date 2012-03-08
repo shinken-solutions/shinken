@@ -142,18 +142,18 @@ Like temporary attributes such as "imported_from", etc.. """
                 setattr(self, prop, entry.default)
 
 
-    # We load every usefull parameter so no need to access global conf later
-    # Must be called after a change in a gloabl conf parameter
+    # We load every useful parameter so no need to access global conf later
+    # Must be called after a change in a global conf parameter
     def load_global_conf(cls, conf):
         """ Used to put global values in the sub Class like
-        hosts ro services """
+        hosts or services """
         # conf have properties, if 'enable_notifications' :
         # { [...] 'class_inherit' : [(Host, None), (Service, None),
         #  (Contact, None)]}
         # get the name and put the value if None, put the Name
         # (not None) if not (not clear ?)
         for prop, entry in conf.properties.items():
-            # If we have a class_inherit, and the arbtier really send us it
+            # If we have a class_inherit, and the arbiter really send us it
             # if 'class_inherit' in entry and hasattr(conf, prop):
             if hasattr(conf, prop):
                 for (cls_dest, change_name) in entry.class_inherit:
@@ -173,14 +173,6 @@ Like temporary attributes such as "imported_from", etc.. """
         cls = self.__class__
         for prop, tab in cls.properties.items():
             try:
-#                if isinstance(tab, dict):
-#                    if 'pythonize' in tab:
-#                        f = tab['pythonize']
-#                        old_val = getattr(self, prop)
-#                        new_val = f(old_val)
-#                        #print "Changing ", old_val, "by", new_val
-#                        setattr(self, prop, new_val)
-#                else: #new style for service
                 new_val = tab.pythonize(getattr(self, prop))
                 setattr(self, prop, new_val)
             except AttributeError, exp:
@@ -251,6 +243,7 @@ Like temporary attributes such as "imported_from", etc.. """
                         # Template should keep their '+'
                         if self.is_tpl():
                             value = '+' + value
+                        setattr(self, prop, value)
                     return value
 
         # Maybe templates only give us + values, so we didn't quit, but we already got a
@@ -258,7 +251,7 @@ Like temporary attributes such as "imported_from", etc.. """
         template_with_only_plus = hasattr(self, prop)
         
         # I do not have endingprop, my templates too... Maybe a plus?
-        # warning : ifall my templates gave me '+' values, do not forgot to
+        # warning : if all my templates gave me '+' values, do not forgot to
         # add the already set self.prop value
         if self.has_plus(prop):
             if template_with_only_plus:
@@ -723,6 +716,14 @@ class Items(object):
 
         # Then look for individual ok
         for i in self:
+            # Alias and display_name hook hook
+            prop_name = getattr(self.__class__, 'name_property', None)
+            if prop_name and not hasattr(i, 'alias') and hasattr(i, prop_name):
+                setattr(i, 'alias', getattr(i, prop_name))
+            if prop_name and getattr(i, 'display_name', '') == '' and hasattr(i, prop_name):
+                setattr(i, 'display_name', getattr(i, prop_name))
+
+            # Now other checks
             if not i.is_correct():
                 n = getattr(i, 'imported_from', "unknown source")
                 safe_print("Error: In", i.get_name(), "is incorrect ; from", n)
@@ -1006,7 +1007,7 @@ class Items(object):
             gn = gn.replace('-', HostGroup_Name_Parse_Ctx.minus_sign_in_name)
             gn = gn.replace('print', HostGroup_Name_Parse_Ctx.print_in_name)
             newgroupname2hostnames[gn] = val
-        
+
         set_res = []
         try:
             set_res = set(eval(str_setexpr, newgroupname2hostnames, {}))
@@ -1330,7 +1331,7 @@ def get_all_host_names_set(hosts):
     return set(
         h.host_name
         for h in hosts.items.values()
-        if getattr(h, 'host_name', '') != ''
+        if getattr(h, 'host_name', '') != '' and not h.is_tpl()
     )
 
 

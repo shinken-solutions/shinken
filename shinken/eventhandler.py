@@ -1,24 +1,27 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 :
-#    Gabes Jean, naparuba@gmail.com
-#    Gerhard Lausser, Gerhard.Lausser@consol.de
-#    Gregory Starck, g.starck@gmail.com
-#    Hartmut Goebel, h.goebel@goebel-consult.de
+
+# -*- coding: utf-8 -*-
+
+# Copyright (C) 2009-2011 :
+#     Gabes Jean, naparuba@gmail.com
+#     Gerhard Lausser, Gerhard.Lausser@consol.de
+#     Gregory Starck, g.starck@gmail.com
+#     Hartmut Goebel, h.goebel@goebel-consult.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
 
@@ -26,6 +29,7 @@ from action import Action
 from shinken.property import IntegerProp, StringProp
 from shinken.autoslots import AutoSlots
 
+""" TODO : Add some comment about this class for the doc"""
 class EventHandler(Action):
     # AutoSlots create the __slots__ with properties and
     # running_properties names
@@ -81,10 +85,10 @@ class EventHandler(Action):
         self.reactionner_tag = reactionner_tag
 
 
-    #return a copy of the check but just what is important for execution
-    #So we remove the ref and all
+    # return a copy of the check but just what is important for execution
+    # So we remove the ref and all
     def copy_shell(self):
-        #We create a dummy check with nothing in it, just defaults values
+        # We create a dummy check with nothing in it, just defaults values
         return self.copy_shell__( EventHandler('', id=self.id) )
 
 
@@ -96,20 +100,20 @@ class EventHandler(Action):
         self.execution_time = getattr(e, 'execution_time', 0.0)
         self.perf_data = getattr(e, 'perf_data', '')
 
-
+    #<TMI!!>
     def get_outputs(self, out, max_plugins_output_length):
         elts = out.split('\n')
-        #For perf data
+        # For perf data
         elts_line1 = elts[0].split('|')
-        #First line before | is output
+        # First line before | is output
         self.output = elts_line1[0]
-        #After | is perfdata
+        # After | is perfdata
         if len(elts_line1) > 1:
             self.perf_data = elts_line1[1]
-        #The others lines are long_output
+        #T he others lines are long_output
         if len(elts) > 1:
             self.long_output = '\n'.join(elts[1:])
-
+    #</TMI!!>
 
     def is_launchable(self, t):
         return t >= self.t_to_go
@@ -124,7 +128,7 @@ class EventHandler(Action):
 
 
 
-    #Call by picle for dataify the coment
+    #Call by pickle for dataify the coment
     #because we DO NOT WANT REF in this pickleisation!
     def __getstate__(self):
         cls = self.__class__
@@ -137,7 +141,7 @@ class EventHandler(Action):
         return res
 
 
-    # Inversed funtion of getstate
+    # Inverted funtion of getstate
     def __setstate__(self, state):
         cls = self.__class__
         self.id = state['id']

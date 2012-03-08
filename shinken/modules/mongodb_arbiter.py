@@ -40,17 +40,17 @@ properties = {
 # called by the plugin manager to get a module instance
 def get_instance(plugin):
     print "[MongoDB Importer Module] : Get Mongodb importer instance for plugin %s" % plugin.get_name()
-    server   = plugin.server
+    uri   = plugin.uri
     database = plugin.database
 
-    instance = Mongodb_arbiter(plugin, server, database)
+    instance = Mongodb_arbiter(plugin, uri, database)
     return instance
 
 # Retrieve hosts from a Mongodb
 class Mongodb_arbiter(BaseModule):
-    def __init__(self, mod_conf, server, database):
+    def __init__(self, mod_conf, uri, database):
         BaseModule.__init__(self, mod_conf)
-        self.server     = server
+        self.uri        = uri
         self.database   = database
         # Some used varaible init
         self.con = None
@@ -59,9 +59,9 @@ class Mongodb_arbiter(BaseModule):
 
     # Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
-        print "[Mongodb Importer Module] : Try to open a Mongodb connection to %s:%s" % (self.server, self.database)
+        print "[Mongodb Importer Module] : Try to open a Mongodb connection to %s:%s" % (self.uri, self.database)
         try:
-            self.con = Connection(self.server)
+            self.con = Connection(self.uri)
             self.db = getattr(self.con, self.database)
         except Exception, e:
             print "Mongodb Module : Error %s:" % e
@@ -84,7 +84,7 @@ class Mongodb_arbiter(BaseModule):
             del h['_id']
             # And we add an imported_from property to say it came from
             # mongodb
-            h['imported_from'] = 'mongodb:%s:%s' % (self.server, self.database)
+            h['imported_from'] = 'mongodb:%s:%s' % (self.uri, self.database)
             r['hosts'].append(h)
 
         return r

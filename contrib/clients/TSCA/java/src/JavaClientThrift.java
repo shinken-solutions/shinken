@@ -53,7 +53,7 @@ public class JavaClientThrift{
 				line = file.readLine();
 		                while (line != null){
 		                        State state = new State();
-                	  	      	state.timestamp = (int)date.getTime();
+                	  	      	state.timestamp = date.getTime();
                         		String[] tab = line.split(",");
                         		state.hostname = tab[0];
 		                        state.serv = tab[1];

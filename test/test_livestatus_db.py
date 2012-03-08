@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.6
+    #!/usr/bin/env python2.6
 # -*- coding: utf-8 -*-
 
 #Copyright (C) 2009-2010 :
@@ -38,6 +38,9 @@ import copy
 from shinken.brok import Brok
 from shinken.objects.timeperiod import Timeperiod
 from shinken.objects.module import Module
+from shinken.objects.service import Service
+from shinken.modules.livestatus_broker.mapping import Logline
+from shinken.modules.logstore_sqlite import LiveStatusLogStoreSqlite
 from shinken.comment import Comment
 
 sys.setcheckinterval(10000)
@@ -66,6 +69,25 @@ class TestConfig(ShinkenTest):
             self.livestatus_broker.manage_brok(brok)
         self.sched.broks = {}
 
+    def tearDown(self):
+        self.livestatus_broker.db.commit()
+        self.livestatus_broker.db.close()
+        if os.path.exists(self.livelogs):
+            os.remove(self.livelogs)
+        if os.path.exists(self.livelogs+"-journal"):
+            os.remove(self.livelogs+"-journal")
+        if os.path.exists("tmp/archives"):
+            for db in os.listdir("tmp/archives"):
+                print "cleanup", db
+                os.remove(os.path.join("tmp/archives", db))
+        if os.path.exists('var/nagios.log'):
+            os.remove('var/nagios.log')
+        if os.path.exists('var/retention.dat'):
+            os.remove('var/retention.dat')
+        if os.path.exists('var/status.dat'):
+            os.remove('var/status.dat')
+        self.livestatus_broker = None
+
 
 
 class TestConfigSmall(TestConfig):
@@ -85,34 +107,6 @@ class TestConfigSmall(TestConfig):
         host = self.sched.hosts.find_by_name("test_host_0")
         host.__class__.use_aggressive_host_checking = 1
 
-
-
-
-    def tearDown(self):
-        self.livestatus_broker.db.commit()
-        self.livestatus_broker.db.close()
-        if os.path.exists(self.livelogs):
-            os.remove(self.livelogs)
-        if os.path.exists(self.livelogs+"-journal"):
-            os.remove(self.livelogs+"-journal")
-        if os.path.exists(self.pnp4nagios):
-            shutil.rmtree(self.pnp4nagios)
-        if os.path.exists('var/nagios.log'):
-            os.remove('var/nagios.log')
-        if os.path.exists('var/retention.dat'):
-            os.remove('var/retention.dat')
-        if os.path.exists('var/status.dat'):
-            os.remove('var/status.dat')
-        to_del = [attr for attr in self.livestatus_broker.livestatus.__class__.out_map['Host'].keys() if attr.startswith('host_')]
-        for attr in to_del:
-            del self.livestatus_broker.livestatus.__class__.out_map['Host'][attr]
-        self.livestatus_broker = None
-
-        if os.path.exists("tmp/archives"):
-            for db in os.listdir("tmp/archives"):
-                os.remove(os.path.join("tmp/archives", db))
-
-
     def write_logs(self, host, loops=0):
         for loop in range(0, loops):
             host.state = 'DOWN'
@@ -127,6 +121,76 @@ class TestConfigSmall(TestConfig):
             host.raise_alert_log_entry()
             self.update_broker()
 
+
+    def test_hostsbygroup(self):
+        self.print_header()
+        now = time.time()
+        objlist = []
+        print "-------------------------------------------"
+        print "Service.lsm_host_name", Service.lsm_host_name
+        print "Logline.lsm_current_host_name", Logline.lsm_current_host_name
+        print "-------------------------------------------"
+        for host in self.sched.hosts:
+            objlist.append([host, 0, 'UP'])
+        for service in self.sched.services:
+            objlist.append([service, 0, 'OK'])
+        self.scheduler_loop(1, objlist)
+        self.update_broker()
+        request = """GET hostsbygroup
+ColumnHeaders: on
+Columns: host_name hostgroup_name
+Filter: groups >= allhosts
+OutputFormat: csv
+KeepAlive: on
+ResponseHeader: fixed16
+"""
+
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+
+    def test_one_log(self):
+        self.print_header()
+        host = self.sched.hosts.find_by_name("test_host_0")
+        now = time.time()
+        time_warp(-3600)
+        num_logs = 0
+	host.state = 'DOWN'
+	host.state_type = 'SOFT'
+	host.attempt = 1
+	host.output = "i am down"
+	host.raise_alert_log_entry()
+	time.sleep(3600)
+	host.state = 'UP'
+	host.state_type = 'HARD'
+	host.attempt = 1
+	host.output = "i am up"
+	host.raise_alert_log_entry()
+	time.sleep(3600)
+        self.update_broker()
+        print "-------------------------------------------"
+        print "Service.lsm_host_name", Service.lsm_host_name
+        print "Logline.lsm_current_host_name", Logline.lsm_current_host_name
+        print "-------------------------------------------"
+
+        self.livestatus_broker.db.log_db_do_archive()
+        print "request logs from", int(now - 3600), int(now + 3600)
+        print "request logs from", time.asctime(time.localtime(int(now - 3600))), time.asctime(time.localtime(int(now + 3600)))
+        request = """GET log
+Filter: time >= """ + str(int(now - 3600)) + """
+Filter: time <= """ + str(int(now + 3600)) + """
+Columns: time type options state host_name"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        print "next next_log_db_rotate", time.asctime(time.localtime(self.livestatus_broker.db.next_log_db_rotate))
+        result = self.livestatus_broker.db.log_db_historic_contents()
+        for day in result:
+            print "file is", day[0]
+            print "start is", time.asctime(time.localtime(day[3]))
+            print "stop  is", time.asctime(time.localtime(day[4]))
+            print "archive is", day[2]
+            print "handle is", day[1]
+        print self.livestatus_broker.db.log_db_relevant_files(now - 3600, now +  3600 )
+            
 
     def test_num_logs(self):
         self.print_header()
@@ -145,7 +209,7 @@ class TestConfigSmall(TestConfig):
             host.state = 'UP'
             host.state_type = 'HARD'
             host.attempt = 1
-            host.output = "i am down"
+            host.output = "i am up"
             host.raise_alert_log_entry()
             num_logs += 1
             time.sleep(3600)
@@ -239,20 +303,27 @@ Columns: time type options state host_name"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         pyresponse = eval(response)
-        self.assert_(len(pyresponse) == logs)
         print "pyresponse", len(pyresponse)
         print "expect", logs
+        self.assert_(len(pyresponse) == logs)
 
         self.livestatus_broker.db.log_db_do_archive()
         self.assert_(os.path.exists("tmp/archives"))
         self.assert_(len([d for d in os.listdir("tmp/archives") if not d.endswith("journal")]) == 4)
         lengths = []
         for db in sorted([d for d in os.listdir("tmp/archives") if not d.endswith("journal")]):
-            dbh = LiveStatusDb("tmp/archives/" + db, "tmp", 3600)
-            numlogs = dbh.execute("SELECT COUNT(*) FROM logs")
+            dbmodconf = Module({'module_name' : 'LogStore',
+                'module_type' : 'logstore_sqlite',
+                'use_aggressive_sql' : '0',
+                'database_file' : "tmp/archives/" + db,
+                'max_logs_age' : '0',
+            })
+            tmpconn = LiveStatusLogStoreSqlite(dbmodconf)
+            tmpconn.open()
+            numlogs = tmpconn.execute("SELECT COUNT(*) FROM logs")
             lengths.append(numlogs[0][0])
             print "db entries", db, numlogs
-            dbh.close()
+            tmpconn.close()
         print "lengths is", lengths
         self.assert_(lengths == [6,14,22,30])
 
@@ -355,11 +426,18 @@ Columns: time type options state host_name"""
         self.assert_(len([d for d in os.listdir("tmp/archives") if not d.endswith("journal")]) == 4)
         lengths = []
         for db in sorted([d for d in os.listdir("tmp/archives") if not d.endswith("journal")]):
-            dbh = LiveStatusDb("tmp/archives/" + db, "tmp", 3600)
-            numlogs = dbh.execute("SELECT COUNT(*) FROM logs")
+            dbmodconf = Module({'module_name' : 'LogStore',
+                'module_type' : 'logstore_sqlite',
+                'use_aggressive_sql' : '0',
+                'database_file' : "tmp/archives/" + db,
+                'max_logs_age' : '0',
+            })
+            tmpconn = LiveStatusLogStoreSqlite(dbmodconf)
+            tmpconn.open()
+            numlogs = tmpconn.execute("SELECT COUNT(*) FROM logs")
             lengths.append(numlogs[0][0])
             print "db entries", db, numlogs
-            dbh.close()
+            tmpconn.close()
         print "lengths is", lengths
         self.assert_(lengths == [12,28,44,60])
 
@@ -397,9 +475,67 @@ Columns: time type options state host_name"""
         archives_path = os.path.join(os.path.dirname(database_file), 'archives')
         print "archive is", archives_path
 
-
+    def test_sven(self):
+        self.print_header()
+        host = self.sched.hosts.find_by_name("test_host_0")
+        now = time.time()
+        num_logs = 0
+	host.state = 'DOWN'
+	host.state_type = 'SOFT'
+	host.attempt = 1
+	host.output = "i am down"
+	host.raise_alert_log_entry()
+	time.sleep(60)
+	host.state = 'UP'
+	host.state_type = 'HARD'
+	host.attempt = 1
+	host.output = "i am up"
+	host.raise_alert_log_entry()
+	time.sleep(60)
+        self.show_logs()
+        self.update_broker()
+        self.livestatus_broker.db.log_db_do_archive()
+        query_end = time.time() + 3600
+        query_start = query_end - 3600 * 24 * 21
+        request = """GET log
+Columns: class time type state host_name service_description plugin_output message options contact_name command_name state_type current_host_groups current_service_groups
+Filter: time >= """ + str(int(query_start)) + """
+Filter: time <= """ + str(int(query_end)) + """
+And: 2
+Filter: host_name = test_host_0
+Filter: type = HOST ALERT
+Filter: options ~ ;HARD;
+Filter: type = INITIAL HOST STATE
+Filter: options ~ ;HARD;
+Filter: type = CURRENT HOST STATE
+Filter: options ~ ;HARD;
+Filter: type = HOST DOWNTIME ALERT
+Or: 7
+And: 2
+Filter: host_name = test_host_0
+Filter: type = SERVICE ALERT
+Filter: options ~ ;HARD;
+Filter: type = INITIAL SERVICE STATE
+Filter: options ~ ;HARD;
+Filter: type = CURRENT SERVICE STATE
+Filter: options ~ ;HARD;
+Filter: type = SERVICE DOWNTIME ALERT
+Or: 7
+And: 2
+Filter: class = 2
+Filter: type ~~ TIMEPERIOD TRANSITION
+Or: 4
+OutputFormat: json
+ResponseHeader: fixed16
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print request
+        print response
+        pyresponse = eval(response.splitlines()[1])
+        self.assert_(len(pyresponse) == 2)
 
 class TestConfigBig(TestConfig):
+
     def setUp(self):
         start_setUp = time.time()
         self.setup_with_file('etc/nagios_5r_100h_2000s.cfg')
@@ -415,26 +551,6 @@ class TestConfigBig(TestConfig):
         host = self.sched.hosts.find_by_name("test_host_000")
         host.__class__.use_aggressive_host_checking = 1
 
-
-    def init_livestatus(self):
-        #self.livelogs = 'tmp/livelogs.db' + self.testid
-        self.livelogs = 'tmp/livelogs.db' + "wrumm"
-        self.db_archives = os.path.join(os.path.dirname(self.livelogs), 'archives')
-        self.pnp4nagios = 'tmp/pnp4nagios_test' + self.testid
-        self.livestatus_broker = Livestatus_broker(livestatus_modconf, '127.0.0.1', str(50000 + os.getpid()), 'live', [], self.livelogs, self.db_archives, 365, self.pnp4nagios)
-        self.livestatus_broker.create_queues()
-        #self.livestatus_broker.properties = {
-        #    'to_queue' : 0,
-        #    'from_queue' : 0
-        #
-        #    }
-        self.livestatus_broker.init()
-        self.livestatus_broker.db = LiveStatusDb(self.livestatus_broker.database_file, self.livestatus_broker.archive_path, self.livestatus_broker.max_logs_age)
-
-        self.livestatus_broker.livestatus = LiveStatus(self.livestatus_broker.configs, self.livestatus_broker.hosts, self.livestatus_broker.services, self.livestatus_broker.contacts, self.livestatus_broker.hostgroups, self.livestatus_broker.servicegroups, self.livestatus_broker.contactgroups, self.livestatus_broker.timeperiods, self.livestatus_broker.commands, self.livestatus_broker.schedulers, self.livestatus_broker.pollers, self.livestatus_broker.reactionners, self.livestatus_broker.brokers, self.livestatus_broker.db, self.livestatus_broker.use_aggressive_sql, self.livestatus_broker.pnp_path, self.livestatus_broker.from_q)
-
-
-
     def test_a_long_history(self):
         #return
         test_host_005 = self.sched.hosts.find_by_name("test_host_005")
@@ -444,12 +560,42 @@ class TestConfigBig(TestConfig):
         test_ok_04 = self.sched.services.find_srv_by_name_and_hostname("test_host_005", "test_ok_04")
         test_ok_16 = self.sched.services.find_srv_by_name_and_hostname("test_host_005", "test_ok_16")
         test_ok_99 = self.sched.services.find_srv_by_name_and_hostname("test_host_099", "test_ok_01")
-        starttime = time.time()
-        numlogs = self.livestatus_broker.db.execute("SELECT COUNT(*) FROM logs")
-        if numlogs[0][0] == 0:
-            # run silently
-            old_stdout = sys.stdout
-            sys.stdout = open(os.devnull, "w")
+
+        days = 4
+        etime = time.time()
+        print "now it is", time.ctime(etime)
+        print "now it is", time.gmtime(etime)
+        etime_midnight = (etime - (etime % 86400)) + time.altzone
+        print "midnight was", time.ctime(etime_midnight)
+        print "midnight was", time.gmtime(etime_midnight)
+        query_start = etime_midnight - (days - 1) * 86400
+        query_end = etime_midnight
+        print "query_start", time.ctime(query_start)
+        print "query_end ", time.ctime(query_end)
+
+        # |----------|----------|----------|----------|----------|---x
+        #                                                            etime
+        #                                                        etime_midnight
+        #             ---x------
+        #                etime -  4 days
+        #                       |---
+        #                       query_start
+        #
+        #                ............................................
+        #                events in the log database ranging till now
+        #
+        #                       |________________________________|
+        #                       events which will be read from db
+        #
+        loops = int(86400 / 192)
+        time_warp(-1 * days * 86400)
+        print "warp back to", time.ctime(time.time())
+        # run silently
+        old_stdout = sys.stdout
+        sys.stdout = open(os.devnull, "w")
+        should_be = 0
+        for day in xrange(days):
+            sys.stderr.write("day %d now it is %s i run %d loops\n" % (day, time.ctime(time.time()), loops))
             self.scheduler_loop(2, [
                 [test_ok_00, 0, "OK"],
                 [test_ok_01, 0, "OK"],
@@ -458,9 +604,8 @@ class TestConfigBig(TestConfig):
                 [test_ok_99, 0, "OK"],
             ])
             self.update_broker()
-            should_be = 0
             #for i in xrange(3600 * 24 * 7):
-            for i in xrange(10000): 
+            for i in xrange(loops):
                 if i % 10000 == 0:
                     sys.stderr.write(str(i))
                 if i % 399 == 0:
@@ -471,7 +616,9 @@ class TestConfigBig(TestConfig):
                         [test_ok_16, 1, "WARN"],
                         [test_ok_99, 2, "CRIT"],
                     ])
-                    should_be += 3
+                    if int(time.time()) >= query_start and int(time.time()) <= query_end:
+                        should_be += 3
+                        sys.stderr.write("now it should be %s\n" % should_be)
                 time.sleep(62)
                 if i % 399 == 0:
                     self.scheduler_loop(1, [
@@ -481,34 +628,37 @@ class TestConfigBig(TestConfig):
                         [test_ok_16, 0, "OK"],
                         [test_ok_99, 0, "OK"],
                     ])
-                    should_be += 1
+                    if int(time.time()) >= query_start and int(time.time()) <= query_end:
+                        should_be += 1
+                        sys.stderr.write("now it should be %s\n" % should_be)
                 time.sleep(2)
-                if i % 199 == 0:
+                if i % 17 == 0:
                     self.scheduler_loop(3, [
                         [test_ok_00, 1, "WARN"],
                         [test_ok_01, 2, "CRIT"],
                     ])
+
                 time.sleep(62)
-                if i % 199 == 0:
+                if i % 17 == 0:
                     self.scheduler_loop(1, [
                         [test_ok_00, 0, "OK"],
                         [test_ok_01, 0, "OK"],
                     ])
                 time.sleep(2)
-                if i % 299 == 0:
+                if i % 14 == 0:
                     self.scheduler_loop(3, [
                         [test_host_005, 2, "DOWN"],
                     ])
-                if i % 19 == 0:
+                if i % 12 == 0:
                     self.scheduler_loop(3, [
                         [test_host_099, 2, "DOWN"],
                     ])
                 time.sleep(62)
-                if i % 299 == 0:
+                if i % 14 == 0:
                     self.scheduler_loop(3, [
                         [test_host_005, 0, "UP"],
                     ])
-                if i % 19 == 0:
+                if i % 12 == 0:
                     self.scheduler_loop(3, [
                         [test_host_099, 0, "UP"],
                     ])
@@ -517,25 +667,20 @@ class TestConfigBig(TestConfig):
                 if i % 1000 == 0:
                     self.livestatus_broker.db.commit()
             endtime = time.time()
-            sys.stdout.close()
-            sys.stdout = old_stdout
             self.livestatus_broker.db.commit()
-        else:
-            should_be = numlogs[0][0]
-            xxx = self.livestatus_broker.db.execute("SELECT min(time), max(time) FROM logs")
-            print xxx
-            starttime, endtime = [self.livestatus_broker.db.execute("SELECT min(time), max(time) FROM logs")][0][0]
-            
-        
+            sys.stderr.write("day %d end it is %s\n" % (day, time.ctime(time.time())))
+        sys.stdout.close()
+        sys.stdout = old_stdout
+        self.livestatus_broker.db.commit_and_rotate_log_db()
+        numlogs = self.livestatus_broker.db.execute("SELECT COUNT(*) FROM logs")
+        print "numlogs is", numlogs
+
         # now we have a lot of events
         # find type = HOST ALERT for test_host_005
-        q = int((endtime - starttime) / 8)
-        starttime += q
-        endtime -= q
         request = """GET log
 Columns: class time type state host_name service_description plugin_output message options contact_name command_name state_type current_host_groups current_service_groups
-Filter: time >= """ + str(int(starttime)) + """
-Filter: time <= """ + str(int(endtime)) + """
+Filter: time >= """ + str(int(query_start)) + """
+Filter: time <= """ + str(int(query_end)) + """
 Filter: type = SERVICE ALERT
 And: 1
 Filter: type = HOST ALERT
@@ -557,30 +702,83 @@ OutputFormat: json"""
         time.time = original_time_time
         time.sleep = original_time_sleep
         print request
+        print "query 1 --------------------------------------------------"
+        tic = time.time()
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        tac = time.time()
         pyresponse = eval(response)
-        print "number of records", len(pyresponse)
-        print "should be", should_be
-        numlogs = self.livestatus_broker.db.execute("SELECT min(time), max(time) FROM logs")
-        print starttime, endtime, numlogs
-        self.livestatus_broker.livestatus.use_aggressive_sql = True
-        print "aggrosql", self.livestatus_broker.livestatus.use_aggressive_sql
-        response2, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        self.assert_(response2 == response)
-        print "aggrosql", self.livestatus_broker.livestatus.use_aggressive_sql
-        response2, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        self.assert_(response2 == response)
-        self.livestatus_broker.livestatus.use_aggressive_sql = False
-        print "aggrosql", self.livestatus_broker.livestatus.use_aggressive_sql
-        response2, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        self.assert_(response2 == response)
-        print "aggrosql", self.livestatus_broker.livestatus.use_aggressive_sql
-        response2, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        self.assert_(response2 == response)
-        # back to fake time for the other tests can run faster
+        print "number of records with test_ok_01", len(pyresponse)
+        self.assert_(len(pyresponse) == should_be)
+
+        # and now test Negate:
+        request = """GET log
+Filter: time >= """ + str(int(query_start)) + """
+Filter: time <= """ + str(int(query_end)) + """
+Filter: type = SERVICE ALERT
+And: 1
+Filter: type = HOST ALERT
+And: 1
+Filter: type = SERVICE FLAPPING ALERT
+Filter: type = HOST FLAPPING ALERT
+Filter: type = SERVICE DOWNTIME ALERT
+Filter: type = HOST DOWNTIME ALERT
+Filter: type ~ starting...
+Filter: type ~ shutting down...
+Or: 8
+Filter: host_name = test_host_099
+Filter: service_description = test_ok_01
+And: 2
+Negate:
+And: 2
+OutputFormat: json"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print "got response with true instead of negate"
+        notpyresponse = eval(response)
+        print "number of records without test_ok_01", len(notpyresponse)
+
+        request = """GET log
+Filter: time >= """ + str(int(query_start)) + """
+Filter: time <= """ + str(int(query_end)) + """
+Filter: type = SERVICE ALERT
+And: 1
+Filter: type = HOST ALERT
+And: 1
+Filter: type = SERVICE FLAPPING ALERT
+Filter: type = HOST FLAPPING ALERT
+Filter: type = SERVICE DOWNTIME ALERT
+Filter: type = HOST DOWNTIME ALERT
+Filter: type ~ starting...
+Filter: type ~ shutting down...
+Or: 8
+OutputFormat: json"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        allpyresponse = eval(response)
+        print "all records", len(allpyresponse)
+        self.assert_(len(allpyresponse) == len(notpyresponse) + len(pyresponse))
+        # the numlogs above only counts records in the currently attached db
+        numlogs = self.livestatus_broker.db.execute("SELECT COUNT(*) FROM logs WHERE time >= %d AND time <= %d" %(int(query_start), int(query_end)))
+        print "numlogs is", numlogs
+
         time.time = fake_time_time
         time.sleep = fake_time_sleep
 
+
+class TestConfigNoLogstore(TestConfig):
+
+    def setUp(self):
+        start_setUp = time.time()
+        self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
+        Comment.id = 1
+        self.testid = str(os.getpid() + random.randint(1, 1000))
+        self.init_livestatus()
+        print "Cleaning old broks?"
+        self.sched.fill_initial_broks()
+        self.update_broker()
+        print "************* Overall Setup:", time.time() - start_setUp
+        # add use_aggressive_host_checking so we can mix exit codes 1 and 2
+        # but still get DOWN state
+        host = self.sched.hosts.find_by_name("test_host_0")
+        host.__class__.use_aggressive_host_checking = 1
 
     def tearDown(self):
         self.livestatus_broker.db.commit()
@@ -589,19 +787,83 @@ OutputFormat: json"""
             os.remove(self.livelogs)
         if os.path.exists(self.livelogs+"-journal"):
             os.remove(self.livelogs+"-journal")
-        if os.path.exists(self.pnp4nagios):
-            shutil.rmtree(self.pnp4nagios)
+        if os.path.exists(self.livestatus_broker.pnp_path):
+            shutil.rmtree(self.livestatus_broker.pnp_path)
         if os.path.exists('var/nagios.log'):
             os.remove('var/nagios.log')
         if os.path.exists('var/retention.dat'):
             os.remove('var/retention.dat')
         if os.path.exists('var/status.dat'):
             os.remove('var/status.dat')
-        to_del = [attr for attr in self.livestatus_broker.livestatus.__class__.out_map['Host'].keys() if attr.startswith('host_')]
-        for attr in to_del:
-            del self.livestatus_broker.livestatus.__class__.out_map['Host'][attr]
         self.livestatus_broker = None
 
+    def init_livestatus(self):
+        self.livelogs = 'tmp/livelogs.db' + self.testid
+        modconf = Module({'module_name' : 'LiveStatus',
+            'module_type': 'livestatus',
+            'port': str(50000 + os.getpid()),
+            'pnp_path': 'tmp/pnp4nagios_test' + self.testid,
+            'host': '127.0.0.1',
+            'socket': 'live',
+            'name': 'test', #?
+            'database_file': self.livelogs,
+        })
+
+        dbmodconf = Module({'module_name' : 'LogStore',
+            'module_type': 'logstore_sqlite',
+            'use_aggressive_sql': "0",
+            'database_file': self.livelogs,
+            'archive_path': os.path.join(os.path.dirname(self.livelogs), 'archives'),
+        })
+        ####################################
+        # !NOT! modconf.modules = [dbmodconf]
+        ####################################
+        self.livestatus_broker = LiveStatus_broker(modconf)
+        self.livestatus_broker.create_queues()
+
+        self.livestatus_broker.init()
+
+        #--- livestatus_broker.main
+        self.livestatus_broker.log = logger
+        # this seems to damage the logger so that the scheduler can't use it
+        #self.livestatus_broker.log.load_obj(self.livestatus_broker)
+        self.livestatus_broker.debug_output = []
+        self.livestatus_broker.modules_manager = ModulesManager('livestatus', self.livestatus_broker.find_modules_path(), [])
+        self.livestatus_broker.modules_manager.set_modules(self.livestatus_broker.modules)
+        # We can now output some previouly silented debug ouput
+        self.livestatus_broker.do_load_modules()
+        for inst in self.livestatus_broker.modules_manager.instances:
+            if inst.properties["type"].startswith('logstore'):
+                f = getattr(inst, 'load', None)
+                if f and callable(f):
+                    f(self.livestatus_broker) #!!! NOT self here !!!!
+                break
+        for s in self.livestatus_broker.debug_output:
+            print "errors during load", s
+        del self.livestatus_broker.debug_output
+        self.livestatus_broker.add_compatibility_sqlite_module()
+        self.livestatus_broker.rg = LiveStatusRegenerator()
+        self.livestatus_broker.datamgr = datamgr
+        datamgr.load(self.livestatus_broker.rg)
+        self.livestatus_broker.query_cache = LiveStatusQueryCache()
+        self.livestatus_broker.query_cache.disable()
+        self.livestatus_broker.rg.register_cache(self.livestatus_broker.query_cache)
+        #--- livestatus_broker.main
+
+        #--- livestatus_broker.do_main
+        self.livestatus_broker.db = self.livestatus_broker.modules_manager.instances[0]
+        self.livestatus_broker.db.open()
+        #--- livestatus_broker.do_main
+
+        #--- livestatus_broker.manage_lql_thread
+        self.livestatus_broker.livestatus = LiveStatus(self.livestatus_broker.datamgr, self.livestatus_broker.query_cache, self.livestatus_broker.db, self.livestatus_broker.pnp_path, self.livestatus_broker.from_q)
+        #--- livestatus_broker.manage_lql_thread
+
+
+    def test_has_implicit_module(self):
+        self.assert_(self.livestatus_broker.modules_manager.instances[0].properties['type'] == 'logstore_sqlite')
+        self.assert_(self.livestatus_broker.modules_manager.instances[0].__class__.__name__ == 'LiveStatusLogStoreSqlite')
+        self.assert_(self.livestatus_broker.db.database_file == self.livelogs)
 
 
 if __name__ == '__main__':

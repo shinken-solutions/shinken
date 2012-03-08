@@ -1,24 +1,29 @@
-#!/usr/bin/python
-#Copyright (C) 2009 Gabes Jean, naparuba@gmail.com
+#!/usr/bin/env python
+
+# -*- coding: utf-8 -*-
+
+# Copyright (C) 2009-2012 :
+#    Gabes Jean, naparuba@gmail.com
+#    Nicolas Dupeux, nicolas.dupeux@arkea.com
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This Class is an example of an Arbiter module
-#Here for the configuration phase AND running one
+# This Class is an NSCA Arbiter module
+# Here for the configuration phase AND running one
 
 
 import time
@@ -31,19 +36,22 @@ from shinken.basemodule import BaseModule
 from shinken.external_command import ExternalCommand
 
 properties = {
-    'daemons' : ['arbiter', 'receiver'],
-    'type' : 'nsca_server',
-    'external' : True,
-    'phases' : ['running'],
+    'daemons': ['arbiter', 'receiver'],
+    'type': 'nsca_server',
+    'external': True,
+    'phases': ['running'],
     }
+
 
 def decrypt_xor(data, key):
     keylen = len(key)
-    crypted = [chr(ord(data[i]) ^ ord(key[i % keylen])) for i in xrange(len(data))]
+    crypted = [chr(ord(data[i]) ^ ord(key[i % keylen]))
+            for i in xrange(len(data))]
     return ''.join(crypted)
 
-#called by the plugin manager to get a broker
+
 def get_instance(plugin):
+    """ Return a module instance for the plugin manager """
     print "Get a NSCA arbiter module for plugin %s" % plugin.get_name()
 
     if hasattr(plugin, 'host'):
@@ -65,33 +73,28 @@ def get_instance(plugin):
         password = plugin.password
     else:
         password = ""
+    if hasattr(plugin, 'max_packet_age'):
+        max_packet_age = min(plugin.max_packet_age, 900)
+    else:
+        max_packet_age = 30
 
-    instance = NSCA_arbiter(plugin, host, port, encryption_method, password)
+    instance = NSCA_arbiter(plugin, host, port,
+            encryption_method, password, max_packet_age)
     return instance
 
 
 #Just print some stuff
 class NSCA_arbiter(BaseModule):
-    def __init__(self, modconf, host, port, encryption_method, password):
+
+    def __init__(self, modconf, host, port,
+            encryption_method, password, max_packet_age):
         BaseModule.__init__(self, modconf)
         self.host = host
         self.port = port
         self.encryption_method = encryption_method
         self.password = password
         self.rng = random.Random(password)
-
-
-    #Ok, main function that is called in the CONFIGURATION phase
-    def get_objects(self):
-        print "[Dummy] ask me for objects to return"
-        r = {'hosts' : []}
-        h = {'name' : 'dummy host from dummy arbiter module',
-             'register' : '0',
-             }
-
-        r['hosts'].append(h)
-        print "[Dummy] Returning to Arbiter the hosts:", r
-        return r
+        self.max_packet_age = max_packet_age
 
     def send_init_packet(self, socket):
         '''
@@ -100,7 +103,7 @@ class NSCA_arbiter(BaseModule):
          128-131 : unix timestamp
         '''
         iv = ''.join([chr(self.rng.randrange(256)) for i in xrange(128)])
-        init_packet = struct.pack("!128sI", iv, int(time.mktime(time.gmtime())))
+        init_packet = struct.pack("!128sI", iv, int(time.time()))
         socket.send(init_packet)
         return iv
 
@@ -120,11 +123,11 @@ class NSCA_arbiter(BaseModule):
             return None
 
         if self.encryption_method == 1:
-            data = decrypt_xor(data,self.password)
-            data = decrypt_xor(data,iv)
+            data = decrypt_xor(data, self.password)
+            data = decrypt_xor(data, iv)
 
-        (version, pad1, crc32, timestamp, rc, hostname_dirty, service_dirty, output_dirty, pad2) = struct.unpack("!hhIIh64s128s512sh",data)
-        hostname =  hostname_dirty.split("\0", 1)[0]
+        (version, pad1, crc32, timestamp, rc, hostname_dirty, service_dirty, output_dirty, pad2) = struct.unpack("!hhIIh64s128s512sh", data)
+        hostname = hostname_dirty.split("\0", 1)[0]
         service = service_dirty.split("\0", 1)[0]
         output = output_dirty.split("\0", 1)[0]
         return (timestamp, rc, hostname, service, output)
@@ -134,12 +137,23 @@ class NSCA_arbiter(BaseModule):
         Send a check result command to the arbiter
         '''
         if len(service) == 0:
-            extcmd = "[%lu] PROCESS_HOST_CHECK_RESULT;%s;%d;%s\n" % (timestamp,hostname,rc,output)
+            extcmd = "[%lu] PROCESS_HOST_CHECK_RESULT;%s;%d;%s\n" % (timestamp, hostname, rc, output)
         else:
-            extcmd = "[%lu] PROCESS_SERVICE_CHECK_RESULT;%s;%s;%d;%s\n" % (timestamp,hostname,service,rc,output)
+            extcmd = "[%lu] PROCESS_SERVICE_CHECK_RESULT;%s;%s;%d;%s\n" % (timestamp, hostname, service, rc, output)
 
         e = ExternalCommand(extcmd)
         self.from_q.put(e)
+
+    def process_check_result(self, databuffer, IV):
+        (timestamp, rc, hostname, service, output) = self.read_check_result(databuffer, IV)
+        current_time = time.time()
+        check_result_age = current_time - timestamp
+        if timestamp > current_time:
+            print "Dropping packet with future timestamp."
+        elif check_result_age > self.max_packet_age:
+            print "Dropping packet with stale timestamp - packet was %s seconds old." % check_result_age
+        else:
+            self.post_command(timestamp, rc, hostname, service, output)
 
 
     # When you are in "external" mode, that is the main loop of your process
@@ -156,7 +170,7 @@ class NSCA_arbiter(BaseModule):
         IVs = {}
 
         while not self.interrupted:
-            inputready,outputready,exceptready = select.select(input,[],[], 1)
+            inputready, outputready, exceptready = select.select(input, [], [], 1)
             for s in inputready:
                 if s == server:
                     # handle the server socket
@@ -169,6 +183,8 @@ class NSCA_arbiter(BaseModule):
                     data = s.recv(size)
                     if len(data) == 0:
                         # Closed socket
+                        del databuffer[s]
+                        del IVs[s]
                         s.close()
                         input.remove(s)
                         continue
@@ -176,15 +192,7 @@ class NSCA_arbiter(BaseModule):
                         databuffer[s] += data
                     else:
                         databuffer[s] = data
-                    if len(databuffer[s]) == 720:
+                    while len(databuffer[s]) >= 720:
                         # end-of-transmission or an empty line was received
-                        (timestamp, rc, hostname, service, output)=self.read_check_result(databuffer[s],IVs[s])
-                        del databuffer[s]
-                        del IVs[s]
-                        self.post_command(timestamp,rc,hostname,service,output)
-                        try:
-                            s.shutdown(2)
-                        except Exception , exp:
-                            print exp
-                        s.close()
-                        input.remove(s)
+                        self.process_check_result(databuffer[s][0:720], IVs[s])
+                        databuffer[s] = databuffer[s][720:]

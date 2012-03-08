@@ -23,6 +23,7 @@
 #
 
 import os
+import sys
 
 #It's ugly I know....
 from shinken_test import *
@@ -34,11 +35,23 @@ time.sleep = original_time_sleep
 class TestAction(ShinkenTest):
     #setUp is in shinken_test
 
-    def wait_finished(self, a):
-        for i in xrange(1, 100000):
+    def wait_finished(self, a, size=8012):
+        start = time.time()
+        while True:
+            # Do the job
             if a.status == 'launched':
-                a.check_finished(8012)
+                #print a.process.poll()
+                a.check_finished(size)
                 time.sleep(0.01)
+            #print a.status
+            if a.status != 'launched':
+                #print "Finish", a.status
+                return
+            # 20s timeout
+            if time.time() - start > 20:
+                print "COMMAND TIMEOUT AT 20s"
+                return
+
 
     #Change ME :)
     def test_action(self):
@@ -57,6 +70,7 @@ class TestAction(ShinkenTest):
         self.wait_finished(a)
         self.assert_(a.exit_status == 0)
         self.assert_(a.status == 'done')
+        print a.output
         self.assert_(a.output == "Hi, I'm for testing only. Please do not use me directly, really")
         self.assert_(a.perf_data == "Hip=99% Bob=34mm")
 
@@ -137,6 +151,61 @@ class TestAction(ShinkenTest):
         print "FUck", a.status, a.output
         self.assert_(a.exit_status == 0)
         self.assert_(a.status == 'done')
+
+
+    def test_got_unclosed_quote(self):
+        # https://github.com/naparuba/shinken/issues/155
+        a = Action()
+        a.timeout = 10
+        a.command = "libexec/dummy_command_nobang.sh -a 'wwwwzzzzeeee"
+        a.env = {}
+        if os.name == 'nt':
+            return
+        a.execute()
+
+        self.wait_finished(a)
+        self.assert_(a.status == 'done')
+        print "FUck", a.status, a.output
+        if sys.version_info < (2, 7):
+            # cygwin: /bin/sh: -c: line 0: unexpected EOF while looking for matching'
+            # ubuntu: /bin/sh: Syntax error: Unterminated quoted string
+            self.assert_(a.output.startswith("/bin/sh"))
+            self.assert_(a.exit_status == 3)
+        else:
+            self.assert_(a.output == 'Not a valid shell command: No closing quotation')
+            self.assert_(a.exit_status == 3)
+
+
+
+    # We got problems on LARGE output, more than 64K in fact.
+    # We try to solve it with the fcntl and non blocking read
+    # instead of "communicate" mode. So here we try to get a 100K
+    # output. Should NOT be in a timeout
+    def test_huge_output(self):
+        a = Action()
+        a.timeout = 5
+        a.env = {}
+
+        if os.name == 'nt':
+            a.command = r"""python -c 'print "A"*1000000'"""
+            # FROM NOW IT4S FAIL ON WINDOWS :(
+            return
+        else:
+            a.command = r"""python -u -c 'print "A"*100000'"""
+        print "EXECUTE"
+        a.execute()
+        print "EXECUTE FINISE"
+        self.assert_(a.status == 'launched')
+        #Give also the max output we want for the command
+        self.wait_finished(a, 10000000000)
+        print "Status?", a.exit_status
+        self.assert_(a.exit_status == 0)
+        print "Output", len(a.output)
+        self.assert_(a.exit_status == 0)
+        self.assert_(a.status == 'done')
+        self.assert_(a.output == "A"*100000)
+        self.assert_(a.perf_data == "")
+
 
 
 if __name__ == '__main__':

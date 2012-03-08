@@ -41,6 +41,10 @@ class Host_perfdata_broker(BaseModule):
         self.template = self.template.replace(r'\t', '\t')
         self.template = self.template.replace(r'\n', '\n')
 
+        # In Nagios it's said to force a return in line
+        if not self.template.endswith('\n'):
+            self.template += '\n'
+
 
     #Called by Broker so we can do init stuff
     #TODO : add conf param to get pass with init
@@ -72,6 +76,7 @@ class Host_perfdata_broker(BaseModule):
             '$HOSTOUTPUT$' : data['output'],
             '$HOSTSTATE$' : current_state,
             '$HOSTPERFDATA$' : data['perf_data'],
+            '$LASTHOSTSTATE$' : data['last_state'],
             }
         s = self.template
         for m in macros:

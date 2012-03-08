@@ -119,14 +119,14 @@ class ObjectsCacheFile:
         Contact : {
             'contact_name' : {'required' : True, 'default' : '0'},
             'alias' : {'required' : False, 'default' : '0'},
-            'host_notifications_enabled' : {'required' : True, 'depythonize' : from_bool_to_string},
-            'service_notifications_enabled' : {'required' : True, 'depythonize' : from_bool_to_string},
-            'host_notification_period' : {'required' : True, 'depythonize' : 'get_name'},
-            'service_notification_period' : {'required' : True, 'depythonize' : 'get_name'},
-            'host_notification_options' : {'required' : True, 'depythonize' : from_list_to_split, 'default' : 'd,u,r,f,s,n'},
-            'service_notification_options' : {'required' : True, 'depythonize' : from_list_to_split, 'default' : 'w,u,c,r,f,s,n'},
-            'host_notification_commands' : {'required' : True, 'depythonize' : 'call'},
-            'service_notification_commands' : {'required' : True, 'depythonize' : 'call'},
+            'host_notifications_enabled' : {'required' : True},
+            'service_notifications_enabled' : {'required' : True},
+            'host_notification_period' : {'required' : True},
+            'service_notification_period' : {'required' : True},
+            'host_notification_options' : {'required' : True},
+            'service_notification_options' : {'required' : True},
+            'host_notification_commands' : {'required' : True},
+            'service_notification_commands' : {'required' : True},
             'email' : {'required' : False},
             'pager' : {'required' : False},
             'address1' : {'required' : False},
@@ -266,10 +266,6 @@ class ObjectsCacheFile:
                                 value = ','.join(['%s' % y for x in value if isinstance(x, list) for y in x] + \
                                     ['%s' % x for x in value if not isinstance(x, list)])
                             else:
-                                #ok not a direct function, maybe a functin provided by value...
-                                # DBG : lmimoza
-                                if not hasattr(value, f):
-                                    print "DBG"*10, "object", value, type(value), 'is missing', f
                                 f = getattr(value, f)
                                 if callable(f):
                                     value = f()

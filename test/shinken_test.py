@@ -39,6 +39,7 @@ from shinken.brokerlink import BrokerLink
 from shinken.satellitelink import SatelliteLink
 from shinken.notification import Notification
 from shinken.modulesmanager import ModulesManager
+from shinken.basemodule import BaseModule
 
 from shinken.brok import Brok
 
@@ -46,12 +47,13 @@ from shinken.daemons.schedulerdaemon import Shinken
 from shinken.daemons.brokerdaemon import Broker
 from shinken.daemons.arbiterdaemon import Arbiter
 
-from shinken.misc.regenerator import Regenerator
 
 from shinken.modules import livestatus_broker
-from shinken.modules.livestatus_broker import Livestatus_broker
+from shinken.modules.livestatus_broker import LiveStatus_broker
 from shinken.modules.livestatus_broker.livestatus import LiveStatus
-from shinken.modules.livestatus_broker.livestatus_db import LiveStatusDb
+from shinken.modules.livestatus_broker.livestatus_regenerator import LiveStatusRegenerator
+from shinken.modules.livestatus_broker.livestatus_query_cache import LiveStatusQueryCache
+from shinken.misc.datamanager import datamgr
 
 livestatus_modconf = Module()
 livestatus_modconf.module_name = "livestatus"
@@ -93,6 +95,9 @@ def time_warp(duration):
 # time.time = original_time_time
 # time.sleep = original_time_sleep
 
+class Pluginconf(object):
+    pass
+
 
 class ShinkenTest(unittest.TestCase):
     def setUp(self):
@@ -106,7 +111,6 @@ class ShinkenTest(unittest.TestCase):
         self.log.load_obj(self)
         self.config_files = [path]
         self.conf = Config()
-        self.conf.read_config(self.config_files)
         buf = self.conf.read_config(self.config_files)
         raw_objects = self.conf.read_config_buf(buf)
         self.conf.create_objects_for_type(raw_objects, 'arbiter')
@@ -116,14 +120,18 @@ class ShinkenTest(unittest.TestCase):
         self.conf.old_properties_names_to_new()
         self.conf.instance_id = 0
         self.conf.instance_name = 'test'
+        # Hack push_flavor, that is set by the dispatcher
+        self.conf.push_flavor = 0
         self.conf.linkify_templates()
         self.conf.apply_inheritance()
         self.conf.explode()
+        print "Aconf.services has %d elements" % len(self.conf.services)
         self.conf.create_reversed_list()
         self.conf.remove_twins()
         self.conf.apply_implicit_inheritance()
         self.conf.fill_default()
         self.conf.remove_templates()
+        print "conf.services has %d elements" % len(self.conf.services)
         self.conf.create_reversed_list()
         self.conf.pythonize()
         self.conf.linkify()
@@ -331,20 +339,85 @@ class ShinkenTest(unittest.TestCase):
         self.assert_(self.conf.conf_is_correct)
 
 
+    def find_modules_path(self):
+        """ Find the absolute path of the shinken module directory and returns it.  """
+        import shinken
+
+        # BEWARE: this way of finding path is good if we still
+        # DO NOT HAVE CHANGE PWD!!!
+        # Now get the module path. It's in fact the directory modules
+        # inside the shinken directory. So let's find it.
+
+        print "modulemanager file", shinken.modulesmanager.__file__
+        modulespath = os.path.abspath(shinken.modulesmanager.__file__)
+        print "modulemanager absolute file", modulespath
+        # We got one of the files of
+        parent_path = os.path.dirname(os.path.dirname(modulespath))
+        modulespath = os.path.join(parent_path, 'shinken', 'modules')
+        print("Using modules path : %s" % (modulespath))
+
+        return modulespath
+
+    def do_load_modules(self):
+        self.modules_manager.load_and_init()
+        self.log.log("I correctly loaded the modules : [%s]" % (','.join([inst.get_name() for inst in self.modules_manager.instances])))
+
+
+
     def init_livestatus(self):
         self.livelogs = 'tmp/livelogs.db' + self.testid
-        self.db_archives = os.path.join(os.path.dirname(self.livelogs), 'archives')
-        self.pnp4nagios = 'tmp/pnp4nagios_test' + self.testid
-        self.livestatus_broker = Livestatus_broker(livestatus_modconf, '127.0.0.1', str(50000 + os.getpid()), 'live', [], self.livelogs, self.db_archives, 365, self.pnp4nagios, True)
+        modconf = Module({'module_name' : 'LiveStatus', 
+            'module_type' : 'livestatus',
+            'port' : str(50000 + os.getpid()),
+            'pnp_path' : 'tmp/pnp4nagios_test' + self.testid,
+            'host' : '127.0.0.1',
+            'socket' : 'live',
+            'name' : 'test', #?
+        })
+
+        dbmodconf = Module({'module_name' : 'LogStore', 
+            'module_type' : 'logstore_sqlite',
+            'use_aggressive_sql' : "0",
+            'database_file' : self.livelogs,
+            'archive_path' : os.path.join(os.path.dirname(self.livelogs), 'archives'),
+        })
+        modconf.modules = [dbmodconf]
+        self.livestatus_broker = LiveStatus_broker(modconf)
         self.livestatus_broker.create_queues()
-        #self.livestatus_broker.properties = {
-        #    'to_queue' : 0,
-        #    'from_queue' : 0
-        #
-        #    }
+
+        #--- livestatus_broker.main
+        self.livestatus_broker.log = logger
+        # this seems to damage the logger so that the scheduler can't use it
+        #self.livestatus_broker.log.load_obj(self.livestatus_broker)
+        self.livestatus_broker.debug_output = []
+        self.livestatus_broker.modules_manager = ModulesManager('livestatus', self.livestatus_broker.find_modules_path(), [])
+        self.livestatus_broker.modules_manager.set_modules(self.livestatus_broker.modules)
+        # We can now output some previouly silented debug ouput
+        self.livestatus_broker.do_load_modules()
+        for inst in self.livestatus_broker.modules_manager.instances:
+            if inst.properties["type"].startswith('logstore'):
+                f = getattr(inst, 'load', None)
+                if f and callable(f):
+                    f(self.livestatus_broker) #!!! NOT self here !!!!
+                break
+        for s in self.livestatus_broker.debug_output:
+            print "errors during load", s
+        del self.livestatus_broker.debug_output
+        self.livestatus_broker.rg = LiveStatusRegenerator()
+        self.livestatus_broker.datamgr = datamgr
+        datamgr.load(self.livestatus_broker.rg)
+        self.livestatus_broker.query_cache = LiveStatusQueryCache()
+        self.livestatus_broker.query_cache.disable()
+        self.livestatus_broker.rg.register_cache(self.livestatus_broker.query_cache)
+        #--- livestatus_broker.main
+
         self.livestatus_broker.init()
-        self.livestatus_broker.db = LiveStatusDb(self.livestatus_broker.database_file, self.livestatus_broker.archive_path, self.livestatus_broker.max_logs_age)
-        self.livestatus_broker.livestatus = LiveStatus(self.livestatus_broker.configs, self.livestatus_broker.hosts, self.livestatus_broker.services, self.livestatus_broker.contacts, self.livestatus_broker.hostgroups, self.livestatus_broker.servicegroups, self.livestatus_broker.contactgroups, self.livestatus_broker.timeperiods, self.livestatus_broker.commands, self.livestatus_broker.schedulers, self.livestatus_broker.pollers, self.livestatus_broker.reactionners, self.livestatus_broker.brokers, self.livestatus_broker.db, self.livestatus_broker.use_aggressive_sql, self.livestatus_broker.pnp_path, self.livestatus_broker.from_q)
+        self.livestatus_broker.db = self.livestatus_broker.modules_manager.instances[0]
+        self.livestatus_broker.livestatus = LiveStatus(self.livestatus_broker.datamgr, self.livestatus_broker.query_cache, self.livestatus_broker.db, self.livestatus_broker.pnp_path, self.livestatus_broker.from_q)
+
+        #--- livestatus_broker.do_main
+        self.livestatus_broker.db.open()
+        #--- livestatus_broker.do_main
 
 
 if __name__ == '__main__':

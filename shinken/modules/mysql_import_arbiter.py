@@ -16,7 +16,7 @@
 #
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
-
+ 
 #This module imports hosts and services configuration from a MySQL Database
 #Queries for getting hosts and services are pulled from shinken-specific.cfg configuration file.
 
@@ -39,24 +39,26 @@ def get_instance(plugin):
     login = plugin.login
     password = plugin.password
     database = plugin.database
-    reqhosts = getattr(plugin, 'reqhosts', None)
-    reqservices = getattr(plugin, 'reqservices', None)
-    reqcontacts = getattr(plugin, 'reqcontacts', None)
-    
-    instance = MySQL_importer_arbiter(plugin, host, login, password, database,reqhosts,reqservices, reqcontacts)
+    reqlist = {}
+    reqlist['hosts'] = getattr(plugin, 'reqhosts', None)
+    reqlist['services'] = getattr(plugin, 'reqservices', None)
+    reqlist['contacts'] = getattr(plugin, 'reqcontacts', None)
+    reqlist['contactgroups'] = getattr(plugin, 'reqcontactgroups', None)
+    reqlist['hostdependencies'] = getattr(plugin, 'reqhostdependencies', None)
+    reqlist['servicedependencies'] = getattr(plugin, 'reqservicedependencies', None)
+
+    instance = MySQL_importer_arbiter(plugin, host, login, password, database, reqlist)
     return instance
 
 #Retrieve hosts from a MySQL database
 class MySQL_importer_arbiter(BaseModule):
-    def __init__(self, mod_conf, host, login, password, database, reqhosts,reqservices, reqcontacts):
+    def __init__(self, mod_conf, host, login, password, database, reqlist):
         BaseModule.__init__(self, mod_conf)
         self.host  = host
         self.login = login
         self.password = password
         self.database = database
-        self.reqhosts = reqhosts
-        self.reqservices = reqservices
-        self.reqcontacts = reqcontacts
+        self.reqlist = reqlist
 
 
     #Called by Arbiter to say 'let's prepare yourself guy'
@@ -71,75 +73,44 @@ class MySQL_importer_arbiter(BaseModule):
             print "MySQL Module : Error %d: %s" % (e.args[0], e.args[1])
             raise
         print "[MySQL Importer Module] : Connection opened"
-
-
+ 
+ 
     #Main function that is called in the CONFIGURATION phase
     def get_objects(self):
         if not hasattr(self, 'conn'):
             print "[MySQL Importer Module] : Problem during init phase"
             return {}
-
-        r = {'hosts' : []}
-        r['services'] = []
-        r['contacts'] = []
-        result_set = {}
-
+ 
+        #Create variables for result
+        r = {}
+ 
         cursor = self.conn.cursor (MySQLdb.cursors.DictCursor)
-        if self.reqhosts:
-            print "[MySQL Importer Module] : getting hosts configuration from database"
-            try:
-                cursor.execute (self.reqhosts)
-                result_set = cursor.fetchall ()
-            except MySQLdb.Error, e:
-                print "MySQL Module : Error %d: %s" % (e.args[0], e.args[1])
+ 
+        #For all parameters
+        for k,v in self.reqlist.iteritems():
+            r[k] = []
+ 
+            if(v != None):
+                result_set = {}
+                print "[MySQL Importer Module] : getting %s configuration from database" % (k)
 
-            for row in result_set:
-                h = {}
-                for column in row:
-                    if row[column]:
-                        h[column]= row[column]
-                r['hosts'].append(h)
+                try:
+                    cursor.execute (v)
+                    result_set = cursor.fetchall ()
+                except MySQLdb.Error, e:
+                    print "MySQL Module : Error %d: %s" % (e.args[0], e.args[1])
 
-        if self.reqservices:
-            print "[MySQL Importer Module] : getting services configuration from database"
+                #Create set whith result
+                for row in result_set:
+                    h = {}
+                    for column in row:
+                        if row[column]:
+                            h[column]= row[column]
+                    r[k].append(h)
 
-
-            try:
-                cursor.execute (self.reqservices)
-                result_set = cursor.fetchall ()
-            except MySQLdb.Error, e:
-                print "MySQL Module : Error %d: %s" % (e.args[0], e.args[1])
-
-            for row in result_set:
-                h = {}
-                for column in row:
-                    if row[column]:
-                        h[column]= row[column]
-                r['services'].append(h)
-
-            cursor.close ()
-            self.conn.close ()
-            del self.conn
-
-        if self.reqcontacts:
-            print "[MySQL Importer Module] : getting contacts configuration from database"
-
-            try:
-                cursor.execute (self.reqcontacts)
-                result_set = cursor.fetchall ()
-            except MySQLdb.Error, e:
-                print "MySQL Module : Error %d: %s" % (e.args[0], e.args[1])
-
-            for row in result_set:
-                c = {}
-                for column in row:
-                    if row[column]:
-                        c[column]= row[column]
-                r['contacts'].append(c)
-
-            cursor.close ()
-            self.conn.close ()
-            del self.conn
-
+        cursor.close ()
+        self.conn.close ()
+        del self.conn
+ 
         print "[MySQL Importer Module] : Returning to Arbiter the object:", r
         return r

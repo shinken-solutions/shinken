@@ -1,0 +1,103 @@
+===========================================
+Shinken installation script for shinken 1.0
+===========================================
+
+===== WARNING : THIS SCRIPT IS STILL IN RC Stage =====
+
+Contact
+~~~~~~~~
+
+You can contact me at dguenault at monitoring-fr dot org if you find a bug
+or you can write an issue in the github interface
+
+if you find and fix a bug just send me the patch and i will apply it (and add credit for the patch in the README file)
+
+Minimal requirements
+~~~~~~~~~~~~~~~~~~~~
+
+For RedHat/CentOs you will need redhat-lsb (and git for cloning this repository)
+For Debian based distro you will need lsb_release 
+
+Usage
+~~~~~
+
+This is a really simple script allowing to install a fully fonctionnal shinken in seconds !
+Curently only tested with Ubuntu/Linux Mint/Debian and RHEL/CentOS 5/6 distros. 
+
+Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z [poller|centreon] | -e daemons | -p plugins [plugname]
+    -k  Kill shinken
+    -i  Install shinken
+    -w  Remove demo configuration (DEPRECATED)
+    -d  Remove shinken
+    -u  Update an existing shinken installation (DEPRECATED)
+    -v  purge livestatus sqlite db and shrink sqlite db
+    -b  Backup shinken configuration plugins and data
+    -r  Restore shinken configuration plugins and data
+    -l  List shinken backups
+    -c  Compress rotated logs
+    -e  Which daemons to keep enabled at boot time
+    -z  This is a really special usecase that allow to install shinken on Centreon Enterprise Server in place of nagios (DEPRECATED)
+    -p  Install plugins or addons (args should be one of the following : 
+        check_esx3
+        nagios-plugins
+        check_oracle_health
+        check_mysql_health
+        check_wmi_plus
+        check_mongodb
+        check_emc_clariion
+        check_nwc_health
+        check_hpasm
+        manubulon (snmp plugins)
+        capture_plugin
+        pnp4nagios
+        multisite
+        nagvis
+        mongodb
+    -h  Show help
+
+configuration file
+~~~~~~~~~~~~~~~~~~
+
+You can modify the target folder, version, backup folder or user/group the following way :
+
+  TARGET=/usr/local/nagios SKUSER=toto SKGROUP=titi ./shinken.sh -i
+
+allowed values are :
+
+  TMP           temporary folder
+  TARGET        where to put shinken
+  BACKUPDIR     where to put backups
+  SKUSER        shinken user
+  SKGROUP       shinken group
+
+Others configuration values are stored in shinken.conf. You can try to modify them, but never forget to test it before using them in production.
+
+Using proxy
+~~~~~~~~~~~
+
+You can enable support for proxy this way 
+    ex : USEPROXY=1 ./shinken.sh -i
+
+Do not forget to declare proxy environment variables 
+
+    export http_proxy=http://login:password@proxy:port
+    export https_proxy=$http_proxy
+
+For debian package manager you also have to declare your proxy in /etc/apt/apt.conf
+
+    Acquire::http::Proxy "http://login:password@proxy:Port";
+
+For yum package manager you have to declare your proxy in /etc/yum.conf
+
+    proxy=http://proxy:port/
+    proxy_username=username
+    proxy_password=password
+
+Using proxy and sudo
+~~~~~~~~~~~~~~~~~~~~
+
+You should use -E option in order to preserve your environment variables
+
+    export http_proxy=http://login:password@proxy:port
+    export https_proxy=$http_proxy
+    sudo -E -- USEPROXY=1 ./shinken.sh -i 

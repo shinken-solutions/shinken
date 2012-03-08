@@ -1,741 +1,116 @@
-#!/usr/bin/python
-#Copyright (C) 2009 Gabes Jean, naparuba@gmail.com
+# -*- coding: utf-8 -*-
 #
-#This file is part of Shinken.
+# Copyright (C) 2009-2012:
+#     Gabes Jean, naparuba@gmail.com
+#     Gerhard Lausser, Gerhard.Lausser@consol.de
+#     Gregory Starck, g.starck@gmail.com
+#     Hartmut Goebel, h.goebel@goebel-consult.de
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# This file is part of Shinken.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This Class is a plugin for the Shinken Broker. It is in charge
-#to brok information of the service perfdata into the file
-#var/service-perfdata
-#So it just manage the service_check_return
-#Maybe one day host data will be usefull too
-#It will need just a new file, and a new manager :)
+"""
+This Class is a plugin for the Shinken Broker. It is in charge
+to get broks, recreate real objects and present them through
+a livestatus query interface
+"""
 
 import select
 import socket
-import sys
 import os
 import time
-import datetime
 import errno
 import re
 import traceback
 import Queue
+import threading
 
-from shinken.objects import Host
-from shinken.objects import Hostgroup
-from shinken.objects import Service
-from shinken.objects import Servicegroup
-from shinken.objects import Contact
-from shinken.objects import Contactgroup
-from shinken.objects import Timeperiod
-from shinken.objects import Command
-from shinken.objects import Config
-from shinken.schedulerlink import SchedulerLink
-from shinken.reactionnerlink import ReactionnerLink
-from shinken.pollerlink import PollerLink
-from shinken.brokerlink import BrokerLink
-from shinken.macroresolver import MacroResolver
 from shinken.basemodule import BaseModule
 from shinken.message import Message
-from shinken.sorteddict import SortedDict
-
+from shinken.log import logger
+from shinken.modulesmanager import ModulesManager
+from shinken.objects.module import Module
+from shinken.daemon import Daemon
+from shinken.misc.datamanager import datamgr
+#Local import
 from livestatus import LiveStatus
-from livestatus_db import LiveStatusDb, LiveStatusDbError
-from log_line import LOGCLASS_ALERT, LOGCLASS_PROGRAM, LOGCLASS_NOTIFICATION, LOGCLASS_PASSIVECHECK, LOGCLASS_COMMAND, LOGCLASS_STATE, LOGCLASS_INVALID, LOGOBJECT_INFO, LOGOBJECT_HOST, LOGOBJECT_SERVICE, Logline
+from livestatus_regenerator import LiveStatusRegenerator
+from livestatus_query_cache import LiveStatusQueryCache
 
 
-properties = {
-    'daemons' : ['broker'],
-    'type' : 'livestatus',
-    'external' : True,
-    'phases' : ['running'],
-    }
 
+# Class for the LiveStatus Broker
+# Get broks and listen to livestatus query language requests
+class LiveStatus_broker(BaseModule, Daemon):
 
-#Class for the Livestatus Broker
-#Get broks and listen to livestatus query language requests
-class Livestatus_broker(BaseModule):
-    def __init__(self, mod_conf, host, port, socket, allowed_hosts, database_file, archive_path, max_logs_age, pnp_path, use_aggressive_sql=False, debug=None, debug_queries=False):
-        BaseModule.__init__(self, mod_conf)
-        self.host = host
-        self.port = port
-        self.socket = socket
-        self.allowed_hosts = allowed_hosts
-        self.database_file = database_file
-        self.archive_path = archive_path
-        self.max_logs_age = max_logs_age
-        self.pnp_path = pnp_path
-        self.use_aggressive_sql = use_aggressive_sql
-        self.debug = debug
-        self.debug_queries = debug_queries
+    def __init__(self, modconf):
+        BaseModule.__init__(self, modconf)
+        self.plugins = []
+        self.use_threads = (getattr(modconf, 'use_threads', '0') == 1)
+        self.host = getattr(modconf, 'host', '127.0.0.1')
+        if self.host == '*':
+            self.host = '0.0.0.0'
+        self.port = getattr(modconf, 'port', None)
+        self.socket = getattr(modconf, 'socket', None)
+        if self.port == 'none':
+            self.port = None
+        if self.port:
+            self.port = int(self.port)
+        if self.socket == 'none':
+            self.socket = None
+        self.allowed_hosts = getattr(modconf, 'allowed_hosts', '')
+        ips = [ip.strip() for ip in self.allowed_hosts.split(',') if ip]
+        self.allowed_hosts = [ip for ip in ips if re.match(r'^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$', ip)]
+        if len(ips) != len(self.allowed_hosts):
+            print "Warning : the list of allowed hosts is invalid", ips
+            print "Warning : the list of allowed hosts is invalid", self.allowed_hosts
+            raise
+        self.pnp_path = getattr(modconf, 'pnp_path', '')
+        self.debug = getattr(modconf, 'debug', None)
+        self.debug_queries = (getattr(modconf, 'debug_queries', '0') == '1')
+        self.use_query_cache = (getattr(modconf, 'query_cache', '0') == '1')
 
-        #Our datas
-        self.configs = {}
-        self.hosts = SortedDict()
-        self.services = SortedDict()
-        self.contacts = SortedDict()
-        self.hostgroups = SortedDict()
-        self.servicegroups = SortedDict()
-        self.contactgroups = SortedDict()
-        self.timeperiods = SortedDict()
-        self.commands = SortedDict()
-        #Now satellites
-        self.schedulers = SortedDict()
-        self.pollers = SortedDict()
-        self.reactionners = SortedDict()
-        self.brokers = SortedDict()
-        self.service_id_cache = {}
+        #  This is an "artificial" module which is used when an old-style
+        #  shinken-specific.cfg without a separate logstore-module is found.
+        self.compat_sqlite = {
+            'module_name': 'LogStore',
+            'module_type': 'logstore_sqlite',
+            'use_aggressive_sql': "0",
+            'database_file': getattr(modconf, 'database_file', None),
+            'archive_path': getattr(modconf, 'archive_path', None),
+            'max_logs_age': getattr(modconf, 'max_logs_age', None),
+        }
 
-        self.instance_ids = []
+    def add_compatibility_sqlite_module(self):
+        if len([m for m in self.modules_manager.instances if m.properties['type'].startswith('logstore_')]) == 0:
+            #  this shinken-specific.cfg does not use the new submodules
+            for k in self.compat_sqlite.keys():
+                if self.compat_sqlite[k] == None:
+                    del self.compat_sqlite[k]
+            dbmod = Module(self.compat_sqlite)
+            self.modules_manager.set_modules([dbmod])
+            self.modules_manager.load_and_init()
+            self.modules_manager.instances[0].load(self)
 
-        self.number_of_objects = 0
-        self.last_need_data_send = time.time()
-
-
-    #Called by Broker so we can do init stuff
+    # Called by Broker so we can do init stuff
+    # TODO : add conf param to get pass with init
+    # Conf from arbiter!
     def init(self):
-        print "Initialisation of the livestatus broker"
-
-        #to_queue is where we get broks from Broker
-        #self.to_q = self.properties['to_queue']
-
-        #from_quue is where we push back objects like
-        #external commands to the broker
-        #self.from_q = self.properties['from_queue']
-
+        print "Init of the Livestatus '%s'" % self.name
         self.prepare_pnp_path()
-
-        m = MacroResolver()
-        m.output_macros = ['HOSTOUTPUT', 'HOSTPERFDATA', 'HOSTACKAUTHOR', 'HOSTACKCOMMENT', 'SERVICEOUTPUT', 'SERVICEPERFDATA', 'SERVICEACKAUTHOR', 'SERVICEACKCOMMENT']
-
-
-    def manage_program_status_brok(self, b):
-        data = b.data
-        c_id = data['instance_id']
-        print "Creating config:", c_id, data
-        c = Config()
-        for prop in data:
-            setattr(c, prop, data[prop])
-        #print "CFG:", c
-        self.configs[0] = c
-        # And we save that we got data from this instance_id
-        self.instance_ids.append(c_id)
-
-        # We should clean all previously added hosts and services
-        inst_id = data['instance_id']
-        to_del = []
-        to_del_srv = []
-        for h in self.hosts.values():
-            # If the host was in this instance, del it
-            if h.instance_id == inst_id:
-                to_del.append(h.host_name)
-
-                
-        for s in self.services.values():
-            if s.instance_id == inst_id:
-                to_del_srv.append(s.host_name + s.service_description)
-
-        # Now clean hostgroups too
-        for hg in self.hostgroups.values():
-            print "Len before exclude", len(hg.members)
-            # Exclude from members the hosts with this inst_id
-            hg.members = [h for h in hg.members if h.instance_id != inst_id]
-            print "Len after", len(hg.members)
-
-        # Now clean service groups
-        for sg in self.servicegroups.values():
-            sg.members = [s for s in sg.members if s.instance_id != inst_id]
-
-        # Ok, really clean the hosts
-        for i in to_del:
-            try:
-                del self.hosts[i]
-            except KeyError: # maybe it was not inserted in a good way, pass it
-                pass
-
-        # And services
-        for i in to_del_srv:
-            try:
-                del self.services[i]
-            except KeyError: # maybe it was not inserted in a good way, pass it
-                pass
-
-
-
-    def manage_update_program_status_brok(self, b):
-        data = b.data
-        c_id = data['instance_id']
-
-        if c_id not in self.instance_ids:
-            # Do not ask data too quickly, very dangerous
-            # one a minute
-            if time.time() - self.last_need_data_send > 60:
-                print "I ask the broker for instance id data :", c_id
-                msg = Message(id=0, type='NeedData', data={'full_instance_id' : c_id}, source=self.get_name())
-                self.from_q.put(msg)
-                self.last_need_data_send = time.time()
-            return
-
-        # We have only one config here, with id 0
-        c = self.configs[0]
-        self.update_element(c, data)
-    
-
-    def set_schedulingitem_values(self, i):
-        i.check_period = self.get_timeperiod(i.check_period)
-        i.notification_period = self.get_timeperiod(i.notification_period)
-        i.contacts = self.get_contacts(i.contacts)
-        i.rebuild_ref()
-        #Escalations is not use for status_dat
-        del i.escalations
-        
-
-    def manage_initial_host_status_brok(self, b):
-        data = b.data
-        
-        host_name = data['host_name']
-        inst_id = data['instance_id']
-        #print "Creating host:", h_id, b
-        h = Host({})
-        self.update_element(h, data)        
-        self.set_schedulingitem_values(h)
-        
-        h.service_ids = []
-        h.services = []
-        h.instance_id = inst_id
-        # We need to rebuild Downtime and Comment relationship
-        for dtc in h.downtimes + h.comments:
-            dtc.ref = h
-        self.hosts[host_name] = h
-        self.number_of_objects += 1
-
-
-    #In fact, an update of a host is like a check return
-    def manage_update_host_status_brok(self, b):
-        self.manage_host_check_result_brok(b)
-        data = b.data
-        host_name = data['host_name']
-        #In the status, we've got duplicated item, we must relink thems
-        try:
-            h = self.hosts[host_name]
-        except KeyError:
-            print "Warning : the host %s is unknown!" % host_name
-            return
-        self.update_element(h, data)
-        self.set_schedulingitem_values(h)
-        for dtc in h.downtimes + h.comments:
-            dtc.ref = h
-        self.livestatus.count_event('host_checks')
-
-
-    def manage_initial_hostgroup_status_brok(self, b):
-        data = b.data
-        hostgroup_name = data['hostgroup_name']
-        members = data['members']
-        del data['members']
-        
-        # Maybe we already got this hostgroup. If so, use the existing object
-        # because in different instance, we will ahve the same group with different
-        # elements
-        try:
-            hg = self.hostgroups[hostgroup_name]
-        except KeyError:
-            # If we got none, create a new one
-            #print "Creating hostgroup:", hg_id, data
-            hg = Hostgroup()
-            # Set by default members to a void list
-            setattr(hg, 'members', [])
-
-        self.update_element(hg, data)
-
-        for (h_id, h_name) in members:
-            if h_name in self.hosts:
-                hg.members.append(self.hosts[h_name])
-                # Should got uniq value, do uniq this list
-                hg.members = list(set(hg.members))
-
-        #print "HG:", hg
-        self.hostgroups[hostgroup_name] = hg
-        self.number_of_objects += 1
-
-
-    def manage_initial_service_status_brok(self, b):
-        data = b.data
-        s_id = data['id']
-        host_name = data['host_name']
-        service_description = data['service_description']
-        inst_id = data['instance_id']
-        
-        #print "Creating Service:", s_id, data
-        s = Service({})
-        s.instance_id = inst_id
-
-        self.update_element(s, data)
-        self.set_schedulingitem_values(s)
-        
-        try:
-            h = self.hosts[host_name]
-            # Reconstruct the connection between hosts and services
-            h.services.append(s)
-            # There is already a s.host_name, but a reference to the h object can be useful too
-            s.host = h
-        except Exception:
-            return
-        for dtc in s.downtimes + s.comments:
-            dtc.ref = s
-        self.services[host_name+service_description] = s
-        self.number_of_objects += 1
-        # We need this for manage_initial_servicegroup_status_brok where it
-        # will speed things up dramatically
-        self.service_id_cache[s.id] = s
-
-
-    #In fact, an update of a service is like a check return
-    def manage_update_service_status_brok(self, b):
-        self.manage_service_check_result_brok(b)
-        data = b.data
-        host_name = data['host_name']
-        service_description = data['service_description']
-        #In the status, we've got duplicated item, we must relink thems
-        try:
-            s = self.services[host_name+service_description]
-        except KeyError:
-            print "Warning : the service %s/%s is unknown!" % (host_name, service_description)
-            return
-        self.update_element(s, data)
-        self.set_schedulingitem_values(s)
-        for dtc in s.downtimes + s.comments:
-            dtc.ref = s
-        self.livestatus.count_event('service_checks')
-   
-
-
-    def manage_initial_servicegroup_status_brok(self, b):
-        data = b.data
-        sg_id = data['id']
-        servicegroup_name = data['servicegroup_name']
-        members = data['members']
-        del data['members']
-
-        # Like for hostgroups, maybe we already got this
-        # service group from another instance, need to
-        # factorize all
-        try:
-            sg = self.servicegroups[servicegroup_name]
-        except KeyError:
-            #print "Creating servicegroup:", sg_id, data
-            sg = Servicegroup()
-            # By default set members as a void list
-            setattr(sg, 'members', [])
-
-        self.update_element(sg, data)
-
-        for (s_id, s_name) in members:
-            # A direct lookup by s_host_name+s_name is not possible
-            # because we don't have the host_name in members, only ids.
-            try:
-                sg.members.append(self.service_id_cache[s_id])
-            except Exception:
-                pass
-
-        sg.members = list(set(sg.members))
-        self.servicegroups[servicegroup_name] = sg
-        self.number_of_objects += 1
-
-
-    def manage_initial_contact_status_brok(self, b):
-        data = b.data
-        contact_name = data['contact_name']
-        #print "Creating Contact:", c_id, data
-        c = Contact({})
-        self.update_element(c, data)
-        #print "C:", c
-        self.contacts[contact_name] = c
-        self.number_of_objects += 1
-
-
-    def manage_initial_contactgroup_status_brok(self, b):
-        data = b.data
-        contactgroup_name = data['contactgroup_name']
-        members = data['members']
-        del data['members']
-        #print "Creating contactgroup:", cg_id, data
-        cg = Contactgroup()
-        self.update_element(cg, data)
-        setattr(cg, 'members', [])
-        for (c_id, c_name) in members:
-            if c_name in self.contacts:
-                cg.members.append(self.contacts[c_name])
-        #print "CG:", cg
-        self.contactgroups[contactgroup_name] = cg
-        self.number_of_objects += 1
-
-
-    def manage_initial_timeperiod_status_brok(self, b):
-        data = b.data
-        timeperiod_name = data['timeperiod_name']
-        #print "Creating Timeperiod:", tp_id, data
-        tp = Timeperiod({})
-        self.update_element(tp, data)
-        #print "TP:", tp
-        self.timeperiods[timeperiod_name] = tp
-        self.number_of_objects += 1
-
-
-    def manage_initial_command_status_brok(self, b):
-        data = b.data
-        command_name = data['command_name']
-        #print "Creating Command:", c_id, data
-        c = Command({})
-        self.update_element(c, data)
-        #print "CMD:", c
-        self.commands[command_name] = c
-        self.number_of_objects += 1
-
-
-    def manage_initial_scheduler_status_brok(self, b):
-        data = b.data
-        scheduler_name = data['scheduler_name']
-        print "Creating Scheduler:", scheduler_name, data
-        sched = SchedulerLink({})
-        print "Created a new scheduler", sched
-        self.update_element(sched, data)
-        print "Updated scheduler"
-        #print "CMD:", c
-        self.schedulers[scheduler_name] = sched
-        print "scheduler added"
-        #print "MONCUL: Add a new scheduler ", sched
-        self.number_of_objects += 1
-
-
-    def manage_update_scheduler_status_brok(self, b):
-        data = b.data
-        scheduler_name = data['scheduler_name']
-        try:
-            s = self.schedulers[scheduler_name]
-            self.update_element(s, data)
-            #print "S:", s
-        except Exception:
-            pass
-
-
-    def manage_initial_poller_status_brok(self, b):
-        data = b.data
-        poller_name = data['poller_name']
-        print "Creating Poller:", poller_name, data
-        poller = PollerLink({})
-        print "Created a new poller", poller
-        self.update_element(poller, data)
-        print "Updated poller"
-        #print "CMD:", c
-        self.pollers[poller_name] = poller
-        print "poller added"
-        #print "MONCUL: Add a new scheduler ", sched
-        self.number_of_objects += 1
-
-
-    def manage_update_poller_status_brok(self, b):
-        data = b.data
-        poller_name = data['poller_name']
-        try:
-            s = self.pollers[poller_name]
-            self.update_element(s, data)
-        except Exception:
-            pass
-
-
-    def manage_initial_reactionner_status_brok(self, b):
-        data = b.data
-        reactionner_name = data['reactionner_name']
-        print "Creating Reactionner:", reactionner_name, data
-        reac = ReactionnerLink({})
-        print "Created a new reactionner", reac
-        self.update_element(reac, data)
-        print "Updated reactionner"
-        #print "CMD:", c
-        self.reactionners[reactionner_name] = reac
-        print "reactionner added"
-        #print "MONCUL: Add a new scheduler ", sched
-        self.number_of_objects += 1
-
-
-    def manage_update_reactionner_status_brok(self, b):
-        data = b.data
-        reactionner_name = data['reactionner_name']
-        try:
-            s = self.reactionners[reactionner_name]
-            self.update_element(s, data)
-        except Exception:
-            pass
-
-
-    def manage_initial_broker_status_brok(self, b):
-        data = b.data
-        broker_name = data['broker_name']
-        print "Creating Broker:", broker_name, data
-        broker = BrokerLink({})
-        print "Created a new broker", broker
-        self.update_element(broker, data)
-        print "Updated broker"
-        #print "CMD:", c
-        self.brokers[broker_name] = broker
-        print "broker added"
-        #print "MONCUL: Add a new scheduler ", sched
-        self.number_of_objects += 1
-
-
-    def manage_update_broker_status_brok(self, b):
-        data = b.data
-        broker_name = data['broker_name']
-        try:
-            s = self.brokers[broker_name]
-            self.update_element(s, data)
-        except Exception:
-            pass
-
-
-    #A service check have just arrived, we UPDATE data info with this
-    def manage_service_check_result_brok(self, b):
-        data = b.data
-        host_name = data['host_name']
-        service_description = data['service_description']
-        try:
-            s = self.services[host_name+service_description]
-            self.update_element(s, data)
-        except Exception:
-            pass
-
-
-    #A service check update have just arrived, we UPDATE data info with this
-    def manage_service_next_schedule_brok(self, b):
-        self.manage_service_check_result_brok(b)
-
-
-    def manage_host_check_result_brok(self, b):
-        data = b.data
-        host_name = data['host_name']
-        try:
-            h = self.hosts[host_name]
-            self.update_element(h, data)
-        except Exception:
-            pass
-
-
-    # this brok should arrive within a second after the host_check_result_brok
-    def manage_host_next_schedule_brok(self, b):
-        self.manage_host_check_result_brok(b)
-
-
-    #A log brok will be written into a database
-    def manage_log_brok(self, b):
-        data = b.data
-
-        line = data['log'].encode('UTF-8').rstrip()
-
-        # split line and make sql insert
-        #print "LOG--->", line
-        # [1278280765] SERVICE ALERT: test_host_0
-        # split leerzeichen
-        if line[0] != '[' and line[11] != ']':
-            pass
-            print "INVALID"
-            # invalid
-        else:
-            service_states = { 'OK' : 0, 'WARNING' : 1, 'CRITICAL' : 2, 'UNKNOWN' : 3, 'RECOVERY' : 0 }
-            host_states = { 'UP' : 0, 'DOWN' : 1, 'UNREACHABLE' : 2, 'UNKNOWN': 3, 'RECOVERY' : 0 }
-
-            # 'attempt', 'class', 'command_name', 'comment', 'contact_name', 'host_name', 'lineno', 'message',
-            # 'options', 'plugin_output', 'service_description', 'state', 'state_type', 'time', 'type',
-            # 0:info, 1:state, 2:program, 3:notification, 4:passive, 5:command
-
-            # lineno, message?, plugin_output?
-            logobject = LOGOBJECT_INFO
-            logclass = LOGCLASS_INVALID
-            attempt, state = [0] * 2
-            command_name, comment, contact_name, host_name, message, options, plugin_output, service_description, state_type = [''] * 9
-            time= line[1:11]
-            #print "i start with a timestamp", time
-            first_type_pos = line.find(' ') + 1
-            last_type_pos = line.find(':')
-            first_detail_pos = last_type_pos + 2
-            type = line[first_type_pos:last_type_pos]
-            options = line[first_detail_pos:]
-            message = line
-            if type == 'CURRENT SERVICE STATE':
-                logobject = LOGOBJECT_SERVICE
-                logclass = LOGCLASS_STATE
-                host_name, service_description, state, state_type, attempt, plugin_output = options.split(';', 5)
-            elif type == 'INITIAL SERVICE STATE':
-                logobject = LOGOBJECT_SERVICE
-                logclass = LOGCLASS_STATE
-                host_name, service_description, state, state_type, attempt, plugin_output = options.split(';', 5)
-            elif type == 'SERVICE ALERT':
-                # SERVICE ALERT: srv-40;Service-9;CRITICAL;HARD;1;[Errno 2] No such file or directory
-                logobject = LOGOBJECT_SERVICE
-                logclass = LOGCLASS_ALERT
-                host_name, service_description, state, state_type, attempt, plugin_output = options.split(';', 5)
-                state = service_states[state]
-            elif type == 'SERVICE DOWNTIME ALERT':
-                logobject = LOGOBJECT_SERVICE
-                logclass = LOGCLASS_ALERT
-                host_name, service_description, state_type, comment = options.split(';', 3)
-            elif type == 'SERVICE FLAPPING ALERT':
-                logobject = LOGOBJECT_SERVICE
-                logclass = LOGCLASS_ALERT
-                host_name, service_description, state_type, comment = options.split(';', 3)
-
-            elif type == 'CURRENT HOST STATE':
-                logobject = LOGOBJECT_HOST
-                logclass = LOGCLASS_STATE
-                host_name, state, state_type, attempt, plugin_output = options.split(';', 4)
-            elif type == 'INITIAL HOST STATE':
-                logobject = LOGOBJECT_HOST
-                logclass = LOGCLASS_STATE
-                host_name, state, state_type, attempt, plugin_output = options.split(';', 4)
-            elif type == 'HOST ALERT':
-                logobject = LOGOBJECT_HOST
-                logclass = LOGCLASS_ALERT
-                host_name, state, state_type, attempt, plugin_output = options.split(';', 4)
-                state = host_states[state]
-            elif type == 'HOST DOWNTIME ALERT':
-                logobject = LOGOBJECT_HOST
-                logclass = LOGCLASS_ALERT
-                host_name, state_type, comment = options.split(';', 2)
-            elif type == 'HOST FLAPPING ALERT':
-                logobject = LOGOBJECT_HOST
-                logclass = LOGCLASS_ALERT
-                host_name, state_type, comment = options.split(';', 2)
-
-            elif type == 'SERVICE NOTIFICATION':
-                # tust_cuntuct;test_host_0;test_ok_0;CRITICAL;notify-service;i am CRITICAL  <-- normal
-                # SERVICE NOTIFICATION: test_contact;test_host_0;test_ok_0;DOWNTIMESTART (OK);notify-service;OK
-                logobject = LOGOBJECT_SERVICE
-                logclass = LOGCLASS_NOTIFICATION
-                contact_name, host_name, service_description, state_type, command_name, check_plugin_output = options.split(';', 5)
-                if '(' in state_type: # downtime/flapping/etc-notifications take the type UNKNOWN
-                    state_type = 'UNKNOWN'
-                state = service_states[state_type]
-            elif type == 'HOST NOTIFICATION':
-                # tust_cuntuct;test_host_0;DOWN;notify-host;i am DOWN
-                logobject = LOGOBJECT_HOST
-                logclass = LOGCLASS_NOTIFICATION
-                contact_name, host_name, state_type, command_name, check_plugin_output = options.split(';', 4)
-                if '(' in state_type:
-                    state_type = 'UNKNOWN'
-                state = host_states[state_type]
-
-            elif type == 'PASSIVE SERVICE CHECK':
-                logobject = LOGOBJECT_SERVICE
-                logclass = LOGCLASS_PASSIVECHECK
-                host_name, service_description, state, check_plugin_output = options.split(';', 3)
-            elif type == 'PASSIVE HOST CHECK':
-                logobject = LOGOBJECT_HOST
-                logclass = LOGCLASS_PASSIVECHECK
-                host_name, state, check_plugin_output = options.split(';', 2)
-
-            elif type == 'SERVICE EVENT HANDLER':
-                # SERVICE EVENT HANDLER: test_host_0;test_ok_0;CRITICAL;SOFT;1;eventhandler
-                logobject = LOGOBJECT_SERVICE
-                host_name, service_description, state, state_type, attempt, command_name = options.split(';', 5)
-                state = service_states[state]
-            elif type == 'HOST EVENT HANDLER':
-                logobject = LOGOBJECT_HOST
-                host_name, state, state_type, attempt, command_name = options.split(';', 4)
-                state = host_states[state]
-
-            elif type == 'EXTERNAL COMMAND':
-                logobject = LOGOBJECT_INFO
-                logclass = LOGCLASS_COMMAND
-            elif type.startswith('starting...') or \
-                 type.startswith('shutting down...') or \
-                 type.startswith('Bailing out') or \
-                 type.startswith('active mode...') or \
-                 type.startswith('standby mode...'):
-                logobject = LOGOBJECT_INFO
-                logclass = LOGCLASS_PROGRAM
-            else:
-                pass
-                #print "does not match"
-
-            lineno = 0
-
-            try:
-                values = (logobject, attempt, logclass, command_name, comment, contact_name, host_name, lineno, message, options, plugin_output, service_description, state, state_type, time, type)
-            except:
-                print "Unexpected error:", sys.exc_info()[0]
-            #print "LOG:", logobject, logclass, type, host_name, service_description, state, state_type, attempt, plugin_output, contact_name, comment, command_name
-            #print "LOG:", values
-            try:
-                if logclass != LOGCLASS_INVALID:
-                    self.db.execute('INSERT INTO LOGS VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', values)
-            except LiveStatusDbError, e:
-                print "An error occurred:", e.args[0]
-                print "DATABASE ERROR!!!!!!!!!!!!!!!!!"
-        self.livestatus.count_event('log_message')
-
-
-    #The contacts must not be duplicated
-    def get_contacts(self, cs):
-        r = []
-        for c in cs:
-            if c is not None:
-                find_c = self.find_contact(c.get_name())
-                if find_c is not None:
-                    r.append(find_c)
-                else:
-                    print "Error : search for a contact %s that do not exists!" % c.get_name()
-        return r
-
-
-    #The timeperiods must not be duplicated
-    def get_timeperiod(self, t):
-        if t is not None:
-            find_t = self.find_timeperiod(t.get_name())
-            if find_t is not None:
-                return find_t
-            else:
-                print "Error : search for a timeperiod %s that do not exists!" % t.get_name()
-        else:
-            return None
-
-
-    def find_timeperiod(self, timeperiod_name):
-        try:
-            return self.timeperiods[timeperiod_name]
-        except KeyError:
-            return None
-
-
-    def find_contact(self, contact_name):
-        try:
-            return self.contacts[contact_name]
-        except KeyError:
-            return None
-
-
-    def update_element(self, e, data):
-        #print "........%s........" % type(e)
-        for prop in data:
-            #if hasattr(e, prop):
-            #    print "%-20s\t%s\t->\t%s" % (prop, getattr(e, prop), data[prop])
-            #else:
-            #    print "%-20s\t%s\t->\t%s" % (prop, "-", data[prop])
-            setattr(e, prop, data[prop])
-
 
     def prepare_pnp_path(self):
         if not self.pnp_path:
@@ -747,6 +122,206 @@ class Livestatus_broker(BaseModule):
         if self.pnp_path and not self.pnp_path.endswith('/'):
             self.pnp_path += '/'
 
+    def set_debug(self):
+        fdtemp = os.open(self.debug, os.O_CREAT | os.O_WRONLY | os.O_APPEND)
+        ## We close out and err
+        os.close(1)
+        os.close(2)
+        os.dup2(fdtemp, 1)  # standard output (1)
+        os.dup2(fdtemp, 2)  # standard error (2)
+
+    def main(self):
+        self.log = logger
+        self.log.load_obj(self)
+        # Daemon like init
+        self.debug_output = []
+
+        self.modules_manager = ModulesManager('livestatus', self.find_modules_path(), [])
+        self.modules_manager.set_modules(self.modules)
+        # We can now output some previouly silented debug ouput
+        self.do_load_modules()
+        for inst in self.modules_manager.instances:
+            if inst.properties["type"].startswith('logstore'):
+                f = getattr(inst, 'load', None)
+                if f and callable(f):
+                    f(self)
+                break
+        for s in self.debug_output:
+            print s
+        del self.debug_output
+        self.add_compatibility_sqlite_module()
+        self.log = logger
+        self.rg = LiveStatusRegenerator()
+        self.datamgr = datamgr
+        datamgr.load(self.rg)
+        self.query_cache = LiveStatusQueryCache()
+        if not self.use_query_cache:
+            self.query_cache.disable()
+        self.rg.register_cache(self.query_cache)
+
+        try:
+            #import cProfile
+            #cProfile.runctx('''self.do_main()''', globals(), locals(),'/tmp/livestatus.profile')
+            self.do_main()
+        except Exception, exp:
+            msg = Message(id=0, type='ICrash', data={
+                'name': self.get_name(),
+                'exception': exp,
+                'trace': traceback.format_exc()
+            })
+            self.from_q.put(msg)
+            # wait 2 sec so we know that the broker got our message, and die
+            time.sleep(2)
+            raise
+
+    # A plugin send us en external command. We just put it
+    # in the good queue
+    def push_external_command(self, e):
+        print "Livestatus: got an external command", e.__dict__
+        self.from_q.put(e)
+
+    # Real main function
+    def do_main(self):
+        # Maybe we got a debug dump to do
+        if self.debug:
+            self.set_debug()
+        #I register my exit function
+        self.set_exit_handler()
+        print "Go run"
+
+        # Open the logging database
+        self.db = self.modules_manager.instances[0]
+        self.db.open()
+
+        # We ill protect the operations on
+        # the non read+write with a lock and
+        # 2 int
+        self.global_lock = threading.RLock()
+        self.nb_readers = 0
+        self.nb_writers = 0
+
+        self.data_thread = None
+
+        # Check if some og the required directories exist
+        #if not os.path.exists(bottle.TEMPLATE_PATH[0]):
+        #    logger.log('ERROR : the view path do not exist at %s' % bottle.TEMPLATE_PATH)
+        #    sys.exit(2)
+
+        self.load_plugins()
+
+        if self.use_threads:
+            # Launch the data thread"
+            print "Starting Livestatus application"
+            self.data_thread = threading.Thread(None, self.manage_brok_thread, 'datathread')
+            self.data_thread.start()
+            self.lql_thread = threading.Thread(None, self.manage_lql_thread, 'lqlthread')
+            self.lql_thread.start()
+            self.data_thread.join()
+            self.lql_thread.join()
+        else:
+            self.manage_lql_thread()
+
+    # It's the thread function that will get broks
+    # and update data. Will lock the whole thing
+    # while updating
+    def manage_brok_thread(self):
+        print "Data thread started"
+        while True:
+            l = self.to_q.get()
+
+            for b in l:
+                # For updating, we cannot do it while
+                # answer queries, so wait for no readers
+                self.wait_for_no_readers()
+                try:
+                    #print "Got data lock, manage brok"
+                    self.rg.manage_brok(b)
+                    for mod in self.modules_manager.get_internal_instances():
+                        try:
+                            mod.manage_brok(b)
+                        except Exception, exp:
+                            print exp.__dict__
+                            logger.log("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
+                            logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
+                            logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
+                            self.modules_manager.set_to_restart(mod)
+                except Exception, exp:
+                    msg = Message(id=0, type='ICrash', data={
+                        'name': self.get_name(),
+                        'exception': exp,
+                        'trace': traceback.format_exc()
+                    })
+                    self.from_q.put(msg)
+                    # wait 2 sec so we know that the broker got our message, and die
+                    time.sleep(2)
+                    # No need to raise here, we are in a thread, exit!
+                    os._exit(2)
+                #finally:
+                    # We can remove us as a writer from now. It's NOT an atomic operation
+                    # so we REALLY not need a lock here (yes, I try without and I got
+                    # a not so accurate value there....)
+                    self.global_lock.acquire()
+                    self.nb_writers -= 1
+                    self.global_lock.release()
+
+    # Here we will load all plugins (pages) under the webui/plugins
+    # directory. Each one can have a page, views and htdocs dir that we must
+    # route correctly
+    def load_plugins(self):
+        pass
+
+    # It will say if we can launch a page rendering or not.
+    # We can only if there is no writer running from now
+    def wait_for_no_writers(self):
+        while True:
+            self.global_lock.acquire()
+            # We will be able to run
+            if self.nb_writers == 0:
+                # Ok, we can run, register us as readers
+                self.nb_readers += 1
+                self.global_lock.release()
+                break
+            # Oups, a writer is in progress. We must wait a bit
+            self.global_lock.release()
+            # Before checking again, we should wait a bit
+            # like 1ms
+            time.sleep(0.001)
+
+    # It will say if we can launch a brok management or not
+    # We can only if there is no readers running from now
+    def wait_for_no_readers(self):
+        start = time.time()
+        while True:
+            self.global_lock.acquire()
+            # We will be able to run
+            if self.nb_readers == 0:
+                # Ok, we can run, register us as writers
+                self.nb_writers += 1
+                self.global_lock.release()
+                break
+            # Ok, we cannot run now, wait a bit
+            self.global_lock.release()
+            # Before checking again, we should wait a bit
+            # like 1ms
+            time.sleep(0.001)
+            # We should warn if we cannot update broks
+            # for more than 30s because it can be not good
+            if time.time() - start > 30:
+                print "WARNING: we are in lock/read since more than 30s!"
+                start = time.time()
+
+    def manage_brok(self, brok):
+        """We use this method mostly for the unit tests"""
+        self.rg.manage_brok(brok)
+        for mod in self.modules_manager.get_internal_instances():
+            try:
+                mod.manage_brok(brok)
+            except Exception, exp:
+                print exp.__dict__
+                logger.log("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
+                logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
+                logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
+                self.modules_manager.set_to_restart(mod)
 
     def do_stop(self):
         print "[liveStatus] So I quit"
@@ -762,97 +337,74 @@ class Livestatus_broker(BaseModule):
         except:
             pass
 
-        
-    def set_debug(self):
-        fdtemp = os.open(self.debug, os.O_CREAT | os.O_WRONLY | os.O_APPEND)
-        
-        ## We close out and err
-        os.close(1)
-        os.close(2)
-
-        os.dup2(fdtemp, 1) # standard output (1)
-        os.dup2(fdtemp, 2) # standard error (2)
-
-
-    def main(self):
-        try:
-            #import cProfile
-            #cProfile.runctx('''self.do_main()''', globals(), locals(),'/tmp/livestatus.profile')
-            self.do_main()
-        except Exception, exp:
-            
-            msg = Message(id=0, type='ICrash', data={'name' : self.get_name(), 'exception' : exp, 'trace' : traceback.format_exc()})
-            self.from_q.put(msg)
-            # wait 2 sec so we know that the broker got our message, and die
-            time.sleep(2)
-            raise
-
-
-
-    def do_main(self):
-        #I register my exit function
-        self.set_exit_handler()
-        
-        # Maybe we got a debug dump to do
-        if self.debug:
-            self.set_debug()
-
-        # Open the logging database
-        self.db = LiveStatusDb(self.database_file, self.archive_path, self.max_logs_age)
-        self.db.prepare_log_db_table()
-
-        # and immediately archive data
-        self.db.log_db_do_archive()
-
+    # It's the thread function that will get broks
+    # and update data. Will lock the whole thing
+    # while updating
+    def manage_lql_thread(self):
+        print "Livestatus query thread started"
         # This is the main object of this broker where the action takes place
-        self.livestatus = LiveStatus(self.configs, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.db, self.use_aggressive_sql, self.pnp_path, self.from_q)
+        self.livestatus = LiveStatus(self.datamgr, self.query_cache, self.db, self.pnp_path, self.from_q)
 
-        last_number_of_objects = 0
         backlog = 5
         size = 8192
         self.listeners = []
         if self.port:
             server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             server.setblocking(0)
-            server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) 
+            server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             server.bind((self.host, self.port))
             server.listen(backlog)
             self.listeners.append(server)
+            print "listening on tcp port", self.port
         if self.socket:
             if os.path.exists(self.socket):
                 os.remove(self.socket)
+            # I f the socket dir is not existing, create it
+            if not os.path.exists(os.path.dirname(self.socket)):
+                os.mkdir(os.path.dirname(self.socket))
             os.umask(0)
             sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             sock.setblocking(0)
             sock.bind(self.socket)
             sock.listen(backlog)
             self.listeners.append(sock)
+            print "listening on unix socket", self.socket
         self.input = self.listeners[:]
-        databuffer = {}
         open_connections = {}
- 
+
         while not self.interrupted:
-            try:
-                l = self.to_q.get(True, .01)
-                for b in l:
-                    self.manage_brok(b)
-            #We do not ware about Empty queue
-            except Queue.Empty:
-                pass
+            if self.use_threads:
+                self.wait_for_no_writers()
                 self.livestatus.counters.calc_rate()
-            except IOError, e:
-                if hasattr(os, 'errno') and e.errno != os.errno.EINTR:
+            else:
+                try:
+                    l = self.to_q.get(True, .01)
+                    for b in l:
+                        self.rg.manage_brok(b)
+                        for mod in self.modules_manager.get_internal_instances():
+                            try:
+                                mod.manage_brok(b)
+                            except Exception, exp:
+                                print exp.__dict__
+                                logger.log("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
+                                logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
+                                logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
+                                self.modules_manager.set_to_restart(mod)
+                except Queue.Empty:
+                    self.livestatus.counters.calc_rate()
+                except IOError, e:
+                    if hasattr(os, 'errno') and e.errno != os.errno.EINTR:
+                        raise
+                except Exception, exp:
+                    print "Error : got an exeption (bad code?)", exp, exp.__dict__, type(exp)
                     raise
-            #But others are importants
-            except Exception, exp:
-                print "Error : got an exeption (bad code?)", exp.__dict__, type(exp)
-                raise
+                time.sleep(0.01)
 
             # Commit log broks to the database
             self.db.commit_and_rotate_log_db()
 
             # Check for pending livestatus requests
-            inputready,outputready,exceptready = select.select(self.input,[],[], 0)
+            inputready, _, exceptready = select.select(self.input, [], [], 0)
 
             now = time.time()
             if True:
@@ -916,7 +468,7 @@ class Livestatus_broker(BaseModule):
             kick_connections = []
             if len(exceptready) > 0:
                 pass
-                                
+
             if len(inputready) > 0:
                 for s in inputready:
                 # We will identify sockets by their filehandle number
@@ -926,7 +478,7 @@ class Livestatus_broker(BaseModule):
                         # handle the server socket
                         client, address = s.accept()
                         if isinstance(address, tuple):
-                            client_ip, client_port = address
+                            client_ip, _ = address
                             if self.allowed_hosts and address not in self.allowed_hosts:
                                 print "Connection attempt from illegal ip address", client_ip
                                 try:
@@ -943,7 +495,13 @@ class Livestatus_broker(BaseModule):
                             open_connections[socketid]['lastseen'] = now
                         else:
                             # This is a new connection
-                            open_connections[socketid] = { 'keepalive' : False, 'lastseen' : now, 'buffer' : None, 'state' : 'receiving', 'socket' : s }
+                            open_connections[socketid] = {
+                                'keepalive': False,
+                                'lastseen': now,
+                                'buffer': None,
+                                'state': 'receiving',
+                                'socket': s
+                            }
 
                         data = ''
                         try:
@@ -1051,7 +609,6 @@ class Livestatus_broker(BaseModule):
                             # Register this socket for deletion
                             kick_connections.append(s.fileno())
 
-
                 # Now the work is done. Cleanup
                 for socketid in open_connections:
                     print "connection %d is idle since %d seconds (%s)\n" % (socketid, now - open_connections[socketid]['lastseen'], open_connections[socketid]['state'])
@@ -1073,34 +630,16 @@ class Livestatus_broker(BaseModule):
                             del open_connections[socketid]
                             self.input.remove(kick_socket)
                             print "shutdown socket", socketid
-                        except Exception , exp:
+                        except Exception, exp:
                             print exp
                             kick_socket.close()
                             del open_connections[socketid]
                             self.input.remove(kick_socket)
                             print "closed socket", socketid
 
-            else:
-                # There are no incoming requests, so there's time for some housekeeping
-                pass
-                #if now - last_db_cleanup_time > 86400:
-                #    self.db.cleanup_log_db()
-                #    last_db_cleanup_time = now
-                # we don't cleanup and vacuum datafiles any more
-                # in the future we might delete daily datafiles here
-
-            if self.number_of_objects > last_number_of_objects:
-                # Still in the initialization phase
-                # Maybe we should wait until there are no more initial broks
-                # before we open the socket
-                pass
-
         self.do_stop()
-
 
     def write_protocol(self, request, response):
         if self.debug_queries:
             print "REQUEST>>>>>\n" + request + "\n\n"
             print "RESPONSE<<<<\n" + response + "\n\n"
-
-

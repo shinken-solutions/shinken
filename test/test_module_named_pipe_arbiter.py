@@ -23,7 +23,7 @@
 # This file is used to test reading and processing of config files
 #
 
-import os, sys, time
+import os, sys, time, platform
 
 from shinken_test import unittest, ShinkenTest
 
@@ -49,7 +49,8 @@ class TestModuleNamedPipe(ShinkenTest):
     def test_read_named_pipe(self):
 
         # Ok, windows do not have named pipe, we know...
-        if os.name == 'nt':
+        # cygwin cannow write from two sides at the same time
+        if os.name == 'nt' or platform.system().startswith('CYGWIN'):
             return
 
         now = int(time.time())

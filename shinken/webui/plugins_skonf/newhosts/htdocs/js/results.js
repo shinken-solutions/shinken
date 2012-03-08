@@ -25,5 +25,43 @@
 
 
 function validatehostform(name) {
-    document.forms[name].submit();
+    //var form = document.forms[name];//.submit();
+
+    var form = $("form-"+name);
+    //alert("submit" + name);
+    /**
+     * This empties the log and shows the spinning indicator
+     */
+    var log = $("res-"+name).empty().addClass('ajax-loading');
+
+    new Request({
+        method: form.method,
+        url: form.action+"toto",
+        onSuccess: function(responseText, responseXML) {
+            log.removeClass('ajax-loading');
+            log.set('text', 'text goes here');
+	    div_res = $("good-result-"+name);
+	    new Fx.Slide(div_res).show();
+	    div_res.highlight('#ddf');
+        },
+	onFailure: function(responseText, responseXML) {
+            log.removeClass('ajax-loading');
+            log.set('text', 'ajax finished');
+	    div_res = $("bad-result-"+name);
+	    new Fx.Slide(div_res).show();
+	    div_res.highlight('#ddf');
+        }
+
+    }).send(form.toQueryString());
 }
+
+
+
+
+/* We Hide all results divs */
+window.addEvent('domready', function(){
+    var res = $$('.div-result');
+	 res.each(function(el){
+	     new Fx.Slide(el).hide();
+	 });
+});

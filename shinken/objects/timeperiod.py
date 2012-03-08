@@ -78,7 +78,8 @@ from item import Item, Items
 from shinken.daterange import Daterange, CalendarDaterange, StandardDaterange, MonthWeekDayDaterange
 from shinken.daterange import MonthDateDaterange, WeekDayDaterange, MonthDayDaterange
 from shinken.brok import Brok
-from shinken.property import IntegerProp, StringProp, ListProp
+from shinken.property import IntegerProp, StringProp, ListProp, BoolProp
+from shinken.log import logger
 
 
 class Timeperiod(Item):
@@ -95,6 +96,7 @@ class Timeperiod(Item):
         # These are needed if a broker module calls methods on timeperiod objects
         'dateranges':       ListProp   (fill_brok=['full_status'], default=[]),
         'exclude':          ListProp   (fill_brok=['full_status'], default=[]),
+        'is_active':        BoolProp   (default='0')
     })
 
 
@@ -114,12 +116,15 @@ class Timeperiod(Item):
                 self.unresolved.append(key+' '+params[key])
 
         self.cache = {} #For tunning purpose only
+        self.invalid_cache = {} #same but for invalid search
         self.configuration_errors = []
         self.configuration_warnings = []
+        # By default the tp is None so we know we just start
+        self.is_active = None
 
 
     def get_name(self):
-        return self.timeperiod_name
+        return getattr(self, 'timeperiod_name', 'unknown_timeperiod')
 
 
     #We fillfull properties with template ones if need
@@ -163,6 +168,39 @@ class Timeperiod(Item):
             return None
 
 
+    def find_next_invalid_time_from_cache(self, t):
+        try:
+            return self.invalid_cache[t]
+        except KeyError:
+            return None
+
+
+    # will look for active/un-active change. And log it
+    # [1327392000] TIMEPERIOD TRANSITION: <name>;<from>;<to>
+    # from is -1 on startup.  to is 1 if the timeperiod starts 
+    # and 0 if it ends.
+    def check_and_log_activation_change(self):
+        now = int(time.time())
+        
+        was_active = self.is_active
+        self.is_active = self.is_time_valid(now)
+        
+        # If we got a change, log it!
+        if self.is_active != was_active:
+            _from = 0
+            _to = 0
+            # If it's the start, get a special value for was
+            if was_active is None:
+                _from = -1
+            if was_active:
+                _from = 1
+            if self.is_active:
+                _to = 1
+
+            # Now raise the log
+            logger.log('TIMEPERIOD TRANSITION: %s;%d;%d' % (self.get_name(), _from, _to))
+        
+
     # clean the get_next_valid_time_from_t cache
     # The entries are a dict on t. t < now are useless
     # Because we do not care about past anymore.
@@ -175,6 +213,15 @@ class Timeperiod(Item):
                 t_to_del.append(t)
         for t in t_to_del:
             del self.cache[t]
+
+        # same for the invalid cache
+        t_to_del = []
+        for t in self.invalid_cache:
+            if t < now:
+                t_to_del.append(t)
+        for t in t_to_del:
+            del self.invalid_cache[t]
+
 
 
     def get_next_valid_time_from_t(self, t):
@@ -244,8 +291,7 @@ class Timeperiod(Item):
                     still_loop = False
                     local_min = None
 
-        #print "We got it!"
-        #Ok, we update the cache...
+        # Ok, we update the cache...
         self.cache[original_t] = local_min
         return local_min
 
@@ -256,6 +302,12 @@ class Timeperiod(Item):
         original_t = t
         still_loop = True
 
+        # First try to find in cache
+        res_from_cache = self.find_next_invalid_time_from_cache(t)
+        if res_from_cache is not None:
+            return res_from_cache
+
+        #Then look, maybe t is already invalid
         if not self.is_time_valid(t):
             return t
 
@@ -265,23 +317,9 @@ class Timeperiod(Item):
         while still_loop:
             #print "Invalid loop with", time.asctime(time.localtime(local_min))
 
-#            #Ok, not in cache...
-#            #print self.get_name(), "Begin loop with", time.asctime(time.localtime(local_min))
-#            next_exclude = None
-#            for dr in self.exclude:
-#                m = dr.get_next_valid_time_from_t(local_min)
-#                if m != None:
-#                    #print time.asctime(time.localtime(m))
-#                    if next_exclude == None or m <= next_exclude:
-#                        next_exclude = m
-
-#            #Maybe the min of exclude is not valid, it is the min we can find.
-#            if next_exclude != None and not self.is_time_valid(next_exclude):
-#                #print self.get_name(), "find a possible early exit for invalid ! with", time.asctime(time.localtime(next_exclude))
-#                res = next_exclude
-#                still_loop = False
-
             dr_mins = []
+            #val_valids = []
+            #val_inval = []
             #But maybe we can find a better solution with next invalid of standart dateranges
             #print self.get_name(), "After valid of exclude, local_min =", time.asctime(time.localtime(local_min))
             for dr in self.dateranges:
@@ -289,28 +327,56 @@ class Timeperiod(Item):
                 #print dr.__dict__
                 m = dr.get_next_invalid_time_from_t(local_min)
 
-                #print self.get_name(), "Dr give me next invalid", time.asctime(time.localtime(m))
+                #print self.get_name(), "Dr", dr.__dict__,  "give me next invalid", time.asctime(time.localtime(m))
                 if m is not None:
-                    #But maybe it's invalid for this dr, but valid for other ones.
-                    if not self.is_time_valid(m):
-                    #print "Final : Got a next invalid at", time.asctime(time.localtime(m))
-                        dr_mins.append(m)
+                    # But maybe it's invalid for this dr, but valid for other ones.
+                    #if not self.is_time_valid(m):
+                        #print "Final : Got a next invalid at", time.asctime(time.localtime(m))
+                    dr_mins.append(m)
+                    #if not self.is_time_valid(m):
+                    #    val_inval.append(m)
+                    #else:
+                    #    val_valids.append(m)
                         #print "Add a m", time.asctime(time.localtime(m))
 #                    else:
 #                        print dr.__dict__
 #                        print "FUCK bad result\n\n\n"
+            #print "Inval"
+            #for v in val_inval:
+            #    print "\t", time.asctime(time.localtime(v))
+            #print "Valid"
+            #for v in val_valids:
+            #    print "\t", time.asctime(time.localtime(v))
 
             if dr_mins != []:
                 local_min = min(dr_mins)
-                #print "After dr : found invalid local min:", time.asctime(time.localtime(local_min)), "is valid", self.is_time_valid(local_min)
+                # Take the minimum valid as lower for next search
+                #local_min_valid = 0
+                #if val_valids != []:
+                #    local_min_valid = min(val_valids)
+                #if local_min_valid != 0:
+                #    local_min = local_min_valid
+                #else:
+                #    local_min = min(dr_mins)
+                #print "UPDATE After dr : found invalid local min:", time.asctime(time.localtime(local_min)), "is valid", self.is_time_valid(local_min)
 
-            #print self.get_name(), 'Invalid: local min', time.asctime(time.localtime(local_min))
-            #We do not loop unless the local_min is not valid
-            still_loop = False
-
-            #if we've got a real value, we check it with the exclude
+            #print self.get_name(), 'Invalid: local min', local_min#time.asctime(time.localtime(local_min))
+            # We do not loop unless the local_min is not valid
+            if not self.is_time_valid(local_min):
+                still_loop = False
+            else: # continue until we reach too far..., in one minute
+                # After one month, go quicker...
+                if local_min > original_t + 3600*24*30:
+                    local_min += 3600
+                else: # else search for 1min precision
+                    local_min += 60
+                # after one year, stop.
+                if local_min > original_t + 3600*24*366 + 1:#60*24*366 + 1:
+                    still_loop = False
+            #print "Loop?", still_loop
+            # if we've got a real value, we check it with the exclude
             if local_min is not None:
-                #Now check if local_min is not valid
+                # Now check if local_min is not valid
                 for tp in self.exclude:
                     #print self.get_name(),"we check for invalid", time.asctime(time.localtime(local_min)), 'with tp', tp.name
                     if tp.is_time_valid(local_min):
@@ -328,6 +394,8 @@ class Timeperiod(Item):
                     res = local_min
 
         #print "Finished Return the next invalid", time.asctime(time.localtime(local_min))
+        # Ok, we update the cache...
+        self.invalid_cache[original_t] = local_min
         return local_min
 
 

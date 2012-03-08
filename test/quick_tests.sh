@@ -133,7 +133,16 @@ launch_and_assert test_module_ip_tag.py
 launch_and_assert test_dot_virg_in_command.py
 launch_and_assert test_bad_escalation_on_groups.py
 launch_and_assert test_no_host_template.py
+launch_and_assert test_groups_with_no_alias.py
 launch_and_assert test_notif_too_much.py
+launch_and_assert test_timeperiods_state_logs.py
+launch_and_assert test_define_with_space.py
+launch_and_assert test_objects_and_notifways.py
+launch_and_assert test_freshness.py
+launch_and_assert test_star_in_hostgroups.py
+launch_and_assert test_protect_esclamation_point.py
+launch_and_assert test_module_passwd_ui.py
+launch_and_assert test_contactgroups_plus_inheritance.py
 
 launch_and_assert test_maintenance_period.py
 #Live status is a bit longer than the previous, so we put it at the end.

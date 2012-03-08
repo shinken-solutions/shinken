@@ -88,7 +88,7 @@ class Escalation(Item):
             if in_notif_time < self.first_notification_time * interval:
                 return False
 
-            #self.last_notification = 0 mean no end
+            # self.last_notification = 0 mean no end
             if self.last_notification_time != 0 and in_notif_time > self.last_notification_time * interval:
                 return False
 
@@ -96,11 +96,11 @@ class Escalation(Item):
         if status in small_states and small_states[status] not in self.escalation_options:
             return False
 
-        #Maybe the time is not in our escalation_period
+        # Maybe the time is not in our escalation_period
         if self.escalation_period is not None and not self.escalation_period.is_time_valid(t):
             return False
 
-        #Ok, I do not see why not escalade. So it's True :)
+        # Ok, I do not see why not escalade. So it's True :)
         return True
 
 

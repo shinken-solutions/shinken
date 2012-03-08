@@ -77,6 +77,8 @@ class ShinkenAdmin(cmd.Cmd):
     def look_connexion(self):
         if not self.arb:
             self.do_connect('')
+        self.arb.ping()        
+
 
     def emptyline(self):
         return
@@ -122,6 +124,10 @@ class ShinkenAdmin(cmd.Cmd):
         connect to locahost:7770.
         '''
         self.look_connexion()
+        if not self.arb.reachable:
+            print "Cannot connect to the arbiter, bail out"
+            return
+
         data = self.arb.get_all_states()
         
         arbs = data['arbiter']
@@ -176,6 +182,24 @@ class ShinkenAdmin(cmd.Cmd):
         print "+-------------------------------------------------------------------------------+"
 
         
+    def do_getconf(self, line):
+        '''
+        Get the data in the arbiter for a table and some properties
+        like hosts  host_name realm
+        '''
+        self.look_connexion()
+        if not self.arb.reachable:
+            print "Cannot connect to the arbiter, bail out"
+            return
+
+        data = self.arb.get_objects_properties('hosts', 'host_name', 'check_interval')
+        
+        for l in data:
+            print ' '.join(['%s' % i for i in l])
+
+        
+
+
 
     def do_gethostname(self, line):
         '''

@@ -1,52 +1,58 @@
-#!/usr/bin/python
-#Copyright (C) 2009 Gabes Jean, naparuba@gmail.com
+# -*- coding: utf-8 -*-
 #
-#This file is part of Shinken.
+# Copyright (C) 2009-2012:
+#     Gabes Jean, naparuba@gmail.com
+#     Gerhard Lausser, Gerhard.Lausser@consol.de
+#     Gregory Starck, g.starck@gmail.com
+#     Hartmut Goebel, h.goebel@goebel-consult.de
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# This file is part of Shinken.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
 import time
 
-class LiveStatusCounters:#(LiveStatus):
+
+class LiveStatusCounters:  # (LiveStatus):
     def __init__(self):
         self.counters = {
-            'neb_callbacks' : 0,
-            'connections' : 0,
-            'service_checks' : 0,
-            'host_checks' : 0,
-            'forks' : 0,
-            'log_message' : 0,
-            'external_commands' : 0
+            'neb_callbacks': 0,
+            'connections': 0,
+            'service_checks': 0,
+            'host_checks': 0,
+            'forks': 0,
+            'log_message': 0,
+            'external_commands': 0
         }
         self.last_counters = {
-            'neb_callbacks' : 0,
-            'connections' : 0,
-            'service_checks' : 0,
-            'host_checks' : 0,
-            'forks' : 0,
-            'log_message' : 0,
-            'external_commands' : 0
+            'neb_callbacks': 0,
+            'connections': 0,
+            'service_checks': 0,
+            'host_checks': 0,
+            'forks': 0,
+            'log_message': 0,
+            'external_commands': 0
         }
         self.rate = {
-            'neb_callbacks' : 0.0,
-            'connections' : 0.0,
-            'service_checks' : 0.0,
-            'host_checks' : 0.0,
-            'forks' : 0.0,
-            'log_message' : 0.0,
-            'external_commands' : 0.0
+            'neb_callbacks': 0.0,
+            'connections': 0.0,
+            'service_checks': 0.0,
+            'host_checks': 0.0,
+            'forks': 0.0,
+            'log_message': 0.0,
+            'external_commands': 0.0
         }
         self.last_update = 0
         self.interval = 10
@@ -55,7 +61,6 @@ class LiveStatusCounters:#(LiveStatus):
     def increment(self, counter):
         if counter in self.counters:
             self.counters[counter] += 1
-   
 
     def calc_rate(self):
         elapsed = time.time() - self.last_update
@@ -70,7 +75,6 @@ class LiveStatusCounters:#(LiveStatus):
                     avg_rate = self.rate[counter] * (1 - self.rating_weight) + new_rate * self.rating_weight
                 self.rate[counter] = avg_rate
                 self.last_counters[counter] = self.counters[counter]
-
 
     def count(self, counter):
         if counter in self.counters:

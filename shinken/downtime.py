@@ -1,30 +1,45 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 :
-#    Gabes Jean, naparuba@gmail.com
-#    Gerhard Lausser, Gerhard.Lausser@consol.de
-#    Gregory Starck, g.starck@gmail.com
-#    Hartmut Goebel, h.goebel@goebel-consult.de
+
+# -*- coding: utf-8 -*-
+
+# Copyright (C) 2009-2011 :
+#     Gabes Jean, naparuba@gmail.com
+#     Gerhard Lausser, Gerhard.Lausser@consol.de
+#     Gregory Starck, g.starck@gmail.com
+#     Hartmut Goebel, h.goebel@goebel-consult.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
 import time
 from shinken.comment import Comment
 from shinken.property import BoolProp, IntegerProp, StringProp
 
+""" Schedules downtime for a specified service. If the "fixed" argument is set
+ to one (1), downtime will start and end at the times specified by the
+ "start" and "end" arguments.
+ Otherwise, downtime will begin between the "start" and "end" times and last
+ for "duration" seconds. The "start" and "end" arguments are specified
+ in time_t format (seconds since the UNIX epoch). The specified service
+ downtime can be triggered by another downtime entry if the "trigger_id"
+ is set to the ID of another scheduled downtime entry.
+ Set the "trigger_id" argument to zero (0) if the downtime for the
+ specified service should not be triggered by another downtime entry.
+
+"""
 class Downtime:
     id = 1
 
@@ -50,21 +65,11 @@ class Downtime:
     }
 
 
-    #Schedules downtime for a specified service. If the "fixed" argument is set
-    #to one (1), downtime will start and end at the times specified by the
-    #"start" and "end" arguments.
-    #Otherwise, downtime will begin between the "start" and "end" times and last
-    #for "duration" seconds. The "start" and "end" arguments are specified
-    #in time_t format (seconds since the UNIX epoch). The specified service
-    #downtime can be triggered by another downtime entry if the "trigger_id"
-    #is set to the ID of another scheduled downtime entry.
-    #Set the "trigger_id" argument to zero (0) if the downtime for the
-    #specified service should not be triggered by another downtime entry.
     def __init__(self, ref, start_time, end_time, fixed, trigger_id, duration, author, comment):
         self.id = self.__class__.id
         self.__class__.id += 1
-        self.ref = ref #pointer to srv or host we are apply
-        self.activate_me = [] #The other downtimes i need to activate
+        self.ref = ref # pointer to srv or host we are apply
+        self.activate_me = [] # The other downtimes i need to activate
         self.entry_time = int(time.time())
         self.fixed = fixed
         self.start_time = start_time
@@ -75,13 +80,13 @@ class Downtime:
         self.end_time = end_time
         if fixed:
             self.duration = end_time - start_time
-        #This is important for flexible downtimes. Here start_time and
-        #end_time mean: in this time interval it is possible to trigger
-        #the beginning of the downtime which lasts for duration.
-        #Later, when a non-ok event happens, real_end_time will be
-        #recalculated from now+duration
-        #end_time will be displayed in the web interface, but real_end_time
-        #is used internally
+        # This is important for flexible downtimes. Here start_time and
+        # end_time mean: in this time interval it is possible to trigger
+        # the beginning of the downtime which lasts for duration.
+        # Later, when a non-ok event happens, real_end_time will be
+        # recalculated from now+duration
+        # end_time will be displayed in the web interface, but real_end_time
+        # is used internally
         self.real_end_time = end_time
         self.author = author
         self.comment = comment
@@ -129,11 +134,11 @@ class Downtime:
         return res
 
 
-    #The end of the downtime was reached.
+    # The end of the downtime was reached.
     def exit(self):
         res = []
         if self.is_in_effect == True:
-            #This was a fixed or a flexible+triggered downtime
+            # This was a fixed or a flexible+triggered downtime
             self.is_in_effect = False
             self.ref.scheduled_downtime_depth -= 1
             if self.ref.scheduled_downtime_depth == 0:
@@ -141,20 +146,20 @@ class Downtime:
                 self.ref.create_notifications('DOWNTIMEEND')
                 self.ref.in_scheduled_downtime = False
         else:
-            #This was probably a flexible downtime which was not triggered
-            #In this case it silently disappears
+            # This was probably a flexible downtime which was not triggered
+            # In this case it silently disappears
             pass
         self.del_automatic_comment()
         self.can_be_deleted = True
-        #when a downtime ends and the service was critical
-        #a notification is sent with the next critical check
-        #So we should set a flag here which signals consume_result
-        #to send a notification
+        # when a downtime ends and the service was critical
+        # a notification is sent with the next critical check
+        # So we should set a flag here which signals consume_result
+        # to send a notification
         self.ref.in_scheduled_downtime_during_last_check = True
         return res
 
 
-    #A scheduled downtime was prematurely cancelled
+    # A scheduled downtime was prematurely cancelled
     def cancel(self):
         res = []
         self.is_in_effect = False
@@ -165,15 +170,15 @@ class Downtime:
         self.del_automatic_comment()
         self.can_be_deleted = True
         self.ref.in_scheduled_downtime_during_last_check = True
-        #Nagios does not notify on cancelled downtimes
+        # Nagios does not notify on cancelled downtimes
         #res.extend(self.ref.create_notifications('DOWNTIMECANCELLED'))
-        #Also cancel other downtimes triggered by me
+        # Also cancel other downtimes triggered by me
         for dt in self.activate_me:
             res.extend(dt.cancel())
         return res
 
 
-    #Scheduling a downtime creates a comment automatically
+    # Scheduling a downtime creates a comment automatically
     def add_automatic_comment(self):
         if self.fixed == True:
             text = "This %s has been scheduled for fixed downtime from %s to %s. Notifications for the %s will not be sent out during that time period." % (self.ref.my_type, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(self.start_time)), time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(self.end_time)), self.ref.my_type)
@@ -193,24 +198,24 @@ class Downtime:
 
     def del_automatic_comment(self):
         # Extra comment can be None if we load it from a old version of Shinken
-        # TODO : remove it in a future verszion when every oen got upgrade
+        # TODO : remove it in a future version when every one got upgrade
         if self.extra_comment is not None:
             self.extra_comment.can_be_deleted = True
         #self.ref.del_comment(self.comment_id)
 
 
-    #Fill data with info of item by looking at brok_type
-    #in props of properties or running_propterties
+    # Fill data with info of item by looking at brok_type
+    # in props of properties or running_propterties
     def fill_data_brok_from(self, data, brok_type):
         cls = self.__class__
-        #Now config properties
+        # Now config properties
         for prop, entry in cls.properties.items():
             if hasattr(prop, 'fill_brok'):
                 if brok_type in entry['fill_brok']:
                     data[prop] = getattr(self, prop)
 
 
-    #Get a brok with initial status
+    # Get a brok with initial status
     def get_initial_status_brok(self):
         data = {'id': self.id}
 
@@ -219,8 +224,8 @@ class Downtime:
         return b
 
 
-    #Call by picle for dataify the downtime
-    #because we DO NOT WANT REF in this pickleisation!
+    # Call by pickle for dataify the downtime
+    # because we DO NOT WANT REF in this pickleisation!
     def __getstate__(self):
         cls = self.__class__
         # id is not in *_properties
@@ -231,7 +236,7 @@ class Downtime:
         return res
 
 
-    #Inversed funtion of getstate
+    # Inverted funtion of getstate
     def __setstate__(self, state):
         cls = self.__class__
         
@@ -249,8 +254,8 @@ class Downtime:
         if self.id >= cls.id:
             cls.id = self.id + 1
 
-    # Theses 2 functions are DEPRECATED and will be removed in a future version of
-    # Shinken. They should not be useful any more after a first load/save pass.
+    # This function is DEPRECATED and will be removed in a future version of
+    # Shinken. It should not be useful any more after a first load/save pass.
 
     #Inversed funtion of getstate
     def __setstate_deprecated__(self, state):
