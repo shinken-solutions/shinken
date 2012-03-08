@@ -66,6 +66,7 @@
     <script src="/static/js/bootstrap-dropdown.js"></script>
     <script src="/static/js/bootstrap-tooltip.js"></script>
     <script src="/static/js/jquery.meow.js"></script>
+    <script src="/static/js/jquery-jsonp-2.2.1.min.js"></script>
 
     <!--Shinken ones-->
     <script src="/static/js/shinken-refresh.js"></script>

@@ -80,7 +80,7 @@ but also untick thems in the UI */
 function flush_selected_elements(){
     /* We must copy the list so we can parse it in a clean way 
      without fearing some bugs */
-    var cpy = Array.clone(selected_elements);
+    var cpy = $.extend({}, selected_elements);
     $.each(cpy, function(idx, name) {
 	remove_element(name);
     });

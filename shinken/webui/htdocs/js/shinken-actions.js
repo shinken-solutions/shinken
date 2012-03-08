@@ -25,31 +25,25 @@
 
 /* ************************************* Message raise part ******************* */
 function raise_message_ok(text){
-    // Simplest way to use the class...
-    new Message({
-	    iconPath : '/static/images/',
-		icon: "okMedium.png",
-		title: "Success!",
-		message: text
-		}).say();
+    $.meow({
+	message: text,
+	icon: '/static/images/okMedium.png'
+    });
 }
 
 
 function raise_message_error(text){
-    // Simplest way to use the class...
-    new Message({
-            iconPath : '/static/images/',
-                icon: "errorMedium.png",
-                title: "Error!",
-                message: text
-                }).tell();
+    $.meow({
+        message: text,
+        icon: '/static/images/errorMedium.png'
+    });
 }
 
 
 /* React to an action return of the /action page. Look at status
  to see if it's ok or not */
 function react(response){
-    //alert('In react'+ response);
+    //alert('In react'+ response+response.status);
     //alert(response.status == 200);
     if(response.status == 200){
 	raise_message_ok(response.text);
@@ -69,11 +63,12 @@ function manage_error(response){
 
 function launch(url){
     // this code will send a data object via a GET request and alert the retrieved data.
-    var jsonRequest = new Request.JSON(
-                                       {url: url,
-                                        onSuccess: react,
-                                        onFailure : manage_error,
-                                       }).get();
+    //alert('Try to get' + url+'?callback=?');
+    $.jsonp({
+	"url": url+'?callback=?',
+	"success": react,
+	"error": manage_error
+    });
 
 }
 
