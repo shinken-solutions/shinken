@@ -269,24 +269,25 @@ Invalid element name
 			  %if nb == 8:
 			  <div style="float:right;" id="hidden_impacts_or_services_button"><a href="javascript:show_hidden_impacts_or_services()"> {{!helper.get_button('Show all services', img='/static/images/expand.png')}}</a></div>
 			  %end
+			  
 			  %if nb < 8:
-		            <div class="service">
-		          %else:
-			    <div class="service hidden_impacts_services">
+		      <div class="service">
+		      %else:
+			  <div class="service hidden_impacts_services">
 			  %end
 			  <div class="divstate{{s.state_id}}">
-			  %for i in range(0, s.business_impact-2):
-			      <img src='/static/images/star.png'>
-			  %end
-			  <img style="width : 16px; height:16px" src="{{helper.get_icon_state(s)}}">
-			  <span style="font-size:110%">{{!helper.get_link(s, short=True)}}</span> is <span style="font-size:110%">{{s.state}}</span> since {{helper.print_duration(s.last_state_change, just_duration=True, x_elts=2)}}
+			  	%for i in range(0, s.business_impact-2):
+			  	<img src='/static/images/star.png'>
+			  	%end
+			  	<img style="width : 16px; height:16px" src="{{helper.get_icon_state(s)}}">
+			  	<span style="font-size:110%">{{!helper.get_link(s, short=True)}}</span> is <span style="font-size:110%">{{s.state}}</span> since {{helper.print_duration(s.last_state_change, just_duration=True, x_elts=2)}}
 			  </div>
-			    </div>
-			    %# End of this service
+			  </div>
+			  %# End of this service
 			 %end
 			 </div>
 			%end #of the only host part
-
+			</div>
 
 			<!-- If we are a root problem and got real impacts, show them! -->
 			%if elt.is_problem and len(elt.impacts) != 0:
