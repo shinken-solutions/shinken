@@ -92,15 +92,15 @@ class Glpi_arbiter(BaseModule):
         # Get timeperiods
         all_timeperiods = self.con.monitoring.shinkenTimeperiods(arg)
         print "Get all timeperiods", all_timeperiods
-        attributs = {'timeperiod_name', 'alias', 'sunday', 
+        attributs = ['timeperiod_name', 'alias', 'sunday', 
                      'monday', 'tuesday', 'wednesday',
-                     'thursday', 'friday', 'saturday'}
+                     'thursday', 'friday', 'saturday']
         for timeperiod_info in all_timeperiods:
             print "\n\n"
             print "Timeperiod info in GLPI", timeperiod_info
             h = {}
             for attribut in attributs:
-                if timeperiod_info[attribut]:
+                if attribut in timeperiod_info:
                     h[attribut] = timeperiod_info[attribut]
             
             #print "\nReturning to Arbiter the timeperiods:", h
@@ -131,7 +131,7 @@ class Glpi_arbiter(BaseModule):
 	# Get templates
         all_templates = self.con.monitoring.shinkenTemplates(arg)
         print "Get all templates", all_templates
-        attributs = {'name', 'check_interval', 'retry_interval',
+        attributs = ['name', 'check_interval', 'retry_interval',
                      'max_check_attempts','check_period','notification_interval',
                      'notification_period','notification_options','active_checks_enabled',
                      'process_perf_data','active_checks_enabled','passive_checks_enabled',
@@ -139,7 +139,7 @@ class Glpi_arbiter(BaseModule):
                      'freshness_threshold','notifications_enabled','event_handler_enabled',
                      'event_handler','flap_detection_enabled','failure_prediction_enabled',
                      'retain_status_information','retain_nonstatus_information','is_volatile',
-                     '_httpstink'}
+                     '_httpstink']
         for template_info in all_templates:
             print "\n\n"
             print "Template info in GLPI", template_info
@@ -153,7 +153,7 @@ class Glpi_arbiter(BaseModule):
         # Get services
         all_services = self.con.monitoring.shinkenServices(arg)
         print "Get all services", all_services
-        attributs = {'host_name', 'service_description', 'use',
+        attributs = ['host_name', 'service_description', 'use',
                      'check_command', 'check_interval', 'retry_interval',
                      'max_check_attempts', 'check_period', 'contacts',
                      'notification_interval', 'notification_period', 'notification_options',
@@ -162,7 +162,7 @@ class Glpi_arbiter(BaseModule):
                      'check_freshness', 'freshness_threshold', 'notifications_enabled',
                      'event_handler_enabled', 'event_handler', 'flap_detection_enabled',
                      'failure_prediction_enabled', 'retain_status_information', 'retain_nonstatus_information',
-                     'is_volatile', '_httpstink'}
+                     'is_volatile', '_httpstink']
         for service_info in all_services:
             print "\n\n"
             print "Service info in GLPI", service_info
