@@ -19,7 +19,7 @@ Invalid element name
 
 %top_right_banner_state = datamgr.get_overall_state()
 
-%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(), js=['eltdetail/js/dollar.js', 'eltdetail/js/gesture.js'], css=['eltdetail/css/eltdetail.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
+%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(), js=['eltdetail/js/hide.js', 'eltdetail/js/dollar.js', 'eltdetail/js/gesture.js'], css=['eltdetail/css/eltdetail.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
 
 %# " We will save our element name so gesture functions will be able to call for the good elements."
 <script type="text/javascript">var elt_name = '{{elt.get_full_name()}}';</script>
@@ -174,7 +174,7 @@ Invalid element name
 		    	<table class="span5 table table-striped table-bordered table-condensed">
 			  <tr>
 			    <td class="column1">{{elt_type.capitalize()}} Status</td>
-			    <td><span class="state_{{elt.state.lower()}}">{{elt.state}}</span> (since {{helper.print_duration(elt.last_state_change, just_duration=True, x_elts=2)}}) </td>
+			    <td><span class="alert-{{elt.state.lower()}}">{{elt.state}}</span> (since {{helper.print_duration(elt.last_state_change, just_duration=True, x_elts=2)}}) </td>
 			  </tr>
 			  <tr>
 			    <td class="column1">Status Information</td>
@@ -208,9 +208,9 @@ Invalid element name
 			</table>
 			
 			
-			
-			<h3 class="span12">Additonal Informations:</h3>
-			<table class="span5 table table-striped table-bordered table-condensed">
+			<p class="span12" id="hidden_info_button"><a href="javascript:show_hidden_info()" class="btn">Show more</a>	</p>
+			<h3 class="span12 hidden_infos">Additonal Informations:</h3>
+			<table class="span5 table table-striped table-bordered table-condensed hidden_infos">
 			  <tr>
 			    <td class="column1">Last Notification</td>
 			    <td>{{helper.print_date(elt.last_notification)}} (notification {{elt.current_notification_number}})</td>
