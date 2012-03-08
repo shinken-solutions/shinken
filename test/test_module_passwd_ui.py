@@ -27,6 +27,10 @@ import os
 import sys
 
 from shinken_test import unittest, ShinkenTest
+from nose.exc import SkipTest
+if not sys.version_info > (2, 5) :
+    raise SkipTest("bah, i am 2.4.x")
+
 
 from shinken.log import logger
 from shinken.objects.module import Module
