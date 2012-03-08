@@ -2135,6 +2135,40 @@ test_host_0;/nagios/wiki/doku.php/test_host_0
 """)
 
 
+    def test_thruk_action_notes_url_icon_image_complicated(self):
+        self.print_header()
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        svc.action_url = "/pnp4nagios/index.php/graph?host=$HOSTNAME$&srv=$SERVICEDESC$' class='tips' rel='/pnp4nagios/index.php/popup?host=$HOSTNAME$&srv=$SERVICEDESC$"
+        self.sched.get_and_register_status_brok(svc)
+        now = time.time()
+        self.update_broker()
+        request = """GET services
+Columns: host_name service_description action_url
+Filter: host_name = test_host_0
+Filter: service_description = test_ok_0
+OutputFormat: csv
+ResponseHeader: fixed16
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        self.assert_(response == """200         165
+test_host_0;test_ok_0;/pnp4nagios/index.php/graph?host=$HOSTNAME$&srv=$SERVICEDESC$' class='tips' rel='/pnp4nagios/index.php/popup?host=$HOSTNAME$&srv=$SERVICEDESC$
+""")
+        request = """GET services
+Columns: host_name service_description action_url_expanded
+Filter: host_name = test_host_0
+Filter: service_description = test_ok_0
+OutputFormat: csv
+ResponseHeader: fixed16
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        self.assert_(response == """200         159
+test_host_0;test_ok_0;/pnp4nagios/index.php/graph?host=test_host_0&srv=test_ok_0' class='tips' rel='/pnp4nagios/index.php/popup?host=test_host_0&srv=test_ok_0
+""")
+
+
+
     def test_thruk_custom_variables(self):
         self.print_header()
         now = time.time()
