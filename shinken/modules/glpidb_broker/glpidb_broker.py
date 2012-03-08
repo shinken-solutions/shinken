@@ -178,27 +178,27 @@ class Glpidb_broker(BaseModule):
 
 
     #Host result
-    def manage_host_check_result_brok(self, b):
+    #def manage_host_check_result_brok(self, b):
         #logger.log("GLPI : data in DB %s " % b)
-        b.data['date'] = time.strftime('%Y-%m-%d %H:%M:%S')
-        query = self.db_backend.create_insert_query('glpi_plugin_monitoring_serviceevents', b.data)
-        return [query]
+        #b.data['date'] = time.strftime('%Y-%m-%d %H:%M:%S')
+        #query = self.db_backend.create_insert_query('glpi_plugin_monitoring_serviceevents', b.data)
+        #return [query]
 
 
     #Host result
-    def manage_host_check_resultup_brok(self, b):
+    #def manage_host_check_resultup_brok(self, b):
         #logger.log("GLPI : data in DB %s " % b)
-        new_data = copy.deepcopy(b.data)
-        new_data['last_check'] = time.strftime('%Y-%m-%d %H:%M:%S')
-        new_data['id'] = b.data['plugin_monitoring_services_id']
-        del new_data['plugin_monitoring_services_id']
-        del new_data['perf_data']
-        del new_data['output']
-        del new_data['latency']
-        del new_data['execution_time']
-        where_clause = {'id' : new_data['id']}
-        query = self.db_backend.create_update_query('glpi_plugin_monitoring_services', new_data, where_clause)
-        return [query]
+        #new_data = copy.deepcopy(b.data)
+        #new_data['last_check'] = time.strftime('%Y-%m-%d %H:%M:%S')
+        #new_data['id'] = b.data['plugin_monitoring_services_id']
+        #del new_data['plugin_monitoring_services_id']
+        #del new_data['perf_data']
+        #del new_data['output']
+        #del new_data['latency']
+        #del new_data['execution_time']
+        #where_clause = {'id' : new_data['id']}
+        #query = self.db_backend.create_update_query('glpi_plugin_monitoring_services', new_data, where_clause)
+        #return [query]
 
     #Service result
     def manage_service_check_result_brok(self, b):
