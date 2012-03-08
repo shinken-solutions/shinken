@@ -144,8 +144,8 @@ $(document).ready(function() {
 		    %# " We put a 'pulse' around the elements if it's an important one "
 		    %if pb.business_impact > 2 and pb.state_id in [1, 2, 3]:
 		         <span class="pulse"></span>
-		      %end
-		        <img style="width: 16px; height : 16px;" src="{{helper.get_icon_state(pb)}}" /></div>
+	            %end
+		    <img src="{{helper.get_icon_state(pb)}}" /></div>
 		</td>
 		%if pb.host_name == last_hname:
 		   <td class="hostname"> </td>
