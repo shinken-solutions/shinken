@@ -141,7 +141,7 @@ ul.dock li:hover span { display: block; }
     background: white;
 }
 .tableCriticity .txt_status{
-    width:60px;
+    width: 70px;
     text-align:center;
 }
 .tableCriticity .duration{
