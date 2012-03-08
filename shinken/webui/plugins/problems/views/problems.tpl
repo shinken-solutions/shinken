@@ -160,13 +160,13 @@ $(document).ready(function() {
                   <td class="srvdescription"></td>
                 %end
 		<td class='txt_status state_{{pb.state.lower()}}'> {{pb.state}}</td>
-		<td class='duration' title='{{helper.print_date(pb.last_state_change)}}'>{{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}</td>
+		<td class='duration' rel="tooltip" data-original-title='{{helper.print_date(pb.last_state_change)}}'>{{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}</td>
 		%# "We put a title (so a tip) on the output onlly if need"
 		%if len(pb.output) > 100:
 		   %if app.allow_html_output:
-		      <td class='output' title="{{pb.output}}"> {{!helper.strip_html_output(pb.output[:100])}}</td>
+		      <td class='output' rel="tooltip" data-original-title="{{pb.output}}"> {{!helper.strip_html_output(pb.output[:100])}}</td>
 		   %else:
-		      <td class='output' title="{{pb.output}}"> {{pb.output[:100]}}
+		      <td class='output' rel="tooltip" data-original-title="{{pb.output}}"> {{pb.output[:100]}}
 		   %end
 		%else:
 		   %if app.allow_html_output:
