@@ -19,11 +19,16 @@ Invalid element name
 
 %top_right_banner_state = datamgr.get_overall_state()
 
-%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(), css=['eltdetail/css/eltdetail.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
+%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(), js=['eltdetail/js/dollar.js', 'eltdetail/js/gesture.js'], css=['eltdetail/css/eltdetail.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
 
 %# " We will save our element name so gesture functions will be able to call for the good elements."
 <script type="text/javascript">var elt_name = '{{elt.get_full_name()}}';</script>
 
+
+%#  "This is the background canvas for all gesture detection things " 
+%# " Don't ask me why, but the size must be included in the
+%# canvas line here or we got problem!"
+<canvas id="canvas" width="200" height="200" class="grid_10" style="border: 1px solid black;"></canvas>
 
 
 %#  "Content Container Start"
@@ -110,6 +115,29 @@ Invalid element name
 		<button class="btn">Flap Detection</button>
 	</div>
 
+	<div class="btn-group span5 right">
+	  %if elt_type=='host':
+	     <a class="btn dropdown-toggle span6" data-toggle="dropdown" href="#"><span class="pull-left"><i class="icon-cog"></i> Host Commands</span> <span class="caret pull-right"></span></a>
+	  %else:
+	     <a class="btn dropdown-toggle span6" data-toggle="dropdown" href="#"><span class="pull-left"><i class="icon-cog"></i>Service Commands</span> <span class="caret pull-right"></span></a>
+	  %end:
+	  <ul class="dropdown-menu plus6 no-maxwidth">
+	    <li><a href="#"><i class="icon-pencil"></i> Try to fix it!</a></li>
+	    <li><a href="#"><i class="icon-ok"></i>Acknowledge it!</a></li>
+	    <li><a href="#"><i class="icon-repeat"></i> Recheck now</a></li>
+	    <li><a href="#"><i class="icon-share-alt"></i> Submit Check Result</a></li>
+	    <li><a href="#"><i class="icon-comment"></i> Send Custom Notification</a></li>
+	    <li><a href="#"><i class="icon-fire"></i> Schedule Downtime</a></li>
+	    <li class="divider"></li>
+	    %if elt_type=='host':
+	      <li><a href="#"><i class="icon-edit"></i> Edit Host</a></li>
+	    %else:
+	      <li><a href="#"><i class="icon-edit"></i> Edit Service</a></li>
+	    %end:
+	  </ul>
+	</div>
+
+
 	<!--
 	<div class="switches span12">		
 		<ul>
@@ -138,89 +166,68 @@ Invalid element name
 	    	<!-- Tab Summary Start-->
 		    <div class="tab-pane active" id="1">
 		    	%if elt_type=='host':
-			   	<h3 class="span12">Host Information:</h3>
-			    %else:
-			    <h3 class="span12">Service Information:</h3>
-			    %end:
+			  <h3 class="span12">Host Information:</h3>
+			%else:
+			  <h3 class="span12">Service Information:</h3>
+			%end:
 		    	
-		    	<table class="span6 table table-striped table-bordered table-condensed">
-					<tr>
-						<td class="column1">{{elt_type.capitalize()}} Status</td>
-						<td><span class="state_{{elt.state.lower()}}">{{elt.state}}</span> (since {{helper.print_duration(elt.last_state_change, just_duration=True, x_elts=2)}}) </td>
-					</tr>
-					<tr>
-						<td class="column1">Status Information</td>
-						<td>{{elt.output}}</td>
-					</tr>
-					<tr>
-						<td class="column1">Performance Data</td>
-							%# "If there any perf data?"
-							%if len(elt.perf_data) > 0:
-						<td>{{elt.perf_data}}</td>
-							%else:
-						<td>&nbsp;</td>
-							%end
-					</tr>	
-					<tr>										
-						<td class="column1">Current Attempt</td>
-						<td>{{elt.attempt}}/{{elt.max_check_attempts}} ({{elt.state_type}} state)</td>
-					</tr>
-					<tr>		
-						<td class="column1">Last Check Time</td>
-						<td><span class="quickinfo" data-original-title='Last check was at {{time.asctime(time.localtime(elt.last_chk))}}'>was {{helper.print_duration(elt.last_chk)}}</span></td>
-					</tr>
-					<tr>		
-						<td class="column1">Next Scheduled Active Check</td>
-						<td><span class="quickinfo" data-original-title='Next active check at {{time.asctime(time.localtime(elt.next_chk))}}'>{{helper.print_duration(elt.next_chk)}}</span></td>
-					</tr>
-					<tr>		
-						<td class="column1">Last State Change</td>
-						<td>{{time.asctime(time.localtime(elt.last_state_change))}}</td>
-					</tr>
-				</table>
-				
-
-			    <div class="btn-group span5">
-			    %if elt_type=='host':
-			    	<a class="btn dropdown-toggle span6" data-toggle="dropdown" href="#"><span class="pull-left"><i class="icon-cog"></i> Host Commands</span> <span class="caret pull-right"></span></a>
+		    	<table class="span5 table table-striped table-bordered table-condensed">
+			  <tr>
+			    <td class="column1">{{elt_type.capitalize()}} Status</td>
+			    <td><span class="state_{{elt.state.lower()}}">{{elt.state}}</span> (since {{helper.print_duration(elt.last_state_change, just_duration=True, x_elts=2)}}) </td>
+			  </tr>
+			  <tr>
+			    <td class="column1">Status Information</td>
+			    <td>{{elt.output}}</td>
+			  </tr>
+			  <tr>
+			    <td class="column1">Performance Data</td>
+			    %# "If there any perf data?"
+			    %if len(elt.perf_data) > 0:
+			    <td>{{elt.perf_data}}</td>
 			    %else:
-			    	<a class="btn dropdown-toggle span6" data-toggle="dropdown" href="#"><span class="pull-left"><i class="icon-cog"></i>Service Commands</span> <span class="caret pull-right"></span></a>
-			    %end:
-				    <ul class="dropdown-menu plus6 no-maxwidth">
-				    	<li><a href="#"><i class="icon-pencil"></i> Try to fix it!</a></li>
-				    	<li><a href="#"><i class="icon-ok"></i>Acknowledge it!</a></li>
-				    	<li><a href="#"><i class="icon-repeat"></i> Recheck now</a></li>
-				    	<li><a href="#"><i class="icon-share-alt"></i> Submit Check Result</a></li>
-				    	<li><a href="#"><i class="icon-comment"></i> Send Custom Notification</a></li>
-				    	<li><a href="#"><i class="icon-fire"></i> Schedule Downtime</a></li>
-				    	<li class="divider"></li>
-					    %if elt_type=='host':
-					    	<li><a href="#"><i class="icon-edit"></i> Edit Host</a></li>
-					    %else:
-					    	<li><a href="#"><i class="icon-edit"></i> Edit Service</a></li>
-					    %end:
-				    </ul>
-			    </div>
-
-				<h3 class="span12">Additonal Informations:</h3>
-				<table class="span6 table table-striped table-bordered table-condensed">
-					<tr>
-						<td class="column1">Last Notification</td>
-						<td>{{helper.print_date(elt.last_notification)}} (notification {{elt.current_notification_number}})</td>
-					</tr>
-					<tr>			
-						<td class="column1">Check Latency / Duration</td>
-						<td>{{'%.2f' % elt.latency}} / {{'%.2f' % elt.execution_time}} seconds</td>
-					</tr>
-					<tr>
-						<td class="column1">Is This Host Flapping?</td>
-						<td>{{helper.yes_no(elt.is_flapping)}} ({{helper.print_float(elt.percent_state_change)}}% state change)</td>
-					</tr>
-					<tr>
-						<td class="column1">In Scheduled Downtime?</td>
-						<td>{{helper.yes_no(elt.in_scheduled_downtime)}}</td>
-					</tr>
-				</table>
+			    <td>&nbsp;</td>
+			    %end
+			  </tr>	
+			  <tr>										
+			    <td class="column1">Current Attempt</td>
+			    <td>{{elt.attempt}}/{{elt.max_check_attempts}} ({{elt.state_type}} state)</td>
+			  </tr>
+			  <tr>		
+			    <td class="column1">Last Check Time</td>
+			    <td><span class="quickinfo" data-original-title='Last check was at {{time.asctime(time.localtime(elt.last_chk))}}'>was {{helper.print_duration(elt.last_chk)}}</span></td>
+			  </tr>
+			  <tr>		
+			    <td class="column1">Next Scheduled Active Check</td>
+			    <td><span class="quickinfo" data-original-title='Next active check at {{time.asctime(time.localtime(elt.next_chk))}}'>{{helper.print_duration(elt.next_chk)}}</span></td>
+			  </tr>
+			  <tr>		
+			    <td class="column1">Last State Change</td>
+			    <td>{{time.asctime(time.localtime(elt.last_state_change))}}</td>
+			  </tr>
+			</table>
+			
+			
+			
+			<h3 class="span12">Additonal Informations:</h3>
+			<table class="span5 table table-striped table-bordered table-condensed">
+			  <tr>
+			    <td class="column1">Last Notification</td>
+			    <td>{{helper.print_date(elt.last_notification)}} (notification {{elt.current_notification_number}})</td>
+			  </tr>
+			  <tr>			
+			    <td class="column1">Check Latency / Duration</td>
+			    <td>{{'%.2f' % elt.latency}} / {{'%.2f' % elt.execution_time}} seconds</td>
+			  </tr>
+			  <tr>
+			    <td class="column1">Is This Host Flapping?</td>
+			    <td>{{helper.yes_no(elt.is_flapping)}} ({{helper.print_float(elt.percent_state_change)}}% state change)</td>
+			  </tr>
+			  <tr>
+			    <td class="column1">In Scheduled Downtime?</td>
+			    <td>{{helper.yes_no(elt.in_scheduled_downtime)}}</td>
+			  </tr>
+			</table>
 		    </div>
 		    <!-- Tab Summary End-->
 
