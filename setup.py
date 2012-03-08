@@ -225,9 +225,13 @@ class build_config(Command):
             outname = os.path.join(self.build_dir, name)
             log.info('Copying data files in : %s out : %s' % (inname,outname))
             append_file_with(inname, outname,"")
-        #Creating some needed directories
+        # Creating some needed directories
         discovery_dir = os.path.join(self.build_dir + "/objects/discovery")
-        for dirname in [self.var_path,self.run_path,self.log_path,discovery_dir]:
+        if not os.path.exists(discovery_dir):
+            os.makedirs(discovery_dir)
+        for dirname in [self.var_path, self.run_path, self.log_path, discovery_dir]:
+            if self.build_base:
+                dirname = os.path.join(self.build_base, dirname)
             if not os.path.exists(dirname):
                 os.makedirs(dirname)
 
@@ -283,12 +287,14 @@ local_log=%s/arbiterd.log
         for name in additionnal_config_files:
             inname = os.path.join('etc', name)
             outname = os.path.join(self.build_dir, name)
+
+            update_file_with_string(inname, outname,
+                                    "/usr/local/shinken/var", self.var_path)
             # And update the default log path too
             log.info('updating log path in %s', outname)
             update_file_with_string(inname, outname,
                                     "nagios.log",
                                     "%s/nagios.log" % self.log_path)
-
 
 
 class install_config(Command):
@@ -438,7 +444,7 @@ if 'win' in sys.platform:
                      'run':      "c:\\shinken\\var",
                      'libexec':  "c:\\shinken\\libexec",
                      }
-elif 'linux' in sys.platform:
+elif 'linux' in sys.platform or 'sunos5' in sys.platform:
     default_paths = {'var': "/var/lib/shinken/",
                      'etc': "/etc/shinken",
                      'run': "/var/run/shinken",
@@ -575,7 +581,7 @@ if __name__ == "__main__":
         },
       
         name = "Shinken",
-        version = "0.8",
+        version = "1.0",
         packages = find_packages(),
         package_data = {'' : package_data},
         description = "Shinken is a monitoring tool compatible with Nagios configuration and plugins",

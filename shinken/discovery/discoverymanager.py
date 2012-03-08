@@ -48,7 +48,7 @@ class DiscoveryManager:
         self.log.load_obj(self)
         self.config_files = [path]
         self.conf = Config()
-        self.conf.read_config(self.config_files)
+
         buf = self.conf.read_config(self.config_files)
         
         # Add macros on the end of the buf so they will
@@ -106,11 +106,11 @@ class DiscoveryManager:
                     break
                 # Now try to connect
                 try:
-                    server = mod.server
+                    uri = mod.uri
                     database = mod.database
-                    self.dbconnection = Connection(server)
+                    self.dbconnection = Connection(uri)
                     self.db = getattr(self.dbconnection, database)
-                    print "Connection to Mongodb:%s:%s is OK" % (server, database)
+                    print "Connection to Mongodb:%s:%s is OK" % (uri, database)
                 except Exception, exp:
                     logger.log('Error in database init : %s' % exp)
 

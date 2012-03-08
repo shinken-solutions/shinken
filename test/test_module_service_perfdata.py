@@ -31,7 +31,7 @@ from shinken_test import unittest, ShinkenTest
 from shinken.modules.service_perfdata_broker import get_instance
 
 
-class TestConfig(ShinkenTest):
+class TestModSRVPErfdata(ShinkenTest):
     #setUp is in shinken_test
 
     #Change ME :)
@@ -106,6 +106,36 @@ class TestConfig(ShinkenTest):
         
         comparison = u'%d\t%s\t%s\t%s\t%s\t%s\n' % (t, "test_host_0", "test_ok_0", 'BAD', 'value1=0 value2=0'+u'\xf6', 'CRITICAL')
 
+        self.assert_(buf == comparison)
+        fd.close()
+        os.unlink(mod.path)
+
+
+        
+        #Now change with a new template, a CENTREON ONE
+        mod.template = '$LASTSERVICECHECK$\t$HOSTNAME$\t$SERVICEDESC$\t$LASTSERVICESTATE$\t$SERVICESTATE$\t$SERVICEPERFDATA$\n'
+        sl2 = get_instance(mod)
+        sl2.init()
+        print sl2.__dict__
+        t = int(time.time())
+        print "T", t
+        self.scheduler_loop(1, [[svc, 2, 'BAD | value1=0 value2=0'u'\xf6']])
+        #manage all service check result broks
+        for b in self.sched.broks.values():
+            if b.type == 'service_check_result':
+                sl2.manage_brok(b)
+        sl2.file.close()
+        #Ok, go for writing
+        sl2.hook_tick(None)
+
+        fd = open(mod.path)
+        buf = fd.readline().decode('utf8')
+        print fd.read()
+
+        
+        comparison = u'%d\t%s\t%s\t%s\t%s\t%s\n' % (t, "test_host_0", "test_ok_0", 'CRITICAL', 'CRITICAL', 'value1=0 value2=0'+u'\xf6')
+        #print "BUF", buf
+        #print "COM", comparison
         self.assert_(buf == comparison)
         fd.close()
         os.unlink(mod.path)

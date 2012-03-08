@@ -1,210 +1,108 @@
-#!/usr/bin/python
-#Copyright (C) 2009 Gabes Jean, naparuba@gmail.com
+# -*- coding: utf-8 -*-
 #
-#This file is part of Shinken.
+# Copyright (C) 2009-2012:
+#     Gabes Jean, naparuba@gmail.com
+#     Gerhard Lausser, Gerhard.Lausser@consol.de
+#     Gregory Starck, g.starck@gmail.com
+#     Hartmut Goebel, h.goebel@goebel-consult.de
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# This file is part of Shinken.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+
 
 import os
 import re
 import time
-import datetime
-import copy 
-
-try:
-    import sqlite3
-except ImportError:
-    try:
-        import pysqlite2.dbapi2 as sqlite3
-    except ImportError:
-        import sqlite as sqlite3
-
-
-from hooker import Hooker
-from mapping import out_map as LSout_map
+import copy
+from mapping import table_class_map, find_filter_converter, list_livestatus_attributes, Problem
 from livestatus_response import LiveStatusResponse
 from livestatus_stack import LiveStatusStack
 from livestatus_constraints import LiveStatusConstraints
-from livestatus_db import LiveStatusDbError
-from log_line import Logline
 
 
-class Problem:
-    def __init__(self, source, impacts):
-        self.source = source
-        self.impacts = impacts
+class LiveStatusQueryError(Exception):
+    messages = {
+        200: 'OK',
+        404: 'Invalid GET request, no such table \'%s\'',
+        450: 'Invalid GET request, no such column \'%s\'',
+        452: 'Completely invalid GET request \'%s\'',
+    }
+    pass
 
-
-
-class LiveStatusQuery(Hooker):
+class LiveStatusQuery(object):
 
     my_type = 'query'
 
-    def __init__(self, configs, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands, schedulers, pollers, reactionners, brokers, db, use_aggressive_sql, pnp_path, return_queue, counters):
+    def __init__(self, datamgr, query_cache, db, pnp_path, return_queue, counters):
         # Runtime data form the global LiveStatus object
-        self.configs = configs
-        self.hosts = hosts
-        self.services = services
-        self.contacts = contacts
-        self.hostgroups = hostgroups
-        self.servicegroups = servicegroups
-        self.contactgroups = contactgroups
-        self.timeperiods = timeperiods
-        self.commands = commands
-        self.schedulers = schedulers
-        self.pollers = pollers
-        self.reactionners = reactionners
-        self.brokers = brokers
+        self.datamgr = datamgr
+        self.query_cache = query_cache
         self.db = db
-        self.use_aggressive_sql = use_aggressive_sql
         self.pnp_path = pnp_path
         self.return_queue = return_queue
         self.counters = counters
 
         # Private attributes for this specific request
-        self.response = LiveStatusResponse(responseheader = 'off', outputformat = 'csv', keepalive = 'off', columnheaders = 'undef', separators = LiveStatusResponse.separators)
+        self.response = LiveStatusResponse()
+        self.raw_data = ''
         self.table = None
         self.columns = []
         self.filtercolumns = []
         self.prefiltercolumns = []
+        self.outputcolumns = []
         self.stats_group_by = []
         self.stats_columns = []
         self.aliases = []
         self.limit = None
         self.extcmd = False
-        self.out_map = self.copy_out_map_hooks()
 
         # Initialize the stacks which are needed for the Filter: and Stats:
         # filter- and count-operations
         self.filter_stack = LiveStatusStack()
-        # This stack is used to create a full-blown select-statement
-        self.sql_filter_stack = LiveStatusStack()
-        self.sql_filter_stack.type = 'sql'
-        # This stack is used to create a minimal select-statement which
-        # selects only by time >= and time <=
-        self.sql_time_filter_stack = LiveStatusStack()
-        self.sql_time_filter_stack.type = 'sql'
         self.stats_filter_stack = LiveStatusStack()
         self.stats_postprocess_stack = LiveStatusStack()
-        self.stats_request = False
+        self.stats_query = False
 
         # When was this query launched?
         self.tic = time.time()
         # Clients can also send their local time with the request
         self.client_localtime = self.tic
 
-
-    def find_converter(self, attribute):
-        """Return a function that converts textual numbers
-        in the request to the correct data type"""
-        out_map = LSout_map[self.out_map_name]
-        if attribute in out_map and 'type' in out_map[attribute]:
-            if out_map[attribute]['type'] == 'int':
-                return int
-            elif out_map[attribute]['type'] == 'float':
-                return float
-        return None
-
-
-    def set_default_out_map_name(self):
-        """Translate the table name to the corresponding out_map key."""
-        try:
-            self.out_map_name = {
-                'hosts' : 'Host',
-                'services' : 'Service',
-                'hostgroups' : 'Hostgroup',
-                'servicegroups' : 'Servicegroup',
-                'contacts' : 'Contact',
-                'contactgroups' : 'Contactgroup',
-                'comments' : 'Comment',
-                'downtimes' : 'Downtime',
-                'commands' : 'Command',
-                'timeperiods' : 'Timeperiod',
-                'hostsbygroup' : 'Hostsbygroup',
-                'servicesbygroup' : 'Servicesbygroup',
-                'servicesbyhostgroup' : 'Servicesbyhostgroup',
-                'status' : 'Config',
-                'log' : 'Logline',
-                'schedulers' : 'SchedulerLink',
-                'pollers' : 'PollerLink',
-                'reactionners' : 'ReactionnerLink',
-                'brokers' : 'BrokerLink',
-                'problems' : 'Problem',
-                'columns' : 'Config', # just a dummy
-            }[self.table]
-        except:
-            self.out_map_name = 'hosts'
-
-
-    def copy_out_map_hooks(self):
-        """Update the hooks for some out_map entries.
-        
-        Livestatus columns which have a fulldepythonize postprocessor
-        need an updated argument list. The third argument needs to
-        be the request object. (When the out_map is first supplied
-        with hooks, the third argument is the Livestatus object.)
-        
-        """
-        new_map = {}
-        for objtype in LSout_map:
-            new_map[objtype] = {}
-            for attribute in LSout_map[objtype]:
-                new_map[objtype][attribute] = {}
-                entry =  LSout_map[objtype][attribute]
-                if 'hooktype' in entry:
-                    if 'prop' not in entry or entry['prop'] is None:
-                        prop = attribute
-                    else:
-                        prop = entry['prop']
-                    if 'default' in entry:
-                        default = entry['default']
-                    else:
-                        if entry['type'] == 'int' or entry['type'] == 'float':
-                            default = 0
-                        else:
-                            default = ''
-                    func = entry['fulldepythonize']
-                    new_map[objtype][attribute]['hook'] = self.make_hook('get_prop_full_depythonize', prop, default, func, None)
-                else:
-                    new_map[objtype][attribute]['hook'] = entry['hook']
-        return new_map
-
+        # This is mostly used in the Response.format... which needs to know
+        # the class behind a queries table
+        self.table_class_map = table_class_map
 
     def __str__(self):
         output = "LiveStatusRequest:\n"
-        for attr in ["table", "columns", "filtercolumns", "prefiltercolumns", "aliases", "stats_group_by", "stats_request"]:
+        for attr in ["table", "columns", "filtercolumns", "prefiltercolumns", "aliases", "stats_group_by", "stats_query"]:
             output += "request %s: %s\n" % (attr, getattr(self, attr))
         return output
-  
 
     def split_command(self, line, splits=1):
         """Create a list from the words of a line"""
         return line.split(' ', splits)
 
-
     def split_option(self, line, splits=1):
         """Like split_commands, but converts numbers to int data type"""
-        #x = [int(i) if i.isdigit() else i for i in [token.strip() for token in re.split(r"[\s]+", line, splits)]]
         x = map (lambda i: (i.isdigit() and int(i)) or i, [token.strip() for token in re.split(r"[\s]+", line, splits)])
         return x
-
 
     def split_option_with_columns(self, line):
         """Split a line in a command and a list of words"""
         cmd, columns = self.split_option(line)
         return cmd, [self.strip_table_from_column(c) for c in re.compile(r'\s+').split(columns)]
-
 
     def strip_table_from_column(self, column):
         """Cut off the table name, because it is possible 
@@ -223,6 +121,7 @@ class LiveStatusQuery(Hooker):
         sets the attributes of the request object
         
         """
+        self.raw_data = data
         for line in data.splitlines():
             line = line.strip()
             # Tools like NagVis send KEYWORK:option, and we prefer to have
@@ -231,30 +130,31 @@ class LiveStatusQuery(Hooker):
                 line = line.replace(':', ': ')
             keyword = line.split(' ')[0].rstrip(':')
             if keyword == 'GET': # Get the name of the base table
-                cmd, self.table = self.split_command(line)
-                self.set_default_out_map_name()
+                _, self.table = self.split_command(line)
+                if self.table not in table_class_map.keys():
+                    raise LiveStatusQueryError(404, self.table)
             elif keyword == 'Columns': # Get the names of the desired columns
-                cmd, self.columns = self.split_option_with_columns(line)
+                _, self.columns = self.split_option_with_columns(line)
                 self.response.columnheaders = 'off'
             elif keyword == 'ResponseHeader':
-                cmd, responseheader = self.split_option(line)
+                _, responseheader = self.split_option(line)
                 self.response.responseheader = responseheader
             elif keyword == 'OutputFormat':
-                cmd, outputformat = self.split_option(line)
+                _, outputformat = self.split_option(line)
                 self.response.outputformat = outputformat
             elif keyword == 'KeepAlive':
-                cmd, keepalive = self.split_option(line)
+                _, keepalive = self.split_option(line)
                 self.response.keepalive = keepalive
             elif keyword == 'ColumnHeaders':
-                cmd, columnheaders = self.split_option(line)
+                _, columnheaders = self.split_option(line)
                 self.response.columnheaders = columnheaders
             elif keyword == 'Limit':
-                cmd, self.limit = self.split_option(line)
+                _, self.limit = self.split_option(line)
             elif keyword == 'Filter':
                 try:
-                    cmd, attribute, operator, reference = self.split_option(line, 3)
+                    _, attribute, operator, reference = self.split_option(line, 3)
                 except:
-                    cmd, attribute, operator, reference = self.split_option(line, 2) + ['']
+                    _, attribute, operator, reference = self.split_option(line, 2) + ['']
                 if operator in ['=', '>', '>=', '<', '<=', '=~', '~', '~~', '!=', '!>', '!>=', '!<', '!<=']:
                     # Cut off the table name
                     attribute = self.strip_table_from_column(attribute)
@@ -265,52 +165,52 @@ class LiveStatusQuery(Hooker):
                     # the desired operation
                     self.filtercolumns.append(attribute)
                     self.prefiltercolumns.append(attribute)
-                    self.filter_stack.put(self.make_filter(operator, attribute, reference))
+                    self.filter_stack.put_stack(self.make_filter(operator, attribute, reference))
                     if self.table == 'log':
-                        if attribute == 'time':
-                            self.sql_time_filter_stack.put(self.make_sql_filter(operator, attribute, reference))
-                        self.sql_filter_stack.put(self.make_sql_filter(operator, attribute, reference))
+                        self.db.add_filter(operator, attribute, reference)
                 else:
                     print "illegal operation", operator
                     pass # illegal operation
             elif keyword == 'And':
-                cmd, andnum = self.split_option(line)
+                _, andnum = self.split_option(line)
                 # Take the last andnum functions from the stack
                 # Construct a new function which makes a logical and
                 # Put the function back onto the stack
                 self.filter_stack.and_elements(andnum)
                 if self.table == 'log':
-                    #self.sql_time_filter_stack.and_elements(andnum)
-                    self.sql_filter_stack.and_elements(andnum)
+                    self.db.add_filter_and(andnum)
             elif keyword == 'Or':
-                cmd, ornum = self.split_option(line)
+                _, ornum = self.split_option(line)
                 # Take the last ornum functions from the stack
                 # Construct a new function which makes a logical or
                 # Put the function back onto the stack
                 self.filter_stack.or_elements(ornum)
                 if self.table == 'log':
-                    #self.sql_time_filter_stack.or_elements(ornum)
-                    self.sql_filter_stack.or_elements(ornum)
+                    self.db.add_filter_or(ornum)
+            elif keyword == 'Negate':
+                self.filter_stack.not_elements()
+                if self.table == 'log':
+                    self.db.add_filter_not()
             elif keyword == 'StatsGroupBy':
-                cmd, stats_group_by = self.split_option_with_columns(line)
+                _, stats_group_by = self.split_option_with_columns(line)
                 self.filtercolumns.extend(stats_group_by)
                 self.stats_group_by.extend(stats_group_by)
                 # Deprecated. If your query contains at least one Stats:-header
                 # then Columns: has the meaning of the old StatsGroupBy: header
             elif keyword == 'Stats':
-                self.stats_request = True
+                self.stats_query = True
                 try:
-                    cmd, attribute, operator, reference = self.split_option(line, 3)
-                    if attribute in ['sum', 'min', 'max', 'avg', 'std'] and reference.find('as ', 3) != -1:
+                    _, attribute, operator, reference = self.split_option(line, 3)
+                    if attribute in ['sum', 'min', 'max', 'avg', 'std'] and reference.startswith('as '):
                         attribute, operator = operator, attribute
-                        asas, alias = reference.split(' ')
+                        _, alias = reference.split(' ')
                         self.aliases.append(alias)
                     elif attribute in ['sum', 'min', 'max', 'avg', 'std'] and reference == '=':
                         # Workaround for thruk-cmds like: Stats: sum latency =
                         attribute, operator = operator, attribute
                         reference = ''
                 except:
-                    cmd, attribute, operator = self.split_option(line, 3)
+                    _, attribute, operator = self.split_option(line, 3)
                     if attribute in ['sum', 'min', 'max', 'avg', 'std']:
                         attribute, operator = operator, attribute
                     reference = ''
@@ -320,28 +220,28 @@ class LiveStatusQuery(Hooker):
                         operator = { '!>' : '<=', '!>=' : '<', '!<' : '>=', '!<=' : '>' }[operator]
                     self.filtercolumns.append(attribute)
                     self.stats_columns.append(attribute)
-                    self.stats_filter_stack.put(self.make_filter(operator, attribute, reference))
-                    self.stats_postprocess_stack.put(self.make_filter('count', attribute, None))
+                    self.stats_filter_stack.put_stack(self.make_filter(operator, attribute, reference))
+                    self.stats_postprocess_stack.put_stack(self.make_filter('count', attribute, None))
                 elif operator in ['sum', 'min', 'max', 'avg', 'std']:
                     self.stats_columns.append(attribute)
-                    self.stats_filter_stack.put(self.make_filter('dummy', attribute, None))
-                    self.stats_postprocess_stack.put(self.make_filter(operator, attribute, None))
+                    self.stats_filter_stack.put_stack(self.make_filter('dummy', attribute, None))
+                    self.stats_postprocess_stack.put_stack(self.make_filter(operator, attribute, None))
                 else:
                     print "illegal operation", operator
                     pass # illegal operation
             elif keyword == 'StatsAnd':
-                cmd, andnum = self.split_option(line)
+                _, andnum = self.split_option(line)
                 self.stats_filter_stack.and_elements(andnum)
             elif keyword == 'StatsOr':
-                cmd, ornum = self.split_option(line)
+                _, ornum = self.split_option(line)
                 self.stats_filter_stack.or_elements(ornum)
             elif keyword == 'Separators':
-                cmd, sep1, sep2, sep3, sep4 = line.split(' ', 5)
+                _, sep1, sep2, sep3, sep4 = line.split(' ', 5)
                 self.response.separators = map(lambda x: chr(int(x)), [sep1, sep2, sep3, sep4])
             elif keyword == 'Localtime':
-                cmd, self.client_localtime = self.split_option(line)
+                _, self.client_localtime = self.split_option(line)
             elif keyword == 'COMMAND':
-                cmd, self.extcmd = line.split(' ', 1)
+                _, self.extcmd = line.split(' ', 1)
             else:
                 # This line is not valid or not implemented
                 print "Received a line of input which i can't handle : '%s'" % line
@@ -351,16 +251,27 @@ class LiveStatusQuery(Hooker):
     def launch_query(self):
         """ Prepare the request object's filter stacks """
         
+        # The Response object needs to access the Query
+        self.response.load(self)
+
         # A minimal integrity check
         if not self.table:
             return []
+
+        # Ask the cache if this request was already answered under the same
+        # circumstances.
+        cacheable, cache_hit, cached_response = self.query_cache.get_cached_query(self.raw_data)
+        if cache_hit:
+            self.columns = cached_response['columns']
+            self.response.columnheaders = cached_response['columnheaders']
+            return cached_response['result']
 
         # Make columns unique
         self.filtercolumns = list(set(self.filtercolumns))
         self.prefiltercolumns = list(set(self.prefiltercolumns))
         self.stats_columns = list(set(self.stats_columns))
 
-        if self.stats_request:
+        if self.stats_query:
             if len(self.columns) > 0:
                 # StatsGroupBy is deprecated. Columns: can be used instead
                 self.stats_group_by = self.columns
@@ -369,17 +280,26 @@ class LiveStatusQuery(Hooker):
             #if len(self.stats_columns) > 0 and len(self.columns) == 0:
             if len(self.stats_columns) > 0:
                 self.columns = self.stats_columns + self.columns
+        else:
+            if len(self.columns) == 0:
+                self.outputcolumns = list_livestatus_attributes(self.table)
+            else:
+                self.outputcolumns = self.columns
 
         # Make one big filter where the single filters are anded
         self.filter_stack.and_elements(self.filter_stack.qsize())
+
+        # Get the function which implements the Filter: statements
+        filter_func     = self.filter_stack.get_stack()
+        without_filter  = len(self.filtercolumns) == 0
+        cs = LiveStatusConstraints(filter_func, without_filter)
+
         try:
             # Remember the number of stats filters. We need these numbers as columns later.
             # But we need to ask now, because get_live_data() will empty the stack
             num_stats_filters = self.stats_filter_stack.qsize()
             if self.table == 'log':
-                self.sql_time_filter_stack.and_elements(self.sql_time_filter_stack.qsize())
-                self.sql_filter_stack.and_elements(self.sql_filter_stack.qsize())
-                result = self.get_live_data_log()
+                result = self.get_live_data_log(cs)
             else:
                 # If the pnpgraph_present column is involved, then check
                 # with each request if the pnp perfdata path exists
@@ -389,9 +309,9 @@ class LiveStatusQuery(Hooker):
                     self.pnp_path_readable = False
                 # Apply the filters on the broker's host/service/etc elements
           
-                result = self.get_live_data()
+                result = self.get_live_data(cs)
                 
-            if self.stats_request:
+            if self.stats_query:
                 self.columns = range(num_stats_filters)
                 if self.stats_group_by:
                     self.columns = tuple(list(self.stats_group_by) + list(self.columns))
@@ -401,6 +321,14 @@ class LiveStatusQuery(Hooker):
                 else:
                     self.response.columnheaders = 'on'
 
+            if self.stats_query:
+                result = self.statsify_result(result)
+                # statsify_result returns a dict with column numers as keys
+            elif self.table == 'columns':
+                # With stats_request set to True, format_output expects result
+                # to be a list of dicts instead a list of objects
+                self.stats_query = True
+
         except Exception, e:
             import traceback
             print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
@@ -408,25 +336,51 @@ class LiveStatusQuery(Hooker):
             traceback.print_exc(32) 
             print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
             result = []
-        
+
+        if cacheable and not cache_hit:
+            # We cannot cache generators, so we must first read them into a list
+            result = [r for r in result]
+            # Especially for stats requests also the columns and headers
+            # are modified, so we need to save them too.
+            self.query_cache.cache_query(self.raw_data, {
+                'result': result,
+                'columns': self.columns,
+                'columnheaders': self.response.columnheaders,
+            })
+            
         return result
 
     
     def get_hosts_or_services_livedata(self, cs):
+        items = getattr(self.datamgr.rg, self.table)
         if cs.without_filter and not self.limit:
             # Simply format the output
-            return (self.create_output(cs.output_map, x) for x in getattr(self, self.table).itervalues())
+            return [x for x in items]
         elif cs.without_filter and self.limit:
             # Simply format the output of a subset of the objects
-            return (self.create_output(cs.output_map, x) for x in getattr(self, self.table).values()[:self.limit])
+            def genlimit(values, maxelements):
+                loopcnt = 1
+                for val in values:
+                    if loopcnt > maxelements:
+                        return
+                    else:
+                        yield val
+                        loopcnt += 1
+            return (
+                y for y in (
+                    genlimit((x for x in items.__itersorted__()), self.limit)
+                )
+            )
         elif not cs.without_filter and not self.limit:
             # Filter the objects and format the output. At least hosts
             # and services are already sorted by name.
             return (
-                self.create_output(cs.output_map, y) for y in (
-                    x for x in getattr(self, self.table).itervalues() 
-                    if cs.filter_func(self.create_output(cs.filter_map, x)))
-            )
+                x for x in getattr(self.datamgr.rg, self.table).__itersorted__()
+                    if cs.filter_func(x)
+            ) 
+            #  some day.....
+            #  pool = multiprocessing.Pool(processes=4)
+            #  return pool.map(cs.filter_func, getattr(self.datamgr.rg, self.table).__itersorted__())
         elif not cs.without_filter and self.limit:
             # This is a generator which returns up to <limit> elements
             # which passed the filter. If the limit has been reached
@@ -437,13 +391,13 @@ class LiveStatusQuery(Hooker):
                     if loopcnt > maxelements:
                         return
                     else:
-                        if filterfunc(self.create_output(cs.filter_map, val)):
+                        if filterfunc(val):
                             yield val
                             loopcnt += 1
 
             return (
-                self.create_output(cs.output_map, y) for y in (
-                    genlimit((x for x in getattr(self, self.table).itervalues()), self.limit, cs.filter_func)
+                y for y in (
+                    genlimit((x for x in getattr(self.datamgr.rg, self.table).__itersorted__()), self.limit, cs.filter_func)
                 )
             )
     
@@ -456,91 +410,105 @@ class LiveStatusQuery(Hooker):
 
 
     def get_simple_livedata(self, cs):
-        objects = getattr(self, self.table)
-        return [ self.create_output(cs.output_map, obj) for obj in objects.values() ]
+        return [obj for obj in getattr(self.datamgr.rg, self.table)]
 
 
     def get_filtered_livedata(self, cs):
-        objects = getattr(self, self.table).values()
+        items = getattr(self.datamgr.rg, self.table)
         if cs.without_filter:
-            return [ y for y in [ self.create_output(cs.output_map, x) for x in objects ] if cs.filter_func(y) ]
-        res = [ x for x in objects if cs.filter_func(self.create_output(cs.filter_map, x)) ]
-        return [ self.create_output(cs.output_map, x) for x in res ]
+            return [x for x in items]
+        else:
+            return [x for x in items if cs.filter_func(x)]
 
 
     def get_list_livedata(self, cs):
         t = self.table
         if cs.without_filter:
-            res = [ self.create_output(cs.output_map, y) for y in 
+            res = [y for y in 
                         reduce(list.__add__
-                            , [ getattr(x, t) for x in self.services.values() + self.hosts.values()
+                            #, [ getattr(x, t) for x in self.datamgr.rg.services + self.datamgr.rg.hosts
+                                   # if len(getattr(x, t)) > 0 ]
+                            , [ getattr(x, t) for x in self.datamgr.rg.services 
+                                    if len(getattr(x, t)) > 0 ] +
+                             [ getattr(x, t) for x in self.datamgr.rg.hosts
                                     if len(getattr(x, t)) > 0 ]
                             , [])
             ]
         else:
-            res = [ c for c in reduce(list.__add__
-                        , [ getattr(x, t) for x in self.services.values() + self.hosts.values() 
+            res = [c for c in reduce(list.__add__
+                        , [ getattr(x, t) for x in self.datamgr.rg.services
+                                if len(getattr(x, t)) > 0] +
+                         [ getattr(x, t) for x in self.datamgr.rg.hosts
                                 if len(getattr(x, t)) > 0]
                         , []
                         )
-                    if cs.filter_func(self.create_output(cs.filter_map, c)) ]
-            res = [ self.create_output(cs.output_map, x) for x in res ]
+                    if cs.filter_func(c) ]
         return res
     
     
     def get_group_livedata(self, cs, objs, an, group_key, member_key):
-        """ return a list of elements from a "group" of 'objs'. group can be a hostgroup or a servicegroup.
-objs: the objects to get elements from.
-an: the attribute name to set on result.
-group_key: the key to be used to sort the group members.
-member_key: the key to be used to sort each resulting element of a group member. """
-        return [ self.create_output(cs.output_map, x) for x in (
+        """
+        return a list of elements from a "group" of 'objs'. group can be a hostgroup or a servicegroup.
+        objs: the objects to get elements from.
+        an: the attribute name to set on result.
+        group_key: the key to be used to sort the group members.
+        member_key: the key to be used to sort each resulting element of a group member.
+        """
+        def factory(obj, attribute, groupobj):
+            setattr(obj, attribute, groupobj)
+
+        return [x for x in (
                     svc for svc in (
-                        setattr(og[0], an, og[1]) or og[0] for og in (
-                            ( copy.copy(item0), inner_list0[1]) for inner_list0 in (
-                                (sorted(sg1.members, key = member_key), sg1) for sg1 in
-                                    sorted([sg0 for sg0 in objs if sg0.members], key = group_key)
-                                ) for item0 in inner_list0[0]
+                        factory(og[0], an, og[1]) or og[0] for og in ( #
+                            ( copy.copy(item0), inner_list0[1]) for inner_list0 in (  # (copy(host), hostgroup)
+                                (sorted(sg1.members, key = member_key), sg1) for sg1 in  #2 hosts (sort name) von hg, hg
+                                    sorted([sg0 for sg0 in objs if sg0.members], key = group_key) #1 hgs mit members!=[]
+                                ) for item0 in inner_list0[0] #3 item0 ist host
                             )
-                        ) if (cs.without_filter or cs.filter_func(self.create_output(cs.filter_map, svc))))
+                        ) if (cs.without_filter or cs.filter_func(svc)))
         ]
 
 
     def get_hostbygroups_livedata(self, cs):
         member_key = lambda k: k.host_name
         group_key = lambda k: k.hostgroup_name
-        return self.get_group_livedata(cs, self.hostgroups.values(), 'hostgroup', group_key, member_key)        
+        return self.get_group_livedata(cs, self.datamgr.rg.hostgroups, 'hostgroup', group_key, member_key)        
 
 
     def get_servicebygroups_livedata(self, cs):
         member_key = lambda k: k.get_name()
         group_key = lambda k: k.servicegroup_name
-        return self.get_group_livedata(cs, self.servicegroups.values(), 'servicegroup', group_key, member_key)
+        return self.get_group_livedata(cs, self.datamgr.rg.servicegroups, 'servicegroup', group_key, member_key)
     
 
     def get_problem_livedata(self, cs):
         # We will crate a problems list first with all problems and source in it
         # TODO : create with filter
         problems = []
-        for h in self.hosts.values():
+        for h in self.datamgr.rg.hosts.__itersorted__():
             if h.is_problem:
                 pb = Problem(h, h.impacts)
                 problems.append(pb)
-        for s in self.services.values():
+        for s in self.datamgr.rg.services.__itersorted__():
             if s.is_problem:
                 pb = Problem(s, s.impacts)
                 problems.append(pb)
         # Then return
-        return [ self.create_output(cs.output_map, pb) for pb in problems ]
+        return problems
 
 
     def get_status_livedata(self, cs):
-        cs.out_map = self.out_map['Config']
-        return [ self.create_output(cs.output_map, c) for c in self.configs.values() ]
+        return [c for c in self.datamgr.rg.configs.values()]
 
 
     def get_columns_livedata(self, cs):
         result = []
+        # The first 5 lines must be hard-coded
+        # description;name;table;type
+        # A description of the column;description;columns;string
+        # The name of the column within the table;name;columns;string
+        # The name of the table;table;columns;string
+        # The data type of the column (int, float, string, list);type;columns;string
         result.append({
             'description' : 'A description of the column' , 'name' : 'description' , 'table' : 'columns' , 'type' : 'string' })
         result.append({
@@ -549,20 +517,29 @@ member_key: the key to be used to sort each resulting element of a group member.
             'description' : 'The name of the table' , 'name' : 'table' , 'table' : 'columns' , 'type' : 'string' })
         result.append({
             'description' : 'The data type of the column (int, float, string, list)' , 'name' : 'type' , 'table' : 'columns' , 'type' : 'string' })
-        tablenames = { 'Host' : 'hosts', 'Service' : 'services', 'Hostgroup' : 'hostgroups', 'Servicegroup' : 'servicegroups', 'Contact' : 'contacts', 'Contactgroup' : 'contactgroups', 'Command' : 'commands', 'Downtime' : 'downtimes', 'Comment' : 'comments', 'Timeperiod' : 'timeperiods', 'Config' : 'status', 'Logline' : 'log', 'Statsbygroup' : 'statsgroupby', 'Hostsbygroup' : 'hostsbygroup', 'Servicesbygroup' : 'servicesbygroup', 'Servicesbyhostgroup' : 'servicesbyhostgroup' }
-        for obj in sorted(LSout_map, key=lambda x: x):
-            if obj in tablenames:
-                for attr in LSout_map[obj]:
-                    if 'description' in LSout_map[obj][attr] and LSout_map[obj][attr]['description']:
-                        result.append({ 'description' : LSout_map[obj][attr]['description'], 'name' : attr, 'table' : tablenames[obj], 'type' : LSout_map[obj][attr]['type'] })
-                    else:
-                        result.append({'description' : 'to_do_desc', 'name' : attr, 'table' : tablenames[obj], 'type' : LSout_map[obj][attr]['type'] })
+        tablenames = ['hosts', 'services', 'hostgroups', 'servicegroups', 'contacts', 'contactgroups', 'commands', 'downtimes', 'comments', 'timeperiods', 'status', 'log', 'hostsbygroup', 'servicesbygroup', 'servicesbyhostgroup', 'status']
+        for table in tablenames:
+            cls = self.table_class_map[table][1]
+            for attribute in cls.lsm_columns:
+                result.append({
+                    'description' : getattr(cls, 'lsm_'+attribute).im_func.description,
+                    'name' : attribute,
+                    'table' : table,
+                    'type' : {
+                        int : 'int',
+                        float : 'float',
+                        bool : 'int',
+                        list : 'list',
+                        str : 'string',
+                    }[getattr(cls, 'lsm_'+attribute).im_func.datatype],
+                })
+        self.columns = ['description', 'name', 'table', 'type']
         return result
 
 
     def get_servicebyhostgroups_livedata(self, cs):
         # to test..
-        res = [ self.create_output(cs.output_map, x) for x in (
+        res = [x for x in (
                 svc for svc in (
                     setattr(svchgrp[0], 'hostgroup', svchgrp[1]) or svchgrp[0] for svchgrp in (
                         # (service, hostgroup), (service, hostgroup), (service, hostgroup), ...  service objects are individuals
@@ -572,11 +549,11 @@ member_key: the key to be used to sort each resulting element of a group member.
                                 # ([host, host, ...], hostgroup), ([host, host, host, ...], hostgroup), ...  sorted by host_name
                                 (sorted(hg1.members, key = lambda k: k.host_name), hg1) for hg1 in   # ([host, host], hg), ([host], hg),... hostgroup.members->explode->sort
                                     # hostgroups, sorted by hostgroup_name
-                                    sorted([hg0 for hg0 in self.hostgroups.values() if hg0.members], key = lambda k: k.hostgroup_name)
+                                    sorted([hg0 for hg0 in self.datamgr.rg.hostgroups if hg0.members], key = lambda k: k.hostgroup_name)
                             ) for item0 in inner_list0[0] if item0.services
                         ) for item1 in inner_list1[0]
                     )
-                ) if (cs.without_filter or cs.filter_func(self.create_output(cs.filter_map, svc)))
+                ) if (cs.without_filter or cs.filter_func(svc))
             )]
         return res
 
@@ -604,7 +581,7 @@ member_key: the key to be used to sort each resulting element of a group member.
     }
 
 
-    def get_live_data(self):
+    def get_live_data(self, cs):
         """Find the objects which match the request.
         
         This function scans a list of objects (hosts, services, etc.) and
@@ -627,117 +604,44 @@ member_key: the key to be used to sort each resulting element of a group member.
             print("Got unhandled table: %s" % (self.table))
             return []
         
-        # Get the function which implements the Filter: statements
-        filter_func     = self.filter_stack.get_stack()
-        out_map         = self.out_map[self.out_map_name]
-        filter_map      = dict([(k, out_map.get(k)) for k in self.filtercolumns])
-        output_map      = dict([(k, out_map.get(k)) for k in self.columns]) or out_map
-        without_filter  = len(self.filtercolumns) == 0
-    
-        cs = LiveStatusConstraints(filter_func, out_map, filter_map, output_map, without_filter)
-        res = handler(self, cs)
+        result = handler(self, cs)
+        # Now we have a list of full objects (Host, Service, ....)
 
-        if self.limit:
-            if isinstance(res, list):
-                res = res[:self.limit]
-            else:
-                res = list(res)[:self.limit]
+        #if self.limit:
+        #    if isinstance(res, list):
+        #        res = res[:self.limit]
+        #    else:
+        #        res = list(res)[:self.limit]
             
-        if self.stats_request:
-            res = self.statsify_result(res)
-        
-        return res
-
-
-    def get_live_data_log(self):
-        """Like get_live_data, but for log objects"""
-        filter_func = self.filter_stack.get_stack()
-        if self.use_aggressive_sql:
-            # Be aggressive, get preselected data from sqlite and do less
-            # filtering in python. But: only a subset of Filter:-attributes
-            # can be mapped to columns in the logs-table, for the others
-            # we must use "always-true"-clauses. This can result in
-            # funny and potentially ineffective sql-statements
-            sql_filter_func = self.sql_filter_stack.get_stack()
-        else:
-            # Be conservative, get everything from the database between
-            # two dates and apply the Filter:-clauses in python
-            sql_filter_func = self.sql_time_filter_stack.get_stack()
-        out_map = self.out_map[self.out_map_name]
-        filter_map = dict([(k, out_map.get(k)) for k in self.filtercolumns])
-        output_map = dict([(k, out_map.get(k)) for k in self.columns]) or out_map
-        without_filter = len(self.filtercolumns) == 0
-        result = []
-        # We can apply the filterstack here as well. we have columns and filtercolumns.
-        # the only additional step is to enrich log lines with host/service-attributes
-        # A timerange can be useful for a faster preselection of lines
-        filter_clause, filter_values = sql_filter_func()
-        full_filter_clause = filter_clause
-        matchcount = 0
-        for m in re.finditer(r"\?", full_filter_clause):
-            full_filter_clause = re.sub('\\?', str(filter_values[matchcount]), full_filter_clause, 1)
-            matchcount += 1
-        fromtime = 0
-        totime = int(time.time()) + 1
-        gtpat = re.search(r'^(\(*time|(.*\s+time))\s+>\s+(\d+)', full_filter_clause)
-        gepat = re.search(r'^(\(*time|(.*\s+time))\s+>=\s+(\d+)', full_filter_clause)
-        ltpat = re.search(r'^(\(*time|(.*\s+time))\s+<\s+(\d+)', full_filter_clause)
-        lepat = re.search(r'^(\(*time|(.*\s+time))\s+<=\s+(\d+)', full_filter_clause)
-        if gtpat != None:
-            fromtime = int(gtpat.group(3)) + 1
-        if gepat != None:
-            fromtime = int(gepat.group(3))
-        if ltpat != None:
-            totime = int(ltpat.group(3)) - 1
-        if lepat != None:
-            totime = int(lepat.group(3))
-        # now find the list of datafiles
-        filtresult = []
-        #print filter_clause, filter_values
-        for dateobj, handle, archive, fromtime, totime in self.db.log_db_relevant_files(fromtime, totime):
-            dbresult = self.select_live_data_log(filter_clause, filter_values, handle, archive, fromtime, totime)
-            prefiltresult = [y for y in (x.fill(self.hosts, self.services, set(self.columns + self.filtercolumns)) for x in dbresult) if (without_filter or filter_func(self.create_output(filter_map, y)))]
-            filtresult.extend([self.create_output(output_map, x) for x in prefiltresult])
-        if self.stats_request:
-            result = self.statsify_result(filtresult)
-        else:
-            # Results are host/service/etc dicts with the requested attributes
-            # Columns: = keys of the dicts
-            result = filtresult
-
         return result
 
 
-    def row_factory(self, cursor, row):
-        """Handler for the sqlite fetch method."""
-        return Logline(cursor, row)
-
-
-    def select_live_data_log(self, filter_clause, filter_values, handle, archive, fromtime, totime):
-        dbresult = []
-        try:
-            if handle == "main":
-                dbresult = self.db.execute('SELECT * FROM logs WHERE %s' % filter_clause, filter_values, self.row_factory)
-            else:
-                self.db.commit()
-                self.db.execute_attach("ATTACH DATABASE '%s' AS %s" % (archive, handle))
-                dbresult = self.db.execute('SELECT * FROM %s.logs WHERE %s' % (handle, filter_clause), filter_values, self.row_factory)
-                self.db.execute("DETACH DATABASE %s" % handle)
-        except LiveStatusDbError, e:
-            print "An error occurred:", e.args[0]
-        return dbresult
-
-
-    def create_output(self, out_map, elt):
+    def prepare_output(self, item):
         """Convert an object to a dict with selected keys.""" 
         output = {} 
-        for display in out_map.keys():
+        # what to do with empty?
+        #print "prepare coluns %s" % self.outputcolumns
+        for column in self.outputcolumns:
             try:
-                value = out_map[display]['hook'](elt)
-            except:
-                value = ''
-            output[display] = value
+                value = getattr(item, 'lsm_'+column)(self)
+            except Exception:
+                if hasattr(item, 'lsm_'+column):
+                    print "THIS LOOKS LIKE A SERIOUS ERROR", column
+                    value = getattr(item, 'lsm_'+column).im_func.default
+                else:
+                    print "THIS LOOKS LIKE A SERIOUS ERROR I CAN CATCH"
+                    value = getattr(item, 'lsm_'+column).im_func.default
+            output[column] = value
         return output
+
+    def get_live_data_log(self, cs):
+        firstdb = [x for x in self.db.get_live_data_log() ]
+        dbresult = [z for z in (
+            x.fill(self.datamgr) for x in [copy.copy(y) for y in firstdb]
+ # we better manipulate a copy of the rg objects
+            ) if (cs.without_filter or cs.filter_func(z))
+        ]
+        return dbresult
 
 
     def statsify_result(self, filtresult):
@@ -789,7 +693,7 @@ member_key: the key to be used to sort each resulting element of a group member.
             groupedresult = {}
             for elem in filtresult:
                 # Make a tuple consisting of the stats_group_by values
-                stats_group_by_values = tuple([elem[c] for c in self.stats_group_by])
+                stats_group_by_values = tuple([getattr(elem, 'lsm_'+c)(self) for c in self.stats_group_by])
                 if not stats_group_by_values in groupedresult:
                     groupedresult[stats_group_by_values] = []
                 groupedresult[stats_group_by_values].append(elem)
@@ -836,100 +740,152 @@ member_key: the key to be used to sort each resulting element of a group member.
             # may be an integer. (current_attempt for example)
             # So for the filter to work correctly (the two values compared must be
             # of the same type), we need to convert the reference to the desired type
-            converter = self.find_converter(attribute)
+            converter = find_filter_converter(self.table, 'lsm_'+attribute)
             if converter:
                 reference = converter(reference)
-
+        attribute = 'lsm_'+attribute
         # The filters are closures.
         # Add parameter Class (Host, Service), lookup datatype (default string), convert reference
-        def eq_filter(ref):
-            if ((ref[attribute] is None) and (reference == "")):
-                return True
-            return ref[attribute] == reference
+        def eq_filter(item):
+            try:
+                return getattr(item, attribute)(self) == reference
+            except Exception:
+                if hasattr(item, attribute):
+                    return getattr(item.__class__, attribute).im_func.default == reference
+                else:
+                    raise LiveStatusQueryError(450, attribute.replace('lsm_', ''))
 
-        def eq_nocase_filter(ref):
-            return ref[attribute].lower() == reference.lower()
+        def match_filter(item):
+            try:
+                p = re.compile(reference)
+                return p.search(getattr(item, attribute)(self))
+            except Exception:
+                raise LiveStatusQueryError(450, attribute.replace('lsm_', ''))
 
-        def ne_filter(ref):
-            return ref[attribute] != reference
+        def eq_nocase_filter(item):
+            try:
+                return getattr(item, attribute)(self).lower() == reference.lower()
+            except Exception:
+                if hasattr(item, attribute):
+                    return getattr(item.__class__, attribute).im_func.default == reference
+                else:
+                    raise LiveStatusQueryError(450, attribute.replace('lsm_', ''))
 
-        def gt_filter(ref):
-            return ref[attribute] > reference
-
-        def ge_filter(ref):
-            return ref[attribute] >= reference
-
-        def lt_filter(ref):
-            return ref[attribute] < reference
-
-        def le_filter(ref):
-            return ref[attribute] <= reference
-
-        def contains_filter(ref):
-            return reference in ref[attribute].split(',')
-
-        def match_filter(ref):
-            p = re.compile(reference)
-            return p.search(ref[attribute])
-
-        def match_nocase_filter(ref):
+        def match_nocase_filter(item):
             p = re.compile(reference, re.I)
-            return p.search(ref[attribute])
+            return p.search(getattr(item, attribute)(self))
 
-        def ge_contains_filter(ref):
-            if isinstance(ref[attribute], list):
-                return reference in ref[attribute]
-            else:
-                return ref[attribute] >= reference
+        def lt_filter(item):
+            try:
+                return getattr(item, attribute)(self) < reference
+            except Exception:
+                if hasattr(item, attribute):
+                    return getattr(item.__class__, attribute).im_func.default < reference
+                else:
+                    raise LiveStatusQueryError(450, attribute.replace('lsm_', ''))
 
-        def dummy_filter(ref):
+        def gt_filter(item):
+            try:
+                return getattr(item, attribute)(self) > reference
+            except Exception:
+                if hasattr(item, attribute):
+                    return getattr(item.__class__, attribute).im_func.default > reference
+                else:
+                    raise LiveStatusQueryError(450, attribute.replace('lsm_', ''))
+
+        def le_filter(item):
+            try:
+                return getattr(item, attribute)(self) <= reference
+            except Exception:
+                if hasattr(item, attribute):
+                    return getattr(item.__class__, attribute).im_func.default <= reference
+                else:
+                    raise LiveStatusQueryError(450, attribute.replace('lsm_', ''))
+
+        def ge_contains_filter(item):
+            try:
+                if getattr(item, attribute).im_func.datatype == list:
+                    return reference in getattr(item, attribute)(self)
+                else:
+                    return getattr(item, attribute)(self) >= reference
+            except Exception:
+                if hasattr(item, attribute):
+                    return getattr(item.__class__, attribute).im_func.default >= reference
+                else:
+                    raise LiveStatusQueryError(450, attribute.replace('lsm_', ''))
+
+        def ne_filter(item):
+            try:
+                return getattr(item, attribute)(self) != reference
+            except Exception:
+                if hasattr(item, attribute):
+                    return getattr(item.__class__, attribute).im_func.default != reference
+                else:
+                    raise LiveStatusQueryError(450, attribute.replace('lsm_', ''))
+
+        def not_match_filter(item):
+            return not match_filter(item)
+
+        def not_eq_nocase_filter(item):
+            return eq_nocase_filter(item)
+
+        def not_match_nocase_filter(item):
+            return not match_nocase_filter(item)
+
+        def dummy_filter(item):
             return True
 
-        def count_postproc(ref):
-            return len(ref)
+        def count_postproc(item):
+            return len(item)
 
-        def extract_postproc(ref):
-            return [float(obj[attribute]) for obj in ref]
+        def extract_postproc(item):
+            return [float(obj[attribute]) for obj in item]
 
-        def sum_postproc(ref):
-            return sum(float(obj[attribute]) for obj in ref)
+        def sum_postproc(item):
+            return sum(float(getattr(obj, attribute)(self)) for obj in item)
 
-        def max_postproc(ref):
-            if ref != []:
-                return max(float(obj[attribute]) for obj in ref)
+        def max_postproc(item):
+            if item != []:
+                return max(float(getattr(obj, attribute)(self)) for obj in item)
             return 0
 
-        def min_postproc(ref):
-            if ref != []:
-                return min(float(obj[attribute]) for obj in ref)
+        def min_postproc(item):
+            if item != []:
+                return min(float(getattr(obj, attribute)(self)) for obj in item)
             return 0
 
-        def avg_postproc(ref):
-            if ref != []:
-                return sum(float(obj[attribute]) for obj in ref) / len(ref)
+        def avg_postproc(item):
+            if item != []:
+                return sum(float(getattr(obj, attribute)(self)) for obj in item)
             return 0
 
-        def std_postproc(ref):
+        def std_postproc(item):
             return 0
 
         if operator == '=':
             return eq_filter
-        elif operator == '!=':
-            return ne_filter
-        elif operator == '>':
-            return gt_filter
-        elif operator == '>=':
-            return ge_contains_filter
-        elif operator == '<':
-            return lt_filter
-        elif operator == '<=':
-            return le_filter
-        elif operator == '=~':
-            return eq_nocase_filter
         elif operator == '~':
             return match_filter
+        elif operator == '=~':
+            return eq_nocase_filter
         elif operator == '~~':
             return match_nocase_filter
+        elif operator == '<':
+            return lt_filter
+        elif operator == '>':
+            return gt_filter
+        elif operator == '<=':
+            return le_filter
+        elif operator == '>=':
+            return ge_contains_filter
+        elif operator == '!=':
+            return ne_filter
+        elif operator == '!~':
+            return not_match_filter
+        elif operator == '!=~':
+            return ne_nocase_filter
+        elif operator == '!~~':
+            return not_match_nocase_filter
         elif operator == 'dummy':
             return dummy_filter
         elif operator == 'sum':
@@ -952,48 +908,3 @@ member_key: the key to be used to sort each resulting element of a group member.
             raise "wrong operation", operator
 
 
-    def make_sql_filter(self, operator, attribute, reference):
-        # The filters are text fragments which are put together to form a sql where-condition finally.
-        # Add parameter Class (Host, Service), lookup datatype (default string), convert reference
-        # which attributes are suitable for a sql statement
-        good_attributes = ['time', 'attempt', 'class', 'command_name', 'comment', 'contact_name', 'host_name', 'plugin_output', 'service_description', 'state', 'state_type', 'type']
-        good_operators = ['=', '!=']
-
-        def eq_filter():
-            if reference == '':
-                return ['%s IS NULL' % attribute, ()]
-            else:
-                return ['%s = ?' % attribute, (reference, )]
-        def ne_filter():
-            if reference == '':
-                return ['%s IS NOT NULL' % attribute, ()]
-            else: 
-                return ['%s != ?' % attribute, (reference, )]
-        def gt_filter():
-            return ['%s > ?' % attribute, (reference, )]
-        def ge_filter(): 
-            return ['%s >= ?' % attribute, (reference, )]
-        def lt_filter():
-            return ['%s < ?' % attribute, (reference, )]
-        def le_filter():
-            return ['%s <= ?' % attribute, (reference, )]
-        def match_filter():
-            return ['%s LIKE ?' % attribute, ('%'+reference+'%', )]
-        def no_filter():
-            return ['1 = 1', ()]
-        if attribute not in good_attributes:
-            return no_filter
-        if operator == '=':
-            return eq_filter
-        if operator == '>':
-            return gt_filter
-        if operator == '>=':
-            return ge_filter
-        if operator == '<':
-            return lt_filter
-        if operator == '<=':
-            return le_filter
-        if operator == '!=':
-            return ne_filter
-        if operator == '~':
-            return match_filter

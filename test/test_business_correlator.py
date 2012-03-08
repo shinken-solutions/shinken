@@ -321,6 +321,44 @@ class TestBusinesscorrel(ShinkenTest):
 
 
 
+
+
+    # We will try a simple 1of: test_router_0 OR/AND test_host_0
+    def test_simple_1of_business_correlator_with_hosts(self):
+        #
+        # Config is not correct because of a wrong relative path
+        # in the main config file
+        #
+        print "Get the hosts and services"
+        now = time.time()
+        host = self.sched.hosts.find_by_name("test_host_0")
+        host.checks_in_progress = []
+        host.act_depend_of = [] # ignore the router
+        router = self.sched.hosts.find_by_name("test_router_0")
+        router.checks_in_progress = []
+        router.act_depend_of = [] # ignore the router
+        
+        svc_cor = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Simple_1Of_with_host")
+        self.assert_(svc_cor.got_business_rule == True)
+        self.assert_(svc_cor.business_rule is not None)
+        bp_rule = svc_cor.business_rule
+        self.assert_(bp_rule.operand == 'of:')
+        # Simple 1of: so in fact a triple (1,2,2) (1of and MAX,MAX
+        self.assert_(bp_rule.of_values == (1,2,2))
+        
+        
+        sons = bp_rule.sons
+        print "Sons,", sons
+        # We've got 2 sons, 2 services nodes
+        self.assert_(len(sons) == 2)
+        self.assert_(sons[0].operand == 'host')
+        self.assert_(sons[0].sons[0] == host)
+        self.assert_(sons[1].operand == 'host')
+        self.assert_(sons[1].sons[0] == router)
+        
+
+
+
     # We will try a simple bd1 OR db2, but this time we will
     # schedule a real check and see if it's good
     def test_simple_or_business_correlator_with_schedule(self):

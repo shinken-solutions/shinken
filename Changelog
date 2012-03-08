@@ -3,6 +3,129 @@ Shinken ChangeLog
 #######################
 
 	
+1.0 - 28/02/2012
+------------------
+	CORE ENHANCEMENTS
+	* Add : shinken.sh script and skonf.py with a LOT of features for setup and configuration management.
+	* Add : better logging for warnings for host, service and npcd configuration
+	* Add : poller daemon will use all available CPUs by default
+	* Add : poller daemon can now load standard external modules like namedPipe to get external commands from it
+	* Add : brok queue watchdog for satellites, activated for Broker by default at 100000 broks to kill/restart the module..
+	* Add : if the run/var directories are missing, try to create them in the init.d script.
+	* Add : service templates can now be applied on a host template
+	* Add : reactionner can run under android
+	* Add : android SMS module
+	* Add : imlemented a check for dead queue threads. When detected restarts the thread
+	* Add : mail python script
+	* Add : better error text when the pickle load gets an error
+	* Add : manage connexion timeouts in the broker and Pyro4
+	* Add : $$ are now interpreted as $ in macro solving
+	* Add : (reported by : sduchesneau) check_shinken.py now has a timeout. It is set by default at 10s
+	* Add : business rules now support the NOT operand
+	* Add : send broks in external modules as a biglist instead of n broks. It's more efficient (X3 perf for this, can be huge time for huge conf)	
+	* Add : templates for monitoring common devices and services are now included
+	* Add : manage \; to be changed in ; without cutting the rest of the line to be removed as a comment
+	* Add : (reported by : foobar1111) arbiter only matched hostname, and not fqdn. Now it will try fqdn and then the hostname.
+	* Add : retention is now enabled by default at installation time (Pickle)
+	* Add : (From Michael Leinartas) man pages updates
+	* Add : '+' in discovery rule management, so you can 'add' something, like a template
+	* Add : using an undefined template in the configuration is no longer a critical error, just a warning.
+                So the user can just 'tag' hosts first and then create the template
+	* Add : Sebastien Coavoux conducted a large code review! :)
+	* Add : xkilian reviewed and corrected many many pages of the wiki documentation and a few english fixes in the distribution :)
+	* Add : skonf daemon preview. It is not yet meant for production, but is included to get feedback
+	* Add : mongodb insert capabilities for the discovery
+	* Add : TIMEPERIOD TRANSITION logs from the Arbiter to get timeperiods transition output 
+	* Add : is_admin property is now available for contacts
+	* Add : make the nmap discovery do tcp and udp scan
+	* Add : (Victor Igumnov) installation for Solaris
+	
+	CORE FIXES
+	* Fix : use StringIO to read configuration files into a string (much faster with lots of config files)
+	* Fix : (reported by : lminoza) bug in inheritance if templates give only a + elements, should continue to loop and not stop here.
+	* Fix : keep multiple spaces in config files. (check_command!"args   " were stripped)
+	* Fix : pyro 4.10 management
+	* Fix : (reported by : MINOZA, Landy) multi-layer management for service template on host template. So if you apply a service on layer 3 and your host inherit from layer1->layer2
+	* Fix : (reported by : Thibaut Notteboom) catch ConnectionClosedError on poller/reactionner connections
+	* Fix : A better safe_print
+	* Fix : lot of encoding stuff!
+	* FIX : proxy support and python-setuptools installation on RHEL/CENTOS 6
+	* Fix : (reproted by : darkweaver87) somethimes we got a malformed external command. If so, bailout and warn in debug mode.
+	* Fix : when there is a dispatching problem, the arbiter send and send again the same configuration to satellites.
+	* Fix : crash bug when timezone set in config file
+	* Fix : make all log pass the utf8 management
+	* Fix : use auto-generated, absolute path for README (Daniel Widerin)
+	* Fix: last line of email notification must finish by a \n otherwise it will not be sent (Laurent Ollagnier)
+	* Fix: (from rootix2) catch case where service do not have imported_from from modules.
+	* Fix : (reported by : Venelin Petkov) print in hostgroup names was a problem.
+	* Fix : if a scheduler restarted, we got problem because the arbiter did not resend it the configuration
+	* Fix : "host_notification_period" and "service_notification_period" defined twice in the contact definition (Fournet Matthieu)
+	* Fix : (reported by : Httqm) default notification_interval was one minute, 1hour is better.
+	* Fix : (reported by : sprudhomme) longoutput parsing and perfdata did not follow nagios way.
+	* Fix : change sourceforgetrac with github in tracebacks.
+	* Fix : (reported by : lminoza) too many notifications for a contact with multiple notification methods, all where sent when only some would pass filter.
+	* Fix : (reported by : puisea) kill all sub process action tree on unix
+	* Fix : flaw on multiple date and multiple timerange
+	* Fix : if missing alias in objects, put the name if available
+	* Fix : (reported by : denetariko) manage spaces before and after type name in define line
+	* Fix : (reported by: Steve Kieu) missing get_name() method for config
+	* Fix : (reported by : Mihai Efrim) flapping notifications
+	
+	
+
+	
+	MODULE ENHANCEMENTS
+	* Add : rewrite the LiveStatus module, performance boost and simpler. Thanks Gerhard for this huge undertaking!
+	* Add : two new modules for storing livestatus logs. sqlite and mongodb
+	* Add : graphite module for the Broker to export performance data to a Graphite time series database.
+	* Add : module to deal with flat file dependencies
+	* Add : mongodb module for the arbiter, to load hosts object from it
+	* Add : mongodb retention module
+	* Add : the Service-perfdata module now open/close the perfdata file each second. So it's compatible with tools like Centreon that move it
+	* Add : macros supported in skonf. Lots of bug fixes
+	* Add : merlindb now inserts host_contactgroups
+	* Add : NDO Nagios/Shinken mix in database (Sebastien Coavoux)
+	* Add : port option for the mysql connexion with NDO
+	* Add : ip_tag module that can change configuration properties based on the host IP address or IP address range.
+	* Add : simulation mode for the nmap disco wrapper, so we can ask for xml output from users, and then simulate it easily.
+	* Add : new process for nmap discovery output. There is no longer a big mapping pass. It will output what it can, and it's for the discovery_rule to do this job now, 
+                it's far more a BIG thanks to all folks that send me sample xml output :)
+	* Add : enhanced capabilities for the mysql import module (OlivierHa)
+
+	MODULE FIXES
+	* Fix : useless and dangerous str in redis module.
+	* FIX : htpasswd.users file was not correctly updated at installation
+	* Fix : (reported by : DGuenault) hack_poller_tag_by_macros was not applying poller_tag to commands, only root objects
+	* Fix : memcache and redis retention modules. They were loading notifications->contacts->commands but this class got slots but no __getstate__
+	* Fix : (reported by : sprudhomme): long_output in ndo for 1.4b9 version
+	* Fix : NSCA, a loop when the client initiate the socket closing
+
+	UI
+	* Add : now page rendering can be launched in parallel, and so page can now call 'long' queries without breaking all. But during a long query, we still cannot eat broks.
+	* Fix : the WebUI now exits when the brok thread encounters a problem
+	* Add : UI PNP module
+	* Add : if contact is not is_admin, then the /problems view only shows its related elements (if he is a contact of the elemetn, of an impact or a source problems one).
+	* Add : add graph time selection in the detail page
+	* Add : Graphite graph backend
+	* Add : /mobile part
+	* Add : External Authentification for WebUI (SSO) (olivierHa)
+	* Add : tips on the eltgraph view
+	* Fix : acknowledge typo
+	* Fix : Change the scale of the impact view divs
+	* Fix : UI page navigation should not propose page too high if not need
+	* Add : gesture canvas as smaller and visible
+	* Add : address to the eltdetail.tpl
+	* Fix : utf8 names in the UI
+	* Add : allow_html_output parameter for the WebUI
+	* Add : generic perfometer manager for the UI
+	* Fix : search button (Thanx to pydubreucq)
+	* Add : make all nodes apears in the dep graph, but hidden one in very smalls
+	* Add : perfometer image hovering with the graph module like PNP
+	* Add : password iphone like in the login screen
+	* Add : an orange outline to see where the focus is on input
+	
+	
+	
 0.8 - 17/10/2011
 ------------------
 	CORE ENHANCEMENTS
@@ -13,14 +136,14 @@ Shinken ChangeLog
 	* Add : support for hostextinfo
 	* Add : a workdir parameter in the nagios.cfg file for set the arbiter working directory
 	* Add : modules for modules. Will be useful for the global configuration in the WebUI (it's a module, but will need additonnal modules)
-	* Add : alternative installation way in contrib
+	* Add : alternative installation method in contrib
 	* Add : shinken-admin command that can connect to an arbiter and ask daemons status.
 	* Add : discovery runners timeout parameter. Set by default at one hour.
 	* Add : rename criticity into business_impact for hosts and services. Criticity is automatically mapped into business_impact in the configuration reading, and rename min_criticity into min_business_impact for contacts and notifways. And keep a mapping for old conf.
-	* Add : if se t to 0, min_workers will set the pollers/reactionners to use ALL cpus of the server.
+	* Add : if set to 0, min_workers will set the pollers/reactionners to use ALL cpus of the server.
 	* Add : business modulation objects.
 	* Add : new tests for A,B,Cof: rules and a fix for the default return logic.
-	* Add : arbiter ask one a check_interval the managed conf for satellites. So more smooth decisions.
+	* Add : arbiter ask one a check_interval the managed conf for satellites. Makes for smoother decisions.
 
 	
 	CORE FIXES

@@ -24,7 +24,7 @@
 from item import Item, Items
 
 from shinken.util import strip_and_uniq
-from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
+from shinken.property import BoolProp, IntegerProp, StringProp
 from shinken.log import logger
 
 
@@ -52,8 +52,8 @@ class Contact(Item):
         'service_notifications_enabled': BoolProp(default='1', fill_brok=['full_status']),
         'host_notification_period': StringProp(fill_brok=['full_status']),
         'service_notification_period': StringProp(fill_brok=['full_status']),
-        'host_notification_options': ListProp(fill_brok=['full_status']),
-        'service_notification_options': ListProp(fill_brok=['full_status']),
+        'host_notification_options': StringProp(fill_brok=['full_status']),
+        'service_notification_options': StringProp(fill_brok=['full_status']),
         'host_notification_commands': StringProp(fill_brok=['full_status']),
         'service_notification_commands': StringProp(fill_brok=['full_status']),
         'min_business_impact':    IntegerProp(default = '0', fill_brok=['full_status']),
@@ -66,6 +66,7 @@ class Contact(Item):
         'address5':         StringProp(default='none', fill_brok=['full_status']),
         'address6':         StringProp(default='none', fill_brok=['full_status']),
         'can_submit_commands': BoolProp(default='0', fill_brok=['full_status']),
+        'is_admin':         BoolProp(default='0', fill_brok=['full_status']),
         'retain_status_information': BoolProp(default='1', fill_brok=['full_status']),
         'notificationways': StringProp(default='', fill_brok=['full_status']),
         'password' :        StringProp(default='NOPASSWORDSET', fill_brok=['full_status']),
@@ -73,6 +74,7 @@ class Contact(Item):
 
     running_properties = Item.running_properties.copy()
     running_properties.update({
+        'modified_attributes': IntegerProp(default=0L, fill_brok=['full_status'], retention=True),
         'downtimes':        StringProp(default=[], fill_brok=['full_status'], retention=True),
     })
 
@@ -102,7 +104,10 @@ class Contact(Item):
 
     #For debugging purpose only (nice name)
     def get_name(self):
-        return self.contact_name
+        try:
+            return self.contact_name
+        except AttributeError:
+            return 'UnnamedContact'
 
 
     # Search for notification_options with state and if t is
@@ -188,6 +193,7 @@ class Contact(Item):
         else:
             if hasattr(self, 'alias'): #take the alias if we miss the contact_name
                 self.contact_name = self.alias
+
         return state
 
 
@@ -215,10 +221,10 @@ class Contacts(Items):
     inner_class = Contact
 
     def linkify(self, timeperiods, commands, notificationways):
-        self.linkify_with_timeperiods(timeperiods, 'service_notification_period')
-        self.linkify_with_timeperiods(timeperiods, 'host_notification_period')
-        self.linkify_command_list_with_commands(commands, 'service_notification_commands')
-        self.linkify_command_list_with_commands(commands, 'host_notification_commands')
+        #self.linkify_with_timeperiods(timeperiods, 'service_notification_period')
+        #self.linkify_with_timeperiods(timeperiods, 'host_notification_period')
+        #self.linkify_command_list_with_commands(commands, 'service_notification_commands')
+        #self.linkify_command_list_with_commands(commands, 'host_notification_commands')
         self.linkify_with_notificationways(notificationways)
 
     #We've got a notificationways property with , separated contacts names
@@ -250,8 +256,8 @@ class Contacts(Items):
             for cg in c.contactgroups.split(','):
                 contactgroups.add_member(c.contact_name, cg.strip())
 
-        #Now create a notification way with the simple parameter of the
-        #contacts
+        # Now create a notification way with the simple parameter of the
+        # contacts
         for c in self:
             if not c.is_tpl():
                 need_notificationway = False
@@ -260,6 +266,10 @@ class Contacts(Items):
                     if hasattr(c, p):
                         need_notificationway = True
                         params[p] = getattr(c, p)
+                    else: # put a default text value
+                        # Remove the value and put a default value
+                        setattr(c, p, '')
+                    
 
                 if need_notificationway:
                     #print "Create notif way with", params

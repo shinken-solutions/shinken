@@ -180,8 +180,9 @@ class Shinken(BaseSatellite):
                 t_to_go = c.t_to_go
                 ref = c.ref
                 new_t = max(0, t_to_go + difference)
-                # But it's no so simple, we must match the timeperiod
-                new_t = ref.check_period.get_next_valid_time_from_t(new_t)
+                if ref.check_period is not None:
+                    # But it's no so simple, we must match the timeperiod
+                    new_t = ref.check_period.get_next_valid_time_from_t(new_t)
                 # But maybe no there is no more new value! Not good :(
                 # Say as error, with error output
                 if new_t is None:
@@ -206,8 +207,9 @@ class Shinken(BaseSatellite):
 
                 # Notification should be check with notification_period
                 if c.is_a == 'notification':
-                    # But it's no so simple, we must match the timeperiod
-                    new_t = ref.notification_period.get_next_valid_time_from_t(new_t)
+                    if ref.notification_period:
+                        # But it's no so simple, we must match the timeperiod
+                        new_t = ref.notification_period.get_next_valid_time_from_t(new_t)
                     # And got a creation_time variable too
                     c.creation_time = c.creation_time + difference
 
@@ -349,6 +351,15 @@ class Shinken(BaseSatellite):
         # We clear our schedulers managed (it's us :) )
         # and set ourself in it
         self.schedulers = {self.conf.instance_id : self.sched}
+
+
+    # Give the arbiter the data about what I manage
+    # for me it's just my instance_id and my push flavor
+    def what_i_managed(self):
+        if hasattr(self, 'conf'):
+            return {self.conf.instance_id : self.conf.push_flavor} 
+        else:
+            return {}
 
 
     # our main function, launch after the init

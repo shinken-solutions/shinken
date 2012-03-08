@@ -28,6 +28,7 @@ import os
 import Queue
 
 #And now include from this global directory
+from shinken.objects import *
 from shinken.objects import Host
 from shinken.objects import Hostgroup
 from shinken.objects import Service

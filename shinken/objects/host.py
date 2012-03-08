@@ -66,7 +66,7 @@ class Host(SchedulingItem):
     properties.update({
         'host_name':            StringProp(fill_brok=['full_status', 'check_result', 'next_schedule']),
         'alias':                StringProp(fill_brok=['full_status']),
-        'display_name':         StringProp(default='none', fill_brok=['full_status']),
+        'display_name':         StringProp(default='', fill_brok=['full_status']),
         'address':              StringProp(fill_brok=['full_status']),
         'parents':              ListProp(brok_transformation=to_hostnames_list, default='', fill_brok=['full_status']),
         'hostgroups':           StringProp(brok_transformation=to_list_string_of_names, default='', fill_brok=['full_status']),
@@ -79,7 +79,7 @@ class Host(SchedulingItem):
         'passive_checks_enabled': BoolProp(default='1', fill_brok=['full_status'], retention=True),
         'check_period':         StringProp(fill_brok=['full_status']),
         'obsess_over_host':     BoolProp(default='0', fill_brok=['full_status'], retention=True),
-        'check_freshness':      BoolProp(default='0', fill_brok=['full_status'], retention=True),
+        'check_freshness':      BoolProp(default='0', fill_brok=['full_status']),
         'freshness_threshold':  IntegerProp(default='0', fill_brok=['full_status']),
         'event_handler':        StringProp(default='', fill_brok=['full_status']),
         'event_handler_enabled': BoolProp(default='0', fill_brok=['full_status']),
@@ -132,6 +132,7 @@ class Host(SchedulingItem):
     # retention : save/load this property from retention
     running_properties = SchedulingItem.running_properties.copy()
     running_properties.update({
+        'modified_attributes':  IntegerProp(default=0L, fill_brok=['full_status'], retention=True),
         'last_chk':             IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'next_chk':             IntegerProp(default=0, fill_brok=['full_status', 'next_schedule'], retention=True),
         'in_checking':          BoolProp(default=False, fill_brok=['full_status', 'check_result', 'next_schedule']),
@@ -143,10 +144,10 @@ class Host(SchedulingItem):
         'state_type_id':        IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'current_event_id':     StringProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'last_event_id':        IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
-        'last_state':           StringProp(default='PENDING', fill_brok=['full_status'], retention=True),
-        'last_state_id':        IntegerProp(default=0, fill_brok=['full_status'], retention=True),
-        'last_state_type' :     StringProp(default='HARD', fill_brok=['full_status'],  retention=True),
-        'last_state_change':    FloatProp(default=time.time(), fill_brok=['full_status'], retention=True),
+        'last_state':           StringProp(default='PENDING', fill_brok=['full_status', 'check_result'], retention=True),
+        'last_state_id':        IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
+        'last_state_type' :     StringProp(default='HARD', fill_brok=['full_status', 'check_result'],  retention=True),
+        'last_state_change':    FloatProp(default=time.time(), fill_brok=['full_status', 'check_result'], retention=True),
         'last_hard_state_change': FloatProp(default=time.time(), fill_brok=['full_status', 'check_result'], retention=True),
         'last_hard_state':      StringProp(default='PENDING', fill_brok=['full_status'], retention=True),
         'last_hard_state_id' :  IntegerProp(default=0, fill_brok=['full_status'], retention=True),
@@ -812,8 +813,8 @@ class Host(SchedulingItem):
         return "%02dh %02dm %02ds" % (h, m, s)
 
 
-    #Check if a notification for this host is suppressed at this time
-    #This is a check at the host level. Do not look at contacts here
+    # Check if a notification for this host is suppressed at this time
+    # This is a check at the host level. Do not look at contacts here
     def notification_is_blocked_by_item(self, type, t_wished = None):
         if t_wished is None:
             t_wished = time.time()
@@ -881,7 +882,7 @@ class Host(SchedulingItem):
             return True
 
         # Block if flapping
-        if self.is_flapping:
+        if self.is_flapping and type not in ('FLAPPINGSTART', 'FLAPPINGSTOP', 'FLAPPINGDISABLED'):
             return True
 
         return False

@@ -170,10 +170,10 @@ class Config(Item):
         'child_processes_fork_twice': UnusedProp(text='fork twice is not use.'),
         'enable_environment_macros': BoolProp(default='1', class_inherit=[(Host, None), (Service, None)]),
         'enable_flap_detection':    BoolProp(default='1', class_inherit=[(Host, None), (Service, None)]),
-        'low_service_flap_threshold': IntegerProp(default='20', class_inherit=[(Service, 'low_flap_threshold')]),
-        'high_service_flap_threshold': IntegerProp(default='30', class_inherit=[(Service, 'high_flap_threshold')]),
-        'low_host_flap_threshold':  IntegerProp(default='20', class_inherit=[(Host, 'low_flap_threshold')]),
-        'high_host_flap_threshold': IntegerProp(default='30', class_inherit=[(Host, 'high_flap_threshold')]),
+        'low_service_flap_threshold': IntegerProp(default='20', class_inherit=[(Service, 'global_low_flap_threshold')]),
+        'high_service_flap_threshold': IntegerProp(default='30', class_inherit=[(Service, 'global_high_flap_threshold')]),
+        'low_host_flap_threshold':  IntegerProp(default='20', class_inherit=[(Host, 'global_low_flap_threshold')]),
+        'high_host_flap_threshold': IntegerProp(default='30', class_inherit=[(Host, 'global_high_flap_threshold')]),
         'soft_state_dependencies':  BoolProp(managed=False, default='0'),
         'service_check_timeout':    IntegerProp(default='60', class_inherit=[(Service, 'check_timeout')]),
         'host_check_timeout':       IntegerProp(default='30', class_inherit=[(Host, 'check_timeout')]),
@@ -201,9 +201,9 @@ class Config(Item):
         'service_perfdata_file_processing_command': StringProp(managed=False, default=None),
         'check_for_orphaned_services': BoolProp(default='1', class_inherit=[(Service, 'check_for_orphaned')]),
         'check_for_orphaned_hosts': BoolProp(default='1', class_inherit=[(Host, 'check_for_orphaned')]),
-        'check_service_freshness': BoolProp(default='1', class_inherit=[(Service, 'check_freshness')]),
+        'check_service_freshness': BoolProp(default='1', class_inherit=[(Service, 'global_check_freshness')]),
         'service_freshness_check_interval': IntegerProp(default='60'),
-        'check_host_freshness': BoolProp(default='1', class_inherit=[(Host, 'check_freshness')]),
+        'check_host_freshness': BoolProp(default='1', class_inherit=[(Host, 'global_check_freshness')]),
         'host_freshness_check_interval': IntegerProp(default='60'),
         'additional_freshness_latency': IntegerProp(default='15', class_inherit=[(Host, None), (Service, None)]),
         'enable_embedded_perl': BoolProp(managed=False, default='1', help='It will surely never be managed, but it should not be useful with poller performances.'),
@@ -222,6 +222,7 @@ class Config(Item):
         'debug_level':          UnusedProp(text=None),
         'debug_verbosity':      UnusedProp(text=None),
         'max_debug_file_size':  UnusedProp(text=None),
+        'modified_attributes':  IntegerProp(default=0L),
         #'$USERn$ : {'required':False, 'default':''} # Add at run in __init__
 
         # SHINKEN SPECIFIC
@@ -264,6 +265,7 @@ class Config(Item):
         'webui_lock_file'   :    StringProp(default='webui.pid'),
         'webui_port'        :    IntegerProp(default='8080'),
         'webui_host'        :    StringProp(default='0.0.0.0'),
+
    }
 
     macros = {
@@ -340,6 +342,9 @@ class Config(Item):
         self.magic_hash = random.randint(1, 100000)
         self.configuration_errors = []
 
+
+    def get_name(self):
+        return 'global configuration file'
 
     # We've got macro in the resource file and we want
     # to update our MACRO dict with it
@@ -418,7 +423,8 @@ class Config(Item):
                     cfg_file_name = cfg_file_name.strip()
                     try:
                         fd = open(cfg_file_name, 'rU')
-                        logger.log("Processing object config file '%s'" % cfg_file_name)
+                        if self.read_config_silent == 0:
+                            logger.log("Processing object config file '%s'" % cfg_file_name)
                         res.write(os.linesep + '# IMPORTEDFROM=%s' % (cfg_file_name) + os.linesep)
                         res.write(fd.read().decode('utf8', 'replace'))
                         #Be sure to add a line return so we won't mix files
@@ -442,7 +448,8 @@ class Config(Item):
                     for root, dirs, files in os.walk(cfg_dir_name):
                         for file in files:
                             if re.search("\.cfg$", file):
-                                logger.log("Processing object config file '%s'" % os.path.join(root, file))
+                                if self.read_config_silent == 0:
+                                    logger.log("Processing object config file '%s'" % os.path.join(root, file))
                                 try:
                                     res.write(os.linesep + '# IMPORTEDFROM=%s' % (os.path.join(root, file)) + os.linesep)
                                     fd = open(os.path.join(root, file), 'rU')
@@ -517,8 +524,10 @@ class Config(Item):
                 tmp.append("imported_from "+ filefrom)
                 # Get new type
                 elts = re.split('\s', line)
-                tmp_type = elts[1]
-                tmp_type = tmp_type.split('{')[0]
+                # Maybe there was space before and after the type
+                # so we must get all and strip it
+                tmp_type = ' '.join(elts[1:]).strip()
+                tmp_type = tmp_type.split('{')[0].strip()
             else:
                 if in_define:
                     tmp.append(line)
@@ -1259,7 +1268,8 @@ class Config(Item):
         r = self.conf_is_correct
 
         # Globally unamanged parameters
-        logger.log('Checking global parameters...')
+        if self.read_config_silent == 0:
+            logger.log('Checking global parameters...')
         if not self.check_error_on_hard_unmanaged_parameters():
             r = False
             logger.log("check global parameters failed")
@@ -1267,12 +1277,14 @@ class Config(Item):
         for x in ('hosts', 'hostgroups', 'contacts', 'contactgroups', 'notificationways',
                   'escalations', 'services', 'servicegroups', 'timeperiods', 'commands',
                   'hostsextinfo','servicesextinfo'):
-            logger.log('Checking %s...' % (x))
+            if self.read_config_silent == 0:
+                logger.log('Checking %s...' % (x))
             cur = getattr(self, x)
             if not cur.is_correct():
                 r = False
                 logger.log("\t%s conf incorrect !!" % (x))
-            logger.log('\tChecked %d %s' % (len(cur), x))
+            if self.read_config_silent == 0:
+                logger.log('\tChecked %d %s' % (len(cur), x))
 
         # Hosts got a special check for loops
         if not self.hosts.no_loop_in_parents():
@@ -1284,11 +1296,13 @@ class Config(Item):
                    'discoveryrules', 'discoveryruns', 'businessimpactmodulations'):
             try: cur = getattr(self, x)
             except: continue
-            logger.log('Checking %s...' % (x))
+            if self.read_config_silent == 0:
+                logger.log('Checking %s...' % (x))
             if not cur.is_correct():
                 r = False
                 logger.log("\t%s conf incorrect !!" % (x))
-            logger.log('\tChecked %d %s' % (len(cur), x))
+            if self.read_config_silent == 0:
+                logger.log('\tChecked %d %s' % (len(cur), x))
 
         # Look that all scheduler got a broker that will take brok.
         # If there are no, raiea Warning

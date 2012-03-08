@@ -24,6 +24,7 @@
 
 #It's ugly I know....
 from shinken_test import *
+from shinken.misc.regenerator import Regenerator
 
 
 class TestRegenerator(ShinkenTest):
@@ -123,6 +124,9 @@ class TestRegenerator(ShinkenTest):
 
         self.look_for_same_values()
 
+        
+
+        
 
 if __name__ == '__main__':
     unittest.main()

@@ -420,6 +420,19 @@ string_in_file "OK, no more reactionner sent need" $VAR/nagios.log
 string_in_file "OK, no more poller sent need" $VAR/nagios.log
 string_in_file "OK, no more broker sent need" $VAR/nagios.log
 
+# Now we will check what happened when we will an alive satellite, and if another active
+# one got configuration again and again (and so don't work...) or if its managed
+echo "Killing Poller 1"
+
+POLLER1_PID=`ps -fu shinken | grep poller | grep -v test_stack2 | grep -v grep |awk '{print $2, $3}' |grep -E " 1$" | awk '{print $1}'`
+kill $POLLER1_PID
+
+echo "sleep some few seconds to see the arbiter react"
+sleep 5
+# And we look if the arbiter find that the other poller do not need another configuration send
+string_in_file "Skipping configuration 0 send to the poller poller-Master-2 : it already got it" $VAR/nagios.log
+
+
 echo "Now we clean it"
 ./clean.sh
 

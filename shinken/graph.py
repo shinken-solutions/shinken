@@ -1,31 +1,39 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 :
-#    Gabes Jean, naparuba@gmail.com
-#    Gerhard Lausser, Gerhard.Lausser@consol.de
-#    Gregory Starck, g.starck@gmail.com
-#    Hartmut Goebel, h.goebel@goebel-consult.de
+
+# -*- coding: utf-8 -*-
+
+# Copyright (C) 2009-2011 :
+#     Gabes Jean, naparuba@gmail.com
+#     Gerhard Lausser, Gerhard.Lausser@consol.de
+#     Gregory Starck, g.starck@gmail.com
+#     Hartmut Goebel, h.goebel@goebel-consult.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-# Graph is a class to make graph things like DFS checks or accessibility
-# Why use an atomic bomb when a little hammer is enough?
+
+
 
 
 class Graph:
+    """Graph is a class to make graph things like DFS checks or accessibility
+    Why use an atomic bomb when a little hammer is enough?
+    
+    """
+    
     def __init__(self):
         self.nodes = {}
 
@@ -48,7 +56,7 @@ class Graph:
 
         try:
             self.nodes[from_node].append(to_node)
-        # If from_node do not exist, add it with it's son
+        # If from_node does not exist, add it with its son
         except KeyError, exp:
             self.nodes[from_node] = [to_node]
 
@@ -62,7 +70,7 @@ class Graph:
 
         #Now do the job
         for node in self.nodes:
-            #Run the dfs only if the node is not already done */
+            #Run the dfs only if the node has not been already done */
             if node.dfs_loop_status == 'DFS_UNCHECKED':
                 self.dfs_loop_search(node)
             #If LOOP_INSIDE, must be returned
@@ -78,7 +86,7 @@ class Graph:
 
     # DFS_UNCHECKED default value
     # DFS_TEMPORARY_CHECKED check just one time
-    # DFS_OK no problem for node and it's childs
+    # DFS_OK no problem for node and its children
     # DFS_NEAR_LOOP has trouble sons
     # DFS_LOOP_INSIDE is a part of a loop!
     def dfs_loop_search(self, root):
@@ -93,23 +101,23 @@ class Graph:
                 self.dfs_loop_search(child)
                 child_status = child.dfs_loop_status
 
-            # If a child already temporary checked, its a problem,
+            # If a child has already been temporary checked, it's a problem,
             # loop inside, and its a acked status
             if child_status == 'DFS_TEMPORARY_CHECKED':
                 child.dfs_loop_status = 'DFS_LOOP_INSIDE'
                 root.dfs_loop_status = 'DFS_LOOP_INSIDE'
 
-            # If a child already temporary checked, its a problem, loop inside
+            # If a child has already been temporary checked, it's a problem, loop inside
             if child_status in ('DFS_NEAR_LOOP', 'DFS_LOOP_INSIDE'):
-                # if a node is know to be part of a loop, do not let it be less
+                # if a node is known to be part of a loop, do not let it be less
                 if root.dfs_loop_status != 'DFS_LOOP_INSIDE':
                     root.dfs_loop_status = 'DFS_NEAR_LOOP'
-                # We already saw this child, it's a problem
+                # We've already seen this child, it's a problem
                 child.dfs_loop_status = 'DFS_LOOP_INSIDE'
 
         # If root have been modified, do not set it OK
-        # A node is OK if and only if all of his childs are OK
-        # if it does not have child, goes ok
+        # A node is OK if and only if all of its children are OK
+        # if it does not have a child, goes ok
         if root.dfs_loop_status == 'DFS_TEMPORARY_CHECKED':
             root.dfs_loop_status = 'DFS_OK'
 
@@ -117,7 +125,7 @@ class Graph:
     # Get accessibility packs of the graph : in one pack,
     # element are related in a way. Between packs, there is no relation
     # at all.
-    # TODO : Get it work for directionnal graph too
+    # TODO : Make it work for directionnal graph too
     # Because for now, edge must be father->son AND son->father
     def get_accessibility_packs(self):
         packs = []
@@ -137,7 +145,7 @@ class Graph:
         return packs
 
 
-    # Return all mychilds, and all childs of my childs
+    # Return all my children, and all my grandchildren
     def dfs_get_all_childs(self, root):
         root.dfs_loop_status = 'DFS_CHECKED'
 
@@ -148,7 +156,7 @@ class Graph:
         ret.update(self.nodes[root])
 
         for child in self.nodes[root]:
-            # I just don't care about already check childs
+            # I just don't care about already checked childs
             if child.dfs_loop_status == 'DFS_UNCHECKED':
                 ret.update(self.dfs_get_all_childs(child))
 

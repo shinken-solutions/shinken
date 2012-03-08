@@ -22,6 +22,8 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 from shinken.webui.bottle import redirect
+from shinken.misc.filter  import only_related_to
+from shinken.misc.sorter import hst_srv_sort
 
 ### Will be populated by the UI with it's own value
 app = None
@@ -48,7 +50,13 @@ def get_page():
 
     search = app.request.GET.get('search', '')
 
-    pbs = app.datamgr.get_all_problems()
+    pbs = app.datamgr.get_all_problems(to_sort=False)
+    
+    # Filter with the user interests
+    pbs = only_related_to(pbs, user)
+
+    # Sort it now
+    pbs.sort(hst_srv_sort)
 
     # Ok, if need, appli the search filter
     if search:
@@ -104,6 +112,9 @@ def get_all():
 
     all = app.datamgr.get_all_hosts_and_services()
 
+    # Filter or not filter? That is the question....
+    #all = only_related_to(all, user)
+    
     # Ok, if need, appli the search filter
     if search:
         print "SEARCHING FOR", search

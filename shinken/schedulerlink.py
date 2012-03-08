@@ -1,27 +1,30 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 :
-#    Gabes Jean, naparuba@gmail.com
-#    Gerhard Lausser, Gerhard.Lausser@consol.de
-#    Gregory Starck, g.starck@gmail.com
-#    Hartmut Goebel, h.goebel@goebel-consult.de
+
+# -*- coding: utf-8 -*-
+
+# Copyright (C) 2009-2011 :
+#     Gabes Jean, naparuba@gmail.com
+#     Gerhard Lausser, Gerhard.Lausser@consol.de
+#     Gregory Starck, g.starck@gmail.com
+#     Hartmut Goebel, h.goebel@goebel-consult.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#Scheduler is like a satellite for dispatcher
+
 from shinken.satellitelink import SatelliteLink, SatelliteLinks
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 
@@ -30,9 +33,11 @@ from shinken.util import safe_print
 
 
 class SchedulerLink(SatelliteLink):
+    """Please Add a Docstring to describe the class here"""
+    
     id = 0
 
-    #Ok we lie a little here because we are a mere link in fact
+    # Ok we lie a little here because we are a mere link in fact
     my_type = 'scheduler'
 
     properties = SatelliteLink.properties.copy()
@@ -47,6 +52,7 @@ class SchedulerLink(SatelliteLink):
         'conf':      StringProp(default=None),
         'need_conf': StringProp(default=True),
         'external_commands' : StringProp(default=[]),
+        'push_flavor' : IntegerProp(default=0),
     })
 
 
@@ -85,11 +91,12 @@ class SchedulerLink(SatelliteLink):
 
 
     def give_satellite_cfg(self):
-        return {'port' : self.port, 'address' : self.address, 'name' : self.scheduler_name, 'instance_id' : self.id, 'active' : self.conf is not None}
+        return {'port' : self.port, 'address' : self.address, 'name' : self.scheduler_name, 'instance_id' : self.id, 'active' : self.conf is not None,
+                'push_flavor' : self.push_flavor}
 
 
-    #Some parameters can give as 'overriden parameters' like use_timezone
-    #so they will be mixed (in the scheduler) with the standard conf send by the arbiter
+    # Some parameters can give as 'overriden parameters' like use_timezone
+    # so they will be mixed (in the scheduler) with the standard conf sent by the arbiter
     def get_override_configuration(self):
         r = {}
         properties = self.__class__.properties
@@ -99,5 +106,7 @@ class SchedulerLink(SatelliteLink):
         return r
 
 class SchedulerLinks(SatelliteLinks):
+    """Please Add a Docstring to describe the class here"""
+    
     name_property = "scheduler_name"
     inner_class = SchedulerLink

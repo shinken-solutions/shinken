@@ -1,27 +1,28 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 :
-#    Gabes Jean, naparuba@gmail.com
-#    Gerhard Lausser, Gerhard.Lausser@consol.de
-#    Gregory Starck, g.starck@gmail.com
-#    Hartmut Goebel, h.goebel@goebel-consult.de
-#
-#This file is part of Shinken.
-#
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
-#
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
-#
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+# -*- coding: utf-8 -*-
 
-#This class is a wrapper for managing Pyro 3 and 4 version
+# Copyright (C) 2009-2011 :
+#     Gabes Jean, naparuba@gmail.com
+#     Gerhard Lausser, Gerhard.Lausser@consol.de
+#     Gregory Starck, g.starck@gmail.com
+#     Hartmut Goebel, h.goebel@goebel-consult.de
+#
+# This file is part of Shinken.
+#
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+
 
 import select
 import errno
@@ -36,6 +37,8 @@ except ImportError: #ok, no Pyro3, maybe 4
     import Pyro4 as Pyro
 
 
+
+""" This class is a wrapper for managing Pyro 3 and 4 version """
 class InvalidWorkDir(Exception): pass
 class PortNotFree(Exception): pass
 
@@ -68,7 +71,7 @@ try:
             else:
                 prtcol = 'PYRO'
 
-            print "Initializing Pyro connection with host:%s port:%s ssl:%s" % (host, port, use_ssl)
+            print "Info : Initializing Pyro connection with host:%s port:%s ssl:%s" % (host, port, use_ssl)
             # Now the real start
             try:
                 Pyro.core.Daemon.__init__(self, host=host, port=port, prtcol=prtcol, norange=True)
@@ -76,7 +79,7 @@ try:
                 # must be problem with workdir :
                 raise InvalidWorkDir(e)
             except Pyro.errors.DaemonError, e:
-                msg = "Sorry, the port %d is not free: %s" % (port, e)
+                msg = "Error : Sorry, the port %d is not free: %s" % (port, e)
                 raise PortNotFree(msg)
 
         def register(self, obj, name):
@@ -95,7 +98,7 @@ try:
             try:
                 Pyro.core.Daemon.handleRequests(self)    
             # Sometime Pyro send us xml pickling implementation (gnosis) is not available
-            #and I don't know why... :(
+            # and I don't know why... :(
             except NotImplementedError:
                 pass
                 
@@ -147,10 +150,10 @@ except AttributeError, exp:
 
         
         def __init__(self, host, port, use_ssl=False):
-            # Pyro 4 i by default thread, should do select
+            # Pyro 4 is by default a thread, should do select
             # (I hate threads!)
             # And of course the name changed since 4.5...
-            # Since them, we got a better sock reuse, so
+            # Since then, we got a better sock reuse, so
             # before 4.5 we must wait 35 s for the port to stop
             # and in >=4.5 we can use REUSE socket :)
             max_try = 35
@@ -169,21 +172,21 @@ except AttributeError, exp:
             # timewait for close sockets)
             while nb_try < max_try:
                 nb_try += 1
-                print "Initializing Pyro connection with host:%s port:%s ssl:%s" % (host, port, use_ssl)
+                print "Info : Initializing Pyro connection with host:%s port:%s ssl:%s" % (host, port, use_ssl)
                 # And port already use now raise an exception
                 try:
                     Pyro.core.Daemon.__init__(self, host=host, port=port)
                     # Ok, we got our daemon, we can exit
                     break
                 except socket.error, exp:
-                    msg = "Sorry, the port %d is not free : %s" % (port, str(exp))
+                    msg = "Error : Sorry, the port %d is not free : %s" % (port, str(exp))
                     # At 35 (or over), we are very not happy
                     if nb_try >= max_try:
                         raise PortNotFree(msg)
                     print msg, "but we try another time in 1 sec"
                     time.sleep(1)
                 except Exception, e:
-                    # must be problem with pyro workdir :
+                    # must be a problem with pyro workdir :
                     raise InvalidWorkDir(e)
 
 
@@ -223,6 +226,7 @@ except AttributeError, exp:
 
 
 class ShinkenPyroDaemon(PyroClass):
+    """Please Add a Docstring to describe the class here"""
     
     def get_socks_activity(self, timeout):
         try:
@@ -241,4 +245,4 @@ class ShinkenPyroDaemon(PyroClass):
 Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
                     Pyro.errors.CommunicationError, \
                     Pyro.errors.DaemonError, Pyro.errors.ConnectionClosedError, \
-                    Pyro.errors.TimeoutError)
+                    Pyro.errors.TimeoutError, Pyro.errors.NamingError)

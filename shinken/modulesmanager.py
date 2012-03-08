@@ -1,27 +1,29 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 :
-#    Gabes Jean, naparuba@gmail.com
-#    Gerhard Lausser, Gerhard.Lausser@consol.de
-#    Gregory Starck, g.starck@gmail.com
-#    Hartmut Goebel, h.goebel@goebel-consult.de
+
+# -*- coding: utf-8 -*-
+
+# Copyright (C) 2009-2011 :
+#     Gabes Jean, naparuba@gmail.com
+#     Gerhard Lausser, Gerhard.Lausser@consol.de
+#     Gregory Starck, g.starck@gmail.com
+#     Hartmut Goebel, h.goebel@goebel-consult.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This class is use to manage modules and call callback
 
 import os
 import time
@@ -33,7 +35,9 @@ from shinken.basemodule import BaseModule
 from shinken.log import logger
 
 class ModulesManager(object):
-
+    """This class is use to manage modules and call callback"""
+    
+    
     def __init__(self, modules_type, modules_path, modules):
         self.modules_path = modules_path
         self.modules_type = modules_type
@@ -51,8 +55,8 @@ class ModulesManager(object):
         self.manager = manager
 
 
+    # Set the modules requested for this manager
     def set_modules(self, modules):
-        """ Set the modules requested for this manager """
         self.modules = modules
         self.allowed_types = [ mod.module_type for mod in modules ]
 
@@ -61,16 +65,16 @@ class ModulesManager(object):
         self.max_queue_size = max_queue_size
 
 
+    # Import, instanciate & "init" the modules we have been requested
     def load_and_init(self):
-        """ Import, instanciate & "init" the modules we have been requested """
         self.load()
         self.get_instances()
 
 
+    # Try to import the requested modules ; put the imported modules in self.imported_modules.
+    # The previous imported modules, if any, are cleaned before.
     def load(self):
         now = int(time.time())
-        """ Try to import the requested modules ; put the imported modules in self.imported_modules.
-The previous imported modules, if any, are cleaned before. """ 
         # We get all modules file with .py
         modules_files = [ fname[:-3] for fname in os.listdir(self.modules_path) 
                          if fname.endswith(".py") ]
@@ -114,9 +118,9 @@ The previous imported modules, if any, are cleaned before. """
                 logger.log("Warning : the module type %s for %s was not found in modules!" % (module_type, mod_conf.get_name()))
 
 
+    # Try to "init" the given module instance. 
+    # Returns: True on successfull init. False if instance init method raised any Exception.
     def try_instance_init(self, inst):
-        """ Try to "init" the given module instance. 
-Returns: True on successfull init. False if instance init method raised any Exception. """ 
         try:
             logger.log("Trying to init module : %s" % inst.get_name())
             inst.init_try += 1
@@ -141,9 +145,8 @@ Returns: True on successfull init. False if instance init method raised any Exce
             return False
         return True
 
-
+    # Request to "remove" the given instances list or all if not provided
     def clear_instances(self, insts=None):
-        """ Request to "remove" the given instances list or all if not provided """
         if insts is None:
             insts = self.instances[:] # have to make a copy of the list
         for i in insts:
@@ -157,16 +160,16 @@ Returns: True on successfull init. False if instance init method raised any Exce
 
 
     # actually only arbiter call this method with start_external=False..
+    # Create, init and then returns the list of module instances that the caller needs.
+    # If an instance can't be created or init'ed then only log is done. 
+    # That instance is skipped. The previous modules instance(s), if any, are all cleaned.
     def get_instances(self):
-        """ Create, init and then returns the list of module instances that the caller needs.
-If an instance can't be created or init'ed then only log is done. That instance is skipped.
-The previous modules instance(s), if any, are all cleaned. """ 
         self.clear_instances()
         for (mod_conf, module) in self.modules_assoc:
             try:
                 mod_conf.properties = module.properties.copy()
                 inst = module.get_instance(mod_conf)
-                if inst is None: #None = Bad thing happened :)
+                if inst is None: # None = Bad thing happened :)
                     logger.log("get_instance for module %s returned None !" % (mod_conf.get_name()))
                     continue
                 assert(isinstance(inst, BaseModule))
@@ -201,20 +204,20 @@ The previous modules instance(s), if any, are all cleaned. """
                 continue
             
             # ok, init succeed
-            logger.log("Starting external module %s" % inst.get_name())
+            logger.log("Info : Starting external module %s" % inst.get_name())
             inst.start()
 
 
 
-     
+    # Request to cleanly remove the given instance. 
+    # If instance is external also shutdown it cleanly 
     def remove_instance(self, inst):
-        """ Request to cleanly remove the given instance. 
-If instance is external also shutdown it cleanly """
+
         # External instances need to be close before (process + queues)
         if inst.is_external:
-            print "Ask stop process for", inst.get_name()
+            print "Info : Ask stop process for", inst.get_name()
             inst.stop_process()
-            print "Stop process done"
+            print "Info : Stop process done"
         
         inst.clear_queues(self.manager)
 
@@ -223,63 +226,17 @@ If instance is external also shutdown it cleanly """
 
 
     def check_alive_instances(self):
-        #Only for external
+        # Only for external
         for inst in self.instances:
             if not inst in self.to_restart:
                 if inst.is_external and not inst.process.is_alive():
                     logger.log("Error : the external module %s goes down unexpectly!" % inst.get_name())
-                    logger.log("Setting the module %s to restart" % inst.get_name())
+                    logger.log("Info : Setting the module %s to restart" % inst.get_name())
                     # We clean its queues, they are no more useful
                     inst.clear_queues(self.manager)
                     self.to_restart.append(inst)
                     # Ok, no need to look at queue size now
                     continue
-
-                # Maybe the thread's queue of the module got a problem
-                # if so, restart this module
-#                if inst.to_q is not None:
-#                    thr = inst.to_q._thread
-#                    if thr is not None and not thr.is_alive():
-                        # Ok, it's nevera good idea to call a _function, especially
-                        # this one. But we must be sure we do not let the die thread
-#                        try:
-#                            thr._jointhread()
-#                        except Exception, exp:
-#                            print "_jointhread exception :", exp
-                        # Set this queue to start a new thread
-#                        logger.log("Error : the external module %s got a Thread/queue problem!" % inst.get_name())
-#                        inst.to_q._thread = None
-                        
-
-#                        logger.log("Error : the external module %s got a Thread/queue problem!" % inst.get_name())
-#                        logger.log("Setting the module %s to restart" % inst.get_name())
-#                        # We clean its queues, they are no more useful
-#                        inst.clear_queues()
-#                        self.to_restart.append(inst)
-#                        # Ok, no need to look at queue size now
-#                        continue
-
-                # Same for from_q
-#                if inst.from_q is not None:
-#                    thr = inst.from_q._thread
-#                    if thr is not None and not thr.is_alive():
-                        # Ok, it's nevera good idea to call a _function, especially
-                        # this one. But we must be sure we do not let the die thread
-#                        try:
-#                            thr._jointhread()
-#                        except Exception, exp:
-#                            print "_jointhread exception :", exp
-                        # Set this queue to start a new thread
-#                        logger.log("Error : the external module %s got a Thread/queue problem!" % inst.get_name())
-#                        inst.from_q._thread = None
-#                        logger.log("Error : the external module %s got a Thread/queue problem!" % inst.get_name())
-#                        logger.log("Setting the module %s to restart" % inst.get_name())
-#                        # We clean its queues, they are no more useful
-#                        inst.clear_queues()
-#                        self.to_restart.append(inst)
-#                        # Ok, no need to look at queue size now
-#                        continue
-
 
                 # Now look for man queue size. If above value, the module should got a huge problem
                 # and so bailout. It's not a perfect solution, more a watchdog
@@ -294,7 +251,7 @@ If instance is external also shutdown it cleanly """
                     pass
                 if queue_size > self.max_queue_size:
                     logger.log("Error : the external module %s got a too high brok queue size (%s > %s)!" % (inst.get_name(), queue_size, self.max_queue_size))
-                    logger.log("Setting the module %s to restart" % inst.get_name())
+                    logger.log("Info : Setting the module %s to restart" % inst.get_name())
                     # We clean its queues, they are no more useful
                     inst.clear_queues(self.manager)
                     self.to_restart.append(inst)
@@ -307,9 +264,9 @@ If instance is external also shutdown it cleanly """
         to_restart = self.to_restart[:]
         del self.to_restart[:]
         for inst in to_restart:
-            print "I should try to reinit", inst.get_name()
+            print "Info : I should try to reinit", inst.get_name()
             if self.try_instance_init(inst):
-                print "Good, I try to restart",  inst.get_name()
+                print "Info : Good, I try to restart",  inst.get_name()
                 # If it's an external, it will start it
                 inst.start()
                 # Ok it's good now :)

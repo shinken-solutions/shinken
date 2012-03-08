@@ -49,6 +49,9 @@ class TestFlapping(ShinkenTest):
         self.assert_(host.state_type == 'HARD')
         self.assert_(svc.flap_detection_enabled)
 
+        print 'A'*41, svc.low_flap_threshold
+        self.assert_(svc.low_flap_threshold == -1)
+
         # Now 1 test with a bad state
         self.scheduler_loop(1, [[svc, 2, 'Crit']])
         print "******* Current flap change lsit", svc.flapping_changes
@@ -68,6 +71,7 @@ class TestFlapping(ShinkenTest):
         self.assert_(svc.is_flapping)
         #and get a log about it
         self.assert_(self.any_log_match('SERVICE FLAPPING ALERT.*;STARTED'))
+        self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;FLAPPINGSTART'))
 
         # Now we put it as back :)
         # 10 is not enouth to get back as normal
@@ -82,6 +86,7 @@ class TestFlapping(ShinkenTest):
             print "In flapping?", svc.is_flapping
         self.assert_(not svc.is_flapping)
         self.assert_(self.any_log_match('SERVICE FLAPPING ALERT.*;STOPPED'))
+        self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;FLAPPINGSTART'))
 
 if __name__ == '__main__':
     unittest.main()

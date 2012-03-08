@@ -35,6 +35,7 @@ from shinken.pollerlink import PollerLink, PollerLinks
 from shinken.brokerlink import BrokerLink, BrokerLinks
 from shinken.receiverlink import ReceiverLink, ReceiverLinks
 from shinken.util import safe_print
+from shinken.message import Message
 
 
 
@@ -265,7 +266,7 @@ class Regenerator(object):
             new_exclude = []
             for ex in tp.exclude:
                 exname = ex.timeperiod_name
-                t = self.timeperiods(exname)
+                t = self.timeperiods.find_by_name(exname)
                 if t:
                     new_exclude.append(t)
             tp.exclude = new_exclude
@@ -417,6 +418,14 @@ class Regenerator(object):
 
 ############### Brok management part
 
+    def before_after_hook(self, brok, obj):
+        """
+        This can be used by derived classes to compare the data in the brok
+        with the object which will be updated by these data. For example,
+        it is possible to find out in this method whether the state of a
+        host or service has changed.
+        """
+        pass
 
 ####### INITIAL PART
 
@@ -876,6 +885,7 @@ class Regenerator(object):
         h = self.hosts.find_by_name(hname)
 
         if h:
+            self.before_after_hook(b, h)
             self.update_element(h, data)
 
             # We can have some change in our impacts and source problems.
@@ -919,6 +929,7 @@ class Regenerator(object):
         sdesc = data['service_description']
         s = self.services.find_srv_by_name_and_hostname(hname, sdesc)
         if s:
+            self.before_after_hook(b, s)
             self.update_element(s, data)
 
             # We can have some change in our impacts and source problems.
@@ -996,6 +1007,7 @@ class Regenerator(object):
 
         h = self.hosts.find_by_name(hname)
         if h:
+            self.before_after_hook(b, h)
             self.update_element(h, data)
 
 
@@ -1011,6 +1023,7 @@ class Regenerator(object):
         sdesc = data['service_description']
         s = self.services.find_srv_by_name_and_hostname(hname, sdesc)
         if s:
+            self.before_after_hook(b, s)
             self.update_element(s, data)
 
 

@@ -1,24 +1,27 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 :
-#    Gabes Jean, naparuba@gmail.com
-#    Gerhard Lausser, Gerhard.Lausser@consol.de
-#    Gregory Starck, g.starck@gmail.com
-#    Hartmut Goebel, h.goebel@goebel-consult.de
+
+# -*- coding: utf-8 -*-
+
+# Copyright (C) 2009-2011 :
+#     Gabes Jean, naparuba@gmail.com
+#     Gerhard Lausser, Gerhard.Lausser@consol.de
+#     Gregory Starck, g.starck@gmail.com
+#     Hartmut Goebel, h.goebel@goebel-consult.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
 import time
@@ -29,14 +32,14 @@ from shinken.property import BoolProp, IntegerProp, StringProp
 from shinken.autoslots import AutoSlots
 
 class Notification(Action):
+    """Please Add a Docstring to describe the class here"""
+    
     # AutoSlots create the __slots__ with properties and
     # running_properties names
     __metaclass__ = AutoSlots
 
     my_type = 'notification'
 
-    #id = 0 #Is in fact in the Action class to be common with Checks and
-    #events handlers
 
     properties = {
         'is_a' :               StringProp (default='notification'),
@@ -72,6 +75,9 @@ class Notification(Action):
         'worker':              StringProp (default='none'),
         'reactionner_tag':     StringProp (default='None'),
         'creation_time':       IntegerProp(default=0),
+        # Keep a lsit of currently active escalations
+        'already_start_escalations':  StringProp(default=set()),
+
     }
 
     macros = {
@@ -145,12 +151,13 @@ class Notification(Action):
         self.creation_time = time.time()
         self.worker = 'none'
         self.reactionner_tag = reactionner_tag
+        self.already_start_escalations = set()
+        
 
-
-    #return a copy of the check but just what is important for execution
-    #So we remove the ref and all
+    # return a copy of the check but just what is important for execution
+    # So we remove the ref and all
     def copy_shell(self):
-        #We create a dummy check with nothing in it, just defaults values
+        # We create a dummy check with nothing in it, just defaults values
         return self.copy_shell__( Notification('', '', '', '', '', '', '', id=self.id) )
 
 
@@ -167,7 +174,6 @@ class Notification(Action):
 
     def __str__(self):
         return "Notification %d status:%s command:%s ref:%s t_to_go:%s" % (self.id, self.status, self.command, self.ref, time.asctime(time.localtime(self.t_to_go)))
-        #return ''#str(self.__dict__)
 
 
     def get_id(self):
@@ -191,7 +197,7 @@ class Notification(Action):
                 data[prop] = getattr(self, prop)
 
 
-    #Get a brok with initial status
+    # Get a brok with initial status
     def get_initial_status_brok(self):
         data = {'id': self.id}
 
@@ -200,8 +206,8 @@ class Notification(Action):
         return b
 
 
-    #Call by picle for dataify the coment
-    #because we DO NOT WANT REF in this pickleisation!
+    # Call by pickle for dataify the comment
+    # because we DO NOT WANT REF in this pickleisation!
     def __getstate__(self):
         cls = self.__class__
         # id is not in *_properties
@@ -213,7 +219,7 @@ class Notification(Action):
         return res
 
 
-    # Inversed funtion of getstate
+    # Inverted funtion of getstate
     def __setstate__(self, state):
         cls = self.__class__
         self.id = state['id']
@@ -230,4 +236,5 @@ class Notification(Action):
             self.worker = 'none'
         if not getattr(self, 'module_type', None):
             self.module_type = 'fork'
-    
+        if not hasattr(self, 'active_escalations'):
+            self.already_start_escalations = set()

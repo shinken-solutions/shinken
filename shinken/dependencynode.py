@@ -1,9 +1,12 @@
 #!/usr/bin/env python
-# Copyright (C) 2009-2010 :
-#    Gabes Jean, naparuba@gmail.com
-#    Gerhard Lausser, Gerhard.Lausser@consol.de
-#    Gregory Starck, g.starck@gmail.com
-#    Hartmut Goebel, h.goebel@goebel-consult.de
+
+# -*- coding: utf-8 -*-
+
+# Copyright (C) 2009-2011 :
+#     Gabes Jean, naparuba@gmail.com
+#     Gerhard Lausser, Gerhard.Lausser@consol.de
+#     Gregory Starck, g.starck@gmail.com
+#     Hartmut Goebel, h.goebel@goebel-consult.de
 #
 # This file is part of Shinken.
 #
@@ -21,17 +24,13 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-"""
-Here is a node class for dependency_node(s) and a factory to create them
-"""
 
 import re
 
-#pat = "(h1;db | h2;db | h3;db) & (h4;Apache & h5;Apache & h6;Apache) & (h7;lvs | h8;lvs)"
-#pat2 = "h1;db | h2;db"
-#pat3 = "(h1;db | h2;db | h3;db) & (h4;Apache & h5;Apache)"
-#pat4 = "2 of: h1;db | h2;db | h3;db"
 
+"""
+Here is a node class for dependency_node(s) and a factory to create them
+"""
 class DependencyNode(object):
     def __init__(self):
         self.operand = None
@@ -80,28 +79,35 @@ class DependencyNode(object):
             st = s.get_state()
             states.append(st)
 
-        # We will surely need the worse state
-        worse_state = max(states)
-
+        # We will surely need the worst state
+        worst_state = max(states)
+        
+        
+        # Suggestion : What about returning min(states) for the | operand?
+        # We don't need make a difference between an 0 and another no?
+        # If you do so, it may be more efficient with lots of services
+        # or host to return OK, but otherwise I can't see the reason for
+        # this subcase.
+        
         # We look for the better state but not OK/UP
         no_ok = [s for s in states if s != 0]
         if len(no_ok) != 0:
-            better_no_good = min(no_ok)
+            best_not_good = min(no_ok)
 
         # Now look at the rule. For a or
         if self.operand == '|':
             if 0 in states:
                 #print "We find a OK/UP match in an OR", states
                 return 0
-            # no ok/UP-> return worse state
+            # no ok/UP-> return worst state
             else:
-                #print "I send the better no good state...in an OR", better_no_good, states
-                return better_no_good
+                #print "I send the best not good state...in an OR", best_not_good, states
+                return best_not_good
 
-        # With an AND, we just send the worse state
+        # With an AND, we just send the worst state
         if self.operand == '&':
-            #print "We raise worse state for a AND", worse_state,states
-            return worse_state
+            #print "We raise worst state for a AND", worst_state,states
+            return worst_state
 
         # Ok we've got a 'of:' rule
         # We search for OK, WARN or CRIT applications
@@ -120,7 +126,7 @@ class DependencyNode(object):
 
         # Ok and Crit apply with their own values
         # Warn can apply with warn or crit values
-        # so a W C can raise a Warning, but not enouth for 
+        # so a W C can raise a Warning, but not enough for 
         # a critical
         ok_apply = nb_ok >= nb_search_ok
         warn_apply = nb_warn + nb_crit >= nb_search_warn
@@ -128,7 +134,7 @@ class DependencyNode(object):
 
         #print "What apply?", ok_apply, warn_apply, crit_apply
 
-        # return the worse state that apply
+        # return the worst state that apply
         if crit_apply:
             return 2
 
@@ -138,30 +144,30 @@ class DependencyNode(object):
         if ok_apply:
             return 0
 
-        # Maybe even OK is not possible, is so, it depend if the admin
+        # Maybe even OK is not possible, if so, it depends if the admin
         # ask a simple form Xof: or a multiple one A,B,Cof:
-        # the simple should give OK, the mult should give the worse state
+        # the simple should give OK, the mult should give the worst state
         if self.is_of_mul:
             #print "Is mul, send 0"
             return 0
         else:
-            #print "not mul, return worse", worse_state
-            return worse_state
+            #print "not mul, return worst", worse_state
+            return worst_state
 
 
 
-    #return a list of all host/service in our node and below
+    # return a list of all host/service in our node and below
     def list_all_elements(self):
         r = []
 
-        #We are a host/service
+        # We are a host/service
         if self.operand in ['host', 'service']:
             return [self.sons[0]]
 
         for s in self.sons:
             r.extend(s.list_all_elements())
 
-        #and uniq the result
+        # and uniq the result
         return list(set(r))
 
 
@@ -177,9 +183,9 @@ class DependencyNode(object):
         self.of_values = tuple(self.of_values)
         
 
-
+    # Check for empty (= not found) leaf nodes
     def is_valid(self):
-        """Check for empty (= not found) leaf nodes"""
+        
         valid = True
         if not self.sons:
             valid = False
@@ -192,7 +198,7 @@ class DependencyNode(object):
             
 
 
-
+""" TODO : Add some comment about this class for the doc"""
 class DependencyNodeFactory(object):
     def __init__(self):
         pass
@@ -235,7 +241,7 @@ class DependencyNodeFactory(object):
         if not complex_node:
             #print "Try to find?", patern
             # If it's a not value, tag the node and find
-            # the namewithout this ! operator
+            # the name without this ! operator
             if patern.startswith('!'):
                 node.not_value = True
                 patern = patern[1:]
@@ -280,6 +286,7 @@ class DependencyNodeFactory(object):
                     current_rule = node.operand
                     #print "Current rule", current_rule
                     if current_rule is not None and current_rule != 'of:' and c != current_rule:
+                        # Should be logged as a warning / info ? :)
                         #print "Fuck, you mix all dumbass!"
                         return None
                     if current_rule != 'of:':

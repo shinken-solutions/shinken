@@ -22,11 +22,14 @@
         <div class="nav-controll"> 
           <ul class="nav pull-right"> 
             <li class="divider-vertical"></li>
-            %if app.datamgr.get_nb_problems() > 10:
-            <li><a href="#" class="quickinfo" data-original-title='Impacts'><i class="icon-impact"></i><span class="pulsate badger badger-critical">{{app.datamgr.get_nb_problems()}}</span> </a></li>
-            %else:
-            <li><a href="#" class="quickinfo" data-original-title='Impacts'><i class="icon-impact"></i><span class="pulsate badger badger-warning">{{app.datamgr.get_nb_problems()}}</span> </a></li>
-            %end
+	    %if app:
+	      %overall_state = app.datamgr.get_overall_state()
+              %if overall_state == 2:
+              <li><a href="#" class="quickinfo" data-original-title='Impacts'><i class="icon-impact"></i><span class="pulsate badger badger-critical">{{app.datamgr.get_nb_problems()}}</span> </a></li>
+              %elif overall_state == 1:
+              <li><a href="#" class="quickinfo" data-original-title='Impacts'><i class="icon-impact"></i><span class="pulsate badger badger-warning">{{app.datamgr.get_nb_problems()}}</span> </a></li>
+              %end
+	    %end
            <!-- <li><a href="#" class="quickinfo" data-original-title='Settings'><i class="icon-setting"></i></a></li>-->
             <li><a href="/user/logout" class="quickinfo" data-original-title='Logout'><i class="icon-logout"></i></a></li>
           </ul>           

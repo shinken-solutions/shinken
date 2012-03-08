@@ -7,7 +7,7 @@
 %top_right_banner_state = datamgr.get_overall_state()
 
 
-%rebase layout title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/img_hovering.js', 'problems/js/accordion.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css', 'problems/css/perfometer.css', 'problems/css/img_hovering.css'], refresh=True, menu_part='/'+page, user=user
+%rebase layout globals(), title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/img_hovering.js', 'problems/js/accordion.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css', 'problems/css/perfometer.css', 'problems/css/img_hovering.css'], refresh=True, menu_part='/'+page, user=user 
 
 
 %# " If the auth got problem, we bail out"
@@ -144,8 +144,8 @@ $(document).ready(function() {
 		    %# " We put a 'pulse' around the elements if it's an important one "
 		    %if pb.business_impact > 2 and pb.state_id in [1, 2, 3]:
 		         <span class="pulse"></span>
-		      %end
-		        <img style="width: 16px; height : 16px;" src="{{helper.get_icon_state(pb)}}" /></div>
+	            %end
+		    <img src="{{helper.get_icon_state(pb)}}" /></div>
 		</td>
 		%if pb.host_name == last_hname:
 		   <td class="hostname"> </td>
@@ -160,13 +160,13 @@ $(document).ready(function() {
                   <td class="srvdescription"></td>
                 %end
 		<td class='txt_status state_{{pb.state.lower()}}'> {{pb.state}}</td>
-		<td class='duration' title='{{helper.print_date(pb.last_state_change)}}'>{{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}</td>
+		<td class='duration' rel="tooltip" data-original-title='{{helper.print_date(pb.last_state_change)}}'>{{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}</td>
 		%# "We put a title (so a tip) on the output onlly if need"
 		%if len(pb.output) > 100:
 		   %if app.allow_html_output:
-		      <td class='output' title="{{pb.output}}"> {{!helper.strip_html_output(pb.output[:100])}}</td>
+		      <td class='output' rel="tooltip" data-original-title="{{pb.output}}"> {{!helper.strip_html_output(pb.output[:100])}}</td>
 		   %else:
-		      <td class='output' title="{{pb.output}}"> {{pb.output[:100]}}
+		      <td class='output' rel="tooltip" data-original-title="{{pb.output}}"> {{pb.output[:100]}}
 		   %end
 		%else:
 		   %if app.allow_html_output:

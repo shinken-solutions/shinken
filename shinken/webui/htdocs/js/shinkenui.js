@@ -59,6 +59,8 @@ $(function() {
 
 $(function(){
     $('a[rel=tooltip]').tooltip();
+    $('tr[rel=tooltip]').tooltip();
+    $('td[rel=tooltip]').tooltip();
 });
 
 /**
