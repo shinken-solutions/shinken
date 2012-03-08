@@ -1,4 +1,4 @@
-%rebase layout title='Shinken UI login', print_menu=False, js=['login/js/jQuery.dPassword.js', 'login/js/iPhonePassword.js'], css=['login/css/login.css']
+%rebase layout title='Shinken UI login', print_menu=False, js=['login/js/jQuery.dPassword.js'], css=['login/css/login.css']
 
 
 <div id="login_container" class="span9">
@@ -31,4 +31,9 @@
       </form>
     </div>
   </div>
+  <script type="text/javascript">
+    $(document).ready( function() {
+      $('input:password').dPassword();
+    });
+  </script>
 </div>
