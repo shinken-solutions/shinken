@@ -3,7 +3,7 @@
  *
  * licensed under MIT License
  *
- * Copyright (c) 2009 DECAF°, Stefan Ullrich (http://decaf.de)
+ * Copyright (c) 2009 DECAFï¿½, Stefan Ullrich (http://decaf.de)
  *
  * Permission is hereby granted, free of charge, to any person obtaining 
  * a copy of this software and associated documentation files (the "Software"), 
@@ -37,10 +37,10 @@
 
       var defaults = {
          interval:      200,
-         duration:      1500,
+         duration:      500,
          replacement:   '%u25CF',
          prefix:        'password_',
-         debug:  			false
+         debug:  	false
       }
 
       var opts    = $.extend(defaults, options);
