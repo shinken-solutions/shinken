@@ -3,7 +3,7 @@
 %helper = app.helper
 %datamgr = app.datamgr
 
-%title = {'problems' : 'All problems', 'all' : 'All elements'}.get(page, 'Unknown page')
+%title = {'problems' : 'IT problems', 'all' : 'All elements'}.get(page, 'Unknown page')
 
 %top_right_banner_state = datamgr.get_overall_state()
 
@@ -81,10 +81,10 @@ document.addEvent('domready', function() {
 					</div>
 					<div class="tac_content">
 						<div class="tac_col_1">
-							<a href="/problems" style="padding-top:0;">{{app.datamgr.get_nb_all_problems()}}</a>
+							<a href="/problems/{{show}}" style="padding-top:0;">{{app.datamgr.get_nb_all_problems()}}</a>
 						</div>
 						<div class="tac_col_2">
-							<a href="/problems" style="padding-top:0;">{{app.datamgr.get_nb_problems()}}</a>
+							<a href="/problems/{{show}}" style="padding-top:0;">{{app.datamgr.get_nb_problems()}}</a>
 						</div>
 						<div class="tac_col_3">
 							<a href="/all" style="padding-top:0;">{{app.datamgr.get_nb_elements()}}</a>
@@ -94,7 +94,7 @@ document.addEvent('domready', function() {
 
       <li class="left_title"><a href="#">Search</a></li>
       <li>
-				<form method="get" id="search_form" action="/{{page}}">
+				<form method="get" id="search_form" action="/{{page}}/{{show}}">
 					<span class="table">
 						<span class="row">
 							<span class="cell">
@@ -108,6 +108,13 @@ document.addEvent('domready', function() {
 						</span>
 					</span>
 				</form>
+      </li>
+
+      <li class="left_title"><a href="#">Filter</a></li>
+      <li>
+                                <a href="/problems/all">See All</a>
+                                <a href="/problems/warning">See Warnings</a>
+                                <a href="/problems/critical">See Critical only</a>
       </li>
     </ul>
   </div>
@@ -145,9 +152,9 @@ document.addEvent('domready', function() {
 	     %elif start == None or end == None:
 		<span class='extend'>...</span>
 	     %elif search:
-                <a href='/{{page}}?start={{start}}&end={{end}}&search={{search}}' class='page larger'>{{name}}</a>
+                <a href='/{{page}}/{{show}}?start={{start}}&end={{end}}&search={{search}}' class='page larger'>{{name}}</a>
              %else:
-		<a href='/{{page}}?start={{start}}&end={{end}}' class='page larger'>{{name}}</a>
+		<a href='/{{page}}/{{show}}?start={{start}}&end={{end}}' class='page larger'>{{name}}</a>
 	     %end
           %end
 	</div>
@@ -322,7 +329,7 @@ document.addEvent('domready', function() {
 	     %elif start == None or end == None:
 		<span class='extend'>...</span>
              %else:
-		<a href='/{{page}}?start={{start}}&end={{end}}' class='page larger'>{{name}}</a>
+		<a href='/{{page}}/{{show}}?start={{start}}&end={{end}}' class='page larger'>{{name}}</a>
 	     %end
           %end
 	</div>
