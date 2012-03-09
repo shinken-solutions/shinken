@@ -50,5 +50,5 @@ Invalid element
 %#End of the Host Exist or not case
 %end
 
-%include footer
+
 
