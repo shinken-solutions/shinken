@@ -22,18 +22,16 @@
 */
 
 
-window.addEvent('domready', function(){
+$(document).ready(function(){
 
     // First we make opacity low for distant
-    var details = $$('.detail');
-    details.each(function(el){
-	new Fx.Slide(el).hide();
-    });
+    var details = $('.detail');
+    details.hide();
 });
 
 
 
 /* And if the user lick on the good image, we untoggle them. */
 function show_detail(name){
-    var myFx = new Fx.Slide(name).toggle();
+    $('#'+name).toggle();
 }
