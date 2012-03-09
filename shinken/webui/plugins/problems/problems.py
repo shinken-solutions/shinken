@@ -31,7 +31,7 @@ app = None
 import re
 
 # Our page
-def get_page():
+def get_page(show='all'):
     
     # First we look for the user sid
     # so we bail out if it's a false one
@@ -93,12 +93,12 @@ def get_page():
 #    print "get all problems:", pbs
 #    for pb in pbs :
 #        print pb.get_name()
-    return {'app' : app, 'pbs' : pbs, 'valid_user' : True, 'user' : user, 'navi' : navi, 'search' : search, 'page' : 'problems'}
+    return {'app' : app, 'pbs' : pbs, 'valid_user' : True, 'user' : user, 'navi' : navi, 'search' : search, 'page' : 'problems', 'show' : show}
 
 
 
 # Our page
-def get_all():
+def get_all(show='all'):
     
     user = app.get_user_auth()
     if not user:
@@ -147,11 +147,11 @@ def get_all():
     navi = app.helper.get_navi(total, start, step=30)
     all = all[start:end]
 
-    return {'app' : app, 'pbs' : all, 'valid_user' : True, 'user' : user, 'navi' : navi, 'search' : search, 'page' : 'all'}
+    return {'app' : app, 'pbs' : all, 'valid_user' : True, 'user' : user, 'navi' : navi, 'search' : search, 'page' : 'all', 'show' : show}
 
 
 
-pages = {get_page : { 'routes' : ['/problems'], 'view' : 'problems', 'static' : True},
+pages = {get_page : { 'routes' : ['/problems/:show'], 'view' : 'problems', 'static' : True},
          get_all : { 'routes' : ['/all'], 'view' : 'problems', 'static' : True},
          }
 
