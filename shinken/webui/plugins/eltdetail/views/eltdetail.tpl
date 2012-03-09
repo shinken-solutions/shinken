@@ -287,7 +287,7 @@ Invalid element name
 			 %end
 			 </div>
 			%end #of the only host part
-			</div>
+			
 
 			<!-- If we are a root problem and got real impacts, show them! -->
 			%if elt.is_problem and len(elt.impacts) != 0:
@@ -394,6 +394,6 @@ Invalid element name
 	    </div>
 	   
     </div>
-
+</div>
 %#End of the Host Exist or not case
 %end
