@@ -75,6 +75,16 @@
   border-color: rgba(0, 0, 0, 0.15);
 }
 
+.alert-small {
+  background-color: #999999;
+  border-radius: 3px 3px 3px 3px;
+  color: #FFFFFF;
+  font-size: 11.05px;
+  font-weight: bold;
+  padding: 2px 4px 3px;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+}
+
 .alert-critical, .alert-down {
     color: #FFFFFF;
     background-color: #e10000;

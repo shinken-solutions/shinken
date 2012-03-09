@@ -178,7 +178,7 @@ Invalid element name
 		    	<table class="span10 table table-striped table-bordered table-condensed">
 			  <tr>
 			    <td class="column1">{{elt_type.capitalize()}} Status</td>
-			    <td><span class="alert-{{elt.state.lower()}}">{{elt.state}}</span> (since {{helper.print_duration(elt.last_state_change, just_duration=True, x_elts=2)}}) </td>
+			    <td><span class="alert-small alert-{{elt.state.lower()}}">{{elt.state}}</span> (since {{helper.print_duration(elt.last_state_change, just_duration=True, x_elts=2)}}) </td>
 			  </tr>
 			  <tr>
 			    <td class="column1">Status Information</td>
