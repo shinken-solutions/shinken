@@ -1,3 +1,4 @@
+
 #!/usr/bin/python
 #Copyright (C) 2012 Durieux David, d.durieux@siprossii.com
 #
@@ -41,7 +42,7 @@ def get_instance(plugin):
     uri = plugin.uri
     login_name = plugin.login_name
     login_password = plugin.login_password
-    tag = plugin.tag
+    tag = getattr(plugin, 'tag', "")
     instance = Glpi_arbiter(plugin, uri, login_name, login_password, tag)
     return instance
 
