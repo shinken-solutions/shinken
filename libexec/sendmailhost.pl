@@ -23,7 +23,7 @@ $text = "***** Notification Shinken *****\n\n"
         . "Date/Time : $SHORTDATETIME\n\n"
         . "Host output : $HOSTOUTPUT";
 
-$texthtml = " <center><table border='11><th><strong>***** Notification Shinken *****</strong></th></table></center>\n";
+$texthtml = " <center><strong>***** Notification Shinken *****</strong></center>\n";
 
 $color="blue";
 if ($NOTIFICATIONTYPE =~ /RECOVERY/) {
@@ -35,11 +35,11 @@ if ($NOTIFICATIONTYPE =~ /PROBLEM/) {
 
 $HOSTOUTPUT =~ s/=/&#61;/g;
 
-$texthtml = $texthtml  . "<strong>Notification type : <span style='ccolor:$color> $NOTIFICATIONTYPE </span></strong>\n\n";
+$texthtml = $texthtml  . "<strong>Notification type : <span style='color:$color> $NOTIFICATIONTYPE </span></strong>\n\n";
 
 if ($DOWNTIME != 0) {
         $color="#3333FF";
-	$texthtml = $texthtml . "<strong><i><span style='ccolor:$color>This device is actually in maintenance.</span></i></strong>\n\n";
+	$texthtml = $texthtml . "<strong><i><span style='color:$color>This device is actually in maintenance.</span></i></strong>\n\n";
 }
 
 if ($HOSTSTATE =~ /DOWN/) {
@@ -54,7 +54,7 @@ if ($HOSTSTATE =~ /UNREACHABLE/) {
 
 $texthtml = $texthtml  . "<strong>Impacted host</strong> : $HOSTNAME\n"
 	. "<strong>Address</strong> : <i>$HOSTADDRESS</i> \n"
-	. "<strong>Host State : <span style='ccolor:$color> $HOSTSTATE </span></strong>\n"
+	. "<strong>Host State : <span style='color:$color> $HOSTSTATE </span></strong>\n"
 	. "<strong>Date/Time</strong> : <i>$SHORTDATETIME</i> \n\n"
 	. "<strong>Host Output</strong> : $HOSTOUTPUT \n\n\n\n";
 
@@ -72,7 +72,7 @@ $plain = encode_qp $text;
 #$html = encode_entities($texthtml);
 $html = $texthtml;
 $html =~ s/\n\n/\n\n<p>/g;
-$html =~ s/\n/<br>\n/g;
+$html =~ s/\n/<br\/>\n/g;
 $html = "<p>" . $html . "</p>";
 
 $boundary = '--'.$boundary;

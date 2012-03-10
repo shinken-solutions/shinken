@@ -60,7 +60,7 @@ if ($NOTIFICATIONTYPE =~ /RECOVERY/){
 
 $texthtml = $texthtml  . "<strong>Notification : <span style='color:$color>$NOTIFICATIONTYPE</span></strong>\n\n"
 	. "<strong>Impacted service : <i>$SERVICEDESC</i></strong>\n"
-	. "<strong>State : <span style='ccolor:$colorstate>$SERVICESTATE</span></strong>\n\n";
+	. "<strong>State : <span style='color:$colorstate>$SERVICESTATE</span></strong>\n\n";
 
 $texthtml = $texthtml  . "<strong>Host</strong> : $HOSTNAME\n"
 	. "<strong>Address</strong> : <i>$HOSTADDRESS</i>\n"
