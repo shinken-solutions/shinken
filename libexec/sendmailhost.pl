@@ -35,11 +35,11 @@ if ($NOTIFICATIONTYPE =~ /PROBLEM/) {
 
 $HOSTOUTPUT =~ s/=/&#61;/g;
 
-$texthtml = $texthtml  . "<strong>Notification type : <span style='color:$color> $NOTIFICATIONTYPE </span></strong>\n\n";
+$texthtml = $texthtml  . "<strong>Notification type : <span style='color:$color'> $NOTIFICATIONTYPE </span></strong>\n\n";
 
 if ($DOWNTIME != 0) {
         $color="#3333FF";
-	$texthtml = $texthtml . "<strong><i><span style='color:$color>This device is actually in maintenance.</span></i></strong>\n\n";
+	$texthtml = $texthtml . "<strong><i><span style='color:$color'>This device is actually in maintenance.</span></i></strong>\n\n";
 }
 
 if ($HOSTSTATE =~ /DOWN/) {

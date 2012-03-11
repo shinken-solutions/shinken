@@ -110,6 +110,17 @@ class Glpi_arbiter(BaseModule):
         # Get hosts
         all_hosts = self.con.monitoring.shinkenHosts(arg)
         print "Get all hosts", all_hosts
+        attributs = ['display_name', 'hostgroups', 'initial_state', 
+                     'active_checks_enabled', 'passive_checks_enabled', 'obsess_over_host', 
+                     'check_freshness', 'freshness_threshold', 'event_handler', 
+                     'event_handler_enabled', 'low_flap_threshold ', 'high_flap_threshold', 
+                     'flap_detection_enabled', 'flap_detection_options', 'retain_status_information', 
+                     'retain_nonstatus_information', 'contact_groups', 'first_notification_delay', 
+                     'notifications_enabled', 'stalking_options', 'notes', 
+                     'notes_url', 'action_url', 'icon_image', 
+                     'icon_image_alt', 'vrml_image', 'statusmap_image', 
+                     '2d_coords', '3d_coords', 'realm', 
+                     'poller_tag', 'business_impact']
         for host_info in all_hosts:
             print "\n\n"
             print "Host info in GLPI", host_info
@@ -127,6 +138,9 @@ class Glpi_arbiter(BaseModule):
                  'notification_interval' : host_info['notification_interval'],
                  'notification_period' : host_info['notification_period'],
                  'notification_options' : host_info['notification_options']};
+            for attribut in attributs:
+                if attribut in host_info:
+                    h[attribut] = host_info[attribut]
             r['hosts'].append(h)
 
 	# Get templates
@@ -154,8 +168,8 @@ class Glpi_arbiter(BaseModule):
         # Get services
         all_services = self.con.monitoring.shinkenServices(arg)
         print "Get all services", all_services
-        attributs = ['host_name', 'service_description', 'use',
-                     'check_command', 'check_interval', 'retry_interval',
+        attributs = ['host_name', 'hostgroup_name', 'service_description', 
+                     'use', 'check_command', 'check_interval', 'retry_interval',
                      'max_check_attempts', 'check_period', 'contacts',
                      'notification_interval', 'notification_period', 'notification_options',
                      'active_checks_enabled', 'process_perf_data',
@@ -163,7 +177,14 @@ class Glpi_arbiter(BaseModule):
                      'check_freshness', 'freshness_threshold', 'notifications_enabled',
                      'event_handler_enabled', 'event_handler', 'flap_detection_enabled',
                      'failure_prediction_enabled', 'retain_status_information', 'retain_nonstatus_information',
-                     'is_volatile', '_httpstink']
+                     'is_volatile', '_httpstink',
+                     'display_name', 'servicegroups', 'initial_state',
+                     'low_flap_threshold', 'high_flap_threshold', 'flap_detection_options',
+                     'first_notification_delay', 'notifications_enabled', 'contact_groups',
+                     'stalking_options', 'notes', 'notes_url',
+                     'action_url', 'icon_image', 'icon_image_alt',
+                     'poller_tag', 'service_dependencies', 'business_impact']
+
         for service_info in all_services:
             print "\n\n"
             print "Service info in GLPI", service_info
