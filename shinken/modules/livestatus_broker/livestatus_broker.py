@@ -38,6 +38,7 @@ import traceback
 import Queue
 import threading
 
+from shinken.macroresolver import MacroResolver
 from shinken.basemodule import BaseModule
 from shinken.message import Message
 from shinken.log import logger
@@ -111,6 +112,8 @@ class LiveStatus_broker(BaseModule, Daemon):
     def init(self):
         print "Init of the Livestatus '%s'" % self.name
         self.prepare_pnp_path()
+        m = MacroResolver()
+        m.output_macros = ['HOSTOUTPUT', 'HOSTPERFDATA', 'HOSTACKAUTHOR', 'HOSTACKCOMMENT', 'SERVICEOUTPUT', 'SERVICEPERFDATA', 'SERVICEACKAUTHOR', 'SERVICEACKCOMMENT']
 
     def prepare_pnp_path(self):
         if not self.pnp_path:
