@@ -160,7 +160,7 @@ function toggle_checks(name, b){
     //alert('toggle_active_checks::'+hname+b);
     var elts = get_elements(name);
     // Inverse the active check or not for the element
-    if(b == 'True'){ // go disable
+    if(b){ // go disable
 	var url = '/action/DISABLE_'+elts.type+'_CHECK/'+elts.nameslash;
 	launch(url);
 	var url = '/action/DISABLE_PASSIVE_'+elts.type+'_CHECKS/'+elts.nameslash;
@@ -188,7 +188,7 @@ function toggle_notifications(name, b){
     var elts = get_elements(name);
     //alert('toggle_active_checks::'+hname+b);
     // Inverse the active check or not for the element
-    if(b == 'True'){ // go disable
+    if(b){ // go disable
         var url = '/action/DISABLE_'+elts.type+'_NOTIFICATIONS/'+elts.nameslash;
         launch(url);
     }else{ // Go enable
@@ -202,7 +202,7 @@ function toggle_event_handlers(name, b){
     var elts = get_elements(name);
     //alert('toggle_active_checks::'+hname+b);
     // Inverse the active check or not for the element
-    if(b == 'True'){ // go disable
+    if(b){ // go disable
         var url = '/action/DISABLE_'+elts.type+'_EVENT_HANDLER/'+elts.nameslash;
         launch(url);
     }else{ // Go enable
@@ -214,9 +214,9 @@ function toggle_event_handlers(name, b){
 
 function toggle_flap_detection(name, b){
     var elts = get_elements(name);
-    //alert('toggle_active_checks::'+hname+b);
+    //alert('toggle_flap::'+name+b);
     // Inverse the active check or not for the element
-    if(b == 'True'){ // go disable
+    if(b){ //go disable
         var url = '/action/DISABLE_'+elts.type+'_FLAP_DETECTION/'+elts.nameslash;
         launch(url);
     }else{ // Go enable

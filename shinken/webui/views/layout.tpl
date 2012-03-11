@@ -35,6 +35,7 @@
     <link href="/static/css/elements/jquery.meow.css" rel="stylesheet">
     <link href="/static/css/elements/header-element.css" rel="stylesheet">
     <link href="/static/css/custom/deptree.css" rel="stylesheet">
+    <link href="/static/css/custom/buttons.css" rel="stylesheet">
 
     %# And now for css files
       %for p in css:

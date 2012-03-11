@@ -109,17 +109,32 @@ Invalid element name
 
 	<!-- Switch Start -->
 	<div class="btn-group span12 no-leftmargin bottommargin" data-toggle="buttons-checkbox">
-		<button class="btn">Active/passive Checks</button>
-		<button class="btn">Notifications</button>
-		<button class="btn">Event Handler</button>
-		<button class="btn">Flap Detection</button>
+	  %# By default all is unabled
+	  % chk_cls = not_cls = evt_cls = flp_cls = '' 
+	  %if not (elt.active_checks_enabled|elt.passive_checks_enabled):
+	    %chk_cls = 'active'
+	  %end
+	  %if not elt.notifications_enabled:
+	     %not_cls = 'active'
+	  %end
+	  %if not elt.event_handler_enabled:
+	     %evt_cls = 'active'
+	  %end
+	  %if not elt.flap_detection_enabled:
+	     %flp_cls = 'active'
+	  %end
+		<button class="btn btn-onoff {{chk_cls}}" onclick='toggle_checks("{{elt.get_full_name()}}" , !$(this).hasClass("active"))'>Active/passive Checks</button>
+		<button class="btn btn-onoff {{not_cls}}" onclick='toggle_notifications("{{elt.get_full_name()}}" , !$(this).hasClass("active"))'>Notifications</button>
+		<button class="btn btn-onoff {{evt_cls}}" onclick='toggle_event_handlers("{{elt.get_full_name()}}", !$(this).hasClass("active"))'>Event Handler</button>
+		<button class="btn btn-onoff {{flp_cls}}" onclick='toggle_flap_detection("{{elt.get_full_name()}}" , !$(this).hasClass("active"))' >Flap Detection</button>
 	</div>
 
 	<div class="btn-group span5 right">
 	  %if elt_type=='host':
 	     <a class="btn dropdown-toggle span6" data-toggle="dropdown" href="#"><span class="pull-left"><i class="icon-cog"></i> Host Commands</span> <span class="caret pull-right"></span></a>
 	  %else:
-	     <a class="btn dropdown-toggle span6" data-toggle="dropdown" href="#"><span class="pull-left"><i class="icon-cog"></i>Service Commands</span> <span class="caret pull-right"></span></a>
+	     <a class="btn dropdown-toggle span6"
+	  data-toggle="dropdown" href="#"><span class="pull-left"><i class="icon-cog"></i> Service Commands</span> <span class="caret pull-right"></span></a>
 	  %end:
 	  <ul class="dropdown-menu plus6 no-maxwidth">
 	    <li><a href="#"><i class="icon-pencil"></i> Try to fix it!</a></li>
