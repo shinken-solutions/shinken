@@ -109,10 +109,10 @@ Invalid element name
 
 	<!-- Switch Start -->
 	<div class="btn-group span12 no-leftmargin bottommargin" data-toggle="buttons-checkbox">
-		<button class="btn">Active/passive Checks</button>
-		<button class="btn">Notifications</button>
-		<button class="btn">Event Handler</button>
-		<button class="btn">Flap Detection</button>
+		<button class="btn btn-onoff">Active/passive Checks</button>
+		<button class="btn btn-onoff">Notifications</button>
+		<button class="btn btn-onoff">Event Handler</button>
+		<button class="btn btn-onoff">Flap Detection</button>
 	</div>
 
 	<div class="btn-group span5 right">
