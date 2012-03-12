@@ -68,7 +68,7 @@
 	</div>
       
 	<div class="right-panel">
-		<a href="/3dimpacts" class="mb" title="Show impacts in 3D mode.">{{!helper.get_button('Show impacts in 3d', img='/static/images/state_ok.png')}}</a>
+		<a href="/3dimpacts" class="btn" title="Show impacts in 3D mode."><i class="icon-play-circle"></i> Show impacts in 3d</a>
 	</div> 
 
 
@@ -85,7 +85,8 @@
 	
 	    <div class="problems-panel" id="problems-{{imp_id}}" style="visibility: hidden; zoom: 1; opacity: 0; ">
 		<div class="right-panel-top"> 
-			<div class="pblink" id="{{imp_id}}"> <img style="width: 16px;height: 16px;" src='/static/images/disabled.png'> Close </div>
+		  <a href="#a" class="pblink btn" id="{{imp_id}}"> <i class="icon-remove"></i> Close</a>
+		  
 		</div>
 		
 		<br style="clear: both">
@@ -102,8 +103,8 @@
 		</center>-->
 	
 		<div style="float:right;">
-			<a href="{{!helper.get_link_dest(impact)}}">{{!helper.get_button('Go to details', img='/static/images/search.png')}}</a>
-		    <a href="/depgraph/{{impact.get_full_name()}}" class="mb" title="Impact map of {{impact.get_full_name()}}">{{!helper.get_button('Show impact map', img='/static/images/state_ok.png')}}</a>
+		  <a href="{{!helper.get_link_dest(impact)}}" class='btn'><i class="icon-search"></i> Details</a>
+		  <a href="/depgraph/{{impact.get_full_name()}}" class='btn' title="Impact map of {{impact.get_full_name()}}"> <i class="icon-map-marker"></i> Show impact map</a>
 		</div>
 	
 		%##### OK, we print root problem NON ack first

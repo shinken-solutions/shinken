@@ -178,6 +178,16 @@ class DataManager(object):
         return max(h_state, s_state)
 
 
+    # For all business impacting elements, and give the worse state
+    # if warning or critical
+    def get_len_overall_state(self):
+        h_states = [h.state_id for h in self.rg.hosts if h.business_impact > 2 and h.is_impact and h.state_id in [1, 2]]
+        s_states = [s.state_id for s in self.rg.services if  s.business_impact > 2 and s.is_impact and s.state_id in [1, 2]]
+        print "get_len_overall_state:: hosts and services business problems", h_states, s_states
+        # Just return the number of impacting elements
+        return len(h_states) + len(s_states)
+
+
     # Return a tree of {'elt' : Host, 'fathers' : [{}, {}]}
     def get_business_parents(self, obj, levels=3):
         res = {'node' : obj, 'fathers' : []}
