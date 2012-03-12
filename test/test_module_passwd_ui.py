@@ -27,9 +27,16 @@ import os
 import sys
 
 from shinken_test import unittest, ShinkenTest
-from nose.exc import SkipTest
+try:
+    from nose.exc import SkipTest as SkipTest
+except ImportError:
+    SkipTest = None
+
 if not sys.version_info > (2, 5) :
-    raise SkipTest("bah, i am 2.4.x")
+    if SkipTest:
+        raise SkipTest("bah, i am 2.4.x")
+    else:
+        sys.exit(0)
 
 
 from shinken.log import logger

@@ -508,7 +508,8 @@ class Config(Item):
                 line = tmp_line + line
                 tmp_line = ''
                 continuation_line = False
-            if re.search("}", line):
+            # } alone in a line means stop the object reading
+            if re.search("^\s*\t*}\s*\t*$", line):
                 in_define = False
             if re.search("^\s*\t*#|^\s*$|^\s*}", line):
                 pass

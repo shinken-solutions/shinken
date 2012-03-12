@@ -104,4 +104,5 @@ test_star_in_hostgroups.py
 test_freshness.py
 test_protect_esclamation_point.py
 test_module_passwd_ui.py
+test_css_in_command.py
 test_parse_perfdata.py

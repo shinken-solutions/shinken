@@ -143,6 +143,7 @@ launch_and_assert test_star_in_hostgroups.py
 launch_and_assert test_protect_esclamation_point.py
 launch_and_assert test_module_passwd_ui.py
 launch_and_assert test_contactgroups_plus_inheritance.py
+launch_and_assert test_css_in_command.py
 
 launch_and_assert test_maintenance_period.py
 #Live status is a bit longer than the previous, so we put it at the end.
