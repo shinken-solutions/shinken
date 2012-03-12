@@ -198,7 +198,7 @@ class Service(SchedulingItem):
         'last_perf_data':     StringProp (default='', retention=True),
         'host':               StringProp (default=None),
         'customs':            ListProp   (default={}, fill_brok=['full_status']),
-        'notified_contacts':  ListProp  (default=set()), # use for having all contacts we have notified
+        'notified_contacts':  ListProp  (default=set(), retention=True), # use for having all contacts we have notified
         'in_scheduled_downtime': BoolProp(default=False, retention=True),
         'in_scheduled_downtime_during_last_check': BoolProp(default=False, retention=True),
         'actions':            ListProp   (default=[]), #put here checks and notif raised
