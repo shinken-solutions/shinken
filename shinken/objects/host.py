@@ -211,7 +211,7 @@ class Host(SchedulingItem):
         'got_default_realm' :   BoolProp(default=False),
 
         # use for having all contacts we have notified
-        'notified_contacts':    StringProp(default=set()),
+        'notified_contacts':    StringProp(default=set(),retention=True),
 
         'in_scheduled_downtime': BoolProp(default=False, retention=True),
         'in_scheduled_downtime_during_last_check': BoolProp(default=False, retention=True),
