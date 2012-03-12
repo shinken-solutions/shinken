@@ -79,9 +79,9 @@ $plain = encode_qp $text;
 
 #$html = encode_entities($texthtml);
 $html = $texthtml;
-$html =~ s/\n\n/\n\n<p>/g;
-$html =~ s/\n/<br\/>\n/g;
-$html = "<p>" . $html . "</p>";
+#$html =~ s/\n\n/\n\n<p>/g;
+$html =~ s/\n/<br>\n/g;
+#$html = "<p>" . $html . "</p>";
 
 $boundary = '--'.$boundary;
 
@@ -95,9 +95,9 @@ $plain
 
 $boundary
 Content-Type: text/html; charset="utf-8"
-Content-Transfer-Encoding: quoted-printable
 
-<html>$html</html>
+$html
+
 $boundary--
 END_OF_BODY
 
