@@ -1313,6 +1313,19 @@ class Config(Item):
                 if len(rea.potential_brokers) == 0:
                     logger.log("Warning : the scheduler %s got no broker in its realm or upper" % s.get_name())
 
+        # Check that for each poller_tag of a host, a poller exists with this tag
+        # TODO : need to check that poller are in the good realm too
+        hosts_tag = set()
+        pollers_tag = set()
+        for h in self.hosts:
+            hosts_tag.add(h.poller_tag)
+        for p in self.pollers:
+            for t in p.poller_tags:
+                pollers_tag.add(t)
+        if not hosts_tag.issubset(pollers_tag):
+            for tag in hosts_tag.difference(pollers_tag):
+                logger.log("Warning : hosts exist with poller_tag %s but no poller got this tag" %  tag )
+
         self.conf_is_correct = r
 
 
