@@ -83,6 +83,9 @@ $(document).ready(function() {
 
 <div>
 
+  
+  <a class="btn" href="/blabla" data-toggle="modal" data-target="#modal">Launch Modal</a>
+
   	%if navi is not None:
     <div class="pagination span12">
 	    <ul class="pull-right">
