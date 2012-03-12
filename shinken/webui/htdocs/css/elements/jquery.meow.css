@@ -1,7 +1,8 @@
 .meows {
   position: fixed;
-  top: 50;
-  right: 0;
+  top: 25px;
+  right: -15px;
+  z-index: 1000;
 }
 .meow {
   margin: 20px 20px 0 0;
