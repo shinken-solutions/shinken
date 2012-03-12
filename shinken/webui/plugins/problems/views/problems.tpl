@@ -100,7 +100,7 @@ $(document).ready(function() {
   	%# end of the navi part
   	%end
 
-  <div id="accordion" class="span12">
+  <div id="accordion" class="span10">
     %# " We will print Business impact level of course"
     %imp_level = 10
 
@@ -205,8 +205,8 @@ $(document).ready(function() {
 
     %# "This div is need so the element will came back in the center of the previous div"
     <div class="clear"></div>
-      <div id="{{helper.get_html_id(pb)}}" class="detail">
-	<table class="tableCriticity">
+      <div id="{{helper.get_html_id(pb)}}" class="detail row-fluid">
+	<table class="tableCriticity table-bordered table-condensed span6">
 	  <tr>
 	    <td style="width:20px;"><b>Host</b></td>
 	    %if pb.__class__.my_type == 'service':
@@ -231,13 +231,15 @@ $(document).ready(function() {
 	    <td  style="width:20px;">in {{helper.print_duration(pb.next_chk, just_duration=True, x_elts=2)}}</td>
 	    
 	    <td class="tdCriticity" style="width:20px;"></td>
-	    <td class="tdCriticity" style="width:20px;"><div style="float:right;"> <a href="{{!helper.get_link_dest(pb)}}">{{!helper.get_button('Go to details', img='/static/images/search.png')}}</a>
+	    <td class="tdCriticity" style="width:20px;"><div style="float:right;"> <a href="{{!helper.get_link_dest(pb)}}" class='btn'><i class="icon-search"></i> Details</a>
 	</div> </td>
 	  </tr>
 	</table>
 
-	<hr />
+
+	<div class='span8'>
 	%if len(pb.impacts) > 0:
+	<hr />
 	<h5>Impacts:</h5>
 	%end
 	%for i in helper.get_impacts_sorted(pb):
@@ -250,6 +252,7 @@ $(document).ready(function() {
 	  </p>
 	</div>
 	%end
+	</div>
       </div>
 
 
