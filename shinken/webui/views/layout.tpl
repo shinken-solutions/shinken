@@ -66,6 +66,9 @@
     <script src="/static/js/bootstrap-button.js"></script>
     <script src="/static/js/bootstrap-dropdown.js"></script>
     <script src="/static/js/bootstrap-tooltip.js"></script>
+    <script src="/static/js/bootstrap-modal.js"></script>
+    <script src="/static/js/bootstrap-popover.js"></script>
+    <script src="/static/js/bootstrap-transition.js"></script>
     <script src="/static/js/jquery.meow.js"></script>
     <script src="/static/js/jquery-jsonp-2.2.1.min.js"></script>
 
@@ -75,6 +78,7 @@
     <script src="/static/js/shinken-deptree.js"></script>
     <script src="/static/js/shinken-greeting.js"></script>
     <script src="/static/js/shinken-opacity.js"></script>
+    <script src="/static/js/shinken-modals.js"></script>
 
     %# End of classic js import. Now call for specific ones
       %for p in js:
@@ -109,6 +113,9 @@
     </div><!--/.fluid-container-->
 
 
+
+  <!-- The modal div that will be shown when we want, and after put in it the data we want -->
+  <div class="modal fade" id="modal"></div>
 
   </body>
 </html>

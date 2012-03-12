@@ -60,7 +60,6 @@ function manage_error(response){
 }
 
 /* ************************************* Launch the request ******************* */
-
 function launch(url){
     // this code will send a data object via a GET request and alert the retrieved data.
     //alert('Try to get' + url+'?callback=?');

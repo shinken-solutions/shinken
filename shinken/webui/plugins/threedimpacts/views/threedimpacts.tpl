@@ -107,4 +107,3 @@
 
 		</script>
 
-%include footer

@@ -24,7 +24,7 @@
 /* We Hide all detail elements */
 $(document).ready(function(){
     var details = $('.detail');
-    details.hide();
+    details.hide();    
 });
 
 /* And if the user lick on the good image, we untoggle them. */

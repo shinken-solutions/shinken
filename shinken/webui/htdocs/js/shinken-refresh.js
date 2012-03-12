@@ -24,11 +24,59 @@
 
 /* By default, we set the page to reload each 60s*/
 var refresh_timeout = 60;
+var nb_refresh_try = 0;
+
+
+function postpone_refresh(){
+    // If we are not in our first try, warn the user
+    if (nb_refresh_try > 0){
+	$.meow({
+            message: 'The UI backend is not available.',
+            icon: '/static/images/errorMedium.png'
+	});
+    }
+    nb_refresh_try += 1;
+    /* Ok, we are now for a new loop of 60s before retrying... */
+    reinit_refresh();
+}
+
+
+/* React to an action return of the /action page. Look at status
+ to see if it's ok or not */
+function check_gotfirstdata_result(response){
+    //alert('In gotfirstdata_result'+ response+response.status);
+    //alert(response.status == 200);
+    if(response.status == 200 && response.text == '1'){
+	// Go Refresh
+        location.assign(location.href);
+    }else{
+	postpone_refresh();
+    }
+}
+
+
+/* We will try to see if the UI is not in restating mode, and so
+   don't have enough data to refresh the page as it should. (force login) */
+function check_for_data(){
+    // this code will send a data object via a GET request and alert the retrieved data.
+    //alert('Try to get' + url+'?callback=?');
+    $.jsonp({
+	"url": '/gotfirstdata?callback=?',
+	"success": check_gotfirstdata_result,
+	"error": postpone_refresh
+    });
+
+}
+
+
 
 /* Each second, we check for timeout and restart page */
 function check_refresh(){
     if(refresh_timeout < 0){
-        location.assign(location.href);
+        // We will first check ifthe backend is available or not. It's useless to refresh
+	// if the backend is reloading, because it will prompt for login, when wait a little bit
+	// will make the data available.
+	check_for_data();
     }
     refresh_timeout = refresh_timeout - 1;
 }
