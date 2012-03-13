@@ -66,15 +66,15 @@ $(document).ready(function() {
     <ul class="dock">
       <li class="active">
 	<span>Fix</span>
-	<a href="#" onclick="try_to_fix_all()"><img src="/static/images/tools.png" alt="tools"/></a>
+	<a href="javascript:try_to_fix_all();"><img src="/static/images/tools.png" alt="tools"/></a>
       </li>		
       <li>
 	<span>Recheck</span>
-	<a href="#" onclick="recheck_now_all()"><img src="/static/images/big_refresh.png" alt="refresh"/></a>
+	<a href="javascript:recheck_now_all()"><img src="/static/images/big_refresh.png" alt="refresh"/></a>
       </li>
       <li>
 	<span>Acknowledge</span>
-	<a href="#" onclick="acknowledge_all()"><img src="/static/images/big_ack.png" alt="acknowledge"/></a>
+	<a href="javascript:acknowledge_all()"><img src="/static/images/big_ack.png" alt="acknowledge"/></a>
       </li>
       
     </ul>
@@ -86,7 +86,7 @@ $(document).ready(function() {
    <div class="span12 offset2">
 
   	%if navi is not None:
-    <div class="pagination span9">
+    <div class="pagination center">
 	    <ul class="pull-right">
 	    %for name, start, end, is_current in navi:
 	    	%if is_current:
@@ -262,7 +262,7 @@ $(document).ready(function() {
   </div>
 
 	%if navi is not None:
-	<div class="pagination span12">
+	<div class="pagination center">
 		<ul class="pull-right">
 		%for name, start, end, is_current in navi:
 		   	%if is_current:
@@ -280,9 +280,12 @@ $(document).ready(function() {
 	%# end of the navi part
 	%end
 
-  <a class="btn" href="/blabla" data-toggle="modal" data-target="#modal">Launch Modal</a>      
+
 </div>
 
 
 %# """ This div is an image container and will move hover the perfometer with mouse hovering """
 <div id="img_hover"></div>
+
+
+  <a class="btn" href="/blabla" data-toggle="modal" data-target="#modal">Launch Modal</a>      

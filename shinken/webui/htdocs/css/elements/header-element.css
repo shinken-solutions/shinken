@@ -72,3 +72,11 @@
             filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#2F5F8F', EndColorStr='#005086');
 }
 */
+
+
+.pagination.center, .pagination.center ul {
+    float: left;
+    position: relative;
+}
+.pagination.center { left: 50%; }
+.pagination.center ul { left: -50%; }
