@@ -86,7 +86,7 @@ $(document).ready(function() {
    <div class="span12 offset2">
 
   	%if navi is not None:
-    <div class="pagination span12">
+    <div class="pagination span9">
 	    <ul class="pull-right">
 	    %for name, start, end, is_current in navi:
 	    	%if is_current:
@@ -102,7 +102,7 @@ $(document).ready(function() {
   	%# end of the navi part
   	%end
 
-  <div id="accordion" class="span10">
+  <div id="accordion" class="span12">
     %# " We will print Business impact level of course"
     %imp_level = 10
 

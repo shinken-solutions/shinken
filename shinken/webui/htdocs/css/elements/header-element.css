@@ -36,6 +36,10 @@
 }
 
 
+.brand {
+     text-shadow: 1px 1px 3px #E3E3E5; /* FF3.5+, Opera 9+, Saf1+, Chrome */
+}
+
 .nav-controll .navbar-text > span > a {
     color: #FFFFFF;
     border-bottom: thin dotted;

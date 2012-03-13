@@ -101,7 +101,7 @@
 %#				%include navigation_element globals()
 %#			%end
 %#        </div><!--/span-->
-        <div class="span10 min-height">
+        <div class="span12 min-height">
 			%include
         </div><!--/span-->
       </div><!--/row-->
