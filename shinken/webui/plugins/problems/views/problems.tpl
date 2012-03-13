@@ -81,10 +81,9 @@ $(document).ready(function() {
   </div>
 </div>
 
-<div>
 
-  
-  <a class="btn" href="/blabla" data-toggle="modal" data-target="#modal">Launch Modal</a>
+
+   <div class="span12 offset2">
 
   	%if navi is not None:
     <div class="pagination span12">
@@ -246,12 +245,12 @@ $(document).ready(function() {
 	<h5>Impacts:</h5>
 	%end
 	%for i in helper.get_impacts_sorted(pb):
-	<div class="state_{{i.state.lower()}}">
+	<div>
 	  <p><img style="width: 16px; height : 16px;" src="{{helper.get_icon_state(i)}}" />
+	    <span class="alert-small alert-{{i.state.lower()}}">{{i.state}}</span> for {{!helper.get_link(i)}}
 	        %for j in range(0, i.business_impact-2):
 	          <img src='/static/images/star.png' alt="star">
 		%end
-	     {{!helper.get_link(i)}} is {{i.state}}
 	  </p>
 	</div>
 	%end
@@ -280,10 +279,10 @@ $(document).ready(function() {
 	</div>
 	%# end of the navi part
 	%end
-      
+
+  <a class="btn" href="/blabla" data-toggle="modal" data-target="#modal">Launch Modal</a>      
 </div>
 
-<div class="clear"></div>
 
 %# """ This div is an image container and will move hover the perfometer with mouse hovering """
 <div id="img_hover"></div>

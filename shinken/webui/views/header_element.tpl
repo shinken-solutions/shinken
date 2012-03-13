@@ -10,14 +10,37 @@
       </a>
       <a class="brand" href="#">Shinken</a>
       <div class="nav-collapse">
-        <ul class="nav">
-          %if user is not None:
-          <li><a href="#">Dashboard</a></li>
-          <li class="active"><a href="#">Shinken UI</a></li>
-          <li><a href="#">Skonf UI</a></li>
-          %end
+	<ul class="nav">
+	  <li class="dropdown">
+	    <a href="#" class="dropdown-toggle" data-toggle="dropdown"> UI <b class="caret"></b></a>
+	    <ul class="dropdown-menu">
+	      <li><a href="/dashboard">Dashboard</a></li>
+              <li><a href="/">Shinken UI</a></li>
+              <li><a href="/">Skonf UI</a></li>
+	    </ul>
+	  </li>
+	</ul>
+	
+	<ul class="nav">
+	  <li class="active">
+	    <a href="#">Dashboard</a>
+	  </li>
+	  <li><a href="/impacts">Impacts</a></li>
+	  <li><a href="/problems">IT problems</a></li>
+	  <li><a href="/all">All</a></li>
+	</ul>
+	
+	<ul class="nav">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown"> System <b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              <li><a href="/system">Shinken state</a></li>
+              <li><a href="/system/log">System logs</a></li>
+            </ul>
+          </li>
         </ul>
-        
+
+	
         %if user is not None:
         <div class="nav-controll"> 
           <ul class="nav pull-right"> 
@@ -37,9 +60,12 @@
             <p class="navbar-text"><span id="greeting"></span> <span><a href="#"> Dummy<!-- {{user}} --></a></span>!</p> 
           </div> 
         </div>
-        <!--<form class="navbar-search pull-right">
+	<ul class="nav pull-right">
+	  <li class="divider-vertical"></li>
+	</ul>
+        <form class="navbar-search pull-right">
           <input type="text" class="search-query" placeholder="Search">
-        </form>-->
+        </form>
         %end
       </div><!--/.nav-collapse -->
     </div>

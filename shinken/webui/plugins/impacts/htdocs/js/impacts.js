@@ -108,7 +108,7 @@ $(document).ready(
 		//alert("go show"+pb_nb);
 		current_id = pb_nb;
 		el.css('display','block');
-		el.animate({opacity:1, left : '225'});
+		el.animate({opacity:1, left : '0'});
 
 		// Add the active class on the current impact
 		impact.addClass("impact-active");

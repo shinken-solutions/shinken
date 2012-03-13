@@ -32,8 +32,8 @@ Invalid element name
 
 
 %#  "Content Container Start"
-<div id="content_container" class="span12 no-leftmargin">
-
+<div class='offset2'>
+<div id="content_container" class="span12">
 	<h1 class="grid_16 state_{{elt.state.lower()}} icon_down"> <img class="imgsize3" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h1>
 
 	<div class="span12 no-leftmargin box">	   
@@ -409,6 +409,8 @@ Invalid element name
 	    </div>
 	   
     </div>
+</div>
+
 </div>
 %#End of the Host Exist or not case
 %end

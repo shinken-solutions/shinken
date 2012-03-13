@@ -96,11 +96,11 @@
 
     <div class="container-fluid no-leftpadding">
       <div class="row-fluid">
-        <div class="span2 min-height">
-			%if print_menu:
-				%include navigation_element globals()
-			%end
-        </div><!--/span-->
+%#        <div class="span2 min-height">
+%#			%if print_menu:
+%#				%include navigation_element globals()
+%#			%end
+%#        </div><!--/span-->
         <div class="span10 min-height">
 			%include
         </div><!--/span-->
