@@ -41,7 +41,7 @@ except ImportError:
 from shinken.discovery.discoverymanager import DiscoveryManager
 
 
-VERSION = '1.0'
+VERSION = '1.0.1'
 if os.name != 'nt': 
     DEFAULT_CFG = '/etc/shinken/discovery.cfg'
 else:
