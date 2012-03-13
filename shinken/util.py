@@ -181,6 +181,11 @@ def from_float_to_int(val):
 def to_list_string_of_names(ref, tab):
     return ",".join([e.get_name() for e in tab])
 
+# Just a lsit of names
+def to_list_of_names(ref, tab):
+    return [e.get_name() for e in tab]
+
+
 # take a list of hosts and return a list
 # of all host_names
 def to_hostnames_list(ref, tab):

@@ -904,13 +904,25 @@ class Scheduler:
             running_properties = h.__class__.running_properties
             for prop, entry in running_properties.items():
                 if entry.retention:
-                    d[prop] = getattr(h, prop)
+                    v = getattr(h, prop)
+                    # Maybe we should "prepare" the data before saving it
+                    # like get only names instead of the whole objects
+                    f = entry.retention_preparation
+                    if f:
+                        v = f(h, v)
+                    d[prop] = v
             # and some properties are also like this, like
             # active checks enabled or not
             properties = h.__class__.properties
             for prop, entry in properties.items():
                 if entry.retention:
-                    d[prop] = getattr(h, prop)
+                    v = getattr(h, prop)
+                    # Maybe we should "prepare" the data before saving it
+                    # like get only names instead of the whole objects
+                    f = entry.retention_preparation
+                    if f:
+                        v = f(h, v)
+                    d[prop] = v
             all_data['hosts'][h.host_name] = d
 
         # Same for services
@@ -919,12 +931,24 @@ class Scheduler:
             running_properties = s.__class__.running_properties
             for prop, entry in running_properties.items():
                 if entry.retention:
-                    d[prop] = getattr(s, prop)
+                    v = getattr(s, prop)
+                    # Maybe we should "prepare" the data before saving it
+                    # like get only names instead of the whole objects
+                    f = entry.retention_preparation
+                    if f:
+                        v = f(h, v)
+                    d[prop] = v
             # Same for properties, like active checks enabled or not
             properties = s.__class__.properties
             for prop, entry in properties.items():
                 if entry.retention:
-                    d[prop] = getattr(s, prop)
+                    v = getattr(s, prop)
+                    # Maybe we should "prepare" the data before saving it
+                    # like get only names instead of the whole objects
+                    f = entry.retention_preparation
+                    if f:
+                        v = f(h, v)
+                    d[prop] = v
             all_data['services'][(s.host.host_name, s.service_description)] = d
         return all_data
 
@@ -987,7 +1011,18 @@ class Scheduler:
                     # Raises the id of future ack so we don't overwrite
                     # these one
                     Acknowledge.id = max(Acknowledge.id, h.acknowledgement.id + 1)
-
+                # Relink the notified_contacts as a set() of true contacts objects
+                # it it was load from the retention, it's now a list of contacts
+                # names
+                if 'notified_contacts' in d:
+                    new_notified_contacts = set()
+                    for cname in h.notified_contacts:
+                        c = self.contacts.find_by_name(cname)
+                        # Mayeb the contact is gone. Skip it
+                        if c:
+                            new_notified_contacts.add(c)
+                    h.notified_contacts = new_notified_contacts
+                    
 
         ret_services = data['services']
         for (ret_s_h_name, ret_s_desc) in ret_services:
@@ -1040,6 +1075,17 @@ class Scheduler:
                     # Raises the id of future ack so we don't overwrite
                     # these one
                     Acknowledge.id = max(Acknowledge.id, s.acknowledgement.id + 1)
+                # Relink the notified_contacts as a set() of true contacts objects
+                # it it was load from the retention, it's now a list of contacts
+                # names
+                if 'notified_contacts' in d:
+                    new_notified_contacts = set()
+                    for cname in s.notified_contacts:
+                        c = self.contacts.find_by_name(cname)
+                        # Mayeb the contact is gone. Skip it
+                        if c:
+                            new_notified_contacts.add(c)
+                    s.notified_contacts = new_notified_contacts
 
 
 

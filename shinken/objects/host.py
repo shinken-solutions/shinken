@@ -33,7 +33,7 @@ from item import Items
 from schedulingitem import SchedulingItem
 
 from shinken.autoslots import AutoSlots
-from shinken.util import format_t_into_dhms_format, to_hostnames_list, get_obj_name, to_svc_hst_distinct_lists, to_list_string_of_names
+from shinken.util import format_t_into_dhms_format, to_hostnames_list, get_obj_name, to_svc_hst_distinct_lists, to_list_string_of_names, to_list_of_names
 from shinken.property import BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 from shinken.graph import Graph
 from shinken.macroresolver import MacroResolver
@@ -211,7 +211,9 @@ class Host(SchedulingItem):
         'got_default_realm' :   BoolProp(default=False),
 
         # use for having all contacts we have notified
-        'notified_contacts':    StringProp(default=set(),retention=True),
+        # Warning : for the notified_contacts retention save, we save only the names of the contacts, and we should RELINK
+        # them when we load it.
+        'notified_contacts':    StringProp(default=set(), retention=True, retention_preparation=to_list_of_names),
 
         'in_scheduled_downtime': BoolProp(default=False, retention=True),
         'in_scheduled_downtime_during_last_check': BoolProp(default=False, retention=True),

@@ -38,7 +38,7 @@ from shinken.objects.schedulingitem import SchedulingItem
 from shinken.autoslots import AutoSlots
 from shinken.util import strip_and_uniq, format_t_into_dhms_format, to_svc_hst_distinct_lists, \
     get_key_value_sequence, GET_KEY_VALUE_SEQUENCE_ERROR_SYNTAX, GET_KEY_VALUE_SEQUENCE_ERROR_NODEFAULT, \
-    GET_KEY_VALUE_SEQUENCE_ERROR_NODE, to_list_string_of_names
+    GET_KEY_VALUE_SEQUENCE_ERROR_NODE, to_list_string_of_names, to_list_of_names
 from shinken.property import BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 from shinken.macroresolver import MacroResolver
 from shinken.eventhandler import EventHandler
@@ -198,7 +198,9 @@ class Service(SchedulingItem):
         'last_perf_data':     StringProp (default='', retention=True),
         'host':               StringProp (default=None),
         'customs':            ListProp   (default={}, fill_brok=['full_status']),
-        'notified_contacts':  ListProp  (default=set(), retention=True), # use for having all contacts we have notified
+        # Warning : for the notified_contacts retention save, we save only the names of the contacts, and we should RELINK
+        # them when we load it.
+        'notified_contacts':  ListProp  (default=set(), retention=True, retention_preparation=to_list_of_names), # use for having all contacts we have notified
         'in_scheduled_downtime': BoolProp(default=False, retention=True),
         'in_scheduled_downtime_during_last_check': BoolProp(default=False, retention=True),
         'actions':            ListProp   (default=[]), #put here checks and notif raised

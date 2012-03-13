@@ -57,8 +57,9 @@ class Property(object):
     def __init__(self, default=none_object, class_inherit=None,
                  unmanaged=False, help='', no_slots=False,
                  fill_brok=None, conf_send_preparation=None,
-                 brok_transformation=None,retention=False,to_send=False,
-                 override=False,managed=True):
+                 brok_transformation=None, retention=False,
+                 retention_preparation=None, to_send=False,
+                 override=False, managed=True):
                      
         """
         `default`: default value to be used if this property is not set.
@@ -75,6 +76,9 @@ class Property(object):
         `fill_brok`: if set, send to broker. There are two categories:
                      FULL_STATUS for initial and update status,
                      CHECK_RESULT for check results
+        `retention`: if set, we will save this property in the retention files
+        `retention_preparation`: function, if set, will go this function before 
+                     being save to the retention data
 
         Only for the inital call:
 
@@ -106,6 +110,7 @@ class Property(object):
         self.conf_send_preparation = conf_send_preparation
         self.brok_transformation = brok_transformation
         self.retention = retention
+        self.retention_preparation = retention_preparation
         self.to_send = to_send
         self.override = override
         self.managed = managed

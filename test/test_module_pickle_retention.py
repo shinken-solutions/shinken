@@ -129,11 +129,19 @@ class TestConfig(ShinkenTest):
         # Now make real loops with notifications
         self.scheduler_loop(10, [[svc, 2, 'CRITICAL | bibi=99%']])
         #updte the hosts and service in the scheduler in the retentino-file
+        save_notified_contacts = svc2.notified_contacts
+        print "Save notif contacts", save_notified_contacts
         sl.hook_save_retention(self.sched)
 
         r = sl.hook_load_retention(self.sched)
         self.assert_(r == True)
-
+        
+        print "Notif?", svc2.notified_contacts
+        # We should got our contacts, and still the true objects
+        self.assert_(len(svc2.notified_contacts) > 0)
+        for c in svc2.notified_contacts:
+            self.assert_(c in save_notified_contacts)
+        
 
 
 if __name__ == '__main__':
