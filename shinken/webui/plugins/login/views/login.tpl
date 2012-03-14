@@ -1,4 +1,4 @@
-%rebase layout title='Shinken UI login', print_menu=False, js=['login/js/jQuery.dPassword.js'], css=['login/css/login.css']
+%rebase layout title='Shinken UI login', print_header=False, js=['login/js/jQuery.dPassword.js'], css=['login/css/login.css']
 
 
 <div id="login_container" class="span9">

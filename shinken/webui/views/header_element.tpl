@@ -22,12 +22,15 @@
 	</ul>
 	
 	<ul class="nav">
-	  <li class="active">
-	    <a href="#">Dashboard</a>
-	  </li>
-	  <li><a href="/impacts">Impacts</a></li>
-	  <li><a href="/problems">IT problems</a></li>
-	  <li><a href="/all">All</a></li>
+	  %menu = [ ('/', 'Dashboard'), ('/impacts','Impacts'), ('/problems','IT problems'), ('/all', 'All')]
+          %for (key, value) in menu:
+            %# Check for the selected element, if there is one
+            %if menu_part == key:
+              <li class="active"><a href="{{key}}">{{value}}</a></li>
+            %else:
+              <li><a href="{{key}}">{{value}}</a></li>
+            %end
+         %end
 	</ul>
 	
 	<ul class="nav">
