@@ -43,12 +43,17 @@ def get_page():
     if not user:
         redirect("/user/login")
 #        return {'app' : app, 'pbs' : [], 'valid_user' : False, 'user' : None, 'navi' : None}
+
+
+    print 'DUMP GET', app.request.GET.__dict__
  
     #We want to limit the number of elements
     start = int(app.request.GET.get('start', '0'))
     end = int(app.request.GET.get('end', '30'))
 
     search = app.request.GET.get('search', '')
+    if search == '':
+        search = app.request.GET.get('global_search', '')
 
     pbs = app.datamgr.get_all_problems(to_sort=False)
     
@@ -109,6 +114,9 @@ def get_all():
     end = int(app.request.GET.get('end', '30'))
 
     search = app.request.GET.get('search', '')
+    if search == '':
+        search = app.request.GET.get('global_search', '')
+
 
     all = app.datamgr.get_all_hosts_and_services()
 
