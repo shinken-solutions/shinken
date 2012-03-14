@@ -80,3 +80,12 @@
 }
 .pagination.center { left: 50%; }
 .pagination.center ul { left: -50%; }
+
+
+/* Typeachead is by default at 4px radius. 14 looks better.*/
+/*.typeahead {
+  margin-top: 2px;
+  -webkit-border-radius: 14px;
+  -moz-border-radius: 14px;
+  border-radius: 14px;
+}*/

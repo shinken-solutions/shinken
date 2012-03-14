@@ -67,7 +67,7 @@
 	  <li class="divider-vertical"></li>
 	</ul>
         <form class="navbar-search pull-right" action='#'>
-          <input type="text" class="search-query" placeholder="Search" name="global_search">
+          <input type="text" class="search-query typeahead" autocomplete="off" placeholder="Search" name="global_search">
         </form>
         %end
       </div><!--/.nav-collapse -->

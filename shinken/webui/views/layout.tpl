@@ -69,6 +69,8 @@
     <script src="/static/js/bootstrap-modal.js"></script>
     <script src="/static/js/bootstrap-popover.js"></script>
     <script src="/static/js/bootstrap-transition.js"></script>
+    <!-- Warnign, this version of typeahead came from https://gist.github.com/1866577 -->
+    <script src="/static/js/bootstrap-typeahead.js"></script>
     <script src="/static/js/jquery.meow.js"></script>
     <script src="/static/js/jquery-jsonp-2.2.1.min.js"></script>
 

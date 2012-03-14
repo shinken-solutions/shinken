@@ -57,6 +57,21 @@ $(document).ready(function() {
 	  }else
 	   return true;
 	}
+
+	$('.typeahead').typeahead({
+	// note that "value" is the default setting for the property option
+	   /*source: [{value: 'Charlie'}, {value: 'Gudbergur'}, {value: 'Charlie2'}],*/
+	   source: function (typeahead, query) {
+	              $.ajax({url: "/lookup/"+query,
+	                      success: function (data){
+	                        typeahead.process(data)}
+	              });
+	           },
+	onselect: function(obj) { 
+	             $("ul.typeahead.dropdown-menu").find('li.active').data(obj);
+	         }
+	});
+
 </script>
 
 %# "We set the actions div that will be show/hide if we select elements"
