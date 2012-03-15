@@ -38,6 +38,7 @@ from shinken.brok import Brok
 from shinken.objects.timeperiod import Timeperiod
 from shinken.objects.module import Module
 from shinken.comment import Comment
+from shinken.util import from_bool_to_int
 
 sys.setcheckinterval(10000)
 
@@ -1904,6 +1905,38 @@ ResponseHeader: fixed16
 test_host_0;test_ok_0
 """)
 
+
+    def test_host_and_service_eventhandler(self):
+        self.print_header()
+        now = time.time()
+        self.update_broker()
+        host = self.sched.hosts.find_by_name("test_host_0")
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        self.assert_(host.event_handler_enabled == True)
+        self.assert_(svc.event_handler_enabled == True)
+
+        request = """GET services
+Columns: host_name service_description event_handler_enabled event_handler
+Filter: host_name = test_host_0
+Filter: description = test_ok_0
+OutputFormat: csv
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        self.assert_("""test_host_0;test_ok_0;1;eventhandler
+""")
+        self.assert_(response == "%s;%s;%d;%s\n" % (svc.host_name, svc.service_description, from_bool_to_int(svc.event_handler_enabled), svc.event_handler.get_name()))
+
+        request = """GET hosts
+Columns: host_name event_handler_enabled event_handler
+Filter: host_name = test_host_0
+OutputFormat: csv
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        self.assert_("""test_host_0;1;eventhandler
+""")
+        self.assert_(response == "%s;%d;%s\n" % (host.host_name, from_bool_to_int(host.event_handler_enabled), host.event_handler.get_name()))
 
 
     def test_is_executing(self):

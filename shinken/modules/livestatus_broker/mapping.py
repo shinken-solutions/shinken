@@ -333,7 +333,10 @@ livestatus_attribute_map = {
             'datatype': list,
             # 2|omdadmin|hdodo = id|author|comment
         },
-
+        'event_handler': {
+            'description': 'Nagios command used as event handler',
+            'function': lambda item, req: item.event_handler.get_name(),
+        },
         'event_handler_enabled': {
             'description': 'Whether event handling is enabled (0/1)',
             'function': lambda item, req: item.event_handler_enabled,
@@ -856,7 +859,7 @@ livestatus_attribute_map = {
         },
         'event_handler': {
             'description': 'Nagios command used as event handler',
-            'function': lambda item, req: "",  # REPAIRME
+            'function': lambda item, req: item.event_handler.get_name(),
         },
         'event_handler_enabled': {
             'description': 'Whether and event handler is activated for the service (0/1)',
