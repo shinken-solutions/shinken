@@ -1505,7 +1505,7 @@ class Config(Item):
             nb_elements = 0
             for pack in r.packs:
                 nb_elements += len(pack)
-            logger.log("Number of hosts in the realm %s : %d" %(r.get_name(), nb_elements))
+            logger.log("Number of hosts in the realm %s : %d (distributed in %d linked packs)" %(r.get_name(), nb_elements, len(r.packs)))
 
             if nb_schedulers == 0 and nb_elements != 0:
                 err = "ERROR : The realm %s have hosts but no scheduler!" %r.get_name()
