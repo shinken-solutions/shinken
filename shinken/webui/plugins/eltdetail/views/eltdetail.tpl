@@ -19,7 +19,7 @@ Invalid element name
 
 %top_right_banner_state = datamgr.get_overall_state()
 
-%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(), js=['eltdetail/js/hide.js', 'eltdetail/js/dollar.js', 'eltdetail/js/gesture.js'], css=['eltdetail/css/eltdetail.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
+%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(), js=['eltdetail/js/iphone-style-checkboxes.js', 'eltdetail/js/hide.js', 'eltdetail/js/dollar.js', 'eltdetail/js/gesture.js'], css=['eltdetail/css/iphonebuttons.css', 'eltdetail/css/eltdetail.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
 
 %# " We will save our element name so gesture functions will be able to call for the good elements."
 <script type="text/javascript">var elt_name = '{{elt.get_full_name()}}';</script>
@@ -108,26 +108,75 @@ Invalid element name
 	</div>
 
 	<!-- Switch Start -->
-	<div class="btn-group span12 no-leftmargin bottommargin" data-toggle="buttons-checkbox">
+
 	  %# By default all is unabled
-	  % chk_cls = not_cls = evt_cls = flp_cls = '' 
+	  % chk_state = not_state =  evt_state = flp_state = 'checked=""'
 	  %if not (elt.active_checks_enabled|elt.passive_checks_enabled):
-	    %chk_cls = 'active'
+	    %chk_state = 'unchecked=""'
 	  %end
 	  %if not elt.notifications_enabled:
-	     %not_cls = 'active'
+	     %not_state = 'unchecked=""'
 	  %end
 	  %if not elt.event_handler_enabled:
-	     %evt_cls = 'active'
+	     %evt_state = 'unchecked=""'
 	  %end
 	  %if not elt.flap_detection_enabled:
-	     %flp_cls = 'active'
+	     %flp_state = 'unchecked=""'
 	  %end
-		<button class="btn btn-onoff {{chk_cls}}" onclick='toggle_checks("{{elt.get_full_name()}}" , !$(this).hasClass("active"))'>Active/passive Checks</button>
-		<button class="btn btn-onoff {{not_cls}}" onclick='toggle_notifications("{{elt.get_full_name()}}" , !$(this).hasClass("active"))'>Notifications</button>
-		<button class="btn btn-onoff {{evt_cls}}" onclick='toggle_event_handlers("{{elt.get_full_name()}}", !$(this).hasClass("active"))'>Event Handler</button>
-		<button class="btn btn-onoff {{flp_cls}}" onclick='toggle_flap_detection("{{elt.get_full_name()}}" , !$(this).hasClass("active"))' >Flap Detection</button>
-	</div>
+
+
+	  <script type="text/javascript">
+	    $(document).ready(function() {
+               $('#btn-checks').iphoneStyle({
+                 onChange : function(elt, b){toggle_checks("{{elt.get_full_name()}}", !b);}
+	       }
+	       );
+	    });
+
+	    $(document).ready(function() {
+               $('#btn-not').iphoneStyle({
+                 onChange : function(elt, b){toggle_notifications("{{elt.get_full_name()}}", !b);}
+	       }
+	       );
+	    });
+
+	    $(document).ready(function() {
+               $('#btn-evt').iphoneStyle({
+                 onChange : function(elt, b){toggle_event_handlers("{{elt.get_full_name()}}", !b);}
+	       }
+	       );
+	    });
+
+	    $(document).ready(function() {
+               $('#btn-flp').iphoneStyle({
+                 onChange : function(elt, b){toggle_flap_detection("{{elt.get_full_name()}}", !b);}
+               }
+               );
+            });
+
+	    
+	  </script>
+	  <form class="well form-inline span7">
+	    <div class="row-fluid"> 
+	      <div class="span3">
+	    Active/passive checks  <input {{chk_state}} class="iphone" type="checkbox" id='btn-checks'>
+	      </div>
+	      
+	      <div class="span3">
+	    Notifications <input {{not_state}} class="iphone" type="checkbox" id='btn-not'>
+	    </div>
+
+	      <div class="span3">
+	    Event handler  <input {{evt_state}} class="iphone" type="checkbox" id='btn-evt'>
+	    </div>
+
+	      <div class="span3">
+	    Flap detection <input {{flp_state}} class="iphone" type="checkbox" id='btn-flp'>
+	    </div>
+	      </div>
+
+	 </form>
+
 
 	<div class="btn-group span5 right">
 	  %if elt_type=='host':
