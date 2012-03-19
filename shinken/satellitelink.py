@@ -106,6 +106,10 @@ class SatelliteLink(Item):
         #print "Connection is OK, now we put conf", conf
         #print "Try to put conf:", conf
 
+        # Maybe the connexion was not ok, bail out
+        if not self.con:
+            return False
+
         try:
             pyro.set_timeout(self.con, self.data_timeout)
             self.con.put_conf(conf)
