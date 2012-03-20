@@ -21,6 +21,9 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+
+from shinken.webui.bottle import redirect
+
 ### Will be populated by the UI with it's own value
 app = None
 
@@ -33,6 +36,15 @@ def depgraph_host(name):
     if not user:
         return {'app' : app, 'elt' : None, 'valid_user' : False}
 
+
+    # Ok we are in a detail page but the user ask for a specific search
+    search = app.request.GET.get('global_search', None)
+    if search:
+        new_h = app.datamgr.get_host(search)
+        if new_h:
+            redirect("/depgraph/"+search)
+
+
     h = app.datamgr.get_host(name)
     return {'app' : app, 'elt' : h, 'user' : user, 'valid_user' : True}
 
@@ -44,6 +56,14 @@ def depgraph_srv(hname, desc):
 
     if not user:
         return {'app' : app, 'elt' : None, 'valid_user' : False}
+
+    # Ok we are in a detail page but the user ask for a specific search
+    search = app.request.GET.get('global_search', None)
+    if search:
+        new_h = app.datamgr.get_host(search)
+        if new_h:
+            redirect("/depgraph/"+search)
+
 
     s = app.datamgr.get_service(hname, desc)
     return {'app' : app, 'elt' : s, 'user' : user, 'valid_user' : True}

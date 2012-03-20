@@ -39,6 +39,13 @@ def show_host(name):
     if not user:
         redirect("/user/login")
 
+    # Ok we are in a detail page but the user ask for a specific search
+    search = app.request.GET.get('global_search', None)
+    if search:
+        new_h = app.datamgr.get_host(search)
+        if new_h:
+            redirect("/host/"+search)
+
     # Get graph data. By default, show last 4 hours
     now = int(time.time())
     graphstart = int(app.request.GET.get('graphstart', str(now - 4*3600)))
@@ -59,6 +66,14 @@ def show_service(hname, desc):
     if not user:
         redirect("/user/login")
 #        return {'app' : app, 'elt' : None, 'valid_user' : False, 'user' : user}
+
+
+    # Ok we are in a detail page but the user ask for a specific search
+    search = app.request.GET.get('global_search', None)
+    if search:
+        new_h = app.datamgr.get_host(search)
+        if new_h:
+            redirect("/host/"+search)
 
     # Get graph data. By default, show last 4 hours
     now = int(time.time())
