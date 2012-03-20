@@ -73,7 +73,7 @@
       </li>
       <li>
 	<span>Acknowledge</span>
-	<a href="javascript:acknowledge_all()"><img src="/static/images/big_ack.png" alt="acknowledge"/></a>
+	<a href="javascript:acknowledge_all('{{user.get_name()}}')"><img src="/static/images/big_ack.png" alt="acknowledge"/></a>
       </li>
       
     </ul>

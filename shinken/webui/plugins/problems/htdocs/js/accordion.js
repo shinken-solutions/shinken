@@ -105,10 +105,9 @@ function try_to_fix_all(){
 }
 
 
-function acknowledge_all(){
+function acknowledge_all(user){
     $.each(selected_elements, function(idx, name){
-	ackno_element = name;
-	do_acknowledge('Acknowledge from WebUI.');
+	do_acknowledge(name, 'Acknowledge from WebUI.', user);
     });
     flush_selected_elements();
 }
