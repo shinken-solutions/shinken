@@ -22,13 +22,37 @@ Invalid element name
 %rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(), js=['eltdetail/js/iphone-style-checkboxes.js', 'eltdetail/js/hide.js', 'eltdetail/js/dollar.js', 'eltdetail/js/gesture.js'], css=['eltdetail/css/iphonebuttons.css', 'eltdetail/css/eltdetail.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
 
 %# " We will save our element name so gesture functions will be able to call for the good elements."
-<script type="text/javascript">var elt_name = '{{elt.get_full_name()}}';</script>
+<script type="text/javascript">
+  var elt_name = '{{elt.get_full_name()}}';
+
+  /* Now hide canvas */
+  $(document).ready(function(){
+    $('#gesture_panel').hide();
+  });
+
+</script>
 
 
 %#  "This is the background canvas for all gesture detection things " 
 %# " Don't ask me why, but the size must be included in the
 %# canvas line here or we got problem!"
-<canvas id="canvas" width="200" height="200" class="grid_10" style="border: 1px solid black;"></canvas>
+<div class="btn-group left">
+  <a href="javascript:$('#gesture_panel').toggle();" class='btn' title="Show gesture panel"> <i class="icon-map-marker"></i> Show gesture panel</a>
+</div>
+
+<div id='gesture_panel' class='left'>
+  <canvas id="canvas" width="200" height="200" class="grid_10" style="border: 1px solid black;"></canvas>
+  <div class="gesture_button">
+    <img title="By keeping a left click pressed and drawing a check, you will launch an acknowledgement." src="/static/eltdetail/images/gesture-check.png"/> Acknowledge
+  </div>
+  <div class="gesture_button">
+    <img title="By keeping a left click pressed and drawing a check, you will launch an recheck." src="/static/eltdetail/images/gesture-circle.png"/> Recheck
+  </div>
+  <div class="gesture_button">
+    <img title="By keeping a left click pressed and drawing a check, you will launch a try to fix command." src="/static/eltdetail/images/gesture-zigzag.png"/> Fix
+  </div>
+  
+</div>
 
 
 %#  "Content Container Start"
@@ -199,6 +223,10 @@ Invalid element name
 	      <li><a href="#"><i class="icon-edit"></i> Edit Service</a></li>
 	    %end:
 	  </ul>
+	</div>
+
+	<div class="btn-group right">
+	  <a href="/depgraph/{{elt.get_full_name()}}" class='btn' title="Impact map of {{elt.get_full_name()}}"> <i class="icon-map-marker"></i> Show impact map</a>
 	</div>
 
 
