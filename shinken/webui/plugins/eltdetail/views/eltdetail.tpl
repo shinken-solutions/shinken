@@ -474,20 +474,20 @@ Invalid element name
 	      		%if len(uris) == 0:
 	      			<p>No graphs, sorry</p>
 				%else:
-					<ul class="tabmenu">
-						%now = int(time.time())
-						%fourhours = now - 3600*4
-						%lastday = now - 86400
-						%lastweek = now - 86400*7
-						%lastmonth = now - 86400*31
-						%lastyear = now - 86400*365
+				<div class='row-fluid well span6'>
+				  %now = int(time.time())
+				  %fourhours = now - 3600*4
+				  %lastday = now - 86400
+				  %lastweek = now - 86400*7
+				  %lastmonth = now - 86400*31
+				  %lastyear = now - 86400*365
 						
-						<li><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{fourhours}}&graphend={{now}}#graphs" class="">4 hours</a></li>
-						<li><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{lastday}}&graphend={{now}}#graphs" class="">Day</a></li>
-						<li><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{lastweek}}&graphend={{now}}#graphs" class="">Week</a></li>
-						<li><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{lastmonth}}&graphend={{now}}#graphs" class="">Month</a></li>
-						<li><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{lastyear}}&graphend={{now}}#graphs" class="">Year</a></li>
-					</ul>
+				  <div class='span2'><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{fourhours}}&graphend={{now}}#graphs" class="">4 hours</a></div>
+				  <div class='span2'><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{lastday}}&graphend={{now}}#graphs" class="">Day</a></div>
+				  <div class='span2'><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{lastweek}}&graphend={{now}}#graphs" class="">Week</a></div>
+				  <div class='span2'><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{lastmonth}}&graphend={{now}}#graphs" class="">Month</a></div>
+				  <div class='span2'><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{lastyear}}&graphend={{now}}#graphs" class="">Year</a></div>
+				  </div>
 				%end
 								
 				%for g in uris:
