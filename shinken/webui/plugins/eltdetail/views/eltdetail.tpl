@@ -494,7 +494,6 @@ Invalid element name
 				%img_src = g['img_src']
 				%link = g['link']
 				<p><a href="{{link}}"><img src="{{img_src}}" class="graphimg"></img></a></p>
-				moncul
 				%end
 			</div>
 			<!-- Tab Graph End -->
