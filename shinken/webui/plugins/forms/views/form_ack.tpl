@@ -10,17 +10,20 @@
 	do_acknowledge("{{name}}", reason, '{{user.get_name()}}');
 	$('#modal').modal('hide')
 	}
+
+
 </script>
 
 
 <div class="modal-header">
   <a class="close" data-dismiss="modal">×</a>
-  <h3>Submit check</h3>
+  <h3>Acknowledge {{name}}</h3>
 </div>
 <div class="modal-body">
   <form class="well" name='modal_form'>
     <input type="textarea" name='reason' class="span3" placeholder="Reason…">  
     <span class="help-inline">Reason</span>
+
 </form>
 
 </div>

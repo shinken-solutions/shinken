@@ -108,12 +108,18 @@ function try_to_fix(name) {
 
  
 function do_acknowledge(name, text, user){
-    var elts = get_elements(name);//ackno_element);
-    /*alert('acknowledge'+ackno_element+text);*/
+    var elts = get_elements(name);
     var url = '/action/ACKNOWLEDGE_'+elts.type+'_PROBLEM/'+elts.nameslash+'/1/0/1/'+user+'/'+text;
     launch(url);
 }
 
+
+//# SCHEDULE_HOST_DOWNTIME;<host_name>;<start_time>;<end_time>;<fixed>;<trigger_id>;<duration>;<author>;<comment>
+function do_schedule_downtime(name, start_time, end_time, user, comment){
+    var elts = get_elements(name);
+    var url = '/action/SCHEDULE_'+elts.type+'_DOWNTIME/'+elts.nameslash+'/'+start_time+'/'+end_time+'/1/0/0/'+user+'/'+comment;
+    launch(url);
+}
 
 function submit_check(name, return_code, output){
     var elts = get_elements(name);

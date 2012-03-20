@@ -36,6 +36,8 @@
     <link href="/static/css/elements/header-element.css" rel="stylesheet">
     <link href="/static/css/custom/deptree.css" rel="stylesheet">
     <link href="/static/css/custom/buttons.css" rel="stylesheet">
+    <!-- Warnign, this version of datepicker came from http://dl.dropbox.com/u/143355/datepicker/datepicker.html -->    
+    <link href="/static/css/custom/datepicker.css" rel="stylesheet">
 
     %# And now for css files
       %for p in css:
@@ -69,6 +71,9 @@
     <script src="/static/js/bootstrap-modal.js"></script>
     <script src="/static/js/bootstrap-popover.js"></script>
     <script src="/static/js/bootstrap-transition.js"></script>
+
+    <!-- Warnign, this version of datepicker came from http://dl.dropbox.com/u/143355/datepicker/datepicker.html -->
+    <script src="/static/js/bootstrap-datepicker.js"></script>
     <!-- Warnign, this version of typeahead came from https://gist.github.com/1866577 -->
     <script src="/static/js/bootstrap-typeahead.js"></script>
     <script src="/static/js/jquery.meow.js"></script>

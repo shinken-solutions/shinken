@@ -17,7 +17,7 @@
 
 <div class="modal-header">
   <a class="close" data-dismiss="modal">×</a>
-  <h3>Submit check</h3>
+  <h3>Submit check for {{name}}</h3>
 </div>
 <div class="modal-body">
   <form class="well" name='modal_form'>

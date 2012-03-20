@@ -191,7 +191,7 @@ Invalid element name
 	    <li><a href="javascript:recheck_now('{{elt.get_full_name()}}')"><i class="icon-repeat"></i> Recheck now</a></li>
 	    <li><a href="/forms/submit_check/{{elt.get_full_name()}}" data-toggle="modal" data-target="#modal"><i class="icon-share-alt"></i> Submit Check Result</a></li>
 	    <li><a href="#"><i class="icon-comment"></i> Send Custom Notification</a></li>
-	    <li><a href="#"><i class="icon-fire"></i> Schedule Downtime</a></li>
+	    <li><a href="/forms/downtime/{{elt.get_full_name()}}" data-toggle="modal" data-target="#modal"><i class="icon-fire"></i> Schedule Downtime</a></li>
 	    <li class="divider"></li>
 	    %if elt_type=='host':
 	      <li><a href="#"><i class="icon-edit"></i> Edit Host</a></li>
