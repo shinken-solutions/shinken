@@ -19,22 +19,6 @@
 %end
 
 
-%# " Add the auto copleter in the search input form"
-<script type="text/javascript">
-$(document).ready(function() {
- 
-  var inputWord = $('#search_input');
- 
-  // Our instance for the element with id "search_input"
-/*  new Autocompleter.Request.JSON(inputWord, '/lookup', {
-       'indicatorClass': 'autocompleter-loading',
-       'minLength': 3
-  });*/
-
-});
-</script>
-
-
 <script type="text/javascript">
 	function submitform()
 	{

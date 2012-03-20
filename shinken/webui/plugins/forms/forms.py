@@ -44,6 +44,22 @@ def get_page(arg1='nothing'):
     return {'app' : app, 'user' : user}
 
 
+
+def form_submit_check(name):
+    print "Want submit check for", name
+    user = app.get_user_auth()
+
+    if not user:
+        redirect("/user/login")
+        return
+
+    t = 'host'
+    if '/' in name:
+        t = 'service'
+
+    return {'app' : app, 'user' : user, 'name' : name, 'obj_type' : t}
+
+
 # This is the dict teh webui will try to "load".
 #  *here we register one page with both adresses /dummy/:arg1 and /dummy/, both addresses
 #   will call the function get_page.
@@ -52,5 +68,7 @@ def get_page(arg1='nothing'):
 #    the dummy/htdocs/ directory. Bewere : it will take the plugin name to match.
 #  * optional : you can add 'method' : 'POST' so this adress will be only available for
 #    POST calls. By default it's GET. Look at the lookup module for sample about this.
-pages = {get_page : { 'routes' : ['/blabla'], 'view' : 'blabla', 'static' : True}}
+pages = {get_page : { 'routes' : ['/blabla'], 'view' : 'blabla', 'static' : True},
+         form_submit_check : { 'routes' : ['/forms/submit_check/:name#.+#'], 'view' : 'form_submit_check', 'static' : True},
+         }
 

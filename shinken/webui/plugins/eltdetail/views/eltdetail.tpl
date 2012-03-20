@@ -186,10 +186,10 @@ Invalid element name
 	  data-toggle="dropdown" href="#"><span class="pull-left"><i class="icon-cog"></i> Service Commands</span> <span class="caret pull-right"></span></a>
 	  %end:
 	  <ul class="dropdown-menu plus6 no-maxwidth">
-	    <li><a href="#"><i class="icon-pencil"></i> Try to fix it!</a></li>
-	    <li><a href="#"><i class="icon-ok"></i>Acknowledge it!</a></li>
-	    <li><a href="#"><i class="icon-repeat"></i> Recheck now</a></li>
-	    <li><a href="#"><i class="icon-share-alt"></i> Submit Check Result</a></li>
+	    <li><a href="javascript:try_to_fix('{{elt.get_full_name()}}')"><i class="icon-pencil"></i> Try to fix it!</a></li>
+	    <li><a href="javascript:acknowledge('{{elt.get_full_name()}}')"><i class="icon-ok"></i> Acknowledge it!</a></li>
+	    <li><a href="javascript:recheck_now('{{elt.get_full_name()}}')"><i class="icon-repeat"></i> Recheck now</a></li>
+	    <li><a href="/forms/submit_check/{{elt.get_full_name()}}" data-toggle="modal" data-target="#modal"><i class="icon-share-alt"></i> Submit Check Result</a></li>
 	    <li><a href="#"><i class="icon-comment"></i> Send Custom Notification</a></li>
 	    <li><a href="#"><i class="icon-fire"></i> Schedule Downtime</a></li>
 	    <li class="divider"></li>
