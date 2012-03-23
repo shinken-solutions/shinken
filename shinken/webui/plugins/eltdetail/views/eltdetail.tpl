@@ -52,11 +52,11 @@ Invalid element name
 %#  "This is the background canvas for all gesture detection things " 
 %# " Don't ask me why, but the size must be included in the
 %# canvas line here or we got problem!"
-<div class="btn-group left">
+<div class="btn-group pull-left">
   <a href="javascript:$('#gesture_panel').toggle();" class='btn' title="Show gesture panel"> <i class="icon-map-marker"></i> Show gesture panel</a>
 </div>
 
-<div id='gesture_panel' class='left'>
+<div id='gesture_panel' class="pull-left">
   <canvas id="canvas" width="200" height="200" class="grid_10" style="border: 1px solid black;"></canvas>
   <div class="gesture_button">
     <img title="By keeping a left click pressed and drawing a check, you will launch an acknowledgement." src="/static/eltdetail/images/gesture-check.png"/> Acknowledge
@@ -192,10 +192,9 @@ Invalid element name
                  onChange : function(elt, b){toggle_flap_detection("{{elt.get_full_name()}}", !b);}
                }
                );
-            });
-
-	    
+            }); 
 	  </script>
+
 	  <form class="well form-inline span7">
 	    <div class="row-fluid"> 
 	      <div class="span3">
@@ -263,7 +262,7 @@ Invalid element name
 	-->
     <!-- Switch End-->
 
-    <div class="tabbable">
+    <div class="tabbable span12 no-leftmargin">
 	    <ul class="nav nav-tabs">
 	    	<li class="active"><a href="#sumarry" data-toggle="tab">Summary</a></li>
 	    	<li><a href="#comments" data-toggle="tab">Comments / Downtimes</a></li>
@@ -452,7 +451,7 @@ Invalid element name
 					<ol>
 						%for c in elt.comments:
 						<li>
-							<div class="left">
+							<div class="pull-left">
 								<p class="log-text">{{c.comment}}</p>
 								<div class="log-meta"> <span><b>Author:</b> {{c.author}}</span> <span><b>Creation:</b> {{helper.print_date(c.entry_time)}}</span> <span>	<b>Expire:</b>{{helper.print_date(c.expire_time)}}</span>
 								</div>

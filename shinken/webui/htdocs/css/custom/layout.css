@@ -169,12 +169,3 @@ h1 {
 h1, h2, h3, h4 {
 color: #787878;
 }
-
-
-.right{
-    float:right;
-}
-
-.left{
-    float:left;
-}
