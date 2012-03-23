@@ -19,11 +19,14 @@ Invalid element name
 
 %top_right_banner_state = datamgr.get_overall_state()
 
-%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(), js=['eltdetail/js/iphone-style-checkboxes.js', 'eltdetail/js/hide.js', 'eltdetail/js/dollar.js', 'eltdetail/js/gesture.js'], css=['eltdetail/css/iphonebuttons.css', 'eltdetail/css/eltdetail.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
+%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(), js=['eltdetail/js/jquery.color.js', 'eltdetail/js/jquery.Jcrop.js', 'eltdetail/js/iphone-style-checkboxes.js', 'eltdetail/js/hide.js', 'eltdetail/js/dollar.js', 'eltdetail/js/gesture.js', 'eltdetail/js/graphs.js'], css=['eltdetail/css/iphonebuttons.css', 'eltdetail/css/eltdetail.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css', 'eltdetail/css/jquery.Jcrop.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
 
 %# " We will save our element name so gesture functions will be able to call for the good elements."
 <script type="text/javascript">
   var elt_name = '{{elt.get_full_name()}}';
+  
+  var graphstart={{graphstart}};
+  var graphend={{graphend}};
 
   /* Now hide canvas */
   $(document).ready(function(){
@@ -264,13 +267,13 @@ Invalid element name
 
     <div class="tabbable">
 	    <ul class="nav nav-tabs">
-	    	<li class="active"><a href="#1" data-toggle="tab">Summary</a></li>
-	    	<li><a href="#2" data-toggle="tab">Comments / Downtimes</a></li>
-	    	<li><a href="#3" data-toggle="tab">Graph</a></li>
+	    	<li class="active"><a href="#sumarry" data-toggle="tab">Summary</a></li>
+	    	<li><a href="#comments" data-toggle="tab">Comments / Downtimes</a></li>
+	    	<li><a href="#graphs" data-toggle="tab" id='tab_to_graphs'>Graph</a></li>
 	    </ul>
 	    <div class="tab-content">
 	    	<!-- Tab Summary Start-->
-		    <div class="tab-pane active" id="1">
+		    <div class="tab-pane active" id="sumarry">
 		      <!-- Start of the Whole info pack. We got a row of 2 thing : 
 			   left is information, right is related elements -->
 		      <div class="row-fluid">
@@ -436,7 +439,7 @@ Invalid element name
 		    <!-- Tab Summary End-->
 
 		    <!-- Tab Comments and Downtimes Start -->
-		    <div class="tab-pane" id="2">
+		    <div class="tab-pane" id="comments">
 				<div>
 					<ul class="nav nav-pills">
 						<li class="active"> <a href="#" class="">Add Comments</a> </li>
@@ -468,7 +471,7 @@ Invalid element name
 			<!-- Tab Comments and Downtimes End -->
 
 			<!-- Tab Graph Start -->
-			<div class="tab-pane" id="3">
+			<div class="tab-pane" id="graphs">
 	           	<h2>Graphs</h2>
 	       		%uris = app.get_graph_uris(elt, graphstart, graphend)
 	      		%if len(uris) == 0:
@@ -487,14 +490,21 @@ Invalid element name
 				  <div class='span2'><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{lastweek}}&graphend={{now}}#graphs" class="">Week</a></div>
 				  <div class='span2'><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{lastmonth}}&graphend={{now}}#graphs" class="">Month</a></div>
 				  <div class='span2'><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{lastyear}}&graphend={{now}}#graphs" class="">Year</a></div>
-				  </div>
+				</div>
 				%end
-								
+				<div class='row-fluid well span8 jcrop'>
 				%for g in uris:
-				%img_src = g['img_src']
-				%link = g['link']
-				<p><a href="{{link}}"><img src="{{img_src}}" class="graphimg"></img></a></p>
+				  %img_src = g['img_src']
+				%#img_src = 'http://sgemini/pnp4nagios/index.php/image?host=srv-web-asia&srv=_HOST_&view=0&source=0&start=1332497862&end=1332512262'
+				  %link = g['link']
+    				  <p>
+				    <img src="{{img_src}}" class="jcropelt"/>
+				    <a href="{{link}}" class="btn"><i class="icon-plus"></i> Show more</a>
+				    <a href="javascript:zoom('/{{elt_type}}/{{elt.get_full_name()}}?')" class="btn"><i class="icon-zoom-in"></i> Zoom</a>
+				  </p>
+				  
 				%end
+				</div>
 			</div>
 			<!-- Tab Graph End -->
 	    </div>
@@ -505,3 +515,4 @@ Invalid element name
 </div>
 %#End of the Host Exist or not case
 %end
+
