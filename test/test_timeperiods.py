@@ -54,6 +54,7 @@ class TestTimeperiods(ShinkenTest):
         print t_next
         self.assert_(t_next == "Tue Jul 13 16:30:00 2010")
 
+        
 
     def test_simple_with_multiple_time(self):
         self.print_header()

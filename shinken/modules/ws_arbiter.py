@@ -22,16 +22,20 @@
 
 
 import os
+import sys
 import select
-
+import time
 
 ######################## WIP   don't launch it!
 
 
 from shinken.basemodule import BaseModule
 from shinken.external_command import ExternalCommand
+from shinken.log import logger
 
-from shinken.webui.bottle import Bottle, run, static_file, view, route, request, response, abort
+from shinken.webui.bottle import Bottle, run, static_file, view, route, request, response, abort, parse_auth
+
+
 
 properties = {
     'daemons' : ['arbiter', 'receiver'],
@@ -40,89 +44,98 @@ properties = {
     }
 
 #called by the plugin manager to get a broker
-def get_instance(plugin): # plugin: dict de la conf
-    print "aide en une ligne %s" % plugin.get_name()
-
+def get_instance(plugin):
     instance = Ws_arbiter(plugin)
     return instance
 
 
-#Just print some stuff
+# Main app var. Will be fill with our running module instance
+app = None
+
+def get_page():
+    # We get all value we want
+    time_stamp = request.forms.get('time_stamp', 0)
+    host_name = request.forms.get('host_name', None)
+    service_description = request.forms.get('service_description', None)
+    return_code = request.forms.get('return_code', -1)
+    output = request.forms.get('output', None)
+
+    # We check for auth if it's not anonymously allowed
+    if app.username != 'anonymous':
+        basic = parse_auth(request.environ.get('HTTP_AUTHORIZATION',''))
+        # Maybe the user not even ask for user/pass. If so, bail out
+        if not basic:
+            abort(401, 'Authentication required')
+        # Maybe he do not give the good credential?
+        if basic[0] != app.username or basic[1] != app.password:
+            abort(403, 'Authentication denied')
+
+    # Ok, here it's an anonymouscall, or a registred one, but mayeb teh query is false
+    if time_stamp==0 or not host_name or not output or return_code == -1:
+        abort(400, "Incorrect syntax")
+
+    # Maybe we got an host, maybe a service :)
+    if not service_description:
+        cmd = '[%s] PROCESS_HOST_CHECK_RESULT;%s;%s;%s' % (time_stamp, host_name, return_code, output)
+    else:
+        cmd = '[%s] PROCESS_SERVICE_CHECK_RESULT;%s;%s;%s;%s' % (time_stamp, host_name, service_description, return_code, output)
+
+    # Now create the external command and put it in our main queue()
+    # so the arbiter will read it :)
+    ext = ExternalCommand(cmd)
+    app.from_q.put(ext)
+
+    # OK here it's ok, it will return a 200 code
+    
+
+
+# This module will open an HTTP service, where a user can send a command, like a check
+# return.
 class Ws_arbiter(BaseModule):
     def __init__(self, modconf):
         BaseModule.__init__(self, modconf)
         try:
-            username = modconf.username
-            password = modconf.password
-            self.port = modconf.port
-            self.host = '0.0.0.0'
+            self.username = getattr(modconf, 'username', 'anonymous')
+            self.password = getattr(modconf, 'password', '')
+            self.port = int(getattr(modconf, 'port', '7760'))
+            self.host = getattr(modconf, 'host', '0.0.0.0')
         except AttributeError:
             print "Error : the module '%s' do not have a property"
             raise
 
-
-
-    def get(self):
-        buf = os.read(self.fifo, 8096)
-        r = []
-        fullbuf = len(buf) == 8096 and True or False
-        # If the buffer ended with a fragment last time, prepend it here
-        buf = self.cmd_fragments + buf
-        buflen = len(buf)
-        self.cmd_fragments = ''
-        if fullbuf and buf[-1] != '\n':
-            # The buffer was full but ends with a command fragment
-            r.extend([ExternalCommand(s) for s in (buf.split('\n'))[:-1] if s])
-            self.cmd_fragments = (buf.split('\n'))[-1]
-        elif buflen:
-            # The buffer is either half-filled or full with a '\n' at the end.
-            r.extend([ExternalCommand(s) for s in buf.split('\n') if s])
-        else:
-            # The buffer is empty. We "reset" the fifo here. It will be
-            # re-opened in the main loop.
-            os.close(self.fifo)
-        return r
-
-
-    def get_page(self):
-        print "On me demande la page /push"
-        time_stamp = request.forms.get('time_stamp', 0)
-        host_name = request.forms.get('host_name', None)
-        service_description = request.forms.get('service_description', None)
-        return_code = request.forms.get('return_code', -1)
-        output = request.forms.get('output', None)
-
-        if time_stamp==0 or not host_name or not service_description or not output or return_code == -1:
-            print "Je ne suis pas content, je quitte"
-            abort(400, "blalna")
-
-
-
+    # We initialise the HTTP part. It's a simple wsgi backend
+    # with a select hack so we can still exit if someone ask it
     def init_http(self):
-        print "Starting WebUI application"
+        logger.log("Starting WS arbiter http socket")
         self.srv = run(host=self.host, port=self.port, server='wsgirefselect')
-        print "Launch server", self.srv
-        route('/push', callback=self.get_page,method='POST')
+        # And we link our page
+        route('/push_check_result', callback=get_page, method='POST')
 
 
     # When you are in "external" mode, that is the main loop of your process
     def main(self):
+        global app
+        
+        # It's an external module, so we need to be sure that we manage
+        # the signals
         self.set_exit_handler()
 
+        # Go for Http open :)
         self.init_http()
 
-        input = [self.srv.socket]
+        # We fill the global variable with our Queue() link
+        # with the arbiter, because the page should be a non-class
+        # one function
+        app = self
 
+        # We will loop forever on the http socket
+        input = [self.srv.socket]
 
         # Main blocking loop
         while not self.interrupted:
-            # _reader is the underliying file handle of the Queue()
-            # so we can select it too :)
             input = [self.srv.socket]
             inputready,_,_ = select.select(input,[],[], 1)
             for s in inputready:
                 # If it's a web request, ask the webserver to do it
                 if s == self.srv.socket:
-                    #print "Handle Web request"
                     self.srv.handle_request()
-
