@@ -46,6 +46,12 @@ def get_instance(plugin):
     reqlist['contactgroups'] = getattr(plugin, 'reqcontactgroups', None)
     reqlist['hostdependencies'] = getattr(plugin, 'reqhostdependencies', None)
     reqlist['servicedependencies'] = getattr(plugin, 'reqservicedependencies', None)
+    reqlist['realms'] = getattr(plugin, 'reqrealms', None)
+    reqlist['schedulerlinks'] = getattr(plugin, 'reqschedulers', None)
+    reqlist['pollers'] = getattr(plugin, 'reqpollers', None)
+    reqlist['brokers'] = getattr(plugin, 'reqbrokers', None)
+    reqlist['reactionners'] = getattr(plugin, 'reqreactionners', None)
+    reqlist['receivers'] = getattr(plugin, 'reqreceivers', None)
 
     instance = MySQL_importer_arbiter(plugin, host, login, password, database, reqlist)
     return instance
