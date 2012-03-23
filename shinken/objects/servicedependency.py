@@ -56,7 +56,7 @@ class Servicedependency(Item):
     #Give a nice name output, for debbuging purpose
     #(Yes, debbuging CAN happen...)
     def get_name(self):
-        return self.dependent_host_name+'/'+self.dependent_service_description+'..'+self.host_name+'/'+self.service_description
+        return getattr(self, 'dependent_host_name', '')+'/'+getattr(self, 'dependent_service_description', '')+'..'+getattr(self, 'host_name', '')+'/'+getattr(self, 'service_description', '')
 
 
 
@@ -81,21 +81,50 @@ class Servicedependencies(Items):
         self.items[sd.id] = sd
 
 
-    #We create new servicedep if necessery (host groups and co)
+    # We create new servicedep if necessery (host groups and co)
     def explode(self, hostgroups):
-        #The "old" services will be removed. All services with
-        #more than one host or a host group will be in it
+        # The "old" services will be removed. All services with
+        # more than one host or a host group will be in it
         srvdep_to_remove = []
 
-        #Then for every host create a copy of the service with just the host
-        #because we are adding services, we can't just loop in it
+        # Then for every host create a copy of the service with just the host
+        # because we are adding services, we can't just loop in it
         servicedeps = self.items.keys()
         for id in servicedeps:
             sd = self.items[id]
             if sd.is_tpl(): #Exploding template is useless
                 continue
 
+
+            # Get the list of all FATHER hosts and service deps
             hnames = []
+            if hasattr(sd, 'hostgroup_name'):
+                hg_names = sd.hostgroup_name.split(',')
+                hg_names = [hg_name.strip() for hg_name in hg_names]
+                for hg_name in hg_names:
+                    hg = hostgroups.find_by_name(hg_name)
+                    if hg is None:
+                        err = "ERROR : the servicedependecy got an unknown hostgroup_name '%s'" % hg_name
+                        hg.configuration_errors.append(err)
+                        continue
+                    hnames.extend(hg.members.split(','))
+            
+            if not hasattr(sd, 'host_name') and hasattr(sd, 'hostgroup_name'):
+                sd.host_name = ''
+
+            if sd.host_name != '':
+                hnames.extend(sd.host_name.split(','))
+            snames = sd.service_description.split(',')
+            couples = []
+            for hname in hnames:
+                for sname in snames:
+                    couples.append((hname.strip(), sname.strip()))
+
+            if not hasattr(sd, 'dependent_hostgroup_name') and hasattr(sd, 'hostgroup_name'):
+                sd.dependent_hostgroup_name = sd.hostgroup_name
+
+            # Now the dep part (the sons)
+            dep_hnames = []
             if hasattr(sd, 'dependent_hostgroup_name'):
                 hg_names = sd.dependent_hostgroup_name.split(',')
                 hg_names = [hg_name.strip() for hg_name in hg_names]
@@ -105,26 +134,31 @@ class Servicedependencies(Items):
                         err = "ERROR : the servicedependecy got an unknown dependent_hostgroup_name '%s'" % hg_name
                         hg.configuration_errors.append(err)
                         continue
-                    hnames.extend(hg.members.split(','))
+                    dep_hnames.extend(hg.members.split(','))
             
             if not hasattr(sd, 'dependent_host_name'):
-                sd.dependent_host_name = sd.host_name
+                sd.dependent_host_name = getattr(sd, 'host_name', '')
             
-            hnames.extend(sd.dependent_host_name.split(','))
-            snames = sd.dependent_service_description.split(',')
-            couples = []
-            for hname in hnames:
-                for sname in snames:
-                    couples.append((hname, sname))
-            if len(couples) >= 2:
-                for (hname, sname) in couples:
-                    hname = hname.strip()
-                    sname = sname.strip()
+            if sd.dependent_host_name != '':
+                dep_hnames.extend(sd.dependent_host_name.split(','))
+            dep_snames = sd.dependent_service_description.split(',')
+            dep_couples = []
+            for dep_hname in dep_hnames:
+                for dep_sname in dep_snames:
+                    dep_couples.append((dep_hname.strip(), dep_sname.strip()))
+
+            # Create the new service deps from all of this.
+            for (dep_hname, dep_sname) in dep_couples: # the sons, like HTTP
+                for (hname, sname) in couples : # the fathers, like MySQL
                     new_sd = sd.copy()
-                    new_sd.dependent_host_name = hname
-                    new_sd.dependent_service_description = sname
+                    new_sd.host_name = hname
+                    new_sd.service_description = sname
+                    new_sd.dependent_host_name = dep_hname
+                    new_sd.dependent_service_description = dep_sname
                     self.items[new_sd.id] = new_sd
+                # Ok so we can remove the old one
                 srvdep_to_remove.append(id)
+
         self.delete_servicesdep_by_id(srvdep_to_remove)
 
 
@@ -134,8 +168,8 @@ class Servicedependencies(Items):
         self.linkify_s_by_sd()
 
 
-    #We just search for each srvdep the id of the srv
-    #and replace the name by the id
+    # We just search for each srvdep the id of the srv
+    # and replace the name by the id
     def linkify_sd_by_s(self, hosts, services):
         for sd in self:
             try:
@@ -154,7 +188,7 @@ class Servicedependencies(Items):
                 sd.service_description = s
 
             except AttributeError , exp:
-                print exp
+                print "Error on service dep", exp
 
 
     #We just search for each srvdep the id of the srv
@@ -169,7 +203,7 @@ class Servicedependencies(Items):
                 print exp
 
 
-    #We backport service dep to service. So SD is not need anymore
+    # We backport service dep to service. So SD is not need anymore
     def linkify_s_by_sd(self):
         for sd in self:
             if sd.is_tpl(): continue
