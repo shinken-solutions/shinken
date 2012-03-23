@@ -46,8 +46,6 @@ Invalid element name
       $("ul.typeahead.dropdown-menu").find('li.active').data(obj);
     }
   });
-
-
 </script>
 
 
@@ -74,9 +72,9 @@ Invalid element name
 
 
 %#  "Content Container Start"
-<div class='offset2'>
+<div class="">
 <div id="content_container" class="span12">
-	<h1 class="grid_16 state_{{elt.state.lower()}} icon_down"> <img class="imgsize3" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h1>
+	<h1 class="span12 no-leftmargin state_{{elt.state.lower()}} icon_down"> <img class="imgsize3" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h1>
 
 	<div class="span12 no-leftmargin box">	   
 		<table class="span4 no-leftmargin">
