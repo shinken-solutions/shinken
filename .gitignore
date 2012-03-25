@@ -6,6 +6,17 @@ dist
 .settings
 .gitignore
 *.pid
+
+# Logs and databases #
+######################
 *.log*
+*.sql
+*.sqlite
 *.db*
-*.DS_Store
+
+# OS generated files #
+######################
+.DS_Store*
+ehthumbs.db
+Icon?
+Thumbs.db
