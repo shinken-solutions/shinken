@@ -213,7 +213,6 @@ Invalid element name
 	    Flap detection <input {{flp_state}} class="iphone" type="checkbox" id='btn-flp'>
 	    </div>
 	      </div>
-
 	 </form>
 
 
@@ -262,7 +261,13 @@ Invalid element name
 	-->
     <!-- Switch End-->
 
-    <div class="tabbable span12 no-leftmargin">
+    <!-- Start Host/Services-->
+    <div class="span3">
+    	<p></p>
+    </div>
+    <!-- End Host/Service -->
+
+    <div class="tabbable span9 no-leftmargin">
 	    <ul class="nav nav-tabs">
 	    	<li class="active"><a href="#sumarry" data-toggle="tab">Summary</a></li>
 	    	<li><a href="#comments" data-toggle="tab">Comments / Downtimes</a></li>
