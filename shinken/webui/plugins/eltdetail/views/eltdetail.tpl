@@ -46,19 +46,17 @@ Invalid element name
       $("ul.typeahead.dropdown-menu").find('li.active').data(obj);
     }
   });
-
-
 </script>
 
 
 %#  "This is the background canvas for all gesture detection things " 
 %# " Don't ask me why, but the size must be included in the
 %# canvas line here or we got problem!"
-<div class="btn-group left">
+<div class="btn-group pull-left">
   <a href="javascript:$('#gesture_panel').toggle();" class='btn' title="Show gesture panel"> <i class="icon-map-marker"></i> Show gesture panel</a>
 </div>
 
-<div id='gesture_panel' class='left'>
+<div id='gesture_panel' class="pull-left">
   <canvas id="canvas" width="200" height="200" class="grid_10" style="border: 1px solid black;"></canvas>
   <div class="gesture_button">
     <img title="By keeping a left click pressed and drawing a check, you will launch an acknowledgement." src="/static/eltdetail/images/gesture-check.png"/> Acknowledge
@@ -74,9 +72,9 @@ Invalid element name
 
 
 %#  "Content Container Start"
-<div class='offset2'>
+<div class="">
 <div id="content_container" class="span12">
-	<h1 class="grid_16 state_{{elt.state.lower()}} icon_down"> <img class="imgsize3" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h1>
+	<h1 class="span12 no-leftmargin state_{{elt.state.lower()}} icon_down"> <img class="imgsize3" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h1>
 
 	<div class="span12 no-leftmargin box">	   
 		<table class="span4 no-leftmargin">
@@ -194,10 +192,9 @@ Invalid element name
                  onChange : function(elt, b){toggle_flap_detection("{{elt.get_full_name()}}", !b);}
                }
                );
-            });
-
-	    
+            }); 
 	  </script>
+
 	  <form class="well form-inline span7">
 	    <div class="row-fluid"> 
 	      <div class="span3">
@@ -216,7 +213,6 @@ Invalid element name
 	    Flap detection <input {{flp_state}} class="iphone" type="checkbox" id='btn-flp'>
 	    </div>
 	      </div>
-
 	 </form>
 
 
@@ -248,8 +244,36 @@ Invalid element name
 	</div>
  
 
+<<<<<<< HEAD
     <!-- Start of the TAB part-->
     <div class="tabbable">
+=======
+
+	<!--
+	<div class="switches span12">		
+		<ul>
+		    %if elt_type=='host':
+		       %title = 'This will also enable/disable this host services'
+		    %else:
+		       %title = ''
+		    %end
+			<li class="grid_4" title="{{title}}" onclick="toggle_checks('{{elt.get_full_name()}}' , '{{elt.active_checks_enabled|elt.passive_checks_enabled}}')"><span>Active/passive Checks</span> {{!helper.get_input_bool(elt.active_checks_enabled|elt.passive_checks_enabled)}}
+			<li class="grid_4" onclick="toggle_notifications('{{elt.get_full_name()}}' , '{{elt.notifications_enabled}}')"><span>Notifications</span> {{!helper.get_input_bool(elt.notifications_enabled)}} </li>
+			<li class="grid_4" onclick="toggle_event_handlers('{{elt.get_full_name()}}' , '{{elt.event_handler_enabled}}')" ><span>Event Handler</span> {{!helper.get_input_bool(elt.event_handler_enabled)}} </li>
+			<li class="grid_4" onclick="toggle_flap_detection('{{elt.get_full_name()}}' , '{{elt.flap_detection_enabled}}')" ><span>Flap Detection</span> {{!helper.get_input_bool(elt.flap_detection_enabled)}} </li>	
+		</ul>	
+	</div>
+	-->
+    <!-- Switch End-->
+
+    <!-- Start Host/Services-->
+    <div class="span3">
+    	<p></p>
+    </div>
+    <!-- End Host/Service -->
+
+    <div class="tabbable span9 no-leftmargin">
+>>>>>>> webui-eltmockup
 	    <ul class="nav nav-tabs">
 	    	<li class="active"><a href="#sumarry" data-toggle="tab">Summary</a></li>
 	    	<li><a href="#comments" data-toggle="tab">Comments</a></li>
@@ -425,6 +449,7 @@ Invalid element name
 
 		    <!-- Tab Comments Start -->
 		    <div class="tab-pane" id="comments">
+<<<<<<< HEAD
 		      <div>
 			<ul class="nav nav-pills">
 			  <li class="active"><a href="/forms/comment/{{elt.get_full_name()}}" data-toggle="modal" data-target="#modal"><i class="icon-plus"></i> Add comment</a></li>
@@ -485,6 +510,35 @@ Invalid element name
 			      <p>No downtime planned.</p>
 			      %end
 			</div>
+=======
+				<div>
+					<ul class="nav nav-pills">
+						<li class="active"> <a href="#" class="">Add Comments</a> </li>
+						<li> <a onclick="delete_all_comments('{{elt.get_full_name()}}')" href="#" class="">Delete Comments</a> </li>
+					</ul>
+				</div>
+			  	<div class="clear"></div>
+									  
+			 	<div id="log_container">
+					%if len(elt.comments) > 0:
+					<h2></h2>
+					<ol>
+						%for c in elt.comments:
+						<li>
+							<div class="pull-left">
+								<p class="log-text">{{c.comment}}</p>
+								<div class="log-meta"> <span><b>Author:</b> {{c.author}}</span> <span><b>Creation:</b> {{helper.print_date(c.entry_time)}}</span> <span>	<b>Expire:</b>{{helper.print_date(c.expire_time)}}</span>
+								</div>
+							</div>
+							<div class="right log-action"><a class="icon_delete" href="#">Delete</a></div>
+						</li>
+						%end
+					</ol>
+					%else:
+						<p>No comments available</p>
+					%end
+				</div>
+>>>>>>> webui-eltmockup
 			</div>
 			<!-- Tab Comments and Downtimes End -->
 

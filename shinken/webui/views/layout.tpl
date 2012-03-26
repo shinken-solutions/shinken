@@ -93,11 +93,9 @@
     <script type="text/javascript" src="/static/{{p}}"></script>
       %end
 
-
   </head>
 
 <body>
-
 	%if print_header:
 		%include header_element globals()
 	%end
@@ -119,9 +117,6 @@
 		%include footer_element
 
     </div><!--/.fluid-container-->
-
-
-
   <!-- The modal div that will be shown when we want, and after put in it the data we want -->
   <div class="modal fade" id="modal"></div>
 
