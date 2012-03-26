@@ -309,15 +309,22 @@ class Helper(object):
             return """<input type="checkbox" %s />\n""" % id_s
 
 
-    def print_business_rules(self, tree, level=0):
+    def print_business_rules(self, tree, level=0, source_problems=[]):
         safe_print("Should print tree", tree)
+        safe_print('with source_problems', source_problems)
         node = tree['node']
         name = node.get_full_name()
         fathers = tree['fathers']
         s = ''
+        
+        # Maybe we are the root problem of this, and so we are printing it
+        root_str = ''
+        if node in source_problems:
+            print "I am a root problem"
+            root_str = ' <span class="alert-small alert-critical"> Root problem</span>'
         # Do not print the node if it's the root one, we already know its state!
         if level != 0:
-            s += "%s is %s since %s\n" % (self.get_link(node), node.state, self.print_duration(node.last_state_change, just_duration=True))
+            s += "%s is %s since %s %s\n" % (self.get_link(node), node.state, self.print_duration(node.last_state_change, just_duration=True), root_str)
 
         # If we got no parents, no need to print the expand icon
         if len(fathers) > 0:
@@ -341,7 +348,7 @@ class Helper(object):
         
             for n in fathers:
                 sub_node = n['node']
-                sub_s = self.print_business_rules(n, level=level+1)
+                sub_s = self.print_business_rules(n, level=level+1,source_problems=source_problems)
                 s += '<li class="%s">%s</li>' % (self.get_small_icon_state(sub_node), sub_s)
             s += "</ul>"
         safe_print("Returing s:", s)
@@ -349,8 +356,7 @@ class Helper(object):
 
     # Mockup helper
     # User: Frescha
-    # Date: 08.01.2012
-    
+    # Date: 08.01.2012    
     def print_business_tree(self, tree, level=0):
         safe_print("Should print tree", tree)
         node = tree['node']

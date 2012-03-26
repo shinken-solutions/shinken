@@ -142,7 +142,9 @@
 		    <div class="problem-actions opacity_hover">
 		    	<div class="action-fixit"><a href="#" onclick="try_to_fix('{{pb.get_full_name()}}')"> <img class="icon" title="Try to fix it" src="static/images/icon_ack.gif">Try to fix it</a></div>
 		    	%if not pb.problem_has_been_acknowledged:
-		    		<div class="action-ack"><a href="#" onclick="acknowledge('{{pb.get_full_name()}}')"><img class="icon" title="Acknowledge it" src="static/images/link_processes.gif">Acknowledge it</a></div>
+		    	  <div class="action-ack">
+			    <a href="/forms/acknowledge/{{pb.get_full_name()}}" data-toggle="modal" data-target="#modal"><i class="icon-ok"></i> Acknowledge it!</a>
+			    </div>
 		      	%end
 		    </div>
 		</div>
@@ -152,7 +154,7 @@
 		%if len(impact.parent_dependencies) > 0:
 			<a id="togglelink-{{impact.get_dbg_name()}}" href="javascript:toggleBusinessElt('{{impact.get_dbg_name()}}')"> {{!helper.get_button('Show dependency tree', img='/static/images/expand.png')}}</a>
 			<div class="clear"></div>
-		  	{{!helper.print_business_rules(datamgr.get_business_parents(impact))}}
+		  	{{!helper.print_business_rules(datamgr.get_business_parents(impact), source_problems=impact.source_problems)}}
 		%end  
 	</div>
 	%# end for imp_id in impacts:

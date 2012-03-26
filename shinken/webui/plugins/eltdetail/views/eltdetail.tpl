@@ -340,7 +340,7 @@ Invalid element name
 			<h3 class="span10">Root cause:</h3>
 			<a id="togglelink-{{elt.get_dbg_name()}}" href="javascript:toggleBusinessElt('{{elt.get_dbg_name()}}')"> {{!helper.get_button('Show dependency tree', img='/static/images/expand.png')}}</a>
 			<div class="clear"></div>
-			{{!helper.print_business_rules(datamgr.get_business_parents(elt))}}
+			{{!helper.print_business_rules(datamgr.get_business_parents(elt), source_problems=elt.source_problems)}}
 			
 			%end
 
