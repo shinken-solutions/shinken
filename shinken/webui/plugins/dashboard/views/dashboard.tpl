@@ -16,38 +16,53 @@ $(function(){
 
 
 
-  <div class="widget-place">
+<div class="widget-place">
 
-   <div class="widget movable collapsable removable editable closeconfirm">
+  <div class="widget movable collapsable removable editable closeconfirm">
     <div class="widget-header">
-     <strong>Title</strong>
+      <strong>Title</strong>
     </div>
     <div class="widget-editbox">
       Edit the widget here
     </div>
     <div class="widget-content">
-     Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-     Ut accumsan fringilla turpis. Lorem ipsum dolor.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+      Ut accumsan fringilla turpis. Lorem ipsum dolor.
     </div>
-   </div>
   </div>
-  <!-- /place-1 -->
+</div>
+<!-- /place-1 -->
 
-  <div class="widget-place">
-   <div class="widget movable collapsable removable editable closeconfirm">
+<div class="widget-place">
+  <div class="widget movable collapsable removable editable closeconfirm">
     <div class="widget-header">
-     <strong>Title</strong>
+      <strong>Title</strong>
     </div>
     <div class="widget-editbox">
       Edit the widget here
     </div>
     <div class="widget-content">
-     Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-     Ut accumsan fringilla turpis. Lorem ipsum dolor.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+      Ut accumsan fringilla turpis. Lorem ipsum dolor.
     </div>
-   </div>
   </div>
-  <!-- /place-2 -->
+
+
+  <div class="widget movable collapsable removable editable closeconfirm">
+    <div class="widget-header">
+      <strong>Widget 3</strong>
+    </div>
+    <div class="widget-editbox">
+      Edit the widget here
+    </div>
+    <div class="widget-content">
+      Here you can put what you want
+    </div>
+  </div>
+
+
+</div>
+<!-- /place-2 -->
 
 
   <!-- End Easy Widgets plugin HTML markup -->
