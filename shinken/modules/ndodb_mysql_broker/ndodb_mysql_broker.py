@@ -299,7 +299,7 @@ class Ndodb_Mysql_broker(BaseModule):
         self, host_name, service_description, instance_id
         ):
         if instance_id in self.services_cache_sync:
-            if (host_name, service_description) in
+            if (host_name, service_description) in \
             self.services_cache_sync[instance_id]:
                 return self.services_cache_sync[instance_id]
                 [(host_name, service_description)]
@@ -659,7 +659,7 @@ class Ndodb_Mysql_broker(BaseModule):
                                   data['active_checks_enabled'],
                               'notifications_enabled':
                                   data['notifications_enabled'],
-                              'obsess_over_service'
+                              'obsess_over_service':
                               data['obsess_over_service'],
                               'process_performance_data':
                                   data['process_perf_data'],
