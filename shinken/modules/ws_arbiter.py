@@ -54,7 +54,7 @@ app = None
 
 def get_page():
     # We get all value we want
-    time_stamp = request.forms.get('time_stamp', 0)
+    time_stamp = request.forms.get('time_stamp', int(time.time()))
     host_name = request.forms.get('host_name', None)
     service_description = request.forms.get('service_description', None)
     return_code = request.forms.get('return_code', -1)
