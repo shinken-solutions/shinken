@@ -7,32 +7,31 @@
 <div class="page view">
   <img src="/static/images/next.png" class="next-icon" onclick="go_right();"/>
   <img src="/static/images/previous.png" class="previous-icon" onclick="go_left();"/>
-%#    <div class="origin view">
-%#        <div id="camera" class="camera view"></div>
-%#    </div>
 
 %ind = -1
 %for imp in impacts:
    %ind += 1
    %x,y = divmod(ind, 2)
        <div class="media divstate{{imp.state_id}} sliding-impacts" style="left:{{x * 400}}px; position: absolute; top:{{ y * 150}}px; i:{{ind}} {{x}} {{y}}">
-         <span class="wall-pulse pulse" title=""></span>'
+         <span class="wall-pulse pulse" title=""></span>
          <div class="item-icon">
 	          <img class="wall-icon" src="{{app.helper.get_icon_state(imp)}}"></img>
          </div>
+	  <div class="btn-group right item-button">
+	    <a href="{{app.helper.get_link_dest(imp)}}" class='btn' title="Details"> <i class="icon-plus"></i> Details</a>
+	  </div>
+
          <div class="item-text">
           <span class="state_{{imp.state.lower()}}">{{imp.state}} <br/> {{imp.get_full_name()}}</span>
-         </div>
-	       <div class="item-button">
-	          <a href="{{app.helper.get_link_dest(imp)}}">{{!app.helper.get_button('', img='/static/images/search.png')}}</a>
-         </div>
+	 </div>
+
        </div>
 %end
 </div>
 
 
 <script type="text/javascript">
-var images = [];//{{!impacts}};
+var images = [];
 </script>
 
 
