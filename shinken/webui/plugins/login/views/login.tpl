@@ -1,8 +1,9 @@
 %rebase layout title='Shinken UI login', print_header=False, js=['login/js/jQuery.dPassword.js', 'login/js/detectmobilebrowser.js'], css=['login/css/login.css']
 
 
-// If we are a mobile device, go in the /mobile part :)
+
 <script type="text/javascript">
+// If we are a mobile device, go in the /mobile part :)
   $(document).ready(function(){
   //jQuery.browser.mobile is filled by login/js/detectmobilebrowser.js
   if($.browser.mobile){
