@@ -1,6 +1,6 @@
 %helper = app.helper
 
-%rebase layout css=['wall/css/snowstack.css', 'wall/css/wall.css'], title='Wall view', js=[ 'wall/js/wall.js'], refresh=True, user=user, print_menu=False, print_header=True
+%rebase layout css=['wall/css/snowstack.css', 'wall/css/wall.css'], title='Wall view', js=[ 'wall/js/wall.js'], refresh=True, user=user, print_menu=False, print_header=True, menu_part='/wall'
 
 
 
