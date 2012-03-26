@@ -67,5 +67,5 @@ if __name__ == "__main__":
                 notif_host, notif_svc, notif_rc, notif_output = line.split(opts.delimiter)
             notif_to_send.append([notif_host, notif_svc, notif_rc, notif_output])
 
-    print notif_to_send
+#   print notif_to_send
     main(opts.hostname, opts.port, opts.encryption, opts.password, notif_to_send)
