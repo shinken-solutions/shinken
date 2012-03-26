@@ -440,33 +440,33 @@ Invalid element name
 
 		    <!-- Tab Comments and Downtimes Start -->
 		    <div class="tab-pane" id="comments">
-				<div>
-					<ul class="nav nav-pills">
-						<li class="active"> <a href="#" class="">Add Comments</a> </li>
-						<li> <a onclick="delete_all_comments('{{elt.get_full_name()}}')" href="#" class="">Delete Comments</a> </li>
-					</ul>
-				</div>
-			  	<div class="clear"></div>
-									  
-			 	<div id="log_container">
-					%if len(elt.comments) > 0:
-					<h2></h2>
-					<ol>
-						%for c in elt.comments:
-						<li>
-							<div class="left">
-								<p class="log-text">{{c.comment}}</p>
-								<div class="log-meta"> <span><b>Author:</b> {{c.author}}</span> <span><b>Creation:</b> {{helper.print_date(c.entry_time)}}</span> <span>	<b>Expire:</b>{{helper.print_date(c.expire_time)}}</span>
-								</div>
-							</div>
-							<div class="right log-action"><a class="icon_delete" href="#">Delete</a></div>
-						</li>
-						%end
-					</ol>
-					%else:
-						<p>No comments available</p>
-					%end
-				</div>
+		      <div>
+			<ul class="nav nav-pills">
+			  <li class="active"><a href="/forms/comment/{{elt.get_full_name()}}" data-toggle="modal" data-target="#modal"><i class="icon-plus"></i> Add comment</a></li>
+			  <li> <a onclick="delete_all_comments('{{elt.get_full_name()}}')" href="#" class=""><i class="icon-minus"></i> Delete all comments</a> </li>
+			</ul>
+		      </div>
+		      <div class="clear"></div>
+		      
+		      <div id="log_container">
+			%if len(elt.comments) > 0:
+			      <h2></h2>
+			      <ol>
+			  %for c in elt.comments:
+			  <li>
+			    <div class="left">
+			      <p class="log-text">{{c.comment}}</p>
+			      <div class="log-meta"> <span><b>Author:</b> {{c.author}}</span> <span><b>Creation:</b> {{helper.print_date(c.entry_time)}}</span> <span>	<b>Expire:</b>{{helper.print_date(c.expire_time)}}</span>
+			      </div>
+			    </div>
+			    <div class="right log-action"><a class="icon_delete" href="javascript:delete_comment('{{elt.get_full_name()}}', {{c.id}})">Delete</a></div>
+			  </li>
+			  %end
+			      </ol>
+			      %else:
+			      <p>No comments available</p>
+			      %end
+			</div>
 			</div>
 			<!-- Tab Comments and Downtimes End -->
 

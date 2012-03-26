@@ -218,6 +218,16 @@ function toggle_flap_detection(name, b){
 
 
 
+//ADD_SVC_COMMENT;<host_name>;<service_description>;<persistent>;<author>;<comment>
+// We add a persistent comment
+function add_comment(name, user, comment){
+    var elts = get_elements(name);
+    var url = '/action/ADD_'+elts.type+'_COMMENT/'+elts.nameslash+'/1/'+user+'/'+comment;
+    // We can launch it :)
+    launch(url);
+}
+
+
 /* The command that will launch an event handler */
 function delete_comment(name, i) {
     var elts = get_elements(name);
