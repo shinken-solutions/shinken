@@ -500,7 +500,7 @@ Invalid element name
     				  <p>
 				    <img src="{{img_src}}" class="jcropelt"/>
 				    <a href="{{link}}" class="btn"><i class="icon-plus"></i> Show more</a>
-				    <a href="javascript:zoom('/{{elt_type}}/{{elt.get_full_name()}}?')" class="btn"><i class="icon-zoom-in"></i> Zoom</a>
+				    <a href="javascript:graph_zoom('/{{elt_type}}/{{elt.get_full_name()}}?')" class="btn"><i class="icon-zoom-in"></i> Zoom</a>
 				  </p>
 				  
 				%end

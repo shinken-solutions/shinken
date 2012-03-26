@@ -27,50 +27,78 @@
    So we apply only then. Cool isn't it?
    PS : I lost 2 hours in this, and yes, I'm quite angry about this stupid thing....
 */
+$(window).ready(function(){
+    g_s = graphstart;  // Time start and ends
+    g_e = graphend;
+    
+    g_p = 0; // relative pos for start and end
+    g_q = 0;
 
-zoomstart=0;
-zoomend=0;
+    // theses offsets are for PNP, with won't work with
+    // Graphite from now.
+    // TODO
+    g_A = 65;
+    g_B = 25;
+    g_T = 587;
+    
+    g_D = g_T - (g_A + g_B); // The pixel range when we remove borders
+    
+    g_O = g_e - g_s; // total time printed
+});
 
-offset=50;
-offset_end=25;
+/* 
+   { }  <-- User selection.
+
+         s    p             q  e         # s = time start, p = rel pos start, q = rel pos end, e = end time
+         |    {             }  |
+              x             x2           # x = select start, x2=select end     
+   [  A  ][       D           ][  B  ]   # A = offset left, D=usefull, B = offset right
+   [              T                  ]   # T = Total size of the picture
+
+*/
 
 function update_coords(c)
 {
-    
     // variables can be accessed here as
     // c.x, c.y, c.x2, c.y2, c.w, c.h
-    zoomstart=Math.max(0, c.x - offset);
-    zoomend=Math.min(587, c.x2 - offset_end);
+    // Compute relative positions
+    g_p = Math.min(Math.max(g_A, c.x), g_T - g_B) - g_A;
+    g_q = Math.min(Math.max(g_A, c.x2), g_T - g_B) - g_A;
 };
 
 
+// We will compute the relative position of the selection
+// by removing the borders. This will give us g_rp and g_rq.
+// Then we comput ethe ratio of this selection, and so we apply
+// it in the time selection. And we are done.
+function graph_zoom(uri){
 
-// ARG, I'm lost! please don'ttry this, it's buggy as hell. The next tme I do like always
-// IE: draw a diag and code after...
-// PS: but at least the main idea is working :p
+    //alert('Relatives'+g_p+' '+g_q);
+    
+    // We compute the ratio of the relative position from the inner
+    // draw (without the borders)
+    var g_rp = g_p / g_D;
+    var g_rq = g_q / g_D;
 
-function zoom(uri){
-    var original_diff = graphend - graphstart;
-    // From now we assume PNP graphs. Should find a generic way here
+    //alert('Relative ratio: '+g_D+' '+g_rp+' '+g_rq);
+
+    // Now compute the new start and new end we want to border
+    var g_ns = parseInt(g_s + g_O*g_rp);
+    var g_ne = parseInt(g_s + g_O*g_rq);
     
-    ratio = (zoomend - zoomstart) / (587 - (offset + offset_end));
-    
-    alert('Zoom end' + zoomend);
-    if(ratio > 1){
+    //alert('New time '+g_ns+' '+g_ne);
+
+    // Maybe we just fuck up, if so, bailout
+    if(g_ne <= g_ns){
 	return;
     }
-    alert('Ratio is' + ratio+ 'original diff was ' + original_diff);
-
-    var time_ahead = original_diff * (1 - ratio);
-    var time_backward = original_diff 
-
-    var new_graphstart = parseInt(graphstart + time_ahead);
-    var new_graphend = parseInt(graphend - original_diff * (1-ratio));
-    //alert('Start'+graphstart+' came to '+ new_graphstart);
-    var new_uri = uri+'graphstart='+new_graphstart+'&graphend='+new_graphend+'#graphs';
+    
+    // Make the uri and GO!
+    var new_uri = uri+'graphstart='+g_ns+'&graphend='+g_ne+'#graphs';
     window.location=new_uri;
 }
 
+// when we show the graph tab, we apply the crop effect.
 $(window).ready(function(){
     $('#tab_to_graphs').on('shown', function (e) {
 	$('.jcropelt').Jcrop({
