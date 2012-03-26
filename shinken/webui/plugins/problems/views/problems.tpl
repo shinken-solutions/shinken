@@ -286,5 +286,3 @@
 %# """ This div is an image container and will move hover the perfometer with mouse hovering """
 <div id="img_hover"></div>
 
-
-  <a class="btn" href="/blabla" data-toggle="modal" data-target="#modal">Launch Modal</a>      
