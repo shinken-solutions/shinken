@@ -197,23 +197,12 @@ Invalid element name
 
 	  <form class="well form-inline span7">
 	    <div class="row-fluid"> 
-	      <div class="span3">
-	    Active/passive checks  <input {{chk_state}} class="iphone" type="checkbox" id='btn-checks'>
-	      </div>
-	      
-	      <div class="span3">
-	    Notifications <input {{not_state}} class="iphone" type="checkbox" id='btn-not'>
-	    </div>
-
-	      <div class="span3">
-	    Event handler  <input {{evt_state}} class="iphone" type="checkbox" id='btn-evt'>
-	    </div>
-
-	      <div class="span3">
-	    Flap detection <input {{flp_state}} class="iphone" type="checkbox" id='btn-flp'>
-	    </div>
-	      </div>
-	 </form>
+	      <div class="span3"> Active/passive checks  <input {{chk_state}} class="iphone" type="checkbox" id='btn-checks'> </div>
+	      <div class="span3"> Notifications <input {{not_state}} class="iphone" type="checkbox" id='btn-not'> </div>
+		  <div class="span3"> Event handler  <input {{evt_state}} class="iphone" type="checkbox" id='btn-evt'> </div>
+		  <div class="span3"> Flap detection <input {{flp_state}} class="iphone" type="checkbox" id='btn-flp'> </div>
+		</div>
+	  </form>
 
 
 	<div class="btn-group span5 right">
