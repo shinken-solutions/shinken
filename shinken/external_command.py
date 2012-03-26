@@ -415,12 +415,12 @@ class ExternalCommandManager:
         tmp_host = ''
         try:
             for elt in elts[1:]:
-                #safe_print("Searching for a new arg:", elt, i)
+                safe_print("Searching for a new arg:", elt, i)
                 val = elt.strip()
-                if val[-1] == '\n':
+                if val.endswith('\n'):
                     val = val[:-1]
 
-                #safe_print("For command arg", val)
+                safe_print("For command arg", val)
 
                 if not in_service:
                     type_searched = entry['args'][i-1]

@@ -246,29 +246,14 @@ Invalid element name
 	<div class="btn-group right">
 	  <a href="/depgraph/{{elt.get_full_name()}}" class='btn' title="Impact map of {{elt.get_full_name()}}"> <i class="icon-map-marker"></i> Show impact map</a>
 	</div>
+ 
 
-
-	<!--
-	<div class="switches span12">		
-		<ul>
-		    %if elt_type=='host':
-		       %title = 'This will also enable/disable this host services'
-		    %else:
-		       %title = ''
-		    %end
-			<li class="grid_4" title="{{title}}" onclick="toggle_checks('{{elt.get_full_name()}}' , '{{elt.active_checks_enabled|elt.passive_checks_enabled}}')"><span>Active/passive Checks</span> {{!helper.get_input_bool(elt.active_checks_enabled|elt.passive_checks_enabled)}}
-			<li class="grid_4" onclick="toggle_notifications('{{elt.get_full_name()}}' , '{{elt.notifications_enabled}}')"><span>Notifications</span> {{!helper.get_input_bool(elt.notifications_enabled)}} </li>
-			<li class="grid_4" onclick="toggle_event_handlers('{{elt.get_full_name()}}' , '{{elt.event_handler_enabled}}')" ><span>Event Handler</span> {{!helper.get_input_bool(elt.event_handler_enabled)}} </li>
-			<li class="grid_4" onclick="toggle_flap_detection('{{elt.get_full_name()}}' , '{{elt.flap_detection_enabled}}')" ><span>Flap Detection</span> {{!helper.get_input_bool(elt.flap_detection_enabled)}} </li>	
-		</ul>	
-	</div>
-	-->
-    <!-- Switch End-->
-
+    <!-- Start of the TAB part-->
     <div class="tabbable">
 	    <ul class="nav nav-tabs">
 	    	<li class="active"><a href="#sumarry" data-toggle="tab">Summary</a></li>
-	    	<li><a href="#comments" data-toggle="tab">Comments / Downtimes</a></li>
+	    	<li><a href="#comments" data-toggle="tab">Comments</a></li>
+	    	<li><a href="#downtimes" data-toggle="tab">Downtimes</a></li>
 	    	<li><a href="#graphs" data-toggle="tab" id='tab_to_graphs'>Graph</a></li>
 	    </ul>
 	    <div class="tab-content">
@@ -438,7 +423,7 @@ Invalid element name
 		    </div>
 		    <!-- Tab Summary End-->
 
-		    <!-- Tab Comments and Downtimes Start -->
+		    <!-- Tab Comments Start -->
 		    <div class="tab-pane" id="comments">
 		      <div>
 			<ul class="nav nav-pills">
@@ -468,7 +453,41 @@ Invalid element name
 			      %end
 			</div>
 			</div>
+			<!-- Tab Comments End -->
+
+
+		    <!-- Tab Downtimes Start -->
+		    <div class="tab-pane" id="downtimes">
+		      <div>
+			<ul class="nav nav-pills">
+			  <li class="active"><a href="/forms/downtime/{{elt.get_full_name()}}" data-toggle="modal" data-target="#modal"><i class="icon-plus"></i> Add a downtime</a></li>
+			  <li> <a onclick="delete_all_downtimes('{{elt.get_full_name()}}')" href="#" class=""><i class="icon-minus"></i> Delete all downtimes</a> </li>
+			</ul>
+		      </div>
+		      <div class="clear"></div>
+		      
+		      <div id="log_container">
+			%if len(elt.downtimes) > 0:
+			      <h2></h2>
+			      <ol>
+			  %for dt in elt.downtimes:
+			  <li>
+			    <div class="left">
+			      <p class="log-text">{{dt.comment}}</p>
+			      <div class="log-meta"> <span><b>Author:</b> {{dt.author}}</span> <span><b>Start:</b> {{helper.print_date(dt.start_time)}}</span> <span>	<b>Expire:</b>{{helper.print_date(dt.end_time)}}</span>
+			      </div>
+			    </div>
+			    <div class="right log-action"><a class="icon_delete" href="javascript:delete_downtime('{{elt.get_full_name()}}', {{dt.id}})">Delete</a></div>
+			  </li>
+			  %end
+			      </ol>
+			      %else:
+			      <p>No downtime planned.</p>
+			      %end
+			</div>
+			</div>
 			<!-- Tab Comments and Downtimes End -->
+
 
 			<!-- Tab Graph Start -->
 			<div class="tab-pane" id="graphs">
