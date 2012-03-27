@@ -483,3 +483,46 @@ class Webui_broker(BaseModule, Daemon):
         safe_print("Will return", uris)
         # Ok if we got a real contact, and if a module auth it
         return uris
+
+
+
+
+
+
+    # Try to got for an element the graphs uris from modules
+    def get_user_preference(self, user, key, default=None):
+        safe_print("Checking user preference for", user.get_name(), key)
+        
+        for mod in self.modules_manager.get_internal_instances():
+            try:
+                f = getattr(mod, 'get_ui_user_preference', None)
+                if f and callable(f):
+                    r = f(user, key)
+                    return r
+            except Exception , exp:
+                print exp.__dict__
+                logger.log("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
+                logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
+                logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
+                self.modules_manager.set_to_restart(mod)        
+
+        return default
+
+
+    # Try to got for an element the graphs uris from modules
+    def set_user_preference(self, user, key, value):
+        safe_print("Saving user preference for", user.get_name(), key, value)
+
+        for mod in self.modules_manager.get_internal_instances():
+            try:
+                f = getattr(mod, 'set_ui_user_preference', None)
+                if f and callable(f):
+                    f(user, key, value)
+            except Exception , exp:
+                print exp.__dict__
+                logger.log("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
+                logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
+                logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
+                self.modules_manager.set_to_restart(mod)
+
+        # end of all modules

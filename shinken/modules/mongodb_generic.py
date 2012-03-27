@@ -31,7 +31,7 @@ from shinken.basemodule import BaseModule
 
 
 properties = {
-    'daemons' : ['arbiter'],
+    'daemons' : ['arbiter', 'webui'],
     'type' : 'mongodb',
     'external' : False,
     'phases' : ['configuration'],
@@ -39,15 +39,15 @@ properties = {
 
 # called by the plugin manager to get a module instance
 def get_instance(plugin):
-    print "[MongoDB Importer Module] : Get Mongodb importer instance for plugin %s" % plugin.get_name()
+    print "[MongoDB Module] : Get Mongodb instance for plugin %s" % plugin.get_name()
     uri   = plugin.uri
     database = plugin.database
 
-    instance = Mongodb_arbiter(plugin, uri, database)
+    instance = Mongodb_generic(plugin, uri, database)
     return instance
 
 # Retrieve hosts from a Mongodb
-class Mongodb_arbiter(BaseModule):
+class Mongodb_generic(BaseModule):
     def __init__(self, mod_conf, uri, database):
         BaseModule.__init__(self, mod_conf)
         self.uri        = uri
@@ -59,20 +59,23 @@ class Mongodb_arbiter(BaseModule):
 
     # Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
-        print "[Mongodb Importer Module] : Try to open a Mongodb connection to %s:%s" % (self.uri, self.database)
+        print "[Mongodb Module] : Try to open a Mongodb connection to %s:%s" % (self.uri, self.database)
         try:
             self.con = Connection(self.uri)
             self.db = getattr(self.con, self.database)
         except Exception, e:
             print "Mongodb Module : Error %s:" % e
             raise
-        print "[Mongodb Importer Module] : Connection OK"
+        print "[Mongodb Module] : Connection OK"
 
+
+
+################################ Arbiter part #################################
 
     # Main function that is called in the CONFIGURATION phase
     def get_objects(self):
         if not self.db:
-            print "[Mongodb Importer Module] : Problem during init phase"
+            print "[Mongodb Module] : Problem during init phase"
             return {}
 
         r = {'hosts' : []}
@@ -88,3 +91,40 @@ class Mongodb_arbiter(BaseModule):
             r['hosts'].append(h)
 
         return r
+
+
+
+
+
+#################################### WebUI parts ############################
+    # We will get in the mongodb database the user preference entry, adn get the key
+    # they are asking us
+    def get_ui_user_preference(self, user, key):
+        if not self.db:
+            print "[Mongodb] : error Problem during init phase"
+            return None
+
+        if not user:
+            print '[Mongodb] : error get_ui_user_preference::no user'
+            return None
+        
+        e = db.ui_user_preferences.find_one({'_id': user.get_name()})
+        # Maybe it's a new entryor missing this parameter, bail out
+        if not e ir not key in e:
+            return None
+
+        return e.get(key)
+    
+    
+    # Same but for saving
+    def set_ui_user_preference(self, user, key, value):
+        if not self.db:
+            print "[Mongodb] : error Problem during init phase"
+            return None
+
+        if not user:
+            print '[Mongodb] : error get_ui_user_preference::no user'
+            return None
+
+        # Ok, go for update
+        db.ui_user_preferences.update({ _id:user.get_name()}, { '$set': { key : value }}
