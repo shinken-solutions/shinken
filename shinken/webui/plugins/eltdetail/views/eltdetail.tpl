@@ -242,10 +242,10 @@ Invalid element name
 
     <div class="tabbable span9 no-leftmargin">
 	    <ul class="nav nav-tabs">
-	    	<li class="active"><a href="#sumarry" data-toggle="tab">Summary</a></li>
+	    	<li class="active"><a href="#sumarry" data-toggle="tab">Impacts</a></li>
 	    	<li><a href="#comments" data-toggle="tab">Comments</a></li>
 	    	<li><a href="#downtimes" data-toggle="tab">Downtimes</a></li>
-	    	<li><a href="#graphs" data-toggle="tab" id='tab_to_graphs'>Graph</a></li>
+	    	<li><a href="#graphs" data-toggle="tab" id='tab_to_graphs'>Graphs</a></li>
 	    </ul>
 	    <div class="tab-content">
 	    	<!-- Tab Summary Start-->
@@ -254,6 +254,7 @@ Invalid element name
 			   left is information, right is related elements -->
 		      <div class="row-fluid">
 			<!-- Left, information part-->
+			<!--
 		      <div class="span6">
 		    	%if elt_type=='host':
 			  <h3 class="span10">Host Information:</h3>
@@ -318,10 +319,12 @@ Invalid element name
 			    <td>{{helper.yes_no(elt.in_scheduled_downtime)}}</td>
 			  </tr>
 			</table>
-		      </div> <!-- End of the left part -->
+		      </div> 
+			-->
+		      <!-- End of the left part -->
 		      
 		      <!-- So now it's time for the right part, related elements -->
-		      <div class="span6">
+		      <div class="span12">
 
 
 			
