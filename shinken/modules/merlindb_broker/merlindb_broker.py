@@ -35,6 +35,7 @@ def get_objs_names(objs):
     return s
 
 def get_obj_name(obj):
+    print "ARG", obj
     print "Get name on", obj.get_name()
     return obj.get_name()
 
@@ -367,12 +368,12 @@ class Merlindb_broker(BaseModule):
                 'address4' : {'transform' : None},
                 'address5' : {'transform' : None},
                 'address6' : {'transform' : None},
-                'service_notification_commands' : {'transform' : get_objs_names},
+                #'service_notification_commands' : {'transform' : get_objs_names},
                 'pager' : {'transform' : None},
-                'host_notification_period' : {'transform' : get_obj_name},
+                #'host_notification_period' : {'transform' : get_obj_name},
                 'host_notifications_enabled' : {'transform' : None},
-                'host_notification_commands' : {'transform' : get_objs_names},
-                'service_notification_period' : {'transform' : get_obj_name},
+                #'host_notification_commands' : {'transform' : get_objs_names},
+                #'service_notification_period' : {'transform' : get_obj_name},
                 'email' : {'transform' : None},
                 'alias' : {'transform' : None},
                 'host_notification_options' : {'transform' : list_to_comma},
@@ -434,7 +435,7 @@ class Merlindb_broker(BaseModule):
                     #print "Got a prop to change", prop
                     val = brok.data[prop]
                     if mapping[prop]['transform'] is not None:
-                        print "Call function for", type, prop
+                        #print "Call function for", type, prop
                         f = mapping[prop]['transform']
                         val = f(val)
                     name = prop
@@ -680,5 +681,10 @@ class Merlindb_broker(BaseModule):
 
     #A notification have just be created, we INSERT it
     def manage_notification_raise_brok(self, b):
-        query = self.db_backend.create_insert_query('notification', b.data)
+        n_data = {}
+        t = ['reason_type', 'service_description', 'ack_data', 'contacts_notified', 'start_time', 'escalated', 'instance_id',
+         'state', 'end_time', 'ack_author', 'notification_type', 'output', 'id', 'host_name']
+        for prop in t:
+            n_data[prop] = b.data[prop]
+        query = self.db_backend.create_insert_query('notification', n_data)
         return [query]
