@@ -24,7 +24,7 @@ $(function(){
             .css( 'display', 'none' )
             .appendTo( $('body') );
     }
-    //alert($pageslide.length);
+
     /*
      * Private methods 
      */

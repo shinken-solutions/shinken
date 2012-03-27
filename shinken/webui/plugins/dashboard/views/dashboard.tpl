@@ -35,15 +35,30 @@ $(function(){
     
     <a href="javascript:$.pageslide.close()">Close</a>
 </div>
-<script>$(function(){
+<script >$(function(){
   $(".slidelink").pageslide({ direction: "left", modal : true});
   });
 </script>
 
 
-<div class="widget-place">
 
-  <div class="widget movable collapsable removable editable closeconfirm">
+<script>
+  // Now try to load widgets in a dynamic way
+  function AddWidget(url, placeId){
+    $.get(url, function(html){
+      $.fn.AddEasyWidget(html, placeId, {});
+    });
+  }
+
+  // Now load the system as example
+  $(function(){
+     AddWidget('/widget/system', 'widget-place-1');
+  });
+</script>
+
+<div class="widget-place" id="widget-place-1">
+
+  <div class="widget movable collapsable removable editable closeconfirm" >
     <div class="widget-header">
       <strong>Title</strong>
     </div>
@@ -58,7 +73,7 @@ $(function(){
 </div>
 <!-- /place-1 -->
 
-<div class="widget-place">
+<div class="widget-place" id="widget-place-2">
   <div class="widget movable collapsable removable editable closeconfirm">
     <div class="widget-header">
       <strong>Title</strong>

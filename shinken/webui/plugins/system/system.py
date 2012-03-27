@@ -41,6 +41,10 @@ def system_page():
             'receivers' : receivers, 'pollers' : pollers,
             }
 
+def system_widget():
+    return system_page()
+
+
 def show_log():
     user = app.get_user_auth()
 
@@ -59,5 +63,6 @@ def show_log():
             }
 
 pages = {system_page : { 'routes' : ['/system', '/system/'], 'view' : 'system', 'static' : True},
+         system_widget : { 'routes' : ['/widget/system'], 'view' : 'system_widget', 'static' : True, 'widget' : ['dashboard']},
          show_log : { 'routes' : ['/system/log'], 'view' : 'log', 'static' : True},
          }
