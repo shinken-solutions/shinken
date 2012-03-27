@@ -195,24 +195,25 @@ Invalid element name
             }); 
 	  </script>
 
-	  <form class="well form-inline span7">
-	    <div class="row-fluid"> 
-	      <div class="span3"> Active/passive checks  <input {{chk_state}} class="iphone" type="checkbox" id='btn-checks'> </div>
-	      <div class="span3"> Notifications <input {{not_state}} class="iphone" type="checkbox" id='btn-not'> </div>
-		  <div class="span3"> Event handler  <input {{evt_state}} class="iphone" type="checkbox" id='btn-evt'> </div>
-		  <div class="span3"> Flap detection <input {{flp_state}} class="iphone" type="checkbox" id='btn-flp'> </div>
-		</div>
-	  </form>
+	  <div class='row-fluid'>
+	    <form class="well form-inline span7">
+	      <div class="row-fluid"> 
+		<div class="span3"> Active/passive checks  <input {{chk_state}} class="iphone" type="checkbox" id='btn-checks'> </div>
+		<div class="span3"> Notifications <input {{not_state}} class="iphone" type="checkbox" id='btn-not'> </div>
+		<div class="span3"> Event handler  <input {{evt_state}} class="iphone" type="checkbox" id='btn-evt'> </div>
+		<div class="span3"> Flap detection <input {{flp_state}} class="iphone" type="checkbox" id='btn-flp'> </div>
+	      </div>
+	    </form>
+	    
 
-
-	<div class="btn-group span5 right">
+	<div class="btn-group span3 pull-right">
 	  %if elt_type=='host':
-	     <a class="btn dropdown-toggle span6" data-toggle="dropdown" href="#"><span class="pull-left"><i class="icon-cog"></i> Host Commands</span> <span class="caret pull-right"></span></a>
+	     <a class="btn dropdown-toggle span8" data-toggle="dropdown" href="#"><span class="pull-left"><i class="icon-cog"></i> Host Commands</span> <span class="caret pull-right"></span></a>
 	  %else:
-	     <a class="btn dropdown-toggle span6"
+	     <a class="btn dropdown-toggle span8"
 	  data-toggle="dropdown" href="#"><span class="pull-left"><i class="icon-cog"></i> Service Commands</span> <span class="caret pull-right"></span></a>
 	  %end:
-	  <ul class="dropdown-menu plus6 no-maxwidth">
+	  <ul class="dropdown-menu span8 no-maxwidth">
 	    <li><a href="javascript:try_to_fix('{{elt.get_full_name()}}')"><i class="icon-pencil"></i> Try to fix it!</a></li>
 	    <li><a href="/forms/acknowledge/{{elt.get_full_name()}}" data-toggle="modal" data-target="#modal"><i class="icon-ok"></i> Acknowledge it!</a></li>
 	    <li><a href="javascript:recheck_now('{{elt.get_full_name()}}')"><i class="icon-repeat"></i> Recheck now</a></li>
@@ -228,32 +229,10 @@ Invalid element name
 	  </ul>
 	</div>
 
-	<div class="btn-group right">
+	<div class="btn-group pull-right">
 	  <a href="/depgraph/{{elt.get_full_name()}}" class='btn' title="Impact map of {{elt.get_full_name()}}"> <i class="icon-map-marker"></i> Show impact map</a>
 	</div>
- 
-
-<<<<<<< HEAD
-    <!-- Start of the TAB part-->
-    <div class="tabbable">
-=======
-
-	<!--
-	<div class="switches span12">		
-		<ul>
-		    %if elt_type=='host':
-		       %title = 'This will also enable/disable this host services'
-		    %else:
-		       %title = ''
-		    %end
-			<li class="grid_4" title="{{title}}" onclick="toggle_checks('{{elt.get_full_name()}}' , '{{elt.active_checks_enabled|elt.passive_checks_enabled}}')"><span>Active/passive Checks</span> {{!helper.get_input_bool(elt.active_checks_enabled|elt.passive_checks_enabled)}}
-			<li class="grid_4" onclick="toggle_notifications('{{elt.get_full_name()}}' , '{{elt.notifications_enabled}}')"><span>Notifications</span> {{!helper.get_input_bool(elt.notifications_enabled)}} </li>
-			<li class="grid_4" onclick="toggle_event_handlers('{{elt.get_full_name()}}' , '{{elt.event_handler_enabled}}')" ><span>Event Handler</span> {{!helper.get_input_bool(elt.event_handler_enabled)}} </li>
-			<li class="grid_4" onclick="toggle_flap_detection('{{elt.get_full_name()}}' , '{{elt.flap_detection_enabled}}')" ><span>Flap Detection</span> {{!helper.get_input_bool(elt.flap_detection_enabled)}} </li>	
-		</ul>	
 	</div>
-	-->
-    <!-- Switch End-->
 
     <!-- Start Host/Services-->
     <div class="span3">
@@ -262,7 +241,6 @@ Invalid element name
     <!-- End Host/Service -->
 
     <div class="tabbable span9 no-leftmargin">
->>>>>>> webui-eltmockup
 	    <ul class="nav nav-tabs">
 	    	<li class="active"><a href="#sumarry" data-toggle="tab">Summary</a></li>
 	    	<li><a href="#comments" data-toggle="tab">Comments</a></li>
@@ -438,7 +416,6 @@ Invalid element name
 
 		    <!-- Tab Comments Start -->
 		    <div class="tab-pane" id="comments">
-<<<<<<< HEAD
 		      <div>
 			<ul class="nav nav-pills">
 			  <li class="active"><a href="/forms/comment/{{elt.get_full_name()}}" data-toggle="modal" data-target="#modal"><i class="icon-plus"></i> Add comment</a></li>
@@ -499,35 +476,6 @@ Invalid element name
 			      <p>No downtime planned.</p>
 			      %end
 			</div>
-=======
-				<div>
-					<ul class="nav nav-pills">
-						<li class="active"> <a href="#" class="">Add Comments</a> </li>
-						<li> <a onclick="delete_all_comments('{{elt.get_full_name()}}')" href="#" class="">Delete Comments</a> </li>
-					</ul>
-				</div>
-			  	<div class="clear"></div>
-									  
-			 	<div id="log_container">
-					%if len(elt.comments) > 0:
-					<h2></h2>
-					<ol>
-						%for c in elt.comments:
-						<li>
-							<div class="pull-left">
-								<p class="log-text">{{c.comment}}</p>
-								<div class="log-meta"> <span><b>Author:</b> {{c.author}}</span> <span><b>Creation:</b> {{helper.print_date(c.entry_time)}}</span> <span>	<b>Expire:</b>{{helper.print_date(c.expire_time)}}</span>
-								</div>
-							</div>
-							<div class="right log-action"><a class="icon_delete" href="#">Delete</a></div>
-						</li>
-						%end
-					</ol>
-					%else:
-						<p>No comments available</p>
-					%end
-				</div>
->>>>>>> webui-eltmockup
 			</div>
 			<!-- Tab Comments and Downtimes End -->
 
