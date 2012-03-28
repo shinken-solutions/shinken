@@ -1562,11 +1562,11 @@ class Config(Item):
             # Now in packs we have the number of packs [h1, h2, etc]
             # equal to the number of schedulers.
             r.packs = packs
-         logger.log("Number of hosts in all the realm  %d" % nb_elements_all_realms)
-         logger.log("Number of hosts %d" % len(self.hosts))
-         if len(self.hosts) != nb_elements_all_realms:
-             logger.log("There are %d hosts defined, and %d hosts dispatched in the realms. Some hosts have been ignored" %( len(self.hosts), nb_elements_all_realms))
-             self.add_error("There are %d hosts defined, and %d hosts dispatched in the realms. Some hosts have been ignored" %( len(self.hosts), nb_elements_all_realms))
+        logger.log("Number of hosts in all the realm  %d" % nb_elements_all_realms)
+        logger.log("Number of hosts %d" % len(self.hosts))
+        if len(self.hosts) != nb_elements_all_realms:
+            logger.log("There are %d hosts defined, and %d hosts dispatched in the realms. Some hosts have been ignored" %( len(self.hosts), nb_elements_all_realms))
+            self.add_error("There are %d hosts defined, and %d hosts dispatched in the realms. Some hosts have been ignored" %( len(self.hosts), nb_elements_all_realms))
 
 
 
