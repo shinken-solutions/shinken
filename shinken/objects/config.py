@@ -1312,8 +1312,8 @@ class Config(Item):
             if rea:
                 if len(rea.potential_brokers) == 0:
                     logger.log("Error : the scheduler %s got no broker in its realm or upper" % s.get_name())
-                     self.add_error("Error : the scheduler %s got no broker in its realm or upper" % s.get_name())
-                     r = False
+                    self.add_error("Error : the scheduler %s got no broker in its realm or upper" % s.get_name())
+                    r = False
                      
         # Check that for each poller_tag of a host, a poller exists with this tag
         # TODO : need to check that poller are in the good realm too
