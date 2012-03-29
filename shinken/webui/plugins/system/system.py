@@ -21,6 +21,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+import time
+
 ### Will be populated by the UI with it's own value
 app = None
 
@@ -42,7 +44,24 @@ def system_page():
             }
 
 def system_widget():
-    return system_page()
+    user = app.get_user_auth()
+
+    if not user:
+        redirect("/user/login")
+    
+    schedulers = app.datamgr.get_schedulers()
+    brokers = app.datamgr.get_brokers()
+    reactionners = app.datamgr.get_reactionners()
+    receivers = app.datamgr.get_receivers()
+    pollers = app.datamgr.get_pollers()
+
+    widgetid = app.request.forms.get('widgetid', '')
+    
+
+    return {'app' : app, 'user' : user, 'schedulers' : schedulers,
+            'brokers' : brokers, 'reactionners' : reactionners,
+            'receivers' : receivers, 'pollers' : pollers,
+            }
 
 
 def show_log():
