@@ -1,9 +1,37 @@
 
+%import time
+%import json
+%now = int(time.time())
+%if not 'widgetid' in locals() or not widgetid: widgetid = 'widget_system_'+str(now)
+
 %from shinken.bin import VERSION
 %helper = app.helper
 
 
-<div class="widget movable collapsable removable editable closeconfirm">
+%collapsed_value = json.loads(app.get_user_preference(user, widgetid+'_collapsed', default='false'))
+%print "Collapsed value is", collapsed_value
+%collapse = ''
+%if collapsed_value:
+  %collapse = 'collapse'
+%end
+
+
+<script type="text/javascript">
+$(document).ready(function(){
+//alert("My id is"+"{{widgetid}}"+$('#{{widgetid}}').length);
+
+var w = {'id' : '{{widgetid}}', 'base_url' : '/widget/system',
+          'options' : {'key' : 'value'}};
+
+// save into widgets
+widgets['{{widgetid}}'] = w;
+
+
+});
+</script>
+
+
+<div class="widget movable collapsable removable editable closeconfirm {{collapse}}" id="{{widgetid}}">
   <div class="widget-header">
     <strong>System widget</strong>
   </div>

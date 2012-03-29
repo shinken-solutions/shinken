@@ -7,8 +7,10 @@
 <script type="text/javascript">
 $(function(){
 
-  // Very basic usage
-  
+  // where we stock all current widgets loaded, and their options
+  widgets = {};
+
+  // Very basic usage  
   $.fn.EasyWidgets(	
 	{
     effects : {
@@ -21,7 +23,19 @@ $(function(){
       widgetOpenEdit : 'slide',
       widgetCloseEdit : 'slide',
       widgetCancelEdit : 'slide'
-    }
+    },
+
+   callbacks : {
+      onCollapse : function(link, widget){
+          var name = widget.attr('id');
+          var key = name+'_collapsed';
+          $.post("/user/save_pref", { 'key' : key, 'value' : true});
+      },
+      onExtend : function(link, widget){
+        alert('onentend callback :: Link: ' + link + ' - Widget: ' + widget.attr('id'));
+      }
+
+   }
   });
   
 });
