@@ -235,98 +235,90 @@ Invalid element name
 	</div>
 
     <!-- Start Host/Services-->
-    <div class="span3">
-    	<p></p>
+			<!-- Left, information part-->
+    <div class="span4">
+      %if elt_type=='host':
+      <h3 class="span10">Host Information:</h3>
+      %else:
+      <h3 class="span10">Service Information:</h3>
+      %end:
+		    	
+      <table class="span10 table table-striped table-bordered table-condensed">
+	<tr>
+	  <td class="column1">{{elt_type.capitalize()}} Status</td>
+	  <td><span class="alert-small alert-{{elt.state.lower()}}">{{elt.state}}</span> (since {{helper.print_duration(elt.last_state_change, just_duration=True, x_elts=2)}}) </td>
+	</tr>
+	<tr>
+	  <td class="column1">Status Information</td>
+	  <td>{{elt.output}}</td>
+	</tr>
+	<tr>
+	  <td class="column1">Performance Data</td>
+	  %# "If there any perf data?"
+	  %if len(elt.perf_data) > 0:
+	  <td>{{elt.perf_data}}</td>
+	  %else:
+	  <td>&nbsp;</td>
+	  %end
+	</tr>	
+	<tr>										
+	  <td class="column1">Current Attempt</td>
+	  <td>{{elt.attempt}}/{{elt.max_check_attempts}} ({{elt.state_type}} state)</td>
+	</tr>
+	<tr>		
+	  <td class="column1">Last Check Time</td>
+	  <td><span class="quickinfo" data-original-title='Last check was at {{time.asctime(time.localtime(elt.last_chk))}}'>was {{helper.print_duration(elt.last_chk)}}</span></td>
+	</tr>
+	<tr>		
+	  <td class="column1">Next Scheduled Active Check</td>
+	  <td><span class="quickinfo" data-original-title='Next active check at {{time.asctime(time.localtime(elt.next_chk))}}'>{{helper.print_duration(elt.next_chk)}}</span></td>
+	</tr>
+	<tr>		
+	  <td class="column1">Last State Change</td>
+	  <td>{{time.asctime(time.localtime(elt.last_state_change))}}</td>
+	</tr>
+      </table>
+      
+      
+      <p class="span10" id="hidden_info_button"><a href="javascript:show_hidden_info()" class="btn"><i class="icon-plus"></i> Show more</a>	</p>
+      <h3 class="span10 hidden_infos">Additonal Informations:</h3>
+      <table class="span8 table table-striped table-bordered table-condensed hidden_infos">
+	<tr>
+	  <td class="column1">Last Notification</td>
+	  <td>{{helper.print_date(elt.last_notification)}} (notification {{elt.current_notification_number}})</td>
+	</tr>
+	<tr>			
+	  <td class="column1">Check Latency / Duration</td>
+	  <td>{{'%.2f' % elt.latency}} / {{'%.2f' % elt.execution_time}} seconds</td>
+	</tr>
+	<tr>
+	  <td class="column1">Is This Host Flapping?</td>
+	  <td>{{helper.yes_no(elt.is_flapping)}} ({{helper.print_float(elt.percent_state_change)}}% state change)</td>
+	</tr>
+	<tr>
+	  <td class="column1">In Scheduled Downtime?</td>
+	  <td>{{helper.yes_no(elt.in_scheduled_downtime)}}</td>
+	</tr>
+      </table>
+
     </div>
     <!-- End Host/Service -->
 
-    <div class="tabbable span9 no-leftmargin">
+    <div class="tabbable span8 no-leftmargin">
 	    <ul class="nav nav-tabs">
-	    	<li class="active"><a href="#sumarry" data-toggle="tab">Impacts</a></li>
+	    	<li class="active"><a href="#impacts" data-toggle="tab">Impacts</a></li>
 	    	<li><a href="#comments" data-toggle="tab">Comments</a></li>
 	    	<li><a href="#downtimes" data-toggle="tab">Downtimes</a></li>
 	    	<li><a href="#graphs" data-toggle="tab" id='tab_to_graphs'>Graphs</a></li>
 	    </ul>
 	    <div class="tab-content">
 	    	<!-- Tab Summary Start-->
-		    <div class="tab-pane active" id="sumarry">
+		    <div class="tab-pane active" id="impacts">
 		      <!-- Start of the Whole info pack. We got a row of 2 thing : 
 			   left is information, right is related elements -->
 		      <div class="row-fluid">
-			<!-- Left, information part-->
-			<!--
-		      <div class="span6">
-		    	%if elt_type=='host':
-			  <h3 class="span10">Host Information:</h3>
-			%else:
-			  <h3 class="span10">Service Information:</h3>
-			%end:
-		    	
-		    	<table class="span10 table table-striped table-bordered table-condensed">
-			  <tr>
-			    <td class="column1">{{elt_type.capitalize()}} Status</td>
-			    <td><span class="alert-small alert-{{elt.state.lower()}}">{{elt.state}}</span> (since {{helper.print_duration(elt.last_state_change, just_duration=True, x_elts=2)}}) </td>
-			  </tr>
-			  <tr>
-			    <td class="column1">Status Information</td>
-			    <td>{{elt.output}}</td>
-			  </tr>
-			  <tr>
-			    <td class="column1">Performance Data</td>
-			    %# "If there any perf data?"
-			    %if len(elt.perf_data) > 0:
-			    <td>{{elt.perf_data}}</td>
-			    %else:
-			    <td>&nbsp;</td>
-			    %end
-			  </tr>	
-			  <tr>										
-			    <td class="column1">Current Attempt</td>
-			    <td>{{elt.attempt}}/{{elt.max_check_attempts}} ({{elt.state_type}} state)</td>
-			  </tr>
-			  <tr>		
-			    <td class="column1">Last Check Time</td>
-			    <td><span class="quickinfo" data-original-title='Last check was at {{time.asctime(time.localtime(elt.last_chk))}}'>was {{helper.print_duration(elt.last_chk)}}</span></td>
-			  </tr>
-			  <tr>		
-			    <td class="column1">Next Scheduled Active Check</td>
-			    <td><span class="quickinfo" data-original-title='Next active check at {{time.asctime(time.localtime(elt.next_chk))}}'>{{helper.print_duration(elt.next_chk)}}</span></td>
-			  </tr>
-			  <tr>		
-			    <td class="column1">Last State Change</td>
-			    <td>{{time.asctime(time.localtime(elt.last_state_change))}}</td>
-			  </tr>
-			</table>
-			
-			
-			<p class="span10" id="hidden_info_button"><a href="javascript:show_hidden_info()" class="btn"><i class="icon-plus"></i> Show more</a>	</p>
-			<h3 class="span10 hidden_infos">Additonal Informations:</h3>
-			<table class="span8 table table-striped table-bordered table-condensed hidden_infos">
-			  <tr>
-			    <td class="column1">Last Notification</td>
-			    <td>{{helper.print_date(elt.last_notification)}} (notification {{elt.current_notification_number}})</td>
-			  </tr>
-			  <tr>			
-			    <td class="column1">Check Latency / Duration</td>
-			    <td>{{'%.2f' % elt.latency}} / {{'%.2f' % elt.execution_time}} seconds</td>
-			  </tr>
-			  <tr>
-			    <td class="column1">Is This Host Flapping?</td>
-			    <td>{{helper.yes_no(elt.is_flapping)}} ({{helper.print_float(elt.percent_state_change)}}% state change)</td>
-			  </tr>
-			  <tr>
-			    <td class="column1">In Scheduled Downtime?</td>
-			    <td>{{helper.yes_no(elt.in_scheduled_downtime)}}</td>
-			  </tr>
-			</table>
-		      </div> 
-			-->
-		      <!-- End of the left part -->
-		      
 		      <!-- So now it's time for the right part, related elements -->
 		      <div class="span12">
-
-
 			
 			<!-- Show our father dependencies if we got some -->
 			%#    Now print the dependencies if we got somes

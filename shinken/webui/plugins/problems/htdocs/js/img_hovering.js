@@ -33,7 +33,7 @@ var mouse_rel_x = 0;
 var mouse_rel_y = 0;
 
 function create_img(src, alt){
-    var img = document.createElement("img");
+    var img = $("<img/>");
 
     // If we got problem with the image, bail out the
     // print/ WARNING : BEFORE set src!
