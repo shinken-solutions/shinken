@@ -35,6 +35,33 @@ function show_detail(name){
 }
 
 
+// At start we hide the unselect all button
+$(document).ready(function(){
+    $('#unselect_all_btn').hide();
+});
+
+
+// When we select all, add all in the selected list,
+// and hide the select all button, and swap it with
+// unselect all one
+function select_all_problems(){
+    $('#select_all_btn').hide();
+    $('#unselect_all_btn').show();
+    
+    // we wil lget all elements by looking at .details and get their ids
+    $('.detail').each(function(){
+	add_element($(this).attr('id'));
+    });
+}
+
+// guess what? unselect is the total oposite...
+function unselect_all_problems(){
+    $('#unselect_all_btn').hide();
+    $('#select_all_btn').show();
+    flush_selected_elements();
+}
+
+
 /* We keep an array of all selected elements */
 var selected_elements = [];
 

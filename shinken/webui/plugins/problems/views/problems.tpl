@@ -101,7 +101,11 @@
   	%# end of the navi part
   	%end
 
+
   <div id="accordion" class="span12">
+    <a id='select_all_btn' href="javascript:select_all_problems()" class="btn"><i class="icon-check"></i> Select all</a>
+    <a id='unselect_all_btn' href="javascript:unselect_all_problems()" class="btn"><i class="icon-minus"></i> Unselect all</a>
+
     %# " We will print Business impact level of course"
     %imp_level = 10
 
