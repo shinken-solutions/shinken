@@ -72,7 +72,7 @@ def check_deamons_numbers(result, target):
     dead_list = ','.join([n for n in result if not result[n]['alive']])
     #TODO : perfdata to graph deamons would be nice (in big HA architectures)
     #if alive_number <= critical, then we have a big problem
-    if alive_number <= options.critical:
+    if alive_number < options.critical:
         print "CRITICAL - only %d/%d %s(s) UP. Down elements : %s" % (alive_number, total_number, target, dead_list)  
         raise SystemExit, CRITICAL
     #We are not in a case where there is no more daemons, but are there daemons down?
@@ -95,9 +95,9 @@ parser.add_option('-s', '--ssl', dest='ssl', default=False)
 parser.add_option('-t', '--target', dest='target')
 parser.add_option('-d', '--daemonname', dest='daemon', default='')
 #In HA architectures, a warning should be displayed if there's one daemon down
-parser.add_option('-w','--warning', dest='warning', default = 1)
+parser.add_option('-w','--warning', dest='warning', default = 1, type=int)
 #If no deamon is left, display a critical (but shinken will be probably dead already)
-parser.add_option('-c', '--critical', dest='critical', default = 0)
+parser.add_option('-c', '--critical', dest='critical', default = 0, type=int)
 parser.add_option('-T', '--timeout', dest='timeout', default = 10)
 
 #Retrieving options
