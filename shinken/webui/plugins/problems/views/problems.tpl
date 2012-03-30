@@ -141,43 +141,43 @@
        <div>
       %end
 
-	  <div>
-	    <table class="tableCriticity">
-	      <tr>
-	        <td class='tick'> <img src="/static/images/untick.png" alt="untick" /style="cursor:pointer;" onclick="add_remove_elements('{{helper.get_html_id(pb)}}')" id="selector-{{helper.get_html_id(pb)}}" > </td>
-		<td class='img_status'> <div class="aroundpulse">
+	  <div class="tableCriticity pull-left">
+%#	    <table class="tableCriticity">
+	      <div class='tick pull-left'> <img src="/static/images/untick.png" alt="untick" /style="cursor:pointer;" onclick="add_remove_elements('{{helper.get_html_id(pb)}}')" id="selector-{{helper.get_html_id(pb)}}" > </div>
+	      <div class='img_status pull-left'>
+		<div class="aroundpulse">
 		    %# " We put a 'pulse' around the elements if it's an important one "
 		    %if pb.business_impact > 2 and pb.state_id in [1, 2, 3]:
 		         <span class="pulse"></span>
 	            %end
 		    <img src="{{helper.get_icon_state(pb)}}" /></div>
-		</td>
+		</div>
 		%if pb.host_name == last_hname:
-		   <td class="hostname"> </td>
+		   <div class="hostname pull-left"> &nbsp;  </div>
 		%else:
-		    <td class="hostname"> {{!helper.get_host_link(pb)}}</td>
+	          <div class="hostname pull-left"> {{!helper.get_host_link(pb)}}</div>
 		%end
 		%last_hname = pb.host_name
 
 		%if pb.__class__.my_type == 'service':
-		  <td class="srvdescription">{{!helper.get_link(pb, short=True)}}</td>
+		  <div class="srvdescription pull-left">{{!helper.get_link(pb, short=True)}}</div>
 		%else:
-                  <td class="srvdescription"></td>
+                  <div class="srvdescription pull-left"> &nbsp; </div>
                 %end
-		<td class='txt_status state_{{pb.state.lower()}}'> {{pb.state}}</td>
-		<td class='duration' rel="tooltip" data-original-title='{{helper.print_date(pb.last_state_change)}}'>{{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}</td>
+		<div class='txt_status state_{{pb.state.lower()}}  pull-left'> {{pb.state}}</div>
+		<div class='duration pull-left' rel="tooltip" data-original-title='{{helper.print_date(pb.last_state_change)}}'>{{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}</div>
 		%# "We put a title (so a tip) on the output onlly if need"
 		%if len(pb.output) > 100:
 		   %if app.allow_html_output:
-		      <td class='output' rel="tooltip" data-original-title="{{pb.output}}"> {{!helper.strip_html_output(pb.output[:100])}}</td>
+		      <div class='output pull-left' rel="tooltip" data-original-title="{{pb.output}}"> {{!helper.strip_html_output(pb.output[:100])}}</div>
 		   %else:
-		      <td class='output' rel="tooltip" data-original-title="{{pb.output}}"> {{pb.output[:100]}}
+		      <div class='output pull-left' rel="tooltip" data-original-title="{{pb.output}}"> {{pb.output[:100]}}</div>
 		   %end
 		%else:
 		   %if app.allow_html_output:
-                      <td class='output'> {{!helper.strip_html_output(pb.output)}}</td>
+                     <div class='output pull-left'> {{!helper.strip_html_output(pb.output)}}</div>
 		   %else:
-		      <td class='output'> {{pb.output}} </td>
+		      <div class='output pull-left'> {{pb.output}} </div>
                    %end
 		%end
 		%graphs = app.get_graph_uris(pb, now- 4*3600 , now)
@@ -185,28 +185,17 @@
 		%if len(graphs) > 0:
 		      %onmouse_code = 'onmouseover="display_hover_img(\'%s\',\'\');" onmouseout="hide_hover_img();" ' % graphs[0]['img_src']
 		%end
-		<td class="perfometer" {{!onmouse_code}}>
-		  {{!helper.get_perfometer(pb)}}
-		</td>
-		<td class="no_border opacity_hover shortdesc expand" style="max-width:20px;" onclick="show_detail('{{helper.get_html_id(pb)}}')"> <img src="/static/images/expand.png" alt="expand" /> </td>
+		<div class="perfometer pull-left" {{!onmouse_code}}>
+		  {{!helper.get_perfometer(pb)}} &nbsp;
+		</div>
+		<div class="no_border opacity_hover shortdesc expand pull-right" style="max-width:20px;" onclick="show_detail('{{helper.get_html_id(pb)}}')"> <img src="/static/images/expand.png" alt="expand" /> </div>
 		
-		</tr>
 	      
-             </table>
+%#             </table>
 	  </div>  
-	  %# " We put actions buttons with a opacity hover effect, so they won't be too visible"
-%#	  <div class="opacity_hover" >
-%#	    <div style="float:right;">
-%#	      <a href="#" onclick="try_to_fix('{{pb.get_full_name()}}')">{{!helper.get_button('Fix!', img='/static/images/enabled.png')}}</a>
-%#	    </div>
-%#	    <div style="float:right;">
-%#	      <a href="#" onclick="acknowledge('{{pb.get_full_name()}}')">{{!helper.get_button('Ack', img='/static/images/wrench.png')}}</a>
-%#	    </div>
-%#	    <div style="float:right;">
-%#	      <a href="#" onclick="recheck_now('{{pb.get_full_name()}}')">{{!helper.get_button('Recheck', img='/static/images/delay.gif')}}</a>
-%#	    </div>
-%#	  </div>
+	  <div style="clear:both;"/>
 	</div>
+       </div>
 
     %# "This div is need so the element will came back in the center of the previous div"
     <div class="clear"></div>

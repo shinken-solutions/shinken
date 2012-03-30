@@ -4,14 +4,14 @@
 .element   { margin-left: 30px;}
 
 
-.shortdesc { cursor:pointer; width: 70%;float:left;}
+.shortdesc { cursor:pointer; /*width: 70%;*/}
 .tabledesc:hover   {background:#ddd; }
 .detail {margin-left: 30px;}
 
 
 .tableCriticity{
-    padding: 4px;
-    margin-bottom: 3px;
+    padding: 0px;
+    margin-bottom: 1px;
     color: #787878;
     background: white;
     border-top: 1px solid #E3E3E5;
@@ -19,9 +19,6 @@
     border-bottom: 1px solid #E3E3E5;*/
 }
 .tableCriticity:hover   {background:#ddd; }
-.tableCriticity tr{
-    height : 30px;
-}
 
 .tableCriticity a{
     color: #787878;
@@ -118,12 +115,12 @@ ul.dock li:hover span { display: block; }
 
 
 .tableCriticity .tick{
-    width:20px; 
+/*    width:20px; */
     background:none;
 }
 .tableCriticity .tick img{
     max-width: 20px;
-    width: 20px;
+    /*width: 20px;*/
 }
 
 
@@ -147,7 +144,7 @@ ul.dock li:hover span { display: block; }
     background: white;
 }
 .tableCriticity .txt_status{
-    width: 70px;
+    width: 100px;
     text-align:center;
 }
 .tableCriticity .duration{
