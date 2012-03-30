@@ -84,8 +84,14 @@
 
    <div class="span12 offset2">
 
+     <div class='row-fluid'>
+       <div class='span2'>
+    <a id='select_all_btn' href="javascript:select_all_problems()" class="btn"><i class="icon-check"></i> Select all</a>
+    <a id='unselect_all_btn' href="javascript:unselect_all_problems()" class="btn"><i class="icon-minus"></i> Unselect all</a>
+    </div>
+       <div class='span10'>
   	%if navi is not None:
-    <div class="pagination center">
+    <div class="pagination center no-margin">
 	    <ul class="pull-right">
 	    %for name, start, end, is_current in navi:
 	    	%if is_current:
@@ -100,11 +106,11 @@
     </div>
   	%# end of the navi part
   	%end
+    </div>
+       </div>
 
 
   <div id="accordion" class="span12">
-    <a id='select_all_btn' href="javascript:select_all_problems()" class="btn"><i class="icon-check"></i> Select all</a>
-    <a id='unselect_all_btn' href="javascript:unselect_all_problems()" class="btn"><i class="icon-minus"></i> Unselect all</a>
 
     %# " We will print Business impact level of course"
     %imp_level = 10
@@ -153,16 +159,16 @@
 		    <img src="{{helper.get_icon_state(pb)}}" /></div>
 		</div>
 		%if pb.host_name == last_hname:
-		   <div class="hostname pull-left"> &nbsp;  </div>
+		   <div class="hostname cut_long pull-left"> &nbsp;  </div>
 		%else:
-	          <div class="hostname pull-left"> {{!helper.get_host_link(pb)}}</div>
+	          <div class="hostname cut_long pull-left"> {{!helper.get_host_link(pb)}}</div>
 		%end
 		%last_hname = pb.host_name
 
 		%if pb.__class__.my_type == 'service':
-		  <div class="srvdescription pull-left">{{!helper.get_link(pb, short=True)}}</div>
+		  <div class="srvdescription cut_long pull-left">{{!helper.get_link(pb, short=True)}}</div>
 		%else:
-                  <div class="srvdescription pull-left"> &nbsp; </div>
+                  <div class="srvdescription cut_long pull-left"> &nbsp; </div>
                 %end
 		<div class='txt_status state_{{pb.state.lower()}}  pull-left'> {{pb.state}}</div>
 		<div class='duration pull-left' rel="tooltip" data-original-title='{{helper.print_date(pb.last_state_change)}}'>{{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}</div>
