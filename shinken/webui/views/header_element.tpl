@@ -22,7 +22,7 @@
 	</ul>
 	
 	<ul class="nav">
-	  %menu = [ ('/', 'Dashboard'), ('/impacts','Impacts'), ('/problems','IT problems'), ('/all', 'All'), ('/wall', 'Wall')]
+	  %menu = [ ('/dashboard', 'Dashboard'), ('/impacts','Impacts'), ('/problems','IT problems'), ('/all', 'All'), ('/wall', 'Wall')]
           %for (key, value) in menu:
             %# Check for the selected element, if there is one
             %if menu_part == key:

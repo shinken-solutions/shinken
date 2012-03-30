@@ -335,7 +335,11 @@ Invalid element name
 			%# " If the host is a problem, services will be print in the impacts, so don't"
 			%# " print twice "
 			%if elt_type=='host' and not elt.is_problem:
-			<h3 class="span10">My services:</h3>
+			%if len(elt.services) > 0:
+          			<h3 class="span10">My services:</h3>
+			%else:
+				<h3 class="span10">No services</h3>
+			%end
 			<hr>
 			<div class='host-services'>
 			  %nb = 0
@@ -477,11 +481,11 @@ Invalid element name
 
 			<!-- Tab Graph Start -->
 			<div class="tab-pane" id="graphs">
-	           	<h2>Graphs</h2>
 	       		%uris = app.get_graph_uris(elt, graphstart, graphend)
 	      		%if len(uris) == 0:
-	      			<p>No graphs, sorry</p>
+	      			<h3>No graphs, sorry</h3>
 				%else:
+				 <h3>Graphs</h3>
 				<div class='row-fluid well span6'>
 				  %now = int(time.time())
 				  %fourhours = now - 3600*4
@@ -496,7 +500,7 @@ Invalid element name
 				  <div class='span2'><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{lastmonth}}&graphend={{now}}#graphs" class="">Month</a></div>
 				  <div class='span2'><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{lastyear}}&graphend={{now}}#graphs" class="">Year</a></div>
 				</div>
-				%end
+
 				<div class='row-fluid well span8 jcrop'>
 				%for g in uris:
 				  %img_src = g['img_src']
@@ -510,6 +514,7 @@ Invalid element name
 				  
 				%end
 				</div>
+				%end
 			</div>
 			<!-- Tab Graph End -->
 	    </div>
