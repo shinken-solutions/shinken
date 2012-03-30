@@ -156,7 +156,7 @@ ul.dock li:hover span { display: block; }
 .tableCriticity .output{
     width:450px;
     background: white;
-    margin-left : 15px;
+    margin-left : 5px;
 }
 .tableCriticity .expand{
     max-width: 20px;
