@@ -64,13 +64,13 @@ Invalid element name
 <div id='gesture_panel' class="pull-left">
   <canvas id="canvas" width="200" height="200" class="grid_10" style="border: 1px solid black;"></canvas>
   <div class="gesture_button">
-    <img title="By keeping a left click pressed and drawing a check, you will launch an acknowledgement." src="/static/eltdetail/images/gesture-check.png"/> Acknowledge
+    <img title="By keeping a left click pressed and drawing a check, you will launch an acknowledgement." alt="gesture acknowledge" src="/static/eltdetail/images/gesture-check.png"/> Acknowledge
   </div>
   <div class="gesture_button">
-    <img title="By keeping a left click pressed and drawing a check, you will launch an recheck." src="/static/eltdetail/images/gesture-circle.png"/> Recheck
+    <img title="By keeping a left click pressed and drawing a check, you will launch an recheck." alt="gesture recheck" src="/static/eltdetail/images/gesture-circle.png"/> Recheck
   </div>
   <div class="gesture_button">
-    <img title="By keeping a left click pressed and drawing a check, you will launch a try to fix command." src="/static/eltdetail/images/gesture-zigzag.png"/> Fix
+    <img title="By keeping a left click pressed and drawing a check, you will launch a try to fix command." alt="gesture fix" src="/static/eltdetail/images/gesture-zigzag.png"/> Fix
   </div>
   
 </div>
@@ -79,7 +79,7 @@ Invalid element name
 %#  "Content Container Start"
 <div class="">
 <div id="content_container" class="span12">
-	<h1 class="span12 no-leftmargin state_{{elt.state.lower()}} icon_down"> <img class="imgsize3" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h1>
+	<h1 class="span12 no-leftmargin state_{{elt.state.lower()}} icon_down"> <img class="imgsize3" alt="icon state" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h1>
 
 	<div class="span12 no-leftmargin box">	   
 		<table class="span4 no-leftmargin">
@@ -367,9 +367,9 @@ Invalid element name
 			  %end
 			  <div class="divstate{{s.state_id}}">
 			  	%for i in range(0, s.business_impact-2):
-			  	<img src='/static/images/star.png'>
+			  	<img alt="icon state" src="/static/images/star.png">
 			  	%end
-			  	<img style="width : 16px; height:16px" src="{{helper.get_icon_state(s)}}">
+			  	<img style="width : 16px; height:16px" alt="icon state" src="{{helper.get_icon_state(s)}}">
 			  	<span style="font-size:110%">{{!helper.get_link(s, short=True)}}</span> is <span style="font-size:110%">{{s.state}}</span> since {{helper.print_duration(s.last_state_change, just_duration=True, x_elts=2)}}
 			  </div>
 			  </div>
@@ -397,9 +397,9 @@ Invalid element name
 			
 			  <div class="divstate{{i.state_id}}">
 			  %for j in range(0, i.business_impact-2):
-			    <img src='/static/images/star.png'>
+			    <img src="/static/images/star.png" alt="icon star">
 			  %end
-			  <img style="width : 16px; height:16px" src="{{helper.get_icon_state(i)}}">
+			  <img style="width : 16px; height:16px" alt="icon state" src="{{helper.get_icon_state(i)}}">
 			  <span style="font-size:110%">{{!helper.get_link(i)}}</span> is <span style="font-size:110%">{{i.state}}</span> since {{helper.print_duration(i.last_state_change, just_duration=True, x_elts=2)}}
 			  </div>
 			  </div>
