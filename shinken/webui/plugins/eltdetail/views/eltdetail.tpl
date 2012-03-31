@@ -31,6 +31,11 @@ Invalid element name
   /* Now hide canvas */
   $(document).ready(function(){
     $('#gesture_panel').hide();
+
+    // Also hide the button under IE (gesture don't work under it)
+    if (navigator.appName == 'Microsoft Internet Explorer'){
+        $('#btn_show_gesture').hide();
+    }
   });
 
   // Now we hook teh global search thing
@@ -52,7 +57,7 @@ Invalid element name
 %#  "This is the background canvas for all gesture detection things " 
 %# " Don't ask me why, but the size must be included in the
 %# canvas line here or we got problem!"
-<div class="btn-group pull-left">
+<div class="btn-group pull-left" id='btn_show_gesture'>
   <a href="javascript:$('#gesture_panel').toggle();" class='btn' title="Show gesture panel"> <i class="icon-map-marker"></i> Show gesture panel</a>
 </div>
 

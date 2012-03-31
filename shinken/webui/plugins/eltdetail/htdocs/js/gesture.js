@@ -158,3 +158,6 @@ function launch_gesture(gesture, score){
 	}
     }
 }
+
+
+
