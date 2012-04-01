@@ -1329,6 +1329,21 @@ class Config(Item):
                 logger.log("Error : hosts exist with poller_tag %s but no poller got this tag" %  tag )
                 self.add_error("Error : hosts exist with poller_tag %s but no poller got this tag" %  tag )
                 r = False
+
+        # Check that all hosts involved in business_rules are from the same realm
+        for s in self.services:
+            if s.got_business_rule:
+                s_r = s.get_realm().realm_name
+                for elt in s.business_rule.list_all_elements():
+                    #print elt.__class__.my_type
+                    if elt.__class__.my_type == 'host':
+                        elt_r = elt.realm.realm_name
+                    else:
+                        elt_r = elt.get_realm().realm_name    
+                    if not elt_r == s_r:
+                        logger.log("Error : Business_rule '%s' got hosts from another realm : %s" %  (s.service_description,elt_r) )
+                        self.add_error("Error : Business_rule '%s' got hosts from another realm : %s" %  (s.service_description,elt_r) )
+                        r = False
                 
         self.conf_is_correct = r
 
