@@ -1,3 +1,5 @@
+/* From http://timeline.verite.co/ */
+
 /* Verite
  * Verite JS Master
  * Version: 0.1
