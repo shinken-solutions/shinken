@@ -63,6 +63,7 @@ def get_page():
         i = w['id']
         pos = w['position']
         options = w.get('options', {})
+        collapsed = w.get('collapsed', '0')
         
         ## Try to get the options for this widget
         #option_s = app.get_user_preference(user, 'widget_widget_system_1333371012', default='{}')
@@ -71,7 +72,7 @@ def get_page():
         #    json.loads(option_s)
         #print "And dump options for this widget", options
         w['options'] = json.dumps(options)
-        args = {'wid':i}
+        args = {'wid':i, 'collapsed' : collapsed}
         args.update(options)
         w['options_uri'] = '&'.join( '%s=%s' % (k, v) for (k, v) in args.iteritems())
         widgets.append(w)

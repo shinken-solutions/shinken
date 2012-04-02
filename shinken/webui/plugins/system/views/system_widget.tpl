@@ -1,18 +1,17 @@
 
-%import time
-%import json
-%now = int(time.time())
-%if not 'id' in locals() or not id: id = 'widget_system_'+str(now)
-
 %from shinken.bin import VERSION
 %helper = app.helper
 
+%collapsed_s = ''
+%if collapsed != '1':
+   %collapsed_s = 'collpased'
+%end
 
 
 <script type="text/javascript">
 $(document).ready(function(){
 
-  var w = {'id' : '{{id}}', 'base_url' : '/widget/system', 'position' : 'widget-place-1',
+  var w = {'id' : '{{wid}}', 'base_url' : '/widget/system', 'position' : 'widget-place-1',
           'options' : {'key' : 'value'}};
 
   // save into widgets
@@ -22,7 +21,7 @@ $(document).ready(function(){
 
 
 
-<div class="widget movable collapsable removable editable closeconfirm" id="{{id}}">
+<div class="widget movable collapsable removable editable closeconfirm " id="{{wid}}">
   <div class="widget-header">
     <strong>System widget</strong>
   </div>
