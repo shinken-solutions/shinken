@@ -130,3 +130,8 @@ class Mongodb_generic(BaseModule):
         #user.get_name()
         r = self.db.ui_user_preferences.update({ '_id':'bob'}, { '$set': { key : value }})
         print "Return from update", r
+        # Mayeb there was no doc there, if so, create an empty one
+        if not r:
+            print "No entry, I create a new one"
+            self.db.ui_user_preferences.save({ '_id':'bob', key : value})
+            

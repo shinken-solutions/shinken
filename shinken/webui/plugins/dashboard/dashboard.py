@@ -45,14 +45,38 @@ def get_page():
 
     if not user:
         redirect("/user/login")
+
     # Look for the widgets as the json entry
     s = app.get_user_preference(user, 'widgets')
     print "Loaded widgets", s, type(s)
-    widgets = json.loads(s)
-    print "And now objects", widgets
+    # If void, create an empty one
+    if not s:
+        app.set_user_preference(user, 'widgets', '[]')
+        s = '[]'
+    widget_names = json.loads(s)
+    print "And now objects", widget_names
+    widgets = []
+    
+    for w in widget_names:
+        i = w['id']
+        pos = w['position']
+        options = w.get('options', {})
+        
+        ## Try to get the options for this widget
+        #option_s = app.get_user_preference(user, 'widget_widget_system_1333371012', default='{}')
+        #print "And load options_s", option_s
+        #if option_s:
+        #    json.loads(option_s)
+        #print "And dump options for this widget", options
+        w['options'] = options
+        w['options_uri'] = '&'.join( '%s=%s' % (k, v) for (k, v) in options.iteritems())
+        widgets.append(w)
 
-
+    print "Give widgets", widgets
     return {'app' : app, 'user' : user, 'widgets' : widgets}
+
+
+
 
 # Our page
 def get_all():

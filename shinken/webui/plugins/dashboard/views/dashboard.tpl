@@ -63,11 +63,11 @@ $(function(){
      var widgets_ids = [];
      var save_widgets_list = false;
      $.each(widgets, function(idx, w){
-         var o = {'id' : w.id, 'position' : w.position};
+         var o = {'id' : w.id, 'position' : w.position, 'base_url' : w.base_url, 'options' : w.options};
          widgets_ids.push(o);
          if(!w.hasOwnProperty('is_saved')){
            save_widgets_list = true;
-           alert('Saving widget'+w.id);
+           //alert('Saving widget'+w.id);
            var key= 'widget_'+w.id;
            var value = JSON.stringify(w);
            alert('with key:value'+key+' '+value);
@@ -102,6 +102,12 @@ $(function(){
 
   // Now load the system as example
   $(function(){
+      %for w in widgets:
+         %if 'base_url' in w and 'position' in w:
+            %uri = w['base_url'] + "?" + w['options_uri']
+            AddWidget("{{uri}}", "{{w['position']}}");
+         %end
+      %end
       //AddWidget('/widget/system', 'widget-place-1');
   });
 </script>
