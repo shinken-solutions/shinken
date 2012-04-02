@@ -802,6 +802,19 @@ class ExternalCommandManager:
             self.conf.enable_flap_detection = False
             self.conf.explode_global_conf()
             self.sched.get_and_register_update_program_status_brok()
+            # Is need, disable flap state for hosts and services
+            for service in self.conf.services:
+                if service.is_flapping:
+                    service.is_flapping = False
+                    service.flapping_changes = []
+                    self.sched.get_and_register_status_brok(service)
+            for host in self.conf.hosts:
+                if host.is_flapping:
+                    host.is_flapping = False
+                    host.flapping_changes = []
+                    self.sched.get_and_register_status_brok(host)
+
+
 
     # DISABLE_HOSTGROUP_HOST_CHECKS;<hostgroup_name>
     def DISABLE_HOSTGROUP_HOST_CHECKS(self, hostgroup):
@@ -859,6 +872,10 @@ class ExternalCommandManager:
         if host.flap_detection_enabled:
             host.modified_attributes |= MODATTR_FLAP_DETECTION_ENABLED
             host.flap_detection_enabled = False
+            # Maybe the host was flapping, if so, stop flapping
+            if host.is_flapping:
+                host.is_flapping = False
+                host.flapping_changes = []
             self.sched.get_and_register_status_brok(host)
 
     # DISABLE_HOST_FRESHNESS_CHECKS
@@ -951,6 +968,10 @@ class ExternalCommandManager:
         if service.flap_detection_enabled:
             service.modified_attributes |= MODATTR_FLAP_DETECTION_ENABLED
             service.flap_detection_enabled = False
+            # Maybe the service was flapping, if so, stop flapping
+            if service.is_flapping:
+                service.is_flapping = False
+                service.flapping_changes = []
             self.sched.get_and_register_status_brok(service)
 
     # DISABLE_SERVICE_FRESHNESS_CHECKS
@@ -977,10 +998,7 @@ class ExternalCommandManager:
 
     # DISABLE_SVC_FLAP_DETECTION;<host_name>;<service_description>
     def DISABLE_SVC_FLAP_DETECTION(self, service):
-        if service.flap_detection_enabled:
-            service.modified_attributes |= MODATTR_FLAP_DETECTION_ENABLED
-            service.flap_detection_enabled = False
-            self.sched.get_and_register_status_brok(service)
+        self.DISABLE_SERVICE_FLAP_DETECTION(service)
 
     # DISABLE_SVC_NOTIFICATIONS;<host_name>;<service_description>
     def DISABLE_SVC_NOTIFICATIONS(self, service):
