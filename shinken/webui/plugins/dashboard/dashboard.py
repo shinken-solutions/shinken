@@ -58,6 +58,8 @@ def get_page():
     widgets = []
     
     for w in widget_names:
+        if not 'id' in w or not 'position' in w:
+            continue
         i = w['id']
         pos = w['position']
         options = w.get('options', {})
@@ -68,8 +70,10 @@ def get_page():
         #if option_s:
         #    json.loads(option_s)
         #print "And dump options for this widget", options
-        w['options'] = options
-        w['options_uri'] = '&'.join( '%s=%s' % (k, v) for (k, v) in options.iteritems())
+        w['options'] = json.dumps(options)
+        args = {'wid':i}
+        args.update(options)
+        w['options_uri'] = '&'.join( '%s=%s' % (k, v) for (k, v) in args.iteritems())
         widgets.append(w)
 
     print "Give widgets", widgets

@@ -55,11 +55,11 @@ def system_widget():
     receivers = app.datamgr.get_receivers()
     pollers = app.datamgr.get_pollers()
 
-    widgetid = app.request.forms.get('widgetid', None)
+    wid = app.request.forms.get('wid', None)
 
     return {'app' : app, 'user' : user, 'schedulers' : schedulers,
             'brokers' : brokers, 'reactionners' : reactionners,
-            'receivers' : receivers, 'pollers' : pollers, 'widgetid' : widgetid,
+            'receivers' : receivers, 'pollers' : pollers, 'wid' : wid,
             }
 
 

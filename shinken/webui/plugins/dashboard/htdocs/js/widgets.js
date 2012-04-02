@@ -26,6 +26,24 @@ var save_state = false;
 
 
 
+
+// Now try to load widgets in a dynamic way
+function AddWidget(url, placeId){
+    $.get(url, function(html){
+	$.fn.AddEasyWidget(html, placeId, {});
+    });
+}
+
+  // when we add a new widget, we also save the current widgets
+// configuration for this user
+function AddNewWidget(url, placeId){
+    AddWidget(url, placeId);
+    console.log('Add new widget');
+    save_state = true;
+}
+
+
+
 $(function(){
 
   // where we stock all current widgets loaded, and their options
@@ -54,15 +72,27 @@ $(function(){
       },
       onExtend : function(link, widget){
         alert('onentend callback :: Link: ' + link + ' - Widget: ' + widget.attr('id'));
-      }
-
+      },
+      onClose : function(link, widget){
+	   // On close, save all
+	   save_state = true;
+       }
+       
    }
   });
   
-});
 
 
-
+function find_widget(name){
+    res = -1;
+    w = $.each(widgets, function(idx, w){
+	if(name == w.id){
+	    res = w;
+	}
+    });
+    
+    return res;
+}
 
 
 // We will look if we need to save the current state and options or not
@@ -70,13 +100,25 @@ function save_new_widgets(){
      if(!save_state){return;}
      // No more need
      save_state = false;
-     
+
      var widgets_ids = [];
      var save_widgets_list = false;
-     $.each(widgets, function(idx, w){
-         var o = {'id' : w.id, 'position' : w.position, 'base_url' : w.base_url, 'options' : w.options};
-         widgets_ids.push(o);
-         if(!w.hasOwnProperty('is_saved')){
+    $('.widget').each(function(idx, w){
+	
+	// If the widget is closed, don't save it
+	if($(this).css('display') == 'none'){return;}
+
+	id = w.id;
+	var widget = find_widget(id);
+	//alert('Find widget'+widget);
+	// Find the widget and check if it was not closed
+	if(widget != -1){
+	    
+	    //alert('Loop over a widget'+w.id+''+w.position+''+w.base_url);
+            var o = {'id' : widget.id, 'position' : widget.position, 'base_url' : widget.base_url, 'options' : widget.options};
+            widgets_ids.push(o);
+	}
+         /*if(!w.hasOwnProperty('is_saved')){
            save_widgets_list = true;
            //alert('Saving widget'+w.id);
            var key= 'widget_'+w.id;
@@ -84,31 +126,17 @@ function save_new_widgets(){
            //alert('with key:value'+key+' '+value);
            $.post("/user/save_pref", { 'key' : key, 'value' : value});
            w.is_saved=true;
-         }
+         }*/
      });
 
-     // Look if weneed to save the widget lists
-     if(save_widgets_list){
-         alert('Need to save widgets list'+JSON.stringify(widgets_ids));
-         $.post("/user/save_pref", { 'key' : 'widgets', 'value' : JSON.stringify(widgets_ids)});
-     }
-
+    console.log('Need to save widgets list'+JSON.stringify(widgets_ids));
+    $.post("/user/save_pref", { 'key' : 'widgets', 'value' : JSON.stringify(widgets_ids)});
   }
 
 
 
-// Now try to load widgets in a dynamic way
-function AddWidget(url, placeId){
-    $.get(url, function(html){
-	$.fn.AddEasyWidget(html, placeId, {});
-    });
-}
-
-  // when we add a new widget, we also save the current widgets
-// configuration for this user
-function AddNewWidget(url, placeId){
-    AddWidget(url, placeId);
-    save_state = true;
-}
 
 setInterval( save_new_widgets, 1000);
+
+
+});

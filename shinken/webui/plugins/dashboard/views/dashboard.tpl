@@ -4,10 +4,6 @@
 %helper = app.helper
 
 
-<script type="text/javascript">
-</script>
-
-
 
 <p><a href="#pageslide" class="slidelink">Add a new widget</a></p>
 <div id="pageslide" style="display:none">
@@ -16,6 +12,7 @@
     <a href="javascript:AddNewWidget('/widget/system', 'widget-place-1');"> Add system widget</a>
     <a href="javascript:$.pageslide.close()">Close</a>
 </div>
+
 <script >$(function(){
   $(".slidelink").pageslide({ direction: "left", modal : true});
   });
@@ -24,13 +21,14 @@
 
 
 <script>
-
   // Now load the system as example
   $(function(){
       %for w in widgets:
          %if 'base_url' in w and 'position' in w:
             %uri = w['base_url'] + "?" + w['options_uri']
-            AddWidget("{{uri}}", "{{w['position']}}");
+            AddWidget("{{!uri}}", "{{w['position']}}");
+            var w = {'id' : "{{w['id']}}", 'base_url' : "{{w['base_url']}}", 'position' : "{{w['position']}}", 'options' : JSON.parse('{{w['options']}}')};
+            widgets.push(w);
          %end
       %end
       //AddWidget('/widget/system', 'widget-place-1');
@@ -39,48 +37,10 @@
 
 <div class="widget-place" id="widget-place-1">
 
-  <div class="widget movable collapsable removable editable closeconfirm" >
-    <div class="widget-header">
-      <strong>Title</strong>
-    </div>
-    <div class="widget-editbox">
-      Edit the widget here
-    </div>
-    <div class="widget-content">
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-      Ut accumsan fringilla turpis. Lorem ipsum dolor.
-    </div>
-  </div>
 </div>
 <!-- /place-1 -->
 
 <div class="widget-place" id="widget-place-2">
-  <div class="widget movable collapsable removable editable closeconfirm">
-    <div class="widget-header">
-      <strong>Title</strong>
-    </div>
-    <div class="widget-editbox">
-      Edit the widget here
-    </div>
-    <div class="widget-content">
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-      Ut accumsan fringilla turpis. Lorem ipsum dolor.
-    </div>
-  </div>
-
-
-  <div class="widget movable collapsable removable editable closeconfirm">
-    <div class="widget-header">
-      <strong>Widget 3</strong>
-    </div>
-    <div class="widget-editbox">
-      Edit the widget here
-    </div>
-    <div class="widget-content">
-      Here you can put what you want
-    </div>
-  </div>
-
 
 </div>
 <!-- /place-2 -->
