@@ -517,6 +517,7 @@ class Webui_broker(BaseModule, Daemon):
             try:
                 f = getattr(mod, 'set_ui_user_preference', None)
                 if f and callable(f):
+                    print "Call user pref to module", mod.get_name()
                     f(user, key, value)
             except Exception , exp:
                 print exp.__dict__

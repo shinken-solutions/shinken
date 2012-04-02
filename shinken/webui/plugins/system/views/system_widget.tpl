@@ -8,23 +8,22 @@
 %helper = app.helper
 
 
-%collapsed_value = json.loads(app.get_user_preference(user, widgetid+'_collapsed', default='false'))
-%print "Collapsed value is", collapsed_value
+%#collapsed_value = json.loads(app.get_user_preference(user, widgetid+'_collapsed', default='false'))
+%#print "Collapsed value is", collapsed_value
 %collapsed = ''
-%if collapsed_value:
-  %collapsed = 'collapsed'
-%end
+%#if collapsed_value:
+  %#collapsed = 'collapsed'
+%#end
 
 
 <script type="text/javascript">
 $(document).ready(function(){
 
-  var w = {'id' : '{{widgetid}}', 'base_url' : '/widget/system',
+  var w = {'id' : '{{widgetid}}', 'base_url' : '/widget/system', 'position' : 'widget-place-1',
           'options' : {'key' : 'value'}};
 
   // save into widgets
-  widgets['{{widgetid}}'] = w;
-
+  widgets.push(w);
 });
 </script>
 

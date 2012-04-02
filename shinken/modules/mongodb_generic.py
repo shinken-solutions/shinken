@@ -107,10 +107,10 @@ class Mongodb_generic(BaseModule):
         if not user:
             print '[Mongodb] : error get_ui_user_preference::no user'
             return None
-        
-        e = db.ui_user_preferences.find_one({'_id': user.get_name()})
+        # user.get_name()
+        e = self.db.ui_user_preferences.find_one({'_id': 'bob'})
         # Maybe it's a new entryor missing this parameter, bail out
-        if not e ir not key in e:
+        if not e or not key in e:
             return None
 
         return e.get(key)
@@ -127,4 +127,6 @@ class Mongodb_generic(BaseModule):
             return None
 
         # Ok, go for update
-        db.ui_user_preferences.update({ _id:user.get_name()}, { '$set': { key : value }}
+        #user.get_name()
+        r = self.db.ui_user_preferences.update({ '_id':'bob'}, { '$set': { key : value }})
+        print "Return from update", r

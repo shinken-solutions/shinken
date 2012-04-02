@@ -8,11 +8,11 @@
 $(function(){
 
   // where we stock all current widgets loaded, and their options
-  widgets = {};
+  widgets = [];
 
   // Very basic usage  
-  $.fn.EasyWidgets();
-/*	{
+  $.fn.EasyWidgets(
+	{
     effects : {
       effectDuration : 100,
       widgetShow : 'slide',
@@ -36,7 +36,7 @@ $(function(){
       }
 
    }
-  });*/
+  });
   
 });
 </script>
@@ -47,6 +47,7 @@ $(function(){
 <div id="pageslide" style="display:none">
     <h2>Widgets available</h2>
     
+    <a href="javascript:AddNewWidget('/widget/system', 'widget-place-1');"> Add system widget</a>
     <a href="javascript:$.pageslide.close()">Close</a>
 </div>
 <script >$(function(){
@@ -57,6 +58,35 @@ $(function(){
 
 
 <script>
+
+  function save_new_widgets(){
+     var widgets_ids = [];
+     var save_widgets_list = false;
+     $.each(widgets, function(idx, w){
+         var o = {'id' : w.id, 'position' : w.position};
+         widgets_ids.push(o);
+         if(!w.hasOwnProperty('is_saved')){
+           save_widgets_list = true;
+           alert('Saving widget'+w.id);
+           var key= 'widget_'+w.id;
+           var value = JSON.stringify(w);
+           alert('with key:value'+key+' '+value);
+           $.post("/user/save_pref", { 'key' : key, 'value' : value});
+           w.is_saved=true;
+         }
+     });
+
+     // Look if weneed to save the widget lists
+     if(save_widgets_list){
+         alert('Need to save widgets list'+JSON.stringify(widgets_ids));
+         $.post("/user/save_pref", { 'key' : 'widgets', 'value' : JSON.stringify(widgets_ids)});
+     }
+
+  }
+
+  setInterval( save_new_widgets, 1000);
+
+
   // Now try to load widgets in a dynamic way
   function AddWidget(url, placeId){
     $.get(url, function(html){
@@ -64,9 +94,15 @@ $(function(){
     });
   }
 
+  // when we add a new widget, we also save the current widgets
+  // configuration for this user
+  function AddNewWidget(url, placeId){
+      AddWidget(url, placeId) ;
+  }
+
   // Now load the system as example
   $(function(){
-     AddWidget('/widget/system', 'widget-place-1');
+      //AddWidget('/widget/system', 'widget-place-1');
   });
 </script>
 

@@ -22,6 +22,18 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 from shinken.webui.bottle import redirect
+try:
+    import json
+except ImportError:
+    # For old Python version, load
+    # simple json (it can be hard json?! It's 2 functions guy!)
+    try:
+        import simplejson as json
+    except ImportError:
+        print "Error : you need the json or simplejson module"
+        raise
+
+
 
 ### Will be populated by the UI with it's own value
 app = None
@@ -33,17 +45,14 @@ def get_page():
 
     if not user:
         redirect("/user/login")
-    
-    schedulers = app.datamgr.get_schedulers()
-    brokers = app.datamgr.get_brokers()
-    reactionners = app.datamgr.get_reactionners()
-    receivers = app.datamgr.get_receivers()
-    pollers = app.datamgr.get_pollers()
+    # Look for the widgets as the json entry
+    s = app.get_user_preference(user, 'widgets')
+    print "Loaded widgets", s, type(s)
+    widgets = json.loads(s)
+    print "And now objects", widgets
 
-    return {'app' : app, 'user' : user, 'schedulers' : schedulers,
-            'brokers' : brokers, 'reactionners' : reactionners,
-            'receivers' : receivers, 'pollers' : pollers,
-            }
+
+    return {'app' : app, 'user' : user, 'widgets' : widgets}
 
 # Our page
 def get_all():
