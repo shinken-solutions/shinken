@@ -11,8 +11,8 @@ $(function(){
   widgets = {};
 
   // Very basic usage  
-  $.fn.EasyWidgets(	
-	{
+  $.fn.EasyWidgets();
+/*	{
     effects : {
       effectDuration : 100,
       widgetShow : 'slide',
@@ -36,7 +36,7 @@ $(function(){
       }
 
    }
-  });
+  });*/
   
 });
 </script>

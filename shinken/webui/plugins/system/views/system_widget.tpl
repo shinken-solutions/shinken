@@ -10,28 +10,27 @@
 
 %collapsed_value = json.loads(app.get_user_preference(user, widgetid+'_collapsed', default='false'))
 %print "Collapsed value is", collapsed_value
-%collapse = ''
+%collapsed = ''
 %if collapsed_value:
-  %collapse = 'collapse'
+  %collapsed = 'collapsed'
 %end
 
 
 <script type="text/javascript">
 $(document).ready(function(){
-//alert("My id is"+"{{widgetid}}"+$('#{{widgetid}}').length);
 
-var w = {'id' : '{{widgetid}}', 'base_url' : '/widget/system',
+  var w = {'id' : '{{widgetid}}', 'base_url' : '/widget/system',
           'options' : {'key' : 'value'}};
 
-// save into widgets
-widgets['{{widgetid}}'] = w;
-
+  // save into widgets
+  widgets['{{widgetid}}'] = w;
 
 });
 </script>
 
 
-<div class="widget movable collapsable removable editable closeconfirm {{collapse}}" id="{{widgetid}}">
+
+<div class="widget movable collapsable removable editable closeconfirm {{collapsed}}" id="{{widgetid}}">
   <div class="widget-header">
     <strong>System widget</strong>
   </div>
