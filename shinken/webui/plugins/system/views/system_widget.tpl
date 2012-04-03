@@ -12,7 +12,7 @@
 <script type="text/javascript">
 $(document).ready(function(){
 
-  var w = {'id' : '{{wid}}', 'base_url' : '{{base_url}}', 'collapsed' : {{collapsed_j}},
+  var w = {'id' : '{{wid}}', 'base_url' : '{{base_url}}', 'collapsed' : {{collapsed_j}}, 'position' : 'widget-place-1',
           'options' : {'key' : 'value'}};
 
 
