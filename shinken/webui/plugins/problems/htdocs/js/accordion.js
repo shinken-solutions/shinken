@@ -24,7 +24,8 @@
 /* We Hide all detail elements */
 $(document).ready(function(){
     var details = $('.detail');
-    details.hide();    
+    details.hide();
+
 });
 
 /* And if the user lick on the good image, we untoggle them. */
@@ -40,6 +41,11 @@ $(document).ready(function(){
     $('#unselect_all_btn').hide();
 });
 
+
+// At start we hide the selected images
+$(document).ready(function(){
+    $('.img_tick').hide();
+});
 
 // When we select all, add all in the selected list,
 // and hide the select all button, and swap it with
@@ -79,8 +85,9 @@ function add_remove_elements(name){
 /* function when we add an element*/
 function add_element(name){
     selected_elements.push(name);
-    var selector = $('#selector-'+name);
-    selector.attr('src', '/static/images/tick.png');
+    
+    // We show the 'tick' image ofthe selector on the left
+    $('#selector-'+name).show();
     
     $('#actions').css('display', 'inline-block');
     $('#actions').animate({opacity:1});
@@ -97,8 +104,8 @@ function remove_element(name){
 	$('#actions').animate({opacity:0});
 	$('#actions').css('display', 'none');
     }
-    var selector = $('#selector-'+name);
-    selector.attr('src', '/static/images/untick.png');
+    // And hide the tick image
+    $('#selector-'+name).hide();
 }
 
 
