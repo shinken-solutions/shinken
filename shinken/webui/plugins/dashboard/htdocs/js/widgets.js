@@ -21,7 +21,7 @@
 */
 
 
-
+var nb_widgets_loading = 0;
 var save_state = false;
 
 
@@ -31,8 +31,19 @@ function ask_for_widgets_state_save(){
 
 // Now try to load widgets in a dynamic way
 function AddWidget(url, placeId){
+    // We are saying to the user that we are loading a widget with
+    // a spinner
+    nb_widgets_loading += 1;
+    $('#loading').show();
+    
     $.get(url, function(html){
 	$.fn.AddEasyWidget(html, placeId, {});
+	nb_widgets_loading -= 1;
+	//Maybe we are the last widget to load, if so, 
+	// remove the spinner
+	if(nb_widgets_loading==0){
+	    $('#loading').hide();
+	}	
     });
 }
 
@@ -64,6 +75,10 @@ $(function(){
 
     // where we stock all current widgets loaded, and their options
     widgets = [];
+
+
+    // We hide the loader spinner thing
+    $('#loading').hide()
 
     // Very basic usage  
     $.fn.EasyWidgets(

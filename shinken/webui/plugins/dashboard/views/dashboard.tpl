@@ -5,6 +5,7 @@
 
 
 <div class='span12'>
+  <div id='loading' class='pull-left'> <img src='/static/images/spinner.gif'> Loading widgets</div>
   <a href="#pageslide" class="slidelink btn btn-success pull-right"><i class="icon-plus"></i> Add a new widget</a>
 </div>
 <div id="pageslide" style="display:none">
