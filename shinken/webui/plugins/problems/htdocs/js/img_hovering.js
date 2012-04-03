@@ -100,9 +100,17 @@ function hide_hover_img(){
 //window.addEvent('domready', function(){
 $(document).ready(function(){
     document.onmousemove = function(e){
-	mouse_abs_x = e.pageX;
-	mouse_abs_y = e.pageY;
-	
+	// Some fuck.. browser do not support pageX
+	// or give the event... yes, I look at you IE!
+	e = e || window.event;
+	if (e.pageX || e.pageY){
+            mouse_abs_x = e.pageX;
+            mouse_abs_y = e.pageY;
+	}else if (e.clientX || e.clientY) {
+	    mouse_abs_x = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+            mouse_abs_y = e.clientY + document.body.scrollTop  + document.documentElement.scrollTop;
+	}
+	// Now the relative part.
 	mouse_rel_x = e.clientX;
 	mouse_rel_y = e.clientY;
 
