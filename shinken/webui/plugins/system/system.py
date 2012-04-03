@@ -74,7 +74,6 @@ def system_widget():
             'schedulers' : schedulers,
             'brokers' : brokers, 'reactionners' : reactionners,
             'receivers' : receivers, 'pollers' : pollers,
-
             }
 
 
