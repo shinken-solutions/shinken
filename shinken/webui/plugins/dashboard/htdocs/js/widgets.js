@@ -24,9 +24,6 @@
 
 var save_state = false;
 
-
-
-
 // Now try to load widgets in a dynamic way
 function AddWidget(url, placeId){
     $.get(url, function(html){
@@ -34,7 +31,7 @@ function AddWidget(url, placeId){
     });
 }
 
-  // when we add a new widget, we also save the current widgets
+// when we add a new widget, we also save the current widgets
 // configuration for this user
 function AddNewWidget(url, placeId){
     AddWidget(url, placeId);
@@ -46,97 +43,132 @@ function AddNewWidget(url, placeId){
 
 $(function(){
 
-  // where we stock all current widgets loaded, and their options
-  widgets = [];
+    // where we stock all current widgets loaded, and their options
+    widgets = [];
 
-  // Very basic usage  
-  $.fn.EasyWidgets(
+    // Very basic usage  
+    $.fn.EasyWidgets(
 	{
-    effects : {
-      effectDuration : 100,
-      widgetShow : 'slide',
-      widgetHide : 'slide',
-      widgetClose : 'slide',
-      widgetExtend : 'slide',
-      widgetCollapse : 'slide',
-      widgetOpenEdit : 'slide',
-      widgetCloseEdit : 'slide',
-      widgetCancelEdit : 'slide'
-    },
+	    effects : {
+		effectDuration : 100,
+		widgetShow : 'slide',
+		widgetHide : 'slide',
+		widgetClose : 'slide',
+		widgetExtend : 'slide',
+		widgetCollapse : 'slide',
+		widgetOpenEdit : 'slide',
+		widgetCloseEdit : 'slide',
+		widgetCancelEdit : 'slide'
+	    },
 
-   callbacks : {
-      onCollapse : function(link, widget){
-          var name = widget.attr('id');
-          var key = name+'_collapsed';
-          $.post("/user/save_pref", { 'key' : key, 'value' : true});
-      },
-      onExtend : function(link, widget){
-        alert('onentend callback :: Link: ' + link + ' - Widget: ' + widget.attr('id'));
-      },
-      onClose : function(link, widget){
-	   // On close, save all
-	   save_state = true;
-       }
-       
-   }
-  });
-  
-
-
-function find_widget(name){
-    res = -1;
-    w = $.each(widgets, function(idx, w){
-	if(name == w.id){
-	    res = w;
-	}
-    });
+	    callbacks : {
+		onCollapse : function(link, widget){
+		    var w = find_widget(widget.attr('id'));
+                    if(w != -1){
+                        // We finally save the new position
+                        w.collapsed = true;
+                    }
+		    save_state = true;
+		},
+		onExtend : function(link, widget){
+		    console.log('onentend callback :: Link: ' + link + ' - Widget: ' + widget.attr('id'));
+		    var w = find_widget(widget.attr('id'));
+                    if(w != -1){
+                        // We finally save the new position
+                        w.collapsed = false;
+                    }
+                    save_state = true;
+		},
+		onClose : function(link, widget){
+		    // On close, save all
+		    save_state = true;
+		},
+		onChangePositions : function(positions){
+		    save_state = true;
+		    console.log('We arechanging position of'+positions);
+		    
+		    if($.trim(positions) != ''){
+			// Get the widgets places IDs and widgets IDs
+			var places = positions.split('|');
+			console.log('Places'+places);
+			for(var i = 0; i < places.length; i++){
+			    // Every part contain a place ID and possible widgets IDs
+			    var place = places[i].split('=');
+			    // Validate (more or less) the format of the part that must
+			    // contain two element: A place ID and one or more widgets IDs
+			    if(place.length == 2){
+				// Subpart one: the place ID
+				var place_name = place[0];
+				// Subpart two: one or more widgets IDs
+				var widgets = place[1].split(',');
+				// Here we have a place and one or more widgets IDs
+				for(var j = 0; j < widgets.length; j++){
+				    if($.trim(widgets[j]) != ''){
+					// So, append every widget in the appropiate place
+					var widget_name = widgets[j];
+					console.log('Widget and place'+widget_name+' and place '+place_name);
+					var w = find_widget(widget_name);
+					if(w != -1){
+					    // We finally save the new position
+					    w.position = place_name;
+					}
+					console.log('Finded widget'+w);
+					//$(widgetSel).appendTo(placeSel);
+				    }
+				}
+			    }
+			}
+		    }
+		    
+		    
+		},
+	    }
+	});
     
-    return res;
-}
 
 
-// We will look if we need to save the current state and options or not
-function save_new_widgets(){
-     if(!save_state){return;}
-     // No more need
-     save_state = false;
-
-     var widgets_ids = [];
-     var save_widgets_list = false;
-    $('.widget').each(function(idx, w){
+    function find_widget(name){
+	res = -1;
+	w = $.each(widgets, function(idx, w){
+	    if(name == w.id){
+		res = w;
+	    }
+	});
 	
-	// If the widget is closed, don't save it
-	if($(this).css('display') == 'none'){return;}
-
-	id = w.id;
-	var widget = find_widget(id);
-	//alert('Find widget'+widget);
-	// Find the widget and check if it was not closed
-	if(widget != -1){
-	    
-	    //alert('Loop over a widget'+w.id+''+w.position+''+w.base_url);
-            var o = {'id' : widget.id, 'position' : widget.position, 'base_url' : widget.base_url, 'options' : widget.options};
-            widgets_ids.push(o);
-	}
-         /*if(!w.hasOwnProperty('is_saved')){
-           save_widgets_list = true;
-           //alert('Saving widget'+w.id);
-           var key= 'widget_'+w.id;
-           var value = JSON.stringify(w);
-           //alert('with key:value'+key+' '+value);
-           $.post("/user/save_pref", { 'key' : key, 'value' : value});
-           w.is_saved=true;
-         }*/
-     });
-
-    console.log('Need to save widgets list'+JSON.stringify(widgets_ids));
-    $.post("/user/save_pref", { 'key' : 'widgets', 'value' : JSON.stringify(widgets_ids)});
-  }
+	return res;
+    }
 
 
+    // We will look if we need to save the current state and options or not
+    function save_new_widgets(){
+	if(!save_state){return;}
+	// No more need
+	save_state = false;
+
+	var widgets_ids = [];
+	var save_widgets_list = false;
+	$('.widget').each(function(idx, w){
+	    // If the widget is closed, don't save it
+	    if($(this).css('display') == 'none'){return;}
+
+	    //id = w.id;
+	    var widget = find_widget(w.id);
+	    // Find the widget and check if it was not closed
+	    if(widget != -1){
+		var o = {'id' : widget.id, 'position' : widget.position, 'base_url' : widget.base_url, 'options' : widget.options, 'collapsed' : widget.collapsed};
+		console.log('Saving'+o.collapsed);
+		widgets_ids.push(o);
+	    }
+	});
+
+	console.log('Need to save widgets list'+JSON.stringify(widgets_ids));
+	$.post("/user/save_pref", { 'key' : 'widgets', 'value' : JSON.stringify(widgets_ids)});
+    }
 
 
-setInterval( save_new_widgets, 1000);
+
+
+    setInterval( save_new_widgets, 1000);
 
 
 });

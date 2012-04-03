@@ -3,8 +3,8 @@
 %helper = app.helper
 
 %collapsed_s = ''
-%if collapsed != '1':
-   %collapsed_s = 'collpased'
+%if collapsed:
+   %collapsed_s = 'collapsed'
 %end
 
 
@@ -21,7 +21,7 @@ $(document).ready(function(){
 
 
 
-<div class="widget movable collapsable removable editable closeconfirm " id="{{wid}}">
+<div class="widget movable collapsable removable editable closeconfirm {{collapsed_s}}" id="{{wid}}">
   <div class="widget-header">
     <strong>System widget</strong>
   </div>
