@@ -15,6 +15,12 @@ $(document).ready(function(){
   var w = {'id' : '{{wid}}', 'base_url' : '/widget/system', 'position' : 'widget-place-1',
           'options' : {'key' : 'value'}, 'collapsed' : {{collapsed_j}}};
 
+
+  %for (k, v) in options.iteritems():
+     %value = v.get('value', '')
+     w.options['{{k}}'] = '{{value}}';
+  %end
+
   // save into widgets
   widgets.push(w);
 
@@ -27,8 +33,13 @@ $(document).ready(function(){
     // If we can't find the widget, bail out
     if(widget == -1){console.log('cannot find the widget for saving options!'); return;}
     console.log('We fond the widget'+widget);
-    %for k in options:
-       var v = form.{{k}}.value;
+    %for (k, v) in options.iteritems():
+       %# """ for checkbox, the 'value' is useless, we must look at checked """
+       %if v.get('type', 'text') == 'bool':
+          var v = form.{{k}}.checked;
+       %else:
+          var v = form.{{k}}.value;
+       %end
        console.log('Saving the {{k}} with the value'+v);
        widget.options['{{k}}'] = v;
     %end
@@ -46,12 +57,22 @@ $(document).ready(function(){
     <strong>System widget</strong>
   </div>
   <div class="widget-editbox">
-    <form name='options-{{wid}}'>
+    <form name='options-{{wid}}' class="well">
       %for (k, v) in options.iteritems():
          %value = v.get('value', '')
+         %label = v.get('label', k)
          %t = v.get('type', 'text')
+         %if t != 'hidden':
+           <label></label>
+           <span class="help-inline">{{label}}</span>
+	 %end
+	 
+	 %# """ Manage the differents types of values"""
          %if t in ['text', 'int']:
             <input name='{{k}}' value='{{value}}'/>
+	 %end
+	 %if t == 'hidden':
+	    <input type="hidden" name='{{k}}' value='{{value}}'/>
 	 %end
 	 %if t in ['select']:
 	    %values = v.get('values', [])
@@ -61,11 +82,21 @@ $(document).ready(function(){
 	      %end
             </select>
 	 %end
+	 %if t == 'bool':
+	    %checked = ''
+	    %if value:
+	       %checked = 'checked'
+	    %end
+	    <input name='{{k}}' type="checkbox" {{checked}}>
+	 %end
+
       %end
+  
+     <label></label>
+     Save widget options <a class="widget-close-editbox" onclick="submit_{{wid}}_form();" title="Save changes">Save changes</a>
+
     </form>
 
-    System widget options
-    <a class="widget-close-editbox" onclick="submit_{{wid}}_form();" title="Save changes">Save changes</a>
   </div>
   <div class="widget-content">
     %types = [ ('scheduler', schedulers), ('poller', pollers), ('broker', brokers), ('reactionner', reactionners), ('receiver', receivers)]
