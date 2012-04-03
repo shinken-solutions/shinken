@@ -226,7 +226,7 @@ def get_pbs_widget():
 
 
 widget_desc = '''<h3>IT problems</h3>
-Show most impacting IT problems
+Show the most impacting IT problems
 '''
 
 pages = {get_page : { 'routes' : ['/problems'], 'view' : 'problems', 'static' : True},

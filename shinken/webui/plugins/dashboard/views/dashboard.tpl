@@ -1,4 +1,4 @@
-%rebase layout globals(), js=['dashboard/js/widgets.js', 'dashboard/js/jquery.easywidgets.js', 'dashboard/js/jquery.pageslide.js'], css=['dashboard/css/widget.css', 'dashboard/css/jquery.pageslide.css'], title='Dashboard', menu_part='/dashboard'
+%rebase layout globals(), js=['dashboard/js/widgets.js', 'dashboard/js/jquery.easywidgets.js', 'dashboard/js/jquery.pageslide.js'], css=['dashboard/css/widget.css', 'dashboard/css/jquery.pageslide.css', 'dashboard/css/dashboard.css'], title='Dashboard', menu_part='/dashboard'
 
 %from shinken.bin import VERSION
 %helper = app.helper
@@ -12,13 +12,12 @@
     <h2>Widgets available</h2>
     
     %for w in app.get_widgets_for('dashboard'):
-    <p>
-      {{!w['widget_desc']}}
-      <a class='btn btn-success' href="javascript:AddNewWidget('{{w['base_uri']}}', 'widget-place-1');"> <i class="icon-chevron-left"></i> Add {{w['widget_name']}} widget</a></p>
+    <div class='widget_desc'>
+      <p>{{!w['widget_desc']}}</p>
+      <a class='btn btn-success' href="javascript:AddNewWidget('{{w['base_uri']}}', 'widget-place-1');"> <i class="icon-chevron-left"></i> Add {{w['widget_name']}} widget</a>
+    </div>
     %end
 
-
-    <p><a class='btn btn-success' href="javascript:AddNewWidget('/widget/system', 'widget-place-1');"> <i class="icon-chevron-left"></i> Add system widget</a></p>
     
     <p><a class='btn btn-danger' href="javascript:$.pageslide.close()"><i class="icon-remove"></i> Close</a></p>
 </div>

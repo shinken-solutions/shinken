@@ -134,6 +134,7 @@ ul.dock li:hover span { display: block; }
 
 
 .tableCriticity .img_status{
+    margin-right: 6px;
     width:20px;
     background: white;
 }
