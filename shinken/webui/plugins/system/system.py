@@ -68,10 +68,13 @@ def system_widget():
                'notshowthis' : {'value' : 'secret', 'type' : 'hidden'},
                }
 
-    return {'app' : app, 'user' : user, 'schedulers' : schedulers,
+    return {'app' : app, 'user' : user, 'wid' : wid,
+            'collapsed' : collapsed, 'options' : options,
+            'base_url' : '/widget/system', 'title' : 'System widget',
+            'schedulers' : schedulers,
             'brokers' : brokers, 'reactionners' : reactionners,
-            'receivers' : receivers, 'pollers' : pollers, 'wid' : wid,
-            'collapsed' : collapsed, 'options' : options
+            'receivers' : receivers, 'pollers' : pollers,
+
             }
 
 

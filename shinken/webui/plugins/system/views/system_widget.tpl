@@ -12,8 +12,8 @@
 <script type="text/javascript">
 $(document).ready(function(){
 
-  var w = {'id' : '{{wid}}', 'base_url' : '/widget/system', 'position' : 'widget-place-1',
-          'options' : {'key' : 'value'}, 'collapsed' : {{collapsed_j}}};
+  var w = {'id' : '{{wid}}', 'base_url' : '{{base_url}}', 'collapsed' : {{collapsed_j}},
+          'options' : {'key' : 'value'}};
 
 
   %for (k, v) in options.iteritems():
@@ -26,6 +26,7 @@ $(document).ready(function(){
 
 
 });
+
   function submit_{{wid}}_form(){
     var form = document.forms["options-{{wid}}"];
     console.log('Saving form'+form+'and widget'+'{{wid}}');
@@ -54,7 +55,7 @@ $(document).ready(function(){
 
 <div class="widget movable collapsable removable editable closeconfirm {{collapsed_s}}" id="{{wid}}">
   <div class="widget-header">
-    <strong>System widget</strong>
+    <strong>{{title}}</strong>
   </div>
   <div class="widget-editbox">
     <form name='options-{{wid}}' class="well">
@@ -87,13 +88,13 @@ $(document).ready(function(){
 	    %if value:
 	       %checked = 'checked'
 	    %end
-	    <input name='{{k}}' type="checkbox" {{checked}}>
+	    <input name='{{k}}' type="checkbox" {{checked}}/>
 	 %end
 
       %end
   
      <label></label>
-     Save widget options <a class="widget-close-editbox" onclick="submit_{{wid}}_form();" title="Save changes">Save changes</a>
+     <a class="widget-close-editbox btn btn-success" onclick="submit_{{wid}}_form();" title="Save changes"><i class="icon-search"></i> Save changes</a>
 
     </form>
 
