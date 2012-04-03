@@ -84,7 +84,8 @@ class Webui_broker(BaseModule, Daemon):
         self.photo_dir = getattr(modconf, 'photo_dir', 'photos')
         self.photo_dir = os.path.abspath(self.photo_dir)
         print "Webui : using the backend", self.http_backend
-
+        # We will save all widgets
+        self.widgets = {}
 
 
         
@@ -281,7 +282,10 @@ class Webui_broker(BaseModule, Daemon):
                     routes = entry.get('routes', None)
                     v = entry.get('view', None)
                     static = entry.get('static', False)
-
+                    widget_lst = entry.get('widget', [])
+                    widget_desc = entry.get('widget_desc', None)
+                    widget_name = entry.get('widget_name', None)
+                    
                     # IMPORTANT : apply VIEW BEFORE route!
                     if v:
                         print "Link function", f, "and view", v
@@ -304,6 +308,16 @@ class Webui_broker(BaseModule, Daemon):
                     # for them!
                     if static:
                         self.add_static(fdir, m_dir)
+
+                    # It's a valid widget entry if it got all data, and at least one route
+                    # ONLY the first route wil be used for Add!
+                    if widget_name and widget_desc and widget_lst!=[] and routes:
+                        for place in widget_lst:
+                            if place not in self.widgets:
+                                self.widgets[place] = []
+                            w = {'widget_name' : widget_name, 'widget_desc' : widget_desc, 'base_uri' : routes[0]}
+                            print "Loading widget", w
+                            self.widgets[place].append(w)
 
                 # And we add the views dir of this plugin in our TEMPLATE
                 # PATH
@@ -527,3 +541,8 @@ class Webui_broker(BaseModule, Daemon):
                 self.modules_manager.set_to_restart(mod)
 
         # end of all modules
+
+
+    # For a specific place like dashboard we return widget lists
+    def get_widgets_for(self, place):
+        return self.widgets.get(place, [])

@@ -4,13 +4,22 @@
 %helper = app.helper
 
 
-
-<p><a href="#pageslide" class="slidelink">Add a new widget</a></p>
+<div class='span12'>
+  <a href="#pageslide" class="slidelink btn btn-success pull-right"><i class="icon-plus"></i> Add a new widget</a>
+</div>
 <div id="pageslide" style="display:none">
     <h2>Widgets available</h2>
     
-    <a href="javascript:AddNewWidget('/widget/system', 'widget-place-1');"> Add system widget</a>
-    <a href="javascript:$.pageslide.close()">Close</a>
+    %for w in app.get_widgets_for('dashboard'):
+    <p>
+      {{!w['widget_desc']}}
+      <a class='btn btn-success' href="javascript:AddNewWidget('{{w['base_uri']}}', 'widget-place-1');"> <i class="icon-chevron-left"></i> Add {{w['widget_name']}} widget</a></p>
+    %end
+
+
+    <p><a class='btn btn-success' href="javascript:AddNewWidget('/widget/system', 'widget-place-1');"> <i class="icon-chevron-left"></i> Add system widget</a></p>
+    
+    <p><a class='btn btn-danger' href="javascript:$.pageslide.close()"><i class="icon-remove"></i> Close</a></p>
 </div>
 
 <script >$(function(){
