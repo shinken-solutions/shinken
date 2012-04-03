@@ -149,7 +149,7 @@
 
 	  <div class="tableCriticity pull-left">
 %#	    <table class="tableCriticity">
-	      <div class='tick pull-left'> <img src="/static/images/untick.png" alt="untick" /style="cursor:pointer;" onclick="add_remove_elements('{{helper.get_html_id(pb)}}')" id="selector-{{helper.get_html_id(pb)}}" > </div>
+	      <div class='tick pull-left'> <img src="/static/images/untick.png" alt="untick" style="cursor:pointer;" onclick="add_remove_elements('{{helper.get_html_id(pb)}}')" id="selector-{{helper.get_html_id(pb)}}" > </div>
 	      <div class='img_status pull-left'>
 		<div class="aroundpulse">
 		    %# " We put a 'pulse' around the elements if it's an important one "

@@ -1,4 +1,37 @@
 
+%# Load all css stuff we need
+%if not 'css' in locals(): css = []
+%if not 'js' in locals(): js = []
+
+<script type="text/javascript">
+function loadjscssfile(filename, filetype){
+ if (filetype=="js"){ //if filename is a external JavaScript file
+  var fileref=document.createElement('script')
+  fileref.setAttribute("type","text/javascript")
+  fileref.setAttribute("src", filename)
+ }
+ else if (filetype=="css"){ //if filename is an external CSS file
+  var fileref=document.createElement("link")
+  fileref.setAttribute("rel", "stylesheet")
+  fileref.setAttribute("type", "text/css")
+  fileref.setAttribute("href", filename)
+ }
+ if (typeof fileref!="undefined")
+  document.getElementsByTagName("head")[0].appendChild(fileref)
+}
+
+%for p in css:
+  loadjscssfile('/static/'+'{{p}}', 'css');
+%end
+
+%for p in js:
+  loadjscssfile('/static/'+'{{p}}', 'js');
+%end
+
+</script>
+
+
+
 
 %helper = app.helper
 

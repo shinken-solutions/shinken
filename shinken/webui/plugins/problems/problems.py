@@ -28,6 +28,7 @@ from shinken.misc.sorter import hst_srv_sort
 ### Will be populated by the UI with it's own value
 app = None
 
+import time
 import re
 
 # Our page
@@ -159,7 +160,77 @@ def get_all():
 
 
 
+
+
+# Our page
+def get_pbs_widget():
+    
+    user = app.get_user_auth()
+    if not user:
+        redirect("/user/login")
+
+    # We want to limit the number of elements, The user will be able to increase it
+    nb_elements = max(0, int(app.request.GET.get('nb_elements', '10')))
+    search = app.request.GET.get('search', '')
+
+    pbs = app.datamgr.get_all_problems(to_sort=False)
+    
+    # Filter with the user interests
+    pbs = only_related_to(pbs, user)
+
+    # Sort it now
+    pbs.sort(hst_srv_sort)
+
+    # Ok, if need, appli the search filter
+    if search:
+        print "SEARCHING FOR", search
+        print "Before filtering", len(pbs)
+        # We compile the patern
+        pat = re.compile(search, re.IGNORECASE)
+        new_pbs = []
+        for p in pbs:
+            if pat.search(p.get_full_name()):
+                new_pbs.append(p)
+                continue
+            to_add = False
+            for imp in p.impacts:
+                if pat.search(imp.get_full_name()):
+                    to_add = True
+            for src in p.source_problems:
+                if pat.search(src.get_full_name()):
+                    to_add = True
+            if to_add:
+                new_pbs.append(p)
+
+        pbs = new_pbs[:nb_elements]
+        print "After filtering", len(pbs)
+
+    pbs = pbs[:nb_elements]
+
+
+    wid = app.request.GET.get('wid', 'widget_problems_'+str(int(time.time())))
+    collapsed = (app.request.GET.get('collapsed', 'False') == 'True')
+
+    options = {'search' : {'value' : search, 'type' : 'text', 'label' : 'Filter by name'},
+               'nb_elements' : {'value' : nb_elements, 'type' : 'int', 'label' : 'Max number of elements to show'},
+               }
+
+    title = 'IT problems'
+    if search:
+        title = 'IT problems (%s)' % search
+
+
+    return {'app' : app, 'pbs' : pbs, 'user' : user, 'search' : search, 'page' : 'problems',
+            'wid' : wid, 'collapsed' : collapsed, 'options' : options, 'base_url' : '/widget/problems', 'title' : title,
+            }
+
+
+widget_desc = '''<h3>IT problems</h3>
+Show most impacting IT problems
+'''
+
 pages = {get_page : { 'routes' : ['/problems'], 'view' : 'problems', 'static' : True},
          get_all : { 'routes' : ['/all'], 'view' : 'problems', 'static' : True},
+         get_pbs_widget : {'routes' : ['/widget/problems'], 'view' : 'widget_problems', 'static' : True, 'widget' : ['dashboard'], 'widget_desc' : widget_desc, 'widget_name' : 'problems'},
          }
 
