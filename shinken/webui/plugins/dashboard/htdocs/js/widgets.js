@@ -24,6 +24,11 @@
 
 var save_state = false;
 
+
+function ask_for_widgets_state_save(){
+    save_state = true;
+}
+
 // Now try to load widgets in a dynamic way
 function AddWidget(url, placeId){
     $.get(url, function(html){
@@ -36,8 +41,22 @@ function AddWidget(url, placeId){
 function AddNewWidget(url, placeId){
     AddWidget(url, placeId);
     console.log('Add new widget');
-    save_state = true;
+    ask_for_widgets_state_save();
+    //save_state = true;
 }
+
+
+function find_widget(name){
+    res = -1;
+    w = $.each(widgets, function(idx, w){
+	if(name == w.id){
+	    res = w;
+	}
+    });
+    
+    return res;
+}
+
 
 
 
@@ -68,7 +87,8 @@ $(function(){
                         // We finally save the new position
                         w.collapsed = true;
                     }
-		    save_state = true;
+		    ask_for_widgets_state_save();
+		    //save_state = true;
 		},
 		onExtend : function(link, widget){
 		    console.log('onentend callback :: Link: ' + link + ' - Widget: ' + widget.attr('id'));
@@ -77,14 +97,17 @@ $(function(){
                         // We finally save the new position
                         w.collapsed = false;
                     }
-                    save_state = true;
+		    ask_for_widgets_state_save();
+                    //save_state = true;
 		},
 		onClose : function(link, widget){
 		    // On close, save all
-		    save_state = true;
+		    ask_for_widgets_state_save();
+		    //save_state = true;
 		},
 		onChangePositions : function(positions){
-		    save_state = true;
+		    //save_state = true;
+		    ask_for_widgets_state_save();
 		    console.log('We arechanging position of'+positions);
 		    
 		    if($.trim(positions) != ''){
@@ -125,18 +148,6 @@ $(function(){
 	    }
 	});
     
-
-
-    function find_widget(name){
-	res = -1;
-	w = $.each(widgets, function(idx, w){
-	    if(name == w.id){
-		res = w;
-	    }
-	});
-	
-	return res;
-    }
 
 
     // We will look if we need to save the current state and options or not

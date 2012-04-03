@@ -59,10 +59,14 @@ def system_widget():
     collapsed = (app.request.GET.get('collapsed', 'False') == 'True')
     print "SYSTEM COLLAPSED?", collapsed, type(collapsed)
 
+    options = {'key' : {'value' : 1, 'type' : 'int'},
+               'place' : {'value' : '', 'type' : 'select', 'values' : ['Paris', 'Bordeaux', 'Marseille']}
+               }
+
     return {'app' : app, 'user' : user, 'schedulers' : schedulers,
             'brokers' : brokers, 'reactionners' : reactionners,
             'receivers' : receivers, 'pollers' : pollers, 'wid' : wid,
-            'collapsed' : collapsed
+            'collapsed' : collapsed, 'options' : options
             }
 
 

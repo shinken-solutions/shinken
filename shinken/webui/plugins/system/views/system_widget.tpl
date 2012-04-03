@@ -1,10 +1,11 @@
 
-%from shinken.bin import VERSION
 %helper = app.helper
 
 %collapsed_s = ''
+%collapsed_j = 'false'
 %if collapsed:
    %collapsed_s = 'collapsed'
+   %collapsed_j = 'true'
 %end
 
 
@@ -12,11 +13,30 @@
 $(document).ready(function(){
 
   var w = {'id' : '{{wid}}', 'base_url' : '/widget/system', 'position' : 'widget-place-1',
-          'options' : {'key' : 'value'}};
+          'options' : {'key' : 'value'}, 'collapsed' : {{collapsed_j}}};
 
   // save into widgets
   widgets.push(w);
+
+
 });
+  function submit_{{wid}}_form(){
+    var form = document.forms["options-{{wid}}"];
+    console.log('Saving form'+form+'and widget'+'{{wid}}');
+    var widget = find_widget('{{wid}}');
+    // If we can't find the widget, bail out
+    if(widget == -1){console.log('cannot find the widget for saving options!'); return;}
+    console.log('We fond the widget'+widget);
+    %for k in options:
+       var v = form.{{k}}.value;
+       console.log('Saving the {{k}} with the value'+v);
+       widget.options['{{k}}'] = v;
+    %end
+    // so now we can ask for saving the state :)
+    ask_for_widgets_state_save();
+  }
+
+
 </script>
 
 
@@ -26,12 +46,28 @@ $(document).ready(function(){
     <strong>System widget</strong>
   </div>
   <div class="widget-editbox">
+    <form name='options-{{wid}}'>
+      %for (k, v) in options.iteritems():
+         %value = v.get('value', '')
+         %t = v.get('type', 'text')
+         %if t in ['text', 'int']:
+            <input name='{{k}}' value='{{value}}'/>
+	 %end
+	 %if t in ['select']:
+	    %values = v.get('values', [])
+	    <select name='{{k}}'>
+	      %for sub_val in values:
+	         <option value="{{sub_val}}">{{sub_val}}</option>
+	      %end
+            </select>
+	 %end
+      %end
+    </form>
+
     System widget options
+    <a class="widget-close-editbox" onclick="submit_{{wid}}_form();" title="Save changes">Save changes</a>
   </div>
   <div class="widget-content">
-    BLABLA, SYSTEM data
-
-
     %types = [ ('scheduler', schedulers), ('poller', pollers), ('broker', brokers), ('reactionner', reactionners), ('receiver', receivers)]
 
     %for (sat_type, sats) in types:
