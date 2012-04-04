@@ -201,7 +201,7 @@ Invalid element name
 	  </script>
 
 	  <div class='row-fluid'>
-	    <form class="well form-inline span7">
+	    <form class="leftmargin well form-inline span7">
 	      <div class="row-fluid"> 
 		<div class="span3"> Active/passive checks  <input {{chk_state}} class="iphone" type="checkbox" id='btn-checks'> </div>
 		<div class="span3"> Notifications <input {{not_state}} class="iphone" type="checkbox" id='btn-not'> </div>
@@ -210,8 +210,12 @@ Invalid element name
 	      </div>
 	    </form>
 	    
+	<div class='span3 well'>
+	  <div class="btn-group">
+	    <a href="/depgraph/{{elt.get_full_name()}}" class='btn' title="Impact map of {{elt.get_full_name()}}"> <i class="icon-map-marker"></i> Show impact map</a>
+	  </div>
 
-	<div class="btn-group span3 pull-right">
+	  <div class="btn-group">
 	  %if elt_type=='host':
 	     <a class="btn dropdown-toggle span8" data-toggle="dropdown" href="#"><span class="pull-left"><i class="icon-cog"></i> Host Commands</span> <span class="caret pull-right"></span></a>
 	  %else:
@@ -240,10 +244,7 @@ Invalid element name
 	      <li><a class='disabled-link' href="#"><i class="icon-edit"></i> Edit Service</a></li>
 	    %end:
 	  </ul>
-	</div>
-
-	<div class="btn-group pull-right">
-	  <a href="/depgraph/{{elt.get_full_name()}}" class='btn' title="Impact map of {{elt.get_full_name()}}"> <i class="icon-map-marker"></i> Show impact map</a>
+	  </div>
 	</div>
 	</div>
 

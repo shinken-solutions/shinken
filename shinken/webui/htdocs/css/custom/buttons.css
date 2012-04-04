@@ -24,3 +24,8 @@ to remove the !important from onoff so we get a gray "active" state. */
 .btn-onoff:hover {
     background-position: 0 -25px;
 }
+
+/* By default bootstrap put 5px, I don't see why*/
+.btn-group + .btn-group {
+  margin-left: 0px;
+}

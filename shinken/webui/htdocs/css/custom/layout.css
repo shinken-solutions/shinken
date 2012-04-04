@@ -36,6 +36,9 @@
 .bottommargin {
   margin-bottom: 20px;
 }
+.leftmargin {
+  margin-left: 20px !important;
+}
 
 .no-maxwidth{
   max-width: none !important; 
