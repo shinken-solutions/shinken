@@ -25,14 +25,16 @@
 $(document).ready(function(){
     var details = $('.detail');
     details.hide();
-
+    
+    // By default hide all "hide" chevron of the right part
+    $('.chevron-up').hide();
 });
 
 /* And if the user lick on the good image, we untoggle them. */
 function show_detail(name){
-
-    var elt = $('#'+name);
     var myFx = $('#'+name).slideToggle();
+    $('#show-detail-'+name).toggle();
+    $('#hide-detail-'+name).toggle();
 }
 
 

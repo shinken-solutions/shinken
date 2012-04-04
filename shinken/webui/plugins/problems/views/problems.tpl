@@ -194,7 +194,7 @@
 		<div class="perfometer pull-left" {{!onmouse_code}}>
 		  {{!helper.get_perfometer(pb)}} &nbsp;
 		</div>
-		<div class="no_border opacity_hover shortdesc expand pull-right" style="max-width:20px;" onclick="show_detail('{{helper.get_html_id(pb)}}')"> <img src="/static/images/expand.png" alt="expand" /> </div>
+		<div class="no_border opacity_hover shortdesc expand pull-right" style="max-width:20px;" onclick="show_detail('{{helper.get_html_id(pb)}}')"><i class="icon-chevron-down" id='show-detail-{{helper.get_html_id(pb)}}'></i> <i class="icon-chevron-up chevron-up" id='hide-detail-{{helper.get_html_id(pb)}}'></i> </div>
 		
 	      
 %#             </table>
