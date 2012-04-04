@@ -401,13 +401,14 @@ Invalid element name
 		          %else:
 			  <div class="service hidden_impacts_services">
 			  %end
-			
-			  <div class="divstate{{i.state_id}}">
-			  %for j in range(0, i.business_impact-2):
-			    <img src="/static/images/star.png" alt="icon star">
-			  %end
-			  <img style="width : 16px; height:16px" alt="icon state" src="{{helper.get_icon_state(i)}}">
-			  <span style="font-size:110%">{{!helper.get_link(i)}}</span> is <span style="font-size:110%">{{i.state}}</span> since {{helper.print_duration(i.last_state_change, just_duration=True, x_elts=2)}}
+			  
+			  <div>
+			    <img style="width : 16px; height:16px" alt="icon state" src="{{helper.get_icon_state(i)}}">
+			    <span class='alert-small alert-{{i.state.lower()}}' style="font-size:110%">{{i.state}}</span> for <span style="font-size:110%">{{!helper.get_link(i, short=True)}}</span> since {{helper.print_duration(i.last_state_change, just_duration=True, x_elts=2)}}
+			  	%for i in range(0, i.business_impact-2):
+			  	<img alt="icon state" src="/static/images/star.png">
+			  	%end
+
 			  </div>
 			  </div>
 			  %# End of this impact
