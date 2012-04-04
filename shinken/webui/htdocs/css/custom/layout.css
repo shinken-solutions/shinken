@@ -188,3 +188,13 @@ color: #787878;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+
+/* Add a disabled-link style that make the link not show, and put in gray*/
+a.disabled-link,
+a.disabled-link:visited ,
+a.disabled-link:active,
+a.disabled-link:hover {
+    background-color:#ffffff !important;
+    color:#aaa !important;
+    pointer-events: none
+}

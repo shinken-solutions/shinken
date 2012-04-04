@@ -42,7 +42,6 @@
 	  	
 	    <div class="impact pblink" id="{{imp_id}}">
 			<div class="show-problem" id="show-problem-{{imp_id}}">
-				<img src="static/images/trig_right.png" id="show-problem-img-{{imp_id}}">
 			</div>
 			
 		%for i in range(2, impact.business_impact):
@@ -85,7 +84,7 @@
 	
 	    <div class="problems-panel" id="problems-{{imp_id}}" style="visibility: hidden; zoom: 1; opacity: 0; ">
 		<div class="right-panel-top"> 
-		  <a href="#a" class="pblink btn" id="{{imp_id}}"> <i class="icon-remove"></i> Close</a>
+		  <a href="#a" class="pblink btn btn-small btn-danger" id="{{imp_id}}"> <i class="icon-remove"></i> Close</a>
 		  
 		</div>
 		

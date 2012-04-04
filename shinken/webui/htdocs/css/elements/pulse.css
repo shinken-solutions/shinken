@@ -35,6 +35,12 @@
     animation-iteration-count: infinite;
     animation-timing-function: ease-out;
 }
+/* Same but in bigger mode */
+.big-pulse {
+    width: 64px;
+    height: 64px;
+}
+
 /* The animation */
 /* WebKit/Safari and Chrome */
 @-webkit-keyframes pulse {

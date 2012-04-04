@@ -572,8 +572,10 @@ class Helper(object):
     # the full_name with / changed as -- (because in html, / is not valid :) )
     def get_html_id(self, elt):
         return elt.get_full_name().replace('/','--').replace(' ','_')
-        
-
+    
+    # URI with spaces are BAD, must change them with %20
+    def get_uri_name(self, elt):
+        return elt.get_full_name().replace(' ', '%20')
 
 
     

@@ -219,17 +219,25 @@ Invalid element name
 	  data-toggle="dropdown" href="#"><span class="pull-left"><i class="icon-cog"></i> Service Commands</span> <span class="caret pull-right"></span></a>
 	  %end:
 	  <ul class="dropdown-menu span8 no-maxwidth">
-	    <li><a href="javascript:try_to_fix('{{elt.get_full_name()}}')"><i class="icon-pencil"></i> Try to fix it!</a></li>
-	    <li><a href="/forms/acknowledge/{{elt.get_full_name()}}" data-toggle="modal" data-target="#modal"><i class="icon-ok"></i> Acknowledge it!</a></li>
+	    %disabled_s = ''
+	    %if not elt.event_handler:
+	      %disabled_s = 'disabled-link'
+	    %end
+	    <li><a class='{{disabled_s}}' href="javascript:try_to_fix('{{elt.get_full_name()}}')"><i class="icon-pencil"></i> Try to fix it!</a></li>
+	    %disabled_s = ''
+	    %if elt.problem_has_been_acknowledged:
+              %disabled_s = 'disabled-link'
+            %end
+	    <li><a class='{{disabled_s}}' href="/forms/acknowledge/{{helper.get_uri_name(elt)}}" data-toggle="modal" data-target="#modal"><i class="icon-ok"></i> Acknowledge it!</a></li>
 	    <li><a href="javascript:recheck_now('{{elt.get_full_name()}}')"><i class="icon-repeat"></i> Recheck now</a></li>
-	    <li><a href="/forms/submit_check/{{elt.get_full_name()}}" data-toggle="modal" data-target="#modal"><i class="icon-share-alt"></i> Submit Check Result</a></li>
-	    <li><a href="#"><i class="icon-comment"></i> Send Custom Notification</a></li>
-	    <li><a href="/forms/downtime/{{elt.get_full_name()}}" data-toggle="modal" data-target="#modal"><i class="icon-fire"></i> Schedule Downtime</a></li>
+	    <li><a href="/forms/submit_check/{{helper.get_uri_name(elt)}}" data-toggle="modal" data-target="#modal"><i class="icon-share-alt"></i> Submit Check Result</a></li>
+	    <li><a class='disabled-link' href="#"><i class="icon-comment"></i> Send Custom Notification</a></li>
+	    <li><a href="/forms/downtime/{{helper.get_uri_name(elt)}}" data-toggle="modal" data-target="#modal"><i class="icon-fire"></i> Schedule Downtime</a></li>
 	    <li class="divider"></li>
 	    %if elt_type=='host':
-	      <li><a href="#"><i class="icon-edit"></i> Edit Host</a></li>
+	      <li><a class='disabled-link' href="#"><i class="icon-edit"></i> Edit Host</a></li>
 	    %else:
-	      <li><a href="#"><i class="icon-edit"></i> Edit Service</a></li>
+	      <li><a class='disabled-link' href="#"><i class="icon-edit"></i> Edit Service</a></li>
 	    %end:
 	  </ul>
 	</div>
@@ -342,7 +350,7 @@ Invalid element name
 			%if elt_type=='host' and not elt.is_problem:
 			%if len(elt.services) > 0:
           			<h3 class="span10">My services:</h3>
-			%else:
+			%elif len(elt.parent_dependencies) == 0:
 				<h3 class="span10">No services</h3>
 			%end
 			<hr>
