@@ -94,9 +94,7 @@ def show_log():
             'receivers' : receivers, 'pollers' : pollers,
             }
 
-widget_desc = '''<h3>System state</h3>
-Show an aggregated view of all Shinken daemons.
-'''
+widget_desc = '<h3>System state</h3>Show an aggregated view of all Shinken daemons.'
 
 
 pages = {system_page : { 'routes' : ['/system', '/system/'], 'view' : 'system', 'static' : True},

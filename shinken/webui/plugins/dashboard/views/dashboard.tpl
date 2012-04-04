@@ -13,8 +13,9 @@
     
     %for w in app.get_widgets_for('dashboard'):
     <div class='widget_desc'>
-      <p>{{!w['widget_desc']}}</p>
-      <a class='btn btn-success' href="javascript:AddNewWidget('{{w['base_uri']}}', 'widget-place-1');"> <i class="icon-chevron-left"></i> Add {{w['widget_name']}} widget</a>
+      {{!w['widget_desc']}}
+      <p>&nbsp;</p>
+      <p><a class='btn btn-success' href="javascript:AddNewWidget('{{w['base_uri']}}', 'widget-place-1');"> <i class="icon-chevron-left"></i> Add {{w['widget_name']}} widget</a></p>
     </div>
     %end
 
