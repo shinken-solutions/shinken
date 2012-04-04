@@ -57,10 +57,6 @@ Invalid element name
 %#  "This is the background canvas for all gesture detection things " 
 %# " Don't ask me why, but the size must be included in the
 %# canvas line here or we got problem!"
-<div class="btn-group pull-left" id='btn_show_gesture'>
-  <a href="javascript:$('#gesture_panel').toggle();" class='btn' title="Show gesture panel"> <i class="icon-map-marker"></i> Show gesture panel</a>
-</div>
-
 <div id='gesture_panel' class="pull-left">
   <canvas id="canvas" width="200" height="200" class="grid_10" style="border: 1px solid black;"></canvas>
   <div class="gesture_button">
@@ -212,9 +208,10 @@ Invalid element name
 	    
 	<div class='span3 well'>
 	  <div class="btn-group">
+	    <a id='btn_show_gesture' href="#" onclick="$('#gesture_panel').toggle();" class='btn' title="Show gesture panel"> <i class="icon-map-marker"></i> Show gesture panel</a>
 	    <a href="/depgraph/{{elt.get_full_name()}}" class='btn' title="Impact map of {{elt.get_full_name()}}"> <i class="icon-map-marker"></i> Show impact map</a>
 	  </div>
-
+	  <br/>
 	  <div class="btn-group">
 	  %if elt_type=='host':
 	     <a class="btn dropdown-toggle span8" data-toggle="dropdown" href="#"><span class="pull-left"><i class="icon-cog"></i> Host Commands</span> <span class="caret pull-right"></span></a>
