@@ -197,7 +197,7 @@ Invalid element name
 	  </script>
 
 	  <div class='row-fluid'>
-	    <form class="leftmargin well form-inline span7">
+	    <form class="well form-inline span7">
 	      <div class="row-fluid"> 
 		<div class="span3"> Active/passive checks  <input {{chk_state}} class="iphone" type="checkbox" id='btn-checks'> </div>
 		<div class="span3"> Notifications <input {{not_state}} class="iphone" type="checkbox" id='btn-not'> </div>
