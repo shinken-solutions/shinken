@@ -128,7 +128,7 @@ $(document).ready(function(){
       %end
   
      <label></label>
-     <a class="widget-close-editbox btn btn-success" onclick="submit_{{wid}}_form();" title="Save changes"><i class="icon-search"></i> Save changes</a>
+     <a class="widget-close-editbox btn btn-success" onclick="submit_{{wid}}_form();" title="Save changes"><i class="icon-search icon-white"></i> Save changes</a>
 
     </form>
 

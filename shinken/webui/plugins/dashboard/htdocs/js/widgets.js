@@ -83,6 +83,13 @@ $(function(){
     // Very basic usage  
     $.fn.EasyWidgets(
 	{
+	    i18n : {
+		editText : '<i class="icon-edit"></i>',/*<img src="./edit.png" alt="Edit" width="16" height="16" />',*/
+		closeText : '<i class="icon-remove"></i>',
+		collapseText : '<i class="icon-chevron-up"></i>',
+		cancelEditText : '<i class="icon-edit"></i>',
+		extendText : '<i class="icon-chevron-down"></i>',
+	    },
 	    effects : {
 		effectDuration : 100,
 		widgetShow : 'slide',
