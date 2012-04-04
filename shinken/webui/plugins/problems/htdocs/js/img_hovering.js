@@ -40,8 +40,8 @@ function create_img(src, alt){
     img.onerror = function() {
 	img.hide()
     };
-    img.src = src;
-    img.alt = alt;
+    img.attr('src', src);
+    img.attr('alt', alt);
 
     return img;
 }
