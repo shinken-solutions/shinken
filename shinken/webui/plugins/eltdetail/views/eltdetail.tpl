@@ -197,7 +197,7 @@ Invalid element name
 	  </script>
 
 	  <div class='row-fluid'>
-	    <form class="well form-inline span7">
+	    <form class="well form-inline span6">
 	      <div class="row-fluid"> 
 		<div class="span3"> Active/passive checks  <input {{chk_state}} class="iphone" type="checkbox" id='btn-checks'> </div>
 		<div class="span3"> Notifications <input {{not_state}} class="iphone" type="checkbox" id='btn-not'> </div>
@@ -206,20 +206,21 @@ Invalid element name
 	      </div>
 	    </form>
 	    
-	<div class='span3 well'>
+	<div class='span5 well'>
+	  <div class="btn-toolbar">
 	  <div class="btn-group">
-	    <a id='btn_show_gesture' href="#" onclick="$('#gesture_panel').toggle();" class='btn' title="Show gesture panel"> <i class="icon-map-marker"></i> Show gesture panel</a>
+	    <a id='btn_show_gesture' href="#" onclick="$('#gesture_panel').toggle();" class='btn' title="Show gesture panel"> <i class="icon-ok"></i> Show gesture panel</a>
 	    <a href="/depgraph/{{elt.get_full_name()}}" class='btn' title="Impact map of {{elt.get_full_name()}}"> <i class="icon-map-marker"></i> Show impact map</a>
 	  </div>
-	  <br/>
+
 	  <div class="btn-group">
 	  %if elt_type=='host':
-	     <a class="btn dropdown-toggle span8" data-toggle="dropdown" href="#"><span class="pull-left"><i class="icon-cog"></i> Host Commands</span> <span class="caret pull-right"></span></a>
+	     <a class="btn dropdown-toggle" data-toggle="dropdown" href="#"><span class="pull-left"><i class="icon-cog"></i> Host Commands</span> <span class="caret pull-right"></span></a>
 	  %else:
-	     <a class="btn dropdown-toggle span8"
+	     <a class="btn dropdown-toggle"
 	  data-toggle="dropdown" href="#"><span class="pull-left"><i class="icon-cog"></i> Service Commands</span> <span class="caret pull-right"></span></a>
 	  %end:
-	  <ul class="dropdown-menu span8 no-maxwidth">
+	  <ul class="dropdown-menu no-maxwidth">
 	    %disabled_s = ''
 	    %if not elt.event_handler:
 	      %disabled_s = 'disabled-link'
@@ -242,6 +243,7 @@ Invalid element name
 	    %end:
 	  </ul>
 	  </div>
+	</div>
 	</div>
 	</div>
 
