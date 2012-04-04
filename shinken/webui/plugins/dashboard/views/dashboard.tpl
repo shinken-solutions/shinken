@@ -53,6 +53,12 @@
 <div class="widget-place" id="widget-place-2">
 
 </div>
+
+
+<div class="widget-place" id="widget-place-3">
+
+</div>
+
 <!-- /place-2 -->
 
 

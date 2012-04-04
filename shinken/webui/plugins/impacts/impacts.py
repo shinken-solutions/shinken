@@ -77,7 +77,17 @@ def impacts_widget():
  
     wid = app.request.GET.get('wid', 'widget_impacts_'+str(int(time.time())))
     collapsed = (app.request.GET.get('collapsed', 'False') == 'True')
-    options = {}
+
+    nb_elements = max(1, int(app.request.GET.get('nb_elements', '5')))
+    # Now filter for the good number of impacts to show
+    new_impacts = {}
+    for (k,v) in d['impacts'].iteritems():
+        if k <= nb_elements:
+            new_impacts[k] = v
+    d['impacts'] = new_impacts
+
+    options = {'nb_elements' : {'value' : nb_elements, 'type' : 'int', 'label' : 'Max number of elements to show'},
+               }
     
     d.update({'wid' : wid, 'collapsed' : collapsed, 'options' : options,
             'base_url' : '/widget/impacts', 'title' : 'Impacts widget'})
