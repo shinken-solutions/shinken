@@ -374,12 +374,13 @@ Invalid element name
 		      %else:
 			  <div class="service hidden_impacts_services">
 			  %end
-			  <div class="divstate{{s.state_id}}">
+			  <div>
+			    <img style="width : 16px; height:16px" alt="icon state" src="{{helper.get_icon_state(s)}}">
+			    <span class='alert-small alert-{{s.state.lower()}}' style="font-size:110%">{{s.state}}</span> for <span style="font-size:110%">{{!helper.get_link(s, short=True)}}</span> since {{helper.print_duration(s.last_state_change, just_duration=True, x_elts=2)}}
 			  	%for i in range(0, s.business_impact-2):
 			  	<img alt="icon state" src="/static/images/star.png">
 			  	%end
-			  	<img style="width : 16px; height:16px" alt="icon state" src="{{helper.get_icon_state(s)}}">
-			  	<span style="font-size:110%">{{!helper.get_link(s, short=True)}}</span> is <span style="font-size:110%">{{s.state}}</span> since {{helper.print_duration(s.last_state_change, just_duration=True, x_elts=2)}}
+
 			  </div>
 			  </div>
 			  %# End of this service
