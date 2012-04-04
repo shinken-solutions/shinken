@@ -90,7 +90,7 @@ class Log:
 
         # If we want a local log write, do it
         if local_log is not None:
-            logging.info(s)
+            logging.info(s.strip())
 
     def register_local_log(self, path):
         """The log can also write to a local file if needed
