@@ -47,10 +47,14 @@ def get_page(cmd=None):
     # First we look for the user sid
     # so we bail out if it's a false one
     user = app.get_user_auth()
-
+    
+    # Maybe the user is not known at all
     if not user:
         return forge_response(callback, 401, 'Invalid session')
 
+    # Or he is not allowed to launch commands?
+    if not user.can_submit_commands:
+        return forge_response(callback, 403, 'You are not authorized to launch commands')
 
     now = int(time.time())
     print "Ask us an /action page", cmd

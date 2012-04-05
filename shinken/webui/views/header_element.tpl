@@ -60,7 +60,7 @@
             <li><a href="/user/logout" class="quickinfo" data-original-title='Logout'><i class="icon-logout"></i></a></li>
           </ul>           
           <div class="pull-right"> 
-            <p class="navbar-text"><span id="greeting"></span> <span><a href="#"> Dummy<!-- {{user}} --></a></span>!</p> 
+            <p class="navbar-text"><span id="greeting"></span> <span><a href="#"> {{user.get_name().capitalize()}}</a></span>!</p> 
           </div> 
         </div>
 	<ul class="nav pull-right">
