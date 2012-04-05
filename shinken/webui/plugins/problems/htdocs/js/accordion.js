@@ -41,6 +41,13 @@ function show_detail(name){
 // At start we hide the unselect all button
 $(document).ready(function(){
     $('#unselect_all_btn').hide();
+
+    // If actions are not allowed, disable the button 'select all'
+    if(!actions_enabled){
+	$('#select_all_btn').addClass('disabled');
+	// And put in opacity low the 'selectors'
+	$('.tick').css({'opacity' : 0.4});
+    }
 });
 
 
@@ -49,12 +56,26 @@ $(document).ready(function(){
     $('.img_tick').hide();
 });
 
+function toggle_select_buttons(){
+    $('#select_all_btn').toggle();
+    $('#unselect_all_btn').toggle();
+}
+
+function show_unselect_all_button(){
+    $('#select_all_btn').hide();
+    $('#unselect_all_btn').show();
+}
+
 // When we select all, add all in the selected list,
 // and hide the select all button, and swap it with
 // unselect all one
 function select_all_problems(){
-    $('#select_all_btn').hide();
-    $('#unselect_all_btn').show();
+    // Maybe the actions are not allwoed. If so, don't act
+    if(!actions_enabled){return;}
+
+    toggle_select_buttons();
+    /*$('#select_all_btn').hide();
+    $('#unselect_all_btn').show();*/
     
     // we wil lget all elements by looking at .details and get their ids
     $('.detail').each(function(){
@@ -64,8 +85,9 @@ function select_all_problems(){
 
 // guess what? unselect is the total oposite...
 function unselect_all_problems(){
-    $('#unselect_all_btn').hide();
-    $('#select_all_btn').show();
+    toggle_select_buttons();
+    /*$('#unselect_all_btn').hide();
+    $('#select_all_btn').show();*/
     flush_selected_elements();
 }
 
@@ -75,6 +97,9 @@ var selected_elements = [];
 
 
 function add_remove_elements(name){
+    // Maybe the actions are not allwoed. If so, don't act
+    if(!actions_enabled){return;}
+
     //alert(selected_elements.indexOf(name));
     if( selected_elements.indexOf(name) != -1 ){
 	remove_element(name);
@@ -87,6 +112,9 @@ function add_remove_elements(name){
 /* function when we add an element*/
 function add_element(name){
     selected_elements.push(name);
+
+    // We put the select all button in unselect mode
+    show_unselect_all_button();
     
     // We show the 'tick' image ofthe selector on the left
     $('#selector-'+name).show();

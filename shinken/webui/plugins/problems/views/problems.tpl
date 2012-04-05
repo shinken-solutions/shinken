@@ -7,16 +7,23 @@
 %top_right_banner_state = datamgr.get_overall_state()
 
 
+
 %rebase layout globals(), title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/img_hovering.js', 'problems/js/accordion.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css', 'problems/css/perfometer.css', 'problems/css/img_hovering.css'], refresh=True, menu_part='/'+page, user=user 
 
 
-%# " If the auth got problem, we bail out"
-%if not valid_user:
+%# Look for actions if we must show them or not
+%global_disabled = ''
+%if not helper.can_action(user):
+%global_disabled = 'disabled-link'
 <script type="text/javascript">
-  window.location.replace("/login");
+  var actions_enabled = false;
 </script>
-%# " And if the javascript is not follow? not a problem, we gave no data here." 
+%else:
+<script type="text/javascript">
+  var actions_enabled = true;
+</script>
 %end
+
 
 
 <script type="text/javascript">
