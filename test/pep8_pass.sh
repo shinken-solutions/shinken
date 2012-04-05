@@ -32,7 +32,7 @@ DIR=$(cd $(dirname "$0"); pwd)
 cd $DIR
 echo `pwd`
 
-echo "Launching pylint stat pass"
+echo "Launching pep8 stat pass"
 cd ..
 
 pep8  --max-line-length=100 --ignore=E303 shinken/ > $DIR/pep8.txt
