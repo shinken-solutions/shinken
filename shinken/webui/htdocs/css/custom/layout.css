@@ -73,6 +73,14 @@
   vertical-align: -3px; 
 }
 
+.imgsize4 {
+  height: 48px;
+  width: 48px;
+  margin-right: 10px;
+  vertical-align: -3px; 
+}
+
+
 .box {
   min-height: 20px;
   padding: 10px 0px 10px 5px;

@@ -8,7 +8,7 @@
 
 
 
-%rebase layout globals(), title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/img_hovering.js', 'problems/js/accordion.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css', 'problems/css/perfometer.css', 'problems/css/img_hovering.css'], refresh=True, menu_part='/'+page, user=user 
+%rebase layout globals(), title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/img_hovering.js', 'problems/js/accordion.js', 'problems/js/sliding_navigation.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css', 'problems/css/perfometer.css', 'problems/css/img_hovering.css', 'problems/css/sliding_navigation.css'], refresh=True, menu_part='/'+page, user=user 
 
 
 %# Look for actions if we must show them or not
@@ -67,7 +67,7 @@
 
 %# "We set the actions div that will be show/hide if we select elements"
 <div class="dockContainer">
-  <div class="dockWrapper" id="actions">
+  <div class="dockWrapper" id="actionsold">
     <div class="cap left"></div>
     <ul class="dock">
       <li class="active">
@@ -87,6 +87,19 @@
   </div>
 </div>
 
+
+<ul class="sliding-navigation" id="actions">
+  <li class="sliding-element"><h3>Actions</h3></li>
+  <li class="sliding-element">
+    <a href="javascript:try_to_fix_all();"><i class="icon-pencil icon-white"></i> Try to fix</a>
+  </li>		
+  <li class="sliding-element">
+    <a href="javascript:recheck_now_all()"><i class="icon-repeat icon-white"></i> Recheck</a>
+  </li>
+  <li class="sliding-element">
+    <a href="javascript:acknowledge_all('{{user.get_name()}}')"><i class="icon-ok icon-white"></i> Acknowledge</a>
+  </li>
+</ul>
 
 
    <div class="span12 offset2">
@@ -213,7 +226,7 @@
     %# "This div is need so the element will came back in the center of the previous div"
     <div class="clear"></div>
       <div id="{{helper.get_html_id(pb)}}" class="detail row-fluid">
-	<table class="tableCriticity table-bordered table-condensed span6">
+	<table class="well tableCriticity table-bordered table-condensed span6">
 	  <tr>
 	    <td style="width:20px;"><b>Host</b></td>
 	    %if pb.__class__.my_type == 'service':

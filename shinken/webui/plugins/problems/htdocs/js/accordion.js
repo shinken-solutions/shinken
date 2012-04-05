@@ -52,9 +52,13 @@ $(document).ready(function(){
 
 
 // At start we hide the selected images
+// and the actions tabs
 $(document).ready(function(){
     $('.img_tick').hide();
+    $('#actions').hide();
 });
+
+
 
 function toggle_select_buttons(){
     $('#select_all_btn').toggle();
@@ -119,8 +123,9 @@ function add_element(name){
     // We show the 'tick' image ofthe selector on the left
     $('#selector-'+name).show();
     
-    $('#actions').css('display', 'inline-block');
-    $('#actions').animate({opacity:1});
+    $('#actions').show();
+    /*$('#actions').css('display', 'block');
+    $('#actions').animate({opacity:1});*/
     /* The user will ask something, so it's good to reinit
      the refresh time so he got time to launch its action,
     see reload.js for this function */
@@ -131,8 +136,10 @@ function add_element(name){
 function remove_element(name){
     selected_elements.remove(name);
     if(selected_elements.length == 0){
-	$('#actions').animate({opacity:0});
-	$('#actions').css('display', 'none');
+	$('#actions').hide();
+	toggle_select_buttons();
+	/*$('#actions').animate({opacity:0});
+	$('#actions').css('display', 'none');*/
     }
     // And hide the tick image
     $('#selector-'+name).hide();

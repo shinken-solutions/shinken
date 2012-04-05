@@ -14,7 +14,6 @@
 	  <li class="dropdown">
 	    <a href="#" class="dropdown-toggle" data-toggle="dropdown"> UI <b class="caret"></b></a>
 	    <ul class="dropdown-menu">
-	      <li><a href="/dashboard">Dashboard</a></li>
               <li><a href="/">Shinken UI</a></li>
               <li><a href="/">Skonf UI</a></li>
 	    </ul>
@@ -51,9 +50,9 @@
 	    %if app:
 	      %overall_state = app.datamgr.get_overall_state()
               %if overall_state == 2:
-              <li><a href="#" class="quickinfo" data-original-title='Impacts'><i class="icon-impact"></i><span class="pulsate badger badger-critical">{{app.datamgr.get_len_overall_state()}}</span> </a></li>
+              <li><a href="/impacts" class="quickinfo" data-original-title='Impacts'><i class="icon-impact"></i><span class="pulsate badger badger-critical">{{app.datamgr.get_len_overall_state()}}</span> </a></li>
               %elif overall_state == 1:
-              <li><a href="#" class="quickinfo" data-original-title='Impacts'><i class="icon-impact"></i><span class="pulsate badger badger-warning">{{app.datamgr.get_len_overall_state()}}</span> </a></li>
+              <li><a href="/impacts" class="quickinfo" data-original-title='Impacts'><i class="icon-impact"></i><span class="pulsate badger badger-warning">{{app.datamgr.get_len_overall_state()}}</span> </a></li>
               %end
 	    %end
            <!-- <li><a href="#" class="quickinfo" data-original-title='Settings'><i class="icon-setting"></i></a></li>-->
