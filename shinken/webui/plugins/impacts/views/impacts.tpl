@@ -139,7 +139,7 @@
 		      %if not pb.event_handler:
 		      %disabled_s = 'disabled-link'
 		      %end
-		    	<div class="action-fixit"><a class='{{disabled_s}} {{global_disabled}}'' href="#" onclick="try_to_fix('{{pb.get_full_name()}}')"> <i class="icon-screenshot"></i>Try to fix it</a></div>
+		    	<div class="action-fixit"><a class='{{disabled_s}} {{global_disabled}}'' href="#" onclick="try_to_fix('{{pb.get_full_name()}}')"> <i class="icon-pencil"></i>Try to fix it</a></div>
 		    	%if not pb.problem_has_been_acknowledged:
 		    	  <div class="action-ack">
 			    <a class='{{global_disabled}}' href="/forms/acknowledge/{{helper.get_uri_name(pb)}}" data-toggle="modal" data-target="#modal"><i class="icon-ok"></i> Acknowledge it!</a>

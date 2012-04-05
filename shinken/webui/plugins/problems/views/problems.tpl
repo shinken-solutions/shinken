@@ -66,28 +66,6 @@
 </script>
 
 %# "We set the actions div that will be show/hide if we select elements"
-<div class="dockContainer">
-  <div class="dockWrapper" id="actionsold">
-    <div class="cap left"></div>
-    <ul class="dock">
-      <li class="active">
-	<span>Fix</span>
-	<a href="javascript:try_to_fix_all();"><img src="/static/images/tools.png" alt="tools"/></a>
-      </li>		
-      <li>
-	<span>Recheck</span>
-	<a href="javascript:recheck_now_all()"><img src="/static/images/big_refresh.png" alt="refresh"/></a>
-      </li>
-      <li>
-	<span>Acknowledge</span>
-	<a href="javascript:acknowledge_all('{{user.get_name()}}')"><img src="/static/images/big_ack.png" alt="acknowledge"/></a>
-      </li>
-      
-    </ul>
-  </div>
-</div>
-
-
 <ul class="sliding-navigation" id="actions">
   <li class="sliding-element"><h3>Actions</h3></li>
   <li class="sliding-element">
