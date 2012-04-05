@@ -1,16 +1,15 @@
 %helper = app.helper
 %datamgr = app.datamgr
 
-
 %rebase layout globals(), js=['impacts/js/impacts.js', 'impacts/js/multi.js'], title='All critical impacts for your business', css=['impacts/css/impacts.css'], refresh=True, menu_part = '/impacts', user=user
 
-%# " If the auth succeed, we go in the /problems page "
-%if not valid_user:
-	<script type="text/javascript">
-		window.location.replace("/login");
-	</script>
-%# " And if the javascript is not follow? not a problem, we gave no data here."
+
+%# Look for actions if we must show them or not
+%global_disabled = ''
+%if not helper.can_action(user):
+%global_disabled = 'disabled-link'
 %end
+
 
 <div id="impact-container">
 
@@ -50,7 +49,6 @@
 			</div>
 		%end
 	
-		%#	<div class="impact-icon"><img src="static/images/50x50.png"></div>
 			<div class="impact-icon"><img style="width: 64px;height: 64px;" src="{{helper.get_icon_state(impact)}}"></div>
 			<div class="impact-rows">
 				<div class="impact-row">
@@ -67,7 +65,6 @@
 	</div>
       
 	<div class="right-panel">
-		<a href="/3dimpacts" class="btn" title="Show impacts in 3D mode."><i class="icon-play-circle"></i> Show impacts in 3d</a>
 	</div> 
 
 
@@ -84,8 +81,7 @@
 	
 	    <div class="problems-panel" id="problems-{{imp_id}}" style="visibility: hidden; zoom: 1; opacity: 0; ">
 		<div class="right-panel-top"> 
-		  <a href="#a" class="pblink btn btn-small btn-danger" id="{{imp_id}}"> <i class="icon-remove"></i> Close</a>
-		  
+		  <a href="#a" class="pblink close" id="{{imp_id}}"> &times;</a>		  
 		</div>
 		
 		<br style="clear: both">
@@ -139,10 +135,14 @@
 		<div class="problem" id="{{pb_id}}">
 			<div class="divhstate1"> <img style="width: 32px;height: 32px;" src="{{helper.get_icon_state(pb)}}"> {{!helper.get_link(pb)}} is {{pb.state}} since {{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}</div>
 		    <div class="problem-actions opacity_hover">
-		    	<div class="action-fixit"><a href="#" onclick="try_to_fix('{{pb.get_full_name()}}')"> <img class="icon" title="Try to fix it" src="static/images/icon_ack.gif">Try to fix it</a></div>
+		      %disabled_s = ''
+		      %if not pb.event_handler:
+		      %disabled_s = 'disabled-link'
+		      %end
+		    	<div class="action-fixit"><a class='{{disabled_s}} {{global_disabled}}'' href="#" onclick="try_to_fix('{{pb.get_full_name()}}')"> <i class="icon-screenshot"></i>Try to fix it</a></div>
 		    	%if not pb.problem_has_been_acknowledged:
 		    	  <div class="action-ack">
-			    <a href="/forms/acknowledge/{{pb.get_full_name()}}" data-toggle="modal" data-target="#modal"><i class="icon-ok"></i> Acknowledge it!</a>
+			    <a class='{{global_disabled}}' href="/forms/acknowledge/{{helper.get_uri_name(pb)}}" data-toggle="modal" data-target="#modal"><i class="icon-ok"></i> Acknowledge it!</a>
 			    </div>
 		      	%end
 		    </div>
