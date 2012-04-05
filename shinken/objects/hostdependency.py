@@ -53,7 +53,13 @@ class Hostdependency(Item):
     # Give a nice name output, for debbuging purpose
     # (debugging happens more often than expected...)
     def get_name(self):
-        return self.dependent_host_name+'/'+self.host_name
+        dependent_host_name = 'unknown'
+        if getattr(self, 'dependent_host_name', None):
+            dependent_host_name = getattr(getattr(self, 'dependent_host_name'), 'host_name', 'unknown')
+        host_name = 'unknown'
+        if getattr(self, 'host_name', None):
+            host_name = getattr(getattr(self, 'host_name'), 'host_name', 'unknown')
+        return dependent_host_name+'/'+host_name
 
 
 
@@ -76,29 +82,49 @@ class Hostdependencies(Items):
             hd = self.items[id]
             if hd.is_tpl(): #Exploding template is useless
                 continue
-
-            hnames = []
+            
+            # We explode first the dependent (son) part
+            dephnames = []
             if hasattr(hd, 'dependent_hostgroup_name'):
-                hg_names = hd.dependent_hostgroup_name.split(',')
+                dephg_names = hd.dependent_hostgroup_name.split(',')
+                dephg_names = [hg_name.strip() for hg_name in dephg_names]
+                for dephg_name in dephg_names:
+                    dephg = hostgroups.find_by_name(dephg_name)
+                    if dephg is None:
+                        err = "ERROR : the hostdependecy got an unknown dependent_hostgroup_name '%s'" % dephg_name
+                        hd.configuration_errors.append(err)
+                        continue
+                    dephnames.extend(dephg.members.split(','))
+                    
+            if hasattr(hd, 'dependent_host_name'):
+                dephnames.extend(hd.dependent_host_name.split(','))
+
+            #Ok, and nowthe fatehr part :)
+            hnames = []
+            if hasattr(hd, 'hostgroup_name'):
+                hg_names = hd.hostgroup_name.split(',')
                 hg_names = [hg_name.strip() for hg_name in hg_names]
                 for hg_name in hg_names:
                     hg = hostgroups.find_by_name(hg_name)
                     if hg is None:
-                        err = "ERROR : the hostdependecy got an unknown dependent_hostgroup_name '%s'" % hg_name
-                        hg.configuration_errors.append(err)
+                        err = "ERROR : the hostdependecy got an unknown hostgroup_name '%s'" % hg_name
+                        hd.configuration_errors.append(err)
                         continue
                     hnames.extend(hg.members.split(','))
 
-            if hasattr(hd, 'dependent_host_name'):
-                hnames.extend(hd.dependent_host_name.split(','))
+            if hasattr(hd, 'host_name'):
+                hnames.extend(hd.host_name.split(','))
 
-            if len(hnames) >= 1:
+            # Loop over all sons and fathers to get S*F host deps
+            for dephname in dephnames:
+                dephname = dephname.strip()
                 for hname in hnames:
-                    hname = hname.strip()
                     new_hd = hd.copy()
-                    new_hd.dependent_host_name = hname
+                    new_hd.dependent_host_name = dephname
+                    new_hd.host_name = hname
                     self.items[new_hd.id] = new_hd
-                hstdep_to_remove.append(id)
+            hstdep_to_remove.append(id)
+
         self.delete_hostsdep_by_id(hstdep_to_remove)
 
 
