@@ -68,11 +68,18 @@
 	    %end
            <!-- <li><a href="#" class="quickinfo" data-original-title='Settings'><i class="icon-setting"></i></a></li>-->
             <li><a href="/user/logout" class="quickinfo" data-original-title='Logout'><i class="icon-logout"></i></a></li>
-          </ul>           
-          <div class="pull-right"> 
-            <p class="navbar-text"><span id="greeting"></span> <span><a href="#"> {{user.get_name().capitalize()}}</a></span>!</p> 
-          </div> 
-        </div>
+          </ul>
+
+         </div>
+	<ul class="nav pull-right">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Hi {{user.get_name().capitalize()}} <b class="caret"></b></a>
+            <ul class="dropdown-menu">
+	      <a class='disabled-link' href="#"><i class="icon-pencil"></i> Edit profile</a>
+            </ul>
+          </li>
+        </ul>
+
 	<ul class="nav pull-right">
 	  <li class="divider-vertical"></li>
 	</ul>
@@ -84,3 +91,4 @@
     </div>
   </div>
 </div>
+

@@ -223,3 +223,10 @@ a.disabled-link:hover {
     padding-left: 30px;
     background-position: 13px 9px;
 }
+
+/* In the top menu, there is too much margin on the left part,
+ bootstrap put a left margin of 10, I prefer 0*/
+.navbar .nav.pull-right {
+margin-left: 0px;
+margin-right: 0;
+}
