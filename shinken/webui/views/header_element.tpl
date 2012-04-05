@@ -16,6 +16,17 @@
 	    <ul class="dropdown-menu">
               <li><a href="/">Shinken UI</a></li>
               <li><a href="/">Skonf UI</a></li>
+	      <!-- We will add also others UIs on the global menu -->
+	      %if app:
+	        %other_uis = app.get_external_ui_link()
+	        <!-- If we add others UIs, we separate them from the inner ones-->
+	        %if len(other_uis) > 0:
+	          <li class="divider"></li>
+	        %end
+	        %for c in other_uis:
+	           <li><a href="{{c['uri']}}">{{c['label']}}</a></li>
+		%end
+	      %end
 	    </ul>
 	  </li>
 	</ul>

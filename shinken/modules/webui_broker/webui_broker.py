@@ -546,3 +546,23 @@ class Webui_broker(BaseModule, Daemon):
     # For a specific place like dashboard we return widget lists
     def get_widgets_for(self, place):
         return self.widgets.get(place, [])
+
+
+    # Will get all label/uri for external UI like PNP or NagVis
+    def get_external_ui_link(self):
+        lst = []
+        for mod in self.modules_manager.get_internal_instances():
+            try:
+                f = getattr(mod, 'get_external_ui_link', None)
+                if f and callable(f):
+                    r = f()
+                    lst.append(r)
+            except Exception , exp:
+                print exp.__dict__
+                logger.log("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
+                logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
+                logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
+                self.modules_manager.set_to_restart(mod)        
+
+        safe_print("Will return external_ui_link::", lst)
+        return lst

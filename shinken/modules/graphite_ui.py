@@ -72,6 +72,11 @@ class Graphite_Webui(BaseModule):
 
 
 
+    # Give the link for the PNP UI, with a Name
+    def get_external_ui_link(self):
+        return {'label' : 'Graphite', 'uri' : self.uri}
+
+
     # For a perf_data like /=30MB;4899;4568;1234;0  /var=50MB;4899;4568;1234;0 /toto=
     # return ('/', '30'), ('/var', '50')
     def get_metric_and_value(self, perf_data):
