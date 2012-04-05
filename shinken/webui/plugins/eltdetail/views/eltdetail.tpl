@@ -19,6 +19,13 @@ Invalid element name
 
 %top_right_banner_state = datamgr.get_overall_state()
 
+%# Look for actions if we must show them or not
+%global_disabled = ''
+%if not helper.can_action(user):
+%global_disabled = 'disabled-link'
+%end
+
+
 %rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(), js=['eltdetail/js/jquery.color.js', 'eltdetail/js/jquery.Jcrop.js', 'eltdetail/js/iphone-style-checkboxes.js', 'eltdetail/js/hide.js', 'eltdetail/js/dollar.js', 'eltdetail/js/gesture.js', 'eltdetail/js/graphs.js'], css=['eltdetail/css/iphonebuttons.css', 'eltdetail/css/eltdetail.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css', 'eltdetail/css/jquery.Jcrop.css'], top_right_banner_state=top_right_banner_state , user=user, app=app
 
 %# " We will save our element name so gesture functions will be able to call for the good elements."
@@ -172,23 +179,17 @@ Invalid element name
                  onChange : function(elt, b){toggle_checks("{{elt.get_full_name()}}", !b);}
 	       }
 	       );
-	    });
 
-	    $(document).ready(function() {
                $('#btn-not').iphoneStyle({
                  onChange : function(elt, b){toggle_notifications("{{elt.get_full_name()}}", !b);}
 	       }
 	       );
-	    });
 
-	    $(document).ready(function() {
                $('#btn-evt').iphoneStyle({
                  onChange : function(elt, b){toggle_event_handlers("{{elt.get_full_name()}}", !b);}
 	       }
 	       );
-	    });
 
-	    $(document).ready(function() {
                $('#btn-flp').iphoneStyle({
                  onChange : function(elt, b){toggle_flap_detection("{{elt.get_full_name()}}", !b);}
                }
@@ -198,7 +199,7 @@ Invalid element name
 
 	  <div class='row-fluid'>
 	    <form class="well form-inline span6">
-	      <div class="row-fluid"> 
+	      <div class="row-fluid">
 		<div class="span3"> Active/passive checks  <input {{chk_state}} class="iphone" type="checkbox" id='btn-checks'> </div>
 		<div class="span3"> Notifications <input {{not_state}} class="iphone" type="checkbox" id='btn-not'> </div>
 		<div class="span3"> Event handler  <input {{evt_state}} class="iphone" type="checkbox" id='btn-evt'> </div>
@@ -214,33 +215,24 @@ Invalid element name
 	  </div>
 
 	  <div class="btn-group">
-	  %if elt_type=='host':
-	     <a class="btn dropdown-toggle" data-toggle="dropdown" href="#"><span class="pull-left"><i class="icon-cog"></i> Host Commands</span> <span class="caret pull-right"></span></a>
-	  %else:
-	     <a class="btn dropdown-toggle"
-	  data-toggle="dropdown" href="#"><span class="pull-left"><i class="icon-cog"></i> Service Commands</span> <span class="caret pull-right"></span></a>
-	  %end:
+	    <a class="btn dropdown-toggle" data-toggle="dropdown" href="#"><span class="pull-left"><i class="icon-cog"></i> {{elt_type.capitalize()}} commands</span> <span class="caret pull-right"></span></a>
 	  <ul class="dropdown-menu no-maxwidth">
 	    %disabled_s = ''
 	    %if not elt.event_handler:
 	      %disabled_s = 'disabled-link'
 	    %end
-	    <li><a class='{{disabled_s}}' href="javascript:try_to_fix('{{elt.get_full_name()}}')"><i class="icon-pencil"></i> Try to fix it!</a></li>
+	    <li><a class='{{disabled_s}} {{global_disabled}}' href="javascript:try_to_fix('{{elt.get_full_name()}}')"><i class="icon-pencil"></i> Try to fix it!</a></li>
 	    %disabled_s = ''
 	    %if elt.problem_has_been_acknowledged:
               %disabled_s = 'disabled-link'
             %end
-	    <li><a class='{{disabled_s}}' href="/forms/acknowledge/{{helper.get_uri_name(elt)}}" data-toggle="modal" data-target="#modal"><i class="icon-ok"></i> Acknowledge it!</a></li>
-	    <li><a href="javascript:recheck_now('{{elt.get_full_name()}}')"><i class="icon-repeat"></i> Recheck now</a></li>
-	    <li><a href="/forms/submit_check/{{helper.get_uri_name(elt)}}" data-toggle="modal" data-target="#modal"><i class="icon-share-alt"></i> Submit Check Result</a></li>
-	    <li><a class='disabled-link' href="#"><i class="icon-comment"></i> Send Custom Notification</a></li>
-	    <li><a href="/forms/downtime/{{helper.get_uri_name(elt)}}" data-toggle="modal" data-target="#modal"><i class="icon-fire"></i> Schedule Downtime</a></li>
+	    <li><a class='{{disabled_s}} {{global_disabled}}' href="/forms/acknowledge/{{helper.get_uri_name(elt)}}" data-toggle="modal" data-target="#modal"><i class="icon-ok"></i> Acknowledge it!</a></li>
+	    <li><a class='{{global_disabled}}' href="javascript:recheck_now('{{elt.get_full_name()}}')"><i class="icon-repeat"></i> Recheck now</a></li>
+	    <li><a class='{{global_disabled}}' href="/forms/submit_check/{{helper.get_uri_name(elt)}}" data-toggle="modal" data-target="#modal"><i class="icon-share-alt"></i> Submit Check Result</a></li>
+	    <li><a class='disabled-link {{global_disabled}}' href="#"><i class="icon-comment"></i> Send Custom Notification</a></li>
+	    <li><a class='{{global_disabled}}' href="/forms/downtime/{{helper.get_uri_name(elt)}}" data-toggle="modal" data-target="#modal"><i class="icon-fire"></i> Schedule Downtime</a></li>
 	    <li class="divider"></li>
-	    %if elt_type=='host':
-	      <li><a class='disabled-link' href="#"><i class="icon-edit"></i> Edit Host</a></li>
-	    %else:
-	      <li><a class='disabled-link' href="#"><i class="icon-edit"></i> Edit Service</a></li>
-	    %end:
+	    <li><a class='disabled-link' href="#"><i class="icon-edit"></i> Edit {{elt_type.capitalize()}}</a></li>
 	  </ul>
 	  </div>
 	</div>
@@ -432,8 +424,8 @@ Invalid element name
 		    <div class="tab-pane" id="comments">
 		      <div>
 			<ul class="nav nav-pills">
-			  <li class="active"><a href="/forms/comment/{{elt.get_full_name()}}" data-toggle="modal" data-target="#modal"><i class="icon-plus"></i> Add comment</a></li>
-			  <li> <a onclick="delete_all_comments('{{elt.get_full_name()}}')" href="#" class=""><i class="icon-minus"></i> Delete all comments</a> </li>
+			  <li class="active"><a class='{{global_disabled}}' href="/forms/comment/{{helper.get_uri_name(elt)}}" data-toggle="modal" data-target="#modal"><i class="icon-plus"></i> Add comment</a></li>
+			  <li> <a class='{{global_disabled}}' onclick="delete_all_comments('{{elt.get_full_name()}}')" href="#" class=""><i class="icon-minus"></i> Delete all comments</a> </li>
 			</ul>
 		      </div>
 		      <div class="clear"></div>
@@ -449,7 +441,7 @@ Invalid element name
 			      <div class="log-meta"> <span><b>Author:</b> {{c.author}}</span> <span><b>Creation:</b> {{helper.print_date(c.entry_time)}}</span> <span>	<b>Expire:</b>{{helper.print_date(c.expire_time)}}</span>
 			      </div>
 			    </div>
-			    <div class="right log-action"><a class="icon_delete" href="javascript:delete_comment('{{elt.get_full_name()}}', {{c.id}})">Delete</a></div>
+			    <div class="right log-action"><a class="icon_delete {{global_disabled}}" href="javascript:delete_comment('{{elt.get_full_name()}}', {{c.id}})">Delete</a></div>
 			  </li>
 			  %end
 			      </ol>
@@ -465,8 +457,8 @@ Invalid element name
 		    <div class="tab-pane" id="downtimes">
 		      <div>
 			<ul class="nav nav-pills">
-			  <li class="active"><a href="/forms/downtime/{{elt.get_full_name()}}" data-toggle="modal" data-target="#modal"><i class="icon-plus"></i> Add a downtime</a></li>
-			  <li> <a onclick="delete_all_downtimes('{{elt.get_full_name()}}')" href="#" class=""><i class="icon-minus"></i> Delete all downtimes</a> </li>
+			  <li class="active"><a class='{{global_disabled}}' href="/forms/downtime/{{helper.get_uri_name(elt)}}" data-toggle="modal" data-target="#modal"><i class="icon-plus"></i> Add a downtime</a></li>
+			  <li> <a onclick="delete_all_downtimes('{{elt.get_full_name()}}')" href="#" class="{{global_disabled}}"><i class="icon-minus"></i> Delete all downtimes</a> </li>
 			</ul>
 		      </div>
 		      <div class="clear"></div>
@@ -482,7 +474,7 @@ Invalid element name
 			      <div class="log-meta"> <span><b>Author:</b> {{dt.author}}</span> <span><b>Start:</b> {{helper.print_date(dt.start_time)}}</span> <span>	<b>Expire:</b>{{helper.print_date(dt.end_time)}}</span>
 			      </div>
 			    </div>
-			    <div class="right log-action"><a class="icon_delete" href="javascript:delete_downtime('{{elt.get_full_name()}}', {{dt.id}})">Delete</a></div>
+			    <div class="right log-action"><a class="icon_delete {{global_disabled}}" href="javascript:delete_downtime('{{elt.get_full_name()}}', {{dt.id}})">Delete</a></div>
 			  </li>
 			  %end
 			      </ol>

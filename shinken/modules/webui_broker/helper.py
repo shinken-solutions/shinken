@@ -577,6 +577,9 @@ class Helper(object):
     def get_uri_name(self, elt):
         return elt.get_full_name().replace(' ', '%20')
 
+    # say if this user can launch an action or not
+    def can_action(self, user):
+        return user.is_admin or user.can_submit_commands
 
     
     
