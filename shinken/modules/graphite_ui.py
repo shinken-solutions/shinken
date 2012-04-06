@@ -123,9 +123,10 @@ class Graphite_Webui(BaseModule):
         r = []
 
         # Do we have a template ?
-        if os.path.isfile(self.templates_path+'/'+elt.check_command.get_name()):
+        # Don't take the args of the check_command..
+        if os.path.isfile(self.templates_path+'/'+elt.check_command.get_name().split('!')[0]):
             template_html = ''
-            with open(self.templates_path+'/'+elt.check_command.get_name(),'r') as template_file:
+            with open(self.templates_path+'/'+elt.check_command.get_name().split('!')[0],'r') as template_file:
                 template_html += template_file.read()
             # Read the template file, as template string python object
             template_file.closed
@@ -146,7 +147,9 @@ class Graphite_Webui(BaseModule):
                 if not img == "":
                     v = {}
                     v['link'] = self.uri
-                    v['img_src'] = img
+                    # Relace " (default in graphite) with ' 
+                    # to avoid url truncation 
+                    v['img_src'] = img.replace('"','"')
                     r.append(v)
             # No need to continue, we have the images already.      					
             return r
