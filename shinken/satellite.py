@@ -263,7 +263,7 @@ class Satellite(BaseSatellite):
         sname = sched['name']
         uri = sched['uri']
         running_id = sched['running_id']
-        logger.log("Info : [%s] Init de connection with %s at %s" % (self.name, sname, uri))
+        logger.info("[%s] Init de connection with %s at %s" % (self.name, sname, uri))
 
         try:
             socket.setdefaulttimeout(3)
@@ -273,7 +273,7 @@ class Satellite(BaseSatellite):
             # But the multiprocessing module is not copatible with it!
             # so we must disable it imadiatly after
             socket.setdefaulttimeout(None)
-            logger.log("Warning : [%s] Scheduler %s is not initilised or got network problem: %s" % (self.name, sname, str(exp)))
+            logger.warning("[%s] Scheduler %s is not initilised or got network problem: %s" % (self.name, sname, str(exp)))
             sched['con'] = None
             return
 
@@ -284,17 +284,17 @@ class Satellite(BaseSatellite):
             pyro.set_timeout(sch_con, 5)
             new_run_id = sch_con.get_running_id()
         except (Pyro.errors.ProtocolError, Pyro.errors.NamingError, cPickle.PicklingError, KeyError, Pyro.errors.CommunicationError, Pyro.errors.DaemonError) , exp:
-            logger.log("Warning : [%s] Scheduler %s is not initilised or got network problem: %s" % (self.name, sname, str(exp)))
+            logger.warning("[%s] Scheduler %s is not initilised or got network problem: %s" % (self.name, sname, str(exp)))
             sched['con'] = None
             return
 
         # The schedulers have been restarted : it has a new run_id.
         # So we clear all verifs, they are obsolete now.
         if sched['running_id'] != 0 and new_run_id != running_id:
-            logger.log("Info : [%s] The running id of the scheduler %s changed, we must clear it's actions" % (self.name, sname))
+            logger.info("[%s] The running id of the scheduler %s changed, we must clear it's actions" % (self.name, sname))
             sched['wait_homerun'].clear()
         sched['running_id'] = new_run_id
-        logger.log("Info : [%s] Connection OK with scheduler %s" % (self.name, sname))
+        logger.info("[%s] Connection OK with scheduler %s" % (self.name, sname))
 
 
     # Manage action returned from Workers
@@ -381,7 +381,7 @@ class Satellite(BaseSatellite):
                 sched['wait_homerun'].clear()
             else:
                 self.pynag_con_init(sched_id)
-                logger.log("Warning : Sent failed!")
+                logger.log(logger.INFO, "Warning : Sent failed!")
 
 
     # Get all returning actions for a call from a
@@ -418,7 +418,7 @@ class Satellite(BaseSatellite):
         except OSError, exp:
             # We look for the "Function not implemented" under Linux
             if exp.errno == 38 and os.name == 'posix':
-                logger.log("Error : get an exception (%s). If you are under Linux, please check that your /dev/shm directory exists." % (str(exp)))
+                logger.error("get an exception (%s). If you are under Linux, please check that your /dev/shm directory exists." % (str(exp)))
             raise
             
 
@@ -443,7 +443,7 @@ class Satellite(BaseSatellite):
         
         # And save the Queue of this worker, with key = worker id
         self.q_by_mod[module_name][w.id] = q
-        logger.log("Info : [%s] Allocating new %s Worker : %s" % (self.name, module_name, w.id))
+        logger.info("[%s] Allocating new %s Worker : %s" % (self.name, module_name, w.id))
         
         # Ok, all is good. Start it!
         w.start()
@@ -452,7 +452,7 @@ class Satellite(BaseSatellite):
     # The main stop of this daemon. Stop all workers
     # modules and sockets
     def do_stop(self):
-        logger.log('Info : Stopping all workers')
+        logger.info("Stopping all workers")
         for w in self.workers.values():
             try:
                 w.terminate()
@@ -462,7 +462,7 @@ class Satellite(BaseSatellite):
                 pass
         # Close the pyro server socket if it was opened
         if self.pyro_daemon:
-            logger.log('Info : Stopping all network connections')
+            logger.info("Stopping all network connections")
             if self.brok_interface:
                 self.pyro_daemon.unregister(self.brok_interface)
             if self.scheduler_interface:
@@ -519,7 +519,7 @@ class Satellite(BaseSatellite):
             # good : we can think that we have a worker and it's not True
             # So we del it
             if not w.is_alive():
-                logger.log("Warning : [%s] The worker %s goes down unexpectly!" % (self.name, w.id))
+                logger.warning("[%s] The worker %s goes down unexpectly!" % (self.name, w.id))
                 # AIM ... Press FIRE ... <B>HEAD SHOT!</B>
                 w.terminate()
                 w.join(timeout=1)
@@ -851,7 +851,7 @@ class Satellite(BaseSatellite):
 
         self.passive = g_conf['passive']
         if self.passive:
-            logger.log("[%s] Passive mode enabled." % self.name)
+            logger.info("[%s] Passive mode enabled." % self.name)
 
         # If we've got something in the schedulers, we do not want it anymore
         for sched_id in conf['schedulers'] :
@@ -869,7 +869,7 @@ class Satellite(BaseSatellite):
                   already_got = True
             
             if already_got:
-                logger.log("[%s] We already got the conf %d (%s)" % (self.name, sched_id, conf['schedulers'][sched_id]['name']))
+                logger.log(logger.INFO, "[%s] We already got the conf %d (%s)" % (self.name, sched_id, conf['schedulers'][sched_id]['name']))
                 wait_homerun = self.schedulers[sched_id]['wait_homerun']
                 actions = self.schedulers[sched_id]['actions']
 
@@ -901,14 +901,14 @@ class Satellite(BaseSatellite):
                 self.max_workers = cpu_count()
             except NotImplementedError:
                 self.max_workers =4
-            logger.log("Using max workers : %s" % self.max_workers)
+            logger.log(logger.INFO, "Using max workers : %s" % self.max_workers)
         self.min_workers = g_conf['min_workers']
         if self.min_workers == 0 and not is_android:
             try:
                 self.min_workers = cpu_count()
             except NotImplementedError:
                 self.min_workers =4
-            logger.log("Using min workers : %s" % self.min_workers)
+            logger.log(logger.INFO, "Using min workers : %s" % self.min_workers)
 
         self.processes_by_worker = g_conf['processes_by_worker']
         self.polling_interval = g_conf['polling_interval']
@@ -923,11 +923,11 @@ class Satellite(BaseSatellite):
         # Set our giving timezone from arbiter
         use_timezone = g_conf['use_timezone']
         if use_timezone != 'NOTSET':
-            logger.log("[%s] Setting our timezone to %s" %(self.name, use_timezone))
+            logger.log(logger.INFO, "[%s] Setting our timezone to %s" %(self.name, use_timezone))
             os.environ['TZ'] = use_timezone
             time.tzset()
 
-        logger.log("We have our schedulers : %s" % (str(self.schedulers)))
+        logger.log(logger.INFO, "We have our schedulers : %s" % (str(self.schedulers)))
 
         # Now manage modules
         # TODO: check how to better handle this with modules_manager..
@@ -937,7 +937,7 @@ class Satellite(BaseSatellite):
             if not module.module_type in self.q_by_mod:
                 print "Add module object", module
                 self.modules_manager.modules.append(module)
-                logger.log("[%s] Got module : %s " % (self.name, module.module_type))
+                logger.log(logger.INFO, "[%s] Got module : %s " % (self.name, module.module_type))
                 self.q_by_mod[module.module_type] = {}
 
 
@@ -945,7 +945,7 @@ class Satellite(BaseSatellite):
     def main(self):
         try:
             for line in self.get_header():
-                self.log.log(line)
+                self.log.log(logger.INFO, line)
 
             self.load_config_file()
         
@@ -985,9 +985,9 @@ class Satellite(BaseSatellite):
             # Now main loop
             self.do_mainloop()
         except Exception, exp:
-            logger.log("Error: I got an unrecoverable error. I have to exit")
-            logger.log("You can log a bug ticket at https://github.com/naparuba/shinken/issues/new to get help")
-            logger.log("Back trace of it: %s" % (traceback.format_exc()))
+            logger.log(logger.INFO, "Error: I got an unrecoverable error. I have to exit")
+            logger.log(logger.INFO, "You can log a bug ticket at https://github.com/naparuba/shinken/issues/new to get help")
+            logger.log(logger.INFO, "Back trace of it: %s" % (traceback.format_exc()))
             raise
 
 

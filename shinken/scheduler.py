@@ -290,10 +290,10 @@ class Scheduler:
                 try :
                     f(self)
                 except Exception, exp:
-                    logger.log('Warning : The instance %s raise an exception %s. I disable it and set it to restart it later' % (inst.get_name(), str(exp)))
+                    logger.log(logger.INFO, 'Warning : The instance %s raise an exception %s. I disable it and set it to restart it later' % (inst.get_name(), str(exp)))
                     output = cStringIO.StringIO()
                     traceback.print_exc(file=output)
-                    logger.log("Back trace of this remove : %s" % (output.getvalue()))
+                    logger.log(logger.INFO, "Back trace of this remove : %s" % (output.getvalue()))
                     output.close()
                     self.sched_daemon.modules_manager.set_to_restart(inst)
 
@@ -361,7 +361,7 @@ class Scheduler:
             nb_actions_drops = 0
 
         if nb_checks_drops != 0 or nb_broks_drops != 0 or nb_actions_drops != 0:
-            logger.log("Warning : We drop %d checks, %d broks and %d actions" % (nb_checks_drops, nb_broks_drops, nb_actions_drops))
+            logger.log(logger.INFO, "Warning : We drop %d checks, %d broks and %d actions" % (nb_checks_drops, nb_broks_drops, nb_actions_drops))
 
 
     # For tunning purpose we use caches but we do not want them to explode
@@ -569,9 +569,9 @@ class Scheduler:
 
                 # If we' ve got a problem with the notification, raise a Warning log
                 if timeout:
-                    logger.log("Warning : Contact %s %s notification command '%s ' timed out after %d seconds" % (self.actions[c.id].contact.contact_name, self.actions[c.id].ref.__class__.my_type, self.actions[c.id].command, int(execution_time)))
+                    logger.log(logger.INFO, "Warning : Contact %s %s notification command '%s ' timed out after %d seconds" % (self.actions[c.id].contact.contact_name, self.actions[c.id].ref.__class__.my_type, self.actions[c.id].command, int(execution_time)))
                 elif c.exit_status != 0:
-                    logger.log("Warning : the notification command '%s' raised an error (exit code=%d) : '%s'" % (c.command, c.exit_status, c.output))
+                    logger.log(logger.INFO, "Warning : the notification command '%s' raised an error (exit code=%d) : '%s'" % (c.command, c.exit_status, c.output))
             except KeyError , exp: # bad number for notif, not that bad
                 #print exp
                 pass
@@ -593,13 +593,13 @@ class Scheduler:
             # It just die
             try:
                 if c.status == 'timeout':
-                    logger.log("Warning : %s event handler command '%s ' timed out after %d seconds" % (self.actions[c.id].ref.__class__.my_type.capitalize(), self.actions[c.id].command, int(c.execution_time)))
+                    logger.log(logger.INFO, "Warning : %s event handler command '%s ' timed out after %d seconds" % (self.actions[c.id].ref.__class__.my_type.capitalize(), self.actions[c.id].command, int(c.execution_time)))
                 self.actions[c.id].status = 'zombie'
             # Maybe we got a return of a old even handler, so we can forget it
             except KeyError:
                 pass
         else:
-            logger.log("Error : the received result type in unknown ! %s" % str(c.is_a))
+            logger.log(logger.INFO, "Error : the received result type in unknown ! %s" % str(c.is_a))
 
 
 
@@ -626,7 +626,7 @@ class Scheduler:
         # Get good links tab for looping..
         links = self.get_links_from_type(type)
         if links is None:
-            logger.log('DBG: Type unknown for connection! %s' % type)
+            logger.log(logger.INFO, 'DBG: Type unknown for connection! %s' % type)
             return
 
         # We want only to initiate connections to the passive
@@ -657,7 +657,7 @@ class Scheduler:
             # But the multiprocessing module is not copatible with it!
             # so we must disable it imadiatly after
             socket.setdefaulttimeout(None)
-            logger.log("Warning : Connection problem to the %s %s : %s" % (type, links[id]['name'], str(exp)))
+            logger.log(logger.INFO, "Warning : Connection problem to the %s %s : %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
 
@@ -666,24 +666,24 @@ class Scheduler:
             pyro.set_timeout(con, 5)
             con.ping()
         except Pyro.errors.ProtocolError, exp:
-            logger.log("Warning : Connection problem to the %s %s : %s" % (type, links[id]['name'], str(exp)))
+            logger.log(logger.INFO, "Warning : Connection problem to the %s %s : %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
         except Pyro.errors.NamingError, exp:
-            logger.log("Warning : the %s '%s' is not initialized : %s" % (type, links[id]['name'], str(exp)))
+            logger.log(logger.INFO, "Warning : the %s '%s' is not initialized : %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
         except KeyError , exp:
-            logger.log("Warning : the %s '%s' is not initialized : %s" % (type, links[id]['name'], str(exp)))
+            logger.log(logger.INFO, "Warning : the %s '%s' is not initialized : %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             traceback.print_stack()
             return
         except Pyro.errors.CommunicationError, exp:
-            logger.log("Warning : the %s '%s' got CommunicationError : %s" % (type, links[id]['name'], str(exp)))
+            logger.log(logger.INFO, "Warning : the %s '%s' got CommunicationError : %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
 
-        logger.log("Info : Connection OK to the %s %s" % (type, links[id]['name']))
+        logger.log(logger.INFO, "Info : Connection OK to the %s %s" % (type, links[id]['name']))
 
 
     # We should push actions to our passives satellites
@@ -703,20 +703,20 @@ class Scheduler:
                     con.push_actions(lst, self.instance_id)
                     self.nb_checks_send += len(lst)
                 except Pyro.errors.ProtocolError, exp:
-                    logger.log("Warning : Connection problem to the %s %s : %s" % (type, p['name'], str(exp)))
+                    logger.log(logger.INFO, "Warning : Connection problem to the %s %s : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except Pyro.errors.NamingError, exp:
-                    logger.log("Warning : the %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
+                    logger.log(logger.INFO, "Warning : the %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except KeyError , exp:
-                    logger.log("Warning : the %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
+                    logger.log(logger.INFO, "Warning : the %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     traceback.print_stack()
                     return
                 except Pyro.errors.CommunicationError, exp:
-                    logger.log("Warning : the %s '%s' got CommunicationError : %s" % (type, p['name'], str(exp)))
+                    logger.log(logger.INFO, "Warning : the %s '%s' got CommunicationError : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 #we come back to normal timeout
@@ -740,20 +740,20 @@ class Scheduler:
                     con.push_actions(lst, self.instance_id)
                     self.nb_checks_send += len(lst)
                 except Pyro.errors.ProtocolError, exp:
-                    logger.log("Warning : Connection problem to the %s %s : %s" % (type, p['name'], str(exp)))
+                    logger.log(logger.INFO, "Warning : Connection problem to the %s %s : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except Pyro.errors.NamingError, exp:
-                    logger.log("Warning : the %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
+                    logger.log(logger.INFO, "Warning : the %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except KeyError , exp:
-                    logger.log("Warning : the %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
+                    logger.log(logger.INFO, "Warning : the %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     traceback.print_stack()
                     return
                 except Pyro.errors.CommunicationError, exp:
-                    logger.log("Warning : the %s '%s' got CommunicationError : %s" % (type, p['name'], str(exp)))
+                    logger.log(logger.INFO, "Warning : the %s '%s' got CommunicationError : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 #we come back to normal timeout
@@ -780,20 +780,20 @@ class Scheduler:
                     print "Received %d passive results" % nb_received
                     self.waiting_results.extend(results)
                 except Pyro.errors.ProtocolError, exp:
-                    logger.log("Warning : Connection problem to the %s %s : %s" % (type, p['name'], str(exp)))
+                    logger.log(logger.INFO, "Warning : Connection problem to the %s %s : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except Pyro.errors.NamingError, exp:
-                    logger.log("Warning : the %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
+                    logger.log(logger.INFO, "Warning : the %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except KeyError , exp:
-                    logger.log("Warning : the %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
+                    logger.log(logger.INFO, "Warning : the %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     traceback.print_stack()
                     return
                 except Pyro.errors.CommunicationError, exp:
-                    logger.log("Warning : the %s '%s' got CommunicationError : %s" % (type, p['name'], str(exp)))
+                    logger.log(logger.INFO, "Warning : the %s '%s' got CommunicationError : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 #we come back to normal timeout
@@ -816,20 +816,20 @@ class Scheduler:
                     print "Received %d passive results" % nb_received
                     self.waiting_results.extend(results)
                 except Pyro.errors.ProtocolError, exp:
-                    logger.log("Warning : Connection problem to the %s %s : %s" % (type, p['name'], str(exp)))
+                    logger.log(logger.INFO, "Warning : Connection problem to the %s %s : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except Pyro.errors.NamingError, exp:
-                    logger.log("Warning : the %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
+                    logger.log(logger.INFO, "Warning : the %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except KeyError , exp:
-                    logger.log("Warning : the %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
+                    logger.log(logger.INFO, "Warning : the %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     traceback.print_stack()
                     return
                 except Pyro.errors.CommunicationError, exp:
-                    logger.log("Warning : the %s '%s' got CommunicationError : %s" % (type, p['name'], str(exp)))
+                    logger.log(logger.INFO, "Warning : the %s '%s' got CommunicationError : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 #we come back to normal timeout
@@ -1128,7 +1128,7 @@ class Scheduler:
         # We now have all full broks
         self.has_full_broks = True
 
-        logger.log("[%s] Created initial Broks: %d" % (self.instance_name, len(self.broks)))
+        logger.log(logger.INFO, "[%s] Created initial Broks: %d" % (self.instance_name, len(self.broks)))
 
 
     # Crate a brok with program status info
@@ -1376,7 +1376,7 @@ class Scheduler:
                 worker_names[a.worker] += 1
 
         for w in worker_names:
-            logger.log("Warning : %d actions never came back for the satellite '%s'. I'm reenable them for polling" % (worker_names[w], w))
+            logger.log(logger.INFO, "Warning : %d actions never came back for the satellite '%s'. I'm reenable them for polling" % (worker_names[w], w))
 
 
     # Main function
@@ -1387,9 +1387,9 @@ class Scheduler:
         # Ok, now all is initialized, we can make the inital broks
         self.fill_initial_broks(with_logs=True)
 
-        logger.log("Info : [%s] First scheduling launched" % self.instance_name)
+        logger.log(logger.INFO, "Info : [%s] First scheduling launched" % self.instance_name)
         self.schedule()
-        logger.log("Info : [%s] First scheduling done" % self.instance_name)
+        logger.log(logger.INFO, "Info : [%s] First scheduling done" % self.instance_name)
 
         # Now connect to the passive satellites if needed
         for p_id in self.pollers:

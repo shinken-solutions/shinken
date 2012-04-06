@@ -149,7 +149,7 @@ class BaseModule(object):
         if not self.is_external:
             return
         self.stop_process()
-        logger.log("Starting external process for instance %s" % (self.name))
+        logger.log(logger.INFO, "Starting external process for instance %s" % (self.name))
         p = Process(target=self.main, args=())
 
         # Under windows we should not call start() on an object that got
@@ -164,7 +164,7 @@ class BaseModule(object):
         # We save the process data AFTER the fork()
         self.process = p
         self.properties['process'] = p  # TODO: temporary
-        logger.log("%s is now started ; pid=%d" % (self.name, p.pid))
+        logger.log(logger.INFO, "%s is now started ; pid=%d" % (self.name, p.pid))
 
     def __kill(self):
         """Sometime terminate() is not enough, we must "help"
@@ -184,12 +184,12 @@ class BaseModule(object):
     def stop_process(self):
         """Request the module process to stop and release it"""
         if self.process:
-            logger.log("I'm stopping module '%s' process pid:%s " %
+            logger.log(logger.INFO, "I'm stopping module '%s' process pid:%s " %
                        (self.get_name(), self.process.pid))
             self.process.terminate()
             self.process.join(timeout=1)
             if self.process.is_alive():
-                logger.log("The process is still alive, I help it to die")
+                logger.log(logger.INFO, "The process is still alive, I help it to die")
                 self.__kill()
             self.process = None
 
@@ -237,11 +237,11 @@ class BaseModule(object):
     def main(self):
         """module "main" method. Only used by external modules."""
         self.set_signal_handler()
-        logger.log("[%s[%d]]: Now running.." % (self.name, os.getpid()))
+        logger.log(logger.INFO, "[%s[%d]]: Now running.." % (self.name, os.getpid()))
         while not self.interrupted:
             self.do_loop_turn()
         self.do_stop()
-        logger.log("[%s]: exiting now.." % (self.name))
+        logger.log(logger.INFO, "[%s]: exiting now.." % (self.name))
 
     # TODO: apparently some modules would uses "work" as the main method ??
     work = main

@@ -196,7 +196,7 @@ class Daemon(object):
             if not hasattr(self, 'sched'):
                 self.hook_point('save_retention')
             # And we quit
-            logger.log('Stopping all modules')
+            logger.log(logger.INFO, 'Stopping all modules')
             self.modules_manager.stop_all()
         if self.pyro_daemon:
             pyro.shutdown(self.pyro_daemon)
@@ -228,20 +228,20 @@ class Daemon(object):
     
     def do_load_modules(self):
         self.modules_manager.load_and_init()
-        self.log.log("I correctly loaded the modules : [%s]" % (','.join([inst.get_name() for inst in self.modules_manager.instances])))
+        self.log.log(logger.INFO, "I correctly loaded the modules : [%s]" % (','.join([inst.get_name() for inst in self.modules_manager.instances])))
  
     # Dummy method for adding broker to this daemon
     def add(self, elt):
         pass
 
     def dump_memory(self):
-        logger.log("I dump my memory, it can ask some seconds to do")
+        logger.log(logger.INFO, "I dump my memory, it can ask some seconds to do")
         try:
             from guppy import hpy
             hp = hpy()
-            logger.log(hp.heap())
+            logger.log(logger.INFO, hp.heap())
         except ImportError:
-            logger.log('I do not have the module guppy for memory dump, please install it')
+            logger.log(logger.INFO, 'I do not have the module guppy for memory dump, please install it')
             
 
  
@@ -269,7 +269,7 @@ class Daemon(object):
         try:
             os.unlink(self.pidfile)
         except Exception, e:
-            logger.log("Error : Got an error unlinking our pidfile: %s" % (e))
+            logger.log(logger.INFO, "Error : Got an error unlinking our pidfile: %s" % (e))
 
     # Look if we need a local log or not
     def register_local_log(self):
@@ -278,9 +278,9 @@ class Daemon(object):
             try:
                 self.local_log_fd = self.log.register_local_log(self.local_log)
             except IOError, exp:
-                logger.log("Error : opening the log file '%s' failed with '%s'" % (self.local_log, exp))
+                logger.log(logger.INFO, "Error : opening the log file '%s' failed with '%s'" % (self.local_log, exp))
                 sys.exit(2)
-            logger.log("Using the local log file '%s'" % self.local_log)
+            logger.log(logger.INFO, "Using the local log file '%s'" % self.local_log)
 
     # Only on linux: Check for /dev/shm write access
     def check_shm(self):
@@ -290,7 +290,7 @@ class Daemon(object):
             # We get the access rights, and we check them
             mode = stat.S_IMODE(os.lstat(shm_path)[stat.ST_MODE])
             if not mode & stat.S_IWUSR or not mode & stat.S_IRUSR:
-                logger.log("The directory %s is not writable or readable. Please launch as root chmod 777 %s" % (shm_path, shm_path))
+                logger.log(logger.INFO, "The directory %s is not writable or readable. Please launch as root chmod 777 %s" % (shm_path, shm_path))
                 sys.exit(2)   
 
     def __open_pidfile(self, write=False):
@@ -314,7 +314,7 @@ class Daemon(object):
 
         # TODO: other daemon run on nt
         if os.name == 'nt':
-            logger.log("Warning : the parallel daemon check is not available on nt")
+            logger.log(logger.INFO, "Warning : the parallel daemon check is not available on nt")
             self.__open_pidfile(write=True)
             return
 
@@ -323,18 +323,18 @@ class Daemon(object):
         try:
             pid = int(self.fpid.read())
         except:
-            logger.log("Warning : stale pidfile exists (no or invalid or unreadable content). Reusing it.")
+            logger.log(logger.INFO, "Warning : stale pidfile exists (no or invalid or unreadable content). Reusing it.")
             return
         
         try:
             os.kill(pid, 0)
         except OverflowError, e:
             ## pid is too long for "kill" : so bad content:
-            logger.log("Error : stale pidfile exists: pid=%d is too long" % (pid))
+            logger.log(logger.INFO, "Error : stale pidfile exists: pid=%d is too long" % (pid))
             return
         except os.error, e:
             if e.errno == errno.ESRCH:
-                logger.log("Warning : stale pidfile exists (pid=%d not exists). Reusing it." % (pid))
+                logger.log(logger.INFO, "Warning : stale pidfile exists (pid=%d not exists). Reusing it." % (pid))
                 return
             raise
             
@@ -411,7 +411,7 @@ class Daemon(object):
             # In the father : we check if our child exit correctly 
             # it has to write the pid of our futur little child..
             def do_exit(sig, frame):
-                logger.log("Error : Timeout waiting child while it should have quickly returned ; something wierd happened")
+                logger.log(logger.INFO, "Error : Timeout waiting child while it should have quickly returned ; something wierd happened")
                 os.kill(pid, 9)
                 sys.exit(1)
             # wait the child process to check its return status:
@@ -420,7 +420,7 @@ class Daemon(object):
             # if it's not then something wrong can already be on the way so let's wait max 3 secs here. 
             pid, status = os.waitpid(pid, 0)
             if status != 0:
-                logger.log("Error : something wierd happened with/during second fork : status=", status)
+                logger.log(logger.INFO, "Error : something wierd happened with/during second fork : status=", status)
             os._exit(status != 0)
 
         # halfway to daemonize..
@@ -552,7 +552,7 @@ class Daemon(object):
         try:
             return getpwnam(self.user)[2]
         except KeyError , exp:
-            logger.log("Error : the user %s is unknown" % self.user)
+            logger.log(logger.INFO, "Error : the user %s is unknown" % self.user)
             return None
 
 
@@ -561,7 +561,7 @@ class Daemon(object):
         try:
             return getgrnam(self.group)[2]
         except KeyError , exp:
-            logger.log("Error : the group %s is unknown" % self.group )
+            logger.log(logger.INFO, "Error : the group %s is unknown" % self.group )
             return None
 
     # Change user of the running program. Just insult the admin 
@@ -571,34 +571,34 @@ class Daemon(object):
             insane = not self.idontcareaboutsecurity
 
         if is_android:
-            logger.log("Warning : you can't change user on this system")
+            logger.log(logger.INFO, "Warning : you can't change user on this system")
             return
 
         # TODO: change user on nt
         if os.name == 'nt':
-            logger.log("Warning : you can't change user on this system")
+            logger.log(logger.INFO, "Warning : you can't change user on this system")
             return
 
         if (self.user == 'root' or self.group == 'root') and not insane:
-            logger.log("Error :  You want the application run under the root account?")
-            logger.log("I am not agree with it. If you really want it, put :")
-            logger.log("idontcareaboutsecurity=yes")
-            logger.log("in the config file")
-            logger.log("Exiting")
+            logger.log(logger.INFO, "Error :  You want the application run under the root account?")
+            logger.log(logger.INFO, "I am not agree with it. If you really want it, put :")
+            logger.log(logger.INFO, "idontcareaboutsecurity=yes")
+            logger.log(logger.INFO, "in the config file")
+            logger.log(logger.INFO, "Exiting")
             sys.exit(2)
 
         uid = self.find_uid_from_name()
         gid = self.find_gid_from_name()
         if uid is None or gid is None:
-            logger.log("Error : uid or gid is none : Exiting")
+            logger.log(logger.INFO, "Error : uid or gid is none : Exiting")
             sys.exit(2)
         try:
             # First group, then user :)
             os.setregid(gid, gid)
             os.setreuid(uid, uid)
         except OSError, e:
-            logger.log("Error : cannot change user/group to %s/%s (%s [%d])" % (self.user, self.group, e.strerror, e.errno))
-            logger.log("Exiting")
+            logger.log(logger.INFO, "Error : cannot change user/group to %s/%s (%s [%d])" % (self.user, self.group, e.strerror, e.errno))
+            logger.log(logger.INFO, "Exiting")
             sys.exit(2)
 
     # Parse self.config_file and get all properties in it.
@@ -610,14 +610,14 @@ class Daemon(object):
             config = ConfigParser.ConfigParser()
             config.read(self.config_file)
             if config._sections == {}:
-                logger.log("Error : Bad or missing config file : %s " % self.config_file)
+                logger.log(logger.INFO, "Error : Bad or missing config file : %s " % self.config_file)
                 sys.exit(2)
             for (key, value) in config.items('daemon'):
                 if key in properties:
                     value = properties[key].pythonize(value)
                 setattr(self, key, value)
         else:
-            logger.log("Warning : No config file specified, use defaults parameters")
+            logger.log(logger.INFO, "Warning : No config file specified, use defaults parameters")
         # Now fill all defaults where missing parameters
         for prop, entry in properties.items():
             if not hasattr(self, prop):
@@ -732,7 +732,7 @@ class Daemon(object):
         
     # Default action for system time change. Actually a log is done       
     def compensate_system_time_change(self, difference):
-        logger.log('Warning: A system time change of %s has been detected.  Compensating...' % difference)
+        logger.log(logger.INFO, 'Warning: A system time change of %s has been detected.  Compensating...' % difference)
 
 
 
@@ -741,7 +741,7 @@ class Daemon(object):
     # if he send us something
     # (it can just do a ping)
     def wait_for_initial_conf(self, timeout=1.0):
-        logger.log("Waiting for initial configuration")
+        logger.log(logger.INFO, "Waiting for initial configuration")
         cur_timeout = timeout
         # Arbiter do not already set our have_conf param
         while not self.new_conf and not self.interrupted:
@@ -765,7 +765,7 @@ class Daemon(object):
                 try :
                     f(self)
                 except Exception, exp:
-                    logger.log('The instance %s raise an exception %s. I disable, and set it to restart later' % (inst.get_name(), str(exp)))
+                    logger.log(logger.INFO, 'The instance %s raise an exception %s. I disable, and set it to restart later' % (inst.get_name(), str(exp)))
                     self.modules_manager.set_to_restart(inst)
 
 

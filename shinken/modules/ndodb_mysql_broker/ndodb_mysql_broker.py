@@ -82,7 +82,7 @@ class Ndodb_Mysql_broker(BaseModule):
     # TODO: add conf param to get pass with init
     # Conf from arbiter!
     def init(self):
-        logger.log("I connect to NDO database")
+        logger.log(logger.INFO, "I connect to NDO database")
         self.db = DBMysql(self.host, self.user, self.password, self.database,
                           self.character_set, table_prefix='nagios_',
                           port=self.port)
@@ -107,7 +107,7 @@ class Ndodb_Mysql_broker(BaseModule):
             self.centreon_version = False
         else:
             self.centreon_version = True
-            logger.log("[MySQL/NDO] Using the centreon version")
+            logger.log(logger.INFO, "[MySQL/NDO] Using the centreon version")
 
         # Cache for database id
         # In order not to query the database every time
@@ -171,7 +171,7 @@ class Ndodb_Mysql_broker(BaseModule):
         try:
             self.db.connect_database()
         except _mysql_exceptions.OperationalError, exp:
-            logger.log(
+            logger.log(logger.INFO, 
                 "[MySQL/NDO] Module raised an exception: %s ." \
                 "Please check the arguments!" % \
                 exp)
@@ -371,7 +371,7 @@ class Ndodb_Mysql_broker(BaseModule):
             res.append(q)
 
         # We also clean cache, because we are not sure about this data now
-        logger.log("[MySQL/NDO] Flushing caches (clean from instance %d)" % instance_id)
+        logger.log(logger.INFO, "[MySQL/NDO] Flushing caches (clean from instance %d)" % instance_id)
         self.services_cache_sync = {}
         self.hosts_cache_sync = {}
 

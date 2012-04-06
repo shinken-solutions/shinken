@@ -198,7 +198,7 @@ class Timeperiod(Item):
                 _to = 1
 
             # Now raise the log
-            logger.log('TIMEPERIOD TRANSITION: %s;%d;%d' % (self.get_name(), _from, _to))
+            logger.log(logger.INFO, 'TIMEPERIOD TRANSITION: %s;%d;%d' % (self.get_name(), _from, _to))
         
 
     # clean the get_next_valid_time_from_t cache
