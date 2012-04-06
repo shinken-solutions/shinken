@@ -69,7 +69,7 @@ class TestPickleRetentionBroker(ShinkenTest):
         old_broks = copy.copy(self.sched.broks)
 
         # Now get a real broker object
-        arbiter = Arbiter([''], False, False, False, None, None)
+        arbiter = Arbiter([''], False, False, False, None, None, None)
 
         arbiter.broks = self.sched.broks
         #updte the hosts and service in the scheduler in the retentino-file

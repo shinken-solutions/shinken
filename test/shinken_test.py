@@ -241,6 +241,7 @@ class ShinkenTest(unittest.TestCase):
         print "--- logs <<<----------------------------------"
         for brok in sorted(self.sched.broks.values(), lambda x, y: x.id - y.id):
             if brok.type == 'log':
+                brok.prepare()
                 print "LOG:", brok.data['log']
         print "--- logs >>>----------------------------------"
 
@@ -299,6 +300,7 @@ class ShinkenTest(unittest.TestCase):
             lognum = 1
             for brok in sorted(self.sched.broks.values(), lambda x, y: x.id - y.id):
                 if brok.type == 'log':
+                    brok.prepare()
                     if index == lognum:
                         if re.search(regex, brok.data['log']):
                             return True
@@ -310,6 +312,7 @@ class ShinkenTest(unittest.TestCase):
         regex = re.compile(pattern)
         for brok in sorted(self.sched.broks.values(), lambda x, y: x.id - y.id):
             if brok.type == 'log':
+                brok.prepare()
                 if re.search(regex, brok.data['log']):
                     return True
         return False

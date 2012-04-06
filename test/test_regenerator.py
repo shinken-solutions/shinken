@@ -151,7 +151,7 @@ class TestRegenerator(ShinkenTest):
         for i in xrange(1, 1000):
             b = svc.get_initial_status_brok()
             b.prepare()
-            s = Service({}, running_ena=False)
+            s = Service({})
             for (prop, value) in b.data.iteritems():
                 setattr(s, prop, value)
         t1 = time.time()

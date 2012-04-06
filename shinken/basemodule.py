@@ -208,6 +208,8 @@ class BaseModule(object):
         """
         manage = getattr(self, 'manage_' + brok.type + '_brok', None)
         if manage:
+            # Be sure the brok is prepared before call it
+            brok.prepare()
             return manage(brok)
 
     def manage_signal(self, sig, frame):

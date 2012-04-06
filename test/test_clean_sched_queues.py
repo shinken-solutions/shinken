@@ -80,9 +80,11 @@ class TestSchedCleanQueues(ShinkenTest):
 
 
         #####  And now broks
+        l = []
         for i in xrange(1, 1001):
             b = host.get_update_status_brok()
-            host.broks.append(b)
+            l.append(b)
+        host.broks = l
 
         self.sched.get_new_broks()
         print "LEn broks", len(self.sched.broks) 
