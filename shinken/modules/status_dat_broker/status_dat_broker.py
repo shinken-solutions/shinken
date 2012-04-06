@@ -27,6 +27,7 @@ import sys
 import os
 import Queue
 
+
 #And now include from this global directory
 from shinken.objects import *
 from shinken.objects import Host
@@ -401,6 +402,8 @@ class Status_dat_broker(BaseModule):
             try:
                 l = self.to_q.get(True, 5)
                 for b in l:
+                    # un-serialize the brok before use it
+                    b.prepare()
                     self.manage_brok(b)
             except IOError, e:
                 if e.errno != os.errno.EINTR:

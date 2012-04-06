@@ -37,6 +37,7 @@ import re
 import traceback
 import Queue
 import threading
+import cPickle
 
 from shinken.macroresolver import MacroResolver
 from shinken.basemodule import BaseModule
@@ -231,8 +232,10 @@ class LiveStatus_broker(BaseModule, Daemon):
         print "Data thread started"
         while True:
             l = self.to_q.get()
-
             for b in l:
+                # Un-serialize the brok data
+                b.prepare()
+                b = cPickle.loads(b_raw)
                 # For updating, we cannot do it while
                 # answer queries, so wait for no readers
                 self.wait_for_no_readers()
@@ -383,6 +386,8 @@ class LiveStatus_broker(BaseModule, Daemon):
                 try:
                     l = self.to_q.get(True, .01)
                     for b in l:
+                        # Un-serialize the brok data
+                        b.prepare()
                         self.rg.manage_brok(b)
                         for mod in self.modules_manager.get_internal_instances():
                             try:

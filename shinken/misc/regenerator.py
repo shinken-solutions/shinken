@@ -561,7 +561,7 @@ class Regenerator(object):
             print "Not good!", exp
             return
 
-        safe_print("Creating a service: %s/%s in instance %d" % (hname, sdesc, inst_id))
+        #safe_print("Creating a service: %s/%s in instance %d" % (hname, sdesc, inst_id))
 
         s = Service({})
         self.update_element(s, data)

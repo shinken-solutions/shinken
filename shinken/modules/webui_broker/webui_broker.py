@@ -218,6 +218,7 @@ class Webui_broker(BaseModule, Daemon):
            l = self.to_q.get()
            
            for b in l:
+              b.prepare()
               # For updating, we cannot do it while
               # answer queries, so wait for no readers
               self.wait_for_no_readers()

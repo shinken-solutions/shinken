@@ -25,6 +25,7 @@ import sys
 import time
 import traceback
 import socket
+import cPickle
 
 from multiprocessing import active_children
 from Queue import Empty
@@ -93,7 +94,7 @@ class Broker(BaseSatellite):
         cls_type = elt.__class__.my_type
         if cls_type == 'brok':
             # For brok, we TAG brok with our instance_id
-            elt.data['instance_id'] = 0
+            elt.instance_id = 0
             self.broks_internal_raised.append(elt)
             return
         elif cls_type == 'externalcommand':
@@ -561,7 +562,7 @@ class Broker(BaseSatellite):
         # We are sending broks as a big list, more efficient than one by one
         queues = self.modules_manager.get_external_to_queues()
         to_send = [b for b in self.broks if getattr(b, 'need_send_to_ext', True)]
-
+        
         for q in queues:
             q.put(to_send)
 
@@ -584,6 +585,8 @@ class Broker(BaseSatellite):
             b = self.broks.pop()
             # Ok, we can get the brok, and doing something with it
             # REF: doc/broker-modules.png (4-5)
+            # We un serialize the brok before consume it
+            b.prepare()
             self.manage_brok(b)
 
             nb_broks = len(self.broks)
