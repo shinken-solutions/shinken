@@ -22,7 +22,6 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 import cPickle
 
-
 class Brok:
     """A Brok is a piece of information exported by Shinken to the Broker.
     Broker can do whatever he wants with it.
@@ -35,7 +34,8 @@ class Brok:
         self.type = type
         self.id = self.__class__.id
         self.__class__.id += 1
-        self.data = cPickle.dumps(data)
+        self.data = cPickle.dumps(data, cPickle.HIGHEST_PROTOCOL)
+
 
     def __str__(self):
         return str(self.__dict__) + '\n'

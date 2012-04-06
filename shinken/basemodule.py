@@ -32,6 +32,7 @@ import signal
 import time
 from multiprocessing import Queue, Process
 
+
 from shinken.log import logger
 
 # TODO: use a class for defining the module "properties" instead of

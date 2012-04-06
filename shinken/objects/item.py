@@ -88,7 +88,7 @@ class Item(object):
         for prop, entry in self.__class__.running_properties.items():
             # Copy is slow, so we check type
             # Type with __iter__ are list or dict, or tuple.
-            # Item need it's own list, so qe copy
+            # Item need it's own list, so we copy
             val = entry.default
             if hasattr(val, '__iter__'):
                 setattr(self, prop, copy(val))
