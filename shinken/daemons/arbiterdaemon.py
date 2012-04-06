@@ -132,7 +132,7 @@ class IForArbiter(Interface):
 # Main Arbiter Class
 class Arbiter(Daemon):
 
-    def __init__(self, config_files, is_daemon, do_replace, verify_only, debug, debug_file):
+    def __init__(self, config_files, is_daemon, do_replace, verify_only, debug, debug_file, profile):
         
         super(Arbiter, self).__init__('arbiter', config_files[0], is_daemon, do_replace, debug, debug_file)
         

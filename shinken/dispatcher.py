@@ -379,7 +379,6 @@ class Dispatcher:
                         # REF: doc/shinken-scheduler-lost.png (2)
                         override_conf = sched.get_override_configuration()
                         satellites_for_sched = r.get_satellites_links_for_scheduler()
-                        #print "Want to give a satellites pack for the scheduler", satellites_for_sched
                         conf_package = (conf, override_conf, sched.modules, satellites_for_sched)
                         #print "Try to put the conf", conf_package
                         
