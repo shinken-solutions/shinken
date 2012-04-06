@@ -59,7 +59,7 @@ class Nagios_retention_scheduler(BaseModule):
 
     # Ok, main function that is called in the retention creation pass
     def hook_save_retention(self, daemon):
-        logger.log(logger.INFO, "[NagiosRetention] asking me to update the retention objects, but I won't do it.")
+        logger.log("[NagiosRetention] asking me to update the retention objects, but I won't do it.")
 
 
     def _cut_line(self, line):

@@ -92,7 +92,7 @@ class Simple_log_broker(BaseModule):
         yesterday = get_day(now-3600)
         #print "Dates: t_last_mod : %d, t_last_mod_day: %d, today : %d" % (t_last_mod, t_last_mod_day, today)
         if t_last_mod_day != today:
-            logger.log(logger.INFO, "We are archiving the old log file")
+            logger.log("We are archiving the old log file")
 
             #For the first pass, it's not already open
             if not first_pass:
@@ -111,7 +111,7 @@ class Simple_log_broker(BaseModule):
             s_day = d.strftime("-%m-%d-%Y-00")
             archive_name = f_base_name+s_day+ext
             file_archive_path = os.path.join(self.archive_path, archive_name)
-            logger.log(logger.INFO, "Moving the old log file from %s to %s" % (self.path, file_archive_path))
+            logger.log("Moving the old log file from %s to %s" % (self.path, file_archive_path))
 
             shutil.move(self.path, file_archive_path)
 
@@ -143,7 +143,7 @@ There a lot of different possible broks to manage. """
     def init(self):
         moved = self.check_and_do_archive(first_pass=True)
         if not moved:
-            logger.log(logger.INFO, "I open the log file %s" % self.path)
+            logger.log("I open the log file %s" % self.path)
             self.file = open(self.path,'a')
 
 

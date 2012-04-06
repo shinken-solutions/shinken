@@ -316,7 +316,7 @@ class ExternalCommandManager:
 
         #Only log if we are in the Arbiter
         if self.mode == 'dispatcher' and self.conf.log_external_commands:
-            logger.log(logger.INFO, 'EXTERNAL COMMAND: '+command.rstrip())
+            logger.log('EXTERNAL COMMAND: '+command.rstrip())
         r = self.get_command_and_args(command)
         if r is not None:
             is_global = r['global']
@@ -351,7 +351,7 @@ class ExternalCommandManager:
                 else:
                     print "Problem: a configuration is found, but is not assigned!"
         if not host_found:
-                logger.log(logger.INFO, "Warning:  Passive check result was received for host '%s', but the host could not be found!" % host_name)
+                logger.log("Warning:  Passive check result was received for host '%s', but the host could not be found!" % host_name)
                 #print "Sorry but the host", host_name, "was not found"
 
 
@@ -499,7 +499,7 @@ class ExternalCommandManager:
                     if s is not None:
                         args.append(s)
                     else: #error, must be logged
-                        logger.log(logger.INFO, "Warning: a command was received for service '%s' on host '%s', but the service could not be found!" % (srv_name, tmp_host))
+                        logger.log("Warning: a command was received for service '%s' on host '%s', but the service could not be found!" % (srv_name, tmp_host))
 
         except IndexError:
             safe_print("Sorry, the arguments are not corrects")
@@ -1229,7 +1229,7 @@ class ExternalCommandManager:
     def PROCESS_HOST_CHECK_RESULT(self, host, status_code, plugin_output):
         #raise a PASSIVE check only if needed
         if self.conf.log_passive_checks:
-            logger.log(logger.INFO, 'PASSIVE HOST CHECK: %s;%d;%s' % (host.get_name(), status_code, plugin_output))
+            logger.log('PASSIVE HOST CHECK: %s;%d;%s' % (host.get_name(), status_code, plugin_output))
         now = time.time()
         cls = host.__class__
         # If globally disable OR locally, do not launch
@@ -1252,7 +1252,7 @@ class ExternalCommandManager:
     def PROCESS_SERVICE_CHECK_RESULT(self, service, return_code, plugin_output):
         # raise a PASSIVE check only if needed
         if self.conf.log_passive_checks:
-            logger.log(logger.INFO, 'PASSIVE SERVICE CHECK: %s;%s;%d;%s' % (service.host.get_name(), service.get_name(), return_code, plugin_output))
+            logger.log('PASSIVE SERVICE CHECK: %s;%s;%d;%s' % (service.host.get_name(), service.get_name(), return_code, plugin_output))
         now = time.time()
         cls = service.__class__
         # If globally disable OR locally, do not launch
