@@ -136,7 +136,7 @@ class Graphite_Webui(BaseModule):
             values['graphend'] = graphend 
             if t == 'host':
                 values['host'] = elt.host_name
-                values['service'] = '_HOST_'
+                values['service'] = '__HOST__'
             if t == 'service':
                 values['host'] = elt.host.host_name
                 values['service'] = elt.service_description
