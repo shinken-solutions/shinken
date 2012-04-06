@@ -147,12 +147,6 @@ class LiveStatusLogStoreMongoDB(BaseModule):
             self.next_log_db_rotate = time.mktime(nextrotation.timetuple())
             print "next rotation at %s " % time.asctime(time.localtime(self.next_log_db_rotate))
 
-    def do_i_need_this_manage_brok(self, brok):
-        """ Look for a manager function for a brok, and call it """
-        manage = getattr(self, 'manage_' + brok.type + '_brok', None)
-        if manage:
-            return manage(brok)
-
     def manage_log_brok(self, b):
         data = b.data
         line = data['log']
