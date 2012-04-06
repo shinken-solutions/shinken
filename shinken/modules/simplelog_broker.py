@@ -124,9 +124,9 @@ class Simple_log_broker(BaseModule):
 
 
     def manage_brok(self, brok):
-
         """ Request the module to manage the given brok.
-There a lot of different possible broks to manage. """
+        There a lot of different possible broks to manage. 
+        """
         manage = getattr(self, 'manage_' + brok.type + '_brok', None)
         if manage:
             self.check_and_do_archive()
