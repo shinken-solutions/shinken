@@ -188,7 +188,7 @@ class Contact(Item):
         if hasattr(self, 'contact_name'):
             for c in cls.illegal_object_name_chars:
                 if c in self.contact_name:
-                    logger.log("%s : My contact_name got the caracter %s that is not allowed." % (self.get_name(), c))
+                    logger.log(logger.INFO, "%s : My contact_name got the caracter %s that is not allowed." % (self.get_name(), c))
                     state = False
         else:
             if hasattr(self, 'alias'): #take the alias if we miss the contact_name
@@ -201,19 +201,19 @@ class Contact(Item):
     # Raise a log entry when a downtime begins
     # CONTACT DOWNTIME ALERT: test_contact;STARTED; Contact has entered a period of scheduled downtime
     def raise_enter_downtime_log_entry(self):
-        logger.log("CONTACT DOWNTIME ALERT: %s;STARTED; Contact has entered a period of scheduled downtime" % self.get_name())
+        logger.log(logger.INFO, "CONTACT DOWNTIME ALERT: %s;STARTED; Contact has entered a period of scheduled downtime" % self.get_name())
 
 
     # Raise a log entry when a downtime has finished
     # CONTACT DOWNTIME ALERT: test_contact;STOPPED; Contact has exited from a period of scheduled downtime
     def raise_exit_downtime_log_entry(self):
-        logger.log("CONTACT DOWNTIME ALERT: %s;STOPPED; Contact has exited from a period of scheduled downtime" % self.get_name())
+        logger.log(logger.INFO, "CONTACT DOWNTIME ALERT: %s;STOPPED; Contact has exited from a period of scheduled downtime" % self.get_name())
 
 
     # Raise a log entry when a downtime prematurely ends
     # CONTACT DOWNTIME ALERT: test_contact;CANCELLED; Contact has entered a period of scheduled downtime
     def raise_cancel_downtime_log_entry(self):
-        logger.log("CONTACT DOWNTIME ALERT: %s;CANCELLED; Scheduled downtime for contact has been cancelled." % self.get_name())
+        logger.log(logger.INFO, "CONTACT DOWNTIME ALERT: %s;CANCELLED; Scheduled downtime for contact has been cancelled." % self.get_name())
 
 
 class Contacts(Items):

@@ -112,7 +112,7 @@ class DiscoveryManager:
                     self.db = getattr(self.dbconnection, database)
                     print "Connection to Mongodb:%s:%s is OK" % (uri, database)
                 except Exception, exp:
-                    logger.log('Error in database init : %s' % exp)
+                    logger.log(logger.INFO, 'Error in database init : %s' % exp)
 
     # Look if the name is a IPV4 address or not
     def is_ipv4_addr(self, name):

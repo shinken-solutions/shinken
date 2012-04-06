@@ -30,7 +30,7 @@ from shinken.log import logger
 #called by the plugin manager to get a instance
 def get_instance(mod_conf):
 
-    logger.log("Get a ndoDB instance for plugin %s" % mod_conf.get_name())
+    logger.log(logger.INFO, "Get a ndoDB instance for plugin %s" % mod_conf.get_name())
 
     #Default behavior : character_set is utf8 and synchro is turned off
     if not hasattr( mod_conf, 'character_set'):
