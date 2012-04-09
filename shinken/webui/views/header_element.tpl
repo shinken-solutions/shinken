@@ -58,6 +58,15 @@
         <div class="nav-controll"> 
           <ul class="nav pull-right"> 
             <li class="divider-vertical"></li>
+        %if app:
+          %overall_itproblem = app.datamgr.get_nb_all_problems()
+            %if overall_itproblem == 0:
+              <li><a href="#" class="quickinfo" data-original-title='IT Problems'><i class="icon-itproblem"></i><span class="pulsate badger badger-critical">OK!</span> </a></li>
+            %elif overall_itproblem >= 1:
+              <li><a href="#" class="quickinfo" data-original-title='IT Problems'><i class="icon-itproblem"></i><span class="pulsate badger badger-critical">{{app.datamgr.get_nb_all_problems()}}</span> </a></li>
+            %end
+        %end
+
 	    %if app:
 	      %overall_state = app.datamgr.get_overall_state()
               %if overall_state == 2:
@@ -71,11 +80,11 @@
           </ul>
 
          </div>
-	<ul class="nav pull-right">
+	       <ul class="nav pull-right">
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">Hi {{user.get_name().capitalize()}} <b class="caret"></b></a>
             <ul class="dropdown-menu">
-	      <a class='disabled-link' href="#"><i class="icon-pencil"></i> Edit profile</a>
+	           <a class='disabled-link' href="#"><i class="icon-pencil"></i> Edit profile</a>
             </ul>
           </li>
         </ul>

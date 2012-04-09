@@ -19,6 +19,13 @@
   width: 30px; 
 }
 
+.icon-itproblem { 
+  background-image: url("/static/img/icons/icon-it-18x16.png"); 
+  background-position: center; 
+  height: 25px; 
+  width: 30px; 
+}
+
 
 /*.navbar .nav > li > a {
     color: #FFFFFF;
