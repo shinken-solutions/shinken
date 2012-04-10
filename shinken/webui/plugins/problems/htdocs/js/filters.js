@@ -159,7 +159,7 @@ function launch_new_search(page){
 }
 
 
-function launch_current_search(page){
+function get_current_search(page){
     var uri = page+'?';
     v = []
     $.each(current_filters, function(idx, f){
@@ -170,6 +170,12 @@ function launch_current_search(page){
 	}
     });
     uri += v.join('&');
+    return uri;
+}
+
+
+function launch_current_search(page){
+    var uri = get_current_search(page);
     console.log('Go the the new URI: '+uri);
     document.location.href = uri;
 }

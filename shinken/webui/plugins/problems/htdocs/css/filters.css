@@ -1,0 +1,19 @@
+.filter_color {
+    display: block;
+    float: left;
+    margin-top : 2px;
+    margin-left:  5px;
+    margin-right: 4px;
+    width: 6px;
+    height: 15px;
+    border-radius: 2px;
+}
+
+.hst_srv_filter_color{
+    background-color: #02E10C;
+}
+
+.hg_filter_color {
+    background-color: #787878;
+}
+

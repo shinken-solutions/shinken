@@ -30,156 +30,17 @@ app = None
 
 import time
 import re
+import json
 
 # Our page
 def get_page():
-
     return get_view('problems')
-    
-    # First we look for the user sid
-    # so we bail out if it's a false one
-#    sid = app.request.get_cookie("sid")
-    
-
-    user = app.get_user_auth()
-
-    if not user:
-        redirect("/user/login")
-#        return {'app' : app, 'pbs' : [], 'valid_user' : False, 'user' : None, 'navi' : None}
-
-    print 'DUMP GET', app.request.GET.__dict__
- 
-    #We want to limit the number of elements
-    start = int(app.request.GET.get('start', '0'))
-    end = int(app.request.GET.get('end', '30'))
-
-
-    # We will keep a trace of our filters
-    filters = {}
-
-    search = app.request.GET.get('search', '')
-    if search == '':
-        search = app.request.GET.get('global_search', '')
-
-    pbs = app.datamgr.get_all_problems(to_sort=False)
-    
-    # Filter with the user interests
-    pbs = only_related_to(pbs, user)
-    
-    filter_hg = app.get_user_preference(user, 'filter_hg', '')
-    filters['filter_hg'] = filter_hg
-    print 'HG name filter : ', filter_hg
-
-    if filter_hg:
-        print 'WE GOT A FILTER', filter_hg
-        hg = app.datamgr.get_hostgroup(filter_hg)
-        if hg:            
-            print 'And a valid hg filtering'
-            pbs = [pb for pb in pbs if hg in pb.get_hostgroups()]
-
-    # Ok, if need, appli the search filter
-    if search:
-        print "SEARCHING FOR", search
-        print "Before filtering", len(pbs)
-        # We compile the patern
-        pat = re.compile(search, re.IGNORECASE)
-        new_pbs = []
-        for p in pbs:
-            if pat.search(p.get_full_name()):
-                new_pbs.append(p)
-                continue
-            to_add = False
-            for imp in p.impacts:
-                if pat.search(imp.get_full_name()):
-                    to_add = True
-            for src in p.source_problems:
-                if pat.search(src.get_full_name()):
-                    to_add = True
-            if to_add:
-                new_pbs.append(p)
-
-        pbs = new_pbs
-        print "After filtering", len(pbs)
-
-    # Now sort it!
-    pbs.sort(hst_srv_sort)
-
-
-    total = len(pbs)
-    # If we overflow, came back as normal
-    if start > total:
-        start = 0
-        end = 30
-    navi = app.helper.get_navi(total, start, step=30)
-    pbs = pbs[start:end]
-
-#    print "get all problems:", pbs
-#    for pb in pbs :
-#        print pb.get_name()
-    return {'app' : app, 'pbs' : pbs, 'valid_user' : True, 'user' : user, 'navi' : navi, 'search' : search, 'page' : 'problems', 'filters' : filters}
-
 
 
 # Our page
 def get_all():
-
     return get_view('all')
     
-    user = app.get_user_auth()
-    if not user:
-        redirect("/user/login")
- 
-    #We want to limit the number of elements
-    start = int(app.request.GET.get('start', '0'))
-    end = int(app.request.GET.get('end', '30'))
-
-    # We keep a trace of our filters
-    filters = {'filter_hg' : ''}
-    
-
-    search = app.request.GET.get('search', '')
-    if search == '':
-        search = app.request.GET.get('global_search', '')
-
-
-    all = app.datamgr.get_all_hosts_and_services()
-
-    # Filter or not filter? That is the question....
-    #all = only_related_to(all, user)
-    
-    # Ok, if need, appli the search filter
-    if search:
-        print "SEARCHING FOR", search
-        print "Before filtering", len(all)
-        # We compile the patern
-        pat = re.compile(search, re.IGNORECASE)
-        new_all = []
-        for p in all:
-            if pat.search(p.get_full_name()):
-                new_all.append(p)
-                continue
-            to_add = False
-            for imp in p.impacts:
-                if pat.search(imp.get_full_name()):
-                    to_add = True
-            for src in p.source_problems:
-                if pat.search(src.get_full_name()):
-                    to_add = True
-            if to_add:
-                new_all.append(p)
-
-        all = new_all
-        print "After filtering", len(all)
-
-    total = len(all)
-    # If we overflow, came back as normal
-    if start > total:
-        start = 0
-        end = 30
-    navi = app.helper.get_navi(total, start, step=30)
-    all = all[start:end]
-
-    return {'app' : app, 'pbs' : all, 'valid_user' : True, 'user' : user, 'navi' : navi, 'search' : search, 'page' : 'all', 'filters' : filters}
 
 
 
@@ -216,6 +77,13 @@ def get_view(page):
     search_str = '&'.join(search)
     print 'Search str=', search_str
     print 'And search', search
+
+    # Load the bookmarks
+    bookmarks_r = app.get_user_preference(user, 'bookmarks')
+    if not bookmarks_r:
+        app.set_user_preference(user, 'bookmarks', '[]')
+        bookmarks_r = '[]'
+    bookmarks = json.loads(bookmarks_r)
 
     items = []
     if page == 'problems':
@@ -290,7 +158,7 @@ def get_view(page):
 #    print "get all problems:", pbs
 #    for pb in pbs :
 #        print pb.get_name()
-    return {'app' : app, 'pbs' : items, 'user' : user, 'navi' : navi, 'search' : search_str, 'page' : page, 'filters' : filters}
+    return {'app' : app, 'pbs' : items, 'user' : user, 'navi' : navi, 'search' : search_str, 'page' : page, 'filters' : filters, 'bookmarks':bookmarks}
 
 
 

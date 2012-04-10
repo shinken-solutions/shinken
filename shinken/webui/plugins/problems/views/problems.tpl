@@ -8,7 +8,7 @@
 
 
 
-%rebase layout globals(), title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/img_hovering.js', 'problems/js/accordion.js', 'problems/js/sliding_navigation.js', 'problems/js/filters.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css', 'problems/css/perfometer.css', 'problems/css/img_hovering.css', 'problems/css/sliding_navigation.css', 'problems/css/filters.css'], refresh=True, menu_part='/'+page, user=user 
+%rebase layout globals(), title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/img_hovering.js', 'problems/js/accordion.js', 'problems/js/sliding_navigation.js', 'problems/js/filters.js', 'problems/js/bookmarks.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css', 'problems/css/perfometer.css', 'problems/css/img_hovering.css', 'problems/css/sliding_navigation.css', 'problems/css/filters.css'], refresh=True, menu_part='/'+page, user=user 
 
 
 %# Look for actions if we must show them or not
@@ -65,8 +65,12 @@
 
 
 	var active_filters = [];
-
 	
+	// List of the bookmarks
+	var bookmarks = [];
+	%for b in bookmarks:
+	declare_bookmark("{{b['name']}}","{{b['uri']}}");
+	%end
 
 </script>
 
@@ -132,6 +136,14 @@
 <script >$(function(){
   $(".slidelink").pageslide({ direction: "right", modal : true});
   });
+
+$(function(){
+  // We prevent the drpdown to close when we go on a form into it.
+  $('.form_in_dropdown').on('click', function (e) {
+    e.stopPropagation()
+  });
+});
+
 </script>
 
 
@@ -173,9 +185,10 @@
 	</button>
 	<ul class="dropdown-menu">
 	  <li>
-	    <form>
+	    <form class='form_in_dropdown'>
+	      <label> Number of elements to show </label>
 	      <select name='nb_elements'>
-		%t = [30, 50, 100, 200, 500, 1000, '5k', '10k', 'all']
+		%t = [30, 50, 100, 200, 500, 1000, '5000', '10000', 'All']
 		%for v in t:
 		  <option value={{v}}>{{v}}</option>
 		%end
@@ -224,10 +237,34 @@
     </ul>
     <br/>
     %if got_filters:
-    <button class="btn btn-info"> <i class="icon-cog"></i> Save this search</button>
+    <div class="btn-group">
+      <button class="btn btn-info dropdown-toggle" data-toggle="dropdown"> <i class="icon-tags"></i> Save this search</button>
+      <ul class="dropdown-menu">
+	<li>
+	  <form class='form_in_dropdown' id='bookmark_save'>
+	    <label>Bookmark</label>
+	    <input name='bookmark_name'></input>
+	  </form>
+	  <a class="btn btn-success" href='javascript:add_new_bookmark("/{{page}}");'> <i class="icon-ok"></i> Save!</a>
+	</li>
+      </ul>
+    </div>
+
     %end
+    
+    <p>&nbsp;</p>
+    <div id='bookmarks'></div>
+    
+    <script>
+      $(function(){
+      refresh_bookmarks();
+    });</script>
+
   </div>
-    <div class="span10 no-leftmargin">
+  
+
+  <!-- Start of the Right panel, with all problems -->
+  <div class="span10 no-leftmargin">
   <div id="accordion" class="span12">
 
     %# " We will print Business impact level of course"
