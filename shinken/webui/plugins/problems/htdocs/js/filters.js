@@ -91,6 +91,11 @@ function remove_current_filter(type, name, page){
     launch_current_search(page);
 }
 
+// We kill all current filter, and go in our new page
+function remove_all_current_filter(page){
+    current_filters = [];
+    launch_current_search(page);
+}
 
 // The _active_ versions of the add_ are for the elements
 // that are ALREADY filtered in the page.

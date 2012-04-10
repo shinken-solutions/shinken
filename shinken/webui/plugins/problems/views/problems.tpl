@@ -191,10 +191,14 @@
 
 <div class='row-fluid'>
   <div class='span2'>
-    <a href="#pageslide" class="slidelink btn btn-success"><i class="icon-plus"></i> Show filters</a>
+    <a href="#pageslide" class="slidelink btn btn-success"><i class="icon-plus"></i> Add filters</a>
     <p></p>
-    %if len([k for (k,v) in filters.iteritems() if v != '']) > 0:
-      <h3>Active filters</h3>
+    %got_filters = sum([len(v) for (k,v) in filters.iteritems()]) > 0
+    %if got_filters:
+      <div class='row'>
+	<span class='span6'><h3>Active filters</h3></span>
+	<span class='span4 pull-right'><a href='javascript:remove_all_current_filter("/{{page}}");' class="close">&times;</a></span>
+      </div>
     %end
     <ul class="unstyled">
 
@@ -219,7 +223,9 @@
 
     </ul>
     <br/>
+    %if got_filters:
     <button class="btn btn-info"> <i class="icon-cog"></i> Save this search</button>
+    %end
   </div>
     <div class="span10 no-leftmargin">
   <div id="accordion" class="span12">
