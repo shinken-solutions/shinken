@@ -1,14 +1,21 @@
 
+function save_name_filter(){
+    var f = document.forms['namefilter'];
+    var name = f.hg.value;
+    add_hst_srv_filter(name);
+    //$.post("/user/save_pref", { 'key' : 'filter_hg', 'value' : hg});
+}
 
 
 function save_hg_filter(){
     var f = document.forms['hgfilter'];
     var hg = f.hg.value;
-    console.log('Trying to save preference :' + hg);
-    $.post("/user/save_pref", { 'key' : 'filter_hg', 'value' : hg});
+    add_hg_filter(hg);
+    //$.post("/user/save_pref", { 'key' : 'filter_hg', 'value' : hg});
 }
 
 function clean_new_search(){
+    console.log('Cleaning new search');
     new_filters = [];
     refresh_new_search_div();
 }
@@ -21,18 +28,46 @@ function refresh_new_search_div(){
     
     s = '<h4>New filters</h4><ul>';
     
-    $.each(new_filters, function(idx, e){
+    $.each(new_filters, function(idx, f){
 	console.log('Trying to refresh the div with'+idx+'and'+f);
-	s+= '<li>'+f.long_type+': '+f.search+'</li>';
+	t = '<span>'+f.long_type+': '+f.search+'</span>';
+	fun = "remove_new_filter('"+f.type+"', '"+f.search+"');";
+	c = '<span class="filter_delete"><a href="javascript:'+fun+'" class="close">&times;</a></span>';
+	s+= '<li>'+t+c+'</li>';
     });
 
     s += '</ul>';
     $('#new_search').html(s);
-    
+    console.log('We got up to'+new_filters.length);
 }
 
+function already_got_filter(type, name){
+    r = false;
+    $.each(new_filters, function(idx, f){
+	if (f.type == type && f.search == name){
+	    r = true;
+	}
+    });
+    return r;
+}
+
+// We remove from new_filters the filter of type with name
+function remove_new_filter(type, name){
+    new_new_filters = [];
+    $.each(new_filters, function(idx, f){
+	console.log('Check for removing'+f.type+'and'+type);
+	console.log('And name'+f.name+'and'+name);
+	if (!(f.type == type && f.search == name)){
+	    new_new_filters.push(f);
+	}
+    });
+    console.log('New size'+new_new_filters.length);
+    new_filters =  new_new_filters;
+    refresh_new_search_div();
+}
 
 function add_hg_filter(name){
+    if(already_got_filter('hg', name)){return;}
     f = {};
     f.type = 'hg';
     f.long_type = 'Group';
@@ -42,6 +77,7 @@ function add_hg_filter(name){
 }
 
 function add_hst_srv_filter(name){
+    if(already_got_filter('hst_srv', name)){return;}
     f = {};
     f.type = 'hst_srv';
     f.long_type = 'Name';
@@ -50,3 +86,19 @@ function add_hst_srv_filter(name){
     refresh_new_search_div();
 }
 
+
+
+function launch_new_search(page){
+    var uri = page+'?';
+    v = []
+    $.each(new_filters, function(idx, f){
+	if(f.type == 'hst_srv'){
+	    v.push('search=' + f.search);
+	}else{
+	    v.push('search=' + f.type+':'+f.search);
+	}
+    });
+    uri += v.join('&');
+    console.log('Go the the new URI: '+uri);
+    document.location.href = uri;
+}

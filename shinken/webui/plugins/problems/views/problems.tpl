@@ -84,16 +84,26 @@
   </li>
 </ul>
 
-<div id="pageslide" style="display:none">
-  <script type="text/javascript">
+
+<script type="text/javascript">
     // We will create here our new filter options
+    // This should be outside the "pageslide" div. I don't know why
     new_filters = [];
-  </script>
+</script>
+
+<div id="pageslide" style="display:none">
   <div class='row'>
     <span><h2>Filtering options</h2></span>
     <span class='pull-right'><a class='btn btn-danger' href="javascript:$.pageslide.close()"><i class="icon-remove"></i> Close</a></span>    
   </div>
   <div class='in_panel_filter'>
+    <h3>Names</h3>
+    <form name='namefilter'>
+      <input name='name'></input>
+      <p><a class='btn btn-success pull-right' href="javascript:save_name_filter();"> <i class="icon-chevron-right"></i> Add a name filter</a></p>
+    </form>
+
+    <span><p>&nbsp;</p></span>
     <h3>Hostgroup</h3>
     <form name='hgfilter'>
       <select name='hg'>
@@ -101,11 +111,15 @@
 	<option value='{{hg.get_name()}}'> {{hg.get_name()}} ({{len(hg.members)}})</option>
 	%end
       </select>
-      <p><a class='btn btn-success' href="javascript:save_hg_filter();"> <i class="icon-chevron-right"></i> Add to filter</a></p>
+      <p><a class='btn btn-success pull-right' href="javascript:save_hg_filter();"> <i class="icon-chevron-right"></i> Add a group filter</a></p>
     </form>
+    <span><p>&nbsp;</p></span>
   </div>
-  
-  <p><a class='btn btn-warning' href="javascript:clean_new_search();"> <i class="icon-close"></i> Remove all filters</a></p>
+  <div class='row'>
+    <span class='pull-left'><a class='btn btn-inverse' href="javascript:clean_new_search();"> <i class="icon-remove"></i> Remove all filters</a></span>
+  <span class='pull-right'><a class='btn btn-warning' href="javascript:launch_new_search('/{{page}}');"> <i class="icon-play"></i> Launch the search!</a></span>
+    <span><p>&nbsp;</p></span>
+  </div>
   <div id='new_search'>
   </div>
 
