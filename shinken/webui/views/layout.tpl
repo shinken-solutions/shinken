@@ -37,6 +37,7 @@
     <link href="/static/css/elements/header-element.css" rel="stylesheet">
     <link href="/static/css/custom/deptree.css" rel="stylesheet">
     <link href="/static/css/custom/buttons.css" rel="stylesheet">
+    <link href="/static/css/elements/jquery.pageslide.css" rel="stylesheet">
     <!-- css3 effect for pulse is not available on IE 
 	 It's not real comment, if so it will not work.
       -->
@@ -79,6 +80,7 @@
     <script src="/static/js/bootstrap-popover.js"></script>
     <script src="/static/js/bootstrap-transition.js"></script>
 
+    <script src="/static/js/jquery.pageslide.js"></script>
     <!-- Warnign, this version of datepicker came from http://dl.dropbox.com/u/143355/datepicker/datepicker.html -->
     <script src="/static/js/bootstrap-datepicker.js"></script>
     <!-- Warnign, this version of typeahead came from https://gist.github.com/1866577 -->
