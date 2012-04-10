@@ -79,35 +79,54 @@
   </li>
 </ul>
 
+<div id="pageslide" style="display:none">
+  <h2>Filtering options</h2>
+    
+    <p><a class='btn btn-danger' href="javascript:$.pageslide.close()"><i class="icon-remove"></i> Close</a></p>
+</div>
 
-   <div class="span12 offset2">
+<script >$(function(){
+  $(".slidelink").pageslide({ direction: "right", modal : true});
+  });
+</script>
 
-     <div class='row-fluid'>
-       <div class='span2'>
-    <a id='select_all_btn' href="javascript:select_all_problems()" class="btn"><i class="icon-check"></i> Select all</a>
-    <a id='unselect_all_btn' href="javascript:unselect_all_problems()" class="btn"><i class="icon-minus"></i> Unselect all</a>
+
+
+
+
+
+<div class="span12">
+  
+  <div class='row-fluid'>
+    <div class='span2'>
+      <a href="#pageslide" class="slidelink btn btn-success"><i class="icon-plus"></i> Show filters</a>
     </div>
-       <div class='span10'>
-  	%if navi is not None:
-    <div class="pagination center no-margin">
-	    <ul class="pull-right">
-	    %for name, start, end, is_current in navi:
-	    	%if is_current:
-	    	<li class="active"><a href="#">{{name}}</a></li>
-	    	%elif start == None or end == None:
-	    	<li class="disabled"> <a href="#">...</a> </li>
-	    	%else:
-			<li><a href='/{{page}}?start={{start}}&end={{end}}' class='page larger'>{{name}}</a></li>
-	    	%end
+    <div class='span2'>
+      <a id='select_all_btn' href="javascript:select_all_problems()" class="btn pull-left"><i class="icon-check"></i> Select all</a>
+      <a id='unselect_all_btn' href="javascript:unselect_all_problems()" class="btn pull-left"><i class="icon-minus"></i> Unselect all</a>
+    </div>
+    <div class='span8'>
+      %if navi is not None:
+      <div class="pagination center no-margin">
+	<ul class="pull-right">
+	  %for name, start, end, is_current in navi:
+	    %if is_current:
+	    <li class="active"><a href="#">{{name}}</a></li>
+	    %elif start == None or end == None:
+	    <li class="disabled"> <a href="#">...</a> </li>
+	    %else:
+	    <li><a href='/{{page}}?start={{start}}&end={{end}}' class='page larger'>{{name}}</a></li>
 	    %end
-	    </ul>
+	  %end
+	</ul>
     </div>
-  	%# end of the navi part
-  	%end
+      %# end of the navi part
+      %end
     </div>
-       </div>
+  </div>
+</div>
 
-
+<div class="span12 offset2">
   <div id="accordion" class="span12">
 
     %# " We will print Business impact level of course"
