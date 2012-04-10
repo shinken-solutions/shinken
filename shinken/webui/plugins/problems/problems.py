@@ -51,6 +51,9 @@ def get_page():
     start = int(app.request.GET.get('start', '0'))
     end = int(app.request.GET.get('end', '30'))
 
+    # We will keep a trace of our filters
+    filters = {}
+
     search = app.request.GET.get('search', '')
     if search == '':
         search = app.request.GET.get('global_search', '')
@@ -61,13 +64,13 @@ def get_page():
     pbs = only_related_to(pbs, user)
     
     filter_hg = app.get_user_preference(user, 'filter_hg', '')
+    filters['filter_hg'] = filter_hg
     print 'HG name filter : ', filter_hg
 
     if filter_hg:
         print 'WE GOT A FILTER', filter_hg
         hg = app.datamgr.get_hostgroup(filter_hg)
-        if hg:
-            
+        if hg:            
             print 'And a valid hg filtering'
             pbs = [pb for pb in pbs if hg in pb.get_hostgroups()]
 
@@ -110,7 +113,7 @@ def get_page():
 #    print "get all problems:", pbs
 #    for pb in pbs :
 #        print pb.get_name()
-    return {'app' : app, 'pbs' : pbs, 'valid_user' : True, 'user' : user, 'navi' : navi, 'search' : search, 'page' : 'problems'}
+    return {'app' : app, 'pbs' : pbs, 'valid_user' : True, 'user' : user, 'navi' : navi, 'search' : search, 'page' : 'problems', 'filters' : filters}
 
 
 
@@ -124,6 +127,10 @@ def get_all():
     #We want to limit the number of elements
     start = int(app.request.GET.get('start', '0'))
     end = int(app.request.GET.get('end', '30'))
+
+    # We keep a trace of our filters
+    filters = {'filter_hg' : ''}
+    
 
     search = app.request.GET.get('search', '')
     if search == '':
@@ -167,7 +174,7 @@ def get_all():
     navi = app.helper.get_navi(total, start, step=30)
     all = all[start:end]
 
-    return {'app' : app, 'pbs' : all, 'valid_user' : True, 'user' : user, 'navi' : navi, 'search' : search, 'page' : 'all'}
+    return {'app' : app, 'pbs' : all, 'valid_user' : True, 'user' : user, 'navi' : navi, 'search' : search, 'page' : 'all', 'filters' : filters}
 
 
 

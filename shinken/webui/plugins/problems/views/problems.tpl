@@ -8,7 +8,7 @@
 
 
 
-%rebase layout globals(), title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/img_hovering.js', 'problems/js/accordion.js', 'problems/js/sliding_navigation.js', 'problems/js/filters.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css', 'problems/css/perfometer.css', 'problems/css/img_hovering.css', 'problems/css/sliding_navigation.css'], refresh=True, menu_part='/'+page, user=user 
+%rebase layout globals(), title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/img_hovering.js', 'problems/js/accordion.js', 'problems/js/sliding_navigation.js', 'problems/js/filters.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css', 'problems/css/perfometer.css', 'problems/css/img_hovering.css', 'problems/css/sliding_navigation.css', 'problems/css/filters.css'], refresh=True, menu_part='/'+page, user=user 
 
 
 %# Look for actions if we must show them or not
@@ -84,12 +84,12 @@
   <div class='in_panel_filter'>
     <h3>Hostgroup</h3>
       <form name='hgfilter'>
-	<select name='hg'>    
+	<select name='hg'>
 	  %for hg in datamgr.get_hostgroups_sorted():
 	    <option value='{{hg.get_name()}}'> {{hg.get_name()}} ({{len(hg.members)}})</option>
 	  %end
 	</select>
-	<p><a class='btn btn-success' href="javascript:save_hg_filter();"> <i class="icon-chevron-right"></i> Apply filter</a></p>
+	<p><a class='btn btn-success' href="javascript:save_hg_filter();"> <i class="icon-chevron-right"></i> Save filter</a></p>
       </form>
   </div>
     <p><a class='btn btn-danger' href="javascript:$.pageslide.close()"><i class="icon-remove"></i> Close</a></p>
@@ -107,15 +107,12 @@
 
 <div class="span12">
   
-  <div class='row-fluid'>
-    <div class='span2'>
-      <a href="#pageslide" class="slidelink btn btn-success"><i class="icon-plus"></i> Show filters</a>
-    </div>
-    <div class='span2'>
+  <div class='row'>
+    <div class='span2 offset2'>
       <a id='select_all_btn' href="javascript:select_all_problems()" class="btn pull-left"><i class="icon-check"></i> Select all</a>
       <a id='unselect_all_btn' href="javascript:unselect_all_problems()" class="btn pull-left"><i class="icon-minus"></i> Unselect all</a>
     </div>
-    <div class='span8'>
+    <div class='span7'>
       %if navi is not None:
       <div class="pagination center no-margin">
 	<ul class="pull-right">
@@ -133,10 +130,49 @@
       %# end of the navi part
       %end
     </div>
-  </div>
+    
+    <div class='span1'>
+      <div class="btn-group pull-left">
+	<button class="btn"> <i class="icon-cog"></i> </button>
+	<button class="btn dropdown-toggle" data-toggle="dropdown">
+	  <span class="caret"></span>
+	</button>
+	<ul class="dropdown-menu">
+	  <li>
+	    <form>
+	      <select name='nb_elements'>
+		%t = [30, 50, 100, 200, 500, 1000, '5k', '10k', 'all']
+		%for v in t:
+		  <option value={{v}}>{{v}}</option>
+		%end
+	      </select>
+	    </form>
+	  </li>
+	</ul>
+      </div>
+      
+    </div>
 </div>
 
-<div class="span10 offset2">
+
+<div class='row-fluid'>
+  <div class='span2'>
+    <a href="#pageslide" class="slidelink btn btn-success"><i class="icon-plus"></i> Show filters</a>
+    <p></p>
+    %if len([k for (k,v) in filters.iteritems() if v != '']) > 0:
+      <h3>Active filters</h3>
+    %end
+    <ul class="unstyled">
+
+    %if filters['filter_hg']:
+    <li>
+      <span class="hg_filter_color" style="background-color: #787878">&nbsp;</span>
+      <span class="hg_filter_name"> {{filters['filter_hg']}}</span>
+    </li>
+    %end
+    </ul>
+  </div>
+    <div class="span10 no-leftmargin">
   <div id="accordion" class="span12">
 
     %# " We will print Business impact level of course"
@@ -307,7 +343,7 @@
 
 
 </div>
-
+</div>
 
 %# """ This div is an image container and will move hover the perfometer with mouse hovering """
 <div id="img_hover"></div>
