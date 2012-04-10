@@ -57,6 +57,35 @@ class DataManager(object):
     def get_contacts(self):
         return self.rg.contacts
     
+    def get_hostgroups(self):
+        return self.rg.hostgroups
+
+    def get_hostgroup(self, name):
+        return self.rg.hostgroups.find_by_name(name)
+
+    # Get the hostgroups sorted by names, and zero size in the end
+    # if selected one, put it in the first place
+    def get_hostgroups_sorted(self, selected=''):
+        r = []
+        selected = selected.strip()
+        
+        hg_names = [hg.get_name() for hg in self.rg.hostgroups if len(hg.members) > 0 and hg.get_name() != selected]
+        hg_names.sort()
+        hgs = [self.rg.hostgroups.find_by_name(n) for n in hg_names]
+        hgvoid_names = [hg.get_name() for hg in self.rg.hostgroups if len(hg.members) == 0 and hg.get_name() != selected]
+        hgvoid_names.sort()
+        hgvoids = [self.rg.hostgroups.find_by_name(n) for n in hgvoid_names]
+        
+        if selected:
+            hg = self.rg.hostgroups.find_by_name(selected)
+            if hg:
+                r.append(hg)
+                
+        r.extend(hgs)
+        r.extend(hgvoids)
+        
+        return r
+        
 
     def get_hosts(self):
         return self.rg.hosts

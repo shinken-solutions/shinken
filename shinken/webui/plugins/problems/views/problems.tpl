@@ -8,7 +8,7 @@
 
 
 
-%rebase layout globals(), title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/img_hovering.js', 'problems/js/accordion.js', 'problems/js/sliding_navigation.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css', 'problems/css/perfometer.css', 'problems/css/img_hovering.css', 'problems/css/sliding_navigation.css'], refresh=True, menu_part='/'+page, user=user 
+%rebase layout globals(), title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/img_hovering.js', 'problems/js/accordion.js', 'problems/js/sliding_navigation.js', 'problems/js/filters.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css', 'problems/css/perfometer.css', 'problems/css/img_hovering.css', 'problems/css/sliding_navigation.css'], refresh=True, menu_part='/'+page, user=user 
 
 
 %# Look for actions if we must show them or not
@@ -81,7 +81,17 @@
 
 <div id="pageslide" style="display:none">
   <h2>Filtering options</h2>
-    
+  <div class='in_panel_filter'>
+    <h3>Hostgroup</h3>
+      <form name='hgfilter'>
+	<select name='hg'>    
+	  %for hg in datamgr.get_hostgroups_sorted():
+	    <option value='{{hg.get_name()}}'> {{hg.get_name()}} ({{len(hg.members)}})</option>
+	  %end
+	</select>
+	<p><a class='btn btn-success' href="javascript:save_hg_filter();"> <i class="icon-chevron-right"></i> Apply filter</a></p>
+      </form>
+  </div>
     <p><a class='btn btn-danger' href="javascript:$.pageslide.close()"><i class="icon-remove"></i> Close</a></p>
 </div>
 
@@ -126,7 +136,7 @@
   </div>
 </div>
 
-<div class="span12 offset2">
+<div class="span10 offset2">
   <div id="accordion" class="span12">
 
     %# " We will print Business impact level of course"

@@ -45,7 +45,6 @@ def get_page():
         redirect("/user/login")
 #        return {'app' : app, 'pbs' : [], 'valid_user' : False, 'user' : None, 'navi' : None}
 
-
     print 'DUMP GET', app.request.GET.__dict__
  
     #We want to limit the number of elements
@@ -60,9 +59,17 @@ def get_page():
     
     # Filter with the user interests
     pbs = only_related_to(pbs, user)
+    
+    filter_hg = app.get_user_preference(user, 'filter_hg', '')
+    print 'HG name filter : ', filter_hg
 
-    # Sort it now
-    pbs.sort(hst_srv_sort)
+    if filter_hg:
+        print 'WE GOT A FILTER', filter_hg
+        hg = app.datamgr.get_hostgroup(filter_hg)
+        if hg:
+            
+            print 'And a valid hg filtering'
+            pbs = [pb for pb in pbs if hg in pb.get_hostgroups()]
 
     # Ok, if need, appli the search filter
     if search:
@@ -87,6 +94,10 @@ def get_page():
 
         pbs = new_pbs
         print "After filtering", len(pbs)
+
+    # Now sort it!
+    pbs.sort(hst_srv_sort)
+
 
     total = len(pbs)
     # If we overflow, came back as normal
@@ -206,7 +217,6 @@ def get_pbs_widget():
         print "After filtering", len(pbs)
 
     pbs = pbs[:nb_elements]
-
 
     wid = app.request.GET.get('wid', 'widget_problems_'+str(int(time.time())))
     collapsed = (app.request.GET.get('collapsed', 'False') == 'True')

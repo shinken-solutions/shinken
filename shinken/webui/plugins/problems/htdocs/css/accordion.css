@@ -115,3 +115,13 @@ States
 .state_unknown, .state_unreachable{
  background-color: #78CCE3;
 }
+
+
+
+.in_panel_filter{
+    background-color : white;
+    margin : 30px;
+    padding : 10px;
+    border-radius: 4px;
+    color : black;
+}

@@ -477,13 +477,13 @@ class Webui_broker(BaseModule, Daemon):
 
     # Try to got for an element the graphs uris from modules
     def get_graph_uris(self, elt, graphstart, graphend):
-        safe_print("Checking graph uris ", elt.get_full_name())
+        #safe_print("Checking graph uris ", elt.get_full_name())
 
         uris = []
         for mod in self.modules_manager.get_internal_instances():
             try:
                 f = getattr(mod, 'get_graph_uris', None)
-                safe_print("Get graph uris ", f, "from", mod.get_name())
+                #safe_print("Get graph uris ", f, "from", mod.get_name())
                 if f and callable(f):
                     r = f(elt, graphstart, graphend)
                     uris.extend(r)
@@ -494,7 +494,7 @@ class Webui_broker(BaseModule, Daemon):
                 logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)        
 
-        safe_print("Will return", uris)
+        #safe_print("Will return", uris)
         # Ok if we got a real contact, and if a module auth it
         return uris
 
@@ -509,6 +509,7 @@ class Webui_broker(BaseModule, Daemon):
         
         for mod in self.modules_manager.get_internal_instances():
             try:
+                print 'Try to get pref %s from %s' %(key,  mod.get_name())
                 f = getattr(mod, 'get_ui_user_preference', None)
                 if f and callable(f):
                     r = f(user, key)
@@ -519,7 +520,7 @@ class Webui_broker(BaseModule, Daemon):
                 logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
                 logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)        
-
+        print 'get_user_preference :: Nothing return, I send non'
         return default
 
 
