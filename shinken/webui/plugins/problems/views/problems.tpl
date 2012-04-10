@@ -89,6 +89,7 @@
     // We will create here our new filter options
     // This should be outside the "pageslide" div. I don't know why
     new_filters = [];
+    current_filters = [];
 </script>
 
 <div id="pageslide" style="display:none">
@@ -201,18 +202,18 @@
     <li>
       <span class="filter_color hst_srv_filter_color">&nbsp;</span>
       <span class="hst_srv_filter_name">Name : {{n}}</span>
-      <span class="filter_delete"><a class="close">&times;</a></span>
+      <span class="filter_delete"><a href='javascript:remove_current_filter("hst_srv", "{{n}}", "/{{page}}");' class="close">&times;</a></span>
     </li>
-    <script>add_hst_srv_filter('{{n}}');</script>
+    <script>add_active_hst_srv_filter('{{n}}');</script>
     %end
 
     %for hg in filters['hg']:
     <li>
       <span class="filter_color hg_filter_color">&nbsp;</span>
       <span class="hg_filter_name">Group : {{hg}}</span>
-      <span class="filter_delete"><a class="close">&times;</a></span>
+      <span class="filter_delete"><a href='javascript:remove_current_filter("hg", "{{hg}}", "/{{page}}");' class="close">&times;</a></span>
     </li>
-    <script>add_hg_filter('{{hg}}');</script>
+    <script>add_active_hg_filter('{{hg}}');</script>
     %end
     
 

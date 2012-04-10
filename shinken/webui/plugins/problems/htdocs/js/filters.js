@@ -63,7 +63,7 @@ function remove_new_filter(type, name){
     new_new_filters = [];
     $.each(new_filters, function(idx, f){
 	console.log('Check for removing'+f.type+'and'+type);
-	console.log('And name'+f.name+'and'+name);
+	console.log('And name'+f.search+'and'+name);
 	if (!(f.type == type && f.search == name)){
 	    new_new_filters.push(f);
 	}
@@ -73,6 +73,37 @@ function remove_new_filter(type, name){
     refresh_new_search_div();
 }
 
+
+// Now the active version
+function remove_current_filter(type, name, page){
+    new_current_filters = [];
+    $.each(current_filters, function(idx, f){
+	console.log('Check for removing '+f.type+' and '+type);
+	console.log('And name '+f.search+' and '+name);
+	if (!(f.type == type && f.search == name)){
+	    new_current_filters.push(f);
+	}
+    });
+    console.log('New size'+new_current_filters.length);
+    current_filters =  new_current_filters;
+    //console.log('And now go to the page '+page);
+    // And we directly go in the new page so
+    launch_current_search(page);
+}
+
+
+// The _active_ versions of the add_ are for the elements
+// that are ALREADY filtered in the page.
+function add_active_hg_filter(name){
+    f = {};
+    f.type = 'hg';
+    f.long_type = 'Group';
+    f.search = name;
+    current_filters.push(f);
+    add_hg_filter(name);
+}
+
+
 function add_hg_filter(name){
     if(already_got_filter('hg', name)){return;}
     f = {};
@@ -81,6 +112,18 @@ function add_hg_filter(name){
     f.search = name;
     new_filters.push(f);
     refresh_new_search_div();
+}
+
+// The _active_ versions of the add_ are for the elements
+// that are ALREADY filtered in the page.
+function add_active_hst_srv_filter(name){
+    f = {};
+    f.type = 'hst_srv';
+    f.long_type = 'Name';
+    f.search = name;
+    current_filters.push(f);
+    // And add in the panel side
+    add_hst_srv_filter(name);
 }
 
 function add_hst_srv_filter(name){
@@ -109,3 +152,21 @@ function launch_new_search(page){
     console.log('Go the the new URI: '+uri);
     document.location.href = uri;
 }
+
+
+function launch_current_search(page){
+    var uri = page+'?';
+    v = []
+    $.each(current_filters, function(idx, f){
+	if(f.type == 'hst_srv'){
+	    v.push('search=' + f.search);
+	}else{
+	    v.push('search=' + f.type+':'+f.search);
+	}
+    });
+    uri += v.join('&');
+    console.log('Go the the new URI: '+uri);
+    document.location.href = uri;
+}
+
+
