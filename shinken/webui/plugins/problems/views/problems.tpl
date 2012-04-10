@@ -69,7 +69,7 @@
 	// List of the bookmarks
 	var bookmarks = [];
 	%for b in bookmarks:
-	declare_bookmark("{{b['name']}}","{{b['uri']}}");
+	declare_bookmark("{{!b['name']}}","{{!b['uri']}}");
 	%end
 
 </script>
