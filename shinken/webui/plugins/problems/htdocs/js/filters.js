@@ -1,7 +1,7 @@
 
 function save_name_filter(){
     var f = document.forms['namefilter'];
-    var name = f.hg.value;
+    var name = f.name.value;
     add_hst_srv_filter(name);
     //$.post("/user/save_pref", { 'key' : 'filter_hg', 'value' : hg});
 }
@@ -23,8 +23,15 @@ function clean_new_search(){
 function refresh_new_search_div(){
     if(new_filters.length == 0){
 	$('#new_search').html('<h4>No filter selected</h4>');
+	// Actions buttons are now useless...
+	$('#remove_all_filters').animate({'opacity': 0.3});
+	$('#launch_the_search').animate({'opacity': 0.3});
 	return;
     }
+    
+    // The actions buttons are now important :)
+    $('#remove_all_filters').animate({'opacity': 1});
+    $('#launch_the_search').animate({'opacity': 1});
     
     s = '<h4>New filters</h4><ul>';
     

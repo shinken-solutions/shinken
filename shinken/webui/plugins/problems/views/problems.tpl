@@ -116,12 +116,15 @@
     <span><p>&nbsp;</p></span>
   </div>
   <div class='row'>
-    <span class='pull-left'><a class='btn btn-inverse' href="javascript:clean_new_search();"> <i class="icon-remove"></i> Remove all filters</a></span>
-  <span class='pull-right'><a class='btn btn-warning' href="javascript:launch_new_search('/{{page}}');"> <i class="icon-play"></i> Launch the search!</a></span>
+    <span class='pull-left'><a id='remove_all_filters' class='btn btn-inverse' href="javascript:clean_new_search();"> <i class="icon-remove"></i> Remove all filters</a></span>
+  <span class='pull-right'><a id='launch_the_search' class='btn btn-warning' href="javascript:launch_new_search('/{{page}}');"> <i class="icon-play"></i> Launch the search!</a></span>
     <span><p>&nbsp;</p></span>
   </div>
   <div id='new_search'>
   </div>
+  
+  <!-- We put a final touch at the filters and buttons of this panel -->
+  <script>refresh_new_search_div();</script>
 
 </div>
 
