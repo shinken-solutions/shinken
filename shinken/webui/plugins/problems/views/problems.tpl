@@ -63,6 +63,11 @@
 	         }
 	});
 
+
+	var active_filters = [];
+
+	
+
 </script>
 
 %# "We set the actions div that will be show/hide if we select elements"
@@ -80,19 +85,30 @@
 </ul>
 
 <div id="pageslide" style="display:none">
-  <h2>Filtering options</h2>
+  <script type="text/javascript">
+    // We will create here our new filter options
+    new_filters = [];
+  </script>
+  <div class='row'>
+    <span><h2>Filtering options</h2></span>
+    <span class='pull-right'><a class='btn btn-danger' href="javascript:$.pageslide.close()"><i class="icon-remove"></i> Close</a></span>    
+  </div>
   <div class='in_panel_filter'>
     <h3>Hostgroup</h3>
-      <form name='hgfilter'>
-	<select name='hg'>
-	  %for hg in datamgr.get_hostgroups_sorted():
-	    <option value='{{hg.get_name()}}'> {{hg.get_name()}} ({{len(hg.members)}})</option>
-	  %end
-	</select>
-	<p><a class='btn btn-success' href="javascript:save_hg_filter();"> <i class="icon-chevron-right"></i> Save filter</a></p>
-      </form>
+    <form name='hgfilter'>
+      <select name='hg'>
+	%for hg in datamgr.get_hostgroups_sorted():
+	<option value='{{hg.get_name()}}'> {{hg.get_name()}} ({{len(hg.members)}})</option>
+	%end
+      </select>
+      <p><a class='btn btn-success' href="javascript:save_hg_filter();"> <i class="icon-chevron-right"></i> Add to filter</a></p>
+    </form>
   </div>
-    <p><a class='btn btn-danger' href="javascript:$.pageslide.close()"><i class="icon-remove"></i> Close</a></p>
+  
+  <p><a class='btn btn-warning' href="javascript:clean_new_search();"> <i class="icon-close"></i> Remove all filters</a></p>
+  <div id='new_search'>
+  </div>
+
 </div>
 
 <script >$(function(){
@@ -132,7 +148,7 @@
     </div>
     
     <div class='span1'>
-      <div class="btn-group pull-left">
+      <div class="btn-group pull-right">
 	<button class="btn"> <i class="icon-cog"></i> </button>
 	<button class="btn dropdown-toggle" data-toggle="dropdown">
 	  <span class="caret"></span>
@@ -164,13 +180,28 @@
     %end
     <ul class="unstyled">
 
-    %if filters['filter_hg']:
+    %for n in filters['hst_srv']:
     <li>
-      <span class="hg_filter_color" style="background-color: #787878">&nbsp;</span>
-      <span class="hg_filter_name"> {{filters['filter_hg']}}</span>
+      <span class="filter_color hst_srv_filter_color">&nbsp;</span>
+      <span class="hst_srv_filter_name">Name : {{n}}</span>
+      <span class="filter_delete"><a class="close">&times;</a></span>
     </li>
+    <script>add_hst_srv_filter('{{n}}');</script>
     %end
+
+    %for hg in filters['hg']:
+    <li>
+      <span class="filter_color hg_filter_color">&nbsp;</span>
+      <span class="hg_filter_name">Group : {{hg}}</span>
+      <span class="filter_delete"><a class="close">&times;</a></span>
+    </li>
+    <script>add_hg_filter('{{hg}}');</script>
+    %end
+    
+
     </ul>
+    <br/>
+    <button class="btn btn-info"> <i class="icon-cog"></i> Save this search</button>
   </div>
     <div class="span10 no-leftmargin">
   <div id="accordion" class="span12">

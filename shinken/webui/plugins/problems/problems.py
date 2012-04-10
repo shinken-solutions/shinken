@@ -33,6 +33,8 @@ import re
 
 # Our page
 def get_page():
+
+    return get_view('problems')
     
     # First we look for the user sid
     # so we bail out if it's a false one
@@ -50,6 +52,7 @@ def get_page():
     #We want to limit the number of elements
     start = int(app.request.GET.get('start', '0'))
     end = int(app.request.GET.get('end', '30'))
+
 
     # We will keep a trace of our filters
     filters = {}
@@ -119,6 +122,8 @@ def get_page():
 
 # Our page
 def get_all():
+
+    return get_view('all')
     
     user = app.get_user_auth()
     if not user:
@@ -176,6 +181,116 @@ def get_all():
 
     return {'app' : app, 'pbs' : all, 'valid_user' : True, 'user' : user, 'navi' : navi, 'search' : search, 'page' : 'all', 'filters' : filters}
 
+
+
+
+# Our View code. We will get different data from all and /problems
+# but it's mainly filtering changes
+def get_view(page):
+
+    user = app.get_user_auth()
+    if not user:
+        redirect("/user/login")
+
+    print 'DUMP COMMON GET', app.request.GET.__dict__
+ 
+    # We want to limit the number of elements
+    start = int(app.request.GET.get('start', '0'))
+    end = int(app.request.GET.get('end', '30'))
+
+    # We will keep a trace of our filters
+    filters = {}
+    ts = ['hst_srv', 'hg']
+    for t in ts:
+        filters[t] = []
+
+    search = app.request.GET.getall('search')
+    if search == []:
+        search = app.request.GET.get('global_search', '')
+
+    # Most of the case, search will be a simple string, if so
+    # make it a list of this string
+    if isinstance(search, basestring):
+        search = [search]
+
+    search_str = '&'.join(search)
+    print 'Search str=', search_str
+    print 'And search', search
+
+    items = []
+    if page == 'problems':
+        items = app.datamgr.get_all_problems(to_sort=False)
+    elif page == 'all':
+        items = app.datamgr.get_all_hosts_and_services()
+    else: #WTF?!?
+        redirect("/problems")
+    
+    # Filter with the user interests
+    items = only_related_to(items, user)
+    
+    # Ok, if need, appli the search filter
+    for s in search:
+        s = s.strip()
+        if not s:
+            continue
+            
+        print "SEARCHING FOR", s
+        print "Before filtering", len(items)
+        
+        elts = s.split(':', 1)
+        t = 'hst_srv'
+        if len(elts) > 1:
+            t = elts[0]
+            s = elts[1]
+            
+        print 'Search for type %s and patern %s' % (t, s)
+        if not t in filters:
+            filters[t] = []
+        filters[t].append(s)
+
+        if t == 'hst_srv':
+            # We compile the patern
+            pat = re.compile(s, re.IGNORECASE)
+            new_items = []
+            for i in items:
+                if pat.search(i.get_full_name()):
+                    new_items.append(i)
+                    continue
+                to_add = False
+                for imp in i.impacts:
+                    if pat.search(imp.get_full_name()):
+                        to_add = True
+                for src in i.source_problems:
+                    if pat.search(src.get_full_name()):
+                        to_add = True
+                if to_add:
+                    new_items.append(i)
+
+            items = new_items
+
+        if t == 'hg':
+            hg = app.datamgr.get_hostgroup(s)
+            print 'And a valid hg filtering for', s
+            items = [i for i in items if hg in i.get_hostgroups()]
+
+        print "After filtering for",t, s,'we got', len(items)            
+        
+    # Now sort it!
+    items.sort(hst_srv_sort)
+
+    total = len(items)
+    # If we overflow, came back as normal
+    if start > total:
+        start = 0
+        end = 30
+
+    navi = app.helper.get_navi(total, start, step=30)
+    items = items[start:end]
+
+#    print "get all problems:", pbs
+#    for pb in pbs :
+#        print pb.get_name()
+    return {'app' : app, 'pbs' : items, 'user' : user, 'navi' : navi, 'search' : search_str, 'page' : page, 'filters' : filters}
 
 
 
