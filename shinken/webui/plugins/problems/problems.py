@@ -61,7 +61,7 @@ def get_view(page):
 
     # We will keep a trace of our filters
     filters = {}
-    ts = ['hst_srv', 'hg', 'realm', 'htags']
+    ts = ['hst_srv', 'hg', 'realm', 'htag']
     for t in ts:
         filters[t] = []
 
