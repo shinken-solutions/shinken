@@ -23,17 +23,29 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from shinken.misc.perfdata import PerfDatas
+
+
+def perf(obj, name):
+    p = PerfDatas(obj.perfdata)
+    if name in p:
+        print 'I found the perfdata'
+        return p[name].value
+    print 'I am in perf command'
+    return 1
 
 
 class Trigger(object):
     def __init__(self, ref, code):
         self.ref = ref
-        self.code = code.replace(r'\n', '\n')
+        self.code = code.replace(r'\n', '\n').replace(r'\t', '\t')
 
 
     def eval(myself):
         print 'WILL RUN THE CODE', myself.code
         self = myself.ref
+
+        locals()['perf'] = perf
 
         code = compile(myself.code, "<irc>", "exec")
         exec code in dict(locals())
