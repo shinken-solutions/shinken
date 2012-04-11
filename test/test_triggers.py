@@ -28,7 +28,7 @@ from shinken_test import *
 from shinken.trigger import Trigger
 
 
-class TestConfig(ShinkenTest):
+class TestTriggers(ShinkenTest):
     #Uncomment this is you want to use a specific configuration
     #for your test
     def setUp(self):
@@ -36,7 +36,7 @@ class TestConfig(ShinkenTest):
 
     
     #Change ME :)
-    def test_dummy(self):
+    def test_simple_triggers(self):
         #
         # Config is not correct because of a wrong relative path
         # in the main config file
@@ -62,6 +62,19 @@ self.perfdata = "Moncul c'est du poulet3"
         print "Service perfdata", svc.perfdata
         self.assert_(svc.output == "Moncul c'est du poulet2")
         self.assert_(svc.perfdata == "Moncul c'est du poulet3")
+
+    #Change ME :)
+    def test_in_conf_trigger(self):
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "i_got_trigger")
+        print svc.trigger
+        t = Trigger(svc, svc.trigger)
+        t.eval()
+        print "Output", svc.output
+        print "Perfdata", svc.perfdata
+        self.assert_(svc.output == "New output")
+        self.assert_(svc.perfdata == "New perfdata")
+        
+
 
 
 if __name__ == '__main__':

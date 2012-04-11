@@ -28,11 +28,11 @@
 class Trigger(object):
     def __init__(self, ref, code):
         self.ref = ref
-        self.code = code
+        self.code = code.replace(r'\n', '\n')
 
 
     def eval(myself):
-        
+        print 'WILL RUN THE CODE', myself.code
         self = myself.ref
 
         code = compile(myself.code, "<irc>", "exec")
