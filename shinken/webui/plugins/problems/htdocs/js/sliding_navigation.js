@@ -1,10 +1,10 @@
 $(document).ready(
     function()
     {
-	slide_menu(".sliding-navigation", 25, 15, 150, .8);
+	slide_menu(".sliding-navigation", 25, 15);
     });
 
-function slide_menu(navigation_id, pad_out, pad_in, time, multiplier)
+function slide_menu(navigation_id, pad_out, pad_in)
 {
     // creates the target paths
     var list_elements = navigation_id + " li.sliding-element";

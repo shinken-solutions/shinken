@@ -14,6 +14,14 @@ function save_hg_filter(){
     //$.post("/user/save_pref", { 'key' : 'filter_hg', 'value' : hg});
 }
 
+function save_realm_filter(){
+    var f = document.forms['realmfilter'];
+    var r = f.realm.value;
+    add_realm_filter(r);
+    //$.post("/user/save_pref", { 'key' : 'filter_hg', 'value' : hg});
+}
+
+
 function clean_new_search(){
     console.log('Cleaning new search');
     new_filters = [];
@@ -118,6 +126,27 @@ function add_hg_filter(name){
     new_filters.push(f);
     refresh_new_search_div();
 }
+
+
+function add_active_realm_filter(name){
+    f = {};
+    f.type = 'realm';
+    f.long_type = 'Realm';
+    f.search = name;
+    current_filters.push(f);
+    add_realm_filter(name);
+}
+
+function add_realm_filter(name){
+    if(already_got_filter('realm', name)){return;}
+    f = {};
+    f.type = 'realm';
+    f.long_type = 'Realm';
+    f.search = name;
+    new_filters.push(f);
+    refresh_new_search_div();
+}
+
 
 // The _active_ versions of the add_ are for the elements
 // that are ALREADY filtered in the page.

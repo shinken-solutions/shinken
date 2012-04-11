@@ -61,7 +61,7 @@ def get_view(page):
 
     # We will keep a trace of our filters
     filters = {}
-    ts = ['hst_srv', 'hg']
+    ts = ['hst_srv', 'hg', 'realm']
     for t in ts:
         filters[t] = []
 
@@ -141,6 +141,12 @@ def get_view(page):
             print 'And a valid hg filtering for', s
             items = [i for i in items if hg in i.get_hostgroups()]
 
+        if t == 'realm':
+            r = app.datamgr.get_realm(s)
+            print 'Add a realm filter', r
+            items = [i for i in items if i.get_realm() == r]
+            
+
         print "After filtering for",t, s,'we got', len(items)            
         
     # Now sort it!
@@ -158,6 +164,7 @@ def get_view(page):
 #    print "get all problems:", pbs
 #    for pb in pbs :
 #        print pb.get_name()
+    print 'Give filters', filters
     return {'app' : app, 'pbs' : items, 'user' : user, 'navi' : navi, 'search' : search_str, 'page' : page, 'filters' : filters, 'bookmarks':bookmarks}
 
 

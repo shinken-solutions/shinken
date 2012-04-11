@@ -119,6 +119,20 @@
       <p><a class='btn btn-success pull-right' href="javascript:save_hg_filter();"> <i class="icon-chevron-right"></i> Add a group filter</a></p>
     </form>
     <span><p>&nbsp;</p></span>
+
+    <span><p>&nbsp;</p></span>
+    <h3>Realms</h3>
+    <form name='realmfilter'>
+      <select name='realm'>
+	%for r in datamgr.get_realms():
+	<option value='{{r}}'> {{r}}</option>
+	%end
+      </select>
+      <p><a class='btn btn-success pull-right' href="javascript:save_realm_filter();"> <i class="icon-chevron-right"></i> Add a realm filter</a></p>
+    </form>
+    <span><p>&nbsp;</p></span>
+
+
   </div>
   <div class='row'>
     <span class='pull-left'><a id='remove_all_filters' class='btn btn-inverse' href="javascript:clean_new_search();"> <i class="icon-remove"></i> Remove all filters</a></span>
@@ -134,7 +148,9 @@
 </div>
 
 <script >$(function(){
-  $(".slidelink").pageslide({ direction: "right", modal : true});
+     $(".slidelink").pageslide({ direction: "right", modal : true});
+     // When the user ask for the panel, he don't want to refresh now
+     $(".slidelink").click(function() {reinit_refresh();});
   });
 
 $(function(){
@@ -159,6 +175,7 @@ $(function(){
       <a id='unselect_all_btn' href="javascript:unselect_all_problems()" class="btn pull-left"><i class="icon-minus"></i> Unselect all</a>
     </div>
     <div class='span7'>
+      &nbsp;
       %if navi is not None:
       <div class="pagination center no-margin">
 	<ul class="pull-right">
@@ -233,6 +250,14 @@ $(function(){
     <script>add_active_hg_filter('{{hg}}');</script>
     %end
     
+    %for r in filters['realm']:
+    <li>
+      <span class="filter_color realm_filter_color">&nbsp;</span>
+      <span class="realm_filter_name">Realm : {{r}}</span>
+      <span class="filter_delete"><a href='javascript:remove_current_filter("realm", "{{r}}", "/{{page}}");' class="close">&times;</a></span>
+    </li>
+    <script>add_active_realm_filter('{{r}}');</script>
+    %end
 
     </ul>
     <br/>

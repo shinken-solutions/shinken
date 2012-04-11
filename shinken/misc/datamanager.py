@@ -114,6 +114,14 @@ class DataManager(object):
         return None
 
 
+    def get_realms(self):
+        return self.rg.realms
+
+    def get_realm(self, r):
+        if r in self.rg.realms:
+            return r
+        return None
+
     def get_important_impacts(self):
         res = []
         for s in self.rg.services:

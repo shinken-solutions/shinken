@@ -86,6 +86,7 @@ function check_refresh(){
    do some thigns like ask actions or something like that */
 function reinit_refresh(){
     refresh_timeout = 60;
+    console.log('Reinitialize refresh');
 }
 
 /* We will check timeout each 1s*/

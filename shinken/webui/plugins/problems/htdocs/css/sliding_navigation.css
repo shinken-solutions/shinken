@@ -5,6 +5,7 @@ ul.sliding-navigation
     padding: 0;
     padding-top : 50px;
     position : fixed;
+    z-index : 99;
 }
 
 ul.sliding-navigation li.sliding-element h3,

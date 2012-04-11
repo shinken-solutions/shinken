@@ -135,7 +135,7 @@ Invalid element name
 			</tr>
 			%end
 			<tr>
-			  	<td>Notes:</td>
+			  	<td>Notes: </td>
 			    %if elt.notes != '':
 			    <td>{{elt.notes}}</td>
 			    %else:
