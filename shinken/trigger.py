@@ -35,13 +35,6 @@ class Trigger(object):
         
         self = myself.ref
 
-        
-
-        try:
-            if "\n" in myself.code:
-                raise SyntaxError()
-            code = compile(myself.code, "<irc>", "single")
-        except SyntaxError:
-            code = compile(myself.code, "<irc>", "exec")
+        code = compile(myself.code, "<irc>", "exec")
         exec code in dict(locals())
         print 'after exec'
