@@ -98,6 +98,7 @@ class Timeperiod(Item):
         'exclude':          ListProp   (fill_brok=['full_status'], default=[]),
         'is_active':        BoolProp   (default='0')
     })
+    running_properties = Item.running_properties.copy()
 
 
     def __init__(self, params={}):
@@ -121,6 +122,7 @@ class Timeperiod(Item):
         self.configuration_warnings = []
         # By default the tp is None so we know we just start
         self.is_active = None
+        self.tags = set()
 
 
     def get_name(self):

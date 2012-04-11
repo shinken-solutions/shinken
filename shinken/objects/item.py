@@ -41,14 +41,16 @@ from shinken.log import logger
 class Item(object):
     
     properties = {
-        'imported_from':            StringProp(default='unknown')
+        'imported_from':            StringProp(default='unknown'),
     }
     
     running_properties = {
         # All errors and warning raised during the configuration parsing
         # and that will raised real warning/errors during the is_correct
         'configuration_warnings':   ListProp(default=[]),
-        'configuration_errors':     ListProp(default=[]),              
+        'configuration_errors'  :   ListProp(default=[]),
+        # We save all template we asked us to load from
+        'tags'                  :   ListProp(default=set(), fill_brok=['full_status']),
     }
     
     macros = {
@@ -671,7 +673,11 @@ class Items(object):
             tpls = i.get_templates()
             new_tpls = []
             for tpl in tpls:
-                t = self.find_tpl_by_name(tpl.strip())
+                tpl = tpl.strip()
+                # We save this template in the 'tags' set
+                i.tags.add(tpl)
+                # Then we link it
+                t = self.find_tpl_by_name(tpl)
                 # If it's ok, add the template and update the
                 # template graph too
                 if t is not None:

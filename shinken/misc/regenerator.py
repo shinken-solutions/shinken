@@ -62,6 +62,7 @@ class Regenerator(object):
         self.receivers = ReceiverLinks([])
         # From now we only look for realms names
         self.realms = set()
+        self.tags = {}
 
         # And in progress one
         self.inp_hosts = {}
@@ -184,6 +185,12 @@ class Regenerator(object):
 
             # And link contacts too
             self.linkify_contacts(h, 'contacts')
+
+            # Linkify tags
+            for t in h.tags:
+                if not t in self.tags:
+                    self.tags[t] = 0
+                self.tags[t] += 1
 
             # We can really declare this host OK now
             self.hosts[h.id] = h
