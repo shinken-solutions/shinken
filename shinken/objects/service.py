@@ -346,6 +346,8 @@ class Service(SchedulingItem):
     def get_hostgroups(self):
         return self.host.hostgroups
 
+    def get_host_tags(self):
+        return self.host.tags
 
     # Check is required prop are set:
     # template are always correct

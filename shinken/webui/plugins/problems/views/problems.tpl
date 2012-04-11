@@ -120,7 +120,17 @@
     </form>
     <span><p>&nbsp;</p></span>
 
+    <h3>Tag</h3>
+    <form name='htagfilter'>
+      <select name='htag'>
+	%for (t, n) in datamgr.get_host_tags_sorted():
+	<option value='{{t}}'> {{t}} ({{n}})</option>
+	%end
+      </select>
+      <p><a class='btn btn-success pull-right' href="javascript:save_htag_filter();"> <i class="icon-chevron-right"></i> Add a tag filter</a></p>
+    </form>
     <span><p>&nbsp;</p></span>
+
     <h3>Realms</h3>
     <form name='realmfilter'>
       <select name='realm'>
@@ -226,8 +236,8 @@ $(function(){
     %got_filters = sum([len(v) for (k,v) in filters.iteritems()]) > 0
     %if got_filters:
       <div class='row'>
-	<span class='span6'><h3>Active filters</h3></span>
-	<span class='span4 pull-right'><a href='javascript:remove_all_current_filter("/{{page}}");' class="close">&times;</a></span>
+	<span class='span8'><h3>Active filters</h3></span>
+	<span class='span1 pull-right'><a href='javascript:remove_all_current_filter("/{{page}}");' class="close">&times;</a></span>
       </div>
     %end
     <ul class="unstyled">
@@ -258,6 +268,16 @@ $(function(){
     </li>
     <script>add_active_realm_filter('{{r}}');</script>
     %end
+
+    %for r in filters['htag']:
+    <li>
+      <span class="filter_color htag_filter_color">&nbsp;</span>
+      <span class="htag_filter_name">Tag : {{r}}</span>
+      <span class="filter_delete"><a href='javascript:remove_current_filter("htag", "{{r}}", "/{{page}}");' class="close">&times;</a></span>
+    </li>
+    <script>add_active_htag_filter('{{r}}');</script>
+    %end
+
 
     </ul>
     <br/>

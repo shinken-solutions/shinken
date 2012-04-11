@@ -21,6 +21,13 @@ function save_realm_filter(){
     //$.post("/user/save_pref", { 'key' : 'filter_hg', 'value' : hg});
 }
 
+function save_htag_filter(){
+    var f = document.forms['htagfilter'];
+    var r = f.htag.value;
+    add_htag_filter(r);
+    //$.post("/user/save_pref", { 'key' : 'filter_hg', 'value' : hg});
+}
+
 
 function clean_new_search(){
     console.log('Cleaning new search');
@@ -142,6 +149,26 @@ function add_realm_filter(name){
     f = {};
     f.type = 'realm';
     f.long_type = 'Realm';
+    f.search = name;
+    new_filters.push(f);
+    refresh_new_search_div();
+}
+
+
+function add_active_htag_filter(name){
+    f = {};
+    f.type = 'htag';
+    f.long_type = 'Tag';
+    f.search = name;
+    current_filters.push(f);
+    add_htag_filter(name);
+}
+
+function add_htag_filter(name){
+    if(already_got_filter('htag', name)){return;}
+    f = {};
+    f.type = 'htag';
+    f.long_type = 'Tag';
     f.search = name;
     new_filters.push(f);
     refresh_new_search_div();

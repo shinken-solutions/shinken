@@ -61,7 +61,7 @@ def get_view(page):
 
     # We will keep a trace of our filters
     filters = {}
-    ts = ['hst_srv', 'hg', 'realm']
+    ts = ['hst_srv', 'hg', 'realm', 'htags']
     for t in ts:
         filters[t] = []
 
@@ -145,6 +145,10 @@ def get_view(page):
             r = app.datamgr.get_realm(s)
             print 'Add a realm filter', r
             items = [i for i in items if i.get_realm() == r]
+
+        if t == 'htag':
+            print 'Add a htag filter', s
+            items = [i for i in items if s in i.get_host_tags()]
             
 
         print "After filtering for",t, s,'we got', len(items)            

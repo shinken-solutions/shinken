@@ -470,6 +470,9 @@ class Host(SchedulingItem):
     def get_hostgroups(self):
         return self.hostgroups
 
+    def get_host_tags(self):
+        return self.tags
+
     # Say if we got the other in one of your dep list
     def is_linked_with_host(self, other):
         for (h, status, type, timeperiod, inherits_parent) in self.act_depend_of:
