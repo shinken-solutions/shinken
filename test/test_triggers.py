@@ -88,7 +88,21 @@ self.perfdata = "Moncul c'est du poulet3"
         print "Perfdata", svc.perfdata
         self.assert_(svc.output == "not good!")
         self.assert_(svc.perfdata == "cpu=95%")
-        
+
+
+    # Try to catch the perfdatas of self
+    def test_morecomplex_cpu_too_high(self):
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "cpu_too_high_bis")
+        svc.output = 'I am OK'
+        svc.perfdata = 'cpu=95%'
+        print svc.trigger
+        t = Trigger(svc, svc.trigger)
+        t.eval()
+        self.scheduler_loop(2, [])
+        print "Output", svc.output
+        print "Perfdata", svc.perfdata
+        self.assert_(svc.output == "not good!")
+        self.assert_(svc.perfdata == "cpu=95%")
 
 
 

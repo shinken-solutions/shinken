@@ -23,7 +23,28 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+import time
+
 from shinken.misc.perfdata import PerfDatas
+
+
+def critical(obj, output):
+    print "I am in critical for object", obj.get_name()
+    now = time.time()
+    cls = obj.__class__
+    i = obj.launch_check(now, force=True)
+    for chk in obj.actions:
+        if chk.id == i:
+            print 'I founded the check I want to change'
+            c = chk
+            # Now we 'transform the check into a result'
+            # So exit_status, output and status is eaten by the host
+            c.exit_status = 2
+            c.get_outputs(output, obj.max_plugins_output_length)
+            c.status = 'waitconsume'
+            c.check_time = now
+            #self.sched.nb_check_received += 1
+            # Ok now this result will be read by scheduler the next loop
 
 
 def perf(obj, name):
@@ -46,6 +67,7 @@ class Trigger(object):
         self = myself.ref
 
         locals()['perf'] = perf
+        locals()['critical'] = critical
 
         code = compile(myself.code, "<irc>", "exec")
         exec code in dict(locals())
