@@ -346,9 +346,13 @@ class Arbiter(Daemon):
         # Remove templates from config
         self.conf.remove_templates()
 
+        # We compute simple item hash
+        self.conf.compute_hash()
+
         # We removed templates, and so we must recompute the
         # search lists
         self.conf.create_reversed_list()
+
         
         # Pythonize values
         self.conf.pythonize()

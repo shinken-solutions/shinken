@@ -142,14 +142,14 @@ class Service(SchedulingItem):
         'last_state':         StringProp (default='PENDING', fill_brok=['full_status', 'check_result'], retention=True),
         'last_state_type':    StringProp (default='HARD', fill_brok=['full_status', 'check_result'], retention=True),
         'last_state_id':      IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
-        'last_state_change':  FloatProp (default=time.time(), fill_brok=['full_status', 'check_result'], retention=True),
-        'last_hard_state_change': FloatProp(default=time.time(), fill_brok=['full_status', 'check_result'], retention=True),
+        'last_state_change':  FloatProp (default=0.0, fill_brok=['full_status', 'check_result'], retention=True),
+        'last_hard_state_change': FloatProp(default=0.0, fill_brok=['full_status', 'check_result'], retention=True),
         'last_hard_state':    StringProp (default='PENDING', fill_brok=['full_status'], retention=True),
         'last_hard_state_id': IntegerProp(default=0, fill_brok=['full_status'], retention=True),
-        'last_time_ok':       IntegerProp(default=int(time.time()), fill_brok=['full_status', 'check_result'], retention=True),
-        'last_time_warning':  IntegerProp(default=int(time.time()), fill_brok = ['full_status', 'check_result'], retention=True),
-        'last_time_critical': IntegerProp(default=int(time.time()), fill_brok =['full_status', 'check_result'], retention=True),
-        'last_time_unknown':  IntegerProp(default=int(time.time()), fill_brok=['full_status', 'check_result'], retention=True),
+        'last_time_ok':       IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
+        'last_time_warning':  IntegerProp(default=0, fill_brok = ['full_status', 'check_result'], retention=True),
+        'last_time_critical': IntegerProp(default=0, fill_brok =['full_status', 'check_result'], retention=True),
+        'last_time_unknown':  IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'duration_sec':       IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         'state_type':         StringProp (default='HARD', fill_brok=['full_status', 'check_result'], retention=True),
         'state_type_id':      IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
@@ -166,7 +166,7 @@ class Service(SchedulingItem):
         # elements that depend of me
         'chk_depend_of_me':   ListProp   (default=[]),
 
-        'last_state_update':  FloatProp(default=time.time(), fill_brok=['full_status'], retention=True),
+        'last_state_update':  FloatProp(default=0.0, fill_brok=['full_status'], retention=True),
         'checks_in_progress': ListProp(default=[]), # no brok because checks are too linked
         'notifications_in_progress': ListProp(default={}, retention=True), # no broks because notifications are too linked
         'downtimes':          ListProp  (default=[], fill_brok=['full_status'], retention=True),

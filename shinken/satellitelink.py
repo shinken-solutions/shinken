@@ -235,6 +235,7 @@ class SatelliteLink(Item):
 
     # To know if the satellite have a conf (magic_hash = None)
     # OR to know if the satellite have THIS conf (magic_hash != None)
+    # Magic_hash is for arbiter check only
     def have_conf(self,  magic_hash=None):
         if self.con is None:
             self.create_connection()

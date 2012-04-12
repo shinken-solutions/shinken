@@ -35,7 +35,7 @@ import time
 import random
 import itertools
 
-from shinken.util import alive_then_spare_then_deads
+from shinken.util import alive_then_spare_then_deads, safe_print
 from shinken.log import logger
 
 # Always initialize random :)
@@ -369,8 +369,6 @@ class Dispatcher:
                             logger.log('[%s] The scheduler %s do not need conf, sorry' % (r.get_name(), sched.get_name()))
                             continue
                         
-                        #every_one_need_conf = True
-
                         # We tag conf with the instance_name = scheduler_name
                         conf.instance_name = sched.scheduler_name
                         # We give this configuraton a new 'flavor'
@@ -380,6 +378,7 @@ class Dispatcher:
                         override_conf = sched.get_override_configuration()
                         satellites_for_sched = r.get_satellites_links_for_scheduler()
                         conf_package = (conf, override_conf, sched.modules, satellites_for_sched)
+                        
                         #print "Try to put the conf", conf_package
                         
                         is_sent = sched.put_conf(conf_package)

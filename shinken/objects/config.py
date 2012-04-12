@@ -847,8 +847,8 @@ class Config(Item):
         #self.timeperiods.remove_twins()
 
 
-    #Dependancies are importants for scheduling
-    #This function create dependencies linked between elements.
+    # Dependancies are importants for scheduling
+    # This function create dependencies linked between elements.
     def apply_dependencies(self):
         self.hosts.apply_dependencies()
         self.services.apply_dependencies()
@@ -1396,6 +1396,20 @@ class Config(Item):
         self.discoveryruns.remove_templates()
 
 
+    # We will compute simple element md5hash, so we can know
+    # if they changed or not between the restart
+    def compute_hash(self):
+        self.hosts.compute_hash()
+        self.contacts.pythonize()
+        self.notificationways.pythonize()
+        self.services.pythonize()
+        self.resultmodulations.pythonize()
+        self.businessimpactmodulations.pythonize()
+        self.escalations.pythonize()
+        self.discoveryrules.pythonize()
+        self.discoveryruns.pythonize()
+
+
     # Add an error in the configuration error list so we can print them
     #all in one place
     def add_error(self, txt):
@@ -1623,7 +1637,6 @@ class Config(Item):
             cur_conf.notificationways = self.notificationways
             cur_conf.contactgroups = self.contactgroups
             cur_conf.contacts = self.contacts
-            cur_conf.schedulerlinks = copy.copy(self.schedulerlinks)
             #Create hostgroups with just the name and same id, but no members
             new_servicegroups = []
             for sg in self.servicegroups:
@@ -1705,7 +1718,7 @@ class Config(Item):
         for i in self.confs:
             self.confs[i].instance_id = i
             random.seed(time.time())
-            self.confs[i].magic_hash = random.randint(1, 100000)
+#            self.confs[i].magic_hash = 0#random.randint(1, 100000)
 
 
 # ...
