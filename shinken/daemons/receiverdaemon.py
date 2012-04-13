@@ -156,9 +156,10 @@ class Receiver(BaseSatellite):
             name = conf['global']['receiver_name']
         else:
             name = 'Unnamed receiver'
+        self.name = name
         self.log.load_obj(self, name)
 
-        print "Sending us configuration %s" % conf
+        print "[%s] Sending us configuration %s" % (self.name, conf)
 
         if not self.have_modules:
             self.modules = mods = conf['global']['modules']
