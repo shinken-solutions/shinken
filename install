@@ -1303,7 +1303,23 @@ function install_multisite(){
     if [ ! -f "$filename" ]
     then 
         cecho " > Getting check_mk archive" green
-        wget $WGETPROXY $MKURI >> $TMP/shinken.install.log 2>&1 
+        wget $WGETPROXY $MKURI >> $TMP/shinken.install.log 2>&1
+        if [ $? -ne 0 ]
+        then
+            cecho " > Error : the version of multisite provided could not be found" red
+            cecho " > Go to http://mathias-kettner.de/check_mk.html and check the latest version" red
+            cread " > Please type the correct version here (default : $MKVER)"  yellow "1.1.12p7" "nocheck"
+            export MKVER=$readvalue
+            export MKURI="http://mathias-kettner.de/download/check_mk-$MKVER.tar.gz"
+            wget $WGETPROXY $MKURI >> $TMP/shinken.install.log 2>&1
+            if [ $? -ne 0 ]
+            then
+                cecho " > Error : the version of multisite provided could not be found" red
+                exit 2 
+            fi
+            filename=$(echo $MKURI | awk -F"/" '{print $NF}')
+            folder=$(echo $filename | sed -e "s/\.tar\.gz//g")
+        fi
     fi
     
     cecho " > Extracting archive" green
@@ -1316,7 +1332,7 @@ function install_multisite(){
 
     # check if pnp4nagios is here if not move the resulting folder 
     movepnp=0
-    if [ ! -d "$PNPPREFIX" ]
+    if [ -d "$PNPPREFIX" ]
     then
         movepnp=1
     fi

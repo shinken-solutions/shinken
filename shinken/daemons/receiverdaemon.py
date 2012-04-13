@@ -81,7 +81,7 @@ class Receiver(BaseSatellite):
         cls_type = elt.__class__.my_type
         if cls_type == 'brok':
             # For brok, we TAG brok with our instance_id
-            elt.data['instance_id'] = 0
+            elt.instance_id = 0
             self.broks_internal_raised.append(elt)
             return
         elif cls_type == 'externalcommand':
@@ -116,8 +116,8 @@ class Receiver(BaseSatellite):
                 mod.manage_brok(b)
             except Exception , exp:
                 print exp.__dict__
-                logger.log("[%s] Warning : The mod %s raise an exception: %s, I kill it" % (self.name, mod.get_name(),str(exp)))
-                logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
+                logger.log("Warning : The mod %s raise an exception: %s, I kill it" % (mod.get_name(),str(exp)))
+                logger.log("Exception type : %s" % type(exp))
                 logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
                 to_del.append(mod)
         # Now remove mod that raise an exception
@@ -156,20 +156,19 @@ class Receiver(BaseSatellite):
             name = conf['global']['receiver_name']
         else:
             name = 'Unnamed receiver'
-        self.name = name
         self.log.load_obj(self, name)
 
-        print "[%s] Sending us configuration %s" % (self.name, conf)
+        print "Sending us configuration %s" % conf
 
         if not self.have_modules:
             self.modules = mods = conf['global']['modules']
             self.have_modules = True
-            logger.log("[%s] We received modules %s " % (self.name,  mods))
+            logger.log("We received modules %s " % mods)
 
         # Set our giving timezone from arbiter
         use_timezone = conf['global']['use_timezone']
         if use_timezone != 'NOTSET':
-            logger.log("[%s] Setting our timezone to %s" % (self.name, use_timezone))
+            logger.log("Setting our timezone to %s" % use_timezone)
             os.environ['TZ'] = use_timezone
             time.tzset()
         

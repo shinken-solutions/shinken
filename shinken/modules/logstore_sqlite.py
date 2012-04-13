@@ -356,13 +356,6 @@ class LiveStatusLogStoreSqlite(BaseModule):
     def commit(self):
         self.dbconn.commit()
 
-
-    def manage_brok(self, brok):
-        """ Look for a manager function for a brok, and call it """
-        manage = getattr(self, 'manage_' + brok.type + '_brok', None)
-        if manage:
-            return manage(brok)
-
     def manage_log_brok(self, b):
         data = b.data
         line = data['log']

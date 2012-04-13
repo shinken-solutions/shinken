@@ -147,13 +147,13 @@ class Host(SchedulingItem):
         'last_state':           StringProp(default='PENDING', fill_brok=['full_status', 'check_result'], retention=True),
         'last_state_id':        IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'last_state_type' :     StringProp(default='HARD', fill_brok=['full_status', 'check_result'],  retention=True),
-        'last_state_change':    FloatProp(default=time.time(), fill_brok=['full_status', 'check_result'], retention=True),
-        'last_hard_state_change': FloatProp(default=time.time(), fill_brok=['full_status', 'check_result'], retention=True),
+        'last_state_change':    FloatProp(default=0.0, fill_brok=['full_status', 'check_result'], retention=True),
+        'last_hard_state_change': FloatProp(default=0.0, fill_brok=['full_status', 'check_result'], retention=True),
         'last_hard_state':      StringProp(default='PENDING', fill_brok=['full_status'], retention=True),
         'last_hard_state_id' :  IntegerProp(default=0, fill_brok=['full_status'], retention=True),
-        'last_time_up':         IntegerProp(default=int(time.time()), fill_brok=['full_status', 'check_result'], retention=True),
-        'last_time_down':       IntegerProp(default=int(time.time()), fill_brok=['full_status', 'check_result'], retention=True),
-        'last_time_unreachable': IntegerProp(default=int(time.time()), fill_brok=['full_status', 'check_result'], retention=True),
+        'last_time_up':         IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
+        'last_time_down':       IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
+        'last_time_unreachable': IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'duration_sec':         IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         'output':               StringProp(default='', fill_brok=['full_status', 'check_result'], retention=True),
         'long_output':          StringProp(default='', fill_brok=['full_status', 'check_result'], retention=True),
@@ -171,7 +171,7 @@ class Host(SchedulingItem):
 
         # elements that depend of me
         'chk_depend_of_me':     StringProp(default=[]),
-        'last_state_update':    StringProp(default=time.time(), fill_brok=['full_status'], retention=True),
+        'last_state_update':    StringProp(default=0, fill_brok=['full_status'], retention=True),
 
         # no brok ,to much links
         'services':             StringProp(default=[]),

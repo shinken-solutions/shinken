@@ -847,8 +847,8 @@ class Config(Item):
         #self.timeperiods.remove_twins()
 
 
-    #Dependancies are importants for scheduling
-    #This function create dependencies linked between elements.
+    # Dependancies are importants for scheduling
+    # This function create dependencies linked between elements.
     def apply_dependencies(self):
         self.hosts.apply_dependencies()
         self.services.apply_dependencies()
@@ -1306,13 +1306,15 @@ class Config(Item):
                 logger.log('\tChecked %d %s' % (len(cur), x))
 
         # Look that all scheduler got a broker that will take brok.
-        # If there are no, raiea Warning
+        # If there are no, raise an Error
         for s in self.schedulerlinks:
             rea = s.realm
             if rea:
                 if len(rea.potential_brokers) == 0:
-                    logger.log("Warning : the scheduler %s got no broker in its realm or upper" % s.get_name())
-
+                    logger.log("Error : the scheduler %s got no broker in its realm or upper" % s.get_name())
+                    self.add_error("Error : the scheduler %s got no broker in its realm or upper" % s.get_name())
+                    r = False
+                     
         # Check that for each poller_tag of a host, a poller exists with this tag
         # TODO : need to check that poller are in the good realm too
         hosts_tag = set()
@@ -1324,8 +1326,22 @@ class Config(Item):
                 pollers_tag.add(t)
         if not hosts_tag.issubset(pollers_tag):
             for tag in hosts_tag.difference(pollers_tag):
-                logger.log("Warning : hosts exist with poller_tag %s but no poller got this tag" %  tag )
+                logger.log("Error : hosts exist with poller_tag %s but no poller got this tag" %  tag )
+                self.add_error("Error : hosts exist with poller_tag %s but no poller got this tag" %  tag )
+                r = False
 
+        # Check that all hosts involved in business_rules are from the same realm
+        for l in [self.services, self.hosts]:
+            for e in l:
+                if e.got_business_rule:
+                    e_r = e.get_realm().realm_name
+                    for elt in e.business_rule.list_all_elements():
+                        elt_r = elt.get_realm().realm_name
+                        if not elt_r == e_r:
+                            logger.log("Error : Business_rule '%s' got hosts from another realm : %s" %  (e.get_full_name(), elt_r) )
+                            self.add_error("Error : Business_rule '%s' got hosts from another realm : %s" %  (e.get_full_name(), elt_r) )
+                            r = False
+                
         self.conf_is_correct = r
 
 
@@ -1380,12 +1396,30 @@ class Config(Item):
         self.discoveryruns.remove_templates()
 
 
+    # We will compute simple element md5hash, so we can know
+    # if they changed or not between the restart
+    def compute_hash(self):
+        self.hosts.compute_hash()
+        self.contacts.pythonize()
+        self.notificationways.pythonize()
+        self.services.pythonize()
+        self.resultmodulations.pythonize()
+        self.businessimpactmodulations.pythonize()
+        self.escalations.pythonize()
+        self.discoveryrules.pythonize()
+        self.discoveryruns.pythonize()
+
+
     # Add an error in the configuration error list so we can print them
     #all in one place
     def add_error(self, txt):
         err = txt
         self.configuration_errors.append(err)
+        
+        # Possible typo between those 2 variables ?
         self.is_correct = False        
+        self.conf_is_correct = False
+
 
     # Now it's time to show all configuration errors
     def show_errors(self):
@@ -1503,6 +1537,9 @@ class Config(Item):
         # hosts of a realm (in a pack) will be dispatch
         # in the schedulers of this realm
         # REF: doc/pack-agregation.png
+        
+        # Count the numbers of elements in all the realms, to compare it the total number of hosts
+        nb_elements_all_realms = 0
         for r in self.realms:
             #print "Load balancing realm", r.get_name()
             packs = {}
@@ -1519,10 +1556,11 @@ class Config(Item):
             nb_elements = 0
             for pack in r.packs:
                 nb_elements += len(pack)
+                nb_elements_all_realms += len(pack)
             logger.log("Number of hosts in the realm %s : %d (distributed in %d linked packs)" %(r.get_name(), nb_elements, len(r.packs)))
 
             if nb_schedulers == 0 and nb_elements != 0:
-                err = "ERROR : The realm %s have hosts but no scheduler!" %r.get_name()
+                err = "Error : The realm %s have hosts but no scheduler!" %r.get_name()
                 self.add_error(err)
                 r.packs = [] #Dumb pack
                 continue
@@ -1550,6 +1588,11 @@ class Config(Item):
             # Now in packs we have the number of packs [h1, h2, etc]
             # equal to the number of schedulers.
             r.packs = packs
+        logger.log("Number of hosts in all the realm  %d" % nb_elements_all_realms)
+        logger.log("Number of hosts %d" % len(self.hosts))
+        if len(self.hosts) != nb_elements_all_realms:
+            logger.log("There are %d hosts defined, and %d hosts dispatched in the realms. Some hosts have been ignored" %( len(self.hosts), nb_elements_all_realms))
+            self.add_error("There are %d hosts defined, and %d hosts dispatched in the realms. Some hosts have been ignored" %( len(self.hosts), nb_elements_all_realms))
 
 
 
@@ -1594,7 +1637,6 @@ class Config(Item):
             cur_conf.notificationways = self.notificationways
             cur_conf.contactgroups = self.contactgroups
             cur_conf.contacts = self.contacts
-            cur_conf.schedulerlinks = copy.copy(self.schedulerlinks)
             #Create hostgroups with just the name and same id, but no members
             new_servicegroups = []
             for sg in self.servicegroups:
@@ -1676,7 +1718,7 @@ class Config(Item):
         for i in self.confs:
             self.confs[i].instance_id = i
             random.seed(time.time())
-            self.confs[i].magic_hash = random.randint(1, 100000)
+#            self.confs[i].magic_hash = 0#random.randint(1, 100000)
 
 
 # ...

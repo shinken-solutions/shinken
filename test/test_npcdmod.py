@@ -111,6 +111,7 @@ class TestNpcd(ShinkenTest):
         ids.sort()
         for i in ids:
             brok = self.sched.broks[i]
+            brok.prepare()
             self.npcdmod_broker.manage_brok(brok)
         self.sched.broks = {}
 

@@ -25,6 +25,7 @@ import sys
 import time
 import traceback
 import socket
+import cPickle
 
 from multiprocessing import active_children
 from Queue import Empty
@@ -93,7 +94,7 @@ class Broker(BaseSatellite):
         cls_type = elt.__class__.my_type
         if cls_type == 'brok':
             # For brok, we TAG brok with our instance_id
-            elt.data['instance_id'] = 0
+            elt.instance_id = 0
             self.broks_internal_raised.append(elt)
             return
         elif cls_type == 'externalcommand':
@@ -187,7 +188,7 @@ class Broker(BaseSatellite):
             # But the multiprocessing module is not compatible with it!
             # so we must disable it immediately after
             socket.setdefaulttimeout(None)
-            logger.log("[%s] Connection problem to the %s %s : %s" % (self.name, type, links[id]['name'], str(exp)))
+            logger.log("Connection problem to the %s %s : %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
 
@@ -214,7 +215,7 @@ class Broker(BaseSatellite):
             #     print "I do not ask for brok generation"
             links[id]['running_id'] = new_run_id
         except Pyro_exp_pack, exp:
-            logger.log("[%s] Connection problem to the %s %s : %s" % (self.name, type, links[id]['name'], str(exp)))
+            logger.log("Connection problem to the %s %s : %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
 #        except Pyro.errors.NamingError, exp:
@@ -222,12 +223,12 @@ class Broker(BaseSatellite):
 #            links[id]['con'] = None
 #            return
         except KeyError , exp:
-            logger.log("[%s] the %s '%s' is not initialized : %s" % (self.name, type, links[id]['name'], str(exp)))
+            logger.log("the %s '%s' is not initialized : %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             traceback.print_stack()
             return
 
-        logger.log("[%s] Connection OK to the %s %s" % (self.name, type, links[id]['name']))
+        logger.log("Connection OK to the %s %s" % (type, links[id]['name']))
 
 
     # Get a brok. Our role is to put it in the modules
@@ -240,8 +241,8 @@ class Broker(BaseSatellite):
                 mod.manage_brok(b)
             except Exception , exp:
                 print exp.__dict__
-                logger.log("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
-                logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
+                logger.log("Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (mod.get_name(),str(exp)))
+                logger.log("Exception type : %s" % type(exp))
                 logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)
 
@@ -306,16 +307,16 @@ class Broker(BaseSatellite):
                 print exp
                 self.pynag_con_init(sched_id, type=type)
             except Pyro.errors.ProtocolError , exp:
-                logger.log("[%s] Connection problem to the %s %s : %s" % (self.name, type, links[sched_id]['name'], str(exp)))
+                logger.log("Connection problem to the %s %s : %s" % (type, links[sched_id]['name'], str(exp)))
                 links[sched_id]['con'] = None
             # scheduler must not #be initialized
             except AttributeError , exp:
-                logger.log("[%s] The %s %s should not be initialized : %s" % (self.name, type, links[sched_id]['name'], str(exp)))
+                logger.log("The %s %s should not be initialized : %s" % (type, links[sched_id]['name'], str(exp)))
             # scheduler must not have checks
             except Pyro.errors.NamingError , exp:
-                logger.log("[%s] The %s %s should not be initialized : %s" % (self.name, type, links[sched_id]['name'], str(exp)))
+                logger.log("The %s %s should not be initialized : %s" % (type, links[sched_id]['name'], str(exp)))
             except (Pyro.errors.ConnectionClosedError, Pyro.errors.TimeoutError), exp:
-                logger.log("[%s] Connection problem to the %s %s : %s" % (self.name, type, links[sched_id]['name'], str(exp)))
+                logger.log("Connection problem to the %s %s : %s" % (type, links[sched_id]['name'], str(exp)))
                 links[sched_id]['con'] = None
             #  What the F**k? We do not know what happened,
             # so.. bye bye :)
@@ -392,7 +393,7 @@ class Broker(BaseSatellite):
             self.schedulers[sched_id]['last_connection'] = 0
 
 
-        logger.log("[%s] We have our schedulers : %s " % (self.name, self.schedulers))
+        logger.log("We have our schedulers : %s " % self.schedulers)
 
         # Now get arbiter
         for arb_id in conf['arbiters']:
@@ -413,7 +414,7 @@ class Broker(BaseSatellite):
 
             # We do not connect to the arbiter. Connection hangs
 
-        logger.log("[%s] We have our arbiters : %s " % (self.name, self.arbiters))
+        logger.log("We have our arbiters : %s " % self.arbiters)
 
         # Now for pollers
         for pol_id in conf['pollers']:
@@ -437,7 +438,7 @@ class Broker(BaseSatellite):
 #                    #And we connect to it
 #                    self.app.pynag_con_init(pol_id, 'poller')
 
-        logger.log("[%s] We have our pollers : %s" % (self.name, self.pollers))
+        logger.log("We have our pollers : %s" % self.pollers)
 
         # Now reactionners
         for rea_id in conf['reactionners'] :
@@ -462,17 +463,17 @@ class Broker(BaseSatellite):
 #                    #And we connect to it
 #                    self.app.pynag_con_init(rea_id, 'reactionner')
 
-        logger.log("[%s] We have our reactionners : %s" % (self.name, self.reactionners))
+        logger.log("We have our reactionners : %s" % self.reactionners)
 
         if not self.have_modules:
             self.modules = mods = conf['global']['modules']
             self.have_modules = True
-            logger.log("[%s] We received modules %s " % (self.name,  mods))
+            logger.log("We received modules %s " % mods)
 
         # Set our giving timezone from arbiter
         use_timezone = conf['global']['use_timezone']
         if use_timezone != 'NOTSET':
-            logger.log("[%s] Setting our timezone to %s" % (self.name, use_timezone))
+            logger.log("Setting our timezone to %s" % use_timezone)
             os.environ['TZ'] = use_timezone
             time.tzset()
         
@@ -561,7 +562,7 @@ class Broker(BaseSatellite):
         # We are sending broks as a big list, more efficient than one by one
         queues = self.modules_manager.get_external_to_queues()
         to_send = [b for b in self.broks if getattr(b, 'need_send_to_ext', True)]
-
+        
         for q in queues:
             q.put(to_send)
 
@@ -584,6 +585,8 @@ class Broker(BaseSatellite):
             b = self.broks.pop()
             # Ok, we can get the brok, and doing something with it
             # REF: doc/broker-modules.png (4-5)
+            # We un serialize the brok before consume it
+            b.prepare()
             self.manage_brok(b)
 
             nb_broks = len(self.broks)

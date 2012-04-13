@@ -965,7 +965,8 @@ class Thrift_broker(BaseModule):
             try:
                 l = self.to_q.get(True, .01)
                 for b in l:
-                    print b
+                    # unserialize the brok beofre use it
+                    b.prepare()
                     self.manage_brok(b)
             except Queue.Empty:
                 pass

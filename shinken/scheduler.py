@@ -220,7 +220,7 @@ class Scheduler:
 
     def add_Brok(self, brok):
         # For brok, we TAG brok with our instance_id
-        brok.data['instance_id'] = self.instance_id
+        brok.instance_id = self.instance_id
         self.broks[brok.id] = brok
         
     def add_Notification(self, notif):

@@ -58,21 +58,10 @@ class Ndodb_Mysql_broker(BaseModule):
         # Mapping for name of data and transform function
         self.mapping = {
             'program_status': {
-
-                'program_start': {
-                    'name': 'program_start_time', 'transform': de_unixify
-                    },
-
+                'program_start': {'name': 'program_start_time', 'transform': de_unixify},
                 'pid': {'name': 'process_id', 'transform': None},
-
-                'last_alive': {
-                    'name': 'status_update_time', 'transform': de_unixify
-                    },
-
-                'is_running': {
-                    'name': 'is_currently_running', 'transform': None
-                    }
-
+                'last_alive': {'name': 'status_update_time', 'transform': de_unixify},
+                'is_running': {'name': 'is_currently_running', 'transform': None}
                 },
             }
 
@@ -111,6 +100,7 @@ class Ndodb_Mysql_broker(BaseModule):
                 "where TABLE_SCHEMA='ndo' and " \
                 "TABLE_NAME='nagios_servicestatus' and " \
                 "COLUMN_NAME='long_output';"
+
         self.db.execute_query(query)
         row = self.db.fetchone()
         if row is None or len(row) < 1:
@@ -149,9 +139,9 @@ class Ndodb_Mysql_broker(BaseModule):
             # instance_name to reuse the instance_id in the base.
             else:
                 new_b.data['instance_id'] = self.convert_id(
-                    new_b.data['instance_id'],
-                    new_b.data['instance_name']
+                    new_b.data['instance_id'], new_b.data['instance_name']
                     )
+
                 self.todo.append(new_b)
                 for brok in self.todo:
                     # We have to put the good instance ID to all brok waiting
@@ -191,9 +181,7 @@ class Ndodb_Mysql_broker(BaseModule):
     # Query the database to get the proper instance_id
     def get_instance_id(self, name):
         query1 = u"SELECT  max(instance_id) + 1 from nagios_instances"
-        query2 = u"SELECT instance_id from nagios_instances where " \
-                  "instance_name = '%s';" % \
-                  name
+        query2 = u"SELECT instance_id from nagios_instances where instance_name = '%s';" % name
 
         self.db.execute_query(query1)
         row1 = self.db.fetchone()
@@ -215,16 +203,16 @@ class Ndodb_Mysql_broker(BaseModule):
 
 
 
-    def convert_id(self, id, name):
+    def convert_id(self, brok_id, name):
         # Look if we have already encountered this id
-        if id in self.database_id_cache:
-            return self.database_id_cache[id]
+        if brok_id in self.database_id_cache:
+            return self.database_id_cache[brok_id]
         else:
             data_id = 1
             # If we disable the database sync,
             # we are using the in-brok instance_id
             if self.synchronise_database_id == '0':
-                data_id = id
+                data_id = brok_id
             # Else: we are quering the database and get a new one
             else:
                 data_id = self.get_instance_id(name)
@@ -269,9 +257,7 @@ class Ndodb_Mysql_broker(BaseModule):
 
 
 
-    def get_hostgroup_object_id_by_name_sync(
-        self, hostgroup_name, instance_id
-        ):
+    def get_hostgroup_object_id_by_name_sync(self, hostgroup_name, instance_id):
         query = u"SELECT object_id from nagios_objects where " \
                  "name1='%s' and objecttype_id='3' and instance_id='%s'" % \
                  (hostgroup_name, instance_id)
@@ -295,14 +281,11 @@ class Ndodb_Mysql_broker(BaseModule):
 
 
 
-    def get_service_object_id_by_name_sync(
-        self, host_name, service_description, instance_id
-        ):
+    def get_service_object_id_by_name_sync(self, host_name, service_description, instance_id):
+
         if instance_id in self.services_cache_sync:
-            if (host_name, service_description) in \
-            self.services_cache_sync[instance_id]:
-                return self.services_cache_sync[instance_id]
-                [(host_name, service_description)]
+            if (host_name, service_description) in self.services_cache_sync[instance_id]:
+                return self.services_cache_sync[instance_id][(host_name, service_description)]
 
         # else; not in cache:(
         query = u"SELECT object_id from nagios_objects where " \
@@ -316,14 +299,11 @@ class Ndodb_Mysql_broker(BaseModule):
         else:
             if instance_id not in self.services_cache_sync:
                 self.services_cache_sync[instance_id] = {}
-            self.services_cache_sync[instance_id]
-            [(host_name, service_description)] = row[0]
+            self.services_cache_sync[instance_id][(host_name, service_description)] = row[0]
             return row[0]
 
 
-    def get_servicegroup_object_id_by_name_sync(
-        self, servicegroup_name, instance_id
-        ):
+    def get_servicegroup_object_id_by_name_sync(self, servicegroup_name, instance_id):
         query = u"SELECT object_id from nagios_objects where " \
                 "name1='%s' and objecttype_id='4' and instance_id='%s'" % \
                 (servicegroup_name, instance_id)
@@ -345,9 +325,7 @@ class Ndodb_Mysql_broker(BaseModule):
             return row[0]
 
 
-    def get_contactgroup_object_id_by_name_sync(
-    self, contactgroup_name, instance_id
-    ):
+    def get_contactgroup_object_id_by_name_sync(self, contactgroup_name, instance_id):
         query = u"SELECT object_id from nagios_objects where " \
                  "name1='%s' and objecttype_id='11'and instance_id='%s'" % \
                  (contactgroup_name, instance_id)
@@ -375,24 +353,25 @@ class Ndodb_Mysql_broker(BaseModule):
     # So create several queries with all tables we need to delete with
     # our instance_id
     # This brob must be send at the begining of a scheduler session,
-    # if not, BAD THINGS MAY HAPPENED:)
+    # if not, BAD THINGS MAY HAPPEN :)
     def manage_clean_all_my_instance_id_brok(self, b):
         instance_id = b.data['instance_id']
-        tables = ['commands', 'contacts', 'contactgroups', 'hosts',
-                  'hostescalations', 'hostgroups', 'notifications',
-                  'services',  'serviceescalations', 'programstatus',
-                  'servicegroups', 'timeperiods', 'hostgroup_members',
-                  'contactgroup_members', 'objects', 'hoststatus',
-                  'servicestatus', 'instances', 'servicegroup_members']
+        tables = [
+            'commands', 'contacts', 'contactgroups', 'hosts',
+            'hostescalations', 'hostgroups', 'notifications',
+            'services', 'serviceescalations', 'programstatus',
+            'servicegroups', 'timeperiods', 'hostgroup_members',
+            'contactgroup_members', 'objects', 'hoststatus',
+            'servicestatus', 'instances', 'servicegroup_members'
+            ]
+
         res = []
         for table in tables:
-            q = "DELETE FROM %s WHERE instance_id = '%s' " % \
-                ('nagios_' + table, instance_id)
+            q = "DELETE FROM %s WHERE instance_id = '%s' " % ('nagios_' + table, instance_id)
             res.append(q)
 
         # We also clean cache, because we are not sure about this data now
-        logger.log("[MySQL/NDO] Flushing caches (clean from instance %d)" % \
-                   instance_id)
+        logger.log("[MySQL/NDO] Flushing caches (clean from instance %d)" % instance_id)
         self.services_cache_sync = {}
         self.hosts_cache_sync = {}
 
@@ -408,19 +387,19 @@ class Ndodb_Mysql_broker(BaseModule):
         new_b = copy.deepcopy(b)
 
         # Must delete me first
-        query_delete_instance = u"DELETE FROM %s WHERE " \
-        "instance_name = '%s' " % \
-        ('nagios_instances', b.data['instance_name'])
+        query_delete_instance = u"DELETE FROM %s WHERE instance_name = '%s' " % \
+                                ('nagios_instances', b.data['instance_name'])
 
         query_instance = self.db.create_insert_query(
-            'instances',\
-                {'instance_name': new_b.data['instance_name'],\
-                'instance_description': new_b.data['instance_name'], \
-                'instance_id': new_b.data['instance_id']
-                }
+            'instances', \
+            {
+            'instance_name': new_b.data['instance_name'],\
+            'instance_description': new_b.data['instance_name'], \
+            'instance_id': new_b.data['instance_id']
+            }
         )
 
-        to_del = ['instance_name', 'command_file', 'check_external_commands',\
+        to_del = ['instance_name', 'command_file', 'check_external_commands', \
                   'check_service_freshness', 'check_host_freshness']
         to_add = []
         mapping = self.mapping['program_status']
@@ -480,10 +459,11 @@ class Ndodb_Mysql_broker(BaseModule):
         data = b.data
 
         # First add to nagios_objects
-        objects_data = {'instance_id': data['instance_id'], 'objecttype_id': 1,
-                        'name1': data['host_name'],
-                        'is_active': data['active_checks_enabled']
-                        }
+        objects_data = {
+            'instance_id': data['instance_id'], 'objecttype_id': 1,
+            'name1': data['host_name'],
+            'is_active': data['active_checks_enabled']
+        }
         object_query = self.db.create_insert_query('objects', objects_data)
         self.db.execute_query(object_query)
 
@@ -492,88 +472,74 @@ class Ndodb_Mysql_broker(BaseModule):
             )
 
         #print "DATA:", data
-        hosts_data = {'instance_id': data['instance_id'],
-                      'host_object_id': host_id, 'alias': data['alias'],
-                      'display_name': data['display_name'],
-                      'address': data['address'],
-                      'failure_prediction_options': '0',
-                      'check_interval': data['check_interval'],
-                      'retry_interval': data['retry_interval'],
-                      'max_check_attempts': data['max_check_attempts'],
-                      'first_notification_delay':
-                          data['first_notification_delay'],
-                      'notification_interval': data['notification_interval'],
-                      'flap_detection_enabled': data['flap_detection_enabled'],
-                      'low_flap_threshold': data['low_flap_threshold'],
-                      'high_flap_threshold': data['high_flap_threshold'],
-                      'process_performance_data': data['process_perf_data'],
-                      'freshness_checks_enabled': data['check_freshness'],
-                      'freshness_threshold': data['freshness_threshold'],
-                      'passive_checks_enabled': data['passive_checks_enabled'],
-                      'event_handler_enabled': data['event_handler_enabled'],
-                      'active_checks_enabled': data['active_checks_enabled'],
-                      'notifications_enabled': data['notifications_enabled'],
-                      'obsess_over_host': data['obsess_over_host'],
-                      'notes': data['notes'], 'notes_url': data['notes_url'],
-            }
+        hosts_data = {
+            'instance_id': data['instance_id'],
+            'host_object_id': host_id, 'alias': data['alias'],
+            'display_name': data['display_name'],
+            'address': data['address'],
+            'failure_prediction_options': '0',
+            'check_interval': data['check_interval'],
+            'retry_interval': data['retry_interval'],
+            'max_check_attempts': data['max_check_attempts'],
+            'first_notification_delay': data['first_notification_delay'],
+            'notification_interval': data['notification_interval'],
+            'flap_detection_enabled': data['flap_detection_enabled'],
+            'low_flap_threshold': data['low_flap_threshold'],
+            'high_flap_threshold': data['high_flap_threshold'],
+            'process_performance_data': data['process_perf_data'],
+            'freshness_checks_enabled': data['check_freshness'],
+            'freshness_threshold': data['freshness_threshold'],
+            'passive_checks_enabled': data['passive_checks_enabled'],
+            'event_handler_enabled': data['event_handler_enabled'],
+            'active_checks_enabled': data['active_checks_enabled'],
+            'notifications_enabled': data['notifications_enabled'],
+            'obsess_over_host': data['obsess_over_host'],
+            'notes': data['notes'], 'notes_url': data['notes_url'],
+        }
 
         #print "HOST DATA", hosts_data
         query = self.db.create_insert_query('hosts', hosts_data)
 
         # Now create an hoststatus entry
-        hoststatus_data = {'instance_id': data['instance_id'],
-                           'host_object_id': host_id,
-                           'normal_check_interval': data['check_interval'],
-                           'retry_check_interval': data['retry_interval'],
-                           'max_check_attempts': data['max_check_attempts'],
-                           'current_state': data['state_id'],
-                           'state_type': data['state_type_id'],
-                           'passive_checks_enabled':
-                               data['passive_checks_enabled'],
-                           'event_handler_enabled':
-                               data['event_handler_enabled'],
-                           'active_checks_enabled':
-                               data['active_checks_enabled'],
-                           'notifications_enabled':
-                               data['notifications_enabled'],
-                           'obsess_over_host': data['obsess_over_host'],
-                           'process_performance_data':
-                               data['process_perf_data'],
-                           'check_type': 0,
-                           'current_check_attempt': data['attempt'],
-                           'execution_time': data['execution_time'],
-                           'latency': data['latency'],
-                           'output': data['output'],
-                           'perfdata': data['perf_data'],
-                           'last_check': de_unixify(data['last_chk']),
-                           'last_hard_state_change':
-                               de_unixify(data['last_hard_state_change']),
-                           'last_state_change':
-                               de_unixify(data['last_state_change']),
-                           'last_notification':
-                               de_unixify(data['last_notification']),
-                           'current_notification_number':
-                               data['current_notification_number'],
-                           'problem_has_been_acknowledged':
-                               data['problem_has_been_acknowledged'],
-                               'acknowledgement_type':
-                                   data['acknowledgement_type'],
-                           # set check to 1 so nagvis is happy
-                           'has_been_checked': 1,
-                           'percent_state_change':
-                               data['percent_state_change'],
-                           'is_flapping': data['is_flapping'],
-                           'flap_detection_enabled':
-                               data['flap_detection_enabled'],
-                           }
+        hoststatus_data = {
+            'instance_id': data['instance_id'],
+            'host_object_id': host_id,
+            'normal_check_interval': data['check_interval'],
+            'retry_check_interval': data['retry_interval'],
+            'max_check_attempts': data['max_check_attempts'],
+            'current_state': data['state_id'],
+            'state_type': data['state_type_id'],
+            'passive_checks_enabled': data['passive_checks_enabled'],
+            'event_handler_enabled': data['event_handler_enabled'],
+            'active_checks_enabled': data['active_checks_enabled'],
+            'notifications_enabled': data['notifications_enabled'],
+            'obsess_over_host': data['obsess_over_host'],
+            'process_performance_data': data['process_perf_data'],
+            'check_type': 0,
+            'current_check_attempt': data['attempt'],
+            'execution_time': data['execution_time'],
+            'latency': data['latency'],
+            'output': data['output'],
+            'perfdata': data['perf_data'],
+            'last_check': de_unixify(data['last_chk']),
+            'last_hard_state_change': de_unixify(data['last_hard_state_change']),
+            'last_state_change': de_unixify(data['last_state_change']),
+            'last_notification': de_unixify(data['last_notification']),
+            'current_notification_number': data['current_notification_number'],
+            'problem_has_been_acknowledged': data['problem_has_been_acknowledged'],
+               'acknowledgement_type': data['acknowledgement_type'],
+            # set check to 1 so nagvis is happy
+            'has_been_checked': 1,
+            'percent_state_change': data['percent_state_change'],
+            'is_flapping': data['is_flapping'],
+            'flap_detection_enabled': data['flap_detection_enabled'],
+        }
 
         # Centreon add some fields
         if self.centreon_version:
             hoststatus_data['long_output'] = data['long_output']
 
-        hoststatus_query = self.db.create_insert_query(
-            'hoststatus', hoststatus_data
-            )
+        hoststatus_query = self.db.create_insert_query('hoststatus', hoststatus_data)
 
         return [query, hoststatus_query]
 
@@ -585,18 +551,16 @@ class Ndodb_Mysql_broker(BaseModule):
 
         data = b.data
         # First add to nagios_objects
-        objects_data = {'instance_id': data['instance_id'], 'objecttype_id': 2,
-                        'name1': data['host_name'],
-                        'name2': data['service_description'],
-                        'is_active': data['active_checks_enabled']
-                        }
+        objects_data = {
+            'instance_id': data['instance_id'], 'objecttype_id': 2,
+            'name1': data['host_name'],
+            'name2': data['service_description'],
+            'is_active': data['active_checks_enabled']
+        }
         object_query = self.db.create_insert_query('objects', objects_data)
         self.db.execute_query(object_query)
 
-        host_id = self.get_host_object_id_by_name_sync(
-            data['host_name'],
-            data['instance_id']
-            )
+        host_id = self.get_host_object_id_by_name_sync(data['host_name'], data['instance_id'])
 
         service_id = self.get_service_object_id_by_name_sync(
             data['host_name'],
@@ -611,95 +575,76 @@ class Ndodb_Mysql_broker(BaseModule):
         #print "DATA:", data
         #print "HOST ID:", host_id
         #print "SERVICE ID:", service_id
-        services_data = {'instance_id': data['instance_id'],
-                      'service_object_id': service_id,
-                      'host_object_id': host_id,
-                      'display_name': data['display_name'],
-                      'failure_prediction_options': '0',
-                      'check_interval': data['check_interval'],
-                      'retry_interval': data['retry_interval'],
-                      'max_check_attempts': data['max_check_attempts'],
-                      'first_notification_delay':
-                          data['first_notification_delay'],
-                      'notification_interval':
-                          data['notification_interval'],
-                      'flap_detection_enabled':
-                          data['flap_detection_enabled'],
-                      'low_flap_threshold': data['low_flap_threshold'],
-                      'high_flap_threshold': data['high_flap_threshold'],
-                      'process_performance_data': data['process_perf_data'],
-                      'freshness_checks_enabled': data['check_freshness'],
-                      'freshness_threshold': data['freshness_threshold'],
-                      'passive_checks_enabled':
-                          data['passive_checks_enabled'],
-                      'event_handler_enabled': data['event_handler_enabled'],
-                      'active_checks_enabled': data['active_checks_enabled'],
-                      'notifications_enabled': data['notifications_enabled'],
-                      'obsess_over_service': data['obsess_over_service'],
-                      'notes': data['notes'],
-                      'notes_url': data['notes_url']
-            }
+        services_data = {
+            'instance_id': data['instance_id'],
+            'service_object_id': service_id,
+            'host_object_id': host_id,
+            'display_name': data['display_name'],
+            'failure_prediction_options': '0',
+            'check_interval': data['check_interval'],
+            'retry_interval': data['retry_interval'],
+            'max_check_attempts': data['max_check_attempts'],
+            'first_notification_delay': data['first_notification_delay'],
+            'notification_interval': data['notification_interval'],
+            'flap_detection_enabled': data['flap_detection_enabled'],
+            'low_flap_threshold': data['low_flap_threshold'],
+            'high_flap_threshold': data['high_flap_threshold'],
+            'process_performance_data': data['process_perf_data'],
+            'freshness_checks_enabled': data['check_freshness'],
+            'freshness_threshold': data['freshness_threshold'],
+            'passive_checks_enabled': data['passive_checks_enabled'],
+            'event_handler_enabled': data['event_handler_enabled'],
+            'active_checks_enabled': data['active_checks_enabled'],
+            'notifications_enabled': data['notifications_enabled'],
+            'obsess_over_service': data['obsess_over_service'],
+            'notes': data['notes'],
+            'notes_url': data['notes_url']
+        }
 
         #print "HOST DATA", hosts_data
         query = self.db.create_insert_query('services', services_data)
 
         # Now create an hoststatus entry
-        servicestatus_data = {'instance_id': data['instance_id'],
-                              'service_object_id': service_id,
-                              'normal_check_interval': data['check_interval'],
-                              'retry_check_interval': data['retry_interval'],
-                              'max_check_attempts': data['max_check_attempts'],
-                              'current_state': data['state_id'],
-                              'state_type': data['state_type_id'],
-                              'passive_checks_enabled':
-                                  data['passive_checks_enabled'],
-                              'event_handler_enabled':
-                                  data['event_handler_enabled'],
-                              'active_checks_enabled':
-                                  data['active_checks_enabled'],
-                              'notifications_enabled':
-                                  data['notifications_enabled'],
-                              'obsess_over_service':
-                              data['obsess_over_service'],
-                              'process_performance_data':
-                                  data['process_perf_data'],
+        servicestatus_data = {
+            'instance_id': data['instance_id'],
+            'service_object_id': service_id,
+            'normal_check_interval': data['check_interval'],
+            'retry_check_interval': data['retry_interval'],
+            'max_check_attempts': data['max_check_attempts'],
+            'current_state': data['state_id'],
+            'state_type': data['state_type_id'],
+            'passive_checks_enabled': data['passive_checks_enabled'],
+            'event_handler_enabled': data['event_handler_enabled'],
+            'active_checks_enabled': data['active_checks_enabled'],
+            'notifications_enabled': data['notifications_enabled'],
+            'obsess_over_service': data['obsess_over_service'],
+            'process_performance_data': data['process_perf_data'],
 
-                              'check_type': 0,
-                              'current_check_attempt': data['attempt'],
-                              'execution_time': data['execution_time'],
-                              'latency': data['latency'],
-                              'output': data['output'],
-                              'perfdata': data['perf_data'],
-                              'last_check': de_unixify(data['last_chk']),
-                              'last_hard_state_change':
-                                  de_unixify(data['last_hard_state_change']),
-                              'last_state_change':
-                                  de_unixify(data['last_state_change']),
-                              'last_notification':
-                                  de_unixify(data['last_notification']),
-                              'current_notification_number':
-                                  data['current_notification_number'],
-                              'problem_has_been_acknowledged':
-                                  data['problem_has_been_acknowledged'],
-                              'acknowledgement_type':
-                                  data['acknowledgement_type'],
-                              # set check to 1 so nagvis is happy
-                              'has_been_checked': 1,
-                              'percent_state_change':
-                                  data['percent_state_change'],
-                              'is_flapping': data['is_flapping'],
-                              'flap_detection_enabled':
-                                  data['flap_detection_enabled'],
-                              }
+            'check_type': 0,
+            'current_check_attempt': data['attempt'],
+            'execution_time': data['execution_time'],
+            'latency': data['latency'],
+            'output': data['output'],
+            'perfdata': data['perf_data'],
+            'last_check': de_unixify(data['last_chk']),
+            'last_hard_state_change': de_unixify(data['last_hard_state_change']),
+            'last_state_change': de_unixify(data['last_state_change']),
+            'last_notification': de_unixify(data['last_notification']),
+            'current_notification_number': data['current_notification_number'],
+            'problem_has_been_acknowledged': data['problem_has_been_acknowledged'],
+            'acknowledgement_type': data['acknowledgement_type'],
+            # set check to 1 so nagvis is happy
+            'has_been_checked': 1,
+            'percent_state_change': data['percent_state_change'],
+            'is_flapping': data['is_flapping'],
+            'flap_detection_enabled': data['flap_detection_enabled'],
+        }
 
         # Centreon add some fields
         if self.centreon_version:
             servicestatus_data['long_output'] = data['long_output']
 
-        servicestatus_query = self.db.create_insert_query(
-            'servicestatus',
-            servicestatus_data
-            )
+        servicestatus_query = self.db.create_insert_query('servicestatus', servicestatus_data)
 
         return [query, servicestatus_query]
 
@@ -711,16 +656,18 @@ class Ndodb_Mysql_broker(BaseModule):
         data = b.data
 
         # First add to nagios_objects
-        objects_data = {'instance_id': data['instance_id'],
-                        'objecttype_id': 3,
-                        'name1': data['hostgroup_name'],
-                        'is_active': 1
-                        }
+        objects_data = {
+            'instance_id': data['instance_id'],
+            'objecttype_id': 3,
+            'name1': data['hostgroup_name'],
+            'is_active': 1
+        }
         object_query = self.db.create_insert_query('objects', objects_data)
         self.db.execute_query(object_query)
 
         hostgroup_id = self.get_hostgroup_object_id_by_name_sync(
-            data['hostgroup_name'], data['instance_id']
+            data['hostgroup_name'], \
+            data['instance_id']
             )
 
         # We can't get the id of the hostgroup in the base because
@@ -729,12 +676,13 @@ class Ndodb_Mysql_broker(BaseModule):
         # hostgroup and hostgroup_member
         hostgp_id = self.get_max_hostgroup_id_sync()
 
-        hostgroups_data = {'hostgroup_id': hostgp_id,
-                           'instance_id':  data['instance_id'],
-                           'config_type': 0,
-                           'hostgroup_object_id': hostgroup_id,
-                           'alias': data['alias']
-            }
+        hostgroups_data = {
+            'hostgroup_id': hostgp_id,
+            'instance_id': data['instance_id'],
+            'config_type': 0,
+            'hostgroup_object_id': hostgroup_id,
+            'alias': data['alias']
+        }
 
         query = self.db.create_insert_query('hostgroups', hostgroups_data)
         res = [query]
@@ -742,17 +690,14 @@ class Ndodb_Mysql_broker(BaseModule):
         # Ok, the hostgroups table is uptodate, now we add relations
         # between hosts and hostgroups
         for (h_id, h_name) in b.data['members']:
-            host_id = self.get_host_object_id_by_name_sync(
-                h_name, data['instance_id']
-                )
+            host_id = self.get_host_object_id_by_name_sync(h_name, data['instance_id'])
 
-            hostgroup_members_data = {'instance_id': data['instance_id'],
-                                      'hostgroup_id': hostgp_id,
-                                      'host_object_id': host_id
-                                      }
-            q = self.db.create_insert_query(
-                'hostgroup_members', hostgroup_members_data
-                )
+            hostgroup_members_data = {
+                'instance_id': data['instance_id'],
+                'hostgroup_id': hostgp_id,
+                'host_object_id': host_id
+            }
+            q = self.db.create_insert_query('hostgroup_members', hostgroup_members_data)
             res.append(q)
         return res
 
@@ -766,9 +711,12 @@ class Ndodb_Mysql_broker(BaseModule):
         data = b.data
 
         # First add to nagios_objects
-        objects_data = {'instance_id': data['instance_id'], 'objecttype_id': 4,
-                        'name1': data['servicegroup_name'], 'is_active': 1
-                        }
+        objects_data = {
+            'instance_id': data['instance_id'],
+            'objecttype_id': 4,
+            'name1': data['servicegroup_name'],
+            'is_active': 1
+        }
         object_query = self.db.create_insert_query('objects', objects_data)
         self.db.execute_query(object_query)
 
@@ -779,16 +727,15 @@ class Ndodb_Mysql_broker(BaseModule):
 
 
 
-        servicegroups_data = {'servicegroup_id': svcgp_id,
-                              'instance_id':  data['instance_id'],
-                              'config_type': 0,
-                              'servicegroup_object_id': servicegroup_id,
-                              'alias': data['alias']
-            }
+        servicegroups_data = {
+            'servicegroup_id': svcgp_id,
+            'instance_id': data['instance_id'],
+            'config_type': 0,
+            'servicegroup_object_id': servicegroup_id,
+            'alias': data['alias']
+        }
 
-        query = self.db.create_insert_query(
-            'servicegroups', servicegroups_data
-            )
+        query = self.db.create_insert_query('servicegroups', servicegroups_data)
         res = [query]
 
 
@@ -801,9 +748,7 @@ class Ndodb_Mysql_broker(BaseModule):
                                          'servicegroup_id': svcgp_id,
                                          'service_object_id': service_id
                                          }
-            q = self.db.create_insert_query(
-                'servicegroup_members', servicegroup_members_data
-                )
+            q = self.db.create_insert_query('servicegroup_members', servicegroup_members_data)
             res.append(q)
         return res
 
@@ -813,54 +758,49 @@ class Ndodb_Mysql_broker(BaseModule):
     def manage_host_check_result_brok(self, b):
         data = b.data
         #print "DATA", data
-        host_id = self.get_host_object_id_by_name_sync(
-            data['host_name'], data['instance_id']
-            )
+        host_id = self.get_host_object_id_by_name_sync(data['host_name'], data['instance_id'])
 
         # Only the host is impacted
         where_clause = {'host_object_id': host_id}
-        host_check_data = {'instance_id': data['instance_id'],
-                           'check_type': 0, 'is_raw_check': 0,
-                           'current_check_attempt': data['attempt'],
-                           'state': data['state_id'],
-                           'state_type': data['state_type_id'],
-                           'start_time': data['start_time'],
-                           'start_time_usec': 0,
-                           'execution_time': data['execution_time'],
-                           'latency': data['latency'],
-                           'return_code': data['return_code'],
-                           'output': data['output'],
-                           'perfdata': data['perf_data']
+        host_check_data = {
+            'instance_id': data['instance_id'],
+            'check_type': 0, 'is_raw_check': 0,
+            'current_check_attempt': data['attempt'],
+            'state': data['state_id'],
+            'state_type': data['state_type_id'],
+            'start_time': data['start_time'],
+            'start_time_usec': 0,
+            'execution_time': data['execution_time'],
+            'latency': data['latency'],
+            'return_code': data['return_code'],
+            'output': data['output'],
+            'perfdata': data['perf_data']
         }
         # Centreon add some fields
         if self.centreon_version:
             host_check_data['long_output'] = data['long_output']
 
-        query = self.db.create_update_query(
-            'hostchecks', host_check_data, where_clause
-            )
+        query = self.db.create_update_query('hostchecks', host_check_data, where_clause)
 
         # Now servicestatus
-        hoststatus_data = {'instance_id': data['instance_id'],
-                           'check_type': 0,
-                           'current_check_attempt': data['attempt'],
-                           'current_state': data['state_id'],
-                           'state_type': data['state_type_id'],
-                           'execution_time': data['execution_time'],
-                           'latency': data['latency'],
-                           'output': data['output'],
-                           'perfdata': data['perf_data'],
-                           'last_check': de_unixify(data['last_chk']),
-                           'percent_state_change':
-                               data['percent_state_change'],
+        hoststatus_data = {
+            'instance_id': data['instance_id'],
+            'check_type': 0,
+            'current_check_attempt': data['attempt'],
+            'current_state': data['state_id'],
+            'state_type': data['state_type_id'],
+            'execution_time': data['execution_time'],
+            'latency': data['latency'],
+            'output': data['output'],
+            'perfdata': data['perf_data'],
+            'last_check': de_unixify(data['last_chk']),
+            'percent_state_change': data['percent_state_change'],
         }
         # Centreon add some fields
         if self.centreon_version:
             hoststatus_data['long_output'] = data['long_output']
 
-        hoststatus_query = self.db.create_update_query(
-            'hoststatus', hoststatus_data, where_clause
-            )
+        hoststatus_query = self.db.create_update_query('hoststatus', hoststatus_data, where_clause)
 
         return [query, hoststatus_query]
 
@@ -871,18 +811,14 @@ class Ndodb_Mysql_broker(BaseModule):
     def manage_host_next_schedule_brok(self, b):
         data = b.data
 
-        host_id = self.get_host_object_id_by_name_sync(
-            data['host_name'], data['instance_id']
-            )
+        host_id = self.get_host_object_id_by_name_sync(data['host_name'], data['instance_id'])
 
         # Only the host is impacted
         where_clause = {'host_object_id': host_id}
 
         # Just update teh host status
         hoststatus_data = {'next_check': de_unixify(data['next_chk'])}
-        hoststatus_query = self.db.create_update_query(
-            'hoststatus', hoststatus_data, where_clause
-            )
+        hoststatus_query = self.db.create_update_query('hoststatus', hoststatus_data, where_clause)
 
         return [hoststatus_query]
 
@@ -893,48 +829,48 @@ class Ndodb_Mysql_broker(BaseModule):
         data = b.data
         #print "DATA", data
         service_id = self.get_service_object_id_by_name_sync(
-            data['host_name'], data['service_description'],
+            data['host_name'], \
+            data['service_description'], \
             data['instance_id']
             )
 
 
         # Only the service is impacted
         where_clause = {'service_object_id': service_id}
-        service_check_data = {'instance_id': data['instance_id'],
-                           'check_type': 0,
-                           'current_check_attempt': data['attempt'],
-                           'state': data['state_id'],
-                           'state_type': data['state_type_id'],
-                           'start_time': data['start_time'],
-                           'start_time_usec': 0,
-                           'execution_time': data['execution_time'],
-                           'latency': data['latency'],
-                           'return_code': data['return_code'],
-                           'output': data['output'],
-                           'perfdata': data['perf_data']
+        service_check_data = {
+            'instance_id': data['instance_id'],
+            'check_type': 0,
+            'current_check_attempt': data['attempt'],
+            'state': data['state_id'],
+            'state_type': data['state_type_id'],
+            'start_time': data['start_time'],
+            'start_time_usec': 0,
+            'execution_time': data['execution_time'],
+            'latency': data['latency'],
+            'return_code': data['return_code'],
+            'output': data['output'],
+            'perfdata': data['perf_data']
         }
 
         # Centreon add some fields
         if self.centreon_version:
             service_check_data['long_output'] = data['long_output']
 
-        query = self.db.create_update_query(
-            'servicechecks', service_check_data, where_clause
-            )
+        query = self.db.create_update_query('servicechecks', service_check_data, where_clause)
 
         # Now servicestatus
-        servicestatus_data = {'instance_id': data['instance_id'],
-                              'check_type': 0,
-                              'current_check_attempt': data['attempt'],
-                              'current_state': data['state_id'],
-                              'state_type': data['state_type_id'],
-                              'execution_time': data['execution_time'],
-                              'latency': data['latency'],
-                              'output': data['output'],
-                              'perfdata': data['perf_data'],
-                              'last_check': de_unixify(data['last_chk']),
-                              'percent_state_change':
-                                  data['percent_state_change'],
+        servicestatus_data = {
+            'instance_id': data['instance_id'],
+            'check_type': 0,
+            'current_check_attempt': data['attempt'],
+            'current_state': data['state_id'],
+            'state_type': data['state_type_id'],
+            'execution_time': data['execution_time'],
+            'latency': data['latency'],
+            'output': data['output'],
+            'perfdata': data['perf_data'],
+            'last_check': de_unixify(data['last_chk']),
+            'percent_state_change': data['percent_state_change'],
         }
 
         # Centreon add some fields
@@ -942,7 +878,9 @@ class Ndodb_Mysql_broker(BaseModule):
             servicestatus_data['long_output'] = data['long_output']
 
         servicestatus_query = self.db.create_update_query(
-            'servicestatus', servicestatus_data, where_clause
+            'servicestatus', \
+            servicestatus_data, \
+            where_clause
             )
 
         return [query, servicestatus_query]
@@ -980,96 +918,76 @@ class Ndodb_Mysql_broker(BaseModule):
     def manage_update_host_status_brok(self, b):
         data = b.data
 
-        host_id = self.get_host_object_id_by_name_sync(
-            data['host_name'], data['instance_id']
-            )
+        host_id = self.get_host_object_id_by_name_sync(data['host_name'], data['instance_id'])
 
 
-        hosts_data = {'instance_id': data['instance_id'],
-                      'failure_prediction_options': '0',
-                      'check_interval': data['check_interval'],
-                      'retry_interval': data['retry_interval'],
-                      'max_check_attempts': data['max_check_attempts'],
-                      'first_notification_delay':
-                          data['first_notification_delay'],
-                      'notification_interval': data['notification_interval'],
-                      'flap_detection_enabled':
-                          data['flap_detection_enabled'],
-                      'low_flap_threshold': data['low_flap_threshold'],
-                      'high_flap_threshold': data['high_flap_threshold'],
-                      'process_performance_data': data['process_perf_data'],
-                      'freshness_checks_enabled': data['check_freshness'],
-                      'freshness_threshold': data['freshness_threshold'],
-                      'passive_checks_enabled':
-                          data['passive_checks_enabled'],
-                      'event_handler_enabled': data['event_handler_enabled'],
-                      'active_checks_enabled': data['active_checks_enabled'],
-                      'notifications_enabled': data['notifications_enabled'],
-                      'obsess_over_host': data['obsess_over_host'],
-                      'notes': data['notes'],
-                      'notes_url': data['notes_url']
-            }
+        hosts_data = {
+            'instance_id': data['instance_id'],
+            'failure_prediction_options': '0',
+            'check_interval': data['check_interval'],
+            'retry_interval': data['retry_interval'],
+            'max_check_attempts': data['max_check_attempts'],
+            'first_notification_delay': data['first_notification_delay'],
+            'notification_interval': data['notification_interval'],
+            'flap_detection_enabled': data['flap_detection_enabled'],
+            'low_flap_threshold': data['low_flap_threshold'],
+            'high_flap_threshold': data['high_flap_threshold'],
+            'process_performance_data': data['process_perf_data'],
+            'freshness_checks_enabled': data['check_freshness'],
+            'freshness_threshold': data['freshness_threshold'],
+            'passive_checks_enabled': data['passive_checks_enabled'],
+            'event_handler_enabled': data['event_handler_enabled'],
+            'active_checks_enabled': data['active_checks_enabled'],
+            'notifications_enabled': data['notifications_enabled'],
+            'obsess_over_host': data['obsess_over_host'],
+            'notes': data['notes'],
+            'notes_url': data['notes_url']
+        }
         # Only the host is impacted
         where_clause = {'host_object_id': host_id}
 
         query = self.db.create_update_query('hosts', hosts_data, where_clause)
 
         # Now update an hoststatus entry
-        hoststatus_data = {'instance_id': data['instance_id'],
-                           'host_object_id': host_id,
-                           'normal_check_interval': data['check_interval'],
-                           'retry_check_interval': data['retry_interval'],
-                           'max_check_attempts': data['max_check_attempts'],
-                           'current_state': data['state_id'],
-                           'state_type': data['state_type_id'],
-                           'passive_checks_enabled':
-                               data['passive_checks_enabled'],
-                           'event_handler_enabled':
-                               data['event_handler_enabled'],
-                           'active_checks_enabled':
-                               data['active_checks_enabled'],
-                           'notifications_enabled':
-                               data['notifications_enabled'],
-                           'obsess_over_host': data['obsess_over_host'],
-                           'process_performance_data':
-                               data['process_perf_data'],
-                           'check_type': 0,
-                           'current_check_attempt': data['attempt'],
-                           'execution_time': data['execution_time'],
-                           'latency': data['latency'],
-                           'output': data['output'],
-                           'perfdata': data['perf_data'],
-                           'last_check': de_unixify(data['last_chk']),
-                           'last_hard_state_change':
-                           de_unixify(data['last_hard_state_change']),
-                           'last_state_change':
-                                de_unixify(data['last_state_change']),
-                           'last_notification':
-                               de_unixify(data['last_notification']),
-                           'current_notification_number':
-                               data['current_notification_number'],
-                           'problem_has_been_acknowledged':
-                               data['problem_has_been_acknowledged'],
-                           'acknowledgement_type':
-                               data['acknowledgement_type'],
-                           # set check to 1 so nagvis is happy
-                           'has_been_checked': 1,
-                           'is_flapping': data['is_flapping'],
-                           'percent_state_change':
-                               data['percent_state_change'],
-                           'flap_detection_enabled':
-                               data['flap_detection_enabled'],
-                           }
+        hoststatus_data = {
+            'instance_id': data['instance_id'],
+            'host_object_id': host_id,
+            'normal_check_interval': data['check_interval'],
+            'retry_check_interval': data['retry_interval'],
+            'max_check_attempts': data['max_check_attempts'],
+            'current_state': data['state_id'],
+            'state_type': data['state_type_id'],
+            'passive_checks_enabled': data['passive_checks_enabled'],
+            'event_handler_enabled': data['event_handler_enabled'],
+            'active_checks_enabled': data['active_checks_enabled'],
+            'notifications_enabled': data['notifications_enabled'],
+            'obsess_over_host': data['obsess_over_host'],
+            'process_performance_data': data['process_perf_data'],
+            'check_type': 0,
+            'current_check_attempt': data['attempt'],
+            'execution_time': data['execution_time'],
+            'latency': data['latency'],
+            'output': data['output'],
+            'perfdata': data['perf_data'],
+            'last_check': de_unixify(data['last_chk']),
+            'last_hard_state_change': de_unixify(data['last_hard_state_change']),
+            'last_state_change': de_unixify(data['last_state_change']),
+            'last_notification': de_unixify(data['last_notification']),
+            'current_notification_number': data['current_notification_number'],
+            'problem_has_been_acknowledged': data['problem_has_been_acknowledged'],
+            'acknowledgement_type': data['acknowledgement_type'],
+            # set check to 1 so nagvis is happy
+            'has_been_checked': 1,
+            'is_flapping': data['is_flapping'],
+            'percent_state_change': data['percent_state_change'],
+            'flap_detection_enabled': data['flap_detection_enabled'],
+        }
 
         # Centreon add some fields
         if self.centreon_version:
             hoststatus_data['long_output'] = data['long_output']
 
-        hoststatus_query = self.db.create_update_query(
-            'hoststatus',
-            hoststatus_data,
-            where_clause
-            )
+        hoststatus_query = self.db.create_update_query('hoststatus', hoststatus_data, where_clause)
 
         return [query, hoststatus_query]
 
@@ -1086,95 +1004,70 @@ class Ndodb_Mysql_broker(BaseModule):
             )
 
 
-        services_data = {'instance_id': data['instance_id'],
-                      'display_name': data['display_name'],
-                      'failure_prediction_options': '0',
-                      'check_interval': data['check_interval'],
-                      'retry_interval': data['retry_interval'],
-                      'max_check_attempts': data['max_check_attempts'],
-                      'first_notification_delay':
-                          data['first_notification_delay'],
-                      'notification_interval':
-                          data['notification_interval'],
-                      'flap_detection_enabled':
-                          data['flap_detection_enabled'],
-                      'low_flap_threshold': data['low_flap_threshold'],
-                      'high_flap_threshold': data['high_flap_threshold'],
-                      'process_performance_data': data['process_perf_data'],
-                      'freshness_checks_enabled': data['check_freshness'],
-                      'freshness_threshold': data['freshness_threshold'],
-                      'passive_checks_enabled':
-                          data['passive_checks_enabled'],
-                      'event_handler_enabled':
-                          data['event_handler_enabled'],
-                      'active_checks_enabled':
-                          data['active_checks_enabled'],
-                      'notifications_enabled':
-                          data['notifications_enabled'],
-                      'obsess_over_service': data['obsess_over_service'],
-                      'notes': data['notes'],
-                      'notes_url': data['notes_url']
-            }
+        services_data = {
+            'instance_id': data['instance_id'],
+            'display_name': data['display_name'],
+            'failure_prediction_options': '0',
+            'check_interval': data['check_interval'],
+            'retry_interval': data['retry_interval'],
+            'max_check_attempts': data['max_check_attempts'],
+            'first_notification_delay': data['first_notification_delay'],
+            'notification_interval': data['notification_interval'],
+            'flap_detection_enabled': data['flap_detection_enabled'],
+            'low_flap_threshold': data['low_flap_threshold'],
+            'high_flap_threshold': data['high_flap_threshold'],
+            'process_performance_data': data['process_perf_data'],
+            'freshness_checks_enabled': data['check_freshness'],
+            'freshness_threshold': data['freshness_threshold'],
+            'passive_checks_enabled': data['passive_checks_enabled'],
+            'event_handler_enabled': data['event_handler_enabled'],
+            'active_checks_enabled': data['active_checks_enabled'],
+            'notifications_enabled': data['notifications_enabled'],
+            'obsess_over_service': data['obsess_over_service'],
+            'notes': data['notes'],
+            'notes_url': data['notes_url']
+        }
 
         # Only the service is impacted
-        where_clause = {'service_object_id': service_id,
-                        'instance_id': data['instance_id']}
+        where_clause = {'service_object_id': service_id, 'instance_id': data['instance_id']}
         # where_clause = {'host_name': data['host_name']}
-        query = self.db.create_update_query(
-            'services',
-            services_data,
-            where_clause
-            )
+        query = self.db.create_update_query('services', services_data, where_clause)
 
         # Now create an hoststatus entry
-        servicestatus_data = {'instance_id': data['instance_id'],
-                              'service_object_id': service_id,
-                              'normal_check_interval': data['check_interval'],
-                              'retry_check_interval': data['retry_interval'],
-                              'max_check_attempts':
-                                  data['max_check_attempts'],
-                              'current_state': data['state_id'],
-                              'state_type': data['state_type_id'],
-                              'passive_checks_enabled':
-                                  data['passive_checks_enabled'],
-                              'event_handler_enabled':
-                                  data['event_handler_enabled'],
-                              'active_checks_enabled':
-                                  data['active_checks_enabled'],
-                              'notifications_enabled':
-                                  data['notifications_enabled'],
-                              'obsess_over_service':
-                                  data['obsess_over_service'],
-                              'process_performance_data':
-                                  data['process_perf_data'],
+        servicestatus_data = {
+            'instance_id': data['instance_id'],
+            'service_object_id': service_id,
+            'normal_check_interval': data['check_interval'],
+            'retry_check_interval': data['retry_interval'],
+            'max_check_attempts': data['max_check_attempts'],
+            'current_state': data['state_id'],
+            'state_type': data['state_type_id'],
+            'passive_checks_enabled': data['passive_checks_enabled'],
+            'event_handler_enabled': data['event_handler_enabled'],
+            'active_checks_enabled': data['active_checks_enabled'],
+            'notifications_enabled': data['notifications_enabled'],
+            'obsess_over_service': data['obsess_over_service'],
+            'process_performance_data': data['process_perf_data'],
 
-                              'check_type': 0,
-                              'current_check_attempt': data['attempt'],
-                              'execution_time': data['execution_time'],
-                              'latency': data['latency'],
-                              'output': data['output'],
-                              'perfdata': data['perf_data'],
-                              'last_check': de_unixify(data['last_chk']),
-                              'last_hard_state_change':
-                                  de_unixify(data['last_hard_state_change']),
-                              'last_state_change':
-                                  de_unixify(data['last_state_change']),
-                              'last_notification':
-                                  de_unixify(data['last_notification']),
-                              'current_notification_number':
-                                  data['current_notification_number'],
-                              'problem_has_been_acknowledged':
-                                  data['problem_has_been_acknowledged'],
-                              'acknowledgement_type':
-                                  data['acknowledgement_type'],
-                              # set check to 1 so nagvis is happy
-                              'has_been_checked': 1,
-                              'is_flapping': data['is_flapping'],
-                              'percent_state_change':
-                                  data['percent_state_change'],
-                              'flap_detection_enabled':
-                                  data['flap_detection_enabled'],
-                              }
+            'check_type': 0,
+            'current_check_attempt': data['attempt'],
+            'execution_time': data['execution_time'],
+            'latency': data['latency'],
+            'output': data['output'],
+            'perfdata': data['perf_data'],
+            'last_check': de_unixify(data['last_chk']),
+            'last_hard_state_change': de_unixify(data['last_hard_state_change']),
+            'last_state_change': de_unixify(data['last_state_change']),
+            'last_notification': de_unixify(data['last_notification']),
+            'current_notification_number': data['current_notification_number'],
+            'problem_has_been_acknowledged': data['problem_has_been_acknowledged'],
+            'acknowledgement_type': data['acknowledgement_type'],
+            # set check to 1 so nagvis is happy
+            'has_been_checked': 1,
+            'is_flapping': data['is_flapping'],
+            'percent_state_change': data['percent_state_change'],
+            'flap_detection_enabled': data['flap_detection_enabled'],
+        }
 
         # Centreon add some fields
         if self.centreon_version:
@@ -1182,8 +1075,8 @@ class Ndodb_Mysql_broker(BaseModule):
 
         where_clause = {'service_object_id': service_id}
         servicestatus_query = self.db.create_update_query(
-            'servicestatus',
-            servicestatus_data,
+            'servicestatus', \
+            servicestatus_data, \
             where_clause
             )
 
@@ -1197,11 +1090,12 @@ class Ndodb_Mysql_broker(BaseModule):
         data = b.data
 
         # First add to nagios_objects
-        objects_data = {'instance_id': data['instance_id'],
-                        'objecttype_id': 10,
-                        'name1': data['contact_name'],
-                        'is_active': 1
-                        }
+        objects_data = {
+            'instance_id': data['instance_id'],
+            'objecttype_id': 10,
+            'name1': data['contact_name'],
+            'is_active': 1
+        }
         object_query = self.db.create_insert_query('objects', objects_data)
         self.db.execute_query(object_query)
 
@@ -1210,16 +1104,15 @@ class Ndodb_Mysql_broker(BaseModule):
             data['instance_id']
             )
 
-        contacts_data = {'instance_id': data['instance_id'],
-                      'contact_object_id': contact_obj_id,
-                      'alias': data['alias'],
-                      'email_address': data['email'],
-                      'pager_address': data['pager'],
-                      'host_notifications_enabled':
-                          data['host_notifications_enabled'],
-                      'service_notifications_enabled':
-                          data['service_notifications_enabled'],
-            }
+        contacts_data = {
+            'instance_id': data['instance_id'],
+            'contact_object_id': contact_obj_id,
+            'alias': data['alias'],
+            'email_address': data['email'],
+            'pager_address': data['pager'],
+            'host_notifications_enabled': data['host_notifications_enabled'],
+            'service_notifications_enabled': data['service_notifications_enabled'],
+        }
 
         #print "HOST DATA", hosts_data
         query = self.db.create_insert_query('contacts', contacts_data)
@@ -1232,11 +1125,12 @@ class Ndodb_Mysql_broker(BaseModule):
         data = b.data
 
         # First add to nagios_objects
-        objects_data = {'instance_id': data['instance_id'],
-                        'objecttype_id': 11,
-                        'name1': data['contactgroup_name'],
-                        'is_active': 1
-                        }
+        objects_data = {
+            'instance_id': data['instance_id'],
+            'objecttype_id': 11,
+            'name1': data['contactgroup_name'],
+            'is_active': 1
+        }
         object_query = self.db.create_insert_query('objects', objects_data)
         self.db.execute_query(object_query)
 
@@ -1246,35 +1140,29 @@ class Ndodb_Mysql_broker(BaseModule):
             )
         ctcgp_id = self.get_max_contactgroup_id_sync()
 
-        contactgroups_data = {'contactgroup_id': ctcgp_id,
-                           'instance_id':  data['instance_id'],
-                           'config_type': 0,
-                           'contactgroup_object_id': contactgroup_id,
-                           'alias': data['alias']
-            }
+        contactgroups_data = {
+            'contactgroup_id': ctcgp_id,
+            'instance_id': data['instance_id'],
+            'config_type': 0,
+            'contactgroup_object_id': contactgroup_id,
+            'alias': data['alias']
+        }
 
-        query = self.db.create_insert_query(
-            'contactgroups',
-            contactgroups_data
-            )
+        query = self.db.create_insert_query('contactgroups', contactgroups_data)
         res = [query]
 
         # Ok, the hostgroups table is uptodate, now we add relations
         # between hosts and hostgroups
         for (c_id, c_name) in b.data['members']:
 
-            contact_obj_id = self.get_contact_object_id_by_name_sync(
-                c_name,
-                data['instance_id']
-                )
+            contact_obj_id = self.get_contact_object_id_by_name_sync(c_name, data['instance_id'])
 
-            contactgroup_members_data = {'instance_id': data['instance_id'],
-                                         'contactgroup_id': ctcgp_id,
-                                         'contact_object_id': contact_obj_id}
-            q = self.db.create_insert_query(
-                'contactgroup_members',
-                contactgroup_members_data
-                )
+            contactgroup_members_data = {
+                'instance_id': data['instance_id'],
+                 'contactgroup_id': ctcgp_id,
+                 'contact_object_id': contact_obj_id
+            }
+            q = self.db.create_insert_query('contactgroup_members', contactgroup_members_data)
             res.append(q)
         return res
 
@@ -1292,16 +1180,14 @@ class Ndodb_Mysql_broker(BaseModule):
                 data['instance_id']
                 )
         else:
-            host_id = self.get_host_object_id_by_name_sync(
-            data['host_name'],
-            data['instance_id']
-            )
+            host_id = self.get_host_object_id_by_name_sync(data['host_name'], data['instance_id'])
 
-        notification_data = {'instance_id':  data['instance_id'],
-                             'start_time': de_unixify(data['start_time']),
-                             'end_time': de_unixify(data['end_time']),
-                             'state': data['state']
-                             }
+        notification_data = {
+            'instance_id': data['instance_id'],
+             'start_time': de_unixify(data['start_time']),
+             'end_time': de_unixify(data['end_time']),
+             'state': data['state']
+        }
 
         query = self.db.create_insert_query('notifications', notification_data)
         return [query]

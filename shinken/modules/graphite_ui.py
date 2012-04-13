@@ -24,7 +24,9 @@ for mainly get graphs and links.
 
 import re
 import socket
+import os
 
+from string import Template
 from shinken.basemodule import BaseModule
 
 #print "Loaded AD module"
@@ -47,7 +49,8 @@ class Graphite_Webui(BaseModule):
     def __init__(self, modconf):
         BaseModule.__init__(self, modconf)
         self.uri = getattr(modconf, 'uri', None)
-        
+        self.templates_path = getattr(modconf, 'templates_path', '/tmp')
+
         if not self.uri:
             raise Exception('The WebUI Graphite module is missing uri parameter.')
 
@@ -118,6 +121,40 @@ class Graphite_Webui(BaseModule):
 
         t = elt.__class__.my_type
         r = []
+
+        # Do we have a template ?
+        # Don't take the args of the check_command..
+        if os.path.isfile(self.templates_path+'/'+elt.check_command.get_name().split('!')[0]):
+            template_html = ''
+            with open(self.templates_path+'/'+elt.check_command.get_name().split('!')[0],'r') as template_file:
+                template_html += template_file.read()
+            # Read the template file, as template string python object
+            template_file.closed
+            html=Template(template_html)
+            # Build the dict to instanciate the template string
+            values = {}
+            values['graphstart'] = graphstart
+            values['graphend'] = graphend 
+            if t == 'host':
+                values['host'] = elt.host_name
+                values['service'] = '__HOST__'
+            if t == 'service':
+                values['host'] = elt.host.host_name
+                values['service'] = elt.service_description
+            values['uri'] = self.uri
+            # Split, we may have several images.
+            for img in html.substitute(values).split('\n'):
+                if not img == "":
+                    v = {}
+                    v['link'] = self.uri
+                    # Relace " (default in graphite) with ' 
+                    # to avoid url truncation 
+                    v['img_src'] = img.replace('"','"')
+                    r.append(v)
+            # No need to continue, we have the images already.      					
+            return r
+             
+        # If no template is present, then the usual way
 
         if t == 'host':
             couples = self.get_metric_and_value(elt.perf_data)

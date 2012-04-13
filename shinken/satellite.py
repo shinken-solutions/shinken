@@ -485,7 +485,7 @@ class Satellite(BaseSatellite):
         cls_type = elt.__class__.my_type
         if cls_type == 'brok':
             # For brok, we TAG brok with our instance_id
-            elt.data['instance_id'] = 0
+            elt.instance_id = 0
             self.broks[elt.id] = elt
             return
         elif cls_type == 'externalcommand':

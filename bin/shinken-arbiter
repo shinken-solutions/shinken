@@ -87,6 +87,9 @@ parser.add_option('--debugfile', dest='debug_file',
 parser.add_option("-v", "--verify-config",
                   dest="verify_only", action="store_true",
                   help="Verify config file and exit")
+parser.add_option("-p", "--profile",
+                  dest="profile",
+                  help="Dump a profile file. Need the python cProfile librairy")
 
 opts, args = parser.parse_args()
 
@@ -99,7 +102,9 @@ if args:
 # Protect for windows multiprocessing that will RELAUNCH all
 if __name__ == '__main__':
     daemon = Arbiter(debug=opts.debug_file is not None, **opts.__dict__)
-    daemon.main()
-# For perf tuning :
-#import cProfile
-#cProfile.run('''daemon.main()''', '/tmp/arbiter.profile')
+    if not opts.profile:
+        daemon.main()
+    else:
+        # For perf tuning :
+        import cProfile
+        cProfile.run('''daemon.main()''', opts.profile)

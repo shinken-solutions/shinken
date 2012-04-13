@@ -495,7 +495,7 @@ class Regenerator(object):
             print "Not good!", exp
             return
 
-        safe_print("Creating an host: %s in instance %d" % (hname, inst_id))
+        #safe_print("Creating an host: %s in instance %d" % (hname, inst_id))
 
         h = Host({})
         self.update_element(h, data)        
@@ -561,10 +561,11 @@ class Regenerator(object):
             print "Not good!", exp
             return
 
-        safe_print("Creating a service: %s/%s in instance %d" % (hname, sdesc, inst_id))
-
+        #safe_print("Creating a service: %s/%s in instance %d" % (hname, sdesc, inst_id))
+        
         s = Service({})
         self.update_element(s, data)
+        
 
         # Now we will only keep some flat data, instead of useless real objects
         # Change contacts and periods with their name only
@@ -612,7 +613,6 @@ class Regenerator(object):
         # We will link hosts into hostgroups later
         # so now only save it
         inp_servicegroups[sg.id] = sg
-
 
 
     # For Contacts, it's a global value, so 2 cases :

@@ -20,13 +20,13 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
-
+import cPickle
 
 class Brok:
     """A Brok is a piece of information exported by Shinken to the Broker.
     Broker can do whatever he wants with it.
     """
-    __slots__ = ('__dict__', 'id', 'type', 'data')
+    __slots__ = ('__dict__', 'id', 'type', 'data', 'prepared', 'instance_id')
     id = 0
     my_type = 'brok'
 
@@ -34,7 +34,18 @@ class Brok:
         self.type = type
         self.id = self.__class__.id
         self.__class__.id += 1
-        self.data = data
+        self.data = cPickle.dumps(data, cPickle.HIGHEST_PROTOCOL)
+        self.prepared = False
 
     def __str__(self):
         return str(self.__dict__) + '\n'
+
+    # We unserialize the data, and if some prop were
+    # add after teh serialize pass, we integer them in the data
+    def prepare(self):
+        if not self.prepared:
+            self.data = cPickle.loads(self.data)
+            if hasattr(self, 'instance_id'):
+                self.data['instance_id'] = self.instance_id
+        self.prepared = True
+    

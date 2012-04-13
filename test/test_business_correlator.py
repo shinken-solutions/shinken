@@ -1206,6 +1206,7 @@ class TestConfigBroken(ShinkenTest):
         self.assert_(not self.conf.conf_is_correct)
 
         # Get the arbiter's log broks
+        [b.prepare() for b in self.broks.values()]
         logs = [b.data['log'] for b in self.broks.values() if b.type == 'log']
 
         # Simple_1Of_1unk_svc : my business rule is invalid

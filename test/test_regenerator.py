@@ -22,7 +22,15 @@
 # This file is used to test reading and processing of config files
 #
 
+import time, sys
+
+
+sys.path.append("..")
+sys.path.append("../shinken")
+
 #It's ugly I know....
+import shinken
+from shinken.objects import *
 from shinken_test import *
 from shinken.misc.regenerator import Regenerator
 
@@ -84,22 +92,28 @@ class TestRegenerator(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
+        for h in self.sched.hosts:
+            h.realm = h.realm.get_name()
         self.sched.fill_initial_broks()
         self.rg = Regenerator()
 
         # Got the initial creation ones
         ids = self.sched.broks.keys()
         ids.sort()
+        t0 = time.time()
         for i in ids:
             b = self.sched.broks[i]
             print "Manage b", b.type
+            b.prepare()
             self.rg.manage_brok(b)
+        t1 = time.time()
+        print 'First inc', t1 - t0, len(self.sched.broks)
         self.sched.broks.clear()
 
         self.look_for_same_values()
 
+
         print "Get the hosts and services"
-        now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
         host.act_depend_of = [] # ignore the router
@@ -113,17 +127,35 @@ class TestRegenerator(ShinkenTest):
         self.assert_(host.state == 'DOWN')
         self.assert_(host.state_type == 'HARD')
 
-
         ids = self.sched.broks.keys()
         ids.sort()
+        t0 = time.time()
         for i in ids:
             b = self.sched.broks[i]
             print "Manage b", b.type
+            b.prepare()
             self.rg.manage_brok(b)
+        t1 = time.time()
+        print 'Time', t1 - t0
         self.sched.broks.clear()
 
         self.look_for_same_values()
 
+        print 'Time', t1 - t0
+
+        
+        b = svc.get_initial_status_brok()
+        b.prepare()
+        print "GO BENCH!"
+        t0 = time.time()
+        for i in xrange(1, 1000):
+            b = svc.get_initial_status_brok()
+            b.prepare()
+            s = Service({})
+            for (prop, value) in b.data.iteritems():
+                setattr(s, prop, value)
+        t1 = time.time()
+        print "Bench end:", t1 - t0
         
 
         
