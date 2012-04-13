@@ -74,7 +74,8 @@ class Graphite_broker(BaseModule):
             elts = e.split('=', 1)
             if len(elts) != 2:
                 continue
-            name = elts[0]
+            # Replace non alphanum chars with _
+            name = re.sub("[^a-zA-Z0-9]", "_", elts[0])
             raw = elts[1]
             # get the first value of ;
             if ';' in raw:
@@ -102,8 +103,8 @@ class Graphite_broker(BaseModule):
         data = b.data
         
         perf_data = data['perf_data']
-        hname = data['host_name']
-        desc = data['service_description']
+        hname = re.sub("[^a-zA-Z0-9]", "_", data['host_name'])
+        desc = re.sub("[^a-zA-Z0-9]", "_", data['service_description'])
         check_time = int(data['last_chk'])
 
 #        print "Graphite:", hname, desc, check_time, perf_data
@@ -129,7 +130,7 @@ class Graphite_broker(BaseModule):
         data = b.data
         
         perf_data = data['perf_data']
-        hname = data['host_name']
+        hname = re.sub("[^a-zA-Z0-9]", "_", data['host_name'])
         check_time = int(data['last_chk'])
 
  #       print "Graphite:", hname, check_time, perf_data
