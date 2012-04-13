@@ -74,7 +74,7 @@ class Graphite_broker(BaseModule):
             elts = e.split('=', 1)
             if len(elts) != 2:
                 continue
-            # Replace non alphanum chars with _
+            #name = elts[0]
             name = re.sub("[^a-zA-Z0-9]", "_", elts[0])
             raw = elts[1]
             # get the first value of ;
