@@ -60,7 +60,7 @@ class Pickle_retention_generic(BaseModule):
     # Ok, main function that is called in the retention creation pass
     def hook_save_retention(self, daemon):
         log_mgr = logger
-        logger.log("[PickleRetentionGeneric] asking me to update the retention objects")
+        logger.info("[PickleRetentionGeneric] asking me to update the retention objects")
 
         #Now the flat file method
         try:

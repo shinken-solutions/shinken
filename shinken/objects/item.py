@@ -330,7 +330,7 @@ Like temporary attributes such as "imported_from", etc.. """
         if self.configuration_errors != []:
             state = False
             for err in self.configuration_errors:
-                logger.log(err)
+                logger.info(err)
 
         for prop, entry in properties.items():
             if not hasattr(self, prop) and entry.required:

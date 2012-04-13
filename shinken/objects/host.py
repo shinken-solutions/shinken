@@ -376,7 +376,7 @@ class Host(SchedulingItem):
         for prop, entry in cls.properties.items():
             if prop not in special_properties:
                 if not hasattr(self, prop) and entry.required:
-                    logger.log("%s : I do not have %s" % (self.get_name(), prop))
+                    logger.info("%s : I do not have %s" % (self.get_name(), prop))
                     state = False #Bad boy...
 
         # Then look if we have some errors in the conf
@@ -388,39 +388,39 @@ class Host(SchedulingItem):
         if self.configuration_errors != []:
             state = False
             for err in self.configuration_errors:
-                logger.log(err)
+                logger.info(err)
 
         if not hasattr(self, 'notification_period'):
             self.notification_period = None
 
         # Ok now we manage special cases...
         if self.notifications_enabled and self.contacts == []:
-            logger.log("Warning : the host %s has no contacts nor contact_groups in (%s)" % (self.get_name(), source))
+            logger.warning("The host %s has no contacts nor contact_groups in (%s)" % (self.get_name(), source))
         
         if getattr(self, 'check_command', None) is None:
-            logger.log("%s : I've got no check_command" % self.get_name())
+            logger.info("%s : I've got no check_command" % self.get_name())
             state = False
         # Ok got a command, but maybe it's invalid
         else:
             if not self.check_command.is_valid():
-                logger.log("%s : my check_command %s is invalid" % (self.get_name(), self.check_command.command))
+                logger.info("%s : my check_command %s is invalid" % (self.get_name(), self.check_command.command))
                 state = False
             if self.got_business_rule:
                 if not self.business_rule.is_valid():
-                    logger.log("%s : my business rule is invalid" % (self.get_name(),))
+                    logger.info("%s : my business rule is invalid" % (self.get_name(),))
                     for bperror in self.business_rule.configuration_errors:
-                        logger.log("%s : %s" % (self.get_name(), bperror))
+                        logger.info("%s : %s" % (self.get_name(), bperror))
                     state = False
         
         if not hasattr(self, 'notification_interval') and self.notifications_enabled == True:
-            logger.log("%s : I've got no notification_interval but I've got notifications enabled" % self.get_name())
+            logger.info("%s : I've got no notification_interval but I've got notifications enabled" % self.get_name())
             state = False
 
         # If active check is enabled with a check_interval!=0, we must have a check_period
         if ( getattr(self, 'active_checks_enabled', False) 
              and getattr(self, 'check_period', None) is None 
              and getattr(self, 'check_interval', 1) != 0 ):
-            logger.log("%s : My check_period is not correct" % self.get_name())
+            logger.info("%s : My check_period is not correct" % self.get_name())
             state = False
         
         if not hasattr(self, 'check_period'):
@@ -429,7 +429,7 @@ class Host(SchedulingItem):
         if hasattr(self, 'host_name'):
             for c in cls.illegal_object_name_chars:
                 if c in self.host_name:
-                    logger.log("%s : My host_name got the caracter %s that is not allowed." % (self.get_name(), c))
+                    logger.info("%s : My host_name got the caracter %s that is not allowed." % (self.get_name(), c))
                     state = False
 
         return state
@@ -677,7 +677,7 @@ class Host(SchedulingItem):
     # Warning: The results of host 'Server' are stale by 0d 0h 0m 58s (threshold=0d 1h 0m 0s).
     # I'm forcing an immediate check of the host.
     def raise_freshness_log_entry(self, t_stale_by, t_threshold):
-        logger.log("Warning: The results of host '%s' are stale by %s (threshold=%s).  I'm forcing an immediate check of the host." \
+        logger.warning("The results of host '%s' are stale by %s (threshold=%s).  I'm forcing an immediate check of the host." \
                       % (self.get_name(), format_t_into_dhms_format(t_stale_by), format_t_into_dhms_format(t_threshold)))
 
 
@@ -718,7 +718,7 @@ class Host(SchedulingItem):
 
     #If there is no valid time for next check, raise a log entry
     def raise_no_next_check_log_entry(self):
-        logger.log("Warning : I cannot schedule the check for the host '%s' because there is not future valid time" % \
+        logger.warning("I cannot schedule the check for the host '%s' because there is not future valid time" % \
                       (self.get_name()))
 
     #Raise a log entry when a downtime begins
@@ -759,7 +759,7 @@ class Host(SchedulingItem):
             if c.output != self.output:
                 need_stalk = False
         if need_stalk:
-            logger.log("Stalking %s : %s" % (self.get_name(), self.output))
+            logger.info("Stalking %s : %s" % (self.get_name(), self.output))
 
 
     #fill act_depend_of with my parents (so network dep)
@@ -1097,7 +1097,7 @@ class Hosts(Items):
 
         # and raise errors about it
         for h in host_in_loops:
-            logger.log("Error: The host '%s' is part of a circular parent/child chain!" % h.get_name())
+            logger.error("The host '%s' is part of a circular parent/child chain!" % h.get_name())
             r = False
 
         return r

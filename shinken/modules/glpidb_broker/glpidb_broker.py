@@ -179,7 +179,7 @@ class Glpidb_broker(BaseModule):
 
     #Host result
     #def manage_host_check_result_brok(self, b):
-        #logger.log("GLPI : data in DB %s " % b)
+        #logger.info("GLPI : data in DB %s " % b)
         #b.data['date'] = time.strftime('%Y-%m-%d %H:%M:%S')
         #query = self.db_backend.create_insert_query('glpi_plugin_monitoring_serviceevents', b.data)
         #return [query]
@@ -187,7 +187,7 @@ class Glpidb_broker(BaseModule):
 
     #Host result
     #def manage_host_check_resultup_brok(self, b):
-        #logger.log("GLPI : data in DB %s " % b)
+        #logger.info("GLPI : data in DB %s " % b)
         #new_data = copy.deepcopy(b.data)
         #new_data['last_check'] = time.strftime('%Y-%m-%d %H:%M:%S')
         #new_data['id'] = b.data['plugin_monitoring_services_id']
@@ -202,7 +202,7 @@ class Glpidb_broker(BaseModule):
 
     #Service result
     def manage_service_check_result_brok(self, b):
-        #logger.log("GLPI : data in DB %s " % b)
+        #logger.info("GLPI : data in DB %s " % b)
         try:
             b.data['plugin_monitoring_servicescatalogs_id']
             return ''
@@ -215,7 +215,7 @@ class Glpidb_broker(BaseModule):
 
     #Service result
     def manage_service_check_resultup_brok(self, b):
-        logger.log("GLPI : data in DB %s " % b.data)
+        logger.info("GLPI : data in DB %s " % b.data)
         new_data = copy.deepcopy(b.data)
         new_data['last_check'] = time.strftime('%Y-%m-%d %H:%M:%S')
         del new_data['perf_data']

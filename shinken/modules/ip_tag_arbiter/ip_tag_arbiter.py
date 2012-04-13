@@ -41,7 +41,7 @@ class Ip_Tag_Arbiter(BaseModule):
         
 
     def hook_early_configuration(self, arb):
-        logger.log("[IpTag] in hook late config")
+        logger.info("[IpTag] in hook late config")
         for h in arb.conf.hosts:
             if not hasattr(h, 'address') and not hasattr(h, 'host_name'):
                 continue
