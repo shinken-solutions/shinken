@@ -185,7 +185,7 @@ class Skonf(Daemon):
         elif isinstance(b, ExternalCommand):
             self.external_commands.append(b)
         else:
-            logger.log('Warning : cannot manage object type %s (%s)' % (type(b), b))
+            logger.warning('Cannot manage object type %s (%s)' % (type(b), b))
 
             
 
@@ -211,10 +211,7 @@ class Skonf(Daemon):
                 arb.need_conf = False
                 self.me = arb
                 self.is_master = not self.me.spare
-                if self.is_master:
-                    logger.log("I am the master Arbiter : %s" % arb.get_name())
-                else:
-                    logger.log("I am the spare Arbiter : %s" % arb.get_name())
+                logger.info("I am the %s Arbiter : %s" % ('master' if self.is_master else 'spare', arb.get_name())
 
                 # Set myself as alive ;)
                 self.me.alive = True
@@ -228,7 +225,7 @@ class Skonf(Daemon):
                      With the value %s \
                      Thanks." % socket.gethostname())
 
-        logger.log("My own modules : " + ','.join([m.get_name() for m in self.me.modules]))
+        logger.info("My own modules : " + ','.join([m.get_name() for m in self.me.modules]))
 
         # we request the instances without them being *started* 
         # (for these that are concerned ("external" modules):
@@ -350,7 +347,7 @@ class Skonf(Daemon):
         #    sys.exit("Configuration is incorrect, sorry, I bail out")
 
         # REF: doc/shinken-conf-dispatching.png (2)
-        logger.log("Cutting the hosts and services into parts")
+        logger.info("Cutting the hosts and services into parts")
         self.confs = self.conf.cut_into_parts()
 
         # The conf can be incorrect here if the cut into parts see errors like
@@ -359,7 +356,7 @@ class Skonf(Daemon):
             self.conf.show_errors()
             sys.exit("Configuration is incorrect, sorry, I bail out")
 
-        logger.log('Things look okay - No serious problems were detected during the pre-flight check')
+        logger.info('Things look okay - No serious problems were detected during the pre-flight check')
 
         # Now clean objects of temporary/unecessary attributes for live work:
         self.conf.clean()
@@ -396,7 +393,7 @@ class Skonf(Daemon):
         self.host = self.me.address
         self.port = 8766#self.me.port
         
-        logger.log("Configuration Loaded")
+        logger.info("Configuration Loaded")
         print ""
 
 
@@ -437,7 +434,7 @@ class Skonf(Daemon):
         try:
             # Log will be broks
             for line in self.get_header():
-                self.log.log(line)
+                self.log.info(line)
 
             self.load_config_file()
             self.load_web_configuration()
@@ -465,7 +462,7 @@ class Skonf(Daemon):
             except OSError, exp:
                # We look for the "Function not implemented" under Linux
                if exp.errno == 38 and os.name == 'posix':
-                  logger.log("ERROR : get an exception (%s). If you are under Linux, please check that your /dev/shm directory exists." % (str(exp)))
+                  logger.error("Get an exception (%s). If you are under Linux, please check that your /dev/shm directory exists." % (str(exp)))
                   raise
 
 
@@ -489,9 +486,9 @@ class Skonf(Daemon):
             # ends up here and must be handled.
             sys.exit(exp.code)
         except Exception, exp:
-            logger.log("CRITICAL ERROR: I got an unrecoverable error. I have to exit")
-            logger.log("You can log a bug ticket at https://github.com/naparuba/shinken/issues/new to get help")
-            logger.log("Back trace of it: %s" % (traceback.format_exc()))
+            logger.critical("I got an unrecoverable error. I have to exit")
+            logger.critical("You can log a bug ticket at https://github.com/naparuba/shinken/issues/new to get help")
+            logger.critical("Back trace of it: %s" % (traceback.format_exc()))
             raise
 
 
@@ -539,13 +536,13 @@ class Skonf(Daemon):
                 # Maybe the queue got problem
                 # log it and quit it
                 except (IOError, EOFError), exp:
-                    logger.log("Warning : an external module queue got a problem '%s'" % str(exp))
+                    logger.warning("An external module queue got a problem '%s'" % str(exp))
                     break
 
 
     # We wait (block) for arbiter to send us something
     def wait_for_master_death(self):
-        logger.log("Waiting for master death")
+        logger.info("Waiting for master death")
         timeout = 1.0
         self.last_master_speack = time.time()
 
@@ -554,7 +551,7 @@ class Skonf(Daemon):
         for arb in self.conf.arbiterlinks:
             if not arb.spare:
                 master_timeout = arb.check_interval * arb.max_check_attempts
-        logger.log("I'll wait master for %d seconds" % master_timeout)
+        logger.info("I'll wait master for %d seconds" % master_timeout)
         
         while not self.interrupted:
             elapsed, _, tcdiff = self.handleRequests(timeout)
@@ -576,7 +573,7 @@ class Skonf(Daemon):
             # Now check if master is dead or not
             now = time.time()
             if now - self.last_master_speack > master_timeout:
-                logger.log("Master is dead!!!")
+                logger.info("Master is dead!!!")
                 self.must_run = True
                 break
 
@@ -708,7 +705,7 @@ class Skonf(Daemon):
                         
                         
             except Exception, exp:
-                logger.log("Warning in loading plugins : %s" % exp)
+                logger.warning("Loading plugins : %s" % exp)
 
 
 
@@ -877,7 +874,7 @@ class Skonf(Daemon):
         # save this worker
         self.workers[w.id] = w
         
-        logger.log("[%s] Allocating new %s Worker : %s" % (self.name, w.module_name, w.id))
+        logger.info("[%s] Allocating new %s Worker : %s" % (self.name, w.module_name, w.id))
         
         # Ok, all is good. Start it!
         w.start()
@@ -886,7 +883,7 @@ class Skonf(Daemon):
     # TODO : fix hard coded server/database
     def init_db(self):
        if not Connection:
-          logger.log('ERROR : you need the pymongo lib for running skonfui. Please install it')
+          logger.error('You need the pymongo lib for running skonfui. Please install it')
           sys.exit(2)
 
        con = Connection('localhost')

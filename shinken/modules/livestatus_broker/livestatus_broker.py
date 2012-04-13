@@ -244,9 +244,9 @@ class LiveStatus_broker(BaseModule, Daemon):
                             mod.manage_brok(b)
                         except Exception, exp:
                             print exp.__dict__
-                            logger.log("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
-                            logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
-                            logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
+                            logger.warning("[%s] The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
+                            logger.debug("[%s] Exception type : %s" % (self.name, type(exp)))
+                            logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                             self.modules_manager.set_to_restart(mod)
                 except Exception, exp:
                     msg = Message(id=0, type='ICrash', data={
@@ -321,9 +321,9 @@ class LiveStatus_broker(BaseModule, Daemon):
                 mod.manage_brok(brok)
             except Exception, exp:
                 print exp.__dict__
-                logger.log("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
-                logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
-                logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
+                logger.warning("[%s] The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
+                logger.debug("[%s] Exception type : %s" % (self.name, type(exp)))
+                logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)
 
     def do_stop(self):
@@ -389,9 +389,9 @@ class LiveStatus_broker(BaseModule, Daemon):
                                 mod.manage_brok(b)
                             except Exception, exp:
                                 print exp.__dict__
-                                logger.log("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
-                                logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
-                                logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
+                                logger.warning("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
+                                logger.debug("[%s] Exception type : %s" % (self.name, type(exp)))
+                                logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                                 self.modules_manager.set_to_restart(mod)
                 except Queue.Empty:
                     self.livestatus.counters.calc_rate()

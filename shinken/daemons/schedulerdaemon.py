@@ -163,7 +163,7 @@ class Shinken(BaseSatellite):
 
     def compensate_system_time_change(self, difference):
         """ Compensate a system time change of difference for all hosts/services/checks/notifs """
-        logger.log('Warning: A system time change of %d has been detected.  Compensating...' % difference)
+        logger.warning("A system time change of %d has been detected. Compensating..." % difference)
         # We only need to change some value
         self.program_start = max(0, self.program_start + difference)
 
@@ -368,12 +368,12 @@ class Shinken(BaseSatellite):
             self.load_config_file()
             self.do_daemon_init_and_start()
             self.uri2 = self.pyro_daemon.register(self.interface, "ForArbiter")
-            logger.log("[scheduler] General interface is at: %s" % self.uri2)
+            logger.info("[scheduler] General interface is at: %s" % self.uri2)
             self.do_mainloop()
         except Exception, exp:
-            logger.log("CRITICAL ERROR: I got an unrecoverable error. I have to exit")
-            logger.log("You can log a bug ticket at https://github.com/naparuba/shinken/issues/new to get help")
-            logger.log("Back trace of it: %s" % (traceback.format_exc()))
+            logger.critical("I got an unrecoverable error. I have to exit")
+            logger.critical("You can log a bug ticket at https://github.com/naparuba/shinken/issues/new to get help")
+            logger.critical("Back trace of it: %s" % (traceback.format_exc()))
             raise
             
             
