@@ -34,9 +34,14 @@ name = None
 local_log = None
 human_timestamp_log = False
 
-
 class Log:
     """Please Add a Docstring to describe the class here"""
+    NOTSET   = logging.NOTSET
+    DEBUG    = logging.DEBUG
+    INFO     = logging.INFO
+    WARNING  = logging.WARNING
+    ERROR    = logging.ERROR
+    CRITICAL = logging.CRITICAL
 
     def load_obj(self, object, name_=None):
         """ We load the object where we will put log broks
@@ -47,12 +52,40 @@ class Log:
         obj = object
         name = name_
 
+        self._level = logging.NOTSET
+    
+    def setlevel(self, level):
+        self._level = level
+
+    def debug(self, msg, *args, **kwargs):
+        self._log(logging.DEBUG, msg, *args, **kwargs)
+
+    def info(self, msg, *args, **kwargs):
+        self._log(logging.INFO, msg, *args, **kwargs)
+
+    def warning(self, msg, *args, **kwargs):
+        self._log(logging.WARNING, msg, *args, **kwargs)
+
+    def error(self, msg, *args, **kwargs):
+        self._log(logging.ERROR, msg, *args, **kwargs)
+
+    def critical(self, msg, *args, **kwargs):
+        self._log(logging.CRITICAL, msg, *args, **kwargs)
+
     def log(self, message, format=None, print_it=True):
+        """Old log method, kept for NAGIOS compatibility"""
+        self._log(logging.INFO, message, format, print_it, display_level=False)
+
+    def _log(self, level, message, format=None, print_it=True, display_level=True):
         """We enter a log message, we format it, and we add the log brok"""
         global obj
         global name
         global local_log
         global human_timestamp_log
+
+        # ignore messages when message level is lower than Log level
+        if level < self._level:
+            return
 
         if print_it:
             # If the daemon is launched with a non UTF8 shell
@@ -67,21 +100,20 @@ class Log:
             message = message.decode('UTF-8', 'replace')
 
         if format is None:
-            if name is None:
-                if human_timestamp_log:
-                    s = u'[%s] %s\n' % \
-                        (time.asctime(time.localtime(time.time())), message)
-                else:
-                    s = u'[%d] %s\n' % (int(time.time()), message)
-            else:
-                if human_timestamp_log:
-                    s = u'[%s] [%s] %s\n' % \
-                        (time.asctime(time.localtime(time.time())),
-                                                     name,
-                                                     message)
-                else:
-                    s = u'[%d] [%s] %s\n' % (int(time.time()), name, message)
+            lvlname = logging.getLevelName(level)
+
+            fmt  = u'[%%(date)s] %s%%(name)s%%(msg)s\n' % ('%(level)8s: ' if display_level else '')
+            args = {
+                'date' : time.asctime(time.localtime(time.time())) if human_timestamp_log 
+                    else int(time.time()),
+                'level': lvlname,
+                'name' : '' if name is None else '[%s] ' % name,
+                'msg'  : message
+            }
+
+            s = fmt % args
         else:
+            print format, '::', message
             s = format % message
 
         # We create and add the brok
@@ -90,7 +122,7 @@ class Log:
 
         # If we want a local log write, do it
         if local_log is not None:
-            logging.info(s.strip())
+            logging.log(level, s.strip())
 
     def register_local_log(self, path):
         """The log can also write to a local file if needed
