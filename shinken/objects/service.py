@@ -363,7 +363,7 @@ class Service(SchedulingItem):
         for prop, entry in cls.properties.items():
             if prop not in special_properties:
                 if not hasattr(self, prop) and entry.required:
-                    logger.log(logger.INFO, "Error : the service %s on host '%s' do not have %s" % (desc, hname, prop))
+                    logger.log("Error : the service %s on host '%s' do not have %s" % (desc, hname, prop))
                     state = False # Bad boy...
 
         # Then look if we have some errors in the conf
@@ -375,7 +375,7 @@ class Service(SchedulingItem):
         if self.configuration_errors != []:
             state = False
             for err in self.configuration_errors:
-                logger.log(logger.INFO, err)
+                logger.log(err)
 
         #If no notif period, set it to None, mean 24x7
         if not hasattr(self, 'notification_period'):
@@ -383,39 +383,39 @@ class Service(SchedulingItem):
 
         # Ok now we manage special cases...
         if self.notifications_enabled and self.contacts == []:
-            logger.log(logger.INFO, "Warning The service '%s' in the host '%s' do not have contacts nor contact_groups in '%s'" % (desc, hname, source))
+            logger.log("Warning The service '%s' in the host '%s' do not have contacts nor contact_groups in '%s'" % (desc, hname, source))
 
         # Set display_name if need
         if getattr(self, 'display_name', '') == '':
             self.display_name = getattr(self, 'service_description', '')
 
         if not hasattr(self, 'check_command'):
-            logger.log(logger.INFO, "%s : I've got no check_command" % self.get_name())
+            logger.log("%s : I've got no check_command" % self.get_name())
             state = False
         # Ok got a command, but maybe it's invalid
         else:
             if not self.check_command.is_valid():
-                logger.log(logger.INFO, "%s : my check_command %s is invalid" % (self.get_name(), self.check_command.command))
+                logger.log("%s : my check_command %s is invalid" % (self.get_name(), self.check_command.command))
                 state = False
             if self.got_business_rule:
                 if not self.business_rule.is_valid():
-                    logger.log(logger.INFO, "%s : my business rule is invalid" % (self.get_name(),))
+                    logger.log("%s : my business rule is invalid" % (self.get_name(),))
                     for bperror in self.business_rule.configuration_errors:
-                        logger.log(logger.INFO, "%s : %s" % (self.get_name(), bperror))
+                        logger.log("%s : %s" % (self.get_name(), bperror))
                     state = False
         if not hasattr(self, 'notification_interval') \
                 and  self.notifications_enabled == True:
-            logger.log(logger.INFO, "%s : I've got no notification_interval but I've got notifications enabled" % self.get_name())
+            logger.log("%s : I've got no notification_interval but I've got notifications enabled" % self.get_name())
             state = False
         if self.host is None:
-            logger.log(logger.INFO, "The service '%s' got a unknown host_name '%s'." % (desc, self.host_name))
+            logger.log("The service '%s' got a unknown host_name '%s'." % (desc, self.host_name))
             state = False
         if not hasattr(self, 'check_period'):
             self.check_period = None
         if hasattr(self, 'service_description'):
             for c in cls.illegal_object_name_chars:
                 if c in self.service_description:
-                    logger.log(logger.INFO, "%s : My service_description got the caracter %s that is not allowed." % (self.get_name(), c))
+                    logger.log("%s : My service_description got the caracter %s that is not allowed." % (self.get_name(), c))
                     state = False
         return state
 
@@ -664,7 +664,7 @@ class Service(SchedulingItem):
     # Add a log entry with a SERVICE ALERT like:
     # SERVICE ALERT: server;Load;UNKNOWN;HARD;1;I don't know what to say...
     def raise_alert_log_entry(self):
-        logger.log(logger.INFO, 'SERVICE ALERT: %s;%s;%s;%s;%d;%s' % (self.host.get_name(),
+        logger.log('SERVICE ALERT: %s;%s;%s;%s;%d;%s' % (self.host.get_name(),
                                                          self.get_name(),
                                                          self.state,
                                                          self.state_type,
@@ -676,7 +676,7 @@ class Service(SchedulingItem):
     # CURRENT SERVICE STATE: server;Load;UNKNOWN;HARD;1;I don't know what to say...
     def raise_initial_state(self):
         if self.__class__.log_initial_states:
-            logger.log(logger.INFO, 'CURRENT SERVICE STATE: %s;%s;%s;%s;%d;%s' % (self.host.get_name(),
+            logger.log('CURRENT SERVICE STATE: %s;%s;%s;%s;%d;%s' % (self.host.get_name(),
                                                          self.get_name(),
                                                          self.state,
                                                          self.state_type,
@@ -688,7 +688,7 @@ class Service(SchedulingItem):
     # Warning: The results of host 'Server' are stale by 0d 0h 0m 58s (threshold=0d 1h 0m 0s).
     # I'm forcing an immediate check of the host.
     def raise_freshness_log_entry(self, t_stale_by, t_threshold):
-        logger.log(logger.INFO, "Warning: The results of service '%s' on host '%s' are stale by %s (threshold=%s).  I'm forcing an immediate check of the service." \
+        logger.log("Warning: The results of service '%s' on host '%s' are stale by %s (threshold=%s).  I'm forcing an immediate check of the service." \
                       % (self.get_name(), self.host.get_name(), format_t_into_dhms_format(t_stale_by), format_t_into_dhms_format(t_threshold)))
 
 
@@ -704,7 +704,7 @@ class Service(SchedulingItem):
         else:
             state = self.state
         if self.__class__.log_notifications:
-            logger.log(logger.INFO, "SERVICE NOTIFICATION: %s;%s;%s;%s;%s;%s" % (contact.get_name(),
+            logger.log("SERVICE NOTIFICATION: %s;%s;%s;%s;%s;%s" % (contact.get_name(),
                                                                     self.host.get_name(),
                                                                     self.get_name(), state,
                                                                     command.get_name(), self.output))
@@ -714,7 +714,7 @@ class Service(SchedulingItem):
     # SERVICE EVENT HANDLER: test_host_0;test_ok_0;OK;SOFT;4;eventhandler
     def raise_event_handler_log_entry(self, command):
         if self.__class__.log_event_handlers:
-            logger.log(logger.INFO, "SERVICE EVENT HANDLER: %s;%s;%s;%s;%s;%s" % (self.host.get_name(),
+            logger.log("SERVICE EVENT HANDLER: %s;%s;%s;%s;%s;%s" % (self.host.get_name(),
                                                                      self.get_name(),
                                                                      self.state,
                                                                      self.state_type,
@@ -725,41 +725,41 @@ class Service(SchedulingItem):
     # Raise a log entry with FLAPPING START alert like
     # SERVICE FLAPPING ALERT: server;LOAD;STARTED; Service appears to have started flapping (50.6% change >= 50.0% threshold)
     def raise_flapping_start_log_entry(self, change_ratio, threshold):
-        logger.log(logger.INFO, "SERVICE FLAPPING ALERT: %s;%s;STARTED; Service appears to have started flapping (%.1f%% change >= %.1f%% threshold)" % \
+        logger.log("SERVICE FLAPPING ALERT: %s;%s;STARTED; Service appears to have started flapping (%.1f%% change >= %.1f%% threshold)" % \
                       (self.host.get_name(), self.get_name(), change_ratio, threshold))
 
 
     # Raise a log entry with FLAPPING STOP alert like
     # SERVICE FLAPPING ALERT: server;LOAD;STOPPED; Service appears to have stopped flapping (23.0% change < 25.0% threshold)
     def raise_flapping_stop_log_entry(self, change_ratio, threshold):
-        logger.log(logger.INFO, "SERVICE FLAPPING ALERT: %s;%s;STOPPED; Service appears to have stopped flapping (%.1f%% change < %.1f%% threshold)" % \
+        logger.log("SERVICE FLAPPING ALERT: %s;%s;STOPPED; Service appears to have stopped flapping (%.1f%% change < %.1f%% threshold)" % \
                       (self.host.get_name(), self.get_name(), change_ratio, threshold))
 
 
     # If there is no valid time for next check, raise a log entry
     def raise_no_next_check_log_entry(self):
-        logger.log(logger.INFO, "Warning : I cannot schedule the check for the service '%s' on host '%s' because there is not future valid time" % \
+        logger.log("Warning : I cannot schedule the check for the service '%s' on host '%s' because there is not future valid time" % \
                       (self.get_name(), self.host.get_name()))
 
 
     # Raise a log entry when a downtime begins
     # SERVICE DOWNTIME ALERT: test_host_0;test_ok_0;STARTED; Service has entered a period of scheduled downtime
     def raise_enter_downtime_log_entry(self):
-        logger.log(logger.INFO, "SERVICE DOWNTIME ALERT: %s;%s;STARTED; Service has entered a period of scheduled downtime" % \
+        logger.log("SERVICE DOWNTIME ALERT: %s;%s;STARTED; Service has entered a period of scheduled downtime" % \
                       (self.host.get_name(), self.get_name()))
 
 
     # Raise a log entry when a downtime has finished
     # SERVICE DOWNTIME ALERT: test_host_0;test_ok_0;STOPPED; Service has exited from a period of scheduled downtime
     def raise_exit_downtime_log_entry(self):
-        logger.log(logger.INFO, "SERVICE DOWNTIME ALERT: %s;%s;STOPPED; Service has exited from a period of scheduled downtime" % \
+        logger.log("SERVICE DOWNTIME ALERT: %s;%s;STOPPED; Service has exited from a period of scheduled downtime" % \
                       (self.host.get_name(), self.get_name()))
 
 
     # Raise a log entry when a downtime prematurely ends
     # SERVICE DOWNTIME ALERT: test_host_0;test_ok_0;CANCELLED; Service has entered a period of scheduled downtime
     def raise_cancel_downtime_log_entry(self):
-        logger.log(logger.INFO, "SERVICE DOWNTIME ALERT: %s;%s;CANCELLED; Scheduled downtime for service has been cancelled." % \
+        logger.log("SERVICE DOWNTIME ALERT: %s;%s;CANCELLED; Scheduled downtime for service has been cancelled." % \
                       (self.host.get_name(), self.get_name()))
 
 
@@ -781,7 +781,7 @@ class Service(SchedulingItem):
             if c.output == self.output:
                 need_stalk = False
         if need_stalk:
-            logger.log(logger.INFO, "Stalking %s : %s" % (self.get_name(), c.output))
+            logger.log("Stalking %s : %s" % (self.get_name(), c.output))
 
 
     # Give data for checks's macros

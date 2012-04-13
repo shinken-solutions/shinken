@@ -177,7 +177,7 @@ class Webui_broker(BaseModule, Daemon):
 
         # Check if the view dir really exist
         if not os.path.exists(bottle.TEMPLATE_PATH[0]):
-            logger.log(logger.INFO, 'ERROR : the view path do not exist at %s' % bottle.TEMPLATE_PATH)
+            logger.log('ERROR : the view path do not exist at %s' % bottle.TEMPLATE_PATH)
             sys.exit(2)
 
         self.load_plugins()
@@ -229,9 +229,9 @@ class Webui_broker(BaseModule, Daemon):
                           mod.manage_brok(b)
                       except Exception , exp:
                           print exp.__dict__
-                          logger.log(logger.INFO, "[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
-                          logger.log(logger.INFO, "[%s] Exception type : %s" % (self.name, type(exp)))
-                          logger.log(logger.INFO, "Back trace of this kill: %s" % (traceback.format_exc()))
+                          logger.log("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
+                          logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
+                          logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
                           self.modules_manager.set_to_restart(mod)
               except Exception, exp:            
                   msg = Message(id=0, type='ICrash', data={'name' : self.get_name(), 'exception' : exp, 'trace' : traceback.format_exc()})
@@ -315,7 +315,7 @@ class Webui_broker(BaseModule, Daemon):
                         
                         
             except Exception, exp:
-                logger.log(logger.INFO, "Warning in loading plugins : %s" % exp)
+                logger.log("Warning in loading plugins : %s" % exp)
 
 
 
@@ -437,9 +437,9 @@ class Webui_broker(BaseModule, Daemon):
                         break
             except Exception , exp:
                 print exp.__dict__
-                logger.log(logger.INFO, "[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
-                logger.log(logger.INFO, "[%s] Exception type : %s" % (self.name, type(exp)))
-                logger.log(logger.INFO, "Back trace of this kill: %s" % (traceback.format_exc()))
+                logger.log("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
+                logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
+                logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)        
 
         # Ok if we got a real contact, and if a module auth it
@@ -475,9 +475,9 @@ class Webui_broker(BaseModule, Daemon):
                     uris.extend(r)
             except Exception , exp:
                 print exp.__dict__
-                logger.log(logger.INFO, "[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
-                logger.log(logger.INFO, "[%s] Exception type : %s" % (self.name, type(exp)))
-                logger.log(logger.INFO, "Back trace of this kill: %s" % (traceback.format_exc()))
+                logger.log("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
+                logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
+                logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)        
 
         safe_print("Will return", uris)

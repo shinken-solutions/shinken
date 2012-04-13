@@ -102,7 +102,7 @@ class ModulesManager(object):
                 if self.modules_type in m.properties['daemons']:
                     self.imported_modules.append(m)
             except Exception , exp:
-                logger.warning(str(exp))
+                logger.warning("Importing module : %s" % exp)
 
         del self.modules_assoc[:]
         for mod_conf in self.modules:
@@ -115,7 +115,7 @@ class ModulesManager(object):
                     break
             if not is_find:
                 # No module is suitable, we Raise a Warning
-                logger.warning("the module type %s for %s was not found in modules!" % (module_type, mod_conf.get_name()))
+                logger.warning("The module type %s for %s was not found in modules!" % (module_type, mod_conf.get_name()))
 
 
     # Try to "init" the given module instance. 
@@ -137,7 +137,7 @@ class ModulesManager(object):
 
             inst.init()
         except Exception, e:
-            logger.error("the instance %s raised an exception %s, I remove it!" % (inst.get_name(), str(e)))
+            logger.error("The instance %s raised an exception %s, I remove it!" % (inst.get_name(), str(e)))
             output = cStringIO.StringIO()
             traceback.print_exc(file=output)
             logger.error("Back trace of this remove : %s" % (output.getvalue()))
@@ -178,7 +178,7 @@ class ModulesManager(object):
                 s = str(exp)
                 if isinstance(s, str):
                     s = s.decode('UTF-8', 'replace')
-                logger.error("the module %s raised an exception %s, I remove it!" % (mod_conf.get_name(), s))
+                logger.error("The module %s raised an exception %s, I remove it!" % (mod_conf.get_name(), s))
                 output = cStringIO.StringIO()
                 traceback.print_exc(file=output)
                 logger.error("Back trace of this remove : %s" % (output.getvalue()))
@@ -188,7 +188,7 @@ class ModulesManager(object):
             # External are not init now, but only when they are started
             if not inst.is_external and not self.try_instance_init(inst):
                 # If the init failed, we put in in the restart queue
-                logger.warning("the module '%s' failed to init, I will try to restart it later" % inst.get_name())
+                logger.warning("The module '%s' failed to init, I will try to restart it later" % inst.get_name())
                 self.to_restart.append(inst)
 
         return self.instances
@@ -199,7 +199,7 @@ class ModulesManager(object):
         for inst in [inst for inst in self.instances if inst.is_external]:
             # But maybe the init failed a bit, so bypass this ones from now
             if not self.try_instance_init(inst):
-                logger.warning("the module '%s' failed to init, I will try to restart it later" % inst.get_name())
+                logger.warning("The module '%s' failed to init, I will try to restart it later" % inst.get_name())
                 self.to_restart.append(inst)
                 continue
             
@@ -230,7 +230,7 @@ class ModulesManager(object):
         for inst in self.instances:
             if not inst in self.to_restart:
                 if inst.is_external and not inst.process.is_alive():
-                    logger.error("the external module %s goes down unexpectly!" % inst.get_name())
+                    logger.error("The external module %s goes down unexpectly!" % inst.get_name())
                     logger.info("Setting the module %s to restart" % inst.get_name())
                     # We clean its queues, they are no more useful
                     inst.clear_queues(self.manager)
@@ -250,7 +250,7 @@ class ModulesManager(object):
                 except Exception, exp:
                     pass
                 if queue_size > self.max_queue_size:
-                    logger.error("the external module %s got a too high brok queue size (%s > %s)!" % (inst.get_name(), queue_size, self.max_queue_size))
+                    logger.error("The external module %s got a too high brok queue size (%s > %s)!" % (inst.get_name(), queue_size, self.max_queue_size))
                     logger.info("Setting the module %s to restart" % inst.get_name())
                     # We clean its queues, they are no more useful
                     inst.clear_queues(self.manager)

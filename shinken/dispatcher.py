@@ -148,12 +148,12 @@ class Dispatcher:
                 sched = r.confs[cfg_id].assigned_to
                 if sched is None:
                     if self.first_dispatch_done:
-                        logger.log(logger.INFO, "Scheduler configuration %d is unmanaged!!" % cfg_id)
+                        logger.log("Scheduler configuration %d is unmanaged!!" % cfg_id)
                     self.dispatch_ok = False
                 else:
                     if not sched.alive:
                         self.dispatch_ok = False # so we ask a new dispatching
-                        logger.log(logger.INFO, "Warning : Scheduler %s had the configuration %d but is dead, I am not happy." % (sched.get_name(), cfg_id))
+                        logger.log("Warning : Scheduler %s had the configuration %d but is dead, I am not happy." % (sched.get_name(), cfg_id))
                         sched.conf.assigned_to = None
                         sched.conf.is_assigned = False
                         sched.conf.push_flavor = 0
@@ -163,7 +163,7 @@ class Dispatcher:
                     # so ask it what it is really managing, and if not, put the conf unassigned
                     if not sched.do_i_manage(cfg_id, push_flavor):
                         self.dispatch_ok = False # so we ask a new dispatching
-                        logger.log(logger.INFO, "Warning : Scheduler %s did not managed its configuration %d,I am not happy." % (sched.get_name(), cfg_id))
+                        logger.log("Warning : Scheduler %s did not managed its configuration %d,I am not happy." % (sched.get_name(), cfg_id))
                         if sched.conf:
                             sched.conf.assigned_to = None
                             sched.conf.is_assigned = False
@@ -184,7 +184,7 @@ class Dispatcher:
                         # We must have the good number of satellite or we are not happy
                         # So we are sure to raise a dispatch every loop a satellite is missing
                         if len(r.to_satellites_managed_by[kind][cfg_id]) < r.get_nb_of_must_have_satellites(kind):
-                            logger.log(logger.INFO, "Warning : Missing satellite %s for configuration %d :" % (kind, cfg_id))
+                            logger.log("Warning : Missing satellite %s for configuration %d :" % (kind, cfg_id))
 
                             # TODO : less violent! Must only resent to who need?
                             # must be caught by satellite who sees that it already has the conf (hash)
@@ -210,7 +210,7 @@ class Dispatcher:
                             #wim = satellite.managed_confs# what_i_managed()
                             #print "%s [%s]Look at what manage the %s %s (alive? %s, reachable? %s): %s (look for %s)" % (int(time.time()), r.get_name(), kind, satellite.get_name(), satellite.alive, satellite.reachable, wim, cfg_id)
                             if not satellite.alive or (satellite.reachable and not satellite.do_i_manage(cfg_id, push_flavor)):
-                                logger.log(logger.INFO, '[%s] Warning : The %s %s seems to be down, I must re-dispatch its role to someone else.' % (r.get_name(), kind, satellite.get_name()))
+                                logger.log('[%s] Warning : The %s %s seems to be down, I must re-dispatch its role to someone else.' % (r.get_name(), kind, satellite.get_name()))
                                 self.dispatch_ok = False # so we will redispatch all
                                 r.to_satellites_need_dispatch[kind][cfg_id]  = True
                                 r.to_satellites_managed_by[kind][cfg_id] = []
@@ -246,7 +246,7 @@ class Dispatcher:
                 if elt.conf is None and elt.reachable:
                     # print "Ask", elt.get_name() , 'if it got conf'
                     if elt.have_conf():
-                        logger.log(logger.INFO, 'Warning : The element %s have a conf and should not have one! I ask it to idle now' % elt.get_name())
+                        logger.log('Warning : The element %s have a conf and should not have one! I ask it to idle now' % elt.get_name())
                         elt.active = False
                         elt.wait_new_conf()
                         # I do not care about order not send or not. If not,
@@ -277,11 +277,11 @@ class Dispatcher:
                     # We can put it idle, no active and wait_new_conf
                     if len(id_to_delete) == len(cfg_ids):
                         satellite.active = False
-                        logger.log(logger.INFO, "I ask %s to wait a new conf" % satellite.get_name())
+                        logger.log("I ask %s to wait a new conf" % satellite.get_name())
                         satellite.wait_new_conf()
                     else:#It is not fully idle, just less cfg
                         for id in id_to_delete:
-                            logger.log(logger.INFO, "I ask to remove configuration N%d from %s" %(cfg_id, satellite.get_name()))
+                            logger.log("I ask to remove configuration N%d from %s" %(cfg_id, satellite.get_name()))
                             satellite.remove_from_conf(cfg_id)
 
 
@@ -325,8 +325,8 @@ class Dispatcher:
                 conf_to_dispatch = [ cfg for cfg in r.confs.values() if not cfg.is_assigned ]
                 nb_conf = len(conf_to_dispatch)
                 if nb_conf > 0:
-                    logger.log(logger.INFO, "Dispatching Realm %s" % r.get_name())
-                    logger.log(logger.INFO, '[%s] Dispatching %d/%d configurations' % (r.get_name(), nb_conf, len(r.confs)))
+                    logger.log("Dispatching Realm %s" % r.get_name())
+                    logger.log('[%s] Dispatching %d/%d configurations' % (r.get_name(), nb_conf, len(r.confs)))
 
                 # Now we get in scheds all scheduler of this realm and upper so
                 # we will send them conf (in this order)
@@ -334,7 +334,7 @@ class Dispatcher:
 
                 if nb_conf > 0:
                     print_string = '[%s] Schedulers order : %s' % (r.get_name(), ','.join([s.get_name() for s in scheds]))
-                    logger.log(logger.INFO, print_string)
+                    logger.log(print_string)
 
 
                 # Try to send only for alive members
@@ -343,11 +343,11 @@ class Dispatcher:
                 # Now we do the real job
                 # every_one_need_conf = False
                 for conf in conf_to_dispatch:
-                    logger.log(logger.INFO, '[%s] Dispatching configuration %s' % (r.get_name(), conf.id))
+                    logger.log('[%s] Dispatching configuration %s' % (r.get_name(), conf.id))
 
                     # If there is no alive schedulers, not good...
                     if len(scheds) == 0:
-                        logger.log(logger.INFO, '[%s] but there a no alive schedulers in this realm!' % r.get_name())
+                        logger.log('[%s] but there a no alive schedulers in this realm!' % r.get_name())
 
                     # we need to loop until the conf is assigned
                     # or when there are no more schedulers available
@@ -364,9 +364,9 @@ class Dispatcher:
                                 r.to_satellites_managed_by[kind][cfg_id] = []
                             break
                         
-                        logger.log(logger.INFO, '[%s] Trying to send conf %d to scheduler %s' % (r.get_name(), conf.id, sched.get_name()))
+                        logger.log('[%s] Trying to send conf %d to scheduler %s' % (r.get_name(), conf.id, sched.get_name()))
                         if not sched.need_conf:
-                            logger.log(logger.INFO, '[%s] The scheduler %s do not need conf, sorry' % (r.get_name(), sched.get_name()))
+                            logger.log('[%s] The scheduler %s do not need conf, sorry' % (r.get_name(), sched.get_name()))
                             continue
                         
                         #every_one_need_conf = True
@@ -385,10 +385,10 @@ class Dispatcher:
                         
                         is_sent = sched.put_conf(conf_package)
                         if not is_sent:
-                            logger.log(logger.INFO, '[%s] WARNING : configuration dispatching error for scheduler %s' %(r.get_name(), sched.get_name()))
+                            logger.log('[%s] WARNING : configuration dispatching error for scheduler %s' %(r.get_name(), sched.get_name()))
                             continue
                         
-                        logger.log(logger.INFO, '[%s] Dispatch OK of conf in scheduler %s' % (r.get_name(), sched.get_name()))
+                        logger.log('[%s] Dispatch OK of conf in scheduler %s' % (r.get_name(), sched.get_name()))
 
                         sched.conf = conf
                         sched.push_flavor = conf.push_flavor
@@ -414,9 +414,9 @@ class Dispatcher:
             conf_to_dispatch = [ cfg for cfg in self.conf.confs.values() if not cfg.is_assigned ]
             nb_missed = len(conf_to_dispatch)
             if nb_missed > 0:
-                logger.log(logger.INFO, "WARNING : All schedulers configurations are not dispatched, %d are missing" % nb_missed)
+                logger.log("WARNING : All schedulers configurations are not dispatched, %d are missing" % nb_missed)
             else:
-                logger.log(logger.INFO, "OK, all schedulers configurations are dispatched :)")
+                logger.log("OK, all schedulers configurations are dispatched :)")
                 self.dispatch_ok = True
 
             # Sched without conf in a dispatch ok are set to no need_conf
@@ -476,7 +476,7 @@ class Dispatcher:
                             satellite_string = "[%s] Dispatching %s satellite with order : " % (r.get_name(), kind)
                             for satellite in satellites:
                                 satellite_string += '%s (spare:%s), ' % (satellite.get_name(), str(satellite.spare))
-                            logger.log(logger.INFO, satellite_string)
+                            logger.log(satellite_string)
 
 
                             # Now we dispatch cfg to every one ask for it
@@ -495,15 +495,15 @@ class Dispatcher:
                                     is_sent = False
                                     # Maybe this satellite already got this configuration, so skip it
                                     if satellite.do_i_manage(cfg_id, flavor):
-                                        logger.log(logger.INFO, '[%s] Skipping configuration %d send to the %s %s : it already got it' % (r.get_name(), cfg_id, kind, satellite.get_name()))
+                                        logger.log('[%s] Skipping configuration %d send to the %s %s : it already got it' % (r.get_name(), cfg_id, kind, satellite.get_name()))
                                         is_sent = True
                                     else: # ok, it really need it :) 
-                                        logger.log(logger.INFO, '[%s] Trying to send configuration to %s %s' %(r.get_name(), kind, satellite.get_name()))
+                                        logger.log('[%s] Trying to send configuration to %s %s' %(r.get_name(), kind, satellite.get_name()))
                                         is_sent = satellite.put_conf(satellite.cfg)
 
                                     if is_sent:
                                         satellite.active = True
-                                        logger.log(logger.INFO, '[%s] Dispatch OK of configuration %s to %s %s' %(r.get_name(), cfg_id, kind, satellite.get_name()))
+                                        logger.log('[%s] Dispatch OK of configuration %s to %s %s' %(r.get_name(), cfg_id, kind, satellite.get_name()))
                                         # We change the satellite configuration, update our data
                                         satellite.known_conf_managed_push(cfg_id, flavor)
 
@@ -517,7 +517,7 @@ class Dispatcher:
                             # else:
                             #    #I've got enough satellite, the next one are spare for me
                             if nb_cfg_sent == r.get_nb_of_must_have_satellites(kind):
-                                logger.log(logger.INFO, "[%s] OK, no more %s sent need" % (r.get_name(), kind))
+                                logger.log("[%s] OK, no more %s sent need" % (r.get_name(), kind))
                                 r.to_satellites_need_dispatch[kind][cfg_id]  = False
 
 
@@ -526,12 +526,12 @@ class Dispatcher:
             for r in self.realms:
                 for rec in r.receivers:
                     if rec.need_conf:
-                        logger.log(logger.INFO, '[%s] Trying to send configuration to receiver %s' %(r.get_name(), rec.get_name()))
+                        logger.log('[%s] Trying to send configuration to receiver %s' %(r.get_name(), rec.get_name()))
                         is_sent = rec.put_conf(rec.cfg)
                         if is_sent:
                             rec.active = True
                             rec.need_conf = False
-                            logger.log(logger.INFO, '[%s] Dispatch OK of configuration to receiver %s' %(r.get_name(), rec.get_name()))
+                            logger.log('[%s] Dispatch OK of configuration to receiver %s' %(r.get_name(), rec.get_name()))
                         else:
-                            logger.log(logger.INFO, '[%s] WARNING : dispatching failed for receiver %s' %(r.get_name(), rec.get_name()))
+                            logger.log('[%s] WARNING : dispatching failed for receiver %s' %(r.get_name(), rec.get_name()))
                             

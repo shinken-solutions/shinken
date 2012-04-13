@@ -36,7 +36,12 @@ human_timestamp_log = False
 
 class Log:
     """Please Add a Docstring to describe the class here"""
-    INFO = logging.INFO
+    NOTSET   = logging.NOTSET
+    DEBUG    = logging.DEBUG
+    INFO     = logging.INFO
+    WARNING  = logging.WARNING
+    ERROR    = logging.ERROR
+    CRITICAL = logging.CRITICAL
 
     def load_obj(self, object, name_=None):
         """ We load the object where we will put log broks
@@ -48,23 +53,30 @@ class Log:
         name = name_
 
         self._level = logging.NOTSET
+    
+    def setlevel(self, level):
+        self._level = level
 
     def debug(self, msg, *args, **kwargs):
-        self.log(logging.DEBUG, msg, *args, **kwargs)
+        self._log(logging.DEBUG, msg, *args, **kwargs)
 
     def info(self, msg, *args, **kwargs):
-        self.log(logging.INFO, msg, *args, **kwargs)
+        self._log(logging.INFO, msg, *args, **kwargs)
 
     def warning(self, msg, *args, **kwargs):
-        self.log(logging.WARNING, msg, *args, **kwargs)
+        self._log(logging.WARNING, msg, *args, **kwargs)
 
     def error(self, msg, *args, **kwargs):
-        self.log(logging.ERROR, msg, *args, **kwargs)
+        self._log(logging.ERROR, msg, *args, **kwargs)
 
     def critical(self, msg, *args, **kwargs):
-        self.log(logging.CRITICAL, msg, *args, **kwargs)
+        self._log(logging.CRITICAL, msg, *args, **kwargs)
 
-    def log(self, level, message, format=None, print_it=True):
+    def log(self, message, format=None, print_it=True):
+        """Old log method, kept for NAGIOS compatibility"""
+        self._log(logging.INFO, message, format, print_it, display_level=False)
+
+    def _log(self, level, message, format=None, print_it=True, display_level=True):
         """We enter a log message, we format it, and we add the log brok"""
         global obj
         global name
@@ -90,24 +102,18 @@ class Log:
         if format is None:
             lvlname = logging.getLevelName(level)
 
-            if name is None:
-                fmt = u'[%s] %8s: %s\n'
+            fmt  = u'[%%(date)s] %s%%(name)s%%(msg)s\n' % ('%(level)8s: ' if display_level else '')
+            args = {
+                'date' : time.asctime(time.localtime(time.time())) if human_timestamp_log 
+                    else int(time.time()),
+                'level': lvlname,
+                'name' : '' if name is None else '[%s] ' % name,
+                'msg'  : message
+            }
 
-                if human_timestamp_log:
-                    s = fmt % (time.asctime(time.localtime(time.time())), lvlname, message)
-                else:
-                    s = fmt % (int(time.time()), lvlname, message)
-            else:
-                fmt = u'[%s] %8s: [%s] %s\n'
-
-                if human_timestamp_log:
-                    s = fmt % (time.asctime(time.localtime(time.time())), 
-                               lvlname,
-                               name,
-                               message)
-                else:
-                    s = fmt % (int(time.time()), lvlname, name, message)
+            s = fmt % args
         else:
+            print format, '::', message
             s = format % message
 
         # We create and add the brok

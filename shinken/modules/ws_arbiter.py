@@ -106,7 +106,7 @@ class Ws_arbiter(BaseModule):
     # We initialise the HTTP part. It's a simple wsgi backend
     # with a select hack so we can still exit if someone ask it
     def init_http(self):
-        logger.log(logger.INFO, "Starting WS arbiter http socket")
+        logger.log("Starting WS arbiter http socket")
         self.srv = run(host=self.host, port=self.port, server='wsgirefselect')
         # And we link our page
         route('/push_check_result', callback=get_page, method='POST')
