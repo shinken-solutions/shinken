@@ -74,7 +74,8 @@ class Graphite_broker(BaseModule):
             elts = e.split('=', 1)
             if len(elts) != 2:
                 continue
-            name = elts[0]
+            # Replace non-alphanum chars by underscores. Graphite does not like spaces, slashes, dots        
+            name = re.sub("[^a-zA-Z0-9]", "_", elts[0])
             raw = elts[1]
             # get the first value of ;
             if ';' in raw:
