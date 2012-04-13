@@ -116,9 +116,9 @@ class Receiver(BaseSatellite):
                 mod.manage_brok(b)
             except Exception , exp:
                 print exp.__dict__
-                logger.log(logger.INFO, "Warning : The mod %s raise an exception: %s, I kill it" % (mod.get_name(),str(exp)))
-                logger.log(logger.INFO, "Exception type : %s" % type(exp))
-                logger.log(logger.INFO, "Back trace of this kill: %s" % (traceback.format_exc()))
+                logger.log("Warning : The mod %s raise an exception: %s, I kill it" % (mod.get_name(),str(exp)))
+                logger.log("Exception type : %s" % type(exp))
+                logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
                 to_del.append(mod)
         # Now remove mod that raise an exception
         self.modules_manager.clear_instances(to_del)
@@ -164,12 +164,12 @@ class Receiver(BaseSatellite):
         if not self.have_modules:
             self.modules = mods = conf['global']['modules']
             self.have_modules = True
-            logger.log(logger.INFO, "We received modules %s " % mods)
+            logger.log("We received modules %s " % mods)
 
         # Set our giving timezone from arbiter
         use_timezone = conf['global']['use_timezone']
         if use_timezone != 'NOTSET':
-            logger.log(logger.INFO, "Setting our timezone to %s" % use_timezone)
+            logger.log("Setting our timezone to %s" % use_timezone)
             os.environ['TZ'] = use_timezone
             time.tzset()
         
@@ -254,9 +254,9 @@ class Receiver(BaseSatellite):
             self.load_config_file()
         
             for line in self.get_header():
-                self.log.log(logger.INFO, line)
+                self.log.log(line)
 
-            logger.log(logger.INFO, "[Receiver] Using working directory : %s" % os.path.abspath(self.workdir))
+            logger.log("[Receiver] Using working directory : %s" % os.path.abspath(self.workdir))
         
             self.do_daemon_init_and_start()
             
@@ -283,8 +283,8 @@ class Receiver(BaseSatellite):
             self.do_mainloop()
 
         except Exception, exp:
-            logger.log(logger.INFO, "CRITICAL ERROR: I got an unrecoverable error. I have to exit")
-            logger.log(logger.INFO, "You can log a bug ticket at https://github.com/naparuba/shinken/issues/new to get help")
-            logger.log(logger.INFO, "Back trace of it: %s" % (traceback.format_exc()))
+            logger.log("CRITICAL ERROR: I got an unrecoverable error. I have to exit")
+            logger.log("You can log a bug ticket at https://github.com/naparuba/shinken/issues/new to get help")
+            logger.log("Back trace of it: %s" % (traceback.format_exc()))
             raise
 
