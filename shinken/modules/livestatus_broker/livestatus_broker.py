@@ -86,6 +86,14 @@ class LiveStatus_broker(BaseModule, Daemon):
         self.debug = getattr(modconf, 'debug', None)
         self.debug_queries = (getattr(modconf, 'debug_queries', '0') == '1')
         self.use_query_cache = (getattr(modconf, 'query_cache', '0') == '1')
+        if getattr(modconf, 'service_authorization', 'loose') == 'strict':
+            self.service_authorization_strict = True
+        else:
+            self.service_authorization_strict = False
+        if getattr(modconf, 'group_authorization', 'loose') == 'strict':
+            self.group_authorization_strict = True
+        else:
+            self.group_authorization_strict = False
 
         #  This is an "artificial" module which is used when an old-style
         #  shinken-specific.cfg without a separate logstore-module is found.
