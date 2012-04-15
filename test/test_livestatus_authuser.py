@@ -83,21 +83,6 @@ class TestConfigAuth(TestConfig):
         self.livestatus_broker = None
 
 
-    def update_broker(self, dodeepcopy=False):
-        #The brok should be manage in the good order
-        ids = self.sched.broks.keys()
-        ids.sort()
-        for brok_id in ids:
-            brok = self.sched.broks[brok_id]
-            #print "Managing a brok type", brok.type, "of id", brok_id
-            #if brok.type == 'update_service_status':
-            #    print "Problem?", brok.data
-            if dodeepcopy:
-                brok = copy.deepcopy(brok)
-            print brok
-            self.livestatus_broker.manage_brok(brok)
-        self.sched.broks = {}
-
 
     def test_service_authorization_loose(self):
         self.print_header()

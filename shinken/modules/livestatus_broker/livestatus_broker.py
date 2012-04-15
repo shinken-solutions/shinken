@@ -245,7 +245,6 @@ class LiveStatus_broker(BaseModule, Daemon):
             for b in l:
                 # Un-serialize the brok data
                 b.prepare()
-                b = cPickle.loads(b_raw)
                 # For updating, we cannot do it while
                 # answer queries, so wait for no readers
                 self.wait_for_no_readers()
@@ -328,6 +327,7 @@ class LiveStatus_broker(BaseModule, Daemon):
 
     def manage_brok(self, brok):
         """We use this method mostly for the unit tests"""
+        brok.prepare()
         self.rg.manage_brok(brok)
         for mod in self.modules_manager.get_internal_instances():
             try:
