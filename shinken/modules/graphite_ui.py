@@ -161,15 +161,15 @@ class Graphite_Webui(BaseModule):
             if len(couples) == 0:
                 return []
 
-            uri = self.uri + 'render/?width=586&height=308'
+            base_uri = self.uri + 'render/?width=586&height=308'
             # Send a bulk of all metrics at once
             for (metric, _) in couples:
-                uri += "&target=%s.__HOST__.%s" % (re.sub("[^a-zA-Z0-9]", "_",elt.host.host_name), metric)
+                uri = base_uri +  "&target=%s.__HOST__.%s" % (re.sub("[^a-zA-Z0-9]", "_",elt.host_name), metric)
+                v = {}
+                v['link'] = self.uri
+                v['img_src'] = uri
+                r.append(v)
 
-            v = {}
-            v['link'] = self.uri
-            v['img_src'] = uri
-            r.append(v)
             return r
         if t == 'service':
             couples = self.get_metric_and_value(elt.perf_data)
