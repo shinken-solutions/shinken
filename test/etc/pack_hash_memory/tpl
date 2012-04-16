@@ -1,0 +1,6 @@
+define host{
+  check_command                  check-host-alive-parent!up!$HOSTSTATE:test_router_0$
+  host_name                      srv-ZZ
+  use                            generic-host
+}
+
