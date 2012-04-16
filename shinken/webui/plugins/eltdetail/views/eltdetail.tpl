@@ -62,7 +62,7 @@ Invalid element name
 		    {{nb_unack_pb}}
 		  %end
 		</td>
-                <td><a href="/problems" style="padding-top:0;">{{app.datamgr.get_nb_elements()}}</a></td>
+                <td><a href="/all" style="padding-top:0;">{{app.datamgr.get_nb_elements()}}</a></td>
               </tr>
 	    </tbody>
 	  </table>
