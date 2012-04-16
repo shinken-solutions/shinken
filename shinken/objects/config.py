@@ -1588,9 +1588,9 @@ class Config(Item):
             # send the hosts in the same "pack"
             assoc = {}
             if os.path.exists(self.pack_distribution_file):
-                logger.log('Trying to open the distribution file %s' % self.pack_distribution_file)
+                logger.log('INFO : Trying to open the distribution file %s' % self.pack_distribution_file)
                 try:
-                    f = open('/tmp/assoc.dat', 'rb')
+                    f = open(self.pack_distribution_file, 'rb')
                     assoc = cPickle.load(f)
                     f.close()
                 except Exception, exp:
@@ -1637,7 +1637,7 @@ class Config(Item):
                     assoc[elt.get_name()] = i
 
             try:
-                logger.log('Trying to save the distribution file %s : %s' % self.pack_distribution_file)
+                logger.log('INFO : Trying to save the distribution file %s' % self.pack_distribution_file)
                 f = open(self.pack_distribution_file, 'wb')
                 cPickle.dump(assoc, f)
                 f.close()
