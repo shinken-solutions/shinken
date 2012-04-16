@@ -158,21 +158,34 @@ class TestRegenerator(ShinkenTest):
         print "Bench end:", t1 - t0
         
         times = {}
+        sizes = {}
         import cPickle
         data = {}
         cls = svc.__class__
-        for i in xrange(1, 2):#10000):
+        start = time.time()
+        for i in xrange(1, 10000):
             for prop, entry in svc.__class__.properties.items():
                 # Is this property intended for brokking?
                 if 'full_status' in entry.fill_brok:
                     data[prop] = svc.get_property_value_for_brok(prop, cls.properties)
                     if not prop in times:
                         times[prop] = 0
+                        sizes[prop] = 0
                     t0 = time.time()
-                    _ = cPickle.dumps(data[prop])
+                    tmp = cPickle.dumps(data[prop], 0)
+                    sizes[prop] += len(tmp)
                     times[prop] += time.time() - t0
         
-        print "Times", times
+        print "Times"
+        for (k,v) in times.iteritems():
+            print "\t%s : %s" % (k, v)
+        print "\n\n"
+        print "Sizes"
+        for (k,v) in sizes.iteritems():
+            print "\t%s : %s" % (k, v)
+        print "\n"
+        print "total time", time.time() - start
+        
 
 if __name__ == '__main__':
     unittest.main()

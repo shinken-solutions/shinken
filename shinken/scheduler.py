@@ -140,7 +140,9 @@ class Scheduler:
 
 
     # Load conf for future use
-    def load_conf(self, conf):
+    # we are in_test if the data are from an arbiter object like,
+    # so only for tests
+    def load_conf(self, conf, in_test=False):
         self.program_start = int(time.time())
         self.conf = conf
         self.hostgroups = conf.hostgroups
@@ -163,6 +165,15 @@ class Scheduler:
         self.timeperiods = conf.timeperiods
         self.timeperiods.create_reversed_list()
         self.commands = conf.commands
+
+        if not in_test:
+            # Commands in the host/services/contacts are not real one
+            # we must relink them
+            t0 = time.time()
+            self.hosts.late_linkify_h_by_commands(self.commands)
+            self.services.late_linkify_s_by_commands(self.commands)
+            self.contacts.late_linkify_c_by_commands(self.commands)
+            print 'Late command relink in', time.time() - t0
 
         # self.status_file = StatusFile(self)        # External status file
         self.instance_id = conf.instance_id # From Arbiter. Use for

@@ -102,14 +102,6 @@ class Regenerator(object):
         self.commands.create_reversed_list()
 
 
-    def set_schedulingitem_values(self, i):
-        return
-        i.check_period = self.get_timeperiod(i.check_period)
-        i.notification_period = self.get_timeperiod(i.notification_period)
-        i.contacts = self.get_contacts(i.contacts)
-        i.rebuild_ref()
-
-
     # Now we get all data about an instance, link all this stuff :)
     def all_done_linking(self, inst_id):
         # Mem debug phase
@@ -242,7 +234,7 @@ class Regenerator(object):
             # We can really declare this host OK now
             self.services[s.id] = s
         self.services.optimize_service_search(self.hosts)
-        #self.services.create_reversed_list()
+
 
         # Now we can link all impacts/source problem list
         # but only for the new ones here of course
@@ -316,10 +308,9 @@ class Regenerator(object):
         if not cc:
             setattr(o, prop, None)
             return
-        cmdname = cc.command.command_name
+        cmdname = cc.command
         c = self.commands.find_by_name(cmdname)
-        if c:
-            cc.command = c
+        cc.command = c
 
 
     # We look at o.prop and for each command we relink it
@@ -331,10 +322,9 @@ class Regenerator(object):
             return
 
         for cc in v:
-            cmdname = cc.command.command_name
+            cmdname = cc.command
             c = self.commands.find_by_name(cmdname)
-            if c:
-                cc.command = c
+            cc.command = c
         
 
 
@@ -347,9 +337,7 @@ class Regenerator(object):
             return
         tpname = t.timeperiod_name
         tp = self.timeperiods.find_by_name(tpname)
-        if tp:
-            #print "Seeting", prop, tp.get_name(), 'of', o.get_name()
-            setattr(o, prop, tp)
+        setattr(o, prop, tp)
             
     # same than before, but the value is a string here
     def linkify_a_timeperiod_by_name(self, o, prop):
@@ -358,9 +346,7 @@ class Regenerator(object):
             setattr(o, prop, None)
             return
         tp = self.timeperiods.find_by_name(tpname)
-        if tp:
-            #print "Seeting", prop, tp.get_name(), 'of', o.get_name()
-            setattr(o, prop, tp)
+        setattr(o, prop, tp)
 
 
 
@@ -500,16 +486,6 @@ class Regenerator(object):
         h = Host({})
         self.update_element(h, data)        
 
-        # Now we will only keep some flat data, instead of useless real objects
-        # Change contacts with their name only
-        h.contacts = [c.get_name() for c in h.contacts]
-        if h.notification_period:
-            h.notification_period = h.notification_period.get_name()
-        if h.check_period:
-            h.check_period = h.check_period.get_name()
-        if h.maintenance_period:
-            h.maintenance_period = h.maintenance_period.get_name()
-
         # We need to rebuild Downtime and Comment relationship
         for dtc in h.downtimes + h.comments:
             dtc.ref = h
@@ -566,17 +542,6 @@ class Regenerator(object):
         s = Service({})
         self.update_element(s, data)
         
-
-        # Now we will only keep some flat data, instead of useless real objects
-        # Change contacts and periods with their name only
-        s.contacts = [c.get_name() for c in s.contacts]
-        if s.notification_period:
-            s.notification_period = s.notification_period.get_name()
-        if s.check_period:
-            s.check_period = s.check_period.get_name()
-        if s.maintenance_period:
-            s.maintenance_period = s.maintenance_period.get_name()
-
         # We need to rebuild Downtime and Comment relationship
         for dtc in s.downtimes + s.comments:
             dtc.ref = s
