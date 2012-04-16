@@ -44,7 +44,6 @@ from test_livestatus import TestConfig
 sys.setcheckinterval(10000)
 
 
-
 class TestConfigAuth(TestConfig):
     def setUp(self):
         self.setup_with_file('etc/nagios_livestatus_authuser.cfg')
@@ -84,6 +83,57 @@ class TestConfigAuth(TestConfig):
 
 
 
+    """
+test_host_0             cg0      c0,c1
+             test_ok_0  cg0      c0,c1
+             test_ok_1  cg1      c0
+             test_ok_2  cg2      c1
+             test_ok_3  cg3      c2
+
+test_host_1             cg0
+             test_ok_0  cg2
+             test_ok_1  -
+             test_ok_2  -
+             test_ok_3  -
+
+test_host_2             cg3
+             test_ok_0  -
+             test_ok_1  -
+             test_ok_2  -
+             test_ok_3  -
+
+test_host_3             cg3
+             test_ok_0  -
+             test_ok_1  -
+             test_ok_2  -
+             test_ok_3  -
+
+    """
+
+    def test_host_authorization(self):
+        self.print_header()
+        now = time.time()
+        objlist = []
+        for host in self.sched.hosts:
+            objlist.append([host, 0, 'UP'])
+        for service in self.sched.services:
+            objlist.append([service, 0, 'OK'])
+        self.scheduler_loop(1, objlist)
+        self.update_broker()
+        request = """GET hosts
+AuthUser: c0
+Columns: name
+OutputFormat: python
+KeepAlive: on
+"""
+        # test_host_0/1
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response 
+        pyresponse = eval(response)
+        self.assert_(len(pyresponse) == 2)
+        self.assert_("test_host_0" in [h[0] for h in pyresponse])
+        self.assert_("test_host_1" in [h[0] for h in pyresponse])
+
     def test_service_authorization_loose(self):
         self.print_header()
         now = time.time()
@@ -95,11 +145,14 @@ class TestConfigAuth(TestConfig):
         self.scheduler_loop(1, objlist)
         self.update_broker()
         request = """GET hosts
+AuthUser: c0
 Columns: name services
-OutputFormat: csv
+Filter: name = test_host_0
+OutputFormat: python
 KeepAlive: on
 ResponseHeader: fixed16
 """
+        # test_ok_0..3 because c0 is host contact
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response 
 

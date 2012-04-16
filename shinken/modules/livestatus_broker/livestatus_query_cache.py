@@ -210,6 +210,9 @@ class QueryData(object):
             elif keyword == 'Limit':
                 _, limit = self.split_option(line)
                 self.structured_data.append((keyword, limit))
+            elif keyword == 'AuthUser':
+                _, authuser = self.split_option(line)
+                self.structured_data.append((keyword, authuser))
             elif keyword == 'Filter':
                 try:
                     _, attribute, operator, reference = re.split(r"[\s]+", line, 3)
