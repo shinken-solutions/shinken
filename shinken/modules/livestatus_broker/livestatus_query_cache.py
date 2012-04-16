@@ -1,10 +1,12 @@
+#!/usr/bin/python
+
 # -*- coding: utf-8 -*-
-#
+
 # Copyright (C) 2009-2012:
-#     Gabes Jean, naparuba@gmail.com
-#     Gerhard Lausser, Gerhard.Lausser@consol.de
-#     Gregory Starck, g.starck@gmail.com
-#     Hartmut Goebel, h.goebel@goebel-consult.de
+#    Gabes Jean, naparuba@gmail.com
+#    Gerhard Lausser, Gerhard.Lausser@consol.de
+#    Gregory Starck, g.starck@gmail.com
+#    Hartmut Goebel, h.goebel@goebel-consult.de
 #
 # This file is part of Shinken.
 #
@@ -208,6 +210,9 @@ class QueryData(object):
             elif keyword == 'Limit':
                 _, limit = self.split_option(line)
                 self.structured_data.append((keyword, limit))
+            elif keyword == 'AuthUser':
+                _, authuser = self.split_option(line)
+                self.structured_data.append((keyword, authuser))
             elif keyword == 'Filter':
                 try:
                     _, attribute, operator, reference = re.split(r"[\s]+", line, 3)

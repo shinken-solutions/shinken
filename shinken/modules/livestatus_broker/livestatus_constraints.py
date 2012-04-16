@@ -1,10 +1,12 @@
+#!/usr/bin/python
+
 # -*- coding: utf-8 -*-
-#
+
 # Copyright (C) 2009-2012:
-#     Gabes Jean, naparuba@gmail.com
-#     Gerhard Lausser, Gerhard.Lausser@consol.de
-#     Gregory Starck, g.starck@gmail.com
-#     Hartmut Goebel, h.goebel@goebel-consult.de
+#    Gabes Jean, naparuba@gmail.com
+#    Gerhard Lausser, Gerhard.Lausser@consol.de
+#    Gregory Starck, g.starck@gmail.com
+#    Hartmut Goebel, h.goebel@goebel-consult.de
 #
 # This file is part of Shinken.
 #
@@ -24,6 +26,7 @@
 
 class LiveStatusConstraints:
     """ Represent the constraints applied on a livestatus request """
-    def __init__(self, filter_func, without_filter):
+    def __init__(self, filter_func, without_filter, authuser):
         self.filter_func = filter_func
         self.without_filter = without_filter
+        self.authuser = authuser

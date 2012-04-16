@@ -115,8 +115,9 @@ class TestConfig(ShinkenTest):
         print "--- ", title
         for brok in sorted(self.sched.broks.values(), lambda x, y: x.id - y.id):
             if re.compile('^service_').match(brok.type):
-                print "BROK:", brok.type
-                print "BROK   ", brok.data['in_checking']
+                pass
+                #print "BROK:", brok.type
+                #print "BROK   ", brok.data['in_checking']
         self.update_broker()
         request = 'GET services\nColumns: service_description is_executing\n'
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
@@ -1827,8 +1828,8 @@ test_router_0
             print "All broks", b.type, b
             if b.type == 'update_host_status':
                 print "***********"
-                print "Impacts", b.data['impacts']
-                print "Sources",  b.data['source_problems']
+                #print "Impacts", b.data['impacts']
+                #print "Sources",  b.data['source_problems']
 
         for b in host_router_0.broks:
             print " host_router_0.broks", b

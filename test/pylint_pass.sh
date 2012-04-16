@@ -37,9 +37,6 @@
 ## W0201: *Attribute %r defined outside __init__*
 # Used when an instance attribute is defined outside the __init__ method.
 
-## E1101: *%s %r has no %r member*
-# Used when a variable is accessed for an unexistent member.
-
 ## C0302: *Too many lines in module (%s)*
 # Used when a module has too much lines, reducing its readability.
 
@@ -60,7 +57,7 @@ echo `pwd`
 
 echo "Launching pylint stat pass"
 cd ..
-pylint -f parseable --disable-msg=C0111,C0103,W0201,E1101,C0302,R0904,R0902,W0511 --max-line-length 100 shinken/ shinken/modules/*/*py > $DIR/pylint.txt
+pylint -f parseable --disable-msg=C0111,C0103,W0201,C0302,R0904,R0902,W0511 --max-line-length 100 shinken/ shinken/modules/*/*py > $DIR/pylint.txt
 cd $DIR
 echo "Pylint pass done, congrats or not? ;) "
 
