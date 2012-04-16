@@ -276,6 +276,9 @@ class Host(SchedulingItem):
         # Set if the element just change its father/son topology
         'topology_change' : BoolProp(default=False, fill_brok=['full_status']),
 
+        # Keep in mind our pack id afterthe cutting phase
+        'pack_id' : IntegerProp(default=-1),
+
     })
 
     # Hosts macros and prop that give the information

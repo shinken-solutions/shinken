@@ -35,6 +35,7 @@ import socket
 import itertools
 import time
 import random
+import cPickle
 from StringIO import StringIO
 
 
@@ -260,6 +261,10 @@ class Config(Item):
         'strip_idname_fqdn' :    BoolProp(default='1'),
         'runners_timeout'   :    IntegerProp(default='3600'),
 
+        # pack_distribution_file is for keeping a distribution history
+        # of the host distribution in the several "packs" so a same
+        # scheduler will have more change of getting the same host
+        'pack_distribution_file'  : StringProp(default='pack_distribution.dat'),
 
         ## WEBUI part
         'webui_lock_file'   :    StringProp(default='webui.pid'),
@@ -1575,16 +1580,72 @@ class Config(Item):
 
             rr = itertools.cycle(weight_list)
 
-            # we must have nb_schedulers packs)
+            # We must have nb_schedulers packs
             for i in xrange(0, nb_schedulers):
                 packs[i] = []
+
+            # Try to load the history association dict so we will try to
+            # send the hosts in the same "pack"
+            assoc = {}
+            if os.path.exists(self.pack_distribution_file):
+                logger.log('Trying to open the distribution file %s' % self.pack_distribution_file)
+                try:
+                    f = open('/tmp/assoc.dat', 'rb')
+                    assoc = cPickle.load(f)
+                    f.close()
+                except Exception, exp:
+                    logger.log('Warning : cannot open the distribution file %s : %s' % (self.pack_distribution_file, str(exp)))
+
 
             # Now we explode the numerous packs into nb_packs reals packs:
             # we 'load balance' them in a roundrobin way
             for pack in r.packs:
-                i = rr.next()
+                valid_value = False
+                old_pack = -1
                 for elt in pack:
+                    #print 'Look for host', elt.get_name(), 'in assoc'
+                    old_i = assoc.get(elt.get_name(), -1)
+                    #print 'Founded in ASSOC : ', elt.get_name(),old_i
+                    # Maybe it's a new, if so, don't count it
+                    if old_i == -1:
+                        continue
+                    # Maybe it is the first we look at, if so, take it's value
+                    if old_pack == -1 and old_i != -1:
+                        #print 'First value set', elt.get_name(), old_i
+                        old_pack = old_i
+                        valid_value = True
+                        continue
+                    if old_i == old_pack:
+                        #print 'I found a match between elements', old_i
+                        valid_value = True
+                    if old_i != old_pack:
+                        #print 'Outch found a change sorry', old_i, old_pack
+                        valid_value = False
+                #print 'Is valid?', elt.get_name(), valid_value, old_pack
+                i = None
+                # If it's a valid sub pack and the pack id really exist, use it!
+                if valid_value and old_pack in packindices:
+                    #print 'Use a old id for pack', old_pack, [h.get_name() for h in pack]
+                    i = old_pack
+                else : # take a new one
+                    #print 'take a new id for pack', [h.get_name() for h in pack]
+                    i = rr.next()
+
+                for elt in pack:
+                    #print 'We got the element', elt.get_full_name(), ' in pack', i, packindices
                     packs[packindices[i]].append(elt)
+                    assoc[elt.get_name()] = i
+
+            try:
+                logger.log('Trying to save the distribution file %s : %s' % self.pack_distribution_file)
+                f = open(self.pack_distribution_file, 'wb')
+                cPickle.dump(assoc, f)
+                f.close()
+            except Exception, exp:
+                logger.log('Warning : cannot save the distribution file %s : %s' % (self.pack_distribution_file, str(exp)))
+
+
+
             # Now in packs we have the number of packs [h1, h2, etc]
             # equal to the number of schedulers.
             r.packs = packs
@@ -1664,6 +1725,7 @@ class Config(Item):
             for i in r.packs:
                 pack = r.packs[i]
                 for h in pack:
+                    h.pack_id = i
                     self.confs[i+offset].hosts.append(h)
                     for s in h.services:
                         self.confs[i+offset].services.append(s)
@@ -1718,7 +1780,6 @@ class Config(Item):
         for i in self.confs:
             self.confs[i].instance_id = i
             random.seed(time.time())
-#            self.confs[i].magic_hash = 0#random.randint(1, 100000)
 
 
 # ...

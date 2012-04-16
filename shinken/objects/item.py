@@ -191,10 +191,16 @@ Like temporary attributes such as "imported_from", etc.. """
     # Compute a hash of this element values. Should be launched
     # When we got all our values, but not linked with other objects
     def compute_hash(self):
+        # ID will always changed between runs, so we remove it
+        # for hash compute
+        i = self.id
+        del self.id
         m = hashlib.md5()
         tmp = cPickle.dumps(self, cPickle.HIGHEST_PROTOCOL)
         m.update(tmp)
         self.hash = m.digest()
+        # and put again our id
+        self.id = i
 
 
     def get_templates(self):

@@ -22,6 +22,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 import cPickle
 
+
 class Brok:
     """A Brok is a piece of information exported by Shinken to the Broker.
     Broker can do whatever he wants with it.
