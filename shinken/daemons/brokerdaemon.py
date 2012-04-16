@@ -293,7 +293,9 @@ class Broker(BaseSatellite):
             try:
                 con = links[sched_id]['con']
                 if con is not None: # None = not initilized
+                    t0 = time.time()
                     tmp_broks = con.get_broks()
+                    print 'DBG: %s Broks get in %s' % (len(tmp_broks), time.time() - t0)
                     for b in tmp_broks.values():
                         b.instance_id = links[sched_id]['instance_id']
 
@@ -569,7 +571,7 @@ class Broker(BaseSatellite):
         # No more need to send them
         for b in to_send:
             b.need_send_to_ext = False
-        print "DBG: Time to send %s broks" % len(self.broks), time.time() - t0
+        print "DBG: Time to send %s broks" % len(to_send), time.time() - t0
 
         # We must had new broks at the end of the list, so we reverse the list
         self.broks.reverse()

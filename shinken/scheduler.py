@@ -179,7 +179,6 @@ class Scheduler:
         self.update_recurrent_works_tick('clean_queues', self.conf.cleaning_queues_interval)
 
 
-
     # Update the 'tick' for a function call in our
     # recurrent work
     def update_recurrent_works_tick(self, f_name, new_tick):
@@ -1113,7 +1112,7 @@ class Scheduler:
                 b = i.get_initial_status_brok()
                 self.add(b)
 
-        # Only raises the all logs at the scehduler startup
+        # Only raises the all logs at the scheduler startup
         if with_logs:
             # Ask for INITIAL logs for services and hosts
             for i in self.hosts:
@@ -1385,7 +1384,10 @@ class Scheduler:
         self.retention_load()
 
         # Ok, now all is initialized, we can make the inital broks
+        print 'Starting initial broks'
+        t0 = time.time()
         self.fill_initial_broks(with_logs=True)
+        print 'Finishing initial broks', time.time() - t0
 
         logger.log("Info : [%s] First scheduling launched" % self.instance_name)
         self.schedule()

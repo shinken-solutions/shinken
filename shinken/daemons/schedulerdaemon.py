@@ -23,6 +23,7 @@
 import os
 import time
 import traceback
+import cPickle
 
 from shinken.scheduler import Scheduler
 from shinken.macroresolver import MacroResolver
@@ -32,6 +33,7 @@ from shinken.property import PathProp, IntegerProp
 import shinken.pyro_wrapper as pyro
 from shinken.log import logger
 from shinken.satellite import BaseSatellite, IForArbiter as IArb, Interface
+
 
 #Interface for Workers
 
@@ -114,6 +116,7 @@ HE got user entry, so we must listen him carefully and give information he want,
         print "Arbiter want me to wait a new conf"
         self.app.sched.die()
         super(IForArbiter, self).wait_new_conf()        
+
 
 
 # The main app class
@@ -247,8 +250,11 @@ class Shinken(BaseSatellite):
 
 
     def setup_new_conf(self):
-        #self.use_ssl = self.app.use_ssl
-        (conf, override_conf, modules, satellites) = self.new_conf
+        (conf_raw, override_conf, modules, satellites) = self.new_conf
+        t0 = time.time()
+        conf = cPickle.loads(conf_raw)
+        print "DBG : Finish unserialize the conf in", time.time() - t0
+
         self.new_conf = None
         
         # In fact it make the scheduler just DIE as a bad guy. 
@@ -302,16 +308,16 @@ class Shinken(BaseSatellite):
         if self.ichecks is not None:
             print "Deconnecting previous Check Interface from pyro_daemon"
             self.pyro_daemon.unregister(self.ichecks)
-        #Now create and connect it
+        # Now create and connect it
         self.ichecks = IChecks(self.sched)
         self.uri = self.pyro_daemon.register(self.ichecks, "Checks")
         print "The Checks Interface uri is:", self.uri
 
-        #Same for Broks
+        # Same for Broks
         if self.ibroks is not None:
             print "Deconnecting previous Broks Interface from pyro_daemon"
             self.pyro_daemon.unregister(self.ibroks)
-        #Create and connect it
+        # Create and connect it
         self.ibroks = IBroks(self.sched)
         self.uri2 = self.pyro_daemon.register(self.ibroks, "Broks")
         print "The Broks Interface uri is:", self.uri2
@@ -319,7 +325,7 @@ class Shinken(BaseSatellite):
         print("Loading configuration..")
         self.conf.explode_global_conf()
         
-        #we give sched it's conf
+        # we give sched it's conf
         self.sched.reset()
         self.sched.load_conf(self.conf)
         self.sched.load_satellites(self.pollers, self.reactionners)

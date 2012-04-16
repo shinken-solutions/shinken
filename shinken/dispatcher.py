@@ -34,6 +34,7 @@
 import time
 import random
 import itertools
+import cPickle
 
 from shinken.util import alive_then_spare_then_deads, safe_print
 from shinken.log import logger
@@ -368,7 +369,7 @@ class Dispatcher:
                         if not sched.need_conf:
                             logger.log('[%s] The scheduler %s do not need conf, sorry' % (r.get_name(), sched.get_name()))
                             continue
-                        
+
                         # We tag conf with the instance_name = scheduler_name
                         conf.instance_name = sched.scheduler_name
                         # We give this configuraton a new 'flavor'
@@ -377,11 +378,15 @@ class Dispatcher:
                         # REF: doc/shinken-scheduler-lost.png (2)
                         override_conf = sched.get_override_configuration()
                         satellites_for_sched = r.get_satellites_links_for_scheduler()
-                        conf_package = (conf, override_conf, sched.modules, satellites_for_sched)
+
+                        # Prepare the conf before sending it
+                        t0 = time.time()
+                        conf_package = (cPickle.dumps(conf, 2), override_conf, sched.modules, satellites_for_sched)
+                        print "DBG : Finish to serialise the conf in", time.time() - t0
                         
-                        #print "Try to put the conf", conf_package
-                        
+                        t1 = time.time()
                         is_sent = sched.put_conf(conf_package)
+                        print "DBG : conf is sent in ", time.time() - t1
                         if not is_sent:
                             logger.log('[%s] WARNING : configuration dispatching error for scheduler %s' %(r.get_name(), sched.get_name()))
                             continue

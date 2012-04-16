@@ -192,7 +192,6 @@ class SatelliteLink(Item):
         self.broks.append(b)
 
 
-
     # The elements just got a new conf_id, we put it in our list
     # because maybe the satellite is too busy to answer now
     def known_conf_managed_push(self, cfg_id, push_flavor):
