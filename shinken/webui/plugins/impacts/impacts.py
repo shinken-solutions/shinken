@@ -100,5 +100,5 @@ def impacts_widget():
 widget_desc = '<h3>Impacts</h3>Show an aggregated view of the most business impacts!'
 
 pages = {show_impacts : { 'routes' : ['/impacts'], 'view' : 'impacts', 'static' : True} ,
-         impacts_widget : { 'routes' : ['/widget/impacts'], 'view' : 'widget_impacts', 'static' : True, 'widget' : ['dashboard'], 'widget_desc' : widget_desc, 'widget_name' : 'impacts'},
+         impacts_widget : { 'routes' : ['/widget/impacts'], 'view' : 'widget_impacts', 'static' : True, 'widget' : ['dashboard'], 'widget_desc' : widget_desc, 'widget_name' : 'impacts', 'widget_picture' : '/static/impacts/img/widget_impacts.png'},
          }

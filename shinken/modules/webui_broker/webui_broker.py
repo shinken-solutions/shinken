@@ -285,6 +285,7 @@ class Webui_broker(BaseModule, Daemon):
                     widget_lst = entry.get('widget', [])
                     widget_desc = entry.get('widget_desc', None)
                     widget_name = entry.get('widget_name', None)
+                    widget_picture = entry.get('widget_picture', None)
                     
                     # IMPORTANT : apply VIEW BEFORE route!
                     if v:
@@ -315,7 +316,8 @@ class Webui_broker(BaseModule, Daemon):
                         for place in widget_lst:
                             if place not in self.widgets:
                                 self.widgets[place] = []
-                            w = {'widget_name' : widget_name, 'widget_desc' : widget_desc, 'base_uri' : routes[0]}
+                            w = {'widget_name' : widget_name, 'widget_desc' : widget_desc, 'base_uri' : routes[0],
+                                 'widget_picture' : widget_picture}
                             print "Loading widget", w
                             self.widgets[place].append(w)
 

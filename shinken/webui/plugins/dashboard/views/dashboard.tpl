@@ -17,10 +17,20 @@
       <p>&nbsp;</p>
     <div class='row span12'>
     %for w in app.get_widgets_for('dashboard'):
-    <div class='widget_desc span5'>
-      {{!w['widget_desc']}}
-      <p>&nbsp;</p>
-      <p><a class='btn btn-success' href="javascript:AddNewWidget('{{w['base_uri']}}', 'widget-place-1');"> <i class="icon-chevron-left"></i> Add {{w['widget_name']}} widget</a></p>
+    <div class='widget_desc span5' style='position: relative;'>
+      <div class='row'>
+	<span class='span4'>
+	  <img style="width:64px;height:64px" src="{{w['widget_picture']}}" id="widget_desc_{{w['widget_name']}}"/>
+	  <script >$(function(){ $("#widget_desc_{{w['widget_name']}}").tooltip({
+	    'content' : "MONCUL <img src='{{w['widget_picture']}}/>", 'placement' : 'top'});
+	    });</script>
+	</span>
+	<span class='span6'>
+	  {{!w['widget_desc']}}
+	</span>
+	<p>&nbsp;</p>
+      </div>
+      <p class="add_button"><a class='btn btn-success' href="javascript:AddNewWidget('{{w['base_uri']}}', 'widget-place-1');"> <i class="icon-chevron-left"></i> Add {{w['widget_name']}} widget</a></p>
     </div>
     %end
     </div>

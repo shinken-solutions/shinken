@@ -5,7 +5,7 @@
     /*position: fixed;*/
     top: 0;
     height: 100%;
-    z-index: 999999;
+    z-index: 2000;
     
     /* Specify the width of your pageslide here */
     width: 360px;

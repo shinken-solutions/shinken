@@ -242,6 +242,6 @@ Show the most impacting IT problems
 
 pages = {get_page : { 'routes' : ['/problems'], 'view' : 'problems', 'static' : True},
          get_all : { 'routes' : ['/all'], 'view' : 'problems', 'static' : True},
-         get_pbs_widget : {'routes' : ['/widget/problems'], 'view' : 'widget_problems', 'static' : True, 'widget' : ['dashboard'], 'widget_desc' : widget_desc, 'widget_name' : 'problems'},
+         get_pbs_widget : {'routes' : ['/widget/problems'], 'view' : 'widget_problems', 'static' : True, 'widget' : ['dashboard'], 'widget_desc' : widget_desc, 'widget_name' : 'problems', 'widget_picture' : '/static/problems/img/widget_problems.png'},
          }
 

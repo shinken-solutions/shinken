@@ -4,8 +4,14 @@
     padding : 10px;
     border-radius: 4px;
     color : black;
+    min-height : 140px;
+    position: relative; /* To be sure absolute item will b where they should be*/
 }
 
+.widget_desc .add_button{
+    bottom:0px;
+    position:absolute;
+}
 .slidelink{
     margin-right:20px;
 }
