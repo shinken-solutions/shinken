@@ -1198,9 +1198,12 @@ class SchedulingItem(Item):
 
     # return a check to check the host/service
     # and return id of the check
-    def launch_check(self, t, ref_check = None, force=False):
+    def launch_check(self, t, ref_check=None, force=False):
         c = None
         cls = self.__class__
+
+        # Look if we are in check or not
+        self.update_in_checking()
 
         # if I'm already in checking, Why launch a new check?
         # If ref_check_id is not None , this is a dependency_ check
