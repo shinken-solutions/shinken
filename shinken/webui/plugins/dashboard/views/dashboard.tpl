@@ -9,18 +9,24 @@
   <a href="#pageslide" class="slidelink btn btn-success pull-right"><i class="icon-plus"></i> Add a new widget</a>
 </div>
 <div id="pageslide" style="display:none">
-    <h2>Widgets available</h2>
-    
+    <div class='row'>
+      <h2 class='pull-left'>Widgets available</h2>
+      <p class='pull-right'><a class='btn btn-danger' href="javascript:$.pageslide.close()"><i class="icon-remove"></i> Close</a></p>
+    </div>
+      <p>&nbsp;</p>
+      <p>&nbsp;</p>
+    <div class='row span12'>
     %for w in app.get_widgets_for('dashboard'):
-    <div class='widget_desc'>
+    <div class='widget_desc span5'>
       {{!w['widget_desc']}}
       <p>&nbsp;</p>
       <p><a class='btn btn-success' href="javascript:AddNewWidget('{{w['base_uri']}}', 'widget-place-1');"> <i class="icon-chevron-left"></i> Add {{w['widget_name']}} widget</a></p>
     </div>
     %end
+    </div>
 
     
-    <p><a class='btn btn-danger' href="javascript:$.pageslide.close()"><i class="icon-remove"></i> Close</a></p>
+
 </div>
 
 <script >$(function(){
