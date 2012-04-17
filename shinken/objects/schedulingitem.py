@@ -1205,7 +1205,7 @@ class SchedulingItem(Item):
         # Look if we are in check or not
         self.update_in_checking()
 
-        # if I'm already in checking, Why launch a new check?
+        # If I'm already in checking, Why launch a new check?
         # If ref_check_id is not None , this is a dependency_ check
         # If none, it might be a forced check, so OK, I do a new
         if not force and (self.in_checking and ref_check is not None):
