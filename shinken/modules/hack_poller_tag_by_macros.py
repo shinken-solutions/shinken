@@ -62,7 +62,7 @@ class Hack_pt_by_macros(BaseModule):
         
 
     def hook_late_configuration(self, arb):
-        logger.log("[HackPollerTagByMacros in hook late config")
+        logger.log(logger.INFO, "[HackPollerTagByMacros in hook late config")
         for h in arb.conf.hosts:
             if h.poller_tag == 'None' and self.host_macro_name.upper() in h.customs:
                 v = h.customs[self.host_macro_name.upper()]

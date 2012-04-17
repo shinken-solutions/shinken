@@ -95,7 +95,7 @@ class SatelliteLink(Item):
             # so we must disable it imadiatly after
             socket.setdefaulttimeout(None)
             self.con = None
-            logger.log('Error : in creation connection for %s : %s' % (self.get_name(), str(exp)))
+            logger.log(logger.INFO, 'Error : in creation connection for %s : %s' % (self.get_name(), str(exp)))
     
 
 
@@ -151,7 +151,7 @@ class SatelliteLink(Item):
         # We are dead now. Must raise
         # a brok to say it
         if was_alive:
-            logger.log("Warning : Setting the satellite %s to a dead state." % self.get_name())
+            logger.log(logger.INFO, "Warning : Setting the satellite %s to a dead state." % self.get_name())
             b = self.get_update_status_brok()
             self.broks.append(b)
 
@@ -165,7 +165,7 @@ class SatelliteLink(Item):
         # Don't need to warn again and again if the satellite is already dead
         if self.alive:
             s = "Info : Add failed attempt to %s (%d/%d) %s" % (self.get_name(), self.attempt, self.max_check_attempts, reason)
-            logger.log(s)
+            logger.log(logger.INFO, s)
         # check when we just go HARD (dead)
         if self.attempt == self.max_check_attempts:
             self.set_dead()

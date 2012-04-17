@@ -379,7 +379,7 @@ class Host(SchedulingItem):
         for prop, entry in cls.properties.items():
             if prop not in special_properties:
                 if not hasattr(self, prop) and entry.required:
-                    logger.log("%s : I do not have %s" % (self.get_name(), prop))
+                    logger.log(logger.INFO, "%s : I do not have %s" % (self.get_name(), prop))
                     state = False #Bad boy...
 
         # Then look if we have some errors in the conf
@@ -391,39 +391,39 @@ class Host(SchedulingItem):
         if self.configuration_errors != []:
             state = False
             for err in self.configuration_errors:
-                logger.log(err)
+                logger.log(logger.INFO, err)
 
         if not hasattr(self, 'notification_period'):
             self.notification_period = None
 
         # Ok now we manage special cases...
         if self.notifications_enabled and self.contacts == []:
-            logger.log("Warning : the host %s has no contacts nor contact_groups in (%s)" % (self.get_name(), source))
+            logger.log(logger.INFO, "Warning : the host %s has no contacts nor contact_groups in (%s)" % (self.get_name(), source))
         
         if getattr(self, 'check_command', None) is None:
-            logger.log("%s : I've got no check_command" % self.get_name())
+            logger.log(logger.INFO, "%s : I've got no check_command" % self.get_name())
             state = False
         # Ok got a command, but maybe it's invalid
         else:
             if not self.check_command.is_valid():
-                logger.log("%s : my check_command %s is invalid" % (self.get_name(), self.check_command.command))
+                logger.log(logger.INFO, "%s : my check_command %s is invalid" % (self.get_name(), self.check_command.command))
                 state = False
             if self.got_business_rule:
                 if not self.business_rule.is_valid():
-                    logger.log("%s : my business rule is invalid" % (self.get_name(),))
+                    logger.log(logger.INFO, "%s : my business rule is invalid" % (self.get_name(),))
                     for bperror in self.business_rule.configuration_errors:
-                        logger.log("%s : %s" % (self.get_name(), bperror))
+                        logger.log(logger.INFO, "%s : %s" % (self.get_name(), bperror))
                     state = False
         
         if not hasattr(self, 'notification_interval') and self.notifications_enabled == True:
-            logger.log("%s : I've got no notification_interval but I've got notifications enabled" % self.get_name())
+            logger.log(logger.INFO, "%s : I've got no notification_interval but I've got notifications enabled" % self.get_name())
             state = False
 
         # If active check is enabled with a check_interval!=0, we must have a check_period
         if ( getattr(self, 'active_checks_enabled', False) 
              and getattr(self, 'check_period', None) is None 
              and getattr(self, 'check_interval', 1) != 0 ):
-            logger.log("%s : My check_period is not correct" % self.get_name())
+            logger.log(logger.INFO, "%s : My check_period is not correct" % self.get_name())
             state = False
         
         if not hasattr(self, 'check_period'):
@@ -432,7 +432,7 @@ class Host(SchedulingItem):
         if hasattr(self, 'host_name'):
             for c in cls.illegal_object_name_chars:
                 if c in self.host_name:
-                    logger.log("%s : My host_name got the caracter %s that is not allowed." % (self.get_name(), c))
+                    logger.log(logger.INFO, "%s : My host_name got the caracter %s that is not allowed." % (self.get_name(), c))
                     state = False
 
         return state
@@ -666,21 +666,21 @@ class Host(SchedulingItem):
     # Add a log entry with a HOST ALERT like:
     # HOST ALERT: server;DOWN;HARD;1;I don't know what to say...
     def raise_alert_log_entry(self):
-        logger.log('HOST ALERT: %s;%s;%s;%d;%s' % (self.get_name(), self.state, self.state_type, self.attempt, self.output))
+        logger.log(logger.INFO, 'HOST ALERT: %s;%s;%s;%d;%s' % (self.get_name(), self.state, self.state_type, self.attempt, self.output))
 
 
     # If the configuration allow it, raise an initial log like
     # CURRENT HOST STATE: server;DOWN;HARD;1;I don't know what to say...
     def raise_initial_state(self):
         if self.__class__.log_initial_states:
-            logger.log('CURRENT HOST STATE: %s;%s;%s;%d;%s' % (self.get_name(), self.state, self.state_type, self.attempt, self.output))
+            logger.log(logger.INFO, 'CURRENT HOST STATE: %s;%s;%s;%d;%s' % (self.get_name(), self.state, self.state_type, self.attempt, self.output))
 
 
     # Add a log entry with a Freshness alert like:
     # Warning: The results of host 'Server' are stale by 0d 0h 0m 58s (threshold=0d 1h 0m 0s).
     # I'm forcing an immediate check of the host.
     def raise_freshness_log_entry(self, t_stale_by, t_threshold):
-        logger.log("Warning: The results of host '%s' are stale by %s (threshold=%s).  I'm forcing an immediate check of the host." \
+        logger.log(logger.INFO, "Warning: The results of host '%s' are stale by %s (threshold=%s).  I'm forcing an immediate check of the host." \
                       % (self.get_name(), format_t_into_dhms_format(t_stale_by), format_t_into_dhms_format(t_threshold)))
 
 
@@ -694,54 +694,54 @@ class Host(SchedulingItem):
         else:
             state = self.state
         if self.__class__.log_notifications:
-            logger.log("HOST NOTIFICATION: %s;%s;%s;%s;%s" % (contact.get_name(), self.get_name(), state, \
+            logger.log(logger.INFO, "HOST NOTIFICATION: %s;%s;%s;%s;%s" % (contact.get_name(), self.get_name(), state, \
                                                                  command.get_name(), self.output))
 
     # Raise a log entry with a Eventhandler alert like
     # HOST NOTIFICATION: superadmin;server;UP;notify-by-rss;no output
     def raise_event_handler_log_entry(self, command):
         if self.__class__.log_event_handlers:
-            logger.log("HOST EVENT HANDLER: %s;%s;%s;%s;%s" % (self.get_name(), self.state, self.state_type, self.attempt, \
+            logger.log(logger.INFO, "HOST EVENT HANDLER: %s;%s;%s;%s;%s" % (self.get_name(), self.state, self.state_type, self.attempt, \
                                                                  command.get_name()))
 
 
     #Raise a log entry with FLAPPING START alert like
     #HOST FLAPPING ALERT: server;STARTED; Host appears to have started flapping (50.6% change >= 50.0% threshold)
     def raise_flapping_start_log_entry(self, change_ratio, threshold):
-        logger.log("HOST FLAPPING ALERT: %s;STARTED; Host appears to have started flapping (%.1f%% change >= %.1f%% threshold)" % \
+        logger.log(logger.INFO, "HOST FLAPPING ALERT: %s;STARTED; Host appears to have started flapping (%.1f%% change >= %.1f%% threshold)" % \
                       (self.get_name(), change_ratio, threshold))
 
 
     #Raise a log entry with FLAPPING STOP alert like
     #HOST FLAPPING ALERT: server;STOPPED; host appears to have stopped flapping (23.0% change < 25.0% threshold)
     def raise_flapping_stop_log_entry(self, change_ratio, threshold):
-        logger.log("HOST FLAPPING ALERT: %s;STOPPED; Host appears to have stopped flapping (%.1f%% change < %.1f%% threshold)" % \
+        logger.log(logger.INFO, "HOST FLAPPING ALERT: %s;STOPPED; Host appears to have stopped flapping (%.1f%% change < %.1f%% threshold)" % \
                       (self.get_name(), change_ratio, threshold))
 
 
     #If there is no valid time for next check, raise a log entry
     def raise_no_next_check_log_entry(self):
-        logger.log("Warning : I cannot schedule the check for the host '%s' because there is not future valid time" % \
+        logger.log(logger.INFO, "Warning : I cannot schedule the check for the host '%s' because there is not future valid time" % \
                       (self.get_name()))
 
     #Raise a log entry when a downtime begins
     #HOST DOWNTIME ALERT: test_host_0;STARTED; Host has entered a period of scheduled downtime
     def raise_enter_downtime_log_entry(self):
-        logger.log("HOST DOWNTIME ALERT: %s;STARTED; Host has entered a period of scheduled downtime" % \
+        logger.log(logger.INFO, "HOST DOWNTIME ALERT: %s;STARTED; Host has entered a period of scheduled downtime" % \
                       (self.get_name()))
 
 
     #Raise a log entry when a downtime has finished
     #HOST DOWNTIME ALERT: test_host_0;STOPPED; Host has exited from a period of scheduled downtime
     def raise_exit_downtime_log_entry(self):
-        logger.log("HOST DOWNTIME ALERT: %s;STOPPED; Host has exited from a period of scheduled downtime" % \
+        logger.log(logger.INFO, "HOST DOWNTIME ALERT: %s;STOPPED; Host has exited from a period of scheduled downtime" % \
                       (self.get_name()))
 
 
     #Raise a log entry when a downtime prematurely ends
     #HOST DOWNTIME ALERT: test_host_0;CANCELLED; Service has entered a period of scheduled downtime
     def raise_cancel_downtime_log_entry(self):
-        logger.log("HOST DOWNTIME ALERT: %s;CANCELLED; Scheduled downtime for host has been cancelled." % \
+        logger.log(logger.INFO, "HOST DOWNTIME ALERT: %s;CANCELLED; Scheduled downtime for host has been cancelled." % \
                       (self.get_name()))
 
 
@@ -762,7 +762,7 @@ class Host(SchedulingItem):
             if c.output != self.output:
                 need_stalk = False
         if need_stalk:
-            logger.log("Stalking %s : %s" % (self.get_name(), self.output))
+            logger.log(logger.INFO, "Stalking %s : %s" % (self.get_name(), self.output))
 
 
     #fill act_depend_of with my parents (so network dep)
@@ -1112,7 +1112,7 @@ class Hosts(Items):
 
         # and raise errors about it
         for h in host_in_loops:
-            logger.log("Error: The host '%s' is part of a circular parent/child chain!" % h.get_name())
+            logger.log(logger.INFO, "Error: The host '%s' is part of a circular parent/child chain!" % h.get_name())
             r = False
 
         return r

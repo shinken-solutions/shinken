@@ -218,7 +218,7 @@ class LiveStatus_broker(BaseModule, Daemon):
 
         # Check if some og the required directories exist
         #if not os.path.exists(bottle.TEMPLATE_PATH[0]):
-        #    logger.log('ERROR : the view path do not exist at %s' % bottle.TEMPLATE_PATH)
+        #    logger.log(logger.INFO, 'ERROR : the view path do not exist at %s' % bottle.TEMPLATE_PATH)
         #    sys.exit(2)
 
         self.load_plugins()
@@ -256,9 +256,9 @@ class LiveStatus_broker(BaseModule, Daemon):
                             mod.manage_brok(b)
                         except Exception, exp:
                             print exp.__dict__
-                            logger.log("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
-                            logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
-                            logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
+                            logger.log(logger.INFO, "[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
+                            logger.log(logger.INFO, "[%s] Exception type : %s" % (self.name, type(exp)))
+                            logger.log(logger.INFO, "Back trace of this kill: %s" % (traceback.format_exc()))
                             self.modules_manager.set_to_restart(mod)
                 except Exception, exp:
                     msg = Message(id=0, type='ICrash', data={
@@ -334,9 +334,9 @@ class LiveStatus_broker(BaseModule, Daemon):
                 mod.manage_brok(brok)
             except Exception, exp:
                 print exp.__dict__
-                logger.log("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
-                logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
-                logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
+                logger.log(logger.INFO, "[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
+                logger.log(logger.INFO, "[%s] Exception type : %s" % (self.name, type(exp)))
+                logger.log(logger.INFO, "Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)
 
     def do_stop(self):
@@ -404,9 +404,9 @@ class LiveStatus_broker(BaseModule, Daemon):
                                 mod.manage_brok(b)
                             except Exception, exp:
                                 print exp.__dict__
-                                logger.log("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
-                                logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
-                                logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
+                                logger.log(logger.INFO, "[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
+                                logger.log(logger.INFO, "[%s] Exception type : %s" % (self.name, type(exp)))
+                                logger.log(logger.INFO, "Back trace of this kill: %s" % (traceback.format_exc()))
                                 self.modules_manager.set_to_restart(mod)
                 except Queue.Empty:
                     self.livestatus.counters.calc_rate()

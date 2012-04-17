@@ -34,9 +34,9 @@ name = None
 local_log = None
 human_timestamp_log = False
 
-
 class Log:
     """Please Add a Docstring to describe the class here"""
+    INFO = logging.INFO
 
     def load_obj(self, object, name_=None):
         """ We load the object where we will put log broks
@@ -47,12 +47,33 @@ class Log:
         obj = object
         name = name_
 
-    def log(self, message, format=None, print_it=True):
+        self._level = logging.NOTSET
+
+    def debug(self, msg, *args, **kwargs):
+        self.log(logging.DEBUG, msg, *args, **kwargs)
+
+    def info(self, msg, *args, **kwargs):
+        self.log(logging.INFO, msg, *args, **kwargs)
+
+    def warning(self, msg, *args, **kwargs):
+        self.log(logging.WARNING, msg, *args, **kwargs)
+
+    def error(self, msg, *args, **kwargs):
+        self.log(logging.ERROR, msg, *args, **kwargs)
+
+    def critical(self, msg, *args, **kwargs):
+        self.log(logging.CRITICAL, msg, *args, **kwargs)
+
+    def log(self, level, message, format=None, print_it=True):
         """We enter a log message, we format it, and we add the log brok"""
         global obj
         global name
         global local_log
         global human_timestamp_log
+
+        # ignore messages when message level is lower than Log level
+        if level < self._level:
+            return
 
         if print_it:
             # If the daemon is launched with a non UTF8 shell
@@ -67,20 +88,25 @@ class Log:
             message = message.decode('UTF-8', 'replace')
 
         if format is None:
+            lvlname = logging.getLevelName(level)
+
             if name is None:
+                fmt = u'[%s] %8s: %s\n'
+
                 if human_timestamp_log:
-                    s = u'[%s] %s\n' % \
-                        (time.asctime(time.localtime(time.time())), message)
+                    s = fmt % (time.asctime(time.localtime(time.time())), lvlname, message)
                 else:
-                    s = u'[%d] %s\n' % (int(time.time()), message)
+                    s = fmt % (int(time.time()), lvlname, message)
             else:
+                fmt = u'[%s] %8s: [%s] %s\n'
+
                 if human_timestamp_log:
-                    s = u'[%s] [%s] %s\n' % \
-                        (time.asctime(time.localtime(time.time())),
-                                                     name,
-                                                     message)
+                    s = fmt % (time.asctime(time.localtime(time.time())), 
+                               lvlname,
+                               name,
+                               message)
                 else:
-                    s = u'[%d] [%s] %s\n' % (int(time.time()), name, message)
+                    s = fmt % (int(time.time()), lvlname, name, message)
         else:
             s = format % message
 
@@ -90,7 +116,7 @@ class Log:
 
         # If we want a local log write, do it
         if local_log is not None:
-            logging.info(s.strip())
+            logging.log(level, s.strip())
 
     def register_local_log(self, path):
         """The log can also write to a local file if needed

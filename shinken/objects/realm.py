@@ -298,7 +298,7 @@ class Realm(Itemgroup):
              self.nb_brokers, len(self.potential_brokers),
              self.nb_receivers, len(self.potential_receivers)
              )
-        logger.log(s)
+        logger.log(logger.INFO, s)
 
 
 

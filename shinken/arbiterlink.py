@@ -67,7 +67,7 @@ class ArbiterLink(SatelliteLink):
 
     # Look for ourself as an arbiter. Should be our fqdn name, or if not, our hostname one
     def is_me(self):
-        logger.log("And arbiter is launched with the hostname:%s from an arbiter point of view of addr :%s" % (self.host_name, socket.getfqdn()), print_it=False)
+        logger.log(logger.INFO, "And arbiter is launched with the hostname:%s from an arbiter point of view of addr :%s" % (self.host_name, socket.getfqdn()), print_it=False)
         return self.host_name == socket.getfqdn() or self.host_name == socket.gethostname()
 
 

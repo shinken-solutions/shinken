@@ -102,7 +102,7 @@ class ModulesManager(object):
                 if self.modules_type in m.properties['daemons']:
                     self.imported_modules.append(m)
             except Exception , exp:
-                logger.log("Warning in importing module : %s" % exp)
+                logger.warning(str(exp))
 
         del self.modules_assoc[:]
         for mod_conf in self.modules:
@@ -115,14 +115,14 @@ class ModulesManager(object):
                     break
             if not is_find:
                 # No module is suitable, we Raise a Warning
-                logger.log("Warning : the module type %s for %s was not found in modules!" % (module_type, mod_conf.get_name()))
+                logger.warning("the module type %s for %s was not found in modules!" % (module_type, mod_conf.get_name()))
 
 
     # Try to "init" the given module instance. 
     # Returns: True on successfull init. False if instance init method raised any Exception.
     def try_instance_init(self, inst):
         try:
-            logger.log("Trying to init module : %s" % inst.get_name())
+            logger.info("Trying to init module : %s" % inst.get_name())
             inst.init_try += 1
             # Maybe it's a retry
             if inst.init_try > 1:
@@ -137,10 +137,10 @@ class ModulesManager(object):
 
             inst.init()
         except Exception, e:
-            logger.log("Error : the instance %s raised an exception %s, I remove it!" % (inst.get_name(), str(e)))
+            logger.error("the instance %s raised an exception %s, I remove it!" % (inst.get_name(), str(e)))
             output = cStringIO.StringIO()
             traceback.print_exc(file=output)
-            logger.log("Back trace of this remove : %s" % (output.getvalue()))
+            logger.error("Back trace of this remove : %s" % (output.getvalue()))
             output.close()
             return False
         return True
@@ -170,7 +170,7 @@ class ModulesManager(object):
                 mod_conf.properties = module.properties.copy()
                 inst = module.get_instance(mod_conf)
                 if inst is None: # None = Bad thing happened :)
-                    logger.log("get_instance for module %s returned None !" % (mod_conf.get_name()))
+                    logger.info("get_instance for module %s returned None !" % (mod_conf.get_name()))
                     continue
                 assert(isinstance(inst, BaseModule))
                 self.instances.append(inst)
@@ -178,17 +178,17 @@ class ModulesManager(object):
                 s = str(exp)
                 if isinstance(s, str):
                     s = s.decode('UTF-8', 'replace')
-                logger.log("Error : the module %s raised an exception %s, I remove it!" % (mod_conf.get_name(), s))
+                logger.error("the module %s raised an exception %s, I remove it!" % (mod_conf.get_name(), s))
                 output = cStringIO.StringIO()
                 traceback.print_exc(file=output)
-                logger.log("Back trace of this remove : %s" % (output.getvalue()))
+                logger.error("Back trace of this remove : %s" % (output.getvalue()))
                 output.close()
 
         for inst in self.instances:
             # External are not init now, but only when they are started
             if not inst.is_external and not self.try_instance_init(inst):
                 # If the init failed, we put in in the restart queue
-                logger.log("Warning : the module '%s' failed to init, I will try to restart it later" % inst.get_name())
+                logger.warning("the module '%s' failed to init, I will try to restart it later" % inst.get_name())
                 self.to_restart.append(inst)
 
         return self.instances
@@ -199,12 +199,12 @@ class ModulesManager(object):
         for inst in [inst for inst in self.instances if inst.is_external]:
             # But maybe the init failed a bit, so bypass this ones from now
             if not self.try_instance_init(inst):
-                logger.log("Warning : the module '%s' failed to init, I will try to restart it later" % inst.get_name())
+                logger.warning("the module '%s' failed to init, I will try to restart it later" % inst.get_name())
                 self.to_restart.append(inst)
                 continue
             
             # ok, init succeed
-            logger.log("Info : Starting external module %s" % inst.get_name())
+            logger.info("Starting external module %s" % inst.get_name())
             inst.start()
 
 
@@ -230,8 +230,8 @@ class ModulesManager(object):
         for inst in self.instances:
             if not inst in self.to_restart:
                 if inst.is_external and not inst.process.is_alive():
-                    logger.log("Error : the external module %s goes down unexpectly!" % inst.get_name())
-                    logger.log("Info : Setting the module %s to restart" % inst.get_name())
+                    logger.error("the external module %s goes down unexpectly!" % inst.get_name())
+                    logger.info("Setting the module %s to restart" % inst.get_name())
                     # We clean its queues, they are no more useful
                     inst.clear_queues(self.manager)
                     self.to_restart.append(inst)
@@ -250,8 +250,8 @@ class ModulesManager(object):
                 except Exception, exp:
                     pass
                 if queue_size > self.max_queue_size:
-                    logger.log("Error : the external module %s got a too high brok queue size (%s > %s)!" % (inst.get_name(), queue_size, self.max_queue_size))
-                    logger.log("Info : Setting the module %s to restart" % inst.get_name())
+                    logger.error("the external module %s got a too high brok queue size (%s > %s)!" % (inst.get_name(), queue_size, self.max_queue_size))
+                    logger.info("Setting the module %s to restart" % inst.get_name())
                     # We clean its queues, they are no more useful
                     inst.clear_queues(self.manager)
                     self.to_restart.append(inst)
