@@ -492,7 +492,7 @@ class Helper(object):
 
         if current_page >= 2:
             # Name, start, end, is_current
-            res.append(('< First', 0, step, False))
+            res.append((u'\xc2\xab First', 0, step, False))
             res.append(('...', None, None, False))
             
 
@@ -514,7 +514,7 @@ class Helper(object):
             start = int((nb_pages - 1)*step)
             end = int(nb_pages*step)
             res.append(('...', None, None, False))
-            res.append(('Last >', start, end, False))
+            res.append((u'Last \xc2\xbb', start, end, False))
 
         print "Total :", total, "pos", pos, "step", step
         print "nb pages", nb_pages, "current_page", current_page
