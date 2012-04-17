@@ -351,7 +351,7 @@ class ExternalCommandManager:
                 else:
                     print "Problem: a configuration is found, but is not assigned!"
         if not host_found:
-                logger.log("Warning:  Passive check result was received for host '%s', but the host could not be found!" % host_name)
+                logger.warning("Passive check result was received for host '%s', but the host could not be found!" % host_name)
                 #print "Sorry but the host", host_name, "was not found"
 
 
@@ -499,7 +499,7 @@ class ExternalCommandManager:
                     if s is not None:
                         args.append(s)
                     else: #error, must be logged
-                        logger.log("Warning: a command was received for service '%s' on host '%s', but the service could not be found!" % (srv_name, tmp_host))
+                        logger.warning("A command was received for service '%s' on host '%s', but the service could not be found!" % (srv_name, tmp_host))
 
         except IndexError:
             safe_print("Sorry, the arguments are not corrects")

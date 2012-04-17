@@ -188,7 +188,7 @@ class Contact(Item):
         if hasattr(self, 'contact_name'):
             for c in cls.illegal_object_name_chars:
                 if c in self.contact_name:
-                    logger.log("%s : My contact_name got the caracter %s that is not allowed." % (self.get_name(), c))
+                    logger.info("%s : My contact_name got the caracter %s that is not allowed." % (self.get_name(), c))
                     state = False
         else:
             if hasattr(self, 'alias'): #take the alias if we miss the contact_name
