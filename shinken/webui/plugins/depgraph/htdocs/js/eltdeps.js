@@ -78,7 +78,9 @@ function dump(arr, level) {
 }
 
 
-window.onload = function init(){
+//document.onready = function init(){
+$(document).ready(function init(){
+    console.log('On load is ok!');
     //init data
     //If a node in this JSON structure
     //has the "$type" or "$dim" parameters
@@ -322,9 +324,9 @@ window.onload = function init(){
 
     //init RGraph
     var rgraph = new $jit.RGraph({
-	    'injectInto': 'infovis',
-	    'width'     : 700,  
-	    'height'    : 700,
+	    'injectInto': /*'infovis'*/depgraph_injectInto,
+	    'width'     : /*700*/depgraph_width,
+	    'height'    : /*700*/depgraph_height,
 	    //Optional: Add a background canvas
 	    //that draws some concentric circles.
 	    'background': false,
@@ -451,6 +453,6 @@ window.onload = function init(){
     
     setInterval( loop, 1000 / 60 );
 
-}
+});
 
 

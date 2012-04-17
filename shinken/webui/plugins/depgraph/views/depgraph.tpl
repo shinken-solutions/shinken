@@ -24,6 +24,14 @@ Invalid element
 %datamgr = app.datamgr
 
 
+<script type="text/javascript">
+  var depgraph_width = 700;
+  var depgraph_height = 700;
+  var depgraph_injectInto = 'infovis';
+</script>
+
+
+
 %rebase layout globals(), title='Dependencies graph of ' + elt.get_full_name(),  js=['depgraph/js/jit-yc.js', 'depgraph/js/excanvas.js', 'depgraph/js/eltdeps.js'],  css=['depgraph/css/eltdeps.css'],  print_menu=False
 
 
