@@ -150,7 +150,7 @@ class Hot_dependencies_arbiter(BaseModule):
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 close_fds=do_close_fd, shell=True)
         except OSError , exp:
-            self.debug("Error in launching the command %s : %s" % (self.mapping_command, exp))
+            self.error("Fail Launching the command %s : %s" % (self.mapping_command, exp))
 
 
     # Look if the command is finished or not

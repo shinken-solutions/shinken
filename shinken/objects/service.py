@@ -363,7 +363,7 @@ class Service(SchedulingItem):
         for prop, entry in cls.properties.items():
             if prop not in special_properties:
                 if not hasattr(self, prop) and entry.required:
-                    logger.log("Error : the service %s on host '%s' do not have %s" % (desc, hname, prop))
+                    logger.error("The service %s on host '%s' do not have %s" % (desc, hname, prop))
                     state = False # Bad boy...
 
         # Then look if we have some errors in the conf
@@ -375,7 +375,7 @@ class Service(SchedulingItem):
         if self.configuration_errors != []:
             state = False
             for err in self.configuration_errors:
-                logger.log(err)
+                logger.info(err)
 
         #If no notif period, set it to None, mean 24x7
         if not hasattr(self, 'notification_period'):
@@ -383,39 +383,39 @@ class Service(SchedulingItem):
 
         # Ok now we manage special cases...
         if self.notifications_enabled and self.contacts == []:
-            logger.log("Warning The service '%s' in the host '%s' do not have contacts nor contact_groups in '%s'" % (desc, hname, source))
+            logger.warning("The service '%s' in the host '%s' do not have contacts nor contact_groups in '%s'" % (desc, hname, source))
 
         # Set display_name if need
         if getattr(self, 'display_name', '') == '':
             self.display_name = getattr(self, 'service_description', '')
 
         if not hasattr(self, 'check_command'):
-            logger.log("%s : I've got no check_command" % self.get_name())
+            logger.info("%s : I've got no check_command" % self.get_name())
             state = False
         # Ok got a command, but maybe it's invalid
         else:
             if not self.check_command.is_valid():
-                logger.log("%s : my check_command %s is invalid" % (self.get_name(), self.check_command.command))
+                logger.info("%s : my check_command %s is invalid" % (self.get_name(), self.check_command.command))
                 state = False
             if self.got_business_rule:
                 if not self.business_rule.is_valid():
-                    logger.log("%s : my business rule is invalid" % (self.get_name(),))
+                    logger.info("%s : my business rule is invalid" % (self.get_name(),))
                     for bperror in self.business_rule.configuration_errors:
-                        logger.log("%s : %s" % (self.get_name(), bperror))
+                        logger.info("%s : %s" % (self.get_name(), bperror))
                     state = False
         if not hasattr(self, 'notification_interval') \
                 and  self.notifications_enabled == True:
-            logger.log("%s : I've got no notification_interval but I've got notifications enabled" % self.get_name())
+            logger.info("%s : I've got no notification_interval but I've got notifications enabled" % self.get_name())
             state = False
         if self.host is None:
-            logger.log("The service '%s' got a unknown host_name '%s'." % (desc, self.host_name))
+            logger.info("The service '%s' got a unknown host_name '%s'." % (desc, self.host_name))
             state = False
         if not hasattr(self, 'check_period'):
             self.check_period = None
         if hasattr(self, 'service_description'):
             for c in cls.illegal_object_name_chars:
                 if c in self.service_description:
-                    logger.log("%s : My service_description got the caracter %s that is not allowed." % (self.get_name(), c))
+                    logger.info("%s : My service_description got the caracter %s that is not allowed." % (self.get_name(), c))
                     state = False
         return state
 
@@ -688,7 +688,7 @@ class Service(SchedulingItem):
     # Warning: The results of host 'Server' are stale by 0d 0h 0m 58s (threshold=0d 1h 0m 0s).
     # I'm forcing an immediate check of the host.
     def raise_freshness_log_entry(self, t_stale_by, t_threshold):
-        logger.log("Warning: The results of service '%s' on host '%s' are stale by %s (threshold=%s).  I'm forcing an immediate check of the service." \
+        logger.warning("The results of service '%s' on host '%s' are stale by %s (threshold=%s).  I'm forcing an immediate check of the service." \
                       % (self.get_name(), self.host.get_name(), format_t_into_dhms_format(t_stale_by), format_t_into_dhms_format(t_threshold)))
 
 
@@ -738,7 +738,7 @@ class Service(SchedulingItem):
 
     # If there is no valid time for next check, raise a log entry
     def raise_no_next_check_log_entry(self):
-        logger.log("Warning : I cannot schedule the check for the service '%s' on host '%s' because there is not future valid time" % \
+        logger.warning("I cannot schedule the check for the service '%s' on host '%s' because there is not future valid time" % \
                       (self.get_name(), self.host.get_name()))
 
 
@@ -781,7 +781,7 @@ class Service(SchedulingItem):
             if c.output == self.output:
                 need_stalk = False
         if need_stalk:
-            logger.log("Stalking %s : %s" % (self.get_name(), c.output))
+            logger.info("Stalking %s : %s" % (self.get_name(), c.output))
 
 
     # Give data for checks's macros
