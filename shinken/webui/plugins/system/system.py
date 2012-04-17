@@ -70,7 +70,7 @@ def system_widget():
 
     return {'app' : app, 'user' : user, 'wid' : wid,
             'collapsed' : collapsed, 'options' : options,
-            'base_url' : '/widget/system', 'title' : 'System widget',
+            'base_url' : '/widget/system', 'title' : 'System Information',
             'schedulers' : schedulers,
             'brokers' : brokers, 'reactionners' : reactionners,
             'receivers' : receivers, 'pollers' : pollers,
