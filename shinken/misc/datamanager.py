@@ -104,12 +104,25 @@ class DataManager(object):
                 }
 
         res = []
+        res.extend([s for s in self.rg.services if s.state not in dict[show][0]])
+        res.extend([h for h in self.rg.hosts if h.state not in dict[show][1]])
+        if to_sort:
+            res.sort(hst_srv_sort)
+        return res
+
+    # Returns unhandled problems
+    def get_unhandled_problems(self, show='all', to_sort=True):
+        dict = {'all': (['OK', 'PENDING'], ['UP', 'PENDING']),
+                'warning': (['OK', 'PENDING', 'UNKNOWN'], ['UP', 'PENDING', 'UNREACHABLE']),
+                'critical': (['OK', 'PENDING', 'UNKNOWN', 'WARNING'], ['UP', 'PENDING', 'UNREACHABLE', 'WARNING']),
+                }
+
+        res = []
         res.extend([s for s in self.rg.services if s.state not in dict[show][0] and not s.is_impact and not s.problem_has_been_acknowledged and not s.host.problem_has_been_acknowledged])
         res.extend([h for h in self.rg.hosts if h.state not in dict[show][1] and not h.is_impact and not h.problem_has_been_acknowledged])
         if to_sort:
             res.sort(hst_srv_sort)
         return res
-
 
     # Return all non managed impacts
     def get_all_impacts(self):
@@ -134,7 +147,7 @@ class DataManager(object):
 
     # Return the number of problems
     def get_nb_problems(self):
-        return len(self.get_all_problems())
+        return len(self.get_unhandled_problems())
 
     # Get the number of all problems, even the ack ones
     def get_nb_all_problems(self):

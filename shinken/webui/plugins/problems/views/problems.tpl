@@ -3,7 +3,7 @@
 %helper = app.helper
 %datamgr = app.datamgr
 
-%title = {'problems' : 'IT problems', 'all' : 'All elements'}.get(page, 'Unknown page')
+%title = {'problems' : 'IT problems', 'unhandled' : 'Unhandled problems', 'all' : 'All elements'}.get(page, 'Unknown page')
 
 %top_right_banner_state = datamgr.get_overall_state()
 
@@ -84,7 +84,7 @@ document.addEvent('domready', function() {
 							<a href="/problems/{{show}}" style="padding-top:0;">{{app.datamgr.get_nb_all_problems()}}</a>
 						</div>
 						<div class="tac_col_2">
-							<a href="/problems/{{show}}" style="padding-top:0;">{{app.datamgr.get_nb_problems()}}</a>
+							<a href="/unhandled/{{show}}" style="padding-top:0;">{{app.datamgr.get_nb_problems()}}</a>
 						</div>
 						<div class="tac_col_3">
 							<a href="/all" style="padding-top:0;">{{app.datamgr.get_nb_elements()}}</a>
