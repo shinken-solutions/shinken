@@ -742,10 +742,19 @@ class Config(Item):
         self.realms.prepare_for_satellites_conf()
 
 
-    #Some properties are dangerous to be send like that
-    #like realms linked in hosts. Realms are too big to send (too linked)
+    # Some properties are dangerous to be send like that
+    # like realms linked in hosts. Realms are too big to send (too linked)
+    # We are also pre-serializing the confs so the sending pahse will
+    # be quicker.
     def prepare_for_sending(self):
         self.hosts.prepare_for_sending()
+        logger.log('[Arbiter] Serializing the configurations...')
+        for r in self.realms:
+            for (i, conf) in r.confs.iteritems():
+                logger.log('[%s] Serializing the configuration %d' % (r.get_name(), i))
+                t0 = time.time()
+                r.serialized_confs[i] = cPickle.dumps(conf, cPickle.HIGHEST_PROTOCOL)
+                print 'Time to serialize the conf %s:%s  is %s' % (r.get_name(), i, time.time() - t0)
 
 
     def dump(self):

@@ -34,7 +34,6 @@
 import time
 import random
 import itertools
-import cPickle
 
 from shinken.util import alive_then_spare_then_deads, safe_print
 from shinken.log import logger
@@ -371,18 +370,19 @@ class Dispatcher:
                             continue
 
                         # We tag conf with the instance_name = scheduler_name
-                        conf.instance_name = sched.scheduler_name
+                        instance_name = sched.scheduler_name
                         # We give this configuraton a new 'flavor'
                         conf.push_flavor = random.randint(1, 1000000)
                         # REF: doc/shinken-conf-dispatching.png (3)
                         # REF: doc/shinken-scheduler-lost.png (2)
                         override_conf = sched.get_override_configuration()
                         satellites_for_sched = r.get_satellites_links_for_scheduler()
-
+                        s_conf = r.serialized_confs[conf.id]
                         # Prepare the conf before sending it
-                        t0 = time.time()
-                        conf_package = (cPickle.dumps(conf, 2), override_conf, sched.modules, satellites_for_sched)
-                        print "DBG : Finish to serialise the conf in", time.time() - t0
+                        conf_package = {'conf' : s_conf, 'override_conf' : override_conf,
+                                        'modules' : sched.modules, 'satellites' : satellites_for_sched,
+                                        'instance_name' : sched.scheduler_name, 'push_flavor' : conf.push_flavor
+                                        }
                         
                         t1 = time.time()
                         is_sent = sched.put_conf(conf_package)

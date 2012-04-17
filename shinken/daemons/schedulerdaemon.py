@@ -250,20 +250,25 @@ class Shinken(BaseSatellite):
 
 
     def setup_new_conf(self):
-        (conf_raw, override_conf, modules, satellites) = self.new_conf
+        pk = self.new_conf
+        conf_raw = pk['conf']
+        override_conf = pk['override_conf']
+        modules = pk['modules']
+        satellites = pk['satellites']
+        instance_name = pk['instance_name']
+        push_flavor = pk['push_flavor']
+        
         t0 = time.time()
         conf = cPickle.loads(conf_raw)
         print "DBG : Finish unserialize the conf in", time.time() - t0
 
         self.new_conf = None
-        
-        # In fact it make the scheduler just DIE as a bad guy. 
-        # Must manage it better or not manage it at all!
-        #if self.cur_conf and self.cur_conf.magic_hash == conf.magic_hash:
-        #    print("I received a conf with same hash than me, I skip it.")
-        #    return
-        
+
+        # Tag the conf with our data
         self.conf = conf
+        self.conf.push_flavor = push_flavor
+        self.conf.instance_name = instance_name
+
         self.cur_conf = conf
         self.override_conf = override_conf
         self.modules = modules

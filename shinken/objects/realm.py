@@ -22,6 +22,7 @@
 
 import copy
 
+from item import Item
 from itemgroup import Itemgroup, Itemgroups
 from shinken.property import BoolProp, IntegerProp, StringProp
 from shinken.log import logger
@@ -46,6 +47,12 @@ class Realm(Itemgroup):
         #'notes_url': {'required': False, 'default':'', 'fill_brok' : ['full_status']},
         #'action_url': {'required': False, 'default':'', 'fill_brok' : ['full_status']},
     })
+
+    running_properties = Item.running_properties.copy()
+    running_properties.update({
+            'serialized_confs' :     StringProp (default={}),
+        })
+
 
     macros = {
         'REALMNAME':    'realm_name',
