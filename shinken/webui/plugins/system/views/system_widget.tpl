@@ -11,7 +11,7 @@
 %types = [ ('scheduler', schedulers), ('poller', pollers), ('broker', brokers), ('reactionner', reactionners), ('receiver', receivers)]
 
 %for (sat_type, sats) in types:
-  <h3> {{sat_type.capitalize()}} : </h3>
+  <h5> {{sat_type.capitalize()}} : </h5>
 
   <table class="table table-striped table-bordered table-condensed">
 	%for s in sats:
@@ -32,8 +32,9 @@
 
 			<span class="pulse"></span>
 			%end
-			</div>
 			<img style="width: 16px; height : 16px;" src="{{helper.get_icon_state(s)}}" />
+			</div>
+
 			</td>
 			<td> {{s.get_name()}}</td>
 			<td> {{s.alive}}</td>
