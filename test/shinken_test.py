@@ -143,6 +143,7 @@ class ShinkenTest(unittest.TestCase):
         self.conf.create_business_rules_dependencies()
         self.conf.is_correct()
         self.confs = self.conf.cut_into_parts()
+        self.conf.prepare_for_sending()
         self.conf.show_errors()
         self.dispatcher = Dispatcher(self.conf, self.me)
         
