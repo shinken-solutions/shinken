@@ -24,6 +24,20 @@
 /***************************************************************************/
 
 /**
+ * Some browser do NOT have indexOf for arrays... so we add it!
+**/
+    if(!Array.indexOf){
+    Array.prototype.indexOf = function(obj){
+	for(var i=0; i<this.length; i++){
+	    if(this[i]==obj){
+		return i;
+	    }
+	}
+	return -1;
+    }
+}
+
+/**
  * Description: Add a remvoe finction to the lists....
  *  WTF javascript don't have this? Please guys, at least good 
  *  list and dict functions.... you want us to manage memory soon?
