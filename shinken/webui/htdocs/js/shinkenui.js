@@ -26,7 +26,7 @@
 /**
  * Some browser do NOT have indexOf for arrays... so we add it!
 **/
-    if(!Array.indexOf){
+if(!Array.indexOf){
     Array.prototype.indexOf = function(obj){
 	for(var i=0; i<this.length; i++){
 	    if(this[i]==obj){

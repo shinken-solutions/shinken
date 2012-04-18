@@ -70,6 +70,11 @@ function show_unselect_all_button(){
     $('#unselect_all_btn').show();
 }
 
+function show_select_all_button(){
+    $('#unselect_all_btn').hide();
+    $('#select_all_btn').show();
+}
+
 // When we select all, add all in the selected list,
 // and hide the select all button, and swap it with
 // unselect all one
@@ -137,7 +142,7 @@ function remove_element(name){
     selected_elements.remove(name);
     if(selected_elements.length == 0){
 	$('#actions').hide();
-	toggle_select_buttons();
+	show_select_all_button();
 	/*$('#actions').animate({opacity:0});
 	$('#actions').css('display', 'none');*/
     }
