@@ -50,6 +50,7 @@ class TestObjectsAndNotifWays(ShinkenTest):
         print "B nw", b2
         self.assert_(b2.data['host_notification_options'] == u'')
 
+
 if __name__ == '__main__':
     unittest.main()
 

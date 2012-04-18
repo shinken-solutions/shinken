@@ -39,7 +39,7 @@ class TestConfig(ShinkenTest):
         # in the main config file
         #
         print "Get the bad timeperiod"
-        tp = self.sched.timeperiods.find_by_name("24x7")
+        tp = self.conf.timeperiods.find_by_name("24x7")
         self.assert_(tp.is_correct() == False)
 
 

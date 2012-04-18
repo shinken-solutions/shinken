@@ -37,7 +37,7 @@ class TestConfig(ShinkenTest):
         # in the main config file
         #
         self.assert_(not self.conf.conf_is_correct)
-        self.show_logs()
+        #self.show_logs()
 
 
 if __name__ == '__main__':

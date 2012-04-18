@@ -92,8 +92,8 @@ class TestRegenerator(ShinkenTest):
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        for h in self.sched.hosts:
-            h.realm = h.realm.get_name()
+        #for h in self.sched.hosts:
+        #    h.realm = h.realm.get_name()
         self.sched.fill_initial_broks()
         self.rg = Regenerator()
 
