@@ -21,7 +21,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 from shinken.util import safe_print
-from shinken.misc.sorter import hst_srv_sort
+from shinken.misc.sorter import hst_srv_sort, last_state_change_earlier
 
 
 class DataManager(object):
@@ -155,6 +155,13 @@ class DataManager(object):
         if to_sort:
             res.sort(hst_srv_sort)
         return res
+
+    # returns problems, but the most recent before
+    def get_problems_time_sorted(self):
+        pbs = self.get_all_problems(to_sort=False)
+        pbs.sort(last_state_change_earlier)
+        return pbs
+
 
     # Return all non managed impacts
     def get_all_impacts(self):

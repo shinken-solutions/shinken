@@ -98,8 +98,8 @@
 
 <div id="pageslide" style="display:none">
   <div class='row'>
-    <span><h2>Filtering options</h2></span>
-    <span class='pull-right'><a class='btn btn-danger' href="javascript:$.pageslide.close()"><i class="icon-remove"></i> Close</a></span>    
+    <span class='span8'><h2>Filtering options</h2></span>
+    <span class='span3 pull-right'><a class='btn btn-danger' href="javascript:$.pageslide.close()"><i class="icon-remove"></i> Close</a></span>    
   </div>
   <div class='in_panel_filter'>
     <h3>Names</h3>

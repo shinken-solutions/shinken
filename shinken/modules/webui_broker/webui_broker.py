@@ -312,6 +312,7 @@ class Webui_broker(BaseModule, Daemon):
 
                     # It's a valid widget entry if it got all data, and at least one route
                     # ONLY the first route wil be used for Add!
+                    #print "Should I load a widget?",widget_name, widget_desc, widget_lst!=[], routes
                     if widget_name and widget_desc and widget_lst!=[] and routes:
                         for place in widget_lst:
                             if place not in self.widgets:

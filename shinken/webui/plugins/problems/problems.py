@@ -236,12 +236,62 @@ def get_pbs_widget():
             }
 
 
+
+
+
+
+
+
+
+
+
+
+# Our page
+def get_last_errors_widget():
+    
+    user = app.get_user_auth()
+    if not user:
+        redirect("/user/login")
+
+    # We want to limit the number of elements, The user will be able to increase it
+    nb_elements = max(0, int(app.request.GET.get('nb_elements', '10')))
+
+    pbs = app.datamgr.get_problems_time_sorted()
+    
+    # Filter with the user interests
+    pbs = only_related_to(pbs, user)
+
+    # Keep only nb_elements
+    pbs = pbs[:nb_elements]
+
+    wid = app.request.GET.get('wid', 'widget_last_problems_'+str(int(time.time())))
+    collapsed = (app.request.GET.get('collapsed', 'False') == 'True')
+
+    options = {'nb_elements' : {'value' : nb_elements, 'type' : 'int', 'label' : 'Max number of elements to show'},
+               }
+
+    title = 'Last IT problems'
+
+    return {'app' : app, 'pbs' : pbs, 'user' : user, 'page' : 'problems',
+            'wid' : wid, 'collapsed' : collapsed, 'options' : options, 'base_url' : '/widget/last_problems', 'title' : title,
+            }
+
+
+
+
+
 widget_desc = '''<h3>IT problems</h3>
 Show the most impacting IT problems
 '''
 
+last_widget_desc = '''<h3>Last IT problems</h3>
+Show the IT problems sorted by time
+'''
+
+
 pages = {get_page : { 'routes' : ['/problems'], 'view' : 'problems', 'static' : True},
          get_all : { 'routes' : ['/all'], 'view' : 'problems', 'static' : True},
          get_pbs_widget : {'routes' : ['/widget/problems'], 'view' : 'widget_problems', 'static' : True, 'widget' : ['dashboard'], 'widget_desc' : widget_desc, 'widget_name' : 'problems', 'widget_picture' : '/static/problems/img/widget_problems.png'},
+         get_last_errors_widget : {'routes' : ['/widget/last_problems'], 'view' : 'widget_last_problems', 'static' : True, 'widget' : ['dashboard'], 'widget_desc' : last_widget_desc, 'widget_name' : 'last_problems', 'widget_picture' : '/static/problems/img/widget_problems.png'},
          }
 
