@@ -1,4 +1,3 @@
-
 %# Load all css stuff we need
 %if not 'css' in locals(): css = []
 %if not 'js' in locals(): js = []
@@ -103,8 +102,12 @@ $(document).ready(function(){
 	 %end
 	 
 	 %# """ Manage the differents types of values"""
-         %if t in ['text', 'int']:
-            <input name='{{k}}' value='{{value}}'/>
+         %if t in ['text', 'int', 'hst_srv']:
+            <input name='{{k}}' value='{{value}}' id='input-{{wid}}-{{k}}'/>
+	    %if t == 'hst_srv':
+	      <script>link_elt_typeahead('input-{{wid}}-{{k}}');</script>
+	    %end
+
 	 %end
 	 %if t == 'hidden':
 	    <input type="hidden" name='{{k}}' value='{{value}}'/>

@@ -95,6 +95,7 @@
     <script src="/static/js/shinken-greeting.js"></script>
     <script src="/static/js/shinken-opacity.js"></script>
     <script src="/static/js/shinken-modals.js"></script>
+    <script src="/static/js/shinken-widgets.js"></script>
 
     %# End of classic js import. Now call for specific ones
       %for p in js:

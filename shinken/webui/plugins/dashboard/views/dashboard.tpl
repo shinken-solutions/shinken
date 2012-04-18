@@ -4,6 +4,8 @@
 %helper = app.helper
 
 
+
+
 <div class='span12'>
   <div id='loading' class='pull-left'> <img src='/static/images/spinner.gif'> Loading widgets</div>
   %# If we got no widget, we should put the button at the center fo the screen

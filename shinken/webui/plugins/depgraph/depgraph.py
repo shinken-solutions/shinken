@@ -79,7 +79,6 @@ def get_depgraph_widget():
     if not user:
         return {'app' : app, 'elt' : None, 'valid_user' : False}
 
-
     search = app.request.GET.get('search', '').strip()
 
     if not search:
@@ -95,7 +94,7 @@ def get_depgraph_widget():
     wid = app.request.GET.get('wid', 'widget_depgraph_'+str(int(time.time())))
     collapsed = (app.request.GET.get('collapsed', 'False') == 'True')
     
-    options = {'search' : {'value' : search, 'type' : 'text', 'label' : 'Search an element'},
+    options = {'search' : {'value' : search, 'type' : 'hst_srv', 'label' : 'Search an element'},
                }
 
     title = 'Relation graph for %s' % search
