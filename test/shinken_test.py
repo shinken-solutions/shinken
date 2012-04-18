@@ -142,6 +142,10 @@ class ShinkenTest(unittest.TestCase):
         self.conf.create_business_rules()
         self.conf.create_business_rules_dependencies()
         self.conf.is_correct()
+        if not self.conf.conf_is_correct:
+            print "The conf is not correct, I stop here"
+            return
+
         self.confs = self.conf.cut_into_parts()
         self.conf.prepare_for_sending()
         self.conf.show_errors()
