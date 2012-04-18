@@ -84,9 +84,12 @@ $(document).ready(function(){
 
 </script>
 
+%editable = 'editable'
+%if len(options) == 0:
+  %editable = ''
+%end
 
-
-<div class="widget movable collapsable removable editable closeconfirm {{collapsed_s}}" id="{{wid}}">
+<div class="widget movable collapsable removable {{editable}} closeconfirm {{collapsed_s}}" id="{{wid}}">
   <div class="widget-header">
     <strong>{{title}}</strong>
   </div>

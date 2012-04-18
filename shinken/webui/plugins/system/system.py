@@ -62,11 +62,7 @@ def system_widget():
     got_childs = (app.request.GET.get('got_childs', 'False') == 'True')
     key = app.request.GET.get('key', 1)
 
-    options = {'key' : {'value' : key, 'type' : 'int', 'label' : 'Your age'},
-               'place' : {'value' : '', 'type' : 'select', 'values' : ['Paris', 'Bordeaux', 'Marseille'], 'label' : 'Your city'},
-               'got_childs' : {'value' : got_childs, 'type' : 'bool', 'label' : 'Your got childs?'},
-               'notshowthis' : {'value' : 'secret', 'type' : 'hidden'},
-               }
+    options = {}
 
     return {'app' : app, 'user' : user, 'wid' : wid,
             'collapsed' : collapsed, 'options' : options,
