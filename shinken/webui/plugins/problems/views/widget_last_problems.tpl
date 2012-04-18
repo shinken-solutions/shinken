@@ -4,12 +4,7 @@
 %helper = app.helper
 %datamgr = app.datamgr
 
-%top_right_banner_state = datamgr.get_overall_state()
-
 %rebase widget globals(), css=['problems/css/accordion.css', 'problems/css/pagenavi.css', 'problems/css/perfometer.css', 'problems/css/img_hovering.css'], js=['problems/js/img_hovering.js']
-
-%#rebase layout globals(), title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/img_hovering.js', 'problems/js/accordion.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css', 'problems/css/perfometer.css', 'problems/css/img_hovering.css'], refresh=True, menu_part='/'+page, user=user 
-
 
 %if len(pbs) == 0:
   <span>No IT problems! Congrats.</span>

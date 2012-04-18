@@ -523,7 +523,6 @@ Invalid element name
 				<div class='row-fluid well span8 jcrop'>
 				%for g in uris:
 				  %img_src = g['img_src']
-				%#img_src = 'http://sgemini/pnp4nagios/index.php/image?host=srv-web-asia&srv=_HOST_&view=0&source=0&start=1332497862&end=1332512262'
 				  %link = g['link']
     				  <p>
 				    <img src="{{img_src}}" class="jcropelt"/>
