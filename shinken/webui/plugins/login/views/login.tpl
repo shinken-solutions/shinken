@@ -35,10 +35,12 @@
 
         <label>Password</label>
         <input class="span6" id="password" name="password" type="password">
-
+	<!--
         <label class="checkbox">
           <input type="checkbox"> Don't forget me!
         </label>
+	-->
+	<label/>
         <button class="btn" type="submit" href="javascript: submitform()">Login</button>
       </form>
     </div>

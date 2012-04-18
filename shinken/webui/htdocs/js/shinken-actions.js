@@ -27,7 +27,7 @@
 function raise_message_ok(text){
     $.meow({
 	message: text,
-	icon: '/static/images/okMedium.png'
+	icon: '/static/images/ok_medium.png'
     });
 }
 
@@ -35,7 +35,7 @@ function raise_message_ok(text){
 function raise_message_error(text){
     $.meow({
         message: text,
-        icon: '/static/images/errorMedium.png'
+        icon: '/static/images/down_medium.png'
     });
 }
 
