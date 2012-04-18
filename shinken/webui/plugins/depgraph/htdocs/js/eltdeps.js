@@ -78,8 +78,16 @@ function dump(arr, level) {
 }
 
 
-//document.onready = function init(){
-$(document).ready(function init(){
+
+function init_graph(){
+    if(typeof $jit === "undefined"){
+	console.log('Warning : there is no $jit, I postpone my init for 1s');
+	// Still not load $jit? racing problems are a nightmare :)
+	// Ok, we retry in the next second...
+	setTimeout('init_graph()',1000);
+	return;
+    }
+
     console.log('On load is ok!');
     //init data
     //If a node in this JSON structure
@@ -453,6 +461,7 @@ $(document).ready(function init(){
     
     setInterval( loop, 1000 / 60 );
 
-});
+};
 
 
+$(document).ready(init_graph);
