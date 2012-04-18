@@ -49,9 +49,13 @@ function create_img(src){
 function add_tag_image(src, name){
     var img = create_img(src, name);
     var span = $("<span/>");
+    var a = $('<a href="/all?search=htag:'+name+'"/>');
     span.addClass('label');
+    
+    
     span.append(img);
     span.append(''+name);
     // And put the whole in the tag list
-    $('#host_tags').append(span);
+    a.append(span);
+    $('#host_tags').append(a);
 }
