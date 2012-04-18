@@ -125,3 +125,9 @@ States
     border-radius: 4px;
     color : black;
 }
+
+/* The vvv for view same service alerts */
+.go-center {
+    position: relative;
+    left : 35%;
+}

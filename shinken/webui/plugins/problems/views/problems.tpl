@@ -341,14 +341,13 @@ $(function(){
       %end
       %last_output = pb.output
 
-      %if nb_same_output > 3:
-       <div class='opacity_hover'>
+      %if nb_same_output > 2 and page == 'problems':
+       <div class='hide hide_for_{{last_hname}}'>
       %else:
-       <div>
+        <div>
       %end
-
 	  <div class="tableCriticity pull-left">
-%#	    <table class="tableCriticity">
+
 	      <div class='tick pull-left' style="cursor:pointer;" onclick="add_remove_elements('{{helper.get_html_id(pb)}}')"><img id='selector-{{helper.get_html_id(pb)}}' class='img_tick' src='/static/images/tick.png' /></div>
 	      <div class='img_status pull-left'>
 		<div class="aroundpulse">
@@ -400,6 +399,18 @@ $(function(){
 %#             </table>
 	  </div>  
 	  <div style="clear:both;"/>
+
+      %if nb_same_output == 2 and page == 'problems':
+	<div class="tableCriticity opacity_hover">
+	  <a rel=tooltip title='Expand the same service problems' href="javascript:show_hidden_problems('hide_for_{{last_hname}}');" id='btn-hide_for_{{last_hname}}' class='go-center'>
+	    <i class="icon-chevron-down"></i>
+	    <i class="icon-chevron-down"></i>
+	    <i class="icon-chevron-down"></i>
+	  </a>
+	</div>
+      %end
+
+
 	</div>
        </div>
 

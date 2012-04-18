@@ -38,6 +38,13 @@ function show_detail(name){
 }
 
 
+// The user ask to show the hidden problems that are duplicated
+function show_hidden_problems(cls){
+    $('.'+cls).show();
+    // And hide the vvv button
+    $('#btn-'+cls).hide();
+}
+
 // At start we hide the unselect all button
 $(document).ready(function(){
     $('#unselect_all_btn').hide();
