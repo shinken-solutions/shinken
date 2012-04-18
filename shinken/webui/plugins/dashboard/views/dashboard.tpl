@@ -21,9 +21,6 @@
       <div class='row'>
 	<span class='span4'>
 	  <img style="width:64px;height:64px" src="{{w['widget_picture']}}" id="widget_desc_{{w['widget_name']}}"/>
-	  <script >$(function(){ $("#widget_desc_{{w['widget_name']}}").tooltip({
-	    'content' : "MONCUL <img src='{{w['widget_picture']}}/>", 'placement' : 'top'});
-	    });</script>
 	</span>
 	<span class='span6'>
 	  {{!w['widget_desc']}}
@@ -57,7 +54,6 @@
             widgets.push(w);
          %end
       %end
-      //AddWidget('/widget/system', 'widget-place-1');
   });
 </script>
 

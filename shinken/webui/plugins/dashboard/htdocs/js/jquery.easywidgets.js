@@ -368,6 +368,37 @@
 	}
     };
 
+    $.fn.GetEasyWidgetPositions = function(){
+	var s = $.fn.EasyWidgets.defaults;//settings;
+
+	var positions = '';
+	$(s.selectors.places).each(function(){
+	    var widgets = '';
+	    var place = $(this);
+	    var places = place.attr('id') + '=';
+	    place.children(s.selectors.widget).each(function(){
+		var widget = this;
+		var widgetId = widget.id;
+		var haveId = ($.trim(widgetId) != '');
+		if(haveId){
+		    if(widgets == ''){
+			widgets += widgetId;
+		    }else{
+			widgets += ',' + widgetId;
+		    }
+		}
+	    });
+	    places += widgets;
+	    if(positions == ''){
+		positions += places;
+	    }else{
+		positions += '|' + places;
+	    }
+	});
+	console.log('Give positions'+positions);
+	return positions;
+    };
+
     /////////////////////////////
     // Plugin default settings //
     /////////////////////////////

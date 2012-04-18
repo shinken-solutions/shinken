@@ -80,8 +80,48 @@ $(function(){
     // We hide the loader spinner thing
     $('#loading').hide()
 
+    
+    // Function that will look at the current state of the positions,
+    // and will update the widgets objects from it.
+    function update_widgets_positions(positions){
+	if($.trim(positions) != ''){
+	    // Get the widgets places IDs and widgets IDs
+	    var places = positions.split('|');
+	    console.log('Places'+places);
+	    for(var i = 0; i < places.length; i++){
+		// Every part contain a place ID and possible widgets IDs
+		var place = places[i].split('=');
+		// Validate (more or less) the format of the part that must
+		// contain two element: A place ID and one or more widgets IDs
+		if(place.length == 2){
+		    // Subpart one: the place ID
+		    var place_name = place[0];
+		    // Subpart two: one or more widgets IDs
+		    var widgets = place[1].split(',');
+		    // Here we have a place and one or more widgets IDs
+		    for(var j = 0; j < widgets.length; j++){
+			if($.trim(widgets[j]) != ''){
+			    // So, append every widget in the appropiate place
+			    var widget_name = widgets[j];
+			    console.log('Widget and place'+widget_name+' and place '+place_name);
+			    var w = find_widget(widget_name);
+			    if(w != -1){
+				// We finally save the new position
+				w.position = place_name;
+			    }
+			    console.log('Finded widget'+w);
+			    //$(widgetSel).appendTo(placeSel);
+			}
+		    }
+		}
+	    }
+	}
+    }
+    
+
+
     // Very basic usage  
-    $.fn.EasyWidgets(
+    var easy_widget_mgr = $.fn.EasyWidgets(
 	{
 	    i18n : {
 		editText : '<i class="icon-edit"></i>',/*<img src="./edit.png" alt="Edit" width="16" height="16" />',*/
@@ -130,42 +170,8 @@ $(function(){
 		onChangePositions : function(positions){
 		    //save_state = true;
 		    ask_for_widgets_state_save();
-		    console.log('We arechanging position of'+positions);
-		    
-		    if($.trim(positions) != ''){
-			// Get the widgets places IDs and widgets IDs
-			var places = positions.split('|');
-			console.log('Places'+places);
-			for(var i = 0; i < places.length; i++){
-			    // Every part contain a place ID and possible widgets IDs
-			    var place = places[i].split('=');
-			    // Validate (more or less) the format of the part that must
-			    // contain two element: A place ID and one or more widgets IDs
-			    if(place.length == 2){
-				// Subpart one: the place ID
-				var place_name = place[0];
-				// Subpart two: one or more widgets IDs
-				var widgets = place[1].split(',');
-				// Here we have a place and one or more widgets IDs
-				for(var j = 0; j < widgets.length; j++){
-				    if($.trim(widgets[j]) != ''){
-					// So, append every widget in the appropiate place
-					var widget_name = widgets[j];
-					console.log('Widget and place'+widget_name+' and place '+place_name);
-					var w = find_widget(widget_name);
-					if(w != -1){
-					    // We finally save the new position
-					    w.position = place_name;
-					}
-					console.log('Finded widget'+w);
-					//$(widgetSel).appendTo(placeSel);
-				    }
-				}
-			    }
-			}
-		    }
-		    
-		    
+		    console.log('We are changing position of'+positions);
+		    update_widgets_positions(positions);
 		}
 	    }
 	});
@@ -177,6 +183,10 @@ $(function(){
 	if(!save_state){return;}
 	// No more need
 	save_state = false;
+
+	// First we reupdate the widget-position, to be sure the js objects got the good value
+	var pos = $.fn.GetEasyWidgetPositions();
+	update_widgets_positions(pos);
 
 	var widgets_ids = [];
 	var save_widgets_list = false;
@@ -195,6 +205,7 @@ $(function(){
 	});
 
 	console.log('Need to save widgets list'+JSON.stringify(widgets_ids));
+	//alert('Need to save widgets list'+JSON.stringify(widgets_ids));
 	$.post("/user/save_pref", { 'key' : 'widgets', 'value' : JSON.stringify(widgets_ids)});
     }
 
