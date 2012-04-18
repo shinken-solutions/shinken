@@ -36,6 +36,11 @@ function AddWidget(url, placeId){
     nb_widgets_loading += 1;
     $('#loading').show();
     
+    // We also hide the central span with the big button
+    // And show the little one
+    $('#center-button').hide();
+    $('#small_show_panel').show();
+
     $.get(url, function(html){
 	$.fn.AddEasyWidget(html, placeId, {});
 	nb_widgets_loading -= 1;
@@ -165,7 +170,15 @@ $(function(){
 		onClose : function(link, widget){
 		    // On close, save all
 		    ask_for_widgets_state_save();
-		    //save_state = true;
+
+		    // If we got not more widget, we get back the center button,
+		    // and hide the little one.
+		    // WARNING : we are before the real DEL, so we remvoe if it's the last one
+		    if(widgets.length == 1){
+			$('#center-button').show();
+			$('#small_show_panel').hide();
+		    }
+
 		},
 		onChangePositions : function(positions){
 		    //save_state = true;

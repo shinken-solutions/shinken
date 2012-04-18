@@ -6,7 +6,18 @@
 
 <div class='span12'>
   <div id='loading' class='pull-left'> <img src='/static/images/spinner.gif'> Loading widgets</div>
-  <a href="#pageslide" class="slidelink btn btn-success pull-right"><i class="icon-plus"></i> Add a new widget</a>
+  %# If we got no widget, we should put the button at the center fo the screen
+  %small_show_panel_s = ''
+  %if len(widgets) == 0:
+     %small_show_panel_s = 'hide'
+  %end
+  <a id='small_show_panel' href="#pageslide" class="slidelink btn btn-success pull-right {{small_show_panel_s}}"><i class="icon-plus"></i> Add a new widget</a>
+  %# Go in the center of the page!
+  <span class="page-center center" id='center-button'>
+    <h3>You don't have any widget yet?</h3>
+  <a href="#pageslide" class="slidelink btn btn-large btn-success at-center"><i class="icon-plus"></i> Add a new widget</a>
+  </span>
+
 </div>
 <div id="pageslide" style="display:none">
     <div class='row'>
