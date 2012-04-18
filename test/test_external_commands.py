@@ -43,7 +43,7 @@ class TestConfig(ShinkenTest):
         host = self.sched.hosts.find_by_name("test_host_0")
         router = self.sched.hosts.find_by_name("test_router_0")
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
-        self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 2, 'BAD | value1=0 value2=0']])
+        self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [svc, 2, 'BAD | value1=0 value2=0']])
         self.assert_(host.state == 'UP')
         self.assert_(host.state_type == 'HARD')
 
@@ -90,6 +90,35 @@ class TestConfig(ShinkenTest):
         #    os.unlink(self.conf.command_file)
         #except :
         #    pass
+
+        
+        # Now with PAST DATA. We take the router because it was not called from now.
+        past = int(time.time() - 30)
+        excmd = '[%d] PROCESS_HOST_CHECK_RESULT;test_router_0;2;Bob is not happy|rtt=9999;5;10;0;10000' % past
+        self.sched.run_external_command(excmd)
+        self.scheduler_loop(1, [])
+        self.scheduler_loop(1, []) #Need 2 run for get then consume)
+        self.assert_(router.state == 'DOWN')
+        self.assert_(router.output == 'Bob is not happy')
+        print "perf (%s)" % router.perf_data
+        self.assert_(router.perf_data == 'rtt=9999;5;10;0;10000')
+        print "Is the last check agree?", past, router.last_chk
+        self.assert_(past == router.last_chk)
+
+        # Now an even earlier check, should NOT be take
+        very_past = int(time.time() - 3600)
+        excmd = '[%d] PROCESS_HOST_CHECK_RESULT;test_router_0;2;Bob is not happy|rtt=9999;5;10;0;10000' % very_past
+        self.sched.run_external_command(excmd)
+        self.scheduler_loop(1, [])
+        self.scheduler_loop(1, []) #Need 2 run for get then consume)
+        self.assert_(router.state == 'DOWN')
+        self.assert_(router.output == 'Bob is not happy')
+        print "perf (%s)" % router.perf_data
+        self.assert_(router.perf_data == 'rtt=9999;5;10;0;10000')
+        print "Is the last check agree?", very_past, router.last_chk
+        self.assert_(past == router.last_chk)
+        
+
 
 
 if __name__ == '__main__':
