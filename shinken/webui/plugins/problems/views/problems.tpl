@@ -403,9 +403,9 @@ $(function(){
       %if nb_same_output == 2 and page == 'problems':
 	<div class="tableCriticity opacity_hover">
 	  <a rel=tooltip title='Expand the same service problems' href="javascript:show_hidden_problems('hide_for_{{last_hname}}');" id='btn-hide_for_{{last_hname}}' class='go-center'>
-	    <i class="icon-chevron-down"></i>
-	    <i class="icon-chevron-down"></i>
-	    <i class="icon-chevron-down"></i>
+	    <i class="icon-arrow-down"></i>
+	    <i class="icon-arrow-down"></i>
+	    <i class="icon-arrow-down"></i>
 	  </a>
 	</div>
       %end
