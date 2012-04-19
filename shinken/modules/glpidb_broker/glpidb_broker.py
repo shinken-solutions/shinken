@@ -222,6 +222,13 @@ class Glpidb_broker(BaseModule):
 
     #Service result
     def manage_service_check_resultup_brok(self, b):
+        """If a host is defined locally (in shinken) and not in GLPI,
+           we must not edit GLPI datas !
+        """
+        if 'plugin_monitoring_servicescatalogs_id' not in b.data and\
+           'plugin_monitoring_services_id'         not in b.data:
+            return list()
+
         logger.info("GLPI : data in DB %s " % b.data)
         new_data = copy.deepcopy(b.data)
         new_data['last_check'] = time.strftime('%Y-%m-%d %H:%M:%S')
