@@ -210,9 +210,10 @@ $(function(){
 	    //id = w.id;
 	    var widget = find_widget(w.id);
 	    // Find the widget and check if it was not closed
+	    // RMQ : widget_context came from a global value set by the page.
 	    if(widget != -1){
-		var o = {'id' : widget.id, 'position' : widget.position, 'base_url' : widget.base_url, 'options' : widget.options, 'collapsed' : widget.collapsed};
-		console.log('Saving'+o.collapsed);
+		var o = {'id' : widget.id, 'position' : widget.position, 'base_url' : widget.base_url, 'options' : widget.options, 'collapsed' : widget.collapsed, 'for' : widget_context};
+		console.log('Saving'+JSON.stringify(widget));
 		widgets_ids.push(o);
 	    }
 	});

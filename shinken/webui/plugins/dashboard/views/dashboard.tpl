@@ -5,6 +5,11 @@
 
 
 
+<script>
+  /* We are saving the global context for theses widgets */
+  widget_context = 'dashboard';
+</script>
+
 
 <div class='span12'>
   <div id='loading' class='pull-left'> <img src='/static/images/spinner.gif'> Loading widgets</div>
@@ -57,7 +62,7 @@
 
 
 <script>
-  // Now load the system as example
+  // Now load all widgets
   $(function(){
       %for w in widgets:
          %if 'base_url' in w and 'position' in w:

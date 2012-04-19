@@ -60,6 +60,13 @@ def get_page():
     for w in widget_names:
         if not 'id' in w or not 'position' in w:
             continue
+
+        # by default hte widget is for /dashboard
+        w['for'] = w.get('for', 'dashboard')
+        if not w['for'] == 'dashboard':
+            # Not a dashboard widget? I don't want it so
+            continue
+
         i = w['id']
         pos = w['position']
         options = w.get('options', {})
