@@ -57,8 +57,10 @@ class TestConfig(ShinkenTest):
         sl.properties['to_queue'] = None
         sl.init()
         b = Brok('log', {'log' : "look at my ass.\n"})
+        b.prepare()
         sl.manage_brok(b)
         b = Brok('log', {'log' : "look at my ass again.\n"})
+        b.prepare()
         sl.manage_brok(b)
         sl.file.close()
         fd = open(mod.path)

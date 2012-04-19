@@ -38,7 +38,7 @@ class TestServiceWhithBadHost(ShinkenTest):
     
     # Nagios allow service with no host to exist, it will just drop them
     def test_ServiceWhitNoHost(self):
-        self.assert_(self.sched.conf.conf_is_correct == False)
+        self.assert_(self.conf.conf_is_correct == False)
 
 
 if __name__ == '__main__':

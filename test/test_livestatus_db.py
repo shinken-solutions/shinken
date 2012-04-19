@@ -66,6 +66,7 @@ class TestConfig(ShinkenTest):
             #    print "Problem?", brok.data['is_problem']
             if dodeepcopy:
                 brok = copy.deepcopy(brok)
+            brok.prepare()
             self.livestatus_broker.manage_brok(brok)
         self.sched.broks = {}
 

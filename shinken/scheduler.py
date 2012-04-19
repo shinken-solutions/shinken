@@ -140,7 +140,9 @@ class Scheduler:
 
 
     # Load conf for future use
-    def load_conf(self, conf):
+    # we are in_test if the data are from an arbiter object like,
+    # so only for tests
+    def load_conf(self, conf, in_test=False):
         self.program_start = int(time.time())
         self.conf = conf
         self.hostgroups = conf.hostgroups
@@ -164,6 +166,15 @@ class Scheduler:
         self.timeperiods.create_reversed_list()
         self.commands = conf.commands
 
+        if not in_test:
+            # Commands in the host/services/contacts are not real one
+            # we must relink them
+            t0 = time.time()
+            self.hosts.late_linkify_h_by_commands(self.commands)
+            self.services.late_linkify_s_by_commands(self.commands)
+            self.contacts.late_linkify_c_by_commands(self.commands)
+            print 'Late command relink in', time.time() - t0
+
         # self.status_file = StatusFile(self)        # External status file
         self.instance_id = conf.instance_id # From Arbiter. Use for
                                             # Broker to differenciate
@@ -177,7 +188,6 @@ class Scheduler:
         # like the retention one, etc
         self.update_recurrent_works_tick('update_retention_file', self.conf.retention_update_interval * 60)
         self.update_recurrent_works_tick('clean_queues', self.conf.cleaning_queues_interval)
-
 
 
     # Update the 'tick' for a function call in our
@@ -220,7 +230,7 @@ class Scheduler:
 
     def add_Brok(self, brok):
         # For brok, we TAG brok with our instance_id
-        brok.data['instance_id'] = self.instance_id
+        brok.instance_id = self.instance_id
         self.broks[brok.id] = brok
         
     def add_Notification(self, notif):
@@ -1113,7 +1123,7 @@ class Scheduler:
                 b = i.get_initial_status_brok()
                 self.add(b)
 
-        # Only raises the all logs at the scehduler startup
+        # Only raises the all logs at the scheduler startup
         if with_logs:
             # Ask for INITIAL logs for services and hosts
             for i in self.hosts:
@@ -1385,7 +1395,10 @@ class Scheduler:
         self.retention_load()
 
         # Ok, now all is initialized, we can make the inital broks
+        print 'Starting initial broks'
+        t0 = time.time()
         self.fill_initial_broks(with_logs=True)
+        print 'Finishing initial broks', time.time() - t0
 
         logger.info("[%s] First scheduling launched" % self.instance_name)
         self.schedule()

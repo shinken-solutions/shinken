@@ -254,10 +254,14 @@ class ExternalCommandManager:
         self.cmd_fragments = ''
         if self.mode == 'dispatcher':
             self.confs = conf.confs
+        # Will change for each command read, so if a command need it,
+        # it can get it
+        self.current_timestamp = 0
 
 
     def load_scheduler(self, scheduler):
         self.sched = scheduler
+
 
     def load_arbiter(self, arbiter):
         self.arbiter = arbiter
@@ -376,6 +380,20 @@ class ExternalCommandManager:
         if len(elts2) != 2:
             safe_print("Malformed command", command)
             return None
+        ts = elts2[0]
+        # Now we will get the timestamp as [123456]
+        if not ts.startswith('[') or not ts.endswith(']'):
+            safe_print("Malformed command", command)
+            return None
+        # Ok we remove the [ ]
+        ts = ts[1:-1]
+        try: # is an int or not?
+            self.current_timestamp = int(ts)
+        except ValueError:
+            safe_print("Malformed command", command)
+            return None
+
+        # Now get the command
         c_name = elts2[1]
 
         #safe_print("Get command name", c_name)
@@ -504,7 +522,7 @@ class ExternalCommandManager:
         except IndexError:
             safe_print("Sorry, the arguments are not corrects")
             return None
-        safe_print('Finally got ARGS:', args)
+        #safe_print('Finally got ARGS:', args)
         if len(args) == len(entry['args']):
             #safe_print("OK, we can call the command", c_name, "with", args)
             return {'global' : False, 'c_name' : c_name, 'args' : args}
@@ -1234,6 +1252,10 @@ class ExternalCommandManager:
         cls = host.__class__
         # If globally disable OR locally, do not launch
         if cls.accept_passive_checks and host.passive_checks_enabled:
+            # Maybe the check is just too old, if so, bail out!
+            if self.current_timestamp < host.last_chk:
+                return
+
             i = host.launch_check(now, force=True)
             for chk in host.actions:
                 if chk.id == i:
@@ -1243,7 +1265,7 @@ class ExternalCommandManager:
             c.exit_status = status_code
             c.get_outputs(plugin_output, host.max_plugins_output_length)
             c.status = 'waitconsume'
-            c.check_time = now
+            c.check_time = self.current_timestamp  # we are using the external command timestamp
             self.sched.nb_check_received += 1
             # Ok now this result will be read by scheduler the next loop
 
@@ -1257,6 +1279,10 @@ class ExternalCommandManager:
         cls = service.__class__
         # If globally disable OR locally, do not launch
         if cls.accept_passive_checks and service.passive_checks_enabled:
+            # Maybe the check is just too old, if so, bail out!
+            if self.current_timestamp < service.last_chk:
+                return
+
             i = service.launch_check(now, force=True)
             for chk in service.actions:
                 if chk.id == i:
@@ -1266,9 +1292,9 @@ class ExternalCommandManager:
             c.exit_status = return_code
             c.get_outputs(plugin_output, service.max_plugins_output_length)
             c.status = 'waitconsume'
-            c.check_time = now
+            c.check_time = self.current_timestamp  # we are using the external command timestamp
             self.sched.nb_check_received += 1
-            #Ok now this result will be reap by scheduler the next loop
+            # Ok now this result will be reap by scheduler the next loop
 
 
     # READ_STATE_INFORMATION

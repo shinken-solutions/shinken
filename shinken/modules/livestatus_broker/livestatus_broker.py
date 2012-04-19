@@ -1,10 +1,12 @@
+#!/usr/bin/python
+
 # -*- coding: utf-8 -*-
-#
+
 # Copyright (C) 2009-2012:
-#     Gabes Jean, naparuba@gmail.com
-#     Gerhard Lausser, Gerhard.Lausser@consol.de
-#     Gregory Starck, g.starck@gmail.com
-#     Hartmut Goebel, h.goebel@goebel-consult.de
+#    Gabes Jean, naparuba@gmail.com
+#    Gerhard Lausser, Gerhard.Lausser@consol.de
+#    Gregory Starck, g.starck@gmail.com
+#    Hartmut Goebel, h.goebel@goebel-consult.de
 #
 # This file is part of Shinken.
 #
@@ -37,6 +39,7 @@ import re
 import traceback
 import Queue
 import threading
+import cPickle
 
 from shinken.macroresolver import MacroResolver
 from shinken.basemodule import BaseModule
@@ -83,6 +86,14 @@ class LiveStatus_broker(BaseModule, Daemon):
         self.debug = getattr(modconf, 'debug', None)
         self.debug_queries = (getattr(modconf, 'debug_queries', '0') == '1')
         self.use_query_cache = (getattr(modconf, 'query_cache', '0') == '1')
+        if getattr(modconf, 'service_authorization', 'loose') == 'strict':
+            self.service_authorization_strict = True
+        else:
+            self.service_authorization_strict = False
+        if getattr(modconf, 'group_authorization', 'loose') == 'strict':
+            self.group_authorization_strict = True
+        else:
+            self.group_authorization_strict = False
 
         #  This is an "artificial" module which is used when an old-style
         #  shinken-specific.cfg without a separate logstore-module is found.
@@ -231,8 +242,9 @@ class LiveStatus_broker(BaseModule, Daemon):
         print "Data thread started"
         while True:
             l = self.to_q.get()
-
             for b in l:
+                # Un-serialize the brok data
+                b.prepare()
                 # For updating, we cannot do it while
                 # answer queries, so wait for no readers
                 self.wait_for_no_readers()
@@ -315,6 +327,7 @@ class LiveStatus_broker(BaseModule, Daemon):
 
     def manage_brok(self, brok):
         """We use this method mostly for the unit tests"""
+        brok.prepare()
         self.rg.manage_brok(brok)
         for mod in self.modules_manager.get_internal_instances():
             try:
@@ -383,6 +396,8 @@ class LiveStatus_broker(BaseModule, Daemon):
                 try:
                     l = self.to_q.get(True, .01)
                     for b in l:
+                        # Un-serialize the brok data
+                        b.prepare()
                         self.rg.manage_brok(b)
                         for mod in self.modules_manager.get_internal_instances():
                             try:

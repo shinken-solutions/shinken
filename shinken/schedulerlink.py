@@ -111,6 +111,9 @@ class SchedulerLink(SatelliteLink):
                 r[prop] = getattr(self, prop)
         return r
 
+
+
+
 class SchedulerLinks(SatelliteLinks):
     """Please Add a Docstring to describe the class here"""
     

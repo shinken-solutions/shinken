@@ -1,10 +1,12 @@
+#!/usr/bin/python
+
 # -*- coding: utf-8 -*-
-#
+
 # Copyright (C) 2009-2012:
-#     Gabes Jean, naparuba@gmail.com
-#     Gerhard Lausser, Gerhard.Lausser@consol.de
-#     Gregory Starck, g.starck@gmail.com
-#     Hartmut Goebel, h.goebel@goebel-consult.de
+#    Gabes Jean, naparuba@gmail.com
+#    Gerhard Lausser, Gerhard.Lausser@consol.de
+#    Gregory Starck, g.starck@gmail.com
+#    Hartmut Goebel, h.goebel@goebel-consult.de
 #
 # This file is part of Shinken.
 #
@@ -20,7 +22,6 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
-
 
 import os
 import re
@@ -57,6 +58,7 @@ class LiveStatusQuery(object):
         # Private attributes for this specific request
         self.response = LiveStatusResponse()
         self.raw_data = ''
+        self.authuser = None
         self.table = None
         self.columns = []
         self.filtercolumns = []
@@ -150,6 +152,8 @@ class LiveStatusQuery(object):
                 self.response.columnheaders = columnheaders
             elif keyword == 'Limit':
                 _, self.limit = self.split_option(line)
+            elif keyword == 'AuthUser':
+                _, self.authuser = self.split_option(line)
             elif keyword == 'Filter':
                 try:
                     _, attribute, operator, reference = self.split_option(line, 3)
@@ -292,7 +296,7 @@ class LiveStatusQuery(object):
         # Get the function which implements the Filter: statements
         filter_func     = self.filter_stack.get_stack()
         without_filter  = len(self.filtercolumns) == 0
-        cs = LiveStatusConstraints(filter_func, without_filter)
+        cs = LiveStatusConstraints(filter_func, without_filter, self.authuser)
 
         try:
             # Remember the number of stats filters. We need these numbers as columns later.
@@ -352,23 +356,56 @@ class LiveStatusQuery(object):
 
     
     def get_hosts_or_services_livedata(self, cs):
-        items = getattr(self.datamgr.rg, self.table)
+        def gen_all(values):
+            for val in values:
+                yield val
+            return
+        def gen_filtered(values, filterfunc):
+            for val in gen_all(values):
+                if filterfunc(val):
+                    yield val
+            return
+        
+        # This is a generator which returns up to <limit> elements
+        def gen_limit(values, maxelements):
+            loopcnt = 1
+            for val in gen_all(values):
+                if loopcnt > maxelements:
+                    return
+                else:
+                    yield val
+                    loopcnt += 1
+        # This is a generator which returns up to <limit> elements
+        # which passed the filter. If the limit has been reached
+        # it is no longer necessary to loop through the original list.
+        def gen_limit_filtered(values, maxelements, filterfunc):
+            for val in gen_limit(gen_filtered(values, filterfunc), maxelements):
+                yield val
+            return
+
+        def gen_auth(values, authuser):
+            for val in values:
+                # this is probably too sloooow to be run in the innermost loop
+                if authuser in [c.get_name() for c in val.contacts]:
+                    yield val
+            return
+
+        items = getattr(self.datamgr.rg, self.table).__itersorted__()
+        if cs.authuser:
+            items = gen_auth(items, cs.authuser)
+        if not cs.without_filter:
+            items = gen_filtered(items, cs.filter_func)
+        if self.limit:
+            items = gen_limit(items, self.limit)
+        return (i for i in items)
         if cs.without_filter and not self.limit:
             # Simply format the output
             return [x for x in items]
         elif cs.without_filter and self.limit:
             # Simply format the output of a subset of the objects
-            def genlimit(values, maxelements):
-                loopcnt = 1
-                for val in values:
-                    if loopcnt > maxelements:
-                        return
-                    else:
-                        yield val
-                        loopcnt += 1
             return (
                 y for y in (
-                    genlimit((x for x in items.__itersorted__()), self.limit)
+                    gen_limit((x for x in items.__itersorted__()), self.limit)
                 )
             )
         elif not cs.without_filter and not self.limit:
@@ -382,22 +419,10 @@ class LiveStatusQuery(object):
             #  pool = multiprocessing.Pool(processes=4)
             #  return pool.map(cs.filter_func, getattr(self.datamgr.rg, self.table).__itersorted__())
         elif not cs.without_filter and self.limit:
-            # This is a generator which returns up to <limit> elements
-            # which passed the filter. If the limit has been reached
-            # it is no longer necessary to loop through the original list.
-            def genlimit(values, maxelements, filterfunc):
-                loopcnt = 1
-                for val in values:
-                    if loopcnt > maxelements:
-                        return
-                    else:
-                        if filterfunc(val):
-                            yield val
-                            loopcnt += 1
 
             return (
                 y for y in (
-                    genlimit((x for x in getattr(self.datamgr.rg, self.table).__itersorted__()), self.limit, cs.filter_func)
+                    gen_limit_filtered((x for x in getattr(self.datamgr.rg, self.table).__itersorted__()), self.limit, cs.filter_func)
                 )
             )
     

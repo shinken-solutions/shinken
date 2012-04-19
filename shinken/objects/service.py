@@ -38,7 +38,7 @@ from shinken.objects.schedulingitem import SchedulingItem
 from shinken.autoslots import AutoSlots
 from shinken.util import strip_and_uniq, format_t_into_dhms_format, to_svc_hst_distinct_lists, \
     get_key_value_sequence, GET_KEY_VALUE_SEQUENCE_ERROR_SYNTAX, GET_KEY_VALUE_SEQUENCE_ERROR_NODEFAULT, \
-    GET_KEY_VALUE_SEQUENCE_ERROR_NODE, to_list_string_of_names, to_list_of_names
+    GET_KEY_VALUE_SEQUENCE_ERROR_NODE, to_list_string_of_names, to_list_of_names, to_name_if_possible
 from shinken.property import BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 from shinken.macroresolver import MacroResolver
 from shinken.eventhandler import EventHandler
@@ -80,7 +80,7 @@ class Service(SchedulingItem):
         'retry_interval':         IntegerProp(fill_brok=['full_status']),
         'active_checks_enabled':  BoolProp   (default='1', fill_brok= ['full_status'], retention=True),
         'passive_checks_enabled': BoolProp   (default='1', fill_brok=['full_status'], retention=True),
-        'check_period':           StringProp (fill_brok= ['full_status']),
+        'check_period':           StringProp (brok_transformation=to_name_if_possible, fill_brok=['full_status']),
         'obsess_over_service':    BoolProp   (default='0', fill_brok=['full_status'], retention=True),
         'check_freshness':        BoolProp   (default='0', fill_brok=['full_status']),
         'freshness_threshold':    IntegerProp(default='0', fill_brok=['full_status']),
@@ -95,10 +95,10 @@ class Service(SchedulingItem):
         'retain_nonstatus_information': BoolProp(default='1', fill_brok=['full_status']),
         'notification_interval':  IntegerProp(default='60', fill_brok=['full_status']),
         'first_notification_delay':IntegerProp(default='0', fill_brok=['full_status']),
-        'notification_period':    StringProp (fill_brok=['full_status']),
+        'notification_period':    StringProp (brok_transformation=to_name_if_possible, fill_brok=['full_status']),
         'notification_options':   ListProp   (default='w,u,c,r,f,s',fill_brok=['full_status']),
         'notifications_enabled':  BoolProp   (default='1', fill_brok=['full_status']),
-        'contacts':               StringProp (default='', fill_brok=['full_status']),
+        'contacts':               StringProp (default='', brok_transformation=to_list_of_names, fill_brok=['full_status']),
         'contact_groups':         StringProp (default='', fill_brok=['full_status']),
         'stalking_options':       ListProp   (default='', fill_brok=['full_status']),
         'notes':                  StringProp (default='', fill_brok=['full_status']),
@@ -116,7 +116,7 @@ class Service(SchedulingItem):
         'resultmodulations':       StringProp(default=''),
         'business_impact_modulations':    StringProp(default=''),
         'escalations':             StringProp(default='', fill_brok=['full_status']),
-        'maintenance_period':      StringProp(default='', fill_brok=['full_status']),
+        'maintenance_period':      StringProp(default='', brok_transformation=to_name_if_possible, fill_brok=['full_status']),
 
         # service generator
         'duplicate_foreach':       StringProp(default=''),
@@ -142,14 +142,14 @@ class Service(SchedulingItem):
         'last_state':         StringProp (default='PENDING', fill_brok=['full_status', 'check_result'], retention=True),
         'last_state_type':    StringProp (default='HARD', fill_brok=['full_status', 'check_result'], retention=True),
         'last_state_id':      IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
-        'last_state_change':  FloatProp (default=time.time(), fill_brok=['full_status', 'check_result'], retention=True),
-        'last_hard_state_change': FloatProp(default=time.time(), fill_brok=['full_status', 'check_result'], retention=True),
+        'last_state_change':  FloatProp (default=0.0, fill_brok=['full_status', 'check_result'], retention=True),
+        'last_hard_state_change': FloatProp(default=0.0, fill_brok=['full_status', 'check_result'], retention=True),
         'last_hard_state':    StringProp (default='PENDING', fill_brok=['full_status'], retention=True),
         'last_hard_state_id': IntegerProp(default=0, fill_brok=['full_status'], retention=True),
-        'last_time_ok':       IntegerProp(default=int(time.time()), fill_brok=['full_status', 'check_result'], retention=True),
-        'last_time_warning':  IntegerProp(default=int(time.time()), fill_brok = ['full_status', 'check_result'], retention=True),
-        'last_time_critical': IntegerProp(default=int(time.time()), fill_brok =['full_status', 'check_result'], retention=True),
-        'last_time_unknown':  IntegerProp(default=int(time.time()), fill_brok=['full_status', 'check_result'], retention=True),
+        'last_time_ok':       IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
+        'last_time_warning':  IntegerProp(default=0, fill_brok = ['full_status', 'check_result'], retention=True),
+        'last_time_critical': IntegerProp(default=0, fill_brok =['full_status', 'check_result'], retention=True),
+        'last_time_unknown':  IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'duration_sec':       IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         'state_type':         StringProp (default='HARD', fill_brok=['full_status', 'check_result'], retention=True),
         'state_type_id':      IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
@@ -166,7 +166,7 @@ class Service(SchedulingItem):
         # elements that depend of me
         'chk_depend_of_me':   ListProp   (default=[]),
 
-        'last_state_update':  FloatProp(default=time.time(), fill_brok=['full_status'], retention=True),
+        'last_state_update':  FloatProp(default=0.0, fill_brok=['full_status'], retention=True),
         'checks_in_progress': ListProp(default=[]), # no brok because checks are too linked
         'notifications_in_progress': ListProp(default={}, retention=True), # no broks because notifications are too linked
         'downtimes':          ListProp  (default=[], fill_brok=['full_status'], retention=True),
@@ -1061,6 +1061,17 @@ class Services(Items):
                             s.configuration_errors.append(err)
                 s.servicegroups = new_servicegroups
 
+
+
+    # In the scheduler we need to relink the commandCall with
+    # the real commands
+    def late_linkify_s_by_commands(self, commands):
+        props = ['check_command', 'event_handler']
+        for s in self:
+            for prop in props:
+                cc = getattr(s, prop, None)
+                if cc:
+                    cc.late_linkify_with_command(commands)
 
 
     # Delete services by ids

@@ -26,7 +26,7 @@
 from shinken_test import *
 import commands
 
-class TestConfig(ShinkenTest):
+class TestSystemTimeChange(ShinkenTest):
     #setUp is in shinken_test
 
     def set_time(self, d):
@@ -40,7 +40,7 @@ class TestConfig(ShinkenTest):
 
 
     #Change ME :)
-    def test_dummy(self):
+    def test_system_time_change(self):
         #
         # Config is not correct because of a wrong relative path
         # in the main config file
@@ -54,6 +54,9 @@ class TestConfig(ShinkenTest):
         print "Now:", time.asctime(time.localtime(now))
         tomorow = time.asctime(time.localtime(now+86400))
         yesterday = time.asctime(time.localtime(now-86400))
+
+        # Simulate a change now, because by default the value is 1970
+        host.last_state_change = now
 
         host.schedule()
         host_check = host.actions[0]

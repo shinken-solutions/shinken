@@ -132,7 +132,7 @@ class IForArbiter(Interface):
 # Main Arbiter Class
 class Arbiter(Daemon):
 
-    def __init__(self, config_files, is_daemon, do_replace, verify_only, debug, debug_file):
+    def __init__(self, config_files, is_daemon, do_replace, verify_only, debug, debug_file, profile=None):
         
         super(Arbiter, self).__init__('arbiter', config_files[0], is_daemon, do_replace, debug, debug_file)
         
@@ -343,9 +343,13 @@ class Arbiter(Daemon):
         # Remove templates from config
         self.conf.remove_templates()
 
+        # We compute simple item hash
+        self.conf.compute_hash()
+
         # We removed templates, and so we must recompute the
         # search lists
         self.conf.create_reversed_list()
+
         
         # Pythonize values
         self.conf.pythonize()

@@ -35,7 +35,7 @@ class TestBadSatRealmConf(ShinkenTest):
     
     #Change ME :)
     def test_badconf(self):
-        self.assert_(not self.sched.conf.conf_is_correct)
+        self.assert_(not self.conf.conf_is_correct)
 
 
 if __name__ == '__main__':

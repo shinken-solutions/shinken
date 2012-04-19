@@ -35,7 +35,7 @@ import time
 import random
 import itertools
 
-from shinken.util import alive_then_spare_then_deads
+from shinken.util import alive_then_spare_then_deads, safe_print
 from shinken.log import logger
 
 # Always initialize random :)
@@ -368,22 +368,25 @@ class Dispatcher:
                         if not sched.need_conf:
                             logger.info('[%s] The scheduler %s do not need conf, sorry' % (r.get_name(), sched.get_name()))
                             continue
-                        
-                        #every_one_need_conf = True
 
                         # We tag conf with the instance_name = scheduler_name
-                        conf.instance_name = sched.scheduler_name
+                        instance_name = sched.scheduler_name
                         # We give this configuraton a new 'flavor'
                         conf.push_flavor = random.randint(1, 1000000)
                         # REF: doc/shinken-conf-dispatching.png (3)
                         # REF: doc/shinken-scheduler-lost.png (2)
                         override_conf = sched.get_override_configuration()
                         satellites_for_sched = r.get_satellites_links_for_scheduler()
-                        #print "Want to give a satellites pack for the scheduler", satellites_for_sched
-                        conf_package = (conf, override_conf, sched.modules, satellites_for_sched)
-                        #print "Try to put the conf", conf_package
+                        s_conf = r.serialized_confs[conf.id]
+                        # Prepare the conf before sending it
+                        conf_package = {'conf' : s_conf, 'override_conf' : override_conf,
+                                        'modules' : sched.modules, 'satellites' : satellites_for_sched,
+                                        'instance_name' : sched.scheduler_name, 'push_flavor' : conf.push_flavor
+                                        }
                         
+                        t1 = time.time()
                         is_sent = sched.put_conf(conf_package)
+                        print "DBG : conf is sent in ", time.time() - t1
                         if not is_sent:
                             logger.warning('[%s] configuration dispatching error for scheduler %s' %(r.get_name(), sched.get_name()))
                             continue

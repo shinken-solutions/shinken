@@ -27,15 +27,15 @@ from shinken_test import *
 
 
 class TestBadRealmConf(ShinkenTest):
-    #Uncomment this is you want to use a specific configuration
-    #for your test
+    # Uncomment this is you want to use a specific configuration
+    # for your test
     def setUp(self):
         self.setup_with_file('etc/nagios_bad_realm_conf.cfg')
 
     
     #Change ME :)
     def test_bad_conf(self):
-        self.assert_(not self.sched.conf.is_correct)
+        self.assert_(not self.conf.conf_is_correct)
 
 
 if __name__ == '__main__':

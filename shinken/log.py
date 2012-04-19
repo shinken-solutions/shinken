@@ -87,14 +87,6 @@ class Log:
         if level < self._level:
             return
 
-        if print_it:
-            # If the daemon is launched with a non UTF8 shell
-            # we can have problems in printing
-            try:
-                print message
-            except UnicodeEncodeError:
-                print message.encode('ascii', 'ignore')
-
         # We format the log in UTF-8
         if isinstance(message, str):
             message = message.decode('UTF-8', 'replace')
@@ -102,19 +94,31 @@ class Log:
         if format is None:
             lvlname = logging.getLevelName(level)
 
-            fmt  = u'[%%(date)s] %s%%(name)s%%(msg)s\n' % ('%(level)8s: ' if display_level else '')
+            fmt  = u'[%%(date)s] %s%%(name)s%%(msg)s\n' % ('%(level)s : ' if display_level else '')
+            #print "fmt", fmt, lvlname
             args = {
                 'date' : time.asctime(time.localtime(time.time())) if human_timestamp_log 
                     else int(time.time()),
-                'level': lvlname,
+                'level': lvlname.capitalize(),
                 'name' : '' if name is None else '[%s] ' % name,
                 'msg'  : message
             }
 
             s = fmt % args
+            #print "S is", s
+
         else:
             print format, '::', message
             s = format % message
+
+        if print_it:
+            # If the daemon is launched with a non UTF8 shell
+            # we can have problems in printing
+            try:
+                print s
+            except UnicodeEncodeError:
+                print s.encode('ascii', 'ignore')
+
 
         # We create and add the brok
         b = Brok('log', {'log': s})
@@ -123,6 +127,7 @@ class Log:
         # If we want a local log write, do it
         if local_log is not None:
             logging.log(level, s.strip())
+
 
     def register_local_log(self, path):
         """The log can also write to a local file if needed
@@ -147,6 +152,7 @@ class Log:
         # Return the file descriptor of this file
         return basic_log_handler.stream.fileno()
 
+
     def quit(self):
         """Close the local log file at program exit"""
         global local_log
@@ -154,9 +160,11 @@ class Log:
             print "Closing local_log ..", local_log
             local_log.close()
 
+
     def set_human_format(self):
         """Set the output as human format"""
         global human_timestamp_log
         human_timestamp_log = True
+
 
 logger = Log()

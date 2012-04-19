@@ -25,6 +25,7 @@
  elements like service, hosts or contacts.
 """
 import time
+import hashlib, cPickle # for hashing compute
 from copy import copy
 
 from shinken.graph import Graph
@@ -48,7 +49,8 @@ class Item(object):
         # All errors and warning raised during the configuration parsing
         # and that will raised real warning/errors during the is_correct
         'configuration_warnings':   ListProp(default=[]),
-        'configuration_errors':     ListProp(default=[]),              
+        'configuration_errors':     ListProp(default=[]),
+        'hash'                  :   StringProp(default=''),
     }
     
     macros = {
@@ -88,7 +90,7 @@ class Item(object):
         for prop, entry in self.__class__.running_properties.items():
             # Copy is slow, so we check type
             # Type with __iter__ are list or dict, or tuple.
-            # Item need it's own list, so qe copy
+            # Item need it's own list, so we copy
             val = entry.default
             if hasattr(val, '__iter__'):
                 setattr(self, prop, copy(val))
@@ -185,6 +187,20 @@ Like temporary attributes such as "imported_from", etc.. """
             except ValueError, exp:
                 err = "ERROR : incorrect type for property '%s' of '%s'" % (prop, self.get_name())
                 self.configuration_errors.append(err)
+
+    # Compute a hash of this element values. Should be launched
+    # When we got all our values, but not linked with other objects
+    def compute_hash(self):
+        # ID will always changed between runs, so we remove it
+        # for hash compute
+        i = self.id
+        del self.id
+        m = hashlib.md5()
+        tmp = cPickle.dumps(self, cPickle.HIGHEST_PROTOCOL)
+        m.update(tmp)
+        self.hash = m.digest()
+        # and put again our id
+        self.id = i
 
 
     def get_templates(self):
@@ -594,6 +610,11 @@ class Items(object):
 
     def __contains__(self, key):
         return key in self.items
+
+
+    def compute_hash(self):
+        for i in self:
+            i.compute_hash()
 
 
     # We create the reversed list so search will be faster

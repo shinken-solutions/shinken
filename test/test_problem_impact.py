@@ -99,7 +99,9 @@ class TestProblemImpact(ShinkenTest):
         #--------------------------------------------------------------
         #Now check in the brok generation too
         host_router_0_brok = host_router_0.get_update_status_brok()
+        host_router_0_brok.prepare()
         host_router_1_brok = host_router_1.get_update_status_brok()
+        host_router_1_brok.prepare()
 
         #Should be problems and have sub servers as impacts
         for h in all_routers:
@@ -130,10 +132,12 @@ class TestProblemImpact(ShinkenTest):
                 self.assert_(svc.get_dbg_name() in host_router_0_brok.data['impacts']['services'])
                 self.assert_(svc.get_dbg_name() in host_router_1_brok.data['impacts']['services'])
                 brk_svc = svc.get_update_status_brok()
+                brk_svc.prepare()
                 self.assert_(brk_svc.data['source_problems']['hosts'] == ['test_router_0', 'test_router_1'])
             for h in all_routers:
                 self.assert_(h in s.source_problems)
                 brk_hst = s.get_update_status_brok()
+                brk_hst.prepare()
                 self.assert_(h.get_dbg_name() in brk_hst.data['source_problems']['hosts'])
 
 
@@ -271,7 +275,9 @@ class TestProblemImpact(ShinkenTest):
         #--------------------------------------------------------------
         #Now check in the brok generation too
         host_router_0_brok = host_router_0.get_update_status_brok()
+        host_router_0_brok.prepare()
         host_router_1_brok = host_router_1.get_update_status_brok()
+        host_router_1_brok.prepare()
 
         #Should be problems and have sub servers as impacts
         for h in all_routers:
@@ -302,10 +308,12 @@ class TestProblemImpact(ShinkenTest):
                 self.assert_(svc.get_dbg_name() in host_router_0_brok.data['impacts']['services'])
                 self.assert_(svc.get_dbg_name() in host_router_1_brok.data['impacts']['services'])
                 brk_svc = svc.get_update_status_brok()
+                brk_svc.prepare()
                 self.assert_(brk_svc.data['source_problems']['hosts'] == ['test_router_0', 'test_router_1'])
             for h in all_routers:
                 self.assert_(h in s.source_problems)
                 brk_hst = s.get_update_status_brok()
+                brk_hst.prepare()
                 self.assert_(h.get_dbg_name() in brk_hst.data['source_problems']['hosts'])
 
 

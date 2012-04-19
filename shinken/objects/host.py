@@ -33,7 +33,7 @@ from item import Items
 from schedulingitem import SchedulingItem
 
 from shinken.autoslots import AutoSlots
-from shinken.util import format_t_into_dhms_format, to_hostnames_list, get_obj_name, to_svc_hst_distinct_lists, to_list_string_of_names, to_list_of_names
+from shinken.util import format_t_into_dhms_format, to_hostnames_list, get_obj_name, to_svc_hst_distinct_lists, to_list_string_of_names, to_list_of_names,to_name_if_possible
 from shinken.property import BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 from shinken.graph import Graph
 from shinken.macroresolver import MacroResolver
@@ -77,7 +77,7 @@ class Host(SchedulingItem):
         'retry_interval':       IntegerProp(default='0', fill_brok=['full_status']),
         'active_checks_enabled': BoolProp(default='1', fill_brok=['full_status'], retention=True),
         'passive_checks_enabled': BoolProp(default='1', fill_brok=['full_status'], retention=True),
-        'check_period':         StringProp(fill_brok=['full_status']),
+        'check_period':         StringProp(brok_transformation=to_name_if_possible, fill_brok=['full_status']),
         'obsess_over_host':     BoolProp(default='0', fill_brok=['full_status'], retention=True),
         'check_freshness':      BoolProp(default='0', fill_brok=['full_status']),
         'freshness_threshold':  IntegerProp(default='0', fill_brok=['full_status']),
@@ -90,11 +90,11 @@ class Host(SchedulingItem):
         'process_perf_data':    BoolProp(default='1', fill_brok=['full_status'], retention=True),
         'retain_status_information': BoolProp(default='1', fill_brok=['full_status']),
         'retain_nonstatus_information': BoolProp(default='1', fill_brok=['full_status']),
-        'contacts':             StringProp(default='', fill_brok=['full_status']),
+        'contacts':             StringProp(default='', brok_transformation=to_list_of_names, fill_brok=['full_status']),
         'contact_groups':       StringProp(default='', fill_brok=['full_status']),
         'notification_interval': IntegerProp(default='60', fill_brok=['full_status']),
         'first_notification_delay': IntegerProp(default='0', fill_brok=['full_status']),
-        'notification_period':  StringProp(fill_brok=['full_status']),
+        'notification_period':  StringProp(brok_transformation=to_name_if_possible, fill_brok=['full_status']),
         'notification_options': ListProp(default='d,u,r,f', fill_brok=['full_status']),
         'notifications_enabled': BoolProp(default='1', fill_brok=['full_status']),
         'stalking_options':     ListProp(default='', fill_brok=['full_status']),
@@ -122,7 +122,7 @@ class Host(SchedulingItem):
         'resultmodulations':    StringProp(default=''),
         'business_impact_modulations': StringProp(default=''),
         'escalations':          StringProp(default='', fill_brok=['full_status']),
-        'maintenance_period':   StringProp(default='', fill_brok=['full_status']),
+        'maintenance_period':   StringProp(default='', brok_transformation=to_name_if_possible, fill_brok=['full_status']),
 
         # Business impact value
         'business_impact':            IntegerProp(default='2', fill_brok=['full_status']),
@@ -147,13 +147,13 @@ class Host(SchedulingItem):
         'last_state':           StringProp(default='PENDING', fill_brok=['full_status', 'check_result'], retention=True),
         'last_state_id':        IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'last_state_type' :     StringProp(default='HARD', fill_brok=['full_status', 'check_result'],  retention=True),
-        'last_state_change':    FloatProp(default=time.time(), fill_brok=['full_status', 'check_result'], retention=True),
-        'last_hard_state_change': FloatProp(default=time.time(), fill_brok=['full_status', 'check_result'], retention=True),
+        'last_state_change':    FloatProp(default=0.0, fill_brok=['full_status', 'check_result'], retention=True),
+        'last_hard_state_change': FloatProp(default=0.0, fill_brok=['full_status', 'check_result'], retention=True),
         'last_hard_state':      StringProp(default='PENDING', fill_brok=['full_status'], retention=True),
         'last_hard_state_id' :  IntegerProp(default=0, fill_brok=['full_status'], retention=True),
-        'last_time_up':         IntegerProp(default=int(time.time()), fill_brok=['full_status', 'check_result'], retention=True),
-        'last_time_down':       IntegerProp(default=int(time.time()), fill_brok=['full_status', 'check_result'], retention=True),
-        'last_time_unreachable': IntegerProp(default=int(time.time()), fill_brok=['full_status', 'check_result'], retention=True),
+        'last_time_up':         IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
+        'last_time_down':       IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
+        'last_time_unreachable': IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'duration_sec':         IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         'output':               StringProp(default='', fill_brok=['full_status', 'check_result'], retention=True),
         'long_output':          StringProp(default='', fill_brok=['full_status', 'check_result'], retention=True),
@@ -171,7 +171,7 @@ class Host(SchedulingItem):
 
         # elements that depend of me
         'chk_depend_of_me':     StringProp(default=[]),
-        'last_state_update':    StringProp(default=time.time(), fill_brok=['full_status'], retention=True),
+        'last_state_update':    StringProp(default=0, fill_brok=['full_status'], retention=True),
 
         # no brok ,to much links
         'services':             StringProp(default=[]),
@@ -275,6 +275,9 @@ class Host(SchedulingItem):
 
         # Set if the element just change its father/son topology
         'topology_change' : BoolProp(default=False, fill_brok=['full_status']),
+
+        # Keep in mind our pack id afterthe cutting phase
+        'pack_id' : IntegerProp(default=-1),
 
     })
 
@@ -1062,6 +1065,18 @@ class Hosts(Items):
         # items::explode_contact_groups_into_contacts
         # take all contacts from our contact_groups into our contact property
         self.explode_contact_groups_into_contacts(contactgroups)
+
+
+
+    # In the scheduler we need to relink the commandCall with
+    # the real commands
+    def late_linkify_h_by_commands(self, commands):
+        props = ['check_command', 'event_handler']
+        for h in self:
+            for prop in props:
+                cc = getattr(h, prop, None)
+                if cc:
+                    cc.late_linkify_with_command(commands)
 
 
 

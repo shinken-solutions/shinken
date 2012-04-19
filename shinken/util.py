@@ -186,6 +186,14 @@ def to_list_of_names(ref, tab):
     return [e.get_name() for e in tab]
 
 
+# This will give a string if the value exists
+# or '' if not
+def to_name_if_possible(ref, value):
+    if value:
+        return value.get_name()
+    return ''
+
+
 # take a list of hosts and return a list
 # of all host_names
 def to_hostnames_list(ref, tab):
@@ -209,6 +217,8 @@ def to_svc_hst_distinct_lists(ref, tab):
             name = e.get_dbg_name()
             r['hosts'].append(name)
     return r
+
+
 
 
 # Will expand the value with macros from the
