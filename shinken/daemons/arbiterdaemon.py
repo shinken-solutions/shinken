@@ -319,6 +319,9 @@ class Arbiter(Daemon):
         # Manage all post-conf modules
         self.hook_point('early_configuration')
 
+        # Load all file triggers
+        self.conf.load_triggers()
+
         # Create Template links
         self.conf.linkify_templates()
 

@@ -126,6 +126,11 @@ class Host(SchedulingItem):
 
         # Business impact value
         'business_impact':            IntegerProp(default='2', fill_brok=['full_status']),
+
+        # Load some triggers
+        'trigger'        :         StringProp(default=''),
+        'trigger_name'   :         ListProp   (default=''),
+
     })
 
     # properties set only for running purpose
@@ -279,6 +284,8 @@ class Host(SchedulingItem):
         # Keep in mind our pack id afterthe cutting phase
         'pack_id' : IntegerProp(default=-1),
 
+        # Trigger list
+        'triggers'        :  StringProp(default=[])
     })
 
     # Hosts macros and prop that give the information
@@ -968,7 +975,7 @@ class Hosts(Items):
     # hosts -> hosts (parents, etc)
     # hosts -> commands (check_command)
     # hosts -> contacts
-    def linkify(self, timeperiods=None, commands=None, contacts=None, realms=None, resultmodulations=None, businessimpactmodulations=None, escalations=None, hostgroups=None):
+    def linkify(self, timeperiods=None, commands=None, contacts=None, realms=None, resultmodulations=None, businessimpactmodulations=None, escalations=None, hostgroups=None, triggers=None):
         self.linkify_with_timeperiods(timeperiods, 'notification_period')
         self.linkify_with_timeperiods(timeperiods, 'check_period')
         self.linkify_with_timeperiods(timeperiods, 'maintenance_period')
@@ -985,6 +992,8 @@ class Hosts(Items):
         # (just the escalation here, not serviceesca or hostesca).
         # This last one will be link in escalations linkify.
         self.linkify_with_escalations(escalations)
+        self.linkify_with_triggers(triggers)
+
 
     # Fill adress by host_name if not set
     def fill_predictive_missing_parameters(self):
@@ -1052,7 +1061,11 @@ class Hosts(Items):
 
 
     # We look for hostgroups property in hosts and
-    def explode(self, hostgroups, contactgroups):
+    def explode(self, hostgroups, contactgroups, triggers):
+
+        # items::explode_trigger_string_into_triggers
+        self.explode_trigger_string_into_triggers(triggers)
+
         # Register host in the hostgroups
         for h in self:
             if not h.is_tpl() and hasattr(h, 'host_name'):

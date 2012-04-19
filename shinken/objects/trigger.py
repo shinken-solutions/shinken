@@ -135,13 +135,13 @@ class Triggers(Items):
                         logger.error("Cannot open trigger file '%s' for reading: %s" % (p, exp))
                         # ok, skip this one
                         continue
-                    self.create_trigger(file, buf)
+                    self.create_trigger(buf, file[:-5])
         
-                    
+
     # Create a trigger from the string src, and with the good name
     def create_trigger(self, src, name):
         # Ok, go compile the code
-
+        print "Creating a trigger", name
         t = Trigger({'trigger_name' : name, 'code_src' : src})
         t.compile()
         # Ok, add it

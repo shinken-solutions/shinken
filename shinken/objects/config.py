@@ -349,6 +349,7 @@ class Config(Item):
         self.magic_hash = random.randint(1, 100000)
         self.configuration_errors = []
         self.triggers_dirs = []
+        self.triggers = Triggers({})
 
 
     def get_name(self):
@@ -667,7 +668,6 @@ class Config(Item):
 
     # We will load all triggers .trig files from all triggers_dir
     def load_triggers(self):
-        self.triggers = Triggers({})
         for p in self.triggers_dirs:
             self.triggers.load_file(p)
             
@@ -693,7 +693,7 @@ class Config(Item):
         self.hosts.linkify(self.timeperiods, self.commands, \
                                self.contacts, self.realms, \
                                self.resultmodulations, self.businessimpactmodulations, \
-                               self.escalations, self.hostgroups)
+                               self.escalations, self.hostgroups, self.triggers)
 
         self.hostsextinfo.merge(self.hosts)
 
@@ -845,14 +845,15 @@ class Config(Item):
         self.contactgroups.explode()
 
         #print "Hosts"
-        self.hosts.explode(self.hostgroups, self.contactgroups)
+        self.hosts.explode(self.hostgroups, self.contactgroups, self.triggers)
         #print "Hostgroups"
         self.hostgroups.explode()
 
         #print "Services"
         #print "Initialy got nb of services : %d" % len(self.services.items)
         self.services.explode(self.hosts, self.hostgroups, self.contactgroups,
-                              self.servicegroups, self.servicedependencies)
+                              self.servicegroups, self.servicedependencies, 
+                              self.triggers)
         #print "finally got nb of services : %d" % len(self.services.items)
         #print "Servicegroups"
         self.servicegroups.explode()
@@ -1272,10 +1273,11 @@ class Config(Item):
         self.discoveryrules.create_reversed_list()
         self.discoveryruns.create_reversed_list()
         self.commands.create_reversed_list()
+        self.triggers.create_reversed_list()
         
-        #For services it's a special case
-        #we search for hosts, then for services
-        #it's quicker than search in all services
+        # For services it's a special case
+        # we search for hosts, then for services
+        # it's quicker than search in all services
         self.services.optimize_service_search(self.hosts)
 
 
@@ -1515,7 +1517,7 @@ class Config(Item):
                         links.add((e, s.host))
 
         # Same for hosts of course
-        for h in [ h for h in self.hosts if h.got_business_rule]:
+        for h in [h for h in self.hosts if h.got_business_rule]:
             for e in h.business_rule.list_all_elements():
                 if hasattr(e, 'host'): # if it's a service
                     if e.host != h:

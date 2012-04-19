@@ -123,7 +123,11 @@ class Service(SchedulingItem):
         'default_value':           StringProp(default=''),
 
         # Business_Impact value
-        'business_impact':               IntegerProp(default='2', fill_brok=['full_status']),
+        'business_impact':         IntegerProp(default='2', fill_brok=['full_status']),
+
+        # Load some triggers
+        'trigger'        :         StringProp(default=''),
+        'trigger_name'   :         ListProp   (default=''),
     })
 
     # properties used in the running state
@@ -1165,11 +1169,14 @@ class Services(Items):
 
     # We create new service if necessery (host groups and co)
     def explode(self, hosts, hostgroups, contactgroups,
-                servicegroups, servicedependencies):
+                servicegroups, servicedependencies, triggers):
         # The "old" services will be removed. All services with
         # more than one host or a host group will be in it
         srv_to_remove = []
 
+
+        # items::explode_trigger_string_into_triggers
+        self.explode_trigger_string_into_triggers(triggers)
 
         # items::explode_host_groups_into_hosts
         # take all hosts from our hostgroup_name into our host_name property
