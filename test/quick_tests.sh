@@ -146,6 +146,7 @@ launch_and_assert test_contactgroups_plus_inheritance.py
 launch_and_assert test_css_in_command.py
 launch_and_assert test_servicedependency_implicit_hostgroup.py
 launch_and_assert test_pack_hash_memory.py
+launch_and_assert test_triggers.py
 
 launch_and_assert test_maintenance_period.py
 #Live status is a bit longer than the previous, so we put it at the end.

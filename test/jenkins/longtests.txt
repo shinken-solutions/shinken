@@ -100,6 +100,7 @@ test_module_passwd_ui.py
 test_css_in_command.py
 test_servicedependency_implicit_hostgroup.py
 test_pack_hash_memory.py
+test_triggers.py
 test_parse_perfdata.py
 
 # takes long
