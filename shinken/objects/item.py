@@ -573,6 +573,21 @@ Like temporary attributes such as "imported_from", etc.. """
                 setattr(self, prop, None)
 
 
+    # Link with triggers. Can be with a "in source" trigger, or a file name
+    def linkify_with_triggers(self, triggers):
+        print "I am linking my triggers", self.get_full_name()
+        src = getattr(self, 'trigger', '')
+        if src:
+            # Change on the fly the characters
+            src = src.replace(r'\n', '\n').replace(r'\t', '\t')
+            t = triggers.create_trigger(src, 'inner-trigger-'+self.get_full_name())
+            if t:
+                print "Go link the trigger", t.__dict__
+                self.triggers.append(t)
+            
+            
+        
+
 
 class Items(object):
     def __init__(self, items):
@@ -1006,6 +1021,12 @@ class Items(object):
                     else: # TODO: catch?
                         pass
                 setattr(i, prop, com_list)
+
+
+    # Link with triggers. Can be with a "in source" trigger, or a file name
+    def linkify_with_triggers(self, triggers):
+        for i in self:
+            i.linkify_with_triggers(triggers)
 
 
     def evaluate_hostgroup_expression(self, expr, hosts, hostgroups, look_in='hostgroups'):

@@ -1333,3 +1333,8 @@ class SchedulingItem(Item):
         for g in self.comments, self.downtimes:
             for o in g:
                 o.ref = self
+
+    # Go launch all our triggers
+    def eval_triggers(self):
+        for t in self.triggers:
+            t.eval(self)

@@ -122,6 +122,7 @@ class ShinkenTest(unittest.TestCase):
         self.conf.instance_name = 'test'
         # Hack push_flavor, that is set by the dispatcher
         self.conf.push_flavor = 0
+        self.conf.load_triggers()
         self.conf.linkify_templates()
         self.conf.apply_inheritance()
         self.conf.explode()
