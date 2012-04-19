@@ -67,33 +67,35 @@ class Graphite_broker(BaseModule):
         s = perf_data.strip()
         # Get all metrics non void
         elts = s.split(' ')
-        metrics = [e for e in elts if e != '']
+        metrics = [e for e in elts if e != ''] 
 
         for e in metrics:
  #           print "Graphite : groking : ", e
             elts = e.split('=', 1)
             if len(elts) != 2:
                 continue
-            name = elts[0]
+            name = re.sub('[^a-zA-Z0-9]', '_', elts[0])
             raw = elts[1]
             # get the first value of ;
             if ';' in raw:
                 elts = raw.split(';')
-                value = elts[0]
+                name_value = { name : elts[0], name+'_warn' : elts[1], name+'_crit' : elts[2] }
             else:
                 value = raw
+                name_value = { name : raw }
             # bailout if need
-            if value == '':
+            if name_value[name] == '':
                 continue
 
             # Try to get the int/float in it :)
-            m = re.search("(\d*\.*\d*)", value)
+            m = re.search("(\d*\.*\d*)", name_value[name])
             if m:
-                value = m.groups(0)[0]
+                name_value[name] = m.groups(0)[0]
             else:
                 continue
 #            print "graphite : got in the end :", name, value
-            res.append((name, value))
+            for key,value in name_value.items():
+                res.append((key, value))
         return res
 
 
@@ -102,8 +104,8 @@ class Graphite_broker(BaseModule):
         data = b.data
         
         perf_data = data['perf_data']
-        hname = data['host_name']
-        desc = data['service_description']
+        hname = re.sub('[^a-zA-Z0-9]', '_', data['host_name'])
+        desc = re.sub('[^a-zA-Z0-9]', '_', data['service_description'])
         check_time = int(data['last_chk'])
 
 #        print "Graphite:", hname, desc, check_time, perf_data
@@ -129,7 +131,7 @@ class Graphite_broker(BaseModule):
         data = b.data
         
         perf_data = data['perf_data']
-        hname = data['host_name']
+        hname = re.sub('[^a-zA-Z0-9]', '_', data['host_name'])
         check_time = int(data['last_chk'])
 
  #       print "Graphite:", hname, check_time, perf_data
