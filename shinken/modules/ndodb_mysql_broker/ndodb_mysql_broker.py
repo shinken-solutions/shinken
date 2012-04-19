@@ -73,6 +73,7 @@ class Ndodb_Mysql_broker(BaseModule):
         self.database = conf.database
         self.character_set = conf.character_set
         self.port = int(getattr(conf, 'port', '3306'))
+        self.prefix = getattr(conf, 'prefix', 'nagios_')
 
         # Centreon ndo add some fields like long_output
         # that are not in the vanilla ndo
@@ -86,7 +87,7 @@ class Ndodb_Mysql_broker(BaseModule):
     def init(self):
         logger.info("I connect to NDO database")
         self.db = DBMysql(self.host, self.user, self.password, self.database,
-                          self.character_set, table_prefix='nagios_',
+                          self.character_set, table_prefix=self.prefix,
                           port=self.port)
         self.connect_database()
 
