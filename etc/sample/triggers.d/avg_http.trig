@@ -1,0 +1,13 @@
+print "TRIG: I am a trigger in the element", self.get_full_name()
+names = ['srv-web-%d/Http' %i for i in range(1, 4)]
+srvs = [get_object(name) for name in names]
+
+print "TRIG: Got http services", srvs
+perfs = [perf(srv, 'time') for srv in srvs]
+print "TRIG: Got perfs", perfs
+value = sum(perfs, 0.0)/len(perfs)
+print "TRIG: and got the average value", value
+
+print "Now saving data"
+self.output = 'Trigger launch OK'
+self.perf_data = 'HttpAverage=%.3f' % value

@@ -111,11 +111,11 @@ class Log:
             print format, '::', message
             s = format % message
 
-        if print_it:
+        if print_it and len(s) > 1:
             # If the daemon is launched with a non UTF8 shell
             # we can have problems in printing
             try:
-                print s
+                print s[:-1]
             except UnicodeEncodeError:
                 print s.encode('ascii', 'ignore')
 

@@ -421,7 +421,8 @@ class Config(Item):
                 # if os.name != 'nt':
                 #  line = line.replace("\r\n", "\n")
                 res.write(line)
-                line = line[:-1]
+                if line.endswith('\n'):
+                    line = line[:-1]
                 line = line.strip()
                 if re.search("^cfg_file", line) or re.search("^resource_file", line):
                     elts = line.split('=', 1)
@@ -1733,6 +1734,7 @@ class Config(Item):
             cur_conf.notificationways = self.notificationways
             cur_conf.contactgroups = self.contactgroups
             cur_conf.contacts = self.contacts
+            cur_conf.triggers = self.triggers
             #Create hostgroups with just the name and same id, but no members
             new_servicegroups = []
             for sg in self.servicegroups:

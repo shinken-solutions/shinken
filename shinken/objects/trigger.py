@@ -32,6 +32,8 @@ from shinken.misc.perfdata import PerfDatas
 from shinken.property import BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 from shinken.log import logger
 
+objs = {'hosts' : [], 'services' : []}
+
 def critical(obj, output):
     print "I am in critical for object", obj.get_name()
     now = time.time()
@@ -52,12 +54,21 @@ def critical(obj, output):
 
 
 def perf(obj, name):
-    p = PerfDatas(obj.perfdata)
+    p = PerfDatas(obj.perf_data)
     if name in p:
         print 'I found the perfdata'
         return p[name].value
     print 'I am in perf command'
     return 1
+
+
+def get_object(name):
+    if not '/' in name:
+        return objs['hosts'].find_by_name(name)
+    else:
+        elts = name.split('/', 1)
+        return objs['services'].find_srv_by_name_and_hostname(elts[0], elts[1])
+        
 
 
 class Trigger(Item):
@@ -89,6 +100,7 @@ class Trigger(Item):
 
 
     def compile(self):
+        print "Compiling trigger", self.get_name()
         self.code_bin = compile(self.code_src, "<irc>", "exec")        
 
 
@@ -100,6 +112,7 @@ class Trigger(Item):
 
         locals()['perf'] = perf
         locals()['critical'] = critical
+        locals()['get_object'] = get_object
 
         code = myself.code_bin#compile(myself.code_bin, "<irc>", "exec")
         exec code in dict(locals())
@@ -108,10 +121,11 @@ class Trigger(Item):
 
 
     def __getstate__(self):
-        return {}
+        return {'trigger_name' : self.trigger_name, 'code_src' : self.code_src}
 
-    def __setstate__(self):
-        pass
+    def __setstate__(self, d):
+        self.trigger_name = d['trigger_name']
+        self.code_src = d['code_src']
 
 
 class Triggers(Items):
@@ -149,3 +163,13 @@ class Triggers(Items):
         return t
 
 
+    def compile(self):
+        for i in self:
+            i.compile()
+
+
+    def load_objects(self, conf):
+        print "Loading objects in the triggers"
+        global objs
+        objs['hosts'] = conf.hosts
+        objs['services'] = conf.services

@@ -962,6 +962,10 @@ class SchedulingItem(Item):
 
         # update event/problem-counters
         self.update_event_and_problem_id()
+
+        # Now launch trigger if need
+        self.eval_triggers()
+
         self.broks.append(self.get_check_result_brok())
         self.get_obsessive_compulsive_processor_command()
         self.get_perfdata_command()
@@ -1337,4 +1341,8 @@ class SchedulingItem(Item):
     # Go launch all our triggers
     def eval_triggers(self):
         for t in self.triggers:
-            t.eval(self)
+            try:
+                t.eval(self)
+            except Exception, exp:
+                safe_print("We got an exeception from a trigger on", self.get_full_name(), str(exp))
+                

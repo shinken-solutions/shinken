@@ -165,6 +165,12 @@ class Scheduler:
         self.timeperiods = conf.timeperiods
         self.timeperiods.create_reversed_list()
         self.commands = conf.commands
+        self.commands.create_reversed_list()
+        self.triggers = conf.triggers
+        self.triggers.create_reversed_list()
+        self.triggers.compile()
+        self.triggers.load_objects(self)
+        
 
         if not in_test:
             # Commands in the host/services/contacts are not real one
