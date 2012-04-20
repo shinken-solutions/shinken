@@ -49,7 +49,7 @@ from shinken.pyro_wrapper import InvalidWorkDir, Pyro
 
 from shinken.log import logger
 from shinken.modulesmanager import ModulesManager
-from shinken.property import StringProp, BoolProp, PathProp, ConfigPathProp, IntegerProp
+from shinken.property import StringProp, BoolProp, PathProp, ConfigPathProp, IntegerProp, LogLevelProp
 
 
 try:
@@ -133,6 +133,7 @@ class Daemon(object):
         'ca_cert':       StringProp(default='etc/certs/ca.pem'),
         'server_cert':   StringProp(default='etc/certs/server.pem'),
         'use_local_log': BoolProp(default='1'),
+        'log_level': LogLevelProp(default=logger.INFO),
         'hard_ssl_name_check':    BoolProp(default='0'),
         'idontcareaboutsecurity': BoolProp(default='0'),
         'spare':         BoolProp(default='0'),
@@ -453,6 +454,8 @@ class Daemon(object):
         self.check_parallel_run()
         if use_pyro:
             self.setup_pyro_daemon()
+        # Setting log level
+        logger.set_level(self.log_level)
         # Then start to log all in the local file if asked so
         self.register_local_log()
         if self.is_daemon:

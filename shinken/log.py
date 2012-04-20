@@ -54,8 +54,17 @@ class Log:
 
         self._level = logging.NOTSET
     
-    def setlevel(self, level):
+    @staticmethod
+    def get_level_id(lvlName):
+        """Convert a level name (string) to its integer value
+
+           Raise KeyError when name not found
+        """
+        return logging._levelNames[lvlName]
+    
+    def set_level(self, level):
         self._level = level
+        logging.getLogger().setLevel(level)
 
     def debug(self, msg, *args, **kwargs):
         self._log(logging.DEBUG, msg, *args, **kwargs)
@@ -129,24 +138,26 @@ class Log:
             logging.log(level, s.strip())
 
 
-    def register_local_log(self, path):
+    def register_local_log(self, path, level=None):
         """The log can also write to a local file if needed
         and return the file descriptor so we can avoid to
         close it
         """
         global local_log
 
+        if level is not None:
+            self._level = level
+
         # Open the log and set to rotate once a day
-        log_level = logging.DEBUG
         basic_log_handler = TimedRotatingFileHandler(path,
                                                      'midnight',
                                                      backupCount=5)
-        basic_log_handler.setLevel(log_level)
+        basic_log_handler.setLevel(self._level)
         basic_log_formatter = logging.Formatter('%(asctime)s %(message)s')
         basic_log_handler.setFormatter(basic_log_formatter)
         logger = logging.getLogger()
         logger.addHandler(basic_log_handler)
-        logger.setLevel(log_level)
+        logger.setLevel(self._level)
         local_log = basic_log_handler
 
         # Return the file descriptor of this file
