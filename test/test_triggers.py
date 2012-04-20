@@ -25,7 +25,7 @@
 #It's ugly I know....
 
 from shinken_test import *
-from shinken.trigger import Trigger
+from shinken.objects.trigger import Trigger
 
 
 class TestTriggers(ShinkenTest):
