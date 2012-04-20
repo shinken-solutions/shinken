@@ -588,9 +588,11 @@ class Scheduler:
                     logger.warning("Contact %s %s notification command '%s ' timed out after %d seconds" % (self.actions[c.id].contact.contact_name, self.actions[c.id].ref.__class__.my_type, self.actions[c.id].command, int(execution_time)))
                 elif c.exit_status != 0:
                     logger.warning("The notification command '%s' raised an error (exit code=%d) : '%s'" % (c.command, c.exit_status, c.output))
+             
             except KeyError , exp: # bad number for notif, not that bad
                 #print exp
                 pass
+            
             except AttributeError, exp: # bad object, drop it
                 #print exp
                 pass

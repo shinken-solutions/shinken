@@ -31,6 +31,7 @@ time.sleep = original_time_sleep
 from worker import Worker
 from multiprocessing import Queue, Manager
 from objects.service import Service
+from objects.host import Host
 from objects.contact import Contact
 modconf = Module()
 
@@ -44,6 +45,8 @@ class TestTimeout(ShinkenTest):
     def test_notification_timeout(self):
         if os.name == 'nt':
             return
+
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
 
         # These queues connect a poller/reactionner with a worker
         to_queue = Queue()
@@ -61,7 +64,7 @@ class TestTimeout(ShinkenTest):
         # We prepare a notification in the to_queue
         c = Contact()
         c.contact_name = "mr.schinken"
-        n = Notification('PROBLEM', 'scheduled', 'libexec/sleep_command.sh 7', '', Service(), '', '', id=1)
+        n = Notification('PROBLEM', 'scheduled', 'libexec/sleep_command.sh 7', '', svc, '', '', id=1)
         n.status = "queue"
         #n.command = "libexec/sleep_command.sh 7"
         n.t_to_go = time.time()
@@ -104,6 +107,7 @@ class TestTimeout(ShinkenTest):
         # Now look what the scheduler says to all this
         self.sched.actions[n.id] = n
         self.sched.put_results(o)
+        self.show_logs()
         self.assert_(self.any_log_match("Warning : Contact mr.schinken service notification command 'libexec/sleep_command.sh 7 ' timed out after 2 seconds"))
 
 
