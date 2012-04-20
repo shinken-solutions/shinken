@@ -101,8 +101,8 @@ class Ndodb_Mysql_broker(BaseModule):
         # We need to search for centreon_specific fields, like long_output
         query = u"select TABLE_NAME from information_schema.columns " \
                 "where TABLE_SCHEMA='ndo' and " \
-                "TABLE_NAME='nagios_servicestatus' and " \
-                "COLUMN_NAME='long_output';"
+                "TABLE_NAME='%sservicestatus' and " \
+                "COLUMN_NAME='long_output';" % self.prefix
 
         self.db.execute_query(query)
         row = self.db.fetchone()
@@ -183,8 +183,8 @@ class Ndodb_Mysql_broker(BaseModule):
 
     # Query the database to get the proper instance_id
     def get_instance_id(self, name):
-        query1 = u"SELECT  max(instance_id) + 1 from nagios_instances"
-        query2 = u"SELECT instance_id from nagios_instances where instance_name = '%s';" % name
+        query1 = u"SELECT  max(instance_id) + 1 from %sinstances" % self.prefix
+        query2 = u"SELECT instance_id from %sinstances where instance_name = '%s';" % (self.prefix, name)
 
         self.db.execute_query(query1)
         row1 = self.db.fetchone()
@@ -232,9 +232,9 @@ class Ndodb_Mysql_broker(BaseModule):
                 return self.hosts_cache_sync[instance_id][host_name]
 
         # Not in cache, not good
-        query = u"SELECT object_id from nagios_objects where " \
+        query = u"SELECT object_id from %sobjects where " \
                  "name1='%s' and objecttype_id='1' and instance_id='%s'" % \
-                 (host_name, instance_id)
+                 (self.prefix, host_name, instance_id)
         self.db.execute_query(query)
         row = self.db.fetchone()
         if row is None or len(row) < 1:
@@ -248,9 +248,9 @@ class Ndodb_Mysql_broker(BaseModule):
 
 
     def get_contact_object_id_by_name_sync(self, contact_name, instance_id):
-        query = u"SELECT object_id from nagios_objects where " \
+        query = u"SELECT object_id from %sobjects where " \
                  "name1='%s' and objecttype_id='10' and instance_id='%s'" % \
-                 (contact_name, instance_id)
+                 (self.prefix, contact_name, instance_id)
         self.db.execute_query(query)
         row = self.db.fetchone()
         if row is None or len(row) < 1:
@@ -261,9 +261,9 @@ class Ndodb_Mysql_broker(BaseModule):
 
 
     def get_hostgroup_object_id_by_name_sync(self, hostgroup_name, instance_id):
-        query = u"SELECT object_id from nagios_objects where " \
+        query = u"SELECT object_id from %sobjects where " \
                  "name1='%s' and objecttype_id='3' and instance_id='%s'" % \
-                 (hostgroup_name, instance_id)
+                 (self.prefix, hostgroup_name, instance_id)
         self.db.execute_query(query)
         row = self.db.fetchone()
         if row is None or len(row) < 1:
@@ -274,7 +274,7 @@ class Ndodb_Mysql_broker(BaseModule):
 
 
     def get_max_hostgroup_id_sync(self):
-        query = u"SELECT max(hostgroup_id) + 1 from nagios_hostgroups"
+        query = u"SELECT max(hostgroup_id) + 1 from %shostgroups" % self.prefix
         self.db.execute_query(query)
         row = self.db.fetchone()
         if row is None or len(row) < 1:
@@ -291,10 +291,10 @@ class Ndodb_Mysql_broker(BaseModule):
                 return self.services_cache_sync[instance_id][(host_name, service_description)]
 
         # else; not in cache:(
-        query = u"SELECT object_id from nagios_objects where " \
+        query = u"SELECT object_id from %sobjects where " \
                  "name1='%s' and name2='%s' and objecttype_id='2' and " \
                  "instance_id='%s'" % \
-                 (host_name, service_description, instance_id)
+                 (self.prefix, host_name, service_description, instance_id)
         self.db.execute_query(query)
         row = self.db.fetchone()
         if row is None or len(row) < 1:
@@ -307,9 +307,9 @@ class Ndodb_Mysql_broker(BaseModule):
 
 
     def get_servicegroup_object_id_by_name_sync(self, servicegroup_name, instance_id):
-        query = u"SELECT object_id from nagios_objects where " \
+        query = u"SELECT object_id from %sobjects where " \
                 "name1='%s' and objecttype_id='4' and instance_id='%s'" % \
-                (servicegroup_name, instance_id)
+                (self.prefix, servicegroup_name, instance_id)
         self.db.execute_query(query)
         row = self.db.fetchone()
         if row is None or len(row) < 1:
@@ -319,7 +319,7 @@ class Ndodb_Mysql_broker(BaseModule):
 
 
     def get_max_servicegroup_id_sync(self):
-        query = u"SELECT max(servicegroup_id) + 1 from nagios_servicegroups"
+        query = u"SELECT max(servicegroup_id) + 1 from %sservicegroups" % self.prefix
         self.db.execute_query(query)
         row = self.db.fetchone()
         if row is None or len(row) < 1:
@@ -329,9 +329,9 @@ class Ndodb_Mysql_broker(BaseModule):
 
 
     def get_contactgroup_object_id_by_name_sync(self, contactgroup_name, instance_id):
-        query = u"SELECT object_id from nagios_objects where " \
+        query = u"SELECT object_id from %sobjects where " \
                  "name1='%s' and objecttype_id='11'and instance_id='%s'" % \
-                 (contactgroup_name, instance_id)
+                 (self.prefix, contactgroup_name, instance_id)
         self.db.execute_query(query)
         row = self.db.fetchone()
         if row is None or len(row) < 1:
@@ -342,7 +342,7 @@ class Ndodb_Mysql_broker(BaseModule):
 
 
     def get_max_contactgroup_id_sync(self):
-        query = u"SELECT max(contactgroup_id) + 1 from nagios_contactgroups"
+        query = u"SELECT max(contactgroup_id) + 1 from %scontactgroups" % self.prefix
         self.db.execute_query(query)
         row = self.db.fetchone()
         if row is None or len(row) < 1:
@@ -370,7 +370,7 @@ class Ndodb_Mysql_broker(BaseModule):
 
         res = []
         for table in tables:
-            q = "DELETE FROM %s WHERE instance_id = '%s' " % ('nagios_' + table, instance_id)
+            q = "DELETE FROM %s WHERE instance_id = '%s' " % (self.prefix + table, instance_id)
             res.append(q)
 
         # We also clean cache, because we are not sure about this data now
@@ -391,7 +391,7 @@ class Ndodb_Mysql_broker(BaseModule):
 
         # Must delete me first
         query_delete_instance = u"DELETE FROM %s WHERE instance_name = '%s' " % \
-                                ('nagios_instances', b.data['instance_name'])
+                                ('%sinstances' % self.prefix, b.data['instance_name'])
 
         query_instance = self.db.create_insert_query(
             'instances', \
