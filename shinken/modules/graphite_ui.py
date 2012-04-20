@@ -84,33 +84,35 @@ class Graphite_Webui(BaseModule):
         s = perf_data.strip()
         # Get all metrics non void
         elts = s.split(' ')
-        metrics = [e for e in elts if e != '']
+        metrics = [e for e in elts if e != ''] 
 
         for e in metrics:
  #           print "Graphite : groking : ", e
             elts = e.split('=', 1)
             if len(elts) != 2:
                 continue
-            name = elts[0]
+            name = re.sub('[^a-zA-Z0-9]', '_', elts[0])
             raw = elts[1]
             # get the first value of ;
             if ';' in raw:
                 elts = raw.split(';')
-                value = elts[0]
+                name_value = { name : elts[0], name+'_warn' : elts[1], name+'_crit' : elts[2] }
             else:
                 value = raw
+                name_value = { name : raw }
             # bailout if need
-            if value == '':
+            if name_value[name] == '':
                 continue
 
             # Try to get the int/float in it :)
-            m = re.search("(\d*\.*\d*)", value)
+            m = re.search("(\d*\.*\d*)", name_value[name])
             if m:
-                value = m.groups(0)[0]
+                name_value[name] = m.groups(0)[0]
             else:
                 continue
 #            print "graphite : got in the end :", name, value
-            res.append((name, value))
+            for key,value in name_value.items():
+                res.append((key, value))
         return res
         
 
@@ -131,15 +133,17 @@ class Graphite_Webui(BaseModule):
             if len(couples) == 0:
                 return []
 
-            uri = self.uri + 'render/?width=586&height=308'
             # Send a bulk of all metrics at once
             for (metric, _) in couples:
-                uri += "&target=%s.__HOST__.%s" % (elt.host_name, metric)
+                uri = self.uri + 'render/?width=586&height=308&lineMode=connected'
+                if re.search(r'_warn|_crit', metric):
+                    continue
+                uri += "&target=%s.__HOST__.%s" % (elt.host_name, metric+"*")
+                v = {}
+                v['link'] = self.uri
+                v['img_src'] = uri
+                r.append(v)
 
-            v = {}
-            v['link'] = self.uri
-            v['img_src'] = uri
-            r.append(v)
             return r
         if t == 'service':
             couples = self.get_metric_and_value(elt.perf_data)
@@ -148,15 +152,17 @@ class Graphite_Webui(BaseModule):
             if len(couples) == 0:
                 return []
 
-            uri = self.uri + 'render/?width=586&height=308'
             # Send a bulk of all metrics at once
             for (metric, _) in couples:
-                uri += "&target=%s.%s.%s" % (elt.host.host_name, elt.service_description, metric)
+                uri = self.uri + 'render/?width=586&height=308&lineMode=connected'
+                if re.search(r'_warn|_crit', metric):
+                    continue
+                uri += "&target=%s.%s.%s" % (elt.host.host_name, elt.service_description, metric+"*")
+                v = {}
+                v['link'] = self.uri
+                v['img_src'] = uri
+                r.append(v)
 
-            v = {}
-            v['link'] = self.uri
-            v['img_src'] = uri
-            r.append(v)
             return r
 
         # Oups, bad type?
