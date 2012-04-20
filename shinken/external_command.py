@@ -186,7 +186,9 @@ class ExternalCommandManager:
         'ENABLE_SVC_NOTIFICATIONS' : {'global' : False, 'args' : ['service']},
         'PROCESS_FILE' : {'global' : True, 'args' : [None, 'to_bool']},
         'PROCESS_HOST_CHECK_RESULT' : {'global' : False, 'args' : ['host', 'to_int', None]},
+        'PROCESS_HOST_OUTPUT' : {'global' : False, 'args' : ['host', None]},
         'PROCESS_SERVICE_CHECK_RESULT' : {'global' : False, 'args' : ['service', 'to_int', None]},
+        'PROCESS_SERVICE_OUTPUT' : {'global' : False, 'args' : ['service', None]},        
         'READ_STATE_INFORMATION' : {'global' : True, 'args' : []},
         'REMOVE_HOST_ACKNOWLEDGEMENT' : {'global' : False, 'args' : ['host']},
         'REMOVE_SVC_ACKNOWLEDGEMENT' : {'global' : False, 'args' : ['service']},
@@ -1269,6 +1271,11 @@ class ExternalCommandManager:
             self.sched.nb_check_received += 1
             # Ok now this result will be read by scheduler the next loop
 
+    # PROCESS_HOST_OUTPUT;<host_name>;<plugin_output>
+    def PROCESS_HOST_OUTPUT(self, host, plugin_output):
+        self.PROCESS_HOST_CHECK_RESULT(host, host.state_id, plugin_output)
+        
+
 
     # PROCESS_SERVICE_CHECK_RESULT;<host_name>;<service_description>;<return_code>;<plugin_output>
     def PROCESS_SERVICE_CHECK_RESULT(self, service, return_code, plugin_output):
@@ -1295,6 +1302,11 @@ class ExternalCommandManager:
             c.check_time = self.current_timestamp  # we are using the external command timestamp
             self.sched.nb_check_received += 1
             # Ok now this result will be reap by scheduler the next loop
+
+
+    # PROCESS_SERVICE_CHECK_RESULT;<host_name>;<service_description>;<plugin_output>
+    def PROCESS_SERVICE_OUTPUT(self, service, plugin_output):
+        self.PROCESS_SERVICE_CHECK_RESULT(service, service.state_id, plugin_output)
 
 
     # READ_STATE_INFORMATION
