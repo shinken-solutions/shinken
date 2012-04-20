@@ -24,6 +24,7 @@
 
 
 from shinken.util import to_float, to_split, to_char, to_int
+from shinken.log  import logger
 
 __all__ = ['UnusedProp', 'BoolProp', 'IntegerProp', 'FloatProp',
            'CharProp', 'StringProp', 'ListProp',
@@ -195,3 +196,8 @@ class ListProp(Property):
 #    @staticmethod
     def pythonize(self, val):
         return to_split(val)
+
+class LogLevelProp(StringProp):
+    """ A string property representing a logging level """
+    def pythonize(self, val):
+        return logger.get_level_id(val)
