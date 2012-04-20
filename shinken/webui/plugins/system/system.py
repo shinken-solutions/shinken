@@ -1,9 +1,12 @@
-# Copyright (C) 2009-2012 :
+#!/usr/bin/python
+
+# -*- coding: utf-8 -*-
+
+# Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
 #    Hartmut Goebel, h.goebel@goebel-consult.de
-#    Andreas Karfusehr, andreas@karfusehr.de
 #
 # This file is part of Shinken.
 #
@@ -19,6 +22,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+
 
 ### Will be populated by the UI with it's own value
 app = None

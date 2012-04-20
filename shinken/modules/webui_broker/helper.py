@@ -1,5 +1,7 @@
 #!/usr/bin/python
+
 # -*- coding: utf-8 -*-
+
 # Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
@@ -20,6 +22,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+
 
 import time
 import copy

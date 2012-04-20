@@ -1,6 +1,8 @@
+#!/usr/bin/env python
+#
 # -*- coding: utf-8 -*-
-
-# Copyright (C) 2009-2011 :
+#
+# Copyright (C) 2009-2012 :
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
