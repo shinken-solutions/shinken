@@ -71,7 +71,7 @@ from shinken.receiverlink import ReceiverLink, ReceiverLinks
 from shinken.pollerlink import PollerLink, PollerLinks
 from shinken.graph import Graph
 from shinken.log import logger
-from shinken.property import UnusedProp, BoolProp, IntegerProp, CharProp, StringProp
+from shinken.property import UnusedProp, BoolProp, IntegerProp, CharProp, StringProp, LogLevelProp
 from shinken.daemon import get_cur_user, get_cur_group
 
 
@@ -99,6 +99,7 @@ class Config(Item):
         'workdir':                  StringProp(default=''),
         'config_base_dir':         StringProp(default=''), # will be set when we will load a file
         'use_local_log':            BoolProp(default='1'),
+        'log_level':                LogLevelProp(default=logger.INFO),
         'local_log':                StringProp(default='arbiterd.log'),
         'log_file':                 UnusedProp(text=no_longer_used_txt),
         'object_cache_file':        UnusedProp(text=no_longer_used_txt),
