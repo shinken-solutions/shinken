@@ -38,7 +38,6 @@ import random
 import cPickle
 from StringIO import StringIO
 
-
 from item import Item
 from timeperiod import Timeperiod, Timeperiods
 from service import Service, Services
