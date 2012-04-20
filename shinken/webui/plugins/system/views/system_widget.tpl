@@ -41,7 +41,7 @@
 %# 	</table>
 %# %end
 
-<table class="table table-striped table-bordered table-condensed">
+<table class="table table-striped table-bordered table-condensed no-bottommargin topmmargin">
 	<th> State</th>
 	<th> Name</th>
 	<th>Alive</th>
