@@ -4,8 +4,6 @@
  * use directly the default classes names, this names.
  */
 
-
-
 .widget-place {
     margin: 0;
     padding: 0;
@@ -39,9 +37,17 @@
 }
 
 .widget-header {
-    color: #000;
     padding: 0.2em;
-    background-color: #ebebeb;
+
+    color: #333333;
+    background-color: #CCCCCC;
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#EEEEEE), to(#CCCCCC)); /* Saf4+, Chrome */
+    background-image: -webkit-linear-gradient(top, #EEEEEE, #CCCCCC); /* Chrome 10+, Saf5.1+, iOS 5+ */
+    background-image:    -moz-linear-gradient(top, #EEEEEE, #CCCCCC); /* FF3.6 */
+    background-image:     -ms-linear-gradient(top, #EEEEEE, #CCCCCC); /* IE10 */
+    background-image:      -o-linear-gradient(top, #EEEEEE, #CCCCCC); /* Opera 11.10+ */
+    background-image:         linear-gradient(top, #EEEEEE, #CCCCCC);
+            filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#EEEEEE', EndColorStr='#CCCCCC'); /* IE6-IE9 */
 }
 
 .widget-editbox {
