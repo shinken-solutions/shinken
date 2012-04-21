@@ -8,13 +8,13 @@
         <span class="i-bar"></span>
         <span class="i-bar"></span>
       </a>
-      <a class="brand" href="#">Shinken</a>
+      <!--<a class="brand" href="#">Shinken</a>-->
       <div class="nav-collapse">
 	<ul class="nav">
 	  <li class="dropdown">
-	    <a href="#" class="dropdown-toggle" data-toggle="dropdown"> UI <b class="caret"></b></a>
-	    <ul class="dropdown-menu">
-              <li><a href="/">Shinken UI</a></li>
+	    <a href="#" class="dropdown-toggle brand" data-toggle="dropdown" style="color: #FFFFFF"> Shinken <b class="caret"></b></a>
+	    <ul class="dropdown-menu span4">
+              <li><a href="/">Shinken UI </a></li>
               <li><a href="/">Skonf UI</a></li>
 	      <!-- We will add also others UIs on the global menu -->
 	      %if app:
@@ -25,7 +25,7 @@
 	        %end
 	        %for c in other_uis:
 	           <li><a href="{{c['uri']}}">{{c['label']}}</a></li>
-		%end
+		      %end
 	      %end
 	    </ul>
 	  </li>
