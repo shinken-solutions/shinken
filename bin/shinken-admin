@@ -293,8 +293,61 @@ class ShinkenAdmin(cmd.Cmd):
                 print "+--------------------------------------------------------------------------------------+"
 
 
+    def do_setloglevel(self, line):
+        '''
+        Change logging level for the given daemon (change all daemons logging level if no name given).
+        Allowed log level are: DEBUG, INFO, WARNING, ERROR, CRITICAL
 
-intro = 'Available functions :\n# connect [localhost:7770] \n# status\n# gethostname\n# help [function]\n# showconfig [daemon type]\n# quit'
+        WARNING: the change is not permanent! loglevel are reset to configuration value when daemons are restarted
+        '''
+        self.look_connexion()
+        if not self.arb.reachable:
+            print "Cannot connect to the arbiter, bail out"; return
+
+        args     = line.strip().split(' ')
+        if len(args) > 2 or args[0] == '':
+            print "Invalid number of arguments"; return
+
+        daemon   = '*' if len(args) < 2 else args[0]
+        try:
+            loglevel = logger.get_level_id(args[-1])
+        except KeyError:
+            print "Invalid '%s' log level. Must be one of DEBUG, INFO, WARNING, ERROR, CRITICAL" % args[-1]; return
+
+        conf     = self.arb.get_config()
+
+        # find matching daemons
+        matches = []
+
+        for type in sat_types:
+            sats  = self.arb.get_satellite_list(type)
+            sconf = getattr(conf, type+'s')
+
+            matches.extend([{
+                'type'   : type,
+                'name'   : getattr(c, type+'_name'),
+                'address': c.address,
+                'port'   : c.port
+            } for c in sconf if
+                c.alive is True and
+                (daemon == '*' or getattr(c, type+'_name') == daemon)
+            ])
+
+        if len(matches) == 0:
+            print "No daemon(s) found!"
+
+        for m in matches:
+            print "Setting loglevel %s to *%s* daemon" % (args[-1], m['name'])
+            uri  = pyro.create_uri(m['address'], m['port'], "ForArbiter", False)
+            conn = pyro.getProxy(uri)
+
+            try:
+                conn.set_log_level(loglevel)
+            except:
+                print "Cannot reach %s daemon!" % m['name']
+
+
+intro = 'Available functions :\n# connect [localhost:7770] \n# status\n# gethostname\n# help [function]\n# showconfig [daemon type]\n# setloglevel [daemon-name] loglevel\n# quit'
 
 if __name__ == "__main__": 
     ShinkenAdmin().cmdloop(intro)

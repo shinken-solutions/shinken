@@ -106,6 +106,8 @@ class Interface(Pyro.core.ObjBase, object):
     def have_conf(self):
         return self.app.cur_conf is not None
 
+    def set_log_level(self, loglevel):
+        return logger.set_level(loglevel)
 
 # If we are under android, we can't give parameters
 if is_android:
