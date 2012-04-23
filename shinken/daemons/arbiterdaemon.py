@@ -420,7 +420,8 @@ class Arbiter(Daemon):
 
         # Ok, here we must check if we go on or not.
         # TODO : check OK or not
-        self.log_level = self.conf.log_level
+        # TODO : I don't know why conf.log_level is string, not an int
+        self.log_level = logger.get_level_id(self.conf.log_level)
         self.use_local_log = self.conf.use_local_log
         self.local_log = self.conf.local_log
         self.pidfile = os.path.abspath(self.conf.lock_file)
