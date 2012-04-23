@@ -3,7 +3,6 @@ function save_name_filter(){
     var f = document.forms['namefilter'];
     var name = f.name.value;
     add_hst_srv_filter(name);
-    //$.post("/user/save_pref", { 'key' : 'filter_hg', 'value' : hg});
 }
 
 
@@ -11,21 +10,29 @@ function save_hg_filter(){
     var f = document.forms['hgfilter'];
     var hg = f.hg.value;
     add_hg_filter(hg);
-    //$.post("/user/save_pref", { 'key' : 'filter_hg', 'value' : hg});
 }
 
 function save_realm_filter(){
     var f = document.forms['realmfilter'];
     var r = f.realm.value;
     add_realm_filter(r);
-    //$.post("/user/save_pref", { 'key' : 'filter_hg', 'value' : hg});
 }
 
 function save_htag_filter(){
     var f = document.forms['htagfilter'];
     var r = f.htag.value;
     add_htag_filter(r);
-    //$.post("/user/save_pref", { 'key' : 'filter_hg', 'value' : hg});
+}
+
+
+function save_state_ack_filter(){
+    var r = document.forms.ack_filter.show_ack.checked;
+    var b = document.forms.ack_filter.show_both_ack.checked;
+    if(b){
+	add_state_ack_filter('both');
+    }else{
+	add_state_ack_filter(r);
+    }
 }
 
 
@@ -155,6 +162,7 @@ function add_realm_filter(name){
 }
 
 
+// ******************* Host Tag ******************
 function add_active_htag_filter(name){
     f = {};
     f.type = 'htag';
@@ -169,6 +177,27 @@ function add_htag_filter(name){
     f = {};
     f.type = 'htag';
     f.long_type = 'Tag';
+    f.search = name;
+    new_filters.push(f);
+    refresh_new_search_div();
+}
+
+
+// ******************* Ack state ******************
+function add_active_state_ack_filter(name){
+    f = {};
+    f.type = 'ack';
+    f.long_type = 'Acknowledged';
+    f.search = name;
+    current_filters.push(f);
+    add_state_ack_filter(name);
+}
+
+function add_state_ack_filter(name){
+    if(already_got_filter('ack', name)){return;}
+    f = {};
+    f.type = 'ack';
+    f.long_type = 'Acknowledged';
     f.search = name;
     new_filters.push(f);
     refresh_new_search_div();

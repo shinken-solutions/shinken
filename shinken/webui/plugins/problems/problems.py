@@ -61,7 +61,7 @@ def get_view(page):
 
     # We will keep a trace of our filters
     filters = {}
-    ts = ['hst_srv', 'hg', 'realm', 'htag']
+    ts = ['hst_srv', 'hg', 'realm', 'htag', 'ack']
     for t in ts:
         filters[t] = []
 
@@ -87,7 +87,7 @@ def get_view(page):
 
     items = []
     if page == 'problems':
-        items = app.datamgr.get_all_problems(to_sort=False)
+        items = app.datamgr.get_all_problems(to_sort=False, get_acknowledged=True)
     elif page == 'all':
         items = app.datamgr.get_all_hosts_and_services()
     else: #WTF?!?
@@ -149,6 +149,30 @@ def get_view(page):
         if t == 'htag':
             print 'Add a htag filter', s
             items = [i for i in items if s in i.get_host_tags()]
+            
+        if t == 'ack':
+            print "Got an ack filter", s
+            if s == 'false':
+                # First look for hosts, so ok for services, but remove problem_has_been_acknowledged elements
+                items = [i for i in items if i.__class__.my_type=='service' or not i.problem_has_been_acknowledged]
+                # Now ok for hosts, but look for services, and service hosts
+                items = [i for i in items if i.__class__.my_type=='host' or (not i.problem_has_been_acknowledged and not i.host.problem_has_been_acknowledged)]
+            if s == 'true':
+                # First look for hosts, so ok for services, but remove problem_has_been_acknowledged elements
+                items = [i for i in items if i.__class__.my_type=='service' or i.problem_has_been_acknowledged]
+                # Now ok for hosts, but look for services, and service hosts
+                items = [i for i in items if i.__class__.my_type=='host' or (i.problem_has_been_acknowledged or i.host.problem_has_been_acknowledged)]
+                
+                
+            
+    # If we are in the /problems and we do not have an ack filter
+    # we apply by default the ack:false one
+    print "Late problem filtering?",  page == 'problems', len(filters['ack']) == 0
+    if page == 'problems' and len(filters['ack']) == 0:
+        # First look for hosts, so ok for services, but remove problem_has_been_acknowledged elements
+        items = [i for i in items if i.__class__.my_type=='service' or not i.problem_has_been_acknowledged]
+        # Now ok for hosts, but look for services, and service hosts
+        items = [i for i in items if i.__class__.my_type=='host' or (not i.problem_has_been_acknowledged and not i.host.problem_has_been_acknowledged)]
             
 
         print "After filtering for",t, s,'we got', len(items)            

@@ -37,16 +37,17 @@ class DataManager(object):
         hname = hname.decode('utf8', 'ignore')
         return self.rg.hosts.find_by_name(hname)
 
+
     def get_service(self, hname, sdesc):
         hname = hname.decode('utf8', 'ignore')
         sdesc = sdesc.decode('utf8', 'ignore')
         return self.rg.services.find_srv_by_name_and_hostname(hname, sdesc)
 
+
     def get_all_hosts_and_services(self):
         all = []
         all.extend(self.rg.hosts)
         all.extend(self.rg.services)
-        all.sort(hst_srv_sort)
         return all
 
 
@@ -148,10 +149,14 @@ class DataManager(object):
 
 
     # Returns all problems
-    def get_all_problems(self, to_sort=True):
+    def get_all_problems(self, to_sort=True, get_acknowledged=False):
         res = []
-        res.extend([s for s in self.rg.services if s.state not in ['OK', 'PENDING'] and not s.is_impact and not s.problem_has_been_acknowledged and not s.host.problem_has_been_acknowledged])
-        res.extend([h for h in self.rg.hosts if h.state not in ['UP', 'PENDING'] and not h.is_impact and not h.problem_has_been_acknowledged])
+        if not get_acknowledged:
+            res.extend([s for s in self.rg.services if s.state not in ['OK', 'PENDING'] and not s.is_impact and not s.problem_has_been_acknowledged and not s.host.problem_has_been_acknowledged])
+            res.extend([h for h in self.rg.hosts if h.state not in ['UP', 'PENDING'] and not h.is_impact and not h.problem_has_been_acknowledged])
+        else:
+            res.extend([s for s in self.rg.services if s.state not in ['OK', 'PENDING'] and not s.is_impact])
+            res.extend([h for h in self.rg.hosts if h.state not in ['UP', 'PENDING'] and not h.is_impact])
         if to_sort:
             res.sort(hst_srv_sort)
         return res
@@ -187,7 +192,7 @@ class DataManager(object):
 
     # Return the number of problems
     def get_nb_problems(self):
-        return len(self.get_all_problems())
+        return len(self.get_all_problems(to_sort=False))
 
 
     # Get the number of all problems, even the ack ones

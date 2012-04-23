@@ -142,6 +142,26 @@
     </form>
     <span><p>&nbsp;</p></span>
 
+    <h3>States</h3>
+    <form name='ack_filter'>
+      <label>Acknowleged</label>
+      %if page=='problems':
+      <input type='checkbox' name='show_ack'></input>
+      %else:
+      <input type='checkbox' name='show_ack' checked></input>      
+      %end
+      <label>Both acknowleged states</label>
+      <input type='checkbox' name='show_both_ack'></input>
+      <p><a class='btn btn-success pull-right' href="javascript:save_state_ack_filter();"> <i class="icon-chevron-right"></i> Add a acknowleged filter</a></p>
+    </form>
+    <form name='downtime_filter'>
+      <label>Show in downtimes</label>
+      <input type='checkbox' name='show_downtime'/>
+      <p><a class='btn btn-success pull-right' href="javascript:save_state_dowtnime_filter();"> <i class="icon-chevron-right"></i> Add a downtime filter</a></p>
+    </form>
+    
+    <span><p>&nbsp;</p></span>
+
 
   </div>
   <div class='row'>
@@ -278,6 +298,15 @@ $(function(){
     <script>add_active_htag_filter('{{r}}');</script>
     %end
 
+
+    %for r in filters['ack']:
+    <li>
+      <span class="filter_color ack_filter_color">&nbsp;</span>
+      <span class="ack_filter_name">Ack : {{r}}</span>
+      <span class="filter_delete"><a href='javascript:remove_current_filter("ack", "{{r}}", "/{{page}}");' class="close">&times;</a></span>
+    </li>
+    <script>add_active_ack_filter('{{r}}');</script>
+    %end
 
     </ul>
     <br/>
