@@ -52,8 +52,8 @@ class Dispatcher:
         self.conf = conf
         self.realms = conf.realms
         # Direct pointer to importants elements for us
-        self.arbiters = self.conf.arbiterlinks
-        self.schedulers = self.conf.schedulerlinks
+        self.arbiters = self.conf.arbiters
+        self.schedulers = self.conf.schedulers
         self.reactionners = self.conf.reactionners
         self.brokers = self.conf.brokers
         self.receivers = self.conf.receivers

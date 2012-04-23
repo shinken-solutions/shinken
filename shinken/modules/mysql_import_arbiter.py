@@ -52,7 +52,7 @@ def get_instance(plugin):
     reqlist['hostdependencies'] = getattr(plugin, 'reqhostdependencies', None)
     reqlist['servicedependencies'] = getattr(plugin, 'reqservicedependencies', None)
     reqlist['realms'] = getattr(plugin, 'reqrealms', None)
-    reqlist['schedulerlinks'] = getattr(plugin, 'reqschedulers', None)
+    reqlist['schedulers'] = getattr(plugin, 'reqschedulers', None)
     reqlist['pollers'] = getattr(plugin, 'reqpollers', None)
     reqlist['brokers'] = getattr(plugin, 'reqbrokers', None)
     reqlist['reactionners'] = getattr(plugin, 'reqreactionners', None)
