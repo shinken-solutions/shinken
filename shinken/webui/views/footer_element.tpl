@@ -1,6 +1,6 @@
 %import time
 %t0 = time.time()
 
-<div id="footer" class="grid_16">
-	<p class="grid_16">Page generated in {{"%.2f" % (time.time() - t0)}} seconds</p>
-</div>
+<footer>
+	<p class="leftpadding2">Shinken UI, 2011-2012 | Page generated in {{"%.2f" % (time.time() - t0)}} seconds</p>
+</footer>

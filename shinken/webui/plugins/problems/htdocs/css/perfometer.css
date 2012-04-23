@@ -1,57 +1,60 @@
 
-td.perfometer {
+.perfometer {
     padding: 0;
     width: 120px;
+    max-height : 19px;
     min-width : 120px;
     text-align: center;
     border: none;
+    background: white;
 }
 
 
-td.perfometer img.glow {
+.perfometer img.glow {
     position: relative;
     top: 1px;
     width: 120px;
-    height: 25px;
+    height: 18px;
     z-index: 2;
 
 }
 
 
 
-td.perfometer div.text {
+.perfometer div.text {
     position: relative;
-    top: 4px;
+    top: 2px;
     width: 120px;
     height: 0px;
     z-index: 3;
 }
 
 
-td.perfometer div.graph {
+.perfometer div.graph {
     position: relative;
     left: 1px;
     height: 0px;
 }
 
 
-td.perfometer table{
-    padding-top: 2px;
+.perfometer table{
+    /*padding-top: 2px;*/
     width: 120px;
     border: none;
-    height: 22px;
+    height: 18px;
+    max-height: 18px;
     border-radius: 3px;
 }
 
-td.perfometer tbody{
+.perfometer tbody{
     border: none;
     padding-top: 20px;
 }
 
-td.perfometer td {
+.perfometer td {
     padding: 0;
     border: none;
     border-bottom : none;
     border-right : none;
-    height: 22px;
+    height: 19px;
 }

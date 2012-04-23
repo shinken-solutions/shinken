@@ -24,127 +24,64 @@
 /* Now a function for managingthe hovering of the problems. Will make
    appears the actiosn buttons with a smoot way (opacity)*/
 
-window.addEvent('domready', function(){
+$(document).ready(function(){
     
     /* We must avoid $$() call for IE, so call a standad way*/
-    var switches = $(document.body).getElement('.switches');
-    var host_services = $(document.body).getElement('.host-services');
+    var switches = $('.switches');
+    var host_services = $('.host-services');
 
     // We set display actions on hover
-    switches.addEvent('mouseenter', function(){
-	    new Fx.Tween(switches, {property: 'opacity'}).start(1);
+    switches.mouseenter(function(){
+	$(this).animate({'opacity' : 1});
     });
 
     // And on leaving, hide them with opacity -> 0
-    switches.addEvent('mouseleave', function(){
-	    new Fx.Tween(switches, {property: 'opacity'}).start(0.7);
+    switches.mouseleave(function(){
+	$(this).animate({'opacity' : 0.7});
     });
 
     // Now All Services
     // We set display actions on hover, but only if they are present
     if(host_services != null){
-	host_services.addEvent('mouseenter', function(){
-		new Fx.Tween(host_services, {property: 'opacity'}).start(1);
-	    });
+	host_services.mouseenter(function(){
+	    $(this).animate({'opacity' : 1});
+	});
 
 	// And on leaving, hide them with opacity -> 0
-	host_services.addEvent('mouseleave', function(){
-		new Fx.Tween(host_services, {property: 'opacity'}).start(0.3);
-	    });
+	host_services.mouseleave(function(){
+	    $(this).animate({'opacity' : 0.3});
+	});
     }
 
 });
 
-/* Important_impact_div */
-window.addEvent('domready', function(){
-	
-	var important_banner = $('important_banner');
-	if (important_banner != null){
-
-	    var fx = new Fx.Tween(important_banner, {property: 'opacity'});
-	    fx.start(0).chain(
-			      //Notice that "this" refers to the calling object (in this case, the myFx object).
-			      function(){ fx.start(1); },
-			      function(){ fx.start(0); },
-			      function(){ fx.start(1); },
-			      function(){ fx.start(0); },
-			      function(){ fx.start(1); },
-			      function(){ fx.start(0); },
-			      function(){ fx.start(1); }
-			      ); //Will fade the Element out and in twice.
-	}
-    });
 
 /* When he user ask for show all impacts ro services, we display them */
 function show_hidden_impacts_or_services() {
 
-    var imp_srv_s = $$('.hidden_impacts_services');
+    var imp_srv_s = $('.hidden_impacts_services');
     
-    imp_srv_s.each(function(el) {
-	    el.style.display = 'block';
-	    var fx = new Fx.Tween(el, {property: 'opacity'});
-	    fx.start(1);
-	});
+    imp_srv_s.css('display','block');
+    imp_srv_s.animate({'opacity' : 1});
 
     /* An we can delete the button that toggle us */
-    var button = $('hidden_impacts_or_services_button');
-    button.style.display = 'none';
+    var button = $('#hidden_impacts_or_services_button');
+    button.css('display', 'none');
 }
 
 
 /* When he user ask for show all impacts ro services, we display them */
 function show_hidden_info() {
 
-    var info_s = $$('.hidden_infos');
-    
-    info_s.each(function(el) {
-	    el.style.display = 'table-row';
-	    var fx = new Fx.Tween(el, {property: 'opacity'});
-	    fx.start(1);
-	});
+    var info_s = $('.hidden_infos');
+    info_s.css('display', 'block');
+    info_s.animate({'opacity' : 1});
 
     /* An we can delete the button that toggle us */
-    var button = $('hidden_info_button');
-    button.style.display = 'none';
+    var button = $('#hidden_info_button');
+    button.css('display', 'none');
 }
 
 
 
 
-/* Make a lot of elements not show by default, and make them visible
-   when the user move the mouse */
-window.addEvent('domready', function(){
-    /* via @appden, Scott Kyle, http://appden.com/javascript/fun-with-custom-events-on-elements-in-mootools/ */
-    // We make the event show up only once, because when it pop up, we
-    // unregister it
-    Native.implement([Element, Window, Document, Events], {
-	oneEvent: function(type, fn) {
-	    return this.addEvent(type, function() {
-		this.removeEvent(type, arguments.callee);
-		return fn.apply(this, arguments);
-	    });
-	}
-    });
-
-    /* make it happen! */
-    var fades = $$('.fadein');
-
-    // The function that really remvoe fade
-    function remove_fade(){
-	fades.fade('in');
-    }
-
-    // The function that will eat the event
-    function remove_fade_event(e){
-	if(!e.key || e.key == 'tab') {
-	    remove_fade();
-        }
-    }
-
-    // We link our one time event
-    $(document.body).oneEvent('mousemove', remove_fade_event);
-
-    // Or just launch it after 5s
-    setTimeout(remove_fade, 5000);
-
-});

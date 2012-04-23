@@ -1,0 +1,236 @@
+.min-height {
+  min-height: 600px;
+}
+.no-leftpadding {
+	padding-left: 0;
+}
+
+.leftpadding1 {
+  padding-left: 10px;
+}
+
+.leftpadding2 {
+  padding-left: 20px;
+}
+
+.no-leftmargin {
+	margin-left: 0 !important;
+}
+
+.no-bottommargin {
+	margin-bottom: 0 !important;
+}
+
+.no-rightmargin {
+	margin-right: 0 !important;
+}
+
+.no-topmargin {
+	margin-top: 0 !important;
+}
+
+.no-margin {
+    margin : 0 !important;
+}
+
+.topmmargin {
+  margin-top: 10px;
+}
+
+.bottommargin {
+  margin-bottom: 20px;
+}
+.leftmargin {
+  margin-left: 20px !important;
+}
+
+.no-maxwidth{
+  max-width: none !important; 
+}
+
+.quickinfo{
+  text-decoration: none !important;
+}
+
+.plus6 {
+  width: 52.6%;
+}
+
+.imgsize1 {
+  height: 12px;
+  width: 12px;
+  margin-right: 2px;
+  vertical-align:
+}
+
+.imgsize2 {
+  height: 16px;
+  width: 16px;
+  margin-right: 2px;
+  vertical-align:
+}
+
+.imgsize3 {
+  height: 25px;
+  width: 25px;
+  margin-right: 2px;
+  vertical-align: -3px; 
+}
+
+.imgsize4 {
+  height: 48px;
+  width: 48px;
+  margin-right: 10px;
+  vertical-align: -3px; 
+}
+
+
+.box {
+  min-height: 20px;
+  padding: 10px 0px 10px 5px;
+  margin-bottom: 20px;
+  background-color: #f5f5f5;
+  border: 1px solid #eee;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+  width: 99% !important;
+}
+
+.box blockquote {
+  border-color: #ddd;
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+.alert-small {
+  background-color: #999999;
+  border-radius: 3px 3px 3px 3px;
+  color: #FFFFFF;
+  font-size: 11.05px;
+  font-weight: bold;
+  padding: 2px 4px 3px;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+}
+
+.alert-critical, .alert-down {
+    color: #FFFFFF;
+    background-color: #e10000;
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#e10000), to(#bd0000)); /* Saf4+, Chrome */
+    background-image: -webkit-linear-gradient(top, #e10000, #bd0000); /* Chrome 10+, Saf5.1+, iOS 5+ */
+    background-image:    -moz-linear-gradient(top, #e10000, #bd0000); /* FF3.6 */
+    background-image:     -ms-linear-gradient(top, #e10000, #bd0000); /* IE10 */
+    background-image:      -o-linear-gradient(top, #e10000, #bd0000); /* Opera 11.10+ */
+    background-image:         linear-gradient(top, #e10000, #bd0000);
+            filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#e10000', EndColorStr='#bd0000'); /* IE6-IE9 */
+}
+
+.alert-warning {
+    color: #FFFFFF;
+    background-color: #71DB65;
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#FF9900), to(#ff5f00)); /* Saf4+, Chrome */
+    background-image: -webkit-linear-gradient(top, #FF9900, #ff5f00); /* Chrome 10+, Saf5.1+, iOS 5+ */
+    background-image:    -moz-linear-gradient(top, #FF9900, #ff5f00); /* FF3.6 */
+    background-image:     -ms-linear-gradient(top, #FF9900, #ff5f00); /* IE10 */
+    background-image:      -o-linear-gradient(top, #FF9900, #ff5f00); /* Opera 11.10+ */
+    background-image:         linear-gradient(top, #FF9900, #ff5f00);
+            filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#FF9900', EndColorStr='#ff5f00'); /* IE6-IE9 */
+}
+
+.alert-good, .alert-up, .alert-ok {
+    color: #FFFFFF;
+    background-color: #7AB317;
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#7AB317), to(#669900)); /* Saf4+, Chrome */
+    background-image: -webkit-linear-gradient(top, #7AB317, #669900); /* Chrome 10+, Saf5.1+, iOS 5+ */
+    background-image:    -moz-linear-gradient(top, #7AB317, #669900); /* FF3.6 */
+    background-image:     -ms-linear-gradient(top, #7AB317, #669900); /* IE10 */
+    background-image:      -o-linear-gradient(top, #7AB317, #669900); /* Opera 11.10+ */
+    background-image:         linear-gradient(top, #7AB317, #669900);
+            filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#e10000', EndColorStr='#669900'); /* IE6-IE9 */
+}
+
+.alert-info, .alert-unknown, .alert-unreachable {
+    color: #FFFFFF;
+    background-color: #71DB65;
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#71DB65), to(#7AB317)); /* Saf4+, Chrome */
+    background-image: -webkit-linear-gradient(top, #71DB65, #7AB317); /* Chrome 10+, Saf5.1+, iOS 5+ */
+    background-image:    -moz-linear-gradient(top, #71DB65, #7AB317); /* FF3.6 */
+    background-image:     -ms-linear-gradient(top, #71DB65, #7AB317); /* IE10 */
+    background-image:      -o-linear-gradient(top, #71DB65, #7AB317); /* Opera 11.10+ */
+    background-image:         linear-gradient(top, #71DB65, #7AB317);
+            filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#71DB65', EndColorStr='#7AB317'); /* IE6-IE9 */
+}
+
+.badger {
+  background-color: #999999;
+  border-radius: 3px 3px 3px 3px;
+  color: #FFFFFF;
+  font-size: 9.75px;
+  font-weight: bold;
+  padding: 1px 3px 2px;
+  text-transform: uppercase;
+  position: relative;
+  top: -5px;
+  right: 15px;
+  z-index: 666;
+}
+
+.badger-critical {
+  /*background-color: #e10000;*/
+  background-color: rgb(255,0,0); opacity: 0.85;
+  border-radius: 3px 3px 3px 3px;
+  color: #FFFFFF;
+}
+
+.badger-warning {
+  /*background-color: #e10000;*/
+  background-color: rgb(255,153,0); opacity: 0.85;
+  border-radius: 3px 3px 3px 3px;
+  color: #FFFFFF;
+}
+
+h1 {
+  font-size: 26px;
+}
+
+h1, h2, h3, h4 {
+color: #787878;
+}
+
+/* To tag potential long div, and cut them if too long with '...'*/
+.cut_long{
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Add a disabled-link style that make the link not show, and put in gray*/
+a.disabled-link,
+a.disabled-link:visited ,
+a.disabled-link:active,
+a.disabled-link:hover {
+    background-color:#ffffff !important;
+    color:#aaa !important;
+    pointer-events: none
+}
+
+
+
+.navbar-search .search-query {
+    padding-left: 29px;
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAJ5JREFUeNpi+P//PwMQMANxERCfAeI/UBrEZwbJQ9WAFR0A4u1AbAnEbFB6O1ScGaawGoi3wHQiYyBYDZKHKbwHxLo4FOqC5GEKf4Ksw6EQ5IyfIDYTkPEUiNUZsAOQ+F9GRkYJEKcFiDficSOIcRjE4QTiY0C8DuRbqAJLKP8/FP9kQArHUiA+jySJjA8w4LAS5KZd0MAHhaccQIABALsMiBZy4YLtAAAAAElFTkSuQmCC);
+    background-repeat: no-repeat;
+    background-position: 12px 8px;
+}
+
+.navbar-search .search-query:focus, .navbar-search .search-query.focused {
+    padding-left: 30px;
+    background-position: 13px 9px;
+}
+
+/* In the top menu, there is too much margin on the left part,
+ bootstrap put a left margin of 10, I prefer 0*/
+.navbar .nav.pull-right {
+margin-left: 0px;
+margin-right: 0;
+}

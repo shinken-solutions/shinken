@@ -78,7 +78,17 @@ function dump(arr, level) {
 }
 
 
-window.onload = function init(){
+
+function init_graph(){
+    if(typeof $jit === "undefined"){
+	console.log('Warning : there is no $jit, I postpone my init for 1s');
+	// Still not load $jit? racing problems are a nightmare :)
+	// Ok, we retry in the next second...
+	setTimeout('init_graph()',1000);
+	return;
+    }
+
+    console.log('On load is ok!');
     //init data
     //If a node in this JSON structure
     //has the "$type" or "$dim" parameters
@@ -92,7 +102,7 @@ window.onload = function init(){
     var particles;
     var context;
     var particles = [];
-    var particules_by_name = new Hash();
+    var particules_by_name = {};//new Hash();
 
     // Main printing loop for particules, graph is print only when need, 
     // but particules are print each loop
@@ -166,7 +176,7 @@ window.onload = function init(){
 
 
     function clean_particule(name){
-	if (particules_by_name.has(name)){
+	if (particules_by_name[name] != undefined){
 	    p = particules_by_name[name];
             p.active = false;
 	}
@@ -176,8 +186,9 @@ window.onload = function init(){
     // We should NOT create 1000 particules again and again
     // but remeber them to "transalte" them if need (graph rewrite)
     function create_or_update_particule(name, x, y, color, size) {
-	if (particules_by_name.has(name)){
-	    p = particules_by_name.get(name);
+	//alert(particules_by_name['name']);
+	if (particules_by_name[name] != undefined){
+	    p = particules_by_name[name];
 	    p.position = {x: x, y: y};
 	    p.shift = {x: x, y: y};
 	    p.angle = 0;
@@ -206,7 +217,7 @@ window.onload = function init(){
 	    };
 	
 	    particles.push( particle );
-	    particules_by_name.set(name, particle);
+	    particules_by_name[name] = particle;
 	}
     }
 
@@ -321,9 +332,9 @@ window.onload = function init(){
 
     //init RGraph
     var rgraph = new $jit.RGraph({
-	    'injectInto': 'infovis',
-	    'width'     : 700,  
-	    'height'    : 700,
+	    'injectInto': /*'infovis'*/depgraph_injectInto,
+	    'width'     : /*700*/depgraph_width,
+	    'height'    : /*700*/depgraph_height,
 	    //Optional: Add a background canvas
 	    //that draws some concentric circles.
 	    'background': false,
@@ -450,6 +461,7 @@ window.onload = function init(){
     
     setInterval( loop, 1000 / 60 );
 
-}
+};
 
 
+$(document).ready(init_graph);

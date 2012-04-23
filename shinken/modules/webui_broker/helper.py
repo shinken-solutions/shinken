@@ -211,7 +211,7 @@ class Helper(object):
         d['data']['infos'] = r'''%s <h2 class="%s"><img style="width : 64px; height:64px" src="%s"/> %s: %s</h2>
 		       <p>since %s</p>
 		       <div style="float:right;"> <a href="%s">%s</a></div>'''  % (
-            '<img src="/static/images/star.png" alt="star">' * (elt.business_impact - 2),
+            '<img src="/static/img/icons/star.png" alt="star">' * (elt.business_impact - 2),
             elt.state.lower(), self.get_icon_state(elt), elt.state, elt.get_full_name(),
             self.print_duration(elt.last_state_change, just_duration=True, x_elts=2),
             self.get_link_dest(elt), self.get_button('Go to details', img='/static/images/search.png'))
@@ -274,20 +274,22 @@ class Helper(object):
 
     # Return a button with text, image, id and class (if need)
     def get_button(self, text, img=None, id=None, cls=None):
-        s = '<div class="buttons">\n'
+        #s = '<div class="buttons">\n'
+        s = '<div class="btn">\n'
         if cls and not id:
-            s += '<button class="%s">\n' % cls
+            s += '<div class="%s">\n' % cls
         elif id and not cls:
-            s += '<button id="%s">\n' % id
+            s += '<div id="%s">\n' % id
         elif id and cls:
-            s += '<button class="%s" id="%s">\n' % (cls, id)
+            s += '<div class="%s" id="%s">\n' % (cls, id)
         else:
-            s += '<button>\n'
+            s += '<div>\n'
         if img:
             s += '<img src="%s" alt=""/>\n' % img
         s += "%s" % text
-        s+= ''' </button>
+        s+= ''' </div>
             </div>\n'''
+
         return s
 
 
@@ -309,15 +311,22 @@ class Helper(object):
             return """<input type="checkbox" %s />\n""" % id_s
 
 
-    def print_business_rules(self, tree, level=0):
+    def print_business_rules(self, tree, level=0, source_problems=[]):
         safe_print("Should print tree", tree)
+        safe_print('with source_problems', source_problems)
         node = tree['node']
         name = node.get_full_name()
         fathers = tree['fathers']
         s = ''
+        
+        # Maybe we are the root problem of this, and so we are printing it
+        root_str = ''
+        if node in source_problems:
+            print "I am a root problem"
+            root_str = ' <span class="alert-small alert-critical"> Root problem</span>'
         # Do not print the node if it's the root one, we already know its state!
         if level != 0:
-            s += "%s is %s since %s\n" % (self.get_link(node), node.state, self.print_duration(node.last_state_change, just_duration=True))
+            s += "%s is %s since %s %s\n" % (self.get_link(node), node.state, self.print_duration(node.last_state_change, just_duration=True), root_str)
 
         # If we got no parents, no need to print the expand icon
         if len(fathers) > 0:
@@ -341,7 +350,7 @@ class Helper(object):
         
             for n in fathers:
                 sub_node = n['node']
-                sub_s = self.print_business_rules(n, level=level+1)
+                sub_s = self.print_business_rules(n, level=level+1,source_problems=source_problems)
                 s += '<li class="%s">%s</li>' % (self.get_small_icon_state(sub_node), sub_s)
             s += "</ul>"
         safe_print("Returing s:", s)
@@ -349,8 +358,7 @@ class Helper(object):
 
     # Mockup helper
     # User: Frescha
-    # Date: 08.01.2012
-    
+    # Date: 08.01.2012    
     def print_business_tree(self, tree, level=0):
         safe_print("Should print tree", tree)
         node = tree['node']
@@ -426,7 +434,7 @@ class Helper(object):
         txts = {0 : 'None', 1 : 'Low', 2: 'Normal',
                 3 : 'High', 4 : 'Very important', 5 : 'Top for business'}
         nb_stars = max(0, obj.business_impact - 2)
-        stars = '<img src="/static/images/star.png" alt="star">\n' * nb_stars
+        stars = '<img src="/static/img/icons/star.png" alt="star">\n' * nb_stars
         
         res = "%s %s" % (txts.get(obj.business_impact, 'Unknown'), stars)
         return res
@@ -458,7 +466,7 @@ class Helper(object):
         # if not service, host
         return '<a href="/host/%s"> %s </a>' % (obj.get_full_name(), obj.get_full_name())
     
-    #Give only the /service/blabla or /hsot blabla string, like for buttons inclusion
+    #Give only the /service/blabla or /host blabla string, like for buttons inclusion
     def get_link_dest(self, obj):
         return "/%s/%s" % (obj.__class__.my_type, obj.get_full_name())
 
@@ -475,11 +483,8 @@ class Helper(object):
         if getattr(obj, 'icon_set', '') != '':
             return '/static/images/sets/%s/state_%s.png' % (obj.icon_set, ico)
         else:
-            return '/static/images/state_%s.png' % ico
+            return '/static/img/icons/state_%s.png' % ico
         
-
-
-
     # Get 
     def get_navi(self, total, pos, step=30):
         step = float(step)
@@ -565,10 +570,18 @@ class Helper(object):
         return s
 
 
+    # We want the html id of an hostor a service. It's basically
+    # the full_name with / changed as -- (because in html, / is not valid :) )
+    def get_html_id(self, elt):
+        return elt.get_full_name().replace('/','--').replace(' ','_')
+    
+    # URI with spaces are BAD, must change them with %20
+    def get_uri_name(self, elt):
+        return elt.get_full_name().replace(' ', '%20')
 
-
-
-
+    # say if this user can launch an action or not
+    def can_action(self, user):
+        return user.is_admin or user.can_submit_commands
 
     
     

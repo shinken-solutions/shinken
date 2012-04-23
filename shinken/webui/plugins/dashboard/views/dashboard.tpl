@@ -1,109 +1,102 @@
-%rebase layout globals(),js=['dashboard/js/mooMasonry.js'], css=['dashboard/css/dashboard.css', 'dashboard/css/csschart.css'], title='Architecture state', menu_part='/dashboard'
+%rebase layout globals(), js=['dashboard/js/widgets.js', 'dashboard/js/jquery.easywidgets.js'], css=['dashboard/css/widget.css', 'dashboard/css/dashboard.css'], title='Dashboard', menu_part='/dashboard'
 
 %from shinken.bin import VERSION
 %helper = app.helper
 
-<script type="text/javascript">
-	
-	window.addEvent('domready', function(){
-		document.id('secondary').masonry({columnWidth: 100});
-	});
-	
+
+
+<script>
+  /* We are saving the global context for theses widgets */
+  widget_context = 'dashboard';
 </script>
 
-<div id="widget_container" class="grid_16 item">
-	<div id="messagebox" class="gradient_alert" style="margin-top: 20px;">
-		<img src="/static/images/icons/alert.png" alt="some_text" style="height: 40px; width: 40px" class="grid_4"/> 
-		<p><strong>Mockup</strong></p>
-	</div>
-	<div>
-		<div class="wrap">
-        	<div class="box grid_12">
-        		<div class="widget_head"><h3>Business Impacts</h3></div>
-                <p>Donec nec justo eget felis facilisis fermentum. Aliquam porttitor mauris. </p>
-			</div>
 
-            <div class="box grid_4 hide">
-            	<div class="widget_head"><h3>Charts</h3></div>
-                <div class="widget_body">
-                    <dl id="csschart">
-						<dt>Impacts</dt>
-						<dd><span class="first type1 p55"><em>55</em></span></dd>								
-							
-						<dt>Services</dt>
-						<dd><span class="type2 p80"><em>80</em></span></dd>			
-							
-						<dt>Hosts</dt>
-						<dd><span class="type3 p72"><em>72</em></span></dd>	
-					</dl>
-            	</div>
-            </div>
+<div class='span12'>
+  <div id='loading' class='pull-left'> <img src='/static/images/spinner.gif'> Loading widgets</div>
+  %# If we got no widget, we should put the button at the center fo the screen
+  %small_show_panel_s = ''
+  %if len(widgets) == 0:
+     %small_show_panel_s = 'hide'
+  %end
+  <a id='small_show_panel' href="#pageslide" class="slidelink btn btn-success pull-right {{small_show_panel_s}}"><i class="icon-plus"></i> Add a new widget</a>
+  %# Go in the center of the page!
+  <span class="page-center center" id='center-button'>
+    <h3>You don't have any widget yet?</h3>
+  <a href="#pageslide" class="slidelink btn btn-large btn-success at-center"><i class="icon-plus"></i> Add a new widget</a>
+  </span>
 
-            <div class="box grid_3">
-            	<div class="widget_head"> <h3>Shinken Status</h3> </div>
-                <div class="widget_body">
-	                <table border="1">
-						<tbody>
-							<tr>
-								<td class="first">Running sice</td>
-								<td class="second">{{helper.print_duration(app.datamgr.get_program_start())}}</td>
-							</tr>
-							<tr>
-								<td class="first">Version</td>
-								<td class="second">{{VERSION}}</td>
-							</tr>
-							%types = [ ('scheduler', schedulers), ('poller', pollers), ('broker', brokers), ('reactionner', reactionners), ('receiver', receivers)]
-							%for (sat_type, sats) in types:
-								<tr>
-								%for s in sats:
-									<td>{{sat_type.capitalize()}} State</td>
-									<td>	     
-							   			%if not s.alive:
-											<span class="pulse"></span>
-								      	%end
-								      	<img style="width: 16px; height : 16px;" src="{{helper.get_icon_state(s)}}" alt="stateicon"/>
-								    </td>
-									%# end of this satellite type
-							 		%end
-								</tr>
-								%# end of this satellite type
-							 	%end
-						</tbody>
-					</table>
-				</div>
-			</div>
+</div>
+<div id="pageslide" style="display:none">
+    <div class='row'>
+      <h2 class='pull-left'>Widgets available</h2>
+      <p class='pull-right'><a class='btn btn-danger' href="javascript:$.pageslide.close()"><i class="icon-remove"></i> Close</a></p>
+    </div>
+      <p>&nbsp;</p>
+      <p>&nbsp;</p>
+    <div class='row span12'>
+    %for w in app.get_widgets_for('dashboard'):
+    <div class='widget_desc span5' style='position: relative;'>
+      <div class='row'>
+	<span class='span4'>
+	  <img style="width:64px;height:64px" src="{{w['widget_picture']}}" id="widget_desc_{{w['widget_name']}}"/>
+	</span>
+	<span class='span6'>
+	  {{!w['widget_desc']}}
+	</span>
+	<p>&nbsp;</p>
+      </div>
+      <p class="add_button"><a class='btn btn-success' href="javascript:AddNewWidget('{{w['base_uri']}}', 'widget-place-1');"> <i class="icon-chevron-left"></i> Add {{w['widget_name']}} widget</a></p>
+    </div>
+    %end
+    </div>
 
-                <div class="box grid_4">
-                    <div class="widget_head"><h3>IT Problems</h3></div>
-                    <div class="widget_body">
-	                    <table border="1">
-							<tbody>
-								<tr>
-									<td class="first">Problems</td>
-									<td class="second">{{app.datamgr.get_nb_all_problems()}}</td>
-								</tr>
-								<tr>
-									<td class="first">Unhandled </td>
-									<td class="second">{{app.datamgr.get_nb_problems()}}</td>
-								</tr>
-								<tr>
-									<td class="first">Total </td>
-									<td class="second">{{app.datamgr.get_nb_elements()}}</td>
-								</tr>
-							</tbody>
-						</table>
-					</div>
-                </div>
-
-
-
-                <div class="box col1">
-                    <h5>5</h5>
-                    <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Donec odio.</p>
-                </div>
-
-            </div> <!-- /#secondary.wrap -->
-        </div>  
+    
 
 </div>
 
+<script >$(function(){
+  $(".slidelink").pageslide({ direction: "left", modal : true});
+  });
+</script>
+
+
+
+<script>
+  // Now load all widgets
+  $(function(){
+      %for w in widgets:
+         %if 'base_url' in w and 'position' in w:
+            %uri = w['base_url'] + "?" + w['options_uri']
+            AddWidget("{{!uri}}", "{{w['position']}}");
+            var w = {'id' : "{{w['id']}}", 'base_url' : "{{w['base_url']}}", 'position' : "{{w['position']}}", 'options' : JSON.parse('{{w['options']}}')};
+            widgets.push(w);
+         %end
+      %end
+  });
+</script>
+
+<div class="widget-place" id="widget-place-1">
+
+</div>
+<!-- /place-1 -->
+
+<div class="widget-place" id="widget-place-2">
+
+</div>
+
+
+<div class="widget-place" id="widget-place-3">
+
+</div>
+
+<!-- /place-2 -->
+
+
+  <!-- End Easy Widgets plugin HTML markup -->
+
+
+
+
+  <!-- Bellow code not is part of the Easy Widgets plugin HTML markup -->
+
+  <div style="clear:both">

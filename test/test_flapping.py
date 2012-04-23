@@ -88,6 +88,75 @@ class TestFlapping(ShinkenTest):
         self.assert_(self.any_log_match('SERVICE FLAPPING ALERT.*;STOPPED'))
         self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;FLAPPINGSTART'))
 
+
+        ############ Now get back in flap, and try the exteral commands change
+
+        # Now 1 test with a bad state
+        self.scheduler_loop(1, [[svc, 2, 'Crit']])
+        print "******* Current flap change lsit", svc.flapping_changes
+        self.scheduler_loop(1, [[svc, 2, 'Crit']])
+        print "****** Current flap change lsit", svc.flapping_changes
+        #Ok, now go in flap!
+        for i in xrange(1, 10):
+            "**************************************************"
+            print "I:", i
+            self.scheduler_loop(1, [[svc, 0, 'Ok']])
+            print "******* Current flap change lsit", svc.flapping_changes
+            self.scheduler_loop(1, [[svc, 2, 'Crit']])
+            print "****** Current flap change lsit", svc.flapping_changes
+            print "In flapping?", svc.is_flapping
+
+        # Should get in flapping now
+        self.assert_(svc.is_flapping)
+        #and get a log about it
+        self.assert_(self.any_log_match('SERVICE FLAPPING ALERT.*;STARTED'))
+        self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;FLAPPINGSTART'))
+
+        # We run a globa lflap disable, so we should stop flapping now
+        cmd = "[%lu] DISABLE_FLAP_DETECTION" % int(time.time())
+        self.sched.run_external_command(cmd)
+        
+        self.assert_(not svc.is_flapping)
+
+
+
+        
+        ############# NOW a local command for this service
+        # First reenable flap :p
+        cmd = "[%lu] ENABLE_FLAP_DETECTION" % int(time.time())
+        self.sched.run_external_command(cmd)
+
+        # Now 1 test with a bad state
+        self.scheduler_loop(1, [[svc, 2, 'Crit']])
+        print "******* Current flap change lsit", svc.flapping_changes
+        self.scheduler_loop(1, [[svc, 2, 'Crit']])
+        print "****** Current flap change lsit", svc.flapping_changes
+        #Ok, now go in flap!
+        for i in xrange(1, 10):
+            "**************************************************"
+            print "I:", i
+            self.scheduler_loop(1, [[svc, 0, 'Ok']])
+            print "******* Current flap change lsit", svc.flapping_changes
+            self.scheduler_loop(1, [[svc, 2, 'Crit']])
+            print "****** Current flap change lsit", svc.flapping_changes
+            print "In flapping?", svc.is_flapping
+
+        # Should get in flapping now
+        self.assert_(svc.is_flapping)
+        #and get a log about it
+        self.assert_(self.any_log_match('SERVICE FLAPPING ALERT.*;STARTED'))
+        self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;FLAPPINGSTART'))
+
+
+        # We run a globa lflap disable, so we should stop flapping now
+        cmd = "[%lu] DISABLE_SVC_FLAP_DETECTION;test_host_0;test_ok_0" % int(time.time())
+        self.sched.run_external_command(cmd)
+        
+        self.assert_(not svc.is_flapping)
+        
+        
+
+
 if __name__ == '__main__':
     unittest.main()
 

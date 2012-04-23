@@ -1,0 +1,62 @@
+/**
+ * This is the widgets basic CSS. Note that you can change
+ * the classes names using the plugin settings. But you can
+ * use directly the default classes names, this names.
+ */
+
+.widget-place {
+    margin: 0;
+    padding: 0;
+    float: left;
+    width: 33.3%;
+    height: auto;
+    list-style: none;
+    min-height: 400px;
+}
+
+.widget-menu {
+    float:right;
+}
+
+.widget-menu a {
+    margin: 0 0 0 0.5em;
+}
+
+
+.widget-placeholder {
+    border: #000 dashed 1px;
+    color: #000;
+    margin: 1em;
+    background-color: #ebebeb;
+}
+
+.widget {
+    margin: 1em;
+    border: #ebebeb solid 1px;
+    border-radius: 4px;
+}
+
+.widget-header {
+    padding: 0.2em;
+
+    color: #333333;
+    background-color: #CCCCCC;
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#EEEEEE), to(#CCCCCC)); /* Saf4+, Chrome */
+    background-image: -webkit-linear-gradient(top, #EEEEEE, #CCCCCC); /* Chrome 10+, Saf5.1+, iOS 5+ */
+    background-image:    -moz-linear-gradient(top, #EEEEEE, #CCCCCC); /* FF3.6 */
+    background-image:     -ms-linear-gradient(top, #EEEEEE, #CCCCCC); /* IE10 */
+    background-image:      -o-linear-gradient(top, #EEEEEE, #CCCCCC); /* Opera 11.10+ */
+    background-image:         linear-gradient(top, #EEEEEE, #CCCCCC);
+            filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#EEEEEE', EndColorStr='#CCCCCC'); /* IE6-IE9 */
+}
+
+.widget-editbox {
+    color: #000;
+    margin: 0.2em;
+    padding: 0.2em;
+}
+
+/*.widget-content {
+    padding: 0.5em;
+}
+*/

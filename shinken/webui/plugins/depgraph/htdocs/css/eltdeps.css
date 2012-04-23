@@ -22,15 +22,15 @@
 }
 
 #right-container {
-right: 5px;
-background-position: center left;
-
-position: absolute;
-top : 5px;
-background-color:white;
--moz-box-shadow:#555 2px 2px 8px;
--webkit-box-shadow:#555 2px 2px 8px;
--o-box-shadow:#555 2px 2px 8px;
+    right: 5px;
+    background-position: center left;
+    
+    position: absolute;
+    top : 45px;
+    background-color:white;
+    -moz-box-shadow:#555 2px 2px 8px;
+    -webkit-box-shadow:#555 2px 2px 8px;
+    -o-box-shadow:#555 2px 2px 8px;
 
 }
 

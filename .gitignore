@@ -5,3 +5,17 @@ dist
 .pydevproject
 .settings
 .gitignore
+*.pid
+
+# Logs and databases #
+######################
+*.log*
+*.sqlite
+*.db*
+
+# OS generated files #
+######################
+*.DS_Store*
+ehthumbs.db
+Icon?
+Thumbs.db

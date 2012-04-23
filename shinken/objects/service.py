@@ -209,7 +209,7 @@ class Service(SchedulingItem):
         # Warning : for the notified_contacts retention save, we save only the names of the contacts, and we should RELINK
         # them when we load it.
         'notified_contacts':  ListProp  (default=set(), retention=True, retention_preparation=to_list_of_names), # use for having all contacts we have notified
-        'in_scheduled_downtime': BoolProp(default=False, retention=True),
+        'in_scheduled_downtime': BoolProp(default=False, fill_brok=['full_status'], retention=True),
         'in_scheduled_downtime_during_last_check': BoolProp(default=False, retention=True),
         'actions':            ListProp   (default=[]), #put here checks and notif raised
         'broks':              ListProp   (default=[]), #and here broks raised
@@ -355,6 +355,12 @@ class Service(SchedulingItem):
     def get_realm(self):
         return self.host.get_realm()
 
+
+    def get_hostgroups(self):
+        return self.host.hostgroups
+
+    def get_host_tags(self):
+        return self.host.tags
 
     # Check is required prop are set:
     # template are always correct

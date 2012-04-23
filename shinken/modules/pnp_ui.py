@@ -87,6 +87,11 @@ class PNP_Webui(BaseModule):
         return len(elts)
         
 
+    # Give the link for the PNP UI, with a Name
+    def get_external_ui_link(self):
+        return {'label' : 'PNP4', 'uri' : self.uri}
+        
+
 
     # Ask for an host or a service the graph UI that the UI should
     # give to get the graph image link and PNP page link too.

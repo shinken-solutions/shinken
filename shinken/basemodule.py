@@ -51,7 +51,7 @@ class ModuleProperties(object):
 properties = ModuleProperties('the_module_type', the_module_phases, is_mod_ext)
 '''
 
-# The `properties´ dict defines what the module can do and
+# The `properties dict defines what the module can do and
 # if it's an external module or not.
 properties = {
     # name of the module type ; to distinguish between them:
@@ -88,7 +88,7 @@ class BaseModule(object):
     def __init__(self, mod_conf):
         """Instanciate a new module.
         There can be many instance of the same type.
-        `mod_conf´ is module configuration object
+        'mod_conf' is module configuration object
         for this new module instance.
         """
         self.myconf = mod_conf
@@ -110,12 +110,14 @@ class BaseModule(object):
         self.process = None
         self.init_try = 0
 
+
     def init(self):
         """Handle this module "post" init ; just before it'll be started.
         Like just open necessaries file(s), database(s),
         or whatever the module will need.
         """
         pass
+
 
     def create_queues(self, manager=None):
         """The manager is None on android, but a true Manager() elsewhere
@@ -132,6 +134,7 @@ class BaseModule(object):
             self.from_q = manager.Queue()
             self.to_q = manager.Queue()
 
+
     def clear_queues(self, manager):
         """Release the resources associated to the queues of this instance"""
         for q in (self.to_q, self.from_q):
@@ -145,6 +148,7 @@ class BaseModule(object):
             #    q._callmethod('close')
             #    q._callmethod('join_thread')
         self.to_q = self.from_q = None
+
 
     # Start this module process if it's external. if not -> donothing
     def start(self):
@@ -169,6 +173,7 @@ class BaseModule(object):
         self.properties['process'] = p  # TODO: temporary
         logger.info("%s is now started ; pid=%d" % (self.name, p.pid))
 
+
     def __kill(self):
         """Sometime terminate() is not enough, we must "help"
         external modules to die...
@@ -184,6 +189,7 @@ class BaseModule(object):
             if self.process.is_alive():
                 os.kill(self.process.pid, 9)
 
+
     def stop_process(self):
         """Request the module process to stop and release it"""
         if self.process:
@@ -196,13 +202,16 @@ class BaseModule(object):
                 self.__kill()
             self.process = None
 
+
     ## TODO: are these 2 methods really needed ?
     def get_name(self):
         return self.name
 
+
     def has(self, prop):
         """The classic has : do we have a prop or not ?"""
         return hasattr(self, prop)
+
 
     def manage_brok(self, brok):
         """Request the module to manage the given brok.
@@ -214,8 +223,10 @@ class BaseModule(object):
             brok.prepare()
             return manage(brok)
 
+
     def manage_signal(self, sig, frame):
         self.interrupted = True
+
 
     def set_signal_handler(self, sigs=None):
         if sigs is None:
@@ -226,6 +237,7 @@ class BaseModule(object):
 
     set_exit_handler = set_signal_handler
 
+
     def do_stop(self):
         """Called just before the module will exit
         Put in this method all you need to cleanly
@@ -233,11 +245,13 @@ class BaseModule(object):
         """
         pass
 
+
     def do_loop_turn(self):
         """For external modules only:
         implement in this method the body of you main loop
         """
         raise NotImplementedError()
+
 
     def main(self):
         """module "main" method. Only used by external modules."""

@@ -224,7 +224,7 @@ class Host(SchedulingItem):
         # them when we load it.
         'notified_contacts':    StringProp(default=set(), retention=True, retention_preparation=to_list_of_names),
 
-        'in_scheduled_downtime': BoolProp(default=False, retention=True),
+        'in_scheduled_downtime': BoolProp(default=False, fill_brok=['full_status'], retention=True),
         'in_scheduled_downtime_during_last_check': BoolProp(default=False, retention=True),
 
         # put here checks and notif raised
@@ -482,6 +482,12 @@ class Host(SchedulingItem):
     # Get our realm
     def get_realm(self):
         return self.realm
+
+    def get_hostgroups(self):
+        return self.hostgroups
+
+    def get_host_tags(self):
+        return self.tags
 
     # Say if we got the other in one of your dep list
     def is_linked_with_host(self, other):

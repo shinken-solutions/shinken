@@ -68,6 +68,9 @@ class Regenerator(object):
         self.reactionners = ReactionnerLinks([])
         self.brokers = BrokerLinks([])
         self.receivers = ReceiverLinks([])
+        # From now we only look for realms names
+        self.realms = set()
+        self.tags = {}
 
         # And in progress one
         self.inp_hosts = {}
@@ -183,6 +186,12 @@ class Regenerator(object):
             # And link contacts too
             self.linkify_contacts(h, 'contacts')
 
+            # Linkify tags
+            for t in h.tags:
+                if not t in self.tags:
+                    self.tags[t] = 0
+                self.tags[t] += 1
+
             # We can really declare this host OK now
             self.hosts[h.id] = h
 
@@ -244,6 +253,11 @@ class Regenerator(object):
         self.services.optimize_service_search(self.hosts)
 
 
+        # Add realm of theses hosts. Only the first is useful
+        for h in inp_hosts:
+            self.realms.add(h.realm)
+            break
+
         # Now we can link all impacts/source problem list
         # but only for the new ones here of course
         for h in inp_hosts:
@@ -253,6 +267,7 @@ class Regenerator(object):
             self.linkify_host_and_hosts(h, 'childs')
             self.linkify_dict_srv_and_hosts(h, 'parent_dependencies')
             self.linkify_dict_srv_and_hosts(h, 'child_dependencies')
+        
 
         # Now services too
         for s in inp_services:
