@@ -49,6 +49,7 @@ class Graphite_broker(BaseModule):
         BaseModule.__init__(self, modconf)
         self.host = getattr(modconf, 'host', 'localhost')
         self.port = int(getattr(modconf, 'port', '2003'))
+        self.illegal_char = re.compile(r'[^\w]');
 
 
     #Called by Broker so we can do init stuff
@@ -74,7 +75,7 @@ class Graphite_broker(BaseModule):
             elts = e.split('=', 1)
             if len(elts) != 2:
                 continue
-            name = re.sub('[^a-zA-Z0-9]', '_', elts[0])
+            name = self.illegal_char.sub('_', elts[0])
             raw = elts[1]
             # get the first value of ;
             if ';' in raw:
@@ -89,7 +90,7 @@ class Graphite_broker(BaseModule):
 
             # Try to get the int/float in it :)
             for key,value in name_value.items():
-                m = re.search("(\d*\.*\d*)", value)
+                m = re.search("(\d*\.?\d*)(.*)", value)
                 if m:
                     name_value[key] = m.groups(0)[0]
                 else:
@@ -105,8 +106,8 @@ class Graphite_broker(BaseModule):
         data = b.data
         
         perf_data = data['perf_data']
-        hname = re.sub('[^a-zA-Z0-9]', '_', data['host_name'])
-        desc = re.sub('[^a-zA-Z0-9]', '_', data['service_description'])
+        hname = self.illegal_char.sub('_', data['host_name'])
+        desc = self.illegal_char.sub('_', data['service_description'])
         check_time = int(data['last_chk'])
 
 #        print "Graphite:", hname, desc, check_time, perf_data
@@ -132,7 +133,7 @@ class Graphite_broker(BaseModule):
         data = b.data
         
         perf_data = data['perf_data']
-        hname = re.sub('[^a-zA-Z0-9]', '_', data['host_name'])
+        hname = self.illegal_char.sub('_', data['host_name'])
         check_time = int(data['last_chk'])
 
  #       print "Graphite:", hname, check_time, perf_data
