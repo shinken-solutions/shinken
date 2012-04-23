@@ -87,7 +87,8 @@ class Webui_broker(BaseModule, Daemon):
         self.photo_dir = getattr(modconf, 'photo_dir', 'photos')
         self.photo_dir = os.path.abspath(self.photo_dir)
         print "Webui : using the backend", self.http_backend
-
+        # We will save all widgets
+        self.widgets = {}
 
 
         
@@ -307,7 +308,11 @@ class Webui_broker(BaseModule, Daemon):
                     routes = entry.get('routes', None)
                     v = entry.get('view', None)
                     static = entry.get('static', False)
-
+                    widget_lst = entry.get('widget', [])
+                    widget_desc = entry.get('widget_desc', None)
+                    widget_name = entry.get('widget_name', None)
+                    widget_picture = entry.get('widget_picture', None)
+                    
                     # IMPORTANT : apply VIEW BEFORE route!
                     if v:
                         print "Link function", f, "and view", v
@@ -330,6 +335,18 @@ class Webui_broker(BaseModule, Daemon):
                     # for them!
                     if static:
                         self.add_static(fdir, m_dir)
+
+                    # It's a valid widget entry if it got all data, and at least one route
+                    # ONLY the first route wil be used for Add!
+                    #print "Should I load a widget?",widget_name, widget_desc, widget_lst!=[], routes
+                    if widget_name and widget_desc and widget_lst!=[] and routes:
+                        for place in widget_lst:
+                            if place not in self.widgets:
+                                self.widgets[place] = []
+                            w = {'widget_name' : widget_name, 'widget_desc' : widget_desc, 'base_uri' : routes[0],
+                                 'widget_picture' : widget_picture}
+                            print "Loading widget", w
+                            self.widgets[place].append(w)
 
                 # And we add the views dir of this plugin in our TEMPLATE
                 # PATH
@@ -489,13 +506,13 @@ class Webui_broker(BaseModule, Daemon):
 
     # Try to got for an element the graphs uris from modules
     def get_graph_uris(self, elt, graphstart, graphend):
-        safe_print("Checking graph uris ", elt.get_full_name())
+        #safe_print("Checking graph uris ", elt.get_full_name())
 
         uris = []
         for mod in self.modules_manager.get_internal_instances():
             try:
                 f = getattr(mod, 'get_graph_uris', None)
-                safe_print("Get graph uris ", f, "from", mod.get_name())
+                #safe_print("Get graph uris ", f, "from", mod.get_name())
                 if f and callable(f):
                     r = f(elt, graphstart, graphend)
                     uris.extend(r)
@@ -506,6 +523,76 @@ class Webui_broker(BaseModule, Daemon):
                 logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)        
 
-        safe_print("Will return", uris)
+        #safe_print("Will return", uris)
         # Ok if we got a real contact, and if a module auth it
         return uris
+
+
+
+
+
+
+    # Try to got for an element the graphs uris from modules
+    def get_user_preference(self, user, key, default=None):
+        safe_print("Checking user preference for", user.get_name(), key)
+        
+        for mod in self.modules_manager.get_internal_instances():
+            try:
+                print 'Try to get pref %s from %s' %(key,  mod.get_name())
+                f = getattr(mod, 'get_ui_user_preference', None)
+                if f and callable(f):
+                    r = f(user, key)
+                    return r
+            except Exception , exp:
+                print exp.__dict__
+                logger.log("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
+                logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
+                logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
+                self.modules_manager.set_to_restart(mod)        
+        print 'get_user_preference :: Nothing return, I send non'
+        return default
+
+
+    # Try to got for an element the graphs uris from modules
+    def set_user_preference(self, user, key, value):
+        safe_print("Saving user preference for", user.get_name(), key, value)
+
+        for mod in self.modules_manager.get_internal_instances():
+            try:
+                f = getattr(mod, 'set_ui_user_preference', None)
+                if f and callable(f):
+                    print "Call user pref to module", mod.get_name()
+                    f(user, key, value)
+            except Exception , exp:
+                print exp.__dict__
+                logger.log("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
+                logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
+                logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
+                self.modules_manager.set_to_restart(mod)
+
+        # end of all modules
+
+
+    # For a specific place like dashboard we return widget lists
+    def get_widgets_for(self, place):
+        return self.widgets.get(place, [])
+
+
+    # Will get all label/uri for external UI like PNP or NagVis
+    def get_external_ui_link(self):
+        lst = []
+        for mod in self.modules_manager.get_internal_instances():
+            try:
+                f = getattr(mod, 'get_external_ui_link', None)
+                if f and callable(f):
+                    r = f()
+                    lst.append(r)
+            except Exception , exp:
+                print exp.__dict__
+                logger.log("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
+                logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
+                logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
+                self.modules_manager.set_to_restart(mod)        
+
+        safe_print("Will return external_ui_link::", lst)
+        return lst

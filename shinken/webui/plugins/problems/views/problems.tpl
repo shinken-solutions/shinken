@@ -1,39 +1,29 @@
+
 %import time
 %now = time.time()
 %helper = app.helper
 %datamgr = app.datamgr
 
-%title = {'problems' : 'IT problems', 'all' : 'All elements'}.get(page, 'Unknown page')
-
 %top_right_banner_state = datamgr.get_overall_state()
 
 
-%rebase layout title=title, top_right_banner_state=top_right_banner_state, js=['problems/js/img_hovering.js', 'problems/js/accordion.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css', 'problems/css/perfometer.css', 'problems/css/img_hovering.css'], refresh=True, menu_part='/'+page, user=user
+
+%rebase layout globals(), title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/img_hovering.js', 'problems/js/accordion.js', 'problems/js/sliding_navigation.js', 'problems/js/filters.js', 'problems/js/bookmarks.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css', 'problems/css/perfometer.css', 'problems/css/img_hovering.css', 'problems/css/sliding_navigation.css', 'problems/css/filters.css'], refresh=True, menu_part='/'+page, user=user 
 
 
-%# " If the auth got problem, we bail out"
-%if not valid_user:
+%# Look for actions if we must show them or not
+%global_disabled = ''
+%if not helper.can_action(user):
+%global_disabled = 'disabled-link'
 <script type="text/javascript">
-  window.location.replace("/login");
+  var actions_enabled = false;
 </script>
-%# " And if the javascript is not follow? not a problem, we gave no data here." 
+%else:
+<script type="text/javascript">
+  var actions_enabled = true;
+</script>
 %end
 
-
-%# " Add the auto copleter in the search input form"
-<script type="text/javascript">
-document.addEvent('domready', function() {
- 
-  var inputWord = $('search_input');
- 
-  // Our instance for the element with id "search_input"
-  new Autocompleter.Request.JSON(inputWord, '/lookup', {
-       'indicatorClass': 'autocompleter-loading',
-       'minLength': 3
-  });
-
-});
-</script>
 
 
 <script type="text/javascript">
@@ -58,115 +48,313 @@ document.addEvent('domready', function() {
 	  }else
 	   return true;
 	}
+
+	$('.typeahead').typeahead({
+	// note that "value" is the default setting for the property option
+	   /*source: [{value: 'Charlie'}, {value: 'Gudbergur'}, {value: 'Charlie2'}],*/
+	   source: function (typeahead, query) {
+	              $.ajax({url: "/lookup/"+query,
+	                      success: function (data){
+	                        typeahead.process(data)}
+	              });
+	           },
+	onselect: function(obj) { 
+	             $("ul.typeahead.dropdown-menu").find('li.active').data(obj);
+	         }
+	});
+
+
+	var active_filters = [];
+	
+	// List of the bookmarks
+	var bookmarks = [];
+	%for b in bookmarks:
+	declare_bookmark("{{!b['name']}}","{{!b['uri']}}");
+	%end
+
+</script>
+
+%# "We set the actions div that will be show/hide if we select elements"
+<ul class="sliding-navigation" id="actions">
+  <li class="sliding-element"><h3>Actions</h3></li>
+  <li class="sliding-element">
+    <a href="javascript:try_to_fix_all();"><i class="icon-pencil icon-white"></i> Try to fix</a>
+  </li>		
+  <li class="sliding-element">
+    <a href="javascript:recheck_now_all()"><i class="icon-repeat icon-white"></i> Recheck</a>
+  </li>
+  <li class="sliding-element">
+    <a href="javascript:acknowledge_all('{{user.get_name()}}')"><i class="icon-ok icon-white"></i> Acknowledge</a>
+  </li>
+</ul>
+
+
+<script type="text/javascript">
+    // We will create here our new filter options
+    // This should be outside the "pageslide" div. I don't know why
+    new_filters = [];
+    current_filters = [];
+</script>
+
+<div id="pageslide" style="display:none">
+  <div class='row'>
+    <span class='span8'><h2>Filtering options</h2></span>
+    <span class='span3 pull-right'><a class='btn btn-danger' href="javascript:$.pageslide.close()"><i class="icon-remove"></i> Close</a></span>    
+  </div>
+  <div class='in_panel_filter'>
+    <h3>Names</h3>
+    <form name='namefilter' class='form-horizontal'>
+      <input name='name'></input>
+      <p class='pull-right'><a class='btn btn-success pull-right' href="javascript:save_name_filter();"> <i class="icon-chevron-right"></i> Add</a></p>
+    </form>
+
+    <h3>Hostgroup</h3>
+    <form name='hgfilter' class='form-horizontal'>
+      <select name='hg'>
+	%for hg in datamgr.get_hostgroups_sorted():
+	<option value='{{hg.get_name()}}'> {{hg.get_name()}} ({{len(hg.members)}})</option>
+	%end
+      </select>
+      <p class='pull-right'><a class='btn btn-success pull-right' href="javascript:save_hg_filter();"> <i class="icon-chevron-right"></i> Add</a></p>
+    </form>
+
+    <h3>Tag</h3>
+    <form name='htagfilter' class='form-horizontal'>
+      <select name='htag'>
+	%for (t, n) in datamgr.get_host_tags_sorted():
+	<option value='{{t}}'> {{t}} ({{n}})</option>
+	%end
+      </select>
+      <p class='pull-right'><a class='btn btn-success pull-right' href="javascript:save_htag_filter();"> <i class="icon-chevron-right"></i> Add</a></p>
+    </form>
+
+    <h3>Realms</h3>
+    <form name='realmfilter' class='form-horizontal'>
+      <select name='realm'>
+	%for r in datamgr.get_realms():
+	<option value='{{r}}'> {{r}}</option>
+	%end
+      </select>
+      <p class='pull-right'><a class='btn btn-success pull-right' href="javascript:save_realm_filter();"> <i class="icon-chevron-right"></i> Add</a></p>
+    </form>
+
+    <h3>States</h3>
+    <form name='ack_filter' class='form-horizontal'>
+
+      <span class="help-inline">Ack </span>
+      %if page=='problems':
+      <input type='checkbox' name='show_ack'></input>
+      %else:
+      <input type='checkbox' name='show_ack' checked></input>      
+      %end
+
+      <span class="help-inline">Both ack states</span>
+      <input type='checkbox' name='show_both_ack'></input>
+      <p class='pull-right'><a class='btn btn-success pull-right' href="javascript:save_state_ack_filter();"> <i class="icon-chevron-right"></i> Add</a></p>
+    </form>
+
+    <form name='downtime_filter' class='form-horizontal'>
+      <span class="help-inline">Downtime</span>
+      %if page=='problems':
+      <input type='checkbox' name='show_downtime'></input>
+      %else:
+      <input type='checkbox' name='show_downtime' checked></input>
+      %end
+      <span class="help-inline">Both downtime states</span>
+      <input type='checkbox' name='show_both_downtime'></input>
+      <p class='pull-right'><a class='btn btn-success pull-right' href="javascript:save_state_downtime_filter();"> <i class="icon-chevron-right"></i> Add</a></p>
+    </form>
+    
+    <span><p>&nbsp;</p></span>
+
+
+  </div>
+  <div class='row'>
+    <span class='pull-left'><a id='remove_all_filters' class='btn btn-inverse' href="javascript:clean_new_search();"> <i class="icon-remove"></i> Remove all filters</a></span>
+  <span class='pull-right'><a id='launch_the_search' class='btn btn-warning' href="javascript:launch_new_search('/{{page}}');"> <i class="icon-play"></i> Launch the search!</a></span>
+    <span><p>&nbsp;</p></span>
+  </div>
+  <div id='new_search'>
+  </div>
+  
+  <!-- We put a final touch at the filters and buttons of this panel -->
+  <script>refresh_new_search_div();</script>
+
+</div>
+
+<script >$(function(){
+     $(".slidelink").pageslide({ direction: "right", modal : true});
+     // When the user ask for the panel, he don't want to refresh now
+     $(".slidelink").click(function() {reinit_refresh();});
+  });
+
+$(function(){
+  // We prevent the drpdown to close when we go on a form into it.
+  $('.form_in_dropdown').on('click', function (e) {
+    e.stopPropagation()
+  });
+});
+
 </script>
 
 
-	 
-<div id="left_container" class="grid_3">
 
-  <div id="nav_left">
-    <ul>
-      <li class="left_title"><a href="#">Overview</a></li>
-      <li>
-					<div class="tac_header">
-						<div class="tac_col_1">
-							Problems
-						</div>
-						<div class="tac_col_2">
-							Unhandled
-						</div>
-						<div class="tac_col_3">
-							All
-						</div>
-					</div>
-					<div class="tac_content">
-						<div class="tac_col_1">
-							<a href="/problems/{{show}}" style="padding-top:0;">{{app.datamgr.get_nb_all_problems()}}</a>
-						</div>
-						<div class="tac_col_2">
-							<a href="/problems/{{show}}" style="padding-top:0;">{{app.datamgr.get_nb_problems()}}</a>
-						</div>
-						<div class="tac_col_3">
-							<a href="/all" style="padding-top:0;">{{app.datamgr.get_nb_elements()}}</a>
-						</div>
-					</div>
-      </li>
 
-      <li class="left_title"><a href="#">Search</a></li>
-      <li>
-				<form method="get" id="search_form" action="/{{page}}/{{show}}">
-					<span class="table">
-						<span class="row">
-							<span class="cell">
-								<input name="search" type="text" tabindex="1" value="{{search}}" id="search_input"/>
-							</span>
-							<span class="cell">
-								<a tabindex="4" href="javascript: submitform()">
-								<img src="/static/images/search.png" alt="search"/>
-								</a>
-							</span>
-						</span>
-					</span>
-				</form>
-      </li>
 
-  %if page == 'problems':
-      <li class="left_title"><a href="#">Filter</a></li>
-      <li>
-                                <a href="/problems/all">See All</a>
-                                <a href="/problems/warning">See Warnings</a>
-                                <a href="/problems/critical">See Critical only</a>
-      </li>
-  %end
-    </ul>
-  </div>
-</div>
 
-%# "We set the actions div that will be show/hide if we select elements"
-<div class="dockContainer">
-  <div class="dockWrapper" id="actions">
-    <div class="cap left"></div>
-    <ul class="dock">
-      <li class="active">
-	<span>Fix</span>
-	<a href="#" onclick="try_to_fix_all()"><img src="/static/images/tools.png" alt="tools"/></a>
-      </li>		
-      <li>
-	<span>Recheck</span>
-	<a href="#" onclick="recheck_now_all()"><img src="/static/images/big_refresh.png" alt="refresh"/></a>
-      </li>
-      <li>
-	<span>Acknowledge</span>
-	<a href="#" onclick="acknowledge_all()"><img src="/static/images/big_ack.png" alt="acknowledge"/></a>
-      </li>
-      
-    </ul>
-  </div>
-</div>
-<div class="grid_13">
-
-  %if navi is not None:
-      <div id="pagination">
-	<div class='pagenavi'>
+<div class="span12">
+  
+  <div class='row'>
+    <div class='span2 offset2'>
+      <a id='select_all_btn' href="javascript:select_all_problems()" class="btn pull-left"><i class="icon-check"></i> Select all</a>
+      <a id='unselect_all_btn' href="javascript:unselect_all_problems()" class="btn pull-left"><i class="icon-minus"></i> Unselect all</a>
+    </div>
+    <div class='span7'>
+      &nbsp;
+      %if navi is not None:
+      <div class="pagination center no-margin">
+	<ul class="pull-right">
 	  %for name, start, end, is_current in navi:
-	     %if is_current:
-	        <span class='current'>{{name}}</span>
-	     %elif start == None or end == None:
-		<span class='extend'>...</span>
-	     %elif search:
-                <a href='/{{page}}/{{show}}?start={{start}}&end={{end}}&search={{search}}' class='page larger'>{{name}}</a>
-             %else:
-		<a href='/{{page}}/{{show}}?start={{start}}&end={{end}}' class='page larger'>{{name}}</a>
-	     %end
-          %end
-	</div>
+	    %if is_current:
+	    <li class="active"><a href="#">{{name}}</a></li>
+	    %elif start == None or end == None:
+	    <li class="disabled"> <a href="#">...</a> </li>
+	    %else:
+	    <li><a href='/{{page}}?start={{start}}&end={{end}}' class='page larger'>{{name}}</a></li>
+	    %end
+	  %end
+	</ul>
+    </div>
+      %# end of the navi part
+      %end
+    </div>
+    
+    <div class='span1'>
+      <div class="btn-group pull-right">
+	<button class="btn"> <i class="icon-cog"></i> </button>
+	<button class="btn dropdown-toggle" data-toggle="dropdown">
+	  <span class="caret"></span>
+	</button>
+	<ul class="dropdown-menu">
+	  <li>
+	    <form class='form_in_dropdown'>
+	      <label> Number of elements to show </label>
+	      <select name='nb_elements'>
+		%t = [30, 50, 100, 200, 500, 1000, '5000', '10000', 'All']
+		%for v in t:
+		  <option value={{v}}>{{v}}</option>
+		%end
+	      </select>
+	    </form>
+	  </li>
+	</ul>
       </div>
-  %# end of the navi part
-  %end
+      
+    </div>
+</div>
 
 
+<div class='row-fluid'>
+  <div class='span2'>
+    <a href="#pageslide" class="slidelink btn btn-success"><i class="icon-plus"></i> Add filters</a>
+    <p></p>
+    %got_filters = sum([len(v) for (k,v) in filters.iteritems()]) > 0
+    %if got_filters:
+      <div class='row'>
+	<span class='span8'><h3>Active filters</h3></span>
+	<span class='span1 pull-right'><a href='javascript:remove_all_current_filter("/{{page}}");' class="close">&times;</a></span>
+      </div>
+    %end
+    <ul class="unstyled">
 
-  <div id="accordion">
+    %for n in filters['hst_srv']:
+    <li>
+      <span class="filter_color hst_srv_filter_color">&nbsp;</span>
+      <span class="hst_srv_filter_name">Name : {{n}}</span>
+      <span class="filter_delete"><a href='javascript:remove_current_filter("hst_srv", "{{n}}", "/{{page}}");' class="close">&times;</a></span>
+    </li>
+    <script>add_active_hst_srv_filter('{{n}}');</script>
+    %end
+
+    %for hg in filters['hg']:
+    <li>
+      <span class="filter_color hg_filter_color">&nbsp;</span>
+      <span class="hg_filter_name">Group : {{hg}}</span>
+      <span class="filter_delete"><a href='javascript:remove_current_filter("hg", "{{hg}}", "/{{page}}");' class="close">&times;</a></span>
+    </li>
+    <script>add_active_hg_filter('{{hg}}');</script>
+    %end
+    
+    %for r in filters['realm']:
+    <li>
+      <span class="filter_color realm_filter_color">&nbsp;</span>
+      <span class="realm_filter_name">Realm : {{r}}</span>
+      <span class="filter_delete"><a href='javascript:remove_current_filter("realm", "{{r}}", "/{{page}}");' class="close">&times;</a></span>
+    </li>
+    <script>add_active_realm_filter('{{r}}');</script>
+    %end
+
+    %for r in filters['htag']:
+    <li>
+      <span class="filter_color htag_filter_color">&nbsp;</span>
+      <span class="htag_filter_name">Tag : {{r}}</span>
+      <span class="filter_delete"><a href='javascript:remove_current_filter("htag", "{{r}}", "/{{page}}");' class="close">&times;</a></span>
+    </li>
+    <script>add_active_htag_filter('{{r}}');</script>
+    %end
+
+
+    %for r in filters['ack']:
+    <li>
+      <span class="filter_color ack_filter_color">&nbsp;</span>
+      <span class="ack_filter_name">Ack : {{r}}</span>
+      <span class="filter_delete"><a href='javascript:remove_current_filter("ack", "{{r}}", "/{{page}}");' class="close">&times;</a></span>
+    </li>
+    <script>add_active_state_ack_filter('{{r}}');</script>
+    %end
+
+    %for r in filters['downtime']:
+    <li>
+      <span class="filter_color downtime_filter_color">&nbsp;</span>
+      <span class="downtime_filter_name">Downtime : {{r}}</span>
+      <span class="filter_delete"><a href='javascript:remove_current_filter("downtime", "{{r}}", "/{{page}}");' class="close">&times;</a></span>
+    </li>
+    <script>add_active_state_downtime_filter('{{r}}');</script>
+    %end
+
+    </ul>
+    <br/>
+    %if got_filters:
+    <div class="btn-group">
+      <button class="btn btn-info dropdown-toggle" data-toggle="dropdown"> <i class="icon-tags"></i> Save this search</button>
+      <ul class="dropdown-menu">
+	<li>
+	  <form class='form_in_dropdown' id='bookmark_save'>
+	    <label>Bookmark</label>
+	    <input name='bookmark_name'></input>
+	  </form>
+	  <a class="btn btn-success" href='javascript:add_new_bookmark("/{{page}}");'> <i class="icon-ok"></i> Save!</a>
+	</li>
+      </ul>
+    </div>
+
+    %end
+    
+    <p>&nbsp;</p>
+    <div id='bookmarks'></div>
+    
+    <script>
+      $(function(){
+      refresh_bookmarks();
+    });</script>
+
+  </div>
+  
+
+  <!-- Start of the Right panel, with all problems -->
+  <div class="span10 no-leftmargin">
+  <div id="accordion" class="span12">
+
     %# " We will print Business impact level of course"
     %imp_level = 10
 
@@ -178,8 +366,7 @@ document.addEvent('domready', function() {
     %nb_same_output = 0
 
     %for pb in pbs:
-
-      <div class="clear"></div>      
+     
       %if pb.business_impact != imp_level:
        <h2> Business impact : {{!helper.get_business_impact_text(pb)}} </h2>
        %# "We reset the last_hname so we won't overlap this feature across tables"
@@ -197,48 +384,48 @@ document.addEvent('domready', function() {
       %end
       %last_output = pb.output
 
-      %if nb_same_output > 3:
-       <div class='opacity_hover'>
+      %if nb_same_output > 2 and page == 'problems':
+       <div class='hide hide_for_{{last_hname}}'>
       %else:
-       <div>
+        <div>
       %end
+	  <div class="tableCriticity pull-left">
 
-	  <div style="margin-left: 20px; width: 95%; float:left;">
-	    <table class="tableCriticity" style="width: 100%; margin-bottom:3px;">
-	      <tr class="tabledesc">
-	        <td class="no_border" style="width:20px; background:none;"> <img src="/static/images/untick.png" alt="untick" /style="cursor:pointer;" onclick="add_remove_elements('{{pb.get_full_name()}}')" id="selector-{{pb.get_full_name()}}" > </td>
-	        <td class="no_border" style="width:20px;"> <div class="aroundpulse">
+	      <div class='tick pull-left' style="cursor:pointer;" onclick="add_remove_elements('{{helper.get_html_id(pb)}}')"><img id='selector-{{helper.get_html_id(pb)}}' class='img_tick' src='/static/images/tick.png' /></div>
+	      <div class='img_status pull-left'>
+		<div class="aroundpulse">
 		    %# " We put a 'pulse' around the elements if it's an important one "
 		    %if pb.business_impact > 2 and pb.state_id in [1, 2, 3]:
-		    <span class="pulse"></span>
-		    %end
-		    <img style="width: 16px; height : 16px;" src="{{helper.get_icon_state(pb)}}" /></div> </td>
+		         <span class="pulse"></span>
+	            %end
+		    <img src="{{helper.get_icon_state(pb)}}" /></div>
+		</div>
 		%if pb.host_name == last_hname:
-		   <td class="no_border" style="width: 120px;"> </td>
+		   <div class="hostname cut_long pull-left"> &nbsp;  </div>
 		%else:
-		    <td class="no_border" style="width: 120px;"> {{!helper.get_host_link(pb)}}</td>
+	          <div class="hostname cut_long pull-left"> {{!helper.get_host_link(pb)}}</div>
 		%end
 		%last_hname = pb.host_name
 
 		%if pb.__class__.my_type == 'service':
-		  <td	class=" no_border" style="width:120px;">{{!helper.get_link(pb, short=True)}}</td>
+		  <div class="srvdescription cut_long pull-left">{{!helper.get_link(pb, short=True)}}</div>
 		%else:
-                  <td   class=" no_border" style="width:120px;"></td>
+                  <div class="srvdescription cut_long pull-left"> &nbsp; </div>
                 %end
-		<td class=" no_border {{pb.__class__.my_type}}_{{pb.state_id}}" style="width:50px;"> {{pb.state}}</td>
-		<td title='{{helper.print_date(pb.last_state_change)}}' class=" no_border" style="width:50px;">{{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}</td>
+		<div class='txt_status state_{{pb.state.lower()}}  pull-left'> {{pb.state}}</div>
+		<div class='duration pull-left' rel="tooltip" data-original-title='{{helper.print_date(pb.last_state_change)}}'>{{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}</div>
 		%# "We put a title (so a tip) on the output onlly if need"
 		%if len(pb.output) > 100:
 		   %if app.allow_html_output:
-		      <td title="{{pb.output}}" class=" no_border" style="width:450px;"> {{!helper.strip_html_output(pb.output[:100])}}</td>
+		      <div class='output pull-left' rel="tooltip" data-original-title="{{pb.output}}"> {{!helper.strip_html_output(pb.output[:100])}}</div>
 		   %else:
-		      <td title="{{pb.output}}" class=" no_border" style="width:450px;"> {{pb.output[:100]}}
+		      <div class='output pull-left' rel="tooltip" data-original-title="{{pb.output}}"> {{pb.output[:100]}}</div>
 		   %end
 		%else:
 		   %if app.allow_html_output:
-                      <td class=" no_border" style="width:450px;"> {{!helper.strip_html_output(pb.output)}}</td>
+                     <div class='output pull-left'> {{!helper.strip_html_output(pb.output)}}</div>
 		   %else:
-		      <td class=" no_border" style="width:450px;"> {{pb.output}} </td>
+		      <div class='output pull-left'> {{pb.output}} </div>
                    %end
 		%end
 		%graphs = app.get_graph_uris(pb, now- 4*3600 , now)
@@ -246,33 +433,34 @@ document.addEvent('domready', function() {
 		%if len(graphs) > 0:
 		      %onmouse_code = 'onmouseover="display_hover_img(\'%s\',\'\');" onmouseout="hide_hover_img();" ' % graphs[0]['img_src']
 		%end
-		<td class="perfometer" {{!onmouse_code}}>
-		  {{!helper.get_perfometer(pb)}}
-		</td>
-		<td class="no_border opacity_hover shortdesc" style="max-width:20px;" onclick="show_detail('{{pb.get_full_name()}}')"> <img src="/static/images/expand.png" alt="expand" /> </td>
+		<div class="perfometer pull-left" {{!onmouse_code}}>
+		  {{!helper.get_perfometer(pb)}} &nbsp;
+		</div>
+		<div class="no_border opacity_hover shortdesc expand pull-right" style="max-width:20px;" onclick="show_detail('{{helper.get_html_id(pb)}}')"><i class="icon-chevron-down" id='show-detail-{{helper.get_html_id(pb)}}'></i> <i class="icon-chevron-up chevron-up" id='hide-detail-{{helper.get_html_id(pb)}}'></i> </div>
 		
-		</tr>
 	      
-             </table>
+%#             </table>
 	  </div>  
-	  %# " We put actions buttons with a opacity hover effect, so they won't be too visible"
-%#	  <div class="opacity_hover" >
-%#	    <div style="float:right;">
-%#	      <a href="#" onclick="try_to_fix('{{pb.get_full_name()}}')">{{!helper.get_button('Fix!', img='/static/images/enabled.png')}}</a>
-%#	    </div>
-%#	    <div style="float:right;">
-%#	      <a href="#" onclick="acknowledge('{{pb.get_full_name()}}')">{{!helper.get_button('Ack', img='/static/images/wrench.png')}}</a>
-%#	    </div>
-%#	    <div style="float:right;">
-%#	      <a href="#" onclick="recheck_now('{{pb.get_full_name()}}')">{{!helper.get_button('Recheck', img='/static/images/delay.gif')}}</a>
-%#	    </div>
-%#	  </div>
+	  <div style="clear:both;"/>
+
+      %if nb_same_output == 2 and page == 'problems':
+	<div class="tableCriticity opacity_hover">
+	  <a rel=tooltip title='Expand the same service problems' href="javascript:show_hidden_problems('hide_for_{{last_hname}}');" id='btn-hide_for_{{last_hname}}' class='go-center'>
+	    <i class="icon-arrow-down"></i>
+	    <i class="icon-arrow-down"></i>
+	    <i class="icon-arrow-down"></i>
+	  </a>
 	</div>
+      %end
+
+
+	</div>
+       </div>
 
     %# "This div is need so the element will came back in the center of the previous div"
     <div class="clear"></div>
-      <div id="{{pb.get_full_name()}}" class="detail">
-	<table class="tableCriticity">
+      <div id="{{helper.get_html_id(pb)}}" class="detail row-fluid">
+	<table class="well tableCriticity table-bordered table-condensed span6">
 	  <tr>
 	    <td style="width:20px;"><b>Host</b></td>
 	    %if pb.__class__.my_type == 'service':
@@ -283,7 +471,7 @@ document.addEvent('domready', function() {
 	    <td style="width:20px;"><b>Next check</b></td>
 	    <td class="tdCriticity" style="width:20px;"><b>Actions</b></td>
 	    <td class="tdCriticity" style="width:40px;">	<div style="float:right;">
-		<a href="#">{{!helper.get_button('Add to fav', img='/static/images/heart_add.png')}}</a>
+		
 	      </div>
 	    </td>
 	  </tr>
@@ -297,52 +485,57 @@ document.addEvent('domready', function() {
 	    <td  style="width:20px;">in {{helper.print_duration(pb.next_chk, just_duration=True, x_elts=2)}}</td>
 	    
 	    <td class="tdCriticity" style="width:20px;"></td>
-	    <td class="tdCriticity" style="width:20px;"><div style="float:right;"> <a href="{{!helper.get_link_dest(pb)}}">{{!helper.get_button('Go to details', img='/static/images/search.png')}}</a>
+	    <td class="tdCriticity" style="width:20px;"><div style="float:right;"> <a href="{{!helper.get_link_dest(pb)}}" class='btn'><i class="icon-search"></i> Details</a>
 	</div> </td>
 	  </tr>
 	</table>
 
-	<hr />
+
+	<div class='span8'>
 	%if len(pb.impacts) > 0:
+	<hr />
 	<h5>Impacts:</h5>
 	%end
 	%for i in helper.get_impacts_sorted(pb):
-	<div class="state_{{i.state.lower()}}">
+	<div>
 	  <p><img style="width: 16px; height : 16px;" src="{{helper.get_icon_state(i)}}" />
+	    <span class="alert-small alert-{{i.state.lower()}}">{{i.state}}</span> for {{!helper.get_link(i)}}
 	        %for j in range(0, i.business_impact-2):
 	          <img src='/static/images/star.png' alt="star">
 		%end
-	     {{!helper.get_link(i)}} is {{i.state}}
 	  </p>
 	</div>
 	%end
+	</div>
       </div>
 
 
     %end
   </div>
 
-  %if navi is not None:
-      <div id="pagination">
-	<div class='pagenavi'>
-	  %for name, start, end, is_current in navi:
-	     %if is_current:
-	        <span class='current'>{{name}}</span>
-	     %elif start == None or end == None:
-		<span class='extend'>...</span>
-             %else:
-		<a href='/{{page}}/{{show}}?start={{start}}&end={{end}}' class='page larger'>{{name}}</a>
-	     %end
-          %end
+	%if navi is not None:
+	<div class="pagination center">
+		<ul class="pull-right">
+		%for name, start, end, is_current in navi:
+		   	%if is_current:
+		   	<li class="active"><a href="#">{{name}}</a></li>
+		   	%elif start == None or end == None:
+		   	<li class="disabled"> <a href="#">...</a> </li>
+			%elif search:
+			<a href='/{{page}}?start={{start}}&end={{end}}&search={{search}}' class='page larger'>{{name}}</a>
+		   	%else:
+			<li><a href='/{{page}}?start={{start}}&end={{end}}' class='page larger'>{{name}}</a></li>
+		   	%end
+		    %end
+		</ul>
 	</div>
-      </div>
-  %# end of the navi part
-  %end
+	%# end of the navi part
+	%end
 
-      
+
 </div>
-
-<div class="clear"></div>
+</div>
 
 %# """ This div is an image container and will move hover the perfometer with mouse hovering """
 <div id="img_hover"></div>
+

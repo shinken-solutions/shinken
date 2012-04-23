@@ -24,7 +24,15 @@ Invalid element
 %datamgr = app.datamgr
 
 
-%rebase layout title='Dependencies graph of ' + elt.get_full_name(),  js=['depgraph/js/jit-yc.js', 'depgraph/js/excanvas.js', 'depgraph/js/eltdeps.js'],  css=['depgraph/css/eltdeps.css'],  print_menu=False
+<script type="text/javascript">
+  var depgraph_width = 700;
+  var depgraph_height = 700;
+  var depgraph_injectInto = 'infovis';
+</script>
+
+
+
+%rebase layout globals(), title='Dependencies graph of ' + elt.get_full_name(),  js=['depgraph/js/jit-yc.js', 'depgraph/js/excanvas.js', 'depgraph/js/eltdeps.js'],  css=['depgraph/css/eltdeps.css'],  print_menu=False
 
 
 
@@ -32,6 +40,22 @@ Invalid element
 <script type="text/javascript">
   var graph_root = '{{elt.get_full_name()}}';
   var json_graph = {{!helper.create_json_dep_graph(elt, levels=4)}};
+
+  // Now we hook teh global search thing
+  $('.typeahead').typeahead({
+    // note that "value" is the default setting for the property option
+    source: function (typeahead, query) {
+      $.ajax({url: "/lookup/"+query,
+        success: function (data){
+          typeahead.process(data)}
+        });
+      },
+    onselect: function(obj) { 
+      $("ul.typeahead.dropdown-menu").find('li.active').data(obj);
+    }
+  });
+
+
 </script>
 
 
@@ -50,5 +74,5 @@ Invalid element
 %#End of the Host Exist or not case
 %end
 
-%include footer
+
 

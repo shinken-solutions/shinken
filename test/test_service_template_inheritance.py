@@ -43,6 +43,10 @@ class TestConfig(ShinkenTest):
         self.assert_(not svc2.action_url)
         self.assert_(svc2.process_perf_data == False)
 
+        print svc1.tags
+        self.assert_('no-graph' in svc1.tags)
+        self.assert_('base-service-prod' in svc1.tags)
+        
 
 if __name__ == '__main__':
     unittest.main()

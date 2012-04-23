@@ -20,10 +20,10 @@
 
 	<img style="width : 20px; height:20px" src="{{helper.get_icon_state(pb)}}" />
 	{{pb.state}}: {{pb.get_full_name()}}
-	<a href="#" onclick="show_detail('{{pb.get_full_name()}}')"><img style="width : 20px; height:20px" src="/static/images/expand.png" /></a>
+	<a href="#" onclick="show_detail('{{app.helper.get_html_id(pb)}}')"><img style="width : 20px; height:20px" src="/static/images/expand.png" /></a>
       </h2>
 		
-   <div class='detail' id="{{pb.get_full_name()}}">
+   <div class='detail' id="{{app.helper.get_html_id(pb)}}">
      <p>Output : 
        %if app.allow_html_output:
        {{!helper.strip_html_output(pb.output)}}

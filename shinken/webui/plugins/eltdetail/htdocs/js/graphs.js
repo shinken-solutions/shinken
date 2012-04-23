@@ -21,8 +21,89 @@
  along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/* When the page load, we will look at the graph tab to show up
-   all element graph */
+/* We can't apply Jcrop on ready. Why? Because the images are not load, and so
+   they wil have a 0 size. Yes, ti's stupid I know. So hjow to do it?
+   The key is to hook the graph tab. onshow will raise when we active it (and was shown).
+   So we apply only then. Cool isn't it?
+   PS : I lost 2 hours in this, and yes, I'm quite angry about this stupid thing....
+*/
+$(window).ready(function(){
+    g_s = graphstart;  // Time start and ends
+    g_e = graphend;
+    
+    g_p = 0; // relative pos for start and end
+    g_q = 0;
 
-window.addEvent('domready', function(){
+    // theses offsets are for PNP, with won't work with
+    // Graphite from now.
+    // TODO
+    g_A = 65;
+    g_B = 25;
+    g_T = 587;
+    
+    g_D = g_T - (g_A + g_B); // The pixel range when we remove borders
+    
+    g_O = g_e - g_s; // total time printed
+});
+
+/* 
+   { }  <-- User selection.
+
+         s    p             q  e         # s = time start, p = rel pos start, q = rel pos end, e = end time
+         |    {             }  |
+              x             x2           # x = select start, x2=select end     
+   [  A  ][       D           ][  B  ]   # A = offset left, D=usefull, B = offset right
+   [              T                  ]   # T = Total size of the picture
+
+*/
+
+function update_coords(c)
+{
+    // variables can be accessed here as
+    // c.x, c.y, c.x2, c.y2, c.w, c.h
+    // Compute relative positions
+    g_p = Math.min(Math.max(g_A, c.x), g_T - g_B) - g_A;
+    g_q = Math.min(Math.max(g_A, c.x2), g_T - g_B) - g_A;
+};
+
+
+// We will compute the relative position of the selection
+// by removing the borders. This will give us g_rp and g_rq.
+// Then we comput ethe ratio of this selection, and so we apply
+// it in the time selection. And we are done.
+function graph_zoom(uri){
+
+    //alert('Relatives'+g_p+' '+g_q);
+    
+    // We compute the ratio of the relative position from the inner
+    // draw (without the borders)
+    var g_rp = g_p / g_D;
+    var g_rq = g_q / g_D;
+
+    //alert('Relative ratio: '+g_D+' '+g_rp+' '+g_rq);
+
+    // Now compute the new start and new end we want to border
+    var g_ns = parseInt(g_s + g_O*g_rp);
+    var g_ne = parseInt(g_s + g_O*g_rq);
+    
+    //alert('New time '+g_ns+' '+g_ne);
+
+    // Maybe we just fuck up, if so, bailout
+    if(g_ne <= g_ns){
+	return;
+    }
+    
+    // Make the uri and GO!
+    var new_uri = uri+'graphstart='+g_ns+'&graphend='+g_ne+'#graphs';
+    window.location=new_uri;
+}
+
+// when we show the graph tab, we apply the crop effect.
+$(window).ready(function(){
+    $('#tab_to_graphs').on('shown', function (e) {
+	$('.jcropelt').Jcrop({
+	    onSelect: update_coords,
+            onChange: update_coords
+	});
+    })
 });

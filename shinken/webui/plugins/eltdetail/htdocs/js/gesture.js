@@ -7,7 +7,7 @@ var isMouseDown = false; // mouse only bool
 var threshold = 3; // number of pixels required to be moved for a movement to count
 
 
-window.addEvent('domready',function(){
+$(document).ready(function(){
     canvas = document.getElementById("canvas");  
 
     ctx = canvas.getContext("2d");
@@ -158,3 +158,6 @@ function launch_gesture(gesture, score){
 	}
     }
 }
+
+
+

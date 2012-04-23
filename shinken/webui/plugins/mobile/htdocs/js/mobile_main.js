@@ -29,16 +29,8 @@ function go_to(url){
    , make it opacity in 0.5 s and then go to the new page.
 */
 function slide_and_go(url){
-    /* We must avoid $$() call for IE, so call a standad way*/
-    var a = $(document.body).getElement('#all');
-    
-    var toggleEffect = new Fx.Tween(a, {
-	property : 'opacity',
-	duration : 500/*'short'*/
-    });
+    var a = $('#all');
+    a.animate({'opacity' : 0, 'left' : 200});
 
-    toggleEffect.start(1, 0); // go show by in opacity
-    var move = new Fx.Tween(a, {property: 'left', duration : 500});
-    move.start(0, 200); // and by moving right
     setTimeout("go_to('"+url+"')", 500);
 }    

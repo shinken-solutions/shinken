@@ -1,15 +1,15 @@
 %helper = app.helper
 %datamgr = app.datamgr
 
-%rebase layout js=['impacts/js/impacts.js', 'impacts/js/multi.js'], title='All critical impacts for your business', css=['impacts/css/impacts.css'], refresh=True, menu_part = '/impacts', user=user
+%rebase layout globals(), js=['impacts/js/impacts.js', 'impacts/js/multi.js'], title='All critical impacts for your business', css=['impacts/css/impacts.css'], refresh=True, menu_part = '/impacts', user=user
 
-%# " If the auth succeed, we go in the /problems page "
-%if not valid_user:
-	<script type="text/javascript">
-		window.location.replace("/login");
-	</script>
-%# " And if the javascript is not follow? not a problem, we gave no data here."
+
+%# Look for actions if we must show them or not
+%global_disabled = ''
+%if not helper.can_action(user):
+%global_disabled = 'disabled-link'
 %end
+
 
 <div id="impact-container">
 
@@ -41,7 +41,6 @@
 	  	
 	    <div class="impact pblink" id="{{imp_id}}">
 			<div class="show-problem" id="show-problem-{{imp_id}}">
-				<img src="static/images/trig_right.png" id="show-problem-img-{{imp_id}}">
 			</div>
 			
 		%for i in range(2, impact.business_impact):
@@ -50,7 +49,6 @@
 			</div>
 		%end
 	
-		%#	<div class="impact-icon"><img src="static/images/50x50.png"></div>
 			<div class="impact-icon"><img style="width: 64px;height: 64px;" src="{{helper.get_icon_state(impact)}}"></div>
 			<div class="impact-rows">
 				<div class="impact-row">
@@ -67,7 +65,6 @@
 	</div>
       
 	<div class="right-panel">
-		<a href="/3dimpacts" class="mb" title="Show impacts in 3D mode.">{{!helper.get_button('Show impacts in 3d', img='/static/images/state_ok.png')}}</a>
 	</div> 
 
 
@@ -84,7 +81,7 @@
 	
 	    <div class="problems-panel" id="problems-{{imp_id}}" style="visibility: hidden; zoom: 1; opacity: 0; ">
 		<div class="right-panel-top"> 
-			<div class="pblink" id="{{imp_id}}"> <img style="width: 16px;height: 16px;" src='/static/images/disabled.png'> Close </div>
+		  <a href="#a" class="pblink close" id="{{imp_id}}"> &times;</a>		  
 		</div>
 		
 		<br style="clear: both">
@@ -101,8 +98,8 @@
 		</center>-->
 	
 		<div style="float:right;">
-			<a href="{{!helper.get_link_dest(impact)}}">{{!helper.get_button('Go to details', img='/static/images/search.png')}}</a>
-		    <a href="/depgraph/{{impact.get_full_name()}}" class="mb" title="Impact map of {{impact.get_full_name()}}">{{!helper.get_button('Show impact map', img='/static/images/state_ok.png')}}</a>
+		  <a href="{{!helper.get_link_dest(impact)}}" class='btn'><i class="icon-search"></i> Details</a>
+		  <a href="/depgraph/{{impact.get_full_name()}}" class='btn' title="Impact map of {{impact.get_full_name()}}"> <i class="icon-map-marker"></i> Show impact map</a>
 		</div>
 	
 		%##### OK, we print root problem NON ack first
@@ -138,9 +135,15 @@
 		<div class="problem" id="{{pb_id}}">
 			<div class="divhstate1"> <img style="width: 32px;height: 32px;" src="{{helper.get_icon_state(pb)}}"> {{!helper.get_link(pb)}} is {{pb.state}} since {{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}</div>
 		    <div class="problem-actions opacity_hover">
-		    	<div class="action-fixit"><a href="#" onclick="try_to_fix('{{pb.get_full_name()}}')"> <img class="icon" title="Try to fix it" src="static/images/icon_ack.gif">Try to fix it</a></div>
+		      %disabled_s = ''
+		      %if not pb.event_handler:
+		      %disabled_s = 'disabled-link'
+		      %end
+		    	<div class="action-fixit"><a class='{{disabled_s}} {{global_disabled}}'' href="#" onclick="try_to_fix('{{pb.get_full_name()}}')"> <i class="icon-pencil"></i>Try to fix it</a></div>
 		    	%if not pb.problem_has_been_acknowledged:
-		    		<div class="action-ack"><a href="#" onclick="acknowledge('{{pb.get_full_name()}}')"><img class="icon" title="Acknowledge it" src="static/images/link_processes.gif">Acknowledge it</a></div>
+		    	  <div class="action-ack">
+			    <a class='{{global_disabled}}' href="/forms/acknowledge/{{helper.get_uri_name(pb)}}" data-toggle="modal" data-target="#modal"><i class="icon-ok"></i> Acknowledge it!</a>
+			    </div>
 		      	%end
 		    </div>
 		</div>
@@ -150,7 +153,7 @@
 		%if len(impact.parent_dependencies) > 0:
 			<a id="togglelink-{{impact.get_dbg_name()}}" href="javascript:toggleBusinessElt('{{impact.get_dbg_name()}}')"> {{!helper.get_button('Show dependency tree', img='/static/images/expand.png')}}</a>
 			<div class="clear"></div>
-		  	{{!helper.print_business_rules(datamgr.get_business_parents(impact))}}
+		  	{{!helper.print_business_rules(datamgr.get_business_parents(impact), source_problems=impact.source_problems)}}
 		%end  
 	</div>
 	%# end for imp_id in impacts:

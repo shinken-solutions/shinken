@@ -21,6 +21,8 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+import time
+
 from shinken.util import safe_print
 from shinken.webui.bottle import redirect
 
@@ -70,5 +72,33 @@ def show_impacts():
     return {'app' : app, 'impacts' : impacts, 'valid_user' : True, 'user' : user}
 
 
+def impacts_widget():
+    d = show_impacts()
+ 
+    wid = app.request.GET.get('wid', 'widget_impacts_'+str(int(time.time())))
+    collapsed = (app.request.GET.get('collapsed', 'False') == 'True')
 
-pages = {show_impacts : { 'routes' : ['/impacts'], 'view' : 'impacts', 'static' : True}  }
+    nb_elements = max(1, int(app.request.GET.get('nb_elements', '5')))
+    # Now filter for the good number of impacts to show
+    new_impacts = {}
+    for (k,v) in d['impacts'].iteritems():
+        if k <= nb_elements:
+            new_impacts[k] = v
+    d['impacts'] = new_impacts
+
+    options = {'nb_elements' : {'value' : nb_elements, 'type' : 'int', 'label' : 'Max number of elements to show'},
+               }
+    
+    d.update({'wid' : wid, 'collapsed' : collapsed, 'options' : options,
+            'base_url' : '/widget/impacts', 'title' : 'Impacts widget'})
+    
+    return d
+
+
+
+
+widget_desc = '<h3>Impacts</h3>Show an aggregated view of the most business impacts!'
+
+pages = {show_impacts : { 'routes' : ['/impacts'], 'view' : 'impacts', 'static' : True} ,
+         impacts_widget : { 'routes' : ['/widget/impacts'], 'view' : 'widget_impacts', 'static' : True, 'widget' : ['dashboard'], 'widget_desc' : widget_desc, 'widget_name' : 'impacts', 'widget_picture' : '/static/impacts/img/widget_impacts.png'},
+         }

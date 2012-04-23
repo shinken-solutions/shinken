@@ -1,20 +1,28 @@
 #!/usr/bin/python
-#Copyright (C) 2009 Gabes Jean, naparuba@gmail.com
+
+# -*- coding: utf-8 -*-
+
+# Copyright (C) 2009-2012:
+#    Gabes Jean, naparuba@gmail.com
+#    Gerhard Lausser, Gerhard.Lausser@consol.de
+#    Gregory Starck, g.starck@gmail.com
+#    Hartmut Goebel, h.goebel@goebel-consult.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+
 
 import time
 
@@ -60,6 +68,9 @@ class Regenerator(object):
         self.reactionners = ReactionnerLinks([])
         self.brokers = BrokerLinks([])
         self.receivers = ReceiverLinks([])
+        # From now we only look for realms names
+        self.realms = set()
+        self.tags = {}
 
         # And in progress one
         self.inp_hosts = {}
@@ -175,6 +186,12 @@ class Regenerator(object):
             # And link contacts too
             self.linkify_contacts(h, 'contacts')
 
+            # Linkify tags
+            for t in h.tags:
+                if not t in self.tags:
+                    self.tags[t] = 0
+                self.tags[t] += 1
+
             # We can really declare this host OK now
             self.hosts[h.id] = h
 
@@ -236,6 +253,11 @@ class Regenerator(object):
         self.services.optimize_service_search(self.hosts)
 
 
+        # Add realm of theses hosts. Only the first is useful
+        for h in inp_hosts:
+            self.realms.add(h.realm)
+            break
+
         # Now we can link all impacts/source problem list
         # but only for the new ones here of course
         for h in inp_hosts:
@@ -245,6 +267,7 @@ class Regenerator(object):
             self.linkify_host_and_hosts(h, 'childs')
             self.linkify_dict_srv_and_hosts(h, 'parent_dependencies')
             self.linkify_dict_srv_and_hosts(h, 'child_dependencies')
+        
 
         # Now services too
         for s in inp_services:

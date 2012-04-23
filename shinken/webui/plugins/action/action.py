@@ -23,20 +23,38 @@
 ### Will be populated by the UI with it's own value
 app = None
 
+
+
 # We will need external commands here
 import time
 from shinken.external_command import ExternalCommand, ExternalCommandManager
 
+
+def forge_response(callback, status, text):
+    if callback:
+        return "%s({'status':%s,'text':'%s'})" % (callback, status, text)
+    else:
+        return "{'status':%s,'text':'%s'}" % (status, text)
+
 # Our page
 def get_page(cmd=None):
 
+    app.response.content_type = 'application/json'
+
+    print app.request.query.__dict__
+    callback = app.request.query.get('callback', None)
+    
     # First we look for the user sid
     # so we bail out if it's a false one
     user = app.get_user_auth()
-
+    
+    # Maybe the user is not known at all
     if not user:
-        return {'status' : 401, 'text' : 'Invalid session'}
+        return forge_response(callback, 401, 'Invalid session')
 
+    # Or he is not allowed to launch commands?
+    if not user.can_submit_commands:
+        return forge_response(callback, 403, 'You are not authorized to launch commands')
 
     now = int(time.time())
     print "Ask us an /action page", cmd
@@ -48,7 +66,7 @@ def get_page(cmd=None):
     
     # Check if the command exist in the external command list
     if cmd_name not in ExternalCommandManager.commands:
-        return {'status' : 404, 'text' : 'Unknown command %s' % cmd_name}
+        return forge_response(callback, 404,'Unknown command %s' % cmd_name)
 
     extcmd = '[%d] %s' % (now, ';'.join(elts))
     print "Got the; form", extcmd
@@ -59,7 +77,7 @@ def get_page(cmd=None):
     print "Creating the command", e.__dict__
     app.push_external_command(e)
 
-    return {'status' : 200, 'text' : 'Command launched'}
+    return forge_response(callback, 200, 'Command launched')
 
 
 

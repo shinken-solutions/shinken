@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2011 :
+# Copyright (C) 2009-2012 :
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -186,7 +186,9 @@ class ExternalCommandManager:
         'ENABLE_SVC_NOTIFICATIONS' : {'global' : False, 'args' : ['service']},
         'PROCESS_FILE' : {'global' : True, 'args' : [None, 'to_bool']},
         'PROCESS_HOST_CHECK_RESULT' : {'global' : False, 'args' : ['host', 'to_int', None]},
+        'PROCESS_HOST_OUTPUT' : {'global' : False, 'args' : ['host', None]},
         'PROCESS_SERVICE_CHECK_RESULT' : {'global' : False, 'args' : ['service', 'to_int', None]},
+        'PROCESS_SERVICE_OUTPUT' : {'global' : False, 'args' : ['service', None]},        
         'READ_STATE_INFORMATION' : {'global' : True, 'args' : []},
         'REMOVE_HOST_ACKNOWLEDGEMENT' : {'global' : False, 'args' : ['host']},
         'REMOVE_SVC_ACKNOWLEDGEMENT' : {'global' : False, 'args' : ['service']},
@@ -433,12 +435,12 @@ class ExternalCommandManager:
         tmp_host = ''
         try:
             for elt in elts[1:]:
-                #safe_print("Searching for a new arg:", elt, i)
+                safe_print("Searching for a new arg:", elt, i)
                 val = elt.strip()
-                if val[-1] == '\n':
+                if val.endswith('\n'):
                     val = val[:-1]
 
-                #safe_print("For command arg", val)
+                safe_print("For command arg", val)
 
                 if not in_service:
                     type_searched = entry['args'][i-1]
@@ -820,6 +822,19 @@ class ExternalCommandManager:
             self.conf.enable_flap_detection = False
             self.conf.explode_global_conf()
             self.sched.get_and_register_update_program_status_brok()
+            # Is need, disable flap state for hosts and services
+            for service in self.conf.services:
+                if service.is_flapping:
+                    service.is_flapping = False
+                    service.flapping_changes = []
+                    self.sched.get_and_register_status_brok(service)
+            for host in self.conf.hosts:
+                if host.is_flapping:
+                    host.is_flapping = False
+                    host.flapping_changes = []
+                    self.sched.get_and_register_status_brok(host)
+
+
 
     # DISABLE_HOSTGROUP_HOST_CHECKS;<hostgroup_name>
     def DISABLE_HOSTGROUP_HOST_CHECKS(self, hostgroup):
@@ -877,6 +892,10 @@ class ExternalCommandManager:
         if host.flap_detection_enabled:
             host.modified_attributes |= MODATTR_FLAP_DETECTION_ENABLED
             host.flap_detection_enabled = False
+            # Maybe the host was flapping, if so, stop flapping
+            if host.is_flapping:
+                host.is_flapping = False
+                host.flapping_changes = []
             self.sched.get_and_register_status_brok(host)
 
     # DISABLE_HOST_FRESHNESS_CHECKS
@@ -969,6 +988,10 @@ class ExternalCommandManager:
         if service.flap_detection_enabled:
             service.modified_attributes |= MODATTR_FLAP_DETECTION_ENABLED
             service.flap_detection_enabled = False
+            # Maybe the service was flapping, if so, stop flapping
+            if service.is_flapping:
+                service.is_flapping = False
+                service.flapping_changes = []
             self.sched.get_and_register_status_brok(service)
 
     # DISABLE_SERVICE_FRESHNESS_CHECKS
@@ -995,10 +1018,7 @@ class ExternalCommandManager:
 
     # DISABLE_SVC_FLAP_DETECTION;<host_name>;<service_description>
     def DISABLE_SVC_FLAP_DETECTION(self, service):
-        if service.flap_detection_enabled:
-            service.modified_attributes |= MODATTR_FLAP_DETECTION_ENABLED
-            service.flap_detection_enabled = False
-            self.sched.get_and_register_status_brok(service)
+        self.DISABLE_SERVICE_FLAP_DETECTION(service)
 
     # DISABLE_SVC_NOTIFICATIONS;<host_name>;<service_description>
     def DISABLE_SVC_NOTIFICATIONS(self, service):
@@ -1269,6 +1289,11 @@ class ExternalCommandManager:
             self.sched.nb_check_received += 1
             # Ok now this result will be read by scheduler the next loop
 
+    # PROCESS_HOST_OUTPUT;<host_name>;<plugin_output>
+    def PROCESS_HOST_OUTPUT(self, host, plugin_output):
+        self.PROCESS_HOST_CHECK_RESULT(host, host.state_id, plugin_output)
+        
+
 
     # PROCESS_SERVICE_CHECK_RESULT;<host_name>;<service_description>;<return_code>;<plugin_output>
     def PROCESS_SERVICE_CHECK_RESULT(self, service, return_code, plugin_output):
@@ -1295,6 +1320,11 @@ class ExternalCommandManager:
             c.check_time = self.current_timestamp  # we are using the external command timestamp
             self.sched.nb_check_received += 1
             # Ok now this result will be reap by scheduler the next loop
+
+
+    # PROCESS_SERVICE_CHECK_RESULT;<host_name>;<service_description>;<plugin_output>
+    def PROCESS_SERVICE_OUTPUT(self, service, plugin_output):
+        self.PROCESS_SERVICE_CHECK_RESULT(service, service.state_id, plugin_output)
 
 
     # READ_STATE_INFORMATION

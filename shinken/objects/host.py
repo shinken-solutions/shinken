@@ -1,24 +1,28 @@
-#!/usr/bin/env python
-#Copyright (C) 2009-2010 :
+#!/usr/bin/python
+
+# -*- coding: utf-8 -*-
+
+# Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
 #    Hartmut Goebel, h.goebel@goebel-consult.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+
 
 
 """ This is the main class for the Host. In fact it's mainly
@@ -220,7 +224,7 @@ class Host(SchedulingItem):
         # them when we load it.
         'notified_contacts':    StringProp(default=set(), retention=True, retention_preparation=to_list_of_names),
 
-        'in_scheduled_downtime': BoolProp(default=False, retention=True),
+        'in_scheduled_downtime': BoolProp(default=False, fill_brok=['full_status'], retention=True),
         'in_scheduled_downtime_during_last_check': BoolProp(default=False, retention=True),
 
         # put here checks and notif raised
@@ -478,6 +482,12 @@ class Host(SchedulingItem):
     # Get our realm
     def get_realm(self):
         return self.realm
+
+    def get_hostgroups(self):
+        return self.hostgroups
+
+    def get_host_tags(self):
+        return self.tags
 
     # Say if we got the other in one of your dep list
     def is_linked_with_host(self, other):

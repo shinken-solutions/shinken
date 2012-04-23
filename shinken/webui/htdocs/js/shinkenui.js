@@ -1,0 +1,87 @@
+/*Copyright (C) 2009-2012 :
+     Gabes Jean, naparuba@gmail.com
+     Gerhard Lausser, Gerhard.Lausser@consol.de
+     Gregory Starck, g.starck@gmail.com
+     Hartmut Goebel, h.goebel@goebel-consult.de
+     Andreas Karfusehr, andreas@karfusehr.de
+ 
+ This file is part of Shinken.
+ 
+ Shinken is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Affero General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ Shinken is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Affero General Public License for more details.
+ 
+ You should have received a copy of the GNU Affero General Public License
+ along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+/***************************************************************************/
+
+/**
+ * Some browser do NOT have indexOf for arrays... so we add it!
+**/
+if(!Array.indexOf){
+    Array.prototype.indexOf = function(obj){
+	for(var i=0; i<this.length; i++){
+	    if(this[i]==obj){
+		return i;
+	    }
+	}
+	return -1;
+    }
+}
+
+/**
+ * Description: Add a remvoe finction to the lists....
+ *  WTF javascript don't have this? Please guys, at least good 
+ *  list and dict functions.... you want us to manage memory soon?
+ * Example: lst.remove(value)
+ */
+Array.prototype.remove=function(s){
+    var index = this.indexOf(s);
+    while(this.indexOf(s) != -1){
+	this.splice(index, 1);
+	index = this.indexOf(s);
+    }
+}
+
+
+
+/**
+ * Description:
+ * Example: <div class="pulsate"> <p> Example DIV </p> </div>
+ */
+
+$(function() {
+  var p = $(".pulsate");
+  for(var i=0; i<5; i++) {
+    p.animate({opacity: 0.2}, 1000, 'linear')
+     .animate({opacity: 1}, 1000, 'linear');
+  }
+});
+
+/**
+ * Description:
+ * Example: <a rel="tooltip" href="#" data-original-title="Lorem Ipsum">Lorem Ipsum</a>
+ */
+
+$(function(){
+    $('a[rel=tooltip]').tooltip();
+    $('tr[rel=tooltip]').tooltip();
+    $('td[rel=tooltip]').tooltip();
+});
+
+/**
+ * Description:
+ * Example: <div class="quickinfo"> Lorem Ipsum </div>
+ */
+
+$(function(){
+    $(".quickinfo").tooltip({placement: 'bottom'});
+});

@@ -22,16 +22,89 @@
 
 
 /* We Hide all detail elements */
-window.addEvent('domready', function(){
-	 var details = $$('.detail');
-	 details.each(function(el){
-		  new Fx.Slide(el).hide();
-		      });
-		});
+$(document).ready(function(){
+    var details = $('.detail');
+    details.hide();
+    
+    // By default hide all "hide" chevron of the right part
+    $('.chevron-up').hide();
+});
 
 /* And if the user lick on the good image, we untoggle them. */
 function show_detail(name){
-    var myFx = new Fx.Slide(name).toggle();
+    var myFx = $('#'+name).slideToggle();
+    $('#show-detail-'+name).toggle();
+    $('#hide-detail-'+name).toggle();
+}
+
+
+// The user ask to show the hidden problems that are duplicated
+function show_hidden_problems(cls){
+    $('.'+cls).show();
+    // And hide the vvv button
+    $('#btn-'+cls).hide();
+}
+
+// At start we hide the unselect all button
+$(document).ready(function(){
+    $('#unselect_all_btn').hide();
+
+    // If actions are not allowed, disable the button 'select all'
+    if(!actions_enabled){
+	$('#select_all_btn').addClass('disabled');
+	// And put in opacity low the 'selectors'
+	$('.tick').css({'opacity' : 0.4});
+    }
+});
+
+
+// At start we hide the selected images
+// and the actions tabs
+$(document).ready(function(){
+    $('.img_tick').hide();
+    $('#actions').hide();
+});
+
+
+
+function toggle_select_buttons(){
+    $('#select_all_btn').toggle();
+    $('#unselect_all_btn').toggle();
+}
+
+function show_unselect_all_button(){
+    $('#select_all_btn').hide();
+    $('#unselect_all_btn').show();
+}
+
+function show_select_all_button(){
+    $('#unselect_all_btn').hide();
+    $('#select_all_btn').show();
+}
+
+// When we select all, add all in the selected list,
+// and hide the select all button, and swap it with
+// unselect all one
+function select_all_problems(){
+    // Maybe the actions are not allwoed. If so, don't act
+    if(!actions_enabled){return;}
+
+    toggle_select_buttons();
+    /*$('#select_all_btn').hide();
+    $('#unselect_all_btn').show();*/
+    
+    // we wil lget all elements by looking at .details and get their ids
+    $('.detail').each(function(){
+	add_element($(this).attr('id'));
+    });
+}
+
+// guess what? unselect is the total oposite...
+function unselect_all_problems(){
+    toggle_select_buttons();
+    /*$('#unselect_all_btn').hide();
+    $('#select_all_btn').show();*/
+    flush_selected_elements();
 }
 
 
@@ -40,7 +113,11 @@ var selected_elements = [];
 
 
 function add_remove_elements(name){
-    if( selected_elements.contains(name)){
+    // Maybe the actions are not allwoed. If so, don't act
+    if(!actions_enabled){return;}
+
+    //alert(selected_elements.indexOf(name));
+    if( selected_elements.indexOf(name) != -1 ){
 	remove_element(name);
     }else{
 	add_element(name);
@@ -51,10 +128,16 @@ function add_remove_elements(name){
 /* function when we add an element*/
 function add_element(name){
     selected_elements.push(name);
-    var selector = $('selector-'+name);
-    selector.src = '/static/images/tick.png';
-    $('actions').style.display = 'inline-block';
-    $('actions').fade('in');
+
+    // We put the select all button in unselect mode
+    show_unselect_all_button();
+    
+    // We show the 'tick' image ofthe selector on the left
+    $('#selector-'+name).show();
+    
+    $('#actions').show();
+    /*$('#actions').css('display', 'block');
+    $('#actions').animate({opacity:1});*/
     /* The user will ask something, so it's good to reinit
      the refresh time so he got time to launch its action,
     see reload.js for this function */
@@ -63,50 +146,51 @@ function add_element(name){
 
 /* And or course when we remove it... */
 function remove_element(name){
-    selected_elements.erase(name);
+    selected_elements.remove(name);
     if(selected_elements.length == 0){
-	$('actions').fade('out');
-	$('actions').style.display = 'none';
+	$('#actions').hide();
+	show_select_all_button();
+	/*$('#actions').animate({opacity:0});
+	$('#actions').css('display', 'none');*/
     }
-    var selector = $('selector-'+name);
-    selector.src = '/static/images/untick.png';
+    // And hide the tick image
+    $('#selector-'+name).hide();
 }
 
 
 /* Flush selected elements, so clean the list
 but also untick thems in the UI */
 function flush_selected_elements(){
-    /* We must copy the lsit so we can parse it in a clean way 
+    /* We must copy the list so we can parse it in a clean way 
      without fearing some bugs */
-    var cpy = Array.clone(selected_elements);
-    cpy.each(function(name){
-		 remove_element(name);
-	     });
+    var cpy = $.extend({}, selected_elements);
+    $.each(cpy, function(idx, name) {
+	remove_element(name);
+    });
 }
 
 
 /* Now actions buttons : */
 function recheck_now_all(){
-    selected_elements.each(function(name){
-			       recheck_now(name);
-			   });
+    $.each(selected_elements,function(idx, name){
+	recheck_now(name);
+    });
     flush_selected_elements();
 }
 
 
 /* Now actions buttons : */
 function try_to_fix_all(){
-    selected_elements.each(function(name){
-                               try_to_fix(name);
-                           });
+    $.each(selected_elements, function(idx, name){
+        try_to_fix(name);
+    });
     flush_selected_elements();
 }
 
 
-function acknowledge_all(){
-    selected_elements.each(function(name){
-			       ackno_element = name;
-			       do_acknowledge('Acknowledge from WebUI.');
-			   });
+function acknowledge_all(user){
+    $.each(selected_elements, function(idx, name){
+	do_acknowledge(name, 'Acknowledge from WebUI.', user);
+    });
     flush_selected_elements();
 }

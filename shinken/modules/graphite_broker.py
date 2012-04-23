@@ -73,7 +73,7 @@ class Graphite_broker(BaseModule):
         s = perf_data.strip()
         # Get all metrics non void
         elts = s.split(' ')
-        metrics = [e for e in elts if e != '']
+        metrics = [e for e in elts if e != ''] 
 
         for e in metrics:
  #           print "Graphite : groking : ", e
@@ -86,21 +86,23 @@ class Graphite_broker(BaseModule):
             # get the first value of ;
             if ';' in raw:
                 elts = raw.split(';')
-                value = elts[0]
+                name_value = { name : elts[0], name+'_warn' : elts[1], name+'_crit' : elts[2] }
             else:
                 value = raw
+                name_value = { name : raw }
             # bailout if need
-            if value == '':
+            if name_value[name] == '':
                 continue
 
             # Try to get the int/float in it :)
-            m = re.search("(\d*\.*\d*)", value)
+            m = re.search("(\d*\.*\d*)", name_value[name])
             if m:
-                value = m.groups(0)[0]
+                name_value[name] = m.groups(0)[0]
             else:
                 continue
 #            print "graphite : got in the end :", name, value
-            res.append((name, value))
+            for key,value in name_value.items():
+                res.append((key, value))
         return res
 
 

@@ -29,7 +29,7 @@ Invalid element name
 	<div id="nav_left">
 		<ul>
 			<li><a href="#">Overview</a></li>
-			<li><a class="pointer_down" id="v_toggle" href="#"">Gesture</a></li>
+			<li><a class="pointer_down" id="v_toggle" href="#">Gesture</a></li>
 		</ul>
 	</div>
 	
