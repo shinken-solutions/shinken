@@ -139,8 +139,8 @@ class IForArbiter(Interface):
 
 
     def get_all_states(self):
-        res = {'arbiter' : self.app.conf.arbiterlinks,
-               'scheduler' : self.app.conf.schedulerlinks,
+        res = {'arbiter' : self.app.conf.arbiters,
+               'scheduler' : self.app.conf.schedulers,
                'poller' : self.app.conf.pollers,
                'reactionner' : self.app.conf.reactionners,
                'receiver' : self.app.conf.receivers,
@@ -210,7 +210,7 @@ class Skonf(Daemon):
         self.conf.early_arbiter_linking()
 
         # Search wich Arbiterlink I am
-        for arb in self.conf.arbiterlinks:
+        for arb in self.conf.arbiters:
             if arb.is_me():
                 arb.need_conf = False
                 self.me = arb
@@ -502,7 +502,7 @@ class Skonf(Daemon):
         self.new_conf = None
         self.cur_conf = conf
         self.conf = conf        
-        for arb in self.conf.arbiterlinks:
+        for arb in self.conf.arbiters:
             if (arb.address, arb.port) == (self.host, self.port):
                 self.me = arb
                 arb.is_me = lambda: True  # we now definitively know who we are, just keep it.
@@ -552,7 +552,7 @@ class Skonf(Daemon):
 
         # Look for the master timeout
         master_timeout = 300
-        for arb in self.conf.arbiterlinks:
+        for arb in self.conf.arbiters:
             if not arb.spare:
                 master_timeout = arb.check_interval * arb.max_check_attempts
         logger.info("I'll wait master for %d seconds" % master_timeout)
@@ -590,7 +590,7 @@ class Skonf(Daemon):
             self.external_command.resolve_command(ext_cmd)
 
         # Now for all alive schedulers, send the commands
-        for sched in self.conf.schedulerlinks:
+        for sched in self.conf.schedulers:
             cmds = sched.external_commands
             if len(cmds) > 0 and sched.alive:
                 safe_print("Sending %d commands" % len(cmds), 'to scheduler', sched.get_name())
@@ -603,7 +603,7 @@ class Skonf(Daemon):
     def run(self):
         # Before running, I must be sure who am I
         # The arbiters change, so we must refound the new self.me
-        for arb in self.conf.arbiterlinks:
+        for arb in self.conf.arbiters:
             if arb.is_me():
                 self.me = arb
 
@@ -825,16 +825,8 @@ class Skonf(Daemon):
 
     def get_daemons(self, daemon_type):
         """ Returns the daemons list defined in our conf for the given type """
-        # We get the list of the daemons from their links
-        # 'schedulerlinks' for schedulers, 'arbiterlinks' for arbiters
-        # and 'pollers', 'brokers', 'reactionners' for the others
-        if (daemon_type == 'scheduler' or daemon_type == 'arbiter'):
-            daemon_links = daemon_type+'links'
-        else:
-            daemon_links = daemon_type+'s'
-
-        # shouldn't the 'daemon_links' (whetever it is above) be always present ?
-        return getattr(self.conf, daemon_links, None)
+        # shouldn't the 'daemon_types' (whetever it is above) be always present ?
+        return getattr(self.conf, daemon_type+'s', None)
 
     # Helper functions for retention modules
     # So we give our broks and external commands
