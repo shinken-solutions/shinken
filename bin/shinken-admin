@@ -255,10 +255,10 @@ class ShinkenAdmin(cmd.Cmd):
             # get properties from link classes
             if type == 'arbiter': 
                 o = ArbiterLink()
-                cfglink = 'arbiterlinks'
+                cfglink = 'arbiters'
             elif type =='scheduler': 
                 o = SchedulerLink()
-                cfglink = 'schedulerlinks'
+                cfglink = 'schedulers'
             elif type =='poller': 
                 o = PollerLink()
                 cfglink = 'pollers'

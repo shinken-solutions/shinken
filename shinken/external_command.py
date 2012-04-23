@@ -361,7 +361,7 @@ class ExternalCommandManager:
 
     # The command is global, so sent it to every schedulers
     def dispatch_global_command(self, command):
-        for sched in self.conf.schedulerlinks:
+        for sched in self.conf.schedulers:
             safe_print("Sending a command", command, 'to scheduler', sched)
             if sched.alive:                
                 #sched.run_external_command(command)

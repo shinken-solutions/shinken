@@ -311,8 +311,8 @@ class Config(Item):
         'notificationway':  (NotificationWay, NotificationWays, 'notificationways'),
         'servicedependency': (Servicedependency, Servicedependencies, 'servicedependencies'),
         'hostdependency':   (Hostdependency, Hostdependencies, 'hostdependencies'),
-        'arbiter':          (ArbiterLink, ArbiterLinks, 'arbiterlinks'),
-        'scheduler':        (SchedulerLink, SchedulerLinks, 'schedulerlinks'),
+        'arbiter':          (ArbiterLink, ArbiterLinks, 'arbiters'),
+        'scheduler':        (SchedulerLink, SchedulerLinks, 'schedulers'),
         'reactionner':      (ReactionnerLink, ReactionnerLinks, 'reactionners'),
         'broker':           (BrokerLink, BrokerLinks, 'brokers'),
         'receiver':         (ReceiverLink, ReceiverLinks, 'receivers'),
@@ -648,23 +648,23 @@ class Config(Item):
 
         self.modules.create_reversed_list()
 
-        if len(self.arbiterlinks) == 0:
+        if len(self.arbiters) == 0:
             logger.warning("There is no arbiter, I add one in localhost:7770", print_it=False)
             a = ArbiterLink({'arbiter_name' : 'Default-Arbiter',
                              'host_name' : socket.gethostname(),
                              'address' : 'localhost', 'port' : '7770',
                              'spare' : '0'})
-            self.arbiterlinks = ArbiterLinks([a])
+            self.arbiters = ArbiterLinks([a])
 
         #First fill default
-        self.arbiterlinks.fill_default()
+        self.arbiters.fill_default()
         self.modules.fill_default()
 
         #print "****************** Pythonize ******************"
-        self.arbiterlinks.pythonize()
+        self.arbiters.pythonize()
 
         #print "****************** Linkify ******************"
-        self.arbiterlinks.linkify(self.modules)
+        self.arbiters.linkify(self.modules)
         self.modules.linkify()
 
 
@@ -757,8 +757,8 @@ class Config(Item):
 
         #print "Schedulers and satellites"
         #Link all links with realms
-#        self.arbiterlinks.linkify(self.modules)
-        self.schedulerlinks.linkify(self.realms, self.modules)
+#        self.arbiters.linkify(self.modules)
+        self.schedulers.linkify(self.realms, self.modules)
         self.brokers.linkify(self.realms, self.modules)
         self.receivers.linkify(self.realms, self.modules)
         self.reactionners.linkify(self.realms, self.modules)
@@ -966,10 +966,10 @@ class Config(Item):
         self.pollers.fill_default()
         self.brokers.fill_default()
         self.receivers.fill_default()
-        self.schedulerlinks.fill_default()
+        self.schedulers.fill_default()
 
         # The arbiters are already done.
-        # self.arbiterlinks.fill_default()
+        # self.arbiters.fill_default()
 
         #Now fill some fields we can predict (like adress for hosts)
         self.fill_predictive_missing_parameters()
@@ -991,7 +991,7 @@ class Config(Item):
             default = Realm({'realm_name' : 'Default', 'default' : '1'})
             self.realms = Realms([default])
             logger.info("The is no defined realms, so I add a new one %s" % default.get_name(), print_it=False)
-            lists = [self.pollers, self.brokers, self.reactionners, self.receivers, self.schedulerlinks]
+            lists = [self.pollers, self.brokers, self.reactionners, self.receivers, self.schedulers]
             for l in lists:
                 for elt in l:
                     if not hasattr(elt, 'realm'):
@@ -1002,11 +1002,11 @@ class Config(Item):
     #If a satellite is missing, we add them in the localhost
     #with defaults values
     def fill_default_satellites(self):
-        if len(self.schedulerlinks) == 0:
+        if len(self.schedulers) == 0:
             logger.warning("There is no scheduler, I add one in localhost:7768", print_it=False)
             s = SchedulerLink({'scheduler_name' : 'Default-Scheduler',
                                'address' : 'localhost', 'port' : '7768'})
-            self.schedulerlinks = SchedulerLinks([s])
+            self.schedulers = SchedulerLinks([s])
         if len(self.pollers) == 0:
             logger.warning("There is no poller, I add one in localhost:7771", print_it=False)
             p = PollerLink({'poller_name' : 'Default-Poller',
@@ -1036,7 +1036,7 @@ class Config(Item):
 
     #return if one scheduler got a module of type : mod_type
     def got_scheduler_module_type_defined(self, mod_type):
-        for b in self.schedulerlinks:
+        for b in self.schedulers:
             for m in b.modules:
                 if hasattr(m, 'module_type') and m.module_type == mod_type:
                     return True
@@ -1046,7 +1046,7 @@ class Config(Item):
     # but this tuime it's tricky : the python pass is not done!
     # so look with strings!
     def got_arbiter_module_type_defined(self, mod_type):
-        for a in self.arbiterlinks:
+        for a in self.arbiters:
             # Do like the linkify will do after....
             for m in getattr(a , 'modules', '').split(','):
                 # So look at what the arbiter try to call as module
@@ -1187,7 +1187,7 @@ class Config(Item):
             logger.warning("I autogenerated some Scheduler modules, please look at your configuration")
             for m in mod_to_add_to_schedulers:
                 logger.warning("The module %s is autogenerated" %  m.module_name)
-                for b in self.schedulerlinks:
+                for b in self.schedulers:
                     b.modules.append(m)
 
 
@@ -1218,7 +1218,7 @@ class Config(Item):
             logger.warning("I autogenerated some Arbiter modules, please look at your configuration")
             for (mod, data) in mod_to_add:
                 logger.warning("The module %s is autogenerated" % data['module_name'])
-                for a in self.arbiterlinks:
+                for a in self.arbiters:
                     a.modules = ','.join([getattr(a, 'modules', ''), data['module_name']])
                 self.modules.items[mod.id] = mod
 
@@ -1231,7 +1231,7 @@ class Config(Item):
             os.environ['TZ'] = self.use_timezone
             time.tzset()
 
-            tab = [self.schedulerlinks, self.pollers, self.brokers, self.receivers, self.reactionners]
+            tab = [self.schedulers, self.pollers, self.brokers, self.receivers, self.reactionners]
             for t in tab:
                 for s in t:
                     if s.use_timezone == 'NOTSET':
@@ -1334,7 +1334,7 @@ class Config(Item):
             r = False
             logger.info("Hosts: detected loop in parents ; conf incorrect")
         
-        for x in ( 'servicedependencies', 'hostdependencies', 'arbiterlinks', 'schedulerlinks',
+        for x in ( 'servicedependencies', 'hostdependencies', 'arbiters', 'schedulers',
                    'reactionners', 'pollers', 'brokers', 'receivers', 'resultmodulations',
                    'discoveryrules', 'discoveryruns', 'businessimpactmodulations'):
             try: cur = getattr(self, x)
@@ -1349,7 +1349,7 @@ class Config(Item):
 
         # Look that all scheduler got a broker that will take brok.
         # If there are no, raise an Error
-        for s in self.schedulerlinks:
+        for s in self.schedulers:
             rea = s.realm
             if rea:
                 if len(rea.potential_brokers) == 0:
@@ -1406,8 +1406,8 @@ class Config(Item):
         self.discoveryrules.pythonize()
         self.discoveryruns.pythonize()
         # The arbiters are already done
-        # self.arbiterlinks.pythonize()
-        self.schedulerlinks.pythonize()
+        # self.arbiters.pythonize()
+        self.schedulers.pythonize()
         self.realms.pythonize()
         self.reactionners.pythonize()
         self.pollers.pythonize()
@@ -1699,9 +1699,9 @@ class Config(Item):
     # New confs are independent whith checks. The only communication
     # That can be need is macro in commands
     def cut_into_parts(self):
-        #print "Scheduler configurated :", self.schedulerlinks
+        #print "Scheduler configurated :", self.schedulers
         # I do not care about alive or not. User must have set a spare if need it
-        nb_parts = len([s for s in self.schedulerlinks if not s.spare])
+        nb_parts = len([s for s in self.schedulers if not s.spare])
 
         if nb_parts == 0:
             nb_parts = 1
