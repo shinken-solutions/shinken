@@ -131,8 +131,12 @@ class CommandCall(DummyCommandCall):
 
         # The command is a bit special, we just put it's name
         # or a '' if need
-        if self.command:
+        if self.command and not isinstance(self.command, basestring):
             res['command'] = self.command.get_name()
+        # Maybe it's a repickle of a unpickle thing... (like with deepcopy). If so
+        # only take the value
+        elif self.command and isinstance(self.command, basestring):
+            res['command'] = self.command
         else:
             res['command'] = ''
 

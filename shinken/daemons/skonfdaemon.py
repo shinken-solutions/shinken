@@ -51,6 +51,8 @@ from shinken.util import safe_print
 from shinken.skonfuiworker import SkonfUIWorker
 from shinken.message import Message
 
+# DBG : code this!
+from shinken.objects import Contact
 
 # Now the bottle HTTP part :)
 from shinken.webui.bottle import Bottle, run, static_file, view, route, request, response
@@ -215,7 +217,7 @@ class Skonf(Daemon):
                 arb.need_conf = False
                 self.me = arb
                 self.is_master = not self.me.spare
-                logger.info("I am the %s Arbiter : %s" % ('master' if self.is_master else 'spare', arb.get_name())
+                logger.info("I am the %s Arbiter : %s" % ('master' if self.is_master else 'spare', arb.get_name()))
 
                 # Set myself as alive ;)
                 self.me.alive = True
@@ -377,6 +379,7 @@ class Skonf(Daemon):
         # Ok, here we must check if we go on or not.
         # TODO : check OK or not
         self.use_local_log = self.conf.use_local_log
+        self.log_level = logger.get_level_id(self.conf.log_level)
         self.local_log = self.conf.local_log
         self.pidfile = os.path.abspath(self.conf.lock_file)
         self.idontcareaboutsecurity = self.conf.idontcareaboutsecurity
@@ -855,7 +858,10 @@ class Skonf(Daemon):
             return None
 
         #c = self.datamgr.get_contact(user_name)
-        return user_name
+        c = Contact()
+        c.contact_name = user_name
+        c.is_admin = True
+        return c
 
 
 
@@ -895,3 +901,24 @@ class Skonf(Daemon):
        msg = Message(id=0, type='ScanAsk', data={'scan_id' : id})
        print "Creating a Message for ScanAsk", msg
        self.workers_queue.put(msg)
+
+
+        # Will get all label/uri for external UI like PNP or NagVis
+    def get_external_ui_link(self):
+        lst = []
+        for mod in self.modules_manager.get_internal_instances():
+            try:
+                f = getattr(mod, 'get_external_ui_link', None)
+                if f and callable(f):
+                    r = f()
+                    lst.append(r)
+            except Exception , exp:
+                print exp.__dict__
+                logger.log("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
+                logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
+                logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
+                self.modules_manager.set_to_restart(mod)        
+
+        safe_print("Will return external_ui_link::", lst)
+        return lst
+
