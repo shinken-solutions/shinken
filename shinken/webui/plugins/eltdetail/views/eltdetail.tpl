@@ -45,6 +45,16 @@ Invalid element name
     }
   });
 
+
+  /* Look at the # part of the URI. If it match a nav name, go for it*/
+  $(document).ready(function(){
+     if (window.location.hash.length > 0) {
+       $('ul.nav-tabs > li > a[href="' + window.location.hash + '"]').tab('show');
+     }else{
+       $('ul.nav-tabs > li > a:first').tab('show');
+     }
+  });
+
   // Now we hook teh global search thing
   $('.typeahead').typeahead({
     // note that "value" is the default setting for the property option
