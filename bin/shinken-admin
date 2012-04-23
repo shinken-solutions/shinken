@@ -247,7 +247,7 @@ class ShinkenAdmin(cmd.Cmd):
 
         if line == "help" or line == "":
             print "Usage : showconfig objecttype [objectname]"
-            print "Exemple : showconfig poller poller-1"
+            print "Example : showconfig poller poller-1"
         else:
             type=line
             self.look_connexion()
