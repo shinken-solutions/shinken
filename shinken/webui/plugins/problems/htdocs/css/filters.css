@@ -29,3 +29,7 @@
 .ack_filter_color {
     background-color: #EDEDED;
 }
+
+.downtime_filter_color{
+    background-color : #E10C02;
+}

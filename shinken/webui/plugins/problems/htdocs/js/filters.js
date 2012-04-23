@@ -35,6 +35,16 @@ function save_state_ack_filter(){
     }
 }
 
+function save_state_downtime_filter(){
+    var r = document.forms.downtime_filter.show_downtime.checked;
+    var b = document.forms.downtime_filter.show_both_downtime.checked;
+    if(b){
+	add_state_downtime_filter('both');
+    }else{
+	add_state_downtime_filter(r);
+    }
+}
+
 
 function clean_new_search(){
     console.log('Cleaning new search');
@@ -198,6 +208,27 @@ function add_state_ack_filter(name){
     f = {};
     f.type = 'ack';
     f.long_type = 'Acknowledged';
+    f.search = name;
+    new_filters.push(f);
+    refresh_new_search_div();
+}
+
+
+// ******************* Ack state ******************
+function add_active_state_downtime_filter(name){
+    f = {};
+    f.type = 'downtime';
+    f.long_type = 'Downtime';
+    f.search = name;
+    current_filters.push(f);
+    add_state_ack_filter(name);
+}
+
+function add_state_downtime_filter(name){
+    if(already_got_filter('downtime', name)){return;}
+    f = {};
+    f.type = 'downtime';
+    f.long_type = 'Downtime';
     f.search = name;
     new_filters.push(f);
     refresh_new_search_div();

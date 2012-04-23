@@ -103,61 +103,66 @@
   </div>
   <div class='in_panel_filter'>
     <h3>Names</h3>
-    <form name='namefilter'>
+    <form name='namefilter' class='form-horizontal'>
       <input name='name'></input>
-      <p><a class='btn btn-success pull-right' href="javascript:save_name_filter();"> <i class="icon-chevron-right"></i> Add a name filter</a></p>
+      <p class='pull-right'><a class='btn btn-success pull-right' href="javascript:save_name_filter();"> <i class="icon-chevron-right"></i> Add</a></p>
     </form>
 
-    <span><p>&nbsp;</p></span>
     <h3>Hostgroup</h3>
-    <form name='hgfilter'>
+    <form name='hgfilter' class='form-horizontal'>
       <select name='hg'>
 	%for hg in datamgr.get_hostgroups_sorted():
 	<option value='{{hg.get_name()}}'> {{hg.get_name()}} ({{len(hg.members)}})</option>
 	%end
       </select>
-      <p><a class='btn btn-success pull-right' href="javascript:save_hg_filter();"> <i class="icon-chevron-right"></i> Add a group filter</a></p>
+      <p class='pull-right'><a class='btn btn-success pull-right' href="javascript:save_hg_filter();"> <i class="icon-chevron-right"></i> Add</a></p>
     </form>
-    <span><p>&nbsp;</p></span>
 
     <h3>Tag</h3>
-    <form name='htagfilter'>
+    <form name='htagfilter' class='form-horizontal'>
       <select name='htag'>
 	%for (t, n) in datamgr.get_host_tags_sorted():
 	<option value='{{t}}'> {{t}} ({{n}})</option>
 	%end
       </select>
-      <p><a class='btn btn-success pull-right' href="javascript:save_htag_filter();"> <i class="icon-chevron-right"></i> Add a tag filter</a></p>
+      <p class='pull-right'><a class='btn btn-success pull-right' href="javascript:save_htag_filter();"> <i class="icon-chevron-right"></i> Add</a></p>
     </form>
-    <span><p>&nbsp;</p></span>
 
     <h3>Realms</h3>
-    <form name='realmfilter'>
+    <form name='realmfilter' class='form-horizontal'>
       <select name='realm'>
 	%for r in datamgr.get_realms():
 	<option value='{{r}}'> {{r}}</option>
 	%end
       </select>
-      <p><a class='btn btn-success pull-right' href="javascript:save_realm_filter();"> <i class="icon-chevron-right"></i> Add a realm filter</a></p>
+      <p class='pull-right'><a class='btn btn-success pull-right' href="javascript:save_realm_filter();"> <i class="icon-chevron-right"></i> Add</a></p>
     </form>
-    <span><p>&nbsp;</p></span>
 
     <h3>States</h3>
-    <form name='ack_filter'>
-      <label>Acknowleged</label>
+    <form name='ack_filter' class='form-horizontal'>
+
+      <span class="help-inline">Ack </span>
       %if page=='problems':
       <input type='checkbox' name='show_ack'></input>
       %else:
       <input type='checkbox' name='show_ack' checked></input>      
       %end
-      <label>Both acknowleged states</label>
+
+      <span class="help-inline">Both ack states</span>
       <input type='checkbox' name='show_both_ack'></input>
-      <p><a class='btn btn-success pull-right' href="javascript:save_state_ack_filter();"> <i class="icon-chevron-right"></i> Add a acknowleged filter</a></p>
+      <p class='pull-right'><a class='btn btn-success pull-right' href="javascript:save_state_ack_filter();"> <i class="icon-chevron-right"></i> Add</a></p>
     </form>
-    <form name='downtime_filter'>
-      <label>Show in downtimes</label>
-      <input type='checkbox' name='show_downtime'/>
-      <p><a class='btn btn-success pull-right' href="javascript:save_state_dowtnime_filter();"> <i class="icon-chevron-right"></i> Add a downtime filter</a></p>
+
+    <form name='downtime_filter' class='form-horizontal'>
+      <span class="help-inline">Downtime</span>
+      %if page=='problems':
+      <input type='checkbox' name='show_downtime'></input>
+      %else:
+      <input type='checkbox' name='show_downtime' checked></input>
+      %end
+      <span class="help-inline">Both downtime states</span>
+      <input type='checkbox' name='show_both_downtime'></input>
+      <p class='pull-right'><a class='btn btn-success pull-right' href="javascript:save_state_downtime_filter();"> <i class="icon-chevron-right"></i> Add</a></p>
     </form>
     
     <span><p>&nbsp;</p></span>
@@ -305,7 +310,16 @@ $(function(){
       <span class="ack_filter_name">Ack : {{r}}</span>
       <span class="filter_delete"><a href='javascript:remove_current_filter("ack", "{{r}}", "/{{page}}");' class="close">&times;</a></span>
     </li>
-    <script>add_active_ack_filter('{{r}}');</script>
+    <script>add_active_state_ack_filter('{{r}}');</script>
+    %end
+
+    %for r in filters['downtime']:
+    <li>
+      <span class="filter_color downtime_filter_color">&nbsp;</span>
+      <span class="downtime_filter_name">Downtime : {{r}}</span>
+      <span class="filter_delete"><a href='javascript:remove_current_filter("downtime", "{{r}}", "/{{page}}");' class="close">&times;</a></span>
+    </li>
+    <script>add_active_state_downtime_filter('{{r}}');</script>
     %end
 
     </ul>

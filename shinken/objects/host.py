@@ -213,7 +213,7 @@ class Host(SchedulingItem):
         # use for having all contacts we have notified
         'notified_contacts':    StringProp(default=set()),
 
-        'in_scheduled_downtime': BoolProp(default=False, retention=True),
+        'in_scheduled_downtime': BoolProp(default=False, fill_brok=['full_status'], retention=True),
         'in_scheduled_downtime_during_last_check': BoolProp(default=False, retention=True),
 
         # put here checks and notif raised
