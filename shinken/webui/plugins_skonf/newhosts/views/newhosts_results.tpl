@@ -1,7 +1,5 @@
 
-%rebase layout_skonf globals(), title="Discovery scan results", css=['newhosts/css/results.css'], js=['newhosts/js/results.js']
-
-<div> <h1> Discover your new hosts </h1> </div>
+%rebase layout_skonf globals(), title="Discovery scan results", css=['newhosts/css/results.css', 'newhosts/css/token-input.css', 'newhosts/css/token-input-mac.css', 'newhosts/css/token-input-facebook.css'], js=['newhosts/js/results.js', 'newhosts/js/jquery.tokeninput.js']
 
 <p>Here are the scans :</p>
 %for s in scans:
@@ -9,6 +7,10 @@
 %end
 
 <p>Here are the results :</p>
+
+<script>
+  var tags_by_host = {};
+</script>
 
 %for h in pending_hosts:
      %hname = h['host_name']
@@ -24,7 +26,7 @@
            </span>
 	   <span class="cell">
 	     <label for="tags">Tags:</label>
-	     <input name="tags" type="text" tabindex="2" value="{{h['use']}}" id="form-use-{{h['host_name']}}"/>
+	     <input id='input-{{h['host_name']}}' class='to_use_complete' data-use='{{h['use']}}' name="tags" type="text" tabindex="2"  />
 	   </span>
 	   <span class="cell">
 	     <a tabindex="4" href='javascript: validatehostform("{{h['host_name']}}")'>
@@ -38,7 +40,7 @@
 	 </span>
        </span>
      </form>
-
+     <a href='javascript:get_use_values("{{h['host_name']}}")'>TOTO</a>
      <div id="good-result-{{hname}}" class='div-result'>
        OK, the host {{hname}} was added succesfuly.
        <img class='form_button_image' src="/static/images/big_ack.png" alt="OK"/>
@@ -49,21 +51,33 @@
      </div>
 
 
-     %# " Add the auto copleter in the search input form"
-     <script type="text/javascript">
-       document.addEvent('domready', function() {
-         var tags = $("form-use-{{h['host_name']}}");
-       
-         // Our instance for the element with id "use-"
-         new Autocompleter.Request.JSON(tags, '/lookup/tag', {
-            'indicatorClass': 'autocompleter-loading',
-            'minLength': 3,
-            'multiple': true,
-         });
-       
-       });
-     </script>
      </div>
 
 
 %end
+
+
+
+     %# " Add the auto copleter in the search input form"
+     <script type="text/javascript">
+
+
+     </script>
+
+
+<style>
+  #sortable { list-style-type: none; margin: 0; padding: 0; width: 60%; }
+  #sortable li { margin: 0 3px 3px 3px; padding: 0.4em; padding-left: 1.5em; font-size: 1.4em; height: 18px; }
+  #sortable li span { position: absolute; margin-left: -1.3em; }
+  </style>
+<script>
+  $(function() {
+  $( ".token-input-list-facebook" ).sortable();
+  $( ".token-input-list-facebook" ).disableSelection();
+  });
+  </script>
+
+
+
+
+

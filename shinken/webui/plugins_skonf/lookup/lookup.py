@@ -49,8 +49,16 @@ def lookup(name=''):
         print "Lookup %s too short, bail out" % name
         return []
 
-    hnames = (h.host_name for h in app.datamgr.get_hosts())
-    r  = [n for n in hnames if n.startswith(name)]
+
+    print "Lookup for", name
+    tags = set()
+    for h in app.host_templates.values():
+        print "Template", h
+        if hasattr(h, 'name'):
+            tags.add(h.name)
+    r  = [n for n in tags if n.startswith(name)]
+
+    print "RES", r
 
     return json.dumps(r)
 
@@ -73,7 +81,7 @@ def lookup_tag_post():
         print "Template", h
         if hasattr(h, 'name'):
             tags.add(h.name)
-    r  = [n for n in tags if n.startswith(name)]
+    r  = [{'id' :n, 'name' :n} for n in tags if n.startswith(name)]
 
     print "RES", r
 
@@ -81,6 +89,7 @@ def lookup_tag_post():
 
 
 
-pages = {lookup_tag_post : { 'routes' : ['/lookup/tag'] , 'method' : 'POST'}
+pages = {lookup_tag_post : { 'routes' : ['/lookup/tag'] , 'method' : 'POST'},
+         lookup : { 'routes' : ['/lookup/tag/:name']},
          }
 

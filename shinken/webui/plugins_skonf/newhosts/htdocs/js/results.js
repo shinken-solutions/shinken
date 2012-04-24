@@ -59,9 +59,49 @@ function validatehostform(name) {
 
 
 /* We Hide all results divs */
-window.addEvent('domready', function(){
-    var res = $$('.div-result');
-	 res.each(function(el){
-	     new Fx.Slide(el).hide();
-	 });
+$(document).ready(function(){
+    $('.div-result').hide();
+});
+
+
+
+
+
+function get_use_values(name){
+    v = $('.use-value-input-'+name);
+    r = [];
+    $.each(v, function(idx, name){
+        console.log('use-value?'+$(this).html()+' '+idx+' '+name);
+	r.push($(this).html());
+    });
+    //console.log('Got the good values at last!'+r.length);
+    console.log(dump(r));
+    return r;
+}
+
+
+
+// Go autofill tags
+$(document).ready(function(){
+    $(".to_use_complete").each(function(idx, elt){
+        var raw_use = $(this).attr('data-use').split(',');
+        var pop = [];
+        $.each(raw_use, function(idx, v){pop.push({id:v, name : v})});
+	
+	$(this).tokenInput("/lookup/tag",
+			   {'theme' : 'facebook',
+			    prePopulate: pop, 
+			    method : 'POST', queryParam:'value', 
+			    preventDuplicates: true,
+			    tokenFormatter: function(item) { return "<li><p class='use-value-"+this.ref_id+"'>"+item[this.propertyToSearch] + "</p></li>" },ref_id : $(this).attr('id')
+			    
+			   });
+    });
+});
+
+
+
+$(function() {
+    $( ".token-input-list-facebook" ).sortable();
+    $( ".token-input-list-facebook" ).disableSelection();
 });

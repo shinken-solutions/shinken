@@ -1,7 +1,12 @@
 
 %rebase layout_skonf globals()
-<div> <h1> Discover your new hosts </h1> </div>
 
-Discovery launched. Redirecting in progress.
+<div class="span4 offset1 alert alert-success">
+  Discovery launched. Redirecting in progress.
+  <p class='pull-right'>
+    <a class='btn btn-primary' href="/newhosts/results"><i class="icon-chevron-right"></i> Go to results</a>
+  </p>
+</div>
+    
 
-<p><a href='/newhosts/results'>Scan results</a></p>
+
