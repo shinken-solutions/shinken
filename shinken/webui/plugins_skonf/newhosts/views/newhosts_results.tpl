@@ -8,14 +8,10 @@
 
 <p>Here are the results :</p>
 
-<script>
-  var tags_by_host = {};
-</script>
-
 %for h in pending_hosts:
      %hname = h['host_name']
      <div id="host-{{h['host_name']}}" class="grid_10 discovered_host">
-     <br/>{{h}}
+     <br/><!-- "{{h}}" -->
      <form method="post" id="form-{{h['host_name']}}" action="/newhosts/validatehost">
        <span class="table">
 	 <span class="row">
@@ -29,7 +25,7 @@
 	     <input id='input-{{h['host_name']}}' class='to_use_complete' data-use='{{h['use']}}' name="tags" type="text" tabindex="2"  />
 	   </span>
 	   <span class="cell">
-	     <a tabindex="4" href='javascript: validatehostform("{{h['host_name']}}")'>
+	     <a tabindex="4" href='javascript:validatehostform("{{h['host_name']}}")'>
 	       <img class='form_button_image' src="/static/images/big_ack.png" alt="Validate"/>
 	     </a>
 	   </span>
@@ -55,29 +51,6 @@
 
 
 %end
-
-
-
-     %# " Add the auto copleter in the search input form"
-     <script type="text/javascript">
-
-
-     </script>
-
-
-<style>
-  #sortable { list-style-type: none; margin: 0; padding: 0; width: 60%; }
-  #sortable li { margin: 0 3px 3px 3px; padding: 0.4em; padding-left: 1.5em; font-size: 1.4em; height: 18px; }
-  #sortable li span { position: absolute; margin-left: -1.3em; }
-  </style>
-<script>
-  $(function() {
-  $( ".token-input-list-facebook" ).sortable();
-  $( ".token-input-list-facebook" ).disableSelection();
-  });
-  </script>
-
-
 
 
 
