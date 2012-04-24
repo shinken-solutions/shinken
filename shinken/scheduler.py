@@ -176,9 +176,7 @@ class Scheduler:
             # Commands in the host/services/contacts are not real one
             # we must relink them
             t0 = time.time()
-            self.hosts.late_linkify_h_by_commands(self.commands)
-            self.services.late_linkify_s_by_commands(self.commands)
-            self.contacts.late_linkify_c_by_commands(self.commands)
+            self.conf.late_linkify()
             print 'Late command relink in', time.time() - t0
 
         # self.status_file = StatusFile(self)        # External status file
