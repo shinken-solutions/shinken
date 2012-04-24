@@ -744,7 +744,6 @@ $.TokenList = function (input, url_or_data, settings) {
 	console.log(v);
 	add_token({id :v, name : v});
         hidden_input.change();
-
     }
 
     // Do a search and show the "searching" dropdown if the input is longer
