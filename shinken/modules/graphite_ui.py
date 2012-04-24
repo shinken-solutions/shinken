@@ -26,6 +26,7 @@ import re
 import socket
 
 from shinken.basemodule import BaseModule
+from datetime import date
 
 #print "Loaded AD module"
 
@@ -127,6 +128,8 @@ class Graphite_Webui(BaseModule):
         t = elt.__class__.my_type
         r = []
 
+        d = date.fromtimestamp(graphstart)
+        d = d.strftime('%H:%M_%Y%m%d')
 
         if t == 'host':
             couples = self.get_metric_and_value(elt.perf_data)
@@ -140,7 +143,7 @@ class Graphite_Webui(BaseModule):
 
             # Send a bulk of all metrics at once
             for (metric, _) in couples:
-                uri = self.uri + 'render/?width=586&height=308&lineMode=connected'
+                uri = self.uri + 'render/?width=586&height=308&lineMode=connected&from=' + d
                 if re.search(r'_warn|_crit', metric):
                     continue
                 uri += "&target=%s.__HOST__.%s" % (host_name, metric)
@@ -164,7 +167,7 @@ class Graphite_Webui(BaseModule):
             
             # Send a bulk of all metrics at once
             for (metric, value) in couples:
-                uri = self.uri + 'render/?width=586&height=308&lineMode=connected'
+                uri = self.uri + 'render/?width=586&height=308&lineMode=connected&from=' + d
                 if re.search(r'_warn|_crit', metric):
                     continue
                 elif value[1] == '%':
