@@ -55,7 +55,7 @@ def get_page(cmd=None):
         return forge_response(callback, 401, 'Invalid session')
 
     # Or he is not allowed to launch commands?
-    if not user.can_submit_commands:
+    if app.manage_acl and not user.can_submit_commands:
         return forge_response(callback, 403, 'You are not authorized to launch commands')
 
     now = int(time.time())

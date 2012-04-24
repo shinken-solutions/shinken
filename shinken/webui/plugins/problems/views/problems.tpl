@@ -13,7 +13,7 @@
 
 %# Look for actions if we must show them or not
 %global_disabled = ''
-%if not helper.can_action(user):
+%if app.manage_acl and not helper.can_action(user):
 %global_disabled = 'disabled-link'
 <script type="text/javascript">
   var actions_enabled = false;
