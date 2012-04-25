@@ -5,6 +5,7 @@
  * Copyright (c) 2009 James Smith (http://loopj.com)
  * Licensed jointly under the GPL and MIT licenses,
  * choose which one suits your project best!
+ * Doc at : http://loopj.com/jquery-tokeninput/
  *
  */
 

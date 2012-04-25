@@ -1,5 +1,5 @@
 
-%rebase layout_skonf globals(), title="Discovery scan results", css=['newhosts/css/results.css', 'newhosts/css/token-input.css', 'newhosts/css/token-input-mac.css', 'newhosts/css/token-input-facebook.css'], js=['newhosts/js/results.js', 'newhosts/js/jquery.tokeninput.js']
+%rebase layout_skonf globals(), title="Discovery scan results", css=['newhosts/css/results.css', 'newhosts/css/token-input.css', 'newhosts/css/token-input-facebook.css'], js=['newhosts/js/results.js', 'newhosts/js/jquery.tokeninput.js']
 
 <p>Here are the scans :</p>
 %for s in scans:

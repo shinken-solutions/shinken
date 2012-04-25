@@ -170,10 +170,16 @@ function flush_selected_elements(){
 }
 
 
+/* Jquery need simple id, so no / or space. So we get in the #id
+the data-raw-obj-name to get the unchanged name*/
+function unid_name(name){
+    return $('#'+name).attr('data-raw-obj-name');
+}
+
 /* Now actions buttons : */
 function recheck_now_all(){
     $.each(selected_elements,function(idx, name){
-	recheck_now(name);
+	recheck_now(unid_name(name));
     });
     flush_selected_elements();
 }
@@ -182,7 +188,7 @@ function recheck_now_all(){
 /* Now actions buttons : */
 function try_to_fix_all(){
     $.each(selected_elements, function(idx, name){
-        try_to_fix(name);
+        try_to_fix(unid_name(name));
     });
     flush_selected_elements();
 }
@@ -190,7 +196,7 @@ function try_to_fix_all(){
 
 function acknowledge_all(user){
     $.each(selected_elements, function(idx, name){
-	do_acknowledge(name, 'Acknowledge from WebUI.', user);
+	do_acknowledge(unid_name(name), 'Acknowledge from WebUI.', user);
     });
     flush_selected_elements();
 }
