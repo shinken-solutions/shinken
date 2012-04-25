@@ -30,9 +30,26 @@
 	    </ul>
 	  </li>
 	</ul>
+	<ul class="nav">
+	  <li><a href="/main">Home</a></li>
+	</ul>
+
+	<ul class="nav">
+	  %if menu_part == '/newhosts':
+          <li class="dropdown active">
+	  %else:
+	  <li class="dropdown">
+	  %end
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown"> Discovery<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              <li><a href="/newhosts">Scan new hosts</a></li>
+              <li><a href="/newhosts/results">Scan results</a></li>
+            </ul>
+          </li>
+        </ul>
 	
 	<ul class="nav">
-	  %menu = [ ('/main', 'Home'), ('/newhosts', 'New hosts'), ('/packs','Packs'), ('/system','System'), ('/otheruis', 'Link with other UIs')]
+	  %menu = [ ('/packs','Packs'), ('/system','System'), ('/otheruis', 'Link with other UIs')]
           %for (key, value) in menu:
             %# Check for the selected element, if there is one
             %if menu_part == key:
