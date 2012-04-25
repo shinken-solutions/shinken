@@ -87,11 +87,14 @@ def get_scans():
 
 def get_results():
     print "Looking for hosts in pending aprouval"
-    cur = app.db.discovered_hosts.find({})
+    now = int(time.time())
+    yesterday = now - 86400
+    cur = app.db.discovered_hosts.find()
     pending_hosts = [h for h in cur]
 
     print "And in progress scans"
-    cur = app.db.scans.find({})
+    
+    cur = app.db.scans.find({'creation' : {'$gte': yesterday}})
     scans = [s for s in cur]
     for s in scans:
         print "SCAN", s
@@ -106,7 +109,7 @@ def post_validatehost():
     tags = app.request.forms.get('tags', '')
     host_name = app.request.forms.get('host_name', None)
 
-    print "DUMP FORMS", app.request.forms
+    print "DUMP FORMS", app.request.forms.__dict__
     print "Got in request form", _id, host_name, tags
     if not host_name:
         print "BAD HOST NAME for post_validatehost bail out"
@@ -114,13 +117,13 @@ def post_validatehost():
 
     host = {'_id' : _id, 'host_name' : host_name, 'use' : tags}
     print "Saving", host, "in", app.db.hosts
-    r = app.db.hosts.save(host)
-    print "result", r
+    #r = app.db.hosts.save(host)
+    #print "result", r
 
     # Now we can remove the one in the discovered part
     print "And deleting the discovered host"
-    r = app.db.discovered_hosts.remove({'_id' : _id})
-    print "result", r
+    #r = app.db.discovered_hosts.remove({'_id' : _id})
+    #print "result", r
 
     return None
 

@@ -149,7 +149,7 @@
             filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#e10000', EndColorStr='#669900'); /* IE6-IE9 */
 }
 
-.alert-info, .alert-unknown, .alert-unreachable {
+.alert-unknown, .alert-unreachable {
     color: #FFFFFF;
     background-color: #71DB65;
     background-image: -webkit-gradient(linear, left top, left bottom, from(#71DB65), to(#7AB317)); /* Saf4+, Chrome */

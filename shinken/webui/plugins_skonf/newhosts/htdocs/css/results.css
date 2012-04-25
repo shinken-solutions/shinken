@@ -1,7 +1,7 @@
 
 .discovered_host {
-    padding: 5;
-    border : 1px;
+    padding: 7px;
+    border : 2px;
 }
 
 
@@ -11,7 +11,12 @@
 }
 
 
-.log_result.ajax-loading {
+.ajax-loading {
     padding: 20px 0;
     background: url(/static/images/spinner.gif) no-repeat center;
+    width : 20px;
+}
+
+
+.push-result{
 }

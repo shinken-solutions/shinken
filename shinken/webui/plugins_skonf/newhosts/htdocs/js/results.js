@@ -23,48 +23,63 @@
 
 
 
-
 function validatehostform(name) {
     //var form = document.forms[name];//.submit();
 
-    var form = $("form-"+name);
     //alert("submit" + name);
     /**
      * This empties the log and shows the spinning indicator
      */
-    var log = $("res-"+name).empty().addClass('ajax-loading');
+    var f = document.forms['form-'+name];
 
-    new Request({
-        method: form.method,
-        url: form.action+"toto",
-        onSuccess: function(responseText, responseXML) {
-            log.removeClass('ajax-loading');
-            log.set('text', 'text goes here');
-	    div_res = $("good-result-"+name);
-	    new Fx.Slide(div_res).show();
-	    div_res.highlight('#ddf');
+    var data = {'_id' : f._id.value, 'host_name' : f.host_name.value, 'use' : get_use_values(name)};
+    console.log('Data?'+dump(data));
+
+    $('#loading-'+name).show();
+    $.ajax({
+	url: '/newhosts/validatehost',
+	type : 'POST',
+	data : data,
+	success: function(data) {
+	    console.log('Got result for'+name);
+	    var r = $('#push-result-'+name);
+	    r.show();
+	    r.addClass('alert-success');
+	    r.html('Host '+name+' was added succesfully');
+	    $('#loading-'+name).hide();
+	    $('#form-'+name).hide();
+	    $('#show_form-'+name).show();
+	    $('#btn-validate-'+name).css({opacity : 0.5});	    
+	},
+	error: function(data, txt) {
+            console.log('Got bad result for'+name);
+            var r = $('#push-result-'+name);
+	    r.show();
+            r.addClass('alert-error');
+            r.html('Error for '+name+' :' +txt);
+	    $('#loading-'+name).hide();
         },
-	onFailure: function(responseText, responseXML) {
-            log.removeClass('ajax-loading');
-            log.set('text', 'ajax finished');
-	    div_res = $("bad-result-"+name);
-	    new Fx.Slide(div_res).show();
-	    div_res.highlight('#ddf');
-        }
 
-    }).send(form.toQueryString());
+    });
 }
 
 
 
 
-/* We Hide all results divs */
+/* We Hide all results and loading divs */
 $(document).ready(function(){
-    $('.div-result').hide();
+    $('.ajax-loading').hide();
+    $('.show_form').hide();
+    $('.push-result').hide();
 });
 
 
-
+// We should get back our form :p
+function show_form(name){
+    $('#form-'+name).show();
+    $('#show_form-'+name).hide();
+    $('#btn-validate-'+name).css({opacity : 1});
+}
 
 
 function get_use_values(name){
@@ -74,9 +89,9 @@ function get_use_values(name){
         console.log('use-value?'+$(this).html()+' '+idx+' '+name);
 	r.push($(this).html());
     });
-    //console.log('Got the good values at last!'+r.length);
-    console.log(dump(r));
-    return r;
+    //console.log(dump(r));
+    console.log('Inline?'+r.join(','));
+    return r.join(',')
 }
 
 
