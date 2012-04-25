@@ -63,7 +63,9 @@ class Ndodb_Mysql_broker(BaseModule):
                 'program_start': {'name': 'program_start_time', 'transform': de_unixify},
                 'pid': {'name': 'process_id', 'transform': None},
                 'last_alive': {'name': 'status_update_time', 'transform': de_unixify},
-                'is_running': {'name': 'is_currently_running', 'transform': None}
+                'is_running': {'name': 'is_currently_running', 'transform': None},
+                'last_log_rotation': {'name': 'last_log_rotation', 'transform': de_unixify},
+                'last_command_check': {'name': 'last_command_check', 'transform': de_unixify}
                 },
             }
 
@@ -78,7 +80,7 @@ class Ndodb_Mysql_broker(BaseModule):
         # Centreon ndo add some fields like long_output
         # that are not in the vanilla ndo
         self.centreon_version = False
-        self.synchronise_database_id = int(conf.synchronise_database_id)
+        self.synchronize_database_id = int(conf.synchronize_database_id)
 
 
     # Called by Broker so we can do init stuff
@@ -130,9 +132,9 @@ class Ndodb_Mysql_broker(BaseModule):
         # We need to do some brok mod, so we copy it
         new_b = copy.deepcopy(b)
 
-        # If we syncronize, must look for id change
-        if self.synchronise_database_id != '0' and 'instance_id' in new_b.data:
-            # If we use database sync, we have to synchronise database id
+        # If we synchronize, must look for id change
+        if self.synchronize_database_id != '0' and 'instance_id' in new_b.data:
+            # If we use database sync, we have to synchronize database id
             # so we wait for the instance name
             if 'instance_name' not in new_b.data:
                 self.todo.append(new_b)
@@ -158,7 +160,7 @@ class Ndodb_Mysql_broker(BaseModule):
                 self.todo = []
                 return
 
-        # Executed if we don't synchronise or there is no instance_id
+        # Executed if we don't synchronize or there is no instance_id
         queries = BaseModule.manage_brok(self, new_b)
 
         if queries is not None:
@@ -214,7 +216,7 @@ class Ndodb_Mysql_broker(BaseModule):
             data_id = 1
             # If we disable the database sync,
             # we are using the in-brok instance_id
-            if self.synchronise_database_id == '0':
+            if self.synchronize_database_id == '0':
                 data_id = brok_id
             # Else: we are quering the database and get a new one
             else:
@@ -456,7 +458,7 @@ class Ndodb_Mysql_broker(BaseModule):
 
 
 
-    # A host have just be create, database is clean, we INSERT it
+    # A host has just been created, database is clean, we INSERT it
     def manage_initial_host_status_brok(self, b):
 
         data = b.data

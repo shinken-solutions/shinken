@@ -38,8 +38,8 @@ def get_instance(mod_conf):
     # Default behavior : character_set is utf8 and synchro is turned off
     if not hasattr(mod_conf, 'character_set'):
         mod_conf.character_set = 'utf8'
-    if not hasattr(mod_conf, 'synchronise_database_id'):
-        mod_conf.synchronise_database_id = '0'
+    if not hasattr(mod_conf, 'synchronize_database_id'):
+        mod_conf.synchronize_database_id = '0'
     instance = Ndodb_Mysql_broker(mod_conf)
 
     return instance
