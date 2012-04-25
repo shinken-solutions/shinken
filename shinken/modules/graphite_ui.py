@@ -34,6 +34,7 @@ import os
 
 from string import Template
 from shinken.basemodule import BaseModule
+from datetime import date
 
 #print "Loaded AD module"
 
@@ -100,8 +101,7 @@ class Graphite_Webui(BaseModule):
             elts = e.split('=', 1)
             if len(elts) != 2:
                 continue
-            #name = elts[0]
-            name = re.sub("[^a-zA-Z0-9]", "_", elts[0])
+            name = re.sub(r'[^\w]', '_', elts[0])
             raw = elts[1]
             # get the first value of ;
             if ';' in raw:
@@ -115,11 +115,12 @@ class Graphite_Webui(BaseModule):
                 continue
 
             # Try to get the int/float in it :)
-            m = re.search("(\d*\.*\d*)", name_value[name])
-            if m:
-                name_value[name] = m.groups(0)[0]
-            else:
-                continue
+            for key,value in name_value.items():
+                m = re.search("(\d*\.*\d*)(.*)", value)
+                if m:
+                    name_value[key] = m.groups(0)
+                else:
+                    continue
 #            print "graphite : got in the end :", name, value
             for key,value in name_value.items():
                 res.append((key, value))
@@ -135,6 +136,7 @@ class Graphite_Webui(BaseModule):
 
         t = elt.__class__.my_type
         r = []
+
 
         # Do we have a template ?
         if os.path.isfile(self.templates_path+'/'+elt.check_command.get_name().split('!')[0]):
@@ -166,6 +168,9 @@ class Graphite_Webui(BaseModule):
             return r
              
         # If no template is present, then the usual way
+        d = date.fromtimestamp(graphstart)
+        d = d.strftime('%H:%M_%Y%m%d')
+
 
         if t == 'host':
             couples = self.get_metric_and_value(elt.perf_data)
@@ -174,12 +179,16 @@ class Graphite_Webui(BaseModule):
             if len(couples) == 0:
                 return []
 
+            # Remove all non alpha numeric character
+            host_name = re.sub(r'[^\w]', '_', elt.host_name)
+
             # Send a bulk of all metrics at once
             for (metric, _) in couples:
-                uri = self.uri + 'render/?width=586&height=308&lineMode=connected'
+                uri = self.uri + 'render/?width=586&height=308&lineMode=connected&from=' + d
                 if re.search(r'_warn|_crit', metric):
                     continue
-                uri += "&target=%s.__HOST__.%s" % (elt.host_name, metric+"*")
+                uri += "&target=%s.__HOST__.%s" % (host_name, metric)
+                uri += "&target=%s.__HOST__.%s" % (host_name, metric+"?????")
                 v = {}
                 v['link'] = self.uri
                 v['img_src'] = uri
@@ -193,12 +202,19 @@ class Graphite_Webui(BaseModule):
             if len(couples) == 0:
                 return []
 
+            # Remove all non alpha numeric character
+            desc = re.sub(r'[^\w]', '_', elt.service_description)
+            host_name = re.sub(r'[^\w]', '_', elt.host.host_name)
+            
             # Send a bulk of all metrics at once
-            for (metric, _) in couples:
-                uri = self.uri + 'render/?width=586&height=308&lineMode=connected'
+            for (metric, value) in couples:
+                uri = self.uri + 'render/?width=586&height=308&lineMode=connected&from=' + d
                 if re.search(r'_warn|_crit', metric):
                     continue
-                uri += "&target=%s.%s.%s" % (elt.host.host_name, elt.service_description, metric+"*")
+                elif value[1] == '%':
+                    uri += "&yMin=0&yMax=100" 
+                uri += "&target=%s.%s.%s" % (host_name, desc, metric)
+                uri += "&target=%s.%s.%s" % (host_name, desc, metric+"?????")
                 v = {}
                 v['link'] = self.uri
                 v['img_src'] = uri
