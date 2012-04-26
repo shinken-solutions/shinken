@@ -107,6 +107,25 @@ def get_depgraph_widget():
 
 
 
+def get_depgraph_inner(name):
+    # First we look for the user sid
+    # so we bail out if it's a false one
+    user = app.get_user_auth()
+
+    if not user:
+        return {'app' : app, 'elt' : None, 'user' : None}
+
+    elt = None
+    if '/' in name:
+        elts = name.split('/', 1)
+        elt = app.datamgr.get_service(elts[0], elts[1])
+    else:
+        elt = app.datamgr.get_host(name)
+
+    return {'app' : app, 'elt' : elt, 'user' : user}
+
+
+
 
 
 widget_desc = '''<h3>Relation graph</h3>
@@ -117,4 +136,5 @@ Show a graph of an object relations
 pages = {depgraph_host : { 'routes' : ['/depgraph/:name'], 'view' : 'depgraph', 'static' : True},
          depgraph_srv : { 'routes' : ['/depgraph/:hname/:desc'], 'view' : 'depgraph', 'static' : True},
          get_depgraph_widget : {'routes' : ['/widget/depgraph'], 'view' : 'widget_depgraph', 'static' : True, 'widget' : ['dashboard'], 'widget_desc' : widget_desc, 'widget_name' : 'depgraph', 'widget_picture' : '/static/depgraph/img/widget_depgraph.png'},
+         get_depgraph_inner : {'routes' : ['/inner/depgraph/:name#.+#'], 'view' : 'inner_depgraph', 'static' : True},
          }

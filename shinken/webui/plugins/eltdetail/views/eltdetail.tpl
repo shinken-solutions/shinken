@@ -26,7 +26,7 @@ Invalid element name
 %end
 
 
-%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(), js=['eltdetail/js/jquery.color.js', 'eltdetail/js/jquery.Jcrop.js', 'eltdetail/js/iphone-style-checkboxes.js', 'eltdetail/js/hide.js', 'eltdetail/js/dollar.js', 'eltdetail/js/gesture.js', 'eltdetail/js/graphs.js', 'eltdetail/js/tags.js'], css=['eltdetail/css/iphonebuttons.css', 'eltdetail/css/eltdetail.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css', 'eltdetail/css/jquery.Jcrop.css'], top_right_banner_state=top_right_banner_state , user=user, app=app, refresh=True
+%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(), js=['eltdetail/js/jquery.color.js', 'eltdetail/js/jquery.Jcrop.js', 'eltdetail/js/iphone-style-checkboxes.js', 'eltdetail/js/hide.js', 'eltdetail/js/dollar.js', 'eltdetail/js/gesture.js', 'eltdetail/js/graphs.js', 'eltdetail/js/tags.js', 'eltdetail/js/depgraph.js'], css=['eltdetail/css/iphonebuttons.css', 'eltdetail/css/eltdetail.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css', 'eltdetail/css/jquery.Jcrop.css'], top_right_banner_state=top_right_banner_state , user=user, app=app, refresh=True
 
 %# " We will save our element name so gesture functions will be able to call for the good elements."
 <script type="text/javascript">
@@ -337,6 +337,7 @@ Invalid element name
 	    	<li><a href="#comments" data-toggle="tab">Comments</a></li>
 	    	<li><a href="#downtimes" data-toggle="tab">Downtimes</a></li>
 	    	<li><a href="#graphs" data-toggle="tab" id='tab_to_graphs'>Graphs</a></li>
+	    	<li><a href="#depgraph" data-toggle="tab" id='tab_to_depgraph'>Impact graph</a></li>
 	    </ul>
 	    <div class="tab-content">
 	    	<!-- Tab Summary Start-->
@@ -545,6 +546,20 @@ Invalid element name
 				%end
 			</div>
 			<!-- Tab Graph End -->
+
+
+		    <!-- Tab Dep graph Start -->
+		    <div class="tab-pane" id="depgraph">
+		      <div id='inner_depgraph' data-elt-name='{{elt.get_full_name()}}'>
+			<span class='alert alert-error'>
+			Cannot load dependency graph.
+			</span>
+		      </div>
+		    </div>
+		    <!-- Tab Dep graph End -->
+
+
+
 	    </div>
 	   
     </div>
@@ -554,3 +569,8 @@ Invalid element name
 %#End of the Host Exist or not case
 %end
 
+<script>
+/*$(document).ready(function(){
+    $('#inner_depgraph').load('/inner/depgraph/{{elt.get_full_name()}}');
+});*/
+</script>
