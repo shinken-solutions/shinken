@@ -94,6 +94,7 @@ class SkonfUIWorker(Worker):
        vmware = self.scan.get('use_vmware')
        names = self.scan.get('names')
        state = self.scan.get('state')
+       
        print "Info : IN SCAN WORKER:",nmap, vmware, names, state
        
        # Updating the scan entry state
@@ -111,15 +112,16 @@ class SkonfUIWorker(Worker):
        dbmod = 'Mongodb'
 
        
+       # By default I want only hosts I never see
+       # TODO : make this an option
+       d = DiscoveryManager('/home/shinken/shinken/etc/discovery.cfg', macros, overwrite, runners, output_dir=output_dir, dbmod=dbmod, only_new_hosts=True)
 
-       d = DiscoveryManager('/home/shinken/shinken/etc/discovery.cfg', macros, overwrite, runners, output_dir=output_dir, dbmod=dbmod)
+       # Set the scan as launched state
+       self.db.scans.update( {'_id' : scan_id}, { '$set': { 'state' : 'launched' }})
 
        # #Ok, let start the plugins that will give us the data
        d.launch_runners()
        d.wait_for_runners_ends()
-
-       # Set the scan as launched state
-       self.db.scans.update( {'_id' : scan_id}, { '$set': { 'state' : 'launched' }})
 
        # We get the results, now we can reap the data
        d.get_runners_outputs()

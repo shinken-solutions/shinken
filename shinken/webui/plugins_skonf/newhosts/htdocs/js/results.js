@@ -23,6 +23,55 @@
 
 
 
+function delete_discovery_host(name) {
+    var f = document.forms['form-'+name];
+    $.ajax({
+	url: '/newhosts/delete/'+name,
+	success: function(data) {
+	    console.log('Got result for'+name);
+	    var r = $('#push-result-'+name);
+	    r.show();
+	    r.addClass('alert-success');
+	    r.html('Host '+name+' was deleted');
+	    $('#form-'+name).hide();
+	    $('#btn-validate-'+name).hide();
+	},
+	error: function(data, txt) {
+            console.log('Got bad result for'+name);
+            var r = $('#push-result-'+name);
+	    r.show();
+            r.addClass('alert-error');
+            r.html('Error for '+name+' :' +txt);
+        },
+    });
+}
+
+
+function delete_forever_discovery_host(name) {
+    var f = document.forms['form-'+name];
+    $.ajax({
+	url: '/newhosts/tagunmanaged/'+name,
+	success: function(data) {
+	    console.log('Got result for'+name);
+	    var r = $('#push-result-'+name);
+	    r.show();
+	    r.addClass('alert-success');
+	    r.html('Host '+name+' was deleted');
+	    $('#form-'+name).hide();
+	    $('#btn-validate-'+name).hide();
+	},
+	error: function(data, txt) {
+            console.log('Got bad result for'+name);
+            var r = $('#push-result-'+name);
+	    r.show();
+            r.addClass('alert-error');
+            r.html('Error for '+name+' :' +txt);
+        },
+    });
+}
+
+
+
 function validatehostform(name) {
     //var form = document.forms[name];//.submit();
 

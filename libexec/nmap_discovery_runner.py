@@ -19,7 +19,7 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-#sudo nmap 192.168.0.1 -sU -sT -T4 -O --traceroute -oX toto.xml
+#sudo nmap 192.168.0.1 --min-rate 1000 --max-retries 0 -sU -sT -T4 -O --traceroute -oX toto.xml
 
 import optparse
 import sys
@@ -43,6 +43,10 @@ parser.add_option('-t', '--targets', dest="targets",
                   help="NMap scanning targets.")
 parser.add_option('-v', '--verbose', dest="verbose", action='store_true',
                   help="Verbose output.")
+parser.add_option('--min-rate', dest="min_rate",
+                  help="Min rate option for nmap (number of parallel packets to launch. By default 1000)")
+parser.add_option('--max-retries', dest="max_retries",
+                  help="Max retries option for nmap (number of packet send retry). By default 0 - no retry -)")
 parser.add_option('-s', '--simulate', dest="simulate", 
                   help="Simulate a launch by reading an nmap XML output instead of launching a new one.")
 
@@ -60,6 +64,15 @@ if not opts.simulate and not opts.targets:
     parser.error("Requires at least one nmap target for scanning (option -t/--targets)")
 else:
     targets.append(opts.targets)
+
+min_rate = 1000
+if opts.min_rate:
+    min_rate = int(opts.min_rate)
+
+max_retries = 0
+if opts.max_retries:
+    max_retries = int(opts.max_retries)
+
 
 if not opts.verbose:
     verbose = False
@@ -251,7 +264,7 @@ if not simulate:
 
     print "propose a tmppath", tmppath
 
-    cmd = "sudo nmap %s -sU -sT -T4 -O --traceroute -oX %s" % (' '.join(targets) , tmppath)
+    cmd = "sudo nmap %s -sU -sT --min-rate %d --max-retries %d -T4 -O --traceroute -oX %s" % (' '.join(targets) , min_rate, max_retries, tmppath)
     print "Launching command,", cmd
     try:
         nmap_process = subprocess.Popen(

@@ -6,7 +6,7 @@
   %for s in scans:
   %if s['state'] == 'done':
   <div class="alert alert-info">
-  %elif s['state'] == 'preparing':
+  %elif s['state'] in ['preparing', 'launched']:
   <div class="alert alert-success">
   %else:
   <div class="alert alert-error">
@@ -35,10 +35,10 @@
 	 <span class="caret"></span>
        </a>
        <ul class="dropdown-menu">
-	 <a href='javascript:delete_host();'>
+	 <a href='javascript:delete_discovery_host("{{hname}}");'>
 	   <i class="icon-minus"></i> Delete
 	 </a>
-	 <a href='javascript:delete_host();'>
+	 <a href='javascript:delete_forever_discovery_host("{{hname}}");'>
 	   <i class="icon-remove"></i> Delete forever
 	 </a>
        </ul>

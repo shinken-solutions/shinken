@@ -42,7 +42,7 @@ from shinken.macroresolver import MacroResolver
 
 
 class DiscoveryManager:
-    def __init__(self, path, macros, overwrite, runners, output_dir=None, dbmod='', db_direct_insert=False):
+    def __init__(self, path, macros, overwrite, runners, output_dir=None, dbmod='', db_direct_insert=False, only_new_hosts=False):
         # i am arbiter-like
         self.log = logger
         self.overwrite = overwrite
@@ -50,6 +50,7 @@ class DiscoveryManager:
         self.output_dir = output_dir
         self.dbmod = dbmod
         self.db_direct_insert = db_direct_insert
+        self.only_new_hosts = only_new_hosts
         self.log.load_obj(self)
         self.config_files = [path]
         self.conf = Config()
@@ -404,8 +405,17 @@ class DiscoveryManager:
             print "The host '%s' already exists in the database table %s" % (host, table)
             return
 
+        #It can be the same check if db_direct_insert but whatever
+        if self.only_new_hosts:
+            for t in [self.db.hosts, self.db.discovered_hosts]:
+                r = table.find({'_id': host})
+                if r.count() > 0:
+                    print "This is not a new host on", self.db.hosts
+                    return
+                
         print "Saving in database", d
         d['_id'] = host
+        d['_discovery_state'] = 'discovered'
         table.save(d)
         print "saved"
         del d['_id']

@@ -86,10 +86,11 @@ def get_scans():
 
 
 def get_results():
-    print "Looking for hosts in pending aprouval"
+    print "Looking for hosts in discovered state"
     now = int(time.time())
     yesterday = now - 86400
-    cur = app.db.discovered_hosts.find()
+    # Search all new discovery elements that are not disabled or already added
+    cur = app.db.discovered_hosts.find({'_discovery_state' : 'discovered'})
     pending_hosts = [h for h in cur]
 
     print "And in progress scans"
@@ -102,28 +103,40 @@ def get_results():
     return {'app' : app, 'pending_hosts' : pending_hosts, 'scans' : scans}
 
 
+def delete_host(hname):
+    print "Look for simple deleting of an host", hname
+    app.db.discovered_hosts.remove({'_id': hname})
+
+
+def tag_unmanaged(hname):
+    print "Look for infinite delete for", hname
+    r = app.db.discovered_hosts.update({'_id' : hname}, { '$set': { '_discovery_state' : 'disabled' }})
+
 
 def post_validatehost():
     print "Got forms in /newhosts/validatehost call"
     _id = app.request.forms.get('_id', 'unknown-host')
-    tags = app.request.forms.get('tags', '')
+    use = app.request.forms.get('use', '')
     host_name = app.request.forms.get('host_name', None)
 
     print "DUMP FORMS", app.request.forms.__dict__
-    print "Got in request form", _id, host_name, tags
+    print "Got in request form", _id, host_name, use
     if not host_name:
         print "BAD HOST NAME for post_validatehost bail out"
         return None
 
-    host = {'_id' : _id, 'host_name' : host_name, 'use' : tags}
-    print "Saving", host, "in", app.db.hosts
-    #r = app.db.hosts.save(host)
-    #print "result", r
-
-    # Now we can remove the one in the discovered part
-    print "And deleting the discovered host"
-    #r = app.db.discovered_hosts.remove({'_id' : _id})
-    #print "result", r
+    host = {'_id' : _id, 'host_name' : host_name, 'use' : use}
+    # If there is no such host in db.hosts, just add it.
+    r = app.db.hosts.find_one({'_id' : _id})
+    print "Already got host?", r
+    if not r:
+        print "Saving", host, "in", app.db.hosts
+        r = app.db.hosts.save(host)
+        print "Insert result", r
+    
+    # Set this host as added in the discovered_hosts as _discovery_state='added'
+    r = app.db.discovered_hosts.update({'_id' : _id}, { '$set': { '_discovery_state' : 'added' }})
+    print "result of update", r
 
     return None
 
@@ -142,5 +155,7 @@ pages = {get_newhosts : { 'routes' : ['/newhosts'], 'view' : 'newhosts', 'static
          get_scans : { 'routes' : ['/newhosts/scans'], 'view' : 'newhosts_scans', 'static' : True},
          get_results : { 'routes' : ['/newhosts/results'], 'view' : 'newhosts_results', 'static' : True},
          post_validatehost : { 'routes' : ['/newhosts/validatehost'], 'view' : None, 'method' : 'POST'},
+         delete_host : { 'routes' : ['/newhosts/delete/:hname'], 'view' : None},
+         tag_unmanaged : { 'routes' : ['/newhosts/tagunmanaged/:hname'], 'view' : None},
          }
 
