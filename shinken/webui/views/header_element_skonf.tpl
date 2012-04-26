@@ -47,7 +47,26 @@
             </ul>
           </li>
         </ul>
+
+
+	<ul class="nav">
+	  %if menu_part == '/objects':
+          <li class="dropdown active">
+	  %else:
+	  <li class="dropdown">
+	  %end
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown"> Objects<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+	      %lst = ['hosts', 'services', 'contacts', 'commands', 'timeperiods']
+	      %for i in lst:
+                 <li><a href="/objects/{{i}}">{{i.capitalize()}}</a></li>
+	      %end
+            </ul>
+          </li>
+        </ul>
 	
+	
+
 	<ul class="nav">
 	  %menu = [ ('/packs','Packs'), ('/system','System'), ('/otheruis', 'Link with other UIs')]
           %for (key, value) in menu:
@@ -60,16 +79,6 @@
          %end
 	</ul>
 	
-	<ul class="nav">
-          <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown"> System <b class="caret"></b></a>
-            <ul class="dropdown-menu">
-              <li><a href="/system">Shinken state</a></li>
-              <li><a href="/system/log">System logs</a></li>
-            </ul>
-          </li>
-        </ul>
-
 	
         %if user is not None:
         <div class="nav-controll"> 
