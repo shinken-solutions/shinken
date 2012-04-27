@@ -375,10 +375,8 @@ class SatelliteLink(Item):
 
     def prepare_for_conf(self):
         self.cfg = { 'global' : {}, 'schedulers' : {}, 'arbiters' : {}}
-        #cfg_for_satellite['modules'] = satellite.modules
         properties = self.__class__.properties
         for prop, entry in properties.items():
-#            if 'to_send' in entry and entry['to_send']:
             if entry.to_send:
                 self.cfg['global'][prop] = getattr(self, prop)
 

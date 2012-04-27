@@ -261,8 +261,10 @@ class Shinken(BaseSatellite):
         satellites = pk['satellites']
         instance_name = pk['instance_name']
         push_flavor = pk['push_flavor']
+        skip_initial_broks = pk['skip_initial_broks']
         
         t0 = time.time()
+        print "DBG: receiving a new conf at", int(t0)
         conf = cPickle.loads(conf_raw)
         print "DBG : Finish unserialize the conf in", time.time() - t0
 
@@ -272,6 +274,7 @@ class Shinken(BaseSatellite):
         self.conf = conf
         self.conf.push_flavor = push_flavor
         self.conf.instance_name = instance_name
+        self.conf.skip_initial_broks = skip_initial_broks
 
         self.cur_conf = conf
         self.override_conf = override_conf
@@ -309,8 +312,6 @@ class Shinken(BaseSatellite):
         # TODO: if scheduler had previous modules instanciated it must clean them !
         self.modules_manager.set_modules(self.modules)
         self.do_load_modules()
-        # And start external ones too
-        self.modules_manager.start_external_instances()
         
         # give it an interface
         # But first remove previous interface if exists

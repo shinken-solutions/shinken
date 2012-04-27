@@ -115,13 +115,13 @@ class TestPassivePoller(ShinkenTest):
     def test_simple_passive_pollers(self):
         print "The dispatcher", self.dispatcher
         # dummy for the arbiter
-        for a in self.conf.arbiterlinks:
+        for a in self.conf.arbiters:
             a.__class__ = GoodArbiter
         print "Preparing schedulers"
-        scheduler1 = self.conf.schedulerlinks.find_by_name('scheduler-all-1')
+        scheduler1 = self.conf.schedulers.find_by_name('scheduler-all-1')
         self.assert_(scheduler1 is not None)
         scheduler1.__class__ = GoodScheduler
-        scheduler2 = self.conf.schedulerlinks.find_by_name('scheduler-all-2')
+        scheduler2 = self.conf.schedulers.find_by_name('scheduler-all-2')
         self.assert_(scheduler2 is not None)
         scheduler2.__class__ = BadScheduler        
 

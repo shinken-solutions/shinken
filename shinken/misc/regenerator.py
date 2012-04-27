@@ -81,12 +81,58 @@ class Regenerator(object):
 
         # Do not ask for full data resent too much
         self.last_need_data_send = time.time()
+        
+        # Flag to say if our data came from the scheduler or not
+        # (so if we skip *initial* broks)
+        self.in_scheduler_mode = False
 
+        
+    # If we are called from a scheduler it self, we load the data from it
+    def load_from_scheduler(self, sched):
+        # Ok, we are in a scheduler, so we will skip some useless
+        # steps
+        self.in_scheduler_mode = True
+
+        # Go with the data creation/load
+        c = sched.conf
+        # Simulate a drop conf
+        b = sched.get_program_status_brok()
+        b.prepare()
+        self.manage_program_status_brok(b)
+
+        # Now we will lie and directly map our objects :)
+        print "Regenerator::load_from_scheduler"
+        self.hosts = c.hosts
+        self.services = c.services
+        self.notificationways = c.notificationways
+        self.contacts = c.contacts
+        self.hostgroups = c.hostgroups
+        self.servicegroups = c.servicegroups
+        self.contactgroups = c.contactgroups
+        self.timeperiods = c.timeperiods
+        self.commands = c.commands
+        # We also load the realm
+        for h in self.hosts:
+            self.realms.add(h.realm)
+            break
+
+
+    # If we are in a scheduler mode, some broks are dangerous, so
+    # we will skip them
+    def want_brok(self, brok):
+        if self.in_scheduler_mode:
+            return not brok.type in ['program_status', 'initial_host_status',
+                             'initial_hostgroup_status', 'initial_service_status',
+                             'initial_servicegroup_status', 'initial_contact_status',
+                             'initial_contactgroup_status', 'initial_timeperiod_status',
+                             'initial_command_status', 'initial_broks_done']
+        
 
     def manage_brok(self, brok):
         """ Look for a manager function for a brok, and call it """
         manage = getattr(self, 'manage_' + brok.type + '_brok', None)
-        if manage:
+        # If we can and want it, got for it :)
+        if manage and self.want_brok(brok):
             return manage(brok)
 
 
@@ -361,6 +407,7 @@ class Regenerator(object):
         tpname = t.timeperiod_name
         tp = self.timeperiods.find_by_name(tpname)
         setattr(o, prop, tp)
+
             
     # same than before, but the value is a string here
     def linkify_a_timeperiod_by_name(self, o, prop):
@@ -389,6 +436,7 @@ class Regenerator(object):
                 new_v.append(c)
         setattr(o, prop, new_v)
 
+
     # We got a service/host dict, we want to get back to a
     # flat list
     def linkify_dict_srv_and_hosts(self, o, prop):
@@ -411,6 +459,7 @@ class Regenerator(object):
             if h:
                 new_v.append(h)
         setattr(o, prop, new_v)
+
 
     def linkify_host_and_hosts(self, o, prop):
         v = getattr(o, prop)

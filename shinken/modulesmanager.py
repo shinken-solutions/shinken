@@ -119,13 +119,14 @@ class ModulesManager(object):
 
 
     # Try to "init" the given module instance. 
-    # Returns: True on successfull init. False if instance init method raised any Exception.
-    def try_instance_init(self, inst):
+    # If late_start, don't look for last_init_try
+    # Returns: True on successfull init. False if instance init method raised any Exception.                
+    def try_instance_init(self, inst, late_start=False):
         try:
             logger.info("Trying to init module : %s" % inst.get_name())
             inst.init_try += 1
             # Maybe it's a retry
-            if inst.init_try > 1:
+            if not late_start and inst.init_try > 1:
                 # Do not try until 5 sec, or it's too loopy
                 if inst.last_init_try > time.time() - 5:
                     return False
@@ -195,10 +196,10 @@ class ModulesManager(object):
 
 
     # Launch external instaces that are load corectly
-    def start_external_instances(self):
+    def start_external_instances(self, late_start=False):
         for inst in [inst for inst in self.instances if inst.is_external]:
             # But maybe the init failed a bit, so bypass this ones from now
-            if not self.try_instance_init(inst):
+            if not self.try_instance_init(inst, late_start=late_start):
                 logger.warning("The module '%s' failed to init, I will try to restart it later" % inst.get_name())
                 self.to_restart.append(inst)
                 continue

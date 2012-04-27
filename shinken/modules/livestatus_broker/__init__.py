@@ -25,7 +25,7 @@
 
 
 properties = {
-    'daemons': ['broker'],
+    'daemons': ['broker', 'scheduler'],
     'type': 'livestatus',
     'phases': ['running'],
     'external': True,

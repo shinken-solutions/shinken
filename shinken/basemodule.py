@@ -213,6 +213,12 @@ class BaseModule(object):
         return hasattr(self, prop)
 
 
+    # For in scheduler modules, we will not send all broks to external
+    # modules, only what they really want
+    def want_brok(self, b):
+        return True
+
+
     def manage_brok(self, brok):
         """Request the module to manage the given brok.
         There a lot of different possible broks to manage.

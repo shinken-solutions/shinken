@@ -381,7 +381,8 @@ class Dispatcher:
                         # Prepare the conf before sending it
                         conf_package = {'conf' : s_conf, 'override_conf' : override_conf,
                                         'modules' : sched.modules, 'satellites' : satellites_for_sched,
-                                        'instance_name' : sched.scheduler_name, 'push_flavor' : conf.push_flavor
+                                        'instance_name' : sched.scheduler_name, 'push_flavor' : conf.push_flavor,
+                                        'skip_initial_broks' : sched.skip_initial_broks,
                                         }
                         
                         t1 = time.time()

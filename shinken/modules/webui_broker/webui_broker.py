@@ -90,7 +90,9 @@ class Webui_broker(BaseModule, Daemon):
         print "Webui : using the backend", self.http_backend
         # We will save all widgets
         self.widgets = {}
-
+        # We need our regenerator now (before main) so if we are in a scheduler,
+        # rg will be able to skip some broks
+        self.rg = Regenerator()
 
         
 
@@ -111,6 +113,22 @@ class Webui_broker(BaseModule, Daemon):
     # Conf from arbiter!
     def init(self):
         print "Init of the Webui '%s'" % self.name
+
+
+    # This is called only when we are in a scheduler
+    # and just before we are started. So we can gain time, and 
+    # just load all scheduler objects without fear :) (we
+    # will be in another process, so we will be able to hack objects
+    # if need)
+    def hook_pre_scheduler_mod_start(self, sched):
+        print "pre_scheduler_mod_start::", sched.__dict__
+        self.rg.load_from_scheduler(sched)
+
+
+    # In a scheduler we will have a filter of what we really want as a brok
+    def want_brok(self, b):
+        return self.rg.want_brok(b)
+
 
 
     def main(self):
@@ -135,7 +153,6 @@ class Webui_broker(BaseModule, Daemon):
         del self.debug_output
 
         self.check_photo_dir()
-        self.rg = Regenerator()
         self.datamgr = datamgr
         datamgr.load(self.rg)
         self.helper = helper

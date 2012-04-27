@@ -25,7 +25,7 @@
 
 
 properties = {
-    'daemons' : ['broker'],
+    'daemons' : ['broker', 'scheduler'],
     'type' : 'webui',
     'phases' : ['running'],
     'external' : True,

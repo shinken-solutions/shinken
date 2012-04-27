@@ -30,6 +30,7 @@ import traceback
 import cStringIO
 import sys
 import socket
+from Queue import Empty
 
 try:
     import shinken.pyro_wrapper as pyro
@@ -101,6 +102,8 @@ class Scheduler:
             # Reset the topology change flag if need
             16 : ('reset_topology_change_flag', self.reset_topology_change_flag, 1),
             17 : ('check_for_expire_acknowledge', self.check_for_expire_acknowledge, 1),
+            18 : ('send_broks_to_modules', self.send_broks_to_modules , 1),
+            19 : ('get_objects_from_from_queues', self.get_objects_from_from_queues, 1),
         }
 
         # stats part
@@ -183,6 +186,11 @@ class Scheduler:
         self.instance_id = conf.instance_id # From Arbiter. Use for
                                             # Broker to differenciate
                                             # schedulers
+        # Tag our hosts with our instance_id
+        for h in self.hosts:
+            h.instance_id = conf.instance_id
+        for s in self.services:
+            s.instance_id = conf.instance_id
         # self for instance_name
         self.instance_name = conf.instance_name
         # and push flavor
@@ -216,7 +224,7 @@ class Scheduler:
     def die(self):
         self.must_run = False
 
-    # Load the external commande
+    # Load the external command
     def load_external_command(self, e):
         self.external_command = e
 
@@ -259,14 +267,22 @@ class Scheduler:
         self.downtimes[dt.id] = dt
         if dt.extra_comment:
             self.add_Comment(dt.extra_comment)
+
         
     def add_ContactDowntime(self, contact_dt):
         self.contact_downtimes[contact_dt.id] = contact_dt
+
         
     def add_Comment(self, comment):
         self.comments[comment.id] = comment
         b = comment.ref.get_update_status_brok()
         self.add(b)
+
+    
+    # Ok one of our modules send us a command? just run it!
+    def add_ExternalCommand(self, ext_cmd):
+        self.external_command.resolve_command(ext_cmd)
+
     
     # Schedulers have some queues. We can simplify call by adding
     # elements into the proper queue just by looking at their type
@@ -288,7 +304,8 @@ class Scheduler:
         EventHandler:       add_EventHandler,
         Downtime:           add_Downtime,
         ContactDowntime:    add_ContactDowntime,
-        Comment:            add_Comment
+        Comment:            add_Comment,
+        ExternalCommand:    add_ExternalCommand,
     }
     
 
@@ -1118,16 +1135,18 @@ class Scheduler:
         self.add(b)
 
         #  We can't call initial_status from all this types
-        # The order is important, service need host...
+        #  The order is important, service need host...
         initial_status_types = ( self.timeperiods, self.commands,
                           self.contacts, self.contactgroups,
                           self.hosts, self.hostgroups,
                           self.services, self.servicegroups )
 
-        for tab in initial_status_types:
-            for i in tab:
-                b = i.get_initial_status_brok()
-                self.add(b)
+        print 'Skiping initial broks?', self.conf.skip_initial_broks
+        if not self.conf.skip_initial_broks:
+            for tab in initial_status_types:
+                for i in tab:
+                    b = i.get_initial_status_brok()
+                    self.add(b)
 
         # Only raises the all logs at the scheduler startup
         if with_logs:
@@ -1395,16 +1414,52 @@ class Scheduler:
             logger.warning("%d actions never came back for the satellite '%s'. I'm reenable them for polling" % (worker_names[w], w))
 
 
+    # Each loop we are going to send our broks to our modules (if need)
+    def send_broks_to_modules(self):        
+        t0 = time.time()
+        nb_sent = 0
+        for mod in self.sched_daemon.modules_manager.get_external_instances():
+            print "Look for sending to module", mod.get_name()
+            q = mod.to_q
+            to_send = [b for b in self.broks.values() if not getattr(b, 'sent_to_sched_externals', False) and mod.want_brok(b)]
+            q.put(to_send)
+            nb_sent += len(to_send)
+        
+        # No more need to send them
+        for b in self.broks.values():
+            b.sent_to_sched_externals = True
+        print "DBG: Time to send %s broks" % nb_sent, time.time() - t0
+
+
+    # Get 'objects' from external modules
+    # right now on nobody uses it, but it can be useful
+    # for a moduls like livestatus to raise external
+    # commands for example
+    def get_objects_from_from_queues(self):
+        for f in self.sched_daemon.modules_manager.get_external_from_queues():
+            full_queue = True
+            while full_queue:
+                try:
+                    o = f.get(block=False)
+                    self.add(o)
+                except Empty :
+                    full_queue = False
+
+
     # Main function
     def run(self):
         # Then we see if we've got info in the retention file
         self.retention_load()
 
+        # Finally start the external modules now we got our data
+        self.hook_point('pre_scheduler_mod_start')
+        self.sched_daemon.modules_manager.start_external_instances(late_start=True)
+
         # Ok, now all is initialized, we can make the inital broks
         print 'Starting initial broks'
         t0 = time.time()
         self.fill_initial_broks(with_logs=True)
-        print 'Finishing initial broks', time.time() - t0
+        print 'Finishing initial broks at', int(time.time()), 'in', time.time() - t0, 's'
 
         logger.info("[%s] First scheduling launched" % self.instance_name)
         self.schedule()
@@ -1422,8 +1477,13 @@ class Scheduler:
         gogogo = time.time()
 
         self.load_one_min = Load(initial_value=1)
-
+        print "First loop at", int(time.time())
         while self.must_run:
+            #print "Loop"
+            # Before answer to brokers, we send our broks to modules
+            # Ok, go to send our broks to our external modules
+            #self.send_broks_to_modules()
+
             elapsed, _, _ = self.sched_daemon.handleRequests(timeout)
             if elapsed: 
                 timeout -= elapsed
@@ -1456,7 +1516,6 @@ class Scheduler:
             self.push_actions_to_passives_satellites()
             self.get_actions_from_passives_satellites()
             
-
             #if  ticks % 10 == 0:
             #    self.conf.quick_debug()
 

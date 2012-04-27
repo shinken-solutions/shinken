@@ -185,6 +185,38 @@ class TestRegenerator(ShinkenTest):
             print "\t%s : %s" % (k, v)
         print "\n"
         print "total time", time.time() - start
+
+
+
+    #Change ME :)
+    def test_regenerator_load_from_scheduler(self):
+        #
+        # Config is not correct because of a wrong relative path
+        # in the main config file
+        #
+        #for h in self.sched.hosts:
+        #    h.realm = h.realm.get_name()
+        
+        self.rg = Regenerator()
+        self.rg.load_from_scheduler(self.sched)
+        
+        self.sched.fill_initial_broks()        
+        # Got the initial creation ones
+        ids = self.sched.broks.keys()
+        ids.sort()
+        t0 = time.time()
+        for i in ids:
+            b = self.sched.broks[i]
+            print "Manage b", b.type
+            b.prepare()
+            self.rg.manage_brok(b)
+        t1 = time.time()
+        print 'First inc', t1 - t0, len(self.sched.broks)
+        self.sched.broks.clear()
+        
+        self.look_for_same_values()
+        
+        
         
 
 if __name__ == '__main__':
