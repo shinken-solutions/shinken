@@ -225,7 +225,7 @@ class LiveStatusWaitQuery(LiveStatusQuery):
         filter_func = self.filter_stack.get_stack()
         without_filter = len(self.filtercolumns) == 0
 
-        cs = LiveStatusConstraints(filter_func, without_filter)
+        cs = LiveStatusConstraints(filter_func, without_filter, self.authuser)
         result = handler(self, cs)
 
         # A LiveStatusWaitQuery is launched several times, so we need to
