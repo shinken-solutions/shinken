@@ -29,43 +29,89 @@ import random
 from shinken.webui.bottle import redirect
 from shinken.util import to_bool
 from shinken.objects import Host
+from shinken.objects import Service
+from shinken.objects import Timeperiod
+from shinken.objects import Contact
+from shinken.objects import Command
 
+from local_helper import Helper
 
 ### Will be populated by the UI with it's own value
 app = None
 
-def objects_hosts():
+def objects_generic(cls):
     # First we look for the user sid
     # so we bail out if it's a false one
     user = app.get_user_auth()
 
     if not user:
         redirect("/user/login")
+    
+    
+    # Get all entries from db
+    t = getattr(app.db, cls.my_type+'s')
+    cur = t.find({})
+    elts = [cls(i) for i in cur]
+
+    return {'app' : app, 'user' : user, 'elts' : elts, 'elt_type' : cls.my_type}
 
 
-    cur = app.db.hosts.find({})
-    hosts = [Host(h) for h in cur]
-
-    return {'app' : app, 'user' : user, 'hosts' : hosts}
+def objects_hosts():
+    return objects_generic(Host)
 
 
-def disable_host(name):
-    d = app.db.hosts.find_one({'_id' : name})
+def objects_services():
+    return objects_generic(Service)
+
+def objects_timeperiods():
+    return objects_generic(Timeperiod)
+
+def objects_contacts():
+    return objects_generic(Contact)
+
+def objects_commands():
+    return objects_generic(Command)
+
+
+# get data about one specific host
+def objects_host(name):
+    user = app.get_user_auth()
+    if not user:
+        redirect("/user/login")
+
+    elt = app.db.hosts.find_one({'_id' : name})
+    return {'app' : app, 'user' : user, 'elt' : elt, 'helper' : Helper()}
+    
+
+
+def disable_object(cls, name):
+    print "Disable object for", cls, name
+    t = getattr(app.db, cls)
+    d = t.find_one({'_id' : name})
     d['_state'] = 'disabled'
-    r = app.db.hosts.save(d)
+    r = t.save(d)
     print "Disabled?", r
 
 
-def enable_host(name):
-    d = app.db.hosts.find_one({'_id' : name})
+def enable_object(cls, name):
+    print "Enable object for", cls, name
+    t = getattr(app.db, cls)
+    d = t.find_one({'_id' : name})
     d['_state'] = 'enabled'
-    r = app.db.hosts.save(d)
-    print "Enabled?", r
+    r = t.save(d)
+    print "Disabled?", r
+
+
 
 
 
 pages = {objects_hosts : { 'routes' : ['/objects/hosts'], 'view' : 'objects_hosts', 'static' : True},
-         disable_host : { 'routes' : ['/object/q/host/disable/:name']},
-         enable_host : { 'routes' : ['/object/q/host/enable/:name']},
+         objects_services : { 'routes' : ['/objects/services'], 'view' : 'objects_hosts', 'static' : True},
+         objects_timeperiods : { 'routes' : ['/objects/timeperiods'], 'view' : 'objects_hosts', 'static' : True},
+         objects_contacts : { 'routes' : ['/objects/contacts'], 'view' : 'objects_hosts', 'static' : True},
+         objects_commands : { 'routes' : ['/objects/commands'], 'view' : 'objects_hosts', 'static' : True},
+         objects_host : { 'routes' : ['/objects/hosts/:name'], 'view' : 'objects_host', 'static' : True},
+         disable_object : { 'routes' : ['/object/q/:cls/disable/:name']},
+         enable_object : { 'routes' : ['/object/q/:cls/enable/:name']},
          }
 

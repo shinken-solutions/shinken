@@ -7,12 +7,12 @@
 
 
 
-.object_host .hostname {
+.object_host .host_name {
     width: 120px;
     background: white;
 }
 
-.object_host .display {
+.object_host .display_name {
     width: 120px;
     background: white;
 }

@@ -8,14 +8,14 @@
 
 <div class='offset1 span10'>
   <h3>All your hosts</h3>
-  %for h in hosts:
-  <div class='object_host span12'>
-
-    <div class='hostname cut-long pull-left'>{{h.get_name()}}</div>
-    <div class='display pull-left'>{{getattr(h, 'display_name', h.get_name())}}</div>
-    <div class='address pull-left'>{{getattr(h, 'address', h.get_name())}}</div>
-    <div class='realm pull-left'>{{getattr(h, 'realm', '')}}&nbsp;</div>
-    <div class='poller pull-left'>{{getattr(h, 'poller_tag', '')}}&nbsp;</div>
+  %for h in elts:
+  <div class='object_{{elt_type}} span12'>
+    <div class='host_name cut-long pull-left'><a href='/objects/hosts/{{h.get_name()}}'>{{h.get_name()}}</a></div>
+    <div class='display_name cut-long pull-left'>{{getattr(h, 'display_name', '')}}&nbsp;</div>
+    <div class='address cut-long pull-left'>{{getattr(h, 'address', '')}}&nbsp;</div>
+    <div class='realm cut-long pull-left'>{{getattr(h, 'realm', '')}}&nbsp;</div>
+    <div class='poller_tag cut-long pull-left'>{{getattr(h, 'poller_tag', '')}}&nbsp;</div>
+    
     <div class='use pull-left'>
       %for u in getattr(h, 'use', '').split(','):
       <span class='label'><img class='imgsize1' onerror="$(this).hide()" src="/static/images/sets/{{u}}/tag.png" />{{u}}</span>
@@ -34,7 +34,7 @@
 	<a id='btn-disabled-{{h.get_name()}}' class='{{disa_state}} btn btn-small btn-warning' href="javascript:enable_host('{{h.get_name()}}')">Disabled</a>
     </div>
     <br/>
-    <!--{{h}} {{h.customs}}-->
+    <!--{{h}} {{h.host_name}} {{h.customs}}-->
   </div>
   %end
 </div>

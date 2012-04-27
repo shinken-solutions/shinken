@@ -25,7 +25,7 @@
 
 function disable_host(name){
     $.ajax({
-	url: '/object/q/host/disable/'+name,
+	url: '/object/q/hosts/disable/'+name,
 	success: function(data) {
 	    $('#btn-enabled-'+name).hide();
 	    $('#btn-disabled-'+name).show();
@@ -40,7 +40,7 @@ function disable_host(name){
 
 function enable_host(name){
     $.ajax({
-	url: '/object/q/host/enable/'+name,
+	url: '/object/q/hosts/enable/'+name,
 	success: function(data) {
 	    $('#btn-disabled-'+name).hide();
 	    $('#btn-enabled-'+name).show();
