@@ -80,7 +80,7 @@ def objects_host(name):
         redirect("/user/login")
 
     elt = app.db.hosts.find_one({'_id' : name})
-    return {'app' : app, 'user' : user, 'elt' : elt, 'helper' : Helper()}
+    return {'app' : app, 'user' : user, 'elt' : elt, 'helper' : Helper(app)}
     
 
 

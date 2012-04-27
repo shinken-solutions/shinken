@@ -37,22 +37,22 @@ var properties = [];
 	  <input id='input-{{elt['host_name']}}' class='to_use_complete' data-use='{{elt.get('use', '')}}' name="use" type="text" tabindex="2"/>
 	</span>
 	{{!helper.get_string_input(elt, 'poller_tag', 'Monitored from')}}
-	{{!helper.get_string_input(elt, 'check_period', 'Check Period')}}
-	{{!helper.get_string_input(elt, 'check_command', 'Check Command')}}
+	{{!helper.get_select_input(elt, 'check_period', 'Check Period', 'timeperiods', 'timeperiod_name')}}
+	{{!helper.get_select_input(elt, 'check_command', 'Check Command', 'commands', 'command_name')}}
 	{{!helper.get_string_input(elt, 'max_check_attemps', 'Max Check Attempts')}}
 	{{!helper.get_string_input(elt, 'check_interval', 'Normal Check Interval* 60 seconds')}}
 	{{!helper.get_string_input(elt, 'active_checks_enabled', 'Active Checks Enabled')}}
 	{{!helper.get_string_input(elt, 'passive_checks_enabled', 'Passive Checks Enabled')}}
 
 	{{!helper.get_string_input(elt, 'notifications_enabled', 'Notification Enabled')}}
-	{{!helper.get_string_input(elt, 'contacts', 'Contacts')}}
+	{{!helper.get_select_input(elt, 'contacts', 'Contacts', 'contacts', 'contact_name')}}
 	{{!helper.get_string_input(elt, 'contact_groups', 'Contact groups')}}
 	{{!helper.get_string_input(elt, 'notification_interval', 'Notification Interval* 60 seconds')}}
-	{{!helper.get_string_input(elt, 'notification_period', 'Notification Period')}}
+	{{!helper.get_select_input(elt, 'notification_period', 'Notification Period', 'timeperiods', 'timeperiod_name' )}}
 	{{!helper.get_string_input(elt, 'notification_options', 'Notification Options')}}
 	{{!helper.get_string_input(elt, 'first_notification_delay', 'First notification delay')}}
 
-	{{!helper.get_string_input(elt, 'parents', 'Network parents')}}
+	{{!helper.get_select_input(elt, 'parents', 'Network parents', 'hosts', 'host_name')}}
 	
 
 	{{!helper.get_string_input(elt, 'obsess_over_host', 'Obsess Over Host')}}
@@ -65,7 +65,7 @@ var properties = [];
 	{{!helper.get_string_input(elt, 'process_perf_data', 'Process Perf Data')}}
 
 	{{!helper.get_string_input(elt, 'event_handler_enabled', 'Automatic event Handler Enabled')}}
-	{{!helper.get_string_input(elt, 'event_handler', 'Event Handler command')}}
+	{{!helper.get_select_input(elt, 'event_handler', 'Event Handler command', 'commands', 'command_name')}}
 
 
 	
