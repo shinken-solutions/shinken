@@ -21,7 +21,7 @@
 #along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-set -x
+#set -x
 
 
 #####################
