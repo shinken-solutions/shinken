@@ -1,5 +1,5 @@
 
-%rebase layout_skonf globals(), title="Host %s" % elt.get('host_name', 'unknown'),  css=['objects/css/token-input.css', 'objects/css/token-input-facebook.css'], js=['objects/js/host.js', 'objects/js/jquery.tokeninput.js']
+%rebase layout_skonf globals(), title="Host %s" % elt.get('host_name', 'unknown'),  css=['objects/css/token-input.css', 'objects/css/token-input-facebook.css', 'objects/css/jquery.bsmselect.css'], js=['objects/js/host.js', 'objects/js/jquery.tokeninput.js', 'objects/js/jquery.bsmselect.js', 'objects/js/jquery.bsmselect.sortable.js', 'objects/js/jquery.bsmselect.compatibility.js']
 
 <script>
 function submit_form(){
@@ -11,7 +11,43 @@ function submit_form(){
 // Keep a list of all properties, with their own properties :)
 var properties = [];
 
+$(document).ready(function() {
+$("select[multiple]").bsmSelect(
+{
+        showEffect: function($el){ $el.fadeIn(); },
+        hideEffect: function($el){ $el.fadeOut(function(){ $(this).remove();}); },
+        plugins: [$.bsmSelect.plugins.sortable()],
+        title: 'Pick some cities',
+        highlight: 'highlight',
+        addItemTarget: 'original',
+        removeLabel: '<strong>X</strong>',
+        containerClass: 'bsmContainer', // Class for container that wraps this widget
+        listClass: 'bsmList-custom', // Class for the list ($ol)
+        listItemClass: 'bsmListItem-custom', // Class for the <li> list items
+        listItemLabelClass: 'bsmListItemLabel-custom', // Class for the label text that appears in list items
+        removeClass: 'bsmListItemRemove-custom', // Class given to the "remove" link
+        extractLabel: function($o) {return $o.parents('optgroup').attr('label') + "&nbsp;>&nbsp;" + $o.html();}
+      }
+
+/*{
+        sortable: true,
+        animate: true,
+        addItemTarget: 'top'
+    }*/);
+});
+
 </script>
+
+<form>
+<select id="cities1" multiple="multiple" name="cities[]" title="Click to Select a City" class="sminit">
+  <option>Amsterdam</option>
+  <option>Amsterdam</option>
+  <option>Amsterdam</option>
+  <option>Amsterdam</option>
+  <option>Amsterdam</option>
+  <option>Amsterdam</option>
+</select>
+</form>
 
 <div class='offset1 span10'>
   <form name='form-host'>
