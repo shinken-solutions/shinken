@@ -25,8 +25,8 @@ $("select[multiple]").bsmSelect(
         listClass: 'bsmList-custom', // Class for the list ($ol)
         listItemClass: 'bsmListItem-custom', // Class for the <li> list items
         listItemLabelClass: 'bsmListItemLabel-custom', // Class for the label text that appears in list items
-        removeClass: 'bsmListItemRemove-custom', // Class given to the "remove" link
-        extractLabel: function($o) {return $o.parents('optgroup').attr('label') + "&nbsp;>&nbsp;" + $o.html();}
+        removeClass: 'bsmListItemRemove-custom' // Class given to the "remove" link
+	//extractLabel: function($o) {return $o.parents('optgroup').attr('label') + "&nbsp;>&nbsp;" + $o.html();}
       }
 
 /*{
