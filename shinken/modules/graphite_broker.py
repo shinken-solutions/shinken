@@ -40,7 +40,7 @@ properties = {
     }
 
 
-#called by the plugin manager to get a broker
+# Called by the plugin manager to get a broker
 def get_instance(mod_conf):
     print "Get a graphite data module for plugin %s" % mod_conf.get_name()
     instance = Graphite_broker(mod_conf)
@@ -48,8 +48,8 @@ def get_instance(mod_conf):
 
 
 
-#Class for the Merlindb Broker
-#Get broks and puts them in merlin database
+# Class for the Graphite Broker
+# Get broks and send them to a Carbon instance of Graphite
 class Graphite_broker(BaseModule):
     def __init__(self, modconf):
         BaseModule.__init__(self, modconf)
@@ -58,9 +58,9 @@ class Graphite_broker(BaseModule):
         self.illegal_char = re.compile(r'[^\w]');
 
 
-    #Called by Broker so we can do init stuff
-    #TODO : add conf param to get pass with init
-    #Conf from arbiter!
+    # Called by Broker so we can do init stuff
+    # TODO : add conf param to get pass with init
+    # Conf from arbiter!
     def init(self):
         print "[%s] I init the graphite server connection to %s:%s" % (self.get_name(), self.host, self.port) 
         self.con = socket()
@@ -102,29 +102,28 @@ class Graphite_broker(BaseModule):
                     name_value[key] = m.groups(0)[0]
                 else:
                     continue
-#           print "graphite : got in the end :", name, value
+#           print "graphite : end of grok :", name, value
             for key,value in name_value.items():
                 res.append((key, value))
         return res
 
 
-    # A service check have just arrived, we UPDATE data info with this
+    # A service check result brok has just arrived, we UPDATE data info with this
     def manage_service_check_result_brok(self, b):
         data = b.data
         
         perf_data = data['perf_data']
-        hname = self.illegal_char.sub('_', data['host_name'])
-        desc = self.illegal_char.sub('_', data['service_description'])
-
-        check_time = int(data['last_chk'])
-
-#        print "Graphite:", hname, desc, check_time, perf_data
-        
         couples = self.get_metric_and_value(perf_data)
 
         # If no values, we can exit now
         if len(couples) == 0:
             return
+        
+        hname = self.illegal_char.sub('_', data['host_name'])
+        desc = self.illegal_char.sub('_', data['service_description'])
+        check_time = int(data['last_chk'])
+
+#        print "Graphite:", hname, desc, check_time, perf_data
 
         lines = []
         # Send a bulk of all metrics at once
@@ -136,22 +135,22 @@ class Graphite_broker(BaseModule):
 
 
 
-    # An host check have just arrived, we UPDATE data info with this
+    # A host check result brok has just arrived, we UPDATE data info with this
     def manage_host_check_result_brok(self, b):
         data = b.data
         
         perf_data = data['perf_data']
-        hname = self.illegal_char.sub('_', data['host_name'])
-        check_time = int(data['last_chk'])
-
- #       print "Graphite:", hname, check_time, perf_data
-        
         couples = self.get_metric_and_value(perf_data)
 
         # If no values, we can exit now
         if len(couples) == 0:
             return
+        
+        hname = self.illegal_char.sub('_', data['host_name'])
+        check_time = int(data['last_chk'])
 
+ #       print "Graphite:", hname, check_time, perf_data
+ 
         lines = []
         # Send a bulk of all metrics at once
         for (metric, value) in couples:
