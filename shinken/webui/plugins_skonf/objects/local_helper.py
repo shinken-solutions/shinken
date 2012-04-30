@@ -68,13 +68,13 @@ class Helper(object):
         self.app = app
 
     # Return a simple string input
-    def get_string_input(self, elt, prop, name):
-        s = '''<span class="span10">
-                  <span class="help-inline"> %s </span>
-                  <input name="%s" type="text" value="%s" />
+    def get_string_input(self, elt, prop, name, span='span10', innerspan='span2' ,placeholder=''):
+        s = '''<span class="%s">
+                  <span class="help-inline %s"> %s </span>
+                  <input name="%s" type="text" value="%s" placeholder='%s' />
                </span>
                <script>properties.push({'name' : '%s', 'type' : 'string'});</script>
-            ''' % (name, prop, elt.get(prop, ''), prop)
+            ''' % (span, innerspan, name, prop, elt.get(prop, ''), placeholder, prop)
         return s
 
 
@@ -121,9 +121,9 @@ class Helper(object):
            <span class="help-inline span2"> %s </span>
            <script>properties.push({'name' : '%s', 'type' : 'percent'});</script>
            <span class='span1' id='slider_log_%s'>%s%%</span>
-           <div id='slider_%s' class='slider span5' data-log='#slider_log_%s' data-min=0 data-max=100 data-unit='%%' data-value=0 data-active=%s></div>
-           <a href='javascript:toggle_slider("%s");' class='btn btn-mini'>Set/Unset</a>
-        </span>''' % (name, prop, prop, value ,prop, prop, active, prop)
+           <div id='slider_%s' class='slider span5' data-log='#slider_log_%s' data-prop='%s' data-min=0 data-max=100 data-unit='%%' data-value=0 data-active=%s></div>
+           <a id='btn-slider_%s' href='javascript:toggle_slider("%s");' class='btn btn-mini'>Set/Unset</a>
+        </span>''' % (name, prop, prop, value ,prop, prop, prop, active, prop, prop)
         return s
 
 
@@ -188,7 +188,7 @@ class Helper(object):
                   <span class="help-inline span2"> %s </span>
                   %s
                </span>
-               <script>properties.push({'name' : '%s', 'type' : 'select'});</script>
+               <script>properties.push({'name' : '%s', 'type' : 'multiselect'});</script>
             ''' % (name, select_part, prop)
         return s
         
