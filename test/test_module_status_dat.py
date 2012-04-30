@@ -68,6 +68,7 @@ class TestConfig(ShinkenTest):
         #Hack here :(
         sl.properties = {}
         sl.properties['to_queue'] = None
+        self.sched.conf.skip_initial_broks = False
         self.sched.fill_initial_broks()
         print self.sched.broks
         sl.init()
@@ -110,6 +111,7 @@ class TestConfig(ShinkenTest):
 
         #now check if after a resend we still got the good number
         self.sched.broks.clear()
+        self.sched.conf.skip_initial_broks = False
         self.sched.fill_initial_broks()
         #And in the good order!!!
         b_ids = self.sched.broks.keys()

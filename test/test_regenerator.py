@@ -94,6 +94,7 @@ class TestRegenerator(ShinkenTest):
         #
         #for h in self.sched.hosts:
         #    h.realm = h.realm.get_name()
+        self.sched.conf.skip_initial_broks = False
         self.sched.fill_initial_broks()
         self.rg = Regenerator()
 
@@ -200,6 +201,7 @@ class TestRegenerator(ShinkenTest):
         self.rg = Regenerator()
         self.rg.load_from_scheduler(self.sched)
         
+        self.sched.conf.skip_initial_broks = False
         self.sched.fill_initial_broks()        
         # Got the initial creation ones
         ids = self.sched.broks.keys()
