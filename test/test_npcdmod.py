@@ -146,6 +146,7 @@ class TestNpcd(ShinkenTest):
         self.npcdmod_broker.properties['to_queue'] = 0
 
         self.npcdmod_broker.init()
+        self.sched.conf.skip_initial_broks = False
         self.sched.fill_initial_broks()
 
         print "got initial broks"
@@ -177,6 +178,7 @@ class TestNpcd(ShinkenTest):
         self.npcdmod_broker.from_q = Queue()
 
         self.npcdmod_broker.init()
+        self.sched.conf.skip_initial_broks = False
         self.sched.fill_initial_broks()
 
         print "got initial broks"
