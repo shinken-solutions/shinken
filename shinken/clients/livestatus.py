@@ -29,7 +29,7 @@ import asyncore
 
 class LSSyncConnection:
     def __init__(self, addr='127.0.0.1', port=50000, path=None, timeout=10):
-	self.addr = addr
+        self.addr = addr
         self.port = port
         self.path = path
         self.timeout = timeout
@@ -55,6 +55,7 @@ class LSSyncConnection:
                 target = self.path
             else:
                 target = (self.addr, self.port)
+
             try:
                 self.socket.connect(target)
                 self.alive = True
@@ -64,58 +65,64 @@ class LSSyncConnection:
 
 
     def read(self, size):
-	res = ""
-	while size > 0:
-	    data = self.socket.recv(size)
+        res = ""
+        while size > 0:
+            data = self.socket.recv(size)
             l = len(data)
-	    if l == 0:
+
+            if l == 0:
                 print "WARNING, 0 size read"
                 return res # : TODO raise an error
-	    size = size - l
+    
+            size = size - l
             res = res + data
-	return res
+        return res
 
 
     def launch_query(self, query):
         if not self.alive:
-	    self.connect()
+           self.connect()
         if not query.endswith("\n"):
-	    query += "\n"
+           query += "\n"
         query += "OutputFormat: python\nKeepAlive: on\nResponseHeader: fixed16\n\n"
 
         try:
-	    self.socket.send(query)
-	    data = self.read(16)
-	    code = data[0:3]
+            self.socket.send(query)
+            data = self.read(16)
+            code = data[0:3]
             print "RAW DATA", data
-	    length = int(data[4:15])
+
+            length = int(data[4:15])
             print "Len", length
-	    data = self.read(length)
+
+            data = self.read(length)
             print "DATA", data
-	    if code == "200":
-		try:
-		    return eval(data)
-		except:
+
+            if code == "200":
+                try:
+                    return eval(data)
+                except:
                     print "BAD VALUE RETURN", data
                     return None
-	    else:
+            else:
                 print "BAD RETURN CODE", code, data
                 return None
         except IOError, exp:
-	    self.alive = False
+            self.alive = False
             print "SOCKET ERROR", exp
             return None
 
 
     def exec_command(self, command):
-	if not self.alive:
-	    self.connect()
-	if not command.endswith("\n"):
-	    command += "\n"
-	try:
-	    self.socket.send("COMMAND " + command + "\n")
-	except IOError, exp:
-	    self.alive = False
+        if not self.alive:
+            self.connect()
+        if not command.endswith("\n"):
+            command += "\n"
+
+        try:
+            self.socket.send("COMMAND " + command + "\n")
+        except IOError, exp:
+            self.alive = False
             print "COMMAND EXEC error:", exp
 
 
@@ -155,7 +162,7 @@ class Query(object):
 class LSAsynConnection(asyncore.dispatcher):
     def __init__(self, addr='127.0.0.1', port=50000, path=None, timeout=10):
         asyncore.dispatcher.__init__(self)
-	self.addr = addr
+        self.addr = addr
         self.port = port
         self.path = path
         self.timeout = timeout
@@ -211,33 +218,30 @@ class LSAsynConnection(asyncore.dispatcher):
 
 
     def do_read(self, size):
-	res = ""
-	while size > 0:
-	    data = self.socket.recv(size)
+        res = ""
+        while size > 0:
+            data = self.socket.recv(size)
             l = len(data)
-	    if l == 0:
+            if l == 0:
                 print "WARNING, 0 size read"
                 return res # : TODO raise an error
-	    size = size - l
-            res = res + data
-	return res
 
+            size = size - l
+            res = res + data
+        return res
 
 
     def exec_command(self, command):
-	if not self.alive:
-	    self.do_connect()
-	if not command.endswith("\n"):
-	    command += "\n"
-	try:
-	    self.socket.send("COMMAND " + command + "\n")
-	except IOError, exp:
-	    self.alive = False
+        if not self.alive:
+            self.do_connect()
+        if not command.endswith("\n"):
+            command += "\n"
+
+        try:
+            self.socket.send("COMMAND " + command + "\n")
+        except IOError, exp:
+            self.alive = False
             print "COMMAND EXEC error:", exp
-
-
-
-
 
 
     def handle_connect(self):
@@ -299,14 +303,13 @@ class LSAsynConnection(asyncore.dispatcher):
                 q.put(None)
                 return None
         except IOError, exp:
-	    self.alive = False
+            self.alive = False
             print "SOCKET ERROR", exp
             return q.put(None)
 
         # Now the current is done. We put in in our results queue
         self.results.append(q)
         self.current = None
-
 
 
     # Did we finished our job?
@@ -372,8 +375,6 @@ class LSAsynConnection(asyncore.dispatcher):
         self.wait_returns()
         q = self.results.pop()
         return q.result
-        
-
 
 
 class LSConnectionPool(object):
