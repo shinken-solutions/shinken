@@ -65,7 +65,7 @@ They connect here and see if they are still OK with our running_id, if not, they
         nb_received = len(results)
         self.app.nb_check_received += nb_received
         if nb_received != 0:
-            print "Received %d results" % nb_received
+            logger.debug("Received %d results" % nb_received)
         self.app.waiting_results.extend(results)
 
         #for c in results:
@@ -117,7 +117,7 @@ HE got user entry, so we must listen him carefully and give information he want,
     #Us : ... <- Nothing! We are die! you don't follow
     #anything or what??
     def wait_new_conf(self):
-        print "Arbiter want me to wait a new conf"
+        logger.debug("Arbiter want me to wait a new conf")
         self.app.sched.die()
         super(IForArbiter, self).wait_new_conf()        
 
@@ -247,9 +247,9 @@ class Shinken(BaseSatellite):
         self.wait_for_initial_conf()
         if not self.new_conf:
             return
-        print "Ok we've got conf"
+        logger.debug("Ok we've got conf")
         self.setup_new_conf()
-        print "Configuration Loaded"
+        logger.debug("Configuration Loaded")
         self.sched.run()
 
 
@@ -264,9 +264,8 @@ class Shinken(BaseSatellite):
         skip_initial_broks = pk['skip_initial_broks']
         
         t0 = time.time()
-        print "DBG: receiving a new conf at", int(t0)
         conf = cPickle.loads(conf_raw)
-        print "DBG : Finish unserialize the conf in", time.time() - t0
+        logger.debug("Conf received at %d. Unserialized in %d secs" % (t0, time.time() - t0))
 
         self.new_conf = None
 
@@ -302,12 +301,12 @@ class Shinken(BaseSatellite):
             setattr(self.conf, prop, val)
 
         if self.conf.use_timezone != '':
-            print "Setting our timezone to", self.conf.use_timezone
+            logger.debug("Setting our timezone to %s" % str(self.conf.use_timezone))
             os.environ['TZ'] = self.conf.use_timezone
             time.tzset()
 
         if len(self.modules) != 0:
-            print "I've got modules", self.modules
+            logger.debug("I've got %s modules" % str(self.modules))
 
         # TODO: if scheduler had previous modules instanciated it must clean them !
         self.modules_manager.set_modules(self.modules)
@@ -316,23 +315,23 @@ class Shinken(BaseSatellite):
         # give it an interface
         # But first remove previous interface if exists
         if self.ichecks is not None:
-            print "Deconnecting previous Check Interface from pyro_daemon"
+            logger.debug("Deconnecting previous Check Interface from pyro_daemon")
             self.pyro_daemon.unregister(self.ichecks)
         # Now create and connect it
         self.ichecks = IChecks(self.sched)
         self.uri = self.pyro_daemon.register(self.ichecks, "Checks")
-        print "The Checks Interface uri is:", self.uri
+        logger.debug("The Checks Interface uri is: %s" % self.uri)
 
         # Same for Broks
         if self.ibroks is not None:
-            print "Deconnecting previous Broks Interface from pyro_daemon"
+            logger.debug("Deconnecting previous Broks Interface from pyro_daemon")
             self.pyro_daemon.unregister(self.ibroks)
         # Create and connect it
         self.ibroks = IBroks(self.sched)
         self.uri2 = self.pyro_daemon.register(self.ibroks, "Broks")
-        print "The Broks Interface uri is:", self.uri2
+        logger.debug("The Broks Interface uri is: %s" % self.uri2)
 
-        print("Loading configuration..")
+        logger.debug("Loading configuration..")
         self.conf.explode_global_conf()
         
         # we give sched it's conf

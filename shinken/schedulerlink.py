@@ -29,7 +29,7 @@ from shinken.satellitelink import SatelliteLink, SatelliteLinks
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 
 from shinken.pyro_wrapper import Pyro
-from shinken.util import safe_print
+from shinken.log  import logger
 
 
 class SchedulerLink(SatelliteLink):
@@ -66,7 +66,7 @@ class SchedulerLink(SatelliteLink):
             self.create_connection()
         if not self.alive:
             return None
-        safe_print("Send %d commands", len(commands))
+        logger.debug("[SchedulerLink] Sending %d commands" % len(commands))
         try:
             self.con.run_external_commands(commands)
         except Pyro.errors.URIError , exp:
@@ -75,19 +75,23 @@ class SchedulerLink(SatelliteLink):
         except Pyro.errors.ProtocolError , exp:
             self.con = None
             return False
-        except TypeError , exp:
+        except TypeError , exp:            
             try:
-                print ''.join(Pyro.util.getPyroTraceback(exp))
+                exp = ''.join(Pyro.util.getPyroTraceback(exp))
             except:
-                print exp
+                pass
+
+            logger.debug(exp)
         except Pyro.errors.CommunicationError , exp:
             self.con = None
             return False
         except Exception, exp:
             try:
-                print ''.join(Pyro.util.getPyroTraceback(exp))
+                exp = ''.join(Pyro.util.getPyroTraceback(exp))
             except:
-                print exp
+                pass
+            
+            logger.debug(exp)
             self.con = None
             return False
 

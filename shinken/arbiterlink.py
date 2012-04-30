@@ -61,7 +61,7 @@ class ArbiterLink(SatelliteLink):
             if not hasattr(self, prop) and entry.required:
                 # This sould raise an error afterwards?
                 # If so, logger.log it !
-                print self.get_name(), " : I do not have", prop
+                self.debug("%s arbiterlink have not %s property" % (self.get_name(), prop))
                 state = False #Bad boy...
         return state
 

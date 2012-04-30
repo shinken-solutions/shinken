@@ -42,6 +42,7 @@ else:
 import time
 import sys
 import signal
+from log import logger
 
 
 class Worker:
@@ -189,8 +190,9 @@ class Worker:
                    self.returns_queue.put(action)
 
                 except IOError , exp:
-                    print "[%d]Exiting: %s" % (self.id, exp)
+                    logger.error("[%d] Exiting: %s" % (self.id, exp))
                     sys.exit(2)
+
         # Little sleep
         self.wait_time = wait_time
 
@@ -250,13 +252,13 @@ class Worker:
             try:
                 cmsg = c.get(block=False)
                 if cmsg.get_type() == 'Die':
-                    print "Info : [%d]Dad say we are dying..." % self.id
+                    logger.debug("[%d] Dad say we are dying..." % self.id)
                     break
             except :
                 pass
 
             if self._mortal == True and self._idletime > 2 * self._timeout:
-                print "Warning : [%d]Timeout, Harakiri" % self.id
+                logger.warning("[%d] Timeout, Harakiri" % self.id)
                 # The master must be dead and we are lonely, we must die
                 break
 
@@ -264,7 +266,7 @@ class Worker:
             # if so, we really die, our master poller will launch a new
             # worker because we were too weack to manage our job :(
             if len(self.checks) == 0 and self.i_am_dying:
-                print "Warning : [%d] I DIE because I cannot do my job as I should (too many open files?)... forgot me please." % self.id
+                logger.warning("[%d] I DIE because I cannot do my job as I should (too many open files?)... forgot me please." % self.id)
                 break
 
             # Manage a possible time change (our avant will be change with the diff)
