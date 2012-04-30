@@ -51,6 +51,7 @@ class TestConfigAuth(TestConfig):
         self.testid = str(os.getpid() + random.randint(1, 1000))
         self.init_livestatus()
         print "Cleaning old broks?"
+        self.sched.conf.skip_initial_broks = False
         self.sched.fill_initial_broks()
         self.update_broker()
         self.nagios_path = None
@@ -58,7 +59,7 @@ class TestConfigAuth(TestConfig):
         self.nagios_config = None
         # add use_aggressive_host_checking so we can mix exit codes 1 and 2
         # but still get DOWN state
-        host = self.sched.hosts.find_by_name("test_host_0")
+        host = self.sched.hosts.find_by_name("dbsrv1")
         host.__class__.use_aggressive_host_checking = 1
 
 
@@ -84,30 +85,29 @@ class TestConfigAuth(TestConfig):
 
 
     """
-test_host_0             cg0      c0,c1
-             test_ok_0  cg0      c0,c1
-             test_ok_1  cg1      c0
-             test_ok_2  cg2      c1
-             test_ok_3  cg3      c2
+dbsrv1  adm(adm1,adm2,adm3) oradba(oradba1,oradba2)
+    app_db_oracle_check_connect    oradba(oradba1,oradba2) cc(cc1,cc2,cc3)
+    app_db_oracle_check_alertlog   oradba(oradba1,oradba2)
 
-test_host_1             cg0
-             test_ok_0  cg2
-             test_ok_1  -
-             test_ok_2  -
-             test_ok_3  -
+dbsrv2  adm(adm1,adm2,adm3) oradba(oradba1,oradba2)
+    app_db_oracle_check_connect    oradba(oradba1,oradba2) cc(cc1,cc2,cc3)
+    app_db_oracle_check_alertlog   oradba(oradba1,oradba2)
 
-test_host_2             cg3
-             test_ok_0  -
-             test_ok_1  -
-             test_ok_2  -
-             test_ok_3  -
+dbsrv3  adm(adm1,adm2,adm3) oradba(oradba1,oradba2)
+    app_db_oracle_check_connect    oradba(oradba1,oradba2) cc(cc1,cc2,cc3)
+    app_db_oracle_check_alertlog   oradba(oradba1,oradba2)
 
-test_host_3             cg3
-             test_ok_0  -
-             test_ok_1  -
-             test_ok_2  -
-             test_ok_3  -
+dbsrv4  adm(adm1,adm2,adm3) mydba(mydba1,mydba2)
+    app_db_mysql_check_connect     mydba(mydba1,mydba2) cc(cc1,cc2,cc3)
+    app_db_mysql_check_alertlog    mydba(mydba1,mydba2)
 
+dbsrv5  adm(adm1,adm2,adm3) mydba(mydba1,mydba2)
+    app_db_mysql_check_connect     mydba(mydba1,mydba2) cc(cc1,cc2,cc3)
+    app_db_mysql_check_alertlog    mydba(mydba1,mydba2)
+
+www1    adm(adm1,adm2,adm3) web(web1,web2)
+    app_web_apache_check_http      web(web1,web2) cc(cc1,cc2,cc3)
+    app_web_apache_check_errorlog  web(web1,web2)
     """
 
     def test_host_authorization(self):
@@ -121,7 +121,7 @@ test_host_3             cg3
         self.scheduler_loop(1, objlist)
         self.update_broker()
         request = """GET hosts
-AuthUser: c0
+AuthUser: oradba1
 Columns: name
 OutputFormat: python
 KeepAlive: on
@@ -130,9 +130,10 @@ KeepAlive: on
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response 
         pyresponse = eval(response)
-        self.assert_(len(pyresponse) == 2)
-        self.assert_("test_host_0" in [h[0] for h in pyresponse])
-        self.assert_("test_host_1" in [h[0] for h in pyresponse])
+        self.assert_(len(pyresponse) == 3)
+        self.assert_("dbsrv1" in [h[0] for h in pyresponse])
+        self.assert_("dbsrv2" in [h[0] for h in pyresponse])
+        self.assert_("dbsrv3" in [h[0] for h in pyresponse])
 
     def test_service_authorization_loose(self):
         self.print_header()
@@ -145,14 +146,14 @@ KeepAlive: on
         self.scheduler_loop(1, objlist)
         self.update_broker()
         request = """GET hosts
-AuthUser: c0
+AuthUser: adm1
 Columns: name services
-Filter: name = test_host_0
+Filter: name = dbsrv1
 OutputFormat: python
 KeepAlive: on
 ResponseHeader: fixed16
 """
-        # test_ok_0..3 because c0 is host contact
+        # app_db_oracle_* because adm1 is host contact
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response 
 
