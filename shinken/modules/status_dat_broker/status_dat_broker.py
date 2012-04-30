@@ -341,7 +341,7 @@ class Status_dat_broker(BaseModule):
         r = []
         for c in cs:
             if c is not None:
-                find_c = self.find_contact(c.get_name())
+                find_c = self.find_contact(c)
                 if find_c is not None:
                     r.append(find_c)
                 else:
@@ -352,7 +352,7 @@ class Status_dat_broker(BaseModule):
     #The timeperiods must not be duplicated
     def get_timeperiod(self, t):
         if t is not None:
-            find_t = self.find_timeperiod(t.get_name())
+            find_t = self.find_timeperiod(t)
             if find_t is not None:
                 return find_t
             else:
