@@ -1,5 +1,6 @@
 .bsmContainer {
   /* container that surrounds entire bsmSelect widget */
+    display: inline;
 }
 
 .bsmSelect {
@@ -118,6 +119,11 @@
 
 .bsmListItemLabel-custom {
   padding-right: 5px;
+  color: black !important;
+cursor: default;
+font-size: 11px !important;
+white-space: nowrap;
+font-weight: normal !important;
 }
 
 .bsmListItemRemove-custom {

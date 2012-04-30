@@ -126,6 +126,7 @@ class Regenerator(object):
                              'initial_servicegroup_status', 'initial_contact_status',
                              'initial_contactgroup_status', 'initial_timeperiod_status',
                              'initial_command_status', 'initial_broks_done']
+        return True
         
 
     def manage_brok(self, brok):

@@ -625,6 +625,7 @@ class Broker(BaseSatellite):
         # Say to modules it's a new tick :)
         self.hook_point('tick')
 
+
     #  Main function, will loop forever
     def main(self):
         try:

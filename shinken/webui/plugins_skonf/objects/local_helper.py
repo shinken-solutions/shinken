@@ -23,6 +23,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from shinken.util import strip_and_uniq
+
 def find(lst, elt, prop):
     value = elt.get(prop, None)
     if value is None:
@@ -33,6 +35,32 @@ def find(lst, elt, prop):
         if v == value:
             return i
     return None
+
+# We will find in lst elements with the key that match elt.prop values (it's a list
+# of elements wit the keys in lst[key])
+def find_several(lst, elt, prop, key):
+    print 'Find several in', lst, 'for element', elt, 'and property', prop
+    value = elt.get(prop, None)
+    if value is None:
+        return []
+
+    values = value.split(',')
+    values = strip_and_uniq(values)
+    print 'Our values are', values
+
+    res = []
+    # Now try to match what it got
+    for dbi in lst:
+        print 'Try to look at', dbi, 'for property', key
+        v = dbi.get(key, None)
+        if v is None:
+            continue
+        v = v.strip()
+        print 'MAtch with db',v
+        if v  in values:
+            res.append(dbi)
+    print "Return find_several::", res
+    return res
 
 
 class Helper(object):
@@ -47,6 +75,55 @@ class Helper(object):
                </span>
                <script>properties.push({'name' : '%s', 'type' : 'string'});</script>
             ''' % (name, prop, elt.get(prop, ''), prop)
+        return s
+
+
+    def get_bool_input(self, elt, prop, name):
+        # Ok, let's try to see the value in db first
+        v = elt.get(prop, '')
+
+        on = ''
+        if v == '1':
+            on = 'active'
+        off = ''
+        if v == '0':
+            off = 'active'
+        unset = ''
+        if not on and not off:
+            unset = 'active'
+
+        s = '''
+        <span class="span10">
+           <span class="help-inline span2"> %s </span>
+
+        <script>properties.push({'name' : '%s', 'type' : 'bool'});</script>
+	<div class="btn-group span9" data-toggle="buttons-radio">
+	  <button class="btn %s" type="button" name="%s" value="1" >On</button>
+	  <button class="btn %s" type="button" name="%s" value="0" >Off</button>
+	  <button class="btn %s" type="button" name="%s" value="" >Unset</button>
+	</div>
+        </span>''' % (name, prop, on, prop, off, prop, unset, prop)
+        return s
+
+
+
+    def get_percent_input(self, elt, prop, name):
+        # Ok, let's try to see the value in db first
+        v = elt.get(prop, '')
+        value = 0
+        active = '0'
+        if v != '':
+            value = int(v)
+            active = '1'
+
+        s = '''
+        <span class="span10">
+           <span class="help-inline span2"> %s </span>
+           <script>properties.push({'name' : '%s', 'type' : 'percent'});</script>
+           <span class='span1' id='slider_log_%s'>%s%%</span>
+           <div id='slider_%s' class='slider span5' data-log='#slider_log_%s' data-min=0 data-max=100 data-unit='%%' data-value=0 data-active=%s></div>
+           <a href='javascript:toggle_slider("%s");' class='btn btn-mini'>Set/Unset</a>
+        </span>''' % (name, prop, prop, value ,prop, prop, active, prop)
         return s
 
 
@@ -75,7 +152,40 @@ class Helper(object):
         select_part += '</SELECT>'
 
         s = '''<span class="span10">
-                  <span class="help-inline"> %s </span>
+                  <span class="help-inline span2"> %s </span>
+                  %s
+               </span>
+               <script>properties.push({'name' : '%s', 'type' : 'select'});</script>
+            ''' % (name, select_part, prop)
+        return s
+        
+
+    def get_multiselect_input(self, elt, prop, name, cls, key):
+        t = getattr(self.app.db, cls)
+        tps = list(t.find({}))
+        
+        elts_tp = find_several(tps, elt, prop, key)
+        print 'Find a matching element for me?', elts_tp
+
+        select_part = '''<SELECT name="%s" multiple="multiple">''' % prop
+        #if elt_tp:
+        #    select_part += '<OPTION VALUE="%s">%s</OPTION>' % (tpname, tpname)
+        #else:
+        #    select_part += '<OPTION VALUE=""></OPTION>'
+
+        for tp in tps:
+            if not key in tp:
+                continue
+
+            tpname = tp.get(key)
+            if tp in elts_tp:
+                select_part += '<OPTION VALUE="%s" selected="selected" >%s</OPTION>' % (tpname, tpname)
+            else:
+                select_part += '<OPTION VALUE="%s">%s</OPTION>' % (tpname, tpname)
+        select_part += '</SELECT>'
+
+        s = '''<span class="span10">
+                  <span class="help-inline span2"> %s </span>
                   %s
                </span>
                <script>properties.push({'name' : '%s', 'type' : 'select'});</script>
