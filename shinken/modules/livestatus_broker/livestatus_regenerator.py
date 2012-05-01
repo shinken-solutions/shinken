@@ -77,15 +77,25 @@ class LiveStatusRegenerator(Regenerator):
         # Speedup authUser requests by populating _id_contact_heap with contact-names as key and 
         # an array with the associated service ids
         setattr(self.hosts, '_id_contact_heap', dict())
-        setattr(self.services, '_id_contact_heap', dict())
-        setattr(self.hostgroups, '_id_contact_heap', dict())
-        setattr(self.servicegroups, '_id_contact_heap', dict())
         [self.hosts._id_contact_heap.setdefault(c, []).append((get_obj_full_name(v), k)) for (k, v) in self.hosts.items.iteritems() for c in v.contacts]
-        [self.services._id_contact_heap.setdefault(c, []).append((get_obj_full_name(v), k)) for (k, v) in self.services.items.iteritems() for c in v.contacts]
         for c in self.hosts._id_contact_heap.keys():
             self.hosts._id_contact_heap[c].sort(key=lambda x: x[0])
+
+        setattr(self.services, '_id_contact_heap', dict())
+        # strict: one must be an explicity contact of a service in order to see it.
+        # if self.service_authorization_strict:
+        [self.services._id_contact_heap.setdefault(c, []).append((get_obj_full_name(v), k)) for (k, v) in self.services.items.iteritems() for c in v.contacts]
         for c in self.services._id_contact_heap.keys():
             self.services._id_contact_heap[c].sort(key=lambda x: x[0])
+        # todo loose: loop through hosts
+        # if host contact -> all services
+        # if not host contact -> services where one is contact
+
+        setattr(self.hostgroups, '_id_contact_heap', dict())
+        setattr(self.servicegroups, '_id_contact_heap', dict())
+        # if self.group_authorization_strict:
+        # todo strict: a contact must be contact of _all_ members 
+        # todo loose: a contact of a member becomes contact of the whole group
 
         # Everything is new now. We should clean the cache
         self.cache.wipeout()

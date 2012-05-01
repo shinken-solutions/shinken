@@ -110,6 +110,8 @@ class LiveStatus_broker(BaseModule, Daemon):
         # We need to have our regenerator now because it will need to load
         # data from scheduler before main() if in scheduler of course
         self.rg = LiveStatusRegenerator()
+        self.rg.service_authorization_strict = self.service_authorization_strict
+        self.rg.group_authorization_strict = self.group_authorization_strict
 
 
     def add_compatibility_sqlite_module(self):
