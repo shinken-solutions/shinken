@@ -52,7 +52,7 @@ properties = {
 
 #called by the plugin manager to get a broker
 def get_instance(plugin):
-    print "Get a Simple log broker for plugin %s" % plugin.get_name()
+    logger.debug("Get a Simple log broker for plugin %s" % plugin.get_name())
 
     #Catch errors
     path = plugin.path
@@ -122,7 +122,7 @@ class Simple_log_broker(BaseModule):
             shutil.move(self.path, file_archive_path)
 
             #and we overwrite it
-            print "I open the log file %s" % self.path
+            logger.debug("I open the log file %s" % self.path)
             self.file = open(self.path,'a')
 
             return True

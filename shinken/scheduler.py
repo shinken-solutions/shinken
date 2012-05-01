@@ -48,7 +48,7 @@ from shinken.contactdowntime import ContactDowntime
 from shinken.comment import Comment
 from shinken.acknowledge import Acknowledge
 from shinken.log import logger
-from shinken.util import nighty_five_percent, safe_print
+from shinken.util import nighty_five_percent
 from shinken.load import Load
 
 # Pack of common Pyro exceptions
@@ -180,7 +180,7 @@ class Scheduler:
             # we must relink them
             t0 = time.time()
             self.conf.late_linkify()
-            print 'Late command relink in', time.time() - t0
+            logger.debug("Late command relink in %d" % (time.time() - t0))
 
         # self.status_file = StatusFile(self)        # External status file
         self.instance_id = conf.instance_id # From Arbiter. Use for
@@ -208,7 +208,7 @@ class Scheduler:
         for i in self.recurrent_works:
             (name, f, old_tick) = self.recurrent_works[i]
             if name == f_name:
-                print "Changing the tick for the function", name, new_tick
+                logger.debug("Changing the tick to %d for the function %s" % (new_tick, name))
                 self.recurrent_works[i] = (name, f, new_tick)
 
         
@@ -235,7 +235,7 @@ class Scheduler:
             self.run_external_command(command)
 
     def run_external_command(self, command):
-        safe_print("scheduler resolves command", command)
+        logger.debug("scheduler resolves command '%s'" % command)
         ext_cmd = ExternalCommand(command)
         self.external_command.resolve_command(ext_cmd)
 
@@ -315,7 +315,8 @@ class Scheduler:
     def hook_point(self, hook_name):
         for inst in self.sched_daemon.modules_manager.instances:
             full_hook_name = 'hook_' + hook_name
-            print inst.get_name(), hasattr(inst, full_hook_name), hook_name
+            logger.debug("hook_point: %s: %s %s" % (inst.get_name(), str(hasattr(inst, full_hook_name)), hook_name))
+
             if hasattr(inst, full_hook_name):
                 f = getattr(inst, full_hook_name)
                 try :
@@ -675,7 +676,7 @@ class Scheduler:
         # Ok, we can now update it
         links[id]['last_connection'] = time.time()
 
-        print "Info : Init connection with", links[id]['uri']
+        logger.debug("Init connection with %s" % links[id]['uri'])
 
 
         uri = links[id]['uri']
@@ -723,7 +724,7 @@ class Scheduler:
     def push_actions_to_passives_satellites(self):
         # We loop for our passive pollers or reactionners
         for p in filter(lambda p: p['passive'], self.pollers.values()):
-            print "Info I will send actions to the poller", p
+            logger.debug("I will send actions to the poller %s" % str(p))
             con = p['con']
             poller_tags = p['poller_tags']
             if con is not None:
@@ -732,7 +733,7 @@ class Scheduler:
                 try:
                     # intial ping must be quick
                     pyro.set_timeout(con, 120)
-                    print "Info : Sending", len(lst), "actions"
+                    logger.debug("Sending %s actions" % len(lst))
                     con.push_actions(lst, self.instance_id)
                     self.nb_checks_send += len(lst)
                 except Pyro.errors.ProtocolError, exp:
@@ -760,7 +761,7 @@ class Scheduler:
         # TODO :factorize
         # We loop for our passive reactionners
         for p in filter(lambda p: p['passive'], self.reactionners.values()):
-            print "Info : I will send actions to the reactionner", p
+            logger.debug("I will send actions to the reactionner %s" % str(p))
             con = p['con']
             reactionner_tags = p['reactionner_tags']
             if con is not None:
@@ -769,7 +770,7 @@ class Scheduler:
                 try:
                     # intial ping must be quick
                     pyro.set_timeout(con, 120)
-                    print "Info : Sending", len(lst), "actions"
+                    logger.debug("Sending %d actions" % len(lst))
                     con.push_actions(lst, self.instance_id)
                     self.nb_checks_send += len(lst)
                 except Pyro.errors.ProtocolError, exp:
@@ -800,7 +801,7 @@ class Scheduler:
     def get_actions_from_passives_satellites(self):
         # We loop for our passive pollers
         for p in filter(lambda p: p['passive'], self.pollers.values()):
-            print "Info : I will get actions from the poller", p
+            logger.debug("I will get actions from the poller %s" % str(p))
             con = p['con']
             poller_tags = p['poller_tags']
             if con is not None:
@@ -810,7 +811,7 @@ class Scheduler:
                     results = con.get_returns(self.instance_id)
                     nb_received = len(results)
                     self.nb_check_received += nb_received
-                    print "Received %d passive results" % nb_received
+                    logger.debug("Received %d passive results" % nb_received)
                     self.waiting_results.extend(results)
                 except Pyro.errors.ProtocolError, exp:
                     logger.warning("Connection problem to the %s %s : %s" % (type, p['name'], str(exp)))
@@ -836,7 +837,7 @@ class Scheduler:
 
         # We loop for our passive reactionners
         for p in filter(lambda p: p['passive'], self.reactionners.values()):
-            print "Info : I will get actions from the reactionner", p
+            logger.debug("I will get actions from the reactionner %s" % str(p))
             con = p['con']
             reactionner_tags = p['reactionner_tags']
             if con is not None:
@@ -846,7 +847,7 @@ class Scheduler:
                     results = con.get_returns(self.instance_id)
                     nb_received = len(results)
                     self.nb_check_received += nb_received
-                    print "Received %d passive results" % nb_received
+                    logger.debug("Received %d passive results" % nb_received)
                     self.waiting_results.extend(results)
                 except Pyro.errors.ProtocolError, exp:
                     logger.warning("Connection problem to the %s %s : %s" % (type, p['name'], str(exp)))
@@ -1141,7 +1142,7 @@ class Scheduler:
                           self.hosts, self.hostgroups,
                           self.services, self.servicegroups )
 
-        print 'Skiping initial broks?', self.conf.skip_initial_broks
+        logger.debug("Skipping initial broks? %s" % str(self.conf.skip_initial_broks))
         if not self.conf.skip_initial_broks:
             for tab in initial_status_types:
                 for i in tab:
@@ -1419,7 +1420,7 @@ class Scheduler:
         t0 = time.time()
         nb_sent = 0
         for mod in self.sched_daemon.modules_manager.get_external_instances():
-            print "Look for sending to module", mod.get_name()
+            logger.debug("Look for sending to module %s" % mod.get_name())
             q = mod.to_q
             to_send = [b for b in self.broks.values() if not getattr(b, 'sent_to_sched_externals', False) and mod.want_brok(b)]
             q.put(to_send)
@@ -1428,7 +1429,7 @@ class Scheduler:
         # No more need to send them
         for b in self.broks.values():
             b.sent_to_sched_externals = True
-        print "DBG: Time to send %s broks" % nb_sent, time.time() - t0
+        logger.debug("Time to send %s broks (after %d secs)" % (nb_sent, time.time() - t0))
 
 
     # Get 'objects' from external modules
@@ -1456,11 +1457,10 @@ class Scheduler:
         self.sched_daemon.modules_manager.start_external_instances(late_start=True)
 
         # Ok, now all is initialized, we can make the inital broks
-        print 'Starting initial broks'
+        logger.debug("Starting initial broks")
         t0 = time.time()
         self.fill_initial_broks(with_logs=True)
-        print 'Finishing initial broks at', int(time.time()), 'in', time.time() - t0, 's'
-
+        logger.debug("Finishing initial broks at %d in %d secs" % (time.time(), time.time() - t0))
         logger.info("[%s] First scheduling launched" % self.instance_name)
         self.schedule()
         logger.info("[%s] First scheduling done" % self.instance_name)
@@ -1477,7 +1477,7 @@ class Scheduler:
         gogogo = time.time()
 
         self.load_one_min = Load(initial_value=1)
-        print "First loop at", int(time.time())
+        logger.debug("First loop at %d" % time.time())
         while self.must_run:
             #print "Loop"
             # Before answer to brokers, we send our broks to modules
@@ -1494,7 +1494,7 @@ class Scheduler:
 
             # load of the scheduler is the percert of time it is waiting
             l = min(100, 100.0 - self.load_one_min.get_load() * 100)
-            print "Load : (sleep) %.2f (average : %.2f) -> %d%%" % (self.sched_daemon.sleep_time, self.load_one_min.get_load(), l)
+            logger.debug("Load : (sleep) %.2f (average : %.2f) -> %d%%" % (self.sched_daemon.sleep_time, self.load_one_min.get_load(), l))
 
             self.sched_daemon.sleep_time = 0.0
 
@@ -1525,28 +1525,29 @@ class Scheduler:
             nb_zombies = len([c for c in self.checks.values() if c.status=='zombie'])
             nb_notifications = len(self.actions)
 
-            print "Checks:", "total", len(self.checks), "scheduled", nb_scheduled, "inpoller", nb_inpoller, "zombies", nb_zombies, "notifications", nb_notifications
+            logger.debug("Checks: total %s, scheduled %s, inpoller %s, zombies %s, notifications %s" %\
+                (len(self.checks), nb_scheduled, nb_inpoller, nb_zombies, nb_notifications))
 
             # Get a overview of the latencies with just
             # a 95 percentile view, but lso min/max values
             latencies = [s.latency for s in self.services]
             lat_avg, lat_min, lat_max = nighty_five_percent(latencies)
             if lat_avg is not None:
-                print "Latency (avg/min/max) : %.2f/%.2f/%.2f" % (lat_avg, lat_min, lat_max)
+                logger.debug("Latency (avg/min/max) : %.2f/%.2f/%.2f" % (lat_avg, lat_min, lat_max))
 
 
             # print "Notifications:", nb_notifications
             now = time.time()
 
             if self.nb_checks_send != 0:
-                print "Nb checks/notifications/event send:", self.nb_checks_send
+                logger.debug("Nb checks/notifications/event send: %s" % self.nb_checks_send)
             self.nb_checks_send = 0
             if self.nb_broks_send != 0:
-                print "Nb Broks send:", self.nb_broks_send
+                logger.debug("Nb Broks send:" % self.nb_broks_send)
             self.nb_broks_send = 0
 
             time_elapsed = now - gogogo
-            print "Check average =", int(self.nb_check_received / time_elapsed), "checks/s"
+            logger.debug("Check average = %d checks/s" % int(self.nb_check_received / time_elapsed))
 
             if self.need_dump_memory:
                 self.sched_daemon.dump_memory()

@@ -216,9 +216,9 @@ class ModulesManager(object):
 
         # External instances need to be close before (process + queues)
         if inst.is_external:
-            print "Info : Ask stop process for", inst.get_name()
+            logger.debug("Ask stop process for %s" % inst.get_name())
             inst.stop_process()
-            print "Info : Stop process done"
+            logger.debug("Stop process done")
         
         inst.clear_queues(self.manager)
 
@@ -265,9 +265,10 @@ class ModulesManager(object):
         to_restart = self.to_restart[:]
         del self.to_restart[:]
         for inst in to_restart:
-            print "Info : I should try to reinit", inst.get_name()
+            logger.debug("I should try to reinit %s" % inst.get_name())
+
             if self.try_instance_init(inst):
-                print "Info : Good, I try to restart",  inst.get_name()
+                logger.debug("Good, I try to restart %s" % inst.get_name())
                 # If it's an external, it will start it
                 inst.start()
                 # Ok it's good now :)
