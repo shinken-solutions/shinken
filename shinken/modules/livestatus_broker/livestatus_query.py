@@ -153,7 +153,9 @@ class LiveStatusQuery(object):
             elif keyword == 'Limit':
                 _, self.limit = self.split_option(line)
             elif keyword == 'AuthUser':
-                _, self.authuser = self.split_option(line)
+                if self.table in ['hosts', 'hostgroups', 'services', 'servicegroups']:
+                    _, self.authuser = self.split_option(line)
+                # else self.authuser stays None and will be ignored
             elif keyword == 'Filter':
                 try:
                     _, attribute, operator, reference = self.split_option(line, 3)
