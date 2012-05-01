@@ -544,3 +544,11 @@ def get_key_value_sequence(entry, default_value=None):
     #print "***********Diff", t1 -t0
 
     return (array2, GET_KEY_VALUE_SEQUENCE_ERROR_NOERROR)
+
+################################# Python compatibility #####################
+def if_else(condition, true_expression, false_expression):
+    if condition:
+        return true_expression
+    else:
+        return false_expression
+
