@@ -34,7 +34,7 @@ from shinken.util import safe_print, get_obj_full_name
 def itersorted(self, authuser=None):
     if authuser and authuser in self._id_contact_heap:
         # return only items belonging to this contact
-        for _, hid in self._id_contact_heap:
+        for _, hid in self._id_contact_heap[authuser]:
             yield self.items[hid]
     elif not authuser:
         # return all items
