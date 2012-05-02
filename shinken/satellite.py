@@ -654,7 +654,7 @@ class Satellite(BaseSatellite):
             except Exception , exp:
                 logger.debug("A satellite raised an unknown exception : %s (%s)" % (exp, type(exp)))
                 try:
-                    logger.debug(''.join(Pyro.util.getPyroTraceback(exp) if PYRO_VERSION < "4.0" else Pyro.util.getPyroTraceback()))
+                    logger.debug(''.join(if_else(PYRO_VERSION < "4.0", Pyro.util.getPyroTraceback(exp), Pyro.util.getPyroTraceback())))
                 except:
                     pass
                 raise
