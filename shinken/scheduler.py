@@ -1543,7 +1543,7 @@ class Scheduler:
                 logger.debug("Nb checks/notifications/event send: %s" % self.nb_checks_send)
             self.nb_checks_send = 0
             if self.nb_broks_send != 0:
-                logger.debug("Nb Broks send:" % self.nb_broks_send)
+                logger.debug("Nb Broks send: %s" % self.nb_broks_send)
             self.nb_broks_send = 0
 
             time_elapsed = now - gogogo
