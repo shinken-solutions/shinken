@@ -53,7 +53,8 @@ class Servicedependency(Item):
         'inherits_parent':               BoolProp  (default='0'),
         'execution_failure_criteria':    ListProp  (default='n'),
         'notification_failure_criteria': ListProp  (default='n'),
-        'dependency_period':             StringProp(default='')
+        'dependency_period':             StringProp(default=''),
+    'explode_hostgroup':         BoolProp  (default='0')
     })
     
 
@@ -85,6 +86,37 @@ class Servicedependencies(Items):
         self.items[sd.id] = sd
 
 
+    # If we have explode_hostgroup parameter whe have to create a service dependency for each host of the hostgroup
+    def explode_hostgroup(self, sd, hostgroups):
+        # We will create a service dependency for each host part of the host group
+ 
+        # First get services 
+        snames = sd.service_description.split(',')
+ 
+        # And dep services
+        dep_snames = sd.dependent_service_description.split(',')
+ 
+        # Now for each host into hostgroup we will create a service dependency object
+        hg_names = sd.hostgroup_name.split(',')
+        for hg_name in hg_names:
+            hg = hostgroups.find_by_name(hg_name)
+            if hg is None:
+                err = "ERROR : the servicedependecy got an unknown hostgroup_name '%s'" % hg_name
+                self.configuration_errors.append(err)
+                continue
+            hnames = []
+            hnames.extend(hg.members.split(','))
+            for hname in hnames:
+                for dep_sname in dep_snames:
+                    for sname in snames:
+                        new_sd = sd.copy()
+                        new_sd.host_name = hname
+                        new_sd.service_description = sname
+                        new_sd.dependent_host_name = hname
+                        new_sd.dependent_service_description = dep_sname
+                        self.items[new_sd.id] = new_sd
+
+
     # We create new servicedep if necessery (host groups and co)
     def explode(self, hostgroups):
         # The "old" services will be removed. All services with
@@ -99,6 +131,11 @@ class Servicedependencies(Items):
             if sd.is_tpl(): #Exploding template is useless
                 continue
 
+            # Have we to explode the hostgroup into many service ?
+            if hasattr(sd, 'explode_hostgroup') and hasattr(sd, 'hostgroup_name'):
+                self.explode_hostgroup(sd, hostgroups)
+                srvdep_to_remove.append(id)
+                continue
 
             # Get the list of all FATHER hosts and service deps
             hnames = []
