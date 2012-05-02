@@ -397,7 +397,7 @@ class Arbiter(Daemon):
         #    sys.exit("Configuration is incorrect, sorry, I bail out")
 
         # REF: doc/shinken-conf-dispatching.png (2)
-        logger.info("Cutting the hosts and services into parts")
+        logger.info("Cutting the hosts and services into parts", print_it=True)
         self.confs = self.conf.cut_into_parts()
 
         # The conf can be incorrect here if the cut into parts see errors like
@@ -406,7 +406,7 @@ class Arbiter(Daemon):
             self.conf.show_errors()
             sys.exit("Configuration is incorrect, sorry, I bail out")
 
-        logger.info('Things look okay - No serious problems were detected during the pre-flight check')
+        logger.info('Things look okay - No serious problems were detected during the pre-flight check', print_it=True)
 
         # Clean objects of temporary/unecessary attributes for live work:
         self.conf.clean()
@@ -445,7 +445,7 @@ class Arbiter(Daemon):
         self.host = self.me.address
         self.port = self.me.port
         
-        logger.info("Configuration Loaded")
+        logger.info("Configuration Loaded", print_it=True)
 
 
     # Main loop function
