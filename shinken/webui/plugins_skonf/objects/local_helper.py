@@ -25,13 +25,17 @@
 
 from shinken.util import strip_and_uniq
 
-def find(lst, elt, prop):
+def find(lst, elt, prop, key):
+    print 'Finding the', prop, 'of the element', elt
+    print 'And in the list', lst
     value = elt.get(prop, None)
+    print 'Value is', value
     if value is None:
         return None
 
     for i in lst:
-        v = i.get(prop, None)
+        v = i.get(key, None)
+        print 'MAtch with', v, value
         if v == value:
             return i
     return None
@@ -68,13 +72,18 @@ class Helper(object):
         self.app = app
 
     # Return a simple string input
-    def get_string_input(self, elt, prop, name, span='span10', innerspan='span2' ,placeholder=''):
+    def get_string_input(self, elt, prop, name, span='span10', innerspan='span2' ,placeholder='', popover=None):
+        p = ''
+        if popover is not None:
+            p = '<i id="popover-%s" class="icon-question-sign"></i>' % prop
+            p += '<script>$("#popover-%s").popover({"title": "Help", "content" : "%s"});</script>' % (prop, popover)
         s = '''<span class="%s">
                   <span class="help-inline %s"> %s </span>
                   <input name="%s" type="text" value="%s" placeholder='%s' />
+                  %s
                </span>
                <script>properties.push({'name' : '%s', 'type' : 'string'});</script>
-            ''' % (span, innerspan, name, prop, elt.get(prop, ''), placeholder, prop)
+            ''' % (span, innerspan, name, prop, elt.get(prop, ''), placeholder, p, prop)
         return s
 
 
@@ -131,11 +140,12 @@ class Helper(object):
         t = getattr(self.app.db, cls)
         tps = list(t.find({}))
         
-        elt_tp = find(tps, elt, prop)
-        print 'Find a matching element for me?', elt_tp
+        elt_tp = find(tps, elt, prop, key)
+        print 'Find a matching element for me?', elt.get(prop), elt_tp
 
         select_part = '''<SELECT name="%s">''' % prop
         if elt_tp:
+            tpname = elt_tp.get(key)
             select_part += '<OPTION VALUE="%s">%s</OPTION>' % (tpname, tpname)
         else:
             select_part += '<OPTION VALUE=""></OPTION>'

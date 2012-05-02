@@ -23,11 +23,12 @@
 
 
 function get_use_values(name){
-    v = $('.use-value-input-'+name);
+    v = $('.use-value-'+name);
     r = [];
     $.each(v, function(idx, name){
         console.log('use-value?'+$(this).html()+' '+idx+' '+name);
-	r.push($(this).html());
+	var t = $(this).html();
+	r.push(t);
     });
     //console.log(dump(r));
     console.log('Inline?'+r.join(','));

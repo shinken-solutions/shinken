@@ -103,6 +103,34 @@ def enable_object(cls, name):
 
 
 
+def save_object(cls, name):
+    print "Save object for", cls, name
+    t = getattr(app.db, cls)
+    d = t.find_one({'_id' : name})
+    print 'In db', d
+    bd_entry = {'_id' : name}
+    if d:
+        print 'We got an entry in db', d
+        db_entry = d
+        bd_entry['_id'] = name
+        
+    print 'Dump form', app.request.forms.__dict__
+    for k in app.request.forms:
+        #print "K", k
+        v = str(app.request.forms.get(k))
+        # the value can be '' or something else. 
+        # -> '' means not set
+        # -> else set the value :)
+        if v == '' and k in bd_entry:
+            del bd_entry[k]
+        if v != '':
+            bd_entry[k] = v
+
+    print 'We will save our object in db'
+    print bd_entry
+    t.save(bd_entry)
+            
+        
 
 
 pages = {objects_hosts : { 'routes' : ['/objects/hosts'], 'view' : 'objects_hosts', 'static' : True},
@@ -113,5 +141,6 @@ pages = {objects_hosts : { 'routes' : ['/objects/hosts'], 'view' : 'objects_host
          objects_host : { 'routes' : ['/objects/hosts/:name'], 'view' : 'objects_host', 'static' : True},
          disable_object : { 'routes' : ['/object/q/:cls/disable/:name']},
          enable_object : { 'routes' : ['/object/q/:cls/enable/:name']},
+         save_object : { 'routes' : ['/object/q/:cls/save/:name'], 'method' : 'POST'},
          }
 

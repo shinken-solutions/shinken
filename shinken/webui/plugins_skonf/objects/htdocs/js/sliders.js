@@ -47,10 +47,13 @@ function disable_slider(name){
 function toggle_slider(name){
     var s = $('#slider_'+name);
     var b = $('#btn-slider_'+name);
-    console.log("Founded?"+s.length);
+    console.log("Founded?"+s.length+''+s.attr('data-active'));
+    
     if(s.attr('data-active') == 0){
+	console.log('Enable slide');
 	enable_slider(name);
     }else{
+	console.log('Disable slider');
 	disable_slider(name);
     }
 }

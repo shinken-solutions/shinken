@@ -1,17 +1,7 @@
 
-%rebase layout_skonf globals(), title="Host %s" % elt.get('host_name', 'unknown'),  css=['objects/css/token-input.css', 'objects/css/token-input-facebook.css', 'objects/css/jquery.bsmselect.css', 'objects/css/jquery-ui.css'], js=['objects/js/host.js', 'objects/js/jquery.tokeninput.js', 'objects/js/jquery.bsmselect.js', 'objects/js/jquery.bsmselect.sortable.js', 'objects/js/jquery.bsmselect.compatibility.js', 'objects/js/sliders.js', 'objects/js/selects.js']
+%rebase layout_skonf globals(), title="Host %s" % elt.get('host_name', 'unknown'),  css=['objects/css/token-input.css', 'objects/css/token-input-facebook.css', 'objects/css/jquery.bsmselect.css', 'objects/css/jquery-ui.css'], js=['objects/js/host.js', 'objects/js/jquery.tokeninput.js', 'objects/js/jquery.bsmselect.js', 'objects/js/jquery.bsmselect.sortable.js', 'objects/js/jquery.bsmselect.compatibility.js', 'objects/js/sliders.js', 'objects/js/selects.js', 'objects/js/forms.js']
 
 <script>
-function submit_form(){
- var f = document.forms['form-host'];
- console.log("submiting form"+f);
- console.log('Dump properties'+dump(properties));
-
- // Sample for bool: $('button[name="process_perf_data"].active').val();
-  console.log('Dump process_perf_data'+ $('button[name="process_perf_data"].active').val());
-
-
-}
 
 // Keep a list of all properties, with their own properties :)
 var properties = [];
@@ -40,12 +30,13 @@ var properties = [];
       <div class="tab-pane active" id="generic">
 
 
-	{{!helper.get_string_input(elt, 'host_name', 'Hostname', span='span5')}}
+	{{!helper.get_string_input(elt, 'host_name', 'Hostname', span='span5', popover='Name of the host. Should be unique.')}}
 	{{!helper.get_string_input(elt, 'display_name', 'Display name', span='span6', innerspan='span3', placeholder=elt.get('host_name', ''))}}
 	{{!helper.get_string_input(elt, 'address', 'Address', span='span5')}}
 	<span class="span10">
 	  <span class="help-inline span1">Tags </span>
-	  <input id='input-{{elt['host_name']}}' class='to_use_complete offset1' data-use='{{elt.get('use', '')}}' name="use" type="text" tabindex="2"/>
+	  <input id='use' class='to_use_complete offset1' data-use='{{elt.get('use', '')}}' name="use" type="text" tabindex="2"/>
+	  <script>properties.push({'name' : 'use', 'type' : 'use_tags'});</script>
 	</span>
 	{{!helper.get_select_input(elt, 'maintenance_period', 'Maintenance Period', 'timeperiods', 'timeperiod_name')}}
 	{{!helper.get_select_input(elt, 'check_period', 'Check Period', 'timeperiods', 'timeperiod_name')}}
@@ -55,9 +46,6 @@ var properties = [];
 	{{!helper.get_bool_input(elt, 'active_checks_enabled', 'Active Checks Enabled')}}
 	{{!helper.get_bool_input(elt, 'passive_checks_enabled', 'Passive Checks Enabled')}}
 
-
-
-	
 
       </div>
       <!-- Tab Generic stop-->
@@ -100,7 +88,7 @@ var properties = [];
 	{{!helper.get_bool_input(elt, 'flap_detection_enabled', 'Flap Detection Enabled')}}
 	{{!helper.get_string_input(elt, 'flap_detection_options', 'Flapping options')}}
 	{{!helper.get_percent_input(elt, 'low_flap_threshold', 'Low Flap threshold %')}}
-	{{!helper.get_string_input(elt, 'high_flap_threshold','High Flap Threshold %')}}
+	{{!helper.get_percent_input(elt, 'high_flap_threshold','High Flap Threshold %')}}
 	{{!helper.get_bool_input(elt, 'process_perf_data', 'Process Perf Data')}}
 
 	{{!helper.get_bool_input(elt, 'event_handler_enabled', 'Automatic event Handler Enabled')}}

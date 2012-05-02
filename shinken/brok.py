@@ -48,7 +48,9 @@ class Brok:
     # We unserialize the data, and if some prop were
     # add after teh serialize pass, we integer them in the data
     def prepare(self):
-        if not self.prepared:
+        # Maybe the brok is a old daemon one or was already prepared
+        # if so, the data is already ok
+        if hasattr(self, 'prepared') and not self.prepared:
             self.data = cPickle.loads(self.data)
             if hasattr(self, 'instance_id'):
                 self.data['instance_id'] = self.instance_id
