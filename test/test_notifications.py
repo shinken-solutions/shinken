@@ -28,7 +28,7 @@ import time
 from shinken_test import unittest, ShinkenTest
 
 
-class TestConfig(ShinkenTest):
+class TestNotif(ShinkenTest):
 
     def test_continuous_notifications(self):
         self.print_header()

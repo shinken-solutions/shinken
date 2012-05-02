@@ -111,9 +111,7 @@ class Log:
                 'name' : if_else(name is None, '', '[%s] ' % name),
                 'msg'  : message
             }
-
             s = fmt % args
-
         else:
             s = format % message
 
@@ -126,9 +124,12 @@ class Log:
                 print s.encode('ascii', 'ignore')
 
 
-        # We create and add the brok
-        b = Brok('log', {'log': s})
-        obj.add(b)
+        # We create and add the brok but not for debug that don't need
+        # to do a brok for it, and so go in all satellites. Debug
+        # should keep locally
+        if level != logging.DEBUG:
+            b = Brok('log', {'log': s})
+            obj.add(b)
 
         # If we want a local log write, do it
         if local_log is not None:
