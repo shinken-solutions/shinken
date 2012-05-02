@@ -118,7 +118,7 @@ class Comment:
         # if not, we will do errors!
         # -1 because of the 'id' prop
         if len(cls.properties) != (len(state) - 1):
-            print "Passing comment"
+            self.debug("Passing comment")
             return
         
         self.id = state.pop()

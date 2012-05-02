@@ -35,7 +35,7 @@ import time
 import random
 import itertools
 
-from shinken.util import alive_then_spare_then_deads, safe_print
+from shinken.util import alive_then_spare_then_deads
 from shinken.log import logger
 
 # Always initialize random :)
@@ -387,7 +387,7 @@ class Dispatcher:
                         
                         t1 = time.time()
                         is_sent = sched.put_conf(conf_package)
-                        print "DBG : conf is sent in ", time.time() - t1
+                        logger.debug("Conf is sent in %d" % (time.time() - t1))
                         if not is_sent:
                             logger.warning('[%s] configuration dispatching error for scheduler %s' %(r.get_name(), sched.get_name()))
                             continue

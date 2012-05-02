@@ -104,7 +104,7 @@ class IForArbiter(Interface):
     # Arbiter ask me which sched_id I manage, If it is not ok with it
     # It will ask me to remove one or more sched_id
     def what_i_managed(self):
-        print "%s DBG: the arbiter ask me what I manage. It's %s" % (int(time.time()), self.app.what_i_managed())
+        logger.debug("The arbiter ask me what I manage. It's %s" % self.app.what_i_managed())
         return self.app.what_i_managed()#self.app.schedulers.keys()
 
 
@@ -116,7 +116,7 @@ class IForArbiter(Interface):
     # Us : ... <- Nothing! We are dead! you don't get it or what?? 
     # Reading code is not a job for eyes only...
     def wait_new_conf(self):
-        print "Arbiter want me to wait for a new conf"
+        logger.debug("Arbiter want me to wait for a new conf")
         self.app.schedulers.clear()
         self.app.cur_conf = None
 
@@ -201,7 +201,7 @@ class BaseSatellite(Daemon):
 
     def do_stop(self):
         if self.pyro_daemon and self.interface:
-            print "Stopping all network connections"
+            logger.debug("Stopping all network connections")
             self.pyro_daemon.unregister(self.interface)
         super(BaseSatellite, self).do_stop()
 
@@ -359,20 +359,17 @@ class Satellite(BaseSatellite):
                         send_ok = con.put_results(ret)
                 # Not connected or sched is gone
                 except (Pyro_exp_pack, KeyError) , exp:
-                    print exp
+                    logger.debug(str(exp))
                     self.pynag_con_init(sched_id)
                     return
                 except AttributeError , exp: # the scheduler must  not be initialized
-                    print exp
+                    logger.debug(str(exp))
                 except Exception, exp:
-                    print "Warning : A satellite raised an unknown exception :", exp, type(exp)
+                    logger.debug("A satellite raised an unknown exception : %s (%s)" % (exp, type(exp)))
                     try:
-                       if PYRO_VERSION < "4.0":
-                          print ''.join(Pyro.util.getPyroTraceback(exp))
-                       else:
-                          print ''.join(Pyro.util.getPyroTraceback())
+                        logger.debug(''.join(Pyro.util.getPyroTraceback(exp) if PYRO_VERSION < "4.0" else Pyro.util.getPyroTraceback()))
                     except:
-                       pass
+                        pass
                     raise
 
 
@@ -389,11 +386,11 @@ class Satellite(BaseSatellite):
     def get_return_for_passive(self, sched_id):
         # I do not know this scheduler?
         if sched_id not in self.schedulers:
-            print "Info : I do not know this scheduler :", sched_id
+            logger.debug("I do not know this scheduler : %s" % sched_id)
             return []
 
         sched = self.schedulers[sched_id]
-        print "Info : Preparing to return", sched['wait_homerun'].values()
+        logger.debug("Preparing to return %s" % str(sched['wait_homerun'].values()))
         
         # prepare our return
         ret = copy.copy(sched['wait_homerun'].values())
@@ -489,7 +486,7 @@ class Satellite(BaseSatellite):
             self.broks[elt.id] = elt
             return
         elif cls_type == 'externalcommand':
-            print "Info : Adding in queue an external command", elt.__dict__
+            logger.debug("Enqueuing an external command '%s'" % str(elt.__dict__))
             self.external_commands.append(elt)
 
 
@@ -636,7 +633,7 @@ class Satellite(BaseSatellite):
                                              reactionner_tags=self.reactionner_tags, \
                                              worker_name=self.name, \
                                              module_types=self.q_by_mod.keys())
-                    print "Ask actions to", sched_id, "got", len(tmp)
+                    logger.debug("Ask actions to %d, got %d" % (sched_id, len(tmp)))
                     # We 'tag' them with sched_id and put into queue for workers
                     # REF: doc/shinken-action-queues.png (2)
                     self.add_actions(tmp, sched_id)
@@ -645,7 +642,7 @@ class Satellite(BaseSatellite):
             # Ok, con is unknown, so we create it
             # Or maybe is the connection lost, we recreate it
             except (Pyro_exp_pack, KeyError) , exp:
-                print exp
+                logger.debug(str(exp))
                 self.pynag_con_init(sched_id)
             # scheduler must not be initialized
             # or scheduler must not have checks
@@ -654,15 +651,12 @@ class Satellite(BaseSatellite):
             # What the F**k? We do not know what happenned,
             # so.. bye bye :)
             except Exception , exp:
-               print "Warning : A satellite raised an unknown exception :", exp, type(exp)
-               try:
-                  if PYRO_VERSION < "4.0":
-                      print ''.join(Pyro.util.getPyroTraceback(exp))
-                  else:
-                      print ''.join(Pyro.util.getPyroTraceback())
-               except:
-                  pass
-               raise
+                logger.debug("A satellite raised an unknown exception : %s (%s)" % (exp, type(exp)))
+                try:
+                    logger.debug(''.join(Pyro.util.getPyroTraceback(exp) if PYRO_VERSION < "4.0" else Pyro.util.getPyroTraceback()))
+                except:
+                    pass
+                raise
 
 
 
@@ -747,8 +741,8 @@ class Satellite(BaseSatellite):
             for mod in self.q_by_mod:
                 # In workers we've got actions send to queue - queue size
                 for (i, q) in self.q_by_mod[mod].items():
-                    print '[%d][%s][%s]Stats : Workers:%d (Queued:%d TotalReturnWait:%d)' % \
-                        (sched_id, sched['name'], mod, i, q.qsize(), self.get_returns_queue_len())
+                    logger.debug("[%d][%s][%s] Stats : Workers:%d (Queued:%d TotalReturnWait:%d)" % \
+                        (sched_id, sched['name'], mod, i, q.qsize(), self.get_returns_queue_len()))
 
 
         # Before return or get new actions, see how we manage
@@ -760,7 +754,7 @@ class Satellite(BaseSatellite):
             for q in self.q_by_mod[mod].values():
                 total_q += q.qsize()
         if total_q != 0 and wait_ratio < 2*self.polling_interval:
-            print "I decide to up wait ratio"
+            logger.debug("I decide to up wait ratio")
             self.wait_ratio.update_load(wait_ratio * 2)
             #self.wait_ratio.update_load(self.polling_interval)
         else:
@@ -769,7 +763,7 @@ class Satellite(BaseSatellite):
             # it make it come near 2 because if < 2, go up :)
             self.wait_ratio.update_load(self.polling_interval)
         wait_ratio = self.wait_ratio.get_load()
-        print "Wait ratio:", wait_ratio
+        logger.debug("Wait ratio: %f" % wait_ratio)
 
         # We can wait more than 1s if needed,
         # no more than 5s, but no less than 1
@@ -835,7 +829,7 @@ class Satellite(BaseSatellite):
     # Setup the new received conf from arbiter 
     def setup_new_conf(self):
         conf = self.new_conf
-        print "Info : [%s] Sending us a configuration %s " % (self.name, conf)
+        logger.debug("[%s] Sending us a configuration %s" % (self.name, conf))
         self.new_conf = None
         self.cur_conf = conf
         g_conf = conf['global']
@@ -935,7 +929,7 @@ class Satellite(BaseSatellite):
         for module in mods:
             # If we already got it, bypass
             if not module.module_type in self.q_by_mod:
-                print "Add module object", module
+                logger.debug("Add module object %s" % str(module))
                 self.modules_manager.modules.append(module)
                 logger.info("[%s] Got module : %s " % (self.name, module.module_type))
                 self.q_by_mod[module.module_type] = {}
@@ -978,7 +972,7 @@ class Satellite(BaseSatellite):
                      to_del.append(mod)
 
                for mod in to_del:
-                  print 'Info : The module %s is not a worker one, I remove it from the worker list' % mod
+                  logger.debug("The module %s is not a worker one, I remove it from the worker list" % mod)
                   del self.q_by_mod[mod]
                      
 

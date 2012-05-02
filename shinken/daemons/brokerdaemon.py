@@ -102,13 +102,13 @@ class Broker(BaseSatellite):
             self.broks_internal_raised.append(elt)
             return
         elif cls_type == 'externalcommand':
-            print "Adding in queue an external command", ExternalCommand.__dict__
+            logger.debug("Enqueuing an external command '%s'" % str(ExternalCommand.__dict__))
             self.external_commands.append(elt)
         # Maybe we got a Message from the modules, it's way to ask something
         # like from now a full data from a scheduler for example.
         elif cls_type == 'message':
             # We got a message, great!
-            print elt.__dict__
+            logger.debug(str(elt.__dict__))
             if elt.get_type() == 'NeedData':
                 data = elt.get_data()
                 # Full instance id means: I got no data for this scheduler
@@ -208,12 +208,12 @@ class Broker(BaseSatellite):
             # The schedulers have been restarted: it has a new run_id.
             # So we clear all verifs, they are obsolete now.
             if new_run_id != running_id:
-                print "[%s] New running id for the %s %s : %s (was %s)" % (self.name, type, links[id]['name'], new_run_id, running_id)
+                logger.debug("[%s] New running id for the %s %s : %s (was %s)" % (self.name, type, links[id]['name'], new_run_id, running_id))
                 links[id]['broks'].clear()
                 # we must ask for a new full broks if
                 # it's a scheduler
                 if type == 'scheduler':
-                    print "[%s] I ask for a broks generation to the scheduler %s" % (self.name, links[id]['name'])
+                    logger.debug("[%s] I ask for a broks generation to the scheduler %s" % (self.name, links[id]['name']))
                     links[id]['con'].fill_initial_broks()
             # else:
             #     print "I do not ask for brok generation"
@@ -239,12 +239,14 @@ class Broker(BaseSatellite):
     # DO NOT CHANGE data of b !!!
     # REF: doc/broker-modules.png (4-5)
     def manage_brok(self, b):
+        #logger.info("manage brok")
+
         # Call all modules if they catch the call
         for mod in self.modules_manager.get_internal_instances():
             try:
                 mod.manage_brok(b)
             except Exception , exp:
-                print exp.__dict__
+                logger.debug(str(exp.__dict__))
                 logger.warning("The mod %s raise an exception: %s, I'm tagging it to restart later" % (mod.get_name(),str(exp)))
                 logger.warning("Exception type : %s" % type(exp))
                 logger.warning("Back trace of this kill: %s" % (traceback.format_exc()))
@@ -299,7 +301,7 @@ class Broker(BaseSatellite):
                 if con is not None: # None = not initilized
                     t0 = time.time()
                     tmp_broks = con.get_broks()
-                    print 'DBG: %s Broks get in %s' % (len(tmp_broks), time.time() - t0)
+                    logger.debug("%s Broks get in %s" % (len(tmp_broks), time.time() - t0))
                     for b in tmp_broks.values():
                         b.instance_id = links[sched_id]['instance_id']
 
@@ -310,7 +312,7 @@ class Broker(BaseSatellite):
                     self.pynag_con_init(sched_id, type=type)
             # Ok, con is not known, so we create it
             except KeyError , exp:
-                print exp
+                logger.debug(str(exp))
                 self.pynag_con_init(sched_id, type=type)
             except Pyro.errors.ProtocolError , exp:
                 logger.warning("Connection problem to the %s %s : %s" % (type, links[sched_id]['name'], str(exp)))
@@ -327,8 +329,6 @@ class Broker(BaseSatellite):
             #  What the F**k? We do not know what happened,
             # so.. bye bye :)
             except Exception,x:
-                print x.__class__
-                print x.__dict__
                 logger.error(str(x))
                 logger.error(''.join(Pyro.util.getPyroTraceback(x)))
                 sys.exit(1)
@@ -364,7 +364,7 @@ class Broker(BaseSatellite):
         self.name = name
         self.log.load_obj(self, name)
 
-        print "[%s] Sending us configuration %s" % (self.name, conf)
+        logger.debug("[%s] Sending us configuration %s" % (self.name, conf))
         # If we've got something in the schedulers, we do not
         # want it anymore
         # self.schedulers.clear()
@@ -512,15 +512,15 @@ class Broker(BaseSatellite):
         
 
     def do_loop_turn(self):
-        print "Begin Loop : managing old broks", len(self.broks)
+        logger.debug("Begin Loop : managing old broks (%d)" % len(self.broks))
         
         # Dump modules Queues size
         insts = [ inst for inst in self.modules_manager.instances if inst.is_external]
         for inst in insts:
             try:
-                print "External Queue len (%s) : %s" % (inst.get_name(), inst.to_q.qsize())
+                logger.debug("External Queue len (%s) : %s" % (inst.get_name(), inst.to_q.qsize()))
             except Exception, exp:
-                print "External Queue len (%s) : Exception! %s" % (inst.get_name(), exp)
+                logger.debug("External Queue len (%s) : Exception! %s" % (inst.get_name(), exp))
 
 
         # Begin to clean modules
@@ -575,7 +575,7 @@ class Broker(BaseSatellite):
         # No more need to send them
         for b in to_send:
             b.need_send_to_ext = False
-        print "DBG: Time to send %s broks" % len(to_send), time.time() - t0
+        logger.debug("Time to send %s broks (%d secs)" % (len(to_send), time.time() - t0))
 
         # We must had new broks at the end of the list, so we reverse the list
         self.broks.reverse()
@@ -639,7 +639,7 @@ class Broker(BaseSatellite):
             self.do_daemon_init_and_start()
 
             self.uri2 = self.pyro_daemon.register(self.interface, "ForArbiter")
-            print "The Arbiter uri it at", self.uri2
+            logger.debug("The Arbiter uri it at %s" % self.uri2)
 
             #  We wait for initial conf
             self.wait_for_initial_conf()

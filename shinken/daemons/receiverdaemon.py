@@ -89,7 +89,7 @@ class Receiver(BaseSatellite):
             self.broks_internal_raised.append(elt)
             return
         elif cls_type == 'externalcommand':
-            print "Adding in queue an external command", ExternalCommand.__dict__
+            logger.debug("Enqueuing an external command: %s" % str(ExternalCommand.__dict__))
             self.external_commands.append(elt)
 
 
@@ -119,7 +119,6 @@ class Receiver(BaseSatellite):
             try:
                 mod.manage_brok(b)
             except Exception , exp:
-                print exp.__dict__
                 logger.warning("The mod %s raise an exception: %s, I kill it" % (mod.get_name(),str(exp)))
                 logger.warning("Exception type : %s" % type(exp))
                 logger.warning("Back trace of this kill: %s" % (traceback.format_exc()))
@@ -163,7 +162,7 @@ class Receiver(BaseSatellite):
         self.name = name
         self.log.load_obj(self, name)
 
-        print "[%s] Sending us configuration %s" % (self.name, conf)
+        logger.debug("[%s] Sending us configuration %s" % (self.name, conf))
 
         if not self.have_modules:
             self.modules = mods = conf['global']['modules']
@@ -265,7 +264,7 @@ class Receiver(BaseSatellite):
             self.do_daemon_init_and_start()
             
             self.uri2 = self.pyro_daemon.register(self.interface, "ForArbiter")
-            print "The Arbiter uri it at", self.uri2
+            logger.debug("The Arbiter uri it at %s" % self.uri2)
 
             #  We wait for initial conf
             self.wait_for_initial_conf()

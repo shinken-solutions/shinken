@@ -86,7 +86,7 @@ class Log:
         """Old log method, kept for NAGIOS compatibility"""
         self._log(logging.INFO, message, format, print_it, display_level=False)
 
-    def _log(self, level, message, format=None, print_it=True, display_level=True):
+    def _log(self, level, message, format=None, print_it=False, display_level=True):
         """We enter a log message, we format it, and we add the log brok"""
         global obj
         global name
@@ -105,7 +105,6 @@ class Log:
             lvlname = logging.getLevelName(level)
 
             fmt = u'[%%(date)s] %s%%(name)s%%(msg)s\n' % (if_else(display_level, '%(level)s : ', ''))
-            #print "fmt", fmt, lvlname
             args = {
                 'date' : if_else(human_timestamp_log, time.asctime(time.localtime(time.time())), int(time.time())),
                 'level': lvlname.capitalize(),
@@ -114,10 +113,8 @@ class Log:
             }
 
             s = fmt % args
-            #print "S is", s
 
         else:
-            print format, '::', message
             s = format % message
 
         if print_it and len(s) > 1:
@@ -168,7 +165,7 @@ class Log:
         """Close the local log file at program exit"""
         global local_log
         if local_log:
-            print "Closing local_log ..", local_log
+            self.debug("Closing %s local_log" % str(local_log))
             local_log.close()
 
 

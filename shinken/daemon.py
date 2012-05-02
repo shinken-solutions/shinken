@@ -211,7 +211,7 @@ class Daemon(object):
     def request_stop(self):
         self.unlink() 
         self.do_stop()
-        print("Exiting")
+        logger.debug("Exiting")
         sys.exit(0)
 
     def do_loop_turn(self):
@@ -268,11 +268,11 @@ class Daemon(object):
             os.chdir(self.workdir)
         except Exception, e:
             raise InvalidWorkDir(e)
-        print("Info : Successfully changed to workdir: %s" % (self.workdir))
+        logger.debug("Successfully changed to workdir: %s" % (self.workdir))
 
 
     def unlink(self):
-        print "Info : Unlinking", self.pidfile
+        logger.debug("Unlinking %s" % self.pidfile)
         try:
             os.unlink(self.pidfile)
         except Exception, e:
@@ -304,7 +304,7 @@ class Daemon(object):
         ## if problem on opening or creating file it'll be raised to the caller:
         try:
             p = os.path.abspath(self.pidfile)
-            print "Info : opening pid file:", self.pidfile, p
+            logger.debug("Opening pid file: %s" % self.pidfile)
             # Windows do not manage the rw+ mode, so we must open in read mode first, then reopen it write mode...
             if not write and os.path.exists(p):
                self.fpid = open(p, 'r+')
@@ -348,7 +348,7 @@ class Daemon(object):
         if not self.do_replace:
             raise SystemExit, "valid pidfile exists and not forced to replace.  Exiting."
         
-        print "Info : Replacing previous instance ", pid
+        logger.debug("Replacing previous instance %d" % pid)
         try:
             os.kill(pid, 3)
         except os.error, e:
@@ -397,7 +397,7 @@ class Daemon(object):
         if skip_close_fds is None:
             skip_close_fds = tuple()
 
-        print("Info : Redirecting stdout and stderr as necessary..")
+        logger.debug("Redirecting stdout and stderr as necessary..")
         if self.debug:
             fdtemp = os.open(self.debug_file, os.O_CREAT | os.O_WRONLY | os.O_TRUNC)
         else:
@@ -445,10 +445,10 @@ class Daemon(object):
         self.fpid.close()
         del self.fpid
         self.pid = os.getpid()
-        print("Info : We are now fully daemonized :) pid=%d" % (self.pid))
+        logger.debug("We are now fully daemonized :) pid=%d" % self.pid)
         # We can now output some previouly silented debug ouput
         for s in self.debug_output:
-            print s
+            logger.debug(s)
         del self.debug_output
 
 
@@ -495,11 +495,12 @@ class Daemon(object):
         # The SSL part
         if ssl_conf.use_ssl:
             Pyro.config.PYROSSL_CERTDIR = os.path.abspath(ssl_conf.certs_dir)
-            print "Info : Using ssl certificate directory : %s" % Pyro.config.PYROSSL_CERTDIR
+            logger.debug("Using ssl certificate directory : %s" % Pyro.config.PYROSSL_CERTDIR)
             Pyro.config.PYROSSL_CA_CERT = os.path.abspath(ssl_conf.ca_cert)
-            print "Info : Using ssl ca cert file : %s" % Pyro.config.PYROSSL_CA_CERT
+            logger.debug("Using ssl ca cert file : %s" % Pyro.config.PYROSSL_CA_CERT)
             Pyro.config.PYROSSL_CERT = os.path.abspath(ssl_conf.server_cert)
-            print "Info : Using ssl server cert file : %s" % Pyro.config.PYROSSL_CERT
+            logger.debug("Using ssl server cert file : %s" % Pyro.config.PYROSSL_CERT)
+
             if self.hard_ssl_name_check:
                 Pyro.config.PYROSSL_POSTCONNCHECK=1
             else:
@@ -650,7 +651,7 @@ class Daemon(object):
 
 
     def manage_signal(self, sig, frame):
-        print("Info : I'm process %d and I received signal %s" % (os.getpid(), str(sig)))
+        logger.debug("I'm process %d and I received signal %s" % (os.getpid(), str(sig)))
         if sig == 10: # if USR1, ask a memory dump
             self.need_dump_memory = True
         else: #Ok, really ask us to die :)

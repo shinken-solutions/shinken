@@ -27,7 +27,7 @@
 import select
 import errno
 import time
-
+from log import logger
 
 # Try to import Pyro (3 or 4.1) and if not, Pyro4 (4.2 and 4.3)
 try:
@@ -71,7 +71,7 @@ try:
             else:
                 prtcol = 'PYRO'
 
-            print "Info : Initializing Pyro connection with host:%s port:%s ssl:%s" % (host, port, use_ssl)
+            logger.info("Initializing Pyro connection with host:%s port:%s ssl:%s" % (host, port, str(use_ssl)))
             # Now the real start
             try:
                 Pyro.core.Daemon.__init__(self, host=host, port=port, prtcol=prtcol, norange=True)
@@ -172,7 +172,7 @@ except AttributeError, exp:
             # timewait for close sockets)
             while nb_try < max_try:
                 nb_try += 1
-                print "Info : Initializing Pyro connection with host:%s port:%s ssl:%s" % (host, port, use_ssl)
+                logger.info("Initializing Pyro connection with host:%s port:%s ssl:%s" % (host, port, str(use_ssl)))
                 # And port already use now raise an exception
                 try:
                     Pyro.core.Daemon.__init__(self, host=host, port=port)
@@ -183,7 +183,7 @@ except AttributeError, exp:
                     # At 35 (or over), we are very not happy
                     if nb_try >= max_try:
                         raise PortNotFree(msg)
-                    print msg, "but we try another time in 1 sec"
+                    logger.error(msg + "but we try another time in 1 sec")
                     time.sleep(1)
                 except Exception, e:
                     # must be a problem with pyro workdir :
