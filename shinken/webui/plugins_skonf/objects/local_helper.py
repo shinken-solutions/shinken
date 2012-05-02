@@ -25,11 +25,10 @@
 
 from shinken.util import strip_and_uniq
 
-def find(lst, elt, prop, key):
-    print 'Finding the', prop, 'of the element', elt
-    print 'And in the list', lst
-    value = elt.get(prop, None)
-    print 'Value is', value
+def find(value, lst, key):
+    print 'Finding the value', value
+    print 'And in the list', lst, 'and key', key
+
     if value is None:
         return None
 
@@ -70,6 +69,7 @@ def find_several(lst, elt, prop, key):
 class Helper(object):
     def __init__(self, app):
         self.app = app
+
 
     # Return a simple string input
     def get_string_input(self, elt, prop, name, span='span10', innerspan='span2' ,placeholder='', popover=None):
@@ -140,15 +140,16 @@ class Helper(object):
         t = getattr(self.app.db, cls)
         tps = list(t.find({}))
         
-        elt_tp = find(tps, elt, prop, key)
+        value = elt.get(prop, None)
+        elt_tp = find(value, tps, key)
         print 'Find a matching element for me?', elt.get(prop), elt_tp
 
         select_part = '''<SELECT name="%s">''' % prop
         if elt_tp:
             tpname = elt_tp.get(key)
             select_part += '<OPTION VALUE="%s">%s</OPTION>' % (tpname, tpname)
-        else:
-            select_part += '<OPTION VALUE=""></OPTION>'
+        # Always add avoid value if need
+        select_part += '<OPTION VALUE=""></OPTION>'
 
         for tp in tps:
             if tp == elt_tp:
@@ -167,6 +168,50 @@ class Helper(object):
                </span>
                <script>properties.push({'name' : '%s', 'type' : 'select'});</script>
             ''' % (name, select_part, prop)
+        return s
+
+
+    def get_command_input(self, elt, prop, name, cls, key):
+        t = getattr(self.app.db, cls)
+        tps = list(t.find({}))
+        
+        value = elt.get(prop, None)
+        args = ''
+        # We split on the first ! of the data
+        if value is not None:
+            elts = value.split('!',1)
+            value = elts[0]
+            if len(elts) > 1:
+                args = '!'+elts[1]
+            
+        elt_tp = find(value, tps, key)
+        print 'Find a matching element for me?', elt.get(prop), elt_tp
+
+        select_part = '''<SELECT name="%s">''' % prop
+        if elt_tp:
+            tpname = elt_tp.get(key)
+            select_part += '<OPTION VALUE="%s">%s</OPTION>' % (tpname, tpname)
+        # Always add a void option if need
+        select_part += '<OPTION VALUE=""></OPTION>'
+
+        for tp in tps:
+            if tp == elt_tp:
+                continue
+
+            if not key in tp:
+                continue
+
+            tpname = tp.get(key)
+            select_part += '<OPTION VALUE="%s">%s</OPTION>' % (tpname, tpname)
+        select_part += '</SELECT>'
+
+        s = '''<span class="span10">
+                  <span class="help-inline span2"> %s </span>
+                  %s
+                 Args <input name='args-%s' value='%s'></input>
+               </span>
+               <script>properties.push({'name' : '%s', 'type' : 'command'});</script>
+            ''' % (name, select_part, prop, args, prop)
         return s
         
 
@@ -202,3 +247,67 @@ class Helper(object):
             ''' % (name, select_part, prop)
         return s
         
+
+
+
+
+    def get_poller_tag_input(self, elt, prop, name):
+        
+        value = elt.get(prop, None)
+        all_poller_tags = set()
+        for p in self.app.conf.pollers:
+            print 'Look at poller?', p.__dict__
+            for t in p.poller_tags:
+                all_poller_tags.add(t)
+        
+        select_part = '''<SELECT name="%s">''' % prop
+        if value in all_poller_tags:
+            select_part += '<OPTION VALUE="%s">%s</OPTION>' % (value, value)
+        # Always add a void value, to unset if need
+        select_part += '<OPTION VALUE=""></OPTION>'
+
+        for pt in all_poller_tags:
+            if value == pt:
+                continue
+
+            select_part += '<OPTION VALUE="%s">%s</OPTION>' % (pt, pt)
+        select_part += '</SELECT>'
+
+        s = '''<span class="span10">
+                  <span class="help-inline span2"> %s </span>
+                  %s
+               </span>
+               <script>properties.push({'name' : '%s', 'type' : 'select'});</script>
+            ''' % (name, select_part, prop)
+        return s
+
+
+
+    def get_realm_input(self, elt, prop, name):
+        
+        value = elt.get(prop, None)
+        all_realms = set()
+        for r in self.app.conf.realms:
+            print 'Look at realm?', r.__dict__
+            all_realms.add(r.get_name())
+        
+        select_part = '''<SELECT name="%s">''' % prop
+        if value in all_realms:
+            select_part += '<OPTION VALUE="%s">%s</OPTION>' % (value, value)
+        # Always add a void value, to unset if need
+        select_part += '<OPTION VALUE=""></OPTION>'
+
+        for pt in all_realms:
+            if value == pt:
+                continue
+
+            select_part += '<OPTION VALUE="%s">%s</OPTION>' % (pt, pt)
+        select_part += '</SELECT>'
+
+        s = '''<span class="span10">
+                  <span class="help-inline span2"> %s </span>
+                  %s
+               </span>
+               <script>properties.push({'name' : '%s', 'type' : 'select'});</script>
+            ''' % (name, select_part, prop)
+        return s

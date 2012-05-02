@@ -74,6 +74,21 @@ function submit_form(){
 	    value = temp_values.join(',');
 	    console.log('Got multiselect value'+value);
 	}
+	if(type == 'command'){
+	    // Get the command name is easy
+	    var command_name = f[name].value;
+	    // Now get the args
+	    var args = f['args-'+name].value;
+	    value = command_name;
+	    if (args != ''){
+		// Maybe the use forget the first '!', we add it for him
+		if(args[0] != '!'){
+		    args = '!'+args;
+		}
+		value += args;
+	    }
+	    console.log('Get a command value'+value);
+	}
 	if(type == 'use_tags'){
 	    value = get_use_values(name);
 	    console.log('Get a use tag value'+value);

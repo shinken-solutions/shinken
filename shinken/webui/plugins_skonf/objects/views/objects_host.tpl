@@ -40,7 +40,7 @@ var properties = [];
 	</span>
 	{{!helper.get_select_input(elt, 'maintenance_period', 'Maintenance Period', 'timeperiods', 'timeperiod_name')}}
 	{{!helper.get_select_input(elt, 'check_period', 'Check Period', 'timeperiods', 'timeperiod_name')}}
-	{{!helper.get_select_input(elt, 'check_command', 'Check Command', 'commands', 'command_name')}}
+	{{!helper.get_command_input(elt, 'check_command', 'Check Command', 'commands', 'command_name')}}
 	{{!helper.get_string_input(elt, 'max_check_attemps', 'Max Check Attempts')}}
 	{{!helper.get_string_input(elt, 'check_interval', 'Normal Check Interval* 60 seconds')}}
 	{{!helper.get_bool_input(elt, 'active_checks_enabled', 'Active Checks Enabled')}}
@@ -51,13 +51,13 @@ var properties = [];
       <!-- Tab Generic stop-->
 
       <!-- Tab Macros -->
-      <div class="tab-pane active" id="macros">
-	
+      <div class="tab-pane" id="macros">
+	None
       </div>
       <!-- Tab Macros stop -->
 
       <!-- Tab Notifications -->
-      <div class="tab-pane active" id="notifications">
+      <div class="tab-pane" id="notifications">
 
 	{{!helper.get_bool_input(elt, 'notifications_enabled', 'Notification Enabled')}}
 	{{!helper.get_multiselect_input(elt, 'contacts', 'Contacts', 'contacts', 'contact_name')}}
@@ -72,15 +72,16 @@ var properties = [];
       <!-- Tab Notif stop -->
 
       <!-- Tab Depedencies -->
-      <div class="tab-pane active" id="depedencies">
+      <div class="tab-pane" id="depedencies">
 	{{!helper.get_multiselect_input(elt, 'parents', 'Network parents', 'hosts', 'host_name')}}
       </div>
       <!-- Tab dep stop -->
 
 
       <!-- Tab Advanced -->
-      <div class="tab-pane active" id="advanced">
-	{{!helper.get_string_input(elt, 'poller_tag', 'Monitored from')}}
+      <div class="tab-pane" id="advanced">
+	{{!helper.get_poller_tag_input(elt, 'poller_tag', 'Monitored from')}}
+	{{!helper.get_realm_input(elt, 'realm', 'Realm')}}
 
 	{{!helper.get_bool_input(elt, 'obsess_over_host', 'Obsess Over Host')}}	
 	{{!helper.get_bool_input(elt, 'check_freshness', 'Check Freshness')}}
@@ -92,7 +93,7 @@ var properties = [];
 	{{!helper.get_bool_input(elt, 'process_perf_data', 'Process Perf Data')}}
 
 	{{!helper.get_bool_input(elt, 'event_handler_enabled', 'Automatic event Handler Enabled')}}
-	{{!helper.get_select_input(elt, 'event_handler', 'Event Handler command', 'commands', 'command_name')}}
+	{{!helper.get_command_input(elt, 'event_handler', 'Event Handler command', 'commands', 'command_name')}}
 
       </div>
       <!-- Tab Notif stop -->
