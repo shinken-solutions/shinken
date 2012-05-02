@@ -441,7 +441,7 @@ class ExternalCommandManager:
                 if val.endswith('\n'):
                     val = val[:-1]
 
-                logger.debug("For command arg: %s" % str(val))
+                logger.debug("For command arg: %s" % val)
 
                 if not in_service:
                     type_searched = entry['args'][i-1]
