@@ -26,7 +26,7 @@
 import time
 import random
 
-from shinken.webui.bottle import redirect
+from shinken.webui.bottle import redirect, abort
 from shinken.util import to_bool
 from shinken.objects import Host
 from shinken.objects import Service
@@ -38,6 +38,14 @@ from local_helper import Helper
 
 ### Will be populated by the UI with it's own value
 app = None
+
+
+keys = {'hosts' : 'host_name',
+        'services' : 'WTF??',
+        'timeperiods' : 'timeperiod_name',
+        'contacts' : 'contact_name',
+        'commands' : 'command_name'
+        }
 
 def objects_generic(cls):
     # First we look for the user sid
@@ -80,8 +88,17 @@ def objects_host(name):
         redirect("/user/login")
 
     elt = app.db.hosts.find_one({'_id' : name})
+    if not elt:
+        elt = {}
     return {'app' : app, 'user' : user, 'elt' : elt, 'helper' : Helper(app)}
     
+
+def new_host():
+    user = app.get_user_auth()
+    if not user:
+        redirect("/user/login")
+
+    return {'app' : app, 'user' : user, 'elt' : {}, 'helper' : Helper(app)}
 
 
 def disable_object(cls, name):
@@ -129,18 +146,49 @@ def save_object(cls, name):
     print 'We will save our object in db'
     print bd_entry
     t.save(bd_entry)
+
+
+
+def save_new_object(cls):
+    print "Save new object for", cls
+    t = getattr(app.db, cls)
+    # Try to get the name of this new object
+    key = keys[cls]
+    name = app.request.forms.get(key, None)
+    if name is None or name == '':
+        abort(400, "Missing property %s" % key)
+
+    d = t.find_one({'_id' : name})
+    # Save a new object means that there should not be old one
+    # with the same name of course. Or it should be an edit, not a "new"
+    if d is not None:
+        abort(400, "Already an object with the same name '%s'" % name)
+    
+    # Ok, we can save it!
+    save_object(cls, name)
             
         
 
 
-pages = {objects_hosts : { 'routes' : ['/objects/hosts'], 'view' : 'objects_hosts', 'static' : True},
-         objects_services : { 'routes' : ['/objects/services'], 'view' : 'objects_hosts', 'static' : True},
-         objects_timeperiods : { 'routes' : ['/objects/timeperiods'], 'view' : 'objects_hosts', 'static' : True},
-         objects_contacts : { 'routes' : ['/objects/contacts'], 'view' : 'objects_hosts', 'static' : True},
-         objects_commands : { 'routes' : ['/objects/commands'], 'view' : 'objects_hosts', 'static' : True},
-         objects_host : { 'routes' : ['/objects/hosts/:name'], 'view' : 'objects_host', 'static' : True},
-         disable_object : { 'routes' : ['/object/q/:cls/disable/:name']},
-         enable_object : { 'routes' : ['/object/q/:cls/enable/:name']},
-         save_object : { 'routes' : ['/object/q/:cls/save/:name'], 'method' : 'POST'},
-         }
+pages = {
+    # HOSTS
+    objects_hosts : { 'routes' : ['/objects/hosts'], 'view' : 'objects_hosts', 'static' : True},
+    objects_host : { 'routes' : ['/objects/hosts/:name'], 'view' : 'objects_host', 'static' : True},
+    new_host : { 'routes' : ['/objects/add/host'], 'view' : 'objects_host', 'static' : True},
+
+    objects_services : { 'routes' : ['/objects/services'], 'view' : 'objects_hosts', 'static' : True},
+    objects_timeperiods : { 'routes' : ['/objects/timeperiods'], 'view' : 'objects_hosts', 'static' : True},
+    objects_contacts : { 'routes' : ['/objects/contacts'], 'view' : 'objects_contacts', 'static' : True},
+    objects_commands : { 'routes' : ['/objects/commands'], 'view' : 'objects_hosts', 'static' : True},
+
+
+
+    # Action URI
+    disable_object : { 'routes' : ['/object/q/:cls/disable/:name']},
+    enable_object : { 'routes' : ['/object/q/:cls/enable/:name']},
+    
+    # POST backend
+    save_object : { 'routes' : ['/object/q/:cls/save/:name'], 'method' : 'POST'},
+    save_new_object : { 'routes' : ['/object/q/:cls/save/'], 'method' : 'POST'},
+    }
 

@@ -1,4 +1,5 @@
 
+
 %rebase layout_skonf globals(), title="Host %s" % elt.get('host_name', 'unknown'),  css=['objects/css/token-input.css', 'objects/css/token-input-facebook.css', 'objects/css/jquery.bsmselect.css', 'objects/css/jquery-ui.css'], js=['objects/js/host.js', 'objects/js/jquery.tokeninput.js', 'objects/js/jquery.bsmselect.js', 'objects/js/jquery.bsmselect.sortable.js', 'objects/js/jquery.bsmselect.compatibility.js', 'objects/js/sliders.js', 'objects/js/selects.js', 'objects/js/forms.js']
 
 <script>
@@ -6,11 +7,13 @@
 // Keep a list of all properties, with their own properties :)
 var properties = [];
 
-
     </script>
 
 </script>
 
+<div class='offset1 span10'>
+  <span id='saving_log' class='hide alert'></span>
+</div>
 
 <a class='btn btn-info' href="javascript:submit_form()"><i class="icon-ok"></i> Submit</a>
 

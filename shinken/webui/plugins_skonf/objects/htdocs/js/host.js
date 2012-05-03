@@ -42,8 +42,10 @@ $(document).ready(function(){
     $(".to_use_complete").each(function(idx, elt){
         var raw_use = $(this).attr('data-use').split(',');
         var pop = [];
-        $.each(raw_use, function(idx, v){pop.push({id:v, name : v})});
-	
+	// If we got a '' value, a each will put a void element...
+	if(raw_use != ''){
+            $.each(raw_use, function(idx, v){pop.push({id:v, name : v})});
+	};
 
 	/*
 	  Ok, go for the huge part. We want a auto loading of the elements from /lookup/tag,

@@ -21,7 +21,26 @@
  along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+function form_success(){
+    console.log('Form send in success mode');
+    var l = $('#saving_log');
+    l.show();
+    l.removeClass('alert-error');
+    l.addClass('alert-success');
+    l.html('The host was saved sucessfully. You will be redirected to the host list.');
+    setTimeout("location.assign('/objects/hosts');", 1000);
 
+}
+
+function form_error(){
+    console.log('Form send in error mode');
+    var l = $('#saving_log');
+    l.show();
+    l.removeClass('alert-success');
+    l.addClass('alert-error');
+    l.html('Error during the host save.');
+
+}
 
 
 function submit_form(){
@@ -96,6 +115,5 @@ function submit_form(){
 	res[name] = value;
     });
     console.log('Dump data to send'+dump(res));    
-    $.post('/object/q/hosts/save/'+_id, res);
-
+    $.post('/object/q/hosts/save/'+_id, res).success(form_success).error(form_error);
 }
