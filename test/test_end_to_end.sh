@@ -334,7 +334,8 @@ string_in_file "Warning : \[All\] The poller poller-Master seems to be down, I m
 #The spare should got the conf
 string_in_file "\[All\] Dispatch OK of configuration 0 to poller poller-Slave" $VAR/nagios.log
 #And he should got the scheduler link (the sapre one)
-string_in_file "\[poller-Slave\] Connection OK with scheduler scheduler-Spare" $VAR/nagios.log
+#string_in_file "\[poller-Slave\] Connection OK with scheduler scheduler-Spare" $VAR/nagios.log
+string_in_file "\[poller-Slave\] Connection OK with scheduler scheduler-Spare" $VAR/pollerd-2.log
 
 
 echo "Now stop the reactionner"
@@ -348,7 +349,8 @@ string_in_file "Warning : \[All\] The reactionner reactionner-Master seems to be
 #The spare should got the conf
 string_in_file "\[All\] Dispatch OK of configuration 0 to reactionner reactionner-Spare" $VAR/nagios.log
 #And he should got the scheduler link (the sapre one)
-string_in_file "\[reactionner-Spare\] Connection OK with scheduler scheduler-Spare" $VAR/nagios.log
+#string_in_file "\[reactionner-Spare\] Connection OK with scheduler scheduler-Spare" $VAR/nagios.log
+string_in_file "\[reactionner-Spare\] Connection OK with scheduler scheduler-Spare" $VAR/reactionnerd-2.log
 
 
 echo "Now we stop... the Broker!"
