@@ -712,7 +712,7 @@ class Skonf(Daemon):
                         
                         
             except Exception, exp:
-                logger.warning("Loading plugins : %s" % exp)
+               logger.log("Loading plugins : %s" % exp)
 
 
 

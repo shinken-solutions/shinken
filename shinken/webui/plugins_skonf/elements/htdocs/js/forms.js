@@ -28,7 +28,7 @@ function form_success(){
     l.removeClass('alert-error');
     l.addClass('alert-success');
     l.html('The host was saved sucessfully. You will be redirected to the host list.');
-    setTimeout("location.assign('/objects/hosts');", 1000);
+    setTimeout("location.assign('/elements/hosts');", 1000);
 
 }
 

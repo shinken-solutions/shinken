@@ -47,7 +47,7 @@ keys = {'hosts' : 'host_name',
         'commands' : 'command_name'
         }
 
-def objects_generic(cls):
+def elements_generic(cls):
     # First we look for the user sid
     # so we bail out if it's a false one
     user = app.get_user_auth()
@@ -64,25 +64,25 @@ def objects_generic(cls):
     return {'app' : app, 'user' : user, 'elts' : elts, 'elt_type' : cls.my_type}
 
 
-def objects_hosts():
-    return objects_generic(Host)
+def elements_hosts():
+    return elements_generic(Host)
 
 
-def objects_services():
-    return objects_generic(Service)
+def elements_services():
+    return elements_generic(Service)
 
-def objects_timeperiods():
-    return objects_generic(Timeperiod)
+def elements_timeperiods():
+    return elements_generic(Timeperiod)
 
-def objects_contacts():
-    return objects_generic(Contact)
+def elements_contacts():
+    return elements_generic(Contact)
 
-def objects_commands():
-    return objects_generic(Command)
+def elements_commands():
+    return elements_generic(Command)
 
 
 # get data about one specific host
-def objects_host(name):
+def elements_host(name):
     user = app.get_user_auth()
     if not user:
         redirect("/user/login")
@@ -94,6 +94,24 @@ def objects_host(name):
     
 
 def new_host():
+    return new_object()
+
+# get data about one specific contact
+def elements_contact(name):
+    user = app.get_user_auth()
+    if not user:
+        redirect("/user/login")
+
+    elt = app.db.contacts.find_one({'_id' : name})
+    if not elt:
+        elt = {}
+    return {'app' : app, 'user' : user, 'elt' : elt, 'helper' : Helper(app)}
+
+
+def new_contact():
+    return new_object()
+
+def new_object():
     user = app.get_user_auth()
     if not user:
         redirect("/user/login")
@@ -172,23 +190,28 @@ def save_new_object(cls):
 
 pages = {
     # HOSTS
-    objects_hosts : { 'routes' : ['/objects/hosts'], 'view' : 'objects_hosts', 'static' : True},
-    objects_host : { 'routes' : ['/objects/hosts/:name'], 'view' : 'objects_host', 'static' : True},
-    new_host : { 'routes' : ['/objects/add/host'], 'view' : 'objects_host', 'static' : True},
+    elements_hosts : { 'routes' : ['/elements/hosts'], 'view' : 'elements_hosts', 'static' : True},
+    elements_host : { 'routes' : ['/elements/hosts/:name'], 'view' : 'elements_host', 'static' : True},
+    new_host : { 'routes' : ['/elements/add/host'], 'view' : 'elements_host', 'static' : True},
+    
+    # Contacts
+    elements_contacts : { 'routes' : ['/elements/contacts'], 'view' : 'elements_contacts', 'static' : True},
+    elements_contact : { 'routes' : ['/elements/contacts/:name'], 'view' : 'elements_contact', 'static' : True},
+    new_contact : { 'routes' : ['/elements/add/host'], 'view' : 'elements_contact', 'static' : True},
 
-    objects_services : { 'routes' : ['/objects/services'], 'view' : 'objects_hosts', 'static' : True},
-    objects_timeperiods : { 'routes' : ['/objects/timeperiods'], 'view' : 'objects_hosts', 'static' : True},
-    objects_contacts : { 'routes' : ['/objects/contacts'], 'view' : 'objects_contacts', 'static' : True},
-    objects_commands : { 'routes' : ['/objects/commands'], 'view' : 'objects_hosts', 'static' : True},
+    elements_services : { 'routes' : ['/elements/services'], 'view' : 'elements_hosts', 'static' : True},
+    elements_timeperiods : { 'routes' : ['/elements/timeperiods'], 'view' : 'elements_hosts', 'static' : True},
+
+    elements_commands : { 'routes' : ['/elements/commands'], 'view' : 'elements_hosts', 'static' : True},
 
 
 
     # Action URI
-    disable_object : { 'routes' : ['/object/q/:cls/disable/:name']},
-    enable_object : { 'routes' : ['/object/q/:cls/enable/:name']},
+    disable_object : { 'routes' : ['/element/q/:cls/disable/:name']},
+    enable_object : { 'routes' : ['/element/q/:cls/enable/:name']},
     
     # POST backend
-    save_object : { 'routes' : ['/object/q/:cls/save/:name'], 'method' : 'POST'},
-    save_new_object : { 'routes' : ['/object/q/:cls/save/'], 'method' : 'POST'},
+    save_object : { 'routes' : ['/element/q/:cls/save/:name'], 'method' : 'POST'},
+    save_new_object : { 'routes' : ['/element/q/:cls/save/'], 'method' : 'POST'},
     }
 

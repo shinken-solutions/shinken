@@ -1,16 +1,22 @@
 
-%rebase layout_skonf globals(), css=['objects/css/hosts.css'], js=['objects/js/hosts.js']
+%print "user?", user
+
+%rebase layout_skonf globals(), css=['elements/css/hosts.css'], js=['elements/js/hosts.js']
 
 
 <div class='span2 pull-right'>
-  <a class='btn btn-info' href="/objects/add/host"><i class="icon-plus"></i> Add new host</a>
+  <a class='btn btn-info' href="/elements/add/contact"><i class="icon-plus"></i> Add new contact</a>
 </div>
 
 <div class='offset1 span10'>
-  <h3>All your hosts</h3>
+  <h3>All your contacts</h3>
   %for h in elts:
   <div class='object_{{elt_type}} span12'>
-    <div class='host_name cut-long pull-left'><a href='/objects/hosts/{{h.get_name()}}'>{{h.get_name()}}</a></div>
+    <div class='host_name cut-long pull-left'><a href='/elements/hosts/{{h.get_name()}}'>{{h.get_name()}}</a>
+    %if h.get_name() == user.get_name():
+      <span class="label label-important">It's you!</span>
+    %end
+    </div>
     <div class='display_name cut-long pull-left'>{{getattr(h, 'display_name', '')}}&nbsp;</div>
     <div class='address cut-long pull-left'>{{getattr(h, 'address', '')}}&nbsp;</div>
     <div class='realm cut-long pull-left'>{{getattr(h, 'realm', '')}}&nbsp;</div>
