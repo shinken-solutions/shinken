@@ -63,7 +63,13 @@ class Log:
         """
         return logging._levelNames[lvlName]
     
+    # We can have level as an int (logging.INFO) or a string INFO
+    # if string, try to get the int value
     def set_level(self, level):
+        try:
+            int(level)
+        except ValueError:
+            level = getattr(logging, level, logging.NOTSET)
         self._level = level
         logging.getLogger().setLevel(level)
 
