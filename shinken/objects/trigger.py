@@ -36,13 +36,13 @@ from shinken.log import logger
 objs = {'hosts' : [], 'services' : []}
 
 def critical(obj, output):
-    print "I am in critical for object", obj.get_name()
+    logger.debug("[trigger::%s] I am in critical for object" % obj.get_name())
     now = time.time()
     cls = obj.__class__
     i = obj.launch_check(now, force=True)
     for chk in obj.actions:
         if chk.id == i:
-            print 'I founded the check I want to change'
+            logger.debug("[trigger] I founded the check I want to change")
             c = chk
             # Now we 'transform the check into a result'
             # So exit_status, output and status is eaten by the host
@@ -57,9 +57,9 @@ def critical(obj, output):
 def perf(obj, name):
     p = PerfDatas(obj.perf_data)
     if name in p:
-        print 'I found the perfdata'
+        logger.debug("[trigger] I found the perfdata")
         return p[name].value
-    print 'I am in perf command'
+    logger.debug("[trigger] I am in perf command")
     return 1
 
 
@@ -101,14 +101,14 @@ class Trigger(Item):
 
 
     def compile(self):
-        print "Compiling trigger", self.get_name()
+        logger.debug("[trigger::%s] compiling trigger" %  self.get_name())
         self.code_bin = compile(self.code_src, "<irc>", "exec")        
 
 
     # ctx is the object we are evaluating the code. In the code
     # it will be "self".
     def eval(myself, ctx):
-        print 'WILL RUN THE CODE', myself.code_src
+        logger.debug("[trigger::%s] running following code: %s" % (myself.get_name(), myself.code_src))
         self = ctx
 
         locals()['perf'] = perf
@@ -117,8 +117,6 @@ class Trigger(Item):
 
         code = myself.code_bin#compile(myself.code_bin, "<irc>", "exec")
         exec code in dict(locals())
-        print 'after exec'
-
 
 
     def __getstate__(self):
@@ -144,7 +142,7 @@ class Triggers(Items):
                     try:
                         fd = open(p, 'rU')
                         buf = fd.read()
-                        print 'Read trigger', buf
+                        logger.debug("[trigger] reading trigger: %s" % buf)
                         fd.close()
                     except IOError, exp:
                         logger.error("Cannot open trigger file '%s' for reading: %s" % (p, exp))
@@ -156,7 +154,7 @@ class Triggers(Items):
     # Create a trigger from the string src, and with the good name
     def create_trigger(self, src, name):
         # Ok, go compile the code
-        print "Creating a trigger", name
+        logger.debug("[trigger] creating a trigger named %s" % name)
         t = Trigger({'trigger_name' : name, 'code_src' : src})
         t.compile()
         # Ok, add it
@@ -170,7 +168,7 @@ class Triggers(Items):
 
 
     def load_objects(self, conf):
-        print "Loading objects in the triggers"
+        logger.debug("[trigger] loading objects in the triggers")
         global objs
         objs['hosts'] = conf.hosts
         objs['services'] = conf.services
