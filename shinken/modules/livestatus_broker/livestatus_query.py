@@ -385,16 +385,10 @@ class LiveStatusQuery(object):
                 yield val
             return
 
-        def gen_auth(values, authuser):
-            for val in values:
-                # this is probably too sloooow to be run in the innermost loop
-                if authuser in [c.get_name() for c in val.contacts]:
-                    yield val
-            return
-
-        items = getattr(self.datamgr.rg, self.table).__itersorted__()
         if cs.authuser:
-            items = gen_auth(items, cs.authuser)
+            items = getattr(self.datamgr.rg, self.table).__itersorted__(cs.authuser)
+        else:
+            items = getattr(self.datamgr.rg, self.table).__itersorted__()
         if not cs.without_filter:
             items = gen_filtered(items, cs.filter_func)
         if self.limit:

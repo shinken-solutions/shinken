@@ -119,6 +119,19 @@ class LiveStatusRegenerator(Regenerator):
                     # then the hostgroup belongs to the contact
                     if hostgroup_host_ids <= contact_host_ids:
                         self.hostgroups._id_contact_heap.setdefault(c, []).append((v.get_name(), v.id))
+            for c in self.services._id_contact_heap.keys():
+                # only service contacts can be servicegroup-contacts at all
+                # now, which service does the contact know?
+                contact_service_ids = set([h[1] for h in self.services._id_contact_heap[c]])
+                for (k, v) in self.servicegroups.items.iteritems():
+                    # now look if c is contact of all v.members
+                    # we already know the services for which c is a contact
+                    # self.services._id_contact_heap[c] is [(svcdesc, id), (svcdesc, id)
+                    servicegroup_service_ids = set([h.id for h in v.members])
+                    # if all of the servicegroup_service_ids are in contact_service_ids
+                    # then the servicegroup belongs to the contact
+                    if servicegroup_service_ids <= contact_service_ids:
+                        self.servicegroups._id_contact_heap.setdefault(c, []).append((v.get_name(), v.id))
         else:
             # loose: a contact of a member becomes contact of the whole group
             [self.hostgroups._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.hostgroups.items.iteritems() for h in v.members for c in h.contacts]
@@ -127,6 +140,10 @@ class LiveStatusRegenerator(Regenerator):
             # remove duplicates
             self.hostgroups._id_contact_heap[c] = list(set(self.hostgroups._id_contact_heap[c]))
             self.hostgroups._id_contact_heap[c].sort(key=lambda x: x[0])
+        for c in self.servicegroups._id_contact_heap.keys():
+            # remove duplicates
+            self.servicegroups._id_contact_heap[c] = list(set(self.servicegroups._id_contact_heap[c]))
+            self.servicegroups._id_contact_heap[c].sort(key=lambda x: x[0])
  
 
         # Everything is new now. We should clean the cache
