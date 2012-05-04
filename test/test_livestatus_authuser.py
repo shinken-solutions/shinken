@@ -140,9 +140,19 @@ www1    adm(adm1,adm2,adm3) web(web1,web2)
         self.assert_(myhosts == ["dbsrv4", "dbsrv5"])
         winhosts = sorted([s.get_name() for s in self.livestatus_broker.datamgr.rg.hostgroups.__itersorted__("bill")])
         print winhosts
-        print "rg is", self.livestatus_broker.datamgr.rg.hostgroups
-        print "rg is", self.livestatus_broker.datamgr.rg.hostgroups._id_contact_heap
         self.assert_(myhosts == ["dbsrv4", "dbsrv5"])
+        print "rg is", self.livestatus_broker.datamgr.rg.hostgroups
+        self.livestatus_broker.datamgr.rg.group_authorization_strict = False
+        self.livestatus_broker.datamgr.rg.all_done_linking(1)
+        print "==================================================="
+        #print "rg is", self.livestatus_broker.datamgr.rg.hostgroups._id_contact_heap
+        for contact in sorted(self.livestatus_broker.datamgr.rg.hostgroups._id_contact_heap.keys()):
+            print "%-10s %s" % (contact, self.livestatus_broker.datamgr.rg.hostgroups._id_contact_heap[contact])
+        self.livestatus_broker.datamgr.rg.group_authorization_strict = True
+        self.livestatus_broker.datamgr.rg.all_done_linking(1)
+        #print "rg is", self.livestatus_broker.datamgr.rg.hostgroups._id_contact_heap
+        for contact in sorted(self.livestatus_broker.datamgr.rg.hostgroups._id_contact_heap.keys()):
+            print "%-10s %s" % (contact, self.livestatus_broker.datamgr.rg.hostgroups._id_contact_heap[contact])
         
 
     def test_host_authorization(self):

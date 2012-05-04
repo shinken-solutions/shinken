@@ -105,14 +105,20 @@ class LiveStatusRegenerator(Regenerator):
             self.services._id_contact_heap[c].sort(key=lambda x: x[0])
 
 
-        #if self.group_authorization_strict:
-        if False:
-            # todo strict: a contact must be contact of _all_ members (default)
-            [self.hostgroups._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.hostgroups.items.iteritems() for h in v.members for c in h.contacts]
-            for (k, v) in self.hostgroups.items.iteritems():
-                for h in v.members:
-                    for c in h.contacts:
-                        pass
+        if self.group_authorization_strict:
+            for c in self.hosts._id_contact_heap.keys():
+                # only host contacts can be hostgroup-contacts at all
+                # now, which hosts does the contact know?
+                contact_host_ids = set([h[1] for h in self.hosts._id_contact_heap[c]])
+                for (k, v) in self.hostgroups.items.iteritems():
+                    # now look if c is contact of all v.members
+                    # we already know the hosts for which c is a contact
+                    # self.hosts._id_contact_heap[c] is [(hostname, id), (hostname, id)
+                    hostgroup_host_ids = set([h.id for h in v.members])
+                    # if all of the hostgroup_host_ids are in contact_host_ids
+                    # then the hostgroup belongs to the contact
+                    if hostgroup_host_ids <= contact_host_ids:
+                        self.hostgroups._id_contact_heap.setdefault(c, []).append((v.get_name(), v.id))
         else:
             # loose: a contact of a member becomes contact of the whole group
             [self.hostgroups._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.hostgroups.items.iteritems() for h in v.members for c in h.contacts]
