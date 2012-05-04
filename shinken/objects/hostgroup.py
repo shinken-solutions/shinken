@@ -28,6 +28,7 @@
 from itemgroup import Itemgroup, Itemgroups
 
 from shinken.property import StringProp
+from shinken.log import logger
 
 class Hostgroup(Itemgroup):
     id = 1 #0 is always a little bit special... like in database
@@ -80,7 +81,7 @@ class Hostgroup(Itemgroup):
         # so if True here, it must be a loop in HG
         # calls... not GOOD!
         if self.rec_tag:
-            print "Error : we've got a loop in hostgroup definition", self.get_name()
+            logger.error("[hostgroup::%s] got a loop in hostgroup definition" % self.get_name())
             return self.get_hosts()
 
         # Ok, not a loop, we tag it and continue
@@ -159,9 +160,9 @@ class Hostgroups(Itemgroups):
             r = realms.find_by_name(hg.realm.strip())
             if r is not None:
                 hg.realm = r
-                print "Hostgroup", hg.get_name(), "is in the realm", r.get_name()
+                logger.debug("[hostgroups] %s is in %s realm" % (hg.get_name(), r.get_name()))
             else:
-                err = "The hostgroup %s got an unknown realm '%s'" % (hg.get_name(), hg.realm)
+                err = "the hostgroup %s got an unknown realm '%s'" % (hg.get_name(), hg.realm)
                 hg.configuration_errors.append(err)
                 hg.realm = None
                 continue
@@ -169,11 +170,13 @@ class Hostgroups(Itemgroups):
             for h in hg:
                 if h is None: continue
                 if h.realm is None or h.got_default_realm: #default value not hasattr(h, 'realm'):
-                    print "Apply a realm", hg.realm.get_name(), "to host", h.get_name(), "from a hostgroup rule (%s)" % hg.get_name()
+                    logger.debug("[hostgroups] apply a realm %s to host %s from a hostgroup rule (%s)" % \
+                        (hg.realm.get_name(), h.get_name(), hg.get_name()))
                     h.realm = hg.realm
                 else:
                     if h.realm != hg.realm:
-                        print "Warning : host", h.get_name(), "is not in the same realm than it's hostgroup", hg.get_name()
+                        logger.warning("[hostgroups] host %s it not in the same realm than it's hostgroup %s" % \
+                            (h.get_name(), hg.get_name()))
 
 
     # Add a host string to a hostgroup member

@@ -419,7 +419,7 @@ class Timeperiod(Item):
         #Even one invalid is non correct
         for e in self.invalid_entries:
             b = False
-            print "Error : The timeperiod %s got an invalid entry '%s'" % (self.get_name(), e)
+            logger.error("[timeperiod::%s] invalid entry '%s'" % (self.get_name(), e))
         return b
 
 
@@ -616,7 +616,7 @@ class Timeperiod(Item):
                 day = t0
                 dateranges.append(StandardDaterange(day, other))
                 return
-        print "No match for", entry
+        logger.info("[timeentry::%s] no match for %s" % (self.get_name(), entry))
         self.invalid_entries.append(entry)
 
 
@@ -636,8 +636,7 @@ class Timeperiod(Item):
     def linkify(self, timeperiods):
         new_exclude = []
         if self.has('exclude') and self.exclude != '':
-            print "I have excluded"
-            print self.get_name(), self.exclude
+            logger.debug("[timeentry::%s] have excluded %s" % (self.get_name(), self.exclude))
             excluded_tps = self.exclude.split(',')
             #print "I will exclude from:", excluded_tps
             for tp_name in excluded_tps:
@@ -645,13 +644,13 @@ class Timeperiod(Item):
                 if tp is not None:
                     new_exclude.append(tp)
                 else:
-                    print "Error : the timeperiod", tp_name, "is unknown!"
+                    logger.error("[timeentry::%s] unknown %s timeperiod" % (self.get_name(), tp_name))
         self.exclude = new_exclude
 
 
     def check_exclude_rec(self):
         if self.rec_tag:
-            print "Error :", self.get_name(), "is in a loop in exclude parameter"
+            logger.error("[timeentry::%s] is in a loop in exclude parameter" % self.get_name())
             return False
         self.rec_tag = True
         for tp in self.exclude:
