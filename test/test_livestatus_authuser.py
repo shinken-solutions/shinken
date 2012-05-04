@@ -110,6 +110,41 @@ www1    adm(adm1,adm2,adm3) web(web1,web2)
     app_web_apache_check_errorlog  web(web1,web2)
     """
 
+    def test_host_itersorted(self):
+        self.print_header()
+        now = time.time()
+        objlist = []
+        for host in self.sched.hosts:
+            objlist.append([host, 0, 'UP'])
+        for service in self.sched.services:
+            objlist.append([service, 0, 'OK'])
+        self.scheduler_loop(1, objlist)
+        
+        self.update_broker()
+        #self.livestatus_broker.datamgr.rg.all_done_linking(1)
+        print "rg is", self.livestatus_broker.datamgr.rg.hosts
+        print "rg is", self.livestatus_broker.datamgr.rg.hosts._id_contact_heap
+        allhosts = sorted([h.get_full_name() for h in self.livestatus_broker.datamgr.rg.hosts.__itersorted__()])
+        print allhosts
+        self.assert_(allhosts == ["dbsrv1", "dbsrv2", "dbsrv3", "dbsrv4", "dbsrv5", "www1", "www2"])
+        orahosts = sorted([h.get_full_name() for h in self.livestatus_broker.datamgr.rg.hosts.__itersorted__("oradba1")])
+        print orahosts
+        self.assert_(orahosts == ["dbsrv1", "dbsrv2", "dbsrv3"])
+        myhosts = sorted([h.get_full_name() for h in self.livestatus_broker.datamgr.rg.hosts.__itersorted__("mydba2")])
+        print myhosts
+        self.assert_(myhosts == ["dbsrv4", "dbsrv5"])
+        print "rg is", self.livestatus_broker.datamgr.rg.services
+        print "rg is", self.livestatus_broker.datamgr.rg.services._id_contact_heap
+        admservices = sorted([s.get_full_name() for s in self.livestatus_broker.datamgr.rg.services.__itersorted__("adm")])
+        print admservices
+        self.assert_(myhosts == ["dbsrv4", "dbsrv5"])
+        winhosts = sorted([s.get_name() for s in self.livestatus_broker.datamgr.rg.hostgroups.__itersorted__("bill")])
+        print winhosts
+        print "rg is", self.livestatus_broker.datamgr.rg.hostgroups
+        print "rg is", self.livestatus_broker.datamgr.rg.hostgroups._id_contact_heap
+        self.assert_(myhosts == ["dbsrv4", "dbsrv5"])
+        
+
     def test_host_authorization(self):
         self.print_header()
         now = time.time()

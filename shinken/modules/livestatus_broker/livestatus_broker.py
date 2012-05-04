@@ -92,7 +92,7 @@ class LiveStatus_broker(BaseModule, Daemon):
             self.service_authorization_strict = True
         else:
             self.service_authorization_strict = False
-        if getattr(modconf, 'group_authorization', 'loose') == 'strict':
+        if getattr(modconf, 'group_authorization', 'strict') == 'strict':
             self.group_authorization_strict = True
         else:
             self.group_authorization_strict = False
@@ -109,9 +109,7 @@ class LiveStatus_broker(BaseModule, Daemon):
         }
         # We need to have our regenerator now because it will need to load
         # data from scheduler before main() if in scheduler of course
-        self.rg = LiveStatusRegenerator()
-        self.rg.service_authorization_strict = self.service_authorization_strict
-        self.rg.group_authorization_strict = self.group_authorization_strict
+        self.rg = LiveStatusRegenerator(self.service_authorization_strict, self.group_authorization_strict)
 
 
     def add_compatibility_sqlite_module(self):

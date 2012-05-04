@@ -45,6 +45,10 @@ def itersorted(self, authuser=None):
 
 
 class LiveStatusRegenerator(Regenerator):
+    def __init__(self, service_authorization_strict=False, group_authorization_strict=True):
+        super(self.__class__, self).__init__()
+        self.service_authorization_strict = service_authorization_strict
+        self.group_authorization_strict = group_authorization_strict
 
     def all_done_linking(self, inst_id):
         """In addition to the original all_done_linking our items will get sorted"""
@@ -77,25 +81,47 @@ class LiveStatusRegenerator(Regenerator):
         # Speedup authUser requests by populating _id_contact_heap with contact-names as key and 
         # an array with the associated service ids
         setattr(self.hosts, '_id_contact_heap', dict())
-        [self.hosts._id_contact_heap.setdefault(c, []).append((get_obj_full_name(v), k)) for (k, v) in self.hosts.items.iteritems() for c in v.contacts]
+        setattr(self.services, '_id_contact_heap', dict())
+        setattr(self.hostgroups, '_id_contact_heap', dict())
+        setattr(self.servicegroups, '_id_contact_heap', dict())
+
+        [self.hosts._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.hosts.items.iteritems() for c in v.contacts]
         for c in self.hosts._id_contact_heap.keys():
             self.hosts._id_contact_heap[c].sort(key=lambda x: x[0])
 
-        setattr(self.services, '_id_contact_heap', dict())
         # strict: one must be an explicity contact of a service in order to see it.
-        # if self.service_authorization_strict:
-        [self.services._id_contact_heap.setdefault(c, []).append((get_obj_full_name(v), k)) for (k, v) in self.services.items.iteritems() for c in v.contacts]
+        if self.service_authorization_strict:
+            [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.services.items.iteritems() for c in v.contacts]
+        else:
+            # 1. every host contact automatically becomes a service contact
+            [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.services.items.iteritems () for c in v.host.contacts]
+            # 2. explicit service contacts
+            [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.services.items.iteritems () for c in v.contacts]
+        # services without contacts inherit the host's contacts (no matter of strict or loose)
+        [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.services.items.iteritems() if not v.contacts for c in v.host.contacts]
         for c in self.services._id_contact_heap.keys():
+            # remove duplicates
+            self.services._id_contact_heap[c] = list(set(self.services._id_contact_heap[c]))
             self.services._id_contact_heap[c].sort(key=lambda x: x[0])
-        # todo loose: loop through hosts
-        # if host contact -> all services
-        # if not host contact -> services where one is contact
 
-        setattr(self.hostgroups, '_id_contact_heap', dict())
-        setattr(self.servicegroups, '_id_contact_heap', dict())
-        # if self.group_authorization_strict:
-        # todo strict: a contact must be contact of _all_ members 
-        # todo loose: a contact of a member becomes contact of the whole group
+
+        #if self.group_authorization_strict:
+        if False:
+            # todo strict: a contact must be contact of _all_ members (default)
+            [self.hostgroups._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.hostgroups.items.iteritems() for h in v.members for c in h.contacts]
+            for (k, v) in self.hostgroups.items.iteritems():
+                for h in v.members:
+                    for c in h.contacts:
+                        pass
+        else:
+            # loose: a contact of a member becomes contact of the whole group
+            [self.hostgroups._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.hostgroups.items.iteritems() for h in v.members for c in h.contacts]
+            [self.servicegroups._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.servicegroups.items.iteritems() for s in v.members for c in s.contacts] # todo: look at mk-livestatus. what about service's host contacts?
+        for c in self.hostgroups._id_contact_heap.keys():
+            # remove duplicates
+            self.hostgroups._id_contact_heap[c] = list(set(self.hostgroups._id_contact_heap[c]))
+            self.hostgroups._id_contact_heap[c].sort(key=lambda x: x[0])
+ 
 
         # Everything is new now. We should clean the cache
         self.cache.wipeout()
