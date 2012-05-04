@@ -73,6 +73,17 @@ def mean(numberList):
     floatNums = [float(x) for x in numberList]
     return sum(floatNums) / len(numberList)
 
+def median(numberList):
+    sorted_values = sorted(numberList)
+
+    if len(sorted_values) % 2 == 1:
+        return sorted_values[(len(sorted_values)+1)/2-1]
+    else:
+        lower = sorted_values[len(sorted_values)/2-1]
+        upper = sorted_values[len(sorted_values)/2]
+
+    return (float(lower + upper)) / 2  
+
 def run(url, requests, concurrency, qg):
     if (concurrency > requests):
         concurrency = requests
@@ -126,9 +137,9 @@ def run(url, requests, concurrency, qg):
     print "Execution report"
     print "==============="
     print "Running time is %04f s" % running_time
-    print "Query Class          nb  min      max      mean"
+    print "Query Class          nb  min      max       mean     median"
     for query_class, durations in queries_durations.items():
-        print "%s %03d %03f %03f %03f" % (query_class.ljust(20),len(durations),min(durations),max(durations),mean(durations))
+        print "%s %03d %03f %03f %03f %03f" % (query_class.ljust(20),len(durations),min(durations),max(durations),mean(durations),median(durations))
 
 def main(argv):
     # Defaults values
