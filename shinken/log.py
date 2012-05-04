@@ -66,10 +66,9 @@ class Log:
     # We can have level as an int (logging.INFO) or a string INFO
     # if string, try to get the int value
     def set_level(self, level):
-        try:
-            int(level)
-        except ValueError:
-            level = getattr(logging, level, logging.NOTSET)
+        if not isinstance(level, int):
+            raise Type('log level must be an integer')
+
         self._level = level
         logging.getLogger().setLevel(level)
 
