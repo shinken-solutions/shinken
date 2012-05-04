@@ -25,9 +25,13 @@
 
 
 try:
-    import json
+    from cjson import encode as dumps
+    from cjson import decode as loads
 except ImportError:
-    import simplejson as json
+    try:
+        from json import dumps, loads
+    except ImportError:
+        from simplejson import dumps, loads
 
 
 class LiveStatusResponse:
@@ -141,7 +145,8 @@ class LiveStatusResponse:
                             #print "FALLBACK: %s.%s" % (type(item), attribute)
                             value = getattr(item.__class__, attribute).im_func.default
                         else:
-                            value = u''
+                            rows.append(u'')
+                            continue
                     if isinstance(value, bool):
                         if value == True:
                             rows.append(1)
@@ -161,9 +166,9 @@ class LiveStatusResponse:
                 else:
                     lines.insert(0, columns)
             if self.outputformat == 'json':
-                self.output = json.dumps(lines, separators=(',', ':'))
+                self.output = dumps(lines)
             else:
-                self.output = str(json.loads(json.dumps(lines, separators=(',', ':'))))
+                self.output = str(loads(dumps(lines)))
 
     def format_live_data_stats(self, result, columns, aliases):
         lines = []
@@ -226,6 +231,6 @@ class LiveStatusResponse:
                 else:
                     lines.insert(0, columns)
             if self.outputformat == 'json':
-                self.output = json.dumps(lines, separators=(',', ':'))
+                self.output = dumps(lines)
             else:
-                self.output = str(json.loads(json.dumps(lines, separators=(',', ':'))))
+                self.output = str(loads(dumps(lines)))
