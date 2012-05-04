@@ -73,6 +73,17 @@ def mean(numberList):
     floatNums = [float(x) for x in numberList]
     return sum(floatNums) / len(numberList)
 
+def median(numberList):
+    sorted_values = sorted(numberList)
+
+    if len(sorted_values) % 2 == 1:
+        return sorted_values[(len(sorted_values)+1)/2-1]
+    else:
+        lower = sorted_values[len(sorted_values)/2-1]
+        upper = sorted_values[len(sorted_values)/2]
+
+    return (float(lower + upper)) / 2  
+
 def run(url, requests, concurrency, qg):
     if (concurrency > requests):
         concurrency = requests
@@ -93,7 +104,7 @@ def run(url, requests, concurrency, qg):
         (query_class, query_str)=qg.get()
         q=Query(query_str)
         q.query_class = query_class
-        conns[x].stack_query(Query(query_str))
+        conns[x].stack_query(q)
 
     print "Start queries"
     t = time.time()
@@ -102,10 +113,11 @@ def run(url, requests, concurrency, qg):
         for c in conns:
             if c.is_finished():
                 # Store query duration to compute stats
-                duration = c.get_returns()[0].duration
-                if (not queries_durations.has_key(query_class)):
-                    queries_durations[query_class] = []
-                queries_durations[query_class].append(duration)
+                q = c.results.pop()
+                duration = q.duration
+                if (not queries_durations.has_key(q.query_class)):
+                    queries_durations[q.query_class] = []
+                queries_durations[q.query_class].append(q.duration)
                 sys.stdout.flush()
                 remaining -= 1
 
@@ -118,7 +130,7 @@ def run(url, requests, concurrency, qg):
                 (query_class, query_str)=qg.get()
                 q=Query(query_str)
                 q.query_class = query_class
-                c.stack_query(Query(query_str))
+                c.stack_query(q)
     running_time=time.time() - t
     print "End queries"
 
@@ -126,9 +138,9 @@ def run(url, requests, concurrency, qg):
     print "Execution report"
     print "==============="
     print "Running time is %04f s" % running_time
-    print "Query Class          nb  min      max      mean"
+    print "Query Class          nb  min      max       mean     median"
     for query_class, durations in queries_durations.items():
-        print "%s %03d %03f %03f %03f" % (query_class.ljust(20),len(durations),min(durations),max(durations),mean(durations))
+        print "%s %03d %03f %03f %03f %03f" % (query_class.ljust(20),len(durations),min(durations),max(durations),mean(durations),median(durations))
 
 def main(argv):
     # Defaults values
