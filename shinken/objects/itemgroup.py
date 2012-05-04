@@ -31,8 +31,8 @@
 from item import Item, Items
 
 from shinken.brok import Brok
-from shinken.util import safe_print
 from shinken.property import StringProp
+from shinken.log import logger
 
 
 # TODO: subclass Item & Items for Itemgroup & Itemgroups ?
@@ -126,12 +126,12 @@ class Itemgroup(Item):
 
         if self.unknown_members != []:
             for m in self.unknown_members:
-                safe_print("Error : the", self.__class__.my_type, self.get_name(), "got a unknown member" , m)
+                logger.error("[itemgroup::%s] as %s, got unknown member %s" % (self.get_name(), self.__class__.my_type, m))
             res = False
 
         if self.configuration_errors != []:
             for err in self.configuration_errors:
-                print err
+                logger.error("[itemgroup] %s" % err)
             res = False
             
         return res

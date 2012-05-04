@@ -28,6 +28,7 @@
 from itemgroup import Itemgroup, Itemgroups
 
 from shinken.property import StringProp
+from shinken.log import logger
 
 class Servicegroup(Itemgroup):
     id = 1 #0 is always a little bit special... like in database
@@ -83,7 +84,7 @@ class Servicegroup(Itemgroup):
         #so if True here, it must be a loop in HG
         #calls... not GOOD!
         if self.rec_tag:
-            print "Error : we've got a loop in servicegroup definition", self.get_name()
+            logger.error("[servicegroup::%s] got a loop in servicegroup definition" % self.get_name())
             if self.has('members'):
                 return self.members
             else:

@@ -27,6 +27,7 @@
 
 from item import Item, Items
 from shinken.property import BoolProp, StringProp, ListProp
+from shinken.log import logger
 
 
 class Servicedependency(Item):
@@ -229,7 +230,7 @@ class Servicedependencies(Items):
                 sd.service_description = s
 
             except AttributeError , exp:
-                print "Error on service dep", exp
+                logger.error("[servicedependency] fail to linkify by service %s: %s" % (sd, exp))
 
 
     #We just search for each srvdep the id of the srv
@@ -241,7 +242,7 @@ class Servicedependencies(Items):
                 tp = timeperiods.find_by_name(tp_name)
                 sd.dependency_period = tp
             except AttributeError , exp:
-                print exp
+                logger.error("[servicedependency] fail to linkify by timeperiods: %s" % exp)
 
 
     # We backport service dep to service. So SD is not need anymore

@@ -27,6 +27,7 @@
 from item import Item, Items
 
 from shinken.property import BoolProp, StringProp, ListProp
+from shinken.log import logger
 
 class Hostdependency(Item):
     id = 0
@@ -167,7 +168,7 @@ class Hostdependencies(Items):
                 tp = timeperiods.find_by_name(tp_name)
                 hd.dependency_period = tp
             except AttributeError , exp:
-                print exp
+                logger.error("[hostdependency] fail to linkify by timeperiod: %s" % exp)
 
 
     # We backport host dep to host. So HD is not need anymore

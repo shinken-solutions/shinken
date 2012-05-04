@@ -390,19 +390,19 @@ class Host(SchedulingItem):
         for prop, entry in cls.properties.items():
             if prop not in special_properties:
                 if not hasattr(self, prop) and entry.required:
-                    logger.info("%s : I do not have %s" % (self.get_name(), prop))
+                    logger.error("[host::%s] %s property not set" % (self.get_name(), prop))
                     state = False #Bad boy...
 
         # Then look if we have some errors in the conf
         # Juts print warnings, but raise errors
         for err in self.configuration_warnings:
-            print err
+            logger.warning("[host::%s] %s" % (self.get_name(), err))
 
         # Raised all previously saw errors like unknown contacts and co
         if self.configuration_errors != []:
             state = False
             for err in self.configuration_errors:
-                logger.info(err)
+                logger.error("[host::%s] %s" % (self.get_name(), err))
 
         if not hasattr(self, 'notification_period'):
             self.notification_period = None
@@ -423,7 +423,7 @@ class Host(SchedulingItem):
                 if not self.business_rule.is_valid():
                     logger.info("%s : my business rule is invalid" % (self.get_name(),))
                     for bperror in self.business_rule.configuration_errors:
-                        logger.info("%s : %s" % (self.get_name(), bperror))
+                        logger.error("[host::%s] %s" % (self.get_name(), bperror))
                     state = False
         
         if not hasattr(self, 'notification_interval') and self.notifications_enabled == True:
@@ -1022,7 +1022,7 @@ class Hosts(Items):
                 if p is not None:
                     new_parents.append(p)
                 else:
-                    err = "Error : the parent '%s' on host '%s' is unknown!" % (parent, h.get_name())
+                    err = "the parent '%s' on host '%s' is unknown!" % (parent, h.get_name())
                     self.configuration_errors.append(err)
             #print "Me,", h.host_name, "define my parents", new_parents
             #We find the id, we remplace the names
@@ -1041,7 +1041,7 @@ class Hosts(Items):
             if h.realm is not None:
                 p = realms.find_by_name(h.realm.strip())
                 if p is None:
-                    err = "Error : the host %s got a invalid realm (%s)!" % (h.get_name(), h.realm)
+                    err = "the host %s got a invalid realm (%s)!" % (h.get_name(), h.realm)
                     h.configuration_errors.append(err)
                 h.realm = p
             else:
@@ -1065,7 +1065,7 @@ class Hosts(Items):
                         if hg is not None:
                             new_hostgroups.append(hg)
                         else:
-                            err = "Error : the hostgroup '%s' of the host '%s' is unknown" % (hg_name, h.host_name)
+                            err = "the hostgroup '%s' of the host '%s' is unknown" % (hg_name, h.host_name)
                             h.configuration_errors.append(err)
                 h.hostgroups = new_hostgroups
 
