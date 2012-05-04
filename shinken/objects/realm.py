@@ -241,7 +241,7 @@ class Realm(Itemgroup):
         if hasattr(self, type+'s'):
             return getattr(self, type+'s')
         else:
-            print "Sorry I do not have this kind of satellites : ", type
+            logger.debug("[realm] do not have this kind of satellites : %s" % type)
             return []
 
 
@@ -251,7 +251,7 @@ class Realm(Itemgroup):
         if hasattr(self, 'potential_'+type+'s'):
             return getattr(self, 'potential_'+type+'s')
         else:
-            print "Sorry I do not have this kind of satellites : ", type
+            logger.debug("[realm] do not have this kind of satellites : %s" % type)
             return []
 
 
@@ -261,7 +261,7 @@ class Realm(Itemgroup):
         if hasattr(self, 'nb_'+type+'s'):
             return getattr(self, 'nb_'+type+'s')
         else:
-            print "Sorry I do not have this kind of satellites : ", type
+            logger.debug("[realm] do not have this kind of satellites : %s" % type)
             return 0
 
 
