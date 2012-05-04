@@ -104,7 +104,7 @@ def run(url, requests, concurrency, qg):
         (query_class, query_str)=qg.get()
         q=Query(query_str)
         q.query_class = query_class
-        conns[x].stack_query(Query(query_str))
+        conns[x].stack_query(q)
 
     print "Start queries"
     t = time.time()
@@ -113,10 +113,11 @@ def run(url, requests, concurrency, qg):
         for c in conns:
             if c.is_finished():
                 # Store query duration to compute stats
-                duration = c.get_returns()[0].duration
-                if (not queries_durations.has_key(query_class)):
-                    queries_durations[query_class] = []
-                queries_durations[query_class].append(duration)
+                q = c.results.pop()
+                duration = q.duration
+                if (not queries_durations.has_key(q.query_class)):
+                    queries_durations[q.query_class] = []
+                queries_durations[q.query_class].append(q.duration)
                 sys.stdout.flush()
                 remaining -= 1
 
@@ -129,7 +130,7 @@ def run(url, requests, concurrency, qg):
                 (query_class, query_str)=qg.get()
                 q=Query(query_str)
                 q.query_class = query_class
-                c.stack_query(Query(query_str))
+                c.stack_query(q)
     running_time=time.time() - t
     print "End queries"
 
