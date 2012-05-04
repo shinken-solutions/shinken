@@ -26,6 +26,7 @@
 
 import socket
 import asyncore
+import time
 from log import logger
 
 class LSSyncConnection:
@@ -144,6 +145,7 @@ class Query(object):
         # Got some states PENDING -> PICKUP -> DONE
         self.state = 'PENDING'
         self.result = None
+        self.duration = 0
         #By default, an error :)
         self.return_code = '500'
 
@@ -151,11 +153,13 @@ class Query(object):
     def get(self):
         #print "Someone ask my query", self.q
         self.state = 'PICKUP'
+        self.duration = time.time()
         return self.q
 
     def put(self, r):
         self.result = r
         self.state = 'DONE'
+        self.duration = time.time() - self.duration
         #print "Got a result", r
     
 
