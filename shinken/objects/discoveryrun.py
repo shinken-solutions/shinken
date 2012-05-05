@@ -28,12 +28,13 @@ from copy import copy
 
 from item import Item, Items
 
+from shinken.objects.matchingitem import MatchingItem
 from shinken.property import StringProp
 from shinken.eventhandler import EventHandler
 from shinken.macroresolver import MacroResolver
 
 
-class Discoveryrun(Item):
+class Discoveryrun(MatchingItem):
     id = 1 #0 is always special in database, so we do not take risk here
     my_type = 'discoveryrun'
 
@@ -106,85 +107,6 @@ class Discoveryrun(Item):
             return self.discoveryrun_name
         except AttributeError:
             return "UnnamedDiscoveryRun"
-
-
-    # Try to see if the key,value is matching one or
-    # our rule. If value got ',' we must look for each value
-    # If one match, we quit
-    # We can find in matches or not_matches
-    def is_matching(self, key, value, look_in='matches'):
-        if look_in == 'matches':
-            d = self.matches
-        else:
-            d = self.not_matches
-        # If we do not even have the key, we bailout
-        if not key.strip() in d:
-            return False
-
-        # Get my matching patern
-        m = d[key]
-        if ',' in m:
-            matchings = [mt.strip() for mt in m.split(',')]
-        else:
-            matchings = [m]
-        
-        # Split the alue by , too
-        values = value.split(',')
-        for m in matchings:
-            for v in values:
-                #print "Try to match", m, v
-                if re.search(m, v):
-                    return True
-        return False
-
-
-    # Look if we match all discovery data or not
-    # a disco data look as a list of (key, values)
-    def is_matching_disco_datas(self, datas):
-        # If we got not data, no way we can match
-        if len(datas) == 0:
-            return False
-        
-        # First we look if it's possible to match
-        # we must match All self.matches things
-        for m in self.matches:
-            #print "Compare to", m
-            match_one = False
-            for (k, v) in datas.iteritems():
-                # We found at least one of our match key
-                if m == k:
-                    if self.is_matching(k, v):
-                        #print "Got matching with", m, k, v
-                        match_one = True
-                        continue
-            if not match_one:
-                # It match none
-                #print "Match none, FAlse"
-                return False
-        #print "It's possible to be OK"
-
-        # And now look if ANY of not_matches is reach. If so
-        # it's False
-        for m in self.not_matches:
-            #print "Compare to NOT", m
-            match_one = False
-            for (k, v) in datas.iteritems():
-                #print "K,V", k,v
-                # We found at least one of our match key
-                if m == k:
-                    #print "Go loop"
-                    if self.is_matching(k, v, look_in='not_matches'):
-                        #print "Got matching with", m, k, v
-                        match_one = True
-                        continue
-            if match_one:
-                #print "I match one, I quit"
-                return False
-
-        # Ok we match ALL rules in self.matches
-        # and NONE of self.not_matches, we can go :)
-        return True
-
 
 
     # Get an eventhandler object and launch it
