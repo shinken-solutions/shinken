@@ -86,12 +86,21 @@ class DiscoveredHost(object):
 
 
     def get_to_run(self):
-        if self.data['osvendor'] != 'linux':
-            self.in_progress_runners = []
-            return
-        r = self.runners.find_by_name('FakeForLinux')
-        print 'Founded an interesting element?', r
-        self.in_progress_runners = [r]
+        self.in_progress_runners = []
+        for r in self.runners:
+            # If we already launched it, we don't want it :)
+            if r in self.launched_runners:
+                print 'Sorry', r.get_name(), 'was already launched'
+                continue
+            # First level discovery are for large scan, so not for here
+            if r.is_first_level():
+                print 'Sorry', r.get_name(), 'is first level'
+                continue
+            # And of course it must match our data
+            print 'Is ', r.get_name(), 'matching??', r.is_matching_disco_datas(self.properties)
+            if r.is_matching_disco_datas(self.properties):
+                self.in_progress_runners.append(r)
+            
 
 
     def need_to_run(self):
@@ -101,6 +110,7 @@ class DiscoveredHost(object):
 
     # Now we try to match all our hosts with the rules
     def match_rules(self):
+        print 'And our data?', self.data
         for r in self.rules:
             # If the rule was already sucessfuly for this host, skip it
             if r in self.matched_rules:
@@ -158,6 +168,7 @@ class DiscoveredHost(object):
         for r in self.in_progress_runners:
             print "I", self.name, " is launching", r.get_name(), "with a %d seconds timeout" % 3600
             r.launch(timeout=3600)
+            self.launched_runners.append(r)
 
 
     def wait_for_runners_ends(self):
@@ -277,14 +288,23 @@ class DiscoveryManager:
 
 
     def loop_discovery(self):
-        for (name, dh) in self.disco_data.iteritems():
-            to_run = dh.get_to_run()
-            print 'Still to run for', name, to_run
-            if dh.need_to_run():
-                dh.launch_runners()
-                dh.wait_for_runners_ends()
-                dh.get_runners_outputs()
-                dh.match_rules()
+        still_loop = True
+        i = 0
+        while still_loop:
+            i += 1
+            print '\n'
+            print 'LOOP'*10, i
+            still_loop = False
+            for (name, dh) in self.disco_data.iteritems():
+                dh.update_properties()
+                to_run = dh.get_to_run()
+                print 'Still to run for', name, to_run
+                if dh.need_to_run():
+                    still_loop = True
+                    dh.launch_runners()
+                    dh.wait_for_runners_ends()
+                    dh.get_runners_outputs()
+                    dh.match_rules()
 
 
 

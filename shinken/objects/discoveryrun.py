@@ -72,12 +72,7 @@ class Discoveryrun(MatchingItem):
         # -> in self.matches or self.not_matches
         # in writing properties if start with + (means 'add this')
         for key in params:
-            # Some key are quite special
-            if key in ['use']:
-                self.writing_properties[key] = params[key]
-            elif key.startswith('+'):
-                self.writing_properties[key] = params[key]
-            elif key in cls.properties:
+            if key in cls.properties:
                 setattr(self, key, params[key])
             else:
                 if key.startswith('!'):
@@ -107,6 +102,12 @@ class Discoveryrun(MatchingItem):
             return self.discoveryrun_name
         except AttributeError:
             return "UnnamedDiscoveryRun"
+
+
+    # A Run that is first level means that it do not have
+    # any matching filter
+    def is_first_level(self):
+        return len(self.not_matches) + len(self.matches) == 0
 
 
     # Get an eventhandler object and launch it
