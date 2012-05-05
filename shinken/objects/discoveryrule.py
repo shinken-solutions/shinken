@@ -116,7 +116,7 @@ class Discoveryrule(Item):
                 setattr(self, prop, copy(val))
             else:
                 setattr(self, prop, val)
-            #eatch istance to have his own running prop!
+            # each istance to have his own running prop!
 
 
     # Output name
