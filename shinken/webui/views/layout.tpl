@@ -42,9 +42,9 @@
 	 It's not real comment, if so it will not work.
       -->
     
-    <!--<![if !IE]>
+    <![if !IE]>
     <link href="/static/css/elements/pulse.css" rel="stylesheet">
-    <![endif]>-->
+    <![endif]>
 
     <!-- Warnign, this version of datepicker came from http://dl.dropbox.com/u/143355/datepicker/datepicker.html -->    
     <link href="/static/css/custom/datepicker.css" rel="stylesheet">
