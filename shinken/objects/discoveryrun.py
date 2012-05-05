@@ -111,10 +111,9 @@ class Discoveryrun(MatchingItem):
 
 
     # Get an eventhandler object and launch it
-    def launch(self, timeout=300):
+    def launch(self, ctx=[], timeout=300):
         m = MacroResolver()
-        data = []
-        cmd = m.resolve_command(self.discoveryrun_command, data)
+        cmd = m.resolve_command(self.discoveryrun_command, ctx)
         self.current_launch = EventHandler(cmd, timeout=timeout)
         self.current_launch.execute()
 

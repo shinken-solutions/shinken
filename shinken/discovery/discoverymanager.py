@@ -50,6 +50,12 @@ def is_ipv4_addr(name):
 
 
 class DiscoveredHost(object):
+    my_type = 'host' # we fake our type for the macro resolving
+
+    macros = {
+        'HOSTNAME':          'name',
+        }
+
     def __init__(self, name, rules, runners):
         self.name = name
         self.data = {}
@@ -61,6 +67,7 @@ class DiscoveredHost(object):
 
         self.in_progress_runners = []
         self.properties = {}
+        self.customs = {}
 
 
     def update_properties(self):
@@ -83,6 +90,11 @@ class DiscoveredHost(object):
                     d[k] = v
         self.properties = d
         print 'Update our properties', self.name, d
+        
+        # For macro-resolving, we should have our macros too
+        self.customs = {}
+        for (k,v) in self.properties.iteritems():
+            self.customs['_'+k.upper()] = v
 
 
     def get_to_run(self):
@@ -167,7 +179,7 @@ class DiscoveredHost(object):
     def launch_runners(self):
         for r in self.in_progress_runners:
             print "I", self.name, " is launching", r.get_name(), "with a %d seconds timeout" % 3600
-            r.launch(timeout=3600)
+            r.launch(timeout=3600, ctx=[self])
             self.launched_runners.append(r)
 
 
