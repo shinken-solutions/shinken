@@ -695,7 +695,7 @@ class Ndodb_Mysql_broker(BaseModule):
 
         # Ok, the hostgroups table is uptodate, now we add relations
         # between hosts and hostgroups
-        for (h_id, h_name) in b.data['members']:
+        for (_, h_name) in b.data['members']:
             host_id = self.get_host_object_id_by_name_sync(h_name, data['instance_id'])
 
             hostgroup_members_data = {
@@ -747,7 +747,7 @@ class Ndodb_Mysql_broker(BaseModule):
 
         # Ok, the servicegroups table is up to date, now we add relations
         # between service and servicegroups
-        for (s_id, s_name) in b.data['members']:
+        for (s_id, _) in b.data['members']:
             # TODO: Include with the service cache.
             service_id = self.mapping_service_id[s_id]
             servicegroup_members_data = {'instance_id': data['instance_id'],
@@ -1159,7 +1159,7 @@ class Ndodb_Mysql_broker(BaseModule):
 
         # Ok, the hostgroups table is uptodate, now we add relations
         # between hosts and hostgroups
-        for (c_id, c_name) in b.data['members']:
+        for (_, c_name) in b.data['members']:
 
             contact_obj_id = self.get_contact_object_id_by_name_sync(c_name, data['instance_id'])
 
@@ -1179,6 +1179,7 @@ class Ndodb_Mysql_broker(BaseModule):
 
         data = b.data
         #print "CREATING A NOTIFICATION", data
+        #<WTF> Both created variables are not used! </WTF>
         if data['service_description'] != '':
             service_id = self.get_service_object_id_by_name_sync(
                 data['host_name'],
@@ -1190,9 +1191,9 @@ class Ndodb_Mysql_broker(BaseModule):
 
         notification_data = {
             'instance_id': data['instance_id'],
-             'start_time': de_unixify(data['start_time']),
-             'end_time': de_unixify(data['end_time']),
-             'state': data['state']
+            'start_time': de_unixify(data['start_time']),
+            'end_time': de_unixify(data['end_time']),
+            'state': data['state']
         }
 
         query = self.db.create_insert_query('notifications', notification_data)
