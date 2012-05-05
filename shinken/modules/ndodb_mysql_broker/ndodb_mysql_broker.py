@@ -24,13 +24,6 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-# This Class is a plugin for the Shinken Broker. It is in charge
-# to brok information into the database. For the moment
-# only Mysql is supported. This code is __imported__ from Broker.
-# The managed_brok function is called by Broker for manage the broks. It calls
-# the manage_*_brok functions that create queries, and then run queries.
-
-
 import copy
 import time
 import sys
@@ -52,9 +45,16 @@ def de_unixify(t):
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(t))
 
 
-# Class for the NDO MySQL Broker
-# Get broks and puts them in MySQL database
 class Ndodb_Mysql_broker(BaseModule):
+
+    """ This Class is a plugin for the Shinken Broker. It is in charge
+    to brok information into the database. For the moment
+    only Mysql is supported. This code is __imported__ from Broker.
+    The managed_brok function is called by Broker for manage the broks. It calls
+    the manage_*_brok functions that create queries, and then run queries.
+
+    """
+
     def __init__(self, conf):
         BaseModule.__init__(self, conf)
         # Mapping for name of data and transform function
@@ -186,7 +186,8 @@ class Ndodb_Mysql_broker(BaseModule):
     # Query the database to get the proper instance_id
     def get_instance_id(self, name):
         query1 = u"SELECT  max(instance_id) + 1 from %sinstances" % self.prefix
-        query2 = u"SELECT instance_id from %sinstances where instance_name = '%s';" % (self.prefix, name)
+        query2 = u"SELECT instance_id from %sinstances where instance_name = '%s';" % \
+                 (self.prefix, name)
 
         self.db.execute_query(query1)
         row1 = self.db.fetchone()
@@ -222,7 +223,7 @@ class Ndodb_Mysql_broker(BaseModule):
             else:
                 data_id = self.get_instance_id(name)
             # cache this!
-            self.database_id_cache[id] = data_id
+            self.database_id_cache[brok_id] = data_id
             return data_id
 
 
