@@ -410,6 +410,117 @@ KeepAlive: on
         self.assert_(len(pyresponse) == 1)
 
 
+    def test_group_authorization_strict(self):
+        self.print_header()
+        now = time.time()
+        objlist = []
+        for host in self.sched.hosts:
+            objlist.append([host, 0, 'UP'])
+        for service in self.sched.services:
+            objlist.append([service, 0, 'OK'])
+        self.scheduler_loop(1, objlist)
+        self.update_broker()
+        #self.livestatus_broker.datamgr.rg.group_authorization_strict = False
+        #self.livestatus_broker.datamgr.rg.all_done_linking(0)
+        print "hosts/hostgroups"
+        for contact in sorted(self.livestatus_broker.datamgr.rg.hostgroups._id_contact_heap.keys()):
+            print "%-10s %s" % (contact, self.livestatus_broker.datamgr.rg.hosts._id_contact_heap[contact])
+            print "%-10s %s" % (contact, self.livestatus_broker.datamgr.rg.hostgroups._id_contact_heap[contact])
+        print "services/servicegroups"
+        for contact in sorted(self.livestatus_broker.datamgr.rg.servicegroups._id_contact_heap.keys()):
+            print "%-10s %s" % (contact, self.livestatus_broker.datamgr.rg.services._id_contact_heap[contact])
+            print "%-10s %s" % (contact, self.livestatus_broker.datamgr.rg.servicegroups._id_contact_heap[contact])
+        request = """GET hostgroups
+AuthUser: bill
+Columns: name members
+OutputFormat: python
+KeepAlive: on
+"""
+        # bill is contact for all hosts in the windows group
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response 
+        pyresponse = eval(response)
+        self.assert_(len(pyresponse) == 1)
+        self.assert_(pyresponse[0][0] == "windows")
+        request = """GET hostgroups
+AuthUser: web1
+Columns: name members
+OutputFormat: python
+KeepAlive: on
+"""
+        # web1 is contact for www1 and www2, so web
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        pyresponse = eval(response)
+        self.assert_(len(pyresponse) == 1)
+        self.assert_(pyresponse[0][0] == "web")
+        request = """GET hostgroups
+AuthUser: adm1
+Columns: name members
+OutputFormat: python
+KeepAlive: on
+"""
+        # every host has adm1 as contact, so every hostgroup must appear here
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        pyresponse = eval(response)
+        self.assert_(len(pyresponse) == 6)
+
+        print "now check servicesbygroup"
+        request= """GET servicesbygroup
+Columns: servicegroup_name host_name service_description
+AuthUser: oradba1
+"""
+        expect = """oracle;dbsrv1;app_db_oracle_check_alertlog
+oracle;dbsrv1;app_db_oracle_check_connect
+oracle;dbsrv2;app_db_oracle_check_alertlog
+oracle;dbsrv2;app_db_oracle_check_connect
+"""
+
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+
+
+
+    def test_group_authorization_loose(self):
+        self.print_header()
+        now = time.time()
+        objlist = []
+        for host in self.sched.hosts:
+            objlist.append([host, 0, 'UP'])
+        for service in self.sched.services:
+            objlist.append([service, 0, 'OK'])
+        self.scheduler_loop(1, objlist)
+        self.update_broker()
+        self.livestatus_broker.datamgr.rg.group_authorization_strict = False
+        self.livestatus_broker.datamgr.rg.all_done_linking(0)
+        for contact in sorted(self.livestatus_broker.datamgr.rg.hostgroups._id_contact_heap.keys()):
+            print "%-10s %s" % (contact, self.livestatus_broker.datamgr.rg.hosts._id_contact_heap[contact])
+            print "%-10s %s" % (contact, self.livestatus_broker.datamgr.rg.hostgroups._id_contact_heap[contact])
+        request = """GET hostgroups
+AuthUser: bill
+Columns: name members
+OutputFormat: python
+KeepAlive: on
+"""
+        # bill is contact for dbsrv3, dbsrv5, www2 and therefore in oracle, mysql, linux, windows, web and of course all
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        pyresponse = eval(response)
+        #self.assert_(len(pyresponse) == 1)
+
+        request = """GET hostgroups
+AuthUser: web1
+Columns: name members
+OutputFormat: python
+KeepAlive: on
+"""
+        # web1 is contact for www1 and www2, so linux, windows, web and all
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        pyresponse = eval(response)
+        self.assert_(len(pyresponse) == 4)
+
 
 if __name__ == '__main__':
     #import cProfile

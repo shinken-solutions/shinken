@@ -153,7 +153,7 @@ class LiveStatusQuery(object):
             elif keyword == 'Limit':
                 _, self.limit = self.split_option(line)
             elif keyword == 'AuthUser':
-                if self.table in ['hosts', 'hostgroups', 'services', 'servicegroups']:
+                if self.table in ['hosts', 'hostgroups', 'services', 'servicegroups', 'hostsbygroup', 'servicesbygroup']:
                     _, self.authuser = self.split_option(line)
                 # else self.authuser stays None and will be ignored
             elif keyword == 'Filter':
@@ -385,10 +385,7 @@ class LiveStatusQuery(object):
                 yield val
             return
 
-        if cs.authuser:
-            items = getattr(self.datamgr.rg, self.table).__itersorted__(cs.authuser)
-        else:
-            items = getattr(self.datamgr.rg, self.table).__itersorted__()
+        items = getattr(self.datamgr.rg, self.table).__itersorted__(cs.authuser)
         if not cs.without_filter:
             items = gen_filtered(items, cs.filter_func)
         if self.limit:
@@ -435,7 +432,7 @@ class LiveStatusQuery(object):
 
 
     def get_filtered_livedata(self, cs):
-        items = getattr(self.datamgr.rg, self.table)
+        items = getattr(self.datamgr.rg, self.table).__itersorted__(cs.authuser)
         if cs.without_filter:
             return [x for x in items]
         else:
@@ -493,13 +490,13 @@ class LiveStatusQuery(object):
     def get_hostbygroups_livedata(self, cs):
         member_key = lambda k: k.host_name
         group_key = lambda k: k.hostgroup_name
-        return self.get_group_livedata(cs, self.datamgr.rg.hostgroups, 'hostgroup', group_key, member_key)        
+        return self.get_group_livedata(cs, self.datamgr.rg.hostgroups.__itersorted__(cs.authuser), 'hostgroup', group_key, member_key)        
 
 
     def get_servicebygroups_livedata(self, cs):
         member_key = lambda k: k.get_name()
         group_key = lambda k: k.servicegroup_name
-        return self.get_group_livedata(cs, self.datamgr.rg.servicegroups, 'servicegroup', group_key, member_key)
+        return self.get_group_livedata(cs, self.datamgr.rg.servicegroups.__itersorted__(cs.authuser), 'servicegroup', group_key, member_key)
     
 
     def get_problem_livedata(self, cs):
