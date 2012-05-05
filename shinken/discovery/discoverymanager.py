@@ -41,6 +41,16 @@ from shinken.objects import *
 from shinken.macroresolver import MacroResolver
 
 
+
+class DiscoveredHost(object):
+    def __init__(self, name, rules, runners):
+        self.name = name
+        self.data = {}
+        self.rules = rules
+        self.runners = runners
+
+
+
 class DiscoveryManager:
     def __init__(self, path, macros, overwrite, runners, output_dir=None, dbmod='', db_direct_insert=False, only_new_hosts=False):
         # i am arbiter-like
@@ -97,6 +107,7 @@ class DiscoveryManager:
     def add(self, obj):
         pass
 
+
     # We try to init the database connection
     def init_database(self):
         self.dbconnection = None
@@ -120,6 +131,7 @@ class DiscoveryManager:
                 except Exception, exp:
                     logger.error('Database init : %s' % exp)
 
+
     # Look if the name is a IPV4 address or not
     def is_ipv4_addr(self, name):
         p = r"^([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])$"
@@ -134,7 +146,7 @@ class DiscoveryManager:
             if not re.search('::', l):
                 continue
             #print "line", l
-            elts = l.split('::')
+            elts = l.split('::', 1)
             if len(elts) <= 1:
                 #print "Bad discovery data"
                 continue
@@ -151,27 +163,29 @@ class DiscoveryManager:
             
             # Register the name
             if not name in self.disco_data:
-                self.disco_data[name] = {}
+                self.disco_data[name] = DiscoveredHost(name, self.discoveryrules, self.discoveryruns)
+
 
             # Now get key,values
             if not '=' in data:
                 continue
 
-            elts = data.split('=')
+            elts = data.split('=',1)
             if len(elts) <= 1:
                 continue
 
+            dh = self.disco_data[name]
             key = elts[0].strip()
             value = elts[1].strip()
             print "-->", name, key, value
-            self.disco_data[name][key] = value
+            dh.data[key] = value
 
 
+    # Now we try to match all our hosts with the rules
     def match_rules(self):
-        for name in self.disco_data:
-            datas = self.disco_data[name]
+        for (name, dh) in self.disco_data.iteritems():
             for r in self.discoveryrules:
-                if r.is_matching_disco_datas(datas):
+                if r.is_matching_disco_datas(dh.data):
                     if name not in self.disco_matches:
                         self.disco_matches[name] = []
                     self.disco_matches[name].append(r)
