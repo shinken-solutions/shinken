@@ -476,10 +476,20 @@ oracle;dbsrv1;app_db_oracle_check_connect
 oracle;dbsrv2;app_db_oracle_check_alertlog
 oracle;dbsrv2;app_db_oracle_check_connect
 """
-
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
 
+        request= """GET hostsbygroup
+Columns:  hostgroup_name host_name
+OutputFormat: python
+AuthUser: oradba1
+"""
+        # hostsbygroup is not so strict like hostgroups (we get no answer to hostgroups)
+        expect = """
+[[u"all",u"dbsrv3"],
+[u"oracle",u"dbsrv3"],
+[u"windows",u"dbsrv3"]]
+"""
 
 
     def test_group_authorization_loose(self):
