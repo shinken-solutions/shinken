@@ -470,27 +470,63 @@ KeepAlive: on
         request= """GET servicesbygroup
 Columns: servicegroup_name host_name service_description
 AuthUser: oradba1
+OutputFormat: python
 """
         expect = """oracle;dbsrv1;app_db_oracle_check_alertlog
 oracle;dbsrv1;app_db_oracle_check_connect
 oracle;dbsrv2;app_db_oracle_check_alertlog
 oracle;dbsrv2;app_db_oracle_check_connect
+oracle;dbsrv3;app_db_oracle_check_alertlog
+oracle;dbsrv3;app_db_oracle_check_connect
 """
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        #response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
+        # assert len 6
 
         request= """GET hostsbygroup
 Columns:  hostgroup_name host_name
 OutputFormat: python
-AuthUser: oradba1
+AuthUser: web1
 """
         # hostsbygroup is not so strict like hostgroups (we get no answer to hostgroups)
         expect = """
-[[u"all",u"dbsrv3"],
-[u"oracle",u"dbsrv3"],
-[u"windows",u"dbsrv3"]]
+all;www1
+all;www2
+linux;www1
+web;www1
+web;www2
+windows;www2
 """
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
 
+        request= """GET servicesbyhostgroup
+Columns: hostgroup_name host_name service_description
+AuthUser: oradba1
+OutputFormat: csv
+"""
+        expect = """
+all;dbsrv1;app_db_oracle_check_connect
+all;dbsrv1;app_db_oracle_check_alertlog
+all;dbsrv2;app_db_oracle_check_connect
+all;dbsrv2;app_db_oracle_check_alertlog
+all;dbsrv3;app_db_oracle_check_connect
+all;dbsrv3;app_db_oracle_check_alertlog
+linux;dbsrv1;app_db_oracle_check_connect
+linux;dbsrv1;app_db_oracle_check_alertlog
+linux;dbsrv2;app_db_oracle_check_connect
+linux;dbsrv2;app_db_oracle_check_alertlog
+oracle;dbsrv1;app_db_oracle_check_connect
+oracle;dbsrv1;app_db_oracle_check_alertlog
+oracle;dbsrv2;app_db_oracle_check_connect
+oracle;dbsrv2;app_db_oracle_check_alertlog
+oracle;dbsrv3;app_db_oracle_check_connect
+oracle;dbsrv3;app_db_oracle_check_alertlog
+windows;dbsrv3;app_db_oracle_check_connect
+windows;dbsrv3;app_db_oracle_check_alertlog
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
 
     def test_group_authorization_loose(self):
         self.print_header()

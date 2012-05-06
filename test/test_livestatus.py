@@ -1108,17 +1108,19 @@ ResponseHeader: fixed16"""
         #request = """GET comments\nColumns: host_name service_description id source type author comment entry_time entry_type persistent expire_time expires\nFilter: service_description !=\nResponseHeader: fixed16\nOutputFormat: json\n"""
         request = """GET services\nColumns: comments host_comments host_is_executing is_executing\nFilter: service_description !=\nResponseHeader: fixed16\nOutputFormat: json\n"""
         response, _ = self.livestatus_broker.livestatus.handle_request(request)
-        print response
+        print "resp (%s) resp" % response
         good_response = """200          17
 [[[""" + svc_comment_list +"""],[],0,0]]
 """
+        print "resp (%s) resp" % response
+        print "good (%s) good" % good_response
         self.assert_(response == good_response) # json
 
         request = """GET services\nColumns: comments host_comments host_is_executing is_executing\nFilter: service_description !=\nResponseHeader: fixed16\n"""
         response, _ = self.livestatus_broker.livestatus.handle_request(request)
 #        print response
         good_response = """200           9
-""" + svc_comment_list + """;;0;0
+""" + svc_comment_list.replace(" ", "") + """;;0;0
 """
         self.assert_(response == good_response) # csv
 

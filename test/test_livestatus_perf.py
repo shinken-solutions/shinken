@@ -52,6 +52,7 @@ class TestConfigCrazy(ShinkenTest):
         self.testid = str(os.getpid() + random.randint(1, 1000))
         self.init_livestatus()
 
+        self.sched.conf.skip_initial_broks = False
         self.sched.fill_initial_broks()
         self.update_broker()
         self.nagios_path = None
@@ -918,9 +919,11 @@ ResponseHeader: fixed16
         #last_service = reduce(lambda x,y:y,self.livestatus_broker.datamgr.rg.services) 
 
         elapsed = {}
+        requestelapsed = {}
         for page in pages:
             print "oage is", page
             elapsed[page] = 0
+            requestelapsed[page] = []
             for request in pages[page]:
                 print "+--------------------------\n%s\n--------------------------\n" % request
                 # 
@@ -931,8 +934,9 @@ ResponseHeader: fixed16
                 response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
                 tac = time.time()
                 elapsed[page] += (tac - tic)
+                requestelapsed[page].append(tac - tic)
         for page in pages:
-            print "%-40s %f" % (page, elapsed[page])
+            print "%-40s %-10.4f  %s" % (page, elapsed[page], ["%.3f" % f for f in requestelapsed[page]])
 
 
 if __name__ == '__main__':
