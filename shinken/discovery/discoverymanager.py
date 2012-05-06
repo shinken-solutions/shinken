@@ -49,6 +49,15 @@ def is_ipv4_addr(name):
     return (re.match(p, name) is not None)
 
 
+
+def by_order(r1, r2):
+    if r1.discoveryrule_order == r2.discoveryrule_order:
+        return 0
+    if r1.discoveryrule_order > r2.discoveryrule_order:
+        return 1
+    if r1.discoveryrule_order < r2.discoveryrule_order:
+        return -1
+
 class DiscoveredHost(object):
     my_type = 'host' # we fake our type for the macro resolving
 
@@ -73,6 +82,8 @@ class DiscoveredHost(object):
     def update_properties(self):
         d = copy.copy(self.data)
         d['host_name'] = self.name
+
+        self.matched_rules.sort(by_order)
         
         for r in self.matched_rules:
             for k,v in r.writing_properties.iteritems():
@@ -85,6 +96,7 @@ class DiscoveredHost(object):
                         d[prop] = v
                     # oh, must add with a , so
                     else:
+                        print 'Already got', d[prop], 'add', v
                         d[prop] = d[prop] + ',' + v
                 else:
                     d[k] = v

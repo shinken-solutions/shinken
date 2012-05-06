@@ -31,7 +31,7 @@ from item import Item, Items
 from shinken.objects.matchingitem import MatchingItem
 from service import Service
 from host import Host 
-from shinken.property import StringProp, ListProp
+from shinken.property import StringProp, ListProp, IntegerProp
 
 
 class Discoveryrule(MatchingItem):
@@ -42,6 +42,7 @@ class Discoveryrule(MatchingItem):
     properties.update({
         'discoveryrule_name':    StringProp (),
         'creation_type':         StringProp (default='service'),
+        'discoveryrule_order':   IntegerProp(default='0'),
 #        'check_command':         StringProp (),
 #        'service_description':   StringProp (),
 #        'use':                   StringProp(),
