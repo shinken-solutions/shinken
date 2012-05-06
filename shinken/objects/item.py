@@ -358,7 +358,7 @@ Like temporary attributes such as "imported_from", etc.. """
             if not hasattr(self, prop) and entry.required:
                 logger.warning("[item::%s] %s property is missing" % (self.get_name(), prop))
                 state = False
-                
+
         return state
 
 

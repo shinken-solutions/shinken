@@ -91,7 +91,7 @@ class Log:
         """Old log method, kept for NAGIOS compatibility"""
         self._log(logging.INFO, message, format, print_it, display_level=False)
 
-    def _log(self, level, message, format=None, print_it=False, display_level=True):
+    def _log(self, level, message, format=None, print_it=True, display_level=True):
         """We enter a log message, we format it, and we add the log brok"""
         global obj
         global name
