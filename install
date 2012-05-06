@@ -24,9 +24,9 @@
 #set -x
 
 
-#####################
-### ENVIRONNEMENT ###
-#####################
+
+# ENVIRONNEMENT 
+
 
 export myscripts=$(readlink -f $(dirname $0))
 src=$myscripts
@@ -2116,7 +2116,7 @@ function install_check_mysql_health(){
 #             /____/                                                                                    /____/   
 
 function usage(){
-echo "Usage : install -k | -i | -d | -b | -r backupname | -l | -c | -e "daemonslist" | -p pluginname | -a addonname 
+echo "Usage : install -k | -i | -d | -b | -r backupname | -l | -c | -e \"daemonslist\" | -p pluginname | -a addonname 
     -k | --kill             Kill shinken
     -i | --install          Install shinken
     -u | --uninstall        Remove shinken
@@ -2169,7 +2169,7 @@ fi
 
 # options may be followed by one colon to indicate they have a required argument
 
-if ! options=$(getopt -o kiubr:lce:p:a: -l kill,install,uninstall,backup,restore,listbackups,compresslogs,enabledaemons,plugin,addon -- "$@")
+if ! options=$(getopt -o kiubr:lce:p:a: -l kill,install,uninstall,backup,restore:,listbackups,compresslogs,enabledaemons:,plugin:,addon: -- "$@")
 then
     # something went wrong, getopt will put out an error message for us
     exit 2
@@ -2183,6 +2183,9 @@ while [ $# -gt 0 ]
 do
     case $1 in
         -p|--plugin)
+            shift
+            OPTARG=$1
+            shift
             if [ $(shinken_exist) -eq 0 ]
             then
                 cecho " > You should install shinken first ! " red
@@ -2243,32 +2246,38 @@ do
             fi
             ;;
         -a|--addon)
+            shift
+            OPTARG=$1
+            shift
             if [ $(shinken_exist) -eq 0 ]
             then
                 cecho " > You should install shinken first ! " red
                 exit 2
             fi
-            if [ "$OPTARG" == "pnp4nagios" ]
+            if [ "$OPTARG" == "'pnp4nagios'" ]
             then
                 install_pnp4nagios
                 exit 0
-            elif [ "$OPTARG" == "multisite" ]
+            elif [ "$OPTARG" == "'multisite'" ]
             then
                 install_multisite
                 exit 0
-            elif [ "$OPTARG" == "nagvis" ]
+            elif [ "$OPTARG" == "'nagvis'" ]
             then
                 install_nagvis
                 exit 0
-            elif [ "$OPTARG" == "mongodb" ]
+            elif [ "$OPTARG" == "'mongodb'" ]
             then
                 install_mongodb
                 exit 0
             else
-                cecho " > Unknown plugin $OPTARG" red
+                cecho " > Unknown addon $OPTARG" red
             fi
             ;;
         -e|--enabledaemons)
+            shift
+            OPTARG=$1
+            shift
             setdaemons "$OPTARG"
             exit 0
             ;;
@@ -2295,6 +2304,9 @@ do
             exit 0
             ;;
         -r|--restore)
+            shift
+            OPTARG=$1
+            shift
             restore $OPTARG 
             exit 0
             ;;
