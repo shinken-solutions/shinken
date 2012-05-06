@@ -1179,21 +1179,32 @@ class Ndodb_Mysql_broker(BaseModule):
 
         data = b.data
         #print "CREATING A NOTIFICATION", data
-        #<WTF> Both created variables are not used! </WTF>
         if data['service_description'] != '':
-            service_id = self.get_service_object_id_by_name_sync(
+            object_id = self.get_service_object_id_by_name_sync(
                 data['host_name'],
                 data['service_description'],
                 data['instance_id']
                 )
+            notification_type = 1
         else:
-            host_id = self.get_host_object_id_by_name_sync(data['host_name'], data['instance_id'])
+            object_id = self.get_host_object_id_by_name_sync(data['host_name'], data['instance_id'])
+            notification_type = 0
 
+        # TODO : Fill all fields
+        # Missing fields : notification_reason, start_time_usec, end_time_usec,
+        # output, escalated.
+        # Maybe some field are not really interesting :)
+        # TO FIX : output is empty
+        # TO FIX : end_time and start time are equal to 0 (back in the 70's !!)
+        # TO FIX : state is equal to 0
         notification_data = {
             'instance_id': data['instance_id'],
             'start_time': de_unixify(data['start_time']),
             'end_time': de_unixify(data['end_time']),
-            'state': data['state']
+            'state': data['state'],
+            'notification_type': notification_type,
+            'object_id': object_id,
+            'output': data['output']
         }
 
         query = self.db.create_insert_query('notifications', notification_data)
