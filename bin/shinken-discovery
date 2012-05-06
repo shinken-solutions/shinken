@@ -146,5 +146,7 @@ d.read_disco_buf()
 # Now look for rules
 d.match_rules()
 
+d.loop_discovery()
+
 # Ok, we know what to create, now do it!
 d.write_config()
