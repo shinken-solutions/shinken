@@ -1214,7 +1214,7 @@ class TestConfigBroken(ShinkenTest):
         # Error : [items] In Simple_1Of_1unk_svc is incorrect ; from etc/business_correlator_broken/services.cfg
         self.assert_(len([log for log in logs if re.search('Simple_1Of_1unk_svc', log)]) == 3)
         self.assert_(len([log for log in logs if re.search('service test_host_0/db3', log)]) == 1)
-        self.assert_(len([log for log in logs if re.search('Simple_1Of_1unk_svc.+from etc/business_correlator_broken/services.cfg', log)]) == 1)
+        self.assert_(len([log for log in logs if re.search('Simple_1Of_1unk_svc.+from etc.+business_correlator_broken.+services.cfg', log)]) == 1)
         # Info : ERP_unk_svc : my business rule is invalid
         # Info : ERP_unk_svc : Business rule uses unknown service test_host_0/web100
         # Info : ERP_unk_svc : Business rule uses unknown service test_host_0/lvs100
@@ -1222,13 +1222,13 @@ class TestConfigBroken(ShinkenTest):
         self.assert_(len([log for log in logs if re.search('ERP_unk_svc', log)]) == 4)
         self.assert_(len([log for log in logs if re.search('service test_host_0/web100', log)]) == 1)
         self.assert_(len([log for log in logs if re.search('service test_host_0/lvs100', log)]) == 1)
-        self.assert_(len([log for log in logs if re.search('ERP_unk_svc.+from etc/business_correlator_broken/services.cfg', log)]) == 1)
+        self.assert_(len([log for log in logs if re.search('ERP_unk_svc.+from etc.+business_correlator_broken.+services.cfg', log)]) == 1)
         # Info : Simple_1Of_1unk_host : my business rule is invalid
         # Info : Simple_1Of_1unk_host : Business rule uses unknown host test_host_9
         # Error : [items] In Simple_1Of_1unk_host is incorrect ; from etc/business_correlator_broken/services.cfg
         self.assert_(len([log for log in logs if re.search('Simple_1Of_1unk_host', log)]) == 3)
         self.assert_(len([log for log in logs if re.search('host test_host_9', log)]) == 1)
-        self.assert_(len([log for log in logs if re.search('Simple_1Of_1unk_host.+from etc/business_correlator_broken/services.cfg', log)]) == 1)
+        self.assert_(len([log for log in logs if re.search('Simple_1Of_1unk_host.+from etc.+business_correlator_broken.+services.cfg', log)]) == 1)
 
         # Now the number of all failed business rules.
         self.assert_(len([log for log in logs if re.search('my business rule is invalid', log)]) == 3)
