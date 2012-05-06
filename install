@@ -31,10 +31,6 @@
 export myscripts=$(readlink -f $(dirname $0))
 src=$myscripts
 . $myscripts/install.d/shinken.conf
-if [ -f $TMP/shinken.install.log ]
-then
-    rm -f $TMP/shinken.install.log    
-fi 
 
 function remove(){
     cadre "Removing shinken" green
@@ -2160,6 +2156,12 @@ then
         cecho "You should start the script with sudo!" red
         exit 1
 fi
+
+# remove last install log file
+if [ -f $TMP/shinken.install.log ]
+then
+    rm -f $TMP/shinken.install.log    
+fi 
 
 # should we use a proxy for downloading archives
 if [ $USEPROXY -eq 1 ]
