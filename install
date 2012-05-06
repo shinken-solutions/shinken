@@ -2169,7 +2169,7 @@ fi
 
 # options may be followed by one colon to indicate they have a required argument
 
-if ! options=$(getopt -o kiubr:lce:p:a: -l kill,install,uninstall,backup,restore:,listbackups,compresslogs,enabledaemons:,plugin:,addon: -- "$@")
+if ! options=$(getopt -u -o kiubr:lce:p:a: -l kill,install,uninstall,backup,restore:,listbackups,compresslogs,enabledaemons:,plugin:,addon: -- "$@")
 then
     # something went wrong, getopt will put out an error message for us
     exit 2
@@ -2254,19 +2254,19 @@ do
                 cecho " > You should install shinken first ! " red
                 exit 2
             fi
-            if [ "$OPTARG" == "'pnp4nagios'" ]
+            if [ "$OPTARG" == "pnp4nagios" ]
             then
                 install_pnp4nagios
                 exit 0
-            elif [ "$OPTARG" == "'multisite'" ]
+            elif [ "$OPTARG" == "multisite" ]
             then
                 install_multisite
                 exit 0
-            elif [ "$OPTARG" == "'nagvis'" ]
+            elif [ "$OPTARG" == "nagvis" ]
             then
                 install_nagvis
                 exit 0
-            elif [ "$OPTARG" == "'mongodb'" ]
+            elif [ "$OPTARG" == "mongodb" ]
             then
                 install_mongodb
                 exit 0
