@@ -25,14 +25,19 @@
 
 
 try:
-    from cjson import encode as dumps
-    from cjson import decode as loads
+    from ujson import dumps, loads
 except ImportError:
     try:
-        from json import dumps, loads
+        from simplejson import dumps, loads, JSONEncoder
+        # ujson's dumps() cannot handle a separator parameter, which is 
+        # needed to avoid unnecessary spaces in the json output
+        # That's why simplejson and json manipulate the encoder class
+        JSONEncoder.item_separator = ','
+        JSONEncoder.key_separator = ':'
     except ImportError:
-        from simplejson import dumps, loads
-
+        from json import dumps, loads, JSONEncoder
+        JSONEncoder.item_separator = ','
+        JSONEncoder.key_separator = ':'
 
 class LiveStatusResponse:
 

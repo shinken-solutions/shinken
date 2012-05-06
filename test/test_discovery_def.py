@@ -138,6 +138,30 @@ class TestDiscoveryConf(ShinkenTest):
         print genhttp.writing_properties
 
 
+
+
+    def test_discorun_matches(self):
+        linux = self.sched.conf.discoveryruns.find_by_name('linux')
+        self.assert_(linux != None)
+        print linux.__dict__
+        self.assert_(linux.matches == {u'osvendor': u'linux'})
+
+        key = 'osvendor'
+        value = 'microsoft'
+        # Should not match this
+        self.assert_(linux.is_matching(key, value) == False)
+
+        key = 'osvendor'
+        value = 'linux'
+        # Should match this
+        self.assert_(linux.is_matching(key, value) == True)
+
+        # Low look for a list of matchings
+        l = {'openports': '80', 'osvendor' : 'linux'}
+        # should match this
+        self.assert_(linux.is_matching_disco_datas(l) == True)
+
+
 if __name__ == '__main__':
     unittest.main()
 
