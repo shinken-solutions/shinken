@@ -21,7 +21,7 @@ Invalid element name
 
 %# Look for actions if we must show them or not
 %global_disabled = ''
-%if not helper.can_action(user):
+%if app.manage_acl and not helper.can_action(user):
 %global_disabled = 'disabled-link'
 %end
 
