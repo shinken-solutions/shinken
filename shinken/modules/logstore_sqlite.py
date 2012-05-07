@@ -167,7 +167,7 @@ class LiveStatusLogStoreSqlite(BaseModule):
         # 'options', 'plugin_output', 'service_description', 'state', 'state_type', 'time', 'type',
         cmd = "CREATE TABLE IF NOT EXISTS logs(logobject INT, attempt INT, class INT, command_name VARCHAR(64), comment VARCHAR(256), contact_name VARCHAR(64), host_name VARCHAR(64), lineno INT, message VARCHAR(512), options VARCHAR(512), plugin_output VARCHAR(256), service_description VARCHAR(64), state INT, state_type VARCHAR(10), time INT, type VARCHAR(64))"
         self.execute(cmd)
-        cmd = "CREATE INDEX IF NOT EXISTS logs_time ON logs (time)"
+        cmd = "CREATE INDEX IF NOT EXISTS logs_host_name ON logs (host_name)"
         self.execute(cmd)
         cmd = "PRAGMA journal_mode=truncate"
         self.execute(cmd)
