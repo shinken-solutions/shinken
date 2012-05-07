@@ -879,7 +879,6 @@ def removemodule(config,module,objectype,filters):
     if config.has_key(objectype):
         # verify each filter (directive,value)
         for (directive,value) in dfilters.items():
-            print directive,value,config[objectype]            
             for o in config[objectype]:
                 if o.has_key(directive) and o[directive] == value:
                     modules=[]
