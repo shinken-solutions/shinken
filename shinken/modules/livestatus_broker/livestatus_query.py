@@ -54,6 +54,8 @@ class LiveStatusQuery(object):
         self.pnp_path = pnp_path
         self.return_queue = return_queue
         self.counters = counters
+        self.quick_host_filter = []
+        self.quick_service_filter = []
 
         # Private attributes for this specific request
         self.response = LiveStatusResponse()
@@ -171,7 +173,12 @@ class LiveStatusQuery(object):
                     # the desired operation
                     self.filtercolumns.append(attribute)
                     self.prefiltercolumns.append(attribute)
-                    self.filter_stack.put_stack(self.make_filter(operator, attribute, reference))
+                    if attribute == 'host_name':
+                        self.quick_host_filter.append(reference)
+                    elif attribute == 'description':
+                        self.quick_service_filter.append(reference)
+                    else:
+                        self.filter_stack.put_stack(self.make_filter(operator, attribute, reference))
                     if self.table == 'log':
                         self.db.add_filter(operator, attribute, reference)
                 else:
@@ -356,41 +363,69 @@ class LiveStatusQuery(object):
             
         return result
 
-    
-    def get_hosts_or_services_livedata(self, cs):
-        def gen_all(values):
-            for val in values:
-                yield val
-            return
-        def gen_filtered(values, filterfunc):
-            for val in gen_all(values):
-                if filterfunc(val):
-                    yield val
-            return
-        
-        # This is a generator which returns up to <limit> elements
-        def gen_limit(values, maxelements):
-            loopcnt = 1
-            for val in gen_all(values):
-                if loopcnt > maxelements:
-                    return
-                else:
-                    yield val
-                    loopcnt += 1
-        # This is a generator which returns up to <limit> elements
-        # which passed the filter. If the limit has been reached
-        # it is no longer necessary to loop through the original list.
-        def gen_limit_filtered(values, maxelements, filterfunc):
-            for val in gen_limit(gen_filtered(values, filterfunc), maxelements):
-                yield val
-            return
 
+    def gen_filtered(self, values, filterfunc):
+        for val in values:
+            if filterfunc(val):
+                yield val
+        return
+    
+    # This is a generator which returns up to <limit> elements
+    def gen_limit(self, values, maxelements):
+        loopcnt = 1
+        for val in values:
+            if loopcnt > maxelements:
+                return
+            else:
+                yield val
+                loopcnt += 1
+
+    def gen_allhost(self, values, ref):
+        for h in ref:
+            if h in values.keys():
+                for i in values[h]:
+                    yield i
+        return
+
+    def gen_host_serv(self, values):
+        for h in self.quick_host_filter:
+            if h in values.keys():
+                for s in self.quick_service_filter:
+                    if s in values[h]:
+                        yield values[h][s]
+
+    def get_hosts_or_services_livedata(self, cs):
         items = getattr(self.datamgr.rg, self.table).__itersorted__(cs.authuser)
+
+        if len(self.quick_service_filter) > 0 and len(self.quick_host_filter) > 0:
+            mydict = {}
+            for i in items:
+                if not i.host_name in mydict:
+                    mydict[i.host_name] = {}
+                mydict[i.host_name][i.service_description] = i
+            items = self.gen_host_serv(mydict)
+        elif len(self.quick_host_filter) > 0:
+            mydict = {}
+            for i in items:
+                if i.host_name in mydict:
+                    mydict[i.host_name].append(i)
+                else:
+                    mydict[i.host_name] = [i]
+            items = self.gen_allhost(mydict, self.quick_host_filter)
+        elif len(self.quick_service_filter) > 0:
+            mydict = {}
+            for i in items:
+                if i.service_description in mydict:
+                    mydict[i.service_description].append(i)
+                else:
+                    mydict[i.service_description] = [i]
+            items = self.gen_allhost(mydict, self.quick_service_filter)
+
         if not cs.without_filter:
-            items = gen_filtered(items, cs.filter_func)
+            items = self.gen_filtered(items, cs.filter_func)
         if self.limit:
-            items = gen_limit(items, self.limit)
-        return (i for i in items)
+            items = self.gen_limit(items, self.limit)
+        return items
         # todo-list
         #  not possible in the moment, but perhaps with a proxy-function. something for next weekend...
         #  pool = multiprocessing.Pool(processes=4)
