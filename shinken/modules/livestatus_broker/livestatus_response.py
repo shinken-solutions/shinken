@@ -173,7 +173,7 @@ class LiveStatusResponse:
             if self.outputformat == 'json':
                 self.output = dumps(lines)
             else:
-                self.output = str(loads(dumps(lines)))
+                self.output = str(lines)
 
     def format_live_data_stats(self, result, columns, aliases):
         lines = []
@@ -238,4 +238,4 @@ class LiveStatusResponse:
             if self.outputformat == 'json':
                 self.output = dumps(lines)
             else:
-                self.output = str(loads(dumps(lines)))
+                self.output = str(lines)

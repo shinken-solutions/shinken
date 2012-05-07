@@ -52,6 +52,9 @@ class LiveStatusRegenerator(Regenerator):
 
     def all_done_linking(self, inst_id):
         """In addition to the original all_done_linking our items will get sorted"""
+        
+        # We will relink all objects if need. If we are in a scheduler, this function will just bailout
+        # because it's not need :)
         super(self.__class__, self).all_done_linking(inst_id)
 
         # now sort the item collections by name
