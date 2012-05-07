@@ -1384,15 +1384,22 @@ function install_multisite(){
 function install_pnp4nagios(){
     cadre "Install pnp4nagios addon" green
     manageparameters "quiet"
-    if [ "$CODE" == "REDHAT" ]
+
+    if [ $SKIPPREREQUISITES -eq 1 ]
     then
-        cecho " > Installing prerequisites" green
-        yum -yq install $PNPYUMPKG >> $TMP/shinken.install.log 2>&1
+        cecho " SKIPPREREQUISITES enabled : won't install pnp4nagios prerequisites" yellow
     else
-        cecho " > Installing prerequisites" green
-        apt-get update >> $TMP/shinken.install.log 2>&1
-        apt-get -y install $PNPAPTPKG >> $TMP/shinken.install.log 2>&1
+        if [ "$CODE" == "REDHAT" ]
+        then
+            cecho " > Installing prerequisites" green
+            yum -yq install $PNPYUMPKG >> $TMP/shinken.install.log 2>&1
+        else
+            cecho " > Installing prerequisites" green
+            apt-get update >> $TMP/shinken.install.log 2>&1
+            apt-get -y install $PNPAPTPKG >> $TMP/shinken.install.log 2>&1
+        fi
     fi
+
     cd $TMP
 
     filename=$(echo $PNPURI | awk -F"/" '{print $NF}')
@@ -1436,12 +1443,74 @@ function install_pnp4nagios(){
         /etc/init.d/apache2 restart >> $TMP/shinken.install.log 2>&1 
     fi
     cecho " > Enable npcdmod" green
-    ip=$(ifconfig | grep "inet adr" | grep -v 127.0.0.1 | awk '{print $2}' | awk -F : '{print $2}' | head -n 1)
+    ip=$(ifconfig | grep "inet addr" | grep -v 127.0.0.1 | awk '{print $2}' | awk -F : '{print $2}' | head -n 1)
+    cecho " > using ip address : $ip"
     do_skmacro enable_npcd.macro $PNPPREFIX/etc/npcd.cfg,$ip
     cecho " > Starting npcd" green 
     /etc/init.d/npcd start >> $TMP/shinken.install.log 2>&1 
 }
 
+function uninstall_pnp4nagios(){
+    cadre "Uninnstall pnp4nagios addon" green
+    manageparameters "quiet"
+
+    if [ -d "$PNPPREFIX" ]
+    then
+        #first stop daemons
+        cecho " > Stopping daemons " green
+        if [ "$CODE" == "REDHAT" ]
+        then
+            /etc/init.d/httpd stop >> $TMP/shinken.install.log 2>&1
+            /etc/init.d/npcd stop >> $TMP/shinken.install.log 2>&1
+            /etc/init.d/shinken stop >> $TMP/shinken.install.log 2>&1
+        else
+            /etc/init.d/apache2 stop >> $TMP/shinken.install.log 2>&1 
+            /etc/init.d/npcd stop >> $TMP/shinken.install.log 2>&1
+            /etc/init.d/shinken stop >> $TMP/shinken.install.log 2>&1
+        fi
+
+        # remove pnp4nagios folder 
+        cecho " > Removing pnp4nagios" green
+        rm -Rf $PNPPREFIX >> $TMP/shinken.install.log 2>&1
+        rm -Rf /etc/init.d/npcd >> $TMP/shinken.install.log 2>&1
+
+        # remove startup scripts
+        cecho " > Removing pnp4nagios startup scripts" green
+        if [ "$CODE" == "REDHAT" ]
+        then
+            chkconfig npcd off >> $TMP/shinken.install.log 2>&1
+            chkconfig --dell npcd >> $TMP/shinken.install.log 2>&1
+            rm -Rf /etc/init.d/npcd >> $TMP/shinken.install.log 2>&1
+        else
+            update-rc.d -f npcd remove >> $TMP/shinken.install.log 2>&1
+            rm -Rf /etc/init.d/npcd >> $TMP/shinken.install.log 2>&1
+        fi
+
+        # remove pnp4nagios shinken configuration
+        cecho " > Removing NPCPDMOD module from broker configuration " green
+        BROKERS=$(PYTHONPATH=$TARGET $PY $TARGET/install.d/tools/skonf.py -a getobjectnames -f  $TARGET/etc/shinken-specific.cfg -o broker)
+        for o in $BROKERS
+        do 
+            cecho " --> Removing from broker $o" green
+            do_skmacro disable_npcd.macro $o
+        done
+        
+        # start daemons
+        cecho " > Starting daemons " green
+        if [ "$CODE" == "REDHAT" ]
+        then
+            /etc/init.d/httpd start >> $TMP/shinken.install.log 2>&1
+            /etc/init.d/shinken start >> $TMP/shinken.install.log 2>&1
+        else
+            /etc/init.d/apache2 start >> $TMP/shinken.install.log 2>&1 
+            /etc/init.d/shinken start >> $TMP/shinken.install.log 2>&1
+        fi        
+
+    else
+        cecho " > pnp4nagios folder was not found at : $PNPPREFIX" red
+        exit 2
+    fi
+}
 
 function do_skmacro(){
     macro=$1
@@ -1449,7 +1518,8 @@ function do_skmacro(){
     export PYTHONPATH="$TARGET"
     export SHINKEN="$PYTHONPATH"
     export SKTOOLS="$PYTHONPATH/install.d/tools"
-    $PY $SKTOOLS/skonf.py -a macros -f $SKTOOLS/macros/$macro -d $args >> $TMP/shinken.install.log 2>&1 
+    $PY $SKTOOLS/skonf.py -a macros -f $SKTOOLS/macros/$macro -d $args  >> $TMP/shinken.install.log 2>&1 
+    
 }
 
 
@@ -2112,10 +2182,10 @@ function install_check_mysql_health(){
 #             /____/                                                                                    /____/   
 
 function usage(){
-echo "Usage : install -k | -i | -d | -b | -r backupname | -l | -c | -e \"daemonslist\" | -p pluginname | -a addonname 
+echo "Usage : install -k | -i | -u [addonname] | -b | -r backupname | -l | -c | -e \"daemonslist\" | -p pluginname | -a addonname 
     -k | --kill             Kill shinken
     -i | --install          Install shinken
-    -u | --uninstall        Remove shinken
+    -u | --uninstall        Remove shinken and all of the addons. if an argument is specified then just remove the specified argument
     -b | --backup           Backup shinken configuration plugins and data
     -r | --restore          Restore shinken configuration plugins and data
     -l | --listbackups      List shinken backups
@@ -2171,7 +2241,7 @@ fi
 
 # options may be followed by one colon to indicate they have a required argument
 
-if ! options=$(getopt -u -o kiubr:lce:p:a: -l kill,install,uninstall,backup,restore:,listbackups,compresslogs,enabledaemons:,plugin:,addon: -- "$@")
+if ! options=$(getopt -u -o kiu::br:lce:p:a: -l kill,install,uninstall::,backup,restore:,listbackups,compresslogs,enabledaemons:,plugin:,addon: -- "$@")
 then
     # something went wrong, getopt will put out an error message for us
     exit 2
@@ -2298,7 +2368,48 @@ do
             exit 0
             ;;
         -u|--uninstall)
-            remove 
+            # check if there is an optional argument
+            # if so just uninstall the specified addon
+            shift
+            shift
+            OPTARG=$1
+            if [ -z "$OPTARG" ] || [ "$OPTARG" == "--" ]
+            then
+                cread " > Are you sure you want to remove shinken ? (y|N)." yellow "n" "y n" 
+                if [ "$readvalue" == "y" ]                
+                then
+                    remove
+                else
+                    cecho " > Aborting uninstallation" yellow
+                fi
+                exit 0
+            fi
+
+            cread " > Are you sure you want to remove $OPTARG ? (y|N)." yellow "n" "y n" 
+            if [ "$readvalue" == "y" ]                
+            then
+                case $OPTARG in
+                    pnp4nagios)
+                        uninstall_pnp4nagios
+                        exit 0
+                        ;;
+                    nagvis)
+                        cecho " > Not implemented yet" red
+                        exit 2
+                        ;;
+                    multisite)
+                        cecho " > Not implemented yet" red
+                        exit 2
+                        ;;
+                    *)
+                        cecho "Unknown addon $OPTARG" red
+                        exit 2
+                        ;;
+                esac
+            else
+                cecho " > Aborting uninstallation" yellow
+            fi
+
             exit 0
             ;;
         -b|--backup)
