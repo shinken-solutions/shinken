@@ -85,11 +85,11 @@ class TestConfigAuth(TestConfig):
 
 
     """
-dbsrv1  adm(adm1,adm2,adm3) oradba(oradba1,oradba2)
+dbsrv1  adm(adm1,adm2,adm3)
     app_db_oracle_check_connect    oradba(oradba1,oradba2) cc(cc1,cc2,cc3)
     app_db_oracle_check_alertlog   oradba(oradba1,oradba2)
 
-dbsrv2  adm(adm1,adm2,adm3) oradba(oradba1,oradba2)
+dbsrv2  adm(adm1,adm2,adm3)
     app_db_oracle_check_connect    oradba(oradba1,oradba2) cc(cc1,cc2,cc3)
     app_db_oracle_check_alertlog   oradba(oradba1,oradba2)
 
@@ -106,6 +106,10 @@ dbsrv5  adm(adm1,adm2,adm3) mydba(mydba1,mydba2)
     app_db_mysql_check_alertlog    mydba(mydba1,mydba2)
 
 www1    adm(adm1,adm2,adm3) web(web1,web2)
+    app_web_apache_check_http      web(web1,web2) cc(cc1,cc2,cc3)
+    app_web_apache_check_errorlog  web(web1,web2)
+
+www1    adm(adm1,adm2,adm3) web(web1,web2) winadm(bill,steve)
     app_web_apache_check_http      web(web1,web2) cc(cc1,cc2,cc3)
     app_web_apache_check_errorlog  web(web1,web2)
     """
@@ -180,6 +184,21 @@ KeepAlive: on
         self.assert_("dbsrv2" in [h[0] for h in pyresponse])
         self.assert_("dbsrv3" in [h[0] for h in pyresponse])
 
+        request = """GET hosts
+AuthUser: bill
+Columns: name
+OutputFormat: python
+KeepAlive: on
+"""
+        # only windows
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response 
+        pyresponse = eval(response)
+        self.assert_(len(pyresponse) == 3)
+        self.assert_("dbsrv3" in [h[0] for h in pyresponse])
+        self.assert_("dbsrv5" in [h[0] for h in pyresponse])
+        self.assert_("www2" in [h[0] for h in pyresponse])
+
     def test_service_authorization_loose(self):
         self.print_header()
         now = time.time()
@@ -191,17 +210,362 @@ KeepAlive: on
         self.scheduler_loop(1, objlist)
         self.update_broker()
         request = """GET hosts
-AuthUser: adm1
+AuthUser: bill
 Columns: name services
-Filter: name = dbsrv1
+Filter: name = www2
 OutputFormat: python
 KeepAlive: on
-ResponseHeader: fixed16
 """
-        # app_db_oracle_* because adm1 is host contact
+        # all because bill is host contact (via cgroup winadm), 2xapp_web, 1xos_windows
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response 
+        pyresponse = eval(response)
+        print pyresponse 
+        self.assert_(len(pyresponse[0][1]) == 3)
+        self.assert_("app_web_apache_check_http" in pyresponse[0][1])
+        self.assert_("app_web_apache_check_errorlog" in pyresponse[0][1])
+        self.assert_("os_windows_check_autosvc" in pyresponse[0][1])
 
+        request = """GET hosts
+AuthUser: bill
+Columns: name services
+Filter: name = www1
+OutputFormat: python
+KeepAlive: on
+"""
+        # none because bill is neither host contact nor service contact
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response 
+        pyresponse = eval(response)
+        self.assert_(len(pyresponse) == 0)
+
+        request = """GET hosts
+AuthUser: cc1
+Columns: name services
+Filter: name = www2
+OutputFormat: python
+KeepAlive: on
+"""
+        # 1 because cc1 is direct contact for 1 service, app_web_apache_check_http
+        # controlcenter guys are allowed to restart a webserver, nothing else
+        # BUT: this query is a hosts-table-query. cc1 has no access to www2
+        # Therefore, the result is empty (confirmed with mk-livestatus)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response 
+        pyresponse = eval(response)
+        print pyresponse 
+        self.assert_(len(pyresponse) == 0)
+
+        request = """GET services
+AuthUser: cc1
+Columns: description
+Filter: host_name = www2
+OutputFormat: python
+KeepAlive: on
+"""
+        # 1 because cc1 is direct contact for 1 service, app_web_apache_check_http
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response 
+        pyresponse = eval(response)
+        print pyresponse 
+        self.assert_(len(pyresponse[0]) == 1)
+        self.assert_("app_web_apache_check_http" in pyresponse[0][0])
+
+        request = """GET services
+AuthUser: cc1
+Columns: description
+OutputFormat: python
+KeepAlive: on
+"""
+        # cc1 is contact for 7 services
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response 
+        pyresponse = eval(response)
+        print pyresponse 
+        self.assert_(len(pyresponse) == 7)
+
+    def test_service_authorization_strict(self):
+        self.print_header()
+        now = time.time()
+        objlist = []
+        for host in self.sched.hosts:
+            objlist.append([host, 0, 'UP'])
+        for service in self.sched.services:
+            objlist.append([service, 0, 'OK'])
+        self.scheduler_loop(1, objlist)
+        self.update_broker()
+        self.livestatus_broker.datamgr.rg.service_authorization_strict = True
+        self.livestatus_broker.datamgr.rg.all_done_linking(0)
+        request = """GET hosts
+AuthUser: bill
+Columns: name services
+Filter: name = www2
+OutputFormat: python
+KeepAlive: on
+"""
+        # at a first glance, nothing because bill is only host contact, not a contact to any service
+        # BUT www2/os_windows_check_autosvc has no dedicated contacts, so it inherits host contacts
+        # BUUUHUUTT this is a host query. bill is a contact of this host. so we get the full list
+        # of services. not really consistent, but confirmed with mk-livestatus.
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response 
+        pyresponse = eval(response)
+        print pyresponse 
+        #for contact in sorted(self.livestatus_broker.datamgr.rg.hostgroups._id_contact_heap.keys()):
+        #    print "%-10s %s" % (contact, self.livestatus_broker.datamgr.rg.hosts._id_contact_heap[contact])
+        #    here we see in fact, that bill is only contact to www2/os_windows_check_autosvc
+        #    print "%-10s %s" % (contact, self.livestatus_broker.datamgr.rg.services._id_contact_heap[contact])
+        self.assert_(len(pyresponse[0][1]) == 3)
+        self.assert_("app_web_apache_check_http" in pyresponse[0][1])
+        self.assert_("app_web_apache_check_errorlog" in pyresponse[0][1])
+        self.assert_("os_windows_check_autosvc" in pyresponse[0][1])
+
+        request = """GET services
+AuthUser: bill
+Columns: description
+Filter: host_name = www2
+OutputFormat: python
+KeepAlive: on
+"""
+        # now send a service query. this time we get only one service because bill is only 
+        # a contact for this service (even not as a contact-attribute in the service definition
+        # but by service-with-no-contact-attribute-iherits-from-host)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response 
+        pyresponse = eval(response)
+        print pyresponse 
+        self.assert_(len(pyresponse[0]) == 1)
+        self.assert_("os_windows_check_autosvc" in pyresponse[0][0])
+
+        request = """GET hosts
+AuthUser: bill
+Columns: name services
+Filter: name = www1
+OutputFormat: python
+KeepAlive: on
+"""
+        # none because bill is neither host contact nor service contact
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response 
+        pyresponse = eval(response)
+        self.assert_(len(pyresponse) == 0)
+
+        request = """GET hosts
+AuthUser: cc1
+Columns: name services
+Filter: name = www2
+OutputFormat: python
+KeepAlive: on
+"""
+        # 1 because cc1 is direct contact for 1 service, app_web_apache_check_http
+        # controlcenter guys are allowed to restart a webserver, nothing else
+        # BUT: this query is a hosts-table-query. cc1 has no access to www2
+        # Therefore, the result is empty (confirmed with mk-livestatus)
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response 
+        pyresponse = eval(response)
+        print pyresponse 
+        self.assert_(len(pyresponse) == 0)
+
+        request = """GET services
+AuthUser: cc1
+Columns: description
+Filter: host_name = www2
+OutputFormat: python
+KeepAlive: on
+"""
+        # 1 because cc1 is direct contact for 1 service, app_web_apache_check_http
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response 
+        pyresponse = eval(response)
+        print pyresponse 
+        self.assert_(len(pyresponse[0]) == 1)
+        self.assert_("app_web_apache_check_http" in pyresponse[0][0])
+
+        request = """GET services
+AuthUser: cc1
+Columns: description
+OutputFormat: python
+KeepAlive: on
+"""
+        # cc1 is contact for 7 services
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response 
+        pyresponse = eval(response)
+        print pyresponse 
+        self.assert_(len(pyresponse) == 7)
+
+        request = """GET services
+AuthUser: adm1
+Columns: description
+OutputFormat: python
+KeepAlive: on
+"""
+        # adm1 is only host contact. it is never mentioned in a service definition
+        # only www2/os_windows_check_autosvc inherits adm1 via host
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response 
+        pyresponse = eval(response)
+        print pyresponse 
+        self.assert_(len(pyresponse) == 1)
+
+
+    def test_group_authorization_strict(self):
+        self.print_header()
+        now = time.time()
+        objlist = []
+        for host in self.sched.hosts:
+            objlist.append([host, 0, 'UP'])
+        for service in self.sched.services:
+            objlist.append([service, 0, 'OK'])
+        self.scheduler_loop(1, objlist)
+        self.update_broker()
+        #self.livestatus_broker.datamgr.rg.group_authorization_strict = False
+        #self.livestatus_broker.datamgr.rg.all_done_linking(0)
+        print "hosts/hostgroups"
+        for contact in sorted(self.livestatus_broker.datamgr.rg.hostgroups._id_contact_heap.keys()):
+            print "%-10s %s" % (contact, self.livestatus_broker.datamgr.rg.hosts._id_contact_heap[contact])
+            print "%-10s %s" % (contact, self.livestatus_broker.datamgr.rg.hostgroups._id_contact_heap[contact])
+        print "services/servicegroups"
+        for contact in sorted(self.livestatus_broker.datamgr.rg.servicegroups._id_contact_heap.keys()):
+            print "%-10s %s" % (contact, self.livestatus_broker.datamgr.rg.services._id_contact_heap[contact])
+            print "%-10s %s" % (contact, self.livestatus_broker.datamgr.rg.servicegroups._id_contact_heap[contact])
+        request = """GET hostgroups
+AuthUser: bill
+Columns: name members
+OutputFormat: python
+KeepAlive: on
+"""
+        # bill is contact for all hosts in the windows group
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response 
+        pyresponse = eval(response)
+        self.assert_(len(pyresponse) == 1)
+        self.assert_(pyresponse[0][0] == "windows")
+        request = """GET hostgroups
+AuthUser: web1
+Columns: name members
+OutputFormat: python
+KeepAlive: on
+"""
+        # web1 is contact for www1 and www2, so web
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        pyresponse = eval(response)
+        self.assert_(len(pyresponse) == 1)
+        self.assert_(pyresponse[0][0] == "web")
+        request = """GET hostgroups
+AuthUser: adm1
+Columns: name members
+OutputFormat: python
+KeepAlive: on
+"""
+        # every host has adm1 as contact, so every hostgroup must appear here
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        pyresponse = eval(response)
+        self.assert_(len(pyresponse) == 6)
+
+        print "now check servicesbygroup"
+        request= """GET servicesbygroup
+Columns: servicegroup_name host_name service_description
+AuthUser: oradba1
+OutputFormat: python
+"""
+        expect = """oracle;dbsrv1;app_db_oracle_check_alertlog
+oracle;dbsrv1;app_db_oracle_check_connect
+oracle;dbsrv2;app_db_oracle_check_alertlog
+oracle;dbsrv2;app_db_oracle_check_connect
+oracle;dbsrv3;app_db_oracle_check_alertlog
+oracle;dbsrv3;app_db_oracle_check_connect
+"""
+        #response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        # assert len 6
+
+        request= """GET hostsbygroup
+Columns:  hostgroup_name host_name
+OutputFormat: python
+AuthUser: web1
+"""
+        # hostsbygroup is not so strict like hostgroups (we get no answer to hostgroups)
+        expect = """
+all;www1
+all;www2
+linux;www1
+web;www1
+web;www2
+windows;www2
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+
+        request= """GET servicesbyhostgroup
+Columns: hostgroup_name host_name service_description
+AuthUser: oradba1
+OutputFormat: csv
+"""
+        expect = """
+all;dbsrv1;app_db_oracle_check_connect
+all;dbsrv1;app_db_oracle_check_alertlog
+all;dbsrv2;app_db_oracle_check_connect
+all;dbsrv2;app_db_oracle_check_alertlog
+all;dbsrv3;app_db_oracle_check_connect
+all;dbsrv3;app_db_oracle_check_alertlog
+linux;dbsrv1;app_db_oracle_check_connect
+linux;dbsrv1;app_db_oracle_check_alertlog
+linux;dbsrv2;app_db_oracle_check_connect
+linux;dbsrv2;app_db_oracle_check_alertlog
+oracle;dbsrv1;app_db_oracle_check_connect
+oracle;dbsrv1;app_db_oracle_check_alertlog
+oracle;dbsrv2;app_db_oracle_check_connect
+oracle;dbsrv2;app_db_oracle_check_alertlog
+oracle;dbsrv3;app_db_oracle_check_connect
+oracle;dbsrv3;app_db_oracle_check_alertlog
+windows;dbsrv3;app_db_oracle_check_connect
+windows;dbsrv3;app_db_oracle_check_alertlog
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+
+    def test_group_authorization_loose(self):
+        self.print_header()
+        now = time.time()
+        objlist = []
+        for host in self.sched.hosts:
+            objlist.append([host, 0, 'UP'])
+        for service in self.sched.services:
+            objlist.append([service, 0, 'OK'])
+        self.scheduler_loop(1, objlist)
+        self.update_broker()
+        self.livestatus_broker.datamgr.rg.group_authorization_strict = False
+        self.livestatus_broker.datamgr.rg.all_done_linking(0)
+        for contact in sorted(self.livestatus_broker.datamgr.rg.hostgroups._id_contact_heap.keys()):
+            print "%-10s %s" % (contact, self.livestatus_broker.datamgr.rg.hosts._id_contact_heap[contact])
+            print "%-10s %s" % (contact, self.livestatus_broker.datamgr.rg.hostgroups._id_contact_heap[contact])
+        request = """GET hostgroups
+AuthUser: bill
+Columns: name members
+OutputFormat: python
+KeepAlive: on
+"""
+        # bill is contact for dbsrv3, dbsrv5, www2 and therefore in oracle, mysql, linux, windows, web and of course all
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        pyresponse = eval(response)
+        #self.assert_(len(pyresponse) == 1)
+
+        request = """GET hostgroups
+AuthUser: web1
+Columns: name members
+OutputFormat: python
+KeepAlive: on
+"""
+        # web1 is contact for www1 and www2, so linux, windows, web and all
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print response
+        pyresponse = eval(response)
+        self.assert_(len(pyresponse) == 4)
 
 
 if __name__ == '__main__':

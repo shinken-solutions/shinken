@@ -153,7 +153,7 @@ class LiveStatusQuery(object):
             elif keyword == 'Limit':
                 _, self.limit = self.split_option(line)
             elif keyword == 'AuthUser':
-                if self.table in ['hosts', 'hostgroups', 'services', 'servicegroups']:
+                if self.table in ['hosts', 'hostgroups', 'services', 'servicegroups', 'hostsbygroup', 'servicesbygroup', 'servicesbyhostgroup']:
                     _, self.authuser = self.split_option(line)
                 # else self.authuser stays None and will be ignored
             elif keyword == 'Filter':
@@ -385,48 +385,16 @@ class LiveStatusQuery(object):
                 yield val
             return
 
-        def gen_auth(values, authuser):
-            for val in values:
-                # this is probably too sloooow to be run in the innermost loop
-                if authuser in [c.get_name() for c in val.contacts]:
-                    yield val
-            return
-
-        items = getattr(self.datamgr.rg, self.table).__itersorted__()
-        if cs.authuser:
-            items = gen_auth(items, cs.authuser)
+        items = getattr(self.datamgr.rg, self.table).__itersorted__(cs.authuser)
         if not cs.without_filter:
             items = gen_filtered(items, cs.filter_func)
         if self.limit:
             items = gen_limit(items, self.limit)
         return (i for i in items)
-        if cs.without_filter and not self.limit:
-            # Simply format the output
-            return [x for x in items]
-        elif cs.without_filter and self.limit:
-            # Simply format the output of a subset of the objects
-            return (
-                y for y in (
-                    gen_limit((x for x in items.__itersorted__()), self.limit)
-                )
-            )
-        elif not cs.without_filter and not self.limit:
-            # Filter the objects and format the output. At least hosts
-            # and services are already sorted by name.
-            return (
-                x for x in getattr(self.datamgr.rg, self.table).__itersorted__()
-                    if cs.filter_func(x)
-            ) 
-            #  some day.....
-            #  pool = multiprocessing.Pool(processes=4)
-            #  return pool.map(cs.filter_func, getattr(self.datamgr.rg, self.table).__itersorted__())
-        elif not cs.without_filter and self.limit:
-
-            return (
-                y for y in (
-                    gen_limit_filtered((x for x in getattr(self.datamgr.rg, self.table).__itersorted__()), self.limit, cs.filter_func)
-                )
-            )
+        # todo-list
+        #  not possible in the moment, but perhaps with a proxy-function. something for next weekend...
+        #  pool = multiprocessing.Pool(processes=4)
+        #  return pool.map(cs.filter_func, getattr(self.datamgr.rg, self.table).__itersorted__())
     
     def get_hosts_livedata(self, cs):
         return self.get_hosts_or_services_livedata(cs)
@@ -441,7 +409,7 @@ class LiveStatusQuery(object):
 
 
     def get_filtered_livedata(self, cs):
-        items = getattr(self.datamgr.rg, self.table)
+        items = getattr(self.datamgr.rg, self.table).__itersorted__(cs.authuser)
         if cs.without_filter:
             return [x for x in items]
         else:
@@ -473,39 +441,38 @@ class LiveStatusQuery(object):
         return res
     
     
-    def get_group_livedata(self, cs, objs, an, group_key, member_key):
+    def get_group_livedata(self, cs, objs, groupattr1, groupattr2, sorter):
         """
         return a list of elements from a "group" of 'objs'. group can be a hostgroup or a servicegroup.
+        if an element of objs (a host or a service) is member of groups
+        (which means, it has >1 entry in its host/servicegroup attribute (groupattr1))
+        then for each of these groups there will be a copy of the original element with a new attribute called groupattr2
+        which points to the group
         objs: the objects to get elements from.
-        an: the attribute name to set on result.
+        groupattr1: the attribute where an element's groups can be found
+        groupattr2: the attribute name to set on result.
         group_key: the key to be used to sort the group members.
-        member_key: the key to be used to sort each resulting element of a group member.
         """
         def factory(obj, attribute, groupobj):
             setattr(obj, attribute, groupobj)
 
-        return [x for x in (
-                    svc for svc in (
-                        factory(og[0], an, og[1]) or og[0] for og in ( #
-                            ( copy.copy(item0), inner_list0[1]) for inner_list0 in (  # (copy(host), hostgroup)
-                                (sorted(sg1.members, key = member_key), sg1) for sg1 in  #2 hosts (sort name) von hg, hg
-                                    sorted([sg0 for sg0 in objs if sg0.members], key = group_key) #1 hgs mit members!=[]
-                                ) for item0 in inner_list0[0] #3 item0 ist host
-                            )
-                        ) if (cs.without_filter or cs.filter_func(svc)))
-        ]
+        return sorted((
+            factory(og[0], groupattr2, og[1]) or og[0] for og in ( # host, attr, hostgroup or host
+                (copy.copy(inner_list0[0]), item0) for inner_list0 in ( # host', hostgroup
+                    (h, getattr(h, groupattr1)) for h in objs if (cs.without_filter or cs.filter_func(h))  #1 host, [seine hostgroups]
+                ) for item0 in inner_list0[1] # item0 ist einzelne hostgroup
+            )
+        ), key = sorter)
 
 
-    def get_hostbygroups_livedata(self, cs):
-        member_key = lambda k: k.host_name
-        group_key = lambda k: k.hostgroup_name
-        return self.get_group_livedata(cs, self.datamgr.rg.hostgroups, 'hostgroup', group_key, member_key)        
+    def get_hostsbygroup_livedata(self, cs):
+        sorter = lambda k: k.hostgroup.hostgroup_name
+        return self.get_group_livedata(cs, self.datamgr.rg.hosts.__itersorted__(cs.authuser), 'hostgroups', 'hostgroup', sorter)
 
 
-    def get_servicebygroups_livedata(self, cs):
-        member_key = lambda k: k.get_name()
-        group_key = lambda k: k.servicegroup_name
-        return self.get_group_livedata(cs, self.datamgr.rg.servicegroups, 'servicegroup', group_key, member_key)
+    def get_servicesbygroup_livedata(self, cs):
+        sorter = lambda k: k.servicegroup.servicegroup_name
+        return self.get_group_livedata(cs, self.datamgr.rg.services.__itersorted__(cs.authuser), 'servicegroups', 'servicegroup', sorter)
     
 
     def get_problem_livedata(self, cs):
@@ -564,25 +531,16 @@ class LiveStatusQuery(object):
         return result
 
 
-    def get_servicebyhostgroups_livedata(self, cs):
-        # to test..
-        res = [x for x in (
-                svc for svc in (
-                    setattr(svchgrp[0], 'hostgroup', svchgrp[1]) or svchgrp[0] for svchgrp in (
-                        # (service, hostgroup), (service, hostgroup), (service, hostgroup), ...  service objects are individuals
-                        (copy.copy(item1), inner_list1[1]) for inner_list1 in (
-                            # ([service, service, ...], hostgroup), ([service, ...], hostgroup), ...  flattened by host. only if a host has services. sorted by service_description
-                            (sorted(item0.services, key = lambda k: k.service_description), inner_list0[1]) for inner_list0 in (
-                                # ([host, host, ...], hostgroup), ([host, host, host, ...], hostgroup), ...  sorted by host_name
-                                (sorted(hg1.members, key = lambda k: k.host_name), hg1) for hg1 in   # ([host, host], hg), ([host], hg),... hostgroup.members->explode->sort
-                                    # hostgroups, sorted by hostgroup_name
-                                    sorted([hg0 for hg0 in self.datamgr.rg.hostgroups if hg0.members], key = lambda k: k.hostgroup_name)
-                            ) for item0 in inner_list0[0] if item0.services
-                        ) for item1 in inner_list1[0]
-                    )
-                ) if (cs.without_filter or cs.filter_func(svc))
-            )]
-        return res
+    def get_servicesbyhostgroup_livedata(self, cs):
+        objs = self.datamgr.rg.services.__itersorted__(cs.authuser)
+        return sorted([x for x in (
+            setattr(svchgrp[0], 'hostgroup', svchgrp[1]) or svchgrp[0] for svchgrp in (
+                (copy.copy(inner_list0[0]), item0) for inner_list0 in ( #2 service clone and a hostgroup
+                    (s, s.host.hostgroups) for s in objs if (cs.without_filter or cs.filter_func(s))  #1 service, and it's host
+                ) for item0 in inner_list0[1] if inner_list0[1] #2b only if the service's (from all services->filtered in the innermost loop) host has groups
+            )
+        )], key=lambda svc: svc.hostgroup.hostgroup_name)
+
 
     objects_get_handlers = {
         'hosts':                get_hosts_livedata,
@@ -599,12 +557,12 @@ class LiveStatusQuery(object):
         'timeperiods':          get_filtered_livedata,
         'downtimes':            get_list_livedata,
         'comments':             get_list_livedata,
-        'hostsbygroup':         get_hostbygroups_livedata,
-        'servicesbygroup':      get_servicebygroups_livedata,
+        'hostsbygroup':         get_hostsbygroup_livedata,
+        'servicesbygroup':      get_servicesbygroup_livedata,
         'problems':             get_problem_livedata,
         'status':               get_status_livedata,
         'columns':              get_columns_livedata,
-        'servicesbyhostgroup':  get_servicebyhostgroups_livedata
+        'servicesbyhostgroup':  get_servicesbyhostgroup_livedata
     }
 
 

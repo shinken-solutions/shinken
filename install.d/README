@@ -1,8 +1,6 @@
 ===========================================
-Shinken installation script for shinken 1.0
+Shinken installation script for shinken 1.2
 ===========================================
-
-===== WARNING : THIS SCRIPT IS STILL IN RC Stage =====
 
 Contact
 ~~~~~~~~
@@ -24,41 +22,49 @@ Usage
 This is a really simple script allowing to install a fully fonctionnal shinken in seconds !
 Curently only tested with Ubuntu/Linux Mint/Debian and RHEL/CentOS 5/6 distros. 
 
-Usage : shinken -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z [poller|centreon] | -e daemons | -p plugins [plugname]
-    -k  Kill shinken
-    -i  Install shinken
-    -w  Remove demo configuration (DEPRECATED)
-    -d  Remove shinken
-    -u  Update an existing shinken installation (DEPRECATED)
-    -v  purge livestatus sqlite db and shrink sqlite db
-    -b  Backup shinken configuration plugins and data
-    -r  Restore shinken configuration plugins and data
-    -l  List shinken backups
-    -c  Compress rotated logs
-    -e  Which daemons to keep enabled at boot time
-    -z  This is a really special usecase that allow to install shinken on Centreon Enterprise Server in place of nagios (DEPRECATED)
-    -p  Install plugins or addons (args should be one of the following : 
-        check_esx3
-        nagios-plugins
-        check_oracle_health
-        check_mysql_health
-        check_wmi_plus
-        check_mongodb
-        check_emc_clariion
-        check_nwc_health
-        check_hpasm
-        manubulon (snmp plugins)
-        capture_plugin
-        pnp4nagios
-        multisite
-        nagvis
-        mongodb
-    -h  Show help
+Usage : install -k | -i | -d | -b | -r backupname | -l | -c | -e "daemonslist" | -p pluginname | -a addonname 
+
+    -k | --kill             Kill shinken
+    -i | --install          Install shinken
+    -u | --uninstall        Remove shinken
+    -b | --backup           Backup shinken configuration plugins and data
+    -r | --restore          Restore shinken configuration plugins and data
+    -l | --listbackups      List shinken backups
+    -c | --compresslogs     Compress rotated logs
+    -e | --enabledaemons    Which daemons to keep enabled at boot time. It's a quoted list of shinken daemons that should be enabled at startup.
+                            Daemons are :
+                                arbiter
+                                scheduler
+                                poller
+                                broker
+                                reactionner
+                                receiver
+    -p | --plugin           Install plugins. Argument should be one of the following : 
+                               check_esx3
+                               nagios-plugins
+                               check_oracle_health
+                               check_mysql_health
+                               capture_plugin
+                               check_wmi_plus
+                               check_mongodb
+                               check_emc_clariion
+                               check_nwc_health
+                               manubulon (snmp plugins)
+                               check_hpasm
+                               check_netapp2
+                               check_mem (local enhanced memory check plugin)
+    -a | --addons           Install addons. Argument should be one of the following : 
+                               pnp4nagios
+                               multisite
+                               nagvis
+                               mongodb
+    -h | --help             Show help
+
 
 configuration file
 ~~~~~~~~~~~~~~~~~~
 
-You can modify the target folder, version, backup folder or user/group the following way :
+You can modify the target folder, backup folder or user/group the following way :
 
   TARGET=/usr/local/nagios SKUSER=toto SKGROUP=titi ./shinken.sh -i
 

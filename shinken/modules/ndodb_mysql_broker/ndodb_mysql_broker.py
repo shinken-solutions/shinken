@@ -24,13 +24,6 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-# This Class is a plugin for the Shinken Broker. It is in charge
-# to brok information into the database. For the moment
-# only Mysql is supported. This code is __imported__ from Broker.
-# The managed_brok function is called by Broker for manage the broks. It calls
-# the manage_*_brok functions that create queries, and then run queries.
-
-
 import copy
 import time
 import sys
@@ -52,9 +45,16 @@ def de_unixify(t):
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(t))
 
 
-# Class for the NDO MySQL Broker
-# Get broks and puts them in MySQL database
 class Ndodb_Mysql_broker(BaseModule):
+
+    """ This Class is a plugin for the Shinken Broker. It is in charge
+    to brok information into the database. For the moment
+    only Mysql is supported. This code is __imported__ from Broker.
+    The managed_brok function is called by Broker for manage the broks. It calls
+    the manage_*_brok functions that create queries, and then run queries.
+
+    """
+
     def __init__(self, conf):
         BaseModule.__init__(self, conf)
         # Mapping for name of data and transform function
@@ -186,7 +186,8 @@ class Ndodb_Mysql_broker(BaseModule):
     # Query the database to get the proper instance_id
     def get_instance_id(self, name):
         query1 = u"SELECT  max(instance_id) + 1 from %sinstances" % self.prefix
-        query2 = u"SELECT instance_id from %sinstances where instance_name = '%s';" % (self.prefix, name)
+        query2 = u"SELECT instance_id from %sinstances where instance_name = '%s';" % \
+                 (self.prefix, name)
 
         self.db.execute_query(query1)
         row1 = self.db.fetchone()
@@ -222,7 +223,7 @@ class Ndodb_Mysql_broker(BaseModule):
             else:
                 data_id = self.get_instance_id(name)
             # cache this!
-            self.database_id_cache[id] = data_id
+            self.database_id_cache[brok_id] = data_id
             return data_id
 
 
@@ -694,7 +695,7 @@ class Ndodb_Mysql_broker(BaseModule):
 
         # Ok, the hostgroups table is uptodate, now we add relations
         # between hosts and hostgroups
-        for (h_id, h_name) in b.data['members']:
+        for (_, h_name) in b.data['members']:
             host_id = self.get_host_object_id_by_name_sync(h_name, data['instance_id'])
 
             hostgroup_members_data = {
@@ -746,7 +747,7 @@ class Ndodb_Mysql_broker(BaseModule):
 
         # Ok, the servicegroups table is up to date, now we add relations
         # between service and servicegroups
-        for (s_id, s_name) in b.data['members']:
+        for (s_id, _) in b.data['members']:
             # TODO: Include with the service cache.
             service_id = self.mapping_service_id[s_id]
             servicegroup_members_data = {'instance_id': data['instance_id'],
@@ -1158,7 +1159,7 @@ class Ndodb_Mysql_broker(BaseModule):
 
         # Ok, the hostgroups table is uptodate, now we add relations
         # between hosts and hostgroups
-        for (c_id, c_name) in b.data['members']:
+        for (_, c_name) in b.data['members']:
 
             contact_obj_id = self.get_contact_object_id_by_name_sync(c_name, data['instance_id'])
 
@@ -1179,19 +1180,31 @@ class Ndodb_Mysql_broker(BaseModule):
         data = b.data
         #print "CREATING A NOTIFICATION", data
         if data['service_description'] != '':
-            service_id = self.get_service_object_id_by_name_sync(
+            object_id = self.get_service_object_id_by_name_sync(
                 data['host_name'],
                 data['service_description'],
                 data['instance_id']
                 )
+            notification_type = 1
         else:
-            host_id = self.get_host_object_id_by_name_sync(data['host_name'], data['instance_id'])
+            object_id = self.get_host_object_id_by_name_sync(data['host_name'], data['instance_id'])
+            notification_type = 0
 
+        # TODO : Fill all fields
+        # Missing fields : notification_reason, start_time_usec, end_time_usec,
+        # output, escalated.
+        # Maybe some field are not really interesting :)
+        # TO FIX : output is empty
+        # TO FIX : end_time and start time are equal to 0 (back in the 70's !!)
+        # TO FIX : state is equal to 0
         notification_data = {
             'instance_id': data['instance_id'],
-             'start_time': de_unixify(data['start_time']),
-             'end_time': de_unixify(data['end_time']),
-             'state': data['state']
+            'start_time': de_unixify(data['start_time']),
+            'end_time': de_unixify(data['end_time']),
+            'state': data['state'],
+            'notification_type': notification_type,
+            'object_id': object_id,
+            'output': data['output']
         }
 
         query = self.db.create_insert_query('notifications', notification_data)

@@ -28,6 +28,7 @@ from item import Item, Items
 
 from shinken.property import StringProp, ListProp
 from shinken.util import strip_and_uniq
+from shinken.log import logger
 
 class Module(Item):
     id = 1#0 is always special in database, so we do not take risk here
@@ -73,8 +74,7 @@ class Modules(Items):
                 if plug is not None:
                     new_modules.append(plug)
                 else:
-                    err = "Error : the module %s is unknown for %s" % (plug_name, s.get_name())
-                    print "err", err
+                    logger.error("[module] unknown %s module from %s" % (plug_name, s.get_name()))
                     s.configuration_errors.append(err)
             s.modules = new_modules
 

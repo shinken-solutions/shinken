@@ -25,10 +25,19 @@
 
 
 try:
-    import json
+    from ujson import dumps, loads
 except ImportError:
-    import simplejson as json
-
+    try:
+        from simplejson import dumps, loads, JSONEncoder
+        # ujson's dumps() cannot handle a separator parameter, which is 
+        # needed to avoid unnecessary spaces in the json output
+        # That's why simplejson and json manipulate the encoder class
+        JSONEncoder.item_separator = ','
+        JSONEncoder.key_separator = ':'
+    except ImportError:
+        from json import dumps, loads, JSONEncoder
+        JSONEncoder.item_separator = ','
+        JSONEncoder.key_separator = ':'
 
 class LiveStatusResponse:
 
@@ -141,7 +150,8 @@ class LiveStatusResponse:
                             #print "FALLBACK: %s.%s" % (type(item), attribute)
                             value = getattr(item.__class__, attribute).im_func.default
                         else:
-                            value = u''
+                            rows.append(u'')
+                            continue
                     if isinstance(value, bool):
                         if value == True:
                             rows.append(1)
@@ -161,9 +171,9 @@ class LiveStatusResponse:
                 else:
                     lines.insert(0, columns)
             if self.outputformat == 'json':
-                self.output = json.dumps(lines, separators=(',', ':'))
+                self.output = dumps(lines)
             else:
-                self.output = str(json.loads(json.dumps(lines, separators=(',', ':'))))
+                self.output = str(lines)
 
     def format_live_data_stats(self, result, columns, aliases):
         lines = []
@@ -226,6 +236,6 @@ class LiveStatusResponse:
                 else:
                     lines.insert(0, columns)
             if self.outputformat == 'json':
-                self.output = json.dumps(lines, separators=(',', ':'))
+                self.output = dumps(lines)
             else:
-                self.output = str(json.loads(json.dumps(lines, separators=(',', ':'))))
+                self.output = str(lines)

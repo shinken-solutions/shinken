@@ -125,7 +125,12 @@ class Regenerator(object):
                              'initial_hostgroup_status', 'initial_service_status',
                              'initial_servicegroup_status', 'initial_contact_status',
                              'initial_contactgroup_status', 'initial_timeperiod_status',
-                             'initial_command_status', 'initial_broks_done']
+                             'initial_command_status']
+        # Ok you are wondering why we don't add initial_broks_done? It's because the LiveSTatus modules
+        # need this part to do internal things. But don't worry, the vanilla regenerator
+        # will just skip it in all_done_linking :D
+
+        # Not in don't want? so want! :)
         return True
         
 
@@ -162,10 +167,11 @@ class Regenerator(object):
 
     # Now we get all data about an instance, link all this stuff :)
     def all_done_linking(self, inst_id):
-        # Mem debug phase
-        #from guppy import hpy
-        #hp = hpy()
-        #print hp.heap()
+
+        # In a scheduler we are already "linked" so we can skip this
+        if self.in_scheduler_mode:
+            safe_print("Regenerator : We skip the all_done_linking phase because we are in a scheduler")
+            return
 
         start = time.time()
         safe_print("In ALL Done linking phase for instance", inst_id)

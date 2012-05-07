@@ -28,6 +28,7 @@
 from item import Item, Items
 
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
+from shinken.log import logger
 
 
 _special_properties = ( 'service_notification_commands', 'host_notification_commands',
@@ -168,42 +169,42 @@ class NotificationWay(Item):
         for prop, entry in cls.properties.items():
             if prop not in _special_properties:
                 if not hasattr(self, prop) and entry.required:
-                    print self.get_name(), " : I do not have", prop
+                    logger.warning("[notificationway::%s] %s property not set" % (self.get_name(), prop))
                     state = False #Bad boy...
 
         #Ok now we manage special cases...
         #Service part
         if not hasattr(self, 'service_notification_commands') :
-            print self.get_name()," : do not have any service_notification_commands defined"
+            logger.warning("[notificationway::%s] do not have any service_notification_commands defined" % self.get_name())
             state = False
         else:
             for cmd in self.service_notification_commands:
                 if cmd is None:
-                    print self.get_name()," : a service_notification_command is missing"
+                    logger.warning("[notificationway::%s] a service_notification_command is missing" % self.get_name())
                     state = False
                 if not cmd.is_valid():
-                    print self.get_name()," : a service_notification_command is invalid", cmd.get_name()
+                    logger.warning("[notificationway::%s] a service_notification_command is invalid" % self.get_name())
                     state = False
         
         if getattr(self, 'service_notification_period', None) is None:
-            print self.get_name()," : the service_notification_period is invalid"
+            logger.warning("[notificationway::%s] the service_notification_period is invalid" % self.get_name())
             state = False
 
         #Now host part
         if not hasattr(self, 'host_notification_commands') :
-            print self.get_name()," : do not have any host_notification_commands defined"
+            logger.warning("[notificationway::%s] do not have any host_notification_commands defined" % self.get_name())
             state = False
         else:
             for cmd in self.host_notification_commands:
                 if cmd is None :
-                    print self.get_name()," : a host_notification_command is missing"
+                    logger.warning("[notificationway::%s] a host_notification_command is missing" % self.get_name())
                     state = False
                 if not cmd.is_valid():
-                    print self.get_name()," : a host_notification_command is invalid", cmd.get_name(), cmd.__dict__
+                    logger.warning("[notificationway::%s] a host_notification_command is invalid (%s)" % (cmd.get_name(), str(cmd.__dict__)))
                     state = False
 
         if getattr(self, 'host_notification_period', None) is None:
-            print self.get_name()," : the host_notification_period is invalid"
+            logger.warning("[notificationway::%s] the host_notification_period is invalid" % self.get_name())
             state = False
 
         return state

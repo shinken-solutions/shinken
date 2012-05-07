@@ -376,7 +376,7 @@ class Config(Item):
             elts = elt.split('=', 1)
             if len(elts) == 1: #error, there is no = !
                 self.conf_is_correct = False
-                print "Error : the parameter %s is malformed! (no = sign)" % elts[0]
+                logger.error("[config] the parameter %s is malformed! (no = sign)" % elts[0])
             else:
                 self.params[elts[0]] = elts[1]
                 setattr(self, elts[0], elts[1])
@@ -406,7 +406,7 @@ class Config(Item):
             res.write(os.linesep)
             res.write('# IMPORTEDFROM=%s' % (file) + os.linesep)
             if self.read_config_silent == 0:
-               print "Opening configuration file ",file
+               logger.debug("[config] opening '%s' configuration file" % file)
             try:
                 # Open in Universal way for Windows, Mac, Linux
                 fd = open(file, 'rU')
@@ -414,7 +414,7 @@ class Config(Item):
                 fd.close()
                 self.config_base_dir = os.path.dirname(file)
             except IOError, exp:
-                logger.error("Cannot open config file '%s' for reading: %s" % (file, exp))
+                logger.error("[config] cannot open config file '%s' for reading: %s" % (file, exp))
                 #The configuration is invalid because we have a bad file!
                 self.conf_is_correct = False
                 continue
@@ -800,7 +800,7 @@ class Config(Item):
                 logger.log('[%s] Serializing the configuration %d' % (r.get_name(), i))
                 t0 = time.time()
                 r.serialized_confs[i] = cPickle.dumps(conf, cPickle.HIGHEST_PROTOCOL)
-                print 'Time to serialize the conf %s:%s  is %s' % (r.get_name(), i, time.time() - t0)
+                logger.debug("[config] time to serialize the conf %s:%s is %s" % (r.get_name(), i, time.time() - t0))
 
 
     def dump(self):
@@ -845,7 +845,6 @@ class Config(Item):
                     s = prop
                 unmanaged.append(s)
         if len(unmanaged) != 0:
-            print "\n"
             mailing_list_uri = "https://lists.sourceforge.net/lists/listinfo/shinken-devel"
             logger.warning("The following parameter(s) are not curently managed.")
 

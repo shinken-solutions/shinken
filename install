@@ -24,17 +24,13 @@
 #set -x
 
 
-#####################
-### ENVIRONNEMENT ###
-#####################
+
+# ENVIRONNEMENT 
+
 
 export myscripts=$(readlink -f $(dirname $0))
 src=$myscripts
 . $myscripts/install.d/shinken.conf
-if [ -f $TMP/shinken.install.log ]
-then
-    rm -f $TMP/shinken.install.log    
-fi 
 
 function remove(){
     cadre "Removing shinken" green
@@ -946,10 +942,6 @@ function compresslogs(){
             fi
         done
     fi
-}
-
-function shelp(){
-    cat $myscripts/install.d/README
 }
 
 ########################
@@ -2112,63 +2104,94 @@ function install_check_mysql_health(){
     make install >> $TMP/shinken.install.log 2>&1 
 }
 
+#     ___                                          __          ____                                 _            
+#    /   |  _________ ___  ______ ___  ___  ____  / /______   / __ \_________  ________  __________(_)___  ____ _
+#   / /| | / ___/ __ `/ / / / __ `__ \/ _ \/ __ \/ __/ ___/  / /_/ / ___/ __ \/ ___/ _ \/ ___/ ___/ / __ \/ __ `/
+#  / ___ |/ /  / /_/ / /_/ / / / / / /  __/ / / / /_(__  )  / ____/ /  / /_/ / /__/  __(__  |__  ) / / / / /_/ / 
+# /_/  |_/_/   \__, /\__,_/_/ /_/ /_/\___/_/ /_/\__/____/  /_/   /_/   \____/\___/\___/____/____/_/_/ /_/\__, /  
+#             /____/                                                                                    /____/   
 
 function usage(){
-echo "Usage : install -k | -i | -w | -d | -u | -b | -r | -l | -c | -h | -a | -z [poller|centreon] | -e daemons | -p plugins [plugname]
-    -k  Kill shinken
-    -i  Install shinken
-    -w  Remove demo configuration (DEPRECATED)
-    -d  Remove shinken
-    -u  Update an existing shinken installation (DEPRECATED)
-    -v  purge livestatus sqlite db and shrink sqlite db
-    -b  Backup shinken configuration plugins and data
-    -r  Restore shinken configuration plugins and data
-    -l  List shinken backups
-    -c  Compress rotated logs
-    -e  Which daemons to keep enabled at boot time
-    -z  This is a really special usecase that allow to install shinken on Centreon Enterprise Server in place of nagios (DEPRECATED)
-    -p  Install plugins or addons (args should be one of the following : 
-        check_esx3
-        nagios-plugins
-        check_oracle_health
-        check_mysql_health
-        check_wmi_plus
-        check_mongodb
-        check_emc_clariion
-        check_nwc_health
-        check_hpasm
-        manubulon (snmp plugins)
-        check_mem (local enhanced memory check plugin)
-        capture_plugin
-        pnp4nagios
-        multisite
-        nagvis
-        mongodb
-    -h  Show help"
+echo "Usage : install -k | -i | -d | -b | -r backupname | -l | -c | -e \"daemonslist\" | -p pluginname | -a addonname 
+    -k | --kill             Kill shinken
+    -i | --install          Install shinken
+    -u | --uninstall        Remove shinken
+    -b | --backup           Backup shinken configuration plugins and data
+    -r | --restore          Restore shinken configuration plugins and data
+    -l | --listbackups      List shinken backups
+    -c | --compresslogs     Compress rotated logs
+    -e | --enabledaemons    Which daemons to keep enabled at boot time. It's a quoted list of shinken daemons that should be enabled at startup.
+                            Daemons are :
+                                arbiter
+                                scheduler
+                                poller
+                                broker
+                                reactionner
+                                receiver
+    -p | --plugin           Install plugins. Argument should be one of the following : 
+                               check_esx3
+                               nagios-plugins
+                               check_oracle_health
+                               check_mysql_health
+                               capture_plugin
+                               check_wmi_plus
+                               check_mongodb
+                               check_emc_clariion
+                               check_nwc_health
+                               manubulon (snmp plugins)
+                               check_hpasm
+                               check_netapp2
+                               check_mem (local enhanced memory check plugin)
+    -a | --addons           Install addons. Argument should be one of the following : 
+                               pnp4nagios
+                               multisite
+                               nagvis
+                               mongodb
+    -h | --help             Show help"
 }
 
-# Check if we launch the script with root privileges (aka sudo)
+#Check if we launch the script with root privileges (aka sudo)
 if [ "$UID" != "0" ]
 then
         cecho "You should start the script with sudo!" red
         exit 1
 fi
 
+# remove last install log file
+if [ -f $TMP/shinken.install.log ]
+then
+    rm -f $TMP/shinken.install.log    
+fi 
+
+# should we use a proxy for downloading archives
 if [ $USEPROXY -eq 1 ]
 then
     export WGETPROXY=" -Y on "
 fi
 
-while getopts "kidubcr:lz:hsvp:we:" opt; do
-    case $opt in
-        p)
-            if [ "$OPTARG" != "mongodb" ]
+# options may be followed by one colon to indicate they have a required argument
+
+if ! options=$(getopt -u -o kiubr:lce:p:a: -l kill,install,uninstall,backup,restore:,listbackups,compresslogs,enabledaemons:,plugin:,addon: -- "$@")
+then
+    # something went wrong, getopt will put out an error message for us
+    exit 2
+fi
+
+
+set -- $options
+
+
+while [ $# -gt 0 ]
+do
+    case $1 in
+        -p|--plugin)
+            shift
+            OPTARG=$1
+            shift
+            if [ $(shinken_exist) -eq 0 ]
             then
-                if [ $(shinken_exist) -eq 0 ]
-                then
-                    cecho " > You should install shinken first ! " red
-                    exit 2
-                fi
+                cecho " > You should install shinken first ! " red
+                exit 2
             fi
             if [ "$OPTARG" == "check_esx3" ]
             then
@@ -2222,7 +2245,18 @@ while getopts "kidubcr:lz:hsvp:we:" opt; do
             then
                 install_check_netapp2
                 exit 0
-            elif [ "$OPTARG" == "pnp4nagios" ]
+            fi
+            ;;
+        -a|--addon)
+            shift
+            OPTARG=$1
+            shift
+            if [ $(shinken_exist) -eq 0 ]
+            then
+                cecho " > You should install shinken first ! " red
+                exit 2
+            fi
+            if [ "$OPTARG" == "pnp4nagios" ]
             then
                 install_pnp4nagios
                 exit 0
@@ -2239,91 +2273,70 @@ while getopts "kidubcr:lz:hsvp:we:" opt; do
                 install_mongodb
                 exit 0
             else
-                cecho " > Unknown plugin $OPTARG" red
+                cecho " > Unknown addon $OPTARG" red
             fi
             ;;
-        
-        j)
-            addpoller "$OPTARG"
-            exit 0
-            ;;
-        e)
+        -e|--enabledaemons)
+            shift
+            OPTARG=$1
+            shift
             setdaemons "$OPTARG"
             exit 0
             ;;
-        w)
-            cleanconf    
-            exit 0
-            ;;
-        z)
-            mode=$OPTARG
-            cleanconf
-            disablenagios
-            fixsudoers
-            if [ "$mode" = "centreon" ]
-            then
-                fixcentreondb
-                fixforfan
-                enablendodb
-                #enableretention
-                enableperfdata
-                setdaemonsaddresses
-                enableCESCentralDaemons
-                #fixHtpasswdPath
-                #addCESPollers
-            else
-                enableCESPollerDaemons
-            fi
-            exit 0
-            ;;
-        s)
-            rheldvd    
-            exit 0
-            ;;
-        v)
+        -p|--purgelogs)
             purgeSQLITE    
             exit 0
             ;;
-        k)
+        -k|--kill)
             skill
             exit 0
             ;;
-        i)
+        -i|--install)
             FROMSRC=1
             sinstall 
             fixHtpasswdPath
             exit 0
             ;;
-        d)
+        -u|--uninstall)
             remove 
             exit 0
             ;;
-        u)
-            supdate 
-            exit 0
-            ;;
-        b)
+        -b|--backup)
             backup 
             exit 0
             ;;
-        r)
+        -r|--restore)
+            shift
+            OPTARG=$1
+            shift
             restore $OPTARG 
             exit 0
             ;;
-        l)
+        -l|--listbackups)
             backuplist 
             exit 0
             ;;
-        c)
+        -c|--compresslogs)
             compresslogs
             exit 0
             ;;
-        h)
-            shelp    
+        -h|--help)
+            usage    
             exit 0
             ;;
+        (--) 
+            shift
+            break
+            ;;
+        (-*) 
+            cecho "$0: error - unrecognized option $1" red 1>&2
+            exit 2
+            ;;
+        (*) 
+            break
+            ;;
     esac
+    shift
 done
 usage
 exit 0
-

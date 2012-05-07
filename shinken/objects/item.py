@@ -36,7 +36,7 @@ from shinken.graph import Graph
 from shinken.commandcall import CommandCall
 from shinken.property import StringProp, ListProp
 from shinken.brok import Brok
-from shinken.util import strip_and_uniq, safe_print
+from shinken.util import strip_and_uniq
 from shinken.acknowledge import Acknowledge
 from shinken.comment import Comment
 from shinken.log import logger
@@ -188,10 +188,10 @@ Like temporary attributes such as "imported_from", etc.. """
                 pass # Will be catch at the is_correct moment
             except KeyError, exp:
                 #print "Missing prop value", exp
-                err = "ERROR : the property '%s' of '%s' do not have value" % (prop, self.get_name())
+                err = "the property '%s' of '%s' do not have value" % (prop, self.get_name())
                 self.configuration_errors.append(err)
             except ValueError, exp:
-                err = "ERROR : incorrect type for property '%s' of '%s'" % (prop, self.get_name())
+                err = "incorrect type for property '%s' of '%s'" % (prop, self.get_name())
                 self.configuration_errors.append(err)
 
     # Compute a hash of this element values. Should be launched
@@ -352,13 +352,13 @@ Like temporary attributes such as "imported_from", etc.. """
         if self.configuration_errors != []:
             state = False
             for err in self.configuration_errors:
-                logger.info(err)
+                logger.error("[item::%s] %s" % (self.get_name(), err))
 
         for prop, entry in properties.items():
             if not hasattr(self, prop) and entry.required:
-                safe_print(self.get_name(), "missing property :", prop)
+                logger.warning("[item::%s] %s property is missing" % (self.get_name(), prop))
                 state = False
-                
+
         return state
 
 
@@ -437,7 +437,7 @@ Like temporary attributes such as "imported_from", etc.. """
     #  but do not remove the associated comment.
     def unacknowledge_problem(self):
         if self.problem_has_been_acknowledged:
-            safe_print("Deleting acknowledged of", self.get_dbg_name())
+            logger.debug("[item::%s] deleting acknowledge of %s" % (self.get_name(), self.get_dbg_name()))
             self.problem_has_been_acknowledged = False
             # Should not be deleted, a None is Good
             self.acknowledgement = None
@@ -587,7 +587,7 @@ Like temporary attributes such as "imported_from", etc.. """
             src = src.replace(r'\n', '\n').replace(r'\t', '\t')
             t = triggers.create_trigger(src, 'inner-trigger-'+self.__class__.my_type+''+str(self.id))
             if t:
-                print "Go link the trigger", t.__dict__
+                logger.debug("[item::%s] go link the trigger %s" % (self.get_name(), str(t.__dict__)))
                 # Maybe the trigger factory give me a already existing trigger,
                 # so my name can be dropped
                 self.triggers.append(t.get_name())
@@ -603,7 +603,7 @@ Like temporary attributes such as "imported_from", etc.. """
         for tname in self.triggers:
             t = triggers.find_by_name(tname)
             if t:
-                print "Go link the trigger", t.__dict__
+                logger.debug("[item::%s] go link the trigger %s" % (self.get_name(), str(t.__dict__)))
                 new_triggers.append(t)
             else:
                 self.configuration_errors.append('the %s %s does have a unknown trigger_name "%s"' % (self.__class__.my_type, self.get_full_name(), tname))
@@ -743,7 +743,7 @@ class Items(object):
                     # add the template object to us
                     new_tpls.append(t)
                 else: # not find? not good!
-                    err = "WARNING: the template '%s' defined for '%s' is unknown" % (tpl, i.get_name())
+                    err = "the template '%s' defined for '%s' is unknown" % (tpl, i.get_name())
                     i.configuration_warnings.append(err)
             i.templates = new_tpls
 
@@ -767,16 +767,17 @@ class Items(object):
             # Ok, look at no twins (it's bad!)
             for id in twins:
                 i = self.items[id]
-                safe_print("Error: the", i.__class__.my_type, i.get_name(), "is duplicated from", getattr(i, 'imported_from', "unknown source"))
+                logger.error("[items] %s.%s is duplicated from %s" %\
+                    (i.__class__.my_type, i.get_name(), getattr(i, 'imported_from', "unknown source")))
                 r = False
 
         # Then look if we have some errors in the conf
         # Juts print warnings, but raise errors
         for err in self.configuration_warnings:
-            print err
+            logger.warning("[items] %s" % err)
 
         for err in self.configuration_errors:
-            print err
+            logger.error("[items] %s" % err)
             r = False
 
         # Then look for individual ok
@@ -791,7 +792,7 @@ class Items(object):
             # Now other checks
             if not i.is_correct():
                 n = getattr(i, 'imported_from', "unknown source")
-                safe_print("Error: In", i.get_name(), "is incorrect ; from", n)
+                logger.error("[items] In %s is incorrect ; from %s" % (i.get_name(), n))
                 r = False        
         
         return r
@@ -863,7 +864,7 @@ class Items(object):
         for id in self.twins:
             i = self.items[id]
             type = i.__class__.my_type
-            safe_print('Warning: the', type, i.get_name(), 'is already defined.')
+            logger.warning("[items] %s.%s is already defined" % (type, i.get_name()))
             del self[id] # bye bye
         # do not remove twins, we should look in it, but just void it
         self.twins = []
@@ -887,7 +888,7 @@ class Items(object):
                         # Else : Add in the errors tab.
                         # will be raised at is_correct
                         else:
-                            err = "ERROR: the contact '%s' defined for '%s' is unknown" % (c_name, i.get_name())
+                            err = "the contact '%s' defined for '%s' is unknown" % (c_name, i.get_name())
                             i.configuration_errors.append(err)
                 # Get the list, but first make elements uniq
                 i.contacts = list(set(new_contacts))
@@ -905,7 +906,7 @@ class Items(object):
                     if es is not None:
                         new_escalations.append(es)
                     else: # Escalation not find, not good!
-                        err = "ERROR : the escalation '%s' defined for '%s' is unknown" % (es_name, i.get_name())
+                        err = "the escalation '%s' defined for '%s' is unknown" % (es_name, i.get_name())
                         i.configuration_errors.append(err)
                 i.escalations = new_escalations
 
@@ -922,7 +923,7 @@ class Items(object):
                     if rm is not None:
                         new_resultmodulations.append(rm)
                     else:
-                        err = "The result modulation '%s'defined on the %s '%s' do not exist" % (rm_name, i.__class__.my_type, i.get_name())
+                        err = "the result modulation '%s' defined on the %s '%s' do not exist" % (rm_name, i.__class__.my_type, i.get_name())
                         i.configuration_errors.append(err)
                         continue
                 i.resultmodulations = new_resultmodulations
@@ -940,7 +941,7 @@ class Items(object):
                     if rm is not None:
                         new_business_impact_modulations.append(rm)
                     else:
-                        err = "The business impact modulation '%s'defined on the %s '%s' do not exist" % (rm_name, i.__class__.my_type, i.get_name())
+                        err = "the business impact modulation '%s' defined on the %s '%s' do not exist" % (rm_name, i.__class__.my_type, i.get_name())
                         i.configuration_errors.append(err)
                         continue
                 i.business_impact_modulations = new_business_impact_modulations
@@ -1063,9 +1064,8 @@ class Items(object):
         end = len(expr)
         ctxres = hg_name_parse_EXPR(expr, begin, end) 
         if ctxres.rc:
-            err = "The syntax of %s is invalid : %s" % (expr, ctxres.reason)
+            err = "the syntax of %s is invalid : %s" % (expr, ctxres.reason)
             self.configuration_errors.append(err)
-            print err
             return []
         
         str_setexpr = hg_name_rebuild_str(ctxres.full_res)
@@ -1083,13 +1083,11 @@ class Items(object):
         try:
             set_res = set(eval(str_setexpr, newgroupname2hostnames, {}))
         except SyntaxError, e:
-            err = "The syntax of '%s' is invalid (%s)" % (expr, e)
+            err = "the syntax of '%s' is invalid (%s)" % (expr, e)
             self.configuration_errors.append(err)
-            print err
         except NameError, e:
-            err = "There is an unknown name in '%s' (names=%s), err=%s" % (expr, groupsname2hostsnames, e)
+            err = "there is an unknown name in '%s' (names=%s), err=%s" % (expr, groupsname2hostsnames, e)
             self.configuration_errors.append(err)
-            print err
 
         return list(set_res)
 
