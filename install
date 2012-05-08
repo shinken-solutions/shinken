@@ -751,6 +751,7 @@ function sinstall(){
     cp $TARGET/bin/init.d/shinken* /etc/init.d/
     mkdir -p $TARGET/var/archives
     enableretention
+    enable
     if [ "$LOGSTORE" == "mongo" ]
     then
         enablemongologs 
