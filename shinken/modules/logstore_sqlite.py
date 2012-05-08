@@ -169,6 +169,8 @@ class LiveStatusLogStoreSqlite(BaseModule):
         self.execute(cmd)
         cmd = "CREATE INDEX IF NOT EXISTS logs_time ON logs (time)"
         self.execute(cmd)
+        cmd = "CREATE INDEX IF NOT EXISTS logs_host_name ON logs (host_name)"
+        self.execute(cmd)
         cmd = "PRAGMA journal_mode=truncate"
         self.execute(cmd)
         self.commit()
