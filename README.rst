@@ -50,8 +50,8 @@ Third way: install script
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 You can use the install utility script located at the root of the shinken sources.
-The script create the user and group, install all dependencies and then install shinken. It is compatible with Debian, Ubuntu, Centos/Redhat 5.x and 6.x
-The only requirement is an internet connection for the server on which you want to install shinken. It also allow to modify the installation folder in a configuration file.
+The script creates the user and group, installs all dependencies and then it installs shinken. It is compatible with Debian, Ubuntu, Centos/Redhat 5.x and 6.x
+The only requirement is an internet connection for the server on which you want to install shinken. It also allows to modify the installation folder in a configuration file.
 
 If you want shinken installed in seconds (default in /usr/local/shinken), just run ::
 
@@ -116,7 +116,7 @@ __ http://code.google.com/p/pysqlite/
 Just untar and launch `python setup.py install` (and be sure to have
 installed the `python-devel` package too).
 
-For Python, it should be okay with nearly all distribution.
+For Python, it should be okay with almost all distribution.
 
 Under ubuntu, you can grab the Pyro module with::
 
