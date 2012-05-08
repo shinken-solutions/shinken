@@ -53,7 +53,7 @@ You can use the install utility script located at the root of the shinken source
 The script create the user and group, install all dependencies and then install shinken. It is compatible with Debian, Ubuntu, Centos/Redhat 5.x and 6.x
 The only requirement is an internet connection for the server on which you want to install shinken. It also allow to modify the installation folder in a configuration file.
 
-If you want shinken installed in seconds (default in /usr/local/shinken), just run :
+If you want shinken installed in seconds (default in /usr/local/shinken), just run ::
 
   install -i
 
@@ -63,7 +63,7 @@ see install.d/README file for further informations.
 How to update
 =========================
 
-If you used the setup.py way, launch :
+If you used the setup.py way, launch ::
     sudo python setup.py update --install-scripts=/usr/bin/
 
 If you used the install script way :
@@ -72,21 +72,21 @@ If you used the install script way :
 
 2 - cd into the resulting folder
 
-3 - backup shinken configuration plugins and addons and copy the backup id
+3 - backup shinken configuration plugins and addons and copy the backup id::
     
-    ./install -b
+  ./install -b
 
-4 - remove shinken (if you installed addons with the installer say no to the question about removing the addons)
+4 - remove shinken (if you installed addons with the installer say no to the question about removing the addons)::
     
-    ./install -u
+  ./install -u
 
-5 - install shinken 
+5 - install shinken::
 
-    ./install -i
+  ./install -i
 
-6 - restore the backup
+6 - restore the backup::
 
-    ./install -r backupid
+  ./install -r backupid
 
 
 Requirements
@@ -200,5 +200,6 @@ Beware, it will supress all Shinken related files!
 If you used install script 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-cd into shinken source folder and run ./install -u
+cd into shinken source folder and run::
+  ./install -u
 
