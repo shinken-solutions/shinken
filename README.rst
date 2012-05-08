@@ -68,25 +68,23 @@ If you used the setup.py way, launch :
 
 If you used the install script way :
 
-there is curently no simple way to do this :
+1 - grab the latest shinken archive and extract it's content 
 
-  1 - grab the latest shinken archive and extract it's content 
+2 - cd into the resulting folder
 
-  2 - cd into the resulting folder
-
-  3 - backup shinken configuration plugins and addons and copy the backup id
+3 - backup shinken configuration plugins and addons and copy the backup id
     
     ./install -b
 
-  4 - remove shinken (if you installed addons with the installer say no to the question about removing the addons)
+4 - remove shinken (if you installed addons with the installer say no to the question about removing the addons)
     
     ./install -u
 
-  5 - install shinken 
+5 - install shinken 
 
     ./install -i
 
-  6 - restore the backup
+6 - restore the backup
 
     ./install -r backupid
 
