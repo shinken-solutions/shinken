@@ -174,6 +174,9 @@ The `setup.py` install some `init.d` scripts, let's use them::
   /etc/init.d/shinken-broker start
   /etc/init.d/shinken-arbiter start
 
+Install script
+~~~~~~~~~~~~~~~~~~~~
+
 The install script also install some `init.d` scripts and enable them at boot time and start them right after install process end. 
 
 Known bugs
