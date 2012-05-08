@@ -55,7 +55,6 @@ class Graphite_broker(BaseModule):
         BaseModule.__init__(self, modconf)
         self.host = getattr(modconf, 'host', 'localhost')
         self.port = int(getattr(modconf, 'port', '2003'))
-        self.illegal_char = re.compile(r'[^\w]');
 
 
     # Called by Broker so we can do init stuff

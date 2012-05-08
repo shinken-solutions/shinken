@@ -82,7 +82,7 @@ class Graphite_Webui(BaseModule):
 
 
 
-    # Give the link for the PNP UI, with a Name
+    # Give the link for the GRAPHITE UI, with a Name
     def get_external_ui_link(self):
         return {'label' : 'Graphite', 'uri' : self.uri}
 
@@ -101,7 +101,7 @@ class Graphite_Webui(BaseModule):
             elts = e.split('=', 1)
             if len(elts) != 2:
                 continue
-            name = re.sub(r'[^\w]', '_', elts[0])
+            name = self.illegal_char.sub('_', elts[0])
             raw = elts[1]
             # get the first value of ;
             if ';' in raw:
@@ -129,7 +129,7 @@ class Graphite_Webui(BaseModule):
 
 
     # Ask for an host or a service the graph UI that the UI should
-    # give to get the graph image link and PNP page link too.
+    # give to get the graph image link and Graphite page link too.
     def get_graph_uris(self, elt, graphstart, graphend):
         if not elt:
             return []
@@ -151,11 +151,11 @@ class Graphite_Webui(BaseModule):
             values['graphstart'] = graphstart
             values['graphend'] = graphend 
             if t == 'host':
-                values['host'] = re.sub("[^a-zA-Z0-9]", "_",elt.host_name)
+                values['host'] = self.illegal_char.sub("_",elt.host_name)
                 values['service'] = '__HOST__'
             if t == 'service':
-                values['host'] = re.sub("[^a-zA-Z0-9]", "_",elt.host.host_name)
-                values['service'] = re.sub("[^a-zA-Z0-9]", "_",elt.service_description)
+                values['host'] = self.illegal_char.sub("_",elt.host.host_name)
+                values['service'] = self.illegal_char.sub("_",elt.service_description)
             values['uri'] = self.uri
             # Split, we may have several images.
             for img in html.substitute(values).split('\n'):
@@ -180,7 +180,7 @@ class Graphite_Webui(BaseModule):
                 return []
 
             # Remove all non alpha numeric character
-            host_name = re.sub(r'[^\w]', '_', elt.host_name)
+            host_name = self.illegal_char.sub('_', elt.host_name)
 
             # Send a bulk of all metrics at once
             for (metric, _) in couples:
@@ -203,8 +203,8 @@ class Graphite_Webui(BaseModule):
                 return []
 
             # Remove all non alpha numeric character
-            desc = re.sub(r'[^\w]', '_', elt.service_description)
-            host_name = re.sub(r'[^\w]', '_', elt.host.host_name)
+            desc = self.illegal_char.sub('_', elt.service_description)
+            host_name = self.illegal_char.sub('_', elt.host.host_name)
             
             # Send a bulk of all metrics at once
             for (metric, value) in couples:
