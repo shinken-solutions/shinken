@@ -22,11 +22,10 @@ Usage
 This is a really simple script allowing to install a fully fonctionnal shinken in seconds !
 Curently only tested with Ubuntu/Linux Mint/Debian and RHEL/CentOS 5/6 distros. 
 
-Usage : install -k | -i | -d | -b | -r backupname | -l | -c | -e "daemonslist" | -p pluginname | -a addonname 
-
+Usage : install -k | -i | -u [addonname] | -b | -r backupname | -l | -c | -e \"daemonslist\" | -p pluginname | -a addonname 
     -k | --kill             Kill shinken
     -i | --install          Install shinken
-    -u | --uninstall        Remove shinken
+    -u | --uninstall        Remove shinken and all of the addons. if an argument is specified then just remove the specified argument
     -b | --backup           Backup shinken configuration plugins and data
     -r | --restore          Restore shinken configuration plugins and data
     -l | --listbackups      List shinken backups
@@ -60,29 +59,31 @@ Usage : install -k | -i | -d | -b | -r backupname | -l | -c | -e "daemonslist" |
                                mongodb
     -h | --help             Show help
 
-
 configuration file
 ~~~~~~~~~~~~~~~~~~
 
 You can modify the target folder, backup folder or user/group the following way :
 
-  TARGET=/usr/local/nagios SKUSER=toto SKGROUP=titi ./shinken.sh -i
+  TARGET=/usr/local/nagios SKUSER=toto SKGROUP=titi ./install -i
 
 allowed values are :
 
-  TMP           temporary folder
-  TARGET        where to put shinken
-  BACKUPDIR     where to put backups
-  SKUSER        shinken user
-  SKGROUP       shinken group
+  TMP               temporary folder
+  TARGET            where to put shinken
+  ETC               where to put the etc folder
+  BACKUPDIR         where to put backups
+  SKUSER            shinken user
+  SKGROUP           shinken group
+  USEPROXY          use proxy environment variable for wget operations (also see below for proxy usage)
+  SKIPPREREQUISITES bypass prerequisites checks and installation (experimental). Set to 1 if you want to skip prerequisites
 
-Others configuration values are stored in shinken.conf. You can try to modify them, but never forget to test it before using them in production.
+Others configuration values are stored in install.d/shinken.conf. You can try to modify them, but never forget to test it before using them in production.
 
 Using proxy
 ~~~~~~~~~~~
 
 You can enable support for proxy this way 
-    ex : USEPROXY=1 ./shinken.sh -i
+    ex : USEPROXY=1 ./install -i
 
 Do not forget to declare proxy environment variables 
 
