@@ -53,17 +53,16 @@ You can use the install utility script located at the root of the shinken source
 The script create the user and group, install all dependencies and then install shinken. It is compatible with Debian, Ubuntu, Centos/Redhat 5.x and 6.x
 The only requirement is an internet connection for the server on which you want to install shinken. It also allow to modify the installation folder in a configuration file.
 
-If you want shinken installed in seconds in /opt/shinken, just run :
+If you want shinken installed in seconds (default in /usr/local/shinken), just run :
 
   install -i
 
-If you want to remove shinken, just run :
-
-  install -d
+see install.d/README file for further informations.
 
 
 How to update
 =========================
+
 If you used the setup.py way, launch :
     sudo python setup.py update --install-scripts=/usr/bin/
 
@@ -71,13 +70,25 @@ If you used the install script way :
 
 there is curently no simple way to do this :
 
-1 - backup the var etc and plugins folder 
+  1 - grab the latest shinken archive and extract it's content 
 
-2 - remove shinken (install -d)
+  2 - cd into the resulting folder
 
-3 - install shinken (install -i)
+  3 - backup shinken configuration plugins and addons and copy the backup id
+    
+    ./install -b
 
-4 - restore the backups
+  4 - remove shinken (if you installed addons with the installer say no to the question about removing the addons)
+    
+    ./install -u
+
+  5 - install shinken 
+
+    ./install -i
+
+  6 - restore the backup
+
+    ./install -r backupid
 
 
 Requirements
@@ -157,7 +168,7 @@ It's easy, there is a already launch script for you::
 Clean way
 ~~~~~~~~~~~~~~~~~~~~
 
-The `setup.py` installes some `init.d` scripts, let's use them::
+The `setup.py` install some `init.d` scripts, let's use them::
 
   /etc/init.d/shinken-scheduler start
   /etc/init.d/shinken-poller start
@@ -165,6 +176,7 @@ The `setup.py` installes some `init.d` scripts, let's use them::
   /etc/init.d/shinken-broker start
   /etc/init.d/shinken-arbiter start
 
+The install script also install some `init.d` scripts and enable them at boot time and start them right after install process end. 
 
 Known bugs
 ================================
@@ -183,3 +195,9 @@ Clean all :)
 
 There is a script called clean.sh in the source directory for this task.
 Beware, it will supress all Shinken related files!
+
+If you used install script 
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+cd into shinken source folder and run ./install -u
+
