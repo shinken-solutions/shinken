@@ -173,7 +173,7 @@ class Notification(Action):
 
 
     def __str__(self):
-        return "Notification %d status:%s command:%s ref:%s t_to_go:%s" % (self.id, self.status, self.command, self.ref, time.asctime(time.localtime(self.t_to_go)))
+        return "Notification %d status:%s command:%s ref:%s t_to_go:%s" % (self.id, self.status, self.command, getattr(self, 'ref', 'unknown'), time.asctime(time.localtime(self.t_to_go)))
 
 
     def get_id(self):

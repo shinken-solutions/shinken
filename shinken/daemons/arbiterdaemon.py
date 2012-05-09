@@ -350,7 +350,6 @@ class Arbiter(Daemon):
         # We removed templates, and so we must recompute the
         # search lists
         self.conf.create_reversed_list()
-
         
         # Pythonize values
         self.conf.pythonize()
@@ -404,7 +403,9 @@ class Arbiter(Daemon):
         # a realm with hosts and not schedulers for it
         if not self.conf.conf_is_correct:
             self.conf.show_errors()
-            sys.exit("Configuration is incorrect, sorry, I bail out")
+            err = "Configuration is incorrect, sorry, I bail out"
+            logger.error(err)
+            sys.exit(err)
 
         logger.info('Things look okay - No serious problems were detected during the pre-flight check', print_it=True)
 
