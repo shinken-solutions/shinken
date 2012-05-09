@@ -1425,7 +1425,7 @@ function install_pnp4nagios(){
         /etc/init.d/httpd restart >> $TMP/shinken.install.log 2>&1
     else
         /etc/init.d/apache2 restart >> $TMP/shinken.install.log 2>&1 
-    fi
+    fi²
     cecho " > Configuring source tree" green
     ./configure --prefix=$PNPPREFIX --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP >> $TMP/shinken.install.log 2>&1     
     cecho " > Building ...." green
@@ -1444,7 +1444,7 @@ function install_pnp4nagios(){
         /etc/init.d/apache2 restart >> $TMP/shinken.install.log 2>&1 
     fi
     cecho " > Enable npcdmod" green
-    ip=$(ifconfig | grep "inet addr" | grep -v 127.0.0.1 | awk '{print $2}' | awk -F : '{print $2}' | head -n 1)
+    ip=$(ifconfig | grep "inet ad" | grep -v 127.0.0.1 | awk '{print $2}' | awk -F : '{print $2}' | head -n 1)
     cecho " > using ip address : $ip"
     do_skmacro enable_npcd.macro $PNPPREFIX/etc/npcd.cfg,$ip
     cecho " > Starting npcd" green 
