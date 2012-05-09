@@ -514,7 +514,7 @@ class Service(SchedulingItem):
         if prop in host.customs:
             entry = host.customs[prop]
 
-            default_value = getattr(self, 'default_value', None)
+            default_value = getattr(self, 'default_value', '')
             # Transform the generator string to a list
             # Missing values are filled with the default value
             (key_values, errcode) = get_key_value_sequence(entry, default_value)
