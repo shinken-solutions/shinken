@@ -41,6 +41,7 @@ function get_use_values(name){
 $(document).ready(function(){
     $(".to_use_complete").each(function(idx, elt){
         var raw_use = $(this).attr('data-use').split(',');
+	var cls = $(this).attr('data-cls');
         var pop = [];
 	// If we got a '' value, a each will put a void element...
 	if(raw_use != ''){
@@ -57,7 +58,7 @@ $(document).ready(function(){
 
 	  ... yes, I said huge :)
 	 */
-	$(this).tokenInput("/lookup/tag",
+	$(this).tokenInput("/lookup/"+cls+"/tag",
 			   {'theme' : 'facebook',
 			    prePopulate: pop, 
 			    method : 'POST', queryParam:'value', 

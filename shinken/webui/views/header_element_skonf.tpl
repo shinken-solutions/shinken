@@ -50,7 +50,7 @@
 
 
 	<ul class="nav">
-	  %if menu_part == '/objects':
+	  %if menu_part == '/elements':
           <li class="dropdown active">
 	  %else:
 	  <li class="dropdown">
@@ -59,7 +59,7 @@
             <ul class="dropdown-menu">
 	      %lst = ['hosts', 'services', 'contacts', 'commands', 'timeperiods']
 	      %for i in lst:
-                 <li><a href="/objects/{{i}}">{{i.capitalize()}}</a></li>
+                 <li><a href="/elements/{{i}}">{{i.capitalize()}}</a></li>
 	      %end
             </ul>
           </li>
@@ -92,7 +92,7 @@
          </div>
 	       <ul class="nav pull-right">
           <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Hi {{user.get_name().capitalize()}} <b class="caret"></b></a>
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Hi {{user.get('contact_name', 'unknown').capitalize()}} <b class="caret"></b></a>
             <ul class="dropdown-menu">
 	           <a class='disabled-link' href="#"><i class="icon-pencil"></i> Edit profile</a>
             </ul>

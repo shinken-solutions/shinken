@@ -50,6 +50,7 @@ from shinken.external_command import ExternalCommand
 from shinken.util import safe_print
 from shinken.skonfuiworker import SkonfUIWorker
 from shinken.message import Message
+from shinken.misc.datamanagerskonf import datamgr
 
 # DBG : code this!
 from shinken.objects import Contact
@@ -119,6 +120,7 @@ class IForArbiter(Interface):
                         return {'alive' : dae.alive, 'spare' : dae.spare}
         return None
 
+
     # Here a function called by check_shinken to get daemons list
     def get_satellite_list(self, daemon_type):
         satellite_list = []
@@ -181,6 +183,11 @@ class Skonf(Daemon):
         self.workers = {}   # dict of active workers
 
         self.host_templates = None
+        self.service_templates = None
+        self.contact_templates = None
+        self.timeperiod_templates = None
+
+        self.datamgr = datamgr
 
 
 
@@ -279,13 +286,13 @@ class Skonf(Daemon):
         self.hook_point('early_configuration')
 
         # Create Template links
-        self.conf.linkify_templates()
+        #self.conf.linkify_templates()
 
         # All inheritances
-        self.conf.apply_inheritance()
+        #self.conf.apply_inheritance()
 
         # Explode between types
-        self.conf.explode()
+        #self.conf.explode()
 
         # Create Name reversed list for searching list
         self.conf.create_reversed_list()
@@ -294,14 +301,17 @@ class Skonf(Daemon):
         self.conf.remove_twins()
 
         # Implicit inheritance for services
-        self.conf.apply_implicit_inheritance()
+        #self.conf.apply_implicit_inheritance()
 
         # Fill default values
-        self.conf.fill_default()
+        super(Config, self.conf).fill_default()
         
         # Remove templates from config
         # SAVE TEMPLATES
         self.host_templates = self.conf.hosts.templates
+        self.service_templates = self.conf.services.templates
+        self.contact_templates = self.conf.contacts.templates
+        self.timeperiod_templates = self.conf.timeperiods.templates
         # Then clean for other parts
         self.conf.remove_templates()
 
@@ -310,59 +320,60 @@ class Skonf(Daemon):
         self.conf.create_reversed_list()
         
         # Pythonize values
-        self.conf.pythonize()
+        #self.conf.pythonize()
+        super(Config, self.conf).pythonize()
 
         # Linkify objects each others
-        self.conf.linkify()
+        #self.conf.linkify()
 
         # applying dependencies
-        self.conf.apply_dependencies()
+        #self.conf.apply_dependencies()
 
         # Hacking some global parameter inherited from Nagios to create
         # on the fly some Broker modules like for status.dat parameters
         # or nagios.log one if there are no already available
-        self.conf.hack_old_nagios_parameters()
+        #self.conf.hack_old_nagios_parameters()
 
         # Raise warning about curently unmanaged parameters
-        if self.verify_only:
-            self.conf.warn_about_unmanaged_parameters()
+        #if self.verify_only:
+        #    self.conf.warn_about_unmanaged_parameters()
 
         # Exlode global conf parameters into Classes
-        self.conf.explode_global_conf()
+        #self.conf.explode_global_conf()
 
         # set ourown timezone and propagate it to other satellites
-        self.conf.propagate_timezone_option()
+        #self.conf.propagate_timezone_option()
 
         # Look for business rules, and create the dep tree
-        self.conf.create_business_rules()
+        #self.conf.create_business_rules()
         # And link them
-        self.conf.create_business_rules_dependencies()
+        #self.conf.create_business_rules_dependencies()
 
         # Warn about useless parameters in Shinken
-        if self.verify_only:
-            self.conf.notice_about_useless_parameters()
+        #if self.verify_only:
+        #    self.conf.notice_about_useless_parameters()
 
         # Manage all post-conf modules
         self.hook_point('late_configuration')
         
         # Correct conf?
-        self.conf.is_correct()
+        #self.conf.is_correct()
 
         #If the conf is not correct, we must get out now
         #if not self.conf.conf_is_correct:
         #    sys.exit("Configuration is incorrect, sorry, I bail out")
 
         # REF: doc/shinken-conf-dispatching.png (2)
-        logger.info("Cutting the hosts and services into parts")
-        self.confs = self.conf.cut_into_parts()
+        #logger.info("Cutting the hosts and services into parts")
+        #self.confs = self.conf.cut_into_parts()
 
         # The conf can be incorrect here if the cut into parts see errors like
         # a realm with hosts and not schedulers for it
         if not self.conf.conf_is_correct:
             self.conf.show_errors()
-            sys.exit("Configuration is incorrect, sorry, I bail out")
-
-        logger.info('Things look okay - No serious problems were detected during the pre-flight check')
+        #    sys.exit("Configuration is incorrect, sorry, I bail out")
+        else:
+           logger.info('Things look okay - No serious problems were detected during the pre-flight check')
 
         # Now clean objects of temporary/unecessary attributes for live work:
         self.conf.clean()
@@ -374,7 +385,7 @@ class Skonf(Daemon):
         # Some properties need to be "flatten" (put in strings)
         # before being send, like realms for hosts for example
         # BEWARE: after the cutting part, because we stringify some properties
-        self.conf.prepare_for_sending()
+        #self.conf.prepare_for_sending()
 
         # Ok, here we must check if we go on or not.
         # TODO : check OK or not
@@ -630,6 +641,8 @@ class Skonf(Daemon):
 
         self.init_db()
 
+        self.init_datamanager()
+
         # Launch the data thread"
         self.workersmanager_thread = threading.Thread(None, self.workersmanager, 'httpthread')
         self.workersmanager_thread.start()
@@ -857,10 +870,12 @@ class Skonf(Daemon):
         if not user_name:
             return None
 
-        #c = self.datamgr.get_contact(user_name)
-        c = Contact()
-        c.contact_name = user_name
-        c.is_admin = True
+        c = self.datamgr.get_contact(user_name)
+
+        print "Find a contact?", user_name, c
+        #c = Contact()
+        #c.contact_name = user_name
+        #c.is_admin = True
         return c
 
 
@@ -891,6 +906,11 @@ class Skonf(Daemon):
        con = Connection('localhost')
        self.db = con.shinken
 
+
+    def init_datamanager(self):
+       self.datamgr.load_conf(self.conf)
+       self.datamgr.load_db(self.db)
+       
 
     # TODO : code this!
     def check_auth(self, login, password):

@@ -12,7 +12,7 @@
   <h3>All your contacts</h3>
   %for h in elts:
   <div class='object_{{elt_type}} span12'>
-    <div class='host_name cut-long pull-left'><a href='/elements/hosts/{{h.get_name()}}'>{{h.get_name()}}</a>
+    <div class='host_name cut-long pull-left'><a href='/elements/contacts/{{h.get_name()}}'>{{h.get_name()}}</a>
     %if h.get_name() == user.get_name():
       <span class="label label-important">It's you!</span>
     %end

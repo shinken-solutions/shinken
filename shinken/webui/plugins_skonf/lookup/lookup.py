@@ -38,21 +38,30 @@ except ImportError:
         raise
 
 
-def lookup(name=''):
+def lookup(cls='', name=''):
     app.response.content_type = 'application/json'
 
     user = app.get_user_auth()
     if not user:
         return []
+    
+    sources = {'host' : app.host_templates, 'service' : app.service_templates,
+               'contact' : app.contact_templates, 'timeperiod' : app.timeperiod_templates}
 
+    # Look for a valid source
+    if cls not in sources:
+        print "Lookup : bad class", cls
+        return []
+
+    # And a name not too short
     if len(name) < 3:
         print "Lookup %s too short, bail out" % name
         return []
 
 
-    print "Lookup for", name
+    print "Lookup for", name, "in", cls
     tags = set()
-    for h in app.host_templates.values():
+    for h in sources[cls].values():
         print "Template", h
         if hasattr(h, 'name'):
             tags.add(h.name)
@@ -63,21 +72,28 @@ def lookup(name=''):
     return json.dumps(r)
 
 
-def lookup_tag_post():
+def lookup_tag_post(cls=''):
     app.response.content_type = 'application/json'
 
 #    user = app.get_user_auth()
 #    if not user:
 #        return []
+    sources = {'host' : app.host_templates, 'service' : app.service_templates,
+               'contact' : app.contact_templates, 'timeperiod' : app.timeperiod_templates}
+
+
+    if cls not in sources:
+        print "Lookup : bad class", cls
+        return []
 
     name = app.request.forms.get('value')
     if not name or len(name) < 3:
         print "Lookup POST %s too short, bail out" % name
         return []
 
-    print "Lookup for", name
+    print "Lookup for", name, "in", sources[cls]
     tags = set()
-    for h in app.host_templates.values():
+    for h in sources[cls].values():
         print "Template", h
         if hasattr(h, 'name'):
             tags.add(h.name)
@@ -89,7 +105,7 @@ def lookup_tag_post():
 
 
 
-pages = {lookup_tag_post : { 'routes' : ['/lookup/tag'] , 'method' : 'POST'},
-         lookup : { 'routes' : ['/lookup/tag/:name']},
+pages = {lookup_tag_post : { 'routes' : ['/lookup/:cls/tag'] , 'method' : 'POST'},
+         lookup : { 'routes' : ['/lookup/:cls/tag/:name']},
          }
 

@@ -101,8 +101,9 @@ def elements_contact(name):
     user = app.get_user_auth()
     if not user:
         redirect("/user/login")
-
-    elt = app.db.contacts.find_one({'_id' : name})
+        
+    elt = app.datamgr.get_contact(name)
+    #elt = app.db.contacts.find_one({'_id' : name})
     if not elt:
         elt = {}
     return {'app' : app, 'user' : user, 'elt' : elt, 'helper' : Helper(app)}
@@ -197,7 +198,7 @@ pages = {
     # Contacts
     elements_contacts : { 'routes' : ['/elements/contacts'], 'view' : 'elements_contacts', 'static' : True},
     elements_contact : { 'routes' : ['/elements/contacts/:name'], 'view' : 'elements_contact', 'static' : True},
-    new_contact : { 'routes' : ['/elements/add/host'], 'view' : 'elements_contact', 'static' : True},
+    new_contact : { 'routes' : ['/elements/add/contact'], 'view' : 'elements_contact', 'static' : True},
 
     elements_services : { 'routes' : ['/elements/services'], 'view' : 'elements_hosts', 'static' : True},
     elements_timeperiods : { 'routes' : ['/elements/timeperiods'], 'view' : 'elements_hosts', 'static' : True},
