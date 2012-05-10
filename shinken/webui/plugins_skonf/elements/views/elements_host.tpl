@@ -22,7 +22,7 @@ var properties = [];
   <span id='saving_log' class='hide alert'></span>
 </div>
 
-<a class='btn btn-info' href="javascript:submit_form()"><i class="icon-ok"></i> Submit</a>
+<a class='btn btn-info {{editable}}' href="javascript:submit_form()"><i class="icon-ok"></i> Submit</a>
 
 <div class='offset1 span10'>
   <form name='form-host'>

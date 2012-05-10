@@ -312,10 +312,19 @@ class Helper(object):
         return s
 
 
-    def get_customs_input(self, elt, editable=''):
+    def get_customs_inputs(self, elt, editable=''):
+        print "CUSTOM OF", elt
         s = ''
         customs = {}
+
         for (k,v) in elt.iteritems():
             if k.startswith('_') and k != '_id':
-                s+= self.get_string_input(elt, k, k, editable=editable)
+                customs[k] = v
+
+        
+
+        for (k,v) in customs.iteritems():
+                s+= self.get_string_input(elt, k, k[1:], editable=editable)
     
+        
+        return s
