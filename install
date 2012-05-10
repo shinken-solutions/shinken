@@ -2384,6 +2384,11 @@ do
             then
                 install_mongodb
                 exit 0
+            elif [ "$OPTARG" == "nconf" ]
+            then
+                cecho " > Not implemented yet"
+                #install_nconf
+                exit 0
             else
                 cecho " > Unknown addon $OPTARG" red
             fi
@@ -2440,6 +2445,10 @@ do
                         exit 2
                         ;;
                     multisite)
+                        cecho " > Not implemented yet" red
+                        exit 2
+                        ;;
+                    nconf)
                         cecho " > Not implemented yet" red
                         exit 2
                         ;;
