@@ -51,15 +51,18 @@ def elements_generic(cls):
     # First we look for the user sid
     # so we bail out if it's a false one
     user = app.get_user_auth()
-
     if not user:
         redirect("/user/login")
     
-    
+        
     # Get all entries from db
     t = getattr(app.db, cls.my_type+'s')
     cur = t.find({})
     elts = [cls(i) for i in cur]
+    print "GENERIC", cls.my_type
+    if cls.my_type == 'host':
+        print "HOOK HOSTS"
+        elts = [cls(i) for i in app.datamgr.get_hosts()]
 
     return {'app' : app, 'user' : user, 'elts' : elts, 'elt_type' : cls.my_type}
 
@@ -87,7 +90,8 @@ def elements_host(name):
     if not user:
         redirect("/user/login")
 
-    elt = app.db.hosts.find_one({'_id' : name})
+    #elt = app.db.hosts.find_one({'_id' : name})
+    elt = app.datamgr.get_host(name)
     if not elt:
         elt = {}
     return {'app' : app, 'user' : user, 'elt' : elt, 'helper' : Helper(app)}

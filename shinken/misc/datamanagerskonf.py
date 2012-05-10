@@ -53,6 +53,12 @@ class DataManagerSKonf(DataManager):
         for prop in properties:
             if hasattr(o, prop):
                 d[prop] = getattr(o, prop)
+        customs = getattr(o, 'customs', [])
+        for (k,v) in customs.iteritems():
+            print "SET CUSTOM", k, v
+            d[k] = v
+        # Inner object are NOT ediable by skonf!
+        d['editable'] = '0'
         return d
 
 
@@ -65,6 +71,27 @@ class DataManagerSKonf(DataManager):
         print "Looking for", key, value, "in", table, col
         r = col.find_one({key : value})
         print "Founded", r
+        return r
+
+    def get_all_in_db(self, table):
+        col = getattr(self.db, table)
+        print "GET ALL FROM", table, col
+        r = col.find({})
+        print "Founded", r
+        return r
+
+    # Merge internal and db hosts in the same list
+    def get_hosts(self):
+        r = []
+        for h in self.rg.hosts:
+            v = self.unclass(h)
+            print "Unclass", v
+            r.append(v)
+        names = [h['host_name'] for h in r if 'host_name' in h]
+        for h in self.get_all_in_db('hosts'):
+            if not h.get('host_name', '') in names:
+                r.append(h)
+
         return r
 
 
@@ -83,12 +110,12 @@ class DataManagerSKonf(DataManager):
     def get_host(self, hname):
         for c in self.rg.hosts:
             print "DUMP RAW HOST", c, c.__dict__
-        r = self.rg.hosts.find_by_name(cname)
+        r = self.rg.hosts.find_by_name(hname)
         if r:
             r = self.unclass(r)
             print "Will finallyu give un unclass", r
             return r
-        r = self.get_in_db('hosts', 'host_name', cname)
+        r = self.get_in_db('hosts', 'host_name', hname)
         return r
 
         

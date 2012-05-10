@@ -72,22 +72,22 @@ class Helper(object):
 
 
     # Return a simple string input
-    def get_string_input(self, elt, prop, name, span='span10', innerspan='span2' ,placeholder='', popover=None):
+    def get_string_input(self, elt, prop, name, span='span10', innerspan='span2' ,placeholder='', popover=None, editable=''):
         p = ''
         if popover is not None:
             p = '<i id="popover-%s" class="icon-question-sign"></i>' % prop
             p += '<script>$("#popover-%s").popover({"title": "Help", "content" : "%s"});</script>' % (prop, popover)
         s = '''<span class="%s">
                   <span class="help-inline %s"> %s </span>
-                  <input name="%s" type="text" value="%s" placeholder='%s' />
+                  <input class="%s" name="%s" type="text" value="%s" placeholder='%s' %s/>
                   %s
                </span>
                <script>properties.push({'name' : '%s', 'type' : 'string'});</script>
-            ''' % (span, innerspan, name, prop, elt.get(prop, ''), placeholder, p, prop)
+            ''' % (span, innerspan, name, editable, prop, elt.get(prop, ''), placeholder, editable, p, prop)
         return s
 
 
-    def get_bool_input(self, elt, prop, name):
+    def get_bool_input(self, elt, prop, name, editable=''):
         # Ok, let's try to see the value in db first
         v = elt.get(prop, '')
 
@@ -106,17 +106,17 @@ class Helper(object):
            <span class="help-inline span2"> %s </span>
 
         <script>properties.push({'name' : '%s', 'type' : 'bool'});</script>
-	<div class="btn-group span9" data-toggle="buttons-radio">
-	  <button class="btn %s" type="button" name="%s" value="1" >On</button>
-	  <button class="btn %s" type="button" name="%s" value="0" >Off</button>
-	  <button class="btn %s" type="button" name="%s" value="" >Unset</button>
+	<div class="btn-group span9 %s" data-toggle="buttons-radio">
+	  <button class="btn %s %s" type="button" name="%s" value="1" >On</button>
+	  <button class="btn %s %s" type="button" name="%s" value="0" >Off</button>
+	  <button class="btn %s %s" type="button" name="%s" value="" >Unset</button>
 	</div>
-        </span>''' % (name, prop, on, prop, off, prop, unset, prop)
+        </span>''' % (name, prop, editable, on, editable, prop, off, editable, prop, unset, editable, prop)
         return s
 
 
 
-    def get_percent_input(self, elt, prop, name):
+    def get_percent_input(self, elt, prop, name, editable=''):
         # Ok, let's try to see the value in db first
         v = elt.get(prop, '')
         value = 0
@@ -130,13 +130,13 @@ class Helper(object):
            <span class="help-inline span2"> %s </span>
            <script>properties.push({'name' : '%s', 'type' : 'percent'});</script>
            <span class='span1' id='slider_log_%s'>%s%%</span>
-           <div id='slider_%s' class='slider span5' data-log='#slider_log_%s' data-prop='%s' data-min=0 data-max=100 data-unit='%%' data-value=0 data-active=%s></div>
-           <a id='btn-slider_%s' href='javascript:toggle_slider("%s");' class='btn btn-mini'>Set/Unset</a>
-        </span>''' % (name, prop, prop, value ,prop, prop, prop, active, prop, prop)
+           <div id='slider_%s' class='%s slider span5' data-log='#slider_log_%s' data-prop='%s' data-min=0 data-max=100 data-unit='%%' data-value=0 data-active=%s></div>
+           <a id='btn-slider_%s' href='javascript:toggle_slider("%s");' class='btn btn-mini %s'>Set/Unset</a>
+        </span>''' % (name, prop, prop, value ,prop, editable, prop, prop, active, prop, prop, editable)
         return s
 
 
-    def get_select_input(self, elt, prop, name, cls, key):
+    def get_select_input(self, elt, prop, name, cls, key, editable=''):
         t = getattr(self.app.db, cls)
         tps = list(t.find({}))
         
@@ -144,7 +144,7 @@ class Helper(object):
         elt_tp = find(value, tps, key)
         print 'Find a matching element for me?', elt.get(prop), elt_tp
 
-        select_part = '''<SELECT name="%s">''' % prop
+        select_part = '''<SELECT class='%s' name="%s" %s>''' % (editable, prop, editable)
         if elt_tp:
             tpname = elt_tp.get(key)
             select_part += '<OPTION VALUE="%s">%s</OPTION>' % (tpname, tpname)
@@ -171,7 +171,7 @@ class Helper(object):
         return s
 
 
-    def get_command_input(self, elt, prop, name, cls, key):
+    def get_command_input(self, elt, prop, name, cls, key, editable=''):
         t = getattr(self.app.db, cls)
         tps = list(t.find({}))
         
@@ -187,7 +187,7 @@ class Helper(object):
         elt_tp = find(value, tps, key)
         print 'Find a matching element for me?', elt.get(prop), elt_tp
 
-        select_part = '''<SELECT name="%s">''' % prop
+        select_part = '''<SELECT class='%s' name="%s" %s>''' % (editable, prop, editable)
         if elt_tp:
             tpname = elt_tp.get(key)
             select_part += '<OPTION VALUE="%s">%s</OPTION>' % (tpname, tpname)
@@ -208,21 +208,21 @@ class Helper(object):
         s = '''<span class="span10">
                   <span class="help-inline span2"> %s </span>
                   %s
-                 Args <input name='args-%s' value='%s'></input>
+                 Args <input class='%s' name='args-%s' value='%s' %s></input>
                </span>
                <script>properties.push({'name' : '%s', 'type' : 'command'});</script>
-            ''' % (name, select_part, prop, args, prop)
+            ''' % (name, select_part, editable, prop, args, editable, prop)
         return s
         
 
-    def get_multiselect_input(self, elt, prop, name, cls, key):
+    def get_multiselect_input(self, elt, prop, name, cls, key, editable=''):
         t = getattr(self.app.db, cls)
         tps = list(t.find({}))
         
         elts_tp = find_several(tps, elt, prop, key)
         print 'Find a matching element for me?', elts_tp
 
-        select_part = '''<SELECT name="%s" multiple="multiple">''' % prop
+        select_part = '''<SELECT class='%s' name="%s" multiple="multiple" %s>''' % (editable, prop, editable)
         #if elt_tp:
         #    select_part += '<OPTION VALUE="%s">%s</OPTION>' % (tpname, tpname)
         #else:
@@ -251,16 +251,15 @@ class Helper(object):
 
 
 
-    def get_poller_tag_input(self, elt, prop, name):
-        
+    def get_poller_tag_input(self, elt, prop, name, editable=''):
         value = elt.get(prop, None)
         all_poller_tags = set()
         for p in self.app.conf.pollers:
             print 'Look at poller?', p.__dict__
-            for t in p.poller_tags:
-                all_poller_tags.add(t)
+            for t in getattr(p, 'poller_tags', '').split(','):
+                all_poller_tags.add(t.strip())
         
-        select_part = '''<SELECT name="%s">''' % prop
+        select_part = '''<SELECT class='%s' name="%s" %s>''' % (editable, prop, editable)
         if value in all_poller_tags:
             select_part += '<OPTION VALUE="%s">%s</OPTION>' % (value, value)
         # Always add a void value, to unset if need
@@ -283,7 +282,7 @@ class Helper(object):
 
 
 
-    def get_realm_input(self, elt, prop, name):
+    def get_realm_input(self, elt, prop, name, editable=''):
         
         value = elt.get(prop, None)
         all_realms = set()
@@ -291,7 +290,7 @@ class Helper(object):
             print 'Look at realm?', r.__dict__
             all_realms.add(r.get_name())
         
-        select_part = '''<SELECT name="%s">''' % prop
+        select_part = '''<SELECT class='%s' name="%s" %s>''' % (editable, prop, editable)
         if value in all_realms:
             select_part += '<OPTION VALUE="%s">%s</OPTION>' % (value, value)
         # Always add a void value, to unset if need
