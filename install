@@ -1425,7 +1425,7 @@ function install_pnp4nagios(){
         /etc/init.d/httpd restart >> $TMP/shinken.install.log 2>&1
     else
         /etc/init.d/apache2 restart >> $TMP/shinken.install.log 2>&1 
-    fi²
+    fi
     cecho " > Configuring source tree" green
     ./configure --prefix=$PNPPREFIX --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP >> $TMP/shinken.install.log 2>&1     
     cecho " > Building ...." green
