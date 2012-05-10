@@ -115,5 +115,5 @@ function submit_form(){
 	res[name] = value;
     });
     console.log('Dump data to send'+dump(res));    
-    $.post('/object/q/hosts/save/'+_id, res).success(form_success).error(form_error);
+    $.post('/element/q/hosts/save/'+_id, res).success(form_success).error(form_error);
 }
