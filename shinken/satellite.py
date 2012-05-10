@@ -648,6 +648,7 @@ class Satellite(BaseSatellite):
             # scheduler must not be initialized
             # or scheduler must not have checks
             except (AttributeError, Pyro.errors.NamingError) , exp:
+                logger.debug(str(exp))
                 pass
             # What the F**k? We do not know what happenned,
             # so.. bye bye :)

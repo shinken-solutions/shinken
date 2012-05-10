@@ -52,15 +52,16 @@ Usage : install -k | -i | -u [addonname] | -b | -r backupname | -l | -c | -e \"d
                                check_hpasm
                                check_netapp2
                                check_mem (local enhanced memory check plugin)
-    -a | --addons           Install addons. Argument should be one of the following : 
+                               check_snmp_bandwidth (check bandwidth usage with snmp)
+    -a | --addon            Install addons. Argument should be one of the following : 
                                pnp4nagios
                                multisite
                                nagvis
                                mongodb
     -h | --help             Show help
 
-configuration file
-~~~~~~~~~~~~~~~~~~
+configuration file/parameters
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 You can modify the target folder, backup folder or user/group the following way :
 
