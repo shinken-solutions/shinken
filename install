@@ -1078,7 +1078,7 @@ function enableperfdata(){
 function setdaemonsaddresses(){
     export PYTHONPATH=$TARGET
     export PY="$(pythonver)"
-    localip=$(ifconfig $IF | grep "^ *inet adr:" | awk -F : '{print $2}' | awk '{print $1}')
+    localip=$(ifconfig $IF | grep "^ *inet ad:" | awk -F : '{print $2}' | awk '{print $1}')
     result=$($PY $TARGET/install.d/tools/skonf.py -q -a setparam -f $ETC/shinken-specific.cfg -o arbiter -d address -v "$localip")
     cecho " > $result" green    
     result=$($PY $TARGET/install.d/tools/skonf.py -q -a setparam -f $ETC/shinken-specific.cfg -o scheduler -d address -v "$localip")
@@ -1359,7 +1359,7 @@ function install_multisite(){
 #    echo '   },' >> $MKPREFIX/etc/multisite.mk
 #    echo ' }' >> $MKPREFIX/etc/multisite.mk
     cp $src/install.d/multisite.mk $MKPREFIX/etc/
-    ip=$(ifconfig | grep "inet adr" | grep -v 127.0.0.1 | awk '{print $2}' | awk -F : '{print $2}' | head -n 1)
+    ip=$(ifconfig | grep "inet ad" | grep -v 127.0.0.1 | awk '{print $2}' | awk -F : '{print $2}' | head -n 1)
     sed -i "s#__HOSTADDRESS__#"$ip"#g" $MKPREFIX/etc/multisite.mk
     rm -Rf $ETC/check_mk.d/*
     chown -R $SKUSER:$SKGROUP $ETC/check_mk.d
