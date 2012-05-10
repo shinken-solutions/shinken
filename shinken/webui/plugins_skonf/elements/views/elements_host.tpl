@@ -63,6 +63,7 @@ var properties = [];
       <!-- Tab Macros -->
       <div class="tab-pane" id="macros">
 	None
+	{{!helper.get_customs_inputs(elt, editable=editable)}}
       </div>
       <!-- Tab Macros stop -->
 

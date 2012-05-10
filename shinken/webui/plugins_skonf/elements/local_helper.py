@@ -310,3 +310,12 @@ class Helper(object):
                <script>properties.push({'name' : '%s', 'type' : 'select'});</script>
             ''' % (name, select_part, prop)
         return s
+
+
+    def get_customs_input(self, elt, editable=''):
+        s = ''
+        customs = {}
+        for (k,v) in elt.iteritems():
+            if k.startswith('_') and k != '_id':
+                s+= self.get_string_input(elt, k, k, editable=editable)
+    
