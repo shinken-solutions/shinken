@@ -116,14 +116,17 @@ class Helper(object):
 
 
 
-    def get_percent_input(self, elt, prop, name, editable=''):
+    def get_percent_input(self, elt, prop, name, editable='', placeholder=''):
         # Ok, let's try to see the value in db first
         v = elt.get(prop, '')
+        # If not set, take the value from our templates?
         value = 0
         active = '0'
         if v != '':
+            placeholder = value
             value = int(v)
             active = '1'
+
 
         s = '''
         <span class="span10">
@@ -132,7 +135,7 @@ class Helper(object):
            <span class='span1' id='slider_log_%s'>%s%%</span>
            <div id='slider_%s' class='%s slider span5' data-log='#slider_log_%s' data-prop='%s' data-min=0 data-max=100 data-unit='%%' data-value=0 data-active=%s></div>
            <a id='btn-slider_%s' href='javascript:toggle_slider("%s");' class='btn btn-mini %s'>Set/Unset</a>
-        </span>''' % (name, prop, prop, value ,prop, editable, prop, prop, active, prop, prop, editable)
+        </span>''' % (name, prop, prop, placeholder ,prop, editable, prop, prop, active, prop, prop, editable)
         return s
 
 
@@ -369,7 +372,7 @@ class Helper(object):
                             founded = True
                             break
                 if ctype == 'percent':
-                    s+= self.get_percent_input(elt, k, k[1:], editable=editable)
+                    s+= self.get_percent_input(elt, k, k[1:], editable=editable, placeholder=v['placeholder'])
                 else: # if not known, apply string
                     s+= self.get_string_input(elt, k, k[1:], editable=editable, placeholder=v['placeholder'])
         
