@@ -312,19 +312,61 @@ class Helper(object):
         return s
 
 
-    def get_customs_inputs(self, elt, editable=''):
+    def get_customs_inputs(self, app, elt, editable=''):
         print "CUSTOM OF", elt
         s = ''
         customs = {}
 
+        # Get our template names
+        tnames = [t.strip() for t in elt.get('use', '').split(',')]
+
+        # Look for our templates custom values, and get only the first one
+        for t in tnames:
+            for tpl in app.host_templates.values():
+                tname = getattr(tpl, 'name', None)
+                if tname == t:
+                    for (k,v) in tpl.customs.iteritems():
+                        print 'My template customs', k, v
+                        if k not in customs:
+                           customs[k] = {'from' : tname, 'value' : ''}
+
+        # Now the item one, will overwrite any entry
         for (k,v) in elt.iteritems():
             if k.startswith('_') and k != '_id':
-                customs[k] = v
+                customs[k] = {'from' : '__ITEM__', 'value' : v}
 
-        
+        # Get a sorted macro names
+        sorted_names = [k for k in customs]
+        sorted_names.sort()
+        print 'Sorted names', sorted_names
 
-        for (k,v) in customs.iteritems():
-                s+= self.get_string_input(elt, k, k[1:], editable=editable)
-    
+        # We want to show the how element macros value first
+        tnames.insert(0, '__ITEM__')
+        for tname in tnames:
+            new_template = True
+            for k in sorted_names:
+                v = customs[k]
+                if v['from'] != tname:
+                    continue
+                if new_template:
+                    s += '<span class="span10"><span class="label label-info span2">%s</span></span>' % tname
+                    new_template = False
+                print "Looping over template", tname, "customs"
+                ctype = 'string'
+                founded = False
+                for p in app.packs:
+                    if founded:
+                        break
+                    for (m, mv) in p.macros.iteritems():
+                        print "COmpare", k, m
+                        if k.upper() == m.upper():
+                            print 'Match a pack', mv
+                            ctype = mv.get('type', 'string').strip()
+                            founded = True
+                            break
+                if ctype == 'percent':
+                    s+= self.get_percent_input(elt, k, k[1:], editable=editable)
+                else: # if not known, apply string
+                    s+= self.get_string_input(elt, k, k[1:], editable=editable)
         
         return s

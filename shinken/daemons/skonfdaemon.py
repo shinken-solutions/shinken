@@ -285,8 +285,11 @@ class Skonf(Daemon):
         # Manage all post-conf modules
         self.hook_point('early_configuration')
 
+        # Load all file triggers
+        self.conf.load_packs()
+
         # Create Template links
-        #self.conf.linkify_templates()
+        self.conf.linkify_templates()
 
         # All inheritances
         #self.conf.apply_inheritance()
@@ -312,6 +315,7 @@ class Skonf(Daemon):
         self.service_templates = self.conf.services.templates
         self.contact_templates = self.conf.contacts.templates
         self.timeperiod_templates = self.conf.timeperiods.templates
+        self.packs = self.conf.packs
         # Then clean for other parts
         self.conf.remove_templates()
 
