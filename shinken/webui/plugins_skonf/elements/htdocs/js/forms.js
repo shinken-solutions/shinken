@@ -28,7 +28,7 @@ function form_success(){
     l.removeClass('alert-error');
     l.addClass('alert-success');
     l.html('The host was saved sucessfully. You will be redirected to the host list.');
-    setTimeout("location.assign('/elements/hosts');", 1000);
+    //setTimeout("location.assign('/elements/hosts');", 1000);
 
 }
 
@@ -49,6 +49,32 @@ function submit_form(){
     console.log("submiting form"+f);
     console.log('Dump properties'+dump(properties));
     
+
+    // Get all new properties too
+    $.each(new_properties, function(idx, id){
+	var input_name = $('#new_macro_name_'+id);
+	var input_value = $('#new_macro_value_'+id);
+	var name = input_name.val();
+	var value = input_value.val();
+
+	console.log('Get new macro'+name+' '+value);
+	// Don't want void new macro
+	if(name != ''){
+	    // It's a macro, it need to start with _
+	    // And in upper case
+	    if(name[0] != '_'){
+		name = '_'+name;
+	    }
+	    name = name.toUpperCase();
+	    // Set the value input with the good name
+	    input_value.attr('name', name);
+	    // And add this one in the properties list
+	    // so we will really save it
+	    //console.log('SAving new macro'+dump({'name' : name, 'type' : 'string'}))
+	    properties.push({'name' : name, 'type' : 'string'});
+	}
+    });
+
     // Sample for bool: $('button[name="process_perf_data"].active').val();
     console.log('Dump process_perf_data'+ $('button[name="process_perf_data"].active').val());
     var res = {};

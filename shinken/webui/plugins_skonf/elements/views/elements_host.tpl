@@ -1,6 +1,6 @@
 
 
-%rebase layout_skonf globals(), title="Host %s" % elt.get('host_name', 'unknown'),  css=['elements/css/token-input.css', 'elements/css/token-input-facebook.css', 'elements/css/jquery.bsmselect.css', 'elements/css/jquery-ui.css'], js=['elements/js/host.js', 'elements/js/jquery.tokeninput.js', 'elements/js/jquery.bsmselect.js', 'elements/js/jquery.bsmselect.sortable.js', 'elements/js/jquery.bsmselect.compatibility.js', 'elements/js/sliders.js', 'elements/js/selects.js', 'elements/js/forms.js']
+%rebase layout_skonf globals(), title="Host %s" % elt.get('host_name', 'unknown'),  css=['elements/css/token-input.css', 'elements/css/token-input-facebook.css', 'elements/css/jquery.bsmselect.css', 'elements/css/jquery-ui.css'], js=['elements/js/host.js', 'elements/js/jquery.tokeninput.js', 'elements/js/jquery.bsmselect.js', 'elements/js/jquery.bsmselect.sortable.js', 'elements/js/jquery.bsmselect.compatibility.js', 'elements/js/sliders.js', 'elements/js/selects.js', 'elements/js/forms.js', 'elements/js/macros.js']
 
 
 %editable = ''
@@ -13,6 +13,9 @@
 
 // Keep a list of all properties, with their own properties :)
 var properties = [];
+
+// And keep a list of the ids of the new macros generated
+var new_properties = [];
 
 </script>
 
@@ -62,7 +65,6 @@ var properties = [];
 
       <!-- Tab Macros -->
       <div class="tab-pane" id="macros">
-	None
 	{{!helper.get_customs_inputs(app, elt, editable=editable)}}
       </div>
       <!-- Tab Macros stop -->

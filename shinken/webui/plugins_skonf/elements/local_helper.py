@@ -340,6 +340,10 @@ class Helper(object):
         sorted_names.sort()
         print 'Sorted names', sorted_names
 
+
+        
+        s += "<span class='span12'><a class='btn btn-success pull-right' href='javascript:add_macro();'><i class='icon-plus icon-white'></i> Add macro</a></span>"
+        s += "<span id='new_macros' class='span12'></span>"
         # We want to show the how element macros value first
         tnames.insert(0, '__ITEM__')
         for tname in tnames:
@@ -348,8 +352,8 @@ class Helper(object):
                 v = customs[k]
                 if v['from'] != tname:
                     continue
-                if new_template:
-                    s += '<span class="span10"><span class="label label-info span2">%s</span></span>' % tname
+                if new_template and tname != '__ITEM__':
+                    s += '<span class="span10"><span class="label label-info span2"><img class="imgsize1" onerror="$(this).hide()" src="/static/images/sets/%s/tag.png">%s</span></span>' % (tname, tname)
                     new_template = False
                 print "Looping over template", tname, "customs"
                 ctype = 'string'
