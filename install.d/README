@@ -109,3 +109,9 @@ You should use -E option in order to preserve your environment variables
     export http_proxy=http://login:password@proxy:port
     export https_proxy=$http_proxy
     sudo -E -- USEPROXY=1 ./shinken.sh -i 
+
+
+Note about addon installation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you plan to install multisite, pnp4angios and nagvis, you must install them in the following order : pnp4nagios, nagivs and multisite. Installing multisite at the end allow a better intergration of pnp4nagios and nagvis in multisite.

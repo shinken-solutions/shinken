@@ -6,4 +6,4 @@ first install nconf the classical way and then :
 cd /var/www/nconf/include/ajax
 patch -p0 < /path/to/patch/exec_generate_config.php.patch
 
-Do not forget to edit the deployment.ini file !
+Do not forget to edit/replace the deployment.ini file located in config folder ! 
