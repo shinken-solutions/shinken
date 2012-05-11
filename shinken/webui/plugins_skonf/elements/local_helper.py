@@ -342,7 +342,7 @@ class Helper(object):
 
 
         
-        s += "<span class='span12'><a class='btn btn-success pull-right' href='javascript:add_macro();'><i class='icon-plus icon-white'></i> Add macro</a></span>"
+        s += "<span class='span12'><a class='btn btn-success pull-right %s' href='javascript:add_macro();'><i class='icon-plus icon-white'></i> Add macro</a></span>" % editable
         s += "<span id='new_macros' class='span12'></span>"
         # We want to show the how element macros value first
         tnames.insert(0, '__ITEM__')
