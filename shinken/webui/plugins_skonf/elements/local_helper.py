@@ -116,7 +116,7 @@ class Helper(object):
 
 
 
-    def get_percent_input(self, elt, prop, name, editable='', placeholder=''):
+    def get_percent_input(self, elt, prop, name, editable='', placeholder='', popover=None):
         # Ok, let's try to see the value in db first
         v = elt.get(prop, '')
         # If not set, take the value from our templates?
@@ -127,6 +127,10 @@ class Helper(object):
             value = int(v)
             active = '1'
 
+        p = ''
+        if popover is not None:
+            p = '<i id="popover-%s" class="icon-question-sign"></i>' % prop
+            p += '<script>$("#popover-%s").popover({"title": "Help", "content" : "%s"});</script>' % (prop, popover)
 
         s = '''
         <span class="span10">
@@ -135,7 +139,8 @@ class Helper(object):
            <span class='span1' id='slider_log_%s'>%s%%</span>
            <div id='slider_%s' class='%s slider span5' data-log='#slider_log_%s' data-prop='%s' data-min=0 data-max=100 data-unit='%%' data-value=0 data-active=%s></div>
            <a id='btn-slider_%s' href='javascript:toggle_slider("%s");' class='btn btn-mini %s'>Set/Unset</a>
-        </span>''' % (name, prop, prop, placeholder ,prop, editable, prop, prop, active, prop, prop, editable)
+           %s
+        </span>''' % (name, prop, prop, placeholder ,prop, editable, prop, prop, active, prop, prop, editable, p)
         return s
 
 
@@ -371,9 +376,10 @@ class Helper(object):
                             ctype = mv.get('type', 'string').strip()
                             founded = True
                             break
+                popover = mv.get('description', None)
                 if ctype == 'percent':
-                    s+= self.get_percent_input(elt, k, k[1:], editable=editable, placeholder=v['placeholder'])
+                    s+= self.get_percent_input(elt, k, k[1:], editable=editable, placeholder=v['placeholder'], popover=popover)
                 else: # if not known, apply string
-                    s+= self.get_string_input(elt, k, k[1:], editable=editable, placeholder=v['placeholder'])
+                    s+= self.get_string_input(elt, k, k[1:], editable=editable, placeholder=v['placeholder'], popover=popover)
         
         return s
