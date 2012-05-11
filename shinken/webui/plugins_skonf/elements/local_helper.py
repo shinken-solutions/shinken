@@ -365,6 +365,7 @@ class Helper(object):
                     new_template = False
                 print "Looping over template", tname, "customs"
                 ctype = 'string'
+                popover = None
                 founded = False
                 for p in app.packs:
                     if founded:
@@ -374,9 +375,10 @@ class Helper(object):
                         if k.upper() == m.upper():
                             print 'Match a pack', mv
                             ctype = mv.get('type', 'string').strip()
+                            popover = mv.get('description', None)
                             founded = True
                             break
-                popover = mv.get('description', None)
+
                 if ctype == 'percent':
                     s+= self.get_percent_input(elt, k, k[1:], editable=editable, placeholder=v['placeholder'], popover=popover)
                 else: # if not known, apply string

@@ -27,6 +27,10 @@
 import time
 import os
 import re
+try:
+    import json
+except ImportError:
+    json = None
 
 from shinken.objects.item import Item, Items
 from shinken.property import BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
@@ -82,9 +86,12 @@ class Packs(Items):
 
     # Create a pack from the string buf, and get a real object from it
     def create_pack(self, buf, name):
+        if not json:
+            logger.warning("[Pack] cannot load the pack file '%s' : missing json lib" % name)
+            return
         # Ok, go compile the code
         try:
-            d = eval(buf)
+            d = json.loads(buf)
             if not 'name' in d:
                 logger.error("[Pack] no name in the pack '%s'" % name)
                 return
@@ -93,8 +100,7 @@ class Packs(Items):
             p.macros = d.get('macros', {})
             # Ok, add it
             self[p.id] = p
-            return p
-        except Exception, exp:
+        except ValueError, exp:
             logger.error("[Pack] error in loading pack file '%s' : '%s'" % (name, exp))
             
 
