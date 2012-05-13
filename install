@@ -1130,6 +1130,7 @@ function fixHtpasswdPath(){
 # mongodb
 function install_mongodb(){
     cadre "Install mongodb server" green
+    cd $myscripts
     case $CODE in
         REDHAT)
             if [ ! -f "/etc/yum.repos.d/10gen.repo" ]
