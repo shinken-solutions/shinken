@@ -752,6 +752,9 @@ function sinstall(){
     mkdir -p $TARGET/var/archives
     enableretention
     enable_initd
+
+    install_mongodb
+
     if [ "$LOGSTORE" == "mongo" ]
     then
         enablemongologs 
@@ -1142,7 +1145,9 @@ function install_mongodb(){
                 esac
                 sed -i "s/__ARCH__/"$MARCH"/g" /etc/yum.repos.d/10gen.repo
                 yum clean all >> $TMP/shinken.install.log 2>&1
+                cecho " > Installing mongodb server" green
                 yum -y install mongo-10gen mongo-10gen-server >> $TMP/shinken.install.log 2>&1
+                cecho " > Enable mongodb startup scripts" green
                 chkconfig --add mongod >> $TMP/shinken.install.log 2>&1
                 chkconfig mongod on >> $TMP/shinken.install.log 2>&1
                 cecho " > Start mongodb server" green
@@ -1156,6 +1161,7 @@ function install_mongodb(){
             apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10 >> $TMP/shinken.install.log 2>&1
             echo "deb http://downloads-distro.mongodb.org/repo/debian-sysvinit dist 10gen" > /etc/apt/sources.list.d/10gen.list
             apt-get update >> $TMP/shinken.install.log 2>&1
+            cecho " > Installing mongodb server" green
             apt-get install -y mongodb-10gen >> $TMP/shinken.install.log 2>&1
             ;;
         *)
