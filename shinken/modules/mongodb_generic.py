@@ -136,7 +136,17 @@ class Mongodb_generic(BaseModule):
             return None
 
         # Ok, go for update
-        #user.get_name()
+
+        # check a collection exist for this user
+        u = self.db.ui_user_preferences.find_one({'_id': user.get_name()})
+        if not u:
+            # no collection for this user ? create a new one 
+            print "[Mongodb] No user entry for %s, I create a new one" % user.get_name()
+            self.db.ui_user_preferences.save({ '_id':user.get_name(), key : value})
+        else:
+            # found a collection for this user
+            print "[Mongodb] user entry found for %s" % user.get_name()
+
         print '[Mongodb] : saving user pref', "'$set': { %s : %s }" % (key, value)
         r = self.db.ui_user_preferences.update({ '_id':user.get_name()}, { '$set': { key : value }})
         print "[Mongodb] Return from update", r
