@@ -114,7 +114,7 @@ class Mongodb_generic(BaseModule):
             print '[Mongodb] : error get_ui_user_preference::no user'
             return None
         # user.get_name()
-        e = self.db.ui_user_preferences.find_one({'_id': 'bob'})
+        e = self.db.ui_user_preferences.find_one({'_id': user.get_name()})
 
         print '[Mongodb] Get entry?', e
         # Maybe it's a new entryor missing this parameter, bail out
@@ -138,15 +138,15 @@ class Mongodb_generic(BaseModule):
         # Ok, go for update
         #user.get_name()
         print '[Mongodb] : saving user pref', "'$set': { %s : %s }" % (key, value)
-        r = self.db.ui_user_preferences.update({ '_id':'bob'}, { '$set': { key : value }})
+        r = self.db.ui_user_preferences.update({ '_id':user.get_name()}, { '$set': { key : value }})
         print "[Mongodb] Return from update", r
         # Mayeb there was no doc there, if so, create an empty one
         if not r:
             # Maybe the user exist, if so, get the whole user entry
-            u = self.db.ui_user_preferences.find_one({'_id': 'bob'})
+            u = self.db.ui_user_preferences.find_one({'_id': user.get_name()})
             if not u:
                 print "[Mongodb] No user entry for %s, I create a new one" % user.get_name()
-                self.db.ui_user_preferences.save({ '_id':'bob', key : value})
+                self.db.ui_user_preferences.save({ '_id':user.get_name(), key : value})
             else: # ok, it was just the key that was missing, just update it and save it
                 u[key] = value
                 print '[Mongodb] Just saving the new key in the user pref'
