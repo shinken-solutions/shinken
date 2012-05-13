@@ -612,7 +612,7 @@ function fix(){
     chmod -R g+w $ETC
 }
 
-function enable(){
+function enable_initd(){
     cadre "Enabling startup scripts" green
     cp $TARGET/bin/init.d/shinken* /etc/init.d/
     case $DISTRO in
@@ -751,7 +751,7 @@ function sinstall(){
     cp $TARGET/bin/init.d/shinken* /etc/init.d/
     mkdir -p $TARGET/var/archives
     enableretention
-    enable
+    enable_initd
     if [ "$LOGSTORE" == "mongo" ]
     then
         enablemongologs 
