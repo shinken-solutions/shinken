@@ -308,11 +308,10 @@ pages = {
     new_command : { 'routes' : ['/elements/add/command'], 'view' : 'elements_command', 'static' : True},
 
 
-
-
     # Action URI
     disable_object : { 'routes' : ['/element/q/:cls/disable/:name']},
     enable_object : { 'routes' : ['/element/q/:cls/enable/:name']},
+
     
     # POST backend
     save_object : { 'routes' : ['/element/q/:cls/save/:name'], 'method' : 'POST'},

@@ -257,8 +257,6 @@ class Helper(object):
         
 
 
-
-
     def get_poller_tag_input(self, elt, prop, name, editable=''):
         value = elt.get(prop, None)
         all_poller_tags = set()

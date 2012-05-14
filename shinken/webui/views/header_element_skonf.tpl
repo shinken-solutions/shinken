@@ -94,7 +94,7 @@
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">Hi {{user.get('contact_name', 'unknown').capitalize()}} <b class="caret"></b></a>
             <ul class="dropdown-menu">
-	           <a class='disabled-link' href="#"><i class="icon-pencil"></i> Edit profile</a>
+	      <a class='' href="/elements/contacts/{{user.get('contact_name', 'unknown')}}"><i class="icon-pencil"></i> Edit profile</a>
             </ul>
           </li>
         </ul>

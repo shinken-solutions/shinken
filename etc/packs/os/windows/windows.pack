@@ -3,6 +3,8 @@
 
 "description":"Standard windows checks, like CPU, RAM and disk space. Checks are done by WMI.",
 
+"path" : "os/",
+
 "macros":{
 	 "_DOMAIN" : {"type":"string", 
                       "description" : "Windows Domain of the server"

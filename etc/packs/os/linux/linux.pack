@@ -3,6 +3,8 @@
 
 "description":"Standard linux checks, like CPU, RAM and disk space. Checks are done by SNMP.",
 
+"path":"os/",
+
 "macros":{
 	 "_SNMPCOMMUNITY" : {"type":"string", 
 	                     "description":"The read snmp community allowed on the linux server"
