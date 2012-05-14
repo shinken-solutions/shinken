@@ -23,6 +23,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+
 from shinken.util import safe_print
 from shinken.misc.datamanager import DataManager
 
@@ -59,6 +60,12 @@ class DataManagerSKonf(DataManager):
             d[k] = v
         # Inner object are NOT ediable by skonf!
         d['editable'] = '0'
+
+        #For service we must set the _id like it should :)
+        if o.__class__.my_type == 'service':
+            print "SET AN INNER ID FOR", o.get_name(), o.id
+            d['_id'] = 'inner-%s' % o.id
+
         return d
 
 
@@ -85,6 +92,7 @@ class DataManagerSKonf(DataManager):
     def get_generics(self, table, key):
         r = []
         inners = getattr(self.rg, table)
+        print "Got inners", inners, type(inners)
         for i in inners:
             print 'Unclassing', i
             v = self.unclass(i)
@@ -109,7 +117,10 @@ class DataManagerSKonf(DataManager):
         return self.get_generics('timeperiods', 'timeperiod_name')
 
     def get_commands(self):
-        return self.get_generics('command', 'command_name')
+        return self.get_generics('commands', 'command_name')
+
+    def get_services(self):
+        return self.get_generics('services', '_')
 
     
     # Get a specific object
@@ -155,11 +166,24 @@ class DataManagerSKonf(DataManager):
         r = self.rg.timeperiods.find_by_name(cname)
         if r:
             r = self.unclass(r)
-            print "Will finallyu give un unclass", r
+            print "Will finally give un unclass", r
             return r
         r = self.get_in_db('timeperiods', 'timeperiod_name', cname)
         return r
 
+    # Ok for service there is a trick. A service got by default
+    # no KEY, so we got ids and uuid with inner-ID or uuid
+    def get_service(self, name):
+        if name.startswith('inner-'):
+            _id = name[6:]
+            print "New name for search service", _id
+            s = self.rg.services[int(_id)]
+            s = self.unclass(s)
+            return s
+        print "OK search the service uuid", name, "in the database"
+        r = self.get_in_db('services', '_id', name)
+        return r
+            
         
 
 datamgr = DataManagerSKonf()

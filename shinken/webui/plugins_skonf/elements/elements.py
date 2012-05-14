@@ -41,13 +41,13 @@ app = None
 
 
 keys = {'hosts' : 'host_name',
-        'services' : 'WTF??',
+        'services' : '',
         'timeperiods' : 'timeperiod_name',
         'contacts' : 'contact_name',
         'commands' : 'command_name'
         }
 
-def elements_generic(cls):
+def elements_generic(cls, show_tpls=False):
     # First we look for the user sid
     # so we bail out if it's a false one
     user = app.get_user_auth()
@@ -65,6 +65,12 @@ def elements_generic(cls):
     #if cls.my_type == 'host':
     #    print "HOOK HOSTS"
     elts = [cls(i) for i in app.datamgr.get_generics(t, key)]
+    print "GOT elements", elts
+    
+    # Look for removing or keeping templates
+    if not show_tpls:
+        print "REMOVING TEMPLATES"
+        elts = [e for e in elts if not e.is_tpl()]
 
     return {'app' : app, 'user' : user, 'elts' : elts, 'elt_type' : cls.my_type}
 
@@ -74,7 +80,8 @@ def elements_hosts():
 
 
 def elements_services():
-    return elements_generic(Service)
+    return elements_generic(Service, show_tpls=False)
+
 
 def elements_timeperiods():
     return elements_generic(Timeperiod)
@@ -97,7 +104,21 @@ def elements_host(name):
     if not elt:
         elt = {}
     return {'app' : app, 'user' : user, 'elt' : elt, 'helper' : Helper(app)}
-    
+
+
+# get data about one specific host
+def elements_service(name):
+    user = app.get_user_auth()
+    if not user:
+        redirect("/user/login")
+
+    #elt = app.db.hosts.find_one({'_id' : name})
+    elt = app.datamgr.get_service(name)
+    if not elt:
+        elt = {}
+    return {'app' : app, 'user' : user, 'elt' : elt, 'helper' : Helper(app)}
+
+
 
 
 # get data about one specific contact
@@ -139,6 +160,9 @@ def elements_timeperiod(name):
 
 ### New things
 def new_host():
+    return new_object()
+
+def new_service():
     return new_object()
 
 def new_contact():
@@ -185,9 +209,18 @@ def save_object(cls, name):
     old_name = name
     key = keys[cls]
     new_name = app.request.forms.get(key, None)
+
+    # For service, we must force the old_name and the new_one :(
+    if key == '':
+        new_name = name
+
+    print "NEw and old", new_name, old_name
+    # For service we must avoid the key check :(
     if not new_name:
+        print 'Missing the property %s' % key
         abort(400, 'Missing the property %s' % key)
-    
+
+    print "After?"
     t = getattr(app.db, cls)
     d = t.find_one({'_id' : old_name})
 
@@ -228,8 +261,11 @@ def save_new_object(cls):
     # Try to get the name of this new object
     key = keys[cls]
     name = app.request.forms.get(key, None)
-    if name is None or name == '':
-        abort(400, "Missing property %s" % key)
+    
+    # For service such a check must be avoid because there is no real key
+    if key != '':
+        if name is None or name == '':
+            abort(400, "Missing property %s" % key)
 
     d = t.find_one({'_id' : name})
     # Save a new object means that there should not be old one
@@ -254,7 +290,11 @@ pages = {
     elements_contact : { 'routes' : ['/elements/contacts/:name'], 'view' : 'elements_contact', 'static' : True},
     new_contact : { 'routes' : ['/elements/add/contact'], 'view' : 'elements_contact', 'static' : True},
 
-    elements_services : { 'routes' : ['/elements/services'], 'view' : 'elements_hosts', 'static' : True},
+    # Services
+    elements_services : { 'routes' : ['/elements/services'], 'view' : 'elements_services', 'static' : True},
+    elements_service : { 'routes' : ['/elements/services/:name'], 'view' : 'elements_service', 'static' : True},
+    new_service : { 'routes' : ['/elements/add/service'], 'view' : 'elements_service', 'static' : True},
+
 
     # Timeperiods
     elements_timeperiods : { 'routes' : ['/elements/timeperiods'], 'view' : 'elements_timeperiods', 'static' : True},

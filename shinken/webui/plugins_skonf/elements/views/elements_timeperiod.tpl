@@ -38,10 +38,9 @@ var new_properties = [];
     <div class="tab-content">
       <!-- Tab Generic Stop-->
       <div class="tab-pane active" id="generic">
-
-
+	
 	{{!helper.get_string_input(elt, 'timeperiod_name', 'Name', span='span5', popover='Name of the timeperiod. Should be unique.', editable=editable)}}
-
+	
 	{{!helper.get_string_input(elt, 'monday', 'Monday', span='span10', inputsize='input-xxlarge', editable=editable)}}
 	{{!helper.get_string_input(elt, 'tuesday', 'Tuesday', span='span10', inputsize='input-xxlarge', editable=editable)}}
 	{{!helper.get_string_input(elt, 'wednesday', 'Wednesday', span='span10', inputsize='input-xxlarge', editable=editable)}}
