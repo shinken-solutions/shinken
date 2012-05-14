@@ -34,7 +34,7 @@ Pyro = pyro.Pyro
 
 from shinken.util import get_obj_name_two_args_and_void
 from shinken.objects import Item, Items
-from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
+from shinken.property import BoolProp, IntegerProp, StringProp, ListProp, DictProp, AddrProp
 from shinken.log import logger
 
 # Pack of common Pyro exceptions
@@ -64,6 +64,7 @@ class SatelliteLink(Item):
         'polling_interval':   IntegerProp(default='1', fill_brok=['full_status'], to_send=True),
         'use_timezone':       StringProp (default='NOTSET', to_send=True),
         'realm' :             StringProp (default='', fill_brok=['full_status'], brok_transformation=get_obj_name_two_args_and_void),
+        'satellitemap':       DictProp   (default=None, elts_prop=AddrProp, to_send=True, override=True),
     })
     
     running_properties = Item.running_properties.copy()

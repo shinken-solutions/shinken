@@ -872,6 +872,8 @@ class Satellite(BaseSatellite):
             s = conf['schedulers'][sched_id]
             self.schedulers[sched_id] = s
 
+            if s['name'] in g_conf['satellitemap']:
+                s.update(g_conf['satellitemap'][s['name']])
             uri = pyro.create_uri(s['address'], s['port'], 'Checks', self.use_ssl)
 
             self.schedulers[sched_id]['uri'] = uri

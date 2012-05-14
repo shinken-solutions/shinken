@@ -591,8 +591,15 @@ class Config(Item):
                     if elts !=  []:
                         prop = elts[0]
                         value = ' '.join(elts[1:])
-                        tmp[prop] = value
-                if tmp != {}:
+
+                        if prop in tmp:
+                            if not isinstance(tmp[prop], list):
+                                tmp[prop] = [tmp[prop]]
+
+                            tmp[prop].append(value)
+                        else:
+                            tmp[prop] = value
+                if len(tmp) > 0:
                     objects[type].append(tmp)
 
         return objects
