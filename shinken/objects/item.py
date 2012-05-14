@@ -48,6 +48,7 @@ class Item(object):
     properties = {
         'imported_from':            StringProp(default='unknown'),
         'use':                      ListProp(default=''),
+        'name':                     StringProp(default=''),
         'register':                 BoolProp(default='1'),
     }
     

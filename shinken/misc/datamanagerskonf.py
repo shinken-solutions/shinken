@@ -184,6 +184,32 @@ class DataManagerSKonf(DataManager):
         r = self.get_in_db('services', '_id', name)
         return r
             
-        
+
+    # We got a pack name, we look for all objects, and search where this
+    # host template name is used
+    def related_to_pack(self, name):
+        name = name.strip()
+        print "TRY TO MATCH PACK", name
+
+        # First try to match the host template
+        tpl = None
+        for h in self.get_hosts():
+            print "Try to match pack with", h, name, h.get('register', '1') == '0', h.get('name', '') == name
+            
+            if h.get('register', '1') == '0' and h.get('name', '') == name:
+                tpl = h
+                break
+
+        services = []
+        for s in self.get_services():
+            # I want only the templates
+            if s.get('register', '1') != '0':
+                continue
+            use = s.get('host_name', '')
+            elts = use.split(',')
+            elts = [e.strip() for e in elts]
+            if name in elts:
+                services.append(s)
+        return (tpl, services)
 
 datamgr = DataManagerSKonf()
