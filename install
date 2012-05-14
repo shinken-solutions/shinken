@@ -1155,7 +1155,7 @@ function install_mongodb(){
                 /etc/init.d/mongod start >> $TMP/shinken.install.log 2>&1
             else
                 cecho "Allready installed" red
-                exit 2
+                return
             fi
             ;;
         DEBIAN)
