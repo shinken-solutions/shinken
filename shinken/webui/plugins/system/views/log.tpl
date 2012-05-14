@@ -2,53 +2,67 @@
 
 %from shinken.bin import VERSION
 %helper = app.helper
-
-%#  "Left Container Start"
-<div id="left_container" class="grid_2">
-	<div id="nav_left">
-		<ul>
-			<li><a href="/system">System</a></li>
-			<li><a href="/system/log">Log</a></li>
-		</ul>
-	</div>
-</div>
-%#  "Left Container End"
-
-<div id="system_overview" class="grid_14 item">
-	
-	<div id="messagebox" class="gradient_alert" style="margin-top: 20px;">
-		<img src="/static/images/icons/alert.png" alt="some_text" style="height: 40px; width: 40px" class="grid_4"/> 
-		<p><strong>Mockup</strong></p>
-	</div>
-	
-	<h2>Log</h2>
-	<!-- stats overview start -->
-
-	<!-- stats overview end -->
-</div>
+ <div class="alert alert-error alert-block span11">
+    <a class="close" data-dismiss="alert" href="#">×</a>
+    <h4 class="alert-heading">Warning!</h4>
+    No Live Data
+ </div>
 
 <!-- Log Contaier START -->
-
-<div id="log_container" class="grid_14">
-	<h2>Datum 1</h2>
-	<ol>
-		<li>Ent 1</li>
-		<li class="row_alt">Ent 2</li>
-		<li>Ent 3</li>
-	</ol>
-					
-	<h2>Datum 2</h2>
-	<ol>
-		<li>Ent 1</li>
-		<li class="row_alt">Ent 2</li>
-		<li>Ent 3</li>
-		<li class="row_alt">Ent 3</li>
-		<li>Ent 4</li>
-		<li class="row_alt">Ent 6</li>
-		<li>Ent 7</li>
-		<li class="row_alt">Ent 8</li>
-		<li>Ent 9</li>
-		<li class="row_alt">Ent 10</li>
-	</ol>
+<h2>System logs</h2>
+<div class="pagination pull-right">
+    <ul>
+        <li><a href="#">Prev</a></li>
+        <li class="active"><a href="#">1</a></li>
+        <li><a href="#">2</a></li>
+        <li><a href="#">3</a></li>
+        <li><a href="#">4</a></li>
+        <li><a href="#">Next</a></li>
+    </ul>
 </div>
-<!-- Log Contaier START -->
+
+<div id="log_container" class="tabbable tabs-left leftmargin span12">
+    <ul class="nav nav-tabs span3">
+        <li class="active"><a data-toggle="tab" href="#lA">Week 1</a></li>
+        <li><a data-toggle="tab" href="#lB">Week 2</a></li>
+        <li><a data-toggle="tab" href="#lC">Week 3</a></li>
+    </ul>
+    <div class="tab-content span9 pull-right no-leftmargin">
+        <div id="lA" class="tab-pane active">
+        	<p>I'm in Section A.</p>
+       		<ol>
+				<li>Ent 1</li>
+				<li class="row_alt">Ent 2</li>
+				<li>Ent 3</li>
+			</ol>
+        </div>
+        <div id="lB" class="tab-pane">
+         	<ol>
+				<li>Ent 1</li>
+				<li class="row_alt">Ent 2</li>
+				<li>Ent 3</li>
+				<li class="row_alt">Ent 3</li>
+				<li>Ent 4</li>
+				<li class="row_alt">Ent 6</li>
+				<li>Ent 7</li>
+				<li class="row_alt">Ent 8</li>
+				<li>Ent 9</li>
+				<li class="row_alt">Ent 10</li>
+			</ol>
+        </div>
+        <div id="lC" class="tab-pane">
+            <p>What up girl, this is Section C.</p>
+        </div>
+    </div>
+</div>
+<div class="pagination pull-right">
+    <ul>
+        <li><a href="#">Prev</a></li>
+        <li class="active"><a href="#">1</a></li>
+        <li><a href="#">2</a></li>
+        <li><a href="#">3</a></li>
+        <li><a href="#">4</a></li>
+        <li><a href="#">Next</a></li>
+    </ul>
+</div>
+<!-- Log Contaier End -->
