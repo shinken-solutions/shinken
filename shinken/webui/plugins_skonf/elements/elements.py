@@ -125,6 +125,17 @@ def elements_command(name):
     return {'app' : app, 'user' : user, 'elt' : elt, 'helper' : Helper(app)}
 
 
+def elements_timeperiod(name):
+    user = app.get_user_auth()
+    if not user:
+        redirect("/user/login")
+        
+    elt = app.datamgr.get_timeperiod(name)
+    if not elt:
+        elt = {}
+    return {'app' : app, 'user' : user, 'elt' : elt, 'helper' : Helper(app)}
+
+
 
 ### New things
 def new_host():
@@ -134,6 +145,9 @@ def new_contact():
     return new_object()
 
 def new_command():
+    return new_object()
+
+def new_timeperiod():
     return new_object()
 
 
@@ -241,7 +255,12 @@ pages = {
     new_contact : { 'routes' : ['/elements/add/contact'], 'view' : 'elements_contact', 'static' : True},
 
     elements_services : { 'routes' : ['/elements/services'], 'view' : 'elements_hosts', 'static' : True},
+
+    # Timeperiods
     elements_timeperiods : { 'routes' : ['/elements/timeperiods'], 'view' : 'elements_timeperiods', 'static' : True},
+    elements_timeperiod : { 'routes' : ['/elements/timeperiods/:name'], 'view' : 'elements_timeperiod', 'static' : True},
+    new_timeperiod : { 'routes' : ['/elements/add/timeperiod'], 'view' : 'elements_timeperiod', 'static' : True},
+
 
     # Commands
     elements_commands : { 'routes' : ['/elements/commands'], 'view' : 'elements_commands', 'static' : True},

@@ -17,6 +17,7 @@ var properties = [];
 // And keep a list of the ids of the new macros generated
 var new_properties = [];
 
+
 </script>
 
 </script>

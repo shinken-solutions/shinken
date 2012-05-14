@@ -148,6 +148,18 @@ class DataManagerSKonf(DataManager):
         r = self.get_in_db('commands', 'command_name', cname)
         return r
 
+
+    def get_timeperiod(self, cname):
+        for c in self.rg.timeperiods:
+            print "DUMP RAW COMMAND", c, c.__dict__
+        r = self.rg.timeperiods.find_by_name(cname)
+        if r:
+            r = self.unclass(r)
+            print "Will finallyu give un unclass", r
+            return r
+        r = self.get_in_db('timeperiods', 'timeperiod_name', cname)
+        return r
+
         
 
 datamgr = DataManagerSKonf()
