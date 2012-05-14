@@ -56,13 +56,15 @@ def elements_generic(cls):
     
         
     # Get all entries from db
-    t = getattr(app.db, cls.my_type+'s')
-    cur = t.find({})
-    elts = [cls(i) for i in cur]
+    #t = getattr(app.db, cls.my_type+'s')
+    #cur = t.find({})
+    #elts = [cls(i) for i in cur]
     print "GENERIC", cls.my_type
-    if cls.my_type == 'host':
-        print "HOOK HOSTS"
-        elts = [cls(i) for i in app.datamgr.get_hosts()]
+    t = cls.my_type+'s'
+    key = keys[t]
+    #if cls.my_type == 'host':
+    #    print "HOOK HOSTS"
+    elts = [cls(i) for i in app.datamgr.get_generics(t, key)]
 
     return {'app' : app, 'user' : user, 'elts' : elts, 'elt_type' : cls.my_type}
 
@@ -145,14 +147,29 @@ def enable_object(cls, name):
 
 def save_object(cls, name):
     print "Save object for", cls, name
+
+    # First we check if the elements is being renamed
+    old_name = name
+    key = keys[cls]
+    new_name = app.request.forms.get(key, None)
+    if not new_name:
+        abort(400, 'Missing the property %s' % key)
+    
     t = getattr(app.db, cls)
-    d = t.find_one({'_id' : name})
+    d = t.find_one({'_id' : old_name})
+
+    # Maybe we renamed the element? If so, we
+    # must delete the old entry before saving teh new one
+    if new_name != old_name:
+        t.remove({'_id' : old_name})
+        
+
     print 'In db', d
-    bd_entry = {'_id' : name}
+    bd_entry = {'_id' : new_name}
     if d:
         print 'We got an entry in db', d
         db_entry = d
-        bd_entry['_id'] = name
+        bd_entry['_id'] = new_name
         
     print 'Dump form', app.request.forms.__dict__
     for k in app.request.forms:

@@ -37,8 +37,8 @@
          %ena_state = 'hide'
          %disa_state = ''
       %end
-      <a id='btn-enabled-{{hname}}' class='{{ena_state}} {{editable}} btn btn-small btn-success' href="javascript:disable_host('{{h.get_name()}}')">Enabled</a>
-      <a id='btn-disabled-{{hname}}' class='{{disa_state}} {{editable}} btn btn-small btn-warning' href="javascript:enable_host('{{h.get_name()}}')">Disabled</a>
+      <a id='btn-enabled-{{hname}}' class='{{ena_state}} {{editable}} btn btn-small btn-success' href="javascript:disable_element('hosts', '{{h.get_name()}}')">Enabled</a>
+      <a id='btn-disabled-{{hname}}' class='{{disa_state}} {{editable}} btn btn-small btn-warning' href="javascript:enable_element('hosts', '{{h.get_name()}}')">Disabled</a>
     </div>
     <br/>
     <!--{{h}} -->

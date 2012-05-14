@@ -28,7 +28,8 @@ function form_success(){
     l.removeClass('alert-error');
     l.addClass('alert-success');
     l.html('The host was saved sucessfully. You will be redirected to the host list.');
-    //setTimeout("location.assign('/elements/hosts');", 1000);
+    var table = $(document.forms['form-element']).attr('data-table');
+    setTimeout("location.assign('/elements/"+table+"');", 1000);
 
 }
 
@@ -44,7 +45,8 @@ function form_error(){
 
 
 function submit_form(){
-    var f = document.forms['form-host'];
+    var f = document.forms['form-element'];
+    var table = $(f).attr('data-table');
     var _id = f['_id'].value;
     console.log("submiting form"+f);
     console.log('Dump properties'+dump(properties));
@@ -141,5 +143,5 @@ function submit_form(){
 	res[name] = value;
     });
     console.log('Dump data to send'+dump(res));    
-    $.post('/element/q/hosts/save/'+_id, res).success(form_success).error(form_error);
+    $.post('/element/q/'+table+'/save/'+_id, res).success(form_success).error(form_error);
 }

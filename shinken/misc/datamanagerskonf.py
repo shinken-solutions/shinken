@@ -73,6 +73,7 @@ class DataManagerSKonf(DataManager):
         print "Founded", r
         return r
 
+
     def get_all_in_db(self, table):
         col = getattr(self.db, table)
         print "GET ALL FROM", table, col
@@ -80,21 +81,37 @@ class DataManagerSKonf(DataManager):
         print "Founded", r
         return r
 
-    # Merge internal and db hosts in the same list
-    def get_hosts(self):
+
+    def get_generics(self, table, key):
         r = []
-        for h in self.rg.hosts:
-            v = self.unclass(h)
+        inners = getattr(self.rg, table)
+        for i in inners:
+            v = self.unclass(i)
             print "Unclass", v
             r.append(v)
-        names = [h['host_name'] for h in r if 'host_name' in h]
-        for h in self.get_all_in_db('hosts'):
-            if not h.get('host_name', '') in names:
-                r.append(h)
-
+        # Get a lsit of the known elements
+        names = [i[key] for i in r if key in i]
+        for i in self.get_all_in_db(table):
+            if not i.get(key, '') in names:
+                r.append(i)
         return r
+        
 
+    # Merge internal and db hosts in the same list
+    def get_hosts(self):
+        return self.get_generics('hosts', 'host_name')
 
+    def get_contacts(self):
+        return self.get_generics('contacts', 'contact_name')
+
+    def get_timeperiods(self):
+        return self.get_generics('timeperiods', 'timeperiod_name')
+
+    def get_commands(self):
+        return self.get_generics('command', 'command_name')
+
+    
+    # Get a specific object
     def get_contact(self, cname):
         for c in self.rg.contacts:
             print "DUMP RAW CONTACT", c, c.__dict__

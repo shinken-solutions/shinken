@@ -28,7 +28,7 @@ var new_properties = [];
 <a class='btn btn-info {{editable}}' href="javascript:submit_form()"><i class="icon-ok"></i> Submit</a>
 
 <div class='offset1 span10'>
-  <form name='form-host'>
+  <form data-table='hosts' name='form-element'>
     <input name="_id" type="hidden" value="{{elt.get('_id', '')}}"/>
     <ul class="nav nav-tabs">
       <li class="active"><a href="#generic" data-toggle="tab">Generic</a></li>

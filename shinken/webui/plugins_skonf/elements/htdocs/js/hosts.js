@@ -23,9 +23,9 @@
 
 
 
-function disable_host(name){
+function disable_element(table, name){
     $.ajax({
-	url: '/element/q/hosts/disable/'+name,
+	url: '/element/q/'+table+'/disable/'+name,
 	success: function(data) {
 	    $('#btn-enabled-'+name).hide();
 	    $('#btn-disabled-'+name).show();
@@ -38,9 +38,9 @@ function disable_host(name){
 
 }
 
-function enable_host(name){
+function enable_element(table, name){
     $.ajax({
-	url: '/element/q/hosts/enable/'+name,
+	url: '/element/q/'+table+'/enable/'+name,
 	success: function(data) {
 	    $('#btn-disabled-'+name).hide();
 	    $('#btn-enabled-'+name).show();
