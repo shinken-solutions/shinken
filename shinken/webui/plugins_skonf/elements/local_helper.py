@@ -72,18 +72,18 @@ class Helper(object):
 
 
     # Return a simple string input
-    def get_string_input(self, elt, prop, name, span='span10', innerspan='span2' ,placeholder='', popover=None, editable=''):
+    def get_string_input(self, elt, prop, name, span='span10', innerspan='span2', inputsize='', placeholder='', popover=None, editable=''):
         p = ''
         if popover is not None:
             p = '<i id="popover-%s" class="icon-question-sign"></i>' % prop
             p += '<script>$("#popover-%s").popover({"title": "Help", "content" : "%s"});</script>' % (prop, popover)
         s = '''<span class="%s">
                   <span class="help-inline %s"> %s </span>
-                  <input class="%s" name="%s" type="text" value="%s" placeholder='%s' %s/>
+                  <input class="%s %s" name="%s" type="text" value="%s" placeholder='%s' %s/>
                   %s
                </span>
                <script>properties.push({'name' : '%s', 'type' : 'string'});</script>
-            ''' % (span, innerspan, name, editable, prop, elt.get(prop, ''), placeholder, editable, p, prop)
+            ''' % (span, innerspan, name, editable, inputsize, prop, elt.get(prop, ''), placeholder, editable, p, prop)
         return s
 
 

@@ -53,7 +53,7 @@ class DataManagerSKonf(DataManager):
         for prop in properties:
             if hasattr(o, prop):
                 d[prop] = getattr(o, prop)
-        customs = getattr(o, 'customs', [])
+        customs = getattr(o, 'customs', {})
         for (k,v) in customs.iteritems():
             print "SET CUSTOM", k, v
             d[k] = v
@@ -86,6 +86,7 @@ class DataManagerSKonf(DataManager):
         r = []
         inners = getattr(self.rg, table)
         for i in inners:
+            print 'Unclassing', i
             v = self.unclass(i)
             print "Unclass", v
             r.append(v)
@@ -133,6 +134,18 @@ class DataManagerSKonf(DataManager):
             print "Will finallyu give un unclass", r
             return r
         r = self.get_in_db('hosts', 'host_name', hname)
+        return r
+
+
+    def get_command(self, cname):
+        for c in self.rg.commands:
+            print "DUMP RAW COMMAND", c, c.__dict__
+        r = self.rg.commands.find_by_name(cname)
+        if r:
+            r = self.unclass(r)
+            print "Will finallyu give un unclass", r
+            return r
+        r = self.get_in_db('commands', 'command_name', cname)
         return r
 
         

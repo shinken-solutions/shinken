@@ -99,8 +99,6 @@ def elements_host(name):
     return {'app' : app, 'user' : user, 'elt' : elt, 'helper' : Helper(app)}
     
 
-def new_host():
-    return new_object()
 
 # get data about one specific contact
 def elements_contact(name):
@@ -115,8 +113,29 @@ def elements_contact(name):
     return {'app' : app, 'user' : user, 'elt' : elt, 'helper' : Helper(app)}
 
 
+# get data about one specific contact
+def elements_command(name):
+    user = app.get_user_auth()
+    if not user:
+        redirect("/user/login")
+        
+    elt = app.datamgr.get_command(name)
+    if not elt:
+        elt = {}
+    return {'app' : app, 'user' : user, 'elt' : elt, 'helper' : Helper(app)}
+
+
+
+### New things
+def new_host():
+    return new_object()
+
 def new_contact():
     return new_object()
+
+def new_command():
+    return new_object()
+
 
 def new_object():
     user = app.get_user_auth()
@@ -222,9 +241,13 @@ pages = {
     new_contact : { 'routes' : ['/elements/add/contact'], 'view' : 'elements_contact', 'static' : True},
 
     elements_services : { 'routes' : ['/elements/services'], 'view' : 'elements_hosts', 'static' : True},
-    elements_timeperiods : { 'routes' : ['/elements/timeperiods'], 'view' : 'elements_hosts', 'static' : True},
+    elements_timeperiods : { 'routes' : ['/elements/timeperiods'], 'view' : 'elements_timeperiods', 'static' : True},
 
-    elements_commands : { 'routes' : ['/elements/commands'], 'view' : 'elements_hosts', 'static' : True},
+    # Commands
+    elements_commands : { 'routes' : ['/elements/commands'], 'view' : 'elements_commands', 'static' : True},
+    elements_command : { 'routes' : ['/elements/commands/:name'], 'view' : 'elements_command', 'static' : True},
+    new_command : { 'routes' : ['/elements/add/command'], 'view' : 'elements_command', 'static' : True},
+
 
 
 
