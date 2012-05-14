@@ -264,7 +264,7 @@ class Satellite(BaseSatellite):
         sname = sched['name']
         uri = sched['uri']
         running_id = sched['running_id']
-        logger.info("[%s] Init de connection with %s at %s" % (self.name, sname, uri))
+        logger.info("[%s] Init connection with %s at %s" % (self.name, sname, uri))
 
         try:
             socket.setdefaulttimeout(3)
@@ -274,7 +274,7 @@ class Satellite(BaseSatellite):
             # But the multiprocessing module is not copatible with it!
             # so we must disable it imadiatly after
             socket.setdefaulttimeout(None)
-            logger.warning("[%s] Scheduler %s is not initilised or got network problem: %s" % (self.name, sname, str(exp)))
+            logger.warning("[%s] Scheduler %s is not initialized or got network problem: %s" % (self.name, sname, str(exp)))
             sched['con'] = None
             return
 
@@ -285,7 +285,7 @@ class Satellite(BaseSatellite):
             pyro.set_timeout(sch_con, 5)
             new_run_id = sch_con.get_running_id()
         except (Pyro.errors.ProtocolError, Pyro.errors.NamingError, cPickle.PicklingError, KeyError, Pyro.errors.CommunicationError, Pyro.errors.DaemonError) , exp:
-            logger.warning("[%s] Scheduler %s is not initilised or got network problem: %s" % (self.name, sname, str(exp)))
+            logger.warning("[%s] Scheduler %s is not initialized or got network problem: %s" % (self.name, sname, str(exp)))
             sched['con'] = None
             return
 
