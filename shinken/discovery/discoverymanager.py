@@ -31,6 +31,13 @@ import os
 import re
 import time
 import copy
+import random
+# Always initialize random...
+random.seed(time.time())
+try:
+    import uuid
+except ImportError:
+    uuid = None
 
 try:
     from pymongo.connection import Connection
@@ -41,6 +48,12 @@ from shinken.log import logger
 from shinken.objects import *
 from shinken.macroresolver import MacroResolver
 
+
+def get_uuid(self):
+    if uuid:
+        return uuid.uuid4().hex
+    # Ok for old python like 2.4, we will lie here :)
+    return int(random.random()*sys.maxint)
 
 
 # Look if the name is a IPV4 address or not
@@ -588,7 +601,6 @@ class DiscoveryManager:
         tab.append('}\n')
         return '\n'.join(tab)
         
-
 
     # Will wrote all properties/values of d for the host
     # in the database
