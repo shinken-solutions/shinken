@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+# -*- coding: utf-8 -*-
 # Copyright (C) 2009-2011 :
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
@@ -277,20 +277,35 @@ class ShinkenAdmin(cmd.Cmd):
 
             cfg = self.arb.get_config()
             dlinks = getattr(cfg,cfglink)
-            
+
             for d in dlinks:
-                print "+--------------------------------------------------------------------------------------+"
+                print "+%s+" % ("-".center(86,'-'))
                 print "| Config for : {0:71} |".format(type)
-                print "+--------------------------------------------------------------------------------------+"
-                print "| {0:8} | {1:30} | {2:40} |".format("Default","Directive","Value" )
-                print "+--------------------------------------------------------------------------------------+"
-                
+                print "+%s+" % ("-".center(106,'-'))                
+                print "| {0:8} | {1:30} | {2:60} |".format("Default","Directive","Value" )
+                print "+%s+" % ("-".center(106,'-'))                
                 for key in o.properties.keys():
+                    elts=None
+                    default=u""
                     if hasattr(d,key):
-                        print "| {0:8} | {1:30} | {2:40} |".format(" ",key,getattr(d,key))
+                        o = getattr(d,key)
+                        if isinstance(o,list):
+                            eltl=[]
+                            for elt in getattr(d,key):
+                                if isinstance(elt,str):
+                                    eltl.append(unicode(elt))
+                                else:
+                                    eltl.append(unicode(elt.get_name()))
+                            elts = u", ".join(eltl)
+                        else:
+                            elts = unicode(getattr(d,key))
                     else:
-                        print "| {0:8} | {1:30} | {2:40} |".format("D",key,o.properties[key].default)
-                print "+--------------------------------------------------------------------------------------+"
+                        # TODO : get default parameters
+                        default=u"D"
+                        elts="TODO : get default value"
+                    if elts:
+                        print u"| {0:8} | {1:30} | {2:60} |".format(default,unicode(key),elts)
+                print "+%s+" % ("-".center(106,'-'))                
 
 
     def do_setloglevel(self, line):
