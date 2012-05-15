@@ -3,7 +3,7 @@
 
 "description" : "Checks for HP hardware ILO/Insight servers and blade chassis",
 
-"path":"servers/hp/",
+"path":"servers/",
 
 "templates" : ["hp-asm", "hp-blade-chassis"],
 

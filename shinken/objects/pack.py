@@ -100,6 +100,9 @@ class Packs(Items):
             p.description = d.get('description', '')
             p.macros = d.get('macros', {})
             p.templates = d.get('templates', [p.pack_name])
+            p.path = d.get('path', 'various/')
+            if not p.path.endswith('/'):
+                p.path += '/'
             # Ok, add it
             self[p.id] = p
         except ValueError, exp:

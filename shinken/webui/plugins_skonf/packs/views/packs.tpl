@@ -3,9 +3,18 @@
 
 <div> <h1> Packs </h1> </div>
 
-
-%for p in app.packs:
-    <div class='well row'>
+%treename = ''
+%for e in app.datamgr.get_pack_tree(app.packs):
+    %print "ENTRY", e
+    %if e['type'] == 'new_tree':
+       %treename = e['name']
+       <div class='well'> {{e['name'].capitalize()}}  <a href='javascript:toggle_tree("{{e['name']}}")';> <i class="icon-chevron-up"></i> </a>
+    %elif e['type'] == 'end_tree':
+       </div>
+    %else:
+       %p = e['pack']
+  
+    <div class='row {{treename}}'>
       <!-- {{p}} -->
       %pname = p.get_name()
       <div class='span1'>
@@ -48,6 +57,8 @@
       </div>
 
     </div>
+
+   %end
 %end
 
 

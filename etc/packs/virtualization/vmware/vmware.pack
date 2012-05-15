@@ -1,9 +1,9 @@
 {
-"name" : "VMware",
+"name" : "vmware",
 
 "description" : "Checks for VMware virtual machine and ESX/ESXi",
 
-"path":"vmware/",
+"path":"virtualization/",
 
 "templates" : ["esx", "vmware-vm"],
 

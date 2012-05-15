@@ -27,5 +27,10 @@ $(document).ready(function(){
 });
 
 function show_services_list(name){
-    $('#services-'+name).show();
+    $('#services-'+name).toggle();
+}
+
+
+function toggle_tree(name){
+    $('.'+name).toggle();
 }

@@ -187,6 +187,77 @@ class DataManagerSKonf(DataManager):
         return r
             
 
+    def build_pack_tree(self, packs):
+
+        # dirname sons packs
+        t = ('', [], [])
+        for p in packs:
+            path = p.path
+            dirs = path.split('/')
+            dirs = [d for d in dirs if d != '']
+            pos = t
+            for d in dirs:
+                print "In the level", d, " and the context", pos
+                sons = pos[1]
+                print "Get the sons to add me", sons
+                
+                if not d in [s[0] for s in sons]:
+                    print "Add a new level"
+                    print "Get the sons to add me", sons
+                    node = (d, [], [])
+                    sons.append(node)
+                # Ok now search the node for d and take it as our new position
+                for s in sons:
+                    if s[0] == d:
+                        print "We found our new position", s
+                        pos = s
+                        
+            # Now add our pack to this entry
+            print "Add pack to the level", pos[0]
+            pos[2].append(p)
+        print "The whole pack tree", t
+        return t
+                    
+    
+    def get_pack_tree(self, packs):
+        t = self.build_pack_tree(packs)
+        r = self._get_pack_tree(t)
+        print "RETURN WHOLE PACK TREE", r
+        return r
+
+        
+    def _get_pack_tree(self, tree):
+        print "__get_pack_tree:: for", tree
+        name = tree[0]
+        sons = tree[1]
+        packs = tree[2]
+
+        #Sort our sons by they names
+        def _sort(e1, e2):
+            if e1[0] < e2[0]:
+                return -1
+            if e1[0] > e2[0]:
+                return 1
+            return 0
+        sons.sort(_sort)
+
+
+        res = []
+        if name != '':
+            res.append({'type' : 'new_tree', 'name' : name})
+        for p in packs:
+            res.append({'type' : 'pack', 'pack' : p})
+            
+        for s in sons:
+            r = self._get_pack_tree(s)
+            res.extend(r)
+        if name != '':
+            res.append({'type' : 'end_tree', 'name' : name})
+        print "RETURN PARTIAL", res
+        return res
+
+
+
     # We got a pack name, we look for all objects, and search where this
     # host template name is used
     def related_to_pack(self, pack):
