@@ -40,6 +40,13 @@
         %end
       %end
       </div>
+      <div class='pull-right'>
+	%lnk = p.doc_link
+	%if not lnk:
+	   %lnk = "http://www.shinken-monitoring.org/wiki/packs/"+pname
+	%end
+	<a class='pull-right' href="{{lnk}}" target='_blank'> <i class="icon-question-sign"></i></a>
+      </div>
 
       <div class='span10'>
       %for _t in lst:

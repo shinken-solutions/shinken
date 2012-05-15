@@ -7,7 +7,6 @@
 
 "templates" : ["exchange-ht", "exchange-mb", "exchange-cas", "exchange-um"],
 
-"macros":{}	 
-
+"macros":{}
 
 }
