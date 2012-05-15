@@ -49,7 +49,9 @@ class Item(object):
         'imported_from':            StringProp(default='unknown'),
         'use':                      ListProp(default=''),
         'name':                     StringProp(default=''),
-        'register':                 BoolProp(default='1'),
+        
+        # TODO : find why we can't uncomment this line below.
+        #'register':                 BoolProp(default='1'),
     }
     
     running_properties = {

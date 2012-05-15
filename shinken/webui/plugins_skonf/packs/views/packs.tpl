@@ -26,7 +26,7 @@
       %for s in services:
 	 %sid = s.get('_id', '')
 	 %sname = s.get('service_description', 'unknown')
-         <div class='offset1'><a href='/elemments/services/{{sid}}'> {{sname}}</div>
+         <div class='offset1'><a href='/elemments/services/{{sid}}'> {{sname}}</a></div>
       %end
       </div>
 
