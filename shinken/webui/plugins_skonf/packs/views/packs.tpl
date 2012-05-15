@@ -4,12 +4,23 @@
 <div> <h1> Packs </h1> </div>
 
 %treename = ''
+%tree_path = []
 %for e in app.datamgr.get_pack_tree(app.packs):
     %print "ENTRY", e
     %if e['type'] == 'new_tree':
        %treename = e['name']
-       <div class='well'> {{e['name'].capitalize()}}  <a href='javascript:toggle_tree("{{e['name']}}")';> <i class="icon-chevron-up"></i> </a>
+       %tree_path.append(treename)
+       %is_well = 'well'
+       %# For 2nd and more level, do not put well again.
+       %if len(tree_path) > 1:
+          %is_well = ''
+       %end
+       <div class='{{is_well}}'> {{!' <i class="icon-chevron-right"></i> '.join(['<b>%s</b>' % p.capitalize() for p in tree_path])}}
     %elif e['type'] == 'end_tree':
+       %# We remove the last element
+       %tree_path.reverse()
+       %tree_path.pop()
+       %tree_path.reverse()
        </div>
     %else:
        %p = e['pack']
