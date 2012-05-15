@@ -1654,6 +1654,29 @@ function install_check_mongodb(){
         
 }
 
+# Add two plugins to check IBM DS san devices.
+function install_IBM_DS() {
+    cadre "Install check_IBM_DS_health.sh and check_IBM_DS_performance.pl plugins" green
+
+    SMcli_bin=$(which SMcli)
+    if [ $? -ne 0 ]
+    then
+        cecho "You do not have Storage Manager installed. Go on :" red
+        cecho "http://www-933.ibm.com/support/fixcentral/swg/selectFixes?parent=Entry-level+disk+systems&product=ibm/Storage_Disk/DS3500&release=All&platform=All&function=all#Storage%20Manager" red
+        cecho "to download Storage Manager for Linux according to your arch" red
+        exit 2
+    else
+        cecho "Downloading plugins..." green
+        wget $WGETPROXY -O check_IBM_DS_health.sh $CHECKIBMDSHEALTH >> $TMP/shinken.install.log 2>&1
+        wget $WGETPROXY -O check_IBM_DS_performance.pl $CHECKIBMDSPERF >> $TMP/shinken.install.log 2>&1
+    fi
+    
+    cecho "Installing plugins..." green
+    install -b -g $SKGROUP -o $SKUSER -m 0755 -t $TARGET/libexec check_IBM_DS_health.sh check_IBM_DS_performance.pl >> $TMP/shinken.install.log 2>&1
+
+    cadre "Successfully installed IBM DS san monitoring plugins." green
+}
+
 # CHECK_NWC_HEALTH
 function install_check_nwc_health(){
 
@@ -2256,6 +2279,7 @@ echo "Usage : install -k | -i | -u [addonname] | -b | -r backupname | -l | -c | 
                                check_netapp2
                                check_mem (local enhanced memory check plugin)
                                check_snmp_bandwidth (check bandwidth usage with snmp)
+                               check_IBM_DS
     -a | --addon            Install addons. Argument should be one of the following : 
                                pnp4nagios
                                multisite
@@ -2362,6 +2386,10 @@ do
             elif [ "$OPTARG" == "check_snmp_bandwidth" ]
             then
                 install_check_snmp_bandwidth
+                exit 0
+            elif [ "$OPTARG" == "check_IBM_DS" ]
+            then
+                install_IBM_DS
                 exit 0
             fi
             ;;
