@@ -7,12 +7,13 @@
 </div>
 
 <div class='offset1 span10'>
-  <h3>All your hosts</h3>
+  <h3>All your services</h3>
   %for h in elts:
   %hname = h.get_name()
+  %sid = h.customs.get('_ID', 'unknown')
   <div class='object_{{elt_type}} span12'>
     
-    <div class='host_name cut-long pull-left'><a href='/elements/hosts/{{hname}}'>{{hname}}</a></div>
+    <div class='host_name cut-long pull-left'><a href='/elements/services/{{sid}}'>{{hname}}</a></div>
     <div class='display_name cut-long pull-left'>{{getattr(h, 'display_name', '')}}&nbsp;</div>
     <div class='address cut-long pull-left'>{{getattr(h, 'address', '')}}&nbsp;</div>
     <div class='realm cut-long pull-left'>{{getattr(h, 'realm', '')}}&nbsp;</div>
@@ -37,8 +38,8 @@
          %ena_state = 'hide'
          %disa_state = ''
       %end
-      <a id='btn-enabled-{{hname}}' class='{{ena_state}} {{editable}} btn btn-small btn-success' href="javascript:disable_element('hosts', '{{h.get_name()}}')">Enabled</a>
-      <a id='btn-disabled-{{hname}}' class='{{disa_state}} {{editable}} btn btn-small btn-warning' href="javascript:enable_element('hosts', '{{h.get_name()}}')">Disabled</a>
+      <a id='btn-enabled-{{sid}}' class='{{ena_state}} {{editable}} btn btn-small btn-success' href="javascript:disable_element('services', '{{sid}}')">Enabled</a>
+      <a id='btn-disabled-{{sid}}' class='{{disa_state}} {{editable}} btn btn-small btn-warning' href="javascript:enable_element('services', '{{sid}}')">Disabled</a>
     </div>
     <br/>
     <!--{{h}} -->

@@ -29,7 +29,7 @@ var new_properties = [];
 <a class='btn btn-info {{editable}}' href="javascript:submit_form()"><i class="icon-ok"></i> Submit</a>
 
 <div class='offset1 span10'>
-  <form data-table='hosts' name='form-element'>
+  <form data-table='services' name='form-element'>
     <input name="_id" type="hidden" value="{{elt.get('_id', '')}}"/>
     <ul class="nav nav-tabs">
       <li class="active"><a href="#generic" data-toggle="tab">Generic</a></li>
@@ -42,11 +42,9 @@ var new_properties = [];
     <div class="tab-content">
       <!-- Tab Generic Stop-->
       <div class="tab-pane active" id="generic">
-
-
-	{{!helper.get_string_input(elt, 'host_name', 'Hostname', span='span5', popover='Name of the host. Should be unique.', editable=editable)}}
-	{{!helper.get_string_input(elt, 'display_name', 'Display name', span='span6', innerspan='span3', placeholder=elt.get('host_name', ''), editable=editable)}}
-	{{!helper.get_string_input(elt, 'address', 'Address', span='span5', editable=editable)}}
+	
+	{{!helper.get_string_input(elt, 'service_description', 'Name', span='span5', popover='Name of the service.', editable=editable)}}
+	{{!helper.get_string_input(elt, 'display_name', 'Display name', span='span6', innerspan='span3', placeholder=elt.get('service_description', ''), editable=editable)}}
 	<span class="span10">
 	  <span class="help-inline span1">Tags </span>
 	  <input id='use' class='to_use_complete offset1' data-use='{{elt.get('use', '')}}' data-cls='host' name="use" type="text" tabindex="2"/>
@@ -55,6 +53,7 @@ var new_properties = [];
 	{{!helper.get_select_input(elt, 'maintenance_period', 'Maintenance Period', 'timeperiods', 'timeperiod_name', editable=editable)}}
 	{{!helper.get_select_input(elt, 'check_period', 'Check Period', 'timeperiods', 'timeperiod_name', editable=editable)}}
 	{{!helper.get_command_input(elt, 'check_command', 'Check Command', 'commands', 'command_name', editable=editable)}}
+	{{!helper.get_multiselect_input(elt, 'host_name', 'Hostnames', 'hosts', 'host_name', editable=editable)}}
 	{{!helper.get_string_input(elt, 'max_check_attemps', 'Max Check Attempts', editable=editable)}}
 	{{!helper.get_string_input(elt, 'check_interval', 'Normal Check Interval* 60 seconds', editable=editable)}}
 	{{!helper.get_bool_input(elt, 'active_checks_enabled', 'Active Checks Enabled', editable=editable)}}
@@ -87,7 +86,7 @@ var new_properties = [];
 
       <!-- Tab Depedencies -->
       <div class="tab-pane" id="depedencies">
-	{{!helper.get_multiselect_input(elt, 'parents', 'Network parents', 'hosts', 'host_name', editable=editable)}}
+	%#{{!helper.get_multiselect_input(elt, 'parents', 'Network parents', 'hosts', 'host_name', editable=editable)}}
       </div>
       <!-- Tab dep stop -->
 
@@ -95,9 +94,8 @@ var new_properties = [];
       <!-- Tab Advanced -->
       <div class="tab-pane" id="advanced">
 	{{!helper.get_poller_tag_input(elt, 'poller_tag', 'Monitored from', editable=editable)}}
-	{{!helper.get_realm_input(elt, 'realm', 'Realm', editable=editable)}}
 
-	{{!helper.get_bool_input(elt, 'obsess_over_host', 'Obsess Over Host', editable=editable)}}	
+	{{!helper.get_bool_input(elt, 'obsess_over_service', 'Obsess Over Service', editable=editable)}}	
 	{{!helper.get_bool_input(elt, 'check_freshness', 'Check Freshness', editable=editable)}}
 	{{!helper.get_string_input(elt, 'freshness_threshold', 'Freshness Threshold seconds', editable=editable)}}
 	{{!helper.get_bool_input(elt, 'flap_detection_enabled', 'Flap Detection Enabled', editable=editable)}}

@@ -96,6 +96,7 @@ class Packs(Items):
                 logger.error("[Pack] no name in the pack '%s'" % name)
                 return
             p = Pack({})
+            p.pack_name = d['name']
             p.description = d.get('description', '')
             p.macros = d.get('macros', {})
             # Ok, add it

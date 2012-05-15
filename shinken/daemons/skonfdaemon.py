@@ -317,7 +317,7 @@ class Skonf(Daemon):
         self.timeperiod_templates = self.conf.timeperiods.templates
         self.packs = self.conf.packs
         # Then clean for other parts
-        self.conf.remove_templates()
+        #self.conf.remove_templates()
 
         # We removed templates, and so we must recompute the
         # search lists

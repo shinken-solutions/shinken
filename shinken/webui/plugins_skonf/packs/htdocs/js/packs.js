@@ -21,34 +21,11 @@
  along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+// At start, hide the service lists
+$(document).ready(function(){
+    $('.services_list').hide();
+});
 
-
-function disable_element(table, name){
-    $.ajax({
-	url: '/element/q/'+table+'/disable/'+name,
-	success: function(data) {
-	    $('#btn-enabled-'+name).hide();
-	    $('#btn-disabled-'+name).show();
-	    
-	},
-	error: function(data, txt) {
-            console.log('Got bad result for'+name);
-        },
-    });
-
-}
-
-function enable_element(table, name){
-    $.ajax({
-	url: '/element/q/'+table+'/enable/'+name,
-	success: function(data) {
-	    $('#btn-disabled-'+name).hide();
-	    $('#btn-enabled-'+name).show();
-	    
-	},
-	error: function(data, txt) {
-            console.log('Got bad result for'+name);
-        },
-    });
-
+function show_services_list(name){
+    $('#services-'+name).show();
 }

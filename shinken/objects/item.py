@@ -34,7 +34,7 @@ from copy import copy
 
 from shinken.graph import Graph
 from shinken.commandcall import CommandCall
-from shinken.property import StringProp, ListProp
+from shinken.property import StringProp, ListProp, BoolProp
 from shinken.brok import Brok
 from shinken.util import strip_and_uniq
 from shinken.acknowledge import Acknowledge
@@ -48,6 +48,8 @@ class Item(object):
     properties = {
         'imported_from':            StringProp(default='unknown'),
         'use':                      ListProp(default=''),
+        'name':                     StringProp(default=''),
+        'register':                 BoolProp(default='1'),
     }
     
     running_properties = {
@@ -137,7 +139,7 @@ Like temporary attributes such as "imported_from", etc.. """
         """ Return if the elements is a template """
         try:
             return self.register == '0'
-        except:
+        except Exception, exp:
             return False
 
 

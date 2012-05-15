@@ -23,6 +23,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+
 from shinken.util import safe_print
 from shinken.misc.datamanager import DataManager
 
@@ -53,12 +54,18 @@ class DataManagerSKonf(DataManager):
         for prop in properties:
             if hasattr(o, prop):
                 d[prop] = getattr(o, prop)
-        customs = getattr(o, 'customs', [])
+        customs = getattr(o, 'customs', {})
         for (k,v) in customs.iteritems():
             print "SET CUSTOM", k, v
             d[k] = v
         # Inner object are NOT ediable by skonf!
         d['editable'] = '0'
+
+        #For service we must set the _id like it should :)
+        if o.__class__.my_type == 'service':
+            print "SET AN INNER ID FOR", o.get_name(), o.id
+            d['_id'] = 'inner-%s' % o.id
+
         return d
 
 
@@ -73,6 +80,7 @@ class DataManagerSKonf(DataManager):
         print "Founded", r
         return r
 
+
     def get_all_in_db(self, table):
         col = getattr(self.db, table)
         print "GET ALL FROM", table, col
@@ -80,21 +88,42 @@ class DataManagerSKonf(DataManager):
         print "Founded", r
         return r
 
-    # Merge internal and db hosts in the same list
-    def get_hosts(self):
+
+    def get_generics(self, table, key):
         r = []
-        for h in self.rg.hosts:
-            v = self.unclass(h)
+        inners = getattr(self.rg, table)
+        print "Got inners", inners, type(inners)
+        for i in inners:
+            print 'Unclassing', i
+            v = self.unclass(i)
             print "Unclass", v
             r.append(v)
-        names = [h['host_name'] for h in r if 'host_name' in h]
-        for h in self.get_all_in_db('hosts'):
-            if not h.get('host_name', '') in names:
-                r.append(h)
-
+        # Get a lsit of the known elements
+        names = [i[key] for i in r if key in i]
+        for i in self.get_all_in_db(table):
+            if not i.get(key, '') in names:
+                r.append(i)
         return r
+        
 
+    # Merge internal and db hosts in the same list
+    def get_hosts(self):
+        return self.get_generics('hosts', 'host_name')
 
+    def get_contacts(self):
+        return self.get_generics('contacts', 'contact_name')
+
+    def get_timeperiods(self):
+        return self.get_generics('timeperiods', 'timeperiod_name')
+
+    def get_commands(self):
+        return self.get_generics('commands', 'command_name')
+
+    def get_services(self):
+        return self.get_generics('services', '_')
+
+    
+    # Get a specific object
     def get_contact(self, cname):
         for c in self.rg.contacts:
             print "DUMP RAW CONTACT", c, c.__dict__
@@ -118,6 +147,69 @@ class DataManagerSKonf(DataManager):
         r = self.get_in_db('hosts', 'host_name', hname)
         return r
 
-        
+
+    def get_command(self, cname):
+        for c in self.rg.commands:
+            print "DUMP RAW COMMAND", c, c.__dict__
+        r = self.rg.commands.find_by_name(cname)
+        if r:
+            r = self.unclass(r)
+            print "Will finallyu give un unclass", r
+            return r
+        r = self.get_in_db('commands', 'command_name', cname)
+        return r
+
+
+    def get_timeperiod(self, cname):
+        for c in self.rg.timeperiods:
+            print "DUMP RAW COMMAND", c, c.__dict__
+        r = self.rg.timeperiods.find_by_name(cname)
+        if r:
+            r = self.unclass(r)
+            print "Will finally give un unclass", r
+            return r
+        r = self.get_in_db('timeperiods', 'timeperiod_name', cname)
+        return r
+
+    # Ok for service there is a trick. A service got by default
+    # no KEY, so we got ids and uuid with inner-ID or uuid
+    def get_service(self, name):
+        if name.startswith('inner-'):
+            _id = name[6:]
+            print "New name for search service", _id
+            s = self.rg.services[int(_id)]
+            s = self.unclass(s)
+            return s
+        print "OK search the service uuid", name, "in the database"
+        r = self.get_in_db('services', '_id', name)
+        return r
+            
+
+    # We got a pack name, we look for all objects, and search where this
+    # host template name is used
+    def related_to_pack(self, name):
+        name = name.strip()
+        print "TRY TO MATCH PACK", name
+
+        # First try to match the host template
+        tpl = None
+        for h in self.get_hosts():
+            print "Try to match pack with", h, name, h.get('register', '1') == '0', h.get('name', '') == name
+            
+            if h.get('register', '1') == '0' and h.get('name', '') == name:
+                tpl = h
+                break
+
+        services = []
+        for s in self.get_services():
+            # I want only the templates
+            if s.get('register', '1') != '0':
+                continue
+            use = s.get('host_name', '')
+            elts = use.split(',')
+            elts = [e.strip() for e in elts]
+            if name in elts:
+                services.append(s)
+        return (tpl, services)
 
 datamgr = DataManagerSKonf()
