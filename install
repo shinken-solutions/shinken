@@ -1158,11 +1158,14 @@ function install_mongodb(){
             fi
             ;;
         DEBIAN)
-            apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10 >> $TMP/shinken.install.log 2>&1
-            echo "deb http://downloads-distro.mongodb.org/repo/debian-sysvinit dist 10gen" > /etc/apt/sources.list.d/10gen.list
-            apt-get update >> $TMP/shinken.install.log 2>&1
-            cecho " > Installing mongodb server" green
-            apt-get install -y mongodb-10gen >> $TMP/shinken.install.log 2>&1
+            if [ ! -f "/etc/apt/sources.list.d/10gen.list" ]
+            then
+                apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10 >> $TMP/shinken.install.log 2>&1
+                echo "deb http://downloads-distro.mongodb.org/repo/debian-sysvinit dist 10gen" > /etc/apt/sources.list.d/10gen.list
+                apt-get update >> $TMP/shinken.install.log 2>&1
+                cecho " > Installing mongodb server" green
+                apt-get install -y mongodb-10gen >> $TMP/shinken.install.log 2>&1
+            fi
             ;;
         *)
             cecho " > Unknown distribution : $DIST" red
