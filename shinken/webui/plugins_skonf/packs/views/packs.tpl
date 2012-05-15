@@ -48,7 +48,7 @@
          %if len(services) == 0:
 	   <div class="alert">No services enabled for this pack</div>
 	 %else:
-	   <b> {{tpl.get('name', '')}}</b>
+	   <b> {{tpl.get('name', '')}} services : </b>
          %end
 
 	 %for s in services:
