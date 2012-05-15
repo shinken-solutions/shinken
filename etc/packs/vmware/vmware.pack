@@ -1,0 +1,13 @@
+{
+"name" : "VMware",
+
+"description" : "Checks for VMware virtual machine and ESX/ESXi",
+
+"path":"vmware/",
+
+"templates" : ["esx", "vmware-vm"],
+
+"macros":{}
+
+
+}

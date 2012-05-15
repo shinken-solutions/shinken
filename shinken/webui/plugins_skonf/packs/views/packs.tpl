@@ -17,23 +17,33 @@
 	{{p.description}}
       </div>
       <div class='span2'>
-      %tpl, services = app.datamgr.related_to_pack(pname)
-      %if tpl:
-         %tname = tpl.get('name', '')
-         <div> Host template : <a href='/elemments/hosts/{{tname}}'> {{tname}}</a></div>
-      %else:
-         <div class="alert">No host template for this pack!</div>
+      %lst = app.datamgr.related_to_pack(p)
+      %print "LST", lst
+      %for _t in lst:
+        %(tpl, services) = _t
+        %if tpl:
+           %tname = tpl.get('name', '')
+           <div> Host tag : <a href='/elemments/hosts/{{tname}}'> {{tname}}</a></div>
+        %else:
+           <div class="alert">No host template for this pack!</div>
+        %end
       %end
       </div>
-      %if len(services) == 0:
-	 <div class="alert">No services enabled for this pack</div>
-      %end
-      <a class='btn btn-success pull-right' href="javascript:show_services_list('{{pname}}');"> Show services</a>
+      <a class='btn btn-success pull-right' href="javascript:show_services_list('{{pname}}');"> Show services</a>      
       <div id='services-{{pname}}' class='services_list span10'>
-      %for s in services:
-	 %sid = s.get('_id', '')
-	 %sname = s.get('service_description', 'unknown')
-          <div class=''><a href='/elemments/services/{{sid}}'> {{sname}}</a></div>
+      %for _t in lst:
+         %(tpl, services) = _t
+         %if len(services) == 0:
+	   <div class="alert">No services enabled for this pack</div>
+	 %else:
+	   <b> {{tpl.get('name', '')}}</b>
+         %end
+	 
+	 %for s in services:
+	   %sid = s.get('_id', '')
+	   %sname = s.get('service_description', 'unknown')
+           <div class=''><a href='/elemments/services/{{sid}}'> {{sname}}</a></div>
+	 %end
       %end
       </div>
 

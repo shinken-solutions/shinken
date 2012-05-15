@@ -1,0 +1,11 @@
+{
+"name" : "printer-hp",
+
+"description" : "Checks for HP Jetdirect compatible printers",
+
+"path":"printers/hp/",
+
+"macros":{}	 
+
+
+}

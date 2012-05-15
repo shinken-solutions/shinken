@@ -99,6 +99,7 @@ class Packs(Items):
             p.pack_name = d['name']
             p.description = d.get('description', '')
             p.macros = d.get('macros', {})
+            p.templates = d.get('templates', [p.pack_name])
             # Ok, add it
             self[p.id] = p
         except ValueError, exp:
