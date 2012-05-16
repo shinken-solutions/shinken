@@ -24,6 +24,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import json
+import hashlib
 
 from shinken.webui.bottle import redirect
 
@@ -37,7 +38,11 @@ def register():
 
 def do_register():
     username = app.request.forms.get('username')
-    
+    email = app.request.forms.get('email')
+    password = app.request.forms.get('password')
+    password_hash = hashlib.sha512(password).hexdigest()
+    print "Get a new user %s with email %s and hash %s" % (username, email, password_hash)
+
 
 def is_name_available():
     app.response.content_type = 'application/json'
@@ -56,5 +61,6 @@ def is_name_available():
 
 pages = {register : { 'routes' : ['/register'], 'view' : 'register', 'static' : True},
          is_name_available : { 'routes' : ['/availability'], 'method' : 'POST', 'view' : None, 'static' : True},
+         do_register : { 'routes' : ['/register'], 'method' : 'POST', 'view' : 'register', 'static' : True},
          }
 

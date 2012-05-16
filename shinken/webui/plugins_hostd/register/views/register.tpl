@@ -42,14 +42,18 @@ $(document).ready(function(){
 Please register <br/>
 
 <form class='well span5 offset2' name='register' action='/register' METHOD='POST'>
-    <input type="textarea" name='username' class="span3" placeholder="Username" onChange="check_username(this.value)">  
-    <span class="help-inline">Username <i id='name_ok' class="icon-ok"></i> <i id='name_bad' class="icon-remove"></i> </span>
+  <div class="input-prepend">
+    <span class="add-on"><i class="icon-user"></i></span><input type="textarea" name='username' class="span4" placeholder="Username" onKeydown="check_username(this.value)">
+    <span class="help-inline"><i id='name_ok' class="icon-ok"></i> <i id='name_bad' class="icon-remove"></i> </span>
+  </div>
+  <div class="input-prepend">
+    <span class="add-on"><i class="icon-envelope"></i></span><input class="span3" name="email" type="text" placeholder="Email">
+  </div>
 
-    <div class="input-prepend">
-      <span class="add-on"><i class="icon-envelope"></i></span><input class="span2" nae="email" type="text">
-      <span class="help-inline"> Email </span>
-    </div>
-
+  <div class="input-prepend">
+    <span class="add-on"><i class="icon-check"></i></span><input class="span3" name="password" type="password" placeholder="Password">
+  </div>
+  
     <a href='javascript:submit();' class='btn'> submit</a>
     
 </form>
