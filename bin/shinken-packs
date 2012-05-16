@@ -1,0 +1,245 @@
+#!/usr/bin/env python
+
+# Copyright (C) 2009-2012 :
+#    Gabes Jean, naparuba@gmail.com
+#    Gerhard Lausser, Gerhard.Lausser@consol.de
+#    Gregory Starck, g.starck@gmail.com
+#    Hartmut Goebel, h.goebel@goebel-consult.de
+#
+# This file is part of Shinken.
+#
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+
+""""
+
+Warning : THIS IS A PREVIEW, and uglu code that looks as a script.
+
+"""
+
+
+import optparse
+import sys
+import cPickle
+import os
+import re
+import time
+import tempfile
+import json
+import shutil
+import zipfile
+import glob
+
+try:
+    import shinken
+    from shinken.bin import VERSION
+except ImportError:
+    # If importing shinken fails, try to load from current directory
+    # or parent directory to support running without installation.
+    # Submodules will then be loaded from there, too.
+    import imp
+    imp.load_module('shinken', *imp.find_module('shinken', [os.path.realpath("."), os.path.realpath(".."), os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "..")]))
+    from shinken.bin import VERSION
+
+
+from shinken.objects.pack import Pack,Packs
+from shinken.log import logger
+from shinken.objects.config import Config
+
+
+logger.set_level(10)
+class Dummy():
+    def __init__(self): pass
+    def add(self, obj) : pass
+logger.load_obj(Dummy())
+
+if os.name != 'nt': 
+    DEFAULT_CFG = '/etc/shinken/skonf.cfg'
+else:
+    DEFAULT_CFG = 'c:\\shinken\\etc\\skonf.cfg'
+
+
+parser = optparse.OptionParser(
+    "%prog [options] -c skonf_config -p pack_file [-d dest]",
+    version="%prog " + VERSION)
+parser.add_option('-c', '--cfg-input',
+                  dest="cfg_input", help=('Skonf configuration file (skonf.cfg)'))
+parser.add_option('-p', '--pack-file', dest="pack_file",
+                  help="""Pack .pack file that you want to generate from.""")
+parser.add_option('-d', '--dest', dest="p_dest_dir", 
+                  help=""""Directory where to """)
+
+
+opts, args = parser.parse_args()
+
+if not opts.cfg_input:
+    if not os.path.exists(DEFAULT_CFG):
+        parser.error("Requires a skonf configuration file, skonf.cfg (option -c/--cfg-input)")
+    else : # take the default file
+        opts.cfg_input = DEFAULT_CFG
+
+if not opts.pack_file:
+    parser.error("Requires a pack file (option -p/--pack-file)")
+pack_file = opts.pack_file
+
+if not pack_file.endswith('.pack'):
+    print "Sorry, the pack-file is not a .pack file. exiting"
+    sys.exit(2)
+
+p_dest_dir = tempfile.gettempdir()
+if opts.p_dest_dir:
+    p_dest_dir = opts.p_dest_dir
+print "Using the destination directory : %s" % p_dest_dir
+
+src_dir = os.path.abspath(os.path.dirname(pack_file))
+print "Source dir that will be load", src_dir
+
+_tmp = tempfile.mktemp()
+print "Will use the source temp file %s" % _tmp
+f = open(_tmp, 'w')
+f.write('cfg_dir=%s\n' % src_dir)
+f.flush()
+print "Saved tmp file"
+
+cfg = Config()
+buf = cfg.read_config([_tmp])
+raw_objects = cfg.read_config_buf(buf)
+cfg.create_objects(raw_objects)
+
+# Now we can close the cfg temp file
+f.close()
+
+print "Loading pack files"
+cfg.load_packs()
+
+print "Packs", cfg.packs
+
+packs = [p for p in cfg.packs]
+if len(packs) > 1:
+    logger.log("Sorry, there is too much .pack file in the directory %s, please get only one .pack for this directory and it's subdirectories")
+    sys.exit(2)
+
+o = {}    
+pack = packs.pop()
+o['name'] = pack.get_name()
+o['description'] = pack.description
+o['templates'] = pack.templates
+print "We are creating the pack '%s'" % o['name']
+print "Description : %s" % o['description']
+print "Host templates : %s" % ','.join(o['templates'])
+for h in cfg.hosts:
+    if h.is_tpl() and hasattr(h, 'name') and not h.name in o['templates']:
+        print "WARNING : you miss the host template '%s' in the pack file. I'm adding it" % h.name
+        o['templates'].append(h.name)
+
+o['path'] = pack.path
+print "Path : %s" % o['path']
+o['doc_link'] = pack.doc_link
+print "Doc link : %s" % o['doc_link']
+o['macros'] = {}
+print "Macros :"
+for (k,v) in pack.macros.iteritems():
+    t = v.get('type', 'string')
+    d = v.get('description', '')
+    o['macros'][k] = {'type' : t, 'description' : ''}
+    print "\t%s : Type=%s Description='%s'" % (k, t, d)
+
+
+j = json.dumps(o, sort_keys = True, indent = 3)
+print "Pack file generated :", j
+
+create_dir = os.path.join(p_dest_dir, o['name'])
+print "We will create the pack directory in %s" % create_dir
+# Now get all the .cfg files from the src_dir and put them into a pack directory
+if os.path.exists(create_dir) and os.path.isdir(create_dir):
+    print "Warning : the destination directory already exists. I clean it!"
+    #TODO : do the clean
+
+pack_file_dest = os.path.join(create_dir, o['name']+'.pack')
+print "Saving the .pack file into %s" % pack_file_dest
+f = open(pack_file_dest, 'w')
+f.write(j)
+f.close()
+
+for root, dirs, files in os.walk(src_dir):
+    for file in files:
+        if re.search("\.cfg$", file):
+            p = file
+            base = root[len(src_dir):].strip()
+            if base.startswith('/'):
+                base = base[1:]
+            to_save = os.path.join(root, file)
+            print "We will save the file", base, to_save
+            dest_dir = os.path.join(create_dir, base)
+            print "Save in the directory", dest_dir
+            dest_file = os.path.join(dest_dir, file)
+            print "Into the file", dest_file
+            if not os.path.exists(dest_dir):
+                os.mkdir(dest_dir)
+            shutil.copy(to_save, dest_file)
+
+
+zip_file_p = os.path.join(p_dest_dir, o['name']+'.zip')
+print "Want to save the zip file", zip_file_p
+
+fd = zipfile.ZipFile(zip_file_p, "w")
+
+for root, dirs, files in os.walk(create_dir):
+    for file in files:
+        name = os.path.join(root, file)
+        dst_name = name[len(create_dir):]
+        if dst_name.startswith('/'):
+            dst_name = dst_name[1:]
+        print "Saving in zip", name, 'as', dst_name
+        fd.write(name, dst_name, zipfile.ZIP_DEFLATED)
+fd.close()
+
+print "Saved done"
+
+# open the file again, to see what's in it
+file = zipfile.ZipFile(zip_file_p, "r")
+for info in file.infolist():
+    print info.filename
+
+
+
+print "GO PUSH"
+#import os, urllib
+#os.environ["http_proxy"] = "http://proxy:3128"
+#data = urllib.urlopen("http://www.google.fr").read()
+#print "DATA?", data
+
+print "LAUNCH THE FILE", zip_file_p
+
+import pycurl
+
+c = pycurl.Curl()
+c.setopt(c.POST, 1)
+#c.setopt(c.CONNECTTIMEOUT, 5)
+#c.setopt(c.TIMEOUT, 8)
+#c.setopt(c.PROXY, 'http://inthemiddle.com:8080')
+c.setopt(c.URL, "http://127.0.0.1:7765/push")
+
+c.setopt(c.HTTPPOST,[ ("key", "BLABLA"), 
+                      ("data", 
+                       (c.FORM_FILE, str(zip_file_p),
+                        c.FORM_CONTENTTYPE, "application/x-gzip"))
+                      ])
+
+
+#c.setopt(c.HTTPPOST, [("file1", (c.FORM_FILE, str(zip_file_p)))])
+c.setopt(c.VERBOSE, 1)
+r = c.perform()
+print "status code: %s" % c.getinfo(pycurl.HTTP_CODE)
+c.close()
+print "that's it ;)"

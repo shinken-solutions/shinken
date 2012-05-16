@@ -75,7 +75,7 @@ class Packs(Items):
                     try:
                         fd = open(p, 'rU')
                         buf = fd.read()
-                        logger.debug("[pack] reading pack: %s" % buf)
+                        logger.debug("[pack] reading pack: %s" % file)
                         fd.close()
                     except IOError, exp:
                         logger.error("Cannot open pack file '%s' for reading: %s" % (p, exp))
