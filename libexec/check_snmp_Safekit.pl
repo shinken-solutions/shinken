@@ -69,7 +69,7 @@ sub verb { my $t=shift; print $t,"\n" if defined($o_verbose) ; }
 
 # Usage
 sub print_usage {
-    print "Usage: $0 [-v] -H <host> -C <snmp_community> [-2] | (-l login -x passwd [-X pass -L <authp>,<privp>])  [-p <port>] [-f] [-t <timeout>] [-V]\n";
+    print "Usage: $0 [-v] -H <host> -C <snmp_community> [-2] | (-l login -x passwd [-X pass -L <authp>,<privp>]) [-p <port>] [-m Safekit_module] [-f] [-t <timeout>] [-V]\n";
 }
 
 sub isnnum { # Return true if arg is not a number
@@ -83,7 +83,7 @@ sub help {
    print_usage();
    print <<EOT;
 -m, --module
-   Name of Safekit's module to monitor. 
+   Name of Safekit module to monitor. 
 -v, --verbose
    Enabled verbosity.
 -h, --help
