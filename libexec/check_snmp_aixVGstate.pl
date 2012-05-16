@@ -12,6 +12,7 @@ use Net::SNMP;
 use Getopt::Long;
 
 my $lvEntry  = ".1.3.6.1.4.1.2.6.191.2.2.1.1";
+my $lvName   = ".1.3.6.1.4.1.2.6.191.2.2.1.1.1";
 my $lvNameVg = ".1.3.6.1.4.1.2.6.191.2.2.1.1.2";
 my $lvType   = ".1.3.6.1.4.1.2.6.191.2.2.1.1.3";
 my $lvState  = ".1.3.6.1.4.1.2.6.191.2.2.1.1.6";
@@ -23,24 +24,25 @@ my %ERRORS=('OK'=>0,'WARNING'=>1,'CRITICAL'=>2,'UNKNOWN'=>3,'DEPENDENT'=>4);
 
 # Globals
 
-my $o_host =    undef;          # hostname
-my $o_community = undef;        # community
-my $o_port =    161;            # port
-my $o_help=     undef;          # wan't some help ?
-my $o_vgName=     undef;          # vgName
-my $o_debug=	undef;		#debug flag
-my $o_version=  undef;          # print version
+my $o_host =    undef;      # hostname
+my $o_community= undef;    # community
+my $o_port =    161;        # port
+my $o_help=     undef;      # wan't some help ?
+my $o_vgName=   undef;      # vgName
+my $o_excluded= undef;      # excluded LV from scan
+my $o_debug=    undef;      #debug flag
+my $o_version=  undef;      # print version
 # End compatibility
-my $o_timeout=  undef;          # Timeout (Default 5)
-my $o_perf=     undef;          # Output performance data
-my $o_version2= undef;          # use snmp v2c
+my $o_timeout=  undef;      # Timeout (Default 5)
+my $o_perf=     undef;      # Output performance data
+my $o_version2= undef;      # use snmp v2c
 # SNMPv3 specific
-my $o_login=    undef;          # Login for snmpv3
-my $o_passwd=   undef;          # Pass for snmpv3
+my $o_login=    undef;      # Login for snmpv3
+my $o_passwd=   undef;      # Pass for snmpv3
 my $v3protocols=undef;  # V3 protocol list.
-my $o_authproto='md5';          # Auth protocol
-my $o_privproto='des';          # Priv protocol
-my $o_privpass= undef;          # priv password
+my $o_authproto='md5';      # Auth protocol
+my $o_privproto='des';      # Priv protocol
+my $o_privpass= undef;      # priv password
 
 # For verbose output
 sub verb { my $t=shift; print $t,"\n" if defined($o_debug) ; }
@@ -95,42 +97,44 @@ EOT
 sub check_options {
     Getopt::Long::Configure ("bundling");
     GetOptions(
-        'v:s'     => \$o_vgName,        'vgname:s'       => \$o_vgName,
-        'h'     => \$o_help,            'help'          => \$o_help,
-        'd'     => \$o_debug,           'debug'          => \$o_debug,
-        'H:s'   => \$o_host,            'hostname:s'    => \$o_host,
-        'p:i'   => \$o_port,            'port:i'        => \$o_port,
-        'C:s'   => \$o_community,       'community:s'   => \$o_community,
-        'l:s'   => \$o_login,           'login:s'       => \$o_login,
-        'x:s'   => \$o_passwd,          'passwd:s'      => \$o_passwd,
-        'X:s'   => \$o_privpass,        'privpass:s'    => \$o_privpass,
-        'L:s'   => \$v3protocols,       'protocols:s'   => \$v3protocols,
-        't:i'   => \$o_timeout,         'timeout:i'     => \$o_timeout,
-        'V'     => \$o_version,         'version'       => \$o_version,
-        '2'     => \$o_version2,        'v2c'           => \$o_version2,
-        'f'     => \$o_perf,            'perfparse'     => \$o_perf,
-        );
+    'v:s'     => \$o_vgName,        'vgname:s'      => \$o_vgName,
+    'e:s'     => \$o_excluded,        'exclude:s'   => \$o_excluded,
+    'h'     => \$o_help,            'help'          => \$o_help,
+    'd'     => \$o_debug,           'debug'         => \$o_debug,
+    'H:s'   => \$o_host,            'hostname:s'    => \$o_host,
+    'p:i'   => \$o_port,            'port:i'        => \$o_port,
+    'C:s'   => \$o_community,       'community:s'   => \$o_community,
+    'l:s'   => \$o_login,           'login:s'       => \$o_login,
+    'x:s'   => \$o_passwd,          'passwd:s'      => \$o_passwd,
+    'X:s'   => \$o_privpass,        'privpass:s'    => \$o_privpass,
+    'L:s'   => \$v3protocols,       'protocols:s'   => \$v3protocols,
+    't:i'   => \$o_timeout,         'timeout:i'     => \$o_timeout,
+    'V'     => \$o_version,         'version'       => \$o_version,
+    '2'     => \$o_version2,        'v2c'           => \$o_version2,
+    'f'     => \$o_perf,            'perfparse'     => \$o_perf,
+    );
     # Basic checks
-        if (defined($o_timeout) && (isnnum($o_timeout) || ($o_timeout < 2) || ($o_timeout > 60)))
-          { print "Timeout must be >1 and <60 !\n"; print_usage(); exit $ERRORS{"UNKNOWN"}}
-        if (!defined($o_timeout)) {$o_timeout=5;}
+    if (defined($o_timeout) && (isnnum($o_timeout) || ($o_timeout < 2) || ($o_timeout > 60)))
+      { print "Timeout must be >1 and <60 !\n"; print_usage(); exit $ERRORS{"UNKNOWN"}}
+    if (!defined($o_timeout)) {$o_timeout=5;}
     if (defined ($o_help) ) { help(); exit $ERRORS{"UNKNOWN"}};
+    if (! defined($o_vgName)) { $o_vgName = '.*' };
     if (defined($o_version)) { p_version(); exit $ERRORS{"UNKNOWN"}};
     if ( ! defined($o_host) ) # check host and filter 
-        { print_usage(); exit $ERRORS{"UNKNOWN"}}
+    { print_usage(); exit $ERRORS{"UNKNOWN"}}
     # check snmp information
     if ( !defined($o_community) && (!defined($o_login) || !defined($o_passwd)) )
-          { print "Put snmp login info!\n"; print_usage(); exit $ERRORS{"UNKNOWN"}}
-        if ((defined($o_login) || defined($o_passwd)) && (defined($o_community) || defined($o_version2)) )
-          { print "Can't mix snmp v1,2c,3 protocols!\n"; print_usage(); exit $ERRORS{"UNKNOWN"}}
-        if (defined ($v3protocols)) {
-          if (!defined($o_login)) { print "Put snmp V3 login info with protocols!\n"; print_usage(); exit $ERRORS{"UNKNOWN"}}
-          my @v3proto=split(/,/,$v3protocols);
-          if ((defined ($v3proto[0])) && ($v3proto[0] ne "")) {$o_authproto=$v3proto[0];        }       # Auth protocol
-          if (defined ($v3proto[1])) {$o_privproto=$v3proto[1]; }       # Priv  protocol
-          if ((defined ($v3proto[1])) && (!defined($o_privpass))) {
-            print "Put snmp V3 priv login info with priv protocols!\n"; print_usage(); exit $ERRORS{"UNKNOWN"}}
-        }
+      { print "Put snmp login info!\n"; print_usage(); exit $ERRORS{"UNKNOWN"}}
+    if ((defined($o_login) || defined($o_passwd)) && (defined($o_community) || defined($o_version2)) )
+      { print "Can't mix snmp v1,2c,3 protocols!\n"; print_usage(); exit $ERRORS{"UNKNOWN"}}
+    if (defined ($v3protocols)) {
+      if (!defined($o_login)) { print "Put snmp V3 login info with protocols!\n"; print_usage(); exit $ERRORS{"UNKNOWN"}}
+      my @v3proto=split(/,/,$v3protocols);
+      if ((defined ($v3proto[0])) && ($v3proto[0] ne "")) {$o_authproto=$v3proto[0];        }       # Auth protocol
+      if (defined ($v3proto[1])) {$o_privproto=$v3proto[1]; }       # Priv  protocol
+      if ((defined ($v3proto[1])) && (!defined($o_privpass))) {
+        print "Put snmp V3 priv login info with priv protocols!\n"; print_usage(); exit $ERRORS{"UNKNOWN"}}
+    }
 }
 #######
 # MAIN#
@@ -145,46 +149,46 @@ if ( defined($o_login) && defined($o_passwd)) {
   # SNMPv3 login
     if (!defined ($o_privpass)) {
     ($session, $error) = Net::SNMP->session(
-      -hostname         => $o_host,
-      -version          => '3',
-      -username         => $o_login,
+      -hostname     => $o_host,
+      -version      => '3',
+      -username     => $o_login,
       -authpassword     => $o_passwd,
       -authprotocol     => $o_authproto,
-      -timeout          => $o_timeout
+      -timeout      => $o_timeout
     );
   } else {
     ($session, $error) = Net::SNMP->session(
-      -hostname         => $o_host,
-      -version          => '3',
-      -username         => $o_login,
+      -hostname     => $o_host,
+      -version      => '3',
+      -username     => $o_login,
       -authpassword     => $o_passwd,
       -authprotocol     => $o_authproto,
       -privpassword     => $o_privpass,
-          -privprotocol => $o_privproto,
-      -timeout          => $o_timeout
+      -privprotocol => $o_privproto,
+      -timeout      => $o_timeout
     );
   }
 } else {
-	verb("Connexion SNMPv2");
-        if (defined ($o_version2)) {
-                # SNMPv2 Login
-                  ($session, $error) = Net::SNMP->session(
-                 -hostname  => $o_host,
-                 -version   => 2,
-                 -community => $o_community,
-                 -port      => $o_port,
-                 -timeout   => $o_timeout
-                );
-        } else {
-	 verb("Connexion SMNPv1");
-          # SNMPV1 login
-          ($session, $error) = Net::SNMP->session(
-                -hostname  => $o_host,
-                -community => $o_community,
-                -port      => $o_port,
-                -timeout   => $o_timeout
-          );
-        }
+    verb("Connexion SNMPv2");
+    if (defined ($o_version2)) {
+            # SNMPv2 Login
+              ($session, $error) = Net::SNMP->session(
+             -hostname  => $o_host,
+             -version   => 2,
+             -community => $o_community,
+             -port      => $o_port,
+             -timeout   => $o_timeout
+            );
+    } else {
+     verb("Connexion SMNPv1");
+      # SNMPV1 login
+      ($session, $error) = Net::SNMP->session(
+            -hostname  => $o_host,
+            -community => $o_community,
+            -port      => $o_port,
+            -timeout   => $o_timeout
+      );
+    }
 }
 
 verb("Get snmp table of lv informations");
@@ -203,17 +207,17 @@ verb(%$LvTable);
 verb($o_vgName);
 while (($oid, $value) = each(%$LvTable))
 {
-	verb ("oid: $oid value: $value");
-	if ($value =~ /$o_vgName/ and $oid =~ /$lvNameVg\.(\d+)$/)
-	{
-		verb("Indice matched : $1");
-                # Check if it is a jfs2 fs type else we don't care
-                if ($$LvTable{"$lvType.$1"} == 5)
-                {
-                        push (@vgNameBrowsed, $value);
-        	       	push (@lv2monitor, $1);
-                }
-	}
+    verb ("oid: $oid value: $value");
+    if ($value =~ /$o_vgName/ and $oid =~ /$lvNameVg\.(\d+)$/)
+    {
+            verb("Indice matched : $1");
+            # Check if it is a jfs2 fs type else we don't care
+            if ($$LvTable{"$lvType.$1"} == 5)
+            {
+                    push (@vgNameBrowsed, $value);
+                    push (@lv2monitor, $1);
+            }
+    }
 }
 
 verb("Sort keep uniq entry in vgname list");
@@ -221,35 +225,58 @@ my %seen = ();
 my @uniq_vgName = ();
 my $item;
 foreach $item (@vgNameBrowsed) {
-        unless ($seen{$item}) {
-                $seen{$item} = 1;
-                       push(@uniq_vgName, $item);
-        }
+    unless ($seen{$item}) {
+            $seen{$item} = 1;
+                   push(@uniq_vgName, $item);
+    }
 }
 $vgName = join(" " , @uniq_vgName);
+
+# Init counter
+my %counters = (
+    "openStale" => 0,
+    "closeStale" => 0,
+    "openSync" => 0,
+    "closeSync" => 0,
+    "undertermined" => 0,
+);
 
 verb("Test those lv for their state");
 if(@lv2monitor)
 {
-	my $lv;
-	foreach $lv (@lv2monitor)
-	{
-		verb($lv." : ".$$LvTable{"$lvState.$lv"});
-		$$LvTable{"$lvState.$lv"} == 1 and do {print "Open but Stale partition on $vgName";exit $ERRORS{WARNING}};
-		$$LvTable{"$lvState.$lv"} == 3 and do {print "$vgName closed and stale"; exit $ERRORS{CRITICAL}};
-		$$LvTable{"$lvState.$lv"} == 4 and do {
-	if ($$LvTable{"$lvType.$lv"} != 5 || $$LvTable{"$lvType.$lv"} != 6 ) 
-		{print "$vgName: open and sync\n"; exit $ERRORS{OK};}
-	else
-		{print "$vgName closed and sync"; exit $ERRORS{CRITICAL};}
-	};
-		$$LvTable{"$lvState.$lv"} == 5 and do {print "$vgName state undeterminated"; exit $ERRORS{UNKNOWN}};
-	}
-	print "$vgName open and Sync";
-	exit $ERRORS{OK};
+    my $lv;
+    foreach $lv (@lv2monitor)
+    {
+        verb($lv." : ".$$LvTable{"$lvState.$lv"});
+        #Manage excluded LV
+        next if ( defined($o_excluded) and $$LvTable{"$lvName.$lv"} =~ /$o_excluded/ );
+        $$LvTable{"$lvState.$lv"} == 1 and do { $counters{"openStale"}++ };
+        $$LvTable{"$lvState.$lv"} == 2 and do { $counters{"openSync"}++ };
+        $$LvTable{"$lvState.$lv"} == 3 and do { $counters{"closeStale"}++ };
+        $$LvTable{"$lvState.$lv"} == 4 and do {
+        # set as opensync for other fs than jfs2 and jfs2log to not pollute final result
+        if ($$LvTable{"$lvType.$lv"} != 5 && $$LvTable{"$lvType.$lv"} != 6 ) 
+                { $counters{"openSync"}++; }
+        else
+                { $counters{"closeSync"}++; }
+        };
+            $$LvTable{"$lvState.$lv"} == 5 and do { $counters{"undeterminated"}++ };
+    }
+    my $output = "$vgName has $counters{'openStale'} opened stale LV, $counters{'closeStale'} closed Stale LV, $counters{'closeSync'} closed sync LV, $counters{'openSync'} opened sync LV and $counters{'undertermined'} undertermined state LV";
+    if ( defined($o_perf) )
+    {
+    $output .= "| openStaleLV=$counters{'openStale'};;;; closeStaleLV=$counters{'closeStale'};;;; closeSyncLV=$counters{'closeSync'};;;; openSyncLV=$counters{'openSync'};;;; underterminatedLV=$counters{'undertermined'};;;;";
+    }
+    print $output;
+    $counters{'openStale'} > 0     ? exit $ERRORS{CRITICAL} :
+    $counters{'undertermined'} > 0 ? exit $ERRORS{CRITICAL} :
+    $counters{'closeStale'} > 0    ? exit $ERRORS{CRITICAL} :
+    $counters{'closeSync'} > 0     ? exit $ERRORS{WARNING} :
+    $counters{'openSync'} > 0      ? exit $ERRORS{OK} :
+                                     exit $ERRORS{UNKNOWN};
 }
 else
 {
-	print "$vgName does not exist";
-	exit $ERRORS{UNKNOWN};
+    print "$vgName does not exist";
+    exit $ERRORS{UNKNOWN};
 }
