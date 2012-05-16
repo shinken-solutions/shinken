@@ -63,37 +63,6 @@ class Canopsis_broker(BaseModule):
     def init(self):
         logger.info("I connect to canopsis server")
 
-""" message format : 
-
-Source : http://forge.canopsis.org/projects/canopsis/wiki/Event_format
-
-Event :
-{
-  'connector':      'shinken',
-  'connector_name': 'Connector name (nagios1, nagios2 ...)',
-  'event_type':     Event type ('check', 'ack', 'notification', 'downtime'),
-  'source_type':    Source type (component=service or resource=host),
-  'component':      Component name,
-  'resource':       Ressource name,
-  'timestamp':      UNIX seconds timestamp,
-  'state':          State (0 (Ok), 1 (Warning), 2 (Critical), 3 (Unknown)),
-  'state_type':     State type (O (Soft), 1 (Hard)),
-  'output':         Event message,
-  'long_output':    Event long message,
-  'perf_data':      see below
-}
-
-Perfdata :
-    'perf_data':      Performance data ("Nagios format":http://nagiosplug.sourceforge.net/developer-guidelines.html#AEN201)
-    or
-    'perf_data_array': Array of performance data with metric's type ('GAUGE', 'DERIVE', 'COUNTER', 'ABSOLUTE'), Ex:
-        [
-          {'metric': 'shortterm', 'value': 0.25, 'unit': None, 'min': None, 'max': None, 'warn': None, 'crit': None, type: 'GAUGE' },
-          {'metric': 'midterm',   'value': 0.16, 'unit': None, 'min': None, 'max': None, 'warn': None, 'crit': None, type: 'GAUGE' },
-          {'metric': 'longterm',  'value': 0.12, 'unit': None, 'min': None, 'max': None, 'warn': None, 'crit': None, type: 'GAUGE' }
-        ]
-"""
-
     def manage_brok(self, b):
         logger.info("Got brok")        
         #new_b = copy.deepcopy(b)
