@@ -108,7 +108,7 @@
 
 <body>
 	%if print_header:
-		%include header_element_skonf globals()
+		%include header_element_hostd globals()
 	%end
 
     <div class="container-fluid no-leftpadding">

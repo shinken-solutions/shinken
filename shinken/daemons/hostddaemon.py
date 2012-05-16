@@ -924,5 +924,6 @@ class Hostd(Daemon):
        print "File %s is saved" % p
        
 
-
-    
+    def is_name_available(self, username):
+       r = self.db.users.find_one({'_id' : username})
+       return r is None
