@@ -230,7 +230,7 @@ foreach $item (@vgNameBrowsed) {
                    push(@uniq_vgName, $item);
     }
 }
-$vgName = join(" " , @uniq_vgName);
+$vgName = join(", " , @uniq_vgName);
 
 # Init counter
 my %counters = (
