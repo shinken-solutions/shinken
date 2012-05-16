@@ -33,8 +33,11 @@ app = None
 # Our page. If the useer call /dummy/TOTO arg1 will be TOTO.
 # if it's /dummy/, it will be 'nothing'
 def register():
-
     return {'app' : app, 'user' : {}}
+
+def do_register():
+    username = app.request.forms.get('username')
+    
 
 def is_name_available():
     app.response.content_type = 'application/json'
@@ -48,6 +51,7 @@ def is_name_available():
     b = app.is_name_available(name)
     print "Return", b
     return json.dumps(b)
+
 
 
 pages = {register : { 'routes' : ['/register'], 'view' : 'register', 'static' : True},
