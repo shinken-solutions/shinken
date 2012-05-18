@@ -49,6 +49,8 @@ compilation!
 Third way: install script
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Note : NEVER EVER MIX THE DIFFERENTS INSTALLATION WAYS. THIS WILL RUN YOU IN BIG TROUBLES. IF YOU CHOOSE ONE WAY DO NOT TRY OTHERS OR CLEAN UP BEFORE.
+
 You can use the install utility script located at the root of the shinken sources.
 The script creates the user and group, installs all dependencies and then it installs shinken. It is compatible with Debian, Ubuntu, Centos/Redhat 5.x and 6.x
 The only requirement is an internet connection for the server on which you want to install shinken. It also allows to modify the installation folder in a configuration file.
