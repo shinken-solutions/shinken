@@ -1160,11 +1160,14 @@ function install_mongodb(){
             fi
             ;;
         DEBIAN)
-            apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10 >> ${LOGFILE} 2>&1
-            echo "deb http://downloads-distro.mongodb.org/repo/debian-sysvinit dist 10gen" > /etc/apt/sources.list.d/10gen.list
-            apt-get update >> ${LOGFILE} 2>&1
-            cecho " > Installing mongodb server" green
-            apt-get install -y mongodb-10gen >> ${LOGFILE} 2>&1
+            if [ ! -f "/etc/apt/sources.list.d/10gen.list" ]
+            then
+                apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10 >> ${LOGFILE} 2>&1
+                echo "deb http://downloads-distro.mongodb.org/repo/debian-sysvinit dist 10gen" > /etc/apt/sources.list.d/10gen.list
+                apt-get update >> ${LOGFILE} 2>&1
+                cecho " > Installing mongodb server" green
+                apt-get install -y mongodb-10gen >> ${LOGFILE} 2>&1
+            fi
             ;;
         *)
             cecho " > Unknown distribution : $DIST" red
@@ -1541,7 +1544,7 @@ function install_capture_plugin(){
     cadre "Install capture_plugin" green
     cd $TMP
     cecho " > Getting capture_plugin" green
-    wget $WGETPROXY http://www.waggy.at/nagios/capture_plugin.txt >> ${LOGFILE} 2>&1 
+    wget $WGETPROXY $CAPTURE_PLUGIN >> ${LOGFILE} 2>&1 
     cecho " > Installing capture_plugin" green
     mv capture_plugin.txt $TARGET/libexec/capture_plugin
     chmod +x $TARGET/libexec/capture_plugin    
@@ -1654,6 +1657,39 @@ function install_check_mongodb(){
     chmod +x $TARGET/libexec/check_mongodb.py    
     chown $SKUSER:$SKGROUP $TARGET/libexec/check_mongodb.py
         
+}
+
+# Add two plugins to check IBM DS san devices.
+function install_IBM_DS() {
+    cadre "Install check_IBM_DS_health.sh and check_IBM_DS_performance.pl plugins" green
+
+    SMcli_bin=$(which SMcli)
+    if [ $? -ne 0 ]
+    then
+        cecho "You do not have Storage Manager installed. Go on :" red
+        cecho "http://www-933.ibm.com/support/fixcentral/swg/selectFixes?parent=Entry-level+disk+systems&product=ibm/Storage_Disk/DS3500&release=All&platform=All&function=all#Storage%20Manager" red
+        cecho "to download Storage Manager for Linux according to your arch" red
+        exit 2
+    else
+        cecho "Downloading plugins..." green
+        wget $WGETPROXY -O check_IBM_DS_health.sh $CHECKIBMDSHEALTH >> $TMP/shinken.install.log 2>&1
+        wget $WGETPROXY -O check_IBM_DS_performance.pl $CHECKIBMDSPERF >> $TMP/shinken.install.log 2>&1
+    fi
+
+    cecho "Installing plugins..." green
+    install -b -g $SKGROUP -o $SKUSER -m 0755 -t $TARGET/libexec check_IBM_DS_health.sh check_IBM_DS_performance.pl >> $TMP/shinken.install.log 2>&1
+
+    cadre "Successfully installed IBM DS san monitoring plugins." green
+}
+
+function install_IBM_plugins() {
+    cadre "Install check_snmp_aixVGstate.pl, check_snmp_HACMP.pl, check_snmp_Safekit.pl and check_snmp_systemHealth.pl" green
+
+    cecho "Downloading plugins..." green
+    wget $WGETPROXY $CHECKIBM >> $TMP/shinken.install.log 2>&1
+
+    cecho "Installing plugins..." green
+    install -b -g $SKGROUP -o $SKUSER -m 0755 -t $TARGET/libexec check_snmp_systemHealth.pl check_snmp_aixVGstate.pl check_snmp_HACMP.pl check_snmp_Safekit.pl >> $TMP/shinken.install.log 2>&1
 }
 
 # CHECK_NWC_HEALTH
@@ -2258,6 +2294,8 @@ echo "Usage : install -k | -i | -u [addonname] | -b | -r backupname | -l | -c | 
                                check_netapp2
                                check_mem (local enhanced memory check plugin)
                                check_snmp_bandwidth (check bandwidth usage with snmp)
+                               check_IBM
+                               check_IBM_DS
     -a | --addon            Install addons. Argument should be one of the following : 
                                pnp4nagios
                                multisite
@@ -2364,6 +2402,14 @@ do
             elif [ "$OPTARG" == "check_snmp_bandwidth" ]
             then
                 install_check_snmp_bandwidth
+                exit 0
+            elif [ "$OPTARG" == "check_IBM" ]
+            then
+                install_IBM_plugins
+                exit 0
+            elif [ "$OPTARG" == "check_IBM_DS" ]
+            then
+                install_IBM_DS
                 exit 0
             fi
             ;;
