@@ -1,11 +1,11 @@
 
-%rebase layout_skonf globals(), js=['packs/js/packs.js']
+%rebase layout_hostd globals(), js=['packs/js/packs.js']
 
 <div> <h1> Packs </h1> </div>
 
 %treename = ''
 %tree_path = []
-%for e in app.datamgr.get_pack_tree(app.packs):
+%for e in app.datamgr.get_pack_tree():
     %print "ENTRY", e
     %if e['type'] == 'new_tree':
        %treename = e['name']
@@ -27,14 +27,14 @@
   
     <div class='row {{treename}}'>
       <!-- {{p}} -->
-      %pname = p.get_name()
+      %pname = p.get('pack_name', 'unknown')
       <div class='span1'>
 	<span class="label">
 	  <img class="imgsize3" onerror="$(this).hide()" src="/static/images/sets/{{pname}}/tag.png" /> {{pname}}
 	</span>
       </div>
       <div class='span7'>
-	{{p.description}}
+	{{p.get('description', '')}}
       </div>
       <div class='span2'>
       %lst = app.datamgr.related_to_pack(p)
@@ -52,7 +52,7 @@
       %end
       </div>
       <div class='pull-right'>
-	%lnk = p.doc_link
+	%lnk = p.get('doc_link', '')
 	%if not lnk:
 	   %lnk = "http://www.shinken-monitoring.org/wiki/packs/"+pname
 	%end

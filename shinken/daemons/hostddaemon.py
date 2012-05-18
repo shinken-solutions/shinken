@@ -55,7 +55,7 @@ from shinken.external_command import ExternalCommand
 from shinken.util import safe_print
 from shinken.skonfuiworker import SkonfUIWorker
 from shinken.message import Message
-from shinken.misc.datamanagerskonf import datamgr
+from shinken.misc.datamanagerhostd import datamgr
 
 # DBG : code this!
 from shinken.objects import Contact
@@ -291,7 +291,7 @@ class Hostd(Daemon):
         self.hook_point('early_configuration')
 
         # Load all file triggers
-        self.conf.load_packs()
+        #self.conf.load_packs()
 
         # Create Template links
         self.conf.linkify_templates()
@@ -316,11 +316,11 @@ class Hostd(Daemon):
         
         # Remove templates from config
         # SAVE TEMPLATES
-        self.host_templates = self.conf.hosts.templates
-        self.service_templates = self.conf.services.templates
-        self.contact_templates = self.conf.contacts.templates
-        self.timeperiod_templates = self.conf.timeperiods.templates
-        self.packs = self.conf.packs
+        #self.host_templates = self.conf.hosts.templates
+        #self.service_templates = self.conf.services.templates
+        #self.contact_templates = self.conf.contacts.templates
+        #self.timeperiod_templates = self.conf.timeperiods.templates
+        #self.packs = self.conf.packs
         # Then clean for other parts
         #self.conf.remove_templates()
 

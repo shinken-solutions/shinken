@@ -29,20 +29,11 @@ from shinken.webui.bottle import redirect
 ### Will be populated by the UI with it's own value
 app = None
 
-# Our page. If the useer call /dummy/TOTO arg1 will be TOTO.
-# if it's /dummy/, it will be 'nothing'
 def get_packs():
     # First we look for the user sid
     # so we bail out if it's a false one
     user = app.get_user_auth()
 
-    if not user:
-        redirect("/user/login")
-        return
-
-    # we return values for the template (view). But beware, theses values are the
-    # only one the tempalte will have, so we must give it an app link and the
-    # user we are loggued with (it's a contact object in fact)
     return {'app' : app, 'user' : user}
 
 
