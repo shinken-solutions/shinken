@@ -63,15 +63,20 @@ function remove(){
         cecho " > Removing startup scripts" green
         case $CODE in
             REDHAT)
-                chkconfig shinken off
-                chkconfig --del shinken
+                chkconfig shinken off >> ${LOGFILE} 2>&1
+                chkconfig --del shinken >> ${LOGFILE} 2>&1
+                rm -f /etc/init.d/shinken* >> ${LOGFILE} 2>&1
+                ;;
+            Fedora)
+                systemctl disable $SYSTEMDSERVICES >> ${LOGFILE} 2>&1
+                rm -f /lib/systemd/system/shinken* >> ${LOGFILE} 2>&1
                 ;;
             DEBIAN)
                 update-rc.d -f shinken remove >> ${LOGFILE} 2>&1 
+                rm -f /etc/init.d/shinken*
                 ;;
             esac    
     fi
-    rm -f /etc/init.d/shinken*
 
     if [ -d "$PNPPREFIX" ]
     then
@@ -82,21 +87,21 @@ function remove(){
             cecho " > Removing pnp4nagios" green
             rm -Rf $PNPPREFIX
             case $CODE in
-                    REDHAT)
-                            /etc/init.d/npcd stop >> ${LOGFILE} 2>&1
-                            chkconfig npcd off >> ${LOGFILE} 2>&1
-                            chkconfig --del npcd  >> ${LOGFILE} 2>&1
-                            rm -f /etc/init.d/npcd >> ${LOGFILE} 2>&1
-                            rm -f /etc/httpd/conf.d/pnp4nagios.conf >> ${LOGFILE} 2>&1
-                            /etc/init.d/httpd restart >> ${LOGFILE} 2>&1
-                            ;;
-                    DEBIAN)
-                            /etc/init.d/npcd stop >> ${LOGFILE} 2>&1
-                            update-rc.d -f npcd remove >> ${LOGFILE} 2>&1 
-                            rm -f /etc/init.d/npcd >> ${LOGFILE} 2>&1
-                            rm -f /etc/apache2/conf.d/pnp4nagios.conf >> ${LOGFILE} 2>&1
-                            /etc/init.d/apache2 restart >> ${LOGFILE} 2>&1
-                            ;;
+                REDHAT|Fedora)
+                    /etc/init.d/npcd stop >> ${LOGFILE} 2>&1
+                    chkconfig npcd off >> ${LOGFILE} 2>&1
+                    chkconfig --del npcd  >> ${LOGFILE} 2>&1
+                    rm -f /etc/init.d/npcd >> ${LOGFILE} 2>&1
+                    rm -f /etc/httpd/conf.d/pnp4nagios.conf >> ${LOGFILE} 2>&1
+                    /etc/init.d/httpd restart >> ${LOGFILE} 2>&1
+                    ;;
+                DEBIAN)
+                    /etc/init.d/npcd stop >> ${LOGFILE} 2>&1
+                    update-rc.d -f npcd remove >> ${LOGFILE} 2>&1 
+                    rm -f /etc/init.d/npcd >> ${LOGFILE} 2>&1
+                    rm -f /etc/apache2/conf.d/pnp4nagios.conf >> ${LOGFILE} 2>&1
+                    /etc/init.d/apache2 restart >> ${LOGFILE} 2>&1
+                    ;;
             esac   
         else 
             cecho " > Aborting uninstallation of pnp4nagios" yellow
@@ -119,7 +124,7 @@ function remove(){
             sed -i "/^# Needed for  WATO/,+2d" /etc/sudoers
             cecho " > Remove apache configuration" green
             case $CODE in
-                    REDHAT)
+                    REDHAT|Fedora)
                             rm -f /etc/httpd/conf.d/zzz_check_mk.conf >> ${LOGFILE} 2>&1
                             /etc/init.d/httpd restart >> ${LOGFILE} 2>&1
                             ;;
@@ -142,7 +147,7 @@ function remove(){
             cecho " > Removing nagvis" green
             rm -Rf $NAGVISPREFIX
             case $CODE in
-                    REDHAT)
+                    REDHAT|Fedora)
                             rm -f /etc/httpd/conf.d/nagvis.conf >> ${LOGFILE} 2>&1
                             /etc/init.d/httpd restart >> ${LOGFILE} 2>&1
                             ;;
@@ -190,6 +195,23 @@ function skill(){
     fi
     rm -Rf $TMP/bad_start*
     rm -Rf $TARGET/var/*.pid
+}
+
+function sstart() {
+    case $INIT in 
+        init)
+            /etc/init.d/shinken start >> ${LOGFILE} 2>&1
+            ;;
+        systemd)
+            systemctl --system daemon-reload
+            systemctl start $SYSTEMDSERVICES >> ${LOGFILE} 2>&1
+            systemctl status $SYSTEMDSERVICES >> ${LOGFILE} 2>&1
+            ;;
+        *)
+            cecho "Your init system aren't supported in shinken for now." red
+            exit 2
+            ;;
+    esac
 }
 
 
@@ -267,8 +289,8 @@ function installpkg(){
     fi
 
     case $CODE in 
-        REDHAT)
-            yum install -yq $package >> ${LOGFILE} 2>&1 
+        REDHAT|Fedora)
+            yum install -y $package >> ${LOGFILE} 2>&1 
             if [ $? -ne 0 ]
             then
                 return 2
@@ -605,8 +627,7 @@ function relocate(){
 
 function fix(){
     cadre "Applying various fixes" green
-    chmod +x /etc/init.d/shinken
-    chmod +x /etc/default/shinken
+    [ -f /etc/init.d/shinken ] && chmod +x /etc/init.d/shinken
     chmod +x $TARGET/bin/init.d/shinken
     chown -R $SKUSER:$SKGROUP $TARGET
     chown -R $SKUSER:$SKGROUP $ETC
@@ -615,16 +636,30 @@ function fix(){
 }
 
 function enable_initd(){
-    cadre "Enabling startup scripts" green
-    cp $TARGET/bin/init.d/shinken* /etc/init.d/
+    cecho "Installing startup scripts" green
+    case $INIT in
+        init)
+            cp $TARGET/bin/init.d/shinken* /etc/init.d/
+            ;;
+        systemd)
+            cp -f $src/for_fedora/systemd/* /lib/systemd/system
+            # Fix path to daemon in service file for systemd
+            sed -i -e 's/sbin/local\/shinken\/bin/' -e 's/etc\/shinken/usr\/local\/shinken\/etc/g' /lib/systemd/system/shinken*
+            ;;
+        *)
+            cecho " Error! your init system isn't support by shinken for now." red
+            ;;
+    esac
+    cecho " > Enabling $DIST startup script" green
     case $DISTRO in
         REDHAT)
-            cecho " > Enabling $DIST startup script" green
             chkconfig --add shinken
             chkconfig shinken on
             ;;
+        Fedora)
+            systemctl enable $SYSTEMDSERVICES >> ${LOGFILE} 2>&1
+            ;;
         DEBIAN)
-            cecho " > Enabling $DIST startup script" green
             update-rc.d shinken defaults >> ${LOGFILE} 2>&1 
             ;;
     esac    
@@ -750,7 +785,6 @@ function sinstall(){
     cleanuptarget
     relocate
     ln -s $TARGET/bin/default/shinken /etc/default/shinken
-    cp $TARGET/bin/init.d/shinken* /etc/init.d/
     mkdir -p $TARGET/var/archives
     enableretention
     enable_initd
@@ -763,7 +797,7 @@ function sinstall(){
     fi
     fix
     cecho " > Starting shinken" green
-    /etc/init.d/shinken start 
+    sstart
     cecho "+------------------------------------------------------------------------------" green
     cecho "| Shinken is now installed on your server " green
     cecho "| The install location is : $TARGET" green
@@ -843,7 +877,7 @@ function backup(){
 
 
     cecho " > Start shinken" green
-    /etc/init.d/shinken start >> ${LOGFILE} 2>&1
+    sstart
     if [ -f /etc/init.d/npcd ]
     then
         cecho " > Start npcd" green
@@ -1161,11 +1195,16 @@ function install_mongodb(){
             ;;
         Fedora)
             cecho " > Installing mongodb server" green
-            yum -y install $MONGOPKGS >> ${LOGFILE} 2>&1
-            cecho " > Enable mongodb service" green
-            systemctl enable mongod.service >> ${LOGFILE} 2>&1
-            cecho " > Start mongodb server" green
-            systemctl start mongod.service
+            if [ ! -f /lib/systemd/system/mongod.service ]
+            then
+                yum -y install $MONGOPKGS >> ${LOGFILE} 2>&1
+                cecho " > Enable mongodb service" green
+                systemctl enable mongod.service >> ${LOGFILE} 2>&1
+                cecho " > Start mongodb server" green
+                systemctl start mongod.service
+            else
+                cecho "Already installed" yellow
+            fi
             ;;
         DEBIAN)
             if [ ! -f "/etc/apt/sources.list.d/10gen.list" ]
@@ -1190,7 +1229,7 @@ function install_nagvis(){
     cadre "Install nagvis addon" green
     manageparameters "quiet"
     case $CODE in
-        REDHAT)
+        REDHAT|Fedora)
             yum install -y $NAGVISYUMPKGS >> ${LOGFILE} 2>&1
             HTTPDUSER="apache"
             HTTPDGROUP="apache"
@@ -1258,41 +1297,43 @@ function install_multisite(){
     cadre "Install check_mk addon" green
     manageparameters "quiet"
     cecho " > Installing prerequisites" green
-    if [ "$CODE" == "REDHAT" ]
-    then
-        HTTPDUSER="apache"
-        HTTPDGROUP="apache"
-        HTTPDINIT="/etc/init.d/httpd"
-        HTTPDCONF="/etc/httpd"
-        for p in $MKYUMPKG
-        do
-            cecho " -> Installing $p" green
-            yum -y install $p >> ${LOGFILE} 2>&1 
-        done
+    case $CODE in
+        REDHAT|Fedora)
+            HTTPDUSER="apache"
+            HTTPDGROUP="apache"
+            HTTPDINIT="/etc/init.d/httpd"
+            HTTPDCONF="/etc/httpd"
+            for p in $MKYUMPKG
+            do
+                cecho " -> Installing $p" green
+                yum -y install $p >> ${LOGFILE} 2>&1 
+            done
 
-        if [ -f /etc/selinux/config ]
-        then
-            if [ ! -z "$(cat /etc/selinux/config | grep "SELINUX=enforcing")" ]
+            if [ -f /etc/selinux/config ]
             then
-                cecho " > WARNING : selinux is enabled with enforcing state. You should create a rule or disable selinux" yellow
+                if [ ! -z "$(cat /etc/selinux/config | grep "SELINUX=enforcing")" ]
+                then
+                    cecho " > WARNING : selinux is enabled with enforcing state. You should create a rule or disable selinux" yellow
+                fi
             fi
-        fi
-    elif [ "$CODE" == "DEBIAN" ]
-    then
-        HTTPDUSER="www-data"
-        HTTPDGROUP="www-data"
-        HTTPDINIT="/etc/init.d/apache2"
-        HTTPDCONF="/etc/apache2"
-        for p in $MKAPTPKG
-        do
-            cecho " -> Installing $p" green
-            apt-get update >> ${LOGFILE} 2>&1
-            apt-get --force-yes -y install $p >> ${LOGFILE} 2>&1 
-        done
-    else
-        cecho " > Unsupported" red
-        exit 2
-    fi
+            ;;
+        DEBIAN)
+            HTTPDUSER="www-data"
+            HTTPDGROUP="www-data"
+            HTTPDINIT="/etc/init.d/apache2"
+            HTTPDCONF="/etc/apache2"
+            for p in $MKAPTPKG
+            do
+                cecho " -> Installing $p" green
+                apt-get update >> ${LOGFILE} 2>&1
+                apt-get --force-yes -y install $p >> ${LOGFILE} 2>&1 
+            done
+            ;;
+        *)
+            cecho " > Unsupported distro" red
+            exit 2
+            ;;
+    esac
 
 
     usermod -s /bin/bash $HTTPDUSER >> ${LOGFILE} 2>&1
@@ -1377,7 +1418,7 @@ function install_multisite(){
 #    echo '    "url_prefix":     "/",' >> $MKPREFIX/etc/multisite.mk
 #    echo '   },' >> $MKPREFIX/etc/multisite.mk
 #    echo ' }' >> $MKPREFIX/etc/multisite.mk
-    cp $src/install.d/multisite.mk $MKPREFIX/etc/
+        cp $src/install.d/multisite.mk $MKPREFIX/etc/
     ip=$(ifconfig | grep "inet ad" | grep -v 127.0.0.1 | awk '{print $2}' | awk -F : '{print $2}' | head -n 1)
     sed -i "s#__HOSTADDRESS__#"$ip"#g" $MKPREFIX/etc/multisite.mk
     rm -Rf $ETC/check_mk.d/*
@@ -1409,15 +1450,21 @@ function install_pnp4nagios(){
     then
         cecho " SKIPPREREQUISITES enabled : won't install pnp4nagios prerequisites" yellow
     else
-        if [ "$CODE" == "REDHAT" ]
-        then
-            cecho " > Installing prerequisites" green
-            yum -yq install $PNPYUMPKG >> ${LOGFILE} 2>&1
-        else
-            cecho " > Installing prerequisites" green
-            apt-get update >> ${LOGFILE} 2>&1
-            apt-get -y install $PNPAPTPKG >> ${LOGFILE} 2>&1
-        fi
+        case $CODE in
+            REDHAT|Fedora)
+                cecho " > Installing prerequisites" green
+                yum -y install $PNPYUMPKG >> ${LOGFILE} 2>&1
+                ;;
+            DEBIAN)        
+                cecho " > Installing prerequisites" green
+                apt-get update >> ${LOGFILE} 2>&1
+                apt-get -y install $PNPAPTPKG >> ${LOGFILE} 2>&1
+                ;;
+            *)
+                cecho " > Unsupported distro" red
+                exit 2
+                ;;
+        esac
     fi
 
     cd $TMP
@@ -1439,12 +1486,17 @@ function install_pnp4nagios(){
     cd $folder
     #cecho " > Enable mod rewrite for apache" green 
     #a2enmod rewrite >> ${LOGFILE} 2>&1
-    if [ "$CODE" == "REDHAT" ]
-    then
-        /etc/init.d/httpd restart >> ${LOGFILE} 2>&1
-    else
-        /etc/init.d/apache2 restart >> ${LOGFILE} 2>&1 
-    fi
+    case $CODE in
+        REDHAT)
+            /etc/init.d/httpd restart >> ${LOGFILE} 2>&1
+            ;;
+        Fedora)
+            systemctl restart httpd.service >> ${LOGFILE} 2>&1
+            ;;
+        DEBIAN)
+            /etc/init.d/apache2 restart >> ${LOGFILE} 2>&1
+            ;;
+    esac
     cecho " > Configuring source tree" green
     ./configure --prefix=$PNPPREFIX --with-nagios-user=$SKUSER --with-nagios-group=$SKGROUP >> ${LOGFILE} 2>&1     
     cecho " > Building ...." green
@@ -1452,16 +1504,18 @@ function install_pnp4nagios(){
     cecho " > Installing" green
     make fullinstall >> ${LOGFILE} 2>&1 
     rm -f $PNPPREFIX/share/install.php
-    if [ "$CODE" == "REDHAT" ]
-    then
-        cecho " > Fix htpasswd.users path" green
-        sed -i "s#/usr/local/nagios/etc/htpasswd.users#$ETC/htpasswd.users#g" /etc/httpd/conf.d/pnp4nagios.conf 
-        /etc/init.d/httpd restart >> ${LOGFILE} 2>&1 
-    else
-        cecho " > Fix htpasswd.users path" green
-        sed -i "s#/usr/local/nagios/etc/htpasswd.users#$ETC/htpasswd.users#g" /etc/apache2/conf.d/pnp4nagios.conf 
-        /etc/init.d/apache2 restart >> ${LOGFILE} 2>&1 
-    fi
+    case $CODE in
+        REDHAT|Fedora)
+            cecho " > Fix htpasswd.users path" green
+            sed -i "s#/usr/local/nagios/etc/htpasswd.users#$ETC/htpasswd.users#g" /etc/httpd/conf.d/pnp4nagios.conf 
+            /etc/init.d/httpd restart >> ${LOGFILE} 2>&1
+            ;;
+        DEBIAN)
+            cecho " > Fix htpasswd.users path" green
+            sed -i "s#/usr/local/nagios/etc/htpasswd.users#$ETC/htpasswd.users#g" /etc/apache2/conf.d/pnp4nagios.conf 
+            /etc/init.d/apache2 restart >> ${LOGFILE} 2>&1
+            ;;
+    esac
     cecho " > Enable npcdmod" green
     ip=$(ifconfig | grep "inet ad" | grep -v 127.0.0.1 | awk '{print $2}' | awk -F : '{print $2}' | head -n 1)
     cecho " > using ip address : $ip"
@@ -1478,16 +1532,26 @@ function uninstall_pnp4nagios(){
     then
         #first stop daemons
         cecho " > Stopping daemons " green
-        if [ "$CODE" == "REDHAT" ]
-        then
-            /etc/init.d/httpd stop >> ${LOGFILE} 2>&1
-            /etc/init.d/npcd stop >> ${LOGFILE} 2>&1
-            /etc/init.d/shinken stop >> ${LOGFILE} 2>&1
-        else
-            /etc/init.d/apache2 stop >> ${LOGFILE} 2>&1 
-            /etc/init.d/npcd stop >> ${LOGFILE} 2>&1
-            /etc/init.d/shinken stop >> ${LOGFILE} 2>&1
-        fi
+        case $CODE in
+            REDHAT)
+                /etc/init.d/httpd stop >> ${LOGFILE} 2>&1
+                /etc/init.d/npcd stop >> ${LOGFILE} 2>&1
+                /etc/init.d/shinken stop >> ${LOGFILE} 2>&1
+                ;;
+            Fedora)
+                systemctl stop httpd.service $SYSTEMDSERVICES >> ${LOGFILE} 2>&1
+                /etc/init.d/npcd stop >> ${LOGFILE} 2>&1
+                ;;
+            DEBIAN)
+                /etc/init.d/apache2 stop >> ${LOGFILE} 2>&1 
+                /etc/init.d/npcd stop >> ${LOGFILE} 2>&1
+                /etc/init.d/shinken stop >> ${LOGFILE} 2>&1
+                ;;
+            *)
+                cecho " > Unsupported distro" red
+                exit 2
+                ;;
+        esac
 
         # remove pnp4nagios folder 
         cecho " > Removing pnp4nagios" green
@@ -1496,16 +1560,21 @@ function uninstall_pnp4nagios(){
 
         # remove startup scripts
         cecho " > Removing pnp4nagios startup scripts" green
-        if [ "$CODE" == "REDHAT" ]
-        then
-            chkconfig npcd off >> ${LOGFILE} 2>&1
-            chkconfig --dell npcd >> ${LOGFILE} 2>&1
-            rm -Rf /etc/init.d/npcd >> ${LOGFILE} 2>&1
-        else
-            update-rc.d -f npcd remove >> ${LOGFILE} 2>&1
-            rm -Rf /etc/init.d/npcd >> ${LOGFILE} 2>&1
-        fi
-
+        case $CODE in
+            REDHAT|Fedora)
+                chkconfig npcd off >> ${LOGFILE} 2>&1
+                chkconfig --del npcd >> ${LOGFILE} 2>&1
+                rm -Rf /etc/init.d/npcd >> ${LOGFILE} 2>&1
+                ;;
+            DEBIAN)
+                update-rc.d -f npcd remove >> ${LOGFILE} 2>&1
+                rm -Rf /etc/init.d/npcd >> ${LOGFILE} 2>&1
+                ;;
+            *)
+                cecho " > Unsupported distro" red
+                exit 2
+                ;;
+        esac
         # remove pnp4nagios shinken configuration
         cecho " > Removing NPCPDMOD module from broker configuration " green
         BROKERS=$(PYTHONPATH=$TARGET $PY $TARGET/install.d/tools/skonf.py -a getobjectnames -f  $TARGET/etc/shinken-specific.cfg -o broker)
@@ -1517,15 +1586,20 @@ function uninstall_pnp4nagios(){
         
         # start daemons
         cecho " > Starting daemons " green
-        if [ "$CODE" == "REDHAT" ]
-        then
-            /etc/init.d/httpd start >> ${LOGFILE} 2>&1
-            /etc/init.d/shinken start >> ${LOGFILE} 2>&1
-        else
-            /etc/init.d/apache2 start >> ${LOGFILE} 2>&1 
-            /etc/init.d/shinken start >> ${LOGFILE} 2>&1
-        fi        
-
+        case $CODE in
+            REDHAT)
+                /etc/init.d/httpd start >> ${LOGFILE} 2>&1
+                /etc/init.d/shinken start >> ${LOGFILE} 2>&1
+                ;;
+            Fedora)
+                systemctl start httpd.service $SYSTEMDSERVICES >> ${LOGFILE} 2>&1
+                systemctl status httpd.service $SYSTEMDSERVICES >> ${LOGFILE} 2>&1
+                ;;
+            DEBIAN)
+                /etc/init.d/apache2 start >> ${LOGFILE} 2>&1 
+                /etc/init.d/shinken start >> ${LOGFILE} 2>&1
+                ;;
+        esac
     else
         cecho " > pnp4nagios folder was not found at : $PNPPREFIX" red
         exit 2
@@ -1566,15 +1640,21 @@ function install_check_hpasm(){
     cecho "You must install hpasm and or hp snmp agents on the monitored servers" yellow
     read taste
 
-    if [ "$CODE" == "REDHAT" ]
-    then
-        cecho " > Installing prerequisites" green 
-        yum install -yq $CHECKHPASMYUMPKGS  >> ${LOGFILE} 2>&1 
-    else
-        cecho " > Installing prerequisites" green 
-        apt-get update >> ${LOGFILE} 2>&1
-        apt-get -y install $CHECKHPASMAPTPKGS >> ${LOGFILE} 2>&1 
-    fi
+    case $CODE in
+        REDHAT|Fedora)
+            cecho " > Installing prerequisites" green 
+            yum install -y $CHECKHPASMYUMPKGS  >> ${LOGFILE} 2>&1 
+            ;;
+        DEBIAN)
+            cecho " > Installing prerequisites" green 
+            apt-get update >> ${LOGFILE} 2>&1
+            apt-get -y install $CHECKHPASMAPTPKGS >> ${LOGFILE} 2>&1 
+            ;;
+        *)
+            cecho " > Unsupported distro" red
+            exit 2
+            ;;
+    esac
 
     if [ $? -ne 0 ]
     then
@@ -1625,21 +1705,23 @@ function install_check_mongodb(){
 
     cadre "Install check_mongodb plugin from Mike Zupan" green
 
-    if [ "$CODE" == "REDHAT" ]
-    then
-        if [ ! -z "$CHECKMONGOYUMPKG" ]
-        then
-            cecho " > Installing prerequisites" green 
-            yum install -yq $CHECKMONGOYUMPKG  >> ${LOGFILE} 2>&1 
-        fi
-    else
-        if [ ! -z "$CHECKMONGOAPTPKG" ]
-        then
-            cecho " > Installing prerequisites" green 
-            apt-get update >> ${LOGFILE} 2>&1
-            apt-get -y install $CHECKMONGOAPTPKG >> ${LOGFILE} 2>&1 
-        fi
-    fi
+    case $CODE in
+        REDHAT|Fedora)
+            if [ ! -z "$CHECKMONGOYUMPKG" ]
+            then
+                cecho " > Installing prerequisites" green 
+                yum install -y $CHECKMONGOYUMPKG  >> ${LOGFILE} 2>&1 
+            fi
+            ;;
+        DEBIAN)
+            if [ ! -z "$CHECKMONGOAPTPKG" ]
+            then
+                cecho " > Installing prerequisites" green 
+                apt-get update >> ${LOGFILE} 2>&1
+                apt-get -y install $CHECKMONGOAPTPKG >> ${LOGFILE} 2>&1 
+            fi
+            ;;
+    esac
 
     if [ $? -ne 0 ]
     then
@@ -1705,21 +1787,23 @@ function install_check_nwc_health(){
 
     cadre "Install check_nwc_health plugin" green
 
-    if [ "$CODE" == "REDHAT" ]
-    then
-        if [ ! -z "$CHECKNWCYUMPKG" ]
-        then 
-            cecho " > Installing prerequisites" green 
-            yum install -yq $CHECKNWCYUMPKG  >> ${LOGFILE} 2>&1 
-        fi
-    else
-        if [ ! -z "$CHECKNWCAPTPKG" ]
-        then 
-            cecho " > Installing prerequisites" green 
-            apt-get update >> ${LOGFILE} 2>&1
-            apt-get -y install $CHECKNWCAPTPKG >> ${LOGFILE} 2>&1 
-        fi
-    fi
+    case $CODE in
+        REDHAT|Fedora)
+            if [ ! -z "$CHECKNWCYUMPKG" ]
+            then 
+                cecho " > Installing prerequisites" green 
+                yum install -y $CHECKNWCYUMPKG  >> ${LOGFILE} 2>&1 
+            fi
+            ;;
+        DEBIAN)
+           if [ ! -z "$CHECKNWCAPTPKG" ]
+            then 
+                cecho " > Installing prerequisites" green 
+                apt-get update >> ${LOGFILE} 2>&1
+                apt-get -y install $CHECKNWCAPTPKG >> ${LOGFILE} 2>&1 
+            fi
+            ;;
+    esac
 
     if [ $? -ne 0 ]
     then
@@ -1766,21 +1850,23 @@ plugin. Ask your vendor to know how to get it." yellow
     cecho " You should also customize the navisphere agent path in the plugin" yellow
     read taste
 
-    if [ "$CODE" == "REDHAT" ]
-    then
-        if [ ! -z "$CHECKEMCYUMPKG" ]
-        then 
-            cecho " > Installing prerequisites" green 
-            yum install -yq $CHECKEMCYUMPKG  >> ${LOGFILE} 2>&1 
-        fi
-    else
-        if [ ! -z "$CHECKEMCAPTPKG" ]
-        then 
-            cecho " > Installing prerequisites" green 
-            apt-get update >> ${LOGFILE} 2>&1
-            apt-get -y install $CHECKEMCAPTPKG >> ${LOGFILE} 2>&1 
-        fi
-    fi
+    case $CODE in
+        REDHAT|Fedora)
+            if [ ! -z "$CHECKEMCYUMPKG" ]
+            then 
+                cecho " > Installing prerequisites" green 
+                yum install -y $CHECKEMCYUMPKG  >> ${LOGFILE} 2>&1 
+            fi
+            ;;
+        DEBIAN)
+            if [ ! -z "$CHECKEMCAPTPKG" ]
+            then 
+                cecho " > Installing prerequisites" green 
+                apt-get update >> ${LOGFILE} 2>&1
+                apt-get -y install $CHECKEMCAPTPKG >> ${LOGFILE} 2>&1 
+            fi
+            ;;
+    esac
 
     if [ $? -ne 0 ]
     then
@@ -1825,29 +1911,30 @@ function install_check_esx3(){
 
     cadre "Install check_esx3 plugin from op5" green
 
-    if [ "$CODE" == "REDHAT" ]
-    then
-        cecho " > Installing prerequisites" green 
-        # because redhat package nagios-plugins-perl does not ship all files from Nagios::plugins
-        yum install -yq $NAGPLUGYUMPKGS  >> ${LOGFILE} 2>&1 
-        cd $TMP
-        wget $WGETPROXY $NAGPLUGPERL >> ${LOGFILE} 2>&1
-        tar zxvf $(echo $NAGPLUGPERL | awk -F "/" '{print $NF}') >> ${LOGFILE} 2>&1
-        cd  $(echo $NAGPLUGPERL | awk -F "/" '{print $NF}' |sed -e "s/\.tar\.gz//g") >> ${LOGFILE} 2>&1
-        perl Makefile.PL >> ${LOGFILE} 2>&1
-        make >> ${LOGFILE} 2>&1
-        if [ $? -ne 0 ]
-        then
-            cecho " > Error while building Nagios::Plugins perl modules" red
-            exit 2
-        fi    
-        make install >> ${LOGFILE} 2>&1
-        yum install -yq $VSPHERESDKYUMPKGS  >> ${LOGFILE} 2>&1 
-    else
-        cecho " > Installing prerequisites" green 
-        apt-get update >> ${LOGFILE} 2>&1
-        apt-get -y install $VSPHERESDKAPTPKGS >> ${LOGFILE} 2>&1 
-    fi
+    cecho " > Installing prerequisites" green 
+    case $CODE in
+        REDHAT|Fedora)
+            # because redhat package nagios-plugins-perl does not ship all files from Nagios::plugins
+            yum install -y $NAGPLUGYUMPKGS  >> ${LOGFILE} 2>&1 
+            cd $TMP
+            wget $WGETPROXY $NAGPLUGPERL >> ${LOGFILE} 2>&1
+            tar zxvf $(echo $NAGPLUGPERL | awk -F "/" '{print $NF}') >> ${LOGFILE} 2>&1
+            cd  $(echo $NAGPLUGPERL | awk -F "/" '{print $NF}' |sed -e "s/\.tar\.gz//g") >> ${LOGFILE} 2>&1
+            perl Makefile.PL >> ${LOGFILE} 2>&1
+            make >> ${LOGFILE} 2>&1
+            if [ $? -ne 0 ]
+            then
+                cecho " > Error while building Nagios::Plugins perl modules" red
+                exit 2
+            fi    
+            make install >> ${LOGFILE} 2>&1
+            yum install -y $VSPHERESDKYUMPKGS  >> ${LOGFILE} 2>&1 
+            ;;
+        DEBIAN)
+            apt-get update >> ${LOGFILE} 2>&1
+            apt-get -y install $VSPHERESDKAPTPKGS >> ${LOGFILE} 2>&1 
+            ;;
+    esac
     cd $TMP
 
     # workaround arch naming
@@ -1903,15 +1990,17 @@ function install_check_esx3(){
 function install_nagios-plugins(){
     cadre "Install nagios plugins" green
 
-    if [ "$CODE" == "REDHAT" ]
-    then
-        cecho " > Installing prerequisites" green
-        yum install -yq $NAGPLUGYUMPKG  >> ${LOGFILE} 2>&1 
-    else
-        cecho " > Installing prerequisites" green 
-        apt-get update >> ${LOGFILE} 2>&1
-        DEBIAN_FRONTEND=noninteractive apt-get -y install $NAGPLUGAPTPKG >> ${LOGFILE} 2>&1 
-    fi
+    cecho " > Installing prerequisites" green 
+    case $CODE in
+        REDHAT|Fedora)
+            yum install -y $NAGPLUGYUMPKG  >> ${LOGFILE} 2>&1 
+            ;;
+        DEBIAN)
+            apt-get update >> ${LOGFILE} 2>&1
+            DEBIAN_FRONTEND=noninteractive apt-get -y install $NAGPLUGAPTPKG >> ${LOGFILE} 2>&1 
+            ;;
+    esac
+
     cd $TMP
     if [ ! -f "nagios-plugins-$NAGPLUGVERS.tar.gz" ]
     then
@@ -1937,15 +2026,16 @@ function install_nagios-plugins(){
 function install_manubulon(){
     cadre "Install manubulon plugins" green
 
-    if [ "$CODE" == "REDHAT" ]
-    then
-        cecho " > Installing prerequisites" green
-        yum install -yq $MANUBULONYUMPKG  >> ${LOGFILE} 2>&1 
-    else
-        cecho " > Installing prerequisites" green 
-        apt-get update >> ${LOGFILE} 2>&1
-        apt-get -y install $MANUBULONAPTPKG >> ${LOGFILE} 2>&1 
-    fi
+    cecho " > Installing prerequisites" green
+    case $CODE in
+        REDHAT|Fedora)
+            yum install -y $MANUBULONYUMPKG  >> ${LOGFILE} 2>&1 
+            ;;
+        DEBIAN)
+            apt-get update >> ${LOGFILE} 2>&1
+            apt-get -y install $MANUBULONAPTPKG >> ${LOGFILE} 2>&1 
+            ;;
+    esac
     cd $TMP
 
     # check if utils.pm is there
@@ -1983,15 +2073,17 @@ function install_manubulon(){
 function install_check_wmi_plus(){
     cadre "Install check_wmi_plus" green
 
-    if [ "$CODE" == "REDHAT" ]
-    then
-        cecho " > Installing prerequisites" green 
-        yum -yq install $WMICYUMPKG >> ${LOGFILE} 2>&1 
-    else
-        cecho " > Installing prerequisites" green 
-        apt-get update >> ${LOGFILE} 2>&1
-        apt-get -y install $WMICAPTPKG >> ${LOGFILE} 2>&1
-    fi 
+    cecho " > Installing prerequisites" green 
+    case $CODE in
+        REDHAT|Fedora)
+            yum -y install $WMICYUMPKG >> ${LOGFILE} 2>&1 
+            ;;
+        DEBIAN)
+            apt-get update >> ${LOGFILE} 2>&1
+            apt-get -y install $WMICAPTPKG >> ${LOGFILE} 2>&1
+            ;;
+    esac
+
     cd $TMP
     filename=$(echo $WMIC | awk -F"/" '{print $NF}')
     folder=$(echo $filename | sed -e "s/\.tar\.gz//g")
@@ -2060,16 +2152,17 @@ function install_check_oracle_health(){
         exit 2
     fi
 
-    if [ "$CODE" == "REDHAT" ]
-    then
-        cecho " > Installing prerequisites" green 
-        apt-get update >> ${LOGFILE} 2>&1
-        apt-get -y install $CHECKORACLEHEALTHYUMPKG >> ${LOGFILE} 2>&1 
-    else
-        cecho " > Installing prerequisites" green 
-        apt-get update >> ${LOGFILE} 2>&1
-        apt-get -y install $CHECKORACLEHEALTHAPTPKG >> ${LOGFILE} 2>&1 
-    fi
+    cecho " > Installing prerequisites" green 
+    case $CODE in
+        REDHAT|Fedora)
+            apt-get update >> ${LOGFILE} 2>&1
+            apt-get -y install $CHECKORACLEHEALTHYUMPKG >> ${LOGFILE} 2>&1 
+            ;;
+        DEBIAN)
+            apt-get update >> ${LOGFILE} 2>&1
+            apt-get -y install $CHECKORACLEHEALTHAPTPKG >> ${LOGFILE} 2>&1 
+            ;;
+    esac
     cecho " > Installing cpan prerequisites" green
     cd $TMP
     for m in $CHECKORACLEHEALTHCPAN
@@ -2130,15 +2223,17 @@ function install_check_oracle_health(){
 function install_check_netapp2(){
     cadre "Install check_netapp2" green
 
-    if [ "$CODE" == "REDHAT" ]
-    then
-        cecho " > Installing prerequisites" green
-        yum -yq install $CHECKNETAPP2YUMPKGS >> ${LOGFILE}
-    else
-        cecho " > Installing prerequisites" green
-        apt-get update >> ${LOGFILE} 2>&1
-        apt-get -y install $CHECKNETAPP2APTPKGS >> ${LOGFILE}
-    fi
+    cecho " > Installing prerequisites" green
+    case $CODE in
+        REDHAT|Fedora)
+            yum -y install $CHECKNETAPP2YUMPKGS >> ${LOGFILE}
+            ;;
+        DEBIAN)
+            apt-get update >> ${LOGFILE} 2>&1
+            apt-get -y install $CHECKNETAPP2APTPKGS >> ${LOGFILE}
+            ;;
+    esac
+
     cd $TMP
     cecho " > Downloading check_netapp2" green
     wget $WGETPROXY -O check_netapp2 $CHECKNETAPP2 >> ${LOGFILE} 2>&1 
@@ -2156,7 +2251,7 @@ function install_check_netapp2(){
     sed -i "s#/usr/local/nagios/libexec#"$TARGET"/libexec#g" $TARGET/libexec/check_netapp2 >> ${LOGFILE} 2>&1
 }
 
-# CHECK_MEM
+    # CHECK_MEM
 function install_check_mem(){
     cadre "Install check_mem" green
     cd $TMP
@@ -2188,15 +2283,17 @@ function install_check_mem(){
 function install_check_mysql_health(){
     cadre "Install check_mysql_health" green
 
-    if [ "$CODE" == "REDHAT" ]
-    then
-        cecho " > Installing prerequisites" green
-        yum -yq install $CHECKMYSQLHEALTHYUMPKG >> ${LOGFILE}
-    else
-        cecho " > Installing prerequisites" green
-        apt-get update >> ${LOGFILE} 2>&1
-        apt-get -y install $CHECKMYSQLHEALTHAPTPKG >> ${LOGFILE}
-    fi
+    cecho " > Installing prerequisites" green
+    case $CODE in
+        REDHAT|Fedora)
+            yum -y install $CHECKMYSQLHEALTHYUMPKG >> ${LOGFILE}
+            ;;
+        DEBIAN)
+            cecho " > Installing prerequisites" green
+            apt-get update >> ${LOGFILE} 2>&1
+            apt-get -y install $CHECKMYSQLHEALTHAPTPKG >> ${LOGFILE}
+            ;;
+    esac
     cd $TMP
     cecho " > Downloading check_mysql_health" green
     wget $WGETPROXY $CHECKMYSQLHEALTH >> ${LOGFILE} 2>&1 
