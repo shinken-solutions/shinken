@@ -58,7 +58,7 @@ function remove(){
         cecho " > Removing defaults" green
         rm -Rf /etc/default/shinken 
     fi
-    if [ -f "/etc/init.d/shinken" ]
+    if [ -f "/etc/init.d/shinken" ] || [ -f /lib/systemd/system/shinken-arbiter.service ]
     then
         cecho " > Removing startup scripts" green
         case $CODE in
@@ -75,7 +75,7 @@ function remove(){
                 update-rc.d -f shinken remove >> ${LOGFILE} 2>&1 
                 rm -f /etc/init.d/shinken*
                 ;;
-            esac    
+        esac    
     fi
 
     if [ -d "$PNPPREFIX" ]
@@ -179,7 +179,16 @@ function purgeSQLITE(){
 }
 
 function skill(){
-    /etc/init.d/shinken stop >> ${LOGFILE} 2>&1 
+    cecho " > Stopping Shinken" green
+    case $INIT in
+        init)
+            /etc/init.d/shinken stop >> ${LOGFILE} 2>&1 
+            ;;
+        systemd)
+            systemctl stop $SYSTEMDSERVICES >> ${LOGFILE} 2>&1
+            systemctl status $SYSTEMDSERVICES >> ${LOGFILE} 2>&1
+            ;;
+    esac
     pc=$(ps -aef | grep "$TARGET" | grep -v "grep" | wc -l )
     if [ $pc -ne 0 ]
     then    
@@ -198,6 +207,7 @@ function skill(){
 }
 
 function sstart() {
+    cecho " > Starting shinken" green
     case $INIT in 
         init)
             /etc/init.d/shinken start >> ${LOGFILE} 2>&1
@@ -651,12 +661,13 @@ function enable_initd(){
             ;;
     esac
     cecho " > Enabling $DIST startup script" green
-    case $DISTRO in
+    case $CODE in
         REDHAT)
             chkconfig --add shinken
             chkconfig shinken on
             ;;
         Fedora)
+            systemctl --system daemon-reload
             systemctl enable $SYSTEMDSERVICES >> ${LOGFILE} 2>&1
             ;;
         DEBIAN)
@@ -796,7 +807,6 @@ function sinstall(){
         enablemongologs 
     fi
     fix
-    cecho " > Starting shinken" green
     sstart
     cecho "+------------------------------------------------------------------------------" green
     cecho "| Shinken is now installed on your server " green
