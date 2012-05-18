@@ -43,6 +43,7 @@ random.seed(time.time())
 import uuid
 from Queue import Empty
 import socket
+import hashlib
 
 from shinken.objects import Config
 from shinken.external_command import ExternalCommandManager
@@ -874,18 +875,19 @@ class Hostd(Daemon):
         # First we look for the user sid
         # so we bail out if it's a false one
         user_name = self.request.get_cookie("user", secret=self.auth_secret)
+        print "WE GOT COOKIE USER NAME", user_name
 
         # If we cannot check the cookie, bailout
         if not user_name:
             return None
 
-        c = self.datamgr.get_contact(user_name)
+        u = self.db.users.find_one({'_id' : user_name})
 
-        print "Find a contact?", user_name, c
+        print "Find a user", user_name, u
         #c = Contact()
         #c.contact_name = user_name
         #c.is_admin = True
-        return c
+        return u
 
 
 
@@ -905,11 +907,19 @@ class Hostd(Daemon):
        self.datamgr.load_db(self.db)
        
 
-    # TODO : code this!
-    def check_auth(self, login, password):
-       return True
+    def check_auth(self, username, password):
+       password_hash = hashlib.sha512(password).hexdigest()
+       print "Looking for the user", username, "with password hash", password_hash
+       r = self.db.users.find_one({'_id' : username, 'pwd_hash' : password_hash})
+       print "Is user auth?", r
+       return r is not None
 
 
+    def is_actitaved(self, username):
+       r = self.db.users.find_one({'_id' : username})
+       if not r:
+          return False
+       return r['validated']
 
 
     def save_new_pack(self, user, filename, buf):

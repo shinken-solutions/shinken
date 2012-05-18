@@ -35,7 +35,7 @@ def get_page():
     # First we look for the user sid
     # so we bail out if it's a false one
     user = app.get_user_auth()
-
+    print "RESULT OF app.get_user_auth()", user
     if not user:
         redirect("/user/login")
         return
