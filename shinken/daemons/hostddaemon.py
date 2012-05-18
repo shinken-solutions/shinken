@@ -914,12 +914,26 @@ class Hostd(Daemon):
        print "Is user auth?", r
        return r is not None
 
+    def get_user_by_key(self, api_key):
+       r = self.db.users.find_one({'api_key' : api_key})
+       if not r:
+          return None
+       if not r['validated']:
+          return None
+       return r
+
 
     def is_actitaved(self, username):
        r = self.db.users.find_one({'_id' : username})
        if not r:
           return False
        return r['validated']
+
+    def get_api_key(self, username):
+       r = self.db.users.find_one({'_id' : username})
+       if not r:
+          return None
+       return r['api_key']
 
 
     def save_new_pack(self, user, filename, buf):
