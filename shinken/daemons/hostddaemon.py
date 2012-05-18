@@ -914,6 +914,7 @@ class Hostd(Daemon):
        print "Is user auth?", r
        return r is not None
 
+
     def get_user_by_key(self, api_key):
        r = self.db.users.find_one({'api_key' : api_key})
        if not r:
@@ -928,6 +929,7 @@ class Hostd(Daemon):
        if not r:
           return False
        return r['validated']
+
 
     def get_api_key(self, username):
        r = self.db.users.find_one({'_id' : username})
@@ -951,6 +953,12 @@ class Hostd(Daemon):
        f.close()
        print "File %s is saved" % p
        
+       d = {'upload_time' : int(time.time()), 'filename' : filename, 'path' : p, 'user' :  user}
+       print "Saving pending pack", d
+       self.db.pending_packs.save(d)
+       
+
+
 
     def is_name_available(self, username):
        r = self.db.users.find_one({'_id' : username})
