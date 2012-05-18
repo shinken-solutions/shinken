@@ -1149,7 +1149,7 @@ function install_mongodb(){
                 sed -i "s/__ARCH__/"$MARCH"/g" /etc/yum.repos.d/10gen.repo
                 yum clean all >> ${LOGFILE} 2>&1
                 cecho " > Installing mongodb server" green
-                yum -y install mongo-10gen mongo-10gen-server >> ${LOGFILE} 2>&1
+                yum -y install $MONGOPKGS >> ${LOGFILE} 2>&1
                 cecho " > Enable mongodb startup scripts" green
                 chkconfig --add mongod >> ${LOGFILE} 2>&1
                 chkconfig mongod on >> ${LOGFILE} 2>&1
@@ -1159,6 +1159,14 @@ function install_mongodb(){
                 cecho "Allready installed" yellow
             fi
             ;;
+        Fedora)
+            cecho " > Installing mongodb server" green
+            yum -y install $MONGOPKGS >> ${LOGFILE} 2>&1
+            cecho " > Enable mongodb service" green
+            systemctl enable mongod.service >> ${LOGFILE} 2>&1
+            cecho " > Start mongodb server" green
+            systemctl start mongod.service
+            ;;
         DEBIAN)
             if [ ! -f "/etc/apt/sources.list.d/10gen.list" ]
             then
@@ -1166,7 +1174,7 @@ function install_mongodb(){
                 echo "deb http://downloads-distro.mongodb.org/repo/debian-sysvinit dist 10gen" > /etc/apt/sources.list.d/10gen.list
                 apt-get update >> ${LOGFILE} 2>&1
                 cecho " > Installing mongodb server" green
-                apt-get install -y mongodb-10gen >> ${LOGFILE} 2>&1
+                apt-get install -y $MONGOPKGS >> ${LOGFILE} 2>&1
             fi
             ;;
         *)
