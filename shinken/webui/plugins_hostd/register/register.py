@@ -34,7 +34,10 @@ app = None
 # Our page. If the useer call /dummy/TOTO arg1 will be TOTO.
 # if it's /dummy/, it will be 'nothing'
 def register():
-    return {'app' : app, 'user' : {}}
+    error= app.request.GET.get('error', '')
+    success = app.request.GET.get('success', '')    
+    return {'app' : app, 'user' : {}, 'error' : error, 'success' : success}
+
 
 def do_register():
     username = app.request.forms.get('username')
@@ -42,7 +45,20 @@ def do_register():
     password = app.request.forms.get('password')
     password_hash = hashlib.sha512(password).hexdigest()
     print "Get a new user %s with email %s and hash %s" % (username, email, password_hash)
+    if not app.is_name_available(username):
+        redirect('/register?error=Sorry, this username is not available')
 
+    app.register_user(username, password_hash, email)
+    redirect('/register?success=Registering success, please look at your email and click in the link in it to validate your account')
+
+
+def validate():
+    activating_key = app.request.GET.get('activating_key', '')
+    activated = False
+    if activating_key:
+        activated = app.validate_user(activating_key)
+    return {'app' : app, 'user' : {}, 'activating_key' : activating_key, 'activated' : activated}
+        
 
 def is_name_available():
     app.response.content_type = 'application/json'
@@ -62,5 +78,6 @@ def is_name_available():
 pages = {register : { 'routes' : ['/register'], 'view' : 'register', 'static' : True},
          is_name_available : { 'routes' : ['/availability'], 'method' : 'POST', 'view' : None, 'static' : True},
          do_register : { 'routes' : ['/register'], 'method' : 'POST', 'view' : 'register', 'static' : True},
+         validate : { 'routes' : ['/validate'], 'view' : 'validate', 'static' : True},
          }
 

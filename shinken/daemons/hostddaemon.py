@@ -37,6 +37,10 @@ import os
 import time
 import traceback
 import threading
+import random
+import smtplib
+random.seed(time.time())
+import uuid
 from Queue import Empty
 import socket
 
@@ -927,3 +931,46 @@ class Hostd(Daemon):
     def is_name_available(self, username):
        r = self.db.users.find_one({'_id' : username})
        return r is None
+
+
+    def register_user(self, username, pwdhash, email):
+       ak = uuid.uuid4().get_hex()
+       api_key = uuid.uuid4().get_hex()
+       d = {'_id' : username, 'username' : username, 'pwd_hash' : pwdhash, 'email' : email, 'api_key' : api_key, 'activating_key' : ak, 'validated' : False}
+       print "Saving new user", d
+       self.db.users.save(d)
+
+       # Now send the mail
+       fromaddr = 'shinken@localhost'
+       toaddrs  = [email]
+       srvuri = 'http://myhost'
+       # Add the From: and To: headers at the start!
+       msg = ("From: %s\r\nTo: %s\r\n\r\n"
+              % (fromaddr, ", ".join(toaddrs)))
+       msg += 'Thanks %s for registering in the Shinken pack site! Please click on the link below to enable your account.\n' % username
+       msg += ' <a href="%s/validate?activating_key=%s"> Validate your account</a>' % (srvuri, ak)
+       print "Message length is " + repr(len(msg))
+       print "MEssage is", msg
+       print "Go to send mail"
+       try:
+          server = smtplib.SMTP('mailserver')
+          server.set_debuglevel(1)
+          server.sendmail(fromaddr, toaddrs, msg)
+          server.quit()
+       except Exception, exp:
+          print "FUCK, there was a problem with the email sending!", exp
+
+       
+    def validate_user(self, activating_key):
+       u = self.db.users.find_one({'activating_key' : activating_key})
+       print "Try to validate a user with the activated key", activating_key, 'and get', u
+       if not u:
+          return False
+       print "User %s validated"
+       u['validated'] = True
+       self.db.users.save(u)
+       
+       return True
+    
+
+    
