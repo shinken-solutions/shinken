@@ -22,22 +22,22 @@
 </div>
 
 <div id="log_container" class="tabbable tabs-left leftmargin span12">
-    <ul class="nav nav-tabs span3">
+    <ul class="nav nav-tabs span2">
         <li class="active"><a data-toggle="tab" href="#lA">Week 1</a></li>
         <li><a data-toggle="tab" href="#lB">Week 2</a></li>
         <li><a data-toggle="tab" href="#lC">Week 3</a></li>
     </ul>
-    <div class="tab-content span9 pull-right no-leftmargin">
-        <div id="lA" class="tab-pane active">
+    <div class="tab-content span10 pull-right no-leftmargin">
+        <div id="lA" class="span11 tab-pane active">
         	<p>I'm in Section A.</p>
-       		<ol>
+       		<ol class="no-leftmargin">
 				<li>Ent 1</li>
 				<li class="row_alt">Ent 2</li>
 				<li>Ent 3</li>
 			</ol>
         </div>
-        <div id="lB" class="tab-pane">
-         	<ol>
+        <div id="lB" class="span11 tab-pane">
+         	<ol class="no-leftmargin">
 				<li>Ent 1</li>
 				<li class="row_alt">Ent 2</li>
 				<li>Ent 3</li>
@@ -50,7 +50,7 @@
 				<li class="row_alt">Ent 10</li>
 			</ol>
         </div>
-        <div id="lC" class="tab-pane">
+        <div id="lC" class="span11 tab-pane">
             <p>What up girl, this is Section C.</p>
         </div>
     </div>
