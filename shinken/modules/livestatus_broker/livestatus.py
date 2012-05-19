@@ -57,6 +57,7 @@ class LiveStatus(object):
                 response.responseheader = 'fixed16'
             return response.respond()
         except Exception, exp:
+            print "exception!!!", exp
             response = LiveStatusResponse()
             response.output = LiveStatusQueryError.messages[452] % data
             response.statuscode = 452
