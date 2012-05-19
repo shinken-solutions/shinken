@@ -357,7 +357,6 @@ class LiveStatusQueryMetainfo(object):
                 self.query_hints['host_name'] = [f[3] for f in self.structured_data if (f[0] == 'Filter' and f[2] == '=')][0]
                 # this helps: thruk_host_detail, thruk_host_status_detail, thruk_service_detail, nagvis_host_icon
         elif self.table == 'services':
-            print "CATCAT services and eq_filtere", eq_filters
             if eq_filters == ['host_name']:
                 # Do we have exactly 1 Filter, which is 'name'?
                 # In this case, we want the services of this single host

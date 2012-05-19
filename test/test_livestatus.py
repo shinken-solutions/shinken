@@ -2317,6 +2317,7 @@ test_host_0;0;1
     def test_thruk_log_current_groups(self):
         self.print_header() 
         now = time.time()
+        self.update_broker()
         b = Brok('log', {'log' : "[%lu] EXTERNAL COMMAND: [%lu] DISABLE_NOTIFICATIONS" % (now, now) })
         self.livestatus_broker.manage_brok(b)
         b = Brok('log', {'log' : "[%lu] EXTERNAL COMMAND: [%lu] STOP_EXECUTING_SVC_CHECKS" % (now, now) })
@@ -2351,9 +2352,14 @@ OutputFormat: json
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         good_response = "[[\"[%lu] EXTERNAL COMMAND: [%lu] DISABLE_NOTIFICATIONS\",[]],[\"[%lu] EXTERNAL COMMAND: [%lu] STOP_EXECUTING_SVC_CHECKS\",[]]]\n" % (now, now, now, now)
+        pyresponse = eval(response)
+        response = [l[0] for l in pyresponse if not ("Info" in l[0] or "Warning" in l[0] or "Debug" in l[0])]
+        print "pyth", pyresponse
         print "good", good_response
         print "resp", response
-        self.assert_(response == good_response)
+        self.assert_(len(response) == 2)
+        self.assert_("DISABLE_NOTIFICATIONS" in response[0])
+        self.assert_("STOP_EXECUTING_SVC_CHECKS" in response[1])
 
         request = """GET log
 Columns: time current_host_name current_service_description current_host_groups current_service_groups
