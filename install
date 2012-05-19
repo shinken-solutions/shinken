@@ -646,7 +646,7 @@ function fix(){
 }
 
 function enable_initd(){
-    cecho "Installing startup scripts" green
+    cecho " > Installing startup scripts" green
     case $INIT in
         init)
             cp $TARGET/bin/init.d/shinken* /etc/init.d/
@@ -657,7 +657,7 @@ function enable_initd(){
             sed -i -e 's/sbin/local\/shinken\/bin/' -e 's/etc\/shinken/usr\/local\/shinken\/etc/g' /lib/systemd/system/shinken*
             ;;
         *)
-            cecho " Error! your init system isn't support by shinken for now." red
+            cecho " > Error! your init system isn't support by shinken for now." red
             ;;
     esac
     cecho " > Enabling $DIST startup script" green
@@ -2418,13 +2418,6 @@ echo "Usage : install -k | -i | -u [addonname] | -b | -r backupname | -l | -c | 
                                mongodb
     -h | --help             Show help"
 }
-
-#Check if we launch the script with root privileges (aka sudo)
-if [ "$UID" != "0" ]
-then
-        cecho "You should start the script with sudo!" red
-        exit 1
-fi
 
 # remove last install log file
 if [ -f ${LOGFILE} ]
