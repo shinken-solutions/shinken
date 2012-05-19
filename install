@@ -218,7 +218,7 @@ function sstart() {
             systemctl status $SYSTEMDSERVICES >> ${LOGFILE} 2>&1
             ;;
         *)
-            cecho "Your init system aren't supported in shinken for now." red
+            cecho " > Your init system aren't supported in shinken for now." red
             exit 2
             ;;
     esac
