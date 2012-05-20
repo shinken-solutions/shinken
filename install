@@ -385,7 +385,7 @@ function prerequisites(){
 
         DEBIAN)
             PACKAGES=$APTPKGS
-        if [ $SKIPPREREQUISITES -ne 1 ]
+            if [ $SKIPPREREQUISITES -ne 1 ]
             then
                 apt-get update >> ${LOGFILE} 2>&1
             fi
@@ -2450,6 +2450,8 @@ do
             shift
             OPTARG=$1
             shift
+            manageparameters  "quiet"  
+            cecho " > checking if shinken is installed in $TARGET" green            
             if [ $(shinken_exist) -eq 0 ]
             then
                 cecho " > You should install shinken first ! " red
@@ -2525,6 +2527,8 @@ do
             shift
             OPTARG=$1
             shift
+            manageparameters  "quiet"              
+            cecho " > checking if shinken is installed in $TARGET" green
             if [ $(shinken_exist) -eq 0 ]
             then
                 cecho " > You should install shinken first ! " red
