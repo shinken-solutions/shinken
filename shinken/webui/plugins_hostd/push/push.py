@@ -40,6 +40,12 @@ def push_new_pack():
         print "NOT KEY"
     if not data.file:
         print "NO FILE"
+
+    # Check if the user is validated
+    user = app.get_user_by_key(key)
+    if not user:
+        abort(400, 'Sorry, you give a wrong APIKEY or your account is not validated')
+
     if key and data.file:
         print "READING A FILE"
         # LIMIT AT 5MB

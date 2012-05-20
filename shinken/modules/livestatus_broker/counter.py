@@ -24,18 +24,23 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from shinken.webui.bottle import redirect
+class Counter(dict):
+    """
+    This is a special kind of dictionary. It is used to store the usage number
+    for each key. For non-existing keys it simply returns 0.
+    Methods __init__ and __getitem__ are only needed until that happy day
+    when we finally get rid of Python 2.4
+    """
+    def __init__(self, default_factory=None, *a, **kw):
+        dict.__init__(self, *a, **kw)
 
-### Will be populated by the UI with it's own value
-app = None
+    def __getitem__(self, key):
+        try:
+            return dict.__getitem__(self, key)
+        except KeyError:
+            self[key] = 0
+            return self.__missing__(key)
 
-def get_packs():
-    # First we look for the user sid
-    # so we bail out if it's a false one
-    user = app.get_user_auth()
-
-    return {'app' : app, 'user' : user}
-
-
-pages = {get_packs : { 'routes' : ['/packs'], 'view' : 'packs', 'static' : True}}
+    def __missing__(self, key):
+        return 0
 

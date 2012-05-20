@@ -67,6 +67,10 @@ def user_auth():
     is_mobile = app.request.forms.get('is_mobile', '0')
     is_auth = app.check_auth(login, password)
 
+    is_activated = app.is_actitaved(login)
+    if not is_activated:
+        redirect("/user/login?error=Invalid user or Password, or your account is not validated.")
+
     if is_auth:
         app.response.set_cookie('user', login, secret=app.auth_secret, path='/')
         if is_mobile == '1':

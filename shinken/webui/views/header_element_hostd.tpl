@@ -12,10 +12,7 @@
       <div class="nav-collapse">
 	<ul class="nav">
 	  <li class="dropdown">
-	    <a href="#" class="dropdown-toggle brand" data-toggle="dropdown" style="color: #FFFFFF"> Shinken <b class="caret"></b></a>
-	    <ul class="dropdown-menu span4">
-              <li><a href="/">Shinken Packs </a></li>
-	    </ul>
+	    <a href="#" class="brand" style="color: #FFFFFF"> Shinken Packs</a>
 	  </li>
 	</ul>
 	<ul class="nav">
@@ -23,49 +20,14 @@
 	</ul>
 
 	<ul class="nav">
-	  %if menu_part == '/newhosts':
-          <li class="dropdown active">
-	  %else:
-	  <li class="dropdown">
-	  %end
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown"> Discovery<b class="caret"></b></a>
-            <ul class="dropdown-menu">
-              <li><a href="/newhosts">Scan new hosts</a></li>
-              <li><a href="/newhosts/results">Scan results</a></li>
-            </ul>
-          </li>
+          <li><a href="/packs">Packs</a></li>
         </ul>
 
 
 	<ul class="nav">
-	  %if menu_part == '/elements':
-          <li class="dropdown active">
-	  %else:
-	  <li class="dropdown">
-	  %end
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown"> Objects<b class="caret"></b></a>
-            <ul class="dropdown-menu">
-	      %lst = ['hosts', 'services', 'contacts', 'commands', 'timeperiods']
-	      %for i in lst:
-                 <li><a href="/elements/{{i}}">{{i.capitalize()}}</a></li>
-	      %end
-            </ul>
-          </li>
+          <li><a href="/addpack">Upload a pack</a></li>
         </ul>
-	
-	
 
-	<ul class="nav">
-	  %menu = [ ('/packs','Packs'), ('/system','System'), ('/otheruis', 'Link with other UIs')]
-          %for (key, value) in menu:
-            %# Check for the selected element, if there is one
-            %if menu_part == key:
-              <li class="active"><a href="{{key}}">{{value}}</a></li>
-            %else:
-              <li><a href="{{key}}">{{value}}</a></li>
-            %end
-         %end
-	</ul>
 	
 	
         %if user is not None:

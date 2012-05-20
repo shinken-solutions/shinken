@@ -37,8 +37,13 @@ import os
 import time
 import traceback
 import threading
+import random
+import smtplib
+random.seed(time.time())
+import uuid
 from Queue import Empty
 import socket
+import hashlib
 
 from shinken.objects import Config
 from shinken.external_command import ExternalCommandManager
@@ -50,7 +55,7 @@ from shinken.external_command import ExternalCommand
 from shinken.util import safe_print
 from shinken.skonfuiworker import SkonfUIWorker
 from shinken.message import Message
-from shinken.misc.datamanagerskonf import datamgr
+from shinken.misc.datamanagerhostd import datamgr
 
 # DBG : code this!
 from shinken.objects import Contact
@@ -286,7 +291,7 @@ class Hostd(Daemon):
         self.hook_point('early_configuration')
 
         # Load all file triggers
-        self.conf.load_packs()
+        #self.conf.load_packs()
 
         # Create Template links
         self.conf.linkify_templates()
@@ -311,11 +316,11 @@ class Hostd(Daemon):
         
         # Remove templates from config
         # SAVE TEMPLATES
-        self.host_templates = self.conf.hosts.templates
-        self.service_templates = self.conf.services.templates
-        self.contact_templates = self.conf.contacts.templates
-        self.timeperiod_templates = self.conf.timeperiods.templates
-        self.packs = self.conf.packs
+        #self.host_templates = self.conf.hosts.templates
+        #self.service_templates = self.conf.services.templates
+        #self.contact_templates = self.conf.contacts.templates
+        #self.timeperiod_templates = self.conf.timeperiods.templates
+        #self.packs = self.conf.packs
         # Then clean for other parts
         #self.conf.remove_templates()
 
@@ -870,18 +875,19 @@ class Hostd(Daemon):
         # First we look for the user sid
         # so we bail out if it's a false one
         user_name = self.request.get_cookie("user", secret=self.auth_secret)
+        print "WE GOT COOKIE USER NAME", user_name
 
         # If we cannot check the cookie, bailout
         if not user_name:
             return None
 
-        c = self.datamgr.get_contact(user_name)
+        u = self.db.users.find_one({'_id' : user_name})
 
-        print "Find a contact?", user_name, c
+        print "Find a user", user_name, u
         #c = Contact()
         #c.contact_name = user_name
         #c.is_admin = True
-        return c
+        return u
 
 
 
@@ -901,11 +907,35 @@ class Hostd(Daemon):
        self.datamgr.load_db(self.db)
        
 
-    # TODO : code this!
-    def check_auth(self, login, password):
-       return True
+    def check_auth(self, username, password):
+       password_hash = hashlib.sha512(password).hexdigest()
+       print "Looking for the user", username, "with password hash", password_hash
+       r = self.db.users.find_one({'_id' : username, 'pwd_hash' : password_hash})
+       print "Is user auth?", r
+       return r is not None
 
 
+    def get_user_by_key(self, api_key):
+       r = self.db.users.find_one({'api_key' : api_key})
+       if not r:
+          return None
+       if not r['validated']:
+          return None
+       return r
+
+
+    def is_actitaved(self, username):
+       r = self.db.users.find_one({'_id' : username})
+       if not r:
+          return False
+       return r['validated']
+
+
+    def get_api_key(self, username):
+       r = self.db.users.find_one({'_id' : username})
+       if not r:
+          return None
+       return r['api_key']
 
 
     def save_new_pack(self, user, filename, buf):
@@ -923,7 +953,56 @@ class Hostd(Daemon):
        f.close()
        print "File %s is saved" % p
        
+       d = {'upload_time' : int(time.time()), 'filename' : filename, 'path' : p, 'user' :  user}
+       print "Saving pending pack", d
+       self.db.pending_packs.save(d)
+       
+
+
 
     def is_name_available(self, username):
        r = self.db.users.find_one({'_id' : username})
        return r is None
+
+
+    def register_user(self, username, pwdhash, email):
+       ak = uuid.uuid4().get_hex()
+       api_key = uuid.uuid4().get_hex()
+       d = {'_id' : username, 'username' : username, 'pwd_hash' : pwdhash, 'email' : email, 'api_key' : api_key, 'activating_key' : ak, 'validated' : False}
+       print "Saving new user", d
+       self.db.users.save(d)
+
+       # Now send the mail
+       fromaddr = 'shinken@localhost'
+       toaddrs  = [email]
+       srvuri = 'http://myhost'
+       # Add the From: and To: headers at the start!
+       msg = ("From: %s\r\nTo: %s\r\n\r\n"
+              % (fromaddr, ", ".join(toaddrs)))
+       msg += 'Thanks %s for registering in the Shinken pack site! Please click on the link below to enable your account.\n' % username
+       msg += ' <a href="%s/validate?activating_key=%s"> Validate your account</a>' % (srvuri, ak)
+       print "Message length is " + repr(len(msg))
+       print "MEssage is", msg
+       print "Go to send mail"
+       try:
+          server = smtplib.SMTP('mailserver')
+          server.set_debuglevel(1)
+          server.sendmail(fromaddr, toaddrs, msg)
+          server.quit()
+       except Exception, exp:
+          print "FUCK, there was a problem with the email sending!", exp
+
+       
+    def validate_user(self, activating_key):
+       u = self.db.users.find_one({'activating_key' : activating_key})
+       print "Try to validate a user with the activated key", activating_key, 'and get', u
+       if not u:
+          return False
+       print "User %s validated"
+       u['validated'] = True
+       self.db.users.save(u)
+       
+       return True
+    
+
+    
