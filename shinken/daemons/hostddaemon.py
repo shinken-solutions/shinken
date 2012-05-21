@@ -953,9 +953,10 @@ class Hostd(Daemon):
        f.close()
        print "File %s is saved" % p
        
-       d = {'_id' : p, 'upload_time' : int(time.time()), 'filename' : filename, 'path' : p, 'user' :  user}
+       d = {'_id' : p, 'upload_time' : int(time.time()), 'filename' : filename, 'path' : p, 'user' :  user,
+            'state' : 'pending'}
        print "Saving pending pack", d
-       self.db.pending_packs.save(d)
+       self.db.packs.save(d)
        
 
 

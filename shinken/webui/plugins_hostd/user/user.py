@@ -43,13 +43,18 @@ def get_page(username):
         return
 
     uname = user.get('username')
-    cur = app.db.packs.find({'user' : uname})
+    cur = app.db.packs.find({'user' : uname, 'state' : 'validated'})
     validated_packs = [p for p in cur]
 
-    cur = app.db.pending_packs.find({'user' : uname})
+    cur = app.db.packs.find({'user' : uname, 'state' : 'pending'})
     pending_packs = [p for p in cur]
 
-    return {'app' : app, 'user' : user, 'validated_packs' : validated_packs, 'pending_packs' : pending_packs}
+    cur = app.db.packs.find({'user' : uname, 'state' : 'refused'})
+    refused_packs = [p for p in cur]
+
+
+    return {'app' : app, 'user' : user, 'validated_packs' : validated_packs, 'pending_packs' : pending_packs,
+            'refused_packs' : refused_packs}
 
 
 def post_user():

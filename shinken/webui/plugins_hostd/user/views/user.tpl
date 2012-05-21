@@ -50,3 +50,13 @@ Your account {{uname}}
   %end
 </div>
 
+<div class='well span8'>
+  %if len(refused_packs) == 0:
+  No refused packs
+  %else:
+    %for p in refused_packs:
+      <span class='span8 alert alert-error'> {{p.get('filename')}} is refused. Reason : {{p.get('moderation_comment', 'none')}}.</span>
+    %end
+  %end
+</div>
+
