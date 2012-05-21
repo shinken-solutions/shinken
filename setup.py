@@ -70,6 +70,8 @@ if 'update' in sys.argv:
 if 'install' in sys.argv and not '-f' in sys.argv:
     sys.argv.append('-f')
     
+is_install = 'install' in sys.argv
+
 
 # Utility function to read the README file. This was directly taken from:
 # http://packages.python.org/an_example_pypi_project/setuptools.html
@@ -233,9 +235,13 @@ class build_config(Command):
             os.makedirs(discovery_dir)
         for dirname in [self.var_path, self.run_path, self.log_path, discovery_dir]:
             if self.build_base:
-                dirname = os.path.join(self.build_base, dirname)
+                if not is_install:
+                    dirname = os.path.join(self.build_base, os.path.relpath(dirname,'/'))#dirname)
+                else:
+                    dirname = os.path.join(self.build_base, dirname)
             if not os.path.exists(dirname):
                 os.makedirs(dirname)
+
 
 
     def update_configfiles(self):
