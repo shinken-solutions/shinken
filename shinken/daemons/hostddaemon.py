@@ -953,7 +953,7 @@ class Hostd(Daemon):
        f.close()
        print "File %s is saved" % p
        
-       d = {'upload_time' : int(time.time()), 'filename' : filename, 'path' : p, 'user' :  user}
+       d = {'_id' : p, 'upload_time' : int(time.time()), 'filename' : filename, 'path' : p, 'user' :  user}
        print "Saving pending pack", d
        self.db.pending_packs.save(d)
        
@@ -1005,4 +1005,19 @@ class Hostd(Daemon):
        return True
     
 
-    
+    def update_user(self, username, pwd_hash, email):
+       r = self.db.users.find_one({'_id' : username})
+       if not r:
+          return
+       
+       if pwd_hash:
+          r['pwd_hash'] = pwd_hash
+       
+       old_email = r['email']
+       r['email'] = email
+       # If the user changed it's email, put it in validating
+       if old_email != email:
+          r['validated'] = False
+
+       self.db.users.save(r)
+

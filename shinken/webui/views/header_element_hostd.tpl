@@ -29,8 +29,9 @@
         </ul>
 
 	
-	
-        %if user is not None:
+	%if not user : user = {}
+	%print "USER IS", user
+        %if True: 
         <div class="nav-controll"> 
           <ul class="nav pull-right"> 
             <li class="divider-vertical"></li>
@@ -42,10 +43,19 @@
          </div>
 	       <ul class="nav pull-right">
           <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Hi {{user.get('contact_name', 'unknown').capitalize()}} <b class="caret"></b></a>
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Hi {{user.get('username', 'unknown').capitalize()}} <b class="caret"></b></a>
+	    %if user != {}:
+	    %print "WTF?", user
             <ul class="dropdown-menu">
-	      <a class='' href="/elements/contacts/{{user.get('contact_name', 'unknown')}}"><i class="icon-pencil"></i> Edit profile</a>
+	      <a class='' href="/user/{{user.get('username', 'unknown')}}"><i class="icon-pencil"></i> My profile</a>
             </ul>
+	    %else:
+	    <ul class="dropdown-menu">
+              <a class='' href="/register"><i class="icon-pencil"></i> Register</a>
+              <a class='' href="/login"><i class="icon-pencil"></i> Login</a>
+            </ul>
+
+	    %end
           </li>
         </ul>
 

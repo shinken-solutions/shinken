@@ -101,7 +101,7 @@ def get_root():
             app.response.set_cookie('user', user_name, secret=app.auth_secret, path='/')
             redirect("/main")
     else:
-        redirect("/user/login")
+        redirect("/main")
 
 
 
