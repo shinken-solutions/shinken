@@ -65,4 +65,4 @@ To Guillaume Bour for his cleaning patches
 To Raphael Doursenaud for his patch about SNI option in https pack
 To FORLOT Romain for his patch about IBM DS checks
 To Michael COQUARD for this patch about setup.py and build path
-
+To Akiooutori for his bug report about pyro missing SOCK_REUSE parameter in some os
