@@ -132,6 +132,7 @@ class LiveStatus_broker(BaseModule, Daemon):
         self.prepare_pnp_path()
         m = MacroResolver()
         m.output_macros = ['HOSTOUTPUT', 'HOSTPERFDATA', 'HOSTACKAUTHOR', 'HOSTACKCOMMENT', 'SERVICEOUTPUT', 'SERVICEPERFDATA', 'SERVICEACKAUTHOR', 'SERVICEACKCOMMENT']
+        self.rg.load_external_queue(self.from_q)
 
 
     # This is called only when we are in a scheduler

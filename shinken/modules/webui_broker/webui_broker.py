@@ -113,6 +113,7 @@ class Webui_broker(BaseModule, Daemon):
     # Conf from arbiter!
     def init(self):
         print "Init of the Webui '%s'" % self.name
+        self.rg.load_external_queue(self.from_q)
 
 
     # This is called only when we are in a scheduler
