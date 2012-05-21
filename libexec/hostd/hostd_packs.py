@@ -2,16 +2,24 @@ import optparse
 import time
 import sys
 import os
+import zipfile
+import shutil
 
 from pymongo.connection import Connection
 
 VERSION = '0.1'
-
+TMP_PATH = '/tmp/pack_analysing'
 
 def do_list(table):
     search = table.find()
     for s in search:
         print "Pack: %s state:%s user:%s" % (s.get('_id'), s.get('state'), s.get('user'))
+
+
+def check_tmp():
+    if os.path.exists(TMP_PATH):
+        shutil.rmtree(TMP_PATH)
+    os.mkdir(TMP_PATH)
 
 
 def validate_pack(table, pack):
@@ -46,6 +54,17 @@ def delete_pack(table, pack):
 
 
 
+def analyse_pack(table, pack):
+    print "Analysing pack"
+    if not zipfile.is_zipfile(pack):
+        print "ERROR : the pack %s is not a zip file!" % pack
+        sys.exit(2)
+
+    check_tmp()
+    print "UNFLATING PACK INTO", TMP_PATH
+    f = zipfile.ZipFile(pack)
+    f.extractall(TMP_PATH)
+    
 
 if __name__ == '__main__':
     
@@ -68,6 +87,9 @@ if __name__ == '__main__':
                       help='Pack')
     parser.add_option('-c', '--comment', dest='comment',
                       help='Set a comment')
+    parser.add_option('--analyse', dest='do_analyse', action='store_true',
+                      help='Analyse a pack')
+
 
     opts, args = parser.parse_args()
 
@@ -86,8 +108,6 @@ if __name__ == '__main__':
 
     if opts.pack:
         pack = opts.pack
-
-    
 
     if opts.do_list:
         mode = 'list'
@@ -113,3 +133,11 @@ if __name__ == '__main__':
             print "ERROR : no pack filled"
             sys.exit(2)
         delete_pack(table, pack)
+
+    if opts.do_analyse:
+        mode = 'delete'
+        if not pack:
+            print "ERROR : no pack filled"
+            sys.exit(2)
+        analyse_pack(table, pack)
+
