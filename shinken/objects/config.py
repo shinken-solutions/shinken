@@ -592,7 +592,7 @@ class Config(Item):
                         prop = elts[0]
                         value = ' '.join(elts[1:])
 
-                        if prop in tmp:
+                        if prop == 'satellitemap' and prop in tmp:
                             if not isinstance(tmp[prop], list):
                                 tmp[prop] = [tmp[prop]]
 
