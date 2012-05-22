@@ -139,7 +139,7 @@ except AttributeError, exp:
     old_versions = ["4.1", "4.2", "4.3", "4.4"]
     
     # Version not supported for now, we have to work on it
-    bad_version = ["4.14"]
+    bad_versions = ["4.14"]
     
     # Hack for Pyro 4 : with it, there is
     # no more way to send huge packet!
