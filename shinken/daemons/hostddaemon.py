@@ -425,7 +425,7 @@ class Hostd(Daemon):
 
         ##  We need to set self.host & self.port to be used by do_daemon_init_and_start
         self.host = self.me.address
-        self.port = 8766#self.me.port
+        self.port = 8765#self.me.port
         
         logger.info("Configuration Loaded")
         print ""

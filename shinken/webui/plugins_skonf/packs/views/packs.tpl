@@ -1,8 +1,12 @@
 
 %rebase layout_skonf globals(), js=['packs/js/packs.js']
 
-<div> <h1> Packs </h1> </div>
+<div class='span10'> 
+  <h1> Packs </h1> 
+  <a href='/getpacks' class='btn btn-success pull-right'> <i class="icon-search"></i>Get new packs</a>
+</div>
 
+<div class='span12'>
 %treename = ''
 %tree_path = []
 %for e in app.datamgr.get_pack_tree(app.packs):
@@ -83,5 +87,5 @@
    %end
 %end
 
-
+</div>
 
