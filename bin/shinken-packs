@@ -72,7 +72,7 @@ else:
 
 
 
-def create_pack(pack_file, p_dest_dir):
+def create_pack(pack_file, p_dest_dir, share_dir):
     _tmp = tempfile.mktemp()
     
     print "Using the destination directory : %s" % p_dest_dir
@@ -139,7 +139,9 @@ def create_pack(pack_file, p_dest_dir):
     if os.path.exists(create_dir) and os.path.isdir(create_dir):
         print "Warning : the destination directory already exists. I clean it!"
         #TODO : do the clean
+        shutil.rmtree(create_dir)
 
+    os.mkdir(create_dir)
     pack_file_dest = os.path.join(create_dir, o['name']+'.pack')
     print "Saving the .pack file into %s" % pack_file_dest
     f = open(pack_file_dest, 'w')
@@ -162,6 +164,60 @@ def create_pack(pack_file, p_dest_dir):
                 if not os.path.exists(dest_dir):
                     os.mkdir(dest_dir)
                 shutil.copy(to_save, dest_file)
+
+    # Create the share dir
+    os.mkdir(os.path.join(create_dir, 'share'))
+    os.mkdir(os.path.join(create_dir, 'share', 'images'))
+    os.mkdir(os.path.join(create_dir, 'share', 'images', 'sets'))
+    os.mkdir(os.path.join(create_dir, 'share', 'templates'))
+    os.mkdir(os.path.join(create_dir, 'share', 'templates', 'graphite'))
+    os.mkdir(os.path.join(create_dir, 'share', 'templates', 'pnp'))
+
+    # Now look for the share dir and for push icon sets or
+    if share_dir:
+        print "We will parse the share tree to find related files"
+        sets_dir = os.path.join(share_dir, 'images', 'sets')
+        if os.path.exists(sets_dir):
+            print "Looking the share/images/sets"
+            for t in pack.templates:
+                print "Lookng for the template", t
+                _p = os.path.join(sets_dir, t)
+                if os.path.exists(_p) and os.path.isdir(_p):
+                    _d = os.path.join(create_dir, 'share', 'images', 'sets', t)
+                    #if not os.path.exists(_d):
+                    #    os.mkdir(_d)
+                    print "COPY %s into %s" % (_p,  _d)
+                    shutil.copytree(_p, _d)
+                    
+        graphite_templates_dir = os.path.join(share_dir, 'templates', 'graphite')
+        if os.path.exists(graphite_templates_dir):
+            print "Looking the share/templates/graphite dir"
+            for c in cfg.commands:
+                cname = c.get_name()
+                if cname in ['bp_rule', '_internal_host_up']:
+                    continue
+                print "LOOK FOR command", c.get_name()
+                _p = os.path.join(graphite_templates_dir, cname+'.graph')
+                _d = os.path.join(create_dir, 'share', 'templates', 'graphite', cname+'.graph')
+                print "So search for graphite template", _p
+                if os.path.exists(_p):
+                    print "COPYING %s into %s" % (_p, _d)
+                    shutil.copy(_p, _d)
+
+        pnp_templates_dir = os.path.join(share_dir, 'templates', 'pnp')
+        if os.path.exists(pnp_templates_dir):
+            print "Looking the share/templates/pnp dir"
+            for c in cfg.commands:
+                cname = c.get_name()
+                if cname in ['bp_rule', '_internal_host_up']:
+                    continue
+                print "LOOK FOR command", c.get_name()
+                _p = os.path.join(graphite_templates_dir, cname+'.php')
+                _d = os.path.join(create_dir, 'share', 'templates', 'pnp', cname+'.php')
+                print "So search for graphite template", _p
+                if os.path.exists(_p):
+                    print "COPYING %s into %s" % (_p, _d)
+                    shutil.copy(_p, _d)
 
 
     zip_file_p = os.path.join(p_dest_dir, o['name']+'.zip')
@@ -293,7 +349,8 @@ Retrieve : %prog [options] -g -l login -P password
                       dest="create_pack", help=('Mode to create a zip file from a pack'))
     parser.add_option('-p', '--pack-file', dest="pack_file",
                       help="""Pack .pack file that you want to generate from.""")
-    
+    parser.add_option('-s', '--share-dir', dest="share_dir",
+                       help=('Your share directory with templates and icon sets'))
     parser.add_option('-d', '--dest', dest="p_dest_dir", 
                       help=""""Directory where to """)
 
@@ -332,7 +389,7 @@ Retrieve : %prog [options] -g -l login -P password
     p_dest_dir = tempfile.gettempdir()
     src_dir = ''
     _tmp = tempfile.mktemp()
-
+    share_dir = opts.share_dir or ''
 
 
     if opts.create_pack:
@@ -349,7 +406,7 @@ Retrieve : %prog [options] -g -l login -P password
         if opts.p_dest_dir:
             p_dest_dir = opts.p_dest_dir
 
-        create_pack(pack_file, p_dest_dir)
+        create_pack(pack_file, p_dest_dir, share_dir)
 
 
 
