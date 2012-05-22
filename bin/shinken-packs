@@ -293,6 +293,7 @@ Retrieve : %prog [options] -g -l login -P password
                       dest="create_pack", help=('Mode to create a zip file from a pack'))
     parser.add_option('-p', '--pack-file', dest="pack_file",
                       help="""Pack .pack file that you want to generate from.""")
+    
     parser.add_option('-d', '--dest', dest="p_dest_dir", 
                       help=""""Directory where to """)
 
@@ -318,7 +319,7 @@ Retrieve : %prog [options] -g -l login -P password
     parser.add_option('-g', '--get-key', action='store_true',
                       dest="getkey", help=("Mode to retrieve your API key"))
 
-
+    
     
 
 

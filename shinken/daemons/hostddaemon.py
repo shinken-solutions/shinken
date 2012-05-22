@@ -405,6 +405,12 @@ class Hostd(Daemon):
         self.idontcareaboutsecurity = self.conf.idontcareaboutsecurity
         self.user = self.conf.shinken_user
         self.group = self.conf.shinken_group
+
+        self.share_dir = self.conf.share_dir
+        logger.info('Using share directory %s' % self.share_dir)
+
+        self.packs_home = self.conf.packs_home
+        logger.info('Using pack home %s' % self.packs_home)
         
         # If the user set a workdir, let use it. If not, use the
         # pidfile directory
@@ -412,9 +418,6 @@ class Hostd(Daemon):
             self.workdir = os.path.abspath(os.path.dirname(self.pidfile))
         else:
             self.workdir = self.conf.workdir
-        #print "DBG curpath=", os.getcwd()
-        #print "DBG pidfile=", self.pidfile
-        #print "DBG workdir=", self.workdir
 
         ##  We need to set self.host & self.port to be used by do_daemon_init_and_start
         self.host = self.me.address
@@ -441,7 +444,7 @@ class Hostd(Daemon):
         self.photo_dir = os.path.abspath(self.photo_dir)
         print "Webui : using the backend", self.http_backend
 
-        
+
 
 
 
@@ -784,7 +787,15 @@ class Hostd(Daemon):
         # Route static files css files
         @route('/static/:path#.+#')
         def server_static(path):
-            return static_file(path, root=os.path.join(bottle_dir, 'htdocs'))
+           # By default give from the root in bottle_dir/htdocs. If the file is missing,
+           # search in the share dir
+           root = os.path.join(bottle_dir, 'htdocs')
+           p = os.path.join(root, path)
+           print "LOOK for FILE EXISTS", p
+           if not os.path.exists(p):
+              root = self.packs_home
+              print "No such file, I look in", os.path.join(root, path)
+           return static_file(path, root=root)
 
         # And add the favicon ico too
         @route('/favicon.ico')
@@ -940,6 +951,7 @@ class Hostd(Daemon):
 
     def save_new_pack(self, user, filename, buf):
        filename = os.path.basename(filename)
+       short_name = filename[:-4]
        print "Saving a new pack file from a user :", user, filename
        if not user:
           return None
@@ -952,9 +964,9 @@ class Hostd(Daemon):
        f.write(buf)
        f.close()
        print "File %s is saved" % p
-       
-       d = {'_id' : p, 'upload_time' : int(time.time()), 'filename' : filename, 'path' : p, 'user' :  user,
-            'state' : 'pending'}
+       _id = uuid.uuid4().get_hex()
+       d = {'_id' : _id, 'upload_time' : int(time.time()), 'filename' : filename,'filepath' : p, 'path' : '/unanalysed', 'user' :  user,
+            'state' : 'pending', 'pack_name' : short_name, 'moderation_comment':''}
        print "Saving pending pack", d
        self.db.packs.save(d)
        

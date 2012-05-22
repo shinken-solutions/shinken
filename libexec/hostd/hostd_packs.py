@@ -4,16 +4,43 @@ import sys
 import os
 import zipfile
 import shutil
+import glob
+
+
+try:
+    import shinken
+    from shinken.bin import VERSION
+except ImportError:
+    # If importing shinken fails, try to load from current directory
+    # or parent directory to support running without installation.
+    # Submodules will then be loaded from there, too.
+    import imp
+    imp.load_module('shinken', *imp.find_module('shinken', [os.path.realpath("."), os.path.realpath(".."), os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "..")]))
+    from shinken.bin import VERSION
+
+from shinken.objects.pack import Pack,Packs
+
+from shinken.log import logger
+from shinken.objects.config import Config
+
+
+logger.set_level(10)
+class Dummy():
+    def __init__(self): pass
+    def add(self, obj) : pass
+logger.load_obj(Dummy())
+
 
 from pymongo.connection import Connection
 
 VERSION = '0.1'
 TMP_PATH = '/tmp/pack_analysing'
+PACKS_HOME= '/opt/packs'
 
 def do_list(table):
     search = table.find()
     for s in search:
-        print "Pack: %s state:%s user:%s" % (s.get('_id'), s.get('state'), s.get('user'))
+        print "Id:%s Name:%s state:%s user:%s filepath:%s path:%s" % (s.get('_id'), s.get('pack_name'), s.get('state'), s.get('user'), s.get('filepath'), s.get('path'))
 
 
 def check_tmp():
@@ -55,15 +82,56 @@ def delete_pack(table, pack):
 
 
 def analyse_pack(table, pack):
+    p = table.find_one({'_id' : pack})
+    filepath = p['filepath']
     print "Analysing pack"
-    if not zipfile.is_zipfile(pack):
-        print "ERROR : the pack %s is not a zip file!" % pack
+    if not zipfile.is_zipfile(filepath):
+        print "ERROR : the pack %s is not a zip file!" % filepath
         sys.exit(2)
 
     check_tmp()
-    print "UNFLATING PACK INTO", TMP_PATH
-    f = zipfile.ZipFile(pack)
-    f.extractall(TMP_PATH)
+    path = os.path.join(TMP_PATH, pack)
+    print "UNFLATING PACK INTO", path
+    f = zipfile.ZipFile(filepath)
+    f.extractall(path)
+
+    packs = Packs({})
+    packs.load_file(path)
+    packs = [i for i in packs]
+    if len(packs) > 1:
+        print "ERROR : the pack %s got too much .pack file in it!" % pack
+        p['moderation_comment'] = "ERROR : no valid .pack in the pack"
+        p['state'] = 'refused'
+        table.save(p)
+        sys.exit(2)
+
+    if len(packs) == 0:
+        print "ERROR : no valid .pack in the pack %s" % pack
+        p['state'] = 'refused'
+        p['moderation_comment'] = "ERROR : no valid .pack in the pack"
+        table.save(p)
+        sys.exit(2)
+
+    # Now we move the pack to it's final directory
+    dest_path = os.path.join(PACKS_HOME, pack)
+    print "Will copy the tree in the pack tree", dest_path
+    if os.path.exists(dest_path):
+        shutil.rmtree(dest_path)
+    shutil.copytree(path, dest_path)
+    
+    pck = packs.pop()
+    print "We read pack", pck.__dict__
+    # Now we can update the db pack entry
+    p['pack_name'] = pck.pack_name
+    p['description'] = pck.description
+    p['macros'] = pck.macros
+    p['path'] = pck.path
+    p['doc_link'] = pck.doc_link
+    p['state'] = 'ok'
+    print "We want to save the object", p
+    table.save(p)
+    
+
     
 
 if __name__ == '__main__':
