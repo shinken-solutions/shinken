@@ -1037,6 +1037,9 @@ class Hostd(Daemon):
        p['macros'] = pck.macros
        p['path'] = pck.path
        p['templates'] = pck.templates
+       p['services'] = pck.services
+       p['commands'] = pck.commands
+
        if p['path'] == '/':
           p['path'] = '/uncategorized'
        p['doc_link'] = pck.doc_link

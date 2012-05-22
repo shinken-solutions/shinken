@@ -90,7 +90,7 @@ def push_new_pack():
         uname = user.get('username')
         app.save_new_pack(uname, filename, raw)
         if is_cli:
-            return "Hello %s! You uploaded %s (%d bytes)." % (key, filename, len(raw))
+            return "Hello %s! You uploaded %s (%d bytes)." % (uname, filename, len(raw))
         else:
             app.response.content_type = 'application/json'
             return json.dumps({'state' : 'ok', 'text' : "Hello %s! You uploaded %s (%d bytes)." % (key, filename, len(raw))})

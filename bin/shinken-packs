@@ -109,13 +109,38 @@ def create_pack(pack_file, p_dest_dir, share_dir):
     o['name'] = pack.get_name()
     o['description'] = pack.description
     o['templates'] = pack.templates
+    o['services'] = {}
+    o['commands'] = []
     print "We are creating the pack '%s'" % o['name']
     print "Description : %s" % o['description']
     print "Host templates : %s" % ','.join(o['templates'])
+    # We will dump the services linked to theses templates
     for h in cfg.hosts:
         if h.is_tpl() and hasattr(h, 'name') and not h.name in o['templates']:
             print "WARNING : you miss the host template '%s' in the pack file. I'm adding it" % h.name
             o['templates'].append(h.name)
+
+    for s in cfg.services:
+        if s.is_tpl() and hasattr(s, 'service_description') and hasattr(s, 'host_name'):
+            desc = s.service_description
+            if not desc in o['services']:
+                o['services'][desc] = {'templates' : []}
+            tpls = s.host_name.split(',')
+            tpls = [t.strip() for t in tpls]
+            for t in tpls:
+                o['services'][desc]['templates'].append(t)
+            # Make elements uniq
+            o['services'][desc]['templates'] = list(set(o['services'][desc]['templates']))
+
+    for c in cfg.commands:
+        cname = getattr(c, 'command_name', '')
+        if cname in ['bp_rule', '_internal_host_up']:
+            continue
+        if cname:
+            o['commands'].append(cname)
+    # Make comands uniq
+    o['commands'] = list(set(o['commands']))
+    
 
     o['path'] = pack.path
     print "Path : %s" % o['path']

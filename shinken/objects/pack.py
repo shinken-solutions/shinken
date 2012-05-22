@@ -102,6 +102,8 @@ class Packs(Items):
             p.templates = d.get('templates', [p.pack_name])
             p.path = d.get('path', 'various/')
             p.doc_link = d.get('doc_link', '')
+            p.services = d.get('services', {})
+            p.commands = d.get('commands', [])
             if not p.path.endswith('/'):
                 p.path += '/'
             # Ok, add it

@@ -3,7 +3,7 @@
 
 "description":"Sample pack, will do nothing, it's for learning how to make pack files",
 
-"path":"/",
+"path":"/sandbox",
 
 "macros":{ }	 
 

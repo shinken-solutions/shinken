@@ -15,6 +15,15 @@
     <b>Description</b>: {{pack.get('description')}}
   </span>
   <span class='span5'>
+    <b>Documentation</b>: 
+    %doc = pack.get('doc_link')
+    %if not doc:
+       %doc = 'http://www.shinken-monitoring.org/wiki/packs/'+pname
+    %end
+    <a href='{{doc}}'> Link </a>
+  </span>
+
+  <span class='span5'>
     <a class='btn btn-success' href='/getpack/{{pid}}'> <i class="icon-download"></i> Download it!</a>
   </span>
 
@@ -41,6 +50,15 @@
 	  <img class="imgsize3" onerror="$(this).hide()" src="/static/{{pid}}/images/sets/{{t}}/tag.png" /> {{pname}}
 	</span>
      </li>
+     <h5> Services linked </h5>
+     <ul>
+     %for (s, e) in pack.get('services').iteritems():
+        %tpls = e.get('templates')
+        %if t in tpls:
+          <li> {{s}}</li>
+        %end
+     %end
+     </ul>
   %end
   </ul>
 </span>
