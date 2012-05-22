@@ -389,7 +389,12 @@ class LiveStatusLogStoreSqlite(BaseModule):
 
 
     def commit(self):
-        self.dbconn.commit()
+        while True:
+            try:
+                self.dbconn.commit()
+                break
+            except OperationalError:
+                time.sleep(.01)
 
     def manage_log_brok(self, b):
         data = b.data
