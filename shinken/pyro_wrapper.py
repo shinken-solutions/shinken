@@ -169,8 +169,9 @@ except AttributeError, exp:
             else:
                 Pyro.config.SERVERTYPE = "multiplex"
                 # For Pyro >4.X hash
-                Pyro.config.SOCK_REUSE = True
-                max_try = 1
+                if hasattr(Pyro.config, 'SOCK_REUSE'):
+                    Pyro.config.SOCK_REUSE = True
+                    max_try = 1
             nb_try = 0
             is_good = False
             # Ok, Pyro4 do not close sockets like it should,
