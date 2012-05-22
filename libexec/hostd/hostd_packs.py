@@ -49,17 +49,6 @@ def check_tmp():
     os.mkdir(TMP_PATH)
 
 
-def validate_pack(table, pack):
-    u = table.find_one({'_id' : pack})
-    if not u:
-        print 'ERROR : cannot find pack %s' % pack
-        sys.exit(2)
-    u['state'] = 'validated'
-    table.save(u)
-    print "OK : pack %s is validated" % pack
-
-
-
 def refuse_pack(table, pack, comment):
     u = table.find_one({'_id' : pack})
     if not u:
@@ -126,8 +115,12 @@ def analyse_pack(table, pack):
     p['description'] = pck.description
     p['macros'] = pck.macros
     p['path'] = pck.path
+    p['templates'] = pck.templates
+    if p['path'] == '/':
+        p['path'] = '/uncategorized'
     p['doc_link'] = pck.doc_link
-    p['state'] = 'ok'
+    if p['state'] == 'pending':
+        p['state'] = 'ok'
     print "We want to save the object", p
     table.save(p)
     
@@ -145,8 +138,6 @@ if __name__ == '__main__':
                       help="""Mongodb database""")
     parser.add_option('-l', '--list', dest='do_list', action='store_true',
                       help='List packs')
-    parser.add_option('--validate', dest='do_validate', action='store_true',
-                      help='validate a user')
     parser.add_option('--refuse', dest='do_refuse', action='store_true',
                       help='refuse a pack')
     parser.add_option('--delete', dest='do_delete', action='store_true',
@@ -180,13 +171,6 @@ if __name__ == '__main__':
     if opts.do_list:
         mode = 'list'
         do_list(table)
-
-    if opts.do_validate:
-        mode = 'validate'
-        if not pack:
-            print "ERROR : no pack filled"
-            sys.exit(2)
-        validate_pack(table, pack)
 
     if opts.do_refuse:
         mode = 'refuse'

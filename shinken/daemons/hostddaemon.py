@@ -44,8 +44,12 @@ import uuid
 from Queue import Empty
 import socket
 import hashlib
+import zipfile
+import tempfile
+import shutil
 
 from shinken.objects import Config
+from shinken.objects.pack import Pack,Packs
 from shinken.external_command import ExternalCommandManager
 from shinken.dispatcher import Dispatcher
 from shinken.daemon import Daemon, Interface
@@ -794,6 +798,7 @@ class Hostd(Daemon):
            print "LOOK for FILE EXISTS", p
            if not os.path.exists(p):
               root = self.packs_home
+              print "LOOK FOR PATH", path
               print "No such file, I look in", os.path.join(root, path)
            return static_file(path, root=root)
 
@@ -965,11 +970,82 @@ class Hostd(Daemon):
        f.close()
        print "File %s is saved" % p
        _id = uuid.uuid4().get_hex()
-       d = {'_id' : _id, 'upload_time' : int(time.time()), 'filename' : filename,'filepath' : p, 'path' : '/unanalysed', 'user' :  user,
+       d = {'_id' : _id, 'upload_time' : int(time.time()), 'filename' : filename, 'filepath' : p, 'path' : '/unanalysed', 'user' :  user,
             'state' : 'pending', 'pack_name' : short_name, 'moderation_comment':''}
+       # Get all previously sent packs for the same user/filename, and put them as obsolete
+       obs = self.db.packs.find({'filepath' : p})
+       for o in obs:
+          print "The pack make obsolete the pack", o
+          o['state'] = 'obsolete'
+          o['obsoleted_by'] = _id
+          self.db.packs.save(o)
+       # Ok now we can save the pack :)
        print "Saving pending pack", d
        self.db.packs.save(d)
+       # Now we will unzip and load all data from the pack
+       self.load_pack_file(_id)
        
+
+    def load_pack_file(self, pack):
+       p = self.db.packs.find_one({'_id' : pack})
+       filepath = p['filepath']
+       print "Analysing pack"
+       if not zipfile.is_zipfile(filepath):
+          print "ERROR : the pack %s is not a zip file!" % filepath
+          p['state'] = 'refused'
+          p['moderation_comment'] = 'The pack file is not a zip file'
+          self.db.packs.save(p)
+          return
+       TMP_PATH = tempfile.mkdtemp()
+
+       path = os.path.join(TMP_PATH, pack)
+       print "UNFLATING PACK INTO", path
+       f = zipfile.ZipFile(filepath)
+       f.extractall(path)
+
+       packs = Packs({})
+       packs.load_file(path)
+       packs = [i for i in packs]
+       if len(packs) > 1:
+          print "ERROR : the pack %s got too much .pack file in it!" % pack
+          p['moderation_comment'] = "ERROR : no valid .pack in the pack"
+          p['state'] = 'refused'
+          self.db.packs.save(p)
+          shutil.rmtree(TMP_PATH)
+          return
+
+       if len(packs) == 0:
+          print "ERROR : no valid .pack in the pack %s" % pack
+          p['state'] = 'refused'
+          p['moderation_comment'] = "ERROR : no valid .pack in the pack"
+          self.db.packs.save(p)
+          shutil.rmtree(TMP_PATH)
+          return
+
+       # Now we move the pack to it's final directory
+       dest_path = os.path.join(self.packs_home, pack)
+       print "Will copy the tree in the pack tree", dest_path
+       if os.path.exists(dest_path):
+          shutil.rmtree(dest_path)
+       shutil.copytree(path, dest_path)
+    
+       pck = packs.pop()
+       print "We read pack", pck.__dict__
+       # Now we can update the db pack entry
+       p['pack_name'] = pck.pack_name
+       p['description'] = pck.description
+       p['macros'] = pck.macros
+       p['path'] = pck.path
+       p['templates'] = pck.templates
+       if p['path'] == '/':
+          p['path'] = '/uncategorized'
+       p['doc_link'] = pck.doc_link
+       if p['state'] == 'pending':
+          p['state'] = 'ok'
+       print "We want to save the object", p
+       self.db.packs.save(p)
+       shutil.rmtree(TMP_PATH)
+
 
 
 
