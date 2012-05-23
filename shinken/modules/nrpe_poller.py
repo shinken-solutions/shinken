@@ -41,10 +41,12 @@ import shlex
 try :
     import OpenSSL
     SSLWantReadError = OpenSSL.SSL.WantReadError
+    SSLSysCallError = OpenSSL.SSL.SysCallError
     SSLZeroReturnError = OpenSSL.SSL.ZeroReturnError
 except ImportError:
     OpenSSL = None
     SSLWantReadError = None
+    SSLSysCallError = None
     SSLZeroReturnError = None
 
 from Queue import Empty
@@ -256,6 +258,9 @@ class NRPEAsyncClient(asyncore.dispatcher):
             # We can have nothing, it's just that the server
             # do not want to talk to us :(
             except SSLZeroReturnError :
+                buf = ''
+
+            except SSLSysCallError:
                 buf = ''
 
             # Maybe we got nothing from the server (it refuse our ip,
