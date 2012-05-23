@@ -144,7 +144,9 @@ def download_pack(uri):
         return json.dumps(r)            
 
     print "WE get a file os the size", len(buf)
-    r = {'state' : 200, 'text' : 'Ok, the pack is downloaded and install. Please restart skonf to use it.'}
+    
+    
+    r = app.save_pack(buf)
     print "RETURN", r
     return json.dumps(r)
 
