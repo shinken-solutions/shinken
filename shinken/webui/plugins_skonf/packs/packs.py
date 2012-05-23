@@ -26,6 +26,17 @@
 import pycurl
 import json
 from StringIO import StringIO
+try:
+    import json
+except ImportError:
+    # For old Python version, load
+    # simple json (it can be hard json?! It's 2 functions guy!)
+    try:
+        import simplejson as json
+    except ImportError:
+        print "Error : you need the json or simplejson module"
+        raise
+
 
 from shinken.webui.bottle import redirect
 
@@ -53,6 +64,9 @@ def get_new_packs():
     # First we look for the user sid
     # so we bail out if it's a false one
     user = app.get_user_auth()
+    if not user:
+        redirect("/user/login")
+        return
 
     error = ''
     
@@ -66,6 +80,9 @@ def get_new_packs_result():
     # First we look for the user sid
     # so we bail out if it's a false one
     user = app.get_user_auth()
+    if not user:
+        redirect("/user/login")
+        return
 
     search = app.request.forms.get('search')
     error = ''
@@ -101,8 +118,41 @@ def get_new_packs_result():
 
 
 
+def download_pack(uri):
+    app.response.content_type = 'application/json'
+
+    # First we look for the user sid
+    # so we bail out if it's a false one
+    user = app.get_user_auth()
+    if not user:
+        r = {'state' : 401, 'text' : 'Sorry you are not logged!'}
+        return json.dumps(r)            
+
+    print "We are asked to download", uri
+    c = pycurl.Curl()
+    c.setopt(c.HTTPGET, 1)
+    c.setopt(c.URL, uri)
+    response = StringIO()
+    c.setopt(c.WRITEFUNCTION, response.write)
+    c.perform()
+    c.close()
+    response.seek(0)
+    buf = response.read(5000000)
+    add = response.read(1)
+    if add:
+        r = {'state' : 400, 'text' : 'Sorry the file is too big!'}
+        return json.dumps(r)            
+
+    print "WE get a file os the size", len(buf)
+    r = {'state' : 200, 'text' : 'Ok, the pack is downloaded and install. Please restart skonf to use it.'}
+    print "RETURN", r
+    return json.dumps(r)
+
+    
+
 pages = {get_packs : { 'routes' : ['/packs'], 'view' : 'packs', 'static' : True},
          get_new_packs : { 'routes' : ['/getpacks'], 'view' : 'getpacks', 'static' : True},
          get_new_packs_result : { 'routes' : ['/getpacks'], 'method' : 'POST', 'view' : 'getpacks', 'static' : True},
+         download_pack : { 'routes' : ['/download/:uri#.+#'], 'view':None, 'static' : True},
          }
 
