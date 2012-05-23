@@ -1057,6 +1057,28 @@ class Skonf(Daemon):
                    shutil.copy(src_file, full_dst_file)
                 else:
                    logger.warning('Cannot create the directory %s for a pack install' % os.path.join(self.share_dir, from_share_path))
+
+
+       # Now the template one
+       templates_dir = os.path.join(dest_dir, 'templates')
+       if os.path.exists(templates_dir):
+          print "We got an images source dir, we should move it"
+          for root, dirs, files in os.walk(templates_dir):
+             for file in files:
+                src_file = os.path.join(root, file)
+                dst_file = src_file[len(templates_dir):]
+                if dst_file.startswith('/'):
+                   dst_file = dst_file[1:]
+                tpl_dst_dir = os.path.dirname(dst_file)
+                from_share_path = os.path.join('templates', tpl_dst_dir)
+                can_be_copy = expect_file_dirs(self.share_dir, from_share_path)
+                full_dst_file = os.path.join(self.share_dir, from_share_path, file)
+                print "Is the file %s can be copy? %s" % (dst_file, can_be_copy)
+                print "Saving a source file", src_file, 'in', full_dst_file
+                if can_be_copy:
+                   shutil.copy(src_file, full_dst_file)
+                else:
+                   logger.warning('Cannot create the directory %s for a pack install' % os.path.join(self.share_dir, from_share_path))
           
 
        r = {'state' : 200, 'text' : 'Ok, the pack is downloaded and install. Please restart skonf to use it.'}

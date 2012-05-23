@@ -58,7 +58,7 @@ function submit(){
 	<span class='pull-right'>
           <a id='download-{{pid}}' href='javascript:download_pack("{{inst_lnk}}", "{{pid}}");' class='btn btn-success' data-complete-text="Done!" data-loading-text="Loading.." > Install it!</a>
         </span>
-	<span id="message-{{pid}}" class='span10 alert'>
+	<span id="message-{{pid}}" class='span10 alert hide'>
 	</span>
       </div>
     %end

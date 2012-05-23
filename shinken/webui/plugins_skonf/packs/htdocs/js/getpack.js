@@ -46,11 +46,13 @@ function download_pack(uri, id){
 	    }else{
 		message.addClass('alert-error');
 	    }
+	    message.show();
 	    message.html(data.text);
         },
         error : function(data) {
             console.log('We get an error ajax call'+data);
 	    message.addClass('alert-error');
+	    message.show();
 	    message.html('Error during the query '+data);
         }
     });
