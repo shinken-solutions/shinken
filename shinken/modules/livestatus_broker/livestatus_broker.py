@@ -65,7 +65,7 @@ class LiveStatus_broker(BaseModule, Daemon):
         # We can be in a scheduler. If so, we keep a link to it to speed up regnerator phase
         self.scheduler = None
         self.plugins = []
-        self.use_threads = (getattr(modconf, 'use_threads', '0') == 1)
+        self.use_threads = (getattr(modconf, 'use_threads', '0') == '1')
         self.host = getattr(modconf, 'host', '127.0.0.1')
         if self.host == '*':
             self.host = '0.0.0.0'
