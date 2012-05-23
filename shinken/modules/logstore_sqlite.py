@@ -402,14 +402,13 @@ class LiveStatusLogStoreSqlite(BaseModule):
         try:
             logline = Logline(line=line)
             values = logline.as_tuple()
-        except Exception, exp:
-            print "Unexpected error:", exp
-        try:
             if logline.logclass != LOGCLASS_INVALID:
                 self.execute('INSERT INTO LOGS VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', values)
         except LiveStatusLogStoreError, exp:
             print "An error occurred:", exp.args[0]
             print "DATABASE ERROR!!!!!!!!!!!!!!!!!"
+        except Exception, exp:
+            print "Unexpected in manage_log_brok:", exp
         #FIXME need access to this#self.livestatus.count_event('log_message')
 
     def add_filter(self, operator, attribute, reference):
