@@ -27,6 +27,8 @@ import time
 import re
 import copy
 import sys
+import shutil
+import os
 try:
     from ClusterShell.NodeSet import NodeSet, NodeSetParseRangeError
 except ImportError:
@@ -552,3 +554,28 @@ def if_else(condition, true_expression, false_expression):
     else:
         return false_expression
 
+
+
+
+
+############################### Files management #######################
+# We got a file like /tmp/toto/toto2/bob.png And we want to be sur the dir
+# /tmp/toto/toto2/ will really exists so we can copy it. Try to make if if need
+# and return True/False if succeed
+def expect_file_dirs(root, path):
+    dirs = os.path.normpath(path).split('/')
+    dirs = [d for d in dirs if d != '']
+    # We will create all directory until the last one
+    # so we are doing a mkdir -p .....
+    # TODO : and windows????
+    tmp_dir = root
+    for d in dirs:
+        _d = os.path.join(tmp_dir, d)
+        print "Look for the directory existence", _d
+        if not os.path.exists(_d):
+            try:
+                os.mkdir(_d)
+            except:
+                return False
+        tmp_dir = _d
+    return True
