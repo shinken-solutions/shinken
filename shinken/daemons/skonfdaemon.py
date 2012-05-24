@@ -400,6 +400,7 @@ class Skonf(Daemon):
 
         # Ok, here we must check if we go on or not.
         # TODO : check OK or not
+        self.api_key = self.conf.api_key
         self.use_local_log = self.conf.use_local_log
         self.log_level = logger.get_level_id(self.conf.log_level)
         self.local_log = self.conf.local_log
@@ -936,6 +937,10 @@ class Skonf(Daemon):
     # TODO : code this!
     def check_auth(self, login, password):
        return True
+
+
+    def get_api_key(self):
+       return str(self.api_key)
 
     # We are asking to a worker .. to work :)
     def ask_new_scan(self, id):

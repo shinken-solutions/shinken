@@ -30,6 +30,12 @@ Your account {{uname}}
 </form>
 
 
+
+<div class='well span8'>
+  <h4> API KEY : </h4> <h3>{{user.get('api_key')}}</h3>
+</div>
+
+
 <div class='well span8'>
   %if len(pending_packs) == 0:
   No pending packs

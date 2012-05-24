@@ -38,6 +38,8 @@ except ImportError:
         raise
 
 
+from shinken.webui.bottle import redirect, abort, static_file
+
 # HACK
 import socket
 SRV = socket.gethostname()
@@ -57,12 +59,23 @@ def give_pack(p):
 
 def search_post():
     app.response.content_type = 'application/json'
+    # First look if the api_key is good or not
+    api_key = app.request.forms.get('api_key')
+    if not api_key or not app.get_user_by_key(api_key):
+        abort(401, 'You need a valid API KEY to query. Please register')
+
+    # Ok the guy is valid :)
     search = app.request.forms.get('search')
     return do_search(search)
 
 
 def search_get(q):
     app.response.content_type = 'application/json'
+    # First look if the api_key is good or not
+    api_key = app.request.GET.get('api_key')
+    if not api_key or not app.get_user_by_key(api_key):
+        abort(401, 'You need a valid API KEY to query. Please register')
+
     search = q
     return do_search(search)
 
@@ -99,6 +112,11 @@ def do_search(search):
 
 def search_categories():
     app.response.content_type = 'application/json'
+
+    # First look if the api_key is good or not
+    api_key = app.request.forms.get('api_key')
+    if not api_key or not app.get_user_by_key(api_key):
+        abort(401, 'You need a valid API KEY to query. Please register')
 
     root = app.request.forms.get('root')
 
@@ -151,6 +169,10 @@ def tag_sort(t1, t2):
 def search_tags():
     app.response.content_type = 'application/json'
 
+    # First look if the api_key is good or not
+    api_key = app.request.forms.get('api_key')
+    if not api_key or not app.get_user_by_key(api_key):
+        abort(401, 'You need a valid API KEY to query. Please register')
     
     nb = app.request.forms.get('nb')
     if nb:

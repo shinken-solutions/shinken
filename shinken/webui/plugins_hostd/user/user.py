@@ -25,6 +25,17 @@
 
 
 import hashlib
+try:
+    import json
+except ImportError:
+    # For old Python version, load
+    # simple json (it can be hard json?! It's 2 functions guy!)
+    try:
+        import simplejson as json
+    except ImportError:
+        print "Error : you need the json or simplejson module"
+        raise
+
 
 from shinken.webui.bottle import redirect, abort
 
@@ -43,7 +54,7 @@ def get_page(username):
         return
 
     uname = user.get('username')
-    cur = app.db.packs.find({'user' : uname, 'state' : 'validated'})
+    cur = app.db.packs.find({'user' : uname, 'state' : 'ok'})
     validated_packs = [p for p in cur]
 
     cur = app.db.packs.find({'user' : uname, 'state' : 'pending'})
@@ -85,7 +96,21 @@ def post_user():
     
 
 
+def check_key(api_key):
+    user = app.get_user_by_key(api_key)
+    app.response.content_type = 'application/json'
+    if not user:
+        r = {'state' : 401, 'text' : 'Sorry this key is invalid!'}
+        return json.dumps(r)
+    r = {'state' : 200, 'text' : 'Congrats! Connexion is OK!'}
+    return json.dumps(r)
+
+
+
+
+
 pages = {get_page : { 'routes' : ['/user/:username'], 'view' : 'user', 'static' : True},
          post_user : { 'routes' : ['/user'], 'method' : 'POST', 'view' : 'user', 'static' : True},
+         check_key : { 'routes' : ['/checkkey/:api_key']},
          }
 

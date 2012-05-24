@@ -71,6 +71,12 @@ def get_new_packs():
         redirect("/user/login")
         return
 
+    # We need an api_key to launc hthe query
+    api_key = app.get_api_key()
+
+    categories = ''
+    error = ''
+    api_error = ''
     # Get the categories
     c = pycurl.Curl()
     c.setopt(c.POST, 1)
@@ -78,19 +84,26 @@ def get_new_packs():
     #c.setopt(c.TIMEOUT, 8)
     #c.setopt(c.PROXY, 'http://inthemiddle.com:8080')
     c.setopt(c.URL, "http://127.0.0.1:7765/categories")
-    c.setopt(c.HTTPPOST,[ ("root", '/')])    
+    c.setopt(c.HTTPPOST,[ ("root", '/'), ('api_key', api_key)])    
     c.setopt(c.VERBOSE, 1)
     response = StringIO()
     c.setopt(c.WRITEFUNCTION, response.write)
     r = c.perform()
     response.seek(0)
-    categories = json.loads(response.read().replace('\\/', '/'))
     status_code = c.getinfo(pycurl.HTTP_CODE)
+    
+    # We only parse the json if we got 
+    if status_code == 200:
+        categories = json.loads(response.read().replace('\\/', '/'))
+    else:
+        api_error = response.read()
+
     print "status code: %s" % status_code
     c.close()
     print "Json loaded", categories
 
 
+    raw_tags = []
     # Then the tags, like 30
     c = pycurl.Curl()
     c.setopt(c.POST, 1)
@@ -98,14 +111,18 @@ def get_new_packs():
     #c.setopt(c.TIMEOUT, 8)
     #c.setopt(c.PROXY, 'http://inthemiddle.com:8080')
     c.setopt(c.URL, "http://127.0.0.1:7765/tags")
-    c.setopt(c.HTTPPOST,[ ("nb", '50')])
+    c.setopt(c.HTTPPOST,[ ("nb", '50'), ('api_key', api_key)])
     c.setopt(c.VERBOSE, 1)
     response = StringIO()
     c.setopt(c.WRITEFUNCTION, response.write)
     r = c.perform()
     response.seek(0)
-    raw_tags = json.loads(response.read().replace('\\/', '/'))
     status_code = c.getinfo(pycurl.HTTP_CODE)
+    # We only parse the json if we got 
+    if status_code == 200:
+        raw_tags = json.loads(response.read().replace('\\/', '/'))
+    else:
+        api_error = response.read()
     print "status code: %s" % status_code
     c.close()
     print "Json loaded", categories
@@ -134,17 +151,25 @@ def get_new_packs():
     # we return values for the template (view). But beware, theses values are the
     # only one the tempalte will have, so we must give it an app link and the
     # user we are loggued with (it's a contact object in fact)
-    return {'app':app, 'user':user, 'error':error, 'results':None, 'search':None, 'categories' : categories, 'tags':tags,  'print_cat_tree':print_cat_tree}
+    return {'app':app, 'user':user, 'error':error, 'api_error':api_error, 'results':None, 'search':None, 'categories' : categories, 'tags':tags,  'print_cat_tree':print_cat_tree}
 
 
 def launch_search(search):
+    error = ''
+    results = ''
+
+    # We need an api_key to launc hthe query
+    api_key = app.get_api_key()
+    if not api_key:
+        return ('', "You didn't configured your api key!")
+
     c = pycurl.Curl()
     c.setopt(c.POST, 1)
     #c.setopt(c.CONNECTTIMEOUT, 5)
     #c.setopt(c.TIMEOUT, 8)
     #c.setopt(c.PROXY, 'http://inthemiddle.com:8080')
     c.setopt(c.URL, "http://127.0.0.1:7765/search")
-    c.setopt(c.HTTPPOST,[ ("search", search)])
+    c.setopt(c.HTTPPOST,[ ("search", search), ('api_key', api_key)])
     
     #c.setopt(c.HTTPPOST, [("file1", (c.FORM_FILE, str(zip_file_p)))])
     c.setopt(c.VERBOSE, 1)
@@ -153,12 +178,18 @@ def launch_search(search):
     c.setopt(c.WRITEFUNCTION, response.write)
     r = c.perform()
     response.seek(0)
-    results = json.loads(response.read().replace('\\/', '/'))
     status_code = c.getinfo(pycurl.HTTP_CODE)
-    print "status code: %s" % status_code
+    # We only parse the json if we got 
+    if status_code == 200:
+        results = json.loads(response.read().replace('\\/', '/'))
+    else:
+        error = response.read().replace('\\/', '/')
+
     c.close()
-    print "Json loaded", results
-    return results
+
+    print "status code: %s" % status_code
+    print "Json loaded", results, error
+    return (results, error)
 
 
 
@@ -171,16 +202,18 @@ def get_new_packs_result(search):
         return
 
     error = ''
+    api_error = ''
     results = []
     if search:
-        results = launch_search(search)
+        (results, api_error) = launch_search(search)
     else:
         error = 'You forgot the search entry'
 
+    print "get_new_packs_result::",results, error
     # we return values for the template (view). But beware, theses values are the
     # only one the tempalte will have, so we must give it an app link and the
     # user we are loggued with (it's a contact object in fact)
-    return {'app':app, 'user':user, 'error':error, 'results':results, 'search':search, 'categories':None, 'tags':None}
+    return {'app':app, 'user':user, 'error':error, 'api_error':api_error, 'results':results, 'search':search, 'categories':None, 'tags':None}
 
 
 def get_new_packs_result_post():
@@ -193,16 +226,18 @@ def get_new_packs_result_post():
 
     search = app.request.forms.get('search')
     error = ''
+    api_error = ''
     results = []
     if search:
-        results = launch_search(search)
+        (results, api_error) = launch_search(search)
     else:
         error = 'You forgot the search entry'
 
+    print "get_new_packs_result_post::",results, error
     # we return values for the template (view). But beware, theses values are the
     # only one the tempalte will have, so we must give it an app link and the
     # user we are loggued with (it's a contact object in fact)
-    return {'app':app, 'user':user, 'error':error, 'results':results, 'search':search, 'categories':None, 'tags':None}
+    return {'app':app, 'user':user, 'error':error, 'api_error':api_error, 'results':results, 'search':search, 'categories':None, 'tags':None}
 
 
 

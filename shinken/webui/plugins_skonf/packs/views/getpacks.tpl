@@ -17,6 +17,16 @@ function submit(){
     <div class='alert alert-error span5 offset2'> {{error}}</div>
 %end
 
+
+%if api_error:
+    <div class='alert alert-error span5 offset2'> 
+      Oups! There was a problem with the API server connexion
+      <br/>
+      <div id='api_error' class='hide'>{{api_error}}</div>
+      <a href='javascript:$("#api_error").show()' class='btn btn-warning'> <i class="icon-remove"></i> Show the error</a>
+      <a href='/testapi' class='btn btn-success'> <i class="icon-upload"></i> Try an API server connexion</a>
+    </div>
+%end
 <div id="message" class='alert span5 offset2 hide'> </div>
 
 <form class='well span5 offset2' name='getpacks' action='/getpacks' METHOD='POST'>
