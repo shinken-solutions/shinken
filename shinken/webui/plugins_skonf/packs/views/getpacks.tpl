@@ -1,5 +1,5 @@
 
-%rebase layout_skonf globals(), js=['packs/js/packs.js', 'packs/js/getpack.js']
+%rebase layout_skonf globals(), js=['packs/js/packs.js', 'packs/js/getpack.js'], css=['packs/css/tags.css']
 
 <div> <h1> Get new packs </h1> </div>
 
@@ -27,11 +27,33 @@ function submit(){
     
 </form>
 
-<span class='span12'> <h3> Categories</h3>
-%if categories:
-   {{!print_cat_tree(categories)}}
+<span class='span12'> 
+%if tags:
+  <div id='tagCloud' class='well'>
+    <h2> Tags</h2>
+    <ul id='tagList'>
+      %nb_tags = len(tags)
+      %i = 0
+      %for t in tags:
+         %name = t['name']
+         %size = t['size']
+         %occ = t['occ']
+          <li> <a href='' style='font-size:{{size}}em;'>{{name}} ({{occ}})</a> </li>
+      %end
+    </ul>
+  </div>
 %end
 </span>
+
+<span class='span12'>
+%if categories:
+  <div id='categories' class='well span8'>
+    <h2> All categories</h2>
+  {{!print_cat_tree(categories)}}
+  </div>
+%end
+</span>
+
 
 %if search:
 <span class='span12'> <h3> Search for {{search}}</h3></span>

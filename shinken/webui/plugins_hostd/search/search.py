@@ -57,13 +57,20 @@ def give_pack(p):
 
 def search_post():
     app.response.content_type = 'application/json'
-
     search = app.request.forms.get('search')
+    return do_search(search)
 
+
+def search_get(q):
+    app.response.content_type = 'application/json'
+    search = q
+    return do_search(search)
+
+
+def do_search(search):
     if not search  or len(search) < 2 :
-        print "Lookup POST %s too short or missing filter, I bail out" % search
+        print "Lookup %s too short or missing filter, I bail out" % search
         return json.dumps([])
-
 
     print "Lookup for", search, "in pack"
     # TODO : less PERFORMANCE KILLER QUERY!
@@ -84,8 +91,8 @@ def search_post():
                 d = give_pack(p)
                 res.append(d)
             continue
-        
     return json.dumps(res)
+
 
 
 
@@ -131,7 +138,62 @@ def search_categories():
 
 
 
+def tag_sort(t1, t2):
+    _, s1 = t1
+    _, s2 = t2
+    if s1 < s2:
+        return 1
+    if s2 < s1:
+        return -1
+    return 0
+
+
+def search_tags():
+    app.response.content_type = 'application/json'
+
+    
+    nb = app.request.forms.get('nb')
+    if nb:
+        nb = int(nb)
+
+    if not nb or nb > 50:
+        print "Sorry, your tag ask is too big"
+        return json.dumps([])
+
+
+    print "Lookup for %s tags" % nb
+
+    # TODO : less PERFORMANCE KILLER QUERY!
+    packs = app.datamgr.get_packs()
+    all_tags = {}
+    for p in packs:
+        if p.get('state') not in ['ok', 'pending']:
+            continue
+        
+        tags = p.get('path', '').split('/')
+        tags = [c for c in tags if c != '']
+        tags.append(p.get('pack_name'))
+        for t in tags:
+            if not t in all_tags:
+                all_tags[t] = (t, 0)
+            new_size = all_tags[t][1] + 1
+            all_tags[t] = (t, new_size)
+
+    flat_tags = all_tags.values()
+    flat_tags.sort(tag_sort)
+
+    print "FLAT TAGS", flat_tags, len(flat_tags)
+    
+    # Take the last nb ones
+    res = flat_tags[:nb]
+
+    return json.dumps(res)
+
+
+
 pages = {search_post : { 'routes' : ['/search'] , 'method' : 'POST'},
+         search_get : { 'routes' : ['/search/:q']},
          search_categories : { 'routes' : ['/categories'] , 'method' : 'POST'},
+         search_tags : { 'routes' : ['/tags'] , 'method' : 'POST'},
          }
 
