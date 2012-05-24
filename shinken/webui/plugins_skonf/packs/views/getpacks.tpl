@@ -38,7 +38,7 @@ function submit(){
          %name = t['name']
          %size = t['size']
          %occ = t['occ']
-          <li> <a href='' style='font-size:{{size}}em;'>{{name}} ({{occ}})</a> </li>
+          <li> <a href='/getpacks/{{name}}' style='font-size:{{size}}em;'>{{name}} ({{occ}})</a> </li>
       %end
     </ul>
   </div>
@@ -65,7 +65,7 @@ function submit(){
       %pid = p.get('_id')
       %inst_lnk = p.get('install','')
       <div class='span8 well'>
-	{{p}}
+	<!-- {{p}} -->
 	<span class='label'>
 	  %src = p.get('img', '')
 	  <img class="imgsize3" onerror="$(this).hide()" src="{{src}}"/> {{p.get('pack_name', 'unknown')}}
