@@ -36,9 +36,9 @@ def get_page():
     # so we bail out if it's a false one
     user = app.get_user_auth()
     print "RESULT OF app.get_user_auth()", user
-    if not user:
-        redirect("/user/login")
-        return
+    #if not user:
+    #    redirect("/user/login")
+    #    return
 
     # we return values for the template (view). But beware, theses values are the
     # only one the tempalte will have, so we must give it an app link and the

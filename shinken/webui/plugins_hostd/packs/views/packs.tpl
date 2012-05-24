@@ -28,10 +28,13 @@
     <div class='row {{treename}}'>
       <!-- {{p}} -->
       %pname = p.get('pack_name', 'unknown')
+      %pid = p.get('_id', '')
       <div class='span1'>
+	<a href='/pack/{{pid}}'>
 	<span class="label">
-	  <img class="imgsize3" onerror="$(this).hide()" src="/static/images/sets/{{pname}}/tag.png" /> {{pname}}
+	  <img class="imgsize3" onerror="$(this).hide()" src="/static/{{pid}}/images/sets/{{pname}}/tag.png" /> {{pname}}
 	</span>
+	</a>
       </div>
       <div class='span7'>
 	{{p.get('description', '')}}

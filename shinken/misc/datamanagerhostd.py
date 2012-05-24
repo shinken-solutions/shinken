@@ -48,6 +48,9 @@ class DataManagerHostd(DataManagerSKonf):
         r = self.get_in_db('packs', 'pack_name', pname)
         return r
 
+    def get_pack_by_id(self, pid):
+        r = self.get_in_db('packs', '_id', pid)
+        return r
 
     def build_pack_tree(self, packs):
 
@@ -83,6 +86,7 @@ class DataManagerHostd(DataManagerSKonf):
     
     def get_pack_tree(self):
         packs = self.get_packs()
+        packs = [p for p in packs if p['state'] in ['ok', 'pending']]
         print "GOT IN DB PACKS", packs
         t = self.build_pack_tree(packs)
         r = self._get_pack_tree(t)
@@ -140,6 +144,8 @@ class DataManagerHostd(DataManagerSKonf):
                     print "MATCH FOUND for", tname
                     tpl = h
                     break
+            if not tpl:
+                continue
             print "And now the services of this pack template", tname
             services = []
             for s in self.get_services():

@@ -86,7 +86,15 @@ class Regenerator(object):
         # (so if we skip *initial* broks)
         self.in_scheduler_mode = False
 
+        # The Queue where to launch message, will be fill from the broker
+        self.from_q = None
+
+
+    # Load an external queue for sending messages
+    def load_external_queue(self, from_q):
+        self.from_q = from_q
         
+
     # If we are called from a scheduler it self, we load the data from it
     def load_from_scheduler(self, sched):
         # Ok, we are in a scheduler, so we will skip some useless
@@ -893,7 +901,7 @@ class Regenerator(object):
         if not c_id in self.configs.keys():
             # Do not ask data too quickly, very dangerous
             # one a minute
-            if time.time() - self.last_need_data_send > 60:
+            if time.time() - self.last_need_data_send > 60 and self.from_q is not None:
                 print "I ask the broker for instance id data :", c_id
                 msg = Message(id=0, type='NeedData', data={'full_instance_id' : c_id})
                 self.from_q.put(msg)

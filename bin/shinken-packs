@@ -72,7 +72,7 @@ else:
 
 
 
-def create_pack(pack_file, p_dest_dir):
+def create_pack(pack_file, p_dest_dir, share_dir):
     _tmp = tempfile.mktemp()
     
     print "Using the destination directory : %s" % p_dest_dir
@@ -109,13 +109,38 @@ def create_pack(pack_file, p_dest_dir):
     o['name'] = pack.get_name()
     o['description'] = pack.description
     o['templates'] = pack.templates
+    o['services'] = {}
+    o['commands'] = []
     print "We are creating the pack '%s'" % o['name']
     print "Description : %s" % o['description']
     print "Host templates : %s" % ','.join(o['templates'])
+    # We will dump the services linked to theses templates
     for h in cfg.hosts:
         if h.is_tpl() and hasattr(h, 'name') and not h.name in o['templates']:
             print "WARNING : you miss the host template '%s' in the pack file. I'm adding it" % h.name
             o['templates'].append(h.name)
+
+    for s in cfg.services:
+        if s.is_tpl() and hasattr(s, 'service_description') and hasattr(s, 'host_name'):
+            desc = s.service_description
+            if not desc in o['services']:
+                o['services'][desc] = {'templates' : []}
+            tpls = s.host_name.split(',')
+            tpls = [t.strip() for t in tpls]
+            for t in tpls:
+                o['services'][desc]['templates'].append(t)
+            # Make elements uniq
+            o['services'][desc]['templates'] = list(set(o['services'][desc]['templates']))
+
+    for c in cfg.commands:
+        cname = getattr(c, 'command_name', '')
+        if cname in ['bp_rule', '_internal_host_up']:
+            continue
+        if cname:
+            o['commands'].append(cname)
+    # Make comands uniq
+    o['commands'] = list(set(o['commands']))
+    
 
     o['path'] = pack.path
     print "Path : %s" % o['path']
@@ -139,7 +164,9 @@ def create_pack(pack_file, p_dest_dir):
     if os.path.exists(create_dir) and os.path.isdir(create_dir):
         print "Warning : the destination directory already exists. I clean it!"
         #TODO : do the clean
+        shutil.rmtree(create_dir)
 
+    os.mkdir(create_dir)
     pack_file_dest = os.path.join(create_dir, o['name']+'.pack')
     print "Saving the .pack file into %s" % pack_file_dest
     f = open(pack_file_dest, 'w')
@@ -163,6 +190,59 @@ def create_pack(pack_file, p_dest_dir):
                     os.mkdir(dest_dir)
                 shutil.copy(to_save, dest_file)
 
+    # Create the shares dir
+    #os.mkdir(os.path.join(create_dir, 'share'))
+    os.mkdir(os.path.join(create_dir, 'images'))
+    os.mkdir(os.path.join(create_dir, 'images', 'sets'))
+    os.mkdir(os.path.join(create_dir, 'templates'))
+    os.mkdir(os.path.join(create_dir, 'templates', 'graphite'))
+    os.mkdir(os.path.join(create_dir, 'templates', 'pnp'))
+
+    # Now look for the share dir and for push icon sets or
+    if share_dir:
+        print "We will parse the share tree to find related files"
+        sets_dir = os.path.join(share_dir, 'images', 'sets')
+        if os.path.exists(sets_dir):
+            print "Looking the share/images/sets"
+            for t in pack.templates:
+                print "Lookng for the template", t
+                _p = os.path.join(sets_dir, t)
+                if os.path.exists(_p) and os.path.isdir(_p):
+                    _d = os.path.join(create_dir, 'images', 'sets', t)
+                    #if not os.path.exists(_d):
+                    #    os.mkdir(_d)
+                    print "COPY %s into %s" % (_p,  _d)
+                    shutil.copytree(_p, _d)
+                    
+        graphite_templates_dir = os.path.join(share_dir, 'templates', 'graphite')
+        if os.path.exists(graphite_templates_dir):
+            print "Looking the share/templates/graphite dir"
+            for c in cfg.commands:
+                cname = c.get_name()
+                if cname in ['bp_rule', '_internal_host_up']:
+                    continue
+                print "LOOK FOR command", c.get_name()
+                _p = os.path.join(graphite_templates_dir, cname+'.graph')
+                _d = os.path.join(create_dir, 'templates', 'graphite', cname+'.graph')
+                print "So search for graphite template", _p
+                if os.path.exists(_p):
+                    print "COPYING %s into %s" % (_p, _d)
+                    shutil.copy(_p, _d)
+
+        pnp_templates_dir = os.path.join(share_dir, 'templates', 'pnp')
+        if os.path.exists(pnp_templates_dir):
+            print "Looking the share/templates/pnp dir"
+            for c in cfg.commands:
+                cname = c.get_name()
+                if cname in ['bp_rule', '_internal_host_up']:
+                    continue
+                print "LOOK FOR command", c.get_name()
+                _p = os.path.join(graphite_templates_dir, cname+'.php')
+                _d = os.path.join(create_dir, 'templates', 'pnp', cname+'.php')
+                print "So search for graphite template", _p
+                if os.path.exists(_p):
+                    print "COPYING %s into %s" % (_p, _d)
+                    shutil.copy(_p, _d)
 
     zip_file_p = os.path.join(p_dest_dir, o['name']+'.zip')
     print "Want to save the zip file", zip_file_p
@@ -293,6 +373,8 @@ Retrieve : %prog [options] -g -l login -P password
                       dest="create_pack", help=('Mode to create a zip file from a pack'))
     parser.add_option('-p', '--pack-file', dest="pack_file",
                       help="""Pack .pack file that you want to generate from.""")
+    parser.add_option('-s', '--share-dir', dest="share_dir",
+                       help=('Your share directory with templates and icon sets'))
     parser.add_option('-d', '--dest', dest="p_dest_dir", 
                       help=""""Directory where to """)
 
@@ -318,6 +400,9 @@ Retrieve : %prog [options] -g -l login -P password
     parser.add_option('-g', '--get-key', action='store_true',
                       dest="getkey", help=("Mode to retrieve your API key"))
 
+    
+    
+
 
     opts, args = parser.parse_args()
 
@@ -328,7 +413,7 @@ Retrieve : %prog [options] -g -l login -P password
     p_dest_dir = tempfile.gettempdir()
     src_dir = ''
     _tmp = tempfile.mktemp()
-
+    share_dir = opts.share_dir or ''
 
 
     if opts.create_pack:
@@ -345,7 +430,7 @@ Retrieve : %prog [options] -g -l login -P password
         if opts.p_dest_dir:
             p_dest_dir = opts.p_dest_dir
 
-        create_pack(pack_file, p_dest_dir)
+        create_pack(pack_file, p_dest_dir, share_dir)
 
 
 
