@@ -38,10 +38,13 @@ except ImportError:
         raise
 
 
+from local_helper import print_cat_tree
 from shinken.webui.bottle import redirect
 
 ### Will be populated by the UI with it's own value
 app = None
+
+
 
 # Our page. If the useer call /dummy/TOTO arg1 will be TOTO.
 # if it's /dummy/, it will be 'nothing'
@@ -68,12 +71,34 @@ def get_new_packs():
         redirect("/user/login")
         return
 
+
+    c = pycurl.Curl()
+    c.setopt(c.POST, 1)
+    #c.setopt(c.CONNECTTIMEOUT, 5)
+    #c.setopt(c.TIMEOUT, 8)
+    #c.setopt(c.PROXY, 'http://inthemiddle.com:8080')
+    c.setopt(c.URL, "http://127.0.0.1:7765/categories")
+    c.setopt(c.HTTPPOST,[ ("root", '/')])
+    
+    c.setopt(c.VERBOSE, 1)
+
+    response = StringIO()
+    c.setopt(c.WRITEFUNCTION, response.write)
+    r = c.perform()
+    response.seek(0)
+    categories = json.loads(response.read().replace('\\/', '/'))
+    status_code = c.getinfo(pycurl.HTTP_CODE)
+    print "status code: %s" % status_code
+    c.close()
+    print "Json loaded", categories
+
+
     error = ''
     
     # we return values for the template (view). But beware, theses values are the
     # only one the tempalte will have, so we must give it an app link and the
     # user we are loggued with (it's a contact object in fact)
-    return {'app':app, 'user':user, 'error':error, 'results':None, 'search':None}
+    return {'app':app, 'user':user, 'error':error, 'results':None, 'search':None, 'categories' : categories, 'print_cat_tree':print_cat_tree}
 
 
 def get_new_packs_result():
@@ -114,7 +139,7 @@ def get_new_packs_result():
     # we return values for the template (view). But beware, theses values are the
     # only one the tempalte will have, so we must give it an app link and the
     # user we are loggued with (it's a contact object in fact)
-    return {'app':app, 'user':user, 'error':error, 'results':results, 'search':search}
+    return {'app':app, 'user':user, 'error':error, 'results':results, 'search':search, 'categories':None}
 
 
 

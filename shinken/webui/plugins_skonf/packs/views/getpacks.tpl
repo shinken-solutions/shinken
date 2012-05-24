@@ -27,6 +27,11 @@ function submit(){
     
 </form>
 
+<span class='span12'> <h3> Categories</h3>
+%if categories:
+   {{!print_cat_tree(categories)}}
+%end
+</span>
 
 %if search:
 <span class='span12'> <h3> Search for {{search}}</h3></span>

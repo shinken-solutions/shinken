@@ -42,13 +42,28 @@ except ImportError:
 import socket
 SRV = socket.gethostname()
 
+def give_pack(p):
+    d = {}
+    d['_id'] = p['_id']
+    d['user'] = p['user']
+    d['pack_name'] = p['pack_name']
+    d['description'] = p.get('description', '')
+    d['templates'] = p.get('templates', [])
+    # TODO : manage a real server?
+    d['img'] = 'http://%s:7765/static/%s/images/sets/%s/tag.png' % (SRV, p['_id'], d['pack_name'])
+    d['install'] = 'http://%s:7765/getpack/%s' % (SRV, p['_id'])
+    return d
+
+
 def search_post():
     app.response.content_type = 'application/json'
 
     search = app.request.forms.get('search')
-    if not search or len(search) < 3:
-        print "Lookup POST %s too short, bail out" % search
-        return []
+
+    if not search  or len(search) < 2 :
+        print "Lookup POST %s too short or missing filter, I bail out" % search
+        return json.dumps([])
+
 
     print "Lookup for", search, "in pack"
     # TODO : less PERFORMANCE KILLER QUERY!
@@ -57,22 +72,66 @@ def search_post():
     for p in packs:
         if p.get('state') not in ['ok', 'pending']:
             continue
-        if search in p['pack_name'] or search in p.get('description', ''):
-            print "MATCH THE PACK", p
-            d = {}
-            d['_id'] = p['_id']
-            d['user'] = p['user']
-            d['pack_name'] = p['pack_name']
-            d['description'] = p.get('description', '')
-            d['templates'] = p.get('templates', [])
-            # TODO : manage a real server?
-            d['img'] = 'http://%s:7765/static/%s/images/sets/%s/tag.png' % (SRV, p['_id'], d['pack_name'])
-            d['install'] = 'http://%s:7765/getpack/%s' % (SRV, p['_id'])
+        
+        if search and search in p['pack_name'] or search in p.get('description', ''):
+            d = give_pack(p)
             res.append(d)
+            continue
+
+        if search:
+            cats = p.get('path', '').split('/')
+            if search in cats:
+                d = give_pack(p)
+                res.append(d)
+            continue
+        
     return json.dumps(res)
 
 
 
+
+def search_categories():
+    app.response.content_type = 'application/json'
+
+    root = app.request.forms.get('root')
+
+    if not root:
+        print "Lookup categories but missing root!"
+        return json.dumps([])
+
+
+    print "Lookup for categories from root", root, "in pack"
+
+    # TODO : less PERFORMANCE KILLER QUERY!
+    packs = app.datamgr.get_packs()
+    tree = {'name' : '/', 'nb' : 0, 'sons' : {}}
+    for p in packs:
+        if p.get('state') not in ['ok', 'pending']:
+            continue
+        
+        cats = p.get('path', '').split('/')
+        cats = [c for c in cats if c != '']
+        pos = tree
+        name = ''
+        for cat in cats:
+            name += '/'+cat
+            print "Doing cat", cat
+            # If not already declared, add my node
+            if cat not in pos['sons']:
+                pos['sons'][cat] = {'name' : name, 'nb' : 0, 'sons' : {}}
+            pos['sons'][cat]['nb'] += 1
+            # Now go deeper in the tree :)
+            print "Were I came from", pos
+            pos = pos['sons'][cat]
+            print "My new pos", pos
+        
+    print "Tree", tree
+        
+    return json.dumps(tree)
+
+
+
 pages = {search_post : { 'routes' : ['/search'] , 'method' : 'POST'},
+         search_categories : { 'routes' : ['/categories'] , 'method' : 'POST'},
          }
 
