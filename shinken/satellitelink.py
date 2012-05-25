@@ -79,9 +79,19 @@ class SatelliteLink(Item):
     })
 
 
+    def set_arbiter_satellitemap(self, satellitemap):
+        """
+            arb_satmap is the satellitemap in current context:
+                - A SatelliteLink is owned by an Arbiter
+                - satellitemap attribute of SatelliteLink is the map defined IN THE satellite configuration
+                  but for creating connections, we need the have the satellitemap of the Arbiter
+        """
+        self.arb_satmap = {'address': self.address, 'port': self.port}
+        self.arb_satmap.update(satellitemap)
+
     def create_connection(self):
         try:
-            self.uri = pyro.create_uri(self.address, self.port, "ForArbiter", self.__class__.use_ssl)
+            self.uri = pyro.create_uri(self.arb_satmap['address'], self.arb_satmap['port'], "ForArbiter", self.__class__.use_ssl)
             # By default Pyro got problem in connect() function that can take
             # long seconds to raise a timeout. And even with the _setTimeout()
             # call. So we change the whole default connect() timeout
