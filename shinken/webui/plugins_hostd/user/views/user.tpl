@@ -1,3 +1,4 @@
+%import hashlib
 
 %rebase layout_hostd globals(), js=['user/js/user.js']
 
@@ -7,6 +8,10 @@ Your account {{uname}}
 <span id='message' class='alert span10'></span>
 
 <form class='span10 well' name='user' action='/user'>
+  <div class='span2 pull-right'>
+    %emailhash = hashlib.md5(user.get('email').strip().lower()).hexdigest()
+    <img src='http://www.gravatar.com/avatar/{{emailhash}}' class=''/>
+  </div>
   <div class="control-group">
     <label class="control-label" for="username">Username</label>
     <div class="controls">

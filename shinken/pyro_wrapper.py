@@ -61,6 +61,10 @@ try:
         protocol = 'PYROLOC'
         
         def __init__(self, host, port, use_ssl=False):
+            self.port = port
+            # Port = 0 means "I don't want pyro"
+            if self.port == 0:
+                return
             try:
                 Pyro.core.initServer()
             except (OSError, IOError), e: # must be problem with workdir :
@@ -92,7 +96,9 @@ try:
                 pass
 
         def get_sockets(self):
-            return self.getServerSockets()
+            if self.port != 0:
+                return self.getServerSockets()
+            return []
 
         def handleRequests(self, s):
             try:
@@ -154,6 +160,11 @@ except AttributeError, exp:
 
         
         def __init__(self, host, port, use_ssl=False):
+            self.port = port
+            # Port = 0 means "I don't want pyro"
+            if self.port == 0:
+                return
+
             # Pyro 4 is by default a thread, should do select
             # (I hate threads!)
             # And of course the name changed since 4.5...
@@ -198,7 +209,10 @@ except AttributeError, exp:
                     raise InvalidWorkDir(e)
 
 
+        # Get the server socket but not if disabled
         def get_sockets(self):
+            if self.port == 0:
+                return []
             if PYRO_VERSION in old_versions:
                 return self.sockets()
             else:

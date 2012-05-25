@@ -425,7 +425,7 @@ class Hostd(Daemon):
 
         ##  We need to set self.host & self.port to be used by do_daemon_init_and_start
         self.host = self.me.address
-        self.port = 8765#self.me.port
+        self.port = 0
         
         logger.info("Configuration Loaded")
         print ""
@@ -479,7 +479,7 @@ class Hostd(Daemon):
                os.mkdir(self.tmp_pack_path)
 
             self.do_daemon_init_and_start()
-            self.uri_arb = self.pyro_daemon.register(self.interface, "ForArbiter")
+            #self.uri_arb = self.pyro_daemon.register(self.interface, "ForArbiter")
 
             # Under Android, we do not have multiprocessing lib
             # so use standard Queue threads things
