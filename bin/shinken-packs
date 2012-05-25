@@ -289,7 +289,7 @@ def push_pack(zip_file_p, api_key):
     #c.setopt(c.CONNECTTIMEOUT, 5)
     #c.setopt(c.TIMEOUT, 8)
     #c.setopt(c.PROXY, 'http://inthemiddle.com:8080')
-    c.setopt(c.URL, "http://127.0.0.1:7765/push")
+    c.setopt(c.URL, "http://127.0.0.1:7765/pushpack")
 
     c.setopt(c.HTTPPOST,[ ("key", api_key), 
                           ("data", 
@@ -400,6 +400,43 @@ def getkey(login, password):
 
 
 
+
+
+def analyse(api_key, stats_file):
+    if not api_key:
+        print "Error : Sorry, analysing the configuration need an API key"
+        sys.exit(2)
+    if not stats_file:
+        print "Error : missing statitics files for analysing"
+        sys.exit(2)
+
+    import pycurl
+
+    c = pycurl.Curl()
+    c.setopt(c.POST, 1)
+    #c.setopt(c.CONNECTTIMEOUT, 5)
+    #c.setopt(c.TIMEOUT, 8)
+    #c.setopt(c.PROXY, 'http://inthemiddle.com:8080')
+    c.setopt(c.URL, "http://127.0.0.1:7765/pushstats")
+
+    c.setopt(c.HTTPPOST,[ ("key", api_key), 
+                          ("data", 
+                           (c.FORM_FILE, str(stats_file),
+                            c.FORM_CONTENTTYPE, "application/x-gzip"))
+                          ])
+
+
+    #c.setopt(c.HTTPPOST, [("file1", (c.FORM_FILE, str(zip_file_p)))])
+    c.setopt(c.VERBOSE, 1)
+    r = c.perform()
+    print "status code: %s" % c.getinfo(pycurl.HTTP_CODE)
+    c.close()
+    print "that's it ;)"
+
+
+
+
+
 if __name__ == '__main__':
     parser = optparse.OptionParser(
         """
@@ -407,6 +444,7 @@ Create   : %prog [options] -c -p pack_file [-s share_dir] [-d dest]
 Upload   : %prog [options] -u -z pack.zip -k API_KEY
 Register : %prog [options] -r -l login -P password -e email
 Retrieve : %prog [options] -g -l login -P password
+Analyse  : %prog [options] -a -k API_KEY /path/stats.json
 """,
         version="%prog " + VERSION)
     parser.add_option('-c', '--create', action='store_true',
@@ -440,7 +478,8 @@ Retrieve : %prog [options] -g -l login -P password
     parser.add_option('-g', '--get-key', action='store_true',
                       dest="getkey", help=("Mode to retrieve your API key"))
 
-    
+    parser.add_option('-a', '--analyse', action='store_true',
+                      dest="analyse", help=("Mode to analyse your configuration and upload it's characteristics to the server. Only statistics data, no hostnames, usernames not ips will be sent"))
     
 
 
@@ -512,3 +551,19 @@ Retrieve : %prog [options] -g -l login -P password
         password = opts.password
 
         getkey(login, password)
+
+
+
+    if opts.analyse:
+        mode = 'analyse'
+        if not opts.api_key:
+            parser.error("Requires an API key (option -k/--api-key)")
+        api_key = opts.api_key
+        files = args
+        if not files :
+            parser.error("Requires a statistic file to send")
+        if len(files) != 1:
+            parser.error("Too much statistics files to send")
+        p = files[0]
+        print "Sending statistics in file ", p
+        analyse(api_key, p)

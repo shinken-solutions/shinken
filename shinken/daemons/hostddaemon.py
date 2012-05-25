@@ -968,6 +968,15 @@ class Hostd(Daemon):
        return [p for p in self.db.packs.find().limit(nb).sort( 'upload_time', -1 )]
 
 
+    def save_user_stats(self, user, stats):
+       stats['user'] = user['username']
+       stats['_id'] = user['username']
+       stats['upload_time'] = int(time.time())
+       stats['state'] = 'pending'
+       print "Saving cfg stats", stats
+       self.db.cfg_stats.save(stats)
+       
+
     def save_new_pack(self, user, filename, buf):
        filename = os.path.basename(filename)
        short_name = filename[:-4]
