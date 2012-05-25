@@ -40,7 +40,7 @@ import shutil
 import zipfile
 import glob
 import pycurl
-
+from StringIO import StringIO
 
 try:
     import shinken
@@ -321,13 +321,33 @@ def register(login, password, email):
 
     c.setopt(c.HTTPPOST,[ ("username", login), ("password", password), ("email", email), ('cli_mode', '1')])
 
-    #c.setopt(c.HTTPPOST, [("file1", (c.FORM_FILE, str(zip_file_p)))])
-    c.setopt(c.VERBOSE, 1)
+    error = ''
+    obj = ''
+    #c.setopt(c.VERBOSE, 1)
+    response = StringIO()
+    c.setopt(c.WRITEFUNCTION, response.write)
     r = c.perform()
-    print "status code: %s" % c.getinfo(pycurl.HTTP_CODE)
-    c.close()
-    print "that's it ;)"
+    response.seek(0)
+    status_code = c.getinfo(pycurl.HTTP_CODE)
+    # We only parse the json if we got 
+    if status_code == 200:
+        obj = json.loads(response.read().replace('\\/', '/'))
+    else:
+        error = response.read().replace('\\/', '/')
 
+    c.close()
+    print "status code: %s" % status_code
+    if error:
+        print "Sorry there was an error with the query :", error
+        sys.exit(2)
+    state = obj['state']
+    text = obj['text']
+    if state == 200:
+        print "OK :", text
+        sys.exit(0)
+    else:
+        print "Error :", text
+        sys.exit(2)
 
 
 
@@ -351,19 +371,33 @@ def getkey(login, password):
     c.setopt(c.HTTPPOST,[ ("login", login), ("password", password), ('cli_mode', '1')])
 
     #c.setopt(c.HTTPPOST, [("file1", (c.FORM_FILE, str(zip_file_p)))])
-    c.setopt(c.VERBOSE, 1)
+    error = ''
+    #c.setopt(c.VERBOSE, 1)
+    response = StringIO()
+    c.setopt(c.WRITEFUNCTION, response.write)
     r = c.perform()
-    print "status code: %s" % c.getinfo(pycurl.HTTP_CODE)
-    c.close()
-    print "that's it ;)"
+    response.seek(0)
+    status_code = c.getinfo(pycurl.HTTP_CODE)
+    # We only parse the json if we got 
+    if status_code == 200:
+        obj = json.loads(response.read().replace('\\/', '/'))
+    else:
+        error = response.read().replace('\\/', '/')
 
+    c.close()
+    print "status code: %s" % status_code
+    if error:
+        print "Sorry there was an error with the query :", error
+        sys.exit(2)
+
+    print "You api key is", obj['api_key']
 
 
 
 if __name__ == '__main__':
     parser = optparse.OptionParser(
         """
-Create   : %prog [options] -c -p pack_file [-d dest]
+Create   : %prog [options] -c -p pack_file [-s share_dir] [-d dest]
 Upload   : %prog [options] -u -z pack.zip -k API_KEY
 Register : %prog [options] -r -l login -P password -e email
 Retrieve : %prog [options] -g -l login -P password
