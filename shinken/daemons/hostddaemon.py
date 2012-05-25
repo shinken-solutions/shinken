@@ -931,6 +931,10 @@ class Hostd(Daemon):
        return r is not None
 
 
+    def get_user_by_name(self, username):
+       r = self.db.users.find_one({'username' : username})
+       return r
+
     def get_user_by_key(self, api_key):
        r = self.db.users.find_one({'api_key' : api_key})
        if not r:
