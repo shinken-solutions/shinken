@@ -52,6 +52,12 @@ class DataManagerHostd(DataManagerSKonf):
         r = self.get_in_db('packs', '_id', pid)
         return r
 
+
+    def get_pack_by_user_packname(self, username, packname):
+        value = '%s-%s' % (username, packname)
+        r = self.get_in_db('packs', 'link_id', value)
+        return r
+
     def build_pack_tree(self, packs):
 
         # dirname sons packs

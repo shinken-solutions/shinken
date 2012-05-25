@@ -30,8 +30,9 @@
       <!-- {{p}} -->
       %pname = p.get('pack_name', 'unknown')
       %pid = p.get('_id', '')
+      %plink = p.get('link_id', pid)
       <div class='span1'>
-	<a href='/pack/{{pid}}'>
+	<a href='/pack/{{plink}}'>
 	<span class="label">
 	  <img class="imgsize3" onerror="$(this).hide()" src="/static/{{pid}}/images/sets/{{pname}}/tag.png" /> {{pname}}
 	</span>
