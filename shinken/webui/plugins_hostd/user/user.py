@@ -82,7 +82,8 @@ def post_user():
         redirect("/user/login")
         return
 
-
+    # Take the user that send the post and not the 
+    # form value for secutiry reason of course :)
     username = user.get('username')
     email = app.request.forms.get('email')
     password = app.request.forms.get('password')
