@@ -964,6 +964,10 @@ class Hostd(Daemon):
        return r['api_key']
 
 
+    def get_last_packs(self, nb):
+       return [p for p in self.db.packs.find().limit(nb).sort( 'upload_time', -1 )]
+
+
     def save_new_pack(self, user, filename, buf):
        filename = os.path.basename(filename)
        short_name = filename[:-4]
