@@ -221,7 +221,7 @@ class DictProp(Property):
     def pythonize(self, val):
         #import traceback; traceback.print_stack()
         def split(kv):
-            m = re.match("^([^\s]+)\s*(.*)$", kv)
+            m = re.match("^\s*([^\s]+)\s*=\s*([^\s]+)\s*$", kv)
             if m is None:
                 raise ValueError
 
@@ -232,12 +232,10 @@ class DictProp(Property):
 
         if val is None:
             return(dict())
-        elif isinstance(val, (str, unicode)):
-            # we have only one key/value
-            return dict([split(val)])
-       
-        # val is a list of strings
-        return dict([split(kv) for kv in val])
+
+        # val is in the form "key1=addr:[port],key2=addr:[port],..."
+        print ">>>", dict([split(kv) for kv in to_split(val)])
+        return dict([split(kv) for kv in to_split(val)])
 
 class AddrProp(Property):
     """Address property (host + port)"""
