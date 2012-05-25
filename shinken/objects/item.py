@@ -96,7 +96,7 @@ class Item(object):
             else:
                 setattr(self, key, params[key])
 
-        self.arb_satmap = {'address': params.get('address', '0.0.0.0'), 'port': params.get('port', '0')}
+        self.arb_satmap = {'address': params.get('address', '0.0.0.0'), 'port': params.get('port', 0)}
 
     
     def init_running_properties(self):

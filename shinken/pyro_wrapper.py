@@ -111,9 +111,9 @@ try:
 
     def create_uri(address, port, obj_name, use_ssl):
         if not use_ssl:
-            return "PYROLOC://%s:%s/%s" % (address, port, obj_name)
+            return "PYROLOC://%s:%d/%s" % (address, port, obj_name)
         else:
-            return "PYROLOCSSL://%s:%s/%s" % (address, port, obj_name)
+            return "PYROLOCSSL://%s:%d/%s" % (address, port, obj_name)
 
     # Timeout way is also changed between 3 and 4
     # it's a method in 3, a property in 4
