@@ -793,6 +793,13 @@ function sinstall(){
         cp -Rf $src/etc/* $ETC/
     fi
 
+    # We want to copy the src/share into the var
+    if [ ! -d $TARGET/var/share ]
+    then
+	mkdir -p $TARGET/var/share
+	cp -Rf $src/share/* $TARGET/var/share
+    fi
+
     cleanuptarget
     relocate
     ln -s $TARGET/bin/default/shinken /etc/default/shinken
