@@ -204,7 +204,13 @@ def create_pack(pack_file, p_dest_dir, share_dir):
         sets_dir = os.path.join(share_dir, 'images', 'sets')
         if os.path.exists(sets_dir):
             print "Looking the share/images/sets"
-            for t in pack.templates:
+            # We are looking for the hosttags and the template
+            # name too
+            _img_names = pack.templates
+            _img_names.append(o['name'])
+            # Ok but uniq please :)
+            _img_names = list(set(_img_names))
+            for t in _img_names:
                 print "Lookng for the template", t
                 _p = os.path.join(sets_dir, t)
                 if os.path.exists(_p) and os.path.isdir(_p):
