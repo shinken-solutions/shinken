@@ -210,10 +210,11 @@ class SatelliteLink(Item):
 
 
     def ping(self):        
-        print "Pinging %s" % self.get_name()
+        print "Pinging %s" % self.get_name(),
         try:
             if self.con is None:
                 self.create_connection()
+            print " (%s)" % self.uri
 
             # If the connection failed to initialize, bail out
             if self.con is None:
@@ -227,6 +228,7 @@ class SatelliteLink(Item):
             else:
                 self.add_failed_check_attempt()
         except Pyro_exp_pack, exp:
+            print # flush previous print
             self.add_failed_check_attempt(reason=str(exp))
 
 
