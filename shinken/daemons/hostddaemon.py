@@ -939,6 +939,12 @@ class Hostd(Daemon):
           return None
        return r
 
+    def get_email_by_name(self, username):
+       r = self.db.users.find_one({'username' : username})
+       if not r:
+          return ''
+       return r['email']
+
 
     def is_actitaved(self, username):
        r = self.db.users.find_one({'_id' : username})
