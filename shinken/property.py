@@ -227,7 +227,8 @@ class DictProp(Property):
 
             return (
                 m.group(1), 
-                m.group(2) if self.elts_prop is None else self.elts_prop.pythonize(m.group(2))
+                # >2.4 only. we keep it for later. m.group(2) if self.elts_prop is None else self.elts_prop.pythonize(m.group(2))
+                (self.elts_prop.pythonize(m.group(2)), m.group(2))[self.elts_prop is None]
             )
 
         if val is None:
