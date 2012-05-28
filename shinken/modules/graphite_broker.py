@@ -96,7 +96,7 @@ class Graphite_broker(BaseModule):
 
             # Try to get the int/float in it :)
             for key,value in name_value.items():
-                m = re.search("(\d*\.?\d*)(.*)", value)
+                m = re.search("(-?\d*\.?\d*)(.*)", value)
                 if m:
                     name_value[key] = m.groups(0)[0]
                 else:
@@ -127,7 +127,8 @@ class Graphite_broker(BaseModule):
         lines = []
         # Send a bulk of all metrics at once
         for (metric, value) in couples:
-            lines.append("%s.%s.%s %s %d" % (hname, desc, metric, value, check_time))
+            if value:
+                lines.append("%s.%s.%s %s %d" % (hname, desc, metric, value, check_time))
         packet = '\n'.join(lines) + '\n' # Be sure we put \n every where
 #        print "Graphite launching :", packet
         self.con.sendall(packet)
