@@ -20,29 +20,30 @@ Requirements
 `shinken` requires
 
 * `Python`__ 2.4 or higher (Python 2.6 or higher is recommended if you want to use the Web interface)
-* `setuptools`__ or `distribute`__ for installation (see below).
-* `Pyro`__ less then 4.14
-* `multiprocessing` Python package when using Python 2.4 or 2.5
+* `setuptools` or `distribute` for installation (see below).
+* Pyro less then 4.14
+* `multiprocessing`__ Python package when using Python 2.4 or 2.5
   (`multiprocessing` is already included in Python 2.6 and higher)
 
 __ http://www.python.org/download/
-__ pyro 3.x 4.x (except 4.14 and 4.0-4.8)
 __ http://pypi.python.org/pypi/multiprocessing/
 
 If (and only if) you plan to use the `livestatus` module or the web interface, you will also
 need
 
-* `simplejson`__  or `ujson`__  (ujson is much faster)
+* `simplejson`__
+* `ujson`__  (ujson is used in Livestatus for its speed)
 * `pysqlite`__
 
-__ http://pypi.python.org/pypi/simplejson/ and
+__ http://pypi.python.org/pypi/simplejson/
+__ http://pypi.python.org/pypi/ujson/ 
 __ http://code.google.com/p/pysqlite/
-__ http://pypi.python.org/pypi/ujson/
+
 
 Just untar and launch `python setup.py install` (and be sure to have
 installed the `python-devel` package too).
 
-For Python, it should be okay with almost all distribution.
+For Python, it should be okay with almost all distributions.
 
 Under ubuntu, you can grab the Pyro module with::
 
