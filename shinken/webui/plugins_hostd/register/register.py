@@ -49,12 +49,14 @@ def do_register():
     print "Get a new user %s with email %s and hash %s" % (username, email, password_hash)
     if not app.is_name_available(username):
         if cli_mode == '1':
-            abort(400, 'Sorry, this username is not available')
+            app.response.content_type = 'application/json'
+            return json.dumps({'state' : 400, 'text' : 'Sorry, this username is not available'})
         redirect('/register?error=Sorry, this username is not available')
 
     app.register_user(username, password_hash, email)
     if cli_mode == '1':
-        abort(200, 'Registering success, please look at your email and click in the link in it to validate your account')
+        app.response.content_type = 'application/json'
+        return json.dumps({'state' : 200, 'text' : 'Registering success, please look at your email and click in the link in it to validate your account'})
     redirect('/register?success=Registering success, please look at your email and click in the link in it to validate your account')
 
 
@@ -82,6 +84,7 @@ def is_name_available():
 
 
 def get_api_key():
+    app.response.content_type = 'application/json'
     login = app.request.forms.get('login', '')
     password = app.request.forms.get('password', '')
     is_auth = app.check_auth(login, password)
@@ -92,7 +95,8 @@ def get_api_key():
     if is_auth:
         key = app.get_api_key(login)
         if key:
-            abort(200, 'Your API key is %s' % key)
+            r = {'api_key' : key}
+            return json.dumps(r)
         else:
             abort(400, 'Sorry, there is a problem with your api key.')
     else:

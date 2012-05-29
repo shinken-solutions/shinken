@@ -1,6 +1,8 @@
 
 %rebase layout_hostd globals() #, js=['packs/js/pack.js']
 
+<!-- PACK {{pack}} -->
+
 %pname = pack.get('pack_name')
 %pid = pack.get('_id')
 %pstate = pack.get('state')
@@ -29,7 +31,7 @@
 
 </span>
 
-<!-- PACK {{pack}} -->
+<!-- PACK -->
 
 %if pstate == 'obsolete':
     %by = pack.get('obsoleted_by')
@@ -47,7 +49,7 @@
   %for t in pack.get('templates', []):
      <li>
        	<span class="label">
-	  <img class="imgsize3" onerror="$(this).hide()" src="/static/{{pid}}/images/sets/{{t}}/tag.png" /> {{pname}}
+	  <img class="imgsize3" onerror="$(this).hide()" src="/static/{{pid}}/images/sets/{{t}}/tag.png" /> {{t}}
 	</span>
      </li>
      <h5> Services linked </h5>

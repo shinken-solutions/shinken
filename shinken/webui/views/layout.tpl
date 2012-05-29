@@ -5,6 +5,7 @@
 %if not 'css' in locals() : css = []
 %if not 'print_menu' in locals() : print_menu = True
 %if not 'print_header' in locals() : print_header = True
+%if not 'print_footer' in locals() : print_footer = True
 %if not 'refresh' in locals() : refresh = False
 %if not 'user' in locals() : user = None
 %if not 'app' in locals() : app = None
@@ -124,8 +125,9 @@
       </div><!--/row-->
 
       <hr>
-
-		%include footer_element
+    %if print_footer:
+		  %include footer_element
+    %end
 
     </div><!--/.fluid-container-->
   <!-- The modal div that will be shown when we want, and after put in it the data we want -->

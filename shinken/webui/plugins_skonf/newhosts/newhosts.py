@@ -45,9 +45,7 @@ def get_newhosts():
     user = app.get_user_auth()
 
     if not user:
-        pass
-        #redirect("/user/login")
-        #return
+        redirect("/user/login")
 
     # we return values for the template (view). But beware, theses values are the
     # only one the tempalte will have, so we must give it an app link and the
@@ -57,6 +55,11 @@ def get_newhosts():
 
 
 def get_launch():
+    user = app.get_user_auth()
+
+    if not user:
+        redirect("/user/login")
+
     print "Got forms in /newhosts/launch page"
     names = app.request.forms.get('names', '')
     use_nmap = to_bool(app.request.forms.get('use_nmap', '0'))
@@ -76,16 +79,26 @@ def get_launch():
     print "We create the scan", i
     app.ask_new_scan(i)
 
-    return {'app' : app}
+    return {'app' : app, 'user' : user}
 
 
 
 def get_scans():
+    user = app.get_user_auth()
+
+    if not user:
+        redirect("/user/login")
+
     print "Got scans"
-    return {'app' : app}
+    return {'app' : app, 'user' : user}
 
 
 def get_results():
+    user = app.get_user_auth()
+
+    if not user:
+        redirect("/user/login")
+
     print "Looking for hosts in discovered state"
     now = int(time.time())
     yesterday = now - 86400
@@ -100,20 +113,35 @@ def get_results():
     for s in scans:
         print "SCAN", s
 
-    return {'app' : app, 'pending_hosts' : pending_hosts, 'scans' : scans}
+    return {'app' : app, 'user' : user, 'pending_hosts' : pending_hosts, 'scans' : scans}
 
 
 def delete_host(hname):
+    user = app.get_user_auth()
+
+    if not user:
+        redirect("/user/login")
+
     print "Look for simple deleting of an host", hname
     app.db.discovered_hosts.remove({'_id': hname})
 
 
 def tag_unmanaged(hname):
+    user = app.get_user_auth()
+
+    if not user:
+        redirect("/user/login")
+
     print "Look for infinite delete for", hname
     r = app.db.discovered_hosts.update({'_id' : hname}, { '$set': { '_discovery_state' : 'disabled' }})
 
 
 def post_validatehost():
+    user = app.get_user_auth()
+
+    if not user:
+        redirect("/user/login")
+
     print "Got forms in /newhosts/validatehost call"
     _id = app.request.forms.get('_id', 'unknown-host')
     use = app.request.forms.get('use', '')

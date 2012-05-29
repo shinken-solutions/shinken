@@ -531,7 +531,7 @@ class Config(Item):
             # Now we removed real comments, replace them with just ;
             line = line.replace('__ANTI-VIRG__', ';')
             # A backslash means, there is more to come
-            if re.search("\\\s*$", line):
+            if re.search("\\\s*$", line) is not None:
                 continuation_line = True
                 line = re.sub("\\\s*$", "", line)
                 line = re.sub("^\s+", " ", line)
@@ -544,14 +544,14 @@ class Config(Item):
                 tmp_line = ''
                 continuation_line = False
             # } alone in a line means stop the object reading
-            if re.search("^\s*\t*}\s*\t*$", line):
+            if re.search("^\s*}\s*$", line) is not None:
                 in_define = False
-            if re.search("^\s*\t*#|^\s*$|^\s*}", line):
+    
+            if re.search("^\s*#|^\s*$|^\s*}", line) is not None:
                 pass
-
             # A define must be catch and the type save
             # The old entry must be save before
-            elif re.search("^define", line):
+            elif re.search("^define", line) is not None:
                 in_define = True
                 if tmp_type not in objectscfg:
                     objectscfg[tmp_type] = []

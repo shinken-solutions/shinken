@@ -64,11 +64,26 @@
             </ul>
           </li>
         </ul>
+
+
+	<ul class="nav">
+	  %if menu_part == '/packs':
+          <li class="dropdown active">
+	  %else:
+	  <li class="dropdown">
+	  %end
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown"> Packs<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+	      <li><a href="/packs">Your packs</a></li>
+	      <li><a href="/getpacks">Get new packs!</a></li>
+            </ul>
+          </li>
+        </ul>
 	
 	
 
 	<ul class="nav">
-	  %menu = [ ('/packs','Packs'), ('/system','System'), ('/otheruis', 'Link with other UIs')]
+	  %menu = [ ('/system','System'), ('/otheruis', 'Link with other UIs')]
           %for (key, value) in menu:
             %# Check for the selected element, if there is one
             %if menu_part == key:

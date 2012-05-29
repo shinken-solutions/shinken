@@ -1,3 +1,4 @@
+%import hashlib
 
 %rebase layout_hostd globals(), js=['packs/js/packs.js']
 
@@ -29,8 +30,9 @@
       <!-- {{p}} -->
       %pname = p.get('pack_name', 'unknown')
       %pid = p.get('_id', '')
+      %plink = p.get('link_id', pid)
       <div class='span1'>
-	<a href='/pack/{{pid}}'>
+	<a href='/pack/{{plink}}'>
 	<span class="label">
 	  <img class="imgsize3" onerror="$(this).hide()" src="/static/{{pid}}/images/sets/{{pname}}/tag.png" /> {{pname}}
 	</span>
@@ -60,6 +62,12 @@
 	   %lnk = "http://www.shinken-monitoring.org/wiki/packs/"+pname
 	%end
 	<a class='pull-right' href="{{lnk}}" target='_blank'> <i class="icon-question-sign"></i></a>
+      </div>
+
+      <div class='pull-right'>
+	%authoremail = app.get_email_by_name(p.get('user')).strip().lower()
+	%emailhash = hashlib.md5(authoremail).hexdigest()
+	<a href="/user/{{p.get('user')}}"> <img src='http://www.gravatar.com/avatar/{{emailhash}}' class='imgsize3'/></a>
       </div>
 
       <div class='span10'>

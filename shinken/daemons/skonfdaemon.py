@@ -400,6 +400,7 @@ class Skonf(Daemon):
 
         # Ok, here we must check if we go on or not.
         # TODO : check OK or not
+        self.api_key = self.conf.api_key
         self.use_local_log = self.conf.use_local_log
         self.log_level = logger.get_level_id(self.conf.log_level)
         self.local_log = self.conf.local_log
@@ -420,7 +421,7 @@ class Skonf(Daemon):
 
         ##  We need to set self.host & self.port to be used by do_daemon_init_and_start
         self.host = self.me.address
-        self.port = 8766#self.me.port
+        self.port = 0
         
         logger.info("Configuration Loaded")
         print ""
@@ -469,7 +470,7 @@ class Skonf(Daemon):
             self.load_web_configuration()
 
             self.do_daemon_init_and_start()
-            self.uri_arb = self.pyro_daemon.register(self.interface, "ForArbiter")
+            #self.uri_arb = self.pyro_daemon.register(self.interface, "ForArbiter")
 
             # Under Android, we do not have multiprocessing lib
             # so use standard Queue threads things
@@ -936,6 +937,10 @@ class Skonf(Daemon):
     # TODO : code this!
     def check_auth(self, login, password):
        return True
+
+
+    def get_api_key(self):
+       return str(self.api_key)
 
     # We are asking to a worker .. to work :)
     def ask_new_scan(self, id):

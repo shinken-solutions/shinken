@@ -43,11 +43,13 @@ try :
     SSLWantReadError = OpenSSL.SSL.WantReadError
     SSLSysCallError = OpenSSL.SSL.SysCallError
     SSLZeroReturnError = OpenSSL.SSL.ZeroReturnError
+    SSLError = OpenSSL.SSL.Error
 except ImportError:
     OpenSSL = None
     SSLWantReadError = None
     SSLSysCallError = None
     SSLZeroReturnError = None
+    SSLError = None
 
 from Queue import Empty
 from shinken.basemodule import BaseModule
@@ -262,6 +264,9 @@ class NRPEAsyncClient(asyncore.dispatcher):
 
             except SSLSysCallError:
                 buf = ''
+
+            except SSLError:
+                bug = ''
 
             # Maybe we got nothing from the server (it refuse our ip,
             # or refuse arguments...)

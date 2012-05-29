@@ -1,5 +1,5 @@
 
-%rebase layout_skonf globals(), js=['packs/js/packs.js', 'packs/js/getpack.js']
+%rebase layout_skonf globals(), js=['packs/js/packs.js', 'packs/js/getpack.js'], css=['packs/css/tags.css']
 
 <div> <h1> Get new packs </h1> </div>
 
@@ -17,6 +17,16 @@ function submit(){
     <div class='alert alert-error span5 offset2'> {{error}}</div>
 %end
 
+
+%if api_error:
+    <div class='alert alert-error span5 offset2'> 
+      Oups! There was a problem with the API server connexion
+      <br/>
+      <div id='api_error' class='hide'>{{api_error}}</div>
+      <a href='javascript:$("#api_error").show()' class='btn btn-warning'> <i class="icon-remove"></i> Show the error</a>
+      <a href='/testapi' class='btn btn-success'> <i class="icon-upload"></i> Try an API server connexion</a>
+    </div>
+%end
 <div id="message" class='alert span5 offset2 hide'> </div>
 
 <form class='well span5 offset2' name='getpacks' action='/getpacks' METHOD='POST'>
@@ -26,6 +36,33 @@ function submit(){
   <a href='javascript:submit();' class='btn'> Search</a>
     
 </form>
+
+<span class='span12'> 
+%if tags:
+  <div id='tagCloud' class='well'>
+    <h2> Tags</h2>
+    <ul id='tagList'>
+      %nb_tags = len(tags)
+      %i = 0
+      %for t in tags:
+         %name = t['name']
+         %size = t['size']
+         %occ = t['occ']
+          <li> <a href='/getpacks/{{name}}' style='font-size:{{size}}em;'>{{name}} ({{occ}})</a> </li>
+      %end
+    </ul>
+  </div>
+%end
+</span>
+
+<span class='span12'>
+%if categories:
+  <div id='categories' class='well span8'>
+    <h2> All categories</h2>
+  {{!print_cat_tree(categories)}}
+  </div>
+%end
+</span>
 
 
 %if search:
@@ -38,7 +75,7 @@ function submit(){
       %pid = p.get('_id')
       %inst_lnk = p.get('install','')
       <div class='span8 well'>
-	{{p}}
+	<!-- {{p}} -->
 	<span class='label'>
 	  %src = p.get('img', '')
 	  <img class="imgsize3" onerror="$(this).hide()" src="{{src}}"/> {{p.get('pack_name', 'unknown')}}

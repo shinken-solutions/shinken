@@ -42,9 +42,15 @@ def get_pack(pid):
     # so we bail out if it's a false one
     user = app.get_user_auth()
 
-    pack = app.datamgr.get_pack_by_id(pid)
+    # Maybe we got a static uri with user-packname
+    if '-' in pid:
+        uname, packname = pid.split('-', 1)
+        pack = app.datamgr.get_pack_by_user_packname(uname, packname)
+    else: #of the direct inner pack_id (will change for each push)
+        pack = app.datamgr.get_pack_by_id(pid)
 
     return {'app' : app, 'user' : user, 'pack' : pack}
+
 
 def download_pack(pid):
     pack = app.datamgr.get_pack_by_id(pid)

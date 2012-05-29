@@ -216,18 +216,14 @@ class LiveStatusLogStoreSqlite(BaseModule):
         """
         try:
             dbresult = self.execute('SELECT MIN(time),MAX(time) FROM logs')
-            dbresult = [r for r in dbresult if r]
-            try:
-                mintime = dbresult[0][0]
-                maxtime = dbresult[0][1]
-            except IndexError, e:
-                mintime = int(time.time())
-                maxtime = int(time.time())
-
             mintime = dbresult[0][0]
             maxtime = dbresult[0][1]
         except sqlite3.Error, e:
             print "An error occurred:", e.args[0]
+        except IndexError, e:
+            mintime = int(time.time())
+            maxtime = int(time.time())
+
         if mintime is None:
             mintime = int(time.time())
         if maxtime is None:

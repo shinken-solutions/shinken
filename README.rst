@@ -14,6 +14,49 @@ Shinken is backwards-compatible with the Nagios configuration standard
 and plug-ins. It works on any operating system and architecture that
 supports Python, which includes Windows and GNU/Linux.
 
+Requirements
+=========================
+
+`shinken` requires
+
+* `Python`__ 2.4 or higher (Python 2.6 or higher is recommended if you want to use the Web interface)
+* `setuptools` or `distribute` for installation (see below).
+* Pyro less then 4.14
+* `multiprocessing`__ Python package when using Python 2.4 or 2.5
+  (`multiprocessing` is already included in Python 2.6 and higher)
+
+__ http://www.python.org/download/
+__ http://pypi.python.org/pypi/multiprocessing/
+
+If (and only if) you plan to use the `livestatus` module or the web interface, you will also
+need
+
+* `simplejson`__
+* `ujson`__  (ujson is used in Livestatus for its speed)
+* `pysqlite`__
+
+__ http://pypi.python.org/pypi/simplejson/
+__ http://pypi.python.org/pypi/ujson/ 
+__ http://code.google.com/p/pysqlite/
+
+
+Just untar and launch `python setup.py install` (and be sure to have
+installed the `python-devel` package too).
+
+For Python, it should be okay with almost all distributions.
+
+Under ubuntu, you can grab the Pyro module with::
+
+  sudo apt-get install pyro
+
+Under other distributions, you can search for it::
+
+  yum search pyro
+
+And if you do not find it, you can install it from PyPI::
+
+  easy_install pyro
+
 
 How to install Shinken
 =========================
@@ -49,7 +92,7 @@ compilation!
 Third way: install script
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Note : NEVER EVER MIX THE DIFFERENTS INSTALLATION WAYS. THIS WILL RUN YOU IN BIG TROUBLES. IF YOU CHOOSE ONE WAY DO NOT TRY OTHERS OR CLEAN UP BEFORE.
+Note : NEVER EVER MIX THE DIFFERENTS INSTALLATION METHODS. THIS WILL RUN YOU IN BIG TROUBLES. CHOOSE ONE AND UNINSTALL BEFORE TRYING THE OTHER.
 
 You can use the install utility script located at the root of the shinken sources.
 The script creates the user and group, installs all dependencies and then it installs shinken. It is compatible with Debian, Ubuntu, Centos/Redhat 5.x and 6.x
@@ -59,7 +102,7 @@ If you want shinken installed in seconds (default in /usr/local/shinken), just r
 
   install -i
 
-see install.d/README file for further informations.
+see install.d/README file for further information.
 
 
 How to update
@@ -68,9 +111,9 @@ How to update
 If you used the setup.py way, launch ::
     sudo python setup.py update --install-scripts=/usr/bin/
 
-If you used the install script way :
+If you used the install script method :
 
-1 - grab the latest shinken archive and extract it's content 
+1 - grab the latest shinken archive and extract its content 
 
 2 - cd into the resulting folder
 
@@ -89,50 +132,6 @@ If you used the install script way :
 6 - restore the backup::
 
   ./install -r backupid
-
-
-Requirements
-=========================
-
-`shinken` requires
-
-* `Python`__ 2.4 or higher (Python 2.6 or higher is recommended if you want to use the Web interface)
-* `setuptools`__ or `distribute`__ for installation (see below).
-* `Pyro`__
-* `multiprocessing` Python package when using Python 2.4 or 2.5
-  (`multiprocessing` is already included in Python 2.6 and higher)
-
-__ http://www.python.org/download/
-__ pyro
-__ http://pypi.python.org/pypi/multiprocessing/
-
-If (and only if) you plan to use the `livestatus` module or the web interface, I'll also
-need
-
-* `simplejson`__ 
-* `pysqlite`__
-
-__ http://pypi.python.org/pypi/simplejson/ and
-__ http://code.google.com/p/pysqlite/
-
-Just untar and launch `python setup.py install` (and be sure to have
-installed the `python-devel` package too).
-
-For Python, it should be okay with almost all distribution.
-
-Under ubuntu, you can grab the Pyro module with::
-
-  sudo apt-get install pyro
-
-Under other distributions, you can search for it::
-
-  yum search pyro
-
-And if you do not find it, you can install it from PyPI::
-
-  easy_install pyro
-
-And that's all folks :)
 
 
 Where is the configuration?
