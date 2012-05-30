@@ -494,8 +494,8 @@ function prerequisites(){
     then
         cecho " > Installing managed python (experimental) " green
         easy_install pip
-        pip uninstall Pyro
-        pip uninstall Pyro4
+        yes | pip uninstall Pyro
+        yes | pip uninstall Pyro4
         pyroset
         $PYEI "$PYRO"
     fi
