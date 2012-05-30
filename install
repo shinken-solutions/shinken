@@ -493,6 +493,9 @@ function prerequisites(){
     if [ $MANAGEPYRO == 1 ]
     then
         cecho " > Installing managed python (experimental) " green
+        easy_install pip
+        pip uninstall Pyro
+        pip uninstall Pyro4
         pyroset
         $PYEI "$PYRO"
     fi
