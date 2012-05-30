@@ -489,6 +489,13 @@ function prerequisites(){
             fi
         done
     fi
+
+    if [ $MANAGEPYRO == 1 ]
+    then
+        cecho " > Installing managed python (experimental) " green
+        pyroset
+        $PYEI "$PYRO"
+    fi
     
 }
 
