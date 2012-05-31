@@ -32,6 +32,7 @@ import re
 from socket import socket
 
 from shinken.basemodule import BaseModule
+from shinken.misc.regenerator import Regenerator
 
 properties = {
     'daemons' : ['broker'],
@@ -55,6 +56,9 @@ class Graphite_broker(BaseModule):
         BaseModule.__init__(self, modconf)
         self.host = getattr(modconf, 'host', 'localhost')
         self.port = int(getattr(modconf, 'port', '2003'))
+        self.rg = Regenerator()
+        self.host_dict = {}
+        self.svc_dict = {}
 
 
     # Called by Broker so we can do init stuff
@@ -107,6 +111,29 @@ class Graphite_broker(BaseModule):
         return res
 
 
+    def manage_initial_service_status_brok(self, b):
+        self.rg.manage_initial_service_status_brok(b)
+
+
+    def manage_initial_host_status_brok(self, b):
+        self.rg.manage_initial_host_status_brok(b)
+
+
+    def manage_program_status_brok(self, b):
+        self.rg.manage_program_status_brok(b)
+
+
+    def manage_initial_broks_done_brok(self, b):
+        inst_id = b.data['instance_id']
+        print "Finish the configuration of instance", inst_id
+        self.rg.all_done_linking(inst_id)
+        # Prepare host and svc custom value dict
+        for h in self.rg.hosts.items.values():
+            self.host_dict[h.host_name] = h.customs
+        for s in self.rg.services.items.values():
+            self.svc_dict[s.host_name, s.service_description] = s.customs
+
+
     # A service check result brok has just arrived, we UPDATE data info with this
     def manage_service_check_result_brok(self, b):
         data = b.data
@@ -119,7 +146,17 @@ class Graphite_broker(BaseModule):
             return
         
         hname = self.illegal_char.sub('_', data['host_name'])
+        if data['host_name'] in self.host_dict:
+            customs_datas = self.host_dict[data['host_name']]
+            if '_GRAPHITE_PRE' in customs_datas:
+                hname = ".".join((customs_datas['_GRAPHITE_PRE'], hname))
+
         desc = self.illegal_char.sub('_', data['service_description'])
+        if (data['host_name'], data['service_description']) in self.svc_dict:
+            customs_datas = self.svc_dict[(data['host_name'], data['service_description'])]
+            if '_GRAPHITE_POST' in customs_datas:
+                desc = ".".join((desc, customs_datas['_GRAPHITE_POST']))
+
         check_time = int(data['last_chk'])
 
 #        print "Graphite:", hname, desc, check_time, perf_data
@@ -147,6 +184,11 @@ class Graphite_broker(BaseModule):
             return
         
         hname = self.illegal_char.sub('_', data['host_name'])
+        if data['host_name'] in self.host_dict:
+            customs_datas = self.host_dict[data['host_name']]
+            if '_GRAPHITE_PRE' in customs_datas:
+                hname = ".".join((customs_datas['_GRAPHITE_PRE'], hname))
+
         check_time = int(data['last_chk'])
 
  #       print "Graphite:", hname, check_time, perf_data
