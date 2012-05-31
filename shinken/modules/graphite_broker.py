@@ -146,18 +146,14 @@ class Graphite_broker(BaseModule):
             return
         
         hname = self.illegal_char.sub('_', data['host_name'])
-        if '_GRAPHITE_PRE' in data:
-            hname = ".".join((data['_GRAPHITE_PRE'], hname))
         if data['host_name'] in self.host_dict:
             customs_datas = self.host_dict[data['host_name']]
             if '_GRAPHITE_PRE' in customs_datas:
                 hname = ".".join((customs_datas['_GRAPHITE_PRE'], hname))
 
         desc = self.illegal_char.sub('_', data['service_description'])
-        if '_GRAPHITE_POST' in data:
-            desc = ".".join((desc, data['_GRAPHITE_POST']))
-        if data['service_description'] in self.svc_dict:
-            customs_datas = self.svc_dict[data['service_description']]
+        if (data['host_name'], data['service_description']) in self.svc_dict:
+            customs_datas = self.svc_dict[(data['host_name'], data['service_description'])]
             if '_GRAPHITE_POST' in customs_datas:
                 desc = ".".join((desc, customs_datas['_GRAPHITE_POST']))
 
