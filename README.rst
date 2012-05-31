@@ -100,8 +100,7 @@ Preliminary Steps
    useradd --user-group shinken
    usermod --lock shinken
 
-Important Note::
-NEVER EVER MIX THE DIFFERENTS INSTALLATION METHODS. THIS WILL RUN YOU IN BIG TROUBLES. CHOOSE ONE AND UNINSTALL BEFORE TRYING THE OTHER.
+Important Note:: NEVER EVER MIX THE DIFFERENTS INSTALLATION METHODS. THIS WILL RUN YOU IN BIG TROUBLES. CHOOSE ONE AND UNINSTALL BEFORE TRYING THE OTHER.
 
 First way: install script (recommended for end users)
 =====================================================
@@ -226,7 +225,7 @@ specific objects (like links to daemons or realms) are in the file
 
 
 Do I need to change my existing Nagios configuration?
-===================================================
+=====================================================
 
 No, there is no need to change the existing configuration - unless
 you want to add some new hosts and services. Once you are comfortable
