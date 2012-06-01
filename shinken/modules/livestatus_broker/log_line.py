@@ -234,13 +234,13 @@ class Logline(dict):
         and/or log_service
 
         """
-        if self.logobject == LOGOBJECT_HOST:
+        if hasattr(self, 'logobject') and self.logobject == LOGOBJECT_HOST:
             try:
                 setattr(self, 'log_host', datamgr.get_host(self.host_name))
             except Exception, e:
                 print "du scheiss host", e
                 pass
-        elif self.logobject == LOGOBJECT_SERVICE:
+        elif hasattr(self, 'logobject') and self.logobject == LOGOBJECT_SERVICE:
             try:
                 setattr(self, 'log_host', datamgr.get_host(self.host_name))
                 setattr(self, 'log_service', datamgr.get_service(self.host_name, self.service_description))
