@@ -1633,6 +1633,75 @@ function uninstall_pnp4nagios(){
     fi
 }
 
+function install_nconf(){
+    cadre "Install nconf addon" green
+    manageparameters "quiet"
+
+    if [ $SKIPPREREQUISITES -eq 1 ]
+    then
+        cecho " SKIPPREREQUISITES enabled : won't install nconf prerequisites" yellow
+    else
+        case $CODE in
+            REDHAT|Fedora)
+                cecho " > Installing prerequisites" green
+                yum -y install $NCONFYUMPKG >> ${LOGFILE} 2>&1
+                chkconfig mysqld on >> ${LOGFILE} 2>&1
+                chkconfig httpd on >> ${LOGFILE} 2>&1
+                /etc/init.d/httpd restart >> ${LOGFILE} 2>&1
+                /etc/init.d/mysqld restart >> ${LOGFILE} 2>&1
+                ;;
+            DEBIAN)        
+                cecho " > Installing prerequisites" green
+                apt-get update >> ${LOGFILE} 2>&1
+                apt-get -y install $NCONFAPTPKG >> ${LOGFILE} 2>&1
+                ;;
+            *)
+                cecho " > Unsupported distro" red
+                exit 2
+                ;;
+        esac
+    fi
+
+    cd $TMP
+
+    filename=$(echo $NCONF | awk -F"/" '{print $NF}')
+    folder=$(echo $filename | sed -e "s/\.tgz//g")
+    if [ ! -f "$filename" ]
+    then 
+        cecho " > Getting nconf archive" green
+        wget $WGETPROXY $NCONF >> ${LOGFILE} 2>&1 
+    fi
+    
+    cecho " > Extracting archive" green
+    if [ -d "$folder" ]
+    then 
+        rm -Rf $folder
+    fi 
+    tar zxvf $filename >> ${LOGFILE} 2>&1 
+
+    cecho " > Deploy nconf" green
+    case $CODE in
+        REDHAT|Fedora)
+            cp -a nconf /var/www/html
+            ;;
+        DEBIAN)        
+            cp -a nconf /var/www
+            ;;
+        *)
+            cecho " > Unsupported distro" red
+            exit 2
+            ;;
+    esac
+
+    # cecho " > creating database and users" green
+
+    # creads " --> What is your root mysql user ?" yellow
+    # creads " --> What is your root mysql password" yellow 
+
+    # cecho " --> Trying to login with provided credentials" green
+    # mysql -h localhost -u 
+}
+
 function do_skmacro(){
     macro=$1
     args=$2
