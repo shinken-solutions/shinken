@@ -1633,9 +1633,124 @@ function uninstall_pnp4nagios(){
     fi
 }
 
+
+function install_mysql(){
+    cecho " > Checking for mysql server" green
+    case $CODE in
+        REDHAT)
+            if [ -z "$(rpm -qa | grep mysql-server)"]
+            then
+                cecho " --> mysql-server not found. Going to install" yellow
+                yum install -y mysql-server
+                chkconfig mysqld on
+                while true
+                do 
+                    creads " --> Please provide a password for root user : " yellow
+                    MYSQLP1=$readvalue
+                    creads " --> Please confirm root password : " yellow
+                    MYSQLP2=$readvalue
+                    if [ "$MYSQLP1" != "$MYSQLP2" ]
+                    then
+                        cecho " --> passwords does not match" red
+                    else
+                        if [ -z "$MYSQLP1" ] || [ -z "$MYSQLP2" ]
+                        then
+                            cecho " --> password should not be empty" red
+                        else
+                            export MYSQLP=$MYSQLP2
+                            break
+                        fi
+                    fi
+                done
+            fi
+            ;;
+        Fedora)
+            cecho " > Unsuported" red
+            exit 2
+            ;;
+        DEBIAN)
+            if [ -z "$(dpkg -l | grep ^ii.*mysql-server)" ]
+            then
+                cecho " --> mysql-server not found. Going to install" yellow
+                #dfgapt-get update
+                while true
+                do 
+                    creads " --> Please provide a password for root user : " yellow
+                    MYSQLP1=$readvalue
+                    creads " --> Please confirm root password : " yellow
+                    MYSQLP2=$readvalue
+                    if [ "$MYSQLP1" != "$MYSQLP2" ]
+                    then
+                        cecho " --> passwords does not match" red
+                    else
+                        if [ -z "$MYSQLP1" ] || [ -z "$MYSQLP2" ]
+                        then
+                            cecho " --> password should not be empty" red
+                        else
+                            export MYSQLP=$MYSQLP2
+                            break
+                        fi
+                    fi
+                done
+                MYVERS=$(apt-cache search mysql-server- | grep -v "core\|cluster" | grep "mysql-server-" | awk -F\- '{print $3}')
+
+                echo "mysql-server-$MYVERS mysql-server/root_password password $MYSQLP" | debconf-set-selections
+                echo "mysql-server-$MYVERS mysql-server/root_password_again password $MYSQLP" | debconf-set-selections
+                echo "mysql-server-$MYVERS mysql-server/root_password seen true" | debconf-set-selections
+                echo "mysql-server-$MYVERS mysql-server/root_password_again seen true" | debconf-set-selections                
+                apt-get install -y mysql-server
+            fi
+            ;;
+    esac
+
+}
+
+function remove_nconf(){
+    case $CODE in
+        REDHAT|Fedora)
+            NCONFTARGET=/var/www/html/nconf
+            ;;
+        DEBIAN)        
+            NCONFTARGET=/var/www/nconf
+            ;;
+        *)
+            cecho " > Unsupported distro" red
+            exit 2
+            ;;
+    esac
+
+    if [ -d "$NCONFTARGET" ]
+    then
+        rm -Rf $NCONFTARGET   
+        creads " --> Please provide a password for root mysql user : " yellow
+        MYSQLP=$readvalue
+        mysql -h localhost -u root -p$MYSQLP -e "drop database nconf;"             
+    fi
+}
+
 function install_nconf(){
     cadre "Install nconf addon" green
-    manageparameters "quiet"
+    
+    # manageparameters "quiet"
+
+    case $CODE in
+        REDHAT|Fedora)
+            NCONFTARGET=/var/www/html/nconf
+            ;;
+        DEBIAN)        
+            NCONFTARGET=/var/www/nconf
+            ;;
+        *)
+            cecho " > Unsupported distro" red
+            exit 2
+            ;;
+    esac
+
+    if [ -d "$NCONFTARGET" ]
+    then
+        cecho "nconf is already installed !" red
+        exit 2
+    fi
 
     if [ $SKIPPREREQUISITES -eq 1 ]
     then
@@ -1645,10 +1760,8 @@ function install_nconf(){
             REDHAT|Fedora)
                 cecho " > Installing prerequisites" green
                 yum -y install $NCONFYUMPKG >> ${LOGFILE} 2>&1
-                chkconfig mysqld on >> ${LOGFILE} 2>&1
                 chkconfig httpd on >> ${LOGFILE} 2>&1
                 /etc/init.d/httpd restart >> ${LOGFILE} 2>&1
-                /etc/init.d/mysqld restart >> ${LOGFILE} 2>&1
                 ;;
             DEBIAN)        
                 cecho " > Installing prerequisites" green
@@ -1661,6 +1774,8 @@ function install_nconf(){
                 ;;
         esac
     fi
+
+    install_mysql
 
     cd $TMP
 
@@ -1680,26 +1795,88 @@ function install_nconf(){
     tar zxvf $filename >> ${LOGFILE} 2>&1 
 
     cecho " > Deploy nconf" green
+
+    cp -a nconf $NCONFTARGET
+
+    cecho " > Change files owner" green
     case $CODE in
         REDHAT|Fedora)
-            cp -a nconf /var/www/html
+            HTTPDUSER="apache"
+            HTTPDGROUP="apache"
             ;;
         DEBIAN)        
-            cp -a nconf /var/www
+            HTTPDUSER="www-data"
+            HTTPDGROUP="www-data"
             ;;
         *)
             cecho " > Unsupported distro" red
             exit 2
             ;;
-    esac
+    esac   
+    chown -R $HTTPDUSER:$HTTPDGROUP $NCONFTARGET
 
-    # cecho " > creating database and users" green
+    cecho " > create deployment folder" green
+    mkdir -p $ETC/global
+    chown $SKUSER:$HTTPDGROUP $ETC/global
+    chmod g+rwx $ETC/global
 
-    # creads " --> What is your root mysql user ?" yellow
-    # creads " --> What is your root mysql password" yellow 
+    cecho " > configure sudo for deployment (should not work with systemd)" green
+    if [ -z $(cat /etc/sudoers | grep shinken-arbiter)]
+    then
+        echo "$HTTPDUSER ALL=NOPASSWD: /etc/init.d/shinken-­arbiter restart" >> /etc/sudoers
+    fi
 
-    # cecho " --> Trying to login with provided credentials" green
-    # mysql -h localhost -u 
+    cecho " -> Create nconf user and database" green
+    while true
+    do 
+        creads " --> Please provide a password for nconf mysql user : " yellow
+        MYSQLP1=$readvalue
+        creads " --> Please confirm nconf password : " yellow
+        MYSQLP2=$readvalue
+        if [ "$MYSQLP1" != "$MYSQLP2" ]
+        then
+            cecho " --> passwords does not match" red
+        else
+            if [ -z "$MYSQLP1" ] || [ -z "$MYSQLP2" ]
+            then
+                cecho " --> password should not be empty" red
+            else
+                export NCONFP=$MYSQLP2
+                break
+            fi
+        fi
+    done  
+
+    if [ -z "$MYSQLP" ]
+    then
+        creads " --> Please provide a password for root mysql user : " yellow        
+        MYSQLP=$readvalue
+    fi    
+    mysql -h localhost -u root -p$MYSQLP -e "create database if not exists nconf;"  
+    mysql -h localhost -u root -p$MYSQLP -e "grant all privileges on nconf.* to 'nconf'@'localhost' identified by '$NCONFP';flush privileges;"  
+
+
+    cecho " > Patching nconf for shinken support"
+    cd $NCONFTARGET/include/ajax
+    patch -p0 < $myscripts/install.d/exec_generate_config.php.patch
+
+    cecho " > Configure deployment.ini file"
+    cp -f $myscripts/install.d/deployment.ini.in $NCONFTARGET/config/deployment.ini
+    sed -i "s#__SHINKENTARGET__#"$TARGET"#g" $NCONFTARGET/config/deployment.ini 
+    sed -i "s#__NCONFTARGET__#"$NCONFTARGET"#g" $NCONFTARGET/config/deployment.ini 
+    sed -i "s#__SHINKENETC__#"$ETC"#g" $NCONFTARGET/config/deployment.ini 
+
+    cecho " > Nconf is installed, you must go to http://yourhost/nconf and finalize installation"
+    cecho " > mysql credentials and database are :"
+    cecho " --> user : nconf"
+    cecho " --> password : $NCONFP"
+    cecho " --> database : nconf"
+    cecho " > The answer for NAGIOS_BIN at step 'GENERAL CONFIGURATION is' : $TARGET/bin/nagios"
+    cecho " > Hit ENTER when you are done with this step"
+    read
+
+    rm -Rf $NCONFTARGET/INSTALL* $NCONFTARGET/UPDATE*
+
 }
 
 function do_skmacro(){
@@ -2502,6 +2679,7 @@ echo "Usage : install -k | -i | -u [addonname] | -b | -r backupname | -l | -c | 
                                multisite
                                nagvis
                                mongodb
+                               nconf (experimental)
     -h | --help             Show help"
 }
 
@@ -2638,8 +2816,8 @@ do
                 exit 0
             elif [ "$OPTARG" == "nconf" ]
             then
-                cecho " > Not implemented yet"
-                #install_nconf
+                #cecho " > Not implemented yet"
+                install_nconf
                 exit 0
             else
                 cecho " > Unknown addon $OPTARG" red
@@ -2701,8 +2879,8 @@ do
                         exit 2
                         ;;
                     nconf)
-                        cecho " > Not implemented yet" red
-                        exit 2
+                        remove_nconf
+                        exit 0
                         ;;
                     *)
                         cecho "Unknown addon $OPTARG" red
