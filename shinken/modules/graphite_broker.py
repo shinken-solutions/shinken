@@ -56,7 +56,6 @@ class Graphite_broker(BaseModule):
         BaseModule.__init__(self, modconf)
         self.host = getattr(modconf, 'host', 'localhost')
         self.port = int(getattr(modconf, 'port', '2003'))
-        self.rg = Regenerator()
         self.host_dict = {}
         self.svc_dict = {}
 
@@ -112,26 +111,13 @@ class Graphite_broker(BaseModule):
 
 
     def manage_initial_service_status_brok(self, b):
-        self.rg.manage_initial_service_status_brok(b)
+        if '_GRAPHITE_POST' in b.data['customs']:
+            self.svc_dict[(b.data['host_name'], b.data['service_description'])] = b.data['customs']
 
 
     def manage_initial_host_status_brok(self, b):
-        self.rg.manage_initial_host_status_brok(b)
-
-
-    def manage_program_status_brok(self, b):
-        self.rg.manage_program_status_brok(b)
-
-
-    def manage_initial_broks_done_brok(self, b):
-        inst_id = b.data['instance_id']
-        print "Finish the configuration of instance", inst_id
-        self.rg.all_done_linking(inst_id)
-        # Prepare host and svc custom value dict
-        for h in self.rg.hosts.items.values():
-            self.host_dict[h.host_name] = h.customs
-        for s in self.rg.services.items.values():
-            self.svc_dict[s.host_name, s.service_description] = s.customs
+        if '_GRAPHITE_PRE' in b.data['customs']:
+            self.host_dict[b.data['host_name']] = b.data['customs']
 
 
     # A service check result brok has just arrived, we UPDATE data info with this
