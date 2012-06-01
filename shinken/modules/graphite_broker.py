@@ -30,6 +30,7 @@ backend. http://graphite.wikidot.com/start
 
 import re
 from socket import socket
+import cPickle
 
 from shinken.basemodule import BaseModule
 
@@ -55,6 +56,16 @@ class Graphite_broker(BaseModule):
         BaseModule.__init__(self, modconf)
         self.host = getattr(modconf, 'host', 'localhost')
         self.port = int(getattr(modconf, 'port', '2003'))
+        self.use_pickle = getattr(modconf, 'use_pickle', '0') == '1'
+        if self.use_pickle:
+            self.port = int(getattr(modconf, 'port', '2004'))
+        else:
+            self.port = int(getattr(modconf, 'port', '2003'))
+        self.tick_limit = int(getattr(modconf, 'tick_limit', '300'))
+        self.buffer = []
+        self.ticks = 0
+
+
 
 
     # Called by Broker so we can do init stuff
@@ -124,14 +135,24 @@ class Graphite_broker(BaseModule):
 
 #        print "Graphite:", hname, desc, check_time, perf_data
 
-        lines = []
-        # Send a bulk of all metrics at once
-        for (metric, value) in couples:
-            if value:
-                lines.append("%s.%s.%s %s %d" % (hname, desc, metric, value, check_time))
-        packet = '\n'.join(lines) + '\n' # Be sure we put \n every where
-#        print "Graphite launching :", packet
-        self.con.sendall(packet)
+        if self.use_pickle:
+            # Buffer the performance data lines
+            for (metric, value) in couples:
+                if value:
+                    self.buffer.append("%s.%s.%s %s %d" % (hname, desc, metric,
+                                                           value, check_time))
+
+        else:
+            lines = []
+            # Send a bulk of all metrics at once
+            for (metric, value) in couples:
+                if value:
+                    lines.append("%s.%s.%s %s %d" % (hname, desc, metric,
+                                                     value, check_time))
+            packet = '\n'.join(lines) + '\n' # Be sure we put \n every where
+#            print "Graphite launching :", packet
+            self.con.sendall(packet)
+
 
 
 
@@ -151,10 +172,50 @@ class Graphite_broker(BaseModule):
 
  #       print "Graphite:", hname, check_time, perf_data
  
-        lines = []
-        # Send a bulk of all metrics at once
-        for (metric, value) in couples:
-            lines.append("%s.__HOST__.%s %s %d" % (hname, metric, value, check_time))
-        packet = '\n'.join(lines) + '\n' # Be sure we put \n every where
-  #      print "Graphite launching :", packet
-        self.con.sendall(packet)
+        if self.use_pickle:
+            # Buffer the performance data lines
+            for (metric, value) in couples:
+                if value:
+                    self.buffer.append("%s.__HOST__.%s %s %d" % (hname, metric,
+                                                            value, check_time))
+        else:
+            lines = []
+            # Send a bulk of all metrics at once
+            for (metric, value) in couples:
+                if value:
+                    lines.append("%s.__HOST__.%s %s %d" % (hname, metric,
+                                                           value, check_time))
+            packet = '\n'.join(lines) + '\n' # Be sure we put \n every where
+#            print "Graphite launching :", packet
+            self.con.sendall(packet)
+
+    def hook_tick(self, brok):
+        """Each second the broker calls the hook_tick function
+           Every tick try to flush the buffer
+        """
+        if self.use_pickle:
+            if self.ticks >= self.tick_limit:
+                # If the number of ticks where data was not
+                # sent successfully to Graphite reaches the bufferlimit.
+                # Reset the buffer and reset the ticks
+                self.buffer = []
+                self.ticks = 0
+                return
+
+            self.ticks += 1
+
+            # Format the data
+            formatted_buf = '\n'.join(self.buffer) + '\n'
+            # Be sure we put \n every where
+            packet = cPickle.dumps(formatted_buf, cPickle.HIGHEST_PROTOCOL)
+
+            try:
+#                print "Graphite send data using cPickle"
+                self.con.sendall(packet)
+            except IOError, err:
+                logger.error ("Failed sending to the Graphite Carbon
+                               instance network socket! IOError %s")
+                return
+
+            # Flush the buffer after a successful send to Graphite
+            self.buffer = []
