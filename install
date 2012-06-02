@@ -1638,7 +1638,8 @@ function install_mysql(){
     cecho " > Checking for mysql server" green
     case $CODE in
         REDHAT)
-            if [ -z "$(rpm -qa | grep mysql-server)" ]
+            if [ -z "$(rpm -qa | grep mysql-server)" 
+                ]
             then
                 cecho " --> mysql-server not found. Going to install" yellow
                 yum install -y mysql-server >> ${LOGFILE} 2>&1
@@ -2652,6 +2653,78 @@ function install_check_snmp_bandwidth(){
     cp $filename $LIBEXEC/$script
 }
 
+function nconf-import-packs(){
+    manageparameters 'quiet'
+    packs=$TARGET/etc/packs
+
+    case $CODE in
+        REDHAT|Fedora)
+            NCONFTARGET=/var/www/html/nconf
+            ;;
+        DEBIAN)        
+            NCONFTARGET=/var/www/nconf
+            ;;
+        *)
+            cecho " > Unsupported distro" red
+            exit 2
+            ;;
+    esac
+
+
+    objects="macros commands templates"
+
+    for o in $objects
+    do
+        cecho " --> Processing $o" green
+        for domain in $(find $packs -type f -name $o.cfg)
+        do
+            cecho "  ----> Processing $(echo $domain | sed -e "s#$packs##g" -e "s#/#->#g" -e "s#->macros\.cfg##g")" green
+            case $o in 
+                macros)
+                    for line in $(cat $domain | grep -v "^#")
+                    do
+                        if [ -z "$(cat $TARGET/etc/resource.cfg | grep $line)" ]
+                        then
+                            cecho " ------> Adding macros : $line" green
+                            echo $line >> $TARGET/etc/resource.cfg
+                        fi
+                    done
+                    ;;
+                commands)
+                    $NCONFTARGET/bin/add_items_from_nagios.pl -c checkcommand -f $domain > /dev/null 2>&1                       
+                    if [ $? -ne 0 ]
+                    then
+                        cecho " ----> Failed to import $(echo $domain | awk '{print $NF}')" red
+                    else
+                        cecho " ----> Successfully imported $(echo $domain | awk '{print $NF}')" green
+                    fi 
+                    ;;
+                templates)                       
+                    $NCONFTARGET/bin/add_items_from_nagios.pl -c host-template -f $domain > /dev/null 2>&1                       
+                    if [ $? -ne 0 ]
+                    then
+                        cecho " ----> Failed to import $(echo $domain | awk '{print $NF}')" red
+                    else
+                        cecho " ----> Successfully imported $(echo $domain | awk '{print $NF}')" green
+                    fi
+                    ;; 
+            esac
+        done
+    done
+
+    cecho "  ----> Processing services templates" green
+    for file in $(find $TARGET/etc/packs -type f | grep services | grep -v templates.cfg | grep -v commands.cfg | grep -v sample)
+    do
+        $NCONFTARGET/bin/add_items_from_nagios.pl -c advanced-service -f $file
+        if [ $? -ne 0 ]
+        then
+            cecho " ----> Failed to import $(echo $file | awk '{print $NF}')" red
+        else
+            cecho " ----> Successfully imported $(echo $file | awk '{print $NF}')" green
+        fi
+    done
+}
+
 #     ___                                          __          ____                                 _            
 #    /   |  _________ ___  ______ ___  ___  ____  / /______   / __ \_________  ________  __________(_)___  ____ _
 #   / /| | / ___/ __ `/ / / / __ `__ \/ _ \/ __ \/ __/ ___/  / /_/ / ___/ __ \/ ___/ _ \/ ___/ ___/ / __ \/ __ `/
@@ -2716,7 +2789,7 @@ fi
 
 # options may be followed by one colon to indicate they have a required argument
 
-if ! options=$(getopt -u -o kiu::br:lce:p:a:h -l kill,install,uninstall::,backup,restore:,listbackups,compresslogs,enabledaemons:,plugin:,addon:,help -- "$@")
+if ! options=$(getopt -u -o kiu::br:lce:p:a:h -l nconf-import-packs,kill,install,uninstall::,backup,restore:,listbackups,compresslogs,enabledaemons:,plugin:,addon:,help -- "$@")
 then
     # something went wrong, getopt will put out an error message for us
     exit 2
@@ -2935,6 +3008,9 @@ do
             usage    
             exit 0
             ;;
+        --nconf-import-packs)
+            nconf-import-packs
+            exit 0
         (--) 
             shift
             break
