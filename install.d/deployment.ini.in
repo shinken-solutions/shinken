@@ -9,6 +9,6 @@ action      = extract
 [copy global config]
 type        = local
 source_file = "/tmp/global/"
-target_file = "__SHINKENETC__/etc/global/"
+target_file = "__SHINKENETC__/global/"
 action      = copy
 reload_command = "sudo /etc/init.d/shinken-arbiter restart"
