@@ -1823,7 +1823,7 @@ function install_nconf(){
     cecho " > configure sudo for deployment (should not work with systemd)" green
     if [ -z $(cat /etc/sudoers | grep shinken-arbiter)]
     then
-        echo "$HTTPDUSER ALL=NOPASSWD: /etc/init.d/shinken-­arbiter restart" >> /etc/sudoers
+        echo "$HTTPDUSER ALL=NOPASSWD: /etc/init.d/shinken-arbiter restart" >> /etc/sudoers
     fi
 
     cecho " -> Create nconf user and database" green
