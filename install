@@ -1859,17 +1859,24 @@ function install_nconf(){
     mysql -h localhost -u root -p$MYSQLP -e "grant all privileges on nconf.* to 'nconf'@'localhost' identified by '$NCONFP';flush privileges;"  
 
 
-    cecho " > Patching nconf for shinken support"
+    cecho " > Patching nconf for shinken support" green
     cd $NCONFTARGET/include/ajax
-    patch -p0 < $myscripts/install.d/exec_generate_config.php.patch
+    patch -p0 < $myscripts/install.d/exec_generate_config.php.patch >> ${LOGFILE} 2>&1
 
-    cecho " > Configure deployment.ini file"
+    cecho " > Configure deployment.ini file" green
     cp -f $myscripts/install.d/deployment.ini.in $NCONFTARGET/config/deployment.ini
     sed -i "s#__SHINKENTARGET__#"$TARGET"#g" $NCONFTARGET/config/deployment.ini 
     sed -i "s#__NCONFTARGET__#"$NCONFTARGET"#g" $NCONFTARGET/config/deployment.ini 
     sed -i "s#__SHINKENETC__#"$ETC"#g" $NCONFTARGET/config/deployment.ini 
 
+    cecho " > Alter nagios.cfg config file" green
+    sed -i "s/^cfg_dir.*$/#&/g" $TARGET/etc/nagios.cfg
+    sed -i "s/^cfg_file.*$/#&/g" $TARGET/etc/nagios.cfg    
+    echo "cfg_dir=global" >> $TARGET/etc/nagios.cfg    
+    echo "cfg_dir=Default_collector" >> $TARGET/etc/nagios.cfg        
+
     # automaticaly fill default response
+    cecho " > Set default answers on web installer" green
     sed -i "s#\$nagios_bin =.*#\$nagios_bin = \""$TARGET"/bin/nagios\";#g" $NCONFTARGET/INSTALL.php
     sed -i "s#\"database_name\"#\"nconf\"#g" $NCONFTARGET/INSTALL.php
     sed -i "s#\"user_name\"#\"nconf\"#g" $NCONFTARGET/INSTALL.php
