@@ -1659,6 +1659,7 @@ function install_mysql(){
                             cecho " --> password should not be empty" red
                         else
                             export MYSQLP=$MYSQLP2
+                            mysql -h localhost -u root -e "grant all privileges on *.* to 'root'@'localhost' identified by '$MYSQLP'; flush privileges;"
                             break
                         fi
                     fi
