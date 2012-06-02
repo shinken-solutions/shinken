@@ -1643,6 +1643,7 @@ function install_mysql(){
                 cecho " --> mysql-server not found. Going to install" yellow
                 yum install -y mysql-server >> ${LOGFILE} 2>&1
                 chkconfig mysqld on >> ${LOGFILE} 2>&1
+                /etc/init.d/mysqld start >> ${LOGFILE} 2>&1
                 while true
                 do 
                     creads " --> Please provide a password for root user : " yellow
