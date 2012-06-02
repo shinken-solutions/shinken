@@ -1815,13 +1815,16 @@ function install_nconf(){
     esac   
     chown -R $HTTPDUSER:$HTTPDGROUP $NCONFTARGET
 
-    cecho " > create deployment folder" green
+    cecho " > create deployment folders" green
     mkdir -p $ETC/global
+    mkdir -p $ETC/Default_collector
     chown $SKUSER:$HTTPDGROUP $ETC/global
+    chown $SKUSER:$HTTPDGROUP $ETC/Default_collector
     chmod g+rwx $ETC/global
+    chmod g+rwx $ETC/Default_collector
 
     cecho " > configure sudo for deployment (should not work with systemd)" green
-    if [ -z $(cat /etc/sudoers | grep shinken-arbiter)]
+    if [ -z "$(cat /etc/sudoers | grep shinken-arbiter)" ]
     then
         echo "$HTTPDUSER ALL=NOPASSWD: /etc/init.d/shinken-arbiter restart" >> /etc/sudoers
     fi
