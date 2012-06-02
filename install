@@ -1866,13 +1866,19 @@ function install_nconf(){
     sed -i "s#__NCONFTARGET__#"$NCONFTARGET"#g" $NCONFTARGET/config/deployment.ini 
     sed -i "s#__SHINKENETC__#"$ETC"#g" $NCONFTARGET/config/deployment.ini 
 
-    cecho " > Nconf is installed, you must go to http://yourhost/nconf and finalize installation"
-    cecho " > mysql credentials and database are :"
-    cecho " --> user : nconf"
-    cecho " --> password : $NCONFP"
-    cecho " --> database : nconf"
-    cecho " > The answer for NAGIOS_BIN at step 'GENERAL CONFIGURATION is' : $TARGET/bin/nagios"
-    cecho " > Hit ENTER when you are done with this step"
+    # automaticaly fill default response
+    sed -i "s#\$nagios_bin =.*#\$nagios_bin = \""$TARGET"/bin/nagios\";#g" $NCONFTARGET/INSTALL.php
+    sed -i "s#\"database_name\"#\"nconf\"#g" $NCONFTARGET/INSTALL.php
+    sed -i "s#\"user_name\"#\"nconf\"#g" $NCONFTARGET/INSTALL.php
+    sed -i "s#\"password\",#\""$NCONFP"\",#g" $NCONFTARGET/INSTALL.php
+
+    cecho " > Nconf is installed, you must go to http://yourhost/nconf and finalize installation" green
+    cecho " > mysql credentials and database are :" green
+    cecho " --> user : nconf" yellow
+    cecho " --> password : $NCONFP" yellow
+    cecho " --> database : nconf" yellow
+    cecho " > The answer for NAGIOS_BIN at step 'GENERAL CONFIGURATION is' : $TARGET/bin/nagios" yellow
+    cecho " > Hit ENTER when you are done with this step" red
     read
 
     rm -Rf $NCONFTARGET/INSTALL* $NCONFTARGET/UPDATE*
