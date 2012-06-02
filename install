@@ -1641,8 +1641,8 @@ function install_mysql(){
             if [ -z "$(rpm -qa | grep mysql-server)"]
             then
                 cecho " --> mysql-server not found. Going to install" yellow
-                yum install -y mysql-server
-                chkconfig mysqld on
+                yum install -y mysql-server >> ${LOGFILE} 2>&1
+                chkconfig mysqld on >> ${LOGFILE} 2>&1
                 while true
                 do 
                     creads " --> Please provide a password for root user : " yellow
@@ -1672,7 +1672,7 @@ function install_mysql(){
             if [ -z "$(dpkg -l | grep ^ii.*mysql-server)" ]
             then
                 cecho " --> mysql-server not found. Going to install" yellow
-                #dfgapt-get update
+                apt-get update >> ${LOGFILE} 2>&1
                 while true
                 do 
                     creads " --> Please provide a password for root user : " yellow
@@ -1698,7 +1698,7 @@ function install_mysql(){
                 echo "mysql-server-$MYVERS mysql-server/root_password_again password $MYSQLP" | debconf-set-selections
                 echo "mysql-server-$MYVERS mysql-server/root_password seen true" | debconf-set-selections
                 echo "mysql-server-$MYVERS mysql-server/root_password_again seen true" | debconf-set-selections                
-                apt-get install -y mysql-server
+                apt-get install -y mysql-server >> ${LOGFILE} 2>&1
             fi
             ;;
     esac
