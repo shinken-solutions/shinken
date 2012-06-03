@@ -2657,6 +2657,18 @@ function nconf-import-packs(){
     manageparameters 'quiet'
     packs=$TARGET/etc/packs
 
+    # cecho "
+    #     Some tips that are not curently implemented : \n
+    #      - add an attribute called password to class service-template \n
+    #      - edit nagiosadmin contact and replace nagiosadmin by admin and fill the password as you want \n
+    #      - add an attribute called check_command to class service-template \n
+    #      - add an attribute called host_name to class service-template \n
+
+    #      > press ENTER to continue
+    # " red
+
+    # read fake
+
     case $CODE in
         REDHAT|Fedora)
             NCONFTARGET=/var/www/html/nconf
@@ -2672,11 +2684,12 @@ function nconf-import-packs(){
 
 
     objects="macros commands templates"
+    excludekw="databases\|storage\|virtualization\|network\|servers\|microsoft\|sample\|printers\|environmental"
 
     for o in $objects
     do
         cecho " --> Processing $o" green
-        for domain in $(find $packs -type f -name $o.cfg)
+        for domain in $(find $packs -type f -name $o.cfg | grep -v "$excludekw")
         do
             cecho "  ----> Processing $(echo $domain | sed -e "s#$packs##g" -e "s#/#->#g" -e "s#->macros\.cfg##g")" green
             case $o in 
@@ -2691,37 +2704,45 @@ function nconf-import-packs(){
                     done
                     ;;
                 commands)
-                    $NCONFTARGET/bin/add_items_from_nagios.pl -c checkcommand -f $domain > /dev/null 2>&1                       
-                    if [ $? -ne 0 ]
+                    # nconf nedd a directive named command_param_count. so we prepare a file to add this argument
+                    if [ -f /tmp/commands.nconf ]
                     then
-                        cecho " ----> Failed to import $(echo $domain | awk '{print $NF}')" red
-                    else
-                        cecho " ----> Successfully imported $(echo $domain | awk '{print $NF}')" green
-                    fi 
-                    ;;
-                templates)                       
-                    $NCONFTARGET/bin/add_items_from_nagios.pl -c host-template -f $domain > /dev/null 2>&1                       
-                    if [ $? -ne 0 ]
-                    then
-                        cecho " ----> Failed to import $(echo $domain | awk '{print $NF}')" red
-                    else
-                        cecho " ----> Successfully imported $(echo $domain | awk '{print $NF}')" green
+                        rm -f /tmp/commands.nconf
                     fi
+                    while read -r line
+                    do
+                        if [ ! -z "$(echo $line | grep command_line)" ]
+                        then
+                            num=$(echo $line  | awk '/ARG/ { count++ } END { print count}')
+                            if [ -z $(echo $num | sed -e 's/\s//g' -e '/^$/d' ) ]
+                            then
+                                num=0
+                            fi
+                            echo "   command_param_count $num" >> /tmp/commands.nconf
+                        fi                        
+                        echo $line >> /tmp/commands.nconf
+                    done < $domain
+                    $NCONFTARGET/bin/add_items_from_nagios.pl -c checkcommand -f /tmp/commands.nconf 2>&1 | grep "ERROR\|WARN"
+                    ;;
+                templates)
+                    # macros are not imported !!!!     
+                    $NCONFTARGET/bin/add_items_from_nagios.pl -x 4 -c host-template -f $domain 2>&1 | grep "ERROR\|WARN"
                     ;; 
             esac
         done
     done
 
     cecho "  ----> Processing services templates" green
-    for file in $(find $TARGET/etc/packs -type f | grep services | grep -v templates.cfg | grep -v commands.cfg | grep -v sample)
+
+
+    for file in $(find $TARGET/etc/packs -type f | grep -v "$excludekw" | grep services | grep -v templates.cfg | grep -v commands.cfg | grep -v sample)
     do
-        $NCONFTARGET/bin/add_items_from_nagios.pl -c advanced-service -f $file
-        if [ $? -ne 0 ]
-        then
-            cecho " ----> Failed to import $(echo $file | awk '{print $NF}')" red
-        else
-            cecho " ----> Successfully imported $(echo $file | awk '{print $NF}')" green
-        fi
+        # strange : nconf need a directive called name to import services template
+        cp $file $file.nconf
+        sed -i "s/service_description\(.*\)$/name \1\n   service_description \1/g" $file.nconf
+        # what we need to do is to create first a service template and then an advanced service linked to the template
+        $NCONFTARGET/bin/add_items_from_nagios.pl -x 4 -c service-template -f $file.nconf 2>&1 | grep "ERROR\|WARN"
+        rm -f $file.nconf
     done
 }
 
@@ -2772,6 +2793,7 @@ echo "Usage : install -k | -i | -u [addonname] | -b | -r backupname | -l | -c | 
                                nagvis
                                mongodb
                                nconf (experimental)
+    --nconf-import-packs    Import shinken packs into nconf (experimental). This require nconf to be installed
     -h | --help             Show help"
 }
 
