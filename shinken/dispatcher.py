@@ -52,12 +52,20 @@ class Dispatcher:
         self.conf = conf
         self.realms = conf.realms
         # Direct pointer to importants elements for us
-        self.arbiters = self.conf.arbiters
-        self.schedulers = self.conf.schedulers
-        self.reactionners = self.conf.reactionners
-        self.brokers = self.conf.brokers
-        self.receivers = self.conf.receivers
-        self.pollers = self.conf.pollers
+
+        for sat_type in ('arbiters','schedulers','reactionners','brokers','receivers','pollers'):
+            setattr(self, sat_type, getattr(self.conf, sat_type))
+
+            # for each satellite, we look if current arbiter have a specific satellitemap value setted for this satellite
+            # if so, we give this map to the satellite (used to build satellite URI later)
+            if arbiter is None:
+                continue
+
+            key = sat_type[:-1]+'_name' # i.e: schedulers -> scheduler_name
+            for satellite in getattr(self, sat_type):
+                sat_name = getattr(satellite, key)
+                satellite.set_arbiter_satellitemap(arbiter.satellitemap.get(sat_name, {}))
+
         self.dispatch_queue = { 'schedulers': [], 'reactionners': [],
                                 'brokers': [], 'pollers': [] , 'receivers' : []}
         self.elements = [] # all elements, sched and satellites

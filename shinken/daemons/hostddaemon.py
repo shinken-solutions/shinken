@@ -425,7 +425,7 @@ class Hostd(Daemon):
 
         ##  We need to set self.host & self.port to be used by do_daemon_init_and_start
         self.host = self.me.address
-        self.port = 8765#self.me.port
+        self.port = 0
         
         logger.info("Configuration Loaded")
         print ""
@@ -479,7 +479,7 @@ class Hostd(Daemon):
                os.mkdir(self.tmp_pack_path)
 
             self.do_daemon_init_and_start()
-            self.uri_arb = self.pyro_daemon.register(self.interface, "ForArbiter")
+            #self.uri_arb = self.pyro_daemon.register(self.interface, "ForArbiter")
 
             # Under Android, we do not have multiprocessing lib
             # so use standard Queue threads things
@@ -931,6 +931,10 @@ class Hostd(Daemon):
        return r is not None
 
 
+    def get_user_by_name(self, username):
+       r = self.db.users.find_one({'username' : username})
+       return r
+
     def get_user_by_key(self, api_key):
        r = self.db.users.find_one({'api_key' : api_key})
        if not r:
@@ -938,6 +942,12 @@ class Hostd(Daemon):
        if not r['validated']:
           return None
        return r
+
+    def get_email_by_name(self, username):
+       r = self.db.users.find_one({'username' : username})
+       if not r:
+          return ''
+       return r['email']
 
 
     def is_actitaved(self, username):
@@ -953,6 +963,19 @@ class Hostd(Daemon):
           return None
        return r['api_key']
 
+
+    def get_last_packs(self, nb):
+       return [p for p in self.db.packs.find().limit(nb).sort( 'upload_time', -1 )]
+
+
+    def save_user_stats(self, user, stats):
+       stats['user'] = user['username']
+       stats['_id'] = user['username']
+       stats['upload_time'] = int(time.time())
+       stats['state'] = 'pending'
+       print "Saving cfg stats", stats
+       self.db.cfg_stats.save(stats)
+       
 
     def save_new_pack(self, user, filename, buf):
        filename = os.path.basename(filename)
@@ -971,7 +994,7 @@ class Hostd(Daemon):
        print "File %s is saved" % p
        _id = uuid.uuid4().get_hex()
        d = {'_id' : _id, 'upload_time' : int(time.time()), 'filename' : filename, 'filepath' : p, 'path' : '/unanalysed', 'user' :  user,
-            'state' : 'pending', 'pack_name' : short_name, 'moderation_comment':''}
+            'state' : 'pending', 'pack_name' : short_name, 'moderation_comment':'', 'link_id': _id}
        # Get all previously sent packs for the same user/filename, and put them as obsolete
        obs = self.db.packs.find({'filepath' : p})
        for o in obs:
@@ -1045,6 +1068,9 @@ class Hostd(Daemon):
        p['doc_link'] = pck.doc_link
        if p['state'] == 'pending':
           p['state'] = 'ok'
+          
+       # Give a real link name to this pack
+       p['link_id'] = '%s-%s' % (p['user'], p['pack_name'])
        print "We want to save the object", p
        self.db.packs.save(p)
        shutil.rmtree(TMP_PATH)

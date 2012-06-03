@@ -84,6 +84,9 @@ class Webui_broker(BaseModule, Daemon):
         self.remote_user_enable = getattr(modconf, 'remote_user_enable', '0')
         self.remote_user_variable = getattr(modconf, 'remote_user_variable', 'X_REMOTE_USER')
 
+        self.share_dir = getattr(modconf, 'share_dir', 'share')
+        self.share_dir = os.path.abspath(self.share_dir)
+        print "SHARE DIR IS"*10, self.share_dir
         # Load the photo dir and make it a absolute path
         self.photo_dir = getattr(modconf, 'photo_dir', 'photos')
         self.photo_dir = os.path.abspath(self.photo_dir)
@@ -466,7 +469,14 @@ class Webui_broker(BaseModule, Daemon):
         # Route static files css files
         @route('/static/:path#.+#')
         def server_static(path):
-            return static_file(path, root=os.path.join(bottle_dir, 'htdocs'))
+            # By default give from the root in bottle_dir/htdocs. If the file is missing,
+            # search in the share dir
+            root = os.path.join(bottle_dir, 'htdocs')
+            p = os.path.join(root, path)
+            if not os.path.exists(p):
+                root = self.share_dir
+            return static_file(path, root=root)
+
 
         # And add the favicon ico too
         @route('/favicon.ico')

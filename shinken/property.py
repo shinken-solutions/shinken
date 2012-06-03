@@ -23,7 +23,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
+import re
 
 from shinken.util import to_float, to_split, to_char, to_int
 from shinken.log  import logger
@@ -203,3 +203,56 @@ class LogLevelProp(StringProp):
     """ A string property representing a logging level """
     def pythonize(self, val):
         return logger.get_level_id(val)
+
+class DictProp(Property):
+    def __init__(self, elts_prop=None, *args, **kwargs):
+        """Dictionary of values.
+             If elts_prop is not None, must be a Property subclass
+             All dict values will be casted as elts_prop values when pythonized
+            
+            elts_prop = Property of dict members
+        """
+        super(DictProp, self).__init__(*args, **kwargs)
+
+        if not elts_prop is None and not issubclass(elts_prop, Property):
+            raise TypeError("DictProp constructor only accept Property sub-classes as elts_prop parameter")
+        self.elts_prop = elts_prop()
+
+    def pythonize(self, val):
+        #import traceback; traceback.print_stack()
+        def split(kv):
+            m = re.match("^\s*([^\s]+)\s*=\s*([^\s]+)\s*$", kv)
+            if m is None:
+                raise ValueError
+
+            return (
+                m.group(1), 
+                # >2.4 only. we keep it for later. m.group(2) if self.elts_prop is None else self.elts_prop.pythonize(m.group(2))
+                (self.elts_prop.pythonize(m.group(2)), m.group(2))[self.elts_prop is None]
+            )
+
+        if val is None:
+            return(dict())
+
+        # val is in the form "key1=addr:[port],key2=addr:[port],..."
+        print ">>>", dict([split(kv) for kv in to_split(val)])
+        return dict([split(kv) for kv in to_split(val)])
+
+class AddrProp(Property):
+    """Address property (host + port)"""
+
+    def pythonize(self, val):
+        """
+            i.e: val = "192.168.10.24:445"
+            NOTE: port is facultative
+        """
+        m = re.match("^([^:]*)(?::(\d+))?$", val)
+        if m is None:
+            raise ValueError
+
+        addr = {'address': m.group(1)}
+        if m.group(2) is not None:
+           addr['port'] = int(m.group(2))
+
+        return addr
+

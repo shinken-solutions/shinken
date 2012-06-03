@@ -53,18 +53,23 @@ def get_page(username):
         redirect("/user/login")
         return
 
-    uname = user.get('username')
-    cur = app.db.packs.find({'user' : uname, 'state' : 'ok'})
+    #uname = user.get('username')
+    view_user = app.get_user_by_name(username)
+    cur = app.db.packs.find({'user' : username, 'state' : 'ok'})
     validated_packs = [p for p in cur]
 
-    cur = app.db.packs.find({'user' : uname, 'state' : 'pending'})
-    pending_packs = [p for p in cur]
+    # Only show pending and refused packs if YOU are the user
+    pending_packs = []
+    refused_packs = []
+    if user == view_user:
+        cur = app.db.packs.find({'user' : username, 'state' : 'pending'})
+        pending_packs = [p for p in cur]
 
-    cur = app.db.packs.find({'user' : uname, 'state' : 'refused'})
-    refused_packs = [p for p in cur]
+        cur = app.db.packs.find({'user' : username, 'state' : 'refused'})
+        refused_packs = [p for p in cur]
 
 
-    return {'app' : app, 'user' : user, 'validated_packs' : validated_packs, 'pending_packs' : pending_packs,
+    return {'app' : app, 'user' : user, 'view_user' : view_user, 'validated_packs' : validated_packs, 'pending_packs' : pending_packs,
             'refused_packs' : refused_packs}
 
 
@@ -77,7 +82,8 @@ def post_user():
         redirect("/user/login")
         return
 
-
+    # Take the user that send the post and not the 
+    # form value for secutiry reason of course :)
     username = user.get('username')
     email = app.request.forms.get('email')
     password = app.request.forms.get('password')

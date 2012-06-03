@@ -290,6 +290,11 @@ class Shinken(BaseSatellite):
             already_got = pol_id in self.pollers
             p = satellites['pollers'][pol_id]
             self.pollers[pol_id] = p
+
+            if p['name'] in override_conf['satellitemap']:
+                p = dict(p) # make a copy
+                p.update(override_conf['satellitemap'][p['name']])
+
             uri = pyro.create_uri(p['address'], p['port'], 'Schedulers', self.use_ssl)
             self.pollers[pol_id]['uri'] = uri
             self.pollers[pol_id]['last_connection'] = 0

@@ -489,6 +489,16 @@ function prerequisites(){
             fi
         done
     fi
+
+    if [ $MANAGEPYRO == 1 ]
+    then
+        cecho " > Installing managed python (experimental) " green
+        easy_install pip
+        yes | pip uninstall Pyro
+        yes | pip uninstall Pyro4
+        pyroset
+        $PYEI "$PYRO"
+    fi
     
 }
 
@@ -791,6 +801,13 @@ function sinstall(){
     then
         rm -Rf $TARGET/etc
         cp -Rf $src/etc/* $ETC/
+    fi
+
+    # We want to copy the src/share into the var
+    if [ ! -d $TARGET/var/share ]
+    then
+	mkdir -p $TARGET/var/share
+	cp -Rf $src/share/* $TARGET/var/share
     fi
 
     cleanuptarget
@@ -1616,6 +1633,272 @@ function uninstall_pnp4nagios(){
     fi
 }
 
+
+function install_mysql(){
+    cecho " > Checking for mysql server" green
+    case $CODE in
+        REDHAT)
+            if [ -z "$(rpm -qa | grep mysql-server)" 
+                ]
+            then
+                cecho " --> mysql-server not found. Going to install" yellow
+                yum install -y mysql-server >> ${LOGFILE} 2>&1
+                chkconfig mysqld on >> ${LOGFILE} 2>&1
+                /etc/init.d/mysqld start >> ${LOGFILE} 2>&1
+                while true
+                do 
+                    creads " --> Please provide a password for root user : " yellow
+                    MYSQLP1=$readvalue
+                    creads " --> Please confirm root password : " yellow
+                    MYSQLP2=$readvalue
+                    if [ "$MYSQLP1" != "$MYSQLP2" ]
+                    then
+                        cecho " --> passwords does not match" red
+                    else
+                        if [ -z "$MYSQLP1" ] || [ -z "$MYSQLP2" ]
+                        then
+                            cecho " --> password should not be empty" red
+                        else
+                            export MYSQLP=$MYSQLP2
+                            mysql -h localhost -u root -e "grant all privileges on *.* to 'root'@'localhost' identified by '$MYSQLP'; flush privileges;"
+                            break
+                        fi
+                    fi
+                done
+            fi
+            ;;
+        Fedora)
+            cecho " > Unsuported" red
+            exit 2
+            ;;
+        DEBIAN)
+            if [ -z "$(dpkg -l | grep ^ii.*mysql-server)" ]
+            then
+                cecho " --> mysql-server not found. Going to install" yellow
+                apt-get update >> ${LOGFILE} 2>&1
+                while true
+                do 
+                    creads " --> Please provide a password for root user : " yellow
+                    MYSQLP1=$readvalue
+                    creads " --> Please confirm root password : " yellow
+                    MYSQLP2=$readvalue
+                    if [ "$MYSQLP1" != "$MYSQLP2" ]
+                    then
+                        cecho " --> passwords does not match" red
+                    else
+                        if [ -z "$MYSQLP1" ] || [ -z "$MYSQLP2" ]
+                        then
+                            cecho " --> password should not be empty" red
+                        else
+                            export MYSQLP=$MYSQLP2
+                            break
+                        fi
+                    fi
+                done
+                MYVERS=$(apt-cache search mysql-server- | grep -v "core\|cluster" | grep "mysql-server-" | awk -F\- '{print $3}')
+
+                echo "mysql-server-$MYVERS mysql-server/root_password password $MYSQLP" | debconf-set-selections
+                echo "mysql-server-$MYVERS mysql-server/root_password_again password $MYSQLP" | debconf-set-selections
+                echo "mysql-server-$MYVERS mysql-server/root_password seen true" | debconf-set-selections
+                echo "mysql-server-$MYVERS mysql-server/root_password_again seen true" | debconf-set-selections                
+                apt-get install -y mysql-server >> ${LOGFILE} 2>&1
+            fi
+            ;;
+    esac
+
+}
+
+function remove_nconf(){
+    case $CODE in
+        REDHAT|Fedora)
+            NCONFTARGET=/var/www/html/nconf
+            ;;
+        DEBIAN)        
+            NCONFTARGET=/var/www/nconf
+            ;;
+        *)
+            cecho " > Unsupported distro" red
+            exit 2
+            ;;
+    esac
+
+    if [ -d "$NCONFTARGET" ]
+    then
+        rm -Rf $NCONFTARGET   
+        creads " --> Please provide a password for root mysql user : " yellow
+        MYSQLP=$readvalue
+        mysql -h localhost -u root -p$MYSQLP -e "drop database nconf;"             
+    fi
+}
+
+function install_nconf(){
+    cadre "Install nconf addon" green
+    
+    # manageparameters "quiet"
+
+    case $CODE in
+        REDHAT|Fedora)
+            NCONFTARGET=/var/www/html/nconf
+            ;;
+        DEBIAN)        
+            NCONFTARGET=/var/www/nconf
+            ;;
+        *)
+            cecho " > Unsupported distro" red
+            exit 2
+            ;;
+    esac
+
+    if [ -d "$NCONFTARGET" ]
+    then
+        cecho "nconf is already installed !" red
+        exit 2
+    fi
+
+    if [ $SKIPPREREQUISITES -eq 1 ]
+    then
+        cecho " SKIPPREREQUISITES enabled : won't install nconf prerequisites" yellow
+    else
+        case $CODE in
+            REDHAT|Fedora)
+                cecho " > Installing prerequisites" green
+                yum -y install $NCONFYUMPKG >> ${LOGFILE} 2>&1
+                chkconfig httpd on >> ${LOGFILE} 2>&1
+                /etc/init.d/httpd restart >> ${LOGFILE} 2>&1
+                ;;
+            DEBIAN)        
+                cecho " > Installing prerequisites" green
+                apt-get update >> ${LOGFILE} 2>&1
+                apt-get -y install $NCONFAPTPKG >> ${LOGFILE} 2>&1
+                ;;
+            *)
+                cecho " > Unsupported distro" red
+                exit 2
+                ;;
+        esac
+    fi
+
+    install_mysql
+
+    cd $TMP
+
+    filename=$(echo $NCONF | awk -F"/" '{print $NF}')
+    folder=$(echo $filename | sed -e "s/\.tgz//g")
+    if [ ! -f "$filename" ]
+    then 
+        cecho " > Getting nconf archive" green
+        wget $WGETPROXY $NCONF >> ${LOGFILE} 2>&1 
+    fi
+    
+    cecho " > Extracting archive" green
+    if [ -d "$folder" ]
+    then 
+        rm -Rf $folder
+    fi 
+    tar zxvf $filename >> ${LOGFILE} 2>&1 
+
+    cecho " > Deploy nconf" green
+
+    cp -a nconf $NCONFTARGET
+
+    cecho " > Change files owner" green
+    case $CODE in
+        REDHAT|Fedora)
+            HTTPDUSER="apache"
+            HTTPDGROUP="apache"
+            ;;
+        DEBIAN)        
+            HTTPDUSER="www-data"
+            HTTPDGROUP="www-data"
+            ;;
+        *)
+            cecho " > Unsupported distro" red
+            exit 2
+            ;;
+    esac   
+    chown -R $HTTPDUSER:$HTTPDGROUP $NCONFTARGET
+
+    cecho " > create deployment folders" green
+    mkdir -p $ETC/global
+    mkdir -p $ETC/Default_collector
+    chown $SKUSER:$HTTPDGROUP $ETC/global
+    chown $SKUSER:$HTTPDGROUP $ETC/Default_collector
+    chmod g+rwx $ETC/global
+    chmod g+rwx $ETC/Default_collector
+
+    cecho " > configure sudo for deployment (should not work with systemd)" green
+    if [ -z "$(cat /etc/sudoers | grep shinken-arbiter)" ]
+    then
+        echo "$HTTPDUSER ALL=NOPASSWD: /etc/init.d/shinken-arbiter restart" >> /etc/sudoers
+    fi
+    sed -i "s/^Defaults.*requiretty/#&/g" /etc/sudoers
+
+    cecho " -> Create nconf user and database" green
+    while true
+    do 
+        creads " --> Please provide a password for nconf mysql user : " yellow
+        MYSQLP1=$readvalue
+        creads " --> Please confirm nconf password : " yellow
+        MYSQLP2=$readvalue
+        if [ "$MYSQLP1" != "$MYSQLP2" ]
+        then
+            cecho " --> passwords does not match" red
+        else
+            if [ -z "$MYSQLP1" ] || [ -z "$MYSQLP2" ]
+            then
+                cecho " --> password should not be empty" red
+            else
+                export NCONFP=$MYSQLP2
+                break
+            fi
+        fi
+    done  
+
+    if [ -z "$MYSQLP" ]
+    then
+        creads " --> Please provide a password for root mysql user : " yellow        
+        MYSQLP=$readvalue
+    fi    
+    mysql -h localhost -u root -p$MYSQLP -e "create database if not exists nconf;"  
+    mysql -h localhost -u root -p$MYSQLP -e "grant all privileges on nconf.* to 'nconf'@'localhost' identified by '$NCONFP';flush privileges;"  
+
+
+    cecho " > Patching nconf for shinken support" green
+    cd $NCONFTARGET/include/ajax
+    patch -p0 < $myscripts/install.d/exec_generate_config.php.patch >> ${LOGFILE} 2>&1
+
+    cecho " > Configure deployment.ini file" green
+    cp -f $myscripts/install.d/deployment.ini.in $NCONFTARGET/config/deployment.ini
+    sed -i "s#__SHINKENTARGET__#"$TARGET"#g" $NCONFTARGET/config/deployment.ini 
+    sed -i "s#__NCONFTARGET__#"$NCONFTARGET"#g" $NCONFTARGET/config/deployment.ini 
+    sed -i "s#__SHINKENETC__#"$ETC"#g" $NCONFTARGET/config/deployment.ini 
+
+    cecho " > Alter nagios.cfg config file" green
+    sed -i "s/^cfg_dir.*$/#&/g" $TARGET/etc/nagios.cfg
+    sed -i "s/^cfg_file.*$/#&/g" $TARGET/etc/nagios.cfg    
+    echo "cfg_dir=global" >> $TARGET/etc/nagios.cfg    
+    echo "cfg_dir=Default_collector" >> $TARGET/etc/nagios.cfg        
+
+    # automaticaly fill default response
+    cecho " > Set default answers on web installer" green
+    sed -i "s#\$nagios_bin =.*#\$nagios_bin = \""$TARGET"/bin/nagios\";#g" $NCONFTARGET/INSTALL.php
+    sed -i "s#\"database_name\"#\"nconf\"#g" $NCONFTARGET/INSTALL.php
+    sed -i "s#\"user_name\"#\"nconf\"#g" $NCONFTARGET/INSTALL.php
+    sed -i "s#\"password\",#\""$NCONFP"\",#g" $NCONFTARGET/INSTALL.php
+
+    cecho " > Nconf is installed, you must go to http://yourhost/nconf and finalize installation" green
+    cecho " > mysql credentials and database are :" green
+    cecho " --> user : nconf" yellow
+    cecho " --> password : $NCONFP" yellow
+    cecho " --> database : nconf" yellow
+    cecho " > The answer for NAGIOS_BIN at step 'GENERAL CONFIGURATION is' : $TARGET/bin/nagios" yellow
+    cecho " > Hit ENTER when you are done with this step" red
+    read
+
+    rm -Rf $NCONFTARGET/INSTALL* $NCONFTARGET/UPDATE*
+
+}
+
 function do_skmacro(){
     macro=$1
     args=$2
@@ -2370,6 +2653,99 @@ function install_check_snmp_bandwidth(){
     cp $filename $LIBEXEC/$script
 }
 
+function nconf-import-packs(){
+    manageparameters 'quiet'
+    packs=$TARGET/etc/packs
+
+    # cecho "
+    #     Some tips that are not curently implemented : \n
+    #      - add an attribute called password to class service-template \n
+    #      - edit nagiosadmin contact and replace nagiosadmin by admin and fill the password as you want \n
+    #      - add an attribute called check_command to class service-template \n
+    #      - add an attribute called host_name to class service-template \n
+
+    #      > press ENTER to continue
+    # " red
+
+    # read fake
+
+    case $CODE in
+        REDHAT|Fedora)
+            NCONFTARGET=/var/www/html/nconf
+            ;;
+        DEBIAN)        
+            NCONFTARGET=/var/www/nconf
+            ;;
+        *)
+            cecho " > Unsupported distro" red
+            exit 2
+            ;;
+    esac
+
+
+    objects="macros commands templates"
+    excludekw="databases\|storage\|virtualization\|network\|servers\|microsoft\|sample\|printers\|environmental"
+
+    for o in $objects
+    do
+        cecho " --> Processing $o" green
+        for domain in $(find $packs -type f -name $o.cfg | grep -v "$excludekw")
+        do
+            cecho "  ----> Processing $(echo $domain | sed -e "s#$packs##g" -e "s#/#->#g" -e "s#->macros\.cfg##g")" green
+            case $o in 
+                macros)
+                    for line in $(cat $domain | grep -v "^#")
+                    do
+                        if [ -z "$(cat $TARGET/etc/resource.cfg | grep $line)" ]
+                        then
+                            cecho " ------> Adding macros : $line" green
+                            echo $line >> $TARGET/etc/resource.cfg
+                        fi
+                    done
+                    ;;
+                commands)
+                    # nconf nedd a directive named command_param_count. so we prepare a file to add this argument
+                    if [ -f /tmp/commands.nconf ]
+                    then
+                        rm -f /tmp/commands.nconf
+                    fi
+                    while read -r line
+                    do
+                        if [ ! -z "$(echo $line | grep command_line)" ]
+                        then
+                            num=$(echo $line  | awk '/ARG/ { count++ } END { print count}')
+                            if [ -z $(echo $num | sed -e 's/\s//g' -e '/^$/d' ) ]
+                            then
+                                num=0
+                            fi
+                            echo "   command_param_count $num" >> /tmp/commands.nconf
+                        fi                        
+                        echo $line >> /tmp/commands.nconf
+                    done < $domain
+                    $NCONFTARGET/bin/add_items_from_nagios.pl -c checkcommand -f /tmp/commands.nconf 2>&1 | grep "ERROR\|WARN"
+                    ;;
+                templates)
+                    # macros are not imported !!!!     
+                    $NCONFTARGET/bin/add_items_from_nagios.pl -x 4 -c host-template -f $domain 2>&1 | grep "ERROR\|WARN"
+                    ;; 
+            esac
+        done
+    done
+
+    cecho "  ----> Processing services templates" green
+
+
+    for file in $(find $TARGET/etc/packs -type f | grep -v "$excludekw" | grep services | grep -v templates.cfg | grep -v commands.cfg | grep -v sample)
+    do
+        # strange : nconf need a directive called name to import services template
+        cp $file $file.nconf
+        sed -i "s/service_description\(.*\)$/name \1\n   service_description \1/g" $file.nconf
+        # what we need to do is to create first a service template and then an advanced service linked to the template
+        $NCONFTARGET/bin/add_items_from_nagios.pl -x 4 -c service-template -f $file.nconf 2>&1 | grep "ERROR\|WARN"
+        rm -f $file.nconf
+    done
+}
+
 #     ___                                          __          ____                                 _            
 #    /   |  _________ ___  ______ ___  ___  ____  / /______   / __ \_________  ________  __________(_)___  ____ _
 #   / /| | / ___/ __ `/ / / / __ `__ \/ _ \/ __ \/ __/ ___/  / /_/ / ___/ __ \/ ___/ _ \/ ___/ ___/ / __ \/ __ `/
@@ -2416,6 +2792,8 @@ echo "Usage : install -k | -i | -u [addonname] | -b | -r backupname | -l | -c | 
                                multisite
                                nagvis
                                mongodb
+                               nconf (experimental)
+    --nconf-import-packs    Import shinken packs into nconf (experimental). This require nconf to be installed
     -h | --help             Show help"
 }
 
@@ -2433,7 +2811,7 @@ fi
 
 # options may be followed by one colon to indicate they have a required argument
 
-if ! options=$(getopt -u -o kiu::br:lce:p:a:h -l kill,install,uninstall::,backup,restore:,listbackups,compresslogs,enabledaemons:,plugin:,addon:,help -- "$@")
+if ! options=$(getopt -u -o kiu::br:lce:p:a:h -l nconf-import-packs,kill,install,uninstall::,backup,restore:,listbackups,compresslogs,enabledaemons:,plugin:,addon:,help -- "$@")
 then
     # something went wrong, getopt will put out an error message for us
     exit 2
@@ -2552,8 +2930,8 @@ do
                 exit 0
             elif [ "$OPTARG" == "nconf" ]
             then
-                cecho " > Not implemented yet"
-                #install_nconf
+                #cecho " > Not implemented yet"
+                install_nconf
                 exit 0
             else
                 cecho " > Unknown addon $OPTARG" red
@@ -2615,8 +2993,8 @@ do
                         exit 2
                         ;;
                     nconf)
-                        cecho " > Not implemented yet" red
-                        exit 2
+                        remove_nconf
+                        exit 0
                         ;;
                     *)
                         cecho "Unknown addon $OPTARG" red
@@ -2652,6 +3030,9 @@ do
             usage    
             exit 0
             ;;
+        --nconf-import-packs)
+            nconf-import-packs
+            exit 0
         (--) 
             shift
             break
