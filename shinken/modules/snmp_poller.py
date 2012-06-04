@@ -165,7 +165,12 @@ class SnmpObject(object):
                 if seconds == 0:
                     seconds = 1
                     print "SECONDS ==================== 0"
-                datas['bandwidth'] = (self.datas['ifInOctets'] - self.old_datas['ifInOctets']) / seconds
+                try:
+                    datas['bandwidth'] = (self.datas['ifInOctets'] - self.old_datas['ifInOctets']) / seconds
+                except KeyError,e :
+                    msg = 'Waiting data'
+                    self.append_msg(msg)
+                    return
 
                 msg = '%(name)s (%(status)s)%(status_name)s %(bandwidth)s%(unit)s' % datas
                 self.append_msg(msg)
@@ -257,7 +262,10 @@ class SNMPAsyncClient(object):
                                             udp.domainName,
                                             (self.address, 161))
             transportDispatcher.jobStarted(1)
-            transportDispatcher.runDispatcher()
+            try:
+                transportDispatcher.runDispatcher()
+            except Exception, e:
+                self.set_exit("REQUEST ERROR: " + str(e), rc=3)
             transportDispatcher.closeDispatcher()
 
     def find_data(self):
@@ -464,7 +472,11 @@ class Snmp_poller(BaseModule):
         try:
             while(True):
                 #print "I", self.id, "wait for a message"
-                msg = self.s.get(block=False)
+                try:
+                    msg = self.s.get(block=False)
+                except IOError, e:
+                    # IOError: [Errno 104] Connection reset by peer
+                    msg = None
                 if msg is not None:
                     self.checks.append(msg.get_data())
                 #print "I", self.id, "I've got a message!"
