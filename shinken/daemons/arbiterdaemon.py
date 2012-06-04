@@ -134,13 +134,15 @@ class IForArbiter(Interface):
 # Main Arbiter Class
 class Arbiter(Daemon):
 
-    def __init__(self, config_files, is_daemon, do_replace, verify_only, debug, debug_file, profile=None):
+    def __init__(self, config_files, is_daemon, do_replace, verify_only, debug, debug_file, profile=None, analyse=None):
         
         super(Arbiter, self).__init__('arbiter', config_files[0], is_daemon, do_replace, debug, debug_file)
         
         self.config_files = config_files
 
         self.verify_only = verify_only
+
+        self.analyse = analyse
 
         self.broks = {}
         self.is_master = False
@@ -350,7 +352,6 @@ class Arbiter(Daemon):
         # We removed templates, and so we must recompute the
         # search lists
         self.conf.create_reversed_list()
-
         
         # Pythonize values
         self.conf.pythonize()
@@ -404,7 +405,9 @@ class Arbiter(Daemon):
         # a realm with hosts and not schedulers for it
         if not self.conf.conf_is_correct:
             self.conf.show_errors()
-            sys.exit("Configuration is incorrect, sorry, I bail out")
+            err = "Configuration is incorrect, sorry, I bail out"
+            logger.error(err)
+            sys.exit(err)
 
         logger.info('Things look okay - No serious problems were detected during the pre-flight check', print_it=True)
 
@@ -413,6 +416,10 @@ class Arbiter(Daemon):
 
         # Exit if we are just here for config checking
         if self.verify_only:
+            sys.exit(0)
+
+        if self.analyse:
+            self.launch_analyse()
             sys.exit(0)
 
         # Some properties need to be "flatten" (put in strings)
@@ -446,6 +453,36 @@ class Arbiter(Daemon):
         self.port = self.me.port
         
         logger.info("Configuration Loaded", print_it=True)
+
+
+
+    def launch_analyse(self):
+        try:
+            import json
+        except ImportError:
+            print "Error : json is need for statistics file saving. Please update your python version to 2.6"
+            sys.exit(2)
+
+        print "We are doing an statistic analyse dump on the file", self.analyse
+        stats = {}
+        types = ['hosts', 'services', 'contacts', 'timeperiods', 'commands', 'arbiters', 
+                 'schedulers', 'pollers', 'reactionners', 'brokers', 'receivers', 'modules',
+                 'realms']
+        for t in types:
+            lst = getattr(self.conf, t)
+            nb = len([i for i in lst])
+            stats['nb_'+t] = nb
+            print "Got", nb, "for", t
+
+        max_srv_by_host = max([len(h.services) for h in self.conf.hosts])
+        print "Max srv by host", max_srv_by_host
+        stats['max_srv_by_host'] = max_srv_by_host
+        
+        f = open(self.analyse, 'w')
+        s = json.dumps(stats)
+        print "Saving stats data", s
+        f.write(s)
+        f.close()
 
 
     # Main loop function

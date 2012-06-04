@@ -65,7 +65,7 @@ class LiveStatus_broker(BaseModule, Daemon):
         # We can be in a scheduler. If so, we keep a link to it to speed up regnerator phase
         self.scheduler = None
         self.plugins = []
-        self.use_threads = (getattr(modconf, 'use_threads', '0') == 1)
+        self.use_threads = (getattr(modconf, 'use_threads', '0') == '1')
         self.host = getattr(modconf, 'host', '127.0.0.1')
         if self.host == '*':
             self.host = '0.0.0.0'
@@ -132,6 +132,7 @@ class LiveStatus_broker(BaseModule, Daemon):
         self.prepare_pnp_path()
         m = MacroResolver()
         m.output_macros = ['HOSTOUTPUT', 'HOSTPERFDATA', 'HOSTACKAUTHOR', 'HOSTACKCOMMENT', 'SERVICEOUTPUT', 'SERVICEPERFDATA', 'SERVICEACKAUTHOR', 'SERVICEACKCOMMENT']
+        self.rg.load_external_queue(self.from_q)
 
 
     # This is called only when we are in a scheduler

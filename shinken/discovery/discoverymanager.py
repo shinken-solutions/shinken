@@ -31,6 +31,13 @@ import os
 import re
 import time
 import copy
+import random
+# Always initialize random...
+random.seed(time.time())
+try:
+    import uuid
+except ImportError:
+    uuid = None
 
 try:
     from pymongo.connection import Connection
@@ -41,6 +48,12 @@ from shinken.log import logger
 from shinken.objects import *
 from shinken.macroresolver import MacroResolver
 
+
+def get_uuid(self):
+    if uuid:
+        return uuid.uuid4().hex
+    # Ok for old python like 2.4, we will lie here :)
+    return int(random.random()*sys.maxint)
 
 
 # Look if the name is a IPV4 address or not
@@ -78,9 +91,17 @@ class DiscoveredHost(object):
         self.properties = {}
         self.customs = {}
 
+    # In final phase, we keep only _ properties and
+    # rule based one
+    def update_properties(self, final_phase=False):
+        d = {}
+        if final_phase:
+            for (k,v) in self.data.iteritems():
+                if k.startswith('_'):
+                    d[k] = v
+        else:
+            d = copy.copy(self.data)
 
-    def update_properties(self):
-        d = copy.copy(self.data)
         d['host_name'] = self.name
 
         self.matched_rules.sort(by_order)
@@ -108,6 +129,13 @@ class DiscoveredHost(object):
         for (k,v) in self.properties.iteritems():
             self.customs['_'+k.upper()] = v
 
+            
+    # Manager ask us our properties for the configuration, so
+    # we keep only rules properties and _ ones
+    def get_final_properties(self):
+        self.update_properties(final_phase=True)
+        return self.properties
+            
 
     def get_to_run(self):
         self.in_progress_runners = []
@@ -140,6 +168,7 @@ class DiscoveredHost(object):
             if r in self.matched_rules:
                 print 'We already apply the rule', r.get_name(), 'for the host', self.name
                 continue
+            print 'Looking for match with a new rule', r.get_name(), 'for the host', self.name
             if r.is_matching_disco_datas(self.data):
                 self.matched_rules.append(r)
                 print "Generating a new rule", self.name, r.writing_properties
@@ -467,31 +496,8 @@ class DiscoveryManager:
     # We search for all rules of type host, and we merge them
     def write_host_config(self, host):
         dh = self.disco_data[host]
-        host_rules = []
-        for r in dh.matched_rules:
-            if r.creation_type == 'host':
-                host_rules.append(r)
 
-        # If no rule, bail out
-        if len(host_rules) == 0:
-            return
-    
-        # now merge them
-        d = {'host_name' : host}
-        for r in host_rules:
-            for k,v in r.writing_properties.iteritems():
-                # If it's a + (add) property, add with a ,
-                if k.startswith('+'):
-                    prop = k[1:]
-                    # If the d do not already have this prop,
-                    # just push it
-                    if not prop in d:
-                        d[prop] = v
-                    # oh, must add with a , so
-                    else:
-                        d[prop] = d[prop] + ',' + v
-                else:
-                    d[k] = v
+        d = dh.get_final_properties()
         print "Will generate an host", d
         
         # Maybe we do not got a directory output, but
@@ -595,7 +601,6 @@ class DiscoveryManager:
         tab.append('}\n')
         return '\n'.join(tab)
         
-
 
     # Will wrote all properties/values of d for the host
     # in the database

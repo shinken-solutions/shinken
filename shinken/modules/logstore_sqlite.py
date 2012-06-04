@@ -125,7 +125,7 @@ class LiveStatusLogStoreSqlite(BaseModule):
 
     def open(self):
         print "open LiveStatusLogStoreSqlite ok"
-        self.dbconn = sqlite3.connect(self.database_file)
+        self.dbconn = sqlite3.connect(self.database_file, check_same_thread=False)
         # Get no problem for utf8 insert
         self.dbconn.text_factory = str
         self.dbcursor = self.dbconn.cursor()
@@ -168,6 +168,8 @@ class LiveStatusLogStoreSqlite(BaseModule):
         cmd = "CREATE TABLE IF NOT EXISTS logs(logobject INT, attempt INT, class INT, command_name VARCHAR(64), comment VARCHAR(256), contact_name VARCHAR(64), host_name VARCHAR(64), lineno INT, message VARCHAR(512), options VARCHAR(512), plugin_output VARCHAR(256), service_description VARCHAR(64), state INT, state_type VARCHAR(10), time INT, type VARCHAR(64))"
         self.execute(cmd)
         cmd = "CREATE INDEX IF NOT EXISTS logs_time ON logs (time)"
+        self.execute(cmd)
+        cmd = "CREATE INDEX IF NOT EXISTS logs_host_name ON logs (host_name)"
         self.execute(cmd)
         cmd = "PRAGMA journal_mode=truncate"
         self.execute(cmd)
@@ -218,6 +220,10 @@ class LiveStatusLogStoreSqlite(BaseModule):
             maxtime = dbresult[0][1]
         except sqlite3.Error, e:
             print "An error occurred:", e.args[0]
+        except IndexError, e:
+            mintime = int(time.time())
+            maxtime = int(time.time())
+
         if mintime is None:
             mintime = int(time.time())
         if maxtime is None:
@@ -379,7 +385,12 @@ class LiveStatusLogStoreSqlite(BaseModule):
 
 
     def commit(self):
-        self.dbconn.commit()
+        while True:
+            try:
+                self.dbconn.commit()
+                break
+            except OperationalError:
+                time.sleep(.01)
 
     def manage_log_brok(self, b):
         data = b.data
@@ -387,37 +398,34 @@ class LiveStatusLogStoreSqlite(BaseModule):
         try:
             logline = Logline(line=line)
             values = logline.as_tuple()
-        except Exception, exp:
-            print "Unexpected error:", exp
-        try:
             if logline.logclass != LOGCLASS_INVALID:
                 self.execute('INSERT INTO LOGS VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', values)
         except LiveStatusLogStoreError, exp:
             print "An error occurred:", exp.args[0]
             print "DATABASE ERROR!!!!!!!!!!!!!!!!!"
+        except Exception, exp:
+            print "Unexpected in manage_log_brok:", exp
         #FIXME need access to this#self.livestatus.count_event('log_message')
 
     def add_filter(self, operator, attribute, reference):
-	if attribute == 'time':
-	    self.sql_time_filter_stack.put_stack(self.make_sql_filter(operator, attribute, reference))
-            pass
-	self.sql_filter_stack.put_stack(self.make_sql_filter(operator, attribute, reference))
+        if attribute == 'time':
+            self.sql_time_filter_stack.put_stack(self.make_sql_filter(operator, attribute, reference))
+        self.sql_filter_stack.put_stack(self.make_sql_filter(operator, attribute, reference))
 
     def add_filter_and(self, andnum):
-	self.sql_filter_stack.and_elements(andnum)
+        self.sql_filter_stack.and_elements(andnum)
 
     def add_filter_or(self, ornum):
-	self.sql_filter_stack.or_elements(ornum)
+        self.sql_filter_stack.or_elements(ornum)
 
     def add_filter_not(self):
-	self.sql_filter_stack.not_elements()
-
+        self.sql_filter_stack.not_elements()
 
     def get_live_data_log(self):
         """Like get_live_data, but for log objects"""
         # finalize the filter stacks
-	#self.sql_time_filter_stack.and_elements(self.sql_time_filter_stack.qsize())
-	self.sql_filter_stack.and_elements(self.sql_filter_stack.qsize())
+        #self.sql_time_filter_stack.and_elements(self.sql_time_filter_stack.qsize())
+        self.sql_filter_stack.and_elements(self.sql_filter_stack.qsize())
         if self.use_aggressive_sql:
             # Be aggressive, get preselected data from sqlite and do less
             # filtering in python. But: only a subset of Filter:-attributes

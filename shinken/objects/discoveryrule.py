@@ -92,13 +92,9 @@ class Discoveryrule(MatchingItem):
         # in writing properties if start with + (means 'add this')
         for key in params:
             # Some key are quite special
-            if key in ['use']:
-                self.writing_properties[key] = params[key]
-            elif key.startswith('+'):
-                self.writing_properties[key] = params[key]
-            elif key in cls.properties:
+            if key in cls.properties:
                 setattr(self, key, params[key])
-            elif key in tcls.properties:
+            elif key in ['use'] or key.startswith('+') or key in tcls.properties or key.startswith('_'):
                 self.writing_properties[key] = params[key]
             else:
                 if key.startswith('!'):

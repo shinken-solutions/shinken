@@ -32,6 +32,7 @@ that shinken modules will subclass
 import os
 import signal
 import time
+from re import compile
 from multiprocessing import Queue, Process
 
 
@@ -108,6 +109,7 @@ class BaseModule(object):
         # the queue the module will put its result data
         self.from_q = None
         self.process = None
+        self.illegal_char = compile(r'[^\w]');
         self.init_try = 0
 
 

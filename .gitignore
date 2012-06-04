@@ -1,3 +1,5 @@
+# Project files #
+######################
 *.egg-info
 build
 dist
@@ -5,7 +7,6 @@ dist
 .pydevproject
 .settings
 .gitignore
-*.pid
 
 # Logs and databases #
 ######################
@@ -13,9 +14,12 @@ dist
 *.sqlite
 *.db*
 
+
 # OS generated files #
 ######################
 *.DS_Store*
 ehthumbs.db
 Icon?
 Thumbs.db
+*.pid
+._.*

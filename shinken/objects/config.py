@@ -66,6 +66,7 @@ from discoveryrun import Discoveryrun, Discoveryruns
 from hostextinfo import HostExtInfo, HostsExtInfo
 from serviceextinfo import ServiceExtInfo, ServicesExtInfo
 from trigger import Trigger, Triggers
+from pack import Pack, Packs
 
 from shinken.arbiterlink import ArbiterLink, ArbiterLinks
 from shinken.schedulerlink import SchedulerLink, SchedulerLinks
@@ -354,6 +355,8 @@ class Config(Item):
         self.configuration_errors = []
         self.triggers_dirs = []
         self.triggers = Triggers({})
+        self.packs_dirs = []
+        self.packs = Packs({})
 
 
     def get_name(self):
@@ -454,11 +457,15 @@ class Config(Item):
                         cfg_dir_name = elts[1]
                     else:
                         cfg_dir_name = os.path.join(self.config_base_dir, elts[1])
-                    #Ok, look if it's really a directory
+                    # Ok, look if it's really a directory
                     if not os.path.isdir(cfg_dir_name):
                         logger.error("Cannot open config dir '%s' for reading" % cfg_dir_name)
                         self.conf_is_correct = False
-                    #Now walk for it
+
+                    # Look for .pack file into it :)
+                    self.packs_dirs.append(cfg_dir_name)
+
+                    # Now walk for it
                     for root, dirs, files in os.walk(cfg_dir_name):
                         for file in files:
                             if re.search("\.cfg$", file):
@@ -524,7 +531,7 @@ class Config(Item):
             # Now we removed real comments, replace them with just ;
             line = line.replace('__ANTI-VIRG__', ';')
             # A backslash means, there is more to come
-            if re.search("\\\s*$", line):
+            if re.search("\\\s*$", line) is not None:
                 continuation_line = True
                 line = re.sub("\\\s*$", "", line)
                 line = re.sub("^\s+", " ", line)
@@ -537,14 +544,14 @@ class Config(Item):
                 tmp_line = ''
                 continuation_line = False
             # } alone in a line means stop the object reading
-            if re.search("^\s*\t*}\s*\t*$", line):
+            if re.search("^\s*}\s*$", line) is not None:
                 in_define = False
-            if re.search("^\s*\t*#|^\s*$|^\s*}", line):
+    
+            if re.search("^\s*#|^\s*$|^\s*}", line) is not None:
                 pass
-
             # A define must be catch and the type save
             # The old entry must be save before
-            elif re.search("^define", line):
+            elif re.search("^define", line) is not None:
                 in_define = True
                 if tmp_type not in objectscfg:
                     objectscfg[tmp_type] = []
@@ -677,6 +684,10 @@ class Config(Item):
             self.triggers.load_file(p)
             
 
+    # We will load all packs .pack files from all packs_dirs
+    def load_packs(self):
+        for p in self.packs_dirs:
+            self.packs.load_file(p)
 
 
     # We use linkify to make the config more efficient : elements will be

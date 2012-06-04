@@ -60,9 +60,15 @@ class Command(Item):
         self.__class__.id += 1
         
         self.init_running_properties()
-        
+
+        self.customs = {}
+
         for key in params:
-            setattr(self, key, params[key])
+            # Manabe customs values
+            if key.startswith('_'):
+                self.customs[key.upper()] = params[key]
+            else:
+                setattr(self, key, params[key])
         
         if not hasattr(self, 'poller_tag'):
             self.poller_tag = 'None'
@@ -79,8 +85,10 @@ class Command(Item):
             else:
                 self.module_type = 'fork'
 
+
     def get_name(self):
         return self.command_name
+
 
     def pythonize(self):
         self.command_name = self.command_name.strip()

@@ -1,0 +1,20 @@
+;; LOCAL deployment ;;
+
+[extract config]
+type        = local
+source_file = "__NCONFTARGET__/output/NagiosConfig.tgz"
+target_file = "/tmp/"
+action      = extract
+
+[copy global config]
+type        = local
+source_file = "/tmp/global/"
+target_file = "__SHINKENETC__/global/"
+action      = copy
+
+[copy host and service config]
+type        = local
+source_file = "/tmp/Default_collector/"
+target_file = "__SHINKENETC__/Default_collector/"
+action      = copy
+reload_command = "sudo /etc/init.d/shinken-arbiter restart"

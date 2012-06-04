@@ -357,8 +357,9 @@ class Broker(BaseSatellite):
         self.new_conf = None
         self.cur_conf = conf
         # Got our name from the globals
-        if 'broker_name' in conf['global']:
-            name = conf['global']['broker_name']
+        g_conf = conf['global']
+        if 'broker_name' in g_conf:
+            name = g_conf['broker_name']
         else:
             name = 'Unnamed broker'
         self.name = name
@@ -390,8 +391,14 @@ class Broker(BaseSatellite):
                 running_id = 0
             s = conf['schedulers'][sched_id]
             self.schedulers[sched_id] = s
+
+            # replacing scheduler address and port by those defined in satellitemap
+            if s['name'] in g_conf['satellitemap']:
+                s = dict(s) # make a copy
+                s.update(g_conf['satellitemap'][s['name']])
             uri = pyro.create_uri(s['address'], s['port'], 'Broks', self.use_ssl)
             self.schedulers[sched_id]['uri'] = uri
+
             self.schedulers[sched_id]['broks'] = broks
             self.schedulers[sched_id]['instance_id'] = s['instance_id']
             self.schedulers[sched_id]['running_id'] = running_id
@@ -411,8 +418,14 @@ class Broker(BaseSatellite):
                 broks = {}
             a = conf['arbiters'][arb_id]
             self.arbiters[arb_id] = a
+
+            # replacing arbiter address and port by those defined in satellitemap
+            if a['name'] in g_conf['satellitemap']:
+                a = dict(a) # make a copy
+                a.update(g_conf['satellitemap'][a['name']])
             uri = pyro.create_uri(a['address'], a['port'], 'Broks', self.use_ssl)
             self.arbiters[arb_id]['uri'] = uri
+
             self.arbiters[arb_id]['broks'] = broks
             self.arbiters[arb_id]['instance_id'] = 0 # No use so all to 0
             self.arbiters[arb_id]['running_id'] = 0
@@ -434,8 +447,14 @@ class Broker(BaseSatellite):
                 running_id = 0
             p = conf['pollers'][pol_id]
             self.pollers[pol_id] = p
+
+            # replacing poller address and port by those defined in satellitemap
+            if p['name'] in g_conf['satellitemap']:
+                p = dict(p) # make a copy
+                p.update(g_conf['satellitemap'][p['name']])
             uri = pyro.create_uri(p['address'], p['port'], 'Broks', self.use_ssl)
             self.pollers[pol_id]['uri'] = uri
+
             self.pollers[pol_id]['broks'] = broks
             self.pollers[pol_id]['instance_id'] = 0 # No use so all to 0
             self.pollers[pol_id]['running_id'] = running_id
@@ -459,8 +478,14 @@ class Broker(BaseSatellite):
 
             r = conf['reactionners'][rea_id]
             self.reactionners[rea_id] = r
+
+            # replacing reactionner address and port by those defined in satellitemap
+            if r['name'] in g_conf['satellitemap']:
+                r = dict(r) # make a copy
+                r.update(g_conf['satellitemap'][r['name']])
             uri = pyro.create_uri(r['address'], r['port'], 'Broks', self.use_ssl)
             self.reactionners[rea_id]['uri'] = uri
+
             self.reactionners[rea_id]['broks'] = broks
             self.reactionners[rea_id]['instance_id'] = 0 # No use so all to 0
             self.reactionners[rea_id]['running_id'] = running_id

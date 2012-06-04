@@ -59,14 +59,18 @@ class DataManager(object):
         name = name.decode('utf8', 'ignore')
         return self.rg.contacts.find_by_name(name)
 
+
     def get_contacts(self):
         return self.rg.contacts
+
     
     def get_hostgroups(self):
         return self.rg.hostgroups
 
+
     def get_hostgroup(self, name):
         return self.rg.hostgroups.find_by_name(name)
+
 
     # Get the hostgroups sorted by names, and zero size in the end
     # if selected one, put it in the first place
@@ -95,23 +99,30 @@ class DataManager(object):
     def get_hosts(self):
         return self.rg.hosts
 
+
     def get_services(self):
         return self.rg.services
+
 
     def get_schedulers(self):
         return self.rg.schedulers
 
+
     def get_pollers(self):
         return self.rg.pollers
+
 
     def get_brokers(self):
         return self.rg.brokers
 
+
     def get_receivers(self):
         return self.rg.receivers
 
+
     def get_reactionners(self):
         return self.rg.reactionners
+
 
     def get_program_start(self):
         for c in self.rg.configs.values():
@@ -121,6 +132,7 @@ class DataManager(object):
 
     def get_realms(self):
         return self.rg.realms
+
 
     def get_realm(self, r):
         if r in self.rg.realms:

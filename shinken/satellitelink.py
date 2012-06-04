@@ -34,7 +34,7 @@ Pyro = pyro.Pyro
 
 from shinken.util import get_obj_name_two_args_and_void
 from shinken.objects import Item, Items
-from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
+from shinken.property import BoolProp, IntegerProp, StringProp, ListProp, DictProp, AddrProp
 from shinken.log import logger
 
 # Pack of common Pyro exceptions
@@ -64,6 +64,7 @@ class SatelliteLink(Item):
         'polling_interval':   IntegerProp(default='1', fill_brok=['full_status'], to_send=True),
         'use_timezone':       StringProp (default='NOTSET', to_send=True),
         'realm' :             StringProp (default='', fill_brok=['full_status'], brok_transformation=get_obj_name_two_args_and_void),
+        'satellitemap':       DictProp   (default=None, elts_prop=AddrProp, to_send=True, override=True),
     })
     
     running_properties = Item.running_properties.copy()
@@ -78,9 +79,19 @@ class SatelliteLink(Item):
     })
 
 
+    def set_arbiter_satellitemap(self, satellitemap):
+        """
+            arb_satmap is the satellitemap in current context:
+                - A SatelliteLink is owned by an Arbiter
+                - satellitemap attribute of SatelliteLink is the map defined IN THE satellite configuration
+                  but for creating connections, we need the have the satellitemap of the Arbiter
+        """
+        self.arb_satmap = {'address': self.address, 'port': self.port}
+        self.arb_satmap.update(satellitemap)
+
     def create_connection(self):
         try:
-            self.uri = pyro.create_uri(self.address, self.port, "ForArbiter", self.__class__.use_ssl)
+            self.uri = pyro.create_uri(self.arb_satmap['address'], self.arb_satmap['port'], "ForArbiter", self.__class__.use_ssl)
             # By default Pyro got problem in connect() function that can take
             # long seconds to raise a timeout. And even with the _setTimeout()
             # call. So we change the whole default connect() timeout
@@ -199,10 +210,11 @@ class SatelliteLink(Item):
 
 
     def ping(self):        
-        print "Pinging %s" % self.get_name()
+        print "Pinging %s" % self.get_name(),
         try:
             if self.con is None:
                 self.create_connection()
+            print " (%s)" % self.uri
 
             # If the connection failed to initialize, bail out
             if self.con is None:
@@ -216,6 +228,7 @@ class SatelliteLink(Item):
             else:
                 self.add_failed_check_attempt()
         except Pyro_exp_pack, exp:
+            print # flush previous print
             self.add_failed_check_attempt(reason=str(exp))
 
 

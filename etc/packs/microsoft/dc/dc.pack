@@ -1,0 +1,11 @@
+{
+"name" : "dc",
+
+"description" : "Microsoft Active Directory domain controler checks, for replications",
+
+"path":"microsoft/",
+
+"macros":{}	 
+
+
+}

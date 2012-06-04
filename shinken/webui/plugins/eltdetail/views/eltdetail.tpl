@@ -55,7 +55,7 @@ Invalid element name
      }
   });
 
-  // Now we hook teh global search thing
+  // Now we hook the global search thing
   $('.typeahead').typeahead({
     // note that "value" is the default setting for the property option
     source: function (typeahead, query) {

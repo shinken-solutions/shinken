@@ -1,0 +1,29 @@
+{
+"name":"windows",
+
+"description":"Standard windows checks, like CPU, RAM and disk space. Checks are done by WMI.",
+
+"path" : "os/",
+
+"macros":{
+	 "_DOMAIN" : {"type":"string", 
+                      "description" : "Windows Domain of the server"
+                      },
+
+         "_DOMAINUSERSHORT"  : {"type":"string",
+                                "description" : "Short name (without the domain) of the user to query the server. Should have rights on the WMI tables for reading."
+                             },         
+         "_DOMAINUSER"     : {"type":"string",
+                              "description" : "Full name of the user to query. Is by default DOMAIN\\USERSHORT"
+                             },
+         "_DOMAINPASSWORD"     : {"type":"string",
+                                  "description" : "Password for the user that will launch the query"
+                             },
+         "_SHARE_WARN"     : {"type":"percent",
+                              "description" : "Warning level for the share disk space"
+                             },
+         "_SHARE_CRIT"     : {"type":"percent",
+                                "description" : "Critical level for the share disk space"
+                             }
+          }	 
+}

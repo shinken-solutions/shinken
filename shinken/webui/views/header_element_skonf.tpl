@@ -50,7 +50,7 @@
 
 
 	<ul class="nav">
-	  %if menu_part == '/objects':
+	  %if menu_part == '/elements':
           <li class="dropdown active">
 	  %else:
 	  <li class="dropdown">
@@ -59,8 +59,23 @@
             <ul class="dropdown-menu">
 	      %lst = ['hosts', 'services', 'contacts', 'commands', 'timeperiods']
 	      %for i in lst:
-                 <li><a href="/objects/{{i}}">{{i.capitalize()}}</a></li>
+                 <li><a href="/elements/{{i}}">{{i.capitalize()}}</a></li>
 	      %end
+            </ul>
+          </li>
+        </ul>
+
+
+	<ul class="nav">
+	  %if menu_part == '/packs':
+          <li class="dropdown active">
+	  %else:
+	  <li class="dropdown">
+	  %end
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown"> Packs<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+	      <li><a href="/packs">Your packs</a></li>
+	      <li><a href="/getpacks">Get new packs!</a></li>
             </ul>
           </li>
         </ul>
@@ -68,7 +83,7 @@
 	
 
 	<ul class="nav">
-	  %menu = [ ('/packs','Packs'), ('/system','System'), ('/otheruis', 'Link with other UIs')]
+	  %menu = [ ('/system','System'), ('/otheruis', 'Link with other UIs')]
           %for (key, value) in menu:
             %# Check for the selected element, if there is one
             %if menu_part == key:
@@ -92,9 +107,9 @@
          </div>
 	       <ul class="nav pull-right">
           <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Hi {{user.get_name().capitalize()}} <b class="caret"></b></a>
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Hi {{user.get('contact_name', 'unknown').capitalize()}} <b class="caret"></b></a>
             <ul class="dropdown-menu">
-	           <a class='disabled-link' href="#"><i class="icon-pencil"></i> Edit profile</a>
+	      <a class='' href="/elements/contacts/{{user.get('contact_name', 'unknown')}}"><i class="icon-pencil"></i> Edit profile</a>
             </ul>
           </li>
         </ul>

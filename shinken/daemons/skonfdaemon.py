@@ -39,6 +39,9 @@ import traceback
 import threading
 from Queue import Empty
 import socket
+import tempfile
+import zipfile
+import shutil
 
 from shinken.objects import Config
 from shinken.external_command import ExternalCommandManager
@@ -47,9 +50,11 @@ from shinken.daemon import Daemon, Interface
 from shinken.log import logger
 from shinken.brok import Brok
 from shinken.external_command import ExternalCommand
-from shinken.util import safe_print
+from shinken.util import safe_print, expect_file_dirs
 from shinken.skonfuiworker import SkonfUIWorker
 from shinken.message import Message
+from shinken.misc.datamanagerskonf import datamgr
+from shinken.objects.pack import Pack,Packs
 
 # DBG : code this!
 from shinken.objects import Contact
@@ -119,6 +124,7 @@ class IForArbiter(Interface):
                         return {'alive' : dae.alive, 'spare' : dae.spare}
         return None
 
+
     # Here a function called by check_shinken to get daemons list
     def get_satellite_list(self, daemon_type):
         satellite_list = []
@@ -181,6 +187,11 @@ class Skonf(Daemon):
         self.workers = {}   # dict of active workers
 
         self.host_templates = None
+        self.service_templates = None
+        self.contact_templates = None
+        self.timeperiod_templates = None
+
+        self.datamgr = datamgr
 
 
 
@@ -278,14 +289,20 @@ class Skonf(Daemon):
         # Manage all post-conf modules
         self.hook_point('early_configuration')
 
+        self.packs_home = self.conf.packs_home
+        self.share_dir = self.conf.share_dir
+
+        # Load all file triggers
+        self.conf.load_packs()
+
         # Create Template links
         self.conf.linkify_templates()
 
         # All inheritances
-        self.conf.apply_inheritance()
+        #self.conf.apply_inheritance()
 
         # Explode between types
-        self.conf.explode()
+        #self.conf.explode()
 
         # Create Name reversed list for searching list
         self.conf.create_reversed_list()
@@ -294,75 +311,80 @@ class Skonf(Daemon):
         self.conf.remove_twins()
 
         # Implicit inheritance for services
-        self.conf.apply_implicit_inheritance()
+        #self.conf.apply_implicit_inheritance()
 
         # Fill default values
-        self.conf.fill_default()
+        super(Config, self.conf).fill_default()
         
         # Remove templates from config
         # SAVE TEMPLATES
         self.host_templates = self.conf.hosts.templates
+        self.service_templates = self.conf.services.templates
+        self.contact_templates = self.conf.contacts.templates
+        self.timeperiod_templates = self.conf.timeperiods.templates
+        self.packs = self.conf.packs
         # Then clean for other parts
-        self.conf.remove_templates()
+        #self.conf.remove_templates()
 
         # We removed templates, and so we must recompute the
         # search lists
         self.conf.create_reversed_list()
         
         # Pythonize values
-        self.conf.pythonize()
+        #self.conf.pythonize()
+        super(Config, self.conf).pythonize()
 
         # Linkify objects each others
-        self.conf.linkify()
+        #self.conf.linkify()
 
         # applying dependencies
-        self.conf.apply_dependencies()
+        #self.conf.apply_dependencies()
 
         # Hacking some global parameter inherited from Nagios to create
         # on the fly some Broker modules like for status.dat parameters
         # or nagios.log one if there are no already available
-        self.conf.hack_old_nagios_parameters()
+        #self.conf.hack_old_nagios_parameters()
 
         # Raise warning about curently unmanaged parameters
-        if self.verify_only:
-            self.conf.warn_about_unmanaged_parameters()
+        #if self.verify_only:
+        #    self.conf.warn_about_unmanaged_parameters()
 
         # Exlode global conf parameters into Classes
-        self.conf.explode_global_conf()
+        #self.conf.explode_global_conf()
 
         # set ourown timezone and propagate it to other satellites
-        self.conf.propagate_timezone_option()
+        #self.conf.propagate_timezone_option()
 
         # Look for business rules, and create the dep tree
-        self.conf.create_business_rules()
+        #self.conf.create_business_rules()
         # And link them
-        self.conf.create_business_rules_dependencies()
+        #self.conf.create_business_rules_dependencies()
 
         # Warn about useless parameters in Shinken
-        if self.verify_only:
-            self.conf.notice_about_useless_parameters()
+        #if self.verify_only:
+        #    self.conf.notice_about_useless_parameters()
 
         # Manage all post-conf modules
         self.hook_point('late_configuration')
         
         # Correct conf?
-        self.conf.is_correct()
+        #self.conf.is_correct()
 
         #If the conf is not correct, we must get out now
         #if not self.conf.conf_is_correct:
         #    sys.exit("Configuration is incorrect, sorry, I bail out")
 
         # REF: doc/shinken-conf-dispatching.png (2)
-        logger.info("Cutting the hosts and services into parts")
-        self.confs = self.conf.cut_into_parts()
+        #logger.info("Cutting the hosts and services into parts")
+        #self.confs = self.conf.cut_into_parts()
 
         # The conf can be incorrect here if the cut into parts see errors like
         # a realm with hosts and not schedulers for it
         if not self.conf.conf_is_correct:
             self.conf.show_errors()
-            sys.exit("Configuration is incorrect, sorry, I bail out")
-
-        logger.info('Things look okay - No serious problems were detected during the pre-flight check')
+        #    sys.exit("Configuration is incorrect, sorry, I bail out")
+        else:
+           logger.info('Things look okay - No serious problems were detected during the pre-flight check')
 
         # Now clean objects of temporary/unecessary attributes for live work:
         self.conf.clean()
@@ -374,10 +396,11 @@ class Skonf(Daemon):
         # Some properties need to be "flatten" (put in strings)
         # before being send, like realms for hosts for example
         # BEWARE: after the cutting part, because we stringify some properties
-        self.conf.prepare_for_sending()
+        #self.conf.prepare_for_sending()
 
         # Ok, here we must check if we go on or not.
         # TODO : check OK or not
+        self.api_key = self.conf.api_key
         self.use_local_log = self.conf.use_local_log
         self.log_level = logger.get_level_id(self.conf.log_level)
         self.local_log = self.conf.local_log
@@ -398,7 +421,7 @@ class Skonf(Daemon):
 
         ##  We need to set self.host & self.port to be used by do_daemon_init_and_start
         self.host = self.me.address
-        self.port = 8766#self.me.port
+        self.port = 0
         
         logger.info("Configuration Loaded")
         print ""
@@ -447,7 +470,7 @@ class Skonf(Daemon):
             self.load_web_configuration()
 
             self.do_daemon_init_and_start()
-            self.uri_arb = self.pyro_daemon.register(self.interface, "ForArbiter")
+            #self.uri_arb = self.pyro_daemon.register(self.interface, "ForArbiter")
 
             # Under Android, we do not have multiprocessing lib
             # so use standard Queue threads things
@@ -630,6 +653,8 @@ class Skonf(Daemon):
 
         self.init_db()
 
+        self.init_datamanager()
+
         # Launch the data thread"
         self.workersmanager_thread = threading.Thread(None, self.workersmanager, 'httpthread')
         self.workersmanager_thread.start()
@@ -761,7 +786,17 @@ class Skonf(Daemon):
         # Route static files css files
         @route('/static/:path#.+#')
         def server_static(path):
-            return static_file(path, root=os.path.join(bottle_dir, 'htdocs'))
+           # By default give from the root in bottle_dir/htdocs. If the file is missing,
+           # search in the share dir
+           root = os.path.join(bottle_dir, 'htdocs')
+           p = os.path.join(root, path)
+           print "LOOK for FILE EXISTS", p
+           if not os.path.exists(p):
+              root = self.share_dir
+              print "LOOK FOR PATH", path
+              print "No such file, I look in", os.path.join(root, path)
+           return static_file(path, root=root)
+
 
         # And add the favicon ico too
         @route('/favicon.ico')
@@ -857,10 +892,12 @@ class Skonf(Daemon):
         if not user_name:
             return None
 
-        #c = self.datamgr.get_contact(user_name)
-        c = Contact()
-        c.contact_name = user_name
-        c.is_admin = True
+        c = self.datamgr.get_contact(user_name)
+
+        print "Find a contact?", user_name, c
+        #c = Contact()
+        #c.contact_name = user_name
+        #c.is_admin = True
         return c
 
 
@@ -892,9 +929,18 @@ class Skonf(Daemon):
        self.db = con.shinken
 
 
+    def init_datamanager(self):
+       self.datamgr.load_conf(self.conf)
+       self.datamgr.load_db(self.db)
+       
+
     # TODO : code this!
     def check_auth(self, login, password):
        return True
+
+
+    def get_api_key(self):
+       return str(self.api_key)
 
     # We are asking to a worker .. to work :)
     def ask_new_scan(self, id):
@@ -922,3 +968,123 @@ class Skonf(Daemon):
         safe_print("Will return external_ui_link::", lst)
         return lst
 
+
+
+    def save_pack(self, buf):
+       print "SAVING A PACK WITH SIZE", len(buf)
+       _tmpfile = tempfile.mktemp()
+       f = open(_tmpfile, 'wb')
+       f.write(buf)
+       f.close()
+       print "We dump the download pack under", _tmpfile
+       print "CHECK if it's a zip file"
+       if not zipfile.is_zipfile(_tmpfile):
+          print "It's not a zip file!"
+          r = {'state' : 200, 'text' : 'Ok, the pack is downloaded and install. Please restart skonf to use it.'}
+          os.remove(_tmpfile)
+          return r
+       
+
+       TMP_DIR = tempfile.mkdtemp()
+       print "Unflating the pack into", TMP_DIR
+       f = zipfile.ZipFile(_tmpfile)
+       f.extractall(TMP_DIR)
+
+       # The zip file is no more need
+       os.remove(_tmpfile)
+       
+       packs = Packs({})
+       packs.load_file(TMP_DIR)
+       packs = [i for i in packs]
+       if len(packs) > 1:
+          r = {'state' : 400, 'text' : 'ERROR : the pack got too much .pack file in it'}
+          # Clean before exit
+          shutil.rmtree(TMP_DIR)
+          return r
+
+       if len(packs) == 0:
+          r = {'state' : 400, 'text' : 'ERROR : no valid .pack found in the zip file'}
+          # Clean before exit
+          shutil.rmtree(TMP_DIR)
+          return r
+
+       pack = packs.pop()
+       print "We read pack", pack.__dict__
+       # Now we can update the db pack entry
+       pack_name = pack.pack_name
+       pack_path = pack.path
+       if pack_path == '/':
+          pack_path = '/uncategorized'
+       
+       # Now we move the pack to it's final directory
+       dirs = os.path.normpath(pack_path).split('/')
+       dirs = [d for d in dirs if d != '']
+       # We will create all directory until the last one
+       # so we are doing a mkdir -p .....
+       tmp_dir = self.packs_home
+       for d in dirs:
+          _d = os.path.join(tmp_dir, d)
+          print "Look for the directory", _d
+          if not os.path.exists(_d):
+             os.mkdir(_d)
+          tmp_dir = _d
+       # Ok now the last level
+       dest_dir = os.path.join(tmp_dir, pack_name)
+       print "Will copy the tree in the pack tree", dest_dir
+
+       # If it's already here (previous pack?) clean it
+       if os.path.exists(dest_dir):
+          print "Cleaning the old pack dir", dest_dir
+          shutil.rmtree(dest_dir)
+
+       # Copying the new pack
+       shutil.copytree(TMP_DIR, dest_dir)
+       shutil.rmtree(TMP_DIR)
+
+       # Ok we do not want to let some images or templates dir in it,
+       # so we will move all of them too
+       img_dir = os.path.join(dest_dir, 'images')
+       if os.path.exists(img_dir):
+          print "We got an images source dir, we should move it"
+          for root, dirs, files in os.walk(img_dir):
+             for file in files:
+                src_file = os.path.join(root, file)
+                dst_file = src_file[len(img_dir):]
+                if dst_file.startswith('/'):
+                   dst_file = dst_file[1:]
+                img_dst_dir = os.path.dirname(dst_file)
+                from_share_path = os.path.join('images', img_dst_dir)
+                can_be_copy = expect_file_dirs(self.share_dir, from_share_path)
+                full_dst_file = os.path.join(self.share_dir, from_share_path, file)
+                print "Is the file %s can be copy? %s" % (dst_file, can_be_copy)
+                print "Saving a source file", src_file, 'in', full_dst_file
+                if can_be_copy:
+                   shutil.copy(src_file, full_dst_file)
+                else:
+                   logger.warning('Cannot create the directory %s for a pack install' % os.path.join(self.share_dir, from_share_path))
+
+
+       # Now the template one
+       templates_dir = os.path.join(dest_dir, 'templates')
+       if os.path.exists(templates_dir):
+          print "We got an images source dir, we should move it"
+          for root, dirs, files in os.walk(templates_dir):
+             for file in files:
+                src_file = os.path.join(root, file)
+                dst_file = src_file[len(templates_dir):]
+                if dst_file.startswith('/'):
+                   dst_file = dst_file[1:]
+                tpl_dst_dir = os.path.dirname(dst_file)
+                from_share_path = os.path.join('templates', tpl_dst_dir)
+                can_be_copy = expect_file_dirs(self.share_dir, from_share_path)
+                full_dst_file = os.path.join(self.share_dir, from_share_path, file)
+                print "Is the file %s can be copy? %s" % (dst_file, can_be_copy)
+                print "Saving a source file", src_file, 'in', full_dst_file
+                if can_be_copy:
+                   shutil.copy(src_file, full_dst_file)
+                else:
+                   logger.warning('Cannot create the directory %s for a pack install' % os.path.join(self.share_dir, from_share_path))
+          
+
+       r = {'state' : 200, 'text' : 'Ok, the pack is downloaded and install. Please restart skonf to use it.'}
+       return r

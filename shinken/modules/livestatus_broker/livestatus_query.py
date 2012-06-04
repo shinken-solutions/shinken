@@ -31,6 +31,7 @@ from mapping import table_class_map, find_filter_converter, list_livestatus_attr
 from livestatus_response import LiveStatusResponse
 from livestatus_stack import LiveStatusStack
 from livestatus_constraints import LiveStatusConstraints
+from livestatus_query_metainfo import LiveStatusQueryMetainfo
 
 
 class LiveStatusQueryError(Exception):
@@ -57,7 +58,6 @@ class LiveStatusQuery(object):
 
         # Private attributes for this specific request
         self.response = LiveStatusResponse()
-        self.raw_data = ''
         self.authuser = None
         self.table = None
         self.columns = []
@@ -123,7 +123,6 @@ class LiveStatusQuery(object):
         sets the attributes of the request object
         
         """
-        self.raw_data = data
         for line in data.splitlines():
             line = line.strip()
             # Tools like NagVis send KEYWORK:option, and we prefer to have
@@ -252,6 +251,7 @@ class LiveStatusQuery(object):
                 # This line is not valid or not implemented
                 print "Received a line of input which i can't handle : '%s'" % line
                 pass
+        self.metainfo = LiveStatusQueryMetainfo(data)
 
 
     def launch_query(self):
@@ -265,8 +265,8 @@ class LiveStatusQuery(object):
             return []
 
         # Ask the cache if this request was already answered under the same
-        # circumstances.
-        cacheable, cache_hit, cached_response = self.query_cache.get_cached_query(self.raw_data)
+        # circumstances. (And f not, whether this query is cacheable at all)
+        cacheable, cache_hit, cached_response = self.query_cache.get_cached_query(self.metainfo)
         if cache_hit:
             self.columns = cached_response['columns']
             self.response.columnheaders = cached_response['columnheaders']
@@ -299,7 +299,7 @@ class LiveStatusQuery(object):
         filter_func     = self.filter_stack.get_stack()
         without_filter  = len(self.filtercolumns) == 0
         cs = LiveStatusConstraints(filter_func, without_filter, self.authuser)
-
+        
         try:
             # Remember the number of stats filters. We need these numbers as columns later.
             # But we need to ask now, because get_live_data() will empty the stack
@@ -348,7 +348,7 @@ class LiveStatusQuery(object):
             result = [r for r in result]
             # Especially for stats requests also the columns and headers
             # are modified, so we need to save them too.
-            self.query_cache.cache_query(self.raw_data, {
+            self.query_cache.cache_query(self.metainfo, {
                 'result': result,
                 'columns': self.columns,
                 'columnheaders': self.response.columnheaders,
@@ -385,12 +385,16 @@ class LiveStatusQuery(object):
                 yield val
             return
 
-        items = getattr(self.datamgr.rg, self.table).__itersorted__(cs.authuser)
+        # Get an iterator which will return the list of elements belonging to a specific table.
+        # Depending on the hints in the query's metainfo, the list can be only a subset.
+        self.metainfo.query_hints["qclass"] = self.__class__.__name__
+        items = getattr(self.datamgr.rg, self.table).__itersorted__(self.metainfo.query_hints)
+        # Pass the elements through more generators if necessary.
         if not cs.without_filter:
             items = gen_filtered(items, cs.filter_func)
         if self.limit:
             items = gen_limit(items, self.limit)
-        return (i for i in items)
+        return items
         # todo-list
         #  not possible in the moment, but perhaps with a proxy-function. something for next weekend...
         #  pool = multiprocessing.Pool(processes=4)
@@ -409,7 +413,7 @@ class LiveStatusQuery(object):
 
 
     def get_filtered_livedata(self, cs):
-        items = getattr(self.datamgr.rg, self.table).__itersorted__(cs.authuser)
+        items = getattr(self.datamgr.rg, self.table).__itersorted__(self.metainfo.query_hints)
         if cs.without_filter:
             return [x for x in items]
         else:
@@ -467,23 +471,23 @@ class LiveStatusQuery(object):
 
     def get_hostsbygroup_livedata(self, cs):
         sorter = lambda k: k.hostgroup.hostgroup_name
-        return self.get_group_livedata(cs, self.datamgr.rg.hosts.__itersorted__(cs.authuser), 'hostgroups', 'hostgroup', sorter)
+        return self.get_group_livedata(cs, self.datamgr.rg.hosts.__itersorted__(self.metainfo.query_hints), 'hostgroups', 'hostgroup', sorter)
 
 
     def get_servicesbygroup_livedata(self, cs):
         sorter = lambda k: k.servicegroup.servicegroup_name
-        return self.get_group_livedata(cs, self.datamgr.rg.services.__itersorted__(cs.authuser), 'servicegroups', 'servicegroup', sorter)
+        return self.get_group_livedata(cs, self.datamgr.rg.services.__itersorted__(self.metainfo.query_hints), 'servicegroups', 'servicegroup', sorter)
     
 
     def get_problem_livedata(self, cs):
         # We will crate a problems list first with all problems and source in it
         # TODO : create with filter
         problems = []
-        for h in self.datamgr.rg.hosts.__itersorted__():
+        for h in self.datamgr.rg.hosts.__itersorted__(self.metainfo.query_hints):
             if h.is_problem:
                 pb = Problem(h, h.impacts)
                 problems.append(pb)
-        for s in self.datamgr.rg.services.__itersorted__():
+        for s in self.datamgr.rg.services.__itersorted__(self.metainfo.query_hints):
             if s.is_problem:
                 pb = Problem(s, s.impacts)
                 problems.append(pb)
@@ -532,7 +536,7 @@ class LiveStatusQuery(object):
 
 
     def get_servicesbyhostgroup_livedata(self, cs):
-        objs = self.datamgr.rg.services.__itersorted__(cs.authuser)
+        objs = self.datamgr.rg.services.__itersorted__(self.metainfo.query_hints)
         return sorted([x for x in (
             setattr(svchgrp[0], 'hostgroup', svchgrp[1]) or svchgrp[0] for svchgrp in (
                 (copy.copy(inner_list0[0]), item0) for inner_list0 in ( #2 service clone and a hostgroup
@@ -545,7 +549,7 @@ class LiveStatusQuery(object):
     objects_get_handlers = {
         'hosts':                get_hosts_livedata,
         'services':             get_services_livedata,
-        'commands':             get_filtered_livedata,
+        'commands':             get_simple_livedata,
         'schedulers':           get_simple_livedata,
         'brokers':              get_simple_livedata,
         'pollers':              get_simple_livedata,

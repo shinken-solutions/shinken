@@ -41,11 +41,15 @@ import shlex
 try :
     import OpenSSL
     SSLWantReadError = OpenSSL.SSL.WantReadError
+    SSLSysCallError = OpenSSL.SSL.SysCallError
     SSLZeroReturnError = OpenSSL.SSL.ZeroReturnError
+    SSLError = OpenSSL.SSL.Error
 except ImportError:
     OpenSSL = None
     SSLWantReadError = None
+    SSLSysCallError = None
     SSLZeroReturnError = None
+    SSLError = None
 
 from Queue import Empty
 from shinken.basemodule import BaseModule
@@ -257,6 +261,12 @@ class NRPEAsyncClient(asyncore.dispatcher):
             # do not want to talk to us :(
             except SSLZeroReturnError :
                 buf = ''
+
+            except SSLSysCallError:
+                buf = ''
+
+            except SSLError:
+                bug = ''
 
             # Maybe we got nothing from the server (it refuse our ip,
             # or refuse arguments...)

@@ -90,6 +90,10 @@ parser.add_option("-v", "--verify-config",
 parser.add_option("-p", "--profile",
                   dest="profile",
                   help="Dump a profile file. Need the python cProfile librairy")
+parser.add_option("-a", "--analyse",
+                  dest="analyse",
+                  help="Dump an analyse statistics file, for support")
+
 
 opts, args = parser.parse_args()
 

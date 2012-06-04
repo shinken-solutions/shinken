@@ -57,6 +57,7 @@ def usage():
     print "   - setparam : set directive value for an object"
     print "   - delparam : remove directive for an object"
     print "   - getdirective : get a directive value from an object"
+    print "   - getobjectnames : get a list of objects names (required parameters : configfile, objectype)"
     print " * configfile : full path to the shinken-specific.cfg file"
     print " * objectype : configuration object type on which the action apply"
     print " * directive : the directive name of a configuration object"
@@ -80,7 +81,7 @@ def main():
         sys.exit(2)
     for o, a in opts:
         if o == "-a":
-            actions=["setparam","delparam","showconfig","addobject","getdirective","getaddresses","delobject","cloneobject","macros","sync","control","deploy"]
+            actions=["setparam","delparam","showconfig","addobject","getobjectnames","getdirective","getaddresses","delobject","cloneobject","macros","sync","control","deploy","removemodule"]
             if a in actions:
                 action=a
             else:
@@ -202,6 +203,9 @@ def main():
     elif action == "showconfig":
         allowed = [ 'poller', 'arbiter', 'scheduler', 'broker', 'receiver', 'reactionner', 'module' ]
         dumpconfig(objectype,config,allowed)
+    elif action == "getobjectnames":
+        allowed = [ 'poller', 'arbiter', 'scheduler', 'broker', 'receiver', 'reactionner', 'module' ]
+        getobjectnames(objectype,config,allowed)
     elif action == "cloneobject":
         allowed = [ 'poller', 'arbiter', 'scheduler', 'broker', 'receiver', 'reactionner', 'module' ]
         if objectype not in allowed:
@@ -302,6 +306,7 @@ def domacros(configfile,args=[]):
             "setparam":r"(?P<directive>\w+)=(?P<value>.*) from (?P<object>\w+) where (?P<clauses>.*)",
             "delparam":r"(?P<directive>\w+)=(?P<value>.*) from (?P<object>\w+) where (?P<clauses>.*)",
             "getdirective":r"(?P<directives>\w+) from (?P<object>\w+) where (?P<clauses>.*)",
+            "removemodule":r"(?P<module>\w+) from (?P<object>\w+) where (?P<clauses>.*)",
             "control":r"(?P<action>\w+)",
             "writeconfig":r"",
             "sync":r""
@@ -369,6 +374,10 @@ def domacros(configfile,args=[]):
                             if maction == "stop" :return (code,message)
                     elif command == "delparam":
                         code,message = delparam(config,result.group('object'),result.group('directive'),result.group('clauses'))
+                        if not code:
+                            if maction == "stop" :return (code,message)
+                    elif command == "removemodule":
+                        code,message = removemodule(config,result.group('module'),result.group('object'),result.group('clauses'))
                         if not code:
                             if maction == "stop" :return (code,message)
                 else:
@@ -765,7 +774,16 @@ def dumpconfig(type,config,allowed):
                                 print col1+col2 
                     print "+".ljust(99,"-")+"+"
 
-
+def getobjectnames(objectype,config,allowed):
+    names = []
+    for (k,oc) in config.items():
+        if k in allowed and k == objectype:
+            for o in oc:
+                for (d,v) in o.items():
+                    if objectype+"_name" == d:
+                        names.append(v)
+    print ','.join(names)
+    return (True,','.join(names))
 
 def getdirective(config,objectype,directive,filters):
     try:
@@ -842,6 +860,48 @@ def setparam(config,objectype,directive,value,filters):
                 return (True,message)
     else:
         return (False, "Unknown object type %s" % (o))
+
+def removemodule(config,module,objectype,filters):
+    import re
+    dfilters={}
+    if len(filters) > 0:
+        t=filters.split(',')
+        for i in range(len(t)):
+            (k,v)=t[i].split('=')
+            dfilters[k.strip()]=v.strip()
+
+    code = False
+    message = "Nothing was done"
+
+    #print config[objectype]
+
+    # check wether objectype is defined or not
+    if config.has_key(objectype):
+        # verify each filter (directive,value)
+        for (directive,value) in dfilters.items():
+            for o in config[objectype]:
+                if o.has_key(directive) and o[directive] == value:
+                    modules=[]
+                    for m in o["modules"].split(','):
+                        modules.append(m.strip())
+                    if module in modules:
+                        while module in modules:
+                            modules.remove(module)
+                        o["modules"] = ",".join(modules)
+                    message = "removed module %s from objects of type %s" % (module,objectype)
+                    code = True
+                    print message
+                    return (code,message)
+        message = "No module %s found in object of type %s" % (module,objectype)
+        code = True
+        print message
+        return (code,message)
+    else:
+        message = "no objectype %s was found in configuration" % (objectype)
+        code = True
+        print message
+        return (code,message)
+
 
 def delparam(config,objectype,directive,filters):
     import re

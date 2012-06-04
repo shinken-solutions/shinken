@@ -34,7 +34,7 @@ from copy import copy
 
 from shinken.graph import Graph
 from shinken.commandcall import CommandCall
-from shinken.property import StringProp, ListProp
+from shinken.property import StringProp, ListProp, BoolProp
 from shinken.brok import Brok
 from shinken.util import strip_and_uniq
 from shinken.acknowledge import Acknowledge
@@ -47,6 +47,11 @@ class Item(object):
     
     properties = {
         'imported_from':            StringProp(default='unknown'),
+        'use':                      ListProp(default=''),
+        'name':                     StringProp(default=''),
+        
+        # TODO : find why we can't uncomment this line below.
+        #'register':                 BoolProp(default='1'),
     }
     
     running_properties = {
@@ -90,6 +95,15 @@ class Item(object):
                 self.customs[custom_name] = params[key]
             else:
                 setattr(self, key, params[key])
+
+        self.arb_satmap = {'address': '0.0.0.0', 'port': 0}
+        if hasattr(self, 'address'):
+            self.arb_satmap['address'] = self.address
+        if hasattr(self, 'port'):
+            try:
+                self.arb_satmap['port']    = int(self.port)
+            except:
+                pass
 
     
     def init_running_properties(self):
@@ -136,7 +150,7 @@ Like temporary attributes such as "imported_from", etc.. """
         """ Return if the elements is a template """
         try:
             return self.register == '0'
-        except:
+        except Exception, exp:
             return False
 
 
