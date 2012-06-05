@@ -18,7 +18,7 @@
     });
 </script>
 <script type="text/javascript">
-    car settimmer = 0;
+    var settimmer = 0;
     $(function(){
             window.setInterval(function() {
                 var timeCounter = $("span[id=show-time]").html();
