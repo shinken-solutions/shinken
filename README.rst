@@ -200,7 +200,7 @@ and give it to the shinken user::
   mv shinken /usr/local
   chown -R shinken:shinken /usr/local/shinken
 
-Upadate/Remove
+Update / Remove
 --------------
 Should be easy here.
 
