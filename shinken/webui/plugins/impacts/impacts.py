@@ -91,11 +91,9 @@ def impacts_widget():
                }
     
     d.update({'wid' : wid, 'collapsed' : collapsed, 'options' : options,
-            'base_url' : '/widget/impacts', 'title' : 'Impacts widget'})
+            'base_url' : '/widget/impacts', 'title' : 'Impacts'})
     
     return d
-
-
 
 
 widget_desc = '<h3>Impacts</h3>Show an aggregated view of the most business impacts!'
