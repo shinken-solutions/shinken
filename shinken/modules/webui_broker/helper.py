@@ -1,12 +1,11 @@
-#!/usr/bin/python
-
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2012 :
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
 #    Hartmut Goebel, h.goebel@goebel-consult.de
+#	 Andreas Karfusehr, andreas@karfusehr.de
 #
 # This file is part of Shinken.
 #
@@ -22,7 +21,6 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
-
 
 import time
 import copy
@@ -311,6 +309,46 @@ class Helper(object):
             return """<input type="checkbox" %s />\n""" % id_s
 
 
+    def print_business_rules_mobile(self, tree, level=0, source_problems=[]):
+        safe_print("Should print tree", tree)
+        safe_print('with source_problems', source_problems)
+        node = tree['node']
+        name = node.get_full_name()
+        fathers = tree['fathers']
+        s = ''
+        # Maybe we are the root problem of this, and so we are printing it
+        root_str = ''
+        if node in source_problems:
+            print "I am a root problem"
+            root_str = ' <span class="alert-small alert-critical"> Root problem</span>'
+        # Do not print the node if it's the root one, we already know its state!
+        if level != 0:
+            s += "%s is %s since %s %s\n" % (self.get_link_mobile(node), node.state, self.print_duration(node.last_state_change, just_duration=True), root_str)
+
+        # If we got no parents, no need to print the expand icon
+        if len(fathers) > 0:
+            # We look if the below tree is goodor not
+            tree_is_good = (node.state_id == 0)
+            
+            # If the tree is good, we will use an expand image
+            # and hide the tree
+            if tree_is_good:
+                display = 'none'
+                img = 'expand.png'
+            else: # we will already show the tree, and use a reduce image
+                display = 'block'
+                img = 'reduce.png'
+			
+            s += """<ul id="business-parents-%s" style="display: %s; ">""" % (name, display)
+			
+            for n in fathers:
+                sub_node = n['node']
+                sub_s = self.print_business_rules_mobile(n, level=level+1,source_problems=source_problems)
+                s += '<li class="%s">%s</li>' % (self.get_small_icon_state(sub_node), sub_s)
+            s += "</ul>"
+        safe_print("Returing s:", s)
+        return s
+
     def print_business_rules(self, tree, level=0, source_problems=[]):
         safe_print("Should print tree", tree)
         safe_print('with source_problems', source_problems)
@@ -456,15 +494,33 @@ class Helper(object):
         return t
 
 
-    def get_link(self, obj, short=False):
+    def get_link(self, obj, short=False, mobile=False):
         if obj.__class__.my_type == 'service':
             if short:
                 name = obj.get_name()
             else:
                 name = obj.get_full_name()
-            return '<a href="/service/%s"> %s </a>' % (obj.get_full_name(), name)
+            
+            if mobile == False:
+                return '<a href="/service/%s"> %s </a>' % (obj.get_full_name(), name)
+            else:
+                return '<a href="/mobile/service/%s"> %s </a>' % (obj.get_full_name(), name)
         # if not service, host
-        return '<a href="/host/%s"> %s </a>' % (obj.get_full_name(), obj.get_full_name())
+        if mobile == False:
+            return '<a href="/host/%s"> %s </a>' % (obj.get_full_name(), obj.get_full_name())
+        else:
+            return '<a href="/mobile/host/%s"> %s </a>' % (obj.get_full_name(), obj.get_full_name())
+    
+    def get_link_mobile(self, obj, short=False):
+        if obj.__class__.my_type == 'service':
+            if short:
+                name = obj.get_name()
+            else:
+                name = obj.get_full_name()
+            return '<a href="/mobile/service/%s" rel="external"> %s </a>' % (obj.get_full_name(), name)
+        # if not service, host
+        return '<a href="/mobile/host/%s" rel="external"> %s </a>' % (obj.get_full_name(), obj.get_full_name())
+    
     
     #Give only the /service/blabla or /host blabla string, like for buttons inclusion
     def get_link_dest(self, obj):
