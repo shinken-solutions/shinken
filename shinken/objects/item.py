@@ -96,15 +96,6 @@ class Item(object):
             else:
                 setattr(self, key, params[key])
 
-        self.arb_satmap = {'address': '0.0.0.0', 'port': 0}
-        if hasattr(self, 'address'):
-            self.arb_satmap['address'] = self.address
-        if hasattr(self, 'port'):
-            try:
-                self.arb_satmap['port']    = int(self.port)
-            except:
-                pass
-
     
     def init_running_properties(self):
         for prop, entry in self.__class__.running_properties.items():

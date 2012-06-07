@@ -79,6 +79,19 @@ class SatelliteLink(Item):
     })
 
 
+    def __init__(self, *args, **kwargs):
+        super(SatelliteLink, self).__init__(*args, **kwargs)
+
+        self.arb_satmap = {'address': '0.0.0.0', 'port': 0}
+        if hasattr(self, 'address'):
+            self.arb_satmap['address'] = self.address
+        if hasattr(self, 'port'):
+            try:
+                self.arb_satmap['port']    = int(self.port)
+            except:
+                pass
+
+
     def set_arbiter_satellitemap(self, satellitemap):
         """
             arb_satmap is the satellitemap in current context:
@@ -88,6 +101,7 @@ class SatelliteLink(Item):
         """
         self.arb_satmap = {'address': self.address, 'port': self.port}
         self.arb_satmap.update(satellitemap)
+
 
     def create_connection(self):
         try:
