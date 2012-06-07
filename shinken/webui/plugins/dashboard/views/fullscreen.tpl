@@ -1,4 +1,4 @@
-%rebase layout globals(), js=['dashboard/js/widgets.js', 'dashboard/js/jquery.easywidgets.js', 'dashboard/js/jquery.jclock.js',], css=['dashboard/css/widget.css', 'dashboard/css/dashboard.css', 'dashboard/css/fullscreen.css'], title='Dashboard', menu_part='/dashboard', print_header=False, print_footer=False
+%rebase layout globals(), js=['dashboard/js/widgets.js', 'dashboard/js/jquery.easywidgets.js', 'dashboard/js/jquery.jclock.js'], css=['dashboard/css/fullscreen-widget.css', 'dashboard/css/dashboard.css', 'dashboard/css/fullscreen.css'], title='Dashboard', menu_part='/dashboard', print_header=False, print_footer=False
 
 %from shinken.bin import VERSION
 %helper = app.helper
@@ -31,7 +31,6 @@
 <!-- Dashboard Header START -->
 <div id="dash-header" class="span12">
   <ul class="span9 pull-left">
-    <li></li>
     <li></li>
   </ul>
   <ul class="span3 pull-right">
