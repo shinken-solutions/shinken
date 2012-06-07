@@ -71,6 +71,6 @@ class Cfg_Password_Webui(BaseModule):
         if not c:
             return False
 
-        print "User %s (%s) try to init with %s" % (user, c.password, password)
+        print "User %s (%s) try to init" % (user, c.password)
         p = c.password
         return p == password and p != 'NOPASSWORDSET'

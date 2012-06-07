@@ -67,3 +67,5 @@ To FORLOT Romain for his patch about IBM DS checks
 To Michael COQUARD for this patch about setup.py and build path
 To Akiooutori for his bug report about pyro missing SOCK_REUSE parameter in some os
 To Timo Veith for this work on the Wiki refactoring!
+To Lars Hansson for this patches about cfg password module.
+
