@@ -401,6 +401,8 @@ class Skonf(Daemon):
         # Ok, here we must check if we go on or not.
         # TODO : check OK or not
         self.api_key = self.conf.api_key
+        self.community_uri = str(self.conf.community_uri)
+        self.http_proxy = str(self.conf.http_proxy)
         self.use_local_log = self.conf.use_local_log
         self.log_level = logger.get_level_id(self.conf.log_level)
         self.local_log = self.conf.local_log

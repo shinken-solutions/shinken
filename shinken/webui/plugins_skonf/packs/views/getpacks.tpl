@@ -23,7 +23,7 @@ function submit(){
       Oups! There was a problem with the API server connexion
       <br/>
       <div id='api_error' class='hide'>{{api_error}}</div>
-      <a href='javascript:$("#api_error").show()' class='btn btn-warning'> <i class="icon-remove"></i> Show the error</a>
+      <a href="javascript:$('#api_error').show()" class='btn btn-warning'> <i class="icon-remove"></i> Show the error</a>
       <a href='/testapi' class='btn btn-success'> <i class="icon-upload"></i> Try an API server connexion</a>
     </div>
 %end
