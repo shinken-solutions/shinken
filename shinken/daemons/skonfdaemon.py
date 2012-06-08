@@ -876,6 +876,7 @@ class Skonf(Daemon):
         r['external_commands'] = self.external_commands
         return r
 
+
     # Get back our data from a retention module
     def restore_retention_data(self, data):
         broks = data['broks']

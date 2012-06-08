@@ -84,17 +84,21 @@ class Mongodb_generic(BaseModule):
             print "[Mongodb Module] : Problem during init phase"
             return {}
 
-        r = {'hosts' : []}
-
-        cur = self.db.hosts.find({})
-        for h in cur:
-            print "DBG: mongodb: get host", h
-            # We remove a mongodb specific property, the _id
-            del h['_id']
-            # And we add an imported_from property to say it came from
-            # mongodb
-            h['imported_from'] = 'mongodb:%s:%s' % (self.uri, self.database)
-            r['hosts'].append(h)
+        r = {}
+        
+        tables = ['hosts', 'services', 'contacts', 'commands', 'timeperiods']
+        for t in tables:
+            r[t] = []
+            
+            cur = getattr(self.db, t).find({ '_state' : { '$ne' : 'disabled' } })
+            for h in cur:
+                print "DBG: mongodb: get an ", t, h
+                # We remove a mongodb specific property, the _id
+                del h['_id']
+                # And we add an imported_from property to say it came from
+                # mongodb
+                h['imported_from'] = 'mongodb:%s:%s' % (self.uri, self.database)
+                r[t].append(h)
 
         return r
 
