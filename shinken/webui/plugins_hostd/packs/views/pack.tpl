@@ -1,9 +1,10 @@
 
-%rebase layout_hostd globals() #, js=['packs/js/pack.js']
+%pname = pack.get('pack_name')
+%rebase layout_hostd globals(), title='Pack %s' % pname
 
 <!-- PACK {{pack}} -->
 
-%pname = pack.get('pack_name')
+
 %pid = pack.get('_id')
 %pstate = pack.get('state')
 <span class='span10 well'>

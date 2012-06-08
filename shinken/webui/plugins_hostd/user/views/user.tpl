@@ -1,8 +1,9 @@
 %import hashlib
 
-%rebase layout_hostd globals(), js=['user/js/user.js']
-
 %uname = view_user.get('username')
+%rebase layout_hostd globals(), js=['user/js/user.js'], title='User %s' % uname
+
+
 
 %# We need to know if the user asking the page is the user or if it's a public view
 %private_access = (user  == view_user)
