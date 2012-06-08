@@ -64,7 +64,6 @@ class Graphite_broker(BaseModule):
         else:
             self.port = int(getattr(modconf, 'port', '2003'))
         self.tick_limit = int(getattr(modconf, 'tick_limit', '300'))
-        self.illegal_char = re.compile(r'[^\w]');
         self.buffer = []
         self.ticks = 0
         self.host_dict = {}
