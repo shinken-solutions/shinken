@@ -35,7 +35,7 @@ from shinken.basemodule import BaseModule
 print "Loaded Apache/Passwd module"
 
 properties = {
-    'daemons' : ['webui'],
+    'daemons' : ['webui', 'skonf'],
     'type' : 'cfg_password_webui'
     }
 
@@ -67,10 +67,15 @@ class Cfg_Password_Webui(BaseModule):
     def check_auth(self, user, password):
         c = self.app.datamgr.get_contact(user)
 
-        #Ok, if the user is bad, bailout
+        # Ok, if the user is bad, bailout
         if not c:
             return False
-
-        print "User %s (%s) try to init" % (user, c.password)
-        p = c.password
+        
+        print "User %s try to init" % user
+        p = None
+        # In skonf, it's dummy object
+        if isinstance(c, dict):
+            p = c.get('password', 'NOPASSWORDSET')
+        else:
+            p = c.password
         return p == password and p != 'NOPASSWORDSET'

@@ -37,7 +37,7 @@ from shinken.basemodule import BaseModule
 
 
 properties = {
-    'daemons' : ['arbiter', 'webui'],
+    'daemons' : ['arbiter', 'webui', 'skonf'],
     'type' : 'mongodb',
     'external' : False,
     'phases' : ['configuration'],

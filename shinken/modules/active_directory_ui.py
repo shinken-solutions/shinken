@@ -36,7 +36,7 @@ from shinken.basemodule import BaseModule
 print "Loaded AD module"
 
 properties = {
-    'daemons' : ['webui'],
+    'daemons' : ['webui', 'skonf'],
     'type' : 'ad_webui'
     }
 

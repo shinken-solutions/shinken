@@ -50,7 +50,7 @@ from shinken.daemon import Daemon, Interface
 from shinken.log import logger
 from shinken.brok import Brok
 from shinken.external_command import ExternalCommand
-from shinken.util import safe_print, expect_file_dirs
+from shinken.util import safe_print, expect_file_dirs, strip_and_uniq
 from shinken.skonfuiworker import SkonfUIWorker
 from shinken.message import Message
 from shinken.misc.datamanagerskonf import datamgr
@@ -169,7 +169,6 @@ class Skonf(Daemon):
 
         self.broks = {}
         self.is_master = False
-        self.me = None
 
         self.nb_broks_send = 0
 
@@ -222,35 +221,31 @@ class Skonf(Daemon):
 
         self.conf.early_arbiter_linking()
 
-        # Search wich Arbiterlink I am
-        for arb in self.conf.arbiters:
-            if arb.is_me():
-                arb.need_conf = False
-                self.me = arb
-                self.is_master = not self.me.spare
-                logger.info("I am the %s Arbiter : %s" % ('master' if self.is_master else 'spare', arb.get_name()))
+        self.modules = []
+        print "Loading modules", self.conf.skonf_modules
+        modules_names = self.conf.skonf_modules.split(',')
+        modules_names = strip_and_uniq(modules_names)
+        for mod_name in modules_names:
+           m = self.conf.modules.find_by_name(mod_name)
+           if not m:
+              logger.error('cannot find module %s' % mod_name)
+              sys.exit(2)
+           self.modules.append(m)
 
-                # Set myself as alive ;)
-                self.me.alive = True
-            else: #not me
-                arb.need_conf = True
-
-        if not self.me:
-            sys.exit("Error: I cannot find my own Arbiter object, I bail out. \
-                     To solve it, please change the host_name parameter in \
-                     the object Arbiter in the file shinken-specific.cfg. \
-                     With the value %s \
-                     Thanks." % socket.gethostname())
-
-        logger.info("My own modules : " + ','.join([m.get_name() for m in self.me.modules]))
+        logger.info("My own modules : " + ','.join([m.get_name() for m in self.modules]))
 
         # we request the instances without them being *started* 
         # (for these that are concerned ("external" modules):
         # we will *start* these instances after we have been daemonized (if requested)
-        self.modules_manager.set_modules(self.me.modules)
+        self.modules_manager.set_modules(self.modules)
         self.do_load_modules()
 
-        # Call modules that manage this read configuration pass
+        for inst in self.modules_manager.instances:
+            f = getattr(inst, 'load', None)
+            if f and callable(f):
+                f(self)
+
+        """        # Call modules that manage this read configuration pass
         self.hook_point('read_configuration')
 
         # Now we ask for configuration modules if they
@@ -274,7 +269,7 @@ class Skonf(Daemon):
                             # now append the object
                             raw_objects[k].append(x)
                         print "Added %i objects to %s from module %s" % (len(r[prop]), k, inst.get_name())
-
+        """
 
         ### Resume standard operations ###
         self.conf.create_objects(raw_objects)
@@ -422,7 +417,7 @@ class Skonf(Daemon):
         #print "DBG workdir=", self.workdir
 
         ##  We need to set self.host & self.port to be used by do_daemon_init_and_start
-        self.host = self.me.address
+        self.host = ''
         self.port = 0
         
         logger.info("Configuration Loaded")
@@ -530,25 +525,9 @@ class Skonf(Daemon):
         self.new_conf = None
         self.cur_conf = conf
         self.conf = conf        
-        for arb in self.conf.arbiters:
-            if (arb.address, arb.port) == (self.host, self.port):
-                self.me = arb
-                arb.is_me = lambda: True  # we now definitively know who we are, just keep it.
-            else:
-                arb.is_me = lambda: False # and we know who we are not, just keep it.
 
 
     def do_loop_turn(self):
-        # If I am a spare, I wait for the master arbiter to send me
-        # true conf. When
-        if self.me.spare:
-            self.wait_for_initial_conf()
-            if not self.new_conf:
-                return
-            self.setup_new_conf()
-            print "I must wait now"
-            self.wait_for_master_death()
-
         if self.must_run:
             # Main loop
             self.run()
@@ -629,12 +608,6 @@ class Skonf(Daemon):
 
     # Main function
     def run(self):
-        # Before running, I must be sure who am I
-        # The arbiters change, so we must refound the new self.me
-        for arb in self.conf.arbiters:
-            if arb.is_me():
-                self.me = arb
-
         if self.conf.human_timestamp_log:
             logger.set_human_format()
         
@@ -886,6 +859,38 @@ class Skonf(Daemon):
 
 
 
+    def check_auth(self, user, password):
+        print "Checking auth of", user #, password
+        c = self.datamgr.get_contact(user)
+        print "Got", c 
+        if not c:
+            print "Warning: You need to have a contact having the same name as your user %s" % user
+        
+        # TODO : do not forgot the False when release!
+        is_ok = False#(c is not None)#False
+        
+        for mod in self.modules_manager.get_internal_instances():
+            try:
+                f = getattr(mod, 'check_auth', None)
+                print "Get SKONF check_auth", f, "from", mod.get_name()
+                if f and callable(f):
+                    r = f(user, password)
+                    if r:
+                        is_ok = True
+                        # No need for other modules
+                        break
+            except Exception , exp:
+                print exp.__dict__
+                logger.warning("[%s] The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
+                logger.debug("[%s] Exception type : %s" % (self.name, type(exp)))
+                logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
+                self.modules_manager.set_to_restart(mod)        
+
+        # Ok if we got a real contact, and if a module auth it
+        return (is_ok and c is not None)
+
+        
+
     def get_user_auth(self):
         # First we look for the user sid
         # so we bail out if it's a false one
@@ -936,10 +941,6 @@ class Skonf(Daemon):
        self.datamgr.load_conf(self.conf)
        self.datamgr.load_db(self.db)
        
-
-    # TODO : code this!
-    def check_auth(self, login, password):
-       return True
 
 
     def get_api_key(self):
