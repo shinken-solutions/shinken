@@ -1,6 +1,6 @@
 %import hashlib
 
-%rebase layout_hostd globals(), js=['packs/js/packs.js']
+%rebase layout_hostd globals(), js=['packs/js/packs.js'], title='All packs'
 
 <div> <h1> Packs </h1> </div>
 

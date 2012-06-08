@@ -1,6 +1,6 @@
 %import hashlib
 
-%rebase layout_hostd globals(), css=['main/css/main.css']
+%rebase layout_hostd globals(), css=['main/css/main.css'], title='Shinken community website'
 
 <div class='row'>
   <div class='offset1 span5 front_panel'>

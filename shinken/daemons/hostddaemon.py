@@ -416,6 +416,8 @@ class Hostd(Daemon):
         self.packs_home = self.conf.packs_home
         logger.info('Using pack home %s' % self.packs_home)
         
+        self.auth_secret = self.conf.auth_secret.encode('utf8', 'replace')
+
         # If the user set a workdir, let use it. If not, use the
         # pidfile directory
         if self.conf.workdir == '':
@@ -436,7 +438,7 @@ class Hostd(Daemon):
 
         self.http_port = 7765#int(getattr(modconf, 'port', '7767'))
         self.http_host = '0.0.0.0'#getattr(modconf, 'host', '0.0.0.0')
-        self.auth_secret = 'CHANGE_ME'.encode('utf8', 'replace')#getattr(modconf, 'auth_secret').encode('utf8', 'replace')
+        #self.auth_secret = 'YOUDONTKNOWIT'.encode('utf8', 'replace')#getattr(modconf, 'auth_secret').encode('utf8', 'replace')
         self.http_backend = 'auto'#getattr(modconf, 'http_backend', 'auto')
         self.login_text = None#getattr(modconf, 'login_text', None)
         self.allow_html_output = False#to_bool(getattr(modconf, 'allow_html_output', '0'))
@@ -1086,24 +1088,24 @@ class Hostd(Daemon):
     def register_user(self, username, pwdhash, email):
        ak = uuid.uuid4().get_hex()
        api_key = uuid.uuid4().get_hex()
-       d = {'_id' : username, 'username' : username, 'pwd_hash' : pwdhash, 'email' : email, 'api_key' : api_key, 'activating_key' : ak, 'validated' : False}
+       d = {'_id' : username, 'username' : username, 'pwd_hash' : pwdhash, 'email' : email, 'api_key' : api_key, 'activating_key' : ak, 'validated' : False, 'is_admin' : False, 'is_moderator' : False}
        print "Saving new user", d
        self.db.users.save(d)
 
        # Now send the mail
-       fromaddr = 'shinken@localhost'
+       fromaddr = 'shinken@community.shinken-monitoring.org'
        toaddrs  = [email]
-       srvuri = 'http://myhost'
+       srvuri = 'http://community.shinken-monitoring.org'
        # Add the From: and To: headers at the start!
-       msg = ("From: %s\r\nTo: %s\r\n\r\n"
+       msg = ("From: %s\r\nSubject: Registering to Shinken community website\r\nTo: %s\r\n\r\n"
               % (fromaddr, ", ".join(toaddrs)))
-       msg += 'Thanks %s for registering in the Shinken pack site! Please click on the link below to enable your account.\n' % username
-       msg += ' <a href="%s/validate?activating_key=%s"> Validate your account</a>' % (srvuri, ak)
+       msg += 'Thanks %s for registering in the Shinken community site and welcome! Please click on the link below to enable your account so you can start to get packs and submit new ones.\n' % username
+       msg += ' %s/validate?activating_key=%s' % (srvuri, ak)
        print "Message length is " + repr(len(msg))
        print "MEssage is", msg
        print "Go to send mail"
        try:
-          server = smtplib.SMTP('mailserver')
+          server = smtplib.SMTP('localhost')
           server.set_debuglevel(1)
           server.sendmail(fromaddr, toaddrs, msg)
           server.quit()

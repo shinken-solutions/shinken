@@ -1,5 +1,5 @@
 
-%rebase layout_hostd globals(), js=['push/js/jquery.filedrop.js', 'push/js/addpack.js']
+%rebase layout_hostd globals(), js=['push/js/jquery.filedrop.js', 'push/js/addpack.js'], title='Adding a new pack'
 
 
 <span id='dropzone' class='well span10'> Drop you pack file here </span>
