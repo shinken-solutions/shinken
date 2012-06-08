@@ -34,6 +34,7 @@
 import time
 import random
 import itertools
+import threading
 
 from shinken.util import alive_then_spare_then_deads
 from shinken.log import logger
@@ -95,10 +96,12 @@ class Dispatcher:
         # Some flag about dispatch need or not
         self.dispatch_ok = False
         self.first_dispatch_done = False
+        self.sending_conf_to_arb_spare = False
 
         # Prepare the satellites confs
         for satellite in self.satellites:
             satellite.prepare_for_conf()
+
 
         # Some properties must be given to satellites from global
         # configuration, like the max_plugins_output_length to pollers
@@ -128,10 +131,15 @@ class Dispatcher:
 
         for arb in self.arbiters:
             #If not me...
-            if arb != self.arbiter:
+            if arb != self.arbiter and self.sending_conf_to_arb_spare == False:
                 arb.update_infos()
                 #print "Arb", arb.get_name(), "alive?", arb.alive, arb.__dict__
 
+    # Send conf to arbiter spare
+    def send_conf_to_arb_spare(self, arb):
+        self.sending_conf_to_arb_spare = True
+        arb.put_conf(self.conf)
+        self.sending_conf_to_arb_spare = False
 
     # Check if all active items are still alive
     # the result goes into self.dispatch_ok
@@ -140,9 +148,11 @@ class Dispatcher:
         # Check if the other arbiter has a conf
         for arb in self.arbiters:
             # If not me and I'm a master
-            if arb != self.arbiter and self.arbiter and not self.arbiter.spare:
+            if arb != self.arbiter and self.arbiter and not self.arbiter.spare\
+               and self.sending_conf_to_arb_spare == False:
                 if not arb.have_conf(self.conf.magic_hash):
-                    arb.put_conf(self.conf)
+                    t = threading.Thread(target=self.send_conf_to_arb_spare, args=(arb,))
+                    t.start()
                 else:
                     # Ok, it already has the conf. I remember that
                     # it does not have to run, I'm still alive!
