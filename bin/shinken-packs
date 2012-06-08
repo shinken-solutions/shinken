@@ -268,28 +268,24 @@ def create_pack(pack_file, p_dest_dir, share_dir):
     print "The pakc file is saved as", zip_file_p
 
 
-def push_pack(zip_file_p, api_key):
+def push_pack(zip_file_p, api_key, uri, proxy):
     # open the file again, to see what's in it
-    file = zipfile.ZipFile(zip_file_p, "r")
-    for info in file.infolist():
-        print info.filename
+    #file = zipfile.ZipFile(zip_file_p, "r")
+    #for info in file.infolist():
+    #    print info.filename
 
     print "GO PUSH"
-    #import os, urllib
-    #os.environ["http_proxy"] = "http://proxy:3128"
-    #data = urllib.urlopen("http://www.google.fr").read()
-    #print "DATA?", data
-
     print "LAUNCH THE FILE", zip_file_p
 
     import pycurl
 
     c = pycurl.Curl()
     c.setopt(c.POST, 1)
-    #c.setopt(c.CONNECTTIMEOUT, 5)
-    #c.setopt(c.TIMEOUT, 8)
-    #c.setopt(c.PROXY, 'http://inthemiddle.com:8080')
-    c.setopt(c.URL, "http://127.0.0.1:7765/pushpack")
+    c.setopt(c.CONNECTTIMEOUT, 5)
+    c.setopt(c.TIMEOUT, 8)
+    if proxy:
+        c.setopt(c.PROXY, proxy)
+    c.setopt(c.URL, uri+"/pushpack")
 
     c.setopt(c.HTTPPOST,[ ("key", api_key), 
                           ("data", 
@@ -299,17 +295,17 @@ def push_pack(zip_file_p, api_key):
 
 
     #c.setopt(c.HTTPPOST, [("file1", (c.FORM_FILE, str(zip_file_p)))])
-    c.setopt(c.VERBOSE, 1)
+    #c.setopt(c.VERBOSE, 1)
     r = c.perform()
     print "status code: %s" % c.getinfo(pycurl.HTTP_CODE)
     c.close()
-    print "that's it ;)"
+    print "Thanks :) "
 
 
 
 
 
-def register(login, password, email):
+def register(login, password, email, uri, proxy):
     print "GO register"
     #import os, urllib
     #os.environ["http_proxy"] = "http://proxy:3128"
@@ -320,10 +316,11 @@ def register(login, password, email):
 
     c = pycurl.Curl()
     c.setopt(c.POST, 1)
-    #c.setopt(c.CONNECTTIMEOUT, 5)
-    #c.setopt(c.TIMEOUT, 8)
-    #c.setopt(c.PROXY, 'http://inthemiddle.com:8080')
-    c.setopt(c.URL, "http://127.0.0.1:7765/register")
+    c.setopt(c.CONNECTTIMEOUT, 5)
+    c.setopt(c.TIMEOUT, 8)
+    if proxy:
+        c.setopt(c.PROXY, proxy)
+    c.setopt(c.URL, uri+"/register")
 
     c.setopt(c.HTTPPOST,[ ("username", login), ("password", password), ("email", email), ('cli_mode', '1')])
 
@@ -358,7 +355,7 @@ def register(login, password, email):
 
 
 
-def getkey(login, password):
+def getkey(login, password, uri, proxy):
     print "GO get your key"
     #import os, urllib
     #os.environ["http_proxy"] = "http://proxy:3128"
@@ -369,10 +366,11 @@ def getkey(login, password):
 
     c = pycurl.Curl()
     c.setopt(c.POST, 1)
-    #c.setopt(c.CONNECTTIMEOUT, 5)
-    #c.setopt(c.TIMEOUT, 8)
-    #c.setopt(c.PROXY, 'http://inthemiddle.com:8080')
-    c.setopt(c.URL, "http://127.0.0.1:7765/apikey")
+    c.setopt(c.CONNECTTIMEOUT, 5)
+    c.setopt(c.TIMEOUT, 10)
+    if proxy:
+        c.setopt(c.PROXY, proxy)
+    c.setopt(c.URL, uri+"/apikey")
 
     c.setopt(c.HTTPPOST,[ ("login", login), ("password", password), ('cli_mode', '1')])
 
@@ -402,7 +400,7 @@ def getkey(login, password):
 
 
 
-def analyse(api_key, stats_file):
+def analyse(api_key, stats_file, uri, proxy):
     if not api_key:
         print "Error : Sorry, analysing the configuration need an API key"
         sys.exit(2)
@@ -414,10 +412,11 @@ def analyse(api_key, stats_file):
 
     c = pycurl.Curl()
     c.setopt(c.POST, 1)
-    #c.setopt(c.CONNECTTIMEOUT, 5)
-    #c.setopt(c.TIMEOUT, 8)
-    #c.setopt(c.PROXY, 'http://inthemiddle.com:8080')
-    c.setopt(c.URL, "http://127.0.0.1:7765/pushstats")
+    c.setopt(c.CONNECTTIMEOUT, 5)
+    c.setopt(c.TIMEOUT, 8)
+    if proxy:
+        c.setopt(c.PROXY, proxy)
+    c.setopt(c.URL, uri+"/pushstats")
 
     c.setopt(c.HTTPPOST,[ ("key", api_key), 
                           ("data", 
@@ -445,6 +444,8 @@ Upload   : %prog [options] -u -z pack.zip -k API_KEY
 Register : %prog [options] -r -l login -P password -e email
 Retrieve : %prog [options] -g -l login -P password
 Analyse  : %prog [options] -a -k API_KEY /path/stats.json
+
+For more information, look at http://www.shinken-monitoring.org/wiki/packs/create_and_push_packs
 """,
         version="%prog " + VERSION)
     parser.add_option('-c', '--create', action='store_true',
@@ -454,7 +455,11 @@ Analyse  : %prog [options] -a -k API_KEY /path/stats.json
     parser.add_option('-s', '--share-dir', dest="share_dir",
                        help=('Your share directory with templates and icon sets'))
     parser.add_option('-d', '--dest', dest="p_dest_dir", 
-                      help=""""Directory where to """)
+                      help="""Directory where to """)
+    parser.add_option('-U', '--uri', dest="uri",
+                      help="""Uri to push the pack. Default is community.shinken-monitoring.org""")
+    parser.add_option('--proxy', dest="proxy",
+                      help="""Proxy URI. Like http://user:password@proxy-server:3128""")
 
     parser.add_option('-u', '--upload', action='store_true',
                       dest="upload", help=('Mode to upload a pack zip file to the Shinken Pack website. It need an API key for it.'))
@@ -494,6 +499,8 @@ Analyse  : %prog [options] -a -k API_KEY /path/stats.json
     _tmp = tempfile.mktemp()
     share_dir = opts.share_dir or ''
 
+    uri = opts.uri or 'community.shinken-monitoring.org'
+    proxy = opts.proxy or None
 
     if opts.create_pack:
         mode = 'create_pack'
@@ -523,7 +530,7 @@ Analyse  : %prog [options] -a -k API_KEY /path/stats.json
             parser.error("Requires an API key (option -k/--api-key)")
         api_key = opts.api_key
 
-        push_pack(zip_file, api_key)
+        push_pack(zip_file, api_key, uri, proxy)
 
 
     if opts.register:
@@ -538,7 +545,7 @@ Analyse  : %prog [options] -a -k API_KEY /path/stats.json
             parser.error("Requires a valid email (option -e/--email)")
         email = opts.email
 
-        register(login, password, email)
+        register(login, password, email, uri, proxy)
 
 
     if opts.getkey:
@@ -550,7 +557,7 @@ Analyse  : %prog [options] -a -k API_KEY /path/stats.json
             parser.error("Requires a password (option -P/--password)")
         password = opts.password
 
-        getkey(login, password)
+        getkey(login, password, uri, proxy)
 
 
 
@@ -566,4 +573,4 @@ Analyse  : %prog [options] -a -k API_KEY /path/stats.json
             parser.error("Too much statistics files to send")
         p = files[0]
         print "Sending statistics in file ", p
-        analyse(api_key, p)
+        analyse(api_key, p, uri, proxy)
