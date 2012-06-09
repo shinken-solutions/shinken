@@ -34,7 +34,7 @@
      <a id='small_show_panel' href="#pageslide" class="slidelink btn btn-success"><i class="icon-plus"></i> Add a new widget</a>
     <li></li>
   </ul>
-  <ul class="span3 pull-right">
+  <ul class="span2 pull-right">
     <li style="width: 150px;"><span class="jclock clock"></span></li>
     <li><span id="show-time" class="clock">62</span> </li>
   </ul>
@@ -43,15 +43,14 @@
 
 <!-- Jet Pack Area START -->
 <div class="span12">
-  <p style="width: 96.5%" class="btn btn-large btn-success no-leftmergin"><span class="pull-left"><i class="icon-fire icon-white"></i> <b>Nothing To Do Here / <span class="jetpack">Jet Pack Guy</span></b></span></p>
+  <p style="width: 96.5%" class="btn btn-dash btn-success no-leftmergin"><span class="pull-left"><i class="icon-fire icon-white"></i> <b>Nothing To Do Here / <span class="jetpack">Jet Pack Guy</span></b></span></p>
 </div>
 <!-- Jet Pack Area END -->
 
 <div class='span12'>
   <div id='loading' class='pull-left'> <img src='/static/images/spinner.gif'> Loading widgets</div>
-
-
 </div>
+
 <div id="pageslide" style="display:none">
     <div class='row'>
       <h2 class='pull-left'>Widgets available</h2>
