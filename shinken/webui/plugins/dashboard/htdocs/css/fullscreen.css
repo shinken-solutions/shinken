@@ -69,6 +69,13 @@ body {
 .clock {
 	color: #787878;
 	font-weight: bold;
+	font-size: 1.2em;
+	vertical-align: middle;
+	padding-top: 10px;
+}
+
+#show-time {
+	min-width: 35px;
 }
 
 .jetpack {
@@ -77,4 +84,18 @@ body {
 
 .btn-dash {
 	font-size: 2.5em;
+}
+
+.icon-home { 
+  background-image: url("/static/img/icons/icon-home.png"); 
+  background-position: center; 
+  height: 30px; 
+  width: 30px; 
+}
+
+.icon-plus-dash { 
+  background-image: url("/static/img/icons/icon-plus-dash.png"); 
+  background-position: center; 
+  height: 30px; 
+  width: 30px; 
 }

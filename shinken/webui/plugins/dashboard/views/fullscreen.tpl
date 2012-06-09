@@ -31,12 +31,14 @@
 <!-- Dashboard Header START -->
 <div id="dash-header" class="span12">
   <ul class="span9 pull-left">
-     <a id='small_show_panel' href="#pageslide" class="slidelink btn btn-success"><i class="icon-plus"></i> Add a new widget</a>
+     
     <li></li>
   </ul>
   <ul class="span2 pull-right">
     <li style="width: 150px;"><span class="jclock clock"></span></li>
-    <li><span id="show-time" class="clock">62</span> </li>
+    <li> <span id="show-time" class="clock">62</span> </li>
+    <li> <a id='small_show_panel' href="#pageslide" class="slidelink"></a></li>
+    <li> <a href="/dashboard"  class="icon-home"></a></li>
   </ul>
 </div>
 <!-- Dashboard Header END -->
