@@ -26,7 +26,11 @@
 
 
 
-""" The objects package contains definition classes of the different objects that can be declared in configuration files. """
+"""
+The objects package contains definition classes of the different objects
+ that can be declared in configuration files.
+
+ """
 
 from item import Item, Items
 from timeperiod import Timeperiod, Timeperiods
