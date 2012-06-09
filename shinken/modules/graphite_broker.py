@@ -31,8 +31,10 @@ backend. http://graphite.wikidot.com/start
 import re
 from socket import socket
 import cPickle
+import struct
 
 from shinken.basemodule import BaseModule
+from shinken.log import logger
 
 properties = {
     'daemons' : ['broker'],
@@ -64,6 +66,8 @@ class Graphite_broker(BaseModule):
         self.tick_limit = int(getattr(modconf, 'tick_limit', '300'))
         self.buffer = []
         self.ticks = 0
+        self.host_dict = {}
+        self.svc_dict = {}
 
 
 
@@ -118,6 +122,18 @@ class Graphite_broker(BaseModule):
         return res
 
 
+    # Prepare service custom vars
+    def manage_initial_service_status_brok(self, b):
+        if '_GRAPHITE_POST' in b.data['customs']:
+            self.svc_dict[(b.data['host_name'], b.data['service_description'])] = b.data['customs']
+
+
+    # Prepare host custom vars
+    def manage_initial_host_status_brok(self, b):
+        if '_GRAPHITE_PRE' in b.data['customs']:
+            self.host_dict[b.data['host_name']] = b.data['customs']
+
+
     # A service check result brok has just arrived, we UPDATE data info with this
     def manage_service_check_result_brok(self, b):
         data = b.data
@@ -130,7 +146,17 @@ class Graphite_broker(BaseModule):
             return
         
         hname = self.illegal_char.sub('_', data['host_name'])
+        if data['host_name'] in self.host_dict:
+            customs_datas = self.host_dict[data['host_name']]
+            if '_GRAPHITE_PRE' in customs_datas:
+                hname = ".".join((customs_datas['_GRAPHITE_PRE'], hname))
+
         desc = self.illegal_char.sub('_', data['service_description'])
+        if (data['host_name'], data['service_description']) in self.svc_dict:
+            customs_datas = self.svc_dict[(data['host_name'], data['service_description'])]
+            if '_GRAPHITE_POST' in customs_datas:
+                desc = ".".join((desc, customs_datas['_GRAPHITE_POST']))
+
         check_time = int(data['last_chk'])
 
 #        print "Graphite:", hname, desc, check_time, perf_data
@@ -139,8 +165,9 @@ class Graphite_broker(BaseModule):
             # Buffer the performance data lines
             for (metric, value) in couples:
                 if value:
-                    self.buffer.append("%s.%s.%s %s %d" % (hname, desc, metric,
-                                                           value, check_time))
+                    self.buffer.append(("%s.%s.%s" % (hname, desc, metric),
+                                       ("%d" % check_time,
+                                        "%s" % value)))
 
         else:
             lines = []
@@ -152,7 +179,6 @@ class Graphite_broker(BaseModule):
             packet = '\n'.join(lines) + '\n' # Be sure we put \n every where
 #            print "Graphite launching :", packet
             self.con.sendall(packet)
-
 
 
 
@@ -168,6 +194,11 @@ class Graphite_broker(BaseModule):
             return
         
         hname = self.illegal_char.sub('_', data['host_name'])
+        if data['host_name'] in self.host_dict:
+            customs_datas = self.host_dict[data['host_name']]
+            if '_GRAPHITE_PRE' in customs_datas:
+                hname = ".".join((customs_datas['_GRAPHITE_PRE'], hname))
+
         check_time = int(data['last_chk'])
 
  #       print "Graphite:", hname, check_time, perf_data
@@ -176,8 +207,10 @@ class Graphite_broker(BaseModule):
             # Buffer the performance data lines
             for (metric, value) in couples:
                 if value:
-                    self.buffer.append("%s.__HOST__.%s %s %d" % (hname, metric,
-                                                            value, check_time))
+                    self.buffer.append(("%s.__HOST__.%s" % (hname, metric),
+                                       ("%d" % check_time,
+                                        "%s" % value)))
+
         else:
             lines = []
             # Send a bulk of all metrics at once
@@ -205,16 +238,15 @@ class Graphite_broker(BaseModule):
             self.ticks += 1
 
             # Format the data
-            formatted_buf = '\n'.join(self.buffer) + '\n'
-            # Be sure we put \n every where
-            packet = cPickle.dumps(formatted_buf, cPickle.HIGHEST_PROTOCOL)
+            payload = cPickle.dumps(self.buffer)
+            header = struct.pack("!L", len(payload))
+            packet = header + payload
 
             try:
-#                print "Graphite send data using cPickle"
                 self.con.sendall(packet)
             except IOError, err:
                 logger.error ("Failed sending to the Graphite Carbon
-                               instance network socket! IOError %s")
+                               instance network socket! IOError :%s" % str(err)
                 return
 
             # Flush the buffer after a successful send to Graphite
