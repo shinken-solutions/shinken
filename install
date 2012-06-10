@@ -568,6 +568,99 @@ function get_from_git(){
     rm -Rf .git
 }
 
+function register(){
+    cadre "API key registration" green
+
+    if [ -f $ETC/apikey ]
+    then
+        exist=$(cat $ETC/apikey)
+        if [ $? -ne 0 ]
+        then
+            exist=""
+        fi
+    else
+        exist=""
+    fi 
+
+    if [ -z "$exist" ]
+    then
+        cecho " > Api key not found" yellow
+        cread " > Do you Allready have an api key ? [y|n] " green "y" "y n"
+        if [ "$readvalue" == "Y" ] || [ "$readvalue" == "y" ]
+        then
+            creads " --> Please Provide your apikey" yellow
+            if [ ! -z "$readvalue" ]
+            then
+                cecho " --> apikey saved " green
+                echo "$readvalue" > $ETC/apikey
+            else
+                cecho "  --> api key must not be empty" red
+                register
+            fi
+            return 0
+        fi
+    else
+        cecho " > Found api key" green
+        exit 0
+    fi
+
+    cecho " > You must register on community.shinken-monitoring.org in order to use online pack management" yellow
+    cread " --> Do you want to register ? [Y|n] " yellow "Y" "y n"
+    if [ "$readvalue" == "N" ] || [ "$readvalue" == "n" ]
+    then
+        cecho "  --> api key not configured. You will have to do it manualy. See : http://www.shinken-monitoring.org/wiki/packs/start" red
+        return 0
+    fi
+
+    creads " -->login : " yellow
+    login=$readvalue
+    creads " --> password : " yellow
+    pass1=$readvalue
+    creads " --> confirm password : " yellow
+    pass2=$readvalue
+    if [ "$pass1" != "$pass2" ]
+    then
+        cecho " ----> Password confirmation does not match !" red
+        register
+    else
+        pass=$pass1
+        if [ -z "$pass" ]
+        then
+            cecho " ----> Password must not be empty" red
+            register
+        fi
+    fi
+    creads " --> Email" yellow
+    email=$readvalue
+
+    cecho " > trying to register " yellow
+
+    result=$($TARGET/bin/shinken-packs -r -l $login -P $pass -e $email | grep "^OK")
+    if [ ! -z "$result" ]
+    then
+        creads " --> Registration success. Please look at your email and click in the link in it to validate your account (Hit ENTER when done)" green
+        cecho " ----> Getting key" green
+        apikey=$($TARGET/bin/shinken-packs -g -l $login -P $pass | grep "api key is" | awk '{print $5}')
+        if [ -z "$apikey" ]
+        then
+            cecho " ------> There was a problem getting your api key !" red 
+            cecho " ------> Yous should register manualy at http://community.shinken-monitoring.org" red
+            return 1
+        else
+            cecho " ------> Registration success" green
+            echo $apikey > $ETC/apikey
+            apikey=$(cat $ETC/apikey)
+            cd $ETC
+            sed -i "s#api_key=.*#api_key="$apikey"#g" skonf.cfg                    
+            return 0
+        fi
+    else
+        cecho " --> Registration failed !" red
+        register
+    fi
+    return 0
+}
+
 function relocate(){
     cadre "Relocate source tree to $TARGET" green
     # relocate source tree
@@ -643,6 +736,15 @@ function relocate(){
     cd $TARGET/bin/init.d
     mv shinken shinken.in
     cat shinken.in | sed -e "s#\#export PYTHONPATH=.*#export PYTHONPATH="$TARGET"#g" > $TARGET/bin/init.d/shinken
+    # relocate skonf.cfg
+    cd $ETC
+    if [ $USEPROXY -eq 1 ]
+    then
+        sed -i "s#http_proxy=.*$#htt_proxy="$http_proxy"#g" skonf.cfg        
+    fi
+    sed -i "s#/etc/shinken#"$ETC"#g" skonf.cfg  
+    sed -i "s#/tmp#"$TMP"#g" skonf.cfg
+    sed -i "s#/var/lib/shinken/share#"$TARGET"/share#g" skonf.cfg        
 }
 
 function fix(){
@@ -1236,11 +1338,15 @@ function install_mongodb(){
         DEBIAN)
             if [ ! -f "/etc/apt/sources.list.d/10gen.list" ]
             then
+                cecho " > repository configuration not found. Adding 10 gen repository" yellow
                 apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10 >> ${LOGFILE} 2>&1
                 echo "deb http://downloads-distro.mongodb.org/repo/debian-sysvinit dist 10gen" > /etc/apt/sources.list.d/10gen.list
+                cecho " > Updating repositories " > yellow
                 apt-get update >> ${LOGFILE} 2>&1
                 cecho " > Installing mongodb server" green
                 apt-get install -y $MONGOPKGS >> ${LOGFILE} 2>&1
+            else
+                cecho " > 10gen repository found." green
             fi
             ;;
         *)
@@ -2725,25 +2831,26 @@ function nconf-import-packs(){
                     $NCONFTARGET/bin/add_items_from_nagios.pl -c checkcommand -f /tmp/commands.nconf 2>&1 | grep "ERROR\|WARN"
                     ;;
                 templates)
-                    # macros are not imported !!!!     
+                    # macros are not imported !!!! 
+                    # may be defining static files and position them inside
                     $NCONFTARGET/bin/add_items_from_nagios.pl -x 4 -c host-template -f $domain 2>&1 | grep "ERROR\|WARN"
                     ;; 
             esac
         done
     done
 
-    cecho "  ----> Processing services templates" green
+    # cecho "  ----> Processing services templates" green
 
 
-    for file in $(find $TARGET/etc/packs -type f | grep -v "$excludekw" | grep services | grep -v templates.cfg | grep -v commands.cfg | grep -v sample)
-    do
-        # strange : nconf need a directive called name to import services template
-        cp $file $file.nconf
-        sed -i "s/service_description\(.*\)$/name \1\n   service_description \1/g" $file.nconf
-        # what we need to do is to create first a service template and then an advanced service linked to the template
-        $NCONFTARGET/bin/add_items_from_nagios.pl -x 4 -c service-template -f $file.nconf 2>&1 | grep "ERROR\|WARN"
-        rm -f $file.nconf
-    done
+    # for file in $(find $TARGET/etc/packs -type f | grep -v "$excludekw" | grep services | grep -v templates.cfg | grep -v commands.cfg | grep -v sample)
+    # do
+    #     # strange : nconf need a directive called name to import services template
+    #     cp $file $file.nconf
+    #     sed -i "s/service_description\(.*\)$/name \1\n   service_description \1/g" $file.nconf
+    #     # what we need to do is to create first a service template and then an advanced service linked to the template
+    #     $NCONFTARGET/bin/add_items_from_nagios.pl -x 4 -c service-template -f $file.nconf 2>&1 | grep "ERROR\|WARN"
+    #     rm -f $file.nconf
+    # done
 }
 
 #     ___                                          __          ____                                 _            
@@ -2794,6 +2901,7 @@ echo "Usage : install -k | -i | -u [addonname] | -b | -r backupname | -l | -c | 
                                mongodb
                                nconf (experimental)
     --nconf-import-packs    Import shinken packs into nconf (experimental). This require nconf to be installed
+    --register              Register on community (experimental)
     -h | --help             Show help"
 }
 
@@ -2811,7 +2919,7 @@ fi
 
 # options may be followed by one colon to indicate they have a required argument
 
-if ! options=$(getopt -u -o kiu::br:lce:p:a:h -l nconf-import-packs,kill,install,uninstall::,backup,restore:,listbackups,compresslogs,enabledaemons:,plugin:,addon:,help -- "$@")
+if ! options=$(getopt -u -o kiu::br:lce:p:a:h -l register,nconf-import-packs,kill,install,uninstall::,backup,restore:,listbackups,compresslogs,enabledaemons:,plugin:,addon:,help -- "$@")
 then
     # something went wrong, getopt will put out an error message for us
     exit 2
@@ -3033,6 +3141,11 @@ do
         --nconf-import-packs)
             nconf-import-packs
             exit 0
+            ;;
+        --register)
+            register
+            exit 0
+            ;;
         (--) 
             shift
             break
