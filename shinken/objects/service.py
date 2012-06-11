@@ -101,7 +101,7 @@ class Service(SchedulingItem):
         'first_notification_delay':IntegerProp(default='0', fill_brok=['full_status']),
         'notification_period':    StringProp (brok_transformation=to_name_if_possible, fill_brok=['full_status']),
         'notification_options':   ListProp   (default='w,u,c,r,f,s',fill_brok=['full_status']),
-        'notifications_enabled':  BoolProp   (default='1', fill_brok=['full_status']),
+        'notifications_enabled':  BoolProp   (default='1', fill_brok=['full_status'], retention=True)),
         'contacts':               StringProp (default='', brok_transformation=to_list_of_names, fill_brok=['full_status']),
         'contact_groups':         StringProp (default='', fill_brok=['full_status']),
         'stalking_options':       ListProp   (default='', fill_brok=['full_status']),
