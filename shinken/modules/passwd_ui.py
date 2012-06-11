@@ -35,6 +35,7 @@ except ImportError:
     # There is no crypt module on Windows systems
     import fcrypt as crypt
 
+from shinken.misc.md5crypt import apache_md5_crypt
 from shinken.basemodule import BaseModule
 
 print "Loaded Apache/Passwd module"
@@ -82,11 +83,20 @@ class Passwd_Webui(BaseModule):
                 elts = line.split(':')
                 name = elts[0]
                 hash = elts[1]
-                salt = hash[:2]
+                if hash[:5] == '$apr1':
+                    h = hash.split('$')
+                    magic = h[1]
+                    salt = h[2]
+                else:
+                    magic = None
+                    salt = hash[:2]
                 print "PASSWD:", name, hash, salt
                 # If we match the user, look at the crypt
                 if name == user:
-                    compute_hash = crypt.crypt(password, salt)
+                    if magic == 'apr1':
+                        compute_hash = apache_md5_crypt(password, salt)
+                    else:
+                        compute_hash = crypt.crypt(password, salt)
                     print "Computed hash", compute_hash
                     if compute_hash == hash:
                         print "PASSWD : it's good!"
