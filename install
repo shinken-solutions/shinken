@@ -585,7 +585,7 @@ function register(){
     if [ -z "$exist" ]
     then
         cecho " > Api key not found" yellow
-        cread " > Do you Allready have an api key ? [y|n] " green "y" "y n"
+        cread " > Do you already have an api key ? [y|n] " green "y" "y n"
         if [ "$readvalue" == "Y" ] || [ "$readvalue" == "y" ]
         then
             creads " --> Please Provide your apikey" yellow
@@ -1319,7 +1319,7 @@ function install_mongodb(){
                 cecho " > Start mongodb server" green
                 /etc/init.d/mongod start >> ${LOGFILE} 2>&1
             else
-                cecho "Allready installed" yellow
+                cecho "Already installed" yellow
             fi
             ;;
         Fedora)
