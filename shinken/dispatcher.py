@@ -262,7 +262,7 @@ class Dispatcher:
                     # else:
                     #    print "No conf"
 
-        # I ask satellites witch sched_id they manage. If I do not agree, I ask
+        # I ask satellites which sched_id they manage. If I do not agree, I ask
         # them to remove it
         for satellite in self.satellites:
             kind = satellite.get_my_type()
@@ -289,8 +289,8 @@ class Dispatcher:
                         satellite.wait_new_conf()
                     else:#It is not fully idle, just less cfg
                         for id in id_to_delete:
-                            logger.info("I ask to remove configuration N%d from %s" %(cfg_id, satellite.get_name()))
-                            satellite.remove_from_conf(cfg_id)
+                            logger.info("I ask to remove configuration N%d from %s" %(id, satellite.get_name()))
+                            satellite.remove_from_conf(id)
 
 
     # Make an ORDERED list of schedulers so we can
