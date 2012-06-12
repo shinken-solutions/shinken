@@ -816,7 +816,7 @@ class LiveStatusQuery(object):
             return not match_filter(item)
 
         def not_eq_nocase_filter(item):
-            return eq_nocase_filter(item)
+            return not eq_nocase_filter(item)
 
         def not_match_nocase_filter(item):
             return not match_nocase_filter(item)
