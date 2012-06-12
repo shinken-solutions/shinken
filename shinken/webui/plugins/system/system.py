@@ -24,6 +24,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
+from shinken.webui.bottle import redirect
 
 ### Will be populated by the UI with it's own value
 app = None
