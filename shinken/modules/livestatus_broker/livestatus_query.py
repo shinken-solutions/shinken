@@ -872,7 +872,7 @@ class LiveStatusQuery(object):
         elif operator == '!~':
             return not_match_filter
         elif operator == '!=~':
-            return ne_nocase_filter
+            return not_eq_nocase_filter
         elif operator == '!~~':
             return not_match_nocase_filter
         elif operator == 'dummy':
