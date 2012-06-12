@@ -970,7 +970,7 @@ class Scheduler:
                     # like get only names instead of the whole objects
                     f = entry.retention_preparation
                     if f:
-                        v = f(h, v)
+                        v = f(s, v)
                     d[prop] = v
             # Same for properties, like active checks enabled or not
             properties = s.__class__.properties
@@ -981,7 +981,7 @@ class Scheduler:
                     # like get only names instead of the whole objects
                     f = entry.retention_preparation
                     if f:
-                        v = f(h, v)
+                        v = f(s, v)
                     d[prop] = v
             all_data['services'][(s.host.host_name, s.service_description)] = d
         return all_data
