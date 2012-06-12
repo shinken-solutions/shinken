@@ -25,6 +25,7 @@
 
 
 from db import DB
+from shinken.log import logger
 import sqlite3
 
 

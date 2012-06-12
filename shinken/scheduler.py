@@ -353,7 +353,7 @@ class Scheduler:
             to_del_checks = [c for c in self.checks.values() if c.id < id_max - max_checks]
             nb_checks_drops = len(to_del_checks)
             if nb_checks_drops > 0:
-                log.logger("Info : I have to del some checks (%d)..., sorry" % nb_checks_drops)
+                logger.info("I have to del some checks (%d)..., sorry" % nb_checks_drops)
             for c in to_del_checks:
                 i = c.id
                 elt = c.ref
