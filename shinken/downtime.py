@@ -27,6 +27,7 @@
 import time
 from shinken.comment import Comment
 from shinken.property import BoolProp, IntegerProp, StringProp
+from shinken.brok import Brok
 
 """ Schedules downtime for a specified service. If the "fixed" argument is set
  to one (1), downtime will start and end at the times specified by the
