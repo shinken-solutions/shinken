@@ -41,7 +41,7 @@ def itersorted(self, hints=None):
     elif hints['target'] == HINT_SINGLE_HOST:
         try:
             host_id = self._id_by_host_name_heap[hints['host_name']]
-            if 'authuser' in hints and host.id in self._id_contact_heap[hints['authuser']]:
+            if 'authuser' in hints and host_id in self._id_contact_heap[hints['authuser']]:
                 yield self.items[host_id]
             elif 'authuser' not in hints:
                 yield self.items[host_id]
@@ -64,7 +64,7 @@ def itersorted(self, hints=None):
     elif hints['target'] == HINT_SINGLE_SERVICE:
         try:
             service_id = self._id_by_service_name_heap[hints['host_name'] + '/' + hints['service_description']]
-            if 'authuser' in hints and service.id in self._id_contact_heap[hints['authuser']]:
+            if 'authuser' in hints and service_id in self._id_contact_heap[hints['authuser']]:
                 yield self.items[service_id]
             elif 'authuser' not in hints:
                 yield self.items[service_id]
