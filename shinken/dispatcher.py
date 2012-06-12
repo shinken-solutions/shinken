@@ -262,7 +262,7 @@ class Dispatcher:
                     # else:
                     #    print "No conf"
 
-        # I ask satellites witch sched_id they manage. If I do not agree, I ask
+        # I ask satellites which sched_id they manage. If I do not agree, I ask
         # them to remove it
         for satellite in self.satellites:
             kind = satellite.get_my_type()
