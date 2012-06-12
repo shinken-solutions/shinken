@@ -100,7 +100,7 @@ class Host(SchedulingItem):
         'first_notification_delay': IntegerProp(default='0', fill_brok=['full_status']),
         'notification_period':  StringProp(brok_transformation=to_name_if_possible, fill_brok=['full_status']),
         'notification_options': ListProp(default='d,u,r,f', fill_brok=['full_status']),
-        'notifications_enabled': BoolProp(default='1', fill_brok=['full_status'], retention=True)),
+        'notifications_enabled': BoolProp(default='1', fill_brok=['full_status'], retention=True),
         'stalking_options':     ListProp(default='', fill_brok=['full_status']),
         'notes':                StringProp(default='', fill_brok=['full_status']),
         'notes_url':            StringProp(default='', fill_brok=['full_status']),
