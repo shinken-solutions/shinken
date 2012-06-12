@@ -666,7 +666,7 @@ class ExternalCommandManager:
         self.sched.get_and_register_status_brok(host)
 
     # CHANGE_NORMAL_SVC_CHECK_INTERVAL;<host_name>;<service_description>;<check_interval>
-    def CHANGE_NORMAL_HOST_CHECK_INTERVAL(self, service, check_interval):
+    def CHANGE_NORMAL_SVC_CHECK_INTERVAL(self, service, check_interval):
         service.modified_attributes |= MODATTR_NORMAL_CHECK_INTERVAL
         old_interval = service.check_interval
         service.check_interval = check_interval
