@@ -389,7 +389,7 @@ class LiveStatusLogStoreSqlite(BaseModule):
             try:
                 self.dbconn.commit()
                 break
-            except OperationalError:
+            except sqlite3.OperationalError:
                 time.sleep(.01)
 
     def manage_log_brok(self, b):
