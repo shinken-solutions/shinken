@@ -202,7 +202,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
                     try:
                         self.db[self.collection].insert(backlogline, safe=True)
                         self.backlog.remove(backlogline)
-                    except Autoreconnect, exp:
+                    except AutoReconnect, exp:
                         self.is_connected = SWITCHING
                     except Exception, exp:
                         print "Got an exception inserting the backlog", str(exp)
