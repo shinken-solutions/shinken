@@ -512,7 +512,7 @@ livestatus_attribute_map = {
         },
         'modified_attributes_list': {
             'description': 'A list of all modified attributes',
-            'function': lambda item, req: modified_attributes_names(self),  # CONTROLME
+            'function': lambda item, req: modified_attributes_names(item),  # CONTROLME
             'datatype': list,
         },
         'name': {
