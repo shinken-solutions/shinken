@@ -74,7 +74,8 @@ class Modules(Items):
                 if plug is not None:
                     new_modules.append(plug)
                 else:
-                    logger.error("[module] unknown %s module from %s" % (plug_name, s.get_name()))
+                    err = "[module] unknown %s module from %s" % (plug_name, s.get_name())
+                    logger.error(err)
                     s.configuration_errors.append(err)
             s.modules = new_modules
 
