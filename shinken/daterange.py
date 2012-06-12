@@ -334,7 +334,7 @@ class Daterange:
         next_future_timerange_invalid = self.get_next_future_timerange_invalid(t)
         #print "next_future_timerange_invalid:", next_future_timerange_invalid
 
-        # If today there is no more unavalable timerange, search the next day
+        # If today there is no more unavailable timerange, search the next day
         if next_future_timerange_invalid is None:
             #print 'DR: get_next_future_timerange_invalid is None'
             #this day is finish, we check for next period

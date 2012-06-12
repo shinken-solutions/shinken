@@ -38,7 +38,7 @@ def get_instance(plugin):
     try:
         from ip_tag_arbiter import Ip_Tag_Arbiter
     except ImportError , exp:
-        print "Warning : the plugin type %s is unavalable : %s" % ('ip_tag', exp)
+        print "Warning : the plugin type %s is unavailable : %s" % ('ip_tag', exp)
         return None
 
 
