@@ -359,7 +359,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
         elif operator == '!~':
             return not_match_filter
         elif operator == '!=~':
-            return not_eq_nocase_filter
+            return ne_nocase_filter
         elif operator == '!~~':
             return not_match_nocase_filter
 
