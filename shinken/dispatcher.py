@@ -289,8 +289,8 @@ class Dispatcher:
                         satellite.wait_new_conf()
                     else:#It is not fully idle, just less cfg
                         for id in id_to_delete:
-                            logger.info("I ask to remove configuration N%d from %s" %(cfg_id, satellite.get_name()))
-                            satellite.remove_from_conf(cfg_id)
+                            logger.info("I ask to remove configuration N%d from %s" %(id, satellite.get_name()))
+                            satellite.remove_from_conf(id)
 
 
     # Make an ORDERED list of schedulers so we can
