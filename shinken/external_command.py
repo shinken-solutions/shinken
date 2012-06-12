@@ -626,7 +626,7 @@ class ExternalCommandManager:
     def CHANGE_HOST_CHECK_TIMEPERIOD(self, host, timeperiod): # TODO is timeperiod a string or a Timeperiod object?
         host.modified_attributes |= MODATTR_CHECK_TIMEPERIOD
         host.check_period = timeperiod
-        self.sched.get_and_register_status_brok(service)
+        self.sched.get_and_register_status_brok(host)
 
     # CHANGE_HOST_EVENT_HANDLER;<host_name>;<event_handler_command>
     def CHANGE_HOST_EVENT_HANDLER(self, host, event_handler_command):
