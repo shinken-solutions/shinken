@@ -953,23 +953,6 @@ class Items(object):
 
 
 
-    # Make link between item and it's resultmodulations
-    def linkify_with_resultmodulations(self, resultmodulations):
-        for i in self:
-            if hasattr(i, 'resultmodulations'):
-                resultmodulations_tab = i.resultmodulations.split(',')
-                resultmodulations_tab = strip_and_uniq(resultmodulations_tab)
-                new_resultmodulations = []
-                for rm_name in resultmodulations_tab:
-                    rm = resultmodulations.find_by_name(rm_name)
-                    if rm is not None:
-                        new_resultmodulations.append(rm)
-                    else: # TODO WHAT?
-                        pass
-                i.resultmodulations = new_resultmodulations
-
-
-
     # If we've got a contact_groups properties, we search for all
     # theses groups and ask them their contacts, and then add them
     # all into our contacts property
