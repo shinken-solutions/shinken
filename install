@@ -2554,7 +2554,6 @@ function install_check_oracle_health(){
     cecho " > Installing prerequisites" green 
     case $CODE in
         REDHAT|Fedora)
-            yum -y update >> ${LOGFILE} 2>&1
             yum -y install $CHECKORACLEHEALTHYUMPKG >> ${LOGFILE} 2>&1 
             ;;
         DEBIAN)
