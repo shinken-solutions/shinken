@@ -34,7 +34,7 @@ from shinken.log  import logger
 
 class SchedulerLink(SatelliteLink):
     """Please Add a Docstring to describe the class here"""
-    
+
     id = 0
 
     # Ok we lie a little here because we are a mere link in fact
@@ -47,12 +47,12 @@ class SchedulerLink(SatelliteLink):
         'weight':             IntegerProp(default='1', fill_brok=['full_status']),
         'skip_initial_broks': BoolProp(default='0', fill_brok=['full_status']),
     })
-    
-    running_properties = SatelliteLink.running_properties.copy() 
+
+    running_properties = SatelliteLink.running_properties.copy()
     running_properties.update({
         'conf':      StringProp(default=None),
         'need_conf': StringProp(default=True),
-        'external_commands' : StringProp(default=[]),
+        'external_commands': StringProp(default=[]),
         'push_flavor' : IntegerProp(default=0),
     })
 
@@ -69,20 +69,20 @@ class SchedulerLink(SatelliteLink):
         logger.debug("[SchedulerLink] Sending %d commands" % len(commands))
         try:
             self.con.run_external_commands(commands)
-        except Pyro.errors.URIError , exp:
+        except Pyro.errors.URIError, exp:
             self.con = None
             return False
-        except Pyro.errors.ProtocolError , exp:
+        except Pyro.errors.ProtocolError, exp:
             self.con = None
             return False
-        except TypeError , exp:            
+        except TypeError, exp:
             try:
                 exp = ''.join(Pyro.util.getPyroTraceback(exp))
             except:
                 pass
 
             logger.debug(exp)
-        except Pyro.errors.CommunicationError , exp:
+        except Pyro.errors.CommunicationError, exp:
             self.con = None
             return False
         except Exception, exp:
@@ -90,7 +90,7 @@ class SchedulerLink(SatelliteLink):
                 exp = ''.join(Pyro.util.getPyroTraceback(exp))
             except:
                 pass
-            
+
             logger.debug(exp)
             self.con = None
             return False
@@ -102,8 +102,8 @@ class SchedulerLink(SatelliteLink):
 
 
     def give_satellite_cfg(self):
-        return {'port' : self.port, 'address' : self.address, 'name' : self.scheduler_name, 'instance_id' : self.id, 'active' : self.conf is not None,
-                'push_flavor' : self.push_flavor}
+        return {'port': self.port, 'address': self.address, 'name': self.scheduler_name, 'instance_id': self.id, 'active': self.conf is not None,
+                'push_flavor': self.push_flavor}
 
 
     # Some parameters can give as 'overriden parameters' like use_timezone
@@ -121,6 +121,6 @@ class SchedulerLink(SatelliteLink):
 
 class SchedulerLinks(SatelliteLinks):
     """Please Add a Docstring to describe the class here"""
-    
+
     name_property = "scheduler_name"
     inner_class = SchedulerLink
