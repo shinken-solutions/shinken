@@ -29,9 +29,9 @@
 class Singleton(type):
     """The classic Singleton class. So all instance of this class will be the same
     instance in fact.
-    
+
     """
-    
+
     def __init__(cls, name, bases, dict):
         print "Info : Singleton Init"
         super(Singleton, cls).__init__(name, bases, dict)
