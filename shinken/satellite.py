@@ -24,7 +24,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-""" 
+"""
 This class is an interface for reactionner and poller
 The satallite listens to a port the configuration from the Arbiter
 The conf contains the schedulers where actionners will gather actions.
@@ -39,16 +39,16 @@ if arbiter wants it to have a new conf, the satellite forget the previous
 # Try to see if we are in an android device or not
 is_android = True
 try:
-   import android
+    import android
 except ImportError:
-   is_android = False
+    is_android = False
 
 from Queue import Empty
 
 if not is_android:
-   from multiprocessing import Queue, Manager, active_children, cpu_count
+    from multiprocessing import Queue, Manager, active_children, cpu_count
 else:
-   from Queue import Queue
+    from Queue import Queue
 
 import os
 import copy
@@ -86,7 +86,7 @@ from shinken.pyro_wrapper import Pyro_exp_pack
 # Class to tell that we are facing a non worker module
 # but a standard one
 class NotWorkerMod(Exception):
-   pass
+    pass
 
 
 # Interface for Arbiter, our big MASTER
@@ -114,7 +114,7 @@ class IForArbiter(Interface):
     # and wait a new conf)
     # Us : No please...
     # Arbiter : I don't care, hasta la vista baby!
-    # Us : ... <- Nothing! We are dead! you don't get it or what?? 
+    # Us : ... <- Nothing! We are dead! you don't get it or what??
     # Reading code is not a job for eyes only...
     def wait_new_conf(self):
         logger.debug("Arbiter want me to wait for a new conf")
@@ -136,7 +136,7 @@ class IForArbiter(Interface):
     def get_external_commands(self):
         return self.app.get_external_commands()
 
-    
+
     ### NB : only useful for receiver
     def got_conf(self):
         return self.app.cur_conf != None
@@ -180,16 +180,16 @@ class IBroks(Interface):
 
 class BaseSatellite(Daemon):
     """Please Add a Docstring to describe the class here"""
-    
-    
-    def __init__(self, name, config_file, is_daemon, do_replace, debug, debug_file):     
-        
+
+
+    def __init__(self, name, config_file, is_daemon, do_replace, debug, debug_file):
+
         super(BaseSatellite, self).__init__(name, config_file, is_daemon, \
                                                 do_replace, debug, debug_file)
 
         # Ours schedulers
         self.schedulers = {}
-        
+
         # Now we create the interfaces
         self.interface = IForArbiter(self)
 
@@ -211,21 +211,21 @@ class BaseSatellite(Daemon):
     # Give the arbiter the data about what I manage
     # for me it's the ids of my schedulers
     def what_i_managed(self):
-       r = {}
-       for (k,v) in self.schedulers.iteritems():
-          r[k] = v['push_flavor']
-       return r
-        
+        r = {}
+        for (k, v) in self.schedulers.iteritems():
+            r[k] = v['push_flavor']
+        return r
+
 
 
 class Satellite(BaseSatellite):
     """Our main APP class"""
-    
+
     def __init__(self, name, config_file, is_daemon, do_replace, debug, debug_file):
-        
-        super(Satellite, self).__init__(name, config_file, is_daemon, do_replace,\
+
+        super(Satellite, self).__init__(name, config_file, is_daemon, do_replace, \
                                             debug, debug_file)
-        
+
         # Keep broks so they can be eaten by a broker
         self.broks = {}
 
@@ -270,7 +270,7 @@ class Satellite(BaseSatellite):
             socket.setdefaulttimeout(3)
             sch_con = sched['con'] = Pyro.core.getProxyForURI(uri)
             socket.setdefaulttimeout(None)
-        except Pyro_exp_pack , exp:
+        except Pyro_exp_pack, exp:
             # But the multiprocessing module is not copatible with it!
             # so we must disable it imadiatly after
             socket.setdefaulttimeout(None)
@@ -284,7 +284,7 @@ class Satellite(BaseSatellite):
         try:
             pyro.set_timeout(sch_con, 5)
             new_run_id = sch_con.get_running_id()
-        except (Pyro.errors.ProtocolError, Pyro.errors.NamingError, cPickle.PicklingError, KeyError, Pyro.errors.CommunicationError, Pyro.errors.DaemonError) , exp:
+        except (Pyro.errors.ProtocolError, Pyro.errors.NamingError, cPickle.PicklingError, KeyError, Pyro.errors.CommunicationError, Pyro.errors.DaemonError), exp:
             logger.warning("[%s] Scheduler %s is not initialized or got network problem: %s" % (self.name, sname, str(exp)))
             sched['con'] = None
             return
@@ -306,9 +306,9 @@ class Satellite(BaseSatellite):
        # if so, just add this in other queues and return
         cls_type = action.__class__.my_type
         if cls_type not in ['check', 'notification', 'eventhandler']:
-           self.add(action)
-           return 
-       
+            self.add(action)
+            return
+
         # Ok, it's a result. We get it, and fill verifs of the good sched_id
         sched_id = action.sched_id
 
@@ -327,7 +327,7 @@ class Satellite(BaseSatellite):
         except KeyError:
             pass
         # We tag it as "return wanted", and move it in the wait return queue
-        # Stop, if it is "timeout" we need this information later 
+        # Stop, if it is "timeout" we need this information later
         # in the scheduler
         #action.status = 'waitforhomerun'
         try:
@@ -336,7 +336,7 @@ class Satellite(BaseSatellite):
             pass
 
         # We update stats
-        self.nb_actions_in_workers =- 1
+        self.nb_actions_in_workers = -1
 
 
     # Return the chk to scheduler and clean them
@@ -359,11 +359,11 @@ class Satellite(BaseSatellite):
                     if con is not None: # None = not initialized
                         send_ok = con.put_results(ret)
                 # Not connected or sched is gone
-                except (Pyro_exp_pack, KeyError) , exp:
+                except (Pyro_exp_pack, KeyError), exp:
                     logger.debug(str(exp))
                     self.pynag_con_init(sched_id)
                     return
-                except AttributeError , exp: # the scheduler must  not be initialized
+                except AttributeError, exp: # the scheduler must  not be initialized
                     logger.debug(str(exp))
                 except Exception, exp:
                     logger.debug("A satellite raised an unknown exception : %s (%s)" % (exp, type(exp)))
@@ -375,7 +375,7 @@ class Satellite(BaseSatellite):
 
 
             # We clean ONLY if the send is OK
-            if send_ok :
+            if send_ok:
                 sched['wait_homerun'].clear()
             else:
                 self.pynag_con_init(sched_id)
@@ -392,7 +392,7 @@ class Satellite(BaseSatellite):
 
         sched = self.schedulers[sched_id]
         logger.debug("Preparing to return %s" % str(sched['wait_homerun'].values()))
-        
+
         # prepare our return
         ret = copy.copy(sched['wait_homerun'].values())
 
@@ -407,18 +407,18 @@ class Satellite(BaseSatellite):
     def create_and_launch_worker(self, module_name='fork', mortal=True):
         # ceate the input queue of this worker
         try:
-           if is_android:
-              q = Queue()
-           else:
-              q = self.manager.Queue()
-        # If we got no /dev/shm on linux, we can got problem here. 
+            if is_android:
+                q = Queue()
+            else:
+                q = self.manager.Queue()
+        # If we got no /dev/shm on linux, we can got problem here.
         # Must raise with a good message
         except OSError, exp:
             # We look for the "Function not implemented" under Linux
             if exp.errno == 38 and os.name == 'posix':
                 logger.error("Got an exception (%s). If you are under Linux, please check that your /dev/shm directory exists." % (str(exp)))
             raise
-            
+
 
         # If we are in the fork module, we do not specify a target
         target = None
@@ -427,22 +427,22 @@ class Satellite(BaseSatellite):
         else:
             for module in self.modules_manager.instances:
                 if module.properties['type'] == module_name:
-                   # First, see if the module is a 'worker' one or not
-                   if not module.properties.get('worker_capable', False):
-                      raise NotWorkerMod
-                   target = module.work
+                    # First, see if the module is a 'worker' one or not
+                    if not module.properties.get('worker_capable', False):
+                        raise NotWorkerMod
+                    target = module.work
             if target is None:
                 return
         w = Worker(1, q, self.returns_queue, self.processes_by_worker, \
-                   mortal=mortal, max_plugins_output_length = self.max_plugins_output_length, target=target )
+                   mortal=mortal, max_plugins_output_length=self.max_plugins_output_length, target=target)
         w.module_name = module_name
         # save this worker
         self.workers[w.id] = w
-        
+
         # And save the Queue of this worker, with key = worker id
         self.q_by_mod[module_name][w.id] = q
         logger.info("[%s] Allocating new %s Worker : %s" % (self.name, module_name, w.id))
-        
+
         # Ok, all is good. Start it!
         w.start()
 
@@ -456,7 +456,7 @@ class Satellite(BaseSatellite):
                 w.terminate()
                 w.join(timeout=1)
             # A already dead worker or in a worker
-            except (AttributeError, AssertionError): 
+            except (AttributeError, AssertionError):
                 pass
         # Close the pyro server socket if it was opened
         if self.pyro_daemon:
@@ -508,8 +508,8 @@ class Satellite(BaseSatellite):
     def check_and_del_zombie_workers(self):
         # In android, we are using threads, so there is not active_children call
         if not is_android:
-           # Active children make a join with everyone, useful :)
-           active_children()
+            # Active children make a join with everyone, useful :)
+            active_children()
 
         w_to_del = []
         for w in self.workers.values():
@@ -642,17 +642,17 @@ class Satellite(BaseSatellite):
                     self.pynag_con_init(sched_id)
             # Ok, con is unknown, so we create it
             # Or maybe is the connection lost, we recreate it
-            except (Pyro_exp_pack, KeyError) , exp:
+            except (Pyro_exp_pack, KeyError), exp:
                 logger.debug(str(exp))
                 self.pynag_con_init(sched_id)
             # scheduler must not be initialized
             # or scheduler must not have checks
-            except (AttributeError, Pyro.errors.NamingError) , exp:
+            except (AttributeError, Pyro.errors.NamingError), exp:
                 logger.debug(str(exp))
                 pass
             # What the F**k? We do not know what happenned,
             # so.. bye bye :)
-            except Exception , exp:
+            except Exception, exp:
                 logger.debug("A satellite raised an unknown exception : %s (%s)" % (exp, type(exp)))
                 try:
                     logger.debug(''.join(if_else(PYRO_VERSION < "4.0", Pyro.util.getPyroTraceback(exp), Pyro.util.getPyroTraceback())))
@@ -665,8 +665,8 @@ class Satellite(BaseSatellite):
     # In android we got a Queue, and a manager list for others
     def get_returns_queue_len(self):
         return self.returns_queue.qsize()
-        
-        
+
+
     # In android we got a Queue, and a manager list for others
     def get_returns_queue_item(self):
         return self.returns_queue.get()
@@ -683,7 +683,7 @@ class Satellite(BaseSatellite):
                 try:
                     o = f.get(block=False)
                     self.add(o)
-                except Empty :
+                except Empty:
                     full_queue = False
 
 
@@ -707,9 +707,9 @@ class Satellite(BaseSatellite):
             self.clean_previous_run()
 
             self.wait_for_initial_conf()
-            # we may have been interrupted or so; then 
+            # we may have been interrupted or so; then
             # just return from this loop turn
-            if not self.new_conf:  
+            if not self.new_conf:
                 return
             self.setup_new_conf()
 
@@ -755,7 +755,7 @@ class Satellite(BaseSatellite):
         for mod in self.q_by_mod:
             for q in self.q_by_mod[mod].values():
                 total_q += q.qsize()
-        if total_q != 0 and wait_ratio < 2*self.polling_interval:
+        if total_q != 0 and wait_ratio < 2 * self.polling_interval:
             logger.debug("I decide to up wait ratio")
             self.wait_ratio.update_load(wait_ratio * 2)
             #self.wait_ratio.update_load(self.polling_interval)
@@ -771,7 +771,7 @@ class Satellite(BaseSatellite):
         # no more than 5s, but no less than 1
         timeout = self.timeout * wait_ratio
         timeout = max(self.polling_interval, timeout)
-        self.timeout = min(5*self.polling_interval, timeout)
+        self.timeout = min(5 * self.polling_interval, timeout)
 
         # Maybe we do not have enough workers, we check for it
         # and launch the new ones if needed
@@ -781,7 +781,7 @@ class Satellite(BaseSatellite):
         # for queue in self.return_messages:
         while self.get_returns_queue_len() != 0:
             self.manage_action_return(self.get_returns_queue_item())
-            
+
         # If we are passive, we do not initiate the check getting
         # and return
         if not self.passive:
@@ -800,27 +800,27 @@ class Satellite(BaseSatellite):
 
 
     # Do this satellite (poller or reactionner) post "daemonize" init:
-    # we must register our interfaces for 3 possible callers: arbiter, 
+    # we must register our interfaces for 3 possible callers: arbiter,
     # schedulers or brokers.
     def do_post_daemon_init(self):
-        
+
         # And we register them
         self.uri2 = self.pyro_daemon.register(self.interface, "ForArbiter")
         self.uri3 = self.pyro_daemon.register(self.brok_interface, "Broks")
         self.uri4 = self.pyro_daemon.register(self.scheduler_interface, "Schedulers")
-        
+
         # self.s = Queue() # Global Master -> Slave
         # We can open the Queeu for fork AFTER
         self.q_by_mod['fork'] = {}
-        
+
         # Under Android, we do not have multiprocessing lib
         # so use standard Queue threads things
         # but in multiprocess, we are also using a Queue(). It's just
         # not the same
         if is_android:
-           self.returns_queue = Queue()
+            self.returns_queue = Queue()
         else:
-           self.returns_queue = self.manager.Queue()
+            self.returns_queue = self.manager.Queue()
 
         # For multiprocess things, we should not have
         # socket timeouts. will be set explicitly in Pyro calls
@@ -828,7 +828,7 @@ class Satellite(BaseSatellite):
         socket.setdefaulttimeout(None)
 
 
-    # Setup the new received conf from arbiter 
+    # Setup the new received conf from arbiter
     def setup_new_conf(self):
         conf = self.new_conf
         logger.debug("[%s] Sending us a configuration %s" % (self.name, conf))
@@ -850,20 +850,20 @@ class Satellite(BaseSatellite):
             logger.info("[%s] Passive mode enabled." % self.name)
 
         # If we've got something in the schedulers, we do not want it anymore
-        for sched_id in conf['schedulers'] :
+        for sched_id in conf['schedulers']:
 
             already_got = False
 
             # We can already got this conf id, but with another address
             if sched_id in self.schedulers:
-               new_addr = conf['schedulers'][sched_id]['address']
-               old_addr = self.schedulers[sched_id]['address']
-               new_port = conf['schedulers'][sched_id]['port']
-               old_port = self.schedulers[sched_id]['port']
-               # Should got all the same to be ok :)
-               if new_addr == old_addr and new_port == old_port:
-                  already_got = True
-            
+                new_addr = conf['schedulers'][sched_id]['address']
+                old_addr = self.schedulers[sched_id]['address']
+                new_port = conf['schedulers'][sched_id]['port']
+                old_port = self.schedulers[sched_id]['port']
+                # Should got all the same to be ok :)
+                if new_addr == old_addr and new_port == old_port:
+                    already_got = True
+
             if already_got:
                 logger.info("[%s] We already got the conf %d (%s)" % (self.name, sched_id, conf['schedulers'][sched_id]['name']))
                 wait_homerun = self.schedulers[sched_id]['wait_homerun']
@@ -898,20 +898,20 @@ class Satellite(BaseSatellite):
             try:
                 self.max_workers = cpu_count()
             except NotImplementedError:
-                self.max_workers =4
+                self.max_workers = 4
             logger.info("Using max workers : %s" % self.max_workers)
         self.min_workers = g_conf['min_workers']
         if self.min_workers == 0 and not is_android:
             try:
                 self.min_workers = cpu_count()
             except NotImplementedError:
-                self.min_workers =4
+                self.min_workers = 4
             logger.info("Using min workers : %s" % self.min_workers)
 
         self.processes_by_worker = g_conf['processes_by_worker']
         self.polling_interval = g_conf['polling_interval']
         self.timeout = self.polling_interval
-        
+
         # Now set tags
         # ['None'] is the default tags
         self.poller_tags = g_conf.get('poller_tags', ['None'])
@@ -921,7 +921,7 @@ class Satellite(BaseSatellite):
         # Set our giving timezone from arbiter
         use_timezone = g_conf['use_timezone']
         if use_timezone != 'NOTSET':
-            logger.info("[%s] Setting our timezone to %s" %(self.name, use_timezone))
+            logger.info("[%s] Setting our timezone to %s" % (self.name, use_timezone))
             os.environ['TZ'] = use_timezone
             time.tzset()
 
@@ -946,9 +946,9 @@ class Satellite(BaseSatellite):
                 self.log.info(line)
 
             self.load_config_file()
-        
+
             self.do_daemon_init_and_start()
-        
+
             self.do_post_daemon_init()
 
             # We wait for initial conf
@@ -956,29 +956,29 @@ class Satellite(BaseSatellite):
             if not self.new_conf: # we must have either big problem or was requested to shutdown
                 return
             self.setup_new_conf()
-        
+
             # We can load our modules now
             self.modules_manager.set_modules(self.modules_manager.modules)
             self.do_load_modules()
             # And even start external ones
             self.modules_manager.start_external_instances()
-        
+
 
             # Allocate Mortal Threads
             for _ in xrange(1, self.min_workers):
-               to_del = []
-               for mod in self.q_by_mod:
-                  try:
-                     self.create_and_launch_worker(module_name=mod)
-                  # Maybe this modules is not a true worker one.
-                  # if so, just delete if from q_by_mod
-                  except NotWorkerMod:
-                     to_del.append(mod)
+                to_del = []
+                for mod in self.q_by_mod:
+                    try:
+                        self.create_and_launch_worker(module_name=mod)
+                    # Maybe this modules is not a true worker one.
+                    # if so, just delete if from q_by_mod
+                    except NotWorkerMod:
+                        to_del.append(mod)
 
-               for mod in to_del:
-                  logger.debug("The module %s is not a worker one, I remove it from the worker list" % mod)
-                  del self.q_by_mod[mod]
-                     
+                for mod in to_del:
+                    logger.debug("The module %s is not a worker one, I remove it from the worker list" % mod)
+                    del self.q_by_mod[mod]
+
 
             # Now main loop
             self.do_mainloop()
@@ -987,5 +987,3 @@ class Satellite(BaseSatellite):
             logger.error("You can log a bug ticket at https://github.com/naparuba/shinken/issues/new to get help")
             logger.error("Back trace of it: %s" % (traceback.format_exc()))
             raise
-
-
