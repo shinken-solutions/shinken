@@ -42,10 +42,11 @@ Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
                     Pyro.errors.CommunicationError, \
                     Pyro.errors.DaemonError)
 
+
 class SatelliteLink(Item):
     """SatelliteLink is a common Class for link to satellite for
     Arbiter with Conf Dispatcher.
-    
+
     """
 
     #id = 0 each Class will have it's own id
@@ -63,10 +64,10 @@ class SatelliteLink(Item):
         'modules':            ListProp   (default='', to_send=True),
         'polling_interval':   IntegerProp(default='1', fill_brok=['full_status'], to_send=True),
         'use_timezone':       StringProp (default='NOTSET', to_send=True),
-        'realm' :             StringProp (default='', fill_brok=['full_status'], brok_transformation=get_obj_name_two_args_and_void),
+        'realm':              StringProp (default='', fill_brok=['full_status'], brok_transformation=get_obj_name_two_args_and_void),
         'satellitemap':       DictProp   (default=None, elts_prop=AddrProp, to_send=True, override=True),
     })
-    
+
     running_properties = Item.running_properties.copy()
     running_properties.update({
         'con':                  StringProp(default=None),
@@ -87,7 +88,7 @@ class SatelliteLink(Item):
             self.arb_satmap['address'] = self.address
         if hasattr(self, 'port'):
             try:
-                self.arb_satmap['port']    = int(self.port)
+                self.arb_satmap['port'] = int(self.port)
             except:
                 pass
 
@@ -115,13 +116,13 @@ class SatelliteLink(Item):
             # so we must disable it imadiatly after
             socket.setdefaulttimeout(None)
             pyro.set_timeout(self.con, self.timeout)
-        except Pyro_exp_pack , exp:
+        except Pyro_exp_pack, exp:
             # But the multiprocessing module is not copatible with it!
             # so we must disable it imadiatly after
             socket.setdefaulttimeout(None)
             self.con = None
             logger.error("Creating connection for %s : %s" % (self.get_name(), str(exp)))
-    
+
 
 
     def put_conf(self, conf):
@@ -140,7 +141,7 @@ class SatelliteLink(Item):
             self.con.put_conf(conf)
             pyro.set_timeout(self.con, self.timeout)
             return True
-        except Pyro_exp_pack , exp:
+        except Pyro_exp_pack, exp:
             self.con = None
             #print ''.join(Pyro.util.getPyroTraceback(exp))
             return False
@@ -211,7 +212,7 @@ class SatelliteLink(Item):
         # We ping and update the managed list
         self.ping()
         self.update_managed_list()
-        
+
         # Update the state of this element
         b = self.get_update_status_brok()
         self.broks.append(b)
@@ -223,7 +224,7 @@ class SatelliteLink(Item):
         self.managed_confs[cfg_id] = push_flavor
 
 
-    def ping(self):        
+    def ping(self):
         print "Pinging %s" % self.get_name(),
         try:
             if self.con is None:
@@ -250,19 +251,19 @@ class SatelliteLink(Item):
     def wait_new_conf(self):
         if self.con is None:
             self.create_connection()
-        try :
+        try:
             self.con.wait_new_conf()
             return True
         except Pyro_exp_pack, exp:
             self.con = None
             return False
-            
+
 
 
     # To know if the satellite have a conf (magic_hash = None)
     # OR to know if the satellite have THIS conf (magic_hash != None)
     # Magic_hash is for arbiter check only
-    def have_conf(self,  magic_hash=None):
+    def have_conf(self, magic_hash=None):
         if self.con is None:
             self.create_connection()
 
@@ -280,7 +281,7 @@ class SatelliteLink(Item):
             if not isinstance(r, bool):
                 return False
             return r
-        except Pyro_exp_pack , exp:
+        except Pyro_exp_pack, exp:
             self.con = None
             return False
 
@@ -301,7 +302,7 @@ class SatelliteLink(Item):
             if not isinstance(r, bool):
                 return False
             return r
-        except Pyro_exp_pack , exp:
+        except Pyro_exp_pack, exp:
             self.con = None
             return False
 
@@ -317,7 +318,7 @@ class SatelliteLink(Item):
         try:
             self.con.remove_from_conf(sched_id)
             return True
-        except Pyro_exp_pack , exp:
+        except Pyro_exp_pack, exp:
             self.con = None
             return False
 
@@ -340,7 +341,7 @@ class SatelliteLink(Item):
                 self.managed_confs = {}
             # We can update our list now
             self.managed_confs = tab
-        except Pyro_exp_pack , exp:
+        except Pyro_exp_pack, exp:
             # A timeout is not a crime, put this case aside
             if type(exp) == Pyro.errors.TimeoutError:
                 return
@@ -370,7 +371,7 @@ class SatelliteLink(Item):
 
         try:
             return self.con.push_broks(broks)
-        except Pyro_exp_pack , exp:
+        except Pyro_exp_pack, exp:
             self.con = None
             return False
 
@@ -401,7 +402,7 @@ class SatelliteLink(Item):
 
 
     def prepare_for_conf(self):
-        self.cfg = { 'global' : {}, 'schedulers' : {}, 'arbiters' : {}}
+        self.cfg = {'global': {}, 'schedulers': {}, 'arbiters': {}}
         properties = self.__class__.properties
         for prop, entry in properties.items():
             if entry.to_send:
@@ -421,7 +422,14 @@ class SatelliteLink(Item):
 
     # Here for poller and reactionner. Scheduler have its own function
     def give_satellite_cfg(self):
-        return {'port' : self.port, 'address' : self.address, 'name' : self.get_name(), 'instance_id' : self.id, 'active' : True, 'passive' : self.passive, 'poller_tags' : getattr(self, 'poller_tags', []), 'reactionner_tags' : getattr(self, 'reactionner_tags', [])}
+        return {'port': self.port,
+                'address': self.address,
+                'name': self.get_name(),
+                'instance_id': self.id,
+                'active': True,
+                'passive': self.passive,
+                'poller_tags': getattr(self, 'poller_tags', []),
+                'reactionner_tags': getattr(self, 'reactionner_tags', [])}
 
 
 
@@ -430,7 +438,7 @@ class SatelliteLink(Item):
     def __getstate__(self):
         cls = self.__class__
         # id is not in *_properties
-        res = {'id' : self.id}
+        res = {'id': self.id}
         for prop in cls.properties:
             if prop != 'realm':
                 if hasattr(self, prop):
@@ -445,7 +453,7 @@ class SatelliteLink(Item):
     # Inverted function of getstate
     def __setstate__(self, state):
         cls = self.__class__
-        
+
         self.id = state['id']
         for prop in cls.properties:
             if prop in state:
@@ -460,7 +468,7 @@ class SatelliteLink(Item):
 
 class SatelliteLinks(Items):
     """Please Add a Docstring to describe the class here"""
-    
+
     #name_property = "name"
     #inner_class = SchedulerLink
 
