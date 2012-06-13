@@ -245,7 +245,7 @@ class Graphite_broker(BaseModule):
             try:
                 self.con.sendall(packet)
             except IOError, err:
-                logger.error ("Failed sending to the Graphite Carbon instance network socket! IOError :%s" % str(err)
+                logger.error ("Failed sending to the Graphite Carbon instance network socket! IOError :%s" % str(err))
                 return
 
             # Flush the buffer after a successful send to Graphite
