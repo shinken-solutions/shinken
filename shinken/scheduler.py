@@ -59,11 +59,11 @@ Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
 
 class Scheduler:
     """Please Add a Docstring to describe the class here"""
-    
+
     def __init__(self, scheduler_daemon):
         self.sched_daemon = scheduler_daemon
         # When set to false by us, we die and arbiter launch a new Scheduler
-        self.must_run = True 
+        self.must_run = True
 
         self.waiting_results = [] # satellites returns us results
         # and to not wait for them, we putthem here and
@@ -117,7 +117,7 @@ class Scheduler:
         self.log.load_obj(self)
 
         self.instance_id = 0 # Temporary set. Will be erase later
-        
+
         # Ours queues
         self.checks = {}
         self.actions = {}
@@ -139,7 +139,7 @@ class Scheduler:
         del self.waiting_results[:]
         for o in self.checks, self.actions, self.downtimes, self.contact_downtimes, self.comments, self.broks:
             o.clear()
-        
+
 
 
     # Load conf for future use
@@ -173,7 +173,7 @@ class Scheduler:
         self.triggers.create_reversed_list()
         self.triggers.compile()
         self.triggers.load_objects(self)
-        
+
 
         if not in_test:
             # Commands in the host/services/contacts are not real one
@@ -211,7 +211,7 @@ class Scheduler:
                 logger.debug("Changing the tick to %d for the function %s" % (new_tick, name))
                 self.recurrent_works[i] = (name, f, new_tick)
 
-        
+
     # Load the pollers from our app master
     def load_satellites(self, pollers, reactionners):
         self.pollers = pollers
@@ -244,46 +244,46 @@ class Scheduler:
         # For brok, we TAG brok with our instance_id
         brok.instance_id = self.instance_id
         self.broks[brok.id] = brok
-        
+
     def add_Notification(self, notif):
         self.actions[notif.id] = notif
         # A notification ask for a brok
         if notif.contact is not None:
             b = notif.get_initial_status_brok()
             self.add(b)
-            
+
     def add_Check(self, c):
         self.checks[c.id] = c
         # A new check means the host/service changes its next_check
         # need to be refreshed
         b = c.ref.get_next_schedule_brok()
         self.add(b)
-        
+
     def add_EventHandler(self, action):
         # print "Add an event Handler", elt.id
         self.actions[action.id] = action
-        
+
     def add_Downtime(self, dt):
         self.downtimes[dt.id] = dt
         if dt.extra_comment:
             self.add_Comment(dt.extra_comment)
 
-        
+
     def add_ContactDowntime(self, contact_dt):
         self.contact_downtimes[contact_dt.id] = contact_dt
 
-        
+
     def add_Comment(self, comment):
         self.comments[comment.id] = comment
         b = comment.ref.get_update_status_brok()
         self.add(b)
 
-    
+
     # Ok one of our modules send us a command? just run it!
     def add_ExternalCommand(self, ext_cmd):
         self.external_command.resolve_command(ext_cmd)
 
-    
+
     # Schedulers have some queues. We can simplify call by adding
     # elements into the proper queue just by looking at their type
     # Brok -> self.broks
@@ -296,7 +296,7 @@ class Scheduler:
         if f:
             #print("found action for %s : %s" % (elt.__class__.__name__, f.__name__))
             f(self, elt)
- 
+
     __add_actions = {
         Check:              add_Check,
         Brok:               add_Brok,
@@ -307,7 +307,7 @@ class Scheduler:
         Comment:            add_Comment,
         ExternalCommand:    add_ExternalCommand,
     }
-    
+
 
     # We call the function of modules that got the
     # hook function
@@ -319,7 +319,7 @@ class Scheduler:
 
             if hasattr(inst, full_hook_name):
                 f = getattr(inst, full_hook_name)
-                try :
+                try:
                     f(self)
                 except Exception, exp:
                     logger.warning("The instance %s raise an exception %s. I disable it and set it to restart it later" % (inst.get_name(), str(exp)))
@@ -338,7 +338,7 @@ class Scheduler:
         # if we set the interval at 0, we bail out
         if self.conf.cleaning_queues_interval == 0:
             return
-        
+
         max_checks = 5 * (len(self.hosts) + len(self.services))
         max_broks = 5 * (len(self.hosts) + len(self.services))
         max_actions = 5 * len(self.contacts) * (len(self.hosts) + len(self.services))
@@ -458,7 +458,7 @@ class Scheduler:
                 if new != was:
                     #print "The elements", i.get_name(), "change it's business_impact value"
                     self.get_and_register_status_brok(i)
-                    
+
         # When all impacts and classic elements are updated,
         # we can update problems (their value depend on impacts, so
         # they must be done after)
@@ -471,7 +471,7 @@ class Scheduler:
                 # Maybe one of the impacts change it's business_impact to a high value
                 # and so ask for the problem to raise too
                 if new != was:
-                    #print "The elements", i.get_name(), "change it's business_impact value from", was, "to", new 
+                    #print "The elements", i.get_name(), "change it's business_impact value from", was, "to", new
                     self.get_and_register_status_brok(i)
 
 
@@ -512,7 +512,7 @@ class Scheduler:
                 # So if not the good one, loop for next :)
                 if not a.reactionner_tag in reactionner_tags:
                     continue
-                
+
                 # same for module_type
                 if not a.module_type in module_types:
                     continue
@@ -547,7 +547,7 @@ class Scheduler:
                                 # notif_nb of the master notification was already current_notification_number+1.
                                 # If notifications were sent, then host/service-counter will also be incremented
                                 item.current_notification_number = a.notif_nb
-                            
+
                             if item.notification_interval != 0 and a.t_to_go is not None:
                                 # We must continue to send notifications.
                                 # Just leave it in the actions list and set it to "scheduled" and it will be found again later
@@ -555,7 +555,7 @@ class Scheduler:
                                 # a.t_to_go + item.notification_interval * item.__class__.interval_length
                                 # or maybe before because we have an escalation that need to raise up before
                                 a.t_to_go = item.get_next_notification_time(a)
-                                
+
                                 a.notif_nb = item.current_notification_number + 1
                                 a.status = 'scheduled'
                             else:
@@ -601,14 +601,18 @@ class Scheduler:
 
                 # If we' ve got a problem with the notification, raise a Warning log
                 if timeout:
-                    logger.warning("Contact %s %s notification command '%s ' timed out after %d seconds" % (self.actions[c.id].contact.contact_name, self.actions[c.id].ref.__class__.my_type, self.actions[c.id].command, int(execution_time)))
+                    logger.warning("Contact %s %s notification command '%s ' timed out after %d seconds" %
+                                   (self.actions[c.id].contact.contact_name,
+                                    self.actions[c.id].ref.__class__.my_type,
+                                    self.actions[c.id].command,
+                                    int(execution_time)))
                 elif c.exit_status != 0:
                     logger.warning("The notification command '%s' raised an error (exit code=%d) : '%s'" % (c.command, c.exit_status, c.output))
-             
-            except KeyError , exp: # bad number for notif, not that bad
+
+            except KeyError, exp: # bad number for notif, not that bad
                 #print exp
                 pass
-            
+
             except AttributeError, exp: # bad object, drop it
                 #print exp
                 pass
@@ -621,13 +625,16 @@ class Scheduler:
                     c.long_output = c.output
                 self.checks[c.id].get_return_from(c)
                 self.checks[c.id].status = 'waitconsume'
-            except KeyError , exp:
+            except KeyError, exp:
                 pass
         elif c.is_a == 'eventhandler':
             # It just die
             try:
                 if c.status == 'timeout':
-                    logger.warning("%s event handler command '%s ' timed out after %d seconds" % (self.actions[c.id].ref.__class__.my_type.capitalize(), self.actions[c.id].command, int(c.execution_time)))
+                    logger.warning("%s event handler command '%s ' timed out after %d seconds" %
+                                   (self.actions[c.id].ref.__class__.my_type.capitalize(),
+                                    self.actions[c.id].command,
+                                    int(c.execution_time)))
                 self.actions[c.id].status = 'zombie'
             # Maybe we got a return of a old even handler, so we can forget it
             except KeyError:
@@ -639,8 +646,8 @@ class Scheduler:
 
     # Get the good tabs for links regarding to the kind. If unknown, return None
     def get_links_from_type(self, type):
-        t = { 'poller' : self.pollers, 'reactionner' : self.reactionners }
-        if type in t :
+        t = {'poller': self.pollers, 'reactionner': self.reactionners}
+        if type in t:
             return t[type]
         return None
 
@@ -668,7 +675,7 @@ class Scheduler:
         passive = links[id]['passive']
         if not passive:
             return
-        
+
         # If we try to connect too much, we slow down our tests
         if self.is_connection_try_too_close(links[id]):
             return
@@ -687,7 +694,7 @@ class Scheduler:
             links[id]['con'] = Pyro.core.getProxyForURI(uri)
             con = links[id]['con']
             socket.setdefaulttimeout(None)
-        except Pyro_exp_pack , exp:
+        except Pyro_exp_pack, exp:
             # But the multiprocessing module is not copatible with it!
             # so we must disable it imadiatly after
             socket.setdefaulttimeout(None)
@@ -707,7 +714,7 @@ class Scheduler:
             logger.warning("The %s '%s' is not initialized : %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
-        except KeyError , exp:
+        except KeyError, exp:
             logger.warning("The %s '%s' is not initialized : %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             traceback.print_stack()
@@ -744,7 +751,7 @@ class Scheduler:
                     logger.warning("The %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
-                except KeyError , exp:
+                except KeyError, exp:
                     logger.warning("The %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     traceback.print_stack()
@@ -755,7 +762,7 @@ class Scheduler:
                     return
                 #we come back to normal timeout
                 pyro.set_timeout(con, 5)
-            else : # no connection? try to reconnect
+            else: # no connection? try to reconnect
                 self.pynag_con_init(p['instance_id'], type='poller')
 
         # TODO :factorize
@@ -781,7 +788,7 @@ class Scheduler:
                     logger.warning("The %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
-                except KeyError , exp:
+                except KeyError, exp:
                     logger.warning("The %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     traceback.print_stack()
@@ -792,7 +799,7 @@ class Scheduler:
                     return
                 #we come back to normal timeout
                 pyro.set_timeout(con, 5)
-            else : # no connection? try to reconnect
+            else: # no connection? try to reconnect
                 self.pynag_con_init(p['instance_id'], type='reactionner')
 
 
@@ -821,7 +828,7 @@ class Scheduler:
                     logger.warning("The %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
-                except KeyError , exp:
+                except KeyError, exp:
                     logger.warning("The %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     traceback.print_stack()
@@ -857,7 +864,7 @@ class Scheduler:
                     logger.warning("The %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
-                except KeyError , exp:
+                except KeyError, exp:
                     logger.warning("The %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     traceback.print_stack()
@@ -924,15 +931,15 @@ class Scheduler:
     # for the moment, just the status and the notifications.
     def retention_load(self):
         self.hook_point('load_retention')
-        
+
 
 
     # Helper function for module, will give the host and service
     # data
     def get_retention_data(self):
-        # We create an all_data dict with list of useful retention data dicts 
+        # We create an all_data dict with list of useful retention data dicts
         # of our hosts and services
-        all_data = {'hosts' : {}, 'services' : {}}
+        all_data = {'hosts': {}, 'services': {}}
         for h in self.hosts:
             d = {}
             running_properties = h.__class__.running_properties
@@ -1056,7 +1063,7 @@ class Scheduler:
                         if c:
                             new_notified_contacts.add(c)
                     h.notified_contacts = new_notified_contacts
-                    
+
 
         ret_services = data['services']
         for (ret_s_h_name, ret_s_desc) in ret_services:
@@ -1128,7 +1135,7 @@ class Scheduler:
     # broks of service and hosts (initial status)
     def fill_initial_broks(self, with_logs=False):
         # First a Brok for delete all from my instance_id
-        b = Brok('clean_all_my_instance_id', {'instance_id' : self.instance_id})
+        b = Brok('clean_all_my_instance_id', {'instance_id': self.instance_id})
         self.add(b)
 
         # first the program status
@@ -1137,10 +1144,10 @@ class Scheduler:
 
         #  We can't call initial_status from all this types
         #  The order is important, service need host...
-        initial_status_types = ( self.timeperiods, self.commands,
+        initial_status_types = (self.timeperiods, self.commands,
                           self.contacts, self.contactgroups,
                           self.hosts, self.hostgroups,
-                          self.services, self.servicegroups )
+                          self.services, self.servicegroups)
 
         logger.debug("Skipping initial broks? %s" % str(self.conf.skip_initial_broks))
         if not self.conf.skip_initial_broks:
@@ -1158,7 +1165,7 @@ class Scheduler:
                 i.raise_initial_state()
 
         # Add a brok to say that we finished all initial_pass
-        b = Brok('initial_broks_done', {'instance_id' : self.instance_id})
+        b = Brok('initial_broks_done', {'instance_id': self.instance_id})
         self.add(b)
 
         # We now have all full broks
@@ -1404,7 +1411,7 @@ class Scheduler:
                 worker_names[c.worker] += 1
         for a in self.actions.values():
             if a.status == 'inpoller' and a.t_to_go < now - 300:
-                
+
                 a.status = 'scheduled'
                 if a.worker not in worker_names:
                     worker_names[a.worker] = 1
@@ -1416,7 +1423,7 @@ class Scheduler:
 
 
     # Each loop we are going to send our broks to our modules (if need)
-    def send_broks_to_modules(self):        
+    def send_broks_to_modules(self):
         t0 = time.time()
         nb_sent = 0
         for mod in self.sched_daemon.modules_manager.get_external_instances():
@@ -1425,7 +1432,7 @@ class Scheduler:
             to_send = [b for b in self.broks.values() if not getattr(b, 'sent_to_sched_externals', False) and mod.want_brok(b)]
             q.put(to_send)
             nb_sent += len(to_send)
-        
+
         # No more need to send them
         for b in self.broks.values():
             b.sent_to_sched_externals = True
@@ -1443,7 +1450,7 @@ class Scheduler:
                 try:
                     o = f.get(block=False)
                     self.add(o)
-                except Empty :
+                except Empty:
                     full_queue = False
 
 
@@ -1485,7 +1492,7 @@ class Scheduler:
             #self.send_broks_to_modules()
 
             elapsed, _, _ = self.sched_daemon.handleRequests(timeout)
-            if elapsed: 
+            if elapsed:
                 timeout -= elapsed
                 if timeout > 0:
                     continue
@@ -1515,14 +1522,14 @@ class Scheduler:
             #DBG : push actions to passives?
             self.push_actions_to_passives_satellites()
             self.get_actions_from_passives_satellites()
-            
+
             #if  ticks % 10 == 0:
             #    self.conf.quick_debug()
 
             # stats
-            nb_scheduled = len([c for c in self.checks.values() if c.status=='scheduled'])
-            nb_inpoller = len([c for c in self.checks.values() if c.status=='inpoller'])
-            nb_zombies = len([c for c in self.checks.values() if c.status=='zombie'])
+            nb_scheduled = len([c for c in self.checks.values() if c.status == 'scheduled'])
+            nb_inpoller = len([c for c in self.checks.values() if c.status == 'inpoller'])
+            nb_zombies = len([c for c in self.checks.values() if c.status == 'zombie'])
             nb_notifications = len(self.actions)
 
             logger.debug("Checks: total %s, scheduled %s, inpoller %s, zombies %s, notifications %s" %\
@@ -1556,4 +1563,3 @@ class Scheduler:
         # WE must save the retention at the quit BY OURSELF
         # because our daemon will not be able to do it for us
         self.update_retention_file(True)
-            
