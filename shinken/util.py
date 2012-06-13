@@ -114,9 +114,9 @@ def get_start_of_day(year, month_id, day):
 # change a time in seconds like 3600 into a format : 0d 1h 0m 0s
 def format_t_into_dhms_format(t):
     s = t
-    m,s=divmod(s,60)
-    h,m=divmod(m,60)
-    d,h=divmod(h,24)
+    m, s = divmod(s, 60)
+    h, m = divmod(m, 60)
+    d, h = divmod(h, 24)
     return '%sd %sh %sm %ss' % (d, h, m, s)
 
 
@@ -335,7 +335,7 @@ def nighty_five_percent(t):
 def strip_and_uniq(tab):
     new_tab = set()
     for elt in tab:
-        val=elt.strip()
+        val = elt.strip()
         if (val!=''):
             new_tab.add(val)
     return list(new_tab)
@@ -373,9 +373,9 @@ def got_generation_rule_patern_change(xy_couples):
         n = got_generation_rule_patern_change(xy_cpl[1:])
         if n != []:
             for e in n:
-                res.append( [i, '[%d-%d]'%(x,y), e])
+                res.append( [i, '[%d-%d]'%(x, y), e])
         else:
-            res.append( [i, '[%d-%d]'%(x,y), []])
+            res.append( [i, '[%d-%d]'%(x, y), []])
     return res
 
 
@@ -407,7 +407,7 @@ def apply_change_recursive_patern_change(s, rule):
 GET_KEY_VALUE_SEQUENCE_ERROR_NOERROR = 0
 GET_KEY_VALUE_SEQUENCE_ERROR_SYNTAX = 1
 GET_KEY_VALUE_SEQUENCE_ERROR_NODEFAULT = 2
-GET_KEY_VALUE_SEQUENCE_ERROR_NODE= 3
+GET_KEY_VALUE_SEQUENCE_ERROR_NODE = 3
 def get_key_value_sequence(entry, default_value=None):
     array1 = []
     array2 = []
@@ -497,12 +497,12 @@ def get_key_value_sequence(entry, default_value=None):
                 while still_loop:
                     m = pat.search(key)
                     if m is not None: # we've find one X-Y
-                        (x,y) = m.groups()
-                        (x,y) = (int(x), int(y))
-                        xy_couples.append((x,y))
+                        (x, y) = m.groups()
+                        (x, y) = (int(x), int(y))
+                        xy_couples.append((x, y))
                         # We must search if we've gotother X-Y, so
                         # we delete this one, and loop
-                        key = key.replace('[%d-%d]' % (x,y), 'Z'*10)
+                        key = key.replace('[%d-%d]' % (x, y), 'Z'*10)
                     else:#no more X-Y in it
                         still_loop = False
 
