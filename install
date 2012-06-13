@@ -1347,6 +1347,14 @@ function install_mongodb(){
                 apt-get install -y $MONGOPKGS >> ${LOGFILE} 2>&1
             else
                 cecho " > 10gen repository found." green
+                mongoexist=$(dpkg -l | grep "^ii" | grep "mongodb-10gen")
+                if [ -z "$mongoexist" ]
+                then
+                    cecho " > Installing mongodb server" green
+                    apt-get install -y $MONGOPKGS >> ${LOGFILE} 2>&1
+                else
+                    cecho " > Mongodb server already installed" green
+                fi
             fi
             ;;
         *)
