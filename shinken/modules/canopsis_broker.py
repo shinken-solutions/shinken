@@ -31,6 +31,9 @@
 from shinken.basemodule import BaseModule
 from shinken.log import logger
 
+from kombu import BrokerConnection
+from kombu import Producer, Consumer, Exchange, Queue
+
 properties = {
     'daemons' : ['broker'],
     'type' : 'canopsis',
@@ -66,6 +69,15 @@ class Canopsis_broker(BaseModule):
         self.virtual_host = virtual_host
         self.exchange_name = exchange_name
         self.identifier = identifier
+
+        # try to connect to rabbitmq
+
+        # try:
+        self.canopsis = event2amqp(self.host,self.port,self.user,self.password,self.virtual_host, self.exchange_name, self.identifier)
+        self.canopsis.create_connection()        
+        self.canopsis.connect()            
+        # except:
+        #     logger.error("[Canopsis] There was an error trying to connect to Canopsis message bus")
 
     #We call functions like manage_ TYPEOFBROK _brok that return us queries
     def manage_brok(self, b):
@@ -123,10 +135,9 @@ class Canopsis_broker(BaseModule):
 
         if not b.data['host_name'] in self.service_max_check_attempts:
             logger.log("[Canopsis] creating empty dict for host %s service_max_check_attempts" % b.data['host_name'])            
-            self.service_commands[b.data['host_name']] = {}
+            self.service_max_check_attempts[b.data['host_name']] = {}
 
         self.service_max_check_attempts[b.data['host_name']][b.data['service_description']] = b.data['max_check_attempts']
-
 
 
     def manage_host_check_result_brok(self, b):
@@ -138,7 +149,11 @@ class Canopsis_broker(BaseModule):
 
     # A service check has just arrived. Write the performance data to the file
     def manage_service_check_result_brok(self, b):
-        message = self.create_message('ressource','check',b)
+        try:
+            message = self.create_message('resource','check',b)
+        except:
+            logger.error("[Canopsis] Error : there was an error while trying to create message for service")
+
         if not message:
             logger.info("[Canopsis] Warning : Empty service check message")
         else:
@@ -154,7 +169,7 @@ class Canopsis_broker(BaseModule):
 
             source_type should be one of the following :
                 - component => host
-                - ressource => service
+                - resource => service
 
             message format (check): 
 
@@ -164,7 +179,7 @@ class Canopsis_broker(BaseModule):
             x           'event_type'        Event type (check, log, trap, ...)
             x           'source_type'       Source type (component or resource)
             x           'component'         Component name
-            x           'resource'          Ressource name
+            x           'resource'          Resource name
             x           'timestamp'         UNIX seconds timestamp
             x           'state'             State (0 (Ok), 1 (Warning), 2 (Critical), 3 (Unknown))
             x           'state_type'        State type (O (Soft), 1 (Hard))
@@ -179,18 +194,17 @@ class Canopsis_broker(BaseModule):
             x           'command_name'      
                         'address'                               
         """
-
-        if source_type == 'ressource':
+        if source_type == 'resource':
             #service
             specificmessage={
-                'ressource' : b.data['service_description'],
+                'resource' : b.data['service_description'],
                 'command_name' : self.service_commands[b.data['host_name']][b.data['service_description']],
                 'max_attempts' : self.service_max_check_attempts[b.data['host_name']][b.data['service_description']],
             }
         elif source_type == 'component':
             #host
             specificmessage={
-                'ressource' : None,
+                'resource' : None,
                 'command_name' : self.host_commands[b.data['host_name']],
                 'max_check_attempts' : self.host_max_check_attempts[b.data['host_name']]
             }
@@ -222,4 +236,111 @@ class Canopsis_broker(BaseModule):
 
     def push2canopsis(self,message):
         strmessage=str(message)
-        logger.info("[Canopsis] push2canopsis : %s" % (strmessage))
+        self.canopsis.postmessage(message)
+        #logger.info("[Canopsis] push2canopsis : %s" % (strmessage))
+
+class event2amqp():
+
+    def __init__(self,host,port,user,password,virtual_host, exchange_name,identifier):
+
+        self.host = host
+        self.port = port
+        self.user = user
+        self.password = password
+        self.virtual_host = virtual_host
+        self.exchange_name = exchange_name
+        self.identifier = identifier
+
+        self.connection_string = None
+
+        self.connection = None
+        self.channel = None
+        self.producer = None
+        self.exchange = None
+
+
+    def create_connection(self):
+        try:
+            self.connection_string = "amqp://%s:%s@%s:%s/%s" % (self.user,self.password,self.host,self.port,self.virtual_host)
+            self.connection = BrokerConnection(self.connection_string)
+            return True
+        except:
+            logger.error("[Canopsis] there was an error creating amqp broker connection object")
+            return False
+
+    def connect(self):
+        logger.info("[Canopsis] connection with : %s" % self.connection_string)
+        self.connection.connect()
+        return True
+
+    def disconnect(self):
+        if self.connection.connected:
+            self.connection.release()
+        return True
+
+    def get_channel(self):
+        if self.connection.connected:
+            self.channel = self.connection.channel()
+            return True
+        else:
+            logger.error("[Canopsis] You are not connected ...")
+            return False
+
+    def get_exchange(self):
+        self.exchange =  Exchange(self.exchange_name , "topic", durable=True, auto_delete=False)
+        return True
+
+    def create_producer(self):
+        if self.connection.connected:
+            self.producer = Producer(
+                            channel=self.channel,
+                            exchange=self.exchange,
+                            routing_key=self.virtual_host
+                            )
+            return True
+        else:
+            logger.error("[Canopsis] You are not connected ...")
+            return False
+
+    def postmessage(self,message):
+
+        if message["source_type"] == "component":
+            key = "%s.%s.%s.%s.%s" % (
+                    message["connector"],
+                    message["connector_name"],
+                    message["event_type"],
+                    message["source_type"],
+                    message["component"]
+                )
+        else:
+            key = "%s.%s.%s.%s.%s[%s]" % (
+                    message["connector"],
+                    message["connector_name"],
+                    message["event_type"],
+                    message["source_type"],
+                    message["component"],
+                    message["resource"]
+                )
+
+        if self.connection.connected:
+            if self.channel == None:
+                self.get_channel()
+            if self.exchange == None:
+                self.get_exchange()
+            if self.producer == None:
+                self.create_producer()
+            self.producer.publish(body=message, compression=None, routing_key=key, exchange=self.exchange_name)
+            logger.info("[Canopsis] using routing key %s" % key)
+            logger.info("[Canopsis] sending %s" % str(message))
+            return True
+        else:
+            logger.error("[Canopsis] You are not connected ... reconnecting")
+            self.connection.connect()
+            self.get_channel()
+            self.get_exchange()
+            self.create_producer()
+            self.producer.publish(body=message, compression=None, routing_key=key, exchange=self.exchange_name)
+            logger.info("[Canopsis] using routing key %s" % key)
+            logger.info("[Canopsis] sending %s" % str(message))
+            return True
+        return True
