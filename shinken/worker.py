@@ -29,15 +29,15 @@ from Queue import Empty
 # In android, we sould use threads, not process
 is_android = True
 try:
-   import android
+    import android
 except ImportError:
-   is_android = False
+    is_android = False
 
 if not is_android:
-   from multiprocessing import Process, Queue
+    from multiprocessing import Process, Queue
 else:
-   from Queue import Queue
-   from threading import Thread as Process
+    from Queue import Queue
+    from threading import Thread as Process
 
 import time
 import sys
@@ -72,7 +72,7 @@ class Worker:
         self._c = Queue() # Private Control queue for the Worker
         # By default, take our own code
         if target is None:
-            target=self.work
+            target = self.work
         self._process = Process(target=target, args=(s, returns_queue, self._c))
         self.returns_queue = returns_queue
         self.max_plugins_output_length = max_plugins_output_length
@@ -97,11 +97,11 @@ class Worker:
         # Is we are with a Manager() way
         # there should be not such functions
         if hasattr(self._c, 'close'):
-           self._c.close()
-           self._c.join_thread()
+            self._c.close()
+            self._c.join_thread()
         if hasattr(self.input_queue, 'close'):
-           self.input_queue.close()
-           self.input_queue.join_thread()
+            self.input_queue.close()
+            self.input_queue.join_thread()
 
 
     def join(self, timeout=None):
@@ -187,7 +187,7 @@ class Worker:
                 # We answer to the master
                 #msg = Message(id=self.id, type='Result', data=action)
                 try:
-                   self.returns_queue.put(action)
+                    self.returns_queue.put(action)
 
                 except IOError , exp:
                     logger.error("[%d] Exiting: %s" % (self.id, exp))
@@ -227,7 +227,7 @@ class Worker:
         ## restore default signal handler for the workers:
         # but on android, we are a thread, so don't do it
         if not is_android:
-           signal.signal(signal.SIGTERM, signal.SIG_DFL)
+            signal.signal(signal.SIGTERM, signal.SIG_DFL)
         timeout = 1.0
         self.checks = []
         self.returns_queue = returns_queue
