@@ -58,15 +58,16 @@ def get_instance(plugin):
     password        = getattr(plugin, 'password', None)
     virtual_host    = getattr(plugin, 'virtual_host', None)                
     exchange_name   = getattr(plugin, 'exchange_name', None)  
-    identifier      = getattr(plugin, 'identifier', None)               
+    identifier      = getattr(plugin, 'identifier', None)     
+    maxqueueditems  = getattr(plugin, 'maxqueueditems', None)     
 
-    return Canopsis_broker(plugin, host, port, user, password, virtual_host, exchange_name,identifier)
+    return Canopsis_broker(plugin, host, port, user, password, virtual_host, exchange_name,identifier,maxqueueditems)
 
 
 #Class for the Npcd Broker
 #Get broks and put them well-formatted in a spool file
 class Canopsis_broker(BaseModule):
-    def __init__(self, modconf, host, port, user, password, virtual_host, exchange_name, identifier):
+    def __init__(self, modconf, host, port, user, password, virtual_host, exchange_name, identifier,maxqueueditems):
         BaseModule.__init__(self, modconf)
         self.host = host
         self.port = port
@@ -75,8 +76,9 @@ class Canopsis_broker(BaseModule):
         self.virtual_host = virtual_host
         self.exchange_name = exchange_name
         self.identifier = identifier
+        self.maxqueueditems = maxqueueditems
 
-        self.canopsis = event2amqp(self.host,self.port,self.user,self.password,self.virtual_host, self.exchange_name, self.identifier)
+        self.canopsis = event2amqp(self.host,self.port,self.user,self.password,self.virtual_host, self.exchange_name, self.identifier,self.maxqueueditems)
 
     #We call functions like manage_ TYPEOFBROK _brok that return us queries
     def manage_brok(self, b):
@@ -240,7 +242,7 @@ class Canopsis_broker(BaseModule):
 
 class event2amqp():
 
-    def __init__(self,host,port,user,password,virtual_host, exchange_name,identifier):
+    def __init__(self,host,port,user,password,virtual_host, exchange_name,identifier,maxqueueditems):
 
         self.host = host
         self.port = port
@@ -249,6 +251,7 @@ class event2amqp():
         self.virtual_host = virtual_host
         self.exchange_name = exchange_name
         self.identifier = identifier
+        self.maxqueueditems = maxqueueditems
 
         self.connection_string = None
 
@@ -383,16 +386,22 @@ class event2amqp():
                 # logger.error(str(traceback.format_exc()))
                 return False
         else:
-            logger.error("[Canopsis] Not connected, going to queue messages until connection back")
-            self.enqueue_event(key,message)
+            errmsg="[Canopsis] Not connected, going to queue messages until connection back (%s items in queue | max %s)" % (str(len(self.queue)),str(self.maxqueueditems))
+            enqueue_cano_event(key,message)
+            logger.error(errmsg)
             return False
 
     def errback(self,exc,interval):
         logger.warning("Couldn't publish message: %r. Retry in %ds" % (exc, interval))
 
-    def enqueue_event(self,key,message):
-        self.queue.append({"key":key,"message":message})
-        return True
+    def enqueue_cano_event(self,key,message):
+        logger.error("TOTO")
+        if len(self.queue) < self.maxqueueditems:
+            self.queue.append({"key":key,"message":message})
+            return True
+        else:
+            logger.Error("[Canopsis] Maximum retention for event queue %s" % str(self.maxqueueditems))
+            return False
 
     def pop_events(self):
         if self.connected():
