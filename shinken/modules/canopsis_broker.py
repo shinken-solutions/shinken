@@ -28,6 +28,12 @@
 #host and service perfdata to a file which can be processes by the
 #canopsis daemon (http://pnp4nagios.org). It is a reimplementation of canopsis.c
 
+import sys
+
+from collections import deque
+
+import traceback
+
 from shinken.basemodule import BaseModule
 from shinken.log import logger
 
@@ -70,14 +76,7 @@ class Canopsis_broker(BaseModule):
         self.exchange_name = exchange_name
         self.identifier = identifier
 
-        # try to connect to rabbitmq
-
-        # try:
         self.canopsis = event2amqp(self.host,self.port,self.user,self.password,self.virtual_host, self.exchange_name, self.identifier)
-        self.canopsis.create_connection()        
-        self.canopsis.connect()            
-        # except:
-        #     logger.error("[Canopsis] There was an error trying to connect to Canopsis message bus")
 
     #We call functions like manage_ TYPEOFBROK _brok that return us queries
     def manage_brok(self, b):
@@ -257,52 +256,91 @@ class event2amqp():
         self.channel = None
         self.producer = None
         self.exchange = None
-
+        self.queue = deque([])
 
     def create_connection(self):
-        try:
-            self.connection_string = "amqp://%s:%s@%s:%s/%s" % (self.user,self.password,self.host,self.port,self.virtual_host)
+        self.connection_string = "amqp://%s:%s@%s:%s/%s" % (self.user,self.password,self.host,self.port,self.virtual_host)
+        try:        
             self.connection = BrokerConnection(self.connection_string)
             return True
         except:
-            logger.error("[Canopsis] there was an error creating amqp broker connection object")
+            func = sys._getframe(1).f_code.co_name
+            error = str(sys.exc_info()[0])
+            logger.error("[Canopsis] Unexpected error: %s in %s" % (error,func))
             return False
 
     def connect(self):
         logger.info("[Canopsis] connection with : %s" % self.connection_string)
-        self.connection.connect()
-        return True
+        try:
+            self.connection.connect()
+            if not self.connected():
+                return False
+            else:
+                self.get_channel()
+                self.get_exchange()
+                self.create_producer()                
+                return True
+        except:
+            func = sys._getframe(1).f_code.co_name
+            error = str(sys.exc_info()[0])
+            logger.error("[Canopsis] Unexpected error: %s in %s" % (error,func))
+            return False
 
     def disconnect(self):
-        if self.connection.connected:
-            self.connection.release()
-        return True
+        try:        
+            if self.connected():
+                self.connection.release()
+            return True
+        except:
+            func = sys._getframe(1).f_code.co_name
+            error = str(sys.exc_info()[0])
+            logger.error("[Canopsis] Unexpected error: %s in %s" % (error,func))
+            return False
+
+    def connected(self):
+        try:
+            if self.connection.connected:            
+                return True
+            else:
+                return False
+        except:
+            return False
 
     def get_channel(self):
-        if self.connection.connected:
+        try:
             self.channel = self.connection.channel()
-            return True
-        else:
-            logger.error("[Canopsis] You are not connected ...")
+        except:
+            func = sys._getframe(1).f_code.co_name
+            error = str(sys.exc_info()[0])
+            logger.error("[Canopsis] Unexpected error: %s in %s" % (error,func))
             return False
 
     def get_exchange(self):
-        self.exchange =  Exchange(self.exchange_name , "topic", durable=True, auto_delete=False)
-        return True
+        try:
+            self.exchange =  Exchange(self.exchange_name , "topic", durable=True, auto_delete=False)
+        except:
+            func = sys._getframe(1).f_code.co_name
+            error = str(sys.exc_info()[0])
+            logger.error("[Canopsis] Unexpected error: %s in %s" % (error,func))
+            return False
 
     def create_producer(self):
-        if self.connection.connected:
+        try:
             self.producer = Producer(
                             channel=self.channel,
                             exchange=self.exchange,
                             routing_key=self.virtual_host
                             )
-            return True
-        else:
-            logger.error("[Canopsis] You are not connected ...")
+        except:
+            func = sys._getframe(1).f_code.co_name
+            error = str(sys.exc_info()[0])
+            logger.error("[Canopsis] Unexpected error: %s in %s" % (error,func))
             return False
 
-    def postmessage(self,message):
+    def postmessage(self,message,retry=False):
+
+        # process enqueud events if possible
+        self.pop_events()
 
         if message["source_type"] == "component":
             key = "%s.%s.%s.%s.%s" % (
@@ -322,25 +360,53 @@ class event2amqp():
                     message["resource"]
                 )
 
-        if self.connection.connected:
-            if self.channel == None:
-                self.get_channel()
-            if self.exchange == None:
-                self.get_exchange()
-            if self.producer == None:
-                self.create_producer()
-            self.producer.publish(body=message, compression=None, routing_key=key, exchange=self.exchange_name)
+        # connection management
+        if not self.connected():
+            logger.error("[Canopsis] Create connection")
+            self.create_connection()
+            self.connect()
+
+        # publish message
+        if self.connected():
             logger.info("[Canopsis] using routing key %s" % key)
             logger.info("[Canopsis] sending %s" % str(message))
-            return True
+            try:
+                self.producer.revive(self.channel)                
+                self.producer.publish(body=message, compression=None, routing_key=key, exchange=self.exchange_name)
+                return True
+            except:
+                logger.error("[Canopsis] Not connected, going to queue messages until connection back")                
+                self.queue.append({"key":key,"message":message})
+                func = sys._getframe(1).f_code.co_name
+                error = str(sys.exc_info()[0])
+                logger.error("[Canopsis] Unexpected error: %s in %s" % (error,func))
+                # logger.error(str(traceback.format_exc()))
+                return False
         else:
-            logger.error("[Canopsis] You are not connected ... reconnecting")
-            self.connection.connect()
-            self.get_channel()
-            self.get_exchange()
-            self.create_producer()
-            self.producer.publish(body=message, compression=None, routing_key=key, exchange=self.exchange_name)
-            logger.info("[Canopsis] using routing key %s" % key)
-            logger.info("[Canopsis] sending %s" % str(message))
-            return True
+            logger.error("[Canopsis] Not connected, going to queue messages until connection back")
+            self.enqueue_event(key,message)
+            return False
+
+    def errback(self,exc,interval):
+        logger.warning("Couldn't publish message: %r. Retry in %ds" % (exc, interval))
+
+    def enqueue_event(self,key,message):
+        self.queue.append({"key":key,"message":message})
         return True
+
+    def pop_events(self):
+        if self.connected():
+            while len(self.queue) > 0:
+                item = self.queue.pop()
+                try:
+                    logger.info("[Canopsis] Pop item from queue [%s] : %s" % (str(len(self.queue)),str(item)))
+                    self.producer.revive(self.channel)                                    
+                    self.producer.publish(body=item["message"], compression=None, routing_key=item["key"], exchange=self.exchange_name)
+                except:
+                    self.queue.append(item)
+                    func = sys._getframe(1).f_code.co_name
+                    error = str(sys.exc_info()[0])
+                    logger.error("[Canopsis] Unexpected error: %s in %s" % (error,func))
+                    return False
+        else:
+            return False
