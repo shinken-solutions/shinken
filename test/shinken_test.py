@@ -375,16 +375,18 @@ class ShinkenTest(unittest.TestCase):
 
 
 
-    def init_livestatus(self):
+    def init_livestatus(self, modconf=None):
         self.livelogs = 'tmp/livelogs.db' + self.testid
-        modconf = Module({'module_name' : 'LiveStatus', 
-            'module_type' : 'livestatus',
-            'port' : str(50000 + os.getpid()),
-            'pnp_path' : 'tmp/pnp4nagios_test' + self.testid,
-            'host' : '127.0.0.1',
-            'socket' : 'live',
-            'name' : 'test', #?
-        })
+
+        if modconf is None:
+            modconf = Module({'module_name' : 'LiveStatus', 
+                'module_type' : 'livestatus',
+                'port' : str(50000 + os.getpid()),
+                'pnp_path' : 'tmp/pnp4nagios_test' + self.testid,
+                'host' : '127.0.0.1',
+                'socket' : 'live',
+                'name' : 'test', #?
+            })
 
         dbmodconf = Module({'module_name' : 'LogStore', 
             'module_type' : 'logstore_sqlite',
