@@ -437,7 +437,6 @@ class event2amqp():
         # queue retention saving
         if self.tickage >= int(self.queue_dump_frequency) and len(self.queue) > 0:
             # flush queue to disk if queue age reach queue_dump_frequency
-            logger.info("[Canopsis] saving queue")
             self.save_queue()
             self.tickage = 0
 
