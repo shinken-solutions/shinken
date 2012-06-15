@@ -68,8 +68,7 @@ def get_instance(plugin):
     return Canopsis_broker(plugin, host, port, user, password, virtual_host, exchange_name,identifier,maxqueuelength)
 
 
-#Class for the Npcd Broker
-#Get broks and put them well-formatted in a spool file
+#Class for the canopsis Broker
 class Canopsis_broker(BaseModule):
     def __init__(self, modconf, host, port, user, password, virtual_host, exchange_name, identifier,maxqueuelength):
         BaseModule.__init__(self, modconf)
