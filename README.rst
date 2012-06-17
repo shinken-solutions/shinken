@@ -14,11 +14,11 @@ Shinken is backwards-compatible with the Nagios configuration standard
 and plug-ins. It works on any operating system and architecture that
 supports Python, which includes Windows and GNU/Linux.
 
-Installation methods
-====================
+Requirements
+============
 
-Three installation methods are available, they are
-described below. Keep in mind that you should never mix the methods.
+There are common and conditional requirements for the three installation
+methods which are described below. Keep in mind that you should never mix the methods.
 Thus if you installed with the first method, you have to use
 that method as well when you update or remove your installation.
 
@@ -62,6 +62,14 @@ __ http://pypi.python.org/pypi/simplejson/
 __ http://pypi.python.org/pypi/ujson/ 
 __ http://code.google.com/p/pysqlite/
 
+Installing/Checking Common Requirements on Windows
+==================================================
+
+There is an installation guide for Windows and an installation package.
+
+* `Windows Installation guide on the Wiki`__
+
+__ http://www.shinken-monitoring.org/wiki/shinken_10min_start
 
 Installing/Checking Common Requirements on Linux
 ================================================
@@ -87,7 +95,7 @@ And if you do not find it, you can install it from PyPI::
 
 
 How to install Shinken
-=======================
+======================
 
 
 Preliminary Steps
