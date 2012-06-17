@@ -625,6 +625,8 @@ class Scheduler:
                     c.long_output = c.output
                 self.checks[c.id].get_return_from(c)
                 self.checks[c.id].status = 'waitconsume'
+                # Set the corresponding host/service's check_type to active=0
+                c.ref.check_type = 0
             except KeyError, exp:
                 pass
         elif c.is_a == 'eventhandler':

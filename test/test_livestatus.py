@@ -323,6 +323,57 @@ class TestConfigSmall(TestConfig):
         self.livestatus_broker = None
 
 
+    def test_check_type(self):
+        self.print_header()
+        now = time.time()
+        objlist = []
+        for host in self.sched.hosts:
+            objlist.append([host, 0, 'UP'])
+        for service in self.sched.services:
+            objlist.append([service, 2, 'CRIT'])
+        self.scheduler_loop(1, objlist)
+        self.update_broker()
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+
+        request = """GET services
+Columns: host_name service_description state check_type
+Filter: host_name = test_host_0
+Filter: description = test_ok_0
+OutputFormat: csv
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        # The last check was an active check -> check_type=0
+        goodresponse = """test_host_0;test_ok_0;2;0
+"""
+        print response 
+        self.assert_(response == goodresponse)
+
+        excmd = '[%d] PROCESS_SERVICE_CHECK_RESULT;test_host_0;test_ok_0;1;WARN' % int(time.time())
+        self.sched.run_external_command(excmd)
+        self.scheduler_loop(1, [])
+        self.scheduler_loop(1, []) #Need 2 run for get then consume)
+        self.update_broker()
+
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        # The result was from a passive check -> check_type=1
+        goodresponse = """test_host_0;test_ok_0;1;1
+"""
+        print response 
+        self.assert_(response == goodresponse)
+
+        for service in self.sched.services:
+            objlist.append([service, 2, 'CRIT'])
+        self.scheduler_loop(1, objlist)
+        self.update_broker()
+
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        # The last check was an active check -> check_type=0
+        goodresponse = """test_host_0;test_ok_0;2;0
+"""
+        print response 
+        self.assert_(response == goodresponse)
+
+
     def test_childs(self):
         if self.nagios_installed():
             self.start_nagios('1r_1h_1s')
