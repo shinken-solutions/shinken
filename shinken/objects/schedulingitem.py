@@ -1318,11 +1318,18 @@ class SchedulingItem(Item):
         #print "DBG, ask me to manage a check!"
         if c.command.startswith('bp_'):
             state = self.business_rule.get_state()
+        # _internal_host_up is for putting host as UP
         elif c.command == '_internal_host_up':
             state = 0
             c.execution_time = 0
             c.output = 'Host assumed to be UP'
             c.long_output = c.output
+        # Echo is just putting the same state again
+        elif c.command == '_echo':
+            state = self.state
+            c.execution_time = 0
+            c.output = self.output
+            c.long_output = c.long_output
         c.check_time = time.time()
         c.exit_status = state
         #print "DBG, setting state", state

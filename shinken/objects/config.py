@@ -606,6 +606,8 @@ class Config(Item):
         raw_objects['command'].append(bp_rule)
         host_up = {'command_name' : '_internal_host_up', 'command_line' : '_internal_host_up'}
         raw_objects['command'].append(host_up)
+        echo_obj = {'command_name' : '_echo', 'command_line' : '_echo'}
+        raw_objects['command'].append(echo_obj)
 
 
     #We've got raw objects in string, now create real Instances

@@ -159,7 +159,7 @@ class Data(list, object):
 
 
     def __str__(self):
-        return "[%i] %s %s" % (self.time, self.values)
+        return "[%i] %s" % (self.time, self.values)
 
 
     def get_srv_desc(self):
@@ -217,6 +217,7 @@ class CollectdServer(object):
         self.host = host
         self.port = port
 
+        print "[Collectd] Opening socket"
         family, socktype, proto, _, sockaddr = socket.getaddrinfo(
                 None if multicast else self.host, self.port,
                 socket.AF_UNSPEC, socket.SOCK_DGRAM, 0, socket.AI_PASSIVE)[0]
@@ -224,6 +225,7 @@ class CollectdServer(object):
         self._sock = socket.socket(family, socktype, proto)
         self._sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self._sock.bind(sockaddr)
+        print "[Collectd] Socket open"
 
         if multicast:
             if hasattr(socket, "SO_REUSEPORT"):
