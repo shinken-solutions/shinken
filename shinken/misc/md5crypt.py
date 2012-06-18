@@ -41,7 +41,7 @@ apache_md5_crypt() provides a function compatible with Apache's
 MAGIC = '$1$'# Magic string
 ITOA64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
-import md5
+from hashlib import md5
 
 def to64 (v, n):
     ret = ''
@@ -74,7 +74,7 @@ def unix_md5_crypt(pw, salt, magic=None):
 
     ctx = pw + magic + salt
 
-    final = md5.md5(pw + salt + pw).digest()
+    final = md5(pw + salt + pw).digest()
 
     for pl in range(len(pw),0,-16):
         if pl > 16:
@@ -93,7 +93,7 @@ def unix_md5_crypt(pw, salt, magic=None):
             ctx = ctx + pw[0]
         i = i >> 1
 
-    final = md5.md5(ctx).digest()
+    final = md5(ctx).digest()
     
     # The following is supposed to make
     # things run slower. 
@@ -119,7 +119,7 @@ def unix_md5_crypt(pw, salt, magic=None):
             ctx1 = ctx1 + pw
             
             
-        final = md5.md5(ctx1).digest()
+        final = md5(ctx1).digest()
 
 
     # Final xform
