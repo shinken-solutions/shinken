@@ -27,9 +27,10 @@
 from shinken.satellitelink import SatelliteLink, SatelliteLinks
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 
+
 class ReceiverLink(SatelliteLink):
     """Please Add a Docstring to describe the class here"""
-    
+
     id = 0
     my_type = 'receiver'
     properties = SatelliteLink.properties.copy()
@@ -39,19 +40,16 @@ class ReceiverLink(SatelliteLink):
         'manage_sub_realms':  BoolProp   (default='1', fill_brok=['full_status']),
         'manage_arbiters':    BoolProp   (default='0', fill_brok=['full_status'], to_send=True),
     })
-  
+
     def get_name(self):
         return self.receiver_name
-
 
     def register_to_my_realm(self):
         self.realm.receivers.append(self)
 
 
-
-
 class ReceiverLinks(SatelliteLinks):
     """Please Add a Docstring to describe the class here"""
-    
+
     name_property = "receiver_name"
     inner_class = ReceiverLink
