@@ -29,6 +29,8 @@
 #canopsis daemon (http://pnp4nagios.org). It is a reimplementation of canopsis.c
 
 import sys
+import os
+import pickle
 
 from collections import deque
 
@@ -39,10 +41,6 @@ from shinken.log import logger
 
 from kombu import BrokerConnection
 from kombu import Producer, Consumer, Exchange, Queue
-
-# used for periodicaly save the queue
-import gevent
-from gevent import Greenlet
 
 properties = {
     'daemons' : ['broker'],
@@ -63,14 +61,15 @@ def get_instance(plugin):
     virtual_host    = getattr(plugin, 'virtual_host', None)                
     exchange_name   = getattr(plugin, 'exchange_name', None)  
     identifier      = getattr(plugin, 'identifier', None)     
-    maxqueuelength  = getattr(plugin, 'maxqueuelength', None)     
+    maxqueuelength  = getattr(plugin, 'maxqueuelength', 10000)  
+    queue_dump_frequency = getattr(plugin, 'queue_dump_frequency', 300)   
 
-    return Canopsis_broker(plugin, host, port, user, password, virtual_host, exchange_name,identifier,maxqueuelength)
+    return Canopsis_broker(plugin, host, port, user, password, virtual_host, exchange_name,identifier,maxqueuelength,queue_dump_frequency)
 
 
 #Class for the canopsis Broker
 class Canopsis_broker(BaseModule):
-    def __init__(self, modconf, host, port, user, password, virtual_host, exchange_name, identifier,maxqueuelength):
+    def __init__(self, modconf, host, port, user, password, virtual_host, exchange_name, identifier,maxqueuelength,queue_dump_frequency):
         BaseModule.__init__(self, modconf)
         self.host = host
         self.port = port
@@ -80,8 +79,9 @@ class Canopsis_broker(BaseModule):
         self.exchange_name = exchange_name
         self.identifier = identifier
         self.maxqueuelength = maxqueuelength
+        self.queue_dump_frequency = queue_dump_frequency
 
-        self.canopsis = event2amqp(self.host,self.port,self.user,self.password,self.virtual_host, self.exchange_name, self.identifier,self.maxqueuelength)
+        self.canopsis = event2amqp(self.host,self.port,self.user,self.password,self.virtual_host, self.exchange_name, self.identifier,self.maxqueuelength,queue_dump_frequency)
 
     #We call functions like manage_ TYPEOFBROK _brok that return us queries
     def manage_brok(self, b):
@@ -243,9 +243,13 @@ class Canopsis_broker(BaseModule):
         self.canopsis.postmessage(message)
         #logger.info("[Canopsis] push2canopsis : %s" % (strmessage))
 
+    def hook_tick(self, brok):
+        if self.canopsis:
+            self.canopsis.hook_tick(brok)
+
 class event2amqp():
 
-    def __init__(self,host,port,user,password,virtual_host, exchange_name,identifier,maxqueuelength):
+    def __init__(self,host,port,user,password,virtual_host, exchange_name,identifier,maxqueuelength,queue_dump_frequency):
 
         self.host = host
         self.port = port
@@ -255,6 +259,7 @@ class event2amqp():
         self.exchange_name = exchange_name
         self.identifier = identifier
         self.maxqueuelength = maxqueuelength
+        self.queue_dump_frequency = queue_dump_frequency
 
         self.connection_string = None
 
@@ -263,6 +268,11 @@ class event2amqp():
         self.producer = None
         self.exchange = None
         self.queue = deque([])
+
+        self.tickage = 0
+
+        self.load_queue()
+
 
     def create_connection(self):
         self.connection_string = "amqp://%s:%s@%s:%s/%s" % (self.user,self.password,self.host,self.port,self.virtual_host)
@@ -420,12 +430,34 @@ class event2amqp():
         else:
             return False
 
-    def watcher(self):
-        # nice tutorial for gevent : http://sdiehl.github.com/gevent-tutorial/
+    def hook_tick(self, brok):
+
+        self.tickage += 1
+
+        # queue retention saving
+        if self.tickage >= int(self.queue_dump_frequency) and len(self.queue) > 0:
+            # flush queue to disk if queue age reach queue_dump_frequency
+            self.save_queue()
+            self.tickage = 0
+
         return True
 
     def save_queue(self):
+        retentionfile="%s/canopsis.dat" % os.getcwd()
+        logger.info("[Canopsis] saving to %s" % retentionfile)
+        filehandler = open(retentionfile, 'w') 
+        pickle.dump(self.queue, filehandler) 
+        filehandler.close()
+
         return True
 
     def load_queue(self):
+        retentionfile="%s/canopsis.dat" % os.getcwd()
+        logger.info("[Canopsis] loading from %s" % retentionfile)
+        filehandler = open(retentionfile, 'r') 
+
+        try:
+            self.queue = pickle.load(filehandler) 
+        except:
+            pass
         return True

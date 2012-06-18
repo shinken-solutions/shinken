@@ -530,7 +530,7 @@ class LiveStatus_broker(BaseModule, Daemon):
                         client, address = s.accept()
                         if isinstance(address, tuple):
                             client_ip, _ = address
-                            if self.allowed_hosts and address not in self.allowed_hosts:
+                            if self.allowed_hosts and client_ip not in self.allowed_hosts:
                                 print "Connection attempt from illegal ip address", client_ip
                                 try:
                                     #client.send('Buh!\n')

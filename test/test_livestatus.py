@@ -323,6 +323,57 @@ class TestConfigSmall(TestConfig):
         self.livestatus_broker = None
 
 
+    def test_check_type(self):
+        self.print_header()
+        now = time.time()
+        objlist = []
+        for host in self.sched.hosts:
+            objlist.append([host, 0, 'UP'])
+        for service in self.sched.services:
+            objlist.append([service, 2, 'CRIT'])
+        self.scheduler_loop(1, objlist)
+        self.update_broker()
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+
+        request = """GET services
+Columns: host_name service_description state check_type
+Filter: host_name = test_host_0
+Filter: description = test_ok_0
+OutputFormat: csv
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        # The last check was an active check -> check_type=0
+        goodresponse = """test_host_0;test_ok_0;2;0
+"""
+        print response 
+        self.assert_(response == goodresponse)
+
+        excmd = '[%d] PROCESS_SERVICE_CHECK_RESULT;test_host_0;test_ok_0;1;WARN' % int(time.time())
+        self.sched.run_external_command(excmd)
+        self.scheduler_loop(1, [])
+        self.scheduler_loop(1, []) #Need 2 run for get then consume)
+        self.update_broker()
+
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        # The result was from a passive check -> check_type=1
+        goodresponse = """test_host_0;test_ok_0;1;1
+"""
+        print response 
+        self.assert_(response == goodresponse)
+
+        for service in self.sched.services:
+            objlist.append([service, 2, 'CRIT'])
+        self.scheduler_loop(1, objlist)
+        self.update_broker()
+
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        # The last check was an active check -> check_type=0
+        goodresponse = """test_host_0;test_ok_0;2;0
+"""
+        print response 
+        self.assert_(response == goodresponse)
+
+
     def test_childs(self):
         if self.nagios_installed():
             self.start_nagios('1r_1h_1s')
@@ -3623,8 +3674,104 @@ ResponseHeader: fixed16
         print ""
         print "Overall Queries time : %.3f" % total_page
 
-        
+    def test_thruk_search(self):
+        self.print_header()
+        now = time.time()
+        self.update_broker()
+        # 99 test_host_099
+        request = """GET comments
+Columns: author comment entry_time entry_type expires expire_time host_name id persistent service_description source type
+Filter: service_description !=
+Filter: service_description =
+Or: 2
+Filter: comment ~~ 99
+Filter: author ~~ 99
+Or: 2
+OutputFormat: csv
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print "r1",response
+        self.assert_(response == """
+""")
 
+        request = """GET downtimes
+Columns: author comment end_time entry_time fixed host_name id start_time service_description triggered_by
+Filter: service_description !=
+Filter: service_description =
+Or: 2
+Filter: comment ~~ 99
+Filter: author ~~ 99
+Or: 2
+OutputFormat: csv
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print "r1",response
+        self.assert_(response == """
+""")
+
+        request = """GET services
+Columns: host_has_been_checked host_name host_state
+Filter: description ~~ 99
+Filter: groups >= 99
+Filter: plugin_output ~~ 99
+Filter: long_plugin_output ~~ 99
+Filter: host_name ~~ 99
+Filter: host_alias ~~ 99
+Filter: host_address ~~ 99
+Filter: host_groups >= 99
+Filter: host_comments >= -1
+Filter: host_downtimes >= -1
+Filter: comments >= -1
+Filter: downtimes >= -1
+Or: 4
+Or: 9
+OutputFormat: csv
+"""
+        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print "r1",response
+        # test_host_099 matches by name
+        # test_host_098 matches by address (test_host_098 has 127.0.0.99)
+        self.assert_(response == """0;test_host_098;0
+0;test_host_098;0
+0;test_host_098;0
+0;test_host_098;0
+0;test_host_098;0
+0;test_host_098;0
+0;test_host_098;0
+0;test_host_098;0
+0;test_host_098;0
+0;test_host_098;0
+0;test_host_098;0
+0;test_host_098;0
+0;test_host_098;0
+0;test_host_098;0
+0;test_host_098;0
+0;test_host_098;0
+0;test_host_098;0
+0;test_host_098;0
+0;test_host_098;0
+0;test_host_098;0
+0;test_host_099;0
+0;test_host_099;0
+0;test_host_099;0
+0;test_host_099;0
+0;test_host_099;0
+0;test_host_099;0
+0;test_host_099;0
+0;test_host_099;0
+0;test_host_099;0
+0;test_host_099;0
+0;test_host_099;0
+0;test_host_099;0
+0;test_host_099;0
+0;test_host_099;0
+0;test_host_099;0
+0;test_host_099;0
+0;test_host_099;0
+0;test_host_099;0
+0;test_host_099;0
+0;test_host_099;0
+""")
 
         
 
