@@ -727,6 +727,11 @@ class SchedulingItem(Item):
         self.output = c.output
         self.long_output = c.long_output
 
+        # Set the check result type also in the host/service 
+        # 0 = result came from an active check
+        # 1 = result came from a passive check
+        self.check_type = c.check_type
+
         # Get the perf_data only if we want it in the configuration
         if self.__class__.process_performance_data and self.process_perf_data:
             self.last_perf_data = self.perf_data

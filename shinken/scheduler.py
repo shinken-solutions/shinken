@@ -625,8 +625,6 @@ class Scheduler:
                     c.long_output = c.output
                 self.checks[c.id].get_return_from(c)
                 self.checks[c.id].status = 'waitconsume'
-                # Set the corresponding host/service's check_type to active=0
-                c.ref.check_type = 0
             except KeyError, exp:
                 pass
         elif c.is_a == 'eventhandler':
@@ -821,6 +819,8 @@ class Scheduler:
                     nb_received = len(results)
                     self.nb_check_received += nb_received
                     logger.debug("Received %d passive results" % nb_received)
+                    for result in results:
+                        result.set_type_passive()
                     self.waiting_results.extend(results)
                 except Pyro.errors.ProtocolError, exp:
                     logger.warning("Connection problem to the %s %s : %s" % (type, p['name'], str(exp)))
@@ -857,6 +857,8 @@ class Scheduler:
                     nb_received = len(results)
                     self.nb_check_received += nb_received
                     logger.debug("Received %d passive results" % nb_received)
+                    for result in results:
+                        result.set_type_passive()
                     self.waiting_results.extend(results)
                 except Pyro.errors.ProtocolError, exp:
                     logger.warning("Connection problem to the %s %s : %s" % (type, p['name'], str(exp)))

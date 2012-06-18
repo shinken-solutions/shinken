@@ -66,6 +66,8 @@ They connect here and see if they are still OK with our running_id, if not, they
         self.app.nb_check_received += nb_received
         if nb_received != 0:
             logger.debug("Received %d results" % nb_received)
+        for result in results:
+            result.set_type_active()
         self.app.waiting_results.extend(results)
 
         #for c in results:

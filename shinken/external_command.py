@@ -1288,7 +1288,7 @@ class ExternalCommandManager:
             c.status = 'waitconsume'
             c.check_time = self.current_timestamp  # we are using the external command timestamp
             # Set the corresponding host's check_type to passive=1
-            c.ref.check_type = 1
+            c.set_type_passive()
             self.sched.nb_check_received += 1
             # Ok now this result will be read by scheduler the next loop
 
@@ -1322,7 +1322,7 @@ class ExternalCommandManager:
             c.status = 'waitconsume'
             c.check_time = self.current_timestamp  # we are using the external command timestamp
             # Set the corresponding service's check_type to passive=1
-            c.ref.check_type = 1
+            c.set_type_passive()
             self.sched.nb_check_received += 1
             # Ok now this result will be reap by scheduler the next loop
 

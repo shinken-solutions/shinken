@@ -54,6 +54,7 @@ class Check(Action):
         'check_time':   IntegerProp(default=0),
         'execution_time': IntegerProp(default=0),
         'perf_data':    StringProp(default=''),
+        'check_type':   IntegerProp(default=0),
         'poller_tag':   StringProp(default='None'),
         'reactionner_tag':   StringProp(default='None'),
         'env':          StringProp(default={}),
@@ -89,6 +90,7 @@ class Check(Action):
         self.check_time = 0
         self.execution_time = 0
         self.perf_data = ''
+        self.check_type = 0 # which kind of check result? 0=active 1=passive
         self.poller_tag = poller_tag
         self.reactionner_tag = reactionner_tag
         self.module_type = module_type
@@ -126,3 +128,10 @@ class Check(Action):
 
     def get_id(self):
         return self.id
+
+    def set_type_active(self):
+        self.check_type = 0
+
+    def set_type_passive(self):
+        self.check_type = 1
+
