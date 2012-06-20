@@ -29,6 +29,7 @@
 If you look at the scheduling part, look at the scheduling item class"""
 
 import time
+import re
 
 try:
     from ClusterShell.NodeSet import NodeSet, NodeSetParseRangeError
@@ -530,7 +531,9 @@ class Service(SchedulingItem):
                     for key in key_value:
                         if key == 'KEY':
                             if hasattr(self, 'service_description'):
-                                safe_key_value = re.sub(r'[^/w]+', '_', key_value[key])
+                                # We want to change all illegal chars to a _ sign. We can't use class.illegal_obj_char
+                                # because in the "explode" phase, we do not have access to this data! :(
+                                safe_key_value = re.sub(r'['+"`~!$%^&*\"|'<>?,()="+']+', '_', key_value[key])
                                 new_s.service_description = self.service_description.replace('$'+key+'$', safe_key_value)
                         if hasattr(self, 'check_command'):
                             # here we can replace VALUE, VALUE1, VALUE2,...

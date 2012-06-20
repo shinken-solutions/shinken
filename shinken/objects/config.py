@@ -1446,9 +1446,9 @@ class Config(Item):
         self.receivers.pythonize()
 
 
-    #Explode parameters like cached_service_check_horizon in the
-    #Service class in a cached_check_horizon manner, o*hp commands
-    #, etc
+    # Explode parameters like cached_service_check_horizon in the
+    # Service class in a cached_check_horizon manner, o*hp commands
+    # , etc
     def explode_global_conf(self):
         clss = [Service, Host, Contact, SchedulerLink,
                 PollerLink, ReactionnerLink, BrokerLink,
