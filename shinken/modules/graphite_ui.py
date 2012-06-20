@@ -139,9 +139,10 @@ class Graphite_Webui(BaseModule):
 
 
         # Do we have a template ?
-        if os.path.isfile(self.templates_path+'/'+elt.check_command.get_name().split('!')[0]):
+        thefile=self.templates_path+'/'+elt.check_command.get_name().split('!')[0]+'.graph';
+        if os.path.isfile(thefile):
             template_html = ''
-            with open(self.templates_path+'/'+elt.check_command.get_name().split('!')[0],'r') as template_file:
+            with open(thefile,'r') as template_file:
                 template_html += template_file.read()
             # Read the template file, as template string python object
             template_file.closed
