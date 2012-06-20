@@ -75,7 +75,7 @@ class Command(Item):
         if not hasattr(self, 'reactionner_tag'):
             self.reactionner_tag = 'None'
         if not hasattr(self, 'module_type'):
-            # If the command satr with a _, set the module_type
+            # If the command start with a _, set the module_type
             # as the name of the command, without the _
             if getattr(self, 'command_line', '').startswith('_'):
                 module_type = getattr(self, 'command_line', '').split(' ')[0]
