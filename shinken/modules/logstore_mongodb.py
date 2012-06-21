@@ -27,7 +27,7 @@
 
 
 """
-This class is for attaching a sqlite database to a livestatus broker module.
+This class is for attaching a mongodb database to a livestatus broker module.
 It is one possibility for an exchangeable storage for log broks
 """
 
