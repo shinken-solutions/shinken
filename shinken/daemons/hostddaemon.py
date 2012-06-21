@@ -409,6 +409,8 @@ class Hostd(Daemon):
         self.idontcareaboutsecurity = self.conf.idontcareaboutsecurity
         self.user = self.conf.shinken_user
         self.group = self.conf.shinken_group
+        self.override_plugins = getattr(self.conf, 'override_plugins', None)
+        self.http_port = int(getattr(self.conf, 'http_port', '7765'))
 
         self.share_dir = self.conf.share_dir
         logger.info('Using share directory %s' % self.share_dir)
@@ -436,7 +438,7 @@ class Hostd(Daemon):
     def load_web_configuration(self):
         self.plugins = []
 
-        self.http_port = 7765#int(getattr(modconf, 'port', '7767'))
+        #self.http_port = 7765#int(getattr(modconf, 'port', '7767'))
         self.http_host = '0.0.0.0'#getattr(modconf, 'host', '0.0.0.0')
         #self.auth_secret = 'YOUDONTKNOWIT'.encode('utf8', 'replace')#getattr(modconf, 'auth_secret').encode('utf8', 'replace')
         self.http_backend = 'auto'#getattr(modconf, 'http_backend', 'auto')
@@ -663,18 +665,18 @@ class Hostd(Daemon):
         self.init_datamanager()
 
         # Launch the data thread"
-        self.workersmanager_thread = threading.Thread(None, self.workersmanager, 'httpthread')
-        self.workersmanager_thread.start()
+        #self.workersmanager_thread = threading.Thread(None, self.workersmanager, 'httpthread')
+        #self.workersmanager_thread.start()
         # TODO : look for alive and killing
 
         print "Starting HostdUI app"
         srv = run(host=self.http_host, port=self.http_port, server=self.http_backend)
 
 
-    def workersmanager(self):
-        while True:
-            print "Workers manager thread"
-            time.sleep(1)
+#    def workersmanager(self):
+#        while True:
+#            print "Workers manager thread"
+#            time.sleep(1)
 
 
     # Here we will load all plugins (pages) under the webui/plugins
@@ -683,6 +685,8 @@ class Hostd(Daemon):
     def load_plugins(self):
         from shinken.webui import plugins_hostd as plugins
         plugin_dir = os.path.abspath(os.path.dirname(plugins.__file__))
+        if self.override_plugins:
+           plugin_dir = self.override_plugins
         print "Loading plugin directory : %s" % plugin_dir
         
         # Load plugin directories
@@ -696,6 +700,10 @@ class Hostd(Daemon):
         for fdir in plugin_dirs:
             print "Try to load", fdir
             mod_path = 'shinken.webui.plugins_hostd.%s.%s' % (fdir, fdir)
+            # Maybe we want to start a fully new set of pages? If so,
+            # load only them
+            if self.override_plugins:
+               mod_path = '%s.%s' % (fdir, fdir)
             print "MOD PATH", mod_path
             try:
                 m = __import__(mod_path, fromlist=[mod_path])
