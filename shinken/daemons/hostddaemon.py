@@ -56,10 +56,11 @@ from shinken.daemon import Daemon, Interface
 from shinken.log import logger
 from shinken.brok import Brok
 from shinken.external_command import ExternalCommand
-from shinken.util import safe_print
+from shinken.util import safe_print,strip_and_uniq
 from shinken.skonfuiworker import SkonfUIWorker
 from shinken.message import Message
 from shinken.misc.datamanagerhostd import datamgr
+from shinken.modulesmanager import ModulesManager
 
 # DBG : code this!
 from shinken.objects import Contact
@@ -174,7 +175,6 @@ class Hostd(Daemon):
 
         self.broks = {}
         self.is_master = False
-        self.me = None
 
         self.nb_broks_send = 0
 
@@ -209,7 +209,7 @@ class Hostd(Daemon):
         else:
             logger.warning('Cannot manage object type %s (%s)' % (type(b), b))
 
-            
+
 
     def load_config_file(self):
         print "Loading configuration"
@@ -227,59 +227,37 @@ class Hostd(Daemon):
 
         self.conf.early_arbiter_linking()
 
-        # Search wich Arbiterlink I am
-        for arb in self.conf.arbiters:
-            if arb.is_me():
-                arb.need_conf = False
-                self.me = arb
-                self.is_master = not self.me.spare
-                logger.info("I am the %s Arbiter : %s" % ('master' if self.is_master else 'spare', arb.get_name()))
+        self.modules = []
+        print "Loading modules", getattr(self.conf, 'hostd_modules', '')
+        modules_names = getattr(self.conf, 'hostd_modules', '').split(',')
+        modules_names = strip_and_uniq(modules_names)
+        for mod_name in modules_names:
+           m = self.conf.modules.find_by_name(mod_name)
+           if not m:
+              logger.error('cannot find module %s' % mod_name)
+              sys.exit(2)
+           self.modules.append(m)
+        
+        logger.info("My own modules : " + ','.join([m.get_name() for m in self.modules]))
 
-                # Set myself as alive ;)
-                self.me.alive = True
-            else: #not me
-                arb.need_conf = True
 
-        if not self.me:
-            sys.exit("Error: I cannot find my own Arbiter object, I bail out. \
-                     To solve it, please change the host_name parameter in \
-                     the object Arbiter in the file shinken-specific.cfg. \
-                     With the value %s \
-                     Thanks." % socket.gethostname())
-
-        logger.info("My own modules : " + ','.join([m.get_name() for m in self.me.modules]))
+        self.override_modules_path = getattr(self.conf, 'override_modules_path', '')
+        if self.override_modules_path:
+           # We override the module manager
+           print "Overring module manager"
+           self.modules_manager = ModulesManager('hostd', self.override_modules_path, [])
+           
 
         # we request the instances without them being *started* 
         # (for these that are concerned ("external" modules):
         # we will *start* these instances after we have been daemonized (if requested)
-        self.modules_manager.set_modules(self.me.modules)
+        self.modules_manager.set_modules(self.modules)
         self.do_load_modules()
 
-        # Call modules that manage this read configuration pass
-        self.hook_point('read_configuration')
-
-        # Now we ask for configuration modules if they
-        # got items for us
         for inst in self.modules_manager.instances:
-            if 'configuration' in inst.phases:
-                try :
-                    r = inst.get_objects()
-                except Exception, exp:
-                    print "The instance %s raise an exception %s. I bypass it" % (inst.get_name(), str(exp))
-                    continue
-                
-                types_creations = self.conf.types_creations
-                for k in types_creations:
-                    (cls, clss, prop) = types_creations[k]
-                    if prop in r:
-                        for x in r[prop]:
-                            # test if raw_objects[k] is already set - if not, add empty array
-                            if not k in raw_objects:
-                                raw_objects[k] = []
-                            # now append the object
-                            raw_objects[k].append(x)
-                        print "Added %i objects to %s from module %s" % (len(r[prop]), k, inst.get_name())
-
+            f = getattr(inst, 'load', None)
+            if f and callable(f):
+                f(self)
 
         ### Resume standard operations ###
         self.conf.create_objects(raw_objects)
@@ -428,7 +406,7 @@ class Hostd(Daemon):
             self.workdir = self.conf.workdir
 
         ##  We need to set self.host & self.port to be used by do_daemon_init_and_start
-        self.host = self.me.address
+        self.host = '0.0.0.0'
         self.port = 0
         
         logger.info("Configuration Loaded")
@@ -541,25 +519,9 @@ class Hostd(Daemon):
         self.new_conf = None
         self.cur_conf = conf
         self.conf = conf        
-        for arb in self.conf.arbiters:
-            if (arb.address, arb.port) == (self.host, self.port):
-                self.me = arb
-                arb.is_me = lambda: True  # we now definitively know who we are, just keep it.
-            else:
-                arb.is_me = lambda: False # and we know who we are not, just keep it.
 
 
     def do_loop_turn(self):
-        # If I am a spare, I wait for the master arbiter to send me
-        # true conf. When
-        if self.me.spare:
-            self.wait_for_initial_conf()
-            if not self.new_conf:
-                return
-            self.setup_new_conf()
-            print "I must wait now"
-            self.wait_for_master_death()
-
         if self.must_run:
             # Main loop
             self.run()
@@ -640,12 +602,6 @@ class Hostd(Daemon):
 
     # Main function
     def run(self):
-        # Before running, I must be sure who am I
-        # The arbiters change, so we must refound the new self.me
-        for arb in self.conf.arbiters:
-            if arb.is_me():
-                self.me = arb
-
         if self.conf.human_timestamp_log:
             logger.set_human_format()
         

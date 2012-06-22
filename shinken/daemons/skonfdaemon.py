@@ -218,9 +218,9 @@ class Skonf(Daemon):
         # so we can ask them some objects too
         self.conf.create_objects_for_type(raw_objects, 'arbiter')
         self.conf.create_objects_for_type(raw_objects, 'module')
-
+        
         self.conf.early_arbiter_linking()
-
+        
         self.modules = []
         print "Loading modules", self.conf.skonf_modules
         modules_names = self.conf.skonf_modules.split(',')
