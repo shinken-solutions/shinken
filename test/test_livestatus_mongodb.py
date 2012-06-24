@@ -595,6 +595,17 @@ OutputFormat: json"""
         time.time = fake_time_time
         time.sleep = fake_time_sleep
 
+    def test_max_logs_age(self):
+        if not has_pymongo:
+            return
+        dbmodconf = Module({'module_name' : 'LogStore',
+            'module_type' : 'logstore_mongodb',
+            'database' : 'bigbigbig',
+            'mongodb_uri' : "mongodb://127.0.0.1:27017",
+            'max_logs_age' : '7y',
+        })
+        self.assert_(dbmodconf.max_logs_age == 7*365)
+
 
 if __name__ == '__main__':
     #import cProfile

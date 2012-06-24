@@ -89,7 +89,7 @@ class LiveStatusLogStoreSqlite(BaseModule):
         except:
             os.mkdir(self.archive_path)
         max_logs_age = getattr(modconf, 'max_logs_age', '365')
-        maxmatch = re.match(r'^(\d+)([dwm]*)$', max_logs_age)
+        maxmatch = re.match(r'^(\d+)([dwmy]*)$', max_logs_age)
         if maxmatch is None:
             print 'Warning : wrong format for max_logs_age. Must be <number>[d|w|m|y] or <number> and not %s' % max_logs_age
             return None
