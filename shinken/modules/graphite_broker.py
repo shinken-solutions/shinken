@@ -28,6 +28,7 @@ to brok information of the service/host perfdatas into the Graphite
 backend. http://graphite.wikidot.com/start
 """
 
+import sys
 import re
 from socket import socket
 import cPickle
@@ -49,7 +50,54 @@ def get_instance(mod_conf):
     instance = Graphite_broker(mod_conf)
     return instance
 
+def default_hname(graphite_broker, data):
+    """
+    default strategy to generate the hostname (prefix) sent to graphite server
+    """
+    hname = graphite_broker.illegal_char.sub('_', data['host_name'])
+    if data['host_name'] in graphite_broker.host_dict:
+        customs_datas = graphite_broker.host_dict[data['host_name']]
+        if '_GRAPHITE_PRE' in customs_datas:
+            hname = ".".join((customs_datas['_GRAPHITE_PRE'], hname))
+    return hname
 
+def import_function(absolute_path_function):
+    """
+    from a string 'path.module.function' return the function instance
+    """
+    # extract path name and module name from access_control string field
+    path = absolute_path_function.split('.')
+    module_name = '.'.join(path[0:-1])
+    function_name = path[-1]
+
+    # try to load module
+    try:
+        module = sys.modules[module_name]
+    except KeyError:
+        try:
+            __import__(module_name)
+        except ImportError:
+            logger.error("Module '%s' does not exist", module_name)
+            return None
+        module = sys.modules[module_name]
+
+    # try to get function
+    try:
+        func = getattr(module, function_name)
+    except AttributeError:
+        logger.error("Function '%s' is not in module '%s'", function_name,
+                     module_name)
+        return None
+
+    # check if it can be uses a function
+    try:
+        hasattr(func, '__call__')
+    except AttributeError:
+        logger.error("%s is not callable", func)
+        return None
+
+    # everything seem ok (so far)
+    return func
 
 # Class for the Graphite Broker
 # Get broks and send them to a Carbon instance of Graphite
@@ -59,6 +107,19 @@ class Graphite_broker(BaseModule):
         self.host = getattr(modconf, 'host', 'localhost')
         self.port = int(getattr(modconf, 'port', '2003'))
         self.use_pickle = getattr(modconf, 'use_pickle', '0') == '1'
+
+        self.generate_hname = getattr(modconf, 'hname_function', default_hname)
+        # if it's not the default function, it's a string, so it need to be
+        # imported first
+        if self.generate_hname != default_hname:
+            func = import_function(self.generate_hname)
+            if func is None:
+                logger.error("Can't import '%s', use default value",
+                             self.generate_hname)
+                self.generate_hname = default_hname
+            else:
+                self.generate_hname = func
+
         if self.use_pickle:
             self.port = int(getattr(modconf, 'port', '2004'))
         else:
@@ -68,9 +129,6 @@ class Graphite_broker(BaseModule):
         self.ticks = 0
         self.host_dict = {}
         self.svc_dict = {}
-
-
-
 
     # Called by Broker so we can do init stuff
     # TODO : add conf param to get pass with init
@@ -144,12 +202,8 @@ class Graphite_broker(BaseModule):
         # If no values, we can exit now
         if len(couples) == 0:
             return
-        
-        hname = self.illegal_char.sub('_', data['host_name'])
-        if data['host_name'] in self.host_dict:
-            customs_datas = self.host_dict[data['host_name']]
-            if '_GRAPHITE_PRE' in customs_datas:
-                hname = ".".join((customs_datas['_GRAPHITE_PRE'], hname))
+
+        hname = self.generate_hname(self, data)
 
         desc = self.illegal_char.sub('_', data['service_description'])
         if (data['host_name'], data['service_description']) in self.svc_dict:
@@ -192,12 +246,8 @@ class Graphite_broker(BaseModule):
         # If no values, we can exit now
         if len(couples) == 0:
             return
-        
-        hname = self.illegal_char.sub('_', data['host_name'])
-        if data['host_name'] in self.host_dict:
-            customs_datas = self.host_dict[data['host_name']]
-            if '_GRAPHITE_PRE' in customs_datas:
-                hname = ".".join((customs_datas['_GRAPHITE_PRE'], hname))
+
+        hname = self.generate_hname(self, data)
 
         check_time = int(data['last_chk'])
 
