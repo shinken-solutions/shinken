@@ -1,0 +1,9 @@
+
+ifconfig eth0 192.168.10.254 up
+ifconfig eth1 10.0.0.254     up
+
+# activate forwarding
+echo 1 > /proc/sys/net/ipv4/ip_forward
+iptables -A FORWARD -i eth0 -j ACCEPT
+iptables -A FORWARD -o eth0 -j ACCEPT
+iptables -t nat -A POSTROUTING -o eth1 -j MASQUERADE

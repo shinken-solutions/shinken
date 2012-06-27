@@ -819,6 +819,8 @@ class Scheduler:
                     nb_received = len(results)
                     self.nb_check_received += nb_received
                     logger.debug("Received %d passive results" % nb_received)
+                    for result in results:
+                        result.set_type_passive()
                     self.waiting_results.extend(results)
                 except Pyro.errors.ProtocolError, exp:
                     logger.warning("Connection problem to the %s %s : %s" % (type, p['name'], str(exp)))
@@ -855,6 +857,8 @@ class Scheduler:
                     nb_received = len(results)
                     self.nb_check_received += nb_received
                     logger.debug("Received %d passive results" % nb_received)
+                    for result in results:
+                        result.set_type_passive()
                     self.waiting_results.extend(results)
                 except Pyro.errors.ProtocolError, exp:
                     logger.warning("Connection problem to the %s %s : %s" % (type, p['name'], str(exp)))

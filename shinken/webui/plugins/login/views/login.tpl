@@ -1,4 +1,4 @@
-%rebase layout title='Shinken UI login', print_header=False, js=['login/js/jQuery.dPassword.js', 'login/js/detectmobilebrowser.js'], css=['login/css/login.css']
+%rebase layout title='Shinken UI login', print_header=False, js=['login/js/detectmobilebrowser.js'], css=['login/css/login.css']
 
 <script type="text/javascript">
 // If we are a mobile device, go in the /mobile part :)
@@ -38,9 +38,4 @@
       </form>
     </div>
   </div>
-  <script type="text/javascript">
-    $(document).ready( function() {
-      $('input:password').dPassword();
-    });
-  </script>
 </div>

@@ -746,7 +746,7 @@ class LiveStatusQuery(object):
 
         def match_filter(item):
             try:
-                p = re.compile(reference)
+                p = re.compile(str(reference))
                 return p.search(getattr(item, attribute)(self))
             except Exception:
                 raise LiveStatusQueryError(450, attribute.replace('lsm_', ''))
@@ -761,8 +761,11 @@ class LiveStatusQuery(object):
                     raise LiveStatusQueryError(450, attribute.replace('lsm_', ''))
 
         def match_nocase_filter(item):
-            p = re.compile(reference, re.I)
-            return p.search(getattr(item, attribute)(self))
+            try:
+                p = re.compile(str(reference), re.I)
+                return p.search(getattr(item, attribute)(self))
+            except Exception:
+                raise LiveStatusQueryError(450, attribute.replace('lsm_', ''))
 
         def lt_filter(item):
             try:

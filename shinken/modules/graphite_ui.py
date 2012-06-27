@@ -34,7 +34,7 @@ import os
 
 from string import Template
 from shinken.basemodule import BaseModule
-from datetime import date
+from datetime import datetime
 
 #print "Loaded AD module"
 
@@ -137,19 +137,23 @@ class Graphite_Webui(BaseModule):
         t = elt.__class__.my_type
         r = []
 
+        # Format the start & end time (and not only the date)
+        d = datetime.fromtimestamp(graphstart)
+        d = d.strftime('%H:%M_%Y%m%d')
+        e = datetime.fromtimestamp(graphend)
+        e = e.strftime('%H:%M_%Y%m%d')
 
         # Do we have a template ?
-        if os.path.isfile(self.templates_path+'/'+elt.check_command.get_name().split('!')[0]):
+        thefile=self.templates_path+'/'+elt.check_command.get_name().split('!')[0]+'.graph';
+        if os.path.isfile(thefile):
             template_html = ''
-            with open(self.templates_path+'/'+elt.check_command.get_name().split('!')[0],'r') as template_file:
+            with open(thefile,'r') as template_file:
                 template_html += template_file.read()
             # Read the template file, as template string python object
             template_file.closed
             html=Template(template_html)
             # Build the dict to instanciate the template string
-            values = {}
-            values['graphstart'] = graphstart
-            values['graphend'] = graphend 
+            values = {} 
             if t == 'host':
                 values['host'] = self.illegal_char.sub("_",elt.host_name)
                 values['service'] = '__HOST__'
@@ -162,15 +166,12 @@ class Graphite_Webui(BaseModule):
                 if not img == "":
                     v = {}
                     v['link'] = self.uri
-                    v['img_src'] = img.replace('"',"'")
+                    v['img_src'] = img.replace('"',"'") + "&from=" + d + "&until=" + e
                     r.append(v)
             # No need to continue, we have the images already.      					
             return r
              
         # If no template is present, then the usual way
-        d = date.fromtimestamp(graphstart)
-        d = d.strftime('%H:%M_%Y%m%d')
-
 
         if t == 'host':
             couples = self.get_metric_and_value(elt.perf_data)
@@ -184,7 +185,7 @@ class Graphite_Webui(BaseModule):
 
             # Send a bulk of all metrics at once
             for (metric, _) in couples:
-                uri = self.uri + 'render/?width=586&height=308&lineMode=connected&from=' + d
+                uri = self.uri + 'render/?width=586&height=308&lineMode=connected&from=' + d + "&until=" + e 
                 if re.search(r'_warn|_crit', metric):
                     continue
                 uri += "&target=%s.__HOST__.%s" % (host_name, metric)
@@ -208,7 +209,7 @@ class Graphite_Webui(BaseModule):
             
             # Send a bulk of all metrics at once
             for (metric, value) in couples:
-                uri = self.uri + 'render/?width=586&height=308&lineMode=connected&from=' + d
+                uri = self.uri + 'render/?width=586&height=308&lineMode=connected&from=' + d + "&until=" + e 
                 if re.search(r'_warn|_crit', metric):
                     continue
                 elif value[1] == '%':

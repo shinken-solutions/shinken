@@ -27,7 +27,7 @@
 
 
 """
-This class is for attaching a sqlite database to a livestatus broker module.
+This class is for attaching a mongodb database to a livestatus broker module.
 It is one possibility for an exchangeable storage for log broks
 """
 
@@ -97,7 +97,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
         self.collection = getattr(modconf, 'collection', 'logs')
         self.use_aggressive_sql = True
         max_logs_age = getattr(modconf, 'max_logs_age', '365')
-        maxmatch = re.match(r'^(\d+)([dwm]*)$', max_logs_age)
+        maxmatch = re.match(r'^(\d+)([dwmy]*)$', max_logs_age)
         if maxmatch is None:
             print 'Warning : wrong format for max_logs_age. Must be <number>[d|w|m|y] or <number> and not %s' % max_logs_age
             return None

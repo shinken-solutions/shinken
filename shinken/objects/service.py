@@ -29,6 +29,7 @@
 If you look at the scheduling part, look at the scheduling item class"""
 
 import time
+import re
 
 try:
     from ClusterShell.NodeSet import NodeSet, NodeSetParseRangeError
@@ -512,7 +513,12 @@ class Service(SchedulingItem):
 
         # If I do not have the property, we bail out
         if prop in host.customs:
+            # Get the list entry, and the not one if there is one
             entry = host.customs[prop]
+            # Look at the list of the key we do NOT want maybe,
+            # for _disks it will be _!disks
+            not_entry = host.customs.get('_'+'!'+prop[1:], '').split(',')
+            not_keys = strip_and_uniq(not_entry)
 
             default_value = getattr(self, 'default_value', '')
             # Transform the generator string to a list
@@ -522,6 +528,9 @@ class Service(SchedulingItem):
             if key_values:
                 for key_value in key_values:
                     key = key_value['KEY']
+                    # Maybe this key is in the NOT list, if so, skip it
+                    if key in not_keys:
+                        continue
                     value = key_value['VALUE']
                     new_s = self.copy()
                     new_s.host_name = host.get_name()
@@ -530,7 +539,10 @@ class Service(SchedulingItem):
                     for key in key_value:
                         if key == 'KEY':
                             if hasattr(self, 'service_description'):
-                                new_s.service_description = self.service_description.replace('$'+key+'$', key_value[key])
+                                # We want to change all illegal chars to a _ sign. We can't use class.illegal_obj_char
+                                # because in the "explode" phase, we do not have access to this data! :(
+                                safe_key_value = re.sub(r'['+"`~!$%^&*\"|'<>?,()="+']+', '_', key_value[key])
+                                new_s.service_description = self.service_description.replace('$'+key+'$', safe_key_value)
                         if hasattr(self, 'check_command'):
                             # here we can replace VALUE, VALUE1, VALUE2,...
                             new_s.check_command = new_s.check_command.replace('$'+key+'$', key_value[key])

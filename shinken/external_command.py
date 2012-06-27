@@ -1287,6 +1287,8 @@ class ExternalCommandManager:
             c.get_outputs(plugin_output, host.max_plugins_output_length)
             c.status = 'waitconsume'
             c.check_time = self.current_timestamp  # we are using the external command timestamp
+            # Set the corresponding host's check_type to passive=1
+            c.set_type_passive()
             self.sched.nb_check_received += 1
             # Ok now this result will be read by scheduler the next loop
 
@@ -1319,6 +1321,8 @@ class ExternalCommandManager:
             c.get_outputs(plugin_output, service.max_plugins_output_length)
             c.status = 'waitconsume'
             c.check_time = self.current_timestamp  # we are using the external command timestamp
+            # Set the corresponding service's check_type to passive=1
+            c.set_type_passive()
             self.sched.nb_check_received += 1
             # Ok now this result will be reap by scheduler the next loop
 
