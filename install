@@ -1344,7 +1344,7 @@ function install_mongodb(){
                 cecho " > Updating repositories " > yellow
                 apt-get --allow-unauthenticated update >> ${LOGFILE} 2>&1
                 cecho " > Installing mongodb server" green
-                apt-get --allow-unauthenticated install -y $MONGOPKGS >> ${LOGFILE} 2>&1
+                apt-get --allow-unauthenticated --force-yes install -y $MONGOPKGS >> ${LOGFILE} 2>&1
             else
                 cecho " > 10gen repository found." green
                 mongoexist=$(dpkg -l | grep "^ii" | grep "mongodb-10gen")
