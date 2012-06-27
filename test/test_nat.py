@@ -30,62 +30,159 @@
 import os
 import sys
 import time
+import glob
 import shutil
 import os.path
 import unittest
 import subprocess
+
+SVC_CMD = "cd /hostlab && ./bin/shinken-#svc# -d -r -c ./test/etc/netkit/basic/#svc#d.ini\n"
+
+launchers = {
+    'arbiter'    : "cd /hostlab/var && ../bin/shinken-#svc# -r -c ../etc/nagios.cfg -c ../test/etc/netkit/#conf#/shinken-specific.cfg 2>&1 > ./arbiter.debug&\n",
+    'broker'     : SVC_CMD,
+    'poller'     : SVC_CMD,
+    'reactionner': SVC_CMD,
+    'receiver'   : SVC_CMD,
+    'scheduler'  : SVC_CMD,
+}
+
+LOGBASE = os.path.join("#root#","var")
+LOGFILE = os.path.join(LOGBASE, "#svc#d.log")
+logs = {
+    'arbiter'    : os.path.join(LOGBASE, "arbiter.debug"),
+    'broker'     : LOGFILE,
+    'poller'     : LOGFILE,
+    'reactionner': LOGFILE,
+    'receiver'   : LOGFILE,
+    'scheduler'  : LOGFILE,
+}
+
+def cleanup():
+    rootdir = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), "..")
+
+    subprocess.Popen(["lcrash", "--keep-fs", "-d", rootdir], stdout=open('/dev/null'), stderr=subprocess.STDOUT)
+    for prefix in ('pc1','pc2','nat'):
+        for f in glob.glob(os.path.join(rootdir, prefix+'.*')):
+            os.remove(f)
+
 
 class TestNat(unittest.TestCase):
     def setUp(self):
         self.testdir = os.path.dirname(os.path.abspath(sys.argv[0]))
         self.files   = dict()
 
-        for root, dirs, files in os.walk(os.path.join(self.testdir, 'etc', 'netkit')):
-            for f in files:
-                if f.endswith('.disk'):
-                    continue
-
+        # copying netkit configuration file to project root directory
+        root = os.path.join(self.testdir, 'etc', 'netkit')
+        for f in os.listdir(root):
+            if os.path.isfile(os.path.join(root, f)):
                 shutil.copy(os.path.join(root, f), os.path.join(self.testdir, '..'))
                 self.files[f] = os.path.join(self.testdir, '..', f)
+   
+        for vm in ('pc1','pc2', 'nat'):
+            lock = os.path.join(self.testdir, '..', vm+'.STARTED')
+            if os.path.exists(lock):
+                os.remove(lock)
+    
+            self.files[vm+'.lock'] = lock
 
-        self.files['pc1s'] = os.path.join(self.testdir, '..', "pc1.STARTED")
-        self.files['pc2s'] = os.path.join(self.testdir, '..', "pc2.STARTED")
+        # cleanup shinken logs
+        for f in glob.glob(os.path.join(self.testdir, "..", "var", "*.log")):
+            os.remove(f)
+        try:
+            os.remove(logs['arbiter'].replace('#root#', os.path.join(self.testdir, "..")))
+        except:
+            pass
 
     def tearDown(self):
-        subprocess.Popen(["lhalt" , "-d", os.path.join(self.testdir, "..")])
-        subprocess.Popen(["lcrash", "-d", os.path.join(self.testdir, "..")])
+        null = open('/dev/null')
+        subprocess.Popen(["lhalt" , "-q", "-d", os.path.join(self.testdir, "..")], stdout=null, stderr=subprocess.STDOUT)
+        time.sleep(20)
+        subprocess.Popen(["lcrash", "--keep-fs", "-d", os.path.join(self.testdir, "..")], stdout=null, stderr=subprocess.STDOUT)
+        time.sleep(60)
 
-        #for f in self.files:
-        #    os.remove(os.path.join(self.testdir, '..', f))
+        for k, f in self.files.iteritems(): #glob.glob(os.path.join(self.testdir, "..", "*.STARTED"));
+            if os.path.exists(f):
+                os.remove(f)
 
-    def started(self):
-        if not os.path.exists(os.path.join(self.testdir, "..", "pc1.STARTED"))
+    def booted(self):
+        if not os.path.exists(os.path.join(self.testdir, "..", "pc1.STARTED")):
             return False
 
         return os.path.exists(os.path.join(self.testdir, "..", "pc2.STARTED"))
         
-    def init_and_start_vms(self, services):
-        for pc in ('pc1','pc2'):
-            f = open(self.files[pc+'startup'], 'a')
-            for svc in services[pc]:
-                f.write("/hostlab/bin/launch_"+svc+".sh\n")
+    def init_and_start_vms(self, conf, services):
+        for vm in ('pc1','pc2', 'nat'):
+            f = open(self.files[vm+'.startup'], 'a')
 
-            f.write("touch /hostlab/"+pc+".STARTED\n")
+            # extend vm startup
+            extend = os.path.join(self.testdir, "etc", "netkit", conf, vm+".startup")
+            if os.path.exists(extend):
+                e = open(extend, 'r')
+                for l in e.xreadlines():
+                    f.write(l)
+                e.close()
+
+            for svc in services.get(vm, []):
+                f.write(launchers[svc].replace('#svc#', svc).replace('#conf#', conf))
+
+            f.write("touch /hostlab/"+vm+".STARTED\n")
             f.close()
         
-        subprocess.Popen(["lstart","-d",os.path.join(self.testdir, ".."),"-f"])
+        subprocess.Popen(["lstart","-d",os.path.join(self.testdir, ".."),"-f"], stdout=open('/dev/null'), stderr=subprocess.STDOUT)
 
+        # waiting for vms has finished booting
         while not self.booted():
             time.sleep(10)
-        print "done!"
+        print "init_and_start_vms %s done!" % conf
 
-    def test_natted_broker(self):
-        init_and_start_vms({
-            'pc1': ['arbiter'],
+    def found_in_log(self, svc, msg):
+        f = open(logs[svc].replace('#root#', os.path.join(self.testdir, "..")).replace('#svc#', svc), 'r')
+        for line in f.xreadlines():
+            if msg in line:
+                f.close(); return True
+
+        f.close()
+        return False
+
+    def test_01_failed_broker(self):
+        print "conf-01: init..."
+        self.init_and_start_vms('conf-01', {
+            'pc1': ['arbiter', 'poller', 'reactionner', 'receiver', 'scheduler'],
             'pc2': ['broker']
         })
 
+        # waiting 5mins to be sure arbiter sent its configuration to other services
+        print "waiting..."
+        time.sleep(60)
 
+        print "checking..."
+        self.assertTrue(self.found_in_log('broker'  , 'Info : Waiting for initial configuration'))
+        self.assertTrue(self.found_in_log('arbiter' , 'Warning : Missing satellite broker for configuration 0 :'))
+
+        self.assertFalse(self.found_in_log('arbiter', 'Info : [All] Dispatch OK of configuration 0 to broker broker-1'))
+        
+    def test_02_broker(self):
+        print "conf-02: init..."
+        self.init_and_start_vms('conf-02', {
+            'pc1': ['arbiter', 'poller', 'reactionner', 'receiver', 'scheduler'],
+            'pc2': ['broker']
+        })
+
+        # waiting 3mins to be sure arbiter sent its configuration to other services
+        print "waiting..."
+        time.sleep(210)
+
+        print "checking..."
+        self.assertTrue(self.found_in_log('broker' , 'Info : Waiting for initial configuration'))
+        self.assertTrue(self.found_in_log('arbiter', 'Info : [All] Dispatch OK of configuration 0 to broker broker-1'))
+
+        self.assertTrue(self.found_in_log('broker' , 'Info : [broker-1] Connection OK to the scheduler scheduler-1'))
+        self.assertTrue(self.found_in_log('broker' , 'Info : [broker-1] Connection OK to the poller poller-1'))
+        self.assertTrue(self.found_in_log('broker' , 'Info : [broker-1] Connection OK to the reactionner reactionner-1'))
+        
+        
+        
 if __name__ == '__main__':
     #import cProfile
     command = """unittest.main()"""
@@ -94,3 +191,5 @@ if __name__ == '__main__':
 
     #allsuite = unittest.TestLoader.loadTestsFromModule(TestConfig) 
     #unittest.TextTestRunner(verbosity=2).run(allsuite) 
+
+    cleanup()
