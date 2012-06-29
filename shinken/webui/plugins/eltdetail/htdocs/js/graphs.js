@@ -28,6 +28,11 @@
    PS : I lost 2 hours in this, and yes, I'm quite angry about this stupid thing....
 */
 $(window).ready(function(){
+	// This change allow the range to change after the page is loaded.
+	get_range();
+});
+
+function get_range() {	
     g_s = graphstart;  // Time start and ends
     g_e = graphend;
     
@@ -44,7 +49,7 @@ $(window).ready(function(){
     g_D = g_T - (g_A + g_B); // The pixel range when we remove borders
     
     g_O = g_e - g_s; // total time printed
-});
+}
 
 /* 
    { }  <-- User selection.
