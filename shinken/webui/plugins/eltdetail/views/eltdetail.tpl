@@ -516,32 +516,112 @@ Invalid element name
 	      			<h3>No graphs, sorry</h3>
 				%else:
 				 <h3>Graphs</h3>
-				<div class='row-fluid well span6'>
-				  %now = int(time.time())
-				  %fourhours = now - 3600*4
-				  %lastday = now - 86400
-				  %lastweek = now - 86400*7
-				  %lastmonth = now - 86400*31
-				  %lastyear = now - 86400*365
+				 <div class='row-fluid well span6'>
+					
+			<!-- Get the uris for the 4 standard time ranges in advance	 -->
+				   %now = int(time.time())
+				   %fourhours = now - 3600*4
+				   %lastday =   now - 86400
+				   %lastweek =  now - 86400*7
+				   %lastmonth = now - 86400*31
+				   %lastyear =  now - 86400*365
 						
-				  <div class='span2'><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{fourhours}}&graphend={{now}}#graphs" class="">4 hours</a></div>
-				  <div class='span2'><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{lastday}}&graphend={{now}}#graphs" class="">Day</a></div>
-				  <div class='span2'><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{lastweek}}&graphend={{now}}#graphs" class="">Week</a></div>
-				  <div class='span2'><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{lastmonth}}&graphend={{now}}#graphs" class="">Month</a></div>
-				  <div class='span2'><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{lastyear}}&graphend={{now}}#graphs" class="">Year</a></div>
-				</div>
-
-				<div class='row-fluid well span8 jcrop'>
-				%for g in uris:
-				  %img_src = g['img_src']
-				  %link = g['link']
-    				  <p>
-				    <img src="{{img_src}}" class="jcropelt"/>
-				    <a href="{{link}}" class="btn"><i class="icon-plus"></i> Show more</a>
-				    <a href="javascript:graph_zoom('/{{elt_type}}/{{elt.get_full_name()}}?')" class="btn"><i class="icon-zoom-in"></i> Zoom</a>
-				  </p>
+                   %# Let's get all the uris at once.
+                   %uris_4h = app.get_graph_uris(elt, fourhours, now)
+                   %uris_1d = app.get_graph_uris(elt, lastday, now)
+                   %uris_1w = app.get_graph_uris(elt, lastweek, now)
+                   %uris_1m = app.get_graph_uris(elt, lastmonth, now)
+                                  
+                  <!-- Use of javascript to change the content of a div!-->										
+               	  <div class='span2'><a onclick="setHTML(html_4h,{{fourhours}});" class=""> 4 hours</a></div>
+				  <div class='span2'><a onclick="setHTML(html_1d,{{lastday}});" class=""> 1 day</a></div>
+				  <div class='span2'><a onclick="setHTML(html_1w,{{lastweek}});" class=""> 1 week</a></div>
+				  <div class='span2'><a onclick="setHTML(html_1m,{{lastmonth}});" class=""> 1 month</a></div>
 				  
-				%end
+							
+				 </div>
+				  
+					<script langage="javascript">
+						function setHTML(html,start) {
+						<!-- change the content of the div --!>
+							document.getElementById("real_graphs").innerHTML=html;
+							
+							<!-- and call the jcrop javascript --!>
+							$('.jcropelt').Jcrop({
+								onSelect: update_coords,
+								onChange: update_coords
+							});
+							graphstart=start;
+							get_range();
+						}
+										
+						<!-- let's create the html content for each time rand --!>
+						<!-- This is quite ugly here. I do the same thing 4 times --!->
+						<!-- someone said "function" ? You're right.--!>
+						<!-- but the mix between python and javascript is not a easy thing for me --!>
+						html_4h='<p>';
+						html_1d='<p>';
+						html_1w='<p>';
+						html_1m='<p>';
+						%for g in uris_4h:
+							%img_src = g['img_src']
+							%link = g['link']
+							var img_src="{{img_src}}";
+							html_4h = html_4h + '<img src="'+ img_src.replace("'","\'") +'" class="jcropelt"/>';
+                            html_4h = html_4h + '<a href="{{link}}" class="btn"><i class="icon-plus"></i> Show more</a>';
+                            html_4h = html_4h + '<a href="javascript:graph_zoom(\'/{{elt_type}}/{{elt.get_full_name()}}?\')" class="btn"><i class="icon-zoom-in"></i> Zoom</a>';
+                            html_4h = html_4h + '<br>';
+							%end
+						html_4h=html_4h+'</p>';
+													
+     					%for g in uris_1d:
+							%img_src = g['img_src']
+                            %link = g['link']
+							var img_src="{{img_src}}";
+                            html_1d = html_1d +'<img src="'+ img_src.replace("'","\'") +'" class="jcropelt"/>';
+                            html_1d = html_1d + '<a href={{link}}" class="btn"><i class="icon-plus"></i> Show more</a>';
+                            html_1d = html_1d + '<a href="javascript:graph_zoom(\'/{{elt_type}}/{{elt.get_full_name()}}?\')" class="btn"><i class="icon-zoom-in"></i> Zoom</a>';
+                            html_1d = html_1d + '<br>';
+							%end
+						html_1d=html_1d+'</p>';
+						
+						%for g in uris_1w:
+							%img_src = g['img_src']
+							%link = g['link']
+							var img_src="{{img_src}}";
+							html_1w = html_1w + '<img src="'+ img_src.replace("'","\'") +'" class="jcropelt"/>';
+							html_1w = html_1w + '<a href="{{link}}" class="btn"><i class="icon-plus"></i> Show more</a>';
+							html_1w = html_1w + '<a href="javascript:graph_zoom(\'/{{elt_type}}/{{elt.get_full_name()}}?\')" class="btn"><i class="icon-zoom-in"></i> Zoom</a>';
+                            html_1w = html_1w + '<br>';
+							%end
+														
+						%for g in uris_1m:
+							%img_src = g['img_src']
+							%link = g['link']
+							var img_src="{{img_src}}";
+							html_1m = html_1m + '<img src="'+ img_src.replace("'","\'") +'" class="jcropelt"/>';
+							html_1m = html_1m + '<a href="{{link}}" class="btn"><i class="icon-plus"></i> Show more</a>';
+							html_1m = html_1m + '<a href="javascript:graph_zoom(\'/{{elt_type}}/{{elt.get_full_name()}}?\')" class="btn"><i class="icon-zoom-in"></i> Zoom</a>';
+                            html_1m = html_1m + '<br>';
+							%end
+					</script>
+					
+				<div class='row-fluid well span8 jcrop'>
+    			  <div id='real_graphs'>
+    			  <!-- Let's keep this part visible. This is the custom and default range --!>
+				    %for g in uris:
+				      %img_src = g['img_src']
+				      %link = g['link']
+				      <p>
+						
+				        <img src="{{img_src}}" class="jcropelt"/>
+				        <a href="{{link}}" class="btn"><i class="icon-plus"></i> Show more</a>
+				        <a href="javascript:graph_zoom('/{{elt_type}}/{{elt.get_full_name()}}?')" class="btn"><i class="icon-zoom-in"></i> Zoom</a>
+                      </p>
+                      
+					%end      
+					
+				  </div>
 				</div>
 				%end
 			</div>
