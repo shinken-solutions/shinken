@@ -1,0 +1,8 @@
+
+
+ifconfig eth1 192.168.10.42 up
+route add -net 10.0.0.0 netmask 255.255.255.0 gw 192.168.10.254 dev eth1
+
+export DEBIAN_FRONTEND=noninteractive
+apt-get update
+apt-get install -y --force-yes -qq pyro locales-all

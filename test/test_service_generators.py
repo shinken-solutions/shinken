@@ -71,6 +71,37 @@ class TestConfig(ShinkenTest):
         self.assert_(svc_g.check_command.args == ['G', '38%', '24%'])
 
 
+
+
+    #Change ME :)
+    def test_service_generators_not(self):
+        
+        host = self.sched.hosts.find_by_name("test_host_0")
+        host.checks_in_progress = []
+        host.act_depend_of = [] # ignore the router
+        router = self.sched.hosts.find_by_name("test_router_0")
+        router.checks_in_progress = []
+        router.act_depend_of = [] # ignore the router
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+
+        print "All service of", "test_host_0"
+        for s in host.services:
+            print s.get_name()
+        #We ask for 4 services with our disks :)
+        svc_c = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Generated Service NOT C")
+        svc_d = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Generated Service NOT D")
+        svc_e = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Generated Service NOT E")
+        svc_f = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Generated Service NOT F")
+        svc_g = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Generated Service NOT G")
+        
+        self.assert_(svc_c is not None)
+        self.assert_(svc_d is not None)
+        self.assert_(svc_e is None)
+        self.assert_(svc_f is None)
+        self.assert_(svc_g is not None)
+        
+
+
     #Change ME :)
     def test_service_generators_key_generator(self):
         

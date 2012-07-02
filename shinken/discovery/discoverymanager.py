@@ -47,6 +47,8 @@ except ImportError:
 from shinken.log import logger
 from shinken.objects import *
 from shinken.macroresolver import MacroResolver
+from shinken.modulesmanager import ModulesManager
+
 
 
 def get_uuid(self):
@@ -258,7 +260,7 @@ class DiscoveredHost(object):
 
 
 class DiscoveryManager:
-    def __init__(self, path, macros, overwrite, runners, output_dir=None, dbmod='', db_direct_insert=False, only_new_hosts=False):
+    def __init__(self, path, macros, overwrite, runners, output_dir=None, dbmod='', db_direct_insert=False, only_new_hosts=False, backend=None, modules_path=''):
         # i am arbiter-like
         self.log = logger
         self.overwrite = overwrite
@@ -270,6 +272,10 @@ class DiscoveryManager:
         self.log.load_obj(self)
         self.config_files = [path]
         self.conf = Config()
+
+        # For specific backend, to override the classic file/db behavior
+        self.backend = backend
+        self.modules_path = modules_path
 
         buf = self.conf.read_config(self.config_files)
         
@@ -308,6 +314,7 @@ class DiscoveryManager:
         self.disco_matches = {}
 
         self.init_database()
+        self.init_backend()
 
 
     def add(self, obj):
@@ -337,6 +344,25 @@ class DiscoveryManager:
                 except Exception, exp:
                     logger.error('Database init : %s' % exp)
 
+
+    # We try to init the backend if we got one
+    def init_backend(self):
+        if not self.backend:
+            return
+
+        print "Doing backend init"
+        for mod in self.conf.modules:
+            if getattr(mod, 'module_name', '') == self.backend:
+                print "We found our backend", mod.get_name()
+                self.backend = mod
+        if not self.backend:
+            print "ERROR : cannot find the module %s" % self.backend
+            sys.exit(2)
+        self.modules_manager = ModulesManager('discovery', self.modules_path, [])
+        self.modules_manager.set_modules([mod])
+        self.modules_manager.load_and_init()
+        self.backend = self.modules_manager.instances[0]
+        print "We got our backend!", self.backend
 
 
 
@@ -508,6 +534,10 @@ class DiscoveryManager:
         # Maybe we want a database insert
         if self.db:
             self.write_host_config_to_db(host, d)
+
+        
+        if self.backend:
+            self.backend.write_host_config_to_db(host, d)
             
         
     # Will wrote all properties/values of d for the host

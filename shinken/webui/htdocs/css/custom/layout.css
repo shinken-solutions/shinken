@@ -1,3 +1,31 @@
+/**
+* Copyright (C) 2009-2012:
+*    Gabes Jean, naparuba@gmail.com
+*    Gerhard Lausser, Gerhard.Lausser@consol.de
+*    Gregory Starck, g.starck@gmail.com
+*    Hartmut Goebel, h.goebel@goebel-consult.de
+*    Andreas Karfusehr, andreas@karfusehr.de
+*
+* This file is part of Shinken.
+*
+* Shinken is free software: you can redistribute it and/or modify
+* it under the terms of the GNU Affero General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* Shinken is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU Affero General Public License for more details.
+*
+* You should have received a copy of the GNU Affero General Public License
+* along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+*
+**/
+
+/*  Special Shinken styles
+    ------------------------------------------------------- */
+
 .min-height {
   min-height: 600px;
 }
@@ -103,6 +131,9 @@
   border-color: rgba(0, 0, 0, 0.15);
 }
 
+/*  Alert styles
+    ------------------------------------------------------- */
+
 .alert-small {
   background-color: #999999;
   border-radius: 3px 3px 3px 3px;
@@ -161,6 +192,9 @@
             filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#71DB65', EndColorStr='#7AB317'); /* IE6-IE9 */
 }
 
+/*  Badger styles
+    ------------------------------------------------------- */
+
 .badger {
   background-color: #999999;
   border-radius: 3px 3px 3px 3px;
@@ -189,16 +223,23 @@
   color: #FFFFFF;
 }
 
+.badger-ok {
+  background-color: #7AB317;
+  background-image: -moz-linear-gradient(center top , #7AB317, #669900);
+  border-radius: 3px 3px 3px 3px;
+  color: #FFFFFF;
+}
+
 h1 {
   font-size: 26px;
 }
 
 h1, h2, h3, h4 {
-color: #787878;
+  color: #787878;
 }
 
 /* To tag potential long div, and cut them if too long with '...'*/
-.cut_long{
+.cut_long {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -229,6 +270,6 @@ a.disabled-link:hover {
 /* In the top menu, there is too much margin on the left part,
  bootstrap put a left margin of 10, I prefer 0*/
 .navbar .nav.pull-right {
-margin-left: 0px;
-margin-right: 0;
+  margin-left: 0px;
+  margin-right: 0;
 }
