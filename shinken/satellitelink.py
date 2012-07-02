@@ -31,6 +31,7 @@ import socket
 
 import shinken.pyro_wrapper as pyro
 Pyro = pyro.Pyro
+PYRO_VERSION = pyro.PYRO_VERSION
 
 from shinken.util import get_obj_name_two_args_and_void
 from shinken.objects import Item, Items
@@ -117,7 +118,7 @@ class SatelliteLink(Item):
             socket.setdefaulttimeout(None)
             pyro.set_timeout(self.con, self.timeout)
         except Pyro_exp_pack, exp:
-            # But the multiprocessing module is not copatible with it!
+            # But the multiprocessing module is not compatible with it!
             # so we must disable it imadiatly after
             socket.setdefaulttimeout(None)
             self.con = None
@@ -143,7 +144,7 @@ class SatelliteLink(Item):
             return True
         except Pyro_exp_pack, exp:
             self.con = None
-            #print ''.join(Pyro.util.getPyroTraceback(exp))
+            logger.error(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
             return False
 
 
@@ -190,7 +191,7 @@ class SatelliteLink(Item):
         self.attempt = min(self.attempt, self.max_check_attempts)
         # Don't need to warn again and again if the satellite is already dead
         if self.alive:
-            logger.info("Add failed attempt to %s (%d/%d) %s" % (self.get_name(), self.attempt, self.max_check_attempts, reason))
+            logger.warning("Add failed attempt to %s (%d/%d) %s" % (self.get_name(), self.attempt, self.max_check_attempts, reason))
 
         # check when we just go HARD (dead)
         if self.attempt == self.max_check_attempts:
