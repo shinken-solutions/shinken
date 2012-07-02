@@ -76,6 +76,10 @@ class NotificationWay(Item):
         if not self.service_notifications_enabled:
             return False
 
+        if self.in_scheduled_downtime:
+            return False
+
+
         # Maybe the command we ask for are not for us, but for another notification ways
         # on the same contact. If so, bail out
         if cmd and not cmd in self.service_notification_commands:
@@ -113,6 +117,10 @@ class NotificationWay(Item):
     def want_host_notification(self, t, state, type, business_impact, cmd=None):
         if not self.host_notifications_enabled:
             return False
+
+        if self.in_scheduled_downtime:
+            return False
+
 
         # If the business_impact is not high enough, we bail out
         if business_impact < self.min_business_impact:
