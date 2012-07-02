@@ -57,7 +57,6 @@ import sys
 import cPickle
 import traceback
 import socket
-from util import if_else
 
 try:
     import shinken.pyro_wrapper as pyro
@@ -368,7 +367,7 @@ class Satellite(BaseSatellite):
                 except Exception, exp:
                     logger.error("A satellite raised an unknown exception : %s (%s)" % (exp, type(exp)))
                     try:
-                        logger.debug(''.join(if_else(PYRO_VERSION < "4.0", Pyro.util.getPyroTraceback(exp), Pyro.util.getPyroTraceback())))
+                        logger.debug(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
                     except:
                         pass
                     raise
@@ -518,7 +517,7 @@ class Satellite(BaseSatellite):
             # So we del it
             if not w.is_alive():
                 logger.warning("[%s] The worker %s goes down unexpectly!" % (self.name, w.id))
-                # AIM ... Press FIRE ... <B>HEAD SHOT!</B>
+                # Terminate immediately
                 w.terminate()
                 w.join(timeout=1)
                 w_to_del.append(w.id)
@@ -651,11 +650,11 @@ class Satellite(BaseSatellite):
                 logger.debug(str(exp))
                 pass
             # What the F**k? We do not know what happenned,
-            # so.. bye bye :)
+            # log the error message if possible.
             except Exception, exp:
-                logger.debug("A satellite raised an unknown exception : %s (%s)" % (exp, type(exp)))
+                logger.error("A satellite raised an unknown exception : %s (%s)" % (exp, type(exp)))
                 try:
-                    logger.debug(''.join(if_else(PYRO_VERSION < "4.0", Pyro.util.getPyroTraceback(exp), Pyro.util.getPyroTraceback())))
+                    logger.debug(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
                 except:
                     pass
                 raise
