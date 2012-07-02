@@ -31,6 +31,7 @@ from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 from shinken.pyro_wrapper import Pyro
 from shinken.log  import logger
 
+PYRO_VERSION = Pyro.PYRO_VERSION
 
 class SchedulerLink(SatelliteLink):
     """Please Add a Docstring to describe the class here"""
@@ -77,7 +78,7 @@ class SchedulerLink(SatelliteLink):
             return False
         except TypeError, exp:
             try:
-                exp = ''.join(Pyro.util.getPyroTraceback(exp))
+                exp = ''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback())
             except:
                 pass
 
@@ -87,7 +88,7 @@ class SchedulerLink(SatelliteLink):
             return False
         except Exception, exp:
             try:
-                exp = ''.join(Pyro.util.getPyroTraceback(exp))
+                exp = ''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback())
             except:
                 pass
 
