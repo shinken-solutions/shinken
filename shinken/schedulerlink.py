@@ -28,10 +28,12 @@
 from shinken.satellitelink import SatelliteLink, SatelliteLinks
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 
-from shinken.pyro_wrapper import Pyro
+from shinken.pyro_wrapper import pyro
+Pyro = pyro.Pyro
+PYRO_VERSION = pyro.PYRO_VERSION
+
 from shinken.log  import logger
 
-PYRO_VERSION = Pyro.PYRO_VERSION
 
 class SchedulerLink(SatelliteLink):
     """Please Add a Docstring to describe the class here"""
