@@ -57,7 +57,6 @@ import sys
 import cPickle
 import traceback
 import socket
-from util import if_else
 
 try:
     import shinken.pyro_wrapper as pyro
@@ -105,7 +104,7 @@ class IForArbiter(Interface):
     # Arbiter ask me which sched_id I manage, If it is not ok with it
     # It will ask me to remove one or more sched_id
     def what_i_managed(self):
-        logger.debug("The arbiter ask me what I manage. It's %s" % self.app.what_i_managed())
+        logger.debug("The arbiter asked me what I manage. It's %s" % self.app.what_i_managed())
         return self.app.what_i_managed()#self.app.schedulers.keys()
 
 
@@ -117,7 +116,7 @@ class IForArbiter(Interface):
     # Us : ... <- Nothing! We are dead! you don't get it or what??
     # Reading code is not a job for eyes only...
     def wait_new_conf(self):
-        logger.debug("Arbiter want me to wait for a new conf")
+        logger.debug("Arbiter wants me to wait for a new configuration")
         self.app.schedulers.clear()
         self.app.cur_conf = None
 
@@ -167,7 +166,7 @@ class ISchedulers(Interface):
 class IBroks(Interface):
     """Interface for Brokers
     They connect here and get all broks (data for brokers)
-    datas must be ORDERED! (initial status BEFORE uodate...)
+    data must be ORDERED! (initial status BEFORE uodate...)
 
     """
 
@@ -274,7 +273,7 @@ class Satellite(BaseSatellite):
             # But the multiprocessing module is not copatible with it!
             # so we must disable it imadiatly after
             socket.setdefaulttimeout(None)
-            logger.warning("[%s] Scheduler %s is not initialized or got network problem: %s" % (self.name, sname, str(exp)))
+            logger.warning("[%s] Scheduler %s is not initialized or has network problem: %s" % (self.name, sname, str(exp)))
             sched['con'] = None
             return
 
@@ -285,14 +284,14 @@ class Satellite(BaseSatellite):
             pyro.set_timeout(sch_con, 5)
             new_run_id = sch_con.get_running_id()
         except (Pyro.errors.ProtocolError, Pyro.errors.NamingError, cPickle.PicklingError, KeyError, Pyro.errors.CommunicationError, Pyro.errors.DaemonError), exp:
-            logger.warning("[%s] Scheduler %s is not initialized or got network problem: %s" % (self.name, sname, str(exp)))
+            logger.warning("[%s] Scheduler %s is not initialized or has network problem: %s" % (self.name, sname, str(exp)))
             sched['con'] = None
             return
 
         # The schedulers have been restarted : it has a new run_id.
         # So we clear all verifs, they are obsolete now.
         if sched['running_id'] != 0 and new_run_id != running_id:
-            logger.info("[%s] The running id of the scheduler %s changed, we must clear it's actions" % (self.name, sname))
+            logger.info("[%s] The running id of the scheduler %s changed, we must clear its actions" % (self.name, sname))
             sched['wait_homerun'].clear()
         sched['running_id'] = new_run_id
         logger.info("[%s] Connection OK with scheduler %s" % (self.name, sname))
@@ -366,9 +365,9 @@ class Satellite(BaseSatellite):
                 except AttributeError, exp: # the scheduler must  not be initialized
                     logger.debug(str(exp))
                 except Exception, exp:
-                    logger.debug("A satellite raised an unknown exception : %s (%s)" % (exp, type(exp)))
+                    logger.error("A satellite raised an unknown exception : %s (%s)" % (exp, type(exp)))
                     try:
-                        logger.debug(''.join(if_else(PYRO_VERSION < "4.0", Pyro.util.getPyroTraceback(exp), Pyro.util.getPyroTraceback())))
+                        logger.debug(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
                     except:
                         pass
                     raise
@@ -518,7 +517,7 @@ class Satellite(BaseSatellite):
             # So we del it
             if not w.is_alive():
                 logger.warning("[%s] The worker %s goes down unexpectly!" % (self.name, w.id))
-                # AIM ... Press FIRE ... <B>HEAD SHOT!</B>
+                # Terminate immediately
                 w.terminate()
                 w.join(timeout=1)
                 w_to_del.append(w.id)
@@ -651,11 +650,11 @@ class Satellite(BaseSatellite):
                 logger.debug(str(exp))
                 pass
             # What the F**k? We do not know what happenned,
-            # so.. bye bye :)
+            # log the error message if possible.
             except Exception, exp:
-                logger.debug("A satellite raised an unknown exception : %s (%s)" % (exp, type(exp)))
+                logger.error("A satellite raised an unknown exception : %s (%s)" % (exp, type(exp)))
                 try:
-                    logger.debug(''.join(if_else(PYRO_VERSION < "4.0", Pyro.util.getPyroTraceback(exp), Pyro.util.getPyroTraceback())))
+                    logger.debug(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
                 except:
                     pass
                 raise
