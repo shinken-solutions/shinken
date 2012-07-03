@@ -1,0 +1,10 @@
+{
+"name":"safekit",
+
+"description":"Evidian Safekit cluster solution monitoring",
+
+"path":"/cluster",
+
+"macros":{ }	 
+
+}
