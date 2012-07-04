@@ -109,7 +109,6 @@ class TestPollerAddition(ShinkenTest):
         self.setup_with_file('etc/nagios_dispatcher.cfg')
     
     
-    # Change ME :)
     def test_simple_dispatch_and_addition(self):
         print "The dispatcher", self.dispatcher
         # dummy for the arbiter

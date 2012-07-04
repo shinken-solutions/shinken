@@ -67,7 +67,6 @@ class TestConfig(ShinkenTest):
         return r
 
 
-    # Change ME :)
     def test_dummy(self):
         print self.sched.services.items
         svc = self.get_svc()

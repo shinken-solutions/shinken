@@ -110,7 +110,6 @@ class TestDispatcher(ShinkenTest):
         self.setup_with_file('etc/nagios_dispatcher.cfg')
     
     
-    # Change ME :)
     def test_simple_dispatch(self):
         for r in self.conf.realms:
             print r.get_name()
@@ -315,7 +314,6 @@ class TestDispatcherMultiBroker(ShinkenTest):
         self.setup_with_file('etc/nagios_dispatcher_multibrokers.cfg')
     
     
-    # Change ME :)
     def test_simple_dispatch(self):
         print "The dispatcher", self.dispatcher
         # dummy for the arbiter

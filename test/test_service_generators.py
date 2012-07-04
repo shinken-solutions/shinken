@@ -31,7 +31,6 @@ class TestConfig(ShinkenTest):
         self.setup_with_file('etc/nagios_service_generators.cfg')
 
     
-    # Change ME :)
     def test_service_generators(self):
         
         host = self.sched.hosts.find_by_name("test_host_0")
@@ -71,7 +70,6 @@ class TestConfig(ShinkenTest):
 
 
 
-    # Change ME :)
     def test_service_generators_not(self):
         
         host = self.sched.hosts.find_by_name("test_host_0")
@@ -100,7 +98,6 @@ class TestConfig(ShinkenTest):
         
 
 
-    # Change ME :)
     def test_service_generators_key_generator(self):
         
         host = self.sched.hosts.find_by_name("sw_0")

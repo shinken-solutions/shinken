@@ -32,7 +32,6 @@ class TestHostGroupNoHost(ShinkenTest):
         self.setup_with_file('etc/nagios_hostgroup_no_host.cfg')
 
     
-    # Change ME :)
     def test_hostgroup_wit_no_host(self):
         self.assert_(self.sched.conf.conf_is_correct)
 

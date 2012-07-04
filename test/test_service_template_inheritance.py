@@ -30,7 +30,6 @@ class TestConfig(ShinkenTest):
         self.setup_with_file('etc/nagios_service_template_inheritance.cfg')
 
     
-    # Change ME :)
     def test_action_url(self):
         # base-service-prod,no-graph
         svc1 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")

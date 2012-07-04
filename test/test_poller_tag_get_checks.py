@@ -31,7 +31,6 @@ class TestPollerTagGetchecks(ShinkenTest):
         self.setup_with_file('etc/nagios_poller_tag_get_checks.cfg')
 
     
-    # Change ME :)
     def test_good_checks_get_only_tags_with_specific_tags(self):
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
@@ -69,7 +68,6 @@ class TestPollerTagGetchecks(ShinkenTest):
             self.assert_(c.command.startswith('plugins/test_hostcheck.pl'))
 
 
-# Change ME :)
     def test_good_checks_get_only_tags_with_specific_module_types(self):
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []

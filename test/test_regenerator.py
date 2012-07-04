@@ -84,7 +84,6 @@ class TestRegenerator(ShinkenTest):
         
 
     
-    # Change ME :)
     def test_regenerator(self):
         #
         # Config is not correct because of a wrong relative path
@@ -187,7 +186,6 @@ class TestRegenerator(ShinkenTest):
 
 
 
-    # Change ME :)
     def test_regenerator_load_from_scheduler(self):
         #
         # Config is not correct because of a wrong relative path

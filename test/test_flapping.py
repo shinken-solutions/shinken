@@ -32,7 +32,6 @@ class TestFlapping(ShinkenTest):
         self.setup_with_file('etc/nagios_flapping.cfg')
 
     
-    # Change ME :)
     def test_flapping(self):
         #
         # Config is not correct because of a wrong relative path

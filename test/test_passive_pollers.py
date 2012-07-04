@@ -109,7 +109,6 @@ class TestPassivePoller(ShinkenTest):
         self.setup_with_file('etc/nagios_passive_pollers.cfg')
     
     
-    # Change ME :)
     def test_simple_passive_pollers(self):
         print "The dispatcher", self.dispatcher
         # dummy for the arbiter

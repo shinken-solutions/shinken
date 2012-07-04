@@ -32,7 +32,6 @@ from shinken.modules.merlindb_broker import get_instance
 class TestConfig(ShinkenTest):
     # setUp is inherited from ShinkenTest
 
-    # Change ME :)
     def test_simplelog(self):
         print self.conf.modules
         # get our modules

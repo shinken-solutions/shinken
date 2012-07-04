@@ -33,7 +33,6 @@ class TestTriggers(ShinkenTest):
         self.setup_with_file('etc/nagios_triggers.cfg')
 
 
-
     # Try to catch the perf_datas of self
     def test_function_perf(self):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "sample_perf_function")
@@ -84,7 +83,6 @@ class TestTriggers(ShinkenTest):
 
     
 
-    # Change ME :)
     def test_in_conf_trigger(self):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "i_got_trigger")
         print 'will run', svc.trigger
@@ -166,8 +164,6 @@ class TestTriggers(ShinkenTest):
         self.assert_(host.perf_data == "cpu=95")
 
 
-
-    # Change ME :)
     def test_simple_triggers(self):
         #
         # Config is not correct because of a wrong relative path

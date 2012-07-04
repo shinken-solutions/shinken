@@ -34,7 +34,6 @@ class TestConfig(ShinkenTest):
     def create_db(self):
         self.db = DB(table_prefix = 'test_')
 
-    # Change ME :)
     def test_create_insert_query(self):
         self.create_db()
         data = {'id' : "1", "is_master" : True, 'plop' : "master of the universe"}

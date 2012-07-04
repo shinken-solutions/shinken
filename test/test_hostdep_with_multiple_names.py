@@ -32,7 +32,6 @@ class TestHostDepWithMultipleNames(ShinkenTest):
         self.setup_with_file('etc/nagios_hostdep_with_multiple_names.cfg')
 
     
-    # Change ME :)
     def test_DepWithMultipleNames(self):
         for n in ['svn1', 'svn2', 'svn3', 'svn4', 'nas1', 'nas2', 'nas3']:
             globals()[n] = self.sched.hosts.find_by_name(n)

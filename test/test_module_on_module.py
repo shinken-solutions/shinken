@@ -32,7 +32,6 @@ class TestModuleOnModule(ShinkenTest):
         self.setup_with_file('etc/nagios_module_on_module.cfg')
 
     
-    # Change ME :)
     def test_module_on_module(self):
         #
         # Config is not correct because of a wrong relative path

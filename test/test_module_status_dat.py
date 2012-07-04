@@ -42,7 +42,6 @@ class TestConfig(ShinkenTest):
         return nb_s
 
 
-    # Change ME :)
     def test_simplelog(self):
         print self.conf.modules
         # get our modules

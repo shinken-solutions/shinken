@@ -31,7 +31,6 @@ class TestServiceWithPrintName(ShinkenTest):
         self.setup_with_file('etc/nagios_service_with_print_as_name.cfg')
 
     
-    # Change ME :)
     def test_service_with_print_as_name(self):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "print")
         self.assert_(svc is not None)

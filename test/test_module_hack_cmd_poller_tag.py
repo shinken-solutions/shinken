@@ -40,7 +40,6 @@ class TestHackCmdPollerTag(ShinkenTest):
         self.setup_with_file('etc/nagios_module_hack_cmd_poller_tag.cfg')
 
 
-    # Change ME :)
     def test_hack_cmd_poller_tag(self):
         modconf = self.conf.modules.find_by_name('HackCommandsPollerTag')
 

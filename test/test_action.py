@@ -53,7 +53,6 @@ class TestAction(ShinkenTest):
                 return
 
 
-    # Change ME :)
     def test_action(self):
         a = Action()
         a.timeout = 10

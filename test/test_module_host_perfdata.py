@@ -33,7 +33,6 @@ from shinken.brok import Brok
 class TestConfig(ShinkenTest):
     # setUp is inherited from ShinkenTest
 
-    # Change ME :)
     def test_host_perfdata(self):
         print self.conf.modules
         # get our modules

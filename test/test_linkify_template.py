@@ -32,7 +32,6 @@ class TestLinkifyTemplate(ShinkenTest):
         self.setup_with_file('etc/nagios_linkify_template.cfg')
 
     
-    # Change ME :)
     def test_linkify_template(self):
         svc = self.conf.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         b = svc.is_correct()

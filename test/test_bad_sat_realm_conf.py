@@ -32,7 +32,6 @@ class TestBadSatRealmConf(ShinkenTest):
         self.setup_with_file('etc/nagios_bad_sat_realm_conf.cfg')
 
     
-    # Change ME :)
     def test_badconf(self):
         self.assert_(not self.conf.conf_is_correct)
 

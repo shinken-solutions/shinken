@@ -32,7 +32,6 @@ class TestDiscoveryConf(ShinkenTest):
         self.setup_with_file('etc/nagios_discovery_def.cfg')
 
     
-    # Change ME :)
     def test_look_for_discorule(self):
         genhttp = self.sched.conf.discoveryrules.find_by_name('GenHttp')
         self.assert_(genhttp != None)
@@ -106,7 +105,6 @@ class TestDiscoveryConf(ShinkenTest):
         print "LongOutput", nmap.current_launch.long_output
 
 
-    # Change ME :)
     def test_look_for_host_discorule(self):
         genhttp = self.sched.conf.discoveryrules.find_by_name('GenHttpHost')
         self.assert_(genhttp != None)

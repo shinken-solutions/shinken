@@ -33,7 +33,6 @@ class TestConfig(ShinkenTest):
         self.setup_with_file('etc/nagios_not_hostname.cfg')
 
 
-    # Change ME :)
     def test_not_hostname_in_service(self):
         # The service is apply with a host_group on "test_host_0","test_host_1"
         # but have a host_name with !"test_host_1" so there will be just "test_host_0"

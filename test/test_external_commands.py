@@ -37,7 +37,6 @@ class TestConfig(ShinkenTest):
         fd.close()
 
 
-    # Change ME :)
     def test_external_comand(self):
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")

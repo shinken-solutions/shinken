@@ -33,7 +33,6 @@ class TestOrphaned(ShinkenTest):
     #    self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
 
     
-    # Change ME :)
     def test_orphaned(self):
         #
         # Config is not correct because of a wrong relative path

@@ -31,7 +31,6 @@ class TestServiceDepAndGroups(ShinkenTest):
         self.setup_with_file('etc/nagios_servicedependency_implicit_hostgroup.cfg')
 
     
-    # Change ME :)
     def test_implicithostgroups(self):
         #
         # Config is not correct because of a wrong relative path
@@ -70,7 +69,6 @@ class TestServiceDepAndGroups(ShinkenTest):
 
 
 
-    # Change ME :)
     def test_implicithostnames(self):
         #
         # Config is not correct because of a wrong relative path

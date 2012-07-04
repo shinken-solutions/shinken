@@ -32,7 +32,6 @@ class TestCssInCommands(ShinkenTest):
         self.setup_with_file('etc/nagios_css_in_command.cfg')
 
     
-    # Change ME :)
     def test_dummy(self):
         r = self.conf.conf_is_correct
         self.assert_(r)

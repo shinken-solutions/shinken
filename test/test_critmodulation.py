@@ -32,7 +32,6 @@ class TestCritMod(ShinkenTest):
         self.setup_with_file('etc/nagios_critmodulation.cfg')
 
     
-    # Change ME :)
     def test_critmodulation_def(self):
         #
         # Config is not correct because of a wrong relative path

@@ -47,7 +47,6 @@ class TestModuleNamedPipe(ShinkenTest):
     #def setUp(self):
     #    self.setup_with_file('etc/nagios_module_hot_dependencies_arbiter.cfg')
 
-    # Change ME :)
     def test_read_named_pipe(self):
 
         # Ok, windows do not have named pipe, we know...

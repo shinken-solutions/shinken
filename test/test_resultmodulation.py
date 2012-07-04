@@ -40,7 +40,6 @@ class TestConfig(ShinkenTest):
     def get_router(self):
         return self.sched.hosts.find_by_name("test_router_0")
 
-    # Change ME :)
     def test_service_resultmodulation(self):
         svc = self.get_svc()
         host = self.get_host()

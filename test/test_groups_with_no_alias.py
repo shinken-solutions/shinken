@@ -32,7 +32,6 @@ class TestGroupwithNoAlias(ShinkenTest):
         self.setup_with_file('etc/nagios_groups_with_no_alias.cfg')
 
     
-    # Change ME :)
     def test_look_for_alias(self):
         #
         # Config is not correct because of a wrong relative path

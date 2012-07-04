@@ -31,7 +31,6 @@ class TestUIHelper(ShinkenTest):
         self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
 
     
-    # Change ME :)
     def test_duration_print(self):
         now = time.time()
 
@@ -150,7 +149,6 @@ class TestUIHelper(ShinkenTest):
 
 
 
-    # Change ME :)
     def test_dep_graph(self):
         now = time.time()
 

@@ -33,7 +33,6 @@ class TestCreateLinkFromExtCmd(ShinkenTest):
     #    self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
 
     
-    # Change ME :)
     def test_simple_host_link(self):
         now = int(time.time())
         h = self.sched.hosts.find_by_name('test_host_0')

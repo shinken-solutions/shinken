@@ -61,7 +61,6 @@ class TestModuleHotDep(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_module_hot_dependencies_arbiter.cfg')
 
-    # Change ME :)
     def test_simple_json_read(self):
         print self.conf.modules
 

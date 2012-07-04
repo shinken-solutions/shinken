@@ -40,7 +40,6 @@ class TestIpTag(ShinkenTest):
         self.setup_with_file('etc/nagios_module_ip_tag.cfg')
 
 
-    # Change ME :)
     def test_hack_cmd_poller_tag(self):
         modconf = self.conf.modules.find_by_name('IpTag')
 
@@ -71,7 +70,6 @@ class TestIpTag(ShinkenTest):
         #self.assert_(h2.check_command.poller_tag == 'DMZ')
 
 
-    # Change ME :)
     def test_hack_cmd_grp(self):
         modconf = self.conf.modules.find_by_name('IpTagAppend')
 

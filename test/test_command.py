@@ -31,7 +31,6 @@ from shinken.objects import Command, Commands
 class TestCommand(ShinkenTest):
     # setUp is inherited from ShinkenTest
 
-    # Change ME :)
     def test_command(self):
         t = {'command_name' : 'check_command_test',
              'command_line' : '/tmp/dummy_command.sh $ARG1$ $ARG2$',

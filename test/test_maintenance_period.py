@@ -34,7 +34,6 @@ class TestMaintPeriod(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_maintenance_period.cfg')
 
-    # Change ME :)
     def test_check_defined_maintenance_period(self):
         a_24_7 = self.sched.timeperiods.find_by_name("24x7")
         print "Get the hosts and services"

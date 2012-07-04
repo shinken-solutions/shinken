@@ -29,7 +29,6 @@ from shinken_test import *
 class TestConfig(ShinkenTest):
     # setUp is inherited from ShinkenTest
 
-    # Change ME :)
     def test_illegal_caracter_in_names(self):
         illegal_caracts = self.sched.conf.illegal_object_name_chars
         print "Illegal caracters : %s" % illegal_caracts

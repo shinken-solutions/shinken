@@ -44,7 +44,6 @@ modconf.properties = mongodb_retention.properties.copy()
 class TestMongodb(ShinkenTest):
     # setUp is inherited from ShinkenTest
 
-    # Change ME :)
     def test_mongodb_retention(self):
         print self.conf.modules
         # get our modules

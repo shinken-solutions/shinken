@@ -32,7 +32,6 @@ class TestConfig(ShinkenTest):
         self.setup_with_file('etc/nagios_bad_timeperiods.cfg')
 
 
-    # Change ME :)
     def test_dummy(self):
         #
         # Config is not correct because of a wrong relative path

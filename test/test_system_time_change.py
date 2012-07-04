@@ -39,7 +39,6 @@ class TestSystemTimeChange(ShinkenTest):
 
 
 
-    # Change ME :)
     def test_system_time_change(self):
         #
         # Config is not correct because of a wrong relative path

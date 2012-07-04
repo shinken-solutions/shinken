@@ -32,7 +32,6 @@ class TestConfig(ShinkenTest):
         self.setup_with_file('etc/nagios_notif_way.cfg')
 
 
-    # Change ME :)
     def test_contact_def(self):
         #
         # Config is not correct because of a wrong relative path

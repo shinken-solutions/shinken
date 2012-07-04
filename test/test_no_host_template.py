@@ -32,7 +32,6 @@ class TestNoHostTemplate(ShinkenTest):
         self.setup_with_file('etc/nagios_no_host_template.cfg')
 
     
-    # Change ME :)
     def test_host_without_a_template(self):
         #
         # Config is not correct because of a wrong relative path

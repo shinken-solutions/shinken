@@ -32,7 +32,6 @@ class TestMissingObjectValue(ShinkenTest):
         self.setup_with_file('etc/nagios_missing_object_value.cfg')
 
     
-    # Change ME :)
     def test_missing_object_value(self):
         #
         # Config is not correct because of a wrong relative path

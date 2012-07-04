@@ -32,7 +32,6 @@ class TestInheritanceAndPlus(ShinkenTest):
         self.setup_with_file('etc/nagios_inheritance_and_plus.cfg')
 
     
-    # Change ME :)
     def test_inheritance_and_plus(self):
         #
         # Config is not correct because of a wrong relative path

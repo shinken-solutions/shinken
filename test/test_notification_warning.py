@@ -31,7 +31,6 @@ from shinken.notification import Notification
 class TestConfig(ShinkenTest):
     # setUp is inherited from ShinkenTest
 
-    # Change ME :)
     def test_raise_warning_on_notification_errors(self):
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []

@@ -41,7 +41,6 @@ class TestConfig(ShinkenTest):
         hst = self.sched.hosts.find_by_name("test_host_0")
         return (svc, hst)
 
-    # Change ME :)
     def test_resolv_simple(self):
         mr = self.get_mr()
         (svc, hst) = self.get_hst_svc()
