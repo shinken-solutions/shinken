@@ -136,7 +136,7 @@ function submit_check(name, return_code, output){
 function recheck_now(name) {
     var elts = get_elements(name);    
     //alert('Try to fix' + hname);
-    var now = Math.round(new Date().getTime()/1000.0);
+    var now = '$NOW$';
     var url = '/action/SCHEDULE_'+elts.type+'_CHECK/'+elts.nameslash+'/'+now;
     // We can launch it :)
     launch(url);
