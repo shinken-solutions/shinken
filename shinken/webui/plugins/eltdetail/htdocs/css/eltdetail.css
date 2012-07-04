@@ -69,32 +69,17 @@
 	padding-left: 10px;
 }
 
+/*
+    Special elt view classes 
+*/
+
+.verticaltabs-container td { border-top: none; }
+.column1 { width: 50%; }
+
+
 #elt_container h2 {
 	font-size: 15px;
 	margin-bottom: 5px;
-}
-
-#elt_container p {
-	margin-left: 8px
-}
-
-#command_container {
-	margin-top: 20px;
-	margin-bottom: 20px;
-}
-
-#elt_summary {
-	padding: 15px;
-	width: 96%;
-}
-
-#elt_summary table {
-	width: 100%;
-}
-
-#elt_summary table, #elt_summary tr, #elt_summary th, #elt_summary td, #elt_summary tbody{
-	background: none !important;
-	border: none;	
 }
 
 #item_information {
@@ -109,6 +94,7 @@
 /*
 *
 */
+
 #demo {
     margin-top: 20px;
     }
@@ -346,13 +332,42 @@ div.marginbottom {
     margin-bottom: 10px;
 }
 
-/*
-The Magical CSS URL: https://github.com/entropillc/bootstrap-verticaltabs
+/***
+    The Magical CSS URL: https://github.com/entropillc/bootstrap-verticaltabs / bootstrap-verticaltabs.css
 */
 
-.rotat {
-    width: 32px;
-    height: 100%;
-    -webkit-transform: rotate(-90deg); 
-    -moz-transform: rotate(-90deg); 
+.verticaltabs-container {
+  position: relative;
+  min-width: 460px;
+  min-height: 460px;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.verticaltabs-container > .nav-tabs {
+  display: block;
+  position: relative;
+  left: 100%; 
+  width: 1000%;
+  -webkit-transform-origin: 0 0;
+  -moz-transform-origin: 0 0;
+  -ms-transform-origin: 0 0;
+  -o-transform-origin: 0 0;
+  transform-origin: 0 0;
+  -webkit-transform: translateX(-24px) rotate(90deg);
+  -moz-transform: translateX(-24px) rotate(90deg);
+  -ms-transform: translateX(-24px) rotate(90deg);
+  -o-transform: translateX(-24px) rotate(90deg);
+  transform: translateX(-24px) rotate(90deg);
+}
+
+.verticaltabs-container > .tab-content {
+  position: absolute;
+  top: 0;
+  right: 58px;
+  bottom: 0;
+  left: 0;
+  width: auto;
+  height: auto;
 }

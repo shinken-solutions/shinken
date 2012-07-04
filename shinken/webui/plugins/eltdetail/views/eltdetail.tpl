@@ -97,7 +97,7 @@ Invalid element name
             <td><a href="{{elt.action_url}}" target=_blank><img src=/static/eltdetail/images/gear.png></a></td>
 	%end
 <!-- Gear.png can be find here : http://cdn1.iconfinder.com/data/icons/nuove/128x128/actions/gear.png --!>
-<!-- and resized --!>
+<!-- and resized -->
 	  	  
 	<div class="span8">
 	  <span class='pull-right' id='host_tags'>
@@ -107,8 +107,6 @@ Invalid element name
 	    %end
 	  </span>
 	</div>
-
-	  
 
 
 	<div class="span12 no-leftmargin box">	   
@@ -228,7 +226,7 @@ Invalid element name
             }); 
 	  </script>
 
-	  <div class='row-fluid'>
+	  <div class="span12 row-fluid hide">
 	    <form class="well form-inline span6">
 	      <div class="row-fluid">
 		<div class="span3"> Active/passive checks  <input {{chk_state}} class="iphone" type="checkbox" id='btn-checks'> </div>
@@ -269,22 +267,67 @@ Invalid element name
 	</div>
 	</div>
 	</div>
+
 <!-- Start Host/Services-->
-<div class="span4 tabbable tabs-left">
+<div class="tabbable verticaltabs-container span3"> <!-- Wrap the Bootstrap Tabs/Pills in this container to position them vertically -->
     <ul class="nav nav-tabs">
-        <li class="rotat active"><a data-toggle="tab" href="#lA">Infos</a></li>
-        <li class="rotat"><a data-toggle="tab" href="#lB">more ...</a></li>
+      <li class="active"><a href="#basic" data-toggle="tab">{{elt_type.capitalize()}} Information:</a></li>
+      <li><a href="#more" data-toggle="tab">more ...</a></li>
     </ul>
+    
     <div class="tab-content">
-        <div id="lA" class="tab-pane active">
-           <p>I'm in Section A.</p>
-        </div>
-	    <div id="lB" class="tab-pane">
-	       <p>Howdy, I'm in Section B.</p>
-	    </div>
+      <div class="tab-pane fade in active" id="basic">
+      	%if elt_type=='host':
+      	<h3>Host Information:</h3>
+      	%else:
+      	<h3>Service Information:</h3>
+      	%end:
+        
+    	<table class="table">
+       		<tr>
+	  			<td class="column1">Status:</td>
+	  			<td><span class="alert-small alert-{{elt.state.lower()}} quickinfo" data-original-title="since {{helper.print_duration(elt.last_state_change, just_duration=True, x_elts=2)}}">{{elt.state}}</span> </td>
+			</tr>
+		    <tr>
+	  			<td class="column1">Flapping:</td>
+	  			<td><span quickinfo="{{helper.print_float(elt.percent_state_change)}}% state change">{{helper.yes_no(elt.is_flapping)}}</span></td>
+			</tr>
+			<tr>
+	  			<td class="column1">In Scheduled Downtime?</td>
+	  			<td>{{helper.yes_no(elt.in_scheduled_downtime)}}</td>
+			</tr>
+       	</table>
+       	<hr>
+       	<div> <b><i>{{elt.output}}</i></b> </div>
+       	<hr>
+       	<table class="table">
+			<tr>
+				<td class="column1">Last Check:</td>
+				<td><span class="quickinfo" data-original-title='Last check was at {{time.asctime(time.localtime(elt.last_chk))}}'>was {{helper.print_duration(elt.last_chk)}}</span></td>
+			</tr>
+			<tr>		
+	  			<td class="column1">Last State Change</td>
+	  			<td>{{time.asctime(time.localtime(elt.last_state_change))}}</td>
+			</tr>
+			<tr>			
+	  			<td class="column1">Check Latency / Duration</td>
+	  			<td>{{'%.2f' % elt.latency}} / {{'%.2f' % elt.execution_time}} seconds</td>
+			</tr>
+				<tr>										
+	  			<td class="column1">Current Attempt</td>
+	  			<td>{{elt.attempt}}/{{elt.max_check_attempts}} ({{elt.state_type}} state)</td>
+			</tr>
+       	</table>
+      </div>
+      <div class="tab-pane fade" id="more">
+        <h3>more ...</h3>
+        <p>Nunc feugiat risus vel diam hendrerit mattis ultrices urna bibendum. Ut ac est sit amet elit posuere lacinia. Ut a dui ligula. Maecenas quis sapien sit amet est porta elementum id vel nibh. Sed venenatis magna quis nisi fermentum aliquet. Morbi ultricies, urna eget semper feugiat, justo eros facilisis dolor, quis pulvinar purus nibh quis nunc. Duis eget ligula a nisl pellentesque laoreet. Suspendisse eu rhoncus erat. Quisque pharetra facilisis dignissim.</p>
+      </div>
+
     </div>
-</div>
+  </div>
 <!-- End Host/Services-->
+
     <!-- Start Host/Services-->
 			<!-- Left, information part-->
 	<!--
