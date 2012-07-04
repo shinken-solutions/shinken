@@ -273,8 +273,9 @@ Invalid element name
     <ul class="nav nav-tabs">
       <li class="active"><a href="#basic" data-toggle="tab">{{elt_type.capitalize()}} Information:</a></li>
       <li><a href="#more" data-toggle="tab">more ...</a></li>
+      <li><a href="#gesture" data-toggle="tab">Gesture</a></li>
     </ul>
-    
+
     <div class="tab-content">
       <div class="tab-pane fade in active" id="basic">
       	%if elt_type=='host':
@@ -285,16 +286,16 @@ Invalid element name
         
     	<table class="table">
        		<tr>
-	  			<td class="column1">Status:</td>
-	  			<td><span class="alert-small alert-{{elt.state.lower()}} quickinfo" data-original-title="since {{helper.print_duration(elt.last_state_change, just_duration=True, x_elts=2)}}">{{elt.state}}</span> </td>
+	  			<td class="column1"><b>Status:</b></td>
+	  			<td><span class="btn span11 alert-small alert-{{elt.state.lower()}} quickinfo" data-original-title="since {{helper.print_duration(elt.last_state_change, just_duration=True, x_elts=2)}}">{{elt.state}}</span> </td>
 			</tr>
 		    <tr>
 	  			<td class="column1">Flapping:</td>
-	  			<td><span quickinfo="{{helper.print_float(elt.percent_state_change)}}% state change">{{helper.yes_no(elt.is_flapping)}}</span></td>
+	  			<td><span class="btn btn-danger span11" quickinfo="{{helper.print_float(elt.percent_state_change)}}% state change">{{helper.yes_no(elt.is_flapping)}}</span></td>
 			</tr>
 			<tr>
 	  			<td class="column1">In Scheduled Downtime?</td>
-	  			<td>{{helper.yes_no(elt.in_scheduled_downtime)}}</td>
+	  			<td><span class="btn span11 alert-small alert-{{elt.state.lower()}}">{{helper.yes_no(elt.in_scheduled_downtime)}}</span></td>
 			</tr>
        	</table>
        	<hr>
@@ -323,7 +324,18 @@ Invalid element name
         <h3>more ...</h3>
         <p>Nunc feugiat risus vel diam hendrerit mattis ultrices urna bibendum. Ut ac est sit amet elit posuere lacinia. Ut a dui ligula. Maecenas quis sapien sit amet est porta elementum id vel nibh. Sed venenatis magna quis nisi fermentum aliquet. Morbi ultricies, urna eget semper feugiat, justo eros facilisis dolor, quis pulvinar purus nibh quis nunc. Duis eget ligula a nisl pellentesque laoreet. Suspendisse eu rhoncus erat. Quisque pharetra facilisis dignissim.</p>
       </div>
-
+     	<div class="tab-pane fade" id="gesture">
+      		<canvas id="canvas" width="200" height="200" class="grid_10" style="border: 1px solid black;"></canvas>
+	  		<div class="gesture_button">
+	    		<img title="By keeping a left click pressed and drawing a check, you will launch an acknowledgement." alt="gesture acknowledge" src="/static/eltdetail/images/gesture-check.png"/> Acknowledge
+	  		</div>
+	  		<div class="gesture_button">
+	    		<img title="By keeping a left click pressed and drawing a check, you will launch an recheck." alt="gesture recheck" src="/static/eltdetail/images/gesture-circle.png"/> Recheck
+	  		</div>
+			<div class="gesture_button">
+	    		<img title="By keeping a left click pressed and drawing a check, you will launch a try to fix command." alt="gesture fix" src="/static/eltdetail/images/gesture-zigzag.png"/> Fix
+	  		</div>
+	    </div>
     </div>
   </div>
 <!-- End Host/Services-->
