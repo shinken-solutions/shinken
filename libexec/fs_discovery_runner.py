@@ -116,7 +116,7 @@ def get_fs_discovery_output(liste):
         if elt == '_':# if _ is the only detected character
             elt = re.sub(r'^_$', '_root', elt)# so we replace _ with _root
         fsTbl.append(elt)
-    print "%s::fs_name=%s"%(hostname, ','.join(fsTbl))# display like in the nmap model
+    print "%s::_fs=%s"%(hostname, ','.join(fsTbl))# display like in the nmap model
 
 ###############
 #  execution  #
