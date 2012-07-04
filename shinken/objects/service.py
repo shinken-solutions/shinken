@@ -915,8 +915,8 @@ class Service(SchedulingItem):
         if self.host.scheduled_downtime_depth > 0:
             return True
 
-        # Block if in a scheduled downtime and a problem arises
-        if self.scheduled_downtime_depth > 0 and type in ('PROBLEM', 'RECOVERY'):
+        # Block if in a scheduled downtime and a problem arises, or flapping event
+        if self.scheduled_downtime_depth > 0 and type in ('PROBLEM', 'RECOVERY','FLAPPINGSTART', 'FLAPPINGSTOP', 'FLAPPINGDISABLED'):
             return True
 
         # Block if the status is SOFT

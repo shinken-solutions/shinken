@@ -92,7 +92,12 @@ Invalid element name
 %#  "Content Container Start"
 <div class="">
 <div id="content_container" class="span12">
-	<h1 class="span4 no-leftmargin state_{{elt.state.lower()}} icon_down"> <img class="imgsize4" alt="icon state" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h1>
+	<h1 class="span4 no-leftmargin state_{{elt.state.lower()}} icon_down"> <img class="imgsize4" alt="icon state" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h1> 
+        %if elt.action_url != '':
+            <td><a href="{{elt.action_url}}" target=_blank><img src=/static/eltdetail/images/gear.png></a></td>
+	%end
+<!-- Gear.png can be find here : http://cdn1.iconfinder.com/data/icons/nuove/128x128/actions/gear.png --!>
+<!-- and resized --!>
 	  	  
 	<div class="span8">
 	  <span class='pull-right' id='host_tags'>
@@ -157,12 +162,16 @@ Invalid element name
 			</tr>
 			%end
 			<tr>
-			  	<td>Notes: </td>
-			    %if elt.notes != '':
-			    <td>{{elt.notes}}</td>
-			    %else:
-			    <td>(none)</td>
-			    %end
+		            <td>Notes: </td>
+                            %if elt.notes != '' and elt.notes_url != '':
+                                <td><a href="{{elt.notes_url}}" target=_blank>{{elt.notes}}</a></td>
+                            %elif elt.notes == '' and elt.notes_url != '':
+                                <td><a href="{{elt.notes_url}}" target=_blank>{{elt.notes_url}}</a></td>
+                            %elif elt.notes != '' and elt.notes_url == '':
+                                <td>{{elt.notes}}</td>
+                            %else:
+                            <td>(none)</td>
+                            %end
 			</tr>
 		</table>	    
 

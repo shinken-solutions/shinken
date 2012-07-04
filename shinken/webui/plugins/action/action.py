@@ -30,6 +30,31 @@ app = None
 # We will need external commands here
 import time
 from shinken.external_command import ExternalCommand, ExternalCommandManager
+import re
+
+# Function handling $NOW$ macro
+def subsNOW():
+    return str(int(time.time()));
+
+# This dictionnary associate macros with expansion function
+subs = {'$NOW$': subsNOW
+        # Add new macros here
+       }
+
+# Expand macro in a string. It returns the string with macros defined in subs dictionary expanded
+def expand_macros(cmd=None):
+    macros = re.findall(r'(\$\w+\$)',cmd)
+    cmd_expanded = cmd
+    for macro in macros:
+        subfunc = subs.get(macro)
+        if subfunc is None:
+            print "Macro ",macro," is unknown, do nothing"
+            continue
+        print "Expand macro ",macro," in '",cmd_expanded,"'"
+        cmd_expanded = cmd_expanded.replace(macro,subfunc())
+
+    return cmd_expanded
+
 
 
 def forge_response(callback, status, text):
@@ -73,6 +98,10 @@ def get_page(cmd=None):
     extcmd = '[%d] %s' % (now, ';'.join(elts))
     print "Got the; form", extcmd
     
+    # Expand macros
+    extcmd = expand_macros(extcmd)
+    print "Got after macro expansion",extcmd
+
     # Ok, if good, we can launch the command
     extcmd = extcmd.decode('utf8', 'replace')
     e = ExternalCommand(extcmd)
