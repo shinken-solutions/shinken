@@ -1,39 +1,39 @@
 #!/usr/bin/env python2.6
-#Copyright (C) 2009-2010 :
+# Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 #
 # This file is used to test reading and processing of config files
 #
 
-#It's ugly I know....
+# It's ugly I know....
 from shinken_test import *
 from shinken.modules.webui_broker.helper import helper
 
 class TestUIHelper(ShinkenTest):
-    #Uncomment this is you want to use a specific configuration
-    #for your test
+    # Uncomment this is you want to use a specific configuration
+    # for your test
     def setUp(self):
         self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
 
     
-    #Change ME :)
+    # Change ME :)
     def test_duration_print(self):
         now = time.time()
 
@@ -64,7 +64,7 @@ class TestUIHelper(ShinkenTest):
         self.assert_(s == '2s')
 
 
-        #Got 2minutes
+        # Got 2minutes
         s = helper.print_duration(now - 120)
         print "Res", s
         self.assert_(s == '2m ago')
@@ -74,7 +74,7 @@ class TestUIHelper(ShinkenTest):
         print "Res", s
         self.assert_(s == '2h ago')
 
-        #Go 2 days ago
+        # Go 2 days ago
         s = helper.print_duration(now - 3600*24*2)
         print "Res", s
         self.assert_(s == '2d ago')
@@ -110,7 +110,7 @@ class TestUIHelper(ShinkenTest):
         print "Res", s
         self.assert_(s == 'in 2s')
 
-        #Got 2minutes
+        # Got 2minutes
         s = helper.print_duration(now + 120)
         print "Res", s
         self.assert_(s == 'in 2m')
@@ -120,7 +120,7 @@ class TestUIHelper(ShinkenTest):
         print "Res", s
         self.assert_(s == 'in 2h')
 
-        #Go 2 days ago
+        # Go 2 days ago
         s = helper.print_duration(now + 3600*24*2)
         print "Res", s
         self.assert_(s == 'in 2d')
@@ -152,7 +152,7 @@ class TestUIHelper(ShinkenTest):
 
 
 
-    #Change ME :)
+    # Change ME :)
     def test_dep_graph(self):
         now = time.time()
 

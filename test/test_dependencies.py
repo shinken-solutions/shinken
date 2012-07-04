@@ -1,22 +1,22 @@
 #!/usr/bin/env python2.6
-#Copyright (C) 2009-2010 :
+# Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 #
 # This file is used to test host- and service-downtimes.
@@ -158,7 +158,7 @@ class TestConfig(ShinkenTest):
         #self.assert_(host_B in [x[0] for x in host_D.act_depend_of])
 
 
-    #Now test a in service service_dep definition. More easierto use than create a full new object
+    # Now test a in service service_dep definition. More easierto use than create a full new object
     def test_in_servicedef_dep(self):
         svc_parent = self.sched.services.find_srv_by_name_and_hostname("test_host_1", "test_parent_svc")
         svc_son = self.sched.services.find_srv_by_name_and_hostname("test_host_1", "test_son_svc")
@@ -194,9 +194,9 @@ class TestConfig(ShinkenTest):
         print "D state", host_D.state
         print "E dep", host_E.chk_depend_of
         print "I raise?", host_D.do_i_raise_dependency('d', inherit_parents=False)
-        #If I ask D for dep, he should raise Nothing if we do not want parents.
+        # If I ask D for dep, he should raise Nothing if we do not want parents.
         self.assert_(host_D.do_i_raise_dependency('d', inherit_parents=False) == False)
-        #But he should raise a problem (C here) of we ask for its parents
+        # But he should raise a problem (C here) of we ask for its parents
         self.assert_(host_D.do_i_raise_dependency('d', inherit_parents=True) == True)
 
 

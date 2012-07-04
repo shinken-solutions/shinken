@@ -1,22 +1,22 @@
 #!/usr/bin/env python2.6
-#Copyright (C) 2009-2010 :
+# Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
 #
@@ -57,11 +57,11 @@ except ImportError:
         sys.exit(0)
 
 class TestModuleHotDep(ShinkenTest):
-    #setUp is in shinken_test
+    # setUp is in shinken_test
     def setUp(self):
         self.setup_with_file('etc/nagios_module_hot_dependencies_arbiter.cfg')
 
-    #Change ME :)
+    # Change ME :)
     def test_simple_json_read(self):
         print self.conf.modules
 
@@ -82,7 +82,7 @@ class TestModuleHotDep(ShinkenTest):
         self.assert_(host1.is_linked_with_host(host2) == False)
 
     
-        #get our modules
+        # get our modules
         mod = sl = Hot_dependencies_arbiter(modconf, 'tmp/vmware_mapping_file.json', "", 30, 300)
         
         try :
@@ -131,7 +131,7 @@ class TestModuleHotDep(ShinkenTest):
         self.assert_(host1.is_linked_with_host(host0) == False)
         self.assert_(host1.is_linked_with_host(host2) == True)
 
-        #Ok, we can delete the retention file
+        # Ok, we can delete the retention file
         os.unlink(mod.mapping_file)
 
 
@@ -162,7 +162,7 @@ class TestModuleHotDep(ShinkenTest):
         self.assert_(host1.is_linked_with_host(host2) == False)
 
     
-        #get our modules
+        # get our modules
         mod = None
         mod = Module({'type' : 'hot_dependencies', 'module_name' : 'VMWare_auto_linking', 'mapping_file' : 'tmp/vmware_mapping_file.json',
                       'mapping_command' : "libexec/hot_dep_export.py case1 tmp/vmware_mapping_file.json", 'mapping_command_interval' : '30'})
@@ -215,7 +215,7 @@ class TestModuleHotDep(ShinkenTest):
         sl.mapping_command_interval = 0.1
         sl.hook_tick(self)
         time.sleep(1.5)
-        #But we need another tick to get all of it
+        # But we need another tick to get all of it
         sl.hook_tick(self)
 
         # Now we should see link between 1 and 0, but not between 2 and 1
@@ -223,7 +223,7 @@ class TestModuleHotDep(ShinkenTest):
         self.assert_(host1.is_linked_with_host(host2) == True)
 
 
-        #Ok, we can delete the retention file
+        # Ok, we can delete the retention file
         os.unlink(mod.mapping_file)
 
 

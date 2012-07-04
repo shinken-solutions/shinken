@@ -1,22 +1,22 @@
 #!/usr/bin/env python2.6
-#Copyright (C) 2009-2010 :
+# Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
 #
@@ -35,12 +35,12 @@ from shinken.modules.ip_tag_arbiter import get_instance
 
 
 class TestIpTag(ShinkenTest):
-    #setUp is in shinken_test
+    # setUp is in shinken_test
     def setUp(self):
         self.setup_with_file('etc/nagios_module_ip_tag.cfg')
 
 
-    #Change ME :)
+    # Change ME :)
     def test_hack_cmd_poller_tag(self):
         modconf = self.conf.modules.find_by_name('IpTag')
 
@@ -48,7 +48,7 @@ class TestIpTag(ShinkenTest):
         h1 = self.sched.hosts.find_by_name("test_host_0")
         h2 = self.sched.hosts.find_by_name("test_router_0")
 
-        #get our modules
+        # get our modules
         mod = get_instance(modconf)
         # Look if we really change our commands
 
@@ -71,7 +71,7 @@ class TestIpTag(ShinkenTest):
         #self.assert_(h2.check_command.poller_tag == 'DMZ')
 
 
-    #Change ME :)
+    # Change ME :)
     def test_hack_cmd_grp(self):
         modconf = self.conf.modules.find_by_name('IpTagAppend')
 
@@ -80,7 +80,7 @@ class TestIpTag(ShinkenTest):
         h2 = self.sched.hosts.find_by_name("test_router_0")
         h3 = self.sched.hosts.find_by_name("127.0.0.1")
 
-        #get our modules
+        # get our modules
         mod = get_instance(modconf)
         # Look if we really change our commands
 

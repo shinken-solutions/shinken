@@ -1,22 +1,22 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 :
+# Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 #
 # This file is used to test reading and processing of config files
@@ -25,7 +25,7 @@
 import os
 import sys
 
-#It's ugly I know....
+# It's ugly I know....
 from shinken_test import *
 from shinken.action import Action
 
@@ -33,7 +33,7 @@ time.time = original_time_time
 time.sleep = original_time_sleep
 
 class TestAction(ShinkenTest):
-    #setUp is in shinken_test
+    # setUp is in shinken_test
 
     def wait_finished(self, a, size=8012):
         start = time.time()
@@ -53,7 +53,7 @@ class TestAction(ShinkenTest):
                 return
 
 
-    #Change ME :)
+    # Change ME :)
     def test_action(self):
         a = Action()
         a.timeout = 10
@@ -66,7 +66,7 @@ class TestAction(ShinkenTest):
         self.assert_(a.got_shell_characters() == False)
         a.execute()
         self.assert_(a.status == 'launched')
-        #Give also the max output we want for the command
+        # Give also the max output we want for the command
         self.wait_finished(a)
         self.assert_(a.exit_status == 0)
         self.assert_(a.status == 'done')
@@ -89,7 +89,7 @@ class TestAction(ShinkenTest):
         a.execute()
 
         self.assert_(a.status == 'launched')
-        #Give also the max output we want for the command
+        # Give also the max output we want for the command
         self.wait_finished(a)
         print "Output", a.long_output, a.output
         titi_found = False
@@ -100,8 +100,8 @@ class TestAction(ShinkenTest):
         self.assert_(titi_found == True)
         
 
-    #Some commands are shell without bangs! (like in Centreon...)
-    #We can show it in the launch, and it should be managed
+    # Some commands are shell without bangs! (like in Centreon...)
+    # We can show it in the launch, and it should be managed
     def test_noshell_bang_command(self):
         a = Action()
         a.timeout = 10
@@ -196,7 +196,7 @@ class TestAction(ShinkenTest):
         a.execute()
         print "EXECUTE FINISE"
         self.assert_(a.status == 'launched')
-        #Give also the max output we want for the command
+        # Give also the max output we want for the command
         self.wait_finished(a, 10000000000)
         print "Status?", a.exit_status
         self.assert_(a.exit_status == 0)

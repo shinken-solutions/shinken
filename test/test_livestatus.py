@@ -1,24 +1,24 @@
 #!/usr/bin/env python2.6
 # -*- coding: utf-8 -*-
 
-#Copyright (C) 2009-2010 :
+# Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
 #
@@ -59,7 +59,7 @@ class TestConfig(ShinkenTest):
   
 
     def update_broker(self, dodeepcopy=False):
-        #The brok should be manage in the good order
+        # The brok should be manage in the good order
         ids = self.sched.broks.keys()
         ids.sort()
         for brok_id in ids:
@@ -351,7 +351,7 @@ OutputFormat: csv
         excmd = '[%d] PROCESS_SERVICE_CHECK_RESULT;test_host_0;test_ok_0;1;WARN' % int(time.time())
         self.sched.run_external_command(excmd)
         self.scheduler_loop(1, [])
-        self.scheduler_loop(1, []) #Need 2 run for get then consume)
+        self.scheduler_loop(1, []) # Need 2 run for get then consume)
         self.update_broker()
 
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
@@ -833,7 +833,7 @@ Filter: description = test_ok_0
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print 'json with headers__________\n%s\n%s\n' % (request, response)
         self.assert_(response == '[["host_name","description","state"],["test_host_0","test_ok_0",2]]\n')
-        #100% mklivesttaus: self.assert_(response == '[["host_name","description","state"],\n["test_host_0","test_ok_0",2]]\n')
+        # 100% mklivesttaus: self.assert_(response == '[["host_name","description","state"],\n["test_host_0","test_ok_0",2]]\n')
 
 
     def test_thruk(self):
@@ -985,7 +985,7 @@ Separators: 10 59 44 124"""
             nagresponse = self.ask_nagios(request)
             print "nagresponse----------------------------------------------"
             print nagresponse
-            #TODO the entry_times are different. find a way to round the numbers
+            # TODO the entry_times are different. find a way to round the numbers
             # so that they are equal
             #self.assert_(self.lines_equal(response, nagresponse))
 
@@ -1563,8 +1563,8 @@ localhost;1;scheduler-1;7768;0;1
         print "FUCK", response, "TOTO"
         self.assert_(self.lines_equal(response, good_response))
 
-        #Now we update a scheduler state and we check
-        #here the N2
+        # Now we update a scheduler state and we check
+        # here the N2
         schedlink.alive = False
         b = schedlink.get_update_status_brok()
         self.sched.add(b)
@@ -1609,7 +1609,7 @@ othernode;1;reactionner-2;7769;1
         print response == good_response
         self.assert_(self.lines_equal(response, good_response))
 
-        #Now the update part
+        # Now the update part
         reac.alive = False
         b2 = reac.get_update_status_brok()
         self.sched.add(b2)
@@ -1657,7 +1657,7 @@ othernode;1;poller-2;7771;1
         print response == good_response
         self.assert_(self.lines_equal(response, good_response))
 
-        #Now the update part
+        # Now the update part
         pol.alive = False
         b2 = pol.get_update_status_brok()
         self.sched.add(b2)
@@ -1709,7 +1709,7 @@ othernode;1;broker-2;7772;1
         print response == good_response
         self.assert_(self.lines_equal(response, good_response))
 
-        #Now the update part
+        # Now the update part
         pol.alive = False
         b2 = pol.get_initial_status_brok()
         self.sched.add(b2)
@@ -1857,7 +1857,7 @@ test_router_0
         host_router_0 = self.sched.hosts.find_by_name("test_router_0")
         host_router_0.checks_in_progress = []
 
-        #Then initialize host under theses routers
+        # Then initialize host under theses routers
         host_0 = self.sched.hosts.find_by_name("test_host_0")
         host_0.checks_in_progress = []
 
@@ -1873,7 +1873,7 @@ test_router_0
         self.scheduler_loop(1, [[host_router_0, 1, 'DOWN']], do_sleep=False)
         self.scheduler_loop(1, [[host_router_0, 1, 'DOWN']], do_sleep=False)
 
-        #Max attempt is reach, should be HARD now
+        # Max attempt is reach, should be HARD now
         for h in all_routers:
             self.assert_(h.state == 'DOWN')
             self.assert_(h.state_type == 'HARD')
@@ -3282,7 +3282,7 @@ ResponseHeader: fixed16
         total_page += load_time
         print "Response time 1 : %.3f" % load_time
 
-        #Second Query
+        # Second Query
         query_start = time.time()
         request = """
 GET hosts

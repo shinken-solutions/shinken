@@ -1,22 +1,22 @@
 #!/usr/bin/env python2.6
-#Copyright (C) 2009-2010 :
+# Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 #
 # This file is used to test reading and processing of config files
@@ -28,7 +28,7 @@ import time, sys
 sys.path.append("..")
 sys.path.append("../shinken")
 
-#It's ugly I know....
+# It's ugly I know....
 import shinken
 from shinken.objects import *
 from shinken_test import *
@@ -36,8 +36,8 @@ from shinken.misc.regenerator import Regenerator
 
 
 class TestRegenerator(ShinkenTest):
-    #Uncomment this is you want to use a specific configuration
-    #for your test
+    # Uncomment this is you want to use a specific configuration
+    # for your test
     def setUp(self):
         self.setup_with_file('etc/nagios_regenerator.cfg')
 
@@ -71,7 +71,7 @@ class TestRegenerator(ShinkenTest):
             print s.state, orig_s.state
             self.assert_(s.state == orig_s.state)
             self.assert_(s.state_type == orig_s.state_type)
-            #Look for same impacts too
+            # Look for same impacts too
             for i in s.impacts:
                 print "Got impact", i.get_name()
                 same_impacts = i.get_name() in [j.get_name() for j in orig_s.impacts]
@@ -86,13 +86,13 @@ class TestRegenerator(ShinkenTest):
         
 
     
-    #Change ME :)
+    # Change ME :)
     def test_regenerator(self):
         #
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        #for h in self.sched.hosts:
+        # for h in self.sched.hosts:
         #    h.realm = h.realm.get_name()
         self.sched.conf.skip_initial_broks = False
         self.sched.fill_initial_broks()
@@ -189,13 +189,13 @@ class TestRegenerator(ShinkenTest):
 
 
 
-    #Change ME :)
+    # Change ME :)
     def test_regenerator_load_from_scheduler(self):
         #
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        #for h in self.sched.hosts:
+        # for h in self.sched.hosts:
         #    h.realm = h.realm.get_name()
         
         self.rg = Regenerator()

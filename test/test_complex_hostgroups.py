@@ -1,33 +1,33 @@
 #!/usr/bin/env python2.6
-#Copyright (C) 2009-2010 :
+# Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 #
 # This file is used to test reading and processing of config files
 #
 
-#It's ugly I know....
+# It's ugly I know....
 from shinken_test import *
 
 
 class TestConfig(ShinkenTest):
-    #setUp is in shinken_test
+    # setUp is in shinken_test
     def setUp(self):
         self.setup_with_file('etc/nagios_complex_hostgroups.cfg')
 
@@ -48,10 +48,10 @@ class TestConfig(ShinkenTest):
         for h in svc.host_name:
             print h
 
-    #check if service exist in hst, but NOT in others
+    # check if service exist in hst, but NOT in others
     def srv_define_only_on(self, desc, hsts):
         r = True
-        #first hsts
+        # first hsts
         for h in hsts:
             svc = self.find_service(h.host_name, desc)
             if svc is None:
@@ -67,14 +67,14 @@ class TestConfig(ShinkenTest):
         return r
 
 
-    #Change ME :)
+    # Change ME :)
     def test_dummy(self):
         print self.sched.services.items
         svc = self.get_svc()
         print "Service", svc
         #print self.conf.hostgroups
 
-        #All our hosts
+        # All our hosts
         test_linux_web_prod_0 = self.find_host('test_linux_web_prod_0')
         test_linux_web_qual_0 = self.find_host('test_linux_web_qual_0')
         test_win_web_prod_0 = self.find_host('test_win_web_prod_0')
@@ -94,7 +94,7 @@ class TestConfig(ShinkenTest):
         self.assert_(test_linux_web_prod_0 in hg_linux.members)
         self.assert_(test_linux_web_prod_0 not in hg_file.members)
 
-        #First the service define for linux only
+        # First the service define for linux only
         svc = self.find_service('test_linux_web_prod_0', 'linux_0')
         print "Service Linux only", svc.get_dbg_name()
         r = self.srv_define_only_on('linux_0', [test_linux_web_prod_0, test_linux_web_qual_0, test_linux_file_prod_0])
@@ -104,7 +104,7 @@ class TestConfig(ShinkenTest):
         r = self.srv_define_only_on('linux_web_0', [test_linux_web_prod_0, test_linux_web_qual_0, test_linux_file_prod_0,test_win_web_prod_0,test_win_web_qual_0])
         self.assert_(r == True)
 
-        ###Now the real complex things :)
+        ### Now the real complex things :)
         print "Service Linux&web"
         r = self.srv_define_only_on('linux_AND_web_0', [test_linux_web_prod_0, test_linux_web_qual_0])
         self.assert_(r == True)

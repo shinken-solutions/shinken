@@ -23,7 +23,7 @@
 #
 
 import re
-#It's ugly I know....
+# It's ugly I know....
 from shinken_test import *
 
 
@@ -74,7 +74,7 @@ class TestBusinesscorrel(ShinkenTest):
 
         sons = bp_rule.sons
         print "Sons,", sons
-        #We(ve got 2 sons, 2 services nodes
+        # We've got 2 sons, 2 services nodes
         self.assert_(len(sons) == 2)
         self.assert_(sons[0].operand == 'service')
         self.assert_(sons[0].sons[0] == svc_bd1)
@@ -165,7 +165,7 @@ class TestBusinesscorrel(ShinkenTest):
 
         sons = bp_rule.sons
         print "Sons,", sons
-        #We(ve got 2 sons, 2 services nodes
+        # We've got 2 sons, 2 services nodes
         self.assert_(len(sons) == 2)
         self.assert_(sons[0].operand == 'service')
         self.assert_(sons[0].sons[0] == svc_bd1)
@@ -392,7 +392,7 @@ class TestBusinesscorrel(ShinkenTest):
 
         sons = bp_rule.sons
         print "Sons,", sons
-        #We(ve got 2 sons, 2 services nodes
+        # We've got 2 sons, 2 services nodes
         self.assert_(len(sons) == 2)
         self.assert_(sons[0].operand == 'service')
         self.assert_(sons[0].sons[0] == svc_bd1)
@@ -415,9 +415,9 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(c.internal == True)
         self.assert_(c.is_launchable(now))
         
-        #ask the scheduler to launch this check
-        #and ask 2 loops: one for launch the check
-        #and another to integer the result
+        # ask the scheduler to launch this check
+        # and ask 2 loops: one for launch the check
+        # and another to integer the result
         self.scheduler_loop(2, [])
 
         # We should have no more the check
@@ -446,9 +446,9 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(c.internal == True)
         self.assert_(c.is_launchable(now))
         
-        #ask the scheduler to launch this check
-        #and ask 2 loops: one for launch the check
-        #and another to integer the result
+        # ask the scheduler to launch this check
+        # and ask 2 loops: one for launch the check
+        # and another to integer the result
         self.scheduler_loop(2, [])
 
         # We should have no more the check
@@ -477,9 +477,9 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(c.internal == True)
         self.assert_(c.is_launchable(now))
         
-        #ask the scheduler to launch this check
-        #and ask 2 loops: one for launch the check
-        #and another to integer the result
+        # ask the scheduler to launch this check
+        # and ask 2 loops: one for launch the check
+        # and another to integer the result
         self.scheduler_loop(2, [])
 
         # We should have no more the check
@@ -509,9 +509,9 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(c.internal == True)
         self.assert_(c.is_launchable(now))
         
-        #ask the scheduler to launch this check
-        #and ask 2 loops: one for launch the check
-        #and another to integer the result
+        # ask the scheduler to launch this check
+        # and ask 2 loops: one for launch the check
+        # and another to integer the result
         self.scheduler_loop(2, [])
 
         # We should have no more the check
@@ -523,16 +523,16 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(svc_cor.state_type == 'SOFT')
         self.assert_(svc_cor.last_hard_state_id == 0)
 
-        #OK, re recheck again, GO HARD!
+        # OK, re recheck again, GO HARD!
         print "Launch internal check"
         svc_cor.launch_check(now-1)
         c = svc_cor.actions[0]
         self.assert_(c.internal == True)
         self.assert_(c.is_launchable(now))
         
-        #ask the scheduler to launch this check
-        #and ask 2 loops: one for launch the check
-        #and another to integer the result
+        # ask the scheduler to launch this check
+        # and ask 2 loops: one for launch the check
+        # and another to integer the result
         self.scheduler_loop(2, [])
 
         # We should have no more the check
@@ -562,9 +562,9 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(c.internal == True)
         self.assert_(c.is_launchable(now))
         
-        #ask the scheduler to launch this check
-        #and ask 2 loops: one for launch the check
-        #and another to integer the result
+        # ask the scheduler to launch this check
+        # and ask 2 loops: one for launch the check
+        # and another to integer the result
         self.scheduler_loop(2, [])
 
         # We should have no more the check
@@ -654,7 +654,7 @@ class TestBusinesscorrel(ShinkenTest):
 
         sons = bp_rule.sons
         print "Sons,", sons
-        #We've got 3 sons, each 3 rules
+        # We've got 3 sons, each 3 rules
         self.assert_(len(sons) == 3)
         bd_node = sons[0]
         self.assert_(bd_node.operand == '|')
@@ -677,9 +677,9 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(c.internal == True)
         self.assert_(c.is_launchable(now))
         
-        #ask the scheduler to launch this check
-        #and ask 2 loops: one for launch the check
-        #and another to integer the result
+        # ask the scheduler to launch this check
+        # and ask 2 loops: one for launch the check
+        # and another to integer the result
         self.scheduler_loop(2, [])
 
         # We should have no more the check
@@ -708,9 +708,9 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(c.internal == True)
         self.assert_(c.is_launchable(now))
         
-        #ask the scheduler to launch this check
-        #and ask 2 loops: one for launch the check
-        #and another to integer the result
+        # ask the scheduler to launch this check
+        # and ask 2 loops: one for launch the check
+        # and another to integer the result
         self.scheduler_loop(2, [])
 
         # We should have no more the check
@@ -739,9 +739,9 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(c.internal == True)
         self.assert_(c.is_launchable(now))
         
-        #ask the scheduler to launch this check
-        #and ask 2 loops: one for launch the check
-        #and another to integer the result
+        # ask the scheduler to launch this check
+        # and ask 2 loops: one for launch the check
+        # and another to integer the result
         self.scheduler_loop(2, [])
 
         # We should have no more the check
@@ -771,9 +771,9 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(c.internal == True)
         self.assert_(c.is_launchable(now))
         
-        #ask the scheduler to launch this check
-        #and ask 2 loops: one for launch the check
-        #and another to integer the result
+        # ask the scheduler to launch this check
+        # and ask 2 loops: one for launch the check
+        # and another to integer the result
         self.scheduler_loop(2, [])
 
         # We should have no more the check
@@ -785,16 +785,16 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(svc_cor.state_type == 'SOFT')
         self.assert_(svc_cor.last_hard_state_id == 0)
 
-        #OK, re recheck again, GO HARD!
+        # OK, re recheck again, GO HARD!
         print "ERP: Launch internal check"
         svc_cor.launch_check(now-1)
         c = svc_cor.actions[0]
         self.assert_(c.internal == True)
         self.assert_(c.is_launchable(now))
         
-        #ask the scheduler to launch this check
-        #and ask 2 loops: one for launch the check
-        #and another to integer the result
+        # ask the scheduler to launch this check
+        # and ask 2 loops: one for launch the check
+        # and another to integer the result
         self.scheduler_loop(2, [])
 
         # We should have no more the check
@@ -824,9 +824,9 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(c.internal == True)
         self.assert_(c.is_launchable(now))
         
-        #ask the scheduler to launch this check
-        #and ask 2 loops: one for launch the check
-        #and another to integer the result
+        # ask the scheduler to launch this check
+        # and ask 2 loops: one for launch the check
+        # and another to integer the result
         self.scheduler_loop(2, [])
 
         # We should have no more the check
@@ -858,9 +858,9 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(c.internal == True)
         self.assert_(c.is_launchable(now))
 
-        #ask the scheduler to launch this check
-        #and ask 2 loops: one for launch the check
-        #and another to integer the result
+        # ask the scheduler to launch this check
+        # and ask 2 loops: one for launch the check
+        # and another to integer the result
         self.scheduler_loop(2, [])
 
         # We should have no more the check
@@ -887,9 +887,9 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(c.internal == True)
         self.assert_(c.is_launchable(now))
 
-        #ask the scheduler to launch this check
-        #and ask 2 loops: one for launch the check
-        #and another to integer the result
+        # ask the scheduler to launch this check
+        # and ask 2 loops: one for launch the check
+        # and another to integer the result
         self.scheduler_loop(2, [])
 
         # We should have no more the check
@@ -1031,11 +1031,11 @@ class TestBusinesscorrel(ShinkenTest):
         # Ok now more fun, with changing of_values and states
 
         ### W O O O O
-        # 4 of:   -> Ok (we got 4 OK, and not 4 warn or crit, so it's OK)
-        # 5,1,1  -> Warning (at least one warning, and no crit -> warning)
+        # 4 of: -> Ok (we got 4 OK, and not 4 warn or crit, so it's OK)
+        # 5,1,1 -> Warning (at least one warning, and no crit -> warning)
         # 5,2,1 -> OK (we want warning only if we got 2 bad states, so not here)
         self.scheduler_loop(2, [[A, 1, 'WARNING'], [B, 0, 'OK']])
-        #4 of: -> 4,5,5
+        # 4 of: -> 4,5,5
         bp_rule.of_values = (4,5,5)
         bp_rule.is_of_mul = False
         self.assert_(bp_rule.get_state() == 0)
@@ -1052,7 +1052,7 @@ class TestBusinesscorrel(ShinkenTest):
         # 4 of: -> Crtitical (not 4 ok, so we take the worse state, the critical)
         # 4,1,1 -> Critical (2 states raise the waring, but on raise critical, so worse state is critical)
         self.scheduler_loop(2, [[A, 1, 'WARNING'], [B, 2, 'Crit']])
-        #4 of: -> 4,5,5
+        # 4 of: -> 4,5,5
         bp_rule.of_values = (4,5,5)
         bp_rule.is_of_mul = False
         self.assert_(bp_rule.get_state() == 2)
@@ -1062,19 +1062,19 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(bp_rule.get_state() == 2)
 
         ##* W C C O O
-        #* 2 of: OK
-        #* 4,1,1 -> Critical (same as before)
-        #* 4,1,3 -> warning (the warning rule is raised, but the critical is not)
+        # * 2 of: OK
+        # * 4,1,1 -> Critical (same as before)
+        # * 4,1,3 -> warning (the warning rule is raised, but the critical is not)
         self.scheduler_loop(2, [[A, 1, 'WARNING'], [B, 2, 'Crit'], [C, 2, 'Crit']])
-        #* 2 of: 2,5,5
+        # * 2 of: 2,5,5
         bp_rule.of_values = (2,5,5)
         bp_rule.is_of_mul = False
         self.assert_(bp_rule.get_state() == 0)
-        #* 4,1,1
+        # * 4,1,1
         bp_rule.of_values = (4,1,1)
         bp_rule.is_of_mul = True
         self.assert_(bp_rule.get_state() == 2)
-        #* 4,1,3
+        # * 4,1,3
         bp_rule.of_values = (4,1,3)
         bp_rule.is_of_mul = True
         self.assert_(bp_rule.get_state() == 1)
@@ -1115,7 +1115,7 @@ class TestBusinesscorrel(ShinkenTest):
 
         sons = bp_rule.sons
         print "Sons,", sons
-        #We(ve got 2 sons, 2 services nodes
+        # We've got 2 sons, 2 services nodes
         self.assert_(len(sons) == 2)
         self.assert_(sons[0].operand == 'service')
         self.assert_(sons[0].sons[0] == svc_bd1)
