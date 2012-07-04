@@ -27,8 +27,6 @@ from shinken_test import *
 
 
 class TestServiceWhithBadHost(ShinkenTest):
-    # Uncomment this is you want to use a specific configuration
-    # for your test
     def setUp(self):
         try:
             self.setup_with_file('etc/nagios_srv_badhost.cfg')

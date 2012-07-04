@@ -31,6 +31,7 @@ from shinken_test import *
 #time.sleep = original_time_sleep
 
 class TestEscalations(ShinkenTest):
+
     def setUp(self):
         self.setup_with_file('etc/nagios_escalations.cfg')
 

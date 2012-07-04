@@ -36,8 +36,6 @@ from objects.contact import Contact
 modconf = Module()
 
 class TestTimeout(ShinkenTest):
-    # Uncomment this is you want to use a specific configuration
-    # foreyour test
     def setUp(self):
         self.setup_with_file('etc/nagios_check_timeout.cfg')
 

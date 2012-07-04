@@ -29,8 +29,6 @@ time.time = original_time_time
 time.sleep = original_time_sleep
 
 class TestStrangeCaracterInCommands(ShinkenTest):
-    # Uncomment this is you want to use a specific configuration
-    # for your test
     def setUp(self):
         self.setup_with_file('etc/nagios_strange_characters_commands.cfg')
 

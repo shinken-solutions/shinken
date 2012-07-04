@@ -27,8 +27,6 @@ from shinken_test import *
 from shinken.modules.webui_broker.helper import helper
 
 class TestUIHelper(ShinkenTest):
-    # Uncomment this is you want to use a specific configuration
-    # for your test
     def setUp(self):
         self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
 

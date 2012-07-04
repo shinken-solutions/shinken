@@ -41,7 +41,9 @@ modconf.properties = named_pipe.properties.copy()
 
 
 class TestModuleNamedPipe(ShinkenTest):
-    # setUp is in shinken_test
+
+    # Uncomment this is you want to use a specific configuration
+    # for your test
     #def setUp(self):
     #    self.setup_with_file('etc/nagios_module_hot_dependencies_arbiter.cfg')
 

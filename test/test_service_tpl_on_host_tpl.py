@@ -27,7 +27,6 @@ from shinken_test import *
 
 
 class TestSrvTplOnHostTpl(ShinkenTest):
-    # setUp is in shinken_test
     def setUp(self):
         self.setup_with_file('etc/nagios_service_tpl_on_host_tpl.cfg')
 

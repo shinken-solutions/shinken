@@ -36,8 +36,6 @@ from shinken.misc.regenerator import Regenerator
 
 
 class TestRegenerator(ShinkenTest):
-    # Uncomment this is you want to use a specific configuration
-    # for your test
     def setUp(self):
         self.setup_with_file('etc/nagios_regenerator.cfg')
 

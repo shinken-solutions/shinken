@@ -27,8 +27,7 @@ from shinken_test import *
 
 
 class TestFlapping(ShinkenTest):
-    # Uncomment this is you want to use a specific configuration
-    # for your test
+
     def setUp(self):
         self.setup_with_file('etc/nagios_flapping.cfg')
 

@@ -27,8 +27,6 @@ from shinken_test import *
 from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp
 
 class TestConfig(ShinkenTest):
-    # Uncomment this is you want to use a specific configuration
-    # for your test
     def setUp(self):
         pass
 

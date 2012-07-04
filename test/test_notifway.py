@@ -28,7 +28,6 @@ from shinken_test import unittest, ShinkenTest
 
 
 class TestConfig(ShinkenTest):
-    # setUp is in shinken_test
     def setUp(self):
         self.setup_with_file('etc/nagios_notif_way.cfg')
 

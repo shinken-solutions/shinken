@@ -27,8 +27,6 @@ from shinken_test import *
 
 
 class TestStarInGroups(ShinkenTest):
-    # Uncomment this is you want to use a specific configuration
-    # for your test
     def setUp(self):
         self.setup_with_file('etc/nagios_star_in_hostgroups.cfg')
 

@@ -30,6 +30,7 @@ from shinken.objects.timeperiod import Timeperiod
 
 
 class TestMaintPeriod(ShinkenTest):
+
     def setUp(self):
         self.setup_with_file('etc/nagios_maintenance_period.cfg')
 

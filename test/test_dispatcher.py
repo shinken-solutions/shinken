@@ -105,8 +105,7 @@ class BadBroker(BrokerLink):
 
 
 class TestDispatcher(ShinkenTest):
-    # Uncomment this is you want to use a specific configuration
-    # for your test
+
     def setUp(self):
         self.setup_with_file('etc/nagios_dispatcher.cfg')
     
@@ -311,8 +310,7 @@ class TestDispatcher(ShinkenTest):
 
 
 class TestDispatcherMultiBroker(ShinkenTest):
-    # Uncomment this is you want to use a specific configuration
-    # for your test
+
     def setUp(self):
         self.setup_with_file('etc/nagios_dispatcher_multibrokers.cfg')
     

@@ -35,7 +35,7 @@ from shinken.modules.ip_tag_arbiter import get_instance
 
 
 class TestIpTag(ShinkenTest):
-    # setUp is in shinken_test
+
     def setUp(self):
         self.setup_with_file('etc/nagios_module_ip_tag.cfg')
 

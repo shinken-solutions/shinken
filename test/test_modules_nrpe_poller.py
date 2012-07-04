@@ -41,9 +41,11 @@ modconf.properties = nrpe_poller.properties.copy()
 
 
 class TestNrpePoller(ShinkenTest):
-    # setUp is in shinken_test
-#    def setUp(self):
-#        self.setup_with_file('etc/nagios_module_hack_cmd_poller_tag.cfg')
+
+    # Uncomment this is you want to use a specific configuration
+    # for your test
+    #def setUp(self):
+    #    self.setup_with_file('etc/nagios_module_hack_cmd_poller_tag.cfg')
 
 
     # Change ME :)

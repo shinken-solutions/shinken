@@ -57,7 +57,7 @@ except ImportError:
         sys.exit(0)
 
 class TestModuleHotDep(ShinkenTest):
-    # setUp is in shinken_test
+
     def setUp(self):
         self.setup_with_file('etc/nagios_module_hot_dependencies_arbiter.cfg')
 

@@ -35,7 +35,7 @@ from shinken.modules.hack_commands_poller_tag_arbiter import get_instance
 
 
 class TestHackCmdPollerTag(ShinkenTest):
-    # setUp is in shinken_test
+
     def setUp(self):
         self.setup_with_file('etc/nagios_module_hack_cmd_poller_tag.cfg')
 

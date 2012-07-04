@@ -29,8 +29,8 @@ from shinken.misc.perfdata import Metric,PerfDatas
 class TestParsePerfdata(ShinkenTest):
     # Uncomment this is you want to use a specific configuration
     # for your test
-#    def setUp(self):
-#        self.setup_with_file('etc/nagios_parse_perfdata.cfg')
+    #def setUp(self):
+    #    self.setup_with_file('etc/nagios_parse_perfdata.cfg')
 
     
     # Change ME :)

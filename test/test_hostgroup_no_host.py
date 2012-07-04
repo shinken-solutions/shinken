@@ -27,8 +27,7 @@ from shinken_test import *
 
 
 class TestHostGroupNoHost(ShinkenTest):
-    # Uncomment this is you want to use a specific configuration
-    # for your test
+
     def setUp(self):
         self.setup_with_file('etc/nagios_hostgroup_no_host.cfg')
 

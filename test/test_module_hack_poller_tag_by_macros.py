@@ -35,7 +35,7 @@ from shinken.modules.hack_poller_tag_by_macros import get_instance
 
 
 class TestHackPollerTagByMacors(ShinkenTest):
-    # setUp is in shinken_test
+
     def setUp(self):
         self.setup_with_file('etc/nagios_module_hack_poller_tag_by_macros.cfg')
 

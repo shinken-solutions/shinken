@@ -27,7 +27,7 @@ from shinken_test import *
 
 
 class TestConfig(ShinkenTest):
-    # setUp is in shinken_test
+
     def setUp(self):
         self.setup_with_file('etc/nagios_host_missing_adress.cfg')
 
