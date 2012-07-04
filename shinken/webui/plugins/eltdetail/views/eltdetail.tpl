@@ -260,9 +260,25 @@ Invalid element name
 	</div>
 	</div>
 	</div>
-
+<!-- Start Host/Services-->
+<div class="span4 tabbable tabs-left">
+    <ul class="nav nav-tabs">
+        <li class="rotat active"><a data-toggle="tab" href="#lA">Infos</a></li>
+        <li class="rotat"><a data-toggle="tab" href="#lB">more ...</a></li>
+    </ul>
+    <div class="tab-content">
+        <div id="lA" class="tab-pane active">
+           <p>I'm in Section A.</p>
+        </div>
+	    <div id="lB" class="tab-pane">
+	       <p>Howdy, I'm in Section B.</p>
+	    </div>
+    </div>
+</div>
+<!-- End Host/Services-->
     <!-- Start Host/Services-->
 			<!-- Left, information part-->
+	<!--
     <div class="span4">
       %if elt_type=='host':
       <h3 class="span10">Host Information:</h3>
@@ -329,6 +345,7 @@ Invalid element name
       </table>
 
     </div>
+	-->
     <!-- End Host/Service -->
 
     <div class="tabbable span8 no-leftmargin">
