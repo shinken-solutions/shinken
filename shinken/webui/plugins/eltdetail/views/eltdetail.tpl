@@ -95,6 +95,7 @@ Invalid element name
 	<h1 class="span4 no-leftmargin state_{{elt.state.lower()}} icon_down"> <img class="imgsize4" alt="icon state" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h1> 
         %if elt.action_url != '':
             <td><a href="{{elt.action_url}}" target=_blank><img src=/static/eltdetail/images/gear.png></a></td>
+	%end
 <!-- Gear.png can be find here : http://cdn1.iconfinder.com/data/icons/nuove/128x128/actions/gear.png --!>
 <!-- and resized --!>
 	  	  
