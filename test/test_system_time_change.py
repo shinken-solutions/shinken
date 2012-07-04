@@ -27,7 +27,7 @@ from shinken_test import *
 import commands
 
 class TestSystemTimeChange(ShinkenTest):
-    # setUp is in shinken_test
+    # setUp is inherited from ShinkenTest
 
     def set_time(self, d):
         cmd = 'sudo date -s "%s"' % d

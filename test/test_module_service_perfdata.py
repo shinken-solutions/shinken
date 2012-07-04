@@ -32,7 +32,7 @@ from shinken.modules.service_perfdata_broker import get_instance
 
 
 class TestModSRVPErfdata(ShinkenTest):
-    # setUp is in shinken_test
+    # setUp is inherited from ShinkenTest
 
     # Change ME :)
     def test_service_perfdata(self):

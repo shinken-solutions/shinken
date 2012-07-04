@@ -27,7 +27,7 @@ from shinken_test import *
 from shinken.db_sqlite import DBSqlite
 
 class TestConfig(ShinkenTest):
-    # setUp is in shinken_test
+    # setUp is inherited from ShinkenTest
 
 
     def create_db(self):

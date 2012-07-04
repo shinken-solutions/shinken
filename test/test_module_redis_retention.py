@@ -40,7 +40,7 @@ modconf.properties = redis_retention_scheduler.properties.copy()
 
 
 class TestConfig(ShinkenTest):
-    # setUp is in shinken_test
+    # setUp is inherited from ShinkenTest
 
     # Change ME :)
     def test_redis_retention(self):

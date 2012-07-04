@@ -29,7 +29,7 @@ from shinken.commandcall import CommandCall
 from shinken.objects import Command
 
 class TestConfig(ShinkenTest):
-    # setUp is in shinken_test
+    # setUp is inherited from ShinkenTest
 
     def get_mr(self):
         mr = MacroResolver()

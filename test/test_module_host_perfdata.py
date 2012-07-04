@@ -31,7 +31,7 @@ from host_perfdata_broker import *
 from shinken.brok import Brok
 
 class TestConfig(ShinkenTest):
-    # setUp is in shinken_test
+    # setUp is inherited from ShinkenTest
 
     # Change ME :)
     def test_host_perfdata(self):

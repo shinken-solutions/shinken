@@ -27,7 +27,7 @@ from shinken_test import *
 import os
 
 class TestConfig(ShinkenTest):
-    # setUp is in shinken_test
+    # setUp is inherited from ShinkenTest
 
     def send_cmd(self, line):
         s = '[%d] %s\n' % (int(time.time()), line)

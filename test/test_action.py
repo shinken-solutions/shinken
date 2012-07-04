@@ -33,7 +33,7 @@ time.time = original_time_time
 time.sleep = original_time_sleep
 
 class TestAction(ShinkenTest):
-    # setUp is in shinken_test
+    # setUp is inherited from ShinkenTest
 
     def wait_finished(self, a, size=8012):
         start = time.time()

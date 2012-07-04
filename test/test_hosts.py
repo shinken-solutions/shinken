@@ -28,7 +28,7 @@ from shinken_test import *
 
 
 class TestConfig(ShinkenTest):
-    # setUp is in shinken_test
+    # setUp is inherited from ShinkenTest
 
     def get_hst(self):
         return self.sched.hosts.find_by_name("test_host_0")

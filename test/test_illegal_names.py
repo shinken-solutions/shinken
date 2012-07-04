@@ -27,7 +27,7 @@ from shinken_test import *
 
 
 class TestConfig(ShinkenTest):
-    # setUp is in shinken_test
+    # setUp is inherited from ShinkenTest
 
     # Change ME :)
     def test_illegal_caracter_in_names(self):

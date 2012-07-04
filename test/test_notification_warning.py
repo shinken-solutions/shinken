@@ -29,7 +29,7 @@ from shinken.notification import Notification
 
 
 class TestConfig(ShinkenTest):
-    # setUp is in shinken_test
+    # setUp is inherited from ShinkenTest
 
     # Change ME :)
     def test_raise_warning_on_notification_errors(self):

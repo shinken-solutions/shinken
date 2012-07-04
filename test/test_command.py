@@ -29,7 +29,7 @@ from shinken.commandcall import CommandCall
 from shinken.objects import Command, Commands
 
 class TestCommand(ShinkenTest):
-    # setUp is in shinken_test
+    # setUp is inherited from ShinkenTest
 
     # Change ME :)
     def test_command(self):

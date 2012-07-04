@@ -31,7 +31,7 @@ from shinken.modules.status_dat_broker import get_instance
 
 
 class TestConfig(ShinkenTest):
-    # setUp is in shinken_test
+    # setUp is inherited from ShinkenTest
 
     def nb_of_string(self, buf, s):
         nb_s = 0

@@ -28,7 +28,7 @@ from shinken_test import *
 
 
 class TestService(ShinkenTest):
-    # setUp is in shinken_test
+    # setUp is inherited from ShinkenTest
 
     def get_svc(self):
         return self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")

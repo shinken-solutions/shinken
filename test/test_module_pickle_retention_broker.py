@@ -40,7 +40,7 @@ modconf.properties = pickle_retention_file_generic.properties.copy()
 
 
 class TestPickleRetentionBroker(ShinkenTest):
-    # setUp is in shinken_test
+    # setUp is inherited from ShinkenTest
 
     # Change ME :)
     def test_pickle_retention(self):
