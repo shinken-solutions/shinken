@@ -23,7 +23,6 @@
 #
 
 
-# It's ugly I know....
 from shinken_test import *
 
 class TestAcks(ShinkenTest):

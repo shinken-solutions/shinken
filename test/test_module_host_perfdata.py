@@ -23,7 +23,6 @@
 # This file is used to test reading and processing of config files
 #
 
-# It's ugly I know....
 import os
 from shinken_test import *
 sys.path.append("../shinken/modules")

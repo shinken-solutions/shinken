@@ -25,7 +25,6 @@
 import os
 import sys
 
-# It's ugly I know....
 from shinken_test import *
 from shinken.action import Action
 

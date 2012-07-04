@@ -28,7 +28,6 @@ import time, sys
 sys.path.append("..")
 sys.path.append("../shinken")
 
-# It's ugly I know....
 import shinken
 from shinken.objects import *
 from shinken_test import *

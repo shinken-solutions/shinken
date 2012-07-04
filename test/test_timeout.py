@@ -23,7 +23,6 @@
 # This file is used to test reading and processing of config files
 #
 
-# It's ugly I know....
 from shinken_test import *
 # we have an external process, so we must un-fake time functions
 time.time = original_time_time

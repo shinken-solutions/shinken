@@ -24,7 +24,6 @@
 #
 
 
-# It's ugly I know....
 from shinken_test import *
 
 #time.time = original_time_time

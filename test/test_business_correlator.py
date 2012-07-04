@@ -23,7 +23,6 @@
 #
 
 import re
-# It's ugly I know....
 from shinken_test import *
 
 

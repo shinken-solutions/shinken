@@ -26,7 +26,6 @@
 #
 
 
-# It's ugly I know....
 from shinken_test import *
 from shinken.objects.schedulingitem import SchedulingItem
 
