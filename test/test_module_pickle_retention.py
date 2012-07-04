@@ -74,7 +74,7 @@ class TestConfig(ShinkenTest):
         # and passive one too
         self.assert_(svc.passive_checks_enabled == True)
 
-        # updte the hosts and service in the scheduler in the retentino-file
+        # update the hosts and service in the scheduler in the retention-file
         sl.hook_save_retention(self.sched)
         
         self.assert_(svc.state == 'PENDING')
@@ -128,7 +128,7 @@ class TestConfig(ShinkenTest):
 
         # Now make real loops with notifications
         self.scheduler_loop(10, [[svc, 2, 'CRITICAL | bibi=99%']])
-        # updte the hosts and service in the scheduler in the retentino-file
+        # update the hosts and service in the scheduler in the retention-file
         save_notified_contacts = svc2.notified_contacts
         print "Save notif contacts", save_notified_contacts
         sl.hook_save_retention(self.sched)

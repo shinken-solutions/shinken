@@ -58,7 +58,7 @@ class TestMongodb(ShinkenTest):
         sl.init()
         l = logger
 
-        # updte the hosts and service in the scheduler in the retentino-file
+        # update the hosts and service in the scheduler in the retention-file
         sl.hook_save_retention(self.sched)
         
         # Now we change thing
@@ -78,7 +78,7 @@ class TestMongodb(ShinkenTest):
 
         # Now make real loops with notifications
         self.scheduler_loop(10, [[svc, 2, 'CRITICAL | bibi=99%']])
-        # updte the hosts and service in the scheduler in the retentino-file
+        # update the hosts and service in the scheduler in the retention-file
         sl.hook_save_retention(self.sched)
 
         r = sl.hook_load_retention(self.sched)

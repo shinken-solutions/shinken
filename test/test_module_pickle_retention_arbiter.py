@@ -73,7 +73,7 @@ class TestPickleRetentionBroker(ShinkenTest):
 
         arbiter.broks = self.sched.broks
         sl.hook_save_retention(arbiter)#, l)
-        # updte the hosts and service in the scheduler in the retentino-file
+        # update the hosts and service in the scheduler in the retention-file
 
         # Now we clean the source, like if we restart
         arbiter.broks.clear()
