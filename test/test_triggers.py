@@ -34,37 +34,22 @@ class TestTriggers(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_triggers.cfg')
 
+
+
+    # Try to catch the perf_datas of self
+    def test_function_perf(self):
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "sample_perf_function")
+        svc.output = 'I am OK'
+        svc.perf_data = 'cpu=95%'
+        # Go launch it!
+        svc.eval_triggers()
+        self.scheduler_loop(2, [])
+        print "Output", svc.output
+        print "Perf_Data", svc.perf_data
+        self.assert_(svc.output == "not good!")
+        self.assert_(svc.perf_data == "cpu=95%")
+
     
-    # Change ME :)
-    def test_simple_triggers(self):
-        #
-        # Config is not correct because of a wrong relative path
-        # in the main config file
-        #
-        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
-        code = '''r = self.get_name()'''.replace(r'\n', '\n').replace(r'\t', '\t')
-        t = Trigger({'trigger_name' : 'none', 'code_src': code})
-        t.compile()
-        r = t.eval(svc)
-        print r
-
-        code = '''self.output = "Moncul c'est du poulet" '''.replace(r'\n', '\n').replace(r'\t', '\t')
-        t = Trigger({'trigger_name' : 'none', 'code_src': code})
-        t.compile()
-        r = t.eval(svc)
-        print "Service output", svc.output
-        self.assert_(svc.output == "Moncul c'est du poulet")
-
-        code = '''self.output = "Moncul c'est du poulet2"
-self.perf_data = "Moncul c'est du poulet3"
-'''.replace(r'\n', '\n').replace(r'\t', '\t')
-        t = Trigger({'trigger_name' : 'none', 'code_src': code})
-        t.compile()
-        r = t.eval(svc)
-        print "Service output", svc.output
-        print "Service perf_data", svc.perf_data
-        self.assert_(svc.output == "Moncul c'est du poulet2")
-        self.assert_(svc.perf_data == "Moncul c'est du poulet3")
 
     # Change ME :)
     def test_in_conf_trigger(self):
@@ -146,6 +131,39 @@ self.perf_data = "Moncul c'est du poulet3"
         print "Perf_Data", host.perf_data
         self.assert_(host.output == "not good!")
         self.assert_(host.perf_data == "cpu=95")
+
+
+
+    # Change ME :)
+    def test_simple_triggers(self):
+        #
+        # Config is not correct because of a wrong relative path
+        # in the main config file
+        #
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        code = '''r = self.get_name()'''.replace(r'\n', '\n').replace(r'\t', '\t')
+        t = Trigger({'trigger_name' : 'none', 'code_src': code})
+        t.compile()
+        r = t.eval(svc)
+        print r
+
+        code = '''self.output = "Moncul c'est du poulet" '''.replace(r'\n', '\n').replace(r'\t', '\t')
+        t = Trigger({'trigger_name' : 'none', 'code_src': code})
+        t.compile()
+        r = t.eval(svc)
+        print "Service output", svc.output
+        self.assert_(svc.output == "Moncul c'est du poulet")
+
+        code = '''self.output = "Moncul c'est du poulet2"
+self.perf_data = "Moncul c'est du poulet3"
+'''.replace(r'\n', '\n').replace(r'\t', '\t')
+        t = Trigger({'trigger_name' : 'none', 'code_src': code})
+        t.compile()
+        r = t.eval(svc)
+        print "Service output", svc.output
+        print "Service perf_data", svc.perf_data
+        self.assert_(svc.output == "Moncul c'est du poulet2")
+        self.assert_(svc.perf_data == "Moncul c'est du poulet3")
 
 
 

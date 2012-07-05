@@ -32,44 +32,10 @@ from shinken.objects.item import Item, Items
 from shinken.misc.perfdata import PerfDatas
 from shinken.property import BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 from shinken.log import logger
-
-objs = {'hosts': [], 'services': []}
-
-
-def critical(obj, output):
-    logger.debug("[trigger::%s] I am in critical for object" % obj.get_name())
-    now = time.time()
-    cls = obj.__class__
-    i = obj.launch_check(now, force=True)
-    for chk in obj.actions:
-        if chk.id == i:
-            logger.debug("[trigger] I founded the check I want to change")
-            c = chk
-            # Now we 'transform the check into a result'
-            # So exit_status, output and status is eaten by the host
-            c.exit_status = 2
-            c.get_outputs(output, obj.max_plugins_output_length)
-            c.status = 'waitconsume'
-            c.check_time = now
-            #self.sched.nb_check_received += 1
-            # Ok now this result will be read by scheduler the next loop
+from shinken.trigger_functions import objs, trigger_functions
+#objs = {'hosts': [], 'services': []}
 
 
-def perf(obj, name):
-    p = PerfDatas(obj.perf_data)
-    if name in p:
-        logger.debug("[trigger] I found the perfdata")
-        return p[name].value
-    logger.debug("[trigger] I am in perf command")
-    return 1
-
-
-def get_object(name):
-    if not '/' in name:
-        return objs['hosts'].find_by_name(name)
-    else:
-        elts = name.split('/', 1)
-        return objs['services'].find_srv_by_name_and_hostname(elts[0], elts[1])
 
 
 
@@ -111,9 +77,9 @@ class Trigger(Item):
                      (myself.get_name(), myself.code_src))
         self = ctx
 
-        locals()['perf'] = perf
-        locals()['critical'] = critical
-        locals()['get_object'] = get_object
+        # Ok we can declare for this trigger call our functions
+        for (n,f) in trigger_functions.iteritems():
+            locals()[n] = f
 
         code = myself.code_bin  # Comment? => compile(myself.code_bin, "<irc>", "exec")
         exec code in dict(locals())

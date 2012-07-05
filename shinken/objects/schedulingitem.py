@@ -32,6 +32,7 @@ or the consume_check ones. It's a quite important class!
 
 import random
 import time
+import traceback
 
 from item import Item
 
@@ -1360,5 +1361,7 @@ class SchedulingItem(Item):
             try:
                 t.eval(self)
             except Exception, exp:
-                safe_print("We got an exeception from a trigger on", self.get_full_name(), str(exp))
+                safe_print("We got an exeception from a trigger on", self.get_full_name(), str(traceback.format_exc()))
+
+                
                 
