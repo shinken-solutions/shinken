@@ -24,11 +24,11 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This class revolv Macro in commands by looking at the macros list
-#in Class of elements. It give a propertie that call be callable or not.
-#It not callable, it's a simple properties and remplace the macro with the value
-#If callable, it's a method that is call for getting the value. for exemple, to
-#get the number of service in a host, you call a method to get the
+# This class revolv Macro in commands by looking at the macros list
+# in Class of elements. It give a propertie that call be callable or not.
+# It not callable, it's a simple properties and remplace the macro with the value
+# If callable, it's a method that is call for getting the value. for exemple, to
+# get the number of service in a host, you call a method to get the
 # len(host.services)
 
 import re
@@ -42,7 +42,7 @@ class MacroResolver(Borg):
 
 
     my_type = 'macroresolver'
-    #Global macros
+    # Global macros
     macros = {
         'TOTALHOSTSUP':         'get_total_hosts_up',
         'TOTALHOSTSDOWN':       'get_total_hosts_down',
@@ -204,7 +204,7 @@ class MacroResolver(Borg):
                         if elt is not None and elt.__class__ == cls:
                             prop = cls.macros[macro]
                             macros[macro]['val'] = self.get_value_from_element(elt, prop)
-                            #N ow check if we do not have a 'output' macro. If so, we must
+                            # Now check if we do not have a 'output' macro. If so, we must
                             # delete all special caracters that can be dangerous
                             if macro in self.output_macros:
                                 macros[macro]['val'] = self.delete_unwanted_caracters(macros[macro]['val'])
@@ -229,7 +229,7 @@ class MacroResolver(Borg):
             # We replace $$ by a big dirty thing to be sur to not misinterpret it
             c_line = c_line.replace("$$", "DOUBLEDOLLAR")
 
-            if nb_loop > 32: #too mouch loop, we exit
+            if nb_loop > 32: # too mouch loop, we exit
                 still_got_macros = False
 
         # We now replace the big dirty token we made by only a simple $
@@ -288,7 +288,7 @@ class MacroResolver(Borg):
 
     # Resolve MACROS for the ARGN
     def resolve_argn(self, macro, args):
-        #first, get the number of args
+        # first, get the number of args
         id = None
         r = re.search('ARG(?P<id>\d+)', macro)
         if r is not None:
@@ -382,7 +382,7 @@ class MacroResolver(Borg):
     def get_total_hosts_unreacheable(self):
         return len([h for h in self.hosts if h.state == 'UNREACHABLE'])
 
-    #TODO
+    # TODO
     def get_total_hosts_unreacheable_unhandled(self):
         return 0
 
@@ -405,7 +405,7 @@ class MacroResolver(Borg):
     def get_total_services_unknown(self):
         return len([s for s in self.services if s.state == 'UNKNOWN'])
 
-    #TODO
+    # TODO
     def get_total_services_warning_unhandled(self):
         return 0
 

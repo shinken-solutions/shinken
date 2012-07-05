@@ -54,7 +54,7 @@ class Worker:
 
     """
 
-    id = 0#None
+    id = 0# None
     _process = None
     _mortal = None
     _idletime = None
@@ -158,7 +158,7 @@ class Worker:
     # Launch checks that are in status
     # REF: doc/shinken-action-queues.png (4)
     def launch_new_checks(self):
-        #queue
+        # queue
         for chk in self.checks:
             if chk.status == 'queue':
                 self._idletime = 0

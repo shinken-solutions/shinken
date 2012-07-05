@@ -54,7 +54,7 @@ class ArbiterLink(SatelliteLink):
     # Check is required when prop are set:
     # contacts OR contactgroups is need
     def is_correct(self):
-        state = True #guilty or not? :)
+        state = True
         cls = self.__class__
 
         for prop, entry in cls.properties.items():
@@ -62,7 +62,7 @@ class ArbiterLink(SatelliteLink):
                 # This sould raise an error afterwards?
                 # If so, logger.log it !
                 self.debug("%s arbiterlink have not %s property" % (self.get_name(), prop))
-                state = False #Bad boy...
+                state = False # Bad boy...
         return state
 
 

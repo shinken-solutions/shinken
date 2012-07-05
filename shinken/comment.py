@@ -56,17 +56,17 @@ class Comment:
     def __init__(self, ref, persistent, author, comment, comment_type, entry_type, source, expires, expire_time):
         self.id = self.__class__.id
         self.__class__.id += 1
-        self.ref = ref #pointer to srv or host we are apply
+        self.ref = ref # pointer to srv or host we are apply
         self.entry_time = int(time.time())
         self.persistent = persistent
         self.author = author
         self.comment = comment
-        #Now the hidden attributes
-        #HOST_COMMENT=1,SERVICE_COMMENT=2
+        # Now the hidden attributes
+        # HOST_COMMENT=1,SERVICE_COMMENT=2
         self.comment_type = comment_type
-        #USER_COMMENT=1,DOWNTIME_COMMENT=2,FLAPPING_COMMENT=3,ACKNOWLEDGEMENT_COMMENT=4
+        # USER_COMMENT=1,DOWNTIME_COMMENT=2,FLAPPING_COMMENT=3,ACKNOWLEDGEMENT_COMMENT=4
         self.entry_type = entry_type
-        #COMMENTSOURCE_INTERNAL=0,COMMENTSOURCE_EXTERNAL=1
+        # COMMENTSOURCE_INTERNAL=0,COMMENTSOURCE_EXTERNAL=1
         self.source = source
         self.expires = expires
         self.expire_time = expire_time

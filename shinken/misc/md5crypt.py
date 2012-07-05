@@ -88,7 +88,7 @@ def unix_md5_crypt(pw, salt, magic=None):
     i = len(pw)
     while i:
         if i & 1:
-            ctx = ctx + chr(0)  #if ($i & 1) { $ctx->add(pack("C", 0)); }
+            ctx = ctx + chr(0)  # if ($i & 1) { $ctx->add(pack("C", 0)); }
         else:
             ctx = ctx + pw[0]
         i = i >> 1

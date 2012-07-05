@@ -64,16 +64,16 @@ class Graph:
     # Return all nodes that are in a loop. So if return [], no loop
     def loop_check(self):
         in_loop = []
-        #Add the tag for dfs check
+        # Add the tag for dfs check
         for node in self.nodes:
             node.dfs_loop_status = 'DFS_UNCHECKED'
 
-        #Now do the job
+        # Now do the job
         for node in self.nodes:
-            #Run the dfs only if the node has not been already done */
+            # Run the dfs only if the node has not been already done */
             if node.dfs_loop_status == 'DFS_UNCHECKED':
                 self.dfs_loop_search(node)
-            #If LOOP_INSIDE, must be returned
+            # If LOOP_INSIDE, must be returned
             if node.dfs_loop_status == 'DFS_LOOP_INSIDE':
                 in_loop.append(node)
 
