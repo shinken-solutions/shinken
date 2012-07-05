@@ -602,7 +602,7 @@ class Host(SchedulingItem):
             self.state_id_before_impact = self.state_id
             # This flag will know if we overide the impact state
             self.state_changed_since_impact = False
-            self.state = 'UNREACHABLE'# exit code UNDETERMINED
+            self.state = 'UNREACHABLE' # exit code UNDETERMINED
             self.state_id = 2
 
 
@@ -646,7 +646,7 @@ class Host(SchedulingItem):
             self.last_time_down = int(self.last_state_update)
             state_code = 'd'
         else:
-            self.state = 'DOWN'# exit code UNDETERMINED
+            self.state = 'DOWN' # exit code UNDETERMINED
             self.state_id = 1
             self.last_time_down = int(self.last_state_update)
             state_code = 'd'

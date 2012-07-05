@@ -43,7 +43,7 @@ class Realm(Itemgroup):
     properties.update({
         'id':            IntegerProp(default=0, fill_brok=['full_status']),
         'realm_name':    StringProp (fill_brok=['full_status']),
-        'realm_members': StringProp (default=''),# No status_broker_name because it put hosts, not host_name
+        'realm_members': StringProp (default=''), # No status_broker_name because it put hosts, not host_name
         'higher_realms': StringProp (default=''),
         'default':       BoolProp   (default='0'),
         #'alias': {'required':  True, 'fill_brok' : ['full_status']},

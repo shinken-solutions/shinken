@@ -62,12 +62,12 @@ class TestNrpePoller(ShinkenTest):
 
         manager = Manager()
         to_queue = manager.Queue()
-        from_queue = manager.Queue()# list()
+        from_queue = manager.Queue() # list()
         control_queue = Queue()
 
         # We prepare a check in the to_queue
         status = 'queue'
-        command = "$USER1$/check_nrpe -H localhost33  -n -u -t 1 -c check_load3 -a 20"# -a arg1 arg2 arg3"
+        command = "$USER1$/check_nrpe -H localhost33  -n -u -t 1 -c check_load3 -a 20" # -a arg1 arg2 arg3"
         ref = None
         t_to_to = time.time()
         c = Check(status, command, ref, t_to_to)
@@ -91,7 +91,7 @@ class TestNrpePoller(ShinkenTest):
         control_queue.put(msg2)
         sl.work(to_queue, from_queue, control_queue)
 
-        o = from_queue.get()# pop()
+        o = from_queue.get() # pop()
         print "O", o
         
         print o.__dict__

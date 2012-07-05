@@ -187,7 +187,7 @@ class Nagios_retention_scheduler(BaseModule):
                     if prop != 'state_type':
                         val = int(getattr(obj, prop))
                         setattr(obj, prop, val)
-                    else:# state type is a int, but should be set HARd or SOFT
+                    else: # state type is a int, but should be set HARd or SOFT
                         val = int(getattr(obj, prop))
                         if val == 1:
                             setattr(obj, prop, 'HARD')

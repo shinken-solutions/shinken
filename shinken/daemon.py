@@ -387,7 +387,7 @@ class Daemon(object):
             if fd in skip_close_fds: continue
             try:
                 os.close(fd)
-            except OSError:# ERROR, fd wasn't open to begin with (ignored)
+            except OSError: # ERROR, fd wasn't open to begin with (ignored)
                 pass
 
     # Go in "daemon" mode: close unused fds, redirect stdout/err, 

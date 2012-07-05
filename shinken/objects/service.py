@@ -233,7 +233,7 @@ class Service(SchedulingItem):
         'state_changed_since_impact': BoolProp(default=False),
 
         # Easy Service dep definition
-        'service_dependencies': ListProp(default=''),# TODO: find a way to brok it?
+        'service_dependencies': ListProp(default=''), # TODO: find a way to brok it?
 
         # BUSINESS CORRELATOR PART
         # Say if we are business based rule or not
@@ -595,7 +595,7 @@ class Service(SchedulingItem):
             self.state_id_before_impact = self.state_id
             # this flag will know if we overide the impact state
             self.state_changed_since_impact = False
-            self.state = 'UNKNOWN'# exit code UNDETERMINED
+            self.state = 'UNKNOWN' # exit code UNDETERMINED
             self.state_id = 3
 
 
@@ -652,7 +652,7 @@ class Service(SchedulingItem):
             self.last_time_unknown = int(self.last_state_update)
             state_code = 'u'
         else:
-            self.state = 'CRITICAL'# exit code UNDETERMINED
+            self.state = 'CRITICAL' # exit code UNDETERMINED
             self.state_id = 2
             self.last_time_critical = int(self.last_state_update)
             state_code = 'c'

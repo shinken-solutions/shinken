@@ -34,7 +34,7 @@ from shinken.util import from_bool_to_string
 class StatusFile:
     out_map = {
         'Host' : {
-            'host_name' : {},# 'host_name',
+            'host_name' : {}, # 'host_name',
             'modified_attributes' : {'prop' : None, 'default' : '0'},
             'check_command' : {'depythonize' : 'get_name'},
             'check_period' : {'prop' : 'check_period' , 'depythonize' : 'get_name'},

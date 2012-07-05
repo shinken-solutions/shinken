@@ -83,7 +83,7 @@ They connect here and get all broks (data for brokers). datas must be ORDERED! (
     def get_broks(self):
         #print "We ask us broks"
         res = self.app.get_broks()
-        #print "Sending %d broks" % len(res)#, res
+        #print "Sending %d broks" % len(res) #, res
         self.app.nb_broks_send += len(res)
         #we do not more have a full broks in queue
         self.app.has_full_broks = False

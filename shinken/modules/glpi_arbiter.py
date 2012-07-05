@@ -149,7 +149,7 @@ class Glpi_arbiter(BaseModule):
                     h[attribut] = host_info[attribut]
             r['hosts'].append(h)
 
-	# Get templates
+	 # Get templates
         all_templates = self.con.monitoring.shinkenTemplates(arg)
         print "Get all templates", all_templates
         attributs = ['name', 'check_interval', 'retry_interval',

@@ -503,7 +503,7 @@ def get_key_value_sequence(entry, default_value=None):
                         # We must search if we've gotother X-Y, so
                         # we delete this one, and loop
                         key = key.replace('[%d-%d]' % (x, y), 'Z'*10)
-                    else:# no more X-Y in it
+                    else: # no more X-Y in it
                         still_loop = False
 
                 # Now we have our xy_couples, we can manage them

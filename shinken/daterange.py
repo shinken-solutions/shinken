@@ -355,7 +355,8 @@ class Daterange:
             if start_time >= t :
                 #print "start_time >= t :", time.asctime(time.localtime(get_day(start_time)))
                 return get_day(start_time)
-        else:# Else, there is no possibility than in our start_time<->end_time we got
+        else:
+            # Else, there is no possibility than in our start_time<->end_time we got
             # any invalid time (full period out). So it's end_time+1 sec (tomorow of end_time)
             # print "Full period out, got end_time", time.asctime(time.localtime(get_day(end_time +1)))
             return get_day(end_time +1)

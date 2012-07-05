@@ -113,7 +113,7 @@ class Item(object):
     def copy(self):
         """ Return a copy of the item, but give him a new id """
         cls = self.__class__
-        i = cls({})# Dummy item but with it's own running properties
+        i = cls({}) # Dummy item but with it's own running properties
         for prop in cls.properties:
             if hasattr(self, prop):
                 val = getattr(self, prop)
@@ -170,7 +170,7 @@ Like temporary attributes such as "imported_from", etc.. """
             # if 'class_inherit' in entry and hasattr(conf, prop):
             if hasattr(conf, prop):
                 for (cls_dest, change_name) in entry.class_inherit:
-                    if cls_dest == cls:# ok, we've got something to get
+                    if cls_dest == cls: # ok, we've got something to get
                         value = getattr(conf, prop)
                         if change_name is None:
                             setattr(cls, prop, value)

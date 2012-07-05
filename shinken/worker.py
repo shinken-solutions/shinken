@@ -54,7 +54,7 @@ class Worker:
 
     """
 
-    id = 0# None
+    id = 0 # None
     _process = None
     _mortal = None
     _idletime = None

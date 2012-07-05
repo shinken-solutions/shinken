@@ -881,7 +881,7 @@ class Hostd(Daemon):
           sys.exit(2)
 
        con = Connection('localhost')
-       self.db = con.hostd#shinken
+       self.db = con.hostd # shinken
 
 
     def init_datamanager(self):

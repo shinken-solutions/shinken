@@ -105,7 +105,7 @@ class IForArbiter(Interface):
     # It will ask me to remove one or more sched_id
     def what_i_managed(self):
         logger.debug("The arbiter asked me what I manage. It's %s" % self.app.what_i_managed())
-        return self.app.what_i_managed()# self.app.schedulers.keys()
+        return self.app.what_i_managed() # self.app.schedulers.keys()
 
 
     # Call by arbiter if it thinks we are running but we must do not (like

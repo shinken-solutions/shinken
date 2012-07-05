@@ -223,7 +223,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
                 self.is_connected = DISCONNECTED
                 print "An error occurred:", exp
                 print "DATABASE ERROR!!!!!!!!!!!!!!!!!"
-            # FIXME need access to this#self.livestatus.count_event('log_message')
+            # FIXME need access to this #self.livestatus.count_event('log_message')
         else:
             print "This line is invalid", line
 

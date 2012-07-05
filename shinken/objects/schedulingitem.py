@@ -391,7 +391,7 @@ class SchedulingItem(Item):
         # if a parent is not down, no dep can explain the pb
         if False in parent_is_down:
             return False
-        else:# every parents are dead, so... It's not my fault :)
+        else: # every parents are dead, so... It's not my fault :)
             return True
 
 
@@ -406,7 +406,7 @@ class SchedulingItem(Item):
             if type == 'network_dep':
                 p_is_down = False
                 dep_match = [dep.is_state(s) for s in status]
-                if True in dep_match:# the parent match a case, so he is down
+                if True in dep_match: # the parent match a case, so he is down
                     p_is_down = True
                 parent_is_down.append(p_is_down)
 
@@ -414,7 +414,7 @@ class SchedulingItem(Item):
         # or if we do'nt have any parents
         if len(parent_is_down) == 0 or False in parent_is_down:
             return
-        else:# every parents are dead, so... It's not my fault :)
+        else: # every parents are dead, so... It's not my fault :)
             self.set_unreachable()
             return
 

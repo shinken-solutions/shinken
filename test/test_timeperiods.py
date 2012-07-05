@@ -130,7 +130,7 @@ class TestTimeperiods(ShinkenTest):
         july_the_12 = time.mktime(time.strptime("12 Jul 2010 22:00:00", "%d %b %Y %H:%M:%S"))
         t_next_inv = t.get_next_invalid_time_from_t(july_the_12)
         t_next_inv = time.asctime(time.localtime(t_next_inv))
-        print "RES:", t_next_inv#, t.is_time_valid(july_the_12)
+        print "RES:", t_next_inv #, t.is_time_valid(july_the_12)
         self.assert_(t_next_inv == "Tue Jul 13 07:01:00 2010")        
 
         # Now ask about at 00:00 time?
@@ -153,7 +153,7 @@ class TestTimeperiods(ShinkenTest):
         self.assert_(t is not None)
         t_next_inv = t.get_next_invalid_time_from_t(july_the_12)
         t_next_inv = time.asctime(time.localtime(t_next_inv))
-        print "RES:", t_next_inv#, t.is_time_valid(july_the_12)
+        print "RES:", t_next_inv #, t.is_time_valid(july_the_12)
         self.assert_(t_next_inv == 'Wed Jul 13 00:01:00 2011')
 
 

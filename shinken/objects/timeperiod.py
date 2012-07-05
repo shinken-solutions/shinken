@@ -377,7 +377,7 @@ class Timeperiod(Item):
                 #    local_min = min(dr_mins)
                 #print "UPDATE After dr : found invalid local min:", time.asctime(time.localtime(local_min)), "is valid", self.is_time_valid(local_min)
 
-            #print self.get_name(), 'Invalid: local min', local_min#time.asctime(time.localtime(local_min))
+            #print self.get_name(), 'Invalid: local min', local_min #time.asctime(time.localtime(local_min))
             # We do not loop unless the local_min is not valid
             if not self.is_time_valid(local_min):
                 still_loop = False
