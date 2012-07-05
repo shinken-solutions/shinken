@@ -23,8 +23,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-#This Class is an example of an Arbiter module
-#Here for the configuration phase AND running one
+# This Class is an example of an Arbiter module
+# Here for the configuration phase AND running one
 
 
 import re
@@ -39,7 +39,7 @@ properties = {
     }
 
 
-#called by the plugin manager to get a broker
+# called by the plugin manager to get a broker
 def get_instance(plugin):
     print "Get a Hack commands pollertag module for plugin %s" % plugin.get_name()
     instance = Hack_cmds_pt(plugin)
@@ -47,7 +47,7 @@ def get_instance(plugin):
 
 
 
-#Just print some stuff
+# Just print some stuff
 class Hack_cmds_pt(BaseModule):
     def __init__(self, mod_conf):
         BaseModule.__init__(self,  mod_conf)
@@ -55,7 +55,7 @@ class Hack_cmds_pt(BaseModule):
         self.poller_tag = mod_conf.poller_tag
 
 
-    #Called by Arbiter to say 'let's prepare yourself guy'
+    # Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
         print "Initilisation of the hack commands poller tag module"
         #self.return_queue = self.properties['from_queue']

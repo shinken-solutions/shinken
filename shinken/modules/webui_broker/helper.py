@@ -5,7 +5,7 @@
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
 #    Hartmut Goebel, h.goebel@goebel-consult.de
-#	 Andreas Karfusehr, andreas@karfusehr.de
+# 	 Andreas Karfusehr, andreas@karfusehr.de
 #
 # This file is part of Shinken.
 #
@@ -175,7 +175,7 @@ class Helper(object):
         return j
 
     # Return something like:
-    #{
+    # {
     #                  "id": "localhost",
     #                  "name": "localhost",
     #                  "data": {"$color":"red", "$dim": 5*2, "some other key": "some other value"},
@@ -452,7 +452,7 @@ class Helper(object):
                 return 'downtime'
             if obj.is_flapping:
                 return 'flapping'
-            #Ok, no excuse, it's a true error...
+            # Ok, no excuse, it's a true error...
             return obj.state.lower()
         # Maybe it's a satellite
         if obj.__class__.my_type in ['scheduler', 'poller', 
@@ -522,7 +522,7 @@ class Helper(object):
         return '<a href="/mobile/host/%s" rel="external"> %s </a>' % (obj.get_full_name(), obj.get_full_name())
     
     
-    #Give only the /service/blabla or /host blabla string, like for buttons inclusion
+    # Give only the /service/blabla or /host blabla string, like for buttons inclusion
     def get_link_dest(self, obj):
         return "/%s/%s" % (obj.__class__.my_type, obj.get_full_name())
 
@@ -592,7 +592,7 @@ class Helper(object):
     def get_perfometer(self, elt):
         if elt.perf_data != '':
             r = get_perfometer_table_values(elt)
-            #If the perfmeter are not good, bail out
+            # If the perfmeter are not good, bail out
             if r is None:
                 return '\n'
 

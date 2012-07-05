@@ -24,8 +24,8 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This Class is an example of an Scheduler module
-#Here for the configuration phase AND running one
+# This Class is an example of an Scheduler module
+# Here for the configuration phase AND running one
 
 
 import cPickle
@@ -49,7 +49,7 @@ properties = {
     }
 
 
-#called by the plugin manager to get a broker
+# called by the plugin manager to get a broker
 def get_instance(plugin):
     print "Get a pickle retention generic module for plugin %s" % plugin.get_name()
     path = plugin.path
@@ -69,7 +69,7 @@ class Pickle_retention_generic(BaseModule):
         log_mgr = logger
         logger.info("[PickleRetentionGeneric] asking me to update the retention objects")
 
-        #Now the flat file method
+        # Now the flat file method
         try:
             # Open a file near the path, with .tmp extension
             # so in cae or problem, we do not lost the old one
@@ -94,11 +94,11 @@ class Pickle_retention_generic(BaseModule):
         log_mgr.log("Updating retention_file %s" % self.path)
 
 
-    #Should return if it succeed in the retention load or not
+    # Should return if it succeed in the retention load or not
     def hook_load_retention(self, daemon):
         log_mgr = logger
 
-        #Now the old flat file way :(
+        # Now the old flat file way :(
         log_mgr.log("[PickleRetentionGeneric]Reading from retention_file %s" % self.path)
         try:
             f = open(self.path, 'rb')

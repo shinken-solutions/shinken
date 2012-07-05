@@ -262,7 +262,7 @@ class ThriftQuery(Hooker):
                 if self.stats_group_by:
                     self.columns = tuple(list(self.stats_group_by) + list(self.columns))
                 if len(self.aliases) == 0:
-                    #If there were Stats: staments without "as", show no column headers at all
+                    # If there were Stats: staments without "as", show no column headers at all
                     self.response.columnheaders = 'off'
                 else:
                     self.response.columnheaders = 'on'
@@ -610,8 +610,8 @@ member_key: the key to be used to sort each resulting element of a group member.
                 # All possible combinations of stats_group_by values. group is a tuple
                 resultdict[group] = dict(zip(self.stats_group_by, group))
 
-        #The number of Stats: statements
-        #For each statement there is one function on the stack
+        # The number of Stats: statements
+        # For each statement there is one function on the stack
         maxidx = self.stats_filter_stack.qsize()
         for i in range(maxidx):
             # Stats:-statements were put on a Lifo, so we need to reverse the number

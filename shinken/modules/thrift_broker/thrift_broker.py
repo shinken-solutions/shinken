@@ -24,12 +24,12 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This Class is a plugin for the Shinken Broker. It is in charge
-#to brok information of the service perfdata into the file
-#var/service-perfdata
-#So it just manage the service_check_return
-#Maybe one day host data will be usefull too
-#It will need just a new file, and a new manager :)
+# This Class is a plugin for the Shinken Broker. It is in charge
+# to brok information of the service perfdata into the file
+# var/service-perfdata
+# So it just manage the service_check_return
+# Maybe one day host data will be usefull too
+# It will need just a new file, and a new manager :)
 
 import select
 import socket
@@ -207,8 +207,8 @@ class Thrift_brokerHandler(Hooker):
 
         return r
 
-#Class for the Thrift Broker
-#Get broks and listen to thrift query language requests
+# Class for the Thrift Broker
+# Get broks and listen to thrift query language requests
 class Thrift_broker(BaseModule):
     def __init__(self, mod_conf, host, port, socket, allowed_hosts, database_file, max_logs_age, pnp_path, debug=None, debug_queries=False):
         BaseModule.__init__(self, mod_conf)
@@ -222,7 +222,7 @@ class Thrift_broker(BaseModule):
         self.debug = debug
         self.debug_queries = debug_queries
 
-        #Our datas
+        # Our datas
         self.configs = {}
         self.hosts = SortedDict()
         self.services = SortedDict()
@@ -232,7 +232,7 @@ class Thrift_broker(BaseModule):
         self.contactgroups = SortedDict()
         self.timeperiods = SortedDict()
         self.commands = SortedDict()
-        #Now satellites
+        # Now satellites
         self.schedulers = SortedDict()
         self.pollers = SortedDict()
         self.reactionners = SortedDict()
@@ -245,15 +245,15 @@ class Thrift_broker(BaseModule):
         self.last_need_data_send = time.time()
 
 
-    #Called by Broker so we can do init stuff
+    # Called by Broker so we can do init stuff
     def init(self):
         print "Initialisation of the thrift broker"
 
-        #to_queue is where we get broks from Broker
+        # to_queue is where we get broks from Broker
         #self.to_q = self.properties['to_queue']
 
-        #from_quue is where we push back objects like
-        #external commands to the broker
+        # from_quue is where we push back objects like
+        # external commands to the broker
         #self.from_q = self.properties['from_queue']
 
         # db has to be opened in the manage_brok thread
@@ -368,12 +368,12 @@ class Thrift_broker(BaseModule):
         self.number_of_objects += 1
 
 
-    #In fact, an update of a host is like a check return
+    # In fact, an update of a host is like a check return
     def manage_update_host_status_brok(self, b):
         self.manage_host_check_result_brok(b)
         data = b.data
         host_name = data['host_name']
-        #In the status, we've got duplicated item, we must relink thems
+        # In the status, we've got duplicated item, we must relink thems
         try:
             h = self.hosts[host_name]
         except KeyError:
@@ -448,13 +448,13 @@ class Thrift_broker(BaseModule):
         self.service_id_cache[s.id] = s
 
 
-    #In fact, an update of a service is like a check return
+    # In fact, an update of a service is like a check return
     def manage_update_service_status_brok(self, b):
         self.manage_service_check_result_brok(b)
         data = b.data
         host_name = data['host_name']
         service_description = data['service_description']
-        #In the status, we've got duplicated item, we must relink thems
+        # In the status, we've got duplicated item, we must relink thems
         try:
             s = self.services[host_name+service_description]
         except KeyError:
@@ -652,7 +652,7 @@ class Thrift_broker(BaseModule):
             pass
 
 
-    #A service check have just arrived, we UPDATE data info with this
+    # A service check have just arrived, we UPDATE data info with this
     def manage_service_check_result_brok(self, b):
         data = b.data
         host_name = data['host_name']
@@ -664,7 +664,7 @@ class Thrift_broker(BaseModule):
             pass
 
 
-    #A service check update have just arrived, we UPDATE data info with this
+    # A service check update have just arrived, we UPDATE data info with this
     def manage_service_next_schedule_brok(self, b):
         self.manage_service_check_result_brok(b)
 
@@ -684,7 +684,7 @@ class Thrift_broker(BaseModule):
         self.manage_host_check_result_brok(b)
 
 
-    #A log brok will be written into a database
+    # A log brok will be written into a database
     def manage_log_brok(self, b):
         data = b.data
         line = data['log'].encode('UTF-8').rstrip()
@@ -835,7 +835,7 @@ class Thrift_broker(BaseModule):
         self.thrift.count_event('log_message')
 
 
-    #The contacts must not be duplicated
+    # The contacts must not be duplicated
     def get_contacts(self, cs):
         r = []
         for c in cs:
@@ -848,7 +848,7 @@ class Thrift_broker(BaseModule):
         return r
 
 
-    #The timeperiods must not be duplicated
+    # The timeperiods must not be duplicated
     def get_timeperiod(self, t):
         if t is not None:
             find_t = self.find_timeperiod(t.get_name())
@@ -980,13 +980,13 @@ class Thrift_broker(BaseModule):
             except IOError, e:
                 if hasattr(os, 'errno') and e.errno != os.errno.EINTR:
                     raise
-            #But others are importants
+            # But others are importants
             except Exception, exp:
                 print "Error : got an exeption (bad code?)", exp.__dict__, type(exp)
                 raise
 
     def do_main(self):
-        #I register my exit function
+        # I register my exit function
         self.set_exit_handler()
 
         # Maybe we got a debug dump to do

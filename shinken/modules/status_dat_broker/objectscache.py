@@ -24,7 +24,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#File for create the objects.cache file
+# File for create the objects.cache file
 import time
 import os
 import tempfile
@@ -40,18 +40,18 @@ from shinken.objects import Command
 
 from shinken.util import from_bool_to_string,from_list_to_split
 
-#This is a dirty hack. Service.get_name only returns service_description.
-#For the servicegroup config we need more. host_name + service_description
+# This is a dirty hack. Service.get_name only returns service_description.
+# For the servicegroup config we need more. host_name + service_description
 def get_full_name(self):
     return [self.host_name, self.service_description]
 Service.get_status_dat_full_name = get_full_name
 
 
 class ObjectsCacheFile:
-    #prop : is the internal name if it is different than the name in the output file
-    #required :
-    #depythonize :
-    #default :
+    # prop : is the internal name if it is different than the name in the output file
+    # required :
+    # depythonize :
+    # default :
     out_map = {Host : {
             'host_name' : {'required' : True},
             'alias' : {'required' : False},
@@ -254,22 +254,22 @@ class ObjectsCacheFile:
                 if prop is not None and hasattr(elt, prop) and getattr(elt, prop) is not None:
                     value = getattr(elt, prop)
 
-                    #Maybe it's not a value, but a function link
+                    # Maybe it's not a value, but a function link
                     if callable(value):
                         value = value()
 
                     if 'depythonize' in type_map[display]:
                         f = type_map[display]['depythonize']
                         if callable(f):
-                            #for example "from_list_to_split". value is an array and f takes the array as an argument
+                            # for example "from_list_to_split". value is an array and f takes the array as an argument
                             value = f(value)
                         else:
                             if isinstance(value, list):
-                                #depythonize's argument might be an attribute or a method
-                                #example: members is an array of hosts and we want get_name() of each element
+                                # depythonize's argument might be an attribute or a method
+                                # example: members is an array of hosts and we want get_name() of each element
                                 value = [getattr(item, str(f))() for item in value if callable(getattr(item, str(f))) ] \
                                       + [getattr(item, str(f)) for item in value if not callable(getattr(item, str(f))) ]
-                                #at least servicegroups are nested [host,service],.. The need some flattening
+                                # at least servicegroups are nested [host,service],.. The need some flattening
                                 value = ','.join(['%s' % y for x in value if isinstance(x, list) for y in x] + \
                                     ['%s' % x for x in value if not isinstance(x, list)])
                             else:
@@ -284,7 +284,7 @@ class ObjectsCacheFile:
                 elif 'required' in type_map[display] and type_map[display]['required'] == True:
                     try:
                         value = type_map[display]['default']
-                    except KeyError:  #Fuck!
+                    except KeyError:  # Fuck!
                         value = ''
                 if value == 'none':
                     value = ''

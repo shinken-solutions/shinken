@@ -62,7 +62,7 @@ properties = {
     }
 
 
-#called by the plugin manager
+# called by the plugin manager
 def get_instance(plugin):
     print "Get an LogStore Sqlite module for plugin %s" % plugin.get_name()
     instance = LiveStatusLogStoreSqlite(plugin)
@@ -405,7 +405,7 @@ class LiveStatusLogStoreSqlite(BaseModule):
             print "DATABASE ERROR!!!!!!!!!!!!!!!!!"
         except Exception, exp:
             print "Unexpected in manage_log_brok:", exp
-        #FIXME need access to this#self.livestatus.count_event('log_message')
+        # FIXME need access to this#self.livestatus.count_event('log_message')
 
     def add_filter(self, operator, attribute, reference):
         if attribute == 'time':

@@ -24,8 +24,8 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This Class is an example of an Arbiter module
-#Here for the configuration phase AND running one
+# This Class is an example of an Arbiter module
+# Here for the configuration phase AND running one
 
 
 import os
@@ -42,7 +42,7 @@ properties = {
     'worker_capable' : False,
     }
 
-#called by the plugin manager to get a broker
+# called by the plugin manager to get a broker
 def get_instance(plugin):
     print "Get a Named pipe module for plugin %s" % plugin.get_name()
 
@@ -55,7 +55,7 @@ def get_instance(plugin):
     return instance
 
 
-#Just print some stuff
+# Just print some stuff
 class Named_Pipe_arbiter(BaseModule):
     def __init__(self, modconf, path):
         BaseModule.__init__(self, modconf)

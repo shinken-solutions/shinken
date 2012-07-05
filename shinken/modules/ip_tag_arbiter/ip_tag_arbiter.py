@@ -24,8 +24,8 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This Class is an example of an Arbiter module
-#Here for the configuration phase AND running one
+# This Class is an example of an Arbiter module
+# Here for the configuration phase AND running one
 
 import socket
 
@@ -33,7 +33,7 @@ from IPy import IP
 from shinken.basemodule import BaseModule
 from shinken.log import logger
 
-#Just print some stuff
+# Just print some stuff
 class Ip_Tag_Arbiter(BaseModule):
     def __init__(self, mod_conf, ip_range, prop, value, method):
         BaseModule.__init__(self,  mod_conf)
@@ -43,7 +43,7 @@ class Ip_Tag_Arbiter(BaseModule):
         self.method = method
 
 
-    #Called by Arbiter to say 'let's prepare yourself guy'
+    # Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
         print "Initilisation of the ip range tagguer module"
         
@@ -56,7 +56,7 @@ class Ip_Tag_Arbiter(BaseModule):
             # The address to resolve
             addr = None
             
-            #By default take the address, if not, take host_name
+            # By default take the address, if not, take host_name
             if not hasattr(h, 'address'):
                 addr = h.host_name
             else:

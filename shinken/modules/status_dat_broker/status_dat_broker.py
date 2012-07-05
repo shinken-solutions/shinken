@@ -24,18 +24,18 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This Class is a plugin for the Shinken Broker. It is in charge
-#to brok information of the service status.dat file and generate
+# This Class is a plugin for the Shinken Broker. It is in charge
+# to brok information of the service status.dat file and generate
 # the objects.dat files too
 
-#And now classic include
+# And now classic include
 import time
 import sys
 import os
 import Queue
 
 
-#And now include from this global directory
+# And now include from this global directory
 from shinken.objects import *
 from shinken.objects import Host
 from shinken.objects import Hostgroup
@@ -46,14 +46,14 @@ from shinken.objects import Contactgroup
 from shinken.objects import Timeperiod
 from shinken.objects import Command
 from shinken.objects import Config
-#And now include from this directory
+# And now include from this directory
 from status import StatusFile
 from objectscache import ObjectsCacheFile
 
 from shinken.basemodule import BaseModule
 
-#Class for the Merlindb Broker
-#Get broks and puts them in merlin database
+# Class for the Merlindb Broker
+# Get broks and puts them in merlin database
 class Status_dat_broker(BaseModule):
     def __init__(self, modconf, path, opath, update_interval):
         BaseModule.__init__(self, modconf)
@@ -61,17 +61,17 @@ class Status_dat_broker(BaseModule):
         self.opath = opath
         self.update_interval = update_interval
 
-        #Warning :
-        #self.properties will be add by the modulesmanager !!
+        # Warning :
+        # self.properties will be add by the modulesmanager !!
 
 
-    #Called by Broker so we can do init stuff
-    #TODO : add conf param to get pass with init
-    #Conf from arbiter!
+    # Called by Broker so we can do init stuff
+    # TODO : add conf param to get pass with init
+    # Conf from arbiter!
     def init(self):
         print "I am init"
 
-        #Our datas
+        # Our datas
         self.configs = {}
         self.hosts = {}
         self.services = {}
@@ -105,7 +105,7 @@ class Status_dat_broker(BaseModule):
 
         #print 'DBG: Cleann all my instance with brok :', b.id
 
-        #We clean all previous hosts and services from this instance_id
+        # We clean all previous hosts and services from this instance_id
         h_to_del = []
         for h in self.hosts.values():
             if h.instance_id ==  instance_id:
@@ -115,7 +115,7 @@ class Status_dat_broker(BaseModule):
             #print "Deleting previous host %d" % i
             del self.hosts[i]
 
-        #same for services
+        # same for services
         s_to_del = []
         for s in self.services.values():
             if s.instance_id ==  instance_id:
@@ -139,7 +139,7 @@ class Status_dat_broker(BaseModule):
         for prop in data:
             setattr(h, prop, data[prop])
 
-        #add instance_id to the host, so we know in which scheduler he is
+        # add instance_id to the host, so we know in which scheduler he is
         h.instance_id = b.instance_id
 
         h.check_period = self.get_timeperiod(h.check_period)
@@ -147,7 +147,7 @@ class Status_dat_broker(BaseModule):
 
         h.contacts = self.get_contacts(h.contacts)
 
-        #Escalations is not use for status_dat
+        # Escalations is not use for status_dat
         del h.escalations
 
         #print "H:", h
@@ -183,7 +183,7 @@ class Status_dat_broker(BaseModule):
         s = Service({})
         self.update_element(s, data)
 
-        #add instance_id to the host, so we know in which scheduler he is
+        # add instance_id to the host, so we know in which scheduler he is
         s.instance_id = b.instance_id
 
         s.check_period = self.get_timeperiod(s.check_period)
@@ -273,7 +273,7 @@ class Status_dat_broker(BaseModule):
         self.number_of_objects += 1
 
 
-    #A service check have just arrived, we UPDATE data info with this
+    # A service check have just arrived, we UPDATE data info with this
     def manage_service_check_result_brok(self, b):
         data = b.data
         s = self.find_service(data['host_name'], data['service_description'])
@@ -282,16 +282,16 @@ class Status_dat_broker(BaseModule):
             #print "S:", s
 
 
-    #A service check update have just arrived, we UPDATE data info with this
+    # A service check update have just arrived, we UPDATE data info with this
     def manage_service_next_schedule_brok(self, b):
         self.manage_service_check_result_brok(b)
 
 
-    #In fact, an update of a service is like a check return
+    # In fact, an update of a service is like a check return
     def manage_update_service_status_brok(self, b):
         self.manage_service_check_result_brok(b)
         data = b.data
-        #In the status, we've got duplicated item, we must relink thems
+        # In the status, we've got duplicated item, we must relink thems
         s = self.find_service(data['host_name'], data['service_description'])
         if s is not None:
             s.check_period = self.get_timeperiod(s.check_period)
@@ -317,17 +317,17 @@ class Status_dat_broker(BaseModule):
         self.manage_host_check_result_brok(b)
 
 
-    #In fact, an update of a host is like a check return
+    # In fact, an update of a host is like a check return
     def manage_update_host_status_brok(self, b):
         self.manage_host_check_result_brok(b)
         data = b.data
-        #In the status, we've got duplicated item, we must relink thems
+        # In the status, we've got duplicated item, we must relink thems
         h = self.find_host(data['host_name'])
         if h is not None:
             h.check_period = self.get_timeperiod(h.check_period)
             h.notification_period = self.get_timeperiod(h.notification_period)
             h.contacts = self.get_contacts(h.contacts)
-            #Escalations is not use for status_dat
+            # Escalations is not use for status_dat
             del h.escalations
             # We need to rebuild Downtime and Comment relationship
             for dtc in h.downtimes + h.comments:
@@ -336,7 +336,7 @@ class Status_dat_broker(BaseModule):
 
 
 
-    #The contacts must not be duplicated
+    # The contacts must not be duplicated
     def get_contacts(self, cs):
         r = []
         for c in cs:
@@ -349,7 +349,7 @@ class Status_dat_broker(BaseModule):
         return r
 
 
-    #The timeperiods must not be duplicated
+    # The timeperiods must not be duplicated
     def get_timeperiod(self, t):
         if t is not None:
             find_t = self.find_timeperiod(t)
@@ -424,9 +424,9 @@ class Status_dat_broker(BaseModule):
                 #hp=hpy()
                 #print hp.heap()
                 if not objects_cache_written or self.number_of_objects > number_of_objects_written:
-                    #with really big configurations it can take longer than
-                    #status_update_interval to send all objects to this broker
-                    #if more objects are received, write objects.cache again
+                    # with really big configurations it can take longer than
+                    # status_update_interval to send all objects to this broker
+                    # if more objects are received, write objects.cache again
                     print "Generating objects file!"
                     self.objects_cache.create_or_update()
                     number_of_objects_written = self.number_of_objects
@@ -434,7 +434,7 @@ class Status_dat_broker(BaseModule):
 
                 print "Generating status file!"
                 r = self.status.create_or_update()
-                #if we get an error (an exception in fact) we bail out
+                # if we get an error (an exception in fact) we bail out
                 if r is not None:
                     print "[status_dat] Error :", r
                     break

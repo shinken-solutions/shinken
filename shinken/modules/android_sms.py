@@ -56,7 +56,7 @@ def get_instance(mod_conf):
 
 
 
-#Just print some stuff
+# Just print some stuff
 class Android_reactionner(BaseModule):
     
     def __init__(self, mod_conf):
@@ -198,11 +198,11 @@ class Android_reactionner(BaseModule):
         
 
 
-    #id = id of the worker
-    #s = Global Queue Master->Slave
-    #m = Queue Slave->Master
-    #return_queue = queue managed by manager
-    #c = Control Queue for the worker
+    # id = id of the worker
+    # s = Global Queue Master->Slave
+    # m = Queue Slave->Master
+    # return_queue = queue managed by manager
+    # c = Control Queue for the worker
     def work(self, s, returns_queue, c):
         print "Module Android started!"
         self.android = android.Android()

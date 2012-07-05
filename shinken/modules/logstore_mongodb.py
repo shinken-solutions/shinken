@@ -62,7 +62,7 @@ properties = {
     }
 
 
-#called by the plugin manager
+# called by the plugin manager
 def get_instance(plugin):
     print "Get an LogStore MongoDB module for plugin %s" % plugin.get_name()
     instance = LiveStatusLogStoreMongoDB(plugin)
@@ -135,7 +135,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
             if self.replica_set:
                 self.conn = pymongo.ReplicaSetConnection(self.mongodb_uri, replicaSet=self.replica_set, fsync=True)
             else:
-                #Old versions of pymongo do not known about fsync
+                # Old versions of pymongo do not known about fsync
                 if ReplicaSetConnection:
                     self.conn = pymongo.Connection(self.mongodb_uri, fsync=True)
                 else:
@@ -223,7 +223,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
                 self.is_connected = DISCONNECTED
                 print "An error occurred:", exp
                 print "DATABASE ERROR!!!!!!!!!!!!!!!!!"
-            #FIXME need access to this#self.livestatus.count_event('log_message')
+            # FIXME need access to this#self.livestatus.count_event('log_message')
         else:
             print "This line is invalid", line
 

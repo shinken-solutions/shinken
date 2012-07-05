@@ -30,7 +30,7 @@ from ndodb_mysql_broker import Ndodb_Mysql_broker, properties
 from shinken.log import logger
 
 
-#called by the plugin manager to get a instance
+# called by the plugin manager to get a instance
 def get_instance(mod_conf):
 
     logger.info("Get a ndoDB instance for plugin %s" % mod_conf.get_name())

@@ -322,7 +322,7 @@ class LiveStatusQuery(object):
                 if self.stats_group_by:
                     self.columns = tuple(list(self.stats_group_by) + list(self.columns))
                 if len(self.aliases) == 0:
-                    #If there were Stats: staments without "as", show no column headers at all
+                    # If there were Stats: staments without "as", show no column headers at all
                     self.response.columnheaders = 'off'
                 else:
                     self.response.columnheaders = 'on'
@@ -463,7 +463,7 @@ class LiveStatusQuery(object):
         return sorted((
             factory(og[0], groupattr2, og[1]) or og[0] for og in ( # host, attr, hostgroup or host
                 (copy.copy(inner_list0[0]), item0) for inner_list0 in ( # host', hostgroup
-                    (h, getattr(h, groupattr1)) for h in objs if (cs.without_filter or cs.filter_func(h))  #1 host, [seine hostgroups]
+                    (h, getattr(h, groupattr1)) for h in objs if (cs.without_filter or cs.filter_func(h))  # 1 host, [seine hostgroups]
                 ) for item0 in inner_list0[1] # item0 ist einzelne hostgroup
             )
         ), key = sorter)
@@ -539,9 +539,9 @@ class LiveStatusQuery(object):
         objs = self.datamgr.rg.services.__itersorted__(self.metainfo.query_hints)
         return sorted([x for x in (
             setattr(svchgrp[0], 'hostgroup', svchgrp[1]) or svchgrp[0] for svchgrp in (
-                (copy.copy(inner_list0[0]), item0) for inner_list0 in ( #2 service clone and a hostgroup
-                    (s, s.host.hostgroups) for s in objs if (cs.without_filter or cs.filter_func(s))  #1 service, and it's host
-                ) for item0 in inner_list0[1] if inner_list0[1] #2b only if the service's (from all services->filtered in the innermost loop) host has groups
+                (copy.copy(inner_list0[0]), item0) for inner_list0 in ( # 2 service clone and a hostgroup
+                    (s, s.host.hostgroups) for s in objs if (cs.without_filter or cs.filter_func(s))  # 1 service, and it's host
+                ) for item0 in inner_list0[1] if inner_list0[1] # 2b only if the service's (from all services->filtered in the innermost loop) host has groups
             )
         )], key=lambda svc: svc.hostgroup.hostgroup_name)
 
@@ -690,8 +690,8 @@ class LiveStatusQuery(object):
                 # All possible combinations of stats_group_by values. group is a tuple
                 resultdict[group] = dict(zip(self.stats_group_by, group))
 
-        #The number of Stats: statements
-        #For each statement there is one function on the stack
+        # The number of Stats: statements
+        # For each statement there is one function on the stack
         maxidx = self.stats_filter_stack.qsize()
         for i in range(maxidx):
             # Stats:-statements were put on a Lifo, so we need to reverse the number
