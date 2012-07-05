@@ -231,9 +231,9 @@ class Helper(object):
         print 'Find a matching element for me?', elts_tp
 
         select_part = '''<SELECT class='%s' name="%s" multiple="multiple" %s>''' % (editable, prop, editable)
-        #if elt_tp:
+        # if elt_tp:
         #    select_part += '<OPTION VALUE="%s">%s</OPTION>' % (tpname, tpname)
-        #else:
+        # else:
         #    select_part += '<OPTION VALUE=""></OPTION>'
 
         for tp in tps:

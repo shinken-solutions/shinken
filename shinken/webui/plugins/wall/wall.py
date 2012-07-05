@@ -78,7 +78,7 @@ def get_div(elt):
 	<a href="%s">%s</a>
         </div>
 
-        """ % (stars, pulse, icon,  elt.state.lower(), elt.state, elt.get_full_name(), lnk, button)#stars, button)
+        """ % (stars, pulse, icon,  elt.state.lower(), elt.state, elt.get_full_name(), lnk, button)# stars, button)
     s = s.encode('utf8', 'ignore')
     return s
 
@@ -116,7 +116,7 @@ def get_page():
     # Get only the last 10min errors
     all_pbs = [pb for pb in all_pbs if pb.last_state_change > now - 600]
     # And sort it
-    all_pbs.sort(hst_srv_sort)#sort_by_last_state_change)
+    all_pbs.sort(hst_srv_sort)# sort_by_last_state_change)
 
     return {'app' : app, 'user' : user, 'impacts' : impacts, 'problems' : all_pbs}
 
