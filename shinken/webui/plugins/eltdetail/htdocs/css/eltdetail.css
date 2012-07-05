@@ -24,7 +24,7 @@
 **/
 
 #content_container {
-	padding-top: 10px;
+	padding-bottom: 15px;
 }
 
 #event_command {
@@ -42,10 +42,6 @@
     border-top-right-radius: 6px; /* Opera 10.5, IE9, Saf5, Chrome, FF4, iOS 4, Android 2.1+ */      
 	/* useful if you don't want a bg color from leaking outside the border: */        
 	-moz-background-clip: padding; -webkit-background-clip: padding-box; background-clip: padding-box;
-}
-
-#event_command {
-	float:right;
 }
 
 #event_container h3 {
