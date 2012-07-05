@@ -40,7 +40,7 @@ from shinken.trigger_functions import objs, trigger_functions
 
 
 class Trigger(Item):
-    id = 1  # 0 is always special in database, so we do not take risk here
+    id = 1 # zero is always special in database, so we do not take risk here
     my_type = 'trigger'
 
     properties = Item.properties.copy()
@@ -52,7 +52,7 @@ class Trigger(Item):
     running_properties.update({'code_bin': StringProp(default=None)})
 
 
-    #For debugging purpose only (nice name)
+    # For debugging purpose only (nice name)
     def get_name(self):
         try:
             return self.trigger_name

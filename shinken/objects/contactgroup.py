@@ -25,8 +25,8 @@
 
 
 
-#Contactgroups are groups for contacts
-#They are just used for the config read and explode by elements
+# Contactgroups are groups for contacts
+# They are just used for the config read and explode by elements
 
 from itemgroup import Itemgroup, Itemgroups
 
@@ -65,25 +65,25 @@ class Contactgroup(Itemgroup):
             return []
 
 
-    #We fillfull properties with template ones if need
-    #Because hostgroup we call may not have it's members
-    #we call get_hosts_by_explosion on it
+    # We fillfull properties with template ones if need
+    # Because hostgroup we call may not have it's members
+    # we call get_hosts_by_explosion on it
     def get_contacts_by_explosion(self, contactgroups):
-        #First we tag the hg so it will not be explode
-        #if a son of it already call it
+        # First we tag the hg so it will not be explode
+        # if a son of it already call it
         self.already_explode = True
 
-        #Now the recursiv part
-        #rec_tag is set to False avery CG we explode
-        #so if True here, it must be a loop in HG
-        #calls... not GOOD!
+        # Now the recursiv part
+        # rec_tag is set to False avery CG we explode
+        # so if True here, it must be a loop in HG
+        # calls... not GOOD!
         if self.rec_tag:
             logger.error("[contactgroup::%s] got a loop in contactgroup definition" % self.get_name())
             if self.has('members'):
                 return self.members
             else:
                 return ''
-        #Ok, not a loop, we tag it and continue
+        # Ok, not a loop, we tag it and continue
         self.rec_tag = True
 
         cg_mbrs = self.get_contactgroup_members()
@@ -118,34 +118,34 @@ class Contactgroups(Itemgroups):
         self.linkify_cg_by_cont(contacts)
 
 
-    #We just search for each host the id of the host
-    #and replace the name by the id
+    # We just search for each host the id of the host
+    # and replace the name by the id
     def linkify_cg_by_cont(self, contacts):
         for cg in self:
             mbrs = cg.get_contacts()
 
-            #The new member list, in id
+            # The new member list, in id
             new_mbrs = []
             for mbr in mbrs:
                 m = contacts.find_by_name(mbr)
-                #Maybe the contact is missing, if so, must be put in unknown_members
+                # Maybe the contact is missing, if so, must be put in unknown_members
                 if m is not None:
                     new_mbrs.append(m)
                 else:
                     cg.unknown_members.append(mbr)
 
-            #Make members uniq
+            # Make members uniq
             new_mbrs = list(set(new_mbrs))
 
-            #We find the id, we remplace the names
+            # We find the id, we remplace the names
             cg.replace_members(new_mbrs)
 
 
-    #Add a contact string to a contact member
-    #if the contact group do not exist, create it
+    # Add a contact string to a contact member
+    # if the contact group do not exist, create it
     def add_member(self, cname, cgname):
         cg = self.find_by_name(cgname)
-        #if the id do not exist, create the cg
+        # if the id do not exist, create the cg
         if cg is None:
             cg = Contactgroup({'contactgroup_name' : cgname, 'alias' : cgname, 'members' :  cname})
             self.add_contactgroup(cg)
@@ -153,22 +153,22 @@ class Contactgroups(Itemgroups):
             cg.add_string_member(cname)
 
 
-    #Use to fill members with contactgroup_members
+    # Use to fill members with contactgroup_members
     def explode(self):
-        #We do not want a same hg to be explode again and again
-        #so we tag it
+        # We do not want a same hg to be explode again and again
+        # so we tag it
         for tmp_cg in self.items.values():
             tmp_cg.already_explode = False
 
         for cg in self.items.values():
             if cg.has('contactgroup_members') and not cg.already_explode:
-                #get_contacts_by_explosion is a recursive
-                #function, so we must tag hg so we do not loop
+                # get_contacts_by_explosion is a recursive
+                # function, so we must tag hg so we do not loop
                 for tmp_cg in self.items.values():
                     tmp_cg.rec_tag = False
                 cg.get_contacts_by_explosion(self)
 
-        #We clean the tags
+        # We clean the tags
         for tmp_cg in self.items.values():
             if hasattr(tmp_cg, 'rec_tag'):
                 del tmp_cg.rec_tag

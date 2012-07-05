@@ -212,8 +212,8 @@ class Service(SchedulingItem):
         'notified_contacts':  ListProp  (default=set(), retention=True, retention_preparation=to_list_of_names), # use for having all contacts we have notified
         'in_scheduled_downtime': BoolProp(default=False, fill_brok=['full_status'], retention=True),
         'in_scheduled_downtime_during_last_check': BoolProp(default=False, retention=True),
-        'actions':            ListProp   (default=[]), #put here checks and notif raised
-        'broks':              ListProp   (default=[]), #and here broks raised
+        'actions':            ListProp   (default=[]), # put here checks and notif raised
+        'broks':              ListProp   (default=[]), # and here broks raised
 
 
         # Problem/impact part
@@ -235,7 +235,7 @@ class Service(SchedulingItem):
         # Easy Service dep definition
         'service_dependencies': ListProp(default=''),# TODO: find a way to brok it?
 
-        #BUSINESS CORRELATOR PART
+        # BUSINESS CORRELATOR PART
         # Say if we are business based rule or not
         'got_business_rule':  BoolProp (default=False, fill_brok=['full_status']),
         # Our Dependency node for the business rule
@@ -367,7 +367,7 @@ class Service(SchedulingItem):
     # template are always correct
     # contacts OR contactgroups is need
     def is_correct(self):
-        state = True # guilty or not? :)
+        state = True
         cls = self.__class__
 
         source = getattr(self, 'imported_from', 'unknown')
@@ -395,7 +395,7 @@ class Service(SchedulingItem):
             for err in self.configuration_errors:
                 logger.info(err)
 
-        #If no notif period, set it to None, mean 24x7
+        # If no notif period, set it to None, mean 24x7
         if not hasattr(self, 'notification_period'):
             self.notification_period = None
 

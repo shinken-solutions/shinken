@@ -46,11 +46,11 @@ from shinken.log import logger
 
 
 class Host(SchedulingItem):
-    #AutoSlots create the __slots__ with properties and
-    #running_properties names
+    # AutoSlots create the __slots__ with properties and
+    # running_properties names
     __metaclass__ = AutoSlots
 
-    id = 1 #0 is reserved for host (primary node for parents)
+    id = 1 # zero is reserved for host (primary node for parents)
     ok_up = 'UP'
     my_type = 'host'
 
@@ -270,7 +270,7 @@ class Host(SchedulingItem):
         # if the state change, we know so we do not revert it
         'state_changed_since_impact': StringProp(default=False),
 
-        #BUSINESS CORRELATOR PART
+        # BUSINESS CORRELATOR PART
         # Say if we are business based rule or not
         'got_business_rule' : BoolProp(default=False, fill_brok=['full_status']),
         # Our Dependency node for the business rule
@@ -380,7 +380,7 @@ class Host(SchedulingItem):
     # Check is required prop are set:
     # contacts OR contactgroups is need
     def is_correct(self):
-        state = True #guilty or not? :)
+        state = True
         cls = self.__class__
 
         source = getattr(self, 'imported_from', 'unknown')
@@ -391,7 +391,7 @@ class Host(SchedulingItem):
             if prop not in special_properties:
                 if not hasattr(self, prop) and entry.required:
                     logger.error("[host::%s] %s property not set" % (self.get_name(), prop))
-                    state = False #Bad boy...
+                    state = False # Bad boy...
 
         # Then look if we have some errors in the conf
         # Juts print warnings, but raise errors
@@ -507,7 +507,7 @@ class Host(SchedulingItem):
         for t in to_del:
             self.act_depend_of.remove(t)
 
-        #And now in the father part
+        # And now in the father part
         to_del = []
         for (h, status, type, timeperiod, inherits_parent) in other.act_depend_of_me:
             if h == self:
@@ -602,7 +602,7 @@ class Host(SchedulingItem):
             self.state_id_before_impact = self.state_id
             # This flag will know if we overide the impact state
             self.state_changed_since_impact = False
-            self.state = 'UNREACHABLE'#exit code UNDETERMINED
+            self.state = 'UNREACHABLE'# exit code UNDETERMINED
             self.state_id = 2
 
 
@@ -646,7 +646,7 @@ class Host(SchedulingItem):
             self.last_time_down = int(self.last_state_update)
             state_code = 'd'
         else:
-            self.state = 'DOWN'#exit code UNDETERMINED
+            self.state = 'DOWN'# exit code UNDETERMINED
             self.state_id = 1
             self.last_time_down = int(self.last_state_update)
             state_code = 'd'
@@ -722,49 +722,49 @@ class Host(SchedulingItem):
                                                                  command.get_name()))
 
 
-    #Raise a log entry with FLAPPING START alert like
-    #HOST FLAPPING ALERT: server;STARTED; Host appears to have started flapping (50.6% change >= 50.0% threshold)
+    # Raise a log entry with FLAPPING START alert like
+    # HOST FLAPPING ALERT: server;STARTED; Host appears to have started flapping (50.6% change >= 50.0% threshold)
     def raise_flapping_start_log_entry(self, change_ratio, threshold):
         logger.log("HOST FLAPPING ALERT: %s;STARTED; Host appears to have started flapping (%.1f%% change >= %.1f%% threshold)" % \
                       (self.get_name(), change_ratio, threshold))
 
 
-    #Raise a log entry with FLAPPING STOP alert like
-    #HOST FLAPPING ALERT: server;STOPPED; host appears to have stopped flapping (23.0% change < 25.0% threshold)
+    # Raise a log entry with FLAPPING STOP alert like
+    # HOST FLAPPING ALERT: server;STOPPED; host appears to have stopped flapping (23.0% change < 25.0% threshold)
     def raise_flapping_stop_log_entry(self, change_ratio, threshold):
         logger.log("HOST FLAPPING ALERT: %s;STOPPED; Host appears to have stopped flapping (%.1f%% change < %.1f%% threshold)" % \
                       (self.get_name(), change_ratio, threshold))
 
 
-    #If there is no valid time for next check, raise a log entry
+    # If there is no valid time for next check, raise a log entry
     def raise_no_next_check_log_entry(self):
         logger.warning("I cannot schedule the check for the host '%s' because there is not future valid time" % \
                       (self.get_name()))
 
-    #Raise a log entry when a downtime begins
-    #HOST DOWNTIME ALERT: test_host_0;STARTED; Host has entered a period of scheduled downtime
+    # Raise a log entry when a downtime begins
+    # HOST DOWNTIME ALERT: test_host_0;STARTED; Host has entered a period of scheduled downtime
     def raise_enter_downtime_log_entry(self):
         logger.log("HOST DOWNTIME ALERT: %s;STARTED; Host has entered a period of scheduled downtime" % \
                       (self.get_name()))
 
 
-    #Raise a log entry when a downtime has finished
-    #HOST DOWNTIME ALERT: test_host_0;STOPPED; Host has exited from a period of scheduled downtime
+    # Raise a log entry when a downtime has finished
+    # HOST DOWNTIME ALERT: test_host_0;STOPPED; Host has exited from a period of scheduled downtime
     def raise_exit_downtime_log_entry(self):
         logger.log("HOST DOWNTIME ALERT: %s;STOPPED; Host has exited from a period of scheduled downtime" % \
                       (self.get_name()))
 
 
-    #Raise a log entry when a downtime prematurely ends
-    #HOST DOWNTIME ALERT: test_host_0;CANCELLED; Service has entered a period of scheduled downtime
+    # Raise a log entry when a downtime prematurely ends
+    # HOST DOWNTIME ALERT: test_host_0;CANCELLED; Service has entered a period of scheduled downtime
     def raise_cancel_downtime_log_entry(self):
         logger.log("HOST DOWNTIME ALERT: %s;CANCELLED; Scheduled downtime for host has been cancelled." % \
                       (self.get_name()))
 
 
-    #Is stalking ?
-    #Launch if check is waitconsume==first time
-    #and if c.status is in self.stalking_options
+    # Is stalking ?
+    # Launch if check is waitconsume==first time
+    # and if c.status is in self.stalking_options
     def manage_stalking(self, c):
         need_stalk = False
         if c.status == 'waitconsume':
@@ -782,15 +782,15 @@ class Host(SchedulingItem):
             logger.info("Stalking %s : %s" % (self.get_name(), self.output))
 
 
-    #fill act_depend_of with my parents (so network dep)
-    #and say parents they impact me, no timeperiod and follow parents of course
+    # fill act_depend_of with my parents (so network dep)
+    # and say parents they impact me, no timeperiod and follow parents of course
     def fill_parents_dependency(self):
         for parent in self.parents:
             if parent is not None:
-                #I add my parent in my list
+                # I add my parent in my list
                 self.act_depend_of.append( (parent, ['d', 'u', 's', 'f'], 'network_dep', None, True) )
 
-                #And I register myself in my parent list too
+                # And I register myself in my parent list too
                 parent.register_child(self)
 
                 # And add the parent/child dep filling too, for broking
@@ -806,25 +806,25 @@ class Host(SchedulingItem):
         self.act_depend_of_me.append( (child, ['d', 'u', 's', 'f'], 'network_dep', None, True) )
 
 
-    #Give data for checks's macros
+    # Give data for checks's macros
     def get_data_for_checks(self):
         return [self]
 
-    #Give data for event handler's macro
+    # Give data for event handler's macro
     def get_data_for_event_handler(self):
         return [self]
 
-    #Give data for notifications'n macros
+    # Give data for notifications'n macros
     def get_data_for_notifications(self, contact, n):
         return [self, contact, n]
 
 
-    #See if the notification is launchable (time is OK and contact is OK too)
+    # See if the notification is launchable (time is OK and contact is OK too)
     def notification_is_blocked_by_contact(self, n, contact):
         return not contact.want_host_notification(self.last_chk, self.state, n.type, self.business_impact, n.command_call)
 
 
-    #MACRO PART
+    # MACRO PART
     def get_duration_sec(self):
         return str(int(self.duration_sec))
 
@@ -910,8 +910,8 @@ class Host(SchedulingItem):
         return False
 
 
-    #Get a oc*p command if item has obsess_over_*
-    #command. It must be enabled locally and globally
+    # Get a oc*p command if item has obsess_over_*
+    # command. It must be enabled locally and globally
     def get_obsessive_compulsive_processor_command(self):
         cls = self.__class__
         if not cls.obsess_over or not self.obsess_over_host:
@@ -922,7 +922,7 @@ class Host(SchedulingItem):
         cmd = m.resolve_command(cls.ochp_command, data)
         e = EventHandler(cmd, timeout=cls.ochp_timeout)
 
-        #ok we can put it in our temp action queue
+        # ok we can put it in our temp action queue
         self.actions.append(e)
 
 
@@ -970,11 +970,11 @@ class Host(SchedulingItem):
 # CLass for the hosts lists. It's mainly for configuration
 # part
 class Hosts(Items):
-    name_property = "host_name" #use for the search by name
-    inner_class = Host #use for know what is in items
+    name_property = "host_name" # use for the search by name
+    inner_class = Host # use for know what is in items
 
 
-    #prepare_for_conf_sending to flatten some properties
+    # prepare_for_conf_sending to flatten some properties
     def prepare_for_sending(self):
         for h in self:
             h.prepare_for_conf_sending()
@@ -1014,7 +1014,7 @@ class Hosts(Items):
     def linkify_h_by_h(self):
         for h in self:
             parents = h.parents
-            #The new member list
+            # The new member list
             new_parents = []
             for parent in parents:
                 parent = parent.strip()
@@ -1025,7 +1025,7 @@ class Hosts(Items):
                     err = "the parent '%s' on host '%s' is unknown!" % (parent, h.get_name())
                     self.configuration_errors.append(err)
             #print "Me,", h.host_name, "define my parents", new_parents
-            #We find the id, we remplace the names
+            # We find the id, we remplace the names
             h.parents = new_parents
 
 
@@ -1035,7 +1035,7 @@ class Hosts(Items):
         for r in realms:
             if getattr(r, 'default', False):
                 default_realm = r
-        #if default_realm is None:
+        # if default_realm is None:
         #    print "Error : there is no default realm defined!"
         for h in self:
             if h.realm is not None:

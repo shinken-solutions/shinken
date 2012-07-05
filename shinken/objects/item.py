@@ -463,7 +463,7 @@ Like temporary attributes such as "imported_from", etc.. """
 
 
     # Will flatten some parameters taggued by the 'conf_send_preparation'
-    #property because they are too "linked" to be send like that (like realms)
+    # property because they are too "linked" to be send like that (like realms)
     def prepare_for_conf_sending(self):
         cls = self.__class__
 
@@ -642,7 +642,7 @@ class Items(object):
     def __delitem__(self, key):
         try:
             del self.items[key]
-        except KeyError: #we don't want it, we do not have it. All is perfect
+        except KeyError: # we don't want it, we do not have it. All is perfect
             pass
 
     def __setitem__(self, key, value):

@@ -24,8 +24,8 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#The resultmodulation class is used for in scheduler modulation of resulsts
-#like the return code or the output.
+# The resultmodulation class is used for in scheduler modulation of resulsts
+# like the return code or the output.
 
 import time
 
@@ -34,7 +34,7 @@ from item import Item, Items
 from shinken.property import StringProp, ListProp
 
 class Resultmodulation(Item):
-    id = 1#0 is always special in database, so we do not take risk here
+    id = 1 # zero is always special in database, so we do not take risk here
     my_type = 'resultmodulation'
 
     properties = Item.properties.copy()
@@ -53,11 +53,11 @@ class Resultmodulation(Item):
 
     # Make the return code modulation if need
     def module_return(self, return_code):
-        #Only if in modulation_period of modulation_period == None
+        # Only if in modulation_period of modulation_period == None
         if self.modulation_period is None or self.modulation_period.is_time_valid(time.time()):
-            #Try to change the exit code only if a new one is defined
+            # Try to change the exit code only if a new one is defined
             if self.exit_code_modulation is not None:
-                #First with the exit_code_match
+                # First with the exit_code_match
                 if return_code in self.exit_codes_match:
                     return_code = self.exit_code_modulation
 

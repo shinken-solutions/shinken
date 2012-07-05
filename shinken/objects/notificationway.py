@@ -36,7 +36,7 @@ _special_properties = ( 'service_notification_commands', 'host_notification_comm
 
 
 class NotificationWay(Item):
-    id = 1#0 is always special in database, so we do not take risk here
+    id = 1 # zero is always special in database, so we do not take risk here
     my_type = 'notificationway'
 
     properties = Item.properties.copy()
@@ -65,13 +65,13 @@ class NotificationWay(Item):
 
     macros = {}
 
-    #For debugging purpose only (nice name)
+    # For debugging purpose only (nice name)
     def get_name(self):
         return self.notificationway_name
 
 
-    #Search for notification_options with state and if t is
-    #in service_notification_period
+    # Search for notification_options with state and if t is
+    # in service_notification_period
     def want_service_notification(self, t, state, type, business_impact, cmd=None):
         if not self.service_notifications_enabled:
             return False
@@ -101,15 +101,15 @@ class NotificationWay(Item):
         elif type in ('FLAPPINGSTART', 'FLAPPINGSTOP', 'FLAPPINGDISABLED'):
             return b and 'f' in self.service_notification_options
         elif type in ('DOWNTIMESTART', 'DOWNTIMEEND', 'DOWNTIMECANCELLED'):
-            #No notification when a downtime was cancelled. Is that true??
+            # No notification when a downtime was cancelled. Is that true??
             # According to the documentation we need to look at _host_ options
             return b and 's' in self.host_notification_options
 
         return False
 
 
-    #Search for notification_options with state and if t is in
-    #host_notification_period
+    # Search for notification_options with state and if t is in
+    # host_notification_period
     def want_host_notification(self, t, state, type, business_impact, cmd=None):
         if not self.host_notifications_enabled:
             return False
@@ -144,22 +144,22 @@ class NotificationWay(Item):
         return False
 
 
-    #Call to get our commands to launch a Notification
+    # Call to get our commands to launch a Notification
     def get_notification_commands(self, type):
-        #service_notification_commands for service
+        # service_notification_commands for service
         notif_commands_prop = type+'_notification_commands'
         notif_commands = getattr(self, notif_commands_prop)
         return notif_commands
 
 
 
-    #Check is required prop are set:
-    #contacts OR contactgroups is need
+    # Check is required prop are set:
+    # contacts OR contactgroups is need
     def is_correct(self):
-        state = True #guilty or not? :)
+        state = True
         cls = self.__class__
 
-        #A null notif way is a notif way that will do nothing (service = n, hot =n)
+        # A null notif way is a notif way that will do nothing (service = n, hot =n)
         is_null_notifway = False
         if hasattr(self, 'service_notification_options') and self.service_notification_options==['n']:
             if hasattr(self, 'host_notification_options') and self.host_notification_options==['n']:
@@ -170,10 +170,10 @@ class NotificationWay(Item):
             if prop not in _special_properties:
                 if not hasattr(self, prop) and entry.required:
                     logger.warning("[notificationway::%s] %s property not set" % (self.get_name(), prop))
-                    state = False #Bad boy...
+                    state = False # Bad boy...
 
-        #Ok now we manage special cases...
-        #Service part
+        # Ok now we manage special cases...
+        # Service part
         if not hasattr(self, 'service_notification_commands') :
             logger.warning("[notificationway::%s] do not have any service_notification_commands defined" % self.get_name())
             state = False
@@ -190,7 +190,7 @@ class NotificationWay(Item):
             logger.warning("[notificationway::%s] the service_notification_period is invalid" % self.get_name())
             state = False
 
-        #Now host part
+        # Now host part
         if not hasattr(self, 'host_notification_commands') :
             logger.warning("[notificationway::%s] do not have any host_notification_commands defined" % self.get_name())
             state = False
