@@ -71,7 +71,7 @@ from shinken.webui.bottle import Bottle, run, static_file, view, route, request,
 import shinken.webui.bottle as bottle
 bottle.debug(True)
 
-#Import bottle lib to make bottle happy
+# Import bottle lib to make bottle happy
 bottle_dir = os.path.abspath(os.path.dirname(bottle.__file__))
 sys.path.insert(0, bottle_dir)
 
@@ -95,7 +95,7 @@ class IForArbiter(Interface):
         # I've got a conf and a good one
         if self.app.cur_conf and self.app.cur_conf.magic_hash == magic_hash:
             return True
-        else: #I've no conf or a bad one
+        else: # I've no conf or a bad one
             return False
 
     # The master Arbiter is sending us a new conf. Ok, we take it
@@ -141,7 +141,7 @@ class IForArbiter(Interface):
                 if hasattr(dae, daemon_name_attr):
                     satellite_list.append(getattr(dae, daemon_name_attr))
                 else:
-                    #If one daemon has no name... ouch!
+                    # If one daemon has no name... ouch!
                     return None
             return satellite_list
         return None
@@ -416,17 +416,17 @@ class Hostd(Daemon):
     def load_web_configuration(self):
         self.plugins = []
 
-        #self.http_port = 7765#int(getattr(modconf, 'port', '7767'))
-        self.http_host = '0.0.0.0'#getattr(modconf, 'host', '0.0.0.0')
-        #self.auth_secret = 'YOUDONTKNOWIT'.encode('utf8', 'replace')#getattr(modconf, 'auth_secret').encode('utf8', 'replace')
-        self.http_backend = 'auto'#getattr(modconf, 'http_backend', 'auto')
-        self.login_text = None#getattr(modconf, 'login_text', None)
-        self.allow_html_output = False#to_bool(getattr(modconf, 'allow_html_output', '0'))
-        self.remote_user_enable = '0'#getattr(modconf, 'remote_user_enable', '0')
-        self.remote_user_variable = 'X_REMOTE_USER'#getattr(modconf, 'remote_user_variable', 'X_REMOTE_USER')
+        #self.http_port = 7765 # int(getattr(modconf, 'port', '7767'))
+        self.http_host = '0.0.0.0' # getattr(modconf, 'host', '0.0.0.0')
+        #self.auth_secret = 'YOUDONTKNOWIT'.encode('utf8', 'replace') # getattr(modconf, 'auth_secret').encode('utf8', 'replace')
+        self.http_backend = 'auto' # getattr(modconf, 'http_backend', 'auto')
+        self.login_text = None # getattr(modconf, 'login_text', None)
+        self.allow_html_output = False # to_bool(getattr(modconf, 'allow_html_output', '0'))
+        self.remote_user_enable = '0' # getattr(modconf, 'remote_user_enable', '0')
+        self.remote_user_variable = 'X_REMOTE_USER' # getattr(modconf, 'remote_user_variable', 'X_REMOTE_USER')
 
         # Load the photo dir and make it a absolute path
-        self.photo_dir = 'photos'#getattr(modconf, 'photo_dir', 'photos')
+        self.photo_dir = 'photos' # getattr(modconf, 'photo_dir', 'photos')
         self.photo_dir = os.path.abspath(self.photo_dir)
         print "Webui : using the backend", self.http_backend
 
