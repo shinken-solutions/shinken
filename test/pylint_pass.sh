@@ -58,6 +58,5 @@ echo "Working dir is $PWD"
 echo "Launching pylint stat pass"
 cd ..
 pylint -f parseable --disable-msg=C0111,C0103,W0201,C0302,R0904,R0902,W0511 --max-line-length 100 shinken/ shinken/modules/*/*py > $DIR/pylint.txt
-cd $DIR
 echo "Pylint pass done, congrats or not? ;) "
 
