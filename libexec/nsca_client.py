@@ -1,8 +1,11 @@
-### This is a very quick and dirty code for David so he can work on its sikuli agent
-# and report as nsca the results.
-# This need to be clean a lot, it's still a server and should be a client class :)
-# I can do it after my "new baby holidays" are finished ;)
-# J.Gabes
+# This is a very quick and dirty code for David so he can work on its
+# sikuli agent and report as nsca the results.
+#
+# This need to be clean a lot, it's still a server and should be a
+# client class :) I can do it after my "new baby holidays" are
+# finished ;)
+#
+# J. Gabes
 
 
 
@@ -21,7 +24,7 @@ def decrypt_xor(data, key):
 
 
 
-#Just print some stuff
+# Just print some stuff
 class NSCA_client():
     def __init__(self, host, port, encryption_method, password):
         self.host = host
@@ -31,7 +34,7 @@ class NSCA_client():
         self.rng = random.Random(password)
 
 
-    #Ok, main function that is called in the CONFIGURATION phase
+    # Ok, main function that is called in the CONFIGURATION phase
     def get_objects(self):
         print "[Dummy] ask me for objects to return"
         r = {'hosts' : []}

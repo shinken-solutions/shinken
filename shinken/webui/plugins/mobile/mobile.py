@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2011 :
+# Copyright (C) 2009-2011:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -11,20 +11,20 @@
 #    Valentin Brajon, vbrajon@gmail.com
 #    Julien Pilou, pilou.julien@gmail.com
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
 from shinken.util import safe_print
@@ -241,7 +241,7 @@ def show_service(hname, desc):
     return {'app' : app, 'elt' : s, 'valid_user' : True, 'user' : user, 'graphstart' : graphstart,
             'graphend' : graphend}
 
-#The wall
+# The wall
 # Sort hosts and services by impact, states and co
 def sort_by_last_state_change(s1, s2):
     if s1.last_state_change > s2.last_state_change:
@@ -276,7 +276,7 @@ def get_div(elt):
         <a href="%s">%s</a>
         </div>
 
-        """ % (stars, pulse, icon,  elt.state.lower(), elt.state, elt.get_full_name(), lnk, button)#stars, button)
+        """ % (stars, pulse, icon,  elt.state.lower(), elt.state, elt.get_full_name(), lnk, button)# stars, button)
     s = s.encode('utf8', 'ignore')
     return s
 
@@ -297,7 +297,7 @@ def wall():
     # Get only the last 10min errors
     all_pbs = [pb for pb in all_pbs if pb.last_state_change > now - 600]
     # And sort it
-    all_pbs.sort(hst_srv_sort)#sort_by_last_state_change)
+    all_pbs.sort(hst_srv_sort) # sort_by_last_state_change)
 
     return {'app' : app, 'user' : user, 'impacts' : impacts, 'problems' : all_pbs}
 

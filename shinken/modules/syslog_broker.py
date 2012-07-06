@@ -24,8 +24,8 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This Class is a plugin for the Shinken Broker. It is in charge
-#to brok log into the syslog
+# This Class is a plugin for the Shinken Broker. It is in charge
+# to brok log into the syslog
 
 import syslog
 
@@ -39,7 +39,7 @@ properties = {
     }
 
 
-#called by the plugin manager to get a broker
+# called by the plugin manager to get a broker
 def get_instance(plugin):
     print "Get a Syslog broker for plugin %s" % plugin.get_name()
 
@@ -50,13 +50,13 @@ def get_instance(plugin):
 
 
 
-#Class for the Merlindb Broker
-#Get broks and puts them in merlin database
+# Class for the Merlindb Broker
+# Get broks and puts them in merlin database
 class Syslog_broker(BaseModule):
     def __init__(self, modconf):
         BaseModule.__init__(self, modconf)
 
-    #A service check have just arrived, we UPDATE data info with this
+    # A service check have just arrived, we UPDATE data info with this
     def manage_log_brok(self, b):
         data = b.data
         syslog.syslog(data['log'].encode('UTF-8'))

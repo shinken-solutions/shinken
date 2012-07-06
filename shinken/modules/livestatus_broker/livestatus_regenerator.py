@@ -33,7 +33,7 @@ from livestatus_query_metainfo import HINT_NONE, HINT_SINGLE_HOST, HINT_SINGLE_H
 
 
 def itersorted(self, hints=None):
-    #print "hints is", hints
+    # print "hints is", hints
     if hints == None:
         # return all items
         for _, hid in self._id_heap:
@@ -179,7 +179,7 @@ class LiveStatusRegenerator(Regenerator):
                     servicegroup_service_ids = set([h.id for h in v.members])
                     # if all of the servicegroup_service_ids are in contact_service_ids
                     # then the servicegroup belongs to the contact
-                    #print "%-10s %-15s %s <= %s" % (c, v.get_name(), servicegroup_service_ids, contact_service_ids)
+                    # print "%-10s %-15s %s <= %s" % (c, v.get_name(), servicegroup_service_ids, contact_service_ids)
                     if servicegroup_service_ids <= contact_service_ids:
                         self.servicegroups._id_contact_heap.setdefault(c, []).append((v.get_name(), v.id))
         else:
@@ -203,7 +203,7 @@ class LiveStatusRegenerator(Regenerator):
         setattr(self.services, '_id_by_service_name_heap', dict([(get_obj_full_name(v), k) for (k, v) in self.services.items.iteritems()])) 
         setattr(self.services, '_id_by_host_name_heap', dict())
         [self.services._id_by_host_name_heap.setdefault(get_obj_full_name(v.host), []).append(k) for (k, v) in self.services.items.iteritems()]
-        #print self.services._id_by_host_name_heap
+        # print self.services._id_by_host_name_heap
         for hn in self.services._id_by_host_name_heap.keys():
             self.services._id_by_host_name_heap[hn].sort(key=lambda x: get_obj_full_name(self.services[x]))
 

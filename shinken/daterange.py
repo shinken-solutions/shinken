@@ -136,7 +136,7 @@ class Daterange:
 
 
     def __str__(self):
-        return ''#str(self.__dict__)
+        return '' # str(self.__dict__)
 
 
     # By default, daterange are correct
@@ -295,7 +295,7 @@ class Daterange:
             return t
 
         #print "DR Get next valid from:", time.asctime(time.localtime(t))
-        #First we search fot the day of t
+        # First we search fot the day of t
         t_day = self.get_next_valid_day(t)
 
         #print "DR: T next valid day", time.asctime(time.localtime(t_day))
@@ -320,7 +320,7 @@ class Daterange:
         if t_day2 is not None and sec_from_morning is not None:
             return t_day2 + sec_from_morning
         else:
-            #I'm not find any valid time
+            # I'm not find any valid time
             return None
 
 
@@ -355,9 +355,10 @@ class Daterange:
             if start_time >= t :
                 #print "start_time >= t :", time.asctime(time.localtime(get_day(start_time)))
                 return get_day(start_time)
-        else:#Else, there is no possibility than in our start_time<->end_time we got
-            #any invalid time (full period out). So it's end_time+1 sec (tomorow of end_time)
-            #print "Full period out, got end_time", time.asctime(time.localtime(get_day(end_time +1)))
+        else:
+            # Else, there is no possibility than in our start_time<->end_time we got
+            # any invalid time (full period out). So it's end_time+1 sec (tomorow of end_time)
+            # print "Full period out, got end_time", time.asctime(time.localtime(get_day(end_time +1)))
             return get_day(end_time +1)
 
         return None
@@ -404,7 +405,7 @@ class Daterange:
         if t_day2 is not None and sec_from_morning is None:
             return t_day2
         else:
-            #I'm not find any valid time
+            # I'm not find any valid time
             return None
 
 
@@ -484,15 +485,17 @@ class MonthWeekDayDaterange(Daterange):
         end_time = get_end_of_day(self.eyear, month_end_id, day_end)
 
         now_epoch = time.mktime(now)
-        if start_time > end_time: #the period is between years
-            if now_epoch > end_time:#check for next year
+        if start_time > end_time: # the period is between years
+            if now_epoch > end_time: # check for next year
                 day_end = find_day_by_weekday_offset(self.eyear + 1, self.emon, self.ewday, self.ewday_offset)
                 end_time = get_end_of_day(self.eyear + 1, month_end_id, day_end)
-            else:#it s just that the start was the last year
+            else:
+                # it s just that the start was the last year
                 day_start = find_day_by_weekday_offset(self.syear - 1, self.smon, self.swday, self.swday_offset)
                 start_time = get_start_of_day(self.syear - 1, month_id, day_start)
         else:
-            if now_epoch > end_time:#just have to check for next year if necessery
+            if now_epoch > end_time:
+                # just have to check for next year if necessery
                 day_start = find_day_by_weekday_offset(self.syear + 1, self.smon, self.swday, self.swday_offset)
                 start_time = get_start_of_day(self.syear + 1, month_id, day_start)
                 day_end = find_day_by_weekday_offset(self.eyear + 1, self.emon, self.ewday, self.ewday_offset)
@@ -518,15 +521,18 @@ class MonthDateDaterange(Daterange):
         end_time = get_end_of_day(self.eyear, month_end_id, day_end)
 
         now_epoch =  time.mktime(now)
-        if start_time > end_time: #the period is between years
-            if now_epoch > end_time:#check for next year
+        if start_time > end_time: # the period is between years
+            if now_epoch > end_time:
+                # check for next year
                 day_end = find_day_by_offset(self.eyear + 1, self.emon, self.emday)
                 end_time = get_end_of_day(self.eyear + 1, month_end_id, day_end)
-            else:#it s just that start was the last year
+            else:
+                # it s just that start was the last year
                 day_start = find_day_by_offset(self.syear-1, self.smon, self.emday)
                 start_time = get_start_of_day(self.syear-1, month_start_id, day_start)
         else:
-            if now_epoch > end_time:#just have to check for next year if necessery
+            if now_epoch > end_time:
+                # just have to check for next year if necessery
                 day_start = find_day_by_offset(self.syear+1, self.smon, self.emday)
                 start_time = get_start_of_day(self.syear+1, month_start_id, day_start)
                 day_end = find_day_by_offset(self.eyear+1, self.emon, self.emday)

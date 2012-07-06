@@ -684,7 +684,7 @@ class Bottle(object):
             out.apply(response)
             out = self.error_handler.get(out.status, repr)(out)
             if isinstance(out, HTTPResponse):
-                depr('Error handlers must not return :exc:`HTTPResponse`.') #0.9
+                depr('Error handlers must not return :exc:`HTTPResponse`.') # 0.9
             return self._cast(out, request, response)
         if isinstance(out, HTTPResponse):
             out.apply(response)
@@ -746,7 +746,7 @@ class Bottle(object):
             if DEBUG:
                 err += '<h2>Error:</h2>\n<pre>%s</pre>\n' % repr(e)
                 err += '<h2>Traceback:</h2>\n<pre>%s</pre>\n' % format_exc(10)
-            environ['wsgi.errors'].write(err) #TODO: wsgi.error should not get html
+            environ['wsgi.errors'].write(err) # TODO: wsgi.error should not get html
             start_response('500 INTERNAL SERVER ERROR', [('Content-Type', 'text/html')])
             return [tob(err)]
 
@@ -1200,7 +1200,7 @@ class BaseResponse(object):
                 yield 'Set-Cookie', c.OutputString()
 
     def wsgiheader(self):
-        depr('The wsgiheader method is deprecated. See headerlist.') #0.10
+        depr('The wsgiheader method is deprecated. See headerlist.') # 0.10
         return self.headerlist
 
     @property
@@ -1394,7 +1394,7 @@ class TemplatePlugin(object):
         if isinstance(conf, (tuple, list)) and len(conf) == 2:
             return view(conf[0], **conf[1])(callback)
         elif isinstance(conf, str) and 'template_opts' in context['config']:
-            depr('The `template_opts` parameter is deprecated.') #0.9
+            depr('The `template_opts` parameter is deprecated.') # 0.9
             return view(conf, **context['config']['template_opts'])(callback)
         elif isinstance(conf, str):
             return view(conf)(callback)
@@ -1685,7 +1685,7 @@ def parse_auth(header):
     try:
         method, data = header.split(None, 1)
         if method.lower() == 'basic':
-            #TODO: Add 2to3 save base64[encode/decode] functions.
+            # TODO: Add 2to3 save base64[encode/decode] functions.
             user, pwd = touni(base64.b64decode(tob(data))).split(':',1)
             return user, pwd
     except (KeyError, ValueError):
@@ -1774,7 +1774,7 @@ def path_shift(script_name, path_info, shift=1):
 
 
 # Decorators
-#TODO: Replace default_app() with app()
+# TODO: Replace default_app() with app()
 
 def validate(**vkargs):
     """
@@ -1877,7 +1877,7 @@ class WSGIRefServer(ServerAdapter):
         srv = make_server(self.host, self.port, handler, **self.options)
         srv.serve_forever()
 
-##Shinken : add WSGIRefServerSelect
+## Shinken : add WSGIRefServerSelect
 class WSGIRefServerSelect(ServerAdapter):
     def run(self, handler): # pragma: no cover
         print "Call the Select version"
@@ -1887,7 +1887,7 @@ class WSGIRefServerSelect(ServerAdapter):
                 def log_request(*args, **kw): pass
             self.options['handler_class'] = QuietHandler
         srv = make_server(self.host, self.port, handler, **self.options)
-        #srv.serve_forever()
+        # srv.serve_forever()
         return srv
 
 
@@ -2045,7 +2045,7 @@ class AutoServer(ServerAdapter):
             except ImportError:
                 pass
 
-##Shinken : add 'wsgirefselect' : WSGIRefServerSelect,
+## Shinken : add 'wsgirefselect' : WSGIRefServerSelect,
 server_names = {
     'cgi': CGIServer,
     'flup': FlupFCGIServer,
@@ -2144,7 +2144,7 @@ def run(app=None, server='wsgiref', host='127.0.0.1', port=8080,
         :param quiet: Suppress output to stdout and stderr? (default: False)
         :param options: Options passed to the server adapter.
      """
-    #Shinken
+    # Shinken
     res = None
     app = app or default_app()
     if isinstance(app, basestring):
@@ -2169,13 +2169,13 @@ def run(app=None, server='wsgiref', host='127.0.0.1', port=8080,
             else:
                 _reloader_observer(server, app, interval)
         else:
-            #Shinken
+            # Shinken
             res = server.run(app)
     except KeyboardInterrupt:
         pass
     if not server.quiet and not os.environ.get('BOTTLE_CHILD'):
         print "Shutting down..."
-    #Shinken
+    # Shinken
     return res
 
 
@@ -2185,8 +2185,8 @@ class FileCheckerThread(threading.Thread):
     def __init__(self, lockfile, interval):
         threading.Thread.__init__(self)
         self.lockfile, self.interval = lockfile, interval
-        #1: lockfile to old; 2: lockfile missing
-        #3: module file changed; 5: external exit
+        # 1: lockfile to old; 2: lockfile missing
+        # 3: module file changed; 5: external exit
         self.status = 0
 
     def run(self):
@@ -2275,8 +2275,8 @@ class TemplateError(HTTPError):
 class BaseTemplate(object):
     """ Base class and minimal API for template adapters """
     extentions = ['tpl','html','thtml','stpl']
-    settings = {} #used in prepare()
-    defaults = {} #used in render()
+    settings = {} # used in prepare()
+    defaults = {} # used in render()
 
     def __init__(self, source=None, name=None, lookup=[], encoding='utf8', **settings):
         """ Create a new template.
@@ -2521,7 +2521,7 @@ class SimpleTemplate(BaseTemplate):
                 line = line.split('%',1)[1].lstrip() # Full line following the %
                 cline = self.split_comment(line).strip()
                 cmd = re.split(r'[^a-zA-Z0-9_]', cline)[0]
-                flush() ##encodig (TODO: why?)
+                flush() ## encodig (TODO: why?)
                 if cmd in self.blocks or multiline:
                     cmd = multiline or cmd
                     dedent = cmd in self.dedent_blocks # "else:"
@@ -2574,7 +2574,7 @@ class SimpleTemplate(BaseTemplate):
         if '_rebase' in env:
             subtpl, rargs = env['_rebase']
             subtpl = self.__class__(name=subtpl, lookup=self.lookup)
-            rargs['_base'] = _stdout[:] #copy stdout
+            rargs['_base'] = _stdout[:] # copy stdout
             del _stdout[:] # clear stdout
             return subtpl.execute(_stdout, rargs)
         return env

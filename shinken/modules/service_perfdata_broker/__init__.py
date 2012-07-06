@@ -31,11 +31,11 @@ properties = {
     }
 
 
-#called by the plugin manager to get a broker
+# called by the plugin manager to get a broker
 def get_instance(plugin):
     print "Get a Service Perfdata broker for plugin %s" % plugin.get_name()
 
-    #First try to import
+    # First try to import
     try:
         from service_perfdata_broker import Service_perfdata_broker
     except ImportError , exp:
@@ -43,7 +43,7 @@ def get_instance(plugin):
         return None
 
 
-    #Catch errors
+    # Catch errors
     path = plugin.path
     if hasattr(plugin, 'mode'):
         mode = plugin.mode

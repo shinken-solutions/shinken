@@ -63,7 +63,7 @@ class DataManagerSKonf(DataManager):
         # Inner object are NOT ediable by skonf!
         d['editable'] = '0'
 
-        #For service we must set the _id like it should :)
+        # For service we must set the _id like it should :)
         if o.__class__.my_type == 'service':
             print "SET AN INNER ID FOR", o.get_name(), o.id
             d['_id'] = 'inner-%s' % o.id
@@ -232,7 +232,7 @@ class DataManagerSKonf(DataManager):
         sons = tree[1]
         packs = tree[2]
 
-        #Sort our sons by they names
+        # Sort our sons by they names
         def _sort(e1, e2):
             if e1[0] < e2[0]:
                 return -1

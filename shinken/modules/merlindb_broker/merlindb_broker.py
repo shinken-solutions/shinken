@@ -43,33 +43,33 @@ def get_obj_name(obj):
 
 
 def list_to_comma(lst):
-    #For ['d', 'r', 'u'] will return d,r,u
+    # For ['d', 'r', 'u'] will return d,r,u
     return ','.join(lst)
 
 def last_hard_state_to_int(lst):
     return 1
 
-#Class for the Merlindb Broker
-#Get broks and puts them in merlin database
+# Class for the Merlindb Broker
+# Get broks and puts them in merlin database
 class Merlindb_broker(BaseModule):
     def __init__(self, modconf, backend, host=None, user=None, password=None, database=None, character_set=None, database_path=None):
         # Mapping for name of data, rename attributes and transform function
         self.mapping = {
-            #Program status
+            # Program status
             'program_status' : {'program_start' : {'transform' : None},
                                 'pid' : {'transform' : None},
                                 'last_alive' : {'transform' : None},
                                 'is_running' : { 'transform' : None},
                                 'instance_id' : {'transform' : None},
                                 },
-            #Program status update (every 10s)
+            # Program status update (every 10s)
             'update_program_status' : {'program_start' : {'transform' : None},
                                 'pid' : {'transform' : None},
                                 'last_alive' : {'transform' : None},
                                 'is_running' : { 'transform' : None},
                                 'instance_id' : {'transform' : None},
                                 },
-            #Host
+            # Host
             'initial_host_status' : {
                 'id' : {'transform' : None},
                 'instance_id' : {'transform' : None},
@@ -212,7 +212,7 @@ class Merlindb_broker(BaseModule):
                 'next_chk' : {'transform' : None, 'name' : 'next_check'},
                 'host_name' : {'transform' : None},
                 },
-            #Service
+            # Service
             'initial_service_status' : {
                 'id' : {'transform' : None},
                 'instance_id' : {'transform' : None},
@@ -357,7 +357,7 @@ class Merlindb_broker(BaseModule):
                 'host_name' : {'transform' : None},
                 },
 
-            #Contact
+            # Contact
             'initial_contact_status' : {
                 'service_notifications_enabled' : {'transform' : None},
                 'can_submit_commands' : {'transform' : None},
@@ -381,7 +381,7 @@ class Merlindb_broker(BaseModule):
                 'host_notification_options' : {'transform' : list_to_comma},
                 'service_notification_options' : {'transform' : list_to_comma},
                 },
-            #Contact group
+            # Contact group
             'initial_contactgroup_status' : {
                 'contactgroup_name' : {'transform' : None},
                 'alias': {'transform' : None},
@@ -389,7 +389,7 @@ class Merlindb_broker(BaseModule):
                 'id' : {'transform' : None},
                 'members' : {'transform' : None},
                 },
-            #Host group
+            # Host group
             'initial_hostgroup_status' : {
                 'hostgroup_name' : {'transform' : None},
                 'notes' : {'transform' : None},
@@ -410,7 +410,7 @@ class Merlindb_broker(BaseModule):
         self.database_path = database_path
 
 
-        #Now get a backend_db of our backend type
+        # Now get a backend_db of our backend type
         if backend == 'mysql':
 #            from mysql_backend import Mysql_backend
             from shinken.db_mysql import DBMysql
@@ -426,13 +426,13 @@ class Merlindb_broker(BaseModule):
 
     def preprocess(self, type, brok):
         new_brok = copy.deepcopy(brok)
-        #Only preprocess if we can apply a mapping
+        # Only preprocess if we can apply a mapping
         if type in self.mapping:
             to_del = []
             to_add = []
             mapping = self.mapping[brok.type]
             for prop in new_brok.data:
-            #ex : 'name' : 'program_start_time', 'transform'
+            # ex : 'name' : 'program_start_time', 'transform'
                 if prop in mapping:
                     #print "Got a prop to change", prop
                     val = brok.data[prop]
@@ -457,16 +457,16 @@ class Merlindb_broker(BaseModule):
         return new_brok
 
 
-    #Called by Broker so we can do init stuff
-    #TODO : add conf param to get pass with init
-    #Conf from arbiter!
+    # Called by Broker so we can do init stuff
+    # TODO : add conf param to get pass with init
+    # Conf from arbiter!
     def init(self):
         print "I connect to Merlin database"
         self.db_backend.connect_database()
 
 
-    #Get a brok, parse it, and put in in database
-    #We call functions like manage_ TYPEOFBROK _brok that return us queries
+    # Get a brok, parse it, and put in in database
+    # We call functions like manage_ TYPEOFBROK _brok that return us queries
     def manage_brok(self, b):
         type = b.type
         manager = 'manage_'+type+'_brok'
@@ -475,18 +475,18 @@ class Merlindb_broker(BaseModule):
             new_b = self.preprocess(type, b)
             f = getattr(self, manager)
             queries = f(new_b)
-            #Ok, we've got queries, now : run them!
+            # Ok, we've got queries, now : run them!
             for q in queries :
                 self.db_backend.execute_query(q)
             return
 
 
 
-    #Ok, we are at launch and a scheduler want him only, OK...
-    #So ca create several queries with all tables we need to delete with
-    #our instance_id
-    #This brob must be send at the begining of a scheduler session,
-    #if not, BAD THINGS MAY HAPPENED :)
+    # Ok, we are at launch and a scheduler want him only, OK...
+    # So ca create several queries with all tables we need to delete with
+    # our instance_id
+    # This brob must be send at the begining of a scheduler session,
+    # if not, BAD THINGS MAY HAPPENED :)
     def manage_clean_all_my_instance_id_brok(self, b):
         instance_id = b.data['instance_id']
         tables = ['command', 'comment', 'contact', 'contactgroup', 'downtime', 'host',
@@ -500,9 +500,9 @@ class Merlindb_broker(BaseModule):
         return res
 
 
-    #Program status is .. status of program? :)
-    #Like pid, daemon mode, last activity, etc
-    #We aleady clean database, so insert
+    # Program status is .. status of program? :)
+    # Like pid, daemon mode, last activity, etc
+    # We aleady clean database, so insert
     def manage_program_status_brok(self, b):
         instance_id = b.data['instance_id']
         del_query = "DELETE FROM program_status WHERE instance_id = '%s' " % instance_id
@@ -510,9 +510,9 @@ class Merlindb_broker(BaseModule):
         return [del_query,query]
 
 
-    #Program status is .. status of program? :)
-    #Like pid, daemon mode, last activity, etc
-    #We aleady clean database, so insert
+    # Program status is .. status of program? :)
+    # Like pid, daemon mode, last activity, etc
+    # We aleady clean database, so insert
     def manage_update_program_status_brok(self, b):
         instance_id = b.data['instance_id']
         del_query = "DELETE FROM program_status WHERE instance_id = '%s' " % instance_id
@@ -520,36 +520,36 @@ class Merlindb_broker(BaseModule):
         return [del_query,query]
 
 
-    #Initial service status is at start. We need an insert because we
-    #clean the base
+    # Initial service status is at start. We need an insert because we
+    # clean the base
     def manage_initial_service_status_brok(self, b):
         b.data['last_update'] = time.time()
-        #It's a initial entry, so we need insert
+        # It's a initial entry, so we need insert
         query = self.db_backend.create_insert_query('service', b.data)
         return [query]
 
 
-    #A service check have just arrived, we UPDATE data info with this
+    # A service check have just arrived, we UPDATE data info with this
     def manage_service_check_result_brok(self, b):
         data = b.data
         b.data['last_update'] = time.time()
-        #We just impact the service :)
+        # We just impact the service :)
         where_clause = {'host_name' : data['host_name'] , 'service_description' : data['service_description']}
         query = self.db_backend.create_update_query('service', data, where_clause)
         return [query]
 
 
-    #A new service schedule have just arrived, we UPDATE data info with this
+    # A new service schedule have just arrived, we UPDATE data info with this
     def manage_service_next_schedule_brok(self, b):
         data = b.data
-        #We just impact the service :)
+        # We just impact the service :)
         where_clause = {'host_name' : data['host_name'] , 'service_description' : data['service_description']}
         query = self.db_backend.create_update_query('service', data, where_clause)
         return [query]
 
 
 
-    #A full service status? Ok, update data
+    # A full service status? Ok, update data
     def manage_update_service_status_brok(self, b):
         data = b.data
         b.data['last_update'] = time.time()
@@ -558,7 +558,7 @@ class Merlindb_broker(BaseModule):
         return [query]
 
 
-    #A host have just be create, database is clean, we INSERT it
+    # A host have just be create, database is clean, we INSERT it
     def manage_initial_host_status_brok(self, b):
         b.data['last_update'] = time.time()
         tmp_data = copy.copy(b.data)
@@ -575,113 +575,113 @@ class Merlindb_broker(BaseModule):
         return res
 
 
-    #A new host group? Insert it
-    #We need to do something for the members prop (host.id, host_name)
-    #They are for host_hostgroup table, with just host.id hostgroup.id
+    # A new host group? Insert it
+    # We need to do something for the members prop (host.id, host_name)
+    # They are for host_hostgroup table, with just host.id hostgroup.id
     def manage_initial_hostgroup_status_brok(self, b):
         data = b.data
 
-        #Here we've got a special case : in data, there is members
-        #and we do not want it in the INSERT query, so we crate a
-        #tmp_data without it
+        # Here we've got a special case : in data, there is members
+        # and we do not want it in the INSERT query, so we crate a
+        # tmp_data without it
         tmp_data = copy.copy(data)
         del tmp_data['members']
         query = self.db_backend.create_insert_query('hostgroup', tmp_data)
         res = [query]
 
-        #Ok, the hostgroup table is uptodate, now we add relations
-        #between hosts and hostgroups
+        # Ok, the hostgroup table is uptodate, now we add relations
+        # between hosts and hostgroups
         for (h_id, h_name) in b.data['members']:
-            #First clean
+            # First clean
             q_del = "DELETE FROM host_hostgroup WHERE host = '%s' and hostgroup='%s'" % (h_id, b.data['id'])
             res.append(q_del)
-            #Then add
+            # Then add
             q = "INSERT INTO host_hostgroup (host, hostgroup) VALUES ('%s', '%s')" % (h_id, b.data['id'])
             res.append(q)
         return res
 
 
-    #same from hostgroup, but with servicegroup
+    # same from hostgroup, but with servicegroup
     def manage_initial_servicegroup_status_brok(self, b):
         data = b.data
 
-        #Here we've got a special case : in data, there is members
-        #and we do not want it in the INSERT query, so we create a
-        #tmp_data without it
+        # Here we've got a special case : in data, there is members
+        # and we do not want it in the INSERT query, so we create a
+        # tmp_data without it
         tmp_data = copy.copy(data)
         del tmp_data['members']
         query = self.db_backend.create_insert_query('servicegroup', tmp_data)
         res = [query]
 
-        #Now the members part
+        # Now the members part
         for (s_id, s_name) in b.data['members']:
-            #first clean
+            # first clean
             q_del = "DELETE FROM service_servicegroup WHERE service='%s' and servicegroup='%s'" % (s_id, b.data['id'])
             res.append(q_del)
-            #Then add
+            # Then add
             q = "INSERT INTO service_servicegroup (service, servicegroup) VALUES ('%s', '%s')" % (s_id, b.data['id'])
             res.append(q)
         return res
 
 
-    #Same than service result, but for host result
+    # Same than service result, but for host result
     def manage_host_check_result_brok(self, b):
         b.data['last_update'] = time.time()
         data = b.data
-        #Only the host is impacted
+        # Only the host is impacted
         where_clause = {'host_name' : data['host_name']}
         query = self.db_backend.create_update_query('host', data, where_clause)
         return [query]
 
 
-    #Same than service result, but for host new scheduling
+    # Same than service result, but for host new scheduling
     def manage_host_next_schedule_brok(self, b):
         data = b.data
-        #Only the host is impacted
+        # Only the host is impacted
         where_clause = {'host_name' : data['host_name']}
         query = self.db_backend.create_update_query('host', data, where_clause)
         return [query]
 
 
-    #Ok the host is updated
+    # Ok the host is updated
     def manage_update_host_status_brok(self, b):
         b.data['last_update'] = time.time()
         data = b.data
-        #Only this host
+        # Only this host
         where_clause = {'host_name' : data['host_name']}
         query = self.db_backend.create_update_query('host', data, where_clause)
         return [query]
 
 
-    #A contact have just be created, database is clean, we INSERT it
+    # A contact have just be created, database is clean, we INSERT it
     def manage_initial_contact_status_brok(self, b):
         query = self.db_backend.create_insert_query('contact', b.data)
         return [query]
 
 
-    #same from hostgroup, but with servicegroup
+    # same from hostgroup, but with servicegroup
     def manage_initial_contactgroup_status_brok(self, b):
         data = b.data
 
-        #Here we've got a special case : in data, there is members
-        #and we do not want it in the INSERT query, so we create a
-        #tmp_data without it
+        # Here we've got a special case : in data, there is members
+        # and we do not want it in the INSERT query, so we create a
+        # tmp_data without it
         tmp_data = copy.copy(data)
         del tmp_data['members']
         query = self.db_backend.create_insert_query('contactgroup', tmp_data)
         res = [query]
 
-        #Now the members part
+        # Now the members part
         for (c_id, c_name) in b.data['members']:
-            #first clean
+            # first clean
             q_del = "DELETE FROM contact_contactgroup WHERE contact='%s' and contactgroup='%s'" % (c_id, b.data['id'])
             res.append(q_del)
-            #Then add
+            # Then add
             q = "INSERT INTO contact_contactgroup (contact, contactgroup) VALUES ('%s', '%s')" % (c_id, b.data['id'])
             res.append(q)
         return res
 
-    #A notification have just be created, we INSERT it
+    # A notification have just be created, we INSERT it
     def manage_notification_raise_brok(self, b):
         n_data = {}
         t = ['reason_type', 'service_description', 'ack_data', 'contacts_notified', 'start_time', 'escalated', 'instance_id',

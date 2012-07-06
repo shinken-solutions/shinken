@@ -24,9 +24,9 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This Class is a plugin for the Shinken Arbiter. It connect to
-#a GLPI with webservice (xmlrpc, SOAP is garbage) and take all
-#hosts. Simple way from now
+# This Class is a plugin for the Shinken Arbiter. It connect to
+# a GLPI with webservice (xmlrpc, SOAP is garbage) and take all
+# hosts. Simple way from now
 
 
 import xmlrpclib
@@ -42,7 +42,7 @@ properties = {
     }
 
 
-#called by the plugin manager to get a broker
+# called by the plugin manager to get a broker
 def get_instance(plugin):
     print "Get a Simple GLPI arbiter for plugin %s" % plugin.get_name()
     uri = plugin.uri
@@ -54,7 +54,7 @@ def get_instance(plugin):
 
 
 
-#Just get hostname from a GLPI webservices
+# Just get hostname from a GLPI webservices
 class Glpi_arbiter(BaseModule):
     def __init__(self, mod_conf, uri, login_name, login_password, tag):
         BaseModule.__init__(self, mod_conf)
@@ -63,7 +63,7 @@ class Glpi_arbiter(BaseModule):
         self.login_password = login_password
         self.tag = tag
 
-    #Called by Arbiter to say 'let's prepare yourself guy'
+    # Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
         print "I open the GLPI connection to %s" % self.uri
         self.con = xmlrpclib.ServerProxy(self.uri)
@@ -75,7 +75,7 @@ class Glpi_arbiter(BaseModule):
         print "My session number", self.session
 
 
-    #Ok, main function that will load config from GLPI
+    # Ok, main function that will load config from GLPI
     def get_objects(self):
         r = {'commands' : [],
              'timeperiods' : [],
@@ -149,7 +149,7 @@ class Glpi_arbiter(BaseModule):
                     h[attribut] = host_info[attribut]
             r['hosts'].append(h)
 
-	# Get templates
+	 # Get templates
         all_templates = self.con.monitoring.shinkenTemplates(arg)
         print "Get all templates", all_templates
         attributs = ['name', 'check_interval', 'retry_interval',

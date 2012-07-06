@@ -127,7 +127,7 @@ class Dispatcher:
                 elt.need_conf = True
 
         for arb in self.arbiters:
-            #If not me...
+            # If not me...
             if arb != self.arbiter:
                 arb.update_infos()
                 #print "Arb", arb.get_name(), "alive?", arb.alive, arb.__dict__
@@ -197,7 +197,7 @@ class Dispatcher:
                             # TODO : less violent! Must only resent to who need?
                             # must be caught by satellite who sees that it already has the conf (hash)
                             # and do nothing
-                            self.dispatch_ok = False #so we will redispatch all
+                            self.dispatch_ok = False # so we will redispatch all
                             r.to_satellites_need_dispatch[kind][cfg_id]  = True
                             r.to_satellites_managed_by[kind][cfg_id] = []
                         for satellite in r.to_satellites_managed_by[kind][cfg_id]:
@@ -215,7 +215,7 @@ class Dispatcher:
                             #    print "DBG: ERROR: (%s) for satellite %s" % (exp, satellite.__dict__)
                             #    satellite.reachable = False
                             
-                            #wim = satellite.managed_confs# what_i_managed()
+                            #wim = satellite.managed_confs # what_i_managed()
                             #print "%s [%s]Look at what manage the %s %s (alive? %s, reachable? %s): %s (look for %s)" % (int(time.time()), r.get_name(), kind, satellite.get_name(), satellite.alive, satellite.reachable, wim, cfg_id)
                             if not satellite.alive or (satellite.reachable and not satellite.do_i_manage(cfg_id, push_flavor)):
                                 logger.warning('[%s] The %s %s seems to be down, I must re-dispatch its role to someone else.' % (r.get_name(), kind, satellite.get_name()))
@@ -267,7 +267,7 @@ class Dispatcher:
         for satellite in self.satellites:
             kind = satellite.get_my_type()
             if satellite.reachable:
-                cfg_ids = satellite.managed_confs #what_i_managed()
+                cfg_ids = satellite.managed_confs # what_i_managed()
                 # I do not care about satellites that do nothing, they already
                 # do what I want :)
                 if len(cfg_ids) != 0:
@@ -287,7 +287,8 @@ class Dispatcher:
                         satellite.active = False
                         logger.info("I ask %s to wait a new conf" % satellite.get_name())
                         satellite.wait_new_conf()
-                    else:#It is not fully idle, just less cfg
+                    else:
+                        # It is not fully idle, just less cfg
                         for id in id_to_delete:
                             logger.info("I ask to remove configuration N%d from %s" %(id, satellite.get_name()))
                             satellite.remove_from_conf(id)
@@ -362,7 +363,7 @@ class Dispatcher:
                     while True:
                         try:
                             sched = scheds.pop()
-                        except IndexError: #No more schedulers.. not good, no loop
+                        except IndexError: # No more schedulers.. not good, no loop
                             # need_loop = False
                             # The conf does not need to be dispatch
                             cfg_id = conf.id
@@ -468,7 +469,7 @@ class Dispatcher:
                             # But the spare must stay at the end ;)
                             if kind == "broker":
                                 nospare = [s for s in satellites if not s.spare]
-                                #Should look over the list, not over
+                                # Should look over the list, not over
                                 if len(nospare) != 0:
                                     idx = cfg_id % len(nospare)
                                     #print "No spare", nospare

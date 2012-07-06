@@ -1,29 +1,29 @@
 #!/bin/bash
-#Copyright (C) 2009-2010 :
-#    Gabes Jean, naparuba@gmail.com
-#    Gerhard Lausser, Gerhard.Lausser@consol.de
+# Copyright (C) 2009-2010 :
+#     Gabes Jean, naparuba@gmail.com
+#     Gerhard Lausser, Gerhard.Lausser@consol.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
 DIR=$(cd $(dirname "$0"); pwd)
 cd $DIR
 echo `pwd`
 
-#delete the resul of nosetest, for coverage
+# delete the resul of nosetest, for coverage
 rm -f nosetests.xml
 rm -f coverage.xml
 rm -f .coverage
@@ -39,7 +39,7 @@ function launch_and_assert {
     fi
 }
 
-#Launching only quick tests for quick regression check
+# Launching only quick tests for quick regression check
 #for ii in `ls -1 test_*py`; do echo "Launching Test $ii" && python $ii; done
 launch_and_assert test_system_time_change.py
 launch_and_assert test_services.py
@@ -151,7 +151,7 @@ launch_and_assert test_update_output_ext_command.py
 launch_and_assert test_livestatus_allowedhosts.py
 
 launch_and_assert test_maintenance_period.py
-#Live status is a bit longer than the previous, so we put it at the end.
+# Live status is a bit longer than the previous, so we put it at the end.
 launch_and_assert test_livestatus.py
 
 # Can failed on non prepared box

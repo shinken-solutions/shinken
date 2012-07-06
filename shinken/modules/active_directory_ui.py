@@ -41,7 +41,7 @@ properties = {
     }
 
 
-#called by the plugin manager
+# called by the plugin manager
 def get_instance(plugin):
     print "Get an Active Directory UI module for plugin %s" % plugin.get_name()
     

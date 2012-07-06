@@ -32,8 +32,8 @@ from shinken.log import logger
 class Hostdependency(Item):
     id = 0
 
-#F is dep of D
-#host_name                      Host B
+# F is dep of D
+# host_name                      Host B
 #       service_description             Service D
 #       dependent_host_name             Host C
 #       dependent_service_description   Service F
@@ -85,7 +85,7 @@ class Hostdependencies(Items):
         hostdeps = self.items.keys()
         for id in hostdeps:
             hd = self.items[id]
-            if hd.is_tpl(): #Exploding template is useless
+            if hd.is_tpl(): # Exploding template is useless
                 continue
             
             # We explode first the dependent (son) part
@@ -104,7 +104,7 @@ class Hostdependencies(Items):
             if hasattr(hd, 'dependent_host_name'):
                 dephnames.extend(hd.dependent_host_name.split(','))
 
-            #Ok, and nowthe fatehr part :)
+            # Ok, and nowthe fatehr part :)
             hnames = []
             if hasattr(hd, 'hostgroup_name'):
                 hg_names = hd.hostgroup_name.split(',')
@@ -187,14 +187,14 @@ class Hostdependencies(Items):
             depdt_hname.add_host_chk_dependency(hd.host_name, hd.execution_failure_criteria, dp, hd.inherits_parent)
 
 
-    #Apply inheritance for all properties
+    # Apply inheritance for all properties
     def apply_inheritance(self):
-        #We check for all Host properties if the host has it
-        #if not, it check all host templates for a value
+        # We check for all Host properties if the host has it
+        # if not, it check all host templates for a value
         for prop in Hostdependency.properties:
             self.apply_partial_inheritance(prop)
 
-        #Then implicit inheritance
-        #self.apply_implicit_inheritance(hosts)
+        # Then implicit inheritance
+        # self.apply_implicit_inheritance(hosts)
         for h in self:
             h.get_customs_properties_by_inheritance(self)

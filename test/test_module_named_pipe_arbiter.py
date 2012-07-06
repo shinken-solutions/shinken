@@ -1,22 +1,22 @@
-#!/usr/bin/env python2.6
-#Copyright (C) 2009-2010 :
+#!/usr/bin/env python
+# Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
 #
@@ -41,11 +41,12 @@ modconf.properties = named_pipe.properties.copy()
 
 
 class TestModuleNamedPipe(ShinkenTest):
-    #setUp is in shinken_test
+
+    # Uncomment this is you want to use a specific configuration
+    # for your test
     #def setUp(self):
     #    self.setup_with_file('etc/nagios_module_hot_dependencies_arbiter.cfg')
 
-    # Change ME :)
     def test_read_named_pipe(self):
 
         # Ok, windows do not have named pipe, we know...
@@ -59,7 +60,7 @@ class TestModuleNamedPipe(ShinkenTest):
         host0 = self.sched.conf.hosts.find_by_name('test_host_0')
         self.assert_(host0 is not None)
 
-        #get our modules
+        # get our modules
         mod = sl = Named_Pipe_arbiter(modconf, 'tmp/nagios.cmd')
         
         try :
@@ -105,7 +106,7 @@ class TestModuleNamedPipe(ShinkenTest):
         print cmd.__dict__
         self.assert_(cmd.cmd_line.strip() == t.strip())
 
-        #Ok, we can delete the retention file
+        # Ok, we can delete the retention file
         os.unlink('tmp/nagios.cmd')
 
 

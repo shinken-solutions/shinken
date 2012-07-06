@@ -48,7 +48,7 @@ from shinken.modulesmanager import ModulesManager
 from shinken.daemon import Daemon
 from shinken.util import safe_print, to_bool
 
-#Local import
+# Local import
 from shinken.misc.datamanager import datamgr
 from helper import helper
 
@@ -56,7 +56,7 @@ from helper import helper
 import shinken.webui.bottle as bottle
 bottle.debug(True)
 
-#Import bottle lib to make bottle happy
+# Import bottle lib to make bottle happy
 bottle_dir = os.path.abspath(os.path.dirname(bottle.__file__))
 sys.path.insert(0, bottle_dir)
 
@@ -66,8 +66,8 @@ bottle.TEMPLATE_PATH.append(bottle_dir)
 
 
 
-#Class for the Merlindb Broker
-#Get broks and puts them in merlin database
+# Class for the Merlindb Broker
+# Get broks and puts them in merlin database
 class Webui_broker(BaseModule, Daemon):
     def __init__(self, modconf):
         BaseModule.__init__(self, modconf)
@@ -184,7 +184,7 @@ class Webui_broker(BaseModule, Daemon):
 
     # Real main function
     def do_main(self):
-        #I register my exit function
+        # I register my exit function
         self.set_exit_handler()
         print "Go run"
 
@@ -235,34 +235,34 @@ class Webui_broker(BaseModule, Daemon):
     # and update data. Will lock the whole thing
     # while updating
     def manage_brok_thread(self):
-        #DBG: times={}
-        #DBG: time_waiting_no_readers = 0
-        #DBG: time_preparing = 0
+        # DBG: times={}
+        # DBG: time_waiting_no_readers = 0
+        # DBG: time_preparing = 0
         
         print "Data thread started"
         while True:
-           #DBG: t0 = time.time()
-           #DBG: print "WEBUI :: GET START"
+           # DBG: t0 = time.time()
+           # DBG: print "WEBUI :: GET START"
            l = self.to_q.get()
-           #DBG: t1 = time.time()
-           #DBG: print "WEBUI :: GET FINISH with", len(l), "in ", t1 - t0
+           # DBG: t1 = time.time()
+           # DBG: print "WEBUI :: GET FINISH with", len(l), "in ", t1 - t0
            
            for b in l:
-              #DBG: t0 = time.time()
+              # DBG: t0 = time.time()
               b.prepare()
-              #DBG: time_preparing += time.time() - t0
-              #DBG: if not b.type in times:
-              #DBG:     times[b.type] = 0
+              # DBG: time_preparing += time.time() - t0
+              # DBG: if not b.type in times:
+              # DBG:     times[b.type] = 0
               # For updating, we cannot do it while
               # answer queries, so wait for no readers
-              #DBG: t0 = time.time()
+              # DBG: t0 = time.time()
               self.wait_for_no_readers()
-              #DBG: time_waiting_no_readers += time.time() - t0
+              # DBG: time_waiting_no_readers += time.time() - t0
               try:
-               #print "Got data lock, manage brok"
-                  #DBG: t0 = time.time()
+               # print "Got data lock, manage brok"
+                  # DBG: t0 = time.time()
                   self.rg.manage_brok(b)
-                  #DBG: times[b.type] += time.time() - t0
+                  # DBG: times[b.type] += time.time() - t0
                   
                   for mod in self.modules_manager.get_internal_instances():
                       try:
@@ -288,14 +288,14 @@ class Webui_broker(BaseModule, Daemon):
                   self.nb_writers -= 1
                   self.global_lock.release()
                   
-           #DBG: t2 = time.time()
-           #DBG: print "WEBUI :: MANAGE ALL IN ", t2 - t1
-           #DBG: print '"WEBUI : in Waiting no readers', time_waiting_no_readers
-           #DBG: print 'WEBUI in preparing broks', time_preparing
-           #DBG: print "WEBUI And in times:"
-           #DBG: for (k, v) in times.iteritems():
-           #DBG:     print "WEBUI\t %s : %s" % (k, v)
-           #DBG: print "WEBUI\nWEBUI\n"
+           # DBG: t2 = time.time()
+           # DBG: print "WEBUI :: MANAGE ALL IN ", t2 - t1
+           # DBG: print '"WEBUI : in Waiting no readers', time_waiting_no_readers
+           # DBG: print 'WEBUI in preparing broks', time_preparing
+           # DBG: print "WEBUI And in times:"
+           # DBG: for (k, v) in times.iteritems():
+           # DBG:     print "WEBUI\t %s : %s" % (k, v)
+           # DBG: print "WEBUI\nWEBUI\n"
 
 
     # Here we will load all plugins (pages) under the webui/plugins
@@ -495,7 +495,7 @@ class Webui_broker(BaseModule, Daemon):
             print "Warning: You need to have a contact having the same name as your user %s" % user
         
         # TODO : do not forgot the False when release!
-        is_ok = False#(c is not None)#False
+        is_ok = False # (c is not None)
         
         for mod in self.modules_manager.get_internal_instances():
             try:

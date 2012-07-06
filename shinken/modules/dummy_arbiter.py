@@ -23,8 +23,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-#This Class is an example of an Arbiter module
-#Here for the configuration phase AND running one
+# This Class is an example of an Arbiter module
+# Here for the configuration phase AND running one
 
 
 import time
@@ -42,7 +42,7 @@ properties = {
     }
 
 
-#called by the plugin manager to get a broker
+# called by the plugin manager to get a broker
 def get_instance(plugin):
     print "Get a Dummy arbiter module for plugin %s" % plugin.get_name()
     instance = Dummy_arbiter(plugin)
@@ -50,19 +50,19 @@ def get_instance(plugin):
 
 
 
-#Just print some stuff
+# Just print some stuff
 class Dummy_arbiter(BaseModule):
     if False:  ## useless to define this:
         def __init__(self, mod_conf):
             BaseModule.__init__(mod_conf)
 
-    #Called by Arbiter to say 'let's prepare yourself guy'
+    # Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
         print "Initilisation of the dummy arbiter module"
         #self.return_queue = self.properties['from_queue']
         
 
-    #Ok, main function that is called in the CONFIGURATION phase
+    # Ok, main function that is called in the CONFIGURATION phase
     def get_objects(self):
         print "[Dummy] ask me for objects to return"
         r = {'hosts' : []}

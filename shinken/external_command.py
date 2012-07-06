@@ -320,7 +320,7 @@ class ExternalCommandManager:
         # Strip and get utf8 only strings
         command = command.strip()
 
-        #Only log if we are in the Arbiter
+        # Only log if we are in the Arbiter
         if self.mode == 'dispatcher' and self.conf.log_external_commands:
             logger.log('EXTERNAL COMMAND: '+command.rstrip())
         r = self.get_command_and_args(command)
@@ -519,7 +519,7 @@ class ExternalCommandManager:
                     s = self.services.find_srv_by_name_and_hostname(tmp_host, srv_name)
                     if s is not None:
                         args.append(s)
-                    else: #error, must be logged
+                    else: # error, must be logged
                         logger.warning("A command was received for service '%s' on host '%s', but the service could not be found!" % (srv_name, tmp_host))
 
         except IndexError:
@@ -555,33 +555,33 @@ class ExternalCommandManager:
         contact.host_notification_period = notification_timeperiod
         self.sched.get_and_register_status_brok(contact)
 
-    #ADD_SVC_COMMENT;<host_name>;<service_description>;<persistent>;<author>;<comment>
+    # ADD_SVC_COMMENT;<host_name>;<service_description>;<persistent>;<author>;<comment>
     def ADD_SVC_COMMENT(self, service, persistent, author, comment):
         c = Comment(service, persistent, author, comment, 2, 1, 1, False, 0)
         service.add_comment(c)
         self.sched.add(c)
 
-    #ADD_HOST_COMMENT;<host_name>;<persistent>;<author>;<comment>
+    # ADD_HOST_COMMENT;<host_name>;<persistent>;<author>;<comment>
     def ADD_HOST_COMMENT(self, host, persistent, author, comment):
         c = Comment(host, persistent, author, comment, 1, 1, 1, False, 0)
         host.add_comment(c)
         self.sched.add(c)
 
-    #ACKNOWLEDGE_SVC_PROBLEM;<host_name>;<service_description>;<sticky>;<notify>;<persistent>;<author>;<comment>
+    # ACKNOWLEDGE_SVC_PROBLEM;<host_name>;<service_description>;<sticky>;<notify>;<persistent>;<author>;<comment>
     def ACKNOWLEDGE_SVC_PROBLEM(self, service, sticky, notify, persistent, author, comment):
         service.acknowledge_problem(sticky, notify, persistent, author, comment)
 
-    #ACKNOWLEDGE_HOST_PROBLEM;<host_name>;<sticky>;<notify>;<persistent>;<author>;<comment>
-    #TODO : add a better ACK management
+    # ACKNOWLEDGE_HOST_PROBLEM;<host_name>;<sticky>;<notify>;<persistent>;<author>;<comment>
+    # TODO : add a better ACK management
     def ACKNOWLEDGE_HOST_PROBLEM(self, host, sticky, notify, persistent, author, comment):
         host.acknowledge_problem(sticky, notify, persistent, author, comment)
 
-    #ACKNOWLEDGE_SVC_PROBLEM_EXPIRE;<host_name>;<service_description>;<sticky>;<notify>;<persistent>;<end_time>;<author>;<comment>
+    # ACKNOWLEDGE_SVC_PROBLEM_EXPIRE;<host_name>;<service_description>;<sticky>;<notify>;<persistent>;<end_time>;<author>;<comment>
     def ACKNOWLEDGE_SVC_PROBLEM_EXPIRE(self, service, sticky, notify, persistent, end_time, author, comment):
         service.acknowledge_problem(sticky, notify, persistent, author, comment, end_time=end_time)
 
-    #ACKNOWLEDGE_HOST_PROBLEM_EXPIRE;<host_name>;<sticky>;<notify>;<persistent>;<end_time>;<author>;<comment>
-    #TODO : add a better ACK management
+    # ACKNOWLEDGE_HOST_PROBLEM_EXPIRE;<host_name>;<sticky>;<notify>;<persistent>;<end_time>;<author>;<comment>
+    # TODO : add a better ACK management
     def ACKNOWLEDGE_HOST_PROBLEM_EXPIRE(self, host, sticky, notify, persistent, end_time, author, comment):
         host.acknowledge_problem(sticky, notify, persistent, author, comment, end_time=end_time)
 
