@@ -116,6 +116,17 @@ def perf(obj_ref, metric_name):
 
 
 @declared
+def get_custom(obj_ref, cname, default=None):
+    obj = get_objects(obj_ref)
+    if not obj:
+        return default
+    cname = cname.upper().strip()
+    if not cname.startswith('_'):
+        cname = '_'+cname
+    return obj.customs.get(cname, default)
+    
+
+@declared
 def perfs(objs_ref, metric_name):
     objs = get_objects(objs_ref)
     r = []

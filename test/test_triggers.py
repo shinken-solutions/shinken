@@ -68,6 +68,22 @@ class TestTriggers(ShinkenTest):
         self.assert_(svc.output == "OK all is green")
         self.assert_(svc.perf_data == "avgtime=2ms")
 
+
+
+    # Try to catch the perf_datas of self
+    def test_function_custom(self):
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "sample_custom_function")
+        svc.output = 'Nb users?'
+        svc.perf_data = 'users=6'
+        # Go launch it!
+        svc.eval_triggers()
+        self.scheduler_loop(4, [])
+        print "Output", svc.output
+        print "Perf_Data", svc.perf_data
+        self.assert_(svc.output == "OK all is green")
+        self.assert_(svc.perf_data == "users=12")
+
+
     
 
     # Change ME :)
