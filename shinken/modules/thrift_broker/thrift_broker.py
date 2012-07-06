@@ -288,7 +288,7 @@ class Thrift_broker(BaseModule):
             if h.instance_id == inst_id:
                 to_del.append(h.host_name)
 
-                
+
         for s in self.services.values():
             if s.instance_id == inst_id:
                 to_del_srv.append(s.host_name + s.service_description)
@@ -337,7 +337,7 @@ class Thrift_broker(BaseModule):
         # We have only one config here, with id 0
         c = self.configs[0]
         self.update_element(c, data)
-    
+
 
     def set_schedulingitem_values(self, i):
         i.check_period = self.get_timeperiod(i.check_period)
@@ -346,18 +346,18 @@ class Thrift_broker(BaseModule):
         i.rebuild_ref()
         #Escalations is not use for status_dat
         del i.escalations
-        
+
 
     def manage_initial_host_status_brok(self, b):
         data = b.data
-        
+
         host_name = data['host_name']
         inst_id = data['instance_id']
         #print "Creating host:", h_id, b
         h = Host({})
-        self.update_element(h, data)        
+        self.update_element(h, data)
         self.set_schedulingitem_values(h)
-        
+
         h.service_ids = []
         h.services = []
         h.instance_id = inst_id
@@ -391,7 +391,7 @@ class Thrift_broker(BaseModule):
         hostgroup_name = data['hostgroup_name']
         members = data['members']
         del data['members']
-        
+
         # Maybe we already got this hostgroup. If so, use the existing object
         # because in different instance, we will ahve the same group with different
         # elements
@@ -423,14 +423,14 @@ class Thrift_broker(BaseModule):
         host_name = data['host_name']
         service_description = data['service_description']
         inst_id = data['instance_id']
-        
+
         #print "Creating Service:", s_id, data
         s = Service({})
         s.instance_id = inst_id
 
         self.update_element(s, data)
         self.set_schedulingitem_values(s)
-        
+
         try:
             h = self.hosts[host_name]
             # Reconstruct the connection between hosts and services
@@ -465,7 +465,7 @@ class Thrift_broker(BaseModule):
         for dtc in s.downtimes + s.comments:
             dtc.ref = s
         self.thrift.count_event('service_checks')
-   
+
 
 
     def manage_initial_servicegroup_status_brok(self, b):
@@ -914,7 +914,7 @@ class Thrift_broker(BaseModule):
         except sqlite3.DatabaseError, exp:
             print "WARNING : yit seems your database is corrupted. Please recreate it"
         self.dbconn.commit()
-        
+
 
     def prepare_pnp_path(self):
         if not self.pnp_path:
@@ -942,10 +942,10 @@ class Thrift_broker(BaseModule):
         except:
             pass
 
-        
+
     def set_debug(self):
         fdtemp = os.open(self.debug, os.O_CREAT | os.O_WRONLY | os.O_APPEND)
-        
+
         ## We close out and err
         os.close(1)
         os.close(2)
@@ -960,7 +960,7 @@ class Thrift_broker(BaseModule):
             #cProfile.runctx('''self.do_main()''', globals(), locals(),'/tmp/thrift.profile')
             self.do_main()
         except Exception, exp:
-            
+
             msg = Message(id=0, type='ICrash', data={'name' : self.get_name(), 'exception' : exp, 'trace' : traceback.format_exc()})
             self.from_q.put(msg)
             # wait 2 sec so we know that the broker got our message, and die

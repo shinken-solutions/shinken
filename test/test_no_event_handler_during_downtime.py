@@ -30,7 +30,7 @@ class TestNoEventHandlerDuringDowntime(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_no_event_handler_during_downtime.cfg')
 
-    
+
     def test_no_event_handler_during_downtime(self):
 
 
@@ -48,8 +48,8 @@ class TestNoEventHandlerDuringDowntime(ShinkenTest):
         self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 0, 'OK | value1=0 value2=0']])
         self.assert_(host.state == 'UP')
         self.assert_(host.state_type == 'HARD')
-        
-        
+
+
         now = time.time()
         # downtime valid for the next 2 minutes
         cmd = "[%lu] SCHEDULE_SVC_DOWNTIME;test_host_0;test_ok_0;%d;%d;1;0;%d;lausser;blablub" % (now, now, now + 3600, 3600)
@@ -66,7 +66,7 @@ e2=0']])
         # There should be NO event handlers during a downtime!
         self.assert_(not self.any_log_match('SERVICE EVENT HANDLER.*;CRITICAL'))
 
-        
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -53,7 +53,7 @@ class LiveStatusWaitQuery(LiveStatusQuery):
         WaitCondition statements are written into the metafilter string as if they
         were ordinary Filter:-statements. (metafilter is then used for a MetaData object)
 
-        """ 
+        """
         metafilter = ""
         for line in data.splitlines():
             line = line.strip()

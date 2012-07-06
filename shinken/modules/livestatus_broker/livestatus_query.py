@@ -107,7 +107,7 @@ class LiveStatusQuery(object):
         return cmd, [self.strip_table_from_column(c) for c in re.compile(r'\s+').split(columns)]
 
     def strip_table_from_column(self, column):
-        """Cut off the table name, because it is possible 
+        """Cut off the table name, because it is possible
         to say service_state instead of state"""
         bygroupmatch = re.compile('(\w+)by.*group').search(self.table)
         if bygroupmatch:
@@ -118,10 +118,10 @@ class LiveStatusQuery(object):
 
     def parse_input(self, data):
         """Parse the lines of a livestatus request.
-        
+
         This function looks for keywords in input lines and
         sets the attributes of the request object
-        
+
         """
         for line in data.splitlines():
             line = line.strip()
@@ -256,7 +256,7 @@ class LiveStatusQuery(object):
 
     def launch_query(self):
         """ Prepare the request object's filter stacks """
-        
+
         # The Response object needs to access the Query
         self.response.load(self)
 
@@ -299,7 +299,7 @@ class LiveStatusQuery(object):
         filter_func     = self.filter_stack.get_stack()
         without_filter  = len(self.filtercolumns) == 0
         cs = LiveStatusConstraints(filter_func, without_filter, self.authuser)
-        
+
         try:
             # Remember the number of stats filters. We need these numbers as columns later.
             # But we need to ask now, because get_live_data() will empty the stack
@@ -314,9 +314,9 @@ class LiveStatusQuery(object):
                 else:
                     self.pnp_path_readable = False
                 # Apply the filters on the broker's host/service/etc elements
-          
+
                 result = self.get_live_data(cs)
-                
+
             if self.stats_query:
                 self.columns = range(num_stats_filters)
                 if self.stats_group_by:
@@ -339,7 +339,7 @@ class LiveStatusQuery(object):
             import traceback
             print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
             print e
-            traceback.print_exc(32) 
+            traceback.print_exc(32)
             print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
             result = []
 
@@ -353,10 +353,10 @@ class LiveStatusQuery(object):
                 'columns': self.columns,
                 'columnheaders': self.response.columnheaders,
             })
-            
+
         return result
 
-    
+
     def get_hosts_or_services_livedata(self, cs):
         def gen_all(values):
             for val in values:
@@ -367,7 +367,7 @@ class LiveStatusQuery(object):
                 if filterfunc(val):
                     yield val
             return
-        
+
         # This is a generator which returns up to <limit> elements
         def gen_limit(values, maxelements):
             loopcnt = 1
@@ -399,10 +399,10 @@ class LiveStatusQuery(object):
         #  not possible in the moment, but perhaps with a proxy-function. something for next weekend...
         #  pool = multiprocessing.Pool(processes=4)
         #  return pool.map(cs.filter_func, getattr(self.datamgr.rg, self.table).__itersorted__())
-    
+
     def get_hosts_livedata(self, cs):
         return self.get_hosts_or_services_livedata(cs)
-    
+
 
     def get_services_livedata(self, cs):
         return self.get_hosts_or_services_livedata(cs)
@@ -423,11 +423,11 @@ class LiveStatusQuery(object):
     def get_list_livedata(self, cs):
         t = self.table
         if cs.without_filter:
-            res = [y for y in 
+            res = [y for y in
                         reduce(list.__add__
                             #, [ getattr(x, t) for x in self.datamgr.rg.services + self.datamgr.rg.hosts
                                    # if len(getattr(x, t)) > 0 ]
-                            , [ getattr(x, t) for x in self.datamgr.rg.services 
+                            , [ getattr(x, t) for x in self.datamgr.rg.services
                                     if len(getattr(x, t)) > 0 ] +
                              [ getattr(x, t) for x in self.datamgr.rg.hosts
                                     if len(getattr(x, t)) > 0 ]
@@ -443,8 +443,8 @@ class LiveStatusQuery(object):
                         )
                     if cs.filter_func(c) ]
         return res
-    
-    
+
+
     def get_group_livedata(self, cs, objs, groupattr1, groupattr2, sorter):
         """
         return a list of elements from a "group" of 'objs'. group can be a hostgroup or a servicegroup.
@@ -477,7 +477,7 @@ class LiveStatusQuery(object):
     def get_servicesbygroup_livedata(self, cs):
         sorter = lambda k: k.servicegroup.servicegroup_name
         return self.get_group_livedata(cs, self.datamgr.rg.services.__itersorted__(self.metainfo.query_hints), 'servicegroups', 'servicegroup', sorter)
-    
+
 
     def get_problem_livedata(self, cs):
         # We will crate a problems list first with all problems and source in it
@@ -572,7 +572,7 @@ class LiveStatusQuery(object):
 
     def get_live_data(self, cs):
         """Find the objects which match the request.
-        
+
         This function scans a list of objects (hosts, services, etc.) and
         applies the filter functions first. The remaining objects are
         converted to simple dicts which have only the keys that were
@@ -587,12 +587,12 @@ class LiveStatusQuery(object):
         # But it would save a lot of time to already filter the hostgroups. This means host_groups must be hard-coded
         # Also host_name, but then we must filter the second step.
         # And a mixture host_groups/host_name with FilterAnd/Or? Must have several filter functions
-        
+
         handler = self.objects_get_handlers.get(self.table, None)
         if not handler:
             print("Got unhandled table: %s" % (self.table))
             return []
-        
+
         result = handler(self, cs)
         # Now we have a list of full objects (Host, Service, ....)
 
@@ -601,13 +601,13 @@ class LiveStatusQuery(object):
         #        res = res[:self.limit]
         #    else:
         #        res = list(res)[:self.limit]
-            
+
         return result
 
 
     def prepare_output(self, item):
-        """Convert an object to a dict with selected keys.""" 
-        output = {} 
+        """Convert an object to a dict with selected keys."""
+        output = {}
         # what to do with empty?
         #print "prepare coluns %s" % self.outputcolumns
         for column in self.outputcolumns:
@@ -635,7 +635,7 @@ class LiveStatusQuery(object):
 
     def statsify_result(self, filtresult):
         """Applies the stats filter functions to the result.
-        
+
         Explanation:
         stats_group_by is ["service_description", "host_name"]
         filtresult is a list of elements which have, among others, service_description and host_name attributes
@@ -666,7 +666,7 @@ class LiveStatusQuery(object):
 
         Step 3:
         Create the final result array from resultdict
-        
+
         """
         result = []
         resultdict = {}

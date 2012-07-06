@@ -31,7 +31,7 @@ Invalid element name
 %# " We will save our element name so gesture functions will be able to call for the good elements."
 <script type="text/javascript">
   var elt_name = '{{elt.get_full_name()}}';
-  
+
   var graphstart={{graphstart}};
   var graphend={{graphend}};
 
@@ -64,14 +64,14 @@ Invalid element name
           typeahead.process(data)}
         });
       },
-    onselect: function(obj) { 
+    onselect: function(obj) {
       $("ul.typeahead.dropdown-menu").find('li.active').data(obj);
     }
   });
 </script>
 
 
-%#  "This is the background canvas for all gesture detection things " 
+%#  "This is the background canvas for all gesture detection things "
 %# " Don't ask me why, but the size must be included in the
 %# canvas line here or we got problem!"
 <div id='gesture_panel' class="pull-left">
@@ -85,20 +85,20 @@ Invalid element name
   <div class="gesture_button">
     <img title="By keeping a left click pressed and drawing a check, you will launch a try to fix command." alt="gesture fix" src="/static/eltdetail/images/gesture-zigzag.png"/> Fix
   </div>
-  
+
 </div>
 
 
 %#  "Content Container Start"
 <div class="">
 <div id="content_container" class="span12">
-	<h1 class="span4 no-leftmargin state_{{elt.state.lower()}} icon_down"> <img class="imgsize4" alt="icon state" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h1> 
+	<h1 class="span4 no-leftmargin state_{{elt.state.lower()}} icon_down"> <img class="imgsize4" alt="icon state" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h1>
         %if elt.action_url != '':
             <td><a href="{{elt.action_url}}" target=_blank><img src=/static/eltdetail/images/gear.png></a></td>
 	%end
 <!-- Gear.png can be find here : http://cdn1.iconfinder.com/data/icons/nuove/128x128/actions/gear.png --!>
 <!-- and resized --!>
-	  	  
+
 	<div class="span8">
 	  <span class='pull-right' id='host_tags'>
 	    %tags = elt.get_host_tags()
@@ -108,10 +108,10 @@ Invalid element name
 	  </span>
 	</div>
 
-	  
 
 
-	<div class="span12 no-leftmargin box">	   
+
+	<div class="span12 no-leftmargin box">
 		<table class="span4 no-leftmargin">
 		%#Alias, apretns and hostgroups arefor host only
 		%if elt_type=='host':
@@ -128,7 +128,7 @@ Invalid element name
 		    	<td>{{!helper.get_business_impact_text(elt)}}</td>
 			</tr>
 		</table>
-		
+
 		<table class="span3">
 			<tr>
 		    	<td>Parents:</td>
@@ -173,7 +173,7 @@ Invalid element name
                             <td>(none)</td>
                             %end
 			</tr>
-		</table>	    
+		</table>
 
 		<div class="span4">
 		    %#   " If the elements is a root problem with a huge impact and not ack, ask to ack it!"
@@ -183,7 +183,7 @@ Invalid element name
 		    %# "end of the 'SOLVE THIS' highlight box"
 		    %end
 		    </div>
-		</div>				
+		</div>
 	</div>
 
 	<!-- Switch Start -->
@@ -225,7 +225,7 @@ Invalid element name
                  onChange : function(elt, b){toggle_flap_detection("{{elt.get_full_name()}}", !b);}
                }
                );
-            }); 
+            });
 	  </script>
 
 	  <div class='row-fluid'>
@@ -237,7 +237,7 @@ Invalid element name
 		<div class="span3"> Flap detection <input {{flp_state}} class="iphone" type="checkbox" id='btn-flp'> </div>
 	      </div>
 	    </form>
-	    
+
 	<div class='span5 well'>
 	  <div class="btn-toolbar">
 	  <div class="btn-group">
@@ -278,7 +278,7 @@ Invalid element name
       %else:
       <h3 class="span10">Service Information:</h3>
       %end:
-		    	
+
       <table class="span10 table table-striped table-bordered table-condensed">
 	<tr>
 	  <td class="column1">{{elt_type.capitalize()}} Status</td>
@@ -296,26 +296,26 @@ Invalid element name
 	  %else:
 	  <td>&nbsp;</td>
 	  %end
-	</tr>	
-	<tr>										
+	</tr>
+	<tr>
 	  <td class="column1">Current Attempt</td>
 	  <td>{{elt.attempt}}/{{elt.max_check_attempts}} ({{elt.state_type}} state)</td>
 	</tr>
-	<tr>		
+	<tr>
 	  <td class="column1">Last Check Time</td>
 	  <td><span class="quickinfo" data-original-title='Last check was at {{time.asctime(time.localtime(elt.last_chk))}}'>was {{helper.print_duration(elt.last_chk)}}</span></td>
 	</tr>
-	<tr>		
+	<tr>
 	  <td class="column1">Next Scheduled Active Check</td>
 	  <td><span class="quickinfo" data-original-title='Next active check at {{time.asctime(time.localtime(elt.next_chk))}}'>{{helper.print_duration(elt.next_chk)}}</span></td>
 	</tr>
-	<tr>		
+	<tr>
 	  <td class="column1">Last State Change</td>
 	  <td>{{time.asctime(time.localtime(elt.last_state_change))}}</td>
 	</tr>
       </table>
-      
-      
+
+
       <p class="span10" id="hidden_info_button"><a href="javascript:show_hidden_info()" class="btn"><i class="icon-plus"></i> Show more</a>	</p>
       <h3 class="span10 hidden_infos">Additonal Informations:</h3>
       <table class="span8 table table-striped table-bordered table-condensed hidden_infos">
@@ -323,7 +323,7 @@ Invalid element name
 	  <td class="column1">Last Notification</td>
 	  <td>{{helper.print_date(elt.last_notification)}} (notification {{elt.current_notification_number}})</td>
 	</tr>
-	<tr>			
+	<tr>
 	  <td class="column1">Check Latency / Duration</td>
 	  <td>{{'%.2f' % elt.latency}} / {{'%.2f' % elt.execution_time}} seconds</td>
 	</tr>
@@ -351,12 +351,12 @@ Invalid element name
 	    <div class="tab-content">
 	    	<!-- Tab Summary Start-->
 		    <div class="tab-pane active" id="impacts">
-		      <!-- Start of the Whole info pack. We got a row of 2 thing : 
+		      <!-- Start of the Whole info pack. We got a row of 2 thing :
 			   left is information, right is related elements -->
 		      <div class="row-fluid">
 		      <!-- So now it's time for the right part, related elements -->
 		      <div class="span12">
-			
+
 			<!-- Show our father dependencies if we got some -->
 			%#    Now print the dependencies if we got somes
 			%if len(elt.parent_dependencies) > 0:
@@ -364,7 +364,7 @@ Invalid element name
 			<a id="togglelink-{{elt.get_dbg_name()}}" href="javascript:toggleBusinessElt('{{elt.get_dbg_name()}}')"> {{!helper.get_button('Show dependency tree', img='/static/images/expand.png')}}</a>
 			<div class="clear"></div>
 			{{!helper.print_business_rules(datamgr.get_business_parents(elt), source_problems=elt.source_problems)}}
-			
+
 			%end
 
 			<!-- If we are an host and not a problem, show our services -->
@@ -382,16 +382,16 @@ Invalid element name
 			  %nb = 0
 			  %for s in helper.get_host_services_sorted(elt):
 			  %nb += 1
-			  
+
 			  %# " We put a max imapct to print, bacuse too high is just useless"
 			  %if nb > max_impacts:
 			  %   break
 			  %end
-			  
+
 			  %if nb == 8:
 			  <div style="float:right;" id="hidden_impacts_or_services_button"><a href="javascript:show_hidden_impacts_or_services()"> {{!helper.get_button('Show all services', img='/static/images/expand.png')}}</a></div>
 			  %end
-			  
+
 			  %if nb < 8:
 		      <div class="service">
 		      %else:
@@ -410,7 +410,7 @@ Invalid element name
 			 %end
 			 </div>
 			%end #of the only host part
-			
+
 
 			<!-- If we are a root problem and got real impacts, show them! -->
 			%if elt.is_problem and len(elt.impacts) != 0:
@@ -427,7 +427,7 @@ Invalid element name
 		          %else:
 			  <div class="service hidden_impacts_services">
 			  %end
-			  
+
 			  <div>
 			    <img style="width : 16px; height:16px" alt="icon state" src="{{helper.get_icon_state(i)}}">
 			    <span class='alert-small alert-{{i.state.lower()}}' style="font-size:110%">{{i.state}}</span> for <span style="font-size:110%">{{!helper.get_link(i, short=True)}}</span> since {{helper.print_duration(i.last_state_change, just_duration=True, x_elts=2)}}
@@ -446,7 +446,7 @@ Invalid element name
 
 
 		      </div><!-- End of the right part -->
-		      
+
 		      </div>
 		      <!-- End of the row with the 2 blocks-->
 		    </div>
@@ -461,7 +461,7 @@ Invalid element name
 			</ul>
 		      </div>
 		      <div class="clear"></div>
-		      
+
 		      <div id="log_container">
 			%if len(elt.comments) > 0:
 			      <h2></h2>
@@ -494,7 +494,7 @@ Invalid element name
 			</ul>
 		      </div>
 		      <div class="clear"></div>
-		      
+
 		      <div id="log_container">
 			%if len(elt.downtimes) > 0:
 			      <h2></h2>
@@ -526,7 +526,7 @@ Invalid element name
 				%else:
 				 <h3>Graphs</h3>
 				 <div class='row-fluid well span6'>
-					
+
 			<!-- Get the uris for the 4 standard time ranges in advance	 -->
 				   %now = int(time.time())
 				   %fourhours = now - 3600*4
@@ -534,27 +534,27 @@ Invalid element name
 				   %lastweek =  now - 86400*7
 				   %lastmonth = now - 86400*31
 				   %lastyear =  now - 86400*365
-						
+
                    %# Let's get all the uris at once.
                    %uris_4h = app.get_graph_uris(elt, fourhours, now)
                    %uris_1d = app.get_graph_uris(elt, lastday, now)
                    %uris_1w = app.get_graph_uris(elt, lastweek, now)
                    %uris_1m = app.get_graph_uris(elt, lastmonth, now)
-                                  
-                  <!-- Use of javascript to change the content of a div!-->										
+
+                  <!-- Use of javascript to change the content of a div!-->
                	  <div class='span2'><a onclick="setHTML(html_4h,{{fourhours}});" class=""> 4 hours</a></div>
 				  <div class='span2'><a onclick="setHTML(html_1d,{{lastday}});" class=""> 1 day</a></div>
 				  <div class='span2'><a onclick="setHTML(html_1w,{{lastweek}});" class=""> 1 week</a></div>
 				  <div class='span2'><a onclick="setHTML(html_1m,{{lastmonth}});" class=""> 1 month</a></div>
-				  
-							
+
+
 				 </div>
-				  
+
 					<script langage="javascript">
 						function setHTML(html,start) {
 						<!-- change the content of the div --!>
 							document.getElementById("real_graphs").innerHTML=html;
-							
+
 							<!-- and call the jcrop javascript --!>
 							$('.jcropelt').Jcrop({
 								onSelect: update_coords,
@@ -563,7 +563,7 @@ Invalid element name
 							graphstart=start;
 							get_range();
 						}
-										
+
 						<!-- let's create the html content for each time rand --!>
 						<!-- This is quite ugly here. I do the same thing 4 times --!->
 						<!-- someone said "function" ? You're right.--!>
@@ -582,7 +582,7 @@ Invalid element name
                             html_4h = html_4h + '<br>';
 							%end
 						html_4h=html_4h+'</p>';
-													
+
      					%for g in uris_1d:
 							%img_src = g['img_src']
                             %link = g['link']
@@ -593,7 +593,7 @@ Invalid element name
                             html_1d = html_1d + '<br>';
 							%end
 						html_1d=html_1d+'</p>';
-						
+
 						%for g in uris_1w:
 							%img_src = g['img_src']
 							%link = g['link']
@@ -603,7 +603,7 @@ Invalid element name
 							html_1w = html_1w + '<a href="javascript:graph_zoom(\'/{{elt_type}}/{{elt.get_full_name()}}?\')" class="btn"><i class="icon-zoom-in"></i> Zoom</a>';
                             html_1w = html_1w + '<br>';
 							%end
-														
+
 						%for g in uris_1m:
 							%img_src = g['img_src']
 							%link = g['link']
@@ -614,7 +614,7 @@ Invalid element name
                             html_1m = html_1m + '<br>';
 							%end
 					</script>
-					
+
 				<div class='row-fluid well span8 jcrop'>
     			  <div id='real_graphs'>
     			  <!-- Let's keep this part visible. This is the custom and default range --!>
@@ -622,14 +622,14 @@ Invalid element name
 				      %img_src = g['img_src']
 				      %link = g['link']
 				      <p>
-						
+
 				        <img src="{{img_src}}" class="jcropelt"/>
 				        <a href="{{link}}" class="btn"><i class="icon-plus"></i> Show more</a>
 				        <a href="javascript:graph_zoom('/{{elt_type}}/{{elt.get_full_name()}}?')" class="btn"><i class="icon-zoom-in"></i> Zoom</a>
                       </p>
-                      
-					%end      
-					
+
+					%end
+
 				  </div>
 				</div>
 				%end
@@ -650,7 +650,7 @@ Invalid element name
 
 
 	    </div>
-	   
+
     </div>
 </div>
 

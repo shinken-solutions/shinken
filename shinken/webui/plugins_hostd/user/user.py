@@ -48,7 +48,7 @@ def get_page(username):
     # First we look for the user sid
     # so we bail out if it's a false one
     user = app.get_user_auth()
-    
+
     if not user:
         redirect("/user/login")
         return
@@ -77,12 +77,12 @@ def post_user():
     # First we look for the user sid
     # so we bail out if it's a false one
     user = app.get_user_auth()
-    
+
     if not user:
         redirect("/user/login")
         return
 
-    # Take the user that send the post and not the 
+    # Take the user that send the post and not the
     # form value for secutiry reason of course :)
     username = user.get('username')
     email = app.request.forms.get('email')
@@ -93,13 +93,13 @@ def post_user():
         password_hash = hashlib.sha512(password).hexdigest()
     if password != password2:
         abort(400, 'Wrong password')
-    
+
     print "Get a user %s update with email %s and hash %s" % (username, email, password_hash)
 
     app.update_user(username, password_hash, email)
     return
 
-    
+
 
 
 def check_key(api_key):

@@ -33,7 +33,7 @@ from shinken.autoslots import AutoSlots
 
 class Notification(Action):
     """Please Add a Docstring to describe the class here"""
-    
+
     # AutoSlots create the __slots__ with properties and
     # running_properties names
     __metaclass__ = AutoSlots
@@ -121,9 +121,9 @@ class Notification(Action):
 
         # Set host_name and description from the ref
         try:
-            self.host_name = self.ref.host_name        
+            self.host_name = self.ref.host_name
         except:
-            self.host_name = host_name        
+            self.host_name = host_name
         try:
             self.service_description = self.ref.service_description
         except:
@@ -152,7 +152,7 @@ class Notification(Action):
         self.worker = 'none'
         self.reactionner_tag = reactionner_tag
         self.already_start_escalations = set()
-        
+
 
     # return a copy of the check but just what is important for execution
     # So we remove the ref and all

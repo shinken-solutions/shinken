@@ -62,7 +62,7 @@ class Named_Pipe_arbiter(BaseModule):
         self.pipe_path = path
         self.fifo = None
         self.cmd_fragments = ''
-        
+
 
 
     def open(self):
@@ -113,9 +113,9 @@ class Named_Pipe_arbiter(BaseModule):
     # When you are in "external" mode, that is the main loop of your process
     def main(self):
         self.set_exit_handler()
-        
+
         self.open()
-        
+
         input = [self.fifo]
 
         while not self.interrupted:

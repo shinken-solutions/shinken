@@ -53,7 +53,7 @@ class Hostdependency(Item):
         'notification_failure_criteria': ListProp(default='n'),
         'dependency_period':             StringProp(default='')
     })
-    
+
 
     # Give a nice name output, for debbuging purpose
     # (debugging happens more often than expected...)
@@ -87,7 +87,7 @@ class Hostdependencies(Items):
             hd = self.items[id]
             if hd.is_tpl(): # Exploding template is useless
                 continue
-            
+
             # We explode first the dependent (son) part
             dephnames = []
             if hasattr(hd, 'dependent_hostgroup_name'):
@@ -100,7 +100,7 @@ class Hostdependencies(Items):
                         hd.configuration_errors.append(err)
                         continue
                     dephnames.extend(dephg.members.split(','))
-                    
+
             if hasattr(hd, 'dependent_host_name'):
                 dephnames.extend(hd.dependent_host_name.split(','))
 

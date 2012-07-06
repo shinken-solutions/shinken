@@ -11,7 +11,7 @@
 </script>
 
 <div id="login_container" class="span9">
-  
+
   %if login_text:
   <p><span id="login-text"> {{login_text}}</span></p>
   %end
@@ -32,7 +32,7 @@
         <label>Name</label>
         <input class="span6" name="login" type="text">
         <label>Password</label>
-        <input class="span6" id="password" name="password" type="password"> 
+        <input class="span6" id="password" name="password" type="password">
         <br>
         <button class="btn" type="submit" href="javascript: submitform()">Login</button>
       </form>

@@ -9,10 +9,10 @@
 import sys
 import os
 import argparse
-import getopt 
+import getopt
 
 #
-# Usage 
+# Usage
 #
 
 def usage():
@@ -26,10 +26,10 @@ def usage():
 # Main
 #
 
-def readLines(filename): 
-    f = open(filename, "r") 
-    lines = f.readlines() 
-    return lines 
+def readLines(filename):
+    f = open(filename, "r")
+    lines = f.readlines()
+    return lines
 
 def MemValues():
     global memTotal, memCached, memFree
@@ -41,9 +41,9 @@ def MemValues():
         if line.split()[0] == 'Cached:':
              memCached = line.split()[1]
 
-def percentMem():                                                                                                                                             
+def percentMem():
     MemValues()
-    return (((int(memFree) + int(memCached)) * 100) / int(memTotal))  
+    return (((int(memFree) + int(memCached)) * 100) / int(memTotal))
 
 def main():
 
@@ -51,7 +51,7 @@ def main():
         opts, args = getopt.getopt(sys.argv[1:], "hwc:v", ["help", "warning", "critical"])
     except getopt.GetoptError, err:
         # print help information and exit:
-        print str(err) 
+        print str(err)
         usage()
         sys.exit(2)
     output = None
@@ -76,20 +76,20 @@ def main():
     args = parser.parse_args()
     critical = args.critical
     warning = args.warning
-    cmem = str(critical) 
+    cmem = str(critical)
     wmem = str(warning)
     pmemFree = percentMem()
-    pmemUsage = 100 - pmemFree 
+    pmemUsage = 100 - pmemFree
     pmemUsage = str(pmemUsage)
- 
-    if pmemUsage >= cmem : 
-       print 'CRITICAL - Memory usage : '+pmemUsage+'% |mem='+pmemUsage   
+
+    if pmemUsage >= cmem :
+       print 'CRITICAL - Memory usage : '+pmemUsage+'% |mem='+pmemUsage
        sys.exit(2)
     elif pmemUsage >= wmem :
-       print 'WARNING - Memory usage : '+pmemUsage+'% |mem='+pmemUsage    
+       print 'WARNING - Memory usage : '+pmemUsage+'% |mem='+pmemUsage
        sys.exit(1)
     else :
-       print 'OK - Memory usage : '+pmemUsage+'% |mem='+pmemUsage   
+       print 'OK - Memory usage : '+pmemUsage+'% |mem='+pmemUsage
        sys.exit(0)
 
 if __name__ == "__main__":

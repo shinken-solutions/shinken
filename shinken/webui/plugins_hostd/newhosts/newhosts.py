@@ -61,7 +61,7 @@ def get_launch():
     names = app.request.forms.get('names', '')
     use_nmap = to_bool(app.request.forms.get('use_nmap', '0'))
     use_vmware = to_bool(app.request.forms.get('use_vmware', '0'))
-    
+
     print "Got in request form"
     print names
     print 'nmap?', use_nmap
@@ -94,7 +94,7 @@ def get_results():
     pending_hosts = [h for h in cur]
 
     print "And in progress scans"
-    
+
     cur = app.db.scans.find({'creation' : {'$gte': yesterday}})
     scans = [s for s in cur]
     for s in scans:
@@ -133,7 +133,7 @@ def post_validatehost():
         print "Saving", host, "in", app.db.hosts
         r = app.db.hosts.save(host)
         print "Insert result", r
-    
+
     # Set this host as added in the discovered_hosts as _discovery_state='added'
     r = app.db.discovered_hosts.update({'_id' : _id}, { '$set': { '_discovery_state' : 'added' }})
     print "result of update", r

@@ -63,7 +63,7 @@ class Pickle_retention_generic(BaseModule):
     def __init__(self, modconf, path):
         BaseModule.__init__(self, modconf)
         self.path = path
-    
+
     # Ok, main function that is called in the retention creation pass
     def hook_save_retention(self, daemon):
         log_mgr = logger
@@ -74,10 +74,10 @@ class Pickle_retention_generic(BaseModule):
             # Open a file near the path, with .tmp extension
             # so in cae or problem, we do not lost the old one
             f = open(self.path+'.tmp', 'wb')
-            
+
             # We get interesting retention data from the daemon it self
             all_data = daemon.get_retention_data()
-            
+
             # And we save it on file :)
 
             #s = cPickle.dumps(all_data)
@@ -85,7 +85,7 @@ class Pickle_retention_generic(BaseModule):
             cPickle.dump(all_data, f, protocol=cPickle.HIGHEST_PROTOCOL)
             #f.write(s_compress)
             f.close()
-            
+
             # Now move the .tmp fiel to the real path
             shutil.move(self.path+'.tmp', self.path)
         except IOError , exp:
@@ -126,5 +126,5 @@ class Pickle_retention_generic(BaseModule):
         daemon.restore_retention_data(all_data)
 
         log_mgr.log("[PickleRetentionGeneric] OK we've load data from retention file")
-        
+
         return True

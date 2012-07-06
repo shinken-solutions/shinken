@@ -299,7 +299,7 @@ class Config(Item):
         'ADMINPAGER':           ''
         #'USERn' : '$USERn$' # Add at run time
     }
-    
+
     # We create dict of objects
     # Type: 'name in objects' : {Class of object, Class of objects,
     # 'property for self for the objects(config)'
@@ -402,7 +402,7 @@ class Config(Item):
     def read_config(self, files):
         # just a first pass to get the cfg_file and all files in a buf
         res = StringIO()
-        
+
         for file in files:
             # We add a \n (or \r\n) to be sure config files are separated
             # if the previous does not finish with a line return
@@ -507,7 +507,7 @@ class Config(Item):
         types = ['void', 'timeperiod', 'command', 'contactgroup', 'hostgroup',
                  'contact', 'notificationway', 'host', 'service', 'servicegroup',
                  'servicedependency', 'hostdependency', 'arbiter', 'scheduler',
-                 'reactionner', 'broker', 'receiver', 'poller', 'realm', 'module', 
+                 'reactionner', 'broker', 'receiver', 'poller', 'realm', 'module',
                  'resultmodulation', 'escalation', 'serviceescalation', 'hostescalation',
                  'discoveryrun', 'discoveryrule', 'businessimpactmodulation',
                  'hostextinfo','serviceextinfo']
@@ -546,7 +546,7 @@ class Config(Item):
             # } alone in a line means stop the object reading
             if re.search("^\s*}\s*$", line) is not None:
                 in_define = False
-    
+
             if re.search("^\s*#|^\s*$|^\s*}", line) is not None:
                 pass
             # A define must be catch and the type save
@@ -654,7 +654,7 @@ class Config(Item):
     # before all others types
     def early_arbiter_linking(self):
         """ Prepare the arbiter for early operations """
-        
+
         # Should look at hacking command_file module first
         self.hack_old_nagios_parameters_for_arbiter()
 
@@ -684,7 +684,7 @@ class Config(Item):
     def load_triggers(self):
         for p in self.triggers_dirs:
             self.triggers.load_file(p)
-            
+
 
     # We will load all packs .pack files from all packs_dirs
     def load_packs(self):
@@ -885,7 +885,7 @@ class Config(Item):
         #print "Services"
         #print "Initialy got nb of services : %d" % len(self.services.items)
         self.services.explode(self.hosts, self.hostgroups, self.contactgroups,
-                              self.servicegroups, self.servicedependencies, 
+                              self.servicegroups, self.servicedependencies,
                               self.triggers)
         #print "finally got nb of services : %d" % len(self.services.items)
         #print "Servicegroups"
@@ -1307,7 +1307,7 @@ class Config(Item):
         self.discoveryruns.create_reversed_list()
         self.commands.create_reversed_list()
         self.triggers.create_reversed_list()
-        
+
         # For services it's a special case
         # we search for hosts, then for services
         # it's quicker than search in all services
@@ -1347,7 +1347,7 @@ class Config(Item):
         if not self.check_error_on_hard_unmanaged_parameters():
             r = False
             logger.info("Check global parameters failed", print_it=True)
-            
+
         for x in ('hosts', 'hostgroups', 'contacts', 'contactgroups', 'notificationways',
                   'escalations', 'services', 'servicegroups', 'timeperiods', 'commands',
                   'hostsextinfo','servicesextinfo'):
@@ -1364,7 +1364,7 @@ class Config(Item):
         if not self.hosts.no_loop_in_parents():
             r = False
             logger.error("Hosts: detected loop in parents ; conf incorrect")
-        
+
         for x in ( 'servicedependencies', 'hostdependencies', 'arbiters', 'schedulers',
                    'reactionners', 'pollers', 'brokers', 'receivers', 'resultmodulations',
                    'discoveryrules', 'discoveryruns', 'businessimpactmodulations'):
@@ -1387,7 +1387,7 @@ class Config(Item):
                     logger.error("The scheduler %s got no broker in its realm or upper" % s.get_name())
                     self.add_error("Error : the scheduler %s got no broker in its realm or upper" % s.get_name())
                     r = False
-                     
+
         # Check that for each poller_tag of a host, a poller exists with this tag
         # TODO : need to check that poller are in the good realm too
         hosts_tag = set()
@@ -1414,7 +1414,7 @@ class Config(Item):
                             logger.error("Business_rule '%s' got hosts from another realm : %s" %  (e.get_full_name(), elt_r) )
                             self.add_error("Error : Business_rule '%s' got hosts from another realm : %s" %  (e.get_full_name(), elt_r) )
                             r = False
-                
+
         self.conf_is_correct = r
 
 
@@ -1488,9 +1488,9 @@ class Config(Item):
     def add_error(self, txt):
         err = txt
         self.configuration_errors.append(err)
-        
+
         # Possible typo between those 2 variables ?
-        self.is_correct = False        
+        self.is_correct = False
         self.conf_is_correct = False
 
 
@@ -1610,7 +1610,7 @@ class Config(Item):
         # hosts of a realm (in a pack) will be dispatch
         # in the schedulers of this realm
         # REF: doc/pack-agregation.png
-        
+
         # Count the numbers of elements in all the realms, to compare it the total number of hosts
         nb_elements_all_realms = 0
         for r in self.realms:
@@ -1752,7 +1752,7 @@ class Config(Item):
                     val = getattr(self, prop)
                     setattr(cur_conf, prop, val)
                     #print "Copy", prop, val
-            
+
             # we need a deepcopy because each conf
             # will have new hostgroups
             cur_conf.id = i
@@ -1775,9 +1775,9 @@ class Config(Item):
             cur_conf.hosts = [] # will be fill after
             cur_conf.services = [] # will be fill after
             # The elements of the others conf will be tag here
-            cur_conf.other_elements = {}  
+            cur_conf.other_elements = {}
             # if a scheduler have accepted the conf
-            cur_conf.is_assigned = False 
+            cur_conf.is_assigned = False
 
         logger.info("Creating packs for realms", print_it=True)
 

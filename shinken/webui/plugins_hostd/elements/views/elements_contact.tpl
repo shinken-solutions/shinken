@@ -33,7 +33,7 @@ var new_properties = [];
       <li><a href="#direct" data-toggle="tab">Direct configuration</a></li>
       <li><a href="#macros" data-toggle="tab">Macros</a></li>
     </ul>
-    
+
     <div class="tab-content">
       <!-- Tab Generic Stop-->
       <div class="tab-pane active" id="generic">
@@ -49,7 +49,7 @@ var new_properties = [];
 	</span>
 	{{!helper.get_bool_input(elt, 'can_submit_commands', 'Can submit command', editable=editable)}}
 	{{!helper.get_bool_input(elt, 'is_admin', 'Is a monitoring administrator', editable=editable)}}
-	
+
       </div>
       <!-- Tab Generic stop-->
 
@@ -60,8 +60,8 @@ var new_properties = [];
 	{{!helper.get_select_input(elt, 'service_notification_period', 'Service notification Period', 'timeperiods', 'timeperiod_name', editable=editable)}}
 
 
-	{{!helper.get_bool_input(elt, 'host_notifications_enabled', 'Enable host notifications', editable=editable)}}	
-	{{!helper.get_bool_input(elt, 'service_notifications_enabled', 'Enable service notifications', editable=editable)}}	
+	{{!helper.get_bool_input(elt, 'host_notifications_enabled', 'Enable host notifications', editable=editable)}}
+	{{!helper.get_bool_input(elt, 'service_notifications_enabled', 'Enable service notifications', editable=editable)}}
 
 	{{!helper.get_multiselect_input(elt, 'host_notification_commands', 'Host notification commands', 'commands', 'command_name', editable=editable)}}
 	{{!helper.get_multiselect_input(elt, 'service_notification_commands', 'Service notification commands', 'commands', 'command_name', editable=editable)}}
@@ -87,8 +87,8 @@ var new_properties = [];
 
     </div>
 
-    
-    
+
+
     <!--{{elt}} -->
 
   </form>

@@ -21,8 +21,8 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import cmd 
-import sys 
+import cmd
+import sys
 import time
 import datetime
 import copy
@@ -53,7 +53,7 @@ def usage():
     print "   - deploy deploy shinken on hosts defined in authfile (-f path/to/auth)"
     print "   - macros : execute macros file"
     print "   - delobject : remove a shinken object from the shinken configuration file"
-    print "   - cloneobject : clone an object (currently only pollers are suported" 
+    print "   - cloneobject : clone an object (currently only pollers are suported"
     print "   - showconfig : display configuration of object"
     print "   - setparam : set directive value for an object"
     print "   - delparam : remove directive for an object"
@@ -77,7 +77,7 @@ def main():
     try:
         opts, args = getopt.getopt(sys.argv[1:], "qa:f:o:d:v:r:",[])
     except getopt.GetoptError, err:
-        print str(err) 
+        print str(err)
         usage()
         sys.exit(2)
     for o, a in opts:
@@ -90,17 +90,17 @@ def main():
                 usage()
                 sys.exit(2)
         elif o == "-f":
-            configfile = a 
+            configfile = a
         elif o == "-q":
-            quiet = 1 
+            quiet = 1
         elif o == "-o":
             objectype = a
         elif o == "-d":
-            directive = a 
+            directive = a
         elif o == "-v":
             value = a
         elif o == "-r":
-            filters= a 
+            filters= a
         else:
             assert False, "unhandled option"
             sys.exit(2)
@@ -115,7 +115,7 @@ def main():
         print "config file is mandatory"
         usage()
         sys.exit(2)
-    
+
     if objectype == "" and action != "getaddresses" and action != "showconfig" and action != "macros" and action != "sync" and action != "control" and action != "deploy":
         print "object type is mandatory"
         usage()
@@ -125,11 +125,11 @@ def main():
         usage()
         sys.exit(2)
 
-    if filters == "" and action == "delobject": 
+    if filters == "" and action == "delobject":
         print "filters is mandatory"
         usage()
         sys.exit(2)
-    
+
     if value == "" and action == "setparam":
         print "value is mandatory"
         usage()
@@ -151,7 +151,7 @@ def main():
         result,content = setparam(config,objectype,directive,value,filters)
         print content
         if not result:
-            print content 
+            print content
             sys.exit(2)
         else:
             result,content = writeconfig(config,configfile)
@@ -163,7 +163,7 @@ def main():
         result,content = delparam(config,objectype,directive,filters)
         print content
         if not result:
-            print content 
+            print content
             sys.exit(2)
         else:
             result,content = writeconfig(config,configfile)
@@ -224,7 +224,7 @@ def main():
                     sys.exit(2)
                 print "The objectype %s has been cloned with the new attributes : %s" % (objectype,filter)
     elif action == "addobject":
-        print "Not implemented" 
+        print "Not implemented"
         sys.exit(2)
     elif action == "delobject":
         result,confignew = delobject(config,objectype,filters)
@@ -242,17 +242,17 @@ def main():
         """ deploy shinken on remote hosts """
         result,content = deploy(configfile)
         if not result:
-            print content 
+            print content
             sys.exit(2)
         else:
             print "Deploy ok"
     elif action == "getdirective":
         result,content = getdirective(config,objectype,directive,filters)
         if not result:
-            print content 
+            print content
             sys.exit(2)
         else:
-            print content 
+            print content
             sys.exit(0)
     elif action == "getaddresses":
         getaddresses(config)
@@ -321,7 +321,7 @@ def domacros(configfile,args=[]):
             ccommands[cmd] = creg
         else:
             ccommands[cmd] = False
-    last = False 
+    last = False
     indexline=1
 
     """ macros execution """
@@ -383,7 +383,7 @@ def domacros(configfile,args=[]):
                             if maction == "stop" :return (code,message)
                 else:
                     if command == "writeconfig":
-                        code,message = writeconfig(config,configfile)    
+                        code,message = writeconfig(config,configfile)
                         if not code:
                             if maction == "stop" :return (code,message)
                     elif command == "sync":
@@ -396,7 +396,7 @@ def domacros(configfile,args=[]):
                 return (False, "Error Unknown command %s" % (line))
         indexline += 1
     return (True,"Macro execution success")
-    
+
 def delobject(config,objectype,filters):
     dfilters={}
     max=0
@@ -415,12 +415,12 @@ def delobject(config,objectype,filters):
         for i in range(max):
             filterok=0
             for (d,v) in dfilters.items():
-                filterok=filterok+1    
+                filterok=filterok+1
                 if config[objectype][i].has_key(d):
                     if config[objectype][i][d] != v:
-                        filterok=filterok-1    
+                        filterok=filterok-1
                 else:
-                    filterok=filterok-1    
+                    filterok=filterok-1
             if filterok == len(dfilters):
                 config[objectype].pop(i)
                 removed = removed+1
@@ -435,7 +435,7 @@ def cloneobject(config,objectype,directive,filter):
     directives={}
     filters={}
     newobj={}
-    # extract directives to be modified 
+    # extract directives to be modified
     for pair in directive.split(','):
         (d,v)=pair.split('=')
         directives[d]=v
@@ -493,19 +493,19 @@ def showconfig(config,objectype,filters=""):
             filterok=0
             #if config[objectype][i].has_key(directive):
             for (d,v) in dfilters.items():
-                filterok=filterok+1    
+                filterok=filterok+1
                 if config[objectype][i].has_key(d):
                     if config[objectype][i][d] != v:
-                        filterok=filterok-1    
+                        filterok=filterok-1
                 else:
-                    filterok=filterok-1    
+                    filterok=filterok-1
             if filterok == len(dfilters):
                 print "%s[%d]" % (objectype,i)
                 for (d,v) in config[objectype][i].items():
                     print "  %s = %s" % (d,v)
     else:
         print "Unknown object type %s" % (o)
-    return config        
+    return config
 
 def getsatellitesaddresses(config):
     import netifaces
@@ -596,10 +596,10 @@ def deploy(authfile):
 
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    
+
     """ current user """
     user=os.getlogin()
-    
+
     """ define home """
     if user == "root":
         home="/root"
@@ -705,7 +705,7 @@ def addobject(config,objectype,directive):
         print "Invalid objectype"
         sys.exit(2)
 
-    # get a dict of directives 
+    # get a dict of directives
     try:
       directives={}
       for pair in directive.split(','):
@@ -733,7 +733,7 @@ def addobject(config,objectype,directive):
 
 
     # so we can create the new object
-    newobject= {} 
+    newobject= {}
     for (d,v) in directives.items():
         if d != "imported_from":
             newobject[d]=v
@@ -768,11 +768,11 @@ def dumpconfig(type,config,allowed):
                                 for vpe in vp:
                                     col1 = "| "+" ".ljust(47," ")+"| "
                                     col2 = vpe.ljust(48," ")+"|"
-                                    print col1+col2 
+                                    print col1+col2
                             else:
                                 col1 = "| "+d.ljust(47," ")+"| "
                                 col2 = v.ljust(48," ")+"|"
-                                print col1+col2 
+                                print col1+col2
                     print "+".ljust(99,"-")+"+"
 
 def getobjectnames(objectype,config,allowed):
@@ -802,12 +802,12 @@ def getdirective(config,objectype,directive,filters):
 #                return (False,"Two many values. Refine your filter")
             filterok=0
             for (d,v) in dfilters.items():
-                filterok=filterok+1    
+                filterok=filterok+1
                 if config[objectype][0].has_key(d):
                     if config[objectype][0][d] != v:
-                        filterok=filterok-1    
+                        filterok=filterok-1
                 else:
-                    filterok=filterok-1    
+                    filterok=filterok-1
             if filterok == len(dfilters):
                 if not config[objectype][0].has_key(directive):
                     code = False
@@ -822,7 +822,7 @@ def getdirective(config,objectype,directive,filters):
         else:
             return (False, "%s not found" % (objectype))
     except:
-        return (False,"Unknown error in getdirective" ) 
+        return (False,"Unknown error in getdirective" )
 
 def setparam(config,objectype,directive,value,filters):
     import re
@@ -839,12 +839,12 @@ def setparam(config,objectype,directive,value,filters):
         for i in range(max):
             filterok=0
             for (d,v) in dfilters.items():
-                filterok=filterok+1    
+                filterok=filterok+1
                 if config[objectype][i].has_key(d):
                     if config[objectype][i][d] != v:
-                        filterok=filterok-1    
+                        filterok=filterok-1
                 else:
-                    filterok=filterok-1    
+                    filterok=filterok-1
             if filterok == len(dfilters):
                 """ if directive does not exist create it ! """
                 if not config[objectype][i].has_key(directive):
@@ -918,12 +918,12 @@ def delparam(config,objectype,directive,filters):
         for i in range(max):
             filterok=0
             for (d,v) in dfilters.items():
-                filterok=filterok+1    
+                filterok=filterok+1
                 if config[objectype][i].has_key(d):
                     if config[objectype][i][d] != v:
-                        filterok=filterok-1    
+                        filterok=filterok-1
                 else:
-                    filterok=filterok-1    
+                    filterok=filterok-1
             if filterok == len(dfilters):
                 """ if directive exist remove it ! """
                 if config[objectype][i].has_key(directive):

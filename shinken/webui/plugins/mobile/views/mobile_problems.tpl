@@ -10,7 +10,7 @@
 	%if is_current:
 		<li class="ui-btn-active"><a href="#">{{name}}</a></li>
 	%elif start == None or end == None:
-		   	
+
 	%else:
 		<li><a href='/mobile{{menu_part}}?start={{start}}&end={{end}}'>{{name}}</a></li>
 	%end
@@ -31,10 +31,10 @@
 	<img style="width : 20px; height:20px" src="{{helper.get_icon_state(pb)}}" />
 	{{pb.state}}: {{pb.get_full_name()}}
       </h2>
-	
-	<p>  
+
+	<p>
 	<div class='detail' id="{{app.helper.get_html_id(pb)}}">
-     <p><strong>Output: </strong> 
+     <p><strong>Output: </strong>
        %if app.allow_html_output:
        {{!helper.strip_html_output(pb.output)}}
        %else:
@@ -60,9 +60,9 @@
    </div>
 	<a href="/mobile{{!helper.get_link_dest(pb)}}" rel="external" data-role="button" data-icon="search" >More Infos</a>
 	</div>
-	
-   %end	
-	
+
+   %end
+
 </div>
 
 

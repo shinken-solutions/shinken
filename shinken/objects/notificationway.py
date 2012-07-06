@@ -52,7 +52,7 @@ class NotificationWay(Item):
         'service_notification_commands':StringProp (fill_brok=['full_status']),
         'min_business_impact':                IntegerProp(default = '0', fill_brok=['full_status']),
     })
-    
+
     running_properties = Item.running_properties.copy()
 
     # This tab is used to transform old parameters name into new ones
@@ -185,7 +185,7 @@ class NotificationWay(Item):
                 if not cmd.is_valid():
                     logger.warning("[notificationway::%s] a service_notification_command is invalid" % self.get_name())
                     state = False
-        
+
         if getattr(self, 'service_notification_period', None) is None:
             logger.warning("[notificationway::%s] the service_notification_period is invalid" % self.get_name())
             state = False

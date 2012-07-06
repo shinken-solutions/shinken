@@ -14,7 +14,7 @@ Invalid element
 <script type="text/javascript">
   window.location.replace("/login");
 </script>
-%# " And if the javascript is not follow? not a problem, we gave no data here." 
+%# " And if the javascript is not follow? not a problem, we gave no data here."
 %end
 
 
@@ -50,7 +50,7 @@ Invalid element
           typeahead.process(data)}
         });
       },
-    onselect: function(obj) { 
+    onselect: function(obj) {
       $("ul.typeahead.dropdown-menu").find('li.active').data(obj);
     }
   });
@@ -67,7 +67,7 @@ Invalid element
 
 <div id="log">Loading element informations...</div>
 </div>
-	
+
 <div class="clear"></div>
 </div>
 

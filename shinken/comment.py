@@ -92,13 +92,13 @@ class Comment:
     # Inverted funtion of getstate
     def __setstate__(self, state):
         cls = self.__class__
-        
+
         # Maybe it's not a dict but a list like in the old 0.4 format
         # so we should call the 0.4 function for it
         if isinstance(state, list):
             self.__setstate_deprecated__(state)
-            return 
-            
+            return
+
         self.id = state['id']
         for prop in cls.properties:
             if prop in state:
@@ -120,11 +120,11 @@ class Comment:
         if len(cls.properties) != (len(state) - 1):
             self.debug("Passing comment")
             return
-        
+
         self.id = state.pop()
         for prop in cls.properties:
             val = state.pop()
-            setattr(self, prop, val)        
+            setattr(self, prop, val)
         if self.id >= cls.id:
             cls.id = self.id + 1
 

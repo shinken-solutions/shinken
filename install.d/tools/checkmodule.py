@@ -22,8 +22,8 @@
 
 import sys
 import getopt
-def main(argv):                         
-	try:                                
+def main(argv):
+	try:
 		opts, args = getopt.getopt(argv, "m:")
 		ret=0
 		for o, a in opts:
@@ -34,9 +34,9 @@ def main(argv):
 				except:
 					print "KO"
 					ret=2
-	except:           
+	except:
 		ret=1
-	sys.exit(ret) 
+	sys.exit(ret)
 
 if __name__ == "__main__":
 	main(sys.argv[1:])

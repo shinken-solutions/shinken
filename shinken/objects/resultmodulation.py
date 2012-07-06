@@ -44,7 +44,7 @@ class Resultmodulation(Item):
         'exit_code_modulation':  StringProp(default=None),
         'modulation_period':     StringProp(default=None),
     })
-    
+
 
     # For debugging purpose only (nice name)
     def get_name(self):

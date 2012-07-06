@@ -1,5 +1,5 @@
-#!/bin/bash 
-#set -x 
+#!/bin/bash
+#set -x
 # Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
@@ -22,8 +22,8 @@
 
 if [ -f /tmp/shinken.install.log ]
 then
-    rm -f /tmp/shinken.install.log    
-fi 
+    rm -f /tmp/shinken.install.log
+fi
 
 #####################
 ### ENVIRONNEMENT ###
@@ -55,7 +55,7 @@ do
             rm -Rf $res
         fi
     fi
-    
+
 done
 APTLIST="$APTPKGS $VSPHERESDKAPTPKGS $NAGPLUGAPTPK $CHECKORACLEHEALTHAPTPKG $CHECKMONGOAPTPKG $CHECKEMCAPTPKG $CHECKNWCAPTPKG $PNPAPTPKG $MKAPTPKG $WMICAPTPKG $CHECKHPASMAPTPKGS"
 for l in $APTLIST
@@ -63,7 +63,7 @@ do
     for p in $l
     do
         cecho " > remove $p" yellow
-        apt-get purge $p 
+        apt-get purge $p
     done
 done
 apt-get autoremove

@@ -42,7 +42,7 @@ class TestProblemImpact(ShinkenTest):
 
         # The problem_impact_state change should be enabled in the configuration
         self.assert_(self.conf.enable_problem_impacts_states_change == True)
-        
+
         host_router_0 = self.sched.hosts.find_by_name("test_router_0")
         host_router_0.checks_in_progress = []
         self.assert_(host_router_0.business_impact == 2)
@@ -208,7 +208,7 @@ class TestProblemImpact(ShinkenTest):
 
         # The problem_impact_state change should be enabled in the configuration
         self.assert_(self.conf.enable_problem_impacts_states_change == True)
-        
+
         host_router_0 = self.sched.hosts.find_by_name("test_router_0")
         host_router_0.checks_in_progress = []
         self.assert_(host_router_0.business_impact == 2)

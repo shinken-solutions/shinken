@@ -188,7 +188,7 @@ class ExternalCommandManager:
         'PROCESS_HOST_CHECK_RESULT' : {'global' : False, 'args' : ['host', 'to_int', None]},
         'PROCESS_HOST_OUTPUT' : {'global' : False, 'args' : ['host', None]},
         'PROCESS_SERVICE_CHECK_RESULT' : {'global' : False, 'args' : ['service', 'to_int', None]},
-        'PROCESS_SERVICE_OUTPUT' : {'global' : False, 'args' : ['service', None]},        
+        'PROCESS_SERVICE_OUTPUT' : {'global' : False, 'args' : ['service', None]},
         'READ_STATE_INFORMATION' : {'global' : True, 'args' : []},
         'REMOVE_HOST_ACKNOWLEDGEMENT' : {'global' : False, 'args' : ['host']},
         'REMOVE_SVC_ACKNOWLEDGEMENT' : {'global' : False, 'args' : ['service']},
@@ -366,7 +366,7 @@ class ExternalCommandManager:
     def dispatch_global_command(self, command):
         for sched in self.conf.schedulers:
             logger.debug("Sending a command '%s' to scheduler %s" % (command, sched))
-            if sched.alive:                
+            if sched.alive:
                 #sched.run_external_command(command)
                 sched.external_commands.append(command)
 
@@ -408,7 +408,7 @@ class ExternalCommandManager:
         # on every ; because this character may appear in the perfdata of
         # passive check results.
         entry = ExternalCommandManager.commands[c_name]
-        
+
         # Look if the command is purely internal or not
         internal = False
         if 'internal' in entry and entry['internal']:
@@ -417,14 +417,14 @@ class ExternalCommandManager:
         numargs = len(entry['args'])
         if numargs and 'service' in entry['args']:
             numargs += 1
-        elts = command.split(';', numargs) 
+        elts = command.split(';', numargs)
 
         logger.debug("mode= %s, global= %s" % (self.mode, str(entry['global'])))
         if self.mode == 'dispatcher' and entry['global']:
             if not internal:
                 logger.debug("Command '%s' is a global one, we resent it to all schedulers" % c_name)
                 return {'global' : True, 'cmd' : command}
-        
+
 
         #print "Is global?", c_name, entry['global']
         #print "Mode:", self.mode
@@ -1295,7 +1295,7 @@ class ExternalCommandManager:
     # PROCESS_HOST_OUTPUT;<host_name>;<plugin_output>
     def PROCESS_HOST_OUTPUT(self, host, plugin_output):
         self.PROCESS_HOST_CHECK_RESULT(host, host.state_id, plugin_output)
-        
+
 
 
     # PROCESS_SERVICE_CHECK_RESULT;<host_name>;<service_description>;<return_code>;<plugin_output>
@@ -1609,7 +1609,7 @@ class ExternalCommandManager:
             son.add_host_act_dependency(father, ['w', 'u', 'd'], None, True)
             self.sched.get_and_register_status_brok(son)
             self.sched.get_and_register_status_brok(father)
-        
+
 
     # ADD_SIMPLE_HOST_DEPENDENCY;<host_name>;<host_name>
     def DEL_HOST_DEPENDENCY(self, son, father):

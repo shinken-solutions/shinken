@@ -30,14 +30,14 @@ class TestDiscoveryConf(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_discovery_def.cfg')
 
-    
+
     def test_look_for_discorule(self):
         genhttp = self.sched.conf.discoveryrules.find_by_name('GenHttp')
         self.assert_(genhttp != None)
         self.assert_(genhttp.creation_type == 'service')
         self.assert_(genhttp.matches['openports'] == '80,443')
         self.assert_(genhttp.matches['os'] == 'windows')
-        
+
         key = 'osversion'
         value = '2003'
         # Should not match this
@@ -46,7 +46,7 @@ class TestDiscoveryConf(ShinkenTest):
         key = 'openports'
         value = '80'
         self.assert_(genhttp.is_matching(key, value) == True)
-        
+
         # Low look for a list of matchings
         l = {'openports': '80', 'os': 'windows'}
         # should match this
@@ -61,7 +61,7 @@ class TestDiscoveryConf(ShinkenTest):
 
         # Now search the NOT rule
         genhttpnowin = self.sched.conf.discoveryrules.find_by_name('GenHttpNotWindows')
-        
+
         # Should manage this
         l = {'openports' : '80', 'os':  'linux'}
         self.assert_(genhttpnowin.is_matching_disco_datas(l) == True)
@@ -109,7 +109,7 @@ class TestDiscoveryConf(ShinkenTest):
         self.assert_(genhttp != None)
         self.assert_(genhttp.creation_type == 'host')
         self.assert_(genhttp.matches['openports'] == '^80$')
-        
+
         key = 'osversion'
         value = '2003'
         # Should not match this
@@ -118,7 +118,7 @@ class TestDiscoveryConf(ShinkenTest):
         key = 'openports'
         value = '80'
         self.assert_(genhttp.is_matching(key, value) == True)
-        
+
         # Low look for a list of matchings
         l = {'openports': '80', 'os' : 'windows'}
         # should match this

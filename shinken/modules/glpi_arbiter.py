@@ -99,7 +99,7 @@ class Glpi_arbiter(BaseModule):
         # Get timeperiods
         all_timeperiods = self.con.monitoring.shinkenTimeperiods(arg)
         print "Get all timeperiods", all_timeperiods
-        attributs = ['timeperiod_name', 'alias', 'sunday', 
+        attributs = ['timeperiod_name', 'alias', 'sunday',
                      'monday', 'tuesday', 'wednesday',
                      'thursday', 'friday', 'saturday']
         for timeperiod_info in all_timeperiods:
@@ -109,23 +109,23 @@ class Glpi_arbiter(BaseModule):
             for attribut in attributs:
                 if attribut in timeperiod_info:
                     h[attribut] = timeperiod_info[attribut]
-            
+
             #print "\nReturning to Arbiter the timeperiods:", h
             r['timeperiods'].append(h)
 
         # Get hosts
         all_hosts = self.con.monitoring.shinkenHosts(arg)
         print "Get all hosts", all_hosts
-        attributs = ['display_name', 'hostgroups', 'initial_state', 
-                     'active_checks_enabled', 'passive_checks_enabled', 'obsess_over_host', 
-                     'check_freshness', 'freshness_threshold', 'event_handler', 
-                     'event_handler_enabled', 'low_flap_threshold ', 'high_flap_threshold', 
-                     'flap_detection_enabled', 'flap_detection_options', 'retain_status_information', 
-                     'retain_nonstatus_information', 'contact_groups', 'first_notification_delay', 
-                     'notifications_enabled', 'stalking_options', 'notes', 
-                     'notes_url', 'action_url', 'icon_image', 
-                     'icon_image_alt', 'vrml_image', 'statusmap_image', 
-                     '2d_coords', '3d_coords', 'realm', 
+        attributs = ['display_name', 'hostgroups', 'initial_state',
+                     'active_checks_enabled', 'passive_checks_enabled', 'obsess_over_host',
+                     'check_freshness', 'freshness_threshold', 'event_handler',
+                     'event_handler_enabled', 'low_flap_threshold ', 'high_flap_threshold',
+                     'flap_detection_enabled', 'flap_detection_options', 'retain_status_information',
+                     'retain_nonstatus_information', 'contact_groups', 'first_notification_delay',
+                     'notifications_enabled', 'stalking_options', 'notes',
+                     'notes_url', 'action_url', 'icon_image',
+                     'icon_image_alt', 'vrml_image', 'statusmap_image',
+                     '2d_coords', '3d_coords', 'realm',
                      'poller_tag', 'business_impact']
         for host_info in all_hosts:
             print "\n\n"
@@ -174,7 +174,7 @@ class Glpi_arbiter(BaseModule):
         # Get services
         all_services = self.con.monitoring.shinkenServices(arg)
         print "Get all services", all_services
-        attributs = ['host_name', 'hostgroup_name', 'service_description', 
+        attributs = ['host_name', 'hostgroup_name', 'service_description',
                      'use', 'check_command', 'check_interval', 'retry_interval',
                      'max_check_attempts', 'check_period', 'contacts',
                      'notification_interval', 'notification_period', 'notification_options',

@@ -22,15 +22,15 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
- This class is an application that launches actions like 
+ This class is an application that launches actions like
  notifications or event handlers
- The reactionner listens to the Arbiter for the configuration sent through 
+ The reactionner listens to the Arbiter for the configuration sent through
  the given port as first argument.
- The configuration sent by the arbiter specifies from which schedulers the 
+ The configuration sent by the arbiter specifies from which schedulers the
  will take actions.
- When the reactionner is already launched and has its own conf, it keeps 
+ When the reactionner is already launched and has its own conf, it keeps
  on listening the arbiter (one a timeout)
- In case the arbiter has a new conf to send, the reactionner forget its old 
+ In case the arbiter has a new conf to send, the reactionner forget its old
  schedulers (and the associated actions) and take the new ones instead.
 '''
 

@@ -30,7 +30,7 @@ from copy import copy
 from item import Item, Items
 from shinken.objects.matchingitem import MatchingItem
 from service import Service
-from host import Host 
+from host import Host
 from shinken.property import StringProp, ListProp, IntegerProp
 
 
@@ -55,13 +55,13 @@ class Discoveryrule(MatchingItem):
     macros = {}
 
 
-    # The init of a discovery will set the property of 
+    # The init of a discovery will set the property of
     # Discoveryrule.properties as in setattr, but all others
     # will be in a list because we need to have all names
     # and not lost all in __dict__
     def __init__(self, params={}):
         cls = self.__class__
-        
+
         # We have our own id of My Class type :)
         # use set attr for going into the slots
         # instead of __dict__ :)
@@ -82,7 +82,7 @@ class Discoveryrule(MatchingItem):
             return
         tcls = map[t]
 
-        # In my own property : 
+        # In my own property :
         #  -> in __dict__
         # In the properties of the 'creation_type' Class:
         #  -> in self.writing_properties

@@ -63,7 +63,7 @@ Please register <br/>
   <div class="input-prepend">
     <span class="add-on"><i class="icon-check"></i></span><input class="span3" name="password" type="password" placeholder="Password">
   </div>
-  
+
     <a href='javascript:submit();' class='btn'> submit</a>
-    
+
 </form>

@@ -63,7 +63,7 @@ sub help {
    print_usage();
    print <<EOT;
 -v, --vgname
-   Name of vg to monitor. 
+   Name of vg to monitor.
 -d, --debug
    Enabled debug message.
 -h, --help
@@ -75,13 +75,13 @@ sub help {
 -2, --v2c
    Use snmp v2c
 -l, --login=LOGIN ; -x, --passwd=PASSWD
-   Login and auth password for snmpv3 authentication 
-   If no priv password exists, implies AuthNoPriv 
+   Login and auth password for snmpv3 authentication
+   If no priv password exists, implies AuthNoPriv
 -X, --privpass=PASSWD
    Priv password for snmpv3 (AuthPriv protocol)
 -p, --protocols=<authproto>,<privproto>
    <authproto> : Authentication protocol (md5|sha : default md5)
-   <privproto> : Priv protocole (des|aes : default des) 
+   <privproto> : Priv protocole (des|aes : default des)
 -P, --port=PORT
    SNMP port (Default 161)
 -f, --perfparse
@@ -120,7 +120,7 @@ sub check_options {
     if (defined ($o_help) ) { help(); exit $ERRORS{"UNKNOWN"}};
     if (! defined($o_vgName)) { $o_vgName = '.*' };
     if (defined($o_version)) { p_version(); exit $ERRORS{"UNKNOWN"}};
-    if ( ! defined($o_host) ) # check host and filter 
+    if ( ! defined($o_host) ) # check host and filter
     { print_usage(); exit $ERRORS{"UNKNOWN"}}
     # check snmp information
     if ( !defined($o_community) && (!defined($o_login) || !defined($o_passwd)) )
@@ -255,7 +255,7 @@ if(@lv2monitor)
         $$LvTable{"$lvState.$lv"} == 3 and do { $counters{"closeStale"}++ };
         $$LvTable{"$lvState.$lv"} == 4 and do {
         # set as opensync for other fs than jfs2 and jfs2log to not pollute final result
-        if ($$LvTable{"$lvType.$lv"} != 5 && $$LvTable{"$lvType.$lv"} != 6 ) 
+        if ($$LvTable{"$lvType.$lv"} != 5 && $$LvTable{"$lvType.$lv"} != 6 )
                 { $counters{"openSync"}++; }
         else
                 { $counters{"closeSync"}++; }

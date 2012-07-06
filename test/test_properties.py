@@ -29,7 +29,7 @@ class TestConfig(ShinkenTest):
     def setUp(self):
         pass
 
-    
+
     # Test the bool property class
     def test_bool_property(self):
         p = BoolProp(default='1', class_inherit=[('Host', 'accept_passive_checks')])
@@ -51,7 +51,7 @@ class TestConfig(ShinkenTest):
         print s, val
         self.assert_(val == True)
         self.assert_('full_status' in p.fill_brok)
-        
+
 
 if __name__ == '__main__':
     unittest.main()

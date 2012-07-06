@@ -44,7 +44,7 @@ properties = {
 # called by the plugin manager
 def get_instance(plugin):
     print "Get an Active Directory UI module for plugin %s" % plugin.get_name()
-    
+
     instance = AD_Webui(plugin)
     return instance
 
@@ -80,7 +80,7 @@ class AD_Webui(BaseModule):
         # or related exception so you can ignore the result
         self.con.simple_bind_s(self.username, self.password)
         print "AD/Ldap Connection done"
-        
+
 
     def disconnect(self):
         self.con = None
@@ -102,7 +102,7 @@ class AD_Webui(BaseModule):
         # First we try to connect, because there is no "KEEP ALIVE" option
         # available, so we will get a drop after one day...
         self.connect()
-        
+
         print "AD/LDAP : search for contact", contact.get_name()
         searchScope = ldap.SCOPE_SUBTREE
         ## retrieve all attributes
@@ -136,7 +136,7 @@ class AD_Webui(BaseModule):
         # Always clean on exit
         finally:
             self.disconnect()
-    
+
 
     # One of our goal is to look for contacts and get all pictures
     def manage_initial_broks_done_brok(self, b):
@@ -179,7 +179,7 @@ class AD_Webui(BaseModule):
         # If we do not have an ldap uri, no auth :)
         if not self.ldap_uri:
             return False
-        
+
         print "Trying to auth by ldap", user, password
 
         c = self.app.datamgr.get_contact(user)
@@ -201,7 +201,7 @@ class AD_Webui(BaseModule):
 
         local_con = ldap.initialize(self.ldap_uri)
         local_con.set_option(ldap.OPT_REFERRALS,0)
-        
+
         # Any errors will throw an ldap.LDAPError exception
         # or related exception so you can ignore the result
         try:
@@ -210,10 +210,10 @@ class AD_Webui(BaseModule):
             return True
         except ldap.LDAPError, exp:
             print "LMdap auth error:", exp
-        
-        # The local_con will automatically close this connection when 
+
+        # The local_con will automatically close this connection when
         # the object will be deleted, so no close need
 
         # No good? so no auth :)
         return False
-        
+

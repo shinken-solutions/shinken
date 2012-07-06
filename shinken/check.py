@@ -104,7 +104,7 @@ class Check(Action):
         else:
             self.internal = False
         self.from_trigger = from_trigger
-        
+
 
     def copy_shell(self):
         """return a copy of the check but just what is important for execution

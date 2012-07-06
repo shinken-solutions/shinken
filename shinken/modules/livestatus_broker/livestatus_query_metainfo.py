@@ -88,7 +88,7 @@ HINT_SINGLE_SERVICE = 3
 
 class LiveStatusQueryMetainfoFilterStack(LiveStatusStack):
     """
-    This is a filterstack which produces a text representation of 
+    This is a filterstack which produces a text representation of
     a and/or-filter-tree, similar to sql.
     It can be used some time for text analysis.
     """
@@ -131,7 +131,7 @@ class LiveStatusQueryMetainfo(object):
     """
     This class implements a more "machine-readable" form of a livestatus query.
     The lines of a query text are split up in a list of tuples,
-    where the first element is the lql statement and the remaining elements 
+    where the first element is the lql statement and the remaining elements
     are columns, attributes, operators etc.
     It's main purpose is to provide methods which are used to rank the query
     in specific categories.
@@ -311,7 +311,7 @@ class LiveStatusQueryMetainfo(object):
         logline_elements.extend(['current_host_groups', 'current_service_groups'])
         if self.table == 'log':
             limits = sorted([(f[2], int(f[3])) for f in self.structured_data if f[0] == 'Filter' and f[1] == 'time'], key=lambda x: x[1])
-             
+
             if len(limits) == 2 and limits[1][1] <= int(time.time()) and limits[0][0].startswith('>') and limits[1][0].startswith('<'):
                 if has_not_more_than(self.columns, logline_elements):
                     return True

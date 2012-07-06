@@ -31,7 +31,7 @@ from shinken_test import *
 from shinken.log import logger
 from shinken.objects.module import Module
 from shinken.modules import nrpe_poller
-from shinken.modules.nrpe_poller import get_instance 
+from shinken.modules.nrpe_poller import get_instance
 
 
 modconf = Module()
@@ -74,8 +74,8 @@ class TestNrpePoller(ShinkenTest):
 
         msg = Message(id=0, type='Do', data=c)
         to_queue.put(msg)
-        
-        # The worker will read a message by loop. We want it to 
+
+        # The worker will read a message by loop. We want it to
         # do 2 loops, so we fake a message, adn the Number 2 is a real
         # exit one
         msg1 = Message(id=0, type='All is good, continue')
@@ -93,14 +93,14 @@ class TestNrpePoller(ShinkenTest):
 
         o = from_queue.get() # pop()
         print "O", o
-        
+
         print o.__dict__
         self.assert_(o.status == 'done')
         self.assert_(o.exit_status == 2)
 
         # to_queue.close()
         # control_queue.close()
-        
+
 
 
 

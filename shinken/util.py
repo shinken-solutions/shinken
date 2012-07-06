@@ -299,7 +299,7 @@ def sort_by_ids(x, y):
     return 0
 
 
-# From a tab, get the avg, min, max 
+# From a tab, get the avg, min, max
 # for the tab values, but not the lower ones
 # and higer ones that are too distinct
 # than major ones
@@ -319,14 +319,14 @@ def nighty_five_percent(t):
     if l > 100:
         offset = int(l*0.05)
         t_reduce = t_reduce[offset:-offset]
-        
+
     reduce_len = len(t_reduce)
     reduce_sum = sum(t_reduce)
 
     reduce_avg = float(reduce_sum)/reduce_len
     reduce_max = max(t_reduce)
     reduce_min = min(t_reduce)
-    
+
     return (reduce_avg, reduce_min, reduce_max)
 
 
@@ -460,7 +460,7 @@ def get_key_value_sequence(entry, default_value=None):
     # Now create new one but for [X-Y] matchs
     #  array1 holds the original entries. Some of the keys may contain wildcards
     #  array2 is filled with originals and inflated wildcards
-    
+
     if NodeSet is None:
         # The pattern that will say if we have a [X-Y] key.
         pat = re.compile('\[(\d*)-(\d*)\]')

@@ -18,7 +18,7 @@
     <b>Description</b>: {{pack.get('description')}}
   </span>
   <span class='span5'>
-    <b>Documentation</b>: 
+    <b>Documentation</b>:
     %doc = pack.get('doc_link')
     %if not doc:
        %doc = 'http://www.shinken-monitoring.org/wiki/packs/'+pname

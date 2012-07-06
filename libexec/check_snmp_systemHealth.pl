@@ -20,7 +20,7 @@ my %Health    = (
 	'IMM' => ".1.3.6.1.4.1.2.3.51.3.1.4.1.0",
 	'RSA' => ".1.3.6.1.4.1.2.3.51.1.2.7.1.0");
 my %moduleVpdTable = (
-	'IMM' => ".1.3.6.1.4.1.2.3.51.3.1.5", 	
+	'IMM' => ".1.3.6.1.4.1.2.3.51.3.1.5",
 	'RSA' => ".1.3.6.1.4.1.2.3.51.1.2.21");
 my %typeTable = (
 	'IMM' => ".1.3.6.1.4.1.2.3.51.3.1.5.2.1.1.0",
@@ -80,9 +80,9 @@ sub help {
    print_usage();
    print <<EOT;
 -m, --module
-   Choose between IMM or RSA module. 
+   Choose between IMM or RSA module.
 -v, --verbose
-   Increase verbosity. 
+   Increase verbosity.
 -h, --help
    print this help message
 -H, --hostname=HOST
@@ -92,13 +92,13 @@ sub help {
 -2, --v2c
    Use snmp v2c
 -l, --login=LOGIN ; -x, --passwd=PASSWD
-   Login and auth password for snmpv3 authentication 
-   If no priv password exists, implies AuthNoPriv 
+   Login and auth password for snmpv3 authentication
+   If no priv password exists, implies AuthNoPriv
 -X, --privpass=PASSWD
    Priv password for snmpv3 (AuthPriv protocol)
 -p, --protocols=<authproto>,<privproto>
    <authproto> : Authentication protocol (md5|sha : default md5)
-   <privproto> : Priv protocole (des|aes : default des) 
+   <privproto> : Priv protocole (des|aes : default des)
 -P, --port=PORT
    SNMP port (Default 161)
 -t, --timeout=INTEGER
@@ -132,7 +132,7 @@ sub check_options {
         if (!defined($o_timeout)) {$o_timeout=5;}
     if (defined ($o_help) ) { help(); exit $ERRORS{"UNKNOWN"}};
     if (defined($o_version)) { p_version(); exit $ERRORS{"UNKNOWN"}};
-    if ( ! defined($o_host) ) # check host and filter 
+    if ( ! defined($o_host) ) # check host and filter
         { print_usage(); exit $ERRORS{"UNKNOWN"}}
     # check module definition
 	if (!defined($o_module) || ($o_module =~ /imm|rsa/))

@@ -33,7 +33,7 @@ from shinken.property import PathProp, IntegerProp
 class Poller(Satellite):
     do_checks = True    # I do checks
     do_actions = False  # but no actions
-    
+
     properties = Satellite.properties.copy()
     properties.update({
         'pidfile':   PathProp(default='pollerd.pid'),

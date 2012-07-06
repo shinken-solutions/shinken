@@ -6,13 +6,13 @@
 "path":"os/",
 
 "macros":{
-	 "_SNMPCOMMUNITY" : {"type":"string", 
+	 "_SNMPCOMMUNITY" : {"type":"string",
 	                     "description":"The read snmp community allowed on the linux server"
 			     },
 
          "_LOAD_WARN"     : {"type":"string",
                              "description" : "Value for starting warning state for the load average at 1m,5m,15m"
-                             },         
+                             },
          "_LOAD_CRIT"     : {"type":"string",
                              "description" : "Value for starting critical state for the load average at 1m,5m,15m"
                              },
@@ -38,7 +38,7 @@
                                 "description" : "Physical memory and swap critical level"
                              }
 
-          }	 
+          }
 
 
 }

@@ -90,7 +90,7 @@ def get_page():
 
     if not user:
         redirect("/user/login")
-    
+
 
     all_imp_impacts = app.datamgr.get_important_elements()
     all_imp_impacts.sort(hst_srv_sort)
@@ -106,7 +106,7 @@ def get_page():
              "title": "My Image 3", "thumb": "/static/images/state_flapping.png", "zoom": "/static/images/state_flapping.png",
              "html" : get_div(imp)}
         impacts.append(d)
-    
+
     # Got in json format
     #j_impacts = json.dumps(impacts)
 #    print "Return impact in json", j_impacts

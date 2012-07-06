@@ -249,7 +249,7 @@ class SchedulingItem(Item):
         for cm in self.business_impact_modulations:
             now = time.time()
             period = cm.modulation_period
-            if period is None or period.is_time_valid(now):                    
+            if period is None or period.is_time_valid(now):
                 #print "My self", self.get_name(), "go from crit", self.business_impact, "to crit", cm.business_impact
                 self.business_impact = cm.business_impact
                 in_modulation = True
@@ -262,11 +262,11 @@ class SchedulingItem(Item):
             self.business_impact = max(self.business_impact, max([e.business_impact for e in self.impacts]))
             return
 
-        # If we are not a problem, we setup our own_crit if we are not in a 
+        # If we are not a problem, we setup our own_crit if we are not in a
         # modulation period
         if self.my_own_business_impact != -1 and not in_modulation:
             self.business_impact = self.my_own_business_impact
-            
+
 
 
     # Look for my impacts, and remove me from theirs problems list
@@ -609,7 +609,7 @@ class SchedulingItem(Item):
         # if not, only if we enable them (auto launch)
         if self.event_handler is None or ((not self.event_handler_enabled or not cls.enable_event_handlers) and not externalcmd):
             return
-        
+
         # If we do not force and we are in downtime, bailout
         # if the no_event_handlers_during_downtimes is 1 in conf
         if cls.no_event_handlers_during_downtimes and not externalcmd and self.in_scheduled_downtime:
@@ -648,7 +648,7 @@ class SchedulingItem(Item):
     # ot raise notif about it
     def update_hard_unknown_phase_state(self):
         self.was_in_hard_unknown_reach_phase = self.in_hard_unknown_reach_phase
-        
+
         # We do not care about SOFT state at all
         # and we are sure we are no more in such a phase
         if self.state_type != 'HARD' or self.last_state_type != 'HARD':
@@ -668,7 +668,7 @@ class SchedulingItem(Item):
             # if we were already in such a phase, look for its end
             if self.state != 'UNKNOWN' and self.state != 'UNREACHABLE':
                 self.in_hard_unknown_reach_phase = False
-            
+
         # If we just exit the phase, look if we exit with a different state
         # than we enter or not. If so, li and say we were not in such pahse
         # because we need so to raise a new notif
@@ -728,7 +728,7 @@ class SchedulingItem(Item):
         self.output = c.output
         self.long_output = c.long_output
 
-        # Set the check result type also in the host/service 
+        # Set the check result type also in the host/service
         # 0 = result came from an active check
         # 1 = result came from a passive check
         self.check_type = c.check_type
@@ -987,7 +987,7 @@ class SchedulingItem(Item):
 
     def update_event_and_problem_id(self):
         OK_UP = self.__class__.ok_up # OK for service, UP for host
-        if ( self.state != self.last_state and self.last_state != 'PENDING' 
+        if ( self.state != self.last_state and self.last_state != 'PENDING'
                 or self.state != OK_UP and self.last_state == 'PENDING' ):
             SchedulingItem.current_event_id += 1
             self.last_event_id = self.current_event_id
@@ -1066,7 +1066,7 @@ class SchedulingItem(Item):
         std_time = n.t_to_go + self.notification_interval * cls.interval_length
         # standard time is a good one
         res = std_time
-        
+
         creation_time = n.creation_time
         in_notif_time = now - n.creation_time
 
@@ -1089,7 +1089,7 @@ class SchedulingItem(Item):
         # We search since when we are in notification for escalations
         # that are based on this time
         in_notif_time = time.time() - n.creation_time
-        
+
         contacts = set()
         for es in self.escalations:
             if es.is_eligible(n.t_to_go, self.state, n.notif_nb, in_notif_time, cls.interval_length):
@@ -1365,5 +1365,5 @@ class SchedulingItem(Item):
             except Exception, exp:
                 safe_print("We got an exeception from a trigger on", self.get_full_name(), str(traceback.format_exc()))
 
-                
-                
+
+

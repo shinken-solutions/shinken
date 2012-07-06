@@ -26,7 +26,7 @@ from shinken_test import *
 
 
 class TestUpdateOutputExtCommand(ShinkenTest):
-    
+
     def test_dummy(self):
         #
         # Config is not correct because of a wrong relative path

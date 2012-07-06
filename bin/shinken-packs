@@ -65,7 +65,7 @@ class Dummy():
     def add(self, obj) : pass
 logger.load_obj(Dummy())
 
-if os.name != 'nt': 
+if os.name != 'nt':
     DEFAULT_CFG = '/etc/shinken/skonf.cfg'
 else:
     DEFAULT_CFG = 'c:\\shinken\\etc\\skonf.cfg'
@@ -74,7 +74,7 @@ else:
 
 def create_pack(pack_file, p_dest_dir, share_dir):
     _tmp = tempfile.mktemp()
-    
+
     print "Using the destination directory : %s" % p_dest_dir
     src_dir = os.path.abspath(os.path.dirname(pack_file))
     print "Source dir that will be load", src_dir
@@ -104,7 +104,7 @@ def create_pack(pack_file, p_dest_dir, share_dir):
         logger.log("Sorry, there is too much .pack file in the directory %s, please get only one .pack for this directory and it's subdirectories")
         sys.exit(2)
 
-    o = {}    
+    o = {}
     pack = packs.pop()
     o['name'] = pack.get_name()
     o['description'] = pack.description
@@ -140,7 +140,7 @@ def create_pack(pack_file, p_dest_dir, share_dir):
             o['commands'].append(cname)
     # Make comands uniq
     o['commands'] = list(set(o['commands']))
-    
+
 
     o['path'] = pack.path
     print "Path : %s" % o['path']
@@ -219,7 +219,7 @@ def create_pack(pack_file, p_dest_dir, share_dir):
                     #    os.mkdir(_d)
                     print "COPY %s into %s" % (_p,  _d)
                     shutil.copytree(_p, _d)
-                    
+
         graphite_templates_dir = os.path.join(share_dir, 'templates', 'graphite')
         if os.path.exists(graphite_templates_dir):
             print "Looking the share/templates/graphite dir"
@@ -287,8 +287,8 @@ def push_pack(zip_file_p, api_key, uri, proxy):
         c.setopt(c.PROXY, proxy)
     c.setopt(c.URL, uri+"/pushpack")
 
-    c.setopt(c.HTTPPOST,[ ("key", api_key), 
-                          ("data", 
+    c.setopt(c.HTTPPOST,[ ("key", api_key),
+                          ("data",
                            (c.FORM_FILE, str(zip_file_p),
                             c.FORM_CONTENTTYPE, "application/x-gzip"))
                           ])
@@ -332,7 +332,7 @@ def register(login, password, email, uri, proxy):
     r = c.perform()
     response.seek(0)
     status_code = c.getinfo(pycurl.HTTP_CODE)
-    # We only parse the json if we got 
+    # We only parse the json if we got
     if status_code == 200:
         obj = json.loads(response.read().replace('\\/', '/'))
     else:
@@ -382,7 +382,7 @@ def getkey(login, password, uri, proxy):
     r = c.perform()
     response.seek(0)
     status_code = c.getinfo(pycurl.HTTP_CODE)
-    # We only parse the json if we got 
+    # We only parse the json if we got
     if status_code == 200:
         obj = json.loads(response.read().replace('\\/', '/'))
     else:
@@ -418,8 +418,8 @@ def analyse(api_key, stats_file, uri, proxy):
         c.setopt(c.PROXY, proxy)
     c.setopt(c.URL, uri+"/pushstats")
 
-    c.setopt(c.HTTPPOST,[ ("key", api_key), 
-                          ("data", 
+    c.setopt(c.HTTPPOST,[ ("key", api_key),
+                          ("data",
                            (c.FORM_FILE, str(stats_file),
                             c.FORM_CONTENTTYPE, "application/x-gzip"))
                           ])
@@ -454,7 +454,7 @@ For more information, look at http://www.shinken-monitoring.org/wiki/packs/creat
                       help="""Pack .pack file that you want to generate from.""")
     parser.add_option('-s', '--share-dir', dest="share_dir",
                        help=('Your share directory with templates and icon sets'))
-    parser.add_option('-d', '--dest', dest="p_dest_dir", 
+    parser.add_option('-d', '--dest', dest="p_dest_dir",
                       help="""Directory where to """)
     parser.add_option('-U', '--uri', dest="uri",
                       help="""Uri to push the pack. Default is community.shinken-monitoring.org""")
@@ -478,20 +478,20 @@ For more information, look at http://www.shinken-monitoring.org/wiki/packs/creat
                       dest="password", help=("Password for the Shinken pack website registration"))
     parser.add_option('-e', '--email',
                       dest="email", help=("Email for the Shinken pack website registration. Must be valid."))
-    
+
 
     parser.add_option('-g', '--get-key', action='store_true',
                       dest="getkey", help=("Mode to retrieve your API key"))
 
     parser.add_option('-a', '--analyse', action='store_true',
                       dest="analyse", help=("Mode to analyse your configuration and upload it's characteristics to the server. Only statistics data, no hostnames, usernames not ips will be sent"))
-    
+
 
 
     opts, args = parser.parse_args()
 
     mode = ''
-    
+
     # For the create pack part
     pack_file = ''
     p_dest_dir = tempfile.gettempdir()
@@ -508,7 +508,7 @@ For more information, look at http://www.shinken-monitoring.org/wiki/packs/creat
         if not opts.pack_file:
             parser.error("Requires a pack file (option -p/--pack-file)")
         pack_file = opts.pack_file
-            
+
         if not pack_file.endswith('.pack'):
             print "Sorry, the pack-file is not a .pack file. exiting"
             sys.exit(2)
@@ -525,7 +525,7 @@ For more information, look at http://www.shinken-monitoring.org/wiki/packs/creat
         if not opts.zip_file:
             parser.error("Requires a pack zip file (option -z/--zip-file)")
         zip_file = opts.zip_file
-        
+
         if not opts.api_key:
             parser.error("Requires an API key (option -k/--api-key)")
         api_key = opts.api_key

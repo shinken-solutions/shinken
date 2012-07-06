@@ -38,7 +38,7 @@ class TestTimeout(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_check_timeout.cfg')
 
-    
+
     def test_notification_timeout(self):
         if os.name == 'nt':
             return

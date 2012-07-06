@@ -35,7 +35,7 @@ app = None
 # if it's /dummy/, it will be 'nothing'
 def register():
     error= app.request.GET.get('error', '')
-    success = app.request.GET.get('success', '')    
+    success = app.request.GET.get('success', '')
     return {'app' : app, 'user' : {}, 'error' : error, 'success' : success}
 
 
@@ -45,7 +45,7 @@ def do_register():
     password = app.request.forms.get('password')
     password_hash = hashlib.sha512(password).hexdigest()
     cli_mode = app.request.forms.get('cli_mode', '0')
-    
+
     print "Get a new user %s with email %s and hash %s" % (username, email, password_hash)
     if not app.is_name_available(username):
         if cli_mode == '1':
@@ -66,7 +66,7 @@ def validate():
     if activating_key:
         activated = app.validate_user(activating_key)
     return {'app' : app, 'user' : {}, 'activating_key' : activating_key, 'activated' : activated}
-        
+
 
 def is_name_available():
     app.response.content_type = 'application/json'
@@ -101,8 +101,8 @@ def get_api_key():
             abort(400, 'Sorry, there is a problem with your api key.')
     else:
         abort(401, 'Sorry, you need valid credentials to access to your API key')
-        
-    
+
+
 
 
 pages = {register : { 'routes' : ['/register'], 'view' : 'register', 'static' : True},

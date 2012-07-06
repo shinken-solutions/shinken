@@ -58,7 +58,7 @@ class Command(Item):
         setattr(self, 'id', self.__class__.id)
         #self.id = self.__class__.id
         self.__class__.id += 1
-        
+
         self.init_running_properties()
 
         self.customs = {}
@@ -69,7 +69,7 @@ class Command(Item):
                 self.customs[key.upper()] = params[key]
             else:
                 setattr(self, key, params[key])
-        
+
         if not hasattr(self, 'poller_tag'):
             self.poller_tag = 'None'
         if not hasattr(self, 'reactionner_tag'):

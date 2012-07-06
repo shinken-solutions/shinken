@@ -49,7 +49,7 @@ properties = {
 # called by the plugin manager
 def get_instance(plugin):
     print "Get an Apache/Passwd UI module for plugin %s" % plugin.get_name()
-    
+
     instance = Passwd_Webui(plugin)
     return instance
 
@@ -63,7 +63,7 @@ class Passwd_Webui(BaseModule):
     # Try to connect if we got true parameter
     def init(self):
         print "Trying to initalize the Apache/Passwd file"
-        
+
 
     # To load the webui application
     def load(self, app):

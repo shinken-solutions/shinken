@@ -58,11 +58,11 @@ def get_instance(plugin):
     port            = getattr(plugin, 'port', None)
     user            = getattr(plugin, 'user', None)
     password        = getattr(plugin, 'password', None)
-    virtual_host    = getattr(plugin, 'virtual_host', None)                
-    exchange_name   = getattr(plugin, 'exchange_name', None)  
-    identifier      = getattr(plugin, 'identifier', None)     
-    maxqueuelength  = getattr(plugin, 'maxqueuelength', 10000)  
-    queue_dump_frequency = getattr(plugin, 'queue_dump_frequency', 300)   
+    virtual_host    = getattr(plugin, 'virtual_host', None)
+    exchange_name   = getattr(plugin, 'exchange_name', None)
+    identifier      = getattr(plugin, 'identifier', None)
+    maxqueuelength  = getattr(plugin, 'maxqueuelength', 10000)
+    queue_dump_frequency = getattr(plugin, 'queue_dump_frequency', 300)
 
     return Canopsis_broker(plugin, host, port, user, password, virtual_host, exchange_name,identifier,maxqueuelength,queue_dump_frequency)
 
@@ -116,8 +116,8 @@ class Canopsis_broker(BaseModule):
         self.host_max_check_attempts[b.data['host_name']] = b.data['max_check_attempts']
 
         logger.info("[canopsis] initial host max attempts : %s " % str(self.host_max_check_attempts))
-        logger.info("[canopsis] initial host commands : %s " % str(self.host_commands))        
-        logger.info("[canopsis] initial host addresses : %s " % str(self.host_addresses))        
+        logger.info("[canopsis] initial host commands : %s " % str(self.host_commands))
+        logger.info("[canopsis] initial host addresses : %s " % str(self.host_addresses))
 
 
     def manage_initial_service_status_brok(self, b):
@@ -132,13 +132,13 @@ class Canopsis_broker(BaseModule):
             self.service_max_check_attempts = {}
 
         if not b.data['host_name'] in self.service_commands:
-            logger.log("[Canopsis] creating empty dict for host %s service_commands" % b.data['host_name'])            
+            logger.log("[Canopsis] creating empty dict for host %s service_commands" % b.data['host_name'])
             self.service_commands[b.data['host_name']] = {}
 
         self.service_commands[b.data['host_name']][b.data['service_description']] = b.data['check_command'].call
 
         if not b.data['host_name'] in self.service_max_check_attempts:
-            logger.log("[Canopsis] creating empty dict for host %s service_max_check_attempts" % b.data['host_name'])            
+            logger.log("[Canopsis] creating empty dict for host %s service_max_check_attempts" % b.data['host_name'])
             self.service_max_check_attempts[b.data['host_name']] = {}
 
         self.service_max_check_attempts[b.data['host_name']][b.data['service_description']] = b.data['max_check_attempts']
@@ -175,7 +175,7 @@ class Canopsis_broker(BaseModule):
                 - component => host
                 - resource => service
 
-            message format (check): 
+            message format (check):
 
             H S         field               desc
             x           'connector'         Connector type (gelf, nagios, snmp, ...)
@@ -190,13 +190,13 @@ class Canopsis_broker(BaseModule):
             x           'output'            Event message
             x           'long_output'       Event long message
             x           'perfdata'          nagios plugin perfdata raw (for the moment)
-            x           'check_type'        
-            x           'current_attempt'   
-            x           'max_attempts'      
-            x           'execution_time'    
-            x           'latency'           
-            x           'command_name'      
-                        'address'                               
+            x           'check_type'
+            x           'current_attempt'
+            x           'max_attempts'
+            x           'execution_time'
+            x           'latency'
+            x           'command_name'
+                        'address'
         """
         if source_type == 'resource':
             # service
@@ -276,7 +276,7 @@ class event2amqp():
 
     def create_connection(self):
         self.connection_string = "amqp://%s:%s@%s:%s/%s" % (self.user,self.password,self.host,self.port,self.virtual_host)
-        try:        
+        try:
             self.connection = BrokerConnection(self.connection_string)
             return True
         except:
@@ -294,7 +294,7 @@ class event2amqp():
             else:
                 self.get_channel()
                 self.get_exchange()
-                self.create_producer()                
+                self.create_producer()
                 return True
         except:
             func = sys._getframe(1).f_code.co_name
@@ -303,7 +303,7 @@ class event2amqp():
             return False
 
     def disconnect(self):
-        try:        
+        try:
             if self.connected():
                 self.connection.release()
             return True
@@ -315,7 +315,7 @@ class event2amqp():
 
     def connected(self):
         try:
-            if self.connection.connected:            
+            if self.connection.connected:
                 return True
             else:
                 return False
@@ -387,11 +387,11 @@ class event2amqp():
             logger.info("[Canopsis] using routing key %s" % key)
             logger.info("[Canopsis] sending %s" % str(message))
             try:
-                self.producer.revive(self.channel)                
+                self.producer.revive(self.channel)
                 self.producer.publish(body=message, compression=None, routing_key=key, exchange=self.exchange_name)
                 return True
             except:
-                logger.error("[Canopsis] Not connected, going to queue messages until connection back")                
+                logger.error("[Canopsis] Not connected, going to queue messages until connection back")
                 self.queue.append({"key":key,"message":message})
                 func = sys._getframe(1).f_code.co_name
                 error = str(sys.exc_info()[0])
@@ -404,7 +404,7 @@ class event2amqp():
             #enqueue_cano_event(key,message)
             if len(self.queue) < int(self.maxqueuelength):
                 self.queue.append({"key":key,"message":message})
-                logger.info("[Canopsis] Queue length : %d" % len(self.queue))                
+                logger.info("[Canopsis] Queue length : %d" % len(self.queue))
                 return True
             else:
                 logger.error("[Canopsis] Maximum retention for event queue %s reached" % str(self.maxqueuelength))
@@ -419,7 +419,7 @@ class event2amqp():
                 item = self.queue.pop()
                 try:
                     logger.info("[Canopsis] Pop item from queue [%s] : %s" % (str(len(self.queue)),str(item)))
-                    self.producer.revive(self.channel)                                    
+                    self.producer.revive(self.channel)
                     self.producer.publish(body=item["message"], compression=None, routing_key=item["key"], exchange=self.exchange_name)
                 except:
                     self.queue.append(item)
@@ -445,8 +445,8 @@ class event2amqp():
     def save_queue(self):
         retentionfile="%s/canopsis.dat" % os.getcwd()
         logger.info("[Canopsis] saving to %s" % retentionfile)
-        filehandler = open(retentionfile, 'w') 
-        pickle.dump(self.queue, filehandler) 
+        filehandler = open(retentionfile, 'w')
+        pickle.dump(self.queue, filehandler)
         filehandler.close()
 
         return True
@@ -454,10 +454,10 @@ class event2amqp():
     def load_queue(self):
         retentionfile="%s/canopsis.dat" % os.getcwd()
         logger.info("[Canopsis] loading from %s" % retentionfile)
-        filehandler = open(retentionfile, 'r') 
+        filehandler = open(retentionfile, 'r')
 
         try:
-            self.queue = pickle.load(filehandler) 
+            self.queue = pickle.load(filehandler)
         except:
             pass
         return True

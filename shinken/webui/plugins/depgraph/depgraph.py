@@ -85,7 +85,7 @@ def get_depgraph_widget():
 
     if not search:
         search = 'localhost'
-    
+
     elts = search.split('/', 1)
     if len(elts) == 1:
         s = app.datamgr.get_host(search)
@@ -95,13 +95,13 @@ def get_depgraph_widget():
 
     wid = app.request.GET.get('wid', 'widget_depgraph_'+str(int(time.time())))
     collapsed = (app.request.GET.get('collapsed', 'False') == 'True')
-    
+
     options = {'search' : {'value' : search, 'type' : 'hst_srv', 'label' : 'Search an element'},
                }
 
     title = 'Relation graph for %s' % search
 
-    return {'app' : app, 'elt' : s, 'user' : user, 
+    return {'app' : app, 'elt' : s, 'user' : user,
             'wid' : wid, 'collapsed' : collapsed, 'options' : options, 'base_url' : '/widget/depgraph', 'title' : title,
             }
 

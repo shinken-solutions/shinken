@@ -25,7 +25,7 @@
        </div>
     %else:
        %p = e['pack']
-  
+
     <div class='row {{treename}}'>
       <!-- {{p}} -->
       %pname = p.get('pack_name', 'unknown')
@@ -49,7 +49,7 @@
         %if tpl:
            %tname = tpl.get('name', '')
            <div> Host tag : <a href='/elemments/hosts/{{tname}}'> {{tname}}</a>
-	     <a class='pull-right' href="javascript:show_services_list('{{tname}}');"> <i class="icon-chevron-down"></i></a>      
+	     <a class='pull-right' href="javascript:show_services_list('{{tname}}');"> <i class="icon-chevron-down"></i></a>
 	   </div>
         %else:
            <div class="alert">No host template for this pack!</div>

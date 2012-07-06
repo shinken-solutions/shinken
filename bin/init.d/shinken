@@ -33,11 +33,11 @@
 #     - scheduler   : receives checks/actions from arbiter. Schedules & forwards them to pollers.
 #     - poller      : receives the checks from a scheduler. Launch them and returns results
 #     - broker      : manage results by looking at scheduler. Like export to flat file or db.
-#     - reactionner : manage the failed checks by looking at scheduler. 
+#     - reactionner : manage the failed checks by looking at scheduler.
 #     - receiver    : manage all passive data
 ### END INIT INFO
 
-# Deadlink :( 
+# Deadlink :(
 # http://refspecs.freestandards.org/LSB_3.1.1/LSB-Core-generic/LSB-Core-generic/iniscrptact.html
 
 
@@ -63,7 +63,7 @@ test "$ETC" || ETC=$(cd $curpath/../../etc && pwd)
 
 export PATH="${PATH:+$PATH:}/usr/sbin:/bin:/sbin"
 export LANG=en_US.UTF8
-export PYTHONIOENCODING=utf8 
+export PYTHONIOENCODING=utf8
 
 # We try to find the LAST possible Python VERSION
 pythonver() {
@@ -108,8 +108,8 @@ DEBUG=false
 CMD=""
 SUBMODULES=""
 
-## This permits to overhidde the default "default shinken cfg file" : 
-[ -z "$SHINKEN_DEFAULT_FILE" ] && SHINKEN_DEFAULT_FILE="/etc/default/$NAME" 
+## This permits to overhidde the default "default shinken cfg file" :
+[ -z "$SHINKEN_DEFAULT_FILE" ] && SHINKEN_DEFAULT_FILE="/etc/default/$NAME"
 ## so you can now do:
 ## bash -c "SHINKEN_DEFAULT_FILE=$your_own_default_file $init_path/shinken $action $args"
 ## to easily use your own config
@@ -183,7 +183,7 @@ cd $VAR
 
 #set -xv
 
- 
+
 echo_success() {
    log_end_msg 0 $*
 }
@@ -356,7 +356,7 @@ do_stop() {
             echo "FAILED: one or more process for $mod are still running after kill -9 !"
             echo "Remaining processes are (pids="$allpids"):"
             ps -lf $(for p in $allpids ; do echo -n "-p$p " ; done)
-            echo "You should check this." 
+            echo "You should check this."
             return 1
         fi
         echo "OK"
@@ -388,11 +388,11 @@ do_start_() {
     fi
     if test "$1" = "arbiter"
     then
-        # arbiter is special : 
+        # arbiter is special :
         # it doesn't actually declare a "workdir" properties in its config
         # so we have explicitely to cd to the "VAR" directory.
         # so that the default pidfile ( == nagios lock_file) which is now "arbiterd.pid"
-        # will be created at the correct place.  
+        # will be created at the correct place.
         cd "$VAR"
         # TODO: check if other possibility wouldn't be better:
         # declare a "workdir" properties for the arbiter module definition.. in shinken-specific.cfg.
@@ -401,9 +401,9 @@ do_start_() {
     startoutput=$(do_start "$1")
     rc=$?
     if [ $rc -eq 0 ]; then
-        echo_success  
+        echo_success
     else
-        echo "$startoutput" 
+        echo "$startoutput"
         echo_failure
     fi
     return $rc
@@ -438,7 +438,7 @@ do_restart_() {
         if [ $checkrc -ne 0 ]; then
            return 1
         fi
-    fi 
+    fi
     stopoutput=$(do_stop "$mod")
     startoutput=$(do_start "$mod")
     rc=$?

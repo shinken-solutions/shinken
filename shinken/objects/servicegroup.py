@@ -43,7 +43,7 @@ class Servicegroup(Itemgroup):
         'notes_url':         StringProp(default='', fill_brok=['full_status']),
         'action_url':        StringProp(default='', fill_brok=['full_status']),
     })
-    
+
     macros = {
         'SERVICEGROUPALIAS':     'alias',
         'SERVICEGROUPMEMBERS':   'members',

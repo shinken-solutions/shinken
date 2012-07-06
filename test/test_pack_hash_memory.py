@@ -31,8 +31,8 @@ class TestPackHashMemory(ShinkenTest):
 
     def setUp2(self):
         self.setup_with_file('etc/nagios_pack_hash_memory2.cfg')
-    
-    def test_pack_hash_memory(self):        
+
+    def test_pack_hash_memory(self):
         packs = {0 : set(), 1: set()}
         for h in self.sched.hosts:
             print 'First pass : ', h.get_name(), h.pack_id, '\n'

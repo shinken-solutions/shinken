@@ -1,5 +1,5 @@
-#!/bin/bash 
-#set -x 
+#!/bin/bash
+#set -x
 # Copyright (C) 2009-2012 :
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
@@ -22,8 +22,8 @@
 
 if [ -f /tmp/shinken.install.log ]
 then
-    rm -f /tmp/shinken.install.log    
-fi 
+    rm -f /tmp/shinken.install.log
+fi
 
 #####################
 ### ENVIRONNEMENT ###
@@ -55,7 +55,7 @@ read taste
 #            rm -Rf $res
 #        fi
 #    fi
-#    
+#
 #done
 #YUMLIST="$YUMPKGS $VSPHERESDKYUMPKGS $NAGPLUGYUMPK $CHECKORACLEHEALTHYUMPKG $CHECKMONGOYUMPKG $CHECKEMCYUMPKG $CHECKNWCYUMPKG $PNPYUMPKG $MKYUMPKG $WMICYUMPKG $CHECKHPASMYUMPKGS"
 YUMLIST="$YUMPKGS"
@@ -72,8 +72,8 @@ do
             else
                 cecho " > remove $p" yellow
                 yum -y remove $p
-            fi 
-        done 
+            fi
+        done
     done
 done
 yum clean all

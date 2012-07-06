@@ -36,7 +36,7 @@
 		$('[data-role=page]').live('swipeleft', function(event) {
 			$.mobile.changePage($('#right_link').attr('href'));
 		});
-		
+
 		$('[data-role=page]').live('swiperight', function(event) {
 			$.mobile.changePage($('#left_link').attr('href'), {transition:'slide', reverse:true});
 		});

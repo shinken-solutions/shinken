@@ -55,11 +55,11 @@ try:
     PYRO_VERSION = Pyro.constants.VERSION
     Pyro.errors.CommunicationError = Pyro.errors.ProtocolError
     Pyro.errors.TimeoutError = Pyro.errors.ProtocolError
-    
+
     class Pyro3Daemon(Pyro.core.Daemon):
         pyro_version = 3
         protocol = 'PYROLOC'
-        
+
         def __init__(self, host, port, use_ssl=False):
             self.port = port
             # Port = 0 means "I don't want pyro"
@@ -102,12 +102,12 @@ try:
 
         def handleRequests(self, s):
             try:
-                Pyro.core.Daemon.handleRequests(self)    
+                Pyro.core.Daemon.handleRequests(self)
             # Sometime Pyro send us xml pickling implementation (gnosis) is not available
             # and I don't know why... :(
             except NotImplementedError:
                 pass
-                
+
 
     def create_uri(address, port, obj_name, use_ssl):
         if not use_ssl:
@@ -133,8 +133,8 @@ try:
 
 
 except AttributeError, exp:
-    
-    PYRO_VERSION = Pyro.constants.VERSION    
+
+    PYRO_VERSION = Pyro.constants.VERSION
     # Ok, in Pyro 4, interface do not need to
     # inherit from ObjBase, just a dummy class is good
     Pyro.core.ObjBase = dict
@@ -143,10 +143,10 @@ except AttributeError, exp:
     Pyro.config.HMAC_KEY = "NOTSET"
 
     old_versions = ["4.1", "4.2", "4.3", "4.4"]
-    
+
     # Version not supported for now, we have to work on it
     bad_versions = ["4.14"]
-    
+
     # Hack for Pyro 4 : with it, there is
     # no more way to send huge packet!
     # This hack fails with PYRO 4.14!!!
@@ -158,7 +158,7 @@ except AttributeError, exp:
         pyro_version = 4
         protocol = 'PYRO'
 
-        
+
         def __init__(self, host, port, use_ssl=False):
             self.port = port
             # Port = 0 means "I don't want pyro"
@@ -217,15 +217,15 @@ except AttributeError, exp:
                 return self.sockets()
             else:
                 return self.sockets
-    
-        
+
+
         def handleRequests(self, s):
             if PYRO_VERSION in old_versions:
                 Pyro.core.Daemon.handleRequests(self, [s])
             else:
                 Pyro.core.Daemon.events(self, [s])
-    
-    
+
+
     def create_uri(address, port, obj_name, use_ssl=False):
         return "PYRO:%s@%s:%d" % (obj_name, address, port)
 
@@ -249,7 +249,7 @@ except AttributeError, exp:
 
 class ShinkenPyroDaemon(PyroClass):
     """Please Add a Docstring to describe the class here"""
-    
+
     def get_socks_activity(self, timeout):
         try:
             ins, _, _ = select.select(self.get_sockets(), [], [], timeout)

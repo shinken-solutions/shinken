@@ -106,8 +106,8 @@ class BadBroker(BrokerLink):
 class TestPassivePoller(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_passive_pollers.cfg')
-    
-    
+
+
     def test_simple_passive_pollers(self):
         print "The dispatcher", self.dispatcher
         # dummy for the arbiter
@@ -119,7 +119,7 @@ class TestPassivePoller(ShinkenTest):
         scheduler1.__class__ = GoodScheduler
         scheduler2 = self.conf.schedulers.find_by_name('scheduler-all-2')
         self.assert_(scheduler2 is not None)
-        scheduler2.__class__ = BadScheduler        
+        scheduler2.__class__ = BadScheduler
 
         # Poller 1 is normal, 2 and 3 are passives
         print "Preparing pollers"
@@ -143,7 +143,7 @@ class TestPassivePoller(ShinkenTest):
         reactionner1.__class__ = GoodReactionner
         reactionner2 = self.conf.reactionners.find_by_name('reactionner-all-2')
         self.assert_(reactionner2 is not None)
-        reactionner2.__class__ = BadReactionner        
+        reactionner2.__class__ = BadReactionner
 
         print "Preparing brokers"
         broker1 = self.conf.brokers.find_by_name('broker-all-1')
@@ -151,9 +151,9 @@ class TestPassivePoller(ShinkenTest):
         broker1.__class__ = GoodBroker
         broker2 = self.conf.brokers.find_by_name('broker-all-2')
         self.assert_(broker2 is not None)
-        broker2.__class__ = BadBroker        
+        broker2.__class__ = BadBroker
 
-        # Ping all elements. Should have 1 as OK, 2 as 
+        # Ping all elements. Should have 1 as OK, 2 as
         # one bad attempt (3 max)
         self.dispatcher.check_alive()
 
@@ -165,7 +165,7 @@ class TestPassivePoller(ShinkenTest):
         self.assert_(scheduler2.alive == True)
         self.assert_(scheduler2.attempt == 1)
         self.assert_(scheduler2.reachable == False)
-        
+
         # and others satellites too
         self.assert_(poller1.alive == True)
         self.assert_(poller1.attempt == 0)
@@ -183,7 +183,7 @@ class TestPassivePoller(ShinkenTest):
         self.assert_(reactionner2.alive == True)
         self.assert_(reactionner2.attempt == 1)
         self.assert_(reactionner2.reachable == False)
-        
+
         # and others satellites too
         self.assert_(broker1.alive == True)
         self.assert_(broker1.attempt == 0)
@@ -204,7 +204,7 @@ class TestPassivePoller(ShinkenTest):
         self.assert_(scheduler2.alive == True)
         self.assert_(scheduler2.attempt == 2)
         self.assert_(scheduler2.reachable == False)
-        
+
         # and others satellites too
         self.assert_(poller1.alive == True)
         self.assert_(poller1.attempt == 0)
@@ -222,7 +222,7 @@ class TestPassivePoller(ShinkenTest):
         self.assert_(reactionner2.alive == True)
         self.assert_(reactionner2.attempt == 2)
         self.assert_(reactionner2.reachable == False)
-        
+
         # and others satellites too
         self.assert_(broker1.alive == True)
         self.assert_(broker1.attempt == 0)
@@ -243,7 +243,7 @@ class TestPassivePoller(ShinkenTest):
         self.assert_(scheduler2.alive == False)
         self.assert_(scheduler2.attempt == 3)
         self.assert_(scheduler2.reachable == False)
-        
+
         # and others satellites too
         self.assert_(poller1.alive == True)
         self.assert_(poller1.attempt == 0)
@@ -261,7 +261,7 @@ class TestPassivePoller(ShinkenTest):
         self.assert_(reactionner2.alive == False)
         self.assert_(reactionner2.attempt == 3)
         self.assert_(reactionner2.reachable == False)
-        
+
         # and others satellites too
         self.assert_(broker1.alive == True)
         self.assert_(broker1.attempt == 0)
@@ -289,7 +289,7 @@ class TestPassivePoller(ShinkenTest):
             for cfg in r.confs.values():
                 self.assert_(cfg.is_assigned == True)
                 self.assert_(cfg.assigned_to == scheduler1)
-                
+
 
 if __name__ == '__main__':
     unittest.main()

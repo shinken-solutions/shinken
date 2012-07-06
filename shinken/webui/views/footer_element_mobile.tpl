@@ -1,7 +1,7 @@
 
 <div data-role="footer" class="ui-bar" data-position="fixed" id="footer">
 	<a href="#about" data-rel="dialog" data-role="button" data-icon="info" data-iconpos="notext" class="ui-btn-left">About</a>
-	%if locals()['print_menu'] == True:	
+	%if locals()['print_menu'] == True:
 		<!--<a href="#" data-role="button" data-icon="search" data-iconpos="notext">Search</a>-->
 		<div id="userFooter"><span class="username">{{user.get_name().capitalize()}}</span><a href="/user/logout" data-role="button" rel="external" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Logout</a></div>
 	%end

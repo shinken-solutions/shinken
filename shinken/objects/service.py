@@ -247,7 +247,7 @@ class Service(SchedulingItem):
         # or even if we are businesss based.
         'parent_dependencies': StringProp(default=set(), brok_transformation=to_svc_hst_distinct_lists, fill_brok=['full_status']),
         # Here it's the guys that depend on us. So it's the total
-        # opposite of the parent_dependencies 
+        # opposite of the parent_dependencies
         'child_dependencies': StringProp(brok_transformation=to_svc_hst_distinct_lists, default=set(), fill_brok=['full_status']),
 
         # Manage the unknown/unreach during hard state
@@ -257,7 +257,7 @@ class Service(SchedulingItem):
 
         # Set if the element just change its father/son topology
         'topology_change' : BoolProp(default=False, fill_brok=['full_status']),
-        
+
         # Trigger list
         'triggers'        :  StringProp(default=[])
 
@@ -319,15 +319,15 @@ class Service(SchedulingItem):
 #        'criticitymodulations' :    'business_impact_modulations',
     }
 
-####### 
-#                   __ _                       _   _             
-#                  / _(_)                     | | (_)            
-#   ___ ___  _ __ | |_ _  __ _ _   _ _ __ __ _| |_ _  ___  _ __  
-#  / __/ _ \| '_ \|  _| |/ _` | | | | '__/ _` | __| |/ _ \| '_ \ 
+#######
+#                   __ _                       _   _
+#                  / _(_)                     | | (_)
+#   ___ ___  _ __ | |_ _  __ _ _   _ _ __ __ _| |_ _  ___  _ __
+#  / __/ _ \| '_ \|  _| |/ _` | | | | '__/ _` | __| |/ _ \| '_ \
 # | (_| (_) | | | | | | | (_| | |_| | | | (_| | |_| | (_) | | | |
 #  \___\___/|_| |_|_| |_|\__, |\__,_|_|  \__,_|\__|_|\___/|_| |_|
-#                         __/ |                                  
-#                        |___/                                   
+#                         __/ |
+#                        |___/
 ######
 
     # Give a nice name output
@@ -524,7 +524,7 @@ class Service(SchedulingItem):
             # Transform the generator string to a list
             # Missing values are filled with the default value
             (key_values, errcode) = get_key_value_sequence(entry, default_value)
-            
+
             if key_values:
                 for key_value in key_values:
                     key = key_value['KEY']
@@ -568,14 +568,14 @@ class Service(SchedulingItem):
 
 
 #####
-#                         _             
-#                        (_)            
-#  _ __ _   _ _ __  _ __  _ _ __   __ _ 
+#                         _
+#                        (_)
+#  _ __ _   _ _ __  _ __  _ _ __   __ _
 # | '__| | | | '_ \| '_ \| | '_ \ / _` |
 # | |  | |_| | | | | | | | | | | | (_| |
 # |_|   \__,_|_| |_|_| |_|_|_| |_|\__, |
 #                                  __/ |
-#                                 |___/ 
+#                                 |___/
 ####
 
 
@@ -810,7 +810,7 @@ class Service(SchedulingItem):
                 need_stalk = True
             elif c.exit_status == 3 and 'u' in self.stalking_options:
                 need_stalk = True
-            
+
             if c.output == self.output:
                 need_stalk = False
         if need_stalk:
@@ -1245,9 +1245,9 @@ class Services(Items):
                         else: # the standard list
                             duplicate_for_hosts.append(hname)
 
-                    # remove duplicate items from duplicate_for_hosts: 
+                    # remove duplicate items from duplicate_for_hosts:
                     duplicate_for_hosts = list(set(duplicate_for_hosts))
-                    
+
                     # Ok now we clean the duplicate_for_hosts with all hosts
                     # of the not
                     for hname in not_hosts:

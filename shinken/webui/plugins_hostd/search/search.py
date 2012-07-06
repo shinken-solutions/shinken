@@ -92,7 +92,7 @@ def do_search(search):
     for p in packs:
         if p.get('state') not in ['ok', 'pending']:
             continue
-        
+
         if search and search in p['pack_name'] or search in p.get('description', ''):
             d = give_pack(p)
             res.append(d)
@@ -133,7 +133,7 @@ def search_categories():
     for p in packs:
         if p.get('state') not in ['ok', 'pending']:
             continue
-        
+
         cats = p.get('path', '').split('/')
         cats = [c for c in cats if c != '']
         pos = tree
@@ -149,9 +149,9 @@ def search_categories():
             print "Were I came from", pos
             pos = pos['sons'][cat]
             print "My new pos", pos
-        
+
     print "Tree", tree
-        
+
     return json.dumps(tree)
 
 
@@ -173,7 +173,7 @@ def search_tags():
     api_key = app.request.forms.get('api_key')
     if not api_key or not app.get_user_by_key(api_key):
         abort(401, 'You need a valid API KEY to query. Please register')
-    
+
     nb = app.request.forms.get('nb')
     if nb:
         nb = int(nb)
@@ -191,7 +191,7 @@ def search_tags():
     for p in packs:
         if p.get('state') not in ['ok', 'pending']:
             continue
-        
+
         tags = p.get('path', '').split('/')
         tags = [c for c in tags if c != '']
         tags.append(p.get('pack_name'))
@@ -205,7 +205,7 @@ def search_tags():
     flat_tags.sort(tag_sort)
 
     print "FLAT TAGS", flat_tags, len(flat_tags)
-    
+
     # Take the last nb ones
     res = flat_tags[:nb]
 

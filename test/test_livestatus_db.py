@@ -192,7 +192,7 @@ Columns: time type options state host_name"""
             print "archive is", day[2]
             print "handle is", day[1]
         print self.livestatus_broker.db.log_db_relevant_files(now - 3600, now +  3600 )
-            
+
 
     def test_num_logs(self):
         self.print_header()
@@ -235,12 +235,12 @@ Columns: time type options state host_name"""
             print "archive is", day[2]
             print "handle is", day[1]
         print self.livestatus_broker.db.log_db_relevant_files(now - 3 * 24 * 3600, now)
-            
+
 
 
     def test_split_database(self):
         #
-        # after daylight-saving time has begun or ended, 
+        # after daylight-saving time has begun or ended,
         # this test may fail for some days
         #
         #os.removedirs("var/archives")

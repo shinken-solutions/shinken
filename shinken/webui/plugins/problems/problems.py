@@ -42,7 +42,7 @@ def get_page():
 # Our page
 def get_all():
     return get_view('all')
-    
+
 
 
 
@@ -56,7 +56,7 @@ def get_view(page):
         redirect("/user/login")
 
     print 'DUMP COMMON GET', app.request.GET.__dict__
- 
+
     # We want to limit the number of elements
     start = int(app.request.GET.get('start', '0'))
     end = int(app.request.GET.get('end', '30'))
@@ -94,25 +94,25 @@ def get_view(page):
         items = app.datamgr.get_all_hosts_and_services()
     else: # WTF?!?
         redirect("/problems")
-    
+
     # Filter with the user interests
     items = only_related_to(items, user)
-    
+
     # Ok, if need, appli the search filter
     for s in search:
         s = s.strip()
         if not s:
             continue
-            
+
         print "SEARCHING FOR", s
         print "Before filtering", len(items)
-        
+
         elts = s.split(':', 1)
         t = 'hst_srv'
         if len(elts) > 1:
             t = elts[0]
             s = elts[1]
-            
+
         print 'Search for type %s and patern %s' % (t, s)
         if not t in filters:
             filters[t] = []
@@ -151,7 +151,7 @@ def get_view(page):
         if t == 'htag':
             print 'Add a htag filter', s
             items = [i for i in items if s in i.get_host_tags()]
-            
+
         if t == 'ack':
             print "Got an ack filter", s
             if s == 'false':
@@ -178,8 +178,8 @@ def get_view(page):
                 # Now ok for hosts, but look for services, and service hosts
                 items = [i for i in items if i.__class__.my_type=='host' or (i.in_scheduled_downtime or i.host.in_scheduled_downtime)]
 
-        print "After filtering for",t, s,'we got', len(items)                
-            
+        print "After filtering for",t, s,'we got', len(items)
+
     # If we are in the /problems and we do not have an ack filter
     # we apply by default the ack:false one
     print "Late problem filtering?",  page == 'problems', len(filters['ack']) == 0
@@ -198,11 +198,11 @@ def get_view(page):
         items = [i for i in items if i.__class__.my_type=='service' or not i.in_scheduled_downtime]
         # Now ok for hosts, but look for services, and service hosts
         items = [i for i in items if i.__class__.my_type=='host' or (not i.in_scheduled_downtime and not i.host.in_scheduled_downtime)]
-            
 
 
 
-        
+
+
     # Now sort it!
     items.sort(hst_srv_sort)
 
@@ -226,7 +226,7 @@ def get_view(page):
 
 # Our page
 def get_pbs_widget():
-    
+
     user = app.get_user_auth()
     if not user:
         redirect("/user/login")
@@ -236,7 +236,7 @@ def get_pbs_widget():
     search = app.request.GET.get('search', '')
 
     pbs = app.datamgr.get_all_problems(to_sort=False)
-    
+
     # Filter with the user interests
     pbs = only_related_to(pbs, user)
 
@@ -298,7 +298,7 @@ def get_pbs_widget():
 
 # Our page
 def get_last_errors_widget():
-    
+
     user = app.get_user_auth()
     if not user:
         redirect("/user/login")
@@ -307,7 +307,7 @@ def get_last_errors_widget():
     nb_elements = max(0, int(app.request.GET.get('nb_elements', '10')))
 
     pbs = app.datamgr.get_problems_time_sorted()
-    
+
     # Filter with the user interests
     pbs = only_related_to(pbs, user)
 

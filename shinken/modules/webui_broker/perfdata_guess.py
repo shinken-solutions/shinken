@@ -37,7 +37,7 @@ def get_perfometer_table_values(elt):
     # first try to get the command name called
     cmd = elt.check_command.call.split('!')[0]
     print "Looking for perfometer value for command", cmd
-    
+
 
     tab = {'check_http' : manage_check_http_command,
            'check_ping' : manage_check_ping_command,
@@ -76,7 +76,7 @@ def manage_check_http_command(elt):
     base_color = {0 : (102,255,34), 1 : (255,102,0), 2 : (255,0,51)}
     state_id = get_stateid(elt)
     color = base_color.get(state_id, (179,196,255))
-    s_color = 'RGB(%d,%d,%d)' % color    
+    s_color = 'RGB(%d,%d,%d)' % color
     lnk = '#'
     metrics = [(s_color, pct), ('white', 100-pct)]
     title = '%ss' % v
@@ -108,7 +108,7 @@ def manage_check_ping_command(elt):
     base_color = {0 : (102,255,34), 1 : (255,102,0), 2 : (255,0,51)}
     state_id = get_stateid(elt)
     color = base_color.get(state_id, (179,196,255))
-    s_color = 'RGB(%d,%d,%d)' % color    
+    s_color = 'RGB(%d,%d,%d)' % color
 
     lnk = '#'
     metrics = [(s_color, pct), ('white', 100-pct)]
@@ -143,7 +143,7 @@ def manage_check_tcp_command(elt):
     base_color = {0 : (102,255,34), 1 : (255,102,0), 2 : (255,0,51)}
     state_id = get_stateid(elt)
     color = base_color.get(state_id, (179,196,255))
-    s_color = 'RGB(%d,%d,%d)' % color    
+    s_color = 'RGB(%d,%d,%d)' % color
 
     #pct = 100 * (v / m.max)
     # Convert to int
@@ -175,7 +175,7 @@ def manage_unknown_command(elt):
             if v.name is not None and v.value is not None:
                 m = v
                 break
-        
+
     prop = m.name
     print "Got a property", prop, "and a value", m
     v = m.value
@@ -211,16 +211,16 @@ def manage_unknown_command(elt):
 # Get a linear color by looking at the command name
 # and the elt status to get a unique value
 def get_linear_color(elt, name):
-    # base colors are 
+    # base colors are
     #  #6688ff (102,136,255) light blue for OK
     #  #ffdd65 (255,221,101) ligth wellow for warning
     #  #ff6587 (191,75,101) light red for critical
     #  #b3c4ff (179,196,255) very light blue for unknown
     base = {0 : (102,136,255), 1 : (255,221,101), 2 : (191,75,101)}
     state_id = get_stateid(elt)
-    
+
     c = base.get(state_id, (179,196,255))
-    
+
     # Get a "hash" of the metric name
     h = hash(name) % 25
     print "H", h

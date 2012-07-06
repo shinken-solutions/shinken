@@ -10,7 +10,7 @@
 	%if is_current:
 		<li class="ui-btn-active"><a href="#">{{name}}</a></li>
 	%elif start == None or end == None:
-		   	
+
 	%else:
 		<li><a href='/mobile/impacts?start={{start}}&end={{end}}'>{{name}}</a></li>
 	%end
@@ -21,8 +21,8 @@
 %end
 
 <div data-role="collapsible-set" data-iconpos="right" >
-	
-	
+
+
 %i = 0
 
   %for impact in impacts:
@@ -64,7 +64,7 @@
 	      {{!helper.print_business_rules_mobile(datamgr.get_business_parents(impact))}}
 	    %else:
 	      No analysis avialable
-	    %end  
+	    %end
 	</div>
     </div>
     %i += 1

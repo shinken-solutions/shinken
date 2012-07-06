@@ -14,7 +14,7 @@
 
 
 <div id="login_container" class="span9">
-  
+
 %if login_text:
 <p><span id="login-text"> {{login_text}}</span></p>
 %end

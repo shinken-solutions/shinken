@@ -194,14 +194,14 @@ class Timeperiod(Item):
 
     # will look for active/un-active change. And log it
     # [1327392000] TIMEPERIOD TRANSITION: <name>;<from>;<to>
-    # from is -1 on startup.  to is 1 if the timeperiod starts 
+    # from is -1 on startup.  to is 1 if the timeperiod starts
     # and 0 if it ends.
     def check_and_log_activation_change(self):
         now = int(time.time())
-        
+
         was_active = self.is_active
         self.is_active = self.is_time_valid(now)
-        
+
         # If we got a change, log it!
         if self.is_active != was_active:
             _from = 0
@@ -216,7 +216,7 @@ class Timeperiod(Item):
 
             # Now raise the log
             logger.log('TIMEPERIOD TRANSITION: %s;%d;%d' % (self.get_name(), _from, _to))
-        
+
 
     # clean the get_next_valid_time_from_t cache
     # The entries are a dict on t. t < now are useless

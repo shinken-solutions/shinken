@@ -246,12 +246,12 @@ class Contacts(Items):
             # Get the list, but first make elements uniq
             i.notificationways = list(set(new_notificationways))
 
-    
+
     def late_linkify_c_by_commands(self, commands):
         for i in self:
             for nw in i.notificationways:
                 nw.late_linkify_nw_by_commands(commands)
-            
+
 
 
     # We look for contacts property in contacts and
@@ -279,7 +279,7 @@ class Contacts(Items):
                     else: # put a default text value
                         # Remove the value and put a default value
                         setattr(c, p, '')
-                    
+
 
                 if need_notificationway:
                     #print "Create notif way with", params

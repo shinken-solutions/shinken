@@ -57,7 +57,7 @@ def main():
 
 
     all_imp_impacts = app.datamgr.get_important_elements()
-    
+
     all_pbs = app.datamgr.get_all_problems()
 
     return {'app' : app, 'user' : user, 'impacts' : all_imp_impacts, 'problems' : all_pbs}
@@ -71,7 +71,7 @@ def impacts():
     if not user:
         redirect("/mobile/")
         return
-	
+
     # We want to limit the number of elements
     start = int(app.request.GET.get('start', '0'))
     end = int(app.request.GET.get('end', '5'))
@@ -87,8 +87,8 @@ def impacts():
 
     navi = app.helper.get_navi(total, start, step=5)
     all_imp_impacts = all_imp_impacts[start:end]
-    
-    
+
+
     return {'app' : app, 'user' : user, 'navi' : navi, 'impacts' : all_imp_impacts}
 
 
@@ -155,7 +155,7 @@ def system_page():
 
     if not user:
         redirect("/mobile/")
-    
+
     schedulers = app.datamgr.get_schedulers()
     brokers = app.datamgr.get_brokers()
     reactionners = app.datamgr.get_reactionners()
@@ -172,7 +172,7 @@ def show_log():
 
     if not user:
         redirect("/mobile/")
-    
+
     schedulers = app.datamgr.get_schedulers()
     brokers = app.datamgr.get_brokers()
     reactionners = app.datamgr.get_reactionners()
@@ -287,7 +287,7 @@ def wall():
 
     if not user:
         redirect("/mobile/")
-    
+
     all_imp_impacts = app.datamgr.get_important_elements()
     all_imp_impacts.sort(hst_srv_sort)
 

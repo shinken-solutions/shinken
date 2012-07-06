@@ -54,7 +54,7 @@ def get_instance(mod_conf):
 
 # Just print some stuff
 class Dummy_poller(BaseModule):
-    
+
     def __init__(self, mod_conf):
         BaseModule.__init__(self, mod_conf)
 

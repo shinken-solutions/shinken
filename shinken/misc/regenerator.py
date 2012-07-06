@@ -81,7 +81,7 @@ class Regenerator(object):
 
         # Do not ask for full data resent too much
         self.last_need_data_send = time.time()
-        
+
         # Flag to say if our data came from the scheduler or not
         # (so if we skip *initial* broks)
         self.in_scheduler_mode = False
@@ -93,7 +93,7 @@ class Regenerator(object):
     # Load an external queue for sending messages
     def load_external_queue(self, from_q):
         self.from_q = from_q
-        
+
 
     # If we are called from a scheduler it self, we load the data from it
     def load_from_scheduler(self, sched):
@@ -140,7 +140,7 @@ class Regenerator(object):
 
         # Not in don't want? so want! :)
         return True
-        
+
 
     def manage_brok(self, brok):
         """ Look for a manager function for a brok, and call it """
@@ -189,7 +189,7 @@ class Regenerator(object):
             safe_print("Warning : the instance %d is not fully given, bailout" % inst_id)
             return
 
-        # Try to load the in progress list and make them available for 
+        # Try to load the in progress list and make them available for
         # finding
         try:
             inp_hosts = self.inp_hosts[inst_id]
@@ -224,7 +224,7 @@ class Regenerator(object):
                 self.hostgroups[inphg.id] = inphg
         # We can delare hostgroups done
         self.hostgroups.create_reversed_list()
-                
+
         # Now link HOSTS with hostgroups, and commands
         for h in inp_hosts:
             #print "Linking %s groups %s" % (h.get_name(), h.hostgroups)
@@ -234,11 +234,11 @@ class Regenerator(object):
                 if hg:
                     new_hostgroups.append(hg)
             h.hostgroups = new_hostgroups
-            
+
             # Now link Command() objects
             self.linkify_a_command(h, 'check_command')
             self.linkify_a_command(h, 'event_handler')
-            
+
             # Now link timeperiods
             self.linkify_a_timeperiod_by_name(h, 'notification_period')
             self.linkify_a_timeperiod_by_name(h, 'check_period')
@@ -290,17 +290,17 @@ class Regenerator(object):
                 if sg:
                     new_servicegroups.append(sg)
             s.servicegroups = new_servicegroups
-            
+
             # Now link with host
             hname = s.host_name
             s.host = self.hosts.find_by_name(hname)
             if s.host:
                 s.host.services.append(s)
-            
+
             # Now link Command() objects
             self.linkify_a_command(s, 'check_command')
             self.linkify_a_command(s, 'event_handler')
-            
+
             # Now link timeperiods
             self.linkify_a_timeperiod_by_name(s, 'notification_period')
             self.linkify_a_timeperiod_by_name(s, 'check_period')
@@ -328,7 +328,7 @@ class Regenerator(object):
             self.linkify_host_and_hosts(h, 'childs')
             self.linkify_dict_srv_and_hosts(h, 'parent_dependencies')
             self.linkify_dict_srv_and_hosts(h, 'child_dependencies')
-        
+
 
         # Now services too
         for s in inp_services:
@@ -409,7 +409,7 @@ class Regenerator(object):
             cmdname = cc.command
             c = self.commands.find_by_name(cmdname)
             cc.command = c
-        
+
 
 
     # We look at the timeperiod() object of o.prop
@@ -423,7 +423,7 @@ class Regenerator(object):
         tp = self.timeperiods.find_by_name(tpname)
         setattr(o, prop, tp)
 
-            
+
     # same than before, but the value is a string here
     def linkify_a_timeperiod_by_name(self, o, prop):
         tpname = getattr(o, prop, None)
@@ -459,7 +459,7 @@ class Regenerator(object):
 
         if not v:
             setattr(o, prop, [])
-                
+
         new_v = []
         #print "Linkify Dict SRV/Host", v, o.get_name(), prop
         for name in v['services']:
@@ -506,7 +506,7 @@ class Regenerator(object):
         data = b.data
         c_id = data['instance_id']
         safe_print("Regenerator : Creating config:", c_id)
-        
+
         # We get a real Conf object ,adn put our data
         c = Config()
         self.update_element(c, data)
@@ -571,7 +571,7 @@ class Regenerator(object):
         #safe_print("Creating an host: %s in instance %d" % (hname, inst_id))
 
         h = Host({})
-        self.update_element(h, data)        
+        self.update_element(h, data)
 
         # We need to rebuild Downtime and Comment relationship
         for dtc in h.downtimes + h.comments:
@@ -590,7 +590,7 @@ class Regenerator(object):
         data = b.data
         hgname = data['hostgroup_name']
         inst_id = data['instance_id']
-        
+
         # Try to get the inp progress Hostgroups
         try:
             inp_hostgroups = self.inp_hostgroups[inst_id]
@@ -599,7 +599,7 @@ class Regenerator(object):
             return
 
         safe_print("Creating an hostgroup: %s in instance %d" % (hgname, inst_id))
-        
+
         # With void members
         hg = Hostgroup([])
 
@@ -625,10 +625,10 @@ class Regenerator(object):
             return
 
         #safe_print("Creating a service: %s/%s in instance %d" % (hname, sdesc, inst_id))
-        
+
         s = Service({})
         self.update_element(s, data)
-        
+
         # We need to rebuild Downtime and Comment relationship
         for dtc in s.downtimes + s.comments:
             dtc.ref = s
@@ -638,7 +638,7 @@ class Regenerator(object):
 
 
 
-   
+
 
     # We create a servicegroup in our in progress part
     # we will link it after
@@ -646,7 +646,7 @@ class Regenerator(object):
         data = b.data
         sgname = data['servicegroup_name']
         inst_id = data['instance_id']
-        
+
         # Try to get the inp progress Hostgroups
         try:
             inp_servicegroups = self.inp_servicegroups[inst_id]
@@ -655,7 +655,7 @@ class Regenerator(object):
             return
 
         safe_print("Creating a servicegroup: %s in instance %d" % (sgname, inst_id))
-        
+
         # With void members
         sg = Servicegroup([])
 
@@ -683,7 +683,7 @@ class Regenerator(object):
             c = Contact({})
             self.update_element(c, data)
             self.contacts[c.id] = c
-        
+
         # Delete some useless contact values
         del c.host_notification_commands
         del c.service_notification_commands
@@ -708,13 +708,13 @@ class Regenerator(object):
                 if hasattr(cnw, prop):
                     setattr(nw, prop, getattr(cnw, prop))
             new_notifways.append(nw)
-            
+
             # Linking the notification way
             # With commands
             self.linkify_commands(nw, 'host_notification_commands')
             self.linkify_commands(nw, 'service_notification_commands')
-            
-            
+
+
             # Now link timeperiods
             self.linkify_a_timeperiod(nw, 'host_notification_period')
             self.linkify_a_timeperiod(nw, 'service_notification_period')
@@ -733,7 +733,7 @@ class Regenerator(object):
         data = b.data
         cgname = data['contactgroup_name']
         inst_id = data['instance_id']
-        
+
         # Try to get the inp progress Contactgroups
         try:
             inp_contactgroups = self.inp_contactgroups[inst_id]
@@ -742,7 +742,7 @@ class Regenerator(object):
             return
 
         safe_print("Creating an contactgroup: %s in instance %d" % (cgname, inst_id))
-        
+
         # With void members
         cg = Contactgroup([])
 
@@ -762,7 +762,7 @@ class Regenerator(object):
         data = b.data
         #print "Creatin timeperiod", data
         tpname = data['timeperiod_name']
-        
+
         tp = self.timeperiods.find_by_name(tpname)
         if tp:
             # print "Already exisintg timeperiod", tpname
@@ -782,7 +782,7 @@ class Regenerator(object):
     def manage_initial_command_status_brok(self, b):
         data = b.data
         cname = data['command_name']
-        
+
         c = self.commands.find_by_name(cname)
         if c:
             #print "Already existing command", cname, "updating it"
@@ -881,16 +881,16 @@ class Regenerator(object):
     def manage_initial_broks_done_brok(self, b):
         inst_id = b.data['instance_id']
         print "Finish the configuration of instance", inst_id
-        
+
         self.all_done_linking(inst_id)
 
 
-        
+
 
 ################# Status Update part
 
     # A scheduler send us a "I'm alive" brok. If we never
-    # heard about this one, we got some problem and we 
+    # heard about this one, we got some problem and we
     # ask him some initial data :)
     def manage_update_program_status_brok(self, b):
         data = b.data
@@ -911,7 +911,7 @@ class Regenerator(object):
         # Ok, good conf, we can update it
         c = self.configs[c_id]
         self.update_element(c, data)
-            
+
 
 
     # In fact, an update of a host is like a check return
@@ -932,7 +932,7 @@ class Regenerator(object):
         data = b.data
         for prop in clean_prop:
             del data[prop]
-            
+
         hname = data['host_name']
         h = self.hosts.find_by_name(hname)
 
@@ -943,7 +943,7 @@ class Regenerator(object):
             # We can have some change in our impacts and source problems.
             self.linkify_dict_srv_and_hosts(h, 'impacts')
             self.linkify_dict_srv_and_hosts(h, 'source_problems')
-            
+
             # If the topology change, update it
             if toplogy_change:
                 print "Topology change for", h.get_name(), h.parent_dependencies

@@ -59,7 +59,7 @@ class Hack_cmds_pt(BaseModule):
     def init(self):
         print "Initilisation of the hack commands poller tag module"
         #self.return_queue = self.properties['from_queue']
-        
+
 
     # Now look at hosts and services, if they use our command we just changed
     # we must update their commandCall object too
@@ -83,4 +83,4 @@ class Hack_cmds_pt(BaseModule):
                 c.poller_tag = self.poller_tag
                 self.update_service_and_hosts_commandCall(arb, c, self.poller_tag)
 
-                
+

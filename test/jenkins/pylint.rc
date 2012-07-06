@@ -41,10 +41,10 @@ load-plugins=
 # multiple time (only on the command line, not in the configuration file where
 
 # it should appear only once).
-# C0111 Missing docstring 
+# C0111 Missing docstring
 # C0103 Invalid name "%s" (should match %s)
-# W0201 Attribute %r defined outside __init__ 
-# E1101 %s %r has no %r member 
+# W0201 Attribute %r defined outside __init__
+# E1101 %s %r has no %r member
 # F0401 Unable to import %r / Shinken catches imports and uses fallbacks
 disable=C0111,C0302,C0103,R0801,W0201,E1101
 

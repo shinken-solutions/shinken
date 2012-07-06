@@ -166,7 +166,7 @@ class Hostgroups(Itemgroups):
                 hg.configuration_errors.append(err)
                 hg.realm = None
                 continue
-            
+
             for h in hg:
                 if h is None: continue
                 if h.realm is None or h.got_default_realm: # default value not hasattr(h, 'realm'):

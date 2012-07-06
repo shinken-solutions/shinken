@@ -47,4 +47,4 @@ export SHINKEN_MODULE_FILE="$NAME"  ## for 'shinken' init script to see that it'
 "$curdir/shinken" $@ arbiter
 
 exit $?
- 
+

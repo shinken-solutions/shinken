@@ -47,7 +47,7 @@ properties = {
 # called by the plugin manager
 def get_instance(plugin):
     print "Get an GRAPITE UI module for plugin %s" % plugin.get_name()
-    
+
     instance = Graphite_Webui(plugin)
     return instance
 
@@ -94,7 +94,7 @@ class Graphite_Webui(BaseModule):
         s = perf_data.strip()
         # Get all metrics non void
         elts = s.split(' ')
-        metrics = [e for e in elts if e != ''] 
+        metrics = [e for e in elts if e != '']
 
         for e in metrics:
  #           print "Graphite : groking : ", e
@@ -125,7 +125,7 @@ class Graphite_Webui(BaseModule):
             for key,value in name_value.items():
                 res.append((key, value))
         return res
-        
+
 
 
     # Ask for an host or a service the graph UI that the UI should
@@ -153,7 +153,7 @@ class Graphite_Webui(BaseModule):
             template_file.closed
             html=Template(template_html)
             # Build the dict to instanciate the template string
-            values = {} 
+            values = {}
             if t == 'host':
                 values['host'] = self.illegal_char.sub("_",elt.host_name)
                 values['service'] = '__HOST__'
@@ -168,9 +168,9 @@ class Graphite_Webui(BaseModule):
                     v['link'] = self.uri
                     v['img_src'] = img.replace('"',"'") + "&from=" + d + "&until=" + e
                     r.append(v)
-            # No need to continue, we have the images already.      					
+            # No need to continue, we have the images already.
             return r
-             
+
         # If no template is present, then the usual way
 
         if t == 'host':
@@ -185,7 +185,7 @@ class Graphite_Webui(BaseModule):
 
             # Send a bulk of all metrics at once
             for (metric, _) in couples:
-                uri = self.uri + 'render/?width=586&height=308&lineMode=connected&from=' + d + "&until=" + e 
+                uri = self.uri + 'render/?width=586&height=308&lineMode=connected&from=' + d + "&until=" + e
                 if re.search(r'_warn|_crit', metric):
                     continue
                 uri += "&target=%s.__HOST__.%s" % (host_name, metric)
@@ -206,14 +206,14 @@ class Graphite_Webui(BaseModule):
             # Remove all non alpha numeric character
             desc = self.illegal_char.sub('_', elt.service_description)
             host_name = self.illegal_char.sub('_', elt.host.host_name)
-            
+
             # Send a bulk of all metrics at once
             for (metric, value) in couples:
-                uri = self.uri + 'render/?width=586&height=308&lineMode=connected&from=' + d + "&until=" + e 
+                uri = self.uri + 'render/?width=586&height=308&lineMode=connected&from=' + d + "&until=" + e
                 if re.search(r'_warn|_crit', metric):
                     continue
                 elif value[1] == '%':
-                    uri += "&yMin=0&yMax=100" 
+                    uri += "&yMin=0&yMax=100"
                 uri += "&target=%s.%s.%s" % (host_name, desc, metric)
                 uri += "&target=%s.%s.%s" % (host_name, desc, metric+"?????")
                 v = {}

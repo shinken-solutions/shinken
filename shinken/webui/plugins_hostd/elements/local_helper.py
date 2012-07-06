@@ -147,7 +147,7 @@ class Helper(object):
     def get_select_input(self, elt, prop, name, cls, key, editable=''):
         t = getattr(self.app.db, cls)
         tps = list(t.find({}))
-        
+
         value = elt.get(prop, None)
         elt_tp = find(value, tps, key)
         print 'Find a matching element for me?', elt.get(prop), elt_tp
@@ -182,7 +182,7 @@ class Helper(object):
     def get_command_input(self, elt, prop, name, cls, key, editable=''):
         t = getattr(self.app.db, cls)
         tps = list(t.find({}))
-        
+
         value = elt.get(prop, None)
         args = ''
         # We split on the first ! of the data
@@ -191,7 +191,7 @@ class Helper(object):
             value = elts[0]
             if len(elts) > 1:
                 args = '!'+elts[1]
-            
+
         elt_tp = find(value, tps, key)
         print 'Find a matching element for me?', elt.get(prop), elt_tp
 
@@ -221,12 +221,12 @@ class Helper(object):
                <script>properties.push({'name' : '%s', 'type' : 'command'});</script>
             ''' % (name, select_part, editable, prop, args, editable, prop)
         return s
-        
+
 
     def get_multiselect_input(self, elt, prop, name, cls, key, editable=''):
         t = getattr(self.app.db, cls)
         tps = list(t.find({}))
-        
+
         elts_tp = find_several(tps, elt, prop, key)
         print 'Find a matching element for me?', elts_tp
 
@@ -254,7 +254,7 @@ class Helper(object):
                <script>properties.push({'name' : '%s', 'type' : 'multiselect'});</script>
             ''' % (name, select_part, prop)
         return s
-        
+
 
 
     def get_poller_tag_input(self, elt, prop, name, editable=''):
@@ -264,7 +264,7 @@ class Helper(object):
             print 'Look at poller?', p.__dict__
             for t in getattr(p, 'poller_tags', '').split(','):
                 all_poller_tags.add(t.strip())
-        
+
         select_part = '''<SELECT class='%s' name="%s" %s>''' % (editable, prop, editable)
         if value in all_poller_tags:
             select_part += '<OPTION VALUE="%s">%s</OPTION>' % (value, value)
@@ -289,13 +289,13 @@ class Helper(object):
 
 
     def get_realm_input(self, elt, prop, name, editable=''):
-        
+
         value = elt.get(prop, None)
         all_realms = set()
         for r in self.app.conf.realms:
             print 'Look at realm?', r.__dict__
             all_realms.add(r.get_name())
-        
+
         select_part = '''<SELECT class='%s' name="%s" %s>''' % (editable, prop, editable)
         if value in all_realms:
             select_part += '<OPTION VALUE="%s">%s</OPTION>' % (value, value)
@@ -347,7 +347,7 @@ class Helper(object):
         print 'Sorted names', sorted_names
 
 
-        
+
         s += "<span class='span12'><a class='btn btn-success pull-right %s' href='javascript:add_macro();'><i class='icon-plus icon-white'></i> Add macro</a></span>" % editable
         s += "<span id='new_macros' class='span12'></span>"
         # We want to show the how element macros value first
@@ -381,5 +381,5 @@ class Helper(object):
                     s+= self.get_percent_input(elt, k, k[1:], editable=editable, placeholder=v['placeholder'], popover=popover)
                 else: # if not known, apply string
                     s+= self.get_string_input(elt, k, k[1:], editable=editable, placeholder=v['placeholder'], popover=popover)
-        
+
         return s

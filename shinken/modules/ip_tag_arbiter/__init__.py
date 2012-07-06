@@ -47,6 +47,6 @@ def get_instance(plugin):
     prop = plugin.property
     value = plugin.value
     method = getattr(plugin, 'method', 'replace')
-    
+
     instance = Ip_Tag_Arbiter(plugin, ip_range, prop, value, method)
     return instance

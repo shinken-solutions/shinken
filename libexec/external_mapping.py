@@ -21,11 +21,11 @@
 # host1 : vm1
 # host2 : vm2
 # ...
-# You can now get a live update of your dependency tree in shinken for your xen/virtualbox/qemu 
+# You can now get a live update of your dependency tree in shinken for your xen/virtualbox/qemu
 # All you have to do is finding a way to modify this flat file when you do a live migration
 # for example, you can use a script like this in your crontab
 # dsh -Mc -g mydom0group 'xm list | awk "/vm-/ { print \$1 }"' > /tmp/shinken_flat_mapping
-# 
+#
 
 import os
 import sys

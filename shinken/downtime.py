@@ -240,13 +240,13 @@ class Downtime:
     # Inverted funtion of getstate
     def __setstate__(self, state):
         cls = self.__class__
-        
+
         # Maybe it's not a dict but a list like in the old 0.4 format
         # so we should call the 0.4 function for it
         if isinstance(state, list):
             self.__setstate_deprecated__(state)
-            return 
-            
+            return
+
         self.id = state['id']
         for prop in cls.properties:
             if prop in state:
@@ -267,7 +267,7 @@ class Downtime:
         if len(cls.properties) != (len(state) - 1):
             print "Passing downtime"
             return
-        
+
         self.id = state.pop()
         for prop in cls.properties:
             val = state.pop()

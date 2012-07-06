@@ -3,19 +3,19 @@
      Gerhard Lausser, Gerhard.Lausser@consol.de
      Gregory Starck, g.starck@gmail.com
      Hartmut Goebel, h.goebel@goebel-consult.de
- 
+
  This file is part of Shinken.
- 
+
  Shinken is free software: you can redistribute it and/or modify
  it under the terms of the GNU Affero General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
- 
+
  Shinken is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU Affero General Public License for more details.
- 
+
  You should have received a copy of the GNU Affero General Public License
  along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -35,7 +35,7 @@ function AddWidget(url, placeId){
     // a spinner
     nb_widgets_loading += 1;
     $('#loading').show();
-    
+
     // We also hide the central span with the big button
     // And show the little one
     $('#center-button').hide();
@@ -44,11 +44,11 @@ function AddWidget(url, placeId){
     $.get(url, function(html){
 	$.fn.AddEasyWidget(html, placeId, {});
 	nb_widgets_loading -= 1;
-	//Maybe we are the last widget to load, if so, 
+	//Maybe we are the last widget to load, if so,
 	// remove the spinner
 	if(nb_widgets_loading==0){
 	    $('#loading').hide();
-	}	
+	}
     });
 }
 
@@ -69,7 +69,7 @@ function find_widget(name){
 	    res = w;
 	}
     });
-    
+
     return res;
 }
 
@@ -85,7 +85,7 @@ $(function(){
     // We hide the loader spinner thing
     $('#loading').hide()
 
-    
+
     // Function that will look at the current state of the positions,
     // and will update the widgets objects from it.
     function update_widgets_positions(positions){
@@ -122,10 +122,10 @@ $(function(){
 	    }
 	}
     }
-    
 
 
-    // Very basic usage  
+
+    // Very basic usage
     var easy_widget_mgr = $.fn.EasyWidgets(
 	{
 	    i18n : {
@@ -188,7 +188,7 @@ $(function(){
 		}
 	    }
 	});
-    
+
 
 
     // We will look if we need to save the current state and options or not

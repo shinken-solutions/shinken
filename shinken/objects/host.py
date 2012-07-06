@@ -243,7 +243,7 @@ class Host(SchedulingItem):
         # or even if we are business based.
         'parent_dependencies' : StringProp(brok_transformation=to_svc_hst_distinct_lists, default=set(), fill_brok=['full_status']),
         # Here it's the guys that depend on us. So it's the total
-        # opposite of the parent_dependencies 
+        # opposite of the parent_dependencies
         'child_dependencies':   StringProp(
             brok_transformation=to_svc_hst_distinct_lists,
             default=set(),
@@ -275,7 +275,7 @@ class Host(SchedulingItem):
         'got_business_rule' : BoolProp(default=False, fill_brok=['full_status']),
         # Our Dependency node for the business rule
         'business_rule' : StringProp(default=None),
-        
+
         # Manage the unknown/unreach during hard state
         # From now its not really used
         'in_hard_unknown_reach_phase' : BoolProp(default=False, retention=True),
@@ -352,19 +352,19 @@ class Host(SchedulingItem):
         'criticity'             : 'business_impact',
         'hostgroup'             : 'hostgroups',
 #        'criticitymodulations'  : 'business_impact_modulations',
-        
+
     }
 
 
-####### 
-#                   __ _                       _   _             
-#                  / _(_)                     | | (_)            
-#   ___ ___  _ __ | |_ _  __ _ _   _ _ __ __ _| |_ _  ___  _ __  
-#  / __/ _ \| '_ \|  _| |/ _` | | | | '__/ _` | __| |/ _ \| '_ \ 
+#######
+#                   __ _                       _   _
+#                  / _(_)                     | | (_)
+#   ___ ___  _ __ | |_ _  __ _ _   _ _ __ __ _| |_ _  ___  _ __
+#  / __/ _ \| '_ \|  _| |/ _` | | | | '__/ _` | __| |/ _ \| '_ \
 # | (_| (_) | | | | | | | (_| | |_| | | | (_| | |_| | (_) | | | |
 #  \___\___/|_| |_|_| |_|\__, |\__,_|_|  \__,_|\__|_|\___/|_| |_|
-#                         __/ |                                  
-#                        |___/                                   
+#                         __/ |
+#                        |___/
 ######
 
 
@@ -410,7 +410,7 @@ class Host(SchedulingItem):
         # Ok now we manage special cases...
         if self.notifications_enabled and self.contacts == []:
             logger.warning("The host %s has no contacts nor contact_groups in (%s)" % (self.get_name(), source))
-        
+
         if getattr(self, 'check_command', None) is None:
             logger.info("%s : I've got no check_command" % self.get_name())
             state = False
@@ -425,18 +425,18 @@ class Host(SchedulingItem):
                     for bperror in self.business_rule.configuration_errors:
                         logger.error("[host::%s] %s" % (self.get_name(), bperror))
                     state = False
-        
+
         if not hasattr(self, 'notification_interval') and self.notifications_enabled == True:
             logger.info("%s : I've got no notification_interval but I've got notifications enabled" % self.get_name())
             state = False
 
         # If active check is enabled with a check_interval!=0, we must have a check_period
-        if ( getattr(self, 'active_checks_enabled', False) 
-             and getattr(self, 'check_period', None) is None 
+        if ( getattr(self, 'active_checks_enabled', False)
+             and getattr(self, 'check_period', None) is None
              and getattr(self, 'check_interval', 1) != 0 ):
             logger.info("%s : My check_period is not correct" % self.get_name())
             state = False
-        
+
         if not hasattr(self, 'check_period'):
             self.check_period = None
 
@@ -568,14 +568,14 @@ class Host(SchedulingItem):
 
 
 #####
-#                         _             
-#                        (_)            
-#  _ __ _   _ _ __  _ __  _ _ __   __ _ 
+#                         _
+#                        (_)
+#  _ __ _   _ _ __  _ __  _ _ __   __ _
 # | '__| | | | '_ \| '_ \| | '_ \ / _` |
 # | |  | |_| | | | | | | | | | | | (_| |
 # |_|   \__,_|_| |_|_| |_|_|_| |_|\__, |
 #                                  __/ |
-#                                 |___/ 
+#                                 |___/
 ####
 
 

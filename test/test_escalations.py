@@ -48,7 +48,7 @@ class TestEscalations(ShinkenTest):
 
         # To make tests quicker we make notifications send very quickly
         svc.notification_interval = 0.001
-        
+
         svc.checks_in_progress = []
         svc.act_depend_of = [] # no hostchecks on critical checkresults
         #--------------------------------------------------------------
@@ -59,7 +59,7 @@ class TestEscalations(ShinkenTest):
         self.scheduler_loop(1, [[svc, 0, 'OK']], do_sleep=True, sleep_time=0.1)
 
         self.assert_(svc.current_notification_number == 0)
-        
+
         tolevel2 = self.sched.conf.escalations.find_by_name('ToLevel2')
         self.assert_(tolevel2 is not None)
         self.assert_(tolevel2 in svc.escalations)
@@ -86,7 +86,7 @@ class TestEscalations(ShinkenTest):
         #--------------------------------------------------------------
         print "- 1 x BAD get hard -------------------------------------"
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
-        
+
         # We check if we really notify the level1
         self.assert_(self.any_log_match('SERVICE NOTIFICATION: level1.*;CRITICAL;'))
         self.show_and_clear_logs()
@@ -102,13 +102,13 @@ class TestEscalations(ShinkenTest):
         # number is 2
         self.assert_(svc.current_notification_number == 1)
         print "OK, level1 is notified, notif nb = 1"
-        
+
         print "---------------------------------1st round with a hard"
         print "find a way to get the number of the last reaction"
         cnn = svc.current_notification_number
         print "- 1 x BAD repeat -------------------------------------"
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
-        
+
         # Now we raise the notif number of 2, so we can escalade
         self.assert_(self.any_log_match('SERVICE NOTIFICATION: level2.*;CRITICAL;'))
         self.show_and_clear_logs()
@@ -164,7 +164,7 @@ class TestEscalations(ShinkenTest):
 
         # To make tests quicker we make notifications send very quickly
         svc.notification_interval = 0.001
-        
+
         svc.checks_in_progress = []
         svc.act_depend_of = [] # no hostchecks on critical checkresults
         #--------------------------------------------------------------
@@ -186,7 +186,7 @@ class TestEscalations(ShinkenTest):
         self.assert_(tolevel3_time in svc.escalations)
 
         # Go for the running part!
-        
+
         #--------------------------------------------------------------
         # service reaches soft;1
         # there must not be any notification
@@ -202,12 +202,12 @@ class TestEscalations(ShinkenTest):
         #--------------------------------------------------------------
         print "- 1 x BAD get hard -------------------------------------"
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
-        
+
         # We check if we really notify the level1
         self.assert_(self.any_log_match('SERVICE NOTIFICATION: level1.*;CRITICAL;'))
         self.show_and_clear_logs()
         self.show_actions()
-        
+
         # check_notification: yes (hard)
         print "---current_notification_number", svc.current_notification_number
         # notification_number is already sent. the next one has been scheduled
@@ -215,12 +215,12 @@ class TestEscalations(ShinkenTest):
         # number is 2
         self.assert_(svc.current_notification_number == 1)
         print "OK, level1 is notified, notif nb = 1"
-        
+
         print "---------------------------------1st round with a hard"
         print "find a way to get the number of the last reaction"
         cnn = svc.current_notification_number
         print "- 1 x BAD repeat -------------------------------------"
-        
+
         # For the test, we hack the notif value because we do not wan to wait 1 hour!
         for n in svc.notifications_in_progress.values():
             # HOP, we say : it's already 3600 second since the last notif,
@@ -228,9 +228,9 @@ class TestEscalations(ShinkenTest):
             # and we say that there is still 1hour since the notification creation
             # so it will say the notification time is huge, and so it will escalade
             n.creation_time = n.creation_time - 3600
-        
+
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.001)
-        
+
         # Now we raise a notification time of 1hour, we escalade to level2
         self.assert_(self.any_log_match('SERVICE NOTIFICATION: level2.*;CRITICAL;'))
         self.show_and_clear_logs()
@@ -256,7 +256,7 @@ class TestEscalations(ShinkenTest):
             # HOP, we say : it's already 3600 second since the last notif,
             n.t_to_go = time.time()
             n.creation_time = n.creation_time - 3600
-            
+
 
         # One more, we bypass 7200, so now it's level3
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
@@ -304,7 +304,7 @@ class TestEscalations(ShinkenTest):
         # To make tests quicker we make notifications send very quickly
         # 1 day notification interval
         svc.notification_interval = 1400
-        
+
         svc.checks_in_progress = []
         svc.act_depend_of = [] # no hostchecks on critical checkresults
         #--------------------------------------------------------------
@@ -315,7 +315,7 @@ class TestEscalations(ShinkenTest):
         self.scheduler_loop(1, [[svc, 0, 'OK']], do_sleep=True, sleep_time=0.1)
 
         self.assert_(svc.current_notification_number == 0)
-        
+
         # We check that we really linked our escalations :)
         tolevel2_time = self.sched.conf.escalations.find_by_name('ToLevel2-time')
         self.assert_(tolevel2_time is not None)
@@ -354,12 +354,12 @@ class TestEscalations(ShinkenTest):
         # number is 2
         self.assert_(svc.current_notification_number == 1)
         print "OK, level1 is notified, notif nb = 1"
-        
+
         print "---------------------------------1st round with a hard"
         print "find a way to get the number of the last reaction"
         cnn = svc.current_notification_number
         print "- 1 x BAD repeat -------------------------------------"
-        
+
 
         # Now we go for the level2 escalation, so we will need to say : he, it's 1 hour since the begining :p
         print "*************Next", svc.notification_interval * svc.__class__.interval_length
@@ -371,7 +371,7 @@ class TestEscalations(ShinkenTest):
             print abs(next - now)
             # Check if we find the next notification for the next hour,
             # and not for the next day like we ask before
-            self.assert_(abs(next - now - 3600) < 10) 
+            self.assert_(abs(next - now - 3600) < 10)
 
         # And we hack the notification so we can raise really the level2 escalation
         for n in svc.notifications_in_progress.values():
@@ -428,7 +428,7 @@ class TestEscalations(ShinkenTest):
 
 
 
-        # Ok now we get the normal stuff, we do NOT want to raise so soon a 
+        # Ok now we get the normal stuff, we do NOT want to raise so soon a
         # notification.
         self.scheduler_loop(2, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.show_actions()
@@ -440,7 +440,7 @@ class TestEscalations(ShinkenTest):
             self.assert_( 8300 < abs(n.t_to_go - time.time()) < 85000)
         # And so no notification
         self.assert_(not self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;'))
-        
+
 
         # Now we recover, it will be fun because all of level{1,2,3} must be send a
         # recovery notif

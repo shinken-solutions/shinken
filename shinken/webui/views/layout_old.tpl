@@ -21,14 +21,14 @@
 	<head>
     	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     	<title>{{title or 'No title'}}</title>
-      
+
 		<link type="text/css" href="/static/css/custom-theme/jquery-ui-1.8.16.custom.css" rel="stylesheet" />
 		<link href="/static/css/grid.css" rel="stylesheet">
 		<link href="/static/css/layout.css" rel="stylesheet">
 		<link href="/static/css/elements/navigation.css" rel="stylesheet" type="text/css" />
 		<link href="/static/bootstrap/bootstrap.css" rel="stylesheet">
 		<link href="/static/css/elements/badger.css" rel="stylesheet">
-	    
+
 	    %if user is not None:
 	    <link rel="stylesheet" type="text/css" href="/static/css/userinfo.css" media="screen"/>
 	    %end
@@ -37,12 +37,12 @@
       %for p in css:
 		<link rel="stylesheet" type="text/css" href="/static/{{p}}">
       %end
-  
+
         <!--scripts-->
 
         <script type="text/javascript" src="/static/js/jquery-1.6.2.min.js"></script>
         <script type="text/javascript" src="/static/js/jquery-ui-1.8.16.custom.min.js"></script>
-        
+
         <!--daterangepicker-->
         <script type="text/javascript" src="/static/third-party/jQuery-UI-Date-Range-Picker/js/date.js"></script>
         <script type="text/javascript" src="/static/third-party/jQuery-UI-Date-Range-Picker/js/daterangepicker.jQuery.js"></script>
@@ -59,13 +59,13 @@
 
         <!--init for this page-->
         <script type="text/javascript" src="/static/js/demo.js"></script>
-      
+
       %# End of classic js import. Now call for specific ones
       %for p in js:
 		<script type="text/javascript" src="/static/{{p}}"></script>
       %end
 	</head>
-    
+
 	<body class="main">
 		<div class="container_16">
 			%if print_header:

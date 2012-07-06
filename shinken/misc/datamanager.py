@@ -63,7 +63,7 @@ class DataManager(object):
     def get_contacts(self):
         return self.rg.contacts
 
-    
+
     def get_hostgroups(self):
         return self.rg.hostgroups
 
@@ -77,24 +77,24 @@ class DataManager(object):
     def get_hostgroups_sorted(self, selected=''):
         r = []
         selected = selected.strip()
-        
+
         hg_names = [hg.get_name() for hg in self.rg.hostgroups if len(hg.members) > 0 and hg.get_name() != selected]
         hg_names.sort()
         hgs = [self.rg.hostgroups.find_by_name(n) for n in hg_names]
         hgvoid_names = [hg.get_name() for hg in self.rg.hostgroups if len(hg.members) == 0 and hg.get_name() != selected]
         hgvoid_names.sort()
         hgvoids = [self.rg.hostgroups.find_by_name(n) for n in hgvoid_names]
-        
+
         if selected:
             hg = self.rg.hostgroups.find_by_name(selected)
             if hg:
                 r.append(hg)
-                
+
         r.extend(hgs)
         r.extend(hgvoids)
-        
+
         return r
-        
+
 
     def get_hosts(self):
         return self.rg.hosts
@@ -149,7 +149,7 @@ class DataManager(object):
         for n in names:
             r.append((n, self.rg.tags[n]))
         return r
-        
+
 
     def get_important_impacts(self):
         res = []
@@ -225,7 +225,7 @@ class DataManager(object):
     # Return the number of impacts
     def get_nb_impacts(self):
         return len(self.get_all_impacts())
-        
+
 
     def get_nb_elements(self):
         return len(self.rg.services) + len(self.rg.hosts)
@@ -312,6 +312,6 @@ class DataManager(object):
             return []
         r = [s for s in obj.host.services if s.state_id != 0 and s != obj]
         return r
-        
+
 
 datamgr = DataManager()

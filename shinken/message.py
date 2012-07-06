@@ -30,15 +30,15 @@
 class Message:
     """This is a simple message class for communications between actionners and
     workers
-    
+
     """
 
     my_type = 'message'
     _type = None
     _data = None
     _from = None
-    
-    
+
+
     def __init__(self, id, type, data=None, source=None):
         self._type = type
         self._data = data

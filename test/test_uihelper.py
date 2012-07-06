@@ -29,7 +29,7 @@ class TestUIHelper(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
 
-    
+
     def test_duration_print(self):
         now = time.time()
 

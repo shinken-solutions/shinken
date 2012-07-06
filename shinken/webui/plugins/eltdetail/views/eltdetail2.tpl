@@ -32,9 +32,9 @@ Invalid element name
 			<li><a class="pointer_down" id="v_toggle" href="#">Gesture</a></li>
 		</ul>
 	</div>
-	
+
 	<div id="gesture_slide" class="grid_16 opacity_hover">
-	%#  "This is the background canvas for all gesture detection things " 
+	%#  "This is the background canvas for all gesture detection things "
 	%# " Don't ask me why, but the size must be included in the
 	%# canvas line here or we got problem!"
 		<canvas id="canvas" class="grid_10" style="border: 1px solid black; width: 100%;"></canvas>
@@ -47,8 +47,8 @@ Invalid element name
 		<li class="gesture_button">
 	       	<img title="By keeping a left click pressed and drawing a check, you will launch a try to fix command." src="/static/eltdetail/images/gesture-zigzag.png"/> Fix
 		</li>
-	</div>	    
-	
+	</div>
+
 </div>
 %#  "Left Container End"
 
@@ -65,8 +65,8 @@ Invalid element name
 			<dd>{{elt.address}}</dd>
 			<dt>Importance</dt>
 	     	<dd>{{!helper.get_business_impact_text(elt)}}</dd>
-	      
-	
+
+
 	    </dl>
 	    <dl class="grid_4">
 	    	<dt>Parents:</dt>
@@ -104,12 +104,12 @@ Invalid element name
 		    %#   " If the elements is a root problem with a huge impact and not ack, ask to ack it!"
 		    %if elt.is_problem and elt.business_impact > 2 and not elt.problem_has_been_acknowledged:
 			<div id="messagebox" class="gradient_alert">
-				<img src="/static/images/icons/alert.png" alt="some_text" style="height: 40px; width: 40px" class="grid_4"/> 
+				<img src="/static/images/icons/alert.png" alt="some_text" style="height: 40px; width: 40px" class="grid_4"/>
 				<p>This element has got an important impact on your business, please <b>fix it</b> or <b>acknowledge it</b>.</p>
 			</div>
 		    %# "end of the 'SOLVE THIS' highlight box"
 		    %end
-		</div>				
+		</div>
 	</div>
 	<!-- Switch Start-->
 	<div class="switches">
@@ -122,24 +122,24 @@ Invalid element name
 			<li class="grid_4" title="{{title}}" onclick="toggle_checks('{{elt.get_full_name()}}' , '{{elt.active_checks_enabled|elt.passive_checks_enabled}}')"><span>Active/passive Checks</span> {{!helper.get_input_bool(elt.active_checks_enabled|elt.passive_checks_enabled)}}
 			<li class="grid_4" onclick="toggle_notifications('{{elt.get_full_name()}}' , '{{elt.notifications_enabled}}')"><span>Notifications</span> {{!helper.get_input_bool(elt.notifications_enabled)}} </li>
 			<li class="grid_4" onclick="toggle_event_handlers('{{elt.get_full_name()}}' , '{{elt.event_handler_enabled}}')" ><span>Event Handler</span> {{!helper.get_input_bool(elt.event_handler_enabled)}} </li>
-			<li class="grid_4" onclick="toggle_flap_detection('{{elt.get_full_name()}}' , '{{elt.flap_detection_enabled}}')" ><span>Flap Detection</span> {{!helper.get_input_bool(elt.flap_detection_enabled)}} </li>	
-		</ul>	
+			<li class="grid_4" onclick="toggle_flap_detection('{{elt.get_full_name()}}' , '{{elt.flap_detection_enabled}}')" ><span>Flap Detection</span> {{!helper.get_input_bool(elt.flap_detection_enabled)}} </li>
+		</ul>
 	</div>
     <!-- Switch End-->
-      
+
 		<div id="elt_container">
 
 		<script type="text/javascript">
 			document.addEvent('domready', function() {
 			var tabPane = new TabPane('demo');
-					
+
 			   $('demo').addEvent('click:relay(.remove)', function(e) {
 			     new Event(e).stop();
 			     var parent = this.getParent('.tab');
 			     var index = $('demo').getElements('.tab').indexOf(parent);
 			     tabPane.closeTab(index);
 			   });
-					
+
 		     });
 		</script>
 
@@ -163,7 +163,7 @@ Invalid element name
 
 										<dt scope="row" class="column1">Status Information</dt>
 										<dd>{{elt.output}}</dd>
-										
+
 										<dt scope="row" class="column1">Performance Data</dt>
 										%# "If there any perf data?"
 										%if len(elt.perf_data) > 0:
@@ -171,7 +171,7 @@ Invalid element name
 										%else:
 										<dd>&nbsp;</dd>
 										%end
-										
+
 										<dt scope="row" class="column1">Current Attempt</dt>
 										<dd>{{elt.attempt}}/{{elt.max_check_attempts}} ({{elt.state_type}} state)</dd>
 
@@ -212,33 +212,33 @@ Invalid element name
 									</dl>
 								</div>
 							</div>
-		
+
 						    </div>
 							%if elt_type=='host':
 						    <div class="content">
 								%# " Only print host service if elt is an host of course"
 								%# " If the host is a problem, services will be print in the impacts, so don't"
 								%# " print twice "
-								
+
 								%if elt_type=='host' and not elt.is_problem:
 							        <hr>
-							
+
 							        <!--<div class='host-services'>-->
 									<div>
 									<h3> Services </h3>
 									%nb = 0
 									%for s in helper.get_host_services_sorted(elt):
 									%nb += 1
-							
+
 									%# " We put a max imapct to print, bacuse too high is just useless"
 									%if nb > max_impacts:
-									%   break 
+									%   break
 									%end
-							
+
 									%if nb == 8:
 										<div style="float:right;" id="hidden_impacts_or_services_button"><a href="javascript:show_hidden_impacts_or_services()"> {{!helper.get_button('Show all services', img='/static/images/expand.png')}}</a></div>
 									%end
-									
+
 									%if nb < 8:
 									<div class="service">
 									%else:
@@ -255,9 +255,9 @@ Invalid element name
 									%# End of this service
 									%end
 								</div>
-							    
-							    %end #of the only host part			
-							
+
+							    %end #of the only host part
+
 								%if elt.is_problem and len(elt.impacts) != 0:
 								<div>
 								<!--<div class='host-services'>-->
@@ -265,7 +265,7 @@ Invalid element name
 								%nb = 0
 								%for i in helper.get_impacts_sorted(elt):
 								%nb += 1
-								%if nb == 8:	
+								%if nb == 8:
 									<div style="float:right;" id="hidden_impacts_or_services_button"><a href="javascript:show_hidden_impacts_or_services()"> {{!helper.get_button('Show all impacts', img='/static/images/expand.png')}}</a></div>
 								%end
 								%if nb < 8:
@@ -273,7 +273,7 @@ Invalid element name
 								%else:
 								<div class="service hidden_impacts_services">
 								%end
-							        
+
 									<div class="divstate{{i.state_id}}">
 									%for j in range(0, i.business_impact-2):
 										<img src='/static/images/star.png'>
@@ -303,7 +303,7 @@ Invalid element name
 											</ul>
 										</div>
 									  	<div class="clear"></div>
-									  
+
 									  	<div id="log_container">
 											%if len(elt.comments) > 0:
 											<h2></h2>
@@ -351,7 +351,7 @@ Invalid element name
 								  <li><a href="/{{elt_type}}/{{elt.get_full_name()}}?graphstart={{lastyear}}&graphend={{now}}#graphs" class="">Year</a></li>
 								</ul>
 								%end
-								
+
 								%for g in uris:
 								   %img_src = g['img_src']
 								   %link = g['link']

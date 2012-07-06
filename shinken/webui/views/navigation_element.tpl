@@ -2,7 +2,7 @@
 <div class="well sidebar-nav">
        <ul class="nav nav-list">
               <li class="nav-header">Monitor</li>
-              
+
               %menu = [ ('/', 'Dashboard'), ('/impacts','Impacts'), ('/problems','IT problems'), ('/all', 'All') ]
               %for (key, value) in menu:
 

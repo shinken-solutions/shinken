@@ -89,7 +89,7 @@ class Npcd_broker(BaseModule):
         # use so we do nto ask a reinit ofan instance too quickly
         self.last_need_data_send = time.time()
 
-        
+
     # Ask for a full reinit of a scheduler because we lost some data.... sorry
     def ask_reinit(self, c_id):
         # Do not ask data too quickly, very dangerous

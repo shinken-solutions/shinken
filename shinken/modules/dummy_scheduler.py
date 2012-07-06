@@ -49,7 +49,7 @@ def get_instance(mod_conf):
 
 # Just print some stuff
 class Dummy_scheduler(BaseModule):
-    
+
     def __init__(self, mod_conf, foo):
         BaseModule.__init__(self, mod_conf)
         self.myfoo = foo

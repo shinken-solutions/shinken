@@ -53,7 +53,7 @@ class Receiver(BaseSatellite):
 
 
     def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
-        
+
         super(Receiver, self).__init__('receiver', config_file, is_daemon, do_replace, debug, debug_file)
 
         # Our arbiters
@@ -74,7 +74,7 @@ class Receiver(BaseSatellite):
         self.broks = [] # broks to manage
         # broks raised this turn and that need to be put in self.broks
         self.broks_internal_raised = []
-        
+
 
     # Schedulers have some queues. We can simplify call by adding
     # elements into the proper queue just by looking at their type
@@ -148,8 +148,8 @@ class Receiver(BaseSatellite):
             a.terminate()
             a.join(1)
         super(Receiver, self).do_stop()
-        
-        
+
+
     def setup_new_conf(self):
         conf = self.new_conf
         self.new_conf = None
@@ -175,8 +175,8 @@ class Receiver(BaseSatellite):
             logger.info("Setting our timezone to %s" % use_timezone)
             os.environ['TZ'] = use_timezone
             time.tzset()
-        
-        
+
+
 
     def do_loop_turn(self):
         sys.stdout.write(".")
@@ -255,14 +255,14 @@ class Receiver(BaseSatellite):
     def main(self):
         try:
             self.load_config_file()
-        
+
             for line in self.get_header():
                 self.log.info(line)
 
             logger.info("[Receiver] Using working directory : %s" % os.path.abspath(self.workdir))
-        
+
             self.do_daemon_init_and_start()
-            
+
             self.uri2 = self.pyro_daemon.register(self.interface, "ForArbiter")
             logger.debug("The Arbiter uri it at %s" % self.uri2)
 

@@ -69,7 +69,7 @@ class Memcache_retention_scheduler(BaseModule):
         print "[MemcacheRetention] asking me to update the retention objects"
 
         all_data = daemon.get_retention_data()
-        
+
         hosts = all_data['hosts']
         services = all_data['services']
 

@@ -335,7 +335,7 @@ class Realm(Itemgroup):
                 broker.cfg['reactionners'][r.id] = cfg
 
 
-    # Get a conf package of satellites links that can be useful for 
+    # Get a conf package of satellites links that can be useful for
     # a scheduler
     def get_satellites_links_for_scheduler(self):
         cfg = {}

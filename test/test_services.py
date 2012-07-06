@@ -112,7 +112,7 @@ class TestService(ShinkenTest):
         print 'Display name', svc.display_name, 'toto'
         print 'Full name', svc.get_full_name()
         self.assert_(svc.display_name == 'test_ok_0')
-        
+
 
 
     def test_set_state_from_exit_status(self):
@@ -183,7 +183,7 @@ class TestService(ShinkenTest):
         print "FUCK", svc.last_hard_state_change
         orig = svc.last_hard_state_change
         self.assert_(svc.last_hard_state == 'OK')
-        
+
         # now still ok
         self.scheduler_loop(1, [[svc, 0, 'OK | bibi=99%']])
         self.assert_(svc.last_hard_state_change == orig)
@@ -218,7 +218,7 @@ class TestService(ShinkenTest):
         self.assert_(svc.host in svc.parent_dependencies)
         # and if we are a child of it
         self.assert_(svc in svc.host.child_dependencies)
-        
+
 
 if __name__ == '__main__':
     unittest.main()

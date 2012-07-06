@@ -14,7 +14,7 @@
   <a class="close" data-dismiss="alert" href="#">x</a>
     {{s}}
   </div>
-  
+
   %end
 </div>
 
@@ -66,7 +66,7 @@
        </div>
 
      </span>
-     
+
 
      </div>
 

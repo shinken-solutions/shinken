@@ -16,14 +16,14 @@
 %# 			<th>Attempts</th>
 %# 			<th>Last check</th>
 %# 			<th>Realm</th>
-%# 
+%#
 %# 			<tr>
 %# 			<!--<td> <img src="/static/images/untick.png" style="cursor:pointer;" onclick="add_remove_elements('{{s.get_name()}}')" id="selector-{{s.get_name()}}" > </td>-->
 %# 			<td> <div class="aroundpulse">
-%# 
+%#
 %# 			%# " We put a 'pulse' around the elements if it's an important one "
 %# 			%if not s.alive:
-%# 
+%#
 %# 			<span class="pulse"></span>
 %# 			%end
 %# 			<img style="width: 16px; height : 16px;" src="{{helper.get_icon_state(s)}}" />
@@ -71,6 +71,6 @@
 			<td>{{s.realm}}</td>
 		</tr>
 		%# End of this satellite
-		%end	
+		%end
 	%end
 </table>

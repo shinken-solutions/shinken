@@ -37,7 +37,7 @@ var vfx = {
 		}
 	    }
 	}
-	
+
 	if (child)
 	{
 	    e.appendChild(child);
@@ -86,13 +86,13 @@ function cameraTransformForCell(n)
     else
     {
 	return vfx.translate3d(-cx, -cy, 0);
-    }	
+    }
 }
 
 function layoutElement(elem, iwidth, iheight)
 {
     var ratio = Math.min(CHEIGHT / iheight, CWIDTH / iwidth);
-    
+
     iwidth *= ratio;
     iheight *= ratio;
 
@@ -110,7 +110,7 @@ function refreshImage(elem, cell)
     {
 	clearTimeout(zoomTimer);
     }
-    
+
 
     zoomTimer = setTimeout(function ()
 			   {
@@ -118,7 +118,7 @@ function refreshImage(elem, cell)
 			       {
 				   elem.src = cell.info.zoom;
 			       }
-			       
+
 			       zoomTimer = null;
 			   }, 2000);
 }
@@ -130,7 +130,7 @@ function setcellclass(c, name)
 
 function snowstack_togglemedia(index)
 {
-    var cell = cells[index];    
+    var cell = cells[index];
 }
 
 function snowstack_update(newIndex, newmagnifymode)
@@ -139,13 +139,13 @@ function snowstack_update(newIndex, newmagnifymode)
     {
 	return;
     }
-    
+
     if (currentCellIndex != -1)
     {
 	var oldCell = cells[currentCellIndex];
 	setcellclass(oldCell, "cell");
     }
-    
+
     if (cells.length === 0)
     {
 	return;
@@ -156,7 +156,7 @@ function snowstack_update(newIndex, newmagnifymode)
 
     var cell = cells[newIndex];
     magnifyMode = newmagnifymode;
-    
+
     if (magnifyMode)
     {
 	// User figured out magnify mode, not a newbie.
@@ -164,9 +164,9 @@ function snowstack_update(newIndex, newmagnifymode)
 	{
 	    newbieUser = false;
 	}
-	
+
 	cell.div.className = "cell magnify";
-	
+
 	if (snowstack_options.refreshzoom)
 	{
 	    refreshImage(cell.divimage, cell);
@@ -178,7 +178,7 @@ function snowstack_update(newIndex, newmagnifymode)
     }
 
     dolly.style.webkitTransform = cameraTransformForCell(newIndex);
-    
+
     var currentMatrix = new WebKitCSSMatrix(document.defaultView.getComputedStyle(dolly, null).webkitTransform);
     var targetMatrix = new WebKitCSSMatrix(dolly.style.webkitTransform);
     var dx = currentMatrix.m41 - targetMatrix.m41;
@@ -191,7 +191,7 @@ function snowstack_update(newIndex, newmagnifymode)
     {
 	clearTimeout(currentTimer);
     }
-    
+
     currentTimer = setTimeout(function ()
 			      {
 				  camera.style.webkitTransform = "rotateY(0)";
@@ -207,7 +207,7 @@ function snowstack_addimage(info)
 
     var x = Math.floor(n / snowstack_options.rows);
     var y = n - x * snowstack_options.rows;
-    
+
     if (typeof info === "string")
     {
 	var imageurl = info;
@@ -215,7 +215,7 @@ function snowstack_addimage(info)
     }
 
     cell.info = info;
-    
+
     function make_celldiv()
     {
 	var div = vfx.elem("div", { "class": "cell", "style": 'width: ' + CWIDTH + 'px; height: ' + CHEIGHT + 'px' });
@@ -236,7 +236,7 @@ function snowstack_addimage(info)
     vfx.loadhandler(cell.divimage, function ()
 		    {
 			layoutElement(cell.divimage, cell.divimage.width, cell.divimage.height);
-			
+
 			if (cell.info.link)
 			{
 			    //cell.div.appendChild(vfx.elem("a", { "class": "mover view", "href": cell.info.link, "target": "_blank" }, cell.divimage));
@@ -326,13 +326,13 @@ function go_left(){
 global.snowstack_init = function (imagefun, options)
 {
     var loading = true;
-    
+
     camera = vfx.byid("camera");
-    
+
     cellstack = vfx.elem("div", { "class": "view" });
     dolly = vfx.elem("div", { "class": "dolly view" });
     dolly.appendChild(cellstack);
-    
+
     while (camera.hasChildNodes())
     {
 	camera.removeChild(camera.firstChild);
@@ -350,7 +350,7 @@ global.snowstack_init = function (imagefun, options)
 	    }
 	}
     }
-    
+
     if (typeof imagefun !== "function")
     {
 	var images_array = imagefun;
@@ -472,7 +472,7 @@ global.snowstack_init = function (imagefun, options)
 				{
 				    keys[keymap[e.keyCode]] = true;
 				}
-				
+
 				keycheck();
 			    });
 
@@ -480,16 +480,16 @@ global.snowstack_init = function (imagefun, options)
 			    {
 				// So the key will now move sliders
 				e.preventDefault();
-				
+
 				keys[keymap[e.keyCode]] = false;
 				keycheck();
 			    });
-    
+
     var startX = 0;
     var lastX = 0;
 
     var target = document.getElementById("camera");
-    
+
     target.addEventListener('touchstart', function (e)
 			    {
 				//alert('bla');
@@ -498,7 +498,7 @@ global.snowstack_init = function (imagefun, options)
 				e.preventDefault();
 				return false;
 			    }, false);
-    
+
     target.addEventListener('touchmove', function (e)
 			    {
 				lastX = event.touches[0].pageX;
@@ -511,7 +511,7 @@ global.snowstack_init = function (imagefun, options)
 				e.preventDefault();
 				return false;
 			    }, true);
-    
+
     target.addEventListener('touchend', function (e)
 			    {
 				//alert('bla');
@@ -529,7 +529,7 @@ global.snowstack_init = function (imagefun, options)
 				e.preventDefault();
 				return false;
 			    }, true);
-    
+
 };
 
 

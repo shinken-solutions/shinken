@@ -46,7 +46,7 @@ class Ip_Tag_Arbiter(BaseModule):
     # Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
         print "Initilisation of the ip range tagguer module"
-        
+
 
     def hook_early_configuration(self, arb):
         logger.info("[IpTag] in hook late config")
@@ -55,13 +55,13 @@ class Ip_Tag_Arbiter(BaseModule):
                 continue
             # The address to resolve
             addr = None
-            
+
             # By default take the address, if not, take host_name
             if not hasattr(h, 'address'):
                 addr = h.host_name
             else:
                 addr = h.address
-                
+
             print "Looking for h", h.get_name()
             print addr
             h_ip = None
@@ -99,7 +99,7 @@ class Ip_Tag_Arbiter(BaseModule):
                     if not hasattr(h, self.property):
                         # Ok, set the value!
                         setattr(h, self.property, self.value)
-                    
-                
-                
-                                             
+
+
+
+

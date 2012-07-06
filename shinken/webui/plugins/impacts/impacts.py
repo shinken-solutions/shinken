@@ -58,7 +58,7 @@ def show_impacts():
         redirect("/user/login")
 #        return {'app' : app, 'impacts' : {}, 'valid_user' : False, 'user' : user}
 
-    
+
     all_imp_impacts = app.datamgr.get_important_elements()
     all_imp_impacts.sort(hst_srv_sort)
 
@@ -75,7 +75,7 @@ def show_impacts():
 
 def impacts_widget():
     d = show_impacts()
- 
+
     wid = app.request.GET.get('wid', 'widget_impacts_'+str(int(time.time())))
     collapsed = (app.request.GET.get('collapsed', 'False') == 'True')
 
@@ -89,10 +89,10 @@ def impacts_widget():
 
     options = {'nb_elements' : {'value' : nb_elements, 'type' : 'int', 'label' : 'Max number of elements to show'},
                }
-    
+
     d.update({'wid' : wid, 'collapsed' : collapsed, 'options' : options,
             'base_url' : '/widget/impacts', 'title' : 'Impacts'})
-    
+
     return d
 
 

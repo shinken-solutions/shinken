@@ -92,7 +92,7 @@ class NSCA_client():
             extcmd = "[%lu] PROCESS_SERVICE_CHECK_RESULT;%s;%s;%d;%s\n" % (timestamp,hostname,service,rc,output)
 
         print "want to send", extcmd
-        
+
         #e = ExternalCommand(extcmd)
         #self.from_q.put(e)
 
@@ -113,7 +113,7 @@ class NSCA_client():
 
         init = server.recv(size)
         print "got init", init
-        
+
         #init_packet = struct.pack("!128sI",iv,int(time.mktime(time.gmtime())))
         (iv, t) = struct.unpack("!128sI",init)
         print "IV", iv
@@ -143,7 +143,7 @@ class NSCA_client():
         print "Create packent len", len(init_packet)
         #(version, pad1, crc32, timestamp, rc, hostname_dirty, service_dirty, output_dirty, pad2) = struct.unpack("!hhIIh64s128s512sh",data)
 
-        data = decrypt_xor(init_packet,iv)        
+        data = decrypt_xor(init_packet,iv)
         data = decrypt_xor(data,self.password)
 
 

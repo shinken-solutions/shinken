@@ -29,7 +29,7 @@ my %StateRet = (
         3 => "Prim",
         4 => "Second" );
 my %SubStateRet = (
-        0 => "available", 
+        0 => "available",
         1 => "transient",
         2 => "stopped" );
 
@@ -83,7 +83,7 @@ sub help {
    print_usage();
    print <<EOT;
 -m, --module
-   Name of Safekit module to monitor. 
+   Name of Safekit module to monitor.
 -v, --verbose
    Enabled verbosity.
 -h, --help
@@ -95,13 +95,13 @@ sub help {
 -2, --v2c
    Use snmp v2c
 -l, --login=LOGIN ; -x, --passwd=PASSWD
-   Login and auth password for snmpv3 authentication 
-   If no priv password exists, implies AuthNoPriv 
+   Login and auth password for snmpv3 authentication
+   If no priv password exists, implies AuthNoPriv
 -X, --privpass=PASSWD
    Priv password for snmpv3 (AuthPriv protocol)
 -L, --protocols=<authproto>,<privproto>
    <authproto> : Authentication protocol (md5|sha : default md5)
-   <privproto> : Priv protocole (des|aes : default des) 
+   <privproto> : Priv protocole (des|aes : default des)
 -p, --port=PORT
    SNMP port (Default 161)
 -t, --timeout=INTEGER
@@ -135,7 +135,7 @@ sub check_options {
         if (!defined($o_timeout)) {$o_timeout=5;}
     if (defined ($o_help) ) { help(); exit $ERRORS{"UNKNOWN"}};
     if (defined($o_version)) { p_version(); exit $ERRORS{"UNKNOWN"}};
-    if ( ! defined($o_host) ) # check host and filter 
+    if ( ! defined($o_host) ) # check host and filter
         { print_usage(); exit $ERRORS{"UNKNOWN"}}
 #    if ( ! defined($o_module) ) { print "Specify a Safekit module.\n"; print_usage(); exit $ERRORS{"UNKNOWN"};}
     # check snmp information

@@ -24,4 +24,4 @@ setparam modules=LAST, HackPollerTagByMacros from arbiter where arbiter_name=Arb
 # write config
 writeconfig
 # deploy configuration
-sync 
+sync

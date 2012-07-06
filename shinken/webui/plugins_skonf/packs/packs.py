@@ -78,7 +78,7 @@ def get_new_packs():
     error = ''
     api_error = ''
     status_code = 500
-    
+
     # Get the categories
     c = pycurl.Curl()
     c.setopt(c.POST, 1)
@@ -87,7 +87,7 @@ def get_new_packs():
     if app.http_proxy:
         c.setopt(c.PROXY, app.http_proxy)
     c.setopt(c.URL, app.community_uri+"/categories")
-    c.setopt(c.HTTPPOST,[ ("root", '/'), ('api_key', api_key)])    
+    c.setopt(c.HTTPPOST,[ ("root", '/'), ('api_key', api_key)])
     c.setopt(c.VERBOSE, 1)
     response = StringIO()
     c.setopt(c.WRITEFUNCTION, response.write)
@@ -95,13 +95,13 @@ def get_new_packs():
         r = c.perform()
         response.seek(0)
         status_code = c.getinfo(pycurl.HTTP_CODE)
-    
-        # We only parse the json if we got 
+
+        # We only parse the json if we got
         if status_code == 200:
             categories = json.loads(response.read().replace('\\/', '/'))
         else:
             api_error = response.read()
-            
+
         print "status code: %s" % status_code
         c.close()
         print "Json loaded", categories
@@ -127,7 +127,7 @@ def get_new_packs():
         r = c.perform()
         response.seek(0)
         status_code = c.getinfo(pycurl.HTTP_CODE)
-        # We only parse the json if we got 
+        # We only parse the json if we got
         if status_code == 200:
             raw_tags = json.loads(response.read().replace('\\/', '/'))
         else:
@@ -153,13 +153,13 @@ def get_new_packs():
     # Sort by name
     names = new_tags.keys()
     names.sort()
-    
+
     tags = []
     for name in names:
         tags.append(new_tags[name])
 
     error = ''
-    
+
     # we return values for the template (view). But beware, theses values are the
     # only one the tempalte will have, so we must give it an app link and the
     # user we are loggued with (it's a contact object in fact)
@@ -184,7 +184,7 @@ def launch_search(search):
         c.setopt(c.PROXY, app.http_proxy)
     c.setopt(c.URL, app.community_uri+"/search")
     c.setopt(c.HTTPPOST,[ ("search", search), ('api_key', api_key)])
-    
+
     #c.setopt(c.HTTPPOST, [("file1", (c.FORM_FILE, str(zip_file_p)))])
     c.setopt(c.VERBOSE, 1)
 
@@ -194,7 +194,7 @@ def launch_search(search):
         r = c.perform()
         response.seek(0)
         status_code = c.getinfo(pycurl.HTTP_CODE)
-        # We only parse the json if we got 
+        # We only parse the json if we got
         if status_code == 200:
             results = json.loads(response.read().replace('\\/', '/'))
         else:
@@ -267,7 +267,7 @@ def download_pack(uri):
     user = app.get_user_auth()
     if not user:
         r = {'state' : 401, 'text' : 'Sorry you are not logged!'}
-        return json.dumps(r)            
+        return json.dumps(r)
 
     print "We are asked to download", uri
     c = pycurl.Curl()
@@ -293,12 +293,12 @@ def download_pack(uri):
     except Exception, exp:
         r = {'state' : 500, 'text' : 'ERROR: '+str(exp)}
         return json.dumps(r)
-    
+
     r = app.save_pack(buf)
     print "RETURN", r
     return json.dumps(r)
 
-    
+
 
 pages = {get_packs : { 'routes' : ['/packs'], 'view' : 'packs', 'static' : True},
          get_new_packs : { 'routes' : ['/getpacks'], 'view' : 'getpacks', 'static' : True},

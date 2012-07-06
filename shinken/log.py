@@ -54,7 +54,7 @@ class Log:
         name = name_
 
         self._level = logging.NOTSET
-    
+
     @staticmethod
     def get_level_id(lvlName):
         """Convert a level name (string) to its integer value
@@ -62,7 +62,7 @@ class Log:
            Raise KeyError when name not found
         """
         return logging._levelNames[lvlName]
-    
+
     # We can have level as an int (logging.INFO) or a string INFO
     # if string, try to get the int value
     def set_level(self, level):

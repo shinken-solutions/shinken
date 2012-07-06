@@ -52,12 +52,12 @@ class Escalation(Item):
         'contacts':             StringProp(),
         'contact_groups':       StringProp(),
     })
-    
+
     running_properties = Item.running_properties.copy()
     running_properties.update({
         'time_based':           BoolProp(default=False),
     })
-    
+
     # For debugging purpose only (nice name)
     def get_name(self):
         return self.escalation_name
@@ -150,7 +150,7 @@ class Escalation(Item):
             special_properties = _special_properties_time_based
         else: # classic ones
             special_properties = _special_properties
-            
+
         for prop, entry in cls.properties.items():
             if prop not in special_properties:
                 if not hasattr(self, prop) and entry.required:

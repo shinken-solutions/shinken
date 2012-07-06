@@ -29,16 +29,16 @@ class TestSrvTplOnHostTpl(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_service_tpl_on_host_tpl.cfg')
 
-    
+
     # Look is a service template apply on a host one will
     # make hosts that inherit from it got such service
-    def test_service_tpl_on_host_tpl(self):        
+    def test_service_tpl_on_host_tpl(self):
         # In fact the whole thing will be to have the service defined :)
         host = self.sched.hosts.find_by_name("test_host_0")
         print "All the test_host_0 services"
         for s in host.services:
             print s.get_dbg_name()
-        
+
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Service_Template_Description")
         self.assert_(svc is not None)
 
@@ -46,7 +46,7 @@ class TestSrvTplOnHostTpl(ShinkenTest):
     # And look for multy layer template too. Like a service is apply on
     # layer1, that use layer2. And srv is apply on layer2
     def test_service_tpl_on_host_tpl_n_layers(self):
-        
+
         host = self.sched.hosts.find_by_name("host_multi_layers")
         print "All the test_host_0 services"
         for s in host.services:

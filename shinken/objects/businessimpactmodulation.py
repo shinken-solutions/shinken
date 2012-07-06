@@ -43,7 +43,7 @@ class Businessimpactmodulation(Item):
             'business_impact':                IntegerProp(),
             'modulation_period':        StringProp(default=None),
     })
-    
+
 
     # For debugging purpose only (nice name)
     def get_name(self):

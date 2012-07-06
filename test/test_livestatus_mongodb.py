@@ -261,7 +261,7 @@ Filter: time <= """ + str(int(now + 3600)) + """
 Columns: time type options state host_name"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-            
+
 
 
 class TestConfigBig(TestConfig):

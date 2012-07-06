@@ -8,7 +8,7 @@
 
 
 
-%rebase layout globals(), title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/img_hovering.js', 'problems/js/accordion.js', 'problems/js/sliding_navigation.js', 'problems/js/filters.js', 'problems/js/bookmarks.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css', 'problems/css/perfometer.css', 'problems/css/img_hovering.css', 'problems/css/sliding_navigation.css', 'problems/css/filters.css'], refresh=True, menu_part='/'+page, user=user 
+%rebase layout globals(), title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/img_hovering.js', 'problems/js/accordion.js', 'problems/js/sliding_navigation.js', 'problems/js/filters.js', 'problems/js/bookmarks.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css', 'problems/css/perfometer.css', 'problems/css/img_hovering.css', 'problems/css/sliding_navigation.css', 'problems/css/filters.css'], refresh=True, menu_part='/'+page, user=user
 
 
 %# Look for actions if we must show them or not
@@ -31,8 +31,8 @@
 	{
 	document.forms["search_form"].submit();
 	}
-	
-	/* Catch the key ENTER and launch the form 
+
+	/* Catch the key ENTER and launch the form
 	 Will be link in the password field
 	*/
 	function submitenter(myfield,e){
@@ -40,8 +40,8 @@
 	  if (window.event) keycode = window.event.keyCode;
 	  else if (e) keycode = e.which;
 	  else return true;
-	
-	
+
+
 	  if (keycode == 13){
 	    submitform();
 	    return false;
@@ -58,14 +58,14 @@
 	                        typeahead.process(data)}
 	              });
 	           },
-	onselect: function(obj) { 
+	onselect: function(obj) {
 	             $("ul.typeahead.dropdown-menu").find('li.active').data(obj);
 	         }
 	});
 
 
 	var active_filters = [];
-	
+
 	// List of the bookmarks
 	var bookmarks = [];
 	%for b in bookmarks:
@@ -79,7 +79,7 @@
   <li class="sliding-element"><h3>Actions</h3></li>
   <li class="sliding-element">
     <a href="javascript:try_to_fix_all();"><i class="icon-pencil icon-white"></i> Try to fix</a>
-  </li>		
+  </li>
   <li class="sliding-element">
     <a href="javascript:recheck_now_all()"><i class="icon-repeat icon-white"></i> Recheck</a>
   </li>
@@ -99,7 +99,7 @@
 <div id="pageslide" style="display:none">
   <div class='row'>
     <span class='span8'><h2>Filtering options</h2></span>
-    <span class='span3 pull-right'><a class='btn btn-danger' href="javascript:$.pageslide.close()"><i class="icon-remove"></i> Close</a></span>    
+    <span class='span3 pull-right'><a class='btn btn-danger' href="javascript:$.pageslide.close()"><i class="icon-remove"></i> Close</a></span>
   </div>
   <div class='in_panel_filter'>
     <h3>Names</h3>
@@ -145,7 +145,7 @@
       %if page=='problems':
       <input type='checkbox' name='show_ack'></input>
       %else:
-      <input type='checkbox' name='show_ack' checked></input>      
+      <input type='checkbox' name='show_ack' checked></input>
       %end
 
       <span class="help-inline">Both ack states</span>
@@ -164,7 +164,7 @@
       <input type='checkbox' name='show_both_downtime'></input>
       <p class='pull-right'><a class='btn btn-success pull-right' href="javascript:save_state_downtime_filter();"> <i class="icon-chevron-right"></i> Add</a></p>
     </form>
-    
+
     <span><p>&nbsp;</p></span>
 
 
@@ -176,7 +176,7 @@
   </div>
   <div id='new_search'>
   </div>
-  
+
   <!-- We put a final touch at the filters and buttons of this panel -->
   <script>refresh_new_search_div();</script>
 
@@ -203,7 +203,7 @@ $(function(){
 
 
 <div class="span12">
-  
+
   <div class='row'>
     <div class='span2 offset2'>
       <a id='select_all_btn' href="javascript:select_all_problems()" class="btn pull-left"><i class="icon-check"></i> Select all</a>
@@ -228,7 +228,7 @@ $(function(){
       %# end of the navi part
       %end
     </div>
-    
+
     <div class='span1'>
       <div class="btn-group pull-right">
 	<button class="btn"> <i class="icon-cog"></i> </button>
@@ -249,7 +249,7 @@ $(function(){
 	  </li>
 	</ul>
       </div>
-      
+
     </div>
 </div>
 
@@ -284,7 +284,7 @@ $(function(){
     </li>
     <script>add_active_hg_filter('{{hg}}');</script>
     %end
-    
+
     %for r in filters['realm']:
     <li>
       <span class="filter_color realm_filter_color">&nbsp;</span>
@@ -339,17 +339,17 @@ $(function(){
     </div>
 
     %end
-    
+
     <p>&nbsp;</p>
     <div id='bookmarks'></div>
-    
+
     <script>
       $(function(){
       refresh_bookmarks();
     });</script>
 
   </div>
-  
+
 
   <!-- Start of the Right panel, with all problems -->
   <div class="span10 no-leftmargin">
@@ -366,7 +366,7 @@ $(function(){
     %nb_same_output = 0
 
     %for pb in pbs:
-     
+
       %if pb.business_impact != imp_level:
        <h2> Business impact : {{!helper.get_business_impact_text(pb)}} </h2>
        %# "We reset the last_hname so we won't overlap this feature across tables"
@@ -437,10 +437,10 @@ $(function(){
 		  {{!helper.get_perfometer(pb)}} &nbsp;
 		</div>
 		<div class="no_border opacity_hover shortdesc expand pull-right" style="max-width:20px;" onclick="show_detail('{{helper.get_html_id(pb)}}')"><i class="icon-chevron-down" id='show-detail-{{helper.get_html_id(pb)}}'></i> <i class="icon-chevron-up chevron-up" id='hide-detail-{{helper.get_html_id(pb)}}'></i> </div>
-		
-	      
+
+
 %#             </table>
-	  </div>  
+	  </div>
 	  <div style="clear:both;"/>
 
       %if nb_same_output == 2 and page == 'problems':
@@ -471,7 +471,7 @@ $(function(){
 	    <td style="width:20px;"><b>Next check</b></td>
 	    <td class="tdCriticity" style="width:20px;"><b>Actions</b></td>
 	    <td class="tdCriticity" style="width:40px;">	<div style="float:right;">
-		
+
 	      </div>
 	    </td>
 	  </tr>
@@ -483,7 +483,7 @@ $(function(){
 	    <td class=" tdBorderLeft" style="width:20px;">{{pb.get_realm()}}</td>
 	    <td  style="width:20px;">{{helper.print_duration(pb.last_chk, just_duration=True, x_elts=2)}} ago</td>
 	    <td  style="width:20px;">in {{helper.print_duration(pb.next_chk, just_duration=True, x_elts=2)}}</td>
-	    
+
 	    <td class="tdCriticity" style="width:20px;"></td>
 	    <td class="tdCriticity" style="width:20px;"><div style="float:right;"> <a href="{{!helper.get_link_dest(pb)}}" class='btn'><i class="icon-search"></i> Details</a>
 	</div> </td>

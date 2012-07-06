@@ -8,14 +8,14 @@
 <script type="text/javascript">
   window.location.replace("/login");
 </script>
-%# " And if the javascript is not follow? not a problem, we gave no data here." 
+%# " And if the javascript is not follow? not a problem, we gave no data here."
 %end
 
 
 
 		<div id="container"></div>
 
-		%# " all_impacts is what the 3dmanager.js will take it's impacts " 
+		%# " all_impacts is what the 3dmanager.js will take it's impacts "
 		%imp_id = 0
 		%for imp in impacts:
 
@@ -41,8 +41,8 @@
 		%end
 
 		<div id="info">You can click on an object to get more information.</div>
-		
-		
+
+
 
 		<script id="fragmentShader" type="x-shader/x-fragment">
 

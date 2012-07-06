@@ -136,7 +136,7 @@ class LiveStatus_broker(BaseModule, Daemon):
 
 
     # This is called only when we are in a scheduler
-    # and just before we are started. So we can gain time, and 
+    # and just before we are started. So we can gain time, and
     # just load all scheduler objects without fear :) (we
     # will be in another process, so we will be able to hack objects
     # if need)

@@ -30,7 +30,7 @@ class TestSchedCleanQueues(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_clean_sched_queues.cfg')
 
-    
+
     # Try to generate a bunch of external commands
     # and see if they are drop like it should
     def test_sched_clean_queues(self):
@@ -56,7 +56,7 @@ class TestSchedCleanQueues(ShinkenTest):
         print len(self.sched.actions)
         # So get our 1000 external commands
         self.assert_(len(self.sched.actions) >= 1000)
-        
+
         # Try to call the clean, they are just too many!
         self.sched.clean_queues()
         # Should have something like 16 event handler
@@ -85,12 +85,12 @@ class TestSchedCleanQueues(ShinkenTest):
         host.broks = l
 
         self.sched.get_new_broks()
-        print "LEn broks", len(self.sched.broks) 
+        print "LEn broks", len(self.sched.broks)
         self.assert_(len(self.sched.broks) >= 1000)
         self.sched.clean_queues()
         print "LEn broks", len(self.sched.broks)
         self.assert_(len(self.sched.broks) < 30)
-        
+
 
 
 if __name__ == '__main__':

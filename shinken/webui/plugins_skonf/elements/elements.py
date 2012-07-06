@@ -53,8 +53,8 @@ def elements_generic(cls, show_tpls=False):
     user = app.get_user_auth()
     if not user:
         redirect("/user/login")
-    
-        
+
+
     # Get all entries from db
     #t = getattr(app.db, cls.my_type+'s')
     #cur = t.find({})
@@ -66,7 +66,7 @@ def elements_generic(cls, show_tpls=False):
     #    print "HOOK HOSTS"
     elts = [cls(i) for i in app.datamgr.get_generics(t, key)]
     print "GOT elements", elts
-    
+
     # Look for removing or keeping templates
     if not show_tpls:
         print "REMOVING TEMPLATES"
@@ -126,7 +126,7 @@ def elements_contact(name):
     user = app.get_user_auth()
     if not user:
         redirect("/user/login")
-        
+
     elt = app.datamgr.get_contact(name)
     #elt = app.db.contacts.find_one({'_id' : name})
     if not elt:
@@ -139,7 +139,7 @@ def elements_command(name):
     user = app.get_user_auth()
     if not user:
         redirect("/user/login")
-        
+
     elt = app.datamgr.get_command(name)
     if not elt:
         elt = {}
@@ -150,7 +150,7 @@ def elements_timeperiod(name):
     user = app.get_user_auth()
     if not user:
         redirect("/user/login")
-        
+
     elt = app.datamgr.get_timeperiod(name)
     if not elt:
         elt = {}
@@ -228,7 +228,7 @@ def save_object(cls, name):
     # must delete the old entry before saving teh new one
     if new_name != old_name:
         t.remove({'_id' : old_name})
-        
+
 
     print 'In db', d
     bd_entry = {'_id' : new_name}
@@ -236,12 +236,12 @@ def save_object(cls, name):
         print 'We got an entry in db', d
         db_entry = d
         bd_entry['_id'] = new_name
-        
+
     print 'Dump form', app.request.forms.__dict__
     for k in app.request.forms:
         #print "K", k
         v = str(app.request.forms.get(k))
-        # the value can be '' or something else. 
+        # the value can be '' or something else.
         # -> '' means not set
         # -> else set the value :)
         if v == '' and k in bd_entry:
@@ -261,7 +261,7 @@ def save_new_object(cls):
     # Try to get the name of this new object
     key = keys[cls]
     name = app.request.forms.get(key, None)
-    
+
     # For service such a check must be avoid because there is no real key
     if key != '':
         if name is None or name == '':
@@ -272,11 +272,11 @@ def save_new_object(cls):
     # with the same name of course. Or it should be an edit, not a "new"
     if d is not None:
         abort(400, "Already an object with the same name '%s'" % name)
-    
+
     # Ok, we can save it!
     save_object(cls, name)
-            
-        
+
+
 
 
 pages = {
@@ -284,7 +284,7 @@ pages = {
     elements_hosts : { 'routes' : ['/elements/hosts'], 'view' : 'elements_hosts', 'static' : True},
     elements_host : { 'routes' : ['/elements/hosts/:name'], 'view' : 'elements_host', 'static' : True},
     new_host : { 'routes' : ['/elements/add/host'], 'view' : 'elements_host', 'static' : True},
-    
+
     # Contacts
     elements_contacts : { 'routes' : ['/elements/contacts'], 'view' : 'elements_contacts', 'static' : True},
     elements_contact : { 'routes' : ['/elements/contacts/:name'], 'view' : 'elements_contact', 'static' : True},
@@ -312,7 +312,7 @@ pages = {
     disable_object : { 'routes' : ['/element/q/:cls/disable/:name']},
     enable_object : { 'routes' : ['/element/q/:cls/enable/:name']},
 
-    
+
     # POST backend
     save_object : { 'routes' : ['/element/q/:cls/save/:name'], 'method' : 'POST'},
     save_new_object : { 'routes' : ['/element/q/:cls/save/'], 'method' : 'POST'},

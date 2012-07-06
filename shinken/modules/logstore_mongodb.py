@@ -156,7 +156,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
         except Exception, exp:
             # If there is a replica_set, but the host is a simple standalone one
             # we get a "No suitable hosts found" here.
-            # But other reasons are possible too. 
+            # But other reasons are possible too.
             print "Could not open the database", exp
             raise LiveStatusLogStoreError
 
@@ -334,7 +334,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
             return '\'%s\' : { \'$regex\' : %s, \'$options\' : \'i\' }' % (attribute, '^((?!'+reference+').)')
 
         def no_filter():
-            return '\'time\' : { \'$exists\' : True }' 
+            return '\'time\' : { \'$exists\' : True }'
 
         if attribute not in good_attributes:
             return no_filter
@@ -396,7 +396,7 @@ class LiveStatusMongoStack(LiveStatusStack):
         # at a time. This qould require rewriting of the whole expression.
         # So instead of deciding whether a record can pass the filter or not,
         # we let it pass in any case. That's no problem, because the result
-        # of the database query will have to go through the in-memory-objects 
+        # of the database query will have to go through the in-memory-objects
         # filter too.
         negate_filter = lambda: '\'time\' : { \'$exists\' : True }'
         self.put_stack(negate_filter)

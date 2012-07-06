@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2010:
-#    Guillaume Bour/Uperto, guillaume.bour@uperto.com 
+#    Guillaume Bour/Uperto, guillaume.bour@uperto.com
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
@@ -78,12 +78,12 @@ class TestNat(unittest.TestCase):
             if os.path.isfile(os.path.join(root, f)):
                 shutil.copy(os.path.join(root, f), os.path.join(self.testdir, '..'))
                 self.files[f] = os.path.join(self.testdir, '..', f)
-   
+
         for vm in ('pc1','pc2', 'nat'):
             lock = os.path.join(self.testdir, '..', vm+'.STARTED')
             if os.path.exists(lock):
                 os.remove(lock)
-    
+
             self.files[vm+'.lock'] = lock
 
         # cleanup shinken logs
@@ -110,7 +110,7 @@ class TestNat(unittest.TestCase):
             return False
 
         return os.path.exists(os.path.join(self.testdir, "..", "pc2.STARTED"))
-        
+
     def init_and_start_vms(self, conf, services):
         for vm in ('pc1','pc2', 'nat'):
             f = open(self.files[vm+'.startup'], 'a')
@@ -128,7 +128,7 @@ class TestNat(unittest.TestCase):
 
             f.write("touch /hostlab/"+vm+".STARTED\n")
             f.close()
-        
+
         subprocess.Popen(["lstart","-d",os.path.join(self.testdir, ".."),"-f"], stdout=open('/dev/null'), stderr=subprocess.STDOUT)
 
         # waiting for vms has finished booting
@@ -161,7 +161,7 @@ class TestNat(unittest.TestCase):
         self.assertTrue(self.found_in_log('arbiter' , 'Warning : Missing satellite broker for configuration 0 :'))
 
         self.assertFalse(self.found_in_log('arbiter', 'Info : [All] Dispatch OK of configuration 0 to broker broker-1'))
-        
+
     def test_02_broker(self):
         print "conf-02: init..."
         self.init_and_start_vms('conf-02', {
@@ -180,16 +180,16 @@ class TestNat(unittest.TestCase):
         self.assertTrue(self.found_in_log('broker' , 'Info : [broker-1] Connection OK to the scheduler scheduler-1'))
         self.assertTrue(self.found_in_log('broker' , 'Info : [broker-1] Connection OK to the poller poller-1'))
         self.assertTrue(self.found_in_log('broker' , 'Info : [broker-1] Connection OK to the reactionner reactionner-1'))
-        
-        
-        
+
+
+
 if __name__ == '__main__':
     #import cProfile
     command = """unittest.main()"""
     unittest.main()
     #cProfile.runctx( command, globals(), locals(), filename="/tmp/livestatus.profile" )
 
-    #allsuite = unittest.TestLoader.loadTestsFromModule(TestConfig) 
-    #unittest.TextTestRunner(verbosity=2).run(allsuite) 
+    #allsuite = unittest.TestLoader.loadTestsFromModule(TestConfig)
+    #unittest.TextTestRunner(verbosity=2).run(allsuite)
 
     cleanup()

@@ -146,7 +146,7 @@ class __Action(object):
                 self.stdoutdata += no_block_read(self.process.stdout)
                 self.stderrdata += no_block_read(self.process.stderr)
 
-            
+
             if (now - self.check_time) > self.timeout:
                 self.kill__()
                 #print "Kill for timeout", self.process.pid, self.command, now - self.check_time
@@ -208,10 +208,10 @@ class __Action(object):
 ###
 ## OS specific "execute__" & "kill__" are defined by "Action" class definition:
 
-if os.name != 'nt': 
-    
+if os.name != 'nt':
+
     class Action(__Action):
-  
+
         # We allow direct launch only for 2.7 and higher version
         # because if a direct launch crash, under this the file handles
         # are not releases, it's not good.
@@ -219,12 +219,12 @@ if os.name != 'nt':
             # If the command line got shell characters, we should go in a shell
             # mode. So look at theses parameters
             force_shell |= self.got_shell_characters()
-            
+
             # 2.7 and higer Python version need a list of args for cmd
             # and if not force shell (if, it's useless, even dangerous)
             # 2.4->2.6 accept just the string command
             if sys.version_info < (2, 7) or force_shell:
-                cmd = self.command.encode('utf8', 'ignore')    
+                cmd = self.command.encode('utf8', 'ignore')
             else:
                 try:
                     cmd = shlex.split(self.command.encode('utf8', 'ignore'))
@@ -256,7 +256,7 @@ if os.name != 'nt':
                 self.exit_status = 2
                 self.status = 'done'
                 self.execution_time = time.time() - self.check_time
-  
+
                 # Maybe we run out of file descriptor. It's not good at all!
                 if exp.errno == 24 and exp.strerror == 'Too many open files':
                     return 'toomanyopenfiles'
@@ -266,7 +266,7 @@ if os.name != 'nt':
             # We kill a process group because we launched them with preexec_fn=os.setsid and
             # so we can launch a whole kill tree instead of just the first one
             os.killpg(self.process.pid, 9)
-  
+
 else:
 
     import ctypes
@@ -295,7 +295,7 @@ else:
                 logger.info("We kill the process : %s %s" % (exp, self.command))
                 self.status = 'timeout'
                 self.execution_time = time.time() - self.check_time
-  
+
         def kill__(self):
-            TerminateProcess(int(self.process._handle), -1)      
+            TerminateProcess(int(self.process._handle), -1)
 

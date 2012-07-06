@@ -120,7 +120,7 @@ class TestConfig(ShinkenTest):
         self.assert_(com == 'plugins/nothing blabla=toto')
 
 
-        
+
 
 if __name__ == '__main__':
     unittest.main()

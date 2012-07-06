@@ -106,7 +106,7 @@ class DataManagerSKonf(DataManager):
             if not i.get(key, '') in names:
                 r.append(i)
         return r
-        
+
 
     # Merge internal and db hosts in the same list
     def get_hosts(self):
@@ -124,7 +124,7 @@ class DataManagerSKonf(DataManager):
     def get_services(self):
         return self.get_generics('services', '_')
 
-    
+
     # Get a specific object
     def get_contact(self, cname):
         for c in self.rg.contacts:
@@ -185,7 +185,7 @@ class DataManagerSKonf(DataManager):
         print "OK search the service uuid", name, "in the database"
         r = self.get_in_db('services', '_id', name)
         return r
-            
+
 
     def build_pack_tree(self, packs):
 
@@ -200,7 +200,7 @@ class DataManagerSKonf(DataManager):
                 print "In the level", d, " and the context", pos
                 sons = pos[1]
                 print "Get the sons to add me", sons
-                
+
                 if not d in [s[0] for s in sons]:
                     print "Add a new level"
                     print "Get the sons to add me", sons
@@ -211,21 +211,21 @@ class DataManagerSKonf(DataManager):
                     if s[0] == d:
                         print "We found our new position", s
                         pos = s
-                        
+
             # Now add our pack to this entry
             print "Add pack to the level", pos[0]
             pos[2].append(p)
         print "The whole pack tree", t
         return t
-                    
-    
+
+
     def get_pack_tree(self, packs):
         t = self.build_pack_tree(packs)
         r = self._get_pack_tree(t)
         print "RETURN WHOLE PACK TREE", r
         return r
 
-        
+
     def _get_pack_tree(self, tree):
         print "__get_pack_tree:: for", tree
         name = tree[0]
@@ -247,7 +247,7 @@ class DataManagerSKonf(DataManager):
             res.append({'type' : 'new_tree', 'name' : name})
         for p in packs:
             res.append({'type' : 'pack', 'pack' : p})
-            
+
         for s in sons:
             r = self._get_pack_tree(s)
             res.extend(r)
@@ -289,7 +289,7 @@ class DataManagerSKonf(DataManager):
                     print "FOUND A SERVICE THAT MA5TCH", s.get('service_description', '')
                     services.append(s)
             res.append( (tpl, services) )
-            
+
         return res
 
 datamgr = DataManagerSKonf()

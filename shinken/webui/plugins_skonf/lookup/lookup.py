@@ -44,7 +44,7 @@ def lookup(cls='', name=''):
     user = app.get_user_auth()
     if not user:
         return []
-    
+
     sources = {'host' : app.host_templates, 'service' : app.service_templates,
                'contact' : app.contact_templates, 'timeperiod' : app.timeperiod_templates}
 

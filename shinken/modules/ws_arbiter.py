@@ -92,7 +92,7 @@ def get_page():
     app.from_q.put(ext)
 
     # OK here it's ok, it will return a 200 code
-    
+
 
 
 # This module will open an HTTP service, where a user can send a command, like a check
@@ -121,7 +121,7 @@ class Ws_arbiter(BaseModule):
     # When you are in "external" mode, that is the main loop of your process
     def main(self):
         global app
-        
+
         # It's an external module, so we need to be sure that we manage
         # the signals
         self.set_exit_handler()

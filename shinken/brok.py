@@ -55,4 +55,4 @@ class Brok:
             if hasattr(self, 'instance_id'):
                 self.data['instance_id'] = self.instance_id
         self.prepared = True
-    
+

@@ -147,12 +147,12 @@ class ThriftQuery(Hooker):
 
     def copy_out_map_hooks(self):
         """Update the hooks for some out_map entries.
-        
+
         Thrift columns which have a fulldepythonize postprocessor
         need an updated argument list. The third argument needs to
         be the request object. (When the out_map is first supplied
         with hooks, the third argument is the Thrift object.)
-        
+
         """
         new_map = {}
         for objtype in LSout_map:
@@ -184,7 +184,7 @@ class ThriftQuery(Hooker):
         for attr in ["table", "columns", "filtercolumns", "prefiltercolumns", "aliases", "stats_group_by", "stats_request"]:
             output += "request %s: %s\n" % (attr, getattr(self, attr))
         return output
-  
+
 
     def split_command(self, line, splits=1):
         """Create a list from the words of a line"""
@@ -205,7 +205,7 @@ class ThriftQuery(Hooker):
 
 
     def strip_table_from_column(self, column):
-        """Cut off the table name, because it is possible 
+        """Cut off the table name, because it is possible
         to say service_state instead of state"""
         bygroupmatch = re.compile('(\w+)by.*group').search(self.table)
         if bygroupmatch:
@@ -217,7 +217,7 @@ class ThriftQuery(Hooker):
     def launch_query(self):
         """ Prepare the request object's filter stacks """
         print "launch_query"
-        
+
         # A minimal integrity check
         if not self.table:
             return []
@@ -254,9 +254,9 @@ class ThriftQuery(Hooker):
                 else:
                     self.pnp_path_readable = False
                 # Apply the filters on the broker's host/service/etc elements
-          
+
                 result = self.get_live_data()
-                
+
             if self.stats_request:
                 self.columns = range(num_stats_filters)
                 if self.stats_group_by:
@@ -271,13 +271,13 @@ class ThriftQuery(Hooker):
             import traceback
             print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
             print e
-            traceback.print_exc(32) 
+            traceback.print_exc(32)
             print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
             result = []
-        
+
         return result
 
-    
+
     def get_hosts_or_services_livedata(self, cs):
         if cs.without_filter and not self.limit:
             # Simply format the output
@@ -290,14 +290,14 @@ class ThriftQuery(Hooker):
             # and services are already sorted by name.
             return (
                 self.create_output(cs.output_map, y) for y in (
-                    x for x in getattr(self, self.table).itervalues() 
+                    x for x in getattr(self, self.table).itervalues()
                     if cs.without_filter or cs.filter_func(self.create_output(cs.filter_map, x)))
             )
 
-    
+
     def get_hosts_livedata(self, cs):
         return self.get_hosts_or_services_livedata(cs)
-    
+
 
     def get_services_livedata(self, cs):
         return self.get_hosts_or_services_livedata(cs)
@@ -319,7 +319,7 @@ class ThriftQuery(Hooker):
     def get_list_livedata(self, cs):
         t = self.table
         if cs.without_filter:
-            res = [ self.create_output(cs.output_map, y) for y in 
+            res = [ self.create_output(cs.output_map, y) for y in
                         reduce(list.__add__
                             , [ getattr(x, t) for x in self.services.values() + self.hosts.values()
                                     if len(getattr(x, t)) > 0 ]
@@ -327,15 +327,15 @@ class ThriftQuery(Hooker):
             ]
         else:
             res = [ c for c in reduce(list.__add__
-                        , [ getattr(x, t) for x in self.services.values() + self.hosts.values() 
+                        , [ getattr(x, t) for x in self.services.values() + self.hosts.values()
                                 if len(getattr(x, t)) > 0]
                         , []
                         )
                     if cs.filter_func(self.create_output(cs.filter_map, c)) ]
             res = [ self.create_output(cs.output_map, x) for x in res ]
         return res
-    
-    
+
+
     def get_group_livedata(self, cs, objs, an, group_key, member_key):
         """ return a list of elements from a "group" of 'objs'. group can be a hostgroup or a servicegroup.
 objs: the objects to get elements from.
@@ -357,14 +357,14 @@ member_key: the key to be used to sort each resulting element of a group member.
     def get_hostbygroups_livedata(self, cs):
         member_key = lambda k: k.host_name
         group_key = lambda k: k.hostgroup_name
-        return self.get_group_livedata(cs, self.hostgroups.values(), 'hostgroup', group_key, member_key)        
+        return self.get_group_livedata(cs, self.hostgroups.values(), 'hostgroup', group_key, member_key)
 
 
     def get_servicebygroups_livedata(self, cs):
         member_key = lambda k: k.get_name()
         group_key = lambda k: k.servicegroup_name
         return self.get_group_livedata(cs, self.servicegroups.values(), 'servicegroup', group_key, member_key)
-    
+
 
     def get_problem_livedata(self, cs):
         # We will crate a problems list first with all problems and source in it
@@ -454,7 +454,7 @@ member_key: the key to be used to sort each resulting element of a group member.
 
     def get_live_data(self):
         """Find the objects which match the request.
-        
+
         This function scans a list of objects (hosts, services, etc.) and
         applies the filter functions first. The remaining objects are
         converted to simple dicts which have only the keys that were
@@ -475,14 +475,14 @@ member_key: the key to be used to sort each resulting element of a group member.
         if not handler:
             print("Got unhandled table: %s" % (self.table))
             return []
-        
+
         # Get the function which implements the Filter: statements
         filter_func     = self.filter_stack.get_stack()
         out_map         = self.out_map[self.out_map_name]
         filter_map      = dict([(k, out_map.get(k)) for k in self.filtercolumns])
         output_map      = dict([(k, out_map.get(k)) for k in self.columns]) or out_map
         without_filter  = len(self.filtercolumns) == 0
-    
+
         cs = LiveStatusConstraints(filter_func, out_map, filter_map, output_map, without_filter)
         res = handler(self, cs)
 
@@ -491,10 +491,10 @@ member_key: the key to be used to sort each resulting element of a group member.
                 res = res[:self.limit]
             else:
                 res = list(res)[:self.limit]
-            
+
         if self.stats_request:
             res = self.statsify_result(res)
-        
+
         return res
 
 
@@ -542,8 +542,8 @@ member_key: the key to be used to sort each resulting element of a group member.
 
 
     def create_output(self, out_map, elt):
-        """Convert an object to a dict with selected keys.""" 
-        output = {} 
+        """Convert an object to a dict with selected keys."""
+        output = {}
         for display in out_map.keys():
             try:
                 value = out_map[display]['hook'](elt)
@@ -555,7 +555,7 @@ member_key: the key to be used to sort each resulting element of a group member.
 
     def statsify_result(self, filtresult):
         """Applies the stats filter functions to the result.
-        
+
         Explanation:
         stats_group_by is ["service_description", "host_name"]
         filtresult is a list of elements which have, among others, service_description and host_name attributes
@@ -586,7 +586,7 @@ member_key: the key to be used to sort each resulting element of a group member.
 
         Step 3:
         Create the final result array from resultdict
-        
+
         """
         result = []
         resultdict = {}
@@ -774,11 +774,11 @@ member_key: the key to be used to sort each resulting element of a group member.
         def ne_filter():
             if reference == '':
                 return ['%s IS NOT NULL' % attribute, ()]
-            else: 
+            else:
                 return ['%s != ?' % attribute, (reference, )]
         def gt_filter():
             return ['%s > ?' % attribute, (reference, )]
-        def ge_filter(): 
+        def ge_filter():
             return ['%s >= ?' % attribute, (reference, )]
         def lt_filter():
             return ['%s < ?' % attribute, (reference, )]

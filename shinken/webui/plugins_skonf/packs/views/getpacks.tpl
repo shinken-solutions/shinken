@@ -19,7 +19,7 @@ function submit(){
 
 
 %if api_error:
-    <div class='alert alert-error span5 offset2'> 
+    <div class='alert alert-error span5 offset2'>
       Oups! There was a problem with the API server connexion
       <br/>
       <div id='api_error' class='hide'>{{api_error}}</div>
@@ -34,10 +34,10 @@ function submit(){
     <span class="add-on"><i class="icon-search"></i></span><input type="textarea" name='search' class="span4" placeholder="Search">
   </div>
   <a href='javascript:submit();' class='btn'> Search</a>
-    
+
 </form>
 
-<span class='span12'> 
+<span class='span12'>
 %if tags:
   <div id='tagCloud' class='well'>
     <h2> Tags</h2>

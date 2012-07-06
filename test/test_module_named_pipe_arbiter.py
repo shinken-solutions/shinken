@@ -62,12 +62,12 @@ class TestModuleNamedPipe(ShinkenTest):
 
         # get our modules
         mod = sl = Named_Pipe_arbiter(modconf, 'tmp/nagios.cmd')
-        
+
         try :
             os.unlink(mod.path)
         except :
             pass
-        
+
         print "Instance", sl
 
         # Hack here :(
@@ -78,17 +78,17 @@ class TestModuleNamedPipe(ShinkenTest):
 
         #sl.main()
         sl.open()
-        
+
         # Now us we wrote in it
         f = open('tmp/nagios.cmd', 'w')
         t = "[%lu] PROCESS_HOST_CHECK_RESULT;dc1;2;yoyo est mort\n" % now
-        
+
         s = ''
         for i in xrange(1, 1000):
             s += t
-            
+
         print "Len s", len(s)
-        
+
         f.write(s)
         f.flush()
         f.close()

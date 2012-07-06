@@ -31,9 +31,9 @@
 class Graph:
     """Graph is a class to make graph things like DFS checks or accessibility
     Why use an atomic bomb when a little hammer is enough?
-    
+
     """
-    
+
     def __init__(self):
         self.nodes = {}
 

@@ -47,8 +47,8 @@ modconf.properties = hot_dependencies_arbiter.properties.copy()
 
 try:
     import json
-except ImportError: 
-    # For old Python version, load 
+except ImportError:
+    # For old Python version, load
     # simple json (it can be hard json?! It's 2 functions guy!)
     try:
         import simplejson as json
@@ -80,15 +80,15 @@ class TestModuleHotDep(ShinkenTest):
         self.assert_(host2.is_linked_with_host(host1) == False)
         self.assert_(host1.is_linked_with_host(host2) == False)
 
-    
+
         # get our modules
         mod = sl = Hot_dependencies_arbiter(modconf, 'tmp/vmware_mapping_file.json', "", 30, 300)
-        
+
         try :
             os.unlink(mod.mapping_file)
         except :
             pass
-        
+
         print "Instance", sl
 
         # Hack here :(
@@ -123,9 +123,9 @@ class TestModuleHotDep(ShinkenTest):
         f = open(mod.mapping_file, 'wb')
         f.write(json.dumps(links))
         f.close()
-        
+
         sl.hook_tick(self)
-        
+
         # Now we should see link between 1 and 2, but not between 0 and 1
         self.assert_(host1.is_linked_with_host(host0) == False)
         self.assert_(host1.is_linked_with_host(host2) == True)
@@ -160,20 +160,20 @@ class TestModuleHotDep(ShinkenTest):
         self.assert_(host2.is_linked_with_host(host1) == False)
         self.assert_(host1.is_linked_with_host(host2) == False)
 
-    
+
         # get our modules
         mod = None
         mod = Module({'type' : 'hot_dependencies', 'module_name' : 'VMWare_auto_linking', 'mapping_file' : 'tmp/vmware_mapping_file.json',
                       'mapping_command' : "libexec/hot_dep_export.py case1 tmp/vmware_mapping_file.json", 'mapping_command_interval' : '30'})
-        
+
         try :
             os.unlink(mod.mapping_file)
         except :
             pass
-        
+
         sl = get_instance(mod)
         print "Instance", sl
-        
+
         # Hack here :(
         sl.properties = {}
         sl.properties['to_queue'] = None
@@ -189,7 +189,7 @@ class TestModuleHotDep(ShinkenTest):
 
         # We can look is now the hosts are linked or not :)
         self.assert_(host1.is_linked_with_host(host0) == False)
-        
+
         print "Mapping after first pass?", sl.mapping
 
         # The hook_late should have seen a problem of no file
@@ -199,7 +199,7 @@ class TestModuleHotDep(ShinkenTest):
         # Now we look if it's finished, and we get data and manage them
         # with case 1 (0 and 1 linked, not with 1 and 2)
         sl.hook_tick(self)
-        
+
         # Now we should see link between 1 and 0, but not between 2 and 1
         self.assert_(host1.is_linked_with_host(host0) == True)
         self.assert_(host1.is_linked_with_host(host2) == False)

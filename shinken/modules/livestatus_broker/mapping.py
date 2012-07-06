@@ -507,7 +507,7 @@ livestatus_attribute_map = {
         },
         'modified_attributes': {
             'description': 'A bitmask specifying which attributes have been modified',
-            'function': lambda item, req: item.modified_attributes,  # CONTROLME 
+            'function': lambda item, req: item.modified_attributes,  # CONTROLME
             'datatype': int,
         },
         'modified_attributes_list': {
@@ -4370,13 +4370,13 @@ the object represented by log_host.
 def host_redirect_factory(attribute):
     """attribute already comes with lsm_"""
     return lambda item, req: getattr(item.host, attribute)(req)
-    
+
 def ref_redirect_factory(attribute):
     return lambda item, req: getattr(item.ref, attribute)(req)
-    
+
 def log_service_redirect_factory(attribute):
     return lambda item, req: getattr(item.log_service, attribute)(req)
-    
+
 def log_host_redirect_factory(attribute):
     return lambda item, req: getattr(item.log_host, attribute)(req)
 
@@ -4385,17 +4385,17 @@ def log_contact_redirect_factory(attribute):
 
 def hostgroup_redirect_factory(attribute):
     return lambda item, req: getattr(item.hostgroup, attribute)(req)
-    
+
 def servicegroup_redirect_factory(attribute):
     return lambda item, req: getattr(item.servicegroup, attribute)(req)
-    
+
 def catchall_factory(name, req):
     def method(*args):
         print "tried to handle unknown method " + name
         if args:
             print "it had arguments: " + str(args)
     return method
-    
+
 
 #print "FINISHING THE ATTRIBUTE MAPPING>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
 for objtype in ['Host', 'Service', 'Contact', 'Command', 'Timeperiod', 'Downtime', 'Comment', 'Hostgroup', 'Servicegroup', 'Contactgroup', 'SchedulerLink', 'PollerLink', 'ReactionnerLink', 'BrokerLink', 'Problem', 'Logline', 'Config']:
@@ -4499,15 +4499,15 @@ for objtype in ['Host', 'Service', 'Contact', 'Command', 'Timeperiod', 'Downtime
     cls.lsm_columns = []
     for attribute in sorted([x for x in livestatus_attribute_map[objtype]]):
         cls.lsm_columns.append(attribute)
-    
+
 #print "FINISHED THE ATTRIBUTE MAPPING<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
-     
+
 
 
 
 def find_filter_converter(table, attribute, reverse=False):
     """Return a function which converts a string to the attribute's data type"""
-   
+
     tableclass = table_class_map[table][1]
     # attribute already has a lsm-prefix
     function = getattr(tableclass, attribute, None)

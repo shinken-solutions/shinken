@@ -6,7 +6,7 @@
  *  - multi languages clients
  *  - send severals results at once
  *
- * Support languages are : 
+ * Support languages are :
  * 	C++, Java, Python, PHP, Ruby, Erlang, Perl, Haskell,
  * 	C#, Cocoa, JavaScript, Node.js, Smalltalk, and OCaml
  *

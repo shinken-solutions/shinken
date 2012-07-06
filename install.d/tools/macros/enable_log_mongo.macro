@@ -1,4 +1,4 @@
-# Enable log storage to mongodb 
+# Enable log storage to mongodb
 # ARG1: mongodb server FQDN or IP address
 setconfigfile __ETC__/shinken-specific.cfg
 setparam modules=mongologs from module where module_name=Livestatus

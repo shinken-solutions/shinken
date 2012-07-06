@@ -70,11 +70,11 @@ def get_page(cmd=None):
 
     print app.request.query.__dict__
     callback = app.request.query.get('callback', None)
-    
+
     # First we look for the user sid
     # so we bail out if it's a false one
     user = app.get_user_auth()
-    
+
     # Maybe the user is not known at all
     if not user:
         return forge_response(callback, 401, 'Invalid session')
@@ -90,14 +90,14 @@ def get_page(cmd=None):
     cmd_args = elts[1:]
     print "Got command", cmd_name
     print "And args", cmd_args
-    
+
     # Check if the command exist in the external command list
     if cmd_name not in ExternalCommandManager.commands:
         return forge_response(callback, 404,'Unknown command %s' % cmd_name)
 
     extcmd = '[%d] %s' % (now, ';'.join(elts))
     print "Got the; form", extcmd
-    
+
     # Expand macros
     extcmd = expand_macros(extcmd)
     print "Got after macro expansion",extcmd

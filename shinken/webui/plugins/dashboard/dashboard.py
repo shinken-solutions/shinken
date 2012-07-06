@@ -42,7 +42,7 @@ app = None
 
 # Our page
 def get_page():
-    
+
     user = app.get_user_auth()
 
     if not user:
@@ -58,7 +58,7 @@ def get_page():
     widget_names = json.loads(s)
     print "And now objects", widget_names
     widgets = []
-    
+
     for w in widget_names:
         if not 'id' in w or not 'position' in w:
             continue
@@ -73,7 +73,7 @@ def get_page():
         pos = w['position']
         options = w.get('options', {})
         collapsed = w.get('collapsed', '0')
-        
+
         ## Try to get the options for this widget
         #option_s = app.get_user_preference(user, 'widget_widget_system_1333371012', default='{}')
         #print "And load options_s", option_s

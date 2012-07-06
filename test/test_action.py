@@ -96,7 +96,7 @@ class TestAction(ShinkenTest):
                 titi_found = True
 
         self.assert_(titi_found == True)
-        
+
 
     # Some commands are shell without bangs! (like in Centreon...)
     # We can show it in the launch, and it should be managed
@@ -208,7 +208,7 @@ class TestAction(ShinkenTest):
 
 if __name__ == '__main__':
     import sys
-   
+
 #    os.chdir(os.path.dirname(sys.argv[0]))
     unittest.main()
 

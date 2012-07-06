@@ -38,7 +38,7 @@ var new_properties = [];
       <li><a href="#depedencies" data-toggle="tab">Dependencies</a></li>
       <li><a href="#advanced" data-toggle="tab">Advanced</a></li>
     </ul>
-    
+
     <div class="tab-content">
       <!-- Tab Generic Stop-->
       <div class="tab-pane active" id="generic">
@@ -97,7 +97,7 @@ var new_properties = [];
 	{{!helper.get_poller_tag_input(elt, 'poller_tag', 'Monitored from', editable=editable)}}
 	{{!helper.get_realm_input(elt, 'realm', 'Realm', editable=editable)}}
 
-	{{!helper.get_bool_input(elt, 'obsess_over_host', 'Obsess Over Host', editable=editable)}}	
+	{{!helper.get_bool_input(elt, 'obsess_over_host', 'Obsess Over Host', editable=editable)}}
 	{{!helper.get_bool_input(elt, 'check_freshness', 'Check Freshness', editable=editable)}}
 	{{!helper.get_string_input(elt, 'freshness_threshold', 'Freshness Threshold seconds', editable=editable)}}
 	{{!helper.get_bool_input(elt, 'flap_detection_enabled', 'Flap Detection Enabled', editable=editable)}}
@@ -115,8 +115,8 @@ var new_properties = [];
 
     </div>
 
-    
-    
+
+
     <!--{{elt}} -->
 
   </form>

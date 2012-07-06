@@ -60,7 +60,7 @@ function launch_and_assert {
 while read tfile
 do
   case ${tfile:0:1} in
-  "#") 
+  "#")
        ;;
   *)   launch_and_assert $tfile
        ;;

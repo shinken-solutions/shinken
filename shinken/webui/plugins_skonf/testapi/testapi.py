@@ -58,7 +58,7 @@ def check_api_server(api_key):
     url = str(url)
     c.setopt(c.URL, url)
     #c.setopt(c.HTTPPOST,[ ("search", search)])
-    
+
     #c.setopt(c.HTTPPOST, [("file1", (c.FORM_FILE, str(zip_file_p)))])
     c.setopt(c.VERBOSE, 1)
 
@@ -67,7 +67,7 @@ def check_api_server(api_key):
     r = c.perform()
     response.seek(0)
     status_code = c.getinfo(pycurl.HTTP_CODE)
-    # We only parse the json if we got 
+    # We only parse the json if we got
     if status_code == 200:
         results = json.loads(response.read().replace('\\/', '/'))
     else:

@@ -42,7 +42,7 @@ from shinken.discovery.discoverymanager import DiscoveryManager
 
 
 VERSION = '1.0.1'
-if os.name != 'nt': 
+if os.name != 'nt':
     DEFAULT_CFG = '/etc/shinken/discovery.cfg'
 else:
     DEFAULT_CFG = 'c:\\shinken\\etc\\discovery.cfg'
@@ -127,7 +127,7 @@ print "Got macros", macros
 #            if h.get_name() == parent:
 #                print "Houray, we find our parent", self.h.get_name(), "->", h.get_name()
 #                self.parents.append(h.get_name())
-        
+
 
 cfg_input = opts.cfg_input
 output_dir = opts.output_dir

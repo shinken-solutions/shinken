@@ -4,7 +4,7 @@
 
 import sys
 import os
-import getopt 
+import getopt
 import argparse
 import smtplib
 
@@ -13,7 +13,7 @@ def main():
         opts, args = getopt.getopt(sys.argv[1:], "hnsHariotS:v", ["help", "notification", "servicedesc", "hostname", "hostaddress", "servicestate", "shortdatetime", "output", "to", "sender" ])
     except getopt.GetoptError, err:
         # print help information and exit:
-        print str(err) 
+        print str(err)
         usage()
         sys.exit(2)
     output = None
@@ -48,8 +48,8 @@ def main():
 def usage():
     print 'Usage :'
     print sys.argv[0] + ' -s <service name> -n <notification type> -H <hostname> -a <address> -i <date> -o <service output> -t <email>'
-    print '-s --servicedesc : service description' 
-    print '-n --notification : notification type' 
+    print '-s --servicedesc : service description'
+    print '-n --notification : notification type'
     print '-H --hostname : hostname'
     print '-a --hostaddress : host address'
     print '-r --servicestate : service state'
@@ -78,7 +78,7 @@ if __name__ == "__main__":
     hostname = args.hostname
     hostaddress = args.hostaddress
     state = args.servicestate
-    datetime = args.shortdatetime 
+    datetime = args.shortdatetime
     output = args.output
     to = args.to
     sender = args.sender
@@ -90,7 +90,7 @@ from email.mime.text import MIMEText
 
 ## Create message container - the correct MIME type is multipart/alternative.
 msg = MIMEMultipart('alternative')
-msg['Subject'] = subject 
+msg['Subject'] = subject
 msg['From'] = sender
 msg['To'] = to
 

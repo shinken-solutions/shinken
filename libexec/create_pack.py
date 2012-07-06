@@ -86,7 +86,7 @@ define discoveryrule {
        creation_type            host
        # Sample filter for getting port 80
        #openports                ^80$
-       FILTER                   VALUE 
+       FILTER                   VALUE
        +use                     %s
 }
 """ % (pack_name, pack_name)

@@ -43,7 +43,7 @@ class Contactgroup(Itemgroup):
         'contactgroup_name':    StringProp (fill_brok=['full_status']),
         'alias':                StringProp (fill_brok=['full_status']),
     })
-    
+
     macros = {
         'CONTACTGROUPALIAS':    'alias',
         'CONTACTGROUPMEMBERS':  'get_members'

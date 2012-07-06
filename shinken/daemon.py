@@ -30,7 +30,7 @@ import sys
 import time
 import signal
 import select
-import random 
+import random
 import ConfigParser
 
 # Try to see if we are in an android device or not
@@ -89,7 +89,7 @@ class Interface(Pyro.core.ObjBase, object):
     def __init__(self, app):
 
         Pyro.core.ObjBase.__init__(self)
-        
+
         self.app = app
         self.running_id = "%d.%d" % (time.time(), random.random())
 
@@ -98,13 +98,13 @@ class Interface(Pyro.core.ObjBase, object):
 
     def get_running_id(self):
         return self.running_id
-    
+
     def put_conf(self, conf):
         self.app.new_conf = conf
 
     def wait_new_conf(self):
         self.app.cur_conf = None
-        
+
     def have_conf(self):
         return self.app.cur_conf is not None
 
@@ -121,12 +121,12 @@ else:
 class Daemon(object):
 
     properties = {
-        # workdir is relative to $(dirname "$0"/..) 
-        # where "$0" is the path of the file being executed, 
+        # workdir is relative to $(dirname "$0"/..)
+        # where "$0" is the path of the file being executed,
         # in python normally known as:
         #
         #  os.path.join( os.getcwd(), sys.argv[0] )
-        # 
+        #
         # as returned once the daemon is started.
         'workdir':       PathProp(default=DEFAULT_WORK_DIR),
         'host':          StringProp(default='0.0.0.0'),
@@ -145,9 +145,9 @@ class Daemon(object):
     }
 
     def __init__(self, name, config_file, is_daemon, do_replace, debug, debug_file):
-        
+
         self.check_shm()
-        
+
         self.name = name
         self.config_file = config_file
         self.is_daemon = is_daemon
@@ -167,8 +167,8 @@ class Daemon(object):
         # Log init
         self.log = logger
         self.log.load_obj(self)
-        
-        self.new_conf = None # used by controller to push conf 
+
+        self.new_conf = None # used by controller to push conf
         self.cur_conf = None
 
         # Flag to know if we need to dump memory or not
@@ -206,10 +206,10 @@ class Daemon(object):
         if self.pyro_daemon:
             pyro.shutdown(self.pyro_daemon)
         logger.quit()
-        
+
 
     def request_stop(self):
-        self.unlink() 
+        self.unlink()
         self.do_stop()
         logger.debug("Exiting")
         sys.exit(0)
@@ -230,11 +230,11 @@ class Daemon(object):
             if self.interrupted:
                 break
         self.request_stop()
-    
+
     def do_load_modules(self):
         self.modules_manager.load_and_init()
         self.log.info("I correctly loaded the modules : [%s]" % (','.join([inst.get_name() for inst in self.modules_manager.instances])))
- 
+
     # Dummy method for adding broker to this daemon
     def add(self, elt):
         pass
@@ -249,9 +249,9 @@ class Daemon(object):
             logger.info(hp.heap())
         except ImportError:
             logger.warning('I do not have the module guppy for memory dump, please install it')
-            
 
- 
+
+
     def load_config_file(self):
         self.parse_config_file()
         if self.config_file is not None:
@@ -298,7 +298,7 @@ class Daemon(object):
             mode = stat.S_IMODE(os.lstat(shm_path)[stat.ST_MODE])
             if not mode & stat.S_IWUSR or not mode & stat.S_IRUSR:
                 logger.error("The directory %s is not writable or readable. Please launch as root chmod 777 %s" % (shm_path, shm_path))
-                sys.exit(2)   
+                sys.exit(2)
 
     def __open_pidfile(self, write=False):
         ## if problem on opening or creating file it'll be raised to the caller:
@@ -311,7 +311,7 @@ class Daemon(object):
             else: # If it doesnt exist too, we create it as void
                self.fpid = open(p, 'w+')
         except Exception, e:
-            raise InvalidPidFile(e)     
+            raise InvalidPidFile(e)
 
 
     # Check (in pidfile) if there isn't already a daemon running. If yes and do_replace: kill it.
@@ -332,7 +332,7 @@ class Daemon(object):
         except:
             logger.warning("Stale pidfile exists (no or invalid or unreadable content). Reusing it.")
             return
-        
+
         try:
             os.kill(pid, 0)
         except OverflowError, e:
@@ -344,27 +344,27 @@ class Daemon(object):
                 logger.warning("Stale pidfile exists (pid=%d not exists). Reusing it." % (pid))
                 return
             raise
-            
+
         if not self.do_replace:
             raise SystemExit, "valid pidfile exists and not forced to replace.  Exiting."
-        
+
         logger.debug("Replacing previous instance %d" % pid)
         try:
             os.kill(pid, 3)
         except os.error, e:
             if e.errno != errno.ESRCH:
                 raise
-        
+
         self.fpid.close()
         ## TODO: give some time to wait that previous instance finishes ?
         time.sleep(1)
-        # we must also reopen the pid file in write mode 
+        # we must also reopen the pid file in write mode
         # because the previous instance should have deleted it !!
         self.__open_pidfile(write=True)
 
 
     def write_pid(self, pid=None):
-        if pid is None: 
+        if pid is None:
             pid = os.getpid()
         self.fpid.seek(0)
         self.fpid.truncate()
@@ -372,7 +372,7 @@ class Daemon(object):
         self.fpid.close()
         del self.fpid ## no longer needed
 
-    # Close all the process file descriptors. Skip the descriptors 
+    # Close all the process file descriptors. Skip the descriptors
     # present in the skip_close_fds list
     def close_fds(self, skip_close_fds):
         # First we manage the file descriptor, because debug file can be
@@ -390,10 +390,10 @@ class Daemon(object):
             except OSError: # ERROR, fd wasn't open to begin with (ignored)
                 pass
 
-    # Go in "daemon" mode: close unused fds, redirect stdout/err, 
+    # Go in "daemon" mode: close unused fds, redirect stdout/err,
     # chdir, umask, fork-setsid-fork-writepid
     def daemonize(self, skip_close_fds=None):
-        
+
         if skip_close_fds is None:
             skip_close_fds = tuple()
 
@@ -402,20 +402,20 @@ class Daemon(object):
             fdtemp = os.open(self.debug_file, os.O_CREAT | os.O_WRONLY | os.O_TRUNC)
         else:
             fdtemp = os.open(REDIRECT_TO, os.O_RDWR)
-        
+
         ## We close all fd but what we need:
         self.close_fds(skip_close_fds + ( self.fpid.fileno() , fdtemp ))
 
         os.dup2(fdtemp, 1) # standard output (1)
         os.dup2(fdtemp, 2) # standard error (2)
-        
+
         # Now the fork/setsid/fork..
         try:
             pid = os.fork()
         except OSError, e:
             raise Exception, "%s [%d]" % (e.strerror, e.errno)
         if pid != 0:
-            # In the father : we check if our child exit correctly 
+            # In the father : we check if our child exit correctly
             # it has to write the pid of our futur little child..
             def do_exit(sig, frame):
                 logger.error("Timeout waiting child while it should have quickly returned ; something wierd happened")
@@ -424,7 +424,7 @@ class Daemon(object):
             # wait the child process to check its return status:
             signal.signal(signal.SIGALRM, do_exit)
             signal.alarm(3)  # forking & writing a pid in a file should be rather quick..
-            # if it's not then something wrong can already be on the way so let's wait max 3 secs here. 
+            # if it's not then something wrong can already be on the way so let's wait max 3 secs here.
             pid, status = os.waitpid(pid, 0)
             if status != 0:
                 logger.error("Something wierd happened with/during second fork : status=", status)
@@ -467,7 +467,7 @@ class Daemon(object):
             # Do not close the local_log file too if it's open
             if self.local_log_fd:
                 socket_fds.append(self.local_log_fd)
-                
+
 
             socket_fds = tuple(socket_fds)
             self.daemonize(skip_close_fds=socket_fds)
@@ -482,16 +482,16 @@ class Daemon(object):
            self.manager = Manager()
         # And make the module manager know it
         self.modules_manager.load_manager(self.manager)
-           
+
 
 
     def setup_pyro_daemon(self):
-        
+
         if hasattr(self, 'use_ssl'): # "common" daemon
             ssl_conf = self
         else:
             ssl_conf = self.conf     # arbiter daemon..
-    
+
         # The SSL part
         if ssl_conf.use_ssl:
             Pyro.config.PYROSSL_CERTDIR = os.path.abspath(ssl_conf.certs_dir)
@@ -511,11 +511,11 @@ class Daemon(object):
         try:
             Pyro.config.PYRO_STORAGE = "."
             Pyro.config.PYRO_COMPRESSION = 1
-            Pyro.config.PYRO_MULTITHREADED = 0        
+            Pyro.config.PYRO_MULTITHREADED = 0
         except:
             pass
 
-        self.pyro_daemon = pyro.ShinkenPyroDaemon(self.host, self.port, ssl_conf.use_ssl) 
+        self.pyro_daemon = pyro.ShinkenPyroDaemon(self.host, self.port, ssl_conf.use_ssl)
 
 
     def get_socks_activity(self, socks, timeout):
@@ -531,7 +531,7 @@ class Daemon(object):
     # Find the absolute path of the shinken module directory and returns it.
     def find_modules_path(self):
         import shinken
-        
+
         # BEWARE: this way of finding path is good if we still
         # DO NOT HAVE CHANGED PWD!!!
         # Now get the module path. It's in fact the directory modules
@@ -544,7 +544,7 @@ class Daemon(object):
         parent_path = os.path.dirname(os.path.dirname(modulespath))
         modulespath = os.path.join(parent_path, 'shinken', 'modules')
         self.debug_output.append("Using modules path : %s" % (modulespath))
-        
+
         return modulespath
 
 
@@ -574,7 +574,7 @@ class Daemon(object):
             logger.error("The group %s is unknown" % self.group )
             return None
 
-    # Change user of the running program. Just insult the admin 
+    # Change user of the running program. Just insult the admin
     # if he wants root run (it can override). If change failed we sys.exit(2)
     def change_to_user_group(self, insane=None):
         if insane is None:
@@ -612,7 +612,7 @@ class Daemon(object):
 
     # Parse self.config_file and get all properties in it.
     # If some properties need a pythonization, we do it.
-    # Also put default value in the properties if some are missing in the config_file 
+    # Also put default value in the properties if some are missing in the config_file
     def parse_config_file(self):
         properties = self.__class__.properties
         if self.config_file is not None:
@@ -684,17 +684,17 @@ class Daemon(object):
     def print_header(self):
         for line in self.get_header():
             print line
-            
-            
-        
+
+
+
 # Wait up to timeout to handle the pyro daemon requests.
 # If suppl_socks is given it also looks for activity on that list of fd.
 # Returns a 3-tuple:
 # If timeout: first arg is 0, second is [], third is possible system time change value
-# If not timeout (== some fd got activity): 
-#  - first arg is elapsed time since wait, 
+# If not timeout (== some fd got activity):
+#  - first arg is elapsed time since wait,
 #  - second arg is sublist of suppl_socks that got activity.
-#  - third arg is possible system time change value, or 0 if no change. 
+#  - third arg is possible system time change value, or 0 if no change.
     def handleRequests(self, timeout, suppl_socks=None):
 
         if suppl_socks is None:
@@ -719,16 +719,16 @@ class Daemon(object):
         if elapsed == 0: # we have done a few instructions in 0 second exactly !? quantum computer ?
             elapsed = 0.01  # but we absolutely need to return != 0 to indicate that we got activity
         return elapsed, ins, tcdiff
-        
+
     # Check for a possible system time change and act correspondingly.
     # If such a change is detected then we return the number of seconds that changed. 0 if no time change was detected.
-    # Time change can be positive or negative: 
-    # positive when we have been sent in the futur and negative if we have been sent in the past. 
+    # Time change can be positive or negative:
+    # positive when we have been sent in the futur and negative if we have been sent in the past.
     def check_for_system_time_change(self):
 
         now = time.time()
         difference = now - self.t_each_loop
-        
+
         # If we have more than 15 min time change, we need to compensate it
         if abs(difference) > 900:
             self.compensate_system_time_change(difference)
@@ -736,10 +736,10 @@ class Daemon(object):
             difference = 0
 
         self.t_each_loop = now
-        
+
         return difference
-        
-    # Default action for system time change. Actually a log is done       
+
+    # Default action for system time change. Actually a log is done
     def compensate_system_time_change(self, difference):
         logger.warning('A system time change of %s has been detected.  Compensating...' % difference)
 

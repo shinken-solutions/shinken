@@ -19,7 +19,7 @@ Shinken ChangeLog
 
 	MODULES ENHANCEMENTS
 	* Add : lof of GLPI module enhancements, with new properties managed
-	
+
 	MODULES FIXES
 	* Fix : check_esx3 install under ubuntu 32bits edition
 	* Fix : multisite layout, add custom links
@@ -33,8 +33,8 @@ Shinken ChangeLog
 
 	UI FIXES
 	* Fix : Sort alphabeticaly in WebUI
-	
-	
+
+
 1.0 - 28/02/2012
 ------------------
 	CORE ENHANCEMENTS
@@ -54,7 +54,7 @@ Shinken ChangeLog
 	* Add : $$ are now interpreted as $ in macro solving
 	* Add : (reported by : sduchesneau) check_shinken.py now has a timeout. It is set by default at 10s
 	* Add : business rules now support the NOT operand
-	* Add : send broks in external modules as a biglist instead of n broks. It's more efficient (X3 perf for this, can be huge time for huge conf)	
+	* Add : send broks in external modules as a biglist instead of n broks. It's more efficient (X3 perf for this, can be huge time for huge conf)
 	* Add : templates for monitoring common devices and services are now included
 	* Add : manage \; to be changed in ; without cutting the rest of the line to be removed as a comment
 	* Add : (reported by : foobar1111) arbiter only matched hostname, and not fqdn. Now it will try fqdn and then the hostname.
@@ -67,11 +67,11 @@ Shinken ChangeLog
 	* Add : xkilian reviewed and corrected many many pages of the wiki documentation and a few english fixes in the distribution :)
 	* Add : skonf daemon preview. It is not yet meant for production, but is included to get feedback
 	* Add : mongodb insert capabilities for the discovery
-	* Add : TIMEPERIOD TRANSITION logs from the Arbiter to get timeperiods transition output 
+	* Add : TIMEPERIOD TRANSITION logs from the Arbiter to get timeperiods transition output
 	* Add : is_admin property is now available for contacts
 	* Add : make the nmap discovery do tcp and udp scan
 	* Add : (Victor Igumnov) installation for Solaris
-	
+
 	CORE FIXES
 	* Fix : use StringIO to read configuration files into a string (much faster with lots of config files)
 	* Fix : (reported by : lminoza) bug in inheritance if templates give only a + elements, should continue to loop and not stop here.
@@ -102,10 +102,10 @@ Shinken ChangeLog
 	* Fix : (reported by : denetariko) manage spaces before and after type name in define line
 	* Fix : (reported by: Steve Kieu) missing get_name() method for config
 	* Fix : (reported by : Mihai Efrim) flapping notifications
-	
-	
 
-	
+
+
+
 	MODULE ENHANCEMENTS
 	* Add : rewrite the LiveStatus module, performance boost and simpler. Thanks Gerhard for this huge undertaking!
 	* Add : two new modules for storing livestatus logs. sqlite and mongodb
@@ -120,7 +120,7 @@ Shinken ChangeLog
 	* Add : port option for the mysql connexion with NDO
 	* Add : ip_tag module that can change configuration properties based on the host IP address or IP address range.
 	* Add : simulation mode for the nmap disco wrapper, so we can ask for xml output from users, and then simulate it easily.
-	* Add : new process for nmap discovery output. There is no longer a big mapping pass. It will output what it can, and it's for the discovery_rule to do this job now, 
+	* Add : new process for nmap discovery output. There is no longer a big mapping pass. It will output what it can, and it's for the discovery_rule to do this job now,
                 it's far more a BIG thanks to all folks that send me sample xml output :)
 	* Add : enhanced capabilities for the mysql import module (OlivierHa)
 
@@ -155,9 +155,9 @@ Shinken ChangeLog
 	* Add : perfometer image hovering with the graph module like PNP
 	* Add : password iphone like in the login screen
 	* Add : an orange outline to see where the focus is on input
-	
-	
-	
+
+
+
 0.8 - 17/10/2011
 ------------------
 	CORE ENHANCEMENTS
@@ -177,7 +177,7 @@ Shinken ChangeLog
 	* Add : new tests for A,B,Cof: rules and a fix for the default return logic.
 	* Add : arbiter ask one a check_interval the managed conf for satellites. Makes for smoother decisions.
 
-	
+
 	CORE FIXES
 	* Fix : BugFix Pyro4 compatibility
 	* fix : try to fix bad notification output make scehduler crash.
@@ -192,7 +192,7 @@ Shinken ChangeLog
 	* Fix : (reported by : obiouane) missing object value is now reported correctly.
 	* Fix : (Etienne Obriot) multiple = in macos values
 	* Fix : a bug in config.py where resource macros containing a "=" were not correctly processed. Thanks Etienne
-	* Fix : (reported by Seb-Solon) custome macros get problems in notifications. 
+	* Fix : (reported by Seb-Solon) custome macros get problems in notifications.
 	* Fix : (reported by : Michael Grundmann) a service for a void hostgroup and a host exclusion was reporting a bad conf instead if forgot this service.
 	* Fix : (Reported by : Dirk Hallanzy) was not launching under XP due to some pid file creation bad mode.
 	* Fix : (reported by : Vincent Riquer) now a spare broker can be send to sleep again by the arbiter. It will clean its queues and stop modules.
@@ -200,7 +200,7 @@ Shinken ChangeLog
 	* Fix : Change default check/eventhandler/notification timeouts and flap thresholds to make nagios more compatible to shinken.
 	* fix : Better handling of check timeouts (there was an empty output)
 	* fix : Log notification and eventhandler timeouts
-	* Fix : (reported by : Denis GERMAIN) service with no description cause an host problem in linking phase. 
+	* Fix : (reported by : Denis GERMAIN) service with no description cause an host problem in linking phase.
 	* Fix : (reported by : Seb-Solon) manage utf8 in host and service perfdata.
 	* Fix : protect broker agains module taht ask for full instance init about unknown scheduler.
 	* Fix : (reported by Markus Elger) add next schedule date in the retention data.
@@ -208,7 +208,7 @@ Shinken ChangeLog
 	* Fix : (reported by :Markus Elger) bad host count in realms.
 	* Fix : (reported by :Markus Elger) bad host reaml conf were not detected.
 
-	
+
 	MODULES ENHANCEMENTS
 	* Add : module for autotagging poller_tag from a custom macro.
 	* Add : create the simple-log archive dir automatically if it doesn't exist
@@ -231,7 +231,7 @@ Shinken ChangeLog
 	* Add : the REUSEADDR flag to livestatus's socket. Thanks Olivier Hanesse
 	* Add : performance improvement for livestatus queries with Limit:
 
-	
+
 
 	MODULES FIXES
 	* Fix : important bugfix in ncpdmod
@@ -246,7 +246,7 @@ Shinken ChangeLog
 	* Fix : (reported by : Ronny Lindner & Markus Elger) LiveStatus crash in log parsing.
 	* Fix : (reported by : Ronny Lindner) fix status.dat module with utf8 characters
 	* Fix : (reported by : Olivier Hanesse) nrpe module did not tag the check_time value for checks, and so pnp and other tools were not happy. BP rules were alike.
-	* Fix : (reported by Markus Elger) LiveStatus module did not clean previously added elements before recreating them. 
+	* Fix : (reported by Markus Elger) LiveStatus module did not clean previously added elements before recreating them.
 
 
 	UI
@@ -270,7 +270,7 @@ Shinken ChangeLog
 
 
 
-	
+
 0.6 - 03/05/2011
 ------------------
 ENHANCEMENTS
@@ -377,7 +377,7 @@ FIXES
 	*Fix : testing with multisite and thruk
 	*Clean: factorized .is_correct() call for all object types & added log to see more clearly wherer the error is.
 	*Clean: factorization/simplification of code in action.py (and related) for spawning checks processes.+ clean of old deprecated commented code (& "related" too).
-	*Fix : downtime and comment are now pickle in a dict, not a list.	
+	*Fix : downtime and comment are now pickle in a dict, not a list.
 	*Fix : pickle pass for look at tyype, so downtime and comment from 0.4 still ok.
 	*Fix : acknoledge got too much information in the pickle pass, making the pickle save very very huge. Now fit from 100Mo to..2Mo :)
 	*Clean : big clean of hasattr->getattr with default value
@@ -465,8 +465,8 @@ FIXES
 	*Fix : From Nicolas Dupeux : error in livestatus split.
 	*Fix : From Nicolas Dupeux : fix typos in host code
 
-	
-	
+
+
 
 0.3 - 06/10/2010
 ------------------

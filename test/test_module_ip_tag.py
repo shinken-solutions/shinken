@@ -30,7 +30,7 @@ from shinken_test import unittest, ShinkenTest
 from shinken.log import logger
 from shinken.objects.module import Module
 from shinken.modules import ip_tag_arbiter
-from shinken.modules.ip_tag_arbiter import get_instance 
+from shinken.modules.ip_tag_arbiter import get_instance
 
 
 
@@ -55,10 +55,10 @@ class TestIpTag(ShinkenTest):
         # already got poller_tag properties. Must lie here
         # and find a better way to manage this in tests
         del h2.poller_tag
-        
+
         # Calls the mod with our config
         mod.hook_early_configuration(self)
-        
+
 
         print "H1", h1.poller_tag
         self.assert_(h1.poller_tag == 'None')
@@ -88,17 +88,17 @@ class TestIpTag(ShinkenTest):
         h1.hostgroups = 'linux,windows'
         h2.hostgroups = 'linux,windows'
         h3.hostgroups = 'linux,windows'
-        
+
         # Calls the mod with our config
         mod.hook_early_configuration(self)
-        
+
 
         print "H1", h1.hostgroups
         self.assert_('newgroup' not in h1.hostgroups)
 
         print "H2", h2.hostgroups
         self.assert_('newgroup' in h2.hostgroups)
-        
+
         print "H3", h3.hostgroups
         self.assert_('newgroup' in h3.hostgroups)
 

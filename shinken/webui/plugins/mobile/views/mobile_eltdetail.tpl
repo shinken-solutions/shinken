@@ -31,7 +31,7 @@ Invalid element name
 %# " We will save our element name so gesture functions will be able to call for the good elements."
 <script type="text/javascript">
   var elt_name = '{{elt.get_full_name()}}';
-  
+
   var graphstart={{graphstart}};
   var graphend={{graphend}};
 
@@ -54,14 +54,14 @@ Invalid element name
           typeahead.process(data)}
         });
       },
-    onselect: function(obj) { 
+    onselect: function(obj) {
       $("ul.typeahead.dropdown-menu").find('li.active').data(obj);
     }
   });
 </script>
 
 
-%#  "This is the background canvas for all gesture detection things " 
+%#  "This is the background canvas for all gesture detection things "
 %# " Don't ask me why, but the size must be included in the
 %# canvas line here or we got problem!"
 <div id='gesture_panel' class="pull-left">
@@ -75,7 +75,7 @@ Invalid element name
   <div class="gesture_button">
     <img title="By keeping a left click pressed and drawing a check, you will launch a try to fix command." alt="gesture fix" src="/static/eltdetail/images/gesture-zigzag.png"/> Fix
   </div>
-  
+
 </div>
 
 
@@ -84,7 +84,7 @@ Invalid element name
 
 	<h1 class="span12 no-leftmargin state_{{elt.state.lower()}} icon_down"> <img class="imgsize4" alt="icon state" src="{{helper.get_icon_state(elt)}}" width="36" height="36"/>{{elt.state}}: {{elt.get_full_name()}}</h1>
 
-	<div class="span12 no-leftmargin box">	   
+	<div class="span12 no-leftmargin box">
 		<table class="span4 no-leftmargin">
 		%#Alias, apretns and hostgroups arefor host only
 		%if elt_type=='host':
@@ -101,7 +101,7 @@ Invalid element name
 		    	<td>{{!helper.get_business_impact_text(elt)}}</td>
 			</tr>
 		</table>
-		
+
 		<table class="span3">
 			<tr>
 		    	<td><strong>Parents:</strong></td>
@@ -142,7 +142,7 @@ Invalid element name
 			    <td>(none)</td>
 			    %end
 			</tr>
-		</table>	    
+		</table>
 
 		<div class="span4">
 		    %#   " If the elements is a root problem with a huge impact and not ack, ask to ack it!"
@@ -152,7 +152,7 @@ Invalid element name
 		    %# "end of the 'SOLVE THIS' highlight box"
 		    %end
 		    </div>
-		</div>				
+		</div>
 	</div>
 
 	<!-- Switch Start -->
@@ -194,12 +194,12 @@ Invalid element name
                  onChange : function(elt, b){toggle_flap_detection("{{elt.get_full_name()}}", !b);}
                }
                );
-            }); 
+            });
 	  </script>
 
     <!-- Start Host/Services-->
 			<!-- Left, information part-->
-   
+
 
       %if elt_type=='host':
 	<div data-role="collapsible" data-content-theme="a" data-theme="a">
@@ -208,7 +208,7 @@ Invalid element name
 	<div data-role="collapsible" data-content-theme="a" data-theme="a">
       <h3 class="span10">Service Information</h3>
       %end:
-		    	
+
       <table class="span10 table table-striped table-bordered table-condensed">
 	<tr>
 	  <td class="column1"><strong>{{elt_type.capitalize()}} Status: </strong></td>
@@ -226,20 +226,20 @@ Invalid element name
 	  %else:
 	  <td>&nbsp;</td>
 	  %end
-	</tr>	
-	<tr>										
+	</tr>
+	<tr>
 	  <td class="column1"><strong>Current Attempt: </strong></td>
 	  <td>{{elt.attempt}}/{{elt.max_check_attempts}} ({{elt.state_type}} state)</td>
 	</tr>
-	<tr>		
+	<tr>
 	  <td class="column1"><strong>Last Check Time: </strong></td>
 	  <td><span class="quickinfo" data-original-title='Last check was at {{time.asctime(time.localtime(elt.last_chk))}}'>was {{helper.print_duration(elt.last_chk)}}</span></td>
 	</tr>
-	<tr>		
+	<tr>
 	  <td class="column1"><strong>Next Scheduled Active Check: </strong></td>
 	  <td><span class="quickinfo" data-original-title='Next active check at {{time.asctime(time.localtime(elt.next_chk))}}'>{{helper.print_duration(elt.next_chk)}}</span></td>
 	</tr>
-	<tr>		
+	<tr>
 	  <td class="column1"><strong>Last State Change: </strong></td>
 	  <td>{{time.asctime(time.localtime(elt.last_state_change))}}</td>
 	</tr>
@@ -247,7 +247,7 @@ Invalid element name
 	  <td class="column1"><strong>Last Notification: </strong></td>
 	  <td>{{helper.print_date(elt.last_notification)}} (notification {{elt.current_notification_number}})</td>
 	</tr>
-	<tr>			
+	<tr>
 	  <td class="column1"><strong>Check Latency / Duration: </strong></td>
 	  <td>{{'%.2f' % elt.latency}} / {{'%.2f' % elt.execution_time}} seconds</td>
 	</tr>
@@ -262,7 +262,7 @@ Invalid element name
       </table>
 	</div>
 
-    
+
     <!-- End Host/Service -->
 
 
@@ -270,23 +270,23 @@ Invalid element name
 	<h3>Impacts</h3>
 
     <div class="tabbable span8 no-leftmargin">
-	    
+
 	    <div class="tab-content">
 	    	<!-- Tab Summary Start-->
 		    <div class="tab-pane active" id="impacts">
-		      <!-- Start of the Whole info pack. We got a row of 2 thing : 
+		      <!-- Start of the Whole info pack. We got a row of 2 thing :
 			   left is information, right is related elements -->
 		      <div class="row-fluid">
 		      <!-- So now it's time for the right part, related elements -->
 		      <div class="span12">
-			
+
 			<!-- Show our father dependencies if we got some -->
 			%#    Now print the dependencies if we got somes
 			%if len(elt.parent_dependencies) > 0:
 			<h3 class="span10">Root cause:</h3>
 			<div class="clear"></div>
 			%#{{!helper.print_business_rules(datamgr.get_business_parents(elt), source_problems=elt.source_problems, mobile =True)}}
-			
+
 			%end
 
 			<!-- If we are an host and not a problem, show our services -->
@@ -304,14 +304,14 @@ Invalid element name
 			  %nb = 0
 			  %for s in helper.get_host_services_sorted(elt):
 			  %nb += 1
-			  
+
 			  %# " We put a max imapct to print, bacuse too high is just useless"
 			  %if nb > max_impacts:
 			  %   break
 			  %end
-			 
+
 			  <div class="service">
-			  
+
 			  <div>
 			    <img style="width : 16px; height:16px" alt="icon state" src="{{helper.get_icon_state(s)}}">
 			    <span class='alert-small alert-{{s.state.lower()}}' style="font-size:110%">{{s.state}}</span> for <span style="font-size:110%">{{!helper.get_link_mobile(s, short=True)}}</span> since {{helper.print_duration(s.last_state_change, just_duration=True, x_elts=2)}}
@@ -325,7 +325,7 @@ Invalid element name
 			 %end
 			 </div>
 			%end #of the only host part
-			
+
 
 			<!-- If we are a root problem and got real impacts, show them! -->
 			%if elt.is_problem and len(elt.impacts) != 0:
@@ -334,10 +334,10 @@ Invalid element name
 			  %nb = 0
 			  %for i in helper.get_impacts_sorted(elt):
 			  %nb += 1
-			  
+
 		      <div class="service">
-		      
-			  
+
+
 			  <div>
 			    <img style="width : 16px; height:16px" alt="icon state" src="{{helper.get_icon_state(i)}}">
 			    <span class='alert-small alert-{{i.state.lower()}}' style="font-size:110%">{{i.state}}</span> for <span style="font-size:110%">{{!helper.get_link_mobile(i, short=True)}}</span> since {{helper.print_duration(i.last_state_change, just_duration=True, x_elts=2)}}
@@ -356,7 +356,7 @@ Invalid element name
 
 
 		      </div><!-- End of the right part -->
-		      
+
 		      </div>
 		      <!-- End of the row with the 2 blocks-->
 		    </div>
@@ -364,7 +364,7 @@ Invalid element name
 
 		    </div>
 	    </div>
-	</div>   
+	</div>
     </div>
 </div>
 

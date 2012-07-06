@@ -48,14 +48,14 @@ def get_page(cmd=None):
     cmd_args = elts[1:]
     print "Got command", cmd_name
     print "And args", cmd_args
-    
+
     # Check if the command exist in the external command list
     if cmd_name not in ExternalCommandManager.commands:
         return {'status' : 404, 'text' : 'Unknown command %s' % cmd_name}
 
     extcmd = '[%d] %s' % (now, ';'.join(elts))
     print "Got the; form", extcmd
-    
+
     # Ok, if good, we can launch the command
     extcmd = extcmd.decode('utf8', 'replace')
     e = ExternalCommand(extcmd)

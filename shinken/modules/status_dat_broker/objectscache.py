@@ -278,7 +278,7 @@ class ObjectsCacheFile:
                                     value = f()
                                 else:
                                     value = f
-                    
+
                     if len(unicode(value)) == 0:
                         value = ''
                 elif 'required' in type_map[display] and type_map[display]['required'] == True:

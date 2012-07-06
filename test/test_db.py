@@ -67,7 +67,7 @@ class TestConfig(ShinkenTest):
         c = u"UPDATE test_instances set plop='£°é§'  WHERE is_master='1' and id='£°é§'"
         self.assert_(q.strip() == c.strip())
 
-        
+
 
 
 if __name__ == '__main__':

@@ -28,15 +28,15 @@ class memoized(object):
     """Decorator that caches a function's return value each time it is called.
     If called later with the same arguments, the cached value is returned, and
     not re-evaluated.
-    
+
     """
-    
-    
+
+
     def __init__(self, func):
         self.func = func
         self.cache = {}
-        
-        
+
+
     def __call__(self, *args):
         try:
             return self.cache[args]
@@ -47,8 +47,8 @@ class memoized(object):
             # uncatchable -- for instance, passing a list as an argument.
             # Better to not catch it than to blow up entirely.
             return self.func(*args)
-    
-            
-    # Return the function's docstring.        
+
+
+    # Return the function's docstring.
     def __repr__(self):
         return self.func.__doc__

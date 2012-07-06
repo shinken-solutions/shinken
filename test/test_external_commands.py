@@ -89,7 +89,7 @@ class TestConfig(ShinkenTest):
         #except :
         #    pass
 
-        
+
         # Now with PAST DATA. We take the router because it was not called from now.
         past = int(time.time() - 30)
         excmd = '[%d] PROCESS_HOST_CHECK_RESULT;test_router_0;2;Bob is not happy|rtt=9999;5;10;0;10000' % past
@@ -115,7 +115,7 @@ class TestConfig(ShinkenTest):
         self.assert_(router.perf_data == 'rtt=9999;5;10;0;10000')
         print "Is the last check agree?", very_past, router.last_chk
         self.assert_(past == router.last_chk)
-        
+
 
 
 

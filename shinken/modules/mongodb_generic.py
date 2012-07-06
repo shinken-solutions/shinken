@@ -85,11 +85,11 @@ class Mongodb_generic(BaseModule):
             return {}
 
         r = {}
-        
+
         tables = ['hosts', 'services', 'contacts', 'commands', 'timeperiods']
         for t in tables:
             r[t] = []
-            
+
             cur = getattr(self.db, t).find({ '_state' : { '$ne' : 'disabled' } })
             for h in cur:
                 print "DBG: mongodb: get an ", t, h
@@ -127,8 +127,8 @@ class Mongodb_generic(BaseModule):
             return None
 
         return e.get(key)
-    
-    
+
+
     # Same but for saving
     def set_ui_user_preference(self, user, key, value):
         if not self.db:
@@ -144,7 +144,7 @@ class Mongodb_generic(BaseModule):
         # check a collection exist for this user
         u = self.db.ui_user_preferences.find_one({'_id': user.get_name()})
         if not u:
-            # no collection for this user ? create a new one 
+            # no collection for this user ? create a new one
             print "[Mongodb] No user entry for %s, I create a new one" % user.get_name()
             self.db.ui_user_preferences.save({ '_id':user.get_name(), key : value})
         else:
@@ -165,5 +165,5 @@ class Mongodb_generic(BaseModule):
                 u[key] = value
                 print '[Mongodb] Just saving the new key in the user pref'
                 self.db.ui_user_preferences.save(u)
-                
-            
+
+

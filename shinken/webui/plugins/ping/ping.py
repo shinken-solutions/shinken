@@ -41,7 +41,7 @@ def get_ping():
 
     app.response.content_type = 'application/json'
     callback = app.request.query.get('callback', None)
-    
+
     # We do not need to look at the user, should be public
     return forge_response(callback, 200, 'Pong')
 
@@ -56,8 +56,8 @@ def get_gotfirstdata():
         return forge_response(callback, 200, '1')
     else:
         return forge_response(callback, 200, '0')
-    
-    
+
+
 
 pages = {get_ping : { 'routes' : ['/ping']},
          get_gotfirstdata : { 'routes' : ['/gotfirstdata']},

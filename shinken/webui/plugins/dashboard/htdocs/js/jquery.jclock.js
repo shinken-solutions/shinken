@@ -7,38 +7,38 @@
 * http://www.opensource.org/licenses/mit-license.php
 */
 (function($) {
- 
+
   $.fn.jclock = function(options) {
     var version = '2.3.2';
- 
+
     // options
     var opts = $.extend({}, $.fn.jclock.defaults, options);
-         
+
     return this.each(function() {
       $this = $(this);
       $this.timerID = null;
       $this.running = false;
- 
+
       // Record keeping for seeded clock
       $this.increment = 0;
       $this.lastCalled = new Date().getTime();
- 
+
       var o = $.meta ? $.extend({}, opts, $this.data()) : opts;
- 
+
       $this.format = o.format;
       $this.utc = o.utc;
       // deprecate utc_offset (v 2.2.0)
       $this.utcOffset = (o.utc_offset != null) ? o.utc_offset : o.utcOffset;
       $this.seedTime = o.seedTime;
       $this.timeout = o.timeout;
- 
+
       $this.css({
         fontFamily: o.fontFamily,
         fontSize: o.fontSize,
         backgroundColor: o.background,
         color: o.foreground
       });
- 
+
       // %a
       $this.daysAbbrvNames = new Array(7);
       $this.daysAbbrvNames[0] = "Sun";
@@ -48,7 +48,7 @@
       $this.daysAbbrvNames[4] = "Thu";
       $this.daysAbbrvNames[5] = "Fri";
       $this.daysAbbrvNames[6] = "Sat";
- 
+
       // %A
       $this.daysFullNames = new Array(7);
       $this.daysFullNames[0] = "Sunday";
@@ -58,7 +58,7 @@
       $this.daysFullNames[4] = "Thursday";
       $this.daysFullNames[5] = "Friday";
       $this.daysFullNames[6] = "Saturday";
- 
+
       // %b
       $this.monthsAbbrvNames = new Array(12);
       $this.monthsAbbrvNames[0] = "Jan";
@@ -73,7 +73,7 @@
       $this.monthsAbbrvNames[9] = "Oct";
       $this.monthsAbbrvNames[10] = "Nov";
       $this.monthsAbbrvNames[11] = "Dec";
- 
+
       // %B
       $this.monthsFullNames = new Array(12);
       $this.monthsFullNames[0] = "January";
@@ -88,26 +88,26 @@
       $this.monthsFullNames[9] = "October";
       $this.monthsFullNames[10] = "November";
       $this.monthsFullNames[11] = "December";
- 
+
       $.fn.jclock.startClock($this);
- 
+
     });
   };
-       
+
   $.fn.jclock.startClock = function(el) {
     $.fn.jclock.stopClock(el);
     $.fn.jclock.displayTime(el);
   }
- 
+
   $.fn.jclock.stopClock = function(el) {
     if(el.running) {
       clearTimeout(el.timerID);
     }
     el.running = false;
   }
- 
+
   /* if the frequency is "once every minute" then we have to make sure this happens
-   * when the minute changes. */  
+   * when the minute changes. */
   // got this idea from digiclock http://www.radoslavdimov.com/jquery-plugins/jquery-plugin-digiclock/
   function getDelay(timeout) {
 	  if (timeout == 60000) {
@@ -116,7 +116,7 @@
 	  }
 	  return timeout;
   }
-  
+
   $.fn.jclock.displayTime = function(el) {
     var time = $.fn.jclock.currentTime(el);
     var formatted_time = $.fn.jclock.formatTime(time, el);
@@ -135,7 +135,7 @@
       var now = new Date(el.seedTime + el.increment);
       el.lastCalled = new Date().getTime();
     }
- 
+
     if(el.utc == true) {
       var localTime = now.getTime();
       var localOffset = now.getTimezoneOffset() * 60000;
@@ -146,36 +146,36 @@
 
     return now
   }
- 
+
   $.fn.jclock.formatTime = function(time, el) {
- 
+
     var timeNow = "";
     var i = 0;
     var index = 0;
     while ((index = el.format.indexOf("%", i)) != -1) {
       timeNow += el.format.substring(i, index);
       index++;
- 
+
       // modifier flag
       //switch (el.format.charAt(index++)) {
       //}
-      
+
       var property = $.fn.jclock.getProperty(time, el, el.format.charAt(index));
       index++;
-      
+
       //switch (switchCase) {
       //}
- 
+
       timeNow += property;
       i = index
     }
- 
+
     timeNow += el.format.substring(i);
     return timeNow;
   };
- 
+
   $.fn.jclock.getProperty = function(dateObject, el, property) {
- 
+
     switch (property) {
       case "a": // abbrv day names
           return (el.daysAbbrvNames[dateObject.getDay()]);
@@ -214,9 +214,9 @@
       case "%":
           return "%";
     }
- 
+
   }
-       
+
   // plugin defaults (24-hour)
   $.fn.jclock.defaults = {
     format: '%H:%M:%S',
@@ -229,5 +229,5 @@
     seedTime: undefined,
     timeout: 1000 // 1000 = one second, 60000 = one minute
   };
- 
+
 })(jQuery);

@@ -37,13 +37,13 @@ import math
 class Load:
     """This class is for having a easy Load calculation
     without having to send value at regular interval
-    (but it's more efficient if you do this :) ) and without 
+    (but it's more efficient if you do this :) ) and without
     having a list or other stuff. It's just an object, an update and a get
     You can define m : the average for m minutes. The val is
     the initial value. It's better if it's 0 but you can choose.
 
     """
-    
+
     def __init__(self, m=1, initial_value=0):
         self.exp = 0 # first exp
         self.m = m # Number of minute of the avg

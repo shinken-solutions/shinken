@@ -29,7 +29,7 @@ class TestPlusInInheritance(ShinkenTest):
 
     def setUp(self):
         self.setup_with_file('etc/nagios_contactgroups_plus_inheritance.cfg')
-    
+
     def test_contactgroups_plus_inheritance(self):
         host1 = self.sched.hosts.find_by_name("test_host_0")
         # HOST 1 should have 2 group of contacts
@@ -41,7 +41,7 @@ class TestPlusInInheritance(ShinkenTest):
 
         self.assert_("test_contact_1" in [c .get_name() for c in host1.contacts])
         self.assert_("test_contact_2" in [c .get_name() for c in host1.contacts])
-        
+
 
 if __name__ == '__main__':
     unittest.main()

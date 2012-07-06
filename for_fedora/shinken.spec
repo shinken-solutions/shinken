@@ -7,12 +7,12 @@ Source0:        http://%{name}-monitoring.org/pub/%{name}-%{version}.tar.gz
 Source1:        shinken-admin.8shinken
 License:        AGPLv3+
 
-Requires:       python 
-Requires:       python-pyro 
-Requires:       python-simplejson 
+Requires:       python
+Requires:       python-pyro
+Requires:       python-simplejson
 Requires:       python-sqlite2
 Requires:       systemd-units
-Requires:       nmap 
+Requires:       nmap
 BuildRequires:  python-devel
 BuildRequires:  systemd-units
 BuildRoot:      %{_tmppath}/%{name}-%{version}-buildroot
@@ -24,15 +24,15 @@ Buildarch:      noarch
 
 
 %description
-Shinken is a new monitoring tool written in Python. 
-The main goal of Shinken is to allow users to have a fully flexible 
-architecture for their monitoring system that can easily scale to large 
+Shinken is a new monitoring tool written in Python.
+The main goal of Shinken is to allow users to have a fully flexible
+architecture for their monitoring system that can easily scale to large
 environments.
-Shinken also provide interfaces with NDODB and Merlin database, 
+Shinken also provide interfaces with NDODB and Merlin database,
 Livestatus connector Shinken does not include any human interfaces.
 
 %package arbiter
-Summary: Shinken Arbiter 
+Summary: Shinken Arbiter
 Requires: %{name} = %{version}-%{release}
 
 %description arbiter
@@ -83,7 +83,7 @@ Shinken receiver daemon
 # clean git files
 find . -name '.gitignore' -exec rm -f {} \;
 
-# Check confuguration files 
+# Check confuguration files
 sed -i -e 's!plugins-path=/usr/lib/nagios/plugins!plugins-path=%{_libdir}/nagios/plugins!' setup.{cfg,py}
 sed -i -e 's!./$SCRIPT!python ./$SCRIPT!' test/quick_tests.sh
 
@@ -220,7 +220,7 @@ chmod -Rf 0644  %{buildroot}%{python_sitelib}/%{name}/webui/plugins/impacts/impa
 
 %clean
 
-%pre 
+%pre
 echo Adding %{shinken_group} group ...
 getent group %{shinken_group} >/dev/null || groupadd -r %{shinken_group}
 echo Adding %{shinken_user} user ...
@@ -229,77 +229,77 @@ exit 0
 
 
 %post arbiter
-if [ $1 -eq 1 ] ; then 
-    # Initial installation 
+if [ $1 -eq 1 ] ; then
+    # Initial installation
     /bin/systemctl daemon-reload >/dev/null 2>&1 || :
 fi
 
 %post broker
-if [ $1 -eq 1 ] ; then 
-    # Initial installation 
+if [ $1 -eq 1 ] ; then
+    # Initial installation
     /bin/systemctl daemon-reload >/dev/null 2>&1 || :
 fi
 
 %post poller
-if [ $1 -eq 1 ] ; then 
-    # Initial installation 
+if [ $1 -eq 1 ] ; then
+    # Initial installation
     /bin/systemctl daemon-reload >/dev/null 2>&1 || :
 fi
 
 %post reactionner
-if [ $1 -eq 1 ] ; then 
-    # Initial installation 
+if [ $1 -eq 1 ] ; then
+    # Initial installation
     /bin/systemctl daemon-reload >/dev/null 2>&1 || :
 fi
 
 %post scheduler
-if [ $1 -eq 1 ] ; then 
-    # Initial installation 
+if [ $1 -eq 1 ] ; then
+    # Initial installation
     /bin/systemctl daemon-reload >/dev/null 2>&1 || :
 fi
 
 %post receiver
-if [ $1 -eq 1 ] ; then 
-    # Initial installation 
+if [ $1 -eq 1 ] ; then
+    # Initial installation
     /bin/systemctl daemon-reload >/dev/null 2>&1 || :
 fi
 
-%preun arbiter 
+%preun arbiter
 if [ $1 -eq 0 ] ; then
     # Package removal, not upgrade
     /bin/systemctl --no-reload disable %{name}-arbiter.service > /dev/null 2>&1 || :
     /bin/systemctl stop %{name}-arbiter.service > /dev/null 2>&1 || :
 fi
 
-%preun broker 
+%preun broker
 if [ $1 -eq 0 ] ; then
     # Package removal, not upgrade
     /bin/systemctl --no-reload disable %{name}-broker.service > /dev/null 2>&1 || :
     /bin/systemctl stop %{name}-broker.service > /dev/null 2>&1 || :
 fi
 
-%preun poller 
+%preun poller
 if [ $1 -eq 0 ] ; then
     # Package removal, not upgrade
     /bin/systemctl --no-reload disable %{name}-poller.service > /dev/null 2>&1 || :
     /bin/systemctl stop %{name}-poller.service > /dev/null 2>&1 || :
 fi
 
-%preun reactionner 
+%preun reactionner
 if [ $1 -eq 0 ] ; then
     # Package removal, not upgrade
     /bin/systemctl --no-reload disable %{name}-reactionner.service > /dev/null 2>&1 || :
     /bin/systemctl stop %{name}-reactionner.service > /dev/null 2>&1 || :
 fi
 
-%preun scheduler 
+%preun scheduler
 if [ $1 -eq 0 ] ; then
     # Package removal, not upgrade
     /bin/systemctl --no-reload disable %{name}-scheduler.service > /dev/null 2>&1 || :
     /bin/systemctl stop %{name}-scheduler.service > /dev/null 2>&1 || :
 fi
 
-%preun receiver 
+%preun receiver
 if [ $1 -eq 0 ] ; then
     # Package removal, not upgrade
     /bin/systemctl --no-reload disable %{name}-receiver.service > /dev/null 2>&1 || :
@@ -406,12 +406,12 @@ fi
 
 * Mon May 30 2011 David Hannequin <david.hannequin@gmail.com> - 0.6.5-1
 - Update from upstream,
-- Add require python-redis, 
+- Add require python-redis,
 - Add require python-memcached.
 
 * Mon May 30 2011 David Hannequin <david.hannequin@gmail.com> - 0.6.4-3
 - Fix path in default shinken file,
-- Fix path in setup.cfg, 
+- Fix path in setup.cfg,
 - Add file FROM_NAGIOS_TO_SHINKEN.
 
 * Sun May 29 2011 David Hannequin <david.hannequin@gmail.com> - 0.6.4-2
@@ -420,7 +420,7 @@ fi
 - Update from upstreamr.
 
 * Fri May 20 2011 David Hannequin <david.hannequin@gmail.com> - 0.6.4-1
-- Update from upstream. 
+- Update from upstream.
 
 * Sun Apr 29 2011 David Hannequin <david.hannequin@gmail.com> - 0.6-1
 - Fisrt release for fedora.

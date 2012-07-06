@@ -780,7 +780,7 @@ class BaseRequest(DictMixin):
     @property
     def path(self):
         ''' The value of ``PATH_INFO`` with exactly one prefixed slash (to fix
-            broken clients and avoid the "empty path" edge case). ''' 
+            broken clients and avoid the "empty path" edge case). '''
         return '/' + self.environ.get('PATH_INFO','').lstrip('/')
 
     @property
@@ -1088,7 +1088,7 @@ def _hkey(s):
 
 class BaseResponse(object):
     """ Storage class for a response body as well as headers and cookies.
-    
+
         This class does support dict-like case-insensitive item-access to
         headers, but is NOT a dict. Most notably, iterating over a response
         yields parts of the body and not the headers.
@@ -1096,7 +1096,7 @@ class BaseResponse(object):
 
     default_status = 200
     default_content_type = 'text/html; charset=UTF-8'
-    
+
     #: Header blacklist for specific response codes
     #: (rfc2616 section 10.2.3 and 10.3.5)
     bad_headers = {
@@ -1147,7 +1147,7 @@ class BaseResponse(object):
         self.status_code = code
         self.status_line = status or ('%d Unknown' % code)
 
-    status = property(lambda self: self.status_code, _set_status, None, 
+    status = property(lambda self: self.status_code, _set_status, None,
         ''' A writeable property to change the HTTP response status. It accepts
             either a numeric code (100-999) or a string with a custom reason
             phrase (e.g. "404 Brain not found"). Both :data:`status_line` and

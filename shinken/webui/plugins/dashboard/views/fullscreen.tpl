@@ -11,7 +11,7 @@
 <script type="text/javascript">
     $(function($) {
       var options = {
-        format: '%I:%M %p', // 12-hour with am/pm 
+        format: '%I:%M %p', // 12-hour with am/pm
       }
       $('.jclock').jclock(options);
     });
@@ -31,7 +31,7 @@
 <!-- Dashboard Header START -->
 <div id="dash-header" class="span12">
   <ul class="span9 pull-left">
-     
+
     <li></li>
   </ul>
   <ul class="span2 pull-right">

@@ -73,7 +73,7 @@ def check_deamons_numbers(result, target):
     # TODO : perfdata to graph deamons would be nice (in big HA architectures)
     # if alive_number <= critical, then we have a big problem
     if alive_number < options.critical:
-        print "CRITICAL - only %d/%d %s(s) UP. Down elements : %s" % (alive_number, total_number, target, dead_list)  
+        print "CRITICAL - only %d/%d %s(s) UP. Down elements : %s" % (alive_number, total_number, target, dead_list)
         raise SystemExit, CRITICAL
     # We are not in a case where there is no more daemons, but are there daemons down?
     elif dead_number >= options.warning:
@@ -84,7 +84,7 @@ def check_deamons_numbers(result, target):
         print "OK - %d/%d %s(s) UP, with %d/%d spare(s) UP" % (alive_number, total_number, target, alive_spare_number, total_spare_number)
         raise SystemExit, OK
 
-    
+
 # Adding options. None are required, check_shinken will use shinken defaults
 # TODO : Add more control in args problem and usage than the default OptionParser one
 parser = OptionParser()
@@ -129,7 +129,7 @@ except Exception, exp:
     sys.exit(CRITICAL)
 
 
-    
+
 if options.daemon:
     # We just want a check for a single satellite daemon
     # Only OK or CRITICAL here
@@ -139,7 +139,7 @@ if options.daemon:
     except Exception, exp:
         print "CRITICAL : the Arbiter is not reachable : (%s)." % exp
         raise SystemExit, CRITICAL
-    
+
     if result:
         if result['alive']:
             print 'OK - %s alive' % daemon_name

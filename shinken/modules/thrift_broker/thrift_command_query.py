@@ -34,10 +34,10 @@ class ThriftCommandQuery(ThriftQuery):
 
     def parse_input(self, data):
         """Parse the lines of a thrift request.
-        
+
         This function looks for keywords in input lines and
         sets the attributes of the request object
-        
+
         """
         for line in data.splitlines():
             line = line.strip()

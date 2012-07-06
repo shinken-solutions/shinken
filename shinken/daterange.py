@@ -382,7 +382,7 @@ class Daterange:
 
         # tr can't be valid, or it will be return at the begining
         #sec_from_morning = self.get_next_future_timerange_invalid(t)
-        
+
         # Ok we've got a next invalid day and a invalid possibility in
         # timerange, so the next invalid is this day+sec_from_morning
         #print "T_day", t_day, "Sec from morning", sec_from_morning
@@ -390,7 +390,7 @@ class Daterange:
             return t_day + sec_from_morning + 1
 
         # We've got a day but no sec_from_morning : the timerange is full (0->24h)
-        # so the next invalid is this day at the day_start 
+        # so the next invalid is this day at the day_start
         if t_day is not None and sec_from_morning is None:
             return t_day
 

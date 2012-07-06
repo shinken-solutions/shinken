@@ -32,7 +32,7 @@ class TestDisableActiveChecks(ShinkenTest):
     #def setUp(self):
     #    self.setup_with_file('etc/nagios_disable_active_checks.cfg')
 
-    
+
     # We try to disable the actie checks and see if it's really done
     # with a dummy check, so we need to get the same state and output
     def test_disable_active_checks(self):
@@ -43,12 +43,12 @@ class TestDisableActiveChecks(ShinkenTest):
         print "Get the hosts and services"
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
-        
+
         print "Checks in progress", host.checks_in_progress
         c = host.checks_in_progress.pop()
         print c.__dict__
         print c.status
-        
+
 
 
         self.scheduler_loop(1, [[host, 0, 'I set this host UP | value1=1 value2=2']])
@@ -57,14 +57,14 @@ class TestDisableActiveChecks(ShinkenTest):
         last_output = host.output
 
         host.schedule()
-        self.sched.external_command.DISABLE_HOST_CHECK(host)        
-        
+        self.sched.external_command.DISABLE_HOST_CHECK(host)
+
         c = host.checks_in_progress.pop()
         print c.__dict__
         print c.status
         self.assert_(c.status == 'waitconsume')
         self.scheduler_loop(2, [])
-        
+
         print host.state
         print host.output
         self.assert_(host.output == last_output)
@@ -72,8 +72,8 @@ class TestDisableActiveChecks(ShinkenTest):
         print len(host.checks_in_progress)
         print host.in_checking
         self.assert_(host.in_checking == False)
-        
-        
+
+
 
 
 if __name__ == '__main__':

@@ -1249,8 +1249,8 @@ class PerfTest(ShinkenTest):
         print "%d services are in a hard/critical state" % lenc
         self.scheduler_loop(3, nonok)
         self.update_broker()
-        last_host = reduce(lambda x,y:y,self.livestatus_broker.datamgr.rg.hosts) 
-        #last_service = reduce(lambda x,y:y,self.livestatus_broker.datamgr.rg.services) 
+        last_host = reduce(lambda x,y:y,self.livestatus_broker.datamgr.rg.hosts)
+        #last_service = reduce(lambda x,y:y,self.livestatus_broker.datamgr.rg.services)
 
         elapsed = {}
         requestelapsed = {}
@@ -1262,7 +1262,7 @@ class PerfTest(ShinkenTest):
             requestelapsed[page] = []
             for request in pages[page]:
                 print "+--------------------------\n%s\n--------------------------\n" % request
-                # 
+                #
                 request = request.replace('omd-live',last_host.host_name)
                 request = request.replace('Dummy Service', 'test_ok_19')
                 print "---------------------------\n%s\n--------------------------\n" % request

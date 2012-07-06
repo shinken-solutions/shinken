@@ -151,12 +151,12 @@ class ShinkenTest(unittest.TestCase):
         self.conf.prepare_for_sending()
         self.conf.show_errors()
         self.dispatcher = Dispatcher(self.conf, self.me)
-        
+
         scheddaemon = Shinken(None, False, False, False, None)
         self.sched = Scheduler(scheddaemon)
-        
+
         scheddaemon.sched = self.sched
-                
+
         m = MacroResolver()
         m.init(self.conf)
         self.sched.load_conf(self.conf, in_test=True)
@@ -188,7 +188,7 @@ class ShinkenTest(unittest.TestCase):
         self.sched.add(check)  # check is now in sched.checks[]
         # fake execution
         check.check_time = now
-        
+
         # and lie about when we will launch it because
         # if not, the schedule call for ref
         # will not really reschedule it because there
@@ -379,7 +379,7 @@ class ShinkenTest(unittest.TestCase):
         self.livelogs = 'tmp/livelogs.db' + self.testid
 
         if modconf is None:
-            modconf = Module({'module_name' : 'LiveStatus', 
+            modconf = Module({'module_name' : 'LiveStatus',
                 'module_type' : 'livestatus',
                 'port' : str(50000 + os.getpid()),
                 'pnp_path' : 'tmp/pnp4nagios_test' + self.testid,
@@ -388,7 +388,7 @@ class ShinkenTest(unittest.TestCase):
                 'name' : 'test', #?
             })
 
-        dbmodconf = Module({'module_name' : 'LogStore', 
+        dbmodconf = Module({'module_name' : 'LogStore',
             'module_type' : 'logstore_sqlite',
             'use_aggressive_sql' : "0",
             'database_file' : self.livelogs,

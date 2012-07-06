@@ -64,7 +64,7 @@ class Broker(BaseSatellite):
 
 
     def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
-        
+
         super(Broker, self).__init__('broker', config_file, is_daemon, do_replace, debug, debug_file)
 
         # Our arbiters
@@ -183,7 +183,7 @@ class Broker(BaseSatellite):
         running_id = links[id]['running_id']
         # DBG: print "Running id before connection", running_id
         uri = links[id]['uri']
-        
+
         try:
             socket.setdefaulttimeout(3)
             links[id]['con'] = Pyro.core.getProxyForURI(uri)
@@ -333,7 +333,7 @@ class Broker(BaseSatellite):
                 logger.error(''.join(Pyro.util.getPyroTraceback(x)))
                 sys.exit(1)
 
-        
+
     # Helper function for module, will give our broks
     def get_retention_data(self):
         return self.broks
@@ -350,8 +350,8 @@ class Broker(BaseSatellite):
             a.terminate()
             a.join(1)
         super(Broker, self).do_stop()
-        
-        
+
+
     def setup_new_conf(self):
         conf = self.new_conf
         self.new_conf = None
@@ -507,7 +507,7 @@ class Broker(BaseSatellite):
             logger.info("Setting our timezone to %s" % use_timezone)
             os.environ['TZ'] = use_timezone
             time.tzset()
-        
+
         # Connection init with Schedulers
         for sched_id in self.schedulers:
             self.pynag_con_init(sched_id, type='scheduler')
@@ -534,11 +534,11 @@ class Broker(BaseSatellite):
         self.have_modules = False
         self.modules_manager.clear_instances()
 
-        
+
 
     def do_loop_turn(self):
         logger.debug("Begin Loop : managing old broks (%d)" % len(self.broks))
-        
+
         # Dump modules Queues size
         insts = [ inst for inst in self.modules_manager.instances if inst.is_external]
         for inst in insts:
@@ -557,11 +557,11 @@ class Broker(BaseSatellite):
             # Clean previous run from useless objects
             # and close modules
             self.clean_previous_run()
-            
+
             self.wait_for_initial_conf()
-            # we may have been interrupted or so; then 
+            # we may have been interrupted or so; then
             # just return from this loop turn
-            if not self.new_conf:  
+            if not self.new_conf:
                 return
             self.setup_new_conf()
 
@@ -585,7 +585,7 @@ class Broker(BaseSatellite):
 
         # Sort the brok list by id
         self.broks.sort(sort_by_ids)
-        
+
         # and for external queues
         # REF: doc/broker-modules.png (3)
         # We put to external queues broks that was not already send
@@ -593,7 +593,7 @@ class Broker(BaseSatellite):
         # We are sending broks as a big list, more efficient than one by one
         queues = self.modules_manager.get_external_to_queues()
         to_send = [b for b in self.broks if getattr(b, 'need_send_to_ext', True)]
-        
+
         for q in queues:
             q.put(to_send)
 
@@ -655,12 +655,12 @@ class Broker(BaseSatellite):
     def main(self):
         try:
             self.load_config_file()
-        
+
             for line in self.get_header():
                 self.log.info(line)
 
             logger.info("[Broker] Using working directory : %s" % os.path.abspath(self.workdir))
-        
+
             self.do_daemon_init_and_start()
 
             self.uri2 = self.pyro_daemon.register(self.interface, "ForArbiter")

@@ -60,7 +60,7 @@ class TestConfig(ShinkenTest):
         super(TestConfig, self).scheduler_loop(count, reflist, do_sleep, sleep_time)
         if self.nagios_installed() and hasattr(self, 'nagios_started'):
             self.nagios_loop(1, reflist)
-  
+
 
     def update_broker(self, dodeepcopy=False):
         # The brok should be manage in the good order
@@ -110,9 +110,9 @@ class TestConfig(ShinkenTest):
             data2 = [[sorted(c.split(',')) for c in columns] for columns in [line.split(';') for line in sorted(text2.split("\n")) if line]]
             # print "text1 //%s//" % data1
             # print "text2 //%s//" % data2
-            # cmp is clever enough to handle nested arrays 
+            # cmp is clever enough to handle nested arrays
             return cmp(data1, data2) == 0
-            
+
 
     def show_broks(self, title):
         print
@@ -195,7 +195,7 @@ class TestConfig(ShinkenTest):
                 newconfig.close()
         return new_configname
 
-    
+
     def start_nagios(self, config):
         if os.path.exists('var/spool/checkresults'):
             # Cleanup leftover checkresults
@@ -252,8 +252,8 @@ class TestConfig(ShinkenTest):
             unixcat.kill()
         print "unixcat says", out
         return out
-        
-    
+
+
     def nagios_loop(self, count, reflist, do_sleep=False, sleep_time=61):
         now = time.time()
         buffer = open('var/pipebuffer', 'w')
@@ -421,7 +421,7 @@ ColumnHeaders: off
 
         time.sleep(1)
         result = wait.condition_fulfilled()
-        # the plugin has run 
+        # the plugin has run
         print "must not be empty", result
         self.assert_(result)
 

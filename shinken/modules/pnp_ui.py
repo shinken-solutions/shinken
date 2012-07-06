@@ -43,7 +43,7 @@ properties = {
 # called by the plugin manager
 def get_instance(plugin):
     print "Get an PNP UI module for plugin %s" % plugin.get_name()
-    
+
     instance = PNP_Webui(plugin)
     return instance
 
@@ -54,7 +54,7 @@ class PNP_Webui(BaseModule):
         self.uri = getattr(modconf, 'uri', None)
         self.username = getattr(modconf, 'username', None)
         self.password = getattr(modconf, 'password', '')
-        
+
         if not self.uri:
             raise Exception('The WebUI PNP module is missing uri parameter.')
 
@@ -85,12 +85,12 @@ class PNP_Webui(BaseModule):
         elts = perf_data.split(' ')
         elts = [e for e in elts if e != '']
         return len(elts)
-        
+
 
     # Give the link for the PNP UI, with a Name
     def get_external_ui_link(self):
         return {'label' : 'PNP4', 'uri' : self.uri}
-        
+
 
 
     # Ask for an host or a service the graph UI that the UI should

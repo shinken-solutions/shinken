@@ -21,7 +21,7 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with Shinken.  If not, see <http://www.gnu.org/licenses/>. 
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 # This module imports hosts and services configuration from a MySQL Database
 # Queries for getting hosts and services are pulled from shinken-specific.cfg configuration file.
 
@@ -84,23 +84,23 @@ class MySQL_importer_arbiter(BaseModule):
             print "MySQL Module : Error %d: %s" % (e.args[0], e.args[1])
             raise
         print "[MySQL Importer Module] : Connection opened"
- 
- 
+
+
     # Main function that is called in the CONFIGURATION phase
     def get_objects(self):
         if not hasattr(self, 'conn'):
             print "[MySQL Importer Module] : Problem during init phase"
             return {}
- 
+
         # Create variables for result
         r = {}
- 
+
         cursor = self.conn.cursor (MySQLdb.cursors.DictCursor)
- 
+
         # For all parameters
         for k,v in self.reqlist.iteritems():
             r[k] = []
- 
+
             if(v != None):
                 result_set = {}
                 print "[MySQL Importer Module] : getting %s configuration from database" % (k)
@@ -122,6 +122,6 @@ class MySQL_importer_arbiter(BaseModule):
         cursor.close ()
         self.conn.close ()
         del self.conn
- 
+
         print "[MySQL Importer Module] : Returning to Arbiter the object:", r
         return r

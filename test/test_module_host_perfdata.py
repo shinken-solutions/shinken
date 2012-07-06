@@ -95,7 +95,7 @@ class TestConfig(ShinkenTest):
 
         fd = open(mod.path)
         buf = fd.readline().decode('utf8')
-        
+
         #print "BUF:", buf
         comparison = u'%d\t%s\t%s\t%s\t%s\n' % (t, "test_host_0", 'BAD', 'value1=0 value2=0'+u'\xf6', 'DOWN')
         #print "Comparison:", comparison

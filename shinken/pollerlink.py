@@ -31,9 +31,9 @@ from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 class PollerLink(SatelliteLink):
     """This class is the link between Arbiter and Poller. With it, arbiter
     can see if a poller is alive, and can send it new configuration
-    
+
     """
-    
+
     id = 0
     my_type = 'poller'
     # To_send : send or not to satellite conf
@@ -57,6 +57,6 @@ class PollerLink(SatelliteLink):
 
 class PollerLinks(SatelliteLinks):
     """Please Add a Docstring to describe the class here"""
-    
+
     name_property = "poller_name"
     inner_class = PollerLink

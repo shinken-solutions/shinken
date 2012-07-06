@@ -76,7 +76,7 @@ class Graphite_broker(BaseModule):
     # TODO : add conf param to get pass with init
     # Conf from arbiter!
     def init(self):
-        print "[%s] I init the graphite server connection to %s:%s" % (self.get_name(), self.host, self.port) 
+        print "[%s] I init the graphite server connection to %s:%s" % (self.get_name(), self.host, self.port)
         self.con = socket()
         self.con.connect( (self.host, self.port))
 
@@ -88,7 +88,7 @@ class Graphite_broker(BaseModule):
         s = perf_data.strip()
         # Get all metrics non void
         elts = s.split(' ')
-        metrics = [e for e in elts if e != ''] 
+        metrics = [e for e in elts if e != '']
 
         for e in metrics:
  #           print "Graphite : groking : ", e
@@ -137,14 +137,14 @@ class Graphite_broker(BaseModule):
     # A service check result brok has just arrived, we UPDATE data info with this
     def manage_service_check_result_brok(self, b):
         data = b.data
-        
+
         perf_data = data['perf_data']
         couples = self.get_metric_and_value(perf_data)
 
         # If no values, we can exit now
         if len(couples) == 0:
             return
-        
+
         hname = self.illegal_char.sub('_', data['host_name'])
         if data['host_name'] in self.host_dict:
             customs_datas = self.host_dict[data['host_name']]
@@ -185,14 +185,14 @@ class Graphite_broker(BaseModule):
     # A host check result brok has just arrived, we UPDATE data info with this
     def manage_host_check_result_brok(self, b):
         data = b.data
-        
+
         perf_data = data['perf_data']
         couples = self.get_metric_and_value(perf_data)
 
         # If no values, we can exit now
         if len(couples) == 0:
             return
-        
+
         hname = self.illegal_char.sub('_', data['host_name'])
         if data['host_name'] in self.host_dict:
             customs_datas = self.host_dict[data['host_name']]
@@ -202,7 +202,7 @@ class Graphite_broker(BaseModule):
         check_time = int(data['last_chk'])
 
  #       print "Graphite:", hname, check_time, perf_data
- 
+
         if self.use_pickle:
             # Buffer the performance data lines
             for (metric, value) in couples:

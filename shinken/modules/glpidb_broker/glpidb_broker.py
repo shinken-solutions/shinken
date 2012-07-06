@@ -90,7 +90,7 @@ class Glpidb_broker(BaseModule):
         self.database = database
         self.character_set = character_set
         self.database_path = database_path
-        
+
         from shinken.db_mysql import DBMysql
         print "Creating a mysql backend"
         self.db_backend = DBMysql(host, user, password, database, character_set)
@@ -108,7 +108,7 @@ class Glpidb_broker(BaseModule):
 
 
     def preprocess(self, type, brok, checkst):
-        new_brok = copy.deepcopy(brok)        
+        new_brok = copy.deepcopy(brok)
         # Only preprocess if we can apply a mapping
         if type in self.mapping:
             #print "brok data : ", brok.data
@@ -125,7 +125,7 @@ class Glpidb_broker(BaseModule):
                     s = brok.data['host_name'].split('-')
                     new_brok.data['plugin_monitoring_services_id'] = s[1]
                     new_brok.data['event'] = brok.data['output']
-                except: 
+                except:
                     pass
             to_del = []
             to_add = []
@@ -249,4 +249,4 @@ class Glpidb_broker(BaseModule):
         #print "Update service : ", new_data
         query = self.db_backend.create_update_query(table, new_data, where_clause)
         return [query]
-        
+

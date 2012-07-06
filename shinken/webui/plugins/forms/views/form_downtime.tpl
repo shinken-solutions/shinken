@@ -11,7 +11,7 @@
 <script type="text/javascript">
 	function submit_local_form(){
 	  var form = document.forms['modal_form'];
-	
+
 	  var from_day = form.from_day.value;
 	  var from_hour = form.from_hour.value;
 	  var to_day = form.to_day.value;
@@ -53,7 +53,7 @@
 	}
 
 	var reason = form.reason.value;
-	
+
 	// Launch and bailout this modal view
 	do_schedule_downtime("{{name}}", from_epoch, to_epoch, '{{user.get_name()}}', reason);
 	$('#modal').modal('hide')
@@ -74,7 +74,7 @@
 <div class="modal-body">
   <form class="well" name='modal_form'>
 
-    
+
     <label>Downtime date range</label>
     <div class='input'>
       <div class="inline-inputs">

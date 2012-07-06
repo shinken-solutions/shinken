@@ -39,22 +39,22 @@
     <link href="/static/css/custom/deptree.css" rel="stylesheet">
     <link href="/static/css/custom/buttons.css" rel="stylesheet">
     <link href="/static/css/elements/jquery.pageslide.css" rel="stylesheet">
-    <!-- css3 effect for pulse is not available on IE 
+    <!-- css3 effect for pulse is not available on IE
 	 It's not real comment, if so it will not work.
       -->
-    
+
     <![if !IE]>
     <link href="/static/css/elements/pulse.css" rel="stylesheet">
     <![endif]>
 
-    <!-- Warnign, this version of datepicker came from http://dl.dropbox.com/u/143355/datepicker/datepicker.html -->    
+    <!-- Warnign, this version of datepicker came from http://dl.dropbox.com/u/143355/datepicker/datepicker.html -->
     <link href="/static/css/custom/datepicker.css" rel="stylesheet">
 
     %# And now for css files
       %for p in css:
     <link rel="stylesheet" type="text/css" href="/static/{{p}}">
       %end
-    
+
     <style type="text/css">
       body {
         padding-top: 60px;

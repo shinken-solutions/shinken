@@ -34,7 +34,7 @@ def delete_user(table, username):
 
 
 if __name__ == '__main__':
-    
+
     parser = optparse.OptionParser(
         """%prog [options] [-H server] [-d database]""",
         version="%prog " + VERSION)
@@ -50,7 +50,7 @@ if __name__ == '__main__':
                       help='delete a user')
     parser.add_option('-u', '--user', dest='username',
                       help='Username')
-    
+
 
     opts, args = parser.parse_args()
 

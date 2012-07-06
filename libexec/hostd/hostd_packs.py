@@ -107,7 +107,7 @@ def analyse_pack(table, pack):
     if os.path.exists(dest_path):
         shutil.rmtree(dest_path)
     shutil.copytree(path, dest_path)
-    
+
     pck = packs.pop()
     print "We read pack", pck.__dict__
     # Now we can update the db pack entry
@@ -123,12 +123,12 @@ def analyse_pack(table, pack):
         p['state'] = 'ok'
     print "We want to save the object", p
     table.save(p)
-    
 
-    
+
+
 
 if __name__ == '__main__':
-    
+
     parser = optparse.OptionParser(
         """%prog [options] [-H server] [-d database]""",
         version="%prog " + VERSION)

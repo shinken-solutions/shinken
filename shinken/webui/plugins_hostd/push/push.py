@@ -35,7 +35,7 @@ def add_pack_page():
     # First we look for the user sid
     # so we bail out if it's a false one
     user = app.get_user_auth()
-    
+
     if not user:
         redirect("/user/login")
         return
@@ -166,7 +166,7 @@ def push_stats():
 
 pages = {push_new_pack : { 'routes' : ['/pushpack'], 'method' : 'POST', 'view' : None, 'static' : True},
          push_stats : { 'routes' : ['/pushstats'], 'method' : 'POST', 'view' : None, 'static' : True},
-         
+
          add_pack_page : { 'routes' : ['/addpack'], 'view' : 'addpack', 'static' : True},
          }
 

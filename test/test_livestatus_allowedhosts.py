@@ -96,7 +96,7 @@ class TestConfigAuth(TestConfig):
             s.settimeout(10)
             s.connect((ip, port))
             s.send(data)
-           
+
             res = s.recv(16)
         except Exception, e:
             print "Query livestatus failed: ", e
@@ -109,7 +109,7 @@ class TestConfigAuth(TestConfig):
         return len(res) > 0
 
     def test_01_default(self):
-        modconf = Module({'module_name' : 'LiveStatus', 
+        modconf = Module({'module_name' : 'LiveStatus',
             'module_type' : 'livestatus',
             'port' : str(random.randint(50000, 65534)),
             'pnp_path' : 'tmp/pnp4nagios_test' + self.testid,
@@ -119,37 +119,37 @@ class TestConfigAuth(TestConfig):
         })
         self.init_livestatus(modconf)
 
-        # test livestatus connection 
+        # test livestatus connection
         self.assertTrue(self.query_livestatus(modconf.host, int(modconf.port), "GET hosts\n\n"))
 
     def test_02_allow_localhost(self):
-        modconf = Module({'module_name' : 'LiveStatus', 
+        modconf = Module({'module_name' : 'LiveStatus',
             'module_type' : 'livestatus',
             'port' : str(random.randint(50000, 65534)),
             'pnp_path' : 'tmp/pnp4nagios_test' + self.testid,
             'host' : '127.0.0.1',
-            'name' : 'test', 
+            'name' : 'test',
             'modules': '',
             'allowed_hosts' : '127.0.0.1'
         })
         self.init_livestatus(modconf)
 
-        # test livestatus connection 
+        # test livestatus connection
         self.assertTrue(self.query_livestatus(modconf.host, int(modconf.port), "GET hosts\n\n"))
 
     def test_03_dont_allow_localhost(self):
-        modconf = Module({'module_name' : 'LiveStatus', 
+        modconf = Module({'module_name' : 'LiveStatus',
             'module_type' : 'livestatus',
             'port' : str(random.randint(50000, 65534)),
             'pnp_path' : 'tmp/pnp4nagios_test' + self.testid,
             'host' : '127.0.0.1',
-            'name' : 'test', 
+            'name' : 'test',
             'modules': '',
             'allowed_hosts' : '192.168.0.1'
         })
         self.init_livestatus(modconf)
 
-        # test livestatus connection 
+        # test livestatus connection
         self.assertFalse(self.query_livestatus(modconf.host, int(modconf.port), "GET hosts\n\n"))
 
 if __name__ == '__main__':
@@ -158,6 +158,6 @@ if __name__ == '__main__':
     unittest.main()
     #cProfile.runctx( command, globals(), locals(), filename="/tmp/livestatus.profile" )
 
-    #allsuite = unittest.TestLoader.loadTestsFromModule(TestConfig) 
-    #unittest.TextTestRunner(verbosity=2).run(allsuite) 
+    #allsuite = unittest.TestLoader.loadTestsFromModule(TestConfig)
+    #unittest.TextTestRunner(verbosity=2).run(allsuite)
 

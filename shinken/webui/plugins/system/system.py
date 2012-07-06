@@ -34,7 +34,7 @@ def system_page():
 
     if not user:
         redirect("/user/login")
-    
+
     schedulers = app.datamgr.get_schedulers()
     brokers = app.datamgr.get_brokers()
     reactionners = app.datamgr.get_reactionners()
@@ -51,7 +51,7 @@ def system_widget():
 
     if not user:
         redirect("/user/login")
-    
+
     schedulers = app.datamgr.get_schedulers()
     brokers = app.datamgr.get_brokers()
     reactionners = app.datamgr.get_reactionners()
@@ -61,7 +61,7 @@ def system_widget():
     wid = app.request.GET.get('wid', 'widget_system_'+str(int(time.time())))
     collapsed = (app.request.GET.get('collapsed', 'False') == 'True')
     print "SYSTEM COLLAPSED?", collapsed, type(collapsed)
-    
+
     got_childs = (app.request.GET.get('got_childs', 'False') == 'True')
     key = app.request.GET.get('key', 1)
 
@@ -81,7 +81,7 @@ def show_log():
 
     if not user:
         redirect("/user/login")
-    
+
     schedulers = app.datamgr.get_schedulers()
     brokers = app.datamgr.get_brokers()
     reactionners = app.datamgr.get_reactionners()
