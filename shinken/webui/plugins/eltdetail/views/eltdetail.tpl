@@ -219,7 +219,7 @@ $(document).ready(function(){
 			</div>
 		</form>
 
-		<div class='span5 well'>
+		<div class="span5 well">
 			<div class="btn-toolbar">
 				<div class="btn-group">
 					<a id='btn_show_gesture' href="#" onclick="$('#gesture_panel').toggle();" class='btn' title="Show gesture panel"> <i class="icon-ok"></i> Show gesture panel</a>
@@ -283,9 +283,9 @@ $(document).ready(function(){
 							<td><span class="btn span11 alert-small trim-{{helper.yes_no(elt.in_scheduled_downtime)}}">{{helper.yes_no(elt.in_scheduled_downtime)}}</span></td>
 						</tr>
 					</table>
-					<hr>
+					
 					<div> <b><i>{{elt.output}}</i></b> </div>
-					<hr>
+					
 					<table class="table">
 						<tr>
 							<td class="column1">Last Check:</td>
@@ -398,7 +398,7 @@ $(document).ready(function(){
 -->
 <!-- End Host/Service -->
 <!-- Detail info box start -->
-<div class="span8 tabbable">
+<div class="span9 tabbable">
 	<ul class="nav nav-tabs">
 		<li class="active"><a href="#impacts" data-toggle="tab">Impacts</a></li>
 		<li><a href="#comments" data-toggle="tab">Comments</a></li>

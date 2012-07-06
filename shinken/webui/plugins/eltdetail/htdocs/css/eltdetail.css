@@ -334,7 +334,7 @@ div.marginbottom {
 
 .verticaltabs-container {
   position: relative;
-  min-width: 460px;
+  /*min-width: 460px;*/
   min-height: 460px;
   width: 100%;
   height: 100%;
