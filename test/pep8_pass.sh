@@ -36,5 +36,4 @@ echo "Launching pep8 stat pass"
 cd ..
 
 pep8  --max-line-length=100 --ignore=E303 shinken/ > $DIR/pep8.txt
-echo "Pep8 pass done, congrats or not? ;) "
-
+echo "Pep8 pass done, you can find the result in $DIR/pep8.txt"
