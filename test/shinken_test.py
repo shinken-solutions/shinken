@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python
 
 #
 # This file is used to test host- and service-downtimes.
@@ -182,8 +182,8 @@ class ShinkenTest(unittest.TestCase):
         #print "fake", ref
         now = time.time()
         ref.schedule(force=True)
-        #now checks are schedule and we get them in
-        #the action queue
+        # now checks are schedule and we get them in
+        # the action queue
         check = ref.actions.pop()
         self.sched.add(check)  # check is now in sched.checks[]
         # fake execution

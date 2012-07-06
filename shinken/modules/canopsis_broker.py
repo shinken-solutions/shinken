@@ -24,9 +24,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-#This Class is a plugin for the Shinken Broker. It's job is to write
-#host and service perfdata to a file which can be processes by the
-#canopsis daemon (http://pnp4nagios.org). It is a reimplementation of canopsis.c
+# This Class is a plugin for the Shinken Broker. It's job is to write
+# host and service perfdata to a file which can be processes by the
+# canopsis daemon (http://pnp4nagios.org). It is a reimplementation of canopsis.c
 
 import sys
 import os
@@ -50,7 +50,7 @@ properties = {
     }
 
 
-#called by the plugin manager to get a broker
+# called by the plugin manager to get a broker
 def get_instance(plugin):
     # logger.info("Info","Get a canopsis broker for plugin %s" % (str(plugin.get_name())))
 
@@ -67,7 +67,7 @@ def get_instance(plugin):
     return Canopsis_broker(plugin, host, port, user, password, virtual_host, exchange_name,identifier,maxqueuelength,queue_dump_frequency)
 
 
-#Class for the canopsis Broker
+# Class for the canopsis Broker
 class Canopsis_broker(BaseModule):
     def __init__(self, modconf, host, port, user, password, virtual_host, exchange_name, identifier,maxqueuelength,queue_dump_frequency):
         BaseModule.__init__(self, modconf)
@@ -83,7 +83,7 @@ class Canopsis_broker(BaseModule):
 
         self.canopsis = event2amqp(self.host,self.port,self.user,self.password,self.virtual_host, self.exchange_name, self.identifier,self.maxqueuelength,queue_dump_frequency)
 
-    #We call functions like manage_ TYPEOFBROK _brok that return us queries
+    # We call functions like manage_ TYPEOFBROK _brok that return us queries
     def manage_brok(self, b):
         if b.type == "host_check_result":
             self.manage_host_check_result_brok(b)
@@ -199,14 +199,14 @@ class Canopsis_broker(BaseModule):
                         'address'                               
         """
         if source_type == 'resource':
-            #service
+            # service
             specificmessage={
                 'resource' : b.data['service_description'],
                 'command_name' : self.service_commands[b.data['host_name']][b.data['service_description']],
                 'max_attempts' : self.service_max_check_attempts[b.data['host_name']][b.data['service_description']],
             }
         elif source_type == 'component':
-            #host
+            # host
             specificmessage={
                 'resource' : None,
                 'command_name' : self.host_commands[b.data['host_name']],

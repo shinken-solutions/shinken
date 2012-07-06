@@ -35,7 +35,7 @@ from shinken.macroresolver import MacroResolver
 
 
 class Discoveryrun(MatchingItem):
-    id = 1 #0 is always special in database, so we do not take risk here
+    id = 1 # zero is always special in database, so we do not take risk here
     my_type = 'discoveryrun'
 
     properties = Item.properties.copy()

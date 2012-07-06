@@ -42,7 +42,7 @@ def get_ping():
     app.response.content_type = 'application/json'
     callback = app.request.query.get('callback', None)
     
-    #We do not need to look at the user, should be public
+    # We do not need to look at the user, should be public
     return forge_response(callback, 200, 'Pong')
 
 

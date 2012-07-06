@@ -24,7 +24,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#File for create the status.dat file
+# File for create the status.dat file
 import time
 import os
 import tempfile
@@ -34,7 +34,7 @@ from shinken.util import from_bool_to_string
 class StatusFile:
     out_map = {
         'Host' : {
-            'host_name' : {},#'host_name',
+            'host_name' : {}, # 'host_name',
             'modified_attributes' : {'prop' : None, 'default' : '0'},
             'check_command' : {'depythonize' : 'get_name'},
             'check_period' : {'prop' : 'check_period' , 'depythonize' : 'get_name'},
@@ -257,7 +257,7 @@ class StatusFile:
                 if prop is not None and hasattr(elt, prop):
                     value = getattr(elt, prop)
 
-                    #Maybe it's not a value, but a function link
+                    # Maybe it's not a value, but a function link
                     if callable(value):
                         value = value()
 
@@ -267,7 +267,7 @@ class StatusFile:
                             value = f(value)
                         else:
                             #print "Elt: ", elt, "prop", prop
-                            #ok not a direct function, maybe a functin provided by value...
+                            # ok not a direct function, maybe a functin provided by value...
                             if value is not None:
                                 f = getattr(value, f)
                                 value = f()
@@ -275,7 +275,7 @@ class StatusFile:
                 if value is None:
                     try:
                         value = type_map[display]['default']
-                    except KeyError:  #Fuck!
+                    except KeyError:  # Fuck!
                         value = ''
                 output += '\t' + display + '=' + unicode(value) + '\n'
 
@@ -319,7 +319,7 @@ class StatusFile:
 
         for s in self.services.values():
             for c in s.comments:
-                #this is just a workaround until a data-driven solution is found
+                # this is just a workaround until a data-driven solution is found
                 c.host_name = c.ref.host_name
                 if (hasattr(c.ref, 'service_description')):
                     c.service_description = c.ref.service_description
@@ -334,7 +334,7 @@ class StatusFile:
 
         for s in self.services.values():
             for dt in s.downtimes:
-                #this is just a workaround until a data-driven solution is found
+                # this is just a workaround until a data-driven solution is found
                 dt.host_name = dt.ref.host_name
                 if (hasattr(dt.ref, 'service_description')):
                     dt.service_description = dt.ref.service_description

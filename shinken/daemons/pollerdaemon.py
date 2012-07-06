@@ -29,7 +29,7 @@ from shinken.satellite import Satellite
 from shinken.property import PathProp, IntegerProp
 
 
-#Our main APP class
+# Our main APP class
 class Poller(Satellite):
     do_checks = True    # I do checks
     do_actions = False  # but no actions

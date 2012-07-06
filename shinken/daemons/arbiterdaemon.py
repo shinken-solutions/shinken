@@ -48,7 +48,7 @@ class IForArbiter(Interface):
         # I've got a conf and a good one
         if self.app.cur_conf and self.app.cur_conf.magic_hash == magic_hash:
             return True
-        else: #I've no conf or a bad one
+        else: # I've no conf or a bad one
             return False
 
     # The master Arbiter is sending us a new conf. Ok, we take it
@@ -93,7 +93,7 @@ class IForArbiter(Interface):
                 if hasattr(dae, daemon_name_attr):
                     satellite_list.append(getattr(dae, daemon_name_attr))
                 else:
-                    #If one daemon has no name... ouch!
+                    # If one daemon has no name... ouch!
                     return None
             return satellite_list
         return None
@@ -232,7 +232,7 @@ class Arbiter(Daemon):
 
 
     def get_daemon_links(self, daemon_type):
-        #the attribute name to get these differs for schedulers and arbiters
+        # the attribute name to get these differs for schedulers and arbiters
         return daemon_type+'s'
 
 
@@ -262,7 +262,7 @@ class Arbiter(Daemon):
 
                 # Set myself as alive ;)
                 self.me.alive = True
-            else: #not me
+            else: # not me
                 arb.need_conf = True
 
         if not self.me:
@@ -393,8 +393,8 @@ class Arbiter(Daemon):
         # Correct conf?
         self.conf.is_correct()
 
-        #If the conf is not correct, we must get out now
-        #if not self.conf.conf_is_correct:
+        # If the conf is not correct, we must get out now
+        # if not self.conf.conf_is_correct:
         #    sys.exit("Configuration is incorrect, sorry, I bail out")
 
         # REF: doc/shinken-conf-dispatching.png (2)

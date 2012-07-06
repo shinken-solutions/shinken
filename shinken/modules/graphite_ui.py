@@ -36,7 +36,7 @@ from string import Template
 from shinken.basemodule import BaseModule
 from datetime import datetime
 
-#print "Loaded AD module"
+# print "Loaded AD module"
 
 properties = {
     'daemons' : ['webui'],
@@ -44,7 +44,7 @@ properties = {
     }
 
 
-#called by the plugin manager
+# called by the plugin manager
 def get_instance(plugin):
     print "Get an GRAPITE UI module for plugin %s" % plugin.get_name()
     

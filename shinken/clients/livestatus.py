@@ -146,7 +146,7 @@ class Query(object):
         self.state = 'PENDING'
         self.result = None
         self.duration = 0
-        #By default, an error :)
+        # By default, an error :)
         self.return_code = '500'
 
 

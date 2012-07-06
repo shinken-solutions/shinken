@@ -24,7 +24,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#File for a Thrift class which can be used by the status-dat-broker
+# File for a Thrift class which can be used by the status-dat-broker
 import re
 import copy
 import os
@@ -56,7 +56,7 @@ def join_with_separators(prop, ref, request, *args):
 
 def worst_host_state(state_1, state_2):
     """Return the worst of two host states."""
-    #lambda x: reduce(lambda g, c: c if g == 0 else (c if c == 1 else g), (y.state_id for y in x), 0),
+    # lambda x: reduce(lambda g, c: c if g == 0 else (c if c == 1 else g), (y.state_id for y in x), 0),
     if state_2 == 0:
         return state_1
     if state_1 == 1:
@@ -66,7 +66,7 @@ def worst_host_state(state_1, state_2):
 
 def worst_service_state(state_1, state_2):
     """Return the worst of two service states."""
-    #reduce(lambda g, c: c if g == 0 else (c if c == 2 else (c if (c == 3 and g != 2) else g)), (z.state_id for y in x for z in y.services if z.state_type_id == 1), 0),
+    # reduce(lambda g, c: c if g == 0 else (c if c == 2 else (c if (c == 3 and g != 2) else g)), (z.state_id for y in x for z in y.services if z.state_type_id == 1), 0),
     if state_2 == 0:
         return state_1
     if state_1 == 2:
@@ -135,7 +135,7 @@ class Thrift_status(object, Hooker):
             self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, 
             self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.return_queue, self.counters)
         request.parse_input(data)
-        #print "REQUEST\n%s\n" % data
+        # print "REQUEST\n%s\n" % data
         to_del = []
         if sorted([q.my_type for q in request.queries]) == ['command', 'query', 'wait']:
             # The Multisite way
@@ -192,7 +192,7 @@ class Thrift_status(object, Hooker):
             print "We currently do not handle this kind of composed request"
             print sorted([q.my_type for q in request.queries])
 
-        #print "RESPONSE\n%s\n" % output
+        # print "RESPONSE\n%s\n" % output
         print "DURATION %.4fs" % (time.time() - request.tic)
         return output, keepalive
 

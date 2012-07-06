@@ -1,22 +1,22 @@
-#!/usr/bin/env python2.6
-#Copyright (C) 2009-2010 :
+#!/usr/bin/env python
+# Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
 #
@@ -40,12 +40,11 @@ modconf.properties = pickle_retention_file_generic.properties.copy()
 
 
 class TestPickleRetentionBroker(ShinkenTest):
-    #setUp is in shinken_test
+    # setUp is inherited from ShinkenTest
 
-    #Change ME :)
     def test_pickle_retention(self):
         print self.conf.modules
-        #get our modules
+        # get our modules
         mod = pickle_retention_file_generic.Pickle_retention_generic(modconf, 'tmp/retention-test.dat')
         try :
             os.unlink(mod.path)
@@ -54,7 +53,7 @@ class TestPickleRetentionBroker(ShinkenTest):
 
         sl = get_instance(mod)
         print "Instance", sl
-        #Hack here :(
+        # Hack here :(
         sl.properties = {}
         sl.properties['to_queue'] = None
         sl.init()
@@ -72,8 +71,8 @@ class TestPickleRetentionBroker(ShinkenTest):
         broker = Broker('', False, False, False, None)
 
         broker.broks = self.sched.broks.values()
-        #updte the hosts and service in the scheduler in the retentino-file
-        sl.hook_save_retention(broker)#, l)
+        sl.hook_save_retention(broker) #, l)
+        # update the hosts and service in the scheduler in the retention-file
 
         # Now we clean the source, like if we restart
         broker.broks = []
@@ -83,7 +82,7 @@ class TestPickleRetentionBroker(ShinkenTest):
         r = sl.hook_load_retention(broker)
         print len(old_broks), len(broker.broks)
 
-        #We check we load them :)
+        # We check we load them :)
         for b in old_broks.values():
             print "Look for good", b
             finded = False
@@ -92,7 +91,7 @@ class TestPickleRetentionBroker(ShinkenTest):
                     finded = True
             self.assert_(finded)
 
-        #Ok, we can delete the retention file
+        # Ok, we can delete the retention file
         os.unlink(mod.path)
 
 

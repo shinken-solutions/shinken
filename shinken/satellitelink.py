@@ -50,7 +50,7 @@ class SatelliteLink(Item):
 
     """
 
-    #id = 0 each Class will have it's own id
+    # id = 0 each Class will have it's own id
 
     properties = Item.properties.copy()
     properties.update({
@@ -163,8 +163,8 @@ class SatelliteLink(Item):
         self.attempt = 0
         self.reachable = True
 
-        #We came from dead to alive
-        #so we must add a brok update
+        # We came from dead to alive
+        # so we must add a brok update
         if not was_alive:
             b = self.get_update_status_brok()
             self.broks.append(b)
@@ -470,8 +470,8 @@ class SatelliteLink(Item):
 class SatelliteLinks(Items):
     """Please Add a Docstring to describe the class here"""
 
-    #name_property = "name"
-    #inner_class = SchedulerLink
+    # name_property = "name"
+    # inner_class = SchedulerLink
 
     # We must have a realm property, so we find our realm
     def linkify(self, realms, modules):

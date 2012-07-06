@@ -28,8 +28,8 @@
 This module job is to get configuration data (mostly hosts) from a mongodb database.
 """
 
-#This module imports hosts and services configuration from a MySQL Database
-#Queries for getting hosts and services are pulled from shinken-specific.cfg configuration file.
+# This module imports hosts and services configuration from a MySQL Database
+# Queries for getting hosts and services are pulled from shinken-specific.cfg configuration file.
 
 from pymongo.connection import Connection
 

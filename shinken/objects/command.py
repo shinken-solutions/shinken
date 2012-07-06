@@ -98,7 +98,7 @@ class Command(Item):
         return str(self.__dict__)
 
 
-    #Get a brok with initial status
+    # Get a brok with initial status
     def get_initial_status_brok(self):
         cls = self.__class__
         my_type = cls.my_type
@@ -111,9 +111,9 @@ class Command(Item):
 
     def fill_data_brok_from(self, data, brok_type):
         cls = self.__class__
-        #Now config properties
+        # Now config properties
         for prop, entry in cls.properties.items():
-            #Is this property intended for brokking?
+            # Is this property intended for brokking?
 #            if 'fill_brok' in entry[prop]:
             if brok_type in entry.fill_brok:
                 if hasattr(self, prop):
@@ -123,8 +123,8 @@ class Command(Item):
 
 
 
-    #Call by picle for dataify the coment
-    #because we DO NOT WANT REF in this pickleisation!
+    # Call by picle for dataify the coment
+    # because we DO NOT WANT REF in this pickleisation!
     def __getstate__(self):
         cls = self.__class__
         # id is not in *_properties

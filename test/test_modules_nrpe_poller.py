@@ -1,22 +1,22 @@
-#!/usr/bin/env python2.6
-#Copyright (C) 2009-2010 :
+#!/usr/bin/env python
+# Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
 #
@@ -41,12 +41,13 @@ modconf.properties = nrpe_poller.properties.copy()
 
 
 class TestNrpePoller(ShinkenTest):
-    #setUp is in shinken_test
-#    def setUp(self):
-#        self.setup_with_file('etc/nagios_module_hack_cmd_poller_tag.cfg')
+
+    # Uncomment this is you want to use a specific configuration
+    # for your test
+    #def setUp(self):
+    #    self.setup_with_file('etc/nagios_module_hack_cmd_poller_tag.cfg')
 
 
-    #Change ME :)
     def test_nrpe_poller(self):
 
         mod = nrpe_poller.Nrpe_poller(modconf)
@@ -61,12 +62,12 @@ class TestNrpePoller(ShinkenTest):
 
         manager = Manager()
         to_queue = manager.Queue()
-        from_queue = manager.Queue()#list()
+        from_queue = manager.Queue() # list()
         control_queue = Queue()
 
         # We prepare a check in the to_queue
         status = 'queue'
-        command = "$USER1$/check_nrpe -H localhost33  -n -u -t 1 -c check_load3 -a 20"# -a arg1 arg2 arg3"
+        command = "$USER1$/check_nrpe -H localhost33  -n -u -t 1 -c check_load3 -a 20" # -a arg1 arg2 arg3"
         ref = None
         t_to_to = time.time()
         c = Check(status, command, ref, t_to_to)
@@ -83,22 +84,22 @@ class TestNrpePoller(ShinkenTest):
         control_queue.put(msg1)
         for _ in xrange(1, 2):
             control_queue.put(msg1)
-        #control_queue.put(msg1)
-        #control_queue.put(msg1)
-        #control_queue.put(msg1)
-        #control_queue.put(msg1)
+        # control_queue.put(msg1)
+        # control_queue.put(msg1)
+        # control_queue.put(msg1)
+        # control_queue.put(msg1)
         control_queue.put(msg2)
         sl.work(to_queue, from_queue, control_queue)
 
-        o = from_queue.get()#pop()
+        o = from_queue.get() # pop()
         print "O", o
         
         print o.__dict__
         self.assert_(o.status == 'done')
         self.assert_(o.exit_status == 2)
 
-        #to_queue.close()
-        #control_queue.close()
+        # to_queue.close()
+        # control_queue.close()
         
 
 

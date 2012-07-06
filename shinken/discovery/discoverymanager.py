@@ -195,7 +195,7 @@ class DiscoveredHost(object):
             # We can choose to keep only the basename
             # of the nameid, so strip the fqdn
             # But not if it's a plain ipv4 addr
-            #TODO : gt this! if self.conf.strip_idname_fqdn:
+            # TODO : gt this! if self.conf.strip_idname_fqdn:
             if not is_ipv4_addr(name):
                 name = name.split('.', 1)[0]
             
@@ -454,7 +454,7 @@ class DiscoveryManager:
             return True
 
         #print self.runners
-        #If we match the name, ok
+        # If we match the name, ok
         for r in self.runners:
             r_name = r.strip()
             #            print "Look", r_name, name
@@ -649,7 +649,7 @@ class DiscoveryManager:
             print "The host '%s' already exists in the database table %s" % (host, table)
             return
 
-        #It can be the same check if db_direct_insert but whatever
+        # It can be the same check if db_direct_insert but whatever
         if self.only_new_hosts:
             for t in [self.db.hosts, self.db.discovered_hosts]:
                 r = table.find({'_id': host})

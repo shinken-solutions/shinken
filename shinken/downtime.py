@@ -44,8 +44,8 @@ from shinken.brok import Brok
 class Downtime:
     id = 1
 
-    #Just to list the properties we will send as pickle
-    #so to others daemons, so all but NOT REF
+    # Just to list the properties we will send as pickle
+    # so to others daemons, so all but NOT REF
     properties = {
         'activate_me':  StringProp (default=[]),
         'entry_time':   IntegerProp(default=0 ,  fill_brok=['full_status']),
@@ -258,10 +258,10 @@ class Downtime:
     # This function is DEPRECATED and will be removed in a future version of
     # Shinken. It should not be useful any more after a first load/save pass.
 
-    #Inversed funtion of getstate
+    # Inversed funtion of getstate
     def __setstate_deprecated__(self, state):
         cls = self.__class__
-        #Check if the len of this state is like the previous,
+        # Check if the len of this state is like the previous,
         # if not, we will do errors!
         # -1 because of the 'id' prop
         if len(cls.properties) != (len(state) - 1):

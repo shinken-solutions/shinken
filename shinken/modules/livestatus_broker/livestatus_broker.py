@@ -49,7 +49,7 @@ from shinken.modulesmanager import ModulesManager
 from shinken.objects.module import Module
 from shinken.daemon import Daemon
 from shinken.misc.datamanager import datamgr
-#Local import
+# Local import
 from livestatus import LiveStatus
 from livestatus_regenerator import LiveStatusRegenerator
 from livestatus_query_cache import LiveStatusQueryCache
@@ -226,7 +226,7 @@ class LiveStatus_broker(BaseModule, Daemon):
         # Maybe we got a debug dump to do
         if self.debug:
             self.set_debug()
-        #I register my exit function
+        # I register my exit function
         self.set_exit_handler()
         print "Go run"
 

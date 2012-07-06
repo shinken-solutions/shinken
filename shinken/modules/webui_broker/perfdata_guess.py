@@ -146,12 +146,10 @@ def manage_check_tcp_command(elt):
     s_color = 'RGB(%d,%d,%d)' % color    
 
     #pct = 100 * (v / m.max)
-    # go to int
+    # Convert to int
     #pct = int(pct)
-    # But at least 1%
-    #pct = max(1, pct)
-    #And max to 100%
-    #pct = min(pct, 100)
+    # Minimum 1%, maximum 100%
+    #pct = min(max(1, pct), 100)
     lnk = '#'
     metrics = [(s_color, pct), ('white', 100-pct)]
     title = '%ss' % v

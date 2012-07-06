@@ -36,7 +36,7 @@ properties = {
 def get_instance(plugin):
     print "Get a WebUI instancefor plugin %s" % plugin.get_name()
 
-    #First try to import
+    # First try to import
     try:
         from webui_broker import Webui_broker
     except ImportError , exp:

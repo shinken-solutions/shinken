@@ -30,12 +30,12 @@ import sys
 
 from thrift_broker import Thrift_broker, properties
 
-#called by the plugin manager to get a broker
+# called by the plugin manager to get a broker
 def get_instance(plugin):
     print "Get a Thrift broker for plugin %s" % plugin.get_name()
 
     print plugin.__dict__
-    #First try to import
+    # First try to import
     try:
         from thrift_broker import Thrift_broker
     except ImportError , exp:

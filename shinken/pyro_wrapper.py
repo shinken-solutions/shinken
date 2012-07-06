@@ -33,7 +33,7 @@ from log import logger
 try:
     import Pyro
     import Pyro.core
-except ImportError: #ok, no Pyro3, maybe 4
+except ImportError: # ok, no Pyro3, maybe 4
     import Pyro4 as Pyro
 
 
@@ -45,10 +45,10 @@ class PortNotFree(Exception): pass
 PYRO_VERSION = 'UNKNOWN'
 
 
-#Try to see if we are Python 3 or 4
+# Try to see if we are Python 3 or 4
 try:
     Pyro.core.ObjBase
-    #Some one already go here, so we are in 4 if None
+    # Some one already go here, so we are in 4 if None
     if Pyro.core.ObjBase is None:
         raise AttributeError
 

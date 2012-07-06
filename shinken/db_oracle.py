@@ -23,7 +23,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-#Failed to import will be catch by __init__.py
+# Failed to import will be catch by __init__.py
 from cx_Oracle import connect as connect_function
 from cx_Oracle import IntegrityError as IntegrityError_exp
 from cx_Oracle import ProgrammingError as ProgrammingError_exp

@@ -63,9 +63,9 @@ class Load:
             self.exp = 1/math.exp(diff/ (self.m*60.0))
             self.val = new_val + self.exp*(self.val - new_val)
             self.last_update = now
-        except OverflowError: #if the time change without notice, we overflow :(
+        except OverflowError: # if the time change without notice, we overflow :(
             pass
-        except ZeroDivisionError: #do not care
+        except ZeroDivisionError: # do not care
             pass
 
 

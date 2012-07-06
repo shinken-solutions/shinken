@@ -36,7 +36,7 @@ _special_properties_time_based = ( 'contacts', 'contact_groups', 'first_notifica
 
 
 class Escalation(Item):
-    id = 1 #0 is always special in database, so we do not take risk here
+    id = 1 # zero is always special in database, so we do not take risk here
     my_type = 'escalation'
 
     properties = Item.properties.copy()
@@ -46,7 +46,7 @@ class Escalation(Item):
         'last_notification':    IntegerProp(),
         'first_notification_time': IntegerProp(),
         'last_notification_time': IntegerProp(),
-        'notification_interval': IntegerProp('30'), #like Nagios value
+        'notification_interval': IntegerProp('30'), # like Nagios value
         'escalation_period':    StringProp(default=''),
         'escalation_options':   ListProp(default='d,u,r,w,c'),
         'contacts':             StringProp(),
@@ -141,14 +141,14 @@ class Escalation(Item):
     # template are always correct
     # contacts OR contactgroups is need
     def is_correct(self):
-        state = True # guilty or not? :)
+        state = True
         cls = self.__class__
 
         # If we got the _time parameters, we are time based. Unless, we are not :)
         if hasattr(self, 'first_notification_time') or hasattr(self, 'last_notification_time'):
             self.time_based = True
             special_properties = _special_properties_time_based
-        else: #classic ones
+        else: # classic ones
             special_properties = _special_properties
             
         for prop, entry in cls.properties.items():
@@ -203,10 +203,10 @@ class Escalations(Items):
         self.items[es.id] = es
 
 
-    #Will register esclations into service.escalations
+    # Will register esclations into service.escalations
     def linkify_es_by_s(self, services):
         for es in self:
-            #If no host, no hope of having a service
+            # If no host, no hope of having a service
             if not (hasattr(es, 'host_name') and hasattr(es, 'service_description')):
                 continue
             es_hname, sdesc = es.host_name, es.service_description
@@ -221,14 +221,14 @@ class Escalations(Items):
                                 #print "Now service", s.get_name(), 'have', s.escalations
 
 
-    #Will rgister escalations into host.escalations
+    # Will rgister escalations into host.escalations
     def linkify_es_by_h(self, hosts):
         for es in self:
-            #If no host, no hope of having a service
+            # If no host, no hope of having a service
             if (not hasattr(es, 'host_name') or es.host_name.strip() == ''
                     or (hasattr(es, 'service_description') and es.service_description.strip() != '')):
                 continue
-            #I must be NOT a escalati on for service
+            # I must be NOT a escalati on for service
             for hname in strip_and_uniq(es.host_name.split(',')):
                 h = hosts.find_by_name(hname)
                 if h is not None:
@@ -237,13 +237,13 @@ class Escalations(Items):
                     #print "Now host", h.get_name(), 'have', h.escalations
 
 
-    #We look for contacts property in contacts and
+    # We look for contacts property in contacts and
     def explode(self, hosts, hostgroups, contactgroups):
 
-        #items::explode_host_groups_into_hosts
-        #take all hosts from our hostgroup_name into our host_name property
+        # items::explode_host_groups_into_hosts
+        # take all hosts from our hostgroup_name into our host_name property
         self.explode_host_groups_into_hosts(hosts, hostgroups)
 
-        #items::explode_contact_groups_into_contacts
-        #take all contacts from our contact_groups into our contact property
+        # items::explode_contact_groups_into_contacts
+        # take all contacts from our contact_groups into our contact property
         self.explode_contact_groups_into_contacts(contactgroups)
