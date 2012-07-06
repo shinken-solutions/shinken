@@ -25,7 +25,7 @@ sudo rm -fr test/tmp/livelogs*
 sudo rm -fr /etc/default/shinken
 sudo rm -fr bin/default/shinken
 
-#Then kill remaining processes
+# Then kill remaining processes
 # first ask a easy kill, to let them close their sockets!
 killall python2.6 2> /dev/null
 killall python 2> /dev/null

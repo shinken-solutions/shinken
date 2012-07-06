@@ -20,7 +20,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-# environnement
+# environement
 export myscripts=$(readlink -f $(dirname $0))
 
 export plugins="nagios-plugins 
