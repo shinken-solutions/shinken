@@ -607,6 +607,9 @@ if __name__ == "__main__":
         install_requires=[
             required_pkgs
         ],
+        extras_require={
+            'setproctitle': ['setproctitle']
+        },
 
         scripts=glob('bin/shinken-[!_]*'),
 

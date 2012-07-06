@@ -213,6 +213,9 @@ class Worker:
         # but on android, we are a thread, so don't do it
         if not is_android:
             signal.signal(signal.SIGTERM, signal.SIG_DFL)
+
+        self.set_proctitle()
+
         timeout = 1.0
         self.checks = []
         self.returns_queue = returns_queue
@@ -261,3 +264,11 @@ class Worker:
             timeout -= time.time() - begin
             if timeout < 0:
                 timeout = 1.0
+
+    def set_proctitle(self):
+        try:
+            from setproctitle import setproctitle
+            setproctitle("shinken-worker")
+        except:
+            pass
+

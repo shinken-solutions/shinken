@@ -125,6 +125,8 @@ class Webui_broker(BaseModule, Daemon):
         return self.rg.want_brok(b)
 
     def main(self):
+        self.set_proctitle(self.name)
+
         self.log = logger
         self.log.load_obj(self)
 
