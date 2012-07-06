@@ -21,7 +21,7 @@
 
 DIR=$(cd $(dirname "$0"); pwd)
 cd $DIR
-echo `pwd`
+echo "$PWD"
 
 # delete the resul of nosetest, for coverage
 rm -f nosetests.xml

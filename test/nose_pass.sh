@@ -21,7 +21,7 @@
 
 DIR=$(cd $(dirname "$0"); pwd)
 cd $DIR
-echo `pwd`
+echo "Working dir is $PWD"
 
 echo "Launching coverage pass"
 

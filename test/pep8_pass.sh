@@ -30,7 +30,7 @@
 
 DIR=$(cd $(dirname "$0"); pwd)
 cd $DIR
-echo `pwd`
+echo "Working dir is $PWD"
 
 echo "Launching pep8 stat pass"
 cd ..
