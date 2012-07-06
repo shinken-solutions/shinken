@@ -973,8 +973,10 @@ class SchedulingItem(Item):
         # update event/problem-counters
         self.update_event_and_problem_id()
 
-        # Now launch trigger if need
-        self.eval_triggers()
+        # Now launch trigger if need. If it's from a trigger raised check,
+        # do not raise a new one
+        if not c.from_trigger:
+            self.eval_triggers()
 
         self.broks.append(self.get_check_result_brok())
         self.get_obsessive_compulsive_processor_command()

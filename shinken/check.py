@@ -61,11 +61,12 @@ class Check(Action):
         'internal':     BoolProp(default=False),
         'module_type':  StringProp(default='fork'),
         'worker':       StringProp(default='none'),
+        'from_trigger': BoolProp(default=False),
     }
 
     def __init__(self, status, command, ref, t_to_go, dep_check=None, id=None,
                  timeout=10, poller_tag='None', reactionner_tag='None',
-                 env={}, module_type='fork'):
+                 env={}, module_type='fork', from_trigger=False):
 
         self.is_a = 'check'
         self.type = ''
@@ -102,6 +103,8 @@ class Check(Action):
             self.internal = True
         else:
             self.internal = False
+        self.from_trigger = from_trigger
+        
 
     def copy_shell(self):
         """return a copy of the check but just what is important for execution
@@ -110,6 +113,7 @@ class Check(Action):
 
         # We create a dummy check with nothing in it, just defaults values
         return self.copy_shell__(Check('', '', '', '', '', id=self.id))
+
 
     def get_return_from(self, c):
         self.exit_status = c.exit_status

@@ -71,6 +71,40 @@ def critical(obj, output):
 
 
 @declared
+def set_value(obj_ref, output=None, perfdata=None, return_code=None):
+    obj = get_object(obj_ref)
+    if not obj:
+        return
+    output = output or obj.output
+    perfdata = perfdata or obj.perfdata
+    return_code = return_code or obj.state_id
+
+    print "Will set", output, perfdata, return_code, "for the object", obj.get_full_name()
+
+    if perfdata:
+        output = output + ' | ' + perfdata
+    
+    now = time.time()
+    cls = obj.__class__
+    i = obj.launch_check(now, force=True)
+    for chk in obj.actions:
+        if chk.id == i:
+            logger.debug("[trigger] I founded the check I want to change")
+            c = chk
+            # Now we 'transform the check into a result'
+            # So exit_status, output and status is eaten by the host
+            c.exit_status = return_code
+            c.get_outputs(output, obj.max_plugins_output_length)
+            c.status = 'waitconsume'
+            c.check_time = now
+            # IMPORTANT : tag this check as from a trigger, so we will not
+            # loop in an infinite way for triggers checks!
+            c.from_trigger = True
+            # Ok now this result will be read by scheduler the next loop
+    
+    
+
+@declared
 def perf(obj_ref, metric_name):
     obj = get_object(obj_ref)
     p = PerfDatas(obj.perf_data)
@@ -82,10 +116,21 @@ def perf(obj_ref, metric_name):
 
 
 @declared
+def perfs(objs_ref, metric_name):
+    objs = get_objects(objs_ref)
+    r = []
+    for o in objs:
+        v = perf(o, metric_name)
+        r.append(v)
+    return r
+
+
+@declared
 def get_object(ref):
     # Maybe it's already a real object, if so, return it :)
     if not isinstance(ref, basestring):
         return ref
+
     # Ok it's a string
     name = ref
     if not '/' in name:
@@ -94,3 +139,61 @@ def get_object(ref):
         elts = name.split('/', 1)
         return objs['services'].find_srv_by_name_and_hostname(elts[0], elts[1])
 
+
+@declared
+def get_objects(ref):
+    # Maybe it's already a real object, if so, return it :)
+    if not isinstance(ref, basestring):
+        return ref
+
+    name = ref
+    # Maybe there is no '*'? if so, it's one element
+    if not '*' in name:
+        return get_object(name)
+
+    # Ok we look for sliting the host or service thing
+    hname = ''
+    sdesc = ''
+    if not '/' in name:
+        hname = name
+    else:
+        elts = name.split('/', 1)
+        hname = elts[0]
+        sdesc = elts[1]
+    print "Look for", hname, sdesc
+    res = []
+    hosts = []
+    services = []
+
+    # Look for host, and if need, look for service
+    if not '*' in hname:
+        h = objs['hosts'].find_by_name(hname)
+        if h:
+            hosts.append(h)
+    else:
+        hname = hname.replace('*', '.*')
+        p = re.compile(hname)
+        for h in objs['hosts']:
+            print "Compare", hname, "with", h.get_name()
+            if p.search(h.get_name()):
+                hosts.append(h)
+    
+    # Maybe the user ask for justs hosts :)
+    if not sdesc:
+        return hosts
+    
+    for h in hosts:
+        if not '*' in sdesc:
+            s = h.find_service_by_name(sdesc)
+            if s:
+                services.append(s)
+        else:
+            sdesc = sdesc.replace('*', '.*')
+            p = re.compile(sdesc)
+            for s in h.services:
+                print "Compare", s.service_description, "with", sdesc
+                if p.search(s.service_description):
+                    services.append(s)
+
+    print "Found services", services
+    return services

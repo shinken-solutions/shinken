@@ -49,6 +49,25 @@ class TestTriggers(ShinkenTest):
         self.assert_(svc.output == "not good!")
         self.assert_(svc.perf_data == "cpu=95%")
 
+
+    # Try to catch the perf_datas of self
+    def test_function_perfs(self):
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "AVG-HTTP")
+
+        srvs = []
+        for i in xrange(1,4):
+            s = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "HTTP-"+str(i))
+            s.output = 'Http ok'
+            s.perf_data = 'time=%dms' % i
+        
+        # Go launch it!
+        svc.eval_triggers()
+        self.scheduler_loop(4, [])
+        print "Output", svc.output
+        print "Perf_Data", svc.perf_data
+        self.assert_(svc.output == "OK all is green")
+        self.assert_(svc.perf_data == "avgtime=2ms")
+
     
 
     # Change ME :)
