@@ -86,6 +86,14 @@ $(function(){
     $(".quickinfo").tooltip({placement: 'bottom'});
 });
 
+/**
+ * Description:
+ * Example: <div class="quickinfo"> Lorem Ipsum </div>
+ */
+
+$(function(){
+    $(".quickinforight").tooltip({placement: 'right'});
+});
 
 /*
  * How to code whithout a good print function?
