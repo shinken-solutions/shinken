@@ -1,24 +1,24 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#Copyright (C) 2009-2010 :
+# Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
 #
@@ -63,13 +63,13 @@ class TestConfig(ShinkenTest):
   
 
     def update_broker(self, dodeepcopy=False):
-        #The brok should be manage in the good order
+        # The brok should be manage in the good order
         ids = self.sched.broks.keys()
         ids.sort()
         for brok_id in ids:
             brok = self.sched.broks[brok_id]
-            #print "Managing a brok type", brok.type, "of id", brok_id
-            #if brok.type == 'update_service_status':
+            # print "Managing a brok type", brok.type, "of id", brok_id
+            # if brok.type == 'update_service_status':
             #    print "Problem?", brok.data['is_problem']
             if dodeepcopy:
                 brok = copy.deepcopy(brok)
@@ -87,15 +87,15 @@ class TestConfig(ShinkenTest):
         text2 = text2.replace("200           1", "200           0")
         text1 = text1.rstrip()
         text2 = text2.rstrip()
-        #print "text1 //%s//" % text1
-        #print "text2 //%s//" % text2
+        # print "text1 //%s//" % text1
+        # print "text2 //%s//" % text2
         sorted1 = "\n".join(sorted(text1.split("\n")))
         sorted2 = "\n".join(sorted(text2.split("\n")))
         len1 = len(text1.split("\n"))
         len2 = len(text2.split("\n"))
-        #print "%s == %s text cmp %s" % (len1, len2, sorted1 == sorted2)
-        #print "text1 //%s//" % sorted(text1.split("\n"))
-        #print "text2 //%s//" % sorted(text2.split("\n"))
+        # print "%s == %s text cmp %s" % (len1, len2, sorted1 == sorted2)
+        # print "text1 //%s//" % sorted(text1.split("\n"))
+        # print "text2 //%s//" % sorted(text2.split("\n"))
         if sorted1 == sorted2 and len1 == len2:
             return True
         else:
@@ -108,8 +108,8 @@ class TestConfig(ShinkenTest):
             [line for line in sorted(text1.split("\n"))]
             data1 = [[sorted(c.split(',')) for c in columns] for columns in [line.split(';') for line in sorted(text1.split("\n")) if line]]
             data2 = [[sorted(c.split(',')) for c in columns] for columns in [line.split(';') for line in sorted(text2.split("\n")) if line]]
-            #print "text1 //%s//" % data1
-            #print "text2 //%s//" % data2
+            # print "text1 //%s//" % data1
+            # print "text2 //%s//" % data2
             # cmp is clever enough to handle nested arrays 
             return cmp(data1, data2) == 0
             
@@ -401,11 +401,11 @@ ColumnHeaders: off
         # not yet...the plugin must run first
         self.assert_(not result)
 
-        #result = query.launch_query()
-        #response = query.response
-        #response.format_live_data(result, query.columns, query.aliases)
-        #output, keepalive = response.respond()
-        #print "output is", output
+        # result = query.launch_query()
+        # response = query.response
+        # response.format_live_data(result, query.columns, query.aliases)
+        # output, keepalive = response.respond()
+        # print "output is", output
 
         time.sleep(1)
         result = wait.condition_fulfilled()
@@ -474,8 +474,8 @@ COMMAND [1303425876] SCHEDULE_FORCED_HOST_CHECK;test_host_0;1303425870
 
 
 if __name__ == '__main__':
-    #import cProfile
+    # import cProfile
     command = """unittest.main()"""
     unittest.main()
-    #cProfile.runctx( command, globals(), locals(), filename="/tmp/livestatus.profile" )
+    # cProfile.runctx( command, globals(), locals(), filename="/tmp/livestatus.profile" )
 

@@ -8,7 +8,7 @@ def set_to_midnight(dt):
 
 class TestConfig(ShinkenTest):
     def update_broker(self, dodeepcopy=False):
-        #The brok should be manage in the good order
+        # The brok should be manage in the good order
         ids = self.sched.broks.keys()
         ids.sort()
         for brok_id in ids:

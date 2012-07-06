@@ -32,7 +32,7 @@ import socket
 
 from shinken.basemodule import BaseModule
 
-#print "Loaded AD module"
+# print "Loaded AD module"
 
 properties = {
     'daemons' : ['webui'],
@@ -40,7 +40,7 @@ properties = {
     }
 
 
-#called by the plugin manager
+# called by the plugin manager
 def get_instance(plugin):
     print "Get an PNP UI module for plugin %s" % plugin.get_name()
     

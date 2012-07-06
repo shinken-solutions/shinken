@@ -43,11 +43,11 @@ from shinken.log import logger
 
 
 class HostExtInfo(Item):
-    #AutoSlots create the __slots__ with properties and
-    #running_properties names
+    # AutoSlots create the __slots__ with properties and
+    # running_properties names
     __metaclass__ = AutoSlots
 
-    id = 1 #0 is reserved for host (primary node for parents)
+    id = 1 # zero is reserved for host (primary node for parents)
     my_type = 'hostextinfo'
 
 
@@ -101,7 +101,7 @@ class HostExtInfo(Item):
     # Check is required prop are set:
     # host_name is needed
     def is_correct(self):
-        state = True #guilty or not? :)
+        state = True
         cls = self.__class__
 
         return state
@@ -131,8 +131,8 @@ class HostExtInfo(Item):
 # Class for the hosts lists. It's mainly for configuration
 # part
 class HostsExtInfo(Items):
-    name_property = "host_name" #use for the search by name
-    inner_class = HostExtInfo #use for know what is in items
+    name_property = "host_name" # use for the search by name
+    inner_class = HostExtInfo # use for know what is in items
 
 
     # Merge extended host information into host

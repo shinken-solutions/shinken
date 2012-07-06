@@ -636,7 +636,7 @@ class Broker(BaseSatellite):
         self.get_objects_from_from_queues()
 
         # Maybe we do not have something to do, so we wait a little
-        #TODO : redone the diff management....
+        # TODO : redone the diff management....
         if len(self.broks) == 0:
             while self.timeout > 0:
                 begin = time.time()

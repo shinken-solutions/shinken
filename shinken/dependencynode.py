@@ -65,10 +65,10 @@ class DependencyNode(object):
                     return 0
                 if self.operand == 'host' and state == 0:
                     return 1
-                #Critical -> OK
+                # Critical -> OK
                 if self.operand == 'service' and state == 2:
                     return 0
-                #OK -> CRITICAL (warning is untouched)
+                # OK -> CRITICAL (warning is untouched)
                 if self.operand == 'service' and state == 0:
                     return 2
             return state
@@ -231,7 +231,7 @@ class DependencyNodeFactory(object):
             if mul_of:
                 node.is_of_mul = True
                 node.of_values = (int(g[0]), int(g[1]), int(g[2]))
-            else: #if not, use A,0,0, we will change 0 after to put MAX
+            else: # if not, use A,0,0, we will change 0 after to put MAX
                 node.of_values = (int(g[0]), 0, 0)
             patern = m.groups()[3]
 

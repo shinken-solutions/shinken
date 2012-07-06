@@ -160,7 +160,7 @@ class Daemon(object):
         now = time.time()
         self.program_start = now
         self.t_each_loop = now # used to track system time change
-        self.sleep_time = 0.0 #used to track the time we wait
+        self.sleep_time = 0.0 # used to track the time we wait
 
         self.pyro_daemon = None
 
@@ -387,7 +387,7 @@ class Daemon(object):
             if fd in skip_close_fds: continue
             try:
                 os.close(fd)
-            except OSError:# ERROR, fd wasn't open to begin with (ignored)
+            except OSError: # ERROR, fd wasn't open to begin with (ignored)
                 pass
 
     # Go in "daemon" mode: close unused fds, redirect stdout/err, 
@@ -557,7 +557,7 @@ class Daemon(object):
         self.modules_manager.try_to_restart_deads()
 
 
-    #Just give the uid of a user by looking at it's name
+    # Just give the uid of a user by looking at it's name
     def find_uid_from_name(self):
         try:
             return getpwnam(self.user)[2]
@@ -566,7 +566,7 @@ class Daemon(object):
             return None
 
 
-    #Just give the gid of a group by looking at its name
+    # Just give the gid of a group by looking at its name
     def find_gid_from_name(self):
         try:
             return getgrnam(self.group)[2]
@@ -654,7 +654,7 @@ class Daemon(object):
         logger.debug("I'm process %d and I received signal %s" % (os.getpid(), str(sig)))
         if sig == 10: # if USR1, ask a memory dump
             self.need_dump_memory = True
-        else: #Ok, really ask us to die :)
+        else: # Ok, really ask us to die :)
             self.interrupted = True
 
 

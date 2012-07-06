@@ -31,19 +31,19 @@ from itemgroup import Itemgroup, Itemgroups
 from shinken.property import BoolProp, IntegerProp, StringProp
 from shinken.log import logger
 
-#It change from hostgroup Class because there is no members
-#propertie, just the realm_members that we rewrite on it.
+# It change from hostgroup Class because there is no members
+# propertie, just the realm_members that we rewrite on it.
 
 
 class Realm(Itemgroup):
-    id = 1 #0 is always a little bit special... like in database
+    id = 1 # zero is always a little bit special... like in database
     my_type = 'realm'
 
     properties = Itemgroup.properties.copy()
     properties.update({
         'id':            IntegerProp(default=0, fill_brok=['full_status']),
         'realm_name':    StringProp (fill_brok=['full_status']),
-        'realm_members': StringProp (default=''),#No status_broker_name because it put hosts, not host_name
+        'realm_members': StringProp (default=''), # No status_broker_name because it put hosts, not host_name
         'higher_realms': StringProp (default=''),
         'default':       BoolProp   (default='0'),
         #'alias': {'required':  True, 'fill_brok' : ['full_status']},
@@ -117,7 +117,7 @@ class Realm(Itemgroup):
             else:
                 return ''
 
-        #Ok, not a loop, we tag it and continue
+        # Ok, not a loop, we tag it and continue
         self.rec_tag = True
 
         p_mbrs = self.get_realm_members()
@@ -235,8 +235,8 @@ class Realm(Itemgroup):
                     self.potential_receivers.append(broker)
 
 
-    #Return the list of satellites of a certain type
-    #like reactionner -> self.reactionners
+    # Return the list of satellites of a certain type
+    # like reactionner -> self.reactionners
     def get_satellties_by_type(self, type):
         if hasattr(self, type+'s'):
             return getattr(self, type+'s')
@@ -245,8 +245,8 @@ class Realm(Itemgroup):
             return []
 
 
-    #Return the list of potentials satellites of a certain type
-    #like reactionner -> self.potential_reactionners
+    # Return the list of potentials satellites of a certain type
+    # like reactionner -> self.potential_reactionners
     def get_potential_satellites_by_type(self, type):
         if hasattr(self, 'potential_'+type+'s'):
             return getattr(self, 'potential_'+type+'s')
@@ -255,8 +255,8 @@ class Realm(Itemgroup):
             return []
 
 
-    #Return the list of potentials satellites of a certain type
-    #like reactionner -> self.nb_reactionners
+    # Return the list of potentials satellites of a certain type
+    # like reactionner -> self.nb_reactionners
     def get_nb_of_must_have_satellites(self, type):
         if hasattr(self, 'nb_'+type+'s'):
             return getattr(self, 'nb_'+type+'s')
@@ -265,7 +265,7 @@ class Realm(Itemgroup):
             return 0
 
 
-    #Fill dict of realms for managing the satellites confs
+    # Fill dict of realms for managing the satellites confs
     def prepare_for_satellites_conf(self):
         self.to_satellites = {}
         self.to_satellites['reactionner'] = {}
@@ -385,22 +385,22 @@ class Realms(Itemgroups):
             p.confs = {}
 
 
-    #We just search for each realm the others realms
-    #and replace the name by the realm
+    # We just search for each realm the others realms
+    # and replace the name by the realm
     def linkify_p_by_p(self):
         for p in self.items.values():
             mbrs = p.get_realm_members()
-            #The new member list, in id
+            # The new member list, in id
             new_mbrs = []
             for mbr in mbrs:
                 new_mbr = self.find_by_name(mbr)
                 if new_mbr is not None:
                     new_mbrs.append(new_mbr)
-            #We find the id, we remplace the names
+            # We find the id, we remplace the names
             p.realm_members = new_mbrs
 
-        #Now put higher realm in sub realms
-        #So after they can
+        # Now put higher realm in sub realms
+        # So after they can
         for p in self.items.values():
             p.higher_realms = []
 
@@ -409,21 +409,21 @@ class Realms(Itemgroups):
                 sub_p.higher_realms.append(p)
 
 
-    #Use to fill members with hostgroup_members
+    # Use to fill members with hostgroup_members
     def explode(self):
-        #We do not want a same hg to be explode again and again
-        #so we tag it
+        # We do not want a same hg to be explode again and again
+        # so we tag it
         for tmp_p in self.items.values():
             tmp_p.already_explode = False
         for p in self:
             if p.has('realm_members') and not p.already_explode:
-                #get_hosts_by_explosion is a recursive
-                #function, so we must tag hg so we do not loop
+                # get_hosts_by_explosion is a recursive
+                # function, so we must tag hg so we do not loop
                 for tmp_p in self:
                     tmp_p.rec_tag = False
                 p.get_realms_by_explosion(self)
 
-        #We clean the tags
+        # We clean the tags
         for tmp_p in self.items.values():
             if hasattr(tmp_p, 'rec_tag'):
                 del tmp_p.rec_tag

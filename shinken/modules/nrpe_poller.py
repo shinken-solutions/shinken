@@ -24,8 +24,8 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This Class is an example of an Scheduler module
-#Here for the configuration phase AND running one
+# This Class is an example of an Scheduler module
+# Here for the configuration phase AND running one
 
 
 import sys
@@ -64,7 +64,7 @@ properties = {
     }
 
 
-#called by the plugin manager to get a broker
+# called by the plugin manager to get a broker
 def get_instance(mod_conf):
     print "Get a nrpe poller module for plugin %s" % mod_conf.get_name()
     instance = Nrpe_poller(mod_conf)
@@ -317,7 +317,7 @@ class NRPEAsyncClient(asyncore.dispatcher):
 
 
 def parse_args(cmd_args):
-    #Default params
+    # Default params
     host = None
     command = None
     port = 5666
@@ -326,7 +326,7 @@ def parse_args(cmd_args):
     use_ssl = True
     add_args = []
 
-    #Manage the options
+    # Manage the options
     try:
         opts, args = getopt.getopt(cmd_args, "H::p::nut::c::a::", [])
     except getopt.GetoptError, err:
@@ -357,7 +357,7 @@ def parse_args(cmd_args):
 
 
 
-#Just print some stuff
+# Just print some stuff
 class Nrpe_poller(BaseModule):
     
     def __init__(self, mod_conf):
@@ -479,11 +479,11 @@ class Nrpe_poller(BaseModule):
             self.checks.remove(chk)
 
 
-    #id = id of the worker
-    #s = Global Queue Master->Slave
-    #m = Queue Slave->Master
-    #return_queue = queue managed by manager
-    #c = Control Queue for the worker
+    # id = id of the worker
+    # s = Global Queue Master->Slave
+    # m = Queue Slave->Master
+    # return_queue = queue managed by manager
+    # c = Control Queue for the worker
     def work(self, s, returns_queue, c):
         print "[Nrpe] Module NRPE started!"
         ## restore default signal handler for the workers:
@@ -518,7 +518,7 @@ class Nrpe_poller(BaseModule):
             except :
                 pass
 
-            #TODO : better time management
+            # TODO : better time management
             time.sleep(.1)
 
             timeout -= time.time() - begin

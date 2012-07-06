@@ -24,7 +24,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This Class is a plugin for the Shinken Arbiter. It read a json file
+# This Class is a plugin for the Shinken Arbiter. It read a json file
 # with all links between objects. Update them (create/delete) at the 
 # launch or at fly
 
@@ -57,7 +57,7 @@ properties = {
     }
 
 
-#called by the plugin manager to get a broker
+# called by the plugin manager to get a broker
 def get_instance(plugin):
     print "Get a Hot dependencies module for arbiter with plugin %s" % plugin.get_name()
     mapping_file = getattr(plugin, 'mapping_file', '')
@@ -88,7 +88,7 @@ class Hot_dependencies_arbiter(BaseModule):
         self.in_debug = in_debug
 
         
-    #Called by Arbiter to say 'let's prepare yourself guy'
+    # Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
         print "I open the HOT dependency module"
         # Remember what we add
@@ -184,7 +184,7 @@ class Hot_dependencies_arbiter(BaseModule):
             # We got one in progress, we should look if it's finished or not
             self._watch_command_finished()
 
-    #Ok, main function that will load dep from a json file
+    # Ok, main function that will load dep from a json file
     def hook_late_configuration(self, arb):
         # We will return external commands to the arbiter, so
         # it can just manage it easily and in a generic way

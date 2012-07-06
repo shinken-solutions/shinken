@@ -121,7 +121,7 @@ def format_t_into_dhms_format(t):
 
 
 ################################# Pythonization ###########################
-#first change to float so manage for example 25.0 to 25
+# first change to float so manage for example 25.0 to 25
 def to_int(val):
     return int(float(val))
 
@@ -146,7 +146,7 @@ def to_best_int_float(val):
         return i
     return f
 
-#bool('0') = true, so...
+# bool('0') = true, so...
 def to_bool(val):
     if val == '1':
         return True
@@ -272,19 +272,19 @@ def scheduler_no_spare_first(x, y):
 
 #-1 is x first, 0 equal, 1 is y first
 def alive_then_spare_then_deads(x, y):
-    #First are alive
+    # First are alive
     if x.alive and not y.alive:
         return -1
     if y.alive and not x.alive:
         return 0
-    #if not alive both, I really don't care...
+    # if not alive both, I really don't care...
     if not x.alive and not y.alive:
         return -1
-    #Ok, both are alive... now spare after no spare
+    # Ok, both are alive... now spare after no spare
     if not x.spare:
         return -1
-    #x is a spare, so y must be before, even if
-    #y is a spare
+    # x is a spare, so y must be before, even if
+    # y is a spare
     if not y.spare:
         return 1
     return 0
@@ -295,7 +295,7 @@ def sort_by_ids(x, y):
         return -1
     if x.id > y.id:
         return 1
-    #So is equal
+    # So is equal
     return 0
 
 
@@ -309,7 +309,7 @@ def nighty_five_percent(t):
 
     l = len(t)
 
-    #If void tab, wtf??
+    # If void tab, wtf??
     if l == 0:
         return (None, None, None)
 
@@ -503,7 +503,7 @@ def get_key_value_sequence(entry, default_value=None):
                         # We must search if we've gotother X-Y, so
                         # we delete this one, and loop
                         key = key.replace('[%d-%d]' % (x, y), 'Z'*10)
-                    else:#no more X-Y in it
+                    else: # no more X-Y in it
                         still_loop = False
 
                 # Now we have our xy_couples, we can manage them
@@ -529,7 +529,7 @@ def get_key_value_sequence(entry, default_value=None):
                 nodes_set = expand_xy_patern(orig_key)
                 new_keys = list(nodes_set)
 
-                #Then we apply them all to get ours final keys
+                # Then we apply them all to get ours final keys
                 for new_key in new_keys:
                 #res = apply_change_recursive_patern_change(orig_key, rule)
                     new_r = {}

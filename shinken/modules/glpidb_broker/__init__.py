@@ -24,7 +24,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This text is print at the import
+# This text is print at the import
 print "I am GlpiDB Broker"
 
 properties = {
@@ -34,11 +34,11 @@ properties = {
     }
 
 
-#called by the plugin manager to get a broker
+# called by the plugin manager to get a broker
 def get_instance(plugin):
     print "Get a Glpi broker for plugin %s" % plugin.get_name()
 
-    #First try to import
+    # First try to import
     try:
         from glpidb_broker import Glpidb_broker
     except ImportError , exp:
@@ -46,7 +46,7 @@ def get_instance(plugin):
         return None
 
 
-    #Now load the goo module for the backend
+    # Now load the goo module for the backend
     try:
         host = plugin.host
         user = plugin.user

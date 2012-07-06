@@ -1,22 +1,22 @@
 #!/bin/bash
-#Copyright (C) 2009-2010 :
-#    Gabes Jean, naparuba@gmail.com
-#    Gerhard Lausser, Gerhard.Lausser@consol.de
+# Copyright (C) 2009-2010:
+#     Gabes Jean, naparuba@gmail.com
+#     Gerhard Lausser, Gerhard.Lausser@consol.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
 #set -x
@@ -33,7 +33,7 @@ NB_CPUS=`cat /proc/cpuinfo  | grep 'processor' | wc -l` || 4
 echo "NB CPUS : " $NB_CPUS
 
 
-#check for a process existance with good number
+# check for a process existance with good number
 function check_process_nb {
     NB=`ps -ef | grep python | grep -v grep | grep "shinken-"$1 | wc -l`
     if [ $NB != "$2" ]
@@ -129,7 +129,7 @@ function globalize_config {
 
 
 
-#Standard launch process packets
+# Standard launch process packets
 NB_SCHEDULERS=2
 # NB Poller is 1 for core + nb cpus
 NB_POLLERS=$((2 + $NB_CPUS))
@@ -207,7 +207,7 @@ then
 fi
 echo "Real install OK"
 
-#Useful to take it from setup_parameter? It's just for coding here
+# Useful to take it from setup_parameter? It's just for coding here
 ETC=/etc/shinken
 is_file_present $ETC/nagios.cfg
 is_file_present $ETC/shinken-specific.cfg
@@ -278,97 +278,97 @@ echo "Now checking for existing apps"
 echo "we can sleep 5sec for conf dispatching and so good number of process"
 sleep 10
 
-#The number of process changed, we mush look for it
+# The number of process changed, we mush look for it
 
 
-#Standard launch process packets
+# Standard launch process packets
 NB_SCHEDULERS=4
-#1+NB_CPUS for stack 1, and 1 for 2 (not active, so no worker)
+# 1+NB_CPUS for stack 1, and 1 for 2 (not active, so no worker)
 NB_POLLERS=$((2 + $NB_CPUS + 2))
-#2 for stack1, 1 for stack2 (no worker from now)
+# 2 for stack1, 1 for stack2 (no worker from now)
 NB_REACTIONNERS=5
-#2 for stack 1, 1 for stack2 (no livesatus.dat nor log worker launch)
+# 2 for stack 1, 1 for stack2 (no livesatus.dat nor log worker launch)
 NB_BROKERS=5
-#Still 1 receiver
+# Still 1 receiver
 NB_RECEIVERS=2
-#still 1
+# still 1
 NB_ARBITERS=3
 
-#Now check if the run looks good with var in the direct directory
+# Now check if the run looks good with var in the direct directory
 check_good_run var var var
 
 echo "All launch of HA daemons is OK"
 
-#Now we kill and see if all is OK :)
-#We clean the log file
-#$VAR/nagios.log
+# Now we kill and see if all is OK :)
+# We clean the log file
+#> $VAR/nagios.log
 
 
-#We kill the most important thing first : the scheduler-Master
+# We kill the most important thing first : the scheduler-Master
 bin/stop_scheduler.sh
 
-#We sleep to be sruethe scheduler see us
+# We sleep to be sruethe scheduler see us
 sleep 15
 NB_SCHEDULERS=2
 print_date
 
 
-#First we look is the arbiter saw the scheduler as dead
+# First we look is the arbiter saw the scheduler as dead
 string_in_file "Warning : Scheduler scheduler-Master had the configuration 0 but is dead, I am not happy." $VAR/nagios.log
-#Then we look if the scheduler-spare got a conf from arbiter (here, view from the arbiter)
+# Then we look if the scheduler-spare got a conf from arbiter (here, view from the arbiter)
 string_in_file "Dispatch OK of conf in scheduler scheduler-Spare" $VAR/nagios.log
 
-#then is the broker know it and try to connect to the new scheduler-spare
+# then is the broker know it and try to connect to the new scheduler-spare
 string_in_file "\[broker-Master\] Connection OK to the scheduler scheduler-Spare" $VAR/nagios.log
 
 
 echo "Now stop the poller-Master"
-#Now we stop the poller. We will see the sapre take the job (we hope in fact :) )
+# Now we stop the poller. We will see the sapre take the job (we hope in fact :) )
 bin/stop_poller.sh
-#check_good_run var
+# check_good_run var
 sleep 10
 print_date
 
-#The master should be look dead
+# The master should be look dead
 string_in_file "Warning : \[All\] The poller poller-Master seems to be down, I must re-dispatch its role to someone else." $VAR/nagios.log
-#The spare should got the conf
+# The spare should got the conf
 string_in_file "\[All\] Dispatch OK of configuration 0 to poller poller-Slave" $VAR/nagios.log
-#And he should got the scheduler link (the sapre one)
+# And he should got the scheduler link (the sapre one)
 string_in_file "\[poller-Slave\] Connection OK with scheduler scheduler-Spare" $VAR/nagios.log
 #string_in_file "\[poller-Slave\] Connection OK with scheduler scheduler-Spare" $VAR/pollerd-2.log
 
 
 echo "Now stop the reactionner"
 bin/stop_reactionner.sh
-#check_good_run var
+# check_good_run var
 sleep 10
 print_date
 
-#The master should be look dead
+# The master should be look dead
 string_in_file "Warning : \[All\] The reactionner reactionner-Master seems to be down, I must re-dispatch its role to someone else." $VAR/nagios.log
-#The spare should got the conf
+# The spare should got the conf
 string_in_file "\[All\] Dispatch OK of configuration 0 to reactionner reactionner-Spare" $VAR/nagios.log
-#And he should got the scheduler link (the sapre one)
+# And he should got the scheduler link (the sapre one)
 string_in_file "\[reactionner-Spare\] Connection OK with scheduler scheduler-Spare" $VAR/nagios.log
-#string_in_file "\[reactionner-Spare\] Connection OK with scheduler scheduler-Spare" $VAR/reactionnerd-2.log
+# string_in_file "\[reactionner-Spare\] Connection OK with scheduler scheduler-Spare" $VAR/reactionnerd-2.log
 
 
 echo "Now we stop... the Broker!"
 bin/stop_broker.sh
-#check_good_run var
+# check_good_run var
 sleep 10
 print_date
 
-#The master should be look dead
+# The master should be look dead
 string_in_file "Warning : \[All\] The broker broker-Master seems to be down, I must re-dispatch its role to someone else." $VAR/nagios.log
-#The spare should got the conf
+# The spare should got the conf
 string_in_file "\[All\] Dispatch OK of configuration 0 to broker broker-Slave" $VAR/nagios.log
-#And he should got the scheduler link (the spare one)
+# And he should got the scheduler link (the spare one)
 string_in_file "\[broker-Slave\] Connection OK to the scheduler scheduler-Spare" $VAR/nagios.log
-#And to other satellites
+# And to other satellites
 string_in_file "\[broker-Slave\] Connection OK to the reactionner reactionner-Spare" $VAR/nagios.log
 string_in_file "\[broker-Slave\] Connection problem to the poller poller-Master" $VAR/nagios.log
-#And should have load the modules
+# And should have load the modules
 string_in_file "\[broker-Slave\] I correctly loaded the modules : \[Simple-log,Livestatus\]" $VAR/nagios.log
 
 
@@ -394,28 +394,28 @@ echo "Now checking for existing apps"
 echo "we can sleep 5sec for conf dispatching and so good number of process"
 sleep 10
 
-#The number of process changed, we mush look for it
+# The number of process changed, we mush look for it
 
-#Standard launch process packets
+# Standard launch process packets
 NB_SCHEDULERS=4
-#1 + nb cpus for stack 1, and same for stack 2
+# 1 + nb cpus for stack 1, and same for stack 2
 NB_POLLERS=$((2 + $NB_CPUS + 2 + $NB_CPUS))
-#2 for stack1, same for stack 2
+# 2 for stack1, same for stack 2
 NB_REACTIONNERS=6
-#2 for stack 1, 1 for stack2 (no livestatus nor log worker launch)
+# 2 for stack 1, 1 for stack2 (no livestatus nor log worker launch)
 NB_BROKERS=5
-#STill one receivers
+# STill one receivers
 NB_RECEIVERS=2
-#still 1
+# still 1
 NB_ARBITERS=3
 
-#Now check if the run looks good with var in the direct directory
+# Now check if the run looks good with var in the direct directory
 check_good_run var var var
 
 echo "All launch of LB daemons is OK"
 
 
-#Now look if it's also good in the log file too
+# Now look if it's also good in the log file too
 string_in_file "Dispatch OK of conf in scheduler scheduler-Master-2" $VAR/nagios.log
 string_in_file "Dispatch OK of conf in scheduler scheduler-Master-1" $VAR/nagios.log
 string_in_file "OK, no more reactionner sent need" $VAR/nagios.log
@@ -457,29 +457,29 @@ echo "Now checking for existing apps"
 echo "we can sleep 5sec for conf dispatching and so good number of process"
 sleep 10
 
-#The number of process changed, we mush look for it
+# The number of process changed, we mush look for it
 
 
-#Standard launch process packets
+# Standard launch process packets
 NB_SCHEDULERS=4
-#5 for stack 1, and 5 for stack 2
+# 5 for stack 1, and 5 for stack 2
 NB_POLLERS=$((2 + $NB_CPUS + 2 + $NB_CPUS))
-#2 for stack1, Only 1 for stack 2 because it is not active
+# 2 for stack1, Only 1 for stack 2 because it is not active
 NB_REACTIONNERS=5
-#2 for stack 1, 1 for stack2 (no livestatus nor log worker launch)
+# 2 for stack 1, 1 for stack2 (no livestatus nor log worker launch)
 NB_BROKERS=5
-#Still oen receiver
+# Still oen receiver
 NB_RECEIVERS=2
-#still 1
+# still 1
 NB_ARBITERS=3
 
-#Now check if the run looks good with var in the direct directory
+# Now check if the run looks good with var in the direct directory
 check_good_run var var var
 
 echo "All launch of LB daemons is OK"
 
 
-#Now look if it's also good in the log file too
+# Now look if it's also good in the log file too
 string_in_file "Dispatch OK of conf in scheduler scheduler-Master-2" $VAR/nagios.log
 string_in_file "Dispatch OK of conf in scheduler scheduler-Master-1" $VAR/nagios.log
 string_in_file "OK, no more reactionner sent need" $VAR/nagios.log
@@ -516,9 +516,9 @@ echo "Now checking for existing apps"
 echo "we can sleep 5sec for conf dispatching and so good number of process"
 sleep 10
 
-#The number of process changed, we mush look for it
+# The number of process changed, we mush look for it
 
-#Standard launch process packets
+# Standard launch process packets
 NB_SCHEDULERS=2
 # NB Poller is 1 for core + nb cpus
 NB_POLLERS=$((2 + $NB_CPUS))
@@ -527,20 +527,20 @@ NB_BROKERS=4
 NB_RECEIVERS=2
 NB_ARBITERS=3  # master itself & namedpipe-autogenerated !
 
-#Now check if the run looks good with var in the direct directory
+# Now check if the run looks good with var in the direct directory
 check_good_run var var var
 
 echo "All launch of LB daemons is OK"
 
 
-#Now look if it's also good in the log file too
+# Now look if it's also good in the log file too
 string_in_file "Dispatch OK of conf in scheduler scheduler-1" $VAR/nagios.log
 string_in_file "OK, no more reactionner sent need" $VAR/nagios.log
 string_in_file "OK, no more poller sent need" $VAR/nagios.log
 string_in_file "OK, no more broker sent need" $VAR/nagios.log
 
 
-#Now we stop the scheduler and restart it
+# Now we stop the scheduler and restart it
 # We clean the log and restart teh scheduler
 bin/stop_scheduler.sh
 > $VAR/nagios.log

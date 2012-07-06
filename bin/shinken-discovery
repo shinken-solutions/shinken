@@ -139,7 +139,7 @@ modules_path = opts.modules_path or ''
 # Get the Manager for all of the discovery thing
 d = DiscoveryManager(cfg_input, macros, overwrite, runners, output_dir=output_dir, dbmod=dbmod, backend=backend, modules_path=modules_path)
 
-# #Ok, let start the plugins that will give us the data
+# Ok, let start the plugins that will give us the data
 d.launch_runners()
 d.wait_for_runners_ends()
 

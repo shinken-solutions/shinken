@@ -31,7 +31,7 @@ from shinken.property import StringProp
 from shinken.log import logger
 
 class Hostgroup(Itemgroup):
-    id = 1 #0 is always a little bit special... like in database
+    id = 1 # zero is always a little bit special... like in database
     my_type = 'hostgroup'
 
     properties = Itemgroup.properties.copy()
@@ -115,12 +115,12 @@ class Hostgroups(Itemgroups):
         self.linkify_hg_by_realms(realms)
 
 
-    #We just search for each hostgroup the id of the hosts
-    #and replace the name by the id
+    # We just search for each hostgroup the id of the hosts
+    # and replace the name by the id
     def linkify_hg_by_hst(self, hosts):
         for hg in self:
             mbrs = hg.get_hosts()
-            #The new member list, in id
+            # The new member list, in id
             new_mbrs = []
 
             for mbr in mbrs:
@@ -147,13 +147,13 @@ class Hostgroups(Itemgroups):
                 h.hostgroups = list(set(h.hostgroups))
 
 
-    #More than an explode function, but we need to already
-    #have members so... Will be really linkify just after
-    #And we explode realm in ours members, but do not overide
-    #a host realm value if it's already set
+    # More than an explode function, but we need to already
+    # have members so... Will be really linkify just after
+    # And we explode realm in ours members, but do not overide
+    # a host realm value if it's already set
     def linkify_hg_by_realms(self, realms):
-        #Now we explode the realm value if we've got one
-        #The group realm must not overide a host one (warning?)
+        # Now we explode the realm value if we've got one
+        # The group realm must not overide a host one (warning?)
         for hg in self:
             if not hasattr(hg, 'realm'): continue
 
@@ -169,7 +169,7 @@ class Hostgroups(Itemgroups):
             
             for h in hg:
                 if h is None: continue
-                if h.realm is None or h.got_default_realm: #default value not hasattr(h, 'realm'):
+                if h.realm is None or h.got_default_realm: # default value not hasattr(h, 'realm'):
                     logger.debug("[hostgroups] apply a realm %s to host %s from a hostgroup rule (%s)" % \
                         (hg.realm.get_name(), h.get_name(), hg.get_name()))
                     h.realm = hg.realm
@@ -183,7 +183,7 @@ class Hostgroups(Itemgroups):
     # if the host group do not exist, create it
     def add_member(self, hname, hgname):
         hg = self.find_by_name(hgname)
-        #if the id do not exist, create the hg
+        # if the id do not exist, create the hg
         if hg is None:
             hg = Hostgroup({'hostgroup_name' : hgname, 'alias' : hgname, 'members' :  hname})
             self.add(hg)
@@ -191,21 +191,21 @@ class Hostgroups(Itemgroups):
             hg.add_string_member(hname)
 
 
-    #Use to fill members with hostgroup_members
+    # Use to fill members with hostgroup_members
     def explode(self):
-        #We do not want a same hg to be explode again and again
-        #so we tag it
+        # We do not want a same hg to be explode again and again
+        # so we tag it
         for tmp_hg in self.items.values():
             tmp_hg.already_explode = False
         for hg in self.items.values():
             if hg.has('hostgroup_members') and not hg.already_explode:
-                #get_hosts_by_explosion is a recursive
-                #function, so we must tag hg so we do not loop
+                # get_hosts_by_explosion is a recursive
+                # function, so we must tag hg so we do not loop
                 for tmp_hg in self.items.values():
                     tmp_hg.rec_tag = False
                 hg.get_hosts_by_explosion(self)
 
-        #We clean the tags
+        # We clean the tags
         for tmp_hg in self.items.values():
             if hasattr(tmp_hg, 'rec_tag'):
                 del tmp_hg.rec_tag

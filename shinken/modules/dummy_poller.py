@@ -23,8 +23,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-#This Class is an example of an Scheduler module
-#Here for the configuration phase AND running one
+# This Class is an example of an Scheduler module
+# Here for the configuration phase AND running one
 
 import sys
 import signal
@@ -44,7 +44,7 @@ properties = {
 }
 
 
-#called by the plugin manager to get a broker
+# called by the plugin manager to get a broker
 def get_instance(mod_conf):
     print "Get a Dummy poller module for plugin %s" % mod_conf.get_name()
     instance = Dummy_poller(mod_conf)
@@ -52,7 +52,7 @@ def get_instance(mod_conf):
 
 
 
-#Just print some stuff
+# Just print some stuff
 class Dummy_poller(BaseModule):
     
     def __init__(self, mod_conf):
@@ -86,7 +86,7 @@ class Dummy_poller(BaseModule):
     # Launch checks that are in status
     # REF: doc/shinken-action-queues.png (4)
     def launch_new_checks(self):
-        #queue
+        # queue
         for chk in self.checks:
             if chk.status == 'queue':
                 print "Dummy (bad) check for", chk.command
@@ -113,11 +113,11 @@ class Dummy_poller(BaseModule):
             self.checks.remove(chk)
 
 
-    #id = id of the worker
-    #s = Global Queue Master->Slave
-    #m = Queue Slave->Master
-    #return_queue = queue managed by manager
-    #c = Control Queue for the worker
+    # id = id of the worker
+    # s = Global Queue Master->Slave
+    # m = Queue Slave->Master
+    # return_queue = queue managed by manager
+    # c = Control Queue for the worker
     def work(self, s, returns_queue, c):
         print "Module Dummy started!"
         ## restore default signal handler for the workers:

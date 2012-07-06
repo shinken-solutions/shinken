@@ -106,7 +106,7 @@ class DataManagerHostd(DataManagerSKonf):
         sons = tree[1]
         packs = tree[2]
 
-        #Sort our sons by they names
+        # Sort our sons by they names
         def _sort(e1, e2):
             if e1[0] < e2[0]:
                 return -1

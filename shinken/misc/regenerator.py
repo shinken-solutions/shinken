@@ -522,7 +522,7 @@ class Regenerator(object):
         # And we save it
         self.configs[c_id] = c
 
-        ##Clean the old "hard" objects
+        ## Clean the old "hard" objects
 
         # We should clean all previously added hosts and services
         safe_print("Clean hosts/service of", c_id)
@@ -564,7 +564,7 @@ class Regenerator(object):
         # Try to get the inp progress Hosts
         try:
             inp_hosts = self.inp_hosts[inst_id]
-        except Exception, exp: #not good. we will cry in theprogram update
+        except Exception, exp: # not good. we will cry in theprogram update
             print "Not good!", exp
             return
 
@@ -594,7 +594,7 @@ class Regenerator(object):
         # Try to get the inp progress Hostgroups
         try:
             inp_hostgroups = self.inp_hostgroups[inst_id]
-        except Exception, exp: #not good. we will cry in theprogram update
+        except Exception, exp: # not good. we will cry in theprogram update
             print "Not good!", exp
             return
 
@@ -620,7 +620,7 @@ class Regenerator(object):
         # Try to get the inp progress Hosts
         try:
             inp_services = self.inp_services[inst_id]
-        except Exception, exp: #not good. we will cry in theprogram update
+        except Exception, exp: # not good. we will cry in theprogram update
             print "Not good!", exp
             return
 
@@ -650,7 +650,7 @@ class Regenerator(object):
         # Try to get the inp progress Hostgroups
         try:
             inp_servicegroups = self.inp_servicegroups[inst_id]
-        except Exception, exp: #not good. we will cry in theprogram update
+        except Exception, exp: # not good. we will cry in theprogram update
             print "Not good!", exp
             return
 
@@ -737,7 +737,7 @@ class Regenerator(object):
         # Try to get the inp progress Contactgroups
         try:
             inp_contactgroups = self.inp_contactgroups[inst_id]
-        except Exception, exp: #not good. we will cry in theprogram update
+        except Exception, exp: # not good. we will cry in theprogram update
             print "Not good!", exp
             return
 
@@ -958,7 +958,7 @@ class Regenerator(object):
 
 
 
-    #In fact, an update of a service is like a check return
+    # In fact, an update of a service is like a check return
     def manage_update_service_status_brok(self, b):
         # There are some properties that should not change and are already linked
         # so just remove them
@@ -1068,7 +1068,7 @@ class Regenerator(object):
         self.manage_host_check_result_brok(b)
 
 
-    #A service check have just arrived, we UPDATE data info with this
+    # A service check have just arrived, we UPDATE data info with this
     def manage_service_check_result_brok(self, b):
         data = b.data
         hname = data['host_name']
@@ -1079,7 +1079,7 @@ class Regenerator(object):
             self.update_element(s, data)
 
 
-    #A service check update have just arrived, we UPDATE data info with this
+    # A service check update have just arrived, we UPDATE data info with this
     def manage_service_next_schedule_brok(self, b):
         self.manage_service_check_result_brok(b)
 

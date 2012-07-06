@@ -23,8 +23,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-#This Class is an example of an Scheduler module
-#Here for the configuration phase AND running one
+# This Class is an example of an Scheduler module
+# Here for the configuration phase AND running one
 
 
 import cPickle
@@ -49,7 +49,7 @@ properties = {
     }
 
 
-#called by the plugin manager to get a broker
+# called by the plugin manager to get a broker
 def get_instance(plugin):
     print "Get a pickle retention scheduler module for plugin %s" % plugin.get_name()
     path = plugin.path
@@ -71,14 +71,14 @@ class Pickle_retention_scheduler(BaseModule):
     # The real function, this wall module will be soonly removed
     def update_retention_objects(self, sched, log_mgr):
         print "[PickleRetention] asking me to update the retention objects"
-        #Now the flat file method
+        # Now the flat file method
         try:
             # Open a file near the path, with .tmp extension
             # so in cae or problem, we do not lost the old one
             f = open(self.path+'.tmp', 'wb')
-            #Just put hosts/services becauses checks and notifications
-            #are already link into
-            #all_data = {'hosts' : sched.hosts, 'services' : sched.services}
+            # Just put hosts/services becauses checks and notifications
+            # are already link into
+            # all_data = {'hosts' : sched.hosts, 'services' : sched.services}
             
             # We create a all_data dict with lsit of dict of retention useful
             # data of our hosts and services
@@ -101,11 +101,11 @@ class Pickle_retention_scheduler(BaseModule):
     def hook_load_retention(self, daemon):
         return self.load_retention_objects(daemon, logger)
 
-    #Should return if it succeed in the retention load or not
+    # Should return if it succeed in the retention load or not
     def load_retention_objects(self, sched, log_mgr):
         print "[PickleRetention] asking me to load the retention objects"
 
-        #Now the old flat file way :(
+        # Now the old flat file way :(
         log_mgr.log("[PickleRetention]Reading from retention_file %s" % self.path)
         try:
             f = open(self.path, 'rb')

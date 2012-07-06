@@ -236,7 +236,7 @@ class build_config(Command):
         for dirname in [self.var_path, self.run_path, self.log_path, discovery_dir]:
             if self.build_base:
                 if not is_install:
-                    dirname = os.path.join(self.build_base, os.path.relpath(dirname,'/'))#dirname)
+                    dirname = os.path.join(self.build_base, os.path.relpath(dirname,'/')) #dirname)
                 else:
                     dirname = os.path.join(self.build_base, dirname)
             if not os.path.exists(dirname):

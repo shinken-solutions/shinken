@@ -37,7 +37,7 @@ properties = {
     'external' : True,
     }
 
-#called by the plugin manager to get a broker
+# called by the plugin manager to get a broker
 def get_instance(plugin):
     instance = Collectd_arbiter(plugin)
     return instance

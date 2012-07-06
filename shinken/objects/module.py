@@ -31,7 +31,7 @@ from shinken.util import strip_and_uniq
 from shinken.log import logger
 
 class Module(Item):
-    id = 1#0 is always special in database, so we do not take risk here
+    id = 1 # zero is always special in database, so we do not take risk here
     my_type = 'module'
 
     properties = Item.properties.copy()
@@ -44,7 +44,7 @@ class Module(Item):
     macros = {}
 
 
-    #For debugging purpose only (nice name)
+    # For debugging purpose only (nice name)
     def get_name(self):
         return self.module_name
 
@@ -80,6 +80,6 @@ class Modules(Items):
             s.modules = new_modules
 
 
-    #We look for contacts property in contacts and
+    # We look for contacts property in contacts and
     def explode(self):
         pass

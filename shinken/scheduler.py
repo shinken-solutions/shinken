@@ -760,7 +760,7 @@ class Scheduler:
                     logger.warning("The %s '%s' got CommunicationError : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
-                #we come back to normal timeout
+                # we come back to normal timeout
                 pyro.set_timeout(con, 5)
             else: # no connection? try to reconnect
                 self.pynag_con_init(p['instance_id'], type='poller')
@@ -797,7 +797,7 @@ class Scheduler:
                     logger.warning("The %s '%s' got CommunicationError : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
-                #we come back to normal timeout
+                # we come back to normal timeout
                 pyro.set_timeout(con, 5)
             else: # no connection? try to reconnect
                 self.pynag_con_init(p['instance_id'], type='reactionner')
@@ -839,7 +839,7 @@ class Scheduler:
                     logger.warning("The %s '%s' got CommunicationError : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
-                #we come back to normal timeout
+                # we come back to normal timeout
                 pyro.set_timeout(con, 5)
             else: # no connection, try reinit
                 self.pynag_con_init(p['instance_id'], type='poller')
@@ -877,7 +877,7 @@ class Scheduler:
                     logger.warning("The %s '%s' got CommunicationError : %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
-                #we come back to normal timeout
+                # we come back to normal timeout
                 pyro.set_timeout(con, 5)
             else: # no connection, try reinit
                 self.pynag_con_init(p['instance_id'], type='reactionner')
@@ -1523,7 +1523,7 @@ class Scheduler:
                         # print "I run function :", name
                         f()
 
-            #DBG : push actions to passives?
+            # DBG : push actions to passives?
             self.push_actions_to_passives_satellites()
             self.get_actions_from_passives_satellites()
 

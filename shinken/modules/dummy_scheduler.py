@@ -23,8 +23,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-#This Class is an example of an Scheduler module
-#Here for the configuration phase AND running one
+# This Class is an example of an Scheduler module
+# Here for the configuration phase AND running one
 
 
 
@@ -39,7 +39,7 @@ properties = {
     }
 
 
-#called by the plugin manager to get a broker
+# called by the plugin manager to get a broker
 def get_instance(mod_conf):
     print "Get a Dummy scheduler module for plugin %s" % mod_conf.get_name()
     instance = Dummy_scheduler(mod_conf, foo="bar")
@@ -47,30 +47,30 @@ def get_instance(mod_conf):
 
 
 
-#Just print some stuff
+# Just print some stuff
 class Dummy_scheduler(BaseModule):
     
     def __init__(self, mod_conf, foo):
         BaseModule.__init__(self, mod_conf)
         self.myfoo = foo
 
-    #Called by Scheduler to say 'let's prepare yourself guy'
+    # Called by Scheduler to say 'let's prepare yourself guy'
     def init(self):
         print "Initilisation of the dummy scheduler module"
-        #self.return_queue = self.properties['from_queue']
+        # self.return_queue = self.properties['from_queue']
 
 
-    #Ok, main function that is called in the retention creation pass
+    # Ok, main function that is called in the retention creation pass
     def update_retention_objects(self, sched, log_mgr):
         print "[Dummy] asking me to update the retention objects"
 
 
-    #Should return if it succeed in the retention load or not
+    # Should return if it succeed in the retention load or not
     def load_retention_objects(self, sched, log_mrg):
         print "[Dummy] asking me to load the retention objects"
         return False
 
-#From now external is not used in the scheduler job
+# From now external is not used in the scheduler job
 #    #When you are in "external" mode, that is the main loop of your process
 #    def main(self):
 #        while True:

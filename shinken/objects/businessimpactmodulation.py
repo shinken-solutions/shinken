@@ -24,8 +24,8 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#The resultmodulation class is used for in scheduler modulation of resulsts
-#like the return code or the output.
+# The resultmodulation class is used for in scheduler modulation of resulsts
+# like the return code or the output.
 
 import time
 
@@ -34,7 +34,7 @@ from item import Item, Items
 from shinken.property import StringProp, IntegerProp
 
 class Businessimpactmodulation(Item):
-    id = 1#0 is always special in database, so we do not take risk here
+    id = 1 # zero is always special in database, so we do not take risk here
     my_type = 'businessimpactmodulation'
 
     properties = Item.properties.copy()

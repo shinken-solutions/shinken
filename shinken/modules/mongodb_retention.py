@@ -81,7 +81,7 @@ class Mongodb_retention_scheduler(BaseModule):
         hosts = all_data['hosts']
         services = all_data['services']
         
-        #Now the flat file method
+        # Now the flat file method
         for h_name in hosts:
             h = hosts[h_name]
             key = "HOST-%s" % h_name
@@ -117,7 +117,7 @@ class Mongodb_retention_scheduler(BaseModule):
         # Now the new redis way :)
         log_mgr.log("MongodbRetention] asking me to load the retention objects")
 
-        #We got list of loaded data from retention uri
+        # We got list of loaded data from retention uri
         ret_hosts = {}
         ret_services = {}
 
@@ -137,7 +137,7 @@ class Mongodb_retention_scheduler(BaseModule):
 
         for s in daemon.services:
             key = "SERVICE-%s,%s" % (s.host.host_name, s.service_description)
-            #space are not allowed in memcache key.. so change it by SPACE token
+            # space are not allowed in memcache key.. so change it by SPACE token
             key = key.replace(' ', 'SPACE')
             try:
                 fd = self.services_fs.get_last_version(key)

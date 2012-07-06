@@ -23,8 +23,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-#This Class is an example of an Scheduler module
-#Here for the configuration phase AND running one
+# This Class is an example of an Scheduler module
+# Here for the configuration phase AND running one
 
 
 import redis
@@ -40,7 +40,7 @@ properties = {
     }
 
 
-#called by the plugin manager to get a broker
+# called by the plugin manager to get a broker
 def get_instance(plugin):
     print "Get a redis retention scheduler module for plugin %s" % plugin.get_name()
     server = plugin.server
@@ -49,20 +49,20 @@ def get_instance(plugin):
 
 
 
-#Just print some stuff
+# Just print some stuff
 class Redis_retention_scheduler(BaseModule):
     def __init__(self, modconf, server):
         BaseModule.__init__(self, modconf)
         self.server = server
 
-    #Called by Scheduler to say 'let's prepare yourself guy'
+    # Called by Scheduler to say 'let's prepare yourself guy'
     def init(self):
         print "Initilisation of the redis module"
         #self.return_queue = self.properties['from_queue']
         self.mc = redis.Redis(self.server)
 
 
-    #Ok, main function that is called in the retention creation pass
+    # Ok, main function that is called in the retention creation pass
     def hook_save_retention(self, daemon):
         log_mgr = logger
         print "[RedisRetention] asking me to update the retention objects"
@@ -72,7 +72,7 @@ class Redis_retention_scheduler(BaseModule):
         hosts = all_data['hosts']
         services = all_data['services']
         
-        #Now the flat file method
+        # Now the flat file method
         for h_name in hosts:
             h = hosts[h_name]
             key = "HOST-%s" % h_name
@@ -82,7 +82,7 @@ class Redis_retention_scheduler(BaseModule):
         for (h_name, s_desc) in services:
             s = services[(h_name, s_desc)]
             key = "SERVICE-%s,%s" % (h_name, s_desc)
-            #space are not allowed in memcache key.. so change it by SPACE token
+            # space are not allowed in memcache key.. so change it by SPACE token
             key = key.replace(' ', 'SPACE')
             #print "Using key", key
             val = cPickle.dumps(s)
@@ -91,14 +91,14 @@ class Redis_retention_scheduler(BaseModule):
 
 
 
-    #Should return if it succeed in the retention load or not
+    # Should return if it succeed in the retention load or not
     def hook_load_retention(self, daemon):
         log_mgr = logger
 
         # Now the new redis way :)
         log_mgr.log("[RedisRetention] asking me to load the retention objects")
 
-        #We got list of loaded data from retention server
+        # We got list of loaded data from retention server
         ret_hosts = {}
         ret_services = {}
 
@@ -114,7 +114,7 @@ class Redis_retention_scheduler(BaseModule):
 
         for s in daemon.services:
             key = "SERVICE-%s,%s" % (s.host.host_name, s.service_description)
-            #space are not allowed in memcache key.. so change it by SPACE token
+            # space are not allowed in memcache key.. so change it by SPACE token
             key = key.replace(' ', 'SPACE')
             #print "Using key", key
             val = self.mc.get(key)
