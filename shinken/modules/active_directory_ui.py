@@ -36,8 +36,8 @@ from shinken.basemodule import BaseModule
 print "Loaded AD module"
 
 properties = {
-    'daemons' : ['webui', 'skonf'],
-    'type' : 'ad_webui'
+    'daemons': ['webui', 'skonf'],
+    'type': 'ad_webui'
     }
 
 
@@ -123,7 +123,7 @@ class AD_Webui(BaseModule):
 
                 if result_type == ldap.RES_SEARCH_ENTRY:
                     (_, elts) = result_data[0]
-                    try :
+                    try:
                         account_name = elts['userPrincipalName'][0]
                     except Exception:
                         account_name = str(result_data[0])
@@ -193,7 +193,7 @@ class AD_Webui(BaseModule):
         # with j.gabes@google.com for example
         elts = self.find_contact_entry(c)
 
-        try :
+        try:
             account_name = elts['userPrincipalName'][0]
         except KeyError:
             print "Cannot find the userPrincipalName entry, so use the user entry"

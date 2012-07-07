@@ -584,7 +584,7 @@ class DiscoveryManager:
         #print "Generate services for", host
         #print srv_rules
         for (desc, rules) in srv_rules.items():
-            d = {'service_description' : desc, 'host_name' : host}
+            d = {'service_description': desc, 'host_name': host}
             for r in rules:
                 d.update(r.writing_properties)
             print "Generating", desc, d

@@ -48,9 +48,9 @@ class TestModSRVPErfdata(ShinkenTest):
         # Warning, the r (raw) is important here
         self.assert_(mod.template == r'$LASTSERVICECHECK$\t$HOSTNAME$\t$SERVICEDESC$\t$SERVICEOUTPUT$\t$SERVICESTATE$\t$SERVICEPERFDATA$\n')
 
-        try :
+        try:
             os.unlink(mod.path)
-        except :
+        except:
             pass
 
         sl = get_instance(mod)

@@ -58,8 +58,8 @@ def show_3dimpacts():
     all_imp_impacts.sort(hst_srv_sort)
 
 
-    return {'app' : app, 'impacts' : all_imp_impacts, 'valid_user' : True}
+    return {'app': app, 'impacts': all_imp_impacts, 'valid_user': True}
 
 
 
-pages = {show_3dimpacts : { 'routes' : ['/3dimpacts'], 'view' : 'threedimpacts', 'static' : True}}
+pages = {show_3dimpacts: { 'routes': ['/3dimpacts'], 'view': 'threedimpacts', 'static': True}}

@@ -44,9 +44,9 @@ from shinken.webui.bottle import Bottle, run, static_file, view, route, request,
 
 
 properties = {
-    'daemons' : ['arbiter', 'receiver'],
-    'type' : 'ws_arbiter',
-    'external' : True,
+    'daemons': ['arbiter', 'receiver'],
+    'type': 'ws_arbiter',
+    'external': True,
     }
 
 # called by the plugin manager to get a broker

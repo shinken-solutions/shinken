@@ -39,10 +39,10 @@ from shinken.basemodule import BaseModule
 from shinken.message import Message
 
 properties = {
-    'daemons' : ['broker'],
-    'type' : 'npcdmod',
-    'external' : True,
-    'phases' : ['running'],
+    'daemons': ['broker'],
+    'type': 'npcdmod',
+    'external': True,
+    'phases': ['running'],
     }
 
 
@@ -96,7 +96,7 @@ class Npcd_broker(BaseModule):
         # one a minute
         if time.time() - self.last_need_data_send > 60:
             print "I ask the broker for instance id data :", c_id
-            msg = Message(id=0, type='NeedData', data={'full_instance_id' : c_id}, source=self.get_name())
+            msg = Message(id=0, type='NeedData', data={'full_instance_id': c_id}, source=self.get_name())
             self.from_q.put(msg)
             self.last_need_data_send = time.time()
         return

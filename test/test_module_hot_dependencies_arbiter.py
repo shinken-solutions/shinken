@@ -84,9 +84,9 @@ class TestModuleHotDep(ShinkenTest):
         # get our modules
         mod = sl = Hot_dependencies_arbiter(modconf, 'tmp/vmware_mapping_file.json', "", 30, 300)
 
-        try :
+        try:
             os.unlink(mod.mapping_file)
-        except :
+        except:
             pass
 
         print "Instance", sl
@@ -163,12 +163,12 @@ class TestModuleHotDep(ShinkenTest):
 
         # get our modules
         mod = None
-        mod = Module({'type' : 'hot_dependencies', 'module_name' : 'VMWare_auto_linking', 'mapping_file' : 'tmp/vmware_mapping_file.json',
-                      'mapping_command' : "libexec/hot_dep_export.py case1 tmp/vmware_mapping_file.json", 'mapping_command_interval' : '30'})
+        mod = Module({'type': 'hot_dependencies', 'module_name': 'VMWare_auto_linking', 'mapping_file': 'tmp/vmware_mapping_file.json',
+                      'mapping_command': "libexec/hot_dep_export.py case1 tmp/vmware_mapping_file.json", 'mapping_command_interval': '30'})
 
-        try :
+        try:
             os.unlink(mod.mapping_file)
-        except :
+        except:
             pass
 
         sl = get_instance(mod)

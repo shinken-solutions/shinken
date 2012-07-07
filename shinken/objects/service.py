@@ -131,8 +131,8 @@ class Service(SchedulingItem):
         'business_impact':         IntegerProp(default='2', fill_brok=['full_status']),
 
         # Load some triggers
-        'trigger'        :         StringProp(default=''),
-        'trigger_name'   :         ListProp   (default=''),
+        'trigger':         StringProp(default=''),
+        'trigger_name':         ListProp   (default=''),
     })
 
     # properties used in the running state
@@ -256,10 +256,10 @@ class Service(SchedulingItem):
         'state_before_hard_unknown_reach_phase': StringProp(default='OK', retention=True),
 
         # Set if the element just change its father/son topology
-        'topology_change' : BoolProp(default=False, fill_brok=['full_status']),
+        'topology_change': BoolProp(default=False, fill_brok=['full_status']),
 
         # Trigger list
-        'triggers'        :  StringProp(default=[])
+        'triggers':  StringProp(default=[])
 
     })
 
@@ -312,10 +312,10 @@ class Service(SchedulingItem):
     # Or Shinken deprecated names like criticity
     old_properties = {
         'normal_check_interval':    'check_interval',
-        'retry_check_interval' :    'retry_interval',
-        'criticity'            :    'business_impact',
-        'hostgroup'            :    'hostgroup_name',
-        'hostgroups'            :    'hostgroup_name',
+        'retry_check_interval':    'retry_interval',
+        'criticity':    'business_impact',
+        'hostgroup':    'hostgroup_name',
+        'hostgroups':    'hostgroup_name',
 #        'criticitymodulations' :    'business_impact_modulations',
     }
 

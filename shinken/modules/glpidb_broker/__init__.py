@@ -28,9 +28,9 @@
 print "I am GlpiDB Broker"
 
 properties = {
-    'daemons' : ['broker'],
-    'type' : 'glpidb',
-    'phases' : ['running'],
+    'daemons': ['broker'],
+    'type': 'glpidb',
+    'phases': ['running'],
     }
 
 

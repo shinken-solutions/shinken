@@ -230,7 +230,7 @@ class Downtime:
     def __getstate__(self):
         cls = self.__class__
         # id is not in *_properties
-        res = { 'id' : self.id }
+        res = { 'id': self.id }
         for prop in cls.properties:
             if hasattr(self, prop):
                 res[prop] = getattr(self, prop)

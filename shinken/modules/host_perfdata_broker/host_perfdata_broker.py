@@ -64,7 +64,7 @@ class Host_perfdata_broker(BaseModule):
     # We've got a 0, 1, 2 or 3 (or something else? ->3
     # And want a real OK, WARNING, CRITICAL, etc...
     def resolve_host_state(self, state):
-        states = {0 : 'UP', 1 : 'DOWN', 2 : 'DOWN', 3 : 'UNKNOWN'}
+        states = {0: 'UP', 1: 'DOWN', 2: 'DOWN', 3: 'UNKNOWN'}
         if state in states:
             return states[state]
         else:
@@ -78,12 +78,12 @@ class Host_perfdata_broker(BaseModule):
         # "$TIMET\t$HOSTNAME\t$OUTPUT\t$SERVICESTATE\t$PERFDATA\n"
         current_state = self.resolve_host_state(data['state_id'])
         macros = {
-            '$LASTHOSTCHECK$' : int(data['last_chk']),
-            '$HOSTNAME$' : data['host_name'],
-            '$HOSTOUTPUT$' : data['output'],
-            '$HOSTSTATE$' : current_state,
-            '$HOSTPERFDATA$' : data['perf_data'],
-            '$LASTHOSTSTATE$' : data['last_state'],
+            '$LASTHOSTCHECK$': int(data['last_chk']),
+            '$HOSTNAME$': data['host_name'],
+            '$HOSTOUTPUT$': data['output'],
+            '$HOSTSTATE$': current_state,
+            '$HOSTPERFDATA$': data['perf_data'],
+            '$LASTHOSTSTATE$': data['last_state'],
             }
         s = self.template
         for m in macros:

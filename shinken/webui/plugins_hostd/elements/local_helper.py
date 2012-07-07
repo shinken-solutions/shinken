@@ -334,12 +334,12 @@ class Helper(object):
                     for (k,v) in tpl.customs.iteritems():
                         print 'My template customs', k, v
                         if k not in customs:
-                           customs[k] = {'from' : tname, 'value' : '', 'placeholder' : v}
+                           customs[k] = {'from': tname, 'value': '', 'placeholder': v}
 
         # Now the item one, will overwrite any entry
         for (k,v) in elt.iteritems():
             if k.startswith('_') and k != '_id':
-                customs[k] = {'from' : '__ITEM__', 'value' : v, 'placeholder' : ''}
+                customs[k] = {'from': '__ITEM__', 'value': v, 'placeholder': ''}
 
         # Get a sorted macro names
         sorted_names = [k for k in customs]

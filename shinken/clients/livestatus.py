@@ -338,7 +338,7 @@ class LSAsynConnection(asyncore.dispatcher):
             return
 
         #print "handle write"
-        try :
+        try:
             q = self.get_query()
             sent = self.send(q.get())
         except socket.error, exp:

@@ -80,7 +80,7 @@ class TestAction(ShinkenTest):
             return
         else:
             a.command = "/usr/bin/env"
-        a.env = {'TITI' : 'est en vacance'}
+        a.env = {'TITI': 'est en vacance'}
 
         self.assert_(a.got_shell_characters() == False)
 

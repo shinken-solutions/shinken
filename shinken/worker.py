@@ -254,7 +254,7 @@ class Worker:
                 if cmsg.get_type() == 'Die':
                     logger.debug("[%d] Dad say we are dying..." % self.id)
                     break
-            except :
+            except:
                 pass
 
             if self._mortal == True and self._idletime > 2 * self._timeout:

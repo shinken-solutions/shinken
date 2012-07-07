@@ -32,10 +32,10 @@ import syslog
 from shinken.basemodule import BaseModule
 
 properties = {
-    'daemons' : ['broker'],
-    'type' : 'syslog',
-    'external' : False,
-    'phases' : ['running'],
+    'daemons': ['broker'],
+    'type': 'syslog',
+    'external': False,
+    'phases': ['running'],
     }
 
 

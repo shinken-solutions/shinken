@@ -41,9 +41,9 @@ def system_page():
     receivers = app.datamgr.get_receivers()
     pollers = app.datamgr.get_pollers()
 
-    return {'app' : app, 'user' : user, 'schedulers' : schedulers,
-            'brokers' : brokers, 'reactionners' : reactionners,
-            'receivers' : receivers, 'pollers' : pollers,
+    return {'app': app, 'user': user, 'schedulers': schedulers,
+            'brokers': brokers, 'reactionners': reactionners,
+            'receivers': receivers, 'pollers': pollers,
             }
 
 def system_widget():
@@ -67,12 +67,12 @@ def system_widget():
 
     options = {}
 
-    return {'app' : app, 'user' : user, 'wid' : wid,
-            'collapsed' : collapsed, 'options' : options,
-            'base_url' : '/widget/system', 'title' : 'System Information',
-            'schedulers' : schedulers,
-            'brokers' : brokers, 'reactionners' : reactionners,
-            'receivers' : receivers, 'pollers' : pollers,
+    return {'app': app, 'user': user, 'wid': wid,
+            'collapsed': collapsed, 'options': options,
+            'base_url': '/widget/system', 'title': 'System Information',
+            'schedulers': schedulers,
+            'brokers': brokers, 'reactionners': reactionners,
+            'receivers': receivers, 'pollers': pollers,
             }
 
 
@@ -88,9 +88,9 @@ def show_log():
     receivers = app.datamgr.get_receivers()
     pollers = app.datamgr.get_pollers()
 
-    return {'app' : app, 'user' : user, 'schedulers' : schedulers,
-            'brokers' : brokers, 'reactionners' : reactionners,
-            'receivers' : receivers, 'pollers' : pollers,
+    return {'app': app, 'user': user, 'schedulers': schedulers,
+            'brokers': brokers, 'reactionners': reactionners,
+            'receivers': receivers, 'pollers': pollers,
             }
 
 widget_desc = '''<h3>System state</h3>
@@ -98,7 +98,7 @@ Show an aggregated view of all Shinken daemons.
 '''
 
 
-pages = {system_page : { 'routes' : ['/system', '/system/'], 'view' : 'system', 'static' : True},
-         system_widget : { 'routes' : ['/widget/system'], 'view' : 'system_widget', 'static' : True, 'widget' : ['dashboard'], 'widget_desc' : widget_desc, 'widget_name' : 'system', 'widget_picture' : '/static/system/img/widget_system.png'},
-         show_log : { 'routes' : ['/system/log'], 'view' : 'log', 'static' : True},
+pages = {system_page: { 'routes': ['/system', '/system/'], 'view': 'system', 'static': True},
+         system_widget: { 'routes': ['/widget/system'], 'view': 'system_widget', 'static': True, 'widget': ['dashboard'], 'widget_desc': widget_desc, 'widget_name': 'system', 'widget_picture': '/static/system/img/widget_system.png'},
+         show_log: { 'routes': ['/system/log'], 'view': 'log', 'static': True},
          }

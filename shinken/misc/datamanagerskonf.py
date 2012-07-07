@@ -78,7 +78,7 @@ class DataManagerSKonf(DataManager):
     def get_in_db(self, table, key, value):
         col = getattr(self.db, table)
         print "Looking for", key, value, "in", table, col
-        r = col.find_one({key : value})
+        r = col.find_one({key: value})
         print "Founded", r
         return r
 
@@ -244,15 +244,15 @@ class DataManagerSKonf(DataManager):
 
         res = []
         if name != '':
-            res.append({'type' : 'new_tree', 'name' : name})
+            res.append({'type': 'new_tree', 'name': name})
         for p in packs:
-            res.append({'type' : 'pack', 'pack' : p})
+            res.append({'type': 'pack', 'pack': p})
 
         for s in sons:
             r = self._get_pack_tree(s)
             res.extend(r)
         if name != '':
-            res.append({'type' : 'end_tree', 'name' : name})
+            res.append({'type': 'end_tree', 'name': name})
         print "RETURN PARTIAL", res
         return res
 

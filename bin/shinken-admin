@@ -107,7 +107,7 @@ class ShinkenAdmin(cmd.Cmd):
         #port = int(port)
         print "Connection to %s:%s" % (addr, port)
         ArbiterLink.use_ssl = False
-        self.arb = ArbiterLink({'arbiter_name': 'unnamed arbiter', 'address' : addr, 'port' : port})
+        self.arb = ArbiterLink({'arbiter_name': 'unnamed arbiter', 'address': addr, 'port': port})
         self.arb.fill_default()
         self.arb.pythonize()
         self.arb.update_infos()
@@ -339,10 +339,10 @@ class ShinkenAdmin(cmd.Cmd):
             sconf = getattr(conf, type+'s')
 
             matches.extend([{
-                'type'   : type,
-                'name'   : getattr(c, type+'_name'),
+                'type': type,
+                'name': getattr(c, type+'_name'),
                 'address': c.address,
-                'port'   : c.port
+                'port': c.port
             } for c in sconf if
                 c.alive is True and
                 (daemon == '*' or getattr(c, type+'_name') == daemon)

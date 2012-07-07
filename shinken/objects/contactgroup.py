@@ -147,7 +147,7 @@ class Contactgroups(Itemgroups):
         cg = self.find_by_name(cgname)
         # if the id do not exist, create the cg
         if cg is None:
-            cg = Contactgroup({'contactgroup_name' : cgname, 'alias' : cgname, 'members' :  cname})
+            cg = Contactgroup({'contactgroup_name': cgname, 'alias': cgname, 'members':  cname})
             self.add_contactgroup(cg)
         else:
             cg.add_string_member(cname)

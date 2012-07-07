@@ -154,13 +154,13 @@ def to_bool(val):
         return False
 
 def from_bool_to_string(b):
-    if b :
+    if b:
         return '1'
     else:
         return '0'
 
 def from_bool_to_int(b):
-    if b :
+    if b:
         return 1
     else:
         return 0
@@ -209,7 +209,7 @@ def to_hostnames_list(ref, tab):
 # *services : all services of the tab
 # *hosts : all hosts of the tab
 def to_svc_hst_distinct_lists(ref, tab):
-    r = {'hosts' : [], 'services' : []}
+    r = {'hosts': [], 'services': []}
     for e in tab:
         cls = e.__class__
         if cls.my_type == 'service':
@@ -427,7 +427,7 @@ def get_key_value_sequence(entry, default_value=None):
 
     if all_keyval_pattern.match(conf_entry):
         for mat in re.finditer(keyval_pattern, conf_entry):
-            r = { 'KEY' : mat.group('key') }
+            r = { 'KEY': mat.group('key') }
             # The key is in mat.group('key')
             # If there are also value(s)...
             if mat.group('values'):

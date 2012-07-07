@@ -36,7 +36,7 @@ def depgraph_host(name):
     user = app.get_user_auth()
 
     if not user:
-        return {'app' : app, 'elt' : None, 'valid_user' : False}
+        return {'app': app, 'elt': None, 'valid_user': False}
 
 
     # Ok we are in a detail page but the user ask for a specific search
@@ -48,7 +48,7 @@ def depgraph_host(name):
 
 
     h = app.datamgr.get_host(name)
-    return {'app' : app, 'elt' : h, 'user' : user, 'valid_user' : True}
+    return {'app': app, 'elt': h, 'user': user, 'valid_user': True}
 
 
 def depgraph_srv(hname, desc):
@@ -57,7 +57,7 @@ def depgraph_srv(hname, desc):
     user = app.get_user_auth()
 
     if not user:
-        return {'app' : app, 'elt' : None, 'valid_user' : False}
+        return {'app': app, 'elt': None, 'valid_user': False}
 
     # Ok we are in a detail page but the user ask for a specific search
     search = app.request.GET.get('global_search', None)
@@ -68,7 +68,7 @@ def depgraph_srv(hname, desc):
 
 
     s = app.datamgr.get_service(hname, desc)
-    return {'app' : app, 'elt' : s, 'user' : user, 'valid_user' : True}
+    return {'app': app, 'elt': s, 'user': user, 'valid_user': True}
 
 
 
@@ -79,7 +79,7 @@ def get_depgraph_widget():
     user = app.get_user_auth()
 
     if not user:
-        return {'app' : app, 'elt' : None, 'valid_user' : False}
+        return {'app': app, 'elt': None, 'valid_user': False}
 
     search = app.request.GET.get('search', '').strip()
 
@@ -96,13 +96,13 @@ def get_depgraph_widget():
     wid = app.request.GET.get('wid', 'widget_depgraph_'+str(int(time.time())))
     collapsed = (app.request.GET.get('collapsed', 'False') == 'True')
 
-    options = {'search' : {'value' : search, 'type' : 'hst_srv', 'label' : 'Search an element'},
+    options = {'search': {'value': search, 'type': 'hst_srv', 'label': 'Search an element'},
                }
 
     title = 'Relation graph for %s' % search
 
-    return {'app' : app, 'elt' : s, 'user' : user,
-            'wid' : wid, 'collapsed' : collapsed, 'options' : options, 'base_url' : '/widget/depgraph', 'title' : title,
+    return {'app': app, 'elt': s, 'user': user,
+            'wid': wid, 'collapsed': collapsed, 'options': options, 'base_url': '/widget/depgraph', 'title': title,
             }
 
 
@@ -113,7 +113,7 @@ def get_depgraph_inner(name):
     user = app.get_user_auth()
 
     if not user:
-        return {'app' : app, 'elt' : None, 'user' : None}
+        return {'app': app, 'elt': None, 'user': None}
 
     elt = None
     if '/' in name:
@@ -122,7 +122,7 @@ def get_depgraph_inner(name):
     else:
         elt = app.datamgr.get_host(name)
 
-    return {'app' : app, 'elt' : elt, 'user' : user}
+    return {'app': app, 'elt': elt, 'user': user}
 
 
 
@@ -133,8 +133,8 @@ Show a graph of an object relations
 '''
 
 
-pages = {depgraph_host : { 'routes' : ['/depgraph/:name'], 'view' : 'depgraph', 'static' : True},
-         depgraph_srv : { 'routes' : ['/depgraph/:hname/:desc'], 'view' : 'depgraph', 'static' : True},
-         get_depgraph_widget : {'routes' : ['/widget/depgraph'], 'view' : 'widget_depgraph', 'static' : True, 'widget' : ['dashboard'], 'widget_desc' : widget_desc, 'widget_name' : 'depgraph', 'widget_picture' : '/static/depgraph/img/widget_depgraph.png'},
-         get_depgraph_inner : {'routes' : ['/inner/depgraph/:name#.+#'], 'view' : 'inner_depgraph', 'static' : True},
+pages = {depgraph_host: { 'routes': ['/depgraph/:name'], 'view': 'depgraph', 'static': True},
+         depgraph_srv: { 'routes': ['/depgraph/:hname/:desc'], 'view': 'depgraph', 'static': True},
+         get_depgraph_widget: {'routes': ['/widget/depgraph'], 'view': 'widget_depgraph', 'static': True, 'widget': ['dashboard'], 'widget_desc': widget_desc, 'widget_name': 'depgraph', 'widget_picture': '/static/depgraph/img/widget_depgraph.png'},
+         get_depgraph_inner: {'routes': ['/inner/depgraph/:name#.+#'], 'view': 'inner_depgraph', 'static': True},
          }

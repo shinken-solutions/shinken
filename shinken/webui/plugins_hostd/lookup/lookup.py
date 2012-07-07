@@ -45,8 +45,8 @@ def lookup(cls='', name=''):
     if not user:
         return []
 
-    sources = {'host' : app.host_templates, 'service' : app.service_templates,
-               'contact' : app.contact_templates, 'timeperiod' : app.timeperiod_templates}
+    sources = {'host': app.host_templates, 'service': app.service_templates,
+               'contact': app.contact_templates, 'timeperiod': app.timeperiod_templates}
 
     # Look for a valid source
     if cls not in sources:
@@ -78,8 +78,8 @@ def lookup_tag_post(cls=''):
 #    user = app.get_user_auth()
 #    if not user:
 #        return []
-    sources = {'host' : app.host_templates, 'service' : app.service_templates,
-               'contact' : app.contact_templates, 'timeperiod' : app.timeperiod_templates}
+    sources = {'host': app.host_templates, 'service': app.service_templates,
+               'contact': app.contact_templates, 'timeperiod': app.timeperiod_templates}
 
 
     if cls not in sources:
@@ -97,7 +97,7 @@ def lookup_tag_post(cls=''):
         print "Template", h
         if hasattr(h, 'name'):
             tags.add(h.name)
-    r  = [{'id' :n, 'name' :n} for n in tags if n.startswith(name)]
+    r  = [{'id':n, 'name':n} for n in tags if n.startswith(name)]
 
     print "RES", r
 
@@ -105,7 +105,7 @@ def lookup_tag_post(cls=''):
 
 
 
-pages = {lookup_tag_post : { 'routes' : ['/lookup/:cls/tag'] , 'method' : 'POST'},
-         lookup : { 'routes' : ['/lookup/:cls/tag/:name']},
+pages = {lookup_tag_post: { 'routes': ['/lookup/:cls/tag'] , 'method': 'POST'},
+         lookup: { 'routes': ['/lookup/:cls/tag/:name']},
          }
 

@@ -31,10 +31,10 @@ from shinken.basemodule import BaseModule
 
 
 properties = {
-    'daemons' : ['arbiter'],
-    'type' : 'mysql_import',
-    'external' : False,
-    'phases' : ['configuration'],
+    'daemons': ['arbiter'],
+    'type': 'mysql_import',
+    'external': False,
+    'phases': ['configuration'],
 }
 
 # called by the plugin manager to get a broker

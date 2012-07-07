@@ -47,7 +47,7 @@ def main():
             notification = a
         elif o in ("-c", "--critical"):
             notification = a
-	else :
+	else:
 	    assert False , "unknown options"
 
 if __name__ == "__main__":
@@ -77,13 +77,13 @@ if __name__ == "__main__":
     wload15 = str(listwarning[2])
 
 
-    if load1 >= cload1 or load5 >= cload5 or load15 >= cload15 :
+    if load1 >= cload1 or load5 >= cload5 or load15 >= cload15:
        print 'CRITICAL - Load average : '+load1+','+load5+','+load15+'|load1='+load1+'; load5='+load5+'; load15='+load15
        sys.exit(2)
-    elif load1 >= wload1 or load5 >= wload5 or load15 >= wload15 :
+    elif load1 >= wload1 or load5 >= wload5 or load15 >= wload15:
        print 'WARNING - Load average : '+load1+','+load5+','+load15+'|load1='+load1+'; load5='+load5+'; load15='+load15
        sys.exit(1)
-    else :
+    else:
        print 'OK - Load average : '+load1+','+load5+','+load15+'|load1='+load1+'; load5='+load5+'; load15='+load15
        sys.exit(0)
 

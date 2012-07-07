@@ -25,8 +25,8 @@
 
 
 properties = {
-    'daemons' : ['arbiter'],
-    'type' : 'ip_tag',
+    'daemons': ['arbiter'],
+    'type': 'ip_tag',
     }
 
 

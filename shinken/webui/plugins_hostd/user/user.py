@@ -55,22 +55,22 @@ def get_page(username):
 
     #uname = user.get('username')
     view_user = app.get_user_by_name(username)
-    cur = app.db.packs.find({'user' : username, 'state' : 'ok'})
+    cur = app.db.packs.find({'user': username, 'state': 'ok'})
     validated_packs = [p for p in cur]
 
     # Only show pending and refused packs if YOU are the user
     pending_packs = []
     refused_packs = []
     if user == view_user:
-        cur = app.db.packs.find({'user' : username, 'state' : 'pending'})
+        cur = app.db.packs.find({'user': username, 'state': 'pending'})
         pending_packs = [p for p in cur]
 
-        cur = app.db.packs.find({'user' : username, 'state' : 'refused'})
+        cur = app.db.packs.find({'user': username, 'state': 'refused'})
         refused_packs = [p for p in cur]
 
 
-    return {'app' : app, 'user' : user, 'view_user' : view_user, 'validated_packs' : validated_packs, 'pending_packs' : pending_packs,
-            'refused_packs' : refused_packs}
+    return {'app': app, 'user': user, 'view_user': view_user, 'validated_packs': validated_packs, 'pending_packs': pending_packs,
+            'refused_packs': refused_packs}
 
 
 def post_user():
@@ -106,17 +106,17 @@ def check_key(api_key):
     user = app.get_user_by_key(api_key)
     app.response.content_type = 'application/json'
     if not user:
-        r = {'state' : 401, 'text' : 'Sorry this key is invalid!'}
+        r = {'state': 401, 'text': 'Sorry this key is invalid!'}
         return json.dumps(r)
-    r = {'state' : 200, 'text' : 'Congrats! Connexion is OK!'}
+    r = {'state': 200, 'text': 'Congrats! Connexion is OK!'}
     return json.dumps(r)
 
 
 
 
 
-pages = {get_page : { 'routes' : ['/user/:username'], 'view' : 'user', 'static' : True},
-         post_user : { 'routes' : ['/user'], 'method' : 'POST', 'view' : 'user', 'static' : True},
-         check_key : { 'routes' : ['/checkkey/:api_key']},
+pages = {get_page: { 'routes': ['/user/:username'], 'view': 'user', 'static': True},
+         post_user: { 'routes': ['/user'], 'method': 'POST', 'view': 'user', 'static': True},
+         check_key: { 'routes': ['/checkkey/:api_key']},
          }
 

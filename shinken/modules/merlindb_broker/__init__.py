@@ -24,9 +24,9 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 properties = {
-    'daemons' : ['broker'],
-    'type' : 'merlindb',
-    'phases' : ['running'],
+    'daemons': ['broker'],
+    'type': 'merlindb',
+    'phases': ['running'],
     }
 
 

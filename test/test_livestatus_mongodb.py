@@ -79,7 +79,7 @@ class TestConfig(ShinkenTest):
 
     def init_livestatus(self):
         self.livelogs = 'tmp/livelogs.db' + self.testid
-        modconf = Module({'module_name' : 'LiveStatus',
+        modconf = Module({'module_name': 'LiveStatus',
             'module_type': 'livestatus',
             'port': str(50000 + os.getpid()),
             'pnp_path': 'tmp/pnp4nagios_test' + self.testid,
@@ -88,7 +88,7 @@ class TestConfig(ShinkenTest):
             'name': 'test', # ?
         })
 
-        dbmodconf = Module({'module_name' : 'LogStore',
+        dbmodconf = Module({'module_name': 'LogStore',
             'module_type': 'logstore_mongodb',
             'mongodb_uri': "mongodb://127.0.0.1:27017",
             'database': 'testtest'+self.testid,
@@ -286,22 +286,22 @@ class TestConfigBig(TestConfig):
 
     def init_livestatus(self):
         self.livelogs = "bigbigbig"
-        modconf = Module({'module_name' : 'LiveStatus',
-            'module_type' : 'livestatus',
-            'port' : str(50000 + os.getpid()),
-            'pnp_path' : 'tmp/livestatus_broker.pnp_path_test' + self.testid,
-            'host' : '127.0.0.1',
-            'socket' : 'live',
-            'name' : 'test', # ?
+        modconf = Module({'module_name': 'LiveStatus',
+            'module_type': 'livestatus',
+            'port': str(50000 + os.getpid()),
+            'pnp_path': 'tmp/livestatus_broker.pnp_path_test' + self.testid,
+            'host': '127.0.0.1',
+            'socket': 'live',
+            'name': 'test', # ?
         })
 
-        dbmodconf = Module({'module_name' : 'LogStore',
-            'module_type' : 'logstore_mongodb',
-            'database' : 'bigbigbig',
-            'mongodb_uri' : "mongodb://127.0.0.1:27017",
+        dbmodconf = Module({'module_name': 'LogStore',
+            'module_type': 'logstore_mongodb',
+            'database': 'bigbigbig',
+            'mongodb_uri': "mongodb://127.0.0.1:27017",
             #'mongodb_uri' : "mongodb://10.0.12.50:27017,10.0.12.51:27017",
         #    'replica_set' : 'livestatus',
-            'max_logs_age' : '7',
+            'max_logs_age': '7',
         })
         modconf.modules = [dbmodconf]
         self.livestatus_broker = LiveStatus_broker(modconf)
@@ -558,18 +558,18 @@ OutputFormat: json"""
         times = [x['time'] for x in self.livestatus_broker.db.conn.bigbigbig.logs.find()]
         print "whole database", numlogs, min(times), max(times)
         numlogs = self.livestatus_broker.db.conn.bigbigbig.logs.find({
-            '$and' : [
-                {'time' : { '$gt' : min(times)} },
-                {'time' : { '$lte' : max(times)} }
+            '$and': [
+                {'time': { '$gt': min(times)} },
+                {'time': { '$lte': max(times)} }
             ]}).count()
         now = max(times)
         daycount = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         for day in xrange(25):
             one_day_earlier = now - 3600*24
             numlogs = self.livestatus_broker.db.conn.bigbigbig.logs.find({
-                '$and' : [
-                    {'time' : { '$gt' : one_day_earlier} },
-                    {'time' : { '$lte' : now} }
+                '$and': [
+                    {'time': { '$gt': one_day_earlier} },
+                    {'time': { '$lte': now} }
                 ]}).count()
             daycount[day] = numlogs
             print "day -%02d %d..%d - %d" % (day, one_day_earlier, now, numlogs)
@@ -579,9 +579,9 @@ OutputFormat: json"""
         for day in xrange(25):
             one_day_earlier = now - 3600*24
             numlogs = self.livestatus_broker.db.conn.bigbigbig.logs.find({
-                '$and' : [
-                    {'time' : { '$gt' : one_day_earlier} },
-                    {'time' : { '$lte' : now} }
+                '$and': [
+                    {'time': { '$gt': one_day_earlier} },
+                    {'time': { '$lte': now} }
                 ]}).count()
             print "day -%02d %d..%d - %d" % (day, one_day_earlier, now, numlogs)
             now = one_day_earlier
@@ -598,11 +598,11 @@ OutputFormat: json"""
     def test_max_logs_age(self):
         if not has_pymongo:
             return
-        dbmodconf = Module({'module_name' : 'LogStore',
-            'module_type' : 'logstore_mongodb',
-            'database' : 'bigbigbig',
-            'mongodb_uri' : "mongodb://127.0.0.1:27017",
-            'max_logs_age' : '7y',
+        dbmodconf = Module({'module_name': 'LogStore',
+            'module_type': 'logstore_mongodb',
+            'database': 'bigbigbig',
+            'mongodb_uri': "mongodb://127.0.0.1:27017",
+            'max_logs_age': '7y',
         })
         self.assert_(dbmodconf.max_logs_age == 7*365)
 

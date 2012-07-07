@@ -76,7 +76,7 @@ class Discoveryrule(MatchingItem):
         if not 'creation_type' in params:
             params['creation_type'] = 'service'
 
-        map = {'service' : Service, 'host' : Host}
+        map = {'service': Service, 'host': Host}
         t =  params['creation_type']
         if not t in map:
             return

@@ -86,10 +86,10 @@ from thrift.protocol import TBinaryProtocol
 from thrift.server import TServer
 
 properties = {
-    'daemons' : ['broker'],
-    'type' : 'thrift',
-    'external' : True,
-    'phases' : ['running'],
+    'daemons': ['broker'],
+    'type': 'thrift',
+    'external': True,
+    'phases': ['running'],
     }
 
 tables = ["hosts",""]
@@ -159,7 +159,7 @@ class Thrift_brokerHandler(Hooker):
                     else:
                         attribute = query.strip_table_from_column(filter.attribute)
                         if operator in ['!>', '!>=', '!<', '!<=']:
-                            operator = { '!>' : '<=', '!>=' : '<', '!<' : '>=', '!<=' : '>' }[operator]
+                            operator = { '!>': '<=', '!>=': '<', '!<': '>=', '!<=': '>' }[operator]
                         query.filtercolumns.append(attribute)
                         query.prefiltercolumns.append(attribute)
                         query.filter_stack.put(query.make_filter(operator, attribute, filter.reference))
@@ -179,7 +179,7 @@ class Thrift_brokerHandler(Hooker):
                         attribute = query.strip_table_from_column(stat.attribute)
                         if operator in ['=', '>', '>=', '<', '<=', '=~', '~', '~~', '!=', '!>', '!>=', '!<', '!<=']:
                             if operator in ['!>', '!>=', '!<', '!<=']:
-                                operator = { '!>' : '<=', '!>=' : '<', '!<' : '>=', '!<=' : '>' }[operator]
+                                operator = { '!>': '<=', '!>=': '<', '!<': '>=', '!<=': '>' }[operator]
                             query.filtercolumns.append(attribute)
                             query.stats_columns.append(attribute)
                             query.stats_filter_stack.put(query.make_filter(operator, attribute, stat.reference))
@@ -329,7 +329,7 @@ class Thrift_broker(BaseModule):
             # one a minute
             if time.time() - self.last_need_data_send > 60:
                 print "I ask the broker for instance id data :", c_id
-                msg = Message(id=0, type='NeedData', data={'full_instance_id' : c_id})
+                msg = Message(id=0, type='NeedData', data={'full_instance_id': c_id})
                 self.from_q.put(msg)
                 self.last_need_data_send = time.time()
             return
@@ -697,8 +697,8 @@ class Thrift_broker(BaseModule):
             print "INVALID"
             # invalid
         else:
-            service_states = { 'OK' : 0, 'WARNING' : 1, 'CRITICAL' : 2, 'UNKNOWN' : 3, 'RECOVERY' : 0 }
-            host_states = { 'UP' : 0, 'DOWN' : 1, 'UNREACHABLE' : 2, 'UNKNOWN': 3, 'RECOVERY' : 0 }
+            service_states = { 'OK': 0, 'WARNING': 1, 'CRITICAL': 2, 'UNKNOWN': 3, 'RECOVERY': 0 }
+            host_states = { 'UP': 0, 'DOWN': 1, 'UNREACHABLE': 2, 'UNKNOWN': 3, 'RECOVERY': 0 }
 
             # 'attempt', 'class', 'command_name', 'comment', 'contact_name', 'host_name', 'lineno', 'message',
             # 'options', 'plugin_output', 'service_description', 'state', 'state_type', 'time', 'type',
@@ -904,7 +904,7 @@ class Thrift_broker(BaseModule):
         limit = int(time.time() - self.max_logs_age * 86400)
         print "Deleting messages from the log database older than %s" % time.asctime(time.localtime(limit))
         if sqlite3.paramstyle == 'pyformat':
-            self.dbcursor.execute('DELETE FROM LOGS WHERE time < %(limit)s', { 'limit' : limit })
+            self.dbcursor.execute('DELETE FROM LOGS WHERE time < %(limit)s', { 'limit': limit })
         else:
             self.dbcursor.execute('DELETE FROM LOGS WHERE time < ?', (limit,))
         self.dbconn.commit()
@@ -961,7 +961,7 @@ class Thrift_broker(BaseModule):
             self.do_main()
         except Exception, exp:
 
-            msg = Message(id=0, type='ICrash', data={'name' : self.get_name(), 'exception' : exp, 'trace' : traceback.format_exc()})
+            msg = Message(id=0, type='ICrash', data={'name': self.get_name(), 'exception': exp, 'trace': traceback.format_exc()})
             self.from_q.put(msg)
             # wait 2 sec so we know that the broker got our message, and die
             time.sleep(2)

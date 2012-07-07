@@ -63,9 +63,9 @@ class TestModuleNamedPipe(ShinkenTest):
         # get our modules
         mod = sl = Named_Pipe_arbiter(modconf, 'tmp/nagios.cmd')
 
-        try :
+        try:
             os.unlink(mod.path)
-        except :
+        except:
             pass
 
         print "Instance", sl

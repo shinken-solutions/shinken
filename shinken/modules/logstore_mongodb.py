@@ -55,10 +55,10 @@ from shinken.objects.module import Module
 from shinken.log import logger
 
 properties = {
-    'daemons' : ['livestatus'],
-    'type' : 'logstore_mongodb',
-    'external' : False,
-    'phases' : ['running'],
+    'daemons': ['livestatus'],
+    'type': 'logstore_mongodb',
+    'external': False,
+    'phases': ['running'],
     }
 
 
@@ -174,7 +174,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
             today0000 = datetime.datetime(today.year, today.month, today.day, 0, 0, 0)
             today0005 = datetime.datetime(today.year, today.month, today.day, 0, 5, 0)
             oldest = today0000 - datetime.timedelta(days=self.max_logs_age)
-            self.db[self.collection].remove({ u'time' : { '$lt' : time.mktime(oldest.timetuple()) }}, safe=True)
+            self.db[self.collection].remove({ u'time': { '$lt': time.mktime(oldest.timetuple()) }}, safe=True)
 
             if now < time.mktime(today0005.timetuple()):
                 nextrotation = today0005

@@ -170,13 +170,13 @@ class TestTriggers(ShinkenTest):
         #
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         code = '''r = self.get_name()'''.replace(r'\n', '\n').replace(r'\t', '\t')
-        t = Trigger({'trigger_name' : 'none', 'code_src': code})
+        t = Trigger({'trigger_name': 'none', 'code_src': code})
         t.compile()
         r = t.eval(svc)
         print r
 
         code = '''self.output = "Moncul c'est du poulet" '''.replace(r'\n', '\n').replace(r'\t', '\t')
-        t = Trigger({'trigger_name' : 'none', 'code_src': code})
+        t = Trigger({'trigger_name': 'none', 'code_src': code})
         t.compile()
         r = t.eval(svc)
         print "Service output", svc.output
@@ -185,7 +185,7 @@ class TestTriggers(ShinkenTest):
         code = '''self.output = "Moncul c'est du poulet2"
 self.perf_data = "Moncul c'est du poulet3"
 '''.replace(r'\n', '\n').replace(r'\t', '\t')
-        t = Trigger({'trigger_name' : 'none', 'code_src': code})
+        t = Trigger({'trigger_name': 'none', 'code_src': code})
         t.compile()
         r = t.eval(svc)
         print "Service output", svc.output

@@ -39,10 +39,10 @@ def get_perfometer_table_values(elt):
     print "Looking for perfometer value for command", cmd
 
 
-    tab = {'check_http' : manage_check_http_command,
-           'check_ping' : manage_check_ping_command,
-           'check_tcp' : manage_check_tcp_command,
-           'check_ftp' : manage_check_tcp_command,
+    tab = {'check_http': manage_check_http_command,
+           'check_ping': manage_check_ping_command,
+           'check_tcp': manage_check_tcp_command,
+           'check_ftp': manage_check_tcp_command,
         }
 
     f = tab.get(cmd, None)
@@ -73,15 +73,15 @@ def manage_check_http_command(elt):
     # OK : #6f2 (102,255,34) green
     # Warning : #f60 (255,102,0) orange
     # Crit : #ff0033 (255,0,51)
-    base_color = {0 : (102,255,34), 1 : (255,102,0), 2 : (255,0,51)}
+    base_color = {0: (102,255,34), 1: (255,102,0), 2: (255,0,51)}
     state_id = get_stateid(elt)
     color = base_color.get(state_id, (179,196,255))
     s_color = 'RGB(%d,%d,%d)' % color
     lnk = '#'
     metrics = [(s_color, pct), ('white', 100-pct)]
     title = '%ss' % v
-    print "HTTP: return", {'lnk' : lnk, 'metrics' : metrics, 'title' : title}
-    return {'lnk' : lnk, 'metrics' : metrics, 'title' : title}
+    print "HTTP: return", {'lnk': lnk, 'metrics': metrics, 'title': title}
+    return {'lnk': lnk, 'metrics': metrics, 'title': title}
 
 
 
@@ -105,7 +105,7 @@ def manage_check_ping_command(elt):
     # OK : #6f2 (102,255,34) green
     # Warning : #f60 (255,102,0) orange
     # Crit : #ff0033 (255,0,51)
-    base_color = {0 : (102,255,34), 1 : (255,102,0), 2 : (255,0,51)}
+    base_color = {0: (102,255,34), 1: (255,102,0), 2: (255,0,51)}
     state_id = get_stateid(elt)
     color = base_color.get(state_id, (179,196,255))
     s_color = 'RGB(%d,%d,%d)' % color
@@ -113,8 +113,8 @@ def manage_check_ping_command(elt):
     lnk = '#'
     metrics = [(s_color, pct), ('white', 100-pct)]
     title = '%sms' % v
-    print "HTTP: return", {'lnk' : lnk, 'metrics' : metrics, 'title' : title}
-    return {'lnk' : lnk, 'metrics' : metrics, 'title' : title}
+    print "HTTP: return", {'lnk': lnk, 'metrics': metrics, 'title': title}
+    return {'lnk': lnk, 'metrics': metrics, 'title': title}
 
 
 
@@ -140,7 +140,7 @@ def manage_check_tcp_command(elt):
     # OK : #6f2 (102,255,34) green
     # Warning : #f60 (255,102,0) orange
     # Crit : #ff0033 (255,0,51)
-    base_color = {0 : (102,255,34), 1 : (255,102,0), 2 : (255,0,51)}
+    base_color = {0: (102,255,34), 1: (255,102,0), 2: (255,0,51)}
     state_id = get_stateid(elt)
     color = base_color.get(state_id, (179,196,255))
     s_color = 'RGB(%d,%d,%d)' % color
@@ -153,8 +153,8 @@ def manage_check_tcp_command(elt):
     lnk = '#'
     metrics = [(s_color, pct), ('white', 100-pct)]
     title = '%ss' % v
-    print "HTTP: return", {'lnk' : lnk, 'metrics' : metrics, 'title' : title}
-    return {'lnk' : lnk, 'metrics' : metrics, 'title' : title}
+    print "HTTP: return", {'lnk': lnk, 'metrics': metrics, 'title': title}
+    return {'lnk': lnk, 'metrics': metrics, 'title': title}
 
 
 
@@ -204,8 +204,8 @@ def manage_unknown_command(elt):
     metrics = [(s_color, pct), ('white', 100-pct)]
     uom = '' or m.uom
     title = '%s%s' % (v, uom)
-    print "HTTP: return", {'lnk' : lnk, 'metrics' : metrics, 'title' : title}
-    return {'lnk' : lnk, 'metrics' : metrics, 'title' : title}
+    print "HTTP: return", {'lnk': lnk, 'metrics': metrics, 'title': title}
+    return {'lnk': lnk, 'metrics': metrics, 'title': title}
 
 
 # Get a linear color by looking at the command name
@@ -216,7 +216,7 @@ def get_linear_color(elt, name):
     #  #ffdd65 (255,221,101) ligth wellow for warning
     #  #ff6587 (191,75,101) light red for critical
     #  #b3c4ff (179,196,255) very light blue for unknown
-    base = {0 : (102,136,255), 1 : (255,221,101), 2 : (191,75,101)}
+    base = {0: (102,136,255), 1: (255,221,101), 2: (191,75,101)}
     state_id = get_stateid(elt)
 
     c = base.get(state_id, (179,196,255))

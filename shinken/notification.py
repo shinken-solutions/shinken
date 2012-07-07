@@ -42,8 +42,8 @@ class Notification(Action):
 
 
     properties = {
-        'is_a' :               StringProp (default='notification'),
-        'type' :               StringProp (default=''),
+        'is_a':               StringProp (default='notification'),
+        'type':               StringProp (default=''),
         'notification_type':   IntegerProp(default=0,  fill_brok=['full_status']),
         'start_time':          StringProp (default=0,  fill_brok=['full_status']),
         'end_time':            StringProp (default=0,  fill_brok=['full_status']),
@@ -211,7 +211,7 @@ class Notification(Action):
     def __getstate__(self):
         cls = self.__class__
         # id is not in *_properties
-        res = {'id' : self.id}
+        res = {'id': self.id}
         for prop in cls.properties:
             if hasattr(self, prop):
                 res[prop] = getattr(self, prop)

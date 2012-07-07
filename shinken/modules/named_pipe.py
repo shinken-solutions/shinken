@@ -36,10 +36,10 @@ from shinken.basemodule import BaseModule
 from shinken.external_command import ExternalCommand
 
 properties = {
-    'daemons' : ['arbiter', 'receiver', 'poller'],
-    'type' : 'named_pipe',
-    'external' : True,
-    'worker_capable' : False,
+    'daemons': ['arbiter', 'receiver', 'poller'],
+    'type': 'named_pipe',
+    'external': True,
+    'worker_capable': False,
     }
 
 # called by the plugin manager to get a broker

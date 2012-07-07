@@ -25,10 +25,10 @@
 
 
 properties = {
-    'daemons' : ['broker'],
-    'type' : 'status_dat',
-    'external' : True,
-    'phases' : ['running'],
+    'daemons': ['broker'],
+    'type': 'status_dat',
+    'external': True,
+    'phases': ['running'],
     }
 
 

@@ -67,7 +67,7 @@ class Dispatcher:
                 satellite.set_arbiter_satellitemap(arbiter.satellitemap.get(sat_name, {}))
 
         self.dispatch_queue = { 'schedulers': [], 'reactionners': [],
-                                'brokers': [], 'pollers': [] , 'receivers' : []}
+                                'brokers': [], 'pollers': [] , 'receivers': []}
         self.elements = [] # all elements, sched and satellites
         self.satellites = [] # only satellites not schedulers
 
@@ -102,7 +102,7 @@ class Dispatcher:
 
         # Some properties must be given to satellites from global
         # configuration, like the max_plugins_output_length to pollers
-        parameters = {'max_plugins_output_length' : self.conf.max_plugins_output_length}
+        parameters = {'max_plugins_output_length': self.conf.max_plugins_output_length}
         for poller in self.pollers:
             poller.add_global_conf_parameters(parameters)
 
@@ -388,10 +388,10 @@ class Dispatcher:
                         satellites_for_sched = r.get_satellites_links_for_scheduler()
                         s_conf = r.serialized_confs[conf.id]
                         # Prepare the conf before sending it
-                        conf_package = {'conf' : s_conf, 'override_conf' : override_conf,
-                                        'modules' : sched.modules, 'satellites' : satellites_for_sched,
-                                        'instance_name' : sched.scheduler_name, 'push_flavor' : conf.push_flavor,
-                                        'skip_initial_broks' : sched.skip_initial_broks,
+                        conf_package = {'conf': s_conf, 'override_conf': override_conf,
+                                        'modules': sched.modules, 'satellites': satellites_for_sched,
+                                        'instance_name': sched.scheduler_name, 'push_flavor': conf.push_flavor,
+                                        'skip_initial_broks': sched.skip_initial_broks,
                                         }
 
                         t1 = time.time()
@@ -410,7 +410,7 @@ class Dispatcher:
                         conf.assigned_to = sched
 
                         # We update all data for this scheduler
-                        sched.managed_confs = {conf.id : conf.push_flavor}
+                        sched.managed_confs = {conf.id: conf.push_flavor}
 
                         # Now we generate the conf for satellites:
                         cfg_id = conf.id

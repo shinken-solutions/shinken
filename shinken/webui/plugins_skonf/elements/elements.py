@@ -40,11 +40,11 @@ from local_helper import Helper
 app = None
 
 
-keys = {'hosts' : 'host_name',
-        'services' : '',
-        'timeperiods' : 'timeperiod_name',
-        'contacts' : 'contact_name',
-        'commands' : 'command_name'
+keys = {'hosts': 'host_name',
+        'services': '',
+        'timeperiods': 'timeperiod_name',
+        'contacts': 'contact_name',
+        'commands': 'command_name'
         }
 
 def elements_generic(cls, show_tpls=False):
@@ -72,7 +72,7 @@ def elements_generic(cls, show_tpls=False):
         print "REMOVING TEMPLATES"
         elts = [e for e in elts if not e.is_tpl()]
 
-    return {'app' : app, 'user' : user, 'elts' : elts, 'elt_type' : cls.my_type}
+    return {'app': app, 'user': user, 'elts': elts, 'elt_type': cls.my_type}
 
 
 def elements_hosts():
@@ -103,7 +103,7 @@ def elements_host(name):
     elt = app.datamgr.get_host(name)
     if not elt:
         elt = {}
-    return {'app' : app, 'user' : user, 'elt' : elt, 'helper' : Helper(app)}
+    return {'app': app, 'user': user, 'elt': elt, 'helper': Helper(app)}
 
 
 # get data about one specific host
@@ -116,7 +116,7 @@ def elements_service(name):
     elt = app.datamgr.get_service(name)
     if not elt:
         elt = {}
-    return {'app' : app, 'user' : user, 'elt' : elt, 'helper' : Helper(app)}
+    return {'app': app, 'user': user, 'elt': elt, 'helper': Helper(app)}
 
 
 
@@ -131,7 +131,7 @@ def elements_contact(name):
     #elt = app.db.contacts.find_one({'_id' : name})
     if not elt:
         elt = {}
-    return {'app' : app, 'user' : user, 'elt' : elt, 'helper' : Helper(app)}
+    return {'app': app, 'user': user, 'elt': elt, 'helper': Helper(app)}
 
 
 # get data about one specific contact
@@ -143,7 +143,7 @@ def elements_command(name):
     elt = app.datamgr.get_command(name)
     if not elt:
         elt = {}
-    return {'app' : app, 'user' : user, 'elt' : elt, 'helper' : Helper(app)}
+    return {'app': app, 'user': user, 'elt': elt, 'helper': Helper(app)}
 
 
 def elements_timeperiod(name):
@@ -154,7 +154,7 @@ def elements_timeperiod(name):
     elt = app.datamgr.get_timeperiod(name)
     if not elt:
         elt = {}
-    return {'app' : app, 'user' : user, 'elt' : elt, 'helper' : Helper(app)}
+    return {'app': app, 'user': user, 'elt': elt, 'helper': Helper(app)}
 
 
 
@@ -180,13 +180,13 @@ def new_object():
     if not user:
         redirect("/user/login")
 
-    return {'app' : app, 'user' : user, 'elt' : {}, 'helper' : Helper(app)}
+    return {'app': app, 'user': user, 'elt': {}, 'helper': Helper(app)}
 
 
 def disable_object(cls, name):
     print "Disable object for", cls, name
     t = getattr(app.db, cls)
-    d = t.find_one({'_id' : name})
+    d = t.find_one({'_id': name})
     d['_state'] = 'disabled'
     r = t.save(d)
     print "Disabled?", r
@@ -195,7 +195,7 @@ def disable_object(cls, name):
 def enable_object(cls, name):
     print "Enable object for", cls, name
     t = getattr(app.db, cls)
-    d = t.find_one({'_id' : name})
+    d = t.find_one({'_id': name})
     d['_state'] = 'enabled'
     r = t.save(d)
     print "Disabled?", r
@@ -222,16 +222,16 @@ def save_object(cls, name):
 
     print "After?"
     t = getattr(app.db, cls)
-    d = t.find_one({'_id' : old_name})
+    d = t.find_one({'_id': old_name})
 
     # Maybe we renamed the element? If so, we
     # must delete the old entry before saving teh new one
     if new_name != old_name:
-        t.remove({'_id' : old_name})
+        t.remove({'_id': old_name})
 
 
     print 'In db', d
-    bd_entry = {'_id' : new_name}
+    bd_entry = {'_id': new_name}
     if d:
         print 'We got an entry in db', d
         db_entry = d
@@ -267,7 +267,7 @@ def save_new_object(cls):
         if name is None or name == '':
             abort(400, "Missing property %s" % key)
 
-    d = t.find_one({'_id' : name})
+    d = t.find_one({'_id': name})
     # Save a new object means that there should not be old one
     # with the same name of course. Or it should be an edit, not a "new"
     if d is not None:
@@ -281,40 +281,40 @@ def save_new_object(cls):
 
 pages = {
     # HOSTS
-    elements_hosts : { 'routes' : ['/elements/hosts'], 'view' : 'elements_hosts', 'static' : True},
-    elements_host : { 'routes' : ['/elements/hosts/:name'], 'view' : 'elements_host', 'static' : True},
-    new_host : { 'routes' : ['/elements/add/host'], 'view' : 'elements_host', 'static' : True},
+    elements_hosts: { 'routes': ['/elements/hosts'], 'view': 'elements_hosts', 'static': True},
+    elements_host: { 'routes': ['/elements/hosts/:name'], 'view': 'elements_host', 'static': True},
+    new_host: { 'routes': ['/elements/add/host'], 'view': 'elements_host', 'static': True},
 
     # Contacts
-    elements_contacts : { 'routes' : ['/elements/contacts'], 'view' : 'elements_contacts', 'static' : True},
-    elements_contact : { 'routes' : ['/elements/contacts/:name'], 'view' : 'elements_contact', 'static' : True},
-    new_contact : { 'routes' : ['/elements/add/contact'], 'view' : 'elements_contact', 'static' : True},
+    elements_contacts: { 'routes': ['/elements/contacts'], 'view': 'elements_contacts', 'static': True},
+    elements_contact: { 'routes': ['/elements/contacts/:name'], 'view': 'elements_contact', 'static': True},
+    new_contact: { 'routes': ['/elements/add/contact'], 'view': 'elements_contact', 'static': True},
 
     # Services
-    elements_services : { 'routes' : ['/elements/services'], 'view' : 'elements_services', 'static' : True},
-    elements_service : { 'routes' : ['/elements/services/:name'], 'view' : 'elements_service', 'static' : True},
-    new_service : { 'routes' : ['/elements/add/service'], 'view' : 'elements_service', 'static' : True},
+    elements_services: { 'routes': ['/elements/services'], 'view': 'elements_services', 'static': True},
+    elements_service: { 'routes': ['/elements/services/:name'], 'view': 'elements_service', 'static': True},
+    new_service: { 'routes': ['/elements/add/service'], 'view': 'elements_service', 'static': True},
 
 
     # Timeperiods
-    elements_timeperiods : { 'routes' : ['/elements/timeperiods'], 'view' : 'elements_timeperiods', 'static' : True},
-    elements_timeperiod : { 'routes' : ['/elements/timeperiods/:name'], 'view' : 'elements_timeperiod', 'static' : True},
-    new_timeperiod : { 'routes' : ['/elements/add/timeperiod'], 'view' : 'elements_timeperiod', 'static' : True},
+    elements_timeperiods: { 'routes': ['/elements/timeperiods'], 'view': 'elements_timeperiods', 'static': True},
+    elements_timeperiod: { 'routes': ['/elements/timeperiods/:name'], 'view': 'elements_timeperiod', 'static': True},
+    new_timeperiod: { 'routes': ['/elements/add/timeperiod'], 'view': 'elements_timeperiod', 'static': True},
 
 
     # Commands
-    elements_commands : { 'routes' : ['/elements/commands'], 'view' : 'elements_commands', 'static' : True},
-    elements_command : { 'routes' : ['/elements/commands/:name'], 'view' : 'elements_command', 'static' : True},
-    new_command : { 'routes' : ['/elements/add/command'], 'view' : 'elements_command', 'static' : True},
+    elements_commands: { 'routes': ['/elements/commands'], 'view': 'elements_commands', 'static': True},
+    elements_command: { 'routes': ['/elements/commands/:name'], 'view': 'elements_command', 'static': True},
+    new_command: { 'routes': ['/elements/add/command'], 'view': 'elements_command', 'static': True},
 
 
     # Action URI
-    disable_object : { 'routes' : ['/element/q/:cls/disable/:name']},
-    enable_object : { 'routes' : ['/element/q/:cls/enable/:name']},
+    disable_object: { 'routes': ['/element/q/:cls/disable/:name']},
+    enable_object: { 'routes': ['/element/q/:cls/enable/:name']},
 
 
     # POST backend
-    save_object : { 'routes' : ['/element/q/:cls/save/:name'], 'method' : 'POST'},
-    save_new_object : { 'routes' : ['/element/q/:cls/save/'], 'method' : 'POST'},
+    save_object: { 'routes': ['/element/q/:cls/save/:name'], 'method': 'POST'},
+    save_new_object: { 'routes': ['/element/q/:cls/save/'], 'method': 'POST'},
     }
 

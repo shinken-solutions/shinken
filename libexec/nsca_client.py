@@ -37,9 +37,9 @@ class NSCA_client():
     # Ok, main function that is called in the CONFIGURATION phase
     def get_objects(self):
         print "[Dummy] ask me for objects to return"
-        r = {'hosts' : []}
-        h = {'name' : 'dummy host from dummy arbiter module',
-             'register' : '0',
+        r = {'hosts': []}
+        h = {'name': 'dummy host from dummy arbiter module',
+             'register': '0',
              }
 
         r['hosts'].append(h)

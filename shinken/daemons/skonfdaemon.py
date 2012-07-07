@@ -121,7 +121,7 @@ class IForArbiter(Interface):
             for dae in daemons:
                 if hasattr(dae, daemon_name_attr) and getattr(dae, daemon_name_attr) == daemon_name:
                     if hasattr(dae, 'alive') and hasattr(dae, 'spare'):
-                        return {'alive' : dae.alive, 'spare' : dae.spare}
+                        return {'alive': dae.alive, 'spare': dae.spare}
         return None
 
 
@@ -147,12 +147,12 @@ class IForArbiter(Interface):
 
 
     def get_all_states(self):
-        res = {'arbiter' : self.app.conf.arbiters,
-               'scheduler' : self.app.conf.schedulers,
-               'poller' : self.app.conf.pollers,
-               'reactionner' : self.app.conf.reactionners,
-               'receiver' : self.app.conf.receivers,
-               'broker' : self.app.conf.brokers}
+        res = {'arbiter': self.app.conf.arbiters,
+               'scheduler': self.app.conf.schedulers,
+               'poller': self.app.conf.pollers,
+               'reactionner': self.app.conf.reactionners,
+               'receiver': self.app.conf.receivers,
+               'broker': self.app.conf.brokers}
         return res
 
 
@@ -948,7 +948,7 @@ class Skonf(Daemon):
 
     # We are asking to a worker .. to work :)
     def ask_new_scan(self, id):
-       msg = Message(id=0, type='ScanAsk', data={'scan_id' : id})
+       msg = Message(id=0, type='ScanAsk', data={'scan_id': id})
        print "Creating a Message for ScanAsk", msg
        self.workers_queue.put(msg)
 
@@ -984,7 +984,7 @@ class Skonf(Daemon):
        print "CHECK if it's a zip file"
        if not zipfile.is_zipfile(_tmpfile):
           print "It's not a zip file!"
-          r = {'state' : 200, 'text' : 'Ok, the pack is downloaded and install. Please restart skonf to use it.'}
+          r = {'state': 200, 'text': 'Ok, the pack is downloaded and install. Please restart skonf to use it.'}
           os.remove(_tmpfile)
           return r
 
@@ -1001,13 +1001,13 @@ class Skonf(Daemon):
        packs.load_file(TMP_DIR)
        packs = [i for i in packs]
        if len(packs) > 1:
-          r = {'state' : 400, 'text' : 'ERROR : the pack got too much .pack file in it'}
+          r = {'state': 400, 'text': 'ERROR : the pack got too much .pack file in it'}
           # Clean before exit
           shutil.rmtree(TMP_DIR)
           return r
 
        if len(packs) == 0:
-          r = {'state' : 400, 'text' : 'ERROR : no valid .pack found in the zip file'}
+          r = {'state': 400, 'text': 'ERROR : no valid .pack found in the zip file'}
           # Clean before exit
           shutil.rmtree(TMP_DIR)
           return r
@@ -1090,5 +1090,5 @@ class Skonf(Daemon):
                    logger.warning('Cannot create the directory %s for a pack install' % os.path.join(self.share_dir, from_share_path))
 
 
-       r = {'state' : 200, 'text' : 'Ok, the pack is downloaded and install. Please restart skonf to use it.'}
+       r = {'state': 200, 'text': 'Ok, the pack is downloaded and install. Please restart skonf to use it.'}
        return r

@@ -15,7 +15,7 @@ def do_list(table):
 
 
 def validate_user(table, username):
-    u = table.find_one({'username' : username})
+    u = table.find_one({'username': username})
     if not u:
         print 'ERROR : cannot find user %s' % username
         sys.exit(2)
@@ -25,11 +25,11 @@ def validate_user(table, username):
 
 
 def delete_user(table, username):
-    u = table.find_one({'username' : username})
+    u = table.find_one({'username': username})
     if not u:
         print 'ERROR : cannot find user %s' % username
         sys.exit(2)
-    table.remove({'username' : username})
+    table.remove({'username': username})
     print "OK : user %s is deleted"
 
 

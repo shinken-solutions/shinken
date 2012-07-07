@@ -372,24 +372,24 @@ def domacros(configfile,args=[]):
                     elif command == "setparam":
                         code,message = setparam(config,result.group('object'),result.group('directive'),result.group('value'),result.group('clauses'))
                         if not code:
-                            if maction == "stop" :return (code,message)
+                            if maction == "stop":return (code,message)
                     elif command == "delparam":
                         code,message = delparam(config,result.group('object'),result.group('directive'),result.group('clauses'))
                         if not code:
-                            if maction == "stop" :return (code,message)
+                            if maction == "stop":return (code,message)
                     elif command == "removemodule":
                         code,message = removemodule(config,result.group('module'),result.group('object'),result.group('clauses'))
                         if not code:
-                            if maction == "stop" :return (code,message)
+                            if maction == "stop":return (code,message)
                 else:
                     if command == "writeconfig":
                         code,message = writeconfig(config,configfile)
                         if not code:
-                            if maction == "stop" :return (code,message)
+                            if maction == "stop":return (code,message)
                     elif command == "sync":
                         code,message = sync(config,configfile,authfile)
                         if not code:
-                            if maction == "stop" :return (code,message)
+                            if maction == "stop":return (code,message)
                 matched=True
         if not matched:
             if not line == "":
@@ -473,7 +473,7 @@ def getaddresses(config):
         if ot in allowed:
             for o in oc:
                 for (d,v) in o.items():
-                    if d == "address" and v != "localhost" and v != "127.0.01" :
+                    if d == "address" and v != "localhost" and v != "127.0.01":
                         if not v in addresses:
                             addresses.append(v)
                             print v
@@ -528,7 +528,7 @@ def getsatellitesaddresses(config):
         if ot in allowed:
             for o in oc:
                 for (d,v) in o.items():
-                    if d == "address" and v != "localhost" and v != "127.0.01" :
+                    if d == "address" and v != "localhost" and v != "127.0.01":
                         if not v in local and not v in addresses:
                             addresses.append(v)
 
@@ -564,7 +564,7 @@ def sync(config,configfile,authfile):
     code,addresses = getsatellitesaddresses(config)
 
     code,auth = getauthdata(authfile)
-    if not code :
+    if not code:
         return (False,auth)
 
     """ now push configuration to each satellite """
@@ -640,7 +640,7 @@ def control(authfile,action):
     import string
 
     code,auth = getauthdata(authfile)
-    if not code :
+    if not code:
         return (False,auth)
 
     """ which command for an action """

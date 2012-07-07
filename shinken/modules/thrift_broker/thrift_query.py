@@ -119,27 +119,27 @@ class ThriftQuery(Hooker):
         """Translate the table name to the corresponding out_map key."""
         try:
             self.out_map_name = {
-                'hosts' : 'Host',
-                'services' : 'Service',
-                'hostgroups' : 'Hostgroup',
-                'servicegroups' : 'Servicegroup',
-                'contacts' : 'Contact',
-                'contactgroups' : 'Contactgroup',
-                'comments' : 'Comment',
-                'downtimes' : 'Downtime',
-                'commands' : 'Command',
-                'timeperiods' : 'Timeperiod',
-                'hostsbygroup' : 'Hostsbygroup',
-                'servicesbygroup' : 'Servicesbygroup',
-                'servicesbyhostgroup' : 'Servicesbyhostgroup',
-                'status' : 'Config',
-                'log' : 'Logline',
-                'schedulers' : 'SchedulerLink',
-                'pollers' : 'PollerLink',
-                'reactionners' : 'ReactionnerLink',
-                'brokers' : 'BrokerLink',
-                'problems' : 'Problem',
-                'columns' : 'Config', # just a dummy
+                'hosts': 'Host',
+                'services': 'Service',
+                'hostgroups': 'Hostgroup',
+                'servicegroups': 'Servicegroup',
+                'contacts': 'Contact',
+                'contactgroups': 'Contactgroup',
+                'comments': 'Comment',
+                'downtimes': 'Downtime',
+                'commands': 'Command',
+                'timeperiods': 'Timeperiod',
+                'hostsbygroup': 'Hostsbygroup',
+                'servicesbygroup': 'Servicesbygroup',
+                'servicesbyhostgroup': 'Servicesbyhostgroup',
+                'status': 'Config',
+                'log': 'Logline',
+                'schedulers': 'SchedulerLink',
+                'pollers': 'PollerLink',
+                'reactionners': 'ReactionnerLink',
+                'brokers': 'BrokerLink',
+                'problems': 'Problem',
+                'columns': 'Config', # just a dummy
             }[self.table]
         except:
             self.out_map_name = 'hosts'
@@ -390,21 +390,21 @@ member_key: the key to be used to sort each resulting element of a group member.
     def get_columns_livedata(self, cs):
         result = []
         result.append({
-            'description' : 'A description of the column' , 'name' : 'description' , 'table' : 'columns' , 'type' : 'string' })
+            'description': 'A description of the column' , 'name': 'description' , 'table': 'columns' , 'type': 'string' })
         result.append({
-            'description' : 'The name of the column within the table' , 'name' : 'name' , 'table' : 'columns' , 'type' : 'string' })
+            'description': 'The name of the column within the table' , 'name': 'name' , 'table': 'columns' , 'type': 'string' })
         result.append({
-            'description' : 'The name of the table' , 'name' : 'table' , 'table' : 'columns' , 'type' : 'string' })
+            'description': 'The name of the table' , 'name': 'table' , 'table': 'columns' , 'type': 'string' })
         result.append({
-            'description' : 'The data type of the column (int, float, string, list)' , 'name' : 'type' , 'table' : 'columns' , 'type' : 'string' })
-        tablenames = { 'Host' : 'hosts', 'Service' : 'services', 'Hostgroup' : 'hostgroups', 'Servicegroup' : 'servicegroups', 'Contact' : 'contacts', 'Contactgroup' : 'contactgroups', 'Command' : 'commands', 'Downtime' : 'downtimes', 'Comment' : 'comments', 'Timeperiod' : 'timeperiods', 'Config' : 'status', 'Logline' : 'log', 'Statsbygroup' : 'statsgroupby', 'Hostsbygroup' : 'hostsbygroup', 'Servicesbygroup' : 'servicesbygroup', 'Servicesbyhostgroup' : 'servicesbyhostgroup' }
+            'description': 'The data type of the column (int, float, string, list)' , 'name': 'type' , 'table': 'columns' , 'type': 'string' })
+        tablenames = { 'Host': 'hosts', 'Service': 'services', 'Hostgroup': 'hostgroups', 'Servicegroup': 'servicegroups', 'Contact': 'contacts', 'Contactgroup': 'contactgroups', 'Command': 'commands', 'Downtime': 'downtimes', 'Comment': 'comments', 'Timeperiod': 'timeperiods', 'Config': 'status', 'Logline': 'log', 'Statsbygroup': 'statsgroupby', 'Hostsbygroup': 'hostsbygroup', 'Servicesbygroup': 'servicesbygroup', 'Servicesbyhostgroup': 'servicesbyhostgroup' }
         for obj in sorted(LSout_map, key=lambda x: x):
             if obj in tablenames:
                 for attr in LSout_map[obj]:
                     if 'description' in LSout_map[obj][attr] and LSout_map[obj][attr]['description']:
-                        result.append({ 'description' : LSout_map[obj][attr]['description'], 'name' : attr, 'table' : tablenames[obj], 'type' : LSout_map[obj][attr]['type'] })
+                        result.append({ 'description': LSout_map[obj][attr]['description'], 'name': attr, 'table': tablenames[obj], 'type': LSout_map[obj][attr]['type'] })
                     else:
-                        result.append({'description' : 'to_do_desc', 'name' : attr, 'table' : tablenames[obj], 'type' : LSout_map[obj][attr]['type'] })
+                        result.append({'description': 'to_do_desc', 'name': attr, 'table': tablenames[obj], 'type': LSout_map[obj][attr]['type'] })
         return result
 
 

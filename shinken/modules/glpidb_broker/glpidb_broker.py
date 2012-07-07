@@ -36,9 +36,9 @@ import time
 import sys
 
 properties = {
-    'daemons' : ['broker'],
-    'type' : 'glpidb',
-    'phases' : ['running'],
+    'daemons': ['broker'],
+    'type': 'glpidb',
+    'phases': ['running'],
     }
 
 from shinken.basemodule import BaseModule
@@ -56,27 +56,27 @@ class Glpidb_broker(BaseModule):
         # Mapping for name of data, rename attributes and transform function
         self.mapping = {
            # Host
-           'host_check_result' : {
-               'plugin_monitoring_services_id' : {'transform' : None},
-               'event' : {'transform' : None},
-               'perf_data' : {'transform' : None},
-               'output' : {'transform' : None},
-               'state' : {'transform' : None},
-               'latency' : {'transform' : None},
-               'execution_time' : {'transform' : None},
-               'state_type' : {'transform' : None},
+           'host_check_result': {
+               'plugin_monitoring_services_id': {'transform': None},
+               'event': {'transform': None},
+               'perf_data': {'transform': None},
+               'output': {'transform': None},
+               'state': {'transform': None},
+               'latency': {'transform': None},
+               'execution_time': {'transform': None},
+               'state_type': {'transform': None},
                },
            # Service
-           'service_check_result' : {
-               'plugin_monitoring_services_id' : {'transform' : None},
-               'plugin_monitoring_servicescatalogs_id' : {'transform' : None},
-               'event' : {'transform' : None},
-               'perf_data' : {'transform' : None},
-               'output' : {'transform' : None},
-               'state' : {'transform' : None},
-               'latency' : {'transform' : None},
-               'execution_time' : {'transform' : None},
-               'state_type' : {'transform' : None},
+           'service_check_result': {
+               'plugin_monitoring_services_id': {'transform': None},
+               'plugin_monitoring_servicescatalogs_id': {'transform': None},
+               'event': {'transform': None},
+               'perf_data': {'transform': None},
+               'output': {'transform': None},
+               'state': {'transform': None},
+               'latency': {'transform': None},
+               'execution_time': {'transform': None},
+               'state_type': {'transform': None},
                }
            }
         # Last state of check
@@ -168,7 +168,7 @@ class Glpidb_broker(BaseModule):
             f = getattr(self, manager)
             queries = f(new_b)
             # Ok, we've got queries, now : run them!
-            for q in queries :
+            for q in queries:
                 self.db_backend.execute_query(q)
         manager = 'manage_'+type+'_brok'
         if hasattr(self, manager):
@@ -179,7 +179,7 @@ class Glpidb_broker(BaseModule):
             f = getattr(self, manager)
             queries = f(new_b)
             # Ok, we've got queries, now : run them!
-            for q in queries :
+            for q in queries:
                 self.db_backend.execute_query(q)
             return
 
@@ -245,7 +245,7 @@ class Glpidb_broker(BaseModule):
             del new_data['plugin_monitoring_services_id']
             table = 'glpi_plugin_monitoring_services'
 
-        where_clause = {'id' : new_data['id']}
+        where_clause = {'id': new_data['id']}
         #print "Update service : ", new_data
         query = self.db_backend.create_update_query(table, new_data, where_clause)
         return [query]

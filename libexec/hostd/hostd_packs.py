@@ -27,7 +27,7 @@ from shinken.objects.config import Config
 logger.set_level(10)
 class Dummy():
     def __init__(self): pass
-    def add(self, obj) : pass
+    def add(self, obj): pass
 logger.load_obj(Dummy())
 
 
@@ -50,7 +50,7 @@ def check_tmp():
 
 
 def refuse_pack(table, pack, comment):
-    u = table.find_one({'_id' : pack})
+    u = table.find_one({'_id': pack})
     if not u:
         print 'ERROR : cannot find pack %s' % pack
         sys.exit(2)
@@ -61,17 +61,17 @@ def refuse_pack(table, pack, comment):
 
 
 def delete_pack(table, pack):
-    u = table.find_one({'_id' : pack})
+    u = table.find_one({'_id': pack})
     if not u:
         print 'ERROR : cannot find pack %s' % pack
         sys.exit(2)
-    table.remove({'_id' : pack})
+    table.remove({'_id': pack})
     print "OK : pack %s is removed" % pack
 
 
 
 def analyse_pack(table, pack):
-    p = table.find_one({'_id' : pack})
+    p = table.find_one({'_id': pack})
     filepath = p['filepath']
     print "Analysing pack"
     if not zipfile.is_zipfile(filepath):

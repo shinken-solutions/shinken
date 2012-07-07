@@ -33,10 +33,10 @@ from shinken.basemodule import BaseModule
 from shinken.log import logger
 
 properties = {
-    'daemons' : ['arbiter'],
-    'type' : 'hack_poller_tag_by_macros',
-    'external' : False,
-    'phases' : ['late_configuration'],
+    'daemons': ['arbiter'],
+    'type': 'hack_poller_tag_by_macros',
+    'external': False,
+    'phases': ['late_configuration'],
     }
 
 

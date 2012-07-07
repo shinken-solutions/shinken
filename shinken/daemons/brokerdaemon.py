@@ -133,9 +133,9 @@ class Broker(BaseSatellite):
 
     # Get the good tabs for links by the kind. If unknown, return None
     def get_links_from_type(self, type):
-        t = {'scheduler' : self.schedulers, 'arbiter' : self.arbiters, \
-             'poller' : self.pollers, 'reactionner' : self.reactionners}
-        if type in t :
+        t = {'scheduler': self.schedulers, 'arbiter': self.arbiters, \
+             'poller': self.pollers, 'reactionner': self.reactionners}
+        if type in t:
             return t[type]
         return None
 
@@ -280,7 +280,7 @@ class Broker(BaseSatellite):
                 try:
                     o = f.get(block=False)
                     self.add(o)
-                except Empty :
+                except Empty:
                     full_queue = False
 
 
@@ -466,7 +466,7 @@ class Broker(BaseSatellite):
         logger.info("We have our pollers : %s" % self.pollers)
 
         # Now reactionners
-        for rea_id in conf['reactionners'] :
+        for rea_id in conf['reactionners']:
             # Must look if we already have it
             already_got = rea_id in self.reactionners
             if already_got:

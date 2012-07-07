@@ -47,7 +47,7 @@ def get_page(arg1='nothing'):
     # we return values for the template (view). But beware, theses values are the
     # only one the tempalte will have, so we must give it an app link and the
     # user we are loggued with (it's a contact object in fact)
-    return {'app' : app, 'user' : user, 'host' : my_host}
+    return {'app': app, 'user': user, 'host': my_host}
 
 
 # This is the dict teh webui will try to "load".
@@ -58,5 +58,5 @@ def get_page(arg1='nothing'):
 #    the dummy/htdocs/ directory. Bewere : it will take the plugin name to match.
 #  * optional : you can add 'method' : 'POST' so this adress will be only available for
 #    POST calls. By default it's GET. Look at the lookup module for sample about this.
-pages = {get_page : { 'routes' : ['/dummy/:arg1', '/dummy/'], 'view' : 'dummy', 'static' : True}}
+pages = {get_page: { 'routes': ['/dummy/:arg1', '/dummy/'], 'view': 'dummy', 'static': True}}
 

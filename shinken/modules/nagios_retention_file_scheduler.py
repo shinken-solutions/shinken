@@ -42,9 +42,9 @@ from shinken.log import logger
 
 
 properties = {
-    'daemons' : ['scheduler'],
-    'type' : 'nagios_retention_file',
-    'external' : False,
+    'daemons': ['scheduler'],
+    'type': 'nagios_retention_file',
+    'external': False,
 }
 
 
@@ -78,21 +78,21 @@ class Nagios_retention_scheduler(BaseModule):
     def read_retention_buf(self, buf):
         params = []
         objectscfg = {'void': [],
-                      'timeperiod' : [],
-                      'command' : [],
-                      'contactgroup' : [],
-                      'hostgroup' : [],
-                      'contact' : [],
-                      'notificationway' : [],
-                      'host' : [],
-                      'service' : [],
-                      'servicegroup' : [],
-                      'servicedependency' : [],
-                      'hostdependency' : [],
-                      'hostcomment' : [],
-                      'hostdowntime' : [],
-                      'servicecomment' : [],
-                      'servicedowntime' : [],
+                      'timeperiod': [],
+                      'command': [],
+                      'contactgroup': [],
+                      'hostgroup': [],
+                      'contact': [],
+                      'notificationway': [],
+                      'host': [],
+                      'service': [],
+                      'servicegroup': [],
+                      'servicedependency': [],
+                      'hostdependency': [],
+                      'hostcomment': [],
+                      'hostdowntime': [],
+                      'servicecomment': [],
+                      'servicedowntime': [],
                       }
         tmp = []
         tmp_type = 'void'
@@ -319,20 +319,20 @@ class Nagios_retention_scheduler(BaseModule):
         raw_objects = self.read_retention_buf(buf)
         print "Fun raw"
 
-        types_creations = {'timeperiod' : (Timeperiod, Timeperiods, 'timeperiods'),
-                   'service' : (Service, Services, 'services'),
-                   'host' : (Host, Hosts, 'hosts'),
-                   'contact' : (Contact, Contacts, 'contacts'),
+        types_creations = {'timeperiod': (Timeperiod, Timeperiods, 'timeperiods'),
+                   'service': (Service, Services, 'services'),
+                   'host': (Host, Hosts, 'hosts'),
+                   'contact': (Contact, Contacts, 'contacts'),
                    }
 
 
         self.property_mapping = {
-            'service' : [('current_attempt', 'attempt'), ('current_state','state_type_id'),
+            'service': [('current_attempt', 'attempt'), ('current_state','state_type_id'),
                          ('plugin_output','output'), ('last_check','last_chk'),
                          ('performance_data','perf_data'), ('next_check' , 'next_chk'),
                          ('long_plugin_output', 'long_output'), ('check_execution_time', 'execution_time'),
                          ('check_latency', 'latency')],
-            'host' : [('current_attempt', 'attempt'), ('current_state','state_type_id'),
+            'host': [('current_attempt', 'attempt'), ('current_state','state_type_id'),
                       ('plugin_output','output'), ('last_check','last_chk'),
                  ('performance_data','perf_data'), ('next_check' , 'next_chk'),
                       ('long_plugin_output', 'long_output'), ('check_execution_time', 'execution_time'),
@@ -349,7 +349,7 @@ class Nagios_retention_scheduler(BaseModule):
         self.create_and_link_downtimes(raw_objects, all_obj)
 
         # Taken from the scheduler code... sorry
-        all_data = {'hosts' : {}, 'services' : {}}
+        all_data = {'hosts': {}, 'services': {}}
         for h in all_obj['host']:
             d = {}
             running_properties = h.__class__.running_properties

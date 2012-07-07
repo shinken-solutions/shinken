@@ -59,7 +59,7 @@ class NotificationWay(Item):
     # so from Nagios2 format, to Nagios3 ones.
     # Or Shinken deprecated names like criticity
     old_properties = {
-        'min_criticity'            :    'min_business_impact',
+        'min_criticity':    'min_business_impact',
     }
 
 
@@ -88,8 +88,8 @@ class NotificationWay(Item):
         b = self.service_notification_period.is_time_valid(t)
         if 'n' in self.service_notification_options:
             return False
-        t = {'WARNING' : 'w', 'UNKNOWN' : 'u', 'CRITICAL' : 'c',
-             'RECOVERY' : 'r', 'FLAPPING' : 'f', 'DOWNTIME' : 's'}
+        t = {'WARNING': 'w', 'UNKNOWN': 'u', 'CRITICAL': 'c',
+             'RECOVERY': 'r', 'FLAPPING': 'f', 'DOWNTIME': 's'}
         if type == 'PROBLEM':
             if state in t:
                 return b and t[state] in self.service_notification_options
@@ -126,8 +126,8 @@ class NotificationWay(Item):
         b = self.host_notification_period.is_time_valid(t)
         if 'n' in self.host_notification_options:
             return False
-        t = {'DOWN' : 'd', 'UNREACHABLE' : 'u', 'RECOVERY' : 'r',
-             'FLAPPING' : 'f', 'DOWNTIME' : 's'}
+        t = {'DOWN': 'd', 'UNREACHABLE': 'u', 'RECOVERY': 'r',
+             'FLAPPING': 'f', 'DOWNTIME': 's'}
         if type == 'PROBLEM':
             if state in t:
                 return b and t[state] in self.host_notification_options
@@ -174,7 +174,7 @@ class NotificationWay(Item):
 
         # Ok now we manage special cases...
         # Service part
-        if not hasattr(self, 'service_notification_commands') :
+        if not hasattr(self, 'service_notification_commands'):
             logger.warning("[notificationway::%s] do not have any service_notification_commands defined" % self.get_name())
             state = False
         else:
@@ -191,12 +191,12 @@ class NotificationWay(Item):
             state = False
 
         # Now host part
-        if not hasattr(self, 'host_notification_commands') :
+        if not hasattr(self, 'host_notification_commands'):
             logger.warning("[notificationway::%s] do not have any host_notification_commands defined" % self.get_name())
             state = False
         else:
             for cmd in self.host_notification_commands:
-                if cmd is None :
+                if cmd is None:
                     logger.warning("[notificationway::%s] a host_notification_command is missing" % self.get_name())
                     state = False
                 if not cmd.is_valid():

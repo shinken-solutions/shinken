@@ -168,7 +168,7 @@ class Webui_broker(BaseModule, Daemon):
             #cProfile.runctx('''self.do_main()''', globals(), locals(),'/tmp/webui.profile')
             self.do_main()
         except Exception, exp:
-            msg = Message(id=0, type='ICrash', data={'name' : self.get_name(), 'exception' : exp, 'trace' : traceback.format_exc()})
+            msg = Message(id=0, type='ICrash', data={'name': self.get_name(), 'exception': exp, 'trace': traceback.format_exc()})
             self.from_q.put(msg)
             # wait 2 sec so we know that the broker got our message, and die
             time.sleep(2)
@@ -274,7 +274,7 @@ class Webui_broker(BaseModule, Daemon):
                           logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                           self.modules_manager.set_to_restart(mod)
               except Exception, exp:
-                  msg = Message(id=0, type='ICrash', data={'name' : self.get_name(), 'exception' : exp, 'trace' : traceback.format_exc()})
+                  msg = Message(id=0, type='ICrash', data={'name': self.get_name(), 'exception': exp, 'trace': traceback.format_exc()})
                   self.from_q.put(msg)
                   # wait 2 sec so we know that the broker got our message, and die
                   time.sleep(2)
@@ -365,8 +365,8 @@ class Webui_broker(BaseModule, Daemon):
                         for place in widget_lst:
                             if place not in self.widgets:
                                 self.widgets[place] = []
-                            w = {'widget_name' : widget_name, 'widget_desc' : widget_desc, 'base_uri' : routes[0],
-                                 'widget_picture' : widget_picture}
+                            w = {'widget_name': widget_name, 'widget_desc': widget_desc, 'base_uri': routes[0],
+                                 'widget_picture': widget_picture}
                             print "Loading widget", w
                             self.widgets[place].append(w)
 

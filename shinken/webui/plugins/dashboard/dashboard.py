@@ -81,18 +81,18 @@ def get_page():
         #    json.loads(option_s)
         #print "And dump options for this widget", options
         w['options'] = json.dumps(options)
-        args = {'wid':i, 'collapsed' : collapsed}
+        args = {'wid':i, 'collapsed': collapsed}
         args.update(options)
         w['options_uri'] = '&'.join( '%s=%s' % (k, v) for (k, v) in args.iteritems())
         widgets.append(w)
 
     print "Give widgets", widgets
-    return {'app' : app, 'user' : user, 'widgets' : widgets}
+    return {'app': app, 'user': user, 'widgets': widgets}
 
 
 
 
-pages = {get_page : { 'routes' : ['/dashboard'], 'view' : 'dashboard', 'static' : True},
+pages = {get_page: { 'routes': ['/dashboard'], 'view': 'dashboard', 'static': True},
 #         get_all : { 'routes' : ['/dashboard/fullscreen'], 'view' : 'fullscreen', 'static' : True},
          }
 

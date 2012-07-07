@@ -379,20 +379,20 @@ class ShinkenTest(unittest.TestCase):
         self.livelogs = 'tmp/livelogs.db' + self.testid
 
         if modconf is None:
-            modconf = Module({'module_name' : 'LiveStatus',
-                'module_type' : 'livestatus',
-                'port' : str(50000 + os.getpid()),
-                'pnp_path' : 'tmp/pnp4nagios_test' + self.testid,
-                'host' : '127.0.0.1',
-                'socket' : 'live',
-                'name' : 'test', #?
+            modconf = Module({'module_name': 'LiveStatus',
+                'module_type': 'livestatus',
+                'port': str(50000 + os.getpid()),
+                'pnp_path': 'tmp/pnp4nagios_test' + self.testid,
+                'host': '127.0.0.1',
+                'socket': 'live',
+                'name': 'test', #?
             })
 
-        dbmodconf = Module({'module_name' : 'LogStore',
-            'module_type' : 'logstore_sqlite',
-            'use_aggressive_sql' : "0",
-            'database_file' : self.livelogs,
-            'archive_path' : os.path.join(os.path.dirname(self.livelogs), 'archives'),
+        dbmodconf = Module({'module_name': 'LogStore',
+            'module_type': 'logstore_sqlite',
+            'use_aggressive_sql': "0",
+            'database_file': self.livelogs,
+            'archive_path': os.path.join(os.path.dirname(self.livelogs), 'archives'),
         })
         modconf.modules = [dbmodconf]
         self.livestatus_broker = LiveStatus_broker(modconf)

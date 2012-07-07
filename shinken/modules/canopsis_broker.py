@@ -43,10 +43,10 @@ from kombu import BrokerConnection
 from kombu import Producer, Consumer, Exchange, Queue
 
 properties = {
-    'daemons' : ['broker'],
-    'type' : 'canopsis',
-    'external' : False,
-    'phases' : ['running'],
+    'daemons': ['broker'],
+    'type': 'canopsis',
+    'external': False,
+    'phases': ['running'],
     }
 
 
@@ -201,16 +201,16 @@ class Canopsis_broker(BaseModule):
         if source_type == 'resource':
             # service
             specificmessage={
-                'resource' : b.data['service_description'],
-                'command_name' : self.service_commands[b.data['host_name']][b.data['service_description']],
-                'max_attempts' : self.service_max_check_attempts[b.data['host_name']][b.data['service_description']],
+                'resource': b.data['service_description'],
+                'command_name': self.service_commands[b.data['host_name']][b.data['service_description']],
+                'max_attempts': self.service_max_check_attempts[b.data['host_name']][b.data['service_description']],
             }
         elif source_type == 'component':
             # host
             specificmessage={
-                'resource' : None,
-                'command_name' : self.host_commands[b.data['host_name']],
-                'max_check_attempts' : self.host_max_check_attempts[b.data['host_name']]
+                'resource': None,
+                'command_name': self.host_commands[b.data['host_name']],
+                'max_check_attempts': self.host_max_check_attempts[b.data['host_name']]
             }
         else:
             # WTF ?!
@@ -218,22 +218,22 @@ class Canopsis_broker(BaseModule):
             return None
 
         commonmessage={
-            'connector' : u'shinken',
-            'connector_name' : unicode(self.identifier),
-            'event_type' : event_type,
-            'source_type' : source_type,
-            'component' : b.data['host_name'],
-            'timestamp' : b.data['last_chk'],
-            'state' : b.data['state_id'],
-            'state_type' : b.data['state_type_id'],
-            'output' : b.data['output'],
-            'long_output' : b.data['long_output'],
-            'perf_data' : b.data['perf_data'],
-            'check_type' : b.data['check_type'],
-            'current_attempt' : b.data['attempt'],
-            'execution_time' : b.data['execution_time'],
-            'latency' : b.data['latency'],
-            'address' : self.host_addresses[b.data['host_name']]
+            'connector': u'shinken',
+            'connector_name': unicode(self.identifier),
+            'event_type': event_type,
+            'source_type': source_type,
+            'component': b.data['host_name'],
+            'timestamp': b.data['last_chk'],
+            'state': b.data['state_id'],
+            'state_type': b.data['state_type_id'],
+            'output': b.data['output'],
+            'long_output': b.data['long_output'],
+            'perf_data': b.data['perf_data'],
+            'check_type': b.data['check_type'],
+            'current_attempt': b.data['attempt'],
+            'execution_time': b.data['execution_time'],
+            'latency': b.data['latency'],
+            'address': self.host_addresses[b.data['host_name']]
         }
 
         return dict(commonmessage,**specificmessage)

@@ -35,8 +35,8 @@ from shinken.basemodule import BaseModule
 print "Loaded Apache/Passwd module"
 
 properties = {
-    'daemons' : ['webui', 'skonf'],
-    'type' : 'cfg_password_webui'
+    'daemons': ['webui', 'skonf'],
+    'type': 'cfg_password_webui'
     }
 
 

@@ -72,9 +72,9 @@ class Escalation(Item):
     # is in our time interval
     def is_eligible(self, t, status, notif_number, in_notif_time, interval):
         small_states = {
-            'WARNING' : 'w',    'UNKNOWN' : 'u',     'CRITICAL' : 'c',
-            'RECOVERY' : 'r',   'FLAPPING' : 'f',    'DOWNTIME' : 's',
-            'DOWN' : 'd',       'UNREACHABLE' : 'u', 'OK' : 'o', 'UP' : 'o'
+            'WARNING': 'w',    'UNKNOWN': 'u',     'CRITICAL': 'c',
+            'RECOVERY': 'r',   'FLAPPING': 'f',    'DOWNTIME': 's',
+            'DOWN': 'd',       'UNREACHABLE': 'u', 'OK': 'o', 'UP': 'o'
         }
 
         # If we are not time based, we check notification numbers:
@@ -110,9 +110,9 @@ class Escalation(Item):
 
     # t = the reference time
     def get_next_notif_time(self, t_wished, status, creation_time, interval):
-        small_states = {'WARNING' : 'w', 'UNKNOWN' : 'u', 'CRITICAL' : 'c',
-             'RECOVERY' : 'r', 'FLAPPING' : 'f', 'DOWNTIME' : 's',
-             'DOWN' : 'd', 'UNREACHABLE' : 'u', 'OK' : 'o', 'UP' : 'o'}
+        small_states = {'WARNING': 'w', 'UNKNOWN': 'u', 'CRITICAL': 'c',
+             'RECOVERY': 'r', 'FLAPPING': 'f', 'DOWNTIME': 's',
+             'DOWN': 'd', 'UNREACHABLE': 'u', 'OK': 'o', 'UP': 'o'}
 
         # If we are not time based, we bail out!
         if not self.time_based:

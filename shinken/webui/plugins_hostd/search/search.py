@@ -81,7 +81,7 @@ def search_get(q):
 
 
 def do_search(search):
-    if not search  or len(search) < 2 :
+    if not search  or len(search) < 2:
         print "Lookup %s too short or missing filter, I bail out" % search
         return json.dumps([])
 
@@ -129,7 +129,7 @@ def search_categories():
 
     # TODO : less PERFORMANCE KILLER QUERY!
     packs = app.datamgr.get_packs()
-    tree = {'name' : '/', 'nb' : 0, 'sons' : {}}
+    tree = {'name': '/', 'nb': 0, 'sons': {}}
     for p in packs:
         if p.get('state') not in ['ok', 'pending']:
             continue
@@ -143,7 +143,7 @@ def search_categories():
             print "Doing cat", cat
             # If not already declared, add my node
             if cat not in pos['sons']:
-                pos['sons'][cat] = {'name' : name, 'nb' : 0, 'sons' : {}}
+                pos['sons'][cat] = {'name': name, 'nb': 0, 'sons': {}}
             pos['sons'][cat]['nb'] += 1
             # Now go deeper in the tree :)
             print "Were I came from", pos
@@ -213,9 +213,9 @@ def search_tags():
 
 
 
-pages = {search_post : { 'routes' : ['/search'] , 'method' : 'POST'},
-         search_get : { 'routes' : ['/search/:q']},
-         search_categories : { 'routes' : ['/categories'] , 'method' : 'POST'},
-         search_tags : { 'routes' : ['/tags'] , 'method' : 'POST'},
+pages = {search_post: { 'routes': ['/search'] , 'method': 'POST'},
+         search_get: { 'routes': ['/search/:q']},
+         search_categories: { 'routes': ['/categories'] , 'method': 'POST'},
+         search_tags: { 'routes': ['/tags'] , 'method': 'POST'},
          }
 

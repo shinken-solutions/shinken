@@ -112,5 +112,5 @@ def get_page(cmd=None):
 
 
 
-pages = {get_page : { 'routes' : ['/action/:cmd#.+#']}}
+pages = {get_page: { 'routes': ['/action/:cmd#.+#']}}
 

@@ -38,7 +38,7 @@ import asyncore
 import getopt
 import shlex
 
-try :
+try:
     import OpenSSL
     SSLWantReadError = OpenSSL.SSL.WantReadError
     SSLSysCallError = OpenSSL.SSL.SysCallError
@@ -56,11 +56,11 @@ from shinken.basemodule import BaseModule
 
 
 properties = {
-    'daemons' : ['poller'],
-    'type' : 'nrpe_poller',
-    'external' : False,
+    'daemons': ['poller'],
+    'type': 'nrpe_poller',
+    'external': False,
     # To be a real worker module, you must set this
-    'worker_capable' : True,
+    'worker_capable': True,
     }
 
 
@@ -259,7 +259,7 @@ class NRPEAsyncClient(asyncore.dispatcher):
 
             # We can have nothing, it's just that the server
             # do not want to talk to us :(
-            except SSLZeroReturnError :
+            except SSLZeroReturnError:
                 buf = ''
 
             except SSLSysCallError:
@@ -288,7 +288,7 @@ class NRPEAsyncClient(asyncore.dispatcher):
     # query
     def handle_write(self):
         if self.writable():
-            try :
+            try:
                 sent = self.send(self.nrpe.query)
             except socket.error, exp:
                 # In case of problem, just bail out
@@ -515,7 +515,7 @@ class Nrpe_poller(BaseModule):
                 if cmsg.get_type() == 'Die':
                     print "[%d]Dad say we are diing..." % self.id
                     break
-            except :
+            except:
                 pass
 
             # TODO : better time management

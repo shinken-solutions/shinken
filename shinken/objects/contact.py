@@ -65,7 +65,7 @@ class Contact(Item):
         'pager':            StringProp(default='none', fill_brok=['full_status']),
         'address1':         StringProp(default='none', fill_brok=['full_status']),
         'address2':         StringProp(default='none', fill_brok=['full_status']),
-        'address3' :        StringProp(default='none', fill_brok=['full_status']),
+        'address3':        StringProp(default='none', fill_brok=['full_status']),
         'address4':         StringProp(default='none', fill_brok=['full_status']),
         'address5':         StringProp(default='none', fill_brok=['full_status']),
         'address6':         StringProp(default='none', fill_brok=['full_status']),
@@ -73,7 +73,7 @@ class Contact(Item):
         'is_admin':         BoolProp(default='0', fill_brok=['full_status']),
         'retain_status_information': BoolProp(default='1', fill_brok=['full_status']),
         'notificationways': StringProp(default='', fill_brok=['full_status']),
-        'password' :        StringProp(default='NOPASSWORDSET', fill_brok=['full_status']),
+        'password':        StringProp(default='NOPASSWORDSET', fill_brok=['full_status']),
     })
 
     running_properties = Item.running_properties.copy()
@@ -86,7 +86,7 @@ class Contact(Item):
     # so from Nagios2 format, to Nagios3 ones.
     # Or Shinken deprecated names like criticity
     old_properties = {
-        'min_criticity'            :    'min_business_impact',
+        'min_criticity':    'min_business_impact',
     }
 
 

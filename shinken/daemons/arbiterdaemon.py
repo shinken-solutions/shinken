@@ -80,7 +80,7 @@ class IForArbiter(Interface):
             for dae in daemons:
                 if hasattr(dae, daemon_name_attr) and getattr(dae, daemon_name_attr) == daemon_name:
                     if hasattr(dae, 'alive') and hasattr(dae, 'spare'):
-                        return {'alive' : dae.alive, 'spare' : dae.spare}
+                        return {'alive': dae.alive, 'spare': dae.spare}
         return None
 
     # Here a function called by check_shinken to get daemons list
@@ -105,12 +105,12 @@ class IForArbiter(Interface):
 
 
     def get_all_states(self):
-        res = {'arbiter' : self.app.conf.arbiters,
-               'scheduler' : self.app.conf.schedulers,
-               'poller' : self.app.conf.pollers,
-               'reactionner' : self.app.conf.reactionners,
-               'receiver' : self.app.conf.receivers,
-               'broker' : self.app.conf.brokers}
+        res = {'arbiter': self.app.conf.arbiters,
+               'scheduler': self.app.conf.schedulers,
+               'poller': self.app.conf.pollers,
+               'reactionner': self.app.conf.reactionners,
+               'receiver': self.app.conf.receivers,
+               'broker': self.app.conf.brokers}
         return res
 
 
@@ -119,7 +119,7 @@ class IForArbiter(Interface):
         logger.debug('ASK:: table= %s, properties= %s' % (str(table), str(properties)))
         objs = getattr(self.app.conf, table, None)
         logger.debug("OBJS:: %s" % str(objs))
-        if not objs :
+        if not objs:
             return ''
         res = []
         for obj in objs:
@@ -287,7 +287,7 @@ class Arbiter(Daemon):
         # got items for us
         for inst in self.modules_manager.instances:
             if 'configuration' in inst.phases:
-                try :
+                try:
                     r = inst.get_objects()
                 except Exception, exp:
                     logger.debug("The instance %s raise an exception %s. I bypass it" % (inst.get_name(), str(exp)))

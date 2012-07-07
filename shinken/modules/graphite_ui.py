@@ -39,8 +39,8 @@ from datetime import datetime
 # print "Loaded AD module"
 
 properties = {
-    'daemons' : ['webui'],
-    'type' : 'graphite_webui'
+    'daemons': ['webui'],
+    'type': 'graphite_webui'
     }
 
 
@@ -84,7 +84,7 @@ class Graphite_Webui(BaseModule):
 
     # Give the link for the GRAPHITE UI, with a Name
     def get_external_ui_link(self):
-        return {'label' : 'Graphite', 'uri' : self.uri}
+        return {'label': 'Graphite', 'uri': self.uri}
 
 
     # For a perf_data like /=30MB;4899;4568;1234;0  /var=50MB;4899;4568;1234;0 /toto=
@@ -106,10 +106,10 @@ class Graphite_Webui(BaseModule):
             # get the first value of ;
             if ';' in raw:
                 elts = raw.split(';')
-                name_value = { name : elts[0], name+'_warn' : elts[1], name+'_crit' : elts[2] }
+                name_value = { name: elts[0], name+'_warn': elts[1], name+'_crit': elts[2] }
             else:
                 value = raw
-                name_value = { name : raw }
+                name_value = { name: raw }
             # bailout if need
             if name_value[name] == '':
                 continue

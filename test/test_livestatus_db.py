@@ -316,11 +316,11 @@ Columns: time type options state host_name"""
         self.assert_(len([d for d in os.listdir("tmp/archives") if not d.endswith("journal")]) == 4)
         lengths = []
         for db in sorted([d for d in os.listdir("tmp/archives") if not d.endswith("journal")]):
-            dbmodconf = Module({'module_name' : 'LogStore',
-                'module_type' : 'logstore_sqlite',
-                'use_aggressive_sql' : '0',
-                'database_file' : "tmp/archives/" + db,
-                'max_logs_age' : '0',
+            dbmodconf = Module({'module_name': 'LogStore',
+                'module_type': 'logstore_sqlite',
+                'use_aggressive_sql': '0',
+                'database_file': "tmp/archives/" + db,
+                'max_logs_age': '0',
             })
             tmpconn = LiveStatusLogStoreSqlite(dbmodconf)
             tmpconn.open()
@@ -430,11 +430,11 @@ Columns: time type options state host_name"""
         self.assert_(len([d for d in os.listdir("tmp/archives") if not d.endswith("journal")]) == 4)
         lengths = []
         for db in sorted([d for d in os.listdir("tmp/archives") if not d.endswith("journal")]):
-            dbmodconf = Module({'module_name' : 'LogStore',
-                'module_type' : 'logstore_sqlite',
-                'use_aggressive_sql' : '0',
-                'database_file' : "tmp/archives/" + db,
-                'max_logs_age' : '0',
+            dbmodconf = Module({'module_name': 'LogStore',
+                'module_type': 'logstore_sqlite',
+                'use_aggressive_sql': '0',
+                'database_file': "tmp/archives/" + db,
+                'max_logs_age': '0',
             })
             tmpconn = LiveStatusLogStoreSqlite(dbmodconf)
             tmpconn.open()
@@ -807,7 +807,7 @@ class TestConfigNoLogstore(TestConfig):
 
     def init_livestatus(self):
         self.livelogs = 'tmp/livelogs.db' + self.testid
-        modconf = Module({'module_name' : 'LiveStatus',
+        modconf = Module({'module_name': 'LiveStatus',
             'module_type': 'livestatus',
             'port': str(50000 + os.getpid()),
             'pnp_path': 'tmp/pnp4nagios_test' + self.testid,
@@ -817,7 +817,7 @@ class TestConfigNoLogstore(TestConfig):
             'database_file': self.livelogs,
         })
 
-        dbmodconf = Module({'module_name' : 'LogStore',
+        dbmodconf = Module({'module_name': 'LogStore',
             'module_type': 'logstore_sqlite',
             'use_aggressive_sql': "0",
             'database_file': self.livelogs,

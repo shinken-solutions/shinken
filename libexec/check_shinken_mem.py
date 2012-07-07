@@ -67,7 +67,7 @@ def main():
             notification = a
         elif o in ("-c", "--critical"):
             notification = a
-	else :
+	else:
 	    assert False , "unknown options"
 
     parser = argparse.ArgumentParser()
@@ -82,13 +82,13 @@ def main():
     pmemUsage = 100 - pmemFree
     pmemUsage = str(pmemUsage)
 
-    if pmemUsage >= cmem :
+    if pmemUsage >= cmem:
        print 'CRITICAL - Memory usage : '+pmemUsage+'% |mem='+pmemUsage
        sys.exit(2)
-    elif pmemUsage >= wmem :
+    elif pmemUsage >= wmem:
        print 'WARNING - Memory usage : '+pmemUsage+'% |mem='+pmemUsage
        sys.exit(1)
-    else :
+    else:
        print 'OK - Memory usage : '+pmemUsage+'% |mem='+pmemUsage
        sys.exit(0)
 

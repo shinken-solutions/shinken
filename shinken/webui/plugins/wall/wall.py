@@ -118,8 +118,8 @@ def get_page():
     # And sort it
     all_pbs.sort(hst_srv_sort) # sort_by_last_state_change)
 
-    return {'app' : app, 'user' : user, 'impacts' : impacts, 'problems' : all_pbs}
+    return {'app': app, 'user': user, 'impacts': impacts, 'problems': all_pbs}
 
 
-pages = {get_page : { 'routes' : ['/wall/', '/wall'], 'view' : 'wall', 'static' : True}}
+pages = {get_page: { 'routes': ['/wall/', '/wall'], 'view': 'wall', 'static': True}}
 

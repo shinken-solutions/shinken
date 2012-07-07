@@ -50,10 +50,10 @@ from shinken.external_command import ExternalCommand
 
 
 properties = {
-    'daemons' : ['arbiter'],
-    'type' : 'hot_dependencies',
-    'external' : False,
-    'phases' : ['late_configuration'],
+    'daemons': ['arbiter'],
+    'type': 'hot_dependencies',
+    'external': False,
+    'phases': ['late_configuration'],
     }
 
 
@@ -110,7 +110,7 @@ class Hot_dependencies_arbiter(BaseModule):
             if last_update > self.last_update:
                 self.last_update = last_update
                 return True
-        except OSError, exp : # Maybe the file got problem, we bypaass here
+        except OSError, exp: # Maybe the file got problem, we bypaass here
             self.debug(str(exp))
         return False
 

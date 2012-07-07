@@ -40,11 +40,11 @@ from shinken.basemodule import BaseModule
 from shinken.external_command import ExternalCommand
 
 properties = {
-    'daemons' : ['reactionner'],
-    'type' : 'android_sms',
-    'external' : False,
+    'daemons': ['reactionner'],
+    'type': 'android_sms',
+    'external': False,
     # To be a real worker module, you must set this
-    'worker_capable' : True,
+    'worker_capable': True,
 }
 
 
@@ -235,7 +235,7 @@ class Android_reactionner(BaseModule):
                 if cmsg.get_type() == 'Die':
                     print "[%d]Dad say we are diing..." % self.id
                     break
-            except :
+            except:
                 pass
 
             timeout -= time.time() - begin

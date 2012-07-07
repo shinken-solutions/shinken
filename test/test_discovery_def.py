@@ -52,10 +52,10 @@ class TestDiscoveryConf(ShinkenTest):
         # should match this
         self.assert_(genhttp.is_matching_disco_datas(l) == True)
         # Match this one too
-        l = {'openports' : '80', 'os': 'windows', 'super' : 'man'}
+        l = {'openports': '80', 'os': 'windows', 'super': 'man'}
         self.assert_(genhttp.is_matching_disco_datas(l) == True)
         # But not this one
-        l = {'openports' : '80'}
+        l = {'openports': '80'}
         self.assert_(genhttp.is_matching_disco_datas(l) == False)
 
 
@@ -63,11 +63,11 @@ class TestDiscoveryConf(ShinkenTest):
         genhttpnowin = self.sched.conf.discoveryrules.find_by_name('GenHttpNotWindows')
 
         # Should manage this
-        l = {'openports' : '80', 'os':  'linux'}
+        l = {'openports': '80', 'os':  'linux'}
         self.assert_(genhttpnowin.is_matching_disco_datas(l) == True)
 
         # But NOT this one
-        l = {'openports' : '80', 'os': 'windows'}
+        l = {'openports': '80', 'os': 'windows'}
         print "Should NOT match"
         self.assert_(genhttpnowin.is_matching_disco_datas(l) == False)
 
@@ -120,11 +120,11 @@ class TestDiscoveryConf(ShinkenTest):
         self.assert_(genhttp.is_matching(key, value) == True)
 
         # Low look for a list of matchings
-        l = {'openports': '80', 'os' : 'windows'}
+        l = {'openports': '80', 'os': 'windows'}
         # should match this
         self.assert_(genhttp.is_matching_disco_datas(l) == True)
         # Match this one too
-        l = {'openports' : '80', 'os': 'windows', 'super': 'man'}
+        l = {'openports': '80', 'os': 'windows', 'super': 'man'}
         self.assert_(genhttp.is_matching_disco_datas(l) == True)
         # And this last one
         l = {'openports': '80'}
@@ -153,7 +153,7 @@ class TestDiscoveryConf(ShinkenTest):
         self.assert_(linux.is_matching(key, value) == True)
 
         # Low look for a list of matchings
-        l = {'openports': '80', 'osvendor' : 'linux'}
+        l = {'openports': '80', 'osvendor': 'linux'}
         # should match this
         self.assert_(linux.is_matching_disco_datas(l) == True)
 

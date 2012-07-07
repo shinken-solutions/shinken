@@ -60,7 +60,7 @@ def get_packs():
     # we return values for the template (view). But beware, theses values are the
     # only one the tempalte will have, so we must give it an app link and the
     # user we are loggued with (it's a contact object in fact)
-    return {'app' : app, 'user' : user}
+    return {'app': app, 'user': user}
 
 
 def get_new_packs():
@@ -148,7 +148,7 @@ def get_new_packs():
     for (name, occ) in raw_tags:
         i += 1
         size = 1 + float(i)/nb_tags
-        new_tags[name] = {'name' : name, 'size' : size, 'occ' : occ}
+        new_tags[name] = {'name': name, 'size': size, 'occ': occ}
 
     # Sort by name
     names = new_tags.keys()
@@ -163,7 +163,7 @@ def get_new_packs():
     # we return values for the template (view). But beware, theses values are the
     # only one the tempalte will have, so we must give it an app link and the
     # user we are loggued with (it's a contact object in fact)
-    return {'app':app, 'user':user, 'error':error, 'api_error':api_error, 'results':None, 'search':None, 'categories' : categories, 'tags':tags,  'print_cat_tree':print_cat_tree}
+    return {'app':app, 'user':user, 'error':error, 'api_error':api_error, 'results':None, 'search':None, 'categories': categories, 'tags':tags,  'print_cat_tree':print_cat_tree}
 
 
 def launch_search(search):
@@ -266,7 +266,7 @@ def download_pack(uri):
     # so we bail out if it's a false one
     user = app.get_user_auth()
     if not user:
-        r = {'state' : 401, 'text' : 'Sorry you are not logged!'}
+        r = {'state': 401, 'text': 'Sorry you are not logged!'}
         return json.dumps(r)
 
     print "We are asked to download", uri
@@ -286,12 +286,12 @@ def download_pack(uri):
         buf = response.read(5000000)
         add = response.read(1)
         if add:
-            r = {'state' : 400, 'text' : 'Sorry the file is too big!'}
+            r = {'state': 400, 'text': 'Sorry the file is too big!'}
             return json.dumps(r)
 
         print "WE get a file os the size", len(buf)
     except Exception, exp:
-        r = {'state' : 500, 'text' : 'ERROR: '+str(exp)}
+        r = {'state': 500, 'text': 'ERROR: '+str(exp)}
         return json.dumps(r)
 
     r = app.save_pack(buf)
@@ -300,10 +300,10 @@ def download_pack(uri):
 
 
 
-pages = {get_packs : { 'routes' : ['/packs'], 'view' : 'packs', 'static' : True},
-         get_new_packs : { 'routes' : ['/getpacks'], 'view' : 'getpacks', 'static' : True},
-         get_new_packs_result_post : { 'routes' : ['/getpacks'], 'method' : 'POST', 'view' : 'getpacks', 'static' : True},
-         get_new_packs_result : { 'routes' : ['/getpacks/:search#.+#'], 'view' : 'getpacks', 'static' : True},
-         download_pack : { 'routes' : ['/download/:uri#.+#'], 'view':None, 'static' : True},
+pages = {get_packs: { 'routes': ['/packs'], 'view': 'packs', 'static': True},
+         get_new_packs: { 'routes': ['/getpacks'], 'view': 'getpacks', 'static': True},
+         get_new_packs_result_post: { 'routes': ['/getpacks'], 'method': 'POST', 'view': 'getpacks', 'static': True},
+         get_new_packs_result: { 'routes': ['/getpacks/:search#.+#'], 'view': 'getpacks', 'static': True},
+         download_pack: { 'routes': ['/download/:uri#.+#'], 'view':None, 'static': True},
          }
 

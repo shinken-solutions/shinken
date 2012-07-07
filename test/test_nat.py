@@ -39,23 +39,23 @@ import subprocess
 SVC_CMD = "cd /hostlab && ./bin/shinken-#svc# -d -r -c ./test/etc/netkit/basic/#svc#d.ini\n"
 
 launchers = {
-    'arbiter'    : "cd /hostlab/var && ../bin/shinken-#svc# -r -c ../etc/nagios.cfg -c ../test/etc/netkit/#conf#/shinken-specific.cfg 2>&1 > ./arbiter.debug&\n",
-    'broker'     : SVC_CMD,
-    'poller'     : SVC_CMD,
+    'arbiter': "cd /hostlab/var && ../bin/shinken-#svc# -r -c ../etc/nagios.cfg -c ../test/etc/netkit/#conf#/shinken-specific.cfg 2>&1 > ./arbiter.debug&\n",
+    'broker': SVC_CMD,
+    'poller': SVC_CMD,
     'reactionner': SVC_CMD,
-    'receiver'   : SVC_CMD,
-    'scheduler'  : SVC_CMD,
+    'receiver': SVC_CMD,
+    'scheduler': SVC_CMD,
 }
 
 LOGBASE = os.path.join("#root#","var")
 LOGFILE = os.path.join(LOGBASE, "#svc#d.log")
 logs = {
-    'arbiter'    : os.path.join(LOGBASE, "arbiter.debug"),
-    'broker'     : LOGFILE,
-    'poller'     : LOGFILE,
+    'arbiter': os.path.join(LOGBASE, "arbiter.debug"),
+    'broker': LOGFILE,
+    'poller': LOGFILE,
     'reactionner': LOGFILE,
-    'receiver'   : LOGFILE,
-    'scheduler'  : LOGFILE,
+    'receiver': LOGFILE,
+    'scheduler': LOGFILE,
 }
 
 def cleanup():

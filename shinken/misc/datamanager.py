@@ -290,7 +290,7 @@ class DataManager(object):
 
     # Return a tree of {'elt' : Host, 'fathers' : [{}, {}]}
     def get_business_parents(self, obj, levels=3):
-        res = {'node' : obj, 'fathers' : []}
+        res = {'node': obj, 'fathers': []}
 #        if levels == 0 :
 #            return res
 

@@ -165,7 +165,7 @@ class LiveStatusQuery(object):
                     attribute = self.strip_table_from_column(attribute)
                     # Some operators can simply be negated
                     if operator in ['!>', '!>=', '!<', '!<=']:
-                        operator = { '!>' : '<=', '!>=' : '<', '!<' : '>=', '!<=' : '>' }[operator]
+                        operator = { '!>': '<=', '!>=': '<', '!<': '>=', '!<=': '>' }[operator]
                     # Put a function on top of the filter_stack which implements
                     # the desired operation
                     self.filtercolumns.append(attribute)
@@ -222,7 +222,7 @@ class LiveStatusQuery(object):
                 attribute = self.strip_table_from_column(attribute)
                 if operator in ['=', '>', '>=', '<', '<=', '=~', '~', '~~', '!=', '!>', '!>=', '!<', '!<=']:
                     if operator in ['!>', '!>=', '!<', '!<=']:
-                        operator = { '!>' : '<=', '!>=' : '<', '!<' : '>=', '!<=' : '>' }[operator]
+                        operator = { '!>': '<=', '!>=': '<', '!<': '>=', '!<=': '>' }[operator]
                     self.filtercolumns.append(attribute)
                     self.stats_columns.append(attribute)
                     self.stats_filter_stack.put_stack(self.make_filter(operator, attribute, reference))
@@ -508,27 +508,27 @@ class LiveStatusQuery(object):
         # The name of the table;table;columns;string
         # The data type of the column (int, float, string, list);type;columns;string
         result.append({
-            'description' : 'A description of the column' , 'name' : 'description' , 'table' : 'columns' , 'type' : 'string' })
+            'description': 'A description of the column' , 'name': 'description' , 'table': 'columns' , 'type': 'string' })
         result.append({
-            'description' : 'The name of the column within the table' , 'name' : 'name' , 'table' : 'columns' , 'type' : 'string' })
+            'description': 'The name of the column within the table' , 'name': 'name' , 'table': 'columns' , 'type': 'string' })
         result.append({
-            'description' : 'The name of the table' , 'name' : 'table' , 'table' : 'columns' , 'type' : 'string' })
+            'description': 'The name of the table' , 'name': 'table' , 'table': 'columns' , 'type': 'string' })
         result.append({
-            'description' : 'The data type of the column (int, float, string, list)' , 'name' : 'type' , 'table' : 'columns' , 'type' : 'string' })
+            'description': 'The data type of the column (int, float, string, list)' , 'name': 'type' , 'table': 'columns' , 'type': 'string' })
         tablenames = ['hosts', 'services', 'hostgroups', 'servicegroups', 'contacts', 'contactgroups', 'commands', 'downtimes', 'comments', 'timeperiods', 'status', 'log', 'hostsbygroup', 'servicesbygroup', 'servicesbyhostgroup', 'status']
         for table in tablenames:
             cls = self.table_class_map[table][1]
             for attribute in cls.lsm_columns:
                 result.append({
-                    'description' : getattr(cls, 'lsm_'+attribute).im_func.description,
-                    'name' : attribute,
-                    'table' : table,
-                    'type' : {
-                        int : 'int',
-                        float : 'float',
-                        bool : 'int',
-                        list : 'list',
-                        str : 'string',
+                    'description': getattr(cls, 'lsm_'+attribute).im_func.description,
+                    'name': attribute,
+                    'table': table,
+                    'type': {
+                        int: 'int',
+                        float: 'float',
+                        bool: 'int',
+                        list: 'list',
+                        str: 'string',
                     }[getattr(cls, 'lsm_'+attribute).im_func.datatype],
                 })
         self.columns = ['description', 'name', 'table', 'type']

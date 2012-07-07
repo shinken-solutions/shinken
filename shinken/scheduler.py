@@ -75,35 +75,35 @@ class Scheduler:
         # The order is important, so make key an int.
         # TODO : at load, change value by configuration one (like reaper time, etc)
         self.recurrent_works = {
-            0 : ('update_downtimes_and_comments', self.update_downtimes_and_comments, 1),
-            1 : ('schedule', self.schedule, 1), # just schedule
-            2 : ('consume_results', self.consume_results , 1), # incorpore checks and dependencies
-            3 : ('get_new_actions', self.get_new_actions, 1), # now get the news actions (checks, notif) raised
-            4 : ('get_new_broks', self.get_new_broks, 1), # and broks
-            5 : ('delete_zombie_checks', self.delete_zombie_checks, 1),
-            6 : ('delete_zombie_actions', self.delete_zombie_actions, 1),
+            0: ('update_downtimes_and_comments', self.update_downtimes_and_comments, 1),
+            1: ('schedule', self.schedule, 1), # just schedule
+            2: ('consume_results', self.consume_results , 1), # incorpore checks and dependencies
+            3: ('get_new_actions', self.get_new_actions, 1), # now get the news actions (checks, notif) raised
+            4: ('get_new_broks', self.get_new_broks, 1), # and broks
+            5: ('delete_zombie_checks', self.delete_zombie_checks, 1),
+            6: ('delete_zombie_actions', self.delete_zombie_actions, 1),
             # 3 : (self.delete_unwanted_notifications, 1),
-            7 : ('check_freshness', self.check_freshness, 10),
-            8 : ('clean_caches', self.clean_caches, 1),
-            9 : ('update_retention_file', self.update_retention_file, 3600),
-            10 : ('check_orphaned', self.check_orphaned, 60),
+            7: ('check_freshness', self.check_freshness, 10),
+            8: ('clean_caches', self.clean_caches, 1),
+            9: ('update_retention_file', self.update_retention_file, 3600),
+            10: ('check_orphaned', self.check_orphaned, 60),
             # For NagVis like tools : udpdate our status every 10s
-            11 : ('get_and_register_update_program_status_brok', self.get_and_register_update_program_status_brok, 10),
+            11: ('get_and_register_update_program_status_brok', self.get_and_register_update_program_status_brok, 10),
             # Check for system time change. And AFTER get new checks
             # so they are changed too.
-            12 : ('check_for_system_time_change', self.sched_daemon.check_for_system_time_change, 1),
+            12: ('check_for_system_time_change', self.sched_daemon.check_for_system_time_change, 1),
             # launch if need all internal checks
-            13 : ('manage_internal_checks', self.manage_internal_checks, 1),
+            13: ('manage_internal_checks', self.manage_internal_checks, 1),
             # clean some times possible overriden Queues, to do not explode in memory usage
             # every 1/4 of hour
-            14 : ('clean_queues', self.clean_queues, 1),
+            14: ('clean_queues', self.clean_queues, 1),
             # Look for new business_impact change by modulation every minute
-            15 : ('update_business_values', self.update_business_values, 60),
+            15: ('update_business_values', self.update_business_values, 60),
             # Reset the topology change flag if need
-            16 : ('reset_topology_change_flag', self.reset_topology_change_flag, 1),
-            17 : ('check_for_expire_acknowledge', self.check_for_expire_acknowledge, 1),
-            18 : ('send_broks_to_modules', self.send_broks_to_modules , 1),
-            19 : ('get_objects_from_from_queues', self.get_objects_from_from_queues, 1),
+            16: ('reset_topology_change_flag', self.reset_topology_change_flag, 1),
+            17: ('check_for_expire_acknowledge', self.check_for_expire_acknowledge, 1),
+            18: ('send_broks_to_modules', self.send_broks_to_modules , 1),
+            19: ('get_objects_from_from_queues', self.get_objects_from_from_queues, 1),
         }
 
         # stats part
@@ -1195,34 +1195,34 @@ class Scheduler:
     # TODO : GET REAL VALUES
     def get_program_status_brok(self):
         now = int(time.time())
-        data = {"is_running" : 1,
-                "instance_id" : self.instance_id,
+        data = {"is_running": 1,
+                "instance_id": self.instance_id,
                 "instance_name": self.instance_name,
-                "last_alive" : now,
-                "program_start" : self.program_start,
-                "pid" : os.getpid(),
-                "daemon_mode" : 1,
-                "last_command_check" : now,
-                "last_log_rotation" : now,
-                "notifications_enabled" : self.conf.enable_notifications,
-                "active_service_checks_enabled" : self.conf.execute_service_checks,
-                "passive_service_checks_enabled" : self.conf.accept_passive_service_checks,
-                "active_host_checks_enabled" : self.conf.execute_host_checks,
-                "passive_host_checks_enabled" : self.conf.accept_passive_host_checks,
-                "event_handlers_enabled" : self.conf.enable_event_handlers,
-                "flap_detection_enabled" : self.conf.enable_flap_detection,
-                "failure_prediction_enabled" : 0,
-                "process_performance_data" : self.conf.process_performance_data,
-                "obsess_over_hosts" : self.conf.obsess_over_hosts,
-                "obsess_over_services" : self.conf.obsess_over_services,
-                "modified_host_attributes" : 0,
-                "modified_service_attributes" : 0,
-                "global_host_event_handler" : self.conf.global_host_event_handler,
-                'global_service_event_handler' : self.conf.global_service_event_handler,
-                'check_external_commands' : self.conf.check_external_commands,
-                'check_service_freshness' : self.conf.check_service_freshness,
-                'check_host_freshness' : self.conf.check_host_freshness,
-                'command_file' : self.conf.command_file
+                "last_alive": now,
+                "program_start": self.program_start,
+                "pid": os.getpid(),
+                "daemon_mode": 1,
+                "last_command_check": now,
+                "last_log_rotation": now,
+                "notifications_enabled": self.conf.enable_notifications,
+                "active_service_checks_enabled": self.conf.execute_service_checks,
+                "passive_service_checks_enabled": self.conf.accept_passive_service_checks,
+                "active_host_checks_enabled": self.conf.execute_host_checks,
+                "passive_host_checks_enabled": self.conf.accept_passive_host_checks,
+                "event_handlers_enabled": self.conf.enable_event_handlers,
+                "flap_detection_enabled": self.conf.enable_flap_detection,
+                "failure_prediction_enabled": 0,
+                "process_performance_data": self.conf.process_performance_data,
+                "obsess_over_hosts": self.conf.obsess_over_hosts,
+                "obsess_over_services": self.conf.obsess_over_services,
+                "modified_host_attributes": 0,
+                "modified_service_attributes": 0,
+                "global_host_event_handler": self.conf.global_host_event_handler,
+                'global_service_event_handler': self.conf.global_service_event_handler,
+                'check_external_commands': self.conf.check_external_commands,
+                'check_service_freshness': self.conf.check_service_freshness,
+                'check_host_freshness': self.conf.check_host_freshness,
+                'command_file': self.conf.command_file
                 }
         b = Brok('program_status', data)
         return b

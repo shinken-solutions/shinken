@@ -109,12 +109,12 @@ class TestConfigAuth(TestConfig):
         return len(res) > 0
 
     def test_01_default(self):
-        modconf = Module({'module_name' : 'LiveStatus',
-            'module_type' : 'livestatus',
-            'port' : str(random.randint(50000, 65534)),
-            'pnp_path' : 'tmp/pnp4nagios_test' + self.testid,
-            'host' : '127.0.0.1',
-            'name' : 'test',
+        modconf = Module({'module_name': 'LiveStatus',
+            'module_type': 'livestatus',
+            'port': str(random.randint(50000, 65534)),
+            'pnp_path': 'tmp/pnp4nagios_test' + self.testid,
+            'host': '127.0.0.1',
+            'name': 'test',
             'modules': ''
         })
         self.init_livestatus(modconf)
@@ -123,14 +123,14 @@ class TestConfigAuth(TestConfig):
         self.assertTrue(self.query_livestatus(modconf.host, int(modconf.port), "GET hosts\n\n"))
 
     def test_02_allow_localhost(self):
-        modconf = Module({'module_name' : 'LiveStatus',
-            'module_type' : 'livestatus',
-            'port' : str(random.randint(50000, 65534)),
-            'pnp_path' : 'tmp/pnp4nagios_test' + self.testid,
-            'host' : '127.0.0.1',
-            'name' : 'test',
+        modconf = Module({'module_name': 'LiveStatus',
+            'module_type': 'livestatus',
+            'port': str(random.randint(50000, 65534)),
+            'pnp_path': 'tmp/pnp4nagios_test' + self.testid,
+            'host': '127.0.0.1',
+            'name': 'test',
             'modules': '',
-            'allowed_hosts' : '127.0.0.1'
+            'allowed_hosts': '127.0.0.1'
         })
         self.init_livestatus(modconf)
 
@@ -138,14 +138,14 @@ class TestConfigAuth(TestConfig):
         self.assertTrue(self.query_livestatus(modconf.host, int(modconf.port), "GET hosts\n\n"))
 
     def test_03_dont_allow_localhost(self):
-        modconf = Module({'module_name' : 'LiveStatus',
-            'module_type' : 'livestatus',
-            'port' : str(random.randint(50000, 65534)),
-            'pnp_path' : 'tmp/pnp4nagios_test' + self.testid,
-            'host' : '127.0.0.1',
-            'name' : 'test',
+        modconf = Module({'module_name': 'LiveStatus',
+            'module_type': 'livestatus',
+            'port': str(random.randint(50000, 65534)),
+            'pnp_path': 'tmp/pnp4nagios_test' + self.testid,
+            'host': '127.0.0.1',
+            'name': 'test',
             'modules': '',
-            'allowed_hosts' : '192.168.0.1'
+            'allowed_hosts': '192.168.0.1'
         })
         self.init_livestatus(modconf)
 

@@ -49,7 +49,7 @@ class TestConfig(ShinkenTest):
         print "TOTO", md.db_backend.__dict__
 
         md.init()
-        b = Brok('clean_all_my_instance_id', {'instance_id' : 0})
+        b = Brok('clean_all_my_instance_id', {'instance_id': 0})
         md.manage_brok(b)
         r = md.db_backend.db_cursor.execute("SELECT count(*) from timeperiod WHERE instance_id = '0'")
         self.assert_(r.fetchall() == [(0,)])

@@ -32,9 +32,9 @@ from shinken.basemodule import BaseModule
 from shinken.external_command import ExternalCommand
 
 properties = {
-    'daemons' : ['arbiter', 'receiver'],
-    'type' : 'collectd',
-    'external' : True,
+    'daemons': ['arbiter', 'receiver'],
+    'type': 'collectd',
+    'external': True,
     }
 
 # called by the plugin manager to get a broker
@@ -117,14 +117,14 @@ def decode_string(msgtype, pklen, buf):
 
 # Mapping of message types to decoding functions.
 decoder_mapping = {
-    TYPE_VALUES         : decode_values,
-    TYPE_TIME           : decode_number,
-    TYPE_INTERVAL       : decode_number,
-    TYPE_HOST           : decode_string,
-    TYPE_PLUGIN         : decode_string,
+    TYPE_VALUES: decode_values,
+    TYPE_TIME: decode_number,
+    TYPE_INTERVAL: decode_number,
+    TYPE_HOST: decode_string,
+    TYPE_PLUGIN: decode_string,
     TYPE_PLUGIN_INSTANCE: decode_string,
-    TYPE_TYPE           : decode_string,
-    TYPE_TYPE_INSTANCE  : decode_string,
+    TYPE_TYPE: decode_string,
+    TYPE_TYPE_INSTANCE: decode_string,
 }
 
 

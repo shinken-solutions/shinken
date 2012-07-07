@@ -221,20 +221,20 @@ class Thrift_status(object, Hooker):
 
         """
         delegate_map = {
-            'Logline' : {
-                'current_service_' : 'log_service',
-                'current_host_' : 'log_host',
+            'Logline': {
+                'current_service_': 'log_service',
+                'current_host_': 'log_host',
             },
-            'Service' : {
-                'host_' : 'host',
+            'Service': {
+                'host_': 'host',
             },
-            'Comment' : {
-                'service_' : 'ref',
-                'host_' : 'ref',
+            'Comment': {
+                'service_': 'ref',
+                'host_': 'ref',
             },
-            'Downtime' : {
-                'service_' : 'ref',
-                'host_' : 'ref',
+            'Downtime': {
+                'service_': 'ref',
+                'host_': 'ref',
             }
         }
         for objtype in Thrift_status.out_map:

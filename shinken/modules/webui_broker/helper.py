@@ -197,12 +197,12 @@ class Helper(object):
         # We set the values for webui/plugins/depgraph/htdocs/js/eltdeps.js
         # so a node with important data for rendering
         # type = custom, business_impact and img_src.
-        d = {'id' : elt.get_dbg_name(), 'name' : elt.get_dbg_name(),
-             'data' : {'$type' : 'custom',
-                       'business_impact' : elt.business_impact,
-                       'img_src' : self.get_icon_state(elt),
+        d = {'id': elt.get_dbg_name(), 'name': elt.get_dbg_name(),
+             'data': {'$type': 'custom',
+                       'business_impact': elt.business_impact,
+                       'img_src': self.get_icon_state(elt),
                        },
-             'adjacencies' : []
+             'adjacencies': []
              }
 
         # Set the right info panel
@@ -232,8 +232,8 @@ class Helper(object):
 
         # Now put in adj our parents
         for p in elt.parent_dependencies:
-            pd = {'nodeTo' : p.get_dbg_name(),
-                  'data' : {"$type":"line", "$direction": [elt.get_dbg_name(), p.get_dbg_name()]}}
+            pd = {'nodeTo': p.get_dbg_name(),
+                  'data': {"$type":"line", "$direction": [elt.get_dbg_name(), p.get_dbg_name()]}}
 
             # Naive way of looking at impact
             if elt.state_id != 0 and p.state_id != 0:
@@ -251,7 +251,7 @@ class Helper(object):
     # Return all linked elements of this elt, and 2 level
     # higer and lower :)
     def get_all_linked_elts(self, elt, levels=3):
-        if levels == 0 :
+        if levels == 0:
             return set()
 
         my = set()
@@ -469,8 +469,8 @@ class Helper(object):
     # For an object, give it's business impact as text
     # and stars if need
     def get_business_impact_text(self, obj):
-        txts = {0 : 'None', 1 : 'Low', 2: 'Normal',
-                3 : 'High', 4 : 'Very important', 5 : 'Top for business'}
+        txts = {0: 'None', 1: 'Low', 2: 'Normal',
+                3: 'High', 4: 'Very important', 5: 'Top for business'}
         nb_stars = max(0, obj.business_impact - 2)
         stars = '<img src="/static/img/icons/star.png" alt="star">\n' * nb_stars
 

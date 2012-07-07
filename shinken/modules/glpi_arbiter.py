@@ -35,10 +35,10 @@ from shinken.basemodule import BaseModule
 
 
 properties = {
-    'daemons' : ['arbiter'],
-    'type' : 'glpi',
-    'external' : False,
-    'phases' : ['configuration'],
+    'daemons': ['arbiter'],
+    'type': 'glpi',
+    'external': False,
+    'phases': ['configuration'],
     }
 
 
@@ -69,7 +69,7 @@ class Glpi_arbiter(BaseModule):
         self.con = xmlrpclib.ServerProxy(self.uri)
         print "Connection opened"
         print "Authentification in progress"
-        arg = {'login_name' : self.login_name , 'login_password' : self.login_password}
+        arg = {'login_name': self.login_name , 'login_password': self.login_password}
         res = self.con.glpi.doLogin(arg)
         self.session = res['session']
         print "My session number", self.session
@@ -77,13 +77,13 @@ class Glpi_arbiter(BaseModule):
 
     # Ok, main function that will load config from GLPI
     def get_objects(self):
-        r = {'commands' : [],
-             'timeperiods' : [],
-             'hosts' : [],
-             'services' : [],
-             'contacts' : []}
-        arg = {'session' : self.session,
-               'tag' : self.tag}
+        r = {'commands': [],
+             'timeperiods': [],
+             'hosts': [],
+             'services': [],
+             'contacts': []}
+        arg = {'session': self.session,
+               'tag': self.tag}
 
         # Get commands
         all_commands = self.con.monitoring.shinkenCommands(arg)
@@ -91,8 +91,8 @@ class Glpi_arbiter(BaseModule):
         for command_info in all_commands:
             print "\n\n"
             print "Command info in GLPI", command_info
-            h = {'command_name' : command_info['command_name'],
-                 'command_line' : command_info['command_line'],
+            h = {'command_name': command_info['command_name'],
+                 'command_line': command_info['command_line'],
                  }
             r['commands'].append(h)
 
@@ -130,20 +130,20 @@ class Glpi_arbiter(BaseModule):
         for host_info in all_hosts:
             print "\n\n"
             print "Host info in GLPI", host_info
-            h = {'host_name' : host_info['host_name'],
-                 'alias' : host_info['alias'],
-                 'address' : host_info['address'],
-                 'parents' : host_info['parents'],
-                 'check_command' : host_info['check_command'],
-                 'check_interval' : host_info['check_interval'],
-                 'retry_interval' : host_info['retry_interval'],
-                 'max_check_attempts' : host_info['max_check_attempts'],
-                 'check_period' : host_info['check_period'],
-                 'contacts' : host_info['contacts'],
-                 'process_perf_data' : host_info['process_perf_data'],
-                 'notification_interval' : host_info['notification_interval'],
-                 'notification_period' : host_info['notification_period'],
-                 'notification_options' : host_info['notification_options']};
+            h = {'host_name': host_info['host_name'],
+                 'alias': host_info['alias'],
+                 'address': host_info['address'],
+                 'parents': host_info['parents'],
+                 'check_command': host_info['check_command'],
+                 'check_interval': host_info['check_interval'],
+                 'retry_interval': host_info['retry_interval'],
+                 'max_check_attempts': host_info['max_check_attempts'],
+                 'check_period': host_info['check_period'],
+                 'contacts': host_info['contacts'],
+                 'process_perf_data': host_info['process_perf_data'],
+                 'notification_interval': host_info['notification_interval'],
+                 'notification_period': host_info['notification_period'],
+                 'notification_options': host_info['notification_options']};
             for attribut in attributs:
                 if attribut in host_info:
                     h[attribut] = host_info[attribut]
@@ -164,7 +164,7 @@ class Glpi_arbiter(BaseModule):
         for template_info in all_templates:
             print "\n\n"
             print "Template info in GLPI", template_info
-            h = {'register' : '0'};
+            h = {'register': '0'};
             for attribut in attributs:
                 if attribut in template_info:
                     h[attribut] = template_info[attribut]
@@ -207,18 +207,18 @@ class Glpi_arbiter(BaseModule):
         for contact_info in all_contacts:
             print "\n\n"
             print "Contact info in GLPI", contact_info
-            h = {'contact_name' : contact_info['contact_name'],
-                 'alias' : contact_info['alias'],
-                 'host_notifications_enabled' : contact_info['host_notifications_enabled'],
-                 'service_notifications_enabled' : contact_info['service_notifications_enabled'],
-                 'service_notification_period' : contact_info['service_notification_period'],
-                 'host_notification_period' : contact_info['host_notification_period'],
-                 'service_notification_options' : contact_info['service_notification_options'],
-                 'host_notification_options' : contact_info['host_notification_options'],
-                 'service_notification_commands' : contact_info['service_notification_commands'],
-                 'host_notification_commands' : contact_info['host_notification_commands'],
-                 'email' : contact_info['email'],
-                 'pager' : contact_info['pager'],
+            h = {'contact_name': contact_info['contact_name'],
+                 'alias': contact_info['alias'],
+                 'host_notifications_enabled': contact_info['host_notifications_enabled'],
+                 'service_notifications_enabled': contact_info['service_notifications_enabled'],
+                 'service_notification_period': contact_info['service_notification_period'],
+                 'host_notification_period': contact_info['host_notification_period'],
+                 'service_notification_options': contact_info['service_notification_options'],
+                 'host_notification_options': contact_info['host_notification_options'],
+                 'service_notification_commands': contact_info['service_notification_commands'],
+                 'host_notification_commands': contact_info['host_notification_commands'],
+                 'email': contact_info['email'],
+                 'pager': contact_info['pager'],
                  }
             r['contacts'].append(h)
 

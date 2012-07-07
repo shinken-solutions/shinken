@@ -35,9 +35,9 @@ from shinken.basemodule import BaseModule
 from shinken.log import logger
 
 properties = {
-    'daemons' : ['scheduler'],
-    'type' : 'memcache_retention',
-    'external' : False,
+    'daemons': ['scheduler'],
+    'type': 'memcache_retention',
+    'external': False,
     }
 
 
@@ -126,7 +126,7 @@ class Memcache_retention_scheduler(BaseModule):
                 val = cPickle.loads(val)
                 ret_services[(s.host.host_name, s.service_description)] = val
 
-        all_data = {'hosts' : ret_hosts, 'services' : ret_services}
+        all_data = {'hosts': ret_hosts, 'services': ret_services}
 
         # Ok, now comme load them scheduler :)
         daemon.restore_retention_data(all_data)

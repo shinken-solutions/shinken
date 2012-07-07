@@ -47,9 +47,9 @@ class TestConfig(ShinkenTest):
         print "Tempalte%stoto" % mod.template
 #        self.assert_(mod.template == r'$LASTHOSTCHECK\t$HOSTNAME$\t$HOSTOUTPUT$\t$HOSTSTATE$\t$HOSTPERFDATA$\n')
 
-        try :
+        try:
             os.unlink(mod.path)
-        except :
+        except:
             pass
 
         sl = get_instance(mod)

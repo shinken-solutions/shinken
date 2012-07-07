@@ -53,12 +53,12 @@ def get_graphs_widget():
     wid = app.request.GET.get('wid', 'widget_graphs_'+str(int(time.time())))
     collapsed = (app.request.GET.get('collapsed', 'False') == 'True')
 
-    options = {'search' : {'value' : search, 'type' : 'hst_srv', 'label' : 'Element name'},}
+    options = {'search': {'value': search, 'type': 'hst_srv', 'label': 'Element name'},}
 
     title = 'Element graphs for %s' % search
 
-    return {'app' : app, 'elt' : elt, 'user' : user,
-            'wid' : wid, 'collapsed' : collapsed, 'options' : options, 'base_url' : '/widget/graphs', 'title' : title,
+    return {'app': app, 'elt': elt, 'user': user,
+            'wid': wid, 'collapsed': collapsed, 'options': options, 'base_url': '/widget/graphs', 'title': title,
             }
 
 widget_desc = '''<h3>Graphs</h3>
@@ -67,6 +67,6 @@ Show the perfdata graph
 
 
 pages = {
-    get_graphs_widget : {'routes' : ['/widget/graphs'], 'view' : 'widget_graphs', 'static' : True, 'widget' : ['dashboard'], 'widget_desc' : widget_desc, 'widget_name' : 'graphs', 'widget_picture' : '/static/graphs/img/widget_graphs.png'},
+    get_graphs_widget: {'routes': ['/widget/graphs'], 'view': 'widget_graphs', 'static': True, 'widget': ['dashboard'], 'widget_desc': widget_desc, 'widget_name': 'graphs', 'widget_picture': '/static/graphs/img/widget_graphs.png'},
     }
 

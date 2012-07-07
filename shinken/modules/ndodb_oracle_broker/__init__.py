@@ -27,9 +27,9 @@
 import os
 
 properties = {
-    'daemons' : ['broker'],
-    'type' : 'ndodb_oracle',
-    'phases' : ['running'],
+    'daemons': ['broker'],
+    'type': 'ndodb_oracle',
+    'phases': ['running'],
     }
 
 

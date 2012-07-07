@@ -113,7 +113,7 @@ class MacroResolver(Borg):
             if elt == '$':
                 in_macro = not in_macro
             elif in_macro:
-                macros[elt] = {'val' : '', 'type' : 'unknown'}
+                macros[elt] = {'val': '', 'type': 'unknown'}
 
         #self.cache[s] = macros
         if '' in macros:

@@ -36,7 +36,7 @@ app = None
 def register():
     error= app.request.GET.get('error', '')
     success = app.request.GET.get('success', '')
-    return {'app' : app, 'user' : {}, 'error' : error, 'success' : success}
+    return {'app': app, 'user': {}, 'error': error, 'success': success}
 
 
 def do_register():
@@ -50,13 +50,13 @@ def do_register():
     if not app.is_name_available(username):
         if cli_mode == '1':
             app.response.content_type = 'application/json'
-            return json.dumps({'state' : 400, 'text' : 'Sorry, this username is not available'})
+            return json.dumps({'state': 400, 'text': 'Sorry, this username is not available'})
         redirect('/register?error=Sorry, this username is not available')
 
     app.register_user(username, password_hash, email)
     if cli_mode == '1':
         app.response.content_type = 'application/json'
-        return json.dumps({'state' : 200, 'text' : 'Registering success, please look at your email and click in the link in it to validate your account'})
+        return json.dumps({'state': 200, 'text': 'Registering success, please look at your email and click in the link in it to validate your account'})
     redirect('/register?success=Registering success, please look at your email and click in the link in it to validate your account')
 
 
@@ -65,7 +65,7 @@ def validate():
     activated = False
     if activating_key:
         activated = app.validate_user(activating_key)
-    return {'app' : app, 'user' : {}, 'activating_key' : activating_key, 'activated' : activated}
+    return {'app': app, 'user': {}, 'activating_key': activating_key, 'activated': activated}
 
 
 def is_name_available():
@@ -95,7 +95,7 @@ def get_api_key():
     if is_auth:
         key = app.get_api_key(login)
         if key:
-            r = {'api_key' : key}
+            r = {'api_key': key}
             return json.dumps(r)
         else:
             abort(400, 'Sorry, there is a problem with your api key.')
@@ -105,10 +105,10 @@ def get_api_key():
 
 
 
-pages = {register : { 'routes' : ['/register'], 'view' : 'register', 'static' : True},
-         is_name_available : { 'routes' : ['/availability'], 'method' : 'POST', 'view' : None, 'static' : True},
-         do_register : { 'routes' : ['/register'], 'method' : 'POST', 'view' : 'register', 'static' : True},
-         validate : { 'routes' : ['/validate'], 'view' : 'validate', 'static' : True},
-         get_api_key : { 'routes' : ['/apikey'], 'method' : 'POST'},
+pages = {register: { 'routes': ['/register'], 'view': 'register', 'static': True},
+         is_name_available: { 'routes': ['/availability'], 'method': 'POST', 'view': None, 'static': True},
+         do_register: { 'routes': ['/register'], 'method': 'POST', 'view': 'register', 'static': True},
+         validate: { 'routes': ['/validate'], 'view': 'validate', 'static': True},
+         get_api_key: { 'routes': ['/apikey'], 'method': 'POST'},
          }
 

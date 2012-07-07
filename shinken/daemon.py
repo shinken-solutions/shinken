@@ -771,7 +771,7 @@ class Daemon(object):
             full_hook_name = 'hook_' + hook_name
             if hasattr(inst, full_hook_name):
                 f = getattr(inst, full_hook_name)
-                try :
+                try:
                     f(self)
                 except Exception, exp:
                     logger.warning('The instance %s raise an exception %s. I disable, and set it to restart later' % (inst.get_name(), str(exp)))

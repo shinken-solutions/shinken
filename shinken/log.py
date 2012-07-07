@@ -111,10 +111,10 @@ class Log:
 
             fmt = u'[%%(date)s] %s%%(name)s%%(msg)s\n' % (if_else(display_level, '%(level)s : ', ''))
             args = {
-                'date' : if_else(human_timestamp_log, time.asctime(time.localtime(time.time())), int(time.time())),
+                'date': if_else(human_timestamp_log, time.asctime(time.localtime(time.time())), int(time.time())),
                 'level': lvlname.capitalize(),
-                'name' : if_else(name is None, '', '[%s] ' % name),
-                'msg'  : message
+                'name': if_else(name is None, '', '[%s] ' % name),
+                'msg': message
             }
             s = fmt % args
         else:

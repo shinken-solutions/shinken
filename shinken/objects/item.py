@@ -59,9 +59,9 @@ class Item(object):
         # and that will raised real warning/errors during the is_correct
         'configuration_warnings':   ListProp(default=[]),
         'configuration_errors':     ListProp(default=[]),
-        'hash'                  :   StringProp(default=''),
+        'hash':   StringProp(default=''),
         # We save all template we asked us to load from
-        'tags'                  :   ListProp(default=set(), fill_brok=['full_status']),
+        'tags':   ListProp(default=set(), fill_brok=['full_status']),
     }
 
     macros = {
@@ -423,7 +423,7 @@ Like temporary attributes such as "imported_from", etc.. """
             self.acknowledgement = a
             if self.my_type == 'host':
                 comment_type = 1
-            else :
+            else:
                 comment_type = 2
             c = Comment(self, persistent, author, comment,
                         comment_type, 4, 0, False, 0)
@@ -526,7 +526,7 @@ Like temporary attributes such as "imported_from", etc.. """
     def get_initial_status_brok(self):
         cls = self.__class__
         my_type = cls.my_type
-        data = {'id' : self.id}
+        data = {'id': self.id}
 
         self.fill_data_brok_from(data, 'full_status')
         b = Brok('initial_'+my_type+'_status', data)
@@ -538,7 +538,7 @@ Like temporary attributes such as "imported_from", etc.. """
         cls = self.__class__
         my_type = cls.my_type
 
-        data = {'id' : self.id}
+        data = {'id': self.id}
         self.fill_data_brok_from(data, 'full_status')
         b = Brok('update_'+my_type+'_status', data)
         return b

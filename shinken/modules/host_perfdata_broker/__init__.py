@@ -25,9 +25,9 @@
 
 
 properties = {
-    'daemons' : ['broker'],
-    'type' : 'host_perfdata',
-    'phases' : ['running'],
+    'daemons': ['broker'],
+    'type': 'host_perfdata',
+    'phases': ['running'],
     }
 
 

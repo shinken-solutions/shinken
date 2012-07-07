@@ -127,7 +127,7 @@ class IForArbiter(Interface):
             for dae in daemons:
                 if hasattr(dae, daemon_name_attr) and getattr(dae, daemon_name_attr) == daemon_name:
                     if hasattr(dae, 'alive') and hasattr(dae, 'spare'):
-                        return {'alive' : dae.alive, 'spare' : dae.spare}
+                        return {'alive': dae.alive, 'spare': dae.spare}
         return None
 
 
@@ -153,12 +153,12 @@ class IForArbiter(Interface):
 
 
     def get_all_states(self):
-        res = {'arbiter' : self.app.conf.arbiters,
-               'scheduler' : self.app.conf.schedulers,
-               'poller' : self.app.conf.pollers,
-               'reactionner' : self.app.conf.reactionners,
-               'receiver' : self.app.conf.receivers,
-               'broker' : self.app.conf.brokers}
+        res = {'arbiter': self.app.conf.arbiters,
+               'scheduler': self.app.conf.schedulers,
+               'poller': self.app.conf.pollers,
+               'reactionner': self.app.conf.reactionners,
+               'receiver': self.app.conf.receivers,
+               'broker': self.app.conf.brokers}
         return res
 
 
@@ -863,7 +863,7 @@ class Hostd(Daemon):
         if not user_name:
             return None
 
-        u = self.db.users.find_one({'_id' : user_name})
+        u = self.db.users.find_one({'_id': user_name})
 
         print "Find a user", user_name, u
         #c = Contact()
@@ -892,17 +892,17 @@ class Hostd(Daemon):
     def check_auth(self, username, password):
        password_hash = hashlib.sha512(password).hexdigest()
        print "Looking for the user", username, "with password hash", password_hash
-       r = self.db.users.find_one({'_id' : username, 'pwd_hash' : password_hash})
+       r = self.db.users.find_one({'_id': username, 'pwd_hash': password_hash})
        print "Is user auth?", r
        return r is not None
 
 
     def get_user_by_name(self, username):
-       r = self.db.users.find_one({'username' : username})
+       r = self.db.users.find_one({'username': username})
        return r
 
     def get_user_by_key(self, api_key):
-       r = self.db.users.find_one({'api_key' : api_key})
+       r = self.db.users.find_one({'api_key': api_key})
        if not r:
           return None
        if not r['validated']:
@@ -910,21 +910,21 @@ class Hostd(Daemon):
        return r
 
     def get_email_by_name(self, username):
-       r = self.db.users.find_one({'username' : username})
+       r = self.db.users.find_one({'username': username})
        if not r:
           return ''
        return r['email']
 
 
     def is_actitaved(self, username):
-       r = self.db.users.find_one({'_id' : username})
+       r = self.db.users.find_one({'_id': username})
        if not r:
           return False
        return r['validated']
 
 
     def get_api_key(self, username):
-       r = self.db.users.find_one({'_id' : username})
+       r = self.db.users.find_one({'_id': username})
        if not r:
           return None
        return r['api_key']
@@ -959,10 +959,10 @@ class Hostd(Daemon):
        f.close()
        print "File %s is saved" % p
        _id = uuid.uuid4().get_hex()
-       d = {'_id' : _id, 'upload_time' : int(time.time()), 'filename' : filename, 'filepath' : p, 'path' : '/unanalysed', 'user' :  user,
-            'state' : 'pending', 'pack_name' : short_name, 'moderation_comment':'', 'link_id': _id}
+       d = {'_id': _id, 'upload_time': int(time.time()), 'filename': filename, 'filepath': p, 'path': '/unanalysed', 'user':  user,
+            'state': 'pending', 'pack_name': short_name, 'moderation_comment':'', 'link_id': _id}
        # Get all previously sent packs for the same user/filename, and put them as obsolete
-       obs = self.db.packs.find({'filepath' : p})
+       obs = self.db.packs.find({'filepath': p})
        for o in obs:
           print "The pack make obsolete the pack", o
           o['state'] = 'obsolete'
@@ -976,7 +976,7 @@ class Hostd(Daemon):
 
 
     def load_pack_file(self, pack):
-       p = self.db.packs.find_one({'_id' : pack})
+       p = self.db.packs.find_one({'_id': pack})
        filepath = p['filepath']
        print "Analysing pack"
        if not zipfile.is_zipfile(filepath):
@@ -1045,14 +1045,14 @@ class Hostd(Daemon):
 
 
     def is_name_available(self, username):
-       r = self.db.users.find_one({'_id' : username})
+       r = self.db.users.find_one({'_id': username})
        return r is None
 
 
     def register_user(self, username, pwdhash, email):
        ak = uuid.uuid4().get_hex()
        api_key = uuid.uuid4().get_hex()
-       d = {'_id' : username, 'username' : username, 'pwd_hash' : pwdhash, 'email' : email, 'api_key' : api_key, 'activating_key' : ak, 'validated' : False, 'is_admin' : False, 'is_moderator' : False}
+       d = {'_id': username, 'username': username, 'pwd_hash': pwdhash, 'email': email, 'api_key': api_key, 'activating_key': ak, 'validated': False, 'is_admin': False, 'is_moderator': False}
        print "Saving new user", d
        self.db.users.save(d)
 
@@ -1078,7 +1078,7 @@ class Hostd(Daemon):
 
 
     def validate_user(self, activating_key):
-       u = self.db.users.find_one({'activating_key' : activating_key})
+       u = self.db.users.find_one({'activating_key': activating_key})
        print "Try to validate a user with the activated key", activating_key, 'and get', u
        if not u:
           return False
@@ -1090,7 +1090,7 @@ class Hostd(Daemon):
 
 
     def update_user(self, username, pwd_hash, email):
-       r = self.db.users.find_one({'_id' : username})
+       r = self.db.users.find_one({'_id': username})
        if not r:
           return
 

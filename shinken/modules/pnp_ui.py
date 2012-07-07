@@ -35,8 +35,8 @@ from shinken.basemodule import BaseModule
 # print "Loaded AD module"
 
 properties = {
-    'daemons' : ['webui'],
-    'type' : 'pnp_webui'
+    'daemons': ['webui'],
+    'type': 'pnp_webui'
     }
 
 
@@ -89,7 +89,7 @@ class PNP_Webui(BaseModule):
 
     # Give the link for the PNP UI, with a Name
     def get_external_ui_link(self):
-        return {'label' : 'PNP4', 'uri' : self.uri}
+        return {'label': 'PNP4', 'uri': self.uri}
 
 
 

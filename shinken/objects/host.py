@@ -132,8 +132,8 @@ class Host(SchedulingItem):
         'business_impact':            IntegerProp(default='2', fill_brok=['full_status']),
 
         # Load some triggers
-        'trigger'        :         StringProp(default=''),
-        'trigger_name'   :         ListProp   (default=''),
+        'trigger':         StringProp(default=''),
+        'trigger_name':         ListProp   (default=''),
 
     })
 
@@ -155,11 +155,11 @@ class Host(SchedulingItem):
         'last_event_id':        IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'last_state':           StringProp(default='PENDING', fill_brok=['full_status', 'check_result'], retention=True),
         'last_state_id':        IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
-        'last_state_type' :     StringProp(default='HARD', fill_brok=['full_status', 'check_result'],  retention=True),
+        'last_state_type':     StringProp(default='HARD', fill_brok=['full_status', 'check_result'],  retention=True),
         'last_state_change':    FloatProp(default=0.0, fill_brok=['full_status', 'check_result'], retention=True),
         'last_hard_state_change': FloatProp(default=0.0, fill_brok=['full_status', 'check_result'], retention=True),
         'last_hard_state':      StringProp(default='PENDING', fill_brok=['full_status'], retention=True),
-        'last_hard_state_id' :  IntegerProp(default=0, fill_brok=['full_status'], retention=True),
+        'last_hard_state_id':  IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         'last_time_up':         IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'last_time_down':       IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'last_time_unreachable': IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
@@ -217,7 +217,7 @@ class Host(SchedulingItem):
         'perf_data':            StringProp(default='', fill_brok=['full_status', 'check_result'], retention=True),
         'last_perf_data':       StringProp(default='', retention=True),
         'customs':              StringProp(default={}, fill_brok=['full_status']),
-        'got_default_realm' :   BoolProp(default=False),
+        'got_default_realm':   BoolProp(default=False),
 
         # use for having all contacts we have notified
         # Warning : for the notified_contacts retention save, we save only the names of the contacts, and we should RELINK
@@ -241,7 +241,7 @@ class Host(SchedulingItem):
         # so our parents as network relation, or a host
         # we are depending in a hostdependency
         # or even if we are business based.
-        'parent_dependencies' : StringProp(brok_transformation=to_svc_hst_distinct_lists, default=set(), fill_brok=['full_status']),
+        'parent_dependencies': StringProp(brok_transformation=to_svc_hst_distinct_lists, default=set(), fill_brok=['full_status']),
         # Here it's the guys that depend on us. So it's the total
         # opposite of the parent_dependencies
         'child_dependencies':   StringProp(
@@ -272,24 +272,24 @@ class Host(SchedulingItem):
 
         # BUSINESS CORRELATOR PART
         # Say if we are business based rule or not
-        'got_business_rule' : BoolProp(default=False, fill_brok=['full_status']),
+        'got_business_rule': BoolProp(default=False, fill_brok=['full_status']),
         # Our Dependency node for the business rule
-        'business_rule' : StringProp(default=None),
+        'business_rule': StringProp(default=None),
 
         # Manage the unknown/unreach during hard state
         # From now its not really used
-        'in_hard_unknown_reach_phase' : BoolProp(default=False, retention=True),
-        'was_in_hard_unknown_reach_phase' : BoolProp(default=False, retention=True),
-        'state_before_hard_unknown_reach_phase' : StringProp(default='UP', retention=True),
+        'in_hard_unknown_reach_phase': BoolProp(default=False, retention=True),
+        'was_in_hard_unknown_reach_phase': BoolProp(default=False, retention=True),
+        'state_before_hard_unknown_reach_phase': StringProp(default='UP', retention=True),
 
         # Set if the element just change its father/son topology
-        'topology_change' : BoolProp(default=False, fill_brok=['full_status']),
+        'topology_change': BoolProp(default=False, fill_brok=['full_status']),
 
         # Keep in mind our pack id afterthe cutting phase
-        'pack_id' : IntegerProp(default=-1),
+        'pack_id': IntegerProp(default=-1),
 
         # Trigger list
-        'triggers'        :  StringProp(default=[])
+        'triggers':  StringProp(default=[])
     })
 
     # Hosts macros and prop that give the information
@@ -347,10 +347,10 @@ class Host(SchedulingItem):
     # so from Nagios2 format, to Nagios3 ones.
     # Or Shinken deprecated names like criticity
     old_properties = {
-        'normal_check_interval' : 'check_interval',
-        'retry_check_interval'  : 'retry_interval',
-        'criticity'             : 'business_impact',
-        'hostgroup'             : 'hostgroups',
+        'normal_check_interval': 'check_interval',
+        'retry_check_interval': 'retry_interval',
+        'criticity': 'business_impact',
+        'hostgroup': 'hostgroups',
 #        'criticitymodulations'  : 'business_impact_modulations',
 
     }

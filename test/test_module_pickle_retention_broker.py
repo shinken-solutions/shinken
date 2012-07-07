@@ -46,9 +46,9 @@ class TestPickleRetentionBroker(ShinkenTest):
         print self.conf.modules
         # get our modules
         mod = pickle_retention_file_generic.Pickle_retention_generic(modconf, 'tmp/retention-test.dat')
-        try :
+        try:
             os.unlink(mod.path)
-        except :
+        except:
             pass
 
         sl = get_instance(mod)

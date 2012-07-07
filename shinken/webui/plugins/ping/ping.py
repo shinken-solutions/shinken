@@ -59,7 +59,7 @@ def get_gotfirstdata():
 
 
 
-pages = {get_ping : { 'routes' : ['/ping']},
-         get_gotfirstdata : { 'routes' : ['/gotfirstdata']},
+pages = {get_ping: { 'routes': ['/ping']},
+         get_gotfirstdata: { 'routes': ['/gotfirstdata']},
          }
 

@@ -54,8 +54,8 @@ def show_host(name):
 
     # Ok, we can lookup it
     h = app.datamgr.get_host(name)
-    return {'app' : app, 'elt' : h, 'valid_user' : True, 'user' : user, 'graphstart' : graphstart,
-            'graphend' : graphend}
+    return {'app': app, 'elt': h, 'valid_user': True, 'user': user, 'graphstart': graphstart,
+            'graphend': graphend}
 
 
 def show_service(hname, desc):
@@ -84,11 +84,11 @@ def show_service(hname, desc):
 
     # Ok, we can lookup it :)
     s = app.datamgr.get_service(hname, desc)
-    return {'app' : app, 'elt' : s, 'valid_user' : True, 'user' : user, 'graphstart' : graphstart,
-            'graphend' : graphend}
+    return {'app': app, 'elt': s, 'valid_user': True, 'user': user, 'graphstart': graphstart,
+            'graphend': graphend}
 
 
-pages = {show_host : { 'routes' : ['/host/:name'], 'view' : 'eltdetail', 'static' : True},
-         show_service : { 'routes' : ['/service/:hname/:desc#.+#'], 'view' : 'eltdetail', 'static' : True},
+pages = {show_host: { 'routes': ['/host/:name'], 'view': 'eltdetail', 'static': True},
+         show_service: { 'routes': ['/service/:hname/:desc#.+#'], 'view': 'eltdetail', 'static': True},
          }
 

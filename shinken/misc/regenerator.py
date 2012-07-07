@@ -903,7 +903,7 @@ class Regenerator(object):
             # one a minute
             if time.time() - self.last_need_data_send > 60 and self.from_q is not None:
                 print "I ask the broker for instance id data :", c_id
-                msg = Message(id=0, type='NeedData', data={'full_instance_id' : c_id})
+                msg = Message(id=0, type='NeedData', data={'full_instance_id': c_id})
                 self.from_q.put(msg)
                 self.last_need_data_send = time.time()
             return

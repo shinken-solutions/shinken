@@ -80,7 +80,7 @@ def check_deamons_numbers(result, target):
         print "WARNING - %d/%d %s(s) DOWN :%s" % (dead_number, total_number, target, dead_list)
         raise SystemExit, WARNING
         # Everything seems fine. But that's no surprise, is it?
-    else :
+    else:
         print "OK - %d/%d %s(s) UP, with %d/%d spare(s) UP" % (alive_number, total_number, target, alive_spare_number, total_spare_number)
         raise SystemExit, OK
 
@@ -171,6 +171,6 @@ else:
     # Now we have all data
     if result:
         check_deamons_numbers(result, options.target)
-    else :
+    else:
         print 'UNKNOWN - Arbiter could not retrieve status for %s' % options.target
         raise SystemExit, UNKNOWN

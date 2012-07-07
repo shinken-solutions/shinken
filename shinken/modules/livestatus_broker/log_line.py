@@ -79,7 +79,7 @@ class Logline(dict):
                     'RECOVERY': 0
                 }
                 host_states = {
-                    'UP' :0,
+                    'UP':0,
                     'DOWN': 1,
                     'UNREACHABLE': 2,
                     'UNKNOWN': 3,

@@ -49,9 +49,9 @@ class TestConfig(ShinkenTest):
         now = time.time()
         # get our modules
         mod = pickle_retention_file_scheduler.Pickle_retention_scheduler(modconf, 'tmp/retention-test.dat')
-        try :
+        try:
             os.unlink(mod.path)
-        except :
+        except:
             pass
 
         sl = get_instance(mod)

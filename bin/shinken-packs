@@ -62,7 +62,7 @@ from shinken.objects.config import Config
 logger.set_level(10)
 class Dummy():
     def __init__(self): pass
-    def add(self, obj) : pass
+    def add(self, obj): pass
 logger.load_obj(Dummy())
 
 if os.name != 'nt':
@@ -124,7 +124,7 @@ def create_pack(pack_file, p_dest_dir, share_dir):
         if s.is_tpl() and hasattr(s, 'service_description') and hasattr(s, 'host_name'):
             desc = s.service_description
             if not desc in o['services']:
-                o['services'][desc] = {'templates' : []}
+                o['services'][desc] = {'templates': []}
             tpls = s.host_name.split(',')
             tpls = [t.strip() for t in tpls]
             for t in tpls:
@@ -151,7 +151,7 @@ def create_pack(pack_file, p_dest_dir, share_dir):
     for (k,v) in pack.macros.iteritems():
         t = v.get('type', 'string')
         d = v.get('description', '')
-        o['macros'][k] = {'type' : t, 'description' : ''}
+        o['macros'][k] = {'type': t, 'description': ''}
         print "\t%s : Type=%s Description='%s'" % (k, t, d)
 
 
@@ -567,7 +567,7 @@ For more information, look at http://www.shinken-monitoring.org/wiki/packs/creat
             parser.error("Requires an API key (option -k/--api-key)")
         api_key = opts.api_key
         files = args
-        if not files :
+        if not files:
             parser.error("Requires a statistic file to send")
         if len(files) != 1:
             parser.error("Too much statistics files to send")

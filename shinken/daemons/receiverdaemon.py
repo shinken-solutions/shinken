@@ -138,7 +138,7 @@ class Receiver(BaseSatellite):
                 try:
                     o = f.get(block=False)
                     self.add(o)
-                except Empty :
+                except Empty:
                     full_queue = False
 
 

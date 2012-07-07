@@ -34,9 +34,9 @@ from shinken.basemodule import BaseModule
 from shinken.log import logger
 
 properties = {
-    'daemons' : ['scheduler'],
-    'type' : 'redis_retention',
-    'external' : False,
+    'daemons': ['scheduler'],
+    'type': 'redis_retention',
+    'external': False,
     }
 
 
@@ -124,7 +124,7 @@ class Redis_retention_scheduler(BaseModule):
                 ret_services[(s.host.host_name, s.service_description)] = val
 
 
-        all_data = {'hosts' : ret_hosts, 'services' : ret_services}
+        all_data = {'hosts': ret_hosts, 'services': ret_services}
 
         # Ok, now comme load them scheduler :)
         daemon.restore_retention_data(all_data)

@@ -78,7 +78,7 @@ macros=[]
 if not opts.cfg_input:
     if not os.path.exists(DEFAULT_CFG):
         parser.error("Requires a discovery configuration file, discovery.cfg (option -c/--cfg-input)")
-    else : # take the default file
+    else: # take the default file
         opts.cfg_input = DEFAULT_CFG
 
 if not opts.output_dir and not opts.dbmod and not opts.backend:

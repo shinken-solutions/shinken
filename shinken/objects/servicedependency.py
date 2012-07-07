@@ -191,7 +191,7 @@ class Servicedependencies(Items):
 
             # Create the new service deps from all of this.
             for (dep_hname, dep_sname) in dep_couples: # the sons, like HTTP
-                for (hname, sname) in couples : # the fathers, like MySQL
+                for (hname, sname) in couples: # the fathers, like MySQL
                     new_sd = sd.copy()
                     new_sd.host_name = hname
                     new_sd.service_description = sname

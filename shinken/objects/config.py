@@ -240,7 +240,7 @@ class Config(Item):
         'no_event_handlers_during_downtimes': BoolProp(default='0', class_inherit=[(Host, None), (Service, None)]),
 
         # Interval between cleaning queues pass
-        'cleaning_queues_interval' : IntegerProp(default='900'),
+        'cleaning_queues_interval': IntegerProp(default='900'),
 
         # Enable or not the notice about old Nagios parameters
         'disable_old_nagios_parameters_whining': BoolProp(default='0'),
@@ -258,25 +258,25 @@ class Config(Item):
                                                                 (ReceiverLink, None),  (ArbiterLink, None)]),
         'certs_dir':             StringProp(default='etc/certs'),
         'ca_cert':               StringProp(default='etc/certs/ca.pem'),
-        'server_cert' :          StringProp(default='etc/certs/server.pem'),
+        'server_cert':          StringProp(default='etc/certs/server.pem'),
         'hard_ssl_name_check':   BoolProp(default='0'),
 
         # Log format
         'human_timestamp_log':   BoolProp(default='0'),
 
         ## Discovery part
-        'strip_idname_fqdn' :    BoolProp(default='1'),
-        'runners_timeout'   :    IntegerProp(default='3600'),
+        'strip_idname_fqdn':    BoolProp(default='1'),
+        'runners_timeout':    IntegerProp(default='3600'),
 
         # pack_distribution_file is for keeping a distribution history
         # of the host distribution in the several "packs" so a same
         # scheduler will have more change of getting the same host
-        'pack_distribution_file'  : StringProp(default='pack_distribution.dat'),
+        'pack_distribution_file': StringProp(default='pack_distribution.dat'),
 
         ## WEBUI part
-        'webui_lock_file'   :    StringProp(default='webui.pid'),
-        'webui_port'        :    IntegerProp(default='8080'),
-        'webui_host'        :    StringProp(default='0.0.0.0'),
+        'webui_lock_file':    StringProp(default='webui.pid'),
+        'webui_port':    IntegerProp(default='8080'),
+        'webui_host':    StringProp(default='0.0.0.0'),
 
    }
 
@@ -602,11 +602,11 @@ class Config(Item):
     # the check_command bp_rule for business
     # correlator rules
     def add_ghost_objects(self, raw_objects):
-        bp_rule = {'command_name' : 'bp_rule', 'command_line' : 'bp_rule'}
+        bp_rule = {'command_name': 'bp_rule', 'command_line': 'bp_rule'}
         raw_objects['command'].append(bp_rule)
-        host_up = {'command_name' : '_internal_host_up', 'command_line' : '_internal_host_up'}
+        host_up = {'command_name': '_internal_host_up', 'command_line': '_internal_host_up'}
         raw_objects['command'].append(host_up)
-        echo_obj = {'command_name' : '_echo', 'command_line' : '_echo'}
+        echo_obj = {'command_name': '_echo', 'command_line': '_echo'}
         raw_objects['command'].append(echo_obj)
 
 
@@ -662,10 +662,10 @@ class Config(Item):
 
         if len(self.arbiters) == 0:
             logger.warning("There is no arbiter, I add one in localhost:7770", print_it=False)
-            a = ArbiterLink({'arbiter_name' : 'Default-Arbiter',
-                             'host_name' : socket.gethostname(),
-                             'address' : 'localhost', 'port' : '7770',
-                             'spare' : '0'})
+            a = ArbiterLink({'arbiter_name': 'Default-Arbiter',
+                             'host_name': socket.gethostname(),
+                             'address': 'localhost', 'port': '7770',
+                             'spare': '0'})
             self.arbiters = ArbiterLinks([a])
 
         # First fill default
@@ -1019,7 +1019,7 @@ class Config(Item):
         if len(self.realms) == 0:
             # Create a default realm with default value =1
             # so all hosts without realm wil be link with it
-            default = Realm({'realm_name' : 'Default', 'default' : '1'})
+            default = Realm({'realm_name': 'Default', 'default': '1'})
             self.realms = Realms([default])
             logger.info("The is no defined realms, so I add a new one %s" % default.get_name(), print_it=False)
             lists = [self.pollers, self.brokers, self.reactionners, self.receivers, self.schedulers]
@@ -1035,24 +1035,24 @@ class Config(Item):
     def fill_default_satellites(self):
         if len(self.schedulers) == 0:
             logger.warning("There is no scheduler, I add one in localhost:7768", print_it=False)
-            s = SchedulerLink({'scheduler_name' : 'Default-Scheduler',
-                               'address' : 'localhost', 'port' : '7768'})
+            s = SchedulerLink({'scheduler_name': 'Default-Scheduler',
+                               'address': 'localhost', 'port': '7768'})
             self.schedulers = SchedulerLinks([s])
         if len(self.pollers) == 0:
             logger.warning("There is no poller, I add one in localhost:7771", print_it=False)
-            p = PollerLink({'poller_name' : 'Default-Poller',
-                            'address' : 'localhost', 'port' : '7771'})
+            p = PollerLink({'poller_name': 'Default-Poller',
+                            'address': 'localhost', 'port': '7771'})
             self.pollers = PollerLinks([p])
         if len(self.reactionners) == 0:
             logger.warning("There is no reactionner, I add one in localhost:7769", print_it=False)
-            r = ReactionnerLink({'reactionner_name' : 'Default-Reactionner',
-                                 'address' : 'localhost', 'port' : '7769'})
+            r = ReactionnerLink({'reactionner_name': 'Default-Reactionner',
+                                 'address': 'localhost', 'port': '7769'})
             self.reactionners = ReactionnerLinks([r])
         if len(self.brokers) == 0:
             logger.warning("There is no broker, I add one in localhost:7772", print_it=False)
-            b = BrokerLink({'broker_name' : 'Default-Broker',
-                            'address' : 'localhost', 'port' : '7772',
-                            'manage_arbiters' : '1'})
+            b = BrokerLink({'broker_name': 'Default-Broker',
+                            'address': 'localhost', 'port': '7772',
+                            'manage_arbiters': '1'})
             self.brokers = BrokerLinks([b])
 
 
@@ -1145,7 +1145,7 @@ class Config(Item):
             # We need to create the module on the fly?
             if not got_simple_log_module:
                 data = {'module_type': 'simple_log', 'path': self.log_file,
-                        'archive_path' : self.log_archive_path,
+                        'archive_path': self.log_archive_path,
                         'module_name': 'Simple-log-Autogenerated'}
                 mod = Module(data)
                 mod_to_add.append(mod)
@@ -1171,9 +1171,9 @@ class Config(Item):
             if not got_service_perfdata_module:
                 data = {'module_type': 'service_perfdata',
                         'module_name': 'Service-Perfdata-Autogenerated',
-                        'path' : self.service_perfdata_file,
-                        'mode' : self.service_perfdata_file_mode,
-                        'template' : self.service_perfdata_file_template}
+                        'path': self.service_perfdata_file,
+                        'mode': self.service_perfdata_file_mode,
+                        'template': self.service_perfdata_file_template}
                 mod = Module(data)
                 mod_to_add.append(mod)
 
@@ -1186,7 +1186,7 @@ class Config(Item):
             if not got_retention_file_module:
                 data = {'module_type': 'nagios_retention_file',
                         'module_name': 'Nagios-Retention-File-Autogenerated',
-                        'path' : self.state_retention_file}
+                        'path': self.state_retention_file}
                 mod = Module(data)
                 mod_to_add_to_schedulers.append(mod)
 
@@ -1199,8 +1199,8 @@ class Config(Item):
             if not got_host_perfdata_module:
                 data = {'module_type': 'host_perfdata',
                         'module_name': 'Host-Perfdata-Autogenerated',
-                        'path' : self.host_perfdata_file, 'mode' : self.host_perfdata_file_mode,
-                        'template' : self.host_perfdata_file_template}
+                        'path': self.host_perfdata_file, 'mode': self.host_perfdata_file_mode,
+                        'template': self.host_perfdata_file_template}
                 mod = Module(data)
                 mod_to_add.append(mod)
 
@@ -1238,9 +1238,9 @@ class Config(Item):
 
             # We need to create the module on the fly?
             if not got_named_pipe_module:
-                data = {'command_file' : self.command_file,
-                        'module_name'  : 'NamedPipe-Autogenerated',
-                        'module_type'  : 'named_pipe'}
+                data = {'command_file': self.command_file,
+                        'module_name': 'NamedPipe-Autogenerated',
+                        'module_type': 'named_pipe'}
                 mod = Module(data)
                 mod_to_add.append((mod, data))
 
@@ -1695,7 +1695,7 @@ class Config(Item):
                 if valid_value and old_pack in packindices:
                     #print 'Use a old id for pack', old_pack, [h.get_name() for h in pack]
                     i = old_pack
-                else : # take a new one
+                else: # take a new one
                     #print 'take a new id for pack', [h.get_name() for h in pack]
                     i = rr.next()
 

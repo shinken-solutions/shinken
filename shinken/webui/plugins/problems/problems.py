@@ -219,7 +219,7 @@ def get_view(page):
 #    for pb in pbs :
 #        print pb.get_name()
     print 'Give filters', filters
-    return {'app' : app, 'pbs' : items, 'user' : user, 'navi' : navi, 'search' : search_str, 'page' : page, 'filters' : filters, 'bookmarks':bookmarks}
+    return {'app': app, 'pbs': items, 'user': user, 'navi': navi, 'search': search_str, 'page': page, 'filters': filters, 'bookmarks':bookmarks}
 
 
 
@@ -272,8 +272,8 @@ def get_pbs_widget():
     wid = app.request.GET.get('wid', 'widget_problems_'+str(int(time.time())))
     collapsed = (app.request.GET.get('collapsed', 'False') == 'True')
 
-    options = {'search' : {'value' : search, 'type' : 'text', 'label' : 'Filter by name'},
-               'nb_elements' : {'value' : nb_elements, 'type' : 'int', 'label' : 'Max number of elements to show'},
+    options = {'search': {'value': search, 'type': 'text', 'label': 'Filter by name'},
+               'nb_elements': {'value': nb_elements, 'type': 'int', 'label': 'Max number of elements to show'},
                }
 
     title = 'IT problems'
@@ -281,8 +281,8 @@ def get_pbs_widget():
         title = 'IT problems (%s)' % search
 
 
-    return {'app' : app, 'pbs' : pbs, 'user' : user, 'search' : search, 'page' : 'problems',
-            'wid' : wid, 'collapsed' : collapsed, 'options' : options, 'base_url' : '/widget/problems', 'title' : title,
+    return {'app': app, 'pbs': pbs, 'user': user, 'search': search, 'page': 'problems',
+            'wid': wid, 'collapsed': collapsed, 'options': options, 'base_url': '/widget/problems', 'title': title,
             }
 
 
@@ -317,13 +317,13 @@ def get_last_errors_widget():
     wid = app.request.GET.get('wid', 'widget_last_problems_'+str(int(time.time())))
     collapsed = (app.request.GET.get('collapsed', 'False') == 'True')
 
-    options = {'nb_elements' : {'value' : nb_elements, 'type' : 'int', 'label' : 'Max number of elements to show'},
+    options = {'nb_elements': {'value': nb_elements, 'type': 'int', 'label': 'Max number of elements to show'},
                }
 
     title = 'Last IT problems'
 
-    return {'app' : app, 'pbs' : pbs, 'user' : user, 'page' : 'problems',
-            'wid' : wid, 'collapsed' : collapsed, 'options' : options, 'base_url' : '/widget/last_problems', 'title' : title,
+    return {'app': app, 'pbs': pbs, 'user': user, 'page': 'problems',
+            'wid': wid, 'collapsed': collapsed, 'options': options, 'base_url': '/widget/last_problems', 'title': title,
             }
 
 
@@ -339,9 +339,9 @@ Show the IT problems sorted by time
 '''
 
 
-pages = {get_page : { 'routes' : ['/problems'], 'view' : 'problems', 'static' : True},
-         get_all : { 'routes' : ['/all'], 'view' : 'problems', 'static' : True},
-         get_pbs_widget : {'routes' : ['/widget/problems'], 'view' : 'widget_problems', 'static' : True, 'widget' : ['dashboard'], 'widget_desc' : widget_desc, 'widget_name' : 'problems', 'widget_picture' : '/static/problems/img/widget_problems.png'},
-         get_last_errors_widget : {'routes' : ['/widget/last_problems'], 'view' : 'widget_last_problems', 'static' : True, 'widget' : ['dashboard'], 'widget_desc' : last_widget_desc, 'widget_name' : 'last_problems', 'widget_picture' : '/static/problems/img/widget_problems.png'},
+pages = {get_page: { 'routes': ['/problems'], 'view': 'problems', 'static': True},
+         get_all: { 'routes': ['/all'], 'view': 'problems', 'static': True},
+         get_pbs_widget: {'routes': ['/widget/problems'], 'view': 'widget_problems', 'static': True, 'widget': ['dashboard'], 'widget_desc': widget_desc, 'widget_name': 'problems', 'widget_picture': '/static/problems/img/widget_problems.png'},
+         get_last_errors_widget: {'routes': ['/widget/last_problems'], 'view': 'widget_last_problems', 'static': True, 'widget': ['dashboard'], 'widget_desc': last_widget_desc, 'widget_name': 'last_problems', 'widget_picture': '/static/problems/img/widget_problems.png'},
          }
 

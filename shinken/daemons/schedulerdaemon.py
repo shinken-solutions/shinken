@@ -372,14 +372,14 @@ class Shinken(BaseSatellite):
 
         # We clear our schedulers managed (it's us :) )
         # and set ourself in it
-        self.schedulers = {self.conf.instance_id : self.sched}
+        self.schedulers = {self.conf.instance_id: self.sched}
 
 
     # Give the arbiter the data about what I manage
     # for me it's just my instance_id and my push flavor
     def what_i_managed(self):
         if hasattr(self, 'conf'):
-            return {self.conf.instance_id : self.conf.push_flavor}
+            return {self.conf.instance_id: self.conf.push_flavor}
         else:
             return {}
 

@@ -43,9 +43,9 @@ shinken.objects.command.CommandCall = CommandCall
 
 
 properties = {
-    'daemons' : ['scheduler'],
-    'type' : 'pickle_retention_file',
-    'external' : False,
+    'daemons': ['scheduler'],
+    'type': 'pickle_retention_file',
+    'external': False,
     }
 
 
