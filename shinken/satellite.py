@@ -25,15 +25,15 @@
 
 
 """
-This class is an interface for reactionner and poller
-The satallite listens to a port the configuration from the Arbiter
+This class is an interface for Reactionner and Poller daemons
+A Reactionner listens to a port for the configuration from the Arbiter
 The conf contains the schedulers where actionners will gather actions.
 
-The actionner keeps on listening the arbiter
+The Reactionner keeps on listening to the Arbiter
 (one a timeout)
 
-if arbiter wants it to have a new conf, the satellite forget the previous
- schedulers (and actions into) and take the new ones.
+If Arbiter wants it to have a new conf, the satellite forgets the previous
+ Schedulers (and actions into) and takes the new ones.
 """
 
 # Try to see if we are in an android device or not
@@ -150,11 +150,11 @@ class ISchedulers(Interface):
 
     # A Scheduler send me actions to do
     def push_actions(self, actions, sched_id):
-        #print "A scheduler sned me actions", actions
+        # logger.debug("[%s] A scheduler sent me action : %s") % (self.name, actions)
         self.app.add_actions(actions, sched_id)
 
 
-    # A scheduler ask us its returns
+    # A scheduler ask us the action return value
     def get_returns(self, sched_id):
         #print "A scheduler ask me the returns", sched_id
         ret = self.app.get_return_for_passive(sched_id)
