@@ -92,7 +92,7 @@
 		    	<img src="static/images/star.png">
 		    </div>
 		%end
-		<h2 class="state_{{impact.state.lower()}}"><img style="width : 64px; height:64px" src="{{helper.get_icon_state(impact)}}" />{{impact.state}}: {{impact.get_full_name()}}</h2>
+		<h2 class="state_{{impact.state.lower()}}"><img style="width: 64px; height:64px" src="{{helper.get_icon_state(impact)}}" />{{impact.state}}: {{impact.get_full_name()}}</h2>
 		<!--<center>
 			<div class="impact-row"><span class="impact-inpb-name">{{impact.get_full_name()}}</span> is <span class="impact-state-text">{{impact.state}}</span></div>
 		</center>-->
@@ -112,7 +112,7 @@
 		%nb_unack_pbs = len(unack_pbs)
 		%nb_ack_pbs = len(ack_pbs)
 		%if nb_unack_pbs > 0:
-			Root problems unacknowledged :
+			Root problems unacknowledged:
 		%end
 
 		%guessed = []
@@ -129,7 +129,7 @@
 		%end
 
 		%if len(guessed) != 0 and l_pb_id == nb_unack_pbs + nb_ack_pbs + 1:
-		Pure guessed root problems :
+		Pure guessed root problems:
 		%end
 
 		<div class="problem" id="{{pb_id}}">

@@ -183,7 +183,7 @@
 </div>
 
 <script >$(function(){
-     $(".slidelink").pageslide({ direction: "right", modal : true});
+     $(".slidelink").pageslide({ direction: "right", modal: true});
      // When the user ask for the panel, he don't want to refresh now
      $(".slidelink").click(function() {reinit_refresh();});
   });
@@ -270,7 +270,7 @@ $(function(){
     %for n in filters['hst_srv']:
     <li>
       <span class="filter_color hst_srv_filter_color">&nbsp;</span>
-      <span class="hst_srv_filter_name">Name : {{n}}</span>
+      <span class="hst_srv_filter_name">Name: {{n}}</span>
       <span class="filter_delete"><a href='javascript:remove_current_filter("hst_srv", "{{n}}", "/{{page}}");' class="close">&times;</a></span>
     </li>
     <script>add_active_hst_srv_filter('{{n}}');</script>
@@ -279,7 +279,7 @@ $(function(){
     %for hg in filters['hg']:
     <li>
       <span class="filter_color hg_filter_color">&nbsp;</span>
-      <span class="hg_filter_name">Group : {{hg}}</span>
+      <span class="hg_filter_name">Group: {{hg}}</span>
       <span class="filter_delete"><a href='javascript:remove_current_filter("hg", "{{hg}}", "/{{page}}");' class="close">&times;</a></span>
     </li>
     <script>add_active_hg_filter('{{hg}}');</script>
@@ -288,7 +288,7 @@ $(function(){
     %for r in filters['realm']:
     <li>
       <span class="filter_color realm_filter_color">&nbsp;</span>
-      <span class="realm_filter_name">Realm : {{r}}</span>
+      <span class="realm_filter_name">Realm: {{r}}</span>
       <span class="filter_delete"><a href='javascript:remove_current_filter("realm", "{{r}}", "/{{page}}");' class="close">&times;</a></span>
     </li>
     <script>add_active_realm_filter('{{r}}');</script>
@@ -297,7 +297,7 @@ $(function(){
     %for r in filters['htag']:
     <li>
       <span class="filter_color htag_filter_color">&nbsp;</span>
-      <span class="htag_filter_name">Tag : {{r}}</span>
+      <span class="htag_filter_name">Tag: {{r}}</span>
       <span class="filter_delete"><a href='javascript:remove_current_filter("htag", "{{r}}", "/{{page}}");' class="close">&times;</a></span>
     </li>
     <script>add_active_htag_filter('{{r}}');</script>
@@ -307,7 +307,7 @@ $(function(){
     %for r in filters['ack']:
     <li>
       <span class="filter_color ack_filter_color">&nbsp;</span>
-      <span class="ack_filter_name">Ack : {{r}}</span>
+      <span class="ack_filter_name">Ack: {{r}}</span>
       <span class="filter_delete"><a href='javascript:remove_current_filter("ack", "{{r}}", "/{{page}}");' class="close">&times;</a></span>
     </li>
     <script>add_active_state_ack_filter('{{r}}');</script>
@@ -316,7 +316,7 @@ $(function(){
     %for r in filters['downtime']:
     <li>
       <span class="filter_color downtime_filter_color">&nbsp;</span>
-      <span class="downtime_filter_name">Downtime : {{r}}</span>
+      <span class="downtime_filter_name">Downtime: {{r}}</span>
       <span class="filter_delete"><a href='javascript:remove_current_filter("downtime", "{{r}}", "/{{page}}");' class="close">&times;</a></span>
     </li>
     <script>add_active_state_downtime_filter('{{r}}');</script>
@@ -368,7 +368,7 @@ $(function(){
     %for pb in pbs:
 
       %if pb.business_impact != imp_level:
-       <h2> Business impact : {{!helper.get_business_impact_text(pb)}} </h2>
+       <h2> Business impact: {{!helper.get_business_impact_text(pb)}} </h2>
        %# "We reset the last_hname so we won't overlap this feature across tables"
        %last_hname = ''
        %last_output = ''
@@ -498,7 +498,7 @@ $(function(){
 	%end
 	%for i in helper.get_impacts_sorted(pb):
 	<div>
-	  <p><img style="width: 16px; height : 16px;" src="{{helper.get_icon_state(i)}}" />
+	  <p><img style="width: 16px; height: 16px;" src="{{helper.get_icon_state(i)}}" />
 	    <span class="alert-small alert-{{i.state.lower()}}">{{i.state}}</span> for {{!helper.get_link(i)}}
 	        %for j in range(0, i.business_impact-2):
 	          <img src='/static/images/star.png' alt="star">

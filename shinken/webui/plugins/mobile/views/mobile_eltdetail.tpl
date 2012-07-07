@@ -176,22 +176,22 @@ Invalid element name
 	  <script type="text/javascript">
 	    $(document).ready(function() {
                $('#btn-checks').iphoneStyle({
-                 onChange : function(elt, b){toggle_checks("{{elt.get_full_name()}}", !b);}
+                 onChange: function(elt, b){toggle_checks("{{elt.get_full_name()}}",!b);}
 	       }
 	       );
 
                $('#btn-not').iphoneStyle({
-                 onChange : function(elt, b){toggle_notifications("{{elt.get_full_name()}}", !b);}
+                 onChange: function(elt, b){toggle_notifications("{{elt.get_full_name()}}",!b);}
 	       }
 	       );
 
                $('#btn-evt').iphoneStyle({
-                 onChange : function(elt, b){toggle_event_handlers("{{elt.get_full_name()}}", !b);}
+                 onChange: function(elt, b){toggle_event_handlers("{{elt.get_full_name()}}",!b);}
 	       }
 	       );
 
                $('#btn-flp').iphoneStyle({
-                 onChange : function(elt, b){toggle_flap_detection("{{elt.get_full_name()}}", !b);}
+                 onChange: function(elt, b){toggle_flap_detection("{{elt.get_full_name()}}",!b);}
                }
                );
             });
@@ -274,7 +274,7 @@ Invalid element name
 	    <div class="tab-content">
 	    	<!-- Tab Summary Start-->
 		    <div class="tab-pane active" id="impacts">
-		      <!-- Start of the Whole info pack. We got a row of 2 thing :
+		      <!-- Start of the Whole info pack. We got a row of 2 thing:
 			   left is information, right is related elements -->
 		      <div class="row-fluid">
 		      <!-- So now it's time for the right part, related elements -->
@@ -313,7 +313,7 @@ Invalid element name
 			  <div class="service">
 
 			  <div>
-			    <img style="width : 16px; height:16px" alt="icon state" src="{{helper.get_icon_state(s)}}">
+			    <img style="width: 16px; height:16px" alt="icon state" src="{{helper.get_icon_state(s)}}">
 			    <span class='alert-small alert-{{s.state.lower()}}' style="font-size:110%">{{s.state}}</span> for <span style="font-size:110%">{{!helper.get_link_mobile(s, short=True)}}</span> since {{helper.print_duration(s.last_state_change, just_duration=True, x_elts=2)}}
 			  	%for i in range(0, s.business_impact-2):
 			  	<img alt="icon state" src="/static/images/star.png">
@@ -339,7 +339,7 @@ Invalid element name
 
 
 			  <div>
-			    <img style="width : 16px; height:16px" alt="icon state" src="{{helper.get_icon_state(i)}}">
+			    <img style="width: 16px; height:16px" alt="icon state" src="{{helper.get_icon_state(i)}}">
 			    <span class='alert-small alert-{{i.state.lower()}}' style="font-size:110%">{{i.state}}</span> for <span style="font-size:110%">{{!helper.get_link_mobile(i, short=True)}}</span> since {{helper.print_duration(i.last_state_change, just_duration=True, x_elts=2)}}
 			  	%for i in range(0, i.business_impact-2):
 			  	<img alt="icon state" src="/static/images/star.png">

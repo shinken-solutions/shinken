@@ -2,7 +2,7 @@
 %rebase layout_skonf globals(), title="Discovery scan results", css=['newhosts/css/results.css', 'newhosts/css/token-input.css', 'newhosts/css/token-input-facebook.css'], js=['newhosts/js/results.js', 'newhosts/js/jquery.tokeninput.js']
 
 <div class='span10 offset2 well'>
-  <p>Here are the scans :</p>
+  <p>Here are the scans:</p>
   %for s in scans:
   %if s['state'] == 'done':
   <div class="alert alert-info">
@@ -18,7 +18,7 @@
   %end
 </div>
 
-<p class='span8 pull-left'>Here are the results :</p>
+<p class='span8 pull-left'>Here are the results:</p>
 
 
 

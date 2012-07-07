@@ -48,7 +48,7 @@ var new_properties = [];
 	<span class="span10">
 	  <span class="help-inline span1">Tags </span>
 	  <input id='use' class='to_use_complete offset1' data-use='{{elt.get('use', '')}}' data-cls='host' name="use" type="text" tabindex="2"/>
-	  <script>properties.push({'name' : 'use', 'type' : 'use_tags'});</script>
+	  <script>properties.push({'name': 'use', 'type': 'use_tags'});</script>
 	</span>
 	{{!helper.get_select_input(elt, 'maintenance_period', 'Maintenance Period', 'timeperiods', 'timeperiod_name', editable=editable)}}
 	{{!helper.get_select_input(elt, 'check_period', 'Check Period', 'timeperiods', 'timeperiod_name', editable=editable)}}

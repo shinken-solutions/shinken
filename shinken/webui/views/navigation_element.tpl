@@ -1,4 +1,4 @@
-%if not 'app' in locals() : app = None
+%if not 'app' in locals(): app = None
 <div class="well sidebar-nav">
        <ul class="nav nav-list">
               <li class="nav-header">Monitor</li>

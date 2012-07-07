@@ -248,7 +248,7 @@ Invalid element name
 										%for i in range(0, s.business_impact-2):
 											<img src='/static/images/star.png'>
 										%end
-											<img style="width : 16px; height:16px" src="{{helper.get_icon_state(s)}}">
+											<img style="width: 16px; height:16px" src="{{helper.get_icon_state(s)}}">
 											<span style="font-size:110%">{{!helper.get_link(s, short=True)}}</span> is <span style="font-size:110%">{{s.state}}</span> since {{helper.print_duration(s.last_state_change, just_duration=True, x_elts=2)}}
 										</div>
 									</div>
@@ -278,7 +278,7 @@ Invalid element name
 									%for j in range(0, i.business_impact-2):
 										<img src='/static/images/star.png'>
 									%end
-										<img style="width : 16px; height:16px" src="{{helper.get_icon_state(i)}}">
+										<img style="width: 16px; height:16px" src="{{helper.get_icon_state(i)}}">
 										<span style="font-size:110%">{{!helper.get_link(i)}}</span> is <span style="font-size:110%">{{i.state}}</span> since {{helper.print_duration(i.last_state_change, just_duration=True, x_elts=2)}}
 									</div>
 							        </div>

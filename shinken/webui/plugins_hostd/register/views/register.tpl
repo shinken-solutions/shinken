@@ -26,7 +26,7 @@ function check_username(username){
       $.ajax({
         type: 'POST',
         url: '/availability',
-        data: {'value' : username},
+        data: {'value': username},
         success: user_name_is_available
       });
    }

@@ -39,7 +39,7 @@ var images = [];
 %if len(problems) == 0:
 <h2>No new IT problems in the last 10minutes</h2>
 %else:
-<h3>There are {{len(problems)}} new IT problems in the last 10 minutes :</h3>
+<h3>There are {{len(problems)}} new IT problems in the last 10 minutes:</h3>
 %end
 
 %ind = -1
@@ -51,11 +51,11 @@ var images = [];
 	 %if pb.business_impact > 2:
 	   <span class="wall-small-pulse pulse" title=""></span>
 	 %end
-	   <img style="width : 32px; height:32px" src="{{helper.get_icon_state(pb)}}">
+	   <img style="width: 32px; height:32px" src="{{helper.get_icon_state(pb)}}">
 	 </div>
 	 <div class="wall-problems-text">
 	 %for i in range(0, pb.business_impact-2):
-	 <img style="width : 16px; height:16px" src='/static/images/star.png'>
+	 <img style="width: 16px; height:16px" src='/static/images/star.png'>
 	 %end
 
 	   <span style="font-size:110%">{{!helper.get_link(pb, short=False)}}</span> is <span style="font-size:110%">{{pb.state}}</span> since {{helper.print_duration(pb.last_state_change, just_duration=True, x_elts=2)}}

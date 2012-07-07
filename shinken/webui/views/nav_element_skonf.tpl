@@ -1,4 +1,4 @@
-%if not 'app' in locals() : app = None
+%if not 'app' in locals(): app = None
 
 <script type="text/javascript">
 var myMenu = new UvumiDropdown("dropdown-menu",{

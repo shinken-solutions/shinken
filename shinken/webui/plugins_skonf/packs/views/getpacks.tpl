@@ -80,14 +80,14 @@ function submit(){
 	  %src = p.get('img', '')
 	  <img class="imgsize3" onerror="$(this).hide()" src="{{src}}"/> {{p.get('pack_name', 'unknown')}}
 	</span>
-	<span>Provide host tags :
+	<span>Provide host tags:
 	  <ul>
 	  %for t in p.get('templates', []):
 	    <li>{{t}}</li>
 	  %end
 	  </ul>
 	</span>
-	<span>Description : {{p.get('description', '')}}
+	<span>Description: {{p.get('description', '')}}
 	</span>
 	<span id='loading-{{pid}}' class='pull-right hide'>
 	  <img src='/static/images/spinner.gif'>

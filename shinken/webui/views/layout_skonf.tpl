@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 %#Set default values
-%if not 'js' in locals() : js = []
-%if not 'title' in locals() : title = 'No title'
-%if not 'css' in locals() : css = []
-%if not 'print_menu' in locals() : print_menu = True
-%if not 'print_header' in locals() : print_header = True
-%if not 'refresh' in locals() : refresh = False
-%if not 'user' in locals() : user = None
-%if not 'app' in locals() : app = None
+%if not 'js' in locals(): js = []
+%if not 'title' in locals(): title = 'No title'
+%if not 'css' in locals(): css = []
+%if not 'print_menu' in locals(): print_menu = True
+%if not 'print_header' in locals(): print_header = True
+%if not 'refresh' in locals(): refresh = False
+%if not 'user' in locals(): user = None
+%if not 'app' in locals(): app = None
 
 
 %print "APP is", app
 
 %# If not need, disable the top right banner
-%if not 'top_right_banner_state' in locals() : top_right_banner_state = 0
+%if not 'top_right_banner_state' in locals(): top_right_banner_state = 0
 
 %# For the menu selection
-%if not 'menu_part' in locals() : menu_part = ''
+%if not 'menu_part' in locals(): menu_part = ''
 
 <html lang="en">
   <head>

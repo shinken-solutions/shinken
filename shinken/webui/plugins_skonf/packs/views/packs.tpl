@@ -47,7 +47,7 @@
         %(tpl, services) = _t
         %if tpl:
            %tname = tpl.get('name', '')
-           <div> Host tag : <a href='/elemments/hosts/{{tname}}'> {{tname}}</a>
+           <div> Host tag: <a href='/elemments/hosts/{{tname}}'> {{tname}}</a>
 	     <a class='pull-right' href="javascript:show_services_list('{{tname}}');"> <i class="icon-chevron-down"></i></a>
 	   </div>
         %else:
@@ -70,7 +70,7 @@
          %if len(services) == 0:
 	   <div class="alert">No services enabled for this pack</div>
 	 %else:
-	   <b> {{tpl.get('name', '')}} services : </b>
+	   <b> {{tpl.get('name', '')}} services: </b>
          %end
 
 	 %for s in services:

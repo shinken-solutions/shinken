@@ -30,7 +30,7 @@
 	%for (sat_type, sats) in types:
 		<li class="span2">
 		<a  class="box_round_small">
-			<div class="modul_name box_halfround_small"><h3>{{sat_type.capitalize()}} :</h3></div>
+			<div class="modul_name box_halfround_small"><h3>{{sat_type.capitalize()}}:</h3></div>
 				%for s in sats:
 				<dl>
 
@@ -39,7 +39,7 @@
 	      				%if not s.alive:
 	      					<span class="pulse"></span>
 	      				%end
-	      				<img style="width: 16px; height : 16px;" src="{{helper.get_icon_state(s)}}" alt="stateicon"/>
+					<img style="width: 16px; height: 16px;" src="{{helper.get_icon_state(s)}}" alt="stateicon"/>
 	      			</dd>
 					<dt>Name</dt>
 					<dd>{{s.get_name()}}</dd>
@@ -65,7 +65,7 @@
 		%types = [ ('scheduler', schedulers), ('poller', pollers), ('broker', brokers), ('reactionner', reactionners), ('receiver', receivers)]
 
 		%for (sat_type, sats) in types:
-		<h3> {{sat_type.capitalize()}} : </h3>
+		<h3> {{sat_type.capitalize()}}: </h3>
 
 		<table class="table table-striped table-bordered table-condensed">
 		%for s in sats:
@@ -86,7 +86,7 @@
 
 			<span class="pulse"></span>
 			%end
-			<img style="width: 16px; height : 16px;" src="{{helper.get_icon_state(s)}}" />
+			<img style="width: 16px; height: 16px;" src="{{helper.get_icon_state(s)}}" />
 			</div>
 			</td>
 			<td> {{s.get_name()}}</td>
