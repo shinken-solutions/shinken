@@ -249,5 +249,5 @@ __ http://www.shinken-monitoring.org/wiki/
 Known bugs
 ================================
 
-You can consult the open issues list or submit a new issue at :
+You can consult the open issues list or submit a new issue at:
 https://github.com/naparuba/shinken/issues

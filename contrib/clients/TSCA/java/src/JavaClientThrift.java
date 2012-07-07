@@ -24,7 +24,7 @@ public class JavaClientThrift{
 
 	try
 		{
-			// Initialise Thrift :
+			// Initialise Thrift:
 			TTransport transport;
 			transport = new TSocket("localhost", 9090);
 			transport.open();

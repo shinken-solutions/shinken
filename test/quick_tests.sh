@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (C) 2009-2010 :
+# Copyright (C) 2009-2010:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #
@@ -34,7 +34,7 @@ function launch_and_assert {
     python ./$SCRIPT
     if [ $? != 0 ]
 	then
-	echo "Error : the test $SCRIPT failed"
+	echo "Error: the test $SCRIPT failed"
 	exit 2
     fi
 }

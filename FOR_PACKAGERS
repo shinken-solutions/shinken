@@ -1,7 +1,7 @@
 === THANKS :) ====
 Hi,
 
-First of all : THANKS for trying to make a package of Shinken :)
+First of all: THANKS for trying to make a package of Shinken :)
 
 I try to make the setup.py useful to you. It will install the shinken
 library to the classic python way (in site-package).
@@ -17,9 +17,9 @@ You will need the pyro lib too. It must already have a package. If not, take if 
 You can change the place you want to put etc and var in the file setup_parameters.cfg. You can also change
 the owner of theses dir (and ALL files in them) in this file.
 
-But WARNING (bis) : if you set a --root (example =/tmp/something) it will not update the owner of the /etc and /var directory (calling with a --root is for having all files to create a package, so you don't need changing owners).
+But WARNING (bis): if you set a --root (example =/tmp/something) it will not update the owner of the /etc and /var directory (calling with a --root is for having all files to create a package, so you don't need changing owners).
 
-Example when you call :
+Example when you call:
 python setup.py install --root=/tmp/something --record=INSTALLED_FILES --install-scripts=/usr/bin
 (no trailing / for install_scripts)
 You get all files to package in the file INSTALLED_FILES (and only the /tmp/moncul is changed, so it's ok for your system ;)).
@@ -33,9 +33,9 @@ With the python lib + etc + var it should be ok :)
 
 I don't know what more you need exactly, so please ask in the mailing list at
 https://lists.sourceforge.net/lists/listinfo/shinken-devel
-or directly via my email : naparuba@gmail.com
+or directly via my email: naparuba@gmail.com
 
-And again : thanks a lot, a tool without package is nothing :)
+And again: thanks a lot, a tool without package is nothing :)
 
 
 Jean
