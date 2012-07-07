@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-# Copyright (C) 2009-2011 :
+# Copyright (C) 2009-2011:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -32,7 +32,7 @@ DIR=`/usr/bin/dirname $0`
 function pythonver(){
 	versions="2.4 2.5 2.6 2.7"
 	LASTFOUND=""
-	# is there any python here ?
+	# is there any python here?
 	for v in $versions
 	do
 		which python$v > /dev/null 2>&1
@@ -47,7 +47,7 @@ function pythonver(){
 		which python > /dev/null 2>&1
 		if [ $? -ne 0 ]
 		then
-			echo "No python interpreter found !"
+			echo "No python interpreter found!"
 			exit 2
 		else
 			echo "python found"
@@ -98,23 +98,23 @@ while getopts "v:sxpud" opt; do
 			fi
 			;;
 		s)
-			echo "Hey ! you are on shinken here !"
+			echo "Hey! you are on shinken here!"
 			exit 2
 			;;
 		x)
-			echo "Hey ! you are on shinken here !"
+			echo "Hey! you are on shinken here!"
 			exit 2
 			;;
 		p)
-			echo "Hey ! you are on shinken here !"
+			echo "Hey! you are on shinken here!"
 			exit 2
 			;;
 		u)
-			echo "Hey ! you are on shinken here !"
+			echo "Hey! you are on shinken here!"
 			exit 2
 			;;
 		d)
-			echo "Hey ! you are on shinken here !"
+			echo "Hey! you are on shinken here!"
 			exit 2
 			;;
 		*)
