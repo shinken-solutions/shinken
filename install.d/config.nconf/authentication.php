@@ -128,7 +128,7 @@ SELECT attr_value AS username, id_item AS user_id
 ');
 
 #
-#  ::OPTIONAL:: Define ADMIN access here :
+#  ::OPTIONAL:: Define ADMIN access here:
 # if query matches, user will get FULL ADMIN access, for Administrators
 #
 define('AUTH_SQLQUERY_ADMIN',     '

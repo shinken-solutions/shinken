@@ -20,8 +20,8 @@ admin_users = [ "nagiosadmin" ]
 # connection to the local host is done.
 #sites = {
 #   # connect to local Nagios
-#   "local" : {
-#        "alias" : "Munich"
+#   "local": {
+#        "alias": "Munich"
 #   },
 #
 #   # connect to remote site (e.g. local OMD site 'paris')

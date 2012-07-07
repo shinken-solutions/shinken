@@ -34,8 +34,8 @@ src=$(readlink -f "$myscripts/../../..")
 . $myscripts/shinken.conf
 
 cecho "###########################################################" red
-cecho "# CAUTION THIS SCRIPT IS USED ONLY IN DEVELOPMENT PROCESS " red
-cecho "# IT COULD BREAK YOUR SYSTEM ! PRESS CTRL+C TO ABORT      " red
+cecho "# CAUTION THIS SCRIPT IS USED ONLY IN DEVELOPMENT PROCESS  " red
+cecho "# IT COULD BREAK YOUR SYSTEM! PRESS CTRL+C TO ABORT        " red
 cecho "###########################################################" red
 read taste
 path="/usr/local/lib/$(pythonver)/dist-packages"
@@ -44,7 +44,7 @@ pth="eeasy-install.pth"
 for p in $PYLIBSDEB
 do
     module=$(echo $p | awk -F\: '{print $1}')
-    cecho " > going to remove python module : $module" yellow
+    cecho " > going to remove python module: $module" yellow
     echo $path/$module
     if [ ! -z "$(ls -1 $path/$module*)" ]
     then
