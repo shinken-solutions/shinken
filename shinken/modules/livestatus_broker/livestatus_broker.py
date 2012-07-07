@@ -81,8 +81,8 @@ class LiveStatus_broker(BaseModule, Daemon):
         ips = [ip.strip() for ip in self.allowed_hosts.split(',') if ip]
         self.allowed_hosts = [ip for ip in ips if re.match(r'^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$', ip)]
         if len(ips) != len(self.allowed_hosts):
-            print "Warning : the list of allowed hosts is invalid", ips
-            print "Warning : the list of allowed hosts is invalid", self.allowed_hosts
+            print "Warning: the list of allowed hosts is invalid", ips
+            print "Warning: the list of allowed hosts is invalid", self.allowed_hosts
             raise
         self.pnp_path = getattr(modconf, 'pnp_path', '')
         self.debug = getattr(modconf, 'debug', None)
@@ -285,7 +285,7 @@ class LiveStatus_broker(BaseModule, Daemon):
                         except Exception, exp:
                             print exp.__dict__
                             logger.warning("[%s] The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
-                            logger.debug("[%s] Exception type : %s" % (self.name, type(exp)))
+                            logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
                             logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                             self.modules_manager.set_to_restart(mod)
                 except Exception, exp:
@@ -367,7 +367,7 @@ class LiveStatus_broker(BaseModule, Daemon):
             except Exception, exp:
                 print exp.__dict__
                 logger.warning("[%s] The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
-                logger.debug("[%s] Exception type : %s" % (self.name, type(exp)))
+                logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
                 logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)
 
@@ -437,8 +437,8 @@ class LiveStatus_broker(BaseModule, Daemon):
                                 mod.manage_brok(b)
                             except Exception, exp:
                                 print exp.__dict__
-                                logger.warning("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
-                                logger.debug("[%s] Exception type : %s" % (self.name, type(exp)))
+                                logger.warning("[%s] Warning: The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
+                                logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
                                 logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                                 self.modules_manager.set_to_restart(mod)
                 except Queue.Empty:
@@ -447,7 +447,7 @@ class LiveStatus_broker(BaseModule, Daemon):
                     if hasattr(os, 'errno') and e.errno != os.errno.EINTR:
                         raise
                 except Exception, exp:
-                    print "Error : got an exeption (bad code?)", exp, exp.__dict__, type(exp)
+                    print "Error: got an exeption (bad code?)", exp, exp.__dict__, type(exp)
                     raise
                 time.sleep(0.01)
 

@@ -178,7 +178,7 @@ class Regenerator(object):
 
         # In a scheduler we are already "linked" so we can skip this
         if self.in_scheduler_mode:
-            safe_print("Regenerator : We skip the all_done_linking phase because we are in a scheduler")
+            safe_print("Regenerator: We skip the all_done_linking phase because we are in a scheduler")
             return
 
         start = time.time()
@@ -186,7 +186,7 @@ class Regenerator(object):
         # check if the instance is really defined, so got ALL the
         # init phase
         if not inst_id in self.configs.keys():
-            safe_print("Warning : the instance %d is not fully given, bailout" % inst_id)
+            safe_print("Warning: the instance %d is not fully given, bailout" % inst_id)
             return
 
         # Try to load the in progress list and make them available for
@@ -505,7 +505,7 @@ class Regenerator(object):
     def manage_program_status_brok(self, b):
         data = b.data
         c_id = data['instance_id']
-        safe_print("Regenerator : Creating config:", c_id)
+        safe_print("Regenerator: Creating config:", c_id)
 
         # We get a real Conf object ,adn put our data
         c = Config()
@@ -902,7 +902,7 @@ class Regenerator(object):
             # Do not ask data too quickly, very dangerous
             # one a minute
             if time.time() - self.last_need_data_send > 60 and self.from_q is not None:
-                print "I ask the broker for instance id data :", c_id
+                print "I ask the broker for instance id data:", c_id
                 msg = Message(id=0, type='NeedData', data={'full_instance_id': c_id})
                 self.from_q.put(msg)
                 self.last_need_data_send = time.time()

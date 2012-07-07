@@ -102,7 +102,7 @@ class Servicedependencies(Items):
         for hg_name in hg_names:
             hg = hostgroups.find_by_name(hg_name)
             if hg is None:
-                err = "ERROR : the servicedependecy got an unknown hostgroup_name '%s'" % hg_name
+                err = "ERROR: the servicedependecy got an unknown hostgroup_name '%s'" % hg_name
                 self.configuration_errors.append(err)
                 continue
             hnames = []
@@ -146,7 +146,7 @@ class Servicedependencies(Items):
                 for hg_name in hg_names:
                     hg = hostgroups.find_by_name(hg_name)
                     if hg is None:
-                        err = "ERROR : the servicedependecy got an unknown hostgroup_name '%s'" % hg_name
+                        err = "ERROR: the servicedependecy got an unknown hostgroup_name '%s'" % hg_name
                         hg.configuration_errors.append(err)
                         continue
                     hnames.extend(hg.members.split(','))
@@ -173,7 +173,7 @@ class Servicedependencies(Items):
                 for hg_name in hg_names:
                     hg = hostgroups.find_by_name(hg_name)
                     if hg is None:
-                        err = "ERROR : the servicedependecy got an unknown dependent_hostgroup_name '%s'" % hg_name
+                        err = "ERROR: the servicedependecy got an unknown dependent_hostgroup_name '%s'" % hg_name
                         hg.configuration_errors.append(err)
                         continue
                     dep_hnames.extend(hg.members.split(','))

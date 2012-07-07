@@ -35,7 +35,7 @@ class TestPackHashMemory(ShinkenTest):
     def test_pack_hash_memory(self):
         packs = {0: set(), 1: set()}
         for h in self.sched.hosts:
-            print 'First pass : ', h.get_name(), h.pack_id, '\n'
+            print 'First pass: ', h.get_name(), h.pack_id, '\n'
             packs[h.pack_id].add(h)
 
         nb_same = 0

@@ -50,7 +50,7 @@ class TestModuleManager(ShinkenTest):
         # We got one of the files of
         parent_path = os.path.dirname(os.path.dirname(modulespath))
         modulespath = os.path.join(parent_path, 'shinken', 'modules')
-        print("Using modules path : %s" % (modulespath))
+        print("Using modules path: %s" % (modulespath))
 
         return modulespath
 
@@ -63,7 +63,7 @@ class TestModuleManager(ShinkenTest):
         self.modulemanager.load_and_init()
         # And start external ones, like our LiveStatus
         self.modulemanager.start_external_instances()
-        print "I correctly loaded the modules : %s " % ([ inst.get_name() for inst in self.modulemanager.instances ])
+        print "I correctly loaded the modules: %s " % ([ inst.get_name() for inst in self.modulemanager.instances ])
 
         print "*** First kill ****"
         # Now I will try to kill the livestatus module

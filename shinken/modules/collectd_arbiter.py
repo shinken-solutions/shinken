@@ -346,5 +346,5 @@ class Collectd_arbiter(BaseModule):
                     e.add_perf_data(item.get_metric_name(), item.get_metric_value())
 
             except ValueError, exp:
-                print "Collectd read error : ", exp
+                print "Collectd read error: ", exp
 

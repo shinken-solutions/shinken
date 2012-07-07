@@ -90,7 +90,7 @@ class Webui_broker(BaseModule, Daemon):
         # Load the photo dir and make it a absolute path
         self.photo_dir = getattr(modconf, 'photo_dir', 'photos')
         self.photo_dir = os.path.abspath(self.photo_dir)
-        print "Webui : using the backend", self.http_backend
+        print "Webui: using the backend", self.http_backend
         # We will save all widgets
         self.widgets = {}
         # We need our regenerator now (before main) so if we are in a scheduler,
@@ -270,7 +270,7 @@ class Webui_broker(BaseModule, Daemon):
                       except Exception , exp:
                           print exp.__dict__
                           logger.warning("[%s] The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
-                          logger.debug("[%s] Exception type : %s" % (self.name, type(exp)))
+                          logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
                           logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                           self.modules_manager.set_to_restart(mod)
               except Exception, exp:
@@ -304,7 +304,7 @@ class Webui_broker(BaseModule, Daemon):
     def load_plugins(self):
         from shinken.webui import plugins
         plugin_dir = os.path.abspath(os.path.dirname(plugins.__file__))
-        print "Loading plugin directory : %s" % plugin_dir
+        print "Loading plugin directory: %s" % plugin_dir
 
         # Load plugin directories
         plugin_dirs = [ fname for fname in os.listdir(plugin_dir)
@@ -380,7 +380,7 @@ class Webui_broker(BaseModule, Daemon):
 
 
             except Exception, exp:
-                logger.warning("Loading plugins : %s" % exp)
+                logger.warning("Loading plugins: %s" % exp)
 
 
 
@@ -510,7 +510,7 @@ class Webui_broker(BaseModule, Daemon):
             except Exception , exp:
                 print exp.__dict__
                 logger.warning("[%s] The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
-                logger.debug("[%s] Exception type : %s" % (self.name, type(exp)))
+                logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
                 logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)
 
@@ -548,7 +548,7 @@ class Webui_broker(BaseModule, Daemon):
             except Exception , exp:
                 print exp.__dict__
                 logger.warning("[%s] The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
-                logger.debug("[%s] Exception type : %s" % (self.name, type(exp)))
+                logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
                 logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)
 
@@ -574,8 +574,8 @@ class Webui_broker(BaseModule, Daemon):
                     return r
             except Exception , exp:
                 print exp.__dict__
-                logger.log("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
-                logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
+                logger.log("[%s] Warning: The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
+                logger.log("[%s] Exception type: %s" % (self.name, type(exp)))
                 logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)
         print 'get_user_preference :: Nothing return, I send non'
@@ -594,8 +594,8 @@ class Webui_broker(BaseModule, Daemon):
                     f(user, key, value)
             except Exception , exp:
                 print exp.__dict__
-                logger.log("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
-                logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
+                logger.log("[%s] Warning: The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
+                logger.log("[%s] Exception type: %s" % (self.name, type(exp)))
                 logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)
 
@@ -618,8 +618,8 @@ class Webui_broker(BaseModule, Daemon):
                     lst.append(r)
             except Exception , exp:
                 print exp.__dict__
-                logger.log("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
-                logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
+                logger.log("[%s] Warning: The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
+                logger.log("[%s] Exception type: %s" % (self.name, type(exp)))
                 logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)
 

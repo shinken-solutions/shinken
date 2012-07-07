@@ -345,7 +345,7 @@ class Status_dat_broker(BaseModule):
                 if find_c is not None:
                     r.append(find_c)
                 else:
-                    print "Error : search for a contact %s that do not exists!" % c.get_name()
+                    print "Error: search for a contact %s that do not exists!" % c.get_name()
         return r
 
 
@@ -356,7 +356,7 @@ class Status_dat_broker(BaseModule):
             if find_t is not None:
                 return find_t
             else:
-                print "Error : search for a timeperiod %s that do not exists!" % t.get_name()
+                print "Error: search for a timeperiod %s that do not exists!" % t.get_name()
         else:
             return None
 
@@ -436,6 +436,6 @@ class Status_dat_broker(BaseModule):
                 r = self.status.create_or_update()
                 # if we get an error (an exception in fact) we bail out
                 if r is not None:
-                    print "[status_dat] Error :", r
+                    print "[status_dat] Error:", r
                     break
                 last_generation = time.time()

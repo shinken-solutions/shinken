@@ -77,7 +77,7 @@ class SkonfUIWorker(Worker):
 
 
     def get_scan_data(self):
-        print "Info : I ask for a scan with the id", self.scan_asked
+        print "Info: I ask for a scan with the id", self.scan_asked
         scan_id = self.scan_asked.get('scan_id')
         # I search the scan entry in the asked_scans table
         cur = self.db.scans.find({'_id': scan_id})
@@ -88,14 +88,14 @@ class SkonfUIWorker(Worker):
 
 
     def launch_scan(self):
-        print "Info : I try to launch scan", self.scan
+        print "Info: I try to launch scan", self.scan
         scan_id = self.scan.get('_id')
         nmap = self.scan.get('use_nmap')
         vmware = self.scan.get('use_vmware')
         names = self.scan.get('names')
         state = self.scan.get('state')
 
-        print "Info : IN SCAN WORKER:", nmap, vmware, names, state
+        print "Info: IN SCAN WORKER:", nmap, vmware, names, state
 
         # Updating the scan entry state
         self.db.scans.update({'_id': scan_id}, {'$set': {'state': 'preparing'}})
@@ -104,7 +104,7 @@ class SkonfUIWorker(Worker):
 
         elts = names.splitlines()
         targets = ' '.join(elts)
-        print "Info : Launching Nmap with targets", targets
+        print "Info: Launching Nmap with targets", targets
         macros = [('NMAPTARGETS', targets)]
         overwrite = False
         runners = ['nmap']
@@ -173,20 +173,20 @@ class SkonfUIWorker(Worker):
                 try:
                 #print "I", self.id, "wait for a message"
                     msg = self.s.get(block=False)
-                    print "Info : I", self.id, "I've got a message!", msg
+                    print "Info: I", self.id, "I've got a message!", msg
                     if msg is not None and msg.get_type() == 'ScanAsk':
                         self.scan_asked = msg.get_data()
                         self.get_scan_data()
                         self.launch_scan()
                 except Empty, exp:
-                    print "Info : UI worker go to sleep", self.id
+                    print "Info: UI worker go to sleep", self.id
                     time.sleep(1)
 
             # Now get order from master
             try:
                 cmsg = c.get(block=False)
                 if cmsg.get_type() == 'Die':
-                    print "Info : [%d]Dad say we are dying..." % self.id
+                    print "Info: [%d]Dad say we are dying..." % self.id
                     break
 
             except:

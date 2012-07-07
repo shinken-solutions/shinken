@@ -87,10 +87,10 @@ class ShinkenAdmin(cmd.Cmd):
     def do_connect(self, line):
         '''
         Connect to an arbiter daemon
-        Syntax : connect [host]:[port]
-        Ex : for Connecting to server, port 7770
+        Syntax: connect [host]:[port]
+        Ex: for Connecting to server, port 7770
         > connect server:7770
-        Ex : connect to localhost, port 7770
+        Ex: connect to localhost, port 7770
         > connect
         '''
         line = line.strip()
@@ -233,7 +233,7 @@ class ShinkenAdmin(cmd.Cmd):
         '''
         Display daemon configuration
         The column Default show that we are using default values when D is present
-        Ex : show config poller will display configuration for all pollers
+        Ex: show config poller will display configuration for all pollers
         '''
         from shinken.objects import Config
 
@@ -246,8 +246,8 @@ class ShinkenAdmin(cmd.Cmd):
 
 
         if line == "help" or line == "":
-            print "Usage : showconfig objecttype [objectname]"
-            print "Example : showconfig poller poller-1"
+            print "Usage: showconfig objecttype [objectname]"
+            print "Example: showconfig poller poller-1"
         else:
             type=line
             self.look_connexion()
@@ -272,7 +272,7 @@ class ShinkenAdmin(cmd.Cmd):
                 o = ReceiverLink()
                 cfglink = 'receivers'
             else:
-                print "Unknown object type : %s" % (type)
+                print "Unknown object type: %s" % (type)
                 return False
 
             cfg = self.arb.get_config()
@@ -280,7 +280,7 @@ class ShinkenAdmin(cmd.Cmd):
 
             for d in dlinks:
                 print "+%s+" % ("-".center(86,'-'))
-                print "| Config for : {0:71} |".format(type)
+                print "| Config for: {0:71} |".format(type)
                 print "+%s+" % ("-".center(106,'-'))
                 print "| {0:8} | {1:30} | {2:60} |".format("Default","Directive","Value" )
                 print "+%s+" % ("-".center(106,'-'))
@@ -302,7 +302,7 @@ class ShinkenAdmin(cmd.Cmd):
                     else:
                         # TODO: get default parameters
                         default=u"D"
-                        elts="TODO : get default value"
+                        elts="TODO: get default value"
                     if elts:
                         print u"| {0:8} | {1:30} | {2:60} |".format(default,unicode(key),elts)
                 print "+%s+" % ("-".center(106,'-'))
@@ -362,7 +362,7 @@ class ShinkenAdmin(cmd.Cmd):
                 print "Cannot reach %s daemon!" % m['name']
 
 
-intro = 'Available functions :\n# connect [localhost:7770] \n# status\n# gethostname\n# help [function]\n# showconfig [daemon type]\n# setloglevel [daemon-name] loglevel\n# quit'
+intro = 'Available functions:\n# connect [localhost:7770] \n# status\n# gethostname\n# help [function]\n# showconfig [daemon type]\n# setloglevel [daemon-name] loglevel\n# quit'
 
 if __name__ == "__main__":
     ShinkenAdmin().cmdloop(intro)

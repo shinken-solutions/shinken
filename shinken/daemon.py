@@ -79,7 +79,7 @@ REDIRECT_TO = getattr(os, "devnull", "/dev/null")
 UMASK = 027
 from shinken.bin import VERSION
 
-""" TODO : Add some comment about this class for the doc"""
+""" TODO: Add some comment about this class for the doc"""
 class InvalidPidFile(Exception): pass
 
 
@@ -233,7 +233,7 @@ class Daemon(object):
 
     def do_load_modules(self):
         self.modules_manager.load_and_init()
-        self.log.info("I correctly loaded the modules : [%s]" % (','.join([inst.get_name() for inst in self.modules_manager.instances])))
+        self.log.info("I correctly loaded the modules: [%s]" % (','.join([inst.get_name() for inst in self.modules_manager.instances])))
 
     # Dummy method for adding broker to this daemon
     def add(self, elt):
@@ -427,7 +427,7 @@ class Daemon(object):
             # if it's not then something wrong can already be on the way so let's wait max 3 secs here.
             pid, status = os.waitpid(pid, 0)
             if status != 0:
-                logger.error("Something wierd happened with/during second fork : status=", status)
+                logger.error("Something wierd happened with/during second fork: status=", status)
             os._exit(status != 0)
 
         # halfway to daemonize..
@@ -495,11 +495,11 @@ class Daemon(object):
         # The SSL part
         if ssl_conf.use_ssl:
             Pyro.config.PYROSSL_CERTDIR = os.path.abspath(ssl_conf.certs_dir)
-            logger.debug("Using ssl certificate directory : %s" % Pyro.config.PYROSSL_CERTDIR)
+            logger.debug("Using ssl certificate directory: %s" % Pyro.config.PYROSSL_CERTDIR)
             Pyro.config.PYROSSL_CA_CERT = os.path.abspath(ssl_conf.ca_cert)
-            logger.debug("Using ssl ca cert file : %s" % Pyro.config.PYROSSL_CA_CERT)
+            logger.debug("Using ssl ca cert file: %s" % Pyro.config.PYROSSL_CA_CERT)
             Pyro.config.PYROSSL_CERT = os.path.abspath(ssl_conf.server_cert)
-            logger.debug("Using ssl server cert file : %s" % Pyro.config.PYROSSL_CERT)
+            logger.debug("Using ssl server cert file: %s" % Pyro.config.PYROSSL_CERT)
 
             if self.hard_ssl_name_check:
                 Pyro.config.PYROSSL_POSTCONNCHECK=1
@@ -543,7 +543,7 @@ class Daemon(object):
         # We got one of the files
         parent_path = os.path.dirname(os.path.dirname(modulespath))
         modulespath = os.path.join(parent_path, 'shinken', 'modules')
-        self.debug_output.append("Using modules path : %s" % (modulespath))
+        self.debug_output.append("Using modules path: %s" % (modulespath))
 
         return modulespath
 
@@ -591,7 +591,7 @@ class Daemon(object):
 
         if (self.user == 'root' or self.group == 'root') and not insane:
             logger.error("You want the application run under the root account?")
-            logger.error("I am not agree with it. If you really want it, put :")
+            logger.error("I am not agree with it. If you really want it, put:")
             logger.error("idontcareaboutsecurity=yes")
             logger.error("in the config file")
             logger.error("Exiting")
@@ -619,7 +619,7 @@ class Daemon(object):
             config = ConfigParser.ConfigParser()
             config.read(self.config_file)
             if config._sections == {}:
-                logger.error("Bad or missing config file : %s " % self.config_file)
+                logger.error("Bad or missing config file: %s " % self.config_file)
                 sys.exit(2)
             for (key, value) in config.items('daemon'):
                 if key in properties:
@@ -674,7 +674,7 @@ class Daemon(object):
 
     def get_header(self):
         return ["Shinken %s" % VERSION,
-                "Copyright (c) 2009-2011 :",
+                "Copyright (c) 2009-2011:",
                 "Gabes Jean (naparuba@gmail.com)",
                 "Gerhard Lausser, Gerhard.Lausser@consol.de",
                 "Gregory Starck, g.starck@gmail.com",

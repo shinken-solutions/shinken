@@ -62,11 +62,11 @@ parser.add_option('-r', '--runners', dest="runners",
 parser.add_option('-m', '--macros', dest="macros",
                   help="List of macros (like NMAPTARGETS=192.168.0.0/24). Should be the last argument")
 parser.add_option('--db', dest="dbmod",
-                  help="Optionnal : Name of the database module to use.")
+                  help="Optionnal: Name of the database module to use.")
 parser.add_option('--backend', dest="backend",
-                  help="Optionnal : Name of a module that will totally manage the object writing/update thing. If you don't know what it means, maybe you should not use this option :)")
+                  help="Optionnal: Name of a module that will totally manage the object writing/update thing. If you don't know what it means, maybe you should not use this option :)")
 parser.add_option('--modules_path', dest="modules_path",
-                  help="Optionnal : Path for the module loading. If you don't know what it means, maybe you should not use this option :)")
+                  help="Optionnal: Path for the module loading. If you don't know what it means, maybe you should not use this option :)")
 
 
 

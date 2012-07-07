@@ -258,7 +258,7 @@ class Arbiter(Daemon):
                 arb.need_conf = False
                 self.me = arb
                 self.is_master = not self.me.spare
-                logger.info("I am the %s Arbiter : %s" % (('master', 'spare')[self.is_master], arb.get_name()))
+                logger.info("I am the %s Arbiter: %s" % (('master', 'spare')[self.is_master], arb.get_name()))
 
                 # Set myself as alive ;)
                 self.me.alive = True
@@ -272,7 +272,7 @@ class Arbiter(Daemon):
                      With the value %s \
                      Thanks." % socket.gethostname())
 
-        logger.info("My own modules : " + ','.join([m.get_name() for m in self.me.modules]))
+        logger.info("My own modules: " + ','.join([m.get_name() for m in self.me.modules]))
 
         # we request the instances without them being *started*
         # (for those that are concerned ("external" modules):
@@ -460,7 +460,7 @@ class Arbiter(Daemon):
         try:
             import json
         except ImportError:
-            print "Error : json is need for statistics file saving. Please update your python version to 2.6"
+            print "Error: json is need for statistics file saving. Please update your python version to 2.6"
             sys.exit(2)
 
         print "We are doing an statistic analyse dump on the file", self.analyse

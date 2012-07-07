@@ -53,7 +53,7 @@ except ImportError:
     try:
         import simplejson as json
     except ImportError:
-        print "Error : you need the json or simplejson module for this script"
+        print "Error: you need the json or simplejson module for this script"
         sys.exit(0)
 
 class TestModuleHotDep(ShinkenTest):

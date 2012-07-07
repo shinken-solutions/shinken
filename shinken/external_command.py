@@ -56,14 +56,14 @@ MODATTR_NOTIFICATION_TIMEPERIOD = 65536
 
 
 
-""" TODO : Add some comment about this class for the doc"""
+""" TODO: Add some comment about this class for the doc"""
 class ExternalCommand:
     my_type = 'externalcommand'
     def __init__(self, cmd_line):
         self.cmd_line = cmd_line
 
 
-""" TODO : Add some comment about this class for the doc"""
+""" TODO: Add some comment about this class for the doc"""
 class ExternalCommandManager:
 
     commands = {

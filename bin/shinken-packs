@@ -23,7 +23,7 @@
 
 """
 
-Warning : THIS IS A PREVIEW, and uglu code that looks as a script.
+Warning: THIS IS A PREVIEW, and uglu code that looks as a script.
 
 """
 
@@ -75,7 +75,7 @@ else:
 def create_pack(pack_file, p_dest_dir, share_dir):
     _tmp = tempfile.mktemp()
 
-    print "Using the destination directory : %s" % p_dest_dir
+    print "Using the destination directory: %s" % p_dest_dir
     src_dir = os.path.abspath(os.path.dirname(pack_file))
     print "Source dir that will be load", src_dir
 
@@ -112,12 +112,12 @@ def create_pack(pack_file, p_dest_dir, share_dir):
     o['services'] = {}
     o['commands'] = []
     print "We are creating the pack '%s'" % o['name']
-    print "Description : %s" % o['description']
-    print "Host templates : %s" % ','.join(o['templates'])
+    print "Description: %s" % o['description']
+    print "Host templates: %s" % ','.join(o['templates'])
     # We will dump the services linked to theses templates
     for h in cfg.hosts:
         if h.is_tpl() and hasattr(h, 'name') and not h.name in o['templates']:
-            print "WARNING : you miss the host template '%s' in the pack file. I'm adding it" % h.name
+            print "WARNING: you miss the host template '%s' in the pack file. I'm adding it" % h.name
             o['templates'].append(h.name)
 
     for s in cfg.services:
@@ -143,26 +143,26 @@ def create_pack(pack_file, p_dest_dir, share_dir):
 
 
     o['path'] = pack.path
-    print "Path : %s" % o['path']
+    print "Path: %s" % o['path']
     o['doc_link'] = pack.doc_link
-    print "Doc link : %s" % o['doc_link']
+    print "Doc link: %s" % o['doc_link']
     o['macros'] = {}
-    print "Macros :"
+    print "Macros:"
     for (k,v) in pack.macros.iteritems():
         t = v.get('type', 'string')
         d = v.get('description', '')
         o['macros'][k] = {'type': t, 'description': ''}
-        print "\t%s : Type=%s Description='%s'" % (k, t, d)
+        print "\t%s: Type=%s Description='%s'" % (k, t, d)
 
 
     j = json.dumps(o, sort_keys = True, indent = 3)
-    print "Pack file generated :", j
+    print "Pack file generated:", j
 
     create_dir = os.path.join(p_dest_dir, o['name'])
     print "We will create the pack directory in %s" % create_dir
     # Now get all the .cfg files from the src_dir and put them into a pack directory
     if os.path.exists(create_dir) and os.path.isdir(create_dir):
-        print "Warning : the destination directory already exists. I clean it!"
+        print "Warning: the destination directory already exists. I clean it!"
         #TODO: do the clean
         shutil.rmtree(create_dir)
 
@@ -341,15 +341,15 @@ def register(login, password, email, uri, proxy):
     c.close()
     print "status code: %s" % status_code
     if error:
-        print "Sorry there was an error with the query :", error
+        print "Sorry there was an error with the query:", error
         sys.exit(2)
     state = obj['state']
     text = obj['text']
     if state == 200:
-        print "OK :", text
+        print "OK:", text
         sys.exit(0)
     else:
-        print "Error :", text
+        print "Error:", text
         sys.exit(2)
 
 
@@ -391,7 +391,7 @@ def getkey(login, password, uri, proxy):
     c.close()
     print "status code: %s" % status_code
     if error:
-        print "Sorry there was an error with the query :", error
+        print "Sorry there was an error with the query:", error
         sys.exit(2)
 
     print "You api key is", obj['api_key']
@@ -402,10 +402,10 @@ def getkey(login, password, uri, proxy):
 
 def analyse(api_key, stats_file, uri, proxy):
     if not api_key:
-        print "Error : Sorry, analysing the configuration need an API key"
+        print "Error: Sorry, analysing the configuration need an API key"
         sys.exit(2)
     if not stats_file:
-        print "Error : missing statitics files for analysing"
+        print "Error: missing statitics files for analysing"
         sys.exit(2)
 
     import pycurl

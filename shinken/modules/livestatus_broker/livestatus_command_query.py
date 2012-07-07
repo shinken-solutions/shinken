@@ -50,7 +50,7 @@ class LiveStatusCommandQuery(LiveStatusQuery):
                 _, self.extcmd = line.split(' ', 1)
             else:
                 # This line is not valid or not implemented
-                print "Received a line of input which i can't handle : '%s'" % line
+                print "Received a line of input which i can't handle: '%s'" % line
                 pass
 
     def launch_query(self):

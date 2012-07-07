@@ -49,8 +49,8 @@ class NSCA_client():
     def send_init_packet(self, socket):
         '''
         Build an init packet
-         00-127  : IV
-         128-131 : unix timestamp
+         00-127: IV
+         128-131: unix timestamp
         '''
         iv = ''.join([chr(self.rng.randrange(256)) for i in xrange(128)])
         init_packet = struct.pack("!128sI", iv, int(time.mktime(time.gmtime())))
@@ -60,14 +60,14 @@ class NSCA_client():
     def read_check_result(self, data, iv):
         '''
         Read the check result
-         00-01 : Version
-         02-05 : CRC32
-         06-09 : Timestamp
-         10-11 : Return code
-         12-75 : hostname
-         76-203 : service
-         204-715 : output of the plugin
-         716-720 : padding
+         00-01: Version
+         02-05: CRC32
+         06-09: Timestamp
+         10-11: Return code
+         12-75: hostname
+         76-203: service
+         204-715: output of the plugin
+         716-720: padding
         '''
         if len(data) != 720:
             return None
@@ -130,14 +130,14 @@ class NSCA_client():
         pad2=0
         '''
         Read the check result
-         00-01 : Version
-         02-05 : CRC32
-         06-09 : Timestamp
-         10-11 : Return code
-         12-75 : hostname
-         76-203 : service
-         204-715 : output of the plugin
-         716-720 : padding
+         00-01: Version
+         02-05: CRC32
+         06-09: Timestamp
+         10-11: Return code
+         12-75: hostname
+         76-203: service
+         204-715: output of the plugin
+         716-720: padding
         '''
         init_packet = struct.pack("!hhIIh64s128s512sh", version, pad1, crc32, timestamp, rc, hostname_dirty, service_dirty, output_dirty, pad2)
         print "Create packent len", len(init_packet)

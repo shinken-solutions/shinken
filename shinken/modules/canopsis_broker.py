@@ -115,9 +115,9 @@ class Canopsis_broker(BaseModule):
         # max_check_attempts does not appear in check results so build a dict of max_check_attempts
         self.host_max_check_attempts[b.data['host_name']] = b.data['max_check_attempts']
 
-        logger.info("[canopsis] initial host max attempts : %s " % str(self.host_max_check_attempts))
-        logger.info("[canopsis] initial host commands : %s " % str(self.host_commands))
-        logger.info("[canopsis] initial host addresses : %s " % str(self.host_addresses))
+        logger.info("[canopsis] initial host max attempts: %s " % str(self.host_max_check_attempts))
+        logger.info("[canopsis] initial host commands: %s " % str(self.host_commands))
+        logger.info("[canopsis] initial host addresses: %s " % str(self.host_addresses))
 
 
     def manage_initial_service_status_brok(self, b):
@@ -147,7 +147,7 @@ class Canopsis_broker(BaseModule):
     def manage_host_check_result_brok(self, b):
         message = self.create_message('component','check',b)
         if not message:
-            logger.info("[Canopsis] Warning : Empty host check message")
+            logger.info("[Canopsis] Warning: Empty host check message")
         else:
             self.push2canopsis(message)
 
@@ -156,22 +156,22 @@ class Canopsis_broker(BaseModule):
         try:
             message = self.create_message('resource','check',b)
         except:
-            logger.error("[Canopsis] Error : there was an error while trying to create message for service")
+            logger.error("[Canopsis] Error: there was an error while trying to create message for service")
 
         if not message:
-            logger.info("[Canopsis] Warning : Empty service check message")
+            logger.info("[Canopsis] Warning: Empty service check message")
         else:
             self.push2canopsis(message)
 
     def create_message(self,source_type,event_type,b):
         """
-            event_type should be one of the following :
+            event_type should be one of the following:
                 - check
                 - ack
                 - notification
                 - downtime
 
-            source_type should be one of the following :
+            source_type should be one of the following:
                 - component => host
                 - resource => service
 
@@ -286,7 +286,7 @@ class event2amqp():
             return False
 
     def connect(self):
-        logger.info("[Canopsis] connection with : %s" % self.connection_string)
+        logger.info("[Canopsis] connection with: %s" % self.connection_string)
         try:
             self.connection.connect()
             if not self.connected():
@@ -404,7 +404,7 @@ class event2amqp():
             #enqueue_cano_event(key,message)
             if len(self.queue) < int(self.maxqueuelength):
                 self.queue.append({"key": key,"message": message})
-                logger.info("[Canopsis] Queue length : %d" % len(self.queue))
+                logger.info("[Canopsis] Queue length: %d" % len(self.queue))
                 return True
             else:
                 logger.error("[Canopsis] Maximum retention for event queue %s reached" % str(self.maxqueuelength))
@@ -418,7 +418,7 @@ class event2amqp():
             while len(self.queue) > 0:
                 item = self.queue.pop()
                 try:
-                    logger.info("[Canopsis] Pop item from queue [%s] : %s" % (str(len(self.queue)),str(item)))
+                    logger.info("[Canopsis] Pop item from queue [%s]: %s" % (str(len(self.queue)),str(item)))
                     self.producer.revive(self.channel)
                     self.producer.publish(body=item["message"], compression=None, routing_key=item["key"], exchange=self.exchange_name)
                 except:

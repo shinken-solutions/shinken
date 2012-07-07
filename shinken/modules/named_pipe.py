@@ -49,7 +49,7 @@ def get_instance(plugin):
     try:
         path = plugin.command_file
     except AttributeError:
-        print "Error : the plugin '%s' do not have a command_file property"
+        print "Error: the plugin '%s' do not have a command_file property"
         raise
     instance = Named_Pipe_arbiter(plugin, path)
     return instance
@@ -79,7 +79,7 @@ class Named_Pipe_arbiter(BaseModule):
                     os.mkfifo(self.pipe_path, 0660)
                     open(self.pipe_path, 'w+', os.O_NONBLOCK)
                 except OSError , exp:
-                    print "Error : pipe creation failed (",self.pipe_path,')', exp, os.getcwd()
+                    print "Error: pipe creation failed (",self.pipe_path,')', exp, os.getcwd()
                     return None
         print "[%s] Trying to open the named pipe '%s'" % (self.get_name(), self.pipe_path)
         self.fifo = os.open(self.pipe_path, os.O_NONBLOCK)

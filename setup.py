@@ -227,7 +227,7 @@ class build_config(Command):
         for name in config_objects_file:
             inname = os.path.join('etc', name)
             outname = os.path.join(self.build_dir, name)
-            log.info('Copying data files in : %s out : %s' % (inname,outname))
+            log.info('Copying data files in: %s out: %s' % (inname,outname))
             append_file_with(inname, outname,"")
         # Creating some needed directories
         discovery_dir = os.path.join(self.build_dir + "/objects/discovery")
@@ -254,7 +254,7 @@ class build_config(Command):
         for (dname, name) in daemon_ini_files:
             inname = os.path.join('etc', name)
             outname = os.path.join(self.build_dir, name)
-            log.info('updating path in %s : to "%s"' % (outname, self.var_path))
+            log.info('updating path in %s: to "%s"' % (outname, self.var_path))
 
             # but we have to force the user/group & workdir values still:
             append_file_with(inname, outname, """

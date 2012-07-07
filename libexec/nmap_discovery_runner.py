@@ -272,14 +272,14 @@ if not simulate:
             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             close_fds=True, shell=True)
     except OSError , exp:
-        print "Debug : Error in launching command:", cmd, exp
+        print "Debug: Error in launching command:", cmd, exp
         sys.exit(2)
 
     print "Try to communicate"
     (stdoutdata, stderrdata) = nmap_process.communicate()
 
     if nmap_process.returncode != 0:
-        print "Error : the nmap return an error : '%s'" % stderrdata
+        print "Error: the nmap return an error: '%s'" % stderrdata
         sys.exit(2)
 
     print "Got it", (stdoutdata, stderrdata)
@@ -292,11 +292,11 @@ tree = ElementTree()
 try:
     tree.parse(xml_input)
 except IOError, exp:
-    print "Error opening file '%s' : %s" % (xml_input, exp)
+    print "Error opening file '%s': %s" % (xml_input, exp)
     sys.exit(2)
 
 hosts = tree.findall('host')
-debug("Number of hosts : %d" % len(hosts))
+debug("Number of hosts: %d" % len(hosts))
 
 
 all_hosts = []

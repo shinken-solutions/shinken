@@ -28,7 +28,7 @@
 
 import time
 
-""" TODO : Add some comment about this class for the doc"""
+""" TODO: Add some comment about this class for the doc"""
 class ContactDowntime:
     id = 1
 

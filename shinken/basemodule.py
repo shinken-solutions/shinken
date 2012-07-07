@@ -67,7 +67,7 @@ properties = {
 
 
 class ModulePhases:
-    """TODO : Add some comment about this class for the doc"""
+    """TODO: Add some comment about this class for the doc"""
     # TODO: why not use simply integers instead of string
     # to represent the different phases??
     CONFIGURATION = 1
@@ -211,7 +211,7 @@ class BaseModule(object):
 
 
     def has(self, prop):
-        """The classic has : do we have a prop or not ?"""
+        """The classic has: do we have a prop or not?"""
         return hasattr(self, prop)
 
 

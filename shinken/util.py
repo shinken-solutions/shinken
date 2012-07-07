@@ -40,7 +40,7 @@ try:
     stdout_encoding = sys.stdout.encoding
     safe_stdout = (stdout_encoding == 'UTF-8')
 except Exception, exp:
-    print "Error : Encoding detection error", exp
+    print "Error: Encoding detection error", exp
     safe_stdout = False
 
 

@@ -91,7 +91,7 @@ class LiveStatusLogStoreSqlite(BaseModule):
         max_logs_age = getattr(modconf, 'max_logs_age', '365')
         maxmatch = re.match(r'^(\d+)([dwmy]*)$', max_logs_age)
         if maxmatch is None:
-            print 'Warning : wrong format for max_logs_age. Must be <number>[d|w|m|y] or <number> and not %s' % max_logs_age
+            print 'Warning: wrong format for max_logs_age. Must be <number>[d|w|m|y] or <number> and not %s' % max_logs_age
             return None
         else:
             if not maxmatch.group(2):
@@ -321,7 +321,7 @@ class LiveStatusLogStoreSqlite(BaseModule):
             try:
                 self.execute('VACUUM')
             except sqlite3.DatabaseError, exp:
-                print "WARNING : it seems your database is corrupted. Please recreate it"
+                print "WARNING: it seems your database is corrupted. Please recreate it"
             self.commit()
 
     def execute(self, cmd, values=None, row_factory=None):

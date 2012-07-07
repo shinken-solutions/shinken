@@ -365,7 +365,7 @@ class Satellite(BaseSatellite):
                 except AttributeError, exp: # the scheduler must  not be initialized
                     logger.debug(str(exp))
                 except Exception, exp:
-                    logger.error("A satellite raised an unknown exception : %s (%s)" % (exp, type(exp)))
+                    logger.error("A satellite raised an unknown exception: %s (%s)" % (exp, type(exp)))
                     try:
                         logger.debug(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
                     except:
@@ -386,7 +386,7 @@ class Satellite(BaseSatellite):
     def get_return_for_passive(self, sched_id):
         # I do not know this scheduler?
         if sched_id not in self.schedulers:
-            logger.debug("I do not know this scheduler : %s" % sched_id)
+            logger.debug("I do not know this scheduler: %s" % sched_id)
             return []
 
         sched = self.schedulers[sched_id]
@@ -440,7 +440,7 @@ class Satellite(BaseSatellite):
 
         # And save the Queue of this worker, with key = worker id
         self.q_by_mod[module_name][w.id] = q
-        logger.info("[%s] Allocating new %s Worker : %s" % (self.name, module_name, w.id))
+        logger.info("[%s] Allocating new %s Worker: %s" % (self.name, module_name, w.id))
 
         # Ok, all is good. Start it!
         w.start()
@@ -652,7 +652,7 @@ class Satellite(BaseSatellite):
             # What the F**k? We do not know what happenned,
             # log the error message if possible.
             except Exception, exp:
-                logger.error("A satellite raised an unknown exception : %s (%s)" % (exp, type(exp)))
+                logger.error("A satellite raised an unknown exception: %s (%s)" % (exp, type(exp)))
                 try:
                     logger.debug(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
                 except:
@@ -742,7 +742,7 @@ class Satellite(BaseSatellite):
             for mod in self.q_by_mod:
                 # In workers we've got actions send to queue - queue size
                 for (i, q) in self.q_by_mod[mod].items():
-                    logger.debug("[%d][%s][%s] Stats : Workers:%d (Queued:%d TotalReturnWait:%d)" % \
+                    logger.debug("[%d][%s][%s] Stats: Workers:%d (Queued:%d TotalReturnWait:%d)" % \
                         (sched_id, sched['name'], mod, i, q.qsize(), self.get_returns_queue_len()))
 
 
@@ -898,14 +898,14 @@ class Satellite(BaseSatellite):
                 self.max_workers = cpu_count()
             except NotImplementedError:
                 self.max_workers = 4
-            logger.info("Using max workers : %s" % self.max_workers)
+            logger.info("Using max workers: %s" % self.max_workers)
         self.min_workers = g_conf['min_workers']
         if self.min_workers == 0 and not is_android:
             try:
                 self.min_workers = cpu_count()
             except NotImplementedError:
                 self.min_workers = 4
-            logger.info("Using min workers : %s" % self.min_workers)
+            logger.info("Using min workers: %s" % self.min_workers)
 
         self.processes_by_worker = g_conf['processes_by_worker']
         self.polling_interval = g_conf['polling_interval']
@@ -924,7 +924,7 @@ class Satellite(BaseSatellite):
             os.environ['TZ'] = use_timezone
             time.tzset()
 
-        logger.info("We have our schedulers : %s" % (str(self.schedulers)))
+        logger.info("We have our schedulers: %s" % (str(self.schedulers)))
 
         # Now manage modules
         # TODO: check how to better handle this with modules_manager..
@@ -934,7 +934,7 @@ class Satellite(BaseSatellite):
             if not module.module_type in self.q_by_mod:
                 logger.debug("Add module object %s" % str(module))
                 self.modules_manager.modules.append(module)
-                logger.info("[%s] Got module : %s " % (self.name, module.module_type))
+                logger.info("[%s] Got module: %s " % (self.name, module.module_type))
                 self.q_by_mod[module.module_type] = {}
 
 

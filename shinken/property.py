@@ -68,7 +68,7 @@ class Property(object):
         `default`: default value to be used if this property is not set.
                    If default is None, this property is required.
 
-        `class_inherit`: List of 2-tuples, (Service, 'blabla') : must
+        `class_inherit`: List of 2-tuples, (Service, 'blabla'): must
                    set this property to the Service class with name
                    blabla. if (Service, None): must set this property
                    to the Service class with same name
@@ -95,10 +95,10 @@ class Property(object):
                      data is necessary (like realm_name instead of
                      the realm object).
 
-        override : for scheduler, if the property must override the
+        override: for scheduler, if the property must override the
                      value of the configuration we send it
 
-        managed : property that is managed in Nagios but not in Shinken
+        managed: property that is managed in Nagios but not in Shinken
 
         """
 

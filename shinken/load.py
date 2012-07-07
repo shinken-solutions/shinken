@@ -39,7 +39,7 @@ class Load:
     without having to send value at regular interval
     (but it's more efficient if you do this :) ) and without
     having a list or other stuff. It's just an object, an update and a get
-    You can define m : the average for m minutes. The val is
+    You can define m: the average for m minutes. The val is
     the initial value. It's better if it's 0 but you can choose.
 
     """

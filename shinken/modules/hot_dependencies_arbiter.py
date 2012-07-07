@@ -42,7 +42,7 @@ except ImportError:
     try:
         import simplejson as json
     except ImportError:
-        print "Error : you need the json or simplejson module for this script"
+        print "Error: you need the json or simplejson module for this script"
         raise
 
 from shinken.basemodule import BaseModule
@@ -150,7 +150,7 @@ class Hot_dependencies_arbiter(BaseModule):
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 close_fds=do_close_fd, shell=True)
         except OSError , exp:
-            self.error("Fail Launching the command %s : %s" % (self.mapping_command, exp))
+            self.error("Fail Launching the command %s: %s" % (self.mapping_command, exp))
 
 
     # Look if the command is finished or not
@@ -165,7 +165,7 @@ class Hot_dependencies_arbiter(BaseModule):
             # it's finished! Cool
             (stdoutdata, stderrdata) = self.process.communicate()
             if self.process.returncode != 0:
-                self.debug("The command return in error : %s \n %s" % (stderrdata, stdoutdata))
+                self.debug("The command return in error: %s \n %s" % (stderrdata, stdoutdata))
             self.process = None
 
 
@@ -228,8 +228,8 @@ class Hot_dependencies_arbiter(BaseModule):
             self.debug("The mapping file changed, I update it")
             self._update_mapping()
             additions, removed = self._got_mapping_changes()
-            self.debug("Additions : %s" % additions)
-            self.debug("Remove : %s " % removed)
+            self.debug("Additions: %s" % additions)
+            self.debug("Remove: %s " % removed)
             for father_k, son_k in additions:
                 son_type, son_name = son_k
                 father_type, father_name = father_k
@@ -247,7 +247,7 @@ class Hot_dependencies_arbiter(BaseModule):
                     extcmd = "[%lu] ADD_SIMPLE_HOST_DEPENDENCY;%s;%s\n" % (now,son_name, father_name)
                     e = ExternalCommand(extcmd)
 
-                    self.debug('Raising external command : %s' % extcmd)
+                    self.debug('Raising external command: %s' % extcmd)
                     arb.add(e)
             # And now the deletion part
             for father_k, son_k in removed:

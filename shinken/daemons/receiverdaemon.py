@@ -120,7 +120,7 @@ class Receiver(BaseSatellite):
                 mod.manage_brok(b)
             except Exception , exp:
                 logger.warning("The mod %s raise an exception: %s, I kill it" % (mod.get_name(),str(exp)))
-                logger.warning("Exception type : %s" % type(exp))
+                logger.warning("Exception type: %s" % type(exp))
                 logger.warning("Back trace of this kill: %s" % (traceback.format_exc()))
                 to_del.append(mod)
         # Now remove mod that raise an exception
@@ -259,7 +259,7 @@ class Receiver(BaseSatellite):
             for line in self.get_header():
                 self.log.info(line)
 
-            logger.info("[Receiver] Using working directory : %s" % os.path.abspath(self.workdir))
+            logger.info("[Receiver] Using working directory: %s" % os.path.abspath(self.workdir))
 
             self.do_daemon_init_and_start()
 

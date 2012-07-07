@@ -70,7 +70,7 @@ from shinken.daemons.skonfdaemon import Skonf
 
 parser = optparse.OptionParser(
     "%prog [options] -c configfile [-c additional_config_file]",
-    version="%prog : " + VERSION + "     with pyro : " + PYRO_VERSION)
+    version="%prog: " + VERSION + "     with pyro: " + PYRO_VERSION)
 parser.add_option('-c', '--config', action='append',
                   dest="config_files", metavar="CONFIG-FILE",
                   help=('Config file (your nagios.cfg). Multiple -c can be '

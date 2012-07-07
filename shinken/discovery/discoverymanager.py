@@ -332,7 +332,7 @@ class DiscoveryManager:
         for mod in self.conf.modules:
             if getattr(mod, 'module_name', '') == self.dbmod:
                 if Connection is None:
-                    print "ERROR : cannot use Mongodb database : please install the pymongo librairy"
+                    print "ERROR: cannot use Mongodb database: please install the pymongo librairy"
                     break
                 # Now try to connect
                 try:
@@ -342,7 +342,7 @@ class DiscoveryManager:
                     self.db = getattr(self.dbconnection, database)
                     print "Connection to Mongodb:%s:%s is OK" % (uri, database)
                 except Exception, exp:
-                    logger.error('Database init : %s' % exp)
+                    logger.error('Database init: %s' % exp)
 
 
     # We try to init the backend if we got one
@@ -356,7 +356,7 @@ class DiscoveryManager:
                 print "We found our backend", mod.get_name()
                 self.backend = mod
         if not self.backend:
-            print "ERROR : cannot find the module %s" % self.backend
+            print "ERROR: cannot find the module %s" % self.backend
             sys.exit(2)
         self.modules_manager = ModulesManager('discovery', self.modules_path, [])
         self.modules_manager.set_modules([mod])
@@ -473,7 +473,7 @@ class DiscoveryManager:
         allowed_runners = self.allowed_runners()
 
         if len(allowed_runners) == 0:
-            print "ERROR : there is no matching runners selected!"
+            print "ERROR: there is no matching runners selected!"
             return
 
         for r in allowed_runners:
@@ -550,7 +550,7 @@ class DiscoveryManager:
         except OSError, exp:
             # If directory already exist, it's not a problem
             if not exp.errno != '17':
-                print "Cannot create the directory '%s' : '%s'" % (p, exp)
+                print "Cannot create the directory '%s': '%s'" % (p, exp)
                 return
         cfg_p = os.path.join(p, host+'.cfg')
         if os.path.exists(cfg_p) and not self.overwrite:
@@ -565,7 +565,7 @@ class DiscoveryManager:
             fd.write(buf)
             fd.close()
         except OSError, exp:
-            print "Cannot create the file '%s' : '%s'" % (cfg_p, exp)
+            print "Cannot create the file '%s': '%s'" % (cfg_p, exp)
             return
 
 
@@ -619,7 +619,7 @@ class DiscoveryManager:
             fd.write(buf)
             fd.close()
         except OSError, exp:
-            print "Cannot create the file '%s' : '%s'" % (cfg_p, exp)
+            print "Cannot create the file '%s': '%s'" % (cfg_p, exp)
             return
 
 

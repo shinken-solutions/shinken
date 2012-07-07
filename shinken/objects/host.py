@@ -412,29 +412,29 @@ class Host(SchedulingItem):
             logger.warning("The host %s has no contacts nor contact_groups in (%s)" % (self.get_name(), source))
 
         if getattr(self, 'check_command', None) is None:
-            logger.info("%s : I've got no check_command" % self.get_name())
+            logger.info("%s: I've got no check_command" % self.get_name())
             state = False
         # Ok got a command, but maybe it's invalid
         else:
             if not self.check_command.is_valid():
-                logger.info("%s : my check_command %s is invalid" % (self.get_name(), self.check_command.command))
+                logger.info("%s: my check_command %s is invalid" % (self.get_name(), self.check_command.command))
                 state = False
             if self.got_business_rule:
                 if not self.business_rule.is_valid():
-                    logger.info("%s : my business rule is invalid" % (self.get_name(),))
+                    logger.info("%s: my business rule is invalid" % (self.get_name(),))
                     for bperror in self.business_rule.configuration_errors:
                         logger.error("[host::%s] %s" % (self.get_name(), bperror))
                     state = False
 
         if not hasattr(self, 'notification_interval') and self.notifications_enabled == True:
-            logger.info("%s : I've got no notification_interval but I've got notifications enabled" % self.get_name())
+            logger.info("%s: I've got no notification_interval but I've got notifications enabled" % self.get_name())
             state = False
 
         # If active check is enabled with a check_interval!=0, we must have a check_period
         if ( getattr(self, 'active_checks_enabled', False)
              and getattr(self, 'check_period', None) is None
              and getattr(self, 'check_interval', 1) != 0 ):
-            logger.info("%s : My check_period is not correct" % self.get_name())
+            logger.info("%s: My check_period is not correct" % self.get_name())
             state = False
 
         if not hasattr(self, 'check_period'):
@@ -443,7 +443,7 @@ class Host(SchedulingItem):
         if hasattr(self, 'host_name'):
             for c in cls.illegal_object_name_chars:
                 if c in self.host_name:
-                    logger.info("%s : My host_name got the caracter %s that is not allowed." % (self.get_name(), c))
+                    logger.info("%s: My host_name got the caracter %s that is not allowed." % (self.get_name(), c))
                     state = False
 
         return state
@@ -779,7 +779,7 @@ class Host(SchedulingItem):
             if c.output != self.output:
                 need_stalk = False
         if need_stalk:
-            logger.info("Stalking %s : %s" % (self.get_name(), self.output))
+            logger.info("Stalking %s: %s" % (self.get_name(), self.output))
 
 
     # fill act_depend_of with my parents (so network dep)

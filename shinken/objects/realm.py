@@ -110,7 +110,7 @@ class Realm(Itemgroup):
         # so if True here, it must be a loop in HG
         # calls... not GOOD!
         if self.rec_tag:
-            err = "Error : we've got a loop in realm definition %s" % self.get_name()
+            err = "Error: we've got a loop in realm definition %s" % self.get_name()
             self.configuration_errors.append(err)
             if self.has('members'):
                 return self.members
@@ -241,7 +241,7 @@ class Realm(Itemgroup):
         if hasattr(self, type+'s'):
             return getattr(self, type+'s')
         else:
-            logger.debug("[realm] do not have this kind of satellites : %s" % type)
+            logger.debug("[realm] do not have this kind of satellites: %s" % type)
             return []
 
 
@@ -251,7 +251,7 @@ class Realm(Itemgroup):
         if hasattr(self, 'potential_'+type+'s'):
             return getattr(self, 'potential_'+type+'s')
         else:
-            logger.debug("[realm] do not have this kind of satellites : %s" % type)
+            logger.debug("[realm] do not have this kind of satellites: %s" % type)
             return []
 
 
@@ -261,7 +261,7 @@ class Realm(Itemgroup):
         if hasattr(self, 'nb_'+type+'s'):
             return getattr(self, 'nb_'+type+'s')
         else:
-            logger.debug("[realm] do not have this kind of satellites : %s" % type)
+            logger.debug("[realm] do not have this kind of satellites: %s" % type)
             return 0
 
 
@@ -294,7 +294,7 @@ class Realm(Itemgroup):
         self.count_receivers()
         self.fill_potential_receivers()
 
-        s = "%s : (in/potential) (schedulers:%d) (pollers:%d/%d) (reactionners:%d/%d) (brokers:%d/%d) (receivers:%d/%d)" % \
+        s = "%s: (in/potential) (schedulers:%d) (pollers:%d/%d) (reactionners:%d/%d) (brokers:%d/%d) (receivers:%d/%d)" % \
             (self.get_name(),
              len(self.schedulers),
              self.nb_pollers, len(self.potential_pollers),

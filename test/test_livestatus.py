@@ -3280,7 +3280,7 @@ ResponseHeader: fixed16
         #print response
         load_time = time.time() - query_start
         total_page += load_time
-        print "Response time 1 : %.3f" % load_time
+        print "Response time 1: %.3f" % load_time
 
         # Second Query
         query_start = time.time()
@@ -3398,7 +3398,7 @@ ResponseHeader: fixed16
         #print response
         load_time = time.time() - query_start
         total_page += load_time
-        print "Response time 2 : %.3f" % load_time
+        print "Response time 2: %.3f" % load_time
 
 
         # Now Query 3 (service stats)
@@ -3556,7 +3556,7 @@ ResponseHeader: fixed16
         #print response
         load_time = time.time() - query_start
         total_page += load_time
-        print "Response time 3 : %.3f" % load_time
+        print "Response time 3: %.3f" % load_time
 
 
         # 4th Query
@@ -3575,7 +3575,7 @@ ResponseHeader: fixed16
         #print response
         load_time = time.time() - query_start
         total_page += load_time
-        print "Response time 4 : %.3f" % load_time
+        print "Response time 4: %.3f" % load_time
 
 
 
@@ -3595,7 +3595,7 @@ ResponseHeader: fixed16
         #print response
         load_time = time.time() - query_start
         total_page += load_time
-        print "Response time 5 : %.3f" % load_time
+        print "Response time 5: %.3f" % load_time
 
 
 
@@ -3632,7 +3632,7 @@ ResponseHeader: fixed16
         #print response
         load_time = time.time() - query_start
         total_page += load_time
-        print "Response time 6 : %.3f" % load_time
+        print "Response time 6: %.3f" % load_time
 
 
         # 7th Query
@@ -3669,10 +3669,10 @@ ResponseHeader: fixed16
         #print response
         load_time = time.time() - query_start
         total_page += load_time
-        print "Response time 7 : %.3f" % load_time
+        print "Response time 7: %.3f" % load_time
 
         print ""
-        print "Overall Queries time : %.3f" % total_page
+        print "Overall Queries time: %.3f" % total_page
 
     def test_thruk_search(self):
         self.print_header()

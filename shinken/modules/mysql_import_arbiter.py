@@ -39,7 +39,7 @@ properties = {
 
 # called by the plugin manager to get a broker
 def get_instance(plugin):
-    print "[MySQL Importer Module] : Get MySQL importer instance for plugin %s" % plugin.get_name()
+    print "[MySQL Importer Module]: Get MySQL importer instance for plugin %s" % plugin.get_name()
     host = plugin.host
     login = plugin.login
     password = plugin.password
@@ -74,22 +74,22 @@ class MySQL_importer_arbiter(BaseModule):
 
     # Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
-        print "[MySQL Importer Module] : Try to open a MySQL connection to %s" % self.host
+        print "[MySQL Importer Module]: Try to open a MySQL connection to %s" % self.host
         try:
             self.conn = MySQLdb.connect (host = self.host,
                         user = self.login,
                         passwd = self.password,
                         db = self.database)
         except MySQLdb.Error, e:
-            print "MySQL Module : Error %d: %s" % (e.args[0], e.args[1])
+            print "MySQL Module: Error %d: %s" % (e.args[0], e.args[1])
             raise
-        print "[MySQL Importer Module] : Connection opened"
+        print "[MySQL Importer Module]: Connection opened"
 
 
     # Main function that is called in the CONFIGURATION phase
     def get_objects(self):
         if not hasattr(self, 'conn'):
-            print "[MySQL Importer Module] : Problem during init phase"
+            print "[MySQL Importer Module]: Problem during init phase"
             return {}
 
         # Create variables for result
@@ -103,13 +103,13 @@ class MySQL_importer_arbiter(BaseModule):
 
             if(v != None):
                 result_set = {}
-                print "[MySQL Importer Module] : getting %s configuration from database" % (k)
+                print "[MySQL Importer Module]: getting %s configuration from database" % (k)
 
                 try:
                     cursor.execute (v)
                     result_set = cursor.fetchall ()
                 except MySQLdb.Error, e:
-                    print "MySQL Module : Error %d: %s" % (e.args[0], e.args[1])
+                    print "MySQL Module: Error %d: %s" % (e.args[0], e.args[1])
 
                 # Create set whith result
                 for row in result_set:
@@ -123,5 +123,5 @@ class MySQL_importer_arbiter(BaseModule):
         self.conn.close ()
         del self.conn
 
-        print "[MySQL Importer Module] : Returning to Arbiter the object:", r
+        print "[MySQL Importer Module]: Returning to Arbiter the object:", r
         return r

@@ -238,7 +238,7 @@ class Hostd(Daemon):
               sys.exit(2)
            self.modules.append(m)
 
-        logger.info("My own modules : " + ','.join([m.get_name() for m in self.modules]))
+        logger.info("My own modules: " + ','.join([m.get_name() for m in self.modules]))
 
 
         self.override_modules_path = getattr(self.conf, 'override_modules_path', '')
@@ -428,7 +428,7 @@ class Hostd(Daemon):
         # Load the photo dir and make it a absolute path
         self.photo_dir = 'photos' # getattr(modconf, 'photo_dir', 'photos')
         self.photo_dir = os.path.abspath(self.photo_dir)
-        print "Webui : using the backend", self.http_backend
+        print "Webui: using the backend", self.http_backend
 
 
 
@@ -643,7 +643,7 @@ class Hostd(Daemon):
         plugin_dir = os.path.abspath(os.path.dirname(plugins.__file__))
         if self.override_plugins:
            plugin_dir = self.override_plugins
-        print "Loading plugin directory : %s" % plugin_dir
+        print "Loading plugin directory: %s" % plugin_dir
 
         # Load plugin directories
         plugin_dirs = [ fname for fname in os.listdir(plugin_dir)
@@ -708,7 +708,7 @@ class Hostd(Daemon):
 
 
             except Exception, exp:
-               logger.log("Loading plugins : %s" % exp)
+               logger.log("Loading plugins: %s" % exp)
 
 
 
@@ -946,7 +946,7 @@ class Hostd(Daemon):
     def save_new_pack(self, user, filename, buf):
        filename = os.path.basename(filename)
        short_name = filename[:-4]
-       print "Saving a new pack file from a user :", user, filename
+       print "Saving a new pack file from a user:", user, filename
        if not user:
           return None
        user_dir = os.path.join(self.tmp_pack_path, user)
@@ -980,7 +980,7 @@ class Hostd(Daemon):
        filepath = p['filepath']
        print "Analysing pack"
        if not zipfile.is_zipfile(filepath):
-          print "ERROR : the pack %s is not a zip file!" % filepath
+          print "ERROR: the pack %s is not a zip file!" % filepath
           p['state'] = 'refused'
           p['moderation_comment'] = 'The pack file is not a zip file'
           self.db.packs.save(p)
@@ -996,17 +996,17 @@ class Hostd(Daemon):
        packs.load_file(path)
        packs = [i for i in packs]
        if len(packs) > 1:
-          print "ERROR : the pack %s got too much .pack file in it!" % pack
-          p['moderation_comment'] = "ERROR : no valid .pack in the pack"
+          print "ERROR: the pack %s got too much .pack file in it!" % pack
+          p['moderation_comment'] = "ERROR: no valid .pack in the pack"
           p['state'] = 'refused'
           self.db.packs.save(p)
           shutil.rmtree(TMP_PATH)
           return
 
        if len(packs) == 0:
-          print "ERROR : no valid .pack in the pack %s" % pack
+          print "ERROR: no valid .pack in the pack %s" % pack
           p['state'] = 'refused'
-          p['moderation_comment'] = "ERROR : no valid .pack in the pack"
+          p['moderation_comment'] = "ERROR: no valid .pack in the pack"
           self.db.packs.save(p)
           shutil.rmtree(TMP_PATH)
           return

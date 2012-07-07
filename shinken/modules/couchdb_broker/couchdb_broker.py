@@ -160,7 +160,7 @@ class Couchdb_broker(BaseModule):
     # TODO: Modify this comment to explain why we only do one thing here.
     def manage_clean_all_my_instance_id_brok(self, b):
         instance_id = b.data['instance_id']
-        print("[%s] Cleaning id : %d" % (self.get_name(), instance_id))
+        print("[%s] Cleaning id: %d" % (self.get_name(), instance_id))
         return
 
 

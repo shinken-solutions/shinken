@@ -122,7 +122,7 @@ class SatelliteLink(Item):
             # so we must disable it imadiatly after
             socket.setdefaulttimeout(None)
             self.con = None
-            logger.error("Creating connection for %s : %s" % (self.get_name(), str(exp)))
+            logger.error("Creating connection for %s: %s" % (self.get_name(), str(exp)))
 
 
 
@@ -511,6 +511,6 @@ class SatelliteLinks(Items):
                 if plug is not None:
                     new_modules.append(plug)
                 else:
-                    err = "Error : the module %s is unknown for %s" % (plug_name, s.get_name())
+                    err = "Error: the module %s is unknown for %s" % (plug_name, s.get_name())
                     s.configuration_errors.append(err)
             s.modules = new_modules

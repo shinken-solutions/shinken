@@ -99,12 +99,12 @@ class Passwd_Webui(BaseModule):
                         compute_hash = crypt.crypt(password, salt)
                     print "Computed hash", compute_hash
                     if compute_hash == hash:
-                        print "PASSWD : it's good!"
+                        print "PASSWD: it's good!"
                         return True
                 else:
                     print "PASSWD: bad user", name, user
         except Exception, exp:
-            print "Checking auth in passwd %s failed : %s " % (self.passwd, exp)
+            print "Checking auth in passwd %s failed: %s " % (self.passwd, exp)
             return False
         finally:
             try:

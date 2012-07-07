@@ -36,7 +36,7 @@ except ImportError:
     try:
         import simplejson as json
     except ImportError:
-        sys.exit("Error : you need the json or simplejson module for this script")
+        sys.exit("Error: you need the json or simplejson module for this script")
 
 VERSION = '0.1'
 
@@ -84,7 +84,7 @@ def get_vmware_hosts(check_esx_path, vcenter, user, password):
 
     print "Exit status", p.returncode
     if p.returncode == 2:
-        print "Error : the check_esx3.pl return in error :", output
+        print "Error: the check_esx3.pl return in error:", output
         sys.exit(2)
 
     parts = output[0].split(':')
@@ -114,7 +114,7 @@ def get_vm_of_host(check_esx_path, vcenter, host, user, password):
 
     print "Exit status", p.returncode
     if p.returncode == 2:
-        print "Error : the check_esx3.pl return in error :", output
+        print "Error: the check_esx3.pl return in error:", output
         sys.exit(2)
 
     parts = output[0].split(':')
@@ -161,7 +161,7 @@ def write_output(r, path):
         shutil.move(path+'.tmp', path)
         print "File %s wrote" % path
     except IOError, exp:
-        sys.exit("Error writing the file %s : %s" % (path, exp))
+        sys.exit("Error writing the file %s: %s" % (path, exp))
 
 
 def main(check_esx_path, vcenter, user, password, rules):

@@ -1052,7 +1052,7 @@ class Items(object):
         end = len(expr)
         ctxres = hg_name_parse_EXPR(expr, begin, end)
         if ctxres.rc:
-            err = "the syntax of %s is invalid : %s" % (expr, ctxres.reason)
+            err = "the syntax of %s is invalid: %s" % (expr, ctxres.reason)
             self.configuration_errors.append(err)
             return []
 
@@ -1198,7 +1198,7 @@ def find_matching_closing(expr, begin, end):
 def hg_name_parse_item(ctx, expr, begin, end):
     if ctx.last_is_expr:
         ctx.rc = -1
-        ctx.reason = "2 consecutive items without valid separator : '%s' and '%s ..'" % (ctx.prev_res, expr[begin:begin+10])
+        ctx.reason = "2 consecutive items without valid separator: '%s' and '%s ..'" % (ctx.prev_res, expr[begin:begin+10])
         return None
 
     i = s = skip_space(expr, begin, end)
@@ -1269,7 +1269,7 @@ def hg_name_parse_not(ctx, expr, begin, end):
     i = s = skip_space(expr, begin, end)
     if i >= end:
         ctx.rc = -1
-        ctx.reason = "'!' must be followed by an expression !"
+        ctx.reason = "'!' must be followed by an expression!"
         return
     c = expr[i]
     if c not in tabs_hg_name_list_operators:
@@ -1292,7 +1292,7 @@ def hg_name_parse_not(ctx, expr, begin, end):
         n = find_matching_closing(expr, s, end)
         if n is None:
             ctx.rc = -1
-            ctx.reason = "Near '%s' : ( An unmatched left parenthesis creates an unresolved tension that will stay with you all day." % (expr[i:10])
+            ctx.reason = "Near '%s': ( An unmatched left parenthesis creates an unresolved tension that will stay with you all day." % (expr[i:10])
             return
         n += s
         subctx = hg_name_parse_EXPR(expr, s, n, ctx.flags)
@@ -1331,7 +1331,7 @@ def hg_name_parse_subexpr(ctx, expr, begin, end):
     i2e = find_matching_closing(expr, i2s, end)
     if i2e is None:
         ctx.rc = -1
-        ctx.reason = "Near '%s' : ( An unmatched left parenthesis creates an unresolved tension that will stay with you all day." % (expr[begin:begin+10])
+        ctx.reason = "Near '%s': ( An unmatched left parenthesis creates an unresolved tension that will stay with you all day." % (expr[begin:begin+10])
         return
     subctx = hg_name_parse_EXPR(expr, i2s, i2e, ctx.flags)
     if subctx.rc:

@@ -49,21 +49,21 @@ def usage():
     print ""
     print " * actions:"
     print "   - control (control action is specified with -d [stop|start|restart]). Apply action on all satellites"
-    print "   - sync : deploy shinken-specific on all satellites"
+    print "   - sync: deploy shinken-specific on all satellites"
     print "   - deploy deploy shinken on hosts defined in authfile (-f path/to/auth)"
-    print "   - macros : execute macros file"
-    print "   - delobject : remove a shinken object from the shinken configuration file"
-    print "   - cloneobject : clone an object (currently only pollers are suported"
-    print "   - showconfig : display configuration of object"
-    print "   - setparam : set directive value for an object"
-    print "   - delparam : remove directive for an object"
-    print "   - getdirective : get a directive value from an object"
-    print "   - getobjectnames : get a list of objects names (required parameters : configfile, objectype)"
-    print " * configfile : full path to the shinken-specific.cfg file"
-    print " * objectype : configuration object type on which the action apply"
-    print " * directive : the directive name of a configuration object"
-    print " * value : the directive value of a configuration object"
-    print " * r : this parameter restric the application to objects matching the directive/value pair list"
+    print "   - macros: execute macros file"
+    print "   - delobject: remove a shinken object from the shinken configuration file"
+    print "   - cloneobject: clone an object (currently only pollers are suported"
+    print "   - showconfig: display configuration of object"
+    print "   - setparam: set directive value for an object"
+    print "   - delparam: remove directive for an object"
+    print "   - getdirective: get a directive value from an object"
+    print "   - getobjectnames: get a list of objects names (required parameters: configfile, objectype)"
+    print " * configfile: full path to the shinken-specific.cfg file"
+    print " * objectype: configuration object type on which the action apply"
+    print " * directive: the directive name of a configuration object"
+    print " * value: the directive value of a configuration object"
+    print " * r: this parameter restric the application to objects matching the directive/value pair list"
 
 def main():
     config=()
@@ -222,7 +222,7 @@ def main():
                 if not result:
                     print message
                     sys.exit(2)
-                print "The objectype %s has been cloned with the new attributes : %s" % (objectype,filter)
+                print "The objectype %s has been cloned with the new attributes: %s" % (objectype,filter)
     elif action == "addobject":
         print "Not implemented"
         sys.exit(2)
@@ -549,7 +549,7 @@ def getauthdata(authfile):
             if line != "":
                 result = creg.match(line)
                 if result == None:
-                    return "There was an error in the authentication file at line : %s" % (line)
+                    return "There was an error in the authentication file at line: %s" % (line)
                 auth[result.group("address")]={"login": result.group("login"),"password": result.group("password")}
         return (True,auth)
     except:
@@ -572,7 +572,7 @@ def sync(config,configfile,authfile):
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         for address in addresses:
-            print "Synch with : %s" % (address)
+            print "Synch with: %s" % (address)
             if not auth.has_key(address):
                 return (False,"Auth informations for %s does not exist in authfile" % (address))
             else:
@@ -846,7 +846,7 @@ def setparam(config,objectype,directive,value,filters):
                 else:
                     filterok=filterok-1
             if filterok == len(dfilters):
-                """ if directive does not exist create it ! """
+                """ if directive does not exist create it! """
                 if not config[objectype][i].has_key(directive):
                     config[objectype][i][directive]=value
                     message = "Added configuration %s[%d] %s=%s" % (objectype,i,directive,value)
@@ -925,7 +925,7 @@ def delparam(config,objectype,directive,filters):
                 else:
                     filterok=filterok-1
             if filterok == len(dfilters):
-                """ if directive exist remove it ! """
+                """ if directive exist remove it! """
                 if config[objectype][i].has_key(directive):
                     """ config[objectype][i][directive]=value"""
                     config[objectype][i].pop(directive)

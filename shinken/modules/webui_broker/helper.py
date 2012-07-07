@@ -33,7 +33,7 @@ except ImportError:
     try:
         import simplejson as json
     except ImportError:
-        print "Error : you need the json or simplejson module"
+        print "Error: you need the json or simplejson module"
         raise
 
 from shinken.util import safe_print
@@ -206,7 +206,7 @@ class Helper(object):
              }
 
         # Set the right info panel
-        d['data']['infos'] = r'''%s <h2 class="%s"><img style="width : 64px; height:64px" src="%s"/> %s: %s</h2>
+        d['data']['infos'] = r'''%s <h2 class="%s"><img style="width: 64px; height:64px" src="%s"/> %s: %s</h2>
 		       <p>since %s</p>
 		       <div style="float:right;"> <a href="%s">%s</a></div>'''  % (
             '<img src="/static/img/icons/star.png" alt="star">' * (elt.business_impact - 2),
@@ -580,7 +580,7 @@ class Helper(object):
             res.append(('...', None, None, False))
             res.append((u'Last \xc2\xbb', start, end, False))
 
-        print "Total :", total, "pos", pos, "step", step
+        print "Total:", total, "pos", pos, "step", step
         print "nb pages", nb_pages, "current_page", current_page
 
         print "Res", res

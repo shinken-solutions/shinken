@@ -83,7 +83,7 @@ try:
                 # must be problem with workdir:
                 raise InvalidWorkDir(e)
             except Pyro.errors.DaemonError, e:
-                msg = "Error : Sorry, the port %d is not free: %s" % (port, e)
+                msg = "Error: Sorry, the port %d is not free: %s" % (port, e)
                 raise PortNotFree(msg)
 
         def register(self, obj, name):
@@ -198,7 +198,7 @@ except AttributeError, exp:
                     # Ok, we got our daemon, we can exit
                     break
                 except socket.error, exp:
-                    msg = "Error : Sorry, the port %d is not free : %s" % (port, str(exp))
+                    msg = "Error: Sorry, the port %d is not free: %s" % (port, str(exp))
                     # At 35 (or over), we are very not happy
                     if nb_try >= max_try:
                         raise PortNotFree(msg)

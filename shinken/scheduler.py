@@ -325,7 +325,7 @@ class Scheduler:
                     logger.warning("The instance %s raise an exception %s. I disable it and set it to restart it later" % (inst.get_name(), str(exp)))
                     output = cStringIO.StringIO()
                     traceback.print_exc(file=output)
-                    logger.warning("Back trace of this remove : %s" % (output.getvalue()))
+                    logger.warning("Back trace of this remove: %s" % (output.getvalue()))
                     output.close()
                     self.sched_daemon.modules_manager.set_to_restart(inst)
 
@@ -607,7 +607,7 @@ class Scheduler:
                                     self.actions[c.id].command,
                                     int(execution_time)))
                 elif c.exit_status != 0:
-                    logger.warning("The notification command '%s' raised an error (exit code=%d) : '%s'" % (c.command, c.exit_status, c.output))
+                    logger.warning("The notification command '%s' raised an error (exit code=%d): '%s'" % (c.command, c.exit_status, c.output))
 
             except KeyError, exp: # bad number for notif, not that bad
                 #print exp
@@ -640,7 +640,7 @@ class Scheduler:
             except KeyError:
                 pass
         else:
-            logger.error("The received result type in unknown ! %s" % str(c.is_a))
+            logger.error("The received result type in unknown! %s" % str(c.is_a))
 
 
 
@@ -698,7 +698,7 @@ class Scheduler:
             # But the multiprocessing module is not copatible with it!
             # so we must disable it imadiatly after
             socket.setdefaulttimeout(None)
-            logger.warning("Connection problem to the %s %s : %s" % (type, links[id]['name'], str(exp)))
+            logger.warning("Connection problem to the %s %s: %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
 
@@ -707,20 +707,20 @@ class Scheduler:
             pyro.set_timeout(con, 5)
             con.ping()
         except Pyro.errors.ProtocolError, exp:
-            logger.warning("Connection problem to the %s %s : %s" % (type, links[id]['name'], str(exp)))
+            logger.warning("Connection problem to the %s %s: %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
         except Pyro.errors.NamingError, exp:
-            logger.warning("The %s '%s' is not initialized : %s" % (type, links[id]['name'], str(exp)))
+            logger.warning("The %s '%s' is not initialized: %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
         except KeyError, exp:
-            logger.warning("The %s '%s' is not initialized : %s" % (type, links[id]['name'], str(exp)))
+            logger.warning("The %s '%s' is not initialized: %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             traceback.print_stack()
             return
         except Pyro.errors.CommunicationError, exp:
-            logger.warning("The %s '%s' got CommunicationError : %s" % (type, links[id]['name'], str(exp)))
+            logger.warning("The %s '%s' got CommunicationError: %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
 
@@ -744,20 +744,20 @@ class Scheduler:
                     con.push_actions(lst, self.instance_id)
                     self.nb_checks_send += len(lst)
                 except Pyro.errors.ProtocolError, exp:
-                    logger.warning("Connection problem to the %s %s : %s" % (type, p['name'], str(exp)))
+                    logger.warning("Connection problem to the %s %s: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except Pyro.errors.NamingError, exp:
-                    logger.warning("The %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
+                    logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except KeyError, exp:
-                    logger.warning("The %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
+                    logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     traceback.print_stack()
                     return
                 except Pyro.errors.CommunicationError, exp:
-                    logger.warning("The %s '%s' got CommunicationError : %s" % (type, p['name'], str(exp)))
+                    logger.warning("The %s '%s' got CommunicationError: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 # we come back to normal timeout
@@ -781,20 +781,20 @@ class Scheduler:
                     con.push_actions(lst, self.instance_id)
                     self.nb_checks_send += len(lst)
                 except Pyro.errors.ProtocolError, exp:
-                    logger.warning("Connection problem to the %s %s : %s" % (type, p['name'], str(exp)))
+                    logger.warning("Connection problem to the %s %s: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except Pyro.errors.NamingError, exp:
-                    logger.warning("The %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
+                    logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except KeyError, exp:
-                    logger.warning("The %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
+                    logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     traceback.print_stack()
                     return
                 except Pyro.errors.CommunicationError, exp:
-                    logger.warning("The %s '%s' got CommunicationError : %s" % (type, p['name'], str(exp)))
+                    logger.warning("The %s '%s' got CommunicationError: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 # we come back to normal timeout
@@ -823,20 +823,20 @@ class Scheduler:
                         result.set_type_passive()
                     self.waiting_results.extend(results)
                 except Pyro.errors.ProtocolError, exp:
-                    logger.warning("Connection problem to the %s %s : %s" % (type, p['name'], str(exp)))
+                    logger.warning("Connection problem to the %s %s: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except Pyro.errors.NamingError, exp:
-                    logger.warning("The %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
+                    logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except KeyError, exp:
-                    logger.warning("The %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
+                    logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     traceback.print_stack()
                     return
                 except Pyro.errors.CommunicationError, exp:
-                    logger.warning("The %s '%s' got CommunicationError : %s" % (type, p['name'], str(exp)))
+                    logger.warning("The %s '%s' got CommunicationError: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 # we come back to normal timeout
@@ -861,20 +861,20 @@ class Scheduler:
                         result.set_type_passive()
                     self.waiting_results.extend(results)
                 except Pyro.errors.ProtocolError, exp:
-                    logger.warning("Connection problem to the %s %s : %s" % (type, p['name'], str(exp)))
+                    logger.warning("Connection problem to the %s %s: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except Pyro.errors.NamingError, exp:
-                    logger.warning("The %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
+                    logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except KeyError, exp:
-                    logger.warning("The %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
+                    logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     traceback.print_stack()
                     return
                 except Pyro.errors.CommunicationError, exp:
-                    logger.warning("The %s '%s' got CommunicationError : %s" % (type, p['name'], str(exp)))
+                    logger.warning("The %s '%s' got CommunicationError: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 # we come back to normal timeout
@@ -1505,7 +1505,7 @@ class Scheduler:
 
             # load of the scheduler is the percert of time it is waiting
             l = min(100, 100.0 - self.load_one_min.get_load() * 100)
-            logger.debug("Load : (sleep) %.2f (average : %.2f) -> %d%%" % (self.sched_daemon.sleep_time, self.load_one_min.get_load(), l))
+            logger.debug("Load: (sleep) %.2f (average: %.2f) -> %d%%" % (self.sched_daemon.sleep_time, self.load_one_min.get_load(), l))
 
             self.sched_daemon.sleep_time = 0.0
 
@@ -1544,7 +1544,7 @@ class Scheduler:
             latencies = [s.latency for s in self.services]
             lat_avg, lat_min, lat_max = nighty_five_percent(latencies)
             if lat_avg is not None:
-                logger.debug("Latency (avg/min/max) : %.2f/%.2f/%.2f" % (lat_avg, lat_min, lat_max))
+                logger.debug("Latency (avg/min/max): %.2f/%.2f/%.2f" % (lat_avg, lat_min, lat_max))
 
 
             # print "Notifications:", nb_notifications

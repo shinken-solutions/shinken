@@ -232,7 +232,7 @@ class Skonf(Daemon):
               sys.exit(2)
            self.modules.append(m)
 
-        logger.info("My own modules : " + ','.join([m.get_name() for m in self.modules]))
+        logger.info("My own modules: " + ','.join([m.get_name() for m in self.modules]))
 
         # we request the instances without them being *started*
         # (for these that are concerned ("external" modules):
@@ -252,7 +252,7 @@ class Skonf(Daemon):
         # got items for us
         for inst in self.modules_manager.instances:
             if 'configuration' in inst.phases:
-                try :
+                try:
                     r = inst.get_objects()
                 except Exception, exp:
                     print "The instance %s raise an exception %s. I bypass it" % (inst.get_name(), str(exp))
@@ -439,7 +439,7 @@ class Skonf(Daemon):
         # Load the photo dir and make it a absolute path
         self.photo_dir = 'photos' # getattr(modconf, 'photo_dir', 'photos')
         self.photo_dir = os.path.abspath(self.photo_dir)
-        print "Webui : using the backend", self.http_backend
+        print "Webui: using the backend", self.http_backend
 
 
 
@@ -651,7 +651,7 @@ class Skonf(Daemon):
     def load_plugins(self):
         from shinken.webui import plugins_skonf as plugins
         plugin_dir = os.path.abspath(os.path.dirname(plugins.__file__))
-        print "Loading plugin directory : %s" % plugin_dir
+        print "Loading plugin directory: %s" % plugin_dir
 
         # Load plugin directories
         plugin_dirs = [ fname for fname in os.listdir(plugin_dir)
@@ -712,7 +712,7 @@ class Skonf(Daemon):
 
 
             except Exception, exp:
-               logger.log("Loading plugins : %s" % exp)
+               logger.log("Loading plugins: %s" % exp)
 
 
 
@@ -882,7 +882,7 @@ class Skonf(Daemon):
             except Exception , exp:
                 print exp.__dict__
                 logger.warning("[%s] The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
-                logger.debug("[%s] Exception type : %s" % (self.name, type(exp)))
+                logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
                 logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)
 
@@ -921,7 +921,7 @@ class Skonf(Daemon):
         # save this worker
         self.workers[w.id] = w
 
-        logger.info("[%s] Allocating new %s Worker : %s" % (self.name, w.module_name, w.id))
+        logger.info("[%s] Allocating new %s Worker: %s" % (self.name, w.module_name, w.id))
 
         # Ok, all is good. Start it!
         w.start()
@@ -964,8 +964,8 @@ class Skonf(Daemon):
                     lst.append(r)
             except Exception , exp:
                 print exp.__dict__
-                logger.log("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
-                logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
+                logger.log("[%s] Warning: The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
+                logger.log("[%s] Exception type: %s" % (self.name, type(exp)))
                 logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)
 
@@ -1001,13 +1001,13 @@ class Skonf(Daemon):
        packs.load_file(TMP_DIR)
        packs = [i for i in packs]
        if len(packs) > 1:
-          r = {'state': 400, 'text': 'ERROR : the pack got too much .pack file in it'}
+          r = {'state': 400, 'text': 'ERROR: the pack got too much .pack file in it'}
           # Clean before exit
           shutil.rmtree(TMP_DIR)
           return r
 
        if len(packs) == 0:
-          r = {'state': 400, 'text': 'ERROR : no valid .pack found in the zip file'}
+          r = {'state': 400, 'text': 'ERROR: no valid .pack found in the zip file'}
           # Clean before exit
           shutil.rmtree(TMP_DIR)
           return r

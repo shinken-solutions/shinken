@@ -34,7 +34,7 @@ except ImportError:
     try:
         import simplejson as json
     except ImportError:
-        print "Error : you need the json or simplejson module"
+        print "Error: you need the json or simplejson module"
         raise
 
 
@@ -50,7 +50,7 @@ def lookup(cls='', name=''):
 
     # Look for a valid source
     if cls not in sources:
-        print "Lookup : bad class", cls
+        print "Lookup: bad class", cls
         return []
 
     # And a name not too short
@@ -83,7 +83,7 @@ def lookup_tag_post(cls=''):
 
 
     if cls not in sources:
-        print "Lookup : bad class", cls
+        print "Lookup: bad class", cls
         return []
 
     name = app.request.forms.get('value')

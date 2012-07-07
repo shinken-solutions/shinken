@@ -192,7 +192,7 @@ class Dispatcher:
                         # We must have the good number of satellite or we are not happy
                         # So we are sure to raise a dispatch every loop a satellite is missing
                         if len(r.to_satellites_managed_by[kind][cfg_id]) < r.get_nb_of_must_have_satellites(kind):
-                            logger.warning("Missing satellite %s for configuration %d :" % (kind, cfg_id))
+                            logger.warning("Missing satellite %s for configuration %d:" % (kind, cfg_id))
 
                             # TODO: less violent! Must only resent to who need?
                             # must be caught by satellite who sees that it already has the conf (hash)
@@ -342,7 +342,7 @@ class Dispatcher:
                 scheds = self.get_scheduler_ordered_list(r)
 
                 if nb_conf > 0:
-                    print_string = '[%s] Schedulers order : %s' % (r.get_name(), ','.join([s.get_name() for s in scheds]))
+                    print_string = '[%s] Schedulers order: %s' % (r.get_name(), ','.join([s.get_name() for s in scheds]))
                     logger.info(print_string)
 
 
@@ -486,7 +486,7 @@ class Dispatcher:
                                     satellites.extend(spares)
 
                             # Dump the order where we will send conf
-                            satellite_string = "[%s] Dispatching %s satellite with order : " % (r.get_name(), kind)
+                            satellite_string = "[%s] Dispatching %s satellite with order: " % (r.get_name(), kind)
                             for satellite in satellites:
                                 satellite_string += '%s (spare:%s), ' % (satellite.get_name(), str(satellite.spare))
                             logger.info(satellite_string)
@@ -508,7 +508,7 @@ class Dispatcher:
                                     is_sent = False
                                     # Maybe this satellite already got this configuration, so skip it
                                     if satellite.do_i_manage(cfg_id, flavor):
-                                        logger.info('[%s] Skipping configuration %d send to the %s %s : it already got it' % (r.get_name(), cfg_id, kind, satellite.get_name()))
+                                        logger.info('[%s] Skipping configuration %d send to the %s %s: it already got it' % (r.get_name(), cfg_id, kind, satellite.get_name()))
                                         is_sent = True
                                     else: # ok, it really need it :)
                                         logger.info('[%s] Trying to send configuration to %s %s' %(r.get_name(), kind, satellite.get_name()))

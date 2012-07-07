@@ -157,10 +157,10 @@ class TestNat(unittest.TestCase):
         time.sleep(60)
 
         print "checking..."
-        self.assertTrue(self.found_in_log('broker'  , 'Info : Waiting for initial configuration'))
-        self.assertTrue(self.found_in_log('arbiter' , 'Warning : Missing satellite broker for configuration 0 :'))
+        self.assertTrue(self.found_in_log('broker'  , 'Info: Waiting for initial configuration'))
+        self.assertTrue(self.found_in_log('arbiter' , 'Warning: Missing satellite broker for configuration 0:'))
 
-        self.assertFalse(self.found_in_log('arbiter', 'Info : [All] Dispatch OK of configuration 0 to broker broker-1'))
+        self.assertFalse(self.found_in_log('arbiter', 'Info: [All] Dispatch OK of configuration 0 to broker broker-1'))
 
     def test_02_broker(self):
         print "conf-02: init..."
@@ -174,12 +174,12 @@ class TestNat(unittest.TestCase):
         time.sleep(210)
 
         print "checking..."
-        self.assertTrue(self.found_in_log('broker' , 'Info : Waiting for initial configuration'))
-        self.assertTrue(self.found_in_log('arbiter', 'Info : [All] Dispatch OK of configuration 0 to broker broker-1'))
+        self.assertTrue(self.found_in_log('broker' , 'Info: Waiting for initial configuration'))
+        self.assertTrue(self.found_in_log('arbiter', 'Info: [All] Dispatch OK of configuration 0 to broker broker-1'))
 
-        self.assertTrue(self.found_in_log('broker' , 'Info : [broker-1] Connection OK to the scheduler scheduler-1'))
-        self.assertTrue(self.found_in_log('broker' , 'Info : [broker-1] Connection OK to the poller poller-1'))
-        self.assertTrue(self.found_in_log('broker' , 'Info : [broker-1] Connection OK to the reactionner reactionner-1'))
+        self.assertTrue(self.found_in_log('broker' , 'Info: [broker-1] Connection OK to the scheduler scheduler-1'))
+        self.assertTrue(self.found_in_log('broker' , 'Info: [broker-1] Connection OK to the poller poller-1'))
+        self.assertTrue(self.found_in_log('broker' , 'Info: [broker-1] Connection OK to the reactionner reactionner-1'))
 
 
 

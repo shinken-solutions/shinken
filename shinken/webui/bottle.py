@@ -433,10 +433,7 @@ class Bottle(object):
     def mount(self, app, prefix, **options):
         ''' Mount an application to a specific URL prefix. The prefix is added
             to SCIPT_PATH and removed from PATH_INFO before the sub-application
-            is called.
-
-            :param app: an instance of :class:`Bottle`.
-            :param prefix: path prefix used as a mount-point.
+            is called.:param app: an instance of :class:`Bottle`.:param prefix: path prefix used as a mount-point.
 
             All other parameters are passed to the underlying :meth:`route` call.
         '''
@@ -557,19 +554,12 @@ class Bottle(object):
                     return 'Hello %s' % name
 
             The ``:name`` part is a wildcard. See :class:`Router` for syntax
-            details.
-
-            :param path: Request path or a list of paths to listen to. If no
+            details.:param path: Request path or a list of paths to listen to. If no
               path is specified, it is automatically generated from the
-              signature of the function.
-            :param method: HTTP method (`GET`, `POST`, `PUT`, ...) or a list of
-              methods to listen to. (default: `GET`)
-            :param callback: An optional shortcut to avoid the decorator
-              syntax. ``route(..., callback=func)`` equals ``route(...)(func)``
-            :param name: The name for this route. (default: None)
-            :param apply: A decorator or plugin or a list of plugins. These are
-              applied to the route callback in addition to installed plugins.
-            :param skip: A list of plugins, plugin classes or names. Matching
+              signature of the function.:param method: HTTP method (`GET`, `POST`, `PUT`, ...) or a list of
+              methods to listen to. (default: `GET`):param callback: An optional shortcut to avoid the decorator
+              syntax. ``route(..., callback=func)`` equals ``route(...)(func)``:param name: The name for this route. (default: None):param apply: A decorator or plugin or a list of plugins. These are
+              applied to the route callback in addition to installed plugins.:param skip: A list of plugins, plugin classes or names. Matching
               plugins are not installed to this route. ``True`` skips all.
 
             Any additional keyword arguments are stored as route-specific
@@ -985,9 +975,7 @@ class BaseRequest(DictMixin):
 
     def path_shift(self, shift=1):
         ''' Shift path segments from :attr:`path` to :attr:`script_name` and
-            vice versa.
-
-           :param shift: The number of path segments to shift. May be negative
+            vice versa.:param shift: The number of path segments to shift. May be negative
                          to change the shift direction. (default: 1)
         '''
         script = self.environ.get('SCRIPT_NAME','/')
@@ -1175,9 +1163,7 @@ class BaseResponse(object):
 
     def set_header(self, name, value, append=False):
         ''' Create a new response header, replacing any previously defined
-            headers with the same name. This equals ``response[name] = value``.
-
-            :param append: Do not delete previously defined headers. This can
+            headers with the same name. This equals ``response[name] = value``.:param append: Do not delete previously defined headers. This can
                            result in two (or more) headers having the same name.
         '''
         if append:
@@ -1229,22 +1215,11 @@ class BaseResponse(object):
 
     def set_cookie(self, key, value, secret=None, **options):
         ''' Create a new cookie or replace an old one. If the `secret` parameter is
-            set, create a `Signed Cookie` (described below).
-
-            :param key: the name of the cookie.
-            :param value: the value of the cookie.
-            :param secret: a signature key required for signed cookies.
+            set, create a `Signed Cookie` (described below).:param key: the name of the cookie.:param value: the value of the cookie.:param secret: a signature key required for signed cookies.
 
             Additionally, this method accepts all RFC 2109 attributes that are
-            supported by :class:`cookie.Morsel`, including:
-
-            :param max_age: maximum age in seconds. (default: None)
-            :param expires: a datetime object or UNIX timestamp. (default: None)
-            :param domain: the domain that is allowed to read the cookie.
-              (default: current domain)
-            :param path: limits the cookie to a given path (default: ``/``)
-            :param secure: limit the cookie to HTTPS connections (default: off).
-            :param httponly: prevents client-side javascript to read this cookie
+            supported by :class:`cookie.Morsel`, including::param max_age: maximum age in seconds. (default: None):param expires: a datetime object or UNIX timestamp. (default: None):param domain: the domain that is allowed to read the cookie.
+              (default: current domain):param path: limits the cookie to a given path (default: ``/``):param secure: limit the cookie to HTTPS connections (default: off).:param httponly: prevents client-side javascript to read this cookie
               (default: off, requires Python 2.6 or newer).
 
             If neither `expires` nor `max_age` is set (default), the cookie will
@@ -1744,10 +1719,7 @@ def yieldroutes(func):
 def path_shift(script_name, path_info, shift=1):
     ''' Shift path fragments from PATH_INFO to SCRIPT_NAME and vice versa.
 
-        :return: The modified paths.
-        :param script_name: The SCRIPT_NAME path.
-        :param script_name: The PATH_INFO path.
-        :param shift: The number of path fragments to shift. May be negative to
+        :return: The modified paths.:param script_name: The SCRIPT_NAME path.:param script_name: The PATH_INFO path.:param shift: The number of path fragments to shift. May be negative to
           change the shift direction. (default: 1)
     '''
     if shift == 0: return script_name, path_info
@@ -2128,21 +2100,12 @@ def load_app(target):
 ## Shinken: add the return of the server
 def run(app=None, server='wsgiref', host='127.0.0.1', port=8080,
         interval=1, reloader=False, quiet=False, **kargs):
-    """ Start a server instance. This method blocks until the server terminates.
-
-        :param app: WSGI application or target string supported by
-               :func:`load_app`. (default: :func:`default_app`)
-        :param server: Server adapter to use. See :data:`server_names` keys
+    """ Start a server instance. This method blocks until the server terminates.:param app: WSGI application or target string supported by
+               :func:`load_app`. (default: :func:`default_app`):param server: Server adapter to use. See :data:`server_names` keys
                for valid names or pass a :class:`ServerAdapter` subclass.
-               (default: `wsgiref`)
-        :param host: Server address to bind to. Pass ``0.0.0.0`` to listens on
-               all interfaces including the external one. (default: 127.0.0.1)
-        :param port: Server port to bind to. Values below 1024 require root
-               privileges. (default: 8080)
-        :param reloader: Start auto-reloading server? (default: False)
-        :param interval: Auto-reloader interval in seconds (default: 1)
-        :param quiet: Suppress output to stdout and stderr? (default: False)
-        :param options: Options passed to the server adapter.
+               (default: `wsgiref`):param host: Server address to bind to. Pass ``0.0.0.0`` to listens on
+               all interfaces including the external one. (default: 127.0.0.1):param port: Server port to bind to. Values below 1024 require root
+               privileges. (default: 8080):param reloader: Start auto-reloading server? (default: False):param interval: Auto-reloader interval in seconds (default: 1):param quiet: Suppress output to stdout and stderr? (default: False):param options: Options passed to the server adapter.
      """
     # Shinken
     res = None

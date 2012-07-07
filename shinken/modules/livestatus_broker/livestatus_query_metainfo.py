@@ -265,7 +265,7 @@ class LiveStatusQueryMetainfo(object):
                 _, self.client_localtime = self.split_option(line)
                 # NO # self.structured_data.append((keyword, client_localtime))
             else:
-                print "Received a line of input which i can't handle : '%s'" % line
+                print "Received a line of input which i can't handle: '%s'" % line
                 self.structured_data.append((keyword, 'Received a line of input which i can\'t handle: %s' % line))
             self.keyword_counter[keyword] += 1
         self.metainfo_filter_stack.and_elements(self.metainfo_filter_stack.qsize())

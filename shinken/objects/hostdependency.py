@@ -96,7 +96,7 @@ class Hostdependencies(Items):
                 for dephg_name in dephg_names:
                     dephg = hostgroups.find_by_name(dephg_name)
                     if dephg is None:
-                        err = "ERROR : the hostdependecy got an unknown dependent_hostgroup_name '%s'" % dephg_name
+                        err = "ERROR: the hostdependecy got an unknown dependent_hostgroup_name '%s'" % dephg_name
                         hd.configuration_errors.append(err)
                         continue
                     dephnames.extend(dephg.members.split(','))
@@ -112,7 +112,7 @@ class Hostdependencies(Items):
                 for hg_name in hg_names:
                     hg = hostgroups.find_by_name(hg_name)
                     if hg is None:
-                        err = "ERROR : the hostdependecy got an unknown hostgroup_name '%s'" % hg_name
+                        err = "ERROR: the hostdependecy got an unknown hostgroup_name '%s'" % hg_name
                         hd.configuration_errors.append(err)
                         continue
                     hnames.extend(hg.members.split(','))
@@ -146,16 +146,16 @@ class Hostdependencies(Items):
                 dh_name = hd.dependent_host_name
                 h = hosts.find_by_name(h_name)
                 if h is None:
-                    err = "Error : the host dependency got a bad host_name definition '%s'" % h_name
+                    err = "Error: the host dependency got a bad host_name definition '%s'" % h_name
                     hd.configuration_errors.append(err)
                 dh = hosts.find_by_name(dh_name)
                 if dh is None:
-                    err = "Error : the host dependency got a bad dependent_host_name definition '%s'" % dh_name
+                    err = "Error: the host dependency got a bad dependent_host_name definition '%s'" % dh_name
                     hd.configuration_errors.append(err)
                 hd.host_name = h
                 hd.dependent_host_name = dh
             except AttributeError , exp:
-                err = "Error : the host dependency miss a property '%s'" % exp
+                err = "Error: the host dependency miss a property '%s'" % exp
                 hd.configuration_errors.append(err)
 
 

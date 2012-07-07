@@ -108,7 +108,7 @@ class Timerange:
         return self.hstart*3600 + self.mstart* 60  <= sec_from_morning <= self.hend*3600 + self.mend* 60
 
 
-""" TODO : Add some comment about this class for the doc"""
+""" TODO: Add some comment about this class for the doc"""
 class Daterange:
     weekdays = {'monday': 0, 'tuesday': 1, 'wednesday': 2, 'thursday': 3, \
                     'friday': 4, 'saturday': 5, 'sunday': 6 }
@@ -411,7 +411,7 @@ class Daterange:
 
 
 
-""" TODO : Add some comment about this class for the doc"""
+""" TODO: Add some comment about this class for the doc"""
 class CalendarDaterange(Daterange):
     def get_start_and_end_time(self, ref=None):
         start_time = get_start_of_day(self.syear, int(self.smon), self.smday)
@@ -420,7 +420,7 @@ class CalendarDaterange(Daterange):
 
 
 
-""" TODO : Add some comment about this class for the doc"""
+""" TODO: Add some comment about this class for the doc"""
 class StandardDaterange(Daterange):
     def __init__(self, day, other):
         self.other = other
@@ -435,7 +435,7 @@ class StandardDaterange(Daterange):
     def is_correct(self):
         b = self.day in Daterange.weekdays
         if not b:
-            print "Error : %s is not a valid day" % self.day
+            print "Error: %s is not a valid day" % self.day
         return b
 
 
@@ -453,18 +453,18 @@ class StandardDaterange(Daterange):
         return (today_morning + day_diff*86400, tonight + day_diff*86400)
 
 
-""" TODO : Add some comment about this class for the doc"""
+""" TODO: Add some comment about this class for the doc"""
 class MonthWeekDayDaterange(Daterange):
     # It's correct only if the weekday (sunday, etc) is a valid one
     def is_correct(self):
         b = True
         b &= self.swday in Daterange.weekdays
         if not b:
-            print "Error : %s is not a valid day" % self.swday
+            print "Error: %s is not a valid day" % self.swday
 
         b &= self.ewday in Daterange.weekdays
         if not b:
-            print "Error : %s is not a valid day" % self.ewday
+            print "Error: %s is not a valid day" % self.ewday
 
         return b
 
@@ -504,7 +504,7 @@ class MonthWeekDayDaterange(Daterange):
         return (start_time, end_time)
 
 
-""" TODO : Add some comment about this class for the doc"""
+""" TODO: Add some comment about this class for the doc"""
 class MonthDateDaterange(Daterange):
     def get_start_and_end_time(self, ref=None):
         now = time.localtime(ref)
@@ -541,7 +541,7 @@ class MonthDateDaterange(Daterange):
         return (start_time, end_time)
 
 
-""" TODO : Add some comment about this class for the doc"""
+""" TODO: Add some comment about this class for the doc"""
 class WeekDayDaterange(Daterange):
     def get_start_and_end_time(self, ref=None):
         now = time.localtime(ref)
@@ -596,7 +596,7 @@ class WeekDayDaterange(Daterange):
         return (start_time, end_time)
 
 
-""" TODO : Add some comment about this class for the doc"""
+""" TODO: Add some comment about this class for the doc"""
 class MonthDayDaterange(Daterange):
     def get_start_and_end_time(self, ref=None):
         now = time.localtime(ref)

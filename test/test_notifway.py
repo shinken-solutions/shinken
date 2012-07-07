@@ -42,7 +42,7 @@ class TestConfig(ShinkenTest):
         contact = self.sched.contacts.find_by_name("test_contact")
         print "The contact", contact.__dict__
 
-        print "All notification Way :"
+        print "All notification Way:"
         for nw in self.sched.notificationways:
             print "\t", nw.notificationway_name
 
@@ -64,7 +64,7 @@ class TestConfig(ShinkenTest):
         self.assert_(sms_the_night.min_business_impact == 5)
 
 
-        print "Contact notification way(s) :"
+        print "Contact notification way(s):"
         for nw in contact.notificationways:
             print "\t", nw.notificationway_name
             for c in nw.service_notification_commands:

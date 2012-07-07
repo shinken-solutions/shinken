@@ -198,7 +198,7 @@ class DependencyNode(object):
 
 
 
-""" TODO : Add some comment about this class for the doc"""
+""" TODO: Add some comment about this class for the doc"""
 class DependencyNodeFactory(object):
     def __init__(self):
         pass

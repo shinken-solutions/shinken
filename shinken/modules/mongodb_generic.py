@@ -45,7 +45,7 @@ properties = {
 
 # called by the plugin manager to get a module instance
 def get_instance(plugin):
-    print "[MongoDB Module] : Get Mongodb instance for plugin %s" % plugin.get_name()
+    print "[MongoDB Module]: Get Mongodb instance for plugin %s" % plugin.get_name()
     uri   = plugin.uri
     database = plugin.database
 
@@ -65,14 +65,14 @@ class Mongodb_generic(BaseModule):
 
     # Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
-        print "[Mongodb Module] : Try to open a Mongodb connection to %s:%s" % (self.uri, self.database)
+        print "[Mongodb Module]: Try to open a Mongodb connection to %s:%s" % (self.uri, self.database)
         try:
             self.con = Connection(self.uri)
             self.db = getattr(self.con, self.database)
         except Exception, e:
-            print "Mongodb Module : Error %s:" % e
+            print "Mongodb Module: Error %s:" % e
             raise
-        print "[Mongodb Module] : Connection OK"
+        print "[Mongodb Module]: Connection OK"
 
 
 
@@ -81,7 +81,7 @@ class Mongodb_generic(BaseModule):
     # Main function that is called in the CONFIGURATION phase
     def get_objects(self):
         if not self.db:
-            print "[Mongodb Module] : Problem during init phase"
+            print "[Mongodb Module]: Problem during init phase"
             return {}
 
         r = {}
@@ -111,11 +111,11 @@ class Mongodb_generic(BaseModule):
     # they are asking us
     def get_ui_user_preference(self, user, key):
         if not self.db:
-            print "[Mongodb] : error Problem during init phase"
+            print "[Mongodb]: error Problem during init phase"
             return None
 
         if not user:
-            print '[Mongodb] : error get_ui_user_preference::no user'
+            print '[Mongodb]: error get_ui_user_preference::no user'
             return None
         # user.get_name()
         e = self.db.ui_user_preferences.find_one({'_id': user.get_name()})
@@ -132,11 +132,11 @@ class Mongodb_generic(BaseModule):
     # Same but for saving
     def set_ui_user_preference(self, user, key, value):
         if not self.db:
-            print "[Mongodb] : error Problem during init phase"
+            print "[Mongodb]: error Problem during init phase"
             return None
 
         if not user:
-            print '[Mongodb] : error get_ui_user_preference::no user'
+            print '[Mongodb]: error get_ui_user_preference::no user'
             return None
 
         # Ok, go for update
@@ -151,7 +151,7 @@ class Mongodb_generic(BaseModule):
             # found a collection for this user
             print "[Mongodb] user entry found for %s" % user.get_name()
 
-        print '[Mongodb] : saving user pref', "'$set': { %s : %s }" % (key, value)
+        print '[Mongodb]: saving user pref', "'$set': { %s: %s }" % (key, value)
         r = self.db.ui_user_preferences.update({ '_id': user.get_name()}, { '$set': { key: value }})
         print "[Mongodb] Return from update", r
         # Mayeb there was no doc there, if so, create an empty one

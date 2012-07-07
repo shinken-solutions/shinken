@@ -192,7 +192,7 @@ class Broker(BaseSatellite):
             # But the multiprocessing module is not compatible with it!
             # so we must disable it immediately after
             socket.setdefaulttimeout(None)
-            logger.info("Connection problem to the %s %s : %s" % (type, links[id]['name'], str(exp)))
+            logger.info("Connection problem to the %s %s: %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
 
@@ -208,7 +208,7 @@ class Broker(BaseSatellite):
             # The schedulers have been restarted: it has a new run_id.
             # So we clear all verifs, they are obsolete now.
             if new_run_id != running_id:
-                logger.debug("[%s] New running id for the %s %s : %s (was %s)" % (self.name, type, links[id]['name'], new_run_id, running_id))
+                logger.debug("[%s] New running id for the %s %s: %s (was %s)" % (self.name, type, links[id]['name'], new_run_id, running_id))
                 links[id]['broks'].clear()
                 # we must ask for a new full broks if
                 # it's a scheduler
@@ -219,7 +219,7 @@ class Broker(BaseSatellite):
             #     print "I do not ask for brok generation"
             links[id]['running_id'] = new_run_id
         except Pyro_exp_pack, exp:
-            logger.info("Connection problem to the %s %s : %s" % (type, links[id]['name'], str(exp)))
+            logger.info("Connection problem to the %s %s: %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
 #        except Pyro.errors.NamingError, exp:
@@ -227,7 +227,7 @@ class Broker(BaseSatellite):
 #            links[id]['con'] = None
 #            return
         except KeyError , exp:
-            logger.info("the %s '%s' is not initialized : %s" % (type, links[id]['name'], str(exp)))
+            logger.info("the %s '%s' is not initialized: %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             traceback.print_stack()
             return
@@ -248,7 +248,7 @@ class Broker(BaseSatellite):
             except Exception , exp:
                 logger.debug(str(exp.__dict__))
                 logger.warning("The mod %s raise an exception: %s, I'm tagging it to restart later" % (mod.get_name(),str(exp)))
-                logger.warning("Exception type : %s" % type(exp))
+                logger.warning("Exception type: %s" % type(exp))
                 logger.warning("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)
 
@@ -315,16 +315,16 @@ class Broker(BaseSatellite):
                 logger.debug(str(exp))
                 self.pynag_con_init(sched_id, type=type)
             except Pyro.errors.ProtocolError , exp:
-                logger.warning("Connection problem to the %s %s : %s" % (type, links[sched_id]['name'], str(exp)))
+                logger.warning("Connection problem to the %s %s: %s" % (type, links[sched_id]['name'], str(exp)))
                 links[sched_id]['con'] = None
             # scheduler must not #be initialized
             except AttributeError , exp:
-                logger.warning("The %s %s should not be initialized : %s" % (type, links[sched_id]['name'], str(exp)))
+                logger.warning("The %s %s should not be initialized: %s" % (type, links[sched_id]['name'], str(exp)))
             # scheduler must not have checks
             except Pyro.errors.NamingError , exp:
-                logger.warning("The %s %s should not be initialized : %s" % (type, links[sched_id]['name'], str(exp)))
+                logger.warning("The %s %s should not be initialized: %s" % (type, links[sched_id]['name'], str(exp)))
             except (Pyro.errors.ConnectionClosedError, Pyro.errors.TimeoutError), exp:
-                logger.warning("Connection problem to the %s %s : %s" % (type, links[sched_id]['name'], str(exp)))
+                logger.warning("Connection problem to the %s %s: %s" % (type, links[sched_id]['name'], str(exp)))
                 links[sched_id]['con'] = None
             #  What the F**k? We do not know what happened,
             # so.. bye bye :)
@@ -406,7 +406,7 @@ class Broker(BaseSatellite):
             self.schedulers[sched_id]['last_connection'] = 0
 
 
-        logger.info("We have our schedulers : %s " % self.schedulers)
+        logger.info("We have our schedulers: %s " % self.schedulers)
 
         # Now get arbiter
         for arb_id in conf['arbiters']:
@@ -433,7 +433,7 @@ class Broker(BaseSatellite):
 
             # We do not connect to the arbiter. Connection hangs
 
-        logger.info("We have our arbiters : %s " % self.arbiters)
+        logger.info("We have our arbiters: %s " % self.arbiters)
 
         # Now for pollers
         for pol_id in conf['pollers']:
@@ -463,7 +463,7 @@ class Broker(BaseSatellite):
 #                    #And we connect to it
 #                    self.app.pynag_con_init(pol_id, 'poller')
 
-        logger.info("We have our pollers : %s" % self.pollers)
+        logger.info("We have our pollers: %s" % self.pollers)
 
         # Now reactionners
         for rea_id in conf['reactionners']:
@@ -494,7 +494,7 @@ class Broker(BaseSatellite):
 #                    #And we connect to it
 #                    self.app.pynag_con_init(rea_id, 'reactionner')
 
-        logger.info("We have our reactionners : %s" % self.reactionners)
+        logger.info("We have our reactionners: %s" % self.reactionners)
 
         if not self.have_modules:
             self.modules = mods = conf['global']['modules']
@@ -537,15 +537,15 @@ class Broker(BaseSatellite):
 
 
     def do_loop_turn(self):
-        logger.debug("Begin Loop : managing old broks (%d)" % len(self.broks))
+        logger.debug("Begin Loop: managing old broks (%d)" % len(self.broks))
 
         # Dump modules Queues size
         insts = [ inst for inst in self.modules_manager.instances if inst.is_external]
         for inst in insts:
             try:
-                logger.debug("External Queue len (%s) : %s" % (inst.get_name(), inst.to_q.qsize()))
+                logger.debug("External Queue len (%s): %s" % (inst.get_name(), inst.to_q.qsize()))
             except Exception, exp:
-                logger.debug("External Queue len (%s) : Exception! %s" % (inst.get_name(), exp))
+                logger.debug("External Queue len (%s): Exception! %s" % (inst.get_name(), exp))
 
 
         # Begin to clean modules
@@ -659,7 +659,7 @@ class Broker(BaseSatellite):
             for line in self.get_header():
                 self.log.info(line)
 
-            logger.info("[Broker] Using working directory : %s" % os.path.abspath(self.workdir))
+            logger.info("[Broker] Using working directory: %s" % os.path.abspath(self.workdir))
 
             self.do_daemon_init_and_start()
 

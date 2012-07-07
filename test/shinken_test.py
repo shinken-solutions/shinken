@@ -365,13 +365,13 @@ class ShinkenTest(unittest.TestCase):
         # We got one of the files of
         parent_path = os.path.dirname(os.path.dirname(modulespath))
         modulespath = os.path.join(parent_path, 'shinken', 'modules')
-        print("Using modules path : %s" % (modulespath))
+        print("Using modules path: %s" % (modulespath))
 
         return modulespath
 
     def do_load_modules(self):
         self.modules_manager.load_and_init()
-        self.log.log("I correctly loaded the modules : [%s]" % (','.join([inst.get_name() for inst in self.modules_manager.instances])))
+        self.log.log("I correctly loaded the modules: [%s]" % (','.join([inst.get_name() for inst in self.modules_manager.instances])))
 
 
 

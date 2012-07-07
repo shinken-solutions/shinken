@@ -25,7 +25,7 @@ try:
     from pynsca import NSCANotifier
     import pynsca
 except ImportError:
-    sys.exit("Error : you need the pynsca module for this script")
+    sys.exit("Error: you need the pynsca module for this script")
 
 VERSION = '0.1'
 

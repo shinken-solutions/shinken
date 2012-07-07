@@ -39,7 +39,7 @@ def get_instance(plugin):
     try:
         from thrift_broker import Thrift_broker
     except ImportError , exp:
-        print "Warning : the plugin type %s is unavailable : %s" % ('thrift', exp)
+        print "Warning: the plugin type %s is unavailable: %s" % ('thrift', exp)
         return None
 
     if hasattr(plugin, 'host'):
@@ -64,7 +64,7 @@ def get_instance(plugin):
         ips = [ip.strip() for ip in plugin.allowed_hosts.split(',')]
         allowed_hosts = [ip for ip in ips if re.match(r'^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$', ip)]
         if len(ips) != len(allowed_hosts):
-            print "Warning : the list of allowed hosts is invalid"
+            print "Warning: the list of allowed hosts is invalid"
             return None
     else:
         allowed_hosts = []
@@ -78,7 +78,7 @@ def get_instance(plugin):
     if hasattr(plugin, 'max_logs_age'):
         maxmatch = re.match(r'^(\d+)([dwm])$', plugin.max_logs_age)
         if maxmatch is None:
-            print 'Warning : wrong format for max_logs_age. Must be <number>[d|w|m|y] or <number>'
+            print 'Warning: wrong format for max_logs_age. Must be <number>[d|w|m|y] or <number>'
             return None
         else:
             if not maxmatch.group(2):

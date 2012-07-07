@@ -103,7 +103,7 @@ class AD_Webui(BaseModule):
         # available, so we will get a drop after one day...
         self.connect()
 
-        print "AD/LDAP : search for contact", contact.get_name()
+        print "AD/LDAP: search for contact", contact.get_name()
         searchScope = ldap.SCOPE_SUBTREE
         ## retrieve all attributes
         retrieveAttributes = ["userPrincipalName", "thumbnailPhoto", "samaccountname", "email"]
@@ -142,7 +142,7 @@ class AD_Webui(BaseModule):
     def manage_initial_broks_done_brok(self, b):
         if self.con is None:
             return
-        print "AD/LDAP : manage_initial_broks_done_brok, go for pictures"
+        print "AD/LDAP: manage_initial_broks_done_brok, go for pictures"
 
         searchScope = ldap.SCOPE_SUBTREE
         ## retrieve all attributes - again adjust to your needs - see documentation for more options
@@ -185,7 +185,7 @@ class AD_Webui(BaseModule):
         c = self.app.datamgr.get_contact(user)
 
         if not c:
-            print "AD/Ldap : invalid user (not founded)", user
+            print "AD/Ldap: invalid user (not founded)", user
             return False
 
         # first we need to find the principalname of this entry

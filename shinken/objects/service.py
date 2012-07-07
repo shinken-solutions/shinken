@@ -408,22 +408,22 @@ class Service(SchedulingItem):
             self.display_name = getattr(self, 'service_description', '')
 
         if not hasattr(self, 'check_command'):
-            logger.info("%s : I've got no check_command" % self.get_name())
+            logger.info("%s: I've got no check_command" % self.get_name())
             state = False
         # Ok got a command, but maybe it's invalid
         else:
             if not self.check_command.is_valid():
-                logger.info("%s : my check_command %s is invalid" % (self.get_name(), self.check_command.command))
+                logger.info("%s: my check_command %s is invalid" % (self.get_name(), self.check_command.command))
                 state = False
             if self.got_business_rule:
                 if not self.business_rule.is_valid():
-                    logger.info("%s : my business rule is invalid" % (self.get_name(),))
+                    logger.info("%s: my business rule is invalid" % (self.get_name(),))
                     for bperror in self.business_rule.configuration_errors:
-                        logger.info("%s : %s" % (self.get_name(), bperror))
+                        logger.info("%s: %s" % (self.get_name(), bperror))
                     state = False
         if not hasattr(self, 'notification_interval') \
                 and  self.notifications_enabled == True:
-            logger.info("%s : I've got no notification_interval but I've got notifications enabled" % self.get_name())
+            logger.info("%s: I've got no notification_interval but I've got notifications enabled" % self.get_name())
             state = False
         if self.host is None:
             logger.info("The service '%s' got a unknown host_name '%s'." % (desc, self.host_name))
@@ -433,7 +433,7 @@ class Service(SchedulingItem):
         if hasattr(self, 'service_description'):
             for c in cls.illegal_object_name_chars:
                 if c in self.service_description:
-                    logger.info("%s : My service_description got the caracter %s that is not allowed." % (self.get_name(), c))
+                    logger.info("%s: My service_description got the caracter %s that is not allowed." % (self.get_name(), c))
                     state = False
         return state
 
@@ -814,7 +814,7 @@ class Service(SchedulingItem):
             if c.output == self.output:
                 need_stalk = False
         if need_stalk:
-            logger.info("Stalking %s : %s" % (self.get_name(), c.output))
+            logger.info("Stalking %s: %s" % (self.get_name(), c.output))
 
 
     # Give data for checks's macros
@@ -1070,7 +1070,7 @@ class Services(Items):
                 if s.host is not None:
                     hst.add_service_link(s)
                 else: # Ok, the host do not exists!
-                    err = "Error : the service '%s' do not have a host_name not hostgroup_name" % (self.get_name())
+                    err = "Error: the service '%s' do not have a host_name not hostgroup_name" % (self.get_name())
                     s.configuration_errors.append(err)
                     continue
             except AttributeError , exp:
@@ -1091,7 +1091,7 @@ class Services(Items):
                         if sg is not None:
                             new_servicegroups.append(sg)
                         else:
-                            err = "Error : the servicegroup '%s' of the service '%s' is unknown" % (sg_name, s.get_dbg_name())
+                            err = "Error: the servicegroup '%s' of the service '%s' is unknown" % (sg_name, s.get_dbg_name())
                             s.configuration_errors.append(err)
                 s.servicegroups = new_servicegroups
 
@@ -1186,7 +1186,7 @@ class Services(Items):
                     for new_s in s.duplicate(h):
                         self.items[new_s.id] = new_s
                 else: # TODO: raise an error?
-                    err = 'Error : The hostname %s is unknown for the service %s!' % (name, s.get_name())
+                    err = 'Error: The hostname %s is unknown for the service %s!' % (name, s.get_name())
                     s.configuration_errors.append(err)
 
         # Now really create the services

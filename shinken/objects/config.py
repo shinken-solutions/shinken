@@ -853,7 +853,7 @@ class Config(Item):
         for prop, entry in properties.items():
             if not entry.managed and hasattr(self, prop):
                 if entry.help:
-                    s = "%s : %s" % (prop, entry.help)
+                    s = "%s: %s" % (prop, entry.help)
                 else:
                     s = prop
                 unmanaged.append(s)
@@ -1356,7 +1356,7 @@ class Config(Item):
             cur = getattr(self, x)
             if not cur.is_correct():
                 r = False
-                logger.info("\t%s conf incorrect !!" % (x), print_it=True)
+                logger.info("\t%s conf incorrect!!" % (x), print_it=True)
             if self.read_config_silent == 0:
                 logger.info('\tChecked %d %s' % (len(cur), x), print_it=True)
 
@@ -1374,7 +1374,7 @@ class Config(Item):
                 logger.info('Checking %s...' % (x), print_it=True)
             if not cur.is_correct():
                 r = False
-                logger.error("\t%s conf incorrect !!" % (x), print_it=True)
+                logger.error("\t%s conf incorrect!!" % (x), print_it=True)
             if self.read_config_silent == 0:
                 logger.info('\tChecked %d %s' % (len(cur), x), print_it=True)
 
@@ -1385,7 +1385,7 @@ class Config(Item):
             if rea:
                 if len(rea.potential_brokers) == 0:
                     logger.error("The scheduler %s got no broker in its realm or upper" % s.get_name())
-                    self.add_error("Error : the scheduler %s got no broker in its realm or upper" % s.get_name())
+                    self.add_error("Error: the scheduler %s got no broker in its realm or upper" % s.get_name())
                     r = False
 
         # Check that for each poller_tag of a host, a poller exists with this tag
@@ -1400,7 +1400,7 @@ class Config(Item):
         if not hosts_tag.issubset(pollers_tag):
             for tag in hosts_tag.difference(pollers_tag):
                 logger.error("Hosts exist with poller_tag %s but no poller got this tag" %  tag )
-                self.add_error("Error : hosts exist with poller_tag %s but no poller got this tag" %  tag )
+                self.add_error("Error: hosts exist with poller_tag %s but no poller got this tag" %  tag )
                 r = False
 
         # Check that all hosts involved in business_rules are from the same realm
@@ -1411,8 +1411,8 @@ class Config(Item):
                     for elt in e.business_rule.list_all_elements():
                         elt_r = elt.get_realm().realm_name
                         if not elt_r == e_r:
-                            logger.error("Business_rule '%s' got hosts from another realm : %s" %  (e.get_full_name(), elt_r) )
-                            self.add_error("Error : Business_rule '%s' got hosts from another realm : %s" %  (e.get_full_name(), elt_r) )
+                            logger.error("Business_rule '%s' got hosts from another realm: %s" %  (e.get_full_name(), elt_r) )
+                            self.add_error("Error: Business_rule '%s' got hosts from another realm: %s" %  (e.get_full_name(), elt_r) )
                             r = False
 
         self.conf_is_correct = r
@@ -1585,7 +1585,7 @@ class Config(Item):
                 if elt.realm is not None:
                     tmp_realms.add(elt.realm)
             if len(tmp_realms) > 1:
-                self.add_error("Error : the realm configuration of yours hosts is not good because there a more than one realm in one pack (host relations) :")
+                self.add_error("Error: the realm configuration of yours hosts is not good because there a more than one realm in one pack (host relations):")
                 for h in pack:
                     if h.realm is None:
                         err = '   the host %s do not have a realm' % h.get_name()
@@ -1600,7 +1600,7 @@ class Config(Item):
                 if default_realm is not None:
                     default_realm.packs.append(pack)
                 else:
-                    err = "Error : some hosts do not have a realm and you do not defined a default realm!"
+                    err = "Error: some hosts do not have a realm and you do not defined a default realm!"
                     self.add_error(err)
                     for h in pack:
                         err = '    Impacted host: %s ' % h.get_name()
@@ -1630,10 +1630,10 @@ class Config(Item):
             for pack in r.packs:
                 nb_elements += len(pack)
                 nb_elements_all_realms += len(pack)
-            logger.info("Number of hosts in the realm %s : %d (distributed in %d linked packs)" %(r.get_name(), nb_elements, len(r.packs)), print_it=True)
+            logger.info("Number of hosts in the realm %s: %d (distributed in %d linked packs)" %(r.get_name(), nb_elements, len(r.packs)), print_it=True)
 
             if nb_schedulers == 0 and nb_elements != 0:
-                err = "Error : The realm %s have hosts but no scheduler!" %r.get_name()
+                err = "Error: The realm %s have hosts but no scheduler!" %r.get_name()
                 self.add_error(err)
                 r.packs = [] # Dumb pack
                 continue
@@ -1656,13 +1656,13 @@ class Config(Item):
             # send the hosts in the same "pack"
             assoc = {}
             if os.path.exists(self.pack_distribution_file):
-                logger.log('INFO : Trying to open the distribution file %s' % self.pack_distribution_file, print_it=True)
+                logger.log('INFO: Trying to open the distribution file %s' % self.pack_distribution_file, print_it=True)
                 try:
                     f = open(self.pack_distribution_file, 'rb')
                     assoc = cPickle.load(f)
                     f.close()
                 except Exception, exp:
-                    logger.warning('Warning : cannot open the distribution file %s : %s' % (self.pack_distribution_file, str(exp)))
+                    logger.warning('Warning: cannot open the distribution file %s: %s' % (self.pack_distribution_file, str(exp)))
 
 
             # Now we explode the numerous packs into nb_packs reals packs:
@@ -1705,12 +1705,12 @@ class Config(Item):
                     assoc[elt.get_name()] = i
 
             try:
-                logger.log('INFO : Trying to save the distribution file %s' % self.pack_distribution_file)
+                logger.log('INFO: Trying to save the distribution file %s' % self.pack_distribution_file)
                 f = open(self.pack_distribution_file, 'wb')
                 cPickle.dump(assoc, f)
                 f.close()
             except Exception, exp:
-                logger.log('Warning : cannot save the distribution file %s : %s' % (self.pack_distribution_file, str(exp)))
+                logger.log('Warning: cannot save the distribution file %s: %s' % (self.pack_distribution_file, str(exp)))
 
 
 

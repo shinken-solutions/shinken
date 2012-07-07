@@ -564,25 +564,25 @@ member_key: the key to be used to sort each resulting element of a group member.
         groupedresult is a dict where the keys are unique combinations of the stats_group_by attributes
                                 where the values are arrays of elements which have those attributes in common
         Example:
-            groupedresult[("host1","svc1")] = { host_name : "host1", service_description : "svc1", state : 2, in_downtime : 0 }
-            groupedresult[("host1","svc2")] = { host_name : "host1", service_description : "svc2", state : 0, in_downtime : 0 }
-            groupedresult[("host1","svc2")] = { host_name : "host1", service_description : "svc2", state : 1, in_downtime : 1 }
+            groupedresult[("host1","svc1")] = { host_name: "host1", service_description: "svc1", state: 2, in_downtime: 0 }
+            groupedresult[("host1","svc2")] = { host_name: "host1", service_description: "svc2", state: 0, in_downtime: 0 }
+            groupedresult[("host1","svc2")] = { host_name: "host1", service_description: "svc2", state: 1, in_downtime: 1 }
 
         resultdict is a dict where the keys are unique combinations of the stats_group_by attributes
                             where the values are dicts
         resultdict values are dicts where the keys are attribute names from stats_group_by
                                    where the values are attribute values
         Example:
-            resultdict[("host1","svc1")] = { host_name : "host1", service_description : "svc1" }
-            resultdict[("host1","svc2")] = { host_name : "host1", service_description : "svc2" }
+            resultdict[("host1","svc1")] = { host_name: "host1", service_description: "svc1" }
+            resultdict[("host1","svc2")] = { host_name: "host1", service_description: "svc2" }
         These attributes are later used as output columns
 
         Step 2:
         Run the filters (1 filter for each Stats: statement) and the postprocessors (default: len)
-        The filters are numbered. After each run, add the result to resultdictay as <filterno> : <result>
+        The filters are numbered. After each run, add the result to resultdictay as <filterno>: <result>
         Example for Stats: state = 0\nStats: state = 1\nStats: state = 2\nStats: state = 3\n
-            resultdict[("host1","svc1")] = { host_name : "host1", service_description : "svc1", 0 : 0, 1 : 0, 2 : 1, 3 : 0 }
-            resultdict[("host1","svc2")] = { host_name : "host1", service_description : "svc2", 0 : 1, 1 : 1, 2 : 0, 3 : 0 }
+            resultdict[("host1","svc1")] = { host_name: "host1", service_description: "svc1", 0: 0, 1: 0, 2: 1, 3: 0 }
+            resultdict[("host1","svc2")] = { host_name: "host1", service_description: "svc2", 0: 1, 1: 1, 2: 0, 3: 0 }
 
         Step 3:
         Create the final result array from resultdict

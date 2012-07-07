@@ -29,7 +29,7 @@ from action import Action
 from shinken.property import IntegerProp, StringProp
 from shinken.autoslots import AutoSlots
 
-""" TODO : Add some comment about this class for the doc"""
+""" TODO: Add some comment about this class for the doc"""
 class EventHandler(Action):
     # AutoSlots create the __slots__ with properties and
     # running_properties names

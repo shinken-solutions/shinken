@@ -272,7 +272,7 @@ class LSAsynConnection(asyncore.dispatcher):
                 rc = 3
             else:
                 rc = 2
-            message = 'Error : connection timeout after %d seconds' % self.timeout
+            message = 'Error: connection timeout after %d seconds' % self.timeout
             self.set_exit(rc, message)
 
 

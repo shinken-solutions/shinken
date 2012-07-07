@@ -32,7 +32,7 @@ except ImportError:
     try:
         import simplejson as json
     except ImportError:
-        print "Error : you need the json or simplejson module"
+        print "Error: you need the json or simplejson module"
         raise
 
 
@@ -56,7 +56,7 @@ def save_pref():
     if key is None or value is None:
         return
 
-    s = json.dumps('{%s : %s}' % (key, value))
+    s = json.dumps('{%s: %s}' % (key, value))
 
     print "We will save for the user", user.get_name(), key, ':', value
     print "As %s" % s

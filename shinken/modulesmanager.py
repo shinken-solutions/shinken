@@ -102,7 +102,7 @@ class ModulesManager(object):
                 if self.modules_type in m.properties['daemons']:
                     self.imported_modules.append(m)
             except Exception , exp:
-                logger.warning("Importing module : %s" % exp)
+                logger.warning("Importing module: %s" % exp)
 
         del self.modules_assoc[:]
         for mod_conf in self.modules:
@@ -123,7 +123,7 @@ class ModulesManager(object):
     # Returns: True on successfull init. False if instance init method raised any Exception.
     def try_instance_init(self, inst, late_start=False):
         try:
-            logger.info("Trying to init module : %s" % inst.get_name())
+            logger.info("Trying to init module: %s" % inst.get_name())
             inst.init_try += 1
             # Maybe it's a retry
             if not late_start and inst.init_try > 1:
@@ -141,7 +141,7 @@ class ModulesManager(object):
             logger.error("The instance %s raised an exception %s, I remove it!" % (inst.get_name(), str(e)))
             output = cStringIO.StringIO()
             traceback.print_exc(file=output)
-            logger.error("Back trace of this remove : %s" % (output.getvalue()))
+            logger.error("Back trace of this remove: %s" % (output.getvalue()))
             output.close()
             return False
         return True
@@ -171,7 +171,7 @@ class ModulesManager(object):
                 mod_conf.properties = module.properties.copy()
                 inst = module.get_instance(mod_conf)
                 if inst is None: # None = Bad thing happened :)
-                    logger.info("get_instance for module %s returned None !" % (mod_conf.get_name()))
+                    logger.info("get_instance for module %s returned None!" % (mod_conf.get_name()))
                     continue
                 assert(isinstance(inst, BaseModule))
                 self.instances.append(inst)
@@ -182,7 +182,7 @@ class ModulesManager(object):
                 logger.error("The module %s raised an exception %s, I remove it!" % (mod_conf.get_name(), s))
                 output = cStringIO.StringIO()
                 traceback.print_exc(file=output)
-                logger.error("Back trace of this remove : %s" % (output.getvalue()))
+                logger.error("Back trace of this remove: %s" % (output.getvalue()))
                 output.close()
 
         for inst in self.instances:

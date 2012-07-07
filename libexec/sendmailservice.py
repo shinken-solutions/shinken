@@ -46,17 +46,17 @@ def main():
             assert False, "unhandled option"
 
 def usage():
-    print 'Usage :'
+    print 'Usage:'
     print sys.argv[0] + ' -s <service name> -n <notification type> -H <hostname> -a <address> -i <date> -o <service output> -t <email>'
-    print '-s --servicedesc : service description'
-    print '-n --notification : notification type'
-    print '-H --hostname : hostname'
-    print '-a --hostaddress : host address'
-    print '-r --servicestate : service state'
-    print '-i --shortdatetime : date'
-    print '-o --output : service output'
-    print '-t --to : email send to'
-    print '-S --sender : email from'
+    print '-s --servicedesc: service description'
+    print '-n --notification: notification type'
+    print '-H --hostname: hostname'
+    print '-a --hostaddress: host address'
+    print '-r --servicestate: service state'
+    print '-i --shortdatetime: date'
+    print '-o --output: service output'
+    print '-t --to: email send to'
+    print '-S --sender: email from'
 
 if __name__ == "__main__":
     main()

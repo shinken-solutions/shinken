@@ -22,7 +22,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-"""The AutoSlots Class is a MetaClass : it manages how other classes
+"""The AutoSlots Class is a MetaClass: it manages how other classes
  are created (Classes, not instances of theses classes).
  Here it's role is to create the __slots__ list of the class with
  all properties of Class.properties and Class.running_properties

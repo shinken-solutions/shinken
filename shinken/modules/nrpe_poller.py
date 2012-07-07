@@ -76,12 +76,12 @@ class NRPE:
     def build_query(self, command):
         '''
         Build a query packet
-         00-01     : NRPE protocol version
-         02-03     : packet type (01 : query, 02 : response)
-         04-07     : CRC32
-         08-09     : return code of the check if packet type is response
-         10-1034   : command (nul terminated)
-         1035-1036 : reserved
+         00-01: NRPE protocol version
+         02-03: packet type (01: query, 02: response)
+         04-07: CRC32
+         08-09: return code of the check if packet type is response
+         10-1034: command (nul terminated)
+         1035-1036: reserved
         '''
         crc = 0
 

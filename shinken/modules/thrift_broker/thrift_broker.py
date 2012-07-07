@@ -328,7 +328,7 @@ class Thrift_broker(BaseModule):
             # Do not ask data too quickly, very dangerous
             # one a minute
             if time.time() - self.last_need_data_send > 60:
-                print "I ask the broker for instance id data :", c_id
+                print "I ask the broker for instance id data:", c_id
                 msg = Message(id=0, type='NeedData', data={'full_instance_id': c_id})
                 self.from_q.put(msg)
                 self.last_need_data_send = time.time()
@@ -377,7 +377,7 @@ class Thrift_broker(BaseModule):
         try:
             h = self.hosts[host_name]
         except KeyError:
-            print "Warning : the host %s is unknown!" % host_name
+            print "Warning: the host %s is unknown!" % host_name
             return
         self.update_element(h, data)
         self.set_schedulingitem_values(h)
@@ -458,7 +458,7 @@ class Thrift_broker(BaseModule):
         try:
             s = self.services[host_name+service_description]
         except KeyError:
-            print "Warning : the service %s/%s is unknown!" % (host_name, service_description)
+            print "Warning: the service %s/%s is unknown!" % (host_name, service_description)
             return
         self.update_element(s, data)
         self.set_schedulingitem_values(s)
@@ -844,7 +844,7 @@ class Thrift_broker(BaseModule):
                 if find_c is not None:
                     r.append(find_c)
                 else:
-                    print "Error : search for a contact %s that do not exists!" % c.get_name()
+                    print "Error: search for a contact %s that do not exists!" % c.get_name()
         return r
 
 
@@ -855,7 +855,7 @@ class Thrift_broker(BaseModule):
             if find_t is not None:
                 return find_t
             else:
-                print "Error : search for a timeperiod %s that do not exists!" % t.get_name()
+                print "Error: search for a timeperiod %s that do not exists!" % t.get_name()
         else:
             return None
 
@@ -912,7 +912,7 @@ class Thrift_broker(BaseModule):
         try:
             self.dbcursor.execute('VACUUM')
         except sqlite3.DatabaseError, exp:
-            print "WARNING : yit seems your database is corrupted. Please recreate it"
+            print "WARNING: yit seems your database is corrupted. Please recreate it"
         self.dbconn.commit()
 
 
@@ -982,7 +982,7 @@ class Thrift_broker(BaseModule):
                     raise
             # But others are importants
             except Exception, exp:
-                print "Error : got an exeption (bad code?)", exp.__dict__, type(exp)
+                print "Error: got an exeption (bad code?)", exp.__dict__, type(exp)
                 raise
 
     def do_main(self):
