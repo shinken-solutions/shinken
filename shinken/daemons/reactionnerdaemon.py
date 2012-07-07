@@ -26,13 +26,16 @@
 
 
 # This class is an application that launches actions for the schedulers
-# Acions can be notifications or event handlers
-# The actionner listens for the configuration from the Arbiter
-# The configuration consists of a list of schedulers from which
+# Acions can be:
+#    Notifications
+#    Event handlers
+#
+# When running the Reactionner will :
+#   Respond to Pyro pings from Arbiter
+#   Listen for new configurations from Arbiter
+#
+# The configuration consists of a list of Schedulers for which
 # the Reactionner will launch actions for.
-# When running the Reactionner can interact with the Arbiter in the following
-# ways. Respond to Pyro pings from Arbiter, or receive a new configuration
-# Reactionner will flush current actions on configuration reload.
 
 
 from shinken.satellite import Satellite
