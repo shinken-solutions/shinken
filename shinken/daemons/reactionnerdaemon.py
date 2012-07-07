@@ -25,24 +25,23 @@
 
 
 
-# This class is an application for launch actions
-# like notifications or event handlers
-# The actionner listen configuration from Arbiter in a port (first argument)
-# the configuration gived by arbiter is schedulers where actionner will take
-# actions.
-# When already launch and have a conf, actionner still listen to arbiter (one
-# a timeout) if arbiter wants it to have a new conf, actionner forgot old
-# chedulers (and actions into) take new ones and do the (new) job.
+# This class is an application that launches actions for the schedulers
+# Acions can be notifications or event handlers
+# The actionner listens for the configuration from the Arbiter
+# The configuration consists of a list of schedulers from which
+# the Reactionner will launch actions for.
+# When running the Reactionner can interact with the Arbiter in the following
+# ways. Respond to Pyro pings from Arbiter, or receive a new configuration
+# Reactionner will flush current actions on configuration reload.
 
 
 from shinken.satellite import Satellite
 from shinken.property import PathProp, IntegerProp
 
 
-# Our main APP class
 class Reactionner(Satellite):
     do_checks = False # I do not do checks
-    do_actions = True # just actions like notifications
+    do_actions = True
 
     properties = Satellite.properties.copy()
     properties.update({
