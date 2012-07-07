@@ -48,10 +48,10 @@ Service.get_status_dat_full_name = get_full_name
 
 
 class ObjectsCacheFile:
-    # prop : is the internal name if it is different than the name in the output file
-    # required :
-    # depythonize :
-    # default :
+    # prop: is the internal name if it is different than the name in the output file
+    # required:
+    # depythonize:
+    # default:
     out_map = {Host: {
             'host_name': {'required': True},
             'alias': {'required': False},
@@ -59,7 +59,7 @@ class ObjectsCacheFile:
             'parents': {'required': False, 'depythonize': from_list_to_split},
             'check_period': {'required': True, 'depythonize': 'get_name'},
             'check_command': {'required': True, 'depythonize': 'call'},
-            #'contact_groups' : ,
+            #'contact_groups': ,
             'contacts': {'required': True, 'depythonize': 'contact_name'},
             'notification_period': {'required': True, 'depythonize': 'get_name'},
             'initial_state': {'required': True},
@@ -91,7 +91,7 @@ class ObjectsCacheFile:
             'service_description': {'required': True},
             'check_period': {'required': True, 'depythonize': 'get_name'},
             'check_command': {'required': True, 'depythonize': 'call'},
-            #'contact_groups' : {'required' : True, 'depythonize' : 'get_name'},
+            #'contact_groups': {'required': True, 'depythonize': 'get_name'},
             'contacts': {'required': True, 'depythonize': 'contact_name'},
             'notification_period': {'required': True, 'depythonize': 'get_name'},
             'initial_state': {'required': True},
@@ -176,48 +176,48 @@ class ObjectsCacheFile:
         },
 
 
-#               Scheduler : {
-#            'modified_host_attributes' : {'prop' : None, 'default' : '0'},
-#            'modified_service_attributes' : {'prop' : None, 'default' : '0'},
-#            'nagios_pid' : {'prop' : None, 'default' : '0'},
-#            'daemon_mode' : {'prop' : None, 'default' : '0'},
-#            'program_start' : {'prop' : None, 'default' : '0'},
-#            'last_command_check' : {'prop' : None, 'default' : '0'},
-#            'last_log_rotation' : {'prop' : None, 'default' : '0'},
-#            'enable_notifications' : {'prop' : None, 'default' : '0'},
-#            'active_service_checks_enabled' : {'prop' : None, 'default' : '0'},
-#            'passive_service_checks_enabled' : {'prop' : None, 'default' : '0'},
-#            'active_host_checks_enabled' : {'prop' : None, 'default' : '0'},
-#            'passive_host_checks_enabled' : {'prop' : None, 'default' : '0'},
-#            'enable_event_handlers' : {'prop' : None, 'default' : '0'},
-#            'obsess_over_services' : {'prop' : None, 'default' : '0'},
-#            'obsess_over_hosts' : {'prop' : None, 'default' : '0'},
-#            'check_service_freshness' : {'prop' : None, 'default' : '0'},
-#            'check_host_freshness' : {'prop' : None, 'default' : '0'},
-#            'enable_flap_detection' : {'prop' : None, 'default' : '0'},
-#            'enable_failure_prediction' : {'prop' : None, 'default' : '0'},
-#            'process_performance_data' : {'prop' : None, 'default' : '0'},
-#            'global_host_event_handler' : {'prop' : None, 'default' : '0'},
-#            'global_service_event_handler' : {'prop' : None, 'default' : '0'},
-#            'next_comment_id' : {'prop' : None, 'default' : '0'},
-#            'next_downtime_id' : {'prop' : None, 'default' : '0'},
-#            'next_event_id' : {'prop' : None, 'default' : '0'},
-#            'next_problem_id' : {'prop' : None, 'default' : '0'},
-#            'next_notification_id'  : {'prop' : None, 'default' : '0'},
-#            'total_external_command_buffer_slots' : {'prop' : None, 'default' : '0'},
-#            'used_external_command_buffer_slots' : {'prop' : None, 'default' : '0'},
-#            'high_external_command_buffer_slots' : {'prop' : None, 'default' : '0'},
-#            'active_scheduled_host_check_stats' : {'prop' : None, 'default' : '0'},
-#            'active_ondemand_host_check_stats' : {'prop' : None, 'default' : '0'},
-#            'passive_host_check_stats' : {'prop' : None, 'default' : '0'},
-#            'active_scheduled_service_check_stats' : {'prop' : None, 'default' : '0'},
-#            'active_ondemand_service_check_stats' : {'prop' : None, 'default' : '0'},
-#            'passive_service_check_stats' : {'prop' : None, 'default' : '0'},
-#            'cached_host_check_stats' : {'prop' : None, 'default' : '0'},
-#            'cached_service_check_stats' : {'prop' : None, 'default' : '0'},
-#            'external_command_stats' : {'prop' : None, 'default' : '0'},
-#            'parallel_host_check_stats' : {'prop' : None, 'default' : '0'},
-#            'serial_host_check_stats' : {'prop' : None, 'default' : '0'}
+#               Scheduler: {
+#            'modified_host_attributes': {'prop': None, 'default': '0'},
+#            'modified_service_attributes': {'prop': None, 'default': '0'},
+#            'nagios_pid': {'prop': None, 'default': '0'},
+#            'daemon_mode': {'prop': None, 'default': '0'},
+#            'program_start': {'prop': None, 'default': '0'},
+#            'last_command_check': {'prop': None, 'default': '0'},
+#            'last_log_rotation': {'prop': None, 'default': '0'},
+#            'enable_notifications': {'prop': None, 'default': '0'},
+#            'active_service_checks_enabled': {'prop': None, 'default': '0'},
+#            'passive_service_checks_enabled': {'prop': None, 'default': '0'},
+#            'active_host_checks_enabled': {'prop': None, 'default': '0'},
+#            'passive_host_checks_enabled': {'prop': None, 'default': '0'},
+#            'enable_event_handlers': {'prop': None, 'default': '0'},
+#            'obsess_over_services': {'prop': None, 'default': '0'},
+#            'obsess_over_hosts': {'prop': None, 'default': '0'},
+#            'check_service_freshness': {'prop': None, 'default': '0'},
+#            'check_host_freshness': {'prop': None, 'default': '0'},
+#            'enable_flap_detection': {'prop': None, 'default': '0'},
+#            'enable_failure_prediction': {'prop': None, 'default': '0'},
+#            'process_performance_data': {'prop': None, 'default': '0'},
+#            'global_host_event_handler': {'prop': None, 'default': '0'},
+#            'global_service_event_handler': {'prop': None, 'default': '0'},
+#            'next_comment_id': {'prop': None, 'default': '0'},
+#            'next_downtime_id': {'prop': None, 'default': '0'},
+#            'next_event_id': {'prop': None, 'default': '0'},
+#            'next_problem_id': {'prop': None, 'default': '0'},
+#            'next_notification_id': {'prop': None, 'default': '0'},
+#            'total_external_command_buffer_slots': {'prop': None, 'default': '0'},
+#            'used_external_command_buffer_slots': {'prop': None, 'default': '0'},
+#            'high_external_command_buffer_slots': {'prop': None, 'default': '0'},
+#            'active_scheduled_host_check_stats': {'prop': None, 'default': '0'},
+#            'active_ondemand_host_check_stats': {'prop': None, 'default': '0'},
+#            'passive_host_check_stats': {'prop': None, 'default': '0'},
+#            'active_scheduled_service_check_stats': {'prop': None, 'default': '0'},
+#            'active_ondemand_service_check_stats': {'prop': None, 'default': '0'},
+#            'passive_service_check_stats': {'prop': None, 'default': '0'},
+#            'cached_host_check_stats': {'prop': None, 'default': '0'},
+#            'cached_service_check_stats': {'prop': None, 'default': '0'},
+#            'external_command_stats': {'prop': None, 'default': '0'},
+#            'parallel_host_check_stats': {'prop': None, 'default': '0'},
+#            'serial_host_check_stats': {'prop': None, 'default': '0'}
 #            }
     }
 
@@ -308,7 +308,7 @@ class ObjectsCacheFile:
 '''
         output += '# Created: %s\n' % time.ctime()
         output += '########################################\n\n'
-        #print "Create output :", output
+        #print "Create output:", output
 
         for tp in self.timeperiods.values():
             tmp = self.create_output(tp)
@@ -344,7 +344,7 @@ class ObjectsCacheFile:
             output += 'define service {\n' + tmp + '\t}\n\n'
 
 
-        #print "Create output :", output
+        #print "Create output:", output
 
         try:
             temp_fh, temp_objects_cache_file = tempfile.mkstemp(dir=os.path.dirname(self.path))

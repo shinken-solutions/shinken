@@ -390,7 +390,7 @@ class LiveStatusMongoStack(LiveStatusStack):
 
     def not_elements(self):
         top_filter = self.get_stack()
-        #negate_filter = lambda: '\'$not\' : { %s }' % top_filter()
+        #negate_filter = lambda: '\'$not\': { %s }' % top_filter()
         # mongodb doesn't have the not-operator like sql, which can negate
         # a complete expression. Mongodb $not can only reverse one operator
         # at a time. This qould require rewriting of the whole expression.

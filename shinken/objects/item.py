@@ -50,7 +50,7 @@ class Item(object):
         'use':                      ListProp(default=''),
         'name':                     StringProp(default=''),
 
-        # TODO : find why we can't uncomment this line below.
+        # TODO: find why we can't uncomment this line below.
         #'register':                 BoolProp(default='1'),
     }
 
@@ -84,7 +84,7 @@ class Item(object):
         # [0] = _  -> new custom entry in UPPER case
         for key in params:
             if len(params[key]) >= 1 and params[key][0]  == '+':
-                # Special case : a _MACRO can be a plus. so add to plus
+                # Special case: a _MACRO can be a plus. so add to plus
                 # but upper the key for the macro name
                 if key[0] == "_":
                     self.plus[key.upper()] = params[key][1:] # we remove the +
@@ -160,11 +160,11 @@ Like temporary attributes such as "imported_from", etc.. """
     def load_global_conf(cls, conf):
         """ Used to put global values in the sub Class like
         hosts or services """
-        # conf have properties, if 'enable_notifications' :
-        # { [...] 'class_inherit' : [(Host, None), (Service, None),
+        # conf have properties, if 'enable_notifications':
+        # { [...] 'class_inherit': [(Host, None), (Service, None),
         #  (Contact, None)]}
         # get the name and put the value if None, put the Name
-        # (not None) if not (not clear ?)
+        # (not None) if not (not clear?)
         for prop, entry in conf.properties.items():
             # If we have a class_inherit, and the arbiter really send us it
             # if 'class_inherit' in entry and hasattr(conf, prop):
@@ -278,7 +278,7 @@ Like temporary attributes such as "imported_from", etc.. """
         template_with_only_plus = hasattr(self, prop)
 
         # I do not have endingprop, my templates too... Maybe a plus?
-        # warning : if all my templates gave me '+' values, do not forgot to
+        # warning: if all my templates gave me '+' values, do not forgot to
         # add the already set self.prop value
         if self.has_plus(prop):
             if template_with_only_plus:
@@ -890,7 +890,7 @@ class Items(object):
                         c = contacts.find_by_name(c_name)
                         if c is not None:
                             new_contacts.append(c)
-                        # Else : Add in the errors tab.
+                        # Else: Add in the errors tab.
                         # will be raised at is_correct
                         else:
                             err = "the contact '%s' defined for '%s' is unknown" % (c_name, i.get_name())
@@ -1135,7 +1135,7 @@ class HostGroup_Name_Parse_Ctx(object):
     specials_hostgroup_name_chars = ( '*', '(', ')', '!', ) + hgn_chars_separator
 
     space_chars = ( ' ', '\t', )
-    # no group should be named like that :
+    # no group should be named like that:
     catch_all_name = "__ALLELEMENTS__"
     minus_sign_in_name = "__MINUSSIGN_IN_NAME__"
     print_in_name = "__PRINT_IN_NAME__"
@@ -1218,7 +1218,7 @@ def hg_name_parse_item(ctx, expr, begin, end):
         return None
 
     ctx.res_i = i
-    # returns the stripped version of the item :
+    # returns the stripped version of the item:
     res = expr[s:i].strip()
     ctx.prev_res = res
     ctx.last_is_expr = True
@@ -1312,10 +1312,10 @@ def hg_name_parse_not(ctx, expr, begin, end):
 def parse_neg_or_not__(ctx, expr, begin, end):
     begin += 1
     if not ctx.last_is_expr:
-        # "! X" case :
+        # "! X" case:
         res = hg_name_parse_not(ctx, expr, begin, end)
     else:
-        # "A ! B" case :
+        # "A ! B" case:
         ctx.pos_res.append("-")
         ctx.last_is_expr = False
         res = hg_name_parse_single_expr(ctx, expr, begin, end)
@@ -1425,9 +1425,9 @@ def hg_name_get_groupnames(all_res, hosts, hostgroups, res=None, look_in='hostgr
             elts = get_all_host_names_set(hosts)
         else:
             members = []
-            # We got 2 possibilities : hostgroups or templates
+            # We got 2 possibilities: hostgroups or templates
             if look_in == 'hostgroups':
-                # we got a group name :
+                # we got a group name:
                 members = hostgroups.get_members_by_name(tok)
             else:  # == templates
                 # It's a dict of template.
@@ -1442,7 +1442,7 @@ def hg_name_get_groupnames(all_res, hosts, hostgroups, res=None, look_in='hostgr
                 elts = members.split(',')
             elts = strip_and_uniq(elts)
 
-            # the "host_name" members of a hostgroup can also be '*' :
+            # the "host_name" members of a hostgroup can also be '*':
             if '*' in elts:
                 tok = HostGroup_Name_Parse_Ctx.catch_all_name
                 if tok in res:
@@ -1477,7 +1477,7 @@ parse_res must be the 'full_res' attribute of a 'HostGroup_Name_Parse_Ctx' objec
             return "set([])"
         return " ".join( hg_name_rebuild_str(i) for i in parse_res )
 
-    # "base" case :
+    # "base" case:
     # assert( isinstance(parse_res, tuple) )
     # parse_res[0] is the positive results.   == hosts to include.
     # parse_res[1] is the "negative" results. == hosts to NOT include.

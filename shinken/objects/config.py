@@ -89,16 +89,16 @@ class Config(Item):
     my_type = "config"
 
     # Properties:
-    # *required : if True, there is not default, and the config must put them
+    # *required: if True, there is not default, and the config must put them
     # *default: if not set, take this value
-    # *pythonize : function call to
-    # *class_inherit : (Service, 'blabla') : must set this propertie to the
+    # *pythonize: function call to
+    # *class_inherit: (Service, 'blabla'): must set this propertie to the
     #  Service class with name blabla
-    #  if (Service, None) : must set this properti to the Service class with
+    #  if (Service, None): must set this properti to the Service class with
     #  same name
-    # *unused : just to warn the user that the option he use is no more used
+    # *unused: just to warn the user that the option he use is no more used
     #  in Shinken
-    # *usage_text : if present, will print it to explain why it's no more useful
+    # *usage_text: if present, will print it to explain why it's no more useful
     properties = {
         'prefix':                   StringProp(default='/usr/local/shinken/'),
         'workdir':                  StringProp(default=''),
@@ -231,7 +231,7 @@ class Config(Item):
         'debug_verbosity':      UnusedProp(text=None),
         'max_debug_file_size':  UnusedProp(text=None),
         'modified_attributes':  IntegerProp(default=0L),
-        #'$USERn$ : {'required':False, 'default':''} # Add at run in __init__
+        #'$USERn$: {'required':False, 'default':''} # Add at run in __init__
 
         # SHINKEN SPECIFIC
         'idontcareaboutsecurity': BoolProp(default='0'),
@@ -297,11 +297,11 @@ class Config(Item):
         'SERVICEPERFDATAFILE':  '',
         'ADMINEMAIL':           '',
         'ADMINPAGER':           ''
-        #'USERn' : '$USERn$' # Add at run time
+        #'USERn': '$USERn$' # Add at run time
     }
 
     # We create dict of objects
-    # Type: 'name in objects' : {Class of object, Class of objects,
+    # Type: 'name in objects': {Class of object, Class of objects,
     # 'property for self for the objects(config)'
     types_creations = {
         'timeperiod':       (Timeperiod, Timeperiods, 'timeperiods'),
@@ -692,7 +692,7 @@ class Config(Item):
             self.packs.load_file(p)
 
 
-    # We use linkify to make the config more efficient : elements will be
+    # We use linkify to make the config more efficient: elements will be
     # linked, like pointers. For example, a host will have it's service,
     # and contacts directly in it's properties
     # REMEMBER: linkify AFTER explode...
@@ -883,11 +883,11 @@ class Config(Item):
         self.hostgroups.explode()
 
         #print "Services"
-        #print "Initialy got nb of services : %d" % len(self.services.items)
+        #print "Initialy got nb of services: %d" % len(self.services.items)
         self.services.explode(self.hosts, self.hostgroups, self.contactgroups,
                               self.servicegroups, self.servicedependencies,
                               self.triggers)
-        #print "finally got nb of services : %d" % len(self.services.items)
+        #print "finally got nb of services: %d" % len(self.services.items)
         #print "Servicegroups"
         self.servicegroups.explode()
 
@@ -1056,7 +1056,7 @@ class Config(Item):
             self.brokers = BrokerLinks([b])
 
 
-    # Return if one broker got a module of type : mod_type
+    # Return if one broker got a module of type: mod_type
     def got_broker_module_type_defined(self, mod_type):
         for b in self.brokers:
             for m in b.modules:
@@ -1065,7 +1065,7 @@ class Config(Item):
         return False
 
 
-    # return if one scheduler got a module of type : mod_type
+    # return if one scheduler got a module of type: mod_type
     def got_scheduler_module_type_defined(self, mod_type):
         for b in self.schedulers:
             for m in b.modules:
@@ -1073,8 +1073,8 @@ class Config(Item):
                     return True
         return False
 
-    # return if one arbiter got a module of type : mod_type
-    # but this tuime it's tricky : the python pass is not done!
+    # return if one arbiter got a module of type: mod_type
+    # but this tuime it's tricky: the python pass is not done!
     # so look with strings!
     def got_arbiter_module_type_defined(self, mod_type):
         for a in self.arbiters:
@@ -1109,7 +1109,7 @@ class Config(Item):
 
 
     # It's used to hack some old Nagios parameters like
-    # log_file or status_file : if they are present in
+    # log_file or status_file: if they are present in
     # the global configuration and there is no such modules
     # in a Broker, we create it on the fly for all Brokers
     def hack_old_nagios_parameters(self):
@@ -1316,8 +1316,8 @@ class Config(Item):
 
     # Some parameters are just not managed like O*HP commands
     # and regexp capabilities
-    # True : OK
-    # False : error in conf
+    # True: OK
+    # False: error in conf
     def check_error_on_hard_unmanaged_parameters(self):
         r = True
         if self.use_regexp_matching:
@@ -1333,7 +1333,7 @@ class Config(Item):
 
 
     # check if elements are correct or not (fill with defaults, etc)
-    # Warning : this function call be called from a Arbiter AND
+    # Warning: this function call be called from a Arbiter AND
     # from and scheduler. The first one got everything, the second
     # does not have the satellites.
     def is_correct(self):
@@ -1389,7 +1389,7 @@ class Config(Item):
                     r = False
 
         # Check that for each poller_tag of a host, a poller exists with this tag
-        # TODO : need to check that poller are in the good realm too
+        # TODO: need to check that poller are in the good realm too
         hosts_tag = set()
         pollers_tag = set()
         for h in self.hosts:
@@ -1489,7 +1489,7 @@ class Config(Item):
         err = txt
         self.configuration_errors.append(err)
 
-        # Possible typo between those 2 variables ?
+        # Possible typo between those 2 variables?
         self.is_correct = False
         self.conf_is_correct = False
 
@@ -1526,7 +1526,7 @@ class Config(Item):
             for (dep, tmp, tmp2, tmp3, tmp4) in h.chk_depend_of:
                 links.add((dep, h))
 
-        # For services : they are link woth their own host but we need
+        # For services: they are link woth their own host but we need
         # To have the hosts of service dep in the same pack too
         for s in self.services:
             for (dep, tmp, tmp2, tmp3, tmp4) in s.act_depend_of:
@@ -1567,7 +1567,7 @@ class Config(Item):
             g.add_edge(h, dep)
 
         # Access_list from a node il all nodes that are connected
-        # with it : it's a list of ours mini_packs
+        # with it: it's a list of ours mini_packs
         tmp_packs = g.get_accessibility_packs()
 
         # Now We find the default realm (must be unique or
@@ -1673,7 +1673,7 @@ class Config(Item):
                 for elt in pack:
                     #print 'Look for host', elt.get_name(), 'in assoc'
                     old_i = assoc.get(elt.get_name(), -1)
-                    #print 'Founded in ASSOC : ', elt.get_name(),old_i
+                    #print 'Founded in ASSOC: ', elt.get_name(),old_i
                     # Maybe it's a new, if so, don't count it
                     if old_i == -1:
                         continue
@@ -1730,14 +1730,14 @@ class Config(Item):
     # New confs are independent whith checks. The only communication
     # That can be need is macro in commands
     def cut_into_parts(self):
-        #print "Scheduler configurated :", self.schedulers
+        #print "Scheduler configurated:", self.schedulers
         # I do not care about alive or not. User must have set a spare if need it
         nb_parts = len([s for s in self.schedulers if not s.spare])
 
         if nb_parts == 0:
             nb_parts = 1
 
-        # We create dummy configurations for schedulers :
+        # We create dummy configurations for schedulers:
         # they are clone of the master
         # conf but without hosts and services (because they are dispatched between
         # theses configurations)

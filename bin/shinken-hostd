@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2009-2011 :
+# Copyright (C) 2009-2011:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -100,6 +100,6 @@ if args:
 if __name__ == '__main__':
     daemon = Hostd(debug=opts.debug_file is not None, **opts.__dict__)
     daemon.main()
-# For perf tuning :
+# For perf tuning:
 #import cProfile
 #cProfile.run('''daemon.main()''', '/tmp/arbiter.profile')

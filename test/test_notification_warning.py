@@ -45,7 +45,7 @@ class TestConfig(ShinkenTest):
         print n.__dict__
         self.sched.actions[n.id] = n
         self.sched.put_results(n)
-        # Should have raised something like "Warning : the notification command 'BADCOMMAND' raised an error (exit code=2) : '[Errno 2] No such file or directory'"
+        # Should have raised something like "Warning: the notification command 'BADCOMMAND' raised an error (exit code=2): '[Errno 2] No such file or directory'"
         # Ok, in HUDSON, we got a problem here. so always run with a shell run before release please
         if os.environ.get('HUDSON_URL', None):
             return

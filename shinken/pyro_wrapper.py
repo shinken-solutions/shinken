@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -67,7 +67,7 @@ try:
                 return
             try:
                 Pyro.core.initServer()
-            except (OSError, IOError), e: # must be problem with workdir :
+            except (OSError, IOError), e: # must be problem with workdir:
                 raise InvalidWorkDir(e)
             # Set the protocol as asked (ssl or not)
             if use_ssl:
@@ -80,7 +80,7 @@ try:
             try:
                 Pyro.core.Daemon.__init__(self, host=host, port=port, prtcol=prtcol, norange=True)
             except OSError, e:
-                # must be problem with workdir :
+                # must be problem with workdir:
                 raise InvalidWorkDir(e)
             except Pyro.errors.DaemonError, e:
                 msg = "Error : Sorry, the port %d is not free: %s" % (port, e)
@@ -147,7 +147,7 @@ except AttributeError, exp:
     # Version not supported for now, we have to work on it
     bad_versions = ["4.14"]
 
-    # Hack for Pyro 4 : with it, there is
+    # Hack for Pyro 4: with it, there is
     # no more way to send huge packet!
     # This hack fails with PYRO 4.14!!!
     import socket
@@ -205,7 +205,7 @@ except AttributeError, exp:
                     logger.error(msg + "but we try another time in 1 sec")
                     time.sleep(1)
                 except Exception, e:
-                    # must be a problem with pyro workdir :
+                    # must be a problem with pyro workdir:
                     raise InvalidWorkDir(e)
 
 

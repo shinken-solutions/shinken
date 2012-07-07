@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2009-2011 :
+# Copyright (C) 2009-2011:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -109,6 +109,6 @@ if __name__ == '__main__':
     if not opts.profile:
         daemon.main()
     else:
-        # For perf tuning :
+        # For perf tuning:
         import cProfile
         cProfile.run('''daemon.main()''', opts.profile)

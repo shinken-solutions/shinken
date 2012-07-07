@@ -195,7 +195,7 @@ class DiscoveredHost(object):
             # We can choose to keep only the basename
             # of the nameid, so strip the fqdn
             # But not if it's a plain ipv4 addr
-            # TODO : gt this! if self.conf.strip_idname_fqdn:
+            # TODO: gt this! if self.conf.strip_idname_fqdn:
             if not is_ipv4_addr(name):
                 name = name.split('.', 1)[0]
 

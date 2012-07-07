@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright (C) 2009-2011 :
+# Copyright (C) 2009-2011:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -300,7 +300,7 @@ class ShinkenAdmin(cmd.Cmd):
                         else:
                             elts = unicode(getattr(d,key))
                     else:
-                        # TODO : get default parameters
+                        # TODO: get default parameters
                         default=u"D"
                         elts="TODO : get default value"
                     if elts:

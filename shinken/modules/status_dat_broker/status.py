@@ -341,7 +341,7 @@ class StatusFile:
                 tmp = self.create_output(dt)
                 output += dt.ref.my_type + 'downtime {\n' + tmp + '\t}\n\n'
 
-        #print "Create output :", output
+        #print "Create output:", output
         try:
             temp_fh, temp_status_file = tempfile.mkstemp(dir=os.path.dirname(self.path))
             os.write(temp_fh, output.encode('ascii', 'ignore'))

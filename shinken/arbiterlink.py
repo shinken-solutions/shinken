@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -60,7 +60,7 @@ class ArbiterLink(SatelliteLink):
         for prop, entry in cls.properties.items():
             if not hasattr(self, prop) and entry.required:
                 # This sould raise an error afterwards?
-                # If so, logger.log it !
+                # If so, logger.log it!
                 self.debug("%s arbiterlink have not %s property" % (self.get_name(), prop))
                 state = False # Bad boy...
         return state

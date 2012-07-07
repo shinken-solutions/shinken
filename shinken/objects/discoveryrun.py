@@ -65,7 +65,7 @@ class Discoveryrun(MatchingItem):
         self.matches = {} # for matching rules
         self.not_matches = {} # for rules that should NOT match
 
-        # In my own property :
+        # In my own property:
         #  -> in __dict__
         # if not, in matches or not match (if key starts
         # with a !, it's a not rule)

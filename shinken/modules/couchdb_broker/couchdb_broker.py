@@ -71,17 +71,17 @@ class Couchdb_broker(BaseModule):
 
 
     # Create the database connection
-    # TODO : finish (begin :) ) error catch and conf parameters...
+    # TODO: finish (begin :) ) error catch and conf parameters...
     def connect_database(self):
         # First connect to server
         s = couchdb.Server('http://127.0.0.1:5984/')
         # TODO add credentials with
         #db.resource.http.add_credentials
 
-        # Hack because of the Nagle TCP algorithm : couchdb make
+        # Hack because of the Nagle TCP algorithm: couchdb make
         # very small paquets, so Nagle wait 40ms for more bits that will
         # never happend, so make a 40ms latency for all pakets!
-        # So : NO_DELAY :)
+        # So: NO_DELAY :)
         for con in s.resource.http.connections:
             sock = s.resource.http.connections[con].sock
             sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
@@ -97,7 +97,7 @@ class Couchdb_broker(BaseModule):
         # An we clean thems
         for table in tables:
             # We get the database. From now, we drop all the database and recreate a new one
-            # TODO : cleaner way of doing it!!
+            # TODO: cleaner way of doing it!!
             try:
                 s.delete(table)
             except couchdb.client.ResourceNotFound:
@@ -135,7 +135,7 @@ class Couchdb_broker(BaseModule):
 
         # We take the original doc to update it
         doc = db[key]
-        # TODO : find a better way of not having too much revisions...
+        # TODO: find a better way of not having too much revisions...
         db.delete(doc)
 
         # Now stringify datas
@@ -157,7 +157,7 @@ class Couchdb_broker(BaseModule):
     # our instance_id
     # This brok must be sent at the begining of a scheduler session,
     # if not, BAD THINGS MAY HAPPEN :)
-    # TODO : Modify this comment to explain why we only do one thing here.
+    # TODO: Modify this comment to explain why we only do one thing here.
     def manage_clean_all_my_instance_id_brok(self, b):
         instance_id = b.data['instance_id']
         print("[%s] Cleaning id : %d" % (self.get_name(), instance_id))
@@ -207,7 +207,7 @@ class Couchdb_broker(BaseModule):
     def manage_initial_hostgroup_status_brok(self, b):
         data = b.data
 
-        # Here we've got a special case : in data, there is members
+        # Here we've got a special case: in data, there is members
         # and we do not want it in the INSERT query, so we crate a
         # tmp_data without it
         tmp_data = copy.copy(data)
@@ -226,7 +226,7 @@ class Couchdb_broker(BaseModule):
     def manage_initial_servicegroup_status_brok(self, b):
         data = b.data
 
-        # Here we've got a special case : in data, there is members
+        # Here we've got a special case: in data, there is members
         # and we do not want it in the INSERT query, so we create a
         # tmp_data without it
         tmp_data = copy.copy(data)
@@ -267,7 +267,7 @@ class Couchdb_broker(BaseModule):
     def manage_initial_contactgroup_status_brok(self, b):
         data = b.data
 
-        # Here we've got a special case : in data, there is members
+        # Here we've got a special case: in data, there is members
         # and we do not want it in the INSERT query, so we create a
         # tmp_data without it
         tmp_data = copy.copy(data)

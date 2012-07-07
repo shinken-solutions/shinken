@@ -62,7 +62,7 @@ from shinken.message import Message
 from shinken.misc.datamanagerhostd import datamgr
 from shinken.modulesmanager import ModulesManager
 
-# DBG : code this!
+# DBG: code this!
 from shinken.objects import Contact
 
 # Now the bottle HTTP part :)
@@ -379,7 +379,7 @@ class Hostd(Daemon):
         #self.conf.prepare_for_sending()
 
         # Ok, here we must check if we go on or not.
-        # TODO : check OK or not
+        # TODO: check OK or not
         self.use_local_log = self.conf.use_local_log
         self.log_level = logger.get_level_id(self.conf.log_level)
         self.local_log = self.conf.local_log
@@ -494,7 +494,7 @@ class Hostd(Daemon):
             socket.setdefaulttimeout(None)
 
             # ok we are now fully daemon (if requested)
-            # now we can start our "external" modules (if any) :
+            # now we can start our "external" modules (if any):
             self.modules_manager.start_external_instances()
 
             # Ok now we can load the retention data
@@ -623,7 +623,7 @@ class Hostd(Daemon):
         # Launch the data thread"
         #self.workersmanager_thread = threading.Thread(None, self.workersmanager, 'httpthread')
         #self.workersmanager_thread.start()
-        # TODO : look for alive and killing
+        # TODO: look for alive and killing
 
         print "Starting HostdUI app"
         srv = run(host=self.http_host, port=self.http_port, server=self.http_backend)
@@ -675,7 +675,7 @@ class Hostd(Daemon):
                     v = entry.get('view', None)
                     static = entry.get('static', False)
 
-                    # IMPORTANT : apply VIEW BEFORE route!
+                    # IMPORTANT: apply VIEW BEFORE route!
                     if v:
                         #print "Link function", f, "and view", v
                         f = view(v)(f)
@@ -693,7 +693,7 @@ class Hostd(Daemon):
                             f = route(r, callback=lock_version, method=method)
 
                     # If the plugin declare a static entry, register it
-                    # and remeber : really static! because there is no lock
+                    # and remeber: really static! because there is no lock
                     # for them!
                     if static:
                         self.add_static(fdir, m_dir)
@@ -833,7 +833,7 @@ class Hostd(Daemon):
 
     def get_daemons(self, daemon_type):
         """ Returns the daemons list defined in our conf for the given type """
-        # shouldn't the 'daemon_types' (whetever it is above) be always present ?
+        # shouldn't the 'daemon_types' (whetever it is above) be always present?
         return getattr(self.conf, daemon_type+'s', None)
 
     # Helper functions for retention modules
@@ -874,7 +874,7 @@ class Hostd(Daemon):
 
 
 
-    # TODO : fix hard coded server/database
+    # TODO: fix hard coded server/database
     def init_db(self):
        if not Connection:
           logger.error('You need the pymongo lib for running skonfui. Please install it')

@@ -93,6 +93,6 @@ def get_page():
 
 
 pages = {get_page: { 'routes': ['/dashboard'], 'view': 'dashboard', 'static': True},
-#         get_all : { 'routes' : ['/dashboard/fullscreen'], 'view' : 'fullscreen', 'static' : True},
+#         get_all: { 'routes': ['/dashboard/fullscreen'], 'view': 'fullscreen', 'static': True},
          }
 

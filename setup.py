@@ -282,7 +282,7 @@ pidfile=%s/%sd.pid
             log.info('updating path in %s', outname)
 
 
-            ## but we HAVE to set the shinken_user & shinken_group to thoses requested :
+            ## but we HAVE to set the shinken_user & shinken_group to thoses requested:
             append_file_with(inname, outname, """
 shinken_user=%s
 shinken_group=%s
@@ -539,7 +539,7 @@ resource_cfg_files = ('resource.cfg', )
 # Ok, for the webui files it's a bit tricky. we need to add all of them in
 #the package_data of setup(), but from a point of view of the
 # module shinken, so the directory shinken... but without movingfrom pwd!
-# so : sorry for the replace, really... I HATE SETUP()!
+# so: sorry for the replace, really... I HATE SETUP()!
 full_path_webui_files = gen_data_files('shinken/webui')
 webui_files = [s.replace('shinken/webui/', 'webui/') for s in full_path_webui_files]
 

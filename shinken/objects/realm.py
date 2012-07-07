@@ -46,10 +46,10 @@ class Realm(Itemgroup):
         'realm_members': StringProp (default=''), # No status_broker_name because it put hosts, not host_name
         'higher_realms': StringProp (default=''),
         'default':       BoolProp   (default='0'),
-        #'alias': {'required':  True, 'fill_brok' : ['full_status']},
-        #'notes': {'required': False, 'default':'', 'fill_brok' : ['full_status']},
-        #'notes_url': {'required': False, 'default':'', 'fill_brok' : ['full_status']},
-        #'action_url': {'required': False, 'default':'', 'fill_brok' : ['full_status']},
+        #'alias': {'required':  True, 'fill_brok': ['full_status']},
+        #'notes': {'required': False, 'default':'', 'fill_brok': ['full_status']},
+        #'notes_url': {'required': False, 'default':'', 'fill_brok': ['full_status']},
+        #'action_url': {'required': False, 'default':'', 'fill_brok': ['full_status']},
     })
 
     running_properties = Item.running_properties.copy()
@@ -84,7 +84,7 @@ class Realm(Itemgroup):
 
 
     # Use to make pyton properties
-    # TODO : change itemgroup function pythonize?
+    # TODO: change itemgroup function pythonize?
     def pythonize(self):
         cls = self.__class__
         for prop, tab in cls.properties.items():
@@ -307,7 +307,7 @@ class Realm(Itemgroup):
 
 
     # TODO: find a better name...
-    # TODO : and if he goes active?
+    # TODO: and if he goes active?
     def fill_broker_with_poller_reactionner_links(self, broker):
         # First we create/void theses links
         broker.cfg['pollers'] = {}

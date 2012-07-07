@@ -56,7 +56,7 @@ from shinken.message import Message
 from shinken.misc.datamanagerskonf import datamgr
 from shinken.objects.pack import Pack,Packs
 
-# DBG : code this!
+# DBG: code this!
 from shinken.objects import Contact
 
 # Now the bottle HTTP part :)
@@ -394,7 +394,7 @@ class Skonf(Daemon):
         #self.conf.prepare_for_sending()
 
         # Ok, here we must check if we go on or not.
-        # TODO : check OK or not
+        # TODO: check OK or not
         self.api_key = self.conf.api_key
         self.community_uri = str(self.conf.community_uri)
         self.http_proxy = str(self.conf.http_proxy)
@@ -500,7 +500,7 @@ class Skonf(Daemon):
             socket.setdefaulttimeout(None)
 
             # ok we are now fully daemon (if requested)
-            # now we can start our "external" modules (if any) :
+            # now we can start our "external" modules (if any):
             self.modules_manager.start_external_instances()
 
             # Ok now we can load the retention data
@@ -633,7 +633,7 @@ class Skonf(Daemon):
         # Launch the data thread"
         self.workersmanager_thread = threading.Thread(None, self.workersmanager, 'httpthread')
         self.workersmanager_thread.start()
-        # TODO : look for alive and killing
+        # TODO: look for alive and killing
 
         print "Starting SkonfUI app"
         srv = run(host=self.http_host, port=self.http_port, server=self.http_backend)
@@ -679,7 +679,7 @@ class Skonf(Daemon):
                     v = entry.get('view', None)
                     static = entry.get('static', False)
 
-                    # IMPORTANT : apply VIEW BEFORE route!
+                    # IMPORTANT: apply VIEW BEFORE route!
                     if v:
                         #print "Link function", f, "and view", v
                         f = view(v)(f)
@@ -697,7 +697,7 @@ class Skonf(Daemon):
                             f = route(r, callback=lock_version, method=method)
 
                     # If the plugin declare a static entry, register it
-                    # and remeber : really static! because there is no lock
+                    # and remeber: really static! because there is no lock
                     # for them!
                     if static:
                         self.add_static(fdir, m_dir)
@@ -838,7 +838,7 @@ class Skonf(Daemon):
 
     def get_daemons(self, daemon_type):
         """ Returns the daemons list defined in our conf for the given type """
-        # shouldn't the 'daemon_types' (whetever it is above) be always present ?
+        # shouldn't the 'daemon_types' (whetever it is above) be always present?
         return getattr(self.conf, daemon_type+'s', None)
 
     # Helper functions for retention modules
@@ -866,7 +866,7 @@ class Skonf(Daemon):
         if not c:
             print "Warning: You need to have a contact having the same name as your user %s" % user
 
-        # TODO : do not forgot the False when release!
+        # TODO: do not forgot the False when release!
         is_ok = False # (c is not None) # False
 
         for mod in self.modules_manager.get_internal_instances():
@@ -927,7 +927,7 @@ class Skonf(Daemon):
         w.start()
 
 
-    # TODO : fix hard coded server/database
+    # TODO: fix hard coded server/database
     def init_db(self):
        if not Connection:
           logger.error('You need the pymongo lib for running skonfui. Please install it')

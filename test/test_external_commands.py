@@ -86,7 +86,7 @@ class TestConfig(ShinkenTest):
         # Clean the command_file
         #try:
         #    os.unlink(self.conf.command_file)
-        #except :
+        #except:
         #    pass
 
 

@@ -168,10 +168,10 @@ def get_livestatus_full_name(item, req):
 # description (optional): no need to explain this
 # prop (optional): the property of the object. If this is missing, the key is the property
 # type (mandatory): int, float, string, list
-# depythonize : use it if the property needs to be post-processed.
-# fulldepythonize : the same, but the postprocessor takes three arguments. property, object, request
-# delegate : get the property of a different object
-# as : use it together with delegate, if the property of the other object has another name
+# depythonize: use it if the property needs to be post-processed.
+# fulldepythonize: the same, but the postprocessor takes three arguments. property, object, request
+# delegate: get the property of a different object
+# as: use it together with delegate, if the property of the other object has another name
 
 # description
 # function: a lambda with 2 parameters (host/service/comment.., request)
@@ -681,7 +681,7 @@ livestatus_attribute_map = {
         'state': {
             'description': 'The current state of the host (0: up, 1: down, 2: unreachable)',
             'function': lambda item, req: item.state_id,
-            #'function' : i_am_state,
+            #'function': i_am_state,
             'datatype': int,
         },
         'state_type': {
@@ -4443,7 +4443,7 @@ for objtype in ['Host', 'Service', 'Contact', 'Command', 'Timeperiod', 'Downtime
             pass
             # let the lambda return a default value
             # setattr(cls, 'lsm_'+attribute, lambda item, req: 0)
-            # getattr(cls, 'lsm_'+attribute).im_func.datatype = ?
+            # getattr(cls, 'lsm_'+attribute).im_func.datatype =?
         # _Every_ attribute _must_ have a description
         getattr(cls, 'lsm_'+attribute).im_func.description = entry['description']
     if objtype == 'Host':

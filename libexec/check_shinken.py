@@ -70,7 +70,7 @@ def check_deamons_numbers(result, target):
     alive_spare_number = len([e for e in result.values() if e['spare'] and e['alive']])
     dead_number = total_number - alive_number
     dead_list = ','.join([n for n in result if not result[n]['alive']])
-    # TODO : perfdata to graph deamons would be nice (in big HA architectures)
+    # TODO: perfdata to graph deamons would be nice (in big HA architectures)
     # if alive_number <= critical, then we have a big problem
     if alive_number < options.critical:
         print "CRITICAL - only %d/%d %s(s) UP. Down elements : %s" % (alive_number, total_number, target, dead_list)
@@ -86,12 +86,12 @@ def check_deamons_numbers(result, target):
 
 
 # Adding options. None are required, check_shinken will use shinken defaults
-# TODO : Add more control in args problem and usage than the default OptionParser one
+# TODO: Add more control in args problem and usage than the default OptionParser one
 parser = OptionParser()
 parser.add_option('-a', '--hostname', dest='hostname', default='127.0.0.1')
 parser.add_option('-p', '--portnumber', dest='portnum', default=7770)
 parser.add_option('-s', '--ssl', dest='ssl', default=False)
-# TODO : Add a list of correct values for target and don't authorize anything else
+# TODO: Add a list of correct values for target and don't authorize anything else
 parser.add_option('-t', '--target', dest='target')
 parser.add_option('-d', '--daemonname', dest='daemon', default='')
 # In HA architectures, a warning should be displayed if there's one daemon down
@@ -102,7 +102,7 @@ parser.add_option('-T', '--timeout', dest='timeout', default = 10)
 
 # Retrieving options
 options, args = parser.parse_args()
-# TODO : for now, helpme doesn't work as desired
+# TODO: for now, helpme doesn't work as desired
 options.helpme = False
 
 # Check for required option target

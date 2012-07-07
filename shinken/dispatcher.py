@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -135,7 +135,7 @@ class Dispatcher:
 
     # Check if all active items are still alive
     # the result goes into self.dispatch_ok
-    # TODO : finish need conf
+    # TODO: finish need conf
     def check_dispatch(self):
         # Check if the other arbiter has a conf
         for arb in self.arbiters:
@@ -194,7 +194,7 @@ class Dispatcher:
                         if len(r.to_satellites_managed_by[kind][cfg_id]) < r.get_nb_of_must_have_satellites(kind):
                             logger.warning("Missing satellite %s for configuration %d :" % (kind, cfg_id))
 
-                            # TODO : less violent! Must only resent to who need?
+                            # TODO: less violent! Must only resent to who need?
                             # must be caught by satellite who sees that it already has the conf (hash)
                             # and do nothing
                             self.dispatch_ok = False # so we will redispatch all
@@ -209,7 +209,7 @@ class Dispatcher:
 
                             # DBG:
                             #print "What I manage", satellite.get_name(), satellite.what_i_managed()
-                            #try :
+                            #try:
                             #    satellite.reachable and cfg_id not in satellite.what_i_managed()
                             #except TypeError, exp:
                             #    print "DBG: ERROR: (%s) for satellite %s" % (exp, satellite.__dict__)
@@ -244,13 +244,13 @@ class Dispatcher:
     # a spare takes it (good :) ). Like the Empire, the master
     # strikes back! It was still alive! (like Elvis). It still got conf
     # and is running! not good!
-    # Bad dispatch : a link that has a conf but I do not allow this
+    # Bad dispatch: a link that has a conf but I do not allow this
     # so I ask it to wait a new conf and stop kidding.
     def check_bad_dispatch(self):
         for elt in self.elements:
             if hasattr(elt, 'conf'):
                 # If element has a conf, I do not care, it's a good dispatch
-                # If dead : I do not ask it something, it won't respond..
+                # If dead: I do not ask it something, it won't respond..
                 if elt.conf is None and elt.reachable:
                     # print "Ask", elt.get_name() , 'if it got conf'
                     if elt.have_conf():

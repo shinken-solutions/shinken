@@ -232,7 +232,7 @@ class TestPassivePoller(ShinkenTest):
         self.assert_(broker2.attempt == 2)
         self.assert_(broker2.reachable == False)
 
-        ### Now we get BAD, We go DEAD for N2 !
+        ### Now we get BAD, We go DEAD for N2!
         self.dispatcher.check_alive()
 
         # Check good values

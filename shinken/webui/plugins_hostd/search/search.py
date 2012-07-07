@@ -51,7 +51,7 @@ def give_pack(p):
     d['pack_name'] = p['pack_name']
     d['description'] = p.get('description', '')
     d['templates'] = p.get('templates', [])
-    # TODO : manage a real server?
+    # TODO: manage a real server?
     d['img'] = 'http://%s:7765/static/%s/images/sets/%s/tag.png' % (SRV, p['_id'], d['pack_name'])
     d['install'] = 'http://%s:7765/getpack/%s' % (SRV, p['_id'])
     return d
@@ -86,7 +86,7 @@ def do_search(search):
         return json.dumps([])
 
     print "Lookup for", search, "in pack"
-    # TODO : less PERFORMANCE KILLER QUERY!
+    # TODO: less PERFORMANCE KILLER QUERY!
     packs = app.datamgr.get_packs()
     res = []
     for p in packs:
@@ -127,7 +127,7 @@ def search_categories():
 
     print "Lookup for categories from root", root, "in pack"
 
-    # TODO : less PERFORMANCE KILLER QUERY!
+    # TODO: less PERFORMANCE KILLER QUERY!
     packs = app.datamgr.get_packs()
     tree = {'name': '/', 'nb': 0, 'sons': {}}
     for p in packs:
@@ -185,7 +185,7 @@ def search_tags():
 
     print "Lookup for %s tags" % nb
 
-    # TODO : less PERFORMANCE KILLER QUERY!
+    # TODO: less PERFORMANCE KILLER QUERY!
     packs = app.datamgr.get_packs()
     all_tags = {}
     for p in packs:

@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -572,7 +572,7 @@ class ExternalCommandManager:
         service.acknowledge_problem(sticky, notify, persistent, author, comment)
 
     # ACKNOWLEDGE_HOST_PROBLEM;<host_name>;<sticky>;<notify>;<persistent>;<author>;<comment>
-    # TODO : add a better ACK management
+    # TODO: add a better ACK management
     def ACKNOWLEDGE_HOST_PROBLEM(self, host, sticky, notify, persistent, author, comment):
         host.acknowledge_problem(sticky, notify, persistent, author, comment)
 
@@ -581,7 +581,7 @@ class ExternalCommandManager:
         service.acknowledge_problem(sticky, notify, persistent, author, comment, end_time=end_time)
 
     # ACKNOWLEDGE_HOST_PROBLEM_EXPIRE;<host_name>;<sticky>;<notify>;<persistent>;<end_time>;<author>;<comment>
-    # TODO : add a better ACK management
+    # TODO: add a better ACK management
     def ACKNOWLEDGE_HOST_PROBLEM_EXPIRE(self, host, sticky, notify, persistent, end_time, author, comment):
         host.acknowledge_problem(sticky, notify, persistent, author, comment, end_time=end_time)
 
@@ -1263,7 +1263,7 @@ class ExternalCommandManager:
     def PROCESS_FILE(self, file_name, delete):
         pass
 
-    # TODO : say that check is PASSIVE
+    # TODO: say that check is PASSIVE
     # PROCESS_HOST_CHECK_RESULT;<host_name>;<status_code>;<plugin_output>
     def PROCESS_HOST_CHECK_RESULT(self, host, status_code, plugin_output):
         #raise a PASSIVE check only if needed
@@ -1636,7 +1636,7 @@ class ExternalCommandManager:
             return
 
         logger.debug("We found the realm: %s" % str(r))
-        # TODO : backport this in the config class?
+        # TODO: backport this in the config class?
         # We create the PollerLink object
         t = {'poller_name': poller_name, 'address': address, 'port': port}
         p = PollerLink(t)

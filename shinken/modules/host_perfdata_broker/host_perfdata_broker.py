@@ -54,7 +54,7 @@ class Host_perfdata_broker(BaseModule):
 
 
     # Called by Broker so we can do init stuff
-    # TODO : add conf param to get pass with init
+    # TODO: add conf param to get pass with init
     # Conf from arbiter!
     def init(self):
         print "I open the host-perfdata file '%s'" % self.path

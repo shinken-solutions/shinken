@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -113,7 +113,7 @@ class SkonfUIWorker(Worker):
 
 
         # By default I want only hosts I never see
-        # TODO : make this an option
+        # TODO: make this an option
         d = DiscoveryManager('/home/shinken/shinken/etc/discovery.cfg', macros, overwrite, runners, output_dir=output_dir, dbmod=dbmod, only_new_hosts=True)
 
         # Set the scan as launched state

@@ -43,7 +43,7 @@ from shinken.eventhandler import EventHandler
 from shinken.dependencynode import DependencyNodeFactory
 from shinken.util import safe_print
 
-# on system time change just reevaluate the following attributes :
+# on system time change just reevaluate the following attributes:
 on_time_change_update = ( 'last_notification', 'last_state_change', 'last_hard_state_change' )
 
 
@@ -308,9 +308,9 @@ class SchedulingItem(Item):
         impacts = []
         # Ok, if we are impacted, we can add it in our
         # problem list
-        # TODO : remove this unused check
+        # TODO: remove this unused check
         if self.is_impact:
-            # Maybe I was a problem myself, now I can say : not my fault!
+            # Maybe I was a problem myself, now I can say: not my fault!
             if self.is_problem:
                 self.no_more_a_problem()
 
@@ -365,7 +365,7 @@ class SchedulingItem(Item):
     # When all dep are resolved, this function say if
     # action can be raise or not by viewing dep status
     # network_dep have to be all raise to be no action
-    # logic_dep : just one is enouth
+    # logic_dep: just one is enouth
     def is_no_action_dependent(self):
         # Use to know if notif is raise or not
         # no_action = False
@@ -397,7 +397,7 @@ class SchedulingItem(Item):
 
     # We check if we are no action just because of ours parents (or host for
     # service)
-    # TODO : factorize with previous check?
+    # TODO: factorize with previous check?
     def check_and_set_unreachability(self):
         parent_is_down = []
         # We must have all parents raised to be unreachable
@@ -509,7 +509,7 @@ class SchedulingItem(Item):
         # If the retry is 0, take the normal value
         if self.state_type == 'HARD' or self.retry_interval == 0:
             interval = self.check_interval * cls.interval_length
-        else: # TODO : if no retry_interval?
+        else: # TODO: if no retry_interval?
             interval = self.retry_interval * cls.interval_length
 
         # The next_chk is pass so we need a new one
@@ -681,9 +681,9 @@ class SchedulingItem(Item):
     # consume a check return and send action in return
     # main function of reaction of checks like raise notifications
     # Special case:
-    # is_flapping : immediate notif when problem
-    # is_in_scheduled_downtime : no notification
-    # is_volatile : notif immediatly (service only)
+    # is_flapping: immediate notif when problem
+    # is_in_scheduled_downtime: no notification
+    # is_volatile: notif immediatly (service only)
     def consume_result(self, c):
         OK_UP = self.__class__.ok_up # OK for service, UP for host
 
@@ -694,7 +694,7 @@ class SchedulingItem(Item):
             c.long_output = c.long_output.decode('utf8', 'ignore')
 
         # Same for current output
-        # TODO : remove in future version, this is need only for
+        # TODO: remove in future version, this is need only for
         # migration from old shinken version, that got output as str
         # and not unicode
         # if str, go in unicode
@@ -795,7 +795,7 @@ class SchedulingItem(Item):
 
         # OK following a previous OK. perfect if we were not in SOFT
         if c.exit_status == 0 and self.last_state in (OK_UP, 'PENDING'):
-            #print "Case 1 (OK following a previous OK) : code:%s last_state:%s" % (c.exit_status, self.last_state)
+            #print "Case 1 (OK following a previous OK): code:%s last_state:%s" % (c.exit_status, self.last_state)
             self.unacknowledge_problem()
             # action in return can be notification or other checks (dependencies)
             if (self.state_type == 'SOFT') and self.last_state != 'PENDING':
@@ -810,7 +810,7 @@ class SchedulingItem(Item):
         # OK following a NON-OK.
         elif c.exit_status == 0 and self.last_state not in (OK_UP, 'PENDING'):
             self.unacknowledge_problem()
-            #print "Case 2 (OK following a NON-OK) : code:%s last_state:%s" % (c.exit_status, self.last_state)
+            #print "Case 2 (OK following a NON-OK): code:%s last_state:%s" % (c.exit_status, self.last_state)
             if self.state_type == 'SOFT':
                 # OK following a NON-OK still in SOFT state
                 self.add_attempt()
@@ -863,7 +863,7 @@ class SchedulingItem(Item):
 
         # NON-OK follows OK. Everything was fine, but now trouble is ahead
         elif c.exit_status != 0 and self.last_state in (OK_UP, 'PENDING'):
-            #print "Case 4 : NON-OK follows OK : code:%s last_state:%s" % (c.exit_status, self.last_state)
+            #print "Case 4: NON-OK follows OK: code:%s last_state:%s" % (c.exit_status, self.last_state)
             if self.is_max_attempts():
                 # if max_attempts == 1 we're already in deep trouble
                 self.state_type = 'HARD'
@@ -889,11 +889,11 @@ class SchedulingItem(Item):
                 self.raise_alert_log_entry()
                 self.get_event_handlers()
 
-        # If no OK in a no OK : if hard, still hard, if soft,
+        # If no OK in a no OK: if hard, still hard, if soft,
         # check at self.max_check_attempts
         # when we go in hard, we send notification
         elif c.exit_status != 0 and self.last_state != OK_UP:
-            #print "Case 5 (no OK in a no OK) : code:%s last_state:%s state_type:%s" % (c.exit_status, self.last_state,self.state_type)
+            #print "Case 5 (no OK in a no OK): code:%s last_state:%s state_type:%s" % (c.exit_status, self.last_state,self.state_type)
             if self.state_type == 'SOFT':
                 self.add_attempt()
                 if self.is_max_attempts():

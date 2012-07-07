@@ -114,9 +114,9 @@ HE got user entry, so we must listen him carefully and give information he want,
     # Call by arbiter if it thinks we are running but we must do not (like
     # if I was a spare that take a conf but the master returns, I must die
     # and wait a new conf)
-    # Us : No please...
-    # Arbiter : I don't care, hasta la vista baby!
-    # Us : ... <- Nothing! We are die! you don't follow
+    # Us: No please...
+    # Arbiter: I don't care, hasta la vista baby!
+    # Us: ... <- Nothing! We are die! you don't follow
     # anything or what??
     def wait_new_conf(self):
         logger.debug("Arbiter want me to wait a new conf")
@@ -315,7 +315,7 @@ class Shinken(BaseSatellite):
         if len(self.modules) != 0:
             logger.debug("I've got %s modules" % str(self.modules))
 
-        # TODO: if scheduler had previous modules instanciated it must clean them !
+        # TODO: if scheduler had previous modules instanciated it must clean them!
         self.modules_manager.set_modules(self.modules)
         self.do_load_modules()
 
@@ -359,7 +359,7 @@ class Shinken(BaseSatellite):
         #self.conf.quick_debug()
 
         # Now create the external commander
-        # it's a applyer : it role is not to dispatch commands,
+        # it's a applyer: it role is not to dispatch commands,
         # but to apply them
         e = ExternalCommandManager(self.conf, 'applyer')
 

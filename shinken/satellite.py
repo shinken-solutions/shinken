@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -111,9 +111,9 @@ class IForArbiter(Interface):
     # Call by arbiter if it thinks we are running but we must do not (like
     # if I was a spare that take a conf but the master returns, I must die
     # and wait a new conf)
-    # Us : No please...
-    # Arbiter : I don't care, hasta la vista baby!
-    # Us : ... <- Nothing! We are dead! you don't get it or what??
+    # Us: No please...
+    # Arbiter: I don't care, hasta la vista baby!
+    # Us: ... <- Nothing! We are dead! you don't get it or what??
     # Reading code is not a job for eyes only...
     def wait_new_conf(self):
         logger.debug("Arbiter wants me to wait for a new configuration")
@@ -136,7 +136,7 @@ class IForArbiter(Interface):
         return self.app.get_external_commands()
 
 
-    ### NB : only useful for receiver
+    ### NB: only useful for receiver
     def got_conf(self):
         return self.app.cur_conf != None
 
@@ -288,7 +288,7 @@ class Satellite(BaseSatellite):
             sched['con'] = None
             return
 
-        # The schedulers have been restarted : it has a new run_id.
+        # The schedulers have been restarted: it has a new run_id.
         # So we clear all verifs, they are obsolete now.
         if sched['running_id'] != 0 and new_run_id != running_id:
             logger.info("[%s] The running id of the scheduler %s changed, we must clear its actions" % (self.name, sname))
@@ -477,7 +477,7 @@ class Satellite(BaseSatellite):
 
     # A simple function to add objects in self
     # like broks in self.broks, etc
-    # TODO : better tag ID?
+    # TODO: better tag ID?
     def add(self, elt):
         cls_type = elt.__class__.my_type
         if cls_type == 'brok':
@@ -498,11 +498,11 @@ class Satellite(BaseSatellite):
 
 
     # workers are processes, they can die in a numerous of ways
-    # like :
-    # *99.99% : bug in code, sorry :p
-    # *0.005 % : a mix between a stupid admin (or an admin without coffee),
+    # like:
+    # *99.99%: bug in code, sorry:p
+    # *0.005 %: a mix between a stupid admin (or an admin without coffee),
     # and a kill command
-    # *0.005% : alien attack
+    # *0.005%: alien attack
     # So they need to be detected, and restart if need
     def check_and_del_zombie_workers(self):
         # In android, we are using threads, so there is not active_children call
@@ -513,7 +513,7 @@ class Satellite(BaseSatellite):
         w_to_del = []
         for w in self.workers.values():
             # If a worker goes down and we did not ask him, it's not
-            # good : we can think that we have a worker and it's not True
+            # good: we can think that we have a worker and it's not True
             # So we del it
             if not w.is_alive():
                 logger.warning("[%s] The worker %s goes down unexpectly!" % (self.name, w.id))
@@ -544,7 +544,7 @@ class Satellite(BaseSatellite):
 
     # Here we create new workers if the queue load (len of verifs) is too long
     def adjust_worker_number_by_load(self):
-        # TODO : get a real value for a load
+        # TODO: get a real value for a load
         wish_worker = 1
         # I want at least min_workers or wish_workers (the biggest)
         # but not more than max_workers
@@ -553,7 +553,7 @@ class Satellite(BaseSatellite):
                             and len(self.workers) < self.max_workers):
             for mod in self.q_by_mod:
                 self.create_and_launch_worker(module_name=mod)
-        # TODO : if len(workers) > 2*wish, maybe we can kill a worker?
+        # TODO: if len(workers) > 2*wish, maybe we can kill a worker?
 
 
     # Get the Queue() from an action by looking at which module
@@ -716,7 +716,7 @@ class Satellite(BaseSatellite):
         # If so, we listen to it
         # When it push a conf, we reinit connections
         # Sleep in waiting a new conf :)
-        # TODO : manage the diff again.
+        # TODO: manage the diff again.
         while self.timeout > 0:
             begin = time.time()
             self.watch_for_new_conf(self.timeout)
@@ -730,7 +730,7 @@ class Satellite(BaseSatellite):
         self.timeout = self.polling_interval
 
         # Check if zombies workers are among us :)
-        # If so : KILL THEM ALL!!!
+        # If so: KILL THEM ALL!!!
         self.check_and_del_zombie_workers()
 
         # But also modules
@@ -747,7 +747,7 @@ class Satellite(BaseSatellite):
 
 
         # Before return or get new actions, see how we manage
-        # old ones : are they still in queue (s)? If True, we
+        # old ones: are they still in queue (s)? If True, we
         # must wait more or at least have more workers
         wait_ratio = self.wait_ratio.get_load()
         total_q = 0
@@ -890,7 +890,7 @@ class Satellite(BaseSatellite):
                 # And then we connect to it :)
                 self.pynag_con_init(sched_id)
 
-        # Now the limit part, 0 mean : number of cpu of this machine :)
+        # Now the limit part, 0 mean: number of cpu of this machine :)
         # if not available, use 4 (modern hardware)
         self.max_workers = g_conf['max_workers']
         if self.max_workers == 0 and not is_android:

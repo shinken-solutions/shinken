@@ -182,7 +182,7 @@ class Contact(Item):
                     logger.error("[contact::%s] %s property not set" % (self.get_name(), prop))
                     state = False # Bad boy...
 
-        # There is a case where there is no nw : when there is not special_prop defined
+        # There is a case where there is no nw: when there is not special_prop defined
         # at all!!
         if self.notificationways == []:
             for p in _special_properties:

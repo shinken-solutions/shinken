@@ -35,7 +35,7 @@ from shinken.property import StringProp
 from shinken.log import logger
 
 
-# TODO: subclass Item & Items for Itemgroup & Itemgroups ?
+# TODO: subclass Item & Items for Itemgroup & Itemgroups?
 class Itemgroup(Item):
 
     id = 0
@@ -142,7 +142,7 @@ class Itemgroup(Item):
 
 
     # Get a brok with hostgroup info (like id, name)
-    # members is special : list of (id, host_name) for database info
+    # members is special: list of (id, host_name) for database info
     def get_initial_status_brok(self):
         cls = self.__class__
         data = {}

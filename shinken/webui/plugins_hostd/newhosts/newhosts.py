@@ -147,8 +147,8 @@ def post_validatehost():
 #   will call the function get_page.
 #  * we say taht for this page, we are using the template file dummy (so view/dummy.tpl)
 #  * we said this page got some static stuffs. So the webui will match /static/dummy/ to
-#    the dummy/htdocs/ directory. Bewere : it will take the plugin name to match.
-#  * optional : you can add 'method' : 'POST' so this adress will be only available for
+#    the dummy/htdocs/ directory. Bewere: it will take the plugin name to match.
+#  * optional: you can add 'method': 'POST' so this adress will be only available for
 #    POST calls. By default it's GET. Look at the lookup module for sample about this.
 pages = {get_newhosts: { 'routes': ['/newhosts'], 'view': 'newhosts', 'static': True},
          get_launch: { 'routes': ['/newhosts/launch'], 'view': 'newhosts_launch', 'static': True, 'method': 'POST'},

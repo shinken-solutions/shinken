@@ -85,7 +85,7 @@ class TestConfig(ShinkenTest):
             'pnp_path': 'tmp/pnp4nagios_test' + self.testid,
             'host': '127.0.0.1',
             'socket': 'live',
-            'name': 'test', # ?
+            'name': 'test', #?
         })
 
         dbmodconf = Module({'module_name': 'LogStore',
@@ -292,15 +292,15 @@ class TestConfigBig(TestConfig):
             'pnp_path': 'tmp/livestatus_broker.pnp_path_test' + self.testid,
             'host': '127.0.0.1',
             'socket': 'live',
-            'name': 'test', # ?
+            'name': 'test', #?
         })
 
         dbmodconf = Module({'module_name': 'LogStore',
             'module_type': 'logstore_mongodb',
             'database': 'bigbigbig',
             'mongodb_uri': "mongodb://127.0.0.1:27017",
-            #'mongodb_uri' : "mongodb://10.0.12.50:27017,10.0.12.51:27017",
-        #    'replica_set' : 'livestatus',
+            #'mongodb_uri': "mongodb://10.0.12.50:27017,10.0.12.51:27017",
+        #    'replica_set': 'livestatus',
             'max_logs_age': '7',
         })
         modconf.modules = [dbmodconf]

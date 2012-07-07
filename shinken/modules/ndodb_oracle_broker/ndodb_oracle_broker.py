@@ -60,7 +60,7 @@ class Ndodb_Oracle_broker(BaseModule):
 
 
     # Called by Broker so we can do init stuff
-    # TODO : add conf param to get pass with init
+    # TODO: add conf param to get pass with init
     # Conf from arbiter!
     def init(self):
         print "I connect to NDO database with Oracle"
@@ -77,7 +77,7 @@ class Ndodb_Oracle_broker(BaseModule):
         if self.has(manager):
             f = getattr(self, manager)
             queries = f(b)
-            # Ok, we've got queries, now : run them!
+            # Ok, we've got queries, now: run them!
             for q in queries:
                 self.db.execute_query(q)
             return
@@ -158,7 +158,7 @@ class Ndodb_Oracle_broker(BaseModule):
         to_add = []
         mapping = self.mapping['program_status']
         for prop in new_b.data:
-            # ex : 'name' : 'program_start_time', 'transform'
+            # ex: 'name': 'program_start_time', 'transform'
             if prop in mapping:
                 #print "Got a prop to change", prop
                 val = new_b.data[prop]
@@ -176,14 +176,14 @@ class Ndodb_Oracle_broker(BaseModule):
         return [query]
 
 
-    # TODO : fill nagios_instances
+    # TODO: fill nagios_instances
     def manage_update_program_status_brok(self, b):
         new_b = copy.deepcopy(b)
         to_del = ['instance_name']
         to_add = []
         mapping = self.mapping['program_status']
         for prop in new_b.data:
-            # ex : 'name' : 'program_start_time', 'transform'
+            # ex: 'name': 'program_start_time', 'transform'
             if prop in mapping:
                 #print "Got a prop to change", prop
                 val = new_b.data[prop]

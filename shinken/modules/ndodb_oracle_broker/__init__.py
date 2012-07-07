@@ -42,7 +42,7 @@ def get_instance(plugin):
         print "Warning : the plugin type ndodb_oracle is unavailable : %s" % exp
         return None
     print "Get a ndoDB broker for plugin %s" % plugin.get_name()
-    # TODO : catch errors
+    # TODO: catch errors
     if hasattr(plugin, 'oracle_home'):
         os.environ['ORACLE_HOME'] = plugin.oracle_home
         print "INFO: setting Oracle_HOME :", plugin.oracle_home

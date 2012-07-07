@@ -70,7 +70,7 @@ class TestHackCmdPollerTag(ShinkenTest):
         self.assert_(h2 is not None)
 
         # Ok, host1 call cmd2, and host2 cmd1...
-        # sorry for the crossing :p
+        # sorry for the crossing:p
         print "H1", h1.check_command
         print h1.check_command.command
         self.assert_(h1.check_command.poller_tag == 'alreadydefined')

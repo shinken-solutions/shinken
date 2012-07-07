@@ -667,7 +667,7 @@ class Regenerator(object):
         inp_servicegroups[sg.id] = sg
 
 
-    # For Contacts, it's a global value, so 2 cases :
+    # For Contacts, it's a global value, so 2 cases:
     # We got it -> we update it
     # We don't -> we crete it
     # In both cases we need to relink it
@@ -755,9 +755,9 @@ class Regenerator(object):
 
 
 
-    # For Timeperiods we got 2 cases : do we already got the command or not.
-    # if got : just update it
-    # if not : create it and delacre it in our main commands
+    # For Timeperiods we got 2 cases: do we already got the command or not.
+    # if got: just update it
+    # if not: create it and delacre it in our main commands
     def manage_initial_timeperiod_status_brok(self, b):
         data = b.data
         #print "Creatin timeperiod", data
@@ -776,9 +776,9 @@ class Regenerator(object):
             self.timeperiods.create_reversed_list()
 
 
-    # For command we got 2 cases : do we already got the command or not.
-    # if got : just update it
-    # if not : create it and delacre it in our main commands
+    # For command we got 2 cases: do we already got the command or not.
+    # if got: just update it
+    # if not: create it and delacre it in our main commands
     def manage_initial_command_status_brok(self, b):
         data = b.data
         cname = data['command_name']

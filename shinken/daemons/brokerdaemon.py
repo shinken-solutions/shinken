@@ -92,7 +92,7 @@ class Broker(BaseSatellite):
     # Schedulers have some queues. We can simplify the call by adding
     # elements into the proper queue just by looking at their type
     # Brok -> self.broks
-    # TODO : better tag ID?
+    # TODO: better tag ID?
     # External commands -> self.external_commands
     def add(self, elt):
         cls_type = elt.__class__.my_type
@@ -223,7 +223,7 @@ class Broker(BaseSatellite):
             links[id]['con'] = None
             return
 #        except Pyro.errors.NamingError, exp:
-#            logger.log("[%s] the %s '%s' is not initialized : %s" % (self.name, type, links[id]['name'], str(exp)))
+#            logger.log("[%s] the %s '%s' is not initialized: %s" % (self.name, type, links[id]['name'], str(exp)))
 #            links[id]['con'] = None
 #            return
         except KeyError , exp:
@@ -236,7 +236,7 @@ class Broker(BaseSatellite):
 
 
     # Get a brok. Our role is to put it in the modules
-    # DO NOT CHANGE data of b !!!
+    # DO NOT CHANGE data of b!!!
     # REF: doc/broker-modules.png (4-5)
     def manage_brok(self, b):
         #logger.info("manage brok")
@@ -636,7 +636,7 @@ class Broker(BaseSatellite):
         self.get_objects_from_from_queues()
 
         # Maybe we do not have something to do, so we wait a little
-        # TODO : redone the diff management....
+        # TODO: redone the diff management....
         if len(self.broks) == 0:
             while self.timeout > 0:
                 begin = time.time()
@@ -645,7 +645,7 @@ class Broker(BaseSatellite):
                 self.timeout = self.timeout - (end - begin)
             self.timeout = 1.0
 
-            # print "get new broks watch new conf 1 : end", len(self.broks)
+            # print "get new broks watch new conf 1: end", len(self.broks)
 
         # Say to modules it's a new tick :)
         self.hook_point('tick')

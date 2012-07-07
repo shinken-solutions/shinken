@@ -53,7 +53,7 @@ class TestService(ShinkenTest):
         svc_copy = copy.copy(svc)
         # reset the state in the original service
         svc.__setstate__(state)
-        # And it should be the same :then before :)
+        # And it should be the same:then before :)
         for p in cls.properties:
 #            print getattr(svc_copy, p)
 #            print getattr(svc, p)

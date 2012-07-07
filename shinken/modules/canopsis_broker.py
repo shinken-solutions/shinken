@@ -213,7 +213,7 @@ class Canopsis_broker(BaseModule):
                 'max_check_attempts': self.host_max_check_attempts[b.data['host_name']]
             }
         else:
-            # WTF ?!
+            # WTF?!
             logger.info("[Canopsis] Invalid source_type %s" %(source_type))
             return None
 
@@ -241,7 +241,7 @@ class Canopsis_broker(BaseModule):
     def push2canopsis(self,message):
         strmessage=str(message)
         self.canopsis.postmessage(message)
-        #logger.info("[Canopsis] push2canopsis : %s" % (strmessage))
+        #logger.info("[Canopsis] push2canopsis: %s" % (strmessage))
 
     def hook_tick(self, brok):
         if self.canopsis:

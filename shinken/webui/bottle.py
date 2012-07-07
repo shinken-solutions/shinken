@@ -1877,7 +1877,7 @@ class WSGIRefServer(ServerAdapter):
         srv = make_server(self.host, self.port, handler, **self.options)
         srv.serve_forever()
 
-## Shinken : add WSGIRefServerSelect
+## Shinken: add WSGIRefServerSelect
 class WSGIRefServerSelect(ServerAdapter):
     def run(self, handler): # pragma: no cover
         print "Call the Select version"
@@ -2045,7 +2045,7 @@ class AutoServer(ServerAdapter):
             except ImportError:
                 pass
 
-## Shinken : add 'wsgirefselect' : WSGIRefServerSelect,
+## Shinken: add 'wsgirefselect': WSGIRefServerSelect,
 server_names = {
     'cgi': CGIServer,
     'flup': FlupFCGIServer,
@@ -2125,7 +2125,7 @@ def load_app(target):
     app.remove(tmp) # Remove the temporary added default application
     return rv if isinstance(rv, Bottle) else tmp
 
-## Shinken : add the return of the server
+## Shinken: add the return of the server
 def run(app=None, server='wsgiref', host='127.0.0.1', port=8080,
         interval=1, reloader=False, quiet=False, **kargs):
     """ Start a server instance. This method blocks until the server terminates.
@@ -2664,7 +2664,7 @@ HTTP_CODES[418] = "I'm a teapot" # RFC 2324
 _HTTP_STATUS_LINES = dict((k, '%d %s'%(k,v)) for (k,v) in HTTP_CODES.iteritems())
 
 #: The default template used for error pages. Override with @error()
-### SHINKEN MOD : change from bottle import DEBUG to from shinken.webui.bottle import DEBUG,...
+### SHINKEN MOD: change from bottle import DEBUG to from shinken.webui.bottle import DEBUG,...
 ERROR_PAGE_TEMPLATE = """
 %try:
     %from shinken.webui.bottle import DEBUG, HTTP_CODES, request, touni

@@ -73,7 +73,7 @@ class Graphite_broker(BaseModule):
 
 
     # Called by Broker so we can do init stuff
-    # TODO : add conf param to get pass with init
+    # TODO: add conf param to get pass with init
     # Conf from arbiter!
     def init(self):
         print "[%s] I init the graphite server connection to %s:%s" % (self.get_name(), self.host, self.port)
@@ -91,7 +91,7 @@ class Graphite_broker(BaseModule):
         metrics = [e for e in elts if e != '']
 
         for e in metrics:
- #           print "Graphite : groking : ", e
+ #           print "Graphite: groking: ", e
             elts = e.split('=', 1)
             if len(elts) != 2:
                 continue
@@ -116,7 +116,7 @@ class Graphite_broker(BaseModule):
                     name_value[key] = m.groups(0)[0]
                 else:
                     continue
-#           print "graphite : end of grok :", name, value
+#           print "graphite: end of grok:", name, value
             for key,value in name_value.items():
                 res.append((key, value))
         return res
@@ -177,7 +177,7 @@ class Graphite_broker(BaseModule):
                     lines.append("%s.%s.%s %s %d" % (hname, desc, metric,
                                                      value, check_time))
             packet = '\n'.join(lines) + '\n' # Be sure we put \n every where
-#            print "Graphite launching :", packet
+#            print "Graphite launching:", packet
             self.con.sendall(packet)
 
 
@@ -219,7 +219,7 @@ class Graphite_broker(BaseModule):
                     lines.append("%s.__HOST__.%s %s %d" % (hname, metric,
                                                            value, check_time))
             packet = '\n'.join(lines) + '\n' # Be sure we put \n every where
-#            print "Graphite launching :", packet
+#            print "Graphite launching:", packet
             self.con.sendall(packet)
 
     def hook_tick(self, brok):

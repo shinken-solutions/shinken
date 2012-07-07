@@ -73,4 +73,4 @@ if __name__ == '__main__':
         print "database %s does not exist" % opts.database
 
 
-# For perf tuning :
+# For perf tuning:

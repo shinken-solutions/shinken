@@ -31,7 +31,7 @@ from shinken.property import StringProp
 from shinken.autoslots import AutoSlots
 
 
-# Ok, slots are fun : you cannot set the __autoslots__
+# Ok, slots are fun: you cannot set the __autoslots__
 # on the same class you use, fun isn't it? So we define*
 # a dummy useless class to get such :)
 class DummyCommand(object):

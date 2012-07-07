@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -64,7 +64,7 @@ try:
     def get_cur_group():
         return grp.getgrgid( os.getgid() ).gr_name
 except ImportError, exp: # Like in nt system or Android
-    # temporary workarround :
+    # temporary workarround:
     def get_cur_user():
         return "shinken"
     def get_cur_group():
@@ -336,7 +336,7 @@ class Daemon(object):
         try:
             os.kill(pid, 0)
         except OverflowError, e:
-            ## pid is too long for "kill" : so bad content:
+            ## pid is too long for "kill": so bad content:
             logger.error("Stale pidfile exists: pid=%d is too long" % (pid))
             return
         except os.error, e:
@@ -356,10 +356,10 @@ class Daemon(object):
                 raise
 
         self.fpid.close()
-        ## TODO: give some time to wait that previous instance finishes ?
+        ## TODO: give some time to wait that previous instance finishes?
         time.sleep(1)
         # we must also reopen the pid file in write mode
-        # because the previous instance should have deleted it !!
+        # because the previous instance should have deleted it!!
         self.__open_pidfile(write=True)
 
 
@@ -415,7 +415,7 @@ class Daemon(object):
         except OSError, e:
             raise Exception, "%s [%d]" % (e.strerror, e.errno)
         if pid != 0:
-            # In the father : we check if our child exit correctly
+            # In the father: we check if our child exit correctly
             # it has to write the pid of our futur little child..
             def do_exit(sig, frame):
                 logger.error("Timeout waiting child while it should have quickly returned ; something wierd happened")
@@ -716,8 +716,8 @@ class Daemon(object):
                 ins.remove(sock)
         # Tack in elapsed the WHOLE time, even with handling requests
         elapsed = time.time() - before
-        if elapsed == 0: # we have done a few instructions in 0 second exactly !? quantum computer ?
-            elapsed = 0.01  # but we absolutely need to return != 0 to indicate that we got activity
+        if elapsed == 0: # we have done a few instructions in 0 second exactly!? quantum computer?
+            elapsed = 0.01  # but we absolutely need to return!= 0 to indicate that we got activity
         return elapsed, ins, tcdiff
 
     # Check for a possible system time change and act correspondingly.

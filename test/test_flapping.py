@@ -119,7 +119,7 @@ class TestFlapping(ShinkenTest):
 
 
         ############# NOW a local command for this service
-        # First reenable flap :p
+        # First reenable flap:p
         cmd = "[%lu] ENABLE_FLAP_DETECTION" % int(time.time())
         self.sched.run_external_command(cmd)
 

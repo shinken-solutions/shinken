@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -36,7 +36,7 @@ class PollerLink(SatelliteLink):
 
     id = 0
     my_type = 'poller'
-    # To_send : send or not to satellite conf
+    # To_send: send or not to satellite conf
     properties = SatelliteLink.properties.copy()
     properties.update({
         'poller_name':  StringProp(fill_brok=['full_status'], to_send=True),

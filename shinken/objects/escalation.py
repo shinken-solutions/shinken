@@ -63,7 +63,7 @@ class Escalation(Item):
         return self.escalation_name
 
 
-    # Return True if :
+    # Return True if:
     # *time in in escalation_period or we do not have escalation_period
     # *status is in escalation_options
     # *the notification number is in our interval [[first_notification .. last_notification]]

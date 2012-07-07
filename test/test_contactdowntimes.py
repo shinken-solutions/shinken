@@ -68,7 +68,7 @@ class TestContactDowntime(ShinkenTest):
         self.assert_(test_contact.downtimes[0].is_in_effect)
         self.assert_(not test_contact.downtimes[0].can_be_deleted)
 
-        # Ok, we define the downtime like we should, now look at if it does the job : do not
+        # Ok, we define the downtime like we should, now look at if it does the job: do not
         # raise notif during a downtime for this contact
         self.scheduler_loop(3, [[svc, 2, 'CRITICAL']])
 
@@ -93,7 +93,7 @@ class TestContactDowntime(ShinkenTest):
         self.assert_(len(test_contact.downtimes) == 0)
 
         # Now we want this contact to be really notify!
-        # Ok, we define the downtime like we should, now look at if it does the job : do not
+        # Ok, we define the downtime like we should, now look at if it does the job: do not
         # raise notif during a downtime for this contact
         self.scheduler_loop(3, [[svc, 2, 'CRITICAL']])
         self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL'))
@@ -144,7 +144,7 @@ class TestContactDowntime(ShinkenTest):
         self.assert_(not test_contact.downtimes[0].can_be_deleted)
 
         time.sleep(1)
-        # Ok, we define the downtime like we should, now look at if it does the job : do not
+        # Ok, we define the downtime like we should, now look at if it does the job: do not
         # raise notif during a downtime for this contact
         self.scheduler_loop(3, [[svc, 2, 'CRITICAL']])
 
@@ -173,7 +173,7 @@ class TestContactDowntime(ShinkenTest):
 
         time.sleep(1)
         # Now we want this contact to be really notify!
-        # Ok, we define the downtime like we should, now look at if it does the job : do not
+        # Ok, we define the downtime like we should, now look at if it does the job: do not
         # raise notif during a downtime for this contact
         self.scheduler_loop(3, [[svc, 2, 'CRITICAL']])
         self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL'))

@@ -213,7 +213,7 @@ class IPint:
             # splitting of a string into IP and prefixlen et. al.
             x = data.split('-')
             if len(x) == 2:
-                # a.b.c.0-a.b.c.255 specification ?
+                # a.b.c.0-a.b.c.255 specification?
                 (ip, last) = x
                 (self.ip, parsedVersion) = parseAddress(ip)
                 if parsedVersion != 4:
@@ -736,7 +736,7 @@ class IPint:
             # Fixed bySamuel Krempp <krempp@crans.ens-cachan.fr>:
 
             # The bug is quite obvious really (as 99% bugs are once
-            # spotted, isn't it ? ;-) Because of precedence of
+            # spotted, isn't it? ;-) Because of precedence of
             # multiplication by -1 over the substraction, prefixlen
             # differences were causing the __cmp__ function to always
             # return positive numbers, thus the function was failing

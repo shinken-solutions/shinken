@@ -112,7 +112,7 @@ class Webui_broker(BaseModule, Daemon):
 
 
     # Called by Broker so we can do init stuff
-    # TODO : add conf param to get pass with init
+    # TODO: add conf param to get pass with init
     # Conf from arbiter!
     def init(self):
         print "Init of the Webui '%s'" % self.name
@@ -214,7 +214,7 @@ class Webui_broker(BaseModule, Daemon):
         # Launch the data thread"
         self.data_thread = threading.Thread(None, self.manage_brok_thread, 'datathread')
         self.data_thread.start()
-        # TODO : look for alive and killing
+        # TODO: look for alive and killing
 
         # Ok, you want to know why we are using a data thread instead of
         # just call for a select with q._reader, the underliying file
@@ -226,8 +226,8 @@ class Webui_broker(BaseModule, Daemon):
         # ^ IMPORTANT ^
         # We are not managing the lock at this
         # level because we got 2 types of requests:
-        # static images/css/js : no need for lock
-        # pages : need it. So it's managed at a
+        # static images/css/js: no need for lock
+        # pages: need it. So it's managed at a
         # function wrapper at loading pass
 
 
@@ -290,11 +290,11 @@ class Webui_broker(BaseModule, Daemon):
 
            # DBG: t2 = time.time()
            # DBG: print "WEBUI :: MANAGE ALL IN ", t2 - t1
-           # DBG: print '"WEBUI : in Waiting no readers', time_waiting_no_readers
+           # DBG: print '"WEBUI: in Waiting no readers', time_waiting_no_readers
            # DBG: print 'WEBUI in preparing broks', time_preparing
            # DBG: print "WEBUI And in times:"
            # DBG: for (k, v) in times.iteritems():
-           # DBG:     print "WEBUI\t %s : %s" % (k, v)
+           # DBG:     print "WEBUI\t %s: %s" % (k, v)
            # DBG: print "WEBUI\nWEBUI\n"
 
 
@@ -335,7 +335,7 @@ class Webui_broker(BaseModule, Daemon):
                     widget_name = entry.get('widget_name', None)
                     widget_picture = entry.get('widget_picture', None)
 
-                    # IMPORTANT : apply VIEW BEFORE route!
+                    # IMPORTANT: apply VIEW BEFORE route!
                     if v:
                         print "Link function", f, "and view", v
                         f = view(v)(f)
@@ -353,7 +353,7 @@ class Webui_broker(BaseModule, Daemon):
                             f = route(r, callback=lock_version, method=method)
 
                     # If the plugin declare a static entry, register it
-                    # and remeber : really static! because there is no lock
+                    # and remeber: really static! because there is no lock
                     # for them!
                     if static:
                         self.add_static(fdir, m_dir)
@@ -494,7 +494,7 @@ class Webui_broker(BaseModule, Daemon):
         if not c:
             print "Warning: You need to have a contact having the same name as your user %s" % user
 
-        # TODO : do not forgot the False when release!
+        # TODO: do not forgot the False when release!
         is_ok = False # (c is not None)
 
         for mod in self.modules_manager.get_internal_instances():

@@ -31,7 +31,7 @@ class TestCustomsonservicehosgroups(ShinkenTest):
         self.setup_with_file('etc/nagios_customs_on_service_hosgroups.cfg')
 
 
-    # We look for 3 services : on defined as direct on 1 hosts, on other
+    # We look for 3 services: on defined as direct on 1 hosts, on other
     # on 2 hsots, and a last one on a hostgroup
     def test_check_for_custom_copy_on_serice_hostgroups(self):
         # The one host service

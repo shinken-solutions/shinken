@@ -56,15 +56,15 @@ class Host(SchedulingItem):
 
 
     # properties defined by configuration
-    # *required : is required in conf
-    # *default : default value if no set in conf
-    # *pythonize : function to call when transfort string to python object
-    # *fill_brok : if set, send to broker. there are two categories: full_status for initial and update status, check_result for check results
-    # *no_slots : do not take this property for __slots__
+    # *required: is required in conf
+    # *default: default value if no set in conf
+    # *pythonize: function to call when transfort string to python object
+    # *fill_brok: if set, send to broker. there are two categories: full_status for initial and update status, check_result for check results
+    # *no_slots: do not take this property for __slots__
     #  Only for the inital call
-    # conf_send_preparation : if set, will pass the property to this function. It's used to "flatten"
+    # conf_send_preparation: if set, will pass the property to this function. It's used to "flatten"
     #  some dangerous properties like realms that are too 'linked' to be send like that.
-    # brok_transformation : if set, will call the function with the value of the property
+    # brok_transformation: if set, will call the function with the value of the property
     #  the major times it will be to flatten the data (like realm_name instead of the realm object).
     properties = SchedulingItem.properties.copy()
     properties.update({
@@ -138,7 +138,7 @@ class Host(SchedulingItem):
     })
 
     # properties set only for running purpose
-    # retention : save/load this property from retention
+    # retention: save/load this property from retention
     running_properties = SchedulingItem.running_properties.copy()
     running_properties.update({
         'modified_attributes':  IntegerProp(default=0L, fill_brok=['full_status'], retention=True),
@@ -220,7 +220,7 @@ class Host(SchedulingItem):
         'got_default_realm':   BoolProp(default=False),
 
         # use for having all contacts we have notified
-        # Warning : for the notified_contacts retention save, we save only the names of the contacts, and we should RELINK
+        # Warning: for the notified_contacts retention save, we save only the names of the contacts, and we should RELINK
         # them when we load it.
         'notified_contacts':    StringProp(default=set(), retention=True, retention_preparation=to_list_of_names),
 
@@ -351,7 +351,7 @@ class Host(SchedulingItem):
         'retry_check_interval': 'retry_interval',
         'criticity': 'business_impact',
         'hostgroup': 'hostgroups',
-#        'criticitymodulations'  : 'business_impact_modulations',
+#        'criticitymodulations': 'business_impact_modulations',
 
     }
 
@@ -580,7 +580,7 @@ class Host(SchedulingItem):
 
 
 
-    # Set unreachable : all our parents are down!
+    # Set unreachable: all our parents are down!
     # We have a special state, but state was already set, we just need to
     # update it. We are no DOWN, we are UNREACHABLE and
     # got a state id is 2
@@ -762,7 +762,7 @@ class Host(SchedulingItem):
                       (self.get_name()))
 
 
-    # Is stalking ?
+    # Is stalking?
     # Launch if check is waitconsume==first time
     # and if c.status is in self.stalking_options
     def manage_stalking(self, c):
@@ -799,7 +799,7 @@ class Host(SchedulingItem):
 
     # Register a child in our lists
     def register_child(self, child):
-        # We've got 2 list : a list for our child
+        # We've got 2 list: a list for our child
         # where we just put the pointer, it's just for broking
         # and another with all data, useful for 'running' part
         self.childs.append(child)
@@ -1036,7 +1036,7 @@ class Hosts(Items):
             if getattr(r, 'default', False):
                 default_realm = r
         # if default_realm is None:
-        #    print "Error : there is no default realm defined!"
+        #    print "Error: there is no default realm defined!"
         for h in self:
             if h.realm is not None:
                 p = realms.find_by_name(h.realm.strip())
@@ -1045,7 +1045,7 @@ class Hosts(Items):
                     h.configuration_errors.append(err)
                 h.realm = p
             else:
-                #print "Notice : applying default realm %s to host %s" % (default_realm.get_name(), h.get_name())
+                #print "Notice: applying default realm %s to host %s" % (default_realm.get_name(), h.get_name())
                 h.realm = default_realm
                 h.got_default_realm = True
 
@@ -1163,7 +1163,7 @@ class Hosts(Items):
             t.dfs_loop_status = 'DFS_UNCHECKED'
         all_tpl_searched = self.templates_graph.dfs_get_all_childs(tpl)
         # Clean the search tag
-        # TODO : better way?
+        # TODO: better way?
         for t in self.templates.values():
             del t.dfs_loop_status
 

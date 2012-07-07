@@ -140,7 +140,7 @@ class DetectedHost:
 
     # Says if we are a virtual machine or not
     def is_vmware_vm(self):
-        # special case : the esx host itself
+        # special case: the esx host itself
         if self.is_vmware_esx():
             return False
         # Else, look at the mac vendor

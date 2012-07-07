@@ -366,7 +366,7 @@ class Nagios_retention_scheduler(BaseModule):
                 if entry.retention:
                     d[prop] = getattr(s, prop)
             all_data['services'][(s.host_name, s.service_description)] = d
-#        all_data = {'hosts' : {}, 'services' : {}}
+#        all_data = {'hosts': {}, 'services': {}}
 
         sched.restore_retention_data(all_data)
         log_mgr.log("[NagiosRetention] OK we've load data from retention file")

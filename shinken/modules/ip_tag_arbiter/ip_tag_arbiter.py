@@ -85,7 +85,7 @@ class Ip_Tag_Arbiter(BaseModule):
             # the property, tag it!
             if h_ip and h_ip in self.ip_range:
                 print "Is in the range"
-                # 2 cases : append or replace.
+                # 2 cases: append or replace.
                 # append will join with the value if exist
                 # replace will replace it if NOT existing
                 if self.method == 'append':

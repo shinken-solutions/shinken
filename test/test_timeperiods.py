@@ -219,7 +219,7 @@ class TestTimeperiods(ShinkenTest):
         t2.timeperiod_name = 'T2'
         t2.resolve_daterange(t2.dateranges, 'tuesday 00:00-23:58')
         t.exclude = [t2]
-        # We are a bad boy : first time period want a tuesday
+        # We are a bad boy: first time period want a tuesday
         # but exclude do not want it until 23:58. So next is 58 + 1second :)
         t.cache = {}
         t_next = t.get_next_valid_time_from_t(july_the_12)
@@ -248,7 +248,7 @@ class TestTimeperiods(ShinkenTest):
         self.assert_(t_next == "Tue Jul 13 16:30:00 2010")
 
         # Now we add this timeperiod an exception
-        # And a good one : from april (so before so agust (after), and full time.
+        # And a good one: from april (so before so agust (after), and full time.
         # But the 17 is a tuesday, but the 3 of august, so the next 2 tuesday is
         # ..... the Tue Sep 14 :) Yes, we should wait quite a lot :)
         t2 = Timeperiod()
@@ -256,7 +256,7 @@ class TestTimeperiods(ShinkenTest):
         t2.resolve_daterange(t2.dateranges, 'april 1 - august 16 00:00-24:00')
         #print t2.__dict__
         t.exclude = [t2]
-        # We are a bad boy : first time period want a tuesday
+        # We are a bad boy: first time period want a tuesday
         # but exclude do not want it until 23:58. So next is 59 :)
         t.cache = {}
         t_next = t.get_next_valid_time_from_t(july_the_12)
@@ -293,7 +293,7 @@ class TestTimeperiods(ShinkenTest):
         self.assert_(t_next == "Tue Jul 27 16:30:00 2010")
 
         # Now we add this timeperiod an exception
-        # And a good one : from april (so before so agust (after), and full time.
+        # And a good one: from april (so before so agust (after), and full time.
         # But the 27 is nw not possible? So what next? Add a month!
         # last tuesday of august, the 31 :)
         t2 = Timeperiod()
@@ -301,7 +301,7 @@ class TestTimeperiods(ShinkenTest):
         t2.resolve_daterange(t2.dateranges, 'april 1 - august 16 00:00-24:00')
         #print t2.__dict__
         t.exclude = [t2]
-        # We are a bad boy : first time period want a tuesday
+        # We are a bad boy: first time period want a tuesday
         # but exclude do not want it until 23:58. So next is 59 :)
         t.cache = {}
         t_next = t.get_next_valid_time_from_t(july_the_12)
@@ -336,21 +336,21 @@ class TestTimeperiods(ShinkenTest):
         self.assert_(t_next == "Tue Jul 27 16:30:00 2010")
 
         # Now we add this timeperiod an exception
-        # And a good one : from april (so before so agust (after), and full time.
+        # And a good one: from april (so before so agust (after), and full time.
         # But the 27 is nw not possible? So what next? Add a month!
         # But maybe it's not enoutgth? :)
         # The withoutthe 2nd exclude, it's the Tues Aug 31, btu it's inside
         # saturday -1 - monday 1 because saturday -1 is the 28 august, so no.
         # in september saturday -1 is the 25, and tuesday -1 is 28, so still no
         # A month again! So now tuesday -1 is 26 and saturday -1 is 30. So ok
-        # for this one! that was quite long isn't it? And funky ! :)
+        # for this one! that was quite long isn't it? And funky! :)
         t2 = Timeperiod()
         t2.timeperiod_name = 'T2'
         t2.resolve_daterange(t2.dateranges, 'april 1 - august 16 00:00-24:00')
         # Oups, I add a inner daterange ;)
         t2.resolve_daterange(t2.dateranges, 'saturday -1 - monday 1  16:00-24:00')
         t.exclude = [t2]
-        # We are a bad boy : first time period want a tuesday
+        # We are a bad boy: first time period want a tuesday
         # but exclude do not want it until 23:58. So next is 59 :)
         t.cache = {}
         t_next = t.get_next_valid_time_from_t(july_the_12)
@@ -393,7 +393,7 @@ class TestTimeperiods(ShinkenTest):
         t2.resolve_daterange(t2.dateranges, 'thursday 1 april - monday 3 august 00:00-24:00')
         print t2.dateranges[0].__dict__
         t.exclude = [t2]
-        # We are a bad boy : first time period want a tuesday
+        # We are a bad boy: first time period want a tuesday
         # but exclude do not want it until 23:58. So next is 59 :)
         t.cache = {}
         t_next = t.get_next_valid_time_from_t(july_the_12)

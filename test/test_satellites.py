@@ -41,7 +41,7 @@ class TestConfig(ShinkenTest):
         s.port = 9999
         s.max_check_attempts = 4
         s.realm = r
-        # Lie : we start at true here
+        # Lie: we start at true here
         s.alive = True
         print s.__dict__
 

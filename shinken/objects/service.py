@@ -64,12 +64,12 @@ class Service(SchedulingItem):
     my_type = 'service'
 
     # properties defined by configuration
-    # required : is required in conf
-    # default : default value if no set in conf
-    # pythonize : function to call when transfort string to python object
-    # fill_brok : if set, send to broker. there are two categories:
+    # required: is required in conf
+    # default: default value if no set in conf
+    # pythonize: function to call when transfort string to python object
+    # fill_brok: if set, send to broker. there are two categories:
     #  full_status for initial and update status, check_result for check results
-    # no_slots : do not take this property for __slots__
+    # no_slots: do not take this property for __slots__
     properties = SchedulingItem.properties.copy()
     properties.update({
         'host_name':              StringProp (fill_brok=['full_status', 'check_result', 'next_schedule']),
@@ -207,7 +207,7 @@ class Service(SchedulingItem):
         'last_perf_data':     StringProp (default='', retention=True),
         'host':               StringProp (default=None),
         'customs':            ListProp   (default={}, fill_brok=['full_status']),
-        # Warning : for the notified_contacts retention save, we save only the names of the contacts, and we should RELINK
+        # Warning: for the notified_contacts retention save, we save only the names of the contacts, and we should RELINK
         # them when we load it.
         'notified_contacts':  ListProp  (default=set(), retention=True, retention_preparation=to_list_of_names), # use for having all contacts we have notified
         'in_scheduled_downtime': BoolProp(default=False, fill_brok=['full_status'], retention=True),
@@ -316,7 +316,7 @@ class Service(SchedulingItem):
         'criticity':    'business_impact',
         'hostgroup':    'hostgroup_name',
         'hostgroups':    'hostgroup_name',
-#        'criticitymodulations' :    'business_impact_modulations',
+#        'criticitymodulations':    'business_impact_modulations',
     }
 
 #######
@@ -579,7 +579,7 @@ class Service(SchedulingItem):
 ####
 
 
-    # Set unreachable : our host is DOWN, but it mean nothing for a service
+    # Set unreachable: our host is DOWN, but it mean nothing for a service
     def set_unreachable(self):
         pass
 
@@ -796,7 +796,7 @@ class Service(SchedulingItem):
                       (self.host.get_name(), self.get_name()))
 
 
-    # Is stalking ?
+    # Is stalking?
     # Launch if check is waitconsume==first time
     # and if c.status is in self.stalking_options
     def manage_stalking(self, c):
@@ -962,7 +962,7 @@ class Service(SchedulingItem):
 class Services(Items):
     inner_class = Service # use for know what is in items
     # Create the reversed list for speedup search by host_name/name
-    # We also tag service already in list : they are twins. It'a a bad things.
+    # We also tag service already in list: they are twins. It'a a bad things.
     # Hostgroups service have an ID higer thant host service. So it we tag
     # an id that already are in the list, this service is already
     # exist, and is a host,
@@ -985,7 +985,7 @@ class Services(Items):
 
 
 
-    # TODO : finish serach to use reversed
+    # TODO: finish serach to use reversed
     # Search a service id by it's name and host_name
     def find_srv_id_by_name_and_hostname(self, host_name, name):
         # key = (host_name, name)
@@ -1148,17 +1148,17 @@ class Services(Items):
             s.fill_daddy_dependency()
 
 
-    # Add in our queue a service create from another. Special case :
-    # is a template : so hname is a name of template, so need to get all
+    # Add in our queue a service create from another. Special case:
+    # is a template: so hname is a name of template, so need to get all
     # hosts that inherit from it.
     def copy_create_service_from_another(self, hosts, s, hname):
         for_hosts_to_create = []
-        # if we are not a template, it's easy : copy for all host_name
+        # if we are not a template, it's easy: copy for all host_name
         # because they are our final host_name after all
         if not s.is_tpl():
             for_hosts_to_create.append(hname)
         else:
-            # But for template it's more tricky : it's a template name
+            # But for template it's more tricky: it's a template name
             # we've got, not a real host_name/ So we must get a list of host_name
             # that use this template
             # Use the complex expression manager for it, it will call find_hosts_that_use_template
@@ -1185,7 +1185,7 @@ class Services(Items):
                 if h is not None:
                     for new_s in s.duplicate(h):
                         self.items[new_s.id] = new_s
-                else: # TODO : raise an error?
+                else: # TODO: raise an error?
                     err = 'Error : The hostname %s is unknown for the service %s!' % (name, s.get_name())
                     s.configuration_errors.append(err)
 

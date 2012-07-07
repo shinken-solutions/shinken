@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#   Autor : David Hannequin <david.hannequin@gmail.com>
-#   Date : 24 Oct 2011
+#   Autor: David Hannequin <david.hannequin@gmail.com>
+#   Date: 24 Oct 2011
 
 import sys
 import os

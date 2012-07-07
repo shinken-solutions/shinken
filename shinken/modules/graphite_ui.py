@@ -97,7 +97,7 @@ class Graphite_Webui(BaseModule):
         metrics = [e for e in elts if e != '']
 
         for e in metrics:
- #           print "Graphite : groking : ", e
+ #           print "Graphite: groking: ", e
             elts = e.split('=', 1)
             if len(elts) != 2:
                 continue
@@ -121,7 +121,7 @@ class Graphite_Webui(BaseModule):
                     name_value[key] = m.groups(0)
                 else:
                     continue
-#            print "graphite : got in the end :", name, value
+#            print "graphite: got in the end:", name, value
             for key,value in name_value.items():
                 res.append((key, value))
         return res
@@ -143,7 +143,7 @@ class Graphite_Webui(BaseModule):
         e = datetime.fromtimestamp(graphend)
         e = e.strftime('%H:%M_%Y%m%d')
 
-        # Do we have a template ?
+        # Do we have a template?
         thefile=self.templates_path+'/'+elt.check_command.get_name().split('!')[0]+'.graph';
         if os.path.isfile(thefile):
             template_html = ''

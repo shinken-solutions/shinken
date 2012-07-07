@@ -348,7 +348,7 @@ class Timeperiod(Item):
                 if m is not None:
                     # But maybe it's invalid for this dr, but valid for other ones.
                     #if not self.is_time_valid(m):
-                        #print "Final : Got a next invalid at", time.asctime(time.localtime(m))
+                        #print "Final: Got a next invalid at", time.asctime(time.localtime(m))
                     dr_mins.append(m)
                     #if not self.is_time_valid(m):
                     #    val_inval.append(m)
@@ -375,7 +375,7 @@ class Timeperiod(Item):
                 #    local_min = local_min_valid
                 #else:
                 #    local_min = min(dr_mins)
-                #print "UPDATE After dr : found invalid local min:", time.asctime(time.localtime(local_min)), "is valid", self.is_time_valid(local_min)
+                #print "UPDATE After dr: found invalid local min:", time.asctime(time.localtime(local_min)), "is valid", self.is_time_valid(local_min)
 
             #print self.get_name(), 'Invalid: local min', local_min #time.asctime(time.localtime(local_min))
             # We do not loop unless the local_min is not valid

@@ -61,12 +61,12 @@ class Status_dat_broker(BaseModule):
         self.opath = opath
         self.update_interval = update_interval
 
-        # Warning :
-        # self.properties will be add by the modulesmanager !!
+        # Warning:
+        # self.properties will be add by the modulesmanager!!
 
 
     # Called by Broker so we can do init stuff
-    # TODO : add conf param to get pass with init
+    # TODO: add conf param to get pass with init
     # Conf from arbiter!
     def init(self):
         print "I am init"
@@ -103,7 +103,7 @@ class Status_dat_broker(BaseModule):
         data = b.data
         instance_id = data['instance_id']
 
-        #print 'DBG: Cleann all my instance with brok :', b.id
+        #print 'DBG: Cleann all my instance with brok:', b.id
 
         # We clean all previous hosts and services from this instance_id
         h_to_del = []
@@ -131,7 +131,7 @@ class Status_dat_broker(BaseModule):
         data = b.data
         h_id = data['id']
 
-        #print 'DBG: Creacting host with with brok :', b.id
+        #print 'DBG: Creacting host with with brok:', b.id
         #print "Creating host:", h_id, b.__dict__
 
 

@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -83,7 +83,7 @@ class DependencyNode(object):
         worst_state = max(states)
 
 
-        # Suggestion : What about returning min(states) for the | operand?
+        # Suggestion: What about returning min(states) for the | operand?
         # We don't need make a difference between an 0 and another no?
         # If you do so, it may be more efficient with lots of services
         # or host to return OK, but otherwise I can't see the reason for
@@ -286,7 +286,7 @@ class DependencyNodeFactory(object):
                     current_rule = node.operand
                     #print "Current rule", current_rule
                     if current_rule is not None and current_rule != 'of:' and c != current_rule:
-                        # Should be logged as a warning / info ? :)
+                        # Should be logged as a warning / info? :)
                         #print "Fuck, you mix all dumbass!"
                         return None
                     if current_rule != 'of:':
@@ -314,7 +314,7 @@ class DependencyNodeFactory(object):
         node.switch_zeros_of_values()
 
         #print "End, tmp", tmp
-        #print "R %s :" % patern, node
+        #print "R %s:" % patern, node
         return node
 
 

@@ -74,7 +74,7 @@ class LSSyncConnection:
 
             if l == 0:
                 logger.warning("0 size read")
-                return res # : TODO raise an error
+                return res #: TODO raise an error
 
             size = size - l
             res = res + data
@@ -229,7 +229,7 @@ class LSAsynConnection(asyncore.dispatcher):
             l = len(data)
             if l == 0:
                 logger.warning("0 size read")
-                return res # : TODO raise an error
+                return res #: TODO raise an error
 
             size = size - l
             res = res + data
@@ -286,7 +286,7 @@ class LSAsynConnection(asyncore.dispatcher):
         # get a read but no current query? Not normal!
 
         if not q:
-            #print "WARNING : got LS read while no current query in progress. I return"
+            #print "WARNING: got LS read while no current query in progress. I return"
             return
 
         try:

@@ -137,9 +137,9 @@ class TestModuleHotDep(ShinkenTest):
 
 
     # We are trying to see if we can have good data with 2 commands call
-    # CASE1 : link between host0 and 1
-    # then after some second, :
-    # CASE2 : link between host1 and host2, so like the previous test, but with
+    # CASE1: link between host0 and 1
+    # then after some second,:
+    # CASE2: link between host1 and host2, so like the previous test, but with
     # command calls
     def test_json_read_with_command(self):
         print self.conf.modules
@@ -210,7 +210,7 @@ class TestModuleHotDep(ShinkenTest):
             sl.mapping_command = 'libexec/hot_dep_export.py case2 tmp/vmware_mapping_file.json'
         else:
             sl.mapping_command = 'python.exe libexec\\hot_dep_export.py case2 tmp\\vmware_mapping_file.json'
-        # We lie in the interval :p (not 0, because 0 mean : disabled)
+        # We lie in the interval:p (not 0, because 0 mean: disabled)
         sl.mapping_command_interval = 0.1
         sl.hook_tick(self)
         time.sleep(1.5)

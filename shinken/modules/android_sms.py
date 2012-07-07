@@ -27,7 +27,7 @@ This module is an android reactionner module. I will get actions
 for send SMS, and will use android lib for this.
 """
 
-# very important : import android stuff
+# very important: import android stuff
 import android
 
 import sys

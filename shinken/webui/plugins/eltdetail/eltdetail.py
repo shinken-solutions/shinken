@@ -66,7 +66,7 @@ def show_service(hname, desc):
 
     if not user:
         redirect("/user/login")
-#        return {'app' : app, 'elt' : None, 'valid_user' : False, 'user' : user}
+#        return {'app': app, 'elt': None, 'valid_user': False, 'user': user}
 
 
     # Ok we are in a detail page but the user ask for a specific search

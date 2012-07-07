@@ -288,10 +288,10 @@ class DataManager(object):
         return len(h_states) + len(s_states)
 
 
-    # Return a tree of {'elt' : Host, 'fathers' : [{}, {}]}
+    # Return a tree of {'elt': Host, 'fathers': [{}, {}]}
     def get_business_parents(self, obj, levels=3):
         res = {'node': obj, 'fathers': []}
-#        if levels == 0 :
+#        if levels == 0:
 #            return res
 
         for i in obj.parent_dependencies:

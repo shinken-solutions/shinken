@@ -47,14 +47,14 @@ try:
 
     # Connect!
     transport.open()
-    # Thrift server wait a list of list whith the following args :
+    # Thrift server wait a list of list whith the following args:
     #      '''
     #      Read the list result
-    #       Value n1 : Timestamp
-    #       Value n2 : Hostname
-    #       Value n3 : Service
-    #       Value n4 : Return Code
-    #       Value n5 : Output
+    #       Value n1: Timestamp
+    #       Value n2: Hostname
+    #       Value n3: Service
+    #       Value n4: Return Code
+    #       Value n5: Output
     #      '''
     states_list = []
     data = dataArgs()

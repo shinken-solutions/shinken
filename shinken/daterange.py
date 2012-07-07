@@ -3,7 +3,7 @@
 # -*- coding: utf-8 -*-
 
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -353,7 +353,7 @@ class Daterange:
                 #print "Early Return next invalid day:", time.asctime(time.localtime(get_day(t)))
                 return get_day(t)
             if start_time >= t:
-                #print "start_time >= t :", time.asctime(time.localtime(get_day(start_time)))
+                #print "start_time >= t:", time.asctime(time.localtime(get_day(start_time)))
                 return get_day(start_time)
         else:
             # Else, there is no possibility than in our start_time<->end_time we got
@@ -389,7 +389,7 @@ class Daterange:
         if t_day is not None and sec_from_morning is not None:
             return t_day + sec_from_morning + 1
 
-        # We've got a day but no sec_from_morning : the timerange is full (0->24h)
+        # We've got a day but no sec_from_morning: the timerange is full (0->24h)
         # so the next invalid is this day at the day_start
         if t_day is not None and sec_from_morning is None:
             return t_day

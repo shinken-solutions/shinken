@@ -33,7 +33,7 @@ class TestUnknownNotChangeState(ShinkenTest):
 
 
     # We got problem with unknown results on bad connections
-    # for critical services and host : if it was in a notification pass
+    # for critical services and host: if it was in a notification pass
     # then the notification is restarted, but it's just a missing data,
     # not a reason to warn about it
     def test_unknown_do_not_change_state(self):
@@ -101,7 +101,7 @@ class TestUnknownNotChangeState(ShinkenTest):
 
 
     # We got problem with unknown results on bad connections
-    # for critical services and host : if it was in a notification pass
+    # for critical services and host: if it was in a notification pass
     # then the notification is restarted, but it's just a missing data,
     # not a reason to warn about it
     def test_unknown_do_not_change_state_with_different_exit_status_phase(self):
@@ -196,7 +196,7 @@ class TestUnknownNotChangeState(ShinkenTest):
         self.assert_(svc.state == 'UNKNOWN')
         self.assert_(svc.state_type == 'HARD')
 
-        # Should have a notification about it !
+        # Should have a notification about it!
         self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;UNKNOWN'))
         self.show_and_clear_logs()
 
@@ -210,7 +210,7 @@ class TestUnknownNotChangeState(ShinkenTest):
 
 
     # We got problem with unknown results on bad connections
-    # for critical services and host : if it was in a notification pass
+    # for critical services and host: if it was in a notification pass
     # then the notification is restarted, but it's just a missing data,
     # not a reason to warn about it
     def test_unreach_do_not_change_state(self):

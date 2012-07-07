@@ -143,7 +143,7 @@ class NRPE:
             return (self.rc, self.message)
 
         self.state = 'received'
-        # TODO : check crc
+        # TODO: check crc
 
         try:
             response = struct.unpack(">2hih1024s", data)
@@ -248,7 +248,7 @@ class NRPEAsyncClient(asyncore.dispatcher):
                 return
 
             # if we are in ssl, there can be a handshake
-            # problem : we can't talk until we finished
+            # problem: we can't talk until we finished
             # it, sorry
             except SSLWantReadError, exp:
                 try:
@@ -297,7 +297,7 @@ class NRPEAsyncClient(asyncore.dispatcher):
                 return
 
             # if we are in ssl, there can be a handshake
-            # problem : we can't talk until we finished
+            # problem: we can't talk until we finished
             # it, sorry
             except SSLWantReadError, exp:
                 try:
@@ -518,7 +518,7 @@ class Nrpe_poller(BaseModule):
             except:
                 pass
 
-            # TODO : better time management
+            # TODO: better time management
             time.sleep(.1)
 
             timeout -= time.time() - begin

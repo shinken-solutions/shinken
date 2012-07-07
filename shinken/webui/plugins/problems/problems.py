@@ -216,7 +216,7 @@ def get_view(page):
     items = items[start:end]
 
 #    print "get all problems:", pbs
-#    for pb in pbs :
+#    for pb in pbs:
 #        print pb.get_name()
     print 'Give filters', filters
     return {'app': app, 'pbs': items, 'user': user, 'navi': navi, 'search': search_str, 'page': page, 'filters': filters, 'bookmarks': bookmarks}

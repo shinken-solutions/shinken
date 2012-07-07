@@ -97,7 +97,7 @@ def set_value(obj_ref, output=None, perfdata=None, return_code=None):
             c.get_outputs(output, obj.max_plugins_output_length)
             c.status = 'waitconsume'
             c.check_time = now
-            # IMPORTANT : tag this check as from a trigger, so we will not
+            # IMPORTANT: tag this check as from a trigger, so we will not
             # loop in an infinite way for triggers checks!
             c.from_trigger = True
             # Ok now this result will be read by scheduler the next loop

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -39,7 +39,7 @@ except ImportError:
 from shinken.util import safe_print
 from shinken.misc.perfdata import PerfDatas
 from shinken.misc.sorter import hst_srv_sort
-# TODO : manage it in a clean way.
+# TODO: manage it in a clean way.
 from shinken.modules.webui_broker.perfdata_guess import get_perfometer_table_values
 
 

@@ -51,7 +51,7 @@ class DataManagerSKonf(DataManager):
 
         # Get even a partial dict of object properties
         properties = o.__class__.properties.keys()
-        # TODO : we can't add register to properties, find why
+        # TODO: we can't add register to properties, find why
         properties.append('register')
         for prop in properties:
             if hasattr(o, prop):

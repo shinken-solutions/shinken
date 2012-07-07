@@ -144,7 +144,7 @@ class Mongodb_generic(BaseModule):
         # check a collection exist for this user
         u = self.db.ui_user_preferences.find_one({'_id': user.get_name()})
         if not u:
-            # no collection for this user ? create a new one
+            # no collection for this user? create a new one
             print "[Mongodb] No user entry for %s, I create a new one" % user.get_name()
             self.db.ui_user_preferences.save({ '_id': user.get_name(), key: value})
         else:

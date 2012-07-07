@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -226,7 +226,7 @@ class Notification(Action):
         for prop in cls.properties:
             if prop in state:
                 setattr(self, prop, state[prop])
-        # Hook for load of 0.4 notification : there were no
+        # Hook for load of 0.4 notification: there were no
         # creation time, must put one
         if not hasattr(self, 'creation_time'):
             self.creation_time = time.time()

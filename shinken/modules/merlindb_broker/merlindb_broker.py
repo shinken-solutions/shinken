@@ -370,12 +370,12 @@ class Merlindb_broker(BaseModule):
                 'address4': {'transform': None},
                 'address5': {'transform': None},
                 'address6': {'transform': None},
-                #'service_notification_commands' : {'transform' : get_objs_names},
+                #'service_notification_commands': {'transform': get_objs_names},
                 'pager': {'transform': None},
-                #'host_notification_period' : {'transform' : get_obj_name},
+                #'host_notification_period': {'transform': get_obj_name},
                 'host_notifications_enabled': {'transform': None},
-                #'host_notification_commands' : {'transform' : get_objs_names},
-                #'service_notification_period' : {'transform' : get_obj_name},
+                #'host_notification_commands': {'transform': get_objs_names},
+                #'service_notification_period': {'transform': get_obj_name},
                 'email': {'transform': None},
                 'alias': {'transform': None},
                 'host_notification_options': {'transform': list_to_comma},
@@ -432,7 +432,7 @@ class Merlindb_broker(BaseModule):
             to_add = []
             mapping = self.mapping[brok.type]
             for prop in new_brok.data:
-            # ex : 'name' : 'program_start_time', 'transform'
+            # ex: 'name': 'program_start_time', 'transform'
                 if prop in mapping:
                     #print "Got a prop to change", prop
                     val = brok.data[prop]
@@ -458,7 +458,7 @@ class Merlindb_broker(BaseModule):
 
 
     # Called by Broker so we can do init stuff
-    # TODO : add conf param to get pass with init
+    # TODO: add conf param to get pass with init
     # Conf from arbiter!
     def init(self):
         print "I connect to Merlin database"
@@ -475,7 +475,7 @@ class Merlindb_broker(BaseModule):
             new_b = self.preprocess(type, b)
             f = getattr(self, manager)
             queries = f(new_b)
-            # Ok, we've got queries, now : run them!
+            # Ok, we've got queries, now: run them!
             for q in queries:
                 self.db_backend.execute_query(q)
             return
@@ -581,7 +581,7 @@ class Merlindb_broker(BaseModule):
     def manage_initial_hostgroup_status_brok(self, b):
         data = b.data
 
-        # Here we've got a special case : in data, there is members
+        # Here we've got a special case: in data, there is members
         # and we do not want it in the INSERT query, so we crate a
         # tmp_data without it
         tmp_data = copy.copy(data)
@@ -605,7 +605,7 @@ class Merlindb_broker(BaseModule):
     def manage_initial_servicegroup_status_brok(self, b):
         data = b.data
 
-        # Here we've got a special case : in data, there is members
+        # Here we've got a special case: in data, there is members
         # and we do not want it in the INSERT query, so we create a
         # tmp_data without it
         tmp_data = copy.copy(data)
@@ -663,7 +663,7 @@ class Merlindb_broker(BaseModule):
     def manage_initial_contactgroup_status_brok(self, b):
         data = b.data
 
-        # Here we've got a special case : in data, there is members
+        # Here we've got a special case: in data, there is members
         # and we do not want it in the INSERT query, so we create a
         # tmp_data without it
         tmp_data = copy.copy(data)

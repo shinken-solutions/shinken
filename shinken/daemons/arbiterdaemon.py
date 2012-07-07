@@ -176,7 +176,7 @@ class Arbiter(Daemon):
     # because it's stupid to make a crossing connection
     # so we find the broker responsible for our broks,
     # and we send it to him
-    # TODO : better find the broker, here it can be dead?
+    # TODO: better find the broker, here it can be dead?
     # or not the good one?
     def push_broks_to_broker(self):
         for brk in self.conf.brokers:
@@ -428,8 +428,8 @@ class Arbiter(Daemon):
         self.conf.prepare_for_sending()
 
         # Ok, here we must check if we go on or not.
-        # TODO : check OK or not
-        # TODO : I don't know why conf.log_level is string, not an int
+        # TODO: check OK or not
+        # TODO: I don't know why conf.log_level is string, not an int
         self.log_level = logger.get_level_id(self.conf.log_level)
         self.use_local_log = self.conf.use_local_log
         self.local_log = self.conf.local_log
@@ -498,7 +498,7 @@ class Arbiter(Daemon):
             self.uri_arb = self.pyro_daemon.register(self.interface, "ForArbiter")
 
             # ok we are now fully daemonized (if requested)
-            # now we can start our "external" modules (if any) :
+            # now we can start our "external" modules (if any):
             self.modules_manager.start_external_instances()
 
             # Ok now we can load the retention data
@@ -733,7 +733,7 @@ class Arbiter(Daemon):
 
     def get_daemons(self, daemon_type):
         """ Returns the daemons list defined in our conf for the given type """
-        # shouldn't the 'daemon_types' (whatever it is above) be always present ?
+        # shouldn't the 'daemon_types' (whatever it is above) be always present?
         return getattr(self.conf, daemon_type+'s', None)
 
     # Helper functions for retention modules

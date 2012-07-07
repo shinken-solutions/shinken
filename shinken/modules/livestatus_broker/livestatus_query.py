@@ -126,7 +126,7 @@ class LiveStatusQuery(object):
         for line in data.splitlines():
             line = line.strip()
             # Tools like NagVis send KEYWORK:option, and we prefer to have
-            # a space following the :
+            # a space following the:
             if ':' in line and not ' ' in line:
                 line = line.replace(':', ': ')
             keyword = line.split(' ')[0].rstrip(':')
@@ -481,7 +481,7 @@ class LiveStatusQuery(object):
 
     def get_problem_livedata(self, cs):
         # We will crate a problems list first with all problems and source in it
-        # TODO : create with filter
+        # TODO: create with filter
         problems = []
         for h in self.datamgr.rg.hosts.__itersorted__(self.metainfo.query_hints):
             if h.is_problem:

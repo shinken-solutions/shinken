@@ -56,7 +56,7 @@ def show_impacts():
 
     if not user:
         redirect("/user/login")
-#        return {'app' : app, 'impacts' : {}, 'valid_user' : False, 'user' : user}
+#        return {'app': app, 'impacts': {}, 'valid_user': False, 'user': user}
 
 
     all_imp_impacts = app.datamgr.get_important_elements()

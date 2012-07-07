@@ -82,7 +82,7 @@ class Discoveryrule(MatchingItem):
             return
         tcls = map[t]
 
-        # In my own property :
+        # In my own property:
         #  -> in __dict__
         # In the properties of the 'creation_type' Class:
         #  -> in self.writing_properties

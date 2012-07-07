@@ -132,7 +132,7 @@ class Servicedependencies(Items):
             if sd.is_tpl(): # Exploding template is useless
                 continue
 
-            # Have we to explode the hostgroup into many service ?
+            # Have we to explode the hostgroup into many service?
             if hasattr(sd, 'explode_hostgroup') and hasattr(sd, 'hostgroup_name'):
                 self.explode_hostgroup(sd, hostgroups)
                 srvdep_to_remove.append(id)

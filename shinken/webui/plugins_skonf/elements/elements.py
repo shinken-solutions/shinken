@@ -99,7 +99,7 @@ def elements_host(name):
     if not user:
         redirect("/user/login")
 
-    #elt = app.db.hosts.find_one({'_id' : name})
+    #elt = app.db.hosts.find_one({'_id': name})
     elt = app.datamgr.get_host(name)
     if not elt:
         elt = {}
@@ -112,7 +112,7 @@ def elements_service(name):
     if not user:
         redirect("/user/login")
 
-    #elt = app.db.hosts.find_one({'_id' : name})
+    #elt = app.db.hosts.find_one({'_id': name})
     elt = app.datamgr.get_service(name)
     if not elt:
         elt = {}
@@ -128,7 +128,7 @@ def elements_contact(name):
         redirect("/user/login")
 
     elt = app.datamgr.get_contact(name)
-    #elt = app.db.contacts.find_one({'_id' : name})
+    #elt = app.db.contacts.find_one({'_id': name})
     if not elt:
         elt = {}
     return {'app': app, 'user': user, 'elt': elt, 'helper': Helper(app)}

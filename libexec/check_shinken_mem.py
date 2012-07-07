@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#   Autor : David Hannequin <david.hannequin@gmail.com>
-#   Date : 29 Nov 2011
+#   Autor: David Hannequin <david.hannequin@gmail.com>
+#   Date: 29 Nov 2011
 
 #
 # Script init

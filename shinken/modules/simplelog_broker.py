@@ -96,7 +96,7 @@ class Simple_log_broker(BaseModule):
         today = get_day(now)
         # Will be saved with the date of yesterday because all elemetns arefrom yesterday
         yesterday = get_day(now-3600)
-        #print "Dates: t_last_mod : %d, t_last_mod_day: %d, today : %d" % (t_last_mod, t_last_mod_day, today)
+        #print "Dates: t_last_mod: %d, t_last_mod_day: %d, today: %d" % (t_last_mod, t_last_mod_day, today)
         if t_last_mod_day != today:
             logger.info("We are archiving the old log file")
 

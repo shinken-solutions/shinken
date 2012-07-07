@@ -81,7 +81,7 @@ class Glpidb_broker(BaseModule):
            }
         # Last state of check
 #        self.checkstatus = {
-#           '0' : None,
+#           '0': None,
 #           }
         BaseModule.__init__(self, modconf)
         self.host = host
@@ -98,7 +98,7 @@ class Glpidb_broker(BaseModule):
 
 
     # Called by Broker so we can do init stuff
-    # TODO : add conf param to get pass with init
+    # TODO: add conf param to get pass with init
     # Conf from arbiter!
     def init(self):
         print "I connect to Glpi database"
@@ -111,7 +111,7 @@ class Glpidb_broker(BaseModule):
         new_brok = copy.deepcopy(brok)
         # Only preprocess if we can apply a mapping
         if type in self.mapping:
-            #print "brok data : ", brok.data
+            #print "brok data: ", brok.data
             try:
                 s = brok.data['service_description'].split('-')
                 try:
@@ -131,7 +131,7 @@ class Glpidb_broker(BaseModule):
             to_add = []
             mapping = self.mapping[brok.type]
             for prop in new_brok.data:
-            # ex : 'name' : 'program_start_time', 'transform'
+            # ex: 'name': 'program_start_time', 'transform'
                 if prop in mapping:
                     #print "Got a prop to change", prop
                     val = new_brok.data[prop]
@@ -167,7 +167,7 @@ class Glpidb_broker(BaseModule):
             new_b = self.preprocess(type, b, 0)
             f = getattr(self, manager)
             queries = f(new_b)
-            # Ok, we've got queries, now : run them!
+            # Ok, we've got queries, now: run them!
             for q in queries:
                 self.db_backend.execute_query(q)
         manager = 'manage_'+type+'_brok'
@@ -178,7 +178,7 @@ class Glpidb_broker(BaseModule):
                   return
             f = getattr(self, manager)
             queries = f(new_b)
-            # Ok, we've got queries, now : run them!
+            # Ok, we've got queries, now: run them!
             for q in queries:
                 self.db_backend.execute_query(q)
             return
@@ -186,7 +186,7 @@ class Glpidb_broker(BaseModule):
 
     ## Host result
     ## def manage_host_check_result_brok(self, b):
-    ##     logger.info("GLPI : data in DB %s " % b)
+    ##     logger.info("GLPI: data in DB %s " % b)
     ##     b.data['date'] = time.strftime('%Y-%m-%d %H:%M:%S')
     ##     query = self.db_backend.create_insert_query('glpi_plugin_monitoring_serviceevents', b.data)
     ##     return [query]
@@ -194,7 +194,7 @@ class Glpidb_broker(BaseModule):
 
     ## Host result
     ## def manage_host_check_resultup_brok(self, b):
-    ##     logger.info("GLPI : data in DB %s " % b)
+    ##     logger.info("GLPI: data in DB %s " % b)
     ##     new_data = copy.deepcopy(b.data)
     ##     new_data['last_check'] = time.strftime('%Y-%m-%d %H:%M:%S')
     ##     new_data['id'] = b.data['plugin_monitoring_services_id']
@@ -203,19 +203,19 @@ class Glpidb_broker(BaseModule):
     ##     del new_data['output']
     ##     del new_data['latency']
     ##     del new_data['execution_time']
-    ##     where_clause = {'id' : new_data['id']}
+    ##     where_clause = {'id': new_data['id']}
     ##     query = self.db_backend.create_update_query('glpi_plugin_monitoring_services', new_data, where_clause)
     ##     return [query]
 
     # Service result
     def manage_service_check_result_brok(self, b):
-        #logger.info("GLPI : data in DB %s " % b)
+        #logger.info("GLPI: data in DB %s " % b)
         try:
             b.data['plugin_monitoring_servicescatalogs_id']
             return ''
         except:
             b.data['date'] = time.strftime('%Y-%m-%d %H:%M:%S')
-            #print "Add event service : ", b.data
+            #print "Add event service: ", b.data
             query = self.db_backend.create_insert_query('glpi_plugin_monitoring_serviceevents', b.data)
             return [query]
         return ''
@@ -246,7 +246,7 @@ class Glpidb_broker(BaseModule):
             table = 'glpi_plugin_monitoring_services'
 
         where_clause = {'id': new_data['id']}
-        #print "Update service : ", new_data
+        #print "Update service: ", new_data
         query = self.db_backend.create_update_query(table, new_data, where_clause)
         return [query]
 

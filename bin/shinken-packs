@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -163,7 +163,7 @@ def create_pack(pack_file, p_dest_dir, share_dir):
     # Now get all the .cfg files from the src_dir and put them into a pack directory
     if os.path.exists(create_dir) and os.path.isdir(create_dir):
         print "Warning : the destination directory already exists. I clean it!"
-        #TODO : do the clean
+        #TODO: do the clean
         shutil.rmtree(create_dir)
 
     os.mkdir(create_dir)
@@ -465,7 +465,7 @@ For more information, look at http://www.shinken-monitoring.org/wiki/packs/creat
                       dest="upload", help=('Mode to upload a pack zip file to the Shinken Pack website. It need an API key for it.'))
     parser.add_option('-z', '--zip-file',
                       dest="zip_file", help=("Your Pack zip file to send in the Shinken Pack website"))
-    # TODO : where is the PACK WEBSITE??? :)
+    # TODO: where is the PACK WEBSITE??? :)
     parser.add_option('-k', '--api-key',
                       dest="api_key", help=("Your API key for uploading the pack zip file in the Shinken Pack website. If you don't have one, please go to XXXXXX"))
 

@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -111,7 +111,7 @@ def get_start_of_day(year, month_id, day):
     return start_time_epoch
 
 
-# change a time in seconds like 3600 into a format : 0d 1h 0m 0s
+# change a time in seconds like 3600 into a format: 0d 1h 0m 0s
 def format_t_into_dhms_format(t):
     s = t
     m, s = divmod(s, 60)
@@ -175,7 +175,7 @@ def from_float_to_int(val):
 
 
 ### Functions for brok_transformations
-### They take 2 parameters : ref, and a value
+### They take 2 parameters: ref, and a value
 ### ref is the item like a service, and value
 ### if the value to preprocess
 
@@ -206,8 +206,8 @@ def to_hostnames_list(ref, tab):
     return r
 
 # Will create a dict with 2 lists:
-# *services : all services of the tab
-# *hosts : all hosts of the tab
+# *services: all services of the tab
+# *hosts: all hosts of the tab
 def to_svc_hst_distinct_lists(ref, tab):
     r = {'hosts': [], 'services': []}
     for e in tab:
@@ -383,7 +383,7 @@ def got_generation_rule_patern_change(xy_couples):
 # generate by the got_generation_rule_patern_change
 # function.
 # It take one entry of this list, and apply
-# recursivly the change to s like :
+# recursivly the change to s like:
 # s = "Unit [1-3] Port [1-4] Admin [1-5]"
 # rule = [1, '[1-5]', [2, '[1-4]', [3, '[1-3]', []]]]
 # output = Unit 3 Port 2 Admin 1
@@ -401,7 +401,7 @@ def apply_change_recursive_patern_change(s, rule):
 
 # For service generator, get dict from a _custom properties
 # as _disks   C$(80%!90%),D$(80%!90%)$,E$(80%!90%)$
-#return {'C' : '80%!90%', 'D' : '80%!90%', 'E' : '80%!90%'}
+#return {'C': '80%!90%', 'D': '80%!90%', 'E': '80%!90%'}
 # And if we have a key that look like [X-Y] we will expand it
 # into Y-X+1 keys
 GET_KEY_VALUE_SEQUENCE_ERROR_NOERROR = 0
@@ -488,7 +488,7 @@ def get_key_value_sequence(entry, default_value=None):
         # we were with a "key generator"
 
         if got_xy:
-            # Ok 2 cases : we have the NodeSet lib or not.
+            # Ok 2 cases: we have the NodeSet lib or not.
             # if not, we use the dumb algo (quick, but manage less
             # cases like /N or , in patterns)
             if NodeSet is None: # us the old algo
@@ -567,7 +567,7 @@ def expect_file_dirs(root, path):
     dirs = [d for d in dirs if d != '']
     # We will create all directory until the last one
     # so we are doing a mkdir -p .....
-    # TODO : and windows????
+    # TODO: and windows????
     tmp_dir = root
     for d in dirs:
         _d = os.path.join(tmp_dir, d)

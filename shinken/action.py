@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -67,7 +67,7 @@ class __Action(object):
 
     # Mix the env and the environnment variables
     # into a new local env dict
-    # rmq : we cannot just update os.environ because
+    # rmq: we cannot just update os.environ because
     # it will be also modified for all others checks
     def get_local_environnement(self):
         local_env = copy.copy(os.environ)
@@ -130,7 +130,7 @@ class __Action(object):
     def check_finished(self, max_plugins_output_length):
         # We must wait, but checks are variable in time
         # so we do not wait the same for an little check
-        # than a long ping. So we do like TCP : slow start with *2
+        # than a long ping. So we do like TCP: slow start with *2
         # but do not wait more than 0.1s.
         self.last_poll = time.time()
 
@@ -171,7 +171,7 @@ class __Action(object):
         del self.process
 
         # if the exit status is anormal, we add stderr to the output
-        # TODO : Anormal should be logged properly no?
+        # TODO: Anormal should be logged properly no?
         if self.exit_status not in valid_exit_status:
             self.stdoutdata = self.stdoutdata + self.stderrdata
         elif 'sh: -c: line 0: unexpected EOF while looking for matching' in self.stderrdata or 'sh: Syntax error: Unterminated quoted string' in self.stderrdata:
@@ -239,7 +239,7 @@ if os.name != 'nt':
 #            safe_print("Launching", cmd)
 #            safe_print("With env", self.local_env)
 
-            # Now : GO for launch!
+            # Now: GO for launch!
             # The preexec_fn=os.setsid is set to give sons a same process group
             # CF http://www.doughellmann.com/PyMOTW/subprocess/ for detail about this
             try:

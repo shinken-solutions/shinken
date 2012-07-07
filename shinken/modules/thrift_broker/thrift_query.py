@@ -368,7 +368,7 @@ member_key: the key to be used to sort each resulting element of a group member.
 
     def get_problem_livedata(self, cs):
         # We will crate a problems list first with all problems and source in it
-        # TODO : create with filter
+        # TODO: create with filter
         problems = []
         for h in self.hosts.values():
             if h.is_problem:

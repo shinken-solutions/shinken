@@ -79,7 +79,7 @@ class Receiver(BaseSatellite):
     # Schedulers have some queues. We can simplify call by adding
     # elements into the proper queue just by looking at their type
     # Brok -> self.broks
-    # TODO : better tag ID?
+    # TODO: better tag ID?
     # External commands -> self.external_commands
     def add(self, elt):
         cls_type = elt.__class__.my_type
@@ -95,9 +95,9 @@ class Receiver(BaseSatellite):
 
 #    # Get the good tabs for links by the kind. If unknown, return None
 #    def get_links_from_type(self, type):
-#        t = {'scheduler' : self.schedulers, 'arbiter' : self.arbiters, \
-#             'poller' : self.pollers, 'reactionner' : self.reactionners}
-#        if type in t :
+#        t = {'scheduler': self.schedulers, 'arbiter': self.arbiters, \
+#             'poller': self.pollers, 'reactionner': self.reactionners}
+#        if type in t:
 #            return t[type]
 #        return None
 
@@ -110,7 +110,7 @@ class Receiver(BaseSatellite):
 
 
     # Get a brok. Our role is to put it in the modules
-    # THEY MUST DO NOT CHANGE data of b !!!
+    # THEY MUST DO NOT CHANGE data of b!!!
     # REF: doc/receiver-modules.png (4-5)
     def manage_brok(self, b):
         to_del = []
@@ -209,7 +209,7 @@ class Receiver(BaseSatellite):
 #        # REF: doc/receiver-modules.png (3)
 #        for b in self.broks:
 #            # if b.type != 'log':
-#            #     print "Receiver : put brok id : %d" % b.id
+#            #     print "Receiver: put brok id: %d" % b.id
 #            for q in self.modules_manager.get_external_to_queues():
 #                q.put(b)
 
@@ -246,9 +246,9 @@ class Receiver(BaseSatellite):
 
         # Maybe we do not have something to do, so we wait a little
         if len(self.broks) == 0:
-            # print "watch new conf 1 : begin", len(self.broks)
+            # print "watch new conf 1: begin", len(self.broks)
             self.watch_for_new_conf(1.0)
-            # print "get enw broks watch new conf 1 : end", len(self.broks)
+            # print "get enw broks watch new conf 1: end", len(self.broks)
 
 
     #  Main function, will loop forever

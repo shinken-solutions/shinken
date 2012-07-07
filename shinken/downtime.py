@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -199,7 +199,7 @@ class Downtime:
 
     def del_automatic_comment(self):
         # Extra comment can be None if we load it from a old version of Shinken
-        # TODO : remove it in a future version when every one got upgrade
+        # TODO: remove it in a future version when every one got upgrade
         if self.extra_comment is not None:
             self.extra_comment.can_be_deleted = True
         #self.ref.del_comment(self.comment_id)

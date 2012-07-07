@@ -30,9 +30,9 @@ from shinken.misc.perfdata import PerfDatas
 
 
 # Will try to return a dict with:
-# lnk : link to add in this perfdata thing
-# title : text to show on it
-# metrics : list of ('html color', percent) like [('#68f', 35), ('white', 64)]
+# lnk: link to add in this perfdata thing
+# title: text to show on it
+# metrics: list of ('html color', percent) like [('#68f', 35), ('white', 64)]
 def get_perfometer_table_values(elt):
     # first try to get the command name called
     cmd = elt.check_command.call.split('!')[0]
@@ -70,9 +70,9 @@ def manage_check_http_command(elt):
     # Percent of ok should be time/1s
     pct = get_logarithmic(v, 1)
     # Now get the color
-    # OK : #6f2 (102,255,34) green
-    # Warning : #f60 (255,102,0) orange
-    # Crit : #ff0033 (255,0,51)
+    # OK: #6f2 (102,255,34) green
+    # Warning: #f60 (255,102,0) orange
+    # Crit: #ff0033 (255,0,51)
     base_color = {0: (102,255,34), 1: (255,102,0), 2: (255,0,51)}
     state_id = get_stateid(elt)
     color = base_color.get(state_id, (179,196,255))
@@ -102,9 +102,9 @@ def manage_check_ping_command(elt):
     # Percent of ok should be the log of time versus max/2
     pct = get_logarithmic(v, crit/2)
     # Now get the color
-    # OK : #6f2 (102,255,34) green
-    # Warning : #f60 (255,102,0) orange
-    # Crit : #ff0033 (255,0,51)
+    # OK: #6f2 (102,255,34) green
+    # Warning: #f60 (255,102,0) orange
+    # Crit: #ff0033 (255,0,51)
     base_color = {0: (102,255,34), 1: (255,102,0), 2: (255,0,51)}
     state_id = get_stateid(elt)
     color = base_color.get(state_id, (179,196,255))
@@ -137,9 +137,9 @@ def manage_check_tcp_command(elt):
     pct = get_logarithmic(v, m.max/2)
 
     # Now get the color
-    # OK : #6f2 (102,255,34) green
-    # Warning : #f60 (255,102,0) orange
-    # Crit : #ff0033 (255,0,51)
+    # OK: #6f2 (102,255,34) green
+    # Warning: #f60 (255,102,0) orange
+    # Crit: #ff0033 (255,0,51)
     base_color = {0: (102,255,34), 1: (255,102,0), 2: (255,0,51)}
     state_id = get_stateid(elt)
     color = base_color.get(state_id, (179,196,255))

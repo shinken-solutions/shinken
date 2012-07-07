@@ -223,7 +223,7 @@ class TestEscalations(ShinkenTest):
 
         # For the test, we hack the notif value because we do not wan to wait 1 hour!
         for n in svc.notifications_in_progress.values():
-            # HOP, we say : it's already 3600 second since the last notif,
+            # HOP, we say: it's already 3600 second since the last notif,
             svc.notification_interval = 3600
             # and we say that there is still 1hour since the notification creation
             # so it will say the notification time is huge, and so it will escalade
@@ -242,18 +242,18 @@ class TestEscalations(ShinkenTest):
         cnn = svc.current_notification_number
 
         for n in svc.notifications_in_progress.values():
-            # HOP, we say : it's already 3600 second since the last notif
+            # HOP, we say: it's already 3600 second since the last notif
             n.t_to_go = time.time()
 
-        # One more bad, we say : he, it's still near 1 hour, so still level2
+        # One more bad, we say: he, it's still near 1 hour, so still level2
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.assert_(self.any_log_match('SERVICE NOTIFICATION: level2.*;CRITICAL;'))
         self.show_and_clear_logs()
 
-        # Now we go for level3, so again we say : he, in fact we start one hour earlyer,
+        # Now we go for level3, so again we say: he, in fact we start one hour earlyer,
         # so the total notification duration is near 2 hour, so we will raise level3
         for n in svc.notifications_in_progress.values():
-            # HOP, we say : it's already 3600 second since the last notif,
+            # HOP, we say: it's already 3600 second since the last notif,
             n.t_to_go = time.time()
             n.creation_time = n.creation_time - 3600
 
@@ -267,7 +267,7 @@ class TestEscalations(ShinkenTest):
         # Now we send 10 more notif, we must be still level5
         for i in range(10):
             for n in svc.notifications_in_progress.values():
-                # HOP, we say : it's already 3600 second since the last notif,
+                # HOP, we say: it's already 3600 second since the last notif,
                 n.t_to_go = time.time()
 
             self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
@@ -361,7 +361,7 @@ class TestEscalations(ShinkenTest):
         print "- 1 x BAD repeat -------------------------------------"
 
 
-        # Now we go for the level2 escalation, so we will need to say : he, it's 1 hour since the begining :p
+        # Now we go for the level2 escalation, so we will need to say: he, it's 1 hour since the begining:p
         print "*************Next", svc.notification_interval * svc.__class__.interval_length
 
         # first, we check if the next notification will really be near 1 hour because the escalation
@@ -396,11 +396,11 @@ class TestEscalations(ShinkenTest):
 
         # Now the same thing, but for level3, so one more hour
         for n in svc.notifications_in_progress.values():
-            # HOP, we say : it's already 3600 second since the last notif,
+            # HOP, we say: it's already 3600 second since the last notif,
             n.t_to_go = time.time()
             n.creation_time -= 3600
 
-        # One more bad, we say : he, it's 7200 sc of notif, so must be still level3
+        # One more bad, we say: he, it's 7200 sc of notif, so must be still level3
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.assert_(self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;'))
         self.show_and_clear_logs()
@@ -419,7 +419,7 @@ class TestEscalations(ShinkenTest):
         # Now we send 10 more notif, we must be still level3
         for i in range(10):
             for n in svc.notifications_in_progress.values():
-                # HOP, we say : it's already 3600 second since the last notif,
+                # HOP, we say: it's already 3600 second since the last notif,
                 n.t_to_go = time.time()
 
             self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
