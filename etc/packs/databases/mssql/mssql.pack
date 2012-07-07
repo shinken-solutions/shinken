@@ -1,7 +1,7 @@
 {
-"name" : "mssql",
+"name": "mssql",
 
-"description" : "Microsoft Sqlserver checks, like connected users, locks or data size",
+"description": "Microsoft Sqlserver checks, like connected users, locks or data size",
 
 "path":"databases/",
 

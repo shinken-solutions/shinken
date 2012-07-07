@@ -1,7 +1,7 @@
 {
-"name" : "mongodb",
+"name": "mongodb",
 
-"description" : "MongoDB database checks, like connected users, locks or data size",
+"description": "MongoDB database checks, like connected users, locks or data size",
 
 "path":"databases/",
 

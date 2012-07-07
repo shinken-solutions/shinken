@@ -1,7 +1,7 @@
 {
-"name" : "iis",
+"name": "iis",
 
-"description" : "Microsoft IIS checks, for actives users and cache hits",
+"description": "Microsoft IIS checks, for actives users and cache hits",
 
 "path":"microsoft/",
 

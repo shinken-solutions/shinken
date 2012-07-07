@@ -1,7 +1,7 @@
 {
-"name" : "akcp",
+"name": "akcp",
 
-"description" : "Akcp box checks for temperature and humidity",
+"description": "Akcp box checks for temperature and humidity",
 
 "path":"environmental/",
 

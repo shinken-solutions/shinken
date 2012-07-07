@@ -1,11 +1,11 @@
 {
-"name" : "exchange",
+"name": "exchange",
 
-"description" : "Microsoft Exchange checks, for database sizes, activity and errors",
+"description": "Microsoft Exchange checks, for database sizes, activity and errors",
 
 "path":"microsoft/",
 
-"templates" : ["exchange-ht", "exchange-mb", "exchange-cas", "exchange-um"],
+"templates": ["exchange-ht", "exchange-mb", "exchange-cas", "exchange-um"],
 
 "macros":{}
 

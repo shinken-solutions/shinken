@@ -1,7 +1,7 @@
 {
-"name" : "dc",
+"name": "dc",
 
-"description" : "Microsoft Active Directory domain controler checks, for replications",
+"description": "Microsoft Active Directory domain controler checks, for replications",
 
 "path":"microsoft/",
 

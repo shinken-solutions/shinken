@@ -1,7 +1,7 @@
 {
-"name" : "netapp",
+"name": "netapp",
 
-"description" : "Checks for NetApp storage box",
+"description": "Checks for NetApp storage box",
 
 "path":"storage/",
 

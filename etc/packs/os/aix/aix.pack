@@ -1,7 +1,7 @@
 {
-"name" : "aix",
+"name": "aix",
 
-"description" : "Standard AIX checks, like CPU, RAM and disk space. Checks are done by SNMP.",
+"description": "Standard AIX checks, like CPU, RAM and disk space. Checks are done by SNMP.",
 
 "path":"os/",
 
