@@ -1,10 +1,10 @@
 #!/usr/bin/perl -w
 ########################## check_snmp_aixVGstate #################
 my $Version='1.0';
-# Date : Nov 17 2011
-# Author  : Romain Forlot ( rforlot [at] yahoo [dot] com )
-# Licence : GPL - http://www.fsf.org/licenses/gpl.txt
-# Upon work of : Patrick Proy (patrick at proy.org)
+# Date: Nov 17 2011
+# Author: Romain Forlot ( rforlot [at] yahoo [dot] com )
+# Licence: GPL - http://www.fsf.org/licenses/gpl.txt
+# Upon work of: Patrick Proy (patrick at proy.org)
 #################################################################
 
 use strict;
@@ -27,7 +27,7 @@ my %ERRORS=('OK'=>0,'WARNING'=>1,'CRITICAL'=>2,'UNKNOWN'=>3,'DEPENDENT'=>4);
 my $o_host =    undef;      # hostname
 my $o_community= undef;    # community
 my $o_port =    161;        # port
-my $o_help=     undef;      # wan't some help ?
+my $o_help=     undef;      # wan't some help?
 my $o_vgName=   undef;      # vgName
 my $o_excluded= undef;      # excluded LV from scan
 my $o_debug=    undef;      #debug flag
@@ -80,8 +80,8 @@ sub help {
 -X, --privpass=PASSWD
    Priv password for snmpv3 (AuthPriv protocol)
 -p, --protocols=<authproto>,<privproto>
-   <authproto> : Authentication protocol (md5|sha : default md5)
-   <privproto> : Priv protocole (des|aes : default des)
+   <authproto>: Authentication protocol (md5|sha: default md5)
+   <privproto>: Priv protocole (des|aes: default des)
 -P, --port=PORT
    SNMP port (Default 161)
 -f, --perfparse
@@ -115,7 +115,7 @@ sub check_options {
     );
     # Basic checks
     if (defined($o_timeout) && (isnnum($o_timeout) || ($o_timeout < 2) || ($o_timeout > 60)))
-      { print "Timeout must be >1 and <60 !\n"; print_usage(); exit $ERRORS{"UNKNOWN"}}
+      { print "Timeout must be >1 and <60!\n"; print_usage(); exit $ERRORS{"UNKNOWN"}}
     if (!defined($o_timeout)) {$o_timeout=5;}
     if (defined ($o_help) ) { help(); exit $ERRORS{"UNKNOWN"}};
     if (! defined($o_vgName)) { $o_vgName = '.*' };
@@ -210,7 +210,7 @@ while (($oid, $value) = each(%$LvTable))
     verb ("oid: $oid value: $value");
     if ($value =~ /$o_vgName/ and $oid =~ /$lvNameVg\.(\d+)$/)
     {
-            verb("Indice matched : $1");
+            verb("Indice matched: $1");
             # Check if it is a jfs2 fs type else we don't care
             if ($$LvTable{"$lvType.$1"} == 5)
             {
