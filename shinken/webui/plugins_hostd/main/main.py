@@ -45,7 +45,7 @@ def get_page():
     # we return values for the template (view). But beware, theses values are the
     # only one the tempalte will have, so we must give it an app link and the
     # user we are loggued with (it's a contact object in fact)
-    return {'app':app, 'user':user, 'last_packs':last_packs }
+    return {'app': app, 'user': user, 'last_packs': last_packs }
 
 
 # This is the dict teh webui will try to "load".

@@ -141,7 +141,7 @@ class Daemon(object):
         'hard_ssl_name_check':    BoolProp(default='0'),
         'idontcareaboutsecurity': BoolProp(default='0'),
         'spare':         BoolProp(default='0'),
-        'max_queue_size':IntegerProp(default='0'),
+        'max_queue_size': IntegerProp(default='0'),
     }
 
     def __init__(self, name, config_file, is_daemon, do_replace, debug, debug_file):

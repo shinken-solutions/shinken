@@ -163,7 +163,7 @@ def get_new_packs():
     # we return values for the template (view). But beware, theses values are the
     # only one the tempalte will have, so we must give it an app link and the
     # user we are loggued with (it's a contact object in fact)
-    return {'app':app, 'user':user, 'error':error, 'api_error':api_error, 'results':None, 'search':None, 'categories': categories, 'tags':tags,  'print_cat_tree':print_cat_tree}
+    return {'app': app, 'user': user, 'error': error, 'api_error': api_error, 'results': None, 'search': None, 'categories': categories, 'tags': tags,  'print_cat_tree': print_cat_tree}
 
 
 def launch_search(search):
@@ -231,7 +231,7 @@ def get_new_packs_result(search):
     # we return values for the template (view). But beware, theses values are the
     # only one the tempalte will have, so we must give it an app link and the
     # user we are loggued with (it's a contact object in fact)
-    return {'app':app, 'user':user, 'error':error, 'api_error':api_error, 'results':results, 'search':search, 'categories':None, 'tags':None}
+    return {'app': app, 'user': user, 'error': error, 'api_error': api_error, 'results': results, 'search': search, 'categories': None, 'tags': None}
 
 
 def get_new_packs_result_post():
@@ -255,7 +255,7 @@ def get_new_packs_result_post():
     # we return values for the template (view). But beware, theses values are the
     # only one the tempalte will have, so we must give it an app link and the
     # user we are loggued with (it's a contact object in fact)
-    return {'app':app, 'user':user, 'error':error, 'api_error':api_error, 'results':results, 'search':search, 'categories':None, 'tags':None}
+    return {'app': app, 'user': user, 'error': error, 'api_error': api_error, 'results': results, 'search': search, 'categories': None, 'tags': None}
 
 
 
@@ -304,6 +304,6 @@ pages = {get_packs: { 'routes': ['/packs'], 'view': 'packs', 'static': True},
          get_new_packs: { 'routes': ['/getpacks'], 'view': 'getpacks', 'static': True},
          get_new_packs_result_post: { 'routes': ['/getpacks'], 'method': 'POST', 'view': 'getpacks', 'static': True},
          get_new_packs_result: { 'routes': ['/getpacks/:search#.+#'], 'view': 'getpacks', 'static': True},
-         download_pack: { 'routes': ['/download/:uri#.+#'], 'view':None, 'static': True},
+         download_pack: { 'routes': ['/download/:uri#.+#'], 'view': None, 'static': True},
          }
 

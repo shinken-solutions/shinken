@@ -233,7 +233,7 @@ class Helper(object):
         # Now put in adj our parents
         for p in elt.parent_dependencies:
             pd = {'nodeTo': p.get_dbg_name(),
-                  'data': {"$type":"line", "$direction": [elt.get_dbg_name(), p.get_dbg_name()]}}
+                  'data': {"$type": "line", "$direction": [elt.get_dbg_name(), p.get_dbg_name()]}}
 
             # Naive way of looking at impact
             if elt.state_id != 0 and p.state_id != 0:

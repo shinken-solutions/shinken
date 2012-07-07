@@ -97,7 +97,7 @@ def lookup_tag_post(cls=''):
         print "Template", h
         if hasattr(h, 'name'):
             tags.add(h.name)
-    r  = [{'id':n, 'name':n} for n in tags if n.startswith(name)]
+    r  = [{'id': n, 'name': n} for n in tags if n.startswith(name)]
 
     print "RES", r
 

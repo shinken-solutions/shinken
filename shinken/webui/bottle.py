@@ -919,7 +919,7 @@ class BaseRequest(DictMixin):
             instances of :class:`cgi.FieldStorage` (file uploads).
         """
         post = MultiDict()
-        safe_env = {'QUERY_STRING':''} # Build a safe environment for cgi
+        safe_env = {'QUERY_STRING': ''} # Build a safe environment for cgi
         for key in ('REQUEST_METHOD', 'CONTENT_TYPE', 'CONTENT_LENGTH'):
             if key in self.environ: safe_env[key] = self.environ[key]
         if NCTextIOWrapper:
@@ -1861,7 +1861,7 @@ class CGIServer(ServerAdapter):
 class FlupFCGIServer(ServerAdapter):
     def run(self, handler): # pragma: no cover
         import flup.server.fcgi
-        kwargs = {'bindAddress':(self.host, self.port)}
+        kwargs = {'bindAddress': (self.host, self.port)}
         kwargs.update(self.options) # allow to override bindAddress and others
         flup.server.fcgi.WSGIServer(handler, **kwargs).run()
 
@@ -2346,7 +2346,7 @@ class MakoTemplate(BaseTemplate):
     def prepare(self, **options):
         from mako.template import Template
         from mako.lookup import TemplateLookup
-        options.update({'input_encoding':self.encoding})
+        options.update({'input_encoding': self.encoding})
         options.setdefault('format_exceptions', bool(DEBUG))
         lookup = TemplateLookup(directories=self.lookup, **options)
         if self.source:

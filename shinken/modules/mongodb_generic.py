@@ -146,13 +146,13 @@ class Mongodb_generic(BaseModule):
         if not u:
             # no collection for this user ? create a new one
             print "[Mongodb] No user entry for %s, I create a new one" % user.get_name()
-            self.db.ui_user_preferences.save({ '_id':user.get_name(), key: value})
+            self.db.ui_user_preferences.save({ '_id': user.get_name(), key: value})
         else:
             # found a collection for this user
             print "[Mongodb] user entry found for %s" % user.get_name()
 
         print '[Mongodb] : saving user pref', "'$set': { %s : %s }" % (key, value)
-        r = self.db.ui_user_preferences.update({ '_id':user.get_name()}, { '$set': { key: value }})
+        r = self.db.ui_user_preferences.update({ '_id': user.get_name()}, { '$set': { key: value }})
         print "[Mongodb] Return from update", r
         # Mayeb there was no doc there, if so, create an empty one
         if not r:
@@ -160,7 +160,7 @@ class Mongodb_generic(BaseModule):
             u = self.db.ui_user_preferences.find_one({'_id': user.get_name()})
             if not u:
                 print "[Mongodb] No user entry for %s, I create a new one" % user.get_name()
-                self.db.ui_user_preferences.save({ '_id':user.get_name(), key: value})
+                self.db.ui_user_preferences.save({ '_id': user.get_name(), key: value})
             else: # ok, it was just the key that was missing, just update it and save it
                 u[key] = value
                 print '[Mongodb] Just saving the new key in the user pref'

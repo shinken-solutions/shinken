@@ -99,7 +99,7 @@ class Service(SchedulingItem):
         'retain_status_information': BoolProp(default='1', fill_brok=['full_status']),
         'retain_nonstatus_information': BoolProp(default='1', fill_brok=['full_status']),
         'notification_interval':  IntegerProp(default='60', fill_brok=['full_status']),
-        'first_notification_delay':IntegerProp(default='0', fill_brok=['full_status']),
+        'first_notification_delay': IntegerProp(default='0', fill_brok=['full_status']),
         'notification_period':    StringProp (brok_transformation=to_name_if_possible, fill_brok=['full_status']),
         'notification_options':   ListProp   (default='w,u,c,r,f,s',fill_brok=['full_status']),
         'notifications_enabled':  BoolProp   (default='1', fill_brok=['full_status'], retention=True),

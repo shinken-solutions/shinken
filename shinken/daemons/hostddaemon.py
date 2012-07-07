@@ -960,7 +960,7 @@ class Hostd(Daemon):
        print "File %s is saved" % p
        _id = uuid.uuid4().get_hex()
        d = {'_id': _id, 'upload_time': int(time.time()), 'filename': filename, 'filepath': p, 'path': '/unanalysed', 'user':  user,
-            'state': 'pending', 'pack_name': short_name, 'moderation_comment':'', 'link_id': _id}
+            'state': 'pending', 'pack_name': short_name, 'moderation_comment': '', 'link_id': _id}
        # Get all previously sent packs for the same user/filename, and put them as obsolete
        obs = self.db.packs.find({'filepath': p})
        for o in obs:

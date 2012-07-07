@@ -298,19 +298,19 @@ def domacros(configfile,args=[]):
     allowed = [ "arbiter", "scheduler", "poller", "broker", "reactionner", "receiver" ]
 
     commands={
-            "onerror":r"(?P<action>\w+)",
-            "setconfigfile":r"(?P<configfile>.*)",
-            "setauthfile":r"(?P<authfile>.*)",
-            "clone":r"(?P<object>\w+) set (?P<directives>.*) where (?P<clauses>.*)",
-            "delete":r"(?P<object>\w+) where (?P<clauses>.*)",
-            "showconfig":r"(?P<object>\w+)",
-            "setparam":r"(?P<directive>\w+)=(?P<value>.*) from (?P<object>\w+) where (?P<clauses>.*)",
-            "delparam":r"(?P<directive>\w+)=(?P<value>.*) from (?P<object>\w+) where (?P<clauses>.*)",
-            "getdirective":r"(?P<directives>\w+) from (?P<object>\w+) where (?P<clauses>.*)",
-            "removemodule":r"(?P<module>\w+) from (?P<object>\w+) where (?P<clauses>.*)",
-            "control":r"(?P<action>\w+)",
-            "writeconfig":r"",
-            "sync":r""
+            "onerror": r"(?P<action>\w+)",
+            "setconfigfile": r"(?P<configfile>.*)",
+            "setauthfile": r"(?P<authfile>.*)",
+            "clone": r"(?P<object>\w+) set (?P<directives>.*) where (?P<clauses>.*)",
+            "delete": r"(?P<object>\w+) where (?P<clauses>.*)",
+            "showconfig": r"(?P<object>\w+)",
+            "setparam": r"(?P<directive>\w+)=(?P<value>.*) from (?P<object>\w+) where (?P<clauses>.*)",
+            "delparam": r"(?P<directive>\w+)=(?P<value>.*) from (?P<object>\w+) where (?P<clauses>.*)",
+            "getdirective": r"(?P<directives>\w+) from (?P<object>\w+) where (?P<clauses>.*)",
+            "removemodule": r"(?P<module>\w+) from (?P<object>\w+) where (?P<clauses>.*)",
+            "control": r"(?P<action>\w+)",
+            "writeconfig": r"",
+            "sync": r""
             }
 
     """ Compile regexp """
@@ -372,24 +372,24 @@ def domacros(configfile,args=[]):
                     elif command == "setparam":
                         code,message = setparam(config,result.group('object'),result.group('directive'),result.group('value'),result.group('clauses'))
                         if not code:
-                            if maction == "stop":return (code,message)
+                            if maction == "stop": return (code,message)
                     elif command == "delparam":
                         code,message = delparam(config,result.group('object'),result.group('directive'),result.group('clauses'))
                         if not code:
-                            if maction == "stop":return (code,message)
+                            if maction == "stop": return (code,message)
                     elif command == "removemodule":
                         code,message = removemodule(config,result.group('module'),result.group('object'),result.group('clauses'))
                         if not code:
-                            if maction == "stop":return (code,message)
+                            if maction == "stop": return (code,message)
                 else:
                     if command == "writeconfig":
                         code,message = writeconfig(config,configfile)
                         if not code:
-                            if maction == "stop":return (code,message)
+                            if maction == "stop": return (code,message)
                     elif command == "sync":
                         code,message = sync(config,configfile,authfile)
                         if not code:
-                            if maction == "stop":return (code,message)
+                            if maction == "stop": return (code,message)
                 matched=True
         if not matched:
             if not line == "":
@@ -550,7 +550,7 @@ def getauthdata(authfile):
                 result = creg.match(line)
                 if result == None:
                     return "There was an error in the authentication file at line : %s" % (line)
-                auth[result.group("address")]={"login":result.group("login"),"password":result.group("password")}
+                auth[result.group("address")]={"login": result.group("login"),"password": result.group("password")}
         return (True,auth)
     except:
         return (False,"Error while loading authentication data")
@@ -644,7 +644,7 @@ def control(authfile,action):
         return (False,auth)
 
     """ which command for an action """
-    commands = { "stop":"service shinken stop","start":"service shinken start","restart":"service shinken restart"}
+    commands = { "stop": "service shinken stop","start": "service shinken start","restart": "service shinken restart"}
     if not commands.has_key(action):
         return (False,"Unknown action command")
 

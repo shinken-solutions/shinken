@@ -219,7 +219,7 @@ def get_view(page):
 #    for pb in pbs :
 #        print pb.get_name()
     print 'Give filters', filters
-    return {'app': app, 'pbs': items, 'user': user, 'navi': navi, 'search': search_str, 'page': page, 'filters': filters, 'bookmarks':bookmarks}
+    return {'app': app, 'pbs': items, 'user': user, 'navi': navi, 'search': search_str, 'page': page, 'filters': filters, 'bookmarks': bookmarks}
 
 
 

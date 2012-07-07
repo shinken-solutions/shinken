@@ -1249,7 +1249,7 @@ class PerfTest(ShinkenTest):
         print "%d services are in a hard/critical state" % lenc
         self.scheduler_loop(3, nonok)
         self.update_broker()
-        last_host = reduce(lambda x,y:y,self.livestatus_broker.datamgr.rg.hosts)
+        last_host = reduce(lambda x,y: y,self.livestatus_broker.datamgr.rg.hosts)
         #last_service = reduce(lambda x,y:y,self.livestatus_broker.datamgr.rg.services)
 
         elapsed = {}
