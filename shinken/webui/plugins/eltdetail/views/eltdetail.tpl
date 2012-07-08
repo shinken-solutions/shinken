@@ -75,7 +75,7 @@ $(document).ready(function(){
   %#  "Content Container Start"
   <!--<div class="">-->
   <div id="content_container" class="span12">
-  	<h1 class="span6 no-leftmargin state_{{elt.state.lower()}} icon_down"> <img class="imgsize4" alt="icon state" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h1> 
+  	<h1 class="span6 no-leftmargin state_{{elt.state.lower()}} icon_down"> <img class="imgsize3" alt="icon state" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h1> 
   	%if elt.action_url != '':
   	<td><a href="{{elt.action_url}}" target=_blank><img src=/static/eltdetail/images/gear.png></a></td>
   	%end
@@ -283,9 +283,9 @@ $(document).ready(function(){
 							<td><span class="btn span11 alert-small trim-{{helper.yes_no(elt.in_scheduled_downtime)}}">{{helper.yes_no(elt.in_scheduled_downtime)}}</span></td>
 						</tr>
 					</table>
-					
+					<hr>
 					<div> <b><i>{{elt.output}}</i></b> </div>
-					
+					<hr>
 					<table class="table">
 						<tr>
 							<td class="column1">Last Check:</td>
@@ -307,7 +307,29 @@ $(document).ready(function(){
 				</div>
 				<div class="tab-pane fade" id="more">
 					<h3>more ...</h3>
-					<p>Nunc feugiat risus vel diam hendrerit mattis ultrices urna bibendum. Ut ac est sit amet elit posuere lacinia. Ut a dui ligula. Maecenas quis sapien sit amet est porta elementum id vel nibh. Sed venenatis magna quis nisi fermentum aliquet. Morbi ultricies, urna eget semper feugiat, justo eros facilisis dolor, quis pulvinar purus nibh quis nunc. Duis eget ligula a nisl pellentesque laoreet. Suspendisse eu rhoncus erat. Quisque pharetra facilisis dignissim.</p>
+					<table class="table">
+						<tr>
+							<td class="column1">Performance Data</td>
+							%# "If there any perf data?"
+							%if len(elt.perf_data) > 0:
+							<td>{{elt.perf_data}}</td>
+							%else:
+							<td>&nbsp;</td>
+							%end
+						</tr>
+						<tr>		
+							<td class="column1">Next Active Check:</td>
+							<td><span class="quickinfo" data-original-title='Next active check at {{time.asctime(time.localtime(elt.next_chk))}}'>{{helper.print_duration(elt.next_chk)}}</span></td>
+						</tr>
+						<tr>			
+							<td class="column1">Last Notification</td>
+							<td>{{helper.print_date(elt.last_notification)}} (notification {{elt.current_notification_number}})</td>
+						</tr>
+						<tr>										
+							<td class="column1">Current Attempt</td>
+							<td>{{elt.attempt}}/{{elt.max_check_attempts}} ({{elt.state_type}} state)</td>
+						</tr>
+					</table>
 				</div>
 				<div class="tab-pane fade" id="gesture">
 					<h3>Gesture</h3>
@@ -324,91 +346,19 @@ $(document).ready(function(){
 				</div>
 			</div>
 		</div>
-		<!-- End Host/Services-->
 
-		<!-- Start Host/Services-->
-		<!-- Left, information part-->
-	<!--
-    <div class="span4">
-      %if elt_type=='host':
-      <h3 class="span10">Host Information:</h3>
-      %else:
-      <h3 class="span10">Service Information:</h3>
-      %end:
-		    	
-      <table class="span10 table table-striped table-bordered table-condensed">
-	<tr>
-	  <td class="column1">{{elt_type.capitalize()}} Status</td>
-	  <td><span class="alert-small alert-{{elt.state.lower()}}">{{elt.state}}</span> (since {{helper.print_duration(elt.last_state_change, just_duration=True, x_elts=2)}}) </td>
-	</tr>
-	<tr>
-	  <td class="column1">Status Information</td>
-	  <td>{{elt.output}}</td>
-	</tr>
-	<tr>
-	  <td class="column1">Performance Data</td>
-	  %# "If there any perf data?"
-	  %if len(elt.perf_data) > 0:
-	  <td>{{elt.perf_data}}</td>
-	  %else:
-	  <td>&nbsp;</td>
-	  %end
-	</tr>	
-	<tr>										
-	  <td class="column1">Current Attempt</td>
-	  <td>{{elt.attempt}}/{{elt.max_check_attempts}} ({{elt.state_type}} state)</td>
-	</tr>
-	<tr>		
-	  <td class="column1">Last Check Time</td>
-	  <td><span class="quickinfo" data-original-title='Last check was at {{time.asctime(time.localtime(elt.last_chk))}}'>was {{helper.print_duration(elt.last_chk)}}</span></td>
-	</tr>
-	<tr>		
-	  <td class="column1">Next Scheduled Active Check</td>
-	  <td><span class="quickinfo" data-original-title='Next active check at {{time.asctime(time.localtime(elt.next_chk))}}'>{{helper.print_duration(elt.next_chk)}}</span></td>
-	</tr>
-	<tr>		
-	  <td class="column1">Last State Change</td>
-	  <td>{{time.asctime(time.localtime(elt.last_state_change))}}</td>
-	</tr>
-      </table>
-      
-      
-      <p class="span10" id="hidden_info_button"><a href="javascript:show_hidden_info()" class="btn"><i class="icon-plus"></i> Show more</a>	</p>
-      <h3 class="span10 hidden_infos">Additonal Informations:</h3>
-      <table class="span8 table table-striped table-bordered table-condensed hidden_infos">
-	<tr>
-	  <td class="column1">Last Notification</td>
-	  <td>{{helper.print_date(elt.last_notification)}} (notification {{elt.current_notification_number}})</td>
-	</tr>
-	<tr>			
-	  <td class="column1">Check Latency / Duration</td>
-	  <td>{{'%.2f' % elt.latency}} / {{'%.2f' % elt.execution_time}} seconds</td>
-	</tr>
-	<tr>
-	  <td class="column1">Is This Host Flapping?</td>
-	  <td>{{helper.yes_no(elt.is_flapping)}} ({{helper.print_float(elt.percent_state_change)}}% state change)</td>
-	</tr>
-	<tr>
-	  <td class="column1">In Scheduled Downtime?</td>
-	  <td>{{helper.yes_no(elt.in_scheduled_downtime)}}</td>
-	</tr>
-      </table>
-
-    </div>
--->
-<!-- End Host/Service -->
-<!-- Detail info box start -->
-<div class="span9 tabbable">
-	<ul class="nav nav-tabs">
-		<li class="active"><a href="#impacts" data-toggle="tab">Impacts</a></li>
-		<li><a href="#comments" data-toggle="tab">Comments</a></li>
-		<li><a href="#downtimes" data-toggle="tab">Downtimes</a></li>
-		<li><a href="#graphs" data-toggle="tab" id='tab_to_graphs'>Graphs</a></li>
-		<li><a href="#depgraph" data-toggle="tab" id='tab_to_depgraph'>Impact graph</a></li>
-	</ul>
-	<div class="tab-content">
-		<!-- Tab Summary Start-->
-		<div class="tab-pane active" id="impacts">
+		<!-- Detail info box start -->
+		<div class="span9 tabbable">
+			<ul class="nav nav-tabs">
+				<li class="active"><a href="#impacts" data-toggle="tab">Impacts</a></li>
+				<li><a href="#comments" data-toggle="tab">Comments</a></li>
+				<li><a href="#downtimes" data-toggle="tab">Downtimes</a></li>
+				<li><a href="#graphs" data-toggle="tab" id='tab_to_graphs'>Graphs</a></li>
+				<li><a href="#depgraph" data-toggle="tab" id='tab_to_depgraph'>Impact graph</a></li>
+			</ul>
+			<div class="tab-content">
+				<!-- Tab Summary Start-->
+				<div class="tab-pane active" id="impacts">
 		      <!-- Start of the Whole info pack. We got a row of 2 thing : 
 		      left is information, right is related elements -->
 		      <div class="row-fluid">

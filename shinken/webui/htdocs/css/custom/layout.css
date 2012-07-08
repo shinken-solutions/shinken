@@ -133,6 +133,10 @@
 
 /*  Alert styles => BTN Color
     ------------------------------------------------------- */
+.alert {
+  color: #FFFFFF;
+  text-align: center;
+}
 
 .alert-small {
   background-color: #999999;
@@ -143,6 +147,10 @@
   padding: 2px 4px 3px;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
 }
+.trim-Yes, .trim-No {
+  color: #FFFFFF;
+  text-transform: uppercase;
+} 
 
 .alert-critical, .alert-down, .trim-Yes {
   background-color: #da4f49;
