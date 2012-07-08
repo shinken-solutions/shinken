@@ -43,10 +43,10 @@ from kombu import BrokerConnection
 from kombu import Producer, Consumer, Exchange, Queue
 
 properties = {
-    'daemons' : ['broker'],
-    'type' : 'canopsis',
-    'external' : False,
-    'phases' : ['running'],
+    'daemons': ['broker'],
+    'type': 'canopsis',
+    'external': False,
+    'phases': ['running'],
     }
 
 
@@ -58,11 +58,11 @@ def get_instance(plugin):
     port            = getattr(plugin, 'port', None)
     user            = getattr(plugin, 'user', None)
     password        = getattr(plugin, 'password', None)
-    virtual_host    = getattr(plugin, 'virtual_host', None)                
-    exchange_name   = getattr(plugin, 'exchange_name', None)  
-    identifier      = getattr(plugin, 'identifier', None)     
-    maxqueuelength  = getattr(plugin, 'maxqueuelength', 10000)  
-    queue_dump_frequency = getattr(plugin, 'queue_dump_frequency', 300)   
+    virtual_host    = getattr(plugin, 'virtual_host', None)
+    exchange_name   = getattr(plugin, 'exchange_name', None)
+    identifier      = getattr(plugin, 'identifier', None)
+    maxqueuelength  = getattr(plugin, 'maxqueuelength', 10000)
+    queue_dump_frequency = getattr(plugin, 'queue_dump_frequency', 300)
 
     return Canopsis_broker(plugin, host, port, user, password, virtual_host, exchange_name,identifier,maxqueuelength,queue_dump_frequency)
 
@@ -115,9 +115,9 @@ class Canopsis_broker(BaseModule):
         # max_check_attempts does not appear in check results so build a dict of max_check_attempts
         self.host_max_check_attempts[b.data['host_name']] = b.data['max_check_attempts']
 
-        logger.info("[canopsis] initial host max attempts : %s " % str(self.host_max_check_attempts))
-        logger.info("[canopsis] initial host commands : %s " % str(self.host_commands))        
-        logger.info("[canopsis] initial host addresses : %s " % str(self.host_addresses))        
+        logger.info("[canopsis] initial host max attempts: %s " % str(self.host_max_check_attempts))
+        logger.info("[canopsis] initial host commands: %s " % str(self.host_commands))
+        logger.info("[canopsis] initial host addresses: %s " % str(self.host_addresses))
 
 
     def manage_initial_service_status_brok(self, b):
@@ -132,13 +132,13 @@ class Canopsis_broker(BaseModule):
             self.service_max_check_attempts = {}
 
         if not b.data['host_name'] in self.service_commands:
-            logger.log("[Canopsis] creating empty dict for host %s service_commands" % b.data['host_name'])            
+            logger.log("[Canopsis] creating empty dict for host %s service_commands" % b.data['host_name'])
             self.service_commands[b.data['host_name']] = {}
 
         self.service_commands[b.data['host_name']][b.data['service_description']] = b.data['check_command'].call
 
         if not b.data['host_name'] in self.service_max_check_attempts:
-            logger.log("[Canopsis] creating empty dict for host %s service_max_check_attempts" % b.data['host_name'])            
+            logger.log("[Canopsis] creating empty dict for host %s service_max_check_attempts" % b.data['host_name'])
             self.service_max_check_attempts[b.data['host_name']] = {}
 
         self.service_max_check_attempts[b.data['host_name']][b.data['service_description']] = b.data['max_check_attempts']
@@ -147,7 +147,7 @@ class Canopsis_broker(BaseModule):
     def manage_host_check_result_brok(self, b):
         message = self.create_message('component','check',b)
         if not message:
-            logger.info("[Canopsis] Warning : Empty host check message")
+            logger.info("[Canopsis] Warning: Empty host check message")
         else:
             self.push2canopsis(message)
 
@@ -156,26 +156,26 @@ class Canopsis_broker(BaseModule):
         try:
             message = self.create_message('resource','check',b)
         except:
-            logger.error("[Canopsis] Error : there was an error while trying to create message for service")
+            logger.error("[Canopsis] Error: there was an error while trying to create message for service")
 
         if not message:
-            logger.info("[Canopsis] Warning : Empty service check message")
+            logger.info("[Canopsis] Warning: Empty service check message")
         else:
             self.push2canopsis(message)
 
     def create_message(self,source_type,event_type,b):
         """
-            event_type should be one of the following :
+            event_type should be one of the following:
                 - check
                 - ack
                 - notification
                 - downtime
 
-            source_type should be one of the following :
+            source_type should be one of the following:
                 - component => host
                 - resource => service
 
-            message format (check): 
+            message format (check):
 
             H S         field               desc
             x           'connector'         Connector type (gelf, nagios, snmp, ...)
@@ -190,50 +190,50 @@ class Canopsis_broker(BaseModule):
             x           'output'            Event message
             x           'long_output'       Event long message
             x           'perfdata'          nagios plugin perfdata raw (for the moment)
-            x           'check_type'        
-            x           'current_attempt'   
-            x           'max_attempts'      
-            x           'execution_time'    
-            x           'latency'           
-            x           'command_name'      
-                        'address'                               
+            x           'check_type'
+            x           'current_attempt'
+            x           'max_attempts'
+            x           'execution_time'
+            x           'latency'
+            x           'command_name'
+                        'address'
         """
         if source_type == 'resource':
             # service
             specificmessage={
-                'resource' : b.data['service_description'],
-                'command_name' : self.service_commands[b.data['host_name']][b.data['service_description']],
-                'max_attempts' : self.service_max_check_attempts[b.data['host_name']][b.data['service_description']],
+                'resource': b.data['service_description'],
+                'command_name': self.service_commands[b.data['host_name']][b.data['service_description']],
+                'max_attempts': self.service_max_check_attempts[b.data['host_name']][b.data['service_description']],
             }
         elif source_type == 'component':
             # host
             specificmessage={
-                'resource' : None,
-                'command_name' : self.host_commands[b.data['host_name']],
-                'max_check_attempts' : self.host_max_check_attempts[b.data['host_name']]
+                'resource': None,
+                'command_name': self.host_commands[b.data['host_name']],
+                'max_check_attempts': self.host_max_check_attempts[b.data['host_name']]
             }
         else:
-            # WTF ?!
+            # WTF?!
             logger.info("[Canopsis] Invalid source_type %s" %(source_type))
             return None
 
         commonmessage={
-            'connector' : u'shinken',
-            'connector_name' : unicode(self.identifier),
-            'event_type' : event_type,
-            'source_type' : source_type,
-            'component' : b.data['host_name'],
-            'timestamp' : b.data['last_chk'],
-            'state' : b.data['state_id'],
-            'state_type' : b.data['state_type_id'],
-            'output' : b.data['output'],
-            'long_output' : b.data['long_output'],
-            'perf_data' : b.data['perf_data'],
-            'check_type' : b.data['check_type'],
-            'current_attempt' : b.data['attempt'],
-            'execution_time' : b.data['execution_time'],
-            'latency' : b.data['latency'],
-            'address' : self.host_addresses[b.data['host_name']]
+            'connector': u'shinken',
+            'connector_name': unicode(self.identifier),
+            'event_type': event_type,
+            'source_type': source_type,
+            'component': b.data['host_name'],
+            'timestamp': b.data['last_chk'],
+            'state': b.data['state_id'],
+            'state_type': b.data['state_type_id'],
+            'output': b.data['output'],
+            'long_output': b.data['long_output'],
+            'perf_data': b.data['perf_data'],
+            'check_type': b.data['check_type'],
+            'current_attempt': b.data['attempt'],
+            'execution_time': b.data['execution_time'],
+            'latency': b.data['latency'],
+            'address': self.host_addresses[b.data['host_name']]
         }
 
         return dict(commonmessage,**specificmessage)
@@ -241,7 +241,7 @@ class Canopsis_broker(BaseModule):
     def push2canopsis(self,message):
         strmessage=str(message)
         self.canopsis.postmessage(message)
-        #logger.info("[Canopsis] push2canopsis : %s" % (strmessage))
+        #logger.info("[Canopsis] push2canopsis: %s" % (strmessage))
 
     def hook_tick(self, brok):
         if self.canopsis:
@@ -276,7 +276,7 @@ class event2amqp():
 
     def create_connection(self):
         self.connection_string = "amqp://%s:%s@%s:%s/%s" % (self.user,self.password,self.host,self.port,self.virtual_host)
-        try:        
+        try:
             self.connection = BrokerConnection(self.connection_string)
             return True
         except:
@@ -286,7 +286,7 @@ class event2amqp():
             return False
 
     def connect(self):
-        logger.info("[Canopsis] connection with : %s" % self.connection_string)
+        logger.info("[Canopsis] connection with: %s" % self.connection_string)
         try:
             self.connection.connect()
             if not self.connected():
@@ -294,7 +294,7 @@ class event2amqp():
             else:
                 self.get_channel()
                 self.get_exchange()
-                self.create_producer()                
+                self.create_producer()
                 return True
         except:
             func = sys._getframe(1).f_code.co_name
@@ -303,7 +303,7 @@ class event2amqp():
             return False
 
     def disconnect(self):
-        try:        
+        try:
             if self.connected():
                 self.connection.release()
             return True
@@ -315,7 +315,7 @@ class event2amqp():
 
     def connected(self):
         try:
-            if self.connection.connected:            
+            if self.connection.connected:
                 return True
             else:
                 return False
@@ -387,12 +387,12 @@ class event2amqp():
             logger.info("[Canopsis] using routing key %s" % key)
             logger.info("[Canopsis] sending %s" % str(message))
             try:
-                self.producer.revive(self.channel)                
+                self.producer.revive(self.channel)
                 self.producer.publish(body=message, compression=None, routing_key=key, exchange=self.exchange_name)
                 return True
             except:
-                logger.error("[Canopsis] Not connected, going to queue messages until connection back")                
-                self.queue.append({"key":key,"message":message})
+                logger.error("[Canopsis] Not connected, going to queue messages until connection back")
+                self.queue.append({"key": key,"message": message})
                 func = sys._getframe(1).f_code.co_name
                 error = str(sys.exc_info()[0])
                 logger.error("[Canopsis] Unexpected error: %s in %s" % (error,func))
@@ -403,8 +403,8 @@ class event2amqp():
             logger.info(errmsg)
             #enqueue_cano_event(key,message)
             if len(self.queue) < int(self.maxqueuelength):
-                self.queue.append({"key":key,"message":message})
-                logger.info("[Canopsis] Queue length : %d" % len(self.queue))                
+                self.queue.append({"key": key,"message": message})
+                logger.info("[Canopsis] Queue length: %d" % len(self.queue))
                 return True
             else:
                 logger.error("[Canopsis] Maximum retention for event queue %s reached" % str(self.maxqueuelength))
@@ -418,8 +418,8 @@ class event2amqp():
             while len(self.queue) > 0:
                 item = self.queue.pop()
                 try:
-                    logger.info("[Canopsis] Pop item from queue [%s] : %s" % (str(len(self.queue)),str(item)))
-                    self.producer.revive(self.channel)                                    
+                    logger.info("[Canopsis] Pop item from queue [%s]: %s" % (str(len(self.queue)),str(item)))
+                    self.producer.revive(self.channel)
                     self.producer.publish(body=item["message"], compression=None, routing_key=item["key"], exchange=self.exchange_name)
                 except:
                     self.queue.append(item)
@@ -445,8 +445,8 @@ class event2amqp():
     def save_queue(self):
         retentionfile="%s/canopsis.dat" % os.getcwd()
         logger.info("[Canopsis] saving to %s" % retentionfile)
-        filehandler = open(retentionfile, 'w') 
-        pickle.dump(self.queue, filehandler) 
+        filehandler = open(retentionfile, 'w')
+        pickle.dump(self.queue, filehandler)
         filehandler.close()
 
         return True
@@ -454,10 +454,10 @@ class event2amqp():
     def load_queue(self):
         retentionfile="%s/canopsis.dat" % os.getcwd()
         logger.info("[Canopsis] loading from %s" % retentionfile)
-        filehandler = open(retentionfile, 'r') 
+        filehandler = open(retentionfile, 'r')
 
         try:
-            self.queue = pickle.load(filehandler) 
+            self.queue = pickle.load(filehandler)
         except:
             pass
         return True

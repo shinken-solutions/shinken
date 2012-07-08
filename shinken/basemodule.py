@@ -2,7 +2,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -39,7 +39,7 @@ from multiprocessing import Queue, Process
 from shinken.log import logger
 
 # TODO: use a class for defining the module "properties" instead of
-# plain dict ??  Like:
+# plain dict??  Like:
 '''
 class ModuleProperties(object):
     def __init__(self, type, phases, external=False)
@@ -47,7 +47,7 @@ class ModuleProperties(object):
         self.phases = phases
         self.external = external
 '''
-# and  have the new modules instanciate this like follow :
+# and  have the new modules instanciate this like follow:
 '''
 properties = ModuleProperties('the_module_type', the_module_phases, is_mod_ext)
 '''
@@ -58,18 +58,18 @@ properties = {
     # name of the module type ; to distinguish between them:
     'type': None,
 
-    # is the module "external" (external means here a daemon module) ?
+    # is the module "external" (external means here a daemon module)?
     'external': True,
 
-    # Possible configuration phases where the module is involved :
+    # Possible configuration phases where the module is involved:
     'phases': ['configuration', 'late_configuration', 'running', 'retention'],
     }
 
 
 class ModulePhases:
-    """TODO : Add some comment about this class for the doc"""
+    """TODO: Add some comment about this class for the doc"""
     # TODO: why not use simply integers instead of string
-    # to represent the different phases ??
+    # to represent the different phases??
     CONFIGURATION = 1
     LATE_CONFIGURATION = 2
     RUNNING = 4
@@ -205,13 +205,13 @@ class BaseModule(object):
             self.process = None
 
 
-    ## TODO: are these 2 methods really needed ?
+    ## TODO: are these 2 methods really needed?
     def get_name(self):
         return self.name
 
 
     def has(self, prop):
-        """The classic has : do we have a prop or not ?"""
+        """The classic has: do we have a prop or not?"""
         return hasattr(self, prop)
 
 
@@ -270,5 +270,5 @@ class BaseModule(object):
         self.do_stop()
         logger.info("[%s]: exiting now.." % (self.name))
 
-    # TODO: apparently some modules would uses "work" as the main method ??
+    # TODO: apparently some modules would uses "work" as the main method??
     work = main

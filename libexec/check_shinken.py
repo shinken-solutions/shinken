@@ -70,28 +70,28 @@ def check_deamons_numbers(result, target):
     alive_spare_number = len([e for e in result.values() if e['spare'] and e['alive']])
     dead_number = total_number - alive_number
     dead_list = ','.join([n for n in result if not result[n]['alive']])
-    # TODO : perfdata to graph deamons would be nice (in big HA architectures)
+    # TODO: perfdata to graph deamons would be nice (in big HA architectures)
     # if alive_number <= critical, then we have a big problem
     if alive_number < options.critical:
-        print "CRITICAL - only %d/%d %s(s) UP. Down elements : %s" % (alive_number, total_number, target, dead_list)  
+        print "CRITICAL - only %d/%d %s(s) UP. Down elements : %s" % (alive_number, total_number, target, dead_list)
         raise SystemExit, CRITICAL
     # We are not in a case where there is no more daemons, but are there daemons down?
     elif dead_number >= options.warning:
         print "WARNING - %d/%d %s(s) DOWN :%s" % (dead_number, total_number, target, dead_list)
         raise SystemExit, WARNING
         # Everything seems fine. But that's no surprise, is it?
-    else :
+    else:
         print "OK - %d/%d %s(s) UP, with %d/%d spare(s) UP" % (alive_number, total_number, target, alive_spare_number, total_spare_number)
         raise SystemExit, OK
 
-    
+
 # Adding options. None are required, check_shinken will use shinken defaults
-# TODO : Add more control in args problem and usage than the default OptionParser one
+# TODO: Add more control in args problem and usage than the default OptionParser one
 parser = OptionParser()
 parser.add_option('-a', '--hostname', dest='hostname', default='127.0.0.1')
 parser.add_option('-p', '--portnumber', dest='portnum', default=7770)
 parser.add_option('-s', '--ssl', dest='ssl', default=False)
-# TODO : Add a list of correct values for target and don't authorize anything else
+# TODO: Add a list of correct values for target and don't authorize anything else
 parser.add_option('-t', '--target', dest='target')
 parser.add_option('-d', '--daemonname', dest='daemon', default='')
 # In HA architectures, a warning should be displayed if there's one daemon down
@@ -102,7 +102,7 @@ parser.add_option('-T', '--timeout', dest='timeout', default = 10)
 
 # Retrieving options
 options, args = parser.parse_args()
-# TODO : for now, helpme doesn't work as desired
+# TODO: for now, helpme doesn't work as desired
 options.helpme = False
 
 # Check for required option target
@@ -129,7 +129,7 @@ except Exception, exp:
     sys.exit(CRITICAL)
 
 
-    
+
 if options.daemon:
     # We just want a check for a single satellite daemon
     # Only OK or CRITICAL here
@@ -139,7 +139,7 @@ if options.daemon:
     except Exception, exp:
         print "CRITICAL : the Arbiter is not reachable : (%s)." % exp
         raise SystemExit, CRITICAL
-    
+
     if result:
         if result['alive']:
             print 'OK - %s alive' % daemon_name
@@ -171,6 +171,6 @@ else:
     # Now we have all data
     if result:
         check_deamons_numbers(result, options.target)
-    else :
+    else:
         print 'UNKNOWN - Arbiter could not retrieve status for %s' % options.target
         raise SystemExit, UNKNOWN

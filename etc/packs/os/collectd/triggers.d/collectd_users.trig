@@ -11,14 +11,14 @@ state = 0
 output = 'Check OK'
 
 if nb_users > warn:
-   output = 'Warning : users are too high %s' % nb_users
+   output = 'Warning: users are too high %s' % nb_users
    state = 1
 
 if nb_users > crit:
-   output = 'Critical : users are too high %s' % nb_users
+   output = 'Critical: users are too high %s' % nb_users
    state = 2
 
 # Must have better functions here!
 self.state_id = state
-self.state = {0 : 'OK', 1 : 'WARNING', 2 : 'CRITICAL'}[state]
+self.state = {0: 'OK', 1: 'WARNING', 2: 'CRITICAL'}[state]
 self.output = output

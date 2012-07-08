@@ -40,7 +40,7 @@ except ImportError:
     try:
         import simplejson as json
     except ImportError:
-        print "Error : you need the json or simplejson module"
+        print "Error: you need the json or simplejson module"
         raise
 
 ### Will be populated by the UI with it's own value
@@ -57,10 +57,10 @@ def main():
 
 
     all_imp_impacts = app.datamgr.get_important_elements()
-    
+
     all_pbs = app.datamgr.get_all_problems()
 
-    return {'app' : app, 'user' : user, 'impacts' : all_imp_impacts, 'problems' : all_pbs}
+    return {'app': app, 'user': user, 'impacts': all_imp_impacts, 'problems': all_pbs}
 
 
 def impacts():
@@ -71,7 +71,7 @@ def impacts():
     if not user:
         redirect("/mobile/")
         return
-	
+
     # We want to limit the number of elements
     start = int(app.request.GET.get('start', '0'))
     end = int(app.request.GET.get('end', '5'))
@@ -87,9 +87,9 @@ def impacts():
 
     navi = app.helper.get_navi(total, start, step=5)
     all_imp_impacts = all_imp_impacts[start:end]
-    
-    
-    return {'app' : app, 'user' : user, 'navi' : navi, 'impacts' : all_imp_impacts}
+
+
+    return {'app': app, 'user': user, 'navi': navi, 'impacts': all_imp_impacts}
 
 
 def problems():
@@ -119,7 +119,7 @@ def problems():
     navi = app.helper.get_navi(total, start, step=5)
     all_pbs = all_pbs[start:end]
 
-    return {'app' : app, 'user' : user,  'navi' : navi, 'problems' : all_pbs, 'menu_part' : '/problems'}
+    return {'app': app, 'user': user,  'navi': navi, 'problems': all_pbs, 'menu_part': '/problems'}
 
 def dashboard():
     # First we look for the user sid
@@ -148,23 +148,23 @@ def dashboard():
     navi = app.helper.get_navi(total, start, step=5)
     all_pbs = all_pbs[start:end]
 
-    return {'app' : app, 'user' : user, 'navi' : navi, 'problems' : all_pbs, 'menu_part' : '/dashboard'}
+    return {'app': app, 'user': user, 'navi': navi, 'problems': all_pbs, 'menu_part': '/dashboard'}
 
 def system_page():
     user = app.get_user_auth()
 
     if not user:
         redirect("/mobile/")
-    
+
     schedulers = app.datamgr.get_schedulers()
     brokers = app.datamgr.get_brokers()
     reactionners = app.datamgr.get_reactionners()
     receivers = app.datamgr.get_receivers()
     pollers = app.datamgr.get_pollers()
 
-    return {'app' : app, 'user' : user, 'schedulers' : schedulers,
-            'brokers' : brokers, 'reactionners' : reactionners,
-            'receivers' : receivers, 'pollers' : pollers,
+    return {'app': app, 'user': user, 'schedulers': schedulers,
+            'brokers': brokers, 'reactionners': reactionners,
+            'receivers': receivers, 'pollers': pollers,
             }
 
 def show_log():
@@ -172,16 +172,16 @@ def show_log():
 
     if not user:
         redirect("/mobile/")
-    
+
     schedulers = app.datamgr.get_schedulers()
     brokers = app.datamgr.get_brokers()
     reactionners = app.datamgr.get_reactionners()
     receivers = app.datamgr.get_receivers()
     pollers = app.datamgr.get_pollers()
 
-    return {'app' : app, 'user' : user, 'schedulers' : schedulers,
-            'brokers' : brokers, 'reactionners' : reactionners,
-            'receivers' : receivers, 'pollers' : pollers,
+    return {'app': app, 'user': user, 'schedulers': schedulers,
+            'brokers': brokers, 'reactionners': reactionners,
+            'receivers': receivers, 'pollers': pollers,
             }
 
 # Main impacts view
@@ -208,8 +208,8 @@ def show_host(name):
 
     # Ok, we can lookup it
     h = app.datamgr.get_host(name)
-    return {'app' : app, 'elt' : h, 'valid_user' : True, 'user' : user, 'graphstart' : graphstart,
-            'graphend' : graphend}
+    return {'app': app, 'elt': h, 'valid_user': True, 'user': user, 'graphstart': graphstart,
+            'graphend': graphend}
 
 
 def show_service(hname, desc):
@@ -220,7 +220,7 @@ def show_service(hname, desc):
 
     if not user:
         redirect("/mobile/")
-#        return {'app' : app, 'elt' : None, 'valid_user' : False, 'user' : user}
+#        return {'app': app, 'elt': None, 'valid_user': False, 'user': user}
 
 
     # Ok we are in a detail page but the user ask for a specific search
@@ -238,8 +238,8 @@ def show_service(hname, desc):
 
     # Ok, we can lookup it :)
     s = app.datamgr.get_service(hname, desc)
-    return {'app' : app, 'elt' : s, 'valid_user' : True, 'user' : user, 'graphstart' : graphstart,
-            'graphend' : graphend}
+    return {'app': app, 'elt': s, 'valid_user': True, 'user': user, 'graphstart': graphstart,
+            'graphend': graphend}
 
 # The wall
 # Sort hosts and services by impact, states and co
@@ -287,7 +287,7 @@ def wall():
 
     if not user:
         redirect("/mobile/")
-    
+
     all_imp_impacts = app.datamgr.get_important_elements()
     all_imp_impacts.sort(hst_srv_sort)
 
@@ -299,16 +299,16 @@ def wall():
     # And sort it
     all_pbs.sort(hst_srv_sort) # sort_by_last_state_change)
 
-    return {'app' : app, 'user' : user, 'impacts' : impacts, 'problems' : all_pbs}
+    return {'app': app, 'user': user, 'impacts': impacts, 'problems': all_pbs}
 
 
-pages = {main : { 'routes' : ['/mobile/main'], 'view' : 'mobile_main', 'static' : True},
-         impacts : { 'routes' : ['/mobile/impacts'], 'view' : 'mobile_impacts', 'static' : True},
-         problems : { 'routes' : ['/mobile/problems'], 'view' : 'mobile_problems', 'static' : True},
-         dashboard : { 'routes' : ['/mobile/dashboard'], 'view' : 'mobile_problems', 'static' : True},
-         system_page : { 'routes' : ['/mobile/system'], 'view' : 'mobile_system', 'static' : True},
-         show_log : { 'routes' : ['/mobile/log'], 'view' : 'mobile_log', 'static' : True},
-         show_host : { 'routes' : ['/mobile/host/:name'], 'view' : 'mobile_eltdetail', 'static' : True},
-         show_service : { 'routes' : ['/mobile/service/:hname/:desc#.+#'], 'view' : 'mobile_eltdetail', 'static' : True},
-         wall : { 'routes' : ['/mobile/wall/', '/mobile/wall'], 'view' : 'mobile_wall', 'static' : True},
+pages = {main: { 'routes': ['/mobile/main'], 'view': 'mobile_main', 'static': True},
+         impacts: { 'routes': ['/mobile/impacts'], 'view': 'mobile_impacts', 'static': True},
+         problems: { 'routes': ['/mobile/problems'], 'view': 'mobile_problems', 'static': True},
+         dashboard: { 'routes': ['/mobile/dashboard'], 'view': 'mobile_problems', 'static': True},
+         system_page: { 'routes': ['/mobile/system'], 'view': 'mobile_system', 'static': True},
+         show_log: { 'routes': ['/mobile/log'], 'view': 'mobile_log', 'static': True},
+         show_host: { 'routes': ['/mobile/host/:name'], 'view': 'mobile_eltdetail', 'static': True},
+         show_service: { 'routes': ['/mobile/service/:hname/:desc#.+#'], 'view': 'mobile_eltdetail', 'static': True},
+         wall: { 'routes': ['/mobile/wall/', '/mobile/wall'], 'view': 'mobile_wall', 'static': True},
          }

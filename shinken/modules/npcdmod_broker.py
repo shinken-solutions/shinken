@@ -39,10 +39,10 @@ from shinken.basemodule import BaseModule
 from shinken.message import Message
 
 properties = {
-    'daemons' : ['broker'],
-    'type' : 'npcdmod',
-    'external' : True,
-    'phases' : ['running'],
+    'daemons': ['broker'],
+    'type': 'npcdmod',
+    'external': True,
+    'phases': ['running'],
     }
 
 
@@ -89,14 +89,14 @@ class Npcd_broker(BaseModule):
         # use so we do nto ask a reinit ofan instance too quickly
         self.last_need_data_send = time.time()
 
-        
+
     # Ask for a full reinit of a scheduler because we lost some data.... sorry
     def ask_reinit(self, c_id):
         # Do not ask data too quickly, very dangerous
         # one a minute
         if time.time() - self.last_need_data_send > 60:
-            print "I ask the broker for instance id data :", c_id
-            msg = Message(id=0, type='NeedData', data={'full_instance_id' : c_id}, source=self.get_name())
+            print "I ask the broker for instance id data:", c_id
+            msg = Message(id=0, type='NeedData', data={'full_instance_id': c_id}, source=self.get_name())
             self.from_q.put(msg)
             self.last_need_data_send = time.time()
         return

@@ -30,7 +30,7 @@ from shinken_test import unittest, ShinkenTest
 from shinken.log import logger
 from shinken.objects.module import Module
 from shinken.modules import hack_commands_poller_tag_arbiter
-from shinken.modules.hack_commands_poller_tag_arbiter import get_instance 
+from shinken.modules.hack_commands_poller_tag_arbiter import get_instance
 
 
 
@@ -49,12 +49,12 @@ class TestHackCmdPollerTag(ShinkenTest):
 
         # Calls the mod with our config
         mod.hook_late_configuration(self)
-        
+
         cmd1 = self.sched.commands.find_by_name('should_change')
         self.assert_(cmd1 is not None)
         cmd2 = self.sched.commands.find_by_name('should_not_change')
         self.assert_(cmd2 is not None)
-        
+
         # cmd1 should have been updated, but not cmd2
         print "CMD1", cmd1.__dict__
         print "P", cmd1.poller_tag
@@ -62,22 +62,22 @@ class TestHackCmdPollerTag(ShinkenTest):
         print "CMD2", cmd2.__dict__
         print "P", cmd1.poller_tag
         self.assert_(cmd2.poller_tag == 'alreadydefined')
-        
+
         # look for a objects that use it
         h1 = self.sched.hosts.find_by_name("test_host_0")
         self.assert_(h1 is not None)
         h2 = self.sched.hosts.find_by_name("test_router_0")
         self.assert_(h2 is not None)
-        
+
         # Ok, host1 call cmd2, and host2 cmd1...
-        # sorry for the crossing :p
+        # sorry for the crossing:p
         print "H1", h1.check_command
         print h1.check_command.command
         self.assert_(h1.check_command.poller_tag == 'alreadydefined')
         print "H2", h2.check_command
         print h2.check_command.command
         self.assert_(h2.check_command.poller_tag == 'other')
-        
+
 
 
     def test_underscore_commands_module_type_recognition(self):

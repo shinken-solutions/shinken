@@ -25,9 +25,9 @@
 
 
 properties = {
-    'daemons' : ['broker'],
-    'type' : 'service_perfdata',
-    'phases' : ['running'],
+    'daemons': ['broker'],
+    'type': 'service_perfdata',
+    'phases': ['running'],
     }
 
 
@@ -39,7 +39,7 @@ def get_instance(plugin):
     try:
         from service_perfdata_broker import Service_perfdata_broker
     except ImportError , exp:
-        print "Warning : the plugin type %s is unavailable : %s" % ('service_perfdata', exp)
+        print "Warning: the plugin type %s is unavailable: %s" % ('service_perfdata', exp)
         return None
 
 

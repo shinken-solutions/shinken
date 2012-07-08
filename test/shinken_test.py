@@ -151,12 +151,12 @@ class ShinkenTest(unittest.TestCase):
         self.conf.prepare_for_sending()
         self.conf.show_errors()
         self.dispatcher = Dispatcher(self.conf, self.me)
-        
+
         scheddaemon = Shinken(None, False, False, False, None)
         self.sched = Scheduler(scheddaemon)
-        
+
         scheddaemon.sched = self.sched
-                
+
         m = MacroResolver()
         m.init(self.conf)
         self.sched.load_conf(self.conf, in_test=True)
@@ -188,7 +188,7 @@ class ShinkenTest(unittest.TestCase):
         self.sched.add(check)  # check is now in sched.checks[]
         # fake execution
         check.check_time = now
-        
+
         # and lie about when we will launch it because
         # if not, the schedule call for ref
         # will not really reschedule it because there
@@ -365,13 +365,13 @@ class ShinkenTest(unittest.TestCase):
         # We got one of the files of
         parent_path = os.path.dirname(os.path.dirname(modulespath))
         modulespath = os.path.join(parent_path, 'shinken', 'modules')
-        print("Using modules path : %s" % (modulespath))
+        print("Using modules path: %s" % (modulespath))
 
         return modulespath
 
     def do_load_modules(self):
         self.modules_manager.load_and_init()
-        self.log.log("I correctly loaded the modules : [%s]" % (','.join([inst.get_name() for inst in self.modules_manager.instances])))
+        self.log.log("I correctly loaded the modules: [%s]" % (','.join([inst.get_name() for inst in self.modules_manager.instances])))
 
 
 
@@ -379,20 +379,20 @@ class ShinkenTest(unittest.TestCase):
         self.livelogs = 'tmp/livelogs.db' + self.testid
 
         if modconf is None:
-            modconf = Module({'module_name' : 'LiveStatus', 
-                'module_type' : 'livestatus',
-                'port' : str(50000 + os.getpid()),
-                'pnp_path' : 'tmp/pnp4nagios_test' + self.testid,
-                'host' : '127.0.0.1',
-                'socket' : 'live',
-                'name' : 'test', #?
+            modconf = Module({'module_name': 'LiveStatus',
+                'module_type': 'livestatus',
+                'port': str(50000 + os.getpid()),
+                'pnp_path': 'tmp/pnp4nagios_test' + self.testid,
+                'host': '127.0.0.1',
+                'socket': 'live',
+                'name': 'test', #?
             })
 
-        dbmodconf = Module({'module_name' : 'LogStore', 
-            'module_type' : 'logstore_sqlite',
-            'use_aggressive_sql' : "0",
-            'database_file' : self.livelogs,
-            'archive_path' : os.path.join(os.path.dirname(self.livelogs), 'archives'),
+        dbmodconf = Module({'module_name': 'LogStore',
+            'module_type': 'logstore_sqlite',
+            'use_aggressive_sql': "0",
+            'database_file': self.livelogs,
+            'archive_path': os.path.join(os.path.dirname(self.livelogs), 'archives'),
         })
         modconf.modules = [dbmodconf]
         self.livestatus_broker = LiveStatus_broker(modconf)

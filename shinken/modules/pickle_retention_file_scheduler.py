@@ -43,9 +43,9 @@ shinken.objects.command.CommandCall = CommandCall
 
 
 properties = {
-    'daemons' : ['scheduler'],
-    'type' : 'pickle_retention_file',
-    'external' : False,
+    'daemons': ['scheduler'],
+    'type': 'pickle_retention_file',
+    'external': False,
     }
 
 
@@ -78,8 +78,8 @@ class Pickle_retention_scheduler(BaseModule):
             f = open(self.path+'.tmp', 'wb')
             # Just put hosts/services becauses checks and notifications
             # are already link into
-            # all_data = {'hosts' : sched.hosts, 'services' : sched.services}
-            
+            # all_data = {'hosts': sched.hosts, 'services': sched.services}
+
             # We create a all_data dict with lsit of dict of retention useful
             # data of our hosts and services
             all_data = sched.get_retention_data()
@@ -97,7 +97,7 @@ class Pickle_retention_scheduler(BaseModule):
         log_mgr.log("Updating retention_file %s" % self.path)
 
 
-    
+
     def hook_load_retention(self, daemon):
         return self.load_retention_objects(daemon, logger)
 

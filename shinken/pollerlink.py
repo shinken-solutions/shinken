@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -31,17 +31,17 @@ from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 class PollerLink(SatelliteLink):
     """This class is the link between Arbiter and Poller. With it, arbiter
     can see if a poller is alive, and can send it new configuration
-    
+
     """
-    
+
     id = 0
     my_type = 'poller'
-    # To_send : send or not to satellite conf
+    # To_send: send or not to satellite conf
     properties = SatelliteLink.properties.copy()
     properties.update({
         'poller_name':  StringProp(fill_brok=['full_status'], to_send=True),
         'port':         IntegerProp(default=7771, fill_brok=['full_status']),
-        'passive' :     BoolProp(default='0', fill_brok=['full_status'], to_send=True),
+        'passive':     BoolProp(default='0', fill_brok=['full_status'], to_send=True),
         'min_workers':  IntegerProp(default='0', fill_brok=['full_status'], to_send=True),
         'max_workers':  IntegerProp(default='30', fill_brok=['full_status'], to_send=True),
         'processes_by_worker': IntegerProp(default='256', fill_brok=['full_status'], to_send=True),
@@ -57,6 +57,6 @@ class PollerLink(SatelliteLink):
 
 class PollerLinks(SatelliteLinks):
     """Please Add a Docstring to describe the class here"""
-    
+
     name_property = "poller_name"
     inner_class = PollerLink

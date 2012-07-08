@@ -38,7 +38,7 @@ import asyncore
 import getopt
 import shlex
 
-try :
+try:
     import OpenSSL
     SSLWantReadError = OpenSSL.SSL.WantReadError
     SSLSysCallError = OpenSSL.SSL.SysCallError
@@ -56,11 +56,11 @@ from shinken.basemodule import BaseModule
 
 
 properties = {
-    'daemons' : ['poller'],
-    'type' : 'nrpe_poller',
-    'external' : False,
+    'daemons': ['poller'],
+    'type': 'nrpe_poller',
+    'external': False,
     # To be a real worker module, you must set this
-    'worker_capable' : True,
+    'worker_capable': True,
     }
 
 
@@ -76,12 +76,12 @@ class NRPE:
     def build_query(self, command):
         '''
         Build a query packet
-         00-01     : NRPE protocol version
-         02-03     : packet type (01 : query, 02 : response)
-         04-07     : CRC32
-         08-09     : return code of the check if packet type is response
-         10-1034   : command (nul terminated)
-         1035-1036 : reserved 
+         00-01: NRPE protocol version
+         02-03: packet type (01: query, 02: response)
+         04-07: CRC32
+         08-09: return code of the check if packet type is response
+         10-1034: command (nul terminated)
+         1035-1036: reserved
         '''
         crc = 0
 
@@ -94,19 +94,19 @@ class NRPE:
         # We pack it, then we compute CRC32 of this first query
         self.query = struct.pack(">2hih1024scc",02,01,crc,0,command,'N','D')
         crc = binascii.crc32(self.query)
-        
+
         # we restart with the crc value this time
         # because python2.4 do not have pack_into.
         self.query = struct.pack(">2hih1024scc",02,01,crc,0,command,'N','D')
 
-    
+
     def init_query(self,host, port, use_ssl, command):
         self.state = 'creation'
         #print 'build with', command
         self.build_query(command)
         self.host = host
         self.port = port
-        
+
 
 #    def send(self):
 #        self.state = 'sent'
@@ -121,7 +121,7 @@ class NRPE:
 #            self.message = str(exp)
 #            self.state = 'received'
 #            return(self.rc, self.message)
-        
+
 #    def get(self):
 #        # If we already got an error, get out now
 #        if self.state == 'received':
@@ -143,7 +143,7 @@ class NRPE:
             return (self.rc, self.message)
 
         self.state = 'received'
-        # TODO : check crc
+        # TODO: check crc
 
         try:
             response = struct.unpack(">2hih1024s", data)
@@ -153,11 +153,11 @@ class NRPE:
             return (self.rc, self.message)
 
         self.rc = response[3]
-        # the output is fill with \x00 at the end. We 
+        # the output is fill with \x00 at the end. We
         # should clean them
         self.message = response[4].strip('\x00')
         crc_orig = response[2]
-        
+
         return (self.rc, self.message)
 
 
@@ -180,7 +180,7 @@ class NRPEAsyncClient(asyncore.dispatcher):
 
         # And now we create a socket for our connection
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
-        
+
         if use_ssl:
             # The admin want a ssl connection, but there is not openssl
             # lib installed :(
@@ -197,7 +197,7 @@ class NRPEAsyncClient(asyncore.dispatcher):
             self.connect( (host, port) )
         except socket.error,exp:
             self.set_exit(2, str(exp))
-        
+
 
     def wrap_ssl(self):
         self.context = OpenSSL.SSL.Context(OpenSSL.SSL.TLSv1_METHOD)
@@ -213,7 +213,7 @@ class NRPEAsyncClient(asyncore.dispatcher):
     def handle_close(self):
         self.close()
 
-        
+
     def set_exit(self, rc, message):
         self.rc = rc
         self.message = message
@@ -248,10 +248,10 @@ class NRPEAsyncClient(asyncore.dispatcher):
                 return
 
             # if we are in ssl, there can be a handshake
-            # problem : we can't talk until we finished
+            # problem: we can't talk until we finished
             # it, sorry
             except SSLWantReadError, exp:
-                try: 
+                try:
                     self.socket.do_handshake()
                 except SSLWantReadError, exp:
                     return
@@ -259,7 +259,7 @@ class NRPEAsyncClient(asyncore.dispatcher):
 
             # We can have nothing, it's just that the server
             # do not want to talk to us :(
-            except SSLZeroReturnError :
+            except SSLZeroReturnError:
                 buf = ''
 
             except SSLSysCallError:
@@ -275,7 +275,7 @@ class NRPEAsyncClient(asyncore.dispatcher):
                 self.set_exit(rc, message)
             else:
                 self.set_exit(2, "Error : nothing return from the nrpe server")
-            
+
             # We can close the socket, we are done
             self.close()
 
@@ -288,7 +288,7 @@ class NRPEAsyncClient(asyncore.dispatcher):
     # query
     def handle_write(self):
         if self.writable():
-            try : 
+            try:
                 sent = self.send(self.nrpe.query)
             except socket.error, exp:
                 # In case of problem, just bail out
@@ -297,10 +297,10 @@ class NRPEAsyncClient(asyncore.dispatcher):
                 return
 
             # if we are in ssl, there can be a handshake
-            # problem : we can't talk until we finished
+            # problem: we can't talk until we finished
             # it, sorry
             except SSLWantReadError, exp:
-                try: 
+                try:
                     self.socket.do_handshake()
                 except SSLWantReadError, exp:
                     # still not finished, we continue
@@ -310,7 +310,7 @@ class NRPEAsyncClient(asyncore.dispatcher):
             # so we bufferize it
             self.nrpe.query = self.nrpe.query[sent:]
 
-    
+
     def is_done(self):
         return self.nrpe.state == 'received'
 
@@ -350,7 +350,7 @@ def parse_args(cmd_args):
             # Here we got a, btu also all 'args'
             add_args.append(a)
             add_args.extend(args)
-            
+
     return (host, port, unknown_on_timeout, command, timeout, use_ssl, add_args)
 
 
@@ -359,7 +359,7 @@ def parse_args(cmd_args):
 
 # Just print some stuff
 class Nrpe_poller(BaseModule):
-    
+
     def __init__(self, mod_conf):
         BaseModule.__init__(self, mod_conf)
 
@@ -411,7 +411,7 @@ class Nrpe_poller(BaseModule):
                 else:
                     # Set an error so we will quit tis check
                     command = None
-                    
+
                 # If we do not have the good args, we bail out for this check
                 if command is None or host is None:
                     chk.status = 'done'
@@ -419,7 +419,7 @@ class Nrpe_poller(BaseModule):
                     chk.get_outputs('Error : the parameters host or command are not correct.', 8012)
                     chk.execution_time = 0.0
                     continue
-                
+
                 # Ok we are good, we go on
                 total_args = [command]
                 total_args.extend(add_args)
@@ -433,7 +433,7 @@ class Nrpe_poller(BaseModule):
     # REF: doc/shinken-action-queues.png (5)
     def manage_finished_checks(self):
         to_del = []
-        
+
         # First look for checks in timeout
         for c in self.checks:
             if c.status == 'launched':
@@ -441,7 +441,7 @@ class Nrpe_poller(BaseModule):
 
         # We check if all new things in connections
         asyncore.poll(timeout=1)
-        
+
         # Now we look for finished checks
         for c in self.checks:
             # First manage check in error, bad formed
@@ -515,10 +515,10 @@ class Nrpe_poller(BaseModule):
                 if cmsg.get_type() == 'Die':
                     print "[%d]Dad say we are diing..." % self.id
                     break
-            except :
+            except:
                 pass
 
-            # TODO : better time management
+            # TODO: better time management
             time.sleep(.1)
 
             timeout -= time.time() - begin

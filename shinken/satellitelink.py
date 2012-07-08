@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -122,7 +122,7 @@ class SatelliteLink(Item):
             # so we must disable it imadiatly after
             socket.setdefaulttimeout(None)
             self.con = None
-            logger.error("Creating connection for %s : %s" % (self.get_name(), str(exp)))
+            logger.error("Creating connection for %s: %s" % (self.get_name(), str(exp)))
 
 
 
@@ -347,7 +347,7 @@ class SatelliteLink(Item):
             if type(exp) == Pyro.errors.TimeoutError:
                 return
             self.con = None
-            #print "[%s]What i managed : Got exception : %s %s %s" % (self.get_name(), exp, type(exp), exp.__dict__)
+            #print "[%s]What i managed: Got exception: %s %s %s" % (self.get_name(), exp, type(exp), exp.__dict__)
             self.managed_confs = {}
 
 
@@ -511,6 +511,6 @@ class SatelliteLinks(Items):
                 if plug is not None:
                     new_modules.append(plug)
                 else:
-                    err = "Error : the module %s is unknown for %s" % (plug_name, s.get_name())
+                    err = "Error: the module %s is unknown for %s" % (plug_name, s.get_name())
                     s.configuration_errors.append(err)
             s.modules = new_modules

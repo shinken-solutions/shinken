@@ -37,9 +37,9 @@ class NSCA_client():
     # Ok, main function that is called in the CONFIGURATION phase
     def get_objects(self):
         print "[Dummy] ask me for objects to return"
-        r = {'hosts' : []}
-        h = {'name' : 'dummy host from dummy arbiter module',
-             'register' : '0',
+        r = {'hosts': []}
+        h = {'name': 'dummy host from dummy arbiter module',
+             'register': '0',
              }
 
         r['hosts'].append(h)
@@ -49,8 +49,8 @@ class NSCA_client():
     def send_init_packet(self, socket):
         '''
         Build an init packet
-         00-127  : IV
-         128-131 : unix timestamp
+         00-127: IV
+         128-131: unix timestamp
         '''
         iv = ''.join([chr(self.rng.randrange(256)) for i in xrange(128)])
         init_packet = struct.pack("!128sI", iv, int(time.mktime(time.gmtime())))
@@ -60,14 +60,14 @@ class NSCA_client():
     def read_check_result(self, data, iv):
         '''
         Read the check result
-         00-01 : Version
-         02-05 : CRC32
-         06-09 : Timestamp
-         10-11 : Return code
-         12-75 : hostname
-         76-203 : service
-         204-715 : output of the plugin
-         716-720 : padding
+         00-01: Version
+         02-05: CRC32
+         06-09: Timestamp
+         10-11: Return code
+         12-75: hostname
+         76-203: service
+         204-715: output of the plugin
+         716-720: padding
         '''
         if len(data) != 720:
             return None
@@ -92,7 +92,7 @@ class NSCA_client():
             extcmd = "[%lu] PROCESS_SERVICE_CHECK_RESULT;%s;%s;%d;%s\n" % (timestamp,hostname,service,rc,output)
 
         print "want to send", extcmd
-        
+
         #e = ExternalCommand(extcmd)
         #self.from_q.put(e)
 
@@ -113,7 +113,7 @@ class NSCA_client():
 
         init = server.recv(size)
         print "got init", init
-        
+
         #init_packet = struct.pack("!128sI",iv,int(time.mktime(time.gmtime())))
         (iv, t) = struct.unpack("!128sI",init)
         print "IV", iv
@@ -130,20 +130,20 @@ class NSCA_client():
         pad2=0
         '''
         Read the check result
-         00-01 : Version
-         02-05 : CRC32
-         06-09 : Timestamp
-         10-11 : Return code
-         12-75 : hostname
-         76-203 : service
-         204-715 : output of the plugin
-         716-720 : padding
+         00-01: Version
+         02-05: CRC32
+         06-09: Timestamp
+         10-11: Return code
+         12-75: hostname
+         76-203: service
+         204-715: output of the plugin
+         716-720: padding
         '''
         init_packet = struct.pack("!hhIIh64s128s512sh", version, pad1, crc32, timestamp, rc, hostname_dirty, service_dirty, output_dirty, pad2)
         print "Create packent len", len(init_packet)
         #(version, pad1, crc32, timestamp, rc, hostname_dirty, service_dirty, output_dirty, pad2) = struct.unpack("!hhIIh64s128s512sh",data)
 
-        data = decrypt_xor(init_packet,iv)        
+        data = decrypt_xor(init_packet,iv)
         data = decrypt_xor(data,self.password)
 
 

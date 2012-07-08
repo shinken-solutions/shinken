@@ -57,7 +57,7 @@ class Service_perfdata_broker(BaseModule):
 
 
     # Called by Broker so we can do init stuff
-    # TODO : add conf param to get pass with init
+    # TODO: add conf param to get pass with init
     # Conf from arbiter!
     def init(self):
         print "[%s] I open the service-perfdata file '%s'" % (self.name, self.path)
@@ -68,7 +68,7 @@ class Service_perfdata_broker(BaseModule):
     # We've got a 0, 1, 2 or 3 (or something else? ->3
     # And want a real OK, WARNING, CRITICAL, etc...
     def resolve_service_state(self, state):
-        states = {0 : 'OK', 1 : 'WARNING', 2 : 'CRITICAL', 3 : 'UNKNOWN'}
+        states = {0: 'OK', 1: 'WARNING', 2: 'CRITICAL', 3: 'UNKNOWN'}
         if state in states:
             return states[state]
         else:
@@ -82,13 +82,13 @@ class Service_perfdata_broker(BaseModule):
         # "$TIMET\t$HOSTNAME\t$SERVICEDESC\t$OUTPUT\t$SERVICESTATE\t$PERFDATA\n"
         current_state = self.resolve_service_state(data['state_id'])
         macros = {
-            '$LASTSERVICECHECK$' : int(data['last_chk']),
-            '$HOSTNAME$' : data['host_name'],
-            '$SERVICEDESC$' : data['service_description'],
-            '$SERVICEOUTPUT$' : data['output'],
-            '$SERVICESTATE$' : current_state,
-            '$SERVICEPERFDATA$' : data['perf_data'],
-            '$LASTSERVICESTATE$' : data['last_state'],
+            '$LASTSERVICECHECK$': int(data['last_chk']),
+            '$HOSTNAME$': data['host_name'],
+            '$SERVICEDESC$': data['service_description'],
+            '$SERVICEOUTPUT$': data['output'],
+            '$SERVICESTATE$': current_state,
+            '$SERVICEPERFDATA$': data['perf_data'],
+            '$LASTSERVICESTATE$': data['last_state'],
             }
         s = self.template
         for m in macros:
@@ -114,4 +114,4 @@ class Service_perfdata_broker(BaseModule):
             self.file.close()
         except IOError, exp: # Maybe another tool is just getting it, pass
             pass
-            
+

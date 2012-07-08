@@ -38,7 +38,7 @@ class Module(Item):
     properties.update({
         'module_name': StringProp(),
         'module_type': StringProp(),
-        'modules'    : ListProp(default=''),
+        'modules': ListProp(default=''),
     })
 
     macros = {}

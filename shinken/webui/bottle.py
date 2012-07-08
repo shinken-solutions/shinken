@@ -433,10 +433,7 @@ class Bottle(object):
     def mount(self, app, prefix, **options):
         ''' Mount an application to a specific URL prefix. The prefix is added
             to SCIPT_PATH and removed from PATH_INFO before the sub-application
-            is called.
-
-            :param app: an instance of :class:`Bottle`.
-            :param prefix: path prefix used as a mount-point.
+            is called.:param app: an instance of :class:`Bottle`.:param prefix: path prefix used as a mount-point.
 
             All other parameters are passed to the underlying :meth:`route` call.
         '''
@@ -557,19 +554,12 @@ class Bottle(object):
                     return 'Hello %s' % name
 
             The ``:name`` part is a wildcard. See :class:`Router` for syntax
-            details.
-
-            :param path: Request path or a list of paths to listen to. If no
+            details.:param path: Request path or a list of paths to listen to. If no
               path is specified, it is automatically generated from the
-              signature of the function.
-            :param method: HTTP method (`GET`, `POST`, `PUT`, ...) or a list of
-              methods to listen to. (default: `GET`)
-            :param callback: An optional shortcut to avoid the decorator
-              syntax. ``route(..., callback=func)`` equals ``route(...)(func)``
-            :param name: The name for this route. (default: None)
-            :param apply: A decorator or plugin or a list of plugins. These are
-              applied to the route callback in addition to installed plugins.
-            :param skip: A list of plugins, plugin classes or names. Matching
+              signature of the function.:param method: HTTP method (`GET`, `POST`, `PUT`, ...) or a list of
+              methods to listen to. (default: `GET`):param callback: An optional shortcut to avoid the decorator
+              syntax. ``route(..., callback=func)`` equals ``route(...)(func)``:param name: The name for this route. (default: None):param apply: A decorator or plugin or a list of plugins. These are
+              applied to the route callback in addition to installed plugins.:param skip: A list of plugins, plugin classes or names. Matching
               plugins are not installed to this route. ``True`` skips all.
 
             Any additional keyword arguments are stored as route-specific
@@ -780,7 +770,7 @@ class BaseRequest(DictMixin):
     @property
     def path(self):
         ''' The value of ``PATH_INFO`` with exactly one prefixed slash (to fix
-            broken clients and avoid the "empty path" edge case). ''' 
+            broken clients and avoid the "empty path" edge case). '''
         return '/' + self.environ.get('PATH_INFO','').lstrip('/')
 
     @property
@@ -919,7 +909,7 @@ class BaseRequest(DictMixin):
             instances of :class:`cgi.FieldStorage` (file uploads).
         """
         post = MultiDict()
-        safe_env = {'QUERY_STRING':''} # Build a safe environment for cgi
+        safe_env = {'QUERY_STRING': ''} # Build a safe environment for cgi
         for key in ('REQUEST_METHOD', 'CONTENT_TYPE', 'CONTENT_LENGTH'):
             if key in self.environ: safe_env[key] = self.environ[key]
         if NCTextIOWrapper:
@@ -985,9 +975,7 @@ class BaseRequest(DictMixin):
 
     def path_shift(self, shift=1):
         ''' Shift path segments from :attr:`path` to :attr:`script_name` and
-            vice versa.
-
-           :param shift: The number of path segments to shift. May be negative
+            vice versa.:param shift: The number of path segments to shift. May be negative
                          to change the shift direction. (default: 1)
         '''
         script = self.environ.get('SCRIPT_NAME','/')
@@ -1088,7 +1076,7 @@ def _hkey(s):
 
 class BaseResponse(object):
     """ Storage class for a response body as well as headers and cookies.
-    
+
         This class does support dict-like case-insensitive item-access to
         headers, but is NOT a dict. Most notably, iterating over a response
         yields parts of the body and not the headers.
@@ -1096,7 +1084,7 @@ class BaseResponse(object):
 
     default_status = 200
     default_content_type = 'text/html; charset=UTF-8'
-    
+
     #: Header blacklist for specific response codes
     #: (rfc2616 section 10.2.3 and 10.3.5)
     bad_headers = {
@@ -1147,7 +1135,7 @@ class BaseResponse(object):
         self.status_code = code
         self.status_line = status or ('%d Unknown' % code)
 
-    status = property(lambda self: self.status_code, _set_status, None, 
+    status = property(lambda self: self.status_code, _set_status, None,
         ''' A writeable property to change the HTTP response status. It accepts
             either a numeric code (100-999) or a string with a custom reason
             phrase (e.g. "404 Brain not found"). Both :data:`status_line` and
@@ -1175,9 +1163,7 @@ class BaseResponse(object):
 
     def set_header(self, name, value, append=False):
         ''' Create a new response header, replacing any previously defined
-            headers with the same name. This equals ``response[name] = value``.
-
-            :param append: Do not delete previously defined headers. This can
+            headers with the same name. This equals ``response[name] = value``.:param append: Do not delete previously defined headers. This can
                            result in two (or more) headers having the same name.
         '''
         if append:
@@ -1229,22 +1215,11 @@ class BaseResponse(object):
 
     def set_cookie(self, key, value, secret=None, **options):
         ''' Create a new cookie or replace an old one. If the `secret` parameter is
-            set, create a `Signed Cookie` (described below).
-
-            :param key: the name of the cookie.
-            :param value: the value of the cookie.
-            :param secret: a signature key required for signed cookies.
+            set, create a `Signed Cookie` (described below).:param key: the name of the cookie.:param value: the value of the cookie.:param secret: a signature key required for signed cookies.
 
             Additionally, this method accepts all RFC 2109 attributes that are
-            supported by :class:`cookie.Morsel`, including:
-
-            :param max_age: maximum age in seconds. (default: None)
-            :param expires: a datetime object or UNIX timestamp. (default: None)
-            :param domain: the domain that is allowed to read the cookie.
-              (default: current domain)
-            :param path: limits the cookie to a given path (default: ``/``)
-            :param secure: limit the cookie to HTTPS connections (default: off).
-            :param httponly: prevents client-side javascript to read this cookie
+            supported by :class:`cookie.Morsel`, including::param max_age: maximum age in seconds. (default: None):param expires: a datetime object or UNIX timestamp. (default: None):param domain: the domain that is allowed to read the cookie.
+              (default: current domain):param path: limits the cookie to a given path (default: ``/``):param secure: limit the cookie to HTTPS connections (default: off).:param httponly: prevents client-side javascript to read this cookie
               (default: off, requires Python 2.6 or newer).
 
             If neither `expires` nor `max_age` is set (default), the cookie will
@@ -1744,10 +1719,7 @@ def yieldroutes(func):
 def path_shift(script_name, path_info, shift=1):
     ''' Shift path fragments from PATH_INFO to SCRIPT_NAME and vice versa.
 
-        :return: The modified paths.
-        :param script_name: The SCRIPT_NAME path.
-        :param script_name: The PATH_INFO path.
-        :param shift: The number of path fragments to shift. May be negative to
+        :return: The modified paths.:param script_name: The SCRIPT_NAME path.:param script_name: The PATH_INFO path.:param shift: The number of path fragments to shift. May be negative to
           change the shift direction. (default: 1)
     '''
     if shift == 0: return script_name, path_info
@@ -1861,7 +1833,7 @@ class CGIServer(ServerAdapter):
 class FlupFCGIServer(ServerAdapter):
     def run(self, handler): # pragma: no cover
         import flup.server.fcgi
-        kwargs = {'bindAddress':(self.host, self.port)}
+        kwargs = {'bindAddress': (self.host, self.port)}
         kwargs.update(self.options) # allow to override bindAddress and others
         flup.server.fcgi.WSGIServer(handler, **kwargs).run()
 
@@ -1877,7 +1849,7 @@ class WSGIRefServer(ServerAdapter):
         srv = make_server(self.host, self.port, handler, **self.options)
         srv.serve_forever()
 
-## Shinken : add WSGIRefServerSelect
+## Shinken: add WSGIRefServerSelect
 class WSGIRefServerSelect(ServerAdapter):
     def run(self, handler): # pragma: no cover
         print "Call the Select version"
@@ -2024,7 +1996,7 @@ class RocketServer(ServerAdapter):
         https://github.com/defnull/bottle/issues/#issue/63 """
     def run(self, handler):
         from rocket import Rocket
-        server = Rocket((self.host, self.port), 'wsgi', { 'wsgi_app' : handler })
+        server = Rocket((self.host, self.port), 'wsgi', { 'wsgi_app': handler })
         server.start()
 
 
@@ -2045,12 +2017,12 @@ class AutoServer(ServerAdapter):
             except ImportError:
                 pass
 
-## Shinken : add 'wsgirefselect' : WSGIRefServerSelect,
+## Shinken: add 'wsgirefselect': WSGIRefServerSelect,
 server_names = {
     'cgi': CGIServer,
     'flup': FlupFCGIServer,
     'wsgiref': WSGIRefServer,
-    'wsgirefselect' : WSGIRefServerSelect,
+    'wsgirefselect': WSGIRefServerSelect,
     'cherrypy': CherryPyServer,
     'paste': PasteServer,
     'fapws3': FapwsServer,
@@ -2063,7 +2035,7 @@ server_names = {
     'eventlet': EventletServer,
     'gevent': GeventServer,
     'rocket': RocketServer,
-    'bjoern' : BjoernServer,
+    'bjoern': BjoernServer,
     'auto': AutoServer,
 }
 
@@ -2125,24 +2097,15 @@ def load_app(target):
     app.remove(tmp) # Remove the temporary added default application
     return rv if isinstance(rv, Bottle) else tmp
 
-## Shinken : add the return of the server
+## Shinken: add the return of the server
 def run(app=None, server='wsgiref', host='127.0.0.1', port=8080,
         interval=1, reloader=False, quiet=False, **kargs):
-    """ Start a server instance. This method blocks until the server terminates.
-
-        :param app: WSGI application or target string supported by
-               :func:`load_app`. (default: :func:`default_app`)
-        :param server: Server adapter to use. See :data:`server_names` keys
+    """ Start a server instance. This method blocks until the server terminates.:param app: WSGI application or target string supported by
+               :func:`load_app`. (default: :func:`default_app`):param server: Server adapter to use. See :data:`server_names` keys
                for valid names or pass a :class:`ServerAdapter` subclass.
-               (default: `wsgiref`)
-        :param host: Server address to bind to. Pass ``0.0.0.0`` to listens on
-               all interfaces including the external one. (default: 127.0.0.1)
-        :param port: Server port to bind to. Values below 1024 require root
-               privileges. (default: 8080)
-        :param reloader: Start auto-reloading server? (default: False)
-        :param interval: Auto-reloader interval in seconds (default: 1)
-        :param quiet: Suppress output to stdout and stderr? (default: False)
-        :param options: Options passed to the server adapter.
+               (default: `wsgiref`):param host: Server address to bind to. Pass ``0.0.0.0`` to listens on
+               all interfaces including the external one. (default: 127.0.0.1):param port: Server port to bind to. Values below 1024 require root
+               privileges. (default: 8080):param reloader: Start auto-reloading server? (default: False):param interval: Auto-reloader interval in seconds (default: 1):param quiet: Suppress output to stdout and stderr? (default: False):param options: Options passed to the server adapter.
      """
     # Shinken
     res = None
@@ -2346,7 +2309,7 @@ class MakoTemplate(BaseTemplate):
     def prepare(self, **options):
         from mako.template import Template
         from mako.lookup import TemplateLookup
-        options.update({'input_encoding':self.encoding})
+        options.update({'input_encoding': self.encoding})
         options.setdefault('format_exceptions', bool(DEBUG))
         lookup = TemplateLookup(directories=self.lookup, **options)
         if self.source:
@@ -2664,7 +2627,7 @@ HTTP_CODES[418] = "I'm a teapot" # RFC 2324
 _HTTP_STATUS_LINES = dict((k, '%d %s'%(k,v)) for (k,v) in HTTP_CODES.iteritems())
 
 #: The default template used for error pages. Override with @error()
-### SHINKEN MOD : change from bottle import DEBUG to from shinken.webui.bottle import DEBUG,...
+### SHINKEN MOD: change from bottle import DEBUG to from shinken.webui.bottle import DEBUG,...
 ERROR_PAGE_TEMPLATE = """
 %try:
     %from shinken.webui.bottle import DEBUG, HTTP_CODES, request, touni

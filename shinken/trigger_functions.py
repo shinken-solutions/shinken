@@ -50,7 +50,7 @@ class declared(object):
         return self.f(*args)
 
 
-@declared                
+@declared
 def critical(obj, output):
     logger.debug("[trigger::%s] I am in critical for object" % obj.get_name())
     now = time.time()
@@ -83,7 +83,7 @@ def set_value(obj_ref, output=None, perfdata=None, return_code=None):
 
     if perfdata:
         output = output + ' | ' + perfdata
-    
+
     now = time.time()
     cls = obj.__class__
     i = obj.launch_check(now, force=True)
@@ -97,12 +97,12 @@ def set_value(obj_ref, output=None, perfdata=None, return_code=None):
             c.get_outputs(output, obj.max_plugins_output_length)
             c.status = 'waitconsume'
             c.check_time = now
-            # IMPORTANT : tag this check as from a trigger, so we will not
+            # IMPORTANT: tag this check as from a trigger, so we will not
             # loop in an infinite way for triggers checks!
             c.from_trigger = True
             # Ok now this result will be read by scheduler the next loop
-    
-    
+
+
 
 @declared
 def perf(obj_ref, metric_name):
@@ -124,7 +124,7 @@ def get_custom(obj_ref, cname, default=None):
     if not cname.startswith('_'):
         cname = '_'+cname
     return obj.customs.get(cname, default)
-    
+
 
 @declared
 def perfs(objs_ref, metric_name):
@@ -188,11 +188,11 @@ def get_objects(ref):
             print "Compare", hname, "with", h.get_name()
             if p.search(h.get_name()):
                 hosts.append(h)
-    
+
     # Maybe the user ask for justs hosts :)
     if not sdesc:
         return hosts
-    
+
     for h in hosts:
         if not '*' in sdesc:
             s = h.find_service_by_name(sdesc)

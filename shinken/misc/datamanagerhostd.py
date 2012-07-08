@@ -38,7 +38,7 @@ class DataManagerHostd(DataManagerSKonf):
         for i in self.get_all_in_db(table):
             r.append(i)
         return r
-        
+
 
     def get_packs(self):
         return self.get_generics('packs', 'pack_name')
@@ -71,7 +71,7 @@ class DataManagerHostd(DataManagerSKonf):
                 print "In the level", d, " and the context", pos
                 sons = pos[1]
                 print "Get the sons to add me", sons
-                
+
                 if not d in [s[0] for s in sons]:
                     print "Add a new level"
                     print "Get the sons to add me", sons
@@ -82,14 +82,14 @@ class DataManagerHostd(DataManagerSKonf):
                     if s[0] == d:
                         print "We found our new position", s
                         pos = s
-                        
+
             # Now add our pack to this entry
             print "Add pack to the level", pos[0]
             pos[2].append(p)
         print "The whole pack tree", t
         return t
-                    
-    
+
+
     def get_pack_tree(self):
         packs = self.get_packs()
         packs = [p for p in packs if p['state'] in ['ok', 'pending']]
@@ -99,7 +99,7 @@ class DataManagerHostd(DataManagerSKonf):
         print "RETURN WHOLE PACK TREE", r
         return r
 
-        
+
     def _get_pack_tree(self, tree):
         print "__get_pack_tree:: for", tree
         name = tree[0]
@@ -118,15 +118,15 @@ class DataManagerHostd(DataManagerSKonf):
 
         res = []
         if name != '':
-            res.append({'type' : 'new_tree', 'name' : name})
+            res.append({'type': 'new_tree', 'name': name})
         for p in packs:
-            res.append({'type' : 'pack', 'pack' : p})
-            
+            res.append({'type': 'pack', 'pack': p})
+
         for s in sons:
             r = self._get_pack_tree(s)
             res.extend(r)
         if name != '':
-            res.append({'type' : 'end_tree', 'name' : name})
+            res.append({'type': 'end_tree', 'name': name})
         print "RETURN PARTIAL", res
         return res
 
@@ -165,7 +165,7 @@ class DataManagerHostd(DataManagerSKonf):
                     print "FOUND A SERVICE THAT MA5TCH", s.get('service_description', '')
                     services.append(s)
             res.append( (tpl, services) )
-            
+
         return res
 
 datamgr = DataManagerHostd()

@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -81,14 +81,14 @@ class DependencyNode(object):
 
         # We will surely need the worst state
         worst_state = max(states)
-        
-        
-        # Suggestion : What about returning min(states) for the | operand?
+
+
+        # Suggestion: What about returning min(states) for the | operand?
         # We don't need make a difference between an 0 and another no?
         # If you do so, it may be more efficient with lots of services
         # or host to return OK, but otherwise I can't see the reason for
         # this subcase.
-        
+
         # We look for the better state but not OK/UP
         no_ok = [s for s in states if s != 0]
         if len(no_ok) != 0:
@@ -112,11 +112,11 @@ class DependencyNode(object):
         # Ok we've got a 'of:' rule
         # We search for OK, WARN or CRIT applications
         # And we will choice between them
-        
+
         nb_search_ok = self.of_values[0]
         nb_search_warn = self.of_values[1]
         nb_search_crit = self.of_values[2]
-        
+
         # We look for each application
         nb_ok = len([s for s in states if s == 0])
         nb_warn = len([s for s in states if s == 1])
@@ -126,7 +126,7 @@ class DependencyNode(object):
 
         # Ok and Crit apply with their own values
         # Warn can apply with warn or crit values
-        # so a W C can raise a Warning, but not enough for 
+        # so a W C can raise a Warning, but not enough for
         # a critical
         ok_apply = nb_ok >= nb_search_ok
         warn_apply = nb_warn + nb_crit >= nb_search_warn
@@ -181,11 +181,11 @@ class DependencyNode(object):
             if self.of_values[i] == 0:
                 self.of_values[i] = nb_sons
         self.of_values = tuple(self.of_values)
-        
+
 
     # Check for empty (= not found) leaf nodes
     def is_valid(self):
-        
+
         valid = True
         if not self.sons:
             valid = False
@@ -195,10 +195,10 @@ class DependencyNode(object):
                     self.configuration_errors.extend(s.configuration_errors)
                     valid = False
         return valid
-            
 
 
-""" TODO : Add some comment about this class for the doc"""
+
+""" TODO: Add some comment about this class for the doc"""
 class DependencyNodeFactory(object):
     def __init__(self):
         pass
@@ -286,7 +286,7 @@ class DependencyNodeFactory(object):
                     current_rule = node.operand
                     #print "Current rule", current_rule
                     if current_rule is not None and current_rule != 'of:' and c != current_rule:
-                        # Should be logged as a warning / info ? :)
+                        # Should be logged as a warning / info? :)
                         #print "Fuck, you mix all dumbass!"
                         return None
                     if current_rule != 'of:':
@@ -314,7 +314,7 @@ class DependencyNodeFactory(object):
         node.switch_zeros_of_values()
 
         #print "End, tmp", tmp
-        #print "R %s :" % patern, node
+        #print "R %s:" % patern, node
         return node
 
 

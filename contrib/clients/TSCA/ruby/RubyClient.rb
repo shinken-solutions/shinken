@@ -23,7 +23,7 @@ begin
    trace.serv = row[1]
    trace.output = row[2]
    trace.rc = Org::Shinken_monitoring::TSCA::ReturnCode::OK
-   list.push(trace) 
+   list.push(trace)
  end
  data.states = list
  client.submit_list(data)

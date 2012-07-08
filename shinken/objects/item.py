@@ -44,29 +44,29 @@ from shinken.log import logger
 
 
 class Item(object):
-    
+
     properties = {
         'imported_from':            StringProp(default='unknown'),
         'use':                      ListProp(default=''),
         'name':                     StringProp(default=''),
-        
-        # TODO : find why we can't uncomment this line below.
+
+        # TODO: find why we can't uncomment this line below.
         #'register':                 BoolProp(default='1'),
     }
-    
+
     running_properties = {
         # All errors and warning raised during the configuration parsing
         # and that will raised real warning/errors during the is_correct
         'configuration_warnings':   ListProp(default=[]),
         'configuration_errors':     ListProp(default=[]),
-        'hash'                  :   StringProp(default=''),
+        'hash':   StringProp(default=''),
         # We save all template we asked us to load from
-        'tags'                  :   ListProp(default=set(), fill_brok=['full_status']),
+        'tags':   ListProp(default=set(), fill_brok=['full_status']),
     }
-    
+
     macros = {
     }
-    
+
     def __init__(self, params={}):
         # We have our own id of My Class type :)
         # use set attr for going into the slots
@@ -79,12 +79,12 @@ class Item(object):
         self.plus = {} # for value with a +
 
         self.init_running_properties()
-        
+
         # [0] = +  -> new key-plus
         # [0] = _  -> new custom entry in UPPER case
         for key in params:
             if len(params[key]) >= 1 and params[key][0]  == '+':
-                # Special case : a _MACRO can be a plus. so add to plus
+                # Special case: a _MACRO can be a plus. so add to plus
                 # but upper the key for the macro name
                 if key[0] == "_":
                     self.plus[key.upper()] = params[key][1:] # we remove the +
@@ -96,7 +96,7 @@ class Item(object):
             else:
                 setattr(self, key, params[key])
 
-    
+
     def init_running_properties(self):
         for prop, entry in self.__class__.running_properties.items():
             # Copy is slow, so we check type
@@ -126,7 +126,7 @@ class Item(object):
     def clean(self):
         """ Clean useless things not requested once item has been fully initialized&configured.
 Like temporary attributes such as "imported_from", etc.. """
-        for name in ( 'imported_from', 'use', 'plus', 'templates', ): 
+        for name in ( 'imported_from', 'use', 'plus', 'templates', ):
             try:
                 delattr(self, name)
             except AttributeError:
@@ -160,11 +160,11 @@ Like temporary attributes such as "imported_from", etc.. """
     def load_global_conf(cls, conf):
         """ Used to put global values in the sub Class like
         hosts or services """
-        # conf have properties, if 'enable_notifications' :
-        # { [...] 'class_inherit' : [(Host, None), (Service, None),
+        # conf have properties, if 'enable_notifications':
+        # { [...] 'class_inherit': [(Host, None), (Service, None),
         #  (Contact, None)]}
         # get the name and put the value if None, put the Name
-        # (not None) if not (not clear ?)
+        # (not None) if not (not clear?)
         for prop, entry in conf.properties.items():
             # If we have a class_inherit, and the arbiter really send us it
             # if 'class_inherit' in entry and hasattr(conf, prop):
@@ -229,7 +229,7 @@ Like temporary attributes such as "imported_from", etc.. """
             value = getattr(self, prop)
             # Maybe this value is 'null'. If so, we should NOT inherit
             # and just delete this entry, and hope of course.
-            # Keep "null" values, because in "inheritance chaining" they must 
+            # Keep "null" values, because in "inheritance chaining" they must
             # be passed from one level to the next.
             #if value == 'null':
             #    delattr(self, prop)
@@ -276,9 +276,9 @@ Like temporary attributes such as "imported_from", etc.. """
         # Maybe templates only give us + values, so we didn't quit, but we already got a
         # self.prop value after all
         template_with_only_plus = hasattr(self, prop)
-        
+
         # I do not have endingprop, my templates too... Maybe a plus?
-        # warning : if all my templates gave me '+' values, do not forgot to
+        # warning: if all my templates gave me '+' values, do not forgot to
         # add the already set self.prop value
         if self.has_plus(prop):
             if template_with_only_plus:
@@ -352,7 +352,7 @@ Like temporary attributes such as "imported_from", etc.. """
     def is_correct(self):
         state = True
         properties = self.__class__.properties
-        
+
         # Raised all previously saw errors like unknown contacts and co
         if self.configuration_errors != []:
             state = False
@@ -423,7 +423,7 @@ Like temporary attributes such as "imported_from", etc.. """
             self.acknowledgement = a
             if self.my_type == 'host':
                 comment_type = 1
-            else :
+            else:
                 comment_type = 2
             c = Comment(self, persistent, author, comment,
                         comment_type, 4, 0, False, 0)
@@ -526,7 +526,7 @@ Like temporary attributes such as "imported_from", etc.. """
     def get_initial_status_brok(self):
         cls = self.__class__
         my_type = cls.my_type
-        data = {'id' : self.id}
+        data = {'id': self.id}
 
         self.fill_data_brok_from(data, 'full_status')
         b = Brok('initial_'+my_type+'_status', data)
@@ -538,7 +538,7 @@ Like temporary attributes such as "imported_from", etc.. """
         cls = self.__class__
         my_type = cls.my_type
 
-        data = {'id' : self.id}
+        data = {'id': self.id}
         self.fill_data_brok_from(data, 'full_status')
         b = Brok('update_'+my_type+'_status', data)
         return b
@@ -583,7 +583,7 @@ Like temporary attributes such as "imported_from", etc.. """
             else:
                 setattr(self, prop, None)
 
-    
+
     # We look at the 'trigger' prop and we create a trigger for it
     def explode_trigger_string_into_triggers(self, triggers):
         src = getattr(self, 'trigger', '')
@@ -596,7 +596,7 @@ Like temporary attributes such as "imported_from", etc.. """
                 # Maybe the trigger factory give me a already existing trigger,
                 # so my name can be dropped
                 self.triggers.append(t.get_name())
-        
+
 
 
     # Link with triggers. Can be with a "in source" trigger, or a file name
@@ -614,9 +614,9 @@ Like temporary attributes such as "imported_from", etc.. """
                 self.configuration_errors.append('the %s %s does have a unknown trigger_name "%s"' % (self.__class__.my_type, self.get_full_name(), tname))
         self.triggers = new_triggers
 
-        
-            
-        
+
+
+
 
 
 class Items(object):
@@ -798,8 +798,8 @@ class Items(object):
             if not i.is_correct():
                 n = getattr(i, 'imported_from', "unknown source")
                 logger.error("[items] In %s is incorrect ; from %s" % (i.get_name(), n))
-                r = False        
-        
+                r = False
+
         return r
 
 
@@ -890,7 +890,7 @@ class Items(object):
                         c = contacts.find_by_name(c_name)
                         if c is not None:
                             new_contacts.append(c)
-                        # Else : Add in the errors tab.
+                        # Else: Add in the errors tab.
                         # will be raised at is_correct
                         else:
                             err = "the contact '%s' defined for '%s' is unknown" % (c_name, i.get_name())
@@ -1013,7 +1013,7 @@ class Items(object):
                     # TODO: catch None?
                     setattr(i, prop, cmdCall)
                 else:
-                    
+
                     setattr(i, prop, None)
 
 
@@ -1050,12 +1050,12 @@ class Items(object):
     def evaluate_hostgroup_expression(self, expr, hosts, hostgroups, look_in='hostgroups'):
         begin = 0
         end = len(expr)
-        ctxres = hg_name_parse_EXPR(expr, begin, end) 
+        ctxres = hg_name_parse_EXPR(expr, begin, end)
         if ctxres.rc:
-            err = "the syntax of %s is invalid : %s" % (expr, ctxres.reason)
+            err = "the syntax of %s is invalid: %s" % (expr, ctxres.reason)
             self.configuration_errors.append(err)
             return []
-        
+
         str_setexpr = hg_name_rebuild_str(ctxres.full_res)
         # We must protect the eval() against some names that will be match as
         # Python things like - or print and not real names. So we "change" them with __OTHERNAME__
@@ -1114,7 +1114,7 @@ class Items(object):
                             #print "DBG in item.explode_host_groups_into_hosts , added '%s' to group '%s'" % (newhost, i)
                     else:
                         hnames_list.append(h)
-            
+
             i.host_name = ','.join(list(set(hnames_list)))
 
             # Ok, enven with all of it, there is still no host, put it as a template
@@ -1129,36 +1129,36 @@ class Items(object):
 
 
 class HostGroup_Name_Parse_Ctx(object):
-    
-        
+
+
     hgn_chars_separator = ( '|', ',', '&', '^', )
     specials_hostgroup_name_chars = ( '*', '(', ')', '!', ) + hgn_chars_separator
-    
+
     space_chars = ( ' ', '\t', )
-    # no group should be named like that :
+    # no group should be named like that:
     catch_all_name = "__ALLELEMENTS__"
     minus_sign_in_name = "__MINUSSIGN_IN_NAME__"
     print_in_name = "__PRINT_IN_NAME__"
-       
-    
+
+
     # flags:
     empty_item_ok = 0
-     
+
     def __init__(self, expr, flags=None):
         if flags is None:
             flags = []
-        
+
         self.expr = expr
         self.flags = flags
         self.last_is_expr = False
         self.prev_res = None
-        self.res_i = 0 
+        self.res_i = 0
         self.rc = 0
         self.reason = ""
         self.pos_res = []
         self.neg_res = []
         self.full_res = None
-        
+
 
     def __str__(self):
         return "< prev_item='%s' last_is_expr=%s res_i=%d rc=%d >" % (self.prev_res, self.last_is_expr, self.res_i, self.rc)
@@ -1198,27 +1198,27 @@ def find_matching_closing(expr, begin, end):
 def hg_name_parse_item(ctx, expr, begin, end):
     if ctx.last_is_expr:
         ctx.rc = -1
-        ctx.reason = "2 consecutive items without valid separator : '%s' and '%s ..'" % (ctx.prev_res, expr[begin:begin+10])
+        ctx.reason = "2 consecutive items without valid separator: '%s' and '%s ..'" % (ctx.prev_res, expr[begin:begin+10])
         return None
-    
+
     i = s = skip_space(expr, begin, end)
     while i < end:
         c = expr[i]
         if c in HostGroup_Name_Parse_Ctx.specials_hostgroup_name_chars:
             break
         i += 1
-    
+
     if i == s:
         if HostGroup_Name_Parse_Ctx.empty_item_ok in ctx.flags:
             ctx.res_i = i
             return "set([])"
-            
+
         ctx.rc = -1
         ctx.reason = "Invalid item: size is zero, near '%s'." % (expr[i:i+10])
         return None
-    
+
     ctx.res_i = i
-    # returns the stripped version of the item :
+    # returns the stripped version of the item:
     res = expr[s:i].strip()
     ctx.prev_res = res
     ctx.last_is_expr = True
@@ -1233,7 +1233,7 @@ def hg_name_parse_single_expr(ctx, expr, begin, end):
     else:
         res = hg_name_parse_item(ctx, expr, i, end)
     return res
-    
+
 def hg_name_parse_all(ctx, expr, begin, end):
     if ctx.last_is_expr:
         ctx.rc = -1
@@ -1242,7 +1242,7 @@ def hg_name_parse_all(ctx, expr, begin, end):
     ctx.pos_res.append("*")
     ctx.last_is_expr = True
     ctx.res_i = begin + 1 # just skip the '*'
-    
+
 
 def hg_name_parse_expr_operator(ctx, expr, begin, end):
     op = expr[begin]
@@ -1269,7 +1269,7 @@ def hg_name_parse_not(ctx, expr, begin, end):
     i = s = skip_space(expr, begin, end)
     if i >= end:
         ctx.rc = -1
-        ctx.reason = "'!' must be followed by an expression !"
+        ctx.reason = "'!' must be followed by an expression!"
         return
     c = expr[i]
     if c not in tabs_hg_name_list_operators:
@@ -1282,7 +1282,7 @@ def hg_name_parse_not(ctx, expr, begin, end):
             ctx.rc = -1
             ctx.reason = "Invalid item after '!', near '%s'" % (expr[s:s+10])
             return
-        
+
         res = hg_name_parse_item(ctx, expr, s, i)
     else:
         if c != '(':
@@ -1292,7 +1292,7 @@ def hg_name_parse_not(ctx, expr, begin, end):
         n = find_matching_closing(expr, s, end)
         if n is None:
             ctx.rc = -1
-            ctx.reason = "Near '%s' : ( An unmatched left parenthesis creates an unresolved tension that will stay with you all day." % (expr[i:10])
+            ctx.reason = "Near '%s': ( An unmatched left parenthesis creates an unresolved tension that will stay with you all day." % (expr[i:10])
             return
         n += s
         subctx = hg_name_parse_EXPR(expr, s, n, ctx.flags)
@@ -1312,15 +1312,15 @@ def hg_name_parse_not(ctx, expr, begin, end):
 def parse_neg_or_not__(ctx, expr, begin, end):
     begin += 1
     if not ctx.last_is_expr:
-        # "! X" case :
+        # "! X" case:
         res = hg_name_parse_not(ctx, expr, begin, end)
     else:
-        # "A ! B" case :
+        # "A ! B" case:
         ctx.pos_res.append("-")
         ctx.last_is_expr = False
         res = hg_name_parse_single_expr(ctx, expr, begin, end)
     return res
-    
+
 
 def hg_name_parse_subexpr(ctx, expr, begin, end):
     if ctx.last_is_expr:
@@ -1331,7 +1331,7 @@ def hg_name_parse_subexpr(ctx, expr, begin, end):
     i2e = find_matching_closing(expr, i2s, end)
     if i2e is None:
         ctx.rc = -1
-        ctx.reason = "Near '%s' : ( An unmatched left parenthesis creates an unresolved tension that will stay with you all day." % (expr[begin:begin+10])        
+        ctx.reason = "Near '%s': ( An unmatched left parenthesis creates an unresolved tension that will stay with you all day." % (expr[begin:begin+10])
         return
     subctx = hg_name_parse_EXPR(expr, i2s, i2e, ctx.flags)
     if subctx.rc:
@@ -1356,7 +1356,7 @@ tabs_hg_name_list_operators = {
 
 
 def hg_name_parse_expr(ctx, expr, begin, end):
-    """ Parse a hostgroup_name expression, 
+    """ Parse a hostgroup_name expression,
 If parse successfull:
     ctx.rc == 0
     ctx.full_res is the tuple result.
@@ -1373,12 +1373,12 @@ A "sub-parse_expr_result" is either:
     while i < end:
 
         c = expr[i]
-        
+
         handler = tabs_hg_name_list_operators.get(c, hg_name_parse_item)
         res = handler(ctx, expr, i, end)
         if ctx.rc:
             break
-        
+
         if res is not None:
             ctx.pos_res.append(res)
 
@@ -1411,23 +1411,23 @@ def hg_name_get_groupnames(all_res, hosts, hostgroups, res=None, look_in='hostgr
         if isinstance(tok, list):
             hg_name_get_groupnames(tok, hosts, hostgroups, res, look_in)
             continue
-        
+
         save_tok = tok
         if tok in HostGroup_Name_Parse_Ctx.specials_hostgroup_name_chars + ( '-', ):
             if tok != '*':
                 continue
             tok = HostGroup_Name_Parse_Ctx.catch_all_name
-        
+
         if tok in res: # we already got it, good.
             continue
-        
+
         if save_tok == '*':
             elts = get_all_host_names_set(hosts)
         else:
             members = []
-            # We got 2 possibilities : hostgroups or templates
+            # We got 2 possibilities: hostgroups or templates
             if look_in == 'hostgroups':
-                # we got a group name :
+                # we got a group name:
                 members = hostgroups.get_members_by_name(tok)
             else:  # == templates
                 # It's a dict of template.
@@ -1441,16 +1441,16 @@ def hg_name_get_groupnames(all_res, hosts, hostgroups, res=None, look_in='hostgr
             else:
                 elts = members.split(',')
             elts = strip_and_uniq(elts)
-            
-            # the "host_name" members of a hostgroup can also be '*' :
+
+            # the "host_name" members of a hostgroup can also be '*':
             if '*' in elts:
-                tok = HostGroup_Name_Parse_Ctx.catch_all_name 
+                tok = HostGroup_Name_Parse_Ctx.catch_all_name
                 if tok in res:
                     elts = res[tok]
-                else: 
-                    elts = get_all_host_names_set(hosts)    
+                else:
+                    elts = get_all_host_names_set(hosts)
                 # the original tok must still be set:
-                res[save_tok] = elts 
+                res[save_tok] = elts
 
         res[tok] = set(elts)
 
@@ -1470,14 +1470,14 @@ parse_res must be the 'full_res' attribute of a 'HostGroup_Name_Parse_Ctx' objec
         if 'print' in parse_res:
             parse_res = parse_res.replace('print', HostGroup_Name_Parse_Ctx.print_in_name)
         return parse_res
-    
+
     # nearly trivial case, parse_res is here a list of objects:
     if isinstance(parse_res, list):
         if len(parse_res) == 0:
             return "set([])"
         return " ".join( hg_name_rebuild_str(i) for i in parse_res )
-    
-    # "base" case :
+
+    # "base" case:
     # assert( isinstance(parse_res, tuple) )
     # parse_res[0] is the positive results.   == hosts to include.
     # parse_res[1] is the "negative" results. == hosts to NOT include.
@@ -1485,15 +1485,15 @@ parse_res must be the 'full_res' attribute of a 'HostGroup_Name_Parse_Ctx' objec
     # assert( isinstance(parse_res[1], list) )
     posres = " ".join( hg_name_rebuild_str(i) for i in parse_res[0] )
     negres = " ".join( hg_name_rebuild_str(i) for i in parse_res[1] )
-    
+
     posres.strip()
     negres.strip()
-    
+
     lenpos = len(posres)
     lenneg = len(negres)
     if lenpos == 0 and lenneg == 0:   # bouhhh
         return "set([])"
-    
+
     res = "( "
     if lenpos == 0:
         res += "set([])"
@@ -1501,9 +1501,9 @@ parse_res must be the 'full_res' attribute of a 'HostGroup_Name_Parse_Ctx' objec
         res += " ( " + posres + " ) "
     if lenneg > 0:
         res += " - ( " + negres + " )"
-        
+
     res += " )"
-    
+
     return res
 
 

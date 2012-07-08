@@ -36,10 +36,10 @@ from shinken.basemodule import BaseModule
 from shinken.external_command import ExternalCommand
 
 properties = {
-    'daemons' : ['arbiter', 'receiver', 'poller'],
-    'type' : 'named_pipe',
-    'external' : True,
-    'worker_capable' : False,
+    'daemons': ['arbiter', 'receiver', 'poller'],
+    'type': 'named_pipe',
+    'external': True,
+    'worker_capable': False,
     }
 
 # called by the plugin manager to get a broker
@@ -49,7 +49,7 @@ def get_instance(plugin):
     try:
         path = plugin.command_file
     except AttributeError:
-        print "Error : the plugin '%s' do not have a command_file property"
+        print "Error: the plugin '%s' do not have a command_file property"
         raise
     instance = Named_Pipe_arbiter(plugin, path)
     return instance
@@ -62,7 +62,7 @@ class Named_Pipe_arbiter(BaseModule):
         self.pipe_path = path
         self.fifo = None
         self.cmd_fragments = ''
-        
+
 
 
     def open(self):
@@ -79,7 +79,7 @@ class Named_Pipe_arbiter(BaseModule):
                     os.mkfifo(self.pipe_path, 0660)
                     open(self.pipe_path, 'w+', os.O_NONBLOCK)
                 except OSError , exp:
-                    print "Error : pipe creation failed (",self.pipe_path,')', exp, os.getcwd()
+                    print "Error: pipe creation failed (",self.pipe_path,')', exp, os.getcwd()
                     return None
         print "[%s] Trying to open the named pipe '%s'" % (self.get_name(), self.pipe_path)
         self.fifo = os.open(self.pipe_path, os.O_NONBLOCK)
@@ -113,9 +113,9 @@ class Named_Pipe_arbiter(BaseModule):
     # When you are in "external" mode, that is the main loop of your process
     def main(self):
         self.set_exit_handler()
-        
+
         self.open()
-        
+
         input = [self.fifo]
 
         while not self.interrupted:

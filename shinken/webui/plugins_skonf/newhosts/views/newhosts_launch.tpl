@@ -7,6 +7,6 @@
     <a class='btn btn-primary' href="/newhosts/results"><i class="icon-chevron-right"></i> Go to results</a>
   </p>
 </div>
-    
+
 
 

@@ -29,7 +29,7 @@ class TestStarInGroups(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_star_in_hostgroups.cfg')
 
-    
+
     # If we reach a good start, we are ok :)
     # the bug was that an * hostgroup expand get all host_name != ''
     # without looking at register 0 or not

@@ -56,7 +56,7 @@ from shinken.message import Message
 from shinken.misc.datamanagerskonf import datamgr
 from shinken.objects.pack import Pack,Packs
 
-# DBG : code this!
+# DBG: code this!
 from shinken.objects import Contact
 
 # Now the bottle HTTP part :)
@@ -84,7 +84,7 @@ except ImportError:
 # It connects, and together we decide who's the Master and who's the Slave, etc.
 # Here is a also a function to get a new conf from the master
 class IForArbiter(Interface):
-    
+
     def have_conf(self, magic_hash):
         # I've got a conf and a good one
         if self.app.cur_conf and self.app.cur_conf.magic_hash == magic_hash:
@@ -121,7 +121,7 @@ class IForArbiter(Interface):
             for dae in daemons:
                 if hasattr(dae, daemon_name_attr) and getattr(dae, daemon_name_attr) == daemon_name:
                     if hasattr(dae, 'alive') and hasattr(dae, 'spare'):
-                        return {'alive' : dae.alive, 'spare' : dae.spare}
+                        return {'alive': dae.alive, 'spare': dae.spare}
         return None
 
 
@@ -147,12 +147,12 @@ class IForArbiter(Interface):
 
 
     def get_all_states(self):
-        res = {'arbiter' : self.app.conf.arbiters,
-               'scheduler' : self.app.conf.schedulers,
-               'poller' : self.app.conf.pollers,
-               'reactionner' : self.app.conf.reactionners,
-               'receiver' : self.app.conf.receivers,
-               'broker' : self.app.conf.brokers}
+        res = {'arbiter': self.app.conf.arbiters,
+               'scheduler': self.app.conf.schedulers,
+               'poller': self.app.conf.pollers,
+               'reactionner': self.app.conf.reactionners,
+               'receiver': self.app.conf.receivers,
+               'broker': self.app.conf.brokers}
         return res
 
 
@@ -160,9 +160,9 @@ class IForArbiter(Interface):
 class Skonf(Daemon):
 
     def __init__(self, config_files, is_daemon, do_replace, verify_only, debug, debug_file):
-        
+
         super(Skonf, self).__init__('skonf', config_files[0], is_daemon, do_replace, debug, debug_file)
-        
+
         self.config_files = config_files
 
         self.verify_only = verify_only
@@ -203,7 +203,7 @@ class Skonf(Daemon):
         else:
             logger.warning('Cannot manage object type %s (%s)' % (type(b), b))
 
-            
+
 
     def load_config_file(self):
         print "Loading configuration"
@@ -218,9 +218,9 @@ class Skonf(Daemon):
         # so we can ask them some objects too
         self.conf.create_objects_for_type(raw_objects, 'arbiter')
         self.conf.create_objects_for_type(raw_objects, 'module')
-        
+
         self.conf.early_arbiter_linking()
-        
+
         self.modules = []
         print "Loading modules", self.conf.skonf_modules
         modules_names = self.conf.skonf_modules.split(',')
@@ -232,9 +232,9 @@ class Skonf(Daemon):
               sys.exit(2)
            self.modules.append(m)
 
-        logger.info("My own modules : " + ','.join([m.get_name() for m in self.modules]))
+        logger.info("My own modules: " + ','.join([m.get_name() for m in self.modules]))
 
-        # we request the instances without them being *started* 
+        # we request the instances without them being *started*
         # (for these that are concerned ("external" modules):
         # we will *start* these instances after we have been daemonized (if requested)
         self.modules_manager.set_modules(self.modules)
@@ -252,12 +252,12 @@ class Skonf(Daemon):
         # got items for us
         for inst in self.modules_manager.instances:
             if 'configuration' in inst.phases:
-                try :
+                try:
                     r = inst.get_objects()
                 except Exception, exp:
                     print "The instance %s raise an exception %s. I bypass it" % (inst.get_name(), str(exp))
                     continue
-                
+
                 types_creations = self.conf.types_creations
                 for k in types_creations:
                     (cls, clss, prop) = types_creations[k]
@@ -310,7 +310,7 @@ class Skonf(Daemon):
 
         # Fill default values
         super(Config, self.conf).fill_default()
-        
+
         # Remove templates from config
         # SAVE TEMPLATES
         self.host_templates = self.conf.hosts.templates
@@ -324,7 +324,7 @@ class Skonf(Daemon):
         # We removed templates, and so we must recompute the
         # search lists
         self.conf.create_reversed_list()
-        
+
         # Pythonize values
         #self.conf.pythonize()
         super(Config, self.conf).pythonize()
@@ -361,7 +361,7 @@ class Skonf(Daemon):
 
         # Manage all post-conf modules
         self.hook_point('late_configuration')
-        
+
         # Correct conf?
         #self.conf.is_correct()
 
@@ -394,7 +394,7 @@ class Skonf(Daemon):
         #self.conf.prepare_for_sending()
 
         # Ok, here we must check if we go on or not.
-        # TODO : check OK or not
+        # TODO: check OK or not
         self.api_key = self.conf.api_key
         self.community_uri = str(self.conf.community_uri)
         self.http_proxy = str(self.conf.http_proxy)
@@ -405,7 +405,7 @@ class Skonf(Daemon):
         self.idontcareaboutsecurity = self.conf.idontcareaboutsecurity
         self.user = self.conf.shinken_user
         self.group = self.conf.shinken_group
-        
+
         # If the user set a workdir, let use it. If not, use the
         # pidfile directory
         if self.conf.workdir == '':
@@ -419,7 +419,7 @@ class Skonf(Daemon):
         ##  We need to set self.host & self.port to be used by do_daemon_init_and_start
         self.host = ''
         self.port = 0
-        
+
         logger.info("Configuration Loaded")
         print ""
 
@@ -439,7 +439,7 @@ class Skonf(Daemon):
         # Load the photo dir and make it a absolute path
         self.photo_dir = 'photos' # getattr(modconf, 'photo_dir', 'photos')
         self.photo_dir = os.path.abspath(self.photo_dir)
-        print "Webui : using the backend", self.http_backend
+        print "Webui: using the backend", self.http_backend
 
 
 
@@ -484,7 +484,7 @@ class Skonf(Daemon):
                   self.workers_queue = Queue()
                else:
                   self.workers_queue = self.manager.Queue()
-            # If we got no /dev/shm on linux, we can got problem here. 
+            # If we got no /dev/shm on linux, we can got problem here.
             # Must raise with a good message
             except OSError, exp:
                # We look for the "Function not implemented" under Linux
@@ -493,16 +493,16 @@ class Skonf(Daemon):
                   raise
 
 
-                
+
             # For multiprocess things, we should not have
             # sockettimeouts. will be set explicitly in Pyro calls
             import socket
             socket.setdefaulttimeout(None)
 
             # ok we are now fully daemon (if requested)
-            # now we can start our "external" modules (if any) :
+            # now we can start our "external" modules (if any):
             self.modules_manager.start_external_instances()
-            
+
             # Ok now we can load the retention data
             self.hook_point('load_retention')
 
@@ -524,7 +524,7 @@ class Skonf(Daemon):
         conf = self.new_conf
         self.new_conf = None
         self.cur_conf = conf
-        self.conf = conf        
+        self.conf = conf
 
 
     def do_loop_turn(self):
@@ -563,7 +563,7 @@ class Skonf(Daemon):
             if not arb.spare:
                 master_timeout = arb.check_interval * arb.max_check_attempts
         logger.info("I'll wait master for %d seconds" % master_timeout)
-        
+
         while not self.interrupted:
             elapsed, _, tcdiff = self.handleRequests(timeout)
             # if there was a system Time Change (tcdiff) then we have to adapt last_master_speak:
@@ -576,8 +576,8 @@ class Skonf(Daemon):
                 timeout -= elapsed
                 if timeout > 0:
                     continue
-            
-            timeout = 1.0            
+
+            timeout = 1.0
             sys.stdout.write(".")
             sys.stdout.flush()
 
@@ -610,7 +610,7 @@ class Skonf(Daemon):
     def run(self):
         if self.conf.human_timestamp_log:
             logger.set_human_format()
-        
+
         # Ok start to work :)
         self.check_photo_dir()
 
@@ -621,7 +621,7 @@ class Skonf(Daemon):
 
         # Declare the whole app static files AFTER the plugin ones
         self.declare_common_static()
-        
+
         # Start sub workers
         for i in xrange(1, 3):
             self.create_and_launch_worker()
@@ -633,7 +633,7 @@ class Skonf(Daemon):
         # Launch the data thread"
         self.workersmanager_thread = threading.Thread(None, self.workersmanager, 'httpthread')
         self.workersmanager_thread.start()
-        # TODO : look for alive and killing
+        # TODO: look for alive and killing
 
         print "Starting SkonfUI app"
         srv = run(host=self.http_host, port=self.http_port, server=self.http_backend)
@@ -651,8 +651,8 @@ class Skonf(Daemon):
     def load_plugins(self):
         from shinken.webui import plugins_skonf as plugins
         plugin_dir = os.path.abspath(os.path.dirname(plugins.__file__))
-        print "Loading plugin directory : %s" % plugin_dir
-        
+        print "Loading plugin directory: %s" % plugin_dir
+
         # Load plugin directories
         plugin_dirs = [ fname for fname in os.listdir(plugin_dir)
                         if os.path.isdir(os.path.join(plugin_dir, fname)) ]
@@ -679,7 +679,7 @@ class Skonf(Daemon):
                     v = entry.get('view', None)
                     static = entry.get('static', False)
 
-                    # IMPORTANT : apply VIEW BEFORE route!
+                    # IMPORTANT: apply VIEW BEFORE route!
                     if v:
                         #print "Link function", f, "and view", v
                         f = view(v)(f)
@@ -689,15 +689,15 @@ class Skonf(Daemon):
                         for r in routes:
                             method = entry.get('method', 'GET')
                             print "link function", f, "and route", r, "method", method
-                            
+
                             # Ok, we will just use the lock for all
                             # plugin page, but not for static objects
                             # so we set the lock at the function level.
                             lock_version = self.lockable_function(f)
                             f = route(r, callback=lock_version, method=method)
-                            
+
                     # If the plugin declare a static entry, register it
-                    # and remeber : really static! because there is no lock
+                    # and remeber: really static! because there is no lock
                     # for them!
                     if static:
                         self.add_static(fdir, m_dir)
@@ -709,10 +709,10 @@ class Skonf(Daemon):
                 # And finally register me so the pages can get data and other
                 # useful stuff
                 m.app = self
-                        
-                        
+
+
             except Exception, exp:
-               logger.log("Loading plugins : %s" % exp)
+               logger.log("Loading plugins: %s" % exp)
 
 
 
@@ -793,12 +793,12 @@ class Skonf(Daemon):
         self.external_command = e
 
         print "Run baby, run..."
-        timeout = 1.0             
-        
+        timeout = 1.0
+
         while self.must_run and not self.interrupted:
-            
+
             elapsed, ins, _ = self.handleRequests(timeout, suppl_socks)
-            
+
             # If FIFO, read external command
             if ins:
                 now = time.time()
@@ -817,15 +817,15 @@ class Skonf(Daemon):
             if elapsed or ins:
                 timeout -= elapsed
                 if timeout > 0: # only continue if we are not over timeout
-                    continue  
-            
+                    continue
+
             # Timeout
             timeout = 1.0 # reset the timeout value
 
             # Try to see if one of my module is dead, and
             # try to restart previously dead modules :)
             self.check_and_del_zombie_modules()
-            
+
             # Call modules that manage a starting tick pass
             self.hook_point('tick')
             print "Tick"
@@ -838,7 +838,7 @@ class Skonf(Daemon):
 
     def get_daemons(self, daemon_type):
         """ Returns the daemons list defined in our conf for the given type """
-        # shouldn't the 'daemon_types' (whetever it is above) be always present ?
+        # shouldn't the 'daemon_types' (whetever it is above) be always present?
         return getattr(self.conf, daemon_type+'s', None)
 
     # Helper functions for retention modules
@@ -862,13 +862,13 @@ class Skonf(Daemon):
     def check_auth(self, user, password):
         print "Checking auth of", user # , password
         c = self.datamgr.get_contact(user)
-        print "Got", c 
+        print "Got", c
         if not c:
             print "Warning: You need to have a contact having the same name as your user %s" % user
-        
-        # TODO : do not forgot the False when release!
+
+        # TODO: do not forgot the False when release!
         is_ok = False # (c is not None) # False
-        
+
         for mod in self.modules_manager.get_internal_instances():
             try:
                 f = getattr(mod, 'check_auth', None)
@@ -882,14 +882,14 @@ class Skonf(Daemon):
             except Exception , exp:
                 print exp.__dict__
                 logger.warning("[%s] The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
-                logger.debug("[%s] Exception type : %s" % (self.name, type(exp)))
+                logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
                 logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
-                self.modules_manager.set_to_restart(mod)        
+                self.modules_manager.set_to_restart(mod)
 
         # Ok if we got a real contact, and if a module auth it
         return (is_ok and c is not None)
 
-        
+
 
     def get_user_auth(self):
         # First we look for the user sid
@@ -920,14 +920,14 @@ class Skonf(Daemon):
 
         # save this worker
         self.workers[w.id] = w
-        
-        logger.info("[%s] Allocating new %s Worker : %s" % (self.name, w.module_name, w.id))
-        
+
+        logger.info("[%s] Allocating new %s Worker: %s" % (self.name, w.module_name, w.id))
+
         # Ok, all is good. Start it!
         w.start()
 
 
-    # TODO : fix hard coded server/database
+    # TODO: fix hard coded server/database
     def init_db(self):
        if not Connection:
           logger.error('You need the pymongo lib for running skonfui. Please install it')
@@ -940,7 +940,7 @@ class Skonf(Daemon):
     def init_datamanager(self):
        self.datamgr.load_conf(self.conf)
        self.datamgr.load_db(self.db)
-       
+
 
 
     def get_api_key(self):
@@ -948,7 +948,7 @@ class Skonf(Daemon):
 
     # We are asking to a worker .. to work :)
     def ask_new_scan(self, id):
-       msg = Message(id=0, type='ScanAsk', data={'scan_id' : id})
+       msg = Message(id=0, type='ScanAsk', data={'scan_id': id})
        print "Creating a Message for ScanAsk", msg
        self.workers_queue.put(msg)
 
@@ -964,10 +964,10 @@ class Skonf(Daemon):
                     lst.append(r)
             except Exception , exp:
                 print exp.__dict__
-                logger.log("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
-                logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
+                logger.log("[%s] Warning: The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
+                logger.log("[%s] Exception type: %s" % (self.name, type(exp)))
                 logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
-                self.modules_manager.set_to_restart(mod)        
+                self.modules_manager.set_to_restart(mod)
 
         safe_print("Will return external_ui_link::", lst)
         return lst
@@ -984,10 +984,10 @@ class Skonf(Daemon):
        print "CHECK if it's a zip file"
        if not zipfile.is_zipfile(_tmpfile):
           print "It's not a zip file!"
-          r = {'state' : 200, 'text' : 'Ok, the pack is downloaded and install. Please restart skonf to use it.'}
+          r = {'state': 200, 'text': 'Ok, the pack is downloaded and install. Please restart skonf to use it.'}
           os.remove(_tmpfile)
           return r
-       
+
 
        TMP_DIR = tempfile.mkdtemp()
        print "Unflating the pack into", TMP_DIR
@@ -996,18 +996,18 @@ class Skonf(Daemon):
 
        # The zip file is no more need
        os.remove(_tmpfile)
-       
+
        packs = Packs({})
        packs.load_file(TMP_DIR)
        packs = [i for i in packs]
        if len(packs) > 1:
-          r = {'state' : 400, 'text' : 'ERROR : the pack got too much .pack file in it'}
+          r = {'state': 400, 'text': 'ERROR: the pack got too much .pack file in it'}
           # Clean before exit
           shutil.rmtree(TMP_DIR)
           return r
 
        if len(packs) == 0:
-          r = {'state' : 400, 'text' : 'ERROR : no valid .pack found in the zip file'}
+          r = {'state': 400, 'text': 'ERROR: no valid .pack found in the zip file'}
           # Clean before exit
           shutil.rmtree(TMP_DIR)
           return r
@@ -1019,7 +1019,7 @@ class Skonf(Daemon):
        pack_path = pack.path
        if pack_path == '/':
           pack_path = '/uncategorized'
-       
+
        # Now we move the pack to it's final directory
        dirs = os.path.normpath(pack_path).split('/')
        dirs = [d for d in dirs if d != '']
@@ -1088,7 +1088,7 @@ class Skonf(Daemon):
                    shutil.copy(src_file, full_dst_file)
                 else:
                    logger.warning('Cannot create the directory %s for a pack install' % os.path.join(self.share_dir, from_share_path))
-          
 
-       r = {'state' : 200, 'text' : 'Ok, the pack is downloaded and install. Please restart skonf to use it.'}
+
+       r = {'state': 200, 'text': 'Ok, the pack is downloaded and install. Please restart skonf to use it.'}
        return r

@@ -30,7 +30,7 @@ class TestInheritanceAndPlus(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_inheritance_and_plus.cfg')
 
-    
+
     def test_inheritance_and_plus(self):
         #
         # Config is not correct because of a wrong relative path
@@ -52,7 +52,7 @@ class TestInheritanceAndPlus(ShinkenTest):
             print hg.get_name()
         self.assert_(linux in host1.hostgroups)
         self.assert_(dmz in host1.hostgroups)
-            
+
         # HOST2 is in lin-servers,dmz and +mysql, so all three of them
         for hg in host2.hostgroups:
             print hg.get_name()

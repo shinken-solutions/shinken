@@ -31,9 +31,9 @@ class TestCommand(ShinkenTest):
     # setUp is inherited from ShinkenTest
 
     def test_command(self):
-        t = {'command_name' : 'check_command_test',
-             'command_line' : '/tmp/dummy_command.sh $ARG1$ $ARG2$',
-             'poller_tag' : 'DMZ'
+        t = {'command_name': 'check_command_test',
+             'command_line': '/tmp/dummy_command.sh $ARG1$ $ARG2$',
+             'poller_tag': 'DMZ'
              }
         c = Command(t)
         self.assert_(c.command_name == 'check_command_test')

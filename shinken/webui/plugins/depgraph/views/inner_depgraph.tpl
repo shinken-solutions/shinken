@@ -19,7 +19,7 @@ Invalid element
   loadjscssfile('/static/depgraph/js/jit-yc.js', 'js');
   loadjscssfile('/static/depgraph/js/excanvas.js', 'js');
   loadjscssfile('/static/depgraph/js/eltdeps.js', 'js');
-  
+
 
 %# rebase widget globals(), title='Dependencies graph of ' + elt.get_full_name(),  js=['depgraph/js/jit-yc.js', 'depgraph/js/excanvas.js', 'depgraph/js/eltdeps.js'],  css=['depgraph/css/eltdeps.css', 'depgraph/css/eltdeps_widget.css'],  print_menu=False
 

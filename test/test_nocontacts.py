@@ -30,7 +30,7 @@ class TestNoContact(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_nocontacts.cfg')
 
-    
+
     # Seems that Nagios allow non contacts elements, just warning
     # and not error. Should do the same.
     def test_nocontact(self):

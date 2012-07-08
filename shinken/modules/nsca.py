@@ -109,8 +109,8 @@ class NSCA_arbiter(BaseModule):
     def send_init_packet(self, sock):
         '''
         Build an init packet
-         00-127  : IV
-         128-131 : unix timestamp
+         00-127: IV
+         128-131: unix timestamp
         '''
         iv = ''.join([chr(self.rng.randrange(256)) for i in xrange(128)])
         init_packet = struct.pack("!128sI", iv, int(time.time()))

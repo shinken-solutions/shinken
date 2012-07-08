@@ -32,7 +32,7 @@ except ImportError:
     try:
         import simplejson as json
     except ImportError:
-        print "Error : you need the json or simplejson module"
+        print "Error: you need the json or simplejson module"
         raise
 
 
@@ -42,7 +42,7 @@ app = None
 
 # Our page
 def get_page():
-    
+
     user = app.get_user_auth()
 
     if not user:
@@ -58,7 +58,7 @@ def get_page():
     widget_names = json.loads(s)
     print "And now objects", widget_names
     widgets = []
-    
+
     for w in widget_names:
         if not 'id' in w or not 'position' in w:
             continue
@@ -73,7 +73,7 @@ def get_page():
         pos = w['position']
         options = w.get('options', {})
         collapsed = w.get('collapsed', '0')
-        
+
         ## Try to get the options for this widget
         #option_s = app.get_user_preference(user, 'widget_widget_system_1333371012', default='{}')
         #print "And load options_s", option_s
@@ -81,18 +81,18 @@ def get_page():
         #    json.loads(option_s)
         #print "And dump options for this widget", options
         w['options'] = json.dumps(options)
-        args = {'wid':i, 'collapsed' : collapsed}
+        args = {'wid': i, 'collapsed': collapsed}
         args.update(options)
         w['options_uri'] = '&'.join( '%s=%s' % (k, v) for (k, v) in args.iteritems())
         widgets.append(w)
 
     print "Give widgets", widgets
-    return {'app' : app, 'user' : user, 'widgets' : widgets}
+    return {'app': app, 'user': user, 'widgets': widgets}
 
 
 
 
-pages = {get_page : { 'routes' : ['/dashboard'], 'view' : 'dashboard', 'static' : True},
-#         get_all : { 'routes' : ['/dashboard/fullscreen'], 'view' : 'fullscreen', 'static' : True},
+pages = {get_page: { 'routes': ['/dashboard'], 'view': 'dashboard', 'static': True},
+#         get_all: { 'routes': ['/dashboard/fullscreen'], 'view': 'fullscreen', 'static': True},
          }
 

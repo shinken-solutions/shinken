@@ -55,10 +55,10 @@ from shinken.objects.module import Module
 from shinken.log import logger
 
 properties = {
-    'daemons' : ['livestatus'],
-    'type' : 'logstore_mongodb',
-    'external' : False,
-    'phases' : ['running'],
+    'daemons': ['livestatus'],
+    'type': 'logstore_mongodb',
+    'external': False,
+    'phases': ['running'],
     }
 
 
@@ -91,7 +91,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
         self.mongodb_uri = getattr(modconf, 'mongodb_uri', None)
         self.replica_set = getattr(modconf, 'replica_set', None)
         if self.replica_set and not ReplicaSetConnection:
-            logger.log('Error : cannot initialize LogStoreMongoDB module with replica_set because your pymongo lib is too old. Please install it with a 2.x+ version from https://github.com/mongodb/mongo-python-driver/downloads')
+            logger.log('Error: cannot initialize LogStoreMongoDB module with replica_set because your pymongo lib is too old. Please install it with a 2.x+ version from https://github.com/mongodb/mongo-python-driver/downloads')
             return None
         self.database = getattr(modconf, 'database', 'logs')
         self.collection = getattr(modconf, 'collection', 'logs')
@@ -99,7 +99,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
         max_logs_age = getattr(modconf, 'max_logs_age', '365')
         maxmatch = re.match(r'^(\d+)([dwmy]*)$', max_logs_age)
         if maxmatch is None:
-            print 'Warning : wrong format for max_logs_age. Must be <number>[d|w|m|y] or <number> and not %s' % max_logs_age
+            print 'Warning: wrong format for max_logs_age. Must be <number>[d|w|m|y] or <number> and not %s' % max_logs_age
             return None
         else:
             if not maxmatch.group(2):
@@ -156,7 +156,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
         except Exception, exp:
             # If there is a replica_set, but the host is a simple standalone one
             # we get a "No suitable hosts found" here.
-            # But other reasons are possible too. 
+            # But other reasons are possible too.
             print "Could not open the database", exp
             raise LiveStatusLogStoreError
 
@@ -174,7 +174,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
             today0000 = datetime.datetime(today.year, today.month, today.day, 0, 0, 0)
             today0005 = datetime.datetime(today.year, today.month, today.day, 0, 5, 0)
             oldest = today0000 - datetime.timedelta(days=self.max_logs_age)
-            self.db[self.collection].remove({ u'time' : { '$lt' : time.mktime(oldest.timetuple()) }}, safe=True)
+            self.db[self.collection].remove({ u'time': { '$lt': time.mktime(oldest.timetuple()) }}, safe=True)
 
             if now < time.mktime(today0005.timetuple()):
                 nextrotation = today0005
@@ -334,7 +334,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
             return '\'%s\' : { \'$regex\' : %s, \'$options\' : \'i\' }' % (attribute, '^((?!'+reference+').)')
 
         def no_filter():
-            return '\'time\' : { \'$exists\' : True }' 
+            return '\'time\' : { \'$exists\' : True }'
 
         if attribute not in good_attributes:
             return no_filter
@@ -390,13 +390,13 @@ class LiveStatusMongoStack(LiveStatusStack):
 
     def not_elements(self):
         top_filter = self.get_stack()
-        #negate_filter = lambda: '\'$not\' : { %s }' % top_filter()
+        #negate_filter = lambda: '\'$not\': { %s }' % top_filter()
         # mongodb doesn't have the not-operator like sql, which can negate
         # a complete expression. Mongodb $not can only reverse one operator
         # at a time. This qould require rewriting of the whole expression.
         # So instead of deciding whether a record can pass the filter or not,
         # we let it pass in any case. That's no problem, because the result
-        # of the database query will have to go through the in-memory-objects 
+        # of the database query will have to go through the in-memory-objects
         # filter too.
         negate_filter = lambda: '\'time\' : { \'$exists\' : True }'
         self.put_stack(negate_filter)

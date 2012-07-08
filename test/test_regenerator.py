@@ -59,8 +59,8 @@ class TestRegenerator(ShinkenTest):
                 same_pbs = i.get_name() in [j.get_name() for j in orig_h.source_problems]
                 self.assert_(same_pbs)
 
-            
-                
+
+
 
         print "Services:", self.rg.services.__dict__
         for s in self.rg.services:
@@ -80,9 +80,9 @@ class TestRegenerator(ShinkenTest):
                 self.assert_(same_pbs)
             # Look for same host
             self.assert_(s.host.get_name() == orig_s.host.get_name())
-        
 
-    
+
+
     def test_regenerator(self):
         #
         # Config is not correct because of a wrong relative path
@@ -140,7 +140,7 @@ class TestRegenerator(ShinkenTest):
 
         print 'Time', t1 - t0
 
-        
+
         b = svc.get_initial_status_brok()
         b.prepare()
         print "GO BENCH!"
@@ -153,7 +153,7 @@ class TestRegenerator(ShinkenTest):
                 setattr(s, prop, value)
         t1 = time.time()
         print "Bench end:", t1 - t0
-        
+
         times = {}
         sizes = {}
         import cPickle
@@ -172,14 +172,14 @@ class TestRegenerator(ShinkenTest):
                     tmp = cPickle.dumps(data[prop], 0)
                     sizes[prop] += len(tmp)
                     times[prop] += time.time() - t0
-        
+
         print "Times"
         for (k,v) in times.iteritems():
-            print "\t%s : %s" % (k, v)
+            print "\t%s: %s" % (k, v)
         print "\n\n"
         print "Sizes"
         for (k,v) in sizes.iteritems():
-            print "\t%s : %s" % (k, v)
+            print "\t%s: %s" % (k, v)
         print "\n"
         print "total time", time.time() - start
 
@@ -192,12 +192,12 @@ class TestRegenerator(ShinkenTest):
         #
         # for h in self.sched.hosts:
         #    h.realm = h.realm.get_name()
-        
+
         self.rg = Regenerator()
         self.rg.load_from_scheduler(self.sched)
-        
+
         self.sched.conf.skip_initial_broks = False
-        self.sched.fill_initial_broks()        
+        self.sched.fill_initial_broks()
         # Got the initial creation ones
         ids = self.sched.broks.keys()
         ids.sort()
@@ -210,11 +210,11 @@ class TestRegenerator(ShinkenTest):
         t1 = time.time()
         print 'First inc', t1 - t0, len(self.sched.broks)
         self.sched.broks.clear()
-        
+
         self.look_for_same_values()
-        
-        
-        
+
+
+
 
 if __name__ == '__main__':
     unittest.main()

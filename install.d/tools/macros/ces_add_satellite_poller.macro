@@ -17,4 +17,4 @@ clone poller set poller_name=ARG1,address=ARG2 where poller_name=ARG3
 # write config
 writeconfig
 # deploy configuration
-sync 
+sync

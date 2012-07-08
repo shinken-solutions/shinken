@@ -53,7 +53,7 @@ class TestConfig(ShinkenTest):
         hst_copy = copy.copy(hst)
         # reset the state in the original service
         hst.__setstate__(state)
-        # And it should be the same :then before :)
+        # And it should be the same:then before :)
         for p in cls.properties:
 #            print getattr(hst_copy, p)
 #            print getattr(hst, p)

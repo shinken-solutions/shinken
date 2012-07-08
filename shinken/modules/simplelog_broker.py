@@ -43,10 +43,10 @@ from shinken.log import logger
 
 
 properties = {
-    'daemons' : ['broker'],
-    'type' : 'simple_log',
-    'external' : False,
-    'phases' : ['running'],
+    'daemons': ['broker'],
+    'type': 'simple_log',
+    'external': False,
+    'phases': ['running'],
     }
 
 
@@ -87,7 +87,7 @@ class Simple_log_broker(BaseModule):
         now = int(time.time())
         # first check if the file last mod (or creation) was
         # not our day
-        try :
+        try:
             t_last_mod = int(float(str(os.path.getmtime(self.path))))
         except OSError: # there should be no path from now, so no move :)
             return False
@@ -96,7 +96,7 @@ class Simple_log_broker(BaseModule):
         today = get_day(now)
         # Will be saved with the date of yesterday because all elemetns arefrom yesterday
         yesterday = get_day(now-3600)
-        #print "Dates: t_last_mod : %d, t_last_mod_day: %d, today : %d" % (t_last_mod, t_last_mod_day, today)
+        #print "Dates: t_last_mod: %d, t_last_mod_day: %d, today: %d" % (t_last_mod, t_last_mod_day, today)
         if t_last_mod_day != today:
             logger.info("We are archiving the old log file")
 
@@ -131,7 +131,7 @@ class Simple_log_broker(BaseModule):
 
     def manage_brok(self, brok):
         """ Request the module to manage the given brok.
-        There a lot of different possible broks to manage. 
+        There a lot of different possible broks to manage.
         """
         manage = getattr(self, 'manage_' + brok.type + '_brok', None)
         if manage:

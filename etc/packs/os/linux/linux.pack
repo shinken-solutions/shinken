@@ -6,39 +6,39 @@
 "path":"os/",
 
 "macros":{
-	 "_SNMPCOMMUNITY" : {"type":"string", 
+	 "_SNMPCOMMUNITY": {"type":"string",
 	                     "description":"The read snmp community allowed on the linux server"
 			     },
 
-         "_LOAD_WARN"     : {"type":"string",
-                             "description" : "Value for starting warning state for the load average at 1m,5m,15m"
-                             },         
-         "_LOAD_CRIT"     : {"type":"string",
-                             "description" : "Value for starting critical state for the load average at 1m,5m,15m"
+         "_LOAD_WARN": {"type":"string",
+                             "description": "Value for starting warning state for the load average at 1m,5m,15m"
+                             },
+         "_LOAD_CRIT": {"type":"string",
+                             "description": "Value for starting critical state for the load average at 1m,5m,15m"
                              },
 
-         "_STORAGE_WARN"     : {"type":"percent",
-                                "description" : "Warning level for used disk space"
+         "_STORAGE_WARN": {"type":"percent",
+                                "description": "Warning level for used disk space"
                              },
-         "_STORAGE_CRIT"     : {"type":"percent",
-                                "description" : "Critical level for used disk space"
-                             },
-
-         "_CPU_WARN"     : {"type":"percent",
-                                "description" : "Warning level for the CPU usage"
-                             },
-         "_CPU_CRIT"     : {"type":"percent",
-                                "description" : "Critical level for the CPU usage"
+         "_STORAGE_CRIT": {"type":"percent",
+                                "description": "Critical level for used disk space"
                              },
 
-         "_MEMORY_WARN"     : {"type":"doublepercent",
-                                "description" : "Physical memory and swap warning level"
+         "_CPU_WARN": {"type":"percent",
+                                "description": "Warning level for the CPU usage"
                              },
-         "_MEMORY_CRIT"     : {"type":"doublepercent",
-                                "description" : "Physical memory and swap critical level"
+         "_CPU_CRIT": {"type":"percent",
+                                "description": "Critical level for the CPU usage"
+                             },
+
+         "_MEMORY_WARN": {"type":"doublepercent",
+                                "description": "Physical memory and swap warning level"
+                             },
+         "_MEMORY_CRIT": {"type":"doublepercent",
+                                "description": "Physical memory and swap critical level"
                              }
 
-          }	 
+          }
 
 
 }

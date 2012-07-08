@@ -30,7 +30,7 @@ from shinken_test import unittest, ShinkenTest
 from shinken.log import logger
 from shinken.objects.module import Module
 from shinken.modules import hack_poller_tag_by_macros
-from shinken.modules.hack_poller_tag_by_macros import get_instance 
+from shinken.modules.hack_poller_tag_by_macros import get_instance
 
 
 
@@ -49,7 +49,7 @@ class TestHackPollerTagByMacors(ShinkenTest):
 
         # Calls the mod with our config
         mod.hook_late_configuration(self)
-        
+
 
         # look for a objects that use it
         h1 = self.sched.hosts.find_by_name("test_host_0")
@@ -65,7 +65,7 @@ class TestHackPollerTagByMacors(ShinkenTest):
         print svc.poller_tag
         self.assert_(svc.poller_tag == 'None')
         print svc2.poller_tag, svc2.check_command.poller_tag
-        
+
         self.assert_(svc2.poller_tag == 'DMZ2')
         self.assert_(svc2.check_command.poller_tag  == 'DMZ2')
 

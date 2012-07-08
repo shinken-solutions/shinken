@@ -47,10 +47,10 @@ class Ndodb_Oracle_broker(BaseModule):
     def __init__(self, modconf, user, password, database):
         # Mapping for name of dataand transform function
         self.mapping = {
-            'program_status' : {'program_start' : {'name' : 'program_start_time', 'transform' : de_unixify},
-                                'pid' : {'name' : 'process_id', 'transform' : None},
-                                'last_alive' : {'name' : 'status_update_time', 'transform' : de_unixify},
-                                'is_running' : {'name' : 'is_currently_running', 'transform' : None}
+            'program_status': {'program_start': {'name': 'program_start_time', 'transform': de_unixify},
+                                'pid': {'name': 'process_id', 'transform': None},
+                                'last_alive': {'name': 'status_update_time', 'transform': de_unixify},
+                                'is_running': {'name': 'is_currently_running', 'transform': None}
                                 },
             }
         BaseModule.__init__(self, modconf)
@@ -60,7 +60,7 @@ class Ndodb_Oracle_broker(BaseModule):
 
 
     # Called by Broker so we can do init stuff
-    # TODO : add conf param to get pass with init
+    # TODO: add conf param to get pass with init
     # Conf from arbiter!
     def init(self):
         print "I connect to NDO database with Oracle"
@@ -77,8 +77,8 @@ class Ndodb_Oracle_broker(BaseModule):
         if self.has(manager):
             f = getattr(self, manager)
             queries = f(b)
-            # Ok, we've got queries, now : run them!
-            for q in queries :
+            # Ok, we've got queries, now: run them!
+            for q in queries:
                 self.db.execute_query(q)
             return
         #print "(ndodb)I don't manage this brok type", b
@@ -158,7 +158,7 @@ class Ndodb_Oracle_broker(BaseModule):
         to_add = []
         mapping = self.mapping['program_status']
         for prop in new_b.data:
-            # ex : 'name' : 'program_start_time', 'transform'
+            # ex: 'name': 'program_start_time', 'transform'
             if prop in mapping:
                 #print "Got a prop to change", prop
                 val = new_b.data[prop]
@@ -176,14 +176,14 @@ class Ndodb_Oracle_broker(BaseModule):
         return [query]
 
 
-    # TODO : fill nagios_instances
+    # TODO: fill nagios_instances
     def manage_update_program_status_brok(self, b):
         new_b = copy.deepcopy(b)
         to_del = ['instance_name']
         to_add = []
         mapping = self.mapping['program_status']
         for prop in new_b.data:
-            # ex : 'name' : 'program_start_time', 'transform'
+            # ex: 'name': 'program_start_time', 'transform'
             if prop in mapping:
                 #print "Got a prop to change", prop
                 val = new_b.data[prop]
@@ -197,7 +197,7 @@ class Ndodb_Oracle_broker(BaseModule):
             del new_b.data[prop]
         for (name, val) in to_add:
             new_b.data[name] = val
-        where_clause = {'instance_id' : new_b.data['instance_id']}
+        where_clause = {'instance_id': new_b.data['instance_id']}
         query = self.db.create_update_query('programstatus', new_b.data, where_clause)
         return [query]
 
@@ -210,8 +210,8 @@ class Ndodb_Oracle_broker(BaseModule):
         data = new_b.data
 
         # First add to nagios_objects
-        objects_data = {'instance_id' : data['instance_id'], 'objecttype_id' : 1,
-                        'name1' : data['host_name'], 'is_active' : data['active_checks_enabled']
+        objects_data = {'instance_id': data['instance_id'], 'objecttype_id': 1,
+                        'name1': data['host_name'], 'is_active': data['active_checks_enabled']
                         }
         object_query = self.db.create_insert_query('objects', objects_data)
         self.db.execute_query(object_query)
@@ -219,32 +219,32 @@ class Ndodb_Oracle_broker(BaseModule):
         host_id = self.get_host_object_id_by_name(data['host_name'])
 
         #print "DATA:", data
-        hosts_data = {'id' : data['id'], 'instance_id' : data['instance_id'],
-                      'host_object_id' : host_id, 'alias' : data['alias'],
-                      'display_name' : data['display_name'], 'address' : data['address'],
-                      'failure_prediction_options' : '0', 'check_interval' : data['check_interval'],
-                      'retry_interval' : data['retry_interval'], 'max_check_attempts' : data['max_check_attempts'],
-                      'first_notification_delay' : data['first_notification_delay'], 'notification_interval' : data['notification_interval'],
-                      'flap_detection_enabled' : data['flap_detection_enabled'], 'low_flap_threshold' : data['low_flap_threshold'],
-                      'high_flap_threshold' : data['high_flap_threshold'], 'process_performance_data' : data['process_perf_data'],
-                      'freshness_checks_enabled' : data['check_freshness'], 'freshness_threshold' : data['freshness_threshold'],
-                      'passive_checks_enabled' : data['passive_checks_enabled'], 'event_handler_enabled' : data['event_handler_enabled'],
-                      'active_checks_enabled' : data['active_checks_enabled'], 'notifications_enabled' : data['notifications_enabled'],
-                      'obsess_over_host' : data['obsess_over_host'], 'notes' : data['notes'], 'notes_url' : data['notes_url']
+        hosts_data = {'id': data['id'], 'instance_id': data['instance_id'],
+                      'host_object_id': host_id, 'alias': data['alias'],
+                      'display_name': data['display_name'], 'address': data['address'],
+                      'failure_prediction_options': '0', 'check_interval': data['check_interval'],
+                      'retry_interval': data['retry_interval'], 'max_check_attempts': data['max_check_attempts'],
+                      'first_notification_delay': data['first_notification_delay'], 'notification_interval': data['notification_interval'],
+                      'flap_detection_enabled': data['flap_detection_enabled'], 'low_flap_threshold': data['low_flap_threshold'],
+                      'high_flap_threshold': data['high_flap_threshold'], 'process_performance_data': data['process_perf_data'],
+                      'freshness_checks_enabled': data['check_freshness'], 'freshness_threshold': data['freshness_threshold'],
+                      'passive_checks_enabled': data['passive_checks_enabled'], 'event_handler_enabled': data['event_handler_enabled'],
+                      'active_checks_enabled': data['active_checks_enabled'], 'notifications_enabled': data['notifications_enabled'],
+                      'obsess_over_host': data['obsess_over_host'], 'notes': data['notes'], 'notes_url': data['notes_url']
             }
 
         #print "HOST DATA", hosts_data
         query = self.db.create_insert_query('hosts', hosts_data)
 
         # Now create an hoststatus entry
-        hoststatus_data = {'instance_id' : data['instance_id'],
-                           'host_object_id' : host_id,
-                           'normal_check_interval' : data['check_interval'],
-                           'retry_check_interval' : data['retry_interval'], 'max_check_attempts' : data['max_check_attempts'],
-                           'current_state' : data['state_id'], 'state_type' : data['state_type_id'],
-                           'passive_checks_enabled' : data['passive_checks_enabled'], 'event_handler_enabled' : data['event_handler_enabled'],
-                           'active_checks_enabled' : data['active_checks_enabled'], 'notifications_enabled' : data['notifications_enabled'],
-                           'obsess_over_host' : data['obsess_over_host'],'process_performance_data' : data['process_perf_data']
+        hoststatus_data = {'instance_id': data['instance_id'],
+                           'host_object_id': host_id,
+                           'normal_check_interval': data['check_interval'],
+                           'retry_check_interval': data['retry_interval'], 'max_check_attempts': data['max_check_attempts'],
+                           'current_state': data['state_id'], 'state_type': data['state_type_id'],
+                           'passive_checks_enabled': data['passive_checks_enabled'], 'event_handler_enabled': data['event_handler_enabled'],
+                           'active_checks_enabled': data['active_checks_enabled'], 'notifications_enabled': data['notifications_enabled'],
+                           'obsess_over_host': data['obsess_over_host'],'process_performance_data': data['process_perf_data']
         }
         hoststatus_query = self.db.create_insert_query('hoststatus' , hoststatus_data)
 
@@ -257,8 +257,8 @@ class Ndodb_Oracle_broker(BaseModule):
 
         data = new_b.data
         # First add to nagios_objects
-        objects_data = {'instance_id' : data['instance_id'], 'objecttype_id' : 2,
-                        'name1' : data['host_name'], 'name2' : data['service_description'], 'is_active' : data['active_checks_enabled']
+        objects_data = {'instance_id': data['instance_id'], 'objecttype_id': 2,
+                        'name1': data['host_name'], 'name2': data['service_description'], 'is_active': data['active_checks_enabled']
                         }
         object_query = self.db.create_insert_query('objects', objects_data)
         self.db.execute_query(object_query)
@@ -269,32 +269,32 @@ class Ndodb_Oracle_broker(BaseModule):
         #print "DATA:", data
         #print "HOST ID:", host_id
         #print "SERVICE ID:", service_id
-        services_data = {'id' : data['id'], 'instance_id' : data['instance_id'],
-                      'service_object_id' : service_id, 'host_object_id' : host_id,
-                      'display_name' : data['display_name'],
-                      'failure_prediction_options' : '0', 'check_interval' : data['check_interval'],
-                      'retry_interval' : data['retry_interval'], 'max_check_attempts' : data['max_check_attempts'],
-                      'first_notification_delay' : data['first_notification_delay'], 'notification_interval' : data['notification_interval'],
-                      'flap_detection_enabled' : data['flap_detection_enabled'], 'low_flap_threshold' : data['low_flap_threshold'],
-                      'high_flap_threshold' : data['high_flap_threshold'], 'process_performance_data' : data['process_perf_data'],
-                      'freshness_checks_enabled' : data['check_freshness'], 'freshness_threshold' : data['freshness_threshold'],
-                      'passive_checks_enabled' : data['passive_checks_enabled'], 'event_handler_enabled' : data['event_handler_enabled'],
-                      'active_checks_enabled' : data['active_checks_enabled'], 'notifications_enabled' : data['notifications_enabled'],
-                      'obsess_over_service' : data['obsess_over_service'], 'notes' : data['notes'], 'notes_url' : data['notes_url']
+        services_data = {'id': data['id'], 'instance_id': data['instance_id'],
+                      'service_object_id': service_id, 'host_object_id': host_id,
+                      'display_name': data['display_name'],
+                      'failure_prediction_options': '0', 'check_interval': data['check_interval'],
+                      'retry_interval': data['retry_interval'], 'max_check_attempts': data['max_check_attempts'],
+                      'first_notification_delay': data['first_notification_delay'], 'notification_interval': data['notification_interval'],
+                      'flap_detection_enabled': data['flap_detection_enabled'], 'low_flap_threshold': data['low_flap_threshold'],
+                      'high_flap_threshold': data['high_flap_threshold'], 'process_performance_data': data['process_perf_data'],
+                      'freshness_checks_enabled': data['check_freshness'], 'freshness_threshold': data['freshness_threshold'],
+                      'passive_checks_enabled': data['passive_checks_enabled'], 'event_handler_enabled': data['event_handler_enabled'],
+                      'active_checks_enabled': data['active_checks_enabled'], 'notifications_enabled': data['notifications_enabled'],
+                      'obsess_over_service': data['obsess_over_service'], 'notes': data['notes'], 'notes_url': data['notes_url']
             }
 
         #print "HOST DATA", hosts_data
         query = self.db.create_insert_query('services', services_data)
 
         # Now create an hoststatus entry
-        servicestatus_data = {'instance_id' : data['instance_id'],
-                              'service_object_id' : service_id,
-                              'normal_check_interval' : data['check_interval'],
-                              'retry_check_interval' : data['retry_interval'], 'max_check_attempts' : data['max_check_attempts'],
-                              'current_state' : data['state_id'], 'state_type' : data['state_type_id'],
-                              'passive_checks_enabled' : data['passive_checks_enabled'], 'event_handler_enabled' : data['event_handler_enabled'],
-                              'active_checks_enabled' : data['active_checks_enabled'], 'notifications_enabled' : data['notifications_enabled'],
-                              'obsess_over_service' : data['obsess_over_service'],'process_performance_data' : data['process_perf_data']
+        servicestatus_data = {'instance_id': data['instance_id'],
+                              'service_object_id': service_id,
+                              'normal_check_interval': data['check_interval'],
+                              'retry_check_interval': data['retry_interval'], 'max_check_attempts': data['max_check_attempts'],
+                              'current_state': data['state_id'], 'state_type': data['state_type_id'],
+                              'passive_checks_enabled': data['passive_checks_enabled'], 'event_handler_enabled': data['event_handler_enabled'],
+                              'active_checks_enabled': data['active_checks_enabled'], 'notifications_enabled': data['notifications_enabled'],
+                              'obsess_over_service': data['obsess_over_service'],'process_performance_data': data['process_perf_data']
         }
         servicestatus_query = self.db.create_insert_query('servicestatus' , servicestatus_data)
 
@@ -309,17 +309,17 @@ class Ndodb_Oracle_broker(BaseModule):
         data = b.data
 
         # First add to nagios_objects
-        objects_data = {'instance_id' : data['instance_id'], 'objecttype_id' : 3,
-                        'name1' : data['hostgroup_name'], 'is_active' : 1
+        objects_data = {'instance_id': data['instance_id'], 'objecttype_id': 3,
+                        'name1': data['hostgroup_name'], 'is_active': 1
                         }
         object_query = self.db.create_insert_query('objects', objects_data)
         self.db.execute_query(object_query)
 
         hostgroup_id = self.get_hostgroup_object_id_by_name(data['hostgroup_name'])
 
-        hostgroups_data = {'id' : data['id'], 'instance_id' :  data['instance_id'],
-                           'config_type' : 0, 'hostgroup_object_id' : hostgroup_id,
-                           'alias' : data['alias']
+        hostgroups_data = {'id': data['id'], 'instance_id':  data['instance_id'],
+                           'config_type': 0, 'hostgroup_object_id': hostgroup_id,
+                           'alias': data['alias']
             }
 
         query = self.db.create_insert_query('hostgroups', hostgroups_data)
@@ -328,8 +328,8 @@ class Ndodb_Oracle_broker(BaseModule):
         # Ok, the hostgroups table is uptodate, now we add relations
         # between hosts and hostgroups
         for (h_id, h_name) in b.data['members']:
-            hostgroup_members_data = {'instance_id' : data['instance_id'], 'hostgroup_id' : data['id'],
-                                      'host_object_id' : h_id}
+            hostgroup_members_data = {'instance_id': data['instance_id'], 'hostgroup_id': data['id'],
+                                      'host_object_id': h_id}
             q = self.db.create_insert_query('hostgroup_members', hostgroup_members_data)
             res.append(q)
         return res
@@ -343,8 +343,8 @@ class Ndodb_Oracle_broker(BaseModule):
         data = b.data
 
         # First add to nagios_objects
-        objects_data = {'instance_id' : data['instance_id'], 'objecttype_id' : 4,
-                        'name1' : data['servicegroup_name'], 'is_active' : 1
+        objects_data = {'instance_id': data['instance_id'], 'objecttype_id': 4,
+                        'name1': data['servicegroup_name'], 'is_active': 1
                         }
         object_query = self.db.create_insert_query('objects', objects_data)
         self.db.execute_query(object_query)
@@ -352,9 +352,9 @@ class Ndodb_Oracle_broker(BaseModule):
         servicegroup_id = self.get_servicegroup_object_id_by_name(data['servicegroup_name'])
 
 
-        servicegroups_data = {'id' : data['id'], 'instance_id' :  data['instance_id'],
-                           'config_type' : 0, 'servicegroup_object_id' : servicegroup_id,
-                           'alias' : data['alias']
+        servicegroups_data = {'id': data['id'], 'instance_id':  data['instance_id'],
+                           'config_type': 0, 'servicegroup_object_id': servicegroup_id,
+                           'alias': data['alias']
             }
 
         query = self.db.create_insert_query('servicegroups', servicegroups_data)
@@ -363,8 +363,8 @@ class Ndodb_Oracle_broker(BaseModule):
         # Ok, the hostgroups table is uptodate, now we add relations
         # between hosts and hostgroups
         for (s_id, s_name) in b.data['members']:
-            servicegroup_members_data = {'instance_id' : data['instance_id'], 'servicegroup_id' : data['id'],
-                                         'service_object_id' : s_id}
+            servicegroup_members_data = {'instance_id': data['instance_id'], 'servicegroup_id': data['id'],
+                                         'service_object_id': s_id}
             q = self.db.create_insert_query('servicegroup_members', servicegroup_members_data)
             res.append(q)
         return res
@@ -376,23 +376,23 @@ class Ndodb_Oracle_broker(BaseModule):
         #print "DATA", data
         host_id = self.get_host_object_id_by_name(data['host_name'])
         # Only the host is impacted
-        where_clause = {'host_object_id' : host_id}
-        host_check_data = {'instance_id' : data['instance_id'],
-                           'check_type' : 0, 'is_raw_check' : 0, 'current_check_attempt' : data['attempt'],
-                           'state' : data['state_id'], 'state_type' : data['state_type_id'],
-                           'start_time' : data['start_time'], 'start_time_usec' : 0,
-                           'execution_time' : data['execution_time'], 'latency' : data['latency'],
-                           'return_code' : data['return_code'], 'output' : data['output'],
-                           'perfdata' : data['perf_data']
+        where_clause = {'host_object_id': host_id}
+        host_check_data = {'instance_id': data['instance_id'],
+                           'check_type': 0, 'is_raw_check': 0, 'current_check_attempt': data['attempt'],
+                           'state': data['state_id'], 'state_type': data['state_type_id'],
+                           'start_time': data['start_time'], 'start_time_usec': 0,
+                           'execution_time': data['execution_time'], 'latency': data['latency'],
+                           'return_code': data['return_code'], 'output': data['output'],
+                           'perfdata': data['perf_data']
         }
         query = self.db.create_update_query('hostchecks', host_check_data, where_clause)
 
         # Now servicestatus
-        hoststatus_data = {'instance_id' : data['instance_id'],
-                           'check_type' : 0, 'current_check_attempt' : data['attempt'],
-                           'current_state' : data['state_id'], 'state_type' : data['state_type_id'],
-                           'execution_time' : data['execution_time'], 'latency' : data['latency'],
-                           'output' : data['output'], 'perfdata' : data['perf_data']
+        hoststatus_data = {'instance_id': data['instance_id'],
+                           'check_type': 0, 'current_check_attempt': data['attempt'],
+                           'current_state': data['state_id'], 'state_type': data['state_type_id'],
+                           'execution_time': data['execution_time'], 'latency': data['latency'],
+                           'output': data['output'], 'perfdata': data['perf_data']
         }
         hoststatus_query = self.db.create_update_query('hoststatus' , hoststatus_data, where_clause)
 
@@ -406,23 +406,23 @@ class Ndodb_Oracle_broker(BaseModule):
         service_id = self.get_service_object_id_by_name(data['host_name'], data['service_description'])
 
         # Only the service is impacted
-        where_clause = {'service_object_id' : service_id}
-        service_check_data = {'instance_id' : data['instance_id'],
-                           'check_type' : 0, 'current_check_attempt' : data['attempt'],
-                           'state' : data['state_id'], 'state_type' : data['state_type_id'],
-                           'start_time' : data['start_time'], 'start_time_usec' : 0,
-                           'execution_time' : data['execution_time'], 'latency' : data['latency'],
-                           'return_code' : data['return_code'], 'output' : data['output'],
-                           'perfdata' : data['perf_data']
+        where_clause = {'service_object_id': service_id}
+        service_check_data = {'instance_id': data['instance_id'],
+                           'check_type': 0, 'current_check_attempt': data['attempt'],
+                           'state': data['state_id'], 'state_type': data['state_type_id'],
+                           'start_time': data['start_time'], 'start_time_usec': 0,
+                           'execution_time': data['execution_time'], 'latency': data['latency'],
+                           'return_code': data['return_code'], 'output': data['output'],
+                           'perfdata': data['perf_data']
         }
         query = self.db.create_update_query('servicechecks', service_check_data, where_clause)
 
         # Now servicestatus
-        servicestatus_data = {'instance_id' : data['instance_id'],
-                           'check_type' : 0, 'current_check_attempt' : data['attempt'],
-                           'current_state' : data['state_id'], 'state_type' : data['state_type_id'],
-                           'execution_time' : data['execution_time'], 'latency' : data['latency'],
-                           'output' : data['output'], 'perfdata' : data['perf_data']
+        servicestatus_data = {'instance_id': data['instance_id'],
+                           'check_type': 0, 'current_check_attempt': data['attempt'],
+                           'current_state': data['state_id'], 'state_type': data['state_type_id'],
+                           'execution_time': data['execution_time'], 'latency': data['latency'],
+                           'output': data['output'], 'perfdata': data['perf_data']
         }
 
         servicestatus_query = self.db.create_update_query('servicestatus' , servicestatus_data, where_clause)
@@ -434,19 +434,19 @@ class Ndodb_Oracle_broker(BaseModule):
     # Ok the host is updated
     def manage_update_host_status_brok(self, b):
         data = b.data
-        hosts_data = {'instance_id' : data['instance_id'],
-                      'failure_prediction_options' : '0', 'check_interval' : data['check_interval'],
-                      'retry_interval' : data['retry_interval'], 'max_check_attempts' : data['max_check_attempts'],
-                      'first_notification_delay' : data['first_notification_delay'], 'notification_interval' : data['notification_interval'],
-                      'flap_detection_enabled' : data['flap_detection_enabled'], 'low_flap_threshold' : data['low_flap_threshold'],
-                      'high_flap_threshold' : data['high_flap_threshold'], 'process_performance_data' : data['process_perf_data'],
-                      'freshness_checks_enabled' : data['check_freshness'], 'freshness_threshold' : data['freshness_threshold'],
-                      'passive_checks_enabled' : data['passive_checks_enabled'], 'event_handler_enabled' : data['event_handler_enabled'],
-                      'active_checks_enabled' : data['active_checks_enabled'], 'notifications_enabled' : data['notifications_enabled'],
-                      'obsess_over_host' : data['obsess_over_host'], 'notes' : data['notes'], 'notes_url' : data['notes_url']
+        hosts_data = {'instance_id': data['instance_id'],
+                      'failure_prediction_options': '0', 'check_interval': data['check_interval'],
+                      'retry_interval': data['retry_interval'], 'max_check_attempts': data['max_check_attempts'],
+                      'first_notification_delay': data['first_notification_delay'], 'notification_interval': data['notification_interval'],
+                      'flap_detection_enabled': data['flap_detection_enabled'], 'low_flap_threshold': data['low_flap_threshold'],
+                      'high_flap_threshold': data['high_flap_threshold'], 'process_performance_data': data['process_perf_data'],
+                      'freshness_checks_enabled': data['check_freshness'], 'freshness_threshold': data['freshness_threshold'],
+                      'passive_checks_enabled': data['passive_checks_enabled'], 'event_handler_enabled': data['event_handler_enabled'],
+                      'active_checks_enabled': data['active_checks_enabled'], 'notifications_enabled': data['notifications_enabled'],
+                      'obsess_over_host': data['obsess_over_host'], 'notes': data['notes'], 'notes_url': data['notes_url']
                       }
         # Only this host
-        where_clause = {'host_name' : data['host_name']}
+        where_clause = {'host_name': data['host_name']}
         query = self.db.create_update_query('host', hosts_data, where_clause)
         return [query]
 
@@ -457,12 +457,12 @@ class Ndodb_Oracle_broker(BaseModule):
         data = new_b.data
         #print "DATA:", data
 
-        contacts_data = {'contact_id' : data['id'], 'instance_id' : data['instance_id'],
-                      'contact_object_id' : data['id'], 'contact_object_id' : data['id'],
-                      'alias' : data['alias'],
-                      'email_address' : data['email'], 'pager_address' : data['pager'],
-                      'host_notifications_enabled' : data['host_notifications_enabled'],
-                      'service_notifications_enabled' : data['service_notifications_enabled'],
+        contacts_data = {'contact_id': data['id'], 'instance_id': data['instance_id'],
+                      'contact_object_id': data['id'], 'contact_object_id': data['id'],
+                      'alias': data['alias'],
+                      'email_address': data['email'], 'pager_address': data['pager'],
+                      'host_notifications_enabled': data['host_notifications_enabled'],
+                      'service_notifications_enabled': data['service_notifications_enabled'],
             }
 
         #print "HOST DATA", hosts_data
@@ -477,9 +477,9 @@ class Ndodb_Oracle_broker(BaseModule):
     def manage_initial_contactgroup_status_brok(self, b):
         data = b.data
 
-        contactgroups_data = {'id' : data['id'], 'instance_id' :  data['instance_id'],
-                           'config_type' : 0, 'contactgroup_object_id' : data['id'],
-                           'alias' : data['alias']
+        contactgroups_data = {'id': data['id'], 'instance_id':  data['instance_id'],
+                           'config_type': 0, 'contactgroup_object_id': data['id'],
+                           'alias': data['alias']
             }
 
         query = self.db.create_insert_query('contactgroups', contactgroups_data)
@@ -489,8 +489,8 @@ class Ndodb_Oracle_broker(BaseModule):
         # between hosts and hostgroups
         for (c_id, c_name) in b.data['members']:
             #print c_name
-            contactgroup_members_data = {'instance_id' : data['instance_id'], 'contactgroup_id' : data['id'],
-                                         'contact_object_id' : c_id}
+            contactgroup_members_data = {'instance_id': data['instance_id'], 'contactgroup_id': data['id'],
+                                         'contact_object_id': c_id}
             q = self.db.create_insert_query('contactgroup_members', contactgroup_members_data)
             res.append(q)
         return res

@@ -25,10 +25,10 @@
 
 
 properties = {
-    'daemons' : ['broker'],
-    'type' : 'status_dat',
-    'external' : True,
-    'phases' : ['running'],
+    'daemons': ['broker'],
+    'type': 'status_dat',
+    'external': True,
+    'phases': ['running'],
     }
 
 
@@ -41,7 +41,7 @@ def get_instance(plugin):
     try:
         from status_dat_broker import Status_dat_broker
     except ImportError , exp:
-        print "Warning : the plugin type %s is unavailable : %s" % ('status_dat', exp)
+        print "Warning: the plugin type %s is unavailable: %s" % ('status_dat', exp)
         return None
 
     # Catch errors

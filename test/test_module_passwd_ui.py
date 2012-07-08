@@ -32,7 +32,7 @@ try:
 except ImportError:
     SkipTest = None
 
-if not sys.version_info > (2, 5) :
+if not sys.version_info > (2, 5):
     if SkipTest:
         raise SkipTest("bah, i am 2.4.x")
     else:
@@ -42,10 +42,10 @@ if not sys.version_info > (2, 5) :
 from shinken.log import logger
 from shinken.objects.module import Module
 from shinken.modules import passwd_ui
-from shinken.modules.passwd_ui import get_instance 
+from shinken.modules.passwd_ui import get_instance
 
 
-if sys.version_info > (2, 5) :
+if sys.version_info > (2, 5):
     modconf = Module()
     modconf.module_name = "PasswdUI"
     modconf.module_type = passwd_ui.properties['type']
@@ -80,6 +80,6 @@ class TestConfig(ShinkenTest):
 
 
 if __name__ == '__main__':
-    if sys.version_info > (2, 5) :
+    if sys.version_info > (2, 5):
         unittest.main()
 

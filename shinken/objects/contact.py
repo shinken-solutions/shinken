@@ -65,7 +65,7 @@ class Contact(Item):
         'pager':            StringProp(default='none', fill_brok=['full_status']),
         'address1':         StringProp(default='none', fill_brok=['full_status']),
         'address2':         StringProp(default='none', fill_brok=['full_status']),
-        'address3' :        StringProp(default='none', fill_brok=['full_status']),
+        'address3':        StringProp(default='none', fill_brok=['full_status']),
         'address4':         StringProp(default='none', fill_brok=['full_status']),
         'address5':         StringProp(default='none', fill_brok=['full_status']),
         'address6':         StringProp(default='none', fill_brok=['full_status']),
@@ -73,7 +73,7 @@ class Contact(Item):
         'is_admin':         BoolProp(default='0', fill_brok=['full_status']),
         'retain_status_information': BoolProp(default='1', fill_brok=['full_status']),
         'notificationways': StringProp(default='', fill_brok=['full_status']),
-        'password' :        StringProp(default='NOPASSWORDSET', fill_brok=['full_status']),
+        'password':        StringProp(default='NOPASSWORDSET', fill_brok=['full_status']),
     })
 
     running_properties = Item.running_properties.copy()
@@ -86,7 +86,7 @@ class Contact(Item):
     # so from Nagios2 format, to Nagios3 ones.
     # Or Shinken deprecated names like criticity
     old_properties = {
-        'min_criticity'            :    'min_business_impact',
+        'min_criticity':    'min_business_impact',
     }
 
 
@@ -182,7 +182,7 @@ class Contact(Item):
                     logger.error("[contact::%s] %s property not set" % (self.get_name(), prop))
                     state = False # Bad boy...
 
-        # There is a case where there is no nw : when there is not special_prop defined
+        # There is a case where there is no nw: when there is not special_prop defined
         # at all!!
         if self.notificationways == []:
             for p in _special_properties:
@@ -246,12 +246,12 @@ class Contacts(Items):
             # Get the list, but first make elements uniq
             i.notificationways = list(set(new_notificationways))
 
-    
+
     def late_linkify_c_by_commands(self, commands):
         for i in self:
             for nw in i.notificationways:
                 nw.late_linkify_nw_by_commands(commands)
-            
+
 
 
     # We look for contacts property in contacts and
@@ -279,7 +279,7 @@ class Contacts(Items):
                     else: # put a default text value
                         # Remove the value and put a default value
                         setattr(c, p, '')
-                    
+
 
                 if need_notificationway:
                     #print "Create notif way with", params

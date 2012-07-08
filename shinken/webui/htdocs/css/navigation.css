@@ -6,7 +6,7 @@
  *  + Main navigation + Dropdown:	#menu, #dropmenu
  *
  ----------------------------------------------------------------*/
- 
+
 /* ----------------------------------------------------------------
  *  Side navigation
  * ----------------------------------------------------------------*/
@@ -38,7 +38,7 @@
 	padding-top:10px;
 	padding-bottom:10px;
 /*	padding-top: 14px;*/
-	
+
 }
 
 #nav_left li:hover{
@@ -184,7 +184,7 @@ div div.tac_col_3{
 #dropmenu li:hover  {
 	border: 1px solid #777777;
 	padding: 4px 9px 4px 9px;
-	
+
 	/* Background color and gradients */
 
 	background: #F4F4F4;
@@ -240,7 +240,7 @@ div div.tac_col_3{
 	border:1px solid #777777;
 	border-top:none;
 	z-index: 999;
-	
+
 	background: #FAFAFA;
 	/* Gradient background */
 	/*background:#F4F4F4;
@@ -319,7 +319,7 @@ div div.tac_col_3{
 	font-weight:400;
 	letter-spacing:-1px;
 	margin:7px 0 14px 0;
-	
+
 	border-bottom:1px solid #666666;
 }
 

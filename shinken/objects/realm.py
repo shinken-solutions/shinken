@@ -46,15 +46,15 @@ class Realm(Itemgroup):
         'realm_members': StringProp (default=''), # No status_broker_name because it put hosts, not host_name
         'higher_realms': StringProp (default=''),
         'default':       BoolProp   (default='0'),
-        #'alias': {'required':  True, 'fill_brok' : ['full_status']},
-        #'notes': {'required': False, 'default':'', 'fill_brok' : ['full_status']},
-        #'notes_url': {'required': False, 'default':'', 'fill_brok' : ['full_status']},
-        #'action_url': {'required': False, 'default':'', 'fill_brok' : ['full_status']},
+        #'alias': {'required':  True, 'fill_brok': ['full_status']},
+        #'notes': {'required': False, 'default':'', 'fill_brok': ['full_status']},
+        #'notes_url': {'required': False, 'default':'', 'fill_brok': ['full_status']},
+        #'action_url': {'required': False, 'default':'', 'fill_brok': ['full_status']},
     })
 
     running_properties = Item.running_properties.copy()
     running_properties.update({
-            'serialized_confs' :     StringProp (default={}),
+            'serialized_confs':     StringProp (default={}),
         })
 
 
@@ -84,7 +84,7 @@ class Realm(Itemgroup):
 
 
     # Use to make pyton properties
-    # TODO : change itemgroup function pythonize?
+    # TODO: change itemgroup function pythonize?
     def pythonize(self):
         cls = self.__class__
         for prop, tab in cls.properties.items():
@@ -110,7 +110,7 @@ class Realm(Itemgroup):
         # so if True here, it must be a loop in HG
         # calls... not GOOD!
         if self.rec_tag:
-            err = "Error : we've got a loop in realm definition %s" % self.get_name()
+            err = "Error: we've got a loop in realm definition %s" % self.get_name()
             self.configuration_errors.append(err)
             if self.has('members'):
                 return self.members
@@ -241,7 +241,7 @@ class Realm(Itemgroup):
         if hasattr(self, type+'s'):
             return getattr(self, type+'s')
         else:
-            logger.debug("[realm] do not have this kind of satellites : %s" % type)
+            logger.debug("[realm] do not have this kind of satellites: %s" % type)
             return []
 
 
@@ -251,7 +251,7 @@ class Realm(Itemgroup):
         if hasattr(self, 'potential_'+type+'s'):
             return getattr(self, 'potential_'+type+'s')
         else:
-            logger.debug("[realm] do not have this kind of satellites : %s" % type)
+            logger.debug("[realm] do not have this kind of satellites: %s" % type)
             return []
 
 
@@ -261,7 +261,7 @@ class Realm(Itemgroup):
         if hasattr(self, 'nb_'+type+'s'):
             return getattr(self, 'nb_'+type+'s')
         else:
-            logger.debug("[realm] do not have this kind of satellites : %s" % type)
+            logger.debug("[realm] do not have this kind of satellites: %s" % type)
             return 0
 
 
@@ -294,7 +294,7 @@ class Realm(Itemgroup):
         self.count_receivers()
         self.fill_potential_receivers()
 
-        s = "%s : (in/potential) (schedulers:%d) (pollers:%d/%d) (reactionners:%d/%d) (brokers:%d/%d) (receivers:%d/%d)" % \
+        s = "%s: (in/potential) (schedulers:%d) (pollers:%d/%d) (reactionners:%d/%d) (brokers:%d/%d) (receivers:%d/%d)" % \
             (self.get_name(),
              len(self.schedulers),
              self.nb_pollers, len(self.potential_pollers),
@@ -307,7 +307,7 @@ class Realm(Itemgroup):
 
 
     # TODO: find a better name...
-    # TODO : and if he goes active?
+    # TODO: and if he goes active?
     def fill_broker_with_poller_reactionner_links(self, broker):
         # First we create/void theses links
         broker.cfg['pollers'] = {}
@@ -335,7 +335,7 @@ class Realm(Itemgroup):
                 broker.cfg['reactionners'][r.id] = cfg
 
 
-    # Get a conf package of satellites links that can be useful for 
+    # Get a conf package of satellites links that can be useful for
     # a scheduler
     def get_satellites_links_for_scheduler(self):
         cfg = {}

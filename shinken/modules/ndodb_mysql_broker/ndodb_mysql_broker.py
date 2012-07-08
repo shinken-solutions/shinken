@@ -1190,13 +1190,13 @@ class Ndodb_Mysql_broker(BaseModule):
             object_id = self.get_host_object_id_by_name_sync(data['host_name'], data['instance_id'])
             notification_type = 0
 
-        # TODO : Fill all fields
-        # Missing fields : notification_reason, start_time_usec, end_time_usec,
+        # TODO: Fill all fields
+        # Missing fields: notification_reason, start_time_usec, end_time_usec,
         # output, escalated.
         # Maybe some field are not really interesting :)
-        # TO FIX : output is empty
-        # TO FIX : end_time and start time are equal to 0 (back in the 70's !!)
-        # TO FIX : state is equal to 0
+        # TO FIX: output is empty
+        # TO FIX: end_time and start time are equal to 0 (back in the 70's!!)
+        # TO FIX: state is equal to 0
         notification_data = {
             'instance_id': data['instance_id'],
             'start_time': de_unixify(data['start_time']),

@@ -29,7 +29,7 @@ class TestPollerTagGetchecks(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_poller_tag_get_checks.cfg')
 
-    
+
     def test_good_checks_get_only_tags_with_specific_tags(self):
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []

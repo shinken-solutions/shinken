@@ -30,9 +30,9 @@ class TestHostspecialSched(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_nohostsched.cfg')
 
-    
+
     # The hosts can have no check_period nor check_interval.
-    # It's valid, and say : 24x7 and 5min interval in fact.
+    # It's valid, and say: 24x7 and 5min interval in fact.
     def test_nohostsched(self):
         #
         # Config is not correct because of a wrong relative path

@@ -29,7 +29,7 @@ class TestConfig(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_realms.cfg')
 
-    
+
     # We check for each host, if they are in the good realm
     def test_realm_assigntion(self):
         #

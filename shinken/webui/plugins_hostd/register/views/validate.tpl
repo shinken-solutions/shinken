@@ -5,7 +5,7 @@
 
 
 %if not activating_key:
-    <div class='alert alert-error span5 offset2'> Please fill your activing key</div>  
+    <div class='alert alert-error span5 offset2'> Please fill your activing key</div>
 %end
 
 %if activating_key and not activated:

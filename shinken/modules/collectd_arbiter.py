@@ -32,9 +32,9 @@ from shinken.basemodule import BaseModule
 from shinken.external_command import ExternalCommand
 
 properties = {
-    'daemons' : ['arbiter', 'receiver'],
-    'type' : 'collectd',
-    'external' : True,
+    'daemons': ['arbiter', 'receiver'],
+    'type': 'collectd',
+    'external': True,
     }
 
 # called by the plugin manager to get a broker
@@ -77,7 +77,7 @@ short  = struct.Struct("!H")
 double = struct.Struct("<d")
 
 elements = {}
-    
+
 def decode_values(pktype, plen, buf):
     nvalues = short.unpack_from(buf, header.size)[0]
     off = header.size + short.size + nvalues
@@ -117,14 +117,14 @@ def decode_string(msgtype, pklen, buf):
 
 # Mapping of message types to decoding functions.
 decoder_mapping = {
-    TYPE_VALUES         : decode_values,
-    TYPE_TIME           : decode_number,
-    TYPE_INTERVAL       : decode_number,
-    TYPE_HOST           : decode_string,
-    TYPE_PLUGIN         : decode_string,
+    TYPE_VALUES: decode_values,
+    TYPE_TIME: decode_number,
+    TYPE_INTERVAL: decode_number,
+    TYPE_HOST: decode_string,
+    TYPE_PLUGIN: decode_string,
     TYPE_PLUGIN_INSTANCE: decode_string,
-    TYPE_TYPE           : decode_string,
-    TYPE_TYPE_INSTANCE  : decode_string,
+    TYPE_TYPE: decode_string,
+    TYPE_TYPE_INSTANCE: decode_string,
 }
 
 
@@ -167,7 +167,7 @@ class Data(list, object):
         if self.plugininstance:
             r += '_'+self.plugininstance
         return r
-    
+
     def get_metric_name(self):
         r = self.type
         if self.typeinstance:
@@ -232,7 +232,7 @@ class CollectdServer(object):
                 self._sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
 
             val = struct.pack("4sl", socket.inet_aton(self.host), socket.INADDR_ANY)
-            
+
             self._sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, val)
             self._sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, 0)
 
@@ -291,8 +291,8 @@ class Element(object):
     def add_perf_data(self, mname, mvalue):
         self.perf_datas[mname] = mvalue
         self.got_new_data = True
-        
-        
+
+
 
     def get_command(self):
         if len(self.perf_datas) == 0:
@@ -310,7 +310,7 @@ class Element(object):
             self.perf_datas.clear()
             self.last_update = now
             return r
-        
+
 
 
 class Collectd_arbiter(BaseModule):
@@ -321,7 +321,7 @@ class Collectd_arbiter(BaseModule):
     # When you are in "external" mode, that is the main loop of your process
     def main(self):
         self.set_exit_handler()
-        
+
         last_check = 0.0
 
         cs = CollectdServer()
@@ -340,11 +340,11 @@ class Collectd_arbiter(BaseModule):
                     print item, item.__dict__
                     n = item.get_name()
                     if n and n not in elements:
-                        e = Element(item.host, item.get_srv_desc(), item.interval)                
+                        e = Element(item.host, item.get_srv_desc(), item.interval)
                         elements[n] = e
                     e = elements[n]
                     e.add_perf_data(item.get_metric_name(), item.get_metric_value())
 
             except ValueError, exp:
-                print "Collectd read error : ", exp
+                print "Collectd read error: ", exp
 

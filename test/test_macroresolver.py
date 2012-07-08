@@ -70,7 +70,7 @@ class TestConfig(ShinkenTest):
         (svc, hst) = self.get_hst_svc()
         data = svc.get_data_for_checks()
         illegal_macro_output_chars = self.sched.conf.illegal_macro_output_chars
-        print "Illegal macros caracters :", illegal_macro_output_chars
+        print "Illegal macros caracters:", illegal_macro_output_chars
         hst.output = 'monculcestdupoulet'
         dummy_call = "special_macro!$HOSTOUTPUT$"
 
@@ -120,7 +120,7 @@ class TestConfig(ShinkenTest):
         self.assert_(com == 'plugins/nothing blabla=toto')
 
 
-        
+
 
 if __name__ == '__main__':
     unittest.main()

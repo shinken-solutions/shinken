@@ -24,7 +24,7 @@ public class JavaClientThrift{
 
 	try
 		{
-			// Initialise Thrift :
+			// Initialise Thrift:
 			TTransport transport;
 			transport = new TSocket("localhost", 9090);
 			transport.open();
@@ -33,15 +33,15 @@ public class JavaClientThrift{
 			StateService.Client client = new StateService.Client(protocol);
 			perform(client, args);
 			transport.close();
-	} 
+	}
 	catch (TException x)
 		{
 	     	 	x.printStackTrace();
-		} 
+		}
 	}
 
 	public static void perform(StateService.Client client, String[] args) throws TException{
-	
+
 		Date date = new Date();
 		dataArgs data = new dataArgs();
 	 	List<State> list = new ArrayList();
@@ -66,11 +66,11 @@ public class JavaClientThrift{
 				data.states = list;
 				client.submit_list(data);
 				System.out.println();
-				
+
 			}catch(IOException ex){
-	
+
 				System.out.println("Can't read file "+ args[0] +": "+ex.getMessage());
-			
+
 			}
 
 
@@ -80,4 +80,4 @@ public class JavaClientThrift{
 		}
 
 	}
-} 
+}

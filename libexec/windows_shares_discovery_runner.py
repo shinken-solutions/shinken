@@ -30,9 +30,9 @@ parser = optparse.OptionParser(
     "%prog [options] -H HOSTADRESS -u DOMAIN\\USER -p PASSWORD",
     version="%prog " + VERSION)
 
-parser.add_option('-H', dest="hostname", 
+parser.add_option('-H', dest="hostname",
                   help="Hostname to scan")
-parser.add_option('-u', '--user', dest="user", 
+parser.add_option('-u', '--user', dest="user",
                   help="Username to scan with. Default to 'guest'")
 parser.add_option('-p', '--password', dest="password",
                   help="Password of your user. Default to ''")
@@ -80,12 +80,12 @@ try:
 except OSError , exp:
     print "Error in launching command:", cmd, exp
     sys.exit(2)
-    
+
 p_debug("Try to communicate with the subprocess")
 (stdoutdata, stderrdata) = process.communicate()
 
 if process.returncode != 0:
-    print "Error : the share scanner return an error : '%s'" % (stderrdata+stdoutdata)
+    print "Error: the share scanner return an error: '%s'" % (stderrdata+stdoutdata)
     sys.exit(2)
 
 

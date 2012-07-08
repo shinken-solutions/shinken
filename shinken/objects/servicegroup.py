@@ -43,7 +43,7 @@ class Servicegroup(Itemgroup):
         'notes_url':         StringProp(default='', fill_brok=['full_status']),
         'action_url':        StringProp(default='', fill_brok=['full_status']),
     })
-    
+
     macros = {
         'SERVICEGROUPALIAS':     'alias',
         'SERVICEGROUPMEMBERS':   'members',
@@ -159,7 +159,7 @@ class Servicegroups(Itemgroups):
         sg = self.find_by_name(sgname)
         # if the id do not exist, create the cg
         if sg is None:
-            sg = Servicegroup({'servicegroup_name' : sgname, 'alias' : sgname, 'members' :  cname})
+            sg = Servicegroup({'servicegroup_name': sgname, 'alias': sgname, 'members':  cname})
             self.add(sg)
         else:
             sg.add_string_member(cname)

@@ -56,86 +56,86 @@ IPv4ranges = {
 # http://www.iana.org/assignments/ipv6-unicast-address-assignments/
 # http://www.iana.org/assignments/ipv6-multicast-addresses/
 IPv6ranges = {
-    '00000000'                                      : 'RESERVED',               # ::/8
-    '0' * 96                                        : 'RESERVED',               # ::/96 Formerly IPV4COMP [RFC4291]
-    '0' * 128                                       : 'UNSPECIFIED',            # ::/128
-    '0' * 127 + '1'                                 : 'LOOPBACK',               # ::1/128
-    '0' * 80 + '1' * 16                             : 'IPV4MAP',                # ::ffff:0:0/96
-    '00000000011001001111111110011011' + '0' * 64   : 'WKP46TRANS',             # 0064:ff9b::/96 Well-Known-Prefix [RFC6052]
-    '00000001'                                      : 'UNASSIGNED',             # 0100::/8
-    '0000001'                                       : 'RESERVED',               # 0200::/7 Formerly NSAP [RFC4048]
-    '0000010'                                       : 'RESERVED',               # 0400::/7 Formerly IPX [RFC3513]
-    '0000011'                                       : 'RESERVED',               # 0600::/7
-    '00001'                                         : 'RESERVED',               # 0800::/5
-    '0001'                                          : 'RESERVED',               # 1000::/4
-    '001'                                           : 'GLOBAL-UNICAST',         # 2000::/3 [RFC4291]
-    '00100000000000010000000'                       : 'SPECIALPURPOSE',         # 2001::/23 [RFC4773]
-    '00100000000000010000000000000000'              : 'TEREDO',                 # 2001::/32 [RFC4380]
-    '00100000000000010000000000000010' + '0' * 16   : 'BMWG',                   # 2001:0002::/48 Benchmarking [RFC5180]
-    '0010000000000001000000000001'                  : 'ORCHID',                 # 2001:0010::/28 (Temp until 2014-03-21) [RFC4843]
-    '00100000000000010000001'                       : 'ALLOCATED APNIC',        # 2001:0200::/23
-    '00100000000000010000010'                       : 'ALLOCATED ARIN',         # 2001:0400::/23
-    '00100000000000010000011'                       : 'ALLOCATED RIPE NCC',     # 2001:0600::/23
-    '00100000000000010000100'                       : 'ALLOCATED RIPE NCC',     # 2001:0800::/23
-    '00100000000000010000101'                       : 'ALLOCATED RIPE NCC',     # 2001:0a00::/23
-    '00100000000000010000110'                       : 'ALLOCATED APNIC',        # 2001:0c00::/23
-    '00100000000000010000110110111000'              : 'DOCUMENTATION',          # 2001:0db8::/32 [RFC3849]
-    '00100000000000010000111'                       : 'ALLOCATED APNIC',        # 2001:0e00::/23
-    '00100000000000010001001'                       : 'ALLOCATED LACNIC',       # 2001:1200::/23
-    '00100000000000010001010'                       : 'ALLOCATED RIPE NCC',     # 2001:1400::/23
-    '00100000000000010001011'                       : 'ALLOCATED RIPE NCC',     # 2001:1600::/23
-    '00100000000000010001100'                       : 'ALLOCATED ARIN',         # 2001:1800::/23
-    '00100000000000010001101'                       : 'ALLOCATED RIPE NCC',     # 2001:1a00::/23
-    '0010000000000001000111'                        : 'ALLOCATED RIPE NCC',     # 2001:1c00::/22
-    '00100000000000010010'                          : 'ALLOCATED RIPE NCC',     # 2001:2000::/20
-    '001000000000000100110'                         : 'ALLOCATED RIPE NCC',     # 2001:3000::/21
-    '0010000000000001001110'                        : 'ALLOCATED RIPE NCC',     # 2001:3800::/22
-    '0010000000000001001111'                        : 'RESERVED',               # 2001:3c00::/22 Possible future allocation to RIPE NCC
-    '00100000000000010100000'                       : 'ALLOCATED RIPE NCC',     # 2001:4000::/23
-    '00100000000000010100001'                       : 'ALLOCATED AFRINIC',      # 2001:4200::/23
-    '00100000000000010100010'                       : 'ALLOCATED APNIC',        # 2001:4400::/23
-    '00100000000000010100011'                       : 'ALLOCATED RIPE NCC',     # 2001:4600::/23
-    '00100000000000010100100'                       : 'ALLOCATED ARIN',         # 2001:4800::/23
-    '00100000000000010100101'                       : 'ALLOCATED RIPE NCC',     # 2001:4a00::/23
-    '00100000000000010100110'                       : 'ALLOCATED RIPE NCC',     # 2001:4c00::/23
-    '00100000000000010101'                          : 'ALLOCATED RIPE NCC',     # 2001:5000::/20
-    '0010000000000001100'                           : 'ALLOCATED APNIC',        # 2001:8000::/19
-    '00100000000000011010'                          : 'ALLOCATED APNIC',        # 2001:a000::/20
-    '00100000000000011011'                          : 'ALLOCATED APNIC',        # 2001:b000::/20
-    '0010000000000010'                              : '6TO4',                   # 2002::/16 "6to4" [RFC3056]
-    '001000000000001100'                            : 'ALLOCATED RIPE NCC',     # 2003::/18
-    '001001000000'                                  : 'ALLOCATED APNIC',        # 2400::/12
-    '001001100000'                                  : 'ALLOCATED ARIN',         # 2600::/12
-    '00100110000100000000000'                       : 'ALLOCATED ARIN',         # 2610::/23
-    '00100110001000000000000'                       : 'ALLOCATED ARIN',         # 2620::/23
-    '001010000000'                                  : 'ALLOCATED LACNIC',       # 2800::/12
-    '001010100000'                                  : 'ALLOCATED RIPE NCC',     # 2a00::/12
-    '001011000000'                                  : 'ALLOCATED AFRINIC',      # 2c00::/12
-    '00101101'                                      : 'RESERVED',               # 2d00::/8
-    '0010111'                                       : 'RESERVED',               # 2e00::/7
-    '0011'                                          : 'RESERVED',               # 3000::/4
-    '010'                                           : 'RESERVED',               # 4000::/3
-    '011'                                           : 'RESERVED',               # 6000::/3
-    '100'                                           : 'RESERVED',               # 8000::/3
-    '101'                                           : 'RESERVED',               # a000::/3
-    '110'                                           : 'RESERVED',               # c000::/3
-    '1110'                                          : 'RESERVED',               # e000::/4
-    '11110'                                         : 'RESERVED',               # f000::/5
-    '111110'                                        : 'RESERVED',               # f800::/6
-    '1111110'                                       : 'ULA',                    # fc00::/7 [RFC4193]
-    '111111100'                                     : 'RESERVED',               # fe00::/9
-    '1111111010'                                    : 'LINKLOCAL',              # fe80::/10
-    '1111111011'                                    : 'RESERVED',               # fec0::/10 Formerly SITELOCAL [RFC4291]
-    '11111111'                                      : 'MULTICAST',              # ff00::/8
-    '1111111100000001'                              : 'NODE-LOCAL MULTICAST',   # ff01::/16
-    '1111111100000010'                              : 'LINK-LOCAL MULTICAST',   # ff02::/16
-    '1111111100000100'                              : 'ADMIN-LOCAL MULTICAST',  # ff04::/16
-    '1111111100000101'                              : 'SITE-LOCAL MULTICAST',   # ff05::/16
-    '1111111100001000'                              : 'ORG-LOCAL MULTICAST',    # ff08::/16
-    '1111111100001110'                              : 'GLOBAL MULTICAST',       # ff0e::/16
-    '1111111100001111'                              : 'RESERVED MULTICAST',     # ff0f::/16
-    '111111110011'                                  : 'PREFIX-BASED MULTICAST', # ff30::/12 [RFC3306]
-    '111111110111'                                  : 'RP-EMBEDDED MULTICAST',  # ff70::/12 [RFC3956]
+    '00000000': 'RESERVED',               # ::/8
+    '0' * 96: 'RESERVED',               # ::/96 Formerly IPV4COMP [RFC4291]
+    '0' * 128: 'UNSPECIFIED',            # ::/128
+    '0' * 127 + '1': 'LOOPBACK',               # ::1/128
+    '0' * 80 + '1' * 16: 'IPV4MAP',                # ::ffff:0:0/96
+    '00000000011001001111111110011011' + '0' * 64: 'WKP46TRANS',             # 0064:ff9b::/96 Well-Known-Prefix [RFC6052]
+    '00000001': 'UNASSIGNED',             # 0100::/8
+    '0000001': 'RESERVED',               # 0200::/7 Formerly NSAP [RFC4048]
+    '0000010': 'RESERVED',               # 0400::/7 Formerly IPX [RFC3513]
+    '0000011': 'RESERVED',               # 0600::/7
+    '00001': 'RESERVED',               # 0800::/5
+    '0001': 'RESERVED',               # 1000::/4
+    '001': 'GLOBAL-UNICAST',         # 2000::/3 [RFC4291]
+    '00100000000000010000000': 'SPECIALPURPOSE',         # 2001::/23 [RFC4773]
+    '00100000000000010000000000000000': 'TEREDO',                 # 2001::/32 [RFC4380]
+    '00100000000000010000000000000010' + '0' * 16: 'BMWG',                   # 2001:0002::/48 Benchmarking [RFC5180]
+    '0010000000000001000000000001': 'ORCHID',                 # 2001:0010::/28 (Temp until 2014-03-21) [RFC4843]
+    '00100000000000010000001': 'ALLOCATED APNIC',        # 2001:0200::/23
+    '00100000000000010000010': 'ALLOCATED ARIN',         # 2001:0400::/23
+    '00100000000000010000011': 'ALLOCATED RIPE NCC',     # 2001:0600::/23
+    '00100000000000010000100': 'ALLOCATED RIPE NCC',     # 2001:0800::/23
+    '00100000000000010000101': 'ALLOCATED RIPE NCC',     # 2001:0a00::/23
+    '00100000000000010000110': 'ALLOCATED APNIC',        # 2001:0c00::/23
+    '00100000000000010000110110111000': 'DOCUMENTATION',          # 2001:0db8::/32 [RFC3849]
+    '00100000000000010000111': 'ALLOCATED APNIC',        # 2001:0e00::/23
+    '00100000000000010001001': 'ALLOCATED LACNIC',       # 2001:1200::/23
+    '00100000000000010001010': 'ALLOCATED RIPE NCC',     # 2001:1400::/23
+    '00100000000000010001011': 'ALLOCATED RIPE NCC',     # 2001:1600::/23
+    '00100000000000010001100': 'ALLOCATED ARIN',         # 2001:1800::/23
+    '00100000000000010001101': 'ALLOCATED RIPE NCC',     # 2001:1a00::/23
+    '0010000000000001000111': 'ALLOCATED RIPE NCC',     # 2001:1c00::/22
+    '00100000000000010010': 'ALLOCATED RIPE NCC',     # 2001:2000::/20
+    '001000000000000100110': 'ALLOCATED RIPE NCC',     # 2001:3000::/21
+    '0010000000000001001110': 'ALLOCATED RIPE NCC',     # 2001:3800::/22
+    '0010000000000001001111': 'RESERVED',               # 2001:3c00::/22 Possible future allocation to RIPE NCC
+    '00100000000000010100000': 'ALLOCATED RIPE NCC',     # 2001:4000::/23
+    '00100000000000010100001': 'ALLOCATED AFRINIC',      # 2001:4200::/23
+    '00100000000000010100010': 'ALLOCATED APNIC',        # 2001:4400::/23
+    '00100000000000010100011': 'ALLOCATED RIPE NCC',     # 2001:4600::/23
+    '00100000000000010100100': 'ALLOCATED ARIN',         # 2001:4800::/23
+    '00100000000000010100101': 'ALLOCATED RIPE NCC',     # 2001:4a00::/23
+    '00100000000000010100110': 'ALLOCATED RIPE NCC',     # 2001:4c00::/23
+    '00100000000000010101': 'ALLOCATED RIPE NCC',     # 2001:5000::/20
+    '0010000000000001100': 'ALLOCATED APNIC',        # 2001:8000::/19
+    '00100000000000011010': 'ALLOCATED APNIC',        # 2001:a000::/20
+    '00100000000000011011': 'ALLOCATED APNIC',        # 2001:b000::/20
+    '0010000000000010': '6TO4',                   # 2002::/16 "6to4" [RFC3056]
+    '001000000000001100': 'ALLOCATED RIPE NCC',     # 2003::/18
+    '001001000000': 'ALLOCATED APNIC',        # 2400::/12
+    '001001100000': 'ALLOCATED ARIN',         # 2600::/12
+    '00100110000100000000000': 'ALLOCATED ARIN',         # 2610::/23
+    '00100110001000000000000': 'ALLOCATED ARIN',         # 2620::/23
+    '001010000000': 'ALLOCATED LACNIC',       # 2800::/12
+    '001010100000': 'ALLOCATED RIPE NCC',     # 2a00::/12
+    '001011000000': 'ALLOCATED AFRINIC',      # 2c00::/12
+    '00101101': 'RESERVED',               # 2d00::/8
+    '0010111': 'RESERVED',               # 2e00::/7
+    '0011': 'RESERVED',               # 3000::/4
+    '010': 'RESERVED',               # 4000::/3
+    '011': 'RESERVED',               # 6000::/3
+    '100': 'RESERVED',               # 8000::/3
+    '101': 'RESERVED',               # a000::/3
+    '110': 'RESERVED',               # c000::/3
+    '1110': 'RESERVED',               # e000::/4
+    '11110': 'RESERVED',               # f000::/5
+    '111110': 'RESERVED',               # f800::/6
+    '1111110': 'ULA',                    # fc00::/7 [RFC4193]
+    '111111100': 'RESERVED',               # fe00::/9
+    '1111111010': 'LINKLOCAL',              # fe80::/10
+    '1111111011': 'RESERVED',               # fec0::/10 Formerly SITELOCAL [RFC4291]
+    '11111111': 'MULTICAST',              # ff00::/8
+    '1111111100000001': 'NODE-LOCAL MULTICAST',   # ff01::/16
+    '1111111100000010': 'LINK-LOCAL MULTICAST',   # ff02::/16
+    '1111111100000100': 'ADMIN-LOCAL MULTICAST',  # ff04::/16
+    '1111111100000101': 'SITE-LOCAL MULTICAST',   # ff05::/16
+    '1111111100001000': 'ORG-LOCAL MULTICAST',    # ff08::/16
+    '1111111100001110': 'GLOBAL MULTICAST',       # ff0e::/16
+    '1111111100001111': 'RESERVED MULTICAST',     # ff0f::/16
+    '111111110011': 'PREFIX-BASED MULTICAST', # ff30::/12 [RFC3306]
+    '111111110111': 'RP-EMBEDDED MULTICAST',  # ff70::/12 [RFC3956]
     }
 
 
@@ -213,7 +213,7 @@ class IPint:
             # splitting of a string into IP and prefixlen et. al.
             x = data.split('-')
             if len(x) == 2:
-                # a.b.c.0-a.b.c.255 specification ?
+                # a.b.c.0-a.b.c.255 specification?
                 (ip, last) = x
                 (self.ip, parsedVersion) = parseAddress(ip)
                 if parsedVersion != 4:
@@ -736,7 +736,7 @@ class IPint:
             # Fixed bySamuel Krempp <krempp@crans.ens-cachan.fr>:
 
             # The bug is quite obvious really (as 99% bugs are once
-            # spotted, isn't it ? ;-) Because of precedence of
+            # spotted, isn't it? ;-) Because of precedence of
             # multiplication by -1 over the substraction, prefixlen
             # differences were causing the __cmp__ function to always
             # return positive numbers, thus the function was failing

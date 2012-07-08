@@ -52,18 +52,18 @@ class Escalation(Item):
         'contacts':             StringProp(),
         'contact_groups':       StringProp(),
     })
-    
+
     running_properties = Item.running_properties.copy()
     running_properties.update({
         'time_based':           BoolProp(default=False),
     })
-    
+
     # For debugging purpose only (nice name)
     def get_name(self):
         return self.escalation_name
 
 
-    # Return True if :
+    # Return True if:
     # *time in in escalation_period or we do not have escalation_period
     # *status is in escalation_options
     # *the notification number is in our interval [[first_notification .. last_notification]]
@@ -72,9 +72,9 @@ class Escalation(Item):
     # is in our time interval
     def is_eligible(self, t, status, notif_number, in_notif_time, interval):
         small_states = {
-            'WARNING' : 'w',    'UNKNOWN' : 'u',     'CRITICAL' : 'c',
-            'RECOVERY' : 'r',   'FLAPPING' : 'f',    'DOWNTIME' : 's',
-            'DOWN' : 'd',       'UNREACHABLE' : 'u', 'OK' : 'o', 'UP' : 'o'
+            'WARNING': 'w',    'UNKNOWN': 'u',     'CRITICAL': 'c',
+            'RECOVERY': 'r',   'FLAPPING': 'f',    'DOWNTIME': 's',
+            'DOWN': 'd',       'UNREACHABLE': 'u', 'OK': 'o', 'UP': 'o'
         }
 
         # If we are not time based, we check notification numbers:
@@ -110,9 +110,9 @@ class Escalation(Item):
 
     # t = the reference time
     def get_next_notif_time(self, t_wished, status, creation_time, interval):
-        small_states = {'WARNING' : 'w', 'UNKNOWN' : 'u', 'CRITICAL' : 'c',
-             'RECOVERY' : 'r', 'FLAPPING' : 'f', 'DOWNTIME' : 's',
-             'DOWN' : 'd', 'UNREACHABLE' : 'u', 'OK' : 'o', 'UP' : 'o'}
+        small_states = {'WARNING': 'w', 'UNKNOWN': 'u', 'CRITICAL': 'c',
+             'RECOVERY': 'r', 'FLAPPING': 'f', 'DOWNTIME': 's',
+             'DOWN': 'd', 'UNREACHABLE': 'u', 'OK': 'o', 'UP': 'o'}
 
         # If we are not time based, we bail out!
         if not self.time_based:
@@ -150,11 +150,11 @@ class Escalation(Item):
             special_properties = _special_properties_time_based
         else: # classic ones
             special_properties = _special_properties
-            
+
         for prop, entry in cls.properties.items():
             if prop not in special_properties:
                 if not hasattr(self, prop) and entry.required:
-                    logger.info('%s : I do not have %s' % (self.get_name(), prop))
+                    logger.info('%s: I do not have %s' % (self.get_name(), prop))
                     state = False # Bad boy...
 
         # Raised all previously saw errors like unknown contacts and co
@@ -165,23 +165,23 @@ class Escalation(Item):
 
         # Ok now we manage special cases...
         if not hasattr(self, 'contacts') and not hasattr(self, 'contact_groups'):
-            logger.info('%s : I do not have contacts nor contact_groups' % self.get_name())
+            logger.info('%s: I do not have contacts nor contact_groups' % self.get_name())
             state = False
 
         # If time_based or not, we do not check all properties
         if self.time_based:
             if not hasattr(self, 'first_notification_time'):
-                logger.info('%s : I do not have first_notification_time' % self.get_name())
+                logger.info('%s: I do not have first_notification_time' % self.get_name())
                 state = False
             if not hasattr(self, 'last_notification_time'):
-                logger.info('%s : I do not have last_notification_time' % self.get_name())
+                logger.info('%s: I do not have last_notification_time' % self.get_name())
                 state = False
         else: # we check classical properties
             if not hasattr(self, 'first_notification'):
-                logger.info('%s : I do not have first_notification' % self.get_name())
+                logger.info('%s: I do not have first_notification' % self.get_name())
                 state = False
             if not hasattr(self, 'last_notification'):
-                logger.info('%s : I do not have last_notification' % self.get_name())
+                logger.info('%s: I do not have last_notification' % self.get_name())
                 state = False
 
         return state

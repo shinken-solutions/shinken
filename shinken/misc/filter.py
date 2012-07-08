@@ -42,8 +42,8 @@ def only_related_to(lst, user):
         if user in i.contacts:
             r.add(i)
             continue
-        # TODO : add a notified_contact pass
-        
+        # TODO: add a notified_contact pass
+
         # Maybe it's a contact of a linked elements (source problems or impacts)
         is_find = False
         for s in i.source_problems:

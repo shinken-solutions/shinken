@@ -35,10 +35,10 @@ from shinken.external_command import ExternalCommand
 
 
 properties = {
-    'daemons' : ['arbiter'],
-    'type' : 'dummy_arbiter',
-    'external' : True,
-    'phases' : ['configuration', 'late_configuration', 'running'],
+    'daemons': ['arbiter'],
+    'type': 'dummy_arbiter',
+    'external': True,
+    'phases': ['configuration', 'late_configuration', 'running'],
     }
 
 
@@ -60,16 +60,16 @@ class Dummy_arbiter(BaseModule):
     def init(self):
         print "Initilisation of the dummy arbiter module"
         #self.return_queue = self.properties['from_queue']
-        
+
 
     # Ok, main function that is called in the CONFIGURATION phase
     def get_objects(self):
         print "[Dummy] ask me for objects to return"
-        r = {'hosts' : []}
-        h = {'name' : 'dummy host from dummy arbiter module',
-             'register' : '0',
+        r = {'hosts': []}
+        h = {'name': 'dummy host from dummy arbiter module',
+             'register': '0',
              }
-        
+
         r['hosts'].append(h)
         r['hosts'].append( {
                             'host_name': "dummyhost1",
@@ -78,7 +78,7 @@ class Dummy_arbiter(BaseModule):
                             })
         print "[Dummy] Returning to Arbiter the hosts:", r
         return r
-    
+
     def hook_late_configuration(self, conf):
         print("Dummy in hook late config")
 

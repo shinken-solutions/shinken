@@ -22,7 +22,7 @@
  * =========================================================== */
 
 
-!function ( $ ) { 
+!function ( $ ) {
 
   var selector = '[data-datepicker]',
       all = [];
@@ -223,24 +223,24 @@
         // Keyboard navigation shortcuts.
         switch (e.keyCode)
         {
-          case 9: 
-          case 27: 
+          case 9:
+          case 27:
             // Tab or escape hides the datepicker. In this case, just return
             // instead of breaking, so that the e doesn't get stopped.
             this.hide(); return;
-          case 13: 
+          case 13:
             // Enter selects the currently highlighted date.
             this.update(this.selectedDateStr); this.hide(); break;
-          case 38: 
+          case 38:
             // Arrow up goes to prev week.
             this.ahead(0, -7); break;
-          case 40: 
+          case 40:
             // Arrow down goes to next week.
             this.ahead(0, 7); break;
-          case 37: 
+          case 37:
             // Arrow left goes to prev day.
             this.ahead(0, -1); break;
-          case 39: 
+          case 39:
             // Arrow right goes to next day.
             this.ahead(0, 1); break;
           default:
@@ -315,7 +315,7 @@
                                 1);
       }
   };
-  
+
   /* DATEPICKER PLUGIN DEFINITION
    * ============================ */
 
@@ -363,4 +363,4 @@ $.extend($.fn.datepicker.defaults, {
         }
         return date.getFullYear() + "/" + month + "/" + dom;
     }
-});  
+});
