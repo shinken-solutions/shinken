@@ -68,7 +68,7 @@ def main():
         elif o in ("-c", "--critical"):
             notification = a
 	else:
-	    assert False , "unknown options"
+	    assert False, "unknown options"
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-w', '--warning', default = '80')

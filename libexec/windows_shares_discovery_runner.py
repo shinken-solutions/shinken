@@ -77,7 +77,7 @@ try:
         cmd,
         stdout=subprocess.PIPE, stderr=subprocess.PIPE,
         close_fds=True, shell=True)
-except OSError , exp:
+except OSError, exp:
     print "Error in launching command:", cmd, exp
     sys.exit(2)
 

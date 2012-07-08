@@ -88,7 +88,7 @@ class Pickle_retention_generic(BaseModule):
 
             # Now move the .tmp fiel to the real path
             shutil.move(self.path+'.tmp', self.path)
-        except IOError , exp:
+        except IOError, exp:
             log_mgr.log("Error: retention file creation failed, %s" % str(exp))
             return
         log_mgr.log("Updating retention_file %s" % self.path)
@@ -104,20 +104,20 @@ class Pickle_retention_generic(BaseModule):
             f = open(self.path, 'rb')
             all_data = cPickle.load(f)
             f.close()
-        except EOFError , exp:
+        except EOFError, exp:
             print exp
             return False
-        except ValueError , exp:
+        except ValueError, exp:
             print exp
             return False
-        except IOError , exp:
+        except IOError, exp:
             print exp
             return False
-        except IndexError , exp:
+        except IndexError, exp:
             s = "WARNING: Sorry, the ressource file is not compatible: %s" % traceback.format_exc()
             log_mgr.log(s)
             return False
-        except TypeError , exp:
+        except TypeError, exp:
             s = "WARNING: Sorry, the ressource file is not compatible: %s" % traceback.format_exc()
             log_mgr.log(s)
             return False

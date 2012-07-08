@@ -90,7 +90,7 @@ class TestConfigAuth(TestConfig):
         original_time_sleep(3)
 
     def query_livestatus(self, ip, port, data):
-        print "Query livestatus on %s:%d" % (ip,port)
+        print "Query livestatus on %s:%d" % (ip, port)
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.settimeout(10)

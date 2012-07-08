@@ -174,11 +174,11 @@ class TestRegenerator(ShinkenTest):
                     times[prop] += time.time() - t0
 
         print "Times"
-        for (k,v) in times.iteritems():
+        for (k, v) in times.iteritems():
             print "\t%s: %s" % (k, v)
         print "\n\n"
         print "Sizes"
-        for (k,v) in sizes.iteritems():
+        for (k, v) in sizes.iteritems():
             print "\t%s: %s" % (k, v)
         print "\n"
         print "total time", time.time() - start

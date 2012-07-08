@@ -54,7 +54,7 @@ class TestTimeout(ShinkenTest):
 
         # This testscript plays the role of the reactionner
         # Now "fork" a worker
-        w = Worker(1,to_queue,from_queue,1)
+        w = Worker(1, to_queue, from_queue, 1)
         w.id = 1
         w.i_am_dying = False
 
@@ -82,7 +82,7 @@ class TestTimeout(ShinkenTest):
         w.c = control_queue
         # Now we simulate the Worker's work() routine. We can't call it
         # as w.work() because it is an endless loop
-        for i in xrange(1,10):
+        for i in xrange(1, 10):
             w.get_new_checks()
             # During the first loop the sleeping command is launched
             w.launch_new_checks()

@@ -125,7 +125,7 @@ class TestConfig(ShinkenTest):
         """
         self.scheduler_loop(1, [[svc, 0, output]])
         print "Actions", self.sched.actions
-        print 'Output',svc.output
+        print 'Output', svc.output
         print 'long', svc.long_output
         print 'perf', svc.perf_data
 

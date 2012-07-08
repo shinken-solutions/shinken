@@ -59,7 +59,7 @@ def find_several(lst, elt, prop, key):
         if v is None:
             continue
         v = v.strip()
-        print 'MAtch with db',v
+        print 'MAtch with db', v
         if v  in values:
             res.append(dbi)
     print "Return find_several::", res
@@ -140,7 +140,7 @@ class Helper(object):
            <div id='slider_%s' class='%s slider span5' data-log='#slider_log_%s' data-prop='%s' data-min=0 data-max=100 data-unit='%%' data-value=0 data-active=%s></div>
            <a id='btn-slider_%s' href='javascript:toggle_slider("%s");' class='btn btn-mini %s'>Set/Unset</a>
            %s
-        </span>''' % (name, prop, prop, placeholder ,prop, editable, prop, prop, active, prop, prop, editable, p)
+        </span>''' % (name, prop, prop, placeholder, prop, editable, prop, prop, active, prop, prop, editable, p)
         return s
 
 
@@ -187,7 +187,7 @@ class Helper(object):
         args = ''
         # We split on the first ! of the data
         if value is not None:
-            elts = value.split('!',1)
+            elts = value.split('!', 1)
             value = elts[0]
             if len(elts) > 1:
                 args = '!'+elts[1]
@@ -331,13 +331,13 @@ class Helper(object):
             for tpl in app.host_templates.values():
                 tname = getattr(tpl, 'name', None)
                 if tname == t:
-                    for (k,v) in tpl.customs.iteritems():
+                    for (k, v) in tpl.customs.iteritems():
                         print 'My template customs', k, v
                         if k not in customs:
                            customs[k] = {'from': tname, 'value': '', 'placeholder': v}
 
         # Now the item one, will overwrite any entry
-        for (k,v) in elt.iteritems():
+        for (k, v) in elt.iteritems():
             if k.startswith('_') and k != '_id':
                 customs[k] = {'from': '__ITEM__', 'value': v, 'placeholder': ''}
 

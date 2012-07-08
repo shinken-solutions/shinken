@@ -188,7 +188,7 @@ class Broker(BaseSatellite):
             socket.setdefaulttimeout(3)
             links[id]['con'] = Pyro.core.getProxyForURI(uri)
             socket.setdefaulttimeout(None)
-        except Pyro_exp_pack , exp:
+        except Pyro_exp_pack, exp:
             # But the multiprocessing module is not compatible with it!
             # so we must disable it immediately after
             socket.setdefaulttimeout(None)
@@ -226,7 +226,7 @@ class Broker(BaseSatellite):
 #            logger.log("[%s] the %s '%s' is not initialized: %s" % (self.name, type, links[id]['name'], str(exp)))
 #            links[id]['con'] = None
 #            return
-        except KeyError , exp:
+        except KeyError, exp:
             logger.info("the %s '%s' is not initialized: %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             traceback.print_stack()
@@ -245,9 +245,9 @@ class Broker(BaseSatellite):
         for mod in self.modules_manager.get_internal_instances():
             try:
                 mod.manage_brok(b)
-            except Exception , exp:
+            except Exception, exp:
                 logger.debug(str(exp.__dict__))
-                logger.warning("The mod %s raise an exception: %s, I'm tagging it to restart later" % (mod.get_name(),str(exp)))
+                logger.warning("The mod %s raise an exception: %s, I'm tagging it to restart later" % (mod.get_name(), str(exp)))
                 logger.warning("Exception type: %s" % type(exp))
                 logger.warning("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)
@@ -311,24 +311,24 @@ class Broker(BaseSatellite):
                 else: # no con? make the connection
                     self.pynag_con_init(sched_id, type=type)
             # Ok, con is not known, so we create it
-            except KeyError , exp:
+            except KeyError, exp:
                 logger.debug(str(exp))
                 self.pynag_con_init(sched_id, type=type)
-            except Pyro.errors.ProtocolError , exp:
+            except Pyro.errors.ProtocolError, exp:
                 logger.warning("Connection problem to the %s %s: %s" % (type, links[sched_id]['name'], str(exp)))
                 links[sched_id]['con'] = None
             # scheduler must not #be initialized
-            except AttributeError , exp:
+            except AttributeError, exp:
                 logger.warning("The %s %s should not be initialized: %s" % (type, links[sched_id]['name'], str(exp)))
             # scheduler must not have checks
-            except Pyro.errors.NamingError , exp:
+            except Pyro.errors.NamingError, exp:
                 logger.warning("The %s %s should not be initialized: %s" % (type, links[sched_id]['name'], str(exp)))
             except (Pyro.errors.ConnectionClosedError, Pyro.errors.TimeoutError), exp:
                 logger.warning("Connection problem to the %s %s: %s" % (type, links[sched_id]['name'], str(exp)))
                 links[sched_id]['con'] = None
             #  What the F**k? We do not know what happened,
             # so.. bye bye :)
-            except Exception,x:
+            except Exception, x:
                 logger.error(str(x))
                 logger.error(''.join(Pyro.util.getPyroTraceback(x)))
                 sys.exit(1)

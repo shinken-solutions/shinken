@@ -178,7 +178,7 @@ def get_view(page):
                 # Now ok for hosts, but look for services, and service hosts
                 items = [i for i in items if i.__class__.my_type=='host' or (i.in_scheduled_downtime or i.host.in_scheduled_downtime)]
 
-        print "After filtering for",t, s,'we got', len(items)
+        print "After filtering for", t, s, 'we got', len(items)
 
     # If we are in the /problems and we do not have an ack filter
     # we apply by default the ack:false one

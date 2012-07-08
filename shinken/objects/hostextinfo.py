@@ -32,7 +32,7 @@ no use in running part
 
 import time
 
-from item import Item,Items
+from item import Item, Items
 
 from shinken.autoslots import AutoSlots
 from shinken.util import format_t_into_dhms_format, to_hostnames_list, get_obj_name, to_svc_hst_distinct_lists, to_list_string_of_names
@@ -143,11 +143,11 @@ class HostsExtInfo(Items):
                 h = hosts.find_by_name(host_name)
                 if h is not None:
                     # FUUUUUUUUUUsion
-                    self.merge_extinfo(h,ei)
+                    self.merge_extinfo(h, ei)
 
     def merge_extinfo(self, host, extinfo):
-        properties = ['notes','notes_url','icon_image','icon_image_alt','vrml_image','statusmap_image']
+        properties = ['notes', 'notes_url', 'icon_image', 'icon_image_alt', 'vrml_image', 'statusmap_image']
         # host properties have precedence over hostextinfo properties
         for p in properties:
-           if getattr(host,p) == '' and getattr(extinfo,p) != '':
-                setattr(host,p,getattr(extinfo,p))
+           if getattr(host, p) == '' and getattr(extinfo, p) != '':
+                setattr(host, p, getattr(extinfo, p))

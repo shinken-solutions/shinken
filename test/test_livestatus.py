@@ -2596,7 +2596,7 @@ Filter: host_name = test_host_0
 Filter: description = test_ok_0
 Columns: description host_name display_name"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print "hihi",response
+        print "hihi", response
         self.assert_(response == 'test_ok_0;test_host_0;test_ok_0\n')
 
 
@@ -3117,7 +3117,7 @@ ResponseHeader: fixed16
 """
         # 400 services => 400 lines + header + empty last line
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print "r1",response
+        print "r1", response
         self.assert_(len(response.split("\n")) == 402)
 
         request = """GET servicegroups
@@ -3129,7 +3129,7 @@ OutputFormat: csv
         print "sg01 is", sg01
         # 400 services => 400 lines
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print "r2",response
+        print "r2", response
         # take first line, take members column, count list elements = 400 services
         self.assert_(len(((response.split("\n")[0]).split(';')[1]).split(',')) == 400)
 
@@ -3154,7 +3154,7 @@ OutputFormat: csv
         #    print s.get_full_name()
         if hasattr(self.livestatus_broker.rg.services, "__iter__") and hasattr(self.livestatus_broker.rg.services, "itersorted"):
                 print "ris__iter__", self.livestatus_broker.rg.services.__iter__
-                print "ris__itersorted__",self.livestatus_broker.rg.services.itersorted
+                print "ris__itersorted__", self.livestatus_broker.rg.services.itersorted
         i = 0
         while i < 10:
             print self.livestatus_broker.rg.services._id_heap[i]
@@ -3239,7 +3239,7 @@ OutputFormat: csv"""
         # python test_livestatus.py TestConfigBig.test_thruk_unhandled_srv_page_perf
         return
         import cProfile
-        cProfile.runctx('''self.do_test_thruk_unhandled_srv_page_perf()''', globals(), locals(),'/tmp/livestatus_thruk_perf.profile')
+        cProfile.runctx('''self.do_test_thruk_unhandled_srv_page_perf()''', globals(), locals(), '/tmp/livestatus_thruk_perf.profile')
 
 
 
@@ -3690,7 +3690,7 @@ Or: 2
 OutputFormat: csv
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print "r1",response
+        print "r1", response
         self.assert_(response == """
 """)
 
@@ -3705,7 +3705,7 @@ Or: 2
 OutputFormat: csv
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print "r1",response
+        print "r1", response
         self.assert_(response == """
 """)
 
@@ -3728,7 +3728,7 @@ Or: 9
 OutputFormat: csv
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print "r1",response
+        print "r1", response
         # test_host_099 matches by name
         # test_host_098 matches by address (test_host_098 has 127.0.0.99)
         self.assert_(response == """0;test_host_098;0

@@ -30,7 +30,7 @@ import asyncore
 import getopt
 sys.path.append("..")
 sys.path.append("../..")
-from livestatus import LSAsynConnection,Query
+from livestatus import LSAsynConnection, Query
 
 """ Benchmark of the livestatus broker"""
 
@@ -47,18 +47,18 @@ class SimpleQueryGenerator(QueryGenerator):
 
     def get(self):
         query=self.querys[self.i]
-        query_class="%s-%s" % (self.name,self.i)
+        query_class="%s-%s" % (self.name, self.i)
         self.i+=1
         if self.i >= len(self.querys):
             self.i=0
-        return (query_class,query)
+        return (query_class, query)
 
 class FileQueryGenerator(SimpleQueryGenerator):
     def __init__(self, filename):
-        f = open(filename,"r")
+        f = open(filename, "r")
         querys = []
         for query in f:
-            query = query.replace("\\n","\n")
+            query = query.replace("\\n", "\n")
             querys.append(query)
         SimpleQueryGenerator.__init__(self, querys, filename)
 
@@ -99,8 +99,8 @@ def run(url, requests, concurrency, qg):
     else:
         return
 
-    for x in xrange(0,concurrency):
-        conns.append(LSAsynConnection(addr=addr,port=port))
+    for x in xrange(0, concurrency):
+        conns.append(LSAsynConnection(addr=addr, port=port))
         (query_class, query_str)=qg.get()
         q=Query(query_str)
         q.query_class = query_class
@@ -140,7 +140,7 @@ def run(url, requests, concurrency, qg):
     print "Running time is %04f s" % running_time
     print "Query Class          nb  min      max       mean     median"
     for query_class, durations in queries_durations.items():
-        print "%s %03d %03f %03f %03f %03f" % (query_class.ljust(20),len(durations),min(durations),max(durations),mean(durations),median(durations))
+        print "%s %03d %03f %03f %03f %03f" % (query_class.ljust(20), len(durations), min(durations), max(durations), mean(durations), median(durations))
 
 def main(argv):
     # Defaults values
@@ -165,12 +165,12 @@ def main(argv):
     if len(args) >= 1:
         url = args[0]
 
-    print "Running %s queries on %s" % (requests,url)
+    print "Running %s queries on %s" % (requests, url)
     print "Concurrency level %s " % (concurrency)
 
     qg = FileQueryGenerator("thruk_tac.queries")
 
-    run(url,requests,concurrency,qg)
+    run(url, requests, concurrency, qg)
 
 if __name__ == "__main__":
     main(sys.argv[1:])

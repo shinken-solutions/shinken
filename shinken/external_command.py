@@ -73,14 +73,14 @@ class ExternalCommandManager:
         'CHANGE_CONTACT_HOST_NOTIFICATION_TIMEPERIOD': {'global': True, 'args': ['contact', 'time_period']},
         'ADD_SVC_COMMENT': {'global': False, 'args': ['service', 'to_bool', 'author', None]},
         'ADD_HOST_COMMENT': {'global': False, 'args': ['host', 'to_bool', 'author', None]},
-        'ACKNOWLEDGE_SVC_PROBLEM': {'global': False, 'args': ['service' , 'to_int', 'to_bool', 'to_bool', 'author', None]},
+        'ACKNOWLEDGE_SVC_PROBLEM': {'global': False, 'args': ['service', 'to_int', 'to_bool', 'to_bool', 'author', None]},
         'ACKNOWLEDGE_HOST_PROBLEM': {'global': False, 'args': ['host', 'to_int', 'to_bool', 'to_bool', 'author', None]},
-        'ACKNOWLEDGE_SVC_PROBLEM_EXPIRE': {'global': False, 'args': ['service' , 'to_int', 'to_bool', 'to_bool', 'to_int', 'author', None]},
+        'ACKNOWLEDGE_SVC_PROBLEM_EXPIRE': {'global': False, 'args': ['service', 'to_int', 'to_bool', 'to_bool', 'to_int', 'author', None]},
         'ACKNOWLEDGE_HOST_PROBLEM_EXPIRE': {'global': False, 'args': ['host', 'to_int', 'to_bool', 'to_bool', 'to_int', 'author', None]},
         'CHANGE_CONTACT_SVC_NOTIFICATION_TIMEPERIOD': {'global': True, 'args': ['contact', 'time_period']},
-        'CHANGE_CUSTOM_CONTACT_VAR': {'global': True, 'args': ['contact', None,None]},
-        'CHANGE_CUSTOM_HOST_VAR': {'global': False, 'args': ['host', None,None]},
-        'CHANGE_CUSTOM_SVC_VAR': {'global': False, 'args': ['service', None,None]},
+        'CHANGE_CUSTOM_CONTACT_VAR': {'global': True, 'args': ['contact', None, None]},
+        'CHANGE_CUSTOM_HOST_VAR': {'global': False, 'args': ['host', None, None]},
+        'CHANGE_CUSTOM_SVC_VAR': {'global': False, 'args': ['service', None, None]},
         'CHANGE_GLOBAL_HOST_EVENT_HANDLER': {'global': True, 'args': ['command']},
         'CHANGE_GLOBAL_SVC_EVENT_HANDLER': {'global': True, 'args': ['command']},
         'CHANGE_HOST_CHECK_COMMAND': {'global': False, 'args': ['host', 'command']},
@@ -194,14 +194,14 @@ class ExternalCommandManager:
         'REMOVE_SVC_ACKNOWLEDGEMENT': {'global': False, 'args': ['service']},
         'RESTART_PROGRAM': {'global': True, 'args': []},
         'SAVE_STATE_INFORMATION': {'global': True, 'args': []},
-        'SCHEDULE_AND_PROPAGATE_HOST_DOWNTIME': {'global': False, 'args': ['host', 'to_int', 'to_int', 'to_bool', 'to_int', 'to_int', 'author',None]},
+        'SCHEDULE_AND_PROPAGATE_HOST_DOWNTIME': {'global': False, 'args': ['host', 'to_int', 'to_int', 'to_bool', 'to_int', 'to_int', 'author', None]},
         'SCHEDULE_AND_PROPAGATE_TRIGGERED_HOST_DOWNTIME': {'global': False, 'args': ['host', 'to_int', 'to_int', 'to_bool', 'to_int', 'to_int', 'author', None]},
         'SCHEDULE_CONTACT_DOWNTIME': {'global': True, 'args': ['contact', 'to_int', 'to_int', 'author', None]},
         'SCHEDULE_FORCED_HOST_CHECK': {'global': False, 'args': ['host', 'to_int']},
         'SCHEDULE_FORCED_HOST_SVC_CHECKS': {'global': False, 'args': ['host', 'to_int']},
         'SCHEDULE_FORCED_SVC_CHECK': {'global': False, 'args': ['service', 'to_int']},
-        'SCHEDULE_HOSTGROUP_HOST_DOWNTIME': {'global': True, 'args': ['host_group', 'to_int', 'to_int', 'to_bool', 'to_int', 'to_int', 'author',None]},
-        'SCHEDULE_HOSTGROUP_SVC_DOWNTIME': {'global': True, 'args': ['host_group', 'to_int', 'to_int', 'to_bool', 'to_int', 'to_int', 'author',None]},
+        'SCHEDULE_HOSTGROUP_HOST_DOWNTIME': {'global': True, 'args': ['host_group', 'to_int', 'to_int', 'to_bool', 'to_int', 'to_int', 'author', None]},
+        'SCHEDULE_HOSTGROUP_SVC_DOWNTIME': {'global': True, 'args': ['host_group', 'to_int', 'to_int', 'to_bool', 'to_int', 'to_int', 'author', None]},
         'SCHEDULE_HOST_CHECK': {'global': False, 'args': ['host', 'to_int']},
         'SCHEDULE_HOST_DOWNTIME': {'global': False, 'args': ['host', 'to_int', 'to_int', 'to_bool', 'to_int', 'to_int', 'author', None]},
         'SCHEDULE_HOST_SVC_CHECKS': {'global': False, 'args': ['host', 'to_int']},
@@ -280,7 +280,7 @@ class ExternalCommandManager:
                 try:
                     os.mkfifo(self.pipe_path, 0660)
                     open(self.pipe_path, 'w+', os.O_NONBLOCK)
-                except OSError , exp:
+                except OSError, exp:
                     self.error("Pipe creation failed (%s): %s" % (self.pipe_path, str(exp)))
                     return None
         self.fifo = os.open(self.pipe_path, os.O_NONBLOCK)

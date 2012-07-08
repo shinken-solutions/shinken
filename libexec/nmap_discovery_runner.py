@@ -183,7 +183,7 @@ class DetectedHost:
             return
 
         max_accuracy = 0
-        for (os, osgen, accuracy , os_type, vendor) in self.os_possibilities:
+        for (os, osgen, accuracy, os_type, vendor) in self.os_possibilities:
             if accuracy > max_accuracy:
                 max_accuracy = accuracy
 
@@ -264,14 +264,14 @@ if not simulate:
 
     print "propose a tmppath", tmppath
 
-    cmd = "sudo nmap %s -sU -sT --min-rate %d --max-retries %d -T4 -O --traceroute -oX %s" % (' '.join(targets) , min_rate, max_retries, tmppath)
+    cmd = "sudo nmap %s -sU -sT --min-rate %d --max-retries %d -T4 -O --traceroute -oX %s" % (' '.join(targets), min_rate, max_retries, tmppath)
     print "Launching command,", cmd
     try:
         nmap_process = subprocess.Popen(
             cmd,
             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             close_fds=True, shell=True)
-    except OSError , exp:
+    except OSError, exp:
         print "Debug: Error in launching command:", cmd, exp
         sys.exit(2)
 

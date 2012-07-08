@@ -54,7 +54,7 @@ except ImportError:
     from shinken.bin import VERSION
 
 
-from shinken.objects.pack import Pack,Packs
+from shinken.objects.pack import Pack, Packs
 from shinken.log import logger
 from shinken.objects.config import Config
 
@@ -148,7 +148,7 @@ def create_pack(pack_file, p_dest_dir, share_dir):
     print "Doc link: %s" % o['doc_link']
     o['macros'] = {}
     print "Macros:"
-    for (k,v) in pack.macros.iteritems():
+    for (k, v) in pack.macros.iteritems():
         t = v.get('type', 'string')
         d = v.get('description', '')
         o['macros'][k] = {'type': t, 'description': ''}
@@ -287,7 +287,7 @@ def push_pack(zip_file_p, api_key, uri, proxy):
         c.setopt(c.PROXY, proxy)
     c.setopt(c.URL, uri+"/pushpack")
 
-    c.setopt(c.HTTPPOST,[ ("key", api_key),
+    c.setopt(c.HTTPPOST, [ ("key", api_key),
                           ("data",
                            (c.FORM_FILE, str(zip_file_p),
                             c.FORM_CONTENTTYPE, "application/x-gzip"))
@@ -322,7 +322,7 @@ def register(login, password, email, uri, proxy):
         c.setopt(c.PROXY, proxy)
     c.setopt(c.URL, uri+"/register")
 
-    c.setopt(c.HTTPPOST,[ ("username", login), ("password", password), ("email", email), ('cli_mode', '1')])
+    c.setopt(c.HTTPPOST, [ ("username", login), ("password", password), ("email", email), ('cli_mode', '1')])
 
     error = ''
     obj = ''
@@ -372,7 +372,7 @@ def getkey(login, password, uri, proxy):
         c.setopt(c.PROXY, proxy)
     c.setopt(c.URL, uri+"/apikey")
 
-    c.setopt(c.HTTPPOST,[ ("login", login), ("password", password), ('cli_mode', '1')])
+    c.setopt(c.HTTPPOST, [ ("login", login), ("password", password), ('cli_mode', '1')])
 
     #c.setopt(c.HTTPPOST, [("file1", (c.FORM_FILE, str(zip_file_p)))])
     error = ''
@@ -418,7 +418,7 @@ def analyse(api_key, stats_file, uri, proxy):
         c.setopt(c.PROXY, proxy)
     c.setopt(c.URL, uri+"/pushstats")
 
-    c.setopt(c.HTTPPOST,[ ("key", api_key),
+    c.setopt(c.HTTPPOST, [ ("key", api_key),
                           ("data",
                            (c.FORM_FILE, str(stats_file),
                             c.FORM_CONTENTTYPE, "application/x-gzip"))

@@ -145,7 +145,7 @@ class Worker:
                 if msg is not None:
                     self.checks.append(msg.get_data())
                 #print "I", self.id, "I've got a message!"
-        except Empty , exp:
+        except Empty, exp:
             if len(self.checks) == 0:
                 self._idletime = self._idletime + 1
                 time.sleep(1)
@@ -189,7 +189,7 @@ class Worker:
                 try:
                     self.returns_queue.put(action)
 
-                except IOError , exp:
+                except IOError, exp:
                     logger.error("[%d] Exiting: %s" % (self.id, exp))
                     sys.exit(2)
 

@@ -51,19 +51,19 @@ def main(input_file, output_file):
             print "Nothing to do"
             return True
     r = []
-    flatmappingfile = open(input_file,'rb')
+    flatmappingfile = open(input_file, 'rb')
 
     for ligne in flatmappingfile:
         ligne = ligne.rstrip('\n\r')
         parts = ligne.split(':')
         host = parts[0]
         vm = parts[1]
-        v = (('host', host),('host', vm))
+        v = (('host', host), ('host', vm))
         r.append(v)
 
     flatmappingfile.close()
 
-    jsonmappingfile = open(output_file,'wb')
+    jsonmappingfile = open(output_file, 'wb')
     buf=json.dumps(r)
     jsonmappingfile.write(buf)
     jsonmappingfile.close()
@@ -72,7 +72,7 @@ if __name__ == "__main__":
     # Manage the options
     parser = optparse.OptionParser(
         version="Shinken external flat mapping file to json mapping %s" % VERSION)
-    parser.add_option("-o", "--output",dest='output_file',default='/tmp/external_mapping_file.json',
+    parser.add_option("-o", "--output", dest='output_file', default='/tmp/external_mapping_file.json',
                       help="Path of the generated json mapping file.")
     parser.add_option("-i", "--input", dest='input_file', default='/tmp/shinken_flat_mapping',
                       help="Path oh the flat mapping file")

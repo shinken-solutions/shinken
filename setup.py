@@ -28,7 +28,7 @@ import sys
 try:
     python_version = sys.version_info
 except:
-    python_version = (1,5)
+    python_version = (1, 5)
 if python_version < (2, 4):
     sys.exit("Shinken require as a minimum Python 2.4.x, sorry")
 elif python_version >= (3,):
@@ -227,8 +227,8 @@ class build_config(Command):
         for name in config_objects_file:
             inname = os.path.join('etc', name)
             outname = os.path.join(self.build_dir, name)
-            log.info('Copying data files in: %s out: %s' % (inname,outname))
-            append_file_with(inname, outname,"")
+            log.info('Copying data files in: %s out: %s' % (inname, outname))
+            append_file_with(inname, outname, "")
         # Creating some needed directories
         discovery_dir = os.path.join(self.build_dir + "/objects/discovery")
         if not os.path.exists(discovery_dir):
@@ -236,7 +236,7 @@ class build_config(Command):
         for dirname in [self.var_path, self.run_path, self.log_path, discovery_dir]:
             if self.build_base:
                 if not is_install:
-                    dirname = os.path.join(self.build_base, os.path.relpath(dirname,'/')) #dirname)
+                    dirname = os.path.join(self.build_base, os.path.relpath(dirname, '/')) #dirname)
                 else:
                     dirname = os.path.join(self.build_base, dirname)
             if not os.path.exists(dirname):
@@ -428,7 +428,7 @@ def gen_data_files(*dirs):
 
     for src_dir in dirs:
         #print "Getting all files from", src_dir
-        for root,dirs,files in os.walk(src_dir):
+        for root, dirs, files in os.walk(src_dir):
             for file in files:
                 results.append(os.path.join(root, file))
     return results
@@ -543,7 +543,7 @@ resource_cfg_files = ('resource.cfg', )
 full_path_webui_files = gen_data_files('shinken/webui')
 webui_files = [s.replace('shinken/webui/', 'webui/') for s in full_path_webui_files]
 
-package_data = ['*.py','modules/*.py','modules/*/*.py']
+package_data = ['*.py', 'modules/*.py', 'modules/*/*.py']
 package_data.extend(webui_files)
 
 

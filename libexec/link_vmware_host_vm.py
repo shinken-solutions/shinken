@@ -109,7 +109,7 @@ def create_all_links(res, rules):
             # First we apply rules on the names
             host_name = _apply_rules(host, rules)
             vm_name = _apply_rules(vm, rules)
-            v = (('host', host_name),('host', vm_name))
+            v = (('host', host_name), ('host', vm_name))
             r.append(v)
     return r
 

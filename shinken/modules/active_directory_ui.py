@@ -73,7 +73,7 @@ class AD_Webui(BaseModule):
     def connect(self):
         print "Trying to initalize the AD/Ldap connection"
         self.con = ldap.initialize(self.ldap_uri)
-        self.con.set_option(ldap.OPT_REFERRALS,0)
+        self.con.set_option(ldap.OPT_REFERRALS, 0)
 
         print "Trying to connect to AD/Ldap", self.ldap_uri, self.username, self.password, self.basedn
         # Any errors will throw an ldap.LDAPError exception
@@ -200,7 +200,7 @@ class AD_Webui(BaseModule):
             account_name = user
 
         local_con = ldap.initialize(self.ldap_uri)
-        local_con.set_option(ldap.OPT_REFERRALS,0)
+        local_con.set_option(ldap.OPT_REFERRALS, 0)
 
         # Any errors will throw an ldap.LDAPError exception
         # or related exception so you can ignore the result

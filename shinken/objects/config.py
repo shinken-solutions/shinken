@@ -394,7 +394,7 @@ class Config(Item):
 
     def _cut_line(self, line):
         #punct = '"#$%&\'()*+/<=>?@[\\]^`{|}~'
-        tmp = re.split("[" + string.whitespace + "]+" , line, 1)
+        tmp = re.split("[" + string.whitespace + "]+", line, 1)
         r = [elt for elt in tmp if elt != '']
         return r
 
@@ -510,7 +510,7 @@ class Config(Item):
                  'reactionner', 'broker', 'receiver', 'poller', 'realm', 'module',
                  'resultmodulation', 'escalation', 'serviceescalation', 'hostescalation',
                  'discoveryrun', 'discoveryrule', 'businessimpactmodulation',
-                 'hostextinfo','serviceextinfo']
+                 'hostextinfo', 'serviceextinfo']
         objectscfg = {}
         for t in types:
             objectscfg[t] = []
@@ -1079,7 +1079,7 @@ class Config(Item):
     def got_arbiter_module_type_defined(self, mod_type):
         for a in self.arbiters:
             # Do like the linkify will do after....
-            for m in getattr(a , 'modules', '').split(','):
+            for m in getattr(a, 'modules', '').split(','):
                 # So look at what the arbiter try to call as module
                 m = m.strip()
                 # Ok, now look in modules...
@@ -1350,7 +1350,7 @@ class Config(Item):
 
         for x in ('hosts', 'hostgroups', 'contacts', 'contactgroups', 'notificationways',
                   'escalations', 'services', 'servicegroups', 'timeperiods', 'commands',
-                  'hostsextinfo','servicesextinfo'):
+                  'hostsextinfo', 'servicesextinfo'):
             if self.read_config_silent == 0:
                 logger.info('Checking %s...' % (x), print_it=True)
             cur = getattr(self, x)

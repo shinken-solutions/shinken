@@ -157,7 +157,7 @@ class Command(Item):
     # 'module_type': 'fork', 'command_name': u'notify-by-rss'})
     def __setstate_pre_1_0__(self, state):
         for d in state:
-            for k,v in d.items():
+            for k, v in d.items():
                 setattr(self, k, v)
 
 

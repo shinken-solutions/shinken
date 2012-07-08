@@ -73,10 +73,10 @@ class NSCA_client():
             return None
 
         if self.encryption_method == 1:
-            data = decrypt_xor(data,self.password)
-            data = decrypt_xor(data,iv)
+            data = decrypt_xor(data, self.password)
+            data = decrypt_xor(data, iv)
 
-        (version, pad1, crc32, timestamp, rc, hostname_dirty, service_dirty, output_dirty, pad2) = struct.unpack("!hhIIh64s128s512sh",data)
+        (version, pad1, crc32, timestamp, rc, hostname_dirty, service_dirty, output_dirty, pad2) = struct.unpack("!hhIIh64s128s512sh", data)
         hostname =  hostname_dirty.partition("\0", 1)[0]
         service = service_dirty.partition("\0", 1)[0]
         output = output_dirty.partition("\0", 1)[0]
@@ -87,9 +87,9 @@ class NSCA_client():
         Send a check result command to the arbiter
         '''
         if len(service) == 0:
-            extcmd = "[%lu] PROCESS_HOST_CHECK_RESULT;%s;%d;%s\n" % (timestamp,hostname,rc,output)
+            extcmd = "[%lu] PROCESS_HOST_CHECK_RESULT;%s;%d;%s\n" % (timestamp, hostname, rc, output)
         else:
-            extcmd = "[%lu] PROCESS_SERVICE_CHECK_RESULT;%s;%s;%d;%s\n" % (timestamp,hostname,service,rc,output)
+            extcmd = "[%lu] PROCESS_SERVICE_CHECK_RESULT;%s;%s;%d;%s\n" % (timestamp, hostname, service, rc, output)
 
         print "want to send", extcmd
 
@@ -115,7 +115,7 @@ class NSCA_client():
         print "got init", init
 
         #init_packet = struct.pack("!128sI",iv,int(time.mktime(time.gmtime())))
-        (iv, t) = struct.unpack("!128sI",init)
+        (iv, t) = struct.unpack("!128sI", init)
         print "IV", iv
         print "T", t
 
@@ -143,8 +143,8 @@ class NSCA_client():
         print "Create packent len", len(init_packet)
         #(version, pad1, crc32, timestamp, rc, hostname_dirty, service_dirty, output_dirty, pad2) = struct.unpack("!hhIIh64s128s512sh",data)
 
-        data = decrypt_xor(init_packet,iv)
-        data = decrypt_xor(data,self.password)
+        data = decrypt_xor(init_packet, iv)
+        data = decrypt_xor(data, self.password)
 
 
         server.send(data)
@@ -152,7 +152,7 @@ class NSCA_client():
 
         while not self.interrupted:
             print "Loop"
-            inputready,outputready,exceptready = select.select(input,[],[], 1)
+            inputready, outputready, exceptready = select.select(input, [], [], 1)
 
             for s in inputready:
                 if s == server:
@@ -170,13 +170,13 @@ class NSCA_client():
                         databuffer[s] = data
                     if len(databuffer[s]) == 720:
                         # end-of-transmission or an empty line was received
-                        (timestamp, rc, hostname, service, output)=self.read_check_result(databuffer[s],IVs[s])
+                        (timestamp, rc, hostname, service, output)=self.read_check_result(databuffer[s], IVs[s])
                         del databuffer[s]
                         del IVs[s]
-                        self.post_command(timestamp,rc,hostname,service,output)
+                        self.post_command(timestamp, rc, hostname, service, output)
                         try:
                             s.shutdown(2)
-                        except Exception , exp:
+                        except Exception, exp:
                             print exp
                         s.close()
                         input.remove(s)

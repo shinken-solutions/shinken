@@ -42,8 +42,8 @@ def hst_srv_sort(s1, s2):
     tab = {'host': { 0: 0, 1: 4, 2: 1},
            'service': {0: 0, 1: 2, 2: 3, 3: 1}
            }
-    state1 = tab[s1.__class__.my_type].get(s1.state_id ,0)
-    state2 = tab[s2.__class__.my_type].get(s2.state_id ,0)
+    state1 = tab[s1.__class__.my_type].get(s1.state_id, 0)
+    state2 = tab[s2.__class__.my_type].get(s2.state_id, 0)
     # ok, here, same business_impact
     # Compare warn and crit state
     if state1 > state2:
@@ -68,8 +68,8 @@ def worse_first(s1, s2):
     tab = {'host': { 0: 0, 1: 4, 2: 1},
            'service': {0: 0, 1: 2, 2: 3, 3: 1}
            }
-    state1 = tab[s1.__class__.my_type].get(s1.state_id ,0)
-    state2 = tab[s2.__class__.my_type].get(s2.state_id ,0)
+    state1 = tab[s1.__class__.my_type].get(s1.state_id, 0)
+    state2 = tab[s2.__class__.my_type].get(s2.state_id, 0)
 
     # ok, here, same business_impact
     # Compare warn and crit state

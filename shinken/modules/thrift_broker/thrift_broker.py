@@ -92,7 +92,7 @@ properties = {
     'phases': ['running'],
     }
 
-tables = ["hosts",""]
+tables = ["hosts", ""]
 
 class Thrift_brokerHandler(Hooker):
     out_map = out_map
@@ -118,12 +118,12 @@ class Thrift_brokerHandler(Hooker):
         #self.create_out_map_delegates()
         self.create_out_map_hooks()
 
-    def sendCommand(self,command):
+    def sendCommand(self, command):
         print "sendCommand()"
         try:
             cmd = ThriftCommandQuery(self.configs, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, '', self.return_queue, None)
             timestamp = time.time()
-            cmd.extcmd = "[%lu] %s\n" % (timestamp,command)
+            cmd.extcmd = "[%lu] %s\n" % (timestamp, command)
             print cmd.extcmd
             cmd.launch_query()
         except Exception, e:
@@ -994,13 +994,13 @@ class Thrift_broker(BaseModule):
             self.set_debug()
 
         # Start the thread to manage brok
-        broks_manager_thread = threading.Thread(None,self.manage_broks, "broks manager", args = [self] )
+        broks_manager_thread = threading.Thread(None, self.manage_broks, "broks manager", args = [self] )
         broks_manager_thread.start()
 
         # Start the thrift server
         handler = Thrift_brokerHandler(self.configs, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.from_q)
         processor = Broker.Processor(handler)
-        transport = TSocket.TServerSocket("0.0.0.0",self.port)
+        transport = TSocket.TServerSocket("0.0.0.0", self.port)
         tfactory = TTransport.TBufferedTransportFactory()
         pfactory = TBinaryProtocol.TBinaryProtocolFactory()
 

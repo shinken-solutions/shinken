@@ -23,7 +23,7 @@
 #
 
 from shinken_test import *
-from shinken.misc.perfdata import Metric,PerfDatas
+from shinken.misc.perfdata import Metric, PerfDatas
 
 class TestParsePerfdata(ShinkenTest):
     # Uncomment this is you want to use a specific configuration

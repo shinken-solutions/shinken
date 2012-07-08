@@ -104,7 +104,7 @@ class Timeperiod(Item):
     properties = Item.properties.copy()
     properties.update({
         'timeperiod_name':  StringProp (fill_brok=['full_status']),
-        'alias':            StringProp (default='',fill_brok=['full_status']),
+        'alias':            StringProp (default='', fill_brok=['full_status']),
         'use':              StringProp (default=''),
         'register':         IntegerProp(default='1'),
 
@@ -439,7 +439,7 @@ class Timeperiod(Item):
         s += str(self.__dict__)+'\n'
         for elt in self.dateranges:
             s += str(elt)
-            (start,end) = elt.get_start_and_end_time()
+            (start, end) = elt.get_start_and_end_time()
             start = time.asctime(time.localtime(start))
             end = time.asctime(time.localtime(end))
             s += "\nStart and end:"+str((start, end))
@@ -503,15 +503,15 @@ class Timeperiod(Item):
                 ewday = t1
                 swday_offset = smday
                 ewday_offset = emday
-                dateranges.append(WeekDayDaterange(0, 0, 0, swday, swday_offset, 0,0,0, ewday, ewday_offset, skip_interval, other))
+                dateranges.append(WeekDayDaterange(0, 0, 0, swday, swday_offset, 0, 0, 0, ewday, ewday_offset, skip_interval, other))
                 return
             elif t0 in Daterange.months and t1 in Daterange.months:
                 smon = t0
                 emon = t1
-                dateranges.append(MonthDateDaterange(0, smon, smday, 0,0,0,emon,emday,0,0,skip_interval,other))
+                dateranges.append(MonthDateDaterange(0, smon, smday, 0, 0, 0, emon, emday, 0, 0, skip_interval, other))
                 return
             elif t0 == 'day' and t1 == 'day':
-                dateranges.append(MonthDayDaterange(0,0,smday,0,0,0,0,emday, 0,0,skip_interval, other))
+                dateranges.append(MonthDayDaterange(0, 0, smday, 0, 0, 0, 0, emday, 0, 0, skip_interval, other))
                 return
 
         res = re.search('([a-z]*) ([\d-]+) - ([\d-]+) / (\d+)[\s\t]*([0-9:, -]+)', entry)
@@ -523,15 +523,15 @@ class Timeperiod(Item):
                 swday_offset = smday
                 ewday = swday
                 ewday_offset = emday
-                dateranges.append(WeekDayDaterange(0, 0, 0, swday, swday_offset, 0,0,0, ewday, ewday_offset, skip_interval, other))
+                dateranges.append(WeekDayDaterange(0, 0, 0, swday, swday_offset, 0, 0, 0, ewday, ewday_offset, skip_interval, other))
                 return
             elif t0 in Daterange.months:
                 smon = t0
                 emon = smon
-                dateranges.append(MonthDateDaterange(0, smon, smday, 0,0,0,emon,emday,0,0,skip_interval, other))
+                dateranges.append(MonthDateDaterange(0, smon, smday, 0, 0, 0, emon, emday, 0, 0, skip_interval, other))
                 return
             elif t0 == 'day':
-                dateranges.append(MonthDayDaterange(0,0,smday,0,0,0,0,emday,0,0,skip_interval,other))
+                dateranges.append(MonthDayDaterange(0, 0, smday, 0, 0, 0, 0, emday, 0, 0, skip_interval, other))
                 return
 
 
@@ -553,15 +553,15 @@ class Timeperiod(Item):
                 swday_offset = smday
                 ewday = swday
                 ewday_offset = emday
-                dateranges.append(WeekDayDaterange(0, 0, 0, swday, swday_offset, 0,0,0, ewday, ewday_offset, 0, other))
+                dateranges.append(WeekDayDaterange(0, 0, 0, swday, swday_offset, 0, 0, 0, ewday, ewday_offset, 0, other))
                 return
             elif t0 in Daterange.months:
                 smon = t0
                 emon = smon
-                dateranges.append(MonthDateDaterange(0, smon, smday, 0,0,0,emon,emday,0,0, 0, other))
+                dateranges.append(MonthDateDaterange(0, smon, smday, 0, 0, 0, emon, emday, 0, 0, 0, other))
                 return
             elif t0 == 'day':
-                dateranges.append(MonthDayDaterange(0,0,smday,0,0,0,0,emday,0,0,0,other))
+                dateranges.append(MonthDayDaterange(0, 0, smday, 0, 0, 0, 0, emday, 0, 0, 0, other))
                 return
 
         res = re.search('([a-z]*) ([\d-]+) - ([a-z]*) ([\d-]+)[\s\t]*([0-9:, -]+)', entry)
@@ -573,28 +573,28 @@ class Timeperiod(Item):
                 ewday = t1
                 swday_offset = smday
                 ewday_offset = emday
-                dateranges.append(WeekDayDaterange(0, 0, 0, swday, swday_offset, 0,0,0, ewday, ewday_offset, 0, other))
+                dateranges.append(WeekDayDaterange(0, 0, 0, swday, swday_offset, 0, 0, 0, ewday, ewday_offset, 0, other))
                 return
             elif t0 in Daterange.months and t1 in Daterange.months:
                 smon = t0
                 emon = t1
-                dateranges.append(MonthDateDaterange(0, smon, smday, 0,0,0,emon,emday,0,0, 0,other))
+                dateranges.append(MonthDateDaterange(0, smon, smday, 0, 0, 0, emon, emday, 0, 0, 0, other))
                 return
             elif t0 == 'day' and t1 == 'day':
-                dateranges.append(MonthDayDaterange(0,0,smday,0,0,0,0,emday, 0,0, 0, other))
+                dateranges.append(MonthDayDaterange(0, 0, smday, 0, 0, 0, 0, emday, 0, 0, 0, other))
                 return
 
         res = re.search('([a-z]*) ([\d-]+) ([a-z]*)[\s\t]*([0-9:, -]+)', entry)
         if res is not None:
             #print "Good catch 11"
-            (t0, swday_offset, t1,other) = res.groups()
+            (t0, swday_offset, t1, other) = res.groups()
             if t0 in Daterange.weekdays and t1 in Daterange.months:
                 swday = t0
                 smon = t1
                 emon = smon
                 ewday = swday
                 ewday_offset = swday_offset
-                dateranges.append(MonthWeekDayDaterange(0, smon, 0, swday, swday_offset,0,emon,0,ewday,ewday_offset,0,other))
+                dateranges.append(MonthWeekDayDaterange(0, smon, 0, swday, swday_offset, 0, emon, 0, ewday, ewday_offset, 0, other))
                 return
 
         res = re.search('([a-z]*) ([\d-]+)[\s\t]+([0-9:, -]+)', entry)
@@ -606,17 +606,17 @@ class Timeperiod(Item):
                 swday_offset = smday
                 ewday = swday
                 ewday_offset = swday_offset
-                dateranges.append(WeekDayDaterange(0,0,0,swday,swday_offset,0,0,0,ewday,ewday_offset,0,other))
+                dateranges.append(WeekDayDaterange(0, 0, 0, swday, swday_offset, 0, 0, 0, ewday, ewday_offset, 0, other))
                 return
             if t0 in Daterange.months:
                 smon = t0
                 emon = smon
                 emday = smday
-                dateranges.append(MonthDateDaterange(0, smon, smday, 0,0,0,emon,emday,0,0, 0,other))
+                dateranges.append(MonthDateDaterange(0, smon, smday, 0, 0, 0, emon, emday, 0, 0, 0, other))
                 return
             if t0 == 'day':
                 emday = smday
-                dateranges.append(MonthDayDaterange(0,0,smday,0,0,0,0,emday, 0,0, 0, other))
+                dateranges.append(MonthDayDaterange(0, 0, smday, 0, 0, 0, 0, emday, 0, 0, 0, other))
                 return
 
         res = re.search('([a-z]*)[\s\t]+([0-9:, -]+)', entry)
@@ -796,7 +796,7 @@ if __name__ == '__main__':
         #print "Is valid NOW?", t.is_time_valid(now)
         t_next = t.get_next_valid_time_from_t(now + 5*60)
         if t_next is not None:
-            print "Get next valid for now + 5 min ==>", time.asctime(time.localtime(t_next)),"<=="
+            print "Get next valid for now + 5 min ==>", time.asctime(time.localtime(t_next)), "<=="
         else:
             print "===> No future time!!!"
         #print "End date:", t.get_end_time()
@@ -823,5 +823,5 @@ if __name__ == '__main__':
     print "Mon T", str(t)+'\n\n'
     t_next = t.get_next_valid_time_from_t(now)
     t_no_next = t.get_next_invalid_time_from_t(now)
-    print "Get next valid for now ==>", time.asctime(time.localtime(t_next)),"<=="
-    print "Get next invalid for now ==>", time.asctime(time.localtime(t_no_next)),"<=="
+    print "Get next valid for now ==>", time.asctime(time.localtime(t_next)), "<=="
+    print "Get next invalid for now ==>", time.asctime(time.localtime(t_no_next)), "<=="

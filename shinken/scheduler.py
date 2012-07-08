@@ -77,7 +77,7 @@ class Scheduler:
         self.recurrent_works = {
             0: ('update_downtimes_and_comments', self.update_downtimes_and_comments, 1),
             1: ('schedule', self.schedule, 1), # just schedule
-            2: ('consume_results', self.consume_results , 1), # incorpore checks and dependencies
+            2: ('consume_results', self.consume_results, 1), # incorpore checks and dependencies
             3: ('get_new_actions', self.get_new_actions, 1), # now get the news actions (checks, notif) raised
             4: ('get_new_broks', self.get_new_broks, 1), # and broks
             5: ('delete_zombie_checks', self.delete_zombie_checks, 1),
@@ -102,7 +102,7 @@ class Scheduler:
             # Reset the topology change flag if need
             16: ('reset_topology_change_flag', self.reset_topology_change_flag, 1),
             17: ('check_for_expire_acknowledge', self.check_for_expire_acknowledge, 1),
-            18: ('send_broks_to_modules', self.send_broks_to_modules , 1),
+            18: ('send_broks_to_modules', self.send_broks_to_modules, 1),
             19: ('get_objects_from_from_queues', self.get_objects_from_from_queues, 1),
         }
 

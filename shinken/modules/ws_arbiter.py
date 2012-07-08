@@ -68,7 +68,7 @@ def get_page():
 
     # We check for auth if it's not anonymously allowed
     if app.username != 'anonymous':
-        basic = parse_auth(request.environ.get('HTTP_AUTHORIZATION',''))
+        basic = parse_auth(request.environ.get('HTTP_AUTHORIZATION', ''))
         # Maybe the user not even ask for user/pass. If so, bail out
         if not basic:
             abort(401, 'Authentication required')
@@ -140,7 +140,7 @@ class Ws_arbiter(BaseModule):
         # Main blocking loop
         while not self.interrupted:
             input = [self.srv.socket]
-            inputready,_,_ = select.select(input,[],[], 1)
+            inputready, _, _ = select.select(input, [], [], 1)
             for s in inputready:
                 # If it's a web request, ask the webserver to do it
                 if s == self.srv.socket:

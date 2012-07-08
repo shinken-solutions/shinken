@@ -123,7 +123,7 @@ class Simple_log_broker(BaseModule):
 
             # and we overwrite it
             logger.debug("I open the log file %s" % self.path)
-            self.file = open(self.path,'a')
+            self.file = open(self.path, 'a')
 
             return True
         return False
@@ -150,7 +150,7 @@ class Simple_log_broker(BaseModule):
         moved = self.check_and_do_archive(first_pass=True)
         if not moved:
             logger.info("I open the log file %s" % self.path)
-            self.file = open(self.path,'a')
+            self.file = open(self.path, 'a')
 
 
     def do_loop_turn(self):

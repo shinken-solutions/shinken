@@ -82,7 +82,7 @@ class Android_reactionner(BaseModule):
                 if msg is not None:
                     self.checks.append(msg.get_data())
                 #print "I", self.id, "I've got a message!"
-        except Empty , exp:
+        except Empty, exp:
             if len(self.checks) == 0:
                 time.sleep(1)
 
@@ -137,7 +137,7 @@ class Android_reactionner(BaseModule):
             try:
                 # Under android we got a queue here
                 self.returns_queue.put(action)
-            except IOError , exp:
+            except IOError, exp:
                 print "[%d]Exiting: %s" % (self.id, exp)
                 sys.exit(2)
         for chk in to_del:
@@ -192,7 +192,7 @@ class Android_reactionner(BaseModule):
             try:
                 # Under android we got a queue here
                 self.returns_queue.put(cmd)
-            except IOError , exp:
+            except IOError, exp:
                 print "[%d]Exiting: %s" % (self.id, exp)
                 sys.exit(2)
 

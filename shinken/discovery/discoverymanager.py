@@ -98,7 +98,7 @@ class DiscoveredHost(object):
     def update_properties(self, final_phase=False):
         d = {}
         if final_phase:
-            for (k,v) in self.data.iteritems():
+            for (k, v) in self.data.iteritems():
                 if k.startswith('_'):
                     d[k] = v
         else:
@@ -109,7 +109,7 @@ class DiscoveredHost(object):
         self.matched_rules.sort(by_order)
 
         for r in self.matched_rules:
-            for k,v in r.writing_properties.iteritems():
+            for k, v in r.writing_properties.iteritems():
                 # If it's a + (add) property, add with a ,
                 if k.startswith('+'):
                     prop = k[1:]
@@ -128,7 +128,7 @@ class DiscoveredHost(object):
 
         # For macro-resolving, we should have our macros too
         self.customs = {}
-        for (k,v) in self.properties.iteritems():
+        for (k, v) in self.properties.iteritems():
             self.customs['_'+k.upper()] = v
 
 
@@ -418,7 +418,7 @@ class DiscoveryManager:
             if not '=' in data:
                 continue
 
-            elts = data.split('=',1)
+            elts = data.split('=', 1)
             if len(elts) <= 1:
                 continue
 

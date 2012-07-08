@@ -296,20 +296,20 @@ class Nagios_retention_scheduler(BaseModule):
             f = open(self.path)
             buf = f.read()
             f.close()
-        except EOFError , exp:
+        except EOFError, exp:
             print exp
             return False
-        except ValueError , exp:
+        except ValueError, exp:
             print exp
             return False
-        except IOError , exp:
+        except IOError, exp:
             print exp
             return False
-        except IndexError , exp:
+        except IndexError, exp:
             s = "WARNING: Sorry, the ressource file is not compatible"
             log_mgr.log(s)
             return False
-        except TypeError , exp:
+        except TypeError, exp:
             s = "WARNING: Sorry, the ressource file is not compatible"
             log_mgr.log(s)
             return False
@@ -327,14 +327,14 @@ class Nagios_retention_scheduler(BaseModule):
 
 
         self.property_mapping = {
-            'service': [('current_attempt', 'attempt'), ('current_state','state_type_id'),
-                         ('plugin_output','output'), ('last_check','last_chk'),
-                         ('performance_data','perf_data'), ('next_check' , 'next_chk'),
+            'service': [('current_attempt', 'attempt'), ('current_state', 'state_type_id'),
+                         ('plugin_output', 'output'), ('last_check', 'last_chk'),
+                         ('performance_data', 'perf_data'), ('next_check', 'next_chk'),
                          ('long_plugin_output', 'long_output'), ('check_execution_time', 'execution_time'),
                          ('check_latency', 'latency')],
-            'host': [('current_attempt', 'attempt'), ('current_state','state_type_id'),
-                      ('plugin_output','output'), ('last_check','last_chk'),
-                 ('performance_data','perf_data'), ('next_check' , 'next_chk'),
+            'host': [('current_attempt', 'attempt'), ('current_state', 'state_type_id'),
+                      ('plugin_output', 'output'), ('last_check', 'last_chk'),
+                 ('performance_data', 'perf_data'), ('next_check', 'next_chk'),
                       ('long_plugin_output', 'long_output'), ('check_execution_time', 'execution_time'),
                       ('check_latency', 'latency')],
             }

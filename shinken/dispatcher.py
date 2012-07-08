@@ -53,7 +53,7 @@ class Dispatcher:
         self.realms = conf.realms
         # Direct pointer to importants elements for us
 
-        for sat_type in ('arbiters','schedulers','reactionners','brokers','receivers','pollers'):
+        for sat_type in ('arbiters', 'schedulers', 'reactionners', 'brokers', 'receivers', 'pollers'):
             setattr(self, sat_type, getattr(self.conf, sat_type))
 
             # for each satellite, we look if current arbiter have a specific satellitemap value setted for this satellite

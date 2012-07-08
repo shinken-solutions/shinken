@@ -93,7 +93,7 @@ class Realm(Itemgroup):
                 new_val = tab.pythonize(old_val)
                 #print "Changing ", old_val, "by", new_val
                 setattr(self, prop, new_val)
-            except AttributeError , exp:
+            except AttributeError, exp:
                 pass # Will be catch at the is_correct moment
 
 

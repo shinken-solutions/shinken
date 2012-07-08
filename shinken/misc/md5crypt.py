@@ -76,7 +76,7 @@ def unix_md5_crypt(pw, salt, magic=None):
 
     final = md5(pw + salt + pw).digest()
 
-    for pl in range(len(pw),0,-16):
+    for pl in range(len(pw), 0, -16):
         if pl > 16:
             ctx = ctx + final[:16]
         else:
@@ -128,7 +128,7 @@ def unix_md5_crypt(pw, salt, magic=None):
 
     passwd = passwd + to64((int(ord(final[0])) << 16)
                            |(int(ord(final[6])) << 8)
-                           |(int(ord(final[12]))),4)
+                           |(int(ord(final[12]))), 4)
 
     passwd = passwd + to64((int(ord(final[1])) << 16)
                            |(int(ord(final[7])) << 8)

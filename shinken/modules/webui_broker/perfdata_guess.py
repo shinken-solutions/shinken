@@ -73,9 +73,9 @@ def manage_check_http_command(elt):
     # OK: #6f2 (102,255,34) green
     # Warning: #f60 (255,102,0) orange
     # Crit: #ff0033 (255,0,51)
-    base_color = {0: (102,255,34), 1: (255,102,0), 2: (255,0,51)}
+    base_color = {0: (102, 255, 34), 1: (255, 102, 0), 2: (255, 0, 51)}
     state_id = get_stateid(elt)
-    color = base_color.get(state_id, (179,196,255))
+    color = base_color.get(state_id, (179, 196, 255))
     s_color = 'RGB(%d,%d,%d)' % color
     lnk = '#'
     metrics = [(s_color, pct), ('white', 100-pct)]
@@ -105,9 +105,9 @@ def manage_check_ping_command(elt):
     # OK: #6f2 (102,255,34) green
     # Warning: #f60 (255,102,0) orange
     # Crit: #ff0033 (255,0,51)
-    base_color = {0: (102,255,34), 1: (255,102,0), 2: (255,0,51)}
+    base_color = {0: (102, 255, 34), 1: (255, 102, 0), 2: (255, 0, 51)}
     state_id = get_stateid(elt)
-    color = base_color.get(state_id, (179,196,255))
+    color = base_color.get(state_id, (179, 196, 255))
     s_color = 'RGB(%d,%d,%d)' % color
 
     lnk = '#'
@@ -140,9 +140,9 @@ def manage_check_tcp_command(elt):
     # OK: #6f2 (102,255,34) green
     # Warning: #f60 (255,102,0) orange
     # Crit: #ff0033 (255,0,51)
-    base_color = {0: (102,255,34), 1: (255,102,0), 2: (255,0,51)}
+    base_color = {0: (102, 255, 34), 1: (255, 102, 0), 2: (255, 0, 51)}
     state_id = get_stateid(elt)
-    color = base_color.get(state_id, (179,196,255))
+    color = base_color.get(state_id, (179, 196, 255))
     s_color = 'RGB(%d,%d,%d)' % color
 
     #pct = 100 * (v / m.max)
@@ -216,10 +216,10 @@ def get_linear_color(elt, name):
     #  #ffdd65 (255,221,101) ligth wellow for warning
     #  #ff6587 (191,75,101) light red for critical
     #  #b3c4ff (179,196,255) very light blue for unknown
-    base = {0: (102,136,255), 1: (255,221,101), 2: (191,75,101)}
+    base = {0: (102, 136, 255), 1: (255, 221, 101), 2: (191, 75, 101)}
     state_id = get_stateid(elt)
 
-    c = base.get(state_id, (179,196,255))
+    c = base.get(state_id, (179, 196, 255))
 
     # Get a "hash" of the metric name
     h = hash(name) % 25

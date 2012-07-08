@@ -45,7 +45,7 @@ def add_pack_page():
 
 def push_new_pack():
 
-    print "FUCK",app.request.forms.__dict__
+    print "FUCK", app.request.forms.__dict__
     key = app.request.forms.get('key')
     data = app.request.files.get('data')
     print "KEY", key
@@ -104,7 +104,7 @@ def push_new_pack():
 
 
 def push_stats():
-    print "FUCK",app.request.forms.__dict__
+    print "FUCK", app.request.forms.__dict__
     key = app.request.forms.get('key')
     data = app.request.files.get('data')
     print "KEY", key

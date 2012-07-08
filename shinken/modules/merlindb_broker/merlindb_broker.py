@@ -507,7 +507,7 @@ class Merlindb_broker(BaseModule):
         instance_id = b.data['instance_id']
         del_query = "DELETE FROM program_status WHERE instance_id = '%s' " % instance_id
         query = self.db_backend.create_insert_query('program_status', b.data)
-        return [del_query,query]
+        return [del_query, query]
 
 
     # Program status is .. status of program? :)
@@ -517,7 +517,7 @@ class Merlindb_broker(BaseModule):
         instance_id = b.data['instance_id']
         del_query = "DELETE FROM program_status WHERE instance_id = '%s' " % instance_id
         query = self.db_backend.create_insert_query('program_status', b.data)
-        return [del_query,query]
+        return [del_query, query]
 
 
     # Initial service status is at start. We need an insert because we

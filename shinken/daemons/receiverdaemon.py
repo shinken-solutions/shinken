@@ -118,8 +118,8 @@ class Receiver(BaseSatellite):
         for mod in self.modules_manager.get_internal_instances():
             try:
                 mod.manage_brok(b)
-            except Exception , exp:
-                logger.warning("The mod %s raise an exception: %s, I kill it" % (mod.get_name(),str(exp)))
+            except Exception, exp:
+                logger.warning("The mod %s raise an exception: %s, I kill it" % (mod.get_name(), str(exp)))
                 logger.warning("Exception type: %s" % type(exp))
                 logger.warning("Back trace of this kill: %s" % (traceback.format_exc()))
                 to_del.append(mod)

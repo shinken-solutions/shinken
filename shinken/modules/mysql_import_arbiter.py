@@ -98,7 +98,7 @@ class MySQL_importer_arbiter(BaseModule):
         cursor = self.conn.cursor (MySQLdb.cursors.DictCursor)
 
         # For all parameters
-        for k,v in self.reqlist.iteritems():
+        for k, v in self.reqlist.iteritems():
             r[k] = []
 
             if(v != None):

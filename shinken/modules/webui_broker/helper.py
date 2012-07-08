@@ -343,7 +343,7 @@ class Helper(object):
 
             for n in fathers:
                 sub_node = n['node']
-                sub_s = self.print_business_rules_mobile(n, level=level+1,source_problems=source_problems)
+                sub_s = self.print_business_rules_mobile(n, level=level+1, source_problems=source_problems)
                 s += '<li class="%s">%s</li>' % (self.get_small_icon_state(sub_node), sub_s)
             s += "</ul>"
         safe_print("Returing s:", s)
@@ -388,7 +388,7 @@ class Helper(object):
 
             for n in fathers:
                 sub_node = n['node']
-                sub_s = self.print_business_rules(n, level=level+1,source_problems=source_problems)
+                sub_s = self.print_business_rules(n, level=level+1, source_problems=source_problems)
                 s += '<li class="%s">%s</li>' % (self.get_small_icon_state(sub_node), sub_s)
             s += "</ul>"
         safe_print("Returing s:", s)
@@ -629,7 +629,7 @@ class Helper(object):
     # We want the html id of an hostor a service. It's basically
     # the full_name with / changed as -- (because in html, / is not valid :) )
     def get_html_id(self, elt):
-        return elt.get_full_name().replace('/','--').replace(' ','_')
+        return elt.get_full_name().replace('/', '--').replace(' ', '_')
 
     # URI with spaces are BAD, must change them with %20
     def get_uri_name(self, elt):

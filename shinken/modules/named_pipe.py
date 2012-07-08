@@ -78,8 +78,8 @@ class Named_Pipe_arbiter(BaseModule):
                         os.mkdir(os.path.dirname(self.pipe_path))
                     os.mkfifo(self.pipe_path, 0660)
                     open(self.pipe_path, 'w+', os.O_NONBLOCK)
-                except OSError , exp:
-                    print "Error: pipe creation failed (",self.pipe_path,')', exp, os.getcwd()
+                except OSError, exp:
+                    print "Error: pipe creation failed (", self.pipe_path, ')', exp, os.getcwd()
                     return None
         print "[%s] Trying to open the named pipe '%s'" % (self.get_name(), self.pipe_path)
         self.fifo = os.open(self.pipe_path, os.O_NONBLOCK)
@@ -122,7 +122,7 @@ class Named_Pipe_arbiter(BaseModule):
             if input == []:
                 time.sleep(1)
                 continue
-            inputready,outputready,exceptready = select.select(input,[],[], 1)
+            inputready, outputready, exceptready = select.select(input, [], [], 1)
             for s in inputready:
                 ext_cmds = self.get()
 

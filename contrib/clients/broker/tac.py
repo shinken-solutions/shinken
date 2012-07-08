@@ -33,10 +33,10 @@ class TacModel:
         q = GetRequest()
         r = GetResponse()
         q.table=Table.hosts
-        q.stats = [ StatRequest("state","=","0"),
-             StatRequest("state","=","1"),
-             StatRequest("state","=","2"),
-             StatRequest("state","=","3") ]
+        q.stats = [ StatRequest("state", "=", "0"),
+             StatRequest("state", "=", "1"),
+             StatRequest("state", "=", "2"),
+             StatRequest("state", "=", "3") ]
 
         r = self.shinken.get(q)
 
@@ -46,10 +46,10 @@ class TacModel:
         q = GetRequest()
         r = GetResponse()
         q.table=Table.services
-        q.stats = [ StatRequest("state","=","0"),
-             StatRequest("state","=","1"),
-             StatRequest("state","=","2"),
-             StatRequest("state","=","3") ]
+        q.stats = [ StatRequest("state", "=", "0"),
+             StatRequest("state", "=", "1"),
+             StatRequest("state", "=", "2"),
+             StatRequest("state", "=", "3") ]
 
         r = self.shinken.get(q)
 
@@ -66,9 +66,9 @@ class TacView(urwid.WidgetWrap):
         ('banner', 'black', 'light gray', 'standout,underline'),
         ('header', 'black', 'dark gray', 'standout'),
         ('button', 'black', 'light gray'),
-        ('pg normal',    'white',      'dark gray', 'standout'),
-        ('pg complete',  'white',      'light green'),
-        ('pg smooth',     'light green','dark gray'),
+        ('pg normal',   'white',       'dark gray', 'standout'),
+        ('pg complete', 'white',       'light green'),
+        ('pg smooth',   'light green', 'dark gray'),
         ('bg', 'white', 'black'),]
 
     def __init__(self, controller):
@@ -81,56 +81,56 @@ class TacView(urwid.WidgetWrap):
         data = self.controller.get_data()
 
         hosts = data['hosts']
-        self.bHosts['down'].set_label(('button',"%s Down" % hosts[2]))
-        self.bHosts['unreachable'].set_label(('button',"%s Unreachable" % hosts[1]))
-        self.bHosts['up'].set_label(('button',"%s Up" % hosts[0]))
-        self.bHosts['pending'].set_label(('button',"%s Pending" % hosts[3]))
+        self.bHosts['down'].set_label(('button', "%s Down" % hosts[2]))
+        self.bHosts['unreachable'].set_label(('button', "%s Unreachable" % hosts[1]))
+        self.bHosts['up'].set_label(('button', "%s Up" % hosts[0]))
+        self.bHosts['pending'].set_label(('button', "%s Pending" % hosts[3]))
         self.health_hosts.set_completion(
             100 * int(hosts[0]) / (int(hosts[0]) + int(hosts[1]) + int(hosts[2]) + int(hosts[3])))
 
         services = data['services']
-        self.bServices['critical'].set_label(('button',"%s Critical" % services[2]))
-        self.bServices['warning'].set_label(('button',"%s Warning" % services[1]))
-        self.bServices['unknown'].set_label(('button',"%s Unknown" % services[3]))
-        self.bServices['ok'].set_label(('button',"%s Ok" % services[0]))
+        self.bServices['critical'].set_label(('button', "%s Critical" % services[2]))
+        self.bServices['warning'].set_label(('button', "%s Warning" % services[1]))
+        self.bServices['unknown'].set_label(('button', "%s Unknown" % services[3]))
+        self.bServices['ok'].set_label(('button', "%s Ok" % services[0]))
         self.health_services.set_completion(
             100 * int(services[0]) / (int(services[0]) + int(services[1]) + int(services[2]) + int(services[3])))
 
-        self.last_update.set_text(('button',"Last Updated: %s" %  time.strftime('%d/%m/%y %H:%M:%S',time.localtime())))
+        self.last_update.set_text(('button', "Last Updated: %s" %  time.strftime('%d/%m/%y %H:%M:%S', time.localtime())))
 
     def main_window(self):
-        self.last_update = urwid.Text(('button',"Last Updated: %s" % "Never"))
+        self.last_update = urwid.Text(('button', "Last Updated: %s" % "Never"))
 
-        self.outages = urwid.Button(('button',"Outages"))
+        self.outages = urwid.Button(('button', "Outages"))
         network_outages = urwid.Pile([
-            urwid.Text(('header',"Network Outages")),
+            urwid.Text(('header', "Network Outages")),
             self.outages])
 
-        self.health_hosts = urwid.ProgressBar('pg normal','pg complete',100,satt='pg smooth')
-        self.health_services = urwid.ProgressBar('pg normal','pg complete',30,satt='progress')
+        self.health_hosts = urwid.ProgressBar('pg normal', 'pg complete', 100, satt='pg smooth')
+        self.health_services = urwid.ProgressBar('pg normal', 'pg complete', 30, satt='progress')
         network_health = urwid.Pile([
-            urwid.Text(('header',"Network Health")),
+            urwid.Text(('header', "Network Health")),
             self.health_hosts,
             self.health_services
         ])
 
-        network = urwid.Columns([network_outages,network_health])
+        network = urwid.Columns([network_outages, network_health])
 
-        self.bHosts['down'] = urwid.Button(('button',"Down"))
-        self.bHosts['unreachable'] = urwid.Button(('button',"Unreachable"))
-        self.bHosts['up'] = urwid.Button(('button',"Up"))
-        self.bHosts['pending'] = urwid.Button(('button',"Pending"))
+        self.bHosts['down'] = urwid.Button(('button', "Down"))
+        self.bHosts['unreachable'] = urwid.Button(('button', "Unreachable"))
+        self.bHosts['up'] = urwid.Button(('button', "Up"))
+        self.bHosts['pending'] = urwid.Button(('button', "Pending"))
         self.hosts_state = urwid.Columns([
             self.bHosts['down'],
             self.bHosts['unreachable'],
             self.bHosts['up'],
             self.bHosts['pending']])
 
-        self.bServices['critical'] = urwid.Button(('button',"Critical"))
-        self.bServices['warning'] = urwid.Button(('button',"Warning"))
-        self.bServices['unknown'] = urwid.Button(('button',"Unknown"))
-        self.bServices['ok'] = urwid.Button(('button',"Ok"))
-        self.bServices['pending'] = urwid.Button(('button',"Pending"))
+        self.bServices['critical'] = urwid.Button(('button', "Critical"))
+        self.bServices['warning'] = urwid.Button(('button', "Warning"))
+        self.bServices['unknown'] = urwid.Button(('button', "Unknown"))
+        self.bServices['ok'] = urwid.Button(('button', "Ok"))
+        self.bServices['pending'] = urwid.Button(('button', "Pending"))
         self.services_state = urwid.Columns([
             self.bServices['critical'],
             self.bServices['warning'],
@@ -141,17 +141,17 @@ class TacView(urwid.WidgetWrap):
         pile = urwid.Pile([
             urwid.LineBox(urwid.Pile([
                 self.last_update,
-                urwid.Text(('button',"Updated every %s seconds" % REFRESH_INTERVAL))])),
+                urwid.Text(('button', "Updated every %s seconds" % REFRESH_INTERVAL))])),
             urwid.Divider(bottom = 2),
             network,
             urwid.Divider(),
-            urwid.Text(('header',"Hosts")),
+            urwid.Text(('header', "Hosts")),
             self.hosts_state,
             urwid.Divider(),
-            urwid.Text(('header',"Services")),
+            urwid.Text(('header', "Services")),
             self.services_state])
 
-        header = urwid.Text(('banner',"Tactical Monitoring Overview"), align='center')
+        header = urwid.Text(('banner', "Tactical Monitoring Overview"), align='center')
         footer = urwid.Text("Q to quit")
         fill = urwid.Filler(pile, 'middle')
         view = urwid.Frame(fill, header=header, footer=footer)

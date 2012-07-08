@@ -48,7 +48,7 @@ def main():
         elif o in ("-c", "--critical"):
             notification = a
 	else:
-	    assert False , "unknown options"
+	    assert False, "unknown options"
 
 if __name__ == "__main__":
     main()

@@ -54,7 +54,7 @@ from shinken.util import safe_print, expect_file_dirs, strip_and_uniq
 from shinken.skonfuiworker import SkonfUIWorker
 from shinken.message import Message
 from shinken.misc.datamanagerskonf import datamgr
-from shinken.objects.pack import Pack,Packs
+from shinken.objects.pack import Pack, Packs
 
 # DBG: code this!
 from shinken.objects import Contact
@@ -879,9 +879,9 @@ class Skonf(Daemon):
                         is_ok = True
                         # No need for other modules
                         break
-            except Exception , exp:
+            except Exception, exp:
                 print exp.__dict__
-                logger.warning("[%s] The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
+                logger.warning("[%s] The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
                 logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
                 logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)
@@ -962,9 +962,9 @@ class Skonf(Daemon):
                 if f and callable(f):
                     r = f()
                     lst.append(r)
-            except Exception , exp:
+            except Exception, exp:
                 print exp.__dict__
-                logger.log("[%s] Warning: The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
+                logger.log("[%s] Warning: The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
                 logger.log("[%s] Exception type: %s" % (self.name, type(exp)))
                 logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)

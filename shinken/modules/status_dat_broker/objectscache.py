@@ -38,7 +38,7 @@ from shinken.objects import Contactgroup
 from shinken.objects import Timeperiod
 from shinken.objects import Command
 
-from shinken.util import from_bool_to_string,from_list_to_split
+from shinken.util import from_bool_to_string, from_list_to_split
 
 # This is a dirty hack. Service.get_name only returns service_description.
 # For the servicegroup config we need more. host_name + service_description
@@ -352,5 +352,5 @@ class ObjectsCacheFile:
             os.close(temp_fh)
             os.chmod(temp_objects_cache_file, 0640)
             os.rename(temp_objects_cache_file, self.path)
-        except OSError , exp:
+        except OSError, exp:
             return exp

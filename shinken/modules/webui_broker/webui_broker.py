@@ -267,9 +267,9 @@ class Webui_broker(BaseModule, Daemon):
                   for mod in self.modules_manager.get_internal_instances():
                       try:
                           mod.manage_brok(b)
-                      except Exception , exp:
+                      except Exception, exp:
                           print exp.__dict__
-                          logger.warning("[%s] The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
+                          logger.warning("[%s] The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
                           logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
                           logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                           self.modules_manager.set_to_restart(mod)
@@ -507,9 +507,9 @@ class Webui_broker(BaseModule, Daemon):
                         is_ok = True
                         # No need for other modules
                         break
-            except Exception , exp:
+            except Exception, exp:
                 print exp.__dict__
-                logger.warning("[%s] The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
+                logger.warning("[%s] The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
                 logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
                 logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)
@@ -545,9 +545,9 @@ class Webui_broker(BaseModule, Daemon):
                 if f and callable(f):
                     r = f(elt, graphstart, graphend)
                     uris.extend(r)
-            except Exception , exp:
+            except Exception, exp:
                 print exp.__dict__
-                logger.warning("[%s] The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
+                logger.warning("[%s] The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
                 logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
                 logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)
@@ -572,9 +572,9 @@ class Webui_broker(BaseModule, Daemon):
                 if f and callable(f):
                     r = f(user, key)
                     return r
-            except Exception , exp:
+            except Exception, exp:
                 print exp.__dict__
-                logger.log("[%s] Warning: The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
+                logger.log("[%s] Warning: The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
                 logger.log("[%s] Exception type: %s" % (self.name, type(exp)))
                 logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)
@@ -592,9 +592,9 @@ class Webui_broker(BaseModule, Daemon):
                 if f and callable(f):
                     print "Call user pref to module", mod.get_name()
                     f(user, key, value)
-            except Exception , exp:
+            except Exception, exp:
                 print exp.__dict__
-                logger.log("[%s] Warning: The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
+                logger.log("[%s] Warning: The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
                 logger.log("[%s] Exception type: %s" % (self.name, type(exp)))
                 logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)
@@ -616,9 +616,9 @@ class Webui_broker(BaseModule, Daemon):
                 if f and callable(f):
                     r = f()
                     lst.append(r)
-            except Exception , exp:
+            except Exception, exp:
                 print exp.__dict__
-                logger.log("[%s] Warning: The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
+                logger.log("[%s] Warning: The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
                 logger.log("[%s] Exception type: %s" % (self.name, type(exp)))
                 logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)

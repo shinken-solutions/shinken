@@ -229,7 +229,7 @@ class Servicedependencies(Items):
                 s = services.find_srv_by_name_and_hostname(hst_name, s_name)
                 sd.service_description = s
 
-            except AttributeError , exp:
+            except AttributeError, exp:
                 logger.error("[servicedependency] fail to linkify by service %s: %s" % (sd, exp))
 
 
@@ -241,7 +241,7 @@ class Servicedependencies(Items):
                 tp_name = sd.dependency_period
                 tp = timeperiods.find_by_name(tp_name)
                 sd.dependency_period = tp
-            except AttributeError , exp:
+            except AttributeError, exp:
                 logger.error("[servicedependency] fail to linkify by timeperiods: %s" % exp)
 
 

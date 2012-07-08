@@ -246,7 +246,7 @@ class Ndodb_Oracle_broker(BaseModule):
                            'active_checks_enabled': data['active_checks_enabled'], 'notifications_enabled': data['notifications_enabled'],
                            'obsess_over_host': data['obsess_over_host'],'process_performance_data': data['process_perf_data']
         }
-        hoststatus_query = self.db.create_insert_query('hoststatus' , hoststatus_data)
+        hoststatus_query = self.db.create_insert_query('hoststatus', hoststatus_data)
 
         return [query, hoststatus_query]
 
@@ -296,7 +296,7 @@ class Ndodb_Oracle_broker(BaseModule):
                               'active_checks_enabled': data['active_checks_enabled'], 'notifications_enabled': data['notifications_enabled'],
                               'obsess_over_service': data['obsess_over_service'],'process_performance_data': data['process_perf_data']
         }
-        servicestatus_query = self.db.create_insert_query('servicestatus' , servicestatus_data)
+        servicestatus_query = self.db.create_insert_query('servicestatus', servicestatus_data)
 
         return [query, servicestatus_query]
 
@@ -394,7 +394,7 @@ class Ndodb_Oracle_broker(BaseModule):
                            'execution_time': data['execution_time'], 'latency': data['latency'],
                            'output': data['output'], 'perfdata': data['perf_data']
         }
-        hoststatus_query = self.db.create_update_query('hoststatus' , hoststatus_data, where_clause)
+        hoststatus_query = self.db.create_update_query('hoststatus', hoststatus_data, where_clause)
 
         return [query, hoststatus_query]
 
@@ -425,7 +425,7 @@ class Ndodb_Oracle_broker(BaseModule):
                            'output': data['output'], 'perfdata': data['perf_data']
         }
 
-        servicestatus_query = self.db.create_update_query('servicestatus' , servicestatus_data, where_clause)
+        servicestatus_query = self.db.create_update_query('servicestatus', servicestatus_data, where_clause)
 
         return [query, servicestatus_query]
 

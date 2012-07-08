@@ -101,7 +101,7 @@ class ModulesManager(object):
                 # We want to keep only the modules of our type
                 if self.modules_type in m.properties['daemons']:
                     self.imported_modules.append(m)
-            except Exception , exp:
+            except Exception, exp:
                 logger.warning("Importing module: %s" % exp)
 
         del self.modules_assoc[:]
@@ -175,7 +175,7 @@ class ModulesManager(object):
                     continue
                 assert(isinstance(inst, BaseModule))
                 self.instances.append(inst)
-            except Exception , exp:
+            except Exception, exp:
                 s = str(exp)
                 if isinstance(s, str):
                     s = s.decode('UTF-8', 'replace')

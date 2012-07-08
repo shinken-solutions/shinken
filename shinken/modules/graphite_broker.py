@@ -110,14 +110,14 @@ class Graphite_broker(BaseModule):
                 continue
 
             # Try to get the int/float in it :)
-            for key,value in name_value.items():
+            for key, value in name_value.items():
                 m = re.search("(-?\d*\.?\d*)(.*)", value)
                 if m:
                     name_value[key] = m.groups(0)[0]
                 else:
                     continue
 #           print "graphite: end of grok:", name, value
-            for key,value in name_value.items():
+            for key, value in name_value.items():
                 res.append((key, value))
         return res
 

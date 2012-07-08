@@ -49,14 +49,14 @@ import tempfile
 import shutil
 
 from shinken.objects import Config
-from shinken.objects.pack import Pack,Packs
+from shinken.objects.pack import Pack, Packs
 from shinken.external_command import ExternalCommandManager
 from shinken.dispatcher import Dispatcher
 from shinken.daemon import Daemon, Interface
 from shinken.log import logger
 from shinken.brok import Brok
 from shinken.external_command import ExternalCommand
-from shinken.util import safe_print,strip_and_uniq
+from shinken.util import safe_print, strip_and_uniq
 from shinken.skonfuiworker import SkonfUIWorker
 from shinken.message import Message
 from shinken.misc.datamanagerhostd import datamgr

@@ -115,14 +115,14 @@ class Graphite_Webui(BaseModule):
                 continue
 
             # Try to get the int/float in it :)
-            for key,value in name_value.items():
+            for key, value in name_value.items():
                 m = re.search("(\d*\.*\d*)(.*)", value)
                 if m:
                     name_value[key] = m.groups(0)
                 else:
                     continue
 #            print "graphite: got in the end:", name, value
-            for key,value in name_value.items():
+            for key, value in name_value.items():
                 res.append((key, value))
         return res
 
@@ -147,7 +147,7 @@ class Graphite_Webui(BaseModule):
         thefile=self.templates_path+'/'+elt.check_command.get_name().split('!')[0]+'.graph';
         if os.path.isfile(thefile):
             template_html = ''
-            with open(thefile,'r') as template_file:
+            with open(thefile, 'r') as template_file:
                 template_html += template_file.read()
             # Read the template file, as template string python object
             template_file.closed
@@ -155,18 +155,18 @@ class Graphite_Webui(BaseModule):
             # Build the dict to instanciate the template string
             values = {}
             if t == 'host':
-                values['host'] = self.illegal_char.sub("_",elt.host_name)
+                values['host'] = self.illegal_char.sub("_", elt.host_name)
                 values['service'] = '__HOST__'
             if t == 'service':
-                values['host'] = self.illegal_char.sub("_",elt.host.host_name)
-                values['service'] = self.illegal_char.sub("_",elt.service_description)
+                values['host'] = self.illegal_char.sub("_", elt.host.host_name)
+                values['service'] = self.illegal_char.sub("_", elt.service_description)
             values['uri'] = self.uri
             # Split, we may have several images.
             for img in html.substitute(values).split('\n'):
                 if not img == "":
                     v = {}
                     v['link'] = self.uri
-                    v['img_src'] = img.replace('"',"'") + "&from=" + d + "&until=" + e
+                    v['img_src'] = img.replace('"', "'") + "&from=" + d + "&until=" + e
                     r.append(v)
             # No need to continue, we have the images already.
             return r

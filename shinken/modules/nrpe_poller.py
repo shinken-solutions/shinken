@@ -92,15 +92,15 @@ class NRPE:
             return
 
         # We pack it, then we compute CRC32 of this first query
-        self.query = struct.pack(">2hih1024scc",02,01,crc,0,command,'N','D')
+        self.query = struct.pack(">2hih1024scc", 02, 01, crc, 0, command, 'N', 'D')
         crc = binascii.crc32(self.query)
 
         # we restart with the crc value this time
         # because python2.4 do not have pack_into.
-        self.query = struct.pack(">2hih1024scc",02,01,crc,0,command,'N','D')
+        self.query = struct.pack(">2hih1024scc", 02, 01, crc, 0, command, 'N', 'D')
 
 
-    def init_query(self,host, port, use_ssl, command):
+    def init_query(self, host, port, use_ssl, command):
         self.state = 'creation'
         #print 'build with', command
         self.build_query(command)
@@ -195,7 +195,7 @@ class NRPEAsyncClient(asyncore.dispatcher):
         try:
             #print "Connect to", host, port
             self.connect( (host, port) )
-        except socket.error,exp:
+        except socket.error, exp:
             self.set_exit(2, str(exp))
 
 
@@ -382,7 +382,7 @@ class Nrpe_poller(BaseModule):
                 if msg is not None:
                     self.checks.append(msg.get_data())
                 #print "I", self.id, "I've got a message!"
-        except Empty , exp:
+        except Empty, exp:
             if len(self.checks) == 0:
                 time.sleep(1)
 
@@ -449,7 +449,7 @@ class Nrpe_poller(BaseModule):
                 to_del.append(c)
                 try:
                     self.returns_queue.put(c)
-                except IOError , exp:
+                except IOError, exp:
                     print "[%d]Exiting: %s" % (self.id, exp)
                     sys.exit(2)
                 continue
@@ -470,7 +470,7 @@ class Nrpe_poller(BaseModule):
                 to_del.append(c)
                 try:
                     self.returns_queue.put(c)
-                except IOError , exp:
+                except IOError, exp:
                     print "[%d]Exiting: %s" % (self.id, exp)
                     sys.exit(2)
 

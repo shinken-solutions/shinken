@@ -149,7 +149,7 @@ class Hot_dependencies_arbiter(BaseModule):
                 self.mapping_command,
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 close_fds=do_close_fd, shell=True)
-        except OSError , exp:
+        except OSError, exp:
             self.error("Fail Launching the command %s: %s" % (self.mapping_command, exp))
 
 
@@ -244,7 +244,7 @@ class Hot_dependencies_arbiter(BaseModule):
                 if son_type == 'host' and father_type == 'host':
                     # We just raise the external command, arbiter will do the job
                     # to dispatch them
-                    extcmd = "[%lu] ADD_SIMPLE_HOST_DEPENDENCY;%s;%s\n" % (now,son_name, father_name)
+                    extcmd = "[%lu] ADD_SIMPLE_HOST_DEPENDENCY;%s;%s\n" % (now, son_name, father_name)
                     e = ExternalCommand(extcmd)
 
                     self.debug('Raising external command: %s' % extcmd)
@@ -264,7 +264,7 @@ class Hot_dependencies_arbiter(BaseModule):
                 if son_type == 'host' and father_type == 'host':
                     # We just raise the external command, arbiter will do the job
                     # to dispatch them
-                    extcmd = "[%lu] DEL_HOST_DEPENDENCY;%s;%s\n" % (now,son_name, father_name)
+                    extcmd = "[%lu] DEL_HOST_DEPENDENCY;%s;%s\n" % (now, son_name, father_name)
                     e = ExternalCommand(extcmd)
 
                     self.debug('Raising external command %s' % extcmd)

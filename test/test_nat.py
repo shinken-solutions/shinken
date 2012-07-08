@@ -47,7 +47,7 @@ launchers = {
     'scheduler': SVC_CMD,
 }
 
-LOGBASE = os.path.join("#root#","var")
+LOGBASE = os.path.join("#root#", "var")
 LOGFILE = os.path.join(LOGBASE, "#svc#d.log")
 logs = {
     'arbiter': os.path.join(LOGBASE, "arbiter.debug"),
@@ -62,7 +62,7 @@ def cleanup():
     rootdir = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), "..")
 
     subprocess.Popen(["lcrash", "--keep-fs", "-d", rootdir], stdout=open('/dev/null'), stderr=subprocess.STDOUT)
-    for prefix in ('pc1','pc2','nat'):
+    for prefix in ('pc1', 'pc2', 'nat'):
         for f in glob.glob(os.path.join(rootdir, prefix+'.*')):
             os.remove(f)
 
@@ -79,7 +79,7 @@ class TestNat(unittest.TestCase):
                 shutil.copy(os.path.join(root, f), os.path.join(self.testdir, '..'))
                 self.files[f] = os.path.join(self.testdir, '..', f)
 
-        for vm in ('pc1','pc2', 'nat'):
+        for vm in ('pc1', 'pc2', 'nat'):
             lock = os.path.join(self.testdir, '..', vm+'.STARTED')
             if os.path.exists(lock):
                 os.remove(lock)
@@ -96,7 +96,7 @@ class TestNat(unittest.TestCase):
 
     def tearDown(self):
         null = open('/dev/null')
-        subprocess.Popen(["lhalt" , "-q", "-d", os.path.join(self.testdir, "..")], stdout=null, stderr=subprocess.STDOUT)
+        subprocess.Popen(["lhalt", "-q", "-d", os.path.join(self.testdir, "..")], stdout=null, stderr=subprocess.STDOUT)
         time.sleep(20)
         subprocess.Popen(["lcrash", "--keep-fs", "-d", os.path.join(self.testdir, "..")], stdout=null, stderr=subprocess.STDOUT)
         time.sleep(60)
@@ -112,7 +112,7 @@ class TestNat(unittest.TestCase):
         return os.path.exists(os.path.join(self.testdir, "..", "pc2.STARTED"))
 
     def init_and_start_vms(self, conf, services):
-        for vm in ('pc1','pc2', 'nat'):
+        for vm in ('pc1', 'pc2', 'nat'):
             f = open(self.files[vm+'.startup'], 'a')
 
             # extend vm startup
@@ -129,7 +129,7 @@ class TestNat(unittest.TestCase):
             f.write("touch /hostlab/"+vm+".STARTED\n")
             f.close()
 
-        subprocess.Popen(["lstart","-d",os.path.join(self.testdir, ".."),"-f"], stdout=open('/dev/null'), stderr=subprocess.STDOUT)
+        subprocess.Popen(["lstart", "-d", os.path.join(self.testdir, ".."), "-f"], stdout=open('/dev/null'), stderr=subprocess.STDOUT)
 
         # waiting for vms has finished booting
         while not self.booted():
@@ -157,8 +157,8 @@ class TestNat(unittest.TestCase):
         time.sleep(60)
 
         print "checking..."
-        self.assertTrue(self.found_in_log('broker'  , 'Info: Waiting for initial configuration'))
-        self.assertTrue(self.found_in_log('arbiter' , 'Warning: Missing satellite broker for configuration 0:'))
+        self.assertTrue(self.found_in_log('broker', 'Info: Waiting for initial configuration'))
+        self.assertTrue(self.found_in_log('arbiter', 'Warning: Missing satellite broker for configuration 0:'))
 
         self.assertFalse(self.found_in_log('arbiter', 'Info: [All] Dispatch OK of configuration 0 to broker broker-1'))
 
@@ -174,12 +174,12 @@ class TestNat(unittest.TestCase):
         time.sleep(210)
 
         print "checking..."
-        self.assertTrue(self.found_in_log('broker' , 'Info: Waiting for initial configuration'))
+        self.assertTrue(self.found_in_log('broker', 'Info: Waiting for initial configuration'))
         self.assertTrue(self.found_in_log('arbiter', 'Info: [All] Dispatch OK of configuration 0 to broker broker-1'))
 
-        self.assertTrue(self.found_in_log('broker' , 'Info: [broker-1] Connection OK to the scheduler scheduler-1'))
-        self.assertTrue(self.found_in_log('broker' , 'Info: [broker-1] Connection OK to the poller poller-1'))
-        self.assertTrue(self.found_in_log('broker' , 'Info: [broker-1] Connection OK to the reactionner reactionner-1'))
+        self.assertTrue(self.found_in_log('broker', 'Info: [broker-1] Connection OK to the scheduler scheduler-1'))
+        self.assertTrue(self.found_in_log('broker', 'Info: [broker-1] Connection OK to the poller poller-1'))
+        self.assertTrue(self.found_in_log('broker', 'Info: [broker-1] Connection OK to the reactionner reactionner-1'))
 
 
 

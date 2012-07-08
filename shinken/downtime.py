@@ -48,7 +48,7 @@ class Downtime:
     # so to others daemons, so all but NOT REF
     properties = {
         'activate_me':  StringProp (default=[]),
-        'entry_time':   IntegerProp(default=0 ,  fill_brok=['full_status']),
+        'entry_time':   IntegerProp(default=0,  fill_brok=['full_status']),
         'fixed':        BoolProp   (default=True,  fill_brok=['full_status']),
         'start_time':   IntegerProp(default=0,  fill_brok=['full_status']),
         'duration':     IntegerProp(default=0,  fill_brok=['full_status']),

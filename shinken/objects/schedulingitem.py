@@ -1092,7 +1092,7 @@ class SchedulingItem(Item):
 
 
     # Get all contacts (uniq) from eligible escalations
-    def get_escalable_contacts(self,n):
+    def get_escalable_contacts(self, n):
         cls = self.__class__
 
         # We search since when we are in notification for escalations

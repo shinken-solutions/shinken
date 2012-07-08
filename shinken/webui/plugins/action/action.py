@@ -43,15 +43,15 @@ subs = {'$NOW$': subsNOW
 
 # Expand macro in a string. It returns the string with macros defined in subs dictionary expanded
 def expand_macros(cmd=None):
-    macros = re.findall(r'(\$\w+\$)',cmd)
+    macros = re.findall(r'(\$\w+\$)', cmd)
     cmd_expanded = cmd
     for macro in macros:
         subfunc = subs.get(macro)
         if subfunc is None:
-            print "Macro ",macro," is unknown, do nothing"
+            print "Macro ", macro, " is unknown, do nothing"
             continue
-        print "Expand macro ",macro," in '",cmd_expanded,"'"
-        cmd_expanded = cmd_expanded.replace(macro,subfunc())
+        print "Expand macro ", macro, " in '", cmd_expanded, "'"
+        cmd_expanded = cmd_expanded.replace(macro, subfunc())
 
     return cmd_expanded
 
@@ -93,14 +93,14 @@ def get_page(cmd=None):
 
     # Check if the command exist in the external command list
     if cmd_name not in ExternalCommandManager.commands:
-        return forge_response(callback, 404,'Unknown command %s' % cmd_name)
+        return forge_response(callback, 404, 'Unknown command %s' % cmd_name)
 
     extcmd = '[%d] %s' % (now, ';'.join(elts))
     print "Got the; form", extcmd
 
     # Expand macros
     extcmd = expand_macros(extcmd)
-    print "Got after macro expansion",extcmd
+    print "Got after macro expansion", extcmd
 
     # Ok, if good, we can launch the command
     extcmd = extcmd.decode('utf8', 'replace')

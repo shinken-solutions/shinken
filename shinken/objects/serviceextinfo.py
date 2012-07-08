@@ -32,7 +32,7 @@ no use in running part
 
 import time
 
-from item import Item,Items
+from item import Item, Items
 
 from shinken.autoslots import AutoSlots
 from shinken.util import format_t_into_dhms_format, to_hostnames_list, get_obj_name, to_svc_hst_distinct_lists, to_list_string_of_names
@@ -133,19 +133,19 @@ class ServicesExtInfo(Items):
     # Merge extended host information into host
     def merge(self, services):
         for ei in self:
-            if hasattr(ei,'register') and getattr(ei,'register') == '0':
+            if hasattr(ei, 'register') and getattr(ei, 'register') == '0':
                 # We don't have to merge template
                 continue
             hosts_names = ei.get_name().split(",")
             for host_name in hosts_names:
-                s = services.find_srv_by_name_and_hostname(host_name,ei.service_description)
+                s = services.find_srv_by_name_and_hostname(host_name, ei.service_description)
                 if s is not None:
                     # FUUUUUUUUUUsion
-                    self.merge_extinfo(s,ei)
+                    self.merge_extinfo(s, ei)
 
     def merge_extinfo(self, service, extinfo):
-        properties = ['notes','notes_url','icon_image','icon_image_alt']
+        properties = ['notes', 'notes_url', 'icon_image', 'icon_image_alt']
         # service properties have precedence over serviceextinfo properties
         for p in properties:
-           if getattr(service,p) == '' and getattr(extinfo,p) != '':
-                setattr(service,p,getattr(extinfo,p))
+           if getattr(service, p) == '' and getattr(extinfo, p) != '':
+                setattr(service, p, getattr(extinfo, p))

@@ -247,7 +247,7 @@ if os.name != 'nt':
                     cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                     close_fds=True, shell=force_shell, env=self.local_env,
                     preexec_fn=os.setsid)
-            except OSError , exp:
+            except OSError, exp:
                 logger.error("Fail launching command: %s %s %s" % (self.command, exp, force_shell))
                 # Maybe it's just a shell we try to exec. So we must retry
                 if not force_shell and exp.errno == 8 and exp.strerror == 'Exec format error':

@@ -304,7 +304,7 @@ class Element(object):
         now = int(time.time())
         if now > self.last_update + self.interval:
             r = '[%d] PROCESS_SERVICE_OUTPUT;%s;%s;CollectD| ' % (now, self.host_name, self.sdesc)
-            for (k,v) in self.perf_datas.iteritems():
+            for (k, v) in self.perf_datas.iteritems():
                 r += '%s=%s ' % (k, v)
             print 'Updating', (self.host_name, self.sdesc)
             self.perf_datas.clear()

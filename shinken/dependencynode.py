@@ -36,7 +36,7 @@ class DependencyNode(object):
         self.operand = None
         self.sons = []
         # Of: values are a triple OK,WARN,CRIT
-        self.of_values = (0,0,0)
+        self.of_values = (0, 0, 0)
         self.is_of_mul = False
         self.configuration_errors = []
         self.not_value = False

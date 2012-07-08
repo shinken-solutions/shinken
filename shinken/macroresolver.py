@@ -131,7 +131,7 @@ class MacroResolver(Borg):
                 return unicode(value())
             else:
                 return unicode(value)
-        except AttributeError , exp:
+        except AttributeError, exp:
             # Return no value
             return ''
 

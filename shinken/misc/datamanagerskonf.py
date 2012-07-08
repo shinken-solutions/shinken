@@ -57,7 +57,7 @@ class DataManagerSKonf(DataManager):
             if hasattr(o, prop):
                 d[prop] = getattr(o, prop)
         customs = getattr(o, 'customs', {})
-        for (k,v) in customs.iteritems():
+        for (k, v) in customs.iteritems():
             print "SET CUSTOM", k, v
             d[k] = v
         # Inner object are NOT ediable by skonf!

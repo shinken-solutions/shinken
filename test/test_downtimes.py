@@ -245,7 +245,7 @@ class TestDowntime(ShinkenTest):
         self.sched.run_external_command(cmd)
         self.sched.update_downtimes_and_comments()
         print "Launch scheduler loop"
-        self.scheduler_loop(1,[], do_sleep=False) # push the downtime notification
+        self.scheduler_loop(1, [], do_sleep=False) # push the downtime notification
         self.show_actions()
         print "Launch worker loop"
         #self.worker_loop()
@@ -346,7 +346,7 @@ class TestDowntime(ShinkenTest):
         cmd = "[%lu] SCHEDULE_HOST_DOWNTIME;test_host_0;%d;%d;1;0;%d;lausser;blablub" % (now, now, now + duration, duration)
         self.sched.run_external_command(cmd)
         self.sched.update_downtimes_and_comments()
-        self.scheduler_loop(1,[], do_sleep=False) # push the downtime notification
+        self.scheduler_loop(1, [], do_sleep=False) # push the downtime notification
         #self.worker_loop() # push the downtime notification
         time.sleep(10)
         #----------------------------------------------------------------

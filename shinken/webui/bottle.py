@@ -65,7 +65,7 @@ except ImportError: # pragma: no cover
                 raise ImportError("JSON support requires Python 2.6 or simplejson.")
             json_lds = json_dumps
 
-py3k = sys.version_info >= (3,0,0)
+py3k = sys.version_info >= (3, 0, 0)
 NCTextIOWrapper = None
 
 if py3k: # pragma: no cover
@@ -75,7 +75,7 @@ if py3k: # pragma: no cover
     def touni(x, enc='utf8', err='strict'):
         """ Convert anything to unicode """
         return str(x, enc, err) if isinstance(x, bytes) else str(x)
-    if sys.version_info < (3,2,0):
+    if sys.version_info < (3, 2, 0):
         from io import TextIOWrapper
         class NCTextIOWrapper(TextIOWrapper):
             ''' Garbage collecting an io.TextIOWrapper(buffer) instance closes
@@ -297,7 +297,7 @@ class Router(object):
         rule, pairs = self.named[_name]
         if not pairs:
             token = self.syntax.split(rule)
-            parts = [p.replace('\\:',':') for p in token[::3]]
+            parts = [p.replace('\\:', ':') for p in token[::3]]
             names = token[1::3]
             if len(parts) > len(names): names.append(None)
             pairs = zip(parts, names)
@@ -332,7 +332,7 @@ class Router(object):
         if 'GET' in allowed and 'HEAD' not in allowed:
             allowed.append('HEAD')
         raise HTTPError(405, "Method not allowed.",
-                        header=[('Allow',",".join(allowed))])
+                        header=[('Allow', ",".join(allowed))])
 
     def _match_path(self, environ):
         ''' Optimized PATH_INFO matcher. '''
@@ -352,7 +352,7 @@ class Router(object):
             self._compile()
             return self._match_path(environ)
         # For run_once (CGI) environments, don't compile. Just check one by one.
-        epath = path.replace(':','\\:') # Turn path into its own static rule.
+        epath = path.replace(':', '\\:') # Turn path into its own static rule.
         match = self.routes.get(epath) # This returns static rule only.
         if match: return match, {}
         for rule in self.rules:
@@ -371,7 +371,7 @@ class Router(object):
         for rule in self.rules:
             target = self.routes[rule]
             if not self.syntax.search(rule):
-                self.static[rule.replace('\\:',':')] = target
+                self.static[rule.replace('\\:', ':')] = target
                 continue
             gpat = self._compile_pattern(rule)
             fpat = re.sub(r'(\\*)(\(\?P<[^>]*>|\((?!\?))', fpat_sub, gpat.pattern)
@@ -390,7 +390,7 @@ class Router(object):
         ''' Return a regular expression with named groups for each wildcard. '''
         out = ''
         for i, part in enumerate(self.syntax.split(rule)):
-            if i%3 == 0:   out += re.escape(part.replace('\\:',':'))
+            if i%3 == 0:   out += re.escape(part.replace('\\:', ':'))
             elif i%3 == 1: out += '(?P<%s>' % part if part else '(?:'
             else:          out += '%s)' % (part or '[^/]+')
         return re.compile('^%s$'%out)
@@ -771,7 +771,7 @@ class BaseRequest(DictMixin):
     def path(self):
         ''' The value of ``PATH_INFO`` with exactly one prefixed slash (to fix
             broken clients and avoid the "empty path" edge case). '''
-        return '/' + self.environ.get('PATH_INFO','').lstrip('/')
+        return '/' + self.environ.get('PATH_INFO', '').lstrip('/')
 
     @property
     def method(self):
@@ -788,7 +788,7 @@ class BaseRequest(DictMixin):
     def cookies(self):
         """ Cookies parsed into a dictionary. Signed cookies are NOT decoded.
             Use :meth:`get_cookie` if you expect signed cookies. """
-        raw_dict = SimpleCookie(self.environ.get('HTTP_COOKIE',''))
+        raw_dict = SimpleCookie(self.environ.get('HTTP_COOKIE', ''))
         cookies = {}
         for cookie in raw_dict.itervalues():
             cookies[cookie.key] = cookie.value
@@ -978,7 +978,7 @@ class BaseRequest(DictMixin):
             vice versa.:param shift: The number of path segments to shift. May be negative
                          to change the shift direction. (default: 1)
         '''
-        script = self.environ.get('SCRIPT_NAME','/')
+        script = self.environ.get('SCRIPT_NAME', '/')
         self['SCRIPT_NAME'], self['PATH_INFO'] = path_shift(script, self.path, shift)
 
     @property
@@ -993,7 +993,7 @@ class BaseRequest(DictMixin):
         ''' True if the request was triggered by a XMLHttpRequest. This only
             works with JavaScript libraries that support the `X-Requested-With`
             header (most of the popular libraries do). '''
-        requested_with = self.environ.get('HTTP_X_REQUESTED_WITH','')
+        requested_with = self.environ.get('HTTP_X_REQUESTED_WITH', '')
         return requested_with.lower() == 'xmlhttprequest'
 
     @property
@@ -1009,7 +1009,7 @@ class BaseRequest(DictMixin):
             front web-server or a middleware), the password field is None, but
             the user field is looked up from the ``REMOTE_USER`` environ
             variable. On any errors, None is returned. """
-        basic = parse_auth(self.environ.get('HTTP_AUTHORIZATION',''))
+        basic = parse_auth(self.environ.get('HTTP_AUTHORIZATION', ''))
         if basic: return basic
         ruser = self.environ.get('REMOTE_USER')
         if ruser: return (ruser, None)
@@ -1072,7 +1072,7 @@ Request = LocalRequest
 
 
 def _hkey(s):
-    return s.title().replace('_','-')
+    return s.title().replace('_', '-')
 
 class BaseResponse(object):
     """ Storage class for a response body as well as headers and cookies.
@@ -1506,7 +1506,7 @@ class WSGIHeaderDict(DictMixin):
 
     def _ekey(self, key):
         ''' Translate header field name to CGI/WSGI environ key. '''
-        key = key.replace('-','_').upper()
+        key = key.replace('-', '_').upper()
         if key in self.cgikeys:
             return key
         return 'HTTP_' + key
@@ -1661,7 +1661,7 @@ def parse_auth(header):
         method, data = header.split(None, 1)
         if method.lower() == 'basic':
             # TODO: Add 2to3 save base64[encode/decode] functions.
-            user, pwd = touni(base64.b64decode(tob(data))).split(':',1)
+            user, pwd = touni(base64.b64decode(tob(data))).split(':', 1)
             return user, pwd
     except (KeyError, ValueError):
         return None
@@ -1706,7 +1706,7 @@ def yieldroutes(func):
         d(x=5, y=6) -> '/d' and '/d/:x' and '/d/:x/:y'
     """
     import inspect # Expensive module. Only import if necessary.
-    path = '/' + func.__name__.replace('__','/').lstrip('/')
+    path = '/' + func.__name__.replace('__', '/').lstrip('/')
     spec = inspect.getargspec(func)
     argc = len(spec[0]) - len(spec[3] or [])
     path += ('/:%s' * argc) % tuple(spec[0][:argc])
@@ -1816,7 +1816,7 @@ class ServerAdapter(object):
         pass
 
     def __repr__(self):
-        args = ', '.join(['%s=%s'%(k,repr(v)) for k, v in self.options.items()])
+        args = ', '.join(['%s=%s'%(k, repr(v)) for k, v in self.options.items()])
         return "%s(%s)" % (self.__class__.__name__, args)
 
 
@@ -2237,7 +2237,7 @@ class TemplateError(HTTPError):
 
 class BaseTemplate(object):
     """ Base class and minimal API for template adapters """
-    extentions = ['tpl','html','thtml','stpl']
+    extentions = ['tpl', 'html', 'thtml', 'stpl']
     settings = {} # used in prepare()
     defaults = {} # used in render()
 
@@ -2388,9 +2388,9 @@ class SimpleTALTemplate(BaseTemplate):
         for dictarg in args: kwargs.update(dictarg)
         # TODO: maybe reuse a context instead of always creating one
         context = simpleTALES.Context()
-        for k,v in self.defaults.items():
+        for k, v in self.defaults.items():
             context.addGlobal(k, v)
-        for k,v in kwargs.items():
+        for k, v in kwargs.items():
             context.addGlobal(k, v)
         output = StringIO()
         self.tpl.expand(context, output)
@@ -2479,9 +2479,9 @@ class SimpleTemplate(BaseTemplate):
             if lineno <= 2:
                 m = re.search(r"%.*coding[:=]\s*([-\w\.]+)", line)
                 if m: self.encoding = m.group(1)
-                if m: line = line.replace('coding','coding (removed)')
+                if m: line = line.replace('coding', 'coding (removed)')
             if line.strip()[:2].count('%') == 1:
-                line = line.split('%',1)[1].lstrip() # Full line following the %
+                line = line.split('%', 1)[1].lstrip() # Full line following the %
                 cline = self.split_comment(line).strip()
                 cmd = re.split(r'[^a-zA-Z0-9_]', cline)[0]
                 flush() ## encodig (TODO: why?)
@@ -2624,7 +2624,7 @@ DEBUG = False
 #: A dict to map HTTP status codes (e.g. 404) to phrases (e.g. 'Not Found')
 HTTP_CODES = httplib.responses
 HTTP_CODES[418] = "I'm a teapot" # RFC 2324
-_HTTP_STATUS_LINES = dict((k, '%d %s'%(k,v)) for (k,v) in HTTP_CODES.iteritems())
+_HTTP_STATUS_LINES = dict((k, '%d %s'%(k, v)) for (k, v) in HTTP_CODES.iteritems())
 
 #: The default template used for error pages. Override with @error()
 ### SHINKEN MOD: change from bottle import DEBUG to from shinken.webui.bottle import DEBUG,...

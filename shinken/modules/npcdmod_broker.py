@@ -82,7 +82,7 @@ class Npcd_broker(BaseModule):
             raise Exception('npcdmod: An error occurred while attempting to process module arguments')
         try:
             # We open the file with line buffering, so we can better watch it with tail -f
-            self.logfile = codecs.open(self.perfdata_file, 'a','utf-8','replace', 1)
+            self.logfile = codecs.open(self.perfdata_file, 'a', 'utf-8', 'replace', 1)
         except:
             print "could not open file %s" % self.perfdata_file
             raise Exception('could not open file %s" % self.perfdata_file')
@@ -202,7 +202,7 @@ class Npcd_broker(BaseModule):
             if os.path.exists(self.perfdata_file) and os.path.getsize(self.perfdata_file) > 0:
                 print "moving perfdata_file %s (%d lines) to %s" % (self.perfdata_file, self.processed_lines, target)
                 shutil.move(self.perfdata_file, target)
-            self.logfile = codecs.open(self.perfdata_file, 'a','utf-8','replace', 1)
+            self.logfile = codecs.open(self.perfdata_file, 'a', 'utf-8', 'replace', 1)
         except OSError:
             print "could not rotate perfdata_file to %s" % target
             raise

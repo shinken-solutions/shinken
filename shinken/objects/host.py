@@ -37,7 +37,7 @@ from item import Items
 from schedulingitem import SchedulingItem
 
 from shinken.autoslots import AutoSlots
-from shinken.util import format_t_into_dhms_format, to_hostnames_list, get_obj_name, to_svc_hst_distinct_lists, to_list_string_of_names, to_list_of_names,to_name_if_possible
+from shinken.util import format_t_into_dhms_format, to_hostnames_list, get_obj_name, to_svc_hst_distinct_lists, to_list_string_of_names, to_list_of_names, to_name_if_possible
 from shinken.property import BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 from shinken.graph import Graph
 from shinken.macroresolver import MacroResolver

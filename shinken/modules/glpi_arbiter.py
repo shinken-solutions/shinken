@@ -153,13 +153,13 @@ class Glpi_arbiter(BaseModule):
         all_templates = self.con.monitoring.shinkenTemplates(arg)
         print "Get all templates", all_templates
         attributs = ['name', 'check_interval', 'retry_interval',
-                     'max_check_attempts','check_period','notification_interval',
-                     'notification_period','notification_options','active_checks_enabled',
-                     'process_perf_data','active_checks_enabled','passive_checks_enabled',
-                     'parallelize_check','obsess_over_service','check_freshness',
-                     'freshness_threshold','notifications_enabled','event_handler_enabled',
-                     'event_handler','flap_detection_enabled','failure_prediction_enabled',
-                     'retain_status_information','retain_nonstatus_information','is_volatile',
+                     'max_check_attempts', 'check_period', 'notification_interval',
+                     'notification_period', 'notification_options', 'active_checks_enabled',
+                     'process_perf_data', 'active_checks_enabled', 'passive_checks_enabled',
+                     'parallelize_check', 'obsess_over_service', 'check_freshness',
+                     'freshness_threshold', 'notifications_enabled', 'event_handler_enabled',
+                     'event_handler', 'flap_detection_enabled', 'failure_prediction_enabled',
+                     'retain_status_information', 'retain_nonstatus_information', 'is_volatile',
                      '_httpstink']
         for template_info in all_templates:
             print "\n\n"

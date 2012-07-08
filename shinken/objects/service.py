@@ -90,7 +90,7 @@ class Service(SchedulingItem):
         'check_freshness':        BoolProp   (default='0', fill_brok=['full_status']),
         'freshness_threshold':    IntegerProp(default='0', fill_brok=['full_status']),
         'event_handler':          StringProp (default='', fill_brok=['full_status']),
-        'event_handler_enabled':  BoolProp   (default='0',fill_brok=['full_status'], retention=True),
+        'event_handler_enabled':  BoolProp   (default='0', fill_brok=['full_status'], retention=True),
         'low_flap_threshold':     IntegerProp(default='-1', fill_brok= ['full_status']),
         'high_flap_threshold':    IntegerProp(default='-1', fill_brok=['full_status']),
         'flap_detection_enabled': BoolProp   (default='1', fill_brok=['full_status'], retention=True),
@@ -101,7 +101,7 @@ class Service(SchedulingItem):
         'notification_interval':  IntegerProp(default='60', fill_brok=['full_status']),
         'first_notification_delay': IntegerProp(default='0', fill_brok=['full_status']),
         'notification_period':    StringProp (brok_transformation=to_name_if_possible, fill_brok=['full_status']),
-        'notification_options':   ListProp   (default='w,u,c,r,f,s',fill_brok=['full_status']),
+        'notification_options':   ListProp   (default='w,u,c,r,f,s', fill_brok=['full_status']),
         'notifications_enabled':  BoolProp   (default='1', fill_brok=['full_status'], retention=True),
         'contacts':               StringProp (default='', brok_transformation=to_list_of_names, fill_brok=['full_status']),
         'contact_groups':         StringProp (default='', fill_brok=['full_status']),
@@ -143,7 +143,7 @@ class Service(SchedulingItem):
         'next_chk':           IntegerProp(default=0, fill_brok=['full_status', 'next_schedule'], retention=True),
         'in_checking':        BoolProp   (default=False, fill_brok=['full_status', 'check_result', 'next_schedule'], retention=True),
         'latency':            FloatProp  (default=0, fill_brok=['full_status', 'check_result'], retention=True,),
-        'attempt':            IntegerProp(default=0, fill_brok=['full_status', 'check_result'],retention=True),
+        'attempt':            IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'state':              StringProp (default='PENDING', fill_brok=['full_status', 'check_result'], retention=True),
         'state_id':           IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'current_event_id':   IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
@@ -193,7 +193,7 @@ class Service(SchedulingItem):
         'current_problem_id': IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'execution_time':     FloatProp(default=0.0, fill_brok=['full_status', 'check_result'], retention=True),
         'last_notification':  FloatProp(default=0.0, fill_brok=['full_status'], retention=True),
-        'current_notification_number': IntegerProp(default=0, fill_brok=['full_status'],retention=True),
+        'current_notification_number': IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         'current_notification_id': IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         'check_flapping_recovery_notification': BoolProp(default=True, fill_brok=['full_status'], retention=True),
         'scheduled_downtime_depth': IntegerProp(default=0, fill_brok=['full_status'], retention=True),
@@ -916,7 +916,7 @@ class Service(SchedulingItem):
             return True
 
         # Block if in a scheduled downtime and a problem arises, or flapping event
-        if self.scheduled_downtime_depth > 0 and type in ('PROBLEM', 'RECOVERY','FLAPPINGSTART', 'FLAPPINGSTOP', 'FLAPPINGDISABLED'):
+        if self.scheduled_downtime_depth > 0 and type in ('PROBLEM', 'RECOVERY', 'FLAPPINGSTART', 'FLAPPINGSTOP', 'FLAPPINGDISABLED'):
             return True
 
         # Block if the status is SOFT
@@ -1073,7 +1073,7 @@ class Services(Items):
                     err = "Error: the service '%s' do not have a host_name not hostgroup_name" % (self.get_name())
                     s.configuration_errors.append(err)
                     continue
-            except AttributeError , exp:
+            except AttributeError, exp:
                 pass # Will be catch at the is_correct moment
 
 
@@ -1274,9 +1274,9 @@ class Services(Items):
         # Servicegroups property need to be fullfill for got the informations
         # And then just register to this service_group
         for s in self:
-            if not s.is_tpl() and hasattr(s,'service_description'):
+            if not s.is_tpl() and hasattr(s, 'service_description'):
                 sname = s.service_description
-                shname = getattr(s ,'host_name', '')
+                shname = getattr(s, 'host_name', '')
                 if hasattr(s, 'servicegroups'):
                     sgs = s.servicegroups.split(',')
                     for sg in sgs:

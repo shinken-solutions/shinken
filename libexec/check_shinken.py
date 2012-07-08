@@ -95,7 +95,7 @@ parser.add_option('-s', '--ssl', dest='ssl', default=False)
 parser.add_option('-t', '--target', dest='target')
 parser.add_option('-d', '--daemonname', dest='daemon', default='')
 # In HA architectures, a warning should be displayed if there's one daemon down
-parser.add_option('-w','--warning', dest='warning', default = 1, type=int)
+parser.add_option('-w', '--warning', dest='warning', default = 1, type=int)
 # If no deamon is left, display a critical (but shinken will be probably dead already)
 parser.add_option('-c', '--critical', dest='critical', default = 0, type=int)
 parser.add_option('-T', '--timeout', dest='timeout', default = 10)
@@ -115,7 +115,7 @@ elif options.target not in daemon_types:
     parser.print_help()
     raise SystemExit, CRITICAL
 
-uri = pyro.create_uri(options.hostname, options.portnum, PYRO_OBJECT , options.ssl)
+uri = pyro.create_uri(options.hostname, options.portnum, PYRO_OBJECT, options.ssl)
 
 # Set the default socekt connexion to the timeout, by default it's 10s
 socket.setdefaulttimeout(float(options.timeout))

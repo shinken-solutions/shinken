@@ -87,7 +87,7 @@ def get_new_packs():
     if app.http_proxy:
         c.setopt(c.PROXY, app.http_proxy)
     c.setopt(c.URL, app.community_uri+"/categories")
-    c.setopt(c.HTTPPOST,[ ("root", '/'), ('api_key', api_key)])
+    c.setopt(c.HTTPPOST, [ ("root", '/'), ('api_key', api_key)])
     c.setopt(c.VERBOSE, 1)
     response = StringIO()
     c.setopt(c.WRITEFUNCTION, response.write)
@@ -119,7 +119,7 @@ def get_new_packs():
     if app.http_proxy:
         c.setopt(c.PROXY, app.http_proxy)
     c.setopt(c.URL, app.community_uri+"/tags")
-    c.setopt(c.HTTPPOST,[ ("nb", '50'), ('api_key', api_key)])
+    c.setopt(c.HTTPPOST, [ ("nb", '50'), ('api_key', api_key)])
     c.setopt(c.VERBOSE, 1)
     response = StringIO()
     c.setopt(c.WRITEFUNCTION, response.write)
@@ -183,7 +183,7 @@ def launch_search(search):
     if app.http_proxy:
         c.setopt(c.PROXY, app.http_proxy)
     c.setopt(c.URL, app.community_uri+"/search")
-    c.setopt(c.HTTPPOST,[ ("search", search), ('api_key', api_key)])
+    c.setopt(c.HTTPPOST, [ ("search", search), ('api_key', api_key)])
 
     #c.setopt(c.HTTPPOST, [("file1", (c.FORM_FILE, str(zip_file_p)))])
     c.setopt(c.VERBOSE, 1)
@@ -227,7 +227,7 @@ def get_new_packs_result(search):
     else:
         error = 'You forgot the search entry'
 
-    print "get_new_packs_result::",results, error
+    print "get_new_packs_result::", results, error
     # we return values for the template (view). But beware, theses values are the
     # only one the tempalte will have, so we must give it an app link and the
     # user we are loggued with (it's a contact object in fact)
@@ -251,7 +251,7 @@ def get_new_packs_result_post():
     else:
         error = 'You forgot the search entry'
 
-    print "get_new_packs_result_post::",results, error
+    print "get_new_packs_result_post::", results, error
     # we return values for the template (view). But beware, theses values are the
     # only one the tempalte will have, so we must give it an app link and the
     # user we are loggued with (it's a contact object in fact)

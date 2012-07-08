@@ -18,7 +18,7 @@ except ImportError:
     imp.load_module('shinken', *imp.find_module('shinken', [os.path.realpath("."), os.path.realpath(".."), os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "..")]))
     from shinken.bin import VERSION
 
-from shinken.objects.pack import Pack,Packs
+from shinken.objects.pack import Pack, Packs
 
 from shinken.log import logger
 from shinken.objects.config import Config

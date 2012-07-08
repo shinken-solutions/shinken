@@ -265,7 +265,7 @@ Columns: time type options state host_name"""
         now = time.time()
         print "4t is", time.asctime(time.localtime(int(now)))
         logs = 0
-        for day in range(1,5):
+        for day in range(1, 5):
             print "day", day
             # at 12:00
             now = time.time()
@@ -329,7 +329,7 @@ Columns: time type options state host_name"""
             print "db entries", db, numlogs
             tmpconn.close()
         print "lengths is", lengths
-        self.assert_(lengths == [6,14,22,30])
+        self.assert_(lengths == [6, 14, 22, 30])
 
         request = """GET log
 Filter: time >= """ + str(int(back4days_morning)) + """
@@ -393,7 +393,7 @@ Columns: time type options state host_name"""
         time.sleep(5)
         print "4t is", time.asctime(time.localtime(int(now)))
         logs = 0
-        for day in range(1,5):
+        for day in range(1, 5):
             print "day", day
             # at 12:00
             now = time.time()
@@ -443,7 +443,7 @@ Columns: time type options state host_name"""
             print "db entries", db, numlogs
             tmpconn.close()
         print "lengths is", lengths
-        self.assert_(lengths == [12,28,44,60])
+        self.assert_(lengths == [12, 28, 44, 60])
 
 
     def xtest_david_database(self):

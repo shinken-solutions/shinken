@@ -38,7 +38,7 @@ def get_instance(plugin):
     # First try to import
     try:
         from service_perfdata_broker import Service_perfdata_broker
-    except ImportError , exp:
+    except ImportError, exp:
         print "Warning: the plugin type %s is unavailable: %s" % ('service_perfdata', exp)
         return None
 
