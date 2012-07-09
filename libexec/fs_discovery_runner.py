@@ -24,8 +24,6 @@ import re
 
 parser = optparse.OptionParser('%prog [options] -H HOSTADRESS -C SNMPCOMMUNITYREAD -O ARG1 -V SNMPVERSION -l SNMPSECNAME -L SNMPSECLEVEL -p SNMPAUTHPROTO -x SNMPAUTHPASS')
 
-#-P SNMPPRIVPROTO -X SNMPPRIVPASS
-
 # user name and password are defined in /var/lib/net-snmp/snmpd.conf
 # default parameters are defined in /usr/local/shinken/etc/resource.cfg
 parser.add_option("-H", "--hostname", dest="hostname", help="Hostname to scan")
@@ -36,8 +34,6 @@ parser.add_option("-l", "--login", dest="snmpv3_user", help="User name for snmpv
 parser.add_option("-L", "--level", dest="snmpv3_level", help="Security level for snmpv3(default:authNoPriv)")
 parser.add_option("-p", "--authproto", dest="snmpv3_auth", help="Authentication protocol for snmpv3(default:MD5)")
 parser.add_option("-x", "--authpass", dest="snmpv3_auth_pass", help="Authentication password for snmpv3(default:monpassword)")
-#parser.add_option("-P", "--privproto", dest="snmpv3_priv", help="Privacy protocol for snmpv3(default:DES)")
-#parser.add_option("-X", "--privpass", dest="snmpv3_priv_pass", help="Privacy password for snmpv3(default:monpassword)")
 
 
 opts, args = parser.parse_args()
@@ -80,17 +76,6 @@ if opts.snmpv3_auth_pass:
     snmpv3_auth_pass = opts.snmpv3_auth_pass
 else:
     snmpv3_auth_pass = 'mypassword'
-
-#if opts.snmpv3_priv:
-    #snmpv3_priv = opts.snmpv3_priv
-#else:
-    #snmpv3_priv = 'DES'
-
-#if opts.snmpv3_priv_pass:
-    #snmpv3_priv_pass = opts.snmpv3_priv_pass
-#else:
-    #snmpv3_priv_pass = 'mypassword'
-
 
 oid_aix_linux = ".1.3.6.1.2.1.25.3.8.1.2"# hrFSMountPoint
 oid_hpux = ".1.3.6.1.4.1.11.2.3.1.2.2.1.10"# fileSystemName
