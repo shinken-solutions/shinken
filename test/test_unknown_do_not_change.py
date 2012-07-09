@@ -1,40 +1,39 @@
-#!/usr/bin/env python2.6
-#Copyright (C) 2009-2010 :
+#!/usr/bin/env python
+# Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 #
 # This file is used to test reading and processing of config files
 #
 
-#It's ugly I know....
 from shinken_test import *
 
 
 class TestUnknownNotChangeState(ShinkenTest):
-    #Uncomment this is you want to use a specific configuration
-    #for your test
+    # Uncomment this is you want to use a specific configuration
+    # for your test
     #def setUp(self):
     #    self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
 
-    
-    # We got problem with unknown results on bad connections 
-    # for critical services and host : if it was in a notification pass
+
+    # We got problem with unknown results on bad connections
+    # for critical services and host: if it was in a notification pass
     # then the notification is restarted, but it's just a missing data,
     # not a reason to warn about it
     def test_unknown_do_not_change_state(self):
@@ -94,15 +93,15 @@ class TestUnknownNotChangeState(ShinkenTest):
         # We check if we can still have new notifications of course
         # And we speedup the notification
         for n in svc.notifications_in_progress.values():
-            n.t_to_go = time.time()        
+            n.t_to_go = time.time()
         self.scheduler_loop(1, [[svc, 2, 'CRITICAL | value1=1 value2=2']])
         print svc.state, svc.state_type
         self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL'))
         self.show_and_clear_logs()
 
 
-    # We got problem with unknown results on bad connections 
-    # for critical services and host : if it was in a notification pass
+    # We got problem with unknown results on bad connections
+    # for critical services and host: if it was in a notification pass
     # then the notification is restarted, but it's just a missing data,
     # not a reason to warn about it
     def test_unknown_do_not_change_state_with_different_exit_status_phase(self):
@@ -155,7 +154,7 @@ class TestUnknownNotChangeState(ShinkenTest):
         # We check if we can still have new notifications of course
         # And we speedup the notification
         for n in svc.notifications_in_progress.values():
-            n.t_to_go = time.time()        
+            n.t_to_go = time.time()
         self.scheduler_loop(1, [[svc, 1, 'WARNING | value1=1 value2=2']])
         print svc.state, svc.state_type
         self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;WARNING'))
@@ -197,7 +196,7 @@ class TestUnknownNotChangeState(ShinkenTest):
         self.assert_(svc.state == 'UNKNOWN')
         self.assert_(svc.state_type == 'HARD')
 
-        # Should have a notification about it !
+        # Should have a notification about it!
         self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;UNKNOWN'))
         self.show_and_clear_logs()
 
@@ -210,8 +209,8 @@ class TestUnknownNotChangeState(ShinkenTest):
 
 
 
-    # We got problem with unknown results on bad connections 
-    # for critical services and host : if it was in a notification pass
+    # We got problem with unknown results on bad connections
+    # for critical services and host: if it was in a notification pass
     # then the notification is restarted, but it's just a missing data,
     # not a reason to warn about it
     def test_unreach_do_not_change_state(self):
@@ -277,10 +276,10 @@ class TestUnknownNotChangeState(ShinkenTest):
         # If you follow, it THE important point of this test!
         self.assert_(not self.any_log_match('HOST NOTIFICATION.*;DOWN'))
         self.show_and_clear_logs()
-        
+
         print "Now go in the future, I want a notification"
         # Check if we still got the next notification for this of course
-        
+
         # Hack so the notification will raise now if it can
         for n in host.notifications_in_progress.values():
             n.t_to_go = time.time()
@@ -289,7 +288,7 @@ class TestUnknownNotChangeState(ShinkenTest):
         # And here we DO NOT WANT new notification
         self.assert_(self.any_log_match('HOST NOTIFICATION.*;DOWN'))
         self.show_and_clear_logs()
-        
+
 
 
 

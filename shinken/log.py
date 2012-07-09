@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -54,7 +54,7 @@ class Log:
         name = name_
 
         self._level = logging.NOTSET
-    
+
     @staticmethod
     def get_level_id(lvlName):
         """Convert a level name (string) to its integer value
@@ -62,7 +62,7 @@ class Log:
            Raise KeyError when name not found
         """
         return logging._levelNames[lvlName]
-    
+
     # We can have level as an int (logging.INFO) or a string INFO
     # if string, try to get the int value
     def set_level(self, level):
@@ -109,12 +109,12 @@ class Log:
         if format is None:
             lvlname = logging.getLevelName(level)
 
-            fmt = u'[%%(date)s] %s%%(name)s%%(msg)s\n' % (if_else(display_level, '%(level)s : ', ''))
+            fmt = u'[%%(date)s] %s%%(name)s%%(msg)s\n' % (if_else(display_level, '%(level)s: ', ''))
             args = {
-                'date' : if_else(human_timestamp_log, time.asctime(time.localtime(time.time())), int(time.time())),
+                'date': if_else(human_timestamp_log, time.asctime(time.localtime(time.time())), int(time.time())),
                 'level': lvlname.capitalize(),
-                'name' : if_else(name is None, '', '[%s] ' % name),
-                'msg'  : message
+                'name': if_else(name is None, '', '[%s] ' % name),
+                'msg': message
             }
             s = fmt % args
         else:

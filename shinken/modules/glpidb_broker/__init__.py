@@ -24,29 +24,29 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This text is print at the import
+# This text is print at the import
 print "I am GlpiDB Broker"
 
 properties = {
-    'daemons' : ['broker'],
-    'type' : 'glpidb',
-    'phases' : ['running'],
+    'daemons': ['broker'],
+    'type': 'glpidb',
+    'phases': ['running'],
     }
 
 
-#called by the plugin manager to get a broker
+# called by the plugin manager to get a broker
 def get_instance(plugin):
     print "Get a Glpi broker for plugin %s" % plugin.get_name()
 
-    #First try to import
+    # First try to import
     try:
         from glpidb_broker import Glpidb_broker
     except ImportError , exp:
-        print "Warning : the plugin type %s is unavailable : %s" % (properties['type'], exp)
+        print "Warning: the plugin type %s is unavailable: %s" % (properties['type'], exp)
         return None
 
 
-    #Now load the goo module for the backend
+    # Now load the goo module for the backend
     try:
         host = plugin.host
         user = plugin.user
@@ -60,7 +60,7 @@ def get_instance(plugin):
         instance = Glpidb_broker(plugin, host=host, user=user, password=password, database=database, character_set=character_set)
         return instance
     except ImportError , exp:
-        print "Warning : the plugin type %s is unavailable : %s" % (properties['type'], exp)
+        print "Warning: the plugin type %s is unavailable: %s" % (properties['type'], exp)
         return None
 
     print "Not creating a instance!!!"

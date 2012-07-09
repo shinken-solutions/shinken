@@ -25,10 +25,10 @@
 
 
 properties = {
-    'daemons' : ['broker', 'scheduler'],
-    'type' : 'webui',
-    'phases' : ['running'],
-    'external' : True,
+    'daemons': ['broker', 'scheduler'],
+    'type': 'webui',
+    'phases': ['running'],
+    'external': True,
     }
 
 
@@ -36,11 +36,11 @@ properties = {
 def get_instance(plugin):
     print "Get a WebUI instancefor plugin %s" % plugin.get_name()
 
-    #First try to import
+    # First try to import
     try:
         from webui_broker import Webui_broker
     except ImportError , exp:
-        print "Warning : the plugin type %s is unavailable : %s" % ('webui', exp)
+        print "Warning: the plugin type %s is unavailable: %s" % ('webui', exp)
         return None
 
     instance = Webui_broker(plugin)

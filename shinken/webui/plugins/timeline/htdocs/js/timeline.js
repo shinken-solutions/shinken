@@ -23,57 +23,57 @@
   var initializing = false, fnTest = /xyz/.test(function(){xyz;}) ? /\b_super\b/ : /.*/;
   // The base Class implementation (does nothing)
   this.Class = function(){};
-  
+
   // Create a new Class that inherits from this class
   Class.extend = function(prop) {
     var _super = this.prototype;
-    
+
     // Instantiate a base class (but only create the instance,
     // don't run the init constructor)
     initializing = true;
     var prototype = new this();
     initializing = false;
-    
+
     // Copy the properties over onto the new prototype
     for (var name in prop) {
       // Check if we're overwriting an existing function
-      prototype[name] = typeof prop[name] == "function" && 
+      prototype[name] = typeof prop[name] == "function" &&
         typeof _super[name] == "function" && fnTest.test(prop[name]) ?
         (function(name, fn){
           return function() {
             var tmp = this._super;
-            
+
             // Add a new ._super() method that is the same method
             // but on the super-class
             this._super = _super[name];
-            
+
             // The method only need to be bound temporarily, so we
             // remove it when we're done executing
-            var ret = fn.apply(this, arguments);        
+            var ret = fn.apply(this, arguments);
             this._super = tmp;
-            
+
             return ret;
           };
         })(name, prop[name]) :
         prop[name];
     }
-    
+
     // The dummy class constructor
     function Class() {
       // All construction is actually done in the init method
       if ( !initializing && this.init )
         this.init.apply(this, arguments);
     }
-    
+
     // Populate our constructed prototype object
     Class.prototype = prototype;
-    
+
     // Enforce the constructor to be what we expect
     Class.prototype.constructor = Class;
 
     // And make this class extendable
     Class.extend = arguments.callee;
-    
+
     return Class;
   };
 })();
@@ -131,143 +131,143 @@ var global = (function () {
 ================================================== */
 
 if (typeof VMM == 'undefined') {
-	
+
 	/* Main Scope Container
 	================================================== */
 	//var VMM = {};
 	var VMM = Class.extend({
 
 	});
-	
+
 	/* Master Config
 	================================================== */
 	//VMM.master_config.youtube_array
 	VMM.master_config = ({
-		
+
 		init: function() {
 			return this;
 		},
-		
+
 		youtube: {
 			active: false,
 			array: [],
 			api_loaded:false
 		},
-		
+
 	}).init();
-	
+
 	VMM.master_config = ({
-		
+
 		init: function() {
 			return this;
 		},
-		
+
 		youtube: {
 			active: false,
 			array: [],
 			api_loaded:false,
 			que: []
 		},
-		
+
 	}).init();
-	
+
 	/* Abstract out DOM element creation to make independent of library
 	================================================== */
 	//VMM.createElement(tag, value, cName, attrs, styles);
 	VMM.createElement = function(tag, value, cName, attrs, styles) {
-		
+
 		var ce = "";
-		
+
 		if (tag != null && tag != "") {
-			
+
 			// TAG
 			ce += "<" + tag;
 			if (cName != null && cName != "") {
 				ce += " class='" + cName + "'";
 			};
-			
+
 			if (attrs != null && attrs != "") {
 				ce += " " + attrs;
 			};
-			
+
 			if (styles != null && styles != "") {
 				ce += " " + styles;
 			};
-			
+
 			ce += ">";
-			
+
 			if (value != null && value != "") {
 				ce += value;
 			}
-			
+
 			// CLOSE TAG
 			ce = ce + "</" + tag + ">";
 		}
-		
+
 		return ce;
-		
+
     };
 
 	VMM.createMediaElement = function(media, caption, credit) {
-		
+
 		var ce = "";
-		
+
 		var _valid = false;
-		
+
 		ce += "<div class='media'>";
-		
+
 		if (media != null && media != "") {
-			
+
 			valid = true;
-			
+
 			ce += "<img src='" + media + "'>";
-			
+
 			// CREDIT
 			if (credit != null && credit != "") {
 				ce += VMM.createElement("div", credit, "credit");
 			}
-			
+
 			// CAPTION
 			if (caption != null && caption != "") {
 				ce += VMM.createElement("div", caption, "caption");
 			}
 
 		}
-		
+
 		ce += "</div>";
-		
+
 		return ce;
-		
+
     };
 
-	
-	
+
+
 	/* LIBRARY ABSTRACTION
 	================================================== */
-	
+
 	//VMM.attachElement(element, content);
 	VMM.attachElement = function(element, content) {
 		if( typeof( jQuery ) != 'undefined' ){
 			$(element).html(content);
 		}
-		
+
 	};
 	//VMM.appendElement(element, content);
 	VMM.appendElement = function(element, content) {
-		
+
 		if( typeof( jQuery ) != 'undefined' ){
 			$(element).append(content);
 		}
-		
+
 	};
-	
+
 	VMM.getHTML = function(element) {
 		var e;
 		if( typeof( jQuery ) != 'undefined' ){
 			e = $(element).html();
 			return e;
 		}
-		
+
 	};
 	//VMM.getElement(element);
 	VMM.getElement = function(element, p) {
@@ -275,13 +275,13 @@ if (typeof VMM == 'undefined') {
 		if( typeof( jQuery ) != 'undefined' ){
 			if (p) {
 				e = $(element).parent().get(0);
-				
+
 			} else {
 				e = $(element).get(0);
 			}
 			return e;
 		}
-		
+
 	};
 	//VMM.bindEvent(element, the_handler, the_event_type, event_data);
 	//VMM.bindEvent(window, the_handler, "event type", {event_data});
@@ -289,58 +289,58 @@ if (typeof VMM == 'undefined') {
 		var e;
 		var _event_type = "click";
 		var _event_data = {};
-		
+
 		if (the_event_type != null && the_event_type != "") {
 			_event_type = the_event_type;
 		}
-		
+
 		if (_event_data != null && _event_data != "") {
 			_event_data = event_data;
 		}
-		
+
 		if( typeof( jQuery ) != 'undefined' ){
 			$(element).bind(_event_type, _event_data, the_handler);
-			
+
 			//return e;
 		}
-		
+
 	};
 	//VMM.unbindEvent(window, the_handler, "event type");
 	VMM.unbindEvent = function(element, the_handler, the_event_type) {
 		var e;
 		var _event_type = "click";
 		var _event_data = {};
-		
+
 		if (the_event_type != null && the_event_type != "") {
 			_event_type = the_event_type;
 		}
-		
+
 		if( typeof( jQuery ) != 'undefined' ){
 			$(element).unbind(_event_type, the_handler);
-			
+
 			//return e;
 		}
-		
+
 	};
 	//VMM.fireEvent(element, "resize", [data]);
 	VMM.fireEvent = function(element, the_event_type, the_data) {
 		var e;
 		var _event_type = "click";
 		var _data = [];
-		
+
 		if (the_event_type != null && the_event_type != "") {
 			_event_type = the_event_type;
 		}
 		if (the_data != null && the_data != "") {
 			_data = the_data;
 		}
-		
+
 		if( typeof( jQuery ) != 'undefined' ){
 			$(element).trigger(_event_type, _data);
-			
+
 			//return e;
 		}
-		
+
 	};
 
 	// VMM.getJSON(url, the_function);
@@ -363,38 +363,38 @@ if (typeof VMM == 'undefined') {
 		var _class = "";
 		var _content = "";
 
-		
+
 		if (tag != null && tag != "") {
 			_tag = tag;
 		}
-		
+
 		if (cName != null && cName != "") {
 			_class = cName;
 		}
-		
+
 		if (content != null && content != "") {
 			_content = content;
 		}
-		
+
 		if( typeof( jQuery ) != 'undefined' ){
-			
+
 			e = $(tag);
-			
+
 			e.addClass(_class);
 			e.html(_content);
-			
+
 			$(append_to_element).append(e);
-			
+
 			//$(e).appendTo(element);
-			
+
 		}
-		
+
 		return e;
-		
+
 	};
-	
+
 	VMM.Element = ({
-		
+
 		init: function() {
 			return this;
 		},
@@ -409,7 +409,7 @@ if (typeof VMM == 'undefined') {
 					$(element).hide();
 				}
 			}
-			
+
 		},
 		// VMM.Element.remove(element);
 		remove: function(element) {
@@ -440,7 +440,7 @@ if (typeof VMM == 'undefined') {
 					$(element).show();
 				}
 			}
-			
+
 		},
 		// VMM.Element.load(element, callback_function, event_data);
 		load: function(element, callback_function, event_data) {
@@ -486,7 +486,7 @@ if (typeof VMM == 'undefined') {
 		},
 		//VMM.Element.attribute(element, aName, value);
 		attribute: function(element, aName, value) {
-			
+
 			if (value != null && value != "") {
 				if( typeof( jQuery ) != 'undefined' ){
 					$(element).attr(aName, value);
@@ -534,7 +534,7 @@ if (typeof VMM == 'undefined') {
 				}
 			}
 		},
-		
+
 		cssmultiple: function(element, propval) {
 
 			if( typeof( jQuery ) != 'undefined' ){
@@ -603,7 +603,7 @@ if (typeof VMM == 'undefined') {
 			if( typeof( jQuery ) != 'undefined' ){
 				$(element).each(return_function);
 			}
-			
+
 		},
 		/* Each
 		================================================== */
@@ -614,7 +614,7 @@ if (typeof VMM == 'undefined') {
 				e = $(element).html();
 				return e;
 			}
-			
+
 			if (str != null && str != "") {
 				if( typeof( jQuery ) != 'undefined' ){
 					$(element).html(str);
@@ -646,33 +646,33 @@ if (typeof VMM == 'undefined') {
 		},
 		// VMM.Element.animate(element, duration, ease, att, callback_function);
 		animate: function(element, duration, ease, att, callback_function) {
-			
+
 			var _ease = "easein";
 			var _duration = 1000;
 			var _att = {};
-			
+
 			if (duration != null) {
 				if (duration < 1) {
 					_duration = 1;
 				} else {
 					_duration = Math.round(duration);
 				}
-				
+
 			}
-			
+
 			if (ease != null && ease != "") {
 				_ease = ease;
 			}
-			
+
 			if (att != null) {
 				_att = att
 			} else {
 				_att = {opacity: 0}
 			}
-			
-			
+
+
 			if (VMM.Browser.device == "mobile" || VMM.Browser.device == "tablet") {
-				
+
 				var _tdd = Math.round((_duration/1500)*10)/10
 				var __duration = _tdd + 's';
 				VMM.Element.css(element, '-webkit-transition', 'all '+ __duration + ' ease');
@@ -681,7 +681,7 @@ if (typeof VMM == 'undefined') {
 				VMM.Element.css(element, '-ms-transition', 'all '+ __duration + ' ease');
 				VMM.Element.css(element, 'transition', 'all '+ __duration + ' ease');
 				VMM.Element.cssmultiple(element, _att);
-				
+
 				//callback_function();
 				/*
 				if( typeof( jQuery ) != 'undefined' ){
@@ -692,7 +692,7 @@ if (typeof VMM == 'undefined') {
 					}
 				}
 				*/
-				
+
 			} else {
 				if( typeof( jQuery ) != 'undefined' ){
 					if (callback_function != null && callback_function != "") {
@@ -702,8 +702,8 @@ if (typeof VMM == 'undefined') {
 					}
 				}
 			}
-			
-			
+
+
 			/*
 			VMM.Element.cssmultiple(element, {
 				'-webkit-transition': 'all 1s ease-in-out',
@@ -711,13 +711,13 @@ if (typeof VMM == 'undefined') {
 				'-o-transition': 'all 1s ease-in-out',
 				'-ms-transition': 'all 1s ease-in-out',
 				'transition': 'all 1s ease-in-out',
-				
+
 			});
 			*/
 		},
-		
+
 	}).init();
-	
+
 	/* TOUCH
 	================================================== */
 	// VMM.TouchSlider.createSlidePanel(touch_object, move_object, w, padding, vertical, h) ;
@@ -725,7 +725,7 @@ if (typeof VMM == 'undefined') {
 		createPanel: function(touch_object, move_object, w, padding, vertical, h) {
 			VMM.TouchSlider.vertical = false;
 			VMM.TouchSlider.vertical = vertical;
-			
+
 			var x = padding;
 			VMM.TouchSlider.width = w;
 			VMM.TouchSlider.height = h;
@@ -738,15 +738,15 @@ if (typeof VMM == 'undefined') {
 			}
 			*/
 			// VMM.TouchSlider.sticky = sticky;
-			
+
 		},
-		
+
 		removePanel: function(touch_object) {
 			VMM.unbindEvent(touch_object, VMM.TouchSlider.onTouchStart, "touchstart");
 			VMM.unbindEvent(touch_object, VMM.TouchSlider.onTouchMove, "touchmove");
 			VMM.unbindEvent(touch_object, VMM.TouchSlider.onTouchEnd, "touchend");
 		},
-		
+
 		makeTouchable: function(touch_object, move_object) {
 			VMM.bindEvent(touch_object, VMM.TouchSlider.onTouchStart, "touchstart", {element: move_object});
 			VMM.bindEvent(touch_object, VMM.TouchSlider.onTouchMove, "touchmove", {element: move_object});
@@ -761,7 +761,7 @@ if (typeof VMM == 'undefined') {
 		onTouchEnd: function(e) {
 			e.preventDefault();
 			e.stopPropagation();
-			
+
 			if (VMM.TouchSlider.sliding) {
 				VMM.TouchSlider.sliding = false;
 				VMM.TouchSlider.touchEnd(e.data.element, e);
@@ -769,7 +769,7 @@ if (typeof VMM == 'undefined') {
 			} else {
 				return true;
 			}
-			
+
 		},
 		onTouchMove: function(e) {
 			VMM.TouchSlider.touchMove(e.data.element, e);
@@ -784,34 +784,34 @@ if (typeof VMM == 'undefined') {
 			return parseInt(VMM.Element.css(elem, 'top').substring(0, VMM.Element.css(elem, 'top').length - 2), 10);
 		},
 	    touchStart: function(elem, e) {
-			
+
 			VMM.Element.css(elem, '-webkit-transition-duration', '0');
-			
+
 			VMM.TouchSlider.startX = e.originalEvent.touches[0].screenX;
 			VMM.TouchSlider.startY = e.originalEvent.touches[0].screenY;
-			
+
 			VMM.TouchSlider.startLeft = VMM.TouchSlider.getLeft(elem);
 			VMM.TouchSlider.startTop = VMM.TouchSlider.getTop(elem);
-			
+
 			VMM.TouchSlider.touchStartTime = new Date().getTime();
 
 	    },
 		touchEnd: function(elem, e) {
 			if (VMM.TouchSlider.getLeft(elem) > 0) {
-				
+
 				//This means they dragged to the right past the first item
-				
+
 				if (VMM.TouchSlider.vertical) {
 					VMM.Element.animate(elem, 1000, "", {"top": 0});
 				} else {
 					VMM.Element.animate(elem, 1000, "", {"left": 0});
 				}
-				
+
 				VMM.TouchSlider.startX = null;
 				VMM.TouchSlider.startY = null;
-				
+
 				VMM.fireEvent(elem, "TOUCHUPDATE", [0]);
-				
+
 			} else {
 				//This means they were just dragging within the bounds of the grid and we just need to handle the momentum and snap to the grid.
 				VMM.TouchSlider.slideMomentum(elem, e);
@@ -820,23 +820,23 @@ if (typeof VMM == 'undefined') {
 		slideMomentum: function(elem, e) {
 			var slideAdjust = (new Date().getTime() - VMM.TouchSlider.touchStartTime) * 10;
 			var timeAdjust = slideAdjust;
-			
+
 			var left = VMM.TouchSlider.getLeft(elem);
 			var top = VMM.TouchSlider.getTop(elem);
-			
+
 			var changeX = 6000 * (Math.abs(VMM.TouchSlider.startLeft) - Math.abs(left));
 			var changeY = 6000 * (Math.abs(VMM.TouchSlider.startTop) - Math.abs(top));
-			
+
 			slideAdjust = Math.round(changeX / slideAdjust);
 			slideAdjustY = Math.round(changeY / slideAdjust);
 
 			var newLeft = slideAdjust + left;
 			var newTop = slideAdjustY + top;
-			
+
 			var y = newTop % VMM.TouchSlider.height;
 			var t = newLeft % VMM.TouchSlider.width;
-			
-			
+
+
 			var _r_object = {
 				top: Math.min(0, newTop),
 				left: Math.min(0, newLeft),
@@ -853,19 +853,19 @@ if (typeof VMM == 'undefined') {
 		             //Stay on the current cell
 					newLeft -= t;
 				}
-				
+
 				VMM.fireEvent(elem, "TOUCHUPDATE", [Math.min(0, newLeft)]);
-				
+
 			} else {
 				trace("not sticky");
 				//VMM.TouchSlider.doSlide(elem, Math.min(0, newLeft), '0.5s');
 				VMM.Element.animate(elem, 500, "", {"left": Math.min(0, newLeft)});
 			}
 			*/
-			
+
 			VMM.TouchSlider.startX = null;
 			VMM.TouchSlider.startY = null;
-			
+
 	    },
 		doSlide: function(elem, x, duration) {
 			VMM.Element.css(elem, '-webkit-transition-property', 'left');
@@ -873,15 +873,15 @@ if (typeof VMM == 'undefined') {
 			VMM.Element.css(elem, 'left', x);
 		},
 		touchMove: function(elem, e) {
-			
+
 			if (!VMM.TouchSlider.sliding) {
 				//elem.parent().addClass('sliding');
 			}
 
 			VMM.TouchSlider.sliding = true;
-			
+
 			if (VMM.TouchSlider.vertical) {
-				
+
 				if (VMM.TouchSlider.startY > e.originalEvent.touches[0].screenY) {
 					VMM.Element.css(elem, 'top', -(VMM.TouchSlider.startY - e.originalEvent.touches[0].screenY - VMM.TouchSlider.startTop));
 					VMM.TouchSlider.slidingTop = true;
@@ -890,9 +890,9 @@ if (typeof VMM == 'undefined') {
 					VMM.Element.css(elem, 'top', -(VMM.TouchSlider.startY - e.originalEvent.touches[0].screenY - VMM.TouchSlider.startTop));
 					VMM.TouchSlider.slidingTop = false;
 				}
-				
+
 			} else {
-				
+
 				if (VMM.TouchSlider.startX > e.originalEvent.touches[0].screenX) {
 					VMM.Element.css(elem, 'left', -(VMM.TouchSlider.startX - e.originalEvent.touches[0].screenX - VMM.TouchSlider.startLeft));
 					VMM.TouchSlider.slidingLeft = true;
@@ -901,13 +901,13 @@ if (typeof VMM == 'undefined') {
 					VMM.Element.css(elem, 'left', -(VMM.TouchSlider.startX - e.originalEvent.touches[0].screenX - VMM.TouchSlider.startLeft));
 					VMM.TouchSlider.slidingLeft = false;
 				}
-				
+
 			}
-			
-			
+
+
 		}
 	}
-	
+
 	// Hide URL Bar for iOS and Android by Scott Jehl
 	// https://gist.github.com/1183357
 
@@ -928,7 +928,7 @@ if (typeof VMM == 'undefined') {
 					clearInterval( bodycheck );
 					scrollTop = "scrollTop" in doc.body ? doc.body.scrollTop : 1;
 					win.scrollTo( 0, scrollTop === 1 ? 0 : 1 );
-				}	
+				}
 			}, 15 );
 
 			win.addEventListener( "load", function(){
@@ -939,16 +939,16 @@ if (typeof VMM == 'undefined') {
 			}, false );
 		}
 	};
-	
+
 	/* DRAG
 	================================================== */
 	// VMM.DragSlider.createSlidePanel(drag_object, move_object, w, padding, sticky);
 	// VMM.DragSlider.cancelSlide();
 	VMM.DragSlider = {
 		createPanel: function(drag_object, move_object, w, padding, sticky) {
-			
 
-			
+
+
 			var x = padding;
 			VMM.DragSlider.width = w;
 			VMM.DragSlider.makeDraggable(drag_object, move_object);
@@ -983,7 +983,7 @@ if (typeof VMM == 'undefined') {
 		},
 		onDragStart: function(e) {
 			VMM.DragSlider.dragStart(e.data.element, e.data.delement, e);
-			
+
 			e.preventDefault();
 			e.stopPropagation();
 			return true;
@@ -991,7 +991,7 @@ if (typeof VMM == 'undefined') {
 		onDragEnd: function(e) {
 			e.preventDefault();
 			e.stopPropagation();
-			
+
 			if (VMM.DragSlider.sliding) {
 				VMM.DragSlider.sliding = false;
 				VMM.DragSlider.dragEnd(e.data.element, e.data.delement, e);
@@ -999,7 +999,7 @@ if (typeof VMM == 'undefined') {
 			} else {
 				return true;
 			}
-			
+
 		},
 		onDragMove: function(e) {
 			VMM.DragSlider.dragMove(e.data.element, e);
@@ -1008,16 +1008,16 @@ if (typeof VMM == 'undefined') {
 			return false;
 		},
 		dragStart: function(elem, delem, e) {
-			
+
 			VMM.DragSlider.startX = e.pageX;
-			
+
 			VMM.DragSlider.startLeft = VMM.DragSlider.getLeft(elem);
 			VMM.DragSlider.dragStartTime = new Date().getTime();
 			VMM.DragSlider.dragWidth = VMM.Element.width(delem);
-			
+
 			// CANCEL CURRENT ANIMATION IF ANIMATING
 			var _newx = Math.round(VMM.DragSlider.startX - e.pageX - VMM.DragSlider.startLeft);
-			
+
 			VMM.Element.stop(elem);
 			VMM.bindEvent(delem, VMM.DragSlider.onDragMove, "mousemove", {element: elem});
 
@@ -1029,7 +1029,7 @@ if (typeof VMM == 'undefined') {
 				//(VMM.DragSlider.dragWidth/2)
 				//This means they dragged to the right past the first item
 				//VMM.Element.animate(elem, 1000, "linear", {"left": 0});
-				
+
 				//VMM.fireEvent(elem, "DRAGUPDATE", [0]);
 			} else {
 				//This means they were just dragging within the bounds of the grid and we just need to handle the momentum and snap to the grid.
@@ -1040,7 +1040,7 @@ if (typeof VMM == 'undefined') {
 			if (!VMM.DragSlider.sliding) {
 				//elem.parent().addClass('sliding');
 			}
-			
+
 			VMM.DragSlider.sliding = true;
 			if (VMM.DragSlider.startX > e.pageX) {
 				//Sliding to the left
@@ -1061,34 +1061,34 @@ if (typeof VMM == 'undefined') {
 			var changeX = 6000 * (Math.abs(VMM.DragSlider.startLeft) - Math.abs(left));
 			//var changeX = 6000 * (VMM.DragSlider.startLeft - left);
 			slideAdjust = Math.round(changeX / slideAdjust);
-			
+
 			var newLeft = left + slideAdjust;
-			
+
 			var t = newLeft % VMM.DragSlider.width;
 			//left: Math.min(0, newLeft),
 			var _r_object = {
 				left: Math.min(newLeft),
 				time: timeAdjust
 			}
-			
+
 			VMM.fireEvent(elem, "DRAGUPDATE", [_r_object]);
 			var _ease = "easeOutExpo";
 			if (_r_object.time > 0) {
 				VMM.Element.animate(elem, _r_object.time, _ease, {"left": _r_object.left});
 			};
-			
-			
+
+
 			//VMM.DragSlider.startX = null;
 		},
 		getLeft: function(elem) {
 			return parseInt(VMM.Element.css(elem, 'left').substring(0, VMM.Element.css(elem, 'left').length - 2), 10);
 		}
-	
+
 	}
-	
+
 	/* DEVICE
 	================================================== */
-	
+
 	VMM.Browser = {
 		init: function () {
 			this.browser = this.searchString(this.dataBrowser) || "An unknown browser";
@@ -1097,7 +1097,7 @@ if (typeof VMM == 'undefined') {
 				|| "an unknown version";
 			this.OS = this.searchString(this.dataOS) || "an unknown OS";
 			this.device = this.searchDevice(navigator.userAgent);
-			
+
 		},
 		searchDevice: function(d) {
 			if (d.match(/Android/i) || d.match(/iPhone|iPod/i)) {
@@ -1224,11 +1224,11 @@ if (typeof VMM == 'undefined') {
 
 	}
 	VMM.Browser.init();
-	
+
 	/* MEDIA TYPE
 	================================================== */
 	VMM.MediaElement = ({
-		
+
 		init: function() {
 			return this;
 		},
@@ -1242,16 +1242,16 @@ if (typeof VMM == 'undefined') {
 			if (h != null && h != "") {
 				_h = h;
 			}
-			
+
 			if (data.media != null && data.media != "") {
 				_valid = true;
 				var mediaElem = "";
 				var m = {};
-				
+
 				// MEDIA TYPE
 				m = VMM.MediaType(data.media); //returns an object with .type and .id
-				
-				// CREATE MEDIA CODE 
+
+				// CREATE MEDIA CODE
 				if (m.type == "image") {
 					mediaElem = "<div class='thumbnail'><img src='" + m.id + "' width='" + _w + "px' height='" + _h + "px'></div>";
 					return mediaElem;
@@ -1290,7 +1290,7 @@ if (typeof VMM == 'undefined') {
 		},
 		//VMM.MediaElement.create(element, data, returntrue);
 		create: function(element, data, __return, w, h) {
-			
+
 			_return = __return;
 			_w = 500;
 			_h = 400;
@@ -1303,7 +1303,7 @@ if (typeof VMM == 'undefined') {
 			if (h != null && h != "") {
 				_h = h;
 			}
-			
+
 			if (data.media != null && data.media != "") {
 
 				_valid = true;
@@ -1313,7 +1313,7 @@ if (typeof VMM == 'undefined') {
 				var m = {};
 				var media_height = (_h - 50);
 				var isTextMedia = false;
-				
+
 				// CREDIT
 				if (data.credit != null && data.credit != "") {
 					creditElem = "<div class='credit'>" + data.credit + "</div>";
@@ -1322,11 +1322,11 @@ if (typeof VMM == 'undefined') {
 				if (data.caption != null && data.caption != "") {
 					captionElem = "<div class='caption'>" + data.caption + "</div>";
 				}
-				
+
 				// MEDIA TYPE
 				m = VMM.MediaType(data.media); //returns an object with .type and .id
-				
-				// CREATE MEDIA CODE 
+
+				// CREATE MEDIA CODE
 				if (m.type == "image") {
 					mediaElem = "<img src='" + m.id + "'>";
 				} else if (m.type == "flickr") {
@@ -1353,10 +1353,10 @@ if (typeof VMM == 'undefined') {
 					VMM.ExternalAPI.soundcloud.getSound(m.id, soundcloud_id)
 				} else if (m.type == "google-map") {
 					mediaElem = "<iframe class='media-frame map' frameborder='0' width='100%' height='100%' scrolling='no' marginheight='0' marginwidth='0' src='" + m.id + "&amp;output=embed'></iframe>"
-				} else if (m.type == "unknown") { 
-					trace("NO KNOWN MEDIA TYPE FOUND TRYING TO JUST PLACE THE HTML"); 
-					mediaElem = VMM.Util.properQuotes(m.id); 
-				} else if (m.type == "website") { 
+				} else if (m.type == "unknown") {
+					trace("NO KNOWN MEDIA TYPE FOUND TRYING TO JUST PLACE THE HTML");
+					mediaElem = VMM.Util.properQuotes(m.id);
+				} else if (m.type == "website") {
 					mediaElem = "<iframe class='media-frame' frameborder='0' width='100%' height='100%' scrolling='yes' marginheight='0' marginwidth='0' src='" + m.id + "'></iframe>"
 				} else {
 					trace("NO KNOWN MEDIA TYPE FOUND");
@@ -1364,7 +1364,7 @@ if (typeof VMM == 'undefined') {
 				}
 				// WRAP THE MEDIA ELEMENT
 				mediaElem = "<div class='media-container' >" + mediaElem + creditElem + captionElem + "</div>";
-				
+
 				if (_return) {
 					if (isTextMedia) {
 						return "<div class='media text-media'><div class='media-wrapper'>" + mediaElem + "</div></div>";
@@ -1377,11 +1377,11 @@ if (typeof VMM == 'undefined') {
 					VMM.appendElement($mediacontainer, captionElem);
 				}
 			};
-			
+
 		},
-		
+
 	}).init();
-	
+
 	//VMM.mediaType.youtube(d); //should return a true or false
 	// VMM.MediaType(url); //returns an object with .type and .id
 	VMM.MediaType = function(d) {
@@ -1392,9 +1392,9 @@ if (typeof VMM == 'undefined') {
 		    media.id    = d;
 		    success = true;
 		} else if (d.match('(www.)?youtube|youtu\.be')) {
-			if (d.match('embed')) { 
+			if (d.match('embed')) {
 				youtube_id = d.split(/embed\//)[1].split('"')[0];
-			} else { 
+			} else {
 				youtube_id = d.split(/v\/|v=|youtu\.be\//)[1].split(/[?&]/)[0];
 			}
 			//youtube_id = d.split(/v\/|v=|youtu\.be\//)[1].split(/[?&]/)[0];
@@ -1404,7 +1404,7 @@ if (typeof VMM == 'undefined') {
 		} else if (d.match('(player.)?vimeo\.com')) {
 		    //vimeo_id = d.split(/video\/|http:\/\/vimeo\.com\//)[1].split(/[?&]/)[0];
 		    vimeo_id = d.split(/video\/|\/\/vimeo\.com\//)[1].split(/[?&]/)[0];
-		
+
 		    media.type  = "vimeo";
 		    media.id    = vimeo_id;
 		    success = true;
@@ -1438,7 +1438,7 @@ if (typeof VMM == 'undefined') {
 		} else if (d.match("flickr.com/photos")) {
 			media.type = "flickr";
 			//media.id = d.split('/photos/[^/]+/([0-9]+)/gi');
-			
+
 			media.id = d.split("photos\/")[1].split("/")[1];
 			//media.id = media.id.split("/")[1];
 			trace("FLICKR " + media.id);
@@ -1452,13 +1452,13 @@ if (typeof VMM == 'undefined') {
 			media.id    = d;
 			success = true;
 		} else {
-			trace("unknown media");  
+			trace("unknown media");
 			media.type  = "unknown";
 			media.id    = d;
 			success = true;
 		}
-		
-		if (success) { 
+
+		if (success) {
 			return media;
 		} else {
 			trace("No valid media id detected");
@@ -1466,19 +1466,19 @@ if (typeof VMM == 'undefined') {
 		}
 		return false;
 	}
-	
+
 	VMM.Keys = {
 		flickr: "6d6f59d8d30d79f4f402a7644d5073e3",
 	}
-	
+
 	VMM.ExternalAPI = {
-		
+
 		twitter: {
 			tweetArray: [],
 			// VMM.ExternalAPI.twitter.getHTML(id);
 			getHTML: function(id) {
 				var the_url = "https://api.twitter.com/1/statuses/oembed.json?id=" + id+ "&callback=?";
-				
+
 				VMM.getJSON(the_url, function(d) {
 					VMM.ExternalAPI.twitter.onJSONLoaded(d, id);
 				});
@@ -1490,7 +1490,7 @@ if (typeof VMM == 'undefined') {
 			linkify: function(d) {
 				return d.replace(/[@]+[A-Za-z0-9-_]+/g, function(u) {
 					var username = u.replace("@","");
-					
+
 					return u.link("http://twitter.com/"+username);
 				});
 			},
@@ -1505,7 +1505,7 @@ if (typeof VMM == 'undefined') {
 				*/
 				return date;
 			},
-			
+
 			prettyParseTwitterDate: function(d) {
 				var date = new Date(Date.parse(d));
 				return VMM.Util.date.prettyDate(date, true);
@@ -1515,12 +1515,12 @@ if (typeof VMM == 'undefined') {
 			getTweets: function(tweets) {
 				var tweetArray = [];
 				var number_of_tweets = tweets.length;
-				
+
 				for(var i = 0; i < tweets.length; i++) {
-					
+
 					var twitter_id = "";
-					
-					
+
+
 					/* FIND THE TWITTER ID
 					================================================== */
 					if (tweets[i].tweet.match("status\/")) {
@@ -1530,12 +1530,12 @@ if (typeof VMM == 'undefined') {
 					} else {
 						twitter_id = "";
 					}
-					
+
 					/* FETCH THE DATA
 					================================================== */
 					var the_url = "https://api.twitter.com/1/statuses/show.json?id=" + twitter_id + "&include_entities=true&callback=?";
 					VMM.getJSON(the_url, function(d) {
-						
+
 						var tweet = {}
 						/* FORMAT RESPONSE
 						================================================== */
@@ -1546,15 +1546,15 @@ if (typeof VMM == 'undefined') {
 						//twit += VMM.Util.linkify(d.text);
 						twit += td;
 						twit += "</p>";
-						
+
 						twit += "— " + d.user.name + " (<a href='https://twitter.com/" + d.user.screen_name + "'>@" + d.user.screen_name + "</a>) <a href='https://twitter.com/" + d.user.screen_name + "/status/" + d.id + "'>" + VMM.ExternalAPI.twitter.prettyParseTwitterDate(d.created_at) + " </a></blockquote></div>";
-						
+
 						tweet.content = twit;
 						tweet.raw = d;
-						
+
 						tweetArray.push(tweet);
-						
-						
+
+
 						/* CHECK IF THATS ALL OF THEM
 						================================================== */
 						if (tweetArray.length == number_of_tweets) {
@@ -1562,25 +1562,25 @@ if (typeof VMM == 'undefined') {
 							VMM.fireEvent(global, "TWEETSLOADED", the_tweets);
 						}
 					});
-					
+
 				}
-					
-				
+
+
 			},
-			
+
 			// VMM.ExternalAPI.twitter.getTweetSearch(search string);
 			getTweetSearch: function(tweets, number_of_tweets) {
-				
-				
+
+
 				var _number_of_tweets = 40;
 				if (number_of_tweets != null && number_of_tweets != "") {
 					_number_of_tweets = number_of_tweets;
 				}
-				
+
 				var the_url = "http://search.twitter.com/search.json?q=" + tweets + "&rpp=" + _number_of_tweets + "&include_entities=true&result_type=mixed";
 				var tweetArray = [];
 				VMM.getJSON(the_url, function(d) {
-					
+
 					/* FORMAT RESPONSE
 					================================================== */
 					for(var i = 0; i < d.results.length; i++) {
@@ -1599,18 +1599,18 @@ if (typeof VMM == 'undefined') {
 					var the_tweets = {tweetdata: tweetArray}
 					VMM.fireEvent(global, "TWEETSLOADED", the_tweets);
 				});
-				
+
 			},
 			// VMM.ExternalAPI.twitter.prettyHTML(id);
 			prettyHTML: function(id) {
-				
+
 				// https://api.twitter.com/1/statuses/show.json?id=164165553810976768&include_entities=true
 				var the_url = "https://api.twitter.com/1/statuses/show.json?id=" + id + "&include_entities=true&callback=?";
 				VMM.getJSON(the_url, function(d) {
 					VMM.ExternalAPI.twitter.formatJSON(d, id);
 				});
 			},
-			
+
 			formatJSON: function(d, id) {
 				var twit = "<blockquote><p>";
 				var td = VMM.Util.linkify(d.text);
@@ -1631,8 +1631,8 @@ if (typeof VMM == 'undefined') {
 				twit += "<span class='nickname'>@" + d.user.screen_name + "</span>";
 				twit += "</a>"
 				twit += "</div>"
-				
-				
+
+
 				/*
 				<blockquote class="twitter-tweet">
 				<p>Tom Brokaw asks <a href="https://twitter.com/search/%2523Romney">#Romney</a> to remove from ads 1997 NBC report on <a href="https://twitter.com/search/%2523Gingrich">#Gingrich</a> legal troubles. Romney unmoved. <a href="http://t.co/re7vtLNt" title="http://thecaucus.blogs.nytimes.com/2012/01/28/nbc-news-asks-romney-campaign-to-remove-ad/?hp">thecaucus.blogs.nytimes.com/2012/01/28/nbc…</a></p>
@@ -1642,33 +1642,33 @@ if (typeof VMM == 'undefined') {
 				VMM.attachElement("#"+id, twit );
 				//VMM.attachElement("#"+id, VMM.ExternalAPI.twitter.linkify(twit) );
 			}
-			
+
 		},
-		
+
 		maps: {
-			
+
 		},
-		
+
 		flickr: {
-			
+
 			getPhoto: function(mid, id) {
 				// http://soundcloud.com/oembed?iframe=true&url=http://soundcloud.com/erasedtapes/olafur-arnalds-poland
 				var the_url = "http://api.flickr.com/services/rest/?method=flickr.photos.getSizes&api_key=" + VMM.Keys.flickr + "&photo_id=" + mid + "&format=json&nojsoncallback=1";
 				VMM.getJSON(the_url, function(d) {
-					
+
 					var flickr_large_id = id + "_large";
 					var flickr_thumb_id = id + "_thumb";
 					var flickr_img_large = d.sizes.size[d.sizes.size.length - 1].source;
 					var flickr_img_thumb = d.sizes.size[0].source;
-					
+
 					VMM.Element.attr(flickr_large_id, "src", flickr_img_large);
 					VMM.Element.attr(flickr_thumb_id, "src", flickr_img_thumb);
 				});
 			},
-			
-			
+
+
 		},
-		
+
 		soundcloud: {
 			// VMM.ExternalAPI.soundcloud.getSound(url, id)
 			getSound: function(url, id) {
@@ -1679,19 +1679,19 @@ if (typeof VMM == 'undefined') {
 				});
 			},
 		},
-		
+
 		// VMM.ExternalAPI.youtube.init(id);
 		youtube: {
 			init: function(id) {
-				
+
 				if (VMM.master_config.youtube.active) {
 					VMM.master_config.youtube.createPlayer(id);
 				} else {
-					
+
 					VMM.master_config.youtube.que.push(id);
-					
+
 					if (VMM.master_config.youtube.api_loaded) {
-						
+
 					} else {
 						var tag = document.createElement('script');
 						tag.src = "http://www.youtube.com/player_api";
@@ -1699,13 +1699,13 @@ if (typeof VMM == 'undefined') {
 						firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 						VMM.master_config.youtube.api_loaded = true;
 					}
-					
+
 				}
 			},
-			
+
 			onAPIReady: function() {
 				VMM.master_config.youtube.active = true;
-				
+
 				for(var i = 0; i < VMM.master_config.youtube.que.length; i++) {
 					VMM.ExternalAPI.youtube.createPlayer(VMM.master_config.youtube.que[i]);
 				}
@@ -1718,7 +1718,7 @@ if (typeof VMM == 'undefined') {
 					name:'youtube_'+id,
 					playing:false
 				};
-				
+
 				p.player['youtube_'+id] = new YT.Player('youtube_'+id, {
 					height: '390',
 					width: '640',
@@ -1736,20 +1736,20 @@ if (typeof VMM == 'undefined') {
 						'onStateChange': VMM.ExternalAPI.youtube.onStateChange
 					}
 				});
-				
+
 				VMM.master_config.youtube.array.push(p);
 			},
-			
+
 			//VMM.ExternalAPI.youtube.stopPlayers();
 			stopPlayers: function() {
-				for(var i = 0; i < VMM.master_config.youtube.array.length; i++) {				
+				for(var i = 0; i < VMM.master_config.youtube.array.length; i++) {
 					if (VMM.master_config.youtube.array[i].playing) {
 						var the_name = VMM.master_config.youtube.array[i].name;
 						VMM.master_config.youtube.array[i].player[the_name].stopVideo();
 					}
 				}
 			},
-			
+
 			onStateChange: function(e) {
 				for(var i = 0; i < VMM.master_config.youtube.array.length; i++) {
 					var the_name = VMM.master_config.youtube.array[i].name;
@@ -1760,27 +1760,27 @@ if (typeof VMM == 'undefined') {
 					}
 				}
 			},
-			
+
 			onPlayerReady: function(e) {
-				
+
 			}
-			
-			
+
+
 		}
 	}
-	
-	
+
+
 	/* MEDIA
 	================================================== */
 	// something = new VMM.Media(parent, w, h, {thedata});
-	VMM.Media = function(parent, w, h, thedata) {  
-		
+	VMM.Media = function(parent, w, h, thedata) {
+
 		/* PRIVATE VARS
 		================================================== */
 		var data = {}; // HOLDS DATA
-		
+
 		var _valid = false;
-		
+
 		var config = {
 			width: 720,
 			height: 400,
@@ -1797,7 +1797,7 @@ if (typeof VMM == 'undefined') {
 		var $mediacontainer  = "";
 		var $mediaelement = "";
 		var layout = parent; // expecting media div
-		
+
 		if (w != null && w != "") {config.width = w};
 		if (h != null && h != "") {config.height = h};
 		/*
@@ -1815,31 +1815,31 @@ if (typeof VMM == 'undefined') {
 				trace("WAITING ON DATA");
 			}
 		};
-		
+
 		var build = function(media, caption, credit) {
-			
+
 			$media = VMM.appendAndGetElement(layout, "<div>", "media");
 			$container = VMM.appendAndGetElement($media, "<div>", "container");
 			$mediacontainer = VMM.appendAndGetElement($container, "<div>", "media-container");
-			
+
 
 			if (data.media != null && data.media != "") {
 
 				_valid = true;
 				var m = {};
-				
+
 				m = VMM.MediaType(data.media); //returns an object with .type and .id
-				
+
 				if (m.type == "image") {
-					VMM.appendElement($mediacontainer, "<img src='" + m.id + "'>");  
+					VMM.appendElement($mediacontainer, "<img src='" + m.id + "'>");
 				} else if (m.type == "youtube") {
 					VMM.appendElement($mediacontainer, "<iframe frameborder='0' src='http://www.youtube.com/embed/" + m.id + "?&rel=0&theme=light&showinfo=0&hd=1&autohide=0&color=white' allowfullscreen>");
 				} else if (m.type == "vimeo") {
 					VMM.appendElement($mediacontainer, "<iframe frameborder='0' src='http://player.vimeo.com/video/" + m.id + "?title=0&amp;byline=0&amp;portrait=0&amp;color=ffffff'>");
 				} else {
-					
+
 				}
-				
+
 				// CREDIT
 				if (data.credit != null && data.credit != "") {
 					VMM.appendElement($container, VMM.createElement("div", data.credit, "credit"));
@@ -1852,12 +1852,12 @@ if (typeof VMM == 'undefined') {
 
 			}
 	    };
-	
-		
-	
+
+
+
 		/* GETTERS AND SETTERS
 		================================================== */
-		
+
 		this.setData = function(d) {
 			if(typeof d != 'undefined') {
 				data = d;
@@ -1866,20 +1866,20 @@ if (typeof VMM == 'undefined') {
 				trace("NO DATA");
 			}
 		};
-		
+
 		/* RESIZE
 		================================================== */
-		
+
 		function reSize() {
 
 		}
-		
+
 
 
 	}
-	
+
 	// Less expensive to use prototype
-	
+
 	VMM.Media.prototype.height = function(h) {
 		if (h != null && h != "") {
 			config.height = h;
@@ -1888,7 +1888,7 @@ if (typeof VMM == 'undefined') {
 			return config.height;
 		}
 	};
-	
+
 	VMM.Media.prototype.width = function(w) {
 		if (w != null && w != "") {
 			config.width = w;
@@ -1897,14 +1897,14 @@ if (typeof VMM == 'undefined') {
 			return config.width;
 		}
 	};
-	
+
 	/* GETTERS AND SETTERS
 	================================================== */
-	
+
 	VMM.Media.prototype.getData = function() {
 		return data;
 	};
-	
+
 	VMM.Media.prototype.setConfig = function(d) {
 		if(typeof d != 'undefined') {
 			config = d;
@@ -1912,26 +1912,26 @@ if (typeof VMM == 'undefined') {
 			trace("NO CONFIG DATA");
 		}
 	};
-	
+
 	VMM.Media.prototype.getConfig = function() {
 		return config;
 	};
-	
+
 	VMM.Media.prototype.setSize = function(w, h) {
 		if (w != null) {config.width = w};
 		if (h != null) {config.height = h};
 		if (_active) {
 			reSize();
 		}
-		
+
 	}
-	
-	
+
+
 	VMM.Media.prototype.active = function() {
 		return _active;
 	};
-	
-	
+
+
 }
 
 
@@ -2000,7 +2000,7 @@ function onYouTubePlayerAPIReady() {
 	http://gsgd.co.uk/sandbox/jquery/easing/
 ================================================== */
 if( typeof( jQuery ) != 'undefined' ){
-	
+
 	jQuery.easing['jswing'] = jQuery.easing['swing'];
 
 	jQuery.extend( jQuery.easing, {
@@ -2053,9 +2053,9 @@ Object.prototype.clone = function() {
 */
 
 
-/*********************************************** 
-     Begin VMM.Core.js 
-***********************************************/ 
+/***********************************************
+     Begin VMM.Core.js
+***********************************************/
 
 /* Core
 ================================================== */
@@ -2064,120 +2064,120 @@ Object.prototype.clone = function() {
 /* Sequence
 ================================================== */
 if(typeof VMM != 'undefined' && typeof VMM.Sequence == 'undefined') {
-	
+
 
 	VMM.Sequence = Class.extend({
-		
+
 		initialize: function(length,index) {
 			trace('sequence init');
-			
+
 			// PUBLIC
 			this.increment = 1;
 			this.decrement = 1;
 			this.wrap = false;
-			
+
 			// PRIVATE
 			this.length = (length == null) ? 0 : length;
 			this.index = (index == null) ? ((length == 0) ? -1 : 0) : (index >= length) ? length-1 : index;
 			this.synced = [];
 		},
 		setLength: function(i) {
-			
+
 			this.length = i;
-			
+
 			this.setIndex(this.index);
 		},
-		
+
 		getLength: function() {
-			
+
 			return this.length;
-		}, 
-		
+		},
+
 		setIndex: function(i) {
-			
+
 			if(this.length <= 0) {
-				
+
 				this.index = -1;
-				
+
 				return;
 			}
-			
+
 			if(i < 0) i = (this.wrap) ? this.length - (i%this.length) : 0;
 			else if(i >= this.length) i = (this.wrap) ? (i%this.length) : this.length-1;
-			
+
 			var pi = this.index;
-			
+
 			this.index = i;
-			
+
 			if(pi != this.index) {
-			
+
 				// update sequences
 				for(var j=0; j<this.synced.length; j++) {
-				
+
 					var s = this.synced[j];
-				
+
 					if(s.getIndex() != this.index) s.setIndex(this.index);
 				}
 			}
 		},
-		
+
 		getIndex: function() {
-			
+
 			return this.index;
 		},
-		
+
 		next: function() {
-			
+
 			this.setIndex(this.index+this.increment);
 		},
-		
+
 		prev: function () {
-			
+
 			this.setIndex(this.index-this.decrement);
 		},
-		
+
 		sync: function(s,bothWays) {
-			
+
 			if(s instanceof NYTMM.Sequence && s != this) {
-				
+
 				this.synced.push(s);
-				
+
 				if(bothWays) s.sync(this);
-				
+
 				return true;
 			}
-			
+
 			return false;
 		},
-		
+
 		unsync: function(s,bothWays) {
-			
+
 			// update sequences
 			for(var i=0; i<this.synced.length; i++) {
-				
+
 				if(this.synced[i] == s) {
-					
+
 					this.synced.splice(i,1);
-					
+
 					if(bothWays) s.unsync(this);
-					
+
 					return true;
 				}
 			}
-			
+
 			return false;
 		}
-		
+
 	});
-	
+
 }
 
 /* Slider
 ================================================== */
 if(typeof VMM != 'undefined' && typeof VMM.Slider == 'undefined') {
-	
+
 	VMM.Slider = function(parent, content_width, content_height, is_timeline) {
-		
+
 		/* DEVICE
 		================================================== */
 		/*
@@ -2187,7 +2187,7 @@ if(typeof VMM != 'undefined' && typeof VMM.Slider == 'undefined') {
 		trace(VMM.Browser.OS);
 		trace(VMM.Browser.device);
 		*/
-		
+
 		/* PRIVATE VARS
 		================================================== */
 		var _private_var = "private";
@@ -2206,7 +2206,7 @@ if(typeof VMM != 'undefined' && typeof VMM.Slider == 'undefined') {
 			dampen: 48
 		};
 		var slide_positions = [];
-		
+
 		var config = {
 			interval: 10,
 			something: 0,
@@ -2222,24 +2222,24 @@ if(typeof VMM != 'undefined' && typeof VMM.Slider == 'undefined') {
 			timeline: false,
 			spacing: 15,
 		};
-		
-		
-		
+
+
+
 		var slider_width = 1000;
-		
+
 		if (content_width != null && content_width != "") {
 			config.width = content_width;
-		} 
+		}
 		if (content_height != null && content_height != "") {
 			config.height = content_height;
-		} 
+		}
 		if (is_timeline != null && is_timeline != "") {
 			config.timeline = is_timeline;
 		}
-		
+
 		var content = "";
 		var _active = false;
-		
+
 		/* ELEMENTS
 		================================================== */
 		var $slider = "";
@@ -2255,13 +2255,13 @@ if(typeof VMM != 'undefined' && typeof VMM.Slider == 'undefined') {
 		navigation.prevDate;
 		navigation.nextTitle;
 		navigation.prevTitle;
-		
+
 		/* PUBLIC VARS
 		================================================== */
 		this.ver = "0.1";
 		var layout = parent; // expecting slider div
-		
-		
+
+
 		/* PUBLIC FUNCTIONS
 		================================================== */
 		this.init = function(d) {
@@ -2271,7 +2271,7 @@ if(typeof VMM != 'undefined' && typeof VMM.Slider == 'undefined') {
 				trace("WAITING ON DATA");
 			}
 		};
-		
+
 		this.width = function(w) {
 			if (w != null && w != "") {
 				config.width = w;
@@ -2280,7 +2280,7 @@ if(typeof VMM != 'undefined' && typeof VMM.Slider == 'undefined') {
 				return config.width;
 			}
 		}
-		
+
 		this.height = function(h) {
 			if (h != null && h != "") {
 				config.height = h;
@@ -2299,11 +2299,11 @@ if(typeof VMM != 'undefined' && typeof VMM.Slider == 'undefined') {
 				trace("NO DATA");
 			}
 		};
-		
+
 		this.getData = function() {
 			return data;
 		};
-		
+
 		this.setConfig = function(d) {
 			if(typeof d != 'undefined') {
 				config = d;
@@ -2313,87 +2313,87 @@ if(typeof VMM != 'undefined' && typeof VMM.Slider == 'undefined') {
 				trace("NO CONFIG DATA");
 			}
 		}
-		
+
 		this.getConfig = function() {
 			return config;
 		};
-		
+
 		this.setSize = function(w, h) {
 			if (w != null) {config.width = w};
 			if (h != null) {config.height = h};
 			if (_active) {
 				reSize();
 			}
-			
+
 		}
-		
+
 		this.active = function() {
 			return _active;
 		};
-		
+
 		this.getCurrentNumber = function() {
 			return current_slide;
 		};
-		
+
 		this.setSlide = function(n) {
 			goToSlide(n);
 		};
 
-		
+
 		/* ON EVENT
 		================================================== */
-		
+
 		function onConfigSet() {
 			trace("onConfigSet");
 		};
-		
-		
+
+
 		function reSize(go_to_slide, from_start) {
-			
+
 			var _go_to_slide = true;
 			var _from_start = false;
-			
+
 			if (go_to_slide != null) {_go_to_slide = go_to_slide};
 			if (from_start != null) {_from_start = from_start};
-			
+
 			current_width = config.width;
-			
+
 			config.nav_height = VMM.Element.height(navigation.prevBtnContainer);
-			
+
 			config.content_width = current_width - (config.content_padding *2);
-			
+
 			VMM.Element.width($slides_items, (slides.length * config.content_width));
-			
+
 			if (_from_start) {
 				var _pos = VMM.Element.position(slides[current_slide]);
 				VMM.Element.css($slider_container, "left", _pos.left);
 			}
-			
-			
+
+
 			// Position slides
 			positionSlides();
-			
+
 			// Position Nav
 			VMM.Element.css(navigation.nextBtn, "left", (current_width - config.nav_width));
 			VMM.Element.height(navigation.prevBtn, config.height);
 			VMM.Element.height(navigation.nextBtn, config.height);
 			VMM.Element.css(navigation.nextBtnContainer, "top", ( (config.height/2) - (config.nav_height/2) ) );
 			VMM.Element.css(navigation.prevBtnContainer, "top", ( (config.height/2) - (config.nav_height/2) ) );
-			
+
 			// Animate Changes
 			VMM.Element.height($slider_mask, config.height);
 			VMM.Element.width($slider_mask, current_width);
-			
+
 			if (_go_to_slide) {
 				goToSlide(current_slide, "linear", 1);
 			};
-			
+
 			if (current_slide == 0) {
 				VMM.Element.visible(navigation.prevBtn, false);
 			}
-			
+
 		}
-		
+
 		function onNextClick(e) {
 			if (current_slide == slides.length - 1) {
 				VMM.Element.animate($slider_container, config.duration, config.ease, {"left": -(VMM.Element.position(slides[current_slide]).left)});
@@ -2401,9 +2401,9 @@ if(typeof VMM != 'undefined' && typeof VMM.Slider == 'undefined') {
 				goToSlide(current_slide+1);
 				upDate();
 			}
-			
+
 		}
-		
+
 		function onPrevClick(e) {
 			if (current_slide == 0) {
 				goToSlide(current_slide);
@@ -2413,7 +2413,7 @@ if(typeof VMM != 'undefined' && typeof VMM.Slider == 'undefined') {
 			}
 
 		}
-		
+
 		function onTouchUpdate(e, b) {
 			if (slide_positions.length == 0) {
 				for(var i = 0; i < slides.length; i++) {
@@ -2433,61 +2433,61 @@ if(typeof VMM != 'undefined' && typeof VMM.Slider == 'undefined') {
 			} else {
 				VMM.Element.animate($slider_container, config.duration, config.ease, {"left": -(VMM.Element.position(slides[current_slide]).left)});
 			}
-			
+
 			if (typeof b.top == "number") {
 				VMM.Element.animate($slider_container, config.duration, config.ease, {"top": -b.top});
 				//VMM.Element.animate(layout, _duration, _ease, {scrollTop: VMM.Element.prop(layout, "scrollHeight")  + b.top });
 				//VMM.Element.animate(layout, _duration, _ease, {scrollTop: VMM.Element.prop(layout, "scrollHeight") + VMM.Element.height(layout) });
 				//VMM.Element.animate($slider_container, config.duration, config.ease, {"top": -400});
 			} else {
-				
+
 			}
 		};
-		
+
 		function upDate() {
 			VMM.fireEvent(layout, "UPDATE");
 		};
 		/* PRIVATE FUNCTIONS
 		================================================== */
-		
+
 		var getData = function(d) {
 			data = d;
 		};
-		
+
 		/* SLIDES
 		================================================== */
 		// BUILD SLIDES
 		var buildSlides = function(d) {
-			
+
 			// Clear out existing content
 			VMM.attachElement($slides_items, "");
-			
+
 			for(var i = 0; i < d.length; i++) {
 				var bw = "";
 				var _slide;
 				var _media;
-				
+
 				bw = VMM.createElement("div", d[i].content, "content");
 				_slide = VMM.appendAndGetElement($slides_items, "<div>", "slider-item" , bw);
 				slides.push(_slide);
 			}
-			
-			
+
+
 		}
-		
+
 		// POSITION SLIDES AND SIZE THEM
 		var positionSlides = function() {
-			
+
 			/* SIZE SLIDES
 			================================================== */
-			
+
 			VMM.Element.css(".slider-item", "width", config.content_width );
 			VMM.Element.height(".slider-item", config.height);
 			VMM.Element.css(".slider-item .layout-text-media .media .media-container img", "max-height", config.height - 50 );
 			VMM.Element.css(".slider-item .layout-media .media .media-container img", "max-height", config.height - 150 );
-			
 
-			
+
+
 			VMM.Element.css(".slider-item .media .media-container .soundcloud", "max-height", 168 );
 
 			/* RESIZE IFRAME MEDIA ELEMENTS
@@ -2496,7 +2496,7 @@ if(typeof VMM != 'undefined' && typeof VMM.Slider == 'undefined') {
 			var _iframe_height_full = Math.round(config.height) - 160;
 			//var _iframe_width = Math.round((_iframe_height / 9) * 16);
 			var _iframe_width_full = Math.round((_iframe_height_full / 9) * 16);
-			
+
 			var _iframe_width =  (config.content_width/100)*60 ;
 			var _iframe_height = Math.round((_iframe_width / 16) * 9) + 25;
 
@@ -2506,7 +2506,7 @@ if(typeof VMM != 'undefined' && typeof VMM.Slider == 'undefined') {
 			VMM.Element.width(".slider-item .media .media-container .media-frame", _iframe_width);
 			//VMM.Element.width(".slider-item .media .media-container .media-frame", _iframe_width);
 			//VMM.Element.css(".slider-item .media .media-container .media-frame", "max-width", config.content_width );
-			
+
 			// IFRAME FULL SIZE VIDEO
 			VMM.Element.height(".slider-item .layout-media .media .media-container .media-frame", _iframe_height_full);
 			VMM.Element.width(".slider-item .layout-media .media .media-container .media-frame", _iframe_width_full);
@@ -2515,15 +2515,15 @@ if(typeof VMM != 'undefined' && typeof VMM.Slider == 'undefined') {
 			VMM.Element.height(".slider-item .layout-media .media .media-container .soundcloud", config.height - 150);
 			VMM.Element.width(".slider-item .layout-media .media .media-container .soundcloud", config.content_width);
 			VMM.Element.width(".slider-item .layout-text-media .media .media-container .soundcloud", _iframe_width);
-			
+
 			// MAPS
 			VMM.Element.height(".slider-item .media .media-container .map", _iframe_height_full);
-			
+
 			// MAX WIDTH
 			VMM.Element.css(".slider-item .layout-text-media .media .media-container .media-frame", "max-width", config.content_width );
 			//VMM.Element.width(".slider-item .layout-text-media .media .media-container .media-frame", _iframe_width);
 			//VMM.Element.css(".slider-item .layout-text-media .media .media-container .media-frame", "max-height", _iframe_height );
-			
+
 			/* POSITION SLIDES
 			================================================== */
 			var pos = 0;
@@ -2531,55 +2531,55 @@ if(typeof VMM != 'undefined' && typeof VMM.Slider == 'undefined') {
 				pos = i * (config.width+config.spacing);
 				VMM.Element.css(slides[i], "left", pos);
 			}
-			
+
 		}
-		
+
 		var opacitySlides = function(n) {
 			var _ease = "linear";
 			for(var i = 0; i < slides.length; i++) {
 				if (i == current_slide) {
 					VMM.Element.animate(slides[i], config.duration, _ease, {"opacity": 1});
 				} else if (i == current_slide - 1) {
-					VMM.Element.animate(slides[i], config.duration, _ease, {"opacity": 0.1});	
+					VMM.Element.animate(slides[i], config.duration, _ease, {"opacity": 0.1});
 				} else if (i == current_slide + 1) {
-					VMM.Element.animate(slides[i], config.duration, _ease, {"opacity": 0.1});	
+					VMM.Element.animate(slides[i], config.duration, _ease, {"opacity": 0.1});
 				} else {
-					VMM.Element.css(slides[i], "opacity", n);	
+					VMM.Element.css(slides[i], "opacity", n);
 				}
-				
+
 			}
 		}
-		
+
 		// Go to slide
 		//goToSlide(n, ease, duration);
 		var goToSlide = function(n, ease, duration, fast, firstrun) {
-			
+
 			/* STOP ANY VIDEO PLAYERS ACTIVE
 			================================================== */
 			VMM.ExternalAPI.youtube.stopPlayers();
-			
+
 			// Set current slide
 			current_slide = n;
-			
+
 			var _ease = config.ease;
 			var _duration = config.duration;
 			var is_last = false;
 			var is_first = false;
-			
+
 			if (current_slide == 0) {
 				is_first = true;
 			}
 			if (current_slide +1 == slides.length) {
 				is_last = true
 			}
-			
+
 			if (ease != null && ease != "") {_ease = ease};
 			if (duration != null && duration != "") {_duration = duration};
-			
+
 			/* get slide position
 			================================================== */
 			var _pos = VMM.Element.position(slides[current_slide]);
-			
+
 			/* set proper nav titles and dates etc.
 			================================================== */
 			if (is_first) {
@@ -2600,20 +2600,20 @@ if(typeof VMM != 'undefined' && typeof VMM.Slider == 'undefined') {
 				}
 				VMM.attachElement(navigation.nextTitle,  VMM.Util.unlinkify(data[current_slide + 1].title) );
 			}
-			
+
 			/* ANIMATE SLIDE
 			================================================== */
 			if (fast) {
-				VMM.Element.css($slider_container, "left", -(_pos.left - config.content_padding));	
+				VMM.Element.css($slider_container, "left", -(_pos.left - config.content_padding));
 			} else{
 				VMM.Element.stop($slider_container);
 				VMM.Element.animate($slider_container, _duration, _ease, {"left": -(_pos.left - config.content_padding)});
 			}
-			
+
 			if (firstrun) {
 				VMM.fireEvent(layout, "LOADED");
 			}
-			
+
 			/* SET Vertical Scoll
 			================================================== */
 			//opacitySlides(0.85);
@@ -2622,18 +2622,18 @@ if(typeof VMM != 'undefined' && typeof VMM.Slider == 'undefined') {
 			} else {
 				VMM.Element.css(layout, "overflow-y", "hidden" );
 			   VMM.Element.animate(layout, _duration, _ease, {scrollTop: VMM.Element.prop(layout, "scrollHeight") - VMM.Element.height(layout) });
-				
+
 			}
-			
-			
+
+
 		}
 
 		/* NAVIGATION
 		================================================== */
 		var buildNavigation = function() {
-			
+
 			var temp_icon = "<div class='icon'>&nbsp;</div>";
-			
+
 			navigation.nextBtn = VMM.appendAndGetElement($slider, "<div>", "nav-next");
 			navigation.prevBtn = VMM.appendAndGetElement($slider, "<div>", "nav-previous");
 			navigation.nextBtnContainer = VMM.appendAndGetElement(navigation.nextBtn, "<div>", "nav-container", temp_icon);
@@ -2644,58 +2644,58 @@ if(typeof VMM != 'undefined' && typeof VMM.Slider == 'undefined') {
 			}
 			navigation.nextTitle = VMM.appendAndGetElement(navigation.nextBtnContainer, "<div>", "title", "Title Goes Here");
 			navigation.prevTitle = VMM.appendAndGetElement(navigation.prevBtnContainer, "<div>", "title", "Title Goes Here");
-			
+
 			VMM.bindEvent(".nav-next", onNextClick);
 			VMM.bindEvent(".nav-previous", onPrevClick);
 		}
-		
+
 		/* BUILD
 		================================================== */
 		var build = function() {
-			
+
 			// Clear out existing content
 			VMM.attachElement(layout, "");
-			
+
 			// Get DOM Objects to local objects
 			$slider = VMM.getElement("div.slider");
 			$slider_mask = VMM.appendAndGetElement($slider, "<div>", "slider-container-mask");
 			$slider_container = VMM.appendAndGetElement($slider_mask, "<div>", "slider-container");
 			$slides_items = VMM.appendAndGetElement($slider_container, "<div>", "slider-item-container");
-			
+
 			// BUILD NAVIGATION
 			buildNavigation();
 
 			// ATTACH SLIDES
 			buildSlides(data);
-			
+
 			/* MAKE SLIDER TOUCHABLE
 			================================================== */
-			
+
 			var __duration = 3000;
-			
+
 			if (VMM.Browser.device == "tablet" || VMM.Browser.device == "mobile") {
 				config.duration = 500;
 				__duration = 1000;
 				VMM.TouchSlider.createPanel($slider_container, $slider_container, VMM.Element.width(slides[0]), config.spacing, true);
 				VMM.bindEvent($slider_container, onTouchUpdate, "TOUCHUPDATE");
 			} else if (VMM.Browser.device == "mobile") {
-				
+
 			} else {
 				//VMM.DragSlider.createPanel($slider_container, $slider_container, VMM.Element.width(slides[0]), config.spacing, true);
 			}
-			
+
 			reSize(false, true);
 			VMM.Element.visible(navigation.prevBtn, false);
 			// GO TO FIRST SLIDE
 			goToSlide(0, "easeOutExpo", __duration, true, true);
-			
+
 			_active = true;
 		};
-		
+
 	};
-	
-	
-	
+
+
+
 
 }
 
@@ -2704,16 +2704,16 @@ if(typeof VMM != 'undefined' && typeof VMM.Slider == 'undefined') {
 
 
 
-/*********************************************** 
-     Begin VMM.Util.js 
-***********************************************/ 
+/***********************************************
+     Begin VMM.Util.js
+***********************************************/
 
 /* Utilities and Useful Functions
 ================================================== */
 if(typeof VMM != 'undefined' && typeof VMM.Util == 'undefined') {
-	
+
 	VMM.Util = ({
-		
+
 		init: function() {
 			return this;
 		},
@@ -2726,13 +2726,13 @@ if(typeof VMM != 'undefined' && typeof VMM.Util == 'undefined') {
 		},
 		/* CUSTOM SORT
 		================================================== */
-		
+
 		customSort: function(a, b) {
 			var a1= a, b1= b;
 			if(a1== b1) return 0;
 			return a1> b1? 1: -1;
 		},
-		
+
 		/* Given an int or decimal, turn that into string in $xxx,xxx.xx format.
 		================================================== */
 		number2money: function(n, symbol, padding) {
@@ -2746,8 +2746,8 @@ if(typeof VMM != 'undefined' && typeof VMM.Util == 'undefined') {
 			if (symbol) formatted = "$"+formatted;
 			return formatted;
 		},
-		
-		
+
+
 		/* Returns a word count number
 		================================================== */
 		wordCount: function(s) {
@@ -2768,18 +2768,18 @@ if(typeof VMM != 'undefined' && typeof VMM.Util == 'undefined') {
 		// VMM.Util.parseDate(str)
 		parseDate: function(d) {
 			var _date;
-			
+
 			if ( d.match(/,/gi) ) {
-				
+
 
 				var _d_array = d.split(",");
-				
-				
+
+
 				for(var i = 0; i < _d_array.length; i++) {
 					_d_array[i] = parseInt(_d_array[i]);
-					
+
 				}
-				
+
 				_date = new Date();
 				if (_d_array[0]			) {	_date.setFullYear(_d_array[0]);			}
 				if (_d_array[1]	> 1		) {	_date.setMonth(_d_array[1] - 1);		}	else {		_date.setMonth(0);				}
@@ -2801,14 +2801,14 @@ if(typeof VMM != 'undefined' && typeof VMM.Util == 'undefined') {
 				_date.setMilliseconds(0);
 			}else {
 				_date = new Date(
-					parseInt(d.slice(0,4)), 
-					parseInt(d.slice(4,6)) - 1, 
-					parseInt(d.slice(6,8)), 
-					parseInt(d.slice(8,10)), 
+					parseInt(d.slice(0,4)),
+					parseInt(d.slice(4,6)) - 1,
+					parseInt(d.slice(6,8)),
+					parseInt(d.slice(8,10)),
 					parseInt(d.slice(10,12))
 				);
 			}
-			
+
 			return _date;
 		},
 		/* Get the corresponding ratio number
@@ -2844,7 +2844,7 @@ if(typeof VMM != 'undefined' && typeof VMM.Util == 'undefined') {
 			//VMM.Util.date.prettyDate(d, is_abbr)
 			prettyDate: function(d, is_abbr, date_type) {
 				var _date = "";
-				
+
 				if (type.of(d) == "date") {
 					if (d.getMonth() === 0 && d.getDate() == 1 && d.getHours() === 0 && d.getMinutes() === 0 ) {
 						// trace("YEAR ONLY");
@@ -2854,11 +2854,11 @@ if(typeof VMM != 'undefined' && typeof VMM.Util == 'undefined') {
 							// trace("YEAR MONTH");
 							if (is_abbr) {
 								_date = VMM.Util.date.month_abbr[d.getMonth()];
-								
+
 							} else {
 								_date = VMM.Util.date.month[d.getMonth()] + " " + d.getFullYear() ;
 							}
-							
+
 						} else if (d.getHours() === 0 && d.getMinutes() === 0) {
 							// trace("YEAR MONTH DAY");
 							if (is_abbr) {
@@ -2882,43 +2882,43 @@ if(typeof VMM != 'undefined' && typeof VMM.Util == 'undefined') {
 								_date = VMM.Util.date.get12HRTime(d) + "<br/><small>" + VMM.Util.date.day[d.getDay()] + ", " + VMM.Util.date.month[d.getMonth()] + " " + d.getDate() + ", " + d.getFullYear() + " </small> ";
 							}
 						}
-						
-					}	
+
+					}
 					//_date = d.getFullYear();
-					
-					
+
+
 				} else {
 					trace("NOT A VALID DATE?");
 					trace(d);
 				}
-				
+
 				return _date;
 			},
-			
+
 			prettyMonth: function(m, is_year) {
 				var _month = "";
 				if (type.of(t) == "date") {
-					
-					
+
+
 				}
 				return _month;
 			},
-			
+
 			get12HRTime: function(t, is_seconds) {
 				var _time = "";
-				
+
 				if (type.of(t) == "date") {
-					
+
 					_time = VMM.Util.date.theHour(t.getHours()) + ":" + VMM.Util.date.minuteZeroFill(t.getMinutes());
-					
+
 					if (is_seconds) {
 						_time = _time + ":" + VMM.Util.date.minuteZeroFill(t.getSeconds());
 					}
-					
+
 					_time = _time +  VMM.Util.date.hourSuffix(t.getHours());
-					
+
 				}
-				
+
 				return _time;
 			},
 
@@ -2948,53 +2948,53 @@ if(typeof VMM != 'undefined' && typeof VMM.Util == 'undefined') {
 				return (" pm");
 			}
 		},
-		
+
 		// VMM.Util.doubledigit(number).
 		doubledigit: function(n) {
 			return (n < 10 ? '0' : '') + n;
 		},
-		
-		
+
+
 		/* Returns a truncated segement of a long string of between min and max words. If possible, ends on a period (otherwise goes to max).
 		================================================== */
 		truncateWords: function(s, min, max) {
-			
+
 			if (!min) min = 30;
 			if (!max) max = min;
-			
+
 			var initial_whitespace_rExp = /^[^A-Za-z0-9\'\-]+/gi;
 			var left_trimmedStr = s.replace(initial_whitespace_rExp, "");
 			var words = left_trimmedStr.split(" ");
-			
+
 			var result = [];
-			
+
 			min = Math.min(words.length, min);
 			max = Math.min(words.length, max);
-			
+
 			for (var i = 0; i<min; i++) {
 				result.push(words[i]);
-			}		
-			
+			}
+
 			for (var j = min; i<max; i++) {
 				var word = words[i];
-				
+
 				result.push(word);
-				
+
 				if (word.charAt(word.length-1) == '.') {
 					break;
 				}
-			}		
-			
+			}
+
 			return (result.join(' '));
 		},
-		
+
 		/* Turns plain text links into real links
 		================================================== */
 		// VMM.Util.linkify();
 		linkify: function(text,targets,is_touch) {
-			
+
 			if(!text) return text;
-			
+
 			text = text.replace(/((https?\:\/\/|ftp\:\/\/)|(www\.))(\S+)(\w{2,4})(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/gi, function(url) {
 
 				var nice = url;
@@ -3004,12 +3004,12 @@ if(typeof VMM != 'undefined' && typeof VMM.Util == 'undefined') {
 				if(is_touch) {
 					_touch = "onclick = 'void(0)'";
 				}
-				
+
 				onclick = "void(0)";
 				if(targets === null || targets === "") return '<a href="'+ url + " " + _touch + '">'+ url +'</a>';
 				else return "<a href='"+ url + " " + _touch + " target='" +targets+"'>'" + url + "</a>" ;
 			});
-			
+
 			return text;
 		},
 		/* Turns plain text links into real links
@@ -3021,18 +3021,18 @@ if(typeof VMM != 'undefined' && typeof VMM.Util == 'undefined') {
 			text = text.replace(/<\/a>/i, "");
 			return text;
 		},
-		
+
 		/* TK
 		================================================== */
 		nl2br: function(text) {
 			return text.replace(/(\r\n|[\r\n]|\\n|\\r)/g,"<br/>");
 		},
-		
+
 		/* Generate a Unique ID
 		================================================== */
 		// VMM.Util.unique_ID(size);
 		unique_ID: function(size) {
-			
+
 			var getRandomNumber = function(range) {
 				return Math.floor(Math.random() * range);
 			};
@@ -3049,7 +3049,7 @@ if(typeof VMM != 'undefined' && typeof VMM.Util == 'undefined') {
 				}
 				return str;
 			};
-			
+
 			return randomID(size);
 		},
 		/* Tells you if a number is even or not
@@ -3072,33 +3072,33 @@ if(typeof VMM != 'undefined' && typeof VMM.Util == 'undefined') {
 			trace(vars);
 			return vars;
 		},
-		
+
 		/* Cleans up strings to become real HTML
 		================================================== */
 		toHTML: function(text) {
-			
+
 			text = this.nl2br(text);
 			text = this.linkify(text);
-			
+
 			return text.replace(/\s\s/g,"&nbsp;&nbsp;");
 		},
-		
+
 		/* Returns text strings as CamelCase
 		================================================== */
 		toCamelCase: function(s,forceLowerCase) {
-			
+
 			if(forceLowerCase !== false) forceLowerCase = true;
-			
+
 			var sps = ((forceLowerCase) ? s.toLowerCase() : s).split(" ");
-			
+
 			for(var i=0; i<sps.length; i++) {
-				
+
 				sps[i] = sps[i].substr(0,1).toUpperCase() + sps[i].substr(1);
 			}
-			
+
 			return sps.join(" ");
 		},
-		
+
 		/* Replaces dumb quote marks with smart ones
 		================================================== */
 		properQuotes: function(str) {
@@ -3107,17 +3107,17 @@ if(typeof VMM != 'undefined' && typeof VMM.Util == 'undefined') {
 		/* Given an int or decimal, return a string with pretty commas in the correct spot.
 		================================================== */
 		niceNumber: function(n){
-		
+
 			var amount = String( Math.abs(Number(n) ) );
-		    
+
 			var leftOfDecimal = amount.split(/\./g)[0];
 			var rightOfDecimal = amount.split(/\./g)[1];
-		    
+
 			var formatted_text = '';
-		    
+
 			var num_a = leftOfDecimal.toArray();
 			num_a.reverse();
-		    
+
 			for (var i=1; i <= num_a.length; i++) {
 				if ( (i%3 == 0) && (i < num_a.length ) ) {
 					formatted_text = "," + num_a[i-1] + formatted_text;
@@ -3131,11 +3131,11 @@ if(typeof VMM != 'undefined' && typeof VMM.Util == 'undefined') {
 				return formatted_text;
 			}
 		},
-		
+
 		/* Transform text to Title Case
 		================================================== */
 		toTitleCase: function(t){
-			
+
 			var __TitleCase = {
 				__smallWords: ['a', 'an', 'and', 'as', 'at', 'but','by', 'en', 'for', 'if', 'in', 'of', 'on', 'or','the', 'to', 'v[.]?', 'via', 'vs[.]?'],
 
@@ -3192,22 +3192,22 @@ if(typeof VMM != 'undefined' && typeof VMM.Util == 'undefined') {
 			};
 
 			__TitleCase.init();
-			
+
 			t = t.replace(/_/g," ");
 			t = __TitleCase.toTitleCase(t);
-			
+
 			return t;
 		},
-		
+
 	}).init();
-	
-	
-	
+
+
+
 }
 
-/*********************************************** 
-     Begin bootstrap-tooltip.js 
-***********************************************/ 
+/***********************************************
+     Begin bootstrap-tooltip.js
+***********************************************/
 
 /* ===========================================================
  * bootstrap-tooltip.js v2.0.1
@@ -3480,9 +3480,9 @@ if(typeof VMM != 'undefined' && typeof VMM.Util == 'undefined') {
 
 }( window.jQuery );
 
-/*********************************************** 
-     Begin timeline.js 
-***********************************************/ 
+/***********************************************
+     Begin timeline.js
+***********************************************/
 
 /*!
 	Verite Timeline 0.85
@@ -3501,12 +3501,12 @@ if(typeof VMM != 'undefined' && typeof VMM.Util == 'undefined') {
 
     http://www.gnu.org/licenses/
 
-*/  
+*/
 
 /*!
 	TODO
-	-	
-	-	
+	-
+	-
 	FUTURE PLANS
 	-	Better iPhone usability
 	-	Support feeds from popular sources
@@ -3514,7 +3514,7 @@ if(typeof VMM != 'undefined' && typeof VMM.Util == 'undefined') {
 	-	Code optimization
 	-	Clean up config flow
 	-	Possible tagging of events (depends on usability factors)
-	
+
 */
 
 /* 	CodeKit Import
@@ -3530,25 +3530,25 @@ if(typeof VMM != 'undefined' && typeof VMM.Util == 'undefined') {
 ================================================== */
 
 if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
-	
+
 	VMM.Timeline = function(w, h) {
-		
+
 		var $timeline = VMM.getElement("#timeline"); // expecting name only for parent
 		var $feedback;
 		var $messege;
-		
+
 		var html_string = VMM.getElement("#timeline");
-		
+
 		/* CREATE DOM STRUCTURE
 		================================================== */
 		//VMM.attachElement($timeline, "");
-		
+
 		$feedback = VMM.appendAndGetElement($timeline, "<div>", "feedback", "");
 		$messege = VMM.appendAndGetElement($feedback, "<div>", "messege", "Loading Timeline");
-		
+
 		//VMM.appendElement($timeline, "<div class='container main'><div class='feature'><div class='slider'></div></div><div class='navigation'></div></div>");
-		
-		
+
+
 		/* CREATE COMPONENTS
 		================================================== */
 		// SLIDER
@@ -3556,14 +3556,14 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 
 		// TIMENAV
 		var timenav = new VMM.Timeline.TimeNav("div.navigation", 720, 400, true);
-		
+
 		/* PRIVATE VARS
 		================================================== */
 		var _private_var = 'private';
 		var events = {}; // CUSTOM EVENT HOLDER
 		var data = {}; // HOLDS DATA
 		var _dates = []; // HOLDES PROCESSED DATES
-		
+
 		/* CONFIG
 		================================================== */
 		var config = {};
@@ -3575,21 +3575,21 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 		config.loaded = {slider: false, timenav: false, percentloaded:0};
 		config.ease = "easeInOutExpo";
 		config.duration = 1000;
-		
+
 		if (w != null && w != "") {
 			config.width = w;
 			VMM.Element.width($timeline, w);
 		} else {
 			config.width = VMM.Element.width($timeline);
 		}
-		
+
 		if (h != null && h != "") {
 			config.height = h;
 			VMM.Element.height($timeline, h);
 		} else {
 			config.height = VMM.Element.height($timeline);
 		}
-		
+
 		if (VMM.Browser.device == "mobile") {
 			config.nav_width = config.width;
 			config.nav_height = 200;
@@ -3601,7 +3601,7 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 			config.feature_width = config.width;
 			config.feature_height = config.height - config.nav_height;
 		}
-		
+
 		/* CHECK FOR IE7
 		================================================== */
 		var ie7 = false;
@@ -3610,47 +3610,47 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 				ie7 = true;
 			}
 		}
-		
 
-		
+
+
 		/* VER
 		================================================== */
 		this.ver = "0.85";
-		
-		
+
+
 		/* ON EVENT
 		================================================== */
 
 		function onDataReady(e, d) {
-			
+
 			data = d.timeline;
-			
+
 			if (type.of(data.era) == "array") {
-				
+
 			} else {
 				data.era = [];
 			}
-			
+
 			buildDates();
-			
+
 		};
-		
+
 		function onDatesProcessed() {
 			build();
 		}
-		
+
 		function reSize() {
 			updateSize();
 			slider.setSize(config.feature_width, config.feature_height);
 			timenav.setSize(config.width, config.height);
 			resizeSlides();
 		};
-		
+
 		function onSliderLoaded(e) {
 			config.loaded.slider = true;
 			onComponentLoaded();
 		};
-		
+
 		function onComponentLoaded(e) {
 			config.loaded.percentloaded = config.loaded.percentloaded + 25;
 			showMessege("Loading Timeline " + config.loaded.percentloaded);
@@ -3658,28 +3658,28 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 				hideMessege();
 			}
 		}
-		
+
 		function onTimeNavLoaded(e) {
 			config.loaded.timenav = true;
 			onComponentLoaded();
 		}
-		
+
 		function onSlideUpdate(e) {
 			timenav.setMarker(slider.getCurrentNumber(), config.ease,config.duration);
 		};
-		
+
 		function onMarkerUpdate(e) {
 			slider.setSlide(timenav.getCurrentNumber());
 		};
-		
+
 		/* PUBLIC FUNCTIONS
 		================================================== */
 		this.init = function(d) {
-			
+
 			trace('init');
-			
+
 			VMM.bindEvent(global, onDataReady, "DATAREADY");
-			
+
 			/* GET DATA
 			================================================== */
 			if (ie7) {
@@ -3698,15 +3698,15 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 				$feedback = VMM.appendAndGetElement($timeline, "<div>", "feedback", "");
 				$messege = VMM.appendAndGetElement($feedback, "<div>", "messege", "Loading Timeline");
 			}
-			
-			
+
+
 		};
-		
+
 		this.iframeLoaded = function() {
 			trace("iframeLoaded");
 		};
-		
-		/* DATA 
+
+		/* DATA
 		================================================== */
 		var getData = function(url) {
 			VMM.getJSON(url, function(d) {
@@ -3714,67 +3714,67 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 				VMM.fireEvent(global, "DATAREADY");
 			});
 		};
-		
-		/* MESSEGES 
+
+		/* MESSEGES
 		================================================== */
 		var showMessege = function(msg) {
 			//VMM.Element.append($timeline, $feedback);
 			//VMM.attachElement($messege, msg);
-			
+
 			//VMM.Element.animate($feedback, config.duration, config.ease, {"opacity": 1});
-			
+
 		};
 		//VMM.Element.animate(element, duration, ease, att, callback_function);
 		var hideMessege = function() {
-			
+
 			VMM.Element.animate($feedback, config.duration, config.ease*4, {"opacity": 0}, detachMessege);
-			
+
 		};
-		
+
 		var detachMessege = function() {
 			VMM.Element.detach($feedback);
 		}
-		
+
 		/* BUILD DISPLAY
 		================================================== */
 		var build = function() {
-			
+
 			/* CREATE DOM STRUCTURE
 			================================================== */
 			VMM.attachElement($timeline, "");
 			VMM.appendElement($timeline, "<div class='container main'><div class='feature'><div class='slider'></div></div><div class='navigation'></div></div>");
-			
+
 			reSize();
-			
+
 			/* INIT THE OBJECTS
 			================================================== */
 			VMM.bindEvent("div.slider", onSliderLoaded, "LOADED");
 			VMM.bindEvent("div.navigation", onTimeNavLoaded, "LOADED");
 			VMM.bindEvent("div.slider", onSlideUpdate, "UPDATE");
 			VMM.bindEvent("div.navigation", onMarkerUpdate, "UPDATE");
-			
-			
+
+
 			slider.init(_dates);
 			timenav.init(_dates, data.era);
-			
-			
+
+
 			/* RESIZE EVENT LISTENERS
 			================================================== */
 			VMM.bindEvent(global, reSize, "resize");
 			VMM.bindEvent(global, function(e) {e.preventDefault()}, "touchmove");
-			
+
 		};
-		
+
 		// BUILD SLIDE CONTENT	pass in json object
 		var buildSlide = function(dd, d_date) {
 			updateSize();
 			var d = dd;
 			var slide = "";
-			
+
 			var c = {};
 			c._text = "";
 			c._media = "";
-			
+
 			var _valid = false;
 			var _hasmedia = false;
 			var _hastext = false;
@@ -3784,15 +3784,15 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 			if (type.of(d_date) == "date") {
 				_valid = true;
 				if (dd.type == "start") {
-					
+
 				} else {
 					c._text += VMM.createElement("h2", VMM.Util.date.prettyDate(d_date), "date");
 				}
 				//c._text += VMM.createElement("h2", d.strDate, "date");
-				
+
 				if (d.headline != null && d.headline != "") {
 					if (d.type == "tweets") {
-						
+
 					} else if (dd.type == "start") {
 						c._text += VMM.createElement("h2", d.headline, "start");
 					} else {
@@ -3803,62 +3803,62 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 					_hastext = true;
 					c._text += VMM.createElement("p", d.text);
 				}
-				
+
 				c._text = VMM.createElement("div", c._text, "container");
 				c._text = VMM.createElement("div", c._text, "text");
-				
+
 				//trace(c._text);
 			}
-			
+
 			// MEDIA
 			if (_valid) {
-				
+
 				if (d.asset != null && d.asset != "") {
-					
+
 					if (d.asset.media != null && d.asset.media != "") {
 						_hasmedia = true;
 						c._media = VMM.MediaElement.create("", d.asset, true, config.feature_width, config.feature_height);
 					}
-					
+
 				}
-				
+
 			}
-			
+
 			if (_valid) {
 				var _layout_class = "content-container layout";
-				
+
 				if (_hastext) {
 					_layout_class += "-text"
 				}
 				if (_hasmedia) {
 					_layout_class += "-media";
-				} 
+				}
 				//c._media = VMM.createElement("div", c._media, "media-wrapper");
-				
+
 				slide = VMM.createElement("div", c._text + c._media, _layout_class);
 				//trace(slide);
 
 			}
 			return slide;
 		}
-		
+
 		var updateSize = function() {
 			config.width = VMM.Element.width($timeline);
 			config.height = VMM.Element.height($timeline);
-			
+
 			config.nav_width = config.width;
 			config.feature_width = config.width;
-			
+
 			if (VMM.Browser.device == "mobile") {
 				config.feature_height = config.height;
 			} else {
 				config.feature_height = config.height - config.nav_height - 3;
 			}
 		};
-		
+
 		var resizeSlides = function() {
-			
-			/* CHECK FOR MOBILE 
+
+			/* CHECK FOR MOBILE
 			================================================== */
 			if (config.width < 500) {
 				// MOBILE
@@ -3884,31 +3884,31 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 				//VMM.Element.css(".slider-item .container", "max-width", "100%");
 				//VMM.Element.width(".slider-item .media .media-container .media-frame", (config.feature_width - config.spacing) );
 				//VMM.Element.css(".slider-item .media .media-container", "margin-bottom", 5);
-				
+
 				if (config.width < 500) {
 					// MOBILE
 					//VMM.Element.height(".slider-item .media", Math.round(config.height/1.5));
 					//VMM.Element.css(".slider-item .media .media-container", "max-height", Math.round(config.height/1.5) - 50);
 					//VMM.Element.height(".slider-item .media .media-container .media-frame", Math.round(config.height/1.5) - 60);
-					
+
 				} else {
 					// TABLET
 					//VMM.Element.height(".slider-item .media", Math.round(config.feature_height/1.5));
 					//VMM.Element.css(".slider-item .media .media-container", "max-height", Math.round(config.feature_height/1.5) - 50);
 					//VMM.Element.height(".slider-item .media .media-container .media-frame", Math.round(config.feature_height/1.5) - 60);
 				}
-				
+
 			} else {
 				// DESKTOP
 				//VMM.Element.width(".slider-item .layout-media .media", "100%");
-				
+
 				//VMM.Element.width(".slider-item .layout-text-media .media", "75%");
 				//VMM.Element.width(".slider-item .layout-text-media .text", "25%");
-				
+
 				//VMM.Element.width(".slider-item .layout-text .text", "100%");
-				
+
 				//VMM.Element.css(".slider-item .layout-text-media .container", "max-width", 200);
-				
+
 				//VMM.Element.height(".slider-item .media", config.feature_height);
 				//VMM.Element.height(".slider-item .layout-text-media .media .media-container .media-frame", config.feature_height - 60);
 				//VMM.Element.height(".slider-item .layout-media .media .media-container .media-frame", config.feature_height - 160);
@@ -3917,14 +3917,14 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 				//VMM.Element.css(".slider-item .media .media-container", "max-height", config.feature_height- 50);
 				//VMM.Element.css(".slider-item .media .media-container", "margin-bottom", 5);
 			}
-			
+
 		};
-		
+
 		// BUILD DATE OBJECTS
 		var buildDates = function() {
-			
+
 			updateSize();
-			
+
 			/* CREATE START PAGE IF AVAILABLE
 			================================================== */
 			if (data.headline != null && data.headline != "" && data.text != null && data.text != "") {
@@ -3951,14 +3951,14 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 					_dates.push(_date);
 				}
 			}
-			
+
 			for(var i = 0; i < data.date.length; i++) {
-				
+
 				if (data.date[i].startDate != null && data.date[i].startDate != "") {
-					
+
 					var _date = {};
 					// START DATE
-					
+
 					if (data.date[i].type == "tweets") {
 						_date.startdate = VMM.ExternalAPI.twitter.parseTwitterDate(data.date[i].startDate);
 					} else if (data.date[i].type == "google spreadsheet") {
@@ -3967,9 +3967,9 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 					} else {
 						_date.startdate = VMM.Util.parseDate(data.date[i].startDate);
 					}
-					
+
 					_date.uniqueid = (data.date[i].startDate).toString() + "-" + i.toString();
-					
+
 					// END DATE
 					if (data.date[i].endDate != null && data.date[i].endDate != "") {
 						if (data.date[i].type == "tweets") {
@@ -3982,17 +3982,17 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 					} else {
 						_date.enddate = _date.startdate;
 					}
-					
+
 					// TITLE
 					_date.title = data.date[i].headline;
 					_date.type = data.date[i].type;
-					
+
 					// DATE
 					_date.date = VMM.Util.date.prettyDate(_date.startdate);
-					
+
 					// ASSET
 					_date.asset = data.date[i].asset;
-					
+
 					/* NEED FULL FRACTIONAL DATE
 					================================================== */
 
@@ -4000,16 +4000,16 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 					// BUILD SLIDE CONTENT
 					// Won't be added unless there is content
 					_date.content = buildSlide(data.date[i], _date.startdate);
-					
+
 					if (_date.content != null && _date.content != "") {
 						_dates.push(_date);
 					}
-					
+
 				}
-				
-					
+
+
 			};
-			
+
 			/* CUSTOM SORT
 			================================================== */
 			//VMM.Util.customSort(a,b);
@@ -4029,17 +4029,17 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 				trace(_dates[k].startdate);
 			}
 			*/
-			
+
 
 			onDatesProcessed();
 		}
-		
+
 	};
 
 
 	VMM.Timeline.TimeNav = function(parent, content_width, content_height) {
 		trace("VMM.Timeline.TimeNav");
-		
+
 		var events = {}; // CUSTOM EVENT HOLDER
 		var data = []; // HOLDS DATA
 		var eras;
@@ -4049,13 +4049,13 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 		var timespan = {};
 		var current_marker = 0; // CURRENT MARKER
 		var _active = false;
-		
+
 		var timelookup = {
 			day: 24 ,
 			month: 12,
 			year: 10,
 			hour: 60,
-			minute: 60, 
+			minute: 60,
 			second: 1000,
 			decade: 10,
 			century: 100,
@@ -4068,23 +4068,23 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 			days_in_year: 365.242199,
 			hours_in_day: 24
 		};
-		
+
 		var dateFractionBrowser = {
 			day: 86400000 ,
 			week: 7,
 			month: 30.4166666667,
 			year: 12,
 			hour: 24,
-			minute: 1440, 
+			minute: 1440,
 			second: 86400,
 			decade: 10,
 			century: 100,
 			millenium: 1000
 		}
-		
+
 		// somestring = VMM.Util.date.month[2]; // Returns March
 		// somestring = VMM.Util.date.month_abbrev[1]; // Returns Feb.
-		
+
 		var interval = {
 			type: "year",
 			number: 10,
@@ -4092,7 +4092,7 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 			last: 2011,
 			multiplier: 100
 		};
-		
+
 		var interval_major = {
 			type: "year",
 			number: 10,
@@ -4100,20 +4100,20 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 			last: 2011,
 			multiplier: 100
 		};
-		
+
 		var interval_calc = {
 			day: {} ,
 			month: {},
 			year: {},
 			hour: {},
-			minute: {}, 
+			minute: {},
 			second: {},
 			decade: {},
 			century: {},
 			millenium: {},
 			week: {}
 		};
-		
+
 		var config = {
 			interval: 10,
 			something: 0,
@@ -4136,28 +4136,28 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 			min_multiplier:1,
 			has_start_page:false,
 		};
-		 
-		
-		
+
+
+
 		//config.rows = [1, config.marker_height, config.marker_height*2];
 		config.rows = [config.marker_height, config.marker_height*2, 1];
-		
+
 		if (content_width != null && content_width != "") {
 			config.width = content_width;
-		} 
+		}
 		if (content_height != null && content_height != "") {
 			config.height = content_height;
-		} 
-		
+		}
+
 		var content = "";
 		var _active = false;
-		
+
 		/* ELEMENTS
 		================================================== */
 		var $timenav = "";
 		//var $timenav_container_mask = "";
 		//var $timenav_container = "";
-		
+
 		var $content = "";
 		var $time = "";
 		var $timeintervalminor = "";
@@ -4170,7 +4170,7 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 		var $toolbar = "";
 		var $zoomin = "";
 		var $zoomout = "";
-		
+
 		var navigation = {};
 		// Nav Items
 		navigation.nextBtn;
@@ -4179,13 +4179,13 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 		navigation.prevDate;
 		navigation.nextTitle;
 		navigation.prevTitle;
-		
+
 		/* PUBLIC VARS
 		================================================== */
 		this.ver = "0.1";
 		var layout = parent; // expecting slider div
-		
-		
+
+
 		/* PUBLIC FUNCTIONS
 		================================================== */
 		this.init = function(d,e) {
@@ -4198,7 +4198,7 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 				trace("WAITING ON DATA");
 			}
 		};
-		
+
 		/* GETTERS AND SETTERS
 		================================================== */
 		this.setData = function(d,e) {
@@ -4210,7 +4210,7 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 				trace("NO DATA");
 			}
 		};
-		
+
 		this.setSize = function(w, h) {
 			if (w != null) {config.width = w};
 			if (h != null) {config.height = h};
@@ -4218,35 +4218,35 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 				reSize();
 			}
 
-			
+
 		}
-		
+
 		this.setMarker = function(n, ease, duration, fast) {
 			goToMarker(n, ease, duration);
 		}
-		
+
 		this.getCurrentNumber = function() {
 			return current_marker;
 		}
-		
+
 		/* ON EVENT
 		================================================== */
-		
+
 		function onConfigSet() {
 			trace("onConfigSet");
 		};
-		
+
 		function reSize(firstrun) {
 			VMM.Element.css($timenavline, "left", Math.round(config.width/2)+2);
 			//VMM.Element.css($toolbar, "left", Math.round(config.width/2)-19);
-			
+
 			goToMarker(current_marker, config.ease, config.duration, true, firstrun);
 		};
-		
+
 		function upDate() {
 			VMM.fireEvent(layout, "UPDATE");
 		}
-		
+
 		function onZoomIn() {
 			trace("CLICK");
 			VMM.DragSlider.cancelSlide();
@@ -4258,22 +4258,22 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 				refreshTimeline();
 			}
 		}
-		
 
-		
+
+
 		function onZoomOut() {
 			trace("CLICK");
 			VMM.DragSlider.cancelSlide();
 			if (config.multiplier < config.max_multiplier) {
 				config.multiplier = config.multiplier + 1;
 				if (config.multiplier == config.max_multiplier) {
-					
+
 				}
 				refreshTimeline();
 			}
 		}
-		
-		
+
+
 		function onBackHome(e) {
 			VMM.DragSlider.cancelSlide();
 			goToMarker(0);
@@ -4286,39 +4286,39 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 			goToMarker(e.data.number);
 			upDate();
 		};
-		
+
 		function onMarkerHover(e) {
 			VMM.Element.toggleClass(e.data.elem, "zFront");
-			
+
 		};
-		
+
 		/* TOUCH EVENTS
 		================================================== */
 		function onTouchUpdate(e, b) {
 			VMM.Element.animate($timenav, b.time/2, config.ease, {"left": b.left});
-			
-			
+
+
 		};
-		
+
 		/* NAVIGATION
 		================================================== */
 		var buildMarkers = function() {
-			
+
 			var row = 2; //row
 			var lpos = 0; // last marker pos;
 			var row_depth = 0;
-			
+
 			for(var i = 0; i < data.length; i++) {
-				
+
 				var bw = "";
 				var _marker;
 				var _marker_flag;
 				var _marker_content;
-				
+
 				var _marker_dot;
 				var _marker_line;
 				var _marker_line_event;
-				
+
 				/* CREATE ELEMENTS
 				================================================== */
 				_marker = VMM.appendAndGetElement($content, "<div>", "marker");
@@ -4327,28 +4327,28 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 				_marker_dot = VMM.appendAndGetElement(_marker, "<div>", "dot");
 				_marker_line = VMM.appendAndGetElement(_marker, "<div>", "line");
 				_marker_line_event = VMM.appendAndGetElement(_marker_line, "<div>", "event-line");
-				
-				
+
+
 				/* CREATE THUMBNAIL
 				================================================== */
 				if (data[i].asset != null && data[i].asset != "") {
 					VMM.appendElement(_marker_content, VMM.MediaElement.thumbnail(data[i].asset, 32, 32));
 				}
-				
+
 				/* ADD DATE AND TITLE
 				================================================== */
 				VMM.appendElement(_marker_content, "<h3>" + VMM.Util.unlinkify(data[i].title) + "</h3><h4>" + data[i].date + "</h4>");
-				
+
 				/* ADD ID
 				================================================== */
 				VMM.Element.attr(_marker, "id", (data[i].uniqueid).toString());
-				
+
 				/* MARKER CLICK
 				================================================== */
 				VMM.bindEvent(_marker_flag, onMarkerClick, "", {number: i});
 				VMM.bindEvent(_marker_flag, onMarkerHover, "mouseenter mouseleave", {number: i, elem:_marker_flag});
 
-				
+
 
 				/* ADD MARKER OBJ TO ARRAY FOR RETRIEVAL LATER
 				================================================== */
@@ -4358,24 +4358,24 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 					lineevent: _marker_line_event,
 					type: "marker"
 				};
-				
-				
+
+
 				if (data[i].type == "start") {
 					trace("BUILD MARKER HAS START PAGE")
 					config.has_start_page = true;
 					_marker_obj.type = "start";
 				}
-				
+
 				markers.push(_marker_obj);
-				
-				
-				
+
+
+
 			}
-			
+
 			/* CREATE ERAS
 			================================================== */
 			for(var j = 0; j < eras.length; j++) {
-				
+
 				var bw = "";
 				var era = {
 					content:"",
@@ -4385,7 +4385,7 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 					uniqueid:"",
 					color:""
 				};
-				
+
 				era.title = eras[j].headline;
 				era.uniqueid = VMM.Util.unique_ID(4);
 				era.color = eras[j].color;
@@ -4397,31 +4397,31 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 				/* ADD DATE AND TITLE
 				================================================== */
 				VMM.appendElement(era.content, "<h3>" + VMM.Util.unlinkify(era.title) + "</h3>");
-				
-				
+
+
 				era.startdate = VMM.Util.parseDate(eras[j].startDate);
 				era.enddate = VMM.Util.parseDate(eras[j].endDate);
-				
+
 				era_markers.push(era);
 			}
-			
+
 			positionMarkers();
 		}
-		
-		
+
+
 		var positionOnTimeline = function(the_interval, first, last) {
-			
+
 			var _type = the_interval.type;
 			var _multiplier = the_interval.multiplier;
-			
+
 			var _first = getDateFractions(first);
 			var _last = getDateFractions(last);
-			
+
 			/* CALCULATE POSITION ON TIMELINE
 			================================================== */
 			var tsd = first.months;
 			var ted = last.months;
-			
+
 			if (_type == "millenium") {
 				tsd = first.milleniums;
 				ted = last.milleniums;
@@ -4450,58 +4450,58 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 				tsd = _first.minutes;
 				ted = _last.minutes;
 			}
-			
-			
+
+
 			_pos = 		( tsd	 - 	interval.base	 ) * (config.interval_width		/	 config.multiplier);
 			_pos_end = 	( ted	 - 	interval.base	 ) * (config.interval_width		/	 config.multiplier);
-			
+
 			return pos = {begin:_pos ,end:_pos_end};
-			
+
 		}
 
 		var positionMarkers = function(is_animated) {
-			
+
 			var _type = interval.type;
 			var _multiplier = interval.multiplier;
-			
+
 			// ROWS
 			var row = 2; //row
 			var lpos = 0; // last marker pos;
 			var row_depth = 0;
 			var _line_last_height_pos = 150;
 			var _line_height = 6;
-			
+
 			var cur_mark = 0;
-			
+
 			VMM.Element.removeClass(".flag", "row1");
 			VMM.Element.removeClass(".flag", "row2");
 			VMM.Element.removeClass(".flag", "row3");
-			
+
 			for(var i = 0; i < markers.length; i++) {
-				
+
 				//var pos; // X POSITION OF BEGINNING OF EVENT
 				var _line; // EVENT LENGTH
 				//var _pos_end; // X POSITION OF END OF EVENT
-				
+
 				var _marker = markers[i].marker;
 				var _marker_flag = markers[i].flag;
 				var _marker_line_event = markers[i].lineevent;
-				
-				
-				
+
+
+
 				var _pos = positionOnTimeline(interval, data[i].startdate, data[i].enddate);
-				
-				
+
+
 				pos = _pos.begin;
 				_pos_end = _pos.end;
-				
+
 				/* COMPENSATE FOR DATES BEING POITIONED IN THE MIDDLE
 				================================================== */
 				var _pos_offset = -2;
 				pos = Math.round(pos +  _pos_offset);
 				_pos_end = Math.round(_pos_end + _pos_offset);
 				_line = Math.round(_pos_end - pos);
-				
+
 				/* APPLY POSITION TO MARKER
 				================================================== */
 				if (is_animated) {
@@ -4514,7 +4514,7 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 					cur_mark = pos;
 					//trace("=========================== cur_mark " + cur_mark)
 				}
-				
+
 				/* EVENT LENGTH LINE
 				================================================== */
 				if (_line > 5) {
@@ -4523,13 +4523,13 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 					VMM.Element.css(_marker_line_event, "top", _line_last_height_pos);
 					//_line_last_height_pos = _line_last_height_pos - _line_height;
 				}
-				
+
 				/* CONTROL ROW POSITION
 				================================================== */
 				if (pos - lpos < (config.marker_width + config.spacing)) {
 					if (row < config.rows.length - 1) {
 						row ++;
-						
+
 					} else {
 						row = 0;
 						row_depth ++;
@@ -4538,44 +4538,44 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 					row_depth = 0;
 					row = 0;
 				}
-				
+
 				/* SET LAST MARKER POSITION
 				================================================== */
 				lpos = pos;
-				
+
 				if (is_animated) {
 					VMM.Element.stop(_marker_flag);
 					VMM.Element.animate(_marker_flag, config.duration, config.ease, {"top": config.rows[row]});
 				} else {
 					VMM.Element.css(_marker_flag, "top", config.rows[row]);
 				}
-				
+
 				/* IS THE MARKER A REPRESENTATION OF A START SCREEN?
 				================================================== */
 				if (config.has_start_page && markers[i].type == "start") {
 					VMM.Element.visible(_marker, false);
 				}
-				
+
 			}
-			
+
 			for(var j = 0; j < era_markers.length; j++) {
 				//var pos; // X POSITION OF BEGINNING OF EVENT
 				var _line; // EVENT LENGTH
 				//var _pos_end; // X POSITION OF END OF EVENT
-				
+
 				var era = era_markers[j];
 				var era_elem = era.content;
 				var pos = positionOnTimeline(interval, era.startdate, era.enddate);
 				var era_length = pos.end - pos.begin;
 				var era_height = 25;
-				
+
 				/* APPLY POSITION TO MARKER
 				================================================== */
 				VMM.Element.css(era_elem, "left", pos.begin);
 				VMM.Element.css(era_elem, "width", era_length);
 			}
-			
-			
+
+
 			/* ANIMATE THE TIMELINE TO ADJUST TO CHANGES
 			================================================== */
 			if (is_animated) {
@@ -4583,11 +4583,11 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 				VMM.Element.animate($timenav, config.duration/2, config.ease, {"left": (config.width/2) - (cur_mark)});
 			}
 
-		
+
 		}
-		
+
 		var getDateFractions = function(the_date, is_utc) {
-			
+
 			var _time = {};
 			_time.days			= 		the_date / dateFractionBrowser.day;
 			_time.weeks 		= 		_time.days / dateFractionBrowser.week;
@@ -4613,12 +4613,12 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 			*/
 			return _time;
 		}
-		
+
 		var calculateInterval = function() {
-			
+
 			var _first = getDateFractions(data[0].startdate);
 			var _last = getDateFractions(data[data.length - 1].enddate);
-			
+
 			/* MILLENIUM
 			================================================== */
 			// NOT DONE
@@ -4629,7 +4629,7 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 			interval_calc.millenium.number 			= timespan.milleniums;
 			interval_calc.millenium.multiplier	 	= timelookup.millenium;
 			interval_calc.millenium.minor 			= timelookup.millenium;
-			
+
 			/* CENTURY
 			================================================== */
 			// NOT DONE
@@ -4640,7 +4640,7 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 			interval_calc.century.number 			= timespan.centuries;
 			interval_calc.century.multiplier	 	= timelookup.century;
 			interval_calc.century.minor 			= timelookup.century;
-			
+
 			/* DECADE
 			================================================== */
 			interval_calc.decade.type 				= "decade";
@@ -4650,10 +4650,10 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 			interval_calc.decade.number 			= timespan.decades;
 			interval_calc.decade.multiplier 		= timelookup.decade;
 			interval_calc.decade.minor 				= timelookup.decade;
-			
+
 			/* YEAR
 			================================================== */
-			
+
 			interval_calc.year.type					= "year";
 			interval_calc.year.first 				= _first.years;
 			interval_calc.year.base 				= Math.floor(_first.years);
@@ -4661,7 +4661,7 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 			interval_calc.year.number 				= timespan.years;
 			interval_calc.year.multiplier 			= 1;
 			interval_calc.year.minor 				= timelookup.month;
-			
+
 			/* MONTH
 			================================================== */
 			interval_calc.month.type 				= "month";
@@ -4671,19 +4671,19 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 			interval_calc.month.number 				= timespan.months;
 			interval_calc.month.multiplier 			= 1;
 			interval_calc.month.minor 				= Math.round(timelookup.week);
-			
+
 			/* WEEK
 			================================================== */
 			// NOT DONE
 			interval_calc.week.type 				= "week";
-			
+
 			interval_calc.week.first 				= _first.weeks;
 			interval_calc.week.base 				= Math.floor(_first.weeks);
 			interval_calc.week.last 				= _last.weeks;
 			interval_calc.week.number 				= timespan.weeks;
 			interval_calc.week.multiplier 			= 1;
 			interval_calc.week.minor 				= 7;
-			
+
 			/* DAY
 			================================================== */
 			// NOT DONE
@@ -4694,7 +4694,7 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 			interval_calc.day.number 				= timespan.days;
 			interval_calc.day.multiplier 			= 1;
 			interval_calc.day.minor 				= 24;
-			
+
 			/* HOUR
 			================================================== */
 			// NOT DONE
@@ -4705,7 +4705,7 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 			interval_calc.hour.number 				= timespan.hours;
 			interval_calc.hour.multiplier 			= 1;
 			interval_calc.hour.minor 				= 60;
-			
+
 			/* MINUTE
 			================================================== */
 			// NOT DONE
@@ -4716,7 +4716,7 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 			interval_calc.minute.number 			= timespan.minutes;
 			interval_calc.minute.multiplier 		= 1;
 			interval_calc.minute.minor 				= 60;
-			
+
 			/* SECOND
 			================================================== */
 			// NOT DONE
@@ -4728,27 +4728,27 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 			interval_calc.second.multiplier 		= 1;
 			interval_calc.second.minor 				= 10;
 		}
-		
+
 		var positionInterval = function() {
-			
+
 			VMM.attachElement($timeinterval, "");
 			VMM.attachElement($timeintervalmajor, "");
-			
+
 			interval.date = new Date(data[0].startdate.getFullYear(), 0, 1, 0,0,0);
 			interval_major.date = new Date(data[0].startdate.getFullYear(), 0, 1, 0,0,0);
-			
+
 			//interval.date_major_start = new Date(data[0].startdate.getFullYear(), 0, 1, 0,0,0);
 			//interval.date_major_end = new Date(data[0].startdate.getFullYear(), 0, 1, 0,0,0);
-			
+
 			var inc_time = 0;
 			var inc_time_major = 0;
 			var _first_run = true;
 			var _normal_first_pos = 0;
 			var _last_pos = 0;
 			var _last_pos_major = 0;
-			
+
 			for(var i = 0; i < interval.number + 1; i++) {
-				
+
 				var _idd;
 				if (interval.type == "century") {
 					if (_first_run) {
@@ -4764,7 +4764,7 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 					_idd = Math.floor(interval.date.getFullYear() / 10) * 10;
 				} else if (interval.type == "year") {
 					if (_first_run) {
-						
+
 					}
 					interval.date.setFullYear(interval.date.getFullYear() + inc_time);
 					//_idd = interval.date.getFullYear();
@@ -4822,23 +4822,23 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 					//_idd = interval.date.getHours() + ":" + VMM.Util.doubledigit(interval.date.getMinutes()) + ":" + VMM.Util.doubledigit(interval.date.getSeconds());
 					_idd = VMM.Util.date.prettyDate(interval.date, true, interval.type);
 				}
-				
+
 				inc_time = 1;
-				
+
 				if (_first_run) {
-					_normal_first_pos = pos; 
+					_normal_first_pos = pos;
 				}
 				_first_run = false;
-				
+
 				var _pos = positionOnTimeline(interval, interval.date, interval.date);
 				var pos = _pos.begin;
-				
+
 				$interval_date = VMM.appendAndGetElement($timeinterval, "<div>", "_idd");
 				VMM.appendElement($interval_date, _idd);
-				
+
 				VMM.Element.css($interval_date, "left", pos);
 				VMM.Element.css($interval_date, "text-indent", -(VMM.Element.width($interval_date)/2));
-				
+
 				if ((pos - _last_pos) < 65 ) {
 					if ((pos - _last_pos) < 35 ) {
 						if (i%4 == 0) {
@@ -4847,7 +4847,7 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 							} else {
 								VMM.Element.css($interval_date, "display", "");
 							}
-							
+
 						} else {
 							VMM.Element.css($interval_date, "display", "none");
 						}
@@ -4858,21 +4858,21 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 							VMM.Element.css($interval_date, "display", "");
 						}
 					}
-					
+
 				} else {
 					VMM.Element.css($interval_date, "display", "");
 				}
-				
+
 				_last_pos = pos;
 			}
-			
+
 			_first_run = true;
 			_major_first_pos = 0;
 			_major_last_pos = 0;
-			
+
 			for(var i = 0; i < Math.ceil(interval_major.number) + 1; i++) {
 				var _idd;
-				
+
 				if (interval_major.type == "century") {
 					if (_first_run) {
 						interval_major.date.setFullYear(		Math.floor(data[0].startdate.getFullYear() / 100) * 100		);
@@ -4947,66 +4947,66 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 					_idd = VMM.Util.date.prettyDate(interval_major.date, true, interval_major.type);
 				}
 				trace("interval_major.type " + interval_major.type);
-				
+
 				inc_time_major = 1;
-				
-				
-				
+
+
+
 				/* 	BUILD DATE USING SAME METHODOLOGY AS MARKER POSITON
 					CREATE A DATE
 				//================================================== */
-				
+
 				var _pos = positionOnTimeline(interval, interval_major.date, interval_major.date);
 				var pos = _pos.begin;
-				
+
 				$interval_date = VMM.appendAndGetElement($timeintervalmajor, "<div>", "major");
 				VMM.appendElement($interval_date, _idd);
-				
+
 				VMM.Element.css($interval_date, "left", pos);
 				VMM.Element.css($interval_date, "left", pos);
 				VMM.Element.css($interval_date, "text-indent", -(VMM.Element.width($interval_date)/2));
-				
+
 				if (_first_run) {
-					_major_first_pos = pos; 
+					_major_first_pos = pos;
 				}
 				_first_run = false;
-				
+
 				_last_pos_major = pos;
 				_major_last_pos = pos;
-				
+
 			}
-			
+
 			VMM.Element.width($content, interval.number * (config.interval_width / config.multiplier) );
-			
+
 			//VMM.Element.width($timeintervalminor_minor, (interval.number * (config.interval_width / config.multiplier)) + 200 );
 			_minor_pos_offset = 50;
 			var _minor_width = (_major_last_pos - _major_first_pos)+(_minor_pos_offset*6);
 			var _normal_width = (_last_pos)+(_minor_pos_offset*6);
-			
+
 			if (_minor_width < _normal_width) {
 				VMM.Element.width($timeintervalminor_minor, _normal_width);
 			} else {
 				VMM.Element.width($timeintervalminor_minor, _minor_width);
 			}
-			
+
 
 			VMM.Element.css($timeintervalminor_minor, "left", _major_first_pos - _minor_pos_offset);
-			
+
 			config.timeline_width = VMM.Element.width($timeinterval);
-			
-			
+
+
 		}
-		
+
 		var buildInterval = function() {
-			
+
 			/* CALCULATE INTERVAL
 			================================================== */
 			timespan = getDateFractions((data[data.length - 1].enddate) - (data[0].startdate), true);
 			calculateInterval();
-			
+
 			/* DETERMINE DEFAULT INTERVAL TYPE
 			================================================== */
-			
+
 			if (timespan.milleniums > data.length / config.density) {
 				interval = interval_calc.millenium;
 				//interval_major = interval_calc.millenium;
@@ -5016,7 +5016,7 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 			} else if (timespan.decades > data.length / config.density) {
 				interval = interval_calc.decade;
 				//interval_major = Math.ceil(interval_calc.century);
-			} else if (timespan.years > data.length / config.density) {	
+			} else if (timespan.years > data.length / config.density) {
 				interval = interval_calc.year;
 				//interval_major = interval_calc.decade;
 			} else if (timespan.months > data.length / config.density) {
@@ -5042,17 +5042,17 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 				trace("NO FUCKING IDEA WHAT THE TYPE SHOULD BE");
 				interval.type = "unknown";
 			}
-			
+
 			/* DETERMINE MAJOR TYPE
 			================================================== */
-			
+
 			if (timespan.milleniums >= 1) {
 				interval_major = interval_calc.millenium;
 			} else if (timespan.centuries >= 1) {
 				interval_major = interval_calc.century;
 			} else if (timespan.decades >= 1) {
 				interval_major = interval_calc.decade;
-			} else if (timespan.years >= 1) {	
+			} else if (timespan.years >= 1) {
 				interval_major = interval_calc.year;
 			} else if (timespan.months > 1) {
 				interval_major = interval_calc.month;
@@ -5070,27 +5070,27 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 				trace("NO FUCKING IDEA WHAT THE TYPE SHOULD BE");
 				interval_major.type = "unknown";
 			}
-			
+
 			//trace(interval_major.type);
-			
+
 			$timeintervalminor_minor = VMM.appendAndGetElement($timeintervalminor, "<div>", "minor");
-			
+
 			positionInterval();
-			
+
 		}
-		
+
 		/* GO TO TIME MARKER
 		================================================== */
 		var goToMarker = function(n, ease, duration, fast, firstrun) {
-			
+
 			// Set current slide
 			current_marker = n;
-			
+
 			var _ease = config.ease;
 			var _duration = config.duration;
 			var is_last = false;
 			var is_first = false;
-			
+
 			if (current_marker == 0) {
 				is_first = true;
 			}
@@ -5099,24 +5099,24 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 			}
 			if (ease != null && ease != "") {_ease = ease};
 			if (duration != null && duration != "") {_duration = duration};
-			
+
 			/* get marker position
 			================================================== */
 			var _pos = VMM.Element.position(markers[current_marker].marker);
-			
+
 			/* set marker style
 			================================================== */
 			for(var i = 0; i < markers.length; i++) {
 				VMM.Element.removeClass(markers[i].marker, "active");
 			}
-			
+
 			if (config.has_start_page && markers[current_marker].type == "start") {
 				VMM.Element.visible(markers[current_marker].marker, false);
 				VMM.Element.addClass(markers[current_marker].marker, "start");
 			}
-			
+
 			VMM.Element.addClass(markers[current_marker].marker, "active");
-			
+
 			/* set proper nav titles and dates etc.
 			================================================== */
 			if (is_first) {
@@ -5129,25 +5129,25 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 			} else {
 				//VMM.Element.visible(navigation.nextBtn, true);
 			}
-			
+
 			/* ANIMATE MARKER
 			================================================== */
 			VMM.Element.stop($timenav);
 			VMM.Element.animate($timenav, _duration, _ease, {"left": (config.width/2) - (_pos.left)});
-			
-			
+
+
 		}
-		
-		
+
+
 		/* BUILD
 		================================================== */
 		var build = function() {
 			// Clear out existing content
 			VMM.attachElement(layout, "");
-			
+
 			$timenav = VMM.appendAndGetElement(layout, "<div>", "timenav");
 
-			
+
 			$content = VMM.appendAndGetElement($timenav, "<div>", "content");
 			$time = VMM.appendAndGetElement($timenav, "<div>", "time");
 			$timeintervalminor = VMM.appendAndGetElement($time, "<div>", "time-interval-minor");
@@ -5156,35 +5156,35 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 			$timebackground = VMM.appendAndGetElement(layout, "<div>", "timenav-background");
 			$timenavline = VMM.appendAndGetElement($timebackground, "<div>", "timenav-line");
 			$timeintervalbackground = VMM.appendAndGetElement($timebackground, "<div>", "timenav-interval-background", "<div class='top-highlight'></div>");
-			
+
 			buildInterval();
 			buildMarkers();
 			reSize(true);
 			VMM.fireEvent(layout, "LOADED");
-			
+
 			$toolbar = VMM.appendAndGetElement(layout, "<div>", "toolbar");
-			
+
 			if (config.has_start_page) {
 				$backhome = VMM.appendAndGetElement($toolbar, "<div>", "back-home", "<div class='icon'></div>");
 				VMM.bindEvent(".back-home", onBackHome, "click");
 				VMM.Element.css($toolbar, "top", 27);
-				
+
 			}
 			$zoomin = VMM.appendAndGetElement($toolbar, "<div>", "zoom-in", "<div class='icon'></div>");
 			$zoomout = VMM.appendAndGetElement($toolbar, "<div>", "zoom-out", "<div class='icon'></div>");
-			
+
 			VMM.Element.attribute($backhome, "title", "Return to Title");
 			VMM.Element.attribute($backhome, "rel", "tooltip");
-			
+
 			VMM.Element.attribute($zoomin, "title", "Expand Timeline");
 			VMM.Element.attribute($zoomin, "rel", "tooltip");
-			
+
 			VMM.Element.attribute($zoomout, "title", "Contract Timeline");
 			VMM.Element.attribute($zoomout, "rel", "tooltip");
-			
+
 			VMM.bindEvent(".zoom-in", onZoomIn, "click");
 			VMM.bindEvent(".zoom-out", onZoomOut, "click");
-			
+
 
 			$toolbar.tooltip({
 				selector: "div[rel=tooltip]",
@@ -5196,84 +5196,84 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 				VMM.TouchSlider.createPanel($timebackground, $timenav, config.width, config.spacing, false);
 				VMM.bindEvent($timenav, onTouchUpdate, "TOUCHUPDATE");
 			} else {
-				
+
 				VMM.DragSlider.createPanel(layout, $timenav, config.width, config.spacing, false);
 				//VMM.bindEvent($timenav, onDragUpdate, "DRAGUPDATE");
 			}
-			
-			
-			
+
+
+
 			_active = true;
-			
+
 		};
-		
+
 		var refreshTimeline = function() {
 			positionInterval();
 			positionMarkers(true);
 			//reSize();
 		};
-		
-		
-		
+
+
+
 	};
-	
+
 
 	/* 	SOURCE DATA PROCESSOR
 	================================================== */
 	VMM.Timeline.DataObj = {
-		
+
 		data_obj: {},
-		
+
 		model_array: [],
-		
+
 		getData: function(raw_data) {
-			
+
 			data = VMM.Timeline.DataObj.data_obj;
 
-			
+
 			if (type.of(raw_data) != "string") {
-				
+
 				trace("DATA SOURCE: NOT JSON");
 				trace("TRYING HTML PARSE");
 				VMM.Timeline.DataObj.parseHTML(raw_data);
-				
+
 			} else {
-				
+
 				if (raw_data.match("%23")) {
-					
+
 					trace("DATA SOURCE: TWITTER SEARCH");
 					VMM.Timeline.DataObj.model_Tweets.getData("%23medill");
-					
+
 				} else if (	raw_data.match("spreadsheet")	) {
-					
+
 					trace("DATA SOURCE: GOOGLE SPREADSHEET");
 					VMM.Timeline.DataObj.model_GoogleSpreadsheet.getData(raw_data);
-					
+
 				} else {
-					
+
 					trace("DATA SOURCE: JSON");
 					VMM.getJSON(raw_data, VMM.Timeline.DataObj.parseJSON);
-					
+
 				}
-				
+
 			}
-			
+
 		},
-		
+
 		parseHTML: function(d) {
 			trace("parseHTML");
-			
+
 			var _data_obj = VMM.Timeline.DataObj.data_template_obj;
-			
+
 			/*	Timeline start slide
 			================================================== */
 			if (VMM.Element.find("#timeline section", "time")[0]) {
 				_data_obj.timeline.startDate = VMM.Element.html(VMM.Element.find("#timeline section", "time")[0]);
 				_data_obj.timeline.headline = VMM.Element.html(VMM.Element.find("#timeline section", "h2"));
 				_data_obj.timeline.text = VMM.Element.html(VMM.Element.find("#timeline section", "article"));
-				
+
 				var found_main_media = false;
-				
+
 				if (VMM.Element.find("#timeline section", "figure img").length != 0) {
 					found_main_media = true;
 					_data_obj.timeline.asset.media = VMM.Element.attr(VMM.Element.find("#timeline section", "figure img"), "src");
@@ -5293,13 +5293,13 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 					}
 				}
 			}
-			
+
 			/*	Timeline Date Slides
 			================================================== */
 			VMM.Element.each("#timeline li", function(i, elem){
-				
+
 				var valid_date = false;
-				
+
 				var _date = {
 					"type":"default",
 					"startDate":"",
@@ -5313,11 +5313,11 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 		            },
 		            "tags":"Optional"
 				};
-				
+
 				if (VMM.Element.find(this, "time") != 0) {
-					
+
 					valid_date = true;
-					
+
 					_date.startDate = VMM.Element.html(VMM.Element.find(this, "time")[0]);
 
 					if (VMM.Element.find(this, "time")[1]) {
@@ -5347,65 +5347,65 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 							_date.asset.caption = VMM.Element.html(VMM.Element.find(this, "figcaption"));
 						}
 					}
-					
+
 					trace(_date);
 					_data_obj.timeline.date.push(_date);
-					
+
 				}
-				
+
 			});
-			
+
 			VMM.fireEvent(global, "DATAREADY", _data_obj);
-			
+
 		},
-		
+
 		parseJSON: function(d) {
-			
+
 			if (d.timeline.type == "default") {
-				
+
 				trace("DATA SOURCE: JSON STANDARD TIMELINE");
-				
+
 				VMM.fireEvent(global, "DATAREADY", d);
 				//return _data_obj.timeline;
-				
+
 			} else if (d.timeline.type == "twitter") {
-				
+
 				trace("DATA SOURCE: JSON TWEETS");
-				
+
 				VMM.Timeline.DataObj.model_Tweets.buildData(d);
-				
-				
+
+
 			} else {
 				trace("DATA SOURCE: NO IDEA");
 				trace(type.of(d.timeline));
 			};
-			
+
 		},
-		
-		/*	MODEL OBJECTS 
+
+		/*	MODEL OBJECTS
 			New Types of Data can be formatted for the timeline here
 		================================================== */
-		
+
 		model_Tweets: {
-			
+
 			type: "twitter",
-			
+
 			buildData: function(raw_data) {
-				
+
 				VMM.bindEvent(global, VMM.Timeline.DataObj.model_Tweets.onTwitterDataReady, "TWEETSLOADED");
 				VMM.ExternalAPI.twitter.getTweets(raw_data.timeline.tweets);
-				
+
 			},
-			
+
 			getData: function(raw_data) {
-				
+
 				VMM.bindEvent(global, VMM.Timeline.DataObj.model_Tweets.onTwitterDataReady, "TWEETSLOADED");
 				VMM.ExternalAPI.twitter.getTweetSearch(raw_data);
-				
+
 			},
-			
+
 			onTwitterDataReady: function(e, d) {
-				
+
 				var _data_obj = VMM.Timeline.DataObj.data_template_obj;
 
 				for(var i = 0; i < d.tweetdata.length; i++) {
@@ -5425,72 +5425,72 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 					};
 					// pass in the 'created_at' string returned from twitter //
 					// stamp arrives formatted as Tue Apr 07 22:52:51 +0000 2009 //
-					
+
 					//var twit_date = VMM.ExternalAPI.twitter.parseTwitterDate(d.tweetdata[i].raw.created_at);
 					//trace(twit_date);
 					_date.startDate = d.tweetdata[i].raw.created_at;
-					
+
 					if (type.of(d.tweetdata[i].raw.from_user_name)) {
-						_date.headline = d.tweetdata[i].raw.from_user_name + " (<a href='https://twitter.com/" + d.tweetdata[i].raw.from_user + "'>" + "@" + d.tweetdata[i].raw.from_user + "</a>)" ;						
+						_date.headline = d.tweetdata[i].raw.from_user_name + " (<a href='https://twitter.com/" + d.tweetdata[i].raw.from_user + "'>" + "@" + d.tweetdata[i].raw.from_user + "</a>)" ;
 					} else {
 						_date.headline = d.tweetdata[i].raw.user.name + " (<a href='https://twitter.com/" + d.tweetdata[i].raw.user.screen_name + "'>" + "@" + d.tweetdata[i].raw.user.screen_name + "</a>)" ;
-						
+
 					}
-					
+
 					_date.asset.media = d.tweetdata[i].content;
 					_data_obj.timeline.date.push(_date);
-					
+
 				};
-				
+
 				VMM.fireEvent(global, "DATAREADY", _data_obj);
-				
+
 			}
 		},
-		
+
 		model_GoogleSpreadsheet: {
-			
+
 			/*
 				TEMPLATE CAN BE FOUND HERE
 				https://docs.google.com/previewtemplate?id=0AppSVxABhnltdEhzQjQ4MlpOaldjTmZLclQxQWFTOUE&mode=public
-				
+
 			*/
 			type: "google spreadsheet",
-			
+
 			getData: function(raw_data) {
 				var _key = VMM.Util.getUrlVars(raw_data)["key"];
 				var _url = "https://spreadsheets.google.com/feeds/list/" + _key + "/od6/public/values?alt=json";
-				
+
 				if ( VMM.Browser.browser == "Explorer" && parseInt(VMM.Browser.version, 10) >= 8 && window.XDomainRequest) {
 					// Use Microsoft XDR
 					// going to move this to VMM.getJSON
 					trace("it's ie");
 					var ie_xdr = new XDomainRequest();
 					var _url = "//spreadsheets.google.com/feeds/list/" + _key + "/od6/public/values?alt=json";
-					
+
 					ie_xdr.open("get", _url);
 					ie_xdr.onload = function() {
 						var ie_j = {};
 						var ie_json = VMM.parseJSON(ie_xdr.responseText);
 						VMM.Timeline.DataObj.model_GoogleSpreadsheet.buildData(ie_json);
-						
+
 					}
 					ie_xdr.send();
 				} else {
 					trace("not ie");
 					VMM.getJSON(_url, VMM.Timeline.DataObj.model_GoogleSpreadsheet.buildData);
 				}
-				
+
 			},
-			
+
 			buildData: function(d) {
-				
+
 				var _data_obj = VMM.Timeline.DataObj.data_template_obj;
 
 				for(var i = 0; i < d.feed.entry.length; i++) {
-					
-					
+
+
 					var dd = d.feed.entry[i];
-					
+
 					if (dd.gsx$titleslide.$t.match("start")) {
 						_data_obj.timeline.startDate = dd.gsx$startdate.$t;
 						_data_obj.timeline.headline = dd.gsx$headline.$t;
@@ -5526,21 +5526,21 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 
 						_data_obj.timeline.date.push(_date);
 					}
-					
-					
-					
+
+
+
 				};
-				
+
 				VMM.fireEvent(global, "DATAREADY", _data_obj);
-				
+
 			}
-			
+
 		},
-		
-		
+
+
 		/*	TEMPLATE OBJECTS
 		================================================== */
-		
+
 		data_template_obj: {
 			"timeline": {
 		        "headline":"",
@@ -5553,7 +5553,7 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 		        "date": []
 		    }
 		},
-		
+
 		date_obj: {
 			"startDate":"2012,2,2,11,30",
             "headline":"",
@@ -5577,11 +5577,11 @@ if(typeof VMM != 'undefined' && typeof VMM.Timeline == 'undefined') {
 /*
 $(document).ready(function() {
 
-	//Instantiate 
+	//Instantiate
 	timeline = new VMM.Timeline(960, 550); // Pass in width and height or set it in your stylesheet;
-	
+
 	// Initialize
 	timeline.init("example.json"); // Pass in the data
-	
+
 });
 */

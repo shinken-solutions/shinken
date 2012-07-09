@@ -41,15 +41,15 @@ from shinken.basemodule import BaseModule
 print "Loaded Apache/Passwd module"
 
 properties = {
-    'daemons' : ['webui', 'skonf'],
-    'type' : 'passwd_webui'
+    'daemons': ['webui', 'skonf'],
+    'type': 'passwd_webui'
     }
 
 
-#called by the plugin manager
+# called by the plugin manager
 def get_instance(plugin):
     print "Get an Apache/Passwd UI module for plugin %s" % plugin.get_name()
-    
+
     instance = Passwd_Webui(plugin)
     return instance
 
@@ -63,7 +63,7 @@ class Passwd_Webui(BaseModule):
     # Try to connect if we got true parameter
     def init(self):
         print "Trying to initalize the Apache/Passwd file"
-        
+
 
     # To load the webui application
     def load(self, app):
@@ -99,12 +99,12 @@ class Passwd_Webui(BaseModule):
                         compute_hash = crypt.crypt(password, salt)
                     print "Computed hash", compute_hash
                     if compute_hash == hash:
-                        print "PASSWD : it's good!"
+                        print "PASSWD: it's good!"
                         return True
                 else:
                     print "PASSWD: bad user", name, user
         except Exception, exp:
-            print "Checking auth in passwd %s failed : %s " % (self.passwd, exp)
+            print "Checking auth in passwd %s failed: %s " % (self.passwd, exp)
             return False
         finally:
             try:

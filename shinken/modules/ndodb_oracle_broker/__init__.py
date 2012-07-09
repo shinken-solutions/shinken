@@ -27,25 +27,25 @@
 import os
 
 properties = {
-    'daemons' : ['broker'],
-    'type' : 'ndodb_oracle',
-    'phases' : ['running'],
+    'daemons': ['broker'],
+    'type': 'ndodb_oracle',
+    'phases': ['running'],
     }
 
 
-#called by the plugin manager to get a broker
+# called by the plugin manager to get a broker
 def get_instance(plugin):
-    #Try to import all need modules
+    # Try to import all need modules
     try:
         from ndodb_oracle_broker import Ndodb_Oracle_broker
     except ImportError , exp:
-        print "Warning : the plugin type ndodb_oracle is unavailable : %s" % exp
+        print "Warning: the plugin type ndodb_oracle is unavailable: %s" % exp
         return None
     print "Get a ndoDB broker for plugin %s" % plugin.get_name()
-    #TODO : catch errors
+    # TODO: catch errors
     if hasattr(plugin, 'oracle_home'):
         os.environ['ORACLE_HOME'] = plugin.oracle_home
-        print "INFO: setting Oracle_HOME :", plugin.oracle_home
+        print "INFO: setting Oracle_HOME:", plugin.oracle_home
 
     user = plugin.user
     password = plugin.password

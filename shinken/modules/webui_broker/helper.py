@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
 #    Hartmut Goebel, h.goebel@goebel-consult.de
-#	 Andreas Karfusehr, andreas@karfusehr.de
+# 	 Andreas Karfusehr, andreas@karfusehr.de
 #
 # This file is part of Shinken.
 #
@@ -33,13 +33,13 @@ except ImportError:
     try:
         import simplejson as json
     except ImportError:
-        print "Error : you need the json or simplejson module"
+        print "Error: you need the json or simplejson module"
         raise
 
 from shinken.util import safe_print
 from shinken.misc.perfdata import PerfDatas
 from shinken.misc.sorter import hst_srv_sort
-# TODO : manage it in a clean way.
+# TODO: manage it in a clean way.
 from shinken.modules.webui_broker.perfdata_guess import get_perfometer_table_values
 
 
@@ -93,7 +93,7 @@ class Helper(object):
         #print "T", t
         # Get the difference between now and the time of the user
         seconds = int(time.time()) - int(t)
-        
+
         # If it's now, say it :)
         if seconds == 0:
             return 'Now'
@@ -103,7 +103,7 @@ class Helper(object):
         # Remember if it's in the future or not
         if seconds < 0:
             in_future = True
-        
+
         # Now manage all case like in the past
         seconds = abs(seconds)
         #print "In future?", in_future
@@ -117,14 +117,14 @@ class Helper(object):
         weeks, days = divmod(days, 7)
         months, weeks = divmod(weeks, 4)
         years, months = divmod(months, 12)
- 
+
         minutes = long(minutes)
         hours = long(hours)
         days = long(days)
         weeks = long(weeks)
         months = long(months)
         years = long(years)
- 
+
         duration = []
         if years > 0:
             duration.append('%dy' % years)
@@ -175,7 +175,7 @@ class Helper(object):
         return j
 
     # Return something like:
-    #{
+    # {
     #                  "id": "localhost",
     #                  "name": "localhost",
     #                  "data": {"$color":"red", "$dim": 5*2, "some other key": "some other value"},
@@ -197,23 +197,23 @@ class Helper(object):
         # We set the values for webui/plugins/depgraph/htdocs/js/eltdeps.js
         # so a node with important data for rendering
         # type = custom, business_impact and img_src.
-        d = {'id' : elt.get_dbg_name(), 'name' : elt.get_dbg_name(),
-             'data' : {'$type' : 'custom',
-                       'business_impact' : elt.business_impact,
-                       'img_src' : self.get_icon_state(elt),
+        d = {'id': elt.get_dbg_name(), 'name': elt.get_dbg_name(),
+             'data': {'$type': 'custom',
+                       'business_impact': elt.business_impact,
+                       'img_src': self.get_icon_state(elt),
                        },
-             'adjacencies' : []
+             'adjacencies': []
              }
 
         # Set the right info panel
-        d['data']['infos'] = r'''%s <h2 class="%s"><img style="width : 64px; height:64px" src="%s"/> %s: %s</h2>
+        d['data']['infos'] = r'''%s <h2 class="%s"><img style="width: 64px; height:64px" src="%s"/> %s: %s</h2>
 		       <p>since %s</p>
 		       <div style="float:right;"> <a href="%s">%s</a></div>'''  % (
             '<img src="/static/img/icons/star.png" alt="star">' * (elt.business_impact - 2),
             elt.state.lower(), self.get_icon_state(elt), elt.state, elt.get_full_name(),
             self.print_duration(elt.last_state_change, just_duration=True, x_elts=2),
             self.get_link_dest(elt), self.get_button('Go to details', img='/static/images/search.png'))
-                       
+
 
         d['data']['elt_type'] = elt.__class__.my_type
         d['data']['is_problem'] = elt.is_problem
@@ -228,12 +228,12 @@ class Helper(object):
             d['data']['circle'] = 'orange'
         else:
             d['data']['circle'] = 'none'
-     
+
 
         # Now put in adj our parents
         for p in elt.parent_dependencies:
-            pd = {'nodeTo' : p.get_dbg_name(),
-                  'data' : {"$type":"line", "$direction": [elt.get_dbg_name(), p.get_dbg_name()]}}
+            pd = {'nodeTo': p.get_dbg_name(),
+                  'data': {"$type": "line", "$direction": [elt.get_dbg_name(), p.get_dbg_name()]}}
 
             # Naive way of looking at impact
             if elt.state_id != 0 and p.state_id != 0:
@@ -246,12 +246,12 @@ class Helper(object):
         # The sons case is now useful, it will be done by our sons
         # that will link us
         return d
-        
+
 
     # Return all linked elements of this elt, and 2 level
     # higer and lower :)
     def get_all_linked_elts(self, elt, levels=3):
-        if levels == 0 :
+        if levels == 0:
             return set()
 
         my = set()
@@ -265,7 +265,7 @@ class Helper(object):
             par_elts = self.get_all_linked_elts(i, levels=levels - 1)
             for c in par_elts:
                 my.add(c)
-            
+
         safe_print("get_all_linked_elts::Give elements", my)
         return my
 
@@ -329,7 +329,7 @@ class Helper(object):
         if len(fathers) > 0:
             # We look if the below tree is goodor not
             tree_is_good = (node.state_id == 0)
-            
+
             # If the tree is good, we will use an expand image
             # and hide the tree
             if tree_is_good:
@@ -338,9 +338,9 @@ class Helper(object):
             else: # we will already show the tree, and use a reduce image
                 display = 'block'
                 img = 'reduce.png'
-			
+
             s += """<ul id="business-parents-%s" style="display: %s; ">""" % (name, display)
-			
+
             for n in fathers:
                 sub_node = n['node']
                 sub_s = self.print_business_rules_mobile(n, level=level+1,source_problems=source_problems)
@@ -356,7 +356,7 @@ class Helper(object):
         name = node.get_full_name()
         fathers = tree['fathers']
         s = ''
-        
+
         # Maybe we are the root problem of this, and so we are printing it
         root_str = ''
         if node in source_problems:
@@ -370,7 +370,7 @@ class Helper(object):
         if len(fathers) > 0:
             # We look if the below tree is goodor not
             tree_is_good = (node.state_id == 0)
-            
+
             # If the tree is good, we will use an expand image
             # and hide the tree
             if tree_is_good:
@@ -383,9 +383,9 @@ class Helper(object):
             # If we are the root, we already got this
             if level != 0:
                 s += """<a id="togglelink-%s" href="javascript:toggleBusinessElt('%s')"><img id="business-parents-img-%s" src="/static/images/%s" alt="toggle"> </a> \n""" % (name, name, name, img)
-                
+
             s += """<ul id="business-parents-%s" style="display: %s; ">""" % (name, display)
-        
+
             for n in fathers:
                 sub_node = n['node']
                 sub_s = self.print_business_rules(n, level=level+1,source_problems=source_problems)
@@ -396,7 +396,7 @@ class Helper(object):
 
     # Mockup helper
     # User: Frescha
-    # Date: 08.01.2012    
+    # Date: 08.01.2012
     def print_business_tree(self, tree, level=0):
         safe_print("Should print tree", tree)
         node = tree['node']
@@ -411,7 +411,7 @@ class Helper(object):
         if len(fathers) > 0:
             # We look if the below tree is goodor not
             tree_is_good = (node.state_id == 0)
-            
+
             # If the tree is good, we will use an expand image
             # and hide the tree
             if tree_is_good:
@@ -424,16 +424,16 @@ class Helper(object):
             # If we are the root, we already got this
             if level != 0:
                 s += """<a id="togglelink-%s" href="javascript:toggleBusinessElt('%s')"><img id="business-parents-img-%s" src="/static/images/%s" alt="toggle"> </a> \n""" % (name, name, name, img)
-                
+
             s += """<ul id="business-parents-%s" class="treeview" style="display: %s; ">""" % (name, display)
-        
+
             for n in fathers:
                 sub_node = n['node']
                 sub_s = self.print_business_rules(n, level=level+1)
                 s += '<li class="%s">%s</li>' % (self.get_small_icon_state(sub_node), sub_s)
             s += "</ul>"
         safe_print("Returing s:", s)
-        return s    
+        return s
 
     # Get the small state for host/service icons
     # and satellites ones
@@ -452,10 +452,10 @@ class Helper(object):
                 return 'downtime'
             if obj.is_flapping:
                 return 'flapping'
-            #Ok, no excuse, it's a true error...
+            # Ok, no excuse, it's a true error...
             return obj.state.lower()
         # Maybe it's a satellite
-        if obj.__class__.my_type in ['scheduler', 'poller', 
+        if obj.__class__.my_type in ['scheduler', 'poller',
                                      'reactionner', 'broker',
                                      'receiver']:
             if not obj.alive:
@@ -466,19 +466,19 @@ class Helper(object):
         return 'unknown'
 
 
-    # For an object, give it's business impact as text 
+    # For an object, give it's business impact as text
     # and stars if need
     def get_business_impact_text(self, obj):
-        txts = {0 : 'None', 1 : 'Low', 2: 'Normal',
-                3 : 'High', 4 : 'Very important', 5 : 'Top for business'}
+        txts = {0: 'None', 1: 'Low', 2: 'Normal',
+                3: 'High', 4: 'Very important', 5: 'Top for business'}
         nb_stars = max(0, obj.business_impact - 2)
         stars = '<img src="/static/img/icons/star.png" alt="star">\n' * nb_stars
-        
+
         res = "%s %s" % (txts.get(obj.business_impact, 'Unknown'), stars)
         return res
-            
 
-    # We will outpout as a ul/li list the impacts of this 
+
+    # We will outpout as a ul/li list the impacts of this
     def got_impacts_list_as_li(self, obj):
         impacts = obj.impacts
         r = '<ul>\n'
@@ -500,7 +500,7 @@ class Helper(object):
                 name = obj.get_name()
             else:
                 name = obj.get_full_name()
-            
+
             if mobile == False:
                 return '<a href="/service/%s"> %s </a>' % (obj.get_full_name(), name)
             else:
@@ -510,7 +510,7 @@ class Helper(object):
             return '<a href="/host/%s"> %s </a>' % (obj.get_full_name(), obj.get_full_name())
         else:
             return '<a href="/mobile/host/%s"> %s </a>' % (obj.get_full_name(), obj.get_full_name())
-    
+
     def get_link_mobile(self, obj, short=False):
         if obj.__class__.my_type == 'service':
             if short:
@@ -520,9 +520,9 @@ class Helper(object):
             return '<a href="/mobile/service/%s" rel="external"> %s </a>' % (obj.get_full_name(), name)
         # if not service, host
         return '<a href="/mobile/host/%s" rel="external"> %s </a>' % (obj.get_full_name(), obj.get_full_name())
-    
-    
-    #Give only the /service/blabla or /host blabla string, like for buttons inclusion
+
+
+    # Give only the /service/blabla or /host blabla string, like for buttons inclusion
     def get_link_dest(self, obj):
         return "/%s/%s" % (obj.__class__.my_type, obj.get_full_name())
 
@@ -540,13 +540,13 @@ class Helper(object):
             return '/static/images/sets/%s/state_%s.png' % (obj.icon_set, ico)
         else:
             return '/static/img/icons/state_%s.png' % ico
-        
-    # Get 
+
+    # Get
     def get_navi(self, total, pos, step=30):
         step = float(step)
         nb_pages = math.ceil(total / step)
         current_page = int(pos / step)
-        
+
         step = int(step)
 
         res = []
@@ -558,7 +558,7 @@ class Helper(object):
             # Name, start, end, is_current
             res.append((u'\xc2\xab First', 0, step, False))
             res.append(('...', None, None, False))
-            
+
 
         print "Range,", current_page - 1, current_page + 1
         for i in xrange(current_page - 1, current_page + 2):
@@ -580,9 +580,9 @@ class Helper(object):
             res.append(('...', None, None, False))
             res.append((u'Last \xc2\xbb', start, end, False))
 
-        print "Total :", total, "pos", pos, "step", step
+        print "Total:", total, "pos", pos, "step", step
         print "nb pages", nb_pages, "current_page", current_page
-    
+
         print "Res", res
 
         return res
@@ -592,7 +592,7 @@ class Helper(object):
     def get_perfometer(self, elt):
         if elt.perf_data != '':
             r = get_perfometer_table_values(elt)
-            #If the perfmeter are not good, bail out
+            # If the perfmeter are not good, bail out
             if r is None:
                 return '\n'
 
@@ -630,7 +630,7 @@ class Helper(object):
     # the full_name with / changed as -- (because in html, / is not valid :) )
     def get_html_id(self, elt):
         return elt.get_full_name().replace('/','--').replace(' ','_')
-    
+
     # URI with spaces are BAD, must change them with %20
     def get_uri_name(self, elt):
         return elt.get_full_name().replace(' ', '%20')
@@ -639,7 +639,7 @@ class Helper(object):
     def can_action(self, user):
         return user.is_admin or user.can_submit_commands
 
-    
-    
+
+
 
 helper = Helper()

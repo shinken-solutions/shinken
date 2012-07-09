@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-
-# Copyright (C) 2009-2011 :
+#
+# Copyright (C) 2009-2011:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -86,7 +86,7 @@ define discoveryrule {
        creation_type            host
        # Sample filter for getting port 80
        #openports                ^80$
-       FILTER                   VALUE 
+       FILTER                   VALUE
        +use                     %s
 }
 """ % (pack_name, pack_name)

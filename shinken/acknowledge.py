@@ -61,7 +61,7 @@ class Acknowledge:
     # next time Shinken restarts. "persistent" not only means "survive
     # restarts", but also
     #
-    # => End of comment Missing !!
+    # => End of comment Missing!!
     # </WTF??>
 
     def __init__(self, ref, sticky, notify, persistent,

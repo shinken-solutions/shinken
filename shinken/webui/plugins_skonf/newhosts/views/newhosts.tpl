@@ -16,12 +16,12 @@
       <label for="names">Scan:</label>
       <textarea name="names" type="textarea" class='input-xxlarge' tabindex="1" rows="4" placeholder='Please type your hosts IP/FQDN here' value=''></textarea>
     </div>
-    <a id='btn_adv_options' class='btn btn-info' href="javascript:newhosts_show_adv_options()"><i class="icon-chevron-down"></i> Show advanced options</a></span>    
+    <a id='btn_adv_options' class='btn btn-info' href="javascript:newhosts_show_adv_options()"><i class="icon-chevron-down"></i> Show advanced options</a></span>
     <div id='adv_options'>
       <input type="hidden" value="1" name="use_nmap">
       <div class="check-field">
 	<span class="help-inline">Use Nmap discovery</span>
-	<input type="checkbox" id="use_nmap" tabindex="1" checked name="use_nmap"> 
+	<input type="checkbox" id="use_nmap" tabindex="1" checked name="use_nmap">
 	<p class="help-block" for="use_vmware"> Nmap is a network based scanner</p>
       </div>
       <input type="hidden" value="1" name="use_vmware">

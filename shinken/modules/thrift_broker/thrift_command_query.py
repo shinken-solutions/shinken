@@ -34,15 +34,15 @@ class ThriftCommandQuery(ThriftQuery):
 
     def parse_input(self, data):
         """Parse the lines of a thrift request.
-        
+
         This function looks for keywords in input lines and
         sets the attributes of the request object
-        
+
         """
         for line in data.splitlines():
             line = line.strip()
             # Tools like NagVis send KEYWORK:option, and we prefer to have
-            # a space following the :
+            # a space following the:
             if ':' in line and not ' ' in line:
                 line = line.replace(':', ': ')
             keyword = line.split(' ')[0].rstrip(':')
@@ -50,7 +50,7 @@ class ThriftCommandQuery(ThriftQuery):
                 cmd, self.extcmd = line.split(' ', 1)
             else:
                 # This line is not valid or not implemented
-                print "Received a line of input which i can't handle : '%s'" % line
+                print "Received a line of input which i can't handle: '%s'" % line
                 pass
 
 

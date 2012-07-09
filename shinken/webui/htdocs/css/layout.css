@@ -12,9 +12,9 @@
  *     - Host header				#host_header
  *     - Host more					#host_more
  *  + Elements:
- *     - Headlines 
- *     - 
- *     - Tables				
+ *     - Headlines
+ *     -
+ *     - Tables
  *  + Classes
  *     - General				 	-> http://css3please.com/
  *     - Images
@@ -125,7 +125,7 @@ body {
 #login_footer a {
 	color: #BCBCBC;
 	text-decoration: none;
-	text-underline: none; 
+	text-underline: none;
 }
 
 /* ----------------------------------------------------------------
@@ -152,7 +152,7 @@ body {
 /* ----------------------------------------------------------------
  *  Special: Host more
  * ----------------------------------------------------------------*/
- 
+
 #host_more h3, #host_more table {
 	margin-left: 10px;
 }
@@ -231,7 +231,7 @@ table tr td {
 	padding: 4px;
 	text-align: left;
 	vertical-align: top;
-    border-bottom: 1px solid #E3E3E5;   
+    border-bottom: 1px solid #E3E3E5;
 }
 
 table tr.altrow td {
@@ -318,9 +318,9 @@ td.actions a {
   -moz-border-radius: 12px; /* FF1-3.6 */
   -webkit-border-radius: 12px; /* Saf3-4, iOS 1-3.2, Android <1.6 */
           border-radius: 12px; /* Opera 10.5, IE9, Saf5, Chrome, FF4, iOS 4, Android 2.1+ */
-          
-  /* useful if you don't want a bg color from leaking outside the border: */        
-  -moz-background-clip: padding; -webkit-background-clip: padding-box; background-clip: padding-box; 
+
+  /* useful if you don't want a bg color from leaking outside the border: */
+  -moz-background-clip: padding; -webkit-background-clip: padding-box; background-clip: padding-box;
 }
 
 .border_right {
@@ -340,12 +340,12 @@ td.actions a {
 	margin-right: 2px;
     vertical-align: -3px;
 }
- 
+
 .img_stars {
 	height: 11px;
 	margin-top: 2px;
 	margin-right: 4px;
-} 
+}
 
 .img_stars_header {
 	height: 16px;
@@ -358,13 +358,13 @@ td.actions a {
 	background: url("/static/images/warning.png") no-repeat scroll transparent;
 	background-position: 4px;
     padding-left: 24px;
-} 
+}
 
 .icon_tick {
 	background: url("/static/images/tick.png") no-repeat scroll transparent;
 	background-position: 4px;
     padding-left: 24px;
-} 
+}
 
 .icon_cross {
 	background: url("/static/images/cross.png") no-repeat scroll transparent;
@@ -411,7 +411,7 @@ td.actions a {
     background-position: 4px;
 	padding-left: 24px;
     background-size: 17px 17px;
-} 
+}
 
 .icon_service {
     background: url("/static/images/icons/flag_64.png") no-repeat scroll transparent;
@@ -528,9 +528,9 @@ td.actions a {
 
 /*
  * Dummy elements
- * 
+ *
  */
- 
+
 .prefix_custom_2 {
 	margin-left: 20%;
 }
@@ -595,41 +595,41 @@ line-height: 180px;
 		#controls{
 			margin-bottom: 20px
 		}
-		
+
 		#employee_list {
 			width:300px;
 		}
-		
+
 		.ms_container {
 			width:282px;
 			background-color: #F7F8F3;
 			border: 1px solid #dddddd;
 			float:left;
-			margin:5px; 
+			margin:5px;
 			padding: 3px 10px 15px 10px
 		}
-		
+
 		.info{
 			padding-top:10px;
 			clear:both;
 		}
-		
+
 		.info img {
 			padding: 1px;
 			background:#FFF;
 			border:1px solid #c8c8c8;
 			float:left;
 		}
-		
+
 		.vitals {
 			float:right;
 			width: 200px;
 		}
-		
+
 		.vitals h4 {
 			font-size:16px;
 		}
-		
+
 		.control {
 			cursor:pointer;
 			text-align:right;
@@ -742,16 +742,16 @@ line-height: 180px;
 
 
 /* Top rigth banner */
-/* This is the front cloud aera. The image will change with the 
+/* This is the front cloud aera. The image will change with the
 overall status */
-#animate-area  { 
+#animate-area  {
 /*  background-image:url(/static/images/sky_warning.png);*/
   background-position:0px 0px;
   background-repeat:repeat-x;
   z-index : 5;
-  width:128px; 
-  height:128px; 
-  zoom:1; 
+  width:128px;
+  height:128px;
+  zoom:1;
   position: absolute;
   top: 0;
   right: 0;
@@ -759,28 +759,28 @@ overall status */
 }
 
 /* The two area below are for parallax effect*/
-#animate-area-back-1  {     
+#animate-area-back-1  {
     background-image:url(/static/images/back_sky_1.png);
     background-position:-40px -40px;
     background-repeat:repeat-x;
     z-index : 5;
-    width:128px; 
-    height:128px; 
-    zoom:1; 
+    width:128px;
+    height:128px;
+    zoom:1;
     position: absolute;
     top: 0;
     right: 0;
     border: 0;
 }
 
-#animate-area-back-2  { 
+#animate-area-back-2  {
     background-image:url(/static/images/back_sky_2.png);
     background-position:-128px -20px;
     background-repeat:repeat-x;
     z-index : 5;
-    width:128px; 
-    height:128px; 
-    zoom:1; 
+    width:128px;
+    height:128px;
+    zoom:1;
     position: absolute;
     top: 0;
     right: 0;
@@ -1005,7 +1005,7 @@ a.pointer_down {
     background: url("/static/images/icons/gear_pointer_down.png") no-repeat scroll transparent;
 	background-position: right 10px;
 	padding-right: 32px;
-    background-size: 25px 17px;	
+    background-size: 25px 17px;
 	margin: 5px;
 }
 
@@ -1065,13 +1065,13 @@ a.down-big {
 
 
 
-#counters  { 
+#counters  {
   background-position:0px 0px;
   background-repeat:repeat-x;
   z-index : 5;
-/*  width:128px; 
+/*  width:128px;
   height:128px; */
-  zoom:1; 
+  zoom:1;
 /*  position: absolute;
   top: 0;*/
   margin-right: 150px;
@@ -1079,7 +1079,7 @@ a.down-big {
 
   border-radius: 5px;
   -webkit-border-radius: 5px;
-  -moz-border-radius: 5px;  
+  -moz-border-radius: 5px;
 }
 
 

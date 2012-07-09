@@ -1,4 +1,4 @@
-%if 'app' not in locals(): app = None      
+%if 'app' not in locals(): app = None
 
 
 	<div data-role="page" id="home2" data-theme="a">
@@ -9,9 +9,9 @@
                 	%if locals()['back_hide'] == False:
 	                	<a href="#" data-icon="back" data-rel="back" data-transition="slideleft" class="ui-btn-left">Back</a>
 					%end
-						
+
 	               	<a href="/mobile/main" data-icon="home" data-transition="slidedown" data-iconpos="notext" class="ui-btn-right">Home</a>
-					
+
                 	%# Menu composition
                 	%if menu_part <> '':
 		                <div data-role="navbar">
@@ -29,11 +29,11 @@
 		                                <li><a href="/mobile/impacts" data-transition="slide" class="ui-btn-active">Impacts</a></li>
 		                                <li><a id="right_link" href="/mobile/log" data-transition="slide">Log</a></li>
 	                                %elif menu_part == '/log':
-	                                	<li><a id="left_link" data-direction="reverse" href="/mobile/impacts" data-transition="slide">Impacts</a></li>                              
+	                                	<li><a id="left_link" data-direction="reverse" href="/mobile/impacts" data-transition="slide">Impacts</a></li>
 		                                <li><a href="/mobile/log" data-transition="slide" class="ui-btn-active">Log</a></li>
 		                                <li><a id="right_link" href="/mobile/wall" data-transition="slide">Wall</a></li>
 	                                %elif menu_part == '/wall':
-	                                	<li><a id="left_link" data-direction="reverse" href="/mobile/log" data-transition="slide">Log</a></li>                              
+	                                	<li><a id="left_link" data-direction="reverse" href="/mobile/log" data-transition="slide">Log</a></li>
 		                                <li><a href="/mobile/log" data-transition="slide" class="ui-btn-active">Wall</a></li>
 		                                <li><a id="right_link" href="/mobile/system" data-transition="slide">System state</a></li>
 	                                %elif menu_part == '/system':

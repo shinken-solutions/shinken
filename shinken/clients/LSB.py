@@ -82,7 +82,7 @@ def median(numberList):
         lower = sorted_values[len(sorted_values)/2-1]
         upper = sorted_values[len(sorted_values)/2]
 
-    return (float(lower + upper)) / 2  
+    return (float(lower + upper)) / 2
 
 def run(url, requests, concurrency, qg):
     if (concurrency > requests):

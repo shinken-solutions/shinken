@@ -132,7 +132,7 @@ class LiveStatusStack(TopBaseLiveStatusStack):
     def get_stack(self):
         """Return the top element from the stack or a filter which is always true"""
         if self.qsize() == 0:
-            return lambda x : True
+            return lambda x: True
         else:
             return self.get()
 

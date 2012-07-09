@@ -61,7 +61,7 @@ class Metric:
             if self.uom == '%':
                 self.min = 0
                 self.max = 100
-        
+
 
 
 class PerfDatas:
@@ -90,4 +90,4 @@ class PerfDatas:
     def __contains__(self, key):
         return key in self.metrics
 
-    
+

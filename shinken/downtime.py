@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -44,8 +44,8 @@ from shinken.brok import Brok
 class Downtime:
     id = 1
 
-    #Just to list the properties we will send as pickle
-    #so to others daemons, so all but NOT REF
+    # Just to list the properties we will send as pickle
+    # so to others daemons, so all but NOT REF
     properties = {
         'activate_me':  StringProp (default=[]),
         'entry_time':   IntegerProp(default=0 ,  fill_brok=['full_status']),
@@ -199,7 +199,7 @@ class Downtime:
 
     def del_automatic_comment(self):
         # Extra comment can be None if we load it from a old version of Shinken
-        # TODO : remove it in a future version when every one got upgrade
+        # TODO: remove it in a future version when every one got upgrade
         if self.extra_comment is not None:
             self.extra_comment.can_be_deleted = True
         #self.ref.del_comment(self.comment_id)
@@ -230,7 +230,7 @@ class Downtime:
     def __getstate__(self):
         cls = self.__class__
         # id is not in *_properties
-        res = { 'id' : self.id }
+        res = { 'id': self.id }
         for prop in cls.properties:
             if hasattr(self, prop):
                 res[prop] = getattr(self, prop)
@@ -240,13 +240,13 @@ class Downtime:
     # Inverted funtion of getstate
     def __setstate__(self, state):
         cls = self.__class__
-        
+
         # Maybe it's not a dict but a list like in the old 0.4 format
         # so we should call the 0.4 function for it
         if isinstance(state, list):
             self.__setstate_deprecated__(state)
-            return 
-            
+            return
+
         self.id = state['id']
         for prop in cls.properties:
             if prop in state:
@@ -258,16 +258,16 @@ class Downtime:
     # This function is DEPRECATED and will be removed in a future version of
     # Shinken. It should not be useful any more after a first load/save pass.
 
-    #Inversed funtion of getstate
+    # Inversed funtion of getstate
     def __setstate_deprecated__(self, state):
         cls = self.__class__
-        #Check if the len of this state is like the previous,
+        # Check if the len of this state is like the previous,
         # if not, we will do errors!
         # -1 because of the 'id' prop
         if len(cls.properties) != (len(state) - 1):
             print "Passing downtime"
             return
-        
+
         self.id = state.pop()
         for prop in cls.properties:
             val = state.pop()

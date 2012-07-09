@@ -24,7 +24,7 @@
 #right-container {
     right: 5px;
     background-position: center left;
-    
+
     position: absolute;
     top : 45px;
     background-color:white;
@@ -35,7 +35,7 @@
 }
 
 
-/*Border :  Copyright ZURB, freely available for distribution under the MIT license. 
+/*Border :  Copyright ZURB, freely available for distribution under the MIT license.
   http://www.zurb.com/playground/awesome-overlays
  */
 .border {

@@ -39,11 +39,11 @@ from livestatus_broker import LiveStatus_broker
 def get_instance(plugin):
     print "Get a Livestatus instance for plugin %s" % plugin.get_name()
 
-    #First try to import
+    # First try to import
     try:
         from livestatus_broker import LiveStatus_broker
     except ImportError, exp:
-        print "Warning : the plugin type %s is unavailable : %s" % ('livestatus', exp)
+        print "Warning: the plugin type %s is unavailable: %s" % ('livestatus', exp)
         return None
 
     instance = LiveStatus_broker(plugin)

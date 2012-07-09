@@ -24,27 +24,27 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 properties = {
-    'daemons' : ['broker'],
-    'type' : 'merlindb',
-    'phases' : ['running'],
+    'daemons': ['broker'],
+    'type': 'merlindb',
+    'phases': ['running'],
     }
 
 
-#called by the plugin manager to get a broker
+# called by the plugin manager to get a broker
 def get_instance(plugin):
     print "Get a Merlin broker for plugin %s" % plugin.get_name()
     print "Get backend", plugin.backend
     backend = plugin.backend
 
-    #First try to import
+    # First try to import
     try:
         from merlindb_broker import Merlindb_broker
     except ImportError , exp:
-        print "Warning : the plugin type %s is unavailable : %s" % (properties['type'], exp)
+        print "Warning: the plugin type %s is unavailable: %s" % (properties['type'], exp)
         return None
 
 
-    #Now load the goo module for the backend
+    # Now load the goo module for the backend
     if backend == 'mysql':
         try:
             host = plugin.host
@@ -60,7 +60,7 @@ def get_instance(plugin):
             return instance
 
         except ImportError , exp:
-            print "Warning : the plugin type %s is unavailable : %s" % (properties['type'], exp)
+            print "Warning: the plugin type %s is unavailable: %s" % (properties['type'], exp)
             return None
 
     if backend == 'sqlite':
@@ -70,7 +70,7 @@ def get_instance(plugin):
             return instance
 
         except ImportError , exp:
-            print "Warning : the plugin type %s is unavailable : %s" % (properties['type'], exp)
+            print "Warning: the plugin type %s is unavailable: %s" % (properties['type'], exp)
             return None
 
     print "Not creating a instance!!!"

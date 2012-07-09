@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -45,7 +45,7 @@ class DBMysql(DB):
 
     def connect_database(self):
         """Create the database connection
-        TODO : finish (begin :) ) error catch and conf parameters...
+        TODO: finish (begin :) ) error catch and conf parameters...
         Import to catch exception
         """
 
@@ -73,8 +73,8 @@ class DBMysql(DB):
             self.db_cursor.execute(query)
             self.db.commit()
         except IntegrityError, exp:
-            print "[MysqlDB] Warning : a query raise an integrity error :" \
+            print "[MysqlDB] Warning: a query raise an integrity error:" \
                   " %s, %s" % (query, exp)
         except ProgrammingError, exp:
-            print "[MysqlDB] Warning : a query raise a programming error :" \
+            print "[MysqlDB] Warning: a query raise a programming error:" \
                   " %s, %s" % (query, exp)

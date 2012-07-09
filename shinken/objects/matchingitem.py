@@ -53,7 +53,7 @@ class MatchingItem(Item):
             matchings = [mt.strip() for mt in m.split(',')]
         else:
             matchings = [m]
-        
+
         # Split the alue by , too
         values = value.split(',')
         for m in matchings:
@@ -70,7 +70,7 @@ class MatchingItem(Item):
         # If we got not data, no way we can match
         if len(datas) == 0:
             return False
-        
+
         # First we look if it's possible to match
         # we must match All self.matches things
         for m in self.matches:

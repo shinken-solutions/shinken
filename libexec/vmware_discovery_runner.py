@@ -1,24 +1,24 @@
 #!/usr/bin/env python
-#Copyright (C) 2009-2010 :
+# Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
 #    Hartmut Goebel <h.goebel@goebel-consult.de>
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
 import sys
@@ -30,13 +30,13 @@ from subprocess import Popen, PIPE
 # Try to load json (2.5 and higer) or simplejson if failed (python2.4)
 try:
     import json
-except ImportError: 
-    # For old Python version, load 
+except ImportError:
+    # For old Python version, load
     # simple json (it can be hard json?! It's 2 functions guy!)
     try:
         import simplejson as json
     except ImportError:
-        sys.exit("Error : you need the json or simplejson module for this script")
+        sys.exit("Error: you need the json or simplejson module for this script")
 
 VERSION = '0.1'
 
@@ -81,10 +81,10 @@ def get_vmware_hosts(check_esx_path, vcenter, user, password):
     print ' '.join(list_host_cmd)
     p = Popen(list_host_cmd, stdout=PIPE, stderr=PIPE)
     output = p.communicate()
-    
+
     print "Exit status", p.returncode
     if p.returncode == 2:
-        print "Error : the check_esx3.pl return in error :", output
+        print "Error: the check_esx3.pl return in error:", output
         sys.exit(2)
 
     parts = output[0].split(':')
@@ -98,7 +98,7 @@ def get_vmware_hosts(check_esx_path, vcenter, user, password):
         elts = hst_raw.split('(')
         hst = elts[0]
         hosts.append(hst)
-    
+
     return hosts
 
 
@@ -114,7 +114,7 @@ def get_vm_of_host(check_esx_path, vcenter, host, user, password):
 
     print "Exit status", p.returncode
     if p.returncode == 2:
-        print "Error : the check_esx3.pl return in error :", output
+        print "Error: the check_esx3.pl return in error:", output
         sys.exit(2)
 
     parts = output[0].split(':')
@@ -125,7 +125,7 @@ def get_vm_of_host(check_esx_path, vcenter, host, user, password):
 
     vms_raw = parts[1].split('|')[0]
     vms_raw_lst = vms_raw.split(',')
-    
+
     lst = []
     for vm_raw in vms_raw_lst:
         vm_raw = vm_raw.strip()
@@ -161,14 +161,14 @@ def write_output(r, path):
         shutil.move(path+'.tmp', path)
         print "File %s wrote" % path
     except IOError, exp:
-        sys.exit("Error writing the file %s : %s" % (path, exp))
+        sys.exit("Error writing the file %s: %s" % (path, exp))
 
 
 def main(check_esx_path, vcenter, user, password, rules):
     rules = _split_rules(rules)
     res = {}
     hosts = get_vmware_hosts(check_esx_path, vcenter, user, password)
-    
+
     for host in hosts:
         lst = get_vm_of_host(check_esx_path, vcenter, host, user, password)
         if lst:

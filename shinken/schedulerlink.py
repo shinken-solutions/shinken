@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -29,6 +29,8 @@ from shinken.satellitelink import SatelliteLink, SatelliteLinks
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 
 from shinken.pyro_wrapper import Pyro
+from shinken.pyro_wrapper import PYRO_VERSION
+
 from shinken.log  import logger
 
 
@@ -53,7 +55,7 @@ class SchedulerLink(SatelliteLink):
         'conf':      StringProp(default=None),
         'need_conf': StringProp(default=True),
         'external_commands': StringProp(default=[]),
-        'push_flavor' : IntegerProp(default=0),
+        'push_flavor': IntegerProp(default=0),
     })
 
 
@@ -77,7 +79,7 @@ class SchedulerLink(SatelliteLink):
             return False
         except TypeError, exp:
             try:
-                exp = ''.join(Pyro.util.getPyroTraceback(exp))
+                exp = ''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback())
             except:
                 pass
 
@@ -87,7 +89,7 @@ class SchedulerLink(SatelliteLink):
             return False
         except Exception, exp:
             try:
-                exp = ''.join(Pyro.util.getPyroTraceback(exp))
+                exp = ''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback())
             except:
                 pass
 

@@ -1,5 +1,5 @@
-#!/usr/bin/env python2.6
-# Copyright (C) 2009-2010 :
+#!/usr/bin/env python
+# Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
@@ -23,17 +23,15 @@
 #
 
 import re
-#It's ugly I know....
 from shinken_test import *
 
 
 class TestBusinesscorrel(ShinkenTest):
-    # Uncomment this is you want to use a specific configuration
-    # for your test
+
     def setUp(self):
         self.setup_with_file('etc/nagios_business_correlator.cfg')
 
-    
+
     # We will try a simple bd1 OR db2
     def test_simple_or_business_correlator(self):
         #
@@ -51,7 +49,7 @@ class TestBusinesscorrel(ShinkenTest):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
         svc.act_depend_of = [] # no hostchecks on critical checkresults
-        
+
         svc_bd1 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "db1")
         self.assert_(svc_bd1.got_business_rule == False)
         self.assert_(svc_bd1.business_rule is None)
@@ -74,23 +72,23 @@ class TestBusinesscorrel(ShinkenTest):
 
         sons = bp_rule.sons
         print "Sons,", sons
-        #We(ve got 2 sons, 2 services nodes
+        # We've got 2 sons, 2 services nodes
         self.assert_(len(sons) == 2)
         self.assert_(sons[0].operand == 'service')
         self.assert_(sons[0].sons[0] == svc_bd1)
         self.assert_(sons[1].operand == 'service')
         self.assert_(sons[1].sons[0] == svc_bd2)
-        
+
         # Now state working on the states
-        self.scheduler_loop(1, [[svc_bd2, 0, 'OK | value1=1 value2=2'], [svc_bd1, 0, 'OK | rtt=10']])        
+        self.scheduler_loop(1, [[svc_bd2, 0, 'OK | value1=1 value2=2'], [svc_bd1, 0, 'OK | rtt=10']])
         self.assert_(svc_bd1.state == 'OK')
         self.assert_(svc_bd1.state_type == 'HARD')
         self.assert_(svc_bd2.state == 'OK')
         self.assert_(svc_bd2.state_type == 'HARD')
-        
+
         state = bp_rule.get_state()
         self.assert_(state == 0)
-        
+
         # Now we set the bd1 as soft/CRITICAL
         self.scheduler_loop(1, [[svc_bd1, 2, 'CRITICAL | value1=1 value2=2']])
         self.assert_(svc_bd1.state == 'CRITICAL')
@@ -100,13 +98,13 @@ class TestBusinesscorrel(ShinkenTest):
         # The business rule must still be 0
         state = bp_rule.get_state()
         self.assert_(state == 0)
-        
+
         # Now we get bd1 CRITICAL/HARD
         self.scheduler_loop(1, [[svc_bd1, 2, 'CRITICAL | value1=1 value2=2']])
         self.assert_(svc_bd1.state == 'CRITICAL')
         self.assert_(svc_bd1.state_type == 'HARD')
         self.assert_(svc_bd1.last_hard_state_id == 2)
-        
+
         # The rule must still be a 0 (or inside)
         state = bp_rule.get_state()
         self.assert_(state == 0)
@@ -116,7 +114,7 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(svc_bd2.state == 'CRITICAL')
         self.assert_(svc_bd2.state_type == 'HARD')
         self.assert_(svc_bd2.last_hard_state_id == 2)
-        
+
         # And now the state of the rule must be 2
         state = bp_rule.get_state()
         self.assert_(state == 2)
@@ -150,7 +148,7 @@ class TestBusinesscorrel(ShinkenTest):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
         svc.act_depend_of = [] # no hostchecks on critical checkresults
-        
+
         svc_bd1 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "db1")
         self.assert_(svc_bd1.got_business_rule == False)
         self.assert_(svc_bd1.business_rule is None)
@@ -165,23 +163,23 @@ class TestBusinesscorrel(ShinkenTest):
 
         sons = bp_rule.sons
         print "Sons,", sons
-        #We(ve got 2 sons, 2 services nodes
+        # We've got 2 sons, 2 services nodes
         self.assert_(len(sons) == 2)
         self.assert_(sons[0].operand == 'service')
         self.assert_(sons[0].sons[0] == svc_bd1)
         self.assert_(sons[1].operand == 'service')
         self.assert_(sons[1].sons[0] == svc_bd2)
-        
+
         # Now state working on the states
-        self.scheduler_loop(1, [[svc_bd2, 0, 'OK | value1=1 value2=2'], [svc_bd1, 0, 'OK | rtt=10']])        
+        self.scheduler_loop(1, [[svc_bd2, 0, 'OK | value1=1 value2=2'], [svc_bd1, 0, 'OK | rtt=10']])
         self.assert_(svc_bd1.state == 'OK')
         self.assert_(svc_bd1.state_type == 'HARD')
         self.assert_(svc_bd2.state == 'OK')
         self.assert_(svc_bd2.state_type == 'HARD')
-        
+
         state = bp_rule.get_state()
         self.assert_(state == 0)
-        
+
         # Now we set the bd1 as soft/CRITICAL
         self.scheduler_loop(1, [[svc_bd1, 2, 'CRITICAL | value1=1 value2=2']])
         self.assert_(svc_bd1.state == 'CRITICAL')
@@ -192,13 +190,13 @@ class TestBusinesscorrel(ShinkenTest):
         # becase we want HARD states
         state = bp_rule.get_state()
         self.assert_(state == 0)
-        
+
         # Now we get bd1 CRITICAL/HARD
         self.scheduler_loop(1, [[svc_bd1, 2, 'CRITICAL | value1=1 value2=2']])
         self.assert_(svc_bd1.state == 'CRITICAL')
         self.assert_(svc_bd1.state_type == 'HARD')
         self.assert_(svc_bd1.last_hard_state_id == 2)
-        
+
         # The rule must go CRITICAL
         state = bp_rule.get_state()
         self.assert_(state == 2)
@@ -208,7 +206,7 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(svc_bd2.state == 'WARNING')
         self.assert_(svc_bd2.state_type == 'HARD')
         self.assert_(svc_bd2.last_hard_state_id == 1)
-        
+
         # And now the state of the rule must be 2
         state = bp_rule.get_state()
         self.assert_(state == 2)
@@ -243,7 +241,7 @@ class TestBusinesscorrel(ShinkenTest):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
         svc.act_depend_of = [] # no hostchecks on critical checkresults
-        
+
         svc_bd1 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "db1")
         self.assert_(svc_bd1.got_business_rule == False)
         self.assert_(svc_bd1.business_rule is None)
@@ -257,8 +255,8 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(bp_rule.operand == 'of:')
         # Simple 1of: so in fact a triple (1,2,2) (1of and MAX,MAX
         self.assert_(bp_rule.of_values == (1,2,2))
-        
-        
+
+
         sons = bp_rule.sons
         print "Sons,", sons
         # We've got 2 sons, 2 services nodes
@@ -267,17 +265,17 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(sons[0].sons[0] == svc_bd1)
         self.assert_(sons[1].operand == 'service')
         self.assert_(sons[1].sons[0] == svc_bd2)
-        
+
         # Now state working on the states
-        self.scheduler_loop(1, [[svc_bd2, 0, 'OK | value1=1 value2=2'], [svc_bd1, 0, 'OK | rtt=10']])        
+        self.scheduler_loop(1, [[svc_bd2, 0, 'OK | value1=1 value2=2'], [svc_bd1, 0, 'OK | rtt=10']])
         self.assert_(svc_bd1.state == 'OK')
         self.assert_(svc_bd1.state_type == 'HARD')
         self.assert_(svc_bd2.state == 'OK')
         self.assert_(svc_bd2.state_type == 'HARD')
-        
+
         state = bp_rule.get_state()
         self.assert_(state == 0)
-        
+
         # Now we set the bd1 as soft/CRITICAL
         self.scheduler_loop(1, [[svc_bd1, 2, 'CRITICAL | value1=1 value2=2']])
         self.assert_(svc_bd1.state == 'CRITICAL')
@@ -288,13 +286,13 @@ class TestBusinesscorrel(ShinkenTest):
         # becase we want HARD states
         state = bp_rule.get_state()
         self.assert_(state == 0)
-        
+
         # Now we get bd1 CRITICAL/HARD
         self.scheduler_loop(1, [[svc_bd1, 2, 'CRITICAL | value1=1 value2=2']])
         self.assert_(svc_bd1.state == 'CRITICAL')
         self.assert_(svc_bd1.state_type == 'HARD')
         self.assert_(svc_bd1.last_hard_state_id == 2)
-        
+
         # The rule still be OK
         state = bp_rule.get_state()
         self.assert_(state == 0)
@@ -304,7 +302,7 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(svc_bd2.state == 'CRITICAL')
         self.assert_(svc_bd2.state_type == 'HARD')
         self.assert_(svc_bd2.last_hard_state_id == 2)
-        
+
         # And now the state of the rule must be 2 now
         state = bp_rule.get_state()
         self.assert_(state == 2)
@@ -337,7 +335,7 @@ class TestBusinesscorrel(ShinkenTest):
         router = self.sched.hosts.find_by_name("test_router_0")
         router.checks_in_progress = []
         router.act_depend_of = [] # ignore the router
-        
+
         svc_cor = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Simple_1Of_with_host")
         self.assert_(svc_cor.got_business_rule == True)
         self.assert_(svc_cor.business_rule is not None)
@@ -345,8 +343,8 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(bp_rule.operand == 'of:')
         # Simple 1of: so in fact a triple (1,2,2) (1of and MAX,MAX
         self.assert_(bp_rule.of_values == (1,2,2))
-        
-        
+
+
         sons = bp_rule.sons
         print "Sons,", sons
         # We've got 2 sons, 2 services nodes
@@ -355,7 +353,7 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(sons[0].sons[0] == host)
         self.assert_(sons[1].operand == 'host')
         self.assert_(sons[1].sons[0] == router)
-        
+
 
 
 
@@ -377,7 +375,7 @@ class TestBusinesscorrel(ShinkenTest):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
         svc.act_depend_of = [] # no hostchecks on critical checkresults
-        
+
         svc_bd1 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "db1")
         self.assert_(svc_bd1.got_business_rule == False)
         self.assert_(svc_bd1.business_rule is None)
@@ -392,20 +390,20 @@ class TestBusinesscorrel(ShinkenTest):
 
         sons = bp_rule.sons
         print "Sons,", sons
-        #We(ve got 2 sons, 2 services nodes
+        # We've got 2 sons, 2 services nodes
         self.assert_(len(sons) == 2)
         self.assert_(sons[0].operand == 'service')
         self.assert_(sons[0].sons[0] == svc_bd1)
         self.assert_(sons[1].operand == 'service')
         self.assert_(sons[1].sons[0] == svc_bd2)
-        
+
         # Now state working on the states
         self.scheduler_loop(1, [[svc_bd2, 0, 'OK | value1=1 value2=2'], [svc_bd1, 0, 'OK | rtt=10']])
         self.assert_(svc_bd1.state == 'OK')
         self.assert_(svc_bd1.state_type == 'HARD')
         self.assert_(svc_bd2.state == 'OK')
         self.assert_(svc_bd2.state_type == 'HARD')
-        
+
         state = bp_rule.get_state()
         self.assert_(state == 0)
 
@@ -414,21 +412,21 @@ class TestBusinesscorrel(ShinkenTest):
         c = svc_cor.actions[0]
         self.assert_(c.internal == True)
         self.assert_(c.is_launchable(now))
-        
-        #ask the scheduler to launch this check
-        #and ask 2 loops: one for launch the check
-        #and another to integer the result
+
+        # ask the scheduler to launch this check
+        # and ask 2 loops: one for launch the check
+        # and another to integer the result
         self.scheduler_loop(2, [])
 
         # We should have no more the check
         self.assert_(len(svc_cor.actions) == 0)
-        
+
         print "Look at svc_cor state", svc_cor.state
         # What is the svc_cor state now?
         self.assert_(svc_cor.state == 'OK')
         self.assert_(svc_cor.state_type == 'HARD')
         self.assert_(svc_cor.last_hard_state_id == 0)
-        
+
 
         # Now we set the bd1 as soft/CRITICAL
         self.scheduler_loop(1, [[svc_bd1, 2, 'CRITICAL | value1=1 value2=2']])
@@ -445,28 +443,28 @@ class TestBusinesscorrel(ShinkenTest):
         c = svc_cor.actions[0]
         self.assert_(c.internal == True)
         self.assert_(c.is_launchable(now))
-        
-        #ask the scheduler to launch this check
-        #and ask 2 loops: one for launch the check
-        #and another to integer the result
+
+        # ask the scheduler to launch this check
+        # and ask 2 loops: one for launch the check
+        # and another to integer the result
         self.scheduler_loop(2, [])
 
         # We should have no more the check
         self.assert_(len(svc_cor.actions) == 0)
-        
+
         print "Look at svc_cor state", svc_cor.state
         # What is the svc_cor state now?
         self.assert_(svc_cor.state == 'OK')
         self.assert_(svc_cor.state_type == 'HARD')
         self.assert_(svc_cor.last_hard_state_id == 0)
 
-        
+
         # Now we get bd1 CRITICAL/HARD
         self.scheduler_loop(1, [[svc_bd1, 2, 'CRITICAL | value1=1 value2=2']])
         self.assert_(svc_bd1.state == 'CRITICAL')
         self.assert_(svc_bd1.state_type == 'HARD')
         self.assert_(svc_bd1.last_hard_state_id == 2)
-        
+
         # The rule must still be a 0 (or inside)
         state = bp_rule.get_state()
         self.assert_(state == 0)
@@ -476,15 +474,15 @@ class TestBusinesscorrel(ShinkenTest):
         c = svc_cor.actions[0]
         self.assert_(c.internal == True)
         self.assert_(c.is_launchable(now))
-        
-        #ask the scheduler to launch this check
-        #and ask 2 loops: one for launch the check
-        #and another to integer the result
+
+        # ask the scheduler to launch this check
+        # and ask 2 loops: one for launch the check
+        # and another to integer the result
         self.scheduler_loop(2, [])
 
         # We should have no more the check
         self.assert_(len(svc_cor.actions) == 0)
-        
+
         print "Look at svc_cor state", svc_cor.state
         # What is the svc_cor state now?
         self.assert_(svc_cor.state == 'OK')
@@ -497,47 +495,47 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(svc_bd2.state == 'CRITICAL')
         self.assert_(svc_bd2.state_type == 'HARD')
         self.assert_(svc_bd2.last_hard_state_id == 2)
-        
+
         # And now the state of the rule must be 2
         state = bp_rule.get_state()
         self.assert_(state == 2)
-        
+
         # And now we must be CRITICAL/SOFT!
         print "Launch internal check"
         svc_cor.launch_check(now-1)
         c = svc_cor.actions[0]
         self.assert_(c.internal == True)
         self.assert_(c.is_launchable(now))
-        
-        #ask the scheduler to launch this check
-        #and ask 2 loops: one for launch the check
-        #and another to integer the result
+
+        # ask the scheduler to launch this check
+        # and ask 2 loops: one for launch the check
+        # and another to integer the result
         self.scheduler_loop(2, [])
 
         # We should have no more the check
         self.assert_(len(svc_cor.actions) == 0)
-        
+
         print "Look at svc_cor state", svc_cor.state
         # What is the svc_cor state now?
         self.assert_(svc_cor.state == 'CRITICAL')
         self.assert_(svc_cor.state_type == 'SOFT')
         self.assert_(svc_cor.last_hard_state_id == 0)
 
-        #OK, re recheck again, GO HARD!
+        # OK, re recheck again, GO HARD!
         print "Launch internal check"
         svc_cor.launch_check(now-1)
         c = svc_cor.actions[0]
         self.assert_(c.internal == True)
         self.assert_(c.is_launchable(now))
-        
-        #ask the scheduler to launch this check
-        #and ask 2 loops: one for launch the check
-        #and another to integer the result
+
+        # ask the scheduler to launch this check
+        # and ask 2 loops: one for launch the check
+        # and another to integer the result
         self.scheduler_loop(2, [])
 
         # We should have no more the check
         self.assert_(len(svc_cor.actions) == 0)
-        
+
         print "Look at svc_cor state", svc_cor.state
         # What is the svc_cor state now?
         self.assert_(svc_cor.state == 'CRITICAL')
@@ -561,21 +559,21 @@ class TestBusinesscorrel(ShinkenTest):
         c = svc_cor.actions[0]
         self.assert_(c.internal == True)
         self.assert_(c.is_launchable(now))
-        
-        #ask the scheduler to launch this check
-        #and ask 2 loops: one for launch the check
-        #and another to integer the result
+
+        # ask the scheduler to launch this check
+        # and ask 2 loops: one for launch the check
+        # and another to integer the result
         self.scheduler_loop(2, [])
 
         # We should have no more the check
         self.assert_(len(svc_cor.actions) == 0)
-        
+
         print "Look at svc_cor state", svc_cor.state
         # What is the svc_cor state now?
         self.assert_(svc_cor.state == 'WARNING')
         self.assert_(svc_cor.state_type == 'HARD')
         self.assert_(svc_cor.last_hard_state_id == 1)
-        
+
         print "All elements", bp_rule.list_all_elements()
 
         print "IMPACT:", svc_bd2.impacts
@@ -627,7 +625,7 @@ class TestBusinesscorrel(ShinkenTest):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
         svc.act_depend_of = [] # no hostchecks on critical checkresults
-        
+
         svc_bd1 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "db1")
         self.assert_(svc_bd1.got_business_rule == False)
         self.assert_(svc_bd1.business_rule is None)
@@ -654,20 +652,20 @@ class TestBusinesscorrel(ShinkenTest):
 
         sons = bp_rule.sons
         print "Sons,", sons
-        #We've got 3 sons, each 3 rules
+        # We've got 3 sons, each 3 rules
         self.assert_(len(sons) == 3)
         bd_node = sons[0]
         self.assert_(bd_node.operand == '|')
         self.assert_(bd_node.sons[0].sons[0] == svc_bd1)
         self.assert_(bd_node.sons[1].sons[0] == svc_bd2)
-        
+
         # Now state working on the states
         self.scheduler_loop(1, [[svc_bd2, 0, 'OK | value1=1 value2=2'], [svc_bd1, 0, 'OK | rtt=10']])
         self.assert_(svc_bd1.state == 'OK')
         self.assert_(svc_bd1.state_type == 'HARD')
         self.assert_(svc_bd2.state == 'OK')
         self.assert_(svc_bd2.state_type == 'HARD')
-        
+
         state = bp_rule.get_state()
         self.assert_(state == 0)
 
@@ -676,21 +674,21 @@ class TestBusinesscorrel(ShinkenTest):
         c = svc_cor.actions[0]
         self.assert_(c.internal == True)
         self.assert_(c.is_launchable(now))
-        
-        #ask the scheduler to launch this check
-        #and ask 2 loops: one for launch the check
-        #and another to integer the result
+
+        # ask the scheduler to launch this check
+        # and ask 2 loops: one for launch the check
+        # and another to integer the result
         self.scheduler_loop(2, [])
 
         # We should have no more the check
         self.assert_(len(svc_cor.actions) == 0)
-        
+
         print "Look at svc_cor state", svc_cor.state
         # What is the svc_cor state now?
         self.assert_(svc_cor.state == 'OK')
         self.assert_(svc_cor.state_type == 'HARD')
         self.assert_(svc_cor.last_hard_state_id == 0)
-        
+
 
         # Now we set the bd1 as soft/CRITICAL
         self.scheduler_loop(1, [[svc_bd1, 2, 'CRITICAL | value1=1 value2=2']])
@@ -707,28 +705,28 @@ class TestBusinesscorrel(ShinkenTest):
         c = svc_cor.actions[0]
         self.assert_(c.internal == True)
         self.assert_(c.is_launchable(now))
-        
-        #ask the scheduler to launch this check
-        #and ask 2 loops: one for launch the check
-        #and another to integer the result
+
+        # ask the scheduler to launch this check
+        # and ask 2 loops: one for launch the check
+        # and another to integer the result
         self.scheduler_loop(2, [])
 
         # We should have no more the check
         self.assert_(len(svc_cor.actions) == 0)
-        
+
         print "ERP: Look at svc_cor state", svc_cor.state
         # What is the svc_cor state now?
         self.assert_(svc_cor.state == 'OK')
         self.assert_(svc_cor.state_type == 'HARD')
         self.assert_(svc_cor.last_hard_state_id == 0)
 
-        
+
         # Now we get bd1 CRITICAL/HARD
         self.scheduler_loop(1, [[svc_bd1, 2, 'CRITICAL | value1=1 value2=2']])
         self.assert_(svc_bd1.state == 'CRITICAL')
         self.assert_(svc_bd1.state_type == 'HARD')
         self.assert_(svc_bd1.last_hard_state_id == 2)
-        
+
         # The rule must still be a 0 (or inside)
         state = bp_rule.get_state()
         self.assert_(state == 0)
@@ -738,15 +736,15 @@ class TestBusinesscorrel(ShinkenTest):
         c = svc_cor.actions[0]
         self.assert_(c.internal == True)
         self.assert_(c.is_launchable(now))
-        
-        #ask the scheduler to launch this check
-        #and ask 2 loops: one for launch the check
-        #and another to integer the result
+
+        # ask the scheduler to launch this check
+        # and ask 2 loops: one for launch the check
+        # and another to integer the result
         self.scheduler_loop(2, [])
 
         # We should have no more the check
         self.assert_(len(svc_cor.actions) == 0)
-        
+
         print "ERP: Look at svc_cor state", svc_cor.state
         # What is the svc_cor state now?
         self.assert_(svc_cor.state == 'OK')
@@ -759,47 +757,47 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(svc_bd2.state == 'CRITICAL')
         self.assert_(svc_bd2.state_type == 'HARD')
         self.assert_(svc_bd2.last_hard_state_id == 2)
-        
+
         # And now the state of the rule must be 2
         state = bp_rule.get_state()
         self.assert_(state == 2)
-        
+
         # And now we must be CRITICAL/SOFT!
         print "ERP: Launch internal check"
         svc_cor.launch_check(now-1)
         c = svc_cor.actions[0]
         self.assert_(c.internal == True)
         self.assert_(c.is_launchable(now))
-        
-        #ask the scheduler to launch this check
-        #and ask 2 loops: one for launch the check
-        #and another to integer the result
+
+        # ask the scheduler to launch this check
+        # and ask 2 loops: one for launch the check
+        # and another to integer the result
         self.scheduler_loop(2, [])
 
         # We should have no more the check
         self.assert_(len(svc_cor.actions) == 0)
-        
+
         print "ERP: Look at svc_cor state", svc_cor.state
         # What is the svc_cor state now?
         self.assert_(svc_cor.state == 'CRITICAL')
         self.assert_(svc_cor.state_type == 'SOFT')
         self.assert_(svc_cor.last_hard_state_id == 0)
 
-        #OK, re recheck again, GO HARD!
+        # OK, re recheck again, GO HARD!
         print "ERP: Launch internal check"
         svc_cor.launch_check(now-1)
         c = svc_cor.actions[0]
         self.assert_(c.internal == True)
         self.assert_(c.is_launchable(now))
-        
-        #ask the scheduler to launch this check
-        #and ask 2 loops: one for launch the check
-        #and another to integer the result
+
+        # ask the scheduler to launch this check
+        # and ask 2 loops: one for launch the check
+        # and another to integer the result
         self.scheduler_loop(2, [])
 
         # We should have no more the check
         self.assert_(len(svc_cor.actions) == 0)
-        
+
         print "ERP: Look at svc_cor state", svc_cor.state
         # What is the svc_cor state now?
         self.assert_(svc_cor.state == 'CRITICAL')
@@ -823,21 +821,21 @@ class TestBusinesscorrel(ShinkenTest):
         c = svc_cor.actions[0]
         self.assert_(c.internal == True)
         self.assert_(c.is_launchable(now))
-        
-        #ask the scheduler to launch this check
-        #and ask 2 loops: one for launch the check
-        #and another to integer the result
+
+        # ask the scheduler to launch this check
+        # and ask 2 loops: one for launch the check
+        # and another to integer the result
         self.scheduler_loop(2, [])
 
         # We should have no more the check
         self.assert_(len(svc_cor.actions) == 0)
-        
+
         print "ERP: Look at svc_cor state", svc_cor.state
         # What is the svc_cor state now?
         self.assert_(svc_cor.state == 'WARNING')
         self.assert_(svc_cor.state_type == 'HARD')
         self.assert_(svc_cor.last_hard_state_id == 1)
-        
+
         print "All elements", bp_rule.list_all_elements()
 
         print "IMPACT:", svc_bd2.impacts
@@ -858,9 +856,9 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(c.internal == True)
         self.assert_(c.is_launchable(now))
 
-        #ask the scheduler to launch this check
-        #and ask 2 loops: one for launch the check
-        #and another to integer the result
+        # ask the scheduler to launch this check
+        # and ask 2 loops: one for launch the check
+        # and another to integer the result
         self.scheduler_loop(2, [])
 
         # We should have no more the check
@@ -887,9 +885,9 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(c.internal == True)
         self.assert_(c.is_launchable(now))
 
-        #ask the scheduler to launch this check
-        #and ask 2 loops: one for launch the check
-        #and another to integer the result
+        # ask the scheduler to launch this check
+        # and ask 2 loops: one for launch the check
+        # and another to integer the result
         self.scheduler_loop(2, [])
 
         # We should have no more the check
@@ -924,7 +922,7 @@ class TestBusinesscorrel(ShinkenTest):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
         svc.act_depend_of = [] # no hostchecks on critical checkresults
-        
+
         A = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "A")
         self.assert_(A.got_business_rule == False)
         self.assert_(A.business_rule is None)
@@ -947,8 +945,8 @@ class TestBusinesscorrel(ShinkenTest):
         bp_rule = svc_cor.business_rule
         self.assert_(bp_rule.operand == 'of:')
         self.assert_(bp_rule.of_values == (5,1,1))
-        
-        
+
+
         sons = bp_rule.sons
         print "Sons,", sons
         # We've got 2 sons, 2 services nodes
@@ -963,7 +961,7 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(sons[3].sons[0] == D)
         self.assert_(sons[4].operand == 'service')
         self.assert_(sons[4].sons[0] == E)
-        
+
         # Now state working on the states
         self.scheduler_loop(1, [[A, 0, 'OK'], [B, 0, 'OK'], [C, 0, 'OK'], [D, 0, 'OK'], [E, 0, 'OK']])
         self.assert_(A.state == 'OK')
@@ -976,10 +974,10 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(D.state_type == 'HARD')
         self.assert_(E.state == 'OK')
         self.assert_(E.state_type == 'HARD')
-        
+
         state = bp_rule.get_state()
         self.assert_(state == 0)
-        
+
         # Now we set the A as soft/CRITICAL
         self.scheduler_loop(1, [[A, 2, 'CRITICAL']])
         self.assert_(A.state == 'CRITICAL')
@@ -990,13 +988,13 @@ class TestBusinesscorrel(ShinkenTest):
         # becase we want HARD states
         state = bp_rule.get_state()
         self.assert_(state == 0)
-        
+
         # Now we get A CRITICAL/HARD
         self.scheduler_loop(1, [[A, 2, 'CRITICAL']])
         self.assert_(A.state == 'CRITICAL')
         self.assert_(A.state_type == 'HARD')
         self.assert_(A.last_hard_state_id == 2)
-        
+
         # The rule still be OK
         state = bp_rule.get_state()
         self.assert_(state == 2)
@@ -1006,7 +1004,7 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(B.state == 'CRITICAL')
         self.assert_(B.state_type == 'HARD')
         self.assert_(B.last_hard_state_id == 2)
-        
+
         # And now the state of the rule must be 2 now
         state = bp_rule.get_state()
         self.assert_(state == 2)
@@ -1031,15 +1029,15 @@ class TestBusinesscorrel(ShinkenTest):
         # Ok now more fun, with changing of_values and states
 
         ### W O O O O
-        # 4 of:   -> Ok (we got 4 OK, and not 4 warn or crit, so it's OK)
-        # 5,1,1  -> Warning (at least one warning, and no crit -> warning)
+        # 4 of: -> Ok (we got 4 OK, and not 4 warn or crit, so it's OK)
+        # 5,1,1 -> Warning (at least one warning, and no crit -> warning)
         # 5,2,1 -> OK (we want warning only if we got 2 bad states, so not here)
         self.scheduler_loop(2, [[A, 1, 'WARNING'], [B, 0, 'OK']])
-        #4 of: -> 4,5,5
+        # 4 of: -> 4,5,5
         bp_rule.of_values = (4,5,5)
         bp_rule.is_of_mul = False
         self.assert_(bp_rule.get_state() == 0)
-        # 5,1,1 
+        # 5,1,1
         bp_rule.of_values = (5,1,1)
         bp_rule.is_of_mul = True
         self.assert_(bp_rule.get_state() == 1)
@@ -1052,7 +1050,7 @@ class TestBusinesscorrel(ShinkenTest):
         # 4 of: -> Crtitical (not 4 ok, so we take the worse state, the critical)
         # 4,1,1 -> Critical (2 states raise the waring, but on raise critical, so worse state is critical)
         self.scheduler_loop(2, [[A, 1, 'WARNING'], [B, 2, 'Crit']])
-        #4 of: -> 4,5,5
+        # 4 of: -> 4,5,5
         bp_rule.of_values = (4,5,5)
         bp_rule.is_of_mul = False
         self.assert_(bp_rule.get_state() == 2)
@@ -1062,19 +1060,19 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(bp_rule.get_state() == 2)
 
         ##* W C C O O
-        #* 2 of: OK
-        #* 4,1,1 -> Critical (same as before)
-        #* 4,1,3 -> warning (the warning rule is raised, but the critical is not)
+        # * 2 of: OK
+        # * 4,1,1 -> Critical (same as before)
+        # * 4,1,3 -> warning (the warning rule is raised, but the critical is not)
         self.scheduler_loop(2, [[A, 1, 'WARNING'], [B, 2, 'Crit'], [C, 2, 'Crit']])
-        #* 2 of: 2,5,5
+        # * 2 of: 2,5,5
         bp_rule.of_values = (2,5,5)
         bp_rule.is_of_mul = False
         self.assert_(bp_rule.get_state() == 0)
-        #* 4,1,1
+        # * 4,1,1
         bp_rule.of_values = (4,1,1)
         bp_rule.is_of_mul = True
         self.assert_(bp_rule.get_state() == 2)
-        #* 4,1,3
+        # * 4,1,3
         bp_rule.of_values = (4,1,3)
         bp_rule.is_of_mul = True
         self.assert_(bp_rule.get_state() == 1)
@@ -1100,7 +1098,7 @@ class TestBusinesscorrel(ShinkenTest):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
         svc.act_depend_of = [] # no hostchecks on critical checkresults
-        
+
         svc_bd1 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "db1")
         self.assert_(svc_bd1.got_business_rule == False)
         self.assert_(svc_bd1.business_rule is None)
@@ -1115,24 +1113,24 @@ class TestBusinesscorrel(ShinkenTest):
 
         sons = bp_rule.sons
         print "Sons,", sons
-        #We(ve got 2 sons, 2 services nodes
+        # We've got 2 sons, 2 services nodes
         self.assert_(len(sons) == 2)
         self.assert_(sons[0].operand == 'service')
         self.assert_(sons[0].sons[0] == svc_bd1)
         self.assert_(sons[1].operand == 'service')
         self.assert_(sons[1].sons[0] == svc_bd2)
-        
+
         # Now state working on the states
-        self.scheduler_loop(2, [[svc_bd1, 0, 'OK | value1=1 value2=2'], [svc_bd2, 2, 'CRITICAL | rtt=10']])        
+        self.scheduler_loop(2, [[svc_bd1, 0, 'OK | value1=1 value2=2'], [svc_bd2, 2, 'CRITICAL | rtt=10']])
         self.assert_(svc_bd1.state == 'OK')
         self.assert_(svc_bd1.state_type == 'HARD')
         self.assert_(svc_bd2.state == 'CRITICAL')
         self.assert_(svc_bd2.state_type == 'HARD')
-        
+
         # We are a NOT, so should be OK here
         state = bp_rule.get_state()
         self.assert_(state == 0)
-        
+
         # Now we set the bd1 as soft/CRITICAL
         self.scheduler_loop(1, [[svc_bd1, 2, 'CRITICAL | value1=1 value2=2']])
         self.assert_(svc_bd1.state == 'CRITICAL')
@@ -1143,13 +1141,13 @@ class TestBusinesscorrel(ShinkenTest):
         # becase we want HARD states
         state = bp_rule.get_state()
         self.assert_(state == 0)
-        
+
         # Now we get bd1 CRITICAL/HARD
         self.scheduler_loop(1, [[svc_bd1, 2, 'CRITICAL | value1=1 value2=2']])
         self.assert_(svc_bd1.state == 'CRITICAL')
         self.assert_(svc_bd1.state_type == 'HARD')
         self.assert_(svc_bd1.last_hard_state_id == 2)
-        
+
         # The rule must go CRITICAL
         state = bp_rule.get_state()
         self.assert_(state == 2)
@@ -1159,7 +1157,7 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(svc_bd2.state == 'WARNING')
         self.assert_(svc_bd2.state_type == 'HARD')
         self.assert_(svc_bd2.last_hard_state_id == 1)
-        
+
         # And now the state of the rule must be 2
         state = bp_rule.get_state()
         self.assert_(state == 2)
@@ -1209,23 +1207,23 @@ class TestConfigBroken(ShinkenTest):
         [b.prepare() for b in self.broks.values()]
         logs = [b.data['log'] for b in self.broks.values() if b.type == 'log']
 
-        # Info : Simple_1Of_1unk_svc : my business rule is invalid
-        # Info : Simple_1Of_1unk_svc : Business rule uses unknown service test_host_0/db3
-        # Error : [items] In Simple_1Of_1unk_svc is incorrect ; from etc/business_correlator_broken/services.cfg
+        # Info: Simple_1Of_1unk_svc: my business rule is invalid
+        # Info: Simple_1Of_1unk_svc: Business rule uses unknown service test_host_0/db3
+        # Error: [items] In Simple_1Of_1unk_svc is incorrect ; from etc/business_correlator_broken/services.cfg
         self.assert_(len([log for log in logs if re.search('Simple_1Of_1unk_svc', log)]) == 3)
         self.assert_(len([log for log in logs if re.search('service test_host_0/db3', log)]) == 1)
         self.assert_(len([log for log in logs if re.search('Simple_1Of_1unk_svc.+from etc.+business_correlator_broken.+services.cfg', log)]) == 1)
-        # Info : ERP_unk_svc : my business rule is invalid
-        # Info : ERP_unk_svc : Business rule uses unknown service test_host_0/web100
-        # Info : ERP_unk_svc : Business rule uses unknown service test_host_0/lvs100
-        # Error : [items] In ERP_unk_svc is incorrect ; from etc/business_correlator_broken/services.cfg
+        # Info: ERP_unk_svc: my business rule is invalid
+        # Info: ERP_unk_svc: Business rule uses unknown service test_host_0/web100
+        # Info: ERP_unk_svc: Business rule uses unknown service test_host_0/lvs100
+        # Error: [items] In ERP_unk_svc is incorrect ; from etc/business_correlator_broken/services.cfg
         self.assert_(len([log for log in logs if re.search('ERP_unk_svc', log)]) == 4)
         self.assert_(len([log for log in logs if re.search('service test_host_0/web100', log)]) == 1)
         self.assert_(len([log for log in logs if re.search('service test_host_0/lvs100', log)]) == 1)
         self.assert_(len([log for log in logs if re.search('ERP_unk_svc.+from etc.+business_correlator_broken.+services.cfg', log)]) == 1)
-        # Info : Simple_1Of_1unk_host : my business rule is invalid
-        # Info : Simple_1Of_1unk_host : Business rule uses unknown host test_host_9
-        # Error : [items] In Simple_1Of_1unk_host is incorrect ; from etc/business_correlator_broken/services.cfg
+        # Info: Simple_1Of_1unk_host: my business rule is invalid
+        # Info: Simple_1Of_1unk_host: Business rule uses unknown host test_host_9
+        # Error: [items] In Simple_1Of_1unk_host is incorrect ; from etc/business_correlator_broken/services.cfg
         self.assert_(len([log for log in logs if re.search('Simple_1Of_1unk_host', log)]) == 3)
         self.assert_(len([log for log in logs if re.search('host test_host_9', log)]) == 1)
         self.assert_(len([log for log in logs if re.search('Simple_1Of_1unk_host.+from etc.+business_correlator_broken.+services.cfg', log)]) == 1)

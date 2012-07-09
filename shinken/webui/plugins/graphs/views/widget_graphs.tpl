@@ -15,14 +15,14 @@
     <span>No graph for this element</span>
   %end
 
-    
+
     %for g in uris:
       %img_src = g['img_src']
       %link = g['link']
      <p class='widget_graph'>
        <a href="{{link}}" target='_blank'><img src="{{img_src}}"></a>
      </p>
-				  
+
    %end
 
 

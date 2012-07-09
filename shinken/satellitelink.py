@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -31,6 +31,7 @@ import socket
 
 import shinken.pyro_wrapper as pyro
 Pyro = pyro.Pyro
+PYRO_VERSION = pyro.PYRO_VERSION
 
 from shinken.util import get_obj_name_two_args_and_void
 from shinken.objects import Item, Items
@@ -49,7 +50,7 @@ class SatelliteLink(Item):
 
     """
 
-    #id = 0 each Class will have it's own id
+    # id = 0 each Class will have it's own id
 
     properties = Item.properties.copy()
     properties.update({
@@ -117,11 +118,11 @@ class SatelliteLink(Item):
             socket.setdefaulttimeout(None)
             pyro.set_timeout(self.con, self.timeout)
         except Pyro_exp_pack, exp:
-            # But the multiprocessing module is not copatible with it!
+            # But the multiprocessing module is not compatible with it!
             # so we must disable it imadiatly after
             socket.setdefaulttimeout(None)
             self.con = None
-            logger.error("Creating connection for %s : %s" % (self.get_name(), str(exp)))
+            logger.error("Creating connection for %s: %s" % (self.get_name(), str(exp)))
 
 
 
@@ -143,7 +144,7 @@ class SatelliteLink(Item):
             return True
         except Pyro_exp_pack, exp:
             self.con = None
-            #print ''.join(Pyro.util.getPyroTraceback(exp))
+            logger.error(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
             return False
 
 
@@ -162,8 +163,8 @@ class SatelliteLink(Item):
         self.attempt = 0
         self.reachable = True
 
-        #We came from dead to alive
-        #so we must add a brok update
+        # We came from dead to alive
+        # so we must add a brok update
         if not was_alive:
             b = self.get_update_status_brok()
             self.broks.append(b)
@@ -190,7 +191,7 @@ class SatelliteLink(Item):
         self.attempt = min(self.attempt, self.max_check_attempts)
         # Don't need to warn again and again if the satellite is already dead
         if self.alive:
-            logger.info("Add failed attempt to %s (%d/%d) %s" % (self.get_name(), self.attempt, self.max_check_attempts, reason))
+            logger.warning("Add failed attempt to %s (%d/%d) %s" % (self.get_name(), self.attempt, self.max_check_attempts, reason))
 
         # check when we just go HARD (dead)
         if self.attempt == self.max_check_attempts:
@@ -346,7 +347,7 @@ class SatelliteLink(Item):
             if type(exp) == Pyro.errors.TimeoutError:
                 return
             self.con = None
-            #print "[%s]What i managed : Got exception : %s %s %s" % (self.get_name(), exp, type(exp), exp.__dict__)
+            #print "[%s]What i managed: Got exception: %s %s %s" % (self.get_name(), exp, type(exp), exp.__dict__)
             self.managed_confs = {}
 
 
@@ -469,8 +470,8 @@ class SatelliteLink(Item):
 class SatelliteLinks(Items):
     """Please Add a Docstring to describe the class here"""
 
-    #name_property = "name"
-    #inner_class = SchedulerLink
+    # name_property = "name"
+    # inner_class = SchedulerLink
 
     # We must have a realm property, so we find our realm
     def linkify(self, realms, modules):
@@ -510,6 +511,6 @@ class SatelliteLinks(Items):
                 if plug is not None:
                     new_modules.append(plug)
                 else:
-                    err = "Error : the module %s is unknown for %s" % (plug_name, s.get_name())
+                    err = "Error: the module %s is unknown for %s" % (plug_name, s.get_name())
                     s.configuration_errors.append(err)
             s.modules = new_modules

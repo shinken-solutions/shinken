@@ -23,9 +23,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-#This Class is a plugin for the Shinken Broker. It's job is to write
-#host and service perfdata to a file which can be processes by the
-#npcd daemon (http://pnp4nagios.org). It is a reimplementation of npcdmod.c
+# This Class is a plugin for the Shinken Broker. It's job is to write
+# host and service perfdata to a file which can be processes by the
+# npcd daemon (http://pnp4nagios.org). It is a reimplementation of npcdmod.c
 
 
 import shutil
@@ -39,14 +39,14 @@ from shinken.basemodule import BaseModule
 from shinken.message import Message
 
 properties = {
-    'daemons' : ['broker'],
-    'type' : 'npcdmod',
-    'external' : True,
-    'phases' : ['running'],
+    'daemons': ['broker'],
+    'type': 'npcdmod',
+    'external': True,
+    'phases': ['running'],
     }
 
 
-#called by the plugin manager to get a broker
+# called by the plugin manager to get a broker
 def get_instance(plugin):
     print "Get a npcd broker for plugin %s" % plugin.get_name()
     config_file = getattr(plugin, 'config_file', None)
@@ -59,8 +59,8 @@ def get_instance(plugin):
     return instance
 
 
-#Class for the Npcd Broker
-#Get broks and put them well-formatted in a spool file
+# Class for the Npcd Broker
+# Get broks and put them well-formatted in a spool file
 class Npcd_broker(BaseModule):
     def __init__(self, modconf, config_file, perfdata_file, perfdata_spool_dir, perfdata_spool_filename, sleep_time):
         BaseModule.__init__(self, modconf)
@@ -89,14 +89,14 @@ class Npcd_broker(BaseModule):
         # use so we do nto ask a reinit ofan instance too quickly
         self.last_need_data_send = time.time()
 
-        
+
     # Ask for a full reinit of a scheduler because we lost some data.... sorry
     def ask_reinit(self, c_id):
         # Do not ask data too quickly, very dangerous
         # one a minute
         if time.time() - self.last_need_data_send > 60:
-            print "I ask the broker for instance id data :", c_id
-            msg = Message(id=0, type='NeedData', data={'full_instance_id' : c_id}, source=self.get_name())
+            print "I ask the broker for instance id data:", c_id
+            msg = Message(id=0, type='NeedData', data={'full_instance_id': c_id}, source=self.get_name())
             self.from_q.put(msg)
             self.last_need_data_send = time.time()
         return
@@ -104,8 +104,8 @@ class Npcd_broker(BaseModule):
 
 
 
-    #Get a brok, parse it, and put in in database
-    #We call functions like manage_ TYPEOFBROK _brok that return us queries
+    # Get a brok, parse it, and put in in database
+    # We call functions like manage_ TYPEOFBROK _brok that return us queries
     def manage_brok(self, b):
         if self.process_performance_data or b.type in ('program_status', 'update_program_status'):
             BaseModule.manage_brok(self, b)
@@ -144,7 +144,7 @@ class Npcd_broker(BaseModule):
 
     # A host check has just arrived. Write the performance data to the file
     def manage_host_check_result_brok(self, b):
-        #If we don't know about the host or the service, ask for a full init phase!
+        # If we don't know about the host or the service, ask for a full init phase!
         if not b.data['host_name'] in self.host_commands:
             self.ask_reinit(b.data['instance_id'])
             return
@@ -162,7 +162,7 @@ class Npcd_broker(BaseModule):
 
     # A service check has just arrived. Write the performance data to the file
     def manage_service_check_result_brok(self, b):
-        #If we don't know about the host or the service, ask for a full init phase!
+        # If we don't know about the host or the service, ask for a full init phase!
         if not b.data['host_name'] in self.service_commands or not b.data['service_description'] in self.service_commands[b.data['host_name']]:
             self.ask_reinit(b.data['instance_id'])
             return

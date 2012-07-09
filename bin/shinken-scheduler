@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2009-2011 :
+# Copyright (C) 2009-2011:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -54,14 +54,14 @@
 
 '''
  This class is the application in charge of scheduling
- The scheduler listens to the Arbiter for the configuration sent through 
+ The scheduler listens to the Arbiter for the configuration sent through
  the given port as first argument.
- The configuration sent by the arbiter specifies which checks and actions 
- the scheduler must schedule, and a list of reactionners and pollers 
+ The configuration sent by the arbiter specifies which checks and actions
+ the scheduler must schedule, and a list of reactionners and pollers
  to execute them
- When the scheduler is already launched and has its own conf, it keeps on 
+ When the scheduler is already launched and has its own conf, it keeps on
  listening the arbiter (one a timeout)
- In case the arbiter has a new conf to send, the scheduler is stopped 
+ In case the arbiter has a new conf to send, the scheduler is stopped
  and a new one is created.
 '''
 import os
@@ -122,6 +122,6 @@ if args:
 if __name__ == '__main__':
     daemon = Shinken(debug=opts.debug_file is not None, **opts.__dict__)
     daemon.main()
-# For perf running :
+# For perf running:
 #import cProfile
 #cProfile.run('''daemon.main()''', '/tmp/scheduler.profile')
