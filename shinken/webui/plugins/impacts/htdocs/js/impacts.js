@@ -4,29 +4,29 @@
      Gregory Starck, g.starck@gmail.com
      Hartmut Goebel, h.goebel@goebel-consult.de
      Andreas Karfusehr, andreas@karfusehr.de
- 
+
  This file is part of Shinken.
- 
+
  Shinken is free software: you can redistribute it and/or modify
  it under the terms of the GNU Affero General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
- 
+
  Shinken is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU Affero General Public License for more details.
- 
+
  You should have received a copy of the GNU Affero General Public License
  along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /* Add for > icons a toggle root problem panel of this impact
-   and hide all previously open ones 
+   and hide all previously open ones
 */
 $(document).ready(
     function(){
-    
+
 	/* Keep a pointer to the currently open problem*/
 	var old_problem = null;
 	/* Keep the currently click impact */
@@ -35,14 +35,14 @@ $(document).ready(
 	var old_show_pb = null;
 	/* And the id of the problem */
 	var current_id = 0;
-  
+
 	/* We must avoid $$() call for IE, so call a standad way*/
 	var impacts = $('.impact');
 
 	/* We must avoid $$() call for IE, so call a standad way*/
 	var problems = $('.problems-panel');
-  
-    
+
+
 	/* Activate all problems, but in invisible from now*/
 	problems.css('opacity', 0);
 	problems.css('visibility', '');
@@ -77,12 +77,12 @@ $(document).ready(
 
 	    // And fidn the panel we will slide
 	    el = $('#problems-'+pb_nb);//document.getElementById("problems-"+pb_nb);
-	
+
 	    if (old_show_pb != null) {
 		new Fx.Tween(old_show_pb, {property: 'opacity'}).start(0);
 		old_show_pb = null;
 	    }
-      
+
 	    var click_same_problem = false;
 	    if (old_problem == el ) {
 		click_same_problem = true;
@@ -100,7 +100,7 @@ $(document).ready(
 
 	    old_problem = el;
 	    old_impact = impact;
-	    
+
 
 	    /* If it was hide, it was on the left, go right and show up
 	       and reverse the >> right image */
@@ -112,22 +112,22 @@ $(document).ready(
 
 		// Add the active class on the current impact
 		impact.addClass("impact-active");
-		
+
 
 		/* else it was show, go left and hide :)*/
 	    } else {
 		//alert("go hide"+pb_nb);
 		current_id = 0;
-		
+
 		el.animate({left : -450, opacity:0});
-		
+
 		// Add the active class on the current impact
 		impact.removeClass("impact-active");
 
 	    }
-	
+
 	}
-    
+
 
 	// This values is filled by teh /impact page. By default ti's -1
 	// and so it do not ask for a default expand. But it will ask for the first value if
@@ -135,6 +135,6 @@ $(document).ready(
 	if(impact_to_expand != -1){
 	    toggleBox(impact_to_expand);
 	}
-    
+
     });
 

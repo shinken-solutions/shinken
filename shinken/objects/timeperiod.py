@@ -24,54 +24,65 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
-#Calendar date: '(\d{4})-(\d{2})-(\d{2}) - (\d{4})-(\d{2})-(\d{2}) / (\d+) ([0-9:, -]+)' => len = 8  => CALENDAR_DATE
-#               '(\d{4})-(\d{2})-(\d{2}) / (\d+) ([0-9:, -]+)' => len = 5 => CALENDAR_DATE
-#               '(\d{4})-(\d{2})-(\d{2}) - (\d{4})-(\d{2})-(\d{2}) ([0-9:, -]+)' => len = 7 => CALENDAR_DATE
-#               '(\d{4})-(\d{2})-(\d{2}) ([0-9:, -]+)' => len = 4 => CALENDAR_DATE
+# Calendar date
+# -------------
+#  '(\d{4})-(\d{2})-(\d{2}) - (\d{4})-(\d{2})-(\d{2}) / (\d+) ([0-9:, -]+)'
+#   => len = 8  => CALENDAR_DATE
 #
-#Month week day:'([a-z]*) (\d+) ([a-z]*) - ([a-z]*) (\d+) ([a-z]*) / (\d+) ([0-9:, -]+)' => len = 8 => MONTH WEEK DAY
-#               ex: wednesday 1 january - thursday 2 july / 3
+#  '(\d{4})-(\d{2})-(\d{2}) / (\d+) ([0-9:, -]+)'
+#   => len = 5 => CALENDAR_DATE
 #
-#               '([a-z]*) (\d+) - ([a-z]*) (\d+) / (\d+) ([0-9:, -]+)' => len = 6
-#               ex: february 1 - march 15 / 3 => MONTH DATE
-#               ex: monday 2 - thusday 3 / 2 => WEEK DAY
-#               ex: day 2 - day 6 / 3 => MONTH DAY
+#  '(\d{4})-(\d{2})-(\d{2}) - (\d{4})-(\d{2})-(\d{2}) ([0-9:, -]+)'
+#   => len = 7 => CALENDAR_DATE
 #
-#               '([a-z]*) (\d+) - (\d+) / (\d+) ([0-9:, -]+)' => len = 6
-#               ex: february 1 - 15 / 3 => MONTH DATE
-#               ex: thursday 2 - 4 => WEEK DAY
-#               ex: day 1 - 4 => MONTH DAY
+#  '(\d{4})-(\d{2})-(\d{2}) ([0-9:, -]+)'
+#   => len = 4 => CALENDAR_DATE
 #
-#               '([a-z]*) (\d+) ([a-z]*) - ([a-z]*) (\d+) ([a-z]*) ([0-9:, -]+)' => len = 7
-#               ex: wednesday 1 january - thursday 2 july => MONTH WEEK DAY
+# Month week day
+# --------------
+#  '([a-z]*) (\d+) ([a-z]*) - ([a-z]*) (\d+) ([a-z]*) / (\d+) ([0-9:, -]+)'
+#  => len = 8 => MONTH WEEK DAY
+#  e.g.: wednesday 1 january - thursday 2 july / 3
 #
-#               '([a-z]*) (\d+) - (\d+) ([0-9:, -]+)' => len = 7
-#               ex: thursday 2 - 4 => WEEK DAY
-#               ex: february 1 - 15 / 3 => MONTH DATE
-#               ex: day 1 - 4 => MONTH DAY
+#  '([a-z]*) (\d+) - ([a-z]*) (\d+) / (\d+) ([0-9:, -]+)' => len = 6
+#  e.g.: february 1 - march 15 / 3 => MONTH DATE
+#  e.g.: monday 2 - thusday 3 / 2 => WEEK DAY
+#  e.g.: day 2 - day 6 / 3 => MONTH DAY
 #
-#               '([a-z]*) (\d+) - ([a-z]*) (\d+) ([0-9:, -]+)' => len = 5
-#               ex: february 1 - march 15  => MONTH DATE
-#               ex: monday 2 - thusday 3  => WEEK DAY
-#               ex: day 2 - day 6  => MONTH DAY
+#  '([a-z]*) (\d+) - (\d+) / (\d+) ([0-9:, -]+)' => len = 6
+#  e.g.: february 1 - 15 / 3 => MONTH DATE
+#  e.g.: thursday 2 - 4 => WEEK DAY
+#  e.g.: day 1 - 4 => MONTH DAY
 #
-#               '([a-z]*) (\d+) ([0-9:, -]+)' => len = 3
-#               ex: february 3 => MONTH DATE
-#               ex: thursday 2 => WEEK DAY
-#               ex: day 3 => MONTH DAY
+#  '([a-z]*) (\d+) ([a-z]*) - ([a-z]*) (\d+) ([a-z]*) ([0-9:, -]+)' => len = 7
+#  e.g.: wednesday 1 january - thursday 2 july => MONTH WEEK DAY
 #
-#               '([a-z]*) (\d+) ([a-z]*) ([0-9:, -]+)' => len = 4
-#               ex: thusday 3 february => MONTH WEEK DAY
+#  '([a-z]*) (\d+) - (\d+) ([0-9:, -]+)' => len = 7
+#  e.g.: thursday 2 - 4 => WEEK DAY
+#  e.g.: february 1 - 15 / 3 => MONTH DATE
+#  e.g.: day 1 - 4 => MONTH DAY
 #
-#               '([a-z]*) ([0-9:, -]+)' => len = 6
-#               ex: thusday => normal values
+#  '([a-z]*) (\d+) - ([a-z]*) (\d+) ([0-9:, -]+)' => len = 5
+#  e.g.: february 1 - march 15  => MONTH DATE
+#  e.g.: monday 2 - thusday 3  => WEEK DAY
+#  e.g.: day 2 - day 6  => MONTH DAY
 #
-#Types: CALENDAR_DATE
-#       MONTH WEEK DAY
-#       WEEK DAY
-#       MONTH DATE
-#       MONTH DAY
+#  '([a-z]*) (\d+) ([0-9:, -]+)' => len = 3
+#  e.g.: february 3 => MONTH DATE
+#  e.g.: thursday 2 => WEEK DAY
+#  e.g.: day 3 => MONTH DAY
+#
+#  '([a-z]*) (\d+) ([a-z]*) ([0-9:, -]+)' => len = 4
+#  e.g.: thusday 3 february => MONTH WEEK DAY
+#
+#  '([a-z]*) ([0-9:, -]+)' => len = 6
+#  e.g.: thusday => normal values
+#
+# Types: CALENDAR_DATE
+#        MONTH WEEK DAY
+#        WEEK DAY
+#        MONTH DATE
+#        MONTH DAY
 #
 
 import time
@@ -120,8 +131,8 @@ class Timeperiod(Item):
             else:
                 self.unresolved.append(key+' '+params[key])
 
-        self.cache = {} #For tunning purpose only
-        self.invalid_cache = {} #same but for invalid search
+        self.cache = {} # For tunning purpose only
+        self.invalid_cache = {} # same but for invalid search
         self.configuration_errors = []
         self.configuration_warnings = []
         # By default the tp is None so we know we just start
@@ -133,11 +144,11 @@ class Timeperiod(Item):
         return getattr(self, 'timeperiod_name', 'unknown_timeperiod')
 
 
-    #We fillfull properties with template ones if need
-    #for the unresolved values (like sunday ETCETC)
+    # We fillfull properties with template ones if need
+    # for the unresolved values (like sunday ETCETC)
     def get_unresolved_properties_by_inheritance(self, items):
-        #Ok, I do not have prop, Maybe my templates do?
-        #Same story for plus
+        # Ok, I do not have prop, Maybe my templates do?
+        # Same story for plus
         for i in self.templates:
             self.unresolved.extend(i.unresolved)
 
@@ -154,7 +165,7 @@ class Timeperiod(Item):
         return False
 
 
-    #will give the first time > t which is valid
+    # will give the first time > t which is valid
     def get_min_from_t(self, t):
         mins_incl = []
         for dr in self.dateranges:
@@ -162,7 +173,7 @@ class Timeperiod(Item):
         return min(mins_incl)
 
 
-    #will give the first time > t which is not valid
+    # will give the first time > t which is not valid
     def get_not_in_min_from_t(self, f):
         pass
 
@@ -183,14 +194,14 @@ class Timeperiod(Item):
 
     # will look for active/un-active change. And log it
     # [1327392000] TIMEPERIOD TRANSITION: <name>;<from>;<to>
-    # from is -1 on startup.  to is 1 if the timeperiod starts 
+    # from is -1 on startup.  to is 1 if the timeperiod starts
     # and 0 if it ends.
     def check_and_log_activation_change(self):
         now = int(time.time())
-        
+
         was_active = self.is_active
         self.is_active = self.is_time_valid(now)
-        
+
         # If we got a change, log it!
         if self.is_active != was_active:
             _from = 0
@@ -205,7 +216,7 @@ class Timeperiod(Item):
 
             # Now raise the log
             logger.log('TIMEPERIOD TRANSITION: %s;%d;%d' % (self.get_name(), _from, _to))
-        
+
 
     # clean the get_next_valid_time_from_t cache
     # The entries are a dict on t. t < now are useless
@@ -231,7 +242,7 @@ class Timeperiod(Item):
 
 
     def get_next_valid_time_from_t(self, t):
-        #first find from cache
+        # first find from cache
         t = int(t)
         original_t = t
 
@@ -244,10 +255,10 @@ class Timeperiod(Item):
         still_loop = True
 
         local_min = None
-        #Loop for all minutes...
+        # Loop for all minutes...
         while still_loop:
             #print self.get_name(), '\nLoop'
-            #Ok, not in cache...
+            # Ok, not in cache...
             dr_mins = []
             for dr in self.dateranges:
                 dr_mins.append(dr.get_next_valid_time_from_t(t))
@@ -256,10 +267,10 @@ class Timeperiod(Item):
             #for o in dr_mins:
             #    print "FUCK",time.asctime(time.localtime(o)), "\n"
 
-            #Min but not the None valus...
+            # Min but not the None valus...
             try:
                 local_min = min([d for d in dr_mins if d is not None])
-            except ValueError: #dr_mins if full of None, not good
+            except ValueError: # dr_mins if full of None, not good
                 local_min = None
 
             #if local_min != None:
@@ -267,12 +278,12 @@ class Timeperiod(Item):
             #    print "Proposed local min", time.asctime(time.localtime(local_min))
 
 
-            #We do not loop unless the local_min is not valid
+            # We do not loop unless the local_min is not valid
             still_loop = False
 
-            #if we've got a real value, we check it with the exclude
+            # if we've got a real value, we check it with the exclude
             if local_min is not None:
-                #Now check if local_min is not valid
+                # Now check if local_min is not valid
                 for tp in self.exclude:
                     #print self.get_name(), "Check in TP"
                     if tp.is_time_valid(local_min):
@@ -292,7 +303,7 @@ class Timeperiod(Item):
                 still_loop = False
             else:
                 t = local_min
-                #No loop more than one year
+                # No loop more than one year
                 if t > original_t + 3600*24*366 + 1:
                     still_loop = False
                     local_min = None
@@ -313,21 +324,21 @@ class Timeperiod(Item):
         if res_from_cache is not None:
             return res_from_cache
 
-        #Then look, maybe t is already invalid
+        # Then look, maybe t is already invalid
         if not self.is_time_valid(t):
             return t
 
         local_min = t
         res = None
-        #Loop for all minutes...
+        # Loop for all minutes...
         while still_loop:
             #print "Invalid loop with", time.asctime(time.localtime(local_min))
 
             dr_mins = []
             #val_valids = []
             #val_inval = []
-            #But maybe we can find a better solution with next invalid of standart dateranges
-            #print self.get_name(), "After valid of exclude, local_min =", time.asctime(time.localtime(local_min))
+            # But maybe we can find a better solution with next invalid of standart dateranges
+            # print self.get_name(), "After valid of exclude, local_min =", time.asctime(time.localtime(local_min))
             for dr in self.dateranges:
                 #print self.get_name(), "Search a next invalid from DR", time.asctime(time.localtime(local_min))
                 #print dr.__dict__
@@ -337,7 +348,7 @@ class Timeperiod(Item):
                 if m is not None:
                     # But maybe it's invalid for this dr, but valid for other ones.
                     #if not self.is_time_valid(m):
-                        #print "Final : Got a next invalid at", time.asctime(time.localtime(m))
+                        #print "Final: Got a next invalid at", time.asctime(time.localtime(m))
                     dr_mins.append(m)
                     #if not self.is_time_valid(m):
                     #    val_inval.append(m)
@@ -364,9 +375,9 @@ class Timeperiod(Item):
                 #    local_min = local_min_valid
                 #else:
                 #    local_min = min(dr_mins)
-                #print "UPDATE After dr : found invalid local min:", time.asctime(time.localtime(local_min)), "is valid", self.is_time_valid(local_min)
+                #print "UPDATE After dr: found invalid local min:", time.asctime(time.localtime(local_min)), "is valid", self.is_time_valid(local_min)
 
-            #print self.get_name(), 'Invalid: local min', local_min#time.asctime(time.localtime(local_min))
+            #print self.get_name(), 'Invalid: local min', local_min #time.asctime(time.localtime(local_min))
             # We do not loop unless the local_min is not valid
             if not self.is_time_valid(local_min):
                 still_loop = False
@@ -377,7 +388,7 @@ class Timeperiod(Item):
                 else: # else search for 1min precision
                     local_min += 60
                 # after one year, stop.
-                if local_min > original_t + 3600*24*366 + 1:#60*24*366 + 1:
+                if local_min > original_t + 3600*24*366 + 1: # 60*24*366 + 1:
                     still_loop = False
             #print "Loop?", still_loop
             # if we've got a real value, we check it with the exclude
@@ -387,15 +398,15 @@ class Timeperiod(Item):
                     #print self.get_name(),"we check for invalid", time.asctime(time.localtime(local_min)), 'with tp', tp.name
                     if tp.is_time_valid(local_min):
                         still_loop = True
-                        #local_min + 60
+                        # local_min + 60
                         local_min = tp.get_next_invalid_time_from_t(local_min+60)
-                        #No loop more than one year
+                        # No loop more than one year
                         if local_min > original_t + 60*24*366 + 1:
                             still_loop = False
                             res = None
 
-            if not still_loop:#We find a possible value
-                #We take the result the minimal possible
+            if not still_loop: # We find a possible value
+                # We take the result the minimal possible
                 if res is None or local_min < res:
                     res = local_min
 
@@ -409,14 +420,14 @@ class Timeperiod(Item):
         return hasattr(self, prop)
 
 
-    #We are correct only if our daterange are
-    #and if we have no unmatch entries
+    # We are correct only if our daterange are
+    # and if we have no unmatch entries
     def is_correct(self):
         b = True
         for dr in self.dateranges:
             b &= dr.is_correct()
 
-        #Even one invalid is non correct
+        # Even one invalid is non correct
         for e in self.invalid_entries:
             b = False
             logger.error("[timeperiod::%s] invalid entry '%s'" % (self.get_name(), e))
@@ -624,7 +635,7 @@ class Timeperiod(Item):
         pass
 
 
-    #create daterange from unresolved param
+    # create daterange from unresolved param
     def explode(self, timeperiods):
         for entry in self.unresolved:
             #print "Revolving entry", entry
@@ -632,7 +643,7 @@ class Timeperiod(Item):
         self.unresolved = []
 
 
-    #Will make tp in exclude with id of the timeperiods
+    # Will make tp in exclude with id of the timeperiods
     def linkify(self, timeperiods):
         new_exclude = []
         if self.has('exclude') and self.exclude != '':
@@ -660,9 +671,9 @@ class Timeperiod(Item):
 
     def fill_data_brok_from(self, data, brok_type):
         cls = self.__class__
-        #Now config properties
+        # Now config properties
         for prop, entry in cls.properties.items():
-            #Is this property intended for brokking?
+            # Is this property intended for brokking?
 #            if 'fill_brok' in entry:
             if brok_type in entry.fill_brok:
                 if hasattr(self, prop):
@@ -671,11 +682,11 @@ class Timeperiod(Item):
                     data[prop] = entry.default
 
 
-    #Get a brok with initial status
+    # Get a brok with initial status
     def get_initial_status_brok(self):
         cls = self.__class__
         my_type = cls.my_type
-        data = {'id' : self.id}
+        data = {'id': self.id}
 
         self.fill_data_brok_from(data, 'full_status')
         b = Brok('initial_'+my_type+'_status', data)
@@ -701,22 +712,22 @@ class Timeperiods(Items):
 
 
     def apply_inheritance(self):
-        #The only interesting property to inherit is exclude
+        # The only interesting property to inherit is exclude
         self.apply_partial_inheritance('exclude')
         for i in self:
             i.get_customs_properties_by_inheritance(self)
 
-        #And now apply inheritance for unresolved properties
-        #like the dateranges in fact
+        # And now apply inheritance for unresolved properties
+        # like the dateranges in fact
         for tp in self:
             tp.get_unresolved_properties_by_inheritance(self.items)
 
 
-    #check for loop in definition
+    # check for loop in definition
     def is_correct(self):
         r = True
-        #We do not want a same hg to be explode again and again
-        #so we tag it
+        # We do not want a same hg to be explode again and again
+        # so we tag it
         for tp in self.items.values():
             tp.rec_tag = False
 
@@ -725,11 +736,11 @@ class Timeperiods(Items):
                 tmp_tp.rec_tag = False
             r &= tp.check_exclude_rec()
 
-        #We clean the tags
+        # We clean the tags
         for tp in self.items.values():
             del tp.rec_tag
 
-        #And check all timeperiods for correct (sounday is false)
+        # And check all timeperiods for correct (sounday is false)
         for tp in self:
             r &= tp.is_correct()
 

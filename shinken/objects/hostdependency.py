@@ -32,8 +32,8 @@ from shinken.log import logger
 class Hostdependency(Item):
     id = 0
 
-#F is dep of D
-#host_name                      Host B
+# F is dep of D
+# host_name                      Host B
 #       service_description             Service D
 #       dependent_host_name             Host C
 #       dependent_service_description   Service F
@@ -53,7 +53,7 @@ class Hostdependency(Item):
         'notification_failure_criteria': ListProp(default='n'),
         'dependency_period':             StringProp(default='')
     })
-    
+
 
     # Give a nice name output, for debbuging purpose
     # (debugging happens more often than expected...)
@@ -85,9 +85,9 @@ class Hostdependencies(Items):
         hostdeps = self.items.keys()
         for id in hostdeps:
             hd = self.items[id]
-            if hd.is_tpl(): #Exploding template is useless
+            if hd.is_tpl(): # Exploding template is useless
                 continue
-            
+
             # We explode first the dependent (son) part
             dephnames = []
             if hasattr(hd, 'dependent_hostgroup_name'):
@@ -96,15 +96,15 @@ class Hostdependencies(Items):
                 for dephg_name in dephg_names:
                     dephg = hostgroups.find_by_name(dephg_name)
                     if dephg is None:
-                        err = "ERROR : the hostdependecy got an unknown dependent_hostgroup_name '%s'" % dephg_name
+                        err = "ERROR: the hostdependecy got an unknown dependent_hostgroup_name '%s'" % dephg_name
                         hd.configuration_errors.append(err)
                         continue
                     dephnames.extend(dephg.members.split(','))
-                    
+
             if hasattr(hd, 'dependent_host_name'):
                 dephnames.extend(hd.dependent_host_name.split(','))
 
-            #Ok, and nowthe fatehr part :)
+            # Ok, and nowthe fatehr part :)
             hnames = []
             if hasattr(hd, 'hostgroup_name'):
                 hg_names = hd.hostgroup_name.split(',')
@@ -112,7 +112,7 @@ class Hostdependencies(Items):
                 for hg_name in hg_names:
                     hg = hostgroups.find_by_name(hg_name)
                     if hg is None:
-                        err = "ERROR : the hostdependecy got an unknown hostgroup_name '%s'" % hg_name
+                        err = "ERROR: the hostdependecy got an unknown hostgroup_name '%s'" % hg_name
                         hd.configuration_errors.append(err)
                         continue
                     hnames.extend(hg.members.split(','))
@@ -146,16 +146,16 @@ class Hostdependencies(Items):
                 dh_name = hd.dependent_host_name
                 h = hosts.find_by_name(h_name)
                 if h is None:
-                    err = "Error : the host dependency got a bad host_name definition '%s'" % h_name
+                    err = "Error: the host dependency got a bad host_name definition '%s'" % h_name
                     hd.configuration_errors.append(err)
                 dh = hosts.find_by_name(dh_name)
                 if dh is None:
-                    err = "Error : the host dependency got a bad dependent_host_name definition '%s'" % dh_name
+                    err = "Error: the host dependency got a bad dependent_host_name definition '%s'" % dh_name
                     hd.configuration_errors.append(err)
                 hd.host_name = h
                 hd.dependent_host_name = dh
             except AttributeError , exp:
-                err = "Error : the host dependency miss a property '%s'" % exp
+                err = "Error: the host dependency miss a property '%s'" % exp
                 hd.configuration_errors.append(err)
 
 
@@ -187,14 +187,14 @@ class Hostdependencies(Items):
             depdt_hname.add_host_chk_dependency(hd.host_name, hd.execution_failure_criteria, dp, hd.inherits_parent)
 
 
-    #Apply inheritance for all properties
+    # Apply inheritance for all properties
     def apply_inheritance(self):
-        #We check for all Host properties if the host has it
-        #if not, it check all host templates for a value
+        # We check for all Host properties if the host has it
+        # if not, it check all host templates for a value
         for prop in Hostdependency.properties:
             self.apply_partial_inheritance(prop)
 
-        #Then implicit inheritance
-        #self.apply_implicit_inheritance(hosts)
+        # Then implicit inheritance
+        # self.apply_implicit_inheritance(hosts)
         for h in self:
             h.get_customs_properties_by_inheritance(self)

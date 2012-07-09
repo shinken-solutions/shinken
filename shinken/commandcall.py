@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -28,7 +28,7 @@ from shinken.property import StringProp, BoolProp
 
 
 class DummyCommandCall(object):
-    """Ok, slots are fun : you cannot set the __autoslots__
+    """Ok, slots are fun: you cannot set the __autoslots__
      on the same class you use, fun isn't it? So we define*
      a dummy useless class to get such :)
     """

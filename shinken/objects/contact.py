@@ -44,7 +44,7 @@ _simple_way_parameters = ( 'service_notification_period', 'host_notification_per
 
 
 class Contact(Item):
-    id = 1#0 is always special in database, so we do not take risk here
+    id = 1 # zero is always special in database, so we do not take risk here
     my_type = 'contact'
 
     properties = Item.properties.copy()
@@ -65,7 +65,7 @@ class Contact(Item):
         'pager':            StringProp(default='none', fill_brok=['full_status']),
         'address1':         StringProp(default='none', fill_brok=['full_status']),
         'address2':         StringProp(default='none', fill_brok=['full_status']),
-        'address3' :        StringProp(default='none', fill_brok=['full_status']),
+        'address3':        StringProp(default='none', fill_brok=['full_status']),
         'address4':         StringProp(default='none', fill_brok=['full_status']),
         'address5':         StringProp(default='none', fill_brok=['full_status']),
         'address6':         StringProp(default='none', fill_brok=['full_status']),
@@ -73,7 +73,7 @@ class Contact(Item):
         'is_admin':         BoolProp(default='0', fill_brok=['full_status']),
         'retain_status_information': BoolProp(default='1', fill_brok=['full_status']),
         'notificationways': StringProp(default='', fill_brok=['full_status']),
-        'password' :        StringProp(default='NOPASSWORDSET', fill_brok=['full_status']),
+        'password':        StringProp(default='NOPASSWORDSET', fill_brok=['full_status']),
     })
 
     running_properties = Item.running_properties.copy()
@@ -86,7 +86,7 @@ class Contact(Item):
     # so from Nagios2 format, to Nagios3 ones.
     # Or Shinken deprecated names like criticity
     old_properties = {
-        'min_criticity'            :    'min_business_impact',
+        'min_criticity':    'min_business_impact',
     }
 
 
@@ -106,7 +106,7 @@ class Contact(Item):
     }
 
 
-    #For debugging purpose only (nice name)
+    # For debugging purpose only (nice name)
     def get_name(self):
         try:
             return self.contact_name
@@ -136,8 +136,8 @@ class Contact(Item):
         return False
 
 
-    #Search for notification_options with state and if t is in
-    #host_notification_period
+    # Search for notification_options with state and if t is in
+    # host_notification_period
     def want_host_notification(self, t, state, type, business_impact, cmd=None):
         if not self.host_notifications_enabled:
             return False
@@ -154,11 +154,11 @@ class Contact(Item):
             if nw_b:
                 return True
 
-        #Oh, nobody..so NO :)
+        # Oh, nobody..so NO :)
         return False
 
 
-    #Call to get our commands to launch a Notification
+    # Call to get our commands to launch a Notification
     def get_notification_commands(self, type):
         r = []
         # service_notification_commands for service
@@ -169,21 +169,21 @@ class Contact(Item):
 
 
 
-    #Check is required prop are set:
-    #contacts OR contactgroups is need
+    # Check is required prop are set:
+    # contacts OR contactgroups is need
     def is_correct(self):
-        state = True #guilty or not? :)
+        state = True
         cls = self.__class__
 
-        #All of the above are checks in the notificationways part
+        # All of the above are checks in the notificationways part
         for prop, entry in cls.properties.items():
             if prop not in _special_properties:
                 if not hasattr(self, prop) and entry.required:
                     logger.error("[contact::%s] %s property not set" % (self.get_name(), prop))
-                    state = False #Bad boy...
+                    state = False # Bad boy...
 
-        #There is a case where there is no nw : when there is not special_prop defined
-        #at all!!
+        # There is a case where there is no nw: when there is not special_prop defined
+        # at all!!
         if self.notificationways == []:
             for p in _special_properties:
                 logger.error("[contact::%s] %s property is missing" % (self.get_name(), p))
@@ -195,7 +195,7 @@ class Contact(Item):
                     logger.error("[contact::%s] %s character not allowed in contact_name" % (self.get_name(), c))
                     state = False
         else:
-            if hasattr(self, 'alias'): #take the alias if we miss the contact_name
+            if hasattr(self, 'alias'): # take the alias if we miss the contact_name
                 self.contact_name = self.alias
 
         return state
@@ -231,8 +231,8 @@ class Contacts(Items):
         #self.linkify_command_list_with_commands(commands, 'host_notification_commands')
         self.linkify_with_notificationways(notificationways)
 
-    #We've got a notificationways property with , separated contacts names
-    #and we want have a list of NotificationWay
+    # We've got a notificationways property with , separated contacts names
+    # and we want have a list of NotificationWay
     def linkify_with_notificationways(self, notificationways):
         for i in self:
             if not hasattr(i, 'notificationways'): continue
@@ -241,25 +241,25 @@ class Contacts(Items):
                 nw = notificationways.find_by_name(nw_name)
                 if nw is not None:
                     new_notificationways.append(nw)
-                else: #TODO: What?
+                else: # TODO: What?
                     pass
-            #Get the list, but first make elements uniq
+            # Get the list, but first make elements uniq
             i.notificationways = list(set(new_notificationways))
 
-    
+
     def late_linkify_c_by_commands(self, commands):
         for i in self:
             for nw in i.notificationways:
                 nw.late_linkify_nw_by_commands(commands)
-            
 
 
-    #We look for contacts property in contacts and
+
+    # We look for contacts property in contacts and
     def explode(self, contactgroups, notificationways):
-        #Contactgroups property need to be fullfill for got the informations
+        # Contactgroups property need to be fullfill for got the informations
         self.apply_partial_inheritance('contactgroups')
 
-        #Register ourself into the contactsgroups we are in
+        # Register ourself into the contactsgroups we are in
         for c in self:
             if c.is_tpl() or not (hasattr(c, 'contact_name') and hasattr(c, 'contactgroups')):
                 continue
@@ -279,7 +279,7 @@ class Contacts(Items):
                     else: # put a default text value
                         # Remove the value and put a default value
                         setattr(c, p, '')
-                    
+
 
                 if need_notificationway:
                     #print "Create notif way with", params

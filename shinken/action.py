@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -67,7 +67,7 @@ class __Action(object):
 
     # Mix the env and the environnment variables
     # into a new local env dict
-    # rmq : we cannot just update os.environ because
+    # rmq: we cannot just update os.environ because
     # it will be also modified for all others checks
     def get_local_environnement(self):
         local_env = copy.copy(os.environ)
@@ -130,7 +130,7 @@ class __Action(object):
     def check_finished(self, max_plugins_output_length):
         # We must wait, but checks are variable in time
         # so we do not wait the same for an little check
-        # than a long ping. So we do like TCP : slow start with *2
+        # than a long ping. So we do like TCP: slow start with *2
         # but do not wait more than 0.1s.
         self.last_poll = time.time()
 
@@ -146,7 +146,7 @@ class __Action(object):
                 self.stdoutdata += no_block_read(self.process.stdout)
                 self.stderrdata += no_block_read(self.process.stderr)
 
-            
+
             if (now - self.check_time) > self.timeout:
                 self.kill__()
                 #print "Kill for timeout", self.process.pid, self.command, now - self.check_time
@@ -171,7 +171,7 @@ class __Action(object):
         del self.process
 
         # if the exit status is anormal, we add stderr to the output
-        # TODO : Anormal should be logged properly no?
+        # TODO: Anormal should be logged properly no?
         if self.exit_status not in valid_exit_status:
             self.stdoutdata = self.stdoutdata + self.stderrdata
         elif 'sh: -c: line 0: unexpected EOF while looking for matching' in self.stderrdata or 'sh: Syntax error: Unterminated quoted string' in self.stderrdata:
@@ -208,10 +208,10 @@ class __Action(object):
 ###
 ## OS specific "execute__" & "kill__" are defined by "Action" class definition:
 
-if os.name != 'nt': 
-    
+if os.name != 'nt':
+
     class Action(__Action):
-  
+
         # We allow direct launch only for 2.7 and higher version
         # because if a direct launch crash, under this the file handles
         # are not releases, it's not good.
@@ -219,12 +219,12 @@ if os.name != 'nt':
             # If the command line got shell characters, we should go in a shell
             # mode. So look at theses parameters
             force_shell |= self.got_shell_characters()
-            
+
             # 2.7 and higer Python version need a list of args for cmd
             # and if not force shell (if, it's useless, even dangerous)
             # 2.4->2.6 accept just the string command
             if sys.version_info < (2, 7) or force_shell:
-                cmd = self.command.encode('utf8', 'ignore')    
+                cmd = self.command.encode('utf8', 'ignore')
             else:
                 try:
                     cmd = shlex.split(self.command.encode('utf8', 'ignore'))
@@ -239,7 +239,7 @@ if os.name != 'nt':
 #            safe_print("Launching", cmd)
 #            safe_print("With env", self.local_env)
 
-            # Now : GO for launch!
+            # Now: GO for launch!
             # The preexec_fn=os.setsid is set to give sons a same process group
             # CF http://www.doughellmann.com/PyMOTW/subprocess/ for detail about this
             try:
@@ -256,7 +256,7 @@ if os.name != 'nt':
                 self.exit_status = 2
                 self.status = 'done'
                 self.execution_time = time.time() - self.check_time
-  
+
                 # Maybe we run out of file descriptor. It's not good at all!
                 if exp.errno == 24 and exp.strerror == 'Too many open files':
                     return 'toomanyopenfiles'
@@ -266,7 +266,7 @@ if os.name != 'nt':
             # We kill a process group because we launched them with preexec_fn=os.setsid and
             # so we can launch a whole kill tree instead of just the first one
             os.killpg(self.process.pid, 9)
-  
+
 else:
 
     import ctypes
@@ -292,10 +292,10 @@ else:
                 self.process = subprocess.Popen(cmd,
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=self.local_env, shell=True)
             except WindowsError, exp:
-                logger.info("We kill the process : %s %s" % (exp, self.command))
+                logger.info("We kill the process: %s %s" % (exp, self.command))
                 self.status = 'timeout'
                 self.execution_time = time.time() - self.check_time
-  
+
         def kill__(self):
-            TerminateProcess(int(self.process._handle), -1)      
+            TerminateProcess(int(self.process._handle), -1)
 

@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -30,15 +30,15 @@
 class Message:
     """This is a simple message class for communications between actionners and
     workers
-    
+
     """
 
     my_type = 'message'
     _type = None
     _data = None
     _from = None
-    
-    
+
+
     def __init__(self, id, type, data=None, source=None):
         self._type = type
         self._data = data

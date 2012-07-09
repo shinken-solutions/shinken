@@ -1,28 +1,27 @@
-#!/usr/bin/env python2.6
-#Copyright (C) 2009-2010 :
+#!/usr/bin/env python
+# Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 #
 # This file is used to test reading and processing of config files
 #
 
-#It's ugly I know....
 from shinken_test import *
 
 
@@ -105,13 +104,11 @@ class BadBroker(BrokerLink):
 
 
 class TestDispatcher(ShinkenTest):
-    #Uncomment this is you want to use a specific configuration
-    #for your test
+
     def setUp(self):
         self.setup_with_file('etc/nagios_dispatcher.cfg')
-    
-    
-    #Change ME :)
+
+
     def test_simple_dispatch(self):
         for r in self.conf.realms:
             print r.get_name()
@@ -126,14 +123,14 @@ class TestDispatcher(ShinkenTest):
             for s in lst:
                 print "TAG s", s
                 s.realm = r
-        
+
         print "Preparing schedulers"
         scheduler1 = self.conf.schedulers.find_by_name('scheduler-all-1')
         self.assert_(scheduler1 is not None)
         scheduler1.__class__ = GoodScheduler
         scheduler2 = self.conf.schedulers.find_by_name('scheduler-all-2')
         self.assert_(scheduler2 is not None)
-        scheduler2.__class__ = BadScheduler        
+        scheduler2.__class__ = BadScheduler
 
         print "Preparing pollers"
         poller1 = self.conf.pollers.find_by_name('poller-all-1')
@@ -141,7 +138,7 @@ class TestDispatcher(ShinkenTest):
         poller1.__class__ = GoodPoller
         poller2 = self.conf.pollers.find_by_name('poller-all-2')
         self.assert_(poller2 is not None)
-        poller2.__class__ = BadPoller        
+        poller2.__class__ = BadPoller
 
         print "Preparing reactionners"
         reactionner1 = self.conf.reactionners.find_by_name('reactionner-all-1')
@@ -149,7 +146,7 @@ class TestDispatcher(ShinkenTest):
         reactionner1.__class__ = GoodReactionner
         reactionner2 = self.conf.reactionners.find_by_name('reactionner-all-2')
         self.assert_(reactionner2 is not None)
-        reactionner2.__class__ = BadReactionner        
+        reactionner2.__class__ = BadReactionner
 
         print "Preparing brokers"
         broker1 = self.conf.brokers.find_by_name('broker-all-1')
@@ -157,9 +154,9 @@ class TestDispatcher(ShinkenTest):
         broker1.__class__ = GoodBroker
         broker2 = self.conf.brokers.find_by_name('broker-all-2')
         self.assert_(broker2 is not None)
-        broker2.__class__ = BadBroker        
+        broker2.__class__ = BadBroker
 
-        # Ping all elements. Should have 1 as OK, 2 as 
+        # Ping all elements. Should have 1 as OK, 2 as
         # one bad attempt (3 max)
         self.dispatcher.check_alive()
 
@@ -171,8 +168,8 @@ class TestDispatcher(ShinkenTest):
         self.assert_(scheduler2.alive == True)
         self.assert_(scheduler2.attempt == 1)
         self.assert_(scheduler2.reachable == False)
-        
-        #and others satellites too
+
+        # and others satellites too
         self.assert_(poller1.alive == True)
         self.assert_(poller1.attempt == 0)
         self.assert_(poller1.reachable == True)
@@ -181,7 +178,7 @@ class TestDispatcher(ShinkenTest):
         self.assert_(poller2.attempt == 1)
         self.assert_(poller2.reachable == False)
 
-        #and others satellites too
+        # and others satellites too
         self.assert_(reactionner1.alive == True)
         self.assert_(reactionner1.attempt == 0)
         self.assert_(reactionner1.reachable == True)
@@ -189,8 +186,8 @@ class TestDispatcher(ShinkenTest):
         self.assert_(reactionner2.alive == True)
         self.assert_(reactionner2.attempt == 1)
         self.assert_(reactionner2.reachable == False)
-        
-        #and others satellites too
+
+        # and others satellites too
         self.assert_(broker1.alive == True)
         self.assert_(broker1.attempt == 0)
         self.assert_(broker1.reachable == True)
@@ -200,7 +197,7 @@ class TestDispatcher(ShinkenTest):
         self.assert_(broker2.reachable == False)
 
         ### Now add another attempt, still alive, but attemp=2/3
-        
+
         print "CheckAlive "*10
         # We reset check time for the test
         elts = [scheduler1, scheduler2, poller1, poller2, broker1, broker2, reactionner1, reactionner2]
@@ -217,8 +214,8 @@ class TestDispatcher(ShinkenTest):
         self.assert_(scheduler2.alive == True)
         self.assert_(scheduler2.attempt == 2)
         self.assert_(scheduler2.reachable == False)
-        
-        #and others satellites too
+
+        # and others satellites too
         self.assert_(poller1.alive == True)
         self.assert_(poller1.attempt == 0)
         self.assert_(poller1.reachable == True)
@@ -227,7 +224,7 @@ class TestDispatcher(ShinkenTest):
         self.assert_(poller2.attempt == 2)
         self.assert_(poller2.reachable == False)
 
-        #and others satellites too
+        # and others satellites too
         self.assert_(reactionner1.alive == True)
         self.assert_(reactionner1.attempt == 0)
         self.assert_(reactionner1.reachable == True)
@@ -235,8 +232,8 @@ class TestDispatcher(ShinkenTest):
         self.assert_(reactionner2.alive == True)
         self.assert_(reactionner2.attempt == 2)
         self.assert_(reactionner2.reachable == False)
-        
-        #and others satellites too
+
+        # and others satellites too
         self.assert_(broker1.alive == True)
         self.assert_(broker1.attempt == 0)
         self.assert_(broker1.reachable == True)
@@ -245,7 +242,7 @@ class TestDispatcher(ShinkenTest):
         self.assert_(broker2.attempt == 2)
         self.assert_(broker2.reachable == False)
 
-        ### Now we get BAD, We go DEAD for N2 !
+        ### Now we get BAD, We go DEAD for N2!
         print "CheckAlive "*10
         # We reset check time for the test
         elts = [scheduler1, scheduler2, poller1, poller2, broker1, broker2, reactionner1, reactionner2]
@@ -261,8 +258,8 @@ class TestDispatcher(ShinkenTest):
         self.assert_(scheduler2.alive == False)
         self.assert_(scheduler2.attempt == 3)
         self.assert_(scheduler2.reachable == False)
-        
-        #and others satellites too
+
+        # and others satellites too
         self.assert_(poller1.alive == True)
         self.assert_(poller1.attempt == 0)
         self.assert_(poller1.reachable == True)
@@ -271,7 +268,7 @@ class TestDispatcher(ShinkenTest):
         self.assert_(poller2.attempt == 3)
         self.assert_(poller2.reachable == False)
 
-        #and others satellites too
+        # and others satellites too
         self.assert_(reactionner1.alive == True)
         self.assert_(reactionner1.attempt == 0)
         self.assert_(reactionner1.reachable == True)
@@ -279,8 +276,8 @@ class TestDispatcher(ShinkenTest):
         self.assert_(reactionner2.alive == False)
         self.assert_(reactionner2.attempt == 3)
         self.assert_(reactionner2.reachable == False)
-        
-        #and others satellites too
+
+        # and others satellites too
         self.assert_(broker1.alive == True)
         self.assert_(broker1.attempt == 0)
         self.assert_(broker1.reachable == True)
@@ -307,17 +304,15 @@ class TestDispatcher(ShinkenTest):
             for cfg in r.confs.values():
                 self.assert_(cfg.is_assigned == True)
                 self.assert_(cfg.assigned_to == scheduler1)
-                
+
 
 
 class TestDispatcherMultiBroker(ShinkenTest):
-    #Uncomment this is you want to use a specific configuration
-    #for your test
+
     def setUp(self):
         self.setup_with_file('etc/nagios_dispatcher_multibrokers.cfg')
-    
-    
-    #Change ME :)
+
+
     def test_simple_dispatch(self):
         print "The dispatcher", self.dispatcher
         # dummy for the arbiter
@@ -329,7 +324,7 @@ class TestDispatcherMultiBroker(ShinkenTest):
         scheduler1.__class__ = GoodScheduler
         scheduler2 = self.conf.schedulers.find_by_name('scheduler-all-2')
         self.assert_(scheduler2 is not None)
-        scheduler2.__class__ = GoodScheduler       
+        scheduler2.__class__ = GoodScheduler
 
         print "Preparing pollers"
         poller1 = self.conf.pollers.find_by_name('poller-all-1')
@@ -337,7 +332,7 @@ class TestDispatcherMultiBroker(ShinkenTest):
         poller1.__class__ = GoodPoller
         poller2 = self.conf.pollers.find_by_name('poller-all-2')
         self.assert_(poller2 is not None)
-        poller2.__class__ = BadPoller        
+        poller2.__class__ = BadPoller
 
         print "Preparing reactionners"
         reactionner1 = self.conf.reactionners.find_by_name('reactionner-all-1')
@@ -345,7 +340,7 @@ class TestDispatcherMultiBroker(ShinkenTest):
         reactionner1.__class__ = GoodReactionner
         reactionner2 = self.conf.reactionners.find_by_name('reactionner-all-2')
         self.assert_(reactionner2 is not None)
-        reactionner2.__class__ = BadReactionner        
+        reactionner2.__class__ = BadReactionner
 
         print "Preparing brokers"
         broker1 = self.conf.brokers.find_by_name('broker-all-1')
@@ -355,7 +350,7 @@ class TestDispatcherMultiBroker(ShinkenTest):
         self.assert_(broker2 is not None)
         broker2.__class__ = GoodBroker
 
-        # Ping all elements. Should have 1 as OK, 2 as 
+        # Ping all elements. Should have 1 as OK, 2 as
         # one bad attempt (3 max)
         self.dispatcher.check_alive()
 
@@ -367,8 +362,8 @@ class TestDispatcherMultiBroker(ShinkenTest):
         self.assert_(scheduler2.alive == True)
         self.assert_(scheduler2.attempt == 0)
         self.assert_(scheduler2.reachable == True)
-        
-        #and others satellites too
+
+        # and others satellites too
         self.assert_(poller1.alive == True)
         self.assert_(poller1.attempt == 0)
         self.assert_(poller1.reachable == True)
@@ -377,7 +372,7 @@ class TestDispatcherMultiBroker(ShinkenTest):
         self.assert_(poller2.attempt == 1)
         self.assert_(poller2.reachable == False)
 
-        #and others satellites too
+        # and others satellites too
         self.assert_(reactionner1.alive == True)
         self.assert_(reactionner1.attempt == 0)
         self.assert_(reactionner1.reachable == True)
@@ -385,8 +380,8 @@ class TestDispatcherMultiBroker(ShinkenTest):
         self.assert_(reactionner2.alive == True)
         self.assert_(reactionner2.attempt == 1)
         self.assert_(reactionner2.reachable == False)
-        
-        #and others satellites too
+
+        # and others satellites too
         self.assert_(broker1.alive == True)
         self.assert_(broker1.attempt == 0)
         self.assert_(broker1.reachable == True)
@@ -411,8 +406,8 @@ class TestDispatcherMultiBroker(ShinkenTest):
         self.assert_(scheduler2.alive == True)
         self.assert_(scheduler2.attempt == 0)
         self.assert_(scheduler2.reachable == True)
-        
-        #and others satellites too
+
+        # and others satellites too
         self.assert_(poller1.alive == True)
         self.assert_(poller1.attempt == 0)
         self.assert_(poller1.reachable == True)
@@ -421,7 +416,7 @@ class TestDispatcherMultiBroker(ShinkenTest):
         self.assert_(poller2.attempt == 2)
         self.assert_(poller2.reachable == False)
 
-        #and others satellites too
+        # and others satellites too
         self.assert_(reactionner1.alive == True)
         self.assert_(reactionner1.attempt == 0)
         self.assert_(reactionner1.reachable == True)
@@ -429,8 +424,8 @@ class TestDispatcherMultiBroker(ShinkenTest):
         self.assert_(reactionner2.alive == True)
         self.assert_(reactionner2.attempt == 2)
         self.assert_(reactionner2.reachable == False)
-        
-        #and others satellites too
+
+        # and others satellites too
         self.assert_(broker1.alive == True)
         self.assert_(broker1.attempt == 0)
         self.assert_(broker1.reachable == True)
@@ -439,7 +434,7 @@ class TestDispatcherMultiBroker(ShinkenTest):
         self.assert_(broker2.attempt == 0)
         self.assert_(broker2.reachable == True)
 
-        ### Now we get BAD, We go DEAD for N2 !
+        ### Now we get BAD, We go DEAD for N2!
         print "CheckAlive "*10
         # We reset check time for the test
         elts = [scheduler1, scheduler2, poller1, poller2, broker1, broker2, reactionner1, reactionner2]
@@ -455,8 +450,8 @@ class TestDispatcherMultiBroker(ShinkenTest):
         self.assert_(scheduler2.alive == True)
         self.assert_(scheduler2.attempt == 0)
         self.assert_(scheduler2.reachable == True)
-        
-        #and others satellites too
+
+        # and others satellites too
         self.assert_(poller1.alive == True)
         self.assert_(poller1.attempt == 0)
         self.assert_(poller1.reachable == True)
@@ -465,7 +460,7 @@ class TestDispatcherMultiBroker(ShinkenTest):
         self.assert_(poller2.attempt == 3)
         self.assert_(poller2.reachable == False)
 
-        #and others satellites too
+        # and others satellites too
         self.assert_(reactionner1.alive == True)
         self.assert_(reactionner1.attempt == 0)
         self.assert_(reactionner1.reachable == True)
@@ -473,8 +468,8 @@ class TestDispatcherMultiBroker(ShinkenTest):
         self.assert_(reactionner2.alive == False)
         self.assert_(reactionner2.attempt == 3)
         self.assert_(reactionner2.reachable == False)
-        
-        #and others satellites too
+
+        # and others satellites too
         self.assert_(broker1.alive == True)
         self.assert_(broker1.attempt == 0)
         self.assert_(broker1.reachable == True)
@@ -493,7 +488,7 @@ class TestDispatcherMultiBroker(ShinkenTest):
         self.assert_(self.any_log_match('Dispatch OK of conf in scheduler scheduler-all-1'))
         self.assert_(self.any_log_match('Dispatch OK of configuration 0 to reactionner reactionner-all-1'))
         self.assert_(self.any_log_match('Dispatch OK of configuration 0 to poller poller-all-1'))
-        
+
         self.assert_(self.any_log_match('Dispatch OK of configuration 1 to broker broker-all-1'))
         self.assert_(self.any_log_match('Dispatch OK of configuration 0 to broker broker-all-2'))
         self.clear_logs()
@@ -504,7 +499,7 @@ class TestDispatcherMultiBroker(ShinkenTest):
             for cfg in r.confs.values():
                 self.assert_(cfg.is_assigned == True)
                 self.assert_(cfg.assigned_to in [scheduler1, scheduler2])
-                
+
 
 
 

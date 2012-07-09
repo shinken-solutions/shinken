@@ -32,7 +32,7 @@ def print_cat_tree(tree):
         name = name[1:]
     nb = tree['nb']
     s = '<a href="/getpacks/%s"> %s (%d)</a> <ul id="cat-%s">' % (name, name, nb, _id)
-    
+
     print "My sons", tree['sons']
     for (_, node) in tree['sons'].iteritems():
         print "Sub is", node

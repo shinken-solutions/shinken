@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -73,37 +73,37 @@ class Scheduler:
         # etc. All of theses functions are in recurrent_works with the
         # every tick to run. So must be an integer > 0
         # The order is important, so make key an int.
-        # TODO : at load, change value by configuration one (like reaper time, etc)
+        # TODO: at load, change value by configuration one (like reaper time, etc)
         self.recurrent_works = {
-            0 : ('update_downtimes_and_comments', self.update_downtimes_and_comments, 1),
-            1 : ('schedule', self.schedule, 1), # just schedule
-            2 : ('consume_results', self.consume_results , 1), # incorpore checks and dependencies
-            3 : ('get_new_actions', self.get_new_actions, 1), # now get the news actions (checks, notif) raised
-            4 : ('get_new_broks', self.get_new_broks, 1), # and broks
-            5 : ('delete_zombie_checks', self.delete_zombie_checks, 1),
-            6 : ('delete_zombie_actions', self.delete_zombie_actions, 1),
-            # 3 : (self.delete_unwanted_notifications, 1),
-            7 : ('check_freshness', self.check_freshness, 10),
-            8 : ('clean_caches', self.clean_caches, 1),
-            9 : ('update_retention_file', self.update_retention_file, 3600),
-            10 : ('check_orphaned', self.check_orphaned, 60),
-            # For NagVis like tools : udpdate our status every 10s
-            11 : ('get_and_register_update_program_status_brok', self.get_and_register_update_program_status_brok, 10),
+            0: ('update_downtimes_and_comments', self.update_downtimes_and_comments, 1),
+            1: ('schedule', self.schedule, 1), # just schedule
+            2: ('consume_results', self.consume_results , 1), # incorpore checks and dependencies
+            3: ('get_new_actions', self.get_new_actions, 1), # now get the news actions (checks, notif) raised
+            4: ('get_new_broks', self.get_new_broks, 1), # and broks
+            5: ('delete_zombie_checks', self.delete_zombie_checks, 1),
+            6: ('delete_zombie_actions', self.delete_zombie_actions, 1),
+            # 3: (self.delete_unwanted_notifications, 1),
+            7: ('check_freshness', self.check_freshness, 10),
+            8: ('clean_caches', self.clean_caches, 1),
+            9: ('update_retention_file', self.update_retention_file, 3600),
+            10: ('check_orphaned', self.check_orphaned, 60),
+            # For NagVis like tools: udpdate our status every 10s
+            11: ('get_and_register_update_program_status_brok', self.get_and_register_update_program_status_brok, 10),
             # Check for system time change. And AFTER get new checks
             # so they are changed too.
-            12 : ('check_for_system_time_change', self.sched_daemon.check_for_system_time_change, 1),
+            12: ('check_for_system_time_change', self.sched_daemon.check_for_system_time_change, 1),
             # launch if need all internal checks
-            13 : ('manage_internal_checks', self.manage_internal_checks, 1),
+            13: ('manage_internal_checks', self.manage_internal_checks, 1),
             # clean some times possible overriden Queues, to do not explode in memory usage
             # every 1/4 of hour
-            14 : ('clean_queues', self.clean_queues, 1),
+            14: ('clean_queues', self.clean_queues, 1),
             # Look for new business_impact change by modulation every minute
-            15 : ('update_business_values', self.update_business_values, 60),
+            15: ('update_business_values', self.update_business_values, 60),
             # Reset the topology change flag if need
-            16 : ('reset_topology_change_flag', self.reset_topology_change_flag, 1),
-            17 : ('check_for_expire_acknowledge', self.check_for_expire_acknowledge, 1),
-            18 : ('send_broks_to_modules', self.send_broks_to_modules , 1),
-            19 : ('get_objects_from_from_queues', self.get_objects_from_from_queues, 1),
+            16: ('reset_topology_change_flag', self.reset_topology_change_flag, 1),
+            17: ('check_for_expire_acknowledge', self.check_for_expire_acknowledge, 1),
+            18: ('send_broks_to_modules', self.send_broks_to_modules , 1),
+            19: ('get_objects_from_from_queues', self.get_objects_from_from_queues, 1),
         }
 
         # stats part
@@ -294,7 +294,7 @@ class Scheduler:
     def add(self, elt):
         f = self.__add_actions.get(elt.__class__, None)
         if f:
-            #print("found action for %s : %s" % (elt.__class__.__name__, f.__name__))
+            #print("found action for %s: %s" % (elt.__class__.__name__, f.__name__))
             f(self, elt)
 
     __add_actions = {
@@ -311,7 +311,7 @@ class Scheduler:
 
     # We call the function of modules that got the
     # hook function
-    # TODO : find a way to merge this and the version in daemon.py
+    # TODO: find a way to merge this and the version in daemon.py
     def hook_point(self, hook_name):
         for inst in self.sched_daemon.modules_manager.instances:
             full_hook_name = 'hook_' + hook_name
@@ -325,15 +325,15 @@ class Scheduler:
                     logger.warning("The instance %s raise an exception %s. I disable it and set it to restart it later" % (inst.get_name(), str(exp)))
                     output = cStringIO.StringIO()
                     traceback.print_exc(file=output)
-                    logger.warning("Back trace of this remove : %s" % (output.getvalue()))
+                    logger.warning("Back trace of this remove: %s" % (output.getvalue()))
                     output.close()
                     self.sched_daemon.modules_manager.set_to_restart(inst)
 
 
 
     # Ours queues may explode if no one ask us for elements
-    # It's very dangerous : you can crash your server... and it's a bad thing :)
-    # So we 'just' keep last elements : 5 of max is a good overhead
+    # It's very dangerous: you can crash your server... and it's a bad thing :)
+    # So we 'just' keep last elements: 5 of max is a good overhead
     def clean_queues(self):
         # if we set the interval at 0, we bail out
         if self.conf.cleaning_queues_interval == 0:
@@ -349,7 +349,7 @@ class Scheduler:
         # We want id of lower than max_id - 2*max_checks
         if len(self.checks) > max_checks:
             id_max = self.checks.keys()[-1] # The max id is the last id
-                                            # : max is SO slow!
+                                            #: max is SO slow!
             to_del_checks = [c for c in self.checks.values() if c.id < id_max - max_checks]
             nb_checks_drops = len(to_del_checks)
             if nb_checks_drops > 0:
@@ -607,7 +607,7 @@ class Scheduler:
                                     self.actions[c.id].command,
                                     int(execution_time)))
                 elif c.exit_status != 0:
-                    logger.warning("The notification command '%s' raised an error (exit code=%d) : '%s'" % (c.command, c.exit_status, c.output))
+                    logger.warning("The notification command '%s' raised an error (exit code=%d): '%s'" % (c.command, c.exit_status, c.output))
 
             except KeyError, exp: # bad number for notif, not that bad
                 #print exp
@@ -640,7 +640,7 @@ class Scheduler:
             except KeyError:
                 pass
         else:
-            logger.error("The received result type in unknown ! %s" % str(c.is_a))
+            logger.error("The received result type in unknown! %s" % str(c.is_a))
 
 
 
@@ -698,7 +698,7 @@ class Scheduler:
             # But the multiprocessing module is not copatible with it!
             # so we must disable it imadiatly after
             socket.setdefaulttimeout(None)
-            logger.warning("Connection problem to the %s %s : %s" % (type, links[id]['name'], str(exp)))
+            logger.warning("Connection problem to the %s %s: %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
 
@@ -707,20 +707,20 @@ class Scheduler:
             pyro.set_timeout(con, 5)
             con.ping()
         except Pyro.errors.ProtocolError, exp:
-            logger.warning("Connection problem to the %s %s : %s" % (type, links[id]['name'], str(exp)))
+            logger.warning("Connection problem to the %s %s: %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
         except Pyro.errors.NamingError, exp:
-            logger.warning("The %s '%s' is not initialized : %s" % (type, links[id]['name'], str(exp)))
+            logger.warning("The %s '%s' is not initialized: %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
         except KeyError, exp:
-            logger.warning("The %s '%s' is not initialized : %s" % (type, links[id]['name'], str(exp)))
+            logger.warning("The %s '%s' is not initialized: %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             traceback.print_stack()
             return
         except Pyro.errors.CommunicationError, exp:
-            logger.warning("The %s '%s' got CommunicationError : %s" % (type, links[id]['name'], str(exp)))
+            logger.warning("The %s '%s' got CommunicationError: %s" % (type, links[id]['name'], str(exp)))
             links[id]['con'] = None
             return
 
@@ -744,28 +744,28 @@ class Scheduler:
                     con.push_actions(lst, self.instance_id)
                     self.nb_checks_send += len(lst)
                 except Pyro.errors.ProtocolError, exp:
-                    logger.warning("Connection problem to the %s %s : %s" % (type, p['name'], str(exp)))
+                    logger.warning("Connection problem to the %s %s: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except Pyro.errors.NamingError, exp:
-                    logger.warning("The %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
+                    logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except KeyError, exp:
-                    logger.warning("The %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
+                    logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     traceback.print_stack()
                     return
                 except Pyro.errors.CommunicationError, exp:
-                    logger.warning("The %s '%s' got CommunicationError : %s" % (type, p['name'], str(exp)))
+                    logger.warning("The %s '%s' got CommunicationError: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
-                #we come back to normal timeout
+                # we come back to normal timeout
                 pyro.set_timeout(con, 5)
             else: # no connection? try to reconnect
                 self.pynag_con_init(p['instance_id'], type='poller')
 
-        # TODO :factorize
+        # TODO:factorize
         # We loop for our passive reactionners
         for p in filter(lambda p: p['passive'], self.reactionners.values()):
             logger.debug("I will send actions to the reactionner %s" % str(p))
@@ -781,23 +781,23 @@ class Scheduler:
                     con.push_actions(lst, self.instance_id)
                     self.nb_checks_send += len(lst)
                 except Pyro.errors.ProtocolError, exp:
-                    logger.warning("Connection problem to the %s %s : %s" % (type, p['name'], str(exp)))
+                    logger.warning("Connection problem to the %s %s: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except Pyro.errors.NamingError, exp:
-                    logger.warning("The %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
+                    logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except KeyError, exp:
-                    logger.warning("The %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
+                    logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     traceback.print_stack()
                     return
                 except Pyro.errors.CommunicationError, exp:
-                    logger.warning("The %s '%s' got CommunicationError : %s" % (type, p['name'], str(exp)))
+                    logger.warning("The %s '%s' got CommunicationError: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
-                #we come back to normal timeout
+                # we come back to normal timeout
                 pyro.set_timeout(con, 5)
             else: # no connection? try to reconnect
                 self.pynag_con_init(p['instance_id'], type='reactionner')
@@ -823,23 +823,23 @@ class Scheduler:
                         result.set_type_passive()
                     self.waiting_results.extend(results)
                 except Pyro.errors.ProtocolError, exp:
-                    logger.warning("Connection problem to the %s %s : %s" % (type, p['name'], str(exp)))
+                    logger.warning("Connection problem to the %s %s: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except Pyro.errors.NamingError, exp:
-                    logger.warning("The %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
+                    logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except KeyError, exp:
-                    logger.warning("The %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
+                    logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     traceback.print_stack()
                     return
                 except Pyro.errors.CommunicationError, exp:
-                    logger.warning("The %s '%s' got CommunicationError : %s" % (type, p['name'], str(exp)))
+                    logger.warning("The %s '%s' got CommunicationError: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
-                #we come back to normal timeout
+                # we come back to normal timeout
                 pyro.set_timeout(con, 5)
             else: # no connection, try reinit
                 self.pynag_con_init(p['instance_id'], type='poller')
@@ -861,23 +861,23 @@ class Scheduler:
                         result.set_type_passive()
                     self.waiting_results.extend(results)
                 except Pyro.errors.ProtocolError, exp:
-                    logger.warning("Connection problem to the %s %s : %s" % (type, p['name'], str(exp)))
+                    logger.warning("Connection problem to the %s %s: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except Pyro.errors.NamingError, exp:
-                    logger.warning("The %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
+                    logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
                 except KeyError, exp:
-                    logger.warning("The %s '%s' is not initialized : %s" % (type, p['name'], str(exp)))
+                    logger.warning("The %s '%s' is not initialized: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     traceback.print_stack()
                     return
                 except Pyro.errors.CommunicationError, exp:
-                    logger.warning("The %s '%s' got CommunicationError : %s" % (type, p['name'], str(exp)))
+                    logger.warning("The %s '%s' got CommunicationError: %s" % (type, p['name'], str(exp)))
                     p['con'] = None
                     return
-                #we come back to normal timeout
+                # we come back to normal timeout
                 pyro.set_timeout(con, 5)
             else: # no connection, try reinit
                 self.pynag_con_init(p['instance_id'], type='reactionner')
@@ -1192,37 +1192,37 @@ class Scheduler:
 
 
     # Get a brok with program status
-    # TODO : GET REAL VALUES
+    # TODO: GET REAL VALUES
     def get_program_status_brok(self):
         now = int(time.time())
-        data = {"is_running" : 1,
-                "instance_id" : self.instance_id,
+        data = {"is_running": 1,
+                "instance_id": self.instance_id,
                 "instance_name": self.instance_name,
-                "last_alive" : now,
-                "program_start" : self.program_start,
-                "pid" : os.getpid(),
-                "daemon_mode" : 1,
-                "last_command_check" : now,
-                "last_log_rotation" : now,
-                "notifications_enabled" : self.conf.enable_notifications,
-                "active_service_checks_enabled" : self.conf.execute_service_checks,
-                "passive_service_checks_enabled" : self.conf.accept_passive_service_checks,
-                "active_host_checks_enabled" : self.conf.execute_host_checks,
-                "passive_host_checks_enabled" : self.conf.accept_passive_host_checks,
-                "event_handlers_enabled" : self.conf.enable_event_handlers,
-                "flap_detection_enabled" : self.conf.enable_flap_detection,
-                "failure_prediction_enabled" : 0,
-                "process_performance_data" : self.conf.process_performance_data,
-                "obsess_over_hosts" : self.conf.obsess_over_hosts,
-                "obsess_over_services" : self.conf.obsess_over_services,
-                "modified_host_attributes" : 0,
-                "modified_service_attributes" : 0,
-                "global_host_event_handler" : self.conf.global_host_event_handler,
-                'global_service_event_handler' : self.conf.global_service_event_handler,
-                'check_external_commands' : self.conf.check_external_commands,
-                'check_service_freshness' : self.conf.check_service_freshness,
-                'check_host_freshness' : self.conf.check_host_freshness,
-                'command_file' : self.conf.command_file
+                "last_alive": now,
+                "program_start": self.program_start,
+                "pid": os.getpid(),
+                "daemon_mode": 1,
+                "last_command_check": now,
+                "last_log_rotation": now,
+                "notifications_enabled": self.conf.enable_notifications,
+                "active_service_checks_enabled": self.conf.execute_service_checks,
+                "passive_service_checks_enabled": self.conf.accept_passive_service_checks,
+                "active_host_checks_enabled": self.conf.execute_host_checks,
+                "passive_host_checks_enabled": self.conf.accept_passive_host_checks,
+                "event_handlers_enabled": self.conf.enable_event_handlers,
+                "flap_detection_enabled": self.conf.enable_flap_detection,
+                "failure_prediction_enabled": 0,
+                "process_performance_data": self.conf.process_performance_data,
+                "obsess_over_hosts": self.conf.obsess_over_hosts,
+                "obsess_over_services": self.conf.obsess_over_services,
+                "modified_host_attributes": 0,
+                "modified_service_attributes": 0,
+                "global_host_event_handler": self.conf.global_host_event_handler,
+                'global_service_event_handler': self.conf.global_service_event_handler,
+                'check_external_commands': self.conf.check_external_commands,
+                'check_service_freshness': self.conf.check_service_freshness,
+                'check_host_freshness': self.conf.check_host_freshness,
+                'command_file': self.conf.command_file
                 }
         b = Brok('program_status', data)
         return b
@@ -1366,7 +1366,7 @@ class Scheduler:
                 i.schedule()
 
 
-    # Main actions reaper function : it get all new checks,
+    # Main actions reaper function: it get all new checks,
     # notification and event handler from hosts and services
     def get_new_actions(self):
         # ask for service and hosts their next check
@@ -1400,8 +1400,8 @@ class Scheduler:
                     self.add(c)
 
 
-    # Check for orphaned checks : checks that never returns back
-    # so if inpoller and t_to_go < now - 300s : pb!
+    # Check for orphaned checks: checks that never returns back
+    # so if inpoller and t_to_go < now - 300s: pb!
     # Warn only one time for each "worker"
     def check_orphaned(self):
         worker_names = {}
@@ -1505,7 +1505,7 @@ class Scheduler:
 
             # load of the scheduler is the percert of time it is waiting
             l = min(100, 100.0 - self.load_one_min.get_load() * 100)
-            logger.debug("Load : (sleep) %.2f (average : %.2f) -> %d%%" % (self.sched_daemon.sleep_time, self.load_one_min.get_load(), l))
+            logger.debug("Load: (sleep) %.2f (average: %.2f) -> %d%%" % (self.sched_daemon.sleep_time, self.load_one_min.get_load(), l))
 
             self.sched_daemon.sleep_time = 0.0
 
@@ -1520,10 +1520,10 @@ class Scheduler:
                 # A 0 in the tick will just disable it
                 if nb_ticks != 0:
                     if ticks % nb_ticks == 0:
-                        # print "I run function :", name
+                        # print "I run function:", name
                         f()
 
-            #DBG : push actions to passives?
+            # DBG: push actions to passives?
             self.push_actions_to_passives_satellites()
             self.get_actions_from_passives_satellites()
 
@@ -1544,7 +1544,7 @@ class Scheduler:
             latencies = [s.latency for s in self.services]
             lat_avg, lat_min, lat_max = nighty_five_percent(latencies)
             if lat_avg is not None:
-                logger.debug("Latency (avg/min/max) : %.2f/%.2f/%.2f" % (lat_avg, lat_min, lat_max))
+                logger.debug("Latency (avg/min/max): %.2f/%.2f/%.2f" % (lat_avg, lat_min, lat_max))
 
 
             # print "Notifications:", nb_notifications

@@ -37,7 +37,7 @@ To Ronny Lindner for the bug report about non host expressions for services
 To Olivier Hanesse for his bug report about fixed 60s interval in checks
 To Markus Elger for this bug report about no schedule retention data
 To Vincent Riquer for his bug report about HA installation and sapre broker that stay alive
-To Michael Grundmann for his bug report about service host exclusion and void hostgroup 
+To Michael Grundmann for his bug report about service host exclusion and void hostgroup
 To Jan Kaliszewski for his implementation of sorted dicts
 To Claneys Skyne for his typo report
 To Etienne Obriot for his patch about multiple = in macos values
@@ -68,5 +68,5 @@ To Michael COQUARD for this patch about setup.py and build path
 To Akiooutori for his bug report about pyro missing SOCK_REUSE parameter in some os
 To Timo Veith for this work on the Wiki refactoring!
 To Lars Hansson for this patches about cfg password module and Apache one
-To the webui mobile guys : Mael VINCENT, julien Pilou, Gael Millet, Damien Mathieu and hugo Viricel for their new webui mobile ui.
+To the webui mobile guys: Mael VINCENT, julien Pilou, Gael Millet, Damien Mathieu and hugo Viricel for their new webui mobile ui.
 To Mathias Fussenegger for his large patch about configuration tab/space resolution.

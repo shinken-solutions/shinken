@@ -1,45 +1,43 @@
-#!/usr/bin/env python2.6
-#Copyright (C) 2009-2010 :
+#!/usr/bin/env python
+# Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 #
 # This file is used to test reading and processing of config files
 #
 
-#It's ugly I know....
 from shinken_test import *
 import commands
 
 class TestSystemTimeChange(ShinkenTest):
-    #setUp is in shinken_test
+    # setUp is inherited from ShinkenTest
 
     def set_time(self, d):
         cmd = 'sudo date -s "%s"' % d
         print "CMD,", cmd
         # NB: disabled for now because we test in a totally direct way
         #a = commands.getstatusoutput(cmd)
-        #Check the time is set correctly!
+        # Check the time is set correctly!
         #self.assert_(a[0] == 0)
 
 
 
-    #Change ME :)
     def test_system_time_change(self):
         #
         # Config is not correct because of a wrong relative path
@@ -67,7 +65,7 @@ class TestSystemTimeChange(ShinkenTest):
 
         print "Current Host last_state_change", time.asctime(time.localtime(host.last_state_change))
 
-        #Ok, start to check for bad time
+        # Ok, start to check for bad time
         self.set_time(tomorow)
         last_state_change = host.last_state_change
         host.compensate_system_time_change(86400)
@@ -75,7 +73,7 @@ class TestSystemTimeChange(ShinkenTest):
         svc.compensate_system_time_change(86400)
         print "Tomorow Host last_state_change", time.asctime(time.localtime(host.last_state_change))
 
-        #And now a huge change : yesterday (so a 2 day move)
+        # And now a huge change: yesterday (so a 2 day move)
         self.set_time(yesterday)
         last_state_change = host.last_state_change
         host.compensate_system_time_change(-86400 * 2)
@@ -85,8 +83,8 @@ class TestSystemTimeChange(ShinkenTest):
 
         self.set_time(now_str)
 
-        #Ok, now the scheduler and check things
-        #Put checks in the scheduler
+        # Ok, now the scheduler and check things
+        # Put checks in the scheduler
         self.sched.get_new_actions()
 
         host_to_go = host_check.t_to_go
@@ -100,7 +98,7 @@ class TestSystemTimeChange(ShinkenTest):
         self.assert_(host_check.t_to_go - host_to_go == 86400)
         self.assert_(srv_check.t_to_go - srv_to_go == 86400)
 
-        #and yesterday
+        # and yesterday
         host_to_go = host_check.t_to_go
         srv_to_go = srv_check.t_to_go
         self.set_time(yesterday)

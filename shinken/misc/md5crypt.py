@@ -38,7 +38,7 @@ apache_md5_crypt() provides a function compatible with Apache's
 
 """
 
-MAGIC = '$1$'# Magic string
+MAGIC = '$1$' # Magic string
 ITOA64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
 from hashlib import md5
@@ -58,14 +58,14 @@ def apache_md5_crypt (pw, salt):
 
 
 def unix_md5_crypt(pw, salt, magic=None):
-    
+
     if magic==None:
         magic = MAGIC
 
     # Take care of the magic string if present
     if salt[:len(magic)] == magic:
         salt = salt[len(magic):]
-        
+
 
     # salt can have up to 8 characters:
     import string
@@ -88,15 +88,15 @@ def unix_md5_crypt(pw, salt, magic=None):
     i = len(pw)
     while i:
         if i & 1:
-            ctx = ctx + chr(0)  #if ($i & 1) { $ctx->add(pack("C", 0)); }
+            ctx = ctx + chr(0)  # if ($i & 1) { $ctx->add(pack("C", 0)); }
         else:
             ctx = ctx + pw[0]
         i = i >> 1
 
     final = md5(ctx).digest()
-    
+
     # The following is supposed to make
-    # things run slower. 
+    # things run slower.
 
     # my question: WTF???
 
@@ -117,13 +117,13 @@ def unix_md5_crypt(pw, salt, magic=None):
             ctx1 = ctx1 + final[:16]
         else:
             ctx1 = ctx1 + pw
-            
-            
+
+
         final = md5(ctx1).digest()
 
 
     # Final xform
-                                
+
     passwd = ''
 
     passwd = passwd + to64((int(ord(final[0])) << 16)

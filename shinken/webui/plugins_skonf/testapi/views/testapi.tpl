@@ -15,7 +15,7 @@
 %end
 
 %if api_error:
-    <div class='alert alert-error span5 offset2'> 
+    <div class='alert alert-error span5 offset2'>
       <div id='api_error' >{{api_error}}</div>
       <a href='/register' class='btn btn-success'> <i class="icon-user"></i> Register to the API server</a>
     </div>

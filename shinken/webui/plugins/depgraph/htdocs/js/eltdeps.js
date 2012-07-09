@@ -4,19 +4,19 @@
      Gregory Starck, g.starck@gmail.com
      Hartmut Goebel, h.goebel@goebel-consult.de
      Andreas Karfusehr, andreas@karfusehr.de
- 
+
  This file is part of Shinken.
- 
+
  Shinken is free software: you can redistribute it and/or modify
  it under the terms of the GNU Affero General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
- 
+
  Shinken is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU Affero General Public License for more details.
- 
+
  You should have received a copy of the GNU Affero General Public License
  along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -55,15 +55,15 @@ var Log = {
 function dump(arr, level) {
     var dumped_text = "";
     if(!level) level = 0;
-    
+
     //The padding given at the beginning of the line.
     var level_padding = "";
     for(var j=0;j<level+1;j++) level_padding += "    ";
-    
-    if(typeof(arr) == 'object') { //Array/Hashes/Objects 
+
+    if(typeof(arr) == 'object') { //Array/Hashes/Objects
 	for(var item in arr) {
 	    var value = arr[item];
-	    
+
 	    if(typeof(value) == 'object') { //If it is an array,
 		dumped_text += level_padding + "'" + item + "' ...\n";
 		dumped_text += dump(value,level+1);
@@ -96,7 +96,7 @@ function init_graph(){
     //"dim" parameters globally defined in the
     //RGraph constructor.
 
-    
+
     /* Ok, for the circles, w need a particules system, and not recreate them too
      much, but only once by iem, enven when it move! */
     var particles;
@@ -104,7 +104,7 @@ function init_graph(){
     var particles = [];
     var particules_by_name = {};//new Hash();
 
-    // Main printing loop for particules, graph is print only when need, 
+    // Main printing loop for particules, graph is print only when need,
     // but particules are print each loop
     function loop() {
 	for (i = 0, len = particles.length; i < len; i++) {
@@ -116,10 +116,10 @@ function init_graph(){
 	    }
 
 	    var lp = { x: particle.position.x, y: particle.position.y };
-	    
+
 	    // Offset the angle to keep the spin going
 	    particle.angle += particle.speed;
-	    
+
 	    // Apply position
 	    particle.position.x = particle.shift.x + Math.cos(i + particle.angle) * (particle.orbit);
 	    particle.position.y = particle.shift.y + Math.sin(i + particle.angle) * (particle.orbit);
@@ -143,7 +143,7 @@ function init_graph(){
 	    var anti3_x = particle.shift.x + Math.cos(i + particle.angle + 5*Math.PI/3) * (particle.orbit);
 	    var anti3_y = particle.shift.y + Math.sin(i + particle.angle + 5*Math.PI/3) * (particle.orbit);
 
-	    
+
 	    // Compute a local size to make a up/down size effect
 	    var local_size = (Math.cos(particle.angle) - Math.sin(particle.angle) + 2 * particle.size) / 2;
 	    local_size = particle.size;
@@ -194,7 +194,7 @@ function init_graph(){
 	    p.angle = 0;
 	    p.size = 1 * (1 + (size - 2 / 5));
 	    p.active = true;
-	}else{ // New particule :) 
+	}else{ // New particule :)
 	    var color_code = 'gray';
 	    if(color == 'red'){
 		color_code = '#E60000';
@@ -215,7 +215,7 @@ function init_graph(){
 		fillColor: color_code,
 		orbit: 20 * (1 + ((size - 2) / 4 )) // make the orbit bigger for important elements
 	    };
-	
+
 	    particles.push( particle );
 	    particules_by_name[name] = particle;
 	}
@@ -242,9 +242,9 @@ function init_graph(){
 	// For distant service, we should tag them with no label
 	// but important one should be still tags of course.
 	// should saw root problem too
-	if (node._depth == 0) { 
+	if (node._depth == 0) {
 	} else if(node._depth == 1 ){
-	}else if(node._depth >= 2){  
+	}else if(node._depth >= 2){
 	    if (elt_type == 'service' && business_impact <= 2 ){
 		if(state_id == 0 || !is_problem){
 		    b = false;
@@ -253,7 +253,7 @@ function init_graph(){
 	}
 //	alert('Should be print '+node.id+ ' '+b);
 	return b;
-	
+
     }
 
 
@@ -264,7 +264,7 @@ function init_graph(){
 	    'custom': {
 		'render': function(node, canvas) {
 
-		    /*First we need to know where the node is, so we can draw 
+		    /*First we need to know where the node is, so we can draw
 		     in the correct place for the GLOBAL canvas*/
 		    var pos = node.getPos().getc();
 		    var size = 24;
@@ -288,7 +288,7 @@ function init_graph(){
 		    // save it
 		    context = ctx;
 		    img = new Image();
-		    
+
 		    /* We can have some missing data, so just add dummy info */
 		    if (typeof(node.data.img_src) == 'undefined'){
 			img.src = '/static/images/state_ok.png';
@@ -296,7 +296,7 @@ function init_graph(){
 			img.src = node.data.img_src;
 			size = size * (1 + (node.data.business_impact - 2)/3);
 		    }
-		    
+
 		    var elt_type = 'service';
 		    /* We can have some missing data, so just add dummy info */
                     if (typeof(node.data.elt_type) != 'undefined'){
@@ -306,7 +306,7 @@ function init_graph(){
 		    /* We scale the image. Thanks html5 canvas.*/
 		    img.width = size;
 		    img.height = size;
-		    
+
 		    /* If we got a value for the circle */
 		    if (typeof(node.data.img_src) != 'undefined'){
 			color = node.data.circle;
@@ -314,7 +314,7 @@ function init_graph(){
 			    create_or_update_particule(node.id, pos.x, pos.y, color, node.data.business_impact - 1);
 			}else{
 			    // If we didn't print the circle, we can add one for the
-			    // root, so the user will show it. 
+			    // root, so the user will show it.
 			    // DO NOT PUT THE node.id here, because we need this particule to folow the root
 			    // whatever its name is ;)
 			    if(node.id == rgraph.root){
@@ -322,7 +322,7 @@ function init_graph(){
 			    }
 			}
 		    }
-		    
+
 		    //Ok, we draw the image, and we set it in the middle ofthe node :)
 		    ctx.drawImage(img, pos.x-size/2, pos.y-size/2, img.width, img.height);
 		}
@@ -360,7 +360,7 @@ function init_graph(){
 		lineWidth : 0.5,
 		'overridable': true,
 	    },
-	
+
 	    //Add tooltips
 	    Tips: {
 		enable: true,
@@ -369,7 +369,7 @@ function init_graph(){
 		    tip.innerHTML = html;
 		}
 	    },
-	    
+
 	    //Set polar interpolation.
 	    //Default's linear.
 	    interpolation: 'polar',
@@ -400,7 +400,7 @@ function init_graph(){
 	    onBeforeCompute: function(node){
 		Log.write("Focusing on " + node.name + "...");
 
-		
+
 		// Make right column relations list.
 		var html = node.data.infos;
 		$jit.id('inner-details').innerHTML = html;
@@ -453,12 +453,12 @@ function init_graph(){
 
     Log.write('');
 
-    
+
     //create_or_update_particule('moncul', 100,100, 'green', 1);
-    
+
     /*windowResizeHandler();*/
     //loop();
-    
+
     setInterval( loop, 1000 / 60 );
 
 };

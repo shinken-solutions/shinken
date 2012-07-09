@@ -1,22 +1,22 @@
-#!/usr/bin/env python2.6
-#Copyright (C) 2009-2010 :
+#!/usr/bin/env python
+# Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
 #
@@ -41,7 +41,7 @@ class TestNotif(ShinkenTest):
         host.act_depend_of = [] # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
 
-        #To make tests quicker we make notifications send very quickly
+        # To make tests quicker we make notifications send very quickly
         svc.notification_interval = 0.001
 
         svc.checks_in_progress = []
@@ -151,8 +151,8 @@ class TestNotif(ShinkenTest):
         host.act_depend_of = [] # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
 
-        #To make tests quicker we make notifications send very quickly
-        svc.notification_interval = 0.001 #and send imediatly then
+        # To make tests quicker we make notifications send very quickly
+        svc.notification_interval = 0.001 # and send imediatly then
 
         svc.first_notification_delay = 0.1 # set 6s for first notif delay
         svc.checks_in_progress = []
@@ -310,7 +310,7 @@ class TestNotif(ShinkenTest):
         host.act_depend_of = [] # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
 
-        #To make tests quicker we make notifications send very quickly
+        # To make tests quicker we make notifications send very quickly
         svc.notification_interval = 0.001
 
         svc.checks_in_progress = []
@@ -368,13 +368,13 @@ class TestNotif(ShinkenTest):
         host.act_depend_of = [] # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
 
-        #To make tests quicker we make notifications send very quickly
+        # To make tests quicker we make notifications send very quickly
         svc.notification_interval = 0.001
 
         svc.checks_in_progress = []
         svc.act_depend_of = [] # no hostchecks on critical checkresults
 
-        #We want the contact to do not have a mail, so we remove tyhe 'u'
+        # We want the contact to do not have a mail, so we remove tyhe 'u'
         test_contact = self.sched.contacts.find_by_name('test_contact')
         for nw in test_contact.notificationways:
             nw.service_notification_options.remove('u')
@@ -422,7 +422,7 @@ class TestNotif(ShinkenTest):
         self.show_and_clear_logs()
         self.show_actions()
         print "cnn and cur", cnn, svc.current_notification_number
-        
+
         cnn = svc.current_notification_number
         self.scheduler_loop(1, [[svc, 3, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.show_and_clear_logs()

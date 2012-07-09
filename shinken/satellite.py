@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -25,15 +25,15 @@
 
 
 """
-This class is an interface for reactionner and poller
-The satallite listens to a port the configuration from the Arbiter
+This class is an interface for Reactionner and Poller daemons
+A Reactionner listens to a port for the configuration from the Arbiter
 The conf contains the schedulers where actionners will gather actions.
 
-The actionner keeps on listening the arbiter
+The Reactionner keeps on listening to the Arbiter
 (one a timeout)
 
-if arbiter wants it to have a new conf, the satellite forget the previous
- schedulers (and actions into) and take the new ones.
+If Arbiter wants it to have a new conf, the satellite forgets the previous
+ Schedulers (and actions into) and takes the new ones.
 """
 
 # Try to see if we are in an android device or not
@@ -105,15 +105,15 @@ class IForArbiter(Interface):
     # It will ask me to remove one or more sched_id
     def what_i_managed(self):
         logger.debug("The arbiter asked me what I manage. It's %s" % self.app.what_i_managed())
-        return self.app.what_i_managed()#self.app.schedulers.keys()
+        return self.app.what_i_managed() # self.app.schedulers.keys()
 
 
     # Call by arbiter if it thinks we are running but we must do not (like
     # if I was a spare that take a conf but the master returns, I must die
     # and wait a new conf)
-    # Us : No please...
-    # Arbiter : I don't care, hasta la vista baby!
-    # Us : ... <- Nothing! We are dead! you don't get it or what??
+    # Us: No please...
+    # Arbiter: I don't care, hasta la vista baby!
+    # Us: ... <- Nothing! We are dead! you don't get it or what??
     # Reading code is not a job for eyes only...
     def wait_new_conf(self):
         logger.debug("Arbiter wants me to wait for a new configuration")
@@ -121,11 +121,11 @@ class IForArbiter(Interface):
         self.app.cur_conf = None
 
 
-    #<WTF??> Inconsistent comments!
+    # <WTF??> Inconsistent comments!
     # methods are only used by the arbiter or the broker?
     # NB: following methods are only used by broker
     # Used by the Arbiter to push broks to broker
-    #</WTF??>
+    # </WTF??>
     def push_broks(self, broks):
         self.app.add_broks_to_queue(broks.values())
         return True
@@ -136,7 +136,7 @@ class IForArbiter(Interface):
         return self.app.get_external_commands()
 
 
-    ### NB : only useful for receiver
+    ### NB: only useful for receiver
     def got_conf(self):
         return self.app.cur_conf != None
 
@@ -150,11 +150,11 @@ class ISchedulers(Interface):
 
     # A Scheduler send me actions to do
     def push_actions(self, actions, sched_id):
-        #print "A scheduler sned me actions", actions
+        # logger.debug("[%s] A scheduler sent me action : %s") % (self.name, actions)
         self.app.add_actions(actions, sched_id)
 
 
-    # A scheduler ask us its returns
+    # A scheduler ask us the action return value
     def get_returns(self, sched_id):
         #print "A scheduler ask me the returns", sched_id
         ret = self.app.get_return_for_passive(sched_id)
@@ -288,7 +288,7 @@ class Satellite(BaseSatellite):
             sched['con'] = None
             return
 
-        # The schedulers have been restarted : it has a new run_id.
+        # The schedulers have been restarted: it has a new run_id.
         # So we clear all verifs, they are obsolete now.
         if sched['running_id'] != 0 and new_run_id != running_id:
             logger.info("[%s] The running id of the scheduler %s changed, we must clear its actions" % (self.name, sname))
@@ -365,7 +365,7 @@ class Satellite(BaseSatellite):
                 except AttributeError, exp: # the scheduler must  not be initialized
                     logger.debug(str(exp))
                 except Exception, exp:
-                    logger.error("A satellite raised an unknown exception : %s (%s)" % (exp, type(exp)))
+                    logger.error("A satellite raised an unknown exception: %s (%s)" % (exp, type(exp)))
                     try:
                         logger.debug(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
                     except:
@@ -386,7 +386,7 @@ class Satellite(BaseSatellite):
     def get_return_for_passive(self, sched_id):
         # I do not know this scheduler?
         if sched_id not in self.schedulers:
-            logger.debug("I do not know this scheduler : %s" % sched_id)
+            logger.debug("I do not know this scheduler: %s" % sched_id)
             return []
 
         sched = self.schedulers[sched_id]
@@ -440,7 +440,7 @@ class Satellite(BaseSatellite):
 
         # And save the Queue of this worker, with key = worker id
         self.q_by_mod[module_name][w.id] = q
-        logger.info("[%s] Allocating new %s Worker : %s" % (self.name, module_name, w.id))
+        logger.info("[%s] Allocating new %s Worker: %s" % (self.name, module_name, w.id))
 
         # Ok, all is good. Start it!
         w.start()
@@ -477,7 +477,7 @@ class Satellite(BaseSatellite):
 
     # A simple function to add objects in self
     # like broks in self.broks, etc
-    # TODO : better tag ID?
+    # TODO: better tag ID?
     def add(self, elt):
         cls_type = elt.__class__.my_type
         if cls_type == 'brok':
@@ -498,11 +498,11 @@ class Satellite(BaseSatellite):
 
 
     # workers are processes, they can die in a numerous of ways
-    # like :
-    # *99.99% : bug in code, sorry :p
-    # *0.005 % : a mix between a stupid admin (or an admin without coffee),
+    # like:
+    # *99.99%: bug in code, sorry:p
+    # *0.005 %: a mix between a stupid admin (or an admin without coffee),
     # and a kill command
-    # *0.005% : alien attack
+    # *0.005%: alien attack
     # So they need to be detected, and restart if need
     def check_and_del_zombie_workers(self):
         # In android, we are using threads, so there is not active_children call
@@ -513,7 +513,7 @@ class Satellite(BaseSatellite):
         w_to_del = []
         for w in self.workers.values():
             # If a worker goes down and we did not ask him, it's not
-            # good : we can think that we have a worker and it's not True
+            # good: we can think that we have a worker and it's not True
             # So we del it
             if not w.is_alive():
                 logger.warning("[%s] The worker %s goes down unexpectly!" % (self.name, w.id))
@@ -544,7 +544,7 @@ class Satellite(BaseSatellite):
 
     # Here we create new workers if the queue load (len of verifs) is too long
     def adjust_worker_number_by_load(self):
-        # TODO : get a real value for a load
+        # TODO: get a real value for a load
         wish_worker = 1
         # I want at least min_workers or wish_workers (the biggest)
         # but not more than max_workers
@@ -553,7 +553,7 @@ class Satellite(BaseSatellite):
                             and len(self.workers) < self.max_workers):
             for mod in self.q_by_mod:
                 self.create_and_launch_worker(module_name=mod)
-        # TODO : if len(workers) > 2*wish, maybe we can kill a worker?
+        # TODO: if len(workers) > 2*wish, maybe we can kill a worker?
 
 
     # Get the Queue() from an action by looking at which module
@@ -652,7 +652,7 @@ class Satellite(BaseSatellite):
             # What the F**k? We do not know what happenned,
             # log the error message if possible.
             except Exception, exp:
-                logger.error("A satellite raised an unknown exception : %s (%s)" % (exp, type(exp)))
+                logger.error("A satellite raised an unknown exception: %s (%s)" % (exp, type(exp)))
                 try:
                     logger.debug(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
                 except:
@@ -716,7 +716,7 @@ class Satellite(BaseSatellite):
         # If so, we listen to it
         # When it push a conf, we reinit connections
         # Sleep in waiting a new conf :)
-        # TODO : manage the diff again.
+        # TODO: manage the diff again.
         while self.timeout > 0:
             begin = time.time()
             self.watch_for_new_conf(self.timeout)
@@ -730,7 +730,7 @@ class Satellite(BaseSatellite):
         self.timeout = self.polling_interval
 
         # Check if zombies workers are among us :)
-        # If so : KILL THEM ALL!!!
+        # If so: KILL THEM ALL!!!
         self.check_and_del_zombie_workers()
 
         # But also modules
@@ -742,12 +742,12 @@ class Satellite(BaseSatellite):
             for mod in self.q_by_mod:
                 # In workers we've got actions send to queue - queue size
                 for (i, q) in self.q_by_mod[mod].items():
-                    logger.debug("[%d][%s][%s] Stats : Workers:%d (Queued:%d TotalReturnWait:%d)" % \
+                    logger.debug("[%d][%s][%s] Stats: Workers:%d (Queued:%d TotalReturnWait:%d)" % \
                         (sched_id, sched['name'], mod, i, q.qsize(), self.get_returns_queue_len()))
 
 
         # Before return or get new actions, see how we manage
-        # old ones : are they still in queue (s)? If True, we
+        # old ones: are they still in queue (s)? If True, we
         # must wait more or at least have more workers
         wait_ratio = self.wait_ratio.get_load()
         total_q = 0
@@ -890,7 +890,7 @@ class Satellite(BaseSatellite):
                 # And then we connect to it :)
                 self.pynag_con_init(sched_id)
 
-        # Now the limit part, 0 mean : number of cpu of this machine :)
+        # Now the limit part, 0 mean: number of cpu of this machine :)
         # if not available, use 4 (modern hardware)
         self.max_workers = g_conf['max_workers']
         if self.max_workers == 0 and not is_android:
@@ -898,14 +898,14 @@ class Satellite(BaseSatellite):
                 self.max_workers = cpu_count()
             except NotImplementedError:
                 self.max_workers = 4
-            logger.info("Using max workers : %s" % self.max_workers)
+            logger.info("Using max workers: %s" % self.max_workers)
         self.min_workers = g_conf['min_workers']
         if self.min_workers == 0 and not is_android:
             try:
                 self.min_workers = cpu_count()
             except NotImplementedError:
                 self.min_workers = 4
-            logger.info("Using min workers : %s" % self.min_workers)
+            logger.info("Using min workers: %s" % self.min_workers)
 
         self.processes_by_worker = g_conf['processes_by_worker']
         self.polling_interval = g_conf['polling_interval']
@@ -924,7 +924,7 @@ class Satellite(BaseSatellite):
             os.environ['TZ'] = use_timezone
             time.tzset()
 
-        logger.info("We have our schedulers : %s" % (str(self.schedulers)))
+        logger.info("We have our schedulers: %s" % (str(self.schedulers)))
 
         # Now manage modules
         # TODO: check how to better handle this with modules_manager..
@@ -934,7 +934,7 @@ class Satellite(BaseSatellite):
             if not module.module_type in self.q_by_mod:
                 logger.debug("Add module object %s" % str(module))
                 self.modules_manager.modules.append(module)
-                logger.info("[%s] Got module : %s " % (self.name, module.module_type))
+                logger.info("[%s] Got module: %s " % (self.name, module.module_type))
                 self.q_by_mod[module.module_type] = {}
 
 

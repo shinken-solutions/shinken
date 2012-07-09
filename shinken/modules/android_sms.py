@@ -27,7 +27,7 @@ This module is an android reactionner module. I will get actions
 for send SMS, and will use android lib for this.
 """
 
-# very important : import android stuff
+# very important: import android stuff
 import android
 
 import sys
@@ -40,11 +40,11 @@ from shinken.basemodule import BaseModule
 from shinken.external_command import ExternalCommand
 
 properties = {
-    'daemons' : ['reactionner'],
-    'type' : 'android_sms',
-    'external' : False,
+    'daemons': ['reactionner'],
+    'type': 'android_sms',
+    'external': False,
     # To be a real worker module, you must set this
-    'worker_capable' : True,
+    'worker_capable': True,
 }
 
 
@@ -56,9 +56,9 @@ def get_instance(mod_conf):
 
 
 
-#Just print some stuff
+# Just print some stuff
 class Android_reactionner(BaseModule):
-    
+
     def __init__(self, mod_conf):
         BaseModule.__init__(self, mod_conf)
         self.i_am_dying = False
@@ -66,7 +66,7 @@ class Android_reactionner(BaseModule):
     # Called by poller to say 'let's prepare yourself guy'
     def init(self):
         print "Initilisation of the android module"
-        
+
 
 
 
@@ -93,7 +93,7 @@ class Android_reactionner(BaseModule):
         for chk in self.checks:
             if chk.status == 'queue':
                 print "Launchng SMS for command %s" % chk.command
-                
+
                 elts = chk.command.split(' ')
 
                 # Check the command call first
@@ -143,12 +143,12 @@ class Android_reactionner(BaseModule):
         for chk in to_del:
             self.checks.remove(chk)
 
-    
+
     # We will read unread SMS and raise ACK if we read
     # something like 'ack host/service'
     def read_and_parse_sms(self):
         # Get only unread SMS of the inbox
-        SMSmsgs = self.android.smsGetMessages(True, 'inbox').result 
+        SMSmsgs = self.android.smsGetMessages(True, 'inbox').result
         to_mark = []
         cmds = []
         for message in SMSmsgs:
@@ -160,7 +160,7 @@ class Android_reactionner(BaseModule):
             print message
             if body.startswith(('ack', 'Ack', 'ACK')):
                 elts = body.split(' ')
-        
+
                 if len(elts) <= 1:
                     print "Bad message length"
                     continue
@@ -195,14 +195,14 @@ class Android_reactionner(BaseModule):
             except IOError , exp:
                 print "[%d]Exiting: %s" % (self.id, exp)
                 sys.exit(2)
-        
 
 
-    #id = id of the worker
-    #s = Global Queue Master->Slave
-    #m = Queue Slave->Master
-    #return_queue = queue managed by manager
-    #c = Control Queue for the worker
+
+    # id = id of the worker
+    # s = Global Queue Master->Slave
+    # m = Queue Slave->Master
+    # return_queue = queue managed by manager
+    # c = Control Queue for the worker
     def work(self, s, returns_queue, c):
         print "Module Android started!"
         self.android = android.Android()
@@ -235,7 +235,7 @@ class Android_reactionner(BaseModule):
                 if cmsg.get_type() == 'Die':
                     print "[%d]Dad say we are diing..." % self.id
                     break
-            except :
+            except:
                 pass
 
             timeout -= time.time() - begin

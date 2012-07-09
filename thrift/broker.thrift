@@ -11,7 +11,7 @@
 
 namespace * org.shinkenmonitoring.broker
 
-/** 
+/**
  * List of tables you can query
  */
 enum Table {
@@ -48,7 +48,7 @@ struct OutputRequest {
 }
 
 /** Query filters. Filters are expressed using LQL filters syntax
- * Filters are anded together. 
+ * Filters are anded together.
  * You can use boolean expression between filters using 'And' and
  * 'Or' operators and the number of filters to combine in reference
  * field.

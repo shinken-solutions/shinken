@@ -20,4 +20,4 @@
 +servicegroupurl="/check_mk/view.py?view_name=servicegroup&servicegroup=[servicegroup_name]"
  ; URL template for nested map links
  ;mapurl="[htmlbase]/index.php?mod=Map&act=view&show=[map_name]"
- 
+

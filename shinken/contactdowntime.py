@@ -3,7 +3,7 @@
 # -*- coding: utf-8 -*-
 
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -28,7 +28,7 @@
 
 import time
 
-""" TODO : Add some comment about this class for the doc"""
+""" TODO: Add some comment about this class for the doc"""
 class ContactDowntime:
     id = 1
 
@@ -58,7 +58,7 @@ class ContactDowntime:
     def __init__(self, ref, start_time, end_time, author, comment):
         self.id = self.__class__.id
         self.__class__.id += 1
-        self.ref = ref #pointer to srv or host we are apply
+        self.ref = ref # pointer to srv or host we are apply
         self.start_time = start_time
         self.end_time = end_time
         self.author = author

@@ -33,8 +33,8 @@ from shinken.log import logger
 class Servicedependency(Item):
     id = 0
 
-#F is dep of D
-#host_name                      Host B
+# F is dep of D
+# host_name                      Host B
 #       service_description             Service D
 #       dependent_host_name             Host C
 #       dependent_service_description   Service F
@@ -57,10 +57,10 @@ class Servicedependency(Item):
         'dependency_period':             StringProp(default=''),
     'explode_hostgroup':         BoolProp  (default='0')
     })
-    
 
-    #Give a nice name output, for debbuging purpose
-    #(Yes, debbuging CAN happen...)
+
+    # Give a nice name output, for debbuging purpose
+    # (Yes, debbuging CAN happen...)
     def get_name(self):
         return getattr(self, 'dependent_host_name', '')+'/'+getattr(self, 'dependent_service_description', '')+'..'+getattr(self, 'host_name', '')+'/'+getattr(self, 'service_description', '')
 
@@ -72,9 +72,9 @@ class Servicedependencies(Items):
             del self[id]
 
 
-    #Add a simple service dep from another (dep -> par)
+    # Add a simple service dep from another (dep -> par)
     def add_service_dependency(self, dep_host_name, dep_service_description, par_host_name, par_service_description):
-        #We create a "standard" service_dep
+        # We create a "standard" service_dep
         prop = {
             'dependent_host_name':           dep_host_name,
             'dependent_service_description': dep_service_description,
@@ -90,19 +90,19 @@ class Servicedependencies(Items):
     # If we have explode_hostgroup parameter whe have to create a service dependency for each host of the hostgroup
     def explode_hostgroup(self, sd, hostgroups):
         # We will create a service dependency for each host part of the host group
- 
-        # First get services 
+
+        # First get services
         snames = sd.service_description.split(',')
- 
+
         # And dep services
         dep_snames = sd.dependent_service_description.split(',')
- 
+
         # Now for each host into hostgroup we will create a service dependency object
         hg_names = sd.hostgroup_name.split(',')
         for hg_name in hg_names:
             hg = hostgroups.find_by_name(hg_name)
             if hg is None:
-                err = "ERROR : the servicedependecy got an unknown hostgroup_name '%s'" % hg_name
+                err = "ERROR: the servicedependecy got an unknown hostgroup_name '%s'" % hg_name
                 self.configuration_errors.append(err)
                 continue
             hnames = []
@@ -129,10 +129,10 @@ class Servicedependencies(Items):
         servicedeps = self.items.keys()
         for id in servicedeps:
             sd = self.items[id]
-            if sd.is_tpl(): #Exploding template is useless
+            if sd.is_tpl(): # Exploding template is useless
                 continue
 
-            # Have we to explode the hostgroup into many service ?
+            # Have we to explode the hostgroup into many service?
             if hasattr(sd, 'explode_hostgroup') and hasattr(sd, 'hostgroup_name'):
                 self.explode_hostgroup(sd, hostgroups)
                 srvdep_to_remove.append(id)
@@ -146,11 +146,11 @@ class Servicedependencies(Items):
                 for hg_name in hg_names:
                     hg = hostgroups.find_by_name(hg_name)
                     if hg is None:
-                        err = "ERROR : the servicedependecy got an unknown hostgroup_name '%s'" % hg_name
+                        err = "ERROR: the servicedependecy got an unknown hostgroup_name '%s'" % hg_name
                         hg.configuration_errors.append(err)
                         continue
                     hnames.extend(hg.members.split(','))
-            
+
             if not hasattr(sd, 'host_name') and hasattr(sd, 'hostgroup_name'):
                 sd.host_name = ''
 
@@ -173,14 +173,14 @@ class Servicedependencies(Items):
                 for hg_name in hg_names:
                     hg = hostgroups.find_by_name(hg_name)
                     if hg is None:
-                        err = "ERROR : the servicedependecy got an unknown dependent_hostgroup_name '%s'" % hg_name
+                        err = "ERROR: the servicedependecy got an unknown dependent_hostgroup_name '%s'" % hg_name
                         hg.configuration_errors.append(err)
                         continue
                     dep_hnames.extend(hg.members.split(','))
-            
+
             if not hasattr(sd, 'dependent_host_name'):
                 sd.dependent_host_name = getattr(sd, 'host_name', '')
-            
+
             if sd.dependent_host_name != '':
                 dep_hnames.extend(sd.dependent_host_name.split(','))
             dep_snames = sd.dependent_service_description.split(',')
@@ -191,7 +191,7 @@ class Servicedependencies(Items):
 
             # Create the new service deps from all of this.
             for (dep_hname, dep_sname) in dep_couples: # the sons, like HTTP
-                for (hname, sname) in couples : # the fathers, like MySQL
+                for (hname, sname) in couples: # the fathers, like MySQL
                     new_sd = sd.copy()
                     new_sd.host_name = hname
                     new_sd.service_description = sname
@@ -218,14 +218,14 @@ class Servicedependencies(Items):
                 s_name = sd.dependent_service_description
                 hst_name = sd.dependent_host_name
 
-                #The new member list, in id
+                # The new member list, in id
                 s = services.find_srv_by_name_and_hostname(hst_name, s_name)
                 sd.dependent_service_description = s
 
                 s_name = sd.service_description
                 hst_name = sd.host_name
 
-                #The new member list, in id
+                # The new member list, in id
                 s = services.find_srv_by_name_and_hostname(hst_name, s_name)
                 sd.service_description = s
 
@@ -233,8 +233,8 @@ class Servicedependencies(Items):
                 logger.error("[servicedependency] fail to linkify by service %s: %s" % (sd, exp))
 
 
-    #We just search for each srvdep the id of the srv
-    #and replace the name by the id
+    # We just search for each srvdep the id of the srv
+    # and replace the name by the id
     def linkify_sd_by_tp(self, timeperiods):
         for sd in self:
             try:
@@ -257,14 +257,14 @@ class Servicedependencies(Items):
                 dsc.add_service_chk_dependency(sdval, sd.execution_failure_criteria, dp, sd.inherits_parent)
 
 
-    #Apply inheritance for all properties
+    # Apply inheritance for all properties
     def apply_inheritance(self, hosts):
-        #We check for all Host properties if the host has it
-        #if not, it check all host templates for a value
+        # We check for all Host properties if the host has it
+        # if not, it check all host templates for a value
         for prop in Servicedependency.properties:
             self.apply_partial_inheritance(prop)
 
-        #Then implicit inheritance
-        #self.apply_implicit_inheritance(hosts)
+        # Then implicit inheritance
+        # self.apply_implicit_inheritance(hosts)
         for s in self:
             s.get_customs_properties_by_inheritance(self)

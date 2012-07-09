@@ -1,8 +1,8 @@
 # macro for adding a shinken satellite with a tagged poller also deploy config on satellites
-# Arguments are :
-# ARG1 : new poller name
-# ARG2 : new poller address
-# ARG3 : existing poller name that will be used as model for the new poller
+# Arguments are:
+# ARG1: new poller name
+# ARG2: new poller address
+# ARG3: existing poller name that will be used as model for the new poller
 #
 # set configuration file
 setconfigfile /opt/shinken/etc/shinken-specific.cfg
@@ -17,4 +17,4 @@ clone poller set poller_name=ARG1,address=ARG2 where poller_name=ARG3
 # write config
 writeconfig
 # deploy configuration
-sync 
+sync

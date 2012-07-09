@@ -60,7 +60,7 @@ need the following Python packages.
 * `pysqlite`__
 
 __ http://pypi.python.org/pypi/simplejson/
-__ http://pypi.python.org/pypi/ujson/ 
+__ http://pypi.python.org/pypi/ujson/
 __ http://code.google.com/p/pysqlite/
 
 Installing/Checking Common Requirements on Windows
@@ -128,16 +128,16 @@ see install.d/README file for further information.
 
 Update
 ------
-1 - grab the latest shinken archive and extract its content 
+1 - grab the latest shinken archive and extract its content
 
 2 - cd into the resulting folder
 
 3 - backup shinken configuration plugins and addons and copy the backup id::
-    
+
   ./install -b
 
 4 - remove shinken (if you installed addons with the installer say no to the question about removing the addons)::
-    
+
   ./install -u
 
 5 - install the new version::
@@ -156,7 +156,7 @@ cd into shinken source folder and run::
 
 Running
 -------
-The install script also installs some `init.d` scripts, enables them at boot time and starts them right after the install process ends. 
+The install script also installs some `init.d` scripts, enables them at boot time and starts them right after the install process ends.
 
 
 
@@ -249,5 +249,5 @@ __ http://www.shinken-monitoring.org/wiki/
 Known bugs
 ================================
 
-You can consult the open issues list or submit a new issue at :
+You can consult the open issues list or submit a new issue at:
 https://github.com/naparuba/shinken/issues

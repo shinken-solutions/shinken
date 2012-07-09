@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -51,7 +51,7 @@ class ReactionnerLink(SatelliteLink):
         self.realm.reactionners.append(self)
 
 
-class ReactionnerLinks(SatelliteLinks):#(Items):
+class ReactionnerLinks(SatelliteLinks): # (Items):
     """Please Add a Docstring to describe the class here"""
 
     name_property = "reactionner_name"

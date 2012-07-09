@@ -1,13 +1,13 @@
 {
-"name" : "hp",
+"name": "hp",
 
-"description" : "Checks for HP hardware ILO/Insight servers and blade chassis",
+"description": "Checks for HP hardware ILO/Insight servers and blade chassis",
 
 "path":"servers/",
 
-"templates" : ["hp-asm", "hp-blade-chassis"],
+"templates": ["hp-asm", "hp-blade-chassis"],
 
-"macros":{}	 
+"macros":{}
 
 
 }

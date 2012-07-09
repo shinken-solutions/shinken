@@ -79,13 +79,13 @@ class Logline(dict):
                     'RECOVERY': 0
                 }
                 host_states = {
-                    'UP' :0,
+                    'UP': 0,
                     'DOWN': 1,
                     'UNREACHABLE': 2,
                     'UNKNOWN': 3,
                     'RECOVERY': 0
                 }
-    
+
                 # type is 0:info, 1:state, 2:program, 3:notification, 4:passive, 5:command
                 logobject = LOGOBJECT_INFO
                 logclass = LOGCLASS_INVALID
@@ -120,7 +120,7 @@ class Logline(dict):
                     logobject = LOGOBJECT_SERVICE
                     logclass = LOGCLASS_ALERT
                     host_name, service_description, state_type, comment = options.split(';', 3)
-    
+
                 elif type == 'CURRENT HOST STATE':
                     logobject = LOGOBJECT_HOST
                     logclass = LOGCLASS_STATE
@@ -142,7 +142,7 @@ class Logline(dict):
                     logobject = LOGOBJECT_HOST
                     logclass = LOGCLASS_ALERT
                     host_name, state_type, comment = options.split(';', 2)
-    
+
                 elif type == 'SERVICE NOTIFICATION':
                     # tust_cuntuct;test_host_0;test_ok_0;CRITICAL;notify-service;i am CRITICAL  <-- normal
                     # SERVICE NOTIFICATION: test_contact;test_host_0;test_ok_0;DOWNTIMESTART (OK);notify-service;OK
@@ -160,7 +160,7 @@ class Logline(dict):
                     if '(' in state_type:
                         state_type = 'UNKNOWN'
                     state = host_states[state_type]
-    
+
                 elif type == 'PASSIVE SERVICE CHECK':
                     logobject = LOGOBJECT_SERVICE
                     logclass = LOGCLASS_PASSIVECHECK
@@ -174,12 +174,12 @@ class Logline(dict):
                     logobject = LOGOBJECT_SERVICE
                     host_name, service_description, state, state_type, attempt, command_name = options.split(';', 5)
                     state = service_states[state]
-    
+
                 elif type == 'HOST EVENT HANDLER':
                     logobject = LOGOBJECT_HOST
                     host_name, state, state_type, attempt, command_name = options.split(';', 4)
                     state = host_states[state]
-    
+
                 elif type == 'EXTERNAL COMMAND':
                     logobject = LOGOBJECT_INFO
                     logclass = LOGCLASS_COMMAND
@@ -218,10 +218,10 @@ class Logline(dict):
 
     def as_tuple(self):
         return tuple([str(getattr(self, col)) for col in Logline.columns])
-            
+
     def as_dict(self):
         return dict(zip(Logline.columns, [getattr(self, col) for col in Logline.columns]))
-            
+
     def __str__(self):
         return "line: %s" % self.message
 

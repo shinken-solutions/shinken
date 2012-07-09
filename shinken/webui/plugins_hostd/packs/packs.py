@@ -34,7 +34,7 @@ def get_packs():
     # so we bail out if it's a false one
     user = app.get_user_auth()
 
-    return {'app' : app, 'user' : user}
+    return {'app': app, 'user': user}
 
 
 def get_pack(pid):
@@ -46,10 +46,10 @@ def get_pack(pid):
     if '-' in pid:
         uname, packname = pid.split('-', 1)
         pack = app.datamgr.get_pack_by_user_packname(uname, packname)
-    else: #of the direct inner pack_id (will change for each push)
+    else: # of the direct inner pack_id (will change for each push)
         pack = app.datamgr.get_pack_by_id(pid)
 
-    return {'app' : app, 'user' : user, 'pack' : pack}
+    return {'app': app, 'user': user, 'pack': pack}
 
 
 def download_pack(pid):
@@ -62,8 +62,8 @@ def download_pack(pid):
 
 
 pages = {
-    get_packs : { 'routes' : ['/packs'], 'view' : 'packs', 'static' : True},
-    get_pack : { 'routes' : ['/pack/:pid'], 'view' : 'pack', 'static' : True},
-    download_pack : { 'routes' : ['/getpack/:pid'], 'static' : True},
+    get_packs: { 'routes': ['/packs'], 'view': 'packs', 'static': True},
+    get_pack: { 'routes': ['/pack/:pid'], 'view': 'pack', 'static': True},
+    download_pack: { 'routes': ['/getpack/:pid'], 'static': True},
     }
 

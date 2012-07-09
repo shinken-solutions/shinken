@@ -23,17 +23,17 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-#This Class implement the Thrift Service Check Acceptor, an NSCA inspired
+# This Class implement the Thrift Service Check Acceptor, an NSCA inspired
 # interface to submiet checks results
 
-#This text is print at the import
-print "Detected module : TSCA module for Arbiter/receiver"
+# This text is print at the import
+print "Detected module: TSCA module for Arbiter/receiver"
 
 import os
 import sys
 import time
 
-#Thrift Specificities
+# Thrift Specificities
 sys.path.append(os.path.abspath(__file__).rsplit("/", 3)[0] + "/thrift/gen-py")
 from org.shinken_monitoring.tsca import StateService
 from org.shinken_monitoring.tsca.ttypes import *
@@ -52,7 +52,7 @@ properties = {
     }
 
 
-#called by the plugin manager to get a broker
+# called by the plugin manager to get a broker
 def get_instance(plugin):
     print "Get a TSCA arbiter module for plugin %s" % plugin.get_name()
 
@@ -76,7 +76,7 @@ def get_instance(plugin):
     return instance
 
 
-#Used by Thrift to handle client
+# Used by Thrift to handle client
 class StateServiceHandler:
     def __init__(self, tsca_arbiter):
         self.state_list = []
@@ -108,7 +108,7 @@ class StateServiceHandler:
             self.currentlySendingData = False
 
 
-#Just print some stuff
+# Just print some stuff
 class TSCA_arbiter(BaseModule):
     def __init__(self, modconf, host, port, max_packet_age):
         BaseModule.__init__(self, modconf)
@@ -116,7 +116,7 @@ class TSCA_arbiter(BaseModule):
         self.port = port
         self.max_packet_age = max_packet_age
 
-    #Ok, main function that is called in the CONFIGURATION phase
+    # Ok, main function that is called in the CONFIGURATION phase
     def get_objects(self):
         print "[Dummy] ask me for objects to return"
         r = {'hosts': []}
@@ -131,11 +131,11 @@ class TSCA_arbiter(BaseModule):
     def read_check_result(self, state):
         '''
          Read the list result
-          Value n1 : Timestamp
-          Value n2 : Hostname
-          Value n3 : Service
-          Value n4 : Return Code
-          Value n5 : Output
+          Value n1: Timestamp
+          Value n2: Hostname
+          Value n3: Service
+          Value n4: Return Code
+          Value n5: Output
         '''
         timestamp = state.timestamp
         hostname = state.hostname

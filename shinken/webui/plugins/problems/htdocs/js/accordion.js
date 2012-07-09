@@ -3,19 +3,19 @@
      Gerhard Lausser, Gerhard.Lausser@consol.de
      Gregory Starck, g.starck@gmail.com
      Hartmut Goebel, h.goebel@goebel-consult.de
- 
+
  This file is part of Shinken.
- 
+
  Shinken is free software: you can redistribute it and/or modify
  it under the terms of the GNU Affero General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
- 
+
  Shinken is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU Affero General Public License for more details.
- 
+
  You should have received a copy of the GNU Affero General Public License
  along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -25,7 +25,7 @@
 $(document).ready(function(){
     var details = $('.detail');
     details.hide();
-    
+
     // By default hide all "hide" chevron of the right part
     $('.chevron-up').hide();
 });
@@ -92,7 +92,7 @@ function select_all_problems(){
     toggle_select_buttons();
     /*$('#select_all_btn').hide();
     $('#unselect_all_btn').show();*/
-    
+
     // we wil lget all elements by looking at .details and get their ids
     $('.detail').each(function(){
 	add_element($(this).attr('id'));
@@ -123,7 +123,7 @@ function add_remove_elements(name){
 	add_element(name);
     }
 }
-	
+
 
 /* function when we add an element*/
 function add_element(name){
@@ -131,10 +131,10 @@ function add_element(name){
 
     // We put the select all button in unselect mode
     show_unselect_all_button();
-    
+
     // We show the 'tick' image ofthe selector on the left
     $('#selector-'+name).show();
-    
+
     $('#actions').show();
     /*$('#actions').css('display', 'block');
     $('#actions').animate({opacity:1});*/
@@ -161,7 +161,7 @@ function remove_element(name){
 /* Flush selected elements, so clean the list
 but also untick thems in the UI */
 function flush_selected_elements(){
-    /* We must copy the list so we can parse it in a clean way 
+    /* We must copy the list so we can parse it in a clean way
      without fearing some bugs */
     var cpy = $.extend({}, selected_elements);
     $.each(cpy, function(idx, name) {
