@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -31,7 +31,7 @@ from shinken.autoslots import AutoSlots
 
 
 class Check(Action):
-    """ ODO : Add some comment about this class for the doc"""
+    """ ODO: Add some comment about this class for the doc"""
     # AutoSlots create the __slots__ with properties and
     # running_properties names
     __metaclass__ = AutoSlots
@@ -104,7 +104,7 @@ class Check(Action):
         else:
             self.internal = False
         self.from_trigger = from_trigger
-        
+
 
     def copy_shell(self):
         """return a copy of the check but just what is important for execution

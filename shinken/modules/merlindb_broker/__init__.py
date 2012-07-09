@@ -24,9 +24,9 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 properties = {
-    'daemons' : ['broker'],
-    'type' : 'merlindb',
-    'phases' : ['running'],
+    'daemons': ['broker'],
+    'type': 'merlindb',
+    'phases': ['running'],
     }
 
 
@@ -40,7 +40,7 @@ def get_instance(plugin):
     try:
         from merlindb_broker import Merlindb_broker
     except ImportError , exp:
-        print "Warning : the plugin type %s is unavailable : %s" % (properties['type'], exp)
+        print "Warning: the plugin type %s is unavailable: %s" % (properties['type'], exp)
         return None
 
 
@@ -60,7 +60,7 @@ def get_instance(plugin):
             return instance
 
         except ImportError , exp:
-            print "Warning : the plugin type %s is unavailable : %s" % (properties['type'], exp)
+            print "Warning: the plugin type %s is unavailable: %s" % (properties['type'], exp)
             return None
 
     if backend == 'sqlite':
@@ -70,7 +70,7 @@ def get_instance(plugin):
             return instance
 
         except ImportError , exp:
-            print "Warning : the plugin type %s is unavailable : %s" % (properties['type'], exp)
+            print "Warning: the plugin type %s is unavailable: %s" % (properties['type'], exp)
             return None
 
     print "Not creating a instance!!!"

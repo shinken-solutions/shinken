@@ -54,14 +54,14 @@ class TestConfig(ShinkenTest):
         for h in hsts:
             svc = self.find_service(h.host_name, desc)
             if svc is None:
-                print "Error : the host %s is missing service %s!!" % (h.host_name, desc)
+                print "Error: the host %s is missing service %s!!" % (h.host_name, desc)
                 r = False
 
         for h in self.sched.hosts:
             if h not in hsts:
                 svc = self.find_service(h.host_name, desc)
                 if svc is not None:
-                    print "Error : the host %s got the service %s!!" % (h.host_name, desc)
+                    print "Error: the host %s got the service %s!!" % (h.host_name, desc)
                     r = False
         return r
 

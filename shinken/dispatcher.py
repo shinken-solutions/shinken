@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -67,7 +67,7 @@ class Dispatcher:
                 satellite.set_arbiter_satellitemap(arbiter.satellitemap.get(sat_name, {}))
 
         self.dispatch_queue = { 'schedulers': [], 'reactionners': [],
-                                'brokers': [], 'pollers': [] , 'receivers' : []}
+                                'brokers': [], 'pollers': [] , 'receivers': []}
         self.elements = [] # all elements, sched and satellites
         self.satellites = [] # only satellites not schedulers
 
@@ -102,7 +102,7 @@ class Dispatcher:
 
         # Some properties must be given to satellites from global
         # configuration, like the max_plugins_output_length to pollers
-        parameters = {'max_plugins_output_length' : self.conf.max_plugins_output_length}
+        parameters = {'max_plugins_output_length': self.conf.max_plugins_output_length}
         for poller in self.pollers:
             poller.add_global_conf_parameters(parameters)
 
@@ -135,7 +135,7 @@ class Dispatcher:
 
     # Check if all active items are still alive
     # the result goes into self.dispatch_ok
-    # TODO : finish need conf
+    # TODO: finish need conf
     def check_dispatch(self):
         # Check if the other arbiter has a conf
         for arb in self.arbiters:
@@ -192,9 +192,9 @@ class Dispatcher:
                         # We must have the good number of satellite or we are not happy
                         # So we are sure to raise a dispatch every loop a satellite is missing
                         if len(r.to_satellites_managed_by[kind][cfg_id]) < r.get_nb_of_must_have_satellites(kind):
-                            logger.warning("Missing satellite %s for configuration %d :" % (kind, cfg_id))
+                            logger.warning("Missing satellite %s for configuration %d:" % (kind, cfg_id))
 
-                            # TODO : less violent! Must only resent to who need?
+                            # TODO: less violent! Must only resent to who need?
                             # must be caught by satellite who sees that it already has the conf (hash)
                             # and do nothing
                             self.dispatch_ok = False # so we will redispatch all
@@ -206,15 +206,15 @@ class Dispatcher:
                             # is needed
                             # Or maybe it is alive but I thought that this reactionner managed the conf
                             # and it doesn't. I ask a full redispatch of these cfg for both cases
-                            
+
                             # DBG:
                             #print "What I manage", satellite.get_name(), satellite.what_i_managed()
-                            #try :
+                            #try:
                             #    satellite.reachable and cfg_id not in satellite.what_i_managed()
                             #except TypeError, exp:
                             #    print "DBG: ERROR: (%s) for satellite %s" % (exp, satellite.__dict__)
                             #    satellite.reachable = False
-                            
+
                             #wim = satellite.managed_confs # what_i_managed()
                             #print "%s [%s]Look at what manage the %s %s (alive? %s, reachable? %s): %s (look for %s)" % (int(time.time()), r.get_name(), kind, satellite.get_name(), satellite.alive, satellite.reachable, wim, cfg_id)
                             if not satellite.alive or (satellite.reachable and not satellite.do_i_manage(cfg_id, push_flavor)):
@@ -234,7 +234,7 @@ class Dispatcher:
                 if rec.reachable and not rec.got_conf():
                     self.dispatch_ok = False # so we will redispatch all
                     rec.need_conf = True
-                    
+
 
 
 
@@ -244,13 +244,13 @@ class Dispatcher:
     # a spare takes it (good :) ). Like the Empire, the master
     # strikes back! It was still alive! (like Elvis). It still got conf
     # and is running! not good!
-    # Bad dispatch : a link that has a conf but I do not allow this
+    # Bad dispatch: a link that has a conf but I do not allow this
     # so I ask it to wait a new conf and stop kidding.
     def check_bad_dispatch(self):
         for elt in self.elements:
             if hasattr(elt, 'conf'):
                 # If element has a conf, I do not care, it's a good dispatch
-                # If dead : I do not ask it something, it won't respond..
+                # If dead: I do not ask it something, it won't respond..
                 if elt.conf is None and elt.reachable:
                     # print "Ask", elt.get_name() , 'if it got conf'
                     if elt.have_conf():
@@ -342,7 +342,7 @@ class Dispatcher:
                 scheds = self.get_scheduler_ordered_list(r)
 
                 if nb_conf > 0:
-                    print_string = '[%s] Schedulers order : %s' % (r.get_name(), ','.join([s.get_name() for s in scheds]))
+                    print_string = '[%s] Schedulers order: %s' % (r.get_name(), ','.join([s.get_name() for s in scheds]))
                     logger.info(print_string)
 
 
@@ -372,7 +372,7 @@ class Dispatcher:
                                 r.to_satellites_need_dispatch[kind][cfg_id]  = False
                                 r.to_satellites_managed_by[kind][cfg_id] = []
                             break
-                        
+
                         logger.info('[%s] Trying to send conf %d to scheduler %s' % (r.get_name(), conf.id, sched.get_name()))
                         if not sched.need_conf:
                             logger.info('[%s] The scheduler %s do not need conf, sorry' % (r.get_name(), sched.get_name()))
@@ -388,19 +388,19 @@ class Dispatcher:
                         satellites_for_sched = r.get_satellites_links_for_scheduler()
                         s_conf = r.serialized_confs[conf.id]
                         # Prepare the conf before sending it
-                        conf_package = {'conf' : s_conf, 'override_conf' : override_conf,
-                                        'modules' : sched.modules, 'satellites' : satellites_for_sched,
-                                        'instance_name' : sched.scheduler_name, 'push_flavor' : conf.push_flavor,
-                                        'skip_initial_broks' : sched.skip_initial_broks,
+                        conf_package = {'conf': s_conf, 'override_conf': override_conf,
+                                        'modules': sched.modules, 'satellites': satellites_for_sched,
+                                        'instance_name': sched.scheduler_name, 'push_flavor': conf.push_flavor,
+                                        'skip_initial_broks': sched.skip_initial_broks,
                                         }
-                        
+
                         t1 = time.time()
                         is_sent = sched.put_conf(conf_package)
                         logger.debug("Conf is sent in %d" % (time.time() - t1))
                         if not is_sent:
                             logger.warning('[%s] configuration dispatching error for scheduler %s' %(r.get_name(), sched.get_name()))
                             continue
-                        
+
                         logger.info('[%s] Dispatch OK of conf in scheduler %s' % (r.get_name(), sched.get_name()))
 
                         sched.conf = conf
@@ -410,8 +410,8 @@ class Dispatcher:
                         conf.assigned_to = sched
 
                         # We update all data for this scheduler
-                        sched.managed_confs = {conf.id : conf.push_flavor}
-                        
+                        sched.managed_confs = {conf.id: conf.push_flavor}
+
                         # Now we generate the conf for satellites:
                         cfg_id = conf.id
                         for kind in ( 'reactionner', 'poller', 'broker' ):
@@ -454,7 +454,7 @@ class Dispatcher:
                     for kind in ( 'reactionner', 'poller', 'broker' ):
                         if r.to_satellites_need_dispatch[kind][cfg_id]:
                             cfg_for_satellite_part = r.to_satellites[kind][cfg_id]
-                            
+
                             # make copies of potential_react list for sort
                             satellites = []
                             for satellite in r.get_potential_satellites_by_type(kind):
@@ -486,7 +486,7 @@ class Dispatcher:
                                     satellites.extend(spares)
 
                             # Dump the order where we will send conf
-                            satellite_string = "[%s] Dispatching %s satellite with order : " % (r.get_name(), kind)
+                            satellite_string = "[%s] Dispatching %s satellite with order: " % (r.get_name(), kind)
                             for satellite in satellites:
                                 satellite_string += '%s (spare:%s), ' % (satellite.get_name(), str(satellite.spare))
                             logger.info(satellite_string)
@@ -494,13 +494,13 @@ class Dispatcher:
 
                             # Now we dispatch cfg to every one ask for it
                             nb_cfg_sent = 0
-                            for satellite in satellites:                                
+                            for satellite in satellites:
                                 # Send only if we need, and if we can
                                 if nb_cfg_sent < r.get_nb_of_must_have_satellites(kind) and satellite.alive:
                                     satellite.cfg['schedulers'][cfg_id] = cfg_for_satellite_part
                                     if satellite.manage_arbiters:
                                         satellite.cfg['arbiters'] = arbiters_cfg
-                                        
+
                                     # Brokers should have poller/reactionners links too
                                     if kind == "broker":
                                         r.fill_broker_with_poller_reactionner_links(satellite)
@@ -508,9 +508,9 @@ class Dispatcher:
                                     is_sent = False
                                     # Maybe this satellite already got this configuration, so skip it
                                     if satellite.do_i_manage(cfg_id, flavor):
-                                        logger.info('[%s] Skipping configuration %d send to the %s %s : it already got it' % (r.get_name(), cfg_id, kind, satellite.get_name()))
+                                        logger.info('[%s] Skipping configuration %d send to the %s %s: it already got it' % (r.get_name(), cfg_id, kind, satellite.get_name()))
                                         is_sent = True
-                                    else: # ok, it really need it :) 
+                                    else: # ok, it really need it :)
                                         logger.info('[%s] Trying to send configuration to %s %s' %(r.get_name(), kind, satellite.get_name()))
                                         is_sent = satellite.put_conf(satellite.cfg)
 
@@ -522,7 +522,7 @@ class Dispatcher:
 
                                         nb_cfg_sent += 1
                                         r.to_satellites_managed_by[kind][cfg_id].append(satellite)
-                                    
+
                                         # If we got a broker, the conf_id must be sent to only ONE
                                         # broker, so here it's done, we are happy.
                                         if kind == "broker":
@@ -547,4 +547,4 @@ class Dispatcher:
                             logger.info('[%s] Dispatch OK of configuration to receiver %s' %(r.get_name(), rec.get_name()))
                         else:
                             logger.warning('[%s] dispatching failed for receiver %s' %(r.get_name(), rec.get_name()))
-                            
+

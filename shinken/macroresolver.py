@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -99,8 +99,8 @@ class MacroResolver(Borg):
 
     # Return all macros of a string, so cut the $
     # And create a dict with it:
-    # val : value, not set here
-    # type : type of macro, like class one, or ARGN one
+    # val: value, not set here
+    # type: type of macro, like class one, or ARGN one
     def get_macros(self, s):
         #if s in self.cache:
         #    return self.cache[s]
@@ -113,7 +113,7 @@ class MacroResolver(Borg):
             if elt == '$':
                 in_macro = not in_macro
             elif in_macro:
-                macros[elt] = {'val' : '', 'type' : 'unknown'}
+                macros[elt] = {'val': '', 'type': 'unknown'}
 
         #self.cache[s] = macros
         if '' in macros:
@@ -152,7 +152,7 @@ class MacroResolver(Borg):
             cls = o.__class__
             macros = cls.macros
             for macro in macros:
-#                 print "Macro in %s : %s" % (o.__class__, macro)
+#                 print "Macro in %s: %s" % (o.__class__, macro)
                 prop = macros[macro]
                 value = self.get_value_from_element(o, prop)
 #                        print "Value: %s" % value
@@ -268,7 +268,7 @@ class MacroResolver(Borg):
             elif re.match('_SERVICE\w', macro):
                 macros[macro]['type'] = 'CUSTOM'
                 macros[macro]['class'] = 'SERVICE'
-                # value of macro : re.split('_HOST', '_HOSTMAC_ADDRESS')[1]
+                # value of macro: re.split('_HOST', '_HOSTMAC_ADDRESS')[1]
                 continue
             elif re.match('_CONTACT\w', macro):
                 macros[macro]['type'] = 'CUSTOM'
@@ -329,7 +329,7 @@ class MacroResolver(Borg):
         else:
             val = ''
             elt_name = elts[1]
-            # Special case : elt_name can be void
+            # Special case: elt_name can be void
             # so it's the host where it apply
             if elt_name == '':
                 for elt in data:

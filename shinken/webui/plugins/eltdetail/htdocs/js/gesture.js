@@ -8,11 +8,11 @@ var threshold = 3; // number of pixels required to be moved for a movement to co
 
 
 $(document).ready(function(){
-    canvas = document.getElementById("canvas");  
+    canvas = document.getElementById("canvas");
 
     ctx = canvas.getContext("2d");
 
-    
+
     function get_pos(e){
 	// For all devices management, we should
 	// compute as global pos minus the offset of the canvas
@@ -46,11 +46,11 @@ $(document).ready(function(){
     // Or in a mouse case
     canvas.addEventListener('mousedown', function(e) {
 	get_pos(e);
-	
+
 	isMouseDown = true;
 	e.preventDefault();
 	_points = [];
-	
+
 	ctx.beginPath();
 	ctx.strokeStyle = "#bae1ff";
 	ctx.lineCap = "round";

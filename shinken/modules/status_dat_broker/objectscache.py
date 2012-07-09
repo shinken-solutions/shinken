@@ -48,176 +48,176 @@ Service.get_status_dat_full_name = get_full_name
 
 
 class ObjectsCacheFile:
-    # prop : is the internal name if it is different than the name in the output file
-    # required :
-    # depythonize :
-    # default :
-    out_map = {Host : {
-            'host_name' : {'required' : True},
-            'alias' : {'required' : False},
-            'address' : {'required' : True},
-            'parents' : {'required' : False, 'depythonize' : from_list_to_split},
-            'check_period' : {'required' : True, 'depythonize' : 'get_name'},
-            'check_command' : {'required' : True, 'depythonize' : 'call'},
-            #'contact_groups' : ,
-            'contacts' : {'required' : True, 'depythonize' : 'contact_name'},
-            'notification_period' : {'required' : True, 'depythonize' : 'get_name'},
-            'initial_state' : {'required' : True},
-            'check_interval' : {'required' : True},
-            'retry_interval' : {'required' : True},
-            'max_check_attempts' : {'required' : True},
-            'active_checks_enabled' : {'required' : False, 'depythonize' : from_bool_to_string, 'default' : '0'},
-            'passive_checks_enabled' : {'required' : False, 'depythonize' : from_bool_to_string, 'default' : '0'},
-            'obsess_over_host' : {'required' : False, 'depythonize' : from_bool_to_string, 'default' : '0'},
-            'event_handler_enabled' : {'required' : False, 'depythonize' : from_bool_to_string, 'default' : '0'},
-            'low_flap_threshold' : {'required' : False, 'default' : '0'},
-            'high_flap_threshold' : {'required' : False, 'default' : '0'},
-            'flap_detection_enabled' : {'required' : False, 'depythonize' : from_bool_to_string, 'default' : '0'},
-            'flap_detection_options' : {'required' : True, 'depythonize' : from_list_to_split},
-            'freshness_threshold' : {'required' : False, 'default' : '0'},
-            'check_freshness' : {'required' : False, 'depythonize' : from_bool_to_string, 'default' : '0'},
-            'notification_options' : {'required' : True, 'depythonize' : from_list_to_split},
-            'notifications_enabled' : {'required' : False, 'depythonize' : from_bool_to_string, 'default' : '0'},
-            'notification_interval' : {'required' : True},
-            'first_notification_delay' : {'required' : False, 'default' : '0'},
-            'stalking_options' : {'required' : False, 'depythonize' : from_list_to_split, 'default' : 'n'},
-            'process_perf_data' : {'required' : False, 'depythonize' : from_bool_to_string, 'default' : '0'},
-            'failure_prediction_enabled' : {'required' : False, 'depythonize' : from_bool_to_string, 'default' : '0'},
-            'retain_status_information' : {'required' : False, 'depythonize' : from_bool_to_string, 'default' : '0'},
-            'retain_nonstatus_information' : {'required' : False, 'depythonize' : from_bool_to_string, 'default' : '0'},
+    # prop: is the internal name if it is different than the name in the output file
+    # required:
+    # depythonize:
+    # default:
+    out_map = {Host: {
+            'host_name': {'required': True},
+            'alias': {'required': False},
+            'address': {'required': True},
+            'parents': {'required': False, 'depythonize': from_list_to_split},
+            'check_period': {'required': True, 'depythonize': 'get_name'},
+            'check_command': {'required': True, 'depythonize': 'call'},
+            #'contact_groups': ,
+            'contacts': {'required': True, 'depythonize': 'contact_name'},
+            'notification_period': {'required': True, 'depythonize': 'get_name'},
+            'initial_state': {'required': True},
+            'check_interval': {'required': True},
+            'retry_interval': {'required': True},
+            'max_check_attempts': {'required': True},
+            'active_checks_enabled': {'required': False, 'depythonize': from_bool_to_string, 'default': '0'},
+            'passive_checks_enabled': {'required': False, 'depythonize': from_bool_to_string, 'default': '0'},
+            'obsess_over_host': {'required': False, 'depythonize': from_bool_to_string, 'default': '0'},
+            'event_handler_enabled': {'required': False, 'depythonize': from_bool_to_string, 'default': '0'},
+            'low_flap_threshold': {'required': False, 'default': '0'},
+            'high_flap_threshold': {'required': False, 'default': '0'},
+            'flap_detection_enabled': {'required': False, 'depythonize': from_bool_to_string, 'default': '0'},
+            'flap_detection_options': {'required': True, 'depythonize': from_list_to_split},
+            'freshness_threshold': {'required': False, 'default': '0'},
+            'check_freshness': {'required': False, 'depythonize': from_bool_to_string, 'default': '0'},
+            'notification_options': {'required': True, 'depythonize': from_list_to_split},
+            'notifications_enabled': {'required': False, 'depythonize': from_bool_to_string, 'default': '0'},
+            'notification_interval': {'required': True},
+            'first_notification_delay': {'required': False, 'default': '0'},
+            'stalking_options': {'required': False, 'depythonize': from_list_to_split, 'default': 'n'},
+            'process_perf_data': {'required': False, 'depythonize': from_bool_to_string, 'default': '0'},
+            'failure_prediction_enabled': {'required': False, 'depythonize': from_bool_to_string, 'default': '0'},
+            'retain_status_information': {'required': False, 'depythonize': from_bool_to_string, 'default': '0'},
+            'retain_nonstatus_information': {'required': False, 'depythonize': from_bool_to_string, 'default': '0'},
             },
-        Service : {
-            'host_name' : {'required' : True},
-            'service_description' : {'required' : True},
-            'check_period' : {'required' : True, 'depythonize' : 'get_name'},
-            'check_command' : {'required' : True, 'depythonize' : 'call'},
-            #'contact_groups' : {'required' : True, 'depythonize' : 'get_name'},
-            'contacts' : {'required' : True, 'depythonize' : 'contact_name'},
-            'notification_period' : {'required' : True, 'depythonize' : 'get_name'},
-            'initial_state' : {'required' : True},
-            'check_interval' : {'required' : True},
-            'retry_interval' : {'required' : True},
-            'max_check_attempts' : {'required' : True},
-            'is_volatile' : {'required' : False, 'default' : '0'},
-            'parallelize_check' : {'required' : False, 'depythonize' : from_bool_to_string, 'default' : '0'},
-            'active_checks_enabled' : {'required' : False, 'depythonize' : from_bool_to_string, 'default' : '0'},
-            'passive_checks_enabled' : {'required' : False, 'depythonize' : from_bool_to_string, 'default' : '0'},
-            'obsess_over_service' : {'required' : False, 'depythonize' : from_bool_to_string, 'default' : '0'},
-            'event_handler_enabled' : {'required' : False, 'depythonize' : from_bool_to_string, 'default' : '0'},
-            'low_flap_threshold' : {'required' : False, 'default' : '0'},
-            'high_flap_threshold' : {'required' : False, 'default' : '0'},
-            'flap_detection_enabled' : {'required' : False, 'depythonize' : from_bool_to_string, 'default' : '0'},
-            'flap_detection_options' : {'required' : True, 'depythonize' : from_list_to_split},
-            'freshness_threshold' : {'required' : False, 'default' : '0'},
-            'check_freshness' : {'required' : False, 'depythonize' : from_bool_to_string, 'default' : '0'},
-            'notification_options' : {'required' : True, 'depythonize' : from_list_to_split},
-            'notifications_enabled' : {'required' : False, 'depythonize' : from_bool_to_string, 'default' : '0'},
-            'notification_interval' : {'required' : True},
-            'first_notification_delay' : {'required' : False, 'default' : '0'},
-            'stalking_options' : {'required' : False, 'depythonize' : from_list_to_split, 'default' : 'n'},
-            'process_perf_data' : {'required' : False, 'depythonize' : from_bool_to_string, 'default' : '0'},
-            'failure_prediction_enabled' : {'required' : False, 'depythonize' : from_bool_to_string, 'default' : '0'},
-            'notes_url' : {'required' : False},
-            'action_url' : {'required' : False},
-            'retain_status_information' : {'required' : False, 'depythonize' : from_bool_to_string, 'default' : '0'},
-            'retain_nonstatus_information' : {'required' : False, 'depythonize' : from_bool_to_string, 'default' : '0'},
-            },
-
-        Contact : {
-            'contact_name' : {'required' : True, 'default' : '0'},
-            'alias' : {'required' : False, 'default' : '0'},
-            'host_notifications_enabled' : {'required' : True},
-            'service_notifications_enabled' : {'required' : True},
-            'host_notification_period' : {'required' : True},
-            'service_notification_period' : {'required' : True},
-            'host_notification_options' : {'required' : True},
-            'service_notification_options' : {'required' : True},
-            'host_notification_commands' : {'required' : True},
-            'service_notification_commands' : {'required' : True},
-            'email' : {'required' : False},
-            'pager' : {'required' : False},
-            'address1' : {'required' : False},
-            'address2' : {'required' : False},
-            'address3' : {'required' : False},
-            'address4' : {'required' : False},
-            'address5' : {'required' : False},
-            'address6' : {'required' : False},
-            'can_submit_commands' : {'required' : False, 'depythonize' : from_bool_to_string, 'default' : '0'},
-            'retain_status_information' : {'required' : False, 'depythonize' : from_bool_to_string, 'default' : '0'},
-            'retain_nonstatus_information' : {'required' : False, 'depythonize' : from_bool_to_string, 'default' : '0'},
+        Service: {
+            'host_name': {'required': True},
+            'service_description': {'required': True},
+            'check_period': {'required': True, 'depythonize': 'get_name'},
+            'check_command': {'required': True, 'depythonize': 'call'},
+            #'contact_groups': {'required': True, 'depythonize': 'get_name'},
+            'contacts': {'required': True, 'depythonize': 'contact_name'},
+            'notification_period': {'required': True, 'depythonize': 'get_name'},
+            'initial_state': {'required': True},
+            'check_interval': {'required': True},
+            'retry_interval': {'required': True},
+            'max_check_attempts': {'required': True},
+            'is_volatile': {'required': False, 'default': '0'},
+            'parallelize_check': {'required': False, 'depythonize': from_bool_to_string, 'default': '0'},
+            'active_checks_enabled': {'required': False, 'depythonize': from_bool_to_string, 'default': '0'},
+            'passive_checks_enabled': {'required': False, 'depythonize': from_bool_to_string, 'default': '0'},
+            'obsess_over_service': {'required': False, 'depythonize': from_bool_to_string, 'default': '0'},
+            'event_handler_enabled': {'required': False, 'depythonize': from_bool_to_string, 'default': '0'},
+            'low_flap_threshold': {'required': False, 'default': '0'},
+            'high_flap_threshold': {'required': False, 'default': '0'},
+            'flap_detection_enabled': {'required': False, 'depythonize': from_bool_to_string, 'default': '0'},
+            'flap_detection_options': {'required': True, 'depythonize': from_list_to_split},
+            'freshness_threshold': {'required': False, 'default': '0'},
+            'check_freshness': {'required': False, 'depythonize': from_bool_to_string, 'default': '0'},
+            'notification_options': {'required': True, 'depythonize': from_list_to_split},
+            'notifications_enabled': {'required': False, 'depythonize': from_bool_to_string, 'default': '0'},
+            'notification_interval': {'required': True},
+            'first_notification_delay': {'required': False, 'default': '0'},
+            'stalking_options': {'required': False, 'depythonize': from_list_to_split, 'default': 'n'},
+            'process_perf_data': {'required': False, 'depythonize': from_bool_to_string, 'default': '0'},
+            'failure_prediction_enabled': {'required': False, 'depythonize': from_bool_to_string, 'default': '0'},
+            'notes_url': {'required': False},
+            'action_url': {'required': False},
+            'retain_status_information': {'required': False, 'depythonize': from_bool_to_string, 'default': '0'},
+            'retain_nonstatus_information': {'required': False, 'depythonize': from_bool_to_string, 'default': '0'},
             },
 
-        Hostgroup : {
-            'hostgroup_name' : {'required' : True},
-            'alias' : {'required' : False},
-            'members' : {'required' : False, 'depythonize' : 'get_name'},
+        Contact: {
+            'contact_name': {'required': True, 'default': '0'},
+            'alias': {'required': False, 'default': '0'},
+            'host_notifications_enabled': {'required': True},
+            'service_notifications_enabled': {'required': True},
+            'host_notification_period': {'required': True},
+            'service_notification_period': {'required': True},
+            'host_notification_options': {'required': True},
+            'service_notification_options': {'required': True},
+            'host_notification_commands': {'required': True},
+            'service_notification_commands': {'required': True},
+            'email': {'required': False},
+            'pager': {'required': False},
+            'address1': {'required': False},
+            'address2': {'required': False},
+            'address3': {'required': False},
+            'address4': {'required': False},
+            'address5': {'required': False},
+            'address6': {'required': False},
+            'can_submit_commands': {'required': False, 'depythonize': from_bool_to_string, 'default': '0'},
+            'retain_status_information': {'required': False, 'depythonize': from_bool_to_string, 'default': '0'},
+            'retain_nonstatus_information': {'required': False, 'depythonize': from_bool_to_string, 'default': '0'},
+            },
+
+        Hostgroup: {
+            'hostgroup_name': {'required': True},
+            'alias': {'required': False},
+            'members': {'required': False, 'depythonize': 'get_name'},
         },
 
-        Servicegroup : {
-            'servicegroup_name' : {'required' : True},
-            'alias' : {'required' : False},
-            'members' : {'required' : False, 'depythonize' : 'get_status_dat_full_name'},
+        Servicegroup: {
+            'servicegroup_name': {'required': True},
+            'alias': {'required': False},
+            'members': {'required': False, 'depythonize': 'get_status_dat_full_name'},
         },
 
-        Contactgroup : {
-            'contactgroup_name' : {'required' : True},
-            'alias' : {'required' : False},
-            'members' : {'required' : False, 'depythonize' : 'get_name'},
+        Contactgroup: {
+            'contactgroup_name': {'required': True},
+            'alias': {'required': False},
+            'members': {'required': False, 'depythonize': 'get_name'},
         },
 
-        Timeperiod : {
-            'timeperiod_name' : {'required' : True},
-            'alias' : {'required' : False},
+        Timeperiod: {
+            'timeperiod_name': {'required': True},
+            'alias': {'required': False},
         },
 
-        Command : {
-            'command_name' : {'required' : True},
-            'command_line' : {'required' : True},
+        Command: {
+            'command_name': {'required': True},
+            'command_line': {'required': True},
         },
 
 
-#               Scheduler : {
-#            'modified_host_attributes' : {'prop' : None, 'default' : '0'},
-#            'modified_service_attributes' : {'prop' : None, 'default' : '0'},
-#            'nagios_pid' : {'prop' : None, 'default' : '0'},
-#            'daemon_mode' : {'prop' : None, 'default' : '0'},
-#            'program_start' : {'prop' : None, 'default' : '0'},
-#            'last_command_check' : {'prop' : None, 'default' : '0'},
-#            'last_log_rotation' : {'prop' : None, 'default' : '0'},
-#            'enable_notifications' : {'prop' : None, 'default' : '0'},
-#            'active_service_checks_enabled' : {'prop' : None, 'default' : '0'},
-#            'passive_service_checks_enabled' : {'prop' : None, 'default' : '0'},
-#            'active_host_checks_enabled' : {'prop' : None, 'default' : '0'},
-#            'passive_host_checks_enabled' : {'prop' : None, 'default' : '0'},
-#            'enable_event_handlers' : {'prop' : None, 'default' : '0'},
-#            'obsess_over_services' : {'prop' : None, 'default' : '0'},
-#            'obsess_over_hosts' : {'prop' : None, 'default' : '0'},
-#            'check_service_freshness' : {'prop' : None, 'default' : '0'},
-#            'check_host_freshness' : {'prop' : None, 'default' : '0'},
-#            'enable_flap_detection' : {'prop' : None, 'default' : '0'},
-#            'enable_failure_prediction' : {'prop' : None, 'default' : '0'},
-#            'process_performance_data' : {'prop' : None, 'default' : '0'},
-#            'global_host_event_handler' : {'prop' : None, 'default' : '0'},
-#            'global_service_event_handler' : {'prop' : None, 'default' : '0'},
-#            'next_comment_id' : {'prop' : None, 'default' : '0'},
-#            'next_downtime_id' : {'prop' : None, 'default' : '0'},
-#            'next_event_id' : {'prop' : None, 'default' : '0'},
-#            'next_problem_id' : {'prop' : None, 'default' : '0'},
-#            'next_notification_id'  : {'prop' : None, 'default' : '0'},
-#            'total_external_command_buffer_slots' : {'prop' : None, 'default' : '0'},
-#            'used_external_command_buffer_slots' : {'prop' : None, 'default' : '0'},
-#            'high_external_command_buffer_slots' : {'prop' : None, 'default' : '0'},
-#            'active_scheduled_host_check_stats' : {'prop' : None, 'default' : '0'},
-#            'active_ondemand_host_check_stats' : {'prop' : None, 'default' : '0'},
-#            'passive_host_check_stats' : {'prop' : None, 'default' : '0'},
-#            'active_scheduled_service_check_stats' : {'prop' : None, 'default' : '0'},
-#            'active_ondemand_service_check_stats' : {'prop' : None, 'default' : '0'},
-#            'passive_service_check_stats' : {'prop' : None, 'default' : '0'},
-#            'cached_host_check_stats' : {'prop' : None, 'default' : '0'},
-#            'cached_service_check_stats' : {'prop' : None, 'default' : '0'},
-#            'external_command_stats' : {'prop' : None, 'default' : '0'},
-#            'parallel_host_check_stats' : {'prop' : None, 'default' : '0'},
-#            'serial_host_check_stats' : {'prop' : None, 'default' : '0'}
+#               Scheduler: {
+#            'modified_host_attributes': {'prop': None, 'default': '0'},
+#            'modified_service_attributes': {'prop': None, 'default': '0'},
+#            'nagios_pid': {'prop': None, 'default': '0'},
+#            'daemon_mode': {'prop': None, 'default': '0'},
+#            'program_start': {'prop': None, 'default': '0'},
+#            'last_command_check': {'prop': None, 'default': '0'},
+#            'last_log_rotation': {'prop': None, 'default': '0'},
+#            'enable_notifications': {'prop': None, 'default': '0'},
+#            'active_service_checks_enabled': {'prop': None, 'default': '0'},
+#            'passive_service_checks_enabled': {'prop': None, 'default': '0'},
+#            'active_host_checks_enabled': {'prop': None, 'default': '0'},
+#            'passive_host_checks_enabled': {'prop': None, 'default': '0'},
+#            'enable_event_handlers': {'prop': None, 'default': '0'},
+#            'obsess_over_services': {'prop': None, 'default': '0'},
+#            'obsess_over_hosts': {'prop': None, 'default': '0'},
+#            'check_service_freshness': {'prop': None, 'default': '0'},
+#            'check_host_freshness': {'prop': None, 'default': '0'},
+#            'enable_flap_detection': {'prop': None, 'default': '0'},
+#            'enable_failure_prediction': {'prop': None, 'default': '0'},
+#            'process_performance_data': {'prop': None, 'default': '0'},
+#            'global_host_event_handler': {'prop': None, 'default': '0'},
+#            'global_service_event_handler': {'prop': None, 'default': '0'},
+#            'next_comment_id': {'prop': None, 'default': '0'},
+#            'next_downtime_id': {'prop': None, 'default': '0'},
+#            'next_event_id': {'prop': None, 'default': '0'},
+#            'next_problem_id': {'prop': None, 'default': '0'},
+#            'next_notification_id': {'prop': None, 'default': '0'},
+#            'total_external_command_buffer_slots': {'prop': None, 'default': '0'},
+#            'used_external_command_buffer_slots': {'prop': None, 'default': '0'},
+#            'high_external_command_buffer_slots': {'prop': None, 'default': '0'},
+#            'active_scheduled_host_check_stats': {'prop': None, 'default': '0'},
+#            'active_ondemand_host_check_stats': {'prop': None, 'default': '0'},
+#            'passive_host_check_stats': {'prop': None, 'default': '0'},
+#            'active_scheduled_service_check_stats': {'prop': None, 'default': '0'},
+#            'active_ondemand_service_check_stats': {'prop': None, 'default': '0'},
+#            'passive_service_check_stats': {'prop': None, 'default': '0'},
+#            'cached_host_check_stats': {'prop': None, 'default': '0'},
+#            'cached_service_check_stats': {'prop': None, 'default': '0'},
+#            'external_command_stats': {'prop': None, 'default': '0'},
+#            'parallel_host_check_stats': {'prop': None, 'default': '0'},
+#            'serial_host_check_stats': {'prop': None, 'default': '0'}
 #            }
     }
 
@@ -278,7 +278,7 @@ class ObjectsCacheFile:
                                     value = f()
                                 else:
                                     value = f
-                    
+
                     if len(unicode(value)) == 0:
                         value = ''
                 elif 'required' in type_map[display] and type_map[display]['required'] == True:
@@ -308,7 +308,7 @@ class ObjectsCacheFile:
 '''
         output += '# Created: %s\n' % time.ctime()
         output += '########################################\n\n'
-        #print "Create output :", output
+        #print "Create output:", output
 
         for tp in self.timeperiods.values():
             tmp = self.create_output(tp)
@@ -344,9 +344,9 @@ class ObjectsCacheFile:
             output += 'define service {\n' + tmp + '\t}\n\n'
 
 
-        #print "Create output :", output
+        #print "Create output:", output
 
-        try :
+        try:
             temp_fh, temp_objects_cache_file = tempfile.mkstemp(dir=os.path.dirname(self.path))
             os.write(temp_fh, output.encode('ascii', 'ignore'))
             os.close(temp_fh)

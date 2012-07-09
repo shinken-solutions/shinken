@@ -35,15 +35,15 @@ from shinken.basemodule import BaseModule
 print "Loaded Apache/Passwd module"
 
 properties = {
-    'daemons' : ['webui', 'skonf'],
-    'type' : 'cfg_password_webui'
+    'daemons': ['webui', 'skonf'],
+    'type': 'cfg_password_webui'
     }
 
 
 # called by the plugin manager
 def get_instance(plugin):
     print "Get an CFG/Password UI module for plugin %s" % plugin.get_name()
-    
+
     instance = Cfg_Password_Webui(plugin)
     return instance
 
@@ -57,7 +57,7 @@ class Cfg_Password_Webui(BaseModule):
     # Try to connect if we got true parameter
     def init(self):
         print "Trying to initalize the CFG/Password auth"
-        
+
 
     # To load the webui application
     def load(self, app):
@@ -70,7 +70,7 @@ class Cfg_Password_Webui(BaseModule):
         # Ok, if the user is bad, bailout
         if not c:
             return False
-        
+
         print "User %s try to init" % user
         p = None
         # In skonf, it's dummy object

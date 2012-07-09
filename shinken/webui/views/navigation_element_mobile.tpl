@@ -1,4 +1,4 @@
-%if not 'app' in locals() : app = None
+%if not 'app' in locals(): app = None
 <div id="navigation">
 	<ul id="menu" class="grid_12">
 		%menu = [ ('/', 'Home'), ('/mobile/impacts','Impacts'), ('/mobile/problems','IT problems')]

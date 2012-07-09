@@ -30,7 +30,7 @@
 	    </ul>
 	  </li>
 	</ul>
-	
+
 	<ul class="nav">
 	  %menu = [ ('/dashboard', 'Dashboard'), ('/impacts','Impacts'), ('/problems','IT problems'), ('/all', 'All'), ('/wall', 'Wall')]
           %for (key, value) in menu:
@@ -42,7 +42,7 @@
             %end
          %end
 	</ul>
-	
+
 	<ul class="nav">
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown"> System <b class="caret"></b></a>
@@ -53,10 +53,10 @@
           </li>
         </ul>
 
-	
+
         %if user is not None:
-        <div class="nav-controll"> 
-          <ul class="nav pull-right"> 
+        <div class="nav-controll">
+          <ul class="nav pull-right">
             <li class="divider-vertical"></li>
         %if app:
           %overall_itproblem = app.datamgr.get_overall_it_state()

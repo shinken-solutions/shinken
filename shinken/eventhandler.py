@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -29,7 +29,7 @@ from action import Action
 from shinken.property import IntegerProp, StringProp
 from shinken.autoslots import AutoSlots
 
-""" TODO : Add some comment about this class for the doc"""
+""" TODO: Add some comment about this class for the doc"""
 class EventHandler(Action):
     # AutoSlots create the __slots__ with properties and
     # running_properties names
@@ -133,7 +133,7 @@ class EventHandler(Action):
     def __getstate__(self):
         cls = self.__class__
         # id is not in *_properties
-        res = {'id' : self.id}
+        res = {'id': self.id}
         for prop in cls.properties:
             if hasattr(self, prop):
                 res[prop] = getattr(self, prop)

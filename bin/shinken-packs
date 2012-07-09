@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -23,7 +23,7 @@
 
 """
 
-Warning : THIS IS A PREVIEW, and uglu code that looks as a script.
+Warning: THIS IS A PREVIEW, and uglu code that looks as a script.
 
 """
 
@@ -62,10 +62,10 @@ from shinken.objects.config import Config
 logger.set_level(10)
 class Dummy():
     def __init__(self): pass
-    def add(self, obj) : pass
+    def add(self, obj): pass
 logger.load_obj(Dummy())
 
-if os.name != 'nt': 
+if os.name != 'nt':
     DEFAULT_CFG = '/etc/shinken/skonf.cfg'
 else:
     DEFAULT_CFG = 'c:\\shinken\\etc\\skonf.cfg'
@@ -74,8 +74,8 @@ else:
 
 def create_pack(pack_file, p_dest_dir, share_dir):
     _tmp = tempfile.mktemp()
-    
-    print "Using the destination directory : %s" % p_dest_dir
+
+    print "Using the destination directory: %s" % p_dest_dir
     src_dir = os.path.abspath(os.path.dirname(pack_file))
     print "Source dir that will be load", src_dir
 
@@ -104,7 +104,7 @@ def create_pack(pack_file, p_dest_dir, share_dir):
         logger.log("Sorry, there is too much .pack file in the directory %s, please get only one .pack for this directory and it's subdirectories")
         sys.exit(2)
 
-    o = {}    
+    o = {}
     pack = packs.pop()
     o['name'] = pack.get_name()
     o['description'] = pack.description
@@ -112,19 +112,19 @@ def create_pack(pack_file, p_dest_dir, share_dir):
     o['services'] = {}
     o['commands'] = []
     print "We are creating the pack '%s'" % o['name']
-    print "Description : %s" % o['description']
-    print "Host templates : %s" % ','.join(o['templates'])
+    print "Description: %s" % o['description']
+    print "Host templates: %s" % ','.join(o['templates'])
     # We will dump the services linked to theses templates
     for h in cfg.hosts:
         if h.is_tpl() and hasattr(h, 'name') and not h.name in o['templates']:
-            print "WARNING : you miss the host template '%s' in the pack file. I'm adding it" % h.name
+            print "WARNING: you miss the host template '%s' in the pack file. I'm adding it" % h.name
             o['templates'].append(h.name)
 
     for s in cfg.services:
         if s.is_tpl() and hasattr(s, 'service_description') and hasattr(s, 'host_name'):
             desc = s.service_description
             if not desc in o['services']:
-                o['services'][desc] = {'templates' : []}
+                o['services'][desc] = {'templates': []}
             tpls = s.host_name.split(',')
             tpls = [t.strip() for t in tpls]
             for t in tpls:
@@ -140,30 +140,30 @@ def create_pack(pack_file, p_dest_dir, share_dir):
             o['commands'].append(cname)
     # Make comands uniq
     o['commands'] = list(set(o['commands']))
-    
+
 
     o['path'] = pack.path
-    print "Path : %s" % o['path']
+    print "Path: %s" % o['path']
     o['doc_link'] = pack.doc_link
-    print "Doc link : %s" % o['doc_link']
+    print "Doc link: %s" % o['doc_link']
     o['macros'] = {}
-    print "Macros :"
+    print "Macros:"
     for (k,v) in pack.macros.iteritems():
         t = v.get('type', 'string')
         d = v.get('description', '')
-        o['macros'][k] = {'type' : t, 'description' : ''}
-        print "\t%s : Type=%s Description='%s'" % (k, t, d)
+        o['macros'][k] = {'type': t, 'description': ''}
+        print "\t%s: Type=%s Description='%s'" % (k, t, d)
 
 
     j = json.dumps(o, sort_keys = True, indent = 3)
-    print "Pack file generated :", j
+    print "Pack file generated:", j
 
     create_dir = os.path.join(p_dest_dir, o['name'])
     print "We will create the pack directory in %s" % create_dir
     # Now get all the .cfg files from the src_dir and put them into a pack directory
     if os.path.exists(create_dir) and os.path.isdir(create_dir):
-        print "Warning : the destination directory already exists. I clean it!"
-        #TODO : do the clean
+        print "Warning: the destination directory already exists. I clean it!"
+        #TODO: do the clean
         shutil.rmtree(create_dir)
 
     os.mkdir(create_dir)
@@ -219,7 +219,7 @@ def create_pack(pack_file, p_dest_dir, share_dir):
                     #    os.mkdir(_d)
                     print "COPY %s into %s" % (_p,  _d)
                     shutil.copytree(_p, _d)
-                    
+
         graphite_templates_dir = os.path.join(share_dir, 'templates', 'graphite')
         if os.path.exists(graphite_templates_dir):
             print "Looking the share/templates/graphite dir"
@@ -287,8 +287,8 @@ def push_pack(zip_file_p, api_key, uri, proxy):
         c.setopt(c.PROXY, proxy)
     c.setopt(c.URL, uri+"/pushpack")
 
-    c.setopt(c.HTTPPOST,[ ("key", api_key), 
-                          ("data", 
+    c.setopt(c.HTTPPOST,[ ("key", api_key),
+                          ("data",
                            (c.FORM_FILE, str(zip_file_p),
                             c.FORM_CONTENTTYPE, "application/x-gzip"))
                           ])
@@ -332,7 +332,7 @@ def register(login, password, email, uri, proxy):
     r = c.perform()
     response.seek(0)
     status_code = c.getinfo(pycurl.HTTP_CODE)
-    # We only parse the json if we got 
+    # We only parse the json if we got
     if status_code == 200:
         obj = json.loads(response.read().replace('\\/', '/'))
     else:
@@ -341,15 +341,15 @@ def register(login, password, email, uri, proxy):
     c.close()
     print "status code: %s" % status_code
     if error:
-        print "Sorry there was an error with the query :", error
+        print "Sorry there was an error with the query:", error
         sys.exit(2)
     state = obj['state']
     text = obj['text']
     if state == 200:
-        print "OK :", text
+        print "OK:", text
         sys.exit(0)
     else:
-        print "Error :", text
+        print "Error:", text
         sys.exit(2)
 
 
@@ -382,7 +382,7 @@ def getkey(login, password, uri, proxy):
     r = c.perform()
     response.seek(0)
     status_code = c.getinfo(pycurl.HTTP_CODE)
-    # We only parse the json if we got 
+    # We only parse the json if we got
     if status_code == 200:
         obj = json.loads(response.read().replace('\\/', '/'))
     else:
@@ -391,7 +391,7 @@ def getkey(login, password, uri, proxy):
     c.close()
     print "status code: %s" % status_code
     if error:
-        print "Sorry there was an error with the query :", error
+        print "Sorry there was an error with the query:", error
         sys.exit(2)
 
     print "You api key is", obj['api_key']
@@ -402,10 +402,10 @@ def getkey(login, password, uri, proxy):
 
 def analyse(api_key, stats_file, uri, proxy):
     if not api_key:
-        print "Error : Sorry, analysing the configuration need an API key"
+        print "Error: Sorry, analysing the configuration need an API key"
         sys.exit(2)
     if not stats_file:
-        print "Error : missing statitics files for analysing"
+        print "Error: missing statitics files for analysing"
         sys.exit(2)
 
     import pycurl
@@ -418,8 +418,8 @@ def analyse(api_key, stats_file, uri, proxy):
         c.setopt(c.PROXY, proxy)
     c.setopt(c.URL, uri+"/pushstats")
 
-    c.setopt(c.HTTPPOST,[ ("key", api_key), 
-                          ("data", 
+    c.setopt(c.HTTPPOST,[ ("key", api_key),
+                          ("data",
                            (c.FORM_FILE, str(stats_file),
                             c.FORM_CONTENTTYPE, "application/x-gzip"))
                           ])
@@ -454,7 +454,7 @@ For more information, look at http://www.shinken-monitoring.org/wiki/packs/creat
                       help="""Pack .pack file that you want to generate from.""")
     parser.add_option('-s', '--share-dir', dest="share_dir",
                        help=('Your share directory with templates and icon sets'))
-    parser.add_option('-d', '--dest', dest="p_dest_dir", 
+    parser.add_option('-d', '--dest', dest="p_dest_dir",
                       help="""Directory where to """)
     parser.add_option('-U', '--uri', dest="uri",
                       help="""Uri to push the pack. Default is community.shinken-monitoring.org""")
@@ -465,7 +465,7 @@ For more information, look at http://www.shinken-monitoring.org/wiki/packs/creat
                       dest="upload", help=('Mode to upload a pack zip file to the Shinken Pack website. It need an API key for it.'))
     parser.add_option('-z', '--zip-file',
                       dest="zip_file", help=("Your Pack zip file to send in the Shinken Pack website"))
-    # TODO : where is the PACK WEBSITE??? :)
+    # TODO: where is the PACK WEBSITE??? :)
     parser.add_option('-k', '--api-key',
                       dest="api_key", help=("Your API key for uploading the pack zip file in the Shinken Pack website. If you don't have one, please go to XXXXXX"))
 
@@ -478,20 +478,20 @@ For more information, look at http://www.shinken-monitoring.org/wiki/packs/creat
                       dest="password", help=("Password for the Shinken pack website registration"))
     parser.add_option('-e', '--email',
                       dest="email", help=("Email for the Shinken pack website registration. Must be valid."))
-    
+
 
     parser.add_option('-g', '--get-key', action='store_true',
                       dest="getkey", help=("Mode to retrieve your API key"))
 
     parser.add_option('-a', '--analyse', action='store_true',
                       dest="analyse", help=("Mode to analyse your configuration and upload it's characteristics to the server. Only statistics data, no hostnames, usernames not ips will be sent"))
-    
+
 
 
     opts, args = parser.parse_args()
 
     mode = ''
-    
+
     # For the create pack part
     pack_file = ''
     p_dest_dir = tempfile.gettempdir()
@@ -508,7 +508,7 @@ For more information, look at http://www.shinken-monitoring.org/wiki/packs/creat
         if not opts.pack_file:
             parser.error("Requires a pack file (option -p/--pack-file)")
         pack_file = opts.pack_file
-            
+
         if not pack_file.endswith('.pack'):
             print "Sorry, the pack-file is not a .pack file. exiting"
             sys.exit(2)
@@ -525,7 +525,7 @@ For more information, look at http://www.shinken-monitoring.org/wiki/packs/creat
         if not opts.zip_file:
             parser.error("Requires a pack zip file (option -z/--zip-file)")
         zip_file = opts.zip_file
-        
+
         if not opts.api_key:
             parser.error("Requires an API key (option -k/--api-key)")
         api_key = opts.api_key
@@ -567,7 +567,7 @@ For more information, look at http://www.shinken-monitoring.org/wiki/packs/creat
             parser.error("Requires an API key (option -k/--api-key)")
         api_key = opts.api_key
         files = args
-        if not files :
+        if not files:
             parser.error("Requires a statistic file to send")
         if len(files) != 1:
             parser.error("Too much statistics files to send")

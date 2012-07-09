@@ -86,10 +86,10 @@ from thrift.protocol import TBinaryProtocol
 from thrift.server import TServer
 
 properties = {
-    'daemons' : ['broker'],
-    'type' : 'thrift',
-    'external' : True,
-    'phases' : ['running'],
+    'daemons': ['broker'],
+    'type': 'thrift',
+    'external': True,
+    'phases': ['running'],
     }
 
 tables = ["hosts",""]
@@ -159,7 +159,7 @@ class Thrift_brokerHandler(Hooker):
                     else:
                         attribute = query.strip_table_from_column(filter.attribute)
                         if operator in ['!>', '!>=', '!<', '!<=']:
-                            operator = { '!>' : '<=', '!>=' : '<', '!<' : '>=', '!<=' : '>' }[operator]
+                            operator = { '!>': '<=', '!>=': '<', '!<': '>=', '!<=': '>' }[operator]
                         query.filtercolumns.append(attribute)
                         query.prefiltercolumns.append(attribute)
                         query.filter_stack.put(query.make_filter(operator, attribute, filter.reference))
@@ -179,7 +179,7 @@ class Thrift_brokerHandler(Hooker):
                         attribute = query.strip_table_from_column(stat.attribute)
                         if operator in ['=', '>', '>=', '<', '<=', '=~', '~', '~~', '!=', '!>', '!>=', '!<', '!<=']:
                             if operator in ['!>', '!>=', '!<', '!<=']:
-                                operator = { '!>' : '<=', '!>=' : '<', '!<' : '>=', '!<=' : '>' }[operator]
+                                operator = { '!>': '<=', '!>=': '<', '!<': '>=', '!<=': '>' }[operator]
                             query.filtercolumns.append(attribute)
                             query.stats_columns.append(attribute)
                             query.stats_filter_stack.put(query.make_filter(operator, attribute, stat.reference))
@@ -288,7 +288,7 @@ class Thrift_broker(BaseModule):
             if h.instance_id == inst_id:
                 to_del.append(h.host_name)
 
-                
+
         for s in self.services.values():
             if s.instance_id == inst_id:
                 to_del_srv.append(s.host_name + s.service_description)
@@ -328,8 +328,8 @@ class Thrift_broker(BaseModule):
             # Do not ask data too quickly, very dangerous
             # one a minute
             if time.time() - self.last_need_data_send > 60:
-                print "I ask the broker for instance id data :", c_id
-                msg = Message(id=0, type='NeedData', data={'full_instance_id' : c_id})
+                print "I ask the broker for instance id data:", c_id
+                msg = Message(id=0, type='NeedData', data={'full_instance_id': c_id})
                 self.from_q.put(msg)
                 self.last_need_data_send = time.time()
             return
@@ -337,7 +337,7 @@ class Thrift_broker(BaseModule):
         # We have only one config here, with id 0
         c = self.configs[0]
         self.update_element(c, data)
-    
+
 
     def set_schedulingitem_values(self, i):
         i.check_period = self.get_timeperiod(i.check_period)
@@ -346,18 +346,18 @@ class Thrift_broker(BaseModule):
         i.rebuild_ref()
         #Escalations is not use for status_dat
         del i.escalations
-        
+
 
     def manage_initial_host_status_brok(self, b):
         data = b.data
-        
+
         host_name = data['host_name']
         inst_id = data['instance_id']
         #print "Creating host:", h_id, b
         h = Host({})
-        self.update_element(h, data)        
+        self.update_element(h, data)
         self.set_schedulingitem_values(h)
-        
+
         h.service_ids = []
         h.services = []
         h.instance_id = inst_id
@@ -377,7 +377,7 @@ class Thrift_broker(BaseModule):
         try:
             h = self.hosts[host_name]
         except KeyError:
-            print "Warning : the host %s is unknown!" % host_name
+            print "Warning: the host %s is unknown!" % host_name
             return
         self.update_element(h, data)
         self.set_schedulingitem_values(h)
@@ -391,7 +391,7 @@ class Thrift_broker(BaseModule):
         hostgroup_name = data['hostgroup_name']
         members = data['members']
         del data['members']
-        
+
         # Maybe we already got this hostgroup. If so, use the existing object
         # because in different instance, we will ahve the same group with different
         # elements
@@ -423,14 +423,14 @@ class Thrift_broker(BaseModule):
         host_name = data['host_name']
         service_description = data['service_description']
         inst_id = data['instance_id']
-        
+
         #print "Creating Service:", s_id, data
         s = Service({})
         s.instance_id = inst_id
 
         self.update_element(s, data)
         self.set_schedulingitem_values(s)
-        
+
         try:
             h = self.hosts[host_name]
             # Reconstruct the connection between hosts and services
@@ -458,14 +458,14 @@ class Thrift_broker(BaseModule):
         try:
             s = self.services[host_name+service_description]
         except KeyError:
-            print "Warning : the service %s/%s is unknown!" % (host_name, service_description)
+            print "Warning: the service %s/%s is unknown!" % (host_name, service_description)
             return
         self.update_element(s, data)
         self.set_schedulingitem_values(s)
         for dtc in s.downtimes + s.comments:
             dtc.ref = s
         self.thrift.count_event('service_checks')
-   
+
 
 
     def manage_initial_servicegroup_status_brok(self, b):
@@ -697,8 +697,8 @@ class Thrift_broker(BaseModule):
             print "INVALID"
             # invalid
         else:
-            service_states = { 'OK' : 0, 'WARNING' : 1, 'CRITICAL' : 2, 'UNKNOWN' : 3, 'RECOVERY' : 0 }
-            host_states = { 'UP' : 0, 'DOWN' : 1, 'UNREACHABLE' : 2, 'UNKNOWN': 3, 'RECOVERY' : 0 }
+            service_states = { 'OK': 0, 'WARNING': 1, 'CRITICAL': 2, 'UNKNOWN': 3, 'RECOVERY': 0 }
+            host_states = { 'UP': 0, 'DOWN': 1, 'UNREACHABLE': 2, 'UNKNOWN': 3, 'RECOVERY': 0 }
 
             # 'attempt', 'class', 'command_name', 'comment', 'contact_name', 'host_name', 'lineno', 'message',
             # 'options', 'plugin_output', 'service_description', 'state', 'state_type', 'time', 'type',
@@ -844,7 +844,7 @@ class Thrift_broker(BaseModule):
                 if find_c is not None:
                     r.append(find_c)
                 else:
-                    print "Error : search for a contact %s that do not exists!" % c.get_name()
+                    print "Error: search for a contact %s that do not exists!" % c.get_name()
         return r
 
 
@@ -855,7 +855,7 @@ class Thrift_broker(BaseModule):
             if find_t is not None:
                 return find_t
             else:
-                print "Error : search for a timeperiod %s that do not exists!" % t.get_name()
+                print "Error: search for a timeperiod %s that do not exists!" % t.get_name()
         else:
             return None
 
@@ -904,7 +904,7 @@ class Thrift_broker(BaseModule):
         limit = int(time.time() - self.max_logs_age * 86400)
         print "Deleting messages from the log database older than %s" % time.asctime(time.localtime(limit))
         if sqlite3.paramstyle == 'pyformat':
-            self.dbcursor.execute('DELETE FROM LOGS WHERE time < %(limit)s', { 'limit' : limit })
+            self.dbcursor.execute('DELETE FROM LOGS WHERE time < %(limit)s', { 'limit': limit })
         else:
             self.dbcursor.execute('DELETE FROM LOGS WHERE time < ?', (limit,))
         self.dbconn.commit()
@@ -912,9 +912,9 @@ class Thrift_broker(BaseModule):
         try:
             self.dbcursor.execute('VACUUM')
         except sqlite3.DatabaseError, exp:
-            print "WARNING : yit seems your database is corrupted. Please recreate it"
+            print "WARNING: yit seems your database is corrupted. Please recreate it"
         self.dbconn.commit()
-        
+
 
     def prepare_pnp_path(self):
         if not self.pnp_path:
@@ -942,10 +942,10 @@ class Thrift_broker(BaseModule):
         except:
             pass
 
-        
+
     def set_debug(self):
         fdtemp = os.open(self.debug, os.O_CREAT | os.O_WRONLY | os.O_APPEND)
-        
+
         ## We close out and err
         os.close(1)
         os.close(2)
@@ -960,8 +960,8 @@ class Thrift_broker(BaseModule):
             #cProfile.runctx('''self.do_main()''', globals(), locals(),'/tmp/thrift.profile')
             self.do_main()
         except Exception, exp:
-            
-            msg = Message(id=0, type='ICrash', data={'name' : self.get_name(), 'exception' : exp, 'trace' : traceback.format_exc()})
+
+            msg = Message(id=0, type='ICrash', data={'name': self.get_name(), 'exception': exp, 'trace': traceback.format_exc()})
             self.from_q.put(msg)
             # wait 2 sec so we know that the broker got our message, and die
             time.sleep(2)
@@ -982,7 +982,7 @@ class Thrift_broker(BaseModule):
                     raise
             # But others are importants
             except Exception, exp:
-                print "Error : got an exeption (bad code?)", exp.__dict__, type(exp)
+                print "Error: got an exeption (bad code?)", exp.__dict__, type(exp)
                 raise
 
     def do_main(self):

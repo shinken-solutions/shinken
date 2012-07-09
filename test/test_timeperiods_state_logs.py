@@ -31,7 +31,7 @@ class TestTPStateLog(ShinkenTest):
     #def setUp(self):
     #    self.setup_with_file('etc/nagios_timeperiods_state_logs.cfg')
 
-    
+
     # A timeperiod state change should raise a log, and only when change.
     def test_tp_state_log(self):
         now = time.time()
@@ -41,8 +41,8 @@ class TestTPStateLog(ShinkenTest):
         tp.check_and_log_activation_change()
         self.assert_(self.any_log_match("TIMEPERIOD TRANSITION: 24x7;-1;1"))
         self.show_and_clear_logs()
-        
-        # Now make this tp unable to be active again by removing al it's daterange :p
+
+        # Now make this tp unable to be active again by removing al it's daterange:p
         dr = tp.dateranges
         tp.dateranges = []
         tp.check_and_log_activation_change()

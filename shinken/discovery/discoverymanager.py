@@ -107,7 +107,7 @@ class DiscoveredHost(object):
         d['host_name'] = self.name
 
         self.matched_rules.sort(by_order)
-        
+
         for r in self.matched_rules:
             for k,v in r.writing_properties.iteritems():
                 # If it's a + (add) property, add with a ,
@@ -125,19 +125,19 @@ class DiscoveredHost(object):
                     d[k] = v
         self.properties = d
         print 'Update our properties', self.name, d
-        
+
         # For macro-resolving, we should have our macros too
         self.customs = {}
         for (k,v) in self.properties.iteritems():
             self.customs['_'+k.upper()] = v
 
-            
+
     # Manager ask us our properties for the configuration, so
     # we keep only rules properties and _ ones
     def get_final_properties(self):
         self.update_properties(final_phase=True)
         return self.properties
-            
+
 
     def get_to_run(self):
         self.in_progress_runners = []
@@ -154,12 +154,12 @@ class DiscoveredHost(object):
             print 'Is ', r.get_name(), 'matching??', r.is_matching_disco_datas(self.properties)
             if r.is_matching_disco_datas(self.properties):
                 self.in_progress_runners.append(r)
-            
+
 
 
     def need_to_run(self):
         return len(self.in_progress_runners) != 0
-    
+
 
 
     # Now we try to match all our hosts with the rules
@@ -195,10 +195,10 @@ class DiscoveredHost(object):
             # We can choose to keep only the basename
             # of the nameid, so strip the fqdn
             # But not if it's a plain ipv4 addr
-            # TODO : gt this! if self.conf.strip_idname_fqdn:
+            # TODO: gt this! if self.conf.strip_idname_fqdn:
             if not is_ipv4_addr(name):
                 name = name.split('.', 1)[0]
-            
+
             data = '::'.join(elts[1:])
 
             # Maybe it's not me?
@@ -278,7 +278,7 @@ class DiscoveryManager:
         self.modules_path = modules_path
 
         buf = self.conf.read_config(self.config_files)
-        
+
         # Add macros on the end of the buf so they will
         # overwrite the resource.cfg ones
         for (m, v) in macros:
@@ -304,10 +304,10 @@ class DiscoveryManager:
 
         self.discoveryrules = self.conf.discoveryrules
         self.discoveryruns = self.conf.discoveryruns
-        
+
         m = MacroResolver()
         m.init(self.conf)
-        
+
         # Hash = name, and in it (key, value)
         self.disco_data = {}
         # Hash = name, and in it rules that apply
@@ -332,7 +332,7 @@ class DiscoveryManager:
         for mod in self.conf.modules:
             if getattr(mod, 'module_name', '') == self.dbmod:
                 if Connection is None:
-                    print "ERROR : cannot use Mongodb database : please install the pymongo librairy"
+                    print "ERROR: cannot use Mongodb database: please install the pymongo librairy"
                     break
                 # Now try to connect
                 try:
@@ -342,7 +342,7 @@ class DiscoveryManager:
                     self.db = getattr(self.dbconnection, database)
                     print "Connection to Mongodb:%s:%s is OK" % (uri, database)
                 except Exception, exp:
-                    logger.error('Database init : %s' % exp)
+                    logger.error('Database init: %s' % exp)
 
 
     # We try to init the backend if we got one
@@ -356,7 +356,7 @@ class DiscoveryManager:
                 print "We found our backend", mod.get_name()
                 self.backend = mod
         if not self.backend:
-            print "ERROR : cannot find the module %s" % self.backend
+            print "ERROR: cannot find the module %s" % self.backend
             sys.exit(2)
         self.modules_manager = ModulesManager('discovery', self.modules_path, [])
         self.modules_manager.set_modules([mod])
@@ -407,9 +407,9 @@ class DiscoveryManager:
             if self.conf.strip_idname_fqdn:
                 if not is_ipv4_addr(name):
                     name = name.split('.', 1)[0]
-            
+
             data = '::'.join(elts[1:])
-            
+
             # Register the name
             if not name in self.disco_data:
                 self.disco_data[name] = DiscoveredHost(name, self.discoveryrules, self.discoveryruns)
@@ -473,7 +473,7 @@ class DiscoveryManager:
         allowed_runners = self.allowed_runners()
 
         if len(allowed_runners) == 0:
-            print "ERROR : there is no matching runners selected!"
+            print "ERROR: there is no matching runners selected!"
             return
 
         for r in allowed_runners:
@@ -525,7 +525,7 @@ class DiscoveryManager:
 
         d = dh.get_final_properties()
         print "Will generate an host", d
-        
+
         # Maybe we do not got a directory output, but
         # a bdd one.
         if self.output_dir:
@@ -535,11 +535,11 @@ class DiscoveryManager:
         if self.db:
             self.write_host_config_to_db(host, d)
 
-        
+
         if self.backend:
             self.backend.write_host_config_to_db(host, d)
-            
-        
+
+
     # Will wrote all properties/values of d for the host
     # in the file
     def write_host_config_to_file(self, host, d):
@@ -550,7 +550,7 @@ class DiscoveryManager:
         except OSError, exp:
             # If directory already exist, it's not a problem
             if not exp.errno != '17':
-                print "Cannot create the directory '%s' : '%s'" % (p, exp)
+                print "Cannot create the directory '%s': '%s'" % (p, exp)
                 return
         cfg_p = os.path.join(p, host+'.cfg')
         if os.path.exists(cfg_p) and not self.overwrite:
@@ -565,7 +565,7 @@ class DiscoveryManager:
             fd.write(buf)
             fd.close()
         except OSError, exp:
-            print "Cannot create the file '%s' : '%s'" % (cfg_p, exp)
+            print "Cannot create the file '%s': '%s'" % (cfg_p, exp)
             return
 
 
@@ -584,7 +584,7 @@ class DiscoveryManager:
         #print "Generate services for", host
         #print srv_rules
         for (desc, rules) in srv_rules.items():
-            d = {'service_description' : desc, 'host_name' : host}
+            d = {'service_description': desc, 'host_name': host}
             for r in rules:
                 d.update(r.writing_properties)
             print "Generating", desc, d
@@ -619,10 +619,10 @@ class DiscoveryManager:
             fd.write(buf)
             fd.close()
         except OSError, exp:
-            print "Cannot create the file '%s' : '%s'" % (cfg_p, exp)
+            print "Cannot create the file '%s': '%s'" % (cfg_p, exp)
             return
 
-            
+
     # Create a define t { } with data in d
     def get_cfg_bufer(self, d, t):
         tab = ['define %s {' % t]
@@ -630,7 +630,7 @@ class DiscoveryManager:
             tab.append('  %s   %s' % (key, value))
         tab.append('}\n')
         return '\n'.join(tab)
-        
+
 
     # Will wrote all properties/values of d for the host
     # in the database
@@ -656,7 +656,7 @@ class DiscoveryManager:
                 if r.count() > 0:
                     print "This is not a new host on", self.db.hosts
                     return
-                
+
         print "Saving in database", d
         d['_id'] = host
         d['_discovery_state'] = 'discovered'

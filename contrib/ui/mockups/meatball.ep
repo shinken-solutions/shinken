@@ -1387,11 +1387,11 @@ Flap Detection | DISABLE]]></p:property><p:property name="textFont"><![CDATA[Ari
             <text y="11" x="0" style="font-size: 13px; font-style: normal; font-weight: normal; text-align: left; text-anchor: start; dominant-baseline: auto; fill: rgb(99, 99, 99); font-family: Arial; fill-opacity: 1; text-decoration: none;" xml:space="preserve" p:name="text" id="30213fe2f8014b599f239d4ff64e3000">3</text><path id="91368670d0514160ad18095f425d0146" style="fill: none; stroke-width: 1px; visibility: hidden;"/><path id="4d6e10c6c9604f3298d212975f14f49a" style="fill: none; stroke-width: 1px; visibility: hidden;"/>
         </g><g p:type="Shape" p:def="Evolus.Common:PlainText" id="89d2981e06df437fb87156f6d4917157" transform="matrix(1, 0, 0, 1, 53.1799, 5.01997)"><p:metadata><p:property name="disabled"><![CDATA[false]]></p:property><p:property name="label"><![CDATA[Next]]></p:property><p:property name="textColor"><![CDATA[#005086FF]]></p:property><p:property name="textFont"><![CDATA[Arial|bold|normal|13px|none]]></p:property></p:metadata>
             <text y="10" x="0" style="font-size: 13px; font-style: normal; font-weight: bold; text-align: left; text-anchor: start; dominant-baseline: auto; fill: rgb(0, 80, 134); font-family: Arial; fill-opacity: 1; text-decoration: none;" xml:space="preserve" p:name="text" id="4f530aacf45946e2acb725b9e40ffce1">Next</text><path id="2c862cb43d7240f7866ea313d2974ef3" style="fill: none; stroke-width: 1px; visibility: hidden;"/>
-        </g></g><g xmlns="http://www.w3.org/2000/svg" p:type="Shape" xmlns:p="http://www.evolus.vn/Namespace/Pencil" p:def="Evolus.BasicWebElements:table" id="189c8e69b1074964aa98b2e0553b7ee7" transform="matrix(1, 0, 0, 1, 243.8, 187.2)"><p:metadata><p:property name="box"><![CDATA[961.5999999999999,80]]></p:property><p:property name="useHtmlContent"><![CDATA[false]]></p:property><p:property name="fixedHeaderHeight"><![CDATA[false]]></p:property><p:property name="padding"><![CDATA[0,4]]></p:property><p:property name="headerHeight"><![CDATA[0,20]]></p:property><p:property name="h0"><![CDATA[168,0]]></p:property><p:property name="h1"><![CDATA[289,0]]></p:property><p:property name="h2"><![CDATA[433,0]]></p:property><p:property name="h3"><![CDATA[613,0]]></p:property><p:property name="h4"><![CDATA[885,0]]></p:property><p:property name="h5"><![CDATA[897.4933333333332,0]]></p:property><p:property name="h6"><![CDATA[929.5466666666666,0]]></p:property><p:property name="h7"><![CDATA[929.5466666666666,0]]></p:property><p:property name="h8"><![CDATA[929.5466666666666,0]]></p:property><p:property name="h9"><![CDATA[929.5466666666666,0]]></p:property><p:property name="h10"><![CDATA[929.5466666666666,0]]></p:property><p:property name="h11"><![CDATA[929.5466666666666,0]]></p:property><p:property name="content"><![CDATA[Host | Status | Last Check | Uptime | Status Information | Actions 
+        </g></g><g xmlns="http://www.w3.org/2000/svg" p:type="Shape" xmlns:p="http://www.evolus.vn/Namespace/Pencil" p:def="Evolus.BasicWebElements:table" id="189c8e69b1074964aa98b2e0553b7ee7" transform="matrix(1, 0, 0, 1, 243.8, 187.2)"><p:metadata><p:property name="box"><![CDATA[961.5999999999999,80]]></p:property><p:property name="useHtmlContent"><![CDATA[false]]></p:property><p:property name="fixedHeaderHeight"><![CDATA[false]]></p:property><p:property name="padding"><![CDATA[0,4]]></p:property><p:property name="headerHeight"><![CDATA[0,20]]></p:property><p:property name="h0"><![CDATA[168,0]]></p:property><p:property name="h1"><![CDATA[289,0]]></p:property><p:property name="h2"><![CDATA[433,0]]></p:property><p:property name="h3"><![CDATA[613,0]]></p:property><p:property name="h4"><![CDATA[885,0]]></p:property><p:property name="h5"><![CDATA[897.4933333333332,0]]></p:property><p:property name="h6"><![CDATA[929.5466666666666,0]]></p:property><p:property name="h7"><![CDATA[929.5466666666666,0]]></p:property><p:property name="h8"><![CDATA[929.5466666666666,0]]></p:property><p:property name="h9"><![CDATA[929.5466666666666,0]]></p:property><p:property name="h10"><![CDATA[929.5466666666666,0]]></p:property><p:property name="h11"><![CDATA[929.5466666666666,0]]></p:property><p:property name="content"><![CDATA[Host | Status | Last Check | Uptime | Status Information | Actions
 host-name(1) | UP | xx:xx:xx | xx d xx h xx m | status-info |
 host-name(2) | UP | xx:xx:xx | xx d xx h xx m | status-info |
-host-name(3) | DOWN | xx:xx:xx | xx d xx h xx m | status-info | 
-host-name(4) | UP | xx:xx:xx | xx d xx h xx m | status-info | 
+host-name(3) | DOWN | xx:xx:xx | xx d xx h xx m | status-info |
+host-name(4) | UP | xx:xx:xx | xx d xx h xx m | status-info |
 host-name(5) | UNREACHABLE | xx:xx:xx | xx d xx h xx m | status-info |
 host-name(6) | DOWN | xx:xx:xx | xx d xx h xx m | status-info |
 host-name(7) | UP | xx:xx:xx | xx d xx h xx m | status-info |
@@ -3246,24 +3246,24 @@ host-name(12) | UP | xx:xx:xx | xx d xx h xx m | status-info |]]></p:property><p
             <foreignObject x="47.375" y="190" width="285.25" height="0" p:name="text" id="4ee2f080fd6445e68c0c923e3e18ae9a" style="font-family: Arial; font-size: 13px; font-weight: normal; font-style: normal; text-decoration: none; fill: rgb(0, 0, 0); fill-opacity: 1; color: rgb(0, 0, 0); opacity: 1; text-align: center;"><div xmlns="http://www.w3.org/1999/xhtml"></div></foreignObject><path id="c9f4ee67b09441bbacc993ddeea1e830" style="fill: none; stroke-width: 1px; visibility: hidden;"/>
         </g><g xmlns="http://www.w3.org/2000/svg" p:type="Shape" xmlns:p="http://www.evolus.vn/Namespace/Pencil" p:def="Evolus.Common:RichTextBox" id="10953ae34fd14bbab281e24d8fa0a127" transform="matrix(1, 0, 0, 1, 267, 424)"><p:metadata><p:property name="width"><![CDATA[320,0]]></p:property><p:property name="textContent"><![CDATA[<span style="border-collapse: separate; color: rgb(0, 0, 0); font-family: 'Times New Roman'; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: 2; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; font-size: medium;" class="Apple-style-span"><span style="color: rgb(51, 51, 51); font-family: Verdana,'Lucida Grande',Lucida,Helvetica,Arial,sans-serif; font-size: 13px; line-height: 19px; text-align: justify;" class="Apple-style-span"><p style="padding: 0px; margin: 0px 0px 1em;">The
  Arbiter object is a way to defined Arbiter daemons that will manage all
- the configuration and all the architecture of shinken like distributed 
-monitoring and high availability. It reads the configuration, cuts it 
-into parts (N schedulers = N parts), and then send them to all others 
+ the configuration and all the architecture of shinken like distributed
+monitoring and high availability. It reads the configuration, cuts it
+into parts (N schedulers = N parts), and then send them to all others
 elements. It manages the high availability part : if an element dies, it
- re-routes the configuration managed by this falling element to a spare 
-one. Its other role is to receive input from users (like external 
-commands of shinken.cmd) and send them to other elements. There can be 
+ re-routes the configuration managed by this falling element to a spare
+one. Its other role is to receive input from users (like external
+commands of shinken.cmd) and send them to other elements. There can be
 only one active arbiter in the architecture.</p><p style="padding: 0px; margin: 0px 0px 1em;"><br /></p></span></span>]]></p:property><p:property name="textFont"><![CDATA[Arial|normal|normal|13px|none]]></p:property><p:property name="textColor"><![CDATA[#787878FF]]></p:property></p:metadata>
 
             <foreignObject x="0" y="0" width="320" height="298" p:name="text" id="c80f0e7e17814bc5b2b41ef93d864dad" style="font-family: Arial; font-size: 13px; font-weight: normal; font-style: normal; text-decoration: none; color: rgb(120, 120, 120); opacity: 1;"><div xmlns="http://www.w3.org/1999/xhtml"><span style="border-collapse: separate; color: rgb(0, 0, 0); font-family: 'Times New Roman'; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: 2; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; font-size: medium;" class="Apple-style-span"><span style="color: rgb(51, 51, 51); font-family: Verdana,'Lucida Grande',Lucida,Helvetica,Arial,sans-serif; font-size: 13px; line-height: 19px; text-align: justify;" class="Apple-style-span"><p style="padding: 0px; margin: 0px 0px 1em;">The
  Arbiter object is a way to defined Arbiter daemons that will manage all
- the configuration and all the architecture of shinken like distributed 
-monitoring and high availability. It reads the configuration, cuts it 
-into parts (N schedulers = N parts), and then send them to all others 
+ the configuration and all the architecture of shinken like distributed
+monitoring and high availability. It reads the configuration, cuts it
+into parts (N schedulers = N parts), and then send them to all others
 elements. It manages the high availability part : if an element dies, it
- re-routes the configuration managed by this falling element to a spare 
-one. Its other role is to receive input from users (like external 
-commands of shinken.cmd) and send them to other elements. There can be 
+ re-routes the configuration managed by this falling element to a spare
+one. Its other role is to receive input from users (like external
+commands of shinken.cmd) and send them to other elements. There can be
 only one active arbiter in the architecture.</p><p style="padding: 0px; margin: 0px 0px 1em;"><br /></p></span></span></div></foreignObject><path id="885c395d789a467e962778390d309aea" style="fill: none; stroke-width: 1px; visibility: hidden;"/>
         </g><g xmlns="http://www.w3.org/2000/svg" p:type="Shape" xmlns:p="http://www.evolus.vn/Namespace/Pencil" p:def="Evolus.BasicWebElements:heading" id="61d812c79c984ace974a6ed55bf41ddc" transform="matrix(1, 0, 0, 1, 267, 389)"><p:metadata><p:property name="textContent"><![CDATA[Help]]></p:property><p:property name="textFont"><![CDATA[Arial|bold|normal|17px|none]]></p:property><p:property name="textColor"><![CDATA[#787878FF]]></p:property><p:property name="customStyle"><![CDATA[]]></p:property></p:metadata>
 
@@ -4141,29 +4141,29 @@ only one active arbiter in the architecture.</p><p style="padding: 0px; margin: 
             <use xlink:href="#865a4b066cc74b27911a674cbfb1d851" xmlns:xlink="http://www.w3.org/1999/xlink"/>
             <foreignObject x="47.375" y="190" width="285.25" height="0" p:name="text" id="1188b4170f664be79d60684b0b23ba38" style="font-family: Arial; font-size: 13px; font-weight: normal; font-style: normal; text-decoration: none; fill: rgb(0, 0, 0); fill-opacity: 1; color: rgb(0, 0, 0); opacity: 1; text-align: center;"><div xmlns="http://www.w3.org/1999/xhtml"></div></foreignObject><path id="1188b4170f664be79d60684b0b23ba38_underline" style="fill: none; stroke-width: 1px; visibility: hidden;"/>
         </g><g xmlns="http://www.w3.org/2000/svg" p:type="Shape" xmlns:p="http://www.evolus.vn/Namespace/Pencil" p:def="Evolus.Common:RichTextBox" id="10953ae34fd14bbab281e24d8fa0a127" transform="matrix(1, 0, 0, 1, 267, 424)"><p:metadata><p:property name="width"><![CDATA[320,0]]></p:property><p:property name="textContent"><![CDATA[<span class="Apple-style-span" style="border-collapse: separate; color: rgb(0, 0, 0); font-family: 'Times New Roman'; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: 2; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; font-size: medium;"><span class="Apple-style-span" style="color: rgb(51, 51, 51); font-family: Verdana,'Lucida Grande',Lucida,Helvetica,Arial,sans-serif; font-size: 13px; line-height: 19px; text-align: justify;"><p style="padding: 0px; margin: 0px 0px 1em;">The
- Scheduler object is a way to the Arbiter daemons to talk with a 
-scheduler and give it hosts to manage. They are in charge of the 
-scheduling checks, the analysis of results and follow up actions (like 
-if a service is down, ask for a host check). They do not launch checks 
-or notifications. They keep a queue of pending checks and notifications 
-for other elements of the architecture (like pollers or reactionners). 
+ Scheduler object is a way to the Arbiter daemons to talk with a
+scheduler and give it hosts to manage. They are in charge of the
+scheduling checks, the analysis of results and follow up actions (like
+if a service is down, ask for a host check). They do not launch checks
+or notifications. They keep a queue of pending checks and notifications
+for other elements of the architecture (like pollers or reactionners).
 There can be many schedulers.</p><p style="padding: 0px; margin: 0px 0px 1em;">The
- Scheduler definition is optionnal. If no scheduler is defined, Shinken 
-will “create” one for the user. There will be no high availability for 
-it (no spare), and will use the default port in the server where the 
+ Scheduler definition is optionnal. If no scheduler is defined, Shinken
+will “create” one for the user. There will be no high availability for
+it (no spare), and will use the default port in the server where the
 deamon is launched.</p></span></span>]]></p:property><p:property name="textFont"><![CDATA[Arial|normal|normal|13px|none]]></p:property><p:property name="textColor"><![CDATA[#787878FF]]></p:property></p:metadata>
 
             <foreignObject x="0" y="0" width="320" height="298" p:name="text" id="3bf9bd2d0a404cc1a7c9f976533966ac" style="font-family: Arial; font-size: 13px; font-weight: normal; font-style: normal; text-decoration: none; color: rgb(120, 120, 120); opacity: 1;"><div xmlns="http://www.w3.org/1999/xhtml"><span class="Apple-style-span" style="border-collapse: separate; color: rgb(0, 0, 0); font-family: 'Times New Roman'; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: 2; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; font-size: medium;"><span class="Apple-style-span" style="color: rgb(51, 51, 51); font-family: Verdana,'Lucida Grande',Lucida,Helvetica,Arial,sans-serif; font-size: 13px; line-height: 19px; text-align: justify;"><p style="padding: 0px; margin: 0px 0px 1em;">The
- Scheduler object is a way to the Arbiter daemons to talk with a 
-scheduler and give it hosts to manage. They are in charge of the 
-scheduling checks, the analysis of results and follow up actions (like 
-if a service is down, ask for a host check). They do not launch checks 
-or notifications. They keep a queue of pending checks and notifications 
-for other elements of the architecture (like pollers or reactionners). 
+ Scheduler object is a way to the Arbiter daemons to talk with a
+scheduler and give it hosts to manage. They are in charge of the
+scheduling checks, the analysis of results and follow up actions (like
+if a service is down, ask for a host check). They do not launch checks
+or notifications. They keep a queue of pending checks and notifications
+for other elements of the architecture (like pollers or reactionners).
 There can be many schedulers.</p><p style="padding: 0px; margin: 0px 0px 1em;">The
- Scheduler definition is optionnal. If no scheduler is defined, Shinken 
-will “create” one for the user. There will be no high availability for 
-it (no spare), and will use the default port in the server where the 
+ Scheduler definition is optionnal. If no scheduler is defined, Shinken
+will “create” one for the user. There will be no high availability for
+it (no spare), and will use the default port in the server where the
 deamon is launched.</p></span></span></div></foreignObject><path id="3bf9bd2d0a404cc1a7c9f976533966ac_underline" style="fill: none; stroke-width: 1px; visibility: hidden;"/>
         </g><g xmlns="http://www.w3.org/2000/svg" p:type="Shape" xmlns:p="http://www.evolus.vn/Namespace/Pencil" p:def="Evolus.BasicWebElements:heading" id="61d812c79c984ace974a6ed55bf41ddc" transform="matrix(1, 0, 0, 1, 267, 389)"><p:metadata><p:property name="textContent"><![CDATA[Help]]></p:property><p:property name="textFont"><![CDATA[Arial|bold|normal|17px|none]]></p:property><p:property name="textColor"><![CDATA[#787878FF]]></p:property><p:property name="customStyle"><![CDATA[]]></p:property></p:metadata>
 
@@ -4530,21 +4530,21 @@ deamon is launched.</p></span></span></div></foreignObject><path id="3bf9bd2d0a4
             <rect style="fill: rgb(0, 0, 0); fill-opacity: 0; stroke: none;" x="0" y="0" p:name="bgRect" id="4914ea26c695416d834a0e9fafc88c63" width="713" height="10"/>
             <path style="fill: none; stroke: rgb(227, 227, 229); stroke-width: 1; stroke-opacity: 1;" d="M 0 5 L 713.0000002185569 5" p:name="line1" id="483f1e7154c949b6a238719fafd7e28b" transform="translate(0.5, 0.5)"/>
         </g><g xmlns="http://www.w3.org/2000/svg" p:type="Shape" xmlns:p="http://www.evolus.vn/Namespace/Pencil" p:def="Evolus.Common:RichTextBox" id="b04993124fa84ac5bdbec129ca53021c" transform="matrix(1, 0, 0, 1, 267, 424)"><p:metadata><p:property name="width"><![CDATA[320,0]]></p:property><p:property name="textContent"><![CDATA[<span class="Apple-style-span" style="border-collapse: separate; color: rgb(0, 0, 0); font-family: 'Times New Roman'; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: 2; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; font-size: medium;"><span class="Apple-style-span" style="color: rgb(51, 51, 51); font-family: Verdana,'Lucida Grande',Lucida,Helvetica,Arial,sans-serif; font-size: 13px; line-height: 19px; text-align: justify;"><p style="padding: 0px; margin: 0px 0px 1em;">The
- Poller object is a way to the Arbiter daemons to talk with a scheduler 
-and give it hosts to manage. They are in charge of launching plugins as 
-requested by schedulers. When the check is finished they return the 
+ Poller object is a way to the Arbiter daemons to talk with a scheduler
+and give it hosts to manage. They are in charge of launching plugins as
+requested by schedulers. When the check is finished they return the
 result to the schedulers. There can be many pollers.</p><p style="padding: 0px; margin: 0px 0px 1em;">The
- Poller definition is optionnal. If no poller is defined, Shinken will 
+ Poller definition is optionnal. If no poller is defined, Shinken will
 “create” one for the user. There will be no high availability for it (no
  spare), and will use the default port in the server where the deamon is
  launched.</p></span></span>]]></p:property><p:property name="textFont"><![CDATA[Arial|normal|normal|13px|none]]></p:property><p:property name="textColor"><![CDATA[#787878FF]]></p:property></p:metadata>
 
             <foreignObject x="0" y="0" width="320" height="241" p:name="text" id="54eab1e2b694470eb30c6a12ae6fa51e" style="font-family: Arial; font-size: 13px; font-weight: normal; font-style: normal; text-decoration: none; color: rgb(120, 120, 120); opacity: 1;"><div xmlns="http://www.w3.org/1999/xhtml"><span class="Apple-style-span" style="border-collapse: separate; color: rgb(0, 0, 0); font-family: 'Times New Roman'; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: 2; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; font-size: medium;"><span class="Apple-style-span" style="color: rgb(51, 51, 51); font-family: Verdana,'Lucida Grande',Lucida,Helvetica,Arial,sans-serif; font-size: 13px; line-height: 19px; text-align: justify;"><p style="padding: 0px; margin: 0px 0px 1em;">The
- Poller object is a way to the Arbiter daemons to talk with a scheduler 
-and give it hosts to manage. They are in charge of launching plugins as 
-requested by schedulers. When the check is finished they return the 
+ Poller object is a way to the Arbiter daemons to talk with a scheduler
+and give it hosts to manage. They are in charge of launching plugins as
+requested by schedulers. When the check is finished they return the
 result to the schedulers. There can be many pollers.</p><p style="padding: 0px; margin: 0px 0px 1em;">The
- Poller definition is optionnal. If no poller is defined, Shinken will 
+ Poller definition is optionnal. If no poller is defined, Shinken will
 “create” one for the user. There will be no high availability for it (no
  spare), and will use the default port in the server where the deamon is
  launched.</p></span></span></div></foreignObject><path id="54eab1e2b694470eb30c6a12ae6fa51e_underline" style="fill: none; stroke-width: 1px; visibility: hidden;"/><path id="f67215734c584367be5f815fd0ef397a" style="fill: none; stroke-width: 1px; visibility: hidden;"/>
@@ -5210,7 +5210,7 @@ result to the schedulers. There can be many pollers.</p><p style="padding: 0px; 
             <use xlink:href="#754b67b70329466882ab4a19d173d106" xmlns:xlink="http://www.w3.org/1999/xlink"/>
             <foreignObject x="2.5" y="10" width="195" height="0" p:name="text" id="b41ec7d98dff460d8832e41da5bc1ad5" style="font-family: Arial; font-size: 13px; font-weight: normal; font-style: normal; text-decoration: none; fill: rgb(0, 0, 0); fill-opacity: 1; color: rgb(0, 0, 0); opacity: 1; text-align: center;"><div xmlns="http://www.w3.org/1999/xhtml"></div></foreignObject><path id="f49861bb275745dda2080fb89b40e7ee" style="fill: none; stroke-width: 1px; visibility: hidden;"/>
         </g><g xmlns="http://www.w3.org/2000/svg" p:type="Shape" xmlns:p="http://www.evolus.vn/Namespace/Pencil" p:def="Evolus.GTK.Widgets:Button" id="0986030393444272b6a51832822d1f32" transform="matrix(1, 0, 0, 1, 672, 425)"><p:metadata><p:property name="box"><![CDATA[90,24]]></p:property><p:property name="buttonText"><![CDATA[Login]]></p:property><p:property name="textColor"><![CDATA[#000000FF]]></p:property><p:property name="textFont"><![CDATA[Liberation Sans|normal|normal|12px|none]]></p:property><p:property name="textAlign"><![CDATA[1,1]]></p:property><p:property name="disabled"><![CDATA[false]]></p:property></p:metadata>
-            
+
             <defs>
                 <linearGradient x1="0%" y1="0%" x2="0%" y2="100%" p:name="linearFill" id="14ab91bdb15c43d4b9b2cbd09a8b36c3">
                     <stop style="stop-color: rgb(253, 253, 252); stop-opacity: 1;" offset="0" p:name="stop1" id="1d867e8c3c5f4d818850bbdc8f0351dd"/>

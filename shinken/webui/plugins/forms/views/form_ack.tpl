@@ -21,7 +21,7 @@
 </div>
 <div class="modal-body">
   <form class="well" name='modal_form'>
-    <input type="textarea" name='reason' class="span3" placeholder="Reason…">  
+    <input type="textarea" name='reason' class="span3" placeholder="Reason…">
     <span class="help-inline">Reason</span>
 
 </form>

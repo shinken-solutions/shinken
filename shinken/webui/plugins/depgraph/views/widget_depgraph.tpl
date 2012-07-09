@@ -28,7 +28,7 @@ Invalid element
 
 
 <script type="text/javascript">
-  
+
   var graph_root = '{{elt.get_full_name()}}';
   var json_graph = {{!helper.create_json_dep_graph(elt, levels=4)}};
   //console.log('Show the graph'+json_graph);
@@ -41,14 +41,14 @@ Invalid element
 <div id="right-container" class="border">
   <div id="inner-details">
   </div>
-  
+
 </div>
 
 <div id="infovis-{{helper.get_html_id(elt)}}"> </div>
 
   <div id="log">Loading element informations...</div>
 </div>
-	
+
 <div class="clear"></div>
 </div>
 

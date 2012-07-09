@@ -29,7 +29,7 @@ class TestBusinessRulesBadRealmConf(ShinkenTest):
 
     def setUp(self):
         self.setup_with_file('etc/nagios_business_rules_bad_realm_conf.cfg')
-    
+
     def test_bad_conf(self):
         self.assert_(not self.conf.is_correct)
 

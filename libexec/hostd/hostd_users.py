@@ -15,26 +15,26 @@ def do_list(table):
 
 
 def validate_user(table, username):
-    u = table.find_one({'username' : username})
+    u = table.find_one({'username': username})
     if not u:
-        print 'ERROR : cannot find user %s' % username
+        print 'ERROR: cannot find user %s' % username
         sys.exit(2)
     u['validate'] = True
     table.save(u)
-    print "OK : user %s is validated" % username
+    print "OK: user %s is validated" % username
 
 
 def delete_user(table, username):
-    u = table.find_one({'username' : username})
+    u = table.find_one({'username': username})
     if not u:
-        print 'ERROR : cannot find user %s' % username
+        print 'ERROR: cannot find user %s' % username
         sys.exit(2)
-    table.remove({'username' : username})
-    print "OK : user %s is deleted"
+    table.remove({'username': username})
+    print "OK: user %s is deleted"
 
 
 if __name__ == '__main__':
-    
+
     parser = optparse.OptionParser(
         """%prog [options] [-H server] [-d database]""",
         version="%prog " + VERSION)
@@ -50,7 +50,7 @@ if __name__ == '__main__':
                       help='delete a user')
     parser.add_option('-u', '--user', dest='username',
                       help='Username')
-    
+
 
     opts, args = parser.parse_args()
 
@@ -76,12 +76,12 @@ if __name__ == '__main__':
     if opts.do_validate:
         mode = 'validate'
         if not username:
-            print "ERROR : no user filled"
+            print "ERROR: no user filled"
             sys.exit(2)
         validate_user(table, username)
 
     if opts.do_delete:
         if not username:
-            print "ERROR : no user filled"
+            print "ERROR: no user filled"
             sys.exit(2)
         delete_user(table, username)

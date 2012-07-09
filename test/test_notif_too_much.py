@@ -29,7 +29,7 @@ class TestNotifTooMuch(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_notif_too_much.cfg')
 
-    
+
     # The goal of this test is to check if we manage this case:
     # 2 notif ways on one contact. One notif ways should activate, not the other
     # for one timeperiod
@@ -54,14 +54,14 @@ class TestNotifTooMuch(ShinkenTest):
         self.scheduler_loop(1, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 2, 'BAD | value1=0 value2=0']])
         self.assert_(host.state == 'UP')
         self.assert_(host.state_type == 'HARD')
-        
+
         self.scheduler_loop(1, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 2, 'BAD | value1=0 value2=0']])
 
         # We should NOT see a send for the notify-service2 call because it's the good contact
         # but NOT the good period for this notifways. So 24x7 ok, not the never :)
         self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;notify-service'))
         self.assert_(not self.any_log_match('SERVICE NOTIFICATION.*;notify-service2'))
-            
+
 
 
 

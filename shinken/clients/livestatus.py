@@ -74,8 +74,8 @@ class LSSyncConnection:
 
             if l == 0:
                 logger.warning("0 size read")
-                return res # : TODO raise an error
-    
+                return res #: TODO raise an error
+
             size = size - l
             res = res + data
         return res
@@ -161,7 +161,7 @@ class Query(object):
         self.state = 'DONE'
         self.duration = time.time() - self.duration
         #print "Got a result", r
-    
+
 
 
 class LSAsynConnection(asyncore.dispatcher):
@@ -192,7 +192,7 @@ class LSAsynConnection(asyncore.dispatcher):
         #q = Query('GET hosts\nColumns name\n')
         self.queries = []
         self.results = []
-        
+
         self.current = None
 
 
@@ -229,7 +229,7 @@ class LSAsynConnection(asyncore.dispatcher):
             l = len(data)
             if l == 0:
                 logger.warning("0 size read")
-                return res # : TODO raise an error
+                return res #: TODO raise an error
 
             size = size - l
             res = res + data
@@ -260,7 +260,7 @@ class LSAsynConnection(asyncore.dispatcher):
         self.queries = []
         self.close()
 
-        
+
     # Check if we are in timeout. If so, just bailout
     # and set the correct return code from timeout
     # case
@@ -272,7 +272,7 @@ class LSAsynConnection(asyncore.dispatcher):
                 rc = 3
             else:
                 rc = 2
-            message = 'Error : connection timeout after %d seconds' % self.timeout
+            message = 'Error: connection timeout after %d seconds' % self.timeout
             self.set_exit(rc, message)
 
 
@@ -286,7 +286,7 @@ class LSAsynConnection(asyncore.dispatcher):
         # get a read but no current query? Not normal!
 
         if not q:
-            #print "WARNING : got LS read while no current query in progress. I return"
+            #print "WARNING: got LS read while no current query in progress. I return"
             return
 
         try:
@@ -296,7 +296,7 @@ class LSAsynConnection(asyncore.dispatcher):
 
             length = int(data[4:15])
             data = self.do_read(length)
-            
+
             if code == "200":
                 try:
                     d = eval(data)
@@ -336,29 +336,29 @@ class LSAsynConnection(asyncore.dispatcher):
         if not self.writable():
             logger.debug("Not writable, I bail out")
             return
-        
+
         #print "handle write"
-        try :
+        try:
             q = self.get_query()
             sent = self.send(q.get())
         except socket.error, exp:
             logger.debug("Write fail: %s" % str(exp))
             return
         #print "Sent", sent, "data"
-    
+
 
     # We are finished only if we got no pending queries and
     # no in progress query too
     def is_finished(self):
         #print "State:", self.current, len(self.queries)
         return self.current == None and len(self.queries) == 0
-            
+
 
     # Will loop over the time until all returns are back
     def wait_returns(self):
         while self.alive and not self.is_finished():
             asyncore.poll(timeout=0.001)
-            
+
 
     def get_returns(self):
         r = self.results

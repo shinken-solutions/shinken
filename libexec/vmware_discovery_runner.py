@@ -30,13 +30,13 @@ from subprocess import Popen, PIPE
 # Try to load json (2.5 and higer) or simplejson if failed (python2.4)
 try:
     import json
-except ImportError: 
-    # For old Python version, load 
+except ImportError:
+    # For old Python version, load
     # simple json (it can be hard json?! It's 2 functions guy!)
     try:
         import simplejson as json
     except ImportError:
-        sys.exit("Error : you need the json or simplejson module for this script")
+        sys.exit("Error: you need the json or simplejson module for this script")
 
 VERSION = '0.1'
 
@@ -81,10 +81,10 @@ def get_vmware_hosts(check_esx_path, vcenter, user, password):
     print ' '.join(list_host_cmd)
     p = Popen(list_host_cmd, stdout=PIPE, stderr=PIPE)
     output = p.communicate()
-    
+
     print "Exit status", p.returncode
     if p.returncode == 2:
-        print "Error : the check_esx3.pl return in error :", output
+        print "Error: the check_esx3.pl return in error:", output
         sys.exit(2)
 
     parts = output[0].split(':')
@@ -98,7 +98,7 @@ def get_vmware_hosts(check_esx_path, vcenter, user, password):
         elts = hst_raw.split('(')
         hst = elts[0]
         hosts.append(hst)
-    
+
     return hosts
 
 
@@ -114,7 +114,7 @@ def get_vm_of_host(check_esx_path, vcenter, host, user, password):
 
     print "Exit status", p.returncode
     if p.returncode == 2:
-        print "Error : the check_esx3.pl return in error :", output
+        print "Error: the check_esx3.pl return in error:", output
         sys.exit(2)
 
     parts = output[0].split(':')
@@ -125,7 +125,7 @@ def get_vm_of_host(check_esx_path, vcenter, host, user, password):
 
     vms_raw = parts[1].split('|')[0]
     vms_raw_lst = vms_raw.split(',')
-    
+
     lst = []
     for vm_raw in vms_raw_lst:
         vm_raw = vm_raw.strip()
@@ -161,14 +161,14 @@ def write_output(r, path):
         shutil.move(path+'.tmp', path)
         print "File %s wrote" % path
     except IOError, exp:
-        sys.exit("Error writing the file %s : %s" % (path, exp))
+        sys.exit("Error writing the file %s: %s" % (path, exp))
 
 
 def main(check_esx_path, vcenter, user, password, rules):
     rules = _split_rules(rules)
     res = {}
     hosts = get_vmware_hosts(check_esx_path, vcenter, user, password)
-    
+
     for host in hosts:
         lst = get_vm_of_host(check_esx_path, vcenter, host, user, password)
         if lst:

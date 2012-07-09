@@ -54,10 +54,10 @@ class TestConfig(ShinkenTest):
         self.assert_(mod.module_name == 'Status-Dat')
         self.assert_(mod.object_cache_file == '/usr/local/shinken/var/objects.cache')
 
-        try :
+        try:
             os.unlink(mod.status_file)
             os.unlink(mod.module_name)
-        except :
+        except:
             pass
 
 

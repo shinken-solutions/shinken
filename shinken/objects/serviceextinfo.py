@@ -52,15 +52,15 @@ class ServiceExtInfo(Item):
 
 
     # properties defined by configuration
-    # *required : is required in conf
-    # *default : default value if no set in conf
-    # *pythonize : function to call when transfort string to python object
-    # *fill_brok : if set, send to broker. there are two categories: full_status for initial and update status, check_result for check results
-    # *no_slots : do not take this property for __slots__
+    # *required: is required in conf
+    # *default: default value if no set in conf
+    # *pythonize: function to call when transfort string to python object
+    # *fill_brok: if set, send to broker. there are two categories: full_status for initial and update status, check_result for check results
+    # *no_slots: do not take this property for __slots__
     #  Only for the inital call
-    # conf_send_preparation : if set, will pass the property to this function. It's used to "flatten"
+    # conf_send_preparation: if set, will pass the property to this function. It's used to "flatten"
     #  some dangerous properties like realms that are too 'linked' to be send like that.
-    # brok_transformation : if set, will call the function with the value of the property
+    # brok_transformation: if set, will call the function with the value of the property
     #  the major times it will be to flatten the data (like realm_name instead of the realm object).
     properties = Item.properties.copy()
     properties.update({
@@ -81,15 +81,15 @@ class ServiceExtInfo(Item):
         'SERVICENOTES':           'notes'
     }
 
-####### 
-#                   __ _                       _   _             
-#                  / _(_)                     | | (_)            
-#   ___ ___  _ __ | |_ _  __ _ _   _ _ __ __ _| |_ _  ___  _ __  
-#  / __/ _ \| '_ \|  _| |/ _` | | | | '__/ _` | __| |/ _ \| '_ \ 
+#######
+#                   __ _                       _   _
+#                  / _(_)                     | | (_)
+#   ___ ___  _ __ | |_ _  __ _ _   _ _ __ __ _| |_ _  ___  _ __
+#  / __/ _ \| '_ \|  _| |/ _` | | | | '__/ _` | __| |/ _ \| '_ \
 # | (_| (_) | | | | | | | (_| | |_| | | | (_| | |_| | (_) | | | |
 #  \___\___/|_| |_|_| |_|\__, |\__,_|_|  \__,_|\__|_|\___/|_| |_|
-#                         __/ |                                  
-#                        |___/                                   
+#                         __/ |
+#                        |___/
 ######
 
 

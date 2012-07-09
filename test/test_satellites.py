@@ -32,7 +32,7 @@ class TestConfig(ShinkenTest):
         print "Create a Scheduler dummy"
         r = self.conf.realms.find_by_name('Default')
 
-        creation_tab = {'scheduler_name' : 'scheduler-1', 'address' : '0.0.0.0', 'spare' : '0', 'port' : '9999', 'check_interval' : '1', 'realm' : 'Default'}
+        creation_tab = {'scheduler_name': 'scheduler-1', 'address': '0.0.0.0', 'spare': '0', 'port': '9999', 'check_interval': '1', 'realm': 'Default'}
         s = SchedulerLink(creation_tab)
         s.last_check = time.time()-100
         s.timeout = 3
@@ -41,7 +41,7 @@ class TestConfig(ShinkenTest):
         s.port = 9999
         s.max_check_attempts = 4
         s.realm = r
-        # Lie : we start at true here
+        # Lie: we start at true here
         s.alive = True
         print s.__dict__
 

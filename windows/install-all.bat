@@ -7,7 +7,7 @@ REM
 REM
 REM  V 0.1
 REM
-REM Copyright (C) 2011 :
+REM Copyright (C) 2011:
 REM        * E. Beaulieu - Shinken_install_batch@zebux.org
 REM
 REM Shinken installationscript for Windows is free software: you can redistribute it and/or modify
@@ -40,7 +40,7 @@ if not *%CONT:~0,1% == *I if not *%CONT:~0,1% == *i goto remove
 
 :: Check needed programs
 if exist %PATH_INSTSRV%\instsrv.exe goto main
-echo You need to install  %PATH_INSTSRV%\instsrv.exe and %PATH_INSTSRV%\srvany.exe from Microsoft Website !!!
+echo You need to install  %PATH_INSTSRV%\instsrv.exe and %PATH_INSTSRV%\srvany.exe from Microsoft Website!!!
 echo  http://www.microsoft.com/downloads/details.aspx?FamilyID=9D467A69-57FF-4AE7-96EE-B18C4790CFFD
 pause
 exit
@@ -64,7 +64,7 @@ echo                ศอออออออออออออออออออออออออออออออออออผ
 
 :: Check path installation
 if exist %PATH_ROOT% goto begin
-echo The Shinken directory : %PATH_ROOT% does not exist ! Please create it and reinstall Shinken.
+echo The Shinken directory: %PATH_ROOT% does not exist! Please create it and reinstall Shinken.
 pause
 goto end
 
@@ -140,7 +140,7 @@ echo                ศอออออออออออออออออออออออออออออออออออผ
 %PATH_INSTSRV%\instsrv.exe "Shinken-Broker" remove
 %PATH_INSTSRV%\instsrv.exe "Shinken-Receiver" remove
 
-echo Please remove the Shinken directory : %PATH_ROOT%
+echo Please remove the Shinken directory: %PATH_ROOT%
 pause
 exit
 

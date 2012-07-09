@@ -73,7 +73,7 @@
 }
 
 .no-maxwidth{
-  max-width: none !important; 
+  max-width: none !important;
 }
 
 .quickinfo{
@@ -102,14 +102,14 @@
   height: 25px;
   width: 25px;
   margin-right: 2px;
-  vertical-align: -3px; 
+  vertical-align: -3px;
 }
 
 .imgsize4 {
   height: 48px;
   width: 48px;
   margin-right: 10px;
-  vertical-align: -3px; 
+  vertical-align: -3px;
 }
 
 

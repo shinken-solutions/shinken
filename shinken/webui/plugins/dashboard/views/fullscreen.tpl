@@ -11,7 +11,7 @@
 <script type="text/javascript">
     $(function($) {
       var options = {
-        format: '%I:%M %p', // 12-hour with am/pm 
+        format: '%I:%M %p', // 12-hour with am/pm
       }
       $('.jclock').jclock(options);
     });
@@ -31,7 +31,7 @@
 <!-- Dashboard Header START -->
 <div id="dash-header" class="span12">
   <ul class="span9 pull-left">
-     
+
     <li></li>
   </ul>
   <ul class="span2 pull-right">
@@ -79,7 +79,7 @@
 </div>
 
 <script >$(function(){
-  $(".slidelink").pageslide({ direction: "left", modal : true});
+  $(".slidelink").pageslide({ direction: "left", modal: true});
   });
 </script>
 
@@ -92,7 +92,7 @@
          %if 'base_url' in w and 'position' in w:
             %uri = w['base_url'] + "?" + w['options_uri']
             AddWidget("{{!uri}}", "{{w['position']}}");
-            var w = {'id' : "{{w['id']}}", 'base_url' : "{{w['base_url']}}", 'position' : "{{w['position']}}", 'options' : JSON.parse('{{w['options']}}')};
+            var w = {'id': "{{w['id']}}", 'base_url': "{{w['base_url']}}", 'position': "{{w['position']}}", 'options': JSON.parse('{{w['options']}}')};
             widgets.push(w);
          %end
       %end

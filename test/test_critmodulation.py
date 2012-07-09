@@ -30,7 +30,7 @@ class TestCritMod(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_critmodulation.cfg')
 
-    
+
     def test_critmodulation_def(self):
         #
         # Config is not correct because of a wrong relative path
@@ -42,7 +42,7 @@ class TestCritMod(ShinkenTest):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         print svc.business_impact_modulations
         self.assert_(cm in svc.business_impact_modulations)
-        
+
 
 
 if __name__ == '__main__':

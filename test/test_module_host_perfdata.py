@@ -47,9 +47,9 @@ class TestConfig(ShinkenTest):
         print "Tempalte%stoto" % mod.template
 #        self.assert_(mod.template == r'$LASTHOSTCHECK\t$HOSTNAME$\t$HOSTOUTPUT$\t$HOSTSTATE$\t$HOSTPERFDATA$\n')
 
-        try :
+        try:
             os.unlink(mod.path)
-        except :
+        except:
             pass
 
         sl = get_instance(mod)
@@ -95,7 +95,7 @@ class TestConfig(ShinkenTest):
 
         fd = open(mod.path)
         buf = fd.readline().decode('utf8')
-        
+
         #print "BUF:", buf
         comparison = u'%d\t%s\t%s\t%s\t%s\n' % (t, "test_host_0", 'BAD', 'value1=0 value2=0'+u'\xf6', 'DOWN')
         #print "Comparison:", comparison

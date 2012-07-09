@@ -73,7 +73,7 @@ class TestSystemTimeChange(ShinkenTest):
         svc.compensate_system_time_change(86400)
         print "Tomorow Host last_state_change", time.asctime(time.localtime(host.last_state_change))
 
-        # And now a huge change : yesterday (so a 2 day move)
+        # And now a huge change: yesterday (so a 2 day move)
         self.set_time(yesterday)
         last_state_change = host.last_state_change
         host.compensate_system_time_change(-86400 * 2)

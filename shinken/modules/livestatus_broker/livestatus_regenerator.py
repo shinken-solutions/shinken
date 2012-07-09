@@ -92,7 +92,7 @@ class LiveStatusRegenerator(Regenerator):
 
     def all_done_linking(self, inst_id):
         """In addition to the original all_done_linking our items will get sorted"""
-        
+
         # We will relink all objects if need. If we are in a scheduler, this function will just bailout
         # because it's not need :)
         super(self.__class__, self).all_done_linking(inst_id)
@@ -127,7 +127,7 @@ class LiveStatusRegenerator(Regenerator):
         setattr(self.commands, '__itersorted__', types.MethodType(itersorted, self.commands))
         setattr(self.timeperiods, '__itersorted__', types.MethodType(itersorted, self.timeperiods))
 
-        # Speedup authUser requests by populating _id_contact_heap with contact-names as key and 
+        # Speedup authUser requests by populating _id_contact_heap with contact-names as key and
         # an array with the associated host and service ids
         setattr(self.hosts, '_id_contact_heap', dict())
         setattr(self.services, '_id_contact_heap', dict())
@@ -200,7 +200,7 @@ class LiveStatusRegenerator(Regenerator):
         # For services: _id_by_host_name_heap = {'name1':[id1, id2,...], 'name2': [id6, id7,...],...} = hostname maps to list of service_ids
         # For services: _id_by_service_name_heap = {'name1':id1, 'name2': id6,...} = full_service_description maps to service_id
         setattr(self.hosts, '_id_by_host_name_heap', dict([(get_obj_full_name(v), k) for (k, v) in self.hosts.items.iteritems()]))
-        setattr(self.services, '_id_by_service_name_heap', dict([(get_obj_full_name(v), k) for (k, v) in self.services.items.iteritems()])) 
+        setattr(self.services, '_id_by_service_name_heap', dict([(get_obj_full_name(v), k) for (k, v) in self.services.items.iteritems()]))
         setattr(self.services, '_id_by_host_name_heap', dict())
         [self.services._id_by_host_name_heap.setdefault(get_obj_full_name(v.host), []).append(k) for (k, v) in self.services.items.iteritems()]
         # print self.services._id_by_host_name_heap

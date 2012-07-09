@@ -23,7 +23,7 @@
 # environement
 export myscripts=$(readlink -f $(dirname $0))
 
-export plugins="nagios-plugins 
+export plugins="nagios-plugins
 check_mysql_health check_wmi_plus check_mongodb check_emc_clariion
 check_nwc_health capture_plugin"
 export addons="pnp4nagios multisite"
@@ -32,7 +32,7 @@ cd $myscripts
 ./shinken.sh -i
 
 if [ $? -ne 0 ]
-then 
+then
     exit 2
 fi
 
@@ -40,7 +40,7 @@ for p in $plugins
 do
     ./shinken.sh -p $p
     if [ $? -ne 0 ]
-    then 
+    then
         exit 2
     fi
 done
@@ -49,7 +49,7 @@ for m in $modules
 do
     ./shinken.sh -p $p
     if [ $? -ne 0 ]
-    then 
+    then
         exit 2
     fi
 done

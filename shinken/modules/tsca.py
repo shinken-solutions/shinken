@@ -27,7 +27,7 @@
 # interface to submiet checks results
 
 # This text is print at the import
-print "Detected module : TSCA module for Arbiter/receiver"
+print "Detected module: TSCA module for Arbiter/receiver"
 
 import os
 import sys
@@ -131,11 +131,11 @@ class TSCA_arbiter(BaseModule):
     def read_check_result(self, state):
         '''
          Read the list result
-          Value n1 : Timestamp
-          Value n2 : Hostname
-          Value n3 : Service
-          Value n4 : Return Code
-          Value n5 : Output
+          Value n1: Timestamp
+          Value n2: Hostname
+          Value n3: Service
+          Value n4: Return Code
+          Value n5: Output
         '''
         timestamp = state.timestamp
         hostname = state.hostname

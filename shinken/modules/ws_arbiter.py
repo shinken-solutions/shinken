@@ -44,9 +44,9 @@ from shinken.webui.bottle import Bottle, run, static_file, view, route, request,
 
 
 properties = {
-    'daemons' : ['arbiter', 'receiver'],
-    'type' : 'ws_arbiter',
-    'external' : True,
+    'daemons': ['arbiter', 'receiver'],
+    'type': 'ws_arbiter',
+    'external': True,
     }
 
 # called by the plugin manager to get a broker
@@ -92,7 +92,7 @@ def get_page():
     app.from_q.put(ext)
 
     # OK here it's ok, it will return a 200 code
-    
+
 
 
 # This module will open an HTTP service, where a user can send a command, like a check
@@ -106,7 +106,7 @@ class Ws_arbiter(BaseModule):
             self.port = int(getattr(modconf, 'port', '7760'))
             self.host = getattr(modconf, 'host', '0.0.0.0')
         except AttributeError:
-            print "Error : the module '%s' do not have a property"
+            print "Error: the module '%s' do not have a property"
             raise
 
     # We initialise the HTTP part. It's a simple wsgi backend
@@ -121,7 +121,7 @@ class Ws_arbiter(BaseModule):
     # When you are in "external" mode, that is the main loop of your process
     def main(self):
         global app
-        
+
         # It's an external module, so we need to be sure that we manage
         # the signals
         self.set_exit_handler()

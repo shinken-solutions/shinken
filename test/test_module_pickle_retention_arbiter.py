@@ -30,7 +30,7 @@ from shinken_test import *
 from shinken.log import logger
 from shinken.objects.module import Module
 from shinken.modules import pickle_retention_file_generic
-from shinken.modules.pickle_retention_file_generic import get_instance 
+from shinken.modules.pickle_retention_file_generic import get_instance
 
 
 modconf = Module()
@@ -46,9 +46,9 @@ class TestPickleRetentionBroker(ShinkenTest):
         print self.conf.modules
         # get our modules
         mod = pickle_retention_file_generic.Pickle_retention_generic(modconf, 'tmp/retention-test.dat')
-        try :
+        try:
             os.unlink(mod.path)
-        except :
+        except:
             pass
 
         sl = get_instance(mod)
@@ -63,7 +63,7 @@ class TestPickleRetentionBroker(ShinkenTest):
         self.scheduler_loop(1, [[svc, 2, 'BAD | value1=0 value2=0']])
 
         self.sched.get_new_broks()
-        
+
         # Saving the broks we got
         old_broks = copy.copy(self.sched.broks)
 
@@ -76,7 +76,7 @@ class TestPickleRetentionBroker(ShinkenTest):
 
         # Now we clean the source, like if we restart
         arbiter.broks.clear()
-        
+
         self.assert_(len(arbiter.broks)==0)
 
         r = sl.hook_load_retention(arbiter)

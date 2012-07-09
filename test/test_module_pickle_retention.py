@@ -31,7 +31,7 @@ from shinken_test import unittest, ShinkenTest
 from shinken.log import logger
 from shinken.objects.module import Module
 from shinken.modules import pickle_retention_file_scheduler
-from shinken.modules.pickle_retention_file_scheduler import get_instance 
+from shinken.modules.pickle_retention_file_scheduler import get_instance
 
 
 modconf = Module()
@@ -49,9 +49,9 @@ class TestConfig(ShinkenTest):
         now = time.time()
         # get our modules
         mod = pickle_retention_file_scheduler.Pickle_retention_scheduler(modconf, 'tmp/retention-test.dat')
-        try :
+        try:
             os.unlink(mod.path)
-        except :
+        except:
             pass
 
         sl = get_instance(mod)
@@ -75,11 +75,11 @@ class TestConfig(ShinkenTest):
 
         # update the hosts and service in the scheduler in the retention-file
         sl.hook_save_retention(self.sched)
-        
+
         self.assert_(svc.state == 'PENDING')
         print "State", svc.state
         svc.state = 'UP' # was PENDING in the save time
-        
+
         # We try to change active state change too
         svc.active_checks_enabled = False
         svc.passive_checks_enabled = False
@@ -89,7 +89,7 @@ class TestConfig(ShinkenTest):
 
         r = sl.hook_load_retention(self.sched)
         self.assert_(r == True)
-        
+
         # Now look at checks active or not
         # Should be back as normal values :)
         self.assert_(svc.active_checks_enabled == True)
@@ -101,11 +101,11 @@ class TestConfig(ShinkenTest):
 
         # Should be ok, because we load it from retention
         self.assert_(svc.next_chk == in_the_future)
-        
+
         # search if the host is not changed by the loading thing
         svc2 = self.sched.hosts.find_by_name("test_host_0")
         self.assert_(svc == svc2)
-        
+
         self.assert_(svc.state == 'PENDING')
 
         # Ok, we can delete the retention file
@@ -134,13 +134,13 @@ class TestConfig(ShinkenTest):
 
         r = sl.hook_load_retention(self.sched)
         self.assert_(r == True)
-        
+
         print "Notif?", svc2.notified_contacts
         # We should got our contacts, and still the true objects
         self.assert_(len(svc2.notified_contacts) > 0)
         for c in svc2.notified_contacts:
             self.assert_(c in save_notified_contacts)
-        
+
 
 
 if __name__ == '__main__':

@@ -58,14 +58,14 @@ def apache_md5_crypt (pw, salt):
 
 
 def unix_md5_crypt(pw, salt, magic=None):
-    
+
     if magic==None:
         magic = MAGIC
 
     # Take care of the magic string if present
     if salt[:len(magic)] == magic:
         salt = salt[len(magic):]
-        
+
 
     # salt can have up to 8 characters:
     import string
@@ -94,9 +94,9 @@ def unix_md5_crypt(pw, salt, magic=None):
         i = i >> 1
 
     final = md5(ctx).digest()
-    
+
     # The following is supposed to make
-    # things run slower. 
+    # things run slower.
 
     # my question: WTF???
 
@@ -117,13 +117,13 @@ def unix_md5_crypt(pw, salt, magic=None):
             ctx1 = ctx1 + final[:16]
         else:
             ctx1 = ctx1 + pw
-            
-            
+
+
         final = md5(ctx1).digest()
 
 
     # Final xform
-                                
+
     passwd = ''
 
     passwd = passwd + to64((int(ord(final[0])) << 16)

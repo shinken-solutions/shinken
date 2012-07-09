@@ -35,9 +35,9 @@ from shinken.property import StringProp
 from shinken.log import logger
 
 
-# TODO: subclass Item & Items for Itemgroup & Itemgroups ?
+# TODO: subclass Item & Items for Itemgroup & Itemgroups?
 class Itemgroup(Item):
-    
+
     id = 0
 
     properties = Item.properties.copy()
@@ -50,12 +50,12 @@ class Itemgroup(Item):
     def __init__(self, params={}):
         self.id = self.__class__.id
         self.__class__.id += 1
-        
+
         self.init_running_properties()
-        
+
         for key in params:
             setattr(self, key, params[key])
-            
+
 
     # Copy the groups properties EXCEPT the members
     # members need to be fill after manually
@@ -81,7 +81,7 @@ class Itemgroup(Item):
     # so a python list :)
     # We also strip elements because spaces Stinks!
     def pythonize(self):
-        self.members = [ mbr for mbr in 
+        self.members = [ mbr for mbr in
                             ( m.strip() for m in getattr(self, 'members', '').split(',') )
                         if mbr != '' ]
 
@@ -133,7 +133,7 @@ class Itemgroup(Item):
             for err in self.configuration_errors:
                 logger.error("[itemgroup] %s" % err)
             res = False
-            
+
         return res
 
 
@@ -142,7 +142,7 @@ class Itemgroup(Item):
 
 
     # Get a brok with hostgroup info (like id, name)
-    # members is special : list of (id, host_name) for database info
+    # members is special: list of (id, host_name) for database info
     def get_initial_status_brok(self):
         cls = self.__class__
         data = {}
@@ -161,7 +161,7 @@ class Itemgroup(Item):
 
 
 
-class Itemgroups(Items):            
+class Itemgroups(Items):
 
     # If a prop is absent and is not required, put the default value
     def fill_default(self):
@@ -179,4 +179,4 @@ class Itemgroups(Items):
             return []
         return getattr(g, 'members', [])
 
-    
+

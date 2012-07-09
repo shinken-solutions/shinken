@@ -167,7 +167,7 @@ class TestConfig(ShinkenTest):
         print "DumP", self.conf.servicedependencies
 
         # the most important: test_parent is in the chk_depend_of-list of test_son
-        print "Dep : ", svc_son.act_depend_of
+        print "Dep: ", svc_son.act_depend_of
         self.assert_([['u', 'c', 'w']] == [x[1] for x in svc_son.act_depend_of if x[0] is svc_parent])
 
 

@@ -3,7 +3,7 @@
 # -*- coding: utf-8 -*-
 
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -108,13 +108,13 @@ class Timerange:
         return self.hstart*3600 + self.mstart* 60  <= sec_from_morning <= self.hend*3600 + self.mend* 60
 
 
-""" TODO : Add some comment about this class for the doc"""
+""" TODO: Add some comment about this class for the doc"""
 class Daterange:
-    weekdays = {'monday' : 0, 'tuesday' : 1, 'wednesday' : 2, 'thursday' : 3, \
-                    'friday' : 4, 'saturday' : 5, 'sunday': 6 }
-    months = {'january' : 1, 'february': 2, 'march' : 3, 'april' : 4, 'may' : 5, \
-                  'june' : 6, 'july' : 7, 'august' : 8, 'september' : 9, \
-                  'october' : 10, 'november' : 11, 'december' : 12}
+    weekdays = {'monday': 0, 'tuesday': 1, 'wednesday': 2, 'thursday': 3, \
+                    'friday': 4, 'saturday': 5, 'sunday': 6 }
+    months = {'january': 1, 'february': 2, 'march': 3, 'april': 4, 'may': 5, \
+                  'june': 6, 'july': 7, 'august': 8, 'september': 9, \
+                  'october': 10, 'november': 11, 'december': 12}
     def __init__(self, syear, smon, smday, swday, swday_offset,
                  eyear, emon, emday, ewday, ewday_offset, skip_interval, other):
         self.syear = int(syear)
@@ -352,8 +352,8 @@ class Daterange:
             if start_time <= t <= end_time:
                 #print "Early Return next invalid day:", time.asctime(time.localtime(get_day(t)))
                 return get_day(t)
-            if start_time >= t :
-                #print "start_time >= t :", time.asctime(time.localtime(get_day(start_time)))
+            if start_time >= t:
+                #print "start_time >= t:", time.asctime(time.localtime(get_day(start_time)))
                 return get_day(start_time)
         else:
             # Else, there is no possibility than in our start_time<->end_time we got
@@ -382,15 +382,15 @@ class Daterange:
 
         # tr can't be valid, or it will be return at the begining
         #sec_from_morning = self.get_next_future_timerange_invalid(t)
-        
+
         # Ok we've got a next invalid day and a invalid possibility in
         # timerange, so the next invalid is this day+sec_from_morning
         #print "T_day", t_day, "Sec from morning", sec_from_morning
         if t_day is not None and sec_from_morning is not None:
             return t_day + sec_from_morning + 1
 
-        # We've got a day but no sec_from_morning : the timerange is full (0->24h)
-        # so the next invalid is this day at the day_start 
+        # We've got a day but no sec_from_morning: the timerange is full (0->24h)
+        # so the next invalid is this day at the day_start
         if t_day is not None and sec_from_morning is None:
             return t_day
 
@@ -411,7 +411,7 @@ class Daterange:
 
 
 
-""" TODO : Add some comment about this class for the doc"""
+""" TODO: Add some comment about this class for the doc"""
 class CalendarDaterange(Daterange):
     def get_start_and_end_time(self, ref=None):
         start_time = get_start_of_day(self.syear, int(self.smon), self.smday)
@@ -420,7 +420,7 @@ class CalendarDaterange(Daterange):
 
 
 
-""" TODO : Add some comment about this class for the doc"""
+""" TODO: Add some comment about this class for the doc"""
 class StandardDaterange(Daterange):
     def __init__(self, day, other):
         self.other = other
@@ -435,7 +435,7 @@ class StandardDaterange(Daterange):
     def is_correct(self):
         b = self.day in Daterange.weekdays
         if not b:
-            print "Error : %s is not a valid day" % self.day
+            print "Error: %s is not a valid day" % self.day
         return b
 
 
@@ -453,18 +453,18 @@ class StandardDaterange(Daterange):
         return (today_morning + day_diff*86400, tonight + day_diff*86400)
 
 
-""" TODO : Add some comment about this class for the doc"""
+""" TODO: Add some comment about this class for the doc"""
 class MonthWeekDayDaterange(Daterange):
     # It's correct only if the weekday (sunday, etc) is a valid one
     def is_correct(self):
         b = True
         b &= self.swday in Daterange.weekdays
         if not b:
-            print "Error : %s is not a valid day" % self.swday
+            print "Error: %s is not a valid day" % self.swday
 
         b &= self.ewday in Daterange.weekdays
         if not b:
-            print "Error : %s is not a valid day" % self.ewday
+            print "Error: %s is not a valid day" % self.ewday
 
         return b
 
@@ -504,7 +504,7 @@ class MonthWeekDayDaterange(Daterange):
         return (start_time, end_time)
 
 
-""" TODO : Add some comment about this class for the doc"""
+""" TODO: Add some comment about this class for the doc"""
 class MonthDateDaterange(Daterange):
     def get_start_and_end_time(self, ref=None):
         now = time.localtime(ref)
@@ -541,7 +541,7 @@ class MonthDateDaterange(Daterange):
         return (start_time, end_time)
 
 
-""" TODO : Add some comment about this class for the doc"""
+""" TODO: Add some comment about this class for the doc"""
 class WeekDayDaterange(Daterange):
     def get_start_and_end_time(self, ref=None):
         now = time.localtime(ref)
@@ -596,7 +596,7 @@ class WeekDayDaterange(Daterange):
         return (start_time, end_time)
 
 
-""" TODO : Add some comment about this class for the doc"""
+""" TODO: Add some comment about this class for the doc"""
 class MonthDayDaterange(Daterange):
     def get_start_and_end_time(self, ref=None):
         now = time.localtime(ref)

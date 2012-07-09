@@ -30,7 +30,7 @@ class TestNoHostCheck(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_not_execute_host_check.cfg')
 
-    
+
     # We must look taht host checks are disable, and services ones are running
     def test_no_host_check(self):
         #
@@ -59,7 +59,7 @@ class TestNoHostCheck(ShinkenTest):
         # Now disable passive host check
         cmd = "[%lu] STOP_ACCEPTING_PASSIVE_HOST_CHECKS" % now
         self.sched.run_external_command(cmd)
-        
+
         # And now run a new command
         cmd = "[%lu] PROCESS_HOST_CHECK_RESULT;test_host_0;1;bobo2" % now
         self.sched.run_external_command(cmd)

@@ -37,15 +37,15 @@ from shinken.basemodule import BaseModule
 
 
 properties = {
-    'daemons' : ['arbiter', 'webui', 'skonf'],
-    'type' : 'mongodb',
-    'external' : False,
-    'phases' : ['configuration'],
+    'daemons': ['arbiter', 'webui', 'skonf'],
+    'type': 'mongodb',
+    'external': False,
+    'phases': ['configuration'],
 }
 
 # called by the plugin manager to get a module instance
 def get_instance(plugin):
-    print "[MongoDB Module] : Get Mongodb instance for plugin %s" % plugin.get_name()
+    print "[MongoDB Module]: Get Mongodb instance for plugin %s" % plugin.get_name()
     uri   = plugin.uri
     database = plugin.database
 
@@ -65,14 +65,14 @@ class Mongodb_generic(BaseModule):
 
     # Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
-        print "[Mongodb Module] : Try to open a Mongodb connection to %s:%s" % (self.uri, self.database)
+        print "[Mongodb Module]: Try to open a Mongodb connection to %s:%s" % (self.uri, self.database)
         try:
             self.con = Connection(self.uri)
             self.db = getattr(self.con, self.database)
         except Exception, e:
-            print "Mongodb Module : Error %s:" % e
+            print "Mongodb Module: Error %s:" % e
             raise
-        print "[Mongodb Module] : Connection OK"
+        print "[Mongodb Module]: Connection OK"
 
 
 
@@ -81,16 +81,16 @@ class Mongodb_generic(BaseModule):
     # Main function that is called in the CONFIGURATION phase
     def get_objects(self):
         if not self.db:
-            print "[Mongodb Module] : Problem during init phase"
+            print "[Mongodb Module]: Problem during init phase"
             return {}
 
         r = {}
-        
+
         tables = ['hosts', 'services', 'contacts', 'commands', 'timeperiods']
         for t in tables:
             r[t] = []
-            
-            cur = getattr(self.db, t).find({ '_state' : { '$ne' : 'disabled' } })
+
+            cur = getattr(self.db, t).find({ '_state': { '$ne': 'disabled' } })
             for h in cur:
                 print "DBG: mongodb: get an ", t, h
                 # We remove a mongodb specific property, the _id
@@ -111,11 +111,11 @@ class Mongodb_generic(BaseModule):
     # they are asking us
     def get_ui_user_preference(self, user, key):
         if not self.db:
-            print "[Mongodb] : error Problem during init phase"
+            print "[Mongodb]: error Problem during init phase"
             return None
 
         if not user:
-            print '[Mongodb] : error get_ui_user_preference::no user'
+            print '[Mongodb]: error get_ui_user_preference::no user'
             return None
         # user.get_name()
         e = self.db.ui_user_preferences.find_one({'_id': user.get_name()})
@@ -127,16 +127,16 @@ class Mongodb_generic(BaseModule):
             return None
 
         return e.get(key)
-    
-    
+
+
     # Same but for saving
     def set_ui_user_preference(self, user, key, value):
         if not self.db:
-            print "[Mongodb] : error Problem during init phase"
+            print "[Mongodb]: error Problem during init phase"
             return None
 
         if not user:
-            print '[Mongodb] : error get_ui_user_preference::no user'
+            print '[Mongodb]: error get_ui_user_preference::no user'
             return None
 
         # Ok, go for update
@@ -144,15 +144,15 @@ class Mongodb_generic(BaseModule):
         # check a collection exist for this user
         u = self.db.ui_user_preferences.find_one({'_id': user.get_name()})
         if not u:
-            # no collection for this user ? create a new one 
+            # no collection for this user? create a new one
             print "[Mongodb] No user entry for %s, I create a new one" % user.get_name()
-            self.db.ui_user_preferences.save({ '_id':user.get_name(), key : value})
+            self.db.ui_user_preferences.save({ '_id': user.get_name(), key: value})
         else:
             # found a collection for this user
             print "[Mongodb] user entry found for %s" % user.get_name()
 
-        print '[Mongodb] : saving user pref', "'$set': { %s : %s }" % (key, value)
-        r = self.db.ui_user_preferences.update({ '_id':user.get_name()}, { '$set': { key : value }})
+        print '[Mongodb]: saving user pref', "'$set': { %s: %s }" % (key, value)
+        r = self.db.ui_user_preferences.update({ '_id': user.get_name()}, { '$set': { key: value }})
         print "[Mongodb] Return from update", r
         # Mayeb there was no doc there, if so, create an empty one
         if not r:
@@ -160,10 +160,10 @@ class Mongodb_generic(BaseModule):
             u = self.db.ui_user_preferences.find_one({'_id': user.get_name()})
             if not u:
                 print "[Mongodb] No user entry for %s, I create a new one" % user.get_name()
-                self.db.ui_user_preferences.save({ '_id':user.get_name(), key : value})
+                self.db.ui_user_preferences.save({ '_id': user.get_name(), key: value})
             else: # ok, it was just the key that was missing, just update it and save it
                 u[key] = value
                 print '[Mongodb] Just saving the new key in the user pref'
                 self.db.ui_user_preferences.save(u)
-                
-            
+
+

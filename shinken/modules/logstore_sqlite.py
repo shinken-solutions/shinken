@@ -55,10 +55,10 @@ from shinken.basemodule import BaseModule
 from shinken.objects.module import Module
 
 properties = {
-    'daemons' : ['livestatus'],
-    'type' : 'logstore_sqlite',
-    'external' : False,
-    'phases' : ['running'],
+    'daemons': ['livestatus'],
+    'type': 'logstore_sqlite',
+    'external': False,
+    'phases': ['running'],
     }
 
 
@@ -91,7 +91,7 @@ class LiveStatusLogStoreSqlite(BaseModule):
         max_logs_age = getattr(modconf, 'max_logs_age', '365')
         maxmatch = re.match(r'^(\d+)([dwmy]*)$', max_logs_age)
         if maxmatch is None:
-            print 'Warning : wrong format for max_logs_age. Must be <number>[d|w|m|y] or <number> and not %s' % max_logs_age
+            print 'Warning: wrong format for max_logs_age. Must be <number>[d|w|m|y] or <number> and not %s' % max_logs_age
             return None
         else:
             if not maxmatch.group(2):
@@ -296,11 +296,11 @@ class LiveStatusLogStoreSqlite(BaseModule):
                 #tmpconn.prepare_log_db_table()
                 #tmpconn.close()
 
-		dbmodconf = Module({'module_name' : 'LogStore',
-		    'module_type' : 'logstore_sqlite',
-		    'use_aggressive_sql' : '0',
-		    'database_file' : archive,
-                    'max_logs_age' : '0',
+		dbmodconf = Module({'module_name': 'LogStore',
+		    'module_type': 'logstore_sqlite',
+		    'use_aggressive_sql': '0',
+		    'database_file': archive,
+                    'max_logs_age': '0',
 		})
                 tmpconn = LiveStatusLogStoreSqlite(dbmodconf)
                 tmpconn.open()
@@ -321,7 +321,7 @@ class LiveStatusLogStoreSqlite(BaseModule):
             try:
                 self.execute('VACUUM')
             except sqlite3.DatabaseError, exp:
-                print "WARNING : it seems your database is corrupted. Please recreate it"
+                print "WARNING: it seems your database is corrupted. Please recreate it"
             self.commit()
 
     def execute(self, cmd, values=None, row_factory=None):
@@ -599,7 +599,7 @@ class LiveStatusSqlStack(LiveStatusStack):
             # Put it on the stack
             and_clause = '(' + (' AND ').join([x()[0] for x in filters]) + ')'
             and_values = reduce(lambda x, y: x+y, [ x()[1] for x in filters ])
-            and_filter = lambda : [and_clause, and_values]
+            and_filter = lambda: [and_clause, and_values]
             #  print "and_elements", and_clause, and_values
             self.put_stack(and_filter)
 
@@ -611,13 +611,13 @@ class LiveStatusSqlStack(LiveStatusStack):
                 filters.append(self.get_stack())
             or_clause = '(' + (' OR ').join([ x()[0] for x in filters ]) + ')'
             or_values = reduce(lambda x, y: x+y, [ x()[1] for x in filters ])
-            or_filter = lambda : [or_clause, or_values]
+            or_filter = lambda: [or_clause, or_values]
             #  print "or_elements", or_clause
             self.put_stack(or_filter)
 
     def get_stack(self):
         """Return the top element from the stack or a filter which is always true"""
         if self.qsize() == 0:
-            return lambda : ["1 = ?", [1]]
+            return lambda: ["1 = ?", [1]]
         else:
             return self.get()

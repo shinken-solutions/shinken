@@ -42,7 +42,7 @@ class TestConfig(ShinkenTest):
         contact = self.sched.contacts.find_by_name("test_contact")
         print "The contact", contact.__dict__
 
-        print "All notification Way :"
+        print "All notification Way:"
         for nw in self.sched.notificationways:
             print "\t", nw.notificationway_name
 
@@ -52,19 +52,19 @@ class TestConfig(ShinkenTest):
         self.assert_(email_in_day in contact.notificationways)
         email_s_cmd = email_in_day.service_notification_commands.pop()
         email_h_cmd = email_in_day.host_notification_commands.pop()
-        
+
 
         sms_the_night = self.sched.notificationways.find_by_name('sms_the_night')
         self.assert_(sms_the_night in contact.notificationways)
         sms_s_cmd = sms_the_night.service_notification_commands.pop()
         sms_h_cmd = sms_the_night.host_notification_commands.pop()
-        
+
         # And check the criticity values
         self.assert_(email_in_day.min_business_impact == 0)
         self.assert_(sms_the_night.min_business_impact == 5)
-        
 
-        print "Contact notification way(s) :"
+
+        print "Contact notification way(s):"
         for nw in contact.notificationways:
             print "\t", nw.notificationway_name
             for c in nw.service_notification_commands:
@@ -109,7 +109,7 @@ class TestConfig(ShinkenTest):
 
         # We take the EMAIL test because SMS got the night ony, so we take a very low value for criticity here
         self.assert_(email_in_day.want_service_notification(now, 'WARNING', 'PROBLEM', -1) == False)
-        
+
 
 
 if __name__ == '__main__':

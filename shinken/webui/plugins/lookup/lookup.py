@@ -34,7 +34,7 @@ except ImportError:
     try:
         import simplejson as json
     except ImportError:
-        print "Error : you need the json or simplejson module"
+        print "Error: you need the json or simplejson module"
         raise
 
 
@@ -74,7 +74,7 @@ def lookup_post():
 
 
 
-pages = {lookup : { 'routes' : ['/lookup/:name']},
-         lookup_post : { 'routes' : ['/lookup'] , 'method' : 'POST'}
+pages = {lookup: { 'routes': ['/lookup/:name']},
+         lookup_post: { 'routes': ['/lookup'] , 'method': 'POST'}
          }
 

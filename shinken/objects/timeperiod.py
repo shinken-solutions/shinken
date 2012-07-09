@@ -194,14 +194,14 @@ class Timeperiod(Item):
 
     # will look for active/un-active change. And log it
     # [1327392000] TIMEPERIOD TRANSITION: <name>;<from>;<to>
-    # from is -1 on startup.  to is 1 if the timeperiod starts 
+    # from is -1 on startup.  to is 1 if the timeperiod starts
     # and 0 if it ends.
     def check_and_log_activation_change(self):
         now = int(time.time())
-        
+
         was_active = self.is_active
         self.is_active = self.is_time_valid(now)
-        
+
         # If we got a change, log it!
         if self.is_active != was_active:
             _from = 0
@@ -216,7 +216,7 @@ class Timeperiod(Item):
 
             # Now raise the log
             logger.log('TIMEPERIOD TRANSITION: %s;%d;%d' % (self.get_name(), _from, _to))
-        
+
 
     # clean the get_next_valid_time_from_t cache
     # The entries are a dict on t. t < now are useless
@@ -348,7 +348,7 @@ class Timeperiod(Item):
                 if m is not None:
                     # But maybe it's invalid for this dr, but valid for other ones.
                     #if not self.is_time_valid(m):
-                        #print "Final : Got a next invalid at", time.asctime(time.localtime(m))
+                        #print "Final: Got a next invalid at", time.asctime(time.localtime(m))
                     dr_mins.append(m)
                     #if not self.is_time_valid(m):
                     #    val_inval.append(m)
@@ -375,7 +375,7 @@ class Timeperiod(Item):
                 #    local_min = local_min_valid
                 #else:
                 #    local_min = min(dr_mins)
-                #print "UPDATE After dr : found invalid local min:", time.asctime(time.localtime(local_min)), "is valid", self.is_time_valid(local_min)
+                #print "UPDATE After dr: found invalid local min:", time.asctime(time.localtime(local_min)), "is valid", self.is_time_valid(local_min)
 
             #print self.get_name(), 'Invalid: local min', local_min #time.asctime(time.localtime(local_min))
             # We do not loop unless the local_min is not valid
@@ -686,7 +686,7 @@ class Timeperiod(Item):
     def get_initial_status_brok(self):
         cls = self.__class__
         my_type = cls.my_type
-        data = {'id' : self.id}
+        data = {'id': self.id}
 
         self.fill_data_brok_from(data, 'full_status')
         b = Brok('initial_'+my_type+'_status', data)

@@ -30,7 +30,7 @@ class TestFlapping(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_flapping.cfg')
 
-    
+
     def test_flapping(self):
         #
         # Config is not correct because of a wrong relative path
@@ -112,14 +112,14 @@ class TestFlapping(ShinkenTest):
         # We run a globa lflap disable, so we should stop flapping now
         cmd = "[%lu] DISABLE_FLAP_DETECTION" % int(time.time())
         self.sched.run_external_command(cmd)
-        
+
         self.assert_(not svc.is_flapping)
 
 
 
-        
+
         ############# NOW a local command for this service
-        # First reenable flap :p
+        # First reenable flap:p
         cmd = "[%lu] ENABLE_FLAP_DETECTION" % int(time.time())
         self.sched.run_external_command(cmd)
 
@@ -148,10 +148,10 @@ class TestFlapping(ShinkenTest):
         # We run a globa lflap disable, so we should stop flapping now
         cmd = "[%lu] DISABLE_SVC_FLAP_DETECTION;test_host_0;test_ok_0" % int(time.time())
         self.sched.run_external_command(cmd)
-        
+
         self.assert_(not svc.is_flapping)
-        
-        
+
+
 
 
 if __name__ == '__main__':

@@ -44,9 +44,9 @@ class TestConfig(ShinkenTest):
         self.assert_(mod.path == 'tmp/nagios.log')
         self.assert_(mod.module_name == 'Simple-log')
 
-        try :
+        try:
             os.unlink(mod.path)
-        except :
+        except:
             pass
 
         sl = get_instance(mod)
@@ -55,10 +55,10 @@ class TestConfig(ShinkenTest):
         sl.properties = {}
         sl.properties['to_queue'] = None
         sl.init()
-        b = Brok('log', {'log' : "look at my ass.\n"})
+        b = Brok('log', {'log': "look at my ass.\n"})
         b.prepare()
         sl.manage_brok(b)
-        b = Brok('log', {'log' : "look at my ass again.\n"})
+        b = Brok('log', {'log': "look at my ass again.\n"})
         b.prepare()
         sl.manage_brok(b)
         sl.file.close()

@@ -77,7 +77,7 @@ They connect here and see if they are still OK with our running_id, if not, they
 
 class IBroks(Interface):
     """ Interface for Brokers:
-They connect here and get all broks (data for brokers). datas must be ORDERED! (initial status BEFORE uodate...) """ 
+They connect here and get all broks (data for brokers). datas must be ORDERED! (initial status BEFORE uodate...) """
 
     # poller or reactionner ask us actions
     def get_broks(self):
@@ -114,14 +114,14 @@ HE got user entry, so we must listen him carefully and give information he want,
     # Call by arbiter if it thinks we are running but we must do not (like
     # if I was a spare that take a conf but the master returns, I must die
     # and wait a new conf)
-    # Us : No please...
-    # Arbiter : I don't care, hasta la vista baby!
-    # Us : ... <- Nothing! We are die! you don't follow
+    # Us: No please...
+    # Arbiter: I don't care, hasta la vista baby!
+    # Us: ... <- Nothing! We are die! you don't follow
     # anything or what??
     def wait_new_conf(self):
         logger.debug("Arbiter want me to wait a new conf")
         self.app.sched.die()
-        super(IForArbiter, self).wait_new_conf()        
+        super(IForArbiter, self).wait_new_conf()
 
 
 
@@ -134,19 +134,19 @@ class Shinken(BaseSatellite):
         'port':      IntegerProp(default='7768'),
         'local_log': PathProp(default='schedulerd.log'),
     })
-    
-    
+
+
     # Create the shinken class:
     # Create a Pyro server (port = arvg 1)
     # then create the interface for arbiter
     # Then, it wait for a first configuration
     def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
-        
+
         BaseSatellite.__init__(self, 'scheduler', config_file, is_daemon, do_replace, debug, debug_file)
 
         self.interface = IForArbiter(self)
         self.sched = Scheduler(self)
-        
+
         self.ichecks = None
         self.ibroks = None
         self.must_run = True
@@ -244,7 +244,7 @@ class Shinken(BaseSatellite):
             Daemon.manage_signal(self, sig, frame)
 
 
-    def do_loop_turn(self):        
+    def do_loop_turn(self):
         # Ok, now the conf
         self.wait_for_initial_conf()
         if not self.new_conf:
@@ -264,7 +264,7 @@ class Shinken(BaseSatellite):
         instance_name = pk['instance_name']
         push_flavor = pk['push_flavor']
         skip_initial_broks = pk['skip_initial_broks']
-        
+
         t0 = time.time()
         conf = cPickle.loads(conf_raw)
         logger.debug("Conf received at %d. Unserialized in %d secs" % (t0, time.time() - t0))
@@ -315,10 +315,10 @@ class Shinken(BaseSatellite):
         if len(self.modules) != 0:
             logger.debug("I've got %s modules" % str(self.modules))
 
-        # TODO: if scheduler had previous modules instanciated it must clean them !
+        # TODO: if scheduler had previous modules instanciated it must clean them!
         self.modules_manager.set_modules(self.modules)
         self.do_load_modules()
-        
+
         # give it an interface
         # But first remove previous interface if exists
         if self.ichecks is not None:
@@ -340,7 +340,7 @@ class Shinken(BaseSatellite):
 
         logger.debug("Loading configuration..")
         self.conf.explode_global_conf()
-        
+
         # we give sched it's conf
         self.sched.reset()
         self.sched.load_conf(self.conf)
@@ -359,7 +359,7 @@ class Shinken(BaseSatellite):
         #self.conf.quick_debug()
 
         # Now create the external commander
-        # it's a applyer : it role is not to dispatch commands,
+        # it's a applyer: it role is not to dispatch commands,
         # but to apply them
         e = ExternalCommandManager(self.conf, 'applyer')
 
@@ -372,14 +372,14 @@ class Shinken(BaseSatellite):
 
         # We clear our schedulers managed (it's us :) )
         # and set ourself in it
-        self.schedulers = {self.conf.instance_id : self.sched}
+        self.schedulers = {self.conf.instance_id: self.sched}
 
 
     # Give the arbiter the data about what I manage
     # for me it's just my instance_id and my push flavor
     def what_i_managed(self):
         if hasattr(self, 'conf'):
-            return {self.conf.instance_id : self.conf.push_flavor} 
+            return {self.conf.instance_id: self.conf.push_flavor}
         else:
             return {}
 
@@ -397,5 +397,5 @@ class Shinken(BaseSatellite):
             logger.critical("You can log a bug ticket at https://github.com/naparuba/shinken/issues/new to get help")
             logger.critical("Back trace of it: %s" % (traceback.format_exc()))
             raise
-            
-            
+
+

@@ -1,4 +1,4 @@
-# Enable retention on broker scheduler and arbiter 
+# Enable retention on broker scheduler and arbiter
 setconfigfile /opt/shinken/etc/shinken-specific.cfg
 getdirective modules from scheduler where scheduler_name=scheduler-1
 setparam modules=LAST,PickleRetention from scheduler where scheduler_name=scheduler-1

@@ -31,7 +31,7 @@ class TestOrphaned(ShinkenTest):
     #def setUp(self):
     #    self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
 
-    
+
     def test_orphaned(self):
         #
         # Config is not correct because of a wrong relative path
@@ -48,11 +48,11 @@ class TestOrphaned(ShinkenTest):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
         svc.act_depend_of = [] # no hostchecks on critical checkresults
-        
+
         #self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 2, 'BAD | value1=0 value2=0']])
         #self.assert_(host.state == 'UP')
         #self.assert_(host.state_type == 'HARD')
-        
+
         svc.schedule()
         print svc.actions
         self.sched.get_new_actions()
@@ -61,9 +61,9 @@ class TestOrphaned(ShinkenTest):
             # simulate a orphaned situation
             c.t_to_go = now - 301
             c.status = 'inpoller'
-            
+
         self.sched.check_orphaned()
-        
+
         # Should be available to poller now :)
         for c in self.sched.checks.values():
             self.assert_(c.status == 'scheduled')

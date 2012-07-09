@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -36,8 +36,8 @@ from shinken.log import logger
 
 class ModulesManager(object):
     """This class is use to manage modules and call callback"""
-    
-    
+
+
     def __init__(self, modules_type, modules_path, modules):
         self.modules_path = modules_path
         self.modules_type = modules_type
@@ -76,7 +76,7 @@ class ModulesManager(object):
     def load(self):
         now = int(time.time())
         # We get all modules file with .py
-        modules_files = [ fname[:-3] for fname in os.listdir(self.modules_path) 
+        modules_files = [ fname[:-3] for fname in os.listdir(self.modules_path)
                          if fname.endswith(".py") ]
 
         # And directories
@@ -102,7 +102,7 @@ class ModulesManager(object):
                 if self.modules_type in m.properties['daemons']:
                     self.imported_modules.append(m)
             except Exception , exp:
-                logger.warning("Importing module : %s" % exp)
+                logger.warning("Importing module: %s" % exp)
 
         del self.modules_assoc[:]
         for mod_conf in self.modules:
@@ -118,12 +118,12 @@ class ModulesManager(object):
                 logger.warning("The module type %s for %s was not found in modules!" % (module_type, mod_conf.get_name()))
 
 
-    # Try to "init" the given module instance. 
+    # Try to "init" the given module instance.
     # If late_start, don't look for last_init_try
-    # Returns: True on successfull init. False if instance init method raised any Exception.                
+    # Returns: True on successfull init. False if instance init method raised any Exception.
     def try_instance_init(self, inst, late_start=False):
         try:
-            logger.info("Trying to init module : %s" % inst.get_name())
+            logger.info("Trying to init module: %s" % inst.get_name())
             inst.init_try += 1
             # Maybe it's a retry
             if not late_start and inst.init_try > 1:
@@ -141,7 +141,7 @@ class ModulesManager(object):
             logger.error("The instance %s raised an exception %s, I remove it!" % (inst.get_name(), str(e)))
             output = cStringIO.StringIO()
             traceback.print_exc(file=output)
-            logger.error("Back trace of this remove : %s" % (output.getvalue()))
+            logger.error("Back trace of this remove: %s" % (output.getvalue()))
             output.close()
             return False
         return True
@@ -152,7 +152,7 @@ class ModulesManager(object):
             insts = self.instances[:] # have to make a copy of the list
         for i in insts:
             self.remove_instance(i)
-    
+
 
     # Put an instance to the restart queue
     def set_to_restart(self, inst):
@@ -162,7 +162,7 @@ class ModulesManager(object):
 
     # actually only arbiter call this method with start_external=False..
     # Create, init and then returns the list of module instances that the caller needs.
-    # If an instance can't be created or init'ed then only log is done. 
+    # If an instance can't be created or init'ed then only log is done.
     # That instance is skipped. The previous modules instance(s), if any, are all cleaned.
     def get_instances(self):
         self.clear_instances()
@@ -171,7 +171,7 @@ class ModulesManager(object):
                 mod_conf.properties = module.properties.copy()
                 inst = module.get_instance(mod_conf)
                 if inst is None: # None = Bad thing happened :)
-                    logger.info("get_instance for module %s returned None !" % (mod_conf.get_name()))
+                    logger.info("get_instance for module %s returned None!" % (mod_conf.get_name()))
                     continue
                 assert(isinstance(inst, BaseModule))
                 self.instances.append(inst)
@@ -182,7 +182,7 @@ class ModulesManager(object):
                 logger.error("The module %s raised an exception %s, I remove it!" % (mod_conf.get_name(), s))
                 output = cStringIO.StringIO()
                 traceback.print_exc(file=output)
-                logger.error("Back trace of this remove : %s" % (output.getvalue()))
+                logger.error("Back trace of this remove: %s" % (output.getvalue()))
                 output.close()
 
         for inst in self.instances:
@@ -203,15 +203,15 @@ class ModulesManager(object):
                 logger.warning("The module '%s' failed to init, I will try to restart it later" % inst.get_name())
                 self.to_restart.append(inst)
                 continue
-            
+
             # ok, init succeed
             logger.info("Starting external module %s" % inst.get_name())
             inst.start()
 
 
 
-    # Request to cleanly remove the given instance. 
-    # If instance is external also shutdown it cleanly 
+    # Request to cleanly remove the given instance.
+    # If instance is external also shutdown it cleanly
     def remove_instance(self, inst):
 
         # External instances need to be close before (process + queues)
@@ -219,7 +219,7 @@ class ModulesManager(object):
             logger.debug("Ask stop process for %s" % inst.get_name())
             inst.stop_process()
             logger.debug("Stop process done")
-        
+
         inst.clear_queues(self.manager)
 
         # Then do not listen anymore about it
@@ -260,7 +260,7 @@ class ModulesManager(object):
 
 
 
-                
+
     def try_to_restart_deads(self):
         to_restart = self.to_restart[:]
         del self.to_restart[:]
@@ -274,7 +274,7 @@ class ModulesManager(object):
                 # Ok it's good now :)
             else:
                 self.to_restart.append(inst)
-                
+
 
     # Do not give to others inst that got problems
     def get_internal_instances(self, phase=None):
@@ -298,6 +298,6 @@ class ModulesManager(object):
         for inst in self.get_internal_instances():
             if hasattr(inst, 'quit') and callable(inst.quit):
                 inst.quit()
-        
+
         self.clear_instances([ inst for inst in self.instances if inst.is_external])
 

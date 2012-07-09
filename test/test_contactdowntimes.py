@@ -41,14 +41,14 @@ class TestContactDowntime(ShinkenTest):
         test_contact = self.sched.contacts.find_by_name('test_contact')
         cmd = "[%lu] SCHEDULE_CONTACT_DOWNTIME;test_contact;%d;%d;lausser;blablub" % (now, now, now + duration)
         self.sched.run_external_command(cmd)
-        
+
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
         svc.act_depend_of = [] # no hostchecks on critical checkresults
 
         # Change the notif interval, so we can notify as soon as we want
         svc.notification_interval = 0.001
-        
+
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
         host.act_depend_of = [] # ignore the router
@@ -56,47 +56,47 @@ class TestContactDowntime(ShinkenTest):
         #time.sleep(20)
         # We loop, the downtime wil be check and activate
         self.scheduler_loop(1, [[svc, 0, 'OK'], [host, 0, 'UP']])
-        
+
         self.assert_(self.any_log_match('CONTACT DOWNTIME ALERT.*;STARTED'))
         self.show_and_clear_logs()
-        
+
         print "downtime was scheduled. check its activity and the comment"
         self.assert_(len(self.sched.contact_downtimes) == 1)
         self.assert_(len(test_contact.downtimes) == 1)
         self.assert_(test_contact.downtimes[0] in self.sched.contact_downtimes.values())
-        
+
         self.assert_(test_contact.downtimes[0].is_in_effect)
         self.assert_(not test_contact.downtimes[0].can_be_deleted)
-        
-        # Ok, we define the downtime like we should, now look at if it does the job : do not
+
+        # Ok, we define the downtime like we should, now look at if it does the job: do not
         # raise notif during a downtime for this contact
         self.scheduler_loop(3, [[svc, 2, 'CRITICAL']])
 
         # We should NOT see any service notification
-        self.assert_(not self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL'))        
+        self.assert_(not self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL'))
         self.show_and_clear_logs()
 
         # Now we short the downtime a lot so it will be stop at now + 1 sec.
         test_contact.downtimes[0].end_time = time.time() + 1
 
         time.sleep(2)
-        
+
         # We invalidate it with a scheduler loop
         self.scheduler_loop(1, [])
 
         # So we should be out now, with a log
         self.assert_(self.any_log_match('CONTACT DOWNTIME ALERT.*;STOPPED'))
         self.show_and_clear_logs()
-        
+
         print "Downtime was ended. Check it is really stopped"
         self.assert_(len(self.sched.contact_downtimes) == 0)
         self.assert_(len(test_contact.downtimes) == 0)
 
         # Now we want this contact to be really notify!
-        # Ok, we define the downtime like we should, now look at if it does the job : do not
+        # Ok, we define the downtime like we should, now look at if it does the job: do not
         # raise notif during a downtime for this contact
         self.scheduler_loop(3, [[svc, 2, 'CRITICAL']])
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL'))        
+        self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL'))
         self.show_and_clear_logs()
 
 
@@ -116,14 +116,14 @@ class TestContactDowntime(ShinkenTest):
         test_contact = self.sched.contacts.find_by_name('test_contact')
         cmd = "[%lu] SCHEDULE_CONTACT_DOWNTIME;test_contact;%d;%d;lausser;blablub" % (now, now, now + duration)
         self.sched.run_external_command(cmd)
-        
+
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
         svc.act_depend_of = [] # no hostchecks on critical checkresults
 
         # Change the notif interval, so we can notify as soon as we want
         svc.notification_interval = 0.001
-        
+
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
         host.act_depend_of = [] # ignore the router
@@ -131,25 +131,25 @@ class TestContactDowntime(ShinkenTest):
         #time.sleep(20)
         # We loop, the downtime wil be check and activate
         self.scheduler_loop(1, [[svc, 0, 'OK'], [host, 0, 'UP']])
-        
+
         self.assert_(self.any_log_match('CONTACT DOWNTIME ALERT.*;STARTED'))
         self.show_and_clear_logs()
-        
+
         print "downtime was scheduled. check its activity and the comment"
         self.assert_(len(self.sched.contact_downtimes) == 1)
         self.assert_(len(test_contact.downtimes) == 1)
         self.assert_(test_contact.downtimes[0] in self.sched.contact_downtimes.values())
-        
+
         self.assert_(test_contact.downtimes[0].is_in_effect)
         self.assert_(not test_contact.downtimes[0].can_be_deleted)
 
         time.sleep(1)
-        # Ok, we define the downtime like we should, now look at if it does the job : do not
+        # Ok, we define the downtime like we should, now look at if it does the job: do not
         # raise notif during a downtime for this contact
         self.scheduler_loop(3, [[svc, 2, 'CRITICAL']])
 
         # We should NOT see any service notification
-        self.assert_(not self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL'))        
+        self.assert_(not self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL'))
         self.show_and_clear_logs()
 
         downtime_id = test_contact.downtimes[0].id
@@ -159,27 +159,27 @@ class TestContactDowntime(ShinkenTest):
 
         # We check if the downtime is tag as to remove
         self.assert_(test_contact.downtimes[0].can_be_deleted)
-        
+
         # We really delete it
         self.scheduler_loop(1, [])
 
         # So we should be out now, with a log
         self.assert_(self.any_log_match('CONTACT DOWNTIME ALERT.*;CANCELLED'))
         self.show_and_clear_logs()
-        
+
         print "Downtime was cancelled"
         self.assert_(len(self.sched.contact_downtimes) == 0)
         self.assert_(len(test_contact.downtimes) == 0)
 
         time.sleep(1)
         # Now we want this contact to be really notify!
-        # Ok, we define the downtime like we should, now look at if it does the job : do not
+        # Ok, we define the downtime like we should, now look at if it does the job: do not
         # raise notif during a downtime for this contact
         self.scheduler_loop(3, [[svc, 2, 'CRITICAL']])
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL'))        
+        self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL'))
         self.show_and_clear_logs()
 
-        
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -30,7 +30,7 @@ class TestNoNotificationPeriod(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_no_notification_period.cfg')
 
-    
+
     # no notification period should do a 24x7 like period
     # so a None, but always valid in create_notification
     def test_no_notification_period(self):
@@ -48,7 +48,7 @@ class TestNoNotificationPeriod(ShinkenTest):
         self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 0, 'OK | value1=0 value2=0']])
         self.assert_(host.state == 'UP')
         self.assert_(host.state_type == 'HARD')
-        
+
         # Now get bad :)
         self.scheduler_loop(2, [[svc, 2, 'BAD | value1=0 value2=0']])
         self.assert_(svc.notification_period is None)
@@ -58,7 +58,7 @@ class TestNoNotificationPeriod(ShinkenTest):
         self.scheduler_loop(5, [[host, 2, 'BAD | value1=0 value2=0']])
         self.assert_(host.notification_period is None)
         self.assert_(self.any_log_match('HOST NOTIFICATION.*;DOWN'))
-        
+
 
 
 if __name__ == '__main__':

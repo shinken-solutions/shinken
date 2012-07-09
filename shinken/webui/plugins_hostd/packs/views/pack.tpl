@@ -18,7 +18,7 @@
     <b>Description</b>: {{pack.get('description')}}
   </span>
   <span class='span5'>
-    <b>Documentation</b>: 
+    <b>Documentation</b>:
     %doc = pack.get('doc_link')
     %if not doc:
        %doc = 'http://www.shinken-monitoring.org/wiki/packs/'+pname
@@ -36,12 +36,12 @@
 
 %if pstate == 'obsolete':
     %by = pack.get('obsoleted_by')
-    <span class='alert alert-warning span10'> Warning : this pack is obsoleted by a newer version. <a href='/pack/{{by}}'>Please look the new one here.</a></span>
+    <span class='alert alert-warning span10'> Warning: this pack is obsoleted by a newer version. <a href='/pack/{{by}}'>Please look the new one here.</a></span>
 %end
 
 %if pstate == 'refused':
     %reason = pack.get('moderation_comment', '')
-    <span class='alert alert-error span10'> Error : this pack have been refused by a moderator. Reason : {{reason}}</span>
+    <span class='alert alert-error span10'> Error: this pack have been refused by a moderator. Reason: {{reason}}</span>
 %end
 
 <span class='span10 well'>

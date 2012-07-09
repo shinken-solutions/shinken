@@ -65,10 +65,10 @@ class Serviceescalations(Items):
         for es in self:
             properties = es.__class__.properties
 
-            creation_dict = {'escalation_name' : 'Generated-Serviceescalation-%d' % es.id}
+            creation_dict = {'escalation_name': 'Generated-Serviceescalation-%d' % es.id}
             for prop in properties:
                 if hasattr(es, prop):
                     creation_dict[prop] = getattr(es, prop)
-            #print "Creation an escalation with :", creation_dict
+            #print "Creation an escalation with:", creation_dict
             s = Escalation(creation_dict)
             escalations.add_escalation(s)

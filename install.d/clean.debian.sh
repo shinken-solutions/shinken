@@ -1,5 +1,5 @@
-#!/bin/bash 
-#set -x 
+#!/bin/bash
+#set -x
 # Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
@@ -22,8 +22,8 @@
 
 if [ -f /tmp/shinken.install.log ]
 then
-    rm -f /tmp/shinken.install.log    
-fi 
+    rm -f /tmp/shinken.install.log
+fi
 
 #####################
 ### ENVIRONNEMENT ###
@@ -34,8 +34,8 @@ src=$(readlink -f "$myscripts/../../..")
 . $myscripts/shinken.conf
 
 cecho "###########################################################" red
-cecho "# CAUTION THIS SCRIPT IS USED ONLY IN DEVELOPMENT PROCESS " red
-cecho "# IT COULD BREAK YOUR SYSTEM ! PRESS CTRL+C TO ABORT      " red
+cecho "# CAUTION THIS SCRIPT IS USED ONLY IN DEVELOPMENT PROCESS  " red
+cecho "# IT COULD BREAK YOUR SYSTEM! PRESS CTRL+C TO ABORT        " red
 cecho "###########################################################" red
 read taste
 path="/usr/local/lib/$(pythonver)/dist-packages"
@@ -44,7 +44,7 @@ pth="eeasy-install.pth"
 for p in $PYLIBSDEB
 do
     module=$(echo $p | awk -F\: '{print $1}')
-    cecho " > going to remove python module : $module" yellow
+    cecho " > going to remove python module: $module" yellow
     echo $path/$module
     if [ ! -z "$(ls -1 $path/$module*)" ]
     then
@@ -55,7 +55,7 @@ do
             rm -Rf $res
         fi
     fi
-    
+
 done
 APTLIST="$APTPKGS $VSPHERESDKAPTPKGS $NAGPLUGAPTPK $CHECKORACLEHEALTHAPTPKG $CHECKMONGOAPTPKG $CHECKEMCAPTPKG $CHECKNWCAPTPKG $PNPAPTPKG $MKAPTPKG $WMICAPTPKG $CHECKHPASMAPTPKGS"
 for l in $APTLIST
@@ -63,7 +63,7 @@ do
     for p in $l
     do
         cecho " > remove $p" yellow
-        apt-get purge $p 
+        apt-get purge $p
     done
 done
 apt-get autoremove

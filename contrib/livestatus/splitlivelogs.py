@@ -71,6 +71,6 @@ if __name__ == '__main__':
         dbh.close()
     else:
         print "database %s does not exist" % opts.database
-    
 
-# For perf tuning :
+
+# For perf tuning:

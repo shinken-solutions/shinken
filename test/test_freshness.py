@@ -48,7 +48,7 @@ class TestFreshness(ShinkenTest):
         # We do not want to be just a string but a real command
         print "Additonal freshness latency", svc.__class__.additional_freshness_latency
         self.scheduler_loop(1, [[svc, 0, 'OK | bibi=99%']])
-        print "Addi :", svc.last_state_update, svc.freshness_threshold , svc.check_freshness
+        print "Addi:", svc.last_state_update, svc.freshness_threshold , svc.check_freshness
         # By default check fresh ness is set at false, so no new checks
         self.assert_(len(svc.actions) == 0)
         svc.do_check_freshness()
@@ -75,7 +75,7 @@ class TestFreshness(ShinkenTest):
         svc.do_check_freshness()
         self.assert_(len(svc.actions) == 1)
         # And we check for the message in the log too
-        self.assert_(self.any_log_match('Warning : The results of service.*'))
+        self.assert_(self.any_log_match('Warning: The results of service.*'))
 
 
 if __name__ == '__main__':

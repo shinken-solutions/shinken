@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -55,7 +55,7 @@ class SchedulerLink(SatelliteLink):
         'conf':      StringProp(default=None),
         'need_conf': StringProp(default=True),
         'external_commands': StringProp(default=[]),
-        'push_flavor' : IntegerProp(default=0),
+        'push_flavor': IntegerProp(default=0),
     })
 
 

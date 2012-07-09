@@ -1,4 +1,4 @@
-/var/log/shinken/archives/*.log { 
+/var/log/shinken/archives/*.log {
     compress
     daily
     missingok

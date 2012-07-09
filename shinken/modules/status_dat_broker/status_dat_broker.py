@@ -61,12 +61,12 @@ class Status_dat_broker(BaseModule):
         self.opath = opath
         self.update_interval = update_interval
 
-        # Warning :
-        # self.properties will be add by the modulesmanager !!
+        # Warning:
+        # self.properties will be add by the modulesmanager!!
 
 
     # Called by Broker so we can do init stuff
-    # TODO : add conf param to get pass with init
+    # TODO: add conf param to get pass with init
     # Conf from arbiter!
     def init(self):
         print "I am init"
@@ -103,7 +103,7 @@ class Status_dat_broker(BaseModule):
         data = b.data
         instance_id = data['instance_id']
 
-        #print 'DBG: Cleann all my instance with brok :', b.id
+        #print 'DBG: Cleann all my instance with brok:', b.id
 
         # We clean all previous hosts and services from this instance_id
         h_to_del = []
@@ -131,7 +131,7 @@ class Status_dat_broker(BaseModule):
         data = b.data
         h_id = data['id']
 
-        #print 'DBG: Creacting host with with brok :', b.id
+        #print 'DBG: Creacting host with with brok:', b.id
         #print "Creating host:", h_id, b.__dict__
 
 
@@ -345,7 +345,7 @@ class Status_dat_broker(BaseModule):
                 if find_c is not None:
                     r.append(find_c)
                 else:
-                    print "Error : search for a contact %s that do not exists!" % c.get_name()
+                    print "Error: search for a contact %s that do not exists!" % c.get_name()
         return r
 
 
@@ -356,7 +356,7 @@ class Status_dat_broker(BaseModule):
             if find_t is not None:
                 return find_t
             else:
-                print "Error : search for a timeperiod %s that do not exists!" % t.get_name()
+                print "Error: search for a timeperiod %s that do not exists!" % t.get_name()
         else:
             return None
 
@@ -436,6 +436,6 @@ class Status_dat_broker(BaseModule):
                 r = self.status.create_or_update()
                 # if we get an error (an exception in fact) we bail out
                 if r is not None:
-                    print "[status_dat] Error :", r
+                    print "[status_dat] Error:", r
                     break
                 last_generation = time.time()

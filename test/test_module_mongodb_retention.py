@@ -30,7 +30,7 @@ from shinken_test import unittest, ShinkenTest
 from shinken.log import logger
 from shinken.objects.module import Module
 from shinken.modules import mongodb_retention
-from shinken.modules.mongodb_retention import get_instance 
+from shinken.modules.mongodb_retention import get_instance
 
 
 modconf = Module()
@@ -59,20 +59,20 @@ class TestMongodb(ShinkenTest):
 
         # update the hosts and service in the scheduler in the retention-file
         sl.hook_save_retention(self.sched)
-        
+
         # Now we change thing
         svc = self.sched.hosts.find_by_name("test_host_0")
         self.assert_(svc.state == 'PENDING')
         print "State", svc.state
         svc.state = 'UP' # was PENDING in the save time
-        
+
         r = sl.hook_load_retention(self.sched)
         self.assert_(r == True)
-        
+
         # search if the host is not changed by the loading thing
         svc2 = self.sched.hosts.find_by_name("test_host_0")
         self.assert_(svc == svc2)
-        
+
         self.assert_(svc.state == 'PENDING')
 
         # Now make real loops with notifications

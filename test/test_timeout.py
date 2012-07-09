@@ -38,7 +38,7 @@ class TestTimeout(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_check_timeout.cfg')
 
-    
+
     def test_notification_timeout(self):
         if os.name == 'nt':
             return
@@ -105,7 +105,7 @@ class TestTimeout(ShinkenTest):
         self.sched.actions[n.id] = n
         self.sched.put_results(o)
         self.show_logs()
-        self.assert_(self.any_log_match("Warning : Contact mr.schinken service notification command 'libexec/sleep_command.sh 7 ' timed out after 2 seconds"))
+        self.assert_(self.any_log_match("Warning: Contact mr.schinken service notification command 'libexec/sleep_command.sh 7 ' timed out after 2 seconds"))
 
 
 if __name__ == '__main__':

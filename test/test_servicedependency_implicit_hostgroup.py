@@ -29,7 +29,7 @@ class TestServiceDepAndGroups(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_servicedependency_implicit_hostgroup.cfg')
 
-    
+
     def test_implicithostgroups(self):
         #
         # Config is not correct because of a wrong relative path
@@ -40,7 +40,7 @@ class TestServiceDepAndGroups(ShinkenTest):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc_postfix = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "POSTFIX")
         self.assert_(svc_postfix is not None)
-        
+
         svc_snmp = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "SNMP")
         self.assert_(svc_snmp is not None)
 
@@ -77,7 +77,7 @@ class TestServiceDepAndGroups(ShinkenTest):
         now = time.time()
         svc_postfix = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "POSTFIX_BYSSH")
         self.assert_(svc_postfix is not None)
-        
+
         svc_ssh = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "SSH")
         self.assert_(svc_ssh is not None)
 

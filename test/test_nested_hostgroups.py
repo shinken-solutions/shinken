@@ -30,7 +30,7 @@ class TestNestedHostgroups(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_nested_hostgroups.cfg')
 
-    
+
     # We got the service "NestedService" apply in High level
     # group. And this one got a sub group, low one. each got ONE
     # Host, so we must have this servie on both.
@@ -57,14 +57,14 @@ class TestNestedHostgroups(ShinkenTest):
         self.assert_(host2 in hg_high.members)
         svc3 = self.sched.services.find_srv_by_name_and_hostname("test_host_2", "testHostToGroup")
         self.assert_(svc3 is not None)
-        
+
         # And same with an host in the low_group, should have it too
         host3 = self.sched.hosts.find_by_name("test_host_3")
         self.assert_(host3 in hg_high.members)
         svc4 = self.sched.services.find_srv_by_name_and_hostname("test_host_3", "testHostToGroup")
         self.assert_(svc4 is not None)
 
-        
+
 
 if __name__ == '__main__':
     unittest.main()

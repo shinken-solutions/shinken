@@ -29,7 +29,7 @@ class TestConfig(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_service_template_inheritance.cfg')
 
-    
+
     def test_action_url(self):
         # base-service-prod,no-graph
         svc1 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
@@ -43,7 +43,7 @@ class TestConfig(ShinkenTest):
         print svc1.tags
         self.assert_('no-graph' in svc1.tags)
         self.assert_('base-service-prod' in svc1.tags)
-        
+
 
 if __name__ == '__main__':
     unittest.main()

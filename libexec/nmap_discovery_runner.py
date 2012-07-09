@@ -39,7 +39,7 @@ parser = optparse.OptionParser(
     "%prog [options] -t nmap scanning targets",
     version="%prog " + VERSION)
 
-parser.add_option('-t', '--targets', dest="targets", 
+parser.add_option('-t', '--targets', dest="targets",
                   help="NMap scanning targets.")
 parser.add_option('-v', '--verbose', dest="verbose", action='store_true',
                   help="Verbose output.")
@@ -47,7 +47,7 @@ parser.add_option('--min-rate', dest="min_rate",
                   help="Min rate option for nmap (number of parallel packets to launch. By default 1000)")
 parser.add_option('--max-retries', dest="max_retries",
                   help="Max retries option for nmap (number of packet send retry). By default 0 - no retry -)")
-parser.add_option('-s', '--simulate', dest="simulate", 
+parser.add_option('-s', '--simulate', dest="simulate",
                   help="Simulate a launch by reading an nmap XML output instead of launching a new one.")
 
 
@@ -140,7 +140,7 @@ class DetectedHost:
 
     # Says if we are a virtual machine or not
     def is_vmware_vm(self):
-        # special case : the esx host itself
+        # special case: the esx host itself
         if self.is_vmware_esx():
             return False
         # Else, look at the mac vendor
@@ -199,7 +199,7 @@ class DetectedHost:
         # Ok, unknown os... not good
         if self.os == ('', '', '', ''):
             return
-        
+
         self.os_name = self.os[0].lower()
         self.os_version = self.os[1].lower()
         self.os_type = self.os[2].lower()
@@ -225,7 +225,7 @@ class DetectedHost:
         if ip != '':
             r.append(ip)
         return r
-        
+
 
     # for system output
     def get_discovery_system(self):
@@ -234,7 +234,7 @@ class DetectedHost:
         r += '%s::ostype=%s' % (self.get_name(), self.os_type)+'\n'
         r += '%s::osvendor=%s' % (self.get_name(), self.os_vendor)
         return r
-        
+
     def get_discovery_macvendor(self):
         return '%s::macvendor=%s' % (self.get_name(), self.mac_vendor)
 
@@ -272,14 +272,14 @@ if not simulate:
             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             close_fds=True, shell=True)
     except OSError , exp:
-        print "Debug : Error in launching command:", cmd, exp
+        print "Debug: Error in launching command:", cmd, exp
         sys.exit(2)
-    
+
     print "Try to communicate"
     (stdoutdata, stderrdata) = nmap_process.communicate()
 
     if nmap_process.returncode != 0:
-        print "Error : the nmap return an error : '%s'" % stderrdata
+        print "Error: the nmap return an error: '%s'" % stderrdata
         sys.exit(2)
 
     print "Got it", (stdoutdata, stderrdata)
@@ -292,11 +292,11 @@ tree = ElementTree()
 try:
     tree.parse(xml_input)
 except IOError, exp:
-    print "Error opening file '%s' : %s" % (xml_input, exp)
+    print "Error opening file '%s': %s" % (xml_input, exp)
     sys.exit(2)
 
 hosts = tree.findall('host')
-debug("Number of hosts : %d" % len(hosts))
+debug("Number of hosts: %d" % len(hosts))
 
 
 all_hosts = []
@@ -305,7 +305,7 @@ for h in hosts:
     # Bypass non up hosts
     if not is_up(h):
         continue
-    
+
     dh = DetectedHost()
 
     # Now we get the ipaddr and the mac vendor
@@ -387,14 +387,14 @@ for h in hosts:
     #print dh.__dict__
     all_hosts.append(dh)
     #print "\n\n"
-    
+
 
 
 for h in all_hosts:
     name = h.get_name()
     if not name:
         continue
-    
+
     debug("Doing name %s" % name)
     #path = os.path.join(output_dir, name+'.discover')
     #print "Want path", path
@@ -415,11 +415,11 @@ for h in all_hosts:
     #print c.__dict__
     print '\n'.join(h.get_discovery_output())
     #print "\n\n\n"
-    
+
 
 # Try to remove the temppath
 try:
     os.unlink(tmppath)
 except Exception:
     pass
-    
+

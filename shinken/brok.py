@@ -2,7 +2,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -55,4 +55,4 @@ class Brok:
             if hasattr(self, 'instance_id'):
                 self.data['instance_id'] = self.instance_id
         self.prepared = True
-    
+

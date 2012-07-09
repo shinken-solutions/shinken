@@ -55,7 +55,7 @@ class TestTriggers(ShinkenTest):
             s = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "HTTP-"+str(i))
             s.output = 'Http ok'
             s.perf_data = 'time=%dms' % i
-        
+
         # Go launch it!
         svc.eval_triggers()
         self.scheduler_loop(4, [])
@@ -80,7 +80,7 @@ class TestTriggers(ShinkenTest):
         self.assert_(svc.perf_data == "users=12")
 
 
-    
+
 
     def test_in_conf_trigger(self):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "i_got_trigger")
@@ -147,7 +147,7 @@ class TestTriggers(ShinkenTest):
         print "Perf_Data", svc.perf_data
         self.assert_(svc.output == "not good!")
         self.assert_(svc.perf_data == "cpu=95")
-        
+
 
         # same for host
         host = self.sched.hosts.find_by_name('test_host_trigger2')
@@ -170,13 +170,13 @@ class TestTriggers(ShinkenTest):
         #
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         code = '''r = self.get_name()'''.replace(r'\n', '\n').replace(r'\t', '\t')
-        t = Trigger({'trigger_name' : 'none', 'code_src': code})
+        t = Trigger({'trigger_name': 'none', 'code_src': code})
         t.compile()
         r = t.eval(svc)
         print r
 
         code = '''self.output = "Moncul c'est du poulet" '''.replace(r'\n', '\n').replace(r'\t', '\t')
-        t = Trigger({'trigger_name' : 'none', 'code_src': code})
+        t = Trigger({'trigger_name': 'none', 'code_src': code})
         t.compile()
         r = t.eval(svc)
         print "Service output", svc.output
@@ -185,7 +185,7 @@ class TestTriggers(ShinkenTest):
         code = '''self.output = "Moncul c'est du poulet2"
 self.perf_data = "Moncul c'est du poulet3"
 '''.replace(r'\n', '\n').replace(r'\t', '\t')
-        t = Trigger({'trigger_name' : 'none', 'code_src': code})
+        t = Trigger({'trigger_name': 'none', 'code_src': code})
         t.compile()
         r = t.eval(svc)
         print "Service output", svc.output

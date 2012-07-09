@@ -30,7 +30,7 @@ class TestNotifMacros(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_notif_macros.cfg')
 
-    
+
     def test_notif_macro(self):
         #
         # Config is not correct because of a wrong relative path
@@ -59,7 +59,7 @@ class TestNotifMacros(ShinkenTest):
                 got_notif = True
         self.assert_(got_notif)
 
-        
+
 
 if __name__ == '__main__':
     unittest.main()

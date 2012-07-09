@@ -29,9 +29,9 @@ class TestConfig(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_service_generators.cfg')
 
-    
+
     def test_service_generators(self):
-        
+
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
         host.act_depend_of = [] # ignore the router
@@ -49,13 +49,13 @@ class TestConfig(ShinkenTest):
         svc_e = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Generated Service E")
         svc_f = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Generated Service F")
         svc_g = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Generated Service G")
-        
+
         self.assert_(svc_c is not None)
         self.assert_(svc_d is not None)
         self.assert_(svc_e is not None)
         self.assert_(svc_f is not None)
         self.assert_(svc_g is not None)
-        
+
         # two classics
         self.assert_(svc_c.check_command.args == ['C', '80%', '90%'])
         self.assert_(svc_d.check_command.args == ['D', '95%', '70%'])
@@ -70,7 +70,7 @@ class TestConfig(ShinkenTest):
 
 
     def test_service_generators_not(self):
-        
+
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
         host.act_depend_of = [] # ignore the router
@@ -88,17 +88,17 @@ class TestConfig(ShinkenTest):
         svc_e = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Generated Service NOT E")
         svc_f = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Generated Service NOT F")
         svc_g = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Generated Service NOT G")
-        
+
         self.assert_(svc_c is not None)
         self.assert_(svc_d is not None)
         self.assert_(svc_e is None)
         self.assert_(svc_f is None)
         self.assert_(svc_g is not None)
-        
+
 
 
     def test_service_generators_key_generator(self):
-        
+
         host = self.sched.hosts.find_by_name("sw_0")
         host.checks_in_progress = []
         host.act_depend_of = [] # ignore the router

@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -254,7 +254,7 @@ class Worker:
                 if cmsg.get_type() == 'Die':
                     logger.debug("[%d] Dad say we are dying..." % self.id)
                     break
-            except :
+            except:
                 pass
 
             if self._mortal == True and self._idletime > 2 * self._timeout:

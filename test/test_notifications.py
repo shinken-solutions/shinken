@@ -422,7 +422,7 @@ class TestNotif(ShinkenTest):
         self.show_and_clear_logs()
         self.show_actions()
         print "cnn and cur", cnn, svc.current_notification_number
-        
+
         cnn = svc.current_notification_number
         self.scheduler_loop(1, [[svc, 3, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.show_and_clear_logs()

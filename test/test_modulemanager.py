@@ -34,11 +34,11 @@ class TestModuleManager(ShinkenTest):
     #def setUp(self):
     #    self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
 
-    
+
     def find_modules_path(self):
         """ Find the absolute path of the shinken module directory and returns it.  """
         import shinken
-        
+
         # BEWARE: this way of finding path is good if we still
         # DO NOT HAVE CHANGE PWD!!!
         # Now get the module path. It's in fact the directory modules
@@ -50,20 +50,20 @@ class TestModuleManager(ShinkenTest):
         # We got one of the files of
         parent_path = os.path.dirname(os.path.dirname(modulespath))
         modulespath = os.path.join(parent_path, 'shinken', 'modules')
-        print("Using modules path : %s" % (modulespath))
-        
+        print("Using modules path: %s" % (modulespath))
+
         return modulespath
 
 
     # Try to see if the module manager can manage modules
     def test_modulemanager(self):
-        mod = Module({'module_name' : 'LiveStatus', 'module_type' : 'livestatus'})
+        mod = Module({'module_name': 'LiveStatus', 'module_type': 'livestatus'})
         self.modulemanager = ModulesManager('broker', self.find_modules_path(), [])
         self.modulemanager.set_modules([mod])
         self.modulemanager.load_and_init()
         # And start external ones, like our LiveStatus
         self.modulemanager.start_external_instances()
-        print "I correctly loaded the modules : %s " % ([ inst.get_name() for inst in self.modulemanager.instances ])
+        print "I correctly loaded the modules: %s " % ([ inst.get_name() for inst in self.modulemanager.instances ])
 
         print "*** First kill ****"
         # Now I will try to kill the livestatus module
@@ -79,7 +79,7 @@ class TestModuleManager(ShinkenTest):
         self.modulemanager.try_to_restart_deads()
 
         # In fact it's too early, so it won't do it
-        
+
         # Here the inst should still be dead
         print "Is alive?", ls.process.is_alive()
         self.assert_(not ls.process.is_alive())
@@ -113,7 +113,7 @@ class TestModuleManager(ShinkenTest):
         ls.last_init_try =- 5
         self.modulemanager.check_alive_instances()
         self.modulemanager.try_to_restart_deads()
-        
+
         # Here the inst should be alive again
         print "Is alive?", ls.process.is_alive()
         self.assert_(ls.process.is_alive())
@@ -123,7 +123,7 @@ class TestModuleManager(ShinkenTest):
         self.modulemanager.stop_all()
         print "Died"
 
-        
+
 
 if __name__ == '__main__':
     unittest.main()

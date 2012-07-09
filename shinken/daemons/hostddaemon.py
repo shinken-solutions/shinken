@@ -62,7 +62,7 @@ from shinken.message import Message
 from shinken.misc.datamanagerhostd import datamgr
 from shinken.modulesmanager import ModulesManager
 
-# DBG : code this!
+# DBG: code this!
 from shinken.objects import Contact
 
 # Now the bottle HTTP part :)
@@ -90,7 +90,7 @@ except ImportError:
 # It connects, and together we decide who's the Master and who's the Slave, etc.
 # Here is a also a function to get a new conf from the master
 class IForArbiter(Interface):
-    
+
     def have_conf(self, magic_hash):
         # I've got a conf and a good one
         if self.app.cur_conf and self.app.cur_conf.magic_hash == magic_hash:
@@ -127,7 +127,7 @@ class IForArbiter(Interface):
             for dae in daemons:
                 if hasattr(dae, daemon_name_attr) and getattr(dae, daemon_name_attr) == daemon_name:
                     if hasattr(dae, 'alive') and hasattr(dae, 'spare'):
-                        return {'alive' : dae.alive, 'spare' : dae.spare}
+                        return {'alive': dae.alive, 'spare': dae.spare}
         return None
 
 
@@ -153,12 +153,12 @@ class IForArbiter(Interface):
 
 
     def get_all_states(self):
-        res = {'arbiter' : self.app.conf.arbiters,
-               'scheduler' : self.app.conf.schedulers,
-               'poller' : self.app.conf.pollers,
-               'reactionner' : self.app.conf.reactionners,
-               'receiver' : self.app.conf.receivers,
-               'broker' : self.app.conf.brokers}
+        res = {'arbiter': self.app.conf.arbiters,
+               'scheduler': self.app.conf.schedulers,
+               'poller': self.app.conf.pollers,
+               'reactionner': self.app.conf.reactionners,
+               'receiver': self.app.conf.receivers,
+               'broker': self.app.conf.brokers}
         return res
 
 
@@ -166,9 +166,9 @@ class IForArbiter(Interface):
 class Hostd(Daemon):
 
     def __init__(self, config_files, is_daemon, do_replace, verify_only, debug, debug_file):
-        
+
         super(Hostd, self).__init__('hostd', config_files[0], is_daemon, do_replace, debug, debug_file)
-        
+
         self.config_files = config_files
 
         self.verify_only = verify_only
@@ -237,8 +237,8 @@ class Hostd(Daemon):
               logger.error('cannot find module %s' % mod_name)
               sys.exit(2)
            self.modules.append(m)
-        
-        logger.info("My own modules : " + ','.join([m.get_name() for m in self.modules]))
+
+        logger.info("My own modules: " + ','.join([m.get_name() for m in self.modules]))
 
 
         self.override_modules_path = getattr(self.conf, 'override_modules_path', '')
@@ -246,9 +246,9 @@ class Hostd(Daemon):
            # We override the module manager
            print "Overring module manager"
            self.modules_manager = ModulesManager('hostd', self.override_modules_path, [])
-           
 
-        # we request the instances without them being *started* 
+
+        # we request the instances without them being *started*
         # (for these that are concerned ("external" modules):
         # we will *start* these instances after we have been daemonized (if requested)
         self.modules_manager.set_modules(self.modules)
@@ -295,7 +295,7 @@ class Hostd(Daemon):
 
         # Fill default values
         super(Config, self.conf).fill_default()
-        
+
         # Remove templates from config
         # SAVE TEMPLATES
         #self.host_templates = self.conf.hosts.templates
@@ -309,7 +309,7 @@ class Hostd(Daemon):
         # We removed templates, and so we must recompute the
         # search lists
         self.conf.create_reversed_list()
-        
+
         # Pythonize values
         #self.conf.pythonize()
         super(Config, self.conf).pythonize()
@@ -346,7 +346,7 @@ class Hostd(Daemon):
 
         # Manage all post-conf modules
         self.hook_point('late_configuration')
-        
+
         # Correct conf?
         #self.conf.is_correct()
 
@@ -379,7 +379,7 @@ class Hostd(Daemon):
         #self.conf.prepare_for_sending()
 
         # Ok, here we must check if we go on or not.
-        # TODO : check OK or not
+        # TODO: check OK or not
         self.use_local_log = self.conf.use_local_log
         self.log_level = logger.get_level_id(self.conf.log_level)
         self.local_log = self.conf.local_log
@@ -395,7 +395,7 @@ class Hostd(Daemon):
 
         self.packs_home = self.conf.packs_home
         logger.info('Using pack home %s' % self.packs_home)
-        
+
         self.auth_secret = self.conf.auth_secret.encode('utf8', 'replace')
 
         # If the user set a workdir, let use it. If not, use the
@@ -408,7 +408,7 @@ class Hostd(Daemon):
         ##  We need to set self.host & self.port to be used by do_daemon_init_and_start
         self.host = '0.0.0.0'
         self.port = 0
-        
+
         logger.info("Configuration Loaded")
         print ""
 
@@ -428,7 +428,7 @@ class Hostd(Daemon):
         # Load the photo dir and make it a absolute path
         self.photo_dir = 'photos' # getattr(modconf, 'photo_dir', 'photos')
         self.photo_dir = os.path.abspath(self.photo_dir)
-        print "Webui : using the backend", self.http_backend
+        print "Webui: using the backend", self.http_backend
 
 
 
@@ -478,7 +478,7 @@ class Hostd(Daemon):
                   self.workers_queue = Queue()
                else:
                   self.workers_queue = self.manager.Queue()
-            # If we got no /dev/shm on linux, we can got problem here. 
+            # If we got no /dev/shm on linux, we can got problem here.
             # Must raise with a good message
             except OSError, exp:
                # We look for the "Function not implemented" under Linux
@@ -487,16 +487,16 @@ class Hostd(Daemon):
                   raise
 
 
-                
+
             # For multiprocess things, we should not have
             # sockettimeouts. will be set explicitly in Pyro calls
             import socket
             socket.setdefaulttimeout(None)
 
             # ok we are now fully daemon (if requested)
-            # now we can start our "external" modules (if any) :
+            # now we can start our "external" modules (if any):
             self.modules_manager.start_external_instances()
-            
+
             # Ok now we can load the retention data
             self.hook_point('load_retention')
 
@@ -518,7 +518,7 @@ class Hostd(Daemon):
         conf = self.new_conf
         self.new_conf = None
         self.cur_conf = conf
-        self.conf = conf        
+        self.conf = conf
 
 
     def do_loop_turn(self):
@@ -557,7 +557,7 @@ class Hostd(Daemon):
             if not arb.spare:
                 master_timeout = arb.check_interval * arb.max_check_attempts
         logger.info("I'll wait master for %d seconds" % master_timeout)
-        
+
         while not self.interrupted:
             elapsed, _, tcdiff = self.handleRequests(timeout)
             # if there was a system Time Change (tcdiff) then we have to adapt last_master_speak:
@@ -570,8 +570,8 @@ class Hostd(Daemon):
                 timeout -= elapsed
                 if timeout > 0:
                     continue
-            
-            timeout = 1.0            
+
+            timeout = 1.0
             sys.stdout.write(".")
             sys.stdout.flush()
 
@@ -604,7 +604,7 @@ class Hostd(Daemon):
     def run(self):
         if self.conf.human_timestamp_log:
             logger.set_human_format()
-        
+
         # Ok start to work :)
         self.check_photo_dir()
 
@@ -615,7 +615,7 @@ class Hostd(Daemon):
 
         # Declare the whole app static files AFTER the plugin ones
         self.declare_common_static()
-        
+
         self.init_db()
 
         self.init_datamanager()
@@ -623,7 +623,7 @@ class Hostd(Daemon):
         # Launch the data thread"
         #self.workersmanager_thread = threading.Thread(None, self.workersmanager, 'httpthread')
         #self.workersmanager_thread.start()
-        # TODO : look for alive and killing
+        # TODO: look for alive and killing
 
         print "Starting HostdUI app"
         srv = run(host=self.http_host, port=self.http_port, server=self.http_backend)
@@ -643,8 +643,8 @@ class Hostd(Daemon):
         plugin_dir = os.path.abspath(os.path.dirname(plugins.__file__))
         if self.override_plugins:
            plugin_dir = self.override_plugins
-        print "Loading plugin directory : %s" % plugin_dir
-        
+        print "Loading plugin directory: %s" % plugin_dir
+
         # Load plugin directories
         plugin_dirs = [ fname for fname in os.listdir(plugin_dir)
                         if os.path.isdir(os.path.join(plugin_dir, fname)) ]
@@ -675,7 +675,7 @@ class Hostd(Daemon):
                     v = entry.get('view', None)
                     static = entry.get('static', False)
 
-                    # IMPORTANT : apply VIEW BEFORE route!
+                    # IMPORTANT: apply VIEW BEFORE route!
                     if v:
                         #print "Link function", f, "and view", v
                         f = view(v)(f)
@@ -685,15 +685,15 @@ class Hostd(Daemon):
                         for r in routes:
                             method = entry.get('method', 'GET')
                             print "link function", f, "and route", r, "method", method
-                            
+
                             # Ok, we will just use the lock for all
                             # plugin page, but not for static objects
                             # so we set the lock at the function level.
                             lock_version = self.lockable_function(f)
                             f = route(r, callback=lock_version, method=method)
-                            
+
                     # If the plugin declare a static entry, register it
-                    # and remeber : really static! because there is no lock
+                    # and remeber: really static! because there is no lock
                     # for them!
                     if static:
                         self.add_static(fdir, m_dir)
@@ -705,10 +705,10 @@ class Hostd(Daemon):
                 # And finally register me so the pages can get data and other
                 # useful stuff
                 m.app = self
-                        
-                        
+
+
             except Exception, exp:
-               logger.log("Loading plugins : %s" % exp)
+               logger.log("Loading plugins: %s" % exp)
 
 
 
@@ -788,12 +788,12 @@ class Hostd(Daemon):
         self.external_command = e
 
         print "Run baby, run..."
-        timeout = 1.0             
-        
+        timeout = 1.0
+
         while self.must_run and not self.interrupted:
-            
+
             elapsed, ins, _ = self.handleRequests(timeout, suppl_socks)
-            
+
             # If FIFO, read external command
             if ins:
                 now = time.time()
@@ -812,15 +812,15 @@ class Hostd(Daemon):
             if elapsed or ins:
                 timeout -= elapsed
                 if timeout > 0: # only continue if we are not over timeout
-                    continue  
-            
+                    continue
+
             # Timeout
             timeout = 1.0 # reset the timeout value
 
             # Try to see if one of my module is dead, and
             # try to restart previously dead modules :)
             self.check_and_del_zombie_modules()
-            
+
             # Call modules that manage a starting tick pass
             self.hook_point('tick')
             print "Tick"
@@ -833,7 +833,7 @@ class Hostd(Daemon):
 
     def get_daemons(self, daemon_type):
         """ Returns the daemons list defined in our conf for the given type """
-        # shouldn't the 'daemon_types' (whetever it is above) be always present ?
+        # shouldn't the 'daemon_types' (whetever it is above) be always present?
         return getattr(self.conf, daemon_type+'s', None)
 
     # Helper functions for retention modules
@@ -863,7 +863,7 @@ class Hostd(Daemon):
         if not user_name:
             return None
 
-        u = self.db.users.find_one({'_id' : user_name})
+        u = self.db.users.find_one({'_id': user_name})
 
         print "Find a user", user_name, u
         #c = Contact()
@@ -874,7 +874,7 @@ class Hostd(Daemon):
 
 
 
-    # TODO : fix hard coded server/database
+    # TODO: fix hard coded server/database
     def init_db(self):
        if not Connection:
           logger.error('You need the pymongo lib for running skonfui. Please install it')
@@ -887,22 +887,22 @@ class Hostd(Daemon):
     def init_datamanager(self):
        self.datamgr.load_conf(self.conf)
        self.datamgr.load_db(self.db)
-       
+
 
     def check_auth(self, username, password):
        password_hash = hashlib.sha512(password).hexdigest()
        print "Looking for the user", username, "with password hash", password_hash
-       r = self.db.users.find_one({'_id' : username, 'pwd_hash' : password_hash})
+       r = self.db.users.find_one({'_id': username, 'pwd_hash': password_hash})
        print "Is user auth?", r
        return r is not None
 
 
     def get_user_by_name(self, username):
-       r = self.db.users.find_one({'username' : username})
+       r = self.db.users.find_one({'username': username})
        return r
 
     def get_user_by_key(self, api_key):
-       r = self.db.users.find_one({'api_key' : api_key})
+       r = self.db.users.find_one({'api_key': api_key})
        if not r:
           return None
        if not r['validated']:
@@ -910,21 +910,21 @@ class Hostd(Daemon):
        return r
 
     def get_email_by_name(self, username):
-       r = self.db.users.find_one({'username' : username})
+       r = self.db.users.find_one({'username': username})
        if not r:
           return ''
        return r['email']
 
 
     def is_actitaved(self, username):
-       r = self.db.users.find_one({'_id' : username})
+       r = self.db.users.find_one({'_id': username})
        if not r:
           return False
        return r['validated']
 
 
     def get_api_key(self, username):
-       r = self.db.users.find_one({'_id' : username})
+       r = self.db.users.find_one({'_id': username})
        if not r:
           return None
        return r['api_key']
@@ -941,12 +941,12 @@ class Hostd(Daemon):
        stats['state'] = 'pending'
        print "Saving cfg stats", stats
        self.db.cfg_stats.save(stats)
-       
+
 
     def save_new_pack(self, user, filename, buf):
        filename = os.path.basename(filename)
        short_name = filename[:-4]
-       print "Saving a new pack file from a user :", user, filename
+       print "Saving a new pack file from a user:", user, filename
        if not user:
           return None
        user_dir = os.path.join(self.tmp_pack_path, user)
@@ -959,10 +959,10 @@ class Hostd(Daemon):
        f.close()
        print "File %s is saved" % p
        _id = uuid.uuid4().get_hex()
-       d = {'_id' : _id, 'upload_time' : int(time.time()), 'filename' : filename, 'filepath' : p, 'path' : '/unanalysed', 'user' :  user,
-            'state' : 'pending', 'pack_name' : short_name, 'moderation_comment':'', 'link_id': _id}
+       d = {'_id': _id, 'upload_time': int(time.time()), 'filename': filename, 'filepath': p, 'path': '/unanalysed', 'user':  user,
+            'state': 'pending', 'pack_name': short_name, 'moderation_comment': '', 'link_id': _id}
        # Get all previously sent packs for the same user/filename, and put them as obsolete
-       obs = self.db.packs.find({'filepath' : p})
+       obs = self.db.packs.find({'filepath': p})
        for o in obs:
           print "The pack make obsolete the pack", o
           o['state'] = 'obsolete'
@@ -973,14 +973,14 @@ class Hostd(Daemon):
        self.db.packs.save(d)
        # Now we will unzip and load all data from the pack
        self.load_pack_file(_id)
-       
+
 
     def load_pack_file(self, pack):
-       p = self.db.packs.find_one({'_id' : pack})
+       p = self.db.packs.find_one({'_id': pack})
        filepath = p['filepath']
        print "Analysing pack"
        if not zipfile.is_zipfile(filepath):
-          print "ERROR : the pack %s is not a zip file!" % filepath
+          print "ERROR: the pack %s is not a zip file!" % filepath
           p['state'] = 'refused'
           p['moderation_comment'] = 'The pack file is not a zip file'
           self.db.packs.save(p)
@@ -996,17 +996,17 @@ class Hostd(Daemon):
        packs.load_file(path)
        packs = [i for i in packs]
        if len(packs) > 1:
-          print "ERROR : the pack %s got too much .pack file in it!" % pack
-          p['moderation_comment'] = "ERROR : no valid .pack in the pack"
+          print "ERROR: the pack %s got too much .pack file in it!" % pack
+          p['moderation_comment'] = "ERROR: no valid .pack in the pack"
           p['state'] = 'refused'
           self.db.packs.save(p)
           shutil.rmtree(TMP_PATH)
           return
 
        if len(packs) == 0:
-          print "ERROR : no valid .pack in the pack %s" % pack
+          print "ERROR: no valid .pack in the pack %s" % pack
           p['state'] = 'refused'
-          p['moderation_comment'] = "ERROR : no valid .pack in the pack"
+          p['moderation_comment'] = "ERROR: no valid .pack in the pack"
           self.db.packs.save(p)
           shutil.rmtree(TMP_PATH)
           return
@@ -1017,7 +1017,7 @@ class Hostd(Daemon):
        if os.path.exists(dest_path):
           shutil.rmtree(dest_path)
        shutil.copytree(path, dest_path)
-    
+
        pck = packs.pop()
        print "We read pack", pck.__dict__
        # Now we can update the db pack entry
@@ -1034,7 +1034,7 @@ class Hostd(Daemon):
        p['doc_link'] = pck.doc_link
        if p['state'] == 'pending':
           p['state'] = 'ok'
-          
+
        # Give a real link name to this pack
        p['link_id'] = '%s-%s' % (p['user'], p['pack_name'])
        print "We want to save the object", p
@@ -1045,14 +1045,14 @@ class Hostd(Daemon):
 
 
     def is_name_available(self, username):
-       r = self.db.users.find_one({'_id' : username})
+       r = self.db.users.find_one({'_id': username})
        return r is None
 
 
     def register_user(self, username, pwdhash, email):
        ak = uuid.uuid4().get_hex()
        api_key = uuid.uuid4().get_hex()
-       d = {'_id' : username, 'username' : username, 'pwd_hash' : pwdhash, 'email' : email, 'api_key' : api_key, 'activating_key' : ak, 'validated' : False, 'is_admin' : False, 'is_moderator' : False}
+       d = {'_id': username, 'username': username, 'pwd_hash': pwdhash, 'email': email, 'api_key': api_key, 'activating_key': ak, 'validated': False, 'is_admin': False, 'is_moderator': False}
        print "Saving new user", d
        self.db.users.save(d)
 
@@ -1076,27 +1076,27 @@ class Hostd(Daemon):
        except Exception, exp:
           print "FUCK, there was a problem with the email sending!", exp
 
-       
+
     def validate_user(self, activating_key):
-       u = self.db.users.find_one({'activating_key' : activating_key})
+       u = self.db.users.find_one({'activating_key': activating_key})
        print "Try to validate a user with the activated key", activating_key, 'and get', u
        if not u:
           return False
        print "User %s validated"
        u['validated'] = True
        self.db.users.save(u)
-       
+
        return True
-    
+
 
     def update_user(self, username, pwd_hash, email):
-       r = self.db.users.find_one({'_id' : username})
+       r = self.db.users.find_one({'_id': username})
        if not r:
           return
-       
+
        if pwd_hash:
           r['pwd_hash'] = pwd_hash
-       
+
        old_email = r['email']
        r['email'] = email
        # If the user changed it's email, put it in validating

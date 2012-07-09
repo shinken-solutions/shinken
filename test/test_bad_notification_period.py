@@ -30,7 +30,7 @@ class TestBadNotificationPeriod(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_bad_notification_period.cfg')
 
-    
+
     # if a notif period is bad, should be catched!
     def test_bad_notification_period(self):
         self.assert_(self.conf.conf_is_correct == False)

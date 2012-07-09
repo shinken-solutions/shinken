@@ -166,7 +166,7 @@ class Hostgroups(Itemgroups):
                 hg.configuration_errors.append(err)
                 hg.realm = None
                 continue
-            
+
             for h in hg:
                 if h is None: continue
                 if h.realm is None or h.got_default_realm: # default value not hasattr(h, 'realm'):
@@ -185,7 +185,7 @@ class Hostgroups(Itemgroups):
         hg = self.find_by_name(hgname)
         # if the id do not exist, create the hg
         if hg is None:
-            hg = Hostgroup({'hostgroup_name' : hgname, 'alias' : hgname, 'members' :  hname})
+            hg = Hostgroup({'hostgroup_name': hgname, 'alias': hgname, 'members':  hname})
             self.add(hg)
         else:
             hg.add_string_member(hname)

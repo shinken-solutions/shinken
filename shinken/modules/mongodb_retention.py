@@ -37,9 +37,9 @@ from shinken.basemodule import BaseModule
 from shinken.log import logger
 
 properties = {
-    'daemons' : ['scheduler'],
-    'type' : 'mongodb_retention',
-    'external' : False,
+    'daemons': ['scheduler'],
+    'type': 'mongodb_retention',
+    'external': False,
     }
 
 
@@ -77,10 +77,10 @@ class Mongodb_retention_scheduler(BaseModule):
         print "[MongodbRetention] asking me to update the retention objects"
 
         all_data = daemon.get_retention_data()
-        
+
         hosts = all_data['hosts']
         services = all_data['services']
-        
+
         # Now the flat file method
         for h_name in hosts:
             h = hosts[h_name]
@@ -130,7 +130,7 @@ class Mongodb_retention_scheduler(BaseModule):
                 # Go in the next host object
                 continue
             val = fd.read()
-            
+
             if val is not None:
                 val = cPickle.loads(val)
                 ret_hosts[h.host_name] = val
@@ -150,8 +150,8 @@ class Mongodb_retention_scheduler(BaseModule):
                 val = cPickle.loads(val)
                 ret_services[(s.host.host_name, s.service_description)] = val
 
-        
-        all_data = {'hosts' : ret_hosts, 'services' : ret_services}
+
+        all_data = {'hosts': ret_hosts, 'services': ret_services}
 
         # Ok, now comme load them scheduler :)
         daemon.restore_retention_data(all_data)

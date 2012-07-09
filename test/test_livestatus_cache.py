@@ -1,9 +1,9 @@
 from shinken_test import *
 import datetime
 
-def set_to_midnight(dt): 
-    midnight = datetime.time(0) 
-    return datetime.datetime.combine(dt.date(), midnight) 
+def set_to_midnight(dt):
+    midnight = datetime.time(0)
+    return datetime.datetime.combine(dt.date(), midnight)
 
 
 class TestConfig(ShinkenTest):
@@ -170,7 +170,7 @@ Stats: state = 3"""
         #                etime -  4 days
         #                       |---
         #                       query_start
-        #                      
+        #
         #                ............................................
         #                events in the log database ranging till now
         #
@@ -227,7 +227,7 @@ Stats: state = 3"""
                         [test_ok_00, 1, "WARN"],
                         [test_ok_01, 2, "CRIT"],
                     ])
-    
+
                 time.sleep(62)
                 if i % 9 == 0:
                     self.scheduler_loop(1, [
@@ -339,7 +339,7 @@ OutputFormat: json"""
         #time.time = fake_time_time
         #time.sleep = fake_time_sleep
 
-       
+
 
 if __name__ == '__main__':
     #import cProfile

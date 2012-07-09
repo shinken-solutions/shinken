@@ -42,7 +42,7 @@ class TestProblemImpact(ShinkenTest):
 
         # The problem_impact_state change should be enabled in the configuration
         self.assert_(self.conf.enable_problem_impacts_states_change == True)
-        
+
         host_router_0 = self.sched.hosts.find_by_name("test_router_0")
         host_router_0.checks_in_progress = []
         self.assert_(host_router_0.business_impact == 2)
@@ -115,7 +115,7 @@ class TestProblemImpact(ShinkenTest):
                 self.assert_(s.get_dbg_name() in host_router_1_brok.data['impacts']['hosts'])
 
         # Should have host notification, but it's not so simple:
-        # our contact say : not under 5, and our hosts are 2. But
+        # our contact say: not under 5, and our hosts are 2. But
         # the impacts have huge business_impact, so the hosts gain such business_impact
         self.assert_(self.any_log_match('HOST NOTIFICATION.*;'))
         self.show_and_clear_logs()
@@ -208,7 +208,7 @@ class TestProblemImpact(ShinkenTest):
 
         # The problem_impact_state change should be enabled in the configuration
         self.assert_(self.conf.enable_problem_impacts_states_change == True)
-        
+
         host_router_0 = self.sched.hosts.find_by_name("test_router_0")
         host_router_0.checks_in_progress = []
         self.assert_(host_router_0.business_impact == 2)
@@ -291,7 +291,7 @@ class TestProblemImpact(ShinkenTest):
                 self.assert_(s.get_dbg_name() in host_router_1_brok.data['impacts']['hosts'])
 
         # Should have host notification, but it's not so simple:
-        # our contact say : not under 5, and our hosts are 2. And here
+        # our contact say: not under 5, and our hosts are 2. And here
         # the business_impact was still low for our test
         self.assert_(not self.any_log_match('HOST NOTIFICATION.*;'))
         self.show_and_clear_logs()
