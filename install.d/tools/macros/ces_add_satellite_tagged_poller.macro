@@ -1,9 +1,9 @@
 # macro for adding a shinken satellite with a tagged poller also deploy config on satellites
-# Arguments are :
-# ARG1 : new poller name
-# ARG2 : new poller tag
-# ARG3 : new poller address
-# ARG4 : existing poller name that will be used as model for the new poller
+# Arguments are:
+# ARG1: new poller name
+# ARG2: new poller tag
+# ARG3: new poller address
+# ARG4: existing poller name that will be used as model for the new poller
 #
 # set configuration file
 setconfigfile /opt/shinken/etc/shinken-specific.cfg
@@ -24,4 +24,4 @@ setparam modules=LAST, HackPollerTagByMacros from arbiter where arbiter_name=Arb
 # write config
 writeconfig
 # deploy configuration
-sync 
+sync

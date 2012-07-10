@@ -52,14 +52,14 @@ def show_3dimpacts():
 
     if not user:
         redirect("/user/login")
-#        return {'app' : app, 'impacts' : [], 'valid_user' : False}
+#        return {'app': app, 'impacts': [], 'valid_user': False}
 
     all_imp_impacts = app.datamgr.get_important_elements()
     all_imp_impacts.sort(hst_srv_sort)
 
 
-    return {'app' : app, 'impacts' : all_imp_impacts, 'valid_user' : True}
+    return {'app': app, 'impacts': all_imp_impacts, 'valid_user': True}
 
 
 
-pages = {show_3dimpacts : { 'routes' : ['/3dimpacts'], 'view' : 'threedimpacts', 'static' : True}}
+pages = {show_3dimpacts: { 'routes': ['/3dimpacts'], 'view': 'threedimpacts', 'static': True}}

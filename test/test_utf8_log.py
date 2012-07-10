@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #Copyright (C) 2009-2010 :
 #    Gabes Jean, naparuba@gmail.com
@@ -33,7 +33,7 @@ class TestConfig(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
 
-    
+
     # Try to raise an utf8 log message
     def test_utf8log(self):
         sutf = 'héhé'
@@ -43,7 +43,7 @@ class TestConfig(ShinkenTest):
         s = unichr(40960) + u'abcd' + unichr(1972)
         logger.log(s)
 
-        
+
 
 if __name__ == '__main__':
     unittest.main()

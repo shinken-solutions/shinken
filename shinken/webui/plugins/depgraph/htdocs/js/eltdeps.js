@@ -79,12 +79,16 @@ function dump(arr, level) {
 
 
 
-function init_graph(){
+function init_graph(root, jsgraph, width, height, inject) {
+	
+	//alert ("root : " + root +"\n width : "+ width + "\n height : " + height + "\n inject" + inject);
+	
     if(typeof $jit === "undefined"){
 	console.log('Warning : there is no $jit, I postpone my init for 1s');
 	// Still not load $jit? racing problems are a nightmare :)
 	// Ok, we retry in the next second...
-	setTimeout('init_graph()',1000);
+	setTimeout(function(){init_graph(root,jsgraph,width,height,inject)},1000);
+	
 	return;
     }
 
@@ -332,9 +336,9 @@ function init_graph(){
 
     //init RGraph
     var rgraph = new $jit.RGraph({
-	    'injectInto': /*'infovis'*/depgraph_injectInto,
-	    'width'     : /*700*/depgraph_width,
-	    'height'    : /*700*/depgraph_height,
+	    'injectInto': /*'infovis'*/'infovis-'+inject,
+	    'width'     : /*700*/width,
+	    'height'    : /*700*/height,
 	    //Optional: Add a background canvas
 	    //that draws some concentric circles.
 	    'background': false,
@@ -403,7 +407,9 @@ function init_graph(){
 		
 		// Make right column relations list.
 		var html = node.data.infos;
-		$jit.id('inner-details').innerHTML = html;
+		
+		$jit.id('inner-details-'+inject).innerHTML = html;
+		//alert(html);
 	    },
 	    //Add node click handler and some styles.
 	    //This method is called only once for each node/label crated.
@@ -439,9 +445,9 @@ function init_graph(){
 	    }
 	});
     //load graph.
-    /*alert('Loading graph'+json_graph);*/
-    rgraph.loadJSON(json_graph, 1);
-    rgraph.root =  graph_root;
+  //  alert('Loading graph'+jsgraph);
+    rgraph.loadJSON(jsgraph, 1);
+    rgraph.root = root;
 
 
     //compute positions and plot
@@ -464,4 +470,4 @@ function init_graph(){
 };
 
 
-$(document).ready(init_graph);
+

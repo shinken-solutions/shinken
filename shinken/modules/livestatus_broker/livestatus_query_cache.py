@@ -40,7 +40,7 @@ class LFU(object):
     This class implements a dictionary which has a limited number of elements.
     Whenever the maximum number of elements is reached during a write operation
     the element which was read least times is deleted.
-    It was inspired by 
+    It was inspired by
     http://code.activestate.com/recipes/498245-lru-and-lfu-cache-decorators/
     but LFU is much more simpler.
     """
@@ -83,7 +83,7 @@ class LFU(object):
         for k in self.storage:
             text += 'key %10s (%d used)\n' % (str(k), self.use_count[k])
         return text
-        
+
 
 class LiveStatusQueryCache(object):
     """

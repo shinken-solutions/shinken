@@ -48,7 +48,7 @@ from shinken.modulesmanager import ModulesManager
 from shinken.daemon import Daemon
 from shinken.util import safe_print, to_bool
 
-#Local import
+# Local import
 from shinken.misc.datamanager import datamgr
 from helper import helper
 
@@ -56,7 +56,7 @@ from helper import helper
 import shinken.webui.bottle as bottle
 bottle.debug(True)
 
-#Import bottle lib to make bottle happy
+# Import bottle lib to make bottle happy
 bottle_dir = os.path.abspath(os.path.dirname(bottle.__file__))
 sys.path.insert(0, bottle_dir)
 
@@ -66,8 +66,8 @@ bottle.TEMPLATE_PATH.append(bottle_dir)
 
 
 
-#Class for the Merlindb Broker
-#Get broks and puts them in merlin database
+# Class for the Merlindb Broker
+# Get broks and puts them in merlin database
 class Webui_broker(BaseModule, Daemon):
     def __init__(self, modconf):
         BaseModule.__init__(self, modconf)
@@ -90,14 +90,14 @@ class Webui_broker(BaseModule, Daemon):
         # Load the photo dir and make it a absolute path
         self.photo_dir = getattr(modconf, 'photo_dir', 'photos')
         self.photo_dir = os.path.abspath(self.photo_dir)
-        print "Webui : using the backend", self.http_backend
+        print "Webui: using the backend", self.http_backend
         # We will save all widgets
         self.widgets = {}
         # We need our regenerator now (before main) so if we are in a scheduler,
         # rg will be able to skip some broks
         self.rg = Regenerator()
 
-        
+
 
     # We check if the photo directory exists. If not, try to create it
     def check_photo_dir(self):
@@ -108,11 +108,11 @@ class Webui_broker(BaseModule, Daemon):
                 os.mkdir(self.photo_dir)
             except Exception, exp:
                 print "Photo dir creation failed", exp
-                
-        
+
+
 
     # Called by Broker so we can do init stuff
-    # TODO : add conf param to get pass with init
+    # TODO: add conf param to get pass with init
     # Conf from arbiter!
     def init(self):
         print "Init of the Webui '%s'" % self.name
@@ -120,7 +120,7 @@ class Webui_broker(BaseModule, Daemon):
 
 
     # This is called only when we are in a scheduler
-    # and just before we are started. So we can gain time, and 
+    # and just before we are started. So we can gain time, and
     # just load all scheduler objects without fear :) (we
     # will be in another process, so we will be able to hack objects
     # if need)
@@ -138,7 +138,7 @@ class Webui_broker(BaseModule, Daemon):
     def main(self):
         self.log = logger
         self.log.load_obj(self)
-        
+
         # Daemon like init
         self.debug_output = []
 
@@ -150,8 +150,8 @@ class Webui_broker(BaseModule, Daemon):
             f = getattr(inst, 'load', None)
             if f and callable(f):
                 f(self)
-                
-        
+
+
         for s in self.debug_output:
             print s
         del self.debug_output
@@ -167,8 +167,8 @@ class Webui_broker(BaseModule, Daemon):
             #import cProfile
             #cProfile.runctx('''self.do_main()''', globals(), locals(),'/tmp/webui.profile')
             self.do_main()
-        except Exception, exp:            
-            msg = Message(id=0, type='ICrash', data={'name' : self.get_name(), 'exception' : exp, 'trace' : traceback.format_exc()})
+        except Exception, exp:
+            msg = Message(id=0, type='ICrash', data={'name': self.get_name(), 'exception': exp, 'trace': traceback.format_exc()})
             self.from_q.put(msg)
             # wait 2 sec so we know that the broker got our message, and die
             time.sleep(2)
@@ -180,11 +180,11 @@ class Webui_broker(BaseModule, Daemon):
     def push_external_command(self, e):
         print "WebUI: got an external command", e.__dict__
         self.from_q.put(e)
-        
+
 
     # Real main function
     def do_main(self):
-        #I register my exit function
+        # I register my exit function
         self.set_exit_handler()
         print "Go run"
 
@@ -195,7 +195,7 @@ class Webui_broker(BaseModule, Daemon):
         self.nb_readers = 0
         self.nb_writers = 0
 
-        
+
         self.data_thread = None
 
         # Check if the view dir really exist
@@ -207,17 +207,17 @@ class Webui_broker(BaseModule, Daemon):
 
         # Declare the whole app static files AFTER the plugin ones
         self.declare_common_static()
-        
-        
-        
+
+
+
 
         # Launch the data thread"
         self.data_thread = threading.Thread(None, self.manage_brok_thread, 'datathread')
         self.data_thread.start()
-        # TODO : look for alive and killing
+        # TODO: look for alive and killing
 
         # Ok, you want to know why we are using a data thread instead of
-        # just call for a select with q._reader, the underliying file 
+        # just call for a select with q._reader, the underliying file
         # handle of the Queue()? That's just because under Windows, select
         # only manage winsock (so network) file descriptor! What a shame!
         print "Starting WebUI application"
@@ -226,55 +226,55 @@ class Webui_broker(BaseModule, Daemon):
         # ^ IMPORTANT ^
         # We are not managing the lock at this
         # level because we got 2 types of requests:
-        # static images/css/js : no need for lock
-        # pages : need it. So it's managed at a
+        # static images/css/js: no need for lock
+        # pages: need it. So it's managed at a
         # function wrapper at loading pass
 
-                    
+
     # It's the thread function that will get broks
     # and update data. Will lock the whole thing
     # while updating
     def manage_brok_thread(self):
-        #DBG: times={}
-        #DBG: time_waiting_no_readers = 0
-        #DBG: time_preparing = 0
-        
+        # DBG: times={}
+        # DBG: time_waiting_no_readers = 0
+        # DBG: time_preparing = 0
+
         print "Data thread started"
         while True:
-           #DBG: t0 = time.time()
-           #DBG: print "WEBUI :: GET START"
+           # DBG: t0 = time.time()
+           # DBG: print "WEBUI :: GET START"
            l = self.to_q.get()
-           #DBG: t1 = time.time()
-           #DBG: print "WEBUI :: GET FINISH with", len(l), "in ", t1 - t0
-           
+           # DBG: t1 = time.time()
+           # DBG: print "WEBUI :: GET FINISH with", len(l), "in ", t1 - t0
+
            for b in l:
-              #DBG: t0 = time.time()
+              # DBG: t0 = time.time()
               b.prepare()
-              #DBG: time_preparing += time.time() - t0
-              #DBG: if not b.type in times:
-              #DBG:     times[b.type] = 0
+              # DBG: time_preparing += time.time() - t0
+              # DBG: if not b.type in times:
+              # DBG:     times[b.type] = 0
               # For updating, we cannot do it while
               # answer queries, so wait for no readers
-              #DBG: t0 = time.time()
+              # DBG: t0 = time.time()
               self.wait_for_no_readers()
-              #DBG: time_waiting_no_readers += time.time() - t0
+              # DBG: time_waiting_no_readers += time.time() - t0
               try:
-               #print "Got data lock, manage brok"
-                  #DBG: t0 = time.time()
+               # print "Got data lock, manage brok"
+                  # DBG: t0 = time.time()
                   self.rg.manage_brok(b)
-                  #DBG: times[b.type] += time.time() - t0
-                  
+                  # DBG: times[b.type] += time.time() - t0
+
                   for mod in self.modules_manager.get_internal_instances():
                       try:
                           mod.manage_brok(b)
                       except Exception , exp:
                           print exp.__dict__
                           logger.warning("[%s] The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
-                          logger.debug("[%s] Exception type : %s" % (self.name, type(exp)))
+                          logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
                           logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                           self.modules_manager.set_to_restart(mod)
-              except Exception, exp:            
-                  msg = Message(id=0, type='ICrash', data={'name' : self.get_name(), 'exception' : exp, 'trace' : traceback.format_exc()})
+              except Exception, exp:
+                  msg = Message(id=0, type='ICrash', data={'name': self.get_name(), 'exception': exp, 'trace': traceback.format_exc()})
                   self.from_q.put(msg)
                   # wait 2 sec so we know that the broker got our message, and die
                   time.sleep(2)
@@ -287,15 +287,15 @@ class Webui_broker(BaseModule, Daemon):
                   self.global_lock.acquire()
                   self.nb_writers -= 1
                   self.global_lock.release()
-                  
-           #DBG: t2 = time.time()
-           #DBG: print "WEBUI :: MANAGE ALL IN ", t2 - t1
-           #DBG: print '"WEBUI : in Waiting no readers', time_waiting_no_readers
-           #DBG: print 'WEBUI in preparing broks', time_preparing
-           #DBG: print "WEBUI And in times:"
-           #DBG: for (k, v) in times.iteritems():
-           #DBG:     print "WEBUI\t %s : %s" % (k, v)
-           #DBG: print "WEBUI\nWEBUI\n"
+
+           # DBG: t2 = time.time()
+           # DBG: print "WEBUI :: MANAGE ALL IN ", t2 - t1
+           # DBG: print '"WEBUI: in Waiting no readers', time_waiting_no_readers
+           # DBG: print 'WEBUI in preparing broks', time_preparing
+           # DBG: print "WEBUI And in times:"
+           # DBG: for (k, v) in times.iteritems():
+           # DBG:     print "WEBUI\t %s: %s" % (k, v)
+           # DBG: print "WEBUI\nWEBUI\n"
 
 
     # Here we will load all plugins (pages) under the webui/plugins
@@ -304,8 +304,8 @@ class Webui_broker(BaseModule, Daemon):
     def load_plugins(self):
         from shinken.webui import plugins
         plugin_dir = os.path.abspath(os.path.dirname(plugins.__file__))
-        print "Loading plugin directory : %s" % plugin_dir
-        
+        print "Loading plugin directory: %s" % plugin_dir
+
         # Load plugin directories
         plugin_dirs = [ fname for fname in os.listdir(plugin_dir)
                         if os.path.isdir(os.path.join(plugin_dir, fname)) ]
@@ -334,8 +334,8 @@ class Webui_broker(BaseModule, Daemon):
                     widget_desc = entry.get('widget_desc', None)
                     widget_name = entry.get('widget_name', None)
                     widget_picture = entry.get('widget_picture', None)
-                    
-                    # IMPORTANT : apply VIEW BEFORE route!
+
+                    # IMPORTANT: apply VIEW BEFORE route!
                     if v:
                         print "Link function", f, "and view", v
                         f = view(v)(f)
@@ -345,15 +345,15 @@ class Webui_broker(BaseModule, Daemon):
                         for r in routes:
                             method = entry.get('method', 'GET')
                             print "link function", f, "and route", r, "method", method
-                            
+
                             # Ok, we will just use the lock for all
                             # plugin page, but not for static objects
                             # so we set the lock at the function level.
                             lock_version = self.lockable_function(f)
                             f = route(r, callback=lock_version, method=method)
-                            
+
                     # If the plugin declare a static entry, register it
-                    # and remeber : really static! because there is no lock
+                    # and remeber: really static! because there is no lock
                     # for them!
                     if static:
                         self.add_static(fdir, m_dir)
@@ -365,8 +365,8 @@ class Webui_broker(BaseModule, Daemon):
                         for place in widget_lst:
                             if place not in self.widgets:
                                 self.widgets[place] = []
-                            w = {'widget_name' : widget_name, 'widget_desc' : widget_desc, 'base_uri' : routes[0],
-                                 'widget_picture' : widget_picture}
+                            w = {'widget_name': widget_name, 'widget_desc': widget_desc, 'base_uri': routes[0],
+                                 'widget_picture': widget_picture}
                             print "Loading widget", w
                             self.widgets[place].append(w)
 
@@ -377,10 +377,10 @@ class Webui_broker(BaseModule, Daemon):
                 # And finally register me so the pages can get data and other
                 # useful stuff
                 m.app = self
-                        
-                        
+
+
             except Exception, exp:
-                logger.warning("Loading plugins : %s" % exp)
+                logger.warning("Loading plugins: %s" % exp)
 
 
 
@@ -435,7 +435,7 @@ class Webui_broker(BaseModule, Daemon):
                 print "WARNING: we are in lock/read since more than 30s!"
                 start = time.time()
 
-        
+
 
     # We want a lock manager version of the plugin fucntions
     def lockable_function(self, f):
@@ -490,13 +490,13 @@ class Webui_broker(BaseModule, Daemon):
     def check_auth(self, user, password):
         print "Checking auth of", user #, password
         c = self.datamgr.get_contact(user)
-        print "Got", c 
+        print "Got", c
         if not c:
             print "Warning: You need to have a contact having the same name as your user %s" % user
-        
-        # TODO : do not forgot the False when release!
-        is_ok = False#(c is not None)#False
-        
+
+        # TODO: do not forgot the False when release!
+        is_ok = False # (c is not None)
+
         for mod in self.modules_manager.get_internal_instances():
             try:
                 f = getattr(mod, 'check_auth', None)
@@ -510,14 +510,14 @@ class Webui_broker(BaseModule, Daemon):
             except Exception , exp:
                 print exp.__dict__
                 logger.warning("[%s] The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
-                logger.debug("[%s] Exception type : %s" % (self.name, type(exp)))
+                logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
                 logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
-                self.modules_manager.set_to_restart(mod)        
+                self.modules_manager.set_to_restart(mod)
 
         # Ok if we got a real contact, and if a module auth it
         return (is_ok and c is not None)
 
-        
+
 
     def get_user_auth(self):
         # First we look for the user sid
@@ -548,9 +548,9 @@ class Webui_broker(BaseModule, Daemon):
             except Exception , exp:
                 print exp.__dict__
                 logger.warning("[%s] The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
-                logger.debug("[%s] Exception type : %s" % (self.name, type(exp)))
+                logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
                 logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
-                self.modules_manager.set_to_restart(mod)        
+                self.modules_manager.set_to_restart(mod)
 
         #safe_print("Will return", uris)
         # Ok if we got a real contact, and if a module auth it
@@ -564,7 +564,7 @@ class Webui_broker(BaseModule, Daemon):
     # Try to got for an element the graphs uris from modules
     def get_user_preference(self, user, key, default=None):
         safe_print("Checking user preference for", user.get_name(), key)
-        
+
         for mod in self.modules_manager.get_internal_instances():
             try:
                 print 'Try to get pref %s from %s' %(key,  mod.get_name())
@@ -574,10 +574,10 @@ class Webui_broker(BaseModule, Daemon):
                     return r
             except Exception , exp:
                 print exp.__dict__
-                logger.log("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
-                logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
+                logger.log("[%s] Warning: The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
+                logger.log("[%s] Exception type: %s" % (self.name, type(exp)))
                 logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
-                self.modules_manager.set_to_restart(mod)        
+                self.modules_manager.set_to_restart(mod)
         print 'get_user_preference :: Nothing return, I send non'
         return default
 
@@ -594,8 +594,8 @@ class Webui_broker(BaseModule, Daemon):
                     f(user, key, value)
             except Exception , exp:
                 print exp.__dict__
-                logger.log("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
-                logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
+                logger.log("[%s] Warning: The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
+                logger.log("[%s] Exception type: %s" % (self.name, type(exp)))
                 logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)
 
@@ -618,10 +618,10 @@ class Webui_broker(BaseModule, Daemon):
                     lst.append(r)
             except Exception , exp:
                 print exp.__dict__
-                logger.log("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
-                logger.log("[%s] Exception type : %s" % (self.name, type(exp)))
+                logger.log("[%s] Warning: The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(),str(exp)))
+                logger.log("[%s] Exception type: %s" % (self.name, type(exp)))
                 logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
-                self.modules_manager.set_to_restart(mod)        
+                self.modules_manager.set_to_restart(mod)
 
         safe_print("Will return external_ui_link::", lst)
         return lst

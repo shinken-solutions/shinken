@@ -3,26 +3,26 @@
 DIR=$(cd $(dirname "$0"); pwd)
 echo $DIR
 
-#Schedulers
+# Schedulers
 $DIR/../../bin/launch_scheduler_debug.sh
 $DIR/test_stack2/launch_scheduler2_debug.sh
 
-#pollers
+# pollers
 $DIR/../../bin/launch_poller_debug.sh
 $DIR/test_stack2/launch_poller2_debug.sh
 
-#reactionners
+# reactionners
 $DIR/../../bin/launch_reactionner_debug.sh
 $DIR/test_stack2/launch_reactionner2_debug.sh
 
-#brokers
+# brokers
 $DIR/../../bin/launch_broker_debug.sh
 $DIR/test_stack2/launch_broker2_debug.sh
 
-#One receiver
+# One receiver
 $DIR/../../bin/launch_receiver_debug.sh
 
-#From now only one arbtier
+# From now only one arbtier
 $DIR/launch_arbiter3_debug.sh
 
 

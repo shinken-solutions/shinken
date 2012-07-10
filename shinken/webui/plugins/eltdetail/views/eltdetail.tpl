@@ -30,7 +30,14 @@ Invalid element name
 
 %# " We will save our element name so gesture functions will be able to call for the good elements."
 <script type="text/javascript">
+<<<<<<< HEAD
 var elt_name = '{{elt.get_full_name()}}';
+=======
+  var elt_name = '{{elt.get_full_name()}}';
+
+  var graphstart={{graphstart}};
+  var graphend={{graphend}};
+>>>>>>> naparuba/master
 
 var graphstart={{graphstart}};
 var graphend={{graphend}};
@@ -59,6 +66,7 @@ $(document).ready(function(){
   $('.typeahead').typeahead({
     // note that "value" is the default setting for the property option
     source: function (typeahead, query) {
+<<<<<<< HEAD
     	$.ajax({url: "/lookup/"+query,
     		success: function (data){
     			typeahead.process(data)}
@@ -66,11 +74,21 @@ $(document).ready(function(){
     },
     onselect: function(obj) { 
     	$("ul.typeahead.dropdown-menu").find('li.active').data(obj);
+=======
+      $.ajax({url: "/lookup/"+query,
+        success: function (data){
+          typeahead.process(data)}
+        });
+      },
+    onselect: function(obj) {
+      $("ul.typeahead.dropdown-menu").find('li.active').data(obj);
+>>>>>>> naparuba/master
     }
 });
   </script>
 
 
+<<<<<<< HEAD
 
   %#  "Content Container Start"
   <!--<div class="">-->
@@ -90,9 +108,49 @@ $(document).ready(function(){
 			%end
 		</span>
 	</div>
+=======
+%#  "This is the background canvas for all gesture detection things "
+%# " Don't ask me why, but the size must be included in the
+%# canvas line here or we got problem!"
+<div id='gesture_panel' class="pull-left">
+  <canvas id="canvas" width="200" height="200" class="grid_10" style="border: 1px solid black;"></canvas>
+  <div class="gesture_button">
+    <img title="By keeping a left click pressed and drawing a check, you will launch an acknowledgement." alt="gesture acknowledge" src="/static/eltdetail/images/gesture-check.png"/> Acknowledge
+  </div>
+  <div class="gesture_button">
+    <img title="By keeping a left click pressed and drawing a check, you will launch an recheck." alt="gesture recheck" src="/static/eltdetail/images/gesture-circle.png"/> Recheck
+  </div>
+  <div class="gesture_button">
+    <img title="By keeping a left click pressed and drawing a check, you will launch a try to fix command." alt="gesture fix" src="/static/eltdetail/images/gesture-zigzag.png"/> Fix
+  </div>
+
+</div>
 
 
-	<div class="span12 no-leftmargin box">	   
+%#  "Content Container Start"
+<div class="">
+<div id="content_container" class="span12">
+	<h1 class="span4 no-leftmargin state_{{elt.state.lower()}} icon_down"> <img class="imgsize4" alt="icon state" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h1>
+        %if elt.action_url != '':
+            <td><a href="{{elt.action_url}}" target=_blank><img src=/static/eltdetail/images/gear.png></a></td>
+	%end
+<!-- Gear.png can be find here: http://cdn1.iconfinder.com/data/icons/nuove/128x128/actions/gear.png --!>
+<!-- and resized --!>
+
+	<div class="span8">
+	  <span class='pull-right' id='host_tags'>
+	    %tags = elt.get_host_tags()
+	    %for t in tags:
+	    <script>add_tag_image('/static/images/sets/{{t.lower()}}/tag.png','{{t}}');</script>
+	    %end
+	  </span>
+	</div>
+
+>>>>>>> naparuba/master
+
+
+
+	<div class="span12 no-leftmargin box">
 		<table class="span4 no-leftmargin">
 			%#Alias, apretns and hostgroups arefor host only
 			%if elt_type=='host':
@@ -109,7 +167,7 @@ $(document).ready(function(){
 				<td>{{!helper.get_business_impact_text(elt)}}</td>
 			</tr>
 		</table>
-		
+
 		<table class="span3">
 			<tr>
 				<td>Parents:</td>
@@ -154,21 +212,29 @@ $(document).ready(function(){
 				<td>(none)</td>
 				%end
 			</tr>
-		</table>	    
+		</table>
 
 		<div class="span4">
 			%#   " If the elements is a root problem with a huge impact and not ack, ask to ack it!"
 			%if elt.is_problem and elt.business_impact > 2 and not elt.problem_has_been_acknowledged:
 			<div class="alert alert-critical no-bottommargin pulsate">
 				<p>This element has got an important impact on your business, please <b>fix it</b> or <b>acknowledge it</b>.</p>
+<<<<<<< HEAD
 				%# "end of the 'SOLVE THIS' highlight box"
 				%end
 			</div>
 		</div>				
+=======
+		    %# "end of the 'SOLVE THIS' highlight box"
+		    %end
+		    </div>
+		</div>
+>>>>>>> naparuba/master
 	</div>
 
 	<!-- Switch Start -->
 
+<<<<<<< HEAD
 	%# By default all is unabled
 	% chk_state = not_state =  evt_state = flp_state = 'checked=""'
 	%if not (elt.active_checks_enabled|elt.passive_checks_enabled):
@@ -216,6 +282,300 @@ $(document).ready(function(){
 				<div class="span3"> Notifications <input {{not_state}} class="iphone" type="checkbox" id='btn-not'> </div>
 				<div class="span3"> Event handler  <input {{evt_state}} class="iphone" type="checkbox" id='btn-evt'> </div>
 				<div class="span3"> Flap detection <input {{flp_state}} class="iphone" type="checkbox" id='btn-flp'> </div>
+=======
+	  %# By default all is unabled
+	  % chk_state = not_state =  evt_state = flp_state = 'checked=""'
+	  %if not (elt.active_checks_enabled|elt.passive_checks_enabled):
+	    %chk_state = 'unchecked=""'
+	  %end
+	  %if not elt.notifications_enabled:
+	     %not_state = 'unchecked=""'
+	  %end
+	  %if not elt.event_handler_enabled:
+	     %evt_state = 'unchecked=""'
+	  %end
+	  %if not elt.flap_detection_enabled:
+	     %flp_state = 'unchecked=""'
+	  %end
+
+
+	  <script type="text/javascript">
+	    $(document).ready(function() {
+               $('#btn-checks').iphoneStyle({
+                 onChange: function(elt, b){toggle_checks("{{elt.get_full_name()}}",!b);}
+	       }
+	       );
+
+               $('#btn-not').iphoneStyle({
+                 onChange: function(elt, b){toggle_notifications("{{elt.get_full_name()}}",!b);}
+	       }
+	       );
+
+               $('#btn-evt').iphoneStyle({
+                 onChange: function(elt, b){toggle_event_handlers("{{elt.get_full_name()}}",!b);}
+	       }
+	       );
+
+               $('#btn-flp').iphoneStyle({
+                 onChange: function(elt, b){toggle_flap_detection("{{elt.get_full_name()}}",!b);}
+               }
+               );
+            });
+	  </script>
+
+	  <div class='row-fluid'>
+	    <form class="well form-inline span6">
+	      <div class="row-fluid">
+		<div class="span3"> Active/passive checks  <input {{chk_state}} class="iphone" type="checkbox" id='btn-checks'> </div>
+		<div class="span3"> Notifications <input {{not_state}} class="iphone" type="checkbox" id='btn-not'> </div>
+		<div class="span3"> Event handler  <input {{evt_state}} class="iphone" type="checkbox" id='btn-evt'> </div>
+		<div class="span3"> Flap detection <input {{flp_state}} class="iphone" type="checkbox" id='btn-flp'> </div>
+	      </div>
+	    </form>
+
+	<div class='span5 well'>
+	  <div class="btn-toolbar">
+	  <div class="btn-group">
+	    <a id='btn_show_gesture' href="#" onclick="$('#gesture_panel').toggle();" class='btn' title="Show gesture panel"> <i class="icon-ok"></i> Show gesture panel</a>
+	    <a href="/depgraph/{{elt.get_full_name()}}" class='btn' title="Impact map of {{elt.get_full_name()}}"> <i class="icon-map-marker"></i> Show impact map</a>
+	  </div>
+
+	  <div class="btn-group">
+	    <a class="btn dropdown-toggle" data-toggle="dropdown" href="#"><span class="pull-left"><i class="icon-cog"></i> {{elt_type.capitalize()}} commands</span> <span class="caret pull-right"></span></a>
+	  <ul class="dropdown-menu no-maxwidth">
+	    %disabled_s = ''
+	    %if not elt.event_handler:
+	      %disabled_s = 'disabled-link'
+	    %end
+	    <li><a class='{{disabled_s}} {{global_disabled}}' href="javascript:try_to_fix('{{elt.get_full_name()}}')"><i class="icon-pencil"></i> Try to fix it!</a></li>
+	    %disabled_s = ''
+	    %if elt.problem_has_been_acknowledged:
+              %disabled_s = 'disabled-link'
+            %end
+	    <li><a class='{{disabled_s}} {{global_disabled}}' href="/forms/acknowledge/{{helper.get_uri_name(elt)}}" data-toggle="modal" data-target="#modal"><i class="icon-ok"></i> Acknowledge it!</a></li>
+	    <li><a class='{{global_disabled}}' href="javascript:recheck_now('{{elt.get_full_name()}}')"><i class="icon-repeat"></i> Recheck now</a></li>
+	    <li><a class='{{global_disabled}}' href="/forms/submit_check/{{helper.get_uri_name(elt)}}" data-toggle="modal" data-target="#modal"><i class="icon-share-alt"></i> Submit Check Result</a></li>
+	    <li><a class='disabled-link {{global_disabled}}' href="#"><i class="icon-comment"></i> Send Custom Notification</a></li>
+	    <li><a class='{{global_disabled}}' href="/forms/downtime/{{helper.get_uri_name(elt)}}" data-toggle="modal" data-target="#modal"><i class="icon-fire"></i> Schedule Downtime</a></li>
+	    <li class="divider"></li>
+	    <li><a class='disabled-link' href="#"><i class="icon-edit"></i> Edit {{elt_type.capitalize()}}</a></li>
+	  </ul>
+	  </div>
+	</div>
+	</div>
+	</div>
+
+    <!-- Start Host/Services-->
+			<!-- Left, information part-->
+    <div class="span4">
+      %if elt_type=='host':
+      <h3 class="span10">Host Information:</h3>
+      %else:
+      <h3 class="span10">Service Information:</h3>
+      %end:
+
+      <table class="span10 table table-striped table-bordered table-condensed">
+	<tr>
+	  <td class="column1">{{elt_type.capitalize()}} Status</td>
+	  <td><span class="alert-small alert-{{elt.state.lower()}}">{{elt.state}}</span> (since {{helper.print_duration(elt.last_state_change, just_duration=True, x_elts=2)}}) </td>
+	</tr>
+	<tr>
+	  <td class="column1">Status Information</td>
+	  <td>{{elt.output}}</td>
+	</tr>
+	<tr>
+	  <td class="column1">Performance Data</td>
+	  %# "If there any perf data?"
+	  %if len(elt.perf_data) > 0:
+	  <td>{{elt.perf_data}}</td>
+	  %else:
+	  <td>&nbsp;</td>
+	  %end
+	</tr>
+	<tr>
+	  <td class="column1">Current Attempt</td>
+	  <td>{{elt.attempt}}/{{elt.max_check_attempts}} ({{elt.state_type}} state)</td>
+	</tr>
+	<tr>
+	  <td class="column1">Last Check Time</td>
+	  <td><span class="quickinfo" data-original-title='Last check was at {{time.asctime(time.localtime(elt.last_chk))}}'>was {{helper.print_duration(elt.last_chk)}}</span></td>
+	</tr>
+	<tr>
+	  <td class="column1">Next Scheduled Active Check</td>
+	  <td><span class="quickinfo" data-original-title='Next active check at {{time.asctime(time.localtime(elt.next_chk))}}'>{{helper.print_duration(elt.next_chk)}}</span></td>
+	</tr>
+	<tr>
+	  <td class="column1">Last State Change</td>
+	  <td>{{time.asctime(time.localtime(elt.last_state_change))}}</td>
+	</tr>
+      </table>
+
+
+      <p class="span10" id="hidden_info_button"><a href="javascript:show_hidden_info()" class="btn"><i class="icon-plus"></i> Show more</a>	</p>
+      <h3 class="span10 hidden_infos">Additonal Informations:</h3>
+      <table class="span8 table table-striped table-bordered table-condensed hidden_infos">
+	<tr>
+	  <td class="column1">Last Notification</td>
+	  <td>{{helper.print_date(elt.last_notification)}} (notification {{elt.current_notification_number}})</td>
+	</tr>
+	<tr>
+	  <td class="column1">Check Latency / Duration</td>
+	  <td>{{'%.2f' % elt.latency}} / {{'%.2f' % elt.execution_time}} seconds</td>
+	</tr>
+	<tr>
+	  <td class="column1">Is This Host Flapping?</td>
+	  <td>{{helper.yes_no(elt.is_flapping)}} ({{helper.print_float(elt.percent_state_change)}}% state change)</td>
+	</tr>
+	<tr>
+	  <td class="column1">In Scheduled Downtime?</td>
+	  <td>{{helper.yes_no(elt.in_scheduled_downtime)}}</td>
+	</tr>
+      </table>
+
+    </div>
+    <!-- End Host/Service -->
+
+    <div class="tabbable span8 no-leftmargin">
+	    <ul class="nav nav-tabs">
+	    	<li class="active"><a href="#impacts" data-toggle="tab">Impacts</a></li>
+	    	<li><a href="#comments" data-toggle="tab">Comments</a></li>
+	    	<li><a href="#downtimes" data-toggle="tab">Downtimes</a></li>
+	    	<li><a href="#graphs" data-toggle="tab" id='tab_to_graphs'>Graphs</a></li>
+	    	<li><a href="#depgraph" data-toggle="tab" id='tab_to_depgraph'>Impact graph</a></li>
+	    </ul>
+	    <div class="tab-content">
+	    	<!-- Tab Summary Start-->
+		    <div class="tab-pane active" id="impacts">
+		      <!-- Start of the Whole info pack. We got a row of 2 thing:
+			   left is information, right is related elements -->
+		      <div class="row-fluid">
+		      <!-- So now it's time for the right part, related elements -->
+		      <div class="span12">
+
+			<!-- Show our father dependencies if we got some -->
+			%#    Now print the dependencies if we got somes
+			%if len(elt.parent_dependencies) > 0:
+			<h3 class="span10">Root cause:</h3>
+			<a id="togglelink-{{elt.get_dbg_name()}}" href="javascript:toggleBusinessElt('{{elt.get_dbg_name()}}')"> {{!helper.get_button('Show dependency tree', img='/static/images/expand.png')}}</a>
+			<div class="clear"></div>
+			{{!helper.print_business_rules(datamgr.get_business_parents(elt), source_problems=elt.source_problems)}}
+
+			%end
+
+			<!-- If we are an host and not a problem, show our services -->
+			%# " Only print host service if elt is an host of course"
+			%# " If the host is a problem, services will be print in the impacts, so don't"
+			%# " print twice "
+			%if elt_type=='host' and not elt.is_problem:
+			%if len(elt.services) > 0:
+          			<h3 class="span10">My services:</h3>
+			%elif len(elt.parent_dependencies) == 0:
+				<h3 class="span10">No services</h3>
+			%end
+			<hr>
+			<div class='host-services'>
+			  %nb = 0
+			  %for s in helper.get_host_services_sorted(elt):
+			  %nb += 1
+
+			  %# " We put a max imapct to print, bacuse too high is just useless"
+			  %if nb > max_impacts:
+			  %   break
+			  %end
+
+			  %if nb == 8:
+			  <div style="float:right;" id="hidden_impacts_or_services_button"><a href="javascript:show_hidden_impacts_or_services()"> {{!helper.get_button('Show all services', img='/static/images/expand.png')}}</a></div>
+			  %end
+
+			  %if nb < 8:
+		      <div class="service">
+		      %else:
+			  <div class="service hidden_impacts_services">
+			  %end
+			  <div>
+			    <img style="width: 16px; height:16px" alt="icon state" src="{{helper.get_icon_state(s)}}">
+			    <span class='alert-small alert-{{s.state.lower()}}' style="font-size:110%">{{s.state}}</span> for <span style="font-size:110%">{{!helper.get_link(s, short=True)}}</span> since {{helper.print_duration(s.last_state_change, just_duration=True, x_elts=2)}}
+			  	%for i in range(0, s.business_impact-2):
+			  	<img alt="icon state" src="/static/images/star.png">
+			  	%end
+
+			  </div>
+			  </div>
+			  %# End of this service
+			 %end
+			 </div>
+			%end #of the only host part
+
+
+			<!-- If we are a root problem and got real impacts, show them! -->
+			%if elt.is_problem and len(elt.impacts) != 0:
+			<h3 class="span10">My impacts:</h3>
+			<div class='host-services'>
+			  %nb = 0
+			  %for i in helper.get_impacts_sorted(elt):
+			  %nb += 1
+			  %if nb == 8:
+			    <div style="float:right;" id="hidden_impacts_or_services_button"><a href="javascript:show_hidden_impacts_or_services()"> {{!helper.get_button('Show all impacts', img='/static/images/expand.png')}}</a></div>
+			  %end
+			  %if nb < 8:
+		            <div class="service">
+		          %else:
+			  <div class="service hidden_impacts_services">
+			  %end
+
+			  <div>
+			    <img style="width: 16px; height:16px" alt="icon state" src="{{helper.get_icon_state(i)}}">
+			    <span class='alert-small alert-{{i.state.lower()}}' style="font-size:110%">{{i.state}}</span> for <span style="font-size:110%">{{!helper.get_link(i, short=True)}}</span> since {{helper.print_duration(i.last_state_change, just_duration=True, x_elts=2)}}
+			  	%for i in range(0, i.business_impact-2):
+			  	<img alt="icon state" src="/static/images/star.png">
+			  	%end
+
+			  </div>
+			  </div>
+			  %# End of this impact
+			  %end
+			    </div>
+			    %# end of the 'is problem' if
+			    %end
+
+
+
+		      </div><!-- End of the right part -->
+
+		      </div>
+		      <!-- End of the row with the 2 blocks-->
+		    </div>
+		    <!-- Tab Summary End-->
+
+		    <!-- Tab Comments Start -->
+		    <div class="tab-pane" id="comments">
+		      <div>
+			<ul class="nav nav-pills">
+			  <li class="active"><a class='{{global_disabled}}' href="/forms/comment/{{helper.get_uri_name(elt)}}" data-toggle="modal" data-target="#modal"><i class="icon-plus"></i> Add comment</a></li>
+			  <li> <a class='{{global_disabled}}' onclick="delete_all_comments('{{elt.get_full_name()}}')" href="#" class=""><i class="icon-minus"></i> Delete all comments</a> </li>
+			</ul>
+		      </div>
+		      <div class="clear"></div>
+
+		      <div id="log_container">
+			%if len(elt.comments) > 0:
+			      <h2></h2>
+			      <ol>
+			  %for c in elt.comments:
+			  <li>
+			    <div class="left">
+			      <p class="log-text">{{c.comment}}</p>
+			      <div class="log-meta"> <span><b>Author:</b> {{c.author}}</span> <span><b>Creation:</b> {{helper.print_date(c.entry_time)}}</span> <span>	<b>Expire:</b>{{helper.print_date(c.expire_time)}}</span>
+			      </div>
+			    </div>
+			    <div class="right log-action"><a class="icon_delete {{global_disabled}}" href="javascript:delete_comment('{{elt.get_full_name()}}', {{c.id}})">Delete</a></div>
+			  </li>
+			  %end
+			      </ol>
+			      %else:
+			      <p>No comments available</p>
+			      %end
+>>>>>>> naparuba/master
 			</div>
 		</form>
 
@@ -226,6 +586,7 @@ $(document).ready(function(){
 					<a href="/depgraph/{{elt.get_full_name()}}" class='btn' title="Impact map of {{elt.get_full_name()}}"> <i class="icon-map-marker"></i> Show impact map</a>
 				</div>
 
+<<<<<<< HEAD
 				<div class="btn-group">
 					<a class="btn dropdown-toggle" data-toggle="dropdown" href="#"><span class="pull-left"><i class="icon-cog"></i> {{elt_type.capitalize()}} commands</span> <span class="caret pull-right"></span></a>
 					<ul class="dropdown-menu no-maxwidth">
@@ -247,6 +608,37 @@ $(document).ready(function(){
 						<li><a class='disabled-link' href="#"><i class="icon-edit"></i> Edit {{elt_type.capitalize()}}</a></li>
 					</ul>
 				</div>
+=======
+		    <!-- Tab Downtimes Start -->
+		    <div class="tab-pane" id="downtimes">
+		      <div>
+			<ul class="nav nav-pills">
+			  <li class="active"><a class='{{global_disabled}}' href="/forms/downtime/{{helper.get_uri_name(elt)}}" data-toggle="modal" data-target="#modal"><i class="icon-plus"></i> Add a downtime</a></li>
+			  <li> <a onclick="delete_all_downtimes('{{elt.get_full_name()}}')" href="#" class="{{global_disabled}}"><i class="icon-minus"></i> Delete all downtimes</a> </li>
+			</ul>
+		      </div>
+		      <div class="clear"></div>
+
+		      <div id="log_container">
+			%if len(elt.downtimes) > 0:
+			      <h2></h2>
+			      <ol>
+			  %for dt in elt.downtimes:
+			  <li>
+			    <div class="left">
+			      <p class="log-text">{{dt.comment}}</p>
+			      <div class="log-meta"> <span><b>Author:</b> {{dt.author}}</span> <span><b>Start:</b> {{helper.print_date(dt.start_time)}}</span> <span>	<b>Expire:</b>{{helper.print_date(dt.end_time)}}</span>
+			      </div>
+			    </div>
+			    <div class="right log-action"><a class="icon_delete {{global_disabled}}" href="javascript:delete_downtime('{{elt.get_full_name()}}', {{dt.id}})">Delete</a></div>
+			  </li>
+			  %end
+			      </ol>
+			      %else:
+			      <p>No downtime planned.</p>
+			      %end
+			</div>
+>>>>>>> naparuba/master
 			</div>
 		</div>
 	</div>
@@ -261,6 +653,7 @@ $(document).ready(function(){
 				<li><a href="#gesture" data-toggle="tab">Gesture</a></li>
 			</ul>
 
+<<<<<<< HEAD
 			<div class="tab-content">
 				<div class="tab-pane fade in active" id="basic">
 					%if elt_type=='host':
@@ -625,19 +1018,120 @@ $(document).ready(function(){
 
 		      		<div class='row-fluid well span8 jcrop'>
 		      			<div id='real_graphs'>
+=======
+			<!-- Tab Graph Start -->
+			<div class="tab-pane" id="graphs">
+	       		%uris = app.get_graph_uris(elt, graphstart, graphend)
+	      		%if len(uris) == 0:
+	      			<h3>No graphs, sorry</h3>
+				%else:
+				 <h3>Graphs</h3>
+				 <div class='row-fluid well span6'>
+
+			<!-- Get the uris for the 4 standard time ranges in advance	 -->
+				   %now = int(time.time())
+				   %fourhours = now - 3600*4
+				   %lastday =   now - 86400
+				   %lastweek =  now - 86400*7
+				   %lastmonth = now - 86400*31
+				   %lastyear =  now - 86400*365
+
+                   %# Let's get all the uris at once.
+                   %uris_4h = app.get_graph_uris(elt, fourhours, now)
+                   %uris_1d = app.get_graph_uris(elt, lastday, now)
+                   %uris_1w = app.get_graph_uris(elt, lastweek, now)
+                   %uris_1m = app.get_graph_uris(elt, lastmonth, now)
+
+                  <!-- Use of javascript to change the content of a div!-->
+               	  <div class='span2'><a onclick="setHTML(html_4h,{{fourhours}});" class=""> 4 hours</a></div>
+				  <div class='span2'><a onclick="setHTML(html_1d,{{lastday}});" class=""> 1 day</a></div>
+				  <div class='span2'><a onclick="setHTML(html_1w,{{lastweek}});" class=""> 1 week</a></div>
+				  <div class='span2'><a onclick="setHTML(html_1m,{{lastmonth}});" class=""> 1 month</a></div>
+
+
+				 </div>
+
+					<script langage="javascript">
+						function setHTML(html,start) {
+						<!-- change the content of the div --!>
+							document.getElementById("real_graphs").innerHTML=html;
+
+							<!-- and call the jcrop javascript --!>
+							$('.jcropelt').Jcrop({
+								onSelect: update_coords,
+								onChange: update_coords
+							});
+							graphstart=start;
+							get_range();
+						}
+
+						<!-- let's create the html content for each time rand --!>
+						<!-- This is quite ugly here. I do the same thing 4 times --!->
+						<!-- someone said "function"? You're right.--!>
+						<!-- but the mix between python and javascript is not a easy thing for me --!>
+						html_4h='<p>';
+						html_1d='<p>';
+						html_1w='<p>';
+						html_1m='<p>';
+						%for g in uris_4h:
+							%img_src = g['img_src']
+							%link = g['link']
+							var img_src="{{img_src}}";
+							html_4h = html_4h + '<img src="'+ img_src.replace("'","\'") +'" class="jcropelt"/>';
+                            html_4h = html_4h + '<a href="{{link}}" class="btn"><i class="icon-plus"></i> Show more</a>';
+                            html_4h = html_4h + '<a href="javascript:graph_zoom(\'/{{elt_type}}/{{elt.get_full_name()}}?\')" class="btn"><i class="icon-zoom-in"></i> Zoom</a>';
+                            html_4h = html_4h + '<br>';
+							%end
+						html_4h=html_4h+'</p>';
+
+     					%for g in uris_1d:
+							%img_src = g['img_src']
+                            %link = g['link']
+							var img_src="{{img_src}}";
+                            html_1d = html_1d +'<img src="'+ img_src.replace("'","\'") +'" class="jcropelt"/>';
+                            html_1d = html_1d + '<a href={{link}}" class="btn"><i class="icon-plus"></i> Show more</a>';
+                            html_1d = html_1d + '<a href="javascript:graph_zoom(\'/{{elt_type}}/{{elt.get_full_name()}}?\')" class="btn"><i class="icon-zoom-in"></i> Zoom</a>';
+                            html_1d = html_1d + '<br>';
+							%end
+						html_1d=html_1d+'</p>';
+
+						%for g in uris_1w:
+							%img_src = g['img_src']
+							%link = g['link']
+							var img_src="{{img_src}}";
+							html_1w = html_1w + '<img src="'+ img_src.replace("'","\'") +'" class="jcropelt"/>';
+							html_1w = html_1w + '<a href="{{link}}" class="btn"><i class="icon-plus"></i> Show more</a>';
+							html_1w = html_1w + '<a href="javascript:graph_zoom(\'/{{elt_type}}/{{elt.get_full_name()}}?\')" class="btn"><i class="icon-zoom-in"></i> Zoom</a>';
+                            html_1w = html_1w + '<br>';
+							%end
+
+						%for g in uris_1m:
+							%img_src = g['img_src']
+							%link = g['link']
+							var img_src="{{img_src}}";
+							html_1m = html_1m + '<img src="'+ img_src.replace("'","\'") +'" class="jcropelt"/>';
+							html_1m = html_1m + '<a href="{{link}}" class="btn"><i class="icon-plus"></i> Show more</a>';
+							html_1m = html_1m + '<a href="javascript:graph_zoom(\'/{{elt_type}}/{{elt.get_full_name()}}?\')" class="btn"><i class="icon-zoom-in"></i> Zoom</a>';
+                            html_1m = html_1m + '<br>';
+							%end
+					</script>
+
+				<div class='row-fluid well span8 jcrop'>
+    			  <div id='real_graphs'>
+>>>>>>> naparuba/master
     			  <!-- Let's keep this part visible. This is the custom and default range --!>
 				    %for g in uris:
 				      %img_src = g['img_src']
 				      %link = g['link']
 				      <p>
-						
+
 				        <img src="{{img_src}}" class="jcropelt"/>
 				        <a href="{{link}}" class="btn"><i class="icon-plus"></i> Show more</a>
 				        <a href="javascript:graph_zoom('/{{elt_type}}/{{elt.get_full_name()}}?')" class="btn"><i class="icon-zoom-in"></i> Zoom</a>
                       </p>
-                      
-					%end      
-					
+
+					%end
+
 				  </div>
 				</div>
 				%end
@@ -666,7 +1160,13 @@ $(document).ready(function(){
 
 
 
+<<<<<<< HEAD
 	<!--</div>-->
+=======
+	    </div>
+
+    </div>
+>>>>>>> naparuba/master
 </div>
 
 </div>

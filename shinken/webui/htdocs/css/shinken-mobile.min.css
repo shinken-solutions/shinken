@@ -43,9 +43,9 @@ h1 img{
 	padding:5px;
 	word-wrap: break-word;
 }
-.icon-logout-mobile { 
+.icon-logout-mobile {
  /*background-image: url("/static/img/icons/icon-logout.png"); */
- background-position: right; 
- height: 25px; 
- width: 30px; 
-} 
+ background-position: right;
+ height: 25px;
+ width: 30px;
+}

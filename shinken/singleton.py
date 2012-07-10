@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -33,7 +33,7 @@ class Singleton(type):
     """
 
     def __init__(cls, name, bases, dict):
-        print "Info : Singleton Init"
+        print "Info: Singleton Init"
         super(Singleton, cls).__init__(name, bases, dict)
         cls.instance = None
 

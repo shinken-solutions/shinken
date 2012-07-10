@@ -29,7 +29,7 @@ try:
 except ImportError:
     try:
         from simplejson import dumps, loads, JSONEncoder
-        # ujson's dumps() cannot handle a separator parameter, which is 
+        # ujson's dumps() cannot handle a separator parameter, which is
         # needed to avoid unnecessary spaces in the json output
         # That's why simplejson and json manipulate the encoder class
         JSONEncoder.item_separator = ','
@@ -51,7 +51,7 @@ class LiveStatusResponse:
     """
 
     separators = map(lambda x: chr(int(x)), [10, 59, 44, 124])
-    
+
     def __init__(self, responseheader = 'off', outputformat = 'csv', keepalive = 'off', columnheaders = 'off', separators = separators):
         self.responseheader = responseheader
         self.outputformat = outputformat

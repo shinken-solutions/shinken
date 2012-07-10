@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -54,7 +54,7 @@ class Worker:
 
     """
 
-    id = 0#None
+    id = 0 # None
     _process = None
     _mortal = None
     _idletime = None
@@ -158,7 +158,7 @@ class Worker:
     # Launch checks that are in status
     # REF: doc/shinken-action-queues.png (4)
     def launch_new_checks(self):
-        #queue
+        # queue
         for chk in self.checks:
             if chk.status == 'queue':
                 self._idletime = 0
@@ -254,7 +254,7 @@ class Worker:
                 if cmsg.get_type() == 'Die':
                     logger.debug("[%d] Dad say we are dying..." % self.id)
                     break
-            except :
+            except:
                 pass
 
             if self._mortal == True and self._idletime > 2 * self._timeout:

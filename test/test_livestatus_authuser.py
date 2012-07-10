@@ -1,24 +1,24 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#Copyright (C) 2009-2010 :
+# Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
 #
@@ -123,7 +123,7 @@ www1    adm(adm1,adm2,adm3) web(web1,web2) winadm(bill,steve)
         for service in self.sched.services:
             objlist.append([service, 0, 'OK'])
         self.scheduler_loop(1, objlist)
-        
+
         self.update_broker()
         #self.livestatus_broker.datamgr.rg.all_done_linking(1)
         print "rg is", self.livestatus_broker.datamgr.rg.hosts
@@ -157,7 +157,7 @@ www1    adm(adm1,adm2,adm3) web(web1,web2) winadm(bill,steve)
         #print "rg is", self.livestatus_broker.datamgr.rg.hostgroups._id_contact_heap
         for contact in sorted(self.livestatus_broker.datamgr.rg.hostgroups._id_contact_heap.keys()):
             print "%-10s %s" % (contact, self.livestatus_broker.datamgr.rg.hostgroups._id_contact_heap[contact])
-        
+
 
     def test_host_authorization(self):
         self.print_header()
@@ -177,7 +177,7 @@ KeepAlive: on
 """
         # test_host_0/1
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print response 
+        print response
         pyresponse = eval(response)
         self.assert_(len(pyresponse) == 3)
         self.assert_("dbsrv1" in [h[0] for h in pyresponse])
@@ -192,7 +192,7 @@ KeepAlive: on
 """
         # only windows
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print response 
+        print response
         pyresponse = eval(response)
         self.assert_(len(pyresponse) == 3)
         self.assert_("dbsrv3" in [h[0] for h in pyresponse])
@@ -218,9 +218,9 @@ KeepAlive: on
 """
         # all because bill is host contact (via cgroup winadm), 2xapp_web, 1xos_windows
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print response 
+        print response
         pyresponse = eval(response)
-        print pyresponse 
+        print pyresponse
         self.assert_(len(pyresponse[0][1]) == 3)
         self.assert_("app_web_apache_check_http" in pyresponse[0][1])
         self.assert_("app_web_apache_check_errorlog" in pyresponse[0][1])
@@ -235,7 +235,7 @@ KeepAlive: on
 """
         # none because bill is neither host contact nor service contact
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print response 
+        print response
         pyresponse = eval(response)
         self.assert_(len(pyresponse) == 0)
 
@@ -251,9 +251,9 @@ KeepAlive: on
         # BUT: this query is a hosts-table-query. cc1 has no access to www2
         # Therefore, the result is empty (confirmed with mk-livestatus)
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print response 
+        print response
         pyresponse = eval(response)
-        print pyresponse 
+        print pyresponse
         self.assert_(len(pyresponse) == 0)
 
         request = """GET services
@@ -265,9 +265,9 @@ KeepAlive: on
 """
         # 1 because cc1 is direct contact for 1 service, app_web_apache_check_http
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print response 
+        print response
         pyresponse = eval(response)
-        print pyresponse 
+        print pyresponse
         self.assert_(len(pyresponse[0]) == 1)
         self.assert_("app_web_apache_check_http" in pyresponse[0][0])
 
@@ -279,9 +279,9 @@ KeepAlive: on
 """
         # cc1 is contact for 7 services
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print response 
+        print response
         pyresponse = eval(response)
-        print pyresponse 
+        print pyresponse
         self.assert_(len(pyresponse) == 7)
 
     def test_service_authorization_strict(self):
@@ -308,9 +308,9 @@ KeepAlive: on
         # BUUUHUUTT this is a host query. bill is a contact of this host. so we get the full list
         # of services. not really consistent, but confirmed with mk-livestatus.
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print response 
+        print response
         pyresponse = eval(response)
-        print pyresponse 
+        print pyresponse
         #for contact in sorted(self.livestatus_broker.datamgr.rg.hostgroups._id_contact_heap.keys()):
         #    print "%-10s %s" % (contact, self.livestatus_broker.datamgr.rg.hosts._id_contact_heap[contact])
         #    here we see in fact, that bill is only contact to www2/os_windows_check_autosvc
@@ -327,13 +327,13 @@ Filter: host_name = www2
 OutputFormat: python
 KeepAlive: on
 """
-        # now send a service query. this time we get only one service because bill is only 
+        # now send a service query. this time we get only one service because bill is only
         # a contact for this service (even not as a contact-attribute in the service definition
         # but by service-with-no-contact-attribute-iherits-from-host)
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print response 
+        print response
         pyresponse = eval(response)
-        print pyresponse 
+        print pyresponse
         self.assert_(len(pyresponse[0]) == 1)
         self.assert_("os_windows_check_autosvc" in pyresponse[0][0])
 
@@ -346,7 +346,7 @@ KeepAlive: on
 """
         # none because bill is neither host contact nor service contact
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print response 
+        print response
         pyresponse = eval(response)
         self.assert_(len(pyresponse) == 0)
 
@@ -362,9 +362,9 @@ KeepAlive: on
         # BUT: this query is a hosts-table-query. cc1 has no access to www2
         # Therefore, the result is empty (confirmed with mk-livestatus)
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print response 
+        print response
         pyresponse = eval(response)
-        print pyresponse 
+        print pyresponse
         self.assert_(len(pyresponse) == 0)
 
         request = """GET services
@@ -376,9 +376,9 @@ KeepAlive: on
 """
         # 1 because cc1 is direct contact for 1 service, app_web_apache_check_http
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print response 
+        print response
         pyresponse = eval(response)
-        print pyresponse 
+        print pyresponse
         self.assert_(len(pyresponse[0]) == 1)
         self.assert_("app_web_apache_check_http" in pyresponse[0][0])
 
@@ -390,9 +390,9 @@ KeepAlive: on
 """
         # cc1 is contact for 7 services
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print response 
+        print response
         pyresponse = eval(response)
-        print pyresponse 
+        print pyresponse
         self.assert_(len(pyresponse) == 7)
 
         request = """GET services
@@ -404,9 +404,9 @@ KeepAlive: on
         # adm1 is only host contact. it is never mentioned in a service definition
         # only www2/os_windows_check_autosvc inherits adm1 via host
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print response 
+        print response
         pyresponse = eval(response)
-        print pyresponse 
+        print pyresponse
         self.assert_(len(pyresponse) == 1)
 
 
@@ -438,7 +438,7 @@ KeepAlive: on
 """
         # bill is contact for all hosts in the windows group
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print response 
+        print response
         pyresponse = eval(response)
         self.assert_(len(pyresponse) == 1)
         self.assert_(pyresponse[0][0] == "windows")
@@ -574,6 +574,6 @@ if __name__ == '__main__':
     unittest.main()
     #cProfile.runctx( command, globals(), locals(), filename="/tmp/livestatus.profile" )
 
-    #allsuite = unittest.TestLoader.loadTestsFromModule(TestConfig) 
-    #unittest.TextTestRunner(verbosity=2).run(allsuite) 
+    #allsuite = unittest.TestLoader.loadTestsFromModule(TestConfig)
+    #unittest.TextTestRunner(verbosity=2).run(allsuite)
 

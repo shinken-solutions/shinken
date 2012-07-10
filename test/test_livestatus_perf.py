@@ -1,24 +1,24 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#Copyright (C) 2009-2010 :
+# Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
 from shinken_test import *
@@ -1178,7 +1178,7 @@ class PerfTest(ShinkenTest):
         self.livestatus_broker = None
 
     def update_broker(self, dodeepcopy=False):
-        #The brok should be manage in the good order
+        # The brok should be manage in the good order
         ids = self.sched.broks.keys()
         ids.sort()
         for brok_id in ids:
@@ -1249,8 +1249,8 @@ class PerfTest(ShinkenTest):
         print "%d services are in a hard/critical state" % lenc
         self.scheduler_loop(3, nonok)
         self.update_broker()
-        last_host = reduce(lambda x,y:y,self.livestatus_broker.datamgr.rg.hosts) 
-        #last_service = reduce(lambda x,y:y,self.livestatus_broker.datamgr.rg.services) 
+        last_host = reduce(lambda x,y: y,self.livestatus_broker.datamgr.rg.hosts)
+        #last_service = reduce(lambda x,y:y,self.livestatus_broker.datamgr.rg.services)
 
         elapsed = {}
         requestelapsed = {}
@@ -1262,7 +1262,7 @@ class PerfTest(ShinkenTest):
             requestelapsed[page] = []
             for request in pages[page]:
                 print "+--------------------------\n%s\n--------------------------\n" % request
-                # 
+                #
                 request = request.replace('omd-live',last_host.host_name)
                 request = request.replace('Dummy Service', 'test_ok_19')
                 print "---------------------------\n%s\n--------------------------\n" % request

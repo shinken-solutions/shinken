@@ -24,7 +24,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#File for a Thrift class which can be used by the status-dat-broker
+# File for a Thrift class which can be used by the status-dat-broker
 import re
 import copy
 import os
@@ -56,7 +56,7 @@ def join_with_separators(prop, ref, request, *args):
 
 def worst_host_state(state_1, state_2):
     """Return the worst of two host states."""
-    #lambda x: reduce(lambda g, c: c if g == 0 else (c if c == 1 else g), (y.state_id for y in x), 0),
+    # lambda x: reduce(lambda g, c: c if g == 0 else (c if c == 1 else g), (y.state_id for y in x), 0),
     if state_2 == 0:
         return state_1
     if state_1 == 1:
@@ -66,7 +66,7 @@ def worst_host_state(state_1, state_2):
 
 def worst_service_state(state_1, state_2):
     """Return the worst of two service states."""
-    #reduce(lambda g, c: c if g == 0 else (c if c == 2 else (c if (c == 3 and g != 2) else g)), (z.state_id for y in x for z in y.services if z.state_type_id == 1), 0),
+    # reduce(lambda g, c: c if g == 0 else (c if c == 2 else (c if (c == 3 and g != 2) else g)), (z.state_id for y in x for z in y.services if z.state_type_id == 1), 0),
     if state_2 == 0:
         return state_1
     if state_1 == 2:
@@ -80,7 +80,7 @@ def worst_service_state(state_1, state_2):
 
 class Thrift_status(object, Hooker):
     """A class that represents the status of all objects in the broker
-    
+
     """
     # Use out_map from the mapping.py file
     out_map = out_map
@@ -102,7 +102,7 @@ class Thrift_status(object, Hooker):
         self.dbconn = dbconn
         Thrift_status.pnp_path = pnp_path
         self.debuglevel = 2
-        self.dbconn.row_factory = self.row_factory 
+        self.dbconn.row_factory = self.row_factory
         self.return_queue = return_queue
 
         self.create_out_map_delegates()
@@ -131,11 +131,11 @@ class Thrift_status(object, Hooker):
         handles the execution of the request and formatting of the result.
 
         """
-        request = ThriftRequest(data, self.configs, self.hosts, self.services, 
-            self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, 
+        request = ThriftRequest(data, self.configs, self.hosts, self.services,
+            self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands,
             self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.return_queue, self.counters)
         request.parse_input(data)
-        #print "REQUEST\n%s\n" % data
+        # print "REQUEST\n%s\n" % data
         to_del = []
         if sorted([q.my_type for q in request.queries]) == ['command', 'query', 'wait']:
             # The Multisite way
@@ -192,16 +192,16 @@ class Thrift_status(object, Hooker):
             print "We currently do not handle this kind of composed request"
             print sorted([q.my_type for q in request.queries])
 
-        #print "RESPONSE\n%s\n" % output
+        # print "RESPONSE\n%s\n" % output
         print "DURATION %.4fs" % (time.time() - request.tic)
         return output, keepalive
 
 
-                    
+
 
     def create_out_map_delegates(self):
         """Add delegate keys for certain attributes.
-        
+
         Some attributes are not directly reachable via prop or
         need a complicated depythonize function.
         Example: Logline (the objects created for a "GET log" request
@@ -218,23 +218,23 @@ class Thrift_status(object, Hooker):
         as = state
         This instructs the hook function to first get attribute state of
         the object represented by log_host.
-        
+
         """
         delegate_map = {
-            'Logline' : {
-                'current_service_' : 'log_service',
-                'current_host_' : 'log_host',
+            'Logline': {
+                'current_service_': 'log_service',
+                'current_host_': 'log_host',
             },
-            'Service' : {
-                'host_' : 'host',
+            'Service': {
+                'host_': 'host',
             },
-            'Comment' : {
-                'service_' : 'ref',
-                'host_' : 'ref',
+            'Comment': {
+                'service_': 'ref',
+                'host_': 'ref',
             },
-            'Downtime' : {
-                'service_' : 'ref',
-                'host_' : 'ref',
+            'Downtime': {
+                'service_': 'ref',
+                'host_': 'ref',
             }
         }
         for objtype in Thrift_status.out_map:

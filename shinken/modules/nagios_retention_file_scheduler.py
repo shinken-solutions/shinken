@@ -23,8 +23,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-#This Class is an example of an Scheduler module
-#Here for the configuration phase AND running one
+# This Class is an example of an Scheduler module
+# Here for the configuration phase AND running one
 
 
 import re
@@ -42,13 +42,13 @@ from shinken.log import logger
 
 
 properties = {
-    'daemons' : ['scheduler'],
-    'type' : 'nagios_retention_file',
-    'external' : False,
+    'daemons': ['scheduler'],
+    'type': 'nagios_retention_file',
+    'external': False,
 }
 
 
-#called by the plugin manager to get a broker
+# called by the plugin manager to get a broker
 def get_instance(plugin):
     print "Get a Nagios3 retention scheduler module for plugin %s" % plugin.get_name()
     path = plugin.path
@@ -57,7 +57,7 @@ def get_instance(plugin):
 
 
 
-#Just print some stuff
+# Just print some stuff
 class Nagios_retention_scheduler(BaseModule):
     def __init__(self, mod_conf, path):
         BaseModule.__init__(self, mod_conf)
@@ -78,21 +78,21 @@ class Nagios_retention_scheduler(BaseModule):
     def read_retention_buf(self, buf):
         params = []
         objectscfg = {'void': [],
-                      'timeperiod' : [],
-                      'command' : [],
-                      'contactgroup' : [],
-                      'hostgroup' : [],
-                      'contact' : [],
-                      'notificationway' : [],
-                      'host' : [],
-                      'service' : [],
-                      'servicegroup' : [],
-                      'servicedependency' : [],
-                      'hostdependency' : [],
-                      'hostcomment' : [],
-                      'hostdowntime' : [],
-                      'servicecomment' : [],
-                      'servicedowntime' : [],
+                      'timeperiod': [],
+                      'command': [],
+                      'contactgroup': [],
+                      'hostgroup': [],
+                      'contact': [],
+                      'notificationway': [],
+                      'host': [],
+                      'service': [],
+                      'servicegroup': [],
+                      'servicedependency': [],
+                      'hostdependency': [],
+                      'hostcomment': [],
+                      'hostdowntime': [],
+                      'servicecomment': [],
+                      'servicedowntime': [],
                       }
         tmp = []
         tmp_type = 'void'
@@ -103,7 +103,7 @@ class Nagios_retention_scheduler(BaseModule):
         for line in lines:
             line = line.decode('utf8', 'ignore')
             line = line.split(';')[0]
-            #A backslash means, there is more to come
+            # A backslash means, there is more to come
             if re.search("\\\s*$", line):
                 continuation_line = True
                 line = re.sub("\\\s*$", "", line)
@@ -111,7 +111,7 @@ class Nagios_retention_scheduler(BaseModule):
                 tmp_line += line
                 continue
             elif continuation_line:
-                #Now the continuation line is complete
+                # Now the continuation line is complete
                 line = re.sub("^\s+", "", line)
                 line = tmp_line + line
                 tmp_line = ''
@@ -121,15 +121,15 @@ class Nagios_retention_scheduler(BaseModule):
             if re.search("^\s*\t*#|^\s*$|^\s*}", line):
                 pass
 
-            #A define must be catch and the type save
-            #The old entry must be save before
+            # A define must be catch and the type save
+            # The old entry must be save before
             elif re.search("{$", line):
                 in_define = True
                 if tmp_type not in objectscfg:
                     objectscfg[tmp_type] = []
                 objectscfg[tmp_type].append(tmp)
                 tmp = []
-                #Get new type
+                # Get new type
                 elts = re.split('\s', line)
                 tmp_type = elts[0]
 #                tmp_type = tmp_type.split('{')[0]
@@ -161,7 +161,7 @@ class Nagios_retention_scheduler(BaseModule):
         return objects
 
 
-    #We've got raw objects in string, now create real Instances
+    # We've got raw objects in string, now create real Instances
     def create_objects(self, raw_objects, types_creations):
         all_obj = {}
         for t in types_creations:
@@ -181,13 +181,13 @@ class Nagios_retention_scheduler(BaseModule):
                     val = getattr(obj, prop)
                     val = f(val)
                     setattr(obj, prop, val)
-                else: #no pythonize, int by default
+                else: # no pythonize, int by default
                     # if cls.my_type != 'service':
                     #  print "Intify", prop, getattr(obj, prop)
                     if prop != 'state_type':
                         val = int(getattr(obj, prop))
                         setattr(obj, prop, val)
-                    else:#state type is a int, but should be set HARd or SOFT
+                    else: # state type is a int, but should be set HARd or SOFT
                         val = int(getattr(obj, prop))
                         if val == 1:
                             setattr(obj, prop, 'HARD')
@@ -198,20 +198,20 @@ class Nagios_retention_scheduler(BaseModule):
 
     def create_objects_for_type(self, raw_objects, type, types_creations):
         t = type
-        #Ex: the above code do for timeperiods:
-        #timeperiods = []
-        #for timeperiodcfg in objects['timeperiod']:
+        # Ex: the above code do for timeperiods:
+        # timeperiods = []
+        # for timeperiodcfg in objects['timeperiod']:
         #    t = Timeperiod(timeperiodcfg)
         #    t.clean()
         #    timeperiods.append(t)
         #self.timeperiods = Timeperiods(timeperiods)
 
         (cls, clss, prop) = types_creations[t]
-        #List where we put objects
+        # List where we put objects
         lst = []
         for obj_cfg in raw_objects[t]:
-            #We create the object
-            #print "Create obj", obj_cfg
+            # We create the object
+            # print "Create obj", obj_cfg
             o = cls(obj_cfg)
             o.clean()
             if t in self.property_mapping:
@@ -226,14 +226,14 @@ class Nagios_retention_scheduler(BaseModule):
             self.pythonize_running(o, obj_cfg)
             lst.append(o)
         #print "Got", lst
-        #we create the objects Class and we set it in prop
+        # we create the objects Class and we set it in prop
         #setattr(self, prop, clss(lst))
         #print "Object?", clss(lst)
         return clss(lst)
 
 
     def create_and_link_comments(self, raw_objects, all_obj):
-    #first service
+    # first service
         for obj_cfg in raw_objects['servicecomment']:
         #print "Managing", obj_cfg
             host_name = obj_cfg['host_name']
@@ -245,7 +245,7 @@ class Nagios_retention_scheduler(BaseModule):
             #print "Created cmd", cmd
                 srv.add_comment(cmd)
 
-    #then hosts
+    # then hosts
         for obj_cfg in raw_objects['hostcomment']:
         #print "Managing", obj_cfg
             host_name = obj_cfg['host_name']
@@ -260,7 +260,7 @@ class Nagios_retention_scheduler(BaseModule):
 
 
     def create_and_link_downtimes(self, raw_objects, all_obj):
-    #first service
+    # first service
         for obj_cfg in raw_objects['servicedowntime']:
             print "Managing", obj_cfg
             host_name = obj_cfg['host_name']
@@ -272,7 +272,7 @@ class Nagios_retention_scheduler(BaseModule):
                 print "Created dwn", dwn
                 srv.add_downtime(dwn)
 
-    #then hosts
+    # then hosts
         for obj_cfg in raw_objects['hostdowntime']:
             print "Managing", obj_cfg
             host_name = obj_cfg['host_name']
@@ -290,7 +290,7 @@ class Nagios_retention_scheduler(BaseModule):
         log_mgr = logger
         print "[NagiosRetention] asking me to load the retention file"
 
-        #Now the old flat file way :(
+        # Now the old flat file way :(
         log_mgr.log("[NagiosRetention]Reading from retention_file %s" % self.path)
         try:
             f = open(self.path)
@@ -319,20 +319,20 @@ class Nagios_retention_scheduler(BaseModule):
         raw_objects = self.read_retention_buf(buf)
         print "Fun raw"
 
-        types_creations = {'timeperiod' : (Timeperiod, Timeperiods, 'timeperiods'),
-                   'service' : (Service, Services, 'services'),
-                   'host' : (Host, Hosts, 'hosts'),
-                   'contact' : (Contact, Contacts, 'contacts'),
+        types_creations = {'timeperiod': (Timeperiod, Timeperiods, 'timeperiods'),
+                   'service': (Service, Services, 'services'),
+                   'host': (Host, Hosts, 'hosts'),
+                   'contact': (Contact, Contacts, 'contacts'),
                    }
 
 
         self.property_mapping = {
-            'service' : [('current_attempt', 'attempt'), ('current_state','state_type_id'),
+            'service': [('current_attempt', 'attempt'), ('current_state','state_type_id'),
                          ('plugin_output','output'), ('last_check','last_chk'),
                          ('performance_data','perf_data'), ('next_check' , 'next_chk'),
                          ('long_plugin_output', 'long_output'), ('check_execution_time', 'execution_time'),
                          ('check_latency', 'latency')],
-            'host' : [('current_attempt', 'attempt'), ('current_state','state_type_id'),
+            'host': [('current_attempt', 'attempt'), ('current_state','state_type_id'),
                       ('plugin_output','output'), ('last_check','last_chk'),
                  ('performance_data','perf_data'), ('next_check' , 'next_chk'),
                       ('long_plugin_output', 'long_output'), ('check_execution_time', 'execution_time'),
@@ -349,7 +349,7 @@ class Nagios_retention_scheduler(BaseModule):
         self.create_and_link_downtimes(raw_objects, all_obj)
 
         # Taken from the scheduler code... sorry
-        all_data = {'hosts' : {}, 'services' : {}}
+        all_data = {'hosts': {}, 'services': {}}
         for h in all_obj['host']:
             d = {}
             running_properties = h.__class__.running_properties
@@ -358,7 +358,7 @@ class Nagios_retention_scheduler(BaseModule):
                     d[prop] = getattr(h, prop)
             all_data['hosts'][h.host_name] = d
 
-        #Now same for services
+        # Now same for services
         for s in all_obj['service']:
             d = {}
             running_properties = s.__class__.running_properties
@@ -366,8 +366,8 @@ class Nagios_retention_scheduler(BaseModule):
                 if entry.retention:
                     d[prop] = getattr(s, prop)
             all_data['services'][(s.host_name, s.service_description)] = d
-#        all_data = {'hosts' : {}, 'services' : {}}
-            
+#        all_data = {'hosts': {}, 'services': {}}
+
         sched.restore_retention_data(all_data)
         log_mgr.log("[NagiosRetention] OK we've load data from retention file")
 

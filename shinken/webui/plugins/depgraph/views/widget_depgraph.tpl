@@ -26,21 +26,25 @@ Invalid element
 
 
 
-
+<script src=/static/depgraph/js/eltdeps.js></script>
 <script type="text/javascript">
   
-  var graph_root = '{{elt.get_full_name()}}';
-  var json_graph = {{!helper.create_json_dep_graph(elt, levels=4)}};
+  // var graph_root = '{{elt.get_full_name()}}';
+  // var json_graph = {{!helper.create_json_dep_graph(elt, levels=4)}};
   //console.log('Show the graph'+json_graph);
-
+ 
+ 
+ $(document).ready(init_graph('{{elt.get_full_name()}}', {{!helper.create_json_dep_graph(elt, levels=4)}},400, 400,'{{helper.get_html_id(elt)}}'));
+ 
+ 
 </script>
 
 
 
 
 <div id="right-container" class="border">
-  <div id="inner-details">
-  </div>
+  <div id="inner-details-{{helper.get_html_id(elt)}}">
+</div>
   
 </div>
 
@@ -48,7 +52,7 @@ Invalid element
 
   <div id="log">Loading element informations...</div>
 </div>
-	
+  
 <div class="clear"></div>
 </div>
 

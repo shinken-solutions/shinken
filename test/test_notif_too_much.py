@@ -1,38 +1,35 @@
-#!/usr/bin/env python2.6
-#Copyright (C) 2009-2010 :
+#!/usr/bin/env python
+# Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 #
 # This file is used to test reading and processing of config files
 #
 
-#It's ugly I know....
 from shinken_test import *
 
 
 class TestNotifTooMuch(ShinkenTest):
-    #Uncomment this is you want to use a specific configuration
-    #for your test
     def setUp(self):
         self.setup_with_file('etc/nagios_notif_too_much.cfg')
 
-    
+
     # The goal of this test is to check if we manage this case:
     # 2 notif ways on one contact. One notif ways should activate, not the other
     # for one timeperiod
@@ -57,14 +54,14 @@ class TestNotifTooMuch(ShinkenTest):
         self.scheduler_loop(1, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 2, 'BAD | value1=0 value2=0']])
         self.assert_(host.state == 'UP')
         self.assert_(host.state_type == 'HARD')
-        
+
         self.scheduler_loop(1, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 2, 'BAD | value1=0 value2=0']])
 
         # We should NOT see a send for the notify-service2 call because it's the good contact
         # but NOT the good period for this notifways. So 24x7 ok, not the never :)
         self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;notify-service'))
         self.assert_(not self.any_log_match('SERVICE NOTIFICATION.*;notify-service2'))
-            
+
 
 
 

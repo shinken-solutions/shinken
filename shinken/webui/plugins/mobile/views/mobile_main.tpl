@@ -4,11 +4,11 @@
 
 <div id="main" data-theme="a">
 
-	<ul data-role="listview" data-inset="true" data-theme="a"> 	
+	<ul data-role="listview" data-inset="true" data-theme="a">
 		<li><a href="/mobile/dashboard">Dashboard</a>
 			<span class="ui-li-count ui-btn-up-c ui-btn-corner-all">{{len([pb for pb in problems if pb.state in ['DOWN', 'CRITICAL']])}} Critical</span>
 		</li>
-		%if overall_itproblem > 0:	
+		%if overall_itproblem > 0:
 			<li><a href="/mobile/problems">Problems<span class="ui-li-count ui-btn-up-c ui-btn-corner-all">{{app.datamgr.get_nb_all_problems()}}</span></a></li>
 			<li><a href="/mobile/impacts">Impact</a></li>
 		%end

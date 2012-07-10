@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (C) 2009-2011 :
+# Copyright (C) 2009-2011:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -30,12 +30,10 @@
 
 DIR=$(cd $(dirname "$0"); pwd)
 cd $DIR
-echo `pwd`
+echo "Working dir is $PWD"
 
 echo "Launching pep8 stat pass"
 cd ..
 
 pep8  --max-line-length=100 --ignore=E303 shinken/ > $DIR/pep8.txt
-cd $DIR
-echo "Pep8 pass done, congrats or not? ;) "
-
+echo "Pep8 pass done, you can find the result in $DIR/pep8.txt"

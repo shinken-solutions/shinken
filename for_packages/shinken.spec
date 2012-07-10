@@ -15,15 +15,15 @@ Buildarch:      noarch
 %global python_sitelib %(/usr/bin/python -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")
 
 %description
-Shinken is a new monitoring tool written in Python. 
-The main goal of Shinken is to allow users to have a fully flexible 
-architecture for their monitoring system that can easily scale to large 
+Shinken is a new monitoring tool written in Python.
+The main goal of Shinken is to allow users to have a fully flexible
+architecture for their monitoring system that can easily scale to large
 environments.
-Shinken also provide interfaces with NDODB and Merlin database, 
+Shinken also provide interfaces with NDODB and Merlin database,
 Livestatus connector Shinken does not include any human interfaces.
 
 %package arbiter
-Summary: Shinken Arbiter 
+Summary: Shinken Arbiter
 Requires:python, python-pyro, chkconfig, logrotate, shinken
 
 %description arbiter
@@ -169,77 +169,77 @@ echo Adding %{shinken_user} user ...
 /usr/sbin/useradd -M -r -d %{_localstatedir}/log/%{name} -s /sbin/nologin -c "Shinken user" %{shinken_user} > /dev/null 2>&1 || :
 
 %post arbiter
-if [ $1 -eq 1 ] ; then 
-    # Initial installation 
+if [ $1 -eq 1 ] ; then
+    # Initial installation
     /bin/systemctl daemon-reload >/dev/null 2>&1 || :
 fi
 
 %post broker
-if [ $1 -eq 1 ] ; then 
-    # Initial installation 
+if [ $1 -eq 1 ] ; then
+    # Initial installation
     /bin/systemctl daemon-reload >/dev/null 2>&1 || :
 fi
 
 %post poller
-if [ $1 -eq 1 ] ; then 
-    # Initial installation 
+if [ $1 -eq 1 ] ; then
+    # Initial installation
     /bin/systemctl daemon-reload >/dev/null 2>&1 || :
 fi
 
 %post reactionner
-if [ $1 -eq 1 ] ; then 
-    # Initial installation 
+if [ $1 -eq 1 ] ; then
+    # Initial installation
     /bin/systemctl daemon-reload >/dev/null 2>&1 || :
 fi
 
 %post scheduler
-if [ $1 -eq 1 ] ; then 
-    # Initial installation 
+if [ $1 -eq 1 ] ; then
+    # Initial installation
     /bin/systemctl daemon-reload >/dev/null 2>&1 || :
 fi
 
 %post receiver
-if [ $1 -eq 1 ] ; then 
-    # Initial installation 
+if [ $1 -eq 1 ] ; then
+    # Initial installation
     /bin/systemctl daemon-reload >/dev/null 2>&1 || :
 fi
 
-%preun arbiter 
+%preun arbiter
 if [ $1 -eq 0 ] ; then
     # Package removal, not upgrade
     /bin/systemctl --no-reload disable shinken-arbiter.service > /dev/null 2>&1 || :
     /bin/systemctl stop shinken-arbiter.service > /dev/null 2>&1 || :
 fi
 
-%preun broker 
+%preun broker
 if [ $1 -eq 0 ] ; then
     # Package removal, not upgrade
     /bin/systemctl --no-reload disable shinken-broker.service > /dev/null 2>&1 || :
     /bin/systemctl stop shinken-broker.service > /dev/null 2>&1 || :
 fi
 
-%preun poller 
+%preun poller
 if [ $1 -eq 0 ] ; then
     # Package removal, not upgrade
     /bin/systemctl --no-reload disable shinken-poller.service > /dev/null 2>&1 || :
     /bin/systemctl stop shinken-poller.service > /dev/null 2>&1 || :
 fi
 
-%preun reactionner 
+%preun reactionner
 if [ $1 -eq 0 ] ; then
     # Package removal, not upgrade
     /bin/systemctl --no-reload disable shinken-reactionner.service > /dev/null 2>&1 || :
     /bin/systemctl stop shinken-reactionner.service > /dev/null 2>&1 || :
 fi
 
-%preun scheduler 
+%preun scheduler
 if [ $1 -eq 0 ] ; then
     # Package removal, not upgrade
     /bin/systemctl --no-reload disable shinken-scheduler.service > /dev/null 2>&1 || :
     /bin/systemctl stop shinken-scheduler.service > /dev/null 2>&1 || :
 fi
 
-%preun receiver 
+%preun receiver
 if [ $1 -eq 0 ] ; then
     # Package removal, not upgrade
     /bin/systemctl --no-reload disable shinken-receiver.service > /dev/null 2>&1 || :
@@ -345,7 +345,7 @@ fi
 - Replace macro.
 
 * Fri May 20 2011 David Hannequin <david.hannequin@gmail.com> - 0.6.4-1
-- Update from upstream. 
+- Update from upstream.
 
 * Sun Apr 29 2011 David Hannequin <david.hannequin@gmail.com> - 0.6-1
 - Fisrt release for fedora.

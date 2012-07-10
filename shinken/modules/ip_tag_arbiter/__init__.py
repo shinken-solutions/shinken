@@ -25,12 +25,12 @@
 
 
 properties = {
-    'daemons' : ['arbiter'],
-    'type' : 'ip_tag',
+    'daemons': ['arbiter'],
+    'type': 'ip_tag',
     }
 
 
-#called by the plugin manager to get a broker
+# called by the plugin manager to get a broker
 def get_instance(plugin):
     #print "Get a Service Perfdata broker for plugin %s" % plugin.get_name()
 
@@ -38,7 +38,7 @@ def get_instance(plugin):
     try:
         from ip_tag_arbiter import Ip_Tag_Arbiter
     except ImportError , exp:
-        print "Warning : the plugin type %s is unavailable : %s" % ('ip_tag', exp)
+        print "Warning: the plugin type %s is unavailable: %s" % ('ip_tag', exp)
         return None
 
 
@@ -47,6 +47,6 @@ def get_instance(plugin):
     prop = plugin.property
     value = plugin.value
     method = getattr(plugin, 'method', 'replace')
-    
+
     instance = Ip_Tag_Arbiter(plugin, ip_range, prop, value, method)
     return instance

@@ -46,7 +46,7 @@
 
 %if private_access:
 <div class='well span8'>
-  <h4> API KEY : </h4> <h3>{{user.get('api_key')}}</h3>
+  <h4> API KEY: </h4> <h3>{{user.get('api_key')}}</h3>
 </div>
 
 
@@ -77,7 +77,7 @@
   No refused packs
   %else:
     %for p in refused_packs:
-      <span class='span8 alert alert-error'> {{p.get('filename')}} is refused. Reason : {{p.get('moderation_comment', 'none')}}.</span>
+      <span class='span8 alert alert-error'> {{p.get('filename')}} is refused. Reason: {{p.get('moderation_comment', 'none')}}.</span>
     %end
   %end
 </div>

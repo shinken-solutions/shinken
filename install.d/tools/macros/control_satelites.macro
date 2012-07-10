@@ -1,5 +1,5 @@
 # macro for controling satelites
-# Arguments are :
-# ARG1 : action (start,stop,restart)
-setauthfile __PREFIX__/contrib/alternative-installation/shinken-install/tools/macros/auth  
-control ARG1 
+# Arguments are:
+# ARG1: action (start,stop,restart)
+setauthfile __PREFIX__/contrib/alternative-installation/shinken-install/tools/macros/auth
+control ARG1

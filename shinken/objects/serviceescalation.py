@@ -31,7 +31,7 @@ from shinken.property import IntegerProp, StringProp, ListProp
 
 
 class Serviceescalation(Item):
-    id = 1 #0 is always special in database, so we do not take risk here
+    id = 1 # zero is always special in database, so we do not take risk here
     my_type = 'serviceescalation'
 
     properties = Item.properties.copy()
@@ -41,7 +41,7 @@ class Serviceescalation(Item):
         'service_description':   StringProp (),
         'first_notification':    IntegerProp(),
         'last_notification':     IntegerProp(),
-        'notification_interval': IntegerProp('30'), #like Nagios value
+        'notification_interval': IntegerProp('30'), # like Nagios value
         'escalation_period':     StringProp (default=''),
         'escalation_options':    ListProp   (default='d,u,r,w,c'),
         'contacts':              StringProp (),
@@ -49,7 +49,7 @@ class Serviceescalation(Item):
     })
 
 
-    #For debugging purpose only (nice name)
+    # For debugging purpose only (nice name)
     def get_name(self):
         return ''
 
@@ -59,16 +59,16 @@ class Serviceescalations(Items):
     inner_class = Serviceescalation
 
 
-    #We look for contacts property in contacts and
+    # We look for contacts property in contacts and
     def explode(self, escalations):
-        #Now we explode all escalations (host_name, service_description) to escalations
+        # Now we explode all escalations (host_name, service_description) to escalations
         for es in self:
             properties = es.__class__.properties
 
-            creation_dict = {'escalation_name' : 'Generated-Serviceescalation-%d' % es.id}
+            creation_dict = {'escalation_name': 'Generated-Serviceescalation-%d' % es.id}
             for prop in properties:
                 if hasattr(es, prop):
                     creation_dict[prop] = getattr(es, prop)
-            #print "Creation an escalation with :", creation_dict
+            #print "Creation an escalation with:", creation_dict
             s = Escalation(creation_dict)
             escalations.add_escalation(s)

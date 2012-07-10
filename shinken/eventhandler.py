@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -29,7 +29,7 @@ from action import Action
 from shinken.property import IntegerProp, StringProp
 from shinken.autoslots import AutoSlots
 
-""" TODO : Add some comment about this class for the doc"""
+""" TODO: Add some comment about this class for the doc"""
 class EventHandler(Action):
     # AutoSlots create the __slots__ with properties and
     # running_properties names
@@ -59,13 +59,13 @@ class EventHandler(Action):
         'reactionner_tag':     StringProp (default='None'),
     }
 
-    #id = 0 #Is common to Actions
+    # id = 0  #Is common to Actions
     def __init__(self, command, id=None, ref=None, timeout=10, env={}, \
                      module_type='fork', reactionner_tag='None'):
         self.is_a = 'eventhandler'
         self.type = ''
         self.status = 'scheduled'
-        if id is None: #id != None is for copy call only
+        if id is None: # id != None is for copy call only
             self.id = Action.id
             Action.id += 1
         self.ref = ref
@@ -100,7 +100,7 @@ class EventHandler(Action):
         self.execution_time = getattr(e, 'execution_time', 0.0)
         self.perf_data = getattr(e, 'perf_data', '')
 
-    #<TMI!!>
+    # <TMI!!>
     def get_outputs(self, out, max_plugins_output_length):
         elts = out.split('\n')
         # For perf data
@@ -110,10 +110,10 @@ class EventHandler(Action):
         # After | is perfdata
         if len(elts_line1) > 1:
             self.perf_data = elts_line1[1]
-        #T he others lines are long_output
+        # The others lines are long_output
         if len(elts) > 1:
             self.long_output = '\n'.join(elts[1:])
-    #</TMI!!>
+    # </TMI!!>
 
     def is_launchable(self, t):
         return t >= self.t_to_go
@@ -128,12 +128,12 @@ class EventHandler(Action):
 
 
 
-    #Call by pickle for dataify the coment
-    #because we DO NOT WANT REF in this pickleisation!
+    # Call by pickle for dataify the coment
+    # because we DO NOT WANT REF in this pickleisation!
     def __getstate__(self):
         cls = self.__class__
         # id is not in *_properties
-        res = {'id' : self.id}
+        res = {'id': self.id}
         for prop in cls.properties:
             if hasattr(self, prop):
                 res[prop] = getattr(self, prop)

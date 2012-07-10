@@ -4,19 +4,19 @@
      Gregory Starck, g.starck@gmail.com
      Hartmut Goebel, h.goebel@goebel-consult.de
      Andreas Karfusehr, andreas@karfusehr.de
- 
+
  This file is part of Shinken.
- 
+
  Shinken is free software: you can redistribute it and/or modify
  it under the terms of the GNU Affero General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
- 
+
  Shinken is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU Affero General Public License for more details.
- 
+
  You should have received a copy of the GNU Affero General Public License
  along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -27,11 +27,11 @@ function add_new_upload(i, file){
     var fname = file.name;
     var size = file.size;
     s = '<span id="file-'+i+'" class="span10 alert alert-info"><span class="span6">Uploading <b>'+fname+'</b> with size '+size+'b</span>';
-    
+
     s += '<div id="file-bar-contain-'+i+'" class="span10 progress active"> <div id="file-bar-'+i+'" class="bar" style="width: 0%;"></div></div>';
-    
+
     s += '<div id="file-bar-value-'+i+'" class="span1">0%</div>'
-    
+
     s += '</span>';
     var o = $(s);
     $('#files').append(o);

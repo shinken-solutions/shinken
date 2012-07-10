@@ -31,7 +31,7 @@ from shinken.property import StringProp
 from shinken.autoslots import AutoSlots
 
 
-# Ok, slots are fun : you cannot set the __autoslots__
+# Ok, slots are fun: you cannot set the __autoslots__
 # on the same class you use, fun isn't it? So we define*
 # a dummy useless class to get such :)
 class DummyCommand(object):
@@ -58,7 +58,7 @@ class Command(Item):
         setattr(self, 'id', self.__class__.id)
         #self.id = self.__class__.id
         self.__class__.id += 1
-        
+
         self.init_running_properties()
 
         self.customs = {}
@@ -69,7 +69,7 @@ class Command(Item):
                 self.customs[key.upper()] = params[key]
             else:
                 setattr(self, key, params[key])
-        
+
         if not hasattr(self, 'poller_tag'):
             self.poller_tag = 'None'
         if not hasattr(self, 'reactionner_tag'):
@@ -98,11 +98,11 @@ class Command(Item):
         return str(self.__dict__)
 
 
-    #Get a brok with initial status
+    # Get a brok with initial status
     def get_initial_status_brok(self):
         cls = self.__class__
         my_type = cls.my_type
-        data = {'id' : self.id}
+        data = {'id': self.id}
 
         self.fill_data_brok_from(data, 'full_status')
         b = Brok('initial_'+my_type+'_status', data)
@@ -111,9 +111,9 @@ class Command(Item):
 
     def fill_data_brok_from(self, data, brok_type):
         cls = self.__class__
-        #Now config properties
+        # Now config properties
         for prop, entry in cls.properties.items():
-            #Is this property intended for brokking?
+            # Is this property intended for brokking?
 #            if 'fill_brok' in entry[prop]:
             if brok_type in entry.fill_brok:
                 if hasattr(self, prop):
@@ -123,12 +123,12 @@ class Command(Item):
 
 
 
-    #Call by picle for dataify the coment
-    #because we DO NOT WANT REF in this pickleisation!
+    # Call by picle for dataify the coment
+    # because we DO NOT WANT REF in this pickleisation!
     def __getstate__(self):
         cls = self.__class__
         # id is not in *_properties
-        res = {'id' : self.id}
+        res = {'id': self.id}
         for prop in cls.properties:
             if hasattr(self, prop):
                 res[prop] = getattr(self, prop)

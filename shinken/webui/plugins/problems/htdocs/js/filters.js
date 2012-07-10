@@ -3,19 +3,19 @@
      Gerhard Lausser, Gerhard.Lausser@consol.de
      Gregory Starck, g.starck@gmail.com
      Hartmut Goebel, h.goebel@goebel-consult.de
- 
+
  This file is part of Shinken.
- 
+
  Shinken is free software: you can redistribute it and/or modify
  it under the terms of the GNU Affero General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
- 
+
  Shinken is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU Affero General Public License for more details.
- 
+
  You should have received a copy of the GNU Affero General Public License
  along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -81,13 +81,13 @@ function refresh_new_search_div(){
 	$('#launch_the_search').animate({'opacity': 0.3});
 	return;
     }
-    
+
     // The actions buttons are now important :)
     $('#remove_all_filters').animate({'opacity': 1});
     $('#launch_the_search').animate({'opacity': 1});
-    
+
     s = '<h4>New filters</h4><ul>';
-    
+
     $.each(new_filters, function(idx, f){
 	console.log('Trying to refresh the div with'+idx+'and'+f);
 	t = '<span>'+f.long_type+': '+f.search+'</span>';

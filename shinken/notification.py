@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -33,7 +33,7 @@ from shinken.autoslots import AutoSlots
 
 class Notification(Action):
     """Please Add a Docstring to describe the class here"""
-    
+
     # AutoSlots create the __slots__ with properties and
     # running_properties names
     __metaclass__ = AutoSlots
@@ -42,8 +42,8 @@ class Notification(Action):
 
 
     properties = {
-        'is_a' :               StringProp (default='notification'),
-        'type' :               StringProp (default=''),
+        'is_a':               StringProp (default='notification'),
+        'type':               StringProp (default=''),
         'notification_type':   IntegerProp(default=0,  fill_brok=['full_status']),
         'start_time':          StringProp (default=0,  fill_brok=['full_status']),
         'end_time':            StringProp (default=0,  fill_brok=['full_status']),
@@ -105,7 +105,7 @@ class Notification(Action):
 
         self.is_a = 'notification'
         self.type = type
-        if id is None: #id != None is for copy call only
+        if id is None: # id != None is for copy call only
             self.id = Action.id
             Action.id += 1
 
@@ -121,9 +121,9 @@ class Notification(Action):
 
         # Set host_name and description from the ref
         try:
-            self.host_name = self.ref.host_name        
+            self.host_name = self.ref.host_name
         except:
-            self.host_name = host_name        
+            self.host_name = host_name
         try:
             self.service_description = self.ref.service_description
         except:
@@ -136,7 +136,7 @@ class Notification(Action):
         self.notif_nb = notif_nb
         self.contact = contact
 
-        #For brok part
+        # For brok part
         self.contact_name = contact_name
         self.reason_type = reason_type
         self.state = state
@@ -152,7 +152,7 @@ class Notification(Action):
         self.worker = 'none'
         self.reactionner_tag = reactionner_tag
         self.already_start_escalations = set()
-        
+
 
     # return a copy of the check but just what is important for execution
     # So we remove the ref and all
@@ -211,7 +211,7 @@ class Notification(Action):
     def __getstate__(self):
         cls = self.__class__
         # id is not in *_properties
-        res = {'id' : self.id}
+        res = {'id': self.id}
         for prop in cls.properties:
             if hasattr(self, prop):
                 res[prop] = getattr(self, prop)
@@ -226,7 +226,7 @@ class Notification(Action):
         for prop in cls.properties:
             if prop in state:
                 setattr(self, prop, state[prop])
-        # Hook for load of 0.4 notification : there were no
+        # Hook for load of 0.4 notification: there were no
         # creation time, must put one
         if not hasattr(self, 'creation_time'):
             self.creation_time = time.time()

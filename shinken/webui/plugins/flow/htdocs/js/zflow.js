@@ -1,10 +1,10 @@
 /*
     Copyright (C) 2008, 2009 Charles Ying. All Rights Reserved.
-    
+
     This distribution is released under the BSD license.
 
     http://css-vfx.googlecode.com/
-    
+
     See the README for documentation and license.
 */
 
@@ -30,8 +30,8 @@
     }
 
     /*
-      TrayController is a horizontal touch event controller that 
-      tracks cumulative offsets and passes events to a delegate. 
+      TrayController is a horizontal touch event controller that
+      tracks cumulative offsets and passes events to a delegate.
     */
 
     TrayController = function ()
@@ -163,7 +163,7 @@
 
     FlowDelegate.prototype.transformForCell = function (cell, i, offset)
     {
-	/* 
+	/*
            This function needs to be fast, so we avoid function calls, divides, Math.round,
            and precalculate any invariants we can.
 	*/
@@ -217,7 +217,7 @@
 
 	var focused_cell_idx = this.getFocusedCell(currentX);
 	var focused_cell = this.cells[focused_cell_idx];
-	
+
 	/* We make the focus cell apears in a clear way */
 	//alert(focusedCellidx);
 	focused_cell.addClass('selected');
@@ -238,7 +238,7 @@
 
 	var imagesLeft = images.length;
 	//alert('images left'+imagesLeft);
-	
+
 	var cellCSS = {
             top: Math.round(-CSIZE * 0.65) + "px",
             left: Math.round(-CSIZE / 2) + "px",
@@ -265,12 +265,12 @@
 			   /*image.addEventListener("load", function ()
 			     {*/
 			   imagesLeft -= 1;
-			   
+
 			   var iwidth = 200;//image.width;
 			   var iheight = 150;//image.height;
-			   
+
 			   var ratio = Math.min(CSIZE / iheight, CSIZE / iwidth);
-			   
+
 			   iwidth *= ratio;
 			   iheight *= ratio;
 

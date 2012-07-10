@@ -39,7 +39,7 @@ from shinken.log import logger
 from shinken.satellite import BaseSatellite, IForArbiter as IArb, Interface
 
 
-#Interface for Workers
+# Interface for Workers
 
 class IChecks(Interface):
     """ Interface for Workers:
@@ -77,21 +77,21 @@ They connect here and see if they are still OK with our running_id, if not, they
 
 class IBroks(Interface):
     """ Interface for Brokers:
-They connect here and get all broks (data for brokers). datas must be ORDERED! (initial status BEFORE uodate...) """ 
+They connect here and get all broks (data for brokers). datas must be ORDERED! (initial status BEFORE uodate...) """
 
     # poller or reactionner ask us actions
     def get_broks(self):
         #print "We ask us broks"
         res = self.app.get_broks()
-        #print "Sending %d broks" % len(res)#, res
+        #print "Sending %d broks" % len(res) #, res
         self.app.nb_broks_send += len(res)
         #we do not more have a full broks in queue
         self.app.has_full_broks = False
         return res
 
-    #A broker is a new one, if we do not have
-    #a full broks, we clean our broks, and
-    #fill it with all new values
+    # A broker is a new one, if we do not have
+    # a full broks, we clean our broks, and
+    # fill it with all new values
     def fill_initial_broks(self):
         if not self.app.has_full_broks:
             self.app.broks.clear()
@@ -102,8 +102,8 @@ class IForArbiter(IArb):
     """ Interface for Arbiter, our big MASTER. We ask him a conf and after we listen for him.
 HE got user entry, so we must listen him carefully and give information he want, maybe for another scheduler """
 
-    #arbiter is send us a external coomand.
-    #it can send us global command, or specific ones
+    # arbiter is send us a external coomand.
+    # it can send us global command, or specific ones
     def run_external_commands(self, cmds):
         self.app.sched.run_external_commands(cmds)
 
@@ -111,17 +111,17 @@ HE got user entry, so we must listen him carefully and give information he want,
         self.app.sched.die()
         super(IForArbiter, self).put_conf(conf)
 
-    #Call by arbiter if it thinks we are running but we must do not (like
-    #if I was a spare that take a conf but the master returns, I must die
-    #and wait a new conf)
-    #Us : No please...
-    #Arbiter : I don't care, hasta la vista baby!
-    #Us : ... <- Nothing! We are die! you don't follow
-    #anything or what??
+    # Call by arbiter if it thinks we are running but we must do not (like
+    # if I was a spare that take a conf but the master returns, I must die
+    # and wait a new conf)
+    # Us: No please...
+    # Arbiter: I don't care, hasta la vista baby!
+    # Us: ... <- Nothing! We are die! you don't follow
+    # anything or what??
     def wait_new_conf(self):
         logger.debug("Arbiter want me to wait a new conf")
         self.app.sched.die()
-        super(IForArbiter, self).wait_new_conf()        
+        super(IForArbiter, self).wait_new_conf()
 
 
 
@@ -134,19 +134,19 @@ class Shinken(BaseSatellite):
         'port':      IntegerProp(default='7768'),
         'local_log': PathProp(default='schedulerd.log'),
     })
-    
-    
-    #Create the shinken class:
-    #Create a Pyro server (port = arvg 1)
-    #then create the interface for arbiter
-    #Then, it wait for a first configuration
+
+
+    # Create the shinken class:
+    # Create a Pyro server (port = arvg 1)
+    # then create the interface for arbiter
+    # Then, it wait for a first configuration
     def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
-        
+
         BaseSatellite.__init__(self, 'scheduler', config_file, is_daemon, do_replace, debug, debug_file)
 
         self.interface = IForArbiter(self)
         self.sched = Scheduler(self)
-        
+
         self.ichecks = None
         self.ibroks = None
         self.must_run = True
@@ -244,7 +244,7 @@ class Shinken(BaseSatellite):
             Daemon.manage_signal(self, sig, frame)
 
 
-    def do_loop_turn(self):        
+    def do_loop_turn(self):
         # Ok, now the conf
         self.wait_for_initial_conf()
         if not self.new_conf:
@@ -264,7 +264,7 @@ class Shinken(BaseSatellite):
         instance_name = pk['instance_name']
         push_flavor = pk['push_flavor']
         skip_initial_broks = pk['skip_initial_broks']
-        
+
         t0 = time.time()
         conf = cPickle.loads(conf_raw)
         logger.debug("Conf received at %d. Unserialized in %d secs" % (t0, time.time() - t0))
@@ -301,7 +301,7 @@ class Shinken(BaseSatellite):
             self.pollers[pol_id]['uri'] = uri
             self.pollers[pol_id]['last_connection'] = 0
 
-        #First mix conf and override_conf to have our definitive conf
+        # First mix conf and override_conf to have our definitive conf
         for prop in self.override_conf:
             #print "Overriding the property %s with value %s" % (prop, self.override_conf[prop])
             val = self.override_conf[prop]
@@ -315,10 +315,10 @@ class Shinken(BaseSatellite):
         if len(self.modules) != 0:
             logger.debug("I've got %s modules" % str(self.modules))
 
-        # TODO: if scheduler had previous modules instanciated it must clean them !
+        # TODO: if scheduler had previous modules instanciated it must clean them!
         self.modules_manager.set_modules(self.modules)
         self.do_load_modules()
-        
+
         # give it an interface
         # But first remove previous interface if exists
         if self.ichecks is not None:
@@ -340,46 +340,46 @@ class Shinken(BaseSatellite):
 
         logger.debug("Loading configuration..")
         self.conf.explode_global_conf()
-        
+
         # we give sched it's conf
         self.sched.reset()
         self.sched.load_conf(self.conf)
         self.sched.load_satellites(self.pollers, self.reactionners)
 
-        #We must update our Config dict macro with good value
-        #from the config parameters
+        # We must update our Config dict macro with good value
+        # from the config parameters
         self.sched.conf.fill_resource_macros_names_macros()
         #print "DBG: got macors", self.sched.conf.macros
 
-        #Creating the Macroresolver Class & unique instance
+        # Creating the Macroresolver Class & unique instance
         m = MacroResolver()
         m.init(self.conf)
 
         #self.conf.dump()
         #self.conf.quick_debug()
 
-        #Now create the external commander
-        #it's a applyer : it role is not to dispatch commands,
-        #but to apply them
+        # Now create the external commander
+        # it's a applyer: it role is not to dispatch commands,
+        # but to apply them
         e = ExternalCommandManager(self.conf, 'applyer')
 
-        #Scheduler need to know about external command to
-        #activate it if necessery
+        # Scheduler need to know about external command to
+        # activate it if necessery
         self.sched.load_external_command(e)
 
-        #External command need the sched because he can raise checks
+        # External command need the sched because he can raise checks
         e.load_scheduler(self.sched)
 
         # We clear our schedulers managed (it's us :) )
         # and set ourself in it
-        self.schedulers = {self.conf.instance_id : self.sched}
+        self.schedulers = {self.conf.instance_id: self.sched}
 
 
     # Give the arbiter the data about what I manage
     # for me it's just my instance_id and my push flavor
     def what_i_managed(self):
         if hasattr(self, 'conf'):
-            return {self.conf.instance_id : self.conf.push_flavor} 
+            return {self.conf.instance_id: self.conf.push_flavor}
         else:
             return {}
 
@@ -397,5 +397,5 @@ class Shinken(BaseSatellite):
             logger.critical("You can log a bug ticket at https://github.com/naparuba/shinken/issues/new to get help")
             logger.critical("Back trace of it: %s" % (traceback.format_exc()))
             raise
-            
-            
+
+

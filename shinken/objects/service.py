@@ -64,12 +64,12 @@ class Service(SchedulingItem):
     my_type = 'service'
 
     # properties defined by configuration
-    # required : is required in conf
-    # default : default value if no set in conf
-    # pythonize : function to call when transfort string to python object
-    # fill_brok : if set, send to broker. there are two categories:
+    # required: is required in conf
+    # default: default value if no set in conf
+    # pythonize: function to call when transfort string to python object
+    # fill_brok: if set, send to broker. there are two categories:
     #  full_status for initial and update status, check_result for check results
-    # no_slots : do not take this property for __slots__
+    # no_slots: do not take this property for __slots__
     properties = SchedulingItem.properties.copy()
     properties.update({
         'host_name':              StringProp (fill_brok=['full_status', 'check_result', 'next_schedule']),
@@ -99,7 +99,7 @@ class Service(SchedulingItem):
         'retain_status_information': BoolProp(default='1', fill_brok=['full_status']),
         'retain_nonstatus_information': BoolProp(default='1', fill_brok=['full_status']),
         'notification_interval':  IntegerProp(default='60', fill_brok=['full_status']),
-        'first_notification_delay':IntegerProp(default='0', fill_brok=['full_status']),
+        'first_notification_delay': IntegerProp(default='0', fill_brok=['full_status']),
         'notification_period':    StringProp (brok_transformation=to_name_if_possible, fill_brok=['full_status']),
         'notification_options':   ListProp   (default='w,u,c,r,f,s',fill_brok=['full_status']),
         'notifications_enabled':  BoolProp   (default='1', fill_brok=['full_status'], retention=True),
@@ -131,8 +131,8 @@ class Service(SchedulingItem):
         'business_impact':         IntegerProp(default='2', fill_brok=['full_status']),
 
         # Load some triggers
-        'trigger'        :         StringProp(default=''),
-        'trigger_name'   :         ListProp   (default=''),
+        'trigger':         StringProp(default=''),
+        'trigger_name':         ListProp   (default=''),
     })
 
     # properties used in the running state
@@ -207,13 +207,13 @@ class Service(SchedulingItem):
         'last_perf_data':     StringProp (default='', retention=True),
         'host':               StringProp (default=None),
         'customs':            ListProp   (default={}, fill_brok=['full_status']),
-        # Warning : for the notified_contacts retention save, we save only the names of the contacts, and we should RELINK
+        # Warning: for the notified_contacts retention save, we save only the names of the contacts, and we should RELINK
         # them when we load it.
         'notified_contacts':  ListProp  (default=set(), retention=True, retention_preparation=to_list_of_names), # use for having all contacts we have notified
         'in_scheduled_downtime': BoolProp(default=False, fill_brok=['full_status'], retention=True),
         'in_scheduled_downtime_during_last_check': BoolProp(default=False, retention=True),
-        'actions':            ListProp   (default=[]), #put here checks and notif raised
-        'broks':              ListProp   (default=[]), #and here broks raised
+        'actions':            ListProp   (default=[]), # put here checks and notif raised
+        'broks':              ListProp   (default=[]), # and here broks raised
 
 
         # Problem/impact part
@@ -233,9 +233,9 @@ class Service(SchedulingItem):
         'state_changed_since_impact': BoolProp(default=False),
 
         # Easy Service dep definition
-        'service_dependencies': ListProp(default=''),# TODO: find a way to brok it?
+        'service_dependencies': ListProp(default=''), # TODO: find a way to brok it?
 
-        #BUSINESS CORRELATOR PART
+        # BUSINESS CORRELATOR PART
         # Say if we are business based rule or not
         'got_business_rule':  BoolProp (default=False, fill_brok=['full_status']),
         # Our Dependency node for the business rule
@@ -247,7 +247,7 @@ class Service(SchedulingItem):
         # or even if we are businesss based.
         'parent_dependencies': StringProp(default=set(), brok_transformation=to_svc_hst_distinct_lists, fill_brok=['full_status']),
         # Here it's the guys that depend on us. So it's the total
-        # opposite of the parent_dependencies 
+        # opposite of the parent_dependencies
         'child_dependencies': StringProp(brok_transformation=to_svc_hst_distinct_lists, default=set(), fill_brok=['full_status']),
 
         # Manage the unknown/unreach during hard state
@@ -256,10 +256,10 @@ class Service(SchedulingItem):
         'state_before_hard_unknown_reach_phase': StringProp(default='OK', retention=True),
 
         # Set if the element just change its father/son topology
-        'topology_change' : BoolProp(default=False, fill_brok=['full_status']),
-        
+        'topology_change': BoolProp(default=False, fill_brok=['full_status']),
+
         # Trigger list
-        'triggers'        :  StringProp(default=[])
+        'triggers':  StringProp(default=[])
 
     })
 
@@ -312,22 +312,22 @@ class Service(SchedulingItem):
     # Or Shinken deprecated names like criticity
     old_properties = {
         'normal_check_interval':    'check_interval',
-        'retry_check_interval' :    'retry_interval',
-        'criticity'            :    'business_impact',
-        'hostgroup'            :    'hostgroup_name',
-        'hostgroups'            :    'hostgroup_name',
-#        'criticitymodulations' :    'business_impact_modulations',
+        'retry_check_interval':    'retry_interval',
+        'criticity':    'business_impact',
+        'hostgroup':    'hostgroup_name',
+        'hostgroups':    'hostgroup_name',
+#        'criticitymodulations':    'business_impact_modulations',
     }
 
-####### 
-#                   __ _                       _   _             
-#                  / _(_)                     | | (_)            
-#   ___ ___  _ __ | |_ _  __ _ _   _ _ __ __ _| |_ _  ___  _ __  
-#  / __/ _ \| '_ \|  _| |/ _` | | | | '__/ _` | __| |/ _ \| '_ \ 
+#######
+#                   __ _                       _   _
+#                  / _(_)                     | | (_)
+#   ___ ___  _ __ | |_ _  __ _ _   _ _ __ __ _| |_ _  ___  _ __
+#  / __/ _ \| '_ \|  _| |/ _` | | | | '__/ _` | __| |/ _ \| '_ \
 # | (_| (_) | | | | | | | (_| | |_| | | | (_| | |_| | (_) | | | |
 #  \___\___/|_| |_|_| |_|\__, |\__,_|_|  \__,_|\__|_|\___/|_| |_|
-#                         __/ |                                  
-#                        |___/                                   
+#                         __/ |
+#                        |___/
 ######
 
     # Give a nice name output
@@ -367,7 +367,7 @@ class Service(SchedulingItem):
     # template are always correct
     # contacts OR contactgroups is need
     def is_correct(self):
-        state = True # guilty or not? :)
+        state = True
         cls = self.__class__
 
         source = getattr(self, 'imported_from', 'unknown')
@@ -395,7 +395,7 @@ class Service(SchedulingItem):
             for err in self.configuration_errors:
                 logger.info(err)
 
-        #If no notif period, set it to None, mean 24x7
+        # If no notif period, set it to None, mean 24x7
         if not hasattr(self, 'notification_period'):
             self.notification_period = None
 
@@ -408,22 +408,22 @@ class Service(SchedulingItem):
             self.display_name = getattr(self, 'service_description', '')
 
         if not hasattr(self, 'check_command'):
-            logger.info("%s : I've got no check_command" % self.get_name())
+            logger.info("%s: I've got no check_command" % self.get_name())
             state = False
         # Ok got a command, but maybe it's invalid
         else:
             if not self.check_command.is_valid():
-                logger.info("%s : my check_command %s is invalid" % (self.get_name(), self.check_command.command))
+                logger.info("%s: my check_command %s is invalid" % (self.get_name(), self.check_command.command))
                 state = False
             if self.got_business_rule:
                 if not self.business_rule.is_valid():
-                    logger.info("%s : my business rule is invalid" % (self.get_name(),))
+                    logger.info("%s: my business rule is invalid" % (self.get_name(),))
                     for bperror in self.business_rule.configuration_errors:
-                        logger.info("%s : %s" % (self.get_name(), bperror))
+                        logger.info("%s: %s" % (self.get_name(), bperror))
                     state = False
         if not hasattr(self, 'notification_interval') \
                 and  self.notifications_enabled == True:
-            logger.info("%s : I've got no notification_interval but I've got notifications enabled" % self.get_name())
+            logger.info("%s: I've got no notification_interval but I've got notifications enabled" % self.get_name())
             state = False
         if self.host is None:
             logger.info("The service '%s' got a unknown host_name '%s'." % (desc, self.host_name))
@@ -433,7 +433,7 @@ class Service(SchedulingItem):
         if hasattr(self, 'service_description'):
             for c in cls.illegal_object_name_chars:
                 if c in self.service_description:
-                    logger.info("%s : My service_description got the caracter %s that is not allowed." % (self.get_name(), c))
+                    logger.info("%s: My service_description got the caracter %s that is not allowed." % (self.get_name(), c))
                     state = False
         return state
 
@@ -524,7 +524,7 @@ class Service(SchedulingItem):
             # Transform the generator string to a list
             # Missing values are filled with the default value
             (key_values, errcode) = get_key_value_sequence(entry, default_value)
-            
+
             if key_values:
                 for key_value in key_values:
                     key = key_value['KEY']
@@ -568,18 +568,18 @@ class Service(SchedulingItem):
 
 
 #####
-#                         _             
-#                        (_)            
-#  _ __ _   _ _ __  _ __  _ _ __   __ _ 
+#                         _
+#                        (_)
+#  _ __ _   _ _ __  _ __  _ _ __   __ _
 # | '__| | | | '_ \| '_ \| | '_ \ / _` |
 # | |  | |_| | | | | | | | | | | | (_| |
 # |_|   \__,_|_| |_|_| |_|_|_| |_|\__, |
 #                                  __/ |
-#                                 |___/ 
+#                                 |___/
 ####
 
 
-    # Set unreachable : our host is DOWN, but it mean nothing for a service
+    # Set unreachable: our host is DOWN, but it mean nothing for a service
     def set_unreachable(self):
         pass
 
@@ -595,7 +595,7 @@ class Service(SchedulingItem):
             self.state_id_before_impact = self.state_id
             # this flag will know if we overide the impact state
             self.state_changed_since_impact = False
-            self.state = 'UNKNOWN'# exit code UNDETERMINED
+            self.state = 'UNKNOWN' # exit code UNDETERMINED
             self.state_id = 3
 
 
@@ -652,7 +652,7 @@ class Service(SchedulingItem):
             self.last_time_unknown = int(self.last_state_update)
             state_code = 'u'
         else:
-            self.state = 'CRITICAL'# exit code UNDETERMINED
+            self.state = 'CRITICAL' # exit code UNDETERMINED
             self.state_id = 2
             self.last_time_critical = int(self.last_state_update)
             state_code = 'c'
@@ -796,7 +796,7 @@ class Service(SchedulingItem):
                       (self.host.get_name(), self.get_name()))
 
 
-    # Is stalking ?
+    # Is stalking?
     # Launch if check is waitconsume==first time
     # and if c.status is in self.stalking_options
     def manage_stalking(self, c):
@@ -810,11 +810,11 @@ class Service(SchedulingItem):
                 need_stalk = True
             elif c.exit_status == 3 and 'u' in self.stalking_options:
                 need_stalk = True
-            
+
             if c.output == self.output:
                 need_stalk = False
         if need_stalk:
-            logger.info("Stalking %s : %s" % (self.get_name(), c.output))
+            logger.info("Stalking %s: %s" % (self.get_name(), c.output))
 
 
     # Give data for checks's macros
@@ -962,7 +962,7 @@ class Service(SchedulingItem):
 class Services(Items):
     inner_class = Service # use for know what is in items
     # Create the reversed list for speedup search by host_name/name
-    # We also tag service already in list : they are twins. It'a a bad things.
+    # We also tag service already in list: they are twins. It'a a bad things.
     # Hostgroups service have an ID higer thant host service. So it we tag
     # an id that already are in the list, this service is already
     # exist, and is a host,
@@ -985,7 +985,7 @@ class Services(Items):
 
 
 
-    # TODO : finish serach to use reversed
+    # TODO: finish serach to use reversed
     # Search a service id by it's name and host_name
     def find_srv_id_by_name_and_hostname(self, host_name, name):
         # key = (host_name, name)
@@ -1070,7 +1070,7 @@ class Services(Items):
                 if s.host is not None:
                     hst.add_service_link(s)
                 else: # Ok, the host do not exists!
-                    err = "Error : the service '%s' do not have a host_name not hostgroup_name" % (self.get_name())
+                    err = "Error: the service '%s' do not have a host_name not hostgroup_name" % (self.get_name())
                     s.configuration_errors.append(err)
                     continue
             except AttributeError , exp:
@@ -1091,7 +1091,7 @@ class Services(Items):
                         if sg is not None:
                             new_servicegroups.append(sg)
                         else:
-                            err = "Error : the servicegroup '%s' of the service '%s' is unknown" % (sg_name, s.get_dbg_name())
+                            err = "Error: the servicegroup '%s' of the service '%s' is unknown" % (sg_name, s.get_dbg_name())
                             s.configuration_errors.append(err)
                 s.servicegroups = new_servicegroups
 
@@ -1148,17 +1148,17 @@ class Services(Items):
             s.fill_daddy_dependency()
 
 
-    # Add in our queue a service create from another. Special case :
-    # is a template : so hname is a name of template, so need to get all
+    # Add in our queue a service create from another. Special case:
+    # is a template: so hname is a name of template, so need to get all
     # hosts that inherit from it.
     def copy_create_service_from_another(self, hosts, s, hname):
         for_hosts_to_create = []
-        # if we are not a template, it's easy : copy for all host_name
+        # if we are not a template, it's easy: copy for all host_name
         # because they are our final host_name after all
         if not s.is_tpl():
             for_hosts_to_create.append(hname)
         else:
-            # But for template it's more tricky : it's a template name
+            # But for template it's more tricky: it's a template name
             # we've got, not a real host_name/ So we must get a list of host_name
             # that use this template
             # Use the complex expression manager for it, it will call find_hosts_that_use_template
@@ -1185,8 +1185,8 @@ class Services(Items):
                 if h is not None:
                     for new_s in s.duplicate(h):
                         self.items[new_s.id] = new_s
-                else: # TODO : raise an error?
-                    err = 'Error : The hostname %s is unknown for the service %s!' % (name, s.get_name())
+                else: # TODO: raise an error?
+                    err = 'Error: The hostname %s is unknown for the service %s!' % (name, s.get_name())
                     s.configuration_errors.append(err)
 
         # Now really create the services
@@ -1245,9 +1245,9 @@ class Services(Items):
                         else: # the standard list
                             duplicate_for_hosts.append(hname)
 
-                    # remove duplicate items from duplicate_for_hosts: 
+                    # remove duplicate items from duplicate_for_hosts:
                     duplicate_for_hosts = list(set(duplicate_for_hosts))
-                    
+
                     # Ok now we clean the duplicate_for_hosts with all hosts
                     # of the not
                     for hname in not_hosts:

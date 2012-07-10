@@ -49,7 +49,7 @@ from shinken.modulesmanager import ModulesManager
 from shinken.objects.module import Module
 from shinken.daemon import Daemon
 from shinken.misc.datamanager import datamgr
-#Local import
+# Local import
 from livestatus import LiveStatus
 from livestatus_regenerator import LiveStatusRegenerator
 from livestatus_query_cache import LiveStatusQueryCache
@@ -81,8 +81,8 @@ class LiveStatus_broker(BaseModule, Daemon):
         ips = [ip.strip() for ip in self.allowed_hosts.split(',') if ip]
         self.allowed_hosts = [ip for ip in ips if re.match(r'^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$', ip)]
         if len(ips) != len(self.allowed_hosts):
-            print "Warning : the list of allowed hosts is invalid", ips
-            print "Warning : the list of allowed hosts is invalid", self.allowed_hosts
+            print "Warning: the list of allowed hosts is invalid", ips
+            print "Warning: the list of allowed hosts is invalid", self.allowed_hosts
             raise
         self.pnp_path = getattr(modconf, 'pnp_path', '')
         self.debug = getattr(modconf, 'debug', None)
@@ -125,7 +125,7 @@ class LiveStatus_broker(BaseModule, Daemon):
 
 
     # Called by Broker so we can do init stuff
-    # TODO : add conf param to get pass with init
+    # TODO: add conf param to get pass with init
     # Conf from arbiter!
     def init(self):
         print "Init of the Livestatus '%s'" % self.name
@@ -136,7 +136,7 @@ class LiveStatus_broker(BaseModule, Daemon):
 
 
     # This is called only when we are in a scheduler
-    # and just before we are started. So we can gain time, and 
+    # and just before we are started. So we can gain time, and
     # just load all scheduler objects without fear :) (we
     # will be in another process, so we will be able to hack objects
     # if need)
@@ -226,7 +226,7 @@ class LiveStatus_broker(BaseModule, Daemon):
         # Maybe we got a debug dump to do
         if self.debug:
             self.set_debug()
-        #I register my exit function
+        # I register my exit function
         self.set_exit_handler()
         print "Go run"
 
@@ -245,7 +245,7 @@ class LiveStatus_broker(BaseModule, Daemon):
 
         # Check if some og the required directories exist
         #if not os.path.exists(bottle.TEMPLATE_PATH[0]):
-        #    logger.log('ERROR : the view path do not exist at %s' % bottle.TEMPLATE_PATH)
+        #    logger.log('ERROR: the view path do not exist at %s' % bottle.TEMPLATE_PATH)
         #    sys.exit(2)
 
         self.load_plugins()
@@ -285,7 +285,7 @@ class LiveStatus_broker(BaseModule, Daemon):
                         except Exception, exp:
                             print exp.__dict__
                             logger.warning("[%s] The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
-                            logger.debug("[%s] Exception type : %s" % (self.name, type(exp)))
+                            logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
                             logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                             self.modules_manager.set_to_restart(mod)
                 except Exception, exp:
@@ -367,7 +367,7 @@ class LiveStatus_broker(BaseModule, Daemon):
             except Exception, exp:
                 print exp.__dict__
                 logger.warning("[%s] The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
-                logger.debug("[%s] Exception type : %s" % (self.name, type(exp)))
+                logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
                 logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)
 
@@ -437,8 +437,8 @@ class LiveStatus_broker(BaseModule, Daemon):
                                 mod.manage_brok(b)
                             except Exception, exp:
                                 print exp.__dict__
-                                logger.warning("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
-                                logger.debug("[%s] Exception type : %s" % (self.name, type(exp)))
+                                logger.warning("[%s] Warning: The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
+                                logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
                                 logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                                 self.modules_manager.set_to_restart(mod)
                 except Queue.Empty:
@@ -447,7 +447,7 @@ class LiveStatus_broker(BaseModule, Daemon):
                     if hasattr(os, 'errno') and e.errno != os.errno.EINTR:
                         raise
                 except Exception, exp:
-                    print "Error : got an exeption (bad code?)", exp, exp.__dict__, type(exp)
+                    print "Error: got an exeption (bad code?)", exp, exp.__dict__, type(exp)
                     raise
                 time.sleep(0.01)
 
