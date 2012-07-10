@@ -139,7 +139,6 @@ class TestNotif(ShinkenTest):
         self.show_and_clear_actions()
         self.assert_(svc.current_notification_number == 0)
 
-
     def test_continuous_notifications_delayed(self):
         self.print_header()
         # retry_interval 2
@@ -231,7 +230,6 @@ class TestNotif(ShinkenTest):
         self.show_and_clear_logs()
         self.show_and_clear_actions()
 
-
     def test_continuous_notifications_delayed_recovers_fast(self):
         self.print_header()
         # retry_interval 2
@@ -298,7 +296,6 @@ class TestNotif(ShinkenTest):
         self.show_and_clear_logs()
         self.show_and_clear_actions()
 
-
     def test_host_in_downtime_or_down_service_critical(self):
         self.print_header()
         # retry_interval 2
@@ -355,7 +352,6 @@ class TestNotif(ShinkenTest):
         self.assert_(not self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL;'))
         self.show_and_clear_logs()
         self.show_and_clear_actions()
-
 
     def test_only_notified_contacts_notifications(self):
         self.print_header()

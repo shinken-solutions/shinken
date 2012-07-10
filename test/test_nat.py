@@ -58,6 +58,7 @@ logs = {
     'scheduler': LOGFILE,
 }
 
+
 def cleanup():
     rootdir = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), "..")
 

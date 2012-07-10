@@ -21,7 +21,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import os
 import cmd
 import sys
@@ -37,7 +36,6 @@ except ImportError:
     import imp
     imp.load_module('shinken', *imp.find_module('shinken', [os.path.realpath("."), os.path.realpath(".."), os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "..")]))
 
-
 from shinken.bin import VERSION
 
 try:
@@ -47,13 +45,13 @@ except ImportError:
 from shinken.arbiterlink import ArbiterLink
 Pyro = pyro.Pyro
 
+
 class Dummy:
     def add(self, o):
         pass
 
 from shinken.log import logger
 logger.load_obj(Dummy())
-
 
 sat_types = ['arbiter', 'scheduler', 'poller', 'reactionner',
              'receiver', 'broker']
@@ -79,10 +77,8 @@ class ShinkenAdmin(cmd.Cmd):
             self.do_connect('')
         self.arb.ping()
 
-
     def emptyline(self):
         return
-
 
     def do_connect(self, line):
         '''
@@ -115,7 +111,6 @@ class ShinkenAdmin(cmd.Cmd):
             print "Connection OK"
         else:
             print "Connection problem"
-
 
     def do_status(self, line):
         '''
@@ -156,7 +151,6 @@ class ShinkenAdmin(cmd.Cmd):
                                                             s.alive, s.reachable, get_since(s.last_check))
         print "+-------------------------------------------------------------------------------+"
 
-
         print "+-------------------------------------------------------------------------------+"
         print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} | {5:11} |".format("Reactionner", "address", "port", "alive", "reachable", "last_check")
         print "+-------------------------------------------------------------------------------+"
@@ -181,7 +175,6 @@ class ShinkenAdmin(cmd.Cmd):
                                     s.alive, s.reachable, get_since(s.last_check))
         print "+-------------------------------------------------------------------------------+"
 
-
     def do_getconf(self, line):
         '''
         Get the data in the arbiter for a table and some properties
@@ -197,10 +190,6 @@ class ShinkenAdmin(cmd.Cmd):
         for l in data:
             print ' '.join(['%s' % i for i in l])
 
-
-
-
-
     def do_gethostname(self, line):
         '''
         Return the hostname of this machine as is it look for the*
@@ -209,15 +198,12 @@ class ShinkenAdmin(cmd.Cmd):
         import socket
         print socket.gethostname()
 
-
     def do_EOF(self, line):
         return self.do_quit('')
-
 
     def do_quit(self, line):
         print "",
         return True
-
 
     def do_easter(self, line):
         '''
@@ -307,7 +293,6 @@ class ShinkenAdmin(cmd.Cmd):
                         print u"| {0:8} | {1:30} | {2:60} |".format(default, unicode(key), elts)
                 print "+%s+" % ("-".center(106, '-'))
 
-
     def do_setloglevel(self, line):
         '''
         Change logging level for the given daemon (change all daemons logging level if no name given).
@@ -360,7 +345,6 @@ class ShinkenAdmin(cmd.Cmd):
                 conn.set_log_level(loglevel)
             except:
                 print "Cannot reach %s daemon!" % m['name']
-
 
 intro = 'Available functions:\n# connect [localhost:7770] \n# status\n# gethostname\n# help [function]\n# showconfig [daemon type]\n# setloglevel [daemon-name] loglevel\n# quit'
 

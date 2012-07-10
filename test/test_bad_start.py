@@ -38,9 +38,7 @@ from shinken.daemons.schedulerdaemon import Shinken
 from shinken.daemons.reactionnerdaemon import Reactionner
 from shinken.daemons.arbiterdaemon import Arbiter
 
-
 curdir = os.getcwd()
-
 
 daemons_config = {
     Broker:       "../etc/brokerd.ini",
@@ -74,7 +72,6 @@ class template_Test_Daemon_Bad_Start():
         self.get_login_and_group(d)
         return d
 
-
     def test_bad_piddir(self):
         print "Testing bad pidfile ..."
         d = self.get_daemon()
@@ -87,7 +84,6 @@ class template_Test_Daemon_Bad_Start():
         os.unlink(d.pidfile)
         os.rmdir(d.workdir)
 
-
     def test_bad_workdir(self):
         print("Testing bad workdir ... mypid=%d" % (os.getpid()))
         d = self.get_daemon()
@@ -96,7 +92,6 @@ class template_Test_Daemon_Bad_Start():
         self.assertRaises(InvalidWorkDir, d.do_daemon_init_and_start)
         d.do_stop()
         os.rmdir(d.workdir)
-
 
     def test_port_not_free(self):
         print("Testing port not free ... mypid=%d" % (os.getpid()))
@@ -121,18 +116,21 @@ class template_Test_Daemon_Bad_Start():
         os.rmdir(d1.workdir)
 
 
-
 class Test_Broker_Bad_Start(template_Test_Daemon_Bad_Start, unittest.TestCase):
     daemon_cls = Broker
+
 
 class Test_Scheduler_Bad_Start(template_Test_Daemon_Bad_Start, unittest.TestCase):
     daemon_cls = Shinken
 
+
 class Test_Poller_Bad_Start(template_Test_Daemon_Bad_Start, unittest.TestCase):
     daemon_cls = Poller
 
+
 class Test_Reactionner_Bad_Start(template_Test_Daemon_Bad_Start, unittest.TestCase):
     daemon_cls = Reactionner
+
 
 class Test_Arbiter_Bad_Start(template_Test_Daemon_Bad_Start, unittest.TestCase):
     daemon_cls = Arbiter

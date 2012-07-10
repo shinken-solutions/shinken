@@ -63,8 +63,6 @@ if opts.password:
 cred = '%s%%%s' % (user, password)
 
 
-
-
 def p_debug(s):
     if debug:
         print "DEBUG"
@@ -88,11 +86,11 @@ if process.returncode != 0:
     print "Error: the share scanner return an error: '%s'" % (stderrdata+stdoutdata)
     sys.exit(2)
 
-
 disks = []
 printers = []
 
 p_debug("Good return" + stdoutdata)
+
 
 def get_elements(line):
     if line.count('|') < 2:

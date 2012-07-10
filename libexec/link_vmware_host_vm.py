@@ -45,6 +45,7 @@ VERSION = '0.1'
 def _split_rules(rules):
     return [r.strip() for r in rules.split('|')]
 
+
 # Apply all rules on the objects names
 def _apply_rules(name, rules):
     if 'nofqdn' in rules:
@@ -52,6 +53,7 @@ def _apply_rules(name, rules):
     if 'lower' in rules:
         name = name.lower()
     return name
+
 
 # Get all vmware hosts from a VCenter and return the list
 def get_vmware_hosts(check_esx_path, vcenter, user, password):

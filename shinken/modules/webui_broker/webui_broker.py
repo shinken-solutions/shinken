@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 """
 This Class is a plugin for the Shinken Broker. It is in charge
 to get brok and recreate real objects, and propose a Web intnerface :)
@@ -60,10 +59,8 @@ bottle.debug(True)
 bottle_dir = os.path.abspath(os.path.dirname(bottle.__file__))
 sys.path.insert(0, bottle_dir)
 
-
 bottle.TEMPLATE_PATH.append(os.path.join(bottle_dir, 'views'))
 bottle.TEMPLATE_PATH.append(bottle_dir)
-
 
 
 # Class for the Merlindb Broker
@@ -97,8 +94,6 @@ class Webui_broker(BaseModule, Daemon):
         # rg will be able to skip some broks
         self.rg = Regenerator()
 
-
-
     # We check if the photo directory exists. If not, try to create it
     def check_photo_dir(self):
         print "Checking photo path", self.photo_dir
@@ -109,15 +104,12 @@ class Webui_broker(BaseModule, Daemon):
             except Exception, exp:
                 print "Photo dir creation failed", exp
 
-
-
     # Called by Broker so we can do init stuff
     # TODO: add conf param to get pass with init
     # Conf from arbiter!
     def init(self):
         print "Init of the Webui '%s'" % self.name
         self.rg.load_external_queue(self.from_q)
-
 
     # This is called only when we are in a scheduler
     # and just before we are started. So we can gain time, and
@@ -128,12 +120,9 @@ class Webui_broker(BaseModule, Daemon):
         print "pre_scheduler_mod_start::", sched.__dict__
         self.rg.load_from_scheduler(sched)
 
-
     # In a scheduler we will have a filter of what we really want as a brok
     def want_brok(self, b):
         return self.rg.want_brok(b)
-
-
 
     def main(self):
         self.log = logger
@@ -174,13 +163,11 @@ class Webui_broker(BaseModule, Daemon):
             time.sleep(2)
             raise
 
-
     # A plugin send us en external command. We just put it
     # in the good queue
     def push_external_command(self, e):
         print "WebUI: got an external command", e.__dict__
         self.from_q.put(e)
-
 
     # Real main function
     def do_main(self):
@@ -195,7 +182,6 @@ class Webui_broker(BaseModule, Daemon):
         self.nb_readers = 0
         self.nb_writers = 0
 
-
         self.data_thread = None
 
         # Check if the view dir really exist
@@ -207,9 +193,6 @@ class Webui_broker(BaseModule, Daemon):
 
         # Declare the whole app static files AFTER the plugin ones
         self.declare_common_static()
-
-
-
 
         # Launch the data thread"
         self.data_thread = threading.Thread(None, self.manage_brok_thread, 'datathread')
@@ -382,16 +365,14 @@ class Webui_broker(BaseModule, Daemon):
             except Exception, exp:
                 logger.warning("Loading plugins: %s" % exp)
 
-
-
     def add_static(self, fdir, m_dir):
         static_route = '/static/'+fdir+'/:path#.+#'
         print "Declaring static route", static_route
+
         def plugin_static(path):
             print "Ask %s and give %s" % (path, os.path.join(m_dir, 'htdocs'))
             return static_file(path, root=os.path.join(m_dir, 'htdocs'))
         route(static_route, callback=plugin_static)
-
 
     # It will say if we can launch a page rendering or not.
     # We can only if there is no writer running from now
@@ -410,7 +391,6 @@ class Webui_broker(BaseModule, Daemon):
             # Before checking again, we should wait a bit
             # like 1ms
             time.sleep(0.001)
-
 
     # It will say if we can launch a brok management or not
     # We can only if there is no readers running from now
@@ -435,11 +415,10 @@ class Webui_broker(BaseModule, Daemon):
                 print "WARNING: we are in lock/read since more than 30s!"
                 start = time.time()
 
-
-
     # We want a lock manager version of the plugin fucntions
     def lockable_function(self, f):
         print "We create a lock verion of", f
+
         def lock_version(**args):
             self.wait_for_no_writers()
             t = time.time()
@@ -455,7 +434,6 @@ class Webui_broker(BaseModule, Daemon):
                 self.global_lock.release()
         print "The lock version is", lock_version
         return lock_version
-
 
     def declare_common_static(self):
         @route('/static/photos/:path#.+#')
@@ -477,15 +455,10 @@ class Webui_broker(BaseModule, Daemon):
                 root = self.share_dir
             return static_file(path, root=root)
 
-
         # And add the favicon ico too
         @route('/favicon.ico')
         def give_favicon():
             return static_file('favicon.ico', root=os.path.join(bottle_dir, 'htdocs', 'images'))
-
-
-
-
 
     def check_auth(self, user, password):
         print "Checking auth of", user  # , password
@@ -517,8 +490,6 @@ class Webui_broker(BaseModule, Daemon):
         # Ok if we got a real contact, and if a module auth it
         return (is_ok and c is not None)
 
-
-
     def get_user_auth(self):
         # First we look for the user sid
         # so we bail out if it's a false one
@@ -530,8 +501,6 @@ class Webui_broker(BaseModule, Daemon):
 
         c = self.datamgr.get_contact(user_name)
         return c
-
-
 
     # Try to got for an element the graphs uris from modules
     def get_graph_uris(self, elt, graphstart, graphend):
@@ -556,11 +525,6 @@ class Webui_broker(BaseModule, Daemon):
         # Ok if we got a real contact, and if a module auth it
         return uris
 
-
-
-
-
-
     # Try to got for an element the graphs uris from modules
     def get_user_preference(self, user, key, default=None):
         safe_print("Checking user preference for", user.get_name(), key)
@@ -580,7 +544,6 @@ class Webui_broker(BaseModule, Daemon):
                 self.modules_manager.set_to_restart(mod)
         print 'get_user_preference :: Nothing return, I send non'
         return default
-
 
     # Try to got for an element the graphs uris from modules
     def set_user_preference(self, user, key, value):
@@ -605,7 +568,6 @@ class Webui_broker(BaseModule, Daemon):
     # For a specific place like dashboard we return widget lists
     def get_widgets_for(self, place):
         return self.widgets.get(place, [])
-
 
     # Will get all label/uri for external UI like PNP or NagVis
     def get_external_ui_link(self):

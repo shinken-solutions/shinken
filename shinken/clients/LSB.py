@@ -34,10 +34,13 @@ from livestatus import LSAsynConnection, Query
 
 """ Benchmark of the livestatus broker"""
 
+
 class QueryGenerator(object):
     """Generate a livestatus query"""
+
     def get(self):
         pass
+
 
 class SimpleQueryGenerator(QueryGenerator):
     def __init__(self, querys, name="sqg"):
@@ -53,6 +56,7 @@ class SimpleQueryGenerator(QueryGenerator):
             self.i=0
         return (query_class, query)
 
+
 class FileQueryGenerator(SimpleQueryGenerator):
     def __init__(self, filename):
         f = open(filename, "r")
@@ -62,9 +66,11 @@ class FileQueryGenerator(SimpleQueryGenerator):
             querys.append(query)
         SimpleQueryGenerator.__init__(self, querys, filename)
 
+
 def usage():
     print " -n requests     Number of requests to perform [Default: 10]"
     print " -c concurrency  Number of multiple requests to make [Default: 1]"
+
 
 def mean(numberList):
     if len(numberList) == 0:
@@ -72,6 +78,7 @@ def mean(numberList):
 
     floatNums = [float(x) for x in numberList]
     return sum(floatNums) / len(numberList)
+
 
 def median(numberList):
     sorted_values = sorted(numberList)
@@ -83,6 +90,7 @@ def median(numberList):
         upper = sorted_values[len(sorted_values)/2]
 
     return (float(lower + upper)) / 2
+
 
 def run(url, requests, concurrency, qg):
     if (concurrency > requests):
@@ -141,6 +149,7 @@ def run(url, requests, concurrency, qg):
     print "Query Class          nb  min      max       mean     median"
     for query_class, durations in queries_durations.items():
         print "%s %03d %03f %03f %03f %03f" % (query_class.ljust(20), len(durations), min(durations), max(durations), mean(durations), median(durations))
+
 
 def main(argv):
     # Defaults values

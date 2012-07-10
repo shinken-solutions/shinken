@@ -26,6 +26,7 @@ from shinken_test import *
 
 
 class GoodArbiter(ArbiterLink):
+
     # To lie about satellites
     def ping(self):
         print "Dummy OK for", self.get_name()
@@ -39,6 +40,7 @@ class GoodArbiter(ArbiterLink):
 
 
 class GoodScheduler(SchedulerLink):
+
     # To lie about satellites
     def ping(self):
         print "Dummy OK for", self.get_name()
@@ -59,7 +61,9 @@ class BadScheduler(SchedulerLink):
     def have_conf(self, i):
         return False
 
+
 class GoodPoller(PollerLink):
+
     # To lie about satellites
     def ping(self):
         print "Dummy OK for", self.get_name()
@@ -74,7 +78,9 @@ class BadPoller(PollerLink):
         print "Dummy bad ping", self.get_name()
         self.add_failed_check_attempt()
 
+
 class GoodReactionner(ReactionnerLink):
+
     # To lie about satellites
     def ping(self):
         print "Dummy OK for", self.get_name()
@@ -82,13 +88,16 @@ class GoodReactionner(ReactionnerLink):
 
     def put_conf(self, conf):
         return True
+
 
 class BadReactionner(ReactionnerLink):
     def ping(self):
         print "Dummy bad ping", self.get_name()
         self.add_failed_check_attempt()
 
+
 class GoodBroker(BrokerLink):
+
     # To lie about satellites
     def ping(self):
         print "Dummy OK for", self.get_name()
@@ -96,6 +105,7 @@ class GoodBroker(BrokerLink):
 
     def put_conf(self, conf):
         return True
+
 
 class BadBroker(BrokerLink):
     def ping(self):
@@ -107,7 +117,6 @@ class TestDispatcher(ShinkenTest):
 
     def setUp(self):
         self.setup_with_file('etc/nagios_dispatcher.cfg')
-
 
     def test_simple_dispatch(self):
         for r in self.conf.realms:
@@ -195,7 +204,6 @@ class TestDispatcher(ShinkenTest):
         self.assert_(broker2.alive == True)
         self.assert_(broker2.attempt == 1)
         self.assert_(broker2.reachable == False)
-
         ### Now add another attempt, still alive, but attemp=2/3
 
         print "CheckAlive "*10
@@ -306,12 +314,10 @@ class TestDispatcher(ShinkenTest):
                 self.assert_(cfg.assigned_to == scheduler1)
 
 
-
 class TestDispatcherMultiBroker(ShinkenTest):
 
     def setUp(self):
         self.setup_with_file('etc/nagios_dispatcher_multibrokers.cfg')
-
 
     def test_simple_dispatch(self):
         print "The dispatcher", self.dispatcher

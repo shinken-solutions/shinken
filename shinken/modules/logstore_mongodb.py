@@ -25,7 +25,6 @@
 
 # import von modules/livestatus_logstore
 
-
 """
 This class is for attaching a mongodb database to a livestatus broker module.
 It is one possibility for an exchangeable storage for log broks
@@ -49,7 +48,6 @@ except ImportError:
     ReadPreference = None
 from pymongo.errors import AutoReconnect
 
-
 from shinken.basemodule import BaseModule
 from shinken.objects.module import Module
 from shinken.log import logger
@@ -68,10 +66,10 @@ def get_instance(plugin):
     instance = LiveStatusLogStoreMongoDB(plugin)
     return instance
 
+
 def row_factory(cursor, row):
     """Handler for the sqlite fetch method."""
     return Logline(cursor.description, row)
-
 
 CONNECTED = 1
 DISCONNECTED = 2
@@ -362,7 +360,6 @@ class LiveStatusLogStoreMongoDB(BaseModule):
             return ne_nocase_filter
         elif operator == '!~~':
             return not_match_nocase_filter
-
 
 
 class LiveStatusMongoStack(LiveStatusStack):

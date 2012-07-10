@@ -53,7 +53,6 @@ except ImportError:
     if not hasattr(os, "getuid") or os.getuid() != 0:
         imp.load_module('shinken', *imp.find_module('shinken', [".", ".."]))
 
-
 from optparse import OptionParser
 try:
     import shinken.pyro_wrapper as pyro
@@ -83,7 +82,6 @@ def check_deamons_numbers(result, target):
     else:
         print "OK - %d/%d %s(s) UP, with %d/%d spare(s) UP" % (alive_number, total_number, target, alive_spare_number, total_spare_number)
         raise SystemExit, OK
-
 
 # Adding options. None are required, check_shinken will use shinken defaults
 # TODO: Add more control in args problem and usage than the default OptionParser one

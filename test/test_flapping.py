@@ -30,7 +30,6 @@ class TestFlapping(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_flapping.cfg')
 
-
     def test_flapping(self):
         #
         # Config is not correct because of a wrong relative path
@@ -85,7 +84,6 @@ class TestFlapping(ShinkenTest):
         self.assert_(self.any_log_match('SERVICE FLAPPING ALERT.*;STOPPED'))
         self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;FLAPPINGSTART'))
 
-
         ############ Now get back in flap, and try the exteral commands change
 
         # Now 1 test with a bad state
@@ -115,9 +113,6 @@ class TestFlapping(ShinkenTest):
 
         self.assert_(not svc.is_flapping)
 
-
-
-
         ############# NOW a local command for this service
         # First reenable flap:p
         cmd = "[%lu] ENABLE_FLAP_DETECTION" % int(time.time())
@@ -143,7 +138,6 @@ class TestFlapping(ShinkenTest):
         # and get a log about it
         self.assert_(self.any_log_match('SERVICE FLAPPING ALERT.*;STARTED'))
         self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;FLAPPINGSTART'))
-
 
         # We run a globa lflap disable, so we should stop flapping now
         cmd = "[%lu] DISABLE_SVC_FLAP_DETECTION;test_host_0;test_ok_0" % int(time.time())

@@ -35,7 +35,6 @@ class TestConfig(ShinkenTest):
     def get_host(self):
         return self.sched.hosts.find_by_name("test_host_0")
 
-
     def get_router(self):
         return self.sched.hosts.find_by_name("test_router_0")
 

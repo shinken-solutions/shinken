@@ -58,7 +58,6 @@ def lookup(cls='', name=''):
         print "Lookup %s too short, bail out" % name
         return []
 
-
     print "Lookup for", name, "in", cls
     tags = set()
     for h in sources[cls].values():
@@ -102,8 +101,6 @@ def lookup_tag_post(cls=''):
     print "RES", r
 
     return json.dumps(r)
-
-
 
 pages = {lookup_tag_post: { 'routes': ['/lookup/:cls/tag'] , 'method': 'POST'},
          lookup: { 'routes': ['/lookup/:cls/tag/:name']},

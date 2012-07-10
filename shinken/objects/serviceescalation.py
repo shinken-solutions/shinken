@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from item import Item, Items
 from escalation import Escalation
 
@@ -48,7 +47,6 @@ class Serviceescalation(Item):
         'contact_groups':        StringProp(),
     })
 
-
     # For debugging purpose only (nice name)
     def get_name(self):
         return ''
@@ -57,7 +55,6 @@ class Serviceescalation(Item):
 class Serviceescalations(Items):
     name_property = ""
     inner_class = Serviceescalation
-
 
     # We look for contacts property in contacts and
     def explode(self, escalations):

@@ -29,6 +29,7 @@ sys.path.append("../shinken/modules")
 from host_perfdata_broker import *
 from shinken.brok import Brok
 
+
 class TestConfig(ShinkenTest):
     # setUp is inherited from ShinkenTest
 

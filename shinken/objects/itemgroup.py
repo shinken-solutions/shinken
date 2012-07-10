@@ -27,7 +27,6 @@
 
 # And itemgroup is like a item, but it's a group of items :)
 
-
 from item import Item, Items
 
 from shinken.brok import Brok
@@ -56,7 +55,6 @@ class Itemgroup(Item):
         for key in params:
             setattr(self, key, params[key])
 
-
     # Copy the groups properties EXCEPT the members
     # members need to be fill after manually
     def copy_shell(self):
@@ -76,7 +74,6 @@ class Itemgroup(Item):
         new_i.members = []
         return new_i
 
-
     # Change the members like item1 ,item2 to ['item1' , 'item2']
     # so a python list :)
     # We also strip elements because spaces Stinks!
@@ -85,10 +82,8 @@ class Itemgroup(Item):
                             ( m.strip() for m in getattr(self, 'members', '').split(',') )
                         if mbr != '' ]
 
-
     def replace_members(self, members):
         self.members = members
-
 
     # If a prop is absent and is not required, put the default value
     def fill_default(self):
@@ -98,17 +93,14 @@ class Itemgroup(Item):
                 value = entry.default
                 setattr(self, prop, value)
 
-
     def add_string_member(self, member):
         if hasattr(self, 'members'):
             self.members += ','+member
         else:
             self.members = member
 
-
     def __str__(self):
         return str(self.__dict__)+'\n'
-
 
     def __iter__(self):
         return self.members.__iter__()
@@ -136,10 +128,8 @@ class Itemgroup(Item):
 
         return res
 
-
     def has(self, prop):
         return hasattr(self, prop)
-
 
     # Get a brok with hostgroup info (like id, name)
     # members is special: list of (id, host_name) for database info
@@ -160,7 +150,6 @@ class Itemgroup(Item):
         return b
 
 
-
 class Itemgroups(Items):
 
     # If a prop is absent and is not required, put the default value
@@ -168,10 +157,8 @@ class Itemgroups(Items):
         for i in self:
             i.fill_default()
 
-
     def add(self, ig):
         self.items[ig.id] = ig
-
 
     def get_members_by_name(self, gname):
         g = self.find_by_name(gname)

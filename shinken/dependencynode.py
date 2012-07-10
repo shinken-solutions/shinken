@@ -23,8 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 import re
 
 
@@ -43,7 +41,6 @@ class DependencyNode(object):
 
     def __str__(self):
         return "Op:'%s' Val:'%s' Sons:'[%s]'" % (self.operand, self.of_values, ','.join([str(s) for s in self.sons]))
-
 
     # We will get the state of this node, by looking at the state of
     # our sons, and apply our operand
@@ -81,7 +78,6 @@ class DependencyNode(object):
 
         # We will surely need the worst state
         worst_state = max(states)
-
 
         # Suggestion: What about returning min(states) for the | operand?
         # We don't need make a difference between an 0 and another no?
@@ -154,8 +150,6 @@ class DependencyNode(object):
             #print "not mul, return worst", worse_state
             return worst_state
 
-
-
     # return a list of all host/service in our node and below
     def list_all_elements(self):
         r = []
@@ -169,7 +163,6 @@ class DependencyNode(object):
 
         # and uniq the result
         return list(set(r))
-
 
     # If we are a of: rule, we can get some 0 in of_values,
     # if so, change them with NB sons instead

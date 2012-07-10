@@ -32,7 +32,6 @@ from shinken.objects.module import Module
 from shinken.modules import pickle_retention_file_generic
 from shinken.modules.pickle_retention_file_generic import get_instance
 
-
 modconf = Module()
 modconf.module_name = "PickleRetentionGeneric"
 modconf.module_type = pickle_retention_file_generic.properties['type']

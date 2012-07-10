@@ -23,19 +23,21 @@ from shinken.objects.pack import Pack, Packs
 from shinken.log import logger
 from shinken.objects.config import Config
 
-
 logger.set_level(10)
+
+
 class Dummy():
     def __init__(self): pass
+
     def add(self, obj): pass
 logger.load_obj(Dummy())
-
 
 from pymongo.connection import Connection
 
 VERSION = '0.1'
 TMP_PATH = '/tmp/pack_analysing'
 PACKS_HOME= '/opt/packs'
+
 
 def do_list(table):
     search = table.find()
@@ -67,7 +69,6 @@ def delete_pack(table, pack):
         sys.exit(2)
     table.remove({'_id': pack})
     print "OK: pack %s is removed" % pack
-
 
 
 def analyse_pack(table, pack):
@@ -148,7 +149,6 @@ if __name__ == '__main__':
                       help='Set a comment')
     parser.add_option('--analyse', dest='do_analyse', action='store_true',
                       help='Analyse a pack')
-
 
     opts, args = parser.parse_args()
 

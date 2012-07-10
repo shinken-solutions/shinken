@@ -23,8 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 import os
 import time
 
@@ -37,19 +35,16 @@ properties = {
     'external': True,
     }
 
+
 # called by the plugin manager to get a broker
 def get_instance(plugin):
     instance = Collectd_arbiter(plugin)
     return instance
 
-
-
 import socket
 import struct
 import time
 from StringIO import StringIO
-
-
 
 DEFAULT_PORT = 25826
 DEFAULT_MULTICAST_IP = "239.192.74.66"
@@ -65,11 +60,9 @@ TYPE_TYPE_INSTANCE   = 0x0005
 TYPE_VALUES          = 0x0006
 TYPE_INTERVAL        = 0x0007
 
-
 # DS kinds
 DS_TYPE_COUNTER      = 0
 DS_TYPE_GAUGE        = 1
-
 
 header = struct.Struct("!2H")
 number = struct.Struct("!Q")
@@ -77,6 +70,7 @@ short  = struct.Struct("!H")
 double = struct.Struct("<d")
 
 elements = {}
+
 
 def decode_values(pktype, plen, buf):
     nvalues = short.unpack_from(buf, header.size)[0]
@@ -114,7 +108,6 @@ def decode_number(pktype, pklen, buf):
 def decode_string(msgtype, pklen, buf):
     return buf[header.size:pklen-1]
 
-
 # Mapping of message types to decoding functions.
 decoder_mapping = {
     TYPE_VALUES: decode_values,
@@ -145,8 +138,6 @@ def decode_packet(buf):
         off += pklen
 
 
-
-
 class Data(list, object):
     def __init__(self, **kw):
         self.time = 0
@@ -157,10 +148,8 @@ class Data(list, object):
         self.typeinstance = ''
         self.values = []
 
-
     def __str__(self):
         return "[%i] %s" % (self.time, self.values)
-
 
     def get_srv_desc(self):
         r = self.plugin
@@ -206,9 +195,6 @@ class CollectdServer(object):
     host = None
     port = DEFAULT_PORT
 
-
-
-
     def __init__(self, host=None, port=DEFAULT_PORT, multicast=False):
         if host is None:
             multicast = True
@@ -236,7 +222,6 @@ class CollectdServer(object):
             self._sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, val)
             self._sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, 0)
 
-
     def interpret_opcodes(self, iterable):
         d = Data()
 
@@ -259,17 +244,13 @@ class CollectdServer(object):
                 d.values = data
                 yield d
 
-
-
     def receive(self):
         return self._sock.recv(BUFFER_SIZE)
-
 
     def decode(self, buf=None):
         if buf is None:
             buf = self.receive()
         return decode_packet(buf)
-
 
     def read(self, iterable=None):
         if iterable is None:
@@ -292,8 +273,6 @@ class Element(object):
         self.perf_datas[mname] = mvalue
         self.got_new_data = True
 
-
-
     def get_command(self):
         if len(self.perf_datas) == 0:
             return None
@@ -312,11 +291,9 @@ class Element(object):
             return r
 
 
-
 class Collectd_arbiter(BaseModule):
     def __init__(self, modconf):
         BaseModule.__init__(self, modconf)
-
 
     # When you are in "external" mode, that is the main loop of your process
     def main(self):

@@ -22,7 +22,6 @@
 # This file is used to test reading and processing of config files
 #
 
-
 from shinken_test import *
 
 from shinken.notification import Notification

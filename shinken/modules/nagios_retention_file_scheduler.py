@@ -26,9 +26,7 @@
 # This Class is an example of an Scheduler module
 # Here for the configuration phase AND running one
 
-
 import re
-
 
 from shinken.objects import Timeperiod, Timeperiods
 from shinken.objects import Service, Services
@@ -39,7 +37,6 @@ from shinken.downtime import Downtime
 from shinken.basemodule import BaseModule
 from shinken.util import to_bool
 from shinken.log import logger
-
 
 properties = {
     'daemons': ['scheduler'],
@@ -56,7 +53,6 @@ def get_instance(plugin):
     return instance
 
 
-
 # Just print some stuff
 class Nagios_retention_scheduler(BaseModule):
     def __init__(self, mod_conf, path):
@@ -67,13 +63,11 @@ class Nagios_retention_scheduler(BaseModule):
     def hook_save_retention(self, daemon):
         logger.info("[NagiosRetention] asking me to update the retention objects, but I won't do it.")
 
-
     def _cut_line(self, line):
         #punct = '"#$%&\'()*+/<=>?@[\\]^`{|}~'
         tmp = re.split("=", line)
         r = [elt for elt in tmp if elt != '']
         return r
-
 
     def read_retention_buf(self, buf):
         params = []
@@ -160,14 +154,12 @@ class Nagios_retention_scheduler(BaseModule):
 
         return objects
 
-
     # We've got raw objects in string, now create real Instances
     def create_objects(self, raw_objects, types_creations):
         all_obj = {}
         for t in types_creations:
             all_obj[t] = self.create_objects_for_type(raw_objects, t, types_creations)
         return all_obj
-
 
     def pythonize_running(self, obj, obj_cfg):
         cls = obj.__class__
@@ -193,8 +185,6 @@ class Nagios_retention_scheduler(BaseModule):
                             setattr(obj, prop, 'HARD')
                         else:
                             setattr(obj, prop, 'SOFT')
-
-
 
     def create_objects_for_type(self, raw_objects, type, types_creations):
         t = type
@@ -231,7 +221,6 @@ class Nagios_retention_scheduler(BaseModule):
         #print "Object?", clss(lst)
         return clss(lst)
 
-
     def create_and_link_comments(self, raw_objects, all_obj):
         # first service
         for obj_cfg in raw_objects['servicecomment']:
@@ -256,9 +245,6 @@ class Nagios_retention_scheduler(BaseModule):
                 #print "Created cmd", cmd
                 hst.add_comment(cmd)
 
-
-
-
     def create_and_link_downtimes(self, raw_objects, all_obj):
         # first service
         for obj_cfg in raw_objects['servicedowntime']:
@@ -282,8 +268,6 @@ class Nagios_retention_scheduler(BaseModule):
                 dwn = Downtime(hst, int(obj_cfg['start_time']), int(obj_cfg['end_time']), to_bool(obj_cfg['fixed']), int(obj_cfg['triggered_by']), int(obj_cfg['duration']), obj_cfg['author'], obj_cfg['comment'])
                 print "Created dwn", dwn
                 hst.add_downtime(dwn)
-
-
 
     # Should return if it succeed in the retention load or not
     def hook_load_retention(self, sched):
@@ -314,7 +298,6 @@ class Nagios_retention_scheduler(BaseModule):
             log_mgr.log(s)
             return False
 
-
         print "Fin read config"
         raw_objects = self.read_retention_buf(buf)
         print "Fun raw"
@@ -324,7 +307,6 @@ class Nagios_retention_scheduler(BaseModule):
                    'host': (Host, Hosts, 'hosts'),
                    'contact': (Contact, Contacts, 'contacts'),
                    }
-
 
         self.property_mapping = {
             'service': [('current_attempt', 'attempt'), ('current_state', 'state_type_id'),
@@ -340,7 +322,6 @@ class Nagios_retention_scheduler(BaseModule):
             }
 
         all_obj = self.create_objects(raw_objects, types_creations)
-
 
         print "Got all obj", all_obj
 

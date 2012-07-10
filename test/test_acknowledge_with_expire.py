@@ -22,12 +22,12 @@
 # This file is used to test acknowledge of problems
 #
 
-
 from shinken_test import *
 
 # Restore sleep functions
 time.time = original_time_time
 time.sleep = original_time_sleep
+
 
 class TestAcksWithExpire(ShinkenTest):
 

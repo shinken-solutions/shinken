@@ -50,7 +50,6 @@ try:
 except Exception:
     has_pymongo = False
 
-
 sys.setcheckinterval(10000)
 
 
@@ -146,7 +145,6 @@ class TestConfig(ShinkenTest):
                 return True
         return False
 
-
     def update_broker(self, dodeepcopy=False):
         # The brok should be manage in the good order
         ids = self.sched.broks.keys()
@@ -160,7 +158,6 @@ class TestConfig(ShinkenTest):
                 brok = copy.deepcopy(brok)
             self.livestatus_broker.manage_brok(brok)
         self.sched.broks = {}
-
 
 
 class TestConfigSmall(TestConfig):
@@ -183,7 +180,6 @@ class TestConfigSmall(TestConfig):
         host = self.sched.hosts.find_by_name("test_host_0")
         host.__class__.use_aggressive_host_checking = 1
 
-
     def write_logs(self, host, loops=0):
         for loop in range(0, loops):
             host.state = 'DOWN'
@@ -197,7 +193,6 @@ class TestConfigSmall(TestConfig):
             host.output = "i am down"
             host.raise_alert_log_entry()
             self.update_broker()
-
 
     def test_hostsbygroup(self):
         if not has_pymongo:
@@ -263,7 +258,6 @@ Columns: time type options state host_name"""
         print response
 
 
-
 class TestConfigBig(TestConfig):
     def setUp(self):
         if not has_pymongo:
@@ -282,7 +276,6 @@ class TestConfigBig(TestConfig):
         # but still get DOWN state
         host = self.sched.hosts.find_by_name("test_host_000")
         host.__class__.use_aggressive_host_checking = 1
-
 
     def init_livestatus(self):
         self.livelogs = "bigbigbig"
@@ -343,7 +336,6 @@ class TestConfigBig(TestConfig):
 
     def count_log_broks(self):
         return len([brok for brok in self.sched.broks.values() if brok.type == 'log'])
-
 
     def test_a_long_history(self):
         if not has_pymongo:

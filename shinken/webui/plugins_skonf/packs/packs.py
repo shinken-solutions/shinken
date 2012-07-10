@@ -37,13 +37,11 @@ except ImportError:
         print "Error: you need the json or simplejson module"
         raise
 
-
 from local_helper import print_cat_tree
 from shinken.webui.bottle import redirect
 
 ### Will be populated by the UI with it's own value
 app = None
-
 
 
 # Our page. If the useer call /dummy/TOTO arg1 will be TOTO.
@@ -107,7 +105,6 @@ def get_new_packs():
         print "Json loaded", categories
     except Exception, exp:
         api_error = str(exp)
-
 
     raw_tags = []
     status_code = 500
@@ -204,11 +201,9 @@ def launch_search(search):
     except Exception, exp:
         error = str(exp)
 
-
     print "status code: %s" % status_code
     print "Json loaded", results, error
     return (results, error)
-
 
 
 def get_new_packs_result(search):
@@ -258,7 +253,6 @@ def get_new_packs_result_post():
     return {'app': app, 'user': user, 'error': error, 'api_error': api_error, 'results': results, 'search': search, 'categories': None, 'tags': None}
 
 
-
 def download_pack(uri):
     app.response.content_type = 'application/json'
 
@@ -297,8 +291,6 @@ def download_pack(uri):
     r = app.save_pack(buf)
     print "RETURN", r
     return json.dumps(r)
-
-
 
 pages = {get_packs: { 'routes': ['/packs'], 'view': 'packs', 'static': True},
          get_new_packs: { 'routes': ['/getpacks'], 'view': 'getpacks', 'static': True},

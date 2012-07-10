@@ -27,7 +27,6 @@
 # This Class is an NSCA Arbiter module
 # Here for the configuration phase AND running one
 
-
 import time
 import select
 import socket
@@ -97,6 +96,7 @@ def get_instance(plugin):
 
 class NSCA_arbiter(BaseModule):
     """Please Add a Docstring to describe the class here"""
+
     def __init__(self, modconf, host, port, encryption_method, password, max_packet_age):
         BaseModule.__init__(self, modconf)
         self.host = host
@@ -177,7 +177,6 @@ class NSCA_arbiter(BaseModule):
                 check_result_age)
         else:
             self.post_command(timestamp, rc, hostname, service, output)
-
 
     # When you are in "external" mode, that is the main loop of your process
     def main(self):

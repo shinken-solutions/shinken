@@ -23,11 +23,11 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from shinken.webui.bottle import redirect, abort, static_file
 
 ### Will be populated by the UI with it's own value
 app = None
+
 
 def get_packs():
     # First we look for the user sid
@@ -59,7 +59,6 @@ def download_pack(pid):
     path = pack.get('filepath')
     filename = pack.get('filename')
     return static_file(path, root='/', download=filename)
-
 
 pages = {
     get_packs: { 'routes': ['/packs'], 'view': 'packs', 'static': True},

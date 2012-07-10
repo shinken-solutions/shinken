@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import pycurl
 from StringIO import StringIO
 try:
@@ -36,7 +35,6 @@ except ImportError:
     except ImportError:
         print "Error: you need the json or simplejson module"
         raise
-
 
 from shinken.webui.bottle import redirect
 
@@ -104,7 +102,6 @@ def get_page():
     # only one the tempalte will have, so we must give it an app link and the
     # user we are loggued with (it's a contact object in fact)
     return {'app': app, 'user': user, 'results': results, 'api_error': api_error}
-
 
 # This is the dict teh webui will try to "load".
 #  *here we register one page with both adresses /dummy/:arg1 and /dummy/, both addresses

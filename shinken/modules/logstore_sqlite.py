@@ -25,7 +25,6 @@
 
 # import von modules/livestatus_logstore
 
-
 """
 This class is for attaching a sqlite database to a livestatus broker module.
 It is one possibility for an exchangeable storage for log broks
@@ -49,8 +48,6 @@ except ImportError:  # python 2.4 do not have it
         import sqlite as sqlite3  # one last try
         old_implementation = True
 
-
-
 from shinken.basemodule import BaseModule
 from shinken.objects.module import Module
 
@@ -67,6 +64,7 @@ def get_instance(plugin):
     print "Get an LogStore Sqlite module for plugin %s" % plugin.get_name()
     instance = LiveStatusLogStoreSqlite(plugin)
     return instance
+
 
 def row_factory(cursor, row):
     """Handler for the sqlite fetch method."""
@@ -115,7 +113,6 @@ class LiveStatusLogStoreSqlite(BaseModule):
         # Now sleep one second, so that won't get lineno collisions with the last second
         time.sleep(1)
         Logline.lineno = 0
-
 
     def load(self, app):
         self.app = app
@@ -206,7 +203,6 @@ class LiveStatusLogStoreSqlite(BaseModule):
             # See you tomorrow
             self.next_log_db_rotate = time.mktime(nextrotation.timetuple())
             print "next rotation at %s " % time.asctime(time.localtime(self.next_log_db_rotate))
-
 
     def log_db_historic_contents(self):
         """
@@ -384,7 +380,6 @@ class LiveStatusLogStoreSqlite(BaseModule):
         else:
             self.dbcursor.execute(cmd)
 
-
     def commit(self):
         while True:
             try:
@@ -468,7 +463,6 @@ class LiveStatusLogStoreSqlite(BaseModule):
             selectresult = self.select_live_data_log(filter_clause, filter_values, handle, archive, fromtime, totime)
             dbresult.extend(selectresult)
         return dbresult
-
 
     def select_live_data_log(self, filter_clause, filter_values, handle, archive, fromtime, totime):
         dbresult = []
@@ -572,8 +566,6 @@ class LiveStatusLogStoreSqlite(BaseModule):
             return ne_nocase_filter
         elif operator == '!~~':
             return not_match_nocase_filter
-
-
 
 
 class LiveStatusSqlStack(LiveStatusStack):

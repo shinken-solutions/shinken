@@ -65,7 +65,6 @@ widget_desc = '''<h3>Graphs</h3>
 Show the perfdata graph
 '''
 
-
 pages = {
     get_graphs_widget: {'routes': ['/widget/graphs'], 'view': 'widget_graphs', 'static': True, 'widget': ['dashboard'], 'widget_desc': widget_desc, 'widget_name': 'graphs', 'widget_picture': '/static/graphs/img/widget_graphs.png'},
     }

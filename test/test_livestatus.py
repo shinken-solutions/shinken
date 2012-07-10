@@ -51,12 +51,10 @@ class TestConfig(ShinkenTest):
                 return True
         return False
 
-
     def scheduler_loop(self, count, reflist, do_sleep=False, sleep_time=61):
         super(TestConfig, self).scheduler_loop(count, reflist, do_sleep, sleep_time)
         if self.nagios_installed() and hasattr(self, 'nagios_started'):
             self.nagios_loop(1, reflist)
-
 
     def update_broker(self, dodeepcopy=False):
         # The brok should be manage in the good order
@@ -71,7 +69,6 @@ class TestConfig(ShinkenTest):
                 brok = copy.deepcopy(brok)
             self.livestatus_broker.manage_brok(brok)
         self.sched.broks = {}
-
 
     def lines_equal(self, text1, text2):
         # gets two multiline strings and compares the contents
@@ -109,7 +106,6 @@ class TestConfig(ShinkenTest):
             # cmp is clever enough to handle nested arrays
             return cmp(data1, data2) == 0
 
-
     def show_broks(self, title):
         print
         print "--- ", title
@@ -123,7 +119,6 @@ class TestConfig(ShinkenTest):
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
 
-
     def nagios_installed(self, path='/usr/local/nagios/bin/nagios', livestatus='/usr/local/nagios/lib/mk-livestatus/livestatus.o'):
         return False
         raise
@@ -133,7 +128,6 @@ class TestConfig(ShinkenTest):
             return True
         else:
             return False
-
 
     # shinkenize_nagios_config('nagios_1r_1h_1s')
     # We assume that there is a nagios_1r_1h_1s.cfg and a nagios_1r_1h_1s directory for the objects
@@ -194,7 +188,6 @@ class TestConfig(ShinkenTest):
                 newconfig.close()
         return new_configname
 
-
     def start_nagios(self, config):
         if os.path.exists('var/spool/checkresults'):
             # Cleanup leftover checkresults
@@ -213,7 +206,6 @@ class TestConfig(ShinkenTest):
         self.nagios_started = time.time()
         time.sleep(2)
 
-
     def stop_nagios(self):
         if self.nagios_installed():
             print "i stop nagios!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
@@ -230,7 +222,6 @@ class TestConfig(ShinkenTest):
                     shutil.rmtree('etc/' + self.nagios_config)
                 if os.path.exists('etc/nagios_' + self.nagios_config + '.cfg'):
                     os.remove('etc/nagios_' + self.nagios_config + '.cfg')
-
 
     def ask_nagios(self, request):
         if time.time() - self.nagios_started < 2:
@@ -251,7 +242,6 @@ class TestConfig(ShinkenTest):
             unixcat.kill()
         print "unixcat says", out
         return out
-
 
     def nagios_loop(self, count, reflist, do_sleep=False, sleep_time=61):
         now = time.time()
@@ -274,14 +264,12 @@ class TestConfig(ShinkenTest):
         fifo.close()
         time.sleep(5)
 
-
     def nagios_extcmd(self, cmd):
         fifo = open('var/nagios.cmd', 'w')
         fifo.write(cmd)
         fifo.flush()
         fifo.close()
         time.sleep(5)
-
 
 
 class TestConfigSmall(TestConfig):
@@ -302,8 +290,6 @@ class TestConfigSmall(TestConfig):
         host = self.sched.hosts.find_by_name("test_host_0")
         host.__class__.use_aggressive_host_checking = 1
 
-
-
     def tearDown(self):
         self.stop_nagios()
         self.livestatus_broker.db.commit()
@@ -321,7 +307,6 @@ class TestConfigSmall(TestConfig):
         if os.path.exists('var/status.dat'):
             os.remove('var/status.dat')
         self.livestatus_broker = None
-
 
     def test_check_type(self):
         self.print_header()
@@ -372,7 +357,6 @@ OutputFormat: csv
 """
         print response
         self.assert_(response == goodresponse)
-
 
     def test_childs(self):
         if self.nagios_installed():
@@ -514,9 +498,6 @@ ResponseHeader: off
 """
         self.assert_(response == good_response)
 
-
-
-
     def test_servicesbyhostgroup(self):
         if self.nagios_installed():
             self.start_nagios('1r_1h_1s')
@@ -559,7 +540,6 @@ ResponseHeader: fixed16
             print nagresponse
             self.assert_(self.lines_equal(response, nagresponse))
 
-
     def test_hostsbygroup(self):
         self.print_header()
         if self.nagios_installed():
@@ -588,7 +568,6 @@ ResponseHeader: fixed16
             print "nagresponse----------------------------------------------"
             print nagresponse
             self.assert_(self.lines_equal(response, nagresponse))
-
 
     def test_delegate_to_host(self):
         self.print_header()
@@ -629,7 +608,6 @@ Filter: host_state != 0
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         self.assert_(response == 'test_host_0;test_ok_0;2;1;BAD;1;1;DOWN\n')
-
 
     def test_status(self):
         self.print_header()
@@ -809,7 +787,6 @@ Filter: description = test_ok_0
         self.assert_(response == 'test_host_0;test_ok_0;3;notifications_enabled,active_checks_enabled\n')
         print "ma", lssvc.modified_attributes
 
-
     def test_json(self):
         self.print_header()
         print "got initial broks"
@@ -834,7 +811,6 @@ Filter: description = test_ok_0
         print 'json with headers__________\n%s\n%s\n' % (request, response)
         self.assert_(response == '[["host_name","description","state"],["test_host_0","test_ok_0",2]]\n')
         # 100% mklivesttaus: self.assert_(response == '[["host_name","description","state"],\n["test_host_0","test_ok_0",2]]\n')
-
 
     def test_thruk(self):
         self.print_header()
@@ -1084,7 +1060,6 @@ ResponseHeader: fixed16"""
         for s in self.livestatus_broker.livestatus.datamgr.rg.services:
             print "%s %d %s;%d" % (s.state, s.state_id, s.state_type, s.attempt)
 
-
     def test_thruk_config(self):
         self.print_header()
         if self.nagios_installed():
@@ -1108,8 +1083,6 @@ ResponseHeader: fixed16"""
         # Jan/2012 - Columns: accept_passive_host_checks accept_passive_service_checks check_external_commands check_host_freshness check_service_freshness enable_event_handlers enable_flap_detection enable_notifications execute_host_checks execute_service_checks last_command_check last_log_rotation livestatus_version nagios_pid obsess_over_hosts obsess_over_services process_performance_data program_start program_version interval_length
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-
-
 
     def test_thruk_comments(self):
         self.print_header()
@@ -1191,7 +1164,6 @@ ResponseHeader: fixed16\n"""
         print "goodresp", good_response
         self.assert_(response == good_response)
 
-
     def test_thruk_logs(self):
         self.print_header()
         start = time.time()
@@ -1261,7 +1233,6 @@ Or: 3"""
         print response
         self.assert_(self.contains_line(response, 'SERVICE DOWNTIME ALERT;test_host_0;test_ok_0;STARTED; Service has entered a period of scheduled downtime'))
 
-
     def test_thruk_logs_alerts_summary(self):
         self.print_header()
         start = time.time()
@@ -1298,7 +1269,6 @@ Or: 3"""
         self.scheduler_loop(3, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 0, 'OK']], do_sleep=False)
         self.update_broker()
         end = time.time()
-
         # is this an error in thruk?
 
         request = """GET log
@@ -1318,7 +1288,6 @@ Columns: time state state_type host_name service_description current_host_groups
 
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-
 
     def test_thruk_logs_current(self):
         self.print_header()
@@ -1385,7 +1354,6 @@ And: 2"""
 
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-
 
     def test_thruk_logs_utf8(self):
         self.print_header()
@@ -1454,7 +1422,6 @@ And: 2"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         #print response
 
-
     def test_thruk_tac_svc(self):
         self.print_header()
         if self.nagios_installed():
@@ -1519,7 +1486,6 @@ Stats: max execution_time"""
         #    print nagresponse
         #    self.assert_(self.lines_equal(response, nagresponse))
 
-
     def test_columns(self):
         self.print_header()
         self.update_broker()
@@ -1529,7 +1495,6 @@ Stats: max execution_time"""
         request = """GET columns"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-
 
     def test_scheduler_table(self):
         self.print_header()
@@ -1577,8 +1542,6 @@ localhost;1;scheduler-1;7768;0;1
 """
         self.assert_(self.lines_equal(response, good_response))
 
-
-
     def test_reactionner_table(self):
         self.print_header()
         self.update_broker()
@@ -1623,8 +1586,6 @@ othernode;0;reactionner-2;7769;1
 """
         print response == good_response
         self.assert_(self.lines_equal(response, good_response))
-
-
 
     def test_poller_table(self):
         self.print_header()
@@ -1676,8 +1637,6 @@ othernode;0;poller-2;7771;1
         print response == good_response
         self.assert_(self.lines_equal(response, good_response))
 
-
-
     def test_broker_table(self):
         self.print_header()
         self.update_broker()
@@ -1727,8 +1686,6 @@ othernode;0;broker-2;7772;1
 """
         print response == good_response
         self.assert_(self.lines_equal(response, good_response))
-
-
 
     def test_problems_table(self):
         self.print_header()
@@ -1780,7 +1737,6 @@ test_host_0/test_ok_0,test_host_0;test_router_0
         print response == good_response
         self.assert_(response == good_response)
 
-
     def test_parent_childs_dep_lists(self):
         self.print_header()
         self.update_broker()
@@ -1815,7 +1771,6 @@ test_host_0/test_ok_0,test_host_0;test_router_0
         good_response = """test_host_0"""
         self.assert_(response.strip() == good_response.strip())
 
-
     def test_limit(self):
         self.print_header()
         if self.nagios_installed():
@@ -1846,8 +1801,6 @@ test_router_0
             nagresponse = self.ask_nagios(request)
         #    print nagresponse
         #    self.assert_(self.lines_equal(response, nagresponse))
-
-
 
     def test_problem_impact_in_host_service(self):
         self.print_header()
@@ -1927,8 +1880,6 @@ test_host_0;0;"""
         # alphabetically ordered
         self.assert_(response == good_response)
 
-
-
     def test_thruk_servicegroup(self):
         self.print_header()
         now = time.time()
@@ -1959,7 +1910,6 @@ ResponseHeader: fixed16
         self.assert_(response == """200          22
 test_host_0;test_ok_0
 """)
-
 
     def test_host_and_service_eventhandler(self):
         self.print_header()
@@ -1992,7 +1942,6 @@ OutputFormat: csv
         self.assert_("""test_host_0;1;eventhandler
 """)
         self.assert_(response == "%s;%d;%s\n" % (host.host_name, from_bool_to_int(host.event_handler_enabled), host.event_handler.get_name()))
-
 
     def test_is_executing(self):
         self.print_header()
@@ -2053,8 +2002,6 @@ OutputFormat: csv
         request = 'GET services\nColumns: service_description is_executing\n'
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-
-
 
     def test_pnp_path(self):
         self.print_header()
@@ -2127,7 +2074,6 @@ test_router_0;0
 test_host_0;1
 """
         self.assert_(self.lines_equal(response, goodresponse))
-
 
     def test_thruk_action_notes_url_icon_image(self):
         self.print_header()
@@ -2222,7 +2168,6 @@ ResponseHeader: fixed16
 test_host_0;/nagios/wiki/doku.php/test_host_0
 """)
 
-
     def test_thruk_action_notes_url_icon_image_complicated(self):
         self.print_header()
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
@@ -2255,8 +2200,6 @@ ResponseHeader: fixed16
 test_host_0;test_ok_0;/pnp4nagios/index.php/graph?host=test_host_0&srv=test_ok_0' class='tips' rel='/pnp4nagios/index.php/popup?host=test_host_0&srv=test_ok_0
 """)
 
-
-
     def test_thruk_custom_variables(self):
         self.print_header()
         now = time.time()
@@ -2283,7 +2226,6 @@ ResponseHeader: fixed16
         self.assert_(response == """200          41
 test_host_0;test_ok_0;CUSTNAME;custvalue
 """)
-
 
     def test_multisite_hostgroup_alias(self):
         self.print_header()
@@ -2319,8 +2261,6 @@ OutputFormat: csv
 test_host_0;hostgroup_01;test_ok_0|0|0;test_ok_0
 test_host_0;up;test_ok_0|0|0;test_ok_0
 """)
-
-
 
     def test_multisite_in_check_period(self):
         self.print_header()
@@ -2363,7 +2303,6 @@ test_host_0;1;0
         self.assert_(response == """200          16
 test_host_0;0;1
 """)
-
 
     def test_thruk_log_current_groups(self):
         self.print_header()
@@ -2427,7 +2366,6 @@ And: 2"""
         print response
         self.assert_(self.lines_equal(response, good_response))
 
-
     def test_thruk_empty_stats(self):
         self.print_header()
         self.update_broker()
@@ -2447,7 +2385,6 @@ OutputFormat: csv"""
         print response
         self.assert_(self.lines_equal(response, good_response))
 
-
     def test_thruk_host_parents(self):
         self.print_header()
         self.update_broker()
@@ -2464,8 +2401,6 @@ test_host_0;test_router_0
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         self.assert_(self.lines_equal(response, good_response))
-
-
 
     def test_statsgroupby(self):
         self.print_header()
@@ -2506,7 +2441,6 @@ StatsGroupBy: state
         #self.assert_(self.contains_line(response, '2;0'))
         #self.assert_(self.contains_line(response, '3;0'))
 
-
     def test_multisite_column_groupby(self):
         self.print_header()
         now = time.time()
@@ -2545,14 +2479,11 @@ Limit: 1001"""
         self.assert_(self.contains_line(response, 'test_host_0;;1;3;0;0;3'))
         self.assert_(self.contains_line(response, 'test_router_0;;1;4;0;0;4'))
         self.assert_(self.contains_line(response, 'test_host_0;test_ok_0;1;2;1;0;3'))
-
-
         # does not show null-values
         #self.assert_(self.contains_line(response, '0;0'))
         #self.assert_(self.contains_line(response, '1;1'))
         #self.assert_(self.contains_line(response, '2;0'))
         #self.assert_(self.contains_line(response, '3;0'))
-
 
     def test_downtimes_ref(self):
         self.print_header()
@@ -2573,7 +2504,6 @@ Limit: 1001"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         self.assert_(response == 'test_host_0;test_ok_0;1;blablub\n')
-
 
     def test_display_name(self):
         self.print_header()
@@ -2598,7 +2528,6 @@ Columns: description host_name display_name"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print "hihi", response
         self.assert_(response == 'test_ok_0;test_host_0;test_ok_0\n')
-
 
 
 class TestConfigBig(TestConfig):
@@ -2635,7 +2564,6 @@ class TestConfigBig(TestConfig):
         if os.path.exists('var/status.dat'):
             os.remove('var/status.dat')
         self.livestatus_broker = None
-
 
     def test_negate(self):
         # test_host_005 is in hostgroup_01
@@ -2772,8 +2700,6 @@ OutputFormat: python
         self.assert_(h_response == """1;1;0;2;2
 """)
 
-
-
     def test_stats(self):
         self.print_header()
         if self.nagios_installed():
@@ -2816,7 +2742,6 @@ Stats: state = 3"""
             nagresponse = self.ask_nagios(request)
             print nagresponse
             self.assert_(self.lines_equal(response, nagresponse))
-
 
     def test_statsgroupby(self):
         self.print_header()
@@ -2868,7 +2793,6 @@ StatsGroupBy: state
             print nagresponse
             self.assert_(self.lines_equal(response, nagresponse))
 
-
     def test_hostsbygroup(self):
         self.print_header()
         if self.nagios_installed():
@@ -2895,7 +2819,6 @@ ResponseHeader: fixed16
             nagresponse = self.ask_nagios(request)
             print nagresponse
             self.assert_(self.lines_equal(response, nagresponse))
-
 
     def test_servicesbyhostgroup(self):
         self.print_header()
@@ -3056,7 +2979,6 @@ ResponseHeader: fixed16
             print nagresponse
             self.assert_(self.lines_equal(response, nagresponse))
 
-
     def test_childs(self):
         if self.nagios_installed():
             self.start_nagios('5r_100h_2000s')
@@ -3098,7 +3020,6 @@ ResponseHeader: fixed16
             print nagresponse
             self.assert_(self.lines_equal(response, nagresponse))
 
-
     def test_thruk_servicegroup(self):
         self.print_header()
         now = time.time()
@@ -3132,7 +3053,6 @@ OutputFormat: csv
         print "r2", response
         # take first line, take members column, count list elements = 400 services
         self.assert_(len(((response.split("\n")[0]).split(';')[1]).split(',')) == 400)
-
 
     def test_sorted_limit(self):
         self.print_header()
@@ -3226,6 +3146,7 @@ OutputFormat: csv"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         # Again, get all bad services from the scheduler
         sched_bad_unsorted = '\n'.join(["%s;%s;%d" % (s.host_name, s.service_description, s.state_id) for s in self.sched.services])
+
         # Check if the result of the query is sorted
         ## FIXME LAUSSER self.assert_('\n'.join(sorted(sched_bad_unsorted.split('\n'))) == response.strip())
 
@@ -3240,8 +3161,6 @@ OutputFormat: csv"""
         return
         import cProfile
         cProfile.runctx('''self.do_test_thruk_unhandled_srv_page_perf()''', globals(), locals(), '/tmp/livestatus_thruk_perf.profile')
-
-
 
     def do_test_thruk_unhandled_srv_page_perf(self):
         self.print_header()
@@ -3400,7 +3319,6 @@ ResponseHeader: fixed16
         total_page += load_time
         print "Response time 2: %.3f" % load_time
 
-
         # Now Query 3 (service stats)
         query_start = time.time()
         request = """
@@ -3558,7 +3476,6 @@ ResponseHeader: fixed16
         total_page += load_time
         print "Response time 3: %.3f" % load_time
 
-
         # 4th Query
         query_start = time.time()
         request = """
@@ -3577,8 +3494,6 @@ ResponseHeader: fixed16
         total_page += load_time
         print "Response time 4: %.3f" % load_time
 
-
-
         # 5th Query
         query_start = time.time()
         request = """
@@ -3596,8 +3511,6 @@ ResponseHeader: fixed16
         load_time = time.time() - query_start
         total_page += load_time
         print "Response time 5: %.3f" % load_time
-
-
 
         # 6th Query
         query_start = time.time()
@@ -3633,7 +3546,6 @@ ResponseHeader: fixed16
         load_time = time.time() - query_start
         total_page += load_time
         print "Response time 6: %.3f" % load_time
-
 
         # 7th Query
         query_start = time.time()
@@ -3774,7 +3686,6 @@ OutputFormat: csv
 """)
 
 
-
 class TestConfigComplex(TestConfig):
     def setUp(self):
         self.setup_with_file('etc/nagios_problem_impact.cfg')
@@ -3792,7 +3703,6 @@ class TestConfigComplex(TestConfig):
         host = self.sched.hosts.find_by_name("test_host_0")
         host.__class__.use_aggressive_host_checking = 1
 
-
     def tearDown(self):
         self.stop_nagios()
         self.livestatus_broker.db.commit()
@@ -3804,7 +3714,6 @@ class TestConfigComplex(TestConfig):
         if os.path.exists(self.livestatus_broker.pnp_path):
             shutil.rmtree(self.livestatus_broker.pnp_path)
         self.livestatus_broker = None
-
 
     #  test_host_0  has parents test_router_0,test_router_1
     def test_thruk_parents(self):

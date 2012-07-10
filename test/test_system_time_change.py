@@ -25,6 +25,7 @@
 from shinken_test import *
 import commands
 
+
 class TestSystemTimeChange(ShinkenTest):
     # setUp is inherited from ShinkenTest
 
@@ -35,8 +36,6 @@ class TestSystemTimeChange(ShinkenTest):
         #a = commands.getstatusoutput(cmd)
         # Check the time is set correctly!
         #self.assert_(a[0] == 0)
-
-
 
     def test_system_time_change(self):
         #

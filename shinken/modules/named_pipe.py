@@ -27,7 +27,6 @@
 # This Class is an example of an Arbiter module
 # Here for the configuration phase AND running one
 
-
 import os
 import time
 import select
@@ -41,6 +40,7 @@ properties = {
     'external': True,
     'worker_capable': False,
     }
+
 
 # called by the plugin manager to get a broker
 def get_instance(plugin):
@@ -63,8 +63,6 @@ class Named_Pipe_arbiter(BaseModule):
         self.fifo = None
         self.cmd_fragments = ''
 
-
-
     def open(self):
         # At the first open del and create the fifo
         if self.fifo is None:
@@ -86,7 +84,6 @@ class Named_Pipe_arbiter(BaseModule):
         print "[%s] The named pipe '%s' is open" % (self.get_name(), self.pipe_path)
         return self.fifo
 
-
     def get(self):
         buf = os.read(self.fifo, 8096)
         r = []
@@ -107,8 +104,6 @@ class Named_Pipe_arbiter(BaseModule):
             # re-opened in the main loop.
             os.close(self.fifo)
         return r
-
-
 
     # When you are in "external" mode, that is the main loop of your process
     def main(self):

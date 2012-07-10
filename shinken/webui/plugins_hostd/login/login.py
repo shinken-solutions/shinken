@@ -28,6 +28,7 @@ from shinken.webui.bottle import redirect
 ### Will be populated by the UI with it's own value
 app = None
 
+
 # Our page
 def get_page():
     return user_login()
@@ -104,7 +105,6 @@ def get_root():
         redirect("/main")
 
 
-
 def login_mobile():
     user = app.get_user_auth()
     if user:
@@ -114,7 +114,6 @@ def login_mobile():
     login_text = app.login_text
 
     return {'error': err, 'login_text': login_text}
-
 
 pages = { user_login: { 'routes': ['/user/login', '/user/login/'],
                          'view': 'login', 'static': True},

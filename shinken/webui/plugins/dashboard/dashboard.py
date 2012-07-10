@@ -35,10 +35,9 @@ except ImportError:
         print "Error: you need the json or simplejson module"
         raise
 
-
-
 ### Will be populated by the UI with it's own value
 app = None
+
 
 # Our page
 def get_page():
@@ -88,9 +87,6 @@ def get_page():
 
     print "Give widgets", widgets
     return {'app': app, 'user': user, 'widgets': widgets}
-
-
-
 
 pages = {get_page: { 'routes': ['/dashboard'], 'view': 'dashboard', 'static': True},
 #         get_all: { 'routes': ['/dashboard/fullscreen'], 'view': 'fullscreen', 'static': True},

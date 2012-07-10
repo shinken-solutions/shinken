@@ -50,7 +50,6 @@ parser.add_option('--max-retries', dest="max_retries",
 parser.add_option('-s', '--simulate', dest="simulate",
                   help="Simulate a launch by reading an nmap XML output instead of launching a new one.")
 
-
 targets = []
 opts, args = parser.parse_args()
 
@@ -84,16 +83,17 @@ if args:
 
 print "Got our target", targets
 
+
 def debug(txt):
     if verbose:
         print txt
+
 
 # Says if a host is up or not
 def is_up(h):
     status = h.find('status')
     state = status.attrib['state']
     return state == 'up'
-
 
 
 class DetectedHost:
@@ -108,12 +108,10 @@ class DetectedHost:
 
         self.parent = ''
 
-
     # Keep the first name we've got
     def set_host_name(self, name):
         if self.host_name == '':
             self.host_name = name
-
 
     # Get a identifier for this host
     def get_name(self):
@@ -146,11 +144,9 @@ class DetectedHost:
         # Else, look at the mac vendor
         return self.mac_vendor == 'VMware'
 
-
     # Fill the different os possibilities
     def add_os_possibility(self, os, osgen, accuracy, os_type, vendor):
         self.os_possibilities.append( (os, osgen, accuracy, os_type, vendor) )
-
 
     # We search if our potential parent is present in the
     # other detected hosts. If so, set it as my parent
@@ -167,9 +163,6 @@ class DetectedHost:
             if h.get_name() == parent:
                 debug("Houray, we find our parent %s -> %s" % (self.get_name(), h.get_name()))
                 self.parents.append(h.get_name())
-
-
-
 
     # Look at ours oses and see which one is the better
     def compute_os(self):
@@ -205,7 +198,6 @@ class DetectedHost:
         self.os_type = self.os[2].lower()
         self.os_vendor = self.os[3].lower()
 
-
     # Return the string of the 'discovery' items
     def get_discovery_output(self):
         r = []
@@ -225,7 +217,6 @@ class DetectedHost:
         if ip != '':
             r.append(ip)
         return r
-
 
     # for system output
     def get_discovery_system(self):
@@ -298,7 +289,6 @@ except IOError, exp:
 hosts = tree.findall('host')
 debug("Number of hosts: %d" % len(hosts))
 
-
 all_hosts = []
 
 for h in hosts:
@@ -321,7 +311,6 @@ for h in hosts:
             if 'vendor' in addr.attrib:
                 dh.mac_vendor = addr.attrib['vendor'].lower()
 
-
     # Now we've got the hostnames
     host_names = h.findall('hostnames')
     for h_name in host_names:
@@ -330,7 +319,6 @@ for h in hosts:
             #print 'hname', h_n.__dict__
             #print 'Host name', h_n.attrib['name']
             dh.set_host_name(h_n.attrib['name'])
-
 
     # Now print the traceroute
     traces = h.findall('trace')
@@ -353,7 +341,6 @@ for h in hosts:
                     else:
                         dh.parent = hop.attrib['ipaddr']
 
-
     # Now the OS detection
     ios = h.find('os')
     #print os.__dict__
@@ -369,7 +356,6 @@ for h in hosts:
         dh.add_os_possibility(family, osgen, accuracy, os_type, vendor)
     # Ok we can compute our OS now :)
     dh.compute_os()
-
 
     # Now the ports :)
     allports = h.findall('ports')

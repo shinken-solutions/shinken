@@ -32,7 +32,6 @@ from shinken.objects.module import Module
 from shinken.modules import mongodb_retention
 from shinken.modules.mongodb_retention import get_instance
 
-
 modconf = Module()
 modconf.module_name = "MongodbRetention"
 modconf.uri = 'mongodb://127.0.0.1:27017'

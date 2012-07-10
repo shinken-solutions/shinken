@@ -35,7 +35,6 @@ try:
 except ImportError:
     fcntl = None
 
-
 from shinken.util import safe_print
 from shinken.log import logger
 
@@ -91,7 +90,6 @@ class __Action(object):
 
         return self.execute__()  ## OS specific part
 
-
     def get_outputs(self, out, max_plugins_output_length):
         #print "Get only," , max_plugins_output_length, "bytes"
         # Squize all output after max_plugins_output_length
@@ -124,8 +122,6 @@ class __Action(object):
                     self.perf_data += ' ' + elts[1].strip()
         # long_output is all non output and perfline, join with \n
         self.long_output = '\n'.join(long_output)
-
-
 
     def check_finished(self, max_plugins_output_length):
         # We must wait, but checks are variable in time
@@ -190,13 +186,11 @@ class __Action(object):
         self.status = 'done'
         self.execution_time = time.time() - self.check_time
 
-
     def copy_shell__(self, new_i):
         # This will assign the attributes present in 'only_copy_prop' from self to new_i
         for prop in only_copy_prop:
             setattr(new_i, prop, getattr(self, prop))
         return new_i
-
 
     def got_shell_characters(self):
         for c in self.command:
@@ -209,6 +203,7 @@ class __Action(object):
 ## OS specific "execute__" & "kill__" are defined by "Action" class definition:
 
 if os.name != 'nt':
+
 
     class Action(__Action):
 
@@ -261,7 +256,6 @@ if os.name != 'nt':
                 if exp.errno == 24 and exp.strerror == 'Too many open files':
                     return 'toomanyopenfiles'
 
-
         def kill__(self):
             # We kill a process group because we launched them with preexec_fn=os.setsid and
             # so we can launch a whole kill tree instead of just the first one
@@ -271,6 +265,7 @@ else:
 
     import ctypes
     TerminateProcess = ctypes.windll.kernel32.TerminateProcess
+
 
     class Action(__Action):
         def execute__(self):

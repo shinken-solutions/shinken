@@ -29,7 +29,6 @@ class TestProtectEscalmationPoint(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_protect_esclamation_point.cfg')
 
-
     def test_dummy(self):
         #
         # Config is not correct because of a wrong relative path

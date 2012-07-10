@@ -31,6 +31,7 @@ import tempfile
 
 from shinken.util import from_bool_to_string
 
+
 class StatusFile:
     out_map = {
         'Host': {
@@ -231,8 +232,6 @@ class StatusFile:
         },
     }
 
-
-
     def __init__(self, path, configs, hosts, services, contacts):
         #self.conf = scheduler.conf
         #self.scheduler = scheduler
@@ -241,7 +240,6 @@ class StatusFile:
         self.hosts = hosts
         self.services = services
         self.contacts = contacts
-
 
     def create_output(self, elt):
         output = ''
@@ -280,7 +278,6 @@ class StatusFile:
                 output += '\t' + display + '=' + unicode(value) + '\n'
 
         return output
-
 
     def create_or_update(self):
 

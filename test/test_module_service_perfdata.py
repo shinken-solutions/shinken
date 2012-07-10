@@ -102,14 +102,11 @@ class TestModSRVPErfdata(ShinkenTest):
         buf = fd.readline().decode('utf8')
         print fd.read()
 
-
         comparison = u'%d\t%s\t%s\t%s\t%s\t%s\n' % (t, "test_host_0", "test_ok_0", 'BAD', 'value1=0 value2=0'+u'\xf6', 'CRITICAL')
 
         self.assert_(buf == comparison)
         fd.close()
         os.unlink(mod.path)
-
-
 
         # Now change with a new template, a CENTREON ONE
         mod.template = '$LASTSERVICECHECK$\t$HOSTNAME$\t$SERVICEDESC$\t$LASTSERVICESTATE$\t$SERVICESTATE$\t$SERVICEPERFDATA$\n'
@@ -130,7 +127,6 @@ class TestModSRVPErfdata(ShinkenTest):
         fd = open(mod.path)
         buf = fd.readline().decode('utf8')
         print fd.read()
-
 
         comparison = u'%d\t%s\t%s\t%s\t%s\t%s\n' % (t, "test_host_0", "test_ok_0", 'CRITICAL', 'CRITICAL', 'value1=0 value2=0'+u'\xf6')
         #print "BUF", buf

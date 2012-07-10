@@ -32,7 +32,6 @@ from shinken.objects.module import Module
 from shinken.modules import memcache_retention_scheduler
 from shinken.modules.memcache_retention_scheduler import get_instance
 
-
 modconf = Module()
 modconf.module_name = "MemcacheRetention"
 modconf.module_type = memcache_retention_scheduler.properties['type']

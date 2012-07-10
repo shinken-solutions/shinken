@@ -21,6 +21,7 @@ def usage():
     print '   -c (--critical)      Three critical tresholds (defaults: 4,3,2)\n';
     print '   -w (--warning)       Three warning tresholds (defaults: 3,2,1)\n';
     print '   -h (--help)          Usage help\n';
+
 #
 # Main
 #

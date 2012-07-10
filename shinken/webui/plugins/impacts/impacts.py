@@ -31,7 +31,6 @@ from shinken.webui.bottle import redirect
 app = None
 
 
-
 # Sort hosts and services by impact, states and co
 def hst_srv_sort(s1, s2):
     if s1.business_impact > s2.business_impact:
@@ -48,7 +47,6 @@ def hst_srv_sort(s1, s2):
     return s1.get_full_name() > s2.get_full_name()
 
 
-
 def show_impacts():
     # First we look for the user sid
     # so we bail out if it's a false one
@@ -57,7 +55,6 @@ def show_impacts():
     if not user:
         redirect("/user/login")
         #return {'app': app, 'impacts': {}, 'valid_user': False, 'user': user}
-
 
     all_imp_impacts = app.datamgr.get_important_elements()
     all_imp_impacts.sort(hst_srv_sort)
@@ -94,7 +91,6 @@ def impacts_widget():
             'base_url': '/widget/impacts', 'title': 'Impacts'})
 
     return d
-
 
 widget_desc = '<h3>Impacts</h3>Show an aggregated view of the most business impacts!'
 

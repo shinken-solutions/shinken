@@ -29,7 +29,6 @@ class TestConfig(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_host_without_cmd.cfg')
 
-
     def test_host_is_pending(self):
         self.print_header()
         # first of all, a host without check_command must be valid

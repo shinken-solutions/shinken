@@ -23,11 +23,10 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 """
 Helper functions for some filtering, like for user based
 """
+
 
 # Get only user relevant items for the user
 def only_related_to(lst, user):

@@ -34,7 +34,6 @@ class TestModuleManager(ShinkenTest):
     #def setUp(self):
     #    self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
 
-
     def find_modules_path(self):
         """ Find the absolute path of the shinken module directory and returns it.  """
         import shinken
@@ -53,7 +52,6 @@ class TestModuleManager(ShinkenTest):
         print("Using modules path: %s" % (modulespath))
 
         return modulespath
-
 
     # Try to see if the module manager can manage modules
     def test_modulemanager(self):

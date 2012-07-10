@@ -29,7 +29,6 @@ class TestReactionnerTagGetNotifs(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_reactionner_tag_get_notif.cfg')
 
-
     # For a service, we generate a notification and a event handler.
     # Each one got a specific reactionner_tag that we will look for.
     def test_good_checks_get_only_tags_with_specific_tags(self):
@@ -43,7 +42,6 @@ class TestReactionnerTagGetNotifs(ShinkenTest):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
         svc.act_depend_of = []  # no hostchecks on critical checkresults
-
 
         self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 0, 'BAD | value1=0 value2=0']])
 
@@ -64,7 +62,6 @@ class TestReactionnerTagGetNotifs(ShinkenTest):
                 print a.__dict__
                 print a.reactionner_tag
                 self.assert_(a.reactionner_tag == 'eventtag')
-
 
         # Ok the tags are defined as it should, now try to get them as a reactionner :)
         # Now get only tag ones
@@ -80,8 +77,6 @@ class TestReactionnerTagGetNotifs(ShinkenTest):
             # Should be the host one only
             self.assert_(c.command.startswith('plugins/test_eventhandler.pl'))
 
-
-
     # Same that upper, but with modules types
     def test_good_checks_get_only_tags_with_specific_tags_andmodule_types(self):
         now = int(time.time())
@@ -94,7 +89,6 @@ class TestReactionnerTagGetNotifs(ShinkenTest):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
         svc.act_depend_of = []  # no hostchecks on critical checkresults
-
 
         self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 0, 'BAD | value1=0 value2=0']])
 
@@ -115,7 +109,6 @@ class TestReactionnerTagGetNotifs(ShinkenTest):
                 print a.__dict__
                 print a.reactionner_tag
                 self.assert_(a.reactionner_tag == 'eventtag')
-
 
         # Ok the tags are defined as it should, now try to get them as a reactionner :)
         # Now get only tag ones

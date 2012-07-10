@@ -55,7 +55,6 @@ class Service_perfdata_broker(BaseModule):
 
         self.buffer = []
 
-
     # Called by Broker so we can do init stuff
     # TODO: add conf param to get pass with init
     # Conf from arbiter!
@@ -73,7 +72,6 @@ class Service_perfdata_broker(BaseModule):
             return states[state]
         else:
             return 'UNKNOWN'
-
 
     # A service check have just arrived, we UPDATE data info with this
     def manage_service_check_result_brok(self, b):
@@ -98,7 +96,6 @@ class Service_perfdata_broker(BaseModule):
         #                                  data['service_description'], data['output'], \
         #                                  current_state, data['perf_data'] )
         self.buffer.append(s)
-
 
     # Each second the broker say it's a new second. Let use this to
     # dump to the file

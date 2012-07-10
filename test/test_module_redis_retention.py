@@ -32,7 +32,6 @@ from shinken.objects.module import Module
 from shinken.modules import redis_retention_scheduler
 from shinken.modules.redis_retention_scheduler import get_instance
 
-
 modconf = Module()
 modconf.module_name = "RedisRetention"
 modconf.module_type = redis_retention_scheduler.properties['type']

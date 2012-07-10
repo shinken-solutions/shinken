@@ -20,7 +20,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from shinken_test import *
 import os
 import re
@@ -1191,8 +1190,6 @@ class PerfTest(ShinkenTest):
             self.livestatus_broker.manage_brok(brok)
         self.sched.broks = {}
 
-
-
     def test_perf(self):
         print "comment me for performance tests";
         self.print_header()
@@ -1276,7 +1273,6 @@ class PerfTest(ShinkenTest):
             print "%-40s %-10.4f  %s" % (page, elapsed[page], ["%.3f" % f for f in requestelapsed[page]])
 
 
-
 class TestConfigBig(PerfTest):
     def setUp(self):
         print "comment me for performance tests"
@@ -1303,6 +1299,7 @@ class TestConfigBig(PerfTest):
             print ref[0].host_name
             ref[0].checks_in_progress
         super(TestConfigBig, self).scheduler_loop(count, reflist, do_sleep, sleep_time)
+
 
 class TestConfigCrazy(PerfTest):
     def setUp(self):

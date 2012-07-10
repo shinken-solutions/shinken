@@ -62,8 +62,6 @@ class TestConfigAuth(TestConfig):
         host = self.sched.hosts.find_by_name("dbsrv1")
         host.__class__.use_aggressive_host_checking = 1
 
-
-
     def tearDown(self):
         self.stop_nagios()
         self.livestatus_broker.db.commit()
@@ -81,8 +79,6 @@ class TestConfigAuth(TestConfig):
         if os.path.exists('var/status.dat'):
             os.remove('var/status.dat')
         self.livestatus_broker = None
-
-
 
     """
 dbsrv1  adm(adm1,adm2,adm3)
@@ -157,7 +153,6 @@ www1    adm(adm1,adm2,adm3) web(web1,web2) winadm(bill,steve)
         #print "rg is", self.livestatus_broker.datamgr.rg.hostgroups._id_contact_heap
         for contact in sorted(self.livestatus_broker.datamgr.rg.hostgroups._id_contact_heap.keys()):
             print "%-10s %s" % (contact, self.livestatus_broker.datamgr.rg.hostgroups._id_contact_heap[contact])
-
 
     def test_host_authorization(self):
         self.print_header()
@@ -408,7 +403,6 @@ KeepAlive: on
         pyresponse = eval(response)
         print pyresponse
         self.assert_(len(pyresponse) == 1)
-
 
     def test_group_authorization_strict(self):
         self.print_header()

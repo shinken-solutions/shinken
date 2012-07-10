@@ -23,13 +23,11 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from item import Item, Items
 
 from shinken.util import strip_and_uniq
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 from shinken.log import logger
-
 
 _special_properties = ( 'contacts', 'contact_groups', 'first_notification_time', 'last_notification_time' )
 _special_properties_time_based = ( 'contacts', 'contact_groups', 'first_notification', 'last_notification' )
@@ -61,7 +59,6 @@ class Escalation(Item):
     # For debugging purpose only (nice name)
     def get_name(self):
         return self.escalation_name
-
 
     # Return True if:
     # *time in in escalation_period or we do not have escalation_period
@@ -107,7 +104,6 @@ class Escalation(Item):
         # Ok, I do not see why not escalade. So it's True :)
         return True
 
-
     # t = the reference time
     def get_next_notif_time(self, t_wished, status, creation_time, interval):
         small_states = {'WARNING': 'w', 'UNKNOWN': 'u', 'CRITICAL': 'c',
@@ -135,7 +131,6 @@ class Escalation(Item):
 
         # Ok so I ask for my start as a possibility for the next notification time
         return start
-
 
     # Check is required prop are set:
     # template are always correct
@@ -187,7 +182,6 @@ class Escalation(Item):
         return state
 
 
-
 class Escalations(Items):
     name_property = "escalation_name"
     inner_class = Escalation
@@ -198,10 +192,8 @@ class Escalations(Items):
         self.linkify_es_by_s(services)
         self.linkify_es_by_h(hosts)
 
-
     def add_escalation(self, es):
         self.items[es.id] = es
-
 
     # Will register esclations into service.escalations
     def linkify_es_by_s(self, services):

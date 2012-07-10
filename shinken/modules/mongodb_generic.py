@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken. If not, see <http://www.gnu.org/licenses/>.
 
-
 """
 This module job is to get configuration data (mostly hosts) from a mongodb database.
 """
@@ -35,13 +34,13 @@ from pymongo.connection import Connection
 
 from shinken.basemodule import BaseModule
 
-
 properties = {
     'daemons': ['arbiter', 'webui', 'skonf'],
     'type': 'mongodb',
     'external': False,
     'phases': ['configuration'],
 }
+
 
 # called by the plugin manager to get a module instance
 def get_instance(plugin):
@@ -51,6 +50,7 @@ def get_instance(plugin):
 
     instance = Mongodb_generic(plugin, uri, database)
     return instance
+
 
 # Retrieve hosts from a Mongodb
 class Mongodb_generic(BaseModule):
@@ -62,7 +62,6 @@ class Mongodb_generic(BaseModule):
         self.con = None
         self.db = None
 
-
     # Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
         print "[Mongodb Module]: Try to open a Mongodb connection to %s:%s" % (self.uri, self.database)
@@ -73,8 +72,6 @@ class Mongodb_generic(BaseModule):
             print "Mongodb Module: Error %s:" % e
             raise
         print "[Mongodb Module]: Connection OK"
-
-
 
 ################################ Arbiter part #################################
 
@@ -102,10 +99,6 @@ class Mongodb_generic(BaseModule):
 
         return r
 
-
-
-
-
 #################################### WebUI parts ############################
     # We will get in the mongodb database the user preference entry, adn get the key
     # they are asking us
@@ -127,7 +120,6 @@ class Mongodb_generic(BaseModule):
             return None
 
         return e.get(key)
-
 
     # Same but for saving
     def set_ui_user_preference(self, user, key, value):

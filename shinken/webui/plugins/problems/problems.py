@@ -34,6 +34,7 @@ import time
 import re
 import json
 
+
 # Our page
 def get_page():
     return get_view('problems')
@@ -42,9 +43,6 @@ def get_page():
 # Our page
 def get_all():
     return get_view('all')
-
-
-
 
 
 # Our View code. We will get different data from all and /problems
@@ -189,7 +187,6 @@ def get_view(page):
         # Now ok for hosts, but look for services, and service hosts
         items = [i for i in items if i.__class__.my_type=='host' or (not i.problem_has_been_acknowledged and not i.host.problem_has_been_acknowledged)]
 
-
     # If we are in the /problems and we do not have an ack filter
     # we apply by default the ack:false one
     print "Late problem filtering?",  page == 'problems', len(filters['downtime']) == 0
@@ -198,10 +195,6 @@ def get_view(page):
         items = [i for i in items if i.__class__.my_type=='service' or not i.in_scheduled_downtime]
         # Now ok for hosts, but look for services, and service hosts
         items = [i for i in items if i.__class__.my_type=='host' or (not i.in_scheduled_downtime and not i.host.in_scheduled_downtime)]
-
-
-
-
 
     # Now sort it!
     items.sort(hst_srv_sort)
@@ -220,8 +213,6 @@ def get_view(page):
     ##     print pb.get_name()
     print 'Give filters', filters
     return {'app': app, 'pbs': items, 'user': user, 'navi': navi, 'search': search_str, 'page': page, 'filters': filters, 'bookmarks': bookmarks}
-
-
 
 
 # Our page
@@ -280,20 +271,9 @@ def get_pbs_widget():
     if search:
         title = 'IT problems (%s)' % search
 
-
     return {'app': app, 'pbs': pbs, 'user': user, 'search': search, 'page': 'problems',
             'wid': wid, 'collapsed': collapsed, 'options': options, 'base_url': '/widget/problems', 'title': title,
             }
-
-
-
-
-
-
-
-
-
-
 
 
 # Our page
@@ -326,10 +306,6 @@ def get_last_errors_widget():
             'wid': wid, 'collapsed': collapsed, 'options': options, 'base_url': '/widget/last_problems', 'title': title,
             }
 
-
-
-
-
 widget_desc = '''<h3>IT problems</h3>
 Show the most impacting IT problems
 '''
@@ -337,7 +313,6 @@ Show the most impacting IT problems
 last_widget_desc = '''<h3>Last IT problems</h3>
 Show the IT problems sorted by time
 '''
-
 
 pages = {get_page: { 'routes': ['/problems'], 'view': 'problems', 'static': True},
          get_all: { 'routes': ['/all'], 'view': 'problems', 'static': True},

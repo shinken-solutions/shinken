@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from Queue import Empty
 
 # In android, we sould use threads, not process
@@ -60,6 +59,7 @@ class Worker:
     _idletime = None
     _timeout = None
     _c = None
+
     def __init__(self, id, s, returns_queue, processes_by_worker, mortal=True, timeout=300, max_plugins_output_length=8192, target=None):
         self.id = self.__class__.id
         self.__class__.id += 1
@@ -78,14 +78,11 @@ class Worker:
         self.max_plugins_output_length = max_plugins_output_length
         self.i_am_dying = False
 
-
     def is_mortal(self):
         return self._mortal
 
-
     def start(self):
         self._process.start()
-
 
     # Kill the background process
     # AND close correctly the queues (input and output)
@@ -103,35 +100,27 @@ class Worker:
             self.input_queue.close()
             self.input_queue.join_thread()
 
-
     def join(self, timeout=None):
         self._process.join(timeout)
-
 
     def is_alive(self):
         return self._process.is_alive()
 
-
     def is_killable(self):
         return self._mortal and self._idletime > self._timeout
-
 
     def add_idletime(self, time):
         self._idletime = self._idletime + time
 
-
     def reset_idle(self):
         self._idletime = 0
-
 
     def send_message(self, msg):
         self._c.put(msg)
 
-
     # A zombie is immortal, so kill not be kill anymore
     def set_zombie(self):
         self._mortal = False
-
 
     # Get new checks if less than nb_checks_max
     # If no new checks got and no check in queue,
@@ -154,7 +143,6 @@ class Worker:
         except IOError, exp:
             return
 
-
     # Launch checks that are in status
     # REF: doc/shinken-action-queues.png (4)
     def launch_new_checks(self):
@@ -168,7 +156,6 @@ class Worker:
                 if r == 'toomanyopenfiles':
                     # We should die as soon as we return all checks
                     self.i_am_dying = True
-
 
     # Check the status of checks
     # if done, return message finished :)
@@ -202,7 +189,6 @@ class Worker:
         # Little sleep
         time.sleep(wait_time)
 
-
     # Check if our system time change. If so, change our
     def check_for_system_time_change(self):
         now = time.time()
@@ -216,7 +202,6 @@ class Worker:
             return difference
         else:
             return 0
-
 
     # id = id of the worker
     # s = Global Queue Master->Slave

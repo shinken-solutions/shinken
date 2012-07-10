@@ -33,6 +33,7 @@ from itemgroup import Itemgroup, Itemgroups
 from shinken.property import IntegerProp, StringProp
 from shinken.log import logger
 
+
 class Contactgroup(Itemgroup):
     id = 1
     my_type = 'contactgroup'
@@ -49,21 +50,17 @@ class Contactgroup(Itemgroup):
         'CONTACTGROUPMEMBERS':  'get_members'
     }
 
-
     def get_contacts(self):
         return getattr(self, 'members', '')
 
-
     def get_name(self):
         return getattr(self, 'contactgroup_name', 'UNNAMED-CONTACTGROUP')
-
 
     def get_contactgroup_members(self):
         if self.has('contactgroup_members'):
             return self.contactgroup_members.split(',')
         else:
             return []
-
 
     # We fillfull properties with template ones if need
     # Because hostgroup we call may not have it's members
@@ -109,14 +106,11 @@ class Contactgroups(Itemgroups):
             return []
         return cg.get_contacts()
 
-
     def add_contactgroup(self, cg):
         self.items[cg.id] = cg
 
-
     def linkify(self, contacts):
         self.linkify_cg_by_cont(contacts)
-
 
     # We just search for each host the id of the host
     # and replace the name by the id
@@ -140,7 +134,6 @@ class Contactgroups(Itemgroups):
             # We find the id, we remplace the names
             cg.replace_members(new_mbrs)
 
-
     # Add a contact string to a contact member
     # if the contact group do not exist, create it
     def add_member(self, cname, cgname):
@@ -151,7 +144,6 @@ class Contactgroups(Itemgroups):
             self.add_contactgroup(cg)
         else:
             cg.add_string_member(cname)
-
 
     # Use to fill members with contactgroup_members
     def explode(self):

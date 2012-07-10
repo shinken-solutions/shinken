@@ -26,21 +26,17 @@
 # This Class is an example of an Scheduler module
 # Here for the configuration phase AND running one
 
-
 import cPickle
 import shutil
 
-
 from shinken.basemodule import BaseModule
 from shinken.log import logger
-
 
 # Hack for making 0.5 retetnion file load in a 0.6 version
 # because the commandCall class was moved
 import shinken
 from shinken.commandcall import CommandCall
 shinken.objects.command.CommandCall = CommandCall
-
 
 properties = {
     'daemons': ['scheduler'],
@@ -55,7 +51,6 @@ def get_instance(plugin):
     path = plugin.path
     instance = Pickle_retention_scheduler(plugin, path)
     return instance
-
 
 
 # Just print some stuff
@@ -95,8 +90,6 @@ class Pickle_retention_scheduler(BaseModule):
             log_mgr.log("Error: retention file creation failed, %s" % str(exp))
             return
         log_mgr.log("Updating retention_file %s" % self.path)
-
-
 
     def hook_load_retention(self, daemon):
         return self.load_retention_objects(daemon, logger)

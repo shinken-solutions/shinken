@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from shinken.action import Action
 from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp
 from shinken.property import CharProp, StringProp, ListProp
@@ -105,7 +104,6 @@ class Check(Action):
             self.internal = False
         self.from_trigger = from_trigger
 
-
     def copy_shell(self):
         """return a copy of the check but just what is important for execution
         So we remove the ref and all
@@ -113,7 +111,6 @@ class Check(Action):
 
         # We create a dummy check with nothing in it, just defaults values
         return self.copy_shell__(Check('', '', '', '', '', id=self.id))
-
 
     def get_return_from(self, c):
         self.exit_status = c.exit_status

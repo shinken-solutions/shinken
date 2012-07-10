@@ -67,16 +67,13 @@ class PNP_Webui(BaseModule):
             my_name = socket.gethostname()
             self.uri = self.uri.replace('YOURSERVERNAME', my_name)
 
-
     # Try to connect if we got true parameter
     def init(self):
         pass
 
-
     # To load the webui application
     def load(self, app):
         self.app = app
-
 
     # For an element, give the number of elements in
     # the perf_data
@@ -86,12 +83,9 @@ class PNP_Webui(BaseModule):
         elts = [e for e in elts if e != '']
         return len(elts)
 
-
     # Give the link for the PNP UI, with a Name
     def get_external_ui_link(self):
         return {'label': 'PNP4', 'uri': self.uri}
-
-
 
     # Ask for an host or a service the graph UI that the UI should
     # give to get the graph image link and PNP page link too.
@@ -118,7 +112,6 @@ class PNP_Webui(BaseModule):
                 v['img_src'] = self.uri+'index.php/image?host=%s&srv=%s&view=0&source=%d&start=%d&end=%d' % (elt.host.host_name, elt.service_description, i, graphstart, graphend)
                 r.append(v)
             return r
-
 
         # Oups, bad type?
         return []

@@ -45,7 +45,6 @@ class TestConfigAuth(TestConfig):
         Comment.id = 1
         self.testid = str(os.getpid() + random.randint(1, 1000))
 
-
     def tearDown(self):
         # stop thread
         self.livestatus_broker.interrupted = True

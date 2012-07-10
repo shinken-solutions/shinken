@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import os
 
 from shinken.bin import VERSION
@@ -54,6 +53,7 @@ class Problem:
         self.source = source
         self.impacts = impacts
 
+
 def modified_attributes_names(self):
     names_list = []
     names = {
@@ -79,6 +79,7 @@ def modified_attributes_names(self):
         if self.modified_attributes & attr:
             names_list.append(names[attr])
     return names_list
+
 
 def join_with_separators(request, *args):
     if request.response.outputformat == 'csv':
@@ -163,7 +164,6 @@ def get_livestatus_full_name(item, req):
         else:
             return item.host_name
         pass
-
 
 # description (optional): no need to explain this
 # prop (optional): the property of the object. If this is missing, the key is the property
@@ -4344,7 +4344,6 @@ table_class_map = {
     None: ('', type('commandclass', (object, ), {'lsm_columns': []})),
 }
 
-
 """Build the new livestatus-methods and add delegate keys for certain attributes.
 
 Some attributes are not directly reachable via prop or
@@ -4371,23 +4370,30 @@ def host_redirect_factory(attribute):
     """attribute already comes with lsm_"""
     return lambda item, req: getattr(item.host, attribute)(req)
 
+
 def ref_redirect_factory(attribute):
     return lambda item, req: getattr(item.ref, attribute)(req)
+
 
 def log_service_redirect_factory(attribute):
     return lambda item, req: getattr(item.log_service, attribute)(req)
 
+
 def log_host_redirect_factory(attribute):
     return lambda item, req: getattr(item.log_host, attribute)(req)
+
 
 def log_contact_redirect_factory(attribute):
     return lambda item, req: getattr(item.log_contact, attribute)(req)
 
+
 def hostgroup_redirect_factory(attribute):
     return lambda item, req: getattr(item.hostgroup, attribute)(req)
 
+
 def servicegroup_redirect_factory(attribute):
     return lambda item, req: getattr(item.servicegroup, attribute)(req)
+
 
 def catchall_factory(name, req):
     def method(*args):
@@ -4501,9 +4507,6 @@ for objtype in ['Host', 'Service', 'Contact', 'Command', 'Timeperiod', 'Downtime
         cls.lsm_columns.append(attribute)
 
 #print "FINISHED THE ATTRIBUTE MAPPING<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
-
-
-
 
 def find_filter_converter(table, attribute, reverse=False):
     """Return a function which converts a string to the attribute's data type"""

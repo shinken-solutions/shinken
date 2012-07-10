@@ -43,7 +43,6 @@ except ImportError:
         raise
 
 
-
 # Sort hosts and services by impact, states and co
 def sort_by_last_state_change(s1, s2):
     if s1.last_state_change > s2.last_state_change:
@@ -92,13 +91,11 @@ def get_page():
     if not user:
         redirect("/user/login")
 
-
     all_imp_impacts = app.datamgr.get_important_elements()
     all_imp_impacts.sort(hst_srv_sort)
     #all_imp_impacts.sort(hst_srv_sort)
 
     #all_imp_impacts = app.datamgr.get_services() #important_elements()
-
 
     impacts = all_imp_impacts
     ## for imp in all_imp_impacts:
@@ -119,6 +116,5 @@ def get_page():
     all_pbs.sort(hst_srv_sort)  # sort_by_last_state_change)
 
     return {'app': app, 'user': user, 'impacts': impacts, 'problems': all_pbs}
-
 
 pages = {get_page: { 'routes': ['/wall/', '/wall'], 'view': 'wall', 'static': True}}

@@ -29,7 +29,6 @@ class TestPollerTagGetchecks(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_poller_tag_get_checks.cfg')
 
-
     def test_good_checks_get_only_tags_with_specific_tags(self):
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
@@ -66,7 +65,6 @@ class TestPollerTagGetchecks(ShinkenTest):
             # Should be the host one only
             self.assert_(c.command.startswith('plugins/test_hostcheck.pl'))
 
-
     def test_good_checks_get_only_tags_with_specific_module_types(self):
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
@@ -88,7 +86,6 @@ class TestPollerTagGetchecks(ShinkenTest):
             a.t_to_go = 0
         # the scheduler need to get this new checks in its own queues
         self.sched.get_new_actions()
-
 
         # Ask for badly named module type
         untaggued_checks = self.sched.get_to_run_checks(True, False, poller_tags=['None'], module_types=['fork'])

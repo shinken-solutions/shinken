@@ -43,6 +43,7 @@ class LiveStatusQueryError(Exception):
     }
     pass
 
+
 class LiveStatusQuery(object):
 
     my_type = 'query'
@@ -114,7 +115,6 @@ class LiveStatusQuery(object):
             return re.sub(re.sub('s$', '', bygroupmatch.group(1)) + '_', '', column, 1)
         else:
             return re.sub(re.sub('s$', '', self.table) + '_', '', column, 1)
-
 
     def parse_input(self, data):
         """Parse the lines of a livestatus request.
@@ -253,7 +253,6 @@ class LiveStatusQuery(object):
                 pass
         self.metainfo = LiveStatusQueryMetainfo(data)
 
-
     def launch_query(self):
         """ Prepare the request object's filter stacks """
 
@@ -356,12 +355,12 @@ class LiveStatusQuery(object):
 
         return result
 
-
     def get_hosts_or_services_livedata(self, cs):
         def gen_all(values):
             for val in values:
                 yield val
             return
+
         def gen_filtered(values, filterfunc):
             for val in gen_all(values):
                 if filterfunc(val):
@@ -377,6 +376,7 @@ class LiveStatusQuery(object):
                 else:
                     yield val
                     loopcnt += 1
+
         # This is a generator which returns up to <limit> elements
         # which passed the filter. If the limit has been reached
         # it is no longer necessary to loop through the original list.
@@ -403,14 +403,11 @@ class LiveStatusQuery(object):
     def get_hosts_livedata(self, cs):
         return self.get_hosts_or_services_livedata(cs)
 
-
     def get_services_livedata(self, cs):
         return self.get_hosts_or_services_livedata(cs)
 
-
     def get_simple_livedata(self, cs):
         return [obj for obj in getattr(self.datamgr.rg, self.table)]
-
 
     def get_filtered_livedata(self, cs):
         items = getattr(self.datamgr.rg, self.table).__itersorted__(self.metainfo.query_hints)
@@ -418,7 +415,6 @@ class LiveStatusQuery(object):
             return [x for x in items]
         else:
             return [x for x in items if cs.filter_func(x)]
-
 
     def get_list_livedata(self, cs):
         t = self.table
@@ -444,7 +440,6 @@ class LiveStatusQuery(object):
                     if cs.filter_func(c) ]
         return res
 
-
     def get_group_livedata(self, cs, objs, groupattr1, groupattr2, sorter):
         """
         return a list of elements from a "group" of 'objs'. group can be a hostgroup or a servicegroup.
@@ -457,6 +452,7 @@ class LiveStatusQuery(object):
         groupattr2: the attribute name to set on result.
         group_key: the key to be used to sort the group members.
         """
+
         def factory(obj, attribute, groupobj):
             setattr(obj, attribute, groupobj)
 
@@ -468,16 +464,13 @@ class LiveStatusQuery(object):
             )
         ), key = sorter)
 
-
     def get_hostsbygroup_livedata(self, cs):
         sorter = lambda k: k.hostgroup.hostgroup_name
         return self.get_group_livedata(cs, self.datamgr.rg.hosts.__itersorted__(self.metainfo.query_hints), 'hostgroups', 'hostgroup', sorter)
 
-
     def get_servicesbygroup_livedata(self, cs):
         sorter = lambda k: k.servicegroup.servicegroup_name
         return self.get_group_livedata(cs, self.datamgr.rg.services.__itersorted__(self.metainfo.query_hints), 'servicegroups', 'servicegroup', sorter)
-
 
     def get_problem_livedata(self, cs):
         # We will crate a problems list first with all problems and source in it
@@ -494,10 +487,8 @@ class LiveStatusQuery(object):
         # Then return
         return problems
 
-
     def get_status_livedata(self, cs):
         return [c for c in self.datamgr.rg.configs.values()]
-
 
     def get_columns_livedata(self, cs):
         result = []
@@ -534,7 +525,6 @@ class LiveStatusQuery(object):
         self.columns = ['description', 'name', 'table', 'type']
         return result
 
-
     def get_servicesbyhostgroup_livedata(self, cs):
         objs = self.datamgr.rg.services.__itersorted__(self.metainfo.query_hints)
         return sorted([x for x in (
@@ -544,7 +534,6 @@ class LiveStatusQuery(object):
                 ) for item0 in inner_list0[1] if inner_list0[1] # 2b only if the service's (from all services->filtered in the innermost loop) host has groups
             )
         )], key=lambda svc: svc.hostgroup.hostgroup_name)
-
 
     objects_get_handlers = {
         'hosts':                get_hosts_livedata,
@@ -568,7 +557,6 @@ class LiveStatusQuery(object):
         'columns':              get_columns_livedata,
         'servicesbyhostgroup':  get_servicesbyhostgroup_livedata
     }
-
 
     def get_live_data(self, cs):
         """Find the objects which match the request.
@@ -604,7 +592,6 @@ class LiveStatusQuery(object):
 
         return result
 
-
     def prepare_output(self, item):
         """Convert an object to a dict with selected keys."""
         output = {}
@@ -631,7 +618,6 @@ class LiveStatusQuery(object):
             ) if (cs.without_filter or cs.filter_func(z))
         ]
         return dbresult
-
 
     def statsify_result(self, filtresult):
         """Applies the stats filter functions to the result.
@@ -722,7 +708,6 @@ class LiveStatusQuery(object):
             result = [resultdict]
         return result
 
-
     def make_filter(self, operator, attribute, reference):
         if reference is not None:
             # Reference is now datatype string. The referring object attribute on the other hand
@@ -733,6 +718,7 @@ class LiveStatusQuery(object):
             if converter:
                 reference = converter(reference)
         attribute = 'lsm_'+attribute
+
         # The filters are closures.
         # Add parameter Class (Host, Service), lookup datatype (default string), convert reference
         def eq_filter(item):

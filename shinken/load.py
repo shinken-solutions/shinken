@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import time
 import math
 
@@ -31,8 +30,6 @@ import math
 #def calc_load_load(load, exp,n):
 #        load = n + exp*(load - n)
 #        return (load, exp)
-
-
 
 class Load:
     """This class is for having a easy Load calculation
@@ -50,7 +47,6 @@ class Load:
         self.last_update = 0  # last update of the value
         self.val = initial_value  # first value
 
-
     def update_load(self, new_val):
         # The first call do not change the value, just tag
         # the begining of last_update
@@ -67,7 +63,6 @@ class Load:
             pass
         except ZeroDivisionError:  # do not care
             pass
-
 
     def get_load(self):
         return self.val

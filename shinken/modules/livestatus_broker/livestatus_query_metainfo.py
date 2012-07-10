@@ -32,8 +32,6 @@ from livestatus_stack import LiveStatusStack
 def has_not_more_than(list1, list2):
     return len(set(list1).difference(set(list2))) == 0
 
-
-
 """
 There are several categories for queries. Their main difference is the kind
 of event which invalidates the corresponding cache.
@@ -92,6 +90,7 @@ class LiveStatusQueryMetainfoFilterStack(LiveStatusStack):
     a and/or-filter-tree, similar to sql.
     It can be used some time for text analysis.
     """
+
     def __init__(self, *args, **kw):
         self.type = 'text'
         self.__class__.__bases__[0].__init__(self, *args, **kw)
@@ -136,6 +135,7 @@ class LiveStatusQueryMetainfo(object):
     It's main purpose is to provide methods which are used to rank the query
     in specific categories.
     """
+
     def __init__(self, data):
         self.data = data
         self.cache_category = CACHE_IMPOSSIBLE

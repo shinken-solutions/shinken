@@ -26,6 +26,7 @@
 
 class DB(object):
     """DB is a generic class for SQL Database"""
+
     def __init__(self, table_prefix=''):
         self.table_prefix = table_prefix
 

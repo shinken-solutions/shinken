@@ -28,11 +28,9 @@
 # a GLPI with webservice (xmlrpc, SOAP is garbage) and take all
 # hosts. Simple way from now
 
-
 import xmlrpclib
 
 from shinken.basemodule import BaseModule
-
 
 properties = {
     'daemons': ['arbiter'],
@@ -51,7 +49,6 @@ def get_instance(plugin):
     tag = getattr(plugin, 'tag', "")
     instance = Glpi_arbiter(plugin, uri, login_name, login_password, tag)
     return instance
-
 
 
 # Just get hostname from a GLPI webservices
@@ -73,7 +70,6 @@ class Glpi_arbiter(BaseModule):
         res = self.con.glpi.doLogin(arg)
         self.session = res['session']
         print "My session number", self.session
-
 
     # Ok, main function that will load config from GLPI
     def get_objects(self):

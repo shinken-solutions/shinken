@@ -41,7 +41,6 @@ class TestConfig(ShinkenTest):
                 nb_s += 1
         return nb_s
 
-
     def test_simplelog(self):
         print self.conf.modules
         # get our modules
@@ -59,8 +58,6 @@ class TestConfig(ShinkenTest):
             os.unlink(mod.module_name)
         except:
             pass
-
-
 
         sl = get_instance(mod)
         print sl
@@ -107,7 +104,6 @@ class TestConfig(ShinkenTest):
         nb_services = self.nb_of_string(buf, "servicestatus {")
         self.assert_(nb_services  == 1)
 
-
         # now check if after a resend we still got the good number
         self.sched.broks.clear()
         self.sched.conf.skip_initial_broks = False
@@ -148,7 +144,6 @@ class TestConfig(ShinkenTest):
 
         nb_services = self.nb_of_string(buf, "servicestatus {")
         self.assert_(nb_services  == 1)
-
 
         os.unlink(mod.status_file)
         os.unlink(mod.object_cache_file)

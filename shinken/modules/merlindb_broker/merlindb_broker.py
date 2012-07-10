@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import copy
 import time
 
@@ -36,6 +35,7 @@ def get_objs_names(objs):
         s += get_obj_name(o)
     return s
 
+
 def get_obj_name(obj):
     print "ARG", obj
     print "Get name on", obj.get_name()
@@ -46,8 +46,10 @@ def list_to_comma(lst):
     # For ['d', 'r', 'u'] will return d,r,u
     return ','.join(lst)
 
+
 def last_hard_state_to_int(lst):
     return 1
+
 
 # Class for the Merlindb Broker
 # Get broks and puts them in merlin database
@@ -423,7 +425,6 @@ class Merlindb_broker(BaseModule):
             print "Creating a sqlite backend"
             self.db_backend = DBSqlite(self.database_path)
 
-
     def preprocess(self, type, brok):
         new_brok = copy.deepcopy(brok)
         # Only preprocess if we can apply a mapping
@@ -456,14 +457,12 @@ class Merlindb_broker(BaseModule):
             print brok.data
         return new_brok
 
-
     # Called by Broker so we can do init stuff
     # TODO: add conf param to get pass with init
     # Conf from arbiter!
     def init(self):
         print "I connect to Merlin database"
         self.db_backend.connect_database()
-
 
     # Get a brok, parse it, and put in in database
     # We call functions like manage_ TYPEOFBROK _brok that return us queries
@@ -479,8 +478,6 @@ class Merlindb_broker(BaseModule):
             for q in queries:
                 self.db_backend.execute_query(q)
             return
-
-
 
     # Ok, we are at launch and a scheduler want him only, OK...
     # So ca create several queries with all tables we need to delete with
@@ -499,7 +496,6 @@ class Merlindb_broker(BaseModule):
             res.append(q)
         return res
 
-
     # Program status is .. status of program? :)
     # Like pid, daemon mode, last activity, etc
     # We aleady clean database, so insert
@@ -508,7 +504,6 @@ class Merlindb_broker(BaseModule):
         del_query = "DELETE FROM program_status WHERE instance_id = '%s' " % instance_id
         query = self.db_backend.create_insert_query('program_status', b.data)
         return [del_query, query]
-
 
     # Program status is .. status of program? :)
     # Like pid, daemon mode, last activity, etc
@@ -519,7 +514,6 @@ class Merlindb_broker(BaseModule):
         query = self.db_backend.create_insert_query('program_status', b.data)
         return [del_query, query]
 
-
     # Initial service status is at start. We need an insert because we
     # clean the base
     def manage_initial_service_status_brok(self, b):
@@ -527,7 +521,6 @@ class Merlindb_broker(BaseModule):
         # It's a initial entry, so we need insert
         query = self.db_backend.create_insert_query('service', b.data)
         return [query]
-
 
     # A service check have just arrived, we UPDATE data info with this
     def manage_service_check_result_brok(self, b):
@@ -538,7 +531,6 @@ class Merlindb_broker(BaseModule):
         query = self.db_backend.create_update_query('service', data, where_clause)
         return [query]
 
-
     # A new service schedule have just arrived, we UPDATE data info with this
     def manage_service_next_schedule_brok(self, b):
         data = b.data
@@ -547,8 +539,6 @@ class Merlindb_broker(BaseModule):
         query = self.db_backend.create_update_query('service', data, where_clause)
         return [query]
 
-
-
     # A full service status? Ok, update data
     def manage_update_service_status_brok(self, b):
         data = b.data
@@ -556,7 +546,6 @@ class Merlindb_broker(BaseModule):
         where_clause = {'host_name': data['host_name'] , 'service_description': data['service_description']}
         query = self.db_backend.create_update_query('service', data, where_clause)
         return [query]
-
 
     # A host have just be create, database is clean, we INSERT it
     def manage_initial_host_status_brok(self, b):
@@ -573,7 +562,6 @@ class Merlindb_broker(BaseModule):
             q = "INSERT INTO host_contactgroup (host, contactgroup) VALUES ('%s', (SELECT id FROM contactgroup WHERE contactgroup_name = '%s'))" % (b.data['id'], cg_name)
             res.append(q)
         return res
-
 
     # A new host group? Insert it
     # We need to do something for the members prop (host.id, host_name)
@@ -600,7 +588,6 @@ class Merlindb_broker(BaseModule):
             res.append(q)
         return res
 
-
     # same from hostgroup, but with servicegroup
     def manage_initial_servicegroup_status_brok(self, b):
         data = b.data
@@ -623,7 +610,6 @@ class Merlindb_broker(BaseModule):
             res.append(q)
         return res
 
-
     # Same than service result, but for host result
     def manage_host_check_result_brok(self, b):
         b.data['last_update'] = time.time()
@@ -633,7 +619,6 @@ class Merlindb_broker(BaseModule):
         query = self.db_backend.create_update_query('host', data, where_clause)
         return [query]
 
-
     # Same than service result, but for host new scheduling
     def manage_host_next_schedule_brok(self, b):
         data = b.data
@@ -641,7 +626,6 @@ class Merlindb_broker(BaseModule):
         where_clause = {'host_name': data['host_name']}
         query = self.db_backend.create_update_query('host', data, where_clause)
         return [query]
-
 
     # Ok the host is updated
     def manage_update_host_status_brok(self, b):
@@ -652,12 +636,10 @@ class Merlindb_broker(BaseModule):
         query = self.db_backend.create_update_query('host', data, where_clause)
         return [query]
 
-
     # A contact have just be created, database is clean, we INSERT it
     def manage_initial_contact_status_brok(self, b):
         query = self.db_backend.create_insert_query('contact', b.data)
         return [query]
-
 
     # same from hostgroup, but with servicegroup
     def manage_initial_contactgroup_status_brok(self, b):

@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import time
 from shinken.comment import Comment
 from shinken.property import BoolProp, IntegerProp, StringProp
@@ -67,7 +66,6 @@ class Downtime:
         #'ref': None
     }
 
-
     def __init__(self, ref, start_time, end_time, fixed, trigger_id, duration, author, comment):
         self.id = self.__class__.id
         self.__class__.id += 1
@@ -98,7 +96,6 @@ class Downtime:
         self.can_be_deleted = False
         self.add_automatic_comment()
 
-
     def __str__(self):
         if self.is_in_effect == True:
             active = "active"
@@ -110,14 +107,11 @@ class Downtime:
             type = "flexible"
         return "%s %s Downtime id=%d %s - %s" % (active, type, self.id, time.ctime(self.start_time), time.ctime(self.end_time))
 
-
     def trigger_me(self, other_downtime):
         self.activate_me.append(other_downtime)
 
-
     def in_scheduled_downtime(self):
         return self.is_in_effect
-
 
     # The referenced host/service object enters now a (or another) scheduled
     # downtime. Write a log message only if it was not already in a downtime
@@ -135,7 +129,6 @@ class Downtime:
         for dt in self.activate_me:
             res.extend(dt.enter())
         return res
-
 
     # The end of the downtime was reached.
     def exit(self):
@@ -161,7 +154,6 @@ class Downtime:
         self.ref.in_scheduled_downtime_during_last_check = True
         return res
 
-
     # A scheduled downtime was prematurely cancelled
     def cancel(self):
         res = []
@@ -180,7 +172,6 @@ class Downtime:
             res.extend(dt.cancel())
         return res
 
-
     # Scheduling a downtime creates a comment automatically
     def add_automatic_comment(self):
         if self.fixed == True:
@@ -197,7 +188,6 @@ class Downtime:
         self.comment_id = c.id
         self.extra_comment = c
         self.ref.add_comment(c)
-
 
     def del_automatic_comment(self):
         # Extra comment can be None if we load it from a old version of Shinken
@@ -217,7 +207,6 @@ class Downtime:
                 if brok_type in entry['fill_brok']:
                     data[prop] = getattr(self, prop)
 
-
     # Get a brok with initial status
     def get_initial_status_brok(self):
         data = {'id': self.id}
@@ -225,7 +214,6 @@ class Downtime:
         self.fill_data_brok_from(data, 'full_status')
         b = Brok('downtime_raise', data)
         return b
-
 
     # Call by pickle for dataify the downtime
     # because we DO NOT WANT REF in this pickleisation!
@@ -237,7 +225,6 @@ class Downtime:
             if hasattr(self, prop):
                 res[prop] = getattr(self, prop)
         return res
-
 
     # Inverted funtion of getstate
     def __setstate__(self, state):

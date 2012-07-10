@@ -54,7 +54,6 @@ class TestConfig(ShinkenTest):
                 return True
         return False
 
-
     def update_broker(self, dodeepcopy=False):
         # The brok should be manage in the good order
         ids = self.sched.broks.keys()
@@ -90,7 +89,6 @@ class TestConfig(ShinkenTest):
         self.livestatus_broker = None
 
 
-
 class TestConfigSmall(TestConfig):
     def setUp(self):
         self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
@@ -122,7 +120,6 @@ class TestConfigSmall(TestConfig):
             host.output = "i am down"
             host.raise_alert_log_entry()
             self.update_broker()
-
 
     def test_hostsbygroup(self):
         self.print_header()
@@ -193,7 +190,6 @@ Columns: time type options state host_name"""
             print "handle is", day[1]
         print self.livestatus_broker.db.log_db_relevant_files(now - 3600, now +  3600 )
 
-
     def test_num_logs(self):
         self.print_header()
         host = self.sched.hosts.find_by_name("test_host_0")
@@ -235,8 +231,6 @@ Columns: time type options state host_name"""
             print "archive is", day[2]
             print "handle is", day[1]
         print self.livestatus_broker.db.log_db_relevant_files(now - 3 * 24 * 3600, now)
-
-
 
     def test_split_database(self):
         #
@@ -445,7 +439,6 @@ Columns: time type options state host_name"""
         print "lengths is", lengths
         self.assert_(lengths == [12, 28, 44, 60])
 
-
     def xtest_david_database(self):
         #os.removedirs("var/archives")
         self.print_header()
@@ -469,7 +462,6 @@ Columns: time type options state host_name"""
             print "db entries", db, numlogs
             dbh.close()
         print "lengths is", lengths
-
 
     def test_archives_path(self):
         #os.removedirs("var/archives")
@@ -539,6 +531,7 @@ ResponseHeader: fixed16
         pyresponse = [l for l in pyresponse if l[2] not in ["Warning ", "Info ", "Debug "]]
         print pyresponse
         self.assert_(len(pyresponse) == 2)
+
 
 class TestConfigBig(TestConfig):
 
@@ -866,7 +859,6 @@ class TestConfigNoLogstore(TestConfig):
         #--- livestatus_broker.manage_lql_thread
         self.livestatus_broker.livestatus = LiveStatus(self.livestatus_broker.datamgr, self.livestatus_broker.query_cache, self.livestatus_broker.db, self.livestatus_broker.pnp_path, self.livestatus_broker.from_q)
         #--- livestatus_broker.manage_lql_thread
-
 
     def test_has_implicit_module(self):
         self.assert_(self.livestatus_broker.modules_manager.instances[0].properties['type'] == 'logstore_sqlite')

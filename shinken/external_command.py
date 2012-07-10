@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import os
 import time
 
@@ -59,6 +58,7 @@ MODATTR_NOTIFICATION_TIMEPERIOD = 65536
 """ TODO: Add some comment about this class for the doc"""
 class ExternalCommand:
     my_type = 'externalcommand'
+
     def __init__(self, cmd_line):
         self.cmd_line = cmd_line
 
@@ -239,7 +239,6 @@ class ExternalCommandManager:
         'ADD_SIMPLE_POLLER': {'global': True, 'internal': True, 'args': [None, None, None, None]},
     }
 
-
     def __init__(self, conf, mode):
         self.mode = mode
         self.conf = conf
@@ -260,14 +259,11 @@ class ExternalCommandManager:
         # it can get it
         self.current_timestamp = 0
 
-
     def load_scheduler(self, scheduler):
         self.sched = scheduler
 
-
     def load_arbiter(self, arbiter):
         self.arbiter = arbiter
-
 
     def open(self):
         # At the first open del and create the fifo
@@ -285,7 +281,6 @@ class ExternalCommandManager:
                     return None
         self.fifo = os.open(self.pipe_path, os.O_NONBLOCK)
         return self.fifo
-
 
     def get(self):
         buf = os.read(self.fifo, 8096)
@@ -307,7 +302,6 @@ class ExternalCommandManager:
             # re-opened in the main loop.
             os.close(self.fifo)
         return r
-
 
     def resolve_command(self, excmd):
         # Maybe the command is invalid. Bailout
@@ -335,8 +329,6 @@ class ExternalCommandManager:
             else:
                 command = r['cmd']
                 self.dispatch_global_command(command)
-
-
 
     # Ok the command is not for every one, so we search
     # by the hostname which scheduler have the host. Then send
@@ -369,7 +361,6 @@ class ExternalCommandManager:
             if sched.alive:
                 #sched.run_external_command(command)
                 sched.external_commands.append(command)
-
 
     # We need to get the first part, the command name
     def get_command_and_args(self, command):
@@ -424,7 +415,6 @@ class ExternalCommandManager:
             if not internal:
                 logger.debug("Command '%s' is a global one, we resent it to all schedulers" % c_name)
                 return {'global': True, 'cmd': command}
-
 
         #print "Is global?", c_name, entry['global']
         #print "Mode:", self.mode
@@ -534,8 +524,6 @@ class ExternalCommandManager:
         else:
             logger.debug("Sorry, the arguments are not corrects (%s)" % str(args))
             return None
-
-
 
     # CHANGE_CONTACT_MODSATTR;<contact_name>;<value>
     def CHANGE_CONTACT_MODSATTR(self, contact, value):  # TODO
@@ -751,7 +739,6 @@ class ExternalCommandManager:
         if downtime_id in self.sched.contact_downtimes:
             self.sched.contact_downtimes[downtime_id].cancel()
 
-
     # DEL_HOST_COMMENT;<comment_id>
     def DEL_HOST_COMMENT(self, comment_id):
         if comment_id in self.sched.comments:
@@ -834,8 +821,6 @@ class ExternalCommandManager:
                     host.is_flapping = False
                     host.flapping_changes = []
                     self.sched.get_and_register_status_brok(host)
-
-
 
     # DISABLE_HOSTGROUP_HOST_CHECKS;<hostgroup_name>
     def DISABLE_HOSTGROUP_HOST_CHECKS(self, hostgroup):
@@ -1296,8 +1281,6 @@ class ExternalCommandManager:
     def PROCESS_HOST_OUTPUT(self, host, plugin_output):
         self.PROCESS_HOST_CHECK_RESULT(host, host.state_id, plugin_output)
 
-
-
     # PROCESS_SERVICE_CHECK_RESULT;<host_name>;<service_description>;<return_code>;<plugin_output>
     def PROCESS_SERVICE_CHECK_RESULT(self, service, return_code, plugin_output):
         # raise a PASSIVE check only if needed
@@ -1330,7 +1313,6 @@ class ExternalCommandManager:
     # PROCESS_SERVICE_CHECK_RESULT;<host_name>;<service_description>;<plugin_output>
     def PROCESS_SERVICE_OUTPUT(self, service, plugin_output):
         self.PROCESS_SERVICE_CHECK_RESULT(service, service.state_id, plugin_output)
-
 
     # READ_STATE_INFORMATION
     def READ_STATE_INFORMATION(self):
@@ -1584,17 +1566,14 @@ class ExternalCommandManager:
             self.conf.explode_global_conf()
             self.sched.get_and_register_update_program_status_brok()
 
-
     ### Now the shinken specific ones
     # LAUNCH_SVC_EVENT_HANDLER;<host_name>;<service_description>
     def LAUNCH_SVC_EVENT_HANDLER(self, service):
         service.get_event_handlers(externalcmd=True)
 
-
     # LAUNCH_SVC_EVENT_HANDLER;<host_name>;<service_description>
     def LAUNCH_HOST_EVENT_HANDLER(self, host):
         host.get_event_handlers(externalcmd=True)
-
 
     # ADD_SIMPLE_HOST_DEPENDENCY;<host_name>;<host_name>
     def ADD_SIMPLE_HOST_DEPENDENCY(self, son, father):
@@ -1610,7 +1589,6 @@ class ExternalCommandManager:
             self.sched.get_and_register_status_brok(son)
             self.sched.get_and_register_status_brok(father)
 
-
     # ADD_SIMPLE_HOST_DEPENDENCY;<host_name>;<host_name>
     def DEL_HOST_DEPENDENCY(self, son, father):
         if son.is_linked_with_host(father):
@@ -1623,7 +1601,6 @@ class ExternalCommandManager:
             son.del_host_act_dependency(father)
             self.sched.get_and_register_status_brok(son)
             self.sched.get_and_register_status_brok(father)
-
 
     # ADD_SIMPLE_POLLER;realm_name;poller_name;address;port
     def ADD_SIMPLE_POLLER(self, realm_name, poller_name, address, port):

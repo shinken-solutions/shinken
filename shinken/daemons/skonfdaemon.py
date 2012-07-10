@@ -31,7 +31,6 @@ try:
 except ImportError:
     is_android = False
 
-
 import sys
 import os
 import time
@@ -69,7 +68,6 @@ bottle.debug(True)
 bottle_dir = os.path.abspath(os.path.dirname(bottle.__file__))
 sys.path.insert(0, bottle_dir)
 
-
 bottle.TEMPLATE_PATH.append(os.path.join(bottle_dir, 'views'))
 bottle.TEMPLATE_PATH.append(bottle_dir)
 
@@ -77,7 +75,6 @@ try:
     from pymongo.connection import Connection
 except ImportError:
     Connection = None
-
 
 
 # Interface for the other Arbiter
@@ -111,8 +108,6 @@ class IForArbiter(Interface):
             self.app.last_master_speack = time.time()
             self.app.must_run = False
 
-
-
     # Here a function called by check_shinken to get daemon status
     def get_satellite_status(self, daemon_type, daemon_name):
         daemon_name_attr = daemon_type+"_name"
@@ -123,7 +118,6 @@ class IForArbiter(Interface):
                     if hasattr(dae, 'alive') and hasattr(dae, 'spare'):
                         return {'alive': dae.alive, 'spare': dae.spare}
         return None
-
 
     # Here a function called by check_shinken to get daemons list
     def get_satellite_list(self, daemon_type):
@@ -140,11 +134,9 @@ class IForArbiter(Interface):
             return satellite_list
         return None
 
-
     # Dummy call. We are a master, we managed what we want
     def what_i_managed(self):
         return []
-
 
     def get_all_states(self):
         res = {'arbiter': self.app.conf.arbiters,
@@ -192,8 +184,6 @@ class Skonf(Daemon):
 
         self.datamgr = datamgr
 
-
-
     # Use for adding things like broks
     def add(self, b):
         if isinstance(b, Brok):
@@ -203,8 +193,6 @@ class Skonf(Daemon):
         else:
             logger.warning('Cannot manage object type %s (%s)' % (type(b), b))
 
-
-
     def load_config_file(self):
         print "Loading configuration"
         # REF: doc/shinken-conf-dispatching.png (1)
@@ -212,7 +200,6 @@ class Skonf(Daemon):
         raw_objects = self.conf.read_config_buf(buf)
 
         print "Opening local log file"
-
 
         # First we need to get arbiters and modules first
         # so we can ask them some objects too
@@ -423,7 +410,6 @@ class Skonf(Daemon):
         logger.info("Configuration Loaded")
         print ""
 
-
     def load_web_configuration(self):
         self.plugins = []
 
@@ -441,9 +427,6 @@ class Skonf(Daemon):
         self.photo_dir = os.path.abspath(self.photo_dir)
         print "Webui: using the backend", self.http_backend
 
-
-
-
     # We check if the photo directory exists. If not, try to create it
     def check_photo_dir(self):
         print "Checking photo path", self.photo_dir
@@ -453,8 +436,6 @@ class Skonf(Daemon):
                 os.mkdir(self.photo_dir)
             except Exception, exp:
                 print "Photo dir creation failed", exp
-
-
 
     # Main loop function
     def main(self):
@@ -492,8 +473,6 @@ class Skonf(Daemon):
                     logger.error("Get an exception (%s). If you are under Linux, please check that your /dev/shm directory exists." % (str(exp)))
                     raise
 
-
-
             # For multiprocess things, we should not have
             # sockettimeouts. will be set explicitly in Pyro calls
             import socket
@@ -518,7 +497,6 @@ class Skonf(Daemon):
             logger.critical("Back trace of it: %s" % (traceback.format_exc()))
             raise
 
-
     def setup_new_conf(self):
         """ Setup a new conf received from a Master arbiter. """
         conf = self.new_conf
@@ -526,12 +504,10 @@ class Skonf(Daemon):
         self.cur_conf = conf
         self.conf = conf
 
-
     def do_loop_turn(self):
         if self.must_run:
             # Main loop
             self.run()
-
 
     # Get 'objects' from external modules
     # It can be used for get external commands for example
@@ -549,7 +525,6 @@ class Skonf(Daemon):
                 except (IOError, EOFError), exp:
                     logger.warning("An external module queue got a problem '%s'" % str(exp))
                     break
-
 
     # We wait (block) for arbiter to send us something
     def wait_for_master_death(self):
@@ -605,7 +580,6 @@ class Skonf(Daemon):
             # clean them
             sched.external_commands = []
 
-
     # Main function
     def run(self):
         if self.conf.human_timestamp_log:
@@ -638,12 +612,10 @@ class Skonf(Daemon):
         print "Starting SkonfUI app"
         srv = run(host=self.http_host, port=self.http_port, server=self.http_backend)
 
-
     def workersmanager(self):
         while True:
             print "Workers manager thread"
             time.sleep(1)
-
 
     # Here we will load all plugins (pages) under the webui/plugins
     # directory. Each one can have a page, views and htdocs dir that we must
@@ -714,10 +686,6 @@ class Skonf(Daemon):
             except Exception, exp:
                 logger.log("Loading plugins: %s" % exp)
 
-
-
-
-
     def add_static(self, fdir, m_dir):
         static_route = '/static/'+fdir+'/:path#.+#'
         #print "Declaring static route", static_route
@@ -725,9 +693,6 @@ class Skonf(Daemon):
             print "Ask %s and give %s" % (path, os.path.join(m_dir, 'htdocs'))
             return static_file(path, root=os.path.join(m_dir, 'htdocs'))
         route(static_route, callback=plugin_static)
-
-
-
 
     # We want a lock manager version of the plugin fucntions
     def lockable_function(self, f):
@@ -747,7 +712,6 @@ class Skonf(Daemon):
                 #self.global_lock.release()
                 #print "The lock version is", lock_version
         return lock_version
-
 
     def declare_common_static(self):
         @route('/static/photos/:path#.+#')
@@ -772,16 +736,10 @@ class Skonf(Daemon):
                 print "No such file, I look in", os.path.join(root, path)
             return static_file(path, root=root)
 
-
         # And add the favicon ico too
         @route('/favicon.ico')
         def give_favicon():
             return static_file('favicon.ico', root=os.path.join(bottle_dir, 'htdocs', 'images'))
-
-
-
-
-
 
     def old_run(self):
         suppl_socks = None
@@ -835,7 +793,6 @@ class Skonf(Daemon):
                 self.dump_memory()
                 self.need_dump_memory = False
 
-
     def get_daemons(self, daemon_type):
         """ Returns the daemons list defined in our conf for the given type """
         # shouldn't the 'daemon_types' (whetever it is above) be always present?
@@ -849,15 +806,12 @@ class Skonf(Daemon):
         r['external_commands'] = self.external_commands
         return r
 
-
     # Get back our data from a retention module
     def restore_retention_data(self, data):
         broks = data['broks']
         external_commands = data['external_commands']
         self.broks.update(broks)
         self.external_commands.extend(external_commands)
-
-
 
     def check_auth(self, user, password):
         print "Checking auth of", user # , password
@@ -889,8 +843,6 @@ class Skonf(Daemon):
         # Ok if we got a real contact, and if a module auth it
         return (is_ok and c is not None)
 
-
-
     def get_user_auth(self):
         # First we look for the user sid
         # so we bail out if it's a false one
@@ -908,10 +860,6 @@ class Skonf(Daemon):
         #c.is_admin = True
         return c
 
-
-
-
-
     # Create and launch a new worker, and put it into self.workers
     def create_and_launch_worker(self):
         w = SkonfUIWorker(1, self.workers_queue, self.returns_queue, 1, mortal=False, max_plugins_output_length = 1, target=None)
@@ -926,7 +874,6 @@ class Skonf(Daemon):
         # Ok, all is good. Start it!
         w.start()
 
-
     # TODO: fix hard coded server/database
     def init_db(self):
         if not Connection:
@@ -936,12 +883,9 @@ class Skonf(Daemon):
         con = Connection('localhost')
         self.db = con.shinken
 
-
     def init_datamanager(self):
         self.datamgr.load_conf(self.conf)
         self.datamgr.load_db(self.db)
-
-
 
     def get_api_key(self):
         return str(self.api_key)
@@ -951,7 +895,6 @@ class Skonf(Daemon):
         msg = Message(id=0, type='ScanAsk', data={'scan_id': id})
         print "Creating a Message for ScanAsk", msg
         self.workers_queue.put(msg)
-
 
          # Will get all label/uri for external UI like PNP or NagVis
     def get_external_ui_link(self):
@@ -972,8 +915,6 @@ class Skonf(Daemon):
         safe_print("Will return external_ui_link::", lst)
         return lst
 
-
-
     def save_pack(self, buf):
         print "SAVING A PACK WITH SIZE", len(buf)
         _tmpfile = tempfile.mktemp()
@@ -987,7 +928,6 @@ class Skonf(Daemon):
             r = {'state': 200, 'text': 'Ok, the pack is downloaded and install. Please restart skonf to use it.'}
             os.remove(_tmpfile)
             return r
-
 
         TMP_DIR = tempfile.mkdtemp()
         print "Unflating the pack into", TMP_DIR
@@ -1067,7 +1007,6 @@ class Skonf(Daemon):
                     else:
                         logger.warning('Cannot create the directory %s for a pack install' % os.path.join(self.share_dir, from_share_path))
 
-
         # Now the template one
         templates_dir = os.path.join(dest_dir, 'templates')
         if os.path.exists(templates_dir):
@@ -1088,7 +1027,6 @@ class Skonf(Daemon):
                         shutil.copy(src_file, full_dst_file)
                     else:
                         logger.warning('Cannot create the directory %s for a pack install' % os.path.join(self.share_dir, from_share_path))
-
 
         r = {'state': 200, 'text': 'Ok, the pack is downloaded and install. Please restart skonf to use it.'}
         return r

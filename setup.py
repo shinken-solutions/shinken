@@ -56,7 +56,6 @@ from distutils.command.install import install as _install
 from distutils.util import change_root
 from distutils.errors import DistutilsOptionError
 
-
 # We try to see if we are in a full install or an update process
 is_update = False
 if 'update' in sys.argv:
@@ -86,6 +85,7 @@ class build(_build):
     user_options = _build.user_options + [
         ('build-config', None, 'directory to build the config files to'),
         ]
+
     def initialize_options(self):
         _build.initialize_options(self)
         self.build_config = None
@@ -189,7 +189,6 @@ class build_config(Command):
         if self.build_dir is None:
             self.build_dir = os.path.join(self.build_base, 'etc')
 
-
     def run(self):
         if not self.dry_run:
             self.mkpath(self.build_dir)
@@ -242,8 +241,6 @@ class build_config(Command):
             if not os.path.exists(dirname):
                 os.makedirs(dirname)
 
-
-
     def update_configfiles(self):
         # Here, even with --root we should change the file with good values
         # then update the /etc/*d.ini files ../var value with the real var one
@@ -280,7 +277,6 @@ pidfile=%s/%sd.pid
             inname = os.path.join('etc', name)
             outname = os.path.join(self.build_dir, name)
             log.info('updating path in %s', outname)
-
 
             ## but we HAVE to set the shinken_user & shinken_group to thoses requested:
             append_file_with(inname, outname, """
@@ -373,7 +369,6 @@ class install_config(Command):
             self.recursive_chown(self.run_path, uid, gid, self.owner, self.group)
             self.recursive_chown(self.log_path, uid, gid, self.owner, self.group)
 
-
     def get_inputs (self):
         return self.distribution.configs or []
 
@@ -407,10 +402,12 @@ class install_config(Command):
                                        "Maybe you should create this group"
                                        % group_name)
 
+
 def ensure_dir_exist(f):
     dirname = os.path.dirname(f)
     if not os.path.exists(dirname):
         os.makedirs(dirname)
+
 
 def append_file_with(infilename, outfilename, append_string):
     f = open(infilename)
@@ -518,7 +515,6 @@ config_objects_file_extended.extend(srv_pack_files)
 config_objects_file = tuple(config_objects_file_extended)
 print config_objects_file
 
-
 # daemon configs
 daemon_ini_files = (('broker', 'brokerd.ini'),
                     ('broker', 'brokerd-windows.ini'),
@@ -532,8 +528,6 @@ daemon_ini_files = (('broker', 'brokerd.ini'),
                     ('scheduler', 'schedulerd-windows.ini'),
                     )
 
-
-
 resource_cfg_files = ('resource.cfg', )
 
 # Ok, for the webui files it's a bit tricky. we need to add all of them in
@@ -545,7 +539,6 @@ webui_files = [s.replace('shinken/webui/', 'webui/') for s in full_path_webui_fi
 
 package_data = ['*.py', 'modules/*.py', 'modules/*/*.py']
 package_data.extend(webui_files)
-
 
 #By default we add all init.d scripts and some dummy files
 data_files = [
@@ -573,8 +566,6 @@ if not is_update:
         (os.path.join(etc_root, 'default',),
          ['build/bin/default/shinken' ]
          ))
-
-
 #print "DATA", data_files
 
 print "All package _data"
@@ -620,6 +611,5 @@ if __name__ == "__main__":
 
         data_files=data_files,
     )
-
 
 print "Shinken setup done"

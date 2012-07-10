@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import re
 import time
 from heapq import nsmallest
@@ -35,6 +34,7 @@ from counter import Counter
 class LFUCacheMiss(Exception):
     pass
 
+
 class LFU(object):
     """
     This class implements a dictionary which has a limited number of elements.
@@ -44,6 +44,7 @@ class LFU(object):
     http://code.activestate.com/recipes/498245-lru-and-lfu-cache-decorators/
     but LFU is much more simpler.
     """
+
     def __init__(self, maxsize=100):
         self.storage = {}
         self.maxsize = maxsize

@@ -119,7 +119,6 @@ class Canopsis_broker(BaseModule):
         logger.info("[canopsis] initial host commands: %s " % str(self.host_commands))
         logger.info("[canopsis] initial host addresses: %s " % str(self.host_addresses))
 
-
     def manage_initial_service_status_brok(self, b):
         logger.log("[Canopsis] processing initial_service_status")
 
@@ -142,7 +141,6 @@ class Canopsis_broker(BaseModule):
             self.service_max_check_attempts[b.data['host_name']] = {}
 
         self.service_max_check_attempts[b.data['host_name']][b.data['service_description']] = b.data['max_check_attempts']
-
 
     def manage_host_check_result_brok(self, b):
         message = self.create_message('component', 'check', b)
@@ -247,6 +245,7 @@ class Canopsis_broker(BaseModule):
         if self.canopsis:
             self.canopsis.hook_tick(brok)
 
+
 class event2amqp():
 
     def __init__(self, host, port, user, password, virtual_host, exchange_name, identifier, maxqueuelength, queue_dump_frequency):
@@ -272,7 +271,6 @@ class event2amqp():
         self.tickage = 0
 
         self.load_queue()
-
 
     def create_connection(self):
         self.connection_string = "amqp://%s:%s@%s:%s/%s" % (self.user, self.password, self.host, self.port, self.virtual_host)

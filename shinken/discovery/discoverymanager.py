@@ -23,8 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 import sys
 import cPickle
 import os
@@ -50,7 +48,6 @@ from shinken.macroresolver import MacroResolver
 from shinken.modulesmanager import ModulesManager
 
 
-
 def get_uuid(self):
     if uuid:
         return uuid.uuid4().hex
@@ -64,7 +61,6 @@ def is_ipv4_addr(name):
     return (re.match(p, name) is not None)
 
 
-
 def by_order(r1, r2):
     if r1.discoveryrule_order == r2.discoveryrule_order:
         return 0
@@ -72,6 +68,7 @@ def by_order(r1, r2):
         return 1
     if r1.discoveryrule_order < r2.discoveryrule_order:
         return -1
+
 
 class DiscoveredHost(object):
     my_type = 'host'  # we fake our type for the macro resolving
@@ -131,13 +128,11 @@ class DiscoveredHost(object):
         for (k, v) in self.properties.iteritems():
             self.customs['_'+k.upper()] = v
 
-
     # Manager ask us our properties for the configuration, so
     # we keep only rules properties and _ ones
     def get_final_properties(self):
         self.update_properties(final_phase=True)
         return self.properties
-
 
     def get_to_run(self):
         self.in_progress_runners = []
@@ -155,12 +150,8 @@ class DiscoveredHost(object):
             if r.is_matching_disco_datas(self.properties):
                 self.in_progress_runners.append(r)
 
-
-
     def need_to_run(self):
         return len(self.in_progress_runners) != 0
-
-
 
     # Now we try to match all our hosts with the rules
     def match_rules(self):
@@ -175,8 +166,6 @@ class DiscoveredHost(object):
                 self.matched_rules.append(r)
                 print "Generating a new rule", self.name, r.writing_properties
         self.update_properties()
-
-
 
     def read_disco_buf(self, buf):
         print 'Read buf in', self.name
@@ -218,13 +207,11 @@ class DiscoveredHost(object):
             print "INNER -->", name, key, value
             self.data[key] = value
 
-
     def launch_runners(self):
         for r in self.in_progress_runners:
             print "I", self.name, " is launching", r.get_name(), "with a %d seconds timeout" % 3600
             r.launch(timeout=3600, ctx=[self])
             self.launched_runners.append(r)
-
 
     def wait_for_runners_ends(self):
         all_ok = False
@@ -240,7 +227,6 @@ class DiscoveredHost(object):
                     #print r.get_name(), "is not finished"
                     all_ok = False
             time.sleep(0.1)
-
 
     def get_runners_outputs(self):
         for r in self.in_progress_runners:
@@ -316,10 +302,8 @@ class DiscoveryManager:
         self.init_database()
         self.init_backend()
 
-
     def add(self, obj):
         pass
-
 
     # We try to init the database connection
     def init_database(self):
@@ -344,7 +328,6 @@ class DiscoveryManager:
                 except Exception, exp:
                     logger.error('Database init: %s' % exp)
 
-
     # We try to init the backend if we got one
     def init_backend(self):
         if not self.backend:
@@ -364,8 +347,6 @@ class DiscoveryManager:
         self.backend = self.modules_manager.instances[0]
         print "We got our backend!", self.backend
 
-
-
     def loop_discovery(self):
         still_loop = True
         i = 0
@@ -384,8 +365,6 @@ class DiscoveryManager:
                     dh.wait_for_runners_ends()
                     dh.get_runners_outputs()
                     dh.match_rules()
-
-
 
     def read_disco_buf(self):
         buf = self.raw_disco_data
@@ -428,7 +407,6 @@ class DiscoveryManager:
             print "-->", name, key, value
             dh.data[key] = value
 
-
     # Now we try to match all our hosts with the rules
     def match_rules(self):
         for (name, dh) in self.disco_data.iteritems():
@@ -444,7 +422,6 @@ class DiscoveryManager:
                     self.disco_matches[name].append(r)
                     print "Generating", name, r.writing_properties
             dh.update_properties()
-
 
     def is_allowing_runners(self, name):
         name = name.strip()
@@ -464,10 +441,8 @@ class DiscoveryManager:
         # Not good, so not run this!
         return False
 
-
     def allowed_runners(self):
         return [r for r in self.discoveryruns if self.is_allowing_runners(r.get_name())]
-
 
     def launch_runners(self):
         allowed_runners = self.allowed_runners()
@@ -479,7 +454,6 @@ class DiscoveryManager:
         for r in allowed_runners:
             print "I'm launching", r.get_name(), "with a %d seconds timeout" % self.conf.runners_timeout
             r.launch(timeout=self.conf.runners_timeout)
-
 
     def wait_for_runners_ends(self):
         all_ok = False
@@ -495,7 +469,6 @@ class DiscoveryManager:
                     all_ok = False
             time.sleep(0.1)
 
-
     def get_runners_outputs(self):
         for r in self.allowed_runners():
             if r.is_finished():
@@ -510,14 +483,12 @@ class DiscoveryManager:
             for r in self.allowed_runners():
                 print "DBG", r.current_launch
 
-
     # Write all configuration we've got
     def write_config(self):
         for name in self.disco_data:
             print "Writing", name, "configuration"
             self.write_host_config(name)
             self.write_service_config(name)
-
 
     # We search for all rules of type host, and we merge them
     def write_host_config(self, host):
@@ -538,7 +509,6 @@ class DiscoveryManager:
 
         if self.backend:
             self.backend.write_host_config_to_db(host, d)
-
 
     # Will wrote all properties/values of d for the host
     # in the file
@@ -568,7 +538,6 @@ class DiscoveryManager:
             print "Cannot create the file '%s': '%s'" % (cfg_p, exp)
             return
 
-
     # Generate all service for a host
     def write_service_config(self, host):
         srv_rules = {}
@@ -593,7 +562,6 @@ class DiscoveryManager:
             # a bdd one.
             if self.output_dir:
                 self.write_service_config_to_file(host, desc, d)
-
 
     # Will wrote all properties/values of d for the host
     # in the file
@@ -622,7 +590,6 @@ class DiscoveryManager:
             print "Cannot create the file '%s': '%s'" % (cfg_p, exp)
             return
 
-
     # Create a define t { } with data in d
     def get_cfg_bufer(self, d, t):
         tab = ['define %s {' % t]
@@ -630,7 +597,6 @@ class DiscoveryManager:
             tab.append('  %s   %s' % (key, value))
         tab.append('}\n')
         return '\n'.join(tab)
-
 
     # Will wrote all properties/values of d for the host
     # in the database

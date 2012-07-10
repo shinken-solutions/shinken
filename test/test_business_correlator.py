@@ -31,7 +31,6 @@ class TestBusinesscorrel(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_business_correlator.cfg')
 
-
     # We will try a simple bd1 OR db2
     def test_simple_or_business_correlator(self):
         #
@@ -129,8 +128,6 @@ class TestBusinesscorrel(ShinkenTest):
         state = bp_rule.get_state()
         self.assert_(state == 1)
 
-
-
     # We will try a simple bd1 AND db2
     def test_simple_and_business_correlator(self):
         #
@@ -221,9 +218,6 @@ class TestBusinesscorrel(ShinkenTest):
         state = bp_rule.get_state()
         self.assert_(state == 1)
 
-
-
-
     # We will try a simple 1of: bd1 OR/AND db2
     def test_simple_1of_business_correlator(self):
         #
@@ -255,7 +249,6 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(bp_rule.operand == 'of:')
         # Simple 1of: so in fact a triple (1,2,2) (1of and MAX,MAX
         self.assert_(bp_rule.of_values == (1, 2, 2))
-
 
         sons = bp_rule.sons
         print "Sons,", sons
@@ -317,10 +310,6 @@ class TestBusinesscorrel(ShinkenTest):
         state = bp_rule.get_state()
         self.assert_(state == 1)
 
-
-
-
-
     # We will try a simple 1of: test_router_0 OR/AND test_host_0
     def test_simple_1of_business_correlator_with_hosts(self):
         #
@@ -344,7 +333,6 @@ class TestBusinesscorrel(ShinkenTest):
         # Simple 1of: so in fact a triple (1,2,2) (1of and MAX,MAX
         self.assert_(bp_rule.of_values == (1, 2, 2))
 
-
         sons = bp_rule.sons
         print "Sons,", sons
         # We've got 2 sons, 2 services nodes
@@ -353,9 +341,6 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(sons[0].sons[0] == host)
         self.assert_(sons[1].operand == 'host')
         self.assert_(sons[1].sons[0] == router)
-
-
-
 
     # We will try a simple bd1 OR db2, but this time we will
     # schedule a real check and see if it's good
@@ -427,7 +412,6 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(svc_cor.state_type == 'HARD')
         self.assert_(svc_cor.last_hard_state_id == 0)
 
-
         # Now we set the bd1 as soft/CRITICAL
         self.scheduler_loop(1, [[svc_bd1, 2, 'CRITICAL | value1=1 value2=2']])
         self.assert_(svc_bd1.state == 'CRITICAL')
@@ -458,7 +442,6 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(svc_cor.state_type == 'HARD')
         self.assert_(svc_cor.last_hard_state_id == 0)
 
-
         # Now we get bd1 CRITICAL/HARD
         self.scheduler_loop(1, [[svc_bd1, 2, 'CRITICAL | value1=1 value2=2']])
         self.assert_(svc_bd1.state == 'CRITICAL')
@@ -488,7 +471,6 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(svc_cor.state == 'OK')
         self.assert_(svc_cor.state_type == 'HARD')
         self.assert_(svc_cor.last_hard_state_id == 0)
-
 
         # Now we also set bd2 as CRITICAL/HARD... byebye 0 :)
         self.scheduler_loop(2, [[svc_bd2, 2, 'CRITICAL | value1=1 value2=2']])
@@ -542,7 +524,6 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(svc_cor.state_type == 'HARD')
         self.assert_(svc_cor.last_hard_state_id == 2)
 
-
         # And If we set one WARNING?
         self.scheduler_loop(2, [[svc_bd2, 1, 'WARNING | value1=1 value2=2']])
         self.assert_(svc_bd2.state == 'WARNING')
@@ -584,7 +565,6 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(svc_cor in svc_bd2.impacts)
         # and bd1 too
         self.assert_(svc_cor in svc_bd1.impacts)
-
 
     def test_dep_node_list_elements(self):
         svc_bd1 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "db1")
@@ -689,7 +669,6 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(svc_cor.state_type == 'HARD')
         self.assert_(svc_cor.last_hard_state_id == 0)
 
-
         # Now we set the bd1 as soft/CRITICAL
         self.scheduler_loop(1, [[svc_bd1, 2, 'CRITICAL | value1=1 value2=2']])
         self.assert_(svc_bd1.state == 'CRITICAL')
@@ -720,7 +699,6 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(svc_cor.state_type == 'HARD')
         self.assert_(svc_cor.last_hard_state_id == 0)
 
-
         # Now we get bd1 CRITICAL/HARD
         self.scheduler_loop(1, [[svc_bd1, 2, 'CRITICAL | value1=1 value2=2']])
         self.assert_(svc_bd1.state == 'CRITICAL')
@@ -750,7 +728,6 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(svc_cor.state == 'OK')
         self.assert_(svc_cor.state_type == 'HARD')
         self.assert_(svc_cor.last_hard_state_id == 0)
-
 
         # Now we also set bd2 as CRITICAL/HARD... byebye 0 :)
         self.scheduler_loop(2, [[svc_bd2, 2, 'CRITICAL | value1=1 value2=2']])
@@ -803,7 +780,6 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(svc_cor.state == 'CRITICAL')
         self.assert_(svc_cor.state_type == 'HARD')
         self.assert_(svc_cor.last_hard_state_id == 2)
-
 
         # And If we set one WARNING?
         self.scheduler_loop(2, [[svc_bd2, 1, 'WARNING | value1=1 value2=2']])
@@ -899,12 +875,6 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(svc_cor.state_type == 'HARD')
         self.assert_(svc_cor.last_hard_state_id == 0)
 
-
-
-
-
-
-
     # We will try a simple 1of: bd1 OR/AND db2
     def test_complex_ABCof_business_correlator(self):
         #
@@ -945,7 +915,6 @@ class TestBusinesscorrel(ShinkenTest):
         bp_rule = svc_cor.business_rule
         self.assert_(bp_rule.operand == 'of:')
         self.assert_(bp_rule.of_values == (5, 1, 1))
-
 
         sons = bp_rule.sons
         print "Sons,", sons
@@ -1018,13 +987,10 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(B.state_type == 'HARD')
         self.assert_(B.last_hard_state_id == 1)
 
-
         # Must be WARNING (worse no 0 value for both, like for AND rule)
         state = bp_rule.get_state()
         print "state", state
         self.assert_(state == 1)
-
-
 
         # Ok now more fun, with changing of_values and states
 
@@ -1076,10 +1042,6 @@ class TestBusinesscorrel(ShinkenTest):
         bp_rule.of_values = (4, 1, 3)
         bp_rule.is_of_mul = True
         self.assert_(bp_rule.get_state() == 1)
-
-
-
-
 
     # We will try a simple bd1 AND NOT db2
     def test_simple_and_not_business_correlator(self):
@@ -1186,13 +1148,11 @@ class TestBusinesscorrel(ShinkenTest):
         self.assert_(state == 2)
 
 
-
-
 class TestConfigBroken(ShinkenTest):
     """A class with a broken configuration, where business rules reference unknown hosts/services"""
+
     def setUp(self):
         self.setup_with_file('etc/nagios_business_correlator_broken.cfg')
-
 
     def test_conf_is_correct(self):
         #

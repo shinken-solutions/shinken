@@ -27,7 +27,6 @@
 # This Class is an example of an Scheduler module
 # Here for the configuration phase AND running one
 
-
 import cPickle
 import shutil
 import traceback
@@ -40,7 +39,6 @@ from shinken.log import logger
 import shinken
 from shinken.commandcall import CommandCall
 shinken.objects.command.CommandCall = CommandCall
-
 
 properties = {
     'daemons': ['broker', 'arbiter', 'scheduler' ],
@@ -55,7 +53,6 @@ def get_instance(plugin):
     path = plugin.path
     instance = Pickle_retention_generic(plugin, path)
     return instance
-
 
 
 # Just print some stuff
@@ -92,7 +89,6 @@ class Pickle_retention_generic(BaseModule):
             log_mgr.log("Error: retention file creation failed, %s" % str(exp))
             return
         log_mgr.log("Updating retention_file %s" % self.path)
-
 
     # Should return if it succeed in the retention load or not
     def hook_load_retention(self, daemon):

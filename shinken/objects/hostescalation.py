@@ -23,11 +23,11 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from item import Item, Items
 from escalation import Escalation
 
 from shinken.property import IntegerProp, StringProp, ListProp
+
 
 class Hostescalation(Item):
     id = 1  # zero is always special in database, so we do not take risk here
@@ -54,7 +54,6 @@ class Hostescalation(Item):
 class Hostescalations(Items):
     name_property = ""
     inner_class = Hostescalation
-
 
     # We look for contacts property in contacts and
     def explode(self, escalations):

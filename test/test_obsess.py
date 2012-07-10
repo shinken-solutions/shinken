@@ -22,14 +22,13 @@
 # This file is used to test acknowledge of problems
 #
 
-
 from shinken_test import *
+
 
 class TestConfig(ShinkenTest):
 
     def setUp(self):
         self.setup_with_file('etc/nagios_obsess.cfg')
-
 
     def test_ocsp(self):
         self.print_header()
@@ -94,7 +93,6 @@ class TestConfig(ShinkenTest):
         self.worker_loop()
         self.assert_(svc.obsess_over_service)
         self.assert_(not svc.__class__.obsess_over)
-
 
     def test_ochp(self):
         self.print_header()

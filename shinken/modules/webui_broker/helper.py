@@ -50,7 +50,6 @@ class Helper(object):
     def gogo(self):
         return 'HELLO'
 
-
     def act_inactive(self, b):
         if b:
             return 'Active'
@@ -78,7 +77,6 @@ class Helper(object):
         if t == 0 or t == None:
             return 'N/A'
         return time.asctime(time.localtime(t))
-
 
     # For a time, print something like
     # 10m 37s  (just duration = True)
@@ -157,7 +155,6 @@ class Helper(object):
         else:  # past :)
             return ' '.join(duration) + ' ago'
 
-
     # Need to create a X level higer and lower to the element
     def create_json_dep_graph(self, elt, levels=3):
         t0 = time.time()
@@ -214,7 +211,6 @@ class Helper(object):
             self.print_duration(elt.last_state_change, just_duration=True, x_elts=2),
             self.get_link_dest(elt), self.get_button('Go to details', img='/static/images/search.png'))
 
-
         d['data']['elt_type'] = elt.__class__.my_type
         d['data']['is_problem'] = elt.is_problem
         d['data']['state_id'] = elt.state_id
@@ -247,7 +243,6 @@ class Helper(object):
         # that will link us
         return d
 
-
     # Return all linked elements of this elt, and 2 level
     # higer and lower :)
     def get_all_linked_elts(self, elt, levels=3):
@@ -269,7 +264,6 @@ class Helper(object):
         safe_print("get_all_linked_elts::Give elements", my)
         return my
 
-
     # Return a button with text, image, id and class (if need)
     def get_button(self, text, img=None, id=None, cls=None):
         #s = '<div class="buttons">\n'
@@ -290,14 +284,12 @@ class Helper(object):
 
         return s
 
-
     # For and host, return the services sorted by business
     # impact, then state, then desc
     def get_host_services_sorted(self, host):
         t = copy.copy(host.services)
         t.sort(hst_srv_sort)
         return t
-
 
     def get_input_bool(self, b, id=None):
         id_s = ''
@@ -307,7 +299,6 @@ class Helper(object):
             return """<input type="checkbox" checked="checked" %s/>\n""" % id_s
         else:
             return """<input type="checkbox" %s />\n""" % id_s
-
 
     def print_business_rules_mobile(self, tree, level=0, source_problems=[]):
         safe_print("Should print tree", tree)
@@ -465,7 +456,6 @@ class Helper(object):
             return 'ok'
         return 'unknown'
 
-
     # For an object, give it's business impact as text
     # and stars if need
     def get_business_impact_text(self, obj):
@@ -476,7 +466,6 @@ class Helper(object):
 
         res = "%s %s" % (txts.get(obj.business_impact, 'Unknown'), stars)
         return res
-
 
     # We will outpout as a ul/li list the impacts of this
     def got_impacts_list_as_li(self, obj):
@@ -492,7 +481,6 @@ class Helper(object):
         t = copy.copy(obj.impacts)
         t.sort(hst_srv_sort)
         return t
-
 
     def get_link(self, obj, short=False, mobile=False):
         if obj.__class__.my_type == 'service':
@@ -521,7 +509,6 @@ class Helper(object):
         # if not service, host
         return '<a href="/mobile/host/%s" rel="external"> %s </a>' % (obj.get_full_name(), obj.get_full_name())
 
-
     # Give only the /service/blabla or /host blabla string, like for buttons inclusion
     def get_link_dest(self, obj):
         return "/%s/%s" % (obj.__class__.my_type, obj.get_full_name())
@@ -531,7 +518,6 @@ class Helper(object):
         if obj.__class__.my_type == 'service':
             return self.get_link(obj.host)
         return self.get_link(obj)
-
 
     # For an object, return the path of the icons
     def get_icon_state(self, obj):
@@ -559,7 +545,6 @@ class Helper(object):
             res.append((u'\xc2\xab First', 0, step, False))
             res.append(('...', None, None, False))
 
-
         print "Range,", current_page - 1, current_page + 1
         for i in xrange(current_page - 1, current_page + 2):
             if i < 0:
@@ -586,7 +571,6 @@ class Helper(object):
         print "Res", res
 
         return res
-
 
     # Get a perfometer part for html printing
     def get_perfometer(self, elt):
@@ -618,13 +602,10 @@ class Helper(object):
             return s
         return '\n'
 
-
-
     # TODO: Will look at the string s, and return a clean output without
     # danger for the browser
     def strip_html_output(self, s):
         return s
-
 
     # We want the html id of an hostor a service. It's basically
     # the full_name with / changed as -- (because in html, / is not valid :) )
@@ -638,8 +619,5 @@ class Helper(object):
     # say if this user can launch an action or not
     def can_action(self, user):
         return user.is_admin or user.can_submit_commands
-
-
-
 
 helper = Helper()

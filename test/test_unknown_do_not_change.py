@@ -26,6 +26,7 @@ from shinken_test import *
 
 
 class TestUnknownNotChangeState(ShinkenTest):
+
     # Uncomment this is you want to use a specific configuration
     # for your test
     #def setUp(self):
@@ -99,7 +100,6 @@ class TestUnknownNotChangeState(ShinkenTest):
         self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL'))
         self.show_and_clear_logs()
 
-
     # We got problem with unknown results on bad connections
     # for critical services and host: if it was in a notification pass
     # then the notification is restarted, but it's just a missing data,
@@ -166,9 +166,6 @@ class TestUnknownNotChangeState(ShinkenTest):
         self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL'))
         self.show_and_clear_logs()
 
-
-
-
     # But we want to still raise notif as unknown if we first met this state
     def test_unknown_still_raise_notif(self):
         host = self.sched.hosts.find_by_name("test_host_0")
@@ -206,9 +203,6 @@ class TestUnknownNotChangeState(ShinkenTest):
         self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL'))
         self.show_and_clear_logs()
 
-
-
-
     # We got problem with unknown results on bad connections
     # for critical services and host: if it was in a notification pass
     # then the notification is restarted, but it's just a missing data,
@@ -221,7 +215,6 @@ class TestUnknownNotChangeState(ShinkenTest):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
         svc.act_depend_of = []  # no hostchecks on critical checkresults
-
 
         print "GO OK"*10
         self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 0, 'OK | value1=0 value2=0']])

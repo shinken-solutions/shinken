@@ -24,6 +24,7 @@
 
 from shinken_test import *
 
+
 class TestContactDowntime(ShinkenTest):
 
     def test_contact_downtime(self):
@@ -98,8 +99,6 @@ class TestContactDowntime(ShinkenTest):
         self.scheduler_loop(3, [[svc, 2, 'CRITICAL']])
         self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;CRITICAL'))
         self.show_and_clear_logs()
-
-
 
     def test_contact_downtime_and_cancel(self):
         self.print_header()

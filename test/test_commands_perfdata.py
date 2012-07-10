@@ -22,14 +22,13 @@
 # This file is used to test acknowledge of problems
 #
 
-
 from shinken_test import *
+
 
 class TestConfig(ShinkenTest):
 
     def setUp(self):
         self.setup_with_file('etc/nagios_commands_perfdata.cfg')
-
 
     def test_service_perfdata_command(self):
         self.print_header()
@@ -63,7 +62,6 @@ class TestConfig(ShinkenTest):
         print "Actions", self.sched.actions
         self.assert_(self.count_actions() == 0)
 
-
     def test_host_perfdata_command(self):
         # We want an eventhandelr (the perfdata command) to be put in the actions dict
         # after we got a service check
@@ -93,7 +91,6 @@ class TestConfig(ShinkenTest):
         self.scheduler_loop(1, [[host, 0, 'UP | bibi=99%']])
         print "Actions", self.sched.actions
         self.assert_(self.count_actions() == 0)
-
 
     def test_multiline_perfdata(self):
         self.print_header()

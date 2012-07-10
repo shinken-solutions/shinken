@@ -30,7 +30,6 @@ class TestNoNotificationPeriod(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_no_notification_period.cfg')
 
-
     # no notification period should do a 24x7 like period
     # so a None, but always valid in create_notification
     def test_no_notification_period(self):

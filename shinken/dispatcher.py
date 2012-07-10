@@ -44,6 +44,7 @@ random.seed()
 
 # Dispatcher Class
 class Dispatcher:
+
     # Load all elements, set them as not assigned
     # and add them to elements, so loop will be easier :)
     def __init__(self, conf, arbiter):
@@ -235,10 +236,6 @@ class Dispatcher:
                     self.dispatch_ok = False  # so we will redispatch all
                     rec.need_conf = True
 
-
-
-
-
     # Imagine a world where... oh no, wait...
     # Imagine a master got the conf and the network is down
     # a spare takes it (good :) ). Like the Empire, the master
@@ -293,7 +290,6 @@ class Dispatcher:
                             logger.info("I ask to remove configuration N%d from %s" %(id, satellite.get_name()))
                             satellite.remove_from_conf(id)
 
-
     # Make an ORDERED list of schedulers so we can
     # send them conf in this order for a specific realm
     def get_scheduler_ordered_list(self, r):
@@ -321,7 +317,6 @@ class Dispatcher:
 
         return scheds
 
-
     # Manage the dispatch
     # REF: doc/shinken-conf-dispatching.png (3)
     def dispatch(self):
@@ -344,7 +339,6 @@ class Dispatcher:
                 if nb_conf > 0:
                     print_string = '[%s] Schedulers order: %s' % (r.get_name(), ','.join([s.get_name() for s in scheds]))
                     logger.info(print_string)
-
 
                 # Try to send only for alive members
                 scheds = [ s for s in scheds if s.alive ]
@@ -440,7 +434,6 @@ class Dispatcher:
                         # print "Tagging sched", sched.get_name(), "so it do not ask anymore for conf"
                         sched.need_conf = False
 
-
             arbiters_cfg = {}
             for arb in self.arbiters:
                 arbiters_cfg[arb.id] = arb.give_satellite_cfg()
@@ -490,7 +483,6 @@ class Dispatcher:
                             for satellite in satellites:
                                 satellite_string += '%s (spare:%s), ' % (satellite.get_name(), str(satellite.spare))
                             logger.info(satellite_string)
-
 
                             # Now we dispatch cfg to every one ask for it
                             nb_cfg_sent = 0

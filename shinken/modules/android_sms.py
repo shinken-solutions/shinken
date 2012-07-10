@@ -35,7 +35,6 @@ import signal
 import time
 from Queue import Empty
 
-
 from shinken.basemodule import BaseModule
 from shinken.external_command import ExternalCommand
 
@@ -55,7 +54,6 @@ def get_instance(mod_conf):
     return instance
 
 
-
 # Just print some stuff
 class Android_reactionner(BaseModule):
 
@@ -66,9 +64,6 @@ class Android_reactionner(BaseModule):
     # Called by poller to say 'let's prepare yourself guy'
     def init(self):
         print "Initilisation of the android module"
-
-
-
 
     # Get new checks if less than nb_checks_max
     # If no new checks got and no check in queue,
@@ -85,7 +80,6 @@ class Android_reactionner(BaseModule):
         except Empty, exp:
             if len(self.checks) == 0:
                 time.sleep(1)
-
 
     # Launch checks that are in status
     # REF: doc/shinken-action-queues.png (4)
@@ -125,8 +119,6 @@ class Android_reactionner(BaseModule):
                 chk.status = 'done'
                 chk.execution_time = 0.01
 
-
-
     # Check the status of checks
     # if done, return message finished :)
     # REF: doc/shinken-action-queues.png (5)
@@ -142,7 +134,6 @@ class Android_reactionner(BaseModule):
                 sys.exit(2)
         for chk in to_del:
             self.checks.remove(chk)
-
 
     # We will read unread SMS and raise ACK if we read
     # something like 'ack host/service'
@@ -195,8 +186,6 @@ class Android_reactionner(BaseModule):
             except IOError, exp:
                 print "[%d]Exiting: %s" % (self.id, exp)
                 sys.exit(2)
-
-
 
     # id = id of the worker
     # s = Global Queue Master->Slave

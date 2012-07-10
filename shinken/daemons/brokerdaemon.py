@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import os
 import sys
 import time
@@ -52,6 +51,7 @@ from shinken.external_command import ExternalCommand
 
 from shinken.pyro_wrapper import Pyro_exp_pack
 
+
 # Our main APP class
 class Broker(BaseSatellite):
 
@@ -61,7 +61,6 @@ class Broker(BaseSatellite):
         'port':      IntegerProp(default='7772'),
         'local_log': PathProp(default='brokerd.log'),
     })
-
 
     def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
 
@@ -87,7 +86,6 @@ class Broker(BaseSatellite):
         self.broks_internal_raised = []
 
         self.timeout = 1.0
-
 
     # Schedulers have some queues. We can simplify the call by adding
     # elements into the proper queue just by looking at their type
@@ -128,6 +126,7 @@ class Broker(BaseSatellite):
                 data = elt.get_data()
                 logger.error('the module %s just crash! Please look at the traceback:' % data['name'])
                 logger.error(data['trace'])
+
                 # The module death will be looked for elsewhere and restarted.
 
 
@@ -139,13 +138,11 @@ class Broker(BaseSatellite):
             return t[type]
         return None
 
-
     # Call by arbiter to get our external commands
     def get_external_commands(self):
         res = self.external_commands
         self.external_commands = []
         return res
-
 
     # Check if we do not connect to often to this
     def is_connection_try_too_close(self, elt):
@@ -154,7 +151,6 @@ class Broker(BaseSatellite):
         if now - last_connection < 5:
             return  True
         return False
-
 
     # initialize or re-initialize connection with scheduler or
     # arbiter if type == arbiter
@@ -234,7 +230,6 @@ class Broker(BaseSatellite):
 
         logger.info("Connection OK to the %s %s" % (type, links[id]['name']))
 
-
     # Get a brok. Our role is to put it in the modules
     # DO NOT CHANGE data of b!!!
     # REF: doc/broker-modules.png (4-5)
@@ -252,7 +247,6 @@ class Broker(BaseSatellite):
                 logger.warning("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)
 
-
     # Add broks (a tab) to different queues for
     # internal and external modules
     def add_broks_to_queue(self, broks):
@@ -260,14 +254,12 @@ class Broker(BaseSatellite):
         # internal modules
         self.broks.extend(broks)
 
-
     # Each turn we get all broks from
     # self.broks_internal_raised and we put them in
     # self.broks
     def interger_internal_broks(self):
         self.add_broks_to_queue(self.broks_internal_raised)
         self.broks_internal_raised = []
-
 
     # Get 'objects' from external modules
     # right now on nobody uses it, but it can be useful
@@ -282,7 +274,6 @@ class Broker(BaseSatellite):
                     self.add(o)
                 except Empty:
                     full_queue = False
-
 
     # We get new broks from schedulers
     # REF: doc/broker-modules.png (2)
@@ -333,16 +324,13 @@ class Broker(BaseSatellite):
                 logger.error(''.join(Pyro.util.getPyroTraceback(x)))
                 sys.exit(1)
 
-
     # Helper function for module, will give our broks
     def get_retention_data(self):
         return self.broks
 
-
     # Get back our broks from a retention module
     def restore_retention_data(self, data):
         self.broks.extend(data)
-
 
     def do_stop(self):
         act = active_children()
@@ -350,7 +338,6 @@ class Broker(BaseSatellite):
             a.terminate()
             a.join(1)
         super(Broker, self).do_stop()
-
 
     def setup_new_conf(self):
         conf = self.new_conf
@@ -404,7 +391,6 @@ class Broker(BaseSatellite):
             self.schedulers[sched_id]['running_id'] = running_id
             self.schedulers[sched_id]['active'] = s['active']
             self.schedulers[sched_id]['last_connection'] = 0
-
 
         logger.info("We have our schedulers: %s " % self.schedulers)
 
@@ -518,7 +504,6 @@ class Broker(BaseSatellite):
         for rea_id in self.reactionners:
             self.pynag_con_init(rea_id, type='reactionner')
 
-
     # An arbiter ask us to wait for a new conf, so we must clean
     # all our mess we did, and close modules too
     def clean_previous_run(self):
@@ -534,8 +519,6 @@ class Broker(BaseSatellite):
         self.have_modules = False
         self.modules_manager.clear_instances()
 
-
-
     def do_loop_turn(self):
         logger.debug("Begin Loop: managing old broks (%d)" % len(self.broks))
 
@@ -546,7 +529,6 @@ class Broker(BaseSatellite):
                 logger.debug("External Queue len (%s): %s" % (inst.get_name(), inst.to_q.qsize()))
             except Exception, exp:
                 logger.debug("External Queue len (%s): Exception! %s" % (inst.get_name(), exp))
-
 
         # Begin to clean modules
         self.check_and_del_zombie_modules()
@@ -571,7 +553,6 @@ class Broker(BaseSatellite):
         self.watch_for_new_conf(0.0)
         if self.new_conf:
             self.setup_new_conf()
-
 
         # Maybe the last loop we raised some broks internally
         # we should interger them in broks
@@ -649,7 +630,6 @@ class Broker(BaseSatellite):
 
         # Say to modules it's a new tick :)
         self.hook_point('tick')
-
 
     #  Main function, will loop forever
     def main(self):

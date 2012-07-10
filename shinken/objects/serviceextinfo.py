@@ -23,8 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 """ This is the main class for the Service ext info. In fact it's mainly
 about the configuration part. Parameters are merged in Service so it's
 no use in running part
@@ -49,7 +47,6 @@ class ServiceExtInfo(Item):
 
     id = 1  # zero is reserved for host (primary node for parents)
     my_type = 'serviceextinfo'
-
 
     # properties defined by configuration
     # *required: is required in conf
@@ -114,7 +111,6 @@ class ServiceExtInfo(Item):
             except AttributeError:  # outch, no name for this template
                 return 'UNNAMEDHOSTTEMPLATE'
 
-
     # For debugin purpose only
     def get_dbg_name(self):
         return self.host_name
@@ -123,12 +119,12 @@ class ServiceExtInfo(Item):
     def get_full_name(self):
         return self.host_name
 
+
 # Class for the hosts lists. It's mainly for configuration
 # part
 class ServicesExtInfo(Items):
     name_property = "host_name"  # use for the search by name
     inner_class = ServiceExtInfo  # use for know what is in items
-
 
     # Merge extended host information into host
     def merge(self, services):

@@ -25,7 +25,6 @@ import sys
 import os
 
 
-
 def usage():
     print "%s pack_name path" % sys.argv[0]
     sys.exit(1)
@@ -33,8 +32,6 @@ def usage():
 
 if len(sys.argv) < 2:
     usage()
-
-
 
 pack_name = sys.argv[1]
 path = sys.argv[2]
@@ -69,7 +66,6 @@ define host{
 
 create_file('templates.cfg', templates)
 
-
 # Now the macros
 macros = """
 #Uncomment the line and change the name and value
@@ -93,7 +89,6 @@ define discoveryrule {
 
 create_file('discovery.cfg', discovery)
 
-
 # Now the commands
 commands = """
 # EDIT the command with the real one you want
@@ -104,7 +99,6 @@ define command {
 """ % (pack_name, pack_name)
 
 create_file('commands.cfg', commands)
-
 
 # And a sample service
 service = """

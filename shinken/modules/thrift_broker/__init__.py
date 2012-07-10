@@ -27,8 +27,8 @@ import os
 import re
 import sys
 
-
 from thrift_broker import Thrift_broker, properties
+
 
 # called by the plugin manager to get a broker
 def get_instance(plugin):

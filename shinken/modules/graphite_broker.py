@@ -50,7 +50,6 @@ def get_instance(mod_conf):
     return instance
 
 
-
 # Class for the Graphite Broker
 # Get broks and send them to a Carbon instance of Graphite
 class Graphite_broker(BaseModule):
@@ -69,9 +68,6 @@ class Graphite_broker(BaseModule):
         self.host_dict = {}
         self.svc_dict = {}
 
-
-
-
     # Called by Broker so we can do init stuff
     # TODO: add conf param to get pass with init
     # Conf from arbiter!
@@ -79,7 +75,6 @@ class Graphite_broker(BaseModule):
         print "[%s] I init the graphite server connection to %s:%s" % (self.get_name(), self.host, self.port)
         self.con = socket()
         self.con.connect( (self.host, self.port))
-
 
     # For a perf_data like /=30MB;4899;4568;1234;0  /var=50MB;4899;4568;1234;0 /toto=
     # return ('/', '30'), ('/var', '50')
@@ -121,18 +116,15 @@ class Graphite_broker(BaseModule):
                 res.append((key, value))
         return res
 
-
     # Prepare service custom vars
     def manage_initial_service_status_brok(self, b):
         if '_GRAPHITE_POST' in b.data['customs']:
             self.svc_dict[(b.data['host_name'], b.data['service_description'])] = b.data['customs']
 
-
     # Prepare host custom vars
     def manage_initial_host_status_brok(self, b):
         if '_GRAPHITE_PRE' in b.data['customs']:
             self.host_dict[b.data['host_name']] = b.data['customs']
-
 
     # A service check result brok has just arrived, we UPDATE data info with this
     def manage_service_check_result_brok(self, b):
@@ -179,8 +171,6 @@ class Graphite_broker(BaseModule):
             packet = '\n'.join(lines) + '\n'  # Be sure we put \n every where
 #            print "Graphite launching:", packet
             self.con.sendall(packet)
-
-
 
     # A host check result brok has just arrived, we UPDATE data info with this
     def manage_host_check_result_brok(self, b):

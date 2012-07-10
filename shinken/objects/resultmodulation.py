@@ -33,6 +33,7 @@ from item import Item, Items
 
 from shinken.property import StringProp, ListProp
 
+
 class Resultmodulation(Item):
     id = 1  # zero is always special in database, so we do not take risk here
     my_type = 'resultmodulation'
@@ -45,11 +46,9 @@ class Resultmodulation(Item):
         'modulation_period':     StringProp(default=None),
     })
 
-
     # For debugging purpose only (nice name)
     def get_name(self):
         return self.resultmodulation_name
-
 
     # Make the return code modulation if need
     def module_return(self, return_code):
@@ -62,7 +61,6 @@ class Resultmodulation(Item):
                     return_code = self.exit_code_modulation
 
         return return_code
-
 
     # We override the pythonize because we have special cases that we do not want
     # to be do at running
@@ -84,10 +82,8 @@ class Resultmodulations(Items):
     name_property = "resultmodulation_name"
     inner_class = Resultmodulation
 
-
     def linkify(self, timeperiods):
         self.linkify_rm_by_tp(timeperiods)
-
 
     # We just search for each timeperiod the tp
     # and replace the name by the tp

@@ -23,12 +23,11 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 from itemgroup import Itemgroup, Itemgroups
 
 from shinken.property import StringProp
 from shinken.log import logger
+
 
 class Hostgroup(Itemgroup):
     id = 1  # zero is always a little bit special... like in database
@@ -52,21 +51,17 @@ class Hostgroup(Itemgroup):
         'HOSTGROUPACTIONURL': 'action_url'
     }
 
-
     def get_name(self):
         return self.hostgroup_name
 
-
     def get_hosts(self):
         return getattr(self, 'members', '')
-
 
     def get_hostgroup_members(self):
         if self.has('hostgroup_members'):
             return self.hostgroup_members.split(',')
         else:
             return []
-
 
     # We fillfull properties with template ones if need
     # Because hostgroup we call may not have it's members
@@ -98,7 +93,6 @@ class Hostgroup(Itemgroup):
         return self.get_hosts()
 
 
-
 class Hostgroups(Itemgroups):
     name_property = "hostgroup_name"  # is used for finding hostgroups
     inner_class = Hostgroup
@@ -109,11 +103,9 @@ class Hostgroups(Itemgroups):
             return []
         return hg.get_hosts()
 
-
     def linkify(self, hosts=None, realms=None):
         self.linkify_hg_by_hst(hosts)
         self.linkify_hg_by_realms(realms)
-
 
     # We just search for each hostgroup the id of the hosts
     # and replace the name by the id
@@ -136,7 +128,6 @@ class Hostgroups(Itemgroups):
             # Make members uniq
             new_mbrs = list(set(new_mbrs))
 
-
             # We find the id, we remplace the names
             hg.replace_members(new_mbrs)
 
@@ -145,7 +136,6 @@ class Hostgroups(Itemgroups):
                 h.hostgroups.append(hg)
                 # and be sure we are uniq in it
                 h.hostgroups = list(set(h.hostgroups))
-
 
     # More than an explode function, but we need to already
     # have members so... Will be really linkify just after
@@ -178,7 +168,6 @@ class Hostgroups(Itemgroups):
                         logger.warning("[hostgroups] host %s it not in the same realm than it's hostgroup %s" % \
                             (h.get_name(), hg.get_name()))
 
-
     # Add a host string to a hostgroup member
     # if the host group do not exist, create it
     def add_member(self, hname, hgname):
@@ -189,7 +178,6 @@ class Hostgroups(Itemgroups):
             self.add(hg)
         else:
             hg.add_string_member(hname)
-
 
     # Use to fill members with hostgroup_members
     def explode(self):

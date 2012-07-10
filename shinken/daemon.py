@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import os
 import errno
 import sys
@@ -58,19 +57,24 @@ try:
     import pwd, grp
     from pwd import getpwnam
     from grp import getgrnam
+
+
     def get_cur_user():
         return pwd.getpwuid( os.getuid() ).pw_name
+
 
     def get_cur_group():
         return grp.getgrgid( os.getgid() ).gr_name
 except ImportError, exp:  # Like in nt system or Android
+
+
     # temporary workarround:
     def get_cur_user():
         return "shinken"
+
+
     def get_cur_group():
         return "shinken"
-
-
 
 ##########################   DAEMON PART    ###############################
 # The standard I/O file descriptors are redirected to /dev/null by default.
@@ -85,6 +89,7 @@ class InvalidPidFile(Exception): pass
 
 """ Interface for pyro communications """
 class Interface(Pyro.core.ObjBase, object):
+
     #  'app' is to be set to the owner of this interface.
     def __init__(self, app):
 
@@ -190,8 +195,6 @@ class Daemon(object):
         os.umask(UMASK)
         self.set_exit_handler()
 
-
-
     # At least, lose the local log file if needed
     def do_stop(self):
         if self.modules_manager:
@@ -206,7 +209,6 @@ class Daemon(object):
         if self.pyro_daemon:
             pyro.shutdown(self.pyro_daemon)
         logger.quit()
-
 
     def request_stop(self):
         self.unlink()
@@ -250,8 +252,6 @@ class Daemon(object):
         except ImportError:
             logger.warning('I do not have the module guppy for memory dump, please install it')
 
-
-
     def load_config_file(self):
         self.parse_config_file()
         if self.config_file is not None:
@@ -262,14 +262,12 @@ class Daemon(object):
         # Set the modules watchdogs
         self.modules_manager.set_max_queue_size(self.max_queue_size)
 
-
     def change_to_workdir(self):
         try:
             os.chdir(self.workdir)
         except Exception, e:
             raise InvalidWorkDir(e)
         logger.debug("Successfully changed to workdir: %s" % (self.workdir))
-
 
     def unlink(self):
         logger.debug("Unlinking %s" % self.pidfile)
@@ -312,7 +310,6 @@ class Daemon(object):
                 self.fpid = open(p, 'w+')
         except Exception, e:
             raise InvalidPidFile(e)
-
 
     # Check (in pidfile) if there isn't already a daemon running. If yes and do_replace: kill it.
     # Keep in self.fpid the File object to the pidfile. Will be used by writepid.
@@ -361,7 +358,6 @@ class Daemon(object):
         # we must also reopen the pid file in write mode
         # because the previous instance should have deleted it!!
         self.__open_pidfile(write=True)
-
 
     def write_pid(self, pid=None):
         if pid is None:
@@ -451,7 +447,6 @@ class Daemon(object):
             logger.debug(s)
         del self.debug_output
 
-
     def do_daemon_init_and_start(self, use_pyro=True):
         self.change_to_user_group()
         self.change_to_workdir()
@@ -468,7 +463,6 @@ class Daemon(object):
             if self.local_log_fd:
                 socket_fds.append(self.local_log_fd)
 
-
             socket_fds = tuple(socket_fds)
             self.daemonize(skip_close_fds=socket_fds)
         else:
@@ -482,8 +476,6 @@ class Daemon(object):
             self.manager = Manager()
         # And make the module manager know it
         self.modules_manager.load_manager(self.manager)
-
-
 
     def setup_pyro_daemon(self):
 
@@ -517,7 +509,6 @@ class Daemon(object):
 
         self.pyro_daemon = pyro.ShinkenPyroDaemon(self.host, self.port, ssl_conf.use_ssl)
 
-
     def get_socks_activity(self, socks, timeout):
         try:
             ins, _, _ = select.select(socks, [], [], timeout)
@@ -531,7 +522,6 @@ class Daemon(object):
     # Find the absolute path of the shinken module directory and returns it.
     def find_modules_path(self):
         import shinken
-
         # BEWARE: this way of finding path is good if we still
         # DO NOT HAVE CHANGED PWD!!!
         # Now get the module path. It's in fact the directory modules
@@ -547,7 +537,6 @@ class Daemon(object):
 
         return modulespath
 
-
     # modules can have process, and they can die
     def check_and_del_zombie_modules(self):
         # Active children make a join with every one, useful :)
@@ -556,7 +545,6 @@ class Daemon(object):
         # and try to restart previous dead :)
         self.modules_manager.try_to_restart_deads()
 
-
     # Just give the uid of a user by looking at it's name
     def find_uid_from_name(self):
         try:
@@ -564,7 +552,6 @@ class Daemon(object):
         except KeyError, exp:
             logger.error("The user %s is unknown" % self.user)
             return None
-
 
     # Just give the gid of a group by looking at its name
     def find_gid_from_name(self):
@@ -633,7 +620,6 @@ class Daemon(object):
                 value = entry.pythonize(entry.default)
                 setattr(self, prop, value)
 
-
     # Some paths can be relatives. We must have a full path by taking
     # the config file by reference
     def relative_paths_to_full(self, reference_path):
@@ -649,14 +635,12 @@ class Daemon(object):
                 setattr(self, prop, path)
                 #print "Setting %s for %s" % (path, prop)
 
-
     def manage_signal(self, sig, frame):
         logger.debug("I'm process %d and I received signal %s" % (os.getpid(), str(sig)))
         if sig == 10:  # if USR1, ask a memory dump
             self.need_dump_memory = True
         else:  # Ok, really ask us to die :)
             self.interrupted = True
-
 
     def set_exit_handler(self):
         func = self.manage_signal
@@ -671,7 +655,6 @@ class Daemon(object):
             for sig in (signal.SIGTERM, signal.SIGINT, signal.SIGUSR1):
                 signal.signal(sig, func)
 
-
     def get_header(self):
         return ["Shinken %s" % VERSION,
                 "Copyright (c) 2009-2011:",
@@ -684,8 +667,6 @@ class Daemon(object):
     def print_header(self):
         for line in self.get_header():
             print line
-
-
 
 # Wait up to timeout to handle the pyro daemon requests.
 # If suppl_socks is given it also looks for activity on that list of fd.
@@ -743,8 +724,6 @@ class Daemon(object):
     def compensate_system_time_change(self, difference):
         logger.warning('A system time change of %s has been detected.  Compensating...' % difference)
 
-
-
     # Use to wait conf from arbiter.
     # It send us conf in our pyro_daemon. It put the have_conf prop
     # if he send us something
@@ -763,7 +742,6 @@ class Daemon(object):
             sys.stdout.write(".")
             sys.stdout.flush()
 
-
     # We call the function of modules that got the this
     # hook function
     def hook_point(self, hook_name):
@@ -776,7 +754,6 @@ class Daemon(object):
                 except Exception, exp:
                     logger.warning('The instance %s raise an exception %s. I disable, and set it to restart later' % (inst.get_name(), str(exp)))
                     self.modules_manager.set_to_restart(inst)
-
 
     # Dummy function for daemons. Get all retention data
     # So a module can save them

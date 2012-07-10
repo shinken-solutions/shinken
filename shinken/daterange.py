@@ -24,7 +24,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import time, calendar
 
 from shinken.util import get_sec_from_morning, get_day, get_start_of_day, get_end_of_day
@@ -77,6 +76,7 @@ def find_day_by_offset(year, month, offset):
 
 
 class Timerange:
+
     # entry is like 00:00-24:00
     def __init__(self, entry):
         entries = entry.split('-')
@@ -95,13 +95,11 @@ class Timerange:
     def get_sec_from_morning(self):
         return self.hstart*3600 + self.mstart*60
 
-
     def get_first_sec_out_from_morning(self):
         # If start at 0:0, the min out is the end
         if self.hstart == 0 and self.mstart == 0:
             return self.hend*3600 + self.mend*60
         return 0
-
 
     def is_time_valid(self, t):
         sec_from_morning = get_sec_from_morning(t)
@@ -115,6 +113,7 @@ class Daterange:
     months = {'january': 1, 'february': 2, 'march': 3, 'april': 4, 'may': 5, \
                   'june': 6, 'july': 7, 'august': 8, 'september': 9, \
                   'october': 10, 'november': 11, 'december': 12}
+
     def __init__(self, syear, smon, smday, swday, swday_offset,
                  eyear, emon, emday, ewday, ewday_offset, skip_interval, other):
         self.syear = int(syear)
@@ -134,15 +133,12 @@ class Daterange:
         for timeinterval in other.split(','):
             self.timeranges.append(Timerange(timeinterval.strip()))
 
-
     def __str__(self):
         return '' # str(self.__dict__)
-
 
     # By default, daterange are correct
     def is_correct(self):
         return True
-
 
     def get_month_id(cls, month):
         try:
@@ -150,7 +146,6 @@ class Daterange:
         except:
             return None
     get_month_id = classmethod(get_month_id)
-
 
     # @memoized
     def get_month_by_id(cls, id):
@@ -161,14 +156,12 @@ class Daterange:
         return None
     get_month_by_id = classmethod(get_month_by_id)
 
-
     def get_weekday_id(cls, weekday):
         try:
             return Daterange.weekdays[weekday]
         except:
             return None
     get_weekday_id = classmethod(get_weekday_id)
-
 
     def get_weekday_by_id(cls, id):
         id = id % 7
@@ -178,11 +171,8 @@ class Daterange:
         return None
     get_weekday_by_id = classmethod(get_weekday_by_id)
 
-
-
     def get_start_and_end_time(self, ref=None):
         print "Not implemented"
-
 
     def is_time_valid(self, t):
         #print "****Look for time valid for", time.asctime(time.localtime(t))
@@ -195,20 +185,17 @@ class Daterange:
                     return True
         return False
 
-
     def get_min_sec_from_morning(self):
         mins = []
         for tr in self.timeranges:
             mins.append(tr.get_sec_from_morning())
         return min(mins)
 
-
     def get_min_sec_out_from_morning(self):
         mins = []
         for tr in self.timeranges:
             mins.append(tr.get_first_sec_out_from_morning())
         return min(mins)
-
 
     def get_min_from_t(self, t):
         if self.is_time_valid(t):
@@ -217,7 +204,6 @@ class Daterange:
         tr_mins = self.get_min_sec_from_morning()
         return t_day_epoch + tr_mins
 
-
     def is_time_day_valid(self, t):
         (start_time, end_time) = self.get_start_and_end_time(t)
         if start_time <= t <= end_time:
@@ -225,16 +211,12 @@ class Daterange:
         else:
             return False
 
-
     def is_time_day_invalid(self, t):
         (start_time, end_time) = self.get_start_and_end_time(t)
         if start_time <= t <= end_time:
             return False
         else:
             return True
-
-
-
 
     def get_next_future_timerange_valid(self, t):
         #print "Look for get_next_future_timerange_valid for t", t, time.asctime(time.localtime(t))
@@ -248,7 +230,6 @@ class Daterange:
             return min(starts)
         else:
             return None
-
 
     def get_next_future_timerange_invalid(self, t):
         #print 'Call for get_next_future_timerange_invalid from ', time.asctime(time.localtime(t))
@@ -271,7 +252,6 @@ class Daterange:
         else:
             return None
 
-
     def get_next_valid_day(self, t):
         if self.get_next_future_timerange_valid(t) is None:
             # this day is finish, we check for next period
@@ -285,8 +265,6 @@ class Daterange:
         if self.is_time_day_valid(t):
             return get_day(t)
         return None
-
-
 
     def get_next_valid_time_from_t(self, t):
         #print "\tDR Get next valid from:", time.asctime(time.localtime(t))
@@ -322,7 +300,6 @@ class Daterange:
         else:
             # I'm not find any valid time
             return None
-
 
     def get_next_invalid_day(self, t):
         #print "Look in", self.__dict__
@@ -362,7 +339,6 @@ class Daterange:
             return get_day(end_time +1)
 
         return None
-
 
     def get_next_invalid_time_from_t(self, t):
         if not self.is_time_valid(t):
@@ -430,14 +406,12 @@ class StandardDaterange(Daterange):
             self.timeranges.append(Timerange(timeinterval.strip()))
         self.day = day
 
-
     # It's correct only if the weekday (sunday, etc) is a valid one
     def is_correct(self):
         b = self.day in Daterange.weekdays
         if not b:
             print "Error: %s is not a valid day" % self.day
         return b
-
 
     def get_start_and_end_time(self, ref=None):
         now = time.localtime(ref)
@@ -455,6 +429,7 @@ class StandardDaterange(Daterange):
 
 """ TODO: Add some comment about this class for the doc"""
 class MonthWeekDayDaterange(Daterange):
+
     # It's correct only if the weekday (sunday, etc) is a valid one
     def is_correct(self):
         b = True
@@ -467,7 +442,6 @@ class MonthWeekDayDaterange(Daterange):
             print "Error: %s is not a valid day" % self.ewday
 
         return b
-
 
     def get_start_and_end_time(self, ref=None):
         now = time.localtime(ref)

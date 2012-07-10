@@ -30,7 +30,6 @@ class TestFreshness(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_freshness.cfg')
 
-
     # Check if the check_freshnes is doing it's job
     def test_check_freshness(self):
         self.print_header()
@@ -56,7 +55,6 @@ class TestFreshness(ShinkenTest):
 
         # We make it 10s less than it was
         svc.last_state_update = svc.last_state_update - 10
-
 
         #svc.check_freshness = True
         # Now we active it, with a too small value (now - 10s is still higer than now - (1 - 15, the addition time)

@@ -69,7 +69,6 @@ class AD_Webui(BaseModule):
             return
 #        self.connect()
 
-
     def connect(self):
         print "Trying to initalize the AD/Ldap connection"
         self.con = ldap.initialize(self.ldap_uri)
@@ -81,15 +80,12 @@ class AD_Webui(BaseModule):
         self.con.simple_bind_s(self.username, self.password)
         print "AD/Ldap Connection done"
 
-
     def disconnect(self):
         self.con = None
-
 
     # To load the webui application
     def load(self, app):
         self.app = app
-
 
     # Give the entry for a contact
     def find_contact_entry(self, contact):
@@ -137,7 +133,6 @@ class AD_Webui(BaseModule):
         finally:
             self.disconnect()
 
-
     # One of our goal is to look for contacts and get all pictures
     def manage_initial_broks_done_brok(self, b):
         if self.con is None:
@@ -171,8 +166,6 @@ class AD_Webui(BaseModule):
                     print "Cannot write", p, ":", exp
             except KeyError:
                 print "No photo for", c.get_name()
-
-
 
     # Try to auth a user in the ldap dir
     def check_auth(self, user, password):

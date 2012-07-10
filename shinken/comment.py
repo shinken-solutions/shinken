@@ -47,9 +47,6 @@ class Comment:
         #'ref':  None
     }
 
-
-
-
     # Adds a comment to a particular service. If the "persistent" field
     # is set to zero (0), the comment will be deleted the next time
     # Shinken is restarted. Otherwise, the comment will persist
@@ -73,10 +70,8 @@ class Comment:
         self.expire_time = expire_time
         self.can_be_deleted = False
 
-
     def __str__(self):
         return "Comment id=%d %s" % (self.id, self.comment)
-
 
     # Call by pickle for dataify the ackn
     # because we DO NOT WANT REF in this pickleisation!
@@ -88,7 +83,6 @@ class Comment:
             if hasattr(self, prop):
                 res[prop] = getattr(self, prop)
         return res
-
 
     # Inverted funtion of getstate
     def __setstate__(self, state):
@@ -108,7 +102,6 @@ class Comment:
         # to prevent from duplicating id in comments:
         if self.id >= cls.id:
             cls.id = self.id + 1
-
 
     # This function is DEPRECATED and will be removed in a future version of
     # Shinken. It should not be useful any more after a first load/save pass.

@@ -33,7 +33,6 @@ from shinken.objects.module import Module
 from shinken.modules import pickle_retention_file_scheduler
 from shinken.modules.pickle_retention_file_scheduler import get_instance
 
-
 modconf = Module()
 modconf.module_name = "PickleRetention"
 modconf.module_type = pickle_retention_file_scheduler.properties['type']
@@ -95,7 +94,6 @@ class TestConfig(ShinkenTest):
         self.assert_(svc.active_checks_enabled == True)
         # and passive one too
         self.assert_(svc.passive_checks_enabled == True)
-
 
         print "Fuck after load, will go in", svc.next_chk - now
 

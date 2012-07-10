@@ -22,8 +22,8 @@
 # This file is used to test acknowledge of problems
 #
 
-
 from shinken_test import *
+
 
 class TestAcks(ShinkenTest):
 
@@ -89,7 +89,6 @@ class TestAcks(ShinkenTest):
         self.sched.update_downtimes_and_comments()
         self.assert_(len(svc.comments) == 1)
 
-
         #--------------------------------------------------------------
         # service reaches hard;2
         # a notification must have been created but blocked
@@ -117,7 +116,6 @@ class TestAcks(ShinkenTest):
         self.assert_(svc.current_notification_number == 0)
         self.show_and_clear_logs()
         self.show_and_clear_actions()
-
 
     def test_ack_hard_service(self):
         self.print_header()
@@ -219,7 +217,6 @@ class TestAcks(ShinkenTest):
         self.show_and_clear_logs()
         self.show_and_clear_actions()
 
-
     def test_ack_nonsticky_changing_service(self):
         # acknowledge is not sticky
         # service goes from critical to warning
@@ -313,7 +310,6 @@ class TestAcks(ShinkenTest):
         self.assert_(svc.current_notification_number == 0)
         self.show_and_clear_logs()
         self.show_and_clear_actions()
-
 
     def test_ack_sticky_changing_service(self):
         # acknowledge is sticky
@@ -409,7 +405,6 @@ class TestAcks(ShinkenTest):
         self.show_and_clear_logs()
         self.show_and_clear_actions()
 
-
     def test_ack_soft_host(self):
         self.print_header()
         # retry_interval 2
@@ -503,7 +498,6 @@ class TestAcks(ShinkenTest):
         self.assert_(host.current_notification_number == 0)
         self.show_and_clear_logs()
         self.show_and_clear_actions()
-
 
     def test_ack_hard_host(self):
         self.print_header()
@@ -600,7 +594,6 @@ class TestAcks(ShinkenTest):
         self.assert_(host.current_notification_number == 0)
         self.show_and_clear_logs()
         self.show_and_clear_actions()
-
 
     def test_unack_removes_comments(self):
         # critical

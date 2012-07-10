@@ -38,10 +38,8 @@ __author__ = "Hartmut Goebel <h.goebel@goebel-consult.de>"
 __copyright__ = "Copyright 2010-2011 by Hartmut Goebel <h.goebel@goebel-consult.de>"
 __licence__ = "GNU Affero General Public License version 3 (AGPL v3)"
 
-
 FULL_STATUS = 'full_status'
 CHECK_RESULT = 'check_result'
-
 
 none_object = object()
 
@@ -54,8 +52,6 @@ class Property(object):
 
 
     """
-
-
 
     def __init__(self, default=none_object, class_inherit=None,
                  unmanaged=False, help='', no_slots=False,
@@ -144,7 +140,6 @@ class UnusedProp(Property):
         self.unused = True
         self.managed = True
 
-
 _boolean_states = {'1': True, 'yes': True, 'true': True, 'on': True,
                    '0': False, 'no': False, 'false': False, 'off': False}
 
@@ -155,6 +150,7 @@ class BoolProp(Property):
     Boolean values are currently case insensitively defined as 0,
     false, no, off for False, and 1, true, yes, on for True).
     """
+
     #@staticmethod
     def pythonize(self, val):
         return _boolean_states[val.lower()]
@@ -162,6 +158,7 @@ class BoolProp(Property):
 
 class IntegerProp(Property):
     """Please Add a Docstring to describe the class here"""
+
     #@staticmethod
     def pythonize(self, val):
         return to_int(val)
@@ -169,6 +166,7 @@ class IntegerProp(Property):
 
 class FloatProp(Property):
     """Please Add a Docstring to describe the class here"""
+
     #@staticmethod
     def pythonize(self, val):
         return to_float(val)
@@ -176,6 +174,7 @@ class FloatProp(Property):
 
 class CharProp(Property):
     """Please Add a Docstring to describe the class here"""
+
     #@staticmethod
     def pythonize(self, val):
         return to_char(val)
@@ -183,26 +182,34 @@ class CharProp(Property):
 
 class StringProp(Property):
     """Please Add a Docstring to describe the class here"""
+
     #@staticmethod
     def pythonize(self, val):
         return val
 
+
 class PathProp(StringProp):
     """ A string property representing a "running" (== VAR) file path """
+
 
 class ConfigPathProp(StringProp):
     """ A string property representing a config file path """
 
+
 class ListProp(Property):
     """Please Add a Docstring to describe the class here"""
+
     #@staticmethod
     def pythonize(self, val):
         return to_split(val)
 
+
 class LogLevelProp(StringProp):
     """ A string property representing a logging level """
+
     def pythonize(self, val):
         return logger.get_level_id(val)
+
 
 class DictProp(Property):
     def __init__(self, elts_prop=None, *args, **kwargs):
@@ -219,6 +226,7 @@ class DictProp(Property):
         self.elts_prop = elts_prop()
 
     def pythonize(self, val):
+
         #import traceback; traceback.print_stack()
         def split(kv):
             m = re.match("^\s*([^\s]+)\s*=\s*([^\s]+)\s*$", kv)
@@ -237,6 +245,7 @@ class DictProp(Property):
         # val is in the form "key1=addr:[port],key2=addr:[port],..."
         print ">>>", dict([split(kv) for kv in to_split(val)])
         return dict([split(kv) for kv in to_split(val)])
+
 
 class AddrProp(Property):
     """Address property (host + port)"""

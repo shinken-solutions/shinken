@@ -23,10 +23,10 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 """
 Helper functions for some sortings
 """
+
 
 # Sort hosts and services by impact, states and co
 def hst_srv_sort(s1, s2):
@@ -56,7 +56,6 @@ def hst_srv_sort(s1, s2):
         return 1
     else:
         return -1
-
 
 
 # Sort hosts and services by impact, states and co
@@ -90,6 +89,7 @@ def worse_first(s1, s2):
         return -1
     else:
         return 1
+
 
 # Sort hosts and services by last_state_change time
 def last_state_change_earlier(s1, s2):

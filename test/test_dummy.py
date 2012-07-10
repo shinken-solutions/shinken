@@ -30,7 +30,6 @@ class TestConfig(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
 
-
     def test_dummy(self):
         #
         # Config is not correct because of a wrong relative path

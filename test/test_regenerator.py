@@ -24,7 +24,6 @@
 
 import time, sys
 
-
 sys.path.append("..")
 sys.path.append("../shinken")
 
@@ -37,7 +36,6 @@ from shinken.misc.regenerator import Regenerator
 class TestRegenerator(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_regenerator.cfg')
-
 
     def look_for_same_values(self):
         # Look at Regenerator values
@@ -59,9 +57,6 @@ class TestRegenerator(ShinkenTest):
                 same_pbs = i.get_name() in [j.get_name() for j in orig_h.source_problems]
                 self.assert_(same_pbs)
 
-
-
-
         print "Services:", self.rg.services.__dict__
         for s in self.rg.services:
             orig_s = self.sched.services.find_srv_by_name_and_hostname(s.host.host_name, s.service_description)
@@ -80,8 +75,6 @@ class TestRegenerator(ShinkenTest):
                 self.assert_(same_pbs)
             # Look for same host
             self.assert_(s.host.get_name() == orig_s.host.get_name())
-
-
 
     def test_regenerator(self):
         #
@@ -108,7 +101,6 @@ class TestRegenerator(ShinkenTest):
         self.sched.broks.clear()
 
         self.look_for_same_values()
-
 
         print "Get the hosts and services"
         host = self.sched.hosts.find_by_name("test_host_0")
@@ -139,7 +131,6 @@ class TestRegenerator(ShinkenTest):
         self.look_for_same_values()
 
         print 'Time', t1 - t0
-
 
         b = svc.get_initial_status_brok()
         b.prepare()
@@ -182,8 +173,6 @@ class TestRegenerator(ShinkenTest):
             print "\t%s: %s" % (k, v)
         print "\n"
         print "total time", time.time() - start
-
-
 
     def test_regenerator_load_from_scheduler(self):
         #

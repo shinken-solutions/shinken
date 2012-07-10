@@ -23,8 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 """ This class is a base class for nearly all configuration
  elements like service, hosts or contacts.
 """
@@ -40,7 +38,6 @@ from shinken.util import strip_and_uniq
 from shinken.acknowledge import Acknowledge
 from shinken.comment import Comment
 from shinken.log import logger
-
 
 
 class Item(object):
@@ -96,7 +93,6 @@ class Item(object):
             else:
                 setattr(self, key, params[key])
 
-
     def init_running_properties(self):
         for prop, entry in self.__class__.running_properties.items():
             # Copy is slow, so we check type
@@ -108,7 +104,6 @@ class Item(object):
             else:
                 setattr(self, prop, val)
             # each instance to have his own running prop!
-
 
     def copy(self):
         """ Return a copy of the item, but give him a new id """
@@ -122,7 +117,6 @@ class Item(object):
         i.customs = copy(self.customs)
         return i
 
-
     def clean(self):
         """ Clean useless things not requested once item has been fully initialized&configured.
 Like temporary attributes such as "imported_from", etc.. """
@@ -132,10 +126,8 @@ Like temporary attributes such as "imported_from", etc.. """
             except AttributeError:
                 pass
 
-
     def __str__(self):
         return str(self.__dict__)+'\n'
-
 
     def is_tpl(self):
         """ Return if the elements is a template """
@@ -143,7 +135,6 @@ Like temporary attributes such as "imported_from", etc.. """
             return self.register == '0'
         except Exception, exp:
             return False
-
 
     # If a prop is absent and is not required, put the default value
     def fill_default(self):
@@ -153,7 +144,6 @@ Like temporary attributes such as "imported_from", etc.. """
         for prop, entry in cls.properties.items():
             if not hasattr(self, prop) and entry.has_default:
                 setattr(self, prop, entry.default)
-
 
     # We load every useful parameter so no need to access global conf later
     # Must be called after a change in a global conf parameter
@@ -179,7 +169,6 @@ Like temporary attributes such as "imported_from", etc.. """
 
     # Make this method a classmethod
     load_global_conf = classmethod(load_global_conf)
-
 
     # Use to make python properties
     def pythonize(self):
@@ -213,13 +202,11 @@ Like temporary attributes such as "imported_from", etc.. """
         # and put again our id
         self.id = i
 
-
     def get_templates(self):
         if hasattr(self, 'use') and self.use != '':
             return self.use.split(',')
         else:
             return []
-
 
     # We fillfull properties with template ones if need
     def get_property_by_inheritance(self, items, prop):
@@ -297,7 +284,6 @@ Like temporary attributes such as "imported_from", etc.. """
         # Not even a plus... so None :)
         return None
 
-
     # We fillfull properties with template ones if need
     def get_customs_properties_by_inheritance(self, items):
         for i in self.templates:
@@ -324,14 +310,12 @@ Like temporary attributes such as "imported_from", etc.. """
             self.customs[prop] = cust_in_plus[prop]
         return self.customs
 
-
     def has_plus(self, prop):
         try:
             self.plus[prop]
         except:
             return False
         return True
-
 
     def get_all_plus_and_delete(self):
         res = {}
@@ -340,12 +324,10 @@ Like temporary attributes such as "imported_from", etc.. """
             res[prop] = self.get_plus_and_delete(prop)
         return res
 
-
     def get_plus_and_delete(self, prop):
         val = self.plus[prop]
         del self.plus[prop]
         return val
-
 
     # Check is required prop are set:
     # template are always correct
@@ -366,7 +348,6 @@ Like temporary attributes such as "imported_from", etc.. """
 
         return state
 
-
     # This function is used by service and hosts
     # to transform Nagios2 parameters to Nagios3
     # ones, like normal_check_interval to
@@ -381,10 +362,8 @@ Like temporary attributes such as "imported_from", etc.. """
                 value = getattr(self, old_name)
                 setattr(self, new_name, value)
 
-
     def add_downtime(self, downtime):
         self.downtimes.append(downtime)
-
 
     def del_downtime(self, downtime_id):
         d_to_del = None
@@ -395,10 +374,8 @@ Like temporary attributes such as "imported_from", etc.. """
         if d_to_del is not None:
             self.downtimes.remove(d_to_del)
 
-
     def add_comment(self, comment):
         self.comments.append(comment)
-
 
     def del_comment(self, comment_id):
         c_to_del = None
@@ -408,7 +385,6 @@ Like temporary attributes such as "imported_from", etc.. """
                 c.can_be_deleted = True
         if c_to_del is not None:
             self.comments.remove(c_to_del)
-
 
     def acknowledge_problem(self, sticky, notify, persistent, author, comment, end_time=0):
         if self.state != self.ok_up:
@@ -430,13 +406,11 @@ Like temporary attributes such as "imported_from", etc.. """
             self.add_comment(c)
             self.broks.append(self.get_update_status_brok())
 
-
     # Look if we got an ack that is too old with an expire date and should
     # be delete
     def check_for_expire_acknowledge(self):
         if self.acknowledgement and self.acknowledgement.end_time != 0 and self.acknowledgement.end_time < time.time():
             self.unacknowledge_problem()
-
 
     #  Delete the acknowledgement object and reset the flag
     #  but do not remove the associated comment.
@@ -453,14 +427,12 @@ Like temporary attributes such as "imported_from", etc.. """
                     self.del_comment(c.id)
             self.broks.append(self.get_update_status_brok())
 
-
     # Check if we have an acknowledgement and if this is marked as sticky.
     # This is needed when a non-ok state changes
     def unacknowledge_problem_if_not_sticky(self):
         if hasattr(self, 'acknowledgement') and self.acknowledgement is not None:
             if not self.acknowledgement.sticky:
                 self.unacknowledge_problem()
-
 
     # Will flatten some parameters taggued by the 'conf_send_preparation'
     # property because they are too "linked" to be send like that (like realms)
@@ -484,9 +456,6 @@ Like temporary attributes such as "imported_from", etc.. """
                         val = f(getattr(self, prop))
                         setattr(self, prop, val)
 
-
-
-
     # Get the property for an object, with good value
     # and brok_transformation if need
     def get_property_value_for_brok(self, prop, tab):
@@ -501,7 +470,6 @@ Like temporary attributes such as "imported_from", etc.. """
             value = pre_op(self, value)
 
         return value
-
 
     # Fill data with info of item by looking at brok_type
     # in props of properties or running_propterties
@@ -521,7 +489,6 @@ Like temporary attributes such as "imported_from", etc.. """
                 if brok_type in entry.fill_brok:
                     data[prop] = self.get_property_value_for_brok(prop, cls.running_properties)
 
-
     # Get a brok with initial status
     def get_initial_status_brok(self):
         cls = self.__class__
@@ -531,7 +498,6 @@ Like temporary attributes such as "imported_from", etc.. """
         self.fill_data_brok_from(data, 'full_status')
         b = Brok('initial_'+my_type+'_status', data)
         return b
-
 
     # Get a brok with update item status
     def get_update_status_brok(self):
@@ -543,7 +509,6 @@ Like temporary attributes such as "imported_from", etc.. """
         b = Brok('update_'+my_type+'_status', data)
         return b
 
-
     # Get a brok with check_result
     def get_check_result_brok(self):
         cls = self.__class__
@@ -554,7 +519,6 @@ Like temporary attributes such as "imported_from", etc.. """
         b = Brok(my_type+'_check_result', data)
         return b
 
-
     # Get brok about the new schedule (next_check)
     def get_next_schedule_brok(self):
         cls = self.__class__
@@ -564,7 +528,6 @@ Like temporary attributes such as "imported_from", etc.. """
         self.fill_data_brok_from(data, 'next_schedule')
         b = Brok(my_type+'_next_schedule', data)
         return b
-
 
     # Link one command property to a class (for globals like oc*p_command)
     def linkify_one_command_with_commands(self, commands, prop):
@@ -583,7 +546,6 @@ Like temporary attributes such as "imported_from", etc.. """
             else:
                 setattr(self, prop, None)
 
-
     # We look at the 'trigger' prop and we create a trigger for it
     def explode_trigger_string_into_triggers(self, triggers):
         src = getattr(self, 'trigger', '')
@@ -596,8 +558,6 @@ Like temporary attributes such as "imported_from", etc.. """
                 # Maybe the trigger factory give me a already existing trigger,
                 # so my name can be dropped
                 self.triggers.append(t.get_name())
-
-
 
     # Link with triggers. Can be with a "in source" trigger, or a file name
     def linkify_with_triggers(self, triggers):
@@ -615,10 +575,6 @@ Like temporary attributes such as "imported_from", etc.. """
         self.triggers = new_triggers
 
 
-
-
-
-
 class Items(object):
     def __init__(self, items):
         self.items = {}
@@ -630,14 +586,11 @@ class Items(object):
         # We should keep a graph of templates relations
         self.templates_graph = Graph()
 
-
     def __iter__(self):
         return self.items.itervalues()
 
-
     def __len__(self):
         return len(self.items)
-
 
     def __delitem__(self, key):
         try:
@@ -648,19 +601,15 @@ class Items(object):
     def __setitem__(self, key, value):
         self.items[key] = value
 
-
     def __getitem__(self, key):
         return self.items[key]
-
 
     def __contains__(self, key):
         return key in self.items
 
-
     def compute_hash(self):
         for i in self:
             i.compute_hash()
-
 
     # We create the reversed list so search will be faster
     # We also create a twins list with id of twins (not the original
@@ -677,7 +626,6 @@ class Items(object):
                 else:
                     self.twins.append(id)
 
-
     def find_id_by_name(self, name):
         if hasattr(self, 'reversed_list'):
             if name in self.reversed_list:
@@ -693,7 +641,6 @@ class Items(object):
                         return i.id
             return None
 
-
     def find_by_name(self, name):
         id = self.find_id_by_name(name)
         if id is not None:
@@ -701,18 +648,15 @@ class Items(object):
         else:
             return None
 
-
     # It's used to change old Nagios2 names to
     # Nagios3 ones
     def old_properties_names_to_new(self):
         for i in self:
             i.old_properties_names_to_new()
 
-
     def pythonize(self):
         for id in self.items:
             self.items[id].pythonize()
-
 
     def create_tpl_list(self):
         for id in self.items:
@@ -720,13 +664,11 @@ class Items(object):
             if i.is_tpl():
                 self.templates[id] = i
 
-
     def find_tpl_by_name(self, name):
         for i in self.templates.values():
             if hasattr(i, 'name') and i.name == name:
                 return i
         return None
-
 
     # We will link all templates, and create the template
     # graph too
@@ -760,7 +702,6 @@ class Items(object):
         for tpl in self.templates.values():
             for father in tpl.templates:
                 self.templates_graph.add_edge(father, tpl)
-
 
     def is_correct(self):
         # we are ok at the begining. Hope we still ok at the end...
@@ -802,7 +743,6 @@ class Items(object):
 
         return r
 
-
     def remove_templates(self):
         """ Remove useless templates (& properties) of our items ; otherwise we could get errors on config.is_correct() """
         tpls = [ i for i in self if i.is_tpl() ]
@@ -810,7 +750,6 @@ class Items(object):
             del self[i.id]
         del self.templates
         del self.templates_graph
-
 
     def clean(self):
         """ Request to remove the unecessary attributes/others from our items """
@@ -823,14 +762,12 @@ class Items(object):
         for i in self:
             i.fill_default()
 
-
     def __str__(self):
         s = ''
         cls = self.__class__
         for id in self.items:
             s = s + str(cls) + ':' + str(id) + str(self.items[id]) + '\n'
         return s
-
 
     # Inheritance forjust a property
     def apply_partial_inheritance(self, prop):
@@ -844,7 +781,6 @@ class Items(object):
                 except:
                     pass
 
-
     def apply_inheritance(self):
         # We check for all Class properties if the host has it
         # if not, it check all host templates for a value
@@ -853,7 +789,6 @@ class Items(object):
             self.apply_partial_inheritance(prop)
         for i in self:
             i.get_customs_properties_by_inheritance(self)
-
 
     # We remove twins
     # Remember: item id respect the order of conf. So if and item
@@ -898,7 +833,6 @@ class Items(object):
                 # Get the list, but first make elements uniq
                 i.contacts = list(set(new_contacts))
 
-
     # Make link between an object and its escalations
     def linkify_with_escalations(self, escalations):
         for i in self:
@@ -914,7 +848,6 @@ class Items(object):
                         err = "the escalation '%s' defined for '%s' is unknown" % (es_name, i.get_name())
                         i.configuration_errors.append(err)
                 i.escalations = new_escalations
-
 
     # Make link between item and it's resultmodulations
     def linkify_with_resultmodulations(self, resultmodulations):
@@ -933,7 +866,6 @@ class Items(object):
                         continue
                 i.resultmodulations = new_resultmodulations
 
-
     # Make link between item and it's business_impact_modulations
     def linkify_with_business_impact_modulations(self, business_impact_modulations):
         for i in self:
@@ -950,8 +882,6 @@ class Items(object):
                         i.configuration_errors.append(err)
                         continue
                 i.business_impact_modulations = new_business_impact_modulations
-
-
 
     # If we've got a contact_groups properties, we search for all
     # theses groups and ask them their contacts, and then add them
@@ -995,7 +925,6 @@ class Items(object):
                 # Got a real one, just set it :)
                 setattr(i, prop, tp)
 
-
     # Link one command property
     def linkify_one_command_with_commands(self, commands, prop):
         for i in self:
@@ -1015,7 +944,6 @@ class Items(object):
                 else:
 
                     setattr(i, prop, None)
-
 
     # Link a command list (commands with , between) in real CommandCalls
     def linkify_command_list_with_commands(self, commands, prop):
@@ -1040,12 +968,10 @@ class Items(object):
                         pass
                 setattr(i, prop, com_list)
 
-
     # Link with triggers. Can be with a "in source" trigger, or a file name
     def linkify_with_triggers(self, triggers):
         for i in self:
             i.linkify_with_triggers(triggers)
-
 
     def evaluate_hostgroup_expression(self, expr, hosts, hostgroups, look_in='hostgroups'):
         begin = 0
@@ -1078,7 +1004,6 @@ class Items(object):
             self.configuration_errors.append(err)
 
         return list(set_res)
-
 
     # If we've got a hostgroup_name property, we search for all
     # theses groups and ask them their hosts, and then add them
@@ -1121,7 +1046,6 @@ class Items(object):
             if i.host_name == '':
                 i.register = '0'
 
-
     # Take our trigger strings and create true objects with it
     def explode_trigger_string_into_triggers(self, triggers):
         for i in self:
@@ -1129,7 +1053,6 @@ class Items(object):
 
 
 class HostGroup_Name_Parse_Ctx(object):
-
 
     hgn_chars_separator = ( '|', ',', '&', '^', )
     specials_hostgroup_name_chars = ( '*', '(', ')', '!', ) + hgn_chars_separator
@@ -1139,7 +1062,6 @@ class HostGroup_Name_Parse_Ctx(object):
     catch_all_name = "__ALLELEMENTS__"
     minus_sign_in_name = "__MINUSSIGN_IN_NAME__"
     print_in_name = "__PRINT_IN_NAME__"
-
 
     # flags:
     empty_item_ok = 0
@@ -1159,12 +1081,10 @@ class HostGroup_Name_Parse_Ctx(object):
         self.neg_res = []
         self.full_res = None
 
-
     def __str__(self):
         return "< prev_item='%s' last_is_expr=%s res_i=%d rc=%d >" % (self.prev_res, self.last_is_expr, self.res_i, self.rc)
 
     __repr__ = __str__
-
 
 
 def skip_space(expr, begin, end):
@@ -1233,6 +1153,7 @@ def hg_name_parse_single_expr(ctx, expr, begin, end):
     else:
         res = hg_name_parse_item(ctx, expr, i, end)
     return res
+
 
 def hg_name_parse_all(ctx, expr, begin, end):
     if ctx.last_is_expr:
@@ -1343,7 +1264,6 @@ def hg_name_parse_subexpr(ctx, expr, begin, end):
     ctx.prev_res = subctx.prev_res
     return subctx.full_res
 
-
 tabs_hg_name_list_operators = {
     '*': hg_name_parse_all,
     ',': hg_name_parse_or,
@@ -1387,6 +1307,7 @@ A "sub-parse_expr_result" is either:
             if expr[i] not in HostGroup_Name_Parse_Ctx.space_chars:
                 break
             i += 1
+
 
 # Return a set with ALL hosts (used in ! expressions)
 def get_all_host_names_set(hosts):
@@ -1455,6 +1376,7 @@ def hg_name_get_groupnames(all_res, hosts, hostgroups, res=None, look_in='hostgr
         res[tok] = set(elts)
 
     return res
+
 
 def hg_name_rebuild_str(parse_res):
     """ Rebuild a hostgroup_name expression based on 'parse_res'.

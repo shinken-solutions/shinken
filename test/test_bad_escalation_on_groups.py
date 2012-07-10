@@ -30,7 +30,6 @@ class TestBadEscaOnGroups(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_bad_escalation_on_groups.cfg')
 
-
     def test_escalation_inheritance(self):
         #
         # Config is not correct because of a wrong relative path

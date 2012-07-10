@@ -44,6 +44,7 @@ from shinken.objects.config import Config
 
 import getopt, sys
 
+
 def usage():
     print "skonf.py -a action -f configfile -o objecttype -d directive -v value -r directive=value,directive=value"
     print ""
@@ -64,6 +65,7 @@ def usage():
     print " * directive: the directive name of a configuration object"
     print " * value: the directive value of a configuration object"
     print " * r: this parameter restric the application to objects matching the directive/value pair list"
+
 
 def main():
     config=()
@@ -143,7 +145,6 @@ def main():
         commit = False
     else:
         config = None
-
 
     allowed = [ 'poller', 'arbiter', 'scheduler', 'broker', 'receiver', 'reactionner' ]
 
@@ -259,6 +260,7 @@ def main():
     else:
         print "Unknown action %s" % (action)
         sys.exit(2)
+
 
 def domacros(configfile,args=[]):
     import string
@@ -397,6 +399,7 @@ def domacros(configfile,args=[]):
         indexline += 1
     return (True, "Macro execution success")
 
+
 def delobject(config, objectype, filters):
     dfilters={}
     max=0
@@ -430,6 +433,7 @@ def delobject(config, objectype, filters):
             return (True, "%d objects removed" % (removed))
     else:
         return (False, "No %s objects found" % (objectype))
+
 
 def cloneobject(config, objectype, directive, filter):
     directives={}
@@ -478,6 +482,7 @@ def getaddresses(config):
                             addresses.append(v)
                             print v
 
+
 def showconfig(config,objectype,filters=""):
     dfilters={}
     if len(filters) > 0:
@@ -507,6 +512,7 @@ def showconfig(config,objectype,filters=""):
         print "Unknown object type %s" % (o)
     return config
 
+
 def getsatellitesaddresses(config):
     import netifaces
     import re
@@ -533,6 +539,7 @@ def getsatellitesaddresses(config):
                             addresses.append(v)
 
     return (True, addresses)
+
 
 def getauthdata(authfile):
     import re
@@ -585,6 +592,8 @@ def sync(config, configfile, authfile):
         return (False, "There was an error trying to push configuration to %s" % (address))
 
     return (True, addresses)
+
+
 def deploy(authfile):
     import paramiko
     import tarfile
@@ -634,6 +643,7 @@ def deploy(authfile):
 
     return (True, "OK")
 
+
 def control(authfile, action):
     import re
     import paramiko
@@ -676,6 +686,7 @@ def control(authfile, action):
 
     return (True, "Action completed")
 
+
 def writeconfig(config, configfile):
     bck="%s.%d" % (configfile, time.time())
     os.rename(configfile, bck)
@@ -695,6 +706,7 @@ def writeconfig(config, configfile):
                 fd.write(buff)
     fd.close()
     return (True, "Config saved")
+
 
 def addobject(config, objectype, directive):
     # allowed objects types to be added
@@ -731,7 +743,6 @@ def addobject(config, objectype, directive):
                 print "%s %s allready exist" % (objectype, name)
                 sys.exit(2)
 
-
     # so we can create the new object
     newobject= {}
     for (d, v) in directives.items():
@@ -740,8 +751,10 @@ def addobject(config, objectype, directive):
     config[objectype].append(newobject)
     return config
 
+
 def splitCount(s, count):
     return [s[i:i+count] for i in range(0, len(s), count)]
+
 
 def dumpconfig(type, config, allowed):
     for (k, oc) in config.items():
@@ -775,6 +788,7 @@ def dumpconfig(type, config, allowed):
                                 print col1+col2
                     print "+".ljust(99, "-")+"+"
 
+
 def getobjectnames(objectype, config, allowed):
     names = []
     for (k, oc) in config.items():
@@ -785,6 +799,7 @@ def getobjectnames(objectype, config, allowed):
                         names.append(v)
     print ','.join(names)
     return (True, ','.join(names))
+
 
 def getdirective(config, objectype, directive, filters):
     try:
@@ -824,6 +839,7 @@ def getdirective(config, objectype, directive, filters):
     except:
         return (False, "Unknown error in getdirective" )
 
+
 def setparam(config, objectype, directive, value, filters):
     import re
     dfilters={}
@@ -861,6 +877,7 @@ def setparam(config, objectype, directive, value, filters):
                 return (True, message)
     else:
         return (False, "Unknown object type %s" % (o))
+
 
 def removemodule(config, module, objectype, filters):
     import re
@@ -936,6 +953,7 @@ def delparam(config, objectype, directive, filters):
                 return (True, message)
     else:
         return (False, "Unknown object type %s" % (o))
+
 
 def loadconfig(configfile):
     try:

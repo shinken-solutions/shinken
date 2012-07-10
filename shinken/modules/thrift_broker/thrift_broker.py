@@ -94,6 +94,7 @@ properties = {
 
 tables = ["hosts", ""]
 
+
 class Thrift_brokerHandler(Hooker):
     out_map = out_map
 
@@ -189,8 +190,6 @@ class Thrift_brokerHandler(Hooker):
                             query.stats_filter_stack.put(query.make_filter('dummy', attribute, None))
                             query.stats_postprocess_stack.put(query.make_filter(operator, attribute, None))
 
-
-
             print "run query"
             result=query.launch_query()
             print query.response
@@ -206,6 +205,7 @@ class Thrift_brokerHandler(Hooker):
         r.rc = 0
 
         return r
+
 
 # Class for the Thrift Broker
 # Get broks and listen to thrift query language requests
@@ -244,7 +244,6 @@ class Thrift_broker(BaseModule):
         self.number_of_objects = 0
         self.last_need_data_send = time.time()
 
-
     # Called by Broker so we can do init stuff
     def init(self):
         print "Initialisation of the thrift broker"
@@ -260,12 +259,10 @@ class Thrift_broker(BaseModule):
         self.prepare_log_db()
         self.prepare_pnp_path()
 
-
         self.thrift = Thrift_status(self.configs, self.hosts, self.services, self.contacts, self.hostgroups, self.servicegroups, self.contactgroups, self.timeperiods, self.commands, self.schedulers, self.pollers, self.reactionners, self.brokers, self.dbconn, self.pnp_path, self.from_q)
 
         m = MacroResolver()
         m.output_macros = ['HOSTOUTPUT', 'HOSTPERFDATA', 'HOSTACKAUTHOR', 'HOSTACKCOMMENT', 'SERVICEOUTPUT', 'SERVICEPERFDATA', 'SERVICEACKAUTHOR', 'SERVICEACKCOMMENT']
-
 
     def manage_program_status_brok(self, b):
         data = b.data
@@ -318,8 +315,6 @@ class Thrift_broker(BaseModule):
             except KeyError:  # maybe it was not inserted in a good way, pass it
                 pass
 
-
-
     def manage_update_program_status_brok(self, b):
         data = b.data
         c_id = data['instance_id']
@@ -338,7 +333,6 @@ class Thrift_broker(BaseModule):
         c = self.configs[0]
         self.update_element(c, data)
 
-
     def set_schedulingitem_values(self, i):
         i.check_period = self.get_timeperiod(i.check_period)
         i.notification_period = self.get_timeperiod(i.notification_period)
@@ -346,7 +340,6 @@ class Thrift_broker(BaseModule):
         i.rebuild_ref()
         #Escalations is not use for status_dat
         del i.escalations
-
 
     def manage_initial_host_status_brok(self, b):
         data = b.data
@@ -367,7 +360,6 @@ class Thrift_broker(BaseModule):
         self.hosts[host_name] = h
         self.number_of_objects += 1
 
-
     # In fact, an update of a host is like a check return
     def manage_update_host_status_brok(self, b):
         self.manage_host_check_result_brok(b)
@@ -384,7 +376,6 @@ class Thrift_broker(BaseModule):
         for dtc in h.downtimes + h.comments:
             dtc.ref = h
         self.thrift.count_event('host_checks')
-
 
     def manage_initial_hostgroup_status_brok(self, b):
         data = b.data
@@ -416,7 +407,6 @@ class Thrift_broker(BaseModule):
         self.hostgroups[hostgroup_name] = hg
         self.number_of_objects += 1
 
-
     def manage_initial_service_status_brok(self, b):
         data = b.data
         s_id = data['id']
@@ -447,7 +437,6 @@ class Thrift_broker(BaseModule):
         # will speed things up dramatically
         self.service_id_cache[s.id] = s
 
-
     # In fact, an update of a service is like a check return
     def manage_update_service_status_brok(self, b):
         self.manage_service_check_result_brok(b)
@@ -465,8 +454,6 @@ class Thrift_broker(BaseModule):
         for dtc in s.downtimes + s.comments:
             dtc.ref = s
         self.thrift.count_event('service_checks')
-
-
 
     def manage_initial_servicegroup_status_brok(self, b):
         data = b.data
@@ -500,7 +487,6 @@ class Thrift_broker(BaseModule):
         self.servicegroups[servicegroup_name] = sg
         self.number_of_objects += 1
 
-
     def manage_initial_contact_status_brok(self, b):
         data = b.data
         contact_name = data['contact_name']
@@ -510,7 +496,6 @@ class Thrift_broker(BaseModule):
         #print "C:", c
         self.contacts[contact_name] = c
         self.number_of_objects += 1
-
 
     def manage_initial_contactgroup_status_brok(self, b):
         data = b.data
@@ -528,7 +513,6 @@ class Thrift_broker(BaseModule):
         self.contactgroups[contactgroup_name] = cg
         self.number_of_objects += 1
 
-
     def manage_initial_timeperiod_status_brok(self, b):
         data = b.data
         timeperiod_name = data['timeperiod_name']
@@ -539,7 +523,6 @@ class Thrift_broker(BaseModule):
         self.timeperiods[timeperiod_name] = tp
         self.number_of_objects += 1
 
-
     def manage_initial_command_status_brok(self, b):
         data = b.data
         command_name = data['command_name']
@@ -549,7 +532,6 @@ class Thrift_broker(BaseModule):
         #print "CMD:", c
         self.commands[command_name] = c
         self.number_of_objects += 1
-
 
     def manage_initial_scheduler_status_brok(self, b):
         data = b.data
@@ -565,7 +547,6 @@ class Thrift_broker(BaseModule):
         #print "MONCUL: Add a new scheduler ", sched
         self.number_of_objects += 1
 
-
     def manage_update_scheduler_status_brok(self, b):
         data = b.data
         scheduler_name = data['scheduler_name']
@@ -575,7 +556,6 @@ class Thrift_broker(BaseModule):
             #print "S:", s
         except Exception:
             pass
-
 
     def manage_initial_poller_status_brok(self, b):
         data = b.data
@@ -591,7 +571,6 @@ class Thrift_broker(BaseModule):
         #print "MONCUL: Add a new scheduler ", sched
         self.number_of_objects += 1
 
-
     def manage_update_poller_status_brok(self, b):
         data = b.data
         poller_name = data['poller_name']
@@ -600,7 +579,6 @@ class Thrift_broker(BaseModule):
             self.update_element(s, data)
         except Exception:
             pass
-
 
     def manage_initial_reactionner_status_brok(self, b):
         data = b.data
@@ -616,7 +594,6 @@ class Thrift_broker(BaseModule):
         #print "MONCUL: Add a new scheduler ", sched
         self.number_of_objects += 1
 
-
     def manage_update_reactionner_status_brok(self, b):
         data = b.data
         reactionner_name = data['reactionner_name']
@@ -625,7 +602,6 @@ class Thrift_broker(BaseModule):
             self.update_element(s, data)
         except Exception:
             pass
-
 
     def manage_initial_broker_status_brok(self, b):
         data = b.data
@@ -641,7 +617,6 @@ class Thrift_broker(BaseModule):
         #print "MONCUL: Add a new scheduler ", sched
         self.number_of_objects += 1
 
-
     def manage_update_broker_status_brok(self, b):
         data = b.data
         broker_name = data['broker_name']
@@ -650,7 +625,6 @@ class Thrift_broker(BaseModule):
             self.update_element(s, data)
         except Exception:
             pass
-
 
     # A service check have just arrived, we UPDATE data info with this
     def manage_service_check_result_brok(self, b):
@@ -663,11 +637,9 @@ class Thrift_broker(BaseModule):
         except Exception:
             pass
 
-
     # A service check update have just arrived, we UPDATE data info with this
     def manage_service_next_schedule_brok(self, b):
         self.manage_service_check_result_brok(b)
-
 
     def manage_host_check_result_brok(self, b):
         data = b.data
@@ -678,11 +650,9 @@ class Thrift_broker(BaseModule):
         except Exception:
             pass
 
-
     # this brok should arrive within a second after the host_check_result_brok
     def manage_host_next_schedule_brok(self, b):
         self.manage_host_check_result_brok(b)
-
 
     # A log brok will be written into a database
     def manage_log_brok(self, b):
@@ -834,7 +804,6 @@ class Thrift_broker(BaseModule):
                 print "DATABASE ERROR!!!!!!!!!!!!!!!!!"
         self.thrift.count_event('log_message')
 
-
     # The contacts must not be duplicated
     def get_contacts(self, cs):
         r = []
@@ -847,7 +816,6 @@ class Thrift_broker(BaseModule):
                     print "Error: search for a contact %s that do not exists!" % c.get_name()
         return r
 
-
     # The timeperiods must not be duplicated
     def get_timeperiod(self, t):
         if t is not None:
@@ -859,20 +827,17 @@ class Thrift_broker(BaseModule):
         else:
             return None
 
-
     def find_timeperiod(self, timeperiod_name):
         try:
             return self.timeperiods[timeperiod_name]
         except KeyError:
             return None
 
-
     def find_contact(self, contact_name):
         try:
             return self.contacts[contact_name]
         except KeyError:
             return None
-
 
     def update_element(self, e, data):
         #print "........%s........" % type(e)
@@ -882,7 +847,6 @@ class Thrift_broker(BaseModule):
             #else:
             #    print "%-20s\t%s\t->\t%s" % (prop, "-", data[prop])
             setattr(e, prop, data[prop])
-
 
     def prepare_log_db(self):
         # create db file and tables if not existing
@@ -899,7 +863,6 @@ class Thrift_broker(BaseModule):
         self.dbconn.commit()
         # rowfactory will later be redefined (in thrift.py)
 
-
     def cleanup_log_db(self):
         limit = int(time.time() - self.max_logs_age * 86400)
         print "Deleting messages from the log database older than %s" % time.asctime(time.localtime(limit))
@@ -915,7 +878,6 @@ class Thrift_broker(BaseModule):
             print "WARNING: yit seems your database is corrupted. Please recreate it"
         self.dbconn.commit()
 
-
     def prepare_pnp_path(self):
         if not self.pnp_path:
             self.pnp_path = False
@@ -925,7 +887,6 @@ class Thrift_broker(BaseModule):
             print "PNP perfdata path %s does not exist" % self.pnp_path
         if self.pnp_path and not self.pnp_path.endswith('/'):
             self.pnp_path += '/'
-
 
     def do_stop(self):
         print "[thrift] So I quit"
@@ -942,7 +903,6 @@ class Thrift_broker(BaseModule):
         except:
             pass
 
-
     def set_debug(self):
         fdtemp = os.open(self.debug, os.O_CREAT | os.O_WRONLY | os.O_APPEND)
 
@@ -952,7 +912,6 @@ class Thrift_broker(BaseModule):
 
         os.dup2(fdtemp, 1)  # standard output (1)
         os.dup2(fdtemp, 2)  # standard error (2)
-
 
     def main(self):
         try:
@@ -1013,6 +972,7 @@ class Thrift_broker(BaseModule):
         self.do_stop()
 
         return
+
 
 def thrift_factory(cursor, row):
     return Logline(row)

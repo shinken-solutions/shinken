@@ -33,7 +33,6 @@ from shinken.objects.module import Module
 from shinken.modules import npcdmod_broker
 from shinken.modules.npcdmod_broker import Npcd_broker
 
-
 sys.setcheckinterval(10000)
 
 modconf = Module()
@@ -43,13 +42,10 @@ modconf.modules = []
 modconf.properties = npcdmod_broker.properties.copy()
 
 
-
 class TestNpcd(ShinkenTest):
-
 
     def add(self, b):
         self.broks[b.id] = b
-
 
     def fake_check(self, ref, exit_status, output="OK"):
         print "fake", ref
@@ -64,7 +60,6 @@ class TestNpcd(ShinkenTest):
         check.execution_time = 0.001
         check.status = 'waitconsume'
         self.sched.waiting_results.append(check)
-
 
     def scheduler_loop(self, count, reflist):
         for ref in reflist:
@@ -85,7 +80,6 @@ class TestNpcd(ShinkenTest):
             #time.sleep(ref.retry_interval * 60 + 1)
             #time.sleep(60 + 1)
 
-
     def worker_loop(self):
         self.sched.delete_zombie_checks()
         self.sched.delete_zombie_actions()
@@ -104,7 +98,6 @@ class TestNpcd(ShinkenTest):
         #self.show_actions()
         #print "------------ worker loop end ----------------"
 
-
     def update_broker(self):
         self.sched.get_new_broks()
         ids = self.sched.broks.keys()
@@ -115,12 +108,10 @@ class TestNpcd(ShinkenTest):
             self.npcdmod_broker.manage_brok(brok)
         self.sched.broks = {}
 
-
     def print_header(self):
         print "#" * 80 + "\n" + "#" + " " * 78 + "#"
         print "#" + string.center(self.id(), 78) + "#"
         print "#" + " " * 78 + "#\n" + "#" * 80 + "\n"
-
 
     def write_correct_config(self):
         file = open("npcd.cfg", "w")
@@ -129,13 +120,11 @@ class TestNpcd(ShinkenTest):
         file.write("perfdata_spool_filename=pferf")
         file.close()
 
-
     def write_incomplete_config(self):
         file = open("npcd.cfg", "w")
         file.write("perfdata_file = /tmp/pfnerf")
         file.write("perfdata_spool_filename=pferf")
         file.close()
-
 
     def test_write_perfdata_file(self):
         self.print_header()
@@ -166,7 +155,6 @@ class TestNpcd(ShinkenTest):
         if os.path.exists("./perfdata"):
             self.npcdmod_broker.logfile.close()
             os.unlink("./perfdata")
-
 
     def test_npcd_got_missing_conf(self):
         self.print_header()

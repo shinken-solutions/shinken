@@ -40,6 +40,7 @@ from shinken.objects import Command
 
 from shinken.util import from_bool_to_string, from_list_to_split
 
+
 # This is a dirty hack. Service.get_name only returns service_description.
 # For the servicegroup config we need more. host_name + service_description
 def get_full_name(self):
@@ -222,8 +223,6 @@ class ObjectsCacheFile:
         ## }
     }
 
-
-
     def __init__(self, path, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands):
         #self.conf = scheduler.conf
         #self.scheduler = scheduler
@@ -236,7 +235,6 @@ class ObjectsCacheFile:
         self.contactgroups = contactgroups
         self.timeperiods = timeperiods
         self.commands = commands
-
 
     def create_output(self, elt):
         import sys
@@ -294,7 +292,6 @@ class ObjectsCacheFile:
                     output += u'\t' + display + u'\t' + unicode(value) + u'\n'
 
         return output
-
 
     def create_or_update(self):
 

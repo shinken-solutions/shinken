@@ -30,7 +30,6 @@ class TestSchedCleanQueues(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_clean_sched_queues.cfg')
 
-
     # Try to generate a bunch of external commands
     # and see if they are drop like it should
     def test_sched_clean_queues(self):
@@ -75,7 +74,6 @@ class TestSchedCleanQueues(ShinkenTest):
         self.sched.clean_queues()
         print len(self.sched.actions)
         self.assert_(len(self.sched.actions) < 30)
-
 
         #####  And now broks
         l = []

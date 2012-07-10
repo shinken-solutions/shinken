@@ -23,14 +23,11 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 from item import Item, Items
 
 from shinken.util import strip_and_uniq
 from shinken.property import BoolProp, IntegerProp, StringProp
 from shinken.log import logger
-
 
 _special_properties = ( 'service_notification_commands', 'host_notification_commands',
                         'service_notification_period', 'host_notification_period',
@@ -89,7 +86,6 @@ class Contact(Item):
         'min_criticity':    'min_business_impact',
     }
 
-
     macros = {
         'CONTACTNAME':      'contact_name',
         'CONTACTALIAS':     'alias',
@@ -105,14 +101,12 @@ class Contact(Item):
         'CONTACTGROUPNAMES': 'get_groupnames'
     }
 
-
     # For debugging purpose only (nice name)
     def get_name(self):
         try:
             return self.contact_name
         except AttributeError:
             return 'UnnamedContact'
-
 
     # Search for notification_options with state and if t is
     # in service_notification_period
@@ -135,7 +129,6 @@ class Contact(Item):
         # Oh... no one is ok for it? so no, sorry
         return False
 
-
     # Search for notification_options with state and if t is in
     # host_notification_period
     def want_host_notification(self, t, state, type, business_impact, cmd=None):
@@ -157,7 +150,6 @@ class Contact(Item):
         # Oh, nobody..so NO :)
         return False
 
-
     # Call to get our commands to launch a Notification
     def get_notification_commands(self, type):
         r = []
@@ -166,8 +158,6 @@ class Contact(Item):
         for nw in self.notificationways:
             r.extend(getattr(nw, notif_commands_prop))
         return r
-
-
 
     # Check is required prop are set:
     # contacts OR contactgroups is need
@@ -200,19 +190,15 @@ class Contact(Item):
 
         return state
 
-
-
     # Raise a log entry when a downtime begins
     # CONTACT DOWNTIME ALERT: test_contact;STARTED; Contact has entered a period of scheduled downtime
     def raise_enter_downtime_log_entry(self):
         logger.log("CONTACT DOWNTIME ALERT: %s;STARTED; Contact has entered a period of scheduled downtime" % self.get_name())
 
-
     # Raise a log entry when a downtime has finished
     # CONTACT DOWNTIME ALERT: test_contact;STOPPED; Contact has exited from a period of scheduled downtime
     def raise_exit_downtime_log_entry(self):
         logger.log("CONTACT DOWNTIME ALERT: %s;STOPPED; Contact has exited from a period of scheduled downtime" % self.get_name())
-
 
     # Raise a log entry when a downtime prematurely ends
     # CONTACT DOWNTIME ALERT: test_contact;CANCELLED; Contact has entered a period of scheduled downtime
@@ -246,13 +232,10 @@ class Contacts(Items):
             # Get the list, but first make elements uniq
             i.notificationways = list(set(new_notificationways))
 
-
     def late_linkify_c_by_commands(self, commands):
         for i in self:
             for nw in i.notificationways:
                 nw.late_linkify_nw_by_commands(commands)
-
-
 
     # We look for contacts property in contacts and
     def explode(self, contactgroups, notificationways):

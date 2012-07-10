@@ -30,9 +30,7 @@ class TestNoEventHandlerDuringDowntime(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_no_event_handler_during_downtime.cfg')
 
-
     def test_no_event_handler_during_downtime(self):
-
 
         print "Get the hosts and services"
         now = time.time()
@@ -48,7 +46,6 @@ class TestNoEventHandlerDuringDowntime(ShinkenTest):
         self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 0, 'OK | value1=0 value2=0']])
         self.assert_(host.state == 'UP')
         self.assert_(host.state_type == 'HARD')
-
 
         now = time.time()
         # downtime valid for the next 2 minutes

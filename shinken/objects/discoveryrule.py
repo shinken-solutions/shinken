@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import re
 from copy import copy
 
@@ -53,7 +52,6 @@ class Discoveryrule(MatchingItem):
         }
 
     macros = {}
-
 
     # The init of a discovery will set the property of
     # Discoveryrule.properties as in setattr, but all others
@@ -115,6 +113,7 @@ class Discoveryrule(MatchingItem):
                 setattr(self, prop, copy(val))
             else:
                 setattr(self, prop, val)
+
             # each istance to have his own running prop!
 
 
@@ -124,8 +123,6 @@ class Discoveryrule(MatchingItem):
             return self.discoveryrule_name
         except AttributeError:
             return "UnnamedDiscoveryRule"
-
-
 
 
 class Discoveryrules(Items):

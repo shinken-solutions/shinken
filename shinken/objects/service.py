@@ -23,8 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 """ This Class is the service one, s it manage all service specific thing.
 If you look at the scheduling part, look at the scheduling item class"""
 
@@ -35,7 +33,6 @@ try:
     from ClusterShell.NodeSet import NodeSet, NodeSetParseRangeError
 except ImportError:
     NodeSet = None
-
 
 from shinken.objects.item import Items
 from shinken.objects.schedulingitem import SchedulingItem
@@ -338,11 +335,9 @@ class Service(SchedulingItem):
             return self.name
         return 'SERVICE-DESCRIPTION-MISSING'
 
-
     # Get the servicegroups names
     def get_groupnames(self):
         return ','.join([sg.get_name() for sg in self.servicegroups])
-
 
     # Need the whole name for debugin purpose
     def get_dbg_name(self):
@@ -351,11 +346,9 @@ class Service(SchedulingItem):
     def get_full_name(self):
         return "%s/%s" % (self.host.host_name, self.service_description)
 
-
     # Get our realm, so in fact our host one
     def get_realm(self):
         return self.host.get_realm()
-
 
     def get_hostgroups(self):
         return self.host.hostgroups
@@ -437,8 +430,6 @@ class Service(SchedulingItem):
                     state = False
         return state
 
-
-
     # The service is dependent of his father dep
     # Must be AFTER linkify
     def fill_daddy_dependency(self):
@@ -459,7 +450,6 @@ class Service(SchedulingItem):
             # And the parent/child dep lists too
             self.host.register_son_in_parent_child_dependencies(self)
 
-
     # Register the dependency between 2 service for action (notification etc)
     def add_service_act_dependency(self, srv, status, timeperiod, inherits_parent):
         # first I add the other the I depend on in MY list
@@ -471,8 +461,6 @@ class Service(SchedulingItem):
 
         # And the parent/child dep lists too
         srv.register_son_in_parent_child_dependencies(self)
-
-
 
     # Register the dependency between 2 service for action (notification etc)
     # but based on a BUSINESS rule, so on fact:
@@ -487,8 +475,6 @@ class Service(SchedulingItem):
         # And the parent/child dep lists too
         self.register_son_in_parent_child_dependencies(srv)
 
-
-
     # Register the dependency between 2 service for checks
     def add_service_chk_dependency(self, srv, status, timeperiod, inherits_parent):
         # first I add the other the I depend on in MY list
@@ -500,8 +486,6 @@ class Service(SchedulingItem):
 
         # And the parent/child dep lists too
         srv.register_son_in_parent_child_dependencies(self)
-
-
 
     # For a given host, look for all copy we must
     # create for for_each property
@@ -564,9 +548,6 @@ class Service(SchedulingItem):
                     host.configuration_errors.append(err)
         return duplicates
 
-
-
-
 #####
 #                         _
 #                        (_)
@@ -583,7 +564,6 @@ class Service(SchedulingItem):
     def set_unreachable(self):
         pass
 
-
     # We just go an impact, so we go unreachable
     # but only if it's enable in the configuration
     def set_impact_state(self):
@@ -598,7 +578,6 @@ class Service(SchedulingItem):
             self.state = 'UNKNOWN'  # exit code UNDETERMINED
             self.state_id = 3
 
-
     # Ok, we are no more an impact, if no news checks
     # overide the impact state, we came back to old
     # states
@@ -609,13 +588,11 @@ class Service(SchedulingItem):
             self.state = self.state_before_impact
             self.state_id = self.state_id_before_impact
 
-
     # Set state with status return by the check
     # and update flapping state
     def set_state_from_exit_status(self, status):
         now = time.time()
         self.last_state_update = now
-
 
         # we should put in last_state the good last state:
         # if not just change the state by an problem/impact
@@ -665,7 +642,6 @@ class Service(SchedulingItem):
 
         self.duration_sec = now - self.last_state_change
 
-
     # Return True if status is the state (like OK) or small form like 'o'
     def is_state(self, status):
         if status == self.state:
@@ -681,7 +657,6 @@ class Service(SchedulingItem):
             return True
         return False
 
-
     # The last time when the state was not OK
     def last_time_non_ok_or_up(self):
         non_ok_times = filter(lambda x: x > self.last_time_ok, [self.last_time_warning,
@@ -693,7 +668,6 @@ class Service(SchedulingItem):
             last_time_non_ok = min(non_ok_times)
         return last_time_non_ok
 
-
     # Add a log entry with a SERVICE ALERT like:
     # SERVICE ALERT: server;Load;UNKNOWN;HARD;1;I don't know what to say...
     def raise_alert_log_entry(self):
@@ -703,7 +677,6 @@ class Service(SchedulingItem):
                                                          self.state_type,
                                                          self.attempt,
                                                          self.output))
-
 
     # If the configuration allow it, raise an initial log like
     # CURRENT SERVICE STATE: server;Load;UNKNOWN;HARD;1;I don't know what to say...
@@ -716,14 +689,12 @@ class Service(SchedulingItem):
                                                          self.attempt,
                                                          self.output))
 
-
     # Add a log entry with a Freshness alert like:
     # Warning: The results of host 'Server' are stale by 0d 0h 0m 58s (threshold=0d 1h 0m 0s).
     # I'm forcing an immediate check of the host.
     def raise_freshness_log_entry(self, t_stale_by, t_threshold):
         logger.warning("The results of service '%s' on host '%s' are stale by %s (threshold=%s).  I'm forcing an immediate check of the service." \
                       % (self.get_name(), self.host.get_name(), format_t_into_dhms_format(t_stale_by), format_t_into_dhms_format(t_threshold)))
-
 
     # Raise a log entry with a Notification alert like
     # SERVICE NOTIFICATION: superadmin;server;Load;OK;notify-by-rss;no output
@@ -742,7 +713,6 @@ class Service(SchedulingItem):
                                                                     self.get_name(), state,
                                                                     command.get_name(), self.output))
 
-
     # Raise a log entry with a Eventhandler alert like
     # SERVICE EVENT HANDLER: test_host_0;test_ok_0;OK;SOFT;4;eventhandler
     def raise_event_handler_log_entry(self, command):
@@ -754,13 +724,11 @@ class Service(SchedulingItem):
                                                                      self.attempt,
                                                                      command.get_name()))
 
-
     # Raise a log entry with FLAPPING START alert like
     # SERVICE FLAPPING ALERT: server;LOAD;STARTED; Service appears to have started flapping (50.6% change >= 50.0% threshold)
     def raise_flapping_start_log_entry(self, change_ratio, threshold):
         logger.log("SERVICE FLAPPING ALERT: %s;%s;STARTED; Service appears to have started flapping (%.1f%% change >= %.1f%% threshold)" % \
                       (self.host.get_name(), self.get_name(), change_ratio, threshold))
-
 
     # Raise a log entry with FLAPPING STOP alert like
     # SERVICE FLAPPING ALERT: server;LOAD;STOPPED; Service appears to have stopped flapping (23.0% change < 25.0% threshold)
@@ -768,12 +736,10 @@ class Service(SchedulingItem):
         logger.log("SERVICE FLAPPING ALERT: %s;%s;STOPPED; Service appears to have stopped flapping (%.1f%% change < %.1f%% threshold)" % \
                       (self.host.get_name(), self.get_name(), change_ratio, threshold))
 
-
     # If there is no valid time for next check, raise a log entry
     def raise_no_next_check_log_entry(self):
         logger.warning("I cannot schedule the check for the service '%s' on host '%s' because there is not future valid time" % \
                       (self.get_name(), self.host.get_name()))
-
 
     # Raise a log entry when a downtime begins
     # SERVICE DOWNTIME ALERT: test_host_0;test_ok_0;STARTED; Service has entered a period of scheduled downtime
@@ -781,20 +747,17 @@ class Service(SchedulingItem):
         logger.log("SERVICE DOWNTIME ALERT: %s;%s;STARTED; Service has entered a period of scheduled downtime" % \
                       (self.host.get_name(), self.get_name()))
 
-
     # Raise a log entry when a downtime has finished
     # SERVICE DOWNTIME ALERT: test_host_0;test_ok_0;STOPPED; Service has exited from a period of scheduled downtime
     def raise_exit_downtime_log_entry(self):
         logger.log("SERVICE DOWNTIME ALERT: %s;%s;STOPPED; Service has exited from a period of scheduled downtime" % \
                       (self.host.get_name(), self.get_name()))
 
-
     # Raise a log entry when a downtime prematurely ends
     # SERVICE DOWNTIME ALERT: test_host_0;test_ok_0;CANCELLED; Service has entered a period of scheduled downtime
     def raise_cancel_downtime_log_entry(self):
         logger.log("SERVICE DOWNTIME ALERT: %s;%s;CANCELLED; Scheduled downtime for service has been cancelled." % \
                       (self.host.get_name(), self.get_name()))
-
 
     # Is stalking?
     # Launch if check is waitconsume==first time
@@ -816,36 +779,29 @@ class Service(SchedulingItem):
         if need_stalk:
             logger.info("Stalking %s: %s" % (self.get_name(), c.output))
 
-
     # Give data for checks's macros
     def get_data_for_checks(self):
         return [self.host, self]
-
 
     # Give data for evetn handlers's macros
     def get_data_for_event_handler(self):
         return [self.host, self]
 
-
     # Give data for notifications'n macros
     def get_data_for_notifications(self, contact, n):
         return [self.host, self, contact, n]
-
 
     # See if the notification is launchable (time is OK and contact is OK too)
     def notification_is_blocked_by_contact(self, n, contact):
         return not contact.want_service_notification(self.last_chk, self.state, n.type, self.business_impact, n.command_call)
 
-
     def get_duration_sec(self):
         return str(int(self.duration_sec))
-
 
     def get_duration(self):
         m, s = divmod(self.duration_sec, 60)
         h, m = divmod(m, 60)
         return "%02dh %02dm %02ds" % (h, m, s)
-
 
     def get_ack_author_name(self):
         if self.acknowledgement is None:
@@ -857,10 +813,8 @@ class Service(SchedulingItem):
             return ''
         return self.acknowledgement.comment
 
-
     def get_check_command(self):
         return self.check_command.get_name()
-
 
     # Check if a notification for this service is suppressed at this time
     def notification_is_blocked_by_item(self, type, t_wished = None):
@@ -937,9 +891,6 @@ class Service(SchedulingItem):
 
         return False
 
-
-
-
     # Get a oc*p command if item has obsess_over_*
     # command. It must be enabled locally and globally
     def get_obsessive_compulsive_processor_command(self):
@@ -956,11 +907,10 @@ class Service(SchedulingItem):
         self.actions.append(e)
 
 
-
-
 # Class for list of services. It's mainly, mainly for configuration part
 class Services(Items):
     inner_class = Service  # use for know what is in items
+
     # Create the reversed list for speedup search by host_name/name
     # We also tag service already in list: they are twins. It'a a bad things.
     # Hostgroups service have an ID higer thant host service. So it we tag
@@ -983,8 +933,6 @@ class Services(Items):
         # search, so we del it
         del self.reversed_list
 
-
-
     # TODO: finish serach to use reversed
     # Search a service id by it's name and host_name
     def find_srv_id_by_name_and_hostname(self, host_name, name):
@@ -1004,7 +952,6 @@ class Services(Items):
                     return s.id
         return None
 
-
     # Search a service by it's name and hot_name
     def find_srv_by_name_and_hostname(self, host_name, name):
         if hasattr(self, 'hosts'):
@@ -1018,7 +965,6 @@ class Services(Items):
             return self.items[id]
         else:
             return None
-
 
     # Make link between elements:
     # service -> host
@@ -1044,13 +990,11 @@ class Services(Items):
         self.linkify_with_escalations(escalations)
         self.linkify_with_triggers(triggers)
 
-
     # We can link services with hosts so
     # We can search in O(hosts) instead
     # of O(services) for common cases
     def optimize_service_search(self, hosts):
         self.hosts = hosts
-
 
     # We just search for each host the id of the host
     # and replace the name by the id
@@ -1076,7 +1020,6 @@ class Services(Items):
             except AttributeError, exp:
                 pass  # Will be catch at the is_correct moment
 
-
     # We look for servicegroups property in services and
     # link them
     def linkify_s_by_sg(self, servicegroups):
@@ -1095,8 +1038,6 @@ class Services(Items):
                             s.configuration_errors.append(err)
                 s.servicegroups = new_servicegroups
 
-
-
     # In the scheduler we need to relink the commandCall with
     # the real commands
     def late_linkify_s_by_commands(self, commands):
@@ -1107,12 +1048,10 @@ class Services(Items):
                 if cc:
                     cc.late_linkify_with_command(commands)
 
-
     # Delete services by ids
     def delete_services_by_id(self, ids):
         for id in ids:
             del self[id]
-
 
     # Apply implicit inheritance for special properties:
     # contact_groups, notification_interval , notification_period
@@ -1128,7 +1067,6 @@ class Services(Items):
                         if h is not None and hasattr(h, prop):
                             setattr(s, prop, getattr(h, prop))
 
-
     # Apply inheritance for all properties
     def apply_inheritance(self, hosts):
         # We check for all Host properties if the host has it
@@ -1141,12 +1079,10 @@ class Services(Items):
         for s in self:
             s.get_customs_properties_by_inheritance(self)
 
-
     # Create dependencies for services (daddy ones)
     def apply_dependencies(self):
         for s in self:
             s.fill_daddy_dependency()
-
 
     # Add in our queue a service create from another. Special case:
     # is a template: so hname is a name of template, so need to get all
@@ -1199,7 +1135,6 @@ class Services(Items):
         # The "old" services will be removed. All services with
         # more than one host or a host group will be in it
         srv_to_remove = []
-
 
         # items::explode_trigger_string_into_triggers
         self.explode_trigger_string_into_triggers(triggers)
@@ -1306,14 +1241,11 @@ class Services(Items):
                                     servicedependencies.add_service_dependency(s.host_name, s.service_description, hname, desc)
                             i += 1
 
-
-
     # Will create all business tree for the
     # services
     def create_business_rules(self, hosts, services):
         for s in self:
             s.create_business_rules(hosts, services)
-
 
     # Will link all business service/host with theirs
     # dep for problem/impact link

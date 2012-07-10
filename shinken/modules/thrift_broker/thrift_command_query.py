@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from thrift_query import ThriftQuery
 from shinken.external_command import ExternalCommand
 
@@ -52,7 +51,6 @@ class ThriftCommandQuery(ThriftQuery):
                 # This line is not valid or not implemented
                 print "Received a line of input which i can't handle: '%s'" % line
                 pass
-
 
     def launch_query(self):
         """ Prepare the request object's filter stacks """

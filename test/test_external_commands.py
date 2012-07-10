@@ -25,6 +25,7 @@
 from shinken_test import *
 import os
 
+
 class TestConfig(ShinkenTest):
     # setUp is inherited from ShinkenTest
 
@@ -34,7 +35,6 @@ class TestConfig(ShinkenTest):
         fd = open(self.conf.command_file, 'wb')
         fd.write(s)
         fd.close()
-
 
     def test_external_comand(self):
         now = time.time()

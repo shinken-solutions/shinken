@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 properties = {
     'daemons': ['arbiter'],
     'type': 'ip_tag',
@@ -40,7 +39,6 @@ def get_instance(plugin):
     except ImportError, exp:
         print "Warning: the plugin type %s is unavailable: %s" % ('ip_tag', exp)
         return None
-
 
     # Catch errors
     ip_range = plugin.ip_range

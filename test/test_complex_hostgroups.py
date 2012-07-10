@@ -30,7 +30,6 @@ class TestConfig(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_complex_hostgroups.cfg')
 
-
     def get_svc(self):
         return self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
 
@@ -65,7 +64,6 @@ class TestConfig(ShinkenTest):
                     r = False
         return r
 
-
     def test_dummy(self):
         print self.sched.services.items
         svc = self.get_svc()
@@ -78,8 +76,6 @@ class TestConfig(ShinkenTest):
         test_win_web_prod_0 = self.find_host('test_win_web_prod_0')
         test_win_web_qual_0 = self.find_host('test_win_web_qual_0')
         test_linux_file_prod_0 = self.find_host('test_linux_file_prod_0')
-
-
 
         hg_linux = self.find_hostgroup('linux')
         hg_web = self.find_hostgroup('web')

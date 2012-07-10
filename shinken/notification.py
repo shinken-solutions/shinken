@@ -23,13 +23,13 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import time
 
 from shinken.action import Action
 from shinken.brok import Brok
 from shinken.property import BoolProp, IntegerProp, StringProp
 from shinken.autoslots import AutoSlots
+
 
 class Notification(Action):
     """Please Add a Docstring to describe the class here"""
@@ -39,7 +39,6 @@ class Notification(Action):
     __metaclass__ = AutoSlots
 
     my_type = 'notification'
-
 
     properties = {
         'is_a':                StringProp(default='notification'),
@@ -93,7 +92,6 @@ class Notification(Action):
         'SERVICENOTIFICATIONNUMBER': 'notif_nb',
         'SERVICENOTIFICATIONID':    'id'
     }
-
 
     def __init__(self, type='PROBLEM' , status='scheduled', command='UNSET', command_call=None, ref=None, contact=None, t_to_go=0, \
                      contact_name='', host_name='', service_description='',
@@ -153,17 +151,14 @@ class Notification(Action):
         self.reactionner_tag = reactionner_tag
         self.already_start_escalations = set()
 
-
     # return a copy of the check but just what is important for execution
     # So we remove the ref and all
     def copy_shell(self):
         # We create a dummy check with nothing in it, just defaults values
         return self.copy_shell__( Notification('', '', '', '', '', '', '', id=self.id) )
 
-
     def is_launchable(self, t):
         return t >= self.t_to_go
-
 
     def is_administrative(self):
         if self.type in ('PROBLEM', 'RECOVERY'):
@@ -171,14 +166,11 @@ class Notification(Action):
         else:
             return True
 
-
     def __str__(self):
         return "Notification %d status:%s command:%s ref:%s t_to_go:%s" % (self.id, self.status, self.command, getattr(self, 'ref', 'unknown'), time.asctime(time.localtime(self.t_to_go)))
 
-
     def get_id(self):
         return self.id
-
 
     def get_return_from(self, n):
         self.exit_status  = n.exit_status
@@ -196,7 +188,6 @@ class Notification(Action):
             if brok_type in entry.fill_brok:
                 data[prop] = getattr(self, prop)
 
-
     # Get a brok with initial status
     def get_initial_status_brok(self):
         data = {'id': self.id}
@@ -204,7 +195,6 @@ class Notification(Action):
         self.fill_data_brok_from(data, 'full_status')
         b = Brok('notification_raise', data)
         return b
-
 
     # Call by pickle for dataify the comment
     # because we DO NOT WANT REF in this pickleisation!
@@ -217,7 +207,6 @@ class Notification(Action):
                 res[prop] = getattr(self, prop)
 
         return res
-
 
     # Inverted funtion of getstate
     def __setstate__(self, state):

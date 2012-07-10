@@ -27,6 +27,7 @@ from shinken.macroresolver import MacroResolver
 from shinken.commandcall import CommandCall
 from shinken.objects import Command
 
+
 class TestConfig(ShinkenTest):
     # setUp is inherited from ShinkenTest
 
@@ -47,7 +48,6 @@ class TestConfig(ShinkenTest):
         com = mr.resolve_command(svc.check_command, data)
         print com
         self.assert_(com == "plugins/test_servicecheck.pl --type=ok --failchance=5% --previous-state=PENDING --state-duration=0 --total-critical-on-host=0 --total-warning-on-host=0 --hostname test_host_0 --servicedesc test_ok_0 --custom custvalue")
-
 
     # Here call with a special macro TOTALHOSTSUP
     # but call it as arg. So will need 2 pass in macro resolver
@@ -81,7 +81,6 @@ class TestConfig(ShinkenTest):
             print com
             self.assert_(com == 'plugins/nothing monculcestdupoulet')
 
-
     def test_env_macros(self):
         mr = self.get_mr()
         (svc, hst) = self.get_hst_svc()
@@ -94,7 +93,6 @@ class TestConfig(ShinkenTest):
         self.assert_(env['NAGIOS_SERVICEPERCENTCHANGE'] == '0.0')
         self.assert_(env['NAGIOS__SERVICECUSTNAME'] == 'custvalue')
         self.assert_(env['NAGIOS__HOSTOSTYPE'] == 'gnulinux')
-
 
     def test_resource_file(self):
         mr = self.get_mr()

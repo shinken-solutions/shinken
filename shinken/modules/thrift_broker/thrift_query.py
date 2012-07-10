@@ -35,7 +35,6 @@ except ImportError:
     except ImportError:
         import sqlite as sqlite3
 
-
 from shinken.modules.livestatus_broker.hooker import Hooker
 from shinken.modules.livestatus_broker.mapping import out_map as LSout_map
 from thrift_response import ThriftResponse
@@ -47,7 +46,6 @@ class Problem:
     def __init__(self, source, impacts):
         self.source = source
         self.impacts = impacts
-
 
 
 class ThriftQuery(Hooker):
@@ -102,7 +100,6 @@ class ThriftQuery(Hooker):
         # Clients can also send their local time with the request
         self.client_localtime = self.tic
 
-
     def find_converter(self, attribute):
         """Return a function that converts textual numbers
         in the request to the correct data type"""
@@ -113,7 +110,6 @@ class ThriftQuery(Hooker):
             elif out_map[attribute]['type'] == 'float':
                 return float
         return None
-
 
     def set_default_out_map_name(self):
         """Translate the table name to the corresponding out_map key."""
@@ -143,7 +139,6 @@ class ThriftQuery(Hooker):
             }[self.table]
         except:
             self.out_map_name = 'hosts'
-
 
     def copy_out_map_hooks(self):
         """Update the hooks for some out_map entries.
@@ -178,18 +173,15 @@ class ThriftQuery(Hooker):
                     new_map[objtype][attribute]['hook'] = entry['hook']
         return new_map
 
-
     def __str__(self):
         output = "ThriftRequest:\n"
         for attr in ["table", "columns", "filtercolumns", "prefiltercolumns", "aliases", "stats_group_by", "stats_request"]:
             output += "request %s: %s\n" % (attr, getattr(self, attr))
         return output
 
-
     def split_command(self, line, splits=1):
         """Create a list from the words of a line"""
         return line.split(' ', splits)
-
 
     def split_option(self, line, splits=1):
         """Like split_commands, but converts numbers to int data type"""
@@ -197,12 +189,10 @@ class ThriftQuery(Hooker):
         x = map(lambda i: (i.isdigit() and int(i)) or i, [token.strip() for token in re.split(r"[\s]+", line, splits)])
         return x
 
-
     def split_option_with_columns(self, line):
         """Split a line in a command and a list of words"""
         cmd, columns = self.split_option(line)
         return cmd, [self.strip_table_from_column(c) for c in re.compile(r'\s+').split(columns)]
-
 
     def strip_table_from_column(self, column):
         """Cut off the table name, because it is possible
@@ -212,7 +202,6 @@ class ThriftQuery(Hooker):
             return re.sub(re.sub('s$', '', bygroupmatch.group(1)) + '_', '', column, 1)
         else:
             return re.sub(re.sub('s$', '', self.table) + '_', '', column, 1)
-
 
     def launch_query(self):
         """ Prepare the request object's filter stacks """
@@ -277,7 +266,6 @@ class ThriftQuery(Hooker):
 
         return result
 
-
     def get_hosts_or_services_livedata(self, cs):
         if cs.without_filter and not self.limit:
             # Simply format the output
@@ -294,19 +282,15 @@ class ThriftQuery(Hooker):
                     if cs.without_filter or cs.filter_func(self.create_output(cs.filter_map, x)))
             )
 
-
     def get_hosts_livedata(self, cs):
         return self.get_hosts_or_services_livedata(cs)
-
 
     def get_services_livedata(self, cs):
         return self.get_hosts_or_services_livedata(cs)
 
-
     def get_simple_livedata(self, cs):
         objects = getattr(self, self.table)
         return [ self.create_output(cs.output_map, obj) for obj in objects.values() ]
-
 
     def get_filtered_livedata(self, cs):
         objects = getattr(self, self.table).values()
@@ -314,7 +298,6 @@ class ThriftQuery(Hooker):
             return [ y for y in [ self.create_output(cs.output_map, x) for x in objects ] if cs.filter_func(y) ]
         res = [ x for x in objects if cs.filter_func(self.create_output(cs.filter_map, x)) ]
         return [ self.create_output(cs.output_map, x) for x in res ]
-
 
     def get_list_livedata(self, cs):
         t = self.table
@@ -335,7 +318,6 @@ class ThriftQuery(Hooker):
             res = [ self.create_output(cs.output_map, x) for x in res ]
         return res
 
-
     def get_group_livedata(self, cs, objs, an, group_key, member_key):
         """ return a list of elements from a "group" of 'objs'. group can be a hostgroup or a servicegroup.
 objs: the objects to get elements from.
@@ -353,18 +335,15 @@ member_key: the key to be used to sort each resulting element of a group member.
                         ) if (cs.without_filter or cs.filter_func(self.create_output(cs.filter_map, svc))))
         ]
 
-
     def get_hostbygroups_livedata(self, cs):
         member_key = lambda k: k.host_name
         group_key = lambda k: k.hostgroup_name
         return self.get_group_livedata(cs, self.hostgroups.values(), 'hostgroup', group_key, member_key)
 
-
     def get_servicebygroups_livedata(self, cs):
         member_key = lambda k: k.get_name()
         group_key = lambda k: k.servicegroup_name
         return self.get_group_livedata(cs, self.servicegroups.values(), 'servicegroup', group_key, member_key)
-
 
     def get_problem_livedata(self, cs):
         # We will crate a problems list first with all problems and source in it
@@ -381,11 +360,9 @@ member_key: the key to be used to sort each resulting element of a group member.
         # Then return
         return [ self.create_output(cs.output_map, pb) for pb in problems ]
 
-
     def get_status_livedata(self, cs):
         cs.out_map = self.out_map['Config']
         return [ self.create_output(cs.output_map, c) for c in self.configs.values() ]
-
 
     def get_columns_livedata(self, cs):
         result = []
@@ -406,7 +383,6 @@ member_key: the key to be used to sort each resulting element of a group member.
                     else:
                         result.append({'description': 'to_do_desc', 'name': attr, 'table': tablenames[obj], 'type': LSout_map[obj][attr]['type'] })
         return result
-
 
     def get_servicebyhostgroups_livedata(self, cs):
         # to test..
@@ -450,7 +426,6 @@ member_key: the key to be used to sort each resulting element of a group member.
         'columns':              get_columns_livedata,
         'servicesbyhostgroup':  get_servicebyhostgroups_livedata
     }
-
 
     def get_live_data(self):
         """Find the objects which match the request.
@@ -497,7 +472,6 @@ member_key: the key to be used to sort each resulting element of a group member.
 
         return res
 
-
     def get_live_data_log(self):
         """Like get_live_data, but for log objects"""
         filter_func = self.filter_stack.get_stack()
@@ -540,7 +514,6 @@ member_key: the key to be used to sort each resulting element of a group member.
         #print "result is", result
         return result
 
-
     def create_output(self, out_map, elt):
         """Convert an object to a dict with selected keys."""
         output = {}
@@ -551,7 +524,6 @@ member_key: the key to be used to sort each resulting element of a group member.
                 value = ''
             output[display] = value
         return output
-
 
     def statsify_result(self, filtresult):
         """Applies the stats filter functions to the result.
@@ -641,7 +613,6 @@ member_key: the key to be used to sort each resulting element of a group member.
             # Without StatsGroupBy: we have only one line
             result = [resultdict]
         return result
-
 
     def make_filter(self, operator, attribute, reference):
         if reference is not None:
@@ -762,8 +733,8 @@ member_key: the key to be used to sort each resulting element of a group member.
         else:
             raise "wrong operation", operator
 
-
     def make_sql_filter(self, operator, attribute, reference):
+
         # The filters are text fragments which are put together to form a sql where-condition finally.
         # Add parameter Class (Host, Service), lookup datatype (default string), convert reference
         def eq_filter():
@@ -771,19 +742,25 @@ member_key: the key to be used to sort each resulting element of a group member.
                 return ['%s IS NULL' % attribute, ()]
             else:
                 return ['%s = ?' % attribute, (reference, )]
+
         def ne_filter():
             if reference == '':
                 return ['%s IS NOT NULL' % attribute, ()]
             else:
                 return ['%s != ?' % attribute, (reference, )]
+
         def gt_filter():
             return ['%s > ?' % attribute, (reference, )]
+
         def ge_filter():
             return ['%s >= ?' % attribute, (reference, )]
+
         def lt_filter():
             return ['%s < ?' % attribute, (reference, )]
+
         def le_filter():
             return ['%s <= ?' % attribute, (reference, )]
+
         def match_filter():
             return ['%s LIKE ?' % attribute, ('%'+reference+'%', )]
         if operator == '=':

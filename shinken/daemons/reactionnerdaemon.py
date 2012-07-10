@@ -37,7 +37,6 @@
 # The configuration consists of a list of Schedulers for which
 # the Reactionner will launch actions for.
 
-
 from shinken.satellite import Satellite
 from shinken.property import PathProp, IntegerProp
 

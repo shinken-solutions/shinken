@@ -23,11 +23,11 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from shinken.webui.bottle import redirect
 
 ### Will be populated by the UI with it's own value
 app = None
+
 
 # Our page. If the useer call /dummy/TOTO arg1 will be TOTO.
 # if it's /dummy/, it will be 'nothing'
@@ -46,7 +46,6 @@ def get_page(arg1='nothing'):
     return {'app': app, 'user': user}
 
 
-
 def form_submit_check(name):
     print "Want submit check for", name
     user = app.get_user_auth()
@@ -60,6 +59,7 @@ def form_submit_check(name):
         t = 'service'
 
     return {'app': app, 'user': user, 'name': name, 'obj_type': t}
+
 
 def form_ack(name):
     print "Want ackn for", name
@@ -92,8 +92,6 @@ def form_downtime(name):
         return
 
     return {'app': app, 'user': user, 'name': name}
-
-
 
 # This is the dict teh webui will try to "load".
 #  *here we register one page with both adresses /dummy/:arg1 and /dummy/, both addresses

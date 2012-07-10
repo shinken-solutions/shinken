@@ -33,12 +33,10 @@ from shinken.modules import hack_commands_poller_tag_arbiter
 from shinken.modules.hack_commands_poller_tag_arbiter import get_instance
 
 
-
 class TestHackCmdPollerTag(ShinkenTest):
 
     def setUp(self):
         self.setup_with_file('etc/nagios_module_hack_cmd_poller_tag.cfg')
-
 
     def test_hack_cmd_poller_tag(self):
         modconf = self.conf.modules.find_by_name('HackCommandsPollerTag')
@@ -77,8 +75,6 @@ class TestHackCmdPollerTag(ShinkenTest):
         print "H2", h2.check_command
         print h2.check_command.command
         self.assert_(h2.check_command.poller_tag == 'other')
-
-
 
     def test_underscore_commands_module_type_recognition(self):
         cmd_tag = self.sched.commands.find_by_name('will_tag')

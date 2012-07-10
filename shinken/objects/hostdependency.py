@@ -23,15 +23,14 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from item import Item, Items
 
 from shinken.property import BoolProp, StringProp, ListProp
 from shinken.log import logger
 
+
 class Hostdependency(Item):
     id = 0
-
     # F is dep of D
     # host_name                      Host B
     #       service_description             Service D
@@ -54,7 +53,6 @@ class Hostdependency(Item):
         'dependency_period':             StringProp(default='')
     })
 
-
     # Give a nice name output, for debbuging purpose
     # (debugging happens more often than expected...)
     def get_name(self):
@@ -67,12 +65,10 @@ class Hostdependency(Item):
         return dependent_host_name+'/'+host_name
 
 
-
 class Hostdependencies(Items):
     def delete_hostsdep_by_id(self, ids):
         for id in ids:
             del self[id]
-
 
     # We create new hostdep if necessery (host groups and co)
     def explode(self, hostgroups):
@@ -132,12 +128,10 @@ class Hostdependencies(Items):
 
         self.delete_hostsdep_by_id(hstdep_to_remove)
 
-
     def linkify(self, hosts, timeperiods):
         self.linkify_hd_by_h(hosts)
         self.linkify_hd_by_tp(timeperiods)
         self.linkify_h_by_hd()
-
 
     def linkify_hd_by_h(self, hosts):
         for hd in self:
@@ -158,7 +152,6 @@ class Hostdependencies(Items):
                 err = "Error: the host dependency miss a property '%s'" % exp
                 hd.configuration_errors.append(err)
 
-
     # We just search for each hostdep the id of the host
     # and replace the name by the id
     def linkify_hd_by_tp(self, timeperiods):
@@ -169,7 +162,6 @@ class Hostdependencies(Items):
                 hd.dependency_period = tp
             except AttributeError, exp:
                 logger.error("[hostdependency] fail to linkify by timeperiod: %s" % exp)
-
 
     # We backport host dep to host. So HD is not need anymore
     def linkify_h_by_hd(self):
@@ -185,7 +177,6 @@ class Hostdependencies(Items):
             dp = getattr(hd, 'dependency_period', None)
             depdt_hname.add_host_act_dependency(hd.host_name, hd.notification_failure_criteria, dp, hd.inherits_parent)
             depdt_hname.add_host_chk_dependency(hd.host_name, hd.execution_failure_criteria, dp, hd.inherits_parent)
-
 
     # Apply inheritance for all properties
     def apply_inheritance(self):

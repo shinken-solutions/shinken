@@ -30,17 +30,14 @@
 # Maybe one day host data will be usefull too
 # It will need just a new file, and a new manager :)
 
-
 import time
 import shutil
 import os
 import datetime
 
-
 from shinken.basemodule import BaseModule
 from shinken.util import get_day
 from shinken.log import logger
-
 
 properties = {
     'daemons': ['broker'],
@@ -66,7 +63,6 @@ def get_instance(plugin):
     return instance
 
 
-
 # Class for the Merlindb Broker
 # Get broks and puts them in merlin database
 class Simple_log_broker(BaseModule):
@@ -78,7 +74,6 @@ class Simple_log_broker(BaseModule):
             os.stat(archive_path)
         except:
             os.mkdir(archive_path)
-
 
     # Check the path file age. If it's last day, we
     # archive it.
@@ -128,7 +123,6 @@ class Simple_log_broker(BaseModule):
             return True
         return False
 
-
     def manage_brok(self, brok):
         """ Request the module to manage the given brok.
         There a lot of different possible broks to manage.
@@ -138,20 +132,17 @@ class Simple_log_broker(BaseModule):
             self.check_and_do_archive()
             return manage(brok)
 
-
     # A service check have just arrived, we UPDATE data info with this
     def manage_log_brok(self, b):
         data = b.data
         self.file.write(data['log'].encode('UTF-8'))
         self.file.flush()
 
-
     def init(self):
         moved = self.check_and_do_archive(first_pass=True)
         if not moved:
             logger.info("I open the log file %s" % self.path)
             self.file = open(self.path, 'a')
-
 
     def do_loop_turn(self):
         self.check_and_do_archive()

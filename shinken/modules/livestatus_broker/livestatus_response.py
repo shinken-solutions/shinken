@@ -39,6 +39,7 @@ except ImportError:
         JSONEncoder.item_separator = ','
         JSONEncoder.key_separator = ':'
 
+
 class LiveStatusResponse:
 
     """A class which represents the response to a livestatus request.
@@ -61,7 +62,6 @@ class LiveStatusResponse:
         self.statuscode = 200
         self.output = ''
         pass
-
 
     def __str__(self):
         output = "LiveStatusResponse:\n"

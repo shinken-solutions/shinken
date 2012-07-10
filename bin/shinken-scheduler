@@ -51,7 +51,6 @@
 # If the implementation is easy to explain, it may be a good idea.
 # Namespaces are one honking great idea -- let's do more of those!
 
-
 '''
  This class is the application in charge of scheduling
  The scheduler listens to the Arbiter for the configuration sent through
@@ -98,7 +97,6 @@ except ImportError:
 
 from shinken.daemons.schedulerdaemon import Shinken
 from shinken.bin import VERSION
-
 
 parser = optparse.OptionParser(
     "%prog [options]", version="%prog " + VERSION)

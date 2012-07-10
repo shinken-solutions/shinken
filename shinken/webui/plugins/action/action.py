@@ -25,12 +25,11 @@
 ### Will be populated by the UI with it's own value
 app = None
 
-
-
 # We will need external commands here
 import time
 from shinken.external_command import ExternalCommand, ExternalCommandManager
 import re
+
 
 # Function handling $NOW$ macro
 def subsNOW():
@@ -40,6 +39,7 @@ def subsNOW():
 subs = {'$NOW$': subsNOW
         # Add new macros here
        }
+
 
 # Expand macro in a string. It returns the string with macros defined in subs dictionary expanded
 def expand_macros(cmd=None):
@@ -56,12 +56,12 @@ def expand_macros(cmd=None):
     return cmd_expanded
 
 
-
 def forge_response(callback, status, text):
     if callback:
         return "%s({'status':%s,'text':'%s'})" % (callback, status, text)
     else:
         return "{'status':%s,'text':'%s'}" % (status, text)
+
 
 # Our page
 def get_page(cmd=None):
@@ -109,7 +109,5 @@ def get_page(cmd=None):
     app.push_external_command(e)
 
     return forge_response(callback, 200, 'Command launched')
-
-
 
 pages = {get_page: { 'routes': ['/action/:cmd#.+#']}}

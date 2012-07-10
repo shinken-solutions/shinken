@@ -25,6 +25,7 @@
 
 from shinken_test import *
 
+
 class TestPlusInInheritance(ShinkenTest):
 
     def setUp(self):

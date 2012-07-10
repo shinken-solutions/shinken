@@ -25,13 +25,11 @@
 # $HOSTEVENTID$, $HOSTPROBLEMID$ etc.
 #
 
-
 from shinken_test import *
 from shinken.objects.schedulingitem import SchedulingItem
 
 
 class TestConfig(ShinkenTest):
-
 
     def print_ids(self, host, svc, router):
         print "global: cei,lei,cpi,lpi = %d,%d" % (SchedulingItem.current_event_id, SchedulingItem.current_problem_id)

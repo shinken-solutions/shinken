@@ -43,6 +43,7 @@ ITOA64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
 from hashlib import md5
 
+
 def to64 (v, n):
     ret = ''
     while (n - 1 >= 0):
@@ -66,7 +67,6 @@ def unix_md5_crypt(pw, salt, magic=None):
     if salt[:len(magic)] == magic:
         salt = salt[len(magic):]
 
-
     # salt can have up to 8 characters:
     import string
     salt = string.split(salt, '$', 1)[0]
@@ -81,8 +81,6 @@ def unix_md5_crypt(pw, salt, magic=None):
             ctx = ctx + final[:16]
         else:
             ctx = ctx + final[:pl]
-
-
     # Now the 'weird' xform (??)
 
     i = len(pw)
@@ -118,10 +116,7 @@ def unix_md5_crypt(pw, salt, magic=None):
         else:
             ctx1 = ctx1 + pw
 
-
         final = md5(ctx1).digest()
-
-
     # Final xform
 
     passwd = ''
@@ -148,9 +143,7 @@ def unix_md5_crypt(pw, salt, magic=None):
 
     passwd = passwd + to64((int(ord(final[11]))), 2)
 
-
     return magic + salt + '$' + passwd
-
 
 ## assign a wrapper function:
 md5crypt = unix_md5_crypt

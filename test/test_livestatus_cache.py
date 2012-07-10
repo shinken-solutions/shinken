@@ -1,6 +1,7 @@
 from shinken_test import *
 import datetime
 
+
 def set_to_midnight(dt):
     midnight = datetime.time(0)
     return datetime.datetime.combine(dt.date(), midnight)
@@ -22,6 +23,7 @@ class TestConfig(ShinkenTest):
         self.sched.broks = {}
 
     pass
+
 
 class TestConfigBig(TestConfig):
     def setUp(self):
@@ -57,8 +59,6 @@ class TestConfigBig(TestConfig):
         if os.path.exists('var/status.dat'):
             os.remove('var/status.dat')
         self.livestatus_broker = None
-
-
 
     def test_stats(self):
         self.print_header()
@@ -264,7 +264,6 @@ Stats: state = 3"""
         self.livestatus_broker.db.commit_and_rotate_log_db()
         numlogs = self.livestatus_broker.db.execute("SELECT count(*) FROM logs")
         print "numlogs is", numlogs
-
 
         # now we have a lot of events
         # find type = HOST ALERT for test_host_005

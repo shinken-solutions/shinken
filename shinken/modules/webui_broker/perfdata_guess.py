@@ -38,7 +38,6 @@ def get_perfometer_table_values(elt):
     cmd = elt.check_command.call.split('!')[0]
     print "Looking for perfometer value for command", cmd
 
-
     tab = {'check_http': manage_check_http_command,
            'check_ping': manage_check_ping_command,
            'check_tcp': manage_check_tcp_command,
@@ -51,7 +50,6 @@ def get_perfometer_table_values(elt):
 
     r = manage_unknown_command(elt)
     return r
-
 
 
 def manage_check_http_command(elt):
@@ -84,7 +82,6 @@ def manage_check_http_command(elt):
     return {'lnk': lnk, 'metrics': metrics, 'title': title}
 
 
-
 def manage_check_ping_command(elt):
     safe_print('Get check_ping perfdata of', elt.get_full_name())
     p = PerfDatas(elt.perf_data)
@@ -115,8 +112,6 @@ def manage_check_ping_command(elt):
     title = '%sms' % v
     print "HTTP: return", {'lnk': lnk, 'metrics': metrics, 'title': title}
     return {'lnk': lnk, 'metrics': metrics, 'title': title}
-
-
 
 
 def manage_check_tcp_command(elt):
@@ -155,8 +150,6 @@ def manage_check_tcp_command(elt):
     title = '%ss' % v
     print "HTTP: return", {'lnk': lnk, 'metrics': metrics, 'title': title}
     return {'lnk': lnk, 'metrics': metrics, 'title': title}
-
-
 
 
 def manage_unknown_command(elt):
@@ -233,7 +226,6 @@ def get_linear_color(elt, name):
     return color
 
 
-
 def get_stateid(elt):
     state_id = elt.state_id
 
@@ -242,7 +234,6 @@ def get_stateid(elt):
         state_id = 2
 
     return state_id
-
 
 
 def get_logarithmic(value, half):

@@ -441,8 +441,6 @@ class IPint:
         else:
             raise ValueError("only IPv4 and IPv6 supported")
 
-
-
         return ret + self._printPrefix(wantprefixlen)
 
     def strFullsize(self, wantprefixlen = None):
@@ -525,7 +523,6 @@ class IPint:
                 return iprange[bits[:i]]
         return "unknown"
 
-
     def netmask(self):
         """Return netmask as an integer.
 
@@ -542,7 +539,6 @@ class IPint:
             raise ValueError("only IPv4 and IPv6 supported")
 
         return ((2 ** self._prefixlen) - 1) << locallen
-
 
     def strNetmask(self):
         """Return netmask as an string. Mostly useful for IPv6.
@@ -581,7 +577,6 @@ class IPint:
 
         return 2 ** locallen
 
-
     def __nonzero__(self):
         """All IPy objects should evaluate to true in boolean context.
         Ordinarily they do, but if handling a default route expressed as
@@ -590,18 +585,15 @@ class IPint:
         """
         return True
 
-
     def __len__(self):
         """Return the length of a subnet.
 
         Called to implement the built-in function len().
         It breaks with IPv6 Networks. Anybody knows how to fix this."""
-
         # Python < 2.2 has this silly restriction which breaks IPv6
         # how about Python >= 2.2 ... ouch - it persists!
 
         return int(self.len())
-
 
     def __getitem__(self, key):
         """Called to implement evaluation of self[key].
@@ -633,8 +625,6 @@ class IPint:
 
         return self.ip + long(key)
 
-
-
     def __contains__(self, item):
         """Called to implement membership test operators.
 
@@ -656,7 +646,6 @@ class IPint:
             return True
         else:
             return False
-
 
     def overlaps(self, item):
         """Check if two IP address ranges overlap.
@@ -682,14 +671,12 @@ class IPint:
         else:
             return 0
 
-
     def __str__(self):
         """Dispatch to the prefered String Representation.
 
         Used to implement str(IP)."""
 
         return self.strCompressed()
-
 
     def __repr__(self):
         """Print a representation of the Object.
@@ -703,7 +690,6 @@ class IPint:
         """
 
         return("IPint('%s')" % (self.strCompressed(1)))
-
 
     def __cmp__(self, other):
         """Called by comparison operations.
@@ -732,7 +718,6 @@ class IPint:
         if self._prefixlen < other.prefixlen():
             return (other.prefixlen() - self._prefixlen)
         elif self._prefixlen > other.prefixlen():
-
             # Fixed bySamuel Krempp <krempp@crans.ens-cachan.fr>:
 
             # The bug is quite obvious really (as 99% bugs are once
@@ -1023,6 +1008,7 @@ class IP(IPint):
             self.ip & 0xff,
         )
 
+
 def _parseAddressIPv6(ipstr):
     """
     Internal function used by parseAddress() to parse IPv6 address with ':'.
@@ -1143,6 +1129,7 @@ def _parseAddressIPv6(ipstr):
         index += 1
     return value
 
+
 def parseAddress(ipstr):
     """
     Parse a string and return the corresponding IP address (as integer)
@@ -1256,6 +1243,7 @@ def intToIp(ip, version):
 
     return ret
 
+
 def _ipVersionToLen(version):
     """Return number of bits in address for a certain IP version.
 
@@ -1288,11 +1276,11 @@ def _countFollowingZeros(l):
     else:
         return 1 + _countFollowingZeros(l[1:])
 
-
 _BitTable = {'0': '0000', '1': '0001', '2': '0010', '3': '0011',
             '4': '0100', '5': '0101', '6': '0110', '7': '0111',
             '8': '1000', '9': '1001', 'a': '1010', 'b': '1011',
             'c': '1100', 'd': '1101', 'e': '1110', 'f': '1111'}
+
 
 def _intToBin(val):
     """Return the binary representation of an integer as string."""
@@ -1310,6 +1298,7 @@ def _intToBin(val):
         ret = ret[1:]
     return ret
 
+
 def _count1Bits(num):
     """Find the highest bit set to 1 in an integer."""
     ret = 0
@@ -1317,6 +1306,7 @@ def _count1Bits(num):
         num = num >> 1
         ret += 1
     return ret
+
 
 def _count0Bits(num):
     """Find the highest bit set to 0 in an integer."""

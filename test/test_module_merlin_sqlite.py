@@ -44,7 +44,6 @@ class TestConfig(ShinkenTest):
         self.assert_(mod.module_type == 'merlindb')
         self.assert_(mod.backend == 'sqlite')
 
-
         md = get_instance(mod)
         print "TOTO", md.db_backend.__dict__
 

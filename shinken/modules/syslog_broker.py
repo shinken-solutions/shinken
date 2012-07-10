@@ -49,7 +49,6 @@ def get_instance(plugin):
     return instance
 
 
-
 # Class for the Merlindb Broker
 # Get broks and puts them in merlin database
 class Syslog_broker(BaseModule):

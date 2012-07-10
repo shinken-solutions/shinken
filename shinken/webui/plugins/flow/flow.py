@@ -43,7 +43,6 @@ except ImportError:
         raise
 
 
-
 # Get the div for each element
 def get_div(elt):
     icon = app.helper.get_icon_state(elt)
@@ -91,13 +90,11 @@ def get_page():
     if not user:
         redirect("/user/login")
 
-
     all_imp_impacts = app.datamgr.get_important_elements()
     all_imp_impacts.sort(hst_srv_sort)
     #all_imp_impacts.sort(hst_srv_sort)
 
     #all_imp_impacts = app.datamgr.get_services() #important_elements()
-
 
     impacts = []
     for imp in all_imp_impacts:
@@ -118,6 +115,5 @@ def get_page():
     all_pbs.sort(hst_srv_sort)  # sort_by_last_state_change)
 
     return {'app': app, 'user': user, 'impacts': impacts, 'problems': all_pbs}
-
 
 pages = {get_page: { 'routes': ['/flow/'], 'view': 'flow', 'static': True}}

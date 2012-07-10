@@ -84,13 +84,11 @@ class EventHandler(Action):
         self.worker = 'none'
         self.reactionner_tag = reactionner_tag
 
-
     # return a copy of the check but just what is important for execution
     # So we remove the ref and all
     def copy_shell(self):
         # We create a dummy check with nothing in it, just defaults values
         return self.copy_shell__( EventHandler('', id=self.id) )
-
 
     def get_return_from(self, e):
         self.exit_status  = e.exit_status
@@ -118,15 +116,11 @@ class EventHandler(Action):
     def is_launchable(self, t):
         return t >= self.t_to_go
 
-
     def __str__(self):
         return "Check %d status:%s command:%s" % (self.id, self.status, self.command)
 
-
     def get_id(self):
         return self.id
-
-
 
     # Call by pickle for dataify the coment
     # because we DO NOT WANT REF in this pickleisation!
@@ -139,7 +133,6 @@ class EventHandler(Action):
                 res[prop] = getattr(self, prop)
 
         return res
-
 
     # Inverted funtion of getstate
     def __setstate__(self, state):

@@ -33,12 +33,10 @@ from shinken.modules import hack_poller_tag_by_macros
 from shinken.modules.hack_poller_tag_by_macros import get_instance
 
 
-
 class TestHackPollerTagByMacors(ShinkenTest):
 
     def setUp(self):
         self.setup_with_file('etc/nagios_module_hack_poller_tag_by_macros.cfg')
-
 
     def test_hack_cmd_poller_tag(self):
         modconf = self.conf.modules.find_by_name('HackCommandsPollerTag')
@@ -49,7 +47,6 @@ class TestHackPollerTagByMacors(ShinkenTest):
 
         # Calls the mod with our config
         mod.hook_late_configuration(self)
-
 
         # look for a objects that use it
         h1 = self.sched.hosts.find_by_name("test_host_0")

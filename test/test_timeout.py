@@ -34,10 +34,10 @@ from objects.host import Host
 from objects.contact import Contact
 modconf = Module()
 
+
 class TestTimeout(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_check_timeout.cfg')
-
 
     def test_notification_timeout(self):
         if os.name == 'nt':
@@ -50,7 +50,6 @@ class TestTimeout(ShinkenTest):
         #manager = Manager()
         from_queue = Queue() #manager.list()
         control_queue = Queue()
-
 
         # This testscript plays the role of the reactionner
         # Now "fork" a worker

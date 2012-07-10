@@ -44,6 +44,7 @@ except ImportError:
 
 VERSION = '0.1'
 
+
 def main(input_file, output_file):
     # Check if input_file is newer than output_file
     if os.path.exists(output_file):

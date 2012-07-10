@@ -29,6 +29,7 @@ try:
 except ImportError:
     import simplejson as json
 
+
 class ThriftResponse:
 
     """A class which represents the response to a thrift request.
@@ -51,13 +52,11 @@ class ThriftResponse:
         self.output = ''
         pass
 
-
     def __str__(self):
         output = "ThriftResponse:\n"
         for attr in ["responseheader", "outputformat", "keepalive", "columnheaders", "separators"]:
             output += "response %s: %s\n" % (attr, getattr(self, attr))
         return output
-
 
     def respond(self):
         if self.responseheader == 'fixed16':
@@ -66,7 +65,6 @@ class ThriftResponse:
             self.output = '%3d %11d\n' % (statuscode, responselength) + self.output
 
         return self.output, self.keepalive
-
 
     def format_live_data(self, result, columns, aliases):
         lines = []

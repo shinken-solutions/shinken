@@ -102,7 +102,6 @@ def push_new_pack():
         return json.dumps({'state': 'error', 'text': 'Sorry you missed a filed'})
 
 
-
 def push_stats():
     print "FUCK", app.request.forms.__dict__
     key = app.request.forms.get('key')
@@ -161,8 +160,6 @@ def push_stats():
     else:
         app.response.content_type = 'application/json'
         return json.dumps({'state': 'error', 'text': 'Sorry you missed a filed'})
-
-
 
 pages = {push_new_pack: { 'routes': ['/pushpack'], 'method': 'POST', 'view': None, 'static': True},
          push_stats: { 'routes': ['/pushstats'], 'method': 'POST', 'view': None, 'static': True},

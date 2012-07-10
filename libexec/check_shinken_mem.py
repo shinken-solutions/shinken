@@ -31,6 +31,7 @@ def readLines(filename):
     lines = f.readlines()
     return lines
 
+
 def MemValues():
     global memTotal, memCached, memFree
     for line in readLines('/proc/meminfo'):
@@ -41,9 +42,11 @@ def MemValues():
         if line.split()[0] == 'Cached:':
             memCached = line.split()[1]
 
+
 def percentMem():
     MemValues()
     return (((int(memFree) + int(memCached)) * 100) / int(memTotal))
+
 
 def main():
 

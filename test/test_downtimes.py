@@ -27,7 +27,6 @@ from shinken_test import *
 #time.time = original_time_time
 #time.sleep = original_time_sleep
 
-
 class TestDowntime(ShinkenTest):
 
     def test_schedule_fixed_svc_downtime(self):
@@ -213,7 +212,6 @@ class TestDowntime(ShinkenTest):
         self.show_logs()
         self.show_actions()
 
-
     def test_schedule_fixed_host_downtime(self):
         self.print_header()
         # schedule a 2-minute downtime
@@ -323,7 +321,6 @@ class TestDowntime(ShinkenTest):
         self.clear_logs()
         self.clear_actions()
 
-
     def test_schedule_fixed_host_downtime_with_service(self):
         self.print_header()
         host = self.sched.hosts.find_by_name("test_host_0")
@@ -413,9 +410,6 @@ class TestDowntime(ShinkenTest):
         self.assert_(self.log_match(1, 'HOST DOWNTIME ALERT.*STOPPED'))
         self.clear_logs()
         self.clear_actions()
-
-
-
         # todo
         # checks return 1=warn. this means normally up
         # set use_aggressive_host_checking which treats warn as down
@@ -427,7 +421,6 @@ class TestDowntime(ShinkenTest):
         # check for notifications
 
         # host is down and in downtime. what about service eventhandlers?
-
 
     def test_notification_after_cancel_flexible_svc_downtime(self):
         # schedule flexible downtime

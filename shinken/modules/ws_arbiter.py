@@ -26,14 +26,11 @@
 # This Class is an Arbiter module for having a webservice
 # wher you can push external commands
 
-
 import os
 import sys
 import select
 import time
-
 ######################## WIP   don't launch it!
-
 
 from shinken.basemodule import BaseModule
 from shinken.external_command import ExternalCommand
@@ -41,22 +38,21 @@ from shinken.log import logger
 
 from shinken.webui.bottle import Bottle, run, static_file, view, route, request, response, abort, parse_auth
 
-
-
 properties = {
     'daemons': ['arbiter', 'receiver'],
     'type': 'ws_arbiter',
     'external': True,
     }
 
+
 # called by the plugin manager to get a broker
 def get_instance(plugin):
     instance = Ws_arbiter(plugin)
     return instance
 
-
 # Main app var. Will be fill with our running module instance
 app = None
+
 
 def get_page():
     # We get all value we want
@@ -116,7 +112,6 @@ class Ws_arbiter(BaseModule):
         self.srv = run(host=self.host, port=self.port, server='wsgirefselect')
         # And we link our page
         route('/push_check_result', callback=get_page, method='POST')
-
 
     # When you are in "external" mode, that is the main loop of your process
     def main(self):

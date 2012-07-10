@@ -30,7 +30,6 @@ class TestHostGroupNoHost(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_hostgroup_no_host.cfg')
 
-
     def test_hostgroup_wit_no_host(self):
         self.assert_(self.sched.conf.conf_is_correct)
 

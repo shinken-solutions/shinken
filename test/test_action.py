@@ -31,6 +31,7 @@ from shinken.action import Action
 time.time = original_time_time
 time.sleep = original_time_sleep
 
+
 class TestAction(ShinkenTest):
     # setUp is inherited from ShinkenTest
 
@@ -51,7 +52,6 @@ class TestAction(ShinkenTest):
                 print "COMMAND TIMEOUT AT 20s"
                 return
 
-
     def test_action(self):
         a = Action()
         a.timeout = 10
@@ -71,7 +71,6 @@ class TestAction(ShinkenTest):
         print a.output
         self.assert_(a.output == "Hi, I'm for testing only. Please do not use me directly, really")
         self.assert_(a.perf_data == "Hip=99% Bob=34mm")
-
 
     def test_environnement_variables(self):
         a = Action()
@@ -97,7 +96,6 @@ class TestAction(ShinkenTest):
 
         self.assert_(titi_found == True)
 
-
     # Some commands are shell without bangs! (like in Centreon...)
     # We can show it in the launch, and it should be managed
     def test_noshell_bang_command(self):
@@ -116,7 +114,6 @@ class TestAction(ShinkenTest):
         self.assert_(a.exit_status == 0)
         self.assert_(a.status == 'done')
 
-
     def test_got_shell_characters(self):
         a = Action()
         a.timeout = 10
@@ -133,7 +130,6 @@ class TestAction(ShinkenTest):
         self.assert_(a.exit_status == 0)
         self.assert_(a.status == 'done')
 
-
     def test_got_pipe_shell_characters(self):
         a = Action()
         a.timeout = 10
@@ -149,7 +145,6 @@ class TestAction(ShinkenTest):
         print "FUck", a.status, a.output
         self.assert_(a.exit_status == 0)
         self.assert_(a.status == 'done')
-
 
     def test_got_unclosed_quote(self):
         # https://github.com/naparuba/shinken/issues/155
@@ -172,8 +167,6 @@ class TestAction(ShinkenTest):
         else:
             self.assert_(a.output == 'Not a valid shell command: No closing quotation')
             self.assert_(a.exit_status == 3)
-
-
 
     # We got problems on LARGE output, more than 64K in fact.
     # We try to solve it with the fcntl and non blocking read

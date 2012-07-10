@@ -26,13 +26,10 @@
 # This Class is an example of an Arbiter module
 # Here for the configuration phase AND running one
 
-
 import time
-
 
 from shinken.basemodule import BaseModule
 from shinken.external_command import ExternalCommand
-
 
 properties = {
     'daemons': ['arbiter'],
@@ -47,7 +44,6 @@ def get_instance(plugin):
     print "Get a Dummy arbiter module for plugin %s" % plugin.get_name()
     instance = Dummy_arbiter(plugin)
     return instance
-
 
 
 # Just print some stuff

@@ -70,22 +70,17 @@ class Graphite_Webui(BaseModule):
             my_name = socket.gethostname()
             self.uri = self.uri.replace('YOURSERVERNAME', my_name)
 
-
     # Try to connect if we got true parameter
     def init(self):
         pass
-
 
     # To load the webui application
     def load(self, app):
         self.app = app
 
-
-
     # Give the link for the GRAPHITE UI, with a Name
     def get_external_ui_link(self):
         return {'label': 'Graphite', 'uri': self.uri}
-
 
     # For a perf_data like /=30MB;4899;4568;1234;0  /var=50MB;4899;4568;1234;0 /toto=
     # return ('/', '30'), ('/var', '50')
@@ -125,8 +120,6 @@ class Graphite_Webui(BaseModule):
             for key, value in name_value.items():
                 res.append((key, value))
         return res
-
-
 
     # Ask for an host or a service the graph UI that the UI should
     # give to get the graph image link and Graphite page link too.

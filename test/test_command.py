@@ -27,6 +27,7 @@ from shinken_test import *
 from shinken.commandcall import CommandCall
 from shinken.objects import Command, Commands
 
+
 class TestCommand(ShinkenTest):
     # setUp is inherited from ShinkenTest
 

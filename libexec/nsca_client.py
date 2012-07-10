@@ -7,8 +7,6 @@
 #
 # J. Gabes
 
-
-
 import time
 import select
 import socket
@@ -23,7 +21,6 @@ def decrypt_xor(data, key):
     return ''.join(crypted)
 
 
-
 # Just print some stuff
 class NSCA_client():
     def __init__(self, host, port, encryption_method, password):
@@ -32,7 +29,6 @@ class NSCA_client():
         self.encryption_method = encryption_method
         self.password = password
         self.rng = random.Random(password)
-
 
     # Ok, main function that is called in the CONFIGURATION phase
     def get_objects(self):
@@ -146,7 +142,6 @@ class NSCA_client():
         data = decrypt_xor(init_packet, iv)
         data = decrypt_xor(data, self.password)
 
-
         server.send(data)
         sys.exit(0)
 
@@ -180,8 +175,6 @@ class NSCA_client():
                             print exp
                         s.close()
                         input.remove(s)
-
-
 
 nsca = NSCA_client('localhost', 5667, 1, 'helloworld')
 nsca.main()

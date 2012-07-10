@@ -31,6 +31,7 @@ from shinken.webui.bottle import redirect, abort
 ### Will be populated by the UI with it's own value
 app = None
 
+
 # Our page. If the useer call /dummy/TOTO arg1 will be TOTO.
 # if it's /dummy/, it will be 'nothing'
 def register():
@@ -82,7 +83,6 @@ def is_name_available():
     return json.dumps(b)
 
 
-
 def get_api_key():
     app.response.content_type = 'application/json'
     login = app.request.forms.get('login', '')
@@ -101,9 +101,6 @@ def get_api_key():
             abort(400, 'Sorry, there is a problem with your api key.')
     else:
         abort(401, 'Sorry, you need valid credentials to access to your API key')
-
-
-
 
 pages = {register: { 'routes': ['/register'], 'view': 'register', 'static': True},
          is_name_available: { 'routes': ['/availability'], 'method': 'POST', 'view': None, 'static': True},

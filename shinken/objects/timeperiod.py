@@ -115,7 +115,6 @@ class Timeperiod(Item):
     })
     running_properties = Item.running_properties.copy()
 
-
     def __init__(self, params={}):
         self.id = Timeperiod.id
         Timeperiod.id = Timeperiod.id + 1
@@ -139,10 +138,8 @@ class Timeperiod(Item):
         self.is_active = None
         self.tags = set()
 
-
     def get_name(self):
         return getattr(self, 'timeperiod_name', 'unknown_timeperiod')
-
 
     # We fillfull properties with template ones if need
     # for the unresolved values (like sunday ETCETC)
@@ -151,8 +148,6 @@ class Timeperiod(Item):
         # Same story for plus
         for i in self.templates:
             self.unresolved.extend(i.unresolved)
-
-
 
     def is_time_valid(self, t):
         if self.has('exclude'):
@@ -164,7 +159,6 @@ class Timeperiod(Item):
                 return True
         return False
 
-
     # will give the first time > t which is valid
     def get_min_from_t(self, t):
         mins_incl = []
@@ -172,11 +166,9 @@ class Timeperiod(Item):
             mins_incl.append(dr.get_min_from_t(t))
         return min(mins_incl)
 
-
     # will give the first time > t which is not valid
     def get_not_in_min_from_t(self, f):
         pass
-
 
     def find_next_valid_time_from_cache(self, t):
         try:
@@ -184,13 +176,11 @@ class Timeperiod(Item):
         except KeyError:
             return None
 
-
     def find_next_invalid_time_from_cache(self, t):
         try:
             return self.invalid_cache[t]
         except KeyError:
             return None
-
 
     # will look for active/un-active change. And log it
     # [1327392000] TIMEPERIOD TRANSITION: <name>;<from>;<to>
@@ -217,7 +207,6 @@ class Timeperiod(Item):
             # Now raise the log
             logger.log('TIMEPERIOD TRANSITION: %s;%d;%d' % (self.get_name(), _from, _to))
 
-
     # clean the get_next_valid_time_from_t cache
     # The entries are a dict on t. t < now are useless
     # Because we do not care about past anymore.
@@ -239,13 +228,10 @@ class Timeperiod(Item):
         for t in t_to_del:
             del self.invalid_cache[t]
 
-
-
     def get_next_valid_time_from_t(self, t):
         # first find from cache
         t = int(t)
         original_t = t
-
         #print self.get_name(), "Check valid time for", time.asctime(time.localtime(t))
 
         res_from_cache = self.find_next_valid_time_from_cache(t)
@@ -311,7 +297,6 @@ class Timeperiod(Item):
         # Ok, we update the cache...
         self.cache[original_t] = local_min
         return local_min
-
 
     def get_next_invalid_time_from_t(self, t):
         #print '\n\n', self.get_name(), 'search for next invalid from', time.asctime(time.localtime(t))
@@ -415,10 +400,8 @@ class Timeperiod(Item):
         self.invalid_cache[original_t] = local_min
         return local_min
 
-
     def has(self, prop):
         return hasattr(self, prop)
-
 
     # We are correct only if our daterange are
     # and if we have no unmatch entries
@@ -432,7 +415,6 @@ class Timeperiod(Item):
             b = False
             logger.error("[timeperiod::%s] invalid entry '%s'" % (self.get_name(), e))
         return b
-
 
     def __str__(self):
         s = ''
@@ -448,7 +430,6 @@ class Timeperiod(Item):
             s += str(elt)
 
         return s
-
 
     def resolve_daterange(self, dateranges, entry):
         #print "Trying to resolve ", entry
@@ -534,7 +515,6 @@ class Timeperiod(Item):
                 dateranges.append(MonthDayDaterange(0, 0, smday, 0, 0, 0, 0, emday, 0, 0, skip_interval, other))
                 return
 
-
         res = re.search('([a-z]*) ([\d-]+) ([a-z]*) - ([a-z]*) ([\d-]+) ([a-z]*) [\s\t]*([0-9:, -]+)', entry)
         if res is not None:
             #print "Googd catch 8"
@@ -542,7 +522,6 @@ class Timeperiod(Item):
             #print "Debug:", (swday, swday_offset, smon, ewday, ewday_offset, emon, other)
             dateranges.append(MonthWeekDayDaterange(0, smon, 0, swday, swday_offset, 0, emon, 0, ewday, ewday_offset, 0, other))
             return
-
 
         res = re.search('([a-z]*) ([\d-]+) - ([\d-]+)[\s\t]*([0-9:, -]+)', entry)
         if res is not None:
@@ -630,10 +609,8 @@ class Timeperiod(Item):
         logger.info("[timeentry::%s] no match for %s" % (self.get_name(), entry))
         self.invalid_entries.append(entry)
 
-
     def apply_inheritance(self):
         pass
-
 
     # create daterange from unresolved param
     def explode(self, timeperiods):
@@ -641,7 +618,6 @@ class Timeperiod(Item):
             #print "Revolving entry", entry
             self.resolve_daterange(self.dateranges, entry)
         self.unresolved = []
-
 
     # Will make tp in exclude with id of the timeperiods
     def linkify(self, timeperiods):
@@ -658,7 +634,6 @@ class Timeperiod(Item):
                     logger.error("[timeentry::%s] unknown %s timeperiod" % (self.get_name(), tp_name))
         self.exclude = new_exclude
 
-
     def check_exclude_rec(self):
         if self.rec_tag:
             logger.error("[timeentry::%s] is in a loop in exclude parameter" % self.get_name())
@@ -667,7 +642,6 @@ class Timeperiod(Item):
         for tp in self.exclude:
             tp.check_exclude_rec()
         return True
-
 
     def fill_data_brok_from(self, data, brok_type):
         cls = self.__class__
@@ -681,7 +655,6 @@ class Timeperiod(Item):
                 elif entry.has_default:
                     data[prop] = entry.default
 
-
     # Get a brok with initial status
     def get_initial_status_brok(self):
         cls = self.__class__
@@ -693,23 +666,19 @@ class Timeperiod(Item):
         return b
 
 
-
 class Timeperiods(Items):
     name_property = "timeperiod_name"
     inner_class = Timeperiod
-
 
     def explode(self):
         for id in self.items:
             tp = self.items[id]
             tp.explode(self)
 
-
     def linkify(self):
         for id in self.items:
             tp = self.items[id]
             tp.linkify(self)
-
 
     def apply_inheritance(self):
         # The only interesting property to inherit is exclude
@@ -721,7 +690,6 @@ class Timeperiods(Items):
         # like the dateranges in fact
         for tp in self:
             tp.get_unresolved_properties_by_inheritance(self.items)
-
 
     # check for loop in definition
     def is_correct(self):
@@ -743,7 +711,6 @@ class Timeperiods(Items):
         # And check all timeperiods for correct (sounday is false)
         for tp in self:
             r &= tp.is_correct()
-
 
         return r
 
@@ -813,7 +780,6 @@ if __name__ == '__main__':
     t2.timeperiod_name = 't2'
     t2.resolve_daterange(t2.dateranges, 'day 1 - 10 12:00-17:00')
     t2.exclude = [t3]
-
 
     t = Timeperiod()
     t.timeperiod_name = 't'

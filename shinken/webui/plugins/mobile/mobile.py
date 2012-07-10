@@ -46,6 +46,7 @@ except ImportError:
 ### Will be populated by the UI with it's own value
 app = None
 
+
 def main():
     # First we look for the user sid
     # so we bail out if it's a false one
@@ -54,7 +55,6 @@ def main():
     if not user:
         redirect("/mobile/")
         return
-
 
     all_imp_impacts = app.datamgr.get_important_elements()
 
@@ -88,7 +88,6 @@ def impacts():
     navi = app.helper.get_navi(total, start, step=5)
     all_imp_impacts = all_imp_impacts[start:end]
 
-
     return {'app': app, 'user': user, 'navi': navi, 'impacts': all_imp_impacts}
 
 
@@ -121,6 +120,7 @@ def problems():
 
     return {'app': app, 'user': user,  'navi': navi, 'problems': all_pbs, 'menu_part': '/problems'}
 
+
 def dashboard():
     # First we look for the user sid
     # so we bail out if it's a false one
@@ -150,6 +150,7 @@ def dashboard():
 
     return {'app': app, 'user': user, 'navi': navi, 'problems': all_pbs, 'menu_part': '/dashboard'}
 
+
 def system_page():
     user = app.get_user_auth()
 
@@ -167,6 +168,7 @@ def system_page():
             'receivers': receivers, 'pollers': pollers,
             }
 
+
 def show_log():
     user = app.get_user_auth()
 
@@ -183,6 +185,7 @@ def show_log():
             'brokers': brokers, 'reactionners': reactionners,
             'receivers': receivers, 'pollers': pollers,
             }
+
 
 # Main impacts view
 #@route('/host')
@@ -235,11 +238,11 @@ def show_service(hname, desc):
     graphstart = int(app.request.GET.get('graphstart', str(now - 4*3600)))
     graphend = int(app.request.GET.get('graphend', str(now)))
 
-
     # Ok, we can lookup it :)
     s = app.datamgr.get_service(hname, desc)
     return {'app': app, 'elt': s, 'valid_user': True, 'user': user, 'graphstart': graphstart,
             'graphend': graphend}
+
 
 # The wall
 # Sort hosts and services by impact, states and co
@@ -280,6 +283,7 @@ def get_div(elt):
     s = s.encode('utf8', 'ignore')
     return s
 
+
 def wall():
     # First we look for the user sid
     # so we bail out if it's a false one
@@ -300,7 +304,6 @@ def wall():
     all_pbs.sort(hst_srv_sort)  # sort_by_last_state_change)
 
     return {'app': app, 'user': user, 'impacts': impacts, 'problems': all_pbs}
-
 
 pages = {main: { 'routes': ['/mobile/main'], 'view': 'mobile_main', 'static': True},
          impacts: { 'routes': ['/mobile/impacts'], 'view': 'mobile_impacts', 'static': True},

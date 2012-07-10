@@ -23,13 +23,10 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 from item import Item, Items
 
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 from shinken.log import logger
-
 
 _special_properties = ( 'service_notification_commands', 'host_notification_commands',
                         'service_notification_period', 'host_notification_period' )
@@ -62,13 +59,11 @@ class NotificationWay(Item):
         'min_criticity':    'min_business_impact',
     }
 
-
     macros = {}
 
     # For debugging purpose only (nice name)
     def get_name(self):
         return self.notificationway_name
-
 
     # Search for notification_options with state and if t is
     # in service_notification_period
@@ -107,7 +102,6 @@ class NotificationWay(Item):
 
         return False
 
-
     # Search for notification_options with state and if t is in
     # host_notification_period
     def want_host_notification(self, t, state, type, business_impact, cmd=None):
@@ -143,15 +137,12 @@ class NotificationWay(Item):
 
         return False
 
-
     # Call to get our commands to launch a Notification
     def get_notification_commands(self, type):
         # service_notification_commands for service
         notif_commands_prop = type+'_notification_commands'
         notif_commands = getattr(self, notif_commands_prop)
         return notif_commands
-
-
 
     # Check is required prop are set:
     # contacts OR contactgroups is need
@@ -209,8 +200,6 @@ class NotificationWay(Item):
 
         return state
 
-
-
     # In the scheduler we need to relink the commandCall with
     # the real commands
     def late_linkify_nw_by_commands(self, commands):
@@ -218,7 +207,6 @@ class NotificationWay(Item):
         for prop in props:
             for cc in getattr(self, prop, []):
                 cc.late_linkify_with_command(commands)
-
 
 
 class NotificationWays(Items):
@@ -230,7 +218,6 @@ class NotificationWays(Items):
         self.linkify_with_timeperiods(timeperiods, 'host_notification_period')
         self.linkify_command_list_with_commands(commands, 'service_notification_commands')
         self.linkify_command_list_with_commands(commands, 'host_notification_commands')
-
 
     def new_inner_member(self, name=None, params={}):
         if name is None:

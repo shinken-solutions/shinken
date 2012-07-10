@@ -1,7 +1,6 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 
-
 import sys
 import time
 import urwid
@@ -17,9 +16,11 @@ from thrift.protocol import TBinaryProtocol
 
 REFRESH_INTERVAL = 5
 
+
 def handle_keypress(input):
     if input in ('q', 'Q'):
         raise urwid.ExitMainLoop()
+
 
 class TacModel:
     def __init__(self):
@@ -57,6 +58,7 @@ class TacModel:
 
     def close(self):
         self.transport.close()
+
 
 class TacView(urwid.WidgetWrap):
     """
@@ -165,6 +167,7 @@ class TacController:
     A class responsible for setting up the model and view and running
     the application
     """
+
     def __init__(self):
         self.refresh_alarm = None
         self.model = TacModel()

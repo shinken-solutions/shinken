@@ -8,6 +8,7 @@ import getopt
 import argparse
 import smtplib
 
+
 def main():
     try:
         opts, args = getopt.getopt(sys.argv[1:], "hnsHariotS:v", ["help", "notification", "servicedesc", "hostname", "hostaddress", "servicestate", "shortdatetime", "output", "to", "sender" ])
@@ -44,6 +45,7 @@ def main():
             to = a
         else:
             assert False, "unhandled option"
+
 
 def usage():
     print 'Usage:'

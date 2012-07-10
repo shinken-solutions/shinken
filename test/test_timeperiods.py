@@ -23,9 +23,9 @@
 # This file is used to test timeperiods
 #
 
-
 from shinken_test import *
 from shinken.objects.timeperiod import Timeperiod
+
 
 class TestTimeperiods(ShinkenTest):
 
@@ -52,8 +52,6 @@ class TestTimeperiods(ShinkenTest):
         t_next = time.asctime(time.localtime(t_next))
         print t_next
         self.assert_(t_next == "Tue Jul 13 16:30:00 2010")
-
-
 
     def test_simple_with_multiple_time(self):
         self.print_header()
@@ -90,8 +88,6 @@ class TestTimeperiods(ShinkenTest):
         t_next = time.asctime(time.localtime(t_next))
         print "Next?", t_next
         self.assert_(t_next == "Tue Jul 13 00:00:00 2010")
-
-
 
     def test_simple_with_multiple_time_mutltiple_days(self):
         self.print_header()
@@ -146,7 +142,6 @@ class TestTimeperiods(ShinkenTest):
         print "Next?", t_next
         self.assert_(t_next == "Mon Jul 12 00:00:00 2010")
 
-
         # Now look for the never case
         print "24x7"*10
         t = self.conf.timeperiods.find_by_name('24x7')
@@ -155,9 +150,6 @@ class TestTimeperiods(ShinkenTest):
         t_next_inv = time.asctime(time.localtime(t_next_inv))
         print "RES:", t_next_inv #, t.is_time_valid(july_the_12)
         self.assert_(t_next_inv == 'Wed Jul 13 00:01:00 2011')
-
-
-
 
     def test_simple_timeperiod_with_exclude(self):
         self.print_header()
@@ -198,7 +190,6 @@ class TestTimeperiods(ShinkenTest):
         print "T nxt with exclude:", t_next
         self.assert_(t_next == "Tue Jul 13 21:00:01 2010")
 
-
     def test_dayweek_timeperiod_with_exclude(self):
         self.print_header()
         now = time.time()
@@ -231,7 +222,6 @@ class TestTimeperiods(ShinkenTest):
         print "TOTO T next", t_next
 
         self.assert_(t_next == 'Tue Jul 13 23:58:01 2010')
-
 
     def test_mondayweek_timeperiod_with_exclude(self):
         self.print_header()
@@ -271,10 +261,6 @@ class TestTimeperiods(ShinkenTest):
         t_next = time.asctime(time.localtime(t_next))
 
         self.assert_(t_next == 'Tue Sep 14 16:30:00 2010')
-
-
-
-
 
     def test_mondayweek_timeperiod_with_exclude_bis(self):
         self.print_header()
@@ -316,8 +302,6 @@ class TestTimeperiods(ShinkenTest):
         t_next = time.asctime(time.localtime(t_next))
 
         self.assert_(t_next == 'Tue Aug 31 16:30:00 2010')
-
-
 
     def test_funky_mondayweek_timeperiod_with_exclude_and_multiple_daterange(self):
         self.print_header()
@@ -366,8 +350,6 @@ class TestTimeperiods(ShinkenTest):
 
         self.assert_(t_next == 'Tue Oct 26 16:30:00 2010')
         print "Finish this Funky test :)"
-
-
 
     def test_monweekday_timeperiod_with_exclude(self):
         self.print_header()

@@ -23,8 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 """ This is the main class for the Host. In fact it's mainly
 about the configuration part. for the running one, it's better
 to look at the schedulingitem class that manage all
@@ -53,7 +51,6 @@ class Host(SchedulingItem):
     id = 1  # zero is reserved for host (primary node for parents)
     ok_up = 'UP'
     my_type = 'host'
-
 
     # properties defined by configuration
     # *required: is required in conf
@@ -342,7 +339,6 @@ class Host(SchedulingItem):
         'TOTALHOSTSERVICESCRITICAL': 'get_total_services_critical'
     }
 
-
     # This tab is used to transform old parameters name into new ones
     # so from Nagios2 format, to Nagios3 ones.
     # Or Shinken deprecated names like criticity
@@ -353,7 +349,6 @@ class Host(SchedulingItem):
         'hostgroup': 'hostgroups',
         ## 'criticitymodulations': 'business_impact_modulations',
     }
-
 
 #######
 #                   __ _                       _   _
@@ -373,8 +368,6 @@ class Host(SchedulingItem):
             self.address = self.host_name
         if hasattr(self, 'host_name') and not hasattr(self, 'alias'):
             self.alias = self.host_name
-
-
 
     # Check is required prop are set:
     # contacts OR contactgroups is need
@@ -447,14 +440,12 @@ class Host(SchedulingItem):
 
         return state
 
-
     # Search in my service if I've got the service
     def find_service_by_name(self, service_description):
         for s in self.services:
             if getattr(s, 'service_description', '__UNNAMED_SERVICE__') == service_description:
                 return s
         return None
-
 
     # For get a nice name
     def get_name(self):
@@ -468,7 +459,6 @@ class Host(SchedulingItem):
                 return self.name
             except AttributeError:  # outch, no name for this template
                 return 'UNNAMEDHOSTTEMPLATE'
-
 
     # For debugin purpose only
     def get_dbg_name(self):
@@ -495,7 +485,6 @@ class Host(SchedulingItem):
                 return True
         return False
 
-
     # Delete all links in the act_depend_of list of self and other
     def del_host_act_dependency(self, other):
         to_del = []
@@ -520,7 +509,6 @@ class Host(SchedulingItem):
         # and father list in mine
         self.parent_dependencies.remove(other)
 
-
     # Add a dependency for action event handler, notification, etc)
     # and add ourself in it's dep list
     def add_host_act_dependency(self, h, status, timeperiod, inherits_parent):
@@ -531,7 +519,6 @@ class Host(SchedulingItem):
 
         # And the parent/child dep lists too
         h.register_son_in_parent_child_dependencies(self)
-
 
     # Register the dependency between 2 service for action (notification etc)
     # but based on a BUSINESS rule, so on fact:
@@ -547,7 +534,6 @@ class Host(SchedulingItem):
         # And the parent/child dep lists too
         self.register_son_in_parent_child_dependencies(h)
 
-
     # Add a dependency for check (so before launch)
     def add_host_chk_dependency(self, h, status, timeperiod, inherits_parent):
         # I add him in MY list
@@ -559,12 +545,9 @@ class Host(SchedulingItem):
         # Here self depend on h
         h.register_son_in_parent_child_dependencies(self)
 
-
     # Add one of our service to services (at linkify)
     def add_service_link(self, service):
         self.services.append(service)
-
-
 
 #####
 #                         _
@@ -589,7 +572,6 @@ class Host(SchedulingItem):
         self.state = 'UNREACHABLE'
         self.last_time_unreachable = int(now)
 
-
     # We just go an impact, so we go unreachable
     # But only if we enable this stte change in the conf
     def set_impact_state(self):
@@ -604,7 +586,6 @@ class Host(SchedulingItem):
             self.state = 'UNREACHABLE'  # exit code UNDETERMINED
             self.state_id = 2
 
-
     # Ok, we are no more an impact, if no news checks
     # overide the impact state, we came back to old
     # states
@@ -614,7 +595,6 @@ class Host(SchedulingItem):
         if cls.enable_problem_impacts_states_change and not self.state_changed_since_impact:
             self.state = self.state_before_impact
             self.state_id = self.state_id_before_impact
-
 
     # set the state in UP, DOWN, or UNDETERMINED
     # with the status of a check. Also update last_state
@@ -655,7 +635,6 @@ class Host(SchedulingItem):
             self.last_state_change = self.last_state_update
         self.duration_sec = now - self.last_state_change
 
-
     # See if status is status. Can be low of high format (o/UP, d/DOWN, ...)
     def is_state(self, status):
         if status == self.state:
@@ -669,7 +648,6 @@ class Host(SchedulingItem):
             return True
         return False
 
-
     # The last time when the state was not UP
     def last_time_non_ok_or_up(self):
         if self.last_time_down > self.last_time_up:
@@ -678,12 +656,10 @@ class Host(SchedulingItem):
             last_time_non_up = 0
         return last_time_non_up
 
-
     # Add a log entry with a HOST ALERT like:
     # HOST ALERT: server;DOWN;HARD;1;I don't know what to say...
     def raise_alert_log_entry(self):
         logger.log('HOST ALERT: %s;%s;%s;%d;%s' % (self.get_name(), self.state, self.state_type, self.attempt, self.output))
-
 
     # If the configuration allow it, raise an initial log like
     # CURRENT HOST STATE: server;DOWN;HARD;1;I don't know what to say...
@@ -691,14 +667,12 @@ class Host(SchedulingItem):
         if self.__class__.log_initial_states:
             logger.log('CURRENT HOST STATE: %s;%s;%s;%d;%s' % (self.get_name(), self.state, self.state_type, self.attempt, self.output))
 
-
     # Add a log entry with a Freshness alert like:
     # Warning: The results of host 'Server' are stale by 0d 0h 0m 58s (threshold=0d 1h 0m 0s).
     # I'm forcing an immediate check of the host.
     def raise_freshness_log_entry(self, t_stale_by, t_threshold):
         logger.warning("The results of host '%s' are stale by %s (threshold=%s).  I'm forcing an immediate check of the host." \
                       % (self.get_name(), format_t_into_dhms_format(t_stale_by), format_t_into_dhms_format(t_threshold)))
-
 
     # Raise a log entry with a Notification alert like
     # HOST NOTIFICATION: superadmin;server;UP;notify-by-rss;no output
@@ -720,20 +694,17 @@ class Host(SchedulingItem):
             logger.log("HOST EVENT HANDLER: %s;%s;%s;%s;%s" % (self.get_name(), self.state, self.state_type, self.attempt, \
                                                                  command.get_name()))
 
-
     # Raise a log entry with FLAPPING START alert like
     # HOST FLAPPING ALERT: server;STARTED; Host appears to have started flapping (50.6% change >= 50.0% threshold)
     def raise_flapping_start_log_entry(self, change_ratio, threshold):
         logger.log("HOST FLAPPING ALERT: %s;STARTED; Host appears to have started flapping (%.1f%% change >= %.1f%% threshold)" % \
                       (self.get_name(), change_ratio, threshold))
 
-
     # Raise a log entry with FLAPPING STOP alert like
     # HOST FLAPPING ALERT: server;STOPPED; host appears to have stopped flapping (23.0% change < 25.0% threshold)
     def raise_flapping_stop_log_entry(self, change_ratio, threshold):
         logger.log("HOST FLAPPING ALERT: %s;STOPPED; Host appears to have stopped flapping (%.1f%% change < %.1f%% threshold)" % \
                       (self.get_name(), change_ratio, threshold))
-
 
     # If there is no valid time for next check, raise a log entry
     def raise_no_next_check_log_entry(self):
@@ -746,20 +717,17 @@ class Host(SchedulingItem):
         logger.log("HOST DOWNTIME ALERT: %s;STARTED; Host has entered a period of scheduled downtime" % \
                       (self.get_name()))
 
-
     # Raise a log entry when a downtime has finished
     # HOST DOWNTIME ALERT: test_host_0;STOPPED; Host has exited from a period of scheduled downtime
     def raise_exit_downtime_log_entry(self):
         logger.log("HOST DOWNTIME ALERT: %s;STOPPED; Host has exited from a period of scheduled downtime" % \
                       (self.get_name()))
 
-
     # Raise a log entry when a downtime prematurely ends
     # HOST DOWNTIME ALERT: test_host_0;CANCELLED; Service has entered a period of scheduled downtime
     def raise_cancel_downtime_log_entry(self):
         logger.log("HOST DOWNTIME ALERT: %s;CANCELLED; Scheduled downtime for host has been cancelled." % \
                       (self.get_name()))
-
 
     # Is stalking?
     # Launch if check is waitconsume==first time
@@ -780,7 +748,6 @@ class Host(SchedulingItem):
         if need_stalk:
             logger.info("Stalking %s: %s" % (self.get_name(), self.output))
 
-
     # fill act_depend_of with my parents (so network dep)
     # and say parents they impact me, no timeperiod and follow parents of course
     def fill_parents_dependency(self):
@@ -795,7 +762,6 @@ class Host(SchedulingItem):
                 # And add the parent/child dep filling too, for broking
                 parent.register_son_in_parent_child_dependencies(self)
 
-
     # Register a child in our lists
     def register_child(self, child):
         # We've got 2 list: a list for our child
@@ -803,7 +769,6 @@ class Host(SchedulingItem):
         # and another with all data, useful for 'running' part
         self.childs.append(child)
         self.act_depend_of_me.append( (child, ['d', 'u', 's', 'f'], 'network_dep', None, True) )
-
 
     # Give data for checks's macros
     def get_data_for_checks(self):
@@ -817,22 +782,18 @@ class Host(SchedulingItem):
     def get_data_for_notifications(self, contact, n):
         return [self, contact, n]
 
-
     # See if the notification is launchable (time is OK and contact is OK too)
     def notification_is_blocked_by_contact(self, n, contact):
         return not contact.want_host_notification(self.last_chk, self.state, n.type, self.business_impact, n.command_call)
-
 
     # MACRO PART
     def get_duration_sec(self):
         return str(int(self.duration_sec))
 
-
     def get_duration(self):
         m, s = divmod(self.duration_sec, 60)
         h, m = divmod(m, 60)
         return "%02dh %02dm %02ds" % (h, m, s)
-
 
     # Check if a notification for this host is suppressed at this time
     # This is a check at the host level. Do not look at contacts here
@@ -908,7 +869,6 @@ class Host(SchedulingItem):
 
         return False
 
-
     # Get a oc*p command if item has obsess_over_*
     # command. It must be enabled locally and globally
     def get_obsessive_compulsive_processor_command(self):
@@ -924,46 +884,34 @@ class Host(SchedulingItem):
         # ok we can put it in our temp action queue
         self.actions.append(e)
 
-
-
     # Macro part
     def get_total_services(self):
         return str(len(self.services))
 
-
     def get_total_services_ok(self):
         return str(len([s for s in self.services if s.state_id == 0]))
-
 
     def get_total_services_warning(self):
         return str(len([s for s in self.services if s.state_id == 1]))
 
-
     def get_total_services_critical(self):
         return str(len([s for s in self.services if s.state_id == 2]))
 
-
     def get_total_services_unknown(self):
         return str(len([s for s in self.services if s.state_id == 3]))
-
 
     def get_ack_author_name(self):
         if self.acknowledgement is None:
             return ''
         return self.acknowledgement.author
 
-
     def get_ack_comment(self):
         if self.acknowledgement is None:
             return ''
         return self.acknowledgement.comment
 
-
     def get_check_command(self):
         return self.check_command.get_name()
-
-
-
 
 
 # CLass for the hosts lists. It's mainly for configuration
@@ -972,12 +920,10 @@ class Hosts(Items):
     name_property = "host_name"  # use for the search by name
     inner_class = Host  # use for know what is in items
 
-
     # prepare_for_conf_sending to flatten some properties
     def prepare_for_sending(self):
         for h in self:
             h.prepare_for_conf_sending()
-
 
     # Create link between elements:
     # hosts -> timeperiods
@@ -1003,7 +949,6 @@ class Hosts(Items):
         self.linkify_with_escalations(escalations)
         self.linkify_with_triggers(triggers)
 
-
     # Fill adress by host_name if not set
     def fill_predictive_missing_parameters(self):
         for h in self:
@@ -1027,7 +972,6 @@ class Hosts(Items):
             # We find the id, we remplace the names
             h.parents = new_parents
 
-
     # Link with realms and set a default realm if none
     def linkify_h_by_realms(self, realms):
         default_realm = None
@@ -1048,7 +992,6 @@ class Hosts(Items):
                 h.realm = default_realm
                 h.got_default_realm = True
 
-
     # We look for hostgroups property in hosts and
     # link them
     def linkify_h_by_hg(self, hostgroups):
@@ -1067,7 +1010,6 @@ class Hosts(Items):
                             err = "the hostgroup '%s' of the host '%s' is unknown" % (hg_name, h.host_name)
                             h.configuration_errors.append(err)
                 h.hostgroups = new_hostgroups
-
 
     # We look for hostgroups property in hosts and
     def explode(self, hostgroups, contactgroups, triggers):
@@ -1088,8 +1030,6 @@ class Hosts(Items):
         # take all contacts from our contact_groups into our contact property
         self.explode_contact_groups_into_contacts(contactgroups)
 
-
-
     # In the scheduler we need to relink the commandCall with
     # the real commands
     def late_linkify_h_by_commands(self, commands):
@@ -1100,14 +1040,11 @@ class Hosts(Items):
                 if cc:
                     cc.late_linkify_with_command(commands)
 
-
-
     # Create depenancies:
     # Depencies at the host level: host parent
     def apply_dependencies(self):
         for h in self:
             h.fill_parents_dependency()
-
 
     # Parent graph: use to find quickly relations between all host, and loop
     # return True if there is a loop
@@ -1138,7 +1075,6 @@ class Hosts(Items):
             r = False
 
         return r
-
 
     # Return a list of the host_name of the hosts
     # that got the template with name=tpl_name or inherit from
@@ -1182,13 +1118,11 @@ class Hosts(Items):
 
         return list(res)
 
-
     # Will create all business tree for the
     # services
     def create_business_rules(self, hosts, services):
         for h in self:
             h.create_business_rules(hosts, services)
-
 
     # Will link all business service/host with theirs
     # dep for problem/impact link

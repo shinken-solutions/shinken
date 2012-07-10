@@ -30,7 +30,6 @@
 # The managed_brok function is called by Broker for manage the broks. It calls
 # the manage_*_brok functions that create queries, and then run queries.
 
-
 import copy
 import time
 import sys
@@ -44,9 +43,9 @@ properties = {
 from shinken.basemodule import BaseModule
 from shinken.log import logger
 
+
 def de_unixify(t):
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(t))
-
 
 
 # Class for the Glpidb Broker
@@ -95,17 +94,12 @@ class Glpidb_broker(BaseModule):
         print "Creating a mysql backend"
         self.db_backend = DBMysql(host, user, password, database, character_set)
 
-
-
     # Called by Broker so we can do init stuff
     # TODO: add conf param to get pass with init
     # Conf from arbiter!
     def init(self):
         print "I connect to Glpi database"
         self.db_backend.connect_database()
-
-
-
 
     def preprocess(self, type, brok, checkst):
         new_brok = copy.deepcopy(brok)
@@ -155,8 +149,6 @@ class Glpidb_broker(BaseModule):
             print brok.data
         return new_brok
 
-
-
     # Get a brok, parse it, and put in in database
     # We call functions like manage_ TYPEOFBROK _brok that return us queries
     def manage_brok(self, b):
@@ -182,7 +174,6 @@ class Glpidb_broker(BaseModule):
             for q in queries:
                 self.db_backend.execute_query(q)
             return
-
 
     ## Host result
     ## def manage_host_check_result_brok(self, b):

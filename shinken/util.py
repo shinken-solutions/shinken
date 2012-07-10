@@ -125,17 +125,21 @@ def format_t_into_dhms_format(t):
 def to_int(val):
     return int(float(val))
 
+
 def to_float(val):
     return float(val)
 
+
 def to_char(val):
     return val[0]
+
 
 def to_split(val):
     val = val.split(',')
     if val == ['']:
         val = []
     return val
+
 
 def to_best_int_float(val):
     i = int(float(val))
@@ -146,6 +150,7 @@ def to_best_int_float(val):
         return i
     return f
 
+
 # bool('0') = true, so...
 def to_bool(val):
     if val == '1':
@@ -153,11 +158,13 @@ def to_bool(val):
     else:
         return False
 
+
 def from_bool_to_string(b):
     if b:
         return '1'
     else:
         return '0'
+
 
 def from_bool_to_int(b):
     if b:
@@ -165,9 +172,11 @@ def from_bool_to_int(b):
     else:
         return 0
 
+
 def from_list_to_split(val):
     val = ','.join(['%s' % v for v in val])
     return val
+
 
 def from_float_to_int(val):
     val = int(val)
@@ -182,6 +191,7 @@ def from_float_to_int(val):
 # Just a string list of all names, with ,
 def to_list_string_of_names(ref, tab):
     return ",".join([e.get_name() for e in tab])
+
 
 # Just a lsit of names
 def to_list_of_names(ref, tab):
@@ -205,6 +215,7 @@ def to_hostnames_list(ref, tab):
             r.append(h.host_name)
     return r
 
+
 # Will create a dict with 2 lists:
 # *services: all services of the tab
 # *hosts: all hosts of the tab
@@ -221,8 +232,6 @@ def to_svc_hst_distinct_lists(ref, tab):
     return r
 
 
-
-
 # Will expand the value with macros from the
 # host/service ref before brok it
 def expand_with_macros(ref, value):
@@ -234,6 +243,7 @@ def expand_with_macros(ref, value):
 def get_obj_name(obj):
     return obj.get_name()
 
+
 # Same as before, but call with object,prop instead of just value
 # But if we got an attribute error, return ''
 def get_obj_name_two_args_and_void(obj, value):
@@ -242,12 +252,14 @@ def get_obj_name_two_args_and_void(obj, value):
     except AttributeError:
         return ''
 
+
 # Get the full name if there is one
 def get_obj_full_name(obj):
     try:
         return obj.get_full_name()
     except Exception:
         return obj.get_name()
+
 
 # return the list of keys of the custom dict
 # but without the _ before
@@ -288,6 +300,7 @@ def alive_then_spare_then_deads(x, y):
     if not y.spare:
         return 1
     return 0
+
 
 #-1 is x first, 0 equal, 1 is y first
 def sort_by_ids(x, y):
@@ -330,7 +343,6 @@ def nighty_five_percent(t):
     return (reduce_avg, reduce_min, reduce_max)
 
 
-
 ##################### Cleaning ##############
 def strip_and_uniq(tab):
     new_tab = set()
@@ -339,8 +351,6 @@ def strip_and_uniq(tab):
         if (val!=''):
             new_tab.add(val)
     return list(new_tab)
-
-
 
 #################### Pattern change application (mainly for host) #######
 
@@ -352,8 +362,6 @@ def expand_xy_patern(pattern):
                 yield a
     else:
         yield pattern
-
-
 
 
 # This function is used to generate all pattern change as
@@ -398,7 +406,6 @@ def apply_change_recursive_patern_change(s, rule):
         return s
     return apply_change_recursive_patern_change(s, t)
 
-
 # For service generator, get dict from a _custom properties
 # as _disks   C$(80%!90%),D$(80%!90%)$,E$(80%!90%)$
 #return {'C': '80%!90%', 'D': '80%!90%', 'E': '80%!90%'}
@@ -408,6 +415,8 @@ GET_KEY_VALUE_SEQUENCE_ERROR_NOERROR = 0
 GET_KEY_VALUE_SEQUENCE_ERROR_SYNTAX = 1
 GET_KEY_VALUE_SEQUENCE_ERROR_NODEFAULT = 2
 GET_KEY_VALUE_SEQUENCE_ERROR_NODE = 3
+
+
 def get_key_value_sequence(entry, default_value=None):
     array1 = []
     array2 = []
@@ -540,12 +549,11 @@ def get_key_value_sequence(entry, default_value=None):
         else:
             # There were no wildcards
             array2.append(r)
-
-
     #t1 = time.time()
     #print "***********Diff", t1 -t0
 
     return (array2, GET_KEY_VALUE_SEQUENCE_ERROR_NOERROR)
+
 
 ################################# Python compatibility #####################
 def if_else(condition, true_expression, false_expression):
@@ -553,9 +561,6 @@ def if_else(condition, true_expression, false_expression):
         return true_expression
     else:
         return false_expression
-
-
-
 
 
 ############################### Files management #######################

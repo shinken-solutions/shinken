@@ -29,7 +29,6 @@ class TestConfig(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_service_generators.cfg')
 
-
     def test_service_generators(self):
 
         host = self.sched.hosts.find_by_name("test_host_0")
@@ -66,9 +65,6 @@ class TestConfig(ShinkenTest):
         # and the tricky last one (with no value :) )
         self.assert_(svc_g.check_command.args == ['G', '38%', '24%'])
 
-
-
-
     def test_service_generators_not(self):
 
         host = self.sched.hosts.find_by_name("test_host_0")
@@ -95,8 +91,6 @@ class TestConfig(ShinkenTest):
         self.assert_(svc_f is None)
         self.assert_(svc_g is not None)
 
-
-
     def test_service_generators_key_generator(self):
 
         host = self.sched.hosts.find_by_name("sw_0")
@@ -121,8 +115,6 @@ class TestConfig(ShinkenTest):
             print "Look for port", 'Generated Service ' + n
             svc = self.sched.services.find_srv_by_name_and_hostname("sw_0", 'Generated Service ' + n)
             self.assert_(svc is not None)
-
-
 
     def test_service_generators_array(self):
 

@@ -25,13 +25,12 @@
 from shinken_test import *
 from shinken.db_mysql import DBMysql
 
+
 class TestConfig(ShinkenTest):
     # setUp is inherited from ShinkenTest
 
-
     def create_db(self):
         self.db = DBMysql(host='localhost', user='root', password='root', database='merlin', character_set='utf8')
-
 
     def test_connect_database(self):
         self.create_db()
@@ -39,7 +38,6 @@ class TestConfig(ShinkenTest):
             self.db.connect_database()
         except Exception:  # arg, no database here? sic!
             pass
-
 
     def test_execute_query(self):
         self.create_db()

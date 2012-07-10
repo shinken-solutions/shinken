@@ -27,7 +27,6 @@ Warning: THIS IS A PREVIEW, and uglu code that looks as a script.
 
 """
 
-
 import optparse
 import sys
 import cPickle
@@ -53,15 +52,16 @@ except ImportError:
     imp.load_module('shinken', *imp.find_module('shinken', [os.path.realpath("."), os.path.realpath(".."), os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "..")]))
     from shinken.bin import VERSION
 
-
 from shinken.objects.pack import Pack, Packs
 from shinken.log import logger
 from shinken.objects.config import Config
 
-
 logger.set_level(10)
+
+
 class Dummy():
     def __init__(self): pass
+
     def add(self, obj): pass
 logger.load_obj(Dummy())
 
@@ -71,14 +71,12 @@ else:
     DEFAULT_CFG = 'c:\\shinken\\etc\\skonf.cfg'
 
 
-
 def create_pack(pack_file, p_dest_dir, share_dir):
     _tmp = tempfile.mktemp()
 
     print "Using the destination directory: %s" % p_dest_dir
     src_dir = os.path.abspath(os.path.dirname(pack_file))
     print "Source dir that will be load", src_dir
-
 
     print "Will use the source temp file %s" % _tmp
     f = open(_tmp, 'w')
@@ -141,7 +139,6 @@ def create_pack(pack_file, p_dest_dir, share_dir):
     # Make comands uniq
     o['commands'] = list(set(o['commands']))
 
-
     o['path'] = pack.path
     print "Path: %s" % o['path']
     o['doc_link'] = pack.doc_link
@@ -153,7 +150,6 @@ def create_pack(pack_file, p_dest_dir, share_dir):
         d = v.get('description', '')
         o['macros'][k] = {'type': t, 'description': ''}
         print "\t%s: Type=%s Description='%s'" % (k, t, d)
-
 
     j = json.dumps(o, sort_keys = True, indent = 3)
     print "Pack file generated:", j
@@ -293,16 +289,12 @@ def push_pack(zip_file_p, api_key, uri, proxy):
                             c.FORM_CONTENTTYPE, "application/x-gzip"))
                           ])
 
-
     #c.setopt(c.HTTPPOST, [("file1", (c.FORM_FILE, str(zip_file_p)))])
     #c.setopt(c.VERBOSE, 1)
     r = c.perform()
     print "status code: %s" % c.getinfo(pycurl.HTTP_CODE)
     c.close()
     print "Thanks :) "
-
-
-
 
 
 def register(login, password, email, uri, proxy):
@@ -353,8 +345,6 @@ def register(login, password, email, uri, proxy):
         sys.exit(2)
 
 
-
-
 def getkey(login, password, uri, proxy):
     print "GO get your key"
     #import os, urllib
@@ -397,9 +387,6 @@ def getkey(login, password, uri, proxy):
     print "You api key is", obj['api_key']
 
 
-
-
-
 def analyse(api_key, stats_file, uri, proxy):
     if not api_key:
         print "Error: Sorry, analysing the configuration need an API key"
@@ -423,7 +410,6 @@ def analyse(api_key, stats_file, uri, proxy):
                            (c.FORM_FILE, str(stats_file),
                             c.FORM_CONTENTTYPE, "application/x-gzip"))
                           ])
-
 
     #c.setopt(c.HTTPPOST, [("file1", (c.FORM_FILE, str(zip_file_p)))])
     c.setopt(c.VERBOSE, 1)
@@ -469,7 +455,6 @@ For more information, look at http://www.shinken-monitoring.org/wiki/packs/creat
     parser.add_option('-k', '--api-key',
                       dest="api_key", help=("Your API key for uploading the pack zip file in the Shinken Pack website. If you don't have one, please go to XXXXXX"))
 
-
     parser.add_option('-r', '--register', action='store_true',
                       dest="register", help=("Mode to register to the Shinken pack website"))
     parser.add_option('-l', '--login',
@@ -479,14 +464,11 @@ For more information, look at http://www.shinken-monitoring.org/wiki/packs/creat
     parser.add_option('-e', '--email',
                       dest="email", help=("Email for the Shinken pack website registration. Must be valid."))
 
-
     parser.add_option('-g', '--get-key', action='store_true',
                       dest="getkey", help=("Mode to retrieve your API key"))
 
     parser.add_option('-a', '--analyse', action='store_true',
                       dest="analyse", help=("Mode to analyse your configuration and upload it's characteristics to the server. Only statistics data, no hostnames, usernames not ips will be sent"))
-
-
 
     opts, args = parser.parse_args()
 

@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 LOGCLASS_INFO = 0          # all messages not in any other class
 LOGCLASS_ALERT = 1         # alerts: the change service/host state
 LOGCLASS_PROGRAM = 2       # important programm events (restart, ...)
@@ -214,7 +213,6 @@ class Logline(dict):
                 setattr(self, 'state_type', state_type)
                 setattr(self, 'time', int(time))
                 setattr(self, 'type', type)
-
 
     def as_tuple(self):
         return tuple([str(getattr(self, col)) for col in Logline.columns])

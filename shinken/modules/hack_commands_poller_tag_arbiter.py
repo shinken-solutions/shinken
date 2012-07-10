@@ -26,10 +26,8 @@
 # This Class is an example of an Arbiter module
 # Here for the configuration phase AND running one
 
-
 import re
 from shinken.basemodule import BaseModule
-
 
 properties = {
     'daemons': ['arbiter'],
@@ -46,14 +44,12 @@ def get_instance(plugin):
     return instance
 
 
-
 # Just print some stuff
 class Hack_cmds_pt(BaseModule):
     def __init__(self, mod_conf):
         BaseModule.__init__(self,  mod_conf)
         self.cmd_line_match = r"""%s""" % mod_conf.cmd_line_match
         self.poller_tag = mod_conf.poller_tag
-
 
     # Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
@@ -70,8 +66,6 @@ class Hack_cmds_pt(BaseModule):
         for s in arb.conf.services:
             if s.check_command.command == cmd:
                 s.check_command.poller_tag = tag
-
-
 
     def hook_late_configuration(self, arb):
         print("[HackCmdPollerTag in hook late config")

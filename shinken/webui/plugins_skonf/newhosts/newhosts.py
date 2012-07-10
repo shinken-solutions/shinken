@@ -29,13 +29,12 @@ import random
 from shinken.webui.bottle import redirect
 from shinken.util import to_bool
 
-
 # Ask for a random init
 random.seed(time.time())
 
-
 ### Will be populated by the UI with it's own value
 app = None
+
 
 # Our page. If the useer call /dummy/TOTO arg1 will be TOTO.
 # if it's /dummy/, it will be 'nothing'
@@ -51,7 +50,6 @@ def get_newhosts():
     # only one the tempalte will have, so we must give it an app link and the
     # user we are loggued with (it's a contact object in fact)
     return {'app': app, 'user': user}
-
 
 
 def get_launch():
@@ -80,7 +78,6 @@ def get_launch():
     app.ask_new_scan(i)
 
     return {'app': app, 'user': user}
-
 
 
 def get_scans():
@@ -167,8 +164,6 @@ def post_validatehost():
     print "result of update", r
 
     return None
-
-
 
 # This is the dict teh webui will try to "load".
 #  *here we register one page with both adresses /dummy/:arg1 and /dummy/, both addresses

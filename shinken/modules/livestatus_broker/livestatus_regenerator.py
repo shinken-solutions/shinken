@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import types
 from shinken.objects import Contact
 from shinken.objects import NotificationWay
@@ -210,7 +209,6 @@ class LiveStatusRegenerator(Regenerator):
         # Everything is new now. We should clean the cache
         self.cache.wipeout()
 
-
     def manage_initial_contact_status_brok(self, b):
         """overwrite it, because the original method deletes some values"""
         data = b.data
@@ -248,7 +246,6 @@ class LiveStatusRegenerator(Regenerator):
             # With commands
             self.linkify_commands(nw, 'host_notification_commands')
             self.linkify_commands(nw, 'service_notification_commands')
-
 
             # Now link timeperiods
             self.linkify_a_timeperiod(nw, 'host_notification_period')

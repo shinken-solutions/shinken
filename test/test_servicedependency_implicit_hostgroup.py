@@ -29,7 +29,6 @@ class TestServiceDepAndGroups(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_servicedependency_implicit_hostgroup.cfg')
 
-
     def test_implicithostgroups(self):
         #
         # Config is not correct because of a wrong relative path
@@ -63,10 +62,7 @@ class TestServiceDepAndGroups(ShinkenTest):
         self.assert_('test_router_0/SNMP' in svc_cpu_fathers)
         self.assert_('test_host_0/SNMP' in svc_cpu_fathers)
 
-
         svc.act_depend_of = []  # no hostchecks on critical checkresults
-
-
 
     def test_implicithostnames(self):
         #

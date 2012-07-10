@@ -29,13 +29,13 @@ import MySQLdb
 
 from shinken.basemodule import BaseModule
 
-
 properties = {
     'daemons': ['arbiter'],
     'type': 'mysql_import',
     'external': False,
     'phases': ['configuration'],
 }
+
 
 # called by the plugin manager to get a broker
 def get_instance(plugin):
@@ -61,6 +61,7 @@ def get_instance(plugin):
     instance = MySQL_importer_arbiter(plugin, host, login, password, database, reqlist)
     return instance
 
+
 # Retrieve hosts from a MySQL database
 class MySQL_importer_arbiter(BaseModule):
     def __init__(self, mod_conf, host, login, password, database, reqlist):
@@ -70,7 +71,6 @@ class MySQL_importer_arbiter(BaseModule):
         self.password = password
         self.database = database
         self.reqlist = reqlist
-
 
     # Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
@@ -84,7 +84,6 @@ class MySQL_importer_arbiter(BaseModule):
             print "MySQL Module: Error %d: %s" % (e.args[0], e.args[1])
             raise
         print "[MySQL Importer Module]: Connection opened"
-
 
     # Main function that is called in the CONFIGURATION phase
     def get_objects(self):
