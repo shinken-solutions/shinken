@@ -47,10 +47,8 @@ except ImportError:
     import imp
     imp.load_module('shinken', *imp.find_module('shinken', [os.path.realpath("."), os.path.realpath(".."), os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "..")]))
 
-
 from shinken.daemons.pollerdaemon import Poller
 from shinken.bin import VERSION
-
 
 parser = optparse.OptionParser(
     "%prog [options]", version="%prog " + VERSION)
@@ -78,4 +76,3 @@ if __name__ == '__main__':
 # For perf tuning:
 #import cProfile
 #cProfile.run('''daemon.main()''', '/tmp/poller.profile')
-

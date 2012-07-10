@@ -23,8 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 import re
 
 
@@ -36,14 +34,13 @@ class DependencyNode(object):
         self.operand = None
         self.sons = []
         # Of: values are a triple OK,WARN,CRIT
-        self.of_values = (0,0,0)
+        self.of_values = (0, 0, 0)
         self.is_of_mul = False
         self.configuration_errors = []
         self.not_value = False
 
     def __str__(self):
         return "Op:'%s' Val:'%s' Sons:'[%s]'" % (self.operand, self.of_values, ','.join([str(s) for s in self.sons]))
-
 
     # We will get the state of this node, by looking at the state of
     # our sons, and apply our operand
@@ -81,7 +78,6 @@ class DependencyNode(object):
 
         # We will surely need the worst state
         worst_state = max(states)
-
 
         # Suggestion: What about returning min(states) for the | operand?
         # We don't need make a difference between an 0 and another no?
@@ -154,8 +150,6 @@ class DependencyNode(object):
             #print "not mul, return worst", worse_state
             return worst_state
 
-
-
     # return a list of all host/service in our node and below
     def list_all_elements(self):
         r = []
@@ -169,7 +163,6 @@ class DependencyNode(object):
 
         # and uniq the result
         return list(set(r))
-
 
     # If we are a of: rule, we can get some 0 in of_values,
     # if so, change them with NB sons instead
@@ -231,7 +224,7 @@ class DependencyNodeFactory(object):
             if mul_of:
                 node.is_of_mul = True
                 node.of_values = (int(g[0]), int(g[1]), int(g[2]))
-            else: # if not, use A,0,0, we will change 0 after to put MAX
+            else:  # if not, use A,0,0, we will change 0 after to put MAX
                 node.of_values = (int(g[0]), 0, 0)
             patern = m.groups()[3]
 
@@ -276,8 +269,8 @@ class DependencyNodeFactory(object):
                     o = self.eval_cor_patern(tmp, hosts, services)
                     #print "2) I've %s got new sons" % patern , o
                     node.sons.append(o)
-                #else:
-                    #print "Fuck a node son!"
+                ## else:
+                ##     print "Fuck a node son!"
                 tmp = ''
                 continue
 

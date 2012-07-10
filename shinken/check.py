@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from shinken.action import Action
 from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp
 from shinken.property import CharProp, StringProp, ListProp
@@ -91,7 +90,7 @@ class Check(Action):
         self.check_time = 0
         self.execution_time = 0
         self.perf_data = ''
-        self.check_type = 0 # which kind of check result? 0=active 1=passive
+        self.check_type = 0  # which kind of check result? 0=active 1=passive
         self.poller_tag = poller_tag
         self.reactionner_tag = reactionner_tag
         self.module_type = module_type
@@ -105,7 +104,6 @@ class Check(Action):
             self.internal = False
         self.from_trigger = from_trigger
 
-
     def copy_shell(self):
         """return a copy of the check but just what is important for execution
         So we remove the ref and all
@@ -113,7 +111,6 @@ class Check(Action):
 
         # We create a dummy check with nothing in it, just defaults values
         return self.copy_shell__(Check('', '', '', '', '', id=self.id))
-
 
     def get_return_from(self, c):
         self.exit_status = c.exit_status
@@ -138,4 +135,3 @@ class Check(Action):
 
     def set_type_passive(self):
         self.check_type = 1
-

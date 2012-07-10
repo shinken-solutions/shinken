@@ -27,7 +27,6 @@ Warning: THIS IS A PREVIEW, and uglu code that looks as a script.
 
 """
 
-
 import optparse
 import sys
 import cPickle
@@ -53,15 +52,16 @@ except ImportError:
     imp.load_module('shinken', *imp.find_module('shinken', [os.path.realpath("."), os.path.realpath(".."), os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "..")]))
     from shinken.bin import VERSION
 
-
-from shinken.objects.pack import Pack,Packs
+from shinken.objects.pack import Pack, Packs
 from shinken.log import logger
 from shinken.objects.config import Config
 
-
 logger.set_level(10)
+
+
 class Dummy():
     def __init__(self): pass
+
     def add(self, obj): pass
 logger.load_obj(Dummy())
 
@@ -71,14 +71,12 @@ else:
     DEFAULT_CFG = 'c:\\shinken\\etc\\skonf.cfg'
 
 
-
 def create_pack(pack_file, p_dest_dir, share_dir):
     _tmp = tempfile.mktemp()
 
     print "Using the destination directory: %s" % p_dest_dir
     src_dir = os.path.abspath(os.path.dirname(pack_file))
     print "Source dir that will be load", src_dir
-
 
     print "Will use the source temp file %s" % _tmp
     f = open(_tmp, 'w')
@@ -141,21 +139,19 @@ def create_pack(pack_file, p_dest_dir, share_dir):
     # Make comands uniq
     o['commands'] = list(set(o['commands']))
 
-
     o['path'] = pack.path
     print "Path: %s" % o['path']
     o['doc_link'] = pack.doc_link
     print "Doc link: %s" % o['doc_link']
     o['macros'] = {}
     print "Macros:"
-    for (k,v) in pack.macros.iteritems():
+    for (k, v) in pack.macros.iteritems():
         t = v.get('type', 'string')
         d = v.get('description', '')
         o['macros'][k] = {'type': t, 'description': ''}
         print "\t%s: Type=%s Description='%s'" % (k, t, d)
 
-
-    j = json.dumps(o, sort_keys = True, indent = 3)
+    j = json.dumps(o, sort_keys=True, indent=3)
     print "Pack file generated:", j
 
     create_dir = os.path.join(p_dest_dir, o['name'])
@@ -167,7 +163,7 @@ def create_pack(pack_file, p_dest_dir, share_dir):
         shutil.rmtree(create_dir)
 
     os.mkdir(create_dir)
-    pack_file_dest = os.path.join(create_dir, o['name']+'.pack')
+    pack_file_dest = os.path.join(create_dir, o['name'] + '.pack')
     print "Saving the .pack file into %s" % pack_file_dest
     f = open(pack_file_dest, 'w')
     f.write(j)
@@ -217,7 +213,7 @@ def create_pack(pack_file, p_dest_dir, share_dir):
                     _d = os.path.join(create_dir, 'images', 'sets', t)
                     #if not os.path.exists(_d):
                     #    os.mkdir(_d)
-                    print "COPY %s into %s" % (_p,  _d)
+                    print "COPY %s into %s" % (_p, _d)
                     shutil.copytree(_p, _d)
 
         graphite_templates_dir = os.path.join(share_dir, 'templates', 'graphite')
@@ -228,8 +224,8 @@ def create_pack(pack_file, p_dest_dir, share_dir):
                 if cname in ['bp_rule', '_internal_host_up']:
                     continue
                 print "LOOK FOR command", c.get_name()
-                _p = os.path.join(graphite_templates_dir, cname+'.graph')
-                _d = os.path.join(create_dir, 'templates', 'graphite', cname+'.graph')
+                _p = os.path.join(graphite_templates_dir, cname + '.graph')
+                _d = os.path.join(create_dir, 'templates', 'graphite', cname + '.graph')
                 print "So search for graphite template", _p
                 if os.path.exists(_p):
                     print "COPYING %s into %s" % (_p, _d)
@@ -243,14 +239,14 @@ def create_pack(pack_file, p_dest_dir, share_dir):
                 if cname in ['bp_rule', '_internal_host_up']:
                     continue
                 print "LOOK FOR command", c.get_name()
-                _p = os.path.join(graphite_templates_dir, cname+'.php')
-                _d = os.path.join(create_dir, 'templates', 'pnp', cname+'.php')
+                _p = os.path.join(graphite_templates_dir, cname + '.php')
+                _d = os.path.join(create_dir, 'templates', 'pnp', cname + '.php')
                 print "So search for graphite template", _p
                 if os.path.exists(_p):
                     print "COPYING %s into %s" % (_p, _d)
                     shutil.copy(_p, _d)
 
-    zip_file_p = os.path.join(p_dest_dir, o['name']+'.zip')
+    zip_file_p = os.path.join(p_dest_dir, o['name'] + '.zip')
     print "Want to save the zip file", zip_file_p
 
     fd = zipfile.ZipFile(zip_file_p, "w")
@@ -285,14 +281,13 @@ def push_pack(zip_file_p, api_key, uri, proxy):
     c.setopt(c.TIMEOUT, 8)
     if proxy:
         c.setopt(c.PROXY, proxy)
-    c.setopt(c.URL, uri+"/pushpack")
+    c.setopt(c.URL, uri + "/pushpack")
 
-    c.setopt(c.HTTPPOST,[ ("key", api_key),
+    c.setopt(c.HTTPPOST, [("key", api_key),
                           ("data",
                            (c.FORM_FILE, str(zip_file_p),
                             c.FORM_CONTENTTYPE, "application/x-gzip"))
                           ])
-
 
     #c.setopt(c.HTTPPOST, [("file1", (c.FORM_FILE, str(zip_file_p)))])
     #c.setopt(c.VERBOSE, 1)
@@ -300,9 +295,6 @@ def push_pack(zip_file_p, api_key, uri, proxy):
     print "status code: %s" % c.getinfo(pycurl.HTTP_CODE)
     c.close()
     print "Thanks :) "
-
-
-
 
 
 def register(login, password, email, uri, proxy):
@@ -320,9 +312,9 @@ def register(login, password, email, uri, proxy):
     c.setopt(c.TIMEOUT, 8)
     if proxy:
         c.setopt(c.PROXY, proxy)
-    c.setopt(c.URL, uri+"/register")
+    c.setopt(c.URL, uri + "/register")
 
-    c.setopt(c.HTTPPOST,[ ("username", login), ("password", password), ("email", email), ('cli_mode', '1')])
+    c.setopt(c.HTTPPOST, [("username", login), ("password", password), ("email", email), ('cli_mode', '1')])
 
     error = ''
     obj = ''
@@ -353,8 +345,6 @@ def register(login, password, email, uri, proxy):
         sys.exit(2)
 
 
-
-
 def getkey(login, password, uri, proxy):
     print "GO get your key"
     #import os, urllib
@@ -370,9 +360,9 @@ def getkey(login, password, uri, proxy):
     c.setopt(c.TIMEOUT, 10)
     if proxy:
         c.setopt(c.PROXY, proxy)
-    c.setopt(c.URL, uri+"/apikey")
+    c.setopt(c.URL, uri + "/apikey")
 
-    c.setopt(c.HTTPPOST,[ ("login", login), ("password", password), ('cli_mode', '1')])
+    c.setopt(c.HTTPPOST, [("login", login), ("password", password), ('cli_mode', '1')])
 
     #c.setopt(c.HTTPPOST, [("file1", (c.FORM_FILE, str(zip_file_p)))])
     error = ''
@@ -397,9 +387,6 @@ def getkey(login, password, uri, proxy):
     print "You api key is", obj['api_key']
 
 
-
-
-
 def analyse(api_key, stats_file, uri, proxy):
     if not api_key:
         print "Error: Sorry, analysing the configuration need an API key"
@@ -416,14 +403,13 @@ def analyse(api_key, stats_file, uri, proxy):
     c.setopt(c.TIMEOUT, 8)
     if proxy:
         c.setopt(c.PROXY, proxy)
-    c.setopt(c.URL, uri+"/pushstats")
+    c.setopt(c.URL, uri + "/pushstats")
 
-    c.setopt(c.HTTPPOST,[ ("key", api_key),
+    c.setopt(c.HTTPPOST, [("key", api_key),
                           ("data",
                            (c.FORM_FILE, str(stats_file),
                             c.FORM_CONTENTTYPE, "application/x-gzip"))
                           ])
-
 
     #c.setopt(c.HTTPPOST, [("file1", (c.FORM_FILE, str(zip_file_p)))])
     c.setopt(c.VERBOSE, 1)
@@ -469,7 +455,6 @@ For more information, look at http://www.shinken-monitoring.org/wiki/packs/creat
     parser.add_option('-k', '--api-key',
                       dest="api_key", help=("Your API key for uploading the pack zip file in the Shinken Pack website. If you don't have one, please go to XXXXXX"))
 
-
     parser.add_option('-r', '--register', action='store_true',
                       dest="register", help=("Mode to register to the Shinken pack website"))
     parser.add_option('-l', '--login',
@@ -479,14 +464,11 @@ For more information, look at http://www.shinken-monitoring.org/wiki/packs/creat
     parser.add_option('-e', '--email',
                       dest="email", help=("Email for the Shinken pack website registration. Must be valid."))
 
-
     parser.add_option('-g', '--get-key', action='store_true',
                       dest="getkey", help=("Mode to retrieve your API key"))
 
     parser.add_option('-a', '--analyse', action='store_true',
                       dest="analyse", help=("Mode to analyse your configuration and upload it's characteristics to the server. Only statistics data, no hostnames, usernames not ips will be sent"))
-
-
 
     opts, args = parser.parse_args()
 

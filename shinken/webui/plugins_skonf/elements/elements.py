@@ -39,13 +39,13 @@ from local_helper import Helper
 ### Will be populated by the UI with it's own value
 app = None
 
-
 keys = {'hosts': 'host_name',
         'services': '',
         'timeperiods': 'timeperiod_name',
         'contacts': 'contact_name',
         'commands': 'command_name'
         }
+
 
 def elements_generic(cls, show_tpls=False):
     # First we look for the user sid
@@ -54,13 +54,12 @@ def elements_generic(cls, show_tpls=False):
     if not user:
         redirect("/user/login")
 
-
     # Get all entries from db
     #t = getattr(app.db, cls.my_type+'s')
     #cur = t.find({})
     #elts = [cls(i) for i in cur]
     print "GENERIC", cls.my_type
-    t = cls.my_type+'s'
+    t = cls.my_type + 's'
     key = keys[t]
     #if cls.my_type == 'host':
     #    print "HOOK HOSTS"
@@ -86,8 +85,10 @@ def elements_services():
 def elements_timeperiods():
     return elements_generic(Timeperiod)
 
+
 def elements_contacts():
     return elements_generic(Contact)
+
 
 def elements_commands():
     return elements_generic(Command)
@@ -117,8 +118,6 @@ def elements_service(name):
     if not elt:
         elt = {}
     return {'app': app, 'user': user, 'elt': elt, 'helper': Helper(app)}
-
-
 
 
 # get data about one specific contact
@@ -157,19 +156,22 @@ def elements_timeperiod(name):
     return {'app': app, 'user': user, 'elt': elt, 'helper': Helper(app)}
 
 
-
 ### New things
 def new_host():
     return new_object()
 
+
 def new_service():
     return new_object()
+
 
 def new_contact():
     return new_object()
 
+
 def new_command():
     return new_object()
+
 
 def new_timeperiod():
     return new_object()
@@ -201,7 +203,6 @@ def enable_object(cls, name):
     print "Disabled?", r
 
 
-
 def save_object(cls, name):
     print "Save object for", cls, name
 
@@ -229,7 +230,6 @@ def save_object(cls, name):
     if new_name != old_name:
         t.remove({'_id': old_name})
 
-
     print 'In db', d
     bd_entry = {'_id': new_name}
     if d:
@@ -254,7 +254,6 @@ def save_object(cls, name):
     t.save(bd_entry)
 
 
-
 def save_new_object(cls):
     print "Save new object for", cls
     t = getattr(app.db, cls)
@@ -276,45 +275,41 @@ def save_new_object(cls):
     # Ok, we can save it!
     save_object(cls, name)
 
-
-
-
 pages = {
     # HOSTS
-    elements_hosts: { 'routes': ['/elements/hosts'], 'view': 'elements_hosts', 'static': True},
-    elements_host: { 'routes': ['/elements/hosts/:name'], 'view': 'elements_host', 'static': True},
-    new_host: { 'routes': ['/elements/add/host'], 'view': 'elements_host', 'static': True},
+    elements_hosts: {'routes': ['/elements/hosts'], 'view': 'elements_hosts', 'static': True},
+    elements_host: {'routes': ['/elements/hosts/:name'], 'view': 'elements_host', 'static': True},
+    new_host: {'routes': ['/elements/add/host'], 'view': 'elements_host', 'static': True},
 
     # Contacts
-    elements_contacts: { 'routes': ['/elements/contacts'], 'view': 'elements_contacts', 'static': True},
-    elements_contact: { 'routes': ['/elements/contacts/:name'], 'view': 'elements_contact', 'static': True},
-    new_contact: { 'routes': ['/elements/add/contact'], 'view': 'elements_contact', 'static': True},
+    elements_contacts: {'routes': ['/elements/contacts'], 'view': 'elements_contacts', 'static': True},
+    elements_contact: {'routes': ['/elements/contacts/:name'], 'view': 'elements_contact', 'static': True},
+    new_contact: {'routes': ['/elements/add/contact'], 'view': 'elements_contact', 'static': True},
 
     # Services
-    elements_services: { 'routes': ['/elements/services'], 'view': 'elements_services', 'static': True},
-    elements_service: { 'routes': ['/elements/services/:name'], 'view': 'elements_service', 'static': True},
-    new_service: { 'routes': ['/elements/add/service'], 'view': 'elements_service', 'static': True},
+    elements_services: {'routes': ['/elements/services'], 'view': 'elements_services', 'static': True},
+    elements_service: {'routes': ['/elements/services/:name'], 'view': 'elements_service', 'static': True},
+    new_service: {'routes': ['/elements/add/service'], 'view': 'elements_service', 'static': True},
 
 
     # Timeperiods
-    elements_timeperiods: { 'routes': ['/elements/timeperiods'], 'view': 'elements_timeperiods', 'static': True},
-    elements_timeperiod: { 'routes': ['/elements/timeperiods/:name'], 'view': 'elements_timeperiod', 'static': True},
-    new_timeperiod: { 'routes': ['/elements/add/timeperiod'], 'view': 'elements_timeperiod', 'static': True},
+    elements_timeperiods: {'routes': ['/elements/timeperiods'], 'view': 'elements_timeperiods', 'static': True},
+    elements_timeperiod: {'routes': ['/elements/timeperiods/:name'], 'view': 'elements_timeperiod', 'static': True},
+    new_timeperiod: {'routes': ['/elements/add/timeperiod'], 'view': 'elements_timeperiod', 'static': True},
 
 
     # Commands
-    elements_commands: { 'routes': ['/elements/commands'], 'view': 'elements_commands', 'static': True},
-    elements_command: { 'routes': ['/elements/commands/:name'], 'view': 'elements_command', 'static': True},
-    new_command: { 'routes': ['/elements/add/command'], 'view': 'elements_command', 'static': True},
+    elements_commands: {'routes': ['/elements/commands'], 'view': 'elements_commands', 'static': True},
+    elements_command: {'routes': ['/elements/commands/:name'], 'view': 'elements_command', 'static': True},
+    new_command: {'routes': ['/elements/add/command'], 'view': 'elements_command', 'static': True},
 
 
     # Action URI
-    disable_object: { 'routes': ['/element/q/:cls/disable/:name']},
-    enable_object: { 'routes': ['/element/q/:cls/enable/:name']},
+    disable_object: {'routes': ['/element/q/:cls/disable/:name']},
+    enable_object: {'routes': ['/element/q/:cls/enable/:name']},
 
 
     # POST backend
-    save_object: { 'routes': ['/element/q/:cls/save/:name'], 'method': 'POST'},
-    save_new_object: { 'routes': ['/element/q/:cls/save/'], 'method': 'POST'},
+    save_object: {'routes': ['/element/q/:cls/save/:name'], 'method': 'POST'},
+    save_new_object: {'routes': ['/element/q/:cls/save/'], 'method': 'POST'},
     }
-

@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import hashlib
 try:
     import json
@@ -36,11 +35,11 @@ except ImportError:
         print "Error: you need the json or simplejson module"
         raise
 
-
 from shinken.webui.bottle import redirect, abort
 
 ### Will be populated by the UI with it's own value
 app = None
+
 
 # Our page. If the useer call /dummy/TOTO arg1 will be TOTO.
 # if it's /dummy/, it will be 'nothing'
@@ -67,7 +66,6 @@ def get_page(username):
 
         cur = app.db.packs.find({'user': username, 'state': 'refused'})
         refused_packs = [p for p in cur]
-
 
     return {'app': app, 'user': user, 'view_user': view_user, 'validated_packs': validated_packs, 'pending_packs': pending_packs,
             'refused_packs': refused_packs}
@@ -100,8 +98,6 @@ def post_user():
     return
 
 
-
-
 def check_key(api_key):
     user = app.get_user_by_key(api_key)
     app.response.content_type = 'application/json'
@@ -111,12 +107,7 @@ def check_key(api_key):
     r = {'state': 200, 'text': 'Congrats! Connexion is OK!'}
     return json.dumps(r)
 
-
-
-
-
-pages = {get_page: { 'routes': ['/user/:username'], 'view': 'user', 'static': True},
-         post_user: { 'routes': ['/user'], 'method': 'POST', 'view': 'user', 'static': True},
-         check_key: { 'routes': ['/checkkey/:api_key']},
+pages = {get_page: {'routes': ['/user/:username'], 'view': 'user', 'static': True},
+         post_user: {'routes': ['/user'], 'method': 'POST', 'view': 'user', 'static': True},
+         check_key: {'routes': ['/checkkey/:api_key']},
          }
-

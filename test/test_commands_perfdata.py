@@ -22,14 +22,13 @@
 # This file is used to test acknowledge of problems
 #
 
-
 from shinken_test import *
+
 
 class TestConfig(ShinkenTest):
 
     def setUp(self):
         self.setup_with_file('etc/nagios_commands_perfdata.cfg')
-
 
     def test_service_perfdata_command(self):
         self.print_header()
@@ -39,10 +38,10 @@ class TestConfig(ShinkenTest):
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
         #--------------------------------------------------------------
         # initialize host/service state
         #--------------------------------------------------------------
@@ -63,17 +62,16 @@ class TestConfig(ShinkenTest):
         print "Actions", self.sched.actions
         self.assert_(self.count_actions() == 0)
 
-
     def test_host_perfdata_command(self):
         # We want an eventhandelr (the perfdata command) to be put in the actions dict
         # after we got a service check
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
         #--------------------------------------------------------------
         # initialize host/service state
         #--------------------------------------------------------------
@@ -94,7 +92,6 @@ class TestConfig(ShinkenTest):
         print "Actions", self.sched.actions
         self.assert_(self.count_actions() == 0)
 
-
     def test_multiline_perfdata(self):
         self.print_header()
 
@@ -103,10 +100,10 @@ class TestConfig(ShinkenTest):
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
         #--------------------------------------------------------------
         # initialize host/service state
         #--------------------------------------------------------------
@@ -125,7 +122,7 @@ class TestConfig(ShinkenTest):
         """
         self.scheduler_loop(1, [[svc, 0, output]])
         print "Actions", self.sched.actions
-        print 'Output',svc.output
+        print 'Output', svc.output
         print 'long', svc.long_output
         print 'perf', svc.perf_data
 

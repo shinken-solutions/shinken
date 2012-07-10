@@ -26,6 +26,7 @@ from shinken_test import *
 
 
 class TestTPStateLog(ShinkenTest):
+
     # Uncomment this is you want to use a specific configuration
     # for your test
     #def setUp(self):
@@ -59,4 +60,3 @@ class TestTPStateLog(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

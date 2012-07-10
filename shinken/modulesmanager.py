@@ -23,8 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 import os
 import time
 import sys
@@ -34,15 +32,15 @@ import cStringIO
 from shinken.basemodule import BaseModule
 from shinken.log import logger
 
+
 class ModulesManager(object):
     """This class is use to manage modules and call callback"""
-
 
     def __init__(self, modules_type, modules_path, modules):
         self.modules_path = modules_path
         self.modules_type = modules_type
         self.modules = modules
-        self.allowed_types = [ plug.module_type for plug in modules ]
+        self.allowed_types = [plug.module_type for plug in modules]
         self.imported_modules = []
         self.modules_assoc = []
         self.instances = []
@@ -50,38 +48,33 @@ class ModulesManager(object):
         self.max_queue_size = 0
         self.manager = None
 
-
     def load_manager(self, manager):
         self.manager = manager
-
 
     # Set the modules requested for this manager
     def set_modules(self, modules):
         self.modules = modules
-        self.allowed_types = [ mod.module_type for mod in modules ]
-
+        self.allowed_types = [mod.module_type for mod in modules]
 
     def set_max_queue_size(self, max_queue_size):
         self.max_queue_size = max_queue_size
-
 
     # Import, instanciate & "init" the modules we have been requested
     def load_and_init(self):
         self.load()
         self.get_instances()
 
-
     # Try to import the requested modules ; put the imported modules in self.imported_modules.
     # The previous imported modules, if any, are cleaned before.
     def load(self):
         now = int(time.time())
         # We get all modules file with .py
-        modules_files = [ fname[:-3] for fname in os.listdir(self.modules_path)
-                         if fname.endswith(".py") ]
+        modules_files = [fname[:-3] for fname in os.listdir(self.modules_path)
+                         if fname.endswith(".py")]
 
         # And directories
-        modules_files.extend([ fname for fname in os.listdir(self.modules_path)
-                               if os.path.isdir(os.path.join(self.modules_path, fname)) ])
+        modules_files.extend([fname for fname in os.listdir(self.modules_path)
+                               if os.path.isdir(os.path.join(self.modules_path, fname))])
 
         # Now we try to load thems
         # So first we add their dir into the sys.path
@@ -101,7 +94,7 @@ class ModulesManager(object):
                 # We want to keep only the modules of our type
                 if self.modules_type in m.properties['daemons']:
                     self.imported_modules.append(m)
-            except Exception , exp:
+            except Exception, exp:
                 logger.warning("Importing module: %s" % exp)
 
         del self.modules_assoc[:]
@@ -116,7 +109,6 @@ class ModulesManager(object):
             if not is_find:
                 # No module is suitable, we Raise a Warning
                 logger.warning("The module type %s for %s was not found in modules!" % (module_type, mod_conf.get_name()))
-
 
     # Try to "init" the given module instance.
     # If late_start, don't look for last_init_try
@@ -149,16 +141,13 @@ class ModulesManager(object):
     # Request to "remove" the given instances list or all if not provided
     def clear_instances(self, insts=None):
         if insts is None:
-            insts = self.instances[:] # have to make a copy of the list
+            insts = self.instances[:]  # have to make a copy of the list
         for i in insts:
             self.remove_instance(i)
-
 
     # Put an instance to the restart queue
     def set_to_restart(self, inst):
         self.to_restart.append(inst)
-
-
 
     # actually only arbiter call this method with start_external=False..
     # Create, init and then returns the list of module instances that the caller needs.
@@ -170,12 +159,12 @@ class ModulesManager(object):
             try:
                 mod_conf.properties = module.properties.copy()
                 inst = module.get_instance(mod_conf)
-                if inst is None: # None = Bad thing happened :)
+                if inst is None:  # None = Bad thing happened :)
                     logger.info("get_instance for module %s returned None!" % (mod_conf.get_name()))
                     continue
                 assert(isinstance(inst, BaseModule))
                 self.instances.append(inst)
-            except Exception , exp:
+            except Exception, exp:
                 s = str(exp)
                 if isinstance(s, str):
                     s = s.decode('UTF-8', 'replace')
@@ -194,7 +183,6 @@ class ModulesManager(object):
 
         return self.instances
 
-
     # Launch external instaces that are load corectly
     def start_external_instances(self, late_start=False):
         for inst in [inst for inst in self.instances if inst.is_external]:
@@ -207,8 +195,6 @@ class ModulesManager(object):
             # ok, init succeed
             logger.info("Starting external module %s" % inst.get_name())
             inst.start()
-
-
 
     # Request to cleanly remove the given instance.
     # If instance is external also shutdown it cleanly
@@ -224,7 +210,6 @@ class ModulesManager(object):
 
         # Then do not listen anymore about it
         self.instances.remove(inst)
-
 
     def check_alive_instances(self):
         # Only for external
@@ -257,10 +242,6 @@ class ModulesManager(object):
                     inst.clear_queues(self.manager)
                     self.to_restart.append(inst)
 
-
-
-
-
     def try_to_restart_deads(self):
         to_restart = self.to_restart[:]
         del self.to_restart[:]
@@ -275,23 +256,18 @@ class ModulesManager(object):
             else:
                 self.to_restart.append(inst)
 
-
     # Do not give to others inst that got problems
     def get_internal_instances(self, phase=None):
-        return [ inst for inst in self.instances if not inst.is_external and phase in inst.phases and inst not in self.to_restart]
-
+        return [inst for inst in self.instances if not inst.is_external and phase in inst.phases and inst not in self.to_restart]
 
     def get_external_instances(self, phase=None):
-        return [ inst for inst in self.instances if inst.is_external and phase in inst.phases and inst not in self.to_restart]
-
+        return [inst for inst in self.instances if inst.is_external and phase in inst.phases and inst not in self.to_restart]
 
     def get_external_to_queues(self):
-        return [ inst.to_q for inst in self.instances if inst.is_external and inst not in self.to_restart]
-
+        return [inst.to_q for inst in self.instances if inst.is_external and inst not in self.to_restart]
 
     def get_external_from_queues(self):
-        return [ inst.from_q for inst in self.instances if inst.is_external and inst not in self.to_restart]
-
+        return [inst.from_q for inst in self.instances if inst.is_external and inst not in self.to_restart]
 
     def stop_all(self):
         # Ask internal to quit if they can
@@ -299,5 +275,4 @@ class ModulesManager(object):
             if hasattr(inst, 'quit') and callable(inst.quit):
                 inst.quit()
 
-        self.clear_instances([ inst for inst in self.instances if inst.is_external])
-
+        self.clear_instances([inst for inst in self.instances if inst.is_external])

@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import time
 import os
 import re
@@ -36,11 +35,8 @@ from shinken.trigger_functions import objs, trigger_functions
 #objs = {'hosts': [], 'services': []}
 
 
-
-
-
 class Trigger(Item):
-    id = 1 # zero is always special in database, so we do not take risk here
+    id = 1  # zero is always special in database, so we do not take risk here
     my_type = 'trigger'
 
     properties = Item.properties.copy()
@@ -51,24 +47,19 @@ class Trigger(Item):
     running_properties = Item.running_properties.copy()
     running_properties.update({'code_bin': StringProp(default=None)})
 
-
     # For debugging purpose only (nice name)
     def get_name(self):
         try:
             return self.trigger_name
         except AttributeError:
             return 'UnnamedTrigger'
-
-
 #    def __init__(self, ref, code):
 #        self.ref = ref
 #        self.code = code.replace(r'\n', '\n').replace(r'\t', '\t')
 
-
     def compile(self):
         logger.debug("[trigger::%s] compiling trigger" % self.get_name())
         self.code_bin = compile(self.code_src, "<irc>", "exec")
-
 
     # ctx is the object we are evaluating the code. In the code
     # it will be "self".
@@ -78,12 +69,11 @@ class Trigger(Item):
         self = ctx
 
         # Ok we can declare for this trigger call our functions
-        for (n,f) in trigger_functions.iteritems():
+        for (n, f) in trigger_functions.iteritems():
             locals()[n] = f
 
         code = myself.code_bin  # Comment? => compile(myself.code_bin, "<irc>", "exec")
         exec code in dict(locals())
-
 
     def __getstate__(self):
         return {'trigger_name': self.trigger_name, 'code_src': self.code_src}
@@ -96,7 +86,6 @@ class Trigger(Item):
 class Triggers(Items):
     name_property = "trigger_name"
     inner_class = Trigger
-
 
     # We will dig into the path and load all .trig files
     def load_file(self, path):
@@ -116,7 +105,6 @@ class Triggers(Items):
                         continue
                     self.create_trigger(buf, file[:-5])
 
-
     # Create a trigger from the string src, and with the good name
     def create_trigger(self, src, name):
         # Ok, go compile the code
@@ -127,11 +115,9 @@ class Triggers(Items):
         self[t.id] = t
         return t
 
-
     def compile(self):
         for i in self:
             i.compile()
-
 
     def load_objects(self, conf):
         logger.debug("[trigger] loading objects in the triggers")

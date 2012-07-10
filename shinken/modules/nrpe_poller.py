@@ -27,7 +27,6 @@
 # This Class is an example of an Scheduler module
 # Here for the configuration phase AND running one
 
-
 import sys
 import signal
 import time
@@ -54,7 +53,6 @@ except ImportError:
 from Queue import Empty
 from shinken.basemodule import BaseModule
 
-
 properties = {
     'daemons': ['poller'],
     'type': 'nrpe_poller',
@@ -72,6 +70,7 @@ def get_instance(mod_conf):
 
 
 class NRPE:
+
     # Really build the buffer query with our command
     def build_query(self, command):
         '''
@@ -92,21 +91,19 @@ class NRPE:
             return
 
         # We pack it, then we compute CRC32 of this first query
-        self.query = struct.pack(">2hih1024scc",02,01,crc,0,command,'N','D')
+        self.query = struct.pack(">2hih1024scc", 02, 01, crc, 0, command, 'N', 'D')
         crc = binascii.crc32(self.query)
 
         # we restart with the crc value this time
         # because python2.4 do not have pack_into.
-        self.query = struct.pack(">2hih1024scc",02,01,crc,0,command,'N','D')
+        self.query = struct.pack(">2hih1024scc", 02, 01, crc, 0, command, 'N', 'D')
 
-
-    def init_query(self,host, port, use_ssl, command):
+    def init_query(self, host, port, use_ssl, command):
         self.state = 'creation'
         #print 'build with', command
         self.build_query(command)
         self.host = host
         self.port = port
-
 
 #    def send(self):
 #        self.state = 'sent'
@@ -147,7 +144,7 @@ class NRPE:
 
         try:
             response = struct.unpack(">2hih1024s", data)
-        except: # bad format...
+        except:  # bad format...
             self.rc = 3
             self.message = "Error : cannot read output from nrpe daemon..."
             return (self.rc, self.message)
@@ -159,9 +156,6 @@ class NRPE:
         crc_orig = response[2]
 
         return (self.rc, self.message)
-
-
-
 
 
 class NRPEAsyncClient(asyncore.dispatcher):
@@ -194,10 +188,9 @@ class NRPEAsyncClient(asyncore.dispatcher):
 
         try:
             #print "Connect to", host, port
-            self.connect( (host, port) )
-        except socket.error,exp:
+            self.connect((host, port))
+        except socket.error, exp:
             self.set_exit(2, str(exp))
-
 
     def wrap_ssl(self):
         self.context = OpenSSL.SSL.Context(OpenSSL.SSL.TLSv1_METHOD)
@@ -205,21 +198,17 @@ class NRPEAsyncClient(asyncore.dispatcher):
         self.socket = OpenSSL.SSL.Connection(self.context, self.socket)
         self.set_accept_state()
 
-
     def handle_connect(self):
         pass
 
-
     def handle_close(self):
         self.close()
-
 
     def set_exit(self, rc, message):
         self.rc = rc
         self.message = message
         self.execution_time = time.time() - self.start_time
         self.nrpe.state = 'received'
-
 
     # Check if we are in timeout. If so, just bailout
     # and set the correct return code from timeout
@@ -233,7 +222,6 @@ class NRPEAsyncClient(asyncore.dispatcher):
                 rc = 2
             message = 'Error : connection timeout after %d seconds' % self.timeout
             self.set_exit(rc, message)
-
 
     # We got a read for the socket. We do it if we do not already
     # finished. Maybe it's just a SSL handshake continuation, if so
@@ -310,10 +298,8 @@ class NRPEAsyncClient(asyncore.dispatcher):
             # so we bufferize it
             self.nrpe.query = self.nrpe.query[sent:]
 
-
     def is_done(self):
         return self.nrpe.state == 'received'
-
 
 
 def parse_args(cmd_args):
@@ -354,21 +340,16 @@ def parse_args(cmd_args):
     return (host, port, unknown_on_timeout, command, timeout, use_ssl, add_args)
 
 
-
-
-
 # Just print some stuff
 class Nrpe_poller(BaseModule):
 
     def __init__(self, mod_conf):
         BaseModule.__init__(self, mod_conf)
 
-
     # Called by poller to say 'let's prepare yourself guy'
     def init(self):
         print "Initialization of the nrpe poller module"
         self.i_am_dying = False
-
 
     # Get new checks if less than nb_checks_max
     # If no new checks got and no check in queue,
@@ -382,11 +363,9 @@ class Nrpe_poller(BaseModule):
                 if msg is not None:
                     self.checks.append(msg.get_data())
                 #print "I", self.id, "I've got a message!"
-        except Empty , exp:
+        except Empty, exp:
             if len(self.checks) == 0:
                 time.sleep(1)
-
-
 
     # Launch checks that are in status
     # REF: doc/shinken-action-queues.png (4)
@@ -427,7 +406,6 @@ class Nrpe_poller(BaseModule):
                 n = NRPEAsyncClient(host, port, use_ssl, timeout, unknown_on_timeout, cmd)
                 chk.con = n
 
-
     # Check the status of checks
     # if done, return message finished :)
     # REF: doc/shinken-action-queues.png (5)
@@ -449,7 +427,7 @@ class Nrpe_poller(BaseModule):
                 to_del.append(c)
                 try:
                     self.returns_queue.put(c)
-                except IOError , exp:
+                except IOError, exp:
                     print "[%d]Exiting: %s" % (self.id, exp)
                     sys.exit(2)
                 continue
@@ -459,7 +437,7 @@ class Nrpe_poller(BaseModule):
                 c.status = 'done'
                 c.exit_status = getattr(n, 'rc', 3)
                 c.get_outputs(getattr(n, 'message', 'Error in launching command.'), 8012)
-                c.execution_time  = getattr(n, 'execution_time', 0.0)
+                c.execution_time = getattr(n, 'execution_time', 0.0)
 
                 # unlink our object from the original check
                 if hasattr(c, 'con'):
@@ -470,14 +448,13 @@ class Nrpe_poller(BaseModule):
                 to_del.append(c)
                 try:
                     self.returns_queue.put(c)
-                except IOError , exp:
+                except IOError, exp:
                     print "[%d]Exiting: %s" % (self.id, exp)
                     sys.exit(2)
 
         # And delete finished checks
         for chk in to_del:
             self.checks.remove(chk)
-
 
     # id = id of the worker
     # s = Global Queue Master->Slave
@@ -524,5 +501,3 @@ class Nrpe_poller(BaseModule):
             timeout -= time.time() - begin
             if timeout < 0:
                 timeout = 1.0
-
-

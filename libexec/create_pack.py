@@ -25,7 +25,6 @@ import sys
 import os
 
 
-
 def usage():
     print "%s pack_name path" % sys.argv[0]
     sys.exit(1)
@@ -33,8 +32,6 @@ def usage():
 
 if len(sys.argv) < 2:
     usage()
-
-
 
 pack_name = sys.argv[1]
 path = sys.argv[2]
@@ -60,15 +57,14 @@ if not os.path.exists(pack_path):
 # Now the templates.cfg creation
 templates = """
 define host{
-   name				%s
-   use				generic-host
-   check_command           	check_ping
-   register			0
+   name            %s
+   use             generic-host
+   check_command   check_ping
+   register        0
 }
 """ % pack_name
 
 create_file('templates.cfg', templates)
-
 
 # Now the macros
 macros = """
@@ -93,18 +89,16 @@ define discoveryrule {
 
 create_file('discovery.cfg', discovery)
 
-
 # Now the commands
 commands = """
 # EDIT the command with the real one you want
 define command {
-       command_name     check_%s
-       command_line	$PLUGINSDIR$/check_%s -H $HOSTADDRESS$
+       command_name  check_%s
+       command_line  $PLUGINSDIR$/check_%s -H $HOSTADDRESS$
 }
 """ % (pack_name, pack_name)
 
 create_file('commands.cfg', commands)
-
 
 # And a sample service
 service = """
@@ -113,10 +107,9 @@ define service{
    service_description    Sample-%s
    use                    generic-service
    register               0
-   host_name	          %s
+   host_name              %s
    check_command          check_%s
 }
 """ % (pack_name, pack_name, pack_name)
 
 create_file(os.path.join('services', 'sample.cfg'), service)
-

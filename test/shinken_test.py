@@ -18,7 +18,6 @@ sys.path.append("../shinken")
 #sys.path.append("../bin")
 #sys.path.append(os.path.abspath("bin"))
 
-
 import shinken
 from shinken.objects.config import Config
 from shinken.objects.command import Command
@@ -47,7 +46,6 @@ from shinken.daemons.schedulerdaemon import Shinken
 from shinken.daemons.brokerdaemon import Broker
 from shinken.daemons.arbiterdaemon import Arbiter
 
-
 from shinken.modules import livestatus_broker
 from shinken.modules.livestatus_broker import LiveStatus_broker
 from shinken.modules.livestatus_broker.livestatus import LiveStatus
@@ -69,6 +67,7 @@ time.my_offset = 0
 time.my_starttime = time.time()
 time.my_oldtime = time.time
 
+
 def my_time_time():
     now = time.my_oldtime() + time.my_offset
     return now
@@ -76,11 +75,13 @@ def my_time_time():
 original_time_time = time.time
 time.time = my_time_time
 
+
 def my_time_sleep(delay):
     time.my_offset += delay
 
 original_time_sleep = time.sleep
 time.sleep = my_time_sleep
+
 
 def time_warp(duration):
     time.my_offset += duration
@@ -169,14 +170,12 @@ class ShinkenTest(unittest.TestCase):
 
         self.sched.schedule()
 
-
     def add(self, b):
         if isinstance(b, Brok):
             self.broks[b.id] = b
             return
         if isinstance(b, ExternalCommand):
             self.sched.run_external_command(b.cmd_line)
-
 
     def fake_check(self, ref, exit_status, output="OK"):
         #print "fake", ref
@@ -201,7 +200,6 @@ class ShinkenTest(unittest.TestCase):
         check.status = 'waitconsume'
         self.sched.waiting_results.append(check)
 
-
     def scheduler_loop(self, count, reflist, do_sleep=False, sleep_time=61):
         for ref in reflist:
             (obj, exit_status, output) = ref
@@ -225,7 +223,6 @@ class ShinkenTest(unittest.TestCase):
             if do_sleep:
                 time.sleep(sleep_time)
 
-
     def worker_loop(self):
         self.sched.delete_zombie_checks()
         self.sched.delete_zombie_actions()
@@ -244,7 +241,6 @@ class ShinkenTest(unittest.TestCase):
         self.show_actions()
         #print "------------ worker loop end ----------------"
 
-
     def show_logs(self):
         print "--- logs <<<----------------------------------"
         for brok in sorted(self.sched.broks.values(), lambda x, y: x.id - y.id):
@@ -252,7 +248,6 @@ class ShinkenTest(unittest.TestCase):
                 brok.prepare()
                 print "LOG:", brok.data['log']
         print "--- logs >>>----------------------------------"
-
 
     def show_actions(self):
         print "--- actions <<<----------------------------------"
@@ -267,24 +262,19 @@ class ShinkenTest(unittest.TestCase):
                 print "EVENTHANDLER:", a
         print "--- actions >>>----------------------------------"
 
-
     def show_and_clear_logs(self):
         self.show_logs()
         self.clear_logs()
-
 
     def show_and_clear_actions(self):
         self.show_actions()
         self.clear_actions()
 
-
     def count_logs(self):
         return len([b for b in self.sched.broks.values() if b.type == 'log'])
 
-
     def count_actions(self):
         return len(self.sched.actions.values())
-
 
     def clear_logs(self):
         id_to_del = []
@@ -294,10 +284,8 @@ class ShinkenTest(unittest.TestCase):
         for id in id_to_del:
             del self.sched.broks[id]
 
-
     def clear_actions(self):
         self.sched.actions = {}
-
 
     def log_match(self, index, pattern):
         # log messages are counted 1...n, so index=1 for the first message
@@ -315,7 +303,6 @@ class ShinkenTest(unittest.TestCase):
                     lognum += 1
         return False
 
-
     def any_log_match(self, pattern):
         regex = re.compile(pattern)
         for brok in sorted(self.sched.broks.values(), lambda x, y: x.id - y.id):
@@ -324,7 +311,6 @@ class ShinkenTest(unittest.TestCase):
                 if re.search(regex, brok.data['log']):
                     return True
         return False
-
 
     def get_log_match(self, pattern):
         regex = re.compile(pattern)
@@ -335,20 +321,14 @@ class ShinkenTest(unittest.TestCase):
                     res.append(brok.data['log'])
         return res
 
-
-
     def print_header(self):
         print "#" * 80 + "\n" + "#" + " " * 78 + "#"
         print "#" + string.center(self.id(), 78) + "#"
         print "#" + " " * 78 + "#\n" + "#" * 80 + "\n"
 
-
-
-
     def xtest_conf_is_correct(self):
         self.print_header()
         self.assert_(self.conf.conf_is_correct)
-
 
     def find_modules_path(self):
         """ Find the absolute path of the shinken module directory and returns it.  """
@@ -372,8 +352,6 @@ class ShinkenTest(unittest.TestCase):
     def do_load_modules(self):
         self.modules_manager.load_and_init()
         self.log.log("I correctly loaded the modules: [%s]" % (','.join([inst.get_name() for inst in self.modules_manager.instances])))
-
-
 
     def init_livestatus(self, modconf=None):
         self.livelogs = 'tmp/livelogs.db' + self.testid
@@ -411,7 +389,7 @@ class ShinkenTest(unittest.TestCase):
             if inst.properties["type"].startswith('logstore'):
                 f = getattr(inst, 'load', None)
                 if f and callable(f):
-                    f(self.livestatus_broker) #!!! NOT self here !!!!
+                    f(self.livestatus_broker)  # !!! NOT self here !!!!
                 break
         for s in self.livestatus_broker.debug_output:
             print "errors during load", s

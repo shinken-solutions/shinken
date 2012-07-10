@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import sys
 import os
 import time
@@ -39,6 +38,7 @@ from shinken.log import logger
 from shinken.brok import Brok
 from shinken.external_command import ExternalCommand
 
+
 # Interface for the other Arbiter
 # It connects, and together we decide who's the Master and who's the Slave, etc.
 # Here is a also a function to get a new conf from the master
@@ -48,7 +48,7 @@ class IForArbiter(Interface):
         # I've got a conf and a good one
         if self.app.cur_conf and self.app.cur_conf.magic_hash == magic_hash:
             return True
-        else: # I've no conf or a bad one
+        else:  # I've no conf or a bad one
             return False
 
     # The master Arbiter is sending us a new conf. Ok, we take it
@@ -70,11 +70,9 @@ class IForArbiter(Interface):
             self.app.last_master_speack = time.time()
             self.app.must_run = False
 
-
-
     # Here a function called by check_shinken to get daemon status
     def get_satellite_status(self, daemon_type, daemon_name):
-        daemon_name_attr = daemon_type+"_name"
+        daemon_name_attr = daemon_type + "_name"
         daemons = self.app.get_daemons(daemon_type)
         if daemons:
             for dae in daemons:
@@ -86,7 +84,7 @@ class IForArbiter(Interface):
     # Here a function called by check_shinken to get daemons list
     def get_satellite_list(self, daemon_type):
         satellite_list = []
-        daemon_name_attr = daemon_type+"_name"
+        daemon_name_attr = daemon_type + "_name"
         daemons = self.app.get_daemons(daemon_type)
         if daemons:
             for dae in daemons:
@@ -98,11 +96,9 @@ class IForArbiter(Interface):
             return satellite_list
         return None
 
-
     # Dummy call. We are the master, we manage what we want
     def what_i_managed(self):
         return {}
-
 
     def get_all_states(self):
         res = {'arbiter': self.app.conf.arbiters,
@@ -112,7 +108,6 @@ class IForArbiter(Interface):
                'receiver': self.app.conf.receivers,
                'broker': self.app.conf.brokers}
         return res
-
 
     # Try to give some properties of our objects
     def get_objects_properties(self, table, *properties):
@@ -161,7 +156,6 @@ class Arbiter(Daemon):
         self.interface = IForArbiter(self)
         self.conf = Config()
 
-
     # Use for adding things like broks
     def add(self, b):
         if isinstance(b, Brok):
@@ -170,7 +164,6 @@ class Arbiter(Daemon):
             self.external_commands.append(b)
         else:
             logger.warning('Cannot manage object type %s (%s)' % (type(b), b))
-
 
     # We must push our broks to the broker
     # because it's stupid to make a crossing connection
@@ -187,7 +180,6 @@ class Arbiter(Daemon):
                     # They are gone, we keep none!
                     self.broks.clear()
 
-
     # We must take external_commands from all satellites
     # like brokers, pollers, reactionners or receivers
     def get_external_commands_from_satellites(self):
@@ -201,7 +193,6 @@ class Arbiter(Daemon):
                     for new_cmd in new_cmds:
                         self.external_commands.append(new_cmd)
 
-
     # Our links to satellites can raise broks. We must send them
     def get_broks_from_satellitelinks(self):
         tabs = [self.conf.brokers, self.conf.schedulers,
@@ -213,7 +204,6 @@ class Arbiter(Daemon):
                 for b in new_broks:
                     self.add(b)
 
-
     # Our links to satellites can raise broks. We must send them
     def get_initial_broks_from_satellitelinks(self):
         tabs = [self.conf.brokers, self.conf.schedulers,
@@ -221,20 +211,17 @@ class Arbiter(Daemon):
                 self.conf.receivers]
         for tab in tabs:
             for s in tab:
-                b  = s.get_initial_status_brok()
+                b = s.get_initial_status_brok()
                 self.add(b)
-
 
     # Load the external commander
     def load_external_command(self, e):
         self.external_command = e
         self.fifo = e.open()
 
-
     def get_daemon_links(self, daemon_type):
         # the attribute name to get these differs for schedulers and arbiters
-        return daemon_type+'s'
-
+        return daemon_type + 's'
 
     def load_config_file(self):
         logger.debug("Loading configuration")
@@ -243,7 +230,6 @@ class Arbiter(Daemon):
         raw_objects = self.conf.read_config_buf(buf)
 
         logger.debug("Opening local log file")
-
 
         # First we need to get arbiters and modules
         # so we can ask them for objects
@@ -262,7 +248,7 @@ class Arbiter(Daemon):
 
                 # Set myself as alive ;)
                 self.me.alive = True
-            else: # not me
+            else:  # not me
                 arb.need_conf = True
 
         if not self.me:
@@ -304,7 +290,6 @@ class Arbiter(Daemon):
                             # now append the object
                             raw_objects[k].append(x)
                         logger.debug("Added %i objects to %s from module %s" % (len(r[prop]), k, inst.get_name()))
-
 
         ### Resume standard operations ###
         self.conf.create_objects(raw_objects)
@@ -454,8 +439,6 @@ class Arbiter(Daemon):
 
         logger.info("Configuration Loaded", print_it=True)
 
-
-
     def launch_analyse(self):
         try:
             import json
@@ -471,7 +454,7 @@ class Arbiter(Daemon):
         for t in types:
             lst = getattr(self.conf, t)
             nb = len([i for i in lst])
-            stats['nb_'+t] = nb
+            stats['nb_' + t] = nb
             print "Got", nb, "for", t
 
         max_srv_by_host = max([len(h.services) for h in self.conf.hosts])
@@ -483,7 +466,6 @@ class Arbiter(Daemon):
         print "Saving stats data", s
         f.write(s)
         f.close()
-
 
     # Main loop function
     def main(self):
@@ -516,7 +498,6 @@ class Arbiter(Daemon):
             logger.critical("Back trace of it: %s" % (traceback.format_exc()))
             raise
 
-
     def setup_new_conf(self):
         """ Setup a new conf received from a Master arbiter. """
         conf = self.new_conf
@@ -528,8 +509,7 @@ class Arbiter(Daemon):
                 self.me = arb
                 arb.is_me = lambda: True  # we now definitively know who we are, just keep it.
             else:
-                arb.is_me = lambda: False # and we know who we are not, just keep it.
-
+                arb.is_me = lambda: False  # and we know who we are not, just keep it.
 
     def do_loop_turn(self):
         # If I am a spare, I wait for the master arbiter to send me
@@ -545,7 +525,6 @@ class Arbiter(Daemon):
         if self.must_run:
             # Main loop
             self.run()
-
 
     # Get 'objects' from external modules
     # It can be used to get external commands for example
@@ -619,13 +598,11 @@ class Arbiter(Daemon):
             # clean them
             sched.external_commands = []
 
-
     # We will log if there are time period activations
     # change as NOTICE in logs.
     def check_and_log_tp_activation_change(self):
         for tp in self.conf.timeperiods:
             tp.check_and_log_activation_change()
-
 
     # Main function
     def run(self):
@@ -672,18 +649,18 @@ class Arbiter(Daemon):
                 else:
                     self.fifo = self.external_command.open()
                     if self.fifo is not None:
-                        suppl_socks = [ self.fifo ]
+                        suppl_socks = [self.fifo]
                     else:
                         suppl_socks = None
                 elapsed += time.time() - now
 
             if elapsed or ins:
                 timeout -= elapsed
-                if timeout > 0: # only continue if we are not over timeout
+                if timeout > 0:  # only continue if we are not over timeout
                     continue
 
             # Timeout
-            timeout = 1.0 # reset the timeout value
+            timeout = 1.0  # reset the timeout value
 
             # Try to see if one of my module is dead, and
             # try to restart previously dead modules :)
@@ -730,11 +707,10 @@ class Arbiter(Daemon):
                 self.dump_memory()
                 self.need_dump_memory = False
 
-
     def get_daemons(self, daemon_type):
         """ Returns the daemons list defined in our conf for the given type """
         # shouldn't the 'daemon_types' (whatever it is above) be always present?
-        return getattr(self.conf, daemon_type+'s', None)
+        return getattr(self.conf, daemon_type + 's', None)
 
     # Helper functions for retention modules
     # So we give our broks and external commands
@@ -750,4 +726,3 @@ class Arbiter(Daemon):
         external_commands = data['external_commands']
         self.broks.update(broks)
         self.external_commands.extend(external_commands)
-

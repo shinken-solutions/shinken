@@ -33,6 +33,7 @@ from shinken.db import DB
 
 class DBMysql(DB):
     """DBMysql is a MySQL access database class"""
+
     def __init__(self, host, user, password, database, character_set,
                  table_prefix='', port=3306):
         self.host = host

@@ -33,12 +33,10 @@ from shinken.modules import ip_tag_arbiter
 from shinken.modules.ip_tag_arbiter import get_instance
 
 
-
 class TestIpTag(ShinkenTest):
 
     def setUp(self):
         self.setup_with_file('etc/nagios_module_ip_tag.cfg')
-
 
     def test_hack_cmd_poller_tag(self):
         modconf = self.conf.modules.find_by_name('IpTag')
@@ -59,7 +57,6 @@ class TestIpTag(ShinkenTest):
         # Calls the mod with our config
         mod.hook_early_configuration(self)
 
-
         print "H1", h1.poller_tag
         self.assert_(h1.poller_tag == 'None')
 
@@ -68,7 +65,6 @@ class TestIpTag(ShinkenTest):
         # We can't check the check_command, becausewe fake the early conf in a late time
         # so we can't have tagged it.
         #self.assert_(h2.check_command.poller_tag == 'DMZ')
-
 
     def test_hack_cmd_grp(self):
         modconf = self.conf.modules.find_by_name('IpTagAppend')
@@ -92,7 +88,6 @@ class TestIpTag(ShinkenTest):
         # Calls the mod with our config
         mod.hook_early_configuration(self)
 
-
         print "H1", h1.hostgroups
         self.assert_('newgroup' not in h1.hostgroups)
 
@@ -106,4 +101,3 @@ class TestIpTag(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

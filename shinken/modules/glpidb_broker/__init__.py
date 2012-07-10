@@ -41,7 +41,7 @@ def get_instance(plugin):
     # First try to import
     try:
         from glpidb_broker import Glpidb_broker
-    except ImportError , exp:
+    except ImportError, exp:
         print "Warning: the plugin type %s is unavailable: %s" % (properties['type'], exp)
         return None
 
@@ -52,14 +52,14 @@ def get_instance(plugin):
         user = plugin.user
         password = plugin.password
         database = plugin.database
-        if hasattr( plugin, 'character_set'):
+        if hasattr(plugin, 'character_set'):
             character_set = plugin.character_set
         else:
             character_set = 'utf8'
 
         instance = Glpidb_broker(plugin, host=host, user=user, password=password, database=database, character_set=character_set)
         return instance
-    except ImportError , exp:
+    except ImportError, exp:
         print "Warning: the plugin type %s is unavailable: %s" % (properties['type'], exp)
         return None
 
