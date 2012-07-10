@@ -108,7 +108,7 @@ class TestConfig(ShinkenTest):
             print s.get_name()
 
         # We ask for our 6*46 + 6 services with our ports :)
-        # _ports			 Unit [1-6] Port [0-46]$(80%!90%)$,Unit [1-6] Port 47$(80%!90%)$
+        # _ports  Unit [1-6] Port [0-46]$(80%!90%)$,Unit [1-6] Port 47$(80%!90%)$
         for unit_id in xrange(1, 7):
             for port_id in xrange(0, 47):
                 n = "Unit %d Port %d" % (unit_id, port_id)

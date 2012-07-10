@@ -60,10 +60,10 @@ if not os.path.exists(pack_path):
 # Now the templates.cfg creation
 templates = """
 define host{
-   name				%s
-   use				generic-host
-   check_command           	check_ping
-   register			0
+   name            %s
+   use             generic-host
+   check_command   check_ping
+   register        0
 }
 """ % pack_name
 
@@ -98,8 +98,8 @@ create_file('discovery.cfg', discovery)
 commands = """
 # EDIT the command with the real one you want
 define command {
-       command_name     check_%s
-       command_line	$PLUGINSDIR$/check_%s -H $HOSTADDRESS$
+       command_name  check_%s
+       command_line  $PLUGINSDIR$/check_%s -H $HOSTADDRESS$
 }
 """ % (pack_name, pack_name)
 
@@ -113,7 +113,7 @@ define service{
    service_description    Sample-%s
    use                    generic-service
    register               0
-   host_name	          %s
+   host_name              %s
    check_command          check_%s
 }
 """ % (pack_name, pack_name, pack_name)

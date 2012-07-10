@@ -106,11 +106,11 @@ class Helper(object):
            <span class="help-inline span2"> %s </span>
 
         <script>properties.push({'name': '%s', 'type': 'bool'});</script>
-	<div class="btn-group span9 %s" data-toggle="buttons-radio">
-	  <button class="btn %s %s" type="button" name="%s" value="1" >On</button>
-	  <button class="btn %s %s" type="button" name="%s" value="0" >Off</button>
-	  <button class="btn %s %s" type="button" name="%s" value="" >Unset</button>
-	</div>
+        <div class="btn-group span9 %s" data-toggle="buttons-radio">
+          <button class="btn %s %s" type="button" name="%s" value="1" >On</button>
+          <button class="btn %s %s" type="button" name="%s" value="0" >Off</button>
+          <button class="btn %s %s" type="button" name="%s" value="" >Unset</button>
+        </div>
         </span>''' % (name, prop, editable, on, editable, prop, off, editable, prop, unset, editable, prop)
         return s
 

@@ -5,7 +5,7 @@
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
 #    Hartmut Goebel, h.goebel@goebel-consult.de
-# 	 Andreas Karfusehr, andreas@karfusehr.de
+#    Andreas Karfusehr, andreas@karfusehr.de
 #
 # This file is part of Shinken.
 #
@@ -207,8 +207,8 @@ class Helper(object):
 
         # Set the right info panel
         d['data']['infos'] = r'''%s <h2 class="%s"><img style="width: 64px; height:64px" src="%s"/> %s: %s</h2>
-		       <p>since %s</p>
-		       <div style="float:right;"> <a href="%s">%s</a></div>'''  % (
+                   <p>since %s</p>
+                   <div style="float:right;"> <a href="%s">%s</a></div>'''  % (
             '<img src="/static/img/icons/star.png" alt="star">' * (elt.business_impact - 2),
             elt.state.lower(), self.get_icon_state(elt), elt.state, elt.get_full_name(),
             self.print_duration(elt.last_state_change, just_duration=True, x_elts=2),

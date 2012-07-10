@@ -63,13 +63,13 @@ def get_div(elt):
         %s
           %s
         <div class="item-icon">
-	  <img class="wall-icon" src="%s"></img>
+         <img class="wall-icon" src="%s"></img>
         </div>
         <div class="item-text">
           <span class="state_%s">%s %s</span>
         </div>
-	<div class="item-button">
-	   <a href="%s">%s</a>
+        <div class="item-button">
+         <a href="%s">%s</a>
         </div>
         <div class="recheck-button">
            %s

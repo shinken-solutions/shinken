@@ -69,13 +69,13 @@ def get_div(elt):
         %s
           %s
         <div class="item-icon">
-	  <img class="wall-icon" src="%s"></img>
+         <img class="wall-icon" src="%s"></img>
         </div>
         <div class="item-text">
           <span class="state_%s">%s <br/> %s</span>
         </div>
-	<div class="item-button">
-	<a href="%s">%s</a>
+        <div class="item-button">
+         <a href="%s">%s</a>
         </div>
 
         """ % (stars, pulse, icon,  elt.state.lower(), elt.state, elt.get_full_name(), lnk, button)# stars, button)
