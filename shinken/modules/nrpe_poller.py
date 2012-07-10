@@ -188,7 +188,7 @@ class NRPEAsyncClient(asyncore.dispatcher):
 
         try:
             #print "Connect to", host, port
-            self.connect( (host, port) )
+            self.connect((host, port))
         except socket.error, exp:
             self.set_exit(2, str(exp))
 

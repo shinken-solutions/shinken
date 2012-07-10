@@ -422,7 +422,7 @@ class TestEscalations(ShinkenTest):
         for n in svc.notifications_in_progress.values():
             print n, n.t_to_go, time.time(), n.t_to_go - time.time()
             # Should be "near" one day now, so 84000s
-            self.assert_( 8300 < abs(n.t_to_go - time.time()) < 85000)
+            self.assert_(8300 < abs(n.t_to_go - time.time()) < 85000)
         # And so no notification
         self.assert_(not self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;'))
 

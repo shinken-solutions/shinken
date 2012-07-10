@@ -34,10 +34,10 @@ class TacModel:
         q = GetRequest()
         r = GetResponse()
         q.table = Table.hosts
-        q.stats = [ StatRequest("state", "=", "0"),
+        q.stats = [StatRequest("state", "=", "0"),
              StatRequest("state", "=", "1"),
              StatRequest("state", "=", "2"),
-             StatRequest("state", "=", "3") ]
+             StatRequest("state", "=", "3")]
 
         r = self.shinken.get(q)
 
@@ -47,10 +47,10 @@ class TacModel:
         q = GetRequest()
         r = GetResponse()
         q.table = Table.services
-        q.stats = [ StatRequest("state", "=", "0"),
+        q.stats = [StatRequest("state", "=", "0"),
              StatRequest("state", "=", "1"),
              StatRequest("state", "=", "2"),
-             StatRequest("state", "=", "3") ]
+             StatRequest("state", "=", "3")]
 
         r = self.shinken.get(q)
 

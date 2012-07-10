@@ -102,6 +102,6 @@ def lookup_tag_post(cls=''):
 
     return json.dumps(r)
 
-pages = {lookup_tag_post: { 'routes': ['/lookup/:cls/tag'] , 'method': 'POST'},
-         lookup: { 'routes': ['/lookup/:cls/tag/:name']},
+pages = {lookup_tag_post: {'routes': ['/lookup/:cls/tag'], 'method': 'POST'},
+         lookup: {'routes': ['/lookup/:cls/tag/:name']},
          }

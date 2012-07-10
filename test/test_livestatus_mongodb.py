@@ -551,8 +551,8 @@ OutputFormat: json"""
         print "whole database", numlogs, min(times), max(times)
         numlogs = self.livestatus_broker.db.conn.bigbigbig.logs.find({
             '$and': [
-                {'time': { '$gt': min(times)} },
-                {'time': { '$lte': max(times)} }
+                {'time': {'$gt': min(times)}},
+                {'time': {'$lte': max(times)}}
             ]}).count()
         now = max(times)
         daycount = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -560,8 +560,8 @@ OutputFormat: json"""
             one_day_earlier = now - 3600*24
             numlogs = self.livestatus_broker.db.conn.bigbigbig.logs.find({
                 '$and': [
-                    {'time': { '$gt': one_day_earlier} },
-                    {'time': { '$lte': now} }
+                    {'time': {'$gt': one_day_earlier}},
+                    {'time': {'$lte': now}}
                 ]}).count()
             daycount[day] = numlogs
             print "day -%02d %d..%d - %d" % (day, one_day_earlier, now, numlogs)
@@ -572,8 +572,8 @@ OutputFormat: json"""
             one_day_earlier = now - 3600*24
             numlogs = self.livestatus_broker.db.conn.bigbigbig.logs.find({
                 '$and': [
-                    {'time': { '$gt': one_day_earlier} },
-                    {'time': { '$lte': now} }
+                    {'time': {'$gt': one_day_earlier}},
+                    {'time': {'$lte': now}}
                 ]}).count()
             print "day -%02d %d..%d - %d" % (day, one_day_earlier, now, numlogs)
             now = one_day_earlier

@@ -78,9 +78,9 @@ class Itemgroup(Item):
     # so a python list :)
     # We also strip elements because spaces Stinks!
     def pythonize(self):
-        self.members = [ mbr for mbr in
-                            ( m.strip() for m in getattr(self, 'members', '').split(',') )
-                        if mbr != '' ]
+        self.members = [mbr for mbr in
+                            (m.strip() for m in getattr(self, 'members', '').split(','))
+                        if mbr != '']
 
     def replace_members(self, members):
         self.members = members
@@ -145,7 +145,7 @@ class Itemgroup(Item):
         data['members'] = []
         for i in self.members:
             # it look like lisp! ((( ..))), sorry....
-            data['members'].append( (i.id, i.get_name()) )
+            data['members'].append((i.id, i.get_name()))
         b = Brok('initial_' + cls.my_type + '_status', data)
         return b
 

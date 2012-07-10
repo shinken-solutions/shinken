@@ -107,7 +107,7 @@ def check_key(api_key):
     r = {'state': 200, 'text': 'Congrats! Connexion is OK!'}
     return json.dumps(r)
 
-pages = {get_page: { 'routes': ['/user/:username'], 'view': 'user', 'static': True},
-         post_user: { 'routes': ['/user'], 'method': 'POST', 'view': 'user', 'static': True},
-         check_key: { 'routes': ['/checkkey/:api_key']},
+pages = {get_page: {'routes': ['/user/:username'], 'view': 'user', 'static': True},
+         post_user: {'routes': ['/user'], 'method': 'POST', 'view': 'user', 'static': True},
+         check_key: {'routes': ['/checkkey/:api_key']},
          }

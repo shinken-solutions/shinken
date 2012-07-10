@@ -290,8 +290,8 @@ class Webui_broker(BaseModule, Daemon):
         print "Loading plugin directory: %s" % plugin_dir
 
         # Load plugin directories
-        plugin_dirs = [ fname for fname in os.listdir(plugin_dir)
-                        if os.path.isdir(os.path.join(plugin_dir, fname)) ]
+        plugin_dirs = [fname for fname in os.listdir(plugin_dir)
+                        if os.path.isdir(os.path.join(plugin_dir, fname))]
 
         print "Plugin dirs", plugin_dirs
         sys.path.append(plugin_dir)

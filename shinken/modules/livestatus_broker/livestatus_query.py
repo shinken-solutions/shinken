@@ -165,7 +165,7 @@ class LiveStatusQuery(object):
                     attribute = self.strip_table_from_column(attribute)
                     # Some operators can simply be negated
                     if operator in ['!>', '!>=', '!<', '!<=']:
-                        operator = { '!>': '<=', '!>=': '<', '!<': '>=', '!<=': '>' }[operator]
+                        operator = {'!>': '<=', '!>=': '<', '!<': '>=', '!<=': '>'}[operator]
                     # Put a function on top of the filter_stack which implements
                     # the desired operation
                     self.filtercolumns.append(attribute)
@@ -222,7 +222,7 @@ class LiveStatusQuery(object):
                 attribute = self.strip_table_from_column(attribute)
                 if operator in ['=', '>', '>=', '<', '<=', '=~', '~', '~~', '!=', '!>', '!>=', '!<', '!<=']:
                     if operator in ['!>', '!>=', '!<', '!<=']:
-                        operator = { '!>': '<=', '!>=': '<', '!<': '>=', '!<=': '>' }[operator]
+                        operator = {'!>': '<=', '!>=': '<', '!<': '>=', '!<=': '>'}[operator]
                     self.filtercolumns.append(attribute)
                     self.stats_columns.append(attribute)
                     self.stats_filter_stack.put_stack(self.make_filter(operator, attribute, reference))
@@ -423,21 +423,21 @@ class LiveStatusQuery(object):
                         reduce(list.__add__
                             #, [ getattr(x, t) for x in self.datamgr.rg.services + self.datamgr.rg.hosts
                                    # if len(getattr(x, t)) > 0 ]
-                            , [ getattr(x, t) for x in self.datamgr.rg.services
-                                    if len(getattr(x, t)) > 0 ] +
-                             [ getattr(x, t) for x in self.datamgr.rg.hosts
-                                    if len(getattr(x, t)) > 0 ]
+                            , [getattr(x, t) for x in self.datamgr.rg.services
+                                    if len(getattr(x, t)) > 0] +
+                             [getattr(x, t) for x in self.datamgr.rg.hosts
+                                    if len(getattr(x, t)) > 0]
                             , [])
             ]
         else:
             res = [c for c in reduce(list.__add__
-                        , [ getattr(x, t) for x in self.datamgr.rg.services
+                        , [getattr(x, t) for x in self.datamgr.rg.services
                                 if len(getattr(x, t)) > 0] +
-                         [ getattr(x, t) for x in self.datamgr.rg.hosts
+                         [getattr(x, t) for x in self.datamgr.rg.hosts
                                 if len(getattr(x, t)) > 0]
                         , []
                         )
-                    if cs.filter_func(c) ]
+                    if cs.filter_func(c)]
         return res
 
     def get_group_livedata(self, cs, objs, groupattr1, groupattr2, sorter):
@@ -499,13 +499,13 @@ class LiveStatusQuery(object):
         # The name of the table;table;columns;string
         # The data type of the column (int, float, string, list);type;columns;string
         result.append({
-            'description': 'A description of the column' , 'name': 'description' , 'table': 'columns' , 'type': 'string' })
+            'description': 'A description of the column', 'name': 'description', 'table': 'columns', 'type': 'string'})
         result.append({
-            'description': 'The name of the column within the table' , 'name': 'name' , 'table': 'columns' , 'type': 'string' })
+            'description': 'The name of the column within the table', 'name': 'name', 'table': 'columns', 'type': 'string'})
         result.append({
-            'description': 'The name of the table' , 'name': 'table' , 'table': 'columns' , 'type': 'string' })
+            'description': 'The name of the table', 'name': 'table', 'table': 'columns', 'type': 'string'})
         result.append({
-            'description': 'The data type of the column (int, float, string, list)' , 'name': 'type' , 'table': 'columns' , 'type': 'string' })
+            'description': 'The data type of the column (int, float, string, list)', 'name': 'type', 'table': 'columns', 'type': 'string'})
         tablenames = ['hosts', 'services', 'hostgroups', 'servicegroups', 'contacts', 'contactgroups', 'commands', 'downtimes', 'comments', 'timeperiods', 'status', 'log', 'hostsbygroup', 'servicesbygroup', 'servicesbyhostgroup', 'status']
         for table in tablenames:
             cls = self.table_class_map[table][1]
@@ -611,7 +611,7 @@ class LiveStatusQuery(object):
         return output
 
     def get_live_data_log(self, cs):
-        firstdb = [x for x in self.db.get_live_data_log() ]
+        firstdb = [x for x in self.db.get_live_data_log()]
         dbresult = [z for z in (
             x.fill(self.datamgr) for x in [copy.copy(y) for y in firstdb]
  # we better manipulate a copy of the rg objects

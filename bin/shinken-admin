@@ -268,7 +268,7 @@ class ShinkenAdmin(cmd.Cmd):
                 print "+%s+" % ("-".center(86, '-'))
                 print "| Config for: {0:71} |".format(type)
                 print "+%s+" % ("-".center(106, '-'))
-                print "| {0:8} | {1:30} | {2:60} |".format("Default", "Directive", "Value" )
+                print "| {0:8} | {1:30} | {2:60} |".format("Default", "Directive", "Value")
                 print "+%s+" % ("-".center(106, '-'))
                 for key in o.properties.keys():
                     elts = None

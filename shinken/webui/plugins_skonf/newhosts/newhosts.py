@@ -130,7 +130,7 @@ def tag_unmanaged(hname):
         redirect("/user/login")
 
     print "Look for infinite delete for", hname
-    r = app.db.discovered_hosts.update({'_id': hname}, { '$set': { '_discovery_state': 'disabled' }})
+    r = app.db.discovered_hosts.update({'_id': hname}, {'$set': {'_discovery_state': 'disabled'}})
 
 
 def post_validatehost():
@@ -160,7 +160,7 @@ def post_validatehost():
         print "Insert result", r
 
     # Set this host as added in the discovered_hosts as _discovery_state='added'
-    r = app.db.discovered_hosts.update({'_id': _id}, { '$set': { '_discovery_state': 'added' }})
+    r = app.db.discovered_hosts.update({'_id': _id}, {'$set': {'_discovery_state': 'added'}})
     print "result of update", r
 
     return None
@@ -173,11 +173,11 @@ def post_validatehost():
 #    the dummy/htdocs/ directory. Bewere: it will take the plugin name to match.
 #  * optional: you can add 'method': 'POST' so this adress will be only available for
 #    POST calls. By default it's GET. Look at the lookup module for sample about this.
-pages = {get_newhosts: { 'routes': ['/newhosts'], 'view': 'newhosts', 'static': True},
-         get_launch: { 'routes': ['/newhosts/launch'], 'view': 'newhosts_launch', 'static': True, 'method': 'POST'},
-         get_scans: { 'routes': ['/newhosts/scans'], 'view': 'newhosts_scans', 'static': True},
-         get_results: { 'routes': ['/newhosts/results'], 'view': 'newhosts_results', 'static': True},
-         post_validatehost: { 'routes': ['/newhosts/validatehost'], 'view': None, 'method': 'POST'},
-         delete_host: { 'routes': ['/newhosts/delete/:hname'], 'view': None},
-         tag_unmanaged: { 'routes': ['/newhosts/tagunmanaged/:hname'], 'view': None},
+pages = {get_newhosts: {'routes': ['/newhosts'], 'view': 'newhosts', 'static': True},
+         get_launch: {'routes': ['/newhosts/launch'], 'view': 'newhosts_launch', 'static': True, 'method': 'POST'},
+         get_scans: {'routes': ['/newhosts/scans'], 'view': 'newhosts_scans', 'static': True},
+         get_results: {'routes': ['/newhosts/results'], 'view': 'newhosts_results', 'static': True},
+         post_validatehost: {'routes': ['/newhosts/validatehost'], 'view': None, 'method': 'POST'},
+         delete_host: {'routes': ['/newhosts/delete/:hname'], 'view': None},
+         tag_unmanaged: {'routes': ['/newhosts/tagunmanaged/:hname'], 'view': None},
          }

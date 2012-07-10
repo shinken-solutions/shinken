@@ -58,7 +58,7 @@ class Host_perfdata_broker(BaseModule):
     # Conf from arbiter!
     def init(self):
         print "I open the host-perfdata file '%s'" % self.path
-        self.file = codecs.open( self.path, self.mode, "utf-8" )
+        self.file = codecs.open(self.path, self.mode, "utf-8")
 
     # We've got a 0, 1, 2 or 3 (or something else? ->3
     # And want a real OK, WARNING, CRITICAL, etc...

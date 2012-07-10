@@ -55,7 +55,7 @@ if __name__ == "__main__":
     main()
     parser = argparse.ArgumentParser()
     parser.add_argument('-w', '--warning', default='3,2,1')
-    parser.add_argument('-c', '--critical', default='4,3,2' )
+    parser.add_argument('-c', '--critical', default='4,3,2')
     args = parser.parse_args()
     critical = args.critical
     warning = args.warning

@@ -67,7 +67,7 @@ class Dummy_arbiter(BaseModule):
              }
 
         r['hosts'].append(h)
-        r['hosts'].append( {
+        r['hosts'].append({
                             'host_name': "dummyhost1",
                             'use': 'linux-server',
                             'address': 'localhost'

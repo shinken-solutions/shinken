@@ -61,7 +61,7 @@ class Service_perfdata_broker(BaseModule):
     def init(self):
         print "[%s] I open the service-perfdata file '%s'" % (self.name, self.path)
         # Try to open the file to be sure we can
-        self.file = codecs.open( self.path, self.mode, "utf-8" )
+        self.file = codecs.open(self.path, self.mode, "utf-8")
         self.file.close()
 
     # We've got a 0, 1, 2 or 3 (or something else? ->3

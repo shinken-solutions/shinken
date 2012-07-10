@@ -290,32 +290,32 @@ class ThriftQuery(Hooker):
 
     def get_simple_livedata(self, cs):
         objects = getattr(self, self.table)
-        return [ self.create_output(cs.output_map, obj) for obj in objects.values() ]
+        return [self.create_output(cs.output_map, obj) for obj in objects.values()]
 
     def get_filtered_livedata(self, cs):
         objects = getattr(self, self.table).values()
         if cs.without_filter:
-            return [ y for y in [ self.create_output(cs.output_map, x) for x in objects ] if cs.filter_func(y) ]
-        res = [ x for x in objects if cs.filter_func(self.create_output(cs.filter_map, x)) ]
-        return [ self.create_output(cs.output_map, x) for x in res ]
+            return [y for y in [self.create_output(cs.output_map, x) for x in objects] if cs.filter_func(y)]
+        res = [x for x in objects if cs.filter_func(self.create_output(cs.filter_map, x))]
+        return [self.create_output(cs.output_map, x) for x in res]
 
     def get_list_livedata(self, cs):
         t = self.table
         if cs.without_filter:
-            res = [ self.create_output(cs.output_map, y) for y in
+            res = [self.create_output(cs.output_map, y) for y in
                         reduce(list.__add__
-                            , [ getattr(x, t) for x in self.services.values() + self.hosts.values()
-                                    if len(getattr(x, t)) > 0 ]
+                            , [getattr(x, t) for x in self.services.values() + self.hosts.values()
+                                    if len(getattr(x, t)) > 0]
                             , [])
             ]
         else:
-            res = [ c for c in reduce(list.__add__
-                        , [ getattr(x, t) for x in self.services.values() + self.hosts.values()
+            res = [c for c in reduce(list.__add__
+                        , [getattr(x, t) for x in self.services.values() + self.hosts.values()
                                 if len(getattr(x, t)) > 0]
                         , []
                         )
-                    if cs.filter_func(self.create_output(cs.filter_map, c)) ]
-            res = [ self.create_output(cs.output_map, x) for x in res ]
+                    if cs.filter_func(self.create_output(cs.filter_map, c))]
+            res = [self.create_output(cs.output_map, x) for x in res]
         return res
 
     def get_group_livedata(self, cs, objs, an, group_key, member_key):
@@ -324,10 +324,10 @@ objs: the objects to get elements from.
 an: the attribute name to set on result.
 group_key: the key to be used to sort the group members.
 member_key: the key to be used to sort each resulting element of a group member. """
-        return [ self.create_output(cs.output_map, x) for x in (
+        return [self.create_output(cs.output_map, x) for x in (
                     svc for svc in (
                         setattr(og[0], an, og[1]) or og[0] for og in (
-                            ( copy.copy(item0), inner_list0[1]) for inner_list0 in (
+                            (copy.copy(item0), inner_list0[1]) for inner_list0 in (
                                 (sorted(sg1.members, key=member_key), sg1) for sg1 in
                                     sorted([sg0 for sg0 in objs if sg0.members], key=group_key)
                                 ) for item0 in inner_list0[0]
@@ -358,35 +358,35 @@ member_key: the key to be used to sort each resulting element of a group member.
                 pb = Problem(s, s.impacts)
                 problems.append(pb)
         # Then return
-        return [ self.create_output(cs.output_map, pb) for pb in problems ]
+        return [self.create_output(cs.output_map, pb) for pb in problems]
 
     def get_status_livedata(self, cs):
         cs.out_map = self.out_map['Config']
-        return [ self.create_output(cs.output_map, c) for c in self.configs.values() ]
+        return [self.create_output(cs.output_map, c) for c in self.configs.values()]
 
     def get_columns_livedata(self, cs):
         result = []
         result.append({
-            'description': 'A description of the column' , 'name': 'description' , 'table': 'columns' , 'type': 'string' })
+            'description': 'A description of the column', 'name': 'description', 'table': 'columns', 'type': 'string'})
         result.append({
-            'description': 'The name of the column within the table' , 'name': 'name' , 'table': 'columns' , 'type': 'string' })
+            'description': 'The name of the column within the table', 'name': 'name', 'table': 'columns', 'type': 'string'})
         result.append({
-            'description': 'The name of the table' , 'name': 'table' , 'table': 'columns' , 'type': 'string' })
+            'description': 'The name of the table', 'name': 'table', 'table': 'columns', 'type': 'string'})
         result.append({
-            'description': 'The data type of the column (int, float, string, list)' , 'name': 'type' , 'table': 'columns' , 'type': 'string' })
-        tablenames = { 'Host': 'hosts', 'Service': 'services', 'Hostgroup': 'hostgroups', 'Servicegroup': 'servicegroups', 'Contact': 'contacts', 'Contactgroup': 'contactgroups', 'Command': 'commands', 'Downtime': 'downtimes', 'Comment': 'comments', 'Timeperiod': 'timeperiods', 'Config': 'status', 'Logline': 'log', 'Statsbygroup': 'statsgroupby', 'Hostsbygroup': 'hostsbygroup', 'Servicesbygroup': 'servicesbygroup', 'Servicesbyhostgroup': 'servicesbyhostgroup' }
+            'description': 'The data type of the column (int, float, string, list)', 'name': 'type', 'table': 'columns', 'type': 'string'})
+        tablenames = {'Host': 'hosts', 'Service': 'services', 'Hostgroup': 'hostgroups', 'Servicegroup': 'servicegroups', 'Contact': 'contacts', 'Contactgroup': 'contactgroups', 'Command': 'commands', 'Downtime': 'downtimes', 'Comment': 'comments', 'Timeperiod': 'timeperiods', 'Config': 'status', 'Logline': 'log', 'Statsbygroup': 'statsgroupby', 'Hostsbygroup': 'hostsbygroup', 'Servicesbygroup': 'servicesbygroup', 'Servicesbyhostgroup': 'servicesbyhostgroup'}
         for obj in sorted(LSout_map, key=lambda x: x):
             if obj in tablenames:
                 for attr in LSout_map[obj]:
                     if 'description' in LSout_map[obj][attr] and LSout_map[obj][attr]['description']:
-                        result.append({ 'description': LSout_map[obj][attr]['description'], 'name': attr, 'table': tablenames[obj], 'type': LSout_map[obj][attr]['type'] })
+                        result.append({'description': LSout_map[obj][attr]['description'], 'name': attr, 'table': tablenames[obj], 'type': LSout_map[obj][attr]['type']})
                     else:
-                        result.append({'description': 'to_do_desc', 'name': attr, 'table': tablenames[obj], 'type': LSout_map[obj][attr]['type'] })
+                        result.append({'description': 'to_do_desc', 'name': attr, 'table': tablenames[obj], 'type': LSout_map[obj][attr]['type']})
         return result
 
     def get_servicebyhostgroups_livedata(self, cs):
         # to test..
-        res = [ self.create_output(cs.output_map, x) for x in (
+        res = [self.create_output(cs.output_map, x) for x in (
                 svc for svc in (
                     setattr(svchgrp[0], 'hostgroup', svchgrp[1]) or svchgrp[0] for svchgrp in (
                         # (service, hostgroup), (service, hostgroup), (service, hostgroup), ...  service objects are individuals
@@ -741,28 +741,28 @@ member_key: the key to be used to sort each resulting element of a group member.
             if reference == '':
                 return ['%s IS NULL' % attribute, ()]
             else:
-                return ['%s = ?' % attribute, (reference, )]
+                return ['%s = ?' % attribute, (reference,)]
 
         def ne_filter():
             if reference == '':
                 return ['%s IS NOT NULL' % attribute, ()]
             else:
-                return ['%s != ?' % attribute, (reference, )]
+                return ['%s != ?' % attribute, (reference,)]
 
         def gt_filter():
-            return ['%s > ?' % attribute, (reference, )]
+            return ['%s > ?' % attribute, (reference,)]
 
         def ge_filter():
-            return ['%s >= ?' % attribute, (reference, )]
+            return ['%s >= ?' % attribute, (reference,)]
 
         def lt_filter():
-            return ['%s < ?' % attribute, (reference, )]
+            return ['%s < ?' % attribute, (reference,)]
 
         def le_filter():
-            return ['%s <= ?' % attribute, (reference, )]
+            return ['%s <= ?' % attribute, (reference,)]
 
         def match_filter():
-            return ['%s LIKE ?' % attribute, ('%' + reference + '%', )]
+            return ['%s LIKE ?' % attribute, ('%' + reference + '%',)]
         if operator == '=':
             return eq_filter
         if operator == '>':

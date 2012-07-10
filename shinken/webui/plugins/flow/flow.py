@@ -116,4 +116,4 @@ def get_page():
 
     return {'app': app, 'user': user, 'impacts': impacts, 'problems': all_pbs}
 
-pages = {get_page: { 'routes': ['/flow/'], 'view': 'flow', 'static': True}}
+pages = {get_page: {'routes': ['/flow/'], 'view': 'flow', 'static': True}}

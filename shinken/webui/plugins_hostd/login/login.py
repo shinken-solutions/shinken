@@ -115,13 +115,13 @@ def login_mobile():
 
     return {'error': err, 'login_text': login_text}
 
-pages = { user_login: { 'routes': ['/user/login', '/user/login/'],
+pages = {user_login: {'routes': ['/user/login', '/user/login/'],
                          'view': 'login', 'static': True},
-          user_login_redirect: { 'routes': ['/login'] , 'static': True},
-          user_auth: { 'routes': ['/user/auth'],
+          user_login_redirect: {'routes': ['/login'], 'static': True},
+          user_auth: {'routes': ['/user/auth'],
                         'view': 'auth',
                         'method': 'POST', 'static': True},
-          user_logout: { 'routes': ['/user/logout', '/logout'] , 'static': True},
+          user_logout: {'routes': ['/user/logout', '/logout'], 'static': True},
           get_root: {'routes': ['/'], 'static': True},
           login_mobile: {'routes': ['/mobile', '/mobile/'],
                     'view': 'login_mobile', 'static': True}

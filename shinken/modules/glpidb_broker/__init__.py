@@ -52,7 +52,7 @@ def get_instance(plugin):
         user = plugin.user
         password = plugin.password
         database = plugin.database
-        if hasattr( plugin, 'character_set'):
+        if hasattr(plugin, 'character_set'):
             character_set = plugin.character_set
         else:
             character_set = 'utf8'

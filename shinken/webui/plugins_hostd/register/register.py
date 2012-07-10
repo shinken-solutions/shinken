@@ -102,9 +102,9 @@ def get_api_key():
     else:
         abort(401, 'Sorry, you need valid credentials to access to your API key')
 
-pages = {register: { 'routes': ['/register'], 'view': 'register', 'static': True},
-         is_name_available: { 'routes': ['/availability'], 'method': 'POST', 'view': None, 'static': True},
-         do_register: { 'routes': ['/register'], 'method': 'POST', 'view': 'register', 'static': True},
-         validate: { 'routes': ['/validate'], 'view': 'validate', 'static': True},
-         get_api_key: { 'routes': ['/apikey'], 'method': 'POST'},
+pages = {register: {'routes': ['/register'], 'view': 'register', 'static': True},
+         is_name_available: {'routes': ['/availability'], 'method': 'POST', 'view': None, 'static': True},
+         do_register: {'routes': ['/register'], 'method': 'POST', 'view': 'register', 'static': True},
+         validate: {'routes': ['/validate'], 'view': 'validate', 'static': True},
+         get_api_key: {'routes': ['/apikey'], 'method': 'POST'},
          }

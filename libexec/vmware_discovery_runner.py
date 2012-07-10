@@ -43,7 +43,7 @@ VERSION = '0.1'
 
 # Search if we can findthe check_esx3.pl file somewhere
 def search_for_check_esx3():
-    me = os.path.abspath( __file__ )
+    me = os.path.abspath(__file__)
     my_dir = os.path.dirname(me)
     possible_paths = [os.path.join(my_dir, 'check_esx3.pl'),
                       '/var/lib/nagios/check_esx3.pl',

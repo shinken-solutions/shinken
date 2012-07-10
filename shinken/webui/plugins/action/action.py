@@ -110,4 +110,4 @@ def get_page(cmd=None):
 
     return forge_response(callback, 200, 'Command launched')
 
-pages = {get_page: { 'routes': ['/action/:cmd#.+#']}}
+pages = {get_page: {'routes': ['/action/:cmd#.+#']}}

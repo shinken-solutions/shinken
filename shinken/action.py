@@ -38,13 +38,13 @@ except ImportError:
 from shinken.util import safe_print
 from shinken.log import logger
 
-__all__ = ( 'Action' )
+__all__ = ('Action')
 
 valid_exit_status = (0, 1, 2, 3)
 
 only_copy_prop = ('id', 'status', 'command', 't_to_go', 'timeout', 'env', 'module_type', 'execution_time')
 
-shellchars = ( '!', '$', '^', '&', '*', '(', ')', '~', '[', ']',
+shellchars = ('!', '$', '^', '&', '*', '(', ')', '~', '[', ']',
                    '|', '{', '}', ';', '<', '>', '?', '`')
 
 

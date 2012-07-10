@@ -29,15 +29,15 @@ from shinken.util import strip_and_uniq
 from shinken.property import BoolProp, IntegerProp, StringProp
 from shinken.log import logger
 
-_special_properties = ( 'service_notification_commands', 'host_notification_commands',
+_special_properties = ('service_notification_commands', 'host_notification_commands',
                         'service_notification_period', 'host_notification_period',
                         'service_notification_options', 'host_notification_options',
-                        'host_notification_commands', 'contact_name' )
+                        'host_notification_commands', 'contact_name')
 
-_simple_way_parameters = ( 'service_notification_period', 'host_notification_period',
+_simple_way_parameters = ('service_notification_period', 'host_notification_period',
                            'service_notification_options', 'host_notification_options',
                            'service_notification_commands', 'host_notification_commands',
-                           'min_business_impact' )
+                           'min_business_impact')
 
 
 class Contact(Item):

@@ -48,7 +48,7 @@ They connect here and see if they are still OK with our running_id, if not, they
         return self.running_id
 
     # poller or reactionner ask us actions
-    def get_checks(self , do_checks=False, do_actions=False, poller_tags=['None'], \
+    def get_checks(self, do_checks=False, do_actions=False, poller_tags=['None'], \
                        reactionner_tags=['None'], worker_name='none', \
                        module_types=['fork']):
         #print "We ask us checks"

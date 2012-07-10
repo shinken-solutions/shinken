@@ -42,4 +42,4 @@ def get_page():
 
     return {'app': app, 'user': user}
 
-pages = {get_page: { 'routes': ['/worldmap'], 'view': 'worldmap', 'static': True}}
+pages = {get_page: {'routes': ['/worldmap'], 'view': 'worldmap', 'static': True}}

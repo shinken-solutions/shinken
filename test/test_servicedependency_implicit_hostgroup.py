@@ -49,14 +49,14 @@ class TestServiceDepAndGroups(ShinkenTest):
         svc_snmp2 = self.sched.services.find_srv_by_name_and_hostname("test_router_0", "SNMP")
         self.assert_(svc_snmp2 is not None)
 
-        svc_postfix_fathers = [ c[0].get_full_name() for c in svc_postfix.act_depend_of]
+        svc_postfix_fathers = [c[0].get_full_name() for c in svc_postfix.act_depend_of]
         print svc_postfix_fathers
         # Should be [u'test_router_0/SNMP', u'test_host_0/SNMP', u'test_host_0']
         self.assert_('test_router_0/SNMP' in svc_postfix_fathers)
         self.assert_('test_host_0/SNMP' in svc_postfix_fathers)
 
         # Now look for the routers services
-        svc_cpu_fathers = [ c[0].get_full_name() for c in svc_cpu.act_depend_of]
+        svc_cpu_fathers = [c[0].get_full_name() for c in svc_cpu.act_depend_of]
         print svc_cpu_fathers
         # Should be [u'test_router_0/SNMP', u'test_host_0/SNMP', u'test_host_0']
         self.assert_('test_router_0/SNMP' in svc_cpu_fathers)
@@ -80,13 +80,13 @@ class TestServiceDepAndGroups(ShinkenTest):
         svc_cpu = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "CPU_BYSSH")
         self.assert_(svc_cpu is not None)
 
-        svc_postfix_fathers = [ c[0].get_full_name() for c in svc_postfix.act_depend_of]
+        svc_postfix_fathers = [c[0].get_full_name() for c in svc_postfix.act_depend_of]
         print svc_postfix_fathers
         # Should be [u'test_router_0/SNMP', u'test_host_0/SNMP', u'test_host_0']
         self.assert_('test_host_0/SSH' in svc_postfix_fathers)
 
         # Now look for the routers services
-        svc_cpu_fathers = [ c[0].get_full_name() for c in svc_cpu.act_depend_of]
+        svc_cpu_fathers = [c[0].get_full_name() for c in svc_cpu.act_depend_of]
         print svc_cpu_fathers
         # Should be [u'test_router_0/SNMP', u'test_host_0/SNMP', u'test_host_0']
         self.assert_('test_host_0/SSH' in svc_cpu_fathers)

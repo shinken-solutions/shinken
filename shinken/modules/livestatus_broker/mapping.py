@@ -4341,7 +4341,7 @@ table_class_map = {
     'brokers': ('BrokerLink', BrokerLink),
     'problems': ('Problem', Problem),
     'columns': ('Config', Config),  # just a dummy
-    None: ('', type('commandclass', (object, ), {'lsm_columns': []})),
+    None: ('', type('commandclass', (object,), {'lsm_columns': []})),
 }
 
 """Build the new livestatus-methods and add delegate keys for certain attributes.

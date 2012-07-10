@@ -626,8 +626,8 @@ class Skonf(Daemon):
         print "Loading plugin directory: %s" % plugin_dir
 
         # Load plugin directories
-        plugin_dirs = [ fname for fname in os.listdir(plugin_dir)
-                        if os.path.isdir(os.path.join(plugin_dir, fname)) ]
+        plugin_dirs = [fname for fname in os.listdir(plugin_dir)
+                        if os.path.isdir(os.path.join(plugin_dir, fname))]
 
         print "Plugin dirs", plugin_dirs
         sys.path.append(plugin_dir)
@@ -767,7 +767,7 @@ class Skonf(Daemon):
                 else:
                     self.fifo = self.external_command.open()
                     if self.fifo is not None:
-                        suppl_socks = [ self.fifo ]
+                        suppl_socks = [self.fifo]
                     else:
                         suppl_socks = None
                 elapsed += time.time() - now

@@ -38,7 +38,7 @@ class StatusFile:
             'host_name': {}, # 'host_name',
             'modified_attributes': {'prop': None, 'default': '0'},
             'check_command': {'depythonize': 'get_name'},
-            'check_period': {'prop': 'check_period' , 'depythonize': 'get_name'},
+            'check_period': {'prop': 'check_period', 'depythonize': 'get_name'},
             'notification_period': {'prop': 'notification_period', 'depythonize': 'get_name'},
             'check_interval': {},
             'retry_interval': {},

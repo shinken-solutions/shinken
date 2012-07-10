@@ -29,8 +29,8 @@ from shinken.util import strip_and_uniq
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 from shinken.log import logger
 
-_special_properties = ( 'contacts', 'contact_groups', 'first_notification_time', 'last_notification_time' )
-_special_properties_time_based = ( 'contacts', 'contact_groups', 'first_notification', 'last_notification' )
+_special_properties = ('contacts', 'contact_groups', 'first_notification_time', 'last_notification_time')
+_special_properties_time_based = ('contacts', 'contact_groups', 'first_notification', 'last_notification')
 
 
 class Escalation(Item):
@@ -204,8 +204,8 @@ class Escalations(Items):
             es_hname, sdesc = es.host_name, es.service_description
             if '' in (es_hname.strip(), sdesc.strip()):
                 continue
-            for hname in strip_and_uniq( es_hname.split(',') ):
-                for sname in strip_and_uniq( sdesc.split(',') ):
+            for hname in strip_and_uniq(es_hname.split(',')):
+                for sname in strip_and_uniq(sdesc.split(',')):
                     s = services.find_srv_by_name_and_hostname(hname, sname)
                     if s is not None:
                         #print "Linking service", s.get_name(), 'with me', es.get_name()

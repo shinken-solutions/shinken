@@ -101,10 +101,10 @@ class Graphite_Webui(BaseModule):
             # get the first value of ;
             if ';' in raw:
                 elts = raw.split(';')
-                name_value = { name: elts[0], name + '_warn': elts[1], name + '_crit': elts[2] }
+                name_value = {name: elts[0], name + '_warn': elts[1], name + '_crit': elts[2]}
             else:
                 value = raw
-                name_value = { name: raw }
+                name_value = {name: raw}
             # bailout if need
             if name_value[name] == '':
                 continue

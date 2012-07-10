@@ -429,7 +429,7 @@ class Helper(object):
     # Get the small state for host/service icons
     # and satellites ones
     def get_small_icon_state(self, obj):
-        if obj.__class__.my_type in ['service', 'host' ]:
+        if obj.__class__.my_type in ['service', 'host']:
             if obj.state == 'PENDING':
                 return 'unknown'
             if obj.state == 'OK':

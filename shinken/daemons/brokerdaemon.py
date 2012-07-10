@@ -523,7 +523,7 @@ class Broker(BaseSatellite):
         logger.debug("Begin Loop: managing old broks (%d)" % len(self.broks))
 
         # Dump modules Queues size
-        insts = [ inst for inst in self.modules_manager.instances if inst.is_external]
+        insts = [inst for inst in self.modules_manager.instances if inst.is_external]
         for inst in insts:
             try:
                 logger.debug("External Queue len (%s): %s" % (inst.get_name(), inst.to_q.qsize()))

@@ -121,8 +121,8 @@ widget_desc = '''<h3>Relation graph</h3>
 Show a graph of an object relations
 '''
 
-pages = {depgraph_host: { 'routes': ['/depgraph/:name'], 'view': 'depgraph', 'static': True},
-         depgraph_srv: { 'routes': ['/depgraph/:hname/:desc'], 'view': 'depgraph', 'static': True},
+pages = {depgraph_host: {'routes': ['/depgraph/:name'], 'view': 'depgraph', 'static': True},
+         depgraph_srv: {'routes': ['/depgraph/:hname/:desc'], 'view': 'depgraph', 'static': True},
          get_depgraph_widget: {'routes': ['/widget/depgraph'], 'view': 'widget_depgraph', 'static': True, 'widget': ['dashboard'], 'widget_desc': widget_desc, 'widget_name': 'depgraph', 'widget_picture': '/static/depgraph/img/widget_depgraph.png'},
          get_depgraph_inner: {'routes': ['/inner/depgraph/:name#.+#'], 'view': 'inner_depgraph', 'static': True},
          }

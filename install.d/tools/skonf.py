@@ -146,7 +146,7 @@ def main():
     else:
         config = None
 
-    allowed = [ 'poller', 'arbiter', 'scheduler', 'broker', 'receiver', 'reactionner' ]
+    allowed = ['poller', 'arbiter', 'scheduler', 'broker', 'receiver', 'reactionner']
 
     if action == "setparam":
         result, content = setparam(config, objectype, directive, value, filters)
@@ -203,13 +203,13 @@ def main():
         else:
             sys.exit(0)
     elif action == "showconfig":
-        allowed = [ 'poller', 'arbiter', 'scheduler', 'broker', 'receiver', 'reactionner', 'module' ]
+        allowed = ['poller', 'arbiter', 'scheduler', 'broker', 'receiver', 'reactionner', 'module']
         dumpconfig(objectype, config, allowed)
     elif action == "getobjectnames":
-        allowed = [ 'poller', 'arbiter', 'scheduler', 'broker', 'receiver', 'reactionner', 'module' ]
+        allowed = ['poller', 'arbiter', 'scheduler', 'broker', 'receiver', 'reactionner', 'module']
         getobjectnames(objectype, config, allowed)
     elif action == "cloneobject":
-        allowed = [ 'poller', 'arbiter', 'scheduler', 'broker', 'receiver', 'reactionner', 'module' ]
+        allowed = ['poller', 'arbiter', 'scheduler', 'broker', 'receiver', 'reactionner', 'module']
         if objectype not in allowed:
             print "Clone of %s is not supported" % (objectype)
             sys.exit(2)
@@ -297,7 +297,7 @@ def domacros(configfile, args=[]):
                 index_args += 1
             index_line += 1
 
-    allowed = [ "arbiter", "scheduler", "poller", "broker", "reactionner", "receiver" ]
+    allowed = ["arbiter", "scheduler", "poller", "broker", "reactionner", "receiver"]
 
     commands = {
             "onerror": r"(?P<action>\w+)",
@@ -471,7 +471,7 @@ def cloneobject(config, objectype, directive, filter):
 
 
 def getaddresses(config):
-    allowed = [ 'poller', 'arbiter', 'scheduler', 'broker', 'receiver', 'reactionner' ]
+    allowed = ['poller', 'arbiter', 'scheduler', 'broker', 'receiver', 'reactionner']
     addresses = []
     for (ot, oc) in config.items():
         if ot in allowed:
@@ -516,7 +516,7 @@ def showconfig(config, objectype, filters=""):
 def getsatellitesaddresses(config):
     import netifaces
     import re
-    allowed = [ 'poller', 'arbiter', 'scheduler', 'broker', 'receiver', 'reactionner' ]
+    allowed = ['poller', 'arbiter', 'scheduler', 'broker', 'receiver', 'reactionner']
     addresses = []
     local = []
 
@@ -654,7 +654,7 @@ def control(authfile, action):
         return (False, auth)
 
     """ which command for an action """
-    commands = { "stop": "service shinken stop", "start": "service shinken start", "restart": "service shinken restart"}
+    commands = {"stop": "service shinken stop", "start": "service shinken start", "restart": "service shinken restart"}
     if not commands.has_key(action):
         return (False, "Unknown action command")
 
@@ -710,7 +710,7 @@ def writeconfig(config, configfile):
 
 def addobject(config, objectype, directive):
     # allowed objects types to be added
-    allowed = [ 'poller', 'arbiter', 'scheduler', 'broker', 'receiver', 'reactionner' ]
+    allowed = ['poller', 'arbiter', 'scheduler', 'broker', 'receiver', 'reactionner']
 
     # veritfy if object type is allowed
     if not objectype in allowed:
@@ -837,7 +837,7 @@ def getdirective(config, objectype, directive, filters):
         else:
             return (False, "%s not found" % (objectype))
     except:
-        return (False, "Unknown error in getdirective" )
+        return (False, "Unknown error in getdirective")
 
 
 def setparam(config, objectype, directive, value, filters):

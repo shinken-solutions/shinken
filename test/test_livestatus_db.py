@@ -188,7 +188,7 @@ Columns: time type options state host_name"""
             print "stop  is", time.asctime(time.localtime(day[4]))
             print "archive is", day[2]
             print "handle is", day[1]
-        print self.livestatus_broker.db.log_db_relevant_files(now - 3600, now + 3600 )
+        print self.livestatus_broker.db.log_db_relevant_files(now - 3600, now + 3600)
 
     def test_num_logs(self):
         self.print_header()

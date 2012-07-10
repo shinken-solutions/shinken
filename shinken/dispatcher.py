@@ -67,8 +67,8 @@ class Dispatcher:
                 sat_name = getattr(satellite, key)
                 satellite.set_arbiter_satellitemap(arbiter.satellitemap.get(sat_name, {}))
 
-        self.dispatch_queue = { 'schedulers': [], 'reactionners': [],
-                                'brokers': [], 'pollers': [] , 'receivers': []}
+        self.dispatch_queue = {'schedulers': [], 'reactionners': [],
+                                'brokers': [], 'pollers': [], 'receivers': []}
         self.elements = []  # all elements, sched and satellites
         self.satellites = []  # only satellites not schedulers
 
@@ -189,7 +189,7 @@ class Dispatcher:
             for cfg_id in r.confs:
                 push_flavor = r.confs[cfg_id].push_flavor
                 try:
-                    for kind in ( 'reactionner', 'poller', 'broker' ):
+                    for kind in ('reactionner', 'poller', 'broker'):
                         # We must have the good number of satellite or we are not happy
                         # So we are sure to raise a dispatch every loop a satellite is missing
                         if len(r.to_satellites_managed_by[kind][cfg_id]) < r.get_nb_of_must_have_satellites(kind):
@@ -326,7 +326,7 @@ class Dispatcher:
         # If no needed to dispatch, do not dispatch :)
         if not self.dispatch_ok:
             for r in self.realms:
-                conf_to_dispatch = [ cfg for cfg in r.confs.values() if not cfg.is_assigned ]
+                conf_to_dispatch = [cfg for cfg in r.confs.values() if not cfg.is_assigned]
                 nb_conf = len(conf_to_dispatch)
                 if nb_conf > 0:
                     logger.info("Dispatching Realm %s" % r.get_name())
@@ -341,7 +341,7 @@ class Dispatcher:
                     logger.info(print_string)
 
                 # Try to send only for alive members
-                scheds = [ s for s in scheds if s.alive ]
+                scheds = [s for s in scheds if s.alive]
 
                 # Now we do the real job
                 # every_one_need_conf = False
@@ -361,7 +361,7 @@ class Dispatcher:
                             # need_loop = False
                             # The conf does not need to be dispatch
                             cfg_id = conf.id
-                            for kind in ( 'reactionner', 'poller', 'broker' ):
+                            for kind in ('reactionner', 'poller', 'broker'):
                                 r.to_satellites[kind][cfg_id] = None
                                 r.to_satellites_need_dispatch[kind][cfg_id] = False
                                 r.to_satellites_managed_by[kind][cfg_id] = []
@@ -408,7 +408,7 @@ class Dispatcher:
 
                         # Now we generate the conf for satellites:
                         cfg_id = conf.id
-                        for kind in ( 'reactionner', 'poller', 'broker' ):
+                        for kind in ('reactionner', 'poller', 'broker'):
                             r.to_satellites[kind][cfg_id] = sched.give_satellite_cfg()
                             r.to_satellites_need_dispatch[kind][cfg_id] = True
                             r.to_satellites_managed_by[kind][cfg_id] = []
@@ -418,7 +418,7 @@ class Dispatcher:
                         break
 
             # We pop conf to dispatch, so it must be no more conf...
-            conf_to_dispatch = [ cfg for cfg in self.conf.confs.values() if not cfg.is_assigned ]
+            conf_to_dispatch = [cfg for cfg in self.conf.confs.values() if not cfg.is_assigned]
             nb_missed = len(conf_to_dispatch)
             if nb_missed > 0:
                 logger.warning("All schedulers configurations are not dispatched, %d are missing" % nb_missed)
@@ -444,7 +444,7 @@ class Dispatcher:
                     cfg_id = cfg.id
                     # flavor if the push number of this configuration send to a scheduler
                     flavor = cfg.push_flavor
-                    for kind in ( 'reactionner', 'poller', 'broker' ):
+                    for kind in ('reactionner', 'poller', 'broker'):
                         if r.to_satellites_need_dispatch[kind][cfg_id]:
                             cfg_for_satellite_part = r.to_satellites[kind][cfg_id]
 

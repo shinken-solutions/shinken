@@ -70,7 +70,7 @@ class Resultmodulation(Item):
 
         # Then very special cases
         # Intify the exit_codes_match, and make list
-        self.exit_codes_match = [ int(ec) for ec in getattr(self, 'exit_codes_match', []) ]
+        self.exit_codes_match = [int(ec) for ec in getattr(self, 'exit_codes_match', [])]
 
         if hasattr(self, 'exit_code_modulation'):
             self.exit_code_modulation = int(self.exit_code_modulation)

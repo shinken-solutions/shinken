@@ -88,7 +88,7 @@ class EventHandler(Action):
     # So we remove the ref and all
     def copy_shell(self):
         # We create a dummy check with nothing in it, just defaults values
-        return self.copy_shell__( EventHandler('', id=self.id) )
+        return self.copy_shell__(EventHandler('', id=self.id))
 
     def get_return_from(self, e):
         self.exit_status = e.exit_status

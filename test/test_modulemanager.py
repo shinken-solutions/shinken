@@ -61,7 +61,7 @@ class TestModuleManager(ShinkenTest):
         self.modulemanager.load_and_init()
         # And start external ones, like our LiveStatus
         self.modulemanager.start_external_instances()
-        print "I correctly loaded the modules: %s " % ([ inst.get_name() for inst in self.modulemanager.instances ])
+        print "I correctly loaded the modules: %s " % ([inst.get_name() for inst in self.modulemanager.instances])
 
         print "*** First kill ****"
         # Now I will try to kill the livestatus module

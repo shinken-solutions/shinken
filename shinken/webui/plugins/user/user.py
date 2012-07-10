@@ -65,4 +65,4 @@ def save_pref():
 
     return
 
-pages = {save_pref: { 'routes': ['/user/save_pref'], 'method': 'POST'}}
+pages = {save_pref: {'routes': ['/user/save_pref'], 'method': 'POST'}}

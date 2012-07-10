@@ -101,9 +101,9 @@ def form_downtime(name):
 #    the dummy/htdocs/ directory. Bewere: it will take the plugin name to match.
 #  * optional: you can add 'method': 'POST' so this adress will be only available for
 #    POST calls. By default it's GET. Look at the lookup module for sample about this.
-pages = {get_page: { 'routes': ['/blabla'], 'view': 'blabla', 'static': True},
-         form_submit_check: { 'routes': ['/forms/submit_check/:name#.+#'], 'view': 'form_submit_check'},
-         form_ack: { 'routes': ['/forms/acknowledge/:name#.+#'], 'view': 'form_ack'},
-         form_comment: { 'routes': ['/forms/comment/:name#.+#'], 'view': 'form_comment'},
-         form_downtime: { 'routes': ['/forms/downtime/:name#.+#'], 'view': 'form_downtime'},
+pages = {get_page: {'routes': ['/blabla'], 'view': 'blabla', 'static': True},
+         form_submit_check: {'routes': ['/forms/submit_check/:name#.+#'], 'view': 'form_submit_check'},
+         form_ack: {'routes': ['/forms/acknowledge/:name#.+#'], 'view': 'form_ack'},
+         form_comment: {'routes': ['/forms/comment/:name#.+#'], 'view': 'form_comment'},
+         form_downtime: {'routes': ['/forms/downtime/:name#.+#'], 'view': 'form_downtime'},
          }

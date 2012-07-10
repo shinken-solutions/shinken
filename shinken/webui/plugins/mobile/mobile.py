@@ -305,13 +305,13 @@ def wall():
 
     return {'app': app, 'user': user, 'impacts': impacts, 'problems': all_pbs}
 
-pages = {main: { 'routes': ['/mobile/main'], 'view': 'mobile_main', 'static': True},
-         impacts: { 'routes': ['/mobile/impacts'], 'view': 'mobile_impacts', 'static': True},
-         problems: { 'routes': ['/mobile/problems'], 'view': 'mobile_problems', 'static': True},
-         dashboard: { 'routes': ['/mobile/dashboard'], 'view': 'mobile_problems', 'static': True},
-         system_page: { 'routes': ['/mobile/system'], 'view': 'mobile_system', 'static': True},
-         show_log: { 'routes': ['/mobile/log'], 'view': 'mobile_log', 'static': True},
-         show_host: { 'routes': ['/mobile/host/:name'], 'view': 'mobile_eltdetail', 'static': True},
-         show_service: { 'routes': ['/mobile/service/:hname/:desc#.+#'], 'view': 'mobile_eltdetail', 'static': True},
-         wall: { 'routes': ['/mobile/wall/', '/mobile/wall'], 'view': 'mobile_wall', 'static': True},
+pages = {main: {'routes': ['/mobile/main'], 'view': 'mobile_main', 'static': True},
+         impacts: {'routes': ['/mobile/impacts'], 'view': 'mobile_impacts', 'static': True},
+         problems: {'routes': ['/mobile/problems'], 'view': 'mobile_problems', 'static': True},
+         dashboard: {'routes': ['/mobile/dashboard'], 'view': 'mobile_problems', 'static': True},
+         system_page: {'routes': ['/mobile/system'], 'view': 'mobile_system', 'static': True},
+         show_log: {'routes': ['/mobile/log'], 'view': 'mobile_log', 'static': True},
+         show_host: {'routes': ['/mobile/host/:name'], 'view': 'mobile_eltdetail', 'static': True},
+         show_service: {'routes': ['/mobile/service/:hname/:desc#.+#'], 'view': 'mobile_eltdetail', 'static': True},
+         wall: {'routes': ['/mobile/wall/', '/mobile/wall'], 'view': 'mobile_wall', 'static': True},
          }

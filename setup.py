@@ -98,19 +98,19 @@ class build(_build):
 
 class install(_install):
     sub_commands = _install.sub_commands + [
-        ( 'install_config', None ),
+        ('install_config', None),
     ]
     user_options = _install.user_options + [
-        ( 'etc-path=', None, 'read-only single-machine data' ),
-        ( 'var-path=', None, 'modifiable single-machine data' ),
-        ( 'run-path=', None, 'PID files' ),
-        ( 'log-path=', None, 'LOG files' ),
-        ( 'plugins-path=', None, 'program executables' ),
-        ( 'owner=', None, (
+        ('etc-path=', None, 'read-only single-machine data'),
+        ('var-path=', None, 'modifiable single-machine data'),
+        ('run-path=', None, 'PID files'),
+        ('log-path=', None, 'LOG files'),
+        ('plugins-path=', None, 'program executables'),
+        ('owner=', None, (
                 'change owner for etc/*, var, run and log folders (default: %s)' % DEFAULT_OWNER
             )
         ),
-        ( 'group=', None, (
+        ('group=', None, (
                 'change group for etc/*, var, run and log folders (default: %s)' % DEFAULT_GROUP
             )
         ),
@@ -152,7 +152,7 @@ class build_config(Command):
     description = "build the shinken config files"
 
     user_options = [
-        ( 'build-dir=', None, "directory to build the config files to"),
+        ('build-dir=', None, "directory to build the config files to"),
     ]
 
     def initialize_options (self):
@@ -259,7 +259,7 @@ user=%s
 group=%s
 workdir=%s
 pidfile=%s/%sd.pid
-""" % ( self.owner, self.group, self.var_path, self.run_path, dname))
+""" % (self.owner, self.group, self.var_path, self.run_path, dname))
 
         # And now the resource.cfg path with the value of libexec path
         # Replace the libexec path by the one in the parameter file
@@ -284,7 +284,7 @@ shinken_user=%s
 shinken_group=%s
 lock_file=%s/arbiterd.pid
 local_log=%s/arbiterd.log
-""" % ( self.owner, self.group, self.run_path, self.log_path )
+""" % (self.owner, self.group, self.run_path, self.log_path)
             )
 
         # UPDATE Shinken-specific.cfg files too
@@ -305,10 +305,10 @@ class install_config(Command):
     description = "install the shinken config files"
 
     user_options = [
-        ( 'install-dir=', 'd', "directory to install config files to" ),
-        ( 'build-dir=',   'b', "build directory (where to install from)" ),
-        ( 'force',        'f', "force installation (overwrite existing files)"),
-        ( 'skip-build',   None, "skip the build steps" ),
+        ('install-dir=', 'd', "directory to install config files to"),
+        ('build-dir=',   'b', "build directory (where to install from)"),
+        ('force',        'f', "force installation (overwrite existing files)"),
+        ('skip-build',   None, "skip the build steps"),
     ]
 
     boolean_options = ['force', 'skip-build']
@@ -330,7 +330,7 @@ class install_config(Command):
     def finalize_options(self):
         self.set_undefined_options(
             'build',
-                ( 'build_config', 'build_dir' ),
+                ('build_config', 'build_dir'),
         )
         self.set_undefined_options(
             'install',
@@ -528,7 +528,7 @@ daemon_ini_files = (('broker', 'brokerd.ini'),
                     ('scheduler', 'schedulerd-windows.ini'),
                     )
 
-resource_cfg_files = ('resource.cfg', )
+resource_cfg_files = ('resource.cfg',)
 
 # Ok, for the webui files it's a bit tricky. we need to add all of them in
 #the package_data of setup(), but from a point of view of the
@@ -564,7 +564,7 @@ if not is_update:
 
     data_files.append(
         (os.path.join(etc_root, 'default',),
-         ['build/bin/default/shinken' ]
+         ['build/bin/default/shinken']
          ))
 #print "DATA", data_files
 

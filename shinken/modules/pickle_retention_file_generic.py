@@ -41,7 +41,7 @@ from shinken.commandcall import CommandCall
 shinken.objects.command.CommandCall = CommandCall
 
 properties = {
-    'daemons': ['broker', 'arbiter', 'scheduler' ],
+    'daemons': ['broker', 'arbiter', 'scheduler'],
     'type': 'pickle_retention_file_generic',
     'external': False,
     }

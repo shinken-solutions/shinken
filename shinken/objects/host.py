@@ -423,9 +423,9 @@ class Host(SchedulingItem):
             state = False
 
         # If active check is enabled with a check_interval!=0, we must have a check_period
-        if ( getattr(self, 'active_checks_enabled', False)
+        if (getattr(self, 'active_checks_enabled', False)
              and getattr(self, 'check_period', None) is None
-             and getattr(self, 'check_interval', 1) != 0 ):
+             and getattr(self, 'check_interval', 1) != 0):
             logger.info("%s: My check_period is not correct" % self.get_name())
             state = False
 
@@ -491,7 +491,7 @@ class Host(SchedulingItem):
         # First we remove in my list
         for (h, status, type, timeperiod, inherits_parent) in self.act_depend_of:
             if h == other:
-                to_del.append( (h, status, type, timeperiod, inherits_parent))
+                to_del.append((h, status, type, timeperiod, inherits_parent))
         for t in to_del:
             self.act_depend_of.remove(t)
 
@@ -499,7 +499,7 @@ class Host(SchedulingItem):
         to_del = []
         for (h, status, type, timeperiod, inherits_parent) in other.act_depend_of_me:
             if h == self:
-                to_del.append( (h, status, type, timeperiod, inherits_parent) )
+                to_del.append((h, status, type, timeperiod, inherits_parent))
         for t in to_del:
             other.act_depend_of_me.remove(t)
 
@@ -513,9 +513,9 @@ class Host(SchedulingItem):
     # and add ourself in it's dep list
     def add_host_act_dependency(self, h, status, timeperiod, inherits_parent):
         # I add him in MY list
-        self.act_depend_of.append( (h, status, 'logic_dep', timeperiod, inherits_parent) )
+        self.act_depend_of.append((h, status, 'logic_dep', timeperiod, inherits_parent))
         # And I add me in it's list
-        h.act_depend_of_me.append( (self, status, 'logic_dep', timeperiod, inherits_parent) )
+        h.act_depend_of_me.append((self, status, 'logic_dep', timeperiod, inherits_parent))
 
         # And the parent/child dep lists too
         h.register_son_in_parent_child_dependencies(self)
@@ -528,8 +528,8 @@ class Host(SchedulingItem):
     def add_business_rule_act_dependency(self, h, status, timeperiod, inherits_parent):
         # first I add the other the I depend on in MY list
         # I only register so he know that I WILL be a inpact
-        self.act_depend_of_me.append( (h, status, 'business_dep',
-                                      timeperiod, inherits_parent) )
+        self.act_depend_of_me.append((h, status, 'business_dep',
+                                      timeperiod, inherits_parent))
 
         # And the parent/child dep lists too
         self.register_son_in_parent_child_dependencies(h)
@@ -537,9 +537,9 @@ class Host(SchedulingItem):
     # Add a dependency for check (so before launch)
     def add_host_chk_dependency(self, h, status, timeperiod, inherits_parent):
         # I add him in MY list
-        self.chk_depend_of.append( (h, status, 'logic_dep', timeperiod, inherits_parent) )
+        self.chk_depend_of.append((h, status, 'logic_dep', timeperiod, inherits_parent))
         # And I add me in it's list
-        h.chk_depend_of_me.append( (self, status, 'logic_dep', timeperiod, inherits_parent) )
+        h.chk_depend_of_me.append((self, status, 'logic_dep', timeperiod, inherits_parent))
 
         # And we fill parent/childs dep for brok purpose
         # Here self depend on h
@@ -754,7 +754,7 @@ class Host(SchedulingItem):
         for parent in self.parents:
             if parent is not None:
                 # I add my parent in my list
-                self.act_depend_of.append( (parent, ['d', 'u', 's', 'f'], 'network_dep', None, True) )
+                self.act_depend_of.append((parent, ['d', 'u', 's', 'f'], 'network_dep', None, True))
 
                 # And I register myself in my parent list too
                 parent.register_child(self)
@@ -768,7 +768,7 @@ class Host(SchedulingItem):
         # where we just put the pointer, it's just for broking
         # and another with all data, useful for 'running' part
         self.childs.append(child)
-        self.act_depend_of_me.append( (child, ['d', 'u', 's', 'f'], 'network_dep', None, True) )
+        self.act_depend_of_me.append((child, ['d', 'u', 's', 'f'], 'network_dep', None, True))
 
     # Give data for checks's macros
     def get_data_for_checks(self):

@@ -75,7 +75,7 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-w', '--warning', default='80')
-    parser.add_argument('-c', '--critical', default='90' )
+    parser.add_argument('-c', '--critical', default='90')
     args = parser.parse_args()
     critical = args.critical
     warning = args.warning

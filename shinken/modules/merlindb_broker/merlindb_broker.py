@@ -61,14 +61,14 @@ class Merlindb_broker(BaseModule):
             'program_status': {'program_start': {'transform': None},
                                 'pid': {'transform': None},
                                 'last_alive': {'transform': None},
-                                'is_running': { 'transform': None},
+                                'is_running': {'transform': None},
                                 'instance_id': {'transform': None},
                                 },
             # Program status update (every 10s)
             'update_program_status': {'program_start': {'transform': None},
                                 'pid': {'transform': None},
                                 'last_alive': {'transform': None},
-                                'is_running': { 'transform': None},
+                                'is_running': {'transform': None},
                                 'instance_id': {'transform': None},
                                 },
             # Host
@@ -527,7 +527,7 @@ class Merlindb_broker(BaseModule):
         data = b.data
         b.data['last_update'] = time.time()
         # We just impact the service :)
-        where_clause = {'host_name': data['host_name'] , 'service_description': data['service_description']}
+        where_clause = {'host_name': data['host_name'], 'service_description': data['service_description']}
         query = self.db_backend.create_update_query('service', data, where_clause)
         return [query]
 
@@ -535,7 +535,7 @@ class Merlindb_broker(BaseModule):
     def manage_service_next_schedule_brok(self, b):
         data = b.data
         # We just impact the service :)
-        where_clause = {'host_name': data['host_name'] , 'service_description': data['service_description']}
+        where_clause = {'host_name': data['host_name'], 'service_description': data['service_description']}
         query = self.db_backend.create_update_query('service', data, where_clause)
         return [query]
 
@@ -543,7 +543,7 @@ class Merlindb_broker(BaseModule):
     def manage_update_service_status_brok(self, b):
         data = b.data
         b.data['last_update'] = time.time()
-        where_clause = {'host_name': data['host_name'] , 'service_description': data['service_description']}
+        where_clause = {'host_name': data['host_name'], 'service_description': data['service_description']}
         query = self.db_backend.create_update_query('service', data, where_clause)
         return [query]
 

@@ -40,7 +40,7 @@ class ModulesManager(object):
         self.modules_path = modules_path
         self.modules_type = modules_type
         self.modules = modules
-        self.allowed_types = [ plug.module_type for plug in modules ]
+        self.allowed_types = [plug.module_type for plug in modules]
         self.imported_modules = []
         self.modules_assoc = []
         self.instances = []
@@ -54,7 +54,7 @@ class ModulesManager(object):
     # Set the modules requested for this manager
     def set_modules(self, modules):
         self.modules = modules
-        self.allowed_types = [ mod.module_type for mod in modules ]
+        self.allowed_types = [mod.module_type for mod in modules]
 
     def set_max_queue_size(self, max_queue_size):
         self.max_queue_size = max_queue_size
@@ -69,12 +69,12 @@ class ModulesManager(object):
     def load(self):
         now = int(time.time())
         # We get all modules file with .py
-        modules_files = [ fname[:-3] for fname in os.listdir(self.modules_path)
-                         if fname.endswith(".py") ]
+        modules_files = [fname[:-3] for fname in os.listdir(self.modules_path)
+                         if fname.endswith(".py")]
 
         # And directories
-        modules_files.extend([ fname for fname in os.listdir(self.modules_path)
-                               if os.path.isdir(os.path.join(self.modules_path, fname)) ])
+        modules_files.extend([fname for fname in os.listdir(self.modules_path)
+                               if os.path.isdir(os.path.join(self.modules_path, fname))])
 
         # Now we try to load thems
         # So first we add their dir into the sys.path
@@ -258,16 +258,16 @@ class ModulesManager(object):
 
     # Do not give to others inst that got problems
     def get_internal_instances(self, phase=None):
-        return [ inst for inst in self.instances if not inst.is_external and phase in inst.phases and inst not in self.to_restart]
+        return [inst for inst in self.instances if not inst.is_external and phase in inst.phases and inst not in self.to_restart]
 
     def get_external_instances(self, phase=None):
-        return [ inst for inst in self.instances if inst.is_external and phase in inst.phases and inst not in self.to_restart]
+        return [inst for inst in self.instances if inst.is_external and phase in inst.phases and inst not in self.to_restart]
 
     def get_external_to_queues(self):
-        return [ inst.to_q for inst in self.instances if inst.is_external and inst not in self.to_restart]
+        return [inst.to_q for inst in self.instances if inst.is_external and inst not in self.to_restart]
 
     def get_external_from_queues(self):
-        return [ inst.from_q for inst in self.instances if inst.is_external and inst not in self.to_restart]
+        return [inst.from_q for inst in self.instances if inst.is_external and inst not in self.to_restart]
 
     def stop_all(self):
         # Ask internal to quit if they can
@@ -275,4 +275,4 @@ class ModulesManager(object):
             if hasattr(inst, 'quit') and callable(inst.quit):
                 inst.quit()
 
-        self.clear_instances([ inst for inst in self.instances if inst.is_external])
+        self.clear_instances([inst for inst in self.instances if inst.is_external])

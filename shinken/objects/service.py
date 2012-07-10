@@ -369,7 +369,7 @@ class Service(SchedulingItem):
         hname = getattr(self, 'host_name', 'unamed')
 
         special_properties = ('check_period', 'notification_interval', 'host_name',
-                              'hostgroup_name', 'notification_period' )
+                              'hostgroup_name', 'notification_period')
 
         for prop, entry in cls.properties.items():
             if prop not in special_properties:
@@ -437,15 +437,15 @@ class Service(SchedulingItem):
         # and do not have timeperiod, and follow parents dep
         if self.host is not None:
             # I add the dep in MY list
-            self.act_depend_of.append( (self.host,
+            self.act_depend_of.append((self.host,
                                         ['d', 'u', 's', 'f'],
                                         'network_dep',
-                                        None, True) )
+                                        None, True))
             # I add the dep in Daddy list
-            self.host.act_depend_of_me.append( (self,
+            self.host.act_depend_of_me.append((self,
                                                 ['d', 'u', 's', 'f'],
                                                 'network_dep',
-                                                None, True) )
+                                                None, True))
 
             # And the parent/child dep lists too
             self.host.register_son_in_parent_child_dependencies(self)
@@ -453,11 +453,11 @@ class Service(SchedulingItem):
     # Register the dependency between 2 service for action (notification etc)
     def add_service_act_dependency(self, srv, status, timeperiod, inherits_parent):
         # first I add the other the I depend on in MY list
-        self.act_depend_of.append( (srv, status, 'logic_dep',
-                                    timeperiod, inherits_parent) )
+        self.act_depend_of.append((srv, status, 'logic_dep',
+                                    timeperiod, inherits_parent))
         # then I register myself in the other service dep list
-        srv.act_depend_of_me.append( (self, status, 'logic_dep',
-                                      timeperiod, inherits_parent) )
+        srv.act_depend_of_me.append((self, status, 'logic_dep',
+                                      timeperiod, inherits_parent))
 
         # And the parent/child dep lists too
         srv.register_son_in_parent_child_dependencies(self)
@@ -469,8 +469,8 @@ class Service(SchedulingItem):
     # on the database service with the srv=ERP service
     def add_business_rule_act_dependency(self, srv, status, timeperiod, inherits_parent):
         # I only register so he know that I WILL be a inpact
-        self.act_depend_of_me.append( (srv, status, 'business_dep',
-                                      timeperiod, inherits_parent) )
+        self.act_depend_of_me.append((srv, status, 'business_dep',
+                                      timeperiod, inherits_parent))
 
         # And the parent/child dep lists too
         self.register_son_in_parent_child_dependencies(srv)
@@ -478,11 +478,11 @@ class Service(SchedulingItem):
     # Register the dependency between 2 service for checks
     def add_service_chk_dependency(self, srv, status, timeperiod, inherits_parent):
         # first I add the other the I depend on in MY list
-        self.chk_depend_of.append( (srv, status, 'logic_dep',
-                                    timeperiod, inherits_parent) )
+        self.chk_depend_of.append((srv, status, 'logic_dep',
+                                    timeperiod, inherits_parent))
         # then I register myself in the other service dep list
-        srv.chk_depend_of_me.append( (self, status, 'logic_dep',
-                                      timeperiod, inherits_parent) )
+        srv.chk_depend_of_me.append((self, status, 'logic_dep',
+                                      timeperiod, inherits_parent))
 
         # And the parent/child dep lists too
         srv.register_son_in_parent_child_dependencies(self)
@@ -1057,9 +1057,9 @@ class Services(Items):
     # contact_groups, notification_interval , notification_period
     # So service will take info from host if necessery
     def apply_implicit_inheritance(self, hosts):
-        for prop in ( 'contacts', 'contact_groups', 'notification_interval',
+        for prop in ('contacts', 'contact_groups', 'notification_interval',
                       'notification_period', 'resultmodulations', 'business_impact_modulations', 'escalations',
-                      'poller_tag', 'reactionner_tag', 'check_period', 'business_impact', 'maintenance_period' ):
+                      'poller_tag', 'reactionner_tag', 'check_period', 'business_impact', 'maintenance_period'):
             for s in self:
                 if not s.is_tpl():
                     if not hasattr(s, prop) and hasattr(s, 'host_name'):

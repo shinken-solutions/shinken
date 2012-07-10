@@ -66,7 +66,7 @@ class Glpi_arbiter(BaseModule):
         self.con = xmlrpclib.ServerProxy(self.uri)
         print "Connection opened"
         print "Authentification in progress"
-        arg = {'login_name': self.login_name , 'login_password': self.login_password}
+        arg = {'login_name': self.login_name, 'login_password': self.login_password}
         res = self.con.glpi.doLogin(arg)
         self.session = res['session']
         print "My session number", self.session

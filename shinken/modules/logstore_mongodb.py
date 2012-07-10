@@ -172,7 +172,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
             today0000 = datetime.datetime(today.year, today.month, today.day, 0, 0, 0)
             today0005 = datetime.datetime(today.year, today.month, today.day, 0, 5, 0)
             oldest = today0000 - datetime.timedelta(days=self.max_logs_age)
-            self.db[self.collection].remove({ u'time': { '$lt': time.mktime(oldest.timetuple()) }}, safe=True)
+            self.db[self.collection].remove({u'time': {'$lt': time.mktime(oldest.timetuple())}}, safe=True)
 
             if now < time.mktime(today0005.timetuple()):
                 nextrotation = today0005
@@ -268,7 +268,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
         if not self.is_connected == CONNECTED:
             print "sorry, not connected"
         else:
-            dbresult = [Logline([(c, ) for c in columns], [x[col] for col in columns]) for x in self.db[self.collection].find(filter_element).sort([(u'time', pymongo.ASCENDING), (u'lineno', pymongo.ASCENDING)])]
+            dbresult = [Logline([(c,) for c in columns], [x[col] for col in columns]) for x in self.db[self.collection].find(filter_element).sort([(u'time', pymongo.ASCENDING), (u'lineno', pymongo.ASCENDING)])]
         return dbresult
 
     def make_mongo_filter(self, operator, attribute, reference):

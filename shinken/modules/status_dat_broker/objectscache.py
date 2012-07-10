@@ -266,8 +266,8 @@ class ObjectsCacheFile:
                             if isinstance(value, list):
                                 # depythonize's argument might be an attribute or a method
                                 # example: members is an array of hosts and we want get_name() of each element
-                                value = [getattr(item, str(f))() for item in value if callable(getattr(item, str(f))) ] \
-                                      + [getattr(item, str(f)) for item in value if not callable(getattr(item, str(f))) ]
+                                value = [getattr(item, str(f))() for item in value if callable(getattr(item, str(f)))] \
+                                      + [getattr(item, str(f)) for item in value if not callable(getattr(item, str(f)))]
                                 # at least servicegroups are nested [host,service],.. The need some flattening
                                 value = ','.join(['%s' % y for x in value if isinstance(x, list) for y in x] + \
                                     ['%s' % x for x in value if not isinstance(x, list)])

@@ -120,7 +120,7 @@ class Item(object):
     def clean(self):
         """ Clean useless things not requested once item has been fully initialized&configured.
 Like temporary attributes such as "imported_from", etc.. """
-        for name in ( 'imported_from', 'use', 'plus', 'templates', ):
+        for name in ('imported_from', 'use', 'plus', 'templates',):
             try:
                 delattr(self, name)
             except AttributeError:
@@ -745,7 +745,7 @@ class Items(object):
 
     def remove_templates(self):
         """ Remove useless templates (& properties) of our items ; otherwise we could get errors on config.is_correct() """
-        tpls = [ i for i in self if i.is_tpl() ]
+        tpls = [i for i in self if i.is_tpl()]
         for i in tpls:
             del self[i.id]
         del self.templates
@@ -1054,10 +1054,10 @@ class Items(object):
 
 class HostGroup_Name_Parse_Ctx(object):
 
-    hgn_chars_separator = ( '|', ',', '&', '^', )
-    specials_hostgroup_name_chars = ( '*', '(', ')', '!', ) + hgn_chars_separator
+    hgn_chars_separator = ('|', ',', '&', '^',)
+    specials_hostgroup_name_chars = ('*', '(', ')', '!',) + hgn_chars_separator
 
-    space_chars = ( ' ', '\t', )
+    space_chars = (' ', '\t',)
     # no group should be named like that:
     catch_all_name = "__ALLELEMENTS__"
     minus_sign_in_name = "__MINUSSIGN_IN_NAME__"
@@ -1334,7 +1334,7 @@ def hg_name_get_groupnames(all_res, hosts, hostgroups, res=None, look_in='hostgr
             continue
 
         save_tok = tok
-        if tok in HostGroup_Name_Parse_Ctx.specials_hostgroup_name_chars + ( '-', ):
+        if tok in HostGroup_Name_Parse_Ctx.specials_hostgroup_name_chars + ('-',):
             if tok != '*':
                 continue
             tok = HostGroup_Name_Parse_Ctx.catch_all_name
@@ -1397,7 +1397,7 @@ parse_res must be the 'full_res' attribute of a 'HostGroup_Name_Parse_Ctx' objec
     if isinstance(parse_res, list):
         if len(parse_res) == 0:
             return "set([])"
-        return " ".join( hg_name_rebuild_str(i) for i in parse_res )
+        return " ".join(hg_name_rebuild_str(i) for i in parse_res)
 
     # "base" case:
     # assert( isinstance(parse_res, tuple) )
@@ -1405,8 +1405,8 @@ parse_res must be the 'full_res' attribute of a 'HostGroup_Name_Parse_Ctx' objec
     # parse_res[1] is the "negative" results. == hosts to NOT include.
     # assert( isinstance(parse_res[0], list) )
     # assert( isinstance(parse_res[1], list) )
-    posres = " ".join( hg_name_rebuild_str(i) for i in parse_res[0] )
-    negres = " ".join( hg_name_rebuild_str(i) for i in parse_res[1] )
+    posres = " ".join(hg_name_rebuild_str(i) for i in parse_res[0])
+    negres = " ".join(hg_name_rebuild_str(i) for i in parse_res[1])
 
     posres.strip()
     negres.strip()
@@ -1435,5 +1435,5 @@ def hg_name_parse_EXPR(expr, begin, end, flags=None):
     for g in ctx.pos_res, ctx.neg_res:
         if len(g) and g[-1] == '|':
             del g[-1]
-    ctx.full_res = ( ctx.pos_res, ctx.neg_res, )
+    ctx.full_res = (ctx.pos_res, ctx.neg_res,)
     return ctx

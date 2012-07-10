@@ -74,7 +74,7 @@ class Graphite_broker(BaseModule):
     def init(self):
         print "[%s] I init the graphite server connection to %s:%s" % (self.get_name(), self.host, self.port)
         self.con = socket()
-        self.con.connect( (self.host, self.port))
+        self.con.connect((self.host, self.port))
 
     # For a perf_data like /=30MB;4899;4568;1234;0  /var=50MB;4899;4568;1234;0 /toto=
     # return ('/', '30'), ('/var', '50')
@@ -96,10 +96,10 @@ class Graphite_broker(BaseModule):
             # get the first value of ;
             if ';' in raw:
                 elts = raw.split(';')
-                name_value = { name: elts[0], name + '_warn': elts[1], name + '_crit': elts[2] }
+                name_value = {name: elts[0], name + '_warn': elts[1], name + '_crit': elts[2]}
             else:
                 value = raw
-                name_value = { name: raw }
+                name_value = {name: raw}
             # bailout if need
             if name_value[name] == '':
                 continue

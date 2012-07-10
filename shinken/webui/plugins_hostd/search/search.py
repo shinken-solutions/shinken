@@ -205,8 +205,8 @@ def search_tags():
 
     return json.dumps(res)
 
-pages = {search_post: { 'routes': ['/search'] , 'method': 'POST'},
-         search_get: { 'routes': ['/search/:q']},
-         search_categories: { 'routes': ['/categories'] , 'method': 'POST'},
-         search_tags: { 'routes': ['/tags'] , 'method': 'POST'},
+pages = {search_post: {'routes': ['/search'], 'method': 'POST'},
+         search_get: {'routes': ['/search/:q']},
+         search_categories: {'routes': ['/categories'], 'method': 'POST'},
+         search_tags: {'routes': ['/tags'], 'method': 'POST'},
          }

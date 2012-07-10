@@ -489,53 +489,53 @@ class LiveStatusLogStoreSqlite(BaseModule):
             if reference == '':
                 return ['%s IS NULL' % attribute, ()]
             else:
-                return ['%s = ?' % attribute, (reference, )]
+                return ['%s = ?' % attribute, (reference,)]
 
         def match_filter():
             # sqlite matches case-insensitive by default. We make
             # no difference between case-sensitive and case-insensitive
             # here. The python filters will care for the correct
             # matching later.
-            return ['%s LIKE ?' % attribute, ('%' + reference + '%', )]
+            return ['%s LIKE ?' % attribute, ('%' + reference + '%',)]
 
         def eq_nocase_filter():
             if reference == '':
                 return ['%s IS NULL' % attribute, ()]
             else:
-                return ['%s = ?' % attribute.lower(), (reference.lower(), )]
+                return ['%s = ?' % attribute.lower(), (reference.lower(),)]
 
         def match_nocase_filter():
-            return ['%s LIKE ?' % attribute, ('%' + reference + '%', )]
+            return ['%s LIKE ?' % attribute, ('%' + reference + '%',)]
 
         def lt_filter():
-            return ['%s < ?' % attribute, (reference, )]
+            return ['%s < ?' % attribute, (reference,)]
 
         def gt_filter():
-            return ['%s > ?' % attribute, (reference, )]
+            return ['%s > ?' % attribute, (reference,)]
 
         def le_filter():
-            return ['%s <= ?' % attribute, (reference, )]
+            return ['%s <= ?' % attribute, (reference,)]
 
         def ge_filter():
-            return ['%s >= ?' % attribute, (reference, )]
+            return ['%s >= ?' % attribute, (reference,)]
 
         def ne_filter():
             if reference == '':
                 return ['%s IS NOT NULL' % attribute, ()]
             else:
-                return ['%s != ?' % attribute, (reference, )]
+                return ['%s != ?' % attribute, (reference,)]
 
         def not_match_filter():
-            return ['NOT %s LIKE ?' % attribute, ('%' + reference + '%', )]
+            return ['NOT %s LIKE ?' % attribute, ('%' + reference + '%',)]
 
         def ne_nocase_filter():
             if reference == '':
                 return ['NOT %s IS NULL' % attribute, ()]
             else:
-                return ['NOT %s = ?' % attribute.lower(), (reference.lower(), )]
+                return ['NOT %s = ?' % attribute.lower(), (reference.lower(),)]
 
         def not_match_nocase_filter():
-            return ['NOT %s LIKE ?' % attribute, ('%' + reference + '%', )]
+            return ['NOT %s LIKE ?' % attribute, ('%' + reference + '%',)]
 
         def no_filter():
             return ['1 = 1', ()]
@@ -591,7 +591,7 @@ class LiveStatusSqlStack(LiveStatusStack):
             # Make a combined anded function
             # Put it on the stack
             and_clause = '(' + (' AND ').join([x()[0] for x in filters]) + ')'
-            and_values = reduce(lambda x, y: x + y, [ x()[1] for x in filters ])
+            and_values = reduce(lambda x, y: x + y, [x()[1] for x in filters])
             and_filter = lambda: [and_clause, and_values]
             #  print "and_elements", and_clause, and_values
             self.put_stack(and_filter)
@@ -602,8 +602,8 @@ class LiveStatusSqlStack(LiveStatusStack):
             filters = []
             for _ in range(num):
                 filters.append(self.get_stack())
-            or_clause = '(' + (' OR ').join([ x()[0] for x in filters ]) + ')'
-            or_values = reduce(lambda x, y: x + y, [ x()[1] for x in filters ])
+            or_clause = '(' + (' OR ').join([x()[0] for x in filters]) + ')'
+            or_values = reduce(lambda x, y: x + y, [x()[1] for x in filters])
             or_filter = lambda: [or_clause, or_values]
             #  print "or_elements", or_clause
             self.put_stack(or_filter)

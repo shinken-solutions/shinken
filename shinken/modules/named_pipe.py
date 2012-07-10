@@ -127,6 +127,6 @@ class Named_Pipe_arbiter(BaseModule):
                 else:
                     self.fifo = self.open()
                     if self.fifo is not None:
-                        input = [ self.fifo ]
+                        input = [self.fifo]
                     else:
                         input = []

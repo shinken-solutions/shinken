@@ -45,7 +45,7 @@ daemons_config = {
     Poller:       "../etc/pollerd.ini",
     Reactionner:  "../etc/reactionnerd.ini",
     Shinken:      "../etc/schedulerd.ini",
-    Arbiter:    [ "../etc/nagios.cfg", "../etc/shinken-specific.cfg" ]
+    Arbiter:    ["../etc/nagios.cfg", "../etc/shinken-specific.cfg"]
 }
 
 

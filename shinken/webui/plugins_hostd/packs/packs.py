@@ -61,7 +61,7 @@ def download_pack(pid):
     return static_file(path, root='/', download=filename)
 
 pages = {
-    get_packs: { 'routes': ['/packs'], 'view': 'packs', 'static': True},
-    get_pack: { 'routes': ['/pack/:pid'], 'view': 'pack', 'static': True},
-    download_pack: { 'routes': ['/getpack/:pid'], 'static': True},
+    get_packs: {'routes': ['/packs'], 'view': 'packs', 'static': True},
+    get_pack: {'routes': ['/pack/:pid'], 'view': 'pack', 'static': True},
+    download_pack: {'routes': ['/getpack/:pid'], 'static': True},
     }

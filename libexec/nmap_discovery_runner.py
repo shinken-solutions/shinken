@@ -146,7 +146,7 @@ class DetectedHost:
 
     # Fill the different os possibilities
     def add_os_possibility(self, os, osgen, accuracy, os_type, vendor):
-        self.os_possibilities.append( (os, osgen, accuracy, os_type, vendor) )
+        self.os_possibilities.append((os, osgen, accuracy, os_type, vendor))
 
     # We search if our potential parent is present in the
     # other detected hosts. If so, set it as my parent

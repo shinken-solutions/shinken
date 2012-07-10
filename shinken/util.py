@@ -381,9 +381,9 @@ def got_generation_rule_patern_change(xy_couples):
         n = got_generation_rule_patern_change(xy_cpl[1:])
         if n != []:
             for e in n:
-                res.append( [i, '[%d-%d]' % (x, y), e])
+                res.append([i, '[%d-%d]' % (x, y), e])
         else:
-            res.append( [i, '[%d-%d]' % (x, y), []])
+            res.append([i, '[%d-%d]' % (x, y), []])
     return res
 
 
@@ -436,7 +436,7 @@ def get_key_value_sequence(entry, default_value=None):
 
     if all_keyval_pattern.match(conf_entry):
         for mat in re.finditer(keyval_pattern, conf_entry):
-            r = { 'KEY': mat.group('key') }
+            r = {'KEY': mat.group('key')}
             # The key is in mat.group('key')
             # If there are also value(s)...
             if mat.group('values'):

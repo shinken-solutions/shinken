@@ -233,7 +233,7 @@ class LiveStatusQueryMetainfo(object):
                 self.structured_data.append((keyword, ornum))
                 self.metainfo_filter_stack.or_elements(ornum)
             elif keyword == 'Negate':
-                self.structured_data.append((keyword, ))
+                self.structured_data.append((keyword,))
                 self.metainfo_filter_stack.not_elements()
             elif keyword == 'StatsGroupBy':
                 _, columns = self.split_option_with_columns(line)

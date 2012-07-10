@@ -273,7 +273,7 @@ class DataManagerSKonf(DataManager):
                 if tname in elts:
                     print "FOUND A SERVICE THAT MA5TCH", s.get('service_description', '')
                     services.append(s)
-            res.append( (tpl, services) )
+            res.append((tpl, services))
 
         return res
 

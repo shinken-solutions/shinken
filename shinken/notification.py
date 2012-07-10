@@ -155,7 +155,7 @@ class Notification(Action):
     # So we remove the ref and all
     def copy_shell(self):
         # We create a dummy check with nothing in it, just defaults values
-        return self.copy_shell__( Notification('', '', '', '', '', '', '', id=self.id) )
+        return self.copy_shell__(Notification('', '', '', '', '', '', '', id=self.id))
 
     def is_launchable(self, t):
         return t >= self.t_to_go

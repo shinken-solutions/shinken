@@ -160,7 +160,7 @@ class Thrift_brokerHandler(Hooker):
                     else:
                         attribute = query.strip_table_from_column(filter.attribute)
                         if operator in ['!>', '!>=', '!<', '!<=']:
-                            operator = { '!>': '<=', '!>=': '<', '!<': '>=', '!<=': '>' }[operator]
+                            operator = {'!>': '<=', '!>=': '<', '!<': '>=', '!<=': '>'}[operator]
                         query.filtercolumns.append(attribute)
                         query.prefiltercolumns.append(attribute)
                         query.filter_stack.put(query.make_filter(operator, attribute, filter.reference))
@@ -180,7 +180,7 @@ class Thrift_brokerHandler(Hooker):
                         attribute = query.strip_table_from_column(stat.attribute)
                         if operator in ['=', '>', '>=', '<', '<=', '=~', '~', '~~', '!=', '!>', '!>=', '!<', '!<=']:
                             if operator in ['!>', '!>=', '!<', '!<=']:
-                                operator = { '!>': '<=', '!>=': '<', '!<': '>=', '!<=': '>' }[operator]
+                                operator = {'!>': '<=', '!>=': '<', '!<': '>=', '!<=': '>'}[operator]
                             query.filtercolumns.append(attribute)
                             query.stats_columns.append(attribute)
                             query.stats_filter_stack.put(query.make_filter(operator, attribute, stat.reference))
@@ -667,8 +667,8 @@ class Thrift_broker(BaseModule):
             print "INVALID"
             # invalid
         else:
-            service_states = { 'OK': 0, 'WARNING': 1, 'CRITICAL': 2, 'UNKNOWN': 3, 'RECOVERY': 0 }
-            host_states = { 'UP': 0, 'DOWN': 1, 'UNREACHABLE': 2, 'UNKNOWN': 3, 'RECOVERY': 0 }
+            service_states = {'OK': 0, 'WARNING': 1, 'CRITICAL': 2, 'UNKNOWN': 3, 'RECOVERY': 0}
+            host_states = {'UP': 0, 'DOWN': 1, 'UNREACHABLE': 2, 'UNKNOWN': 3, 'RECOVERY': 0}
 
             # 'attempt', 'class', 'command_name', 'comment', 'contact_name', 'host_name', 'lineno', 'message',
             # 'options', 'plugin_output', 'service_description', 'state', 'state_type', 'time', 'type',
@@ -867,7 +867,7 @@ class Thrift_broker(BaseModule):
         limit = int(time.time() - self.max_logs_age * 86400)
         print "Deleting messages from the log database older than %s" % time.asctime(time.localtime(limit))
         if sqlite3.paramstyle == 'pyformat':
-            self.dbcursor.execute('DELETE FROM LOGS WHERE time < %(limit)s', { 'limit': limit })
+            self.dbcursor.execute('DELETE FROM LOGS WHERE time < %(limit)s', {'limit': limit})
         else:
             self.dbcursor.execute('DELETE FROM LOGS WHERE time < ?', (limit,))
         self.dbconn.commit()
@@ -953,7 +953,7 @@ class Thrift_broker(BaseModule):
             self.set_debug()
 
         # Start the thread to manage brok
-        broks_manager_thread = threading.Thread(None, self.manage_broks, "broks manager", args=[self] )
+        broks_manager_thread = threading.Thread(None, self.manage_broks, "broks manager", args=[self])
         broks_manager_thread.start()
 
         # Start the thrift server

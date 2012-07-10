@@ -60,11 +60,11 @@ try:
 
 
     def get_cur_user():
-        return pwd.getpwuid( os.getuid() ).pw_name
+        return pwd.getpwuid(os.getuid()).pw_name
 
 
     def get_cur_group():
-        return grp.getgrgid( os.getgid() ).gr_name
+        return grp.getgrgid(os.getgid()).gr_name
 except ImportError, exp:  # Like in nt system or Android
 
 
@@ -401,7 +401,7 @@ class Daemon(object):
             fdtemp = os.open(REDIRECT_TO, os.O_RDWR)
 
         ## We close all fd but what we need:
-        self.close_fds(skip_close_fds + ( self.fpid.fileno(), fdtemp ))
+        self.close_fds(skip_close_fds + (self.fpid.fileno(), fdtemp))
 
         os.dup2(fdtemp, 1)  # standard output (1)
         os.dup2(fdtemp, 2)  # standard error (2)
@@ -559,7 +559,7 @@ class Daemon(object):
         try:
             return getgrnam(self.group)[2]
         except KeyError, exp:
-            logger.error("The group %s is unknown" % self.group )
+            logger.error("The group %s is unknown" % self.group)
             return None
 
     # Change user of the running program. Just insult the admin

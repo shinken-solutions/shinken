@@ -649,7 +649,7 @@ class Arbiter(Daemon):
                 else:
                     self.fifo = self.external_command.open()
                     if self.fifo is not None:
-                        suppl_socks = [ self.fifo ]
+                        suppl_socks = [self.fifo]
                     else:
                         suppl_socks = None
                 elapsed += time.time() - now

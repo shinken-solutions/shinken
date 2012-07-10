@@ -43,7 +43,7 @@ class TestConfig(ShinkenTest):
         host = self.get_host()
         router = self.get_router()
 
-        self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [svc, 2, 'BAD | value1=0 value2=0'], ])
+        self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [svc, 2, 'BAD | value1=0 value2=0'],])
         self.assert_(host.state == 'UP')
         self.assert_(host.state_type == 'HARD')
 

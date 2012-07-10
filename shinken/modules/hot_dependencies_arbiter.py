@@ -118,7 +118,7 @@ class Hot_dependencies_arbiter(BaseModule):
         self.mapping = set()
         for e in mapping:
             son, father = e
-            self.mapping.add( (tuple(son), tuple(father)) )
+            self.mapping.add((tuple(son), tuple(father)))
 
     # Maybe the file is updated, but the mapping is the same
     # if not, look at addition and remove objects

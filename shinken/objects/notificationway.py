@@ -28,8 +28,8 @@ from item import Item, Items
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 from shinken.log import logger
 
-_special_properties = ( 'service_notification_commands', 'host_notification_commands',
-                        'service_notification_period', 'host_notification_period' )
+_special_properties = ('service_notification_commands', 'host_notification_commands',
+                        'service_notification_period', 'host_notification_period')
 
 
 class NotificationWay(Item):
