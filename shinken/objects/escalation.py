@@ -46,7 +46,7 @@ class Escalation(Item):
         'last_notification':    IntegerProp(),
         'first_notification_time': IntegerProp(),
         'last_notification_time': IntegerProp(),
-        'notification_interval': IntegerProp('30'), # like Nagios value
+        'notification_interval': IntegerProp('-1'), # by default don't use escalation one, but object one
         'escalation_period':    StringProp(default=''),
         'escalation_options':   ListProp(default='d,u,r,w,c'),
         'contacts':             StringProp(),

@@ -1062,8 +1062,17 @@ class SchedulingItem(Item):
         now = time.time()
         cls = self.__class__
 
-        # Get the standard time like if we got no escalations
-        std_time = n.t_to_go + self.notification_interval * cls.interval_length
+        # Look at the minimum notification interval
+        notification_interval = self.notification_interval
+        # and then look for currently active notifications, and take notification_interval
+        # if filled and less than the self value
+        in_notif_time = time.time() - n.creation_time
+        for es in self.escalations:
+            if es.is_eligible(n.t_to_go, self.state, n.notif_nb, in_notif_time, cls.interval_length):
+                if es.notification_interval != -1 and es.notification_interval < notification_interval:
+                    notification_interval = es.notification_interval
+        # So take the by default time
+        std_time = n.t_to_go + notification_interval * cls.interval_length
         # standard time is a good one
         res = std_time
 
