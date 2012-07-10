@@ -488,14 +488,14 @@ class Webui_broker(BaseModule, Daemon):
 
 
     def check_auth(self, user, password):
-        print "Checking auth of", user #, password
+        print "Checking auth of", user  # , password
         c = self.datamgr.get_contact(user)
         print "Got", c
         if not c:
             print "Warning: You need to have a contact having the same name as your user %s" % user
 
         # TODO: do not forgot the False when release!
-        is_ok = False # (c is not None)
+        is_ok = False  # (c is not None)
 
         for mod in self.modules_manager.get_internal_instances():
             try:

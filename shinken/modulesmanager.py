@@ -149,7 +149,7 @@ class ModulesManager(object):
     # Request to "remove" the given instances list or all if not provided
     def clear_instances(self, insts=None):
         if insts is None:
-            insts = self.instances[:] # have to make a copy of the list
+            insts = self.instances[:]  # have to make a copy of the list
         for i in insts:
             self.remove_instance(i)
 
@@ -170,7 +170,7 @@ class ModulesManager(object):
             try:
                 mod_conf.properties = module.properties.copy()
                 inst = module.get_instance(mod_conf)
-                if inst is None: # None = Bad thing happened :)
+                if inst is None:  # None = Bad thing happened :)
                     logger.info("get_instance for module %s returned None!" % (mod_conf.get_name()))
                     continue
                 assert(isinstance(inst, BaseModule))

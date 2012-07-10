@@ -168,9 +168,9 @@ class MacroResolver(Borg):
     # to replace the macros in c_line with real value.
     def resolve_simple_macros_in_string(self, c_line, data, args=None):
         # Now we prepare the classes for looking at the class.macros
-        data.append(self) # For getting global MACROS
+        data.append(self)  # For getting global MACROS
         if hasattr(self, 'conf'):
-            data.append(self.conf) # For USERN macros
+            data.append(self.conf)  # For USERN macros
         clss = [d.__class__ for d in data]
 
         # we should do some loops for nested macros
@@ -229,7 +229,7 @@ class MacroResolver(Borg):
             # We replace $$ by a big dirty thing to be sur to not misinterpret it
             c_line = c_line.replace("$$", "DOUBLEDOLLAR")
 
-            if nb_loop > 32: # too mouch loop, we exit
+            if nb_loop > 32:  # too mouch loop, we exit
                 still_got_macros = False
 
         # We now replace the big dirty token we made by only a simple $

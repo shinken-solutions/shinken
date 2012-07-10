@@ -64,7 +64,7 @@ class TestServiceDepAndGroups(ShinkenTest):
         self.assert_('test_host_0/SNMP' in svc_cpu_fathers)
 
 
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
 
 
 

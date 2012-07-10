@@ -89,7 +89,7 @@ class Simple_log_broker(BaseModule):
         # not our day
         try:
             t_last_mod = int(float(str(os.path.getmtime(self.path))))
-        except OSError: # there should be no path from now, so no move :)
+        except OSError:  # there should be no path from now, so no move :)
             return False
         #print "Ctime %d" % os.path.getctime(self.path)
         t_last_mod_day = get_day(t_last_mod)
@@ -156,7 +156,7 @@ class Simple_log_broker(BaseModule):
     def do_loop_turn(self):
         self.check_and_do_archive()
         try:
-            b = self.to_q.get() # can block here :)
+            b = self.to_q.get()  # can block here :)
         except IOError, e:
             if e.errno != os.errno.EINTR:
                 raise

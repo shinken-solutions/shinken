@@ -115,7 +115,7 @@ class __Action(object):
             # if already in perfdata, direct append
             if in_perfdata:
                 self.perf_data += ' ' + line.strip()
-            else: # not already in? search for the | part :)
+            else:  # not already in? search for the | part :)
                 elts = line.split('|', 1)
                 # The first part will always be long_output
                 long_output.append(elts[0].strip())
@@ -160,7 +160,7 @@ class __Action(object):
         # have the fcntl module (Windows, and maybe some special unix like AIX)
         if not fcntl:
             (self.stdoutdata, self.stderrdata) = self.process.communicate()
-        else: # maybe the command was too quick and finish before we an poll it
+        else:  # maybe the command was too quick and finish before we an poll it
             # so we finish the read
             self.stdoutdata += no_block_read(self.process.stdout)
             self.stderrdata += no_block_read(self.process.stderr)

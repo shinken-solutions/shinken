@@ -112,5 +112,5 @@ class Service_perfdata_broker(BaseModule):
                 self.file.write(s)
             self.file.flush()
             self.file.close()
-        except IOError, exp: # Maybe another tool is just getting it, pass
+        except IOError, exp:  # Maybe another tool is just getting it, pass
             pass

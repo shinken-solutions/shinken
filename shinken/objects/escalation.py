@@ -36,7 +36,7 @@ _special_properties_time_based = ( 'contacts', 'contact_groups', 'first_notifica
 
 
 class Escalation(Item):
-    id = 1 # zero is always special in database, so we do not take risk here
+    id = 1  # zero is always special in database, so we do not take risk here
     my_type = 'escalation'
 
     properties = Item.properties.copy()
@@ -148,14 +148,14 @@ class Escalation(Item):
         if hasattr(self, 'first_notification_time') or hasattr(self, 'last_notification_time'):
             self.time_based = True
             special_properties = _special_properties_time_based
-        else: # classic ones
+        else:  # classic ones
             special_properties = _special_properties
 
         for prop, entry in cls.properties.items():
             if prop not in special_properties:
                 if not hasattr(self, prop) and entry.required:
                     logger.info('%s: I do not have %s' % (self.get_name(), prop))
-                    state = False # Bad boy...
+                    state = False  # Bad boy...
 
         # Raised all previously saw errors like unknown contacts and co
         if self.configuration_errors != []:
@@ -176,7 +176,7 @@ class Escalation(Item):
             if not hasattr(self, 'last_notification_time'):
                 logger.info('%s: I do not have last_notification_time' % self.get_name())
                 state = False
-        else: # we check classical properties
+        else:  # we check classical properties
             if not hasattr(self, 'first_notification'):
                 logger.info('%s: I do not have first_notification' % self.get_name())
                 state = False

@@ -844,7 +844,7 @@ class TestConfigNoLogstore(TestConfig):
             if inst.properties["type"].startswith('logstore'):
                 f = getattr(inst, 'load', None)
                 if f and callable(f):
-                    f(self.livestatus_broker) #!!! NOT self here !!!!
+                    f(self.livestatus_broker)  # !!! NOT self here !!!!
                 break
         for s in self.livestatus_broker.debug_output:
             print "errors during load", s

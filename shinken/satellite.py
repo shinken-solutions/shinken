@@ -355,14 +355,14 @@ class Satellite(BaseSatellite):
             if ret is not []:
                 try:
                     con = sched['con']
-                    if con is not None: # None = not initialized
+                    if con is not None:  # None = not initialized
                         send_ok = con.put_results(ret)
                 # Not connected or sched is gone
                 except (Pyro_exp_pack, KeyError), exp:
                     logger.debug(str(exp))
                     self.pynag_con_init(sched_id)
                     return
-                except AttributeError, exp: # the scheduler must  not be initialized
+                except AttributeError, exp:  # the scheduler must  not be initialized
                     logger.debug(str(exp))
                 except Exception, exp:
                     logger.error("A satellite raised an unknown exception: %s (%s)" % (exp, type(exp)))
@@ -625,7 +625,7 @@ class Satellite(BaseSatellite):
 
             try:
                 con = sched['con']
-                if con is not None: # None = not initilized
+                if con is not None:  # None = not initilized
                     pyro.set_timeout(con, 120)
                     # OK, go for it :)
                     tmp = con.get_checks(do_checks=do_checks, do_actions=do_actions, \
@@ -637,7 +637,7 @@ class Satellite(BaseSatellite):
                     # We 'tag' them with sched_id and put into queue for workers
                     # REF: doc/shinken-action-queues.png (2)
                     self.add_actions(tmp, sched_id)
-                else: # no con? make the connection
+                else:  # no con? make the connection
                     self.pynag_con_init(sched_id)
             # Ok, con is unknown, so we create it
             # Or maybe is the connection lost, we recreate it
@@ -952,7 +952,7 @@ class Satellite(BaseSatellite):
 
             # We wait for initial conf
             self.wait_for_initial_conf()
-            if not self.new_conf: # we must have either big problem or was requested to shutdown
+            if not self.new_conf:  # we must have either big problem or was requested to shutdown
                 return
             self.setup_new_conf()
 

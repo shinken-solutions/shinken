@@ -231,7 +231,7 @@ class DependencyNodeFactory(object):
             if mul_of:
                 node.is_of_mul = True
                 node.of_values = (int(g[0]), int(g[1]), int(g[2]))
-            else: # if not, use A,0,0, we will change 0 after to put MAX
+            else:  # if not, use A,0,0, we will change 0 after to put MAX
                 node.of_values = (int(g[0]), 0, 0)
             patern = m.groups()[3]
 

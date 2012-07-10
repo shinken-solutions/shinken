@@ -91,7 +91,7 @@ class Check(Action):
         self.check_time = 0
         self.execution_time = 0
         self.perf_data = ''
-        self.check_type = 0 # which kind of check result? 0=active 1=passive
+        self.check_type = 0  # which kind of check result? 0=active 1=passive
         self.poller_tag = poller_tag
         self.reactionner_tag = reactionner_tag
         self.module_type = module_type

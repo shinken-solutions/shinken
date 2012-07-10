@@ -193,7 +193,7 @@ class LiveStatusQueryMetainfo(object):
             if keyword == 'GET':
                 self.table = self.split_command(line)[1]
                 self.structured_data.append((keyword, self.split_command(line)[1]))
-            elif keyword == 'Columns': # Get the names of the desired columns
+            elif keyword == 'Columns':  # Get the names of the desired columns
                 _, columns = self.split_option_with_columns(line)
                 self.structured_data.append((keyword, columns))
             elif keyword == 'ResponseHeader':

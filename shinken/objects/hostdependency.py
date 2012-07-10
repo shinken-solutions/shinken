@@ -85,7 +85,7 @@ class Hostdependencies(Items):
         hostdeps = self.items.keys()
         for id in hostdeps:
             hd = self.items[id]
-            if hd.is_tpl(): # Exploding template is useless
+            if hd.is_tpl():  # Exploding template is useless
                 continue
 
             # We explode first the dependent (son) part

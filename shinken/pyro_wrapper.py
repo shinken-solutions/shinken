@@ -33,7 +33,7 @@ from log import logger
 try:
     import Pyro
     import Pyro.core
-except ImportError: # ok, no Pyro3, maybe 4
+except ImportError:  # ok, no Pyro3, maybe 4
     import Pyro4 as Pyro
 
 
@@ -67,7 +67,7 @@ try:
                 return
             try:
                 Pyro.core.initServer()
-            except (OSError, IOError), e: # must be problem with workdir:
+            except (OSError, IOError), e:  # must be problem with workdir:
                 raise InvalidWorkDir(e)
             # Set the protocol as asked (ssl or not)
             if use_ssl:

@@ -31,7 +31,7 @@ from shinken.util import strip_and_uniq
 from shinken.log import logger
 
 class Module(Item):
-    id = 1 # zero is always special in database, so we do not take risk here
+    id = 1  # zero is always special in database, so we do not take risk here
     my_type = 'module'
 
     properties = Item.properties.copy()

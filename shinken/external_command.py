@@ -375,7 +375,7 @@ class ExternalCommandManager:
     def get_command_and_args(self, command):
         #safe_print("Trying to resolve", command)
         command = command.rstrip()
-        elts = command.split(';') # danger!!! passive checkresults with perfdata
+        elts = command.split(';')  # danger!!! passive checkresults with perfdata
         part1 = elts[0]
 
         elts2 = part1.split(' ')
@@ -390,7 +390,7 @@ class ExternalCommandManager:
             return None
         # Ok we remove the [ ]
         ts = ts[1:-1]
-        try: # is an int or not?
+        try:  # is an int or not?
             self.current_timestamp = int(ts)
         except ValueError:
             logger.debug("Malformed command '%s'" % command)
@@ -519,7 +519,7 @@ class ExternalCommandManager:
                     s = self.services.find_srv_by_name_and_hostname(tmp_host, srv_name)
                     if s is not None:
                         args.append(s)
-                    else: # error, must be logged
+                    else:  # error, must be logged
                         logger.warning("A command was received for service '%s' on host '%s', but the service could not be found!" % (srv_name, tmp_host))
 
         except IndexError:
@@ -538,11 +538,11 @@ class ExternalCommandManager:
 
 
     # CHANGE_CONTACT_MODSATTR;<contact_name>;<value>
-    def CHANGE_CONTACT_MODSATTR(self, contact, value): # TODO
+    def CHANGE_CONTACT_MODSATTR(self, contact, value):  # TODO
         contact.modified_service_attributes = long(value)
 
     # CHANGE_CONTACT_MODHATTR;<contact_name>;<value>
-    def CHANGE_CONTACT_MODHATTR(self, contact, value): # TODO
+    def CHANGE_CONTACT_MODHATTR(self, contact, value):  # TODO
         contact.modified_host_attributes = long(value)
 
     # CHANGE_CONTACT_MODATTR;<contact_name>;<value>
@@ -623,7 +623,7 @@ class ExternalCommandManager:
         self.sched.get_and_register_status_brok(host)
 
     # CHANGE_HOST_CHECK_TIMEPERIOD;<host_name>;<timeperiod>
-    def CHANGE_HOST_CHECK_TIMEPERIOD(self, host, timeperiod): # TODO is timeperiod a string or a Timeperiod object?
+    def CHANGE_HOST_CHECK_TIMEPERIOD(self, host, timeperiod):  # TODO is timeperiod a string or a Timeperiod object?
         host.modified_attributes |= MODATTR_CHECK_TIMEPERIOD
         host.check_period = timeperiod
         self.sched.get_and_register_status_brok(host)

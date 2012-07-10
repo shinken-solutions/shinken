@@ -31,7 +31,7 @@ from shinken.property import StringProp
 from shinken.log import logger
 
 class Hostgroup(Itemgroup):
-    id = 1 # zero is always a little bit special... like in database
+    id = 1  # zero is always a little bit special... like in database
     my_type = 'hostgroup'
 
     properties = Itemgroup.properties.copy()
@@ -100,7 +100,7 @@ class Hostgroup(Itemgroup):
 
 
 class Hostgroups(Itemgroups):
-    name_property = "hostgroup_name" # is used for finding hostgroups
+    name_property = "hostgroup_name"  # is used for finding hostgroups
     inner_class = Hostgroup
 
     def get_members_by_name(self, hgname):
@@ -169,7 +169,7 @@ class Hostgroups(Itemgroups):
 
             for h in hg:
                 if h is None: continue
-                if h.realm is None or h.got_default_realm: # default value not hasattr(h, 'realm'):
+                if h.realm is None or h.got_default_realm:  # default value not hasattr(h, 'realm'):
                     logger.debug("[hostgroups] apply a realm %s to host %s from a hostgroup rule (%s)" % \
                         (hg.realm.get_name(), h.get_name(), hg.get_name()))
                     h.realm = hg.realm

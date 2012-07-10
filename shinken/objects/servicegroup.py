@@ -31,7 +31,7 @@ from shinken.property import StringProp
 from shinken.log import logger
 
 class Servicegroup(Itemgroup):
-    id = 1 # zero is always a little bit special... like in database
+    id = 1  # zero is always a little bit special... like in database
     my_type = 'servicegroup'
 
     properties = Itemgroup.properties.copy()
@@ -108,7 +108,7 @@ class Servicegroup(Itemgroup):
 
 
 class Servicegroups(Itemgroups):
-    name_property = "servicegroup_name" # is used for finding servicegroup
+    name_property = "servicegroup_name"  # is used for finding servicegroup
     inner_class = Servicegroup
 
     def linkify(self, services):

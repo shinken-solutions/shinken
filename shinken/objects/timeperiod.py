@@ -131,8 +131,8 @@ class Timeperiod(Item):
             else:
                 self.unresolved.append(key+' '+params[key])
 
-        self.cache = {} # For tunning purpose only
-        self.invalid_cache = {} # same but for invalid search
+        self.cache = {}  # For tunning purpose only
+        self.invalid_cache = {}  # same but for invalid search
         self.configuration_errors = []
         self.configuration_warnings = []
         # By default the tp is None so we know we just start
@@ -270,7 +270,7 @@ class Timeperiod(Item):
             # Min but not the None valus...
             try:
                 local_min = min([d for d in dr_mins if d is not None])
-            except ValueError: # dr_mins if full of None, not good
+            except ValueError:  # dr_mins if full of None, not good
                 local_min = None
 
             #if local_min != None:
@@ -381,14 +381,14 @@ class Timeperiod(Item):
             # We do not loop unless the local_min is not valid
             if not self.is_time_valid(local_min):
                 still_loop = False
-            else: # continue until we reach too far..., in one minute
+            else:  # continue until we reach too far..., in one minute
                 # After one month, go quicker...
                 if local_min > original_t + 3600*24*30:
                     local_min += 3600
-                else: # else search for 1min precision
+                else:  # else search for 1min precision
                     local_min += 60
                 # after one year, stop.
-                if local_min > original_t + 3600*24*366 + 1: # 60*24*366 + 1:
+                if local_min > original_t + 3600*24*366 + 1:  # 60*24*366 + 1:
                     still_loop = False
             #print "Loop?", still_loop
             # if we've got a real value, we check it with the exclude
@@ -405,7 +405,7 @@ class Timeperiod(Item):
                             still_loop = False
                             res = None
 
-            if not still_loop: # We find a possible value
+            if not still_loop:  # We find a possible value
                 # We take the result the minimal possible
                 if res is None or local_min < res:
                     res = local_min

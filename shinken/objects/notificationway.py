@@ -36,7 +36,7 @@ _special_properties = ( 'service_notification_commands', 'host_notification_comm
 
 
 class NotificationWay(Item):
-    id = 1 # zero is always special in database, so we do not take risk here
+    id = 1  # zero is always special in database, so we do not take risk here
     my_type = 'notificationway'
 
     properties = Item.properties.copy()
@@ -170,7 +170,7 @@ class NotificationWay(Item):
             if prop not in _special_properties:
                 if not hasattr(self, prop) and entry.required:
                     logger.warning("[notificationway::%s] %s property not set" % (self.get_name(), prop))
-                    state = False # Bad boy...
+                    state = False  # Bad boy...
 
         # Ok now we manage special cases...
         # Service part

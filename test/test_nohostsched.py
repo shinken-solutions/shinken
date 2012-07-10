@@ -46,7 +46,7 @@ class TestHostspecialSched(ShinkenTest):
         print "Check in", host.next_chk - now
         self.assert_(host.next_chk - now < 301)
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         print "Loop"
         self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2']])
         self.assert_(host.state == 'UP')

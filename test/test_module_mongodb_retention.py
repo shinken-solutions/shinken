@@ -64,7 +64,7 @@ class TestMongodb(ShinkenTest):
         svc = self.sched.hosts.find_by_name("test_host_0")
         self.assert_(svc.state == 'PENDING')
         print "State", svc.state
-        svc.state = 'UP' # was PENDING in the save time
+        svc.state = 'UP'  # was PENDING in the save time
 
         r = sl.hook_load_retention(self.sched)
         self.assert_(r == True)

@@ -187,7 +187,7 @@ def manage_unknown_command(elt):
     pct = 0
     if m.min and m.max and (m.max - m.min != 0):
         pct = 100 * (v / (m.max - m.min))
-    else: # ok, we will really guess this time...
+    else:  # ok, we will really guess this time...
         # Percent of ok should be time/10s
         pct = 100 * (v / 10)
 

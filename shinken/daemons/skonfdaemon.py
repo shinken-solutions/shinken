@@ -89,7 +89,7 @@ class IForArbiter(Interface):
         # I've got a conf and a good one
         if self.app.cur_conf and self.app.cur_conf.magic_hash == magic_hash:
             return True
-        else: # I've no conf or a bad one
+        else:  # I've no conf or a bad one
             return False
 
     # The master Arbiter is sending us a new conf. Ok, we take it
@@ -427,17 +427,17 @@ class Skonf(Daemon):
     def load_web_configuration(self):
         self.plugins = []
 
-        self.http_port = 7766 # int(getattr(modconf, 'port', '7767'))
-        self.http_host = '0.0.0.0' # getattr(modconf, 'host', '0.0.0.0')
-        self.auth_secret = 'CHANGE_ME'.encode('utf8', 'replace') # getattr(modconf, 'auth_secret').encode('utf8', 'replace')
-        self.http_backend = 'auto' # getattr(modconf, 'http_backend', 'auto')
-        self.login_text = None # getattr(modconf, 'login_text', None)
-        self.allow_html_output = False # to_bool(getattr(modconf, 'allow_html_output', '0'))
-        self.remote_user_enable = '0' # getattr(modconf, 'remote_user_enable', '0')
-        self.remote_user_variable = 'X_REMOTE_USER' # getattr(modconf, 'remote_user_variable', 'X_REMOTE_USER')
+        self.http_port = 7766  # int(getattr(modconf, 'port', '7767'))
+        self.http_host = '0.0.0.0'  # getattr(modconf, 'host', '0.0.0.0')
+        self.auth_secret = 'CHANGE_ME'.encode('utf8', 'replace')  # getattr(modconf, 'auth_secret').encode('utf8', 'replace')
+        self.http_backend = 'auto'  # getattr(modconf, 'http_backend', 'auto')
+        self.login_text = None  # getattr(modconf, 'login_text', None)
+        self.allow_html_output = False  # to_bool(getattr(modconf, 'allow_html_output', '0'))
+        self.remote_user_enable = '0'  # getattr(modconf, 'remote_user_enable', '0')
+        self.remote_user_variable = 'X_REMOTE_USER'  # getattr(modconf, 'remote_user_variable', 'X_REMOTE_USER')
 
         # Load the photo dir and make it a absolute path
-        self.photo_dir = 'photos' # getattr(modconf, 'photo_dir', 'photos')
+        self.photo_dir = 'photos'  # getattr(modconf, 'photo_dir', 'photos')
         self.photo_dir = os.path.abspath(self.photo_dir)
         print "Webui: using the backend", self.http_backend
 
@@ -816,11 +816,11 @@ class Skonf(Daemon):
 
             if elapsed or ins:
                 timeout -= elapsed
-                if timeout > 0: # only continue if we are not over timeout
+                if timeout > 0:  # only continue if we are not over timeout
                     continue
 
             # Timeout
-            timeout = 1.0 # reset the timeout value
+            timeout = 1.0  # reset the timeout value
 
             # Try to see if one of my module is dead, and
             # try to restart previously dead modules :)

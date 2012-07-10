@@ -244,7 +244,7 @@ class SatelliteLink(Item):
             else:
                 self.add_failed_check_attempt()
         except Pyro_exp_pack, exp:
-            print # flush previous print
+            print  # flush previous print
             self.add_failed_check_attempt(reason=str(exp))
 
 
@@ -486,7 +486,7 @@ class SatelliteLinks(Items):
             if p_name == '':
                 p = realms.get_default()
                 s.realm = p
-            else: # find the realm one
+            else:  # find the realm one
                 p = realms.find_by_name(p_name)
                 s.realm = p
             # Check if what we get is OK or not

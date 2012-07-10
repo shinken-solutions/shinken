@@ -129,7 +129,7 @@ class Servicedependencies(Items):
         servicedeps = self.items.keys()
         for id in servicedeps:
             sd = self.items[id]
-            if sd.is_tpl(): # Exploding template is useless
+            if sd.is_tpl():  # Exploding template is useless
                 continue
 
             # Have we to explode the hostgroup into many service?
@@ -190,8 +190,8 @@ class Servicedependencies(Items):
                     dep_couples.append((dep_hname.strip(), dep_sname.strip()))
 
             # Create the new service deps from all of this.
-            for (dep_hname, dep_sname) in dep_couples: # the sons, like HTTP
-                for (hname, sname) in couples: # the fathers, like MySQL
+            for (dep_hname, dep_sname) in dep_couples:  # the sons, like HTTP
+                for (hname, sname) in couples:  # the fathers, like MySQL
                     new_sd = sd.copy()
                     new_sd.host_name = hname
                     new_sd.service_description = sname

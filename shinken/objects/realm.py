@@ -36,7 +36,7 @@ from shinken.log import logger
 
 
 class Realm(Itemgroup):
-    id = 1 # zero is always a little bit special... like in database
+    id = 1  # zero is always a little bit special... like in database
     my_type = 'realm'
 
     properties = Itemgroup.properties.copy()
@@ -94,7 +94,7 @@ class Realm(Itemgroup):
                 #print "Changing ", old_val, "by", new_val
                 setattr(self, prop, new_val)
             except AttributeError, exp:
-                pass # Will be catch at the is_correct moment
+                pass  # Will be catch at the is_correct moment
 
 
     # We fillfull properties with template ones if need
@@ -359,7 +359,7 @@ class Realm(Itemgroup):
 
 
 class Realms(Itemgroups):
-    name_property = "realm_name" # is used for finding hostgroups
+    name_property = "realm_name"  # is used for finding hostgroups
     inner_class = Realm
 
 

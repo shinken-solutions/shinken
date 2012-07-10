@@ -65,7 +65,7 @@ class Scheduler:
         # When set to false by us, we die and arbiter launch a new Scheduler
         self.must_run = True
 
-        self.waiting_results = [] # satellites returns us results
+        self.waiting_results = []  # satellites returns us results
         # and to not wait for them, we putthem here and
         # use them later
 
@@ -116,7 +116,7 @@ class Scheduler:
         self.log = logger
         self.log.load_obj(self)
 
-        self.instance_id = 0 # Temporary set. Will be erase later
+        self.instance_id = 0  # Temporary set. Will be erase later
 
         # Ours queues
         self.checks = {}
@@ -127,8 +127,8 @@ class Scheduler:
         self.broks = {}
 
         # Some flags
-        self.has_full_broks = False # have a initial_broks in broks queue?
-        self.need_dump_memory = False # set by signal 1
+        self.has_full_broks = False  # have a initial_broks in broks queue?
+        self.need_dump_memory = False  # set by signal 1
 
         # And a dummy push flavor
         self.push_flavor = 0
@@ -183,7 +183,7 @@ class Scheduler:
             logger.debug("Late command relink in %d" % (time.time() - t0))
 
         # self.status_file = StatusFile(self)        # External status file
-        self.instance_id = conf.instance_id # From Arbiter. Use for
+        self.instance_id = conf.instance_id  # From Arbiter. Use for
                                             # Broker to differenciate
                                             # schedulers
         # Tag our hosts with our instance_id
@@ -348,7 +348,7 @@ class Scheduler:
         # We do not just del them in the check list, but also in their service/host
         # We want id of lower than max_id - 2*max_checks
         if len(self.checks) > max_checks:
-            id_max = self.checks.keys()[-1] # The max id is the last id
+            id_max = self.checks.keys()[-1]  # The max id is the last id
                                             #: max is SO slow!
             to_del_checks = [c for c in self.checks.values() if c.id < id_max - max_checks]
             nb_checks_drops = len(to_del_checks)
@@ -365,7 +365,7 @@ class Scheduler:
                     dependent_checks.depend_on.remove(c.id)
                 for c_temp in c.depend_on:
                     c_temp.depen_on_me.remove(c)
-                del self.checks[i] # Final Bye bye ...
+                del self.checks[i]  # Final Bye bye ...
         else:
             nb_checks_drops = 0
 
@@ -535,7 +535,7 @@ class Scheduler:
                             childnotifications = item.scatter_notification(a)
                             for c in childnotifications:
                                 c.status = 'inpoller'
-                                self.add(c) # this will send a brok
+                                self.add(c)  # this will send a brok
                                 new_c = c.copy_shell()
                                 res.append(new_c)
 
@@ -609,11 +609,11 @@ class Scheduler:
                 elif c.exit_status != 0:
                     logger.warning("The notification command '%s' raised an error (exit code=%d): '%s'" % (c.command, c.exit_status, c.output))
 
-            except KeyError, exp: # bad number for notif, not that bad
+            except KeyError, exp:  # bad number for notif, not that bad
                 #print exp
                 pass
 
-            except AttributeError, exp: # bad object, drop it
+            except AttributeError, exp:  # bad object, drop it
                 #print exp
                 pass
 
@@ -762,7 +762,7 @@ class Scheduler:
                     return
                 # we come back to normal timeout
                 pyro.set_timeout(con, 5)
-            else: # no connection? try to reconnect
+            else:  # no connection? try to reconnect
                 self.pynag_con_init(p['instance_id'], type='poller')
 
         # TODO:factorize
@@ -799,7 +799,7 @@ class Scheduler:
                     return
                 # we come back to normal timeout
                 pyro.set_timeout(con, 5)
-            else: # no connection? try to reconnect
+            else:  # no connection? try to reconnect
                 self.pynag_con_init(p['instance_id'], type='reactionner')
 
 
@@ -841,7 +841,7 @@ class Scheduler:
                     return
                 # we come back to normal timeout
                 pyro.set_timeout(con, 5)
-            else: # no connection, try reinit
+            else:  # no connection, try reinit
                 self.pynag_con_init(p['instance_id'], type='poller')
 
         # We loop for our passive reactionners
@@ -879,7 +879,7 @@ class Scheduler:
                     return
                 # we come back to normal timeout
                 pyro.set_timeout(con, 5)
-            else: # no connection, try reinit
+            else:  # no connection, try reinit
                 self.pynag_con_init(p['instance_id'], type='reactionner')
 
 
@@ -1274,7 +1274,7 @@ class Scheduler:
         # une petite tape dans le dos et tu t'en vas, merci...
         # *pat pat* GFTO, thks :)
         for id in id_to_del:
-            del self.checks[id] # ZANKUSEN!
+            del self.checks[id]  # ZANKUSEN!
 
 
     # Called every 1sec to delete all actions in a zombie state
@@ -1288,7 +1288,7 @@ class Scheduler:
         # une petite tape dans le dos et tu t'en vas, merci...
         # *pat pat* GFTO, thks :)
         for id in id_to_del:
-            del self.actions[id] # ZANKUSEN!
+            del self.actions[id]  # ZANKUSEN!
 
 
     # Check for downtimes start and stop, and register
@@ -1348,10 +1348,10 @@ class Scheduler:
         for dt in self.downtimes.values():
             if dt.real_end_time < now:
                 # this one has expired
-                broks.extend(dt.exit()) # returns downtimestop notifications
+                broks.extend(dt.exit())  # returns downtimestop notifications
             elif now >= dt.start_time and dt.fixed and not dt.is_in_effect:
                 # this one has to start now
-                broks.extend(dt.enter()) # returns downtimestart notifications
+                broks.extend(dt.enter())  # returns downtimestart notifications
                 broks.append(dt.ref.get_update_status_brok())
 
         for b in broks:
@@ -1483,7 +1483,7 @@ class Scheduler:
         # Ticks are for recurrent function call like consume
         # del zombies etc
         ticks = 0
-        timeout = 1.0 # For the select
+        timeout = 1.0  # For the select
 
         gogogo = time.time()
 

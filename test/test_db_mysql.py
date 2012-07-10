@@ -37,7 +37,7 @@ class TestConfig(ShinkenTest):
         self.create_db()
         try:
             self.db.connect_database()
-        except Exception: # arg, no database here? sic!
+        except Exception:  # arg, no database here? sic!
             pass
 
 

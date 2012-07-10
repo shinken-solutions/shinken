@@ -74,7 +74,7 @@ def by_order(r1, r2):
         return -1
 
 class DiscoveredHost(object):
-    my_type = 'host' # we fake our type for the macro resolving
+    my_type = 'host'  # we fake our type for the macro resolving
 
     macros = {
         'HOSTNAME':          'name',

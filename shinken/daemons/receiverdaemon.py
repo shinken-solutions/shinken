@@ -71,7 +71,7 @@ class Receiver(BaseSatellite):
         self.external_commands = []
 
         # All broks to manage
-        self.broks = [] # broks to manage
+        self.broks = []  # broks to manage
         # broks raised this turn and that need to be put in self.broks
         self.broks_internal_raised = []
 

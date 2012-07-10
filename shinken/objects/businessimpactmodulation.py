@@ -34,7 +34,7 @@ from item import Item, Items
 from shinken.property import StringProp, IntegerProp
 
 class Businessimpactmodulation(Item):
-    id = 1 # zero is always special in database, so we do not take risk here
+    id = 1  # zero is always special in database, so we do not take risk here
     my_type = 'businessimpactmodulation'
 
     properties = Item.properties.copy()

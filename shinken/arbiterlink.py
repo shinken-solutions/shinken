@@ -62,7 +62,7 @@ class ArbiterLink(SatelliteLink):
                 # This sould raise an error afterwards?
                 # If so, logger.log it!
                 self.debug("%s arbiterlink have not %s property" % (self.get_name(), prop))
-                state = False # Bad boy...
+                state = False  # Bad boy...
         return state
 
 

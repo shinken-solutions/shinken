@@ -57,7 +57,7 @@ class Comment:
     def __init__(self, ref, persistent, author, comment, comment_type, entry_type, source, expires, expire_time):
         self.id = self.__class__.id
         self.__class__.id += 1
-        self.ref = ref # pointer to srv or host we are apply
+        self.ref = ref  # pointer to srv or host we are apply
         self.entry_time = int(time.time())
         self.persistent = persistent
         self.author = author

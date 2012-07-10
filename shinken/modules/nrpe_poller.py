@@ -147,7 +147,7 @@ class NRPE:
 
         try:
             response = struct.unpack(">2hih1024s", data)
-        except: # bad format...
+        except:  # bad format...
             self.rc = 3
             self.message = "Error : cannot read output from nrpe daemon..."
             return (self.rc, self.message)

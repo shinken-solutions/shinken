@@ -475,14 +475,14 @@ def get_key_value_sequence(entry, default_value=None):
         if NodeSet is None:
             m = pat.search(key)
             got_xy = (m is not None)
-        else: # Try to look with a nodeset check directly
+        else:  # Try to look with a nodeset check directly
             try:
                 ns = NodeSet(str(key))
                 # If we have more than 1 element, we have a xy thing
                 got_xy = (len(ns) != 1)
             except NodeSetParseRangeError:
                 return (None, GET_KEY_VALUE_SEQUENCE_ERROR_NODE)
-                pass # go in the next key
+                pass  # go in the next key
 
         # Now we've got our couples of X-Y. If no void,
         # we were with a "key generator"
@@ -491,19 +491,19 @@ def get_key_value_sequence(entry, default_value=None):
             # Ok 2 cases: we have the NodeSet lib or not.
             # if not, we use the dumb algo (quick, but manage less
             # cases like /N or , in patterns)
-            if NodeSet is None: # us the old algo
+            if NodeSet is None:  # us the old algo
                 still_loop = True
-                xy_couples = [] # will get all X-Y couples
+                xy_couples = []  # will get all X-Y couples
                 while still_loop:
                     m = pat.search(key)
-                    if m is not None: # we've find one X-Y
+                    if m is not None:  # we've find one X-Y
                         (x, y) = m.groups()
                         (x, y) = (int(x), int(y))
                         xy_couples.append((x, y))
                         # We must search if we've gotother X-Y, so
                         # we delete this one, and loop
                         key = key.replace('[%d-%d]' % (x, y), 'Z'*10)
-                    else: # no more X-Y in it
+                    else:  # no more X-Y in it
                         still_loop = False
 
                 # Now we have our xy_couples, we can manage them

@@ -38,7 +38,7 @@ from shinken.log import logger
 
 
 class Pack(Item):
-    id = 1 # zero is always special in database, so we do not take risk here
+    id = 1  # zero is always special in database, so we do not take risk here
     my_type = 'pack'
 
     properties = Item.properties.copy()

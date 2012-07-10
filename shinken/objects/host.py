@@ -50,7 +50,7 @@ class Host(SchedulingItem):
     # running_properties names
     __metaclass__ = AutoSlots
 
-    id = 1 # zero is reserved for host (primary node for parents)
+    id = 1  # zero is reserved for host (primary node for parents)
     ok_up = 'UP'
     my_type = 'host'
 
@@ -390,7 +390,7 @@ class Host(SchedulingItem):
             if prop not in special_properties:
                 if not hasattr(self, prop) and entry.required:
                     logger.error("[host::%s] %s property not set" % (self.get_name(), prop))
-                    state = False # Bad boy...
+                    state = False  # Bad boy...
 
         # Then look if we have some errors in the conf
         # Juts print warnings, but raise errors
@@ -461,12 +461,12 @@ class Host(SchedulingItem):
         if not self.is_tpl():
             try:
                 return self.host_name
-            except AttributeError: # outch, no hostname
+            except AttributeError:  # outch, no hostname
                 return 'UNNAMEDHOST'
         else:
             try:
                 return self.name
-            except AttributeError: # outch, no name for this template
+            except AttributeError:  # outch, no name for this template
                 return 'UNNAMEDHOSTTEMPLATE'
 
 
@@ -601,7 +601,7 @@ class Host(SchedulingItem):
             self.state_id_before_impact = self.state_id
             # This flag will know if we overide the impact state
             self.state_changed_since_impact = False
-            self.state = 'UNREACHABLE' # exit code UNDETERMINED
+            self.state = 'UNREACHABLE'  # exit code UNDETERMINED
             self.state_id = 2
 
 
@@ -645,7 +645,7 @@ class Host(SchedulingItem):
             self.last_time_down = int(self.last_state_update)
             state_code = 'd'
         else:
-            self.state = 'DOWN' # exit code UNDETERMINED
+            self.state = 'DOWN'  # exit code UNDETERMINED
             self.state_id = 1
             self.last_time_down = int(self.last_state_update)
             state_code = 'd'
@@ -969,8 +969,8 @@ class Host(SchedulingItem):
 # CLass for the hosts lists. It's mainly for configuration
 # part
 class Hosts(Items):
-    name_property = "host_name" # use for the search by name
-    inner_class = Host # use for know what is in items
+    name_property = "host_name"  # use for the search by name
+    inner_class = Host  # use for know what is in items
 
 
     # prepare_for_conf_sending to flatten some properties

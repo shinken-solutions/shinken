@@ -35,10 +35,10 @@ class TestAcks(ShinkenTest):
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
         #--------------------------------------------------------------
         # initialize host/service state
         #--------------------------------------------------------------
@@ -111,8 +111,8 @@ class TestAcks(ShinkenTest):
         print "- 1 x OK recover"
         self.show_logs()
         self.show_actions()
-        self.assert_(self.count_logs() == 2) # alert, eventhndlr
-        self.assert_(self.count_actions() == 2) # evt, master notif
+        self.assert_(self.count_logs() == 2)  # alert, eventhndlr
+        self.assert_(self.count_actions() == 2)  # evt, master notif
         self.assert_(not svc.problem_has_been_acknowledged)
         self.assert_(svc.current_notification_number == 0)
         self.show_and_clear_logs()
@@ -124,10 +124,10 @@ class TestAcks(ShinkenTest):
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
         #--------------------------------------------------------------
         # initialize host/service state
         #--------------------------------------------------------------
@@ -197,7 +197,7 @@ class TestAcks(ShinkenTest):
         self.assert_(self.log_match(1, 'SERVICE NOTIFICATION'))
         self.assert_(self.log_match(2, 'SERVICE NOTIFICATION'))
         self.assert_(self.count_logs() == 2)
-        self.assert_(self.count_actions() == 2) # master sched, contact zombie
+        self.assert_(self.count_actions() == 2)  # master sched, contact zombie
         self.assert_(svc.current_notification_number == 4)
         self.show_and_clear_logs()
         self.show_actions()
@@ -212,8 +212,8 @@ class TestAcks(ShinkenTest):
         print "- 1 x OK recover"
         self.show_logs()
         self.show_actions()
-        self.assert_(self.count_logs() == 3) # alert, eventhndlr, notif
-        self.assert_(self.count_actions() == 3) # evt, master notif, notif
+        self.assert_(self.count_logs() == 3)  # alert, eventhndlr, notif
+        self.assert_(self.count_actions() == 3)  # evt, master notif, notif
         self.assert_(not svc.problem_has_been_acknowledged)
         self.assert_(svc.current_notification_number == 0)
         self.show_and_clear_logs()
@@ -228,10 +228,10 @@ class TestAcks(ShinkenTest):
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
         #--------------------------------------------------------------
         # initialize host/service state
         #--------------------------------------------------------------
@@ -294,7 +294,7 @@ class TestAcks(ShinkenTest):
         self.assert_(self.log_match(2, 'SERVICE NOTIFICATION'))
         self.assert_(self.log_match(3, 'SERVICE NOTIFICATION'))
         self.assert_(self.count_logs() == 3)
-        self.assert_(self.count_actions() == 2) # master sched, contact zombie
+        self.assert_(self.count_actions() == 2)  # master sched, contact zombie
         self.assert_(svc.current_notification_number == 4)
         self.show_and_clear_logs()
         self.show_actions()
@@ -307,8 +307,8 @@ class TestAcks(ShinkenTest):
         print "- 1 x OK recover"
         self.show_logs()
         self.show_actions()
-        self.assert_(self.count_logs() == 3) # alert, eventhndlr, notification
-        self.assert_(self.count_actions() == 3) # evt, master notif, contact notif
+        self.assert_(self.count_logs() == 3)  # alert, eventhndlr, notification
+        self.assert_(self.count_actions() == 3)  # evt, master notif, contact notif
         self.assert_(not svc.problem_has_been_acknowledged)
         self.assert_(svc.current_notification_number == 0)
         self.show_and_clear_logs()
@@ -323,10 +323,10 @@ class TestAcks(ShinkenTest):
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
         #--------------------------------------------------------------
         # initialize host/service state
         #--------------------------------------------------------------
@@ -386,7 +386,7 @@ class TestAcks(ShinkenTest):
         self.show_logs()
         self.show_actions()
         self.assert_(self.log_match(1, 'SERVICE ALERT.*WARNING'))
-        self.assert_(self.count_logs() == 1) # alert
+        self.assert_(self.count_logs() == 1)  # alert
         self.assert_(svc.current_notification_number == 2)
         self.show_and_clear_logs()
         self.show_actions()
@@ -401,8 +401,8 @@ class TestAcks(ShinkenTest):
         print "- 1 x OK recover"
         self.show_logs()
         self.show_actions()
-        self.assert_(self.count_logs() == 3) # alert, eventhndlr, notification
-        self.assert_(self.count_actions() == 3) # evt, master notif, contact notif
+        self.assert_(self.count_logs() == 3)  # alert, eventhndlr, notification
+        self.assert_(self.count_actions() == 3)  # evt, master notif, contact notif
         self.assert_(not svc.problem_has_been_acknowledged)
         self.assert_(svc.current_notification_number == 0)
         self.assert_(len(svc.comments) == 0)
@@ -418,10 +418,10 @@ class TestAcks(ShinkenTest):
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
         #--------------------------------------------------------------
         # initialize host/service state
         #--------------------------------------------------------------
@@ -497,8 +497,8 @@ class TestAcks(ShinkenTest):
         print "- 1 x OK recover"
         self.show_logs()
         self.show_actions()
-        self.assert_(self.count_logs() == 2) # alert, eventhndlr, notification
-        self.assert_(self.count_actions() == 2) # evt, master notif, contact notif
+        self.assert_(self.count_logs() == 2)  # alert, eventhndlr, notification
+        self.assert_(self.count_actions() == 2)  # evt, master notif, contact notif
         self.assert_(not host.problem_has_been_acknowledged)
         self.assert_(host.current_notification_number == 0)
         self.show_and_clear_logs()
@@ -510,10 +510,10 @@ class TestAcks(ShinkenTest):
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
         #--------------------------------------------------------------
         # initialize host/service state
         #--------------------------------------------------------------
@@ -581,7 +581,7 @@ class TestAcks(ShinkenTest):
         self.assert_(self.log_match(1, 'HOST NOTIFICATION'))
         self.assert_(self.log_match(2, 'HOST NOTIFICATION'))
         self.assert_(self.count_logs() == 2)
-        self.assert_(self.count_actions() == 2) # master sched, contact zombie
+        self.assert_(self.count_actions() == 2)  # master sched, contact zombie
         self.assert_(host.current_notification_number == 4)
         self.show_and_clear_logs()
         self.show_actions()
@@ -594,8 +594,8 @@ class TestAcks(ShinkenTest):
         print "- 1 x OK recover"
         self.show_logs()
         self.show_actions()
-        self.assert_(self.count_logs() == 3) # alert, eventhndlr, notification
-        self.assert_(self.count_actions() == 3) # evt, master notif, contact notif
+        self.assert_(self.count_logs() == 3)  # alert, eventhndlr, notification
+        self.assert_(self.count_actions() == 3)  # evt, master notif, contact notif
         self.assert_(not host.problem_has_been_acknowledged)
         self.assert_(host.current_notification_number == 0)
         self.show_and_clear_logs()
@@ -614,10 +614,10 @@ class TestAcks(ShinkenTest):
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
         #--------------------------------------------------------------
         # initialize host/service state
         #--------------------------------------------------------------

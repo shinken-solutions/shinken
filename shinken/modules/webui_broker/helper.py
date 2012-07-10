@@ -154,7 +154,7 @@ class Helper(object):
         # Now manage the future or not print
         if in_future:
             return 'in '+' '.join(duration)
-        else: # past :)
+        else:  # past :)
             return ' '.join(duration) + ' ago'
 
 
@@ -335,7 +335,7 @@ class Helper(object):
             if tree_is_good:
                 display = 'none'
                 img = 'expand.png'
-            else: # we will already show the tree, and use a reduce image
+            else:  # we will already show the tree, and use a reduce image
                 display = 'block'
                 img = 'reduce.png'
 
@@ -376,7 +376,7 @@ class Helper(object):
             if tree_is_good:
                 display = 'none'
                 img = 'expand.png'
-            else: # we will already show the tree, and use a reduce image
+            else:  # we will already show the tree, and use a reduce image
                 display = 'block'
                 img = 'reduce.png'
 
@@ -417,7 +417,7 @@ class Helper(object):
             if tree_is_good:
                 display = 'none'
                 img = 'expand.png'
-            else: # we will already show the tree, and use a reduce image
+            else:  # we will already show the tree, and use a reduce image
                 display = 'block'
                 img = 'reduce.png'
 

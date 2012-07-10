@@ -377,7 +377,7 @@ class Config(Item):
     def load_params(self, params):
         for elt in params:
             elts = elt.split('=', 1)
-            if len(elts) == 1: # error, there is no = !
+            if len(elts) == 1:  # error, there is no = !
                 self.conf_is_correct = False
                 logger.error("[config] the parameter %s is malformed! (no = sign)" % elts[0])
             else:
@@ -1542,20 +1542,20 @@ class Config(Item):
         # link them too
         for s in [s for s in self.services if s.got_business_rule]:
             for e in s.business_rule.list_all_elements():
-                if hasattr(e, 'host'): # if it's a service
-                    if e.host != s.host: # do not an host with itself
+                if hasattr(e, 'host'):  # if it's a service
+                    if e.host != s.host:  # do not an host with itself
                         links.add((e.host, s.host))
-                else: # it's already a host
+                else:  # it's already a host
                     if e != s.host:
                         links.add((e, s.host))
 
         # Same for hosts of course
         for h in [h for h in self.hosts if h.got_business_rule]:
             for e in h.business_rule.list_all_elements():
-                if hasattr(e, 'host'): # if it's a service
+                if hasattr(e, 'host'):  # if it's a service
                     if e.host != h:
                         links.add((e.host, h))
-                else: # e is a host
+                else:  # e is a host
                     if e != h:
                         links.add((e, h))
 
@@ -1593,10 +1593,10 @@ class Config(Item):
                     else:
                         err = '   the host %s is in the realm %s' % (h.get_name(), h.realm.get_name())
                         self.add_error(err)
-            if len(tmp_realms) == 1: # Ok, good
-                r = tmp_realms.pop() # There is just one element
+            if len(tmp_realms) == 1:  # Ok, good
+                r = tmp_realms.pop()  # There is just one element
                 r.packs.append(pack)
-            elif len(tmp_realms) == 0: # Hum.. no realm value? So default Realm
+            elif len(tmp_realms) == 0:  # Hum.. no realm value? So default Realm
                 if default_realm is not None:
                     default_realm.packs.append(pack)
                 else:
@@ -1635,7 +1635,7 @@ class Config(Item):
             if nb_schedulers == 0 and nb_elements != 0:
                 err = "Error: The realm %s have hosts but no scheduler!" %r.get_name()
                 self.add_error(err)
-                r.packs = [] # Dumb pack
+                r.packs = []  # Dumb pack
                 continue
 
             packindex = 0
@@ -1695,7 +1695,7 @@ class Config(Item):
                 if valid_value and old_pack in packindices:
                     #print 'Use a old id for pack', old_pack, [h.get_name() for h in pack]
                     i = old_pack
-                else: # take a new one
+                else:  # take a new one
                     #print 'take a new id for pack', [h.get_name() for h in pack]
                     i = rr.next()
 
@@ -1772,8 +1772,8 @@ class Config(Item):
             for sg in self.servicegroups:
                 new_servicegroups.append(sg.copy_shell())
             cur_conf.servicegroups = Servicegroups(new_servicegroups)
-            cur_conf.hosts = [] # will be fill after
-            cur_conf.services = [] # will be fill after
+            cur_conf.hosts = []  # will be fill after
+            cur_conf.services = []  # will be fill after
             # The elements of the others conf will be tag here
             cur_conf.other_elements = {}
             # if a scheduler have accepted the conf
@@ -1842,7 +1842,7 @@ class Config(Item):
         # so they are not tagged)
         for i in self.confs:
             for h in self.confs[i].hosts:
-                for j in [j for j in self.confs if j != i]: # So other than i
+                for j in [j for j in self.confs if j != i]:  # So other than i
                     self.confs[i].other_elements[h.get_name()] = i
 
         # We tag conf with instance_id

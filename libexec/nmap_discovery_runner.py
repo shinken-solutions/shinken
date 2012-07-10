@@ -285,7 +285,7 @@ if not simulate:
     print "Got it", (stdoutdata, stderrdata)
 
     xml_input = tmppath
-else: # simulate mode
+else:  # simulate mode
     xml_input = simulate
 
 tree = ElementTree()

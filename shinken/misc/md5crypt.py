@@ -38,7 +38,7 @@ apache_md5_crypt() provides a function compatible with Apache's
 
 """
 
-MAGIC = '$1$' # Magic string
+MAGIC = '$1$'  # Magic string
 ITOA64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
 from hashlib import md5

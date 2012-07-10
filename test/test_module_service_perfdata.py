@@ -68,7 +68,7 @@ class TestModSRVPErfdata(ShinkenTest):
             if b.type == 'service_check_result':
                 sl.manage_brok(b)
         self.sched.broks = {}
-        sl.file.close() # the sl has also an open (writing) file handle
+        sl.file.close()  # the sl has also an open (writing) file handle
         # Ok, go for writing
         sl.hook_tick(None)
 

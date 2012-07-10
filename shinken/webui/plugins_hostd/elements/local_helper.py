@@ -379,7 +379,7 @@ class Helper(object):
 
                 if ctype == 'percent':
                     s+= self.get_percent_input(elt, k, k[1:], editable=editable, placeholder=v['placeholder'], popover=popover)
-                else: # if not known, apply string
+                else:  # if not known, apply string
                     s+= self.get_string_input(elt, k, k[1:], editable=editable, placeholder=v['placeholder'], popover=popover)
 
         return s

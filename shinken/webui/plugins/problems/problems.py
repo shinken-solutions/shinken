@@ -92,7 +92,7 @@ def get_view(page):
         items = app.datamgr.get_all_problems(to_sort=False, get_acknowledged=True)
     elif page == 'all':
         items = app.datamgr.get_all_hosts_and_services()
-    else: # WTF?!?
+    else:  # WTF?!?
         redirect("/problems")
 
     # Filter with the user interests

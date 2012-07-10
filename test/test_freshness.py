@@ -39,7 +39,7 @@ class TestFreshness(ShinkenTest):
         now = time.time()
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
 
         self.assert_(svc.check_freshness == True)
         #--------------------------------------------------------------

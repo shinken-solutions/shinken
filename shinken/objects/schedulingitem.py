@@ -391,7 +391,7 @@ class SchedulingItem(Item):
         # if a parent is not down, no dep can explain the pb
         if False in parent_is_down:
             return False
-        else: # every parents are dead, so... It's not my fault :)
+        else:  # every parents are dead, so... It's not my fault :)
             return True
 
 
@@ -406,7 +406,7 @@ class SchedulingItem(Item):
             if type == 'network_dep':
                 p_is_down = False
                 dep_match = [dep.is_state(s) for s in status]
-                if True in dep_match: # the parent match a case, so he is down
+                if True in dep_match:  # the parent match a case, so he is down
                     p_is_down = True
                 parent_is_down.append(p_is_down)
 
@@ -414,7 +414,7 @@ class SchedulingItem(Item):
         # or if we do'nt have any parents
         if len(parent_is_down) == 0 or False in parent_is_down:
             return
-        else: # every parents are dead, so... It's not my fault :)
+        else:  # every parents are dead, so... It's not my fault :)
             self.set_unreachable()
             return
 
@@ -502,14 +502,14 @@ class SchedulingItem(Item):
         if self.check_interval == 0 and not force:
             if cls.my_type == 'service':
                 return None
-            else: # host
+            else:  # host
                 self.check_interval = 300 / cls.interval_length
 
         # Interval change is in a HARD state or not
         # If the retry is 0, take the normal value
         if self.state_type == 'HARD' or self.retry_interval == 0:
             interval = self.check_interval * cls.interval_length
-        else: # TODO: if no retry_interval?
+        else:  # TODO: if no retry_interval?
             interval = self.retry_interval * cls.interval_length
 
         # The next_chk is pass so we need a new one
@@ -555,9 +555,9 @@ class SchedulingItem(Item):
     def compensate_system_time_change(self, difference):
         # We only need to change some value
         for p in on_time_change_update:
-            val = getattr(self, p) # current value
+            val = getattr(self, p)  # current value
             # Do not go below 1970 :)
-            val = max(0, val + difference) # diff may be negative
+            val = max(0, val + difference)  # diff may be negative
             setattr(self, p, val)
 
     # For disabling active checks, we need to set active_checks_enabled
@@ -636,7 +636,7 @@ class SchedulingItem(Item):
         for dt in self.downtimes:
             # activate flexible downtimes (do not activate triggered downtimes)
             if dt.fixed == False and dt.is_in_effect == False and dt.start_time <= self.last_chk and self.state_id != 0 and dt.trigger_id == 0:
-                n = dt.enter() # returns downtimestart notifications
+                n = dt.enter()  # returns downtimestart notifications
                 if n is not None:
                     self.actions.append(n)
                 status_updated = True
@@ -685,7 +685,7 @@ class SchedulingItem(Item):
     # is_in_scheduled_downtime: no notification
     # is_volatile: notif immediatly (service only)
     def consume_result(self, c):
-        OK_UP = self.__class__.ok_up # OK for service, UP for host
+        OK_UP = self.__class__.ok_up  # OK for service, UP for host
 
         # Protect against bad type output
         # if str, go in unicode
@@ -986,7 +986,7 @@ class SchedulingItem(Item):
 
 
     def update_event_and_problem_id(self):
-        OK_UP = self.__class__.ok_up # OK for service, UP for host
+        OK_UP = self.__class__.ok_up  # OK for service, UP for host
         if ( self.state != self.last_state and self.last_state != 'PENDING'
                 or self.state != OK_UP and self.last_state == 'PENDING' ):
             SchedulingItem.current_event_id += 1
@@ -1235,9 +1235,9 @@ class SchedulingItem(Item):
         # If none, it might be a forced check, so OK, I do a new
         if not force and (self.in_checking and ref_check is not None):
             now = time.time()
-            c_in_progress = self.checks_in_progress[0] # 0 is OK because in_checking is True
-            if c_in_progress.t_to_go > now: # Very far?
-                c_in_progress.t_to_go = now # No, I want a check right NOW
+            c_in_progress = self.checks_in_progress[0]  # 0 is OK because in_checking is True
+            if c_in_progress.t_to_go > now:  # Very far?
+                c_in_progress.t_to_go = now  # No, I want a check right NOW
             c_in_progress.depend_on_me.append(ref_check)
             return c_in_progress.id
 

@@ -40,11 +40,11 @@ class TestConfig(ShinkenTest):
         test_host_1 = self.sched.hosts.find_by_name("test_host_1")
         test_host_0.checks_in_progress = []
         test_host_1.checks_in_progress = []
-        test_host_0.act_depend_of = [] # ignore the router
-        test_host_1.act_depend_of = [] # ignore the router
+        test_host_0.act_depend_of = []  # ignore the router
+        test_host_1.act_depend_of = []  # ignore the router
         router = self.sched.hosts.find_by_name("test_router_0")
         router.checks_in_progress = []
-        router.act_depend_of = [] # ignore other routers
+        router.act_depend_of = []  # ignore other routers
         test_host_0_test_ok_0 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         test_host_0_test_ok_1 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_1")
         test_host_1_test_ok_0 = self.sched.services.find_srv_by_name_and_hostname("test_host_1", "test_ok_0")
@@ -80,7 +80,7 @@ class TestConfig(ShinkenTest):
         self.assert_(len(test_host_0_test_ok_1.chk_depend_of) == 1)
         self.assert_(len(test_host_1_test_ok_0.chk_depend_of) == 0)
         self.assert_(len(test_host_1_test_ok_1.chk_depend_of) == 1)
-        self.assert_(len(test_host_0_test_ok_0.act_depend_of) == 1) # same, plus the host
+        self.assert_(len(test_host_0_test_ok_0.act_depend_of) == 1)  # same, plus the host
         self.assert_(len(test_host_0_test_ok_1.act_depend_of) == 2)
         self.assert_(len(test_host_1_test_ok_0.act_depend_of) == 1)
         self.assert_(len(test_host_1_test_ok_1.act_depend_of) == 2)

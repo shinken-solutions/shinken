@@ -176,18 +176,18 @@ class Nagios_retention_scheduler(BaseModule):
             if hasattr(obj, prop) and prop in obj_cfg:
                 #if 'pythonize' in entry:
                 f = entry.pythonize
-                if f is not None: # mean it's a string
+                if f is not None:  # mean it's a string
                     #print "Apply", f, "to the property", prop, "for ", cls.my_type
                     val = getattr(obj, prop)
                     val = f(val)
                     setattr(obj, prop, val)
-                else: # no pythonize, int by default
+                else:  # no pythonize, int by default
                     # if cls.my_type != 'service':
                     #  print "Intify", prop, getattr(obj, prop)
                     if prop != 'state_type':
                         val = int(getattr(obj, prop))
                         setattr(obj, prop, val)
-                    else: # state type is a int, but should be set HARd or SOFT
+                    else:  # state type is a int, but should be set HARd or SOFT
                         val = int(getattr(obj, prop))
                         if val == 1:
                             setattr(obj, prop, 'HARD')

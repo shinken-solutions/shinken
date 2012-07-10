@@ -35,7 +35,7 @@ from shinken.macroresolver import MacroResolver
 
 
 class Discoveryrun(MatchingItem):
-    id = 1 # zero is always special in database, so we do not take risk here
+    id = 1  # zero is always special in database, so we do not take risk here
     my_type = 'discoveryrun'
 
     properties = Item.properties.copy()
@@ -62,8 +62,8 @@ class Discoveryrun(MatchingItem):
         setattr(self, 'id', cls.id)
         cls.id += 1
 
-        self.matches = {} # for matching rules
-        self.not_matches = {} # for rules that should NOT match
+        self.matches = {}  # for matching rules
+        self.not_matches = {}  # for rules that should NOT match
 
         # In my own property:
         #  -> in __dict__

@@ -71,14 +71,14 @@ class Downtime:
     def __init__(self, ref, start_time, end_time, fixed, trigger_id, duration, author, comment):
         self.id = self.__class__.id
         self.__class__.id += 1
-        self.ref = ref # pointer to srv or host we are apply
-        self.activate_me = [] # The other downtimes i need to activate
+        self.ref = ref  # pointer to srv or host we are apply
+        self.activate_me = []  # The other downtimes i need to activate
         self.entry_time = int(time.time())
         self.fixed = fixed
         self.start_time = start_time
         self.duration = duration
         self.trigger_id = trigger_id
-        if self.trigger_id != 0: # triggered plus fixed makes no sense
+        if self.trigger_id != 0:  # triggered plus fixed makes no sense
             self.fixed = False
         self.end_time = end_time
         if fixed:
@@ -94,7 +94,7 @@ class Downtime:
         self.author = author
         self.comment = comment
         self.is_in_effect = False    # fixed: start_time has been reached, flexible: non-ok checkresult
-        self.has_been_triggered = False # another downtime has triggered me
+        self.has_been_triggered = False  # another downtime has triggered me
         self.can_be_deleted = False
         self.add_automatic_comment()
 

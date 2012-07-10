@@ -149,7 +149,7 @@ class Logline(dict):
                     logobject = LOGOBJECT_SERVICE
                     logclass = LOGCLASS_NOTIFICATION
                     contact_name, host_name, service_description, state_type, command_name, check_plugin_output = options.split(';', 5)
-                    if '(' in state_type: # downtime/flapping/etc-notifications take the type UNKNOWN
+                    if '(' in state_type:  # downtime/flapping/etc-notifications take the type UNKNOWN
                         state_type = 'UNKNOWN'
                     state = service_states[state_type]
                 elif type == 'HOST NOTIFICATION':

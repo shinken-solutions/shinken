@@ -43,11 +43,11 @@ import threading
 
 try:
     import sqlite3
-except ImportError: # python 2.4 do not have it
+except ImportError:  # python 2.4 do not have it
     try:
-        import pysqlite2.dbapi2 as sqlite3 # but need the pysqlite2 install from http://code.google.com/p/pysqlite/downloads/list
-    except ImportError: # python 2.4 do not have it
-        import sqlite as sqlite3 # one last try
+        import pysqlite2.dbapi2 as sqlite3  # but need the pysqlite2 install from http://code.google.com/p/pysqlite/downloads/list
+    except ImportError:  # python 2.4 do not have it
+        import sqlite as sqlite3  # one last try
 import Queue
 
 from shinken.objects import Host
@@ -308,14 +308,14 @@ class Thrift_broker(BaseModule):
         for i in to_del:
             try:
                 del self.hosts[i]
-            except KeyError: # maybe it was not inserted in a good way, pass it
+            except KeyError:  # maybe it was not inserted in a good way, pass it
                 pass
 
         # And services
         for i in to_del_srv:
             try:
                 del self.services[i]
-            except KeyError: # maybe it was not inserted in a good way, pass it
+            except KeyError:  # maybe it was not inserted in a good way, pass it
                 pass
 
 
@@ -768,7 +768,7 @@ class Thrift_broker(BaseModule):
                 logobject = LOGOBJECT_SERVICE
                 logclass = LOGCLASS_NOTIFICATION
                 contact_name, host_name, service_description, state_type, command_name, check_plugin_output = options.split(';', 5)
-                if '(' in state_type: # downtime/flapping/etc-notifications take the type UNKNOWN
+                if '(' in state_type:  # downtime/flapping/etc-notifications take the type UNKNOWN
                     state_type = 'UNKNOWN'
                 state = service_states[state_type]
             elif type == 'HOST NOTIFICATION':
@@ -950,8 +950,8 @@ class Thrift_broker(BaseModule):
         os.close(1)
         os.close(2)
 
-        os.dup2(fdtemp, 1) # standard output (1)
-        os.dup2(fdtemp, 2) # standard error (2)
+        os.dup2(fdtemp, 1)  # standard output (1)
+        os.dup2(fdtemp, 2)  # standard error (2)
 
 
     def main(self):

@@ -304,7 +304,7 @@ class Daterange:
         # if it's the next day, use a start of the day search for timerange
         if t < t_day:
             sec_from_morning = self.get_next_future_timerange_valid(t_day)
-        else: # t is in this day, so look from t (can be in the evening or so)
+        else:  # t is in this day, so look from t (can be in the evening or so)
             sec_from_morning = self.get_next_future_timerange_valid(t)
         #print "DR: sec from morning", sec_from_morning
 
@@ -376,7 +376,7 @@ class Daterange:
         # if it's the next day, use a start of the day search for timerange
         if t < t_day:
             sec_from_morning = self.get_next_future_timerange_invalid(t_day)
-        else: # t is in this day, so look from t (can be in the evening or so)
+        else:  # t is in this day, so look from t (can be in the evening or so)
             sec_from_morning = self.get_next_future_timerange_invalid(t)
         #print "DR: sec from morning", sec_from_morning
 
@@ -485,8 +485,8 @@ class MonthWeekDayDaterange(Daterange):
         end_time = get_end_of_day(self.eyear, month_end_id, day_end)
 
         now_epoch = time.mktime(now)
-        if start_time > end_time: # the period is between years
-            if now_epoch > end_time: # check for next year
+        if start_time > end_time:  # the period is between years
+            if now_epoch > end_time:  # check for next year
                 day_end = find_day_by_weekday_offset(self.eyear + 1, self.emon, self.ewday, self.ewday_offset)
                 end_time = get_end_of_day(self.eyear + 1, month_end_id, day_end)
             else:
@@ -521,7 +521,7 @@ class MonthDateDaterange(Daterange):
         end_time = get_end_of_day(self.eyear, month_end_id, day_end)
 
         now_epoch =  time.mktime(now)
-        if start_time > end_time: # the period is between years
+        if start_time > end_time:  # the period is between years
             if now_epoch > end_time:
                 # check for next year
                 day_end = find_day_by_offset(self.eyear + 1, self.emon, self.emday)

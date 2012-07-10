@@ -326,9 +326,9 @@ class install_config(Command):
 
         self.root = None
         self.etc_path = None  # typically /etc on Posix systems
-        self.var_path = None # typically /var on Posix systems
+        self.var_path = None  # typically /var on Posix systems
         self.run_path = None  # typically /etc on Posix systems
-        self.log_path = None # typically /var on Posix systems
+        self.log_path = None  # typically /var on Posix systems
         self.plugins_path = None    # typically /libexec on Posix systems
 
     def finalize_options(self):

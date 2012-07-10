@@ -35,7 +35,7 @@ from shinken.property import StringProp, ListProp, IntegerProp
 
 
 class Discoveryrule(MatchingItem):
-    id = 1 # zero is always special in database, so we do not take risk here
+    id = 1  # zero is always special in database, so we do not take risk here
     my_type = 'discoveryrule'
 
     properties = Item.properties.copy()
@@ -68,8 +68,8 @@ class Discoveryrule(MatchingItem):
         setattr(self, 'id', cls.id)
         cls.id += 1
 
-        self.matches = {} # for matching rules
-        self.not_matches = {} # for rules that should NOT match
+        self.matches = {}  # for matching rules
+        self.not_matches = {}  # for rules that should NOT match
         self.writing_properties = {}
 
         # Get the properties of the Class we want

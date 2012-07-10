@@ -31,7 +31,7 @@ from shinken.property import IntegerProp, StringProp, ListProp
 
 
 class Serviceescalation(Item):
-    id = 1 # zero is always special in database, so we do not take risk here
+    id = 1  # zero is always special in database, so we do not take risk here
     my_type = 'serviceescalation'
 
     properties = Item.properties.copy()

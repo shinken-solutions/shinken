@@ -78,7 +78,7 @@ class TestConfig(ShinkenTest):
 
         self.assert_(svc.state == 'PENDING')
         print "State", svc.state
-        svc.state = 'UP' # was PENDING in the save time
+        svc.state = 'UP'  # was PENDING in the save time
 
         # We try to change active state change too
         svc.active_checks_enabled = False

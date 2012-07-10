@@ -46,7 +46,7 @@ def get_pack(pid):
     if '-' in pid:
         uname, packname = pid.split('-', 1)
         pack = app.datamgr.get_pack_by_user_packname(uname, packname)
-    else: # of the direct inner pack_id (will change for each push)
+    else:  # of the direct inner pack_id (will change for each push)
         pack = app.datamgr.get_pack_by_id(pid)
 
     return {'app': app, 'user': user, 'pack': pack}

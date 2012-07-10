@@ -58,7 +58,7 @@ class ContactDowntime:
     def __init__(self, ref, start_time, end_time, author, comment):
         self.id = self.__class__.id
         self.__class__.id += 1
-        self.ref = ref # pointer to srv or host we are apply
+        self.ref = ref  # pointer to srv or host we are apply
         self.start_time = start_time
         self.end_time = end_time
         self.author = author

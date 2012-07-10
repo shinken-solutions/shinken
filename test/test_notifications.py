@@ -38,14 +38,14 @@ class TestNotif(ShinkenTest):
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
 
         # To make tests quicker we make notifications send very quickly
         svc.notification_interval = 0.001
 
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
         #--------------------------------------------------------------
         # initialize host/service state
         #--------------------------------------------------------------
@@ -148,15 +148,15 @@ class TestNotif(ShinkenTest):
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
 
         # To make tests quicker we make notifications send very quickly
-        svc.notification_interval = 0.001 # and send imediatly then
+        svc.notification_interval = 0.001  # and send imediatly then
 
-        svc.first_notification_delay = 0.1 # set 6s for first notif delay
+        svc.first_notification_delay = 0.1  # set 6s for first notif delay
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
         self.scheduler_loop(1, [[host, 0, 'UP']], do_sleep=True, sleep_time=1)
         #-----------------------------------------------------------------
         # initialize with a good check. there must be no pending notification
@@ -209,7 +209,7 @@ class TestNotif(ShinkenTest):
         # 1 master, 1 child
         self.assert_(svc.current_notification_number == 1)
         self.show_actions()
-        self.assert_(len(svc.notifications_in_progress) == 1) # master is zombieand removed_from_in_progress
+        self.assert_(len(svc.notifications_in_progress) == 1)  # master is zombieand removed_from_in_progress
         self.show_logs()
         self.assert_(self.log_match(1, 'SERVICE NOTIFICATION.*;CRITICAL;'))
         self.show_and_clear_logs()
@@ -240,11 +240,11 @@ class TestNotif(ShinkenTest):
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.first_notification_delay = 5
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
         self.scheduler_loop(1, [[host, 0, 'UP']], do_sleep=True, sleep_time=0.1)
         #-----------------------------------------------------------------
         # initialize with a good check. there must be no pending notification
@@ -307,14 +307,14 @@ class TestNotif(ShinkenTest):
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
 
         # To make tests quicker we make notifications send very quickly
         svc.notification_interval = 0.001
 
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
         #--------------------------------------------------------------
         # initialize host/service state
         #--------------------------------------------------------------
@@ -365,14 +365,14 @@ class TestNotif(ShinkenTest):
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
 
         # To make tests quicker we make notifications send very quickly
         svc.notification_interval = 0.001
 
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
 
         # We want the contact to do not have a mail, so we remove tyhe 'u'
         test_contact = self.sched.contacts.find_by_name('test_contact')

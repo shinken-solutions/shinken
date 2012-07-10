@@ -62,9 +62,9 @@ class Itemgroup(Item):
     def copy_shell(self):
         cls = self.__class__
         old_id = cls.id
-        new_i = cls() # create a new group
-        new_i.id = self.id # with the same id
-        cls.id = old_id # Reset the Class counter
+        new_i = cls()  # create a new group
+        new_i.id = self.id  # with the same id
+        cls.id = old_id  # Reset the Class counter
 
         # Copy all properties
         for prop in cls.properties:

@@ -54,7 +54,7 @@ class Worker:
 
     """
 
-    id = 0 # None
+    id = 0  # None
     _process = None
     _mortal = None
     _idletime = None
@@ -69,7 +69,7 @@ class Worker:
         self._timeout = timeout
         self.processes_by_worker = processes_by_worker
         self.input_queue = s
-        self._c = Queue() # Private Control queue for the Worker
+        self._c = Queue()  # Private Control queue for the Worker
         # By default, take our own code
         if target is None:
             target = self.work

@@ -82,7 +82,7 @@ class Broker(BaseSatellite):
         self.external_commands = []
 
         # All broks to manage
-        self.broks = [] # broks to manage
+        self.broks = []  # broks to manage
         # broks raised this turn and that needs to be put in self.broks
         self.broks_internal_raised = []
 
@@ -121,7 +121,7 @@ class Broker(BaseSatellite):
                     try:
                         self.schedulers[c_id]['con'] = None
                         self.schedulers[c_id]['running_id'] = 0
-                    except KeyError: # maybe this instance was not known, forget it
+                    except KeyError:  # maybe this instance was not known, forget it
                         logger.warning("the module %s ask me a full_instance_id for an unknown ID (%d)!" % (source, c_id))
             # Maybe a module tells me that it's dead, I must log it's last words...
             if elt.get_type() == 'ICrash':
@@ -298,7 +298,7 @@ class Broker(BaseSatellite):
         for sched_id in links:
             try:
                 con = links[sched_id]['con']
-                if con is not None: # None = not initilized
+                if con is not None:  # None = not initilized
                     t0 = time.time()
                     tmp_broks = con.get_broks()
                     logger.debug("%s Broks get in %s" % (len(tmp_broks), time.time() - t0))
@@ -308,7 +308,7 @@ class Broker(BaseSatellite):
                     # Ok, we can add theses broks to our queues
                     self.add_broks_to_queue(tmp_broks.values())
 
-                else: # no con? make the connection
+                else:  # no con? make the connection
                     self.pynag_con_init(sched_id, type=type)
             # Ok, con is not known, so we create it
             except KeyError, exp:
@@ -394,7 +394,7 @@ class Broker(BaseSatellite):
 
             # replacing scheduler address and port by those defined in satellitemap
             if s['name'] in g_conf['satellitemap']:
-                s = dict(s) # make a copy
+                s = dict(s)  # make a copy
                 s.update(g_conf['satellitemap'][s['name']])
             uri = pyro.create_uri(s['address'], s['port'], 'Broks', self.use_ssl)
             self.schedulers[sched_id]['uri'] = uri
@@ -421,13 +421,13 @@ class Broker(BaseSatellite):
 
             # replacing arbiter address and port by those defined in satellitemap
             if a['name'] in g_conf['satellitemap']:
-                a = dict(a) # make a copy
+                a = dict(a)  # make a copy
                 a.update(g_conf['satellitemap'][a['name']])
             uri = pyro.create_uri(a['address'], a['port'], 'Broks', self.use_ssl)
             self.arbiters[arb_id]['uri'] = uri
 
             self.arbiters[arb_id]['broks'] = broks
-            self.arbiters[arb_id]['instance_id'] = 0 # No use so all to 0
+            self.arbiters[arb_id]['instance_id'] = 0  # No use so all to 0
             self.arbiters[arb_id]['running_id'] = 0
             self.arbiters[arb_id]['last_connection'] = 0
 
@@ -450,13 +450,13 @@ class Broker(BaseSatellite):
 
             # replacing poller address and port by those defined in satellitemap
             if p['name'] in g_conf['satellitemap']:
-                p = dict(p) # make a copy
+                p = dict(p)  # make a copy
                 p.update(g_conf['satellitemap'][p['name']])
             uri = pyro.create_uri(p['address'], p['port'], 'Broks', self.use_ssl)
             self.pollers[pol_id]['uri'] = uri
 
             self.pollers[pol_id]['broks'] = broks
-            self.pollers[pol_id]['instance_id'] = 0 # No use so all to 0
+            self.pollers[pol_id]['instance_id'] = 0  # No use so all to 0
             self.pollers[pol_id]['running_id'] = running_id
             self.pollers[pol_id]['last_connection'] = 0
 
@@ -481,13 +481,13 @@ class Broker(BaseSatellite):
 
             # replacing reactionner address and port by those defined in satellitemap
             if r['name'] in g_conf['satellitemap']:
-                r = dict(r) # make a copy
+                r = dict(r)  # make a copy
                 r.update(g_conf['satellitemap'][r['name']])
             uri = pyro.create_uri(r['address'], r['port'], 'Broks', self.use_ssl)
             self.reactionners[rea_id]['uri'] = uri
 
             self.reactionners[rea_id]['broks'] = broks
-            self.reactionners[rea_id]['instance_id'] = 0 # No use so all to 0
+            self.reactionners[rea_id]['instance_id'] = 0  # No use so all to 0
             self.reactionners[rea_id]['running_id'] = running_id
             self.reactionners[rea_id]['last_connection'] = 0
 

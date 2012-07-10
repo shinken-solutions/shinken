@@ -34,7 +34,7 @@ class TestConfig(ShinkenTest):
     def test_raise_warning_on_notification_errors(self):
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         cmd = "/error/pl"
         # Create a dummy notif
         n = Notification('PROBLEM', 'scheduled', 'BADCOMMAND', cmd, host, None, 0)

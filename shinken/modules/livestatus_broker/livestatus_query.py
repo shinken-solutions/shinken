@@ -130,11 +130,11 @@ class LiveStatusQuery(object):
             if ':' in line and not ' ' in line:
                 line = line.replace(':', ': ')
             keyword = line.split(' ')[0].rstrip(':')
-            if keyword == 'GET': # Get the name of the base table
+            if keyword == 'GET':  # Get the name of the base table
                 _, self.table = self.split_command(line)
                 if self.table not in table_class_map.keys():
                     raise LiveStatusQueryError(404, self.table)
-            elif keyword == 'Columns': # Get the names of the desired columns
+            elif keyword == 'Columns':  # Get the names of the desired columns
                 _, self.columns = self.split_option_with_columns(line)
                 self.response.columnheaders = 'off'
             elif keyword == 'ResponseHeader':
@@ -175,7 +175,7 @@ class LiveStatusQuery(object):
                         self.db.add_filter(operator, attribute, reference)
                 else:
                     print "illegal operation", operator
-                    pass # illegal operation
+                    pass  # illegal operation
             elif keyword == 'And':
                 _, andnum = self.split_option(line)
                 # Take the last andnum functions from the stack
@@ -233,7 +233,7 @@ class LiveStatusQuery(object):
                     self.stats_postprocess_stack.put_stack(self.make_filter(operator, attribute, None))
                 else:
                     print "illegal operation", operator
-                    pass # illegal operation
+                    pass  # illegal operation
             elif keyword == 'StatsAnd':
                 _, andnum = self.split_option(line)
                 self.stats_filter_stack.and_elements(andnum)

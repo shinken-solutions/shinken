@@ -69,7 +69,7 @@ class Npcd_broker(BaseModule):
         self.perfdata_spool_dir = perfdata_spool_dir
         self.perfdata_spool_filename = perfdata_spool_filename
         self.sleep_time = sleep_time
-        self.process_performance_data = True # this can be reset and set by program_status_broks
+        self.process_performance_data = True  # this can be reset and set by program_status_broks
         self.processed_lines = 0
         self.host_commands = {}
         self.service_commands = {}
@@ -217,7 +217,7 @@ class Npcd_broker(BaseModule):
         self.rotate()
         last_rotated = time.time()
         while not self.interrupted:
-            l = self.to_q.get() # can block here :)
+            l = self.to_q.get()  # can block here :)
             for b in l:
                 # unserialize the brok before use it
                 b.prepare()

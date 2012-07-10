@@ -110,7 +110,7 @@ class Hot_dependencies_arbiter(BaseModule):
             if last_update > self.last_update:
                 self.last_update = last_update
                 return True
-        except OSError, exp: # Maybe the file got problem, we bypaass here
+        except OSError, exp:  # Maybe the file got problem, we bypaass here
             self.debug(str(exp))
         return False
 

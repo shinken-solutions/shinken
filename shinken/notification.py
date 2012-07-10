@@ -105,7 +105,7 @@ class Notification(Action):
 
         self.is_a = 'notification'
         self.type = type
-        if id is None: # id != None is for copy call only
+        if id is None:  # id != None is for copy call only
             self.id = Action.id
             Action.id += 1
 

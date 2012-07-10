@@ -56,7 +56,7 @@ class template_Test_Daemon_Bad_Start():
     def get_login_and_group(self, p):
         try:
             user = os.getlogin()
-        except OSError: # on some rare case, we can have a problem here
+        except OSError:  # on some rare case, we can have a problem here
             # so bypass it and keep default value
             return
         p.user = p.group = user
@@ -67,7 +67,7 @@ class template_Test_Daemon_Bad_Start():
 
     def get_daemon(self):
         os.chdir(curdir)
-        shinken_log.local_log = None # otherwise get some "trashs" logs..
+        shinken_log.local_log = None  # otherwise get some "trashs" logs..
         d = self.create_daemon()
         d.load_config_file()
         d.port = 0

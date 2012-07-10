@@ -48,7 +48,7 @@ class IForArbiter(Interface):
         # I've got a conf and a good one
         if self.app.cur_conf and self.app.cur_conf.magic_hash == magic_hash:
             return True
-        else: # I've no conf or a bad one
+        else:  # I've no conf or a bad one
             return False
 
     # The master Arbiter is sending us a new conf. Ok, we take it
@@ -262,7 +262,7 @@ class Arbiter(Daemon):
 
                 # Set myself as alive ;)
                 self.me.alive = True
-            else: # not me
+            else:  # not me
                 arb.need_conf = True
 
         if not self.me:
@@ -528,7 +528,7 @@ class Arbiter(Daemon):
                 self.me = arb
                 arb.is_me = lambda: True  # we now definitively know who we are, just keep it.
             else:
-                arb.is_me = lambda: False # and we know who we are not, just keep it.
+                arb.is_me = lambda: False  # and we know who we are not, just keep it.
 
 
     def do_loop_turn(self):
@@ -679,11 +679,11 @@ class Arbiter(Daemon):
 
             if elapsed or ins:
                 timeout -= elapsed
-                if timeout > 0: # only continue if we are not over timeout
+                if timeout > 0:  # only continue if we are not over timeout
                     continue
 
             # Timeout
-            timeout = 1.0 # reset the timeout value
+            timeout = 1.0  # reset the timeout value
 
             # Try to see if one of my module is dead, and
             # try to restart previously dead modules :)

@@ -220,7 +220,7 @@ class Regenerator(object):
             # hosts into it
             if hg:
                 hg.members.extend(inphg.members)
-            else: # else take the new one
+            else:  # else take the new one
                 self.hostgroups[inphg.id] = inphg
         # We can delare hostgroups done
         self.hostgroups.create_reversed_list()
@@ -277,7 +277,7 @@ class Regenerator(object):
             # services into it
             if sg:
                 sg.members.extend(inpsg.members)
-            else: # else take the new one
+            else:  # else take the new one
                 self.servicegroups[inpsg.id] = inpsg
         # We can delare servicegroups done
         self.servicegroups.create_reversed_list()
@@ -364,7 +364,7 @@ class Regenerator(object):
             # contacts into it
             if cg:
                 cg.members.extend(inpcg.members)
-            else: # else take the new one
+            else:  # else take the new one
                 self.contactgroups[inpcg.id] = inpcg
         # We can delare contactgroups done
         self.contactgroups.create_reversed_list()
@@ -564,7 +564,7 @@ class Regenerator(object):
         # Try to get the inp progress Hosts
         try:
             inp_hosts = self.inp_hosts[inst_id]
-        except Exception, exp: # not good. we will cry in theprogram update
+        except Exception, exp:  # not good. we will cry in theprogram update
             print "Not good!", exp
             return
 
@@ -594,7 +594,7 @@ class Regenerator(object):
         # Try to get the inp progress Hostgroups
         try:
             inp_hostgroups = self.inp_hostgroups[inst_id]
-        except Exception, exp: # not good. we will cry in theprogram update
+        except Exception, exp:  # not good. we will cry in theprogram update
             print "Not good!", exp
             return
 
@@ -620,7 +620,7 @@ class Regenerator(object):
         # Try to get the inp progress Hosts
         try:
             inp_services = self.inp_services[inst_id]
-        except Exception, exp: # not good. we will cry in theprogram update
+        except Exception, exp:  # not good. we will cry in theprogram update
             print "Not good!", exp
             return
 
@@ -650,7 +650,7 @@ class Regenerator(object):
         # Try to get the inp progress Hostgroups
         try:
             inp_servicegroups = self.inp_servicegroups[inst_id]
-        except Exception, exp: # not good. we will cry in theprogram update
+        except Exception, exp:  # not good. we will cry in theprogram update
             print "Not good!", exp
             return
 
@@ -737,7 +737,7 @@ class Regenerator(object):
         # Try to get the inp progress Contactgroups
         try:
             inp_contactgroups = self.inp_contactgroups[inst_id]
-        except Exception, exp: # not good. we will cry in theprogram update
+        except Exception, exp:  # not good. we will cry in theprogram update
             print "Not good!", exp
             return
 

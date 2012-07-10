@@ -47,7 +47,7 @@ class ServiceExtInfo(Item):
     # running_properties names
     __metaclass__ = AutoSlots
 
-    id = 1 # zero is reserved for host (primary node for parents)
+    id = 1  # zero is reserved for host (primary node for parents)
     my_type = 'serviceextinfo'
 
 
@@ -106,12 +106,12 @@ class ServiceExtInfo(Item):
         if not self.is_tpl():
             try:
                 return self.host_name
-            except AttributeError: # outch, no hostname
+            except AttributeError:  # outch, no hostname
                 return 'UNNAMEDHOST'
         else:
             try:
                 return self.name
-            except AttributeError: # outch, no name for this template
+            except AttributeError:  # outch, no name for this template
                 return 'UNNAMEDHOSTTEMPLATE'
 
 
@@ -126,8 +126,8 @@ class ServiceExtInfo(Item):
 # Class for the hosts lists. It's mainly for configuration
 # part
 class ServicesExtInfo(Items):
-    name_property = "host_name" # use for the search by name
-    inner_class = ServiceExtInfo # use for know what is in items
+    name_property = "host_name"  # use for the search by name
+    inner_class = ServiceExtInfo  # use for know what is in items
 
 
     # Merge extended host information into host

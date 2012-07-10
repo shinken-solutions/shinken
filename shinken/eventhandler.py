@@ -65,7 +65,7 @@ class EventHandler(Action):
         self.is_a = 'eventhandler'
         self.type = ''
         self.status = 'scheduled'
-        if id is None: # id != None is for copy call only
+        if id is None:  # id != None is for copy call only
             self.id = Action.id
             Action.id += 1
         self.ref = ref

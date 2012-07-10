@@ -176,7 +176,7 @@ class Graphite_broker(BaseModule):
                 if value:
                     lines.append("%s.%s.%s %s %d" % (hname, desc, metric,
                                                      value, check_time))
-            packet = '\n'.join(lines) + '\n' # Be sure we put \n every where
+            packet = '\n'.join(lines) + '\n'  # Be sure we put \n every where
 #            print "Graphite launching:", packet
             self.con.sendall(packet)
 
@@ -218,7 +218,7 @@ class Graphite_broker(BaseModule):
                 if value:
                     lines.append("%s.__HOST__.%s %s %d" % (hname, metric,
                                                            value, check_time))
-            packet = '\n'.join(lines) + '\n' # Be sure we put \n every where
+            packet = '\n'.join(lines) + '\n'  # Be sure we put \n every where
 #            print "Graphite launching:", packet
             self.con.sendall(packet)
 

@@ -44,14 +44,14 @@ class TestContactDowntime(ShinkenTest):
 
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
 
         # Change the notif interval, so we can notify as soon as we want
         svc.notification_interval = 0.001
 
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
 
         #time.sleep(20)
         # We loop, the downtime wil be check and activate
@@ -119,14 +119,14 @@ class TestContactDowntime(ShinkenTest):
 
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
 
         # Change the notif interval, so we can notify as soon as we want
         svc.notification_interval = 0.001
 
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
 
         #time.sleep(20)
         # We loop, the downtime wil be check and activate

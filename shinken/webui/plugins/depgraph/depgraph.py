@@ -89,7 +89,7 @@ def get_depgraph_widget():
     elts = search.split('/', 1)
     if len(elts) == 1:
         s = app.datamgr.get_host(search)
-    else: # ok we got a service! :)
+    else:  # ok we got a service! :)
         s = app.datamgr.get_service(elts[0], elts[1])
 
 

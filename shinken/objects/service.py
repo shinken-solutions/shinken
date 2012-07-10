@@ -382,7 +382,7 @@ class Service(SchedulingItem):
             if prop not in special_properties:
                 if not hasattr(self, prop) and entry.required:
                     logger.error("The service %s on host '%s' do not have %s" % (desc, hname, prop))
-                    state = False # Bad boy...
+                    state = False  # Bad boy...
 
         # Then look if we have some errors in the conf
         # Juts print warnings, but raise errors
@@ -534,7 +534,7 @@ class Service(SchedulingItem):
                     value = key_value['VALUE']
                     new_s = self.copy()
                     new_s.host_name = host.get_name()
-                    if self.is_tpl(): # if template, the new one is not
+                    if self.is_tpl():  # if template, the new one is not
                         new_s.register = 1
                     for key in key_value:
                         if key == 'KEY':
@@ -595,7 +595,7 @@ class Service(SchedulingItem):
             self.state_id_before_impact = self.state_id
             # this flag will know if we overide the impact state
             self.state_changed_since_impact = False
-            self.state = 'UNKNOWN' # exit code UNDETERMINED
+            self.state = 'UNKNOWN'  # exit code UNDETERMINED
             self.state_id = 3
 
 
@@ -628,7 +628,7 @@ class Service(SchedulingItem):
                 and self.is_impact \
                 and not self.state_changed_since_impact:
             self.last_state = self.state_before_impact
-        else: # standard case
+        else:  # standard case
             self.last_state = self.state
 
         if status == 0:
@@ -652,7 +652,7 @@ class Service(SchedulingItem):
             self.last_time_unknown = int(self.last_state_update)
             state_code = 'u'
         else:
-            self.state = 'CRITICAL' # exit code UNDETERMINED
+            self.state = 'CRITICAL'  # exit code UNDETERMINED
             self.state_id = 2
             self.last_time_critical = int(self.last_state_update)
             state_code = 'c'
@@ -688,7 +688,7 @@ class Service(SchedulingItem):
                                                                 self.last_time_critical,
                                                                 self.last_time_unknown])
         if len(non_ok_times) == 0:
-            last_time_non_ok = 0 # program_start would be better
+            last_time_non_ok = 0  # program_start would be better
         else:
             last_time_non_ok = min(non_ok_times)
         return last_time_non_ok
@@ -960,7 +960,7 @@ class Service(SchedulingItem):
 
 # Class for list of services. It's mainly, mainly for configuration part
 class Services(Items):
-    inner_class = Service # use for know what is in items
+    inner_class = Service  # use for know what is in items
     # Create the reversed list for speedup search by host_name/name
     # We also tag service already in list: they are twins. It'a a bad things.
     # Hostgroups service have an ID higer thant host service. So it we tag
@@ -1069,12 +1069,12 @@ class Services(Items):
                 # Let the host know we are his service
                 if s.host is not None:
                     hst.add_service_link(s)
-                else: # Ok, the host do not exists!
+                else:  # Ok, the host do not exists!
                     err = "Error: the service '%s' do not have a host_name not hostgroup_name" % (self.get_name())
                     s.configuration_errors.append(err)
                     continue
             except AttributeError, exp:
-                pass # Will be catch at the is_correct moment
+                pass  # Will be catch at the is_correct moment
 
 
     # We look for servicegroups property in services and
@@ -1173,7 +1173,7 @@ class Services(Items):
             def _loop(name):
                 new_s = s.copy()
                 new_s.host_name = name
-                if s.is_tpl(): #  if template, the new one is not
+                if s.is_tpl():  # if template, the new one is not
                     new_s.register = 1
                 self.items[new_s.id] = new_s
         else:
@@ -1185,7 +1185,7 @@ class Services(Items):
                 if h is not None:
                     for new_s in s.duplicate(h):
                         self.items[new_s.id] = new_s
-                else: # TODO: raise an error?
+                else:  # TODO: raise an error?
                     err = 'Error: The hostname %s is unknown for the service %s!' % (name, s.get_name())
                     s.configuration_errors.append(err)
 
@@ -1218,8 +1218,8 @@ class Services(Items):
 
         for id in service_to_check:
             s = self.items[id]
-            duplicate_for_hosts = [] # get the list of our host_names if more than 1
-            not_hosts = [] # the list of !host_name so we remove them after
+            duplicate_for_hosts = []  # get the list of our host_names if more than 1
+            not_hosts = []  # the list of !host_name so we remove them after
 
             # If do not have an host_name, just delete it
             if not hasattr(s, 'host_name'):
@@ -1242,7 +1242,7 @@ class Services(Items):
                         # the not list
                         if len(hname) > 0 and hname[0] == '!':
                             not_hosts.append(hname[1:])
-                        else: # the standard list
+                        else:  # the standard list
                             duplicate_for_hosts.append(hname)
 
                     # remove duplicate items from duplicate_for_hosts:
@@ -1264,8 +1264,8 @@ class Services(Items):
                     if not s.is_tpl() and s.configuration_errors == []:
                         srv_to_remove.append(id)
 
-                else: # Maybe the hnames was full of same host, so we must reset the name
-                    for hname in hnames: # So even if len == 0, we are protected
+                else:  # Maybe the hnames was full of same host, so we must reset the name
+                    for hname in hnames:  # So even if len == 0, we are protected
                         s.host_name = hname
 
         # We clean all service that was for multiple hosts.
@@ -1296,9 +1296,9 @@ class Services(Items):
                         i = 0
                         hname = ''
                         for elt in sdeps:
-                            if i % 2 == 0: # host
+                            if i % 2 == 0:  # host
                                 hname = elt
-                            else: # description
+                            else:  # description
                                 desc = elt
                                 # we can register it (s) (depend on) -> (hname, desc)
                                 # If we do not have enouth data for s, it's no use

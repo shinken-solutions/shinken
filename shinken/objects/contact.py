@@ -44,7 +44,7 @@ _simple_way_parameters = ( 'service_notification_period', 'host_notification_per
 
 
 class Contact(Item):
-    id = 1 # zero is always special in database, so we do not take risk here
+    id = 1  # zero is always special in database, so we do not take risk here
     my_type = 'contact'
 
     properties = Item.properties.copy()
@@ -180,7 +180,7 @@ class Contact(Item):
             if prop not in _special_properties:
                 if not hasattr(self, prop) and entry.required:
                     logger.error("[contact::%s] %s property not set" % (self.get_name(), prop))
-                    state = False # Bad boy...
+                    state = False  # Bad boy...
 
         # There is a case where there is no nw: when there is not special_prop defined
         # at all!!
@@ -195,7 +195,7 @@ class Contact(Item):
                     logger.error("[contact::%s] %s character not allowed in contact_name" % (self.get_name(), c))
                     state = False
         else:
-            if hasattr(self, 'alias'): # take the alias if we miss the contact_name
+            if hasattr(self, 'alias'):  # take the alias if we miss the contact_name
                 self.contact_name = self.alias
 
         return state
@@ -241,7 +241,7 @@ class Contacts(Items):
                 nw = notificationways.find_by_name(nw_name)
                 if nw is not None:
                     new_notificationways.append(nw)
-                else: # TODO: What?
+                else:  # TODO: What?
                     pass
             # Get the list, but first make elements uniq
             i.notificationways = list(set(new_notificationways))
@@ -276,7 +276,7 @@ class Contacts(Items):
                     if hasattr(c, p):
                         need_notificationway = True
                         params[p] = getattr(c, p)
-                    else: # put a default text value
+                    else:  # put a default text value
                         # Remove the value and put a default value
                         setattr(c, p, '')
 

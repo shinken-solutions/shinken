@@ -43,7 +43,7 @@ class TestConfig(ShinkenTest):
         # scheduler.schedule() always schedules a check, even for this
         # kind of hosts
         #host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         host.checks_in_progress = []
         host.in_checking = False
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")

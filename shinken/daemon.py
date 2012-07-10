@@ -63,7 +63,7 @@ try:
 
     def get_cur_group():
         return grp.getgrgid( os.getgid() ).gr_name
-except ImportError, exp: # Like in nt system or Android
+except ImportError, exp:  # Like in nt system or Android
     # temporary workarround:
     def get_cur_user():
         return "shinken"
@@ -159,8 +159,8 @@ class Daemon(object):
         # Track time
         now = time.time()
         self.program_start = now
-        self.t_each_loop = now # used to track system time change
-        self.sleep_time = 0.0 # used to track the time we wait
+        self.t_each_loop = now  # used to track system time change
+        self.sleep_time = 0.0  # used to track the time we wait
 
         self.pyro_daemon = None
 
@@ -168,7 +168,7 @@ class Daemon(object):
         self.log = logger
         self.log.load_obj(self)
 
-        self.new_conf = None # used by controller to push conf
+        self.new_conf = None  # used by controller to push conf
         self.cur_conf = None
 
         # Flag to know if we need to dump memory or not
@@ -308,7 +308,7 @@ class Daemon(object):
             # Windows do not manage the rw+ mode, so we must open in read mode first, then reopen it write mode...
             if not write and os.path.exists(p):
                 self.fpid = open(p, 'r+')
-            else: # If it doesnt exist too, we create it as void
+            else:  # If it doesnt exist too, we create it as void
                 self.fpid = open(p, 'w+')
         except Exception, e:
             raise InvalidPidFile(e)
@@ -370,7 +370,7 @@ class Daemon(object):
         self.fpid.truncate()
         self.fpid.write("%d" % (pid))
         self.fpid.close()
-        del self.fpid ## no longer needed
+        del self.fpid  ## no longer needed
 
     # Close all the process file descriptors. Skip the descriptors
     # present in the skip_close_fds list
@@ -387,7 +387,7 @@ class Daemon(object):
             if fd in skip_close_fds: continue
             try:
                 os.close(fd)
-            except OSError: # ERROR, fd wasn't open to begin with (ignored)
+            except OSError:  # ERROR, fd wasn't open to begin with (ignored)
                 pass
 
     # Go in "daemon" mode: close unused fds, redirect stdout/err,
@@ -406,8 +406,8 @@ class Daemon(object):
         ## We close all fd but what we need:
         self.close_fds(skip_close_fds + ( self.fpid.fileno(), fdtemp ))
 
-        os.dup2(fdtemp, 1) # standard output (1)
-        os.dup2(fdtemp, 2) # standard error (2)
+        os.dup2(fdtemp, 1)  # standard output (1)
+        os.dup2(fdtemp, 2)  # standard error (2)
 
         # Now the fork/setsid/fork..
         try:
@@ -487,7 +487,7 @@ class Daemon(object):
 
     def setup_pyro_daemon(self):
 
-        if hasattr(self, 'use_ssl'): # "common" daemon
+        if hasattr(self, 'use_ssl'):  # "common" daemon
             ssl_conf = self
         else:
             ssl_conf = self.conf     # arbiter daemon..
@@ -652,9 +652,9 @@ class Daemon(object):
 
     def manage_signal(self, sig, frame):
         logger.debug("I'm process %d and I received signal %s" % (os.getpid(), str(sig)))
-        if sig == 10: # if USR1, ask a memory dump
+        if sig == 10:  # if USR1, ask a memory dump
             self.need_dump_memory = True
-        else: # Ok, really ask us to die :)
+        else:  # Ok, really ask us to die :)
             self.interrupted = True
 
 
@@ -708,7 +708,7 @@ class Daemon(object):
         before += tcdiff
         # Increase our sleep time for the time go in select
         self.sleep_time += time.time() - before
-        if len(ins) == 0: # trivial case: no fd activity:
+        if len(ins) == 0:  # trivial case: no fd activity:
             return 0, [], tcdiff
         for sock in socks:
             if sock in ins and sock not in suppl_socks:
@@ -716,7 +716,7 @@ class Daemon(object):
                 ins.remove(sock)
         # Tack in elapsed the WHOLE time, even with handling requests
         elapsed = time.time() - before
-        if elapsed == 0: # we have done a few instructions in 0 second exactly!? quantum computer?
+        if elapsed == 0:  # we have done a few instructions in 0 second exactly!? quantum computer?
             elapsed = 0.01  # but we absolutely need to return!= 0 to indicate that we got activity
         return elapsed, ins, tcdiff
 

@@ -238,7 +238,7 @@ class Shinken(BaseSatellite):
         # If we got USR1, just dump memory
         if sig == 10:
             self.sched.need_dump_memory = True
-        else: # if not, die :)
+        else:  # if not, die :)
             self.sched.die()
             self.must_run = False
             Daemon.manage_signal(self, sig, frame)
@@ -294,7 +294,7 @@ class Shinken(BaseSatellite):
             self.pollers[pol_id] = p
 
             if p['name'] in override_conf['satellitemap']:
-                p = dict(p) # make a copy
+                p = dict(p)  # make a copy
                 p.update(override_conf['satellitemap'][p['name']])
 
             uri = pyro.create_uri(p['address'], p['port'], 'Schedulers', self.use_ssl)

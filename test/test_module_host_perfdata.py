@@ -67,7 +67,7 @@ class TestConfig(ShinkenTest):
             if b.type == 'host_check_result':
                 sl.manage_brok(b)
         self.sched.broks = {}
-        sl.file.close() # the sl also has an open file handle
+        sl.file.close()  # the sl also has an open file handle
 
         fd = open(mod.path)
         buf = fd.readline()

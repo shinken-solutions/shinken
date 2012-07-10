@@ -33,10 +33,10 @@ class TestPollerTagGetchecks(ShinkenTest):
     def test_good_checks_get_only_tags_with_specific_tags(self):
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
 
         # schedule the host so it will have a check :)
         # and for ce the execution now
@@ -70,10 +70,10 @@ class TestPollerTagGetchecks(ShinkenTest):
     def test_good_checks_get_only_tags_with_specific_module_types(self):
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
 
         # schedule the host so it will have a check :)
         # and for ce the execution now
