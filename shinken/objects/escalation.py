@@ -53,7 +53,7 @@ class Escalation(Item):
 
     running_properties = Item.running_properties.copy()
     running_properties.update({
-        'time_based':           BoolProp(default=False),
+        'time_based': BoolProp(default=False),
     })
 
     # For debugging purpose only (nice name)

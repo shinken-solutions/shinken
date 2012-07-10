@@ -164,13 +164,13 @@ class Service(SchedulingItem):
         'is_flapping':        BoolProp(default=False, fill_brok=['full_status'], retention=True),
         #  dependencies for actions like notif of event handler,
         # so AFTER check return
-        'act_depend_of':      ListProp(default=[]),
+        'act_depend_of': ListProp(default=[]),
         # dependencies for checks raise, so BEFORE checks
-        'chk_depend_of':      ListProp(default=[]),
+        'chk_depend_of': ListProp(default=[]),
         # elements that depend of me, so the reverse than just uppper
-        'act_depend_of_me':   ListProp(default=[]),
+        'act_depend_of_me': ListProp(default=[]),
         # elements that depend of me
-        'chk_depend_of_me':   ListProp(default=[]),
+        'chk_depend_of_me': ListProp(default=[]),
 
         'last_state_update':  FloatProp(default=0.0, fill_brok=['full_status'], retention=True),
         'checks_in_progress': ListProp(default=[]), # no brok because checks are too linked
@@ -234,9 +234,9 @@ class Service(SchedulingItem):
 
         # BUSINESS CORRELATOR PART
         # Say if we are business based rule or not
-        'got_business_rule':  BoolProp(default=False, fill_brok=['full_status']),
+        'got_business_rule': BoolProp(default=False, fill_brok=['full_status']),
         # Our Dependency node for the business rule
-        'business_rule':      StringProp(default=None),
+        'business_rule': StringProp(default=None),
 
         # Here it's the elements we are depending on
         # so our parents as network relation, or a host
@@ -256,7 +256,7 @@ class Service(SchedulingItem):
         'topology_change': BoolProp(default=False, fill_brok=['full_status']),
 
         # Trigger list
-        'triggers':  StringProp(default=[])
+        'triggers': StringProp(default=[])
 
     })
 

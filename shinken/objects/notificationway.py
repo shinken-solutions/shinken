@@ -56,7 +56,7 @@ class NotificationWay(Item):
     # so from Nagios2 format, to Nagios3 ones.
     # Or Shinken deprecated names like criticity
     old_properties = {
-        'min_criticity':    'min_business_impact',
+        'min_criticity': 'min_business_impact',
     }
 
     macros = {}

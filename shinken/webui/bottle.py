@@ -1204,8 +1204,8 @@ class BaseResponse(object):
         return hdict
 
     def __contains__(self, name): return _hkey(name) in self._headers
-    def __delitem__(self, name):  del self._headers[_hkey(name)]
-    def __getitem__(self, name):  return self._headers[_hkey(name)][-1]
+    def __delitem__(self, name): del self._headers[_hkey(name)]
+    def __getitem__(self, name): return self._headers[_hkey(name)][-1]
     def __setitem__(self, name, value): self._headers[_hkey(name)] = [str(value)]
 
     def get_header(self, name, default=None):

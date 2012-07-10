@@ -37,7 +37,7 @@ from shinken.log import logger
 # Just print some stuff
 class Ip_Tag_Arbiter(BaseModule):
     def __init__(self, mod_conf, ip_range, prop, value, method):
-        BaseModule.__init__(self,  mod_conf)
+        BaseModule.__init__(self, mod_conf)
         self.ip_range = IP(ip_range)
         self.property = prop
         self.value = value

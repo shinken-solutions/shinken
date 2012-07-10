@@ -262,7 +262,7 @@ def main():
         sys.exit(2)
 
 
-def domacros(configfile,args=[]):
+def domacros(configfile, args=[]):
     import string
     import re
     """ load macro """
@@ -483,7 +483,7 @@ def getaddresses(config):
                             print v
 
 
-def showconfig(config,objectype,filters=""):
+def showconfig(config, objectype, filters=""):
     dfilters={}
     if len(filters) > 0:
         t=filters.split(',')
@@ -557,7 +557,7 @@ def getauthdata(authfile):
                 result = creg.match(line)
                 if result == None:
                     return "There was an error in the authentication file at line: %s" % (line)
-                auth[result.group("address")]={"login": result.group("login"),"password": result.group("password")}
+                auth[result.group("address")]={"login": result.group("login"), "password": result.group("password")}
         return (True, auth)
     except:
         return (False, "Error while loading authentication data")
@@ -654,7 +654,7 @@ def control(authfile, action):
         return (False, auth)
 
     """ which command for an action """
-    commands = { "stop": "service shinken stop","start": "service shinken start","restart": "service shinken restart"}
+    commands = { "stop": "service shinken stop", "start": "service shinken start", "restart": "service shinken restart"}
     if not commands.has_key(action):
         return (False, "Unknown action command")
 

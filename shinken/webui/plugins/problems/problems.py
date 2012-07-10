@@ -180,7 +180,7 @@ def get_view(page):
 
     # If we are in the /problems and we do not have an ack filter
     # we apply by default the ack:false one
-    print "Late problem filtering?",  page == 'problems', len(filters['ack']) == 0
+    print "Late problem filtering?", page == 'problems', len(filters['ack']) == 0
     if page == 'problems' and len(filters['ack']) == 0:
         # First look for hosts, so ok for services, but remove problem_has_been_acknowledged elements
         items = [i for i in items if i.__class__.my_type=='service' or not i.problem_has_been_acknowledged]
@@ -189,7 +189,7 @@ def get_view(page):
 
     # If we are in the /problems and we do not have an ack filter
     # we apply by default the ack:false one
-    print "Late problem filtering?",  page == 'problems', len(filters['downtime']) == 0
+    print "Late problem filtering?", page == 'problems', len(filters['downtime']) == 0
     if page == 'problems' and len(filters['downtime']) == 0:
         # First look for hosts, so ok for services, but remove problem_has_been_acknowledged elements
         items = [i for i in items if i.__class__.my_type=='service' or not i.in_scheduled_downtime]

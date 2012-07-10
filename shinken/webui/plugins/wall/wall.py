@@ -77,7 +77,7 @@ def get_div(elt):
          <a href="%s">%s</a>
         </div>
 
-        """ % (stars, pulse, icon,  elt.state.lower(), elt.state, elt.get_full_name(), lnk, button)# stars, button)
+        """ % (stars, pulse, icon, elt.state.lower(), elt.state, elt.get_full_name(), lnk, button)# stars, button)
     s = s.encode('utf8', 'ignore')
     return s
 

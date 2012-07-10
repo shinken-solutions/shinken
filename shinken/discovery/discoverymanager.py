@@ -74,7 +74,7 @@ class DiscoveredHost(object):
     my_type = 'host'  # we fake our type for the macro resolving
 
     macros = {
-        'HOSTNAME':          'name',
+        'HOSTNAME': 'name',
         }
 
     def __init__(self, name, rules, runners):

@@ -118,7 +118,7 @@ def problems():
     navi = app.helper.get_navi(total, start, step=5)
     all_pbs = all_pbs[start:end]
 
-    return {'app': app, 'user': user,  'navi': navi, 'problems': all_pbs, 'menu_part': '/problems'}
+    return {'app': app, 'user': user, 'navi': navi, 'problems': all_pbs, 'menu_part': '/problems'}
 
 
 def dashboard():
@@ -279,7 +279,7 @@ def get_div(elt):
         <a href="%s">%s</a>
         </div>
 
-        """ % (stars, pulse, icon,  elt.state.lower(), elt.state, elt.get_full_name(), lnk, button)# stars, button)
+        """ % (stars, pulse, icon, elt.state.lower(), elt.state, elt.get_full_name(), lnk, button)# stars, button)
     s = s.encode('utf8', 'ignore')
     return s
 

@@ -58,7 +58,7 @@ class Item(object):
         'configuration_errors':     ListProp(default=[]),
         'hash':   StringProp(default=''),
         # We save all template we asked us to load from
-        'tags':   ListProp(default=set(), fill_brok=['full_status']),
+        'tags': ListProp(default=set(), fill_brok=['full_status']),
     }
 
     macros = {

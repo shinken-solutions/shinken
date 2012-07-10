@@ -76,27 +76,27 @@ class Contact(Item):
     running_properties = Item.running_properties.copy()
     running_properties.update({
         'modified_attributes': IntegerProp(default=0L, fill_brok=['full_status'], retention=True),
-        'downtimes':        StringProp(default=[], fill_brok=['full_status'], retention=True),
+        'downtimes': StringProp(default=[], fill_brok=['full_status'], retention=True),
     })
 
     # This tab is used to transform old parameters name into new ones
     # so from Nagios2 format, to Nagios3 ones.
     # Or Shinken deprecated names like criticity
     old_properties = {
-        'min_criticity':    'min_business_impact',
+        'min_criticity': 'min_business_impact',
     }
 
     macros = {
-        'CONTACTNAME':      'contact_name',
-        'CONTACTALIAS':     'alias',
-        'CONTACTEMAIL':     'email',
-        'CONTACTPAGER':     'pager',
-        'CONTACTADDRESS1':  'address1',
-        'CONTACTADDRESS2':  'address2',
-        'CONTACTADDRESS3':  'address3',
-        'CONTACTADDRESS4':  'address4',
-        'CONTACTADDRESS5':  'address5',
-        'CONTACTADDRESS6':  'address6',
+        'CONTACTNAME': 'contact_name',
+        'CONTACTALIAS': 'alias',
+        'CONTACTEMAIL': 'email',
+        'CONTACTPAGER': 'pager',
+        'CONTACTADDRESS1': 'address1',
+        'CONTACTADDRESS2': 'address2',
+        'CONTACTADDRESS3': 'address3',
+        'CONTACTADDRESS4': 'address4',
+        'CONTACTADDRESS5': 'address5',
+        'CONTACTADDRESS6': 'address6',
         'CONTACTGROUPNAME': 'get_groupname',
         'CONTACTGROUPNAMES': 'get_groupnames'
     }

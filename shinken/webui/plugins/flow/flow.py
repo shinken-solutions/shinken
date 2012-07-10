@@ -76,7 +76,7 @@ def get_div(elt):
         <div class="ack-button">
            %s
         </div>
-        """ % (stars, pulse, icon,  elt.state.lower(), elt.state, elt.get_full_name(), lnk, button, button_recheck, button_ack)
+        """ % (stars, pulse, icon, elt.state.lower(), elt.state, elt.get_full_name(), lnk, button, button_recheck, button_ack)
     s = s.encode('utf8', 'ignore')
     return s
 

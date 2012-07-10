@@ -50,7 +50,7 @@ class SchedulerLink(SatelliteLink):
 
     running_properties = SatelliteLink.running_properties.copy()
     running_properties.update({
-        'conf':      StringProp(default=None),
+        'conf': StringProp(default=None),
         'need_conf': StringProp(default=True),
         'external_commands': StringProp(default=[]),
         'push_flavor': IntegerProp(default=0),

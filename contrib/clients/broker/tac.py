@@ -185,7 +185,7 @@ class TacController:
         data['services'] = self.model.get_data_services()
         return data
 
-    def refresh(self,loop = None, user_data = None):
+    def refresh(self, loop = None, user_data = None):
         self.view.update()
         self.refresh_alarm = self.loop.set_alarm_in(REFRESH_INTERVAL, self.refresh)
 

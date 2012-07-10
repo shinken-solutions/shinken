@@ -160,7 +160,7 @@ def get_new_packs():
     # we return values for the template (view). But beware, theses values are the
     # only one the tempalte will have, so we must give it an app link and the
     # user we are loggued with (it's a contact object in fact)
-    return {'app': app, 'user': user, 'error': error, 'api_error': api_error, 'results': None, 'search': None, 'categories': categories, 'tags': tags,  'print_cat_tree': print_cat_tree}
+    return {'app': app, 'user': user, 'error': error, 'api_error': api_error, 'results': None, 'search': None, 'categories': categories, 'tags': tags, 'print_cat_tree': print_cat_tree}
 
 
 def launch_search(search):

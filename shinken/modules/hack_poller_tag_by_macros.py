@@ -49,7 +49,7 @@ def get_instance(plugin):
 # Just print some stuff
 class Hack_pt_by_macros(BaseModule):
     def __init__(self, mod_conf):
-        BaseModule.__init__(self,  mod_conf)
+        BaseModule.__init__(self, mod_conf)
         self.host_macro_name = mod_conf.host_macro_name
         self.service_macro_name = mod_conf.service_macro_name
 

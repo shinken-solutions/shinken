@@ -52,11 +52,11 @@ class Realm(Itemgroup):
 
     running_properties = Item.running_properties.copy()
     running_properties.update({
-            'serialized_confs':     StringProp(default={}),
+            'serialized_confs': StringProp(default={}),
         })
 
     macros = {
-        'REALMNAME':    'realm_name',
+        'REALMNAME': 'realm_name',
         'REALMMEMBERS': 'members',
     }
 

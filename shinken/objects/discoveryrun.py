@@ -40,8 +40,8 @@ class Discoveryrun(MatchingItem):
 
     properties = Item.properties.copy()
     properties.update({
-        'discoveryrun_name':            StringProp(),
-        'discoveryrun_command':         StringProp(),
+        'discoveryrun_name': StringProp(),
+        'discoveryrun_command': StringProp(),
     })
 
     running_properties = Item.running_properties.copy()

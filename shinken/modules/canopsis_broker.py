@@ -234,7 +234,7 @@ class Canopsis_broker(BaseModule):
             'address': self.host_addresses[b.data['host_name']]
         }
 
-        return dict(commonmessage,**specificmessage)
+        return dict(commonmessage, **specificmessage)
 
     def push2canopsis(self, message):
         strmessage=str(message)
@@ -351,7 +351,7 @@ class event2amqp():
             logger.error("[Canopsis] Unexpected error: %s in %s" % (error, func))
             return False
 
-    def postmessage(self,message,retry=False):
+    def postmessage(self, message, retry=False):
 
         # process enqueud events if possible
         self.pop_events()
@@ -390,7 +390,7 @@ class event2amqp():
                 return True
             except:
                 logger.error("[Canopsis] Not connected, going to queue messages until connection back")
-                self.queue.append({"key": key,"message": message})
+                self.queue.append({"key": key, "message": message})
                 func = sys._getframe(1).f_code.co_name
                 error = str(sys.exc_info()[0])
                 logger.error("[Canopsis] Unexpected error: %s in %s" % (error, func))
@@ -401,7 +401,7 @@ class event2amqp():
             logger.info(errmsg)
             #enqueue_cano_event(key,message)
             if len(self.queue) < int(self.maxqueuelength):
-                self.queue.append({"key": key,"message": message})
+                self.queue.append({"key": key, "message": message})
                 logger.info("[Canopsis] Queue length: %d" % len(self.queue))
                 return True
             else:

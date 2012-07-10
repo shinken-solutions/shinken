@@ -371,7 +371,7 @@ class Ndodb_Mysql_broker(BaseModule):
         query_instance = self.db.create_insert_query(
             'instances', \
             {
-            'instance_name': new_b.data['instance_name'],\
+            'instance_name': new_b.data['instance_name'], \
             'instance_description': new_b.data['instance_name'], \
             'instance_id': new_b.data['instance_id']
             }

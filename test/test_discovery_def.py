@@ -61,7 +61,7 @@ class TestDiscoveryConf(ShinkenTest):
         genhttpnowin = self.sched.conf.discoveryrules.find_by_name('GenHttpNotWindows')
 
         # Should manage this
-        l = {'openports': '80', 'os':  'linux'}
+        l = {'openports': '80', 'os': 'linux'}
         self.assert_(genhttpnowin.is_matching_disco_datas(l) == True)
 
         # But NOT this one

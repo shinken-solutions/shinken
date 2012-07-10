@@ -75,7 +75,7 @@ class Servicedependencies(Items):
             'host_name':                     par_host_name,
             'service_description':           par_service_description,
             'notification_failure_criteria': 'u,c,w',
-            'inherits_parent':               '1',
+            'inherits_parent': '1',
         }
         sd = Servicedependency(prop)
         self.items[sd.id] = sd

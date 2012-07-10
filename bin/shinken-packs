@@ -213,7 +213,7 @@ def create_pack(pack_file, p_dest_dir, share_dir):
                     _d = os.path.join(create_dir, 'images', 'sets', t)
                     #if not os.path.exists(_d):
                     #    os.mkdir(_d)
-                    print "COPY %s into %s" % (_p,  _d)
+                    print "COPY %s into %s" % (_p, _d)
                     shutil.copytree(_p, _d)
 
         graphite_templates_dir = os.path.join(share_dir, 'templates', 'graphite')

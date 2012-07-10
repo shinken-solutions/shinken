@@ -47,7 +47,7 @@ def get_instance(plugin):
 # Just print some stuff
 class Hack_cmds_pt(BaseModule):
     def __init__(self, mod_conf):
-        BaseModule.__init__(self,  mod_conf)
+        BaseModule.__init__(self, mod_conf)
         self.cmd_line_match = r"""%s""" % mod_conf.cmd_line_match
         self.poller_tag = mod_conf.poller_tag
 

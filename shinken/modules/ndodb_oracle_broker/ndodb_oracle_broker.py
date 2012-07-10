@@ -126,7 +126,7 @@ class Ndodb_Oracle_broker(BaseModule):
         instance_id = b.data['instance_id']
         tables = ['commands', 'contacts', 'contactgroups', 'hosts',
                   'hostescalations', 'hostgroups', 'notifications',
-                  'services',  'serviceescalations', 'programstatus',
+                  'services', 'serviceescalations', 'programstatus',
                   'servicegroups', 'timeperiods', 'hostgroup_members',
                   'contactgroup_members', 'objects', 'hoststatus',
                   'servicestatus']
@@ -230,7 +230,7 @@ class Ndodb_Oracle_broker(BaseModule):
                            'current_state': data['state_id'], 'state_type': data['state_type_id'],
                            'passive_checks_enabled': data['passive_checks_enabled'], 'event_handler_enabled': data['event_handler_enabled'],
                            'active_checks_enabled': data['active_checks_enabled'], 'notifications_enabled': data['notifications_enabled'],
-                           'obsess_over_host': data['obsess_over_host'],'process_performance_data': data['process_perf_data']
+                           'obsess_over_host': data['obsess_over_host'], 'process_performance_data': data['process_perf_data']
         }
         hoststatus_query = self.db.create_insert_query('hoststatus', hoststatus_data)
 
@@ -279,7 +279,7 @@ class Ndodb_Oracle_broker(BaseModule):
                               'current_state': data['state_id'], 'state_type': data['state_type_id'],
                               'passive_checks_enabled': data['passive_checks_enabled'], 'event_handler_enabled': data['event_handler_enabled'],
                               'active_checks_enabled': data['active_checks_enabled'], 'notifications_enabled': data['notifications_enabled'],
-                              'obsess_over_service': data['obsess_over_service'],'process_performance_data': data['process_perf_data']
+                              'obsess_over_service': data['obsess_over_service'], 'process_performance_data': data['process_perf_data']
         }
         servicestatus_query = self.db.create_insert_query('servicestatus', servicestatus_data)
 
@@ -300,7 +300,7 @@ class Ndodb_Oracle_broker(BaseModule):
 
         hostgroup_id = self.get_hostgroup_object_id_by_name(data['hostgroup_name'])
 
-        hostgroups_data = {'id': data['id'], 'instance_id':  data['instance_id'],
+        hostgroups_data = {'id': data['id'], 'instance_id': data['instance_id'],
                            'config_type': 0, 'hostgroup_object_id': hostgroup_id,
                            'alias': data['alias']
             }
@@ -332,7 +332,7 @@ class Ndodb_Oracle_broker(BaseModule):
 
         servicegroup_id = self.get_servicegroup_object_id_by_name(data['servicegroup_name'])
 
-        servicegroups_data = {'id': data['id'], 'instance_id':  data['instance_id'],
+        servicegroups_data = {'id': data['id'], 'instance_id': data['instance_id'],
                            'config_type': 0, 'servicegroup_object_id': servicegroup_id,
                            'alias': data['alias']
             }
@@ -450,7 +450,7 @@ class Ndodb_Oracle_broker(BaseModule):
     def manage_initial_contactgroup_status_brok(self, b):
         data = b.data
 
-        contactgroups_data = {'id': data['id'], 'instance_id':  data['instance_id'],
+        contactgroups_data = {'id': data['id'], 'instance_id': data['instance_id'],
                            'config_type': 0, 'contactgroup_object_id': data['id'],
                            'alias': data['alias']
             }

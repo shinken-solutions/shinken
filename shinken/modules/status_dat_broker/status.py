@@ -61,7 +61,7 @@ class StatusFile:
             'next_check': {'prop': 'next_chk'},
             'check_options': {'prop': None, 'default': '0'},
             'current_attempt': {'prop': 'attempt'},
-            'max_attempts':  {'prop': 'max_check_attempts'},
+            'max_attempts': {'prop': 'max_check_attempts'},
             'current_event_id': {'prop': None, 'default': '0'},
             'last_event_id': {'prop': None, 'default': '0'},
             'state_type': {'prop': 'state_type_id', 'default': '0'},

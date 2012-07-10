@@ -171,7 +171,7 @@ class TestNotif(ShinkenTest):
         self.scheduler_loop(1, [[svc, 1, 'BAD']], do_sleep=True, sleep_time=1)
         self.assert_(self.count_actions() == 1)
         print time.time()
-        print  svc.last_time_warning,  svc.last_time_critical,  svc.last_time_unknown, svc.last_time_ok
+        print  svc.last_time_warning, svc.last_time_critical, svc.last_time_unknown, svc.last_time_ok
         last_time_not_ok = svc.last_time_non_ok_or_up()
         deadline = svc.last_time_non_ok_or_up() + svc.first_notification_delay * svc.__class__.interval_length
         #-----------------------------------------------------------------

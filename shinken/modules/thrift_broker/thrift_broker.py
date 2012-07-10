@@ -926,7 +926,7 @@ class Thrift_broker(BaseModule):
             time.sleep(2)
             raise
 
-    def manage_broks(self,*args):
+    def manage_broks(self, *args):
         while True:
             try:
                 l = self.to_q.get(True, .01)
