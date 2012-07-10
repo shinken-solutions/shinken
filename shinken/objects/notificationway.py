@@ -47,7 +47,7 @@ class NotificationWay(Item):
         'service_notification_options':  ListProp(fill_brok=['full_status']),
         'host_notification_commands':    StringProp(fill_brok=['full_status']),
         'service_notification_commands': StringProp(fill_brok=['full_status']),
-        'min_business_impact':           IntegerProp(default = '0', fill_brok=['full_status']),
+        'min_business_impact':           IntegerProp(default='0', fill_brok=['full_status']),
     })
 
     running_properties = Item.running_properties.copy()
@@ -140,7 +140,7 @@ class NotificationWay(Item):
     # Call to get our commands to launch a Notification
     def get_notification_commands(self, type):
         # service_notification_commands for service
-        notif_commands_prop = type+'_notification_commands'
+        notif_commands_prop = type + '_notification_commands'
         notif_commands = getattr(self, notif_commands_prop)
         return notif_commands
 
@@ -152,8 +152,8 @@ class NotificationWay(Item):
 
         # A null notif way is a notif way that will do nothing (service = n, hot =n)
         is_null_notifway = False
-        if hasattr(self, 'service_notification_options') and self.service_notification_options==['n']:
-            if hasattr(self, 'host_notification_options') and self.host_notification_options==['n']:
+        if hasattr(self, 'service_notification_options') and self.service_notification_options == ['n']:
+            if hasattr(self, 'host_notification_options') and self.host_notification_options == ['n']:
                 is_null_notifway = True
                 return True
 

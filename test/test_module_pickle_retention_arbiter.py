@@ -76,7 +76,7 @@ class TestPickleRetentionBroker(ShinkenTest):
         # Now we clean the source, like if we restart
         arbiter.broks.clear()
 
-        self.assert_(len(arbiter.broks)==0)
+        self.assert_(len(arbiter.broks) == 0)
 
         r = sl.hook_load_retention(arbiter)
         print len(old_broks), len(arbiter.broks)

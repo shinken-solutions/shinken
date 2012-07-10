@@ -572,25 +572,25 @@ print "All package _data"
 if __name__ == "__main__":
 
     setup(
-        cmdclass = {
+        cmdclass={
             'build': build,
             'install': install,
             'build_config': build_config,
             'install_config': install_config
         },
 
-        name = "Shinken",
-        version = "1.0.1",
-        packages = find_packages(),
-        package_data = {'': package_data},
-        description = "Shinken is a monitoring tool compatible with Nagios configuration and plugins",
+        name="Shinken",
+        version="1.0.1",
+        packages=find_packages(),
+        package_data={'': package_data},
+        description="Shinken is a monitoring tool compatible with Nagios configuration and plugins",
         long_description=read('README'),
-        author = "Gabes Jean",
-        author_email = "naparuba@gmail.com",
-        license = "GNU Affero General Public License",
-        url = "http://www.shinken-monitoring.org",
+        author="Gabes Jean",
+        author_email="naparuba@gmail.com",
+        license="GNU Affero General Public License",
+        url="http://www.shinken-monitoring.org",
         zip_safe=False,
-        classifiers = [
+        classifiers=[
             'Development Status :: 5 - Production/Stable',
             'Environment :: Console',
             'Intended Audience :: System Administrators',
@@ -603,11 +603,11 @@ if __name__ == "__main__":
             'Topic :: System :: Networking :: Monitoring',
         ],
 
-        install_requires = [
+        install_requires=[
             required_pkgs
         ],
 
-        scripts = glob('bin/shinken-[!_]*'),
+        scripts=glob('bin/shinken-[!_]*'),
 
         data_files=data_files,
     )

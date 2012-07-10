@@ -91,7 +91,7 @@ class EventHandler(Action):
         return self.copy_shell__( EventHandler('', id=self.id) )
 
     def get_return_from(self, e):
-        self.exit_status  = e.exit_status
+        self.exit_status = e.exit_status
         self.output = e.output
         self.long_output = getattr(e, 'long_output', '')
         self.check_time = e.check_time

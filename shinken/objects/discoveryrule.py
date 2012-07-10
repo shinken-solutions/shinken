@@ -75,7 +75,7 @@ class Discoveryrule(MatchingItem):
             params['creation_type'] = 'service'
 
         map = {'service': Service, 'host': Host}
-        t =  params['creation_type']
+        t = params['creation_type']
         if not t in map:
             return
         tcls = map[t]
@@ -97,7 +97,7 @@ class Discoveryrule(MatchingItem):
             else:
                 if key.startswith('!'):
                     key = key.split('!')[1]
-                    self.not_matches[key] = params['!'+key]
+                    self.not_matches[key] = params['!' + key]
                 else:
                     self.matches[key] = params[key]
 

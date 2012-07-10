@@ -110,7 +110,7 @@ class IForArbiter(Interface):
 
     # Here a function called by check_shinken to get daemon status
     def get_satellite_status(self, daemon_type, daemon_name):
-        daemon_name_attr = daemon_type+"_name"
+        daemon_name_attr = daemon_type + "_name"
         daemons = self.app.get_daemons(daemon_type)
         if daemons:
             for dae in daemons:
@@ -122,7 +122,7 @@ class IForArbiter(Interface):
     # Here a function called by check_shinken to get daemons list
     def get_satellite_list(self, daemon_type):
         satellite_list = []
-        daemon_name_attr = daemon_type+"_name"
+        daemon_name_attr = daemon_type + "_name"
         daemons = self.app.get_daemons(daemon_type)
         if daemons:
             for dae in daemons:
@@ -687,7 +687,7 @@ class Skonf(Daemon):
                 logger.log("Loading plugins: %s" % exp)
 
     def add_static(self, fdir, m_dir):
-        static_route = '/static/'+fdir+'/:path#.+#'
+        static_route = '/static/' + fdir + '/:path#.+#'
         #print "Declaring static route", static_route
         def plugin_static(path):
             print "Ask %s and give %s" % (path, os.path.join(m_dir, 'htdocs'))
@@ -796,7 +796,7 @@ class Skonf(Daemon):
     def get_daemons(self, daemon_type):
         """ Returns the daemons list defined in our conf for the given type """
         # shouldn't the 'daemon_types' (whetever it is above) be always present?
-        return getattr(self.conf, daemon_type+'s', None)
+        return getattr(self.conf, daemon_type + 's', None)
 
     # Helper functions for retention modules
     # So we give our broks and external commands
@@ -862,7 +862,7 @@ class Skonf(Daemon):
 
     # Create and launch a new worker, and put it into self.workers
     def create_and_launch_worker(self):
-        w = SkonfUIWorker(1, self.workers_queue, self.returns_queue, 1, mortal=False, max_plugins_output_length = 1, target=None)
+        w = SkonfUIWorker(1, self.workers_queue, self.returns_queue, 1, mortal=False, max_plugins_output_length=1, target=None)
         w.module_name = 'skonfuiworker'
         w.add_database_data('localhost')
 

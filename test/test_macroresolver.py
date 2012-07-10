@@ -75,7 +75,7 @@ class TestConfig(ShinkenTest):
         dummy_call = "special_macro!$HOSTOUTPUT$"
 
         for c in illegal_macro_output_chars:
-            hst.output = 'monculcestdupoulet'+c
+            hst.output = 'monculcestdupoulet' + c
             cc = CommandCall(self.conf.commands, dummy_call)
             com = mr.resolve_command(cc, data)
             print com

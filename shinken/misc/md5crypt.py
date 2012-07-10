@@ -60,7 +60,7 @@ def apache_md5_crypt (pw, salt):
 
 def unix_md5_crypt(pw, salt, magic=None):
 
-    if magic==None:
+    if magic == None:
         magic = MAGIC
 
     # Take care of the magic string if present

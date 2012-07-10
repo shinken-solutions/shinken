@@ -797,7 +797,7 @@ class Host(SchedulingItem):
 
     # Check if a notification for this host is suppressed at this time
     # This is a check at the host level. Do not look at contacts here
-    def notification_is_blocked_by_item(self, type, t_wished = None):
+    def notification_is_blocked_by_item(self, type, t_wished=None):
         if t_wished is None:
             t_wished = time.time()
 

@@ -70,7 +70,7 @@ class Pickle_retention_scheduler(BaseModule):
         try:
             # Open a file near the path, with .tmp extension
             # so in cae or problem, we do not lost the old one
-            f = open(self.path+'.tmp', 'wb')
+            f = open(self.path + '.tmp', 'wb')
             # Just put hosts/services becauses checks and notifications
             # are already link into
             # all_data = {'hosts': sched.hosts, 'services': sched.services}
@@ -85,7 +85,7 @@ class Pickle_retention_scheduler(BaseModule):
             #f.write(s_compress)
             f.close()
             # Now move the .tmp fiel to the real path
-            shutil.move(self.path+'.tmp', self.path)
+            shutil.move(self.path + '.tmp', self.path)
         except IOError, exp:
             log_mgr.log("Error: retention file creation failed, %s" % str(exp))
             return

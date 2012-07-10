@@ -65,7 +65,7 @@ def main(input_file, output_file):
     flatmappingfile.close()
 
     jsonmappingfile = open(output_file, 'wb')
-    buf=json.dumps(r)
+    buf = json.dumps(r)
     jsonmappingfile.write(buf)
     jsonmappingfile.close()
 

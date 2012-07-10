@@ -57,7 +57,7 @@ class Contact(Item):
         'service_notification_options': StringProp(fill_brok=['full_status']),
         'host_notification_commands': StringProp(fill_brok=['full_status']),
         'service_notification_commands': StringProp(fill_brok=['full_status']),
-        'min_business_impact':    IntegerProp(default = '0', fill_brok=['full_status']),
+        'min_business_impact':    IntegerProp(default='0', fill_brok=['full_status']),
         'email':            StringProp(default='none', fill_brok=['full_status']),
         'pager':            StringProp(default='none', fill_brok=['full_status']),
         'address1':         StringProp(default='none', fill_brok=['full_status']),
@@ -154,7 +154,7 @@ class Contact(Item):
     def get_notification_commands(self, type):
         r = []
         # service_notification_commands for service
-        notif_commands_prop = type+'_notification_commands'
+        notif_commands_prop = type + '_notification_commands'
         for nw in self.notificationways:
             r.extend(getattr(nw, notif_commands_prop))
         return r
@@ -268,10 +268,10 @@ class Contacts(Items):
                 if need_notificationway:
                     #print "Create notif way with", params
                     cname = getattr(c, 'contact_name', getattr(c, 'alias', ''))
-                    nw_name = cname+'_inner_notificationway'
+                    nw_name = cname + '_inner_notificationway'
                     notificationways.new_inner_member(nw_name, params)
 
                     if not hasattr(c, 'notificationways'):
                         c.notificationways = nw_name
                     else:
-                        c.notificationways = c.notificationways + ',' +nw_name
+                        c.notificationways = c.notificationways + ',' + nw_name

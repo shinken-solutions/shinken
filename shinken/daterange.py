@@ -68,7 +68,7 @@ def find_day_by_offset(year, month, offset):
     month_id = Daterange.get_month_id(month)
     if month_id is None:
         return None
-    (tmp, days_in_month) =  calendar.monthrange(year, month_id)
+    (tmp, days_in_month) = calendar.monthrange(year, month_id)
     if offset >= 0:
         return min(offset, days_in_month)
     else:
@@ -292,7 +292,7 @@ class Daterange:
 
         # Then we search for the next day of t
         # The sec will be the min of the day
-        t = get_day(t)+86400
+        t = get_day(t) + 86400
         t_day2 = self.get_next_valid_day(t)
         sec_from_morning = self.get_next_future_timerange_valid(t_day2)
         if t_day2 is not None and sec_from_morning is not None:
@@ -336,7 +336,7 @@ class Daterange:
             # Else, there is no possibility than in our start_time<->end_time we got
             # any invalid time (full period out). So it's end_time+1 sec (tomorow of end_time)
             # print "Full period out, got end_time", time.asctime(time.localtime(get_day(end_time +1)))
-            return get_day(end_time +1)
+            return get_day(end_time + 1)
 
         return None
 
@@ -372,7 +372,7 @@ class Daterange:
 
         # Then we search for the next day of t
         # The sec will be the min of the day
-        t = get_day(t)+86400
+        t = get_day(t) + 86400
         t_day2 = self.get_next_invalid_day(t)
         sec_from_morning = self.get_next_future_timerange_invalid(t_day2)
         if t_day2 is not None and sec_from_morning is not None:
@@ -494,7 +494,7 @@ class MonthDateDaterange(Daterange):
         day_end = find_day_by_offset(self.eyear, self.emon, self.emday)
         end_time = get_end_of_day(self.eyear, month_end_id, day_end)
 
-        now_epoch =  time.mktime(now)
+        now_epoch = time.mktime(now)
         if start_time > end_time:  # the period is between years
             if now_epoch > end_time:
                 # check for next year
@@ -547,7 +547,7 @@ class WeekDayDaterange(Daterange):
             day_end = find_day_by_weekday_offset(self.eyear, month_end, self.ewday, self.ewday_offset)
             end_time = get_end_of_day(self.eyear, month_end_id, day_end)
 
-        now_epoch =  time.mktime(now)
+        now_epoch = time.mktime(now)
         # But maybe we look not ethouth far. We should add a month
         if end_time < now_epoch:
             month_end_id = month_end_id + 1
@@ -588,7 +588,7 @@ class MonthDayDaterange(Daterange):
         day_end = find_day_by_offset(self.eyear, month_end, self.emday)
         end_time = get_end_of_day(self.eyear, month_end_id, day_end)
 
-        now_epoch =  time.mktime(now)
+        now_epoch = time.mktime(now)
 
         if start_time > end_time:
             month_end_id = month_end_id + 1

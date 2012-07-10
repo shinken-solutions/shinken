@@ -128,7 +128,7 @@ class Timeperiod(Item):
             if key in ['name', 'alias', 'timeperiod_name', 'exclude', 'use', 'register', 'imported_from']:
                 setattr(self, key, params[key])
             else:
-                self.unresolved.append(key+' '+params[key])
+                self.unresolved.append(key + ' ' + params[key])
 
         self.cache = {}  # For tunning purpose only
         self.invalid_cache = {}  # same but for invalid search
@@ -418,13 +418,13 @@ class Timeperiod(Item):
 
     def __str__(self):
         s = ''
-        s += str(self.__dict__)+'\n'
+        s += str(self.__dict__) + '\n'
         for elt in self.dateranges:
             s += str(elt)
             (start, end) = elt.get_start_and_end_time()
             start = time.asctime(time.localtime(start))
             end = time.asctime(time.localtime(end))
-            s += "\nStart and end:"+str((start, end))
+            s += "\nStart and end:" + str((start, end))
         s += '\nExclude'
         for elt in self.exclude:
             s += str(elt)
@@ -662,7 +662,7 @@ class Timeperiod(Item):
         data = {'id': self.id}
 
         self.fill_data_brok_from(data, 'full_status')
-        b = Brok('initial_'+my_type+'_status', data)
+        b = Brok('initial_' + my_type + '_status', data)
         return b
 
 
@@ -768,7 +768,7 @@ if __name__ == '__main__':
             print "===> No future time!!!"
         #print "End date:", t.get_end_time()
         #print "Next valid", time.asctime(time.localtime(t.get_next_valid_time()))
-        print str(t)+'\n\n'
+        print str(t) + '\n\n'
 
     print "*************************************************************"
     t3 = Timeperiod()
@@ -786,7 +786,7 @@ if __name__ == '__main__':
     t.resolve_daterange(t.dateranges, 'day 1 - 10 14:00-15:00')
     t.exclude = [t2]
 
-    print "Mon T", str(t)+'\n\n'
+    print "Mon T", str(t) + '\n\n'
     t_next = t.get_next_valid_time_from_t(now)
     t_no_next = t.get_next_invalid_time_from_t(now)
     print "Get next valid for now ==>", time.asctime(time.localtime(t_next)), "<=="

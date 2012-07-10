@@ -330,7 +330,7 @@ class TestEscalations(ShinkenTest):
         print "- 1 x BAD get hard -------------------------------------"
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
 
-        print "  ** LEVEL1 ** "* 20
+        print "  ** LEVEL1 ** " * 20
         # We check if we really notify the level1
         self.assert_(self.any_log_match('SERVICE NOTIFICATION: level1.*;CRITICAL;'))
         self.show_and_clear_logs()
@@ -366,7 +366,7 @@ class TestEscalations(ShinkenTest):
             n.t_to_go = time.time()
             n.creation_time -= 3600
 
-        print "  ** LEVEL2 ** "* 20
+        print "  ** LEVEL2 ** " * 20
 
         # We go in trouble too
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.001)
@@ -516,7 +516,7 @@ class TestEscalations(ShinkenTest):
 
         # Sleep 1min and look how the notification is going, only 6s because we will go in
         # escalation in 5s (5s = interval_length, 1 for escalation time)
-        print "---"*200
+        print "---" * 200
         print "We wait a bit, but not enough to go in escalation level2"
         original_time_sleep(2)
 
@@ -527,7 +527,7 @@ class TestEscalations(ShinkenTest):
         self.show_and_clear_logs()
         self.show_actions()
 
-        print "---"*200
+        print "---" * 200
         print "OK NOW we will have an escalation!"
         original_time_sleep(5)
 
@@ -553,7 +553,7 @@ class TestEscalations(ShinkenTest):
 
         # Ok we want to be sure we are using the current escalation interval, the 1 interval = 5s
         # So here we should have a new notification for level2
-        print "*--*--"*20
+        print "*--*--" * 20
         print "Ok now another notification during the escalation 2"
         original_time_sleep(10)
 
@@ -563,7 +563,7 @@ class TestEscalations(ShinkenTest):
         self.show_and_clear_logs()
 
         # Ok now go in the Level3 thing
-        print "*--*--"*20
+        print "*--*--" * 20
         print "Ok now goes in level3 too"
         original_time_sleep(10)
 

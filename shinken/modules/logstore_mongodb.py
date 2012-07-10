@@ -261,7 +261,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
         # We can apply the filterstack here as well. we have columns and filtercolumns.
         # the only additional step is to enrich log lines with host/service-attributes
         # A timerange can be useful for a faster preselection of lines
-        filter_element = eval('{ '+mongo_filter+' }')
+        filter_element = eval('{ ' + mongo_filter + ' }')
         print "mongo filter is", filter_element
         dbresult = []
         columns = ['logobject', 'attempt', 'logclass', 'command_name', 'comment', 'contact_name', 'host_name', 'lineno', 'message', 'options', 'plugin_output', 'service_description', 'state', 'state_type', 'time', 'type']
@@ -295,7 +295,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
             if reference == '':
                 return '\'%s\' : \'\'' % (attribute,)
             else:
-                return '\'%s\' : { \'$regex\' : %s, \'$options\' : \'i\' }' % (attribute, '^'+reference+'$')
+                return '\'%s\' : { \'$regex\' : %s, \'$options\' : \'i\' }' % (attribute, '^' + reference + '$')
 
         def match_nocase_filter():
             return '\'%s\' : { \'$regex\' : %s, \'$options\' : \'i\' }' % (attribute, reference)
@@ -320,16 +320,16 @@ class LiveStatusLogStoreMongoDB(BaseModule):
 
         def not_match_filter():
             # http://myadventuresincoding.wordpress.com/2011/05/19/mongodb-negative-regex-query-in-mongo-shell/
-            return '\'%s\' : { \'$regex\' : %s }' % (attribute, '^((?!'+reference+').)')
+            return '\'%s\' : { \'$regex\' : %s }' % (attribute, '^((?!' + reference + ').)')
 
         def ne_nocase_filter():
             if reference == '':
                 return '\'%s\' : \'\'' % (attribute,)
             else:
-                return '\'%s\' : { \'$regex\' : %s, \'$options\' : \'i\' }' % (attribute, '^((?!'+reference+').)')
+                return '\'%s\' : { \'$regex\' : %s, \'$options\' : \'i\' }' % (attribute, '^((?!' + reference + ').)')
 
         def not_match_nocase_filter():
-            return '\'%s\' : { \'$regex\' : %s, \'$options\' : \'i\' }' % (attribute, '^((?!'+reference+').)')
+            return '\'%s\' : { \'$regex\' : %s, \'$options\' : \'i\' }' % (attribute, '^((?!' + reference + ').)')
 
         def no_filter():
             return '\'time\' : { \'$exists\' : True }'

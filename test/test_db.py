@@ -31,7 +31,7 @@ class TestConfig(ShinkenTest):
     # setUp is inherited from ShinkenTest
 
     def create_db(self):
-        self.db = DB(table_prefix = 'test_')
+        self.db = DB(table_prefix='test_')
 
     def test_create_insert_query(self):
         self.create_db()

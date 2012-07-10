@@ -80,7 +80,7 @@ class Item(object):
         # [0] = +  -> new key-plus
         # [0] = _  -> new custom entry in UPPER case
         for key in params:
-            if len(params[key]) >= 1 and params[key][0]  == '+':
+            if len(params[key]) >= 1 and params[key][0] == '+':
                 # Special case: a _MACRO can be a plus. so add to plus
                 # but upper the key for the macro name
                 if key[0] == "_":
@@ -127,7 +127,7 @@ Like temporary attributes such as "imported_from", etc.. """
                 pass
 
     def __str__(self):
-        return str(self.__dict__)+'\n'
+        return str(self.__dict__) + '\n'
 
     def is_tpl(self):
         """ Return if the elements is a template """
@@ -276,7 +276,7 @@ Like temporary attributes such as "imported_from", etc.. """
             # We must say it's a '+' value, so our son will now that it must
             # still loop
             if self.is_tpl():
-                value = '+'+value
+                value = '+' + value
             setattr(self, prop, value)
 
             return value
@@ -496,7 +496,7 @@ Like temporary attributes such as "imported_from", etc.. """
         data = {'id': self.id}
 
         self.fill_data_brok_from(data, 'full_status')
-        b = Brok('initial_'+my_type+'_status', data)
+        b = Brok('initial_' + my_type + '_status', data)
         return b
 
     # Get a brok with update item status
@@ -506,7 +506,7 @@ Like temporary attributes such as "imported_from", etc.. """
 
         data = {'id': self.id}
         self.fill_data_brok_from(data, 'full_status')
-        b = Brok('update_'+my_type+'_status', data)
+        b = Brok('update_' + my_type + '_status', data)
         return b
 
     # Get a brok with check_result
@@ -516,7 +516,7 @@ Like temporary attributes such as "imported_from", etc.. """
 
         data = {}
         self.fill_data_brok_from(data, 'check_result')
-        b = Brok(my_type+'_check_result', data)
+        b = Brok(my_type + '_check_result', data)
         return b
 
     # Get brok about the new schedule (next_check)
@@ -526,7 +526,7 @@ Like temporary attributes such as "imported_from", etc.. """
 
         data = {}
         self.fill_data_brok_from(data, 'next_schedule')
-        b = Brok(my_type+'_next_schedule', data)
+        b = Brok(my_type + '_next_schedule', data)
         return b
 
     # Link one command property to a class (for globals like oc*p_command)
@@ -552,7 +552,7 @@ Like temporary attributes such as "imported_from", etc.. """
         if src:
             # Change on the fly the characters
             src = src.replace(r'\n', '\n').replace(r'\t', '\t')
-            t = triggers.create_trigger(src, 'inner-trigger-'+self.__class__.my_type+''+str(self.id))
+            t = triggers.create_trigger(src, 'inner-trigger-' + self.__class__.my_type + '' + str(self.id))
             if t:
                 logger.debug("[item::%s] go link the trigger %s" % (self.get_name(), str(t.__dict__)))
                 # Maybe the trigger factory give me a already existing trigger,
@@ -901,7 +901,7 @@ class Items(object):
                     # We add contacts into our contacts
                     if cnames != []:
                         if hasattr(i, 'contacts'):
-                            i.contacts += ','+cnames
+                            i.contacts += ',' + cnames
                         else:
                             i.contacts = cnames
 

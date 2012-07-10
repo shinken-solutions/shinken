@@ -97,7 +97,7 @@ msg['From'] = sender
 msg['To'] = to
 
 # Create the body of the message (a plain-text and an HTML version).
-html = "<html><head></head><body><strong> ***** Shinken Notification ***** </strong><br><br>\r Notification : "+ notify +"<br><br>\rService : "+ desc +" <br>\r Host : "+ hostname +" <br>\r Address : "+ hostaddress +" <br>\r State : "+ state +"<br><br>\r Date/Time : "+ datetime +" Additional Info : "+ output + "</body></html>"
+html = "<html><head></head><body><strong> ***** Shinken Notification ***** </strong><br><br>\r Notification : " + notify + "<br><br>\rService : " + desc + " <br>\r Host : " + hostname + " <br>\r Address : " + hostaddress + " <br>\r State : " + state + "<br><br>\r Date/Time : " + datetime + " Additional Info : " + output + "</body></html>"
 
 # Record the MIME types of one parts - text/html.
 part1 = MIMEText(html, 'html')

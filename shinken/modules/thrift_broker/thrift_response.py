@@ -43,7 +43,7 @@ class ThriftResponse:
 
     separators = map(lambda x: chr(int(x)), [10, 59, 44, 124])
 
-    def __init__(self, responseheader = 'off', outputformat = 'csv', keepalive = 'off', columnheaders = 'off', separators = separators):
+    def __init__(self, responseheader='off', outputformat='csv', keepalive='off', columnheaders='off', separators=separators):
         self.responseheader = responseheader
         self.outputformat = outputformat
         self.keepalive = keepalive
@@ -110,4 +110,4 @@ class ThriftResponse:
             else:
                 lines.insert(0, columns)
         #self.output = self.separators[0].join(lines)
-        self.output=lines
+        self.output = lines

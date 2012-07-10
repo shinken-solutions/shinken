@@ -118,11 +118,11 @@ def create_all_links(res, rules):
 
 def write_output(r, path):
     try:
-        f = open(path+'.tmp', 'wb')
+        f = open(path + '.tmp', 'wb')
         buf = json.dumps(r)
         f.write(buf)
         f.close()
-        shutil.move(path+'.tmp', path)
+        shutil.move(path + '.tmp', path)
         print "File %s wrote" % path
     except IOError, exp:
         sys.exit("Error writing the file %s: %s" % (path, exp))

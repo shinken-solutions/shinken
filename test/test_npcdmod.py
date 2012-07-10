@@ -192,7 +192,7 @@ class TestNpcd(ShinkenTest):
         if os.path.exists("./perfdata"):
             self.npcdmod_broker.logfile.close()
             os.unlink("./perfdata")
-        print "Len"*20, self.npcdmod_broker.from_q.qsize()
+        print "Len" * 20, self.npcdmod_broker.from_q.qsize()
         self.assert_(self.npcdmod_broker.from_q.qsize() == 1)
         self.npcdmod_broker.from_q.close()
 

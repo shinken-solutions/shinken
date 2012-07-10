@@ -64,7 +64,7 @@ class TestHackPollerTagByMacors(ShinkenTest):
         print svc2.poller_tag, svc2.check_command.poller_tag
 
         self.assert_(svc2.poller_tag == 'DMZ2')
-        self.assert_(svc2.check_command.poller_tag  == 'DMZ2')
+        self.assert_(svc2.check_command.poller_tag == 'DMZ2')
 
         # In tests we schedule before applying hook_late_conf, so we must reschedule it
         h2.checks_in_progress = []

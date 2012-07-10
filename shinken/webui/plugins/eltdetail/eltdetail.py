@@ -46,7 +46,7 @@ def show_host(name):
     if search:
         new_h = app.datamgr.get_host(search)
         if new_h:
-            redirect("/host/"+search)
+            redirect("/host/" + search)
 
     # Get graph data. By default, show last 4 hours
     now = int(time.time())
@@ -75,7 +75,7 @@ def show_service(hname, desc):
     if search:
         new_h = app.datamgr.get_host(search)
         if new_h:
-            redirect("/host/"+search)
+            redirect("/host/" + search)
 
     # Get graph data. By default, show last 4 hours
     now = int(time.time())

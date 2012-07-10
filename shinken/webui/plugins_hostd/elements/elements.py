@@ -59,7 +59,7 @@ def elements_generic(cls, show_tpls=False):
     #cur = t.find({})
     #elts = [cls(i) for i in cur]
     print "GENERIC", cls.my_type
-    t = cls.my_type+'s'
+    t = cls.my_type + 's'
     key = keys[t]
     #if cls.my_type == 'host':
     #    print "HOOK HOSTS"

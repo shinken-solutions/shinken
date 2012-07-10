@@ -102,7 +102,7 @@ class TestConfig(ShinkenTest):
         self.assert_(nb_hosts == 2)
 
         nb_services = self.nb_of_string(buf, "servicestatus {")
-        self.assert_(nb_services  == 1)
+        self.assert_(nb_services == 1)
 
         # now check if after a resend we still got the good number
         self.sched.broks.clear()
@@ -143,7 +143,7 @@ class TestConfig(ShinkenTest):
         self.assert_(nb_hosts == 2)
 
         nb_services = self.nb_of_string(buf, "servicestatus {")
-        self.assert_(nb_services  == 1)
+        self.assert_(nb_services == 1)
 
         os.unlink(mod.status_file)
         os.unlink(mod.object_cache_file)

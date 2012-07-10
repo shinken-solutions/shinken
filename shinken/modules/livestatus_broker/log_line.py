@@ -90,7 +90,7 @@ class Logline(dict):
                 logclass = LOGCLASS_INVALID
                 attempt, state = [0] * 2
                 command_name, comment, contact_name, host_name, message, options, plugin_output, service_description, state_type = [''] * 9
-                time= line[1:11]
+                time = line[1:11]
                 first_type_pos = line.find(' ') + 1
                 last_type_pos = line.find(':')
                 first_detail_pos = last_type_pos + 2

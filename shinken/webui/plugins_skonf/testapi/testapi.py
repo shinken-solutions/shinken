@@ -50,7 +50,7 @@ def check_api_server(api_key):
     #c.setopt(c.CONNECTTIMEOUT, 5)
     #c.setopt(c.TIMEOUT, 8)
     #c.setopt(c.PROXY, 'http://inthemiddle.com:8080')
-    url = "http://127.0.0.1:7765/checkkey/"+api_key
+    url = "http://127.0.0.1:7765/checkkey/" + api_key
     print "GO TO URL", url
     # Oups, seems that url an unicode are BAD :)
     url = str(url)

@@ -52,7 +52,7 @@ def get_uuid(self):
     if uuid:
         return uuid.uuid4().hex
     # Ok for old python like 2.4, we will lie here :)
-    return int(random.random()*sys.maxint)
+    return int(random.random() * sys.maxint)
 
 
 # Look if the name is a IPV4 address or not
@@ -353,7 +353,7 @@ class DiscoveryManager:
         while still_loop:
             i += 1
             print '\n'
-            print 'LOOP'*10, i
+            print 'LOOP' * 10, i
             still_loop = False
             for (name, dh) in self.disco_data.iteritems():
                 dh.update_properties()
@@ -522,7 +522,7 @@ class DiscoveryManager:
             if not exp.errno != '17':
                 print "Cannot create the directory '%s': '%s'" % (p, exp)
                 return
-        cfg_p = os.path.join(p, host+'.cfg')
+        cfg_p = os.path.join(p, host + '.cfg')
         if os.path.exists(cfg_p) and not self.overwrite:
             print "The file '%s' already exists" % cfg_p
             return
@@ -569,12 +569,12 @@ class DiscoveryManager:
         p = os.path.join(self.output_dir, host)
 
         # The host conf should already exist
-        cfg_host_p = os.path.join(p, host+'.cfg')
+        cfg_host_p = os.path.join(p, host + '.cfg')
         if not os.path.exists(cfg_host_p):
             print "No host configuration available, I bail out"
             return
 
-        cfg_p = os.path.join(p, desc+'.cfg')
+        cfg_p = os.path.join(p, desc + '.cfg')
         if os.path.exists(cfg_p) and not self.overwrite:
             print "The file '%s' already exists" % cfg_p
             return

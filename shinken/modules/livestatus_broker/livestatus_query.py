@@ -295,8 +295,8 @@ class LiveStatusQuery(object):
         self.filter_stack.and_elements(self.filter_stack.qsize())
 
         # Get the function which implements the Filter: statements
-        filter_func     = self.filter_stack.get_stack()
-        without_filter  = len(self.filtercolumns) == 0
+        filter_func = self.filter_stack.get_stack()
+        without_filter = len(self.filtercolumns) == 0
         cs = LiveStatusConstraints(filter_func, without_filter, self.authuser)
 
         try:
@@ -462,7 +462,7 @@ class LiveStatusQuery(object):
                     (h, getattr(h, groupattr1)) for h in objs if (cs.without_filter or cs.filter_func(h))  # 1 host, [seine hostgroups]
                 ) for item0 in inner_list0[1] # item0 ist einzelne hostgroup
             )
-        ), key = sorter)
+        ), key=sorter)
 
     def get_hostsbygroup_livedata(self, cs):
         sorter = lambda k: k.hostgroup.hostgroup_name
@@ -511,7 +511,7 @@ class LiveStatusQuery(object):
             cls = self.table_class_map[table][1]
             for attribute in cls.lsm_columns:
                 result.append({
-                    'description': getattr(cls, 'lsm_'+attribute).im_func.description,
+                    'description': getattr(cls, 'lsm_' + attribute).im_func.description,
                     'name': attribute,
                     'table': table,
                     'type': {
@@ -520,7 +520,7 @@ class LiveStatusQuery(object):
                         bool: 'int',
                         list: 'list',
                         str: 'string',
-                    }[getattr(cls, 'lsm_'+attribute).im_func.datatype],
+                    }[getattr(cls, 'lsm_' + attribute).im_func.datatype],
                 })
         self.columns = ['description', 'name', 'table', 'type']
         return result
@@ -717,7 +717,7 @@ class LiveStatusQuery(object):
             converter = find_filter_converter(self.table, 'lsm_'+attribute)
             if converter:
                 reference = converter(reference)
-        attribute = 'lsm_'+attribute
+        attribute = 'lsm_' + attribute
 
         # The filters are closures.
         # Add parameter Class (Host, Service), lookup datatype (default string), convert reference

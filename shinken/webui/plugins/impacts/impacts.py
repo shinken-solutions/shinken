@@ -73,7 +73,7 @@ def show_impacts():
 def impacts_widget():
     d = show_impacts()
 
-    wid = app.request.GET.get('wid', 'widget_impacts_'+str(int(time.time())))
+    wid = app.request.GET.get('wid', 'widget_impacts_' + str(int(time.time())))
     collapsed = (app.request.GET.get('collapsed', 'False') == 'True')
 
     nb_elements = max(1, int(app.request.GET.get('nb_elements', '5')))

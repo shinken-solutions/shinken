@@ -35,7 +35,7 @@ app = None
 # Our page. If the useer call /dummy/TOTO arg1 will be TOTO.
 # if it's /dummy/, it will be 'nothing'
 def register():
-    error= app.request.GET.get('error', '')
+    error = app.request.GET.get('error', '')
     success = app.request.GET.get('success', '')
     return {'app': app, 'user': {}, 'error': error, 'success': success}
 

@@ -83,7 +83,7 @@ class TestModuleManager(ShinkenTest):
         self.assert_(not ls.process.is_alive())
 
         # So we lie
-        ls.last_init_try =- 5
+        ls.last_init_try = -5
         self.modulemanager.check_alive_instances()
         self.modulemanager.try_to_restart_deads()
 
@@ -108,7 +108,7 @@ class TestModuleManager(ShinkenTest):
         print "Is alive or not", ls.process.is_alive()
         self.assert_(not ls.process.is_alive())
         # We lie for the test again
-        ls.last_init_try =- 5
+        ls.last_init_try = -5
         self.modulemanager.check_alive_instances()
         self.modulemanager.try_to_restart_deads()
 

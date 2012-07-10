@@ -206,7 +206,7 @@ class TestDispatcher(ShinkenTest):
         self.assert_(broker2.reachable == False)
         ### Now add another attempt, still alive, but attemp=2/3
 
-        print "CheckAlive "*10
+        print "CheckAlive " * 10
         # We reset check time for the test
         elts = [scheduler1, scheduler2, poller1, poller2, broker1, broker2, reactionner1, reactionner2]
         for i in elts:
@@ -251,7 +251,7 @@ class TestDispatcher(ShinkenTest):
         self.assert_(broker2.reachable == False)
 
         ### Now we get BAD, We go DEAD for N2!
-        print "CheckAlive "*10
+        print "CheckAlive " * 10
         # We reset check time for the test
         elts = [scheduler1, scheduler2, poller1, poller2, broker1, broker2, reactionner1, reactionner2]
         for i in elts:
@@ -397,7 +397,7 @@ class TestDispatcherMultiBroker(ShinkenTest):
         self.assert_(broker2.reachable == True)
 
         ### Now add another attempt, still alive, but attemp=2/3
-        print "CheckAlive "*10
+        print "CheckAlive " * 10
         # We reset check time for the test
         elts = [scheduler1, scheduler2, poller1, poller2, broker1, broker2, reactionner1, reactionner2]
         for i in elts:
@@ -441,7 +441,7 @@ class TestDispatcherMultiBroker(ShinkenTest):
         self.assert_(broker2.reachable == True)
 
         ### Now we get BAD, We go DEAD for N2!
-        print "CheckAlive "*10
+        print "CheckAlive " * 10
         # We reset check time for the test
         elts = [scheduler1, scheduler2, poller1, poller2, broker1, broker2, reactionner1, reactionner2]
         for i in elts:

@@ -72,7 +72,7 @@ class IForArbiter(Interface):
 
     # Here a function called by check_shinken to get daemon status
     def get_satellite_status(self, daemon_type, daemon_name):
-        daemon_name_attr = daemon_type+"_name"
+        daemon_name_attr = daemon_type + "_name"
         daemons = self.app.get_daemons(daemon_type)
         if daemons:
             for dae in daemons:
@@ -84,7 +84,7 @@ class IForArbiter(Interface):
     # Here a function called by check_shinken to get daemons list
     def get_satellite_list(self, daemon_type):
         satellite_list = []
-        daemon_name_attr = daemon_type+"_name"
+        daemon_name_attr = daemon_type + "_name"
         daemons = self.app.get_daemons(daemon_type)
         if daemons:
             for dae in daemons:
@@ -211,7 +211,7 @@ class Arbiter(Daemon):
                 self.conf.receivers]
         for tab in tabs:
             for s in tab:
-                b  = s.get_initial_status_brok()
+                b = s.get_initial_status_brok()
                 self.add(b)
 
     # Load the external commander
@@ -221,7 +221,7 @@ class Arbiter(Daemon):
 
     def get_daemon_links(self, daemon_type):
         # the attribute name to get these differs for schedulers and arbiters
-        return daemon_type+'s'
+        return daemon_type + 's'
 
     def load_config_file(self):
         logger.debug("Loading configuration")
@@ -454,7 +454,7 @@ class Arbiter(Daemon):
         for t in types:
             lst = getattr(self.conf, t)
             nb = len([i for i in lst])
-            stats['nb_'+t] = nb
+            stats['nb_' + t] = nb
             print "Got", nb, "for", t
 
         max_srv_by_host = max([len(h.services) for h in self.conf.hosts])
@@ -710,7 +710,7 @@ class Arbiter(Daemon):
     def get_daemons(self, daemon_type):
         """ Returns the daemons list defined in our conf for the given type """
         # shouldn't the 'daemon_types' (whatever it is above) be always present?
-        return getattr(self.conf, daemon_type+'s', None)
+        return getattr(self.conf, daemon_type + 's', None)
 
     # Helper functions for retention modules
     # So we give our broks and external commands

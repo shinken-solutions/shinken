@@ -50,7 +50,7 @@ def get_graphs_widget():
         parts = search.split('/', 1)
         elt = app.datamgr.get_service(parts[0], parts[1])
 
-    wid = app.request.GET.get('wid', 'widget_graphs_'+str(int(time.time())))
+    wid = app.request.GET.get('wid', 'widget_graphs_' + str(int(time.time())))
     collapsed = (app.request.GET.get('collapsed', 'False') == 'True')
 
     options = {'search': {'value': search, 'type': 'hst_srv', 'label': 'Element name'},}

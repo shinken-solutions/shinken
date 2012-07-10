@@ -154,7 +154,7 @@ class Glpidb_broker(BaseModule):
     def manage_brok(self, b):
         type = b.type
         # To update check in glpi_plugin_monitoring_hosts
-        manager = 'manage_'+type+'up_brok'
+        manager = 'manage_' + type + 'up_brok'
         if hasattr(self, manager):
             new_b = self.preprocess(type, b, 0)
             f = getattr(self, manager)
@@ -162,7 +162,7 @@ class Glpidb_broker(BaseModule):
             # Ok, we've got queries, now: run them!
             for q in queries:
                 self.db_backend.execute_query(q)
-        manager = 'manage_'+type+'_brok'
+        manager = 'manage_' + type + '_brok'
         if hasattr(self, manager):
             new_b = self.preprocess(type, b, '1')
             if 'host_name' in new_b.data:

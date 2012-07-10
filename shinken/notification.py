@@ -173,7 +173,7 @@ class Notification(Action):
         return self.id
 
     def get_return_from(self, n):
-        self.exit_status  = n.exit_status
+        self.exit_status = n.exit_status
         #self.output = c.output
         #self.check_time = c.check_time
         #self.execution_time = c.execution_time

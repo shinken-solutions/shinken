@@ -39,7 +39,7 @@ from pymongo.connection import Connection
 
 VERSION = '0.1'
 TMP_PATH = '/tmp/pack_analysing'
-PACKS_HOME= '/opt/packs'
+PACKS_HOME = '/opt/packs'
 
 
 def do_list(table):

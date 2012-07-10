@@ -45,7 +45,7 @@ properties = {
 # called by the plugin manager to get a module instance
 def get_instance(plugin):
     print "[MongoDB Module]: Get Mongodb instance for plugin %s" % plugin.get_name()
-    uri   = plugin.uri
+    uri = plugin.uri
     database = plugin.database
 
     instance = Mongodb_generic(plugin, uri, database)
@@ -56,8 +56,8 @@ def get_instance(plugin):
 class Mongodb_generic(BaseModule):
     def __init__(self, mod_conf, uri, database):
         BaseModule.__init__(self, mod_conf)
-        self.uri        = uri
-        self.database   = database
+        self.uri = uri
+        self.database = database
         # Some used varaible init
         self.con = None
         self.db = None

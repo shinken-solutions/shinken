@@ -83,7 +83,7 @@ class Webui_broker(BaseModule, Daemon):
 
         self.share_dir = getattr(modconf, 'share_dir', 'share')
         self.share_dir = os.path.abspath(self.share_dir)
-        print "SHARE DIR IS"*10, self.share_dir
+        print "SHARE DIR IS" * 10, self.share_dir
         # Load the photo dir and make it a absolute path
         self.photo_dir = getattr(modconf, 'photo_dir', 'photos')
         self.photo_dir = os.path.abspath(self.photo_dir)
@@ -344,7 +344,7 @@ class Webui_broker(BaseModule, Daemon):
                     # It's a valid widget entry if it got all data, and at least one route
                     # ONLY the first route wil be used for Add!
                     #print "Should I load a widget?",widget_name, widget_desc, widget_lst!=[], routes
-                    if widget_name and widget_desc and widget_lst!=[] and routes:
+                    if widget_name and widget_desc and widget_lst != [] and routes:
                         for place in widget_lst:
                             if place not in self.widgets:
                                 self.widgets[place] = []
@@ -366,7 +366,7 @@ class Webui_broker(BaseModule, Daemon):
                 logger.warning("Loading plugins: %s" % exp)
 
     def add_static(self, fdir, m_dir):
-        static_route = '/static/'+fdir+'/:path#.+#'
+        static_route = '/static/' + fdir + '/:path#.+#'
         print "Declaring static route", static_route
 
         def plugin_static(path):
@@ -531,7 +531,7 @@ class Webui_broker(BaseModule, Daemon):
 
         for mod in self.modules_manager.get_internal_instances():
             try:
-                print 'Try to get pref %s from %s' %(key, mod.get_name())
+                print 'Try to get pref %s from %s' % (key, mod.get_name())
                 f = getattr(mod, 'get_ui_user_preference', None)
                 if f and callable(f):
                     r = f(user, key)

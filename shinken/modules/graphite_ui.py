@@ -101,7 +101,7 @@ class Graphite_Webui(BaseModule):
             # get the first value of ;
             if ';' in raw:
                 elts = raw.split(';')
-                name_value = { name: elts[0], name+'_warn': elts[1], name+'_crit': elts[2] }
+                name_value = { name: elts[0], name + '_warn': elts[1], name + '_crit': elts[2] }
             else:
                 value = raw
                 name_value = { name: raw }
@@ -137,14 +137,14 @@ class Graphite_Webui(BaseModule):
         e = e.strftime('%H:%M_%Y%m%d')
 
         # Do we have a template?
-        thefile=self.templates_path+'/'+elt.check_command.get_name().split('!')[0]+'.graph'
+        thefile = self.templates_path + '/' + elt.check_command.get_name().split('!')[0] + '.graph'
         if os.path.isfile(thefile):
             template_html = ''
             with open(thefile, 'r') as template_file:
                 template_html += template_file.read()
             # Read the template file, as template string python object
             template_file.closed
-            html=Template(template_html)
+            html = Template(template_html)
             # Build the dict to instanciate the template string
             values = {}
             if t == 'host':
@@ -182,7 +182,7 @@ class Graphite_Webui(BaseModule):
                 if re.search(r'_warn|_crit', metric):
                     continue
                 uri += "&target=%s.__HOST__.%s" % (host_name, metric)
-                uri += "&target=%s.__HOST__.%s" % (host_name, metric+"?????")
+                uri += "&target=%s.__HOST__.%s" % (host_name, metric + "?????")
                 v = {}
                 v['link'] = self.uri
                 v['img_src'] = uri
@@ -208,7 +208,7 @@ class Graphite_Webui(BaseModule):
                 elif value[1] == '%':
                     uri += "&yMin=0&yMax=100"
                 uri += "&target=%s.%s.%s" % (host_name, desc, metric)
-                uri += "&target=%s.%s.%s" % (host_name, desc, metric+"?????")
+                uri += "&target=%s.%s.%s" % (host_name, desc, metric + "?????")
                 v = {}
                 v['link'] = self.uri
                 v['img_src'] = uri

@@ -43,7 +43,7 @@ def depgraph_host(name):
     if search:
         new_h = app.datamgr.get_host(search)
         if new_h:
-            redirect("/depgraph/"+search)
+            redirect("/depgraph/" + search)
 
     h = app.datamgr.get_host(name)
     return {'app': app, 'elt': h, 'user': user, 'valid_user': True}
@@ -62,7 +62,7 @@ def depgraph_srv(hname, desc):
     if search:
         new_h = app.datamgr.get_host(search)
         if new_h:
-            redirect("/depgraph/"+search)
+            redirect("/depgraph/" + search)
 
     s = app.datamgr.get_service(hname, desc)
     return {'app': app, 'elt': s, 'user': user, 'valid_user': True}
@@ -87,7 +87,7 @@ def get_depgraph_widget():
     else:  # ok we got a service! :)
         s = app.datamgr.get_service(elts[0], elts[1])
 
-    wid = app.request.GET.get('wid', 'widget_depgraph_'+str(int(time.time())))
+    wid = app.request.GET.get('wid', 'widget_depgraph_' + str(int(time.time())))
     collapsed = (app.request.GET.get('collapsed', 'False') == 'True')
 
     options = {'search': {'value': search, 'type': 'hst_srv', 'label': 'Search an element'},

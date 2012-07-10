@@ -198,24 +198,24 @@ class Canopsis_broker(BaseModule):
         """
         if source_type == 'resource':
             # service
-            specificmessage={
+            specificmessage = {
                 'resource': b.data['service_description'],
                 'command_name': self.service_commands[b.data['host_name']][b.data['service_description']],
                 'max_attempts': self.service_max_check_attempts[b.data['host_name']][b.data['service_description']],
             }
         elif source_type == 'component':
             # host
-            specificmessage={
+            specificmessage = {
                 'resource': None,
                 'command_name': self.host_commands[b.data['host_name']],
                 'max_check_attempts': self.host_max_check_attempts[b.data['host_name']]
             }
         else:
             # WTF?!
-            logger.info("[Canopsis] Invalid source_type %s" %(source_type))
+            logger.info("[Canopsis] Invalid source_type %s" % (source_type))
             return None
 
-        commonmessage={
+        commonmessage = {
             'connector': u'shinken',
             'connector_name': unicode(self.identifier),
             'event_type': event_type,
@@ -237,7 +237,7 @@ class Canopsis_broker(BaseModule):
         return dict(commonmessage, **specificmessage)
 
     def push2canopsis(self, message):
-        strmessage=str(message)
+        strmessage = str(message)
         self.canopsis.postmessage(message)
         #logger.info("[Canopsis] push2canopsis: %s" % (strmessage))
 
@@ -331,7 +331,7 @@ class event2amqp():
 
     def get_exchange(self):
         try:
-            self.exchange =  Exchange(self.exchange_name, "topic", durable=True, auto_delete=False)
+            self.exchange = Exchange(self.exchange_name, "topic", durable=True, auto_delete=False)
         except:
             func = sys._getframe(1).f_code.co_name
             error = str(sys.exc_info()[0])
@@ -397,7 +397,7 @@ class event2amqp():
                 # logger.error(str(traceback.format_exc()))
                 return False
         else:
-            errmsg="[Canopsis] Not connected, going to queue messages until connection back (%s items in queue | max %s)" % (str(len(self.queue)), str(self.maxqueuelength))
+            errmsg = "[Canopsis] Not connected, going to queue messages until connection back (%s items in queue | max %s)" % (str(len(self.queue)), str(self.maxqueuelength))
             logger.info(errmsg)
             #enqueue_cano_event(key,message)
             if len(self.queue) < int(self.maxqueuelength):
@@ -441,7 +441,7 @@ class event2amqp():
         return True
 
     def save_queue(self):
-        retentionfile="%s/canopsis.dat" % os.getcwd()
+        retentionfile = "%s/canopsis.dat" % os.getcwd()
         logger.info("[Canopsis] saving to %s" % retentionfile)
         filehandler = open(retentionfile, 'w')
         pickle.dump(self.queue, filehandler)
@@ -450,7 +450,7 @@ class event2amqp():
         return True
 
     def load_queue(self):
-        retentionfile="%s/canopsis.dat" % os.getcwd()
+        retentionfile = "%s/canopsis.dat" % os.getcwd()
         logger.info("[Canopsis] loading from %s" % retentionfile)
         filehandler = open(retentionfile, 'r')
 

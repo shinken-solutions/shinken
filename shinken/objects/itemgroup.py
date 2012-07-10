@@ -95,12 +95,12 @@ class Itemgroup(Item):
 
     def add_string_member(self, member):
         if hasattr(self, 'members'):
-            self.members += ','+member
+            self.members += ',' + member
         else:
             self.members = member
 
     def __str__(self):
-        return str(self.__dict__)+'\n'
+        return str(self.__dict__) + '\n'
 
     def __iter__(self):
         return self.members.__iter__()
@@ -146,7 +146,7 @@ class Itemgroup(Item):
         for i in self.members:
             # it look like lisp! ((( ..))), sorry....
             data['members'].append( (i.id, i.get_name()) )
-        b = Brok('initial_'+cls.my_type+'_status', data)
+        b = Brok('initial_' + cls.my_type + '_status', data)
         return b
 
 

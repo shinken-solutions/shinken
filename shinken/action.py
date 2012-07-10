@@ -131,7 +131,7 @@ class __Action(object):
         self.last_poll = time.time()
 
         if self.process.poll() is None:
-            self.wait_time = min(self.wait_time*2, 0.1)
+            self.wait_time = min(self.wait_time * 2, 0.1)
             #time.sleep(wait_time)
             now = time.time()
 

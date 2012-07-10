@@ -330,13 +330,13 @@ def nighty_five_percent(t):
     # only take a part if we got more
     # than 100 elements, or it's a non sense
     if l > 100:
-        offset = int(l*0.05)
+        offset = int(l * 0.05)
         t_reduce = t_reduce[offset:-offset]
 
     reduce_len = len(t_reduce)
     reduce_sum = sum(t_reduce)
 
-    reduce_avg = float(reduce_sum)/reduce_len
+    reduce_avg = float(reduce_sum) / reduce_len
     reduce_max = max(t_reduce)
     reduce_min = min(t_reduce)
 
@@ -348,7 +348,7 @@ def strip_and_uniq(tab):
     new_tab = set()
     for elt in tab:
         val = elt.strip()
-        if (val!=''):
+        if (val != ''):
             new_tab.add(val)
     return list(new_tab)
 
@@ -381,9 +381,9 @@ def got_generation_rule_patern_change(xy_couples):
         n = got_generation_rule_patern_change(xy_cpl[1:])
         if n != []:
             for e in n:
-                res.append( [i, '[%d-%d]'%(x, y), e])
+                res.append( [i, '[%d-%d]' % (x, y), e])
         else:
-            res.append( [i, '[%d-%d]'%(x, y), []])
+            res.append( [i, '[%d-%d]' % (x, y), []])
     return res
 
 

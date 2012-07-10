@@ -73,7 +73,7 @@ def get_page():
             abort(403, 'Authentication denied')
 
     # Ok, here it's an anonymouscall, or a registred one, but mayeb teh query is false
-    if time_stamp==0 or not host_name or not output or return_code == -1:
+    if time_stamp == 0 or not host_name or not output or return_code == -1:
         abort(400, "Incorrect syntax")
 
     # Maybe we got an host, maybe a service :)

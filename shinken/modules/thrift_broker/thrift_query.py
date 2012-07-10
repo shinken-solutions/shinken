@@ -74,7 +74,7 @@ class ThriftQuery(Hooker):
         self.counters = counters
 
         # Private attributes for this specific request
-        self.response = ThriftResponse(responseheader = 'off', outputformat = 'csv', keepalive = 'off', columnheaders = 'undef', separators = ThriftResponse.separators)
+        self.response = ThriftResponse(responseheader='off', outputformat='csv', keepalive='off', columnheaders='undef', separators=ThriftResponse.separators)
         self.table = None
         self.columns = []
         self.filtercolumns = []
@@ -154,7 +154,7 @@ class ThriftQuery(Hooker):
             new_map[objtype] = {}
             for attribute in LSout_map[objtype]:
                 new_map[objtype][attribute] = {}
-                entry =  LSout_map[objtype][attribute]
+                entry = LSout_map[objtype][attribute]
                 if 'hooktype' in entry:
                     if 'prop' not in entry or entry['prop'] is None:
                         prop = attribute
@@ -328,8 +328,8 @@ member_key: the key to be used to sort each resulting element of a group member.
                     svc for svc in (
                         setattr(og[0], an, og[1]) or og[0] for og in (
                             ( copy.copy(item0), inner_list0[1]) for inner_list0 in (
-                                (sorted(sg1.members, key = member_key), sg1) for sg1 in
-                                    sorted([sg0 for sg0 in objs if sg0.members], key = group_key)
+                                (sorted(sg1.members, key=member_key), sg1) for sg1 in
+                                    sorted([sg0 for sg0 in objs if sg0.members], key=group_key)
                                 ) for item0 in inner_list0[0]
                             )
                         ) if (cs.without_filter or cs.filter_func(self.create_output(cs.filter_map, svc))))
@@ -392,11 +392,11 @@ member_key: the key to be used to sort each resulting element of a group member.
                         # (service, hostgroup), (service, hostgroup), (service, hostgroup), ...  service objects are individuals
                         (copy.copy(item1), inner_list1[1]) for inner_list1 in (
                             # ([service, service, ...], hostgroup), ([service, ...], hostgroup), ...  flattened by host. only if a host has services. sorted by service_description
-                            (sorted(item0.services, key = lambda k: k.service_description), inner_list0[1]) for inner_list0 in (
+                            (sorted(item0.services, key=lambda k: k.service_description), inner_list0[1]) for inner_list0 in (
                                 # ([host, host, ...], hostgroup), ([host, host, host, ...], hostgroup), ...  sorted by host_name
-                                (sorted(hg1.members, key = lambda k: k.host_name), hg1) for hg1 in   # ([host, host], hg), ([host], hg),... hostgroup.members->explode->sort
+                                (sorted(hg1.members, key=lambda k: k.host_name), hg1) for hg1 in   # ([host, host], hg), ([host], hg),... hostgroup.members->explode->sort
                                     # hostgroups, sorted by hostgroup_name
-                                    sorted([hg0 for hg0 in self.hostgroups.values() if hg0.members], key = lambda k: k.hostgroup_name)
+                                    sorted([hg0 for hg0 in self.hostgroups.values() if hg0.members], key=lambda k: k.hostgroup_name)
                             ) for item0 in inner_list0[0] if item0.services
                         ) for item1 in inner_list1[0]
                     )
@@ -452,11 +452,11 @@ member_key: the key to be used to sort each resulting element of a group member.
             return []
 
         # Get the function which implements the Filter: statements
-        filter_func     = self.filter_stack.get_stack()
-        out_map         = self.out_map[self.out_map_name]
-        filter_map      = dict([(k, out_map.get(k)) for k in self.filtercolumns])
-        output_map      = dict([(k, out_map.get(k)) for k in self.columns]) or out_map
-        without_filter  = len(self.filtercolumns) == 0
+        filter_func = self.filter_stack.get_stack()
+        out_map = self.out_map[self.out_map_name]
+        filter_map = dict([(k, out_map.get(k)) for k in self.filtercolumns])
+        output_map = dict([(k, out_map.get(k)) for k in self.columns]) or out_map
+        without_filter = len(self.filtercolumns) == 0
 
         cs = LiveStatusConstraints(filter_func, out_map, filter_map, output_map, without_filter)
         res = handler(self, cs)
@@ -762,7 +762,7 @@ member_key: the key to be used to sort each resulting element of a group member.
             return ['%s <= ?' % attribute, (reference, )]
 
         def match_filter():
-            return ['%s LIKE ?' % attribute, ('%'+reference+'%', )]
+            return ['%s LIKE ?' % attribute, ('%' + reference + '%', )]
         if operator == '=':
             return eq_filter
         if operator == '>':

@@ -56,8 +56,8 @@ class Load:
         now = time.time()
         try:
             diff = now - self.last_update
-            self.exp = 1/math.exp(diff/ (self.m*60.0))
-            self.val = new_val + self.exp*(self.val - new_val)
+            self.exp = 1 / math.exp(diff / (self.m * 60.0))
+            self.val = new_val + self.exp * (self.val - new_val)
             self.last_update = now
         except OverflowError:  # if the time change without notice, we overflow :(
             pass

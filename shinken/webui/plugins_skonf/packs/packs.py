@@ -84,7 +84,7 @@ def get_new_packs():
     c.setopt(c.TIMEOUT, 8)
     if app.http_proxy:
         c.setopt(c.PROXY, app.http_proxy)
-    c.setopt(c.URL, app.community_uri+"/categories")
+    c.setopt(c.URL, app.community_uri + "/categories")
     c.setopt(c.HTTPPOST, [ ("root", '/'), ('api_key', api_key)])
     c.setopt(c.VERBOSE, 1)
     response = StringIO()
@@ -115,7 +115,7 @@ def get_new_packs():
     c.setopt(c.TIMEOUT, 8)
     if app.http_proxy:
         c.setopt(c.PROXY, app.http_proxy)
-    c.setopt(c.URL, app.community_uri+"/tags")
+    c.setopt(c.URL, app.community_uri + "/tags")
     c.setopt(c.HTTPPOST, [ ("nb", '50'), ('api_key', api_key)])
     c.setopt(c.VERBOSE, 1)
     response = StringIO()
@@ -144,7 +144,7 @@ def get_new_packs():
     i = 0
     for (name, occ) in raw_tags:
         i += 1
-        size = 1 + float(i)/nb_tags
+        size = 1 + float(i) / nb_tags
         new_tags[name] = {'name': name, 'size': size, 'occ': occ}
 
     # Sort by name
@@ -179,7 +179,7 @@ def launch_search(search):
     c.setopt(c.TIMEOUT, 8)
     if app.http_proxy:
         c.setopt(c.PROXY, app.http_proxy)
-    c.setopt(c.URL, app.community_uri+"/search")
+    c.setopt(c.URL, app.community_uri + "/search")
     c.setopt(c.HTTPPOST, [ ("search", search), ('api_key', api_key)])
 
     #c.setopt(c.HTTPPOST, [("file1", (c.FORM_FILE, str(zip_file_p)))])
@@ -285,7 +285,7 @@ def download_pack(uri):
 
         print "WE get a file os the size", len(buf)
     except Exception, exp:
-        r = {'state': 500, 'text': 'ERROR: '+str(exp)}
+        r = {'state': 500, 'text': 'ERROR: ' + str(exp)}
         return json.dumps(r)
 
     r = app.save_pack(buf)

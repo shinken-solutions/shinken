@@ -329,7 +329,7 @@ class Router(object):
         try:
             anon = list(anon)
             url = [s if k is None
-                   else s+str(args.pop(k)) if k else s+str(anon.pop())
+                   else s + str(args.pop(k)) if k else s + str(anon.pop())
                    for s, k in pairs]
         except IndexError:
             msg = "Not enough arguments to fill out anonymous wildcards."
@@ -416,7 +416,7 @@ class Router(object):
                 self.dynamic[-1] = (re.compile(combined), self.dynamic[-1][1])
                 self.dynamic[-1][1].append((gpat, target))
             except (AssertionError, IndexError), e:  # AssertionError: Too many groups
-                self.dynamic.append((re.compile('(^%s$)'%fpat),
+                self.dynamic.append((re.compile('(^%s$)' % fpat),
                                     [(gpat, target)]))
             except re.error, e:
                 raise RouteSyntaxError("Could not add Route: %s (%s)" % (rule, e))
@@ -425,13 +425,13 @@ class Router(object):
         ''' Return a regular expression with named groups for each wildcard. '''
         out = ''
         for i, part in enumerate(self.syntax.split(rule)):
-            if i%3 == 0:
+            if i % 3 == 0:
                 out += re.escape(part.replace('\\:', ':'))
-            elif i%3 == 1:
+            elif i % 3 == 1:
                 out += '(?P<%s>' % part if part else '(?:'
             else:
                 out += '%s)' % (part or '[^/]+')
-        return re.compile('^%s$'%out)
+        return re.compile('^%s$' % out)
 
 ###############################################################################
 # Application Object ###########################################################
@@ -562,7 +562,7 @@ class Bottle(object):
         ''' Apply plugins to a route and return a new callable. '''
         wrapped = config['callback']
         plugins = self.plugins + config['apply']
-        skip    = config['skip']
+        skip = config['skip']
         try:
             for plugin in reversed(plugins):
                 if True in skip:
@@ -1109,7 +1109,7 @@ class BaseRequest(DictMixin):
             todelete = ('headers', 'cookies')
 
         for key in todelete:
-            self.environ.pop('bottle.request.'+key, None)
+            self.environ.pop('bottle.request.' + key, None)
 
 
 class LocalRequest(BaseRequest, threading.local):
@@ -1179,7 +1179,7 @@ class BaseResponse(object):
             code, status = status, _HTTP_STATUS_LINES.get(status)
         elif ' ' in status:
             status = status.strip()
-            code   = int(status.split()[0])
+            code = int(status.split()[0])
         else:
             raise ValueError('String status line without a reason phrase.')
         if not 100 <= code <= 999:
@@ -1372,7 +1372,7 @@ class HooksPlugin(object):
         if self._empty():
             return callback
         before_request = self.hooks['before_request']
-        after_request  = self.hooks['after_request']
+        after_request = self.hooks['after_request']
 
         def wrapper(*a, **ka):
             for hook in before_request:
@@ -1871,7 +1871,7 @@ class ServerAdapter(object):
         pass
 
     def __repr__(self):
-        args = ', '.join(['%s=%s'%(k, repr(v)) for k, v in self.options.items()])
+        args = ', '.join(['%s=%s' % (k, repr(v)) for k, v in self.options.items()])
         return "%s(%s)" % (self.__class__.__name__, args)
 
 
@@ -2503,7 +2503,7 @@ class SimpleTemplate(BaseTemplate):
         if '#' not in code:
             return code
         #: Remove comments only (leave quoted strings as they are)
-        subf = lambda m: '' if m.group(0)[0]=='#' else m.group(0)
+        subf = lambda m: '' if m.group(0)[0] == '#' else m.group(0)
         return re.sub(cls.re_pytokens, subf, code)
 
     @cached_property
@@ -2541,7 +2541,7 @@ class SimpleTemplate(BaseTemplate):
                         cline += '_str(%s)' % value
                     elif token == 'CMD':
                         cline += '_escape(%s)' % value
-                    cline +=  ', '
+                    cline += ', '
                 cline = cline[:-2] + '\\\n'
             cline = cline[:-2]
             if cline[:-1].endswith('\\\\\\\\\\n'):
@@ -2707,7 +2707,7 @@ DEBUG = False
 #: A dict to map HTTP status codes (e.g. 404) to phrases (e.g. 'Not Found')
 HTTP_CODES = httplib.responses
 HTTP_CODES[418] = "I'm a teapot"  # RFC 2324
-_HTTP_STATUS_LINES = dict((k, '%d %s'%(k, v)) for (k, v) in HTTP_CODES.iteritems())
+_HTTP_STATUS_LINES = dict((k, '%d %s' % (k, v)) for (k, v) in HTTP_CODES.iteritems())
 
 #: The default template used for error pages. Override with @error()
 ### SHINKEN MOD: change from bottle import DEBUG to from shinken.webui.bottle import DEBUG,...
@@ -2763,4 +2763,4 @@ app.push()
 
 #: A virtual package that redirects import statements.
 #: Example: ``import bottle.ext.sqlite`` actually imports `bottle_sqlite`.
-ext = _ImportRedirect(__name__+'.ext', 'bottle_%s').module
+ext = _ImportRedirect(__name__ + '.ext', 'bottle_%s').module

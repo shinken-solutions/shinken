@@ -83,7 +83,7 @@ p_debug("Try to communicate with the subprocess")
 (stdoutdata, stderrdata) = process.communicate()
 
 if process.returncode != 0:
-    print "Error: the share scanner return an error: '%s'" % (stderrdata+stdoutdata)
+    print "Error: the share scanner return an error: '%s'" % (stderrdata + stdoutdata)
     sys.exit(2)
 
 disks = []
@@ -94,7 +94,7 @@ p_debug("Good return" + stdoutdata)
 
 def get_elements(line):
     if line.count('|') < 2:
-        p_debug("Not a good line"+line)
+        p_debug("Not a good line" + line)
         return None
     elts = line.split('|', 2)
     return elts

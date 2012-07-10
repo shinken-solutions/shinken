@@ -63,14 +63,14 @@ class Ndodb_Oracle_broker(BaseModule):
     # Conf from arbiter!
     def init(self):
         print "I connect to NDO database with Oracle"
-        self.db = DBOracle(self.user, self.password, self.database, table_prefix = '')
+        self.db = DBOracle(self.user, self.password, self.database, table_prefix='')
         self.db.connect_database()
 
     # Get a brok, parse it, and put in in database
     # We call functions like manage_ TYPEOFBROK _brok that return us queries
     def manage_brok(self, b):
         type = b.type
-        manager = 'manage_'+type+'_brok'
+        manager = 'manage_' + type + '_brok'
         #print "(Ndo) I search manager:", manager
         if self.has(manager):
             f = getattr(self, manager)
@@ -132,7 +132,7 @@ class Ndodb_Oracle_broker(BaseModule):
                   'servicestatus']
         res = []
         for table in tables:
-            q = "DELETE FROM %s WHERE instance_id = '%s' " % (''+table, instance_id)
+            q = "DELETE FROM %s WHERE instance_id = '%s' " % ('' + table, instance_id)
             res.append(q)
         return res
 

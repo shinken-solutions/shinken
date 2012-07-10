@@ -220,9 +220,9 @@ class DetectedHost:
 
     # for system output
     def get_discovery_system(self):
-        r = '%s::os=%s' % (self.get_name(), self.os_name)+'\n'
-        r += '%s::osversion=%s' % (self.get_name(), self.os_version)+'\n'
-        r += '%s::ostype=%s' % (self.get_name(), self.os_type)+'\n'
+        r = '%s::os=%s' % (self.get_name(), self.os_name) + '\n'
+        r += '%s::osversion=%s' % (self.get_name(), self.os_version) + '\n'
+        r += '%s::ostype=%s' % (self.get_name(), self.os_type) + '\n'
         r += '%s::osvendor=%s' % (self.get_name(), self.os_vendor)
         return r
 

@@ -68,8 +68,8 @@ class TestConfigAuth(TestConfig):
         self.livestatus_broker.db.close()
         if os.path.exists(self.livelogs):
             os.remove(self.livelogs)
-        if os.path.exists(self.livelogs+"-journal"):
-            os.remove(self.livelogs+"-journal")
+        if os.path.exists(self.livelogs + "-journal"):
+            os.remove(self.livelogs + "-journal")
         if os.path.exists(self.livestatus_broker.pnp_path):
             shutil.rmtree(self.livestatus_broker.pnp_path)
         if os.path.exists('var/nagios.log'):
@@ -461,7 +461,7 @@ KeepAlive: on
         self.assert_(len(pyresponse) == 6)
 
         print "now check servicesbygroup"
-        request= """GET servicesbygroup
+        request = """GET servicesbygroup
 Columns: servicegroup_name host_name service_description
 AuthUser: oradba1
 OutputFormat: python
@@ -477,7 +477,7 @@ oracle;dbsrv3;app_db_oracle_check_connect
         print response
         # assert len 6
 
-        request= """GET hostsbygroup
+        request = """GET hostsbygroup
 Columns:  hostgroup_name host_name
 OutputFormat: python
 AuthUser: web1
@@ -494,7 +494,7 @@ windows;www2
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
 
-        request= """GET servicesbyhostgroup
+        request = """GET servicesbyhostgroup
 Columns: hostgroup_name host_name service_description
 AuthUser: oradba1
 OutputFormat: csv

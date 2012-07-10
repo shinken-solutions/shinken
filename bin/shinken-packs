@@ -151,7 +151,7 @@ def create_pack(pack_file, p_dest_dir, share_dir):
         o['macros'][k] = {'type': t, 'description': ''}
         print "\t%s: Type=%s Description='%s'" % (k, t, d)
 
-    j = json.dumps(o, sort_keys = True, indent = 3)
+    j = json.dumps(o, sort_keys=True, indent=3)
     print "Pack file generated:", j
 
     create_dir = os.path.join(p_dest_dir, o['name'])
@@ -163,7 +163,7 @@ def create_pack(pack_file, p_dest_dir, share_dir):
         shutil.rmtree(create_dir)
 
     os.mkdir(create_dir)
-    pack_file_dest = os.path.join(create_dir, o['name']+'.pack')
+    pack_file_dest = os.path.join(create_dir, o['name'] + '.pack')
     print "Saving the .pack file into %s" % pack_file_dest
     f = open(pack_file_dest, 'w')
     f.write(j)
@@ -224,8 +224,8 @@ def create_pack(pack_file, p_dest_dir, share_dir):
                 if cname in ['bp_rule', '_internal_host_up']:
                     continue
                 print "LOOK FOR command", c.get_name()
-                _p = os.path.join(graphite_templates_dir, cname+'.graph')
-                _d = os.path.join(create_dir, 'templates', 'graphite', cname+'.graph')
+                _p = os.path.join(graphite_templates_dir, cname + '.graph')
+                _d = os.path.join(create_dir, 'templates', 'graphite', cname + '.graph')
                 print "So search for graphite template", _p
                 if os.path.exists(_p):
                     print "COPYING %s into %s" % (_p, _d)
@@ -239,14 +239,14 @@ def create_pack(pack_file, p_dest_dir, share_dir):
                 if cname in ['bp_rule', '_internal_host_up']:
                     continue
                 print "LOOK FOR command", c.get_name()
-                _p = os.path.join(graphite_templates_dir, cname+'.php')
-                _d = os.path.join(create_dir, 'templates', 'pnp', cname+'.php')
+                _p = os.path.join(graphite_templates_dir, cname + '.php')
+                _d = os.path.join(create_dir, 'templates', 'pnp', cname + '.php')
                 print "So search for graphite template", _p
                 if os.path.exists(_p):
                     print "COPYING %s into %s" % (_p, _d)
                     shutil.copy(_p, _d)
 
-    zip_file_p = os.path.join(p_dest_dir, o['name']+'.zip')
+    zip_file_p = os.path.join(p_dest_dir, o['name'] + '.zip')
     print "Want to save the zip file", zip_file_p
 
     fd = zipfile.ZipFile(zip_file_p, "w")
@@ -281,7 +281,7 @@ def push_pack(zip_file_p, api_key, uri, proxy):
     c.setopt(c.TIMEOUT, 8)
     if proxy:
         c.setopt(c.PROXY, proxy)
-    c.setopt(c.URL, uri+"/pushpack")
+    c.setopt(c.URL, uri + "/pushpack")
 
     c.setopt(c.HTTPPOST, [ ("key", api_key),
                           ("data",
@@ -312,7 +312,7 @@ def register(login, password, email, uri, proxy):
     c.setopt(c.TIMEOUT, 8)
     if proxy:
         c.setopt(c.PROXY, proxy)
-    c.setopt(c.URL, uri+"/register")
+    c.setopt(c.URL, uri + "/register")
 
     c.setopt(c.HTTPPOST, [ ("username", login), ("password", password), ("email", email), ('cli_mode', '1')])
 
@@ -360,7 +360,7 @@ def getkey(login, password, uri, proxy):
     c.setopt(c.TIMEOUT, 10)
     if proxy:
         c.setopt(c.PROXY, proxy)
-    c.setopt(c.URL, uri+"/apikey")
+    c.setopt(c.URL, uri + "/apikey")
 
     c.setopt(c.HTTPPOST, [ ("login", login), ("password", password), ('cli_mode', '1')])
 
@@ -403,7 +403,7 @@ def analyse(api_key, stats_file, uri, proxy):
     c.setopt(c.TIMEOUT, 8)
     if proxy:
         c.setopt(c.PROXY, proxy)
-    c.setopt(c.URL, uri+"/pushstats")
+    c.setopt(c.URL, uri + "/pushstats")
 
     c.setopt(c.HTTPPOST, [ ("key", api_key),
                           ("data",

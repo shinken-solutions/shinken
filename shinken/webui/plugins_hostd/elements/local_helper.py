@@ -186,7 +186,7 @@ class Helper(object):
             elts = value.split('!', 1)
             value = elts[0]
             if len(elts) > 1:
-                args = '!'+elts[1]
+                args = '!' + elts[1]
 
         elt_tp = find(value, tps, key)
         print 'Find a matching element for me?', elt.get(prop), elt_tp
@@ -366,8 +366,8 @@ class Helper(object):
                             break
 
                 if ctype == 'percent':
-                    s+= self.get_percent_input(elt, k, k[1:], editable=editable, placeholder=v['placeholder'], popover=popover)
+                    s += self.get_percent_input(elt, k, k[1:], editable=editable, placeholder=v['placeholder'], popover=popover)
                 else:  # if not known, apply string
-                    s+= self.get_string_input(elt, k, k[1:], editable=editable, placeholder=v['placeholder'], popover=popover)
+                    s += self.get_string_input(elt, k, k[1:], editable=editable, placeholder=v['placeholder'], popover=popover)
 
         return s

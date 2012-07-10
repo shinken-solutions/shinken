@@ -61,8 +61,8 @@ TYPE_VALUES          = 0x0006
 TYPE_INTERVAL        = 0x0007
 
 # DS kinds
-DS_TYPE_COUNTER      = 0
-DS_TYPE_GAUGE        = 1
+DS_TYPE_COUNTER = 0
+DS_TYPE_GAUGE = 1
 
 header = struct.Struct("!2H")
 number = struct.Struct("!Q")
@@ -84,7 +84,7 @@ def decode_values(pktype, plen, buf):
         return []
 
     result = []
-    for dstype in map(ord, buf[header.size+short.size:off]):
+    for dstype in map(ord, buf[header.size + short.size:off]):
         if dstype == DS_TYPE_COUNTER:
             v = (dstype, number.unpack_from(buf, off)[0])
             result.append(v)
@@ -154,13 +154,13 @@ class Data(list, object):
     def get_srv_desc(self):
         r = self.plugin
         if self.plugininstance:
-            r += '_'+self.plugininstance
+            r += '_' + self.plugininstance
         return r
 
     def get_metric_name(self):
         r = self.type
         if self.typeinstance:
-            r += '_'+self.typeinstance
+            r += '_' + self.typeinstance
         return r
 
     def get_metric_value(self):
@@ -233,7 +233,7 @@ class CollectdServer(object):
             elif kind == TYPE_HOST:
                 d.host = data
             elif kind == TYPE_PLUGIN:
-                d.plugin  = data
+                d.plugin = data
             elif kind == TYPE_PLUGIN_INSTANCE:
                 d.plugininstance = data
             elif kind == TYPE_TYPE:

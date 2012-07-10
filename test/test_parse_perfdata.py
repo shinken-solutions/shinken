@@ -64,7 +64,7 @@ class TestParsePerfdata(ShinkenTest):
         self.assert_(m.warning == None)
         self.assert_(m.critical == None)
         self.assert_(m.min == None)
-        self.assert_(m.max ==None)
+        self.assert_(m.max == None)
 
         m = p['memused']
         self.assert_(m.name == 'memused')

@@ -119,7 +119,7 @@ class SchedulingItem(Item):
         for b in self.flapping_changes:
             i += 1
             if b:
-                r += i*(1.2-0.8)/flap_history + 0.8
+                r += i * (1.2 - 0.8) / flap_history + 0.8
         r = r / flap_history
         r *= 100
 
@@ -136,7 +136,7 @@ class SchedulingItem(Item):
         if low_flap_threshold == -1:
             cls = self.__class__
             low_flap_threshold = cls.global_low_flap_threshold
-        if high_flap_threshold  == -1:
+        if high_flap_threshold == -1:
             cls = self.__class__
             high_flap_threshold = cls.global_high_flap_threshold
 
@@ -495,7 +495,7 @@ class SchedulingItem(Item):
             # is service_max_check_spread or host_max_check_spread in config
             interval = min(interval, cls.max_check_spread * cls.interval_length)
             r = interval * (random.random() - 0.5)
-            time_add = interval/2 + r
+            time_add = interval / 2 + r
         else:
             time_add = interval
 
@@ -1068,7 +1068,7 @@ class SchedulingItem(Item):
     # Create a "master" notification here, which will later
     # (immediately before the reactionner gets it) be split up
     # in many "child" notifications, one for each contact.
-    def create_notifications(self, type, t_wished = None):
+    def create_notifications(self, type, t_wished=None):
         cls = self.__class__
         # t_wished==None for the first notification launch after consume
         # here we must look at the self.notification_period

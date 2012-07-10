@@ -58,7 +58,7 @@ class Servicedependency(Item):
     # Give a nice name output, for debbuging purpose
     # (Yes, debbuging CAN happen...)
     def get_name(self):
-        return getattr(self, 'dependent_host_name', '')+'/'+getattr(self, 'dependent_service_description', '')+'..'+getattr(self, 'host_name', '')+'/'+getattr(self, 'service_description', '')
+        return getattr(self, 'dependent_host_name', '') + '/' + getattr(self, 'dependent_service_description', '') + '..' + getattr(self, 'host_name', '') + '/' + getattr(self, 'service_description', '')
 
 
 class Servicedependencies(Items):

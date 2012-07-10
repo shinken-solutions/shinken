@@ -30,7 +30,7 @@ class TestConfig(ShinkenTest):
     # setUp is inherited from ShinkenTest
 
     def create_db(self):
-        self.db = DBSqlite("/usr/local/shinken/var/merlindb.sqlite", table_prefix = '')
+        self.db = DBSqlite("/usr/local/shinken/var/merlindb.sqlite", table_prefix='')
 
     def test_connect_database(self):
         self.create_db()

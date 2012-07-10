@@ -74,8 +74,8 @@ class TestConfig(ShinkenTest):
         self.livestatus_broker.db.close()
         if os.path.exists(self.livelogs):
             os.remove(self.livelogs)
-        if os.path.exists(self.livelogs+"-journal"):
-            os.remove(self.livelogs+"-journal")
+        if os.path.exists(self.livelogs + "-journal"):
+            os.remove(self.livelogs + "-journal")
         if os.path.exists("tmp/archives"):
             for db in os.listdir("tmp/archives"):
                 print "cleanup", db
@@ -188,7 +188,7 @@ Columns: time type options state host_name"""
             print "stop  is", time.asctime(time.localtime(day[4]))
             print "archive is", day[2]
             print "handle is", day[1]
-        print self.livestatus_broker.db.log_db_relevant_files(now - 3600, now +  3600 )
+        print self.livestatus_broker.db.log_db_relevant_files(now - 3600, now + 3600 )
 
     def test_num_logs(self):
         self.print_header()
@@ -756,7 +756,7 @@ OutputFormat: json"""
         print "all records", len(allpyresponse)
         self.assert_(len(allpyresponse) == len(notpyresponse) + len(pyresponse))
         # the numlogs above only counts records in the currently attached db
-        numlogs = self.livestatus_broker.db.execute("SELECT COUNT(*) FROM logs WHERE time >= %d AND time <= %d" %(int(query_start), int(query_end)))
+        numlogs = self.livestatus_broker.db.execute("SELECT COUNT(*) FROM logs WHERE time >= %d AND time <= %d" % (int(query_start), int(query_end)))
         print "numlogs is", numlogs
 
         time.time = fake_time_time
@@ -786,8 +786,8 @@ class TestConfigNoLogstore(TestConfig):
         self.livestatus_broker.db.close()
         if os.path.exists(self.livelogs):
             os.remove(self.livelogs)
-        if os.path.exists(self.livelogs+"-journal"):
-            os.remove(self.livelogs+"-journal")
+        if os.path.exists(self.livelogs + "-journal"):
+            os.remove(self.livelogs + "-journal")
         if os.path.exists(self.livestatus_broker.pnp_path):
             shutil.rmtree(self.livestatus_broker.pnp_path)
         if os.path.exists('var/nagios.log'):

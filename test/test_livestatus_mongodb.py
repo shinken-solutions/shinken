@@ -61,8 +61,8 @@ class TestConfig(ShinkenTest):
         self.shutdown_livestatus()
         if os.path.exists(self.livelogs):
             os.remove(self.livelogs)
-        if os.path.exists(self.livelogs+"-journal"):
-            os.remove(self.livelogs+"-journal")
+        if os.path.exists(self.livelogs + "-journal"):
+            os.remove(self.livelogs + "-journal")
         if os.path.exists(self.livestatus_broker.pnp_path):
             shutil.rmtree(self.livestatus_broker.pnp_path)
         if os.path.exists('var/nagios.log'):
@@ -90,7 +90,7 @@ class TestConfig(ShinkenTest):
         dbmodconf = Module({'module_name': 'LogStore',
             'module_type': 'logstore_mongodb',
             'mongodb_uri': "mongodb://127.0.0.1:27017",
-            'database': 'testtest'+self.testid,
+            'database': 'testtest' + self.testid,
         })
         modconf.modules = [dbmodconf]
         self.livestatus_broker = LiveStatus_broker(modconf)

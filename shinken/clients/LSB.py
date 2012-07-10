@@ -49,11 +49,11 @@ class SimpleQueryGenerator(QueryGenerator):
         self.i = 0
 
     def get(self):
-        query=self.querys[self.i]
-        query_class="%s-%s" % (self.name, self.i)
-        self.i+=1
+        query = self.querys[self.i]
+        query_class = "%s-%s" % (self.name, self.i)
+        self.i += 1
         if self.i >= len(self.querys):
-            self.i=0
+            self.i = 0
         return (query_class, query)
 
 
@@ -84,10 +84,10 @@ def median(numberList):
     sorted_values = sorted(numberList)
 
     if len(sorted_values) % 2 == 1:
-        return sorted_values[(len(sorted_values)+1)/2-1]
+        return sorted_values[(len(sorted_values) + 1) / 2 - 1]
     else:
-        lower = sorted_values[len(sorted_values)/2-1]
-        upper = sorted_values[len(sorted_values)/2]
+        lower = sorted_values[len(sorted_values) / 2 - 1]
+        upper = sorted_values[len(sorted_values) / 2]
 
     return (float(lower + upper)) / 2
 
@@ -109,14 +109,14 @@ def run(url, requests, concurrency, qg):
 
     for x in xrange(0, concurrency):
         conns.append(LSAsynConnection(addr=addr, port=port))
-        (query_class, query_str)=qg.get()
-        q=Query(query_str)
+        (query_class, query_str) = qg.get()
+        q = Query(query_str)
         q.query_class = query_class
         conns[x].stack_query(q)
 
     print "Start queries"
     t = time.time()
-    while remaining>0:
+    while remaining > 0:
         asyncore.poll(timeout=1)
         for c in conns:
             if c.is_finished():
@@ -135,11 +135,11 @@ def run(url, requests, concurrency, qg):
                     sys.stdout.flush()
 
                 # Run another query
-                (query_class, query_str)=qg.get()
-                q=Query(query_str)
+                (query_class, query_str) = qg.get()
+                q = Query(query_str)
                 q.query_class = query_class
                 c.stack_query(q)
-    running_time=time.time() - t
+    running_time = time.time() - t
     print "End queries"
 
     print "\n==============="

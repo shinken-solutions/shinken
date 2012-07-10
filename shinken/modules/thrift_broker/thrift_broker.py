@@ -191,9 +191,9 @@ class Thrift_brokerHandler(Hooker):
                             query.stats_postprocess_stack.put(query.make_filter(operator, attribute, None))
 
             print "run query"
-            result=query.launch_query()
+            result = query.launch_query()
             print query.response
-            query.response.outputformat='csv'
+            query.response.outputformat = 'csv'
             query.response.format_live_data(result, query.columns, query.aliases)
             output, keepalive = query.response.respond()
             print output
@@ -431,7 +431,7 @@ class Thrift_broker(BaseModule):
             return
         for dtc in s.downtimes + s.comments:
             dtc.ref = s
-        self.services[host_name+service_description] = s
+        self.services[host_name + service_description] = s
         self.number_of_objects += 1
         # We need this for manage_initial_servicegroup_status_brok where it
         # will speed things up dramatically
@@ -445,7 +445,7 @@ class Thrift_broker(BaseModule):
         service_description = data['service_description']
         # In the status, we've got duplicated item, we must relink thems
         try:
-            s = self.services[host_name+service_description]
+            s = self.services[host_name + service_description]
         except KeyError:
             print "Warning: the service %s/%s is unknown!" % (host_name, service_description)
             return
@@ -632,7 +632,7 @@ class Thrift_broker(BaseModule):
         host_name = data['host_name']
         service_description = data['service_description']
         try:
-            s = self.services[host_name+service_description]
+            s = self.services[host_name + service_description]
             self.update_element(s, data)
         except Exception:
             pass
@@ -679,7 +679,7 @@ class Thrift_broker(BaseModule):
             logclass = LOGCLASS_INVALID
             attempt, state = [0] * 2
             command_name, comment, contact_name, host_name, message, options, plugin_output, service_description, state_type = [''] * 9
-            time= line[1:11]
+            time = line[1:11]
             #print "i start with a timestamp", time
             first_type_pos = line.find(' ') + 1
             last_type_pos = line.find(':')
@@ -850,7 +850,7 @@ class Thrift_broker(BaseModule):
 
     def prepare_log_db(self):
         # create db file and tables if not existing
-        self.dbconn = sqlite3.connect(self.database_file, check_same_thread = False)
+        self.dbconn = sqlite3.connect(self.database_file, check_same_thread=False)
         self.dbcursor = self.dbconn.cursor()
         # 'attempt', 'class', 'command_name', 'comment', 'contact_name', 'host_name', 'lineno', 'message',
         # 'options', 'plugin_output', 'service_description', 'state', 'state_type', 'time', 'type',
@@ -953,7 +953,7 @@ class Thrift_broker(BaseModule):
             self.set_debug()
 
         # Start the thread to manage brok
-        broks_manager_thread = threading.Thread(None, self.manage_broks, "broks manager", args = [self] )
+        broks_manager_thread = threading.Thread(None, self.manage_broks, "broks manager", args=[self] )
         broks_manager_thread.start()
 
         # Start the thrift server

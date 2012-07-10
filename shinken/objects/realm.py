@@ -67,7 +67,7 @@ class Realm(Itemgroup):
         return self.realm_members
 
     def add_string_member(self, member):
-        self.realm_members += ','+member
+        self.realm_members += ',' + member
 
     def get_realm_members(self):
         if self.has('realm_members'):
@@ -219,8 +219,8 @@ class Realm(Itemgroup):
     # Return the list of satellites of a certain type
     # like reactionner -> self.reactionners
     def get_satellties_by_type(self, type):
-        if hasattr(self, type+'s'):
-            return getattr(self, type+'s')
+        if hasattr(self, type + 's'):
+            return getattr(self, type + 's')
         else:
             logger.debug("[realm] do not have this kind of satellites: %s" % type)
             return []
@@ -228,8 +228,8 @@ class Realm(Itemgroup):
     # Return the list of potentials satellites of a certain type
     # like reactionner -> self.potential_reactionners
     def get_potential_satellites_by_type(self, type):
-        if hasattr(self, 'potential_'+type+'s'):
-            return getattr(self, 'potential_'+type+'s')
+        if hasattr(self, 'potential_' + type + 's'):
+            return getattr(self, 'potential_' + type + 's')
         else:
             logger.debug("[realm] do not have this kind of satellites: %s" % type)
             return []
@@ -237,8 +237,8 @@ class Realm(Itemgroup):
     # Return the list of potentials satellites of a certain type
     # like reactionner -> self.nb_reactionners
     def get_nb_of_must_have_satellites(self, type):
-        if hasattr(self, 'nb_'+type+'s'):
-            return getattr(self, 'nb_'+type+'s')
+        if hasattr(self, 'nb_' + type + 's'):
+            return getattr(self, 'nb_' + type + 's')
         else:
             logger.debug("[realm] do not have this kind of satellites: %s" % type)
             return 0

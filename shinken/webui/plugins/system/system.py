@@ -60,7 +60,7 @@ def system_widget():
     receivers = app.datamgr.get_receivers()
     pollers = app.datamgr.get_pollers()
 
-    wid = app.request.GET.get('wid', 'widget_system_'+str(int(time.time())))
+    wid = app.request.GET.get('wid', 'widget_system_' + str(int(time.time())))
     collapsed = (app.request.GET.get('collapsed', 'False') == 'True')
     print "SYSTEM COLLAPSED?", collapsed, type(collapsed)
 

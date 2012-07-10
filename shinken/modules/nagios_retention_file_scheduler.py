@@ -145,7 +145,7 @@ class Nagios_retention_scheduler(BaseModule):
                 tmp = {}
                 for line in items:
                     elts = self._cut_line(line)
-                    if elts !=  []:
+                    if elts != []:
                         prop = elts[0]
                         value = ' '.join(elts[1:])
                         tmp[prop] = value

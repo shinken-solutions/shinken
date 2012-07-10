@@ -151,7 +151,7 @@ class Helper(object):
 
         # Now manage the future or not print
         if in_future:
-            return 'in '+' '.join(duration)
+            return 'in ' + ' '.join(duration)
         else:  # past :)
             return ' '.join(duration) + ' ago'
 
@@ -205,7 +205,7 @@ class Helper(object):
         # Set the right info panel
         d['data']['infos'] = r'''%s <h2 class="%s"><img style="width: 64px; height:64px" src="%s"/> %s: %s</h2>
                    <p>since %s</p>
-                   <div style="float:right;"> <a href="%s">%s</a></div>'''  % (
+                   <div style="float:right;"> <a href="%s">%s</a></div>''' % (
             '<img src="/static/img/icons/star.png" alt="star">' * (elt.business_impact - 2),
             elt.state.lower(), self.get_icon_state(elt), elt.state, elt.get_full_name(),
             self.print_duration(elt.last_state_change, just_duration=True, x_elts=2),
@@ -279,7 +279,7 @@ class Helper(object):
         if img:
             s += '<img src="%s" alt=""/>\n' % img
         s += "%s" % text
-        s+= ''' </div>
+        s += ''' </div>
             </div>\n'''
 
         return s
@@ -551,7 +551,7 @@ class Helper(object):
                 continue
             print "Doing PAGE", i
             is_current = (i == current_page)
-            start = int(i*step)
+            start = int(i * step)
             # Maybe we are generating a page too high, bail out
             if start > total:
                 continue
@@ -560,8 +560,8 @@ class Helper(object):
             res.append(('%d' % (i+1), start, end, is_current))
 
         if current_page < nb_pages - 2:
-            start = int((nb_pages - 1)*step)
-            end = int(nb_pages*step)
+            start = int((nb_pages - 1) * step)
+            end = int(nb_pages * step)
             res.append(('...', None, None, False))
             res.append((u'Last \xc2\xbb', start, end, False))
 

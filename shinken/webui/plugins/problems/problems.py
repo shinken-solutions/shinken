@@ -154,27 +154,27 @@ def get_view(page):
             print "Got an ack filter", s
             if s == 'false':
                 # First look for hosts, so ok for services, but remove problem_has_been_acknowledged elements
-                items = [i for i in items if i.__class__.my_type=='service' or not i.problem_has_been_acknowledged]
+                items = [i for i in items if i.__class__.my_type == 'service' or not i.problem_has_been_acknowledged]
                 # Now ok for hosts, but look for services, and service hosts
-                items = [i for i in items if i.__class__.my_type=='host' or (not i.problem_has_been_acknowledged and not i.host.problem_has_been_acknowledged)]
+                items = [i for i in items if i.__class__.my_type == 'host' or (not i.problem_has_been_acknowledged and not i.host.problem_has_been_acknowledged)]
             if s == 'true':
                 # First look for hosts, so ok for services, but remove problem_has_been_acknowledged elements
-                items = [i for i in items if i.__class__.my_type=='service' or i.problem_has_been_acknowledged]
+                items = [i for i in items if i.__class__.my_type == 'service' or i.problem_has_been_acknowledged]
                 # Now ok for hosts, but look for services, and service hosts
-                items = [i for i in items if i.__class__.my_type=='host' or (i.problem_has_been_acknowledged or i.host.problem_has_been_acknowledged)]
+                items = [i for i in items if i.__class__.my_type == 'host' or (i.problem_has_been_acknowledged or i.host.problem_has_been_acknowledged)]
 
         if t == 'downtime':
             print "Got an downtime filter", s
             if s == 'false':
                 # First look for hosts, so ok for services, but remove problem_has_been_acknowledged elements
-                items = [i for i in items if i.__class__.my_type=='service' or not i.in_scheduled_downtime]
+                items = [i for i in items if i.__class__.my_type == 'service' or not i.in_scheduled_downtime]
                 # Now ok for hosts, but look for services, and service hosts
-                items = [i for i in items if i.__class__.my_type=='host' or (not i.in_scheduled_downtime and not i.host.in_scheduled_downtime)]
+                items = [i for i in items if i.__class__.my_type == 'host' or (not i.in_scheduled_downtime and not i.host.in_scheduled_downtime)]
             if s == 'true':
                 # First look for hosts, so ok for services, but remove problem_has_been_acknowledged elements
-                items = [i for i in items if i.__class__.my_type=='service' or i.in_scheduled_downtime]
+                items = [i for i in items if i.__class__.my_type == 'service' or i.in_scheduled_downtime]
                 # Now ok for hosts, but look for services, and service hosts
-                items = [i for i in items if i.__class__.my_type=='host' or (i.in_scheduled_downtime or i.host.in_scheduled_downtime)]
+                items = [i for i in items if i.__class__.my_type == 'host' or (i.in_scheduled_downtime or i.host.in_scheduled_downtime)]
 
         print "After filtering for", t, s, 'we got', len(items)
 
@@ -183,18 +183,18 @@ def get_view(page):
     print "Late problem filtering?", page == 'problems', len(filters['ack']) == 0
     if page == 'problems' and len(filters['ack']) == 0:
         # First look for hosts, so ok for services, but remove problem_has_been_acknowledged elements
-        items = [i for i in items if i.__class__.my_type=='service' or not i.problem_has_been_acknowledged]
+        items = [i for i in items if i.__class__.my_type == 'service' or not i.problem_has_been_acknowledged]
         # Now ok for hosts, but look for services, and service hosts
-        items = [i for i in items if i.__class__.my_type=='host' or (not i.problem_has_been_acknowledged and not i.host.problem_has_been_acknowledged)]
+        items = [i for i in items if i.__class__.my_type == 'host' or (not i.problem_has_been_acknowledged and not i.host.problem_has_been_acknowledged)]
 
     # If we are in the /problems and we do not have an ack filter
     # we apply by default the ack:false one
     print "Late problem filtering?", page == 'problems', len(filters['downtime']) == 0
     if page == 'problems' and len(filters['downtime']) == 0:
         # First look for hosts, so ok for services, but remove problem_has_been_acknowledged elements
-        items = [i for i in items if i.__class__.my_type=='service' or not i.in_scheduled_downtime]
+        items = [i for i in items if i.__class__.my_type == 'service' or not i.in_scheduled_downtime]
         # Now ok for hosts, but look for services, and service hosts
-        items = [i for i in items if i.__class__.my_type=='host' or (not i.in_scheduled_downtime and not i.host.in_scheduled_downtime)]
+        items = [i for i in items if i.__class__.my_type == 'host' or (not i.in_scheduled_downtime and not i.host.in_scheduled_downtime)]
 
     # Now sort it!
     items.sort(hst_srv_sort)
@@ -260,7 +260,7 @@ def get_pbs_widget():
 
     pbs = pbs[:nb_elements]
 
-    wid = app.request.GET.get('wid', 'widget_problems_'+str(int(time.time())))
+    wid = app.request.GET.get('wid', 'widget_problems_' + str(int(time.time())))
     collapsed = (app.request.GET.get('collapsed', 'False') == 'True')
 
     options = {'search': {'value': search, 'type': 'text', 'label': 'Filter by name'},
@@ -294,7 +294,7 @@ def get_last_errors_widget():
     # Keep only nb_elements
     pbs = pbs[:nb_elements]
 
-    wid = app.request.GET.get('wid', 'widget_last_problems_'+str(int(time.time())))
+    wid = app.request.GET.get('wid', 'widget_last_problems_' + str(int(time.time())))
     collapsed = (app.request.GET.get('collapsed', 'False') == 'True')
 
     options = {'nb_elements': {'value': nb_elements, 'type': 'int', 'label': 'Max number of elements to show'},

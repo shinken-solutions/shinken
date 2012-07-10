@@ -68,7 +68,7 @@ parser.add_option('--modules_path', dest="modules_path",
 opts, args = parser.parse_args()
 
 raw_macros = []
-macros=[]
+macros = []
 
 if not opts.cfg_input:
     if not os.path.exists(DEFAULT_CFG):

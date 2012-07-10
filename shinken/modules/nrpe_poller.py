@@ -437,7 +437,7 @@ class Nrpe_poller(BaseModule):
                 c.status = 'done'
                 c.exit_status = getattr(n, 'rc', 3)
                 c.get_outputs(getattr(n, 'message', 'Error in launching command.'), 8012)
-                c.execution_time  = getattr(n, 'execution_time', 0.0)
+                c.execution_time = getattr(n, 'execution_time', 0.0)
 
                 # unlink our object from the original check
                 if hasattr(c, 'con'):

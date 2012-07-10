@@ -78,7 +78,7 @@ class Simple_log_broker(BaseModule):
     # Check the path file age. If it's last day, we
     # archive it.
     # Return True if the file has moved
-    def check_and_do_archive(self, first_pass = False):
+    def check_and_do_archive(self, first_pass=False):
         now = int(time.time())
         # first check if the file last mod (or creation) was
         # not our day
@@ -90,7 +90,7 @@ class Simple_log_broker(BaseModule):
         t_last_mod_day = get_day(t_last_mod)
         today = get_day(now)
         # Will be saved with the date of yesterday because all elemetns arefrom yesterday
-        yesterday = get_day(now-3600)
+        yesterday = get_day(now - 3600)
         #print "Dates: t_last_mod: %d, t_last_mod_day: %d, today: %d" % (t_last_mod, t_last_mod_day, today)
         if t_last_mod_day != today:
             logger.info("We are archiving the old log file")
@@ -110,7 +110,7 @@ class Simple_log_broker(BaseModule):
             # like -05-09-2010-00
             d = datetime.datetime.fromtimestamp(yesterday)
             s_day = d.strftime("-%m-%d-%Y-00")
-            archive_name = f_base_name+s_day+ext
+            archive_name = f_base_name + s_day + ext
             file_archive_path = os.path.join(self.archive_path, archive_name)
             logger.info("Moving the old log file from %s to %s" % (self.path, file_archive_path))
 

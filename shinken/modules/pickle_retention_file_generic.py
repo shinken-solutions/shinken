@@ -70,7 +70,7 @@ class Pickle_retention_generic(BaseModule):
         try:
             # Open a file near the path, with .tmp extension
             # so in cae or problem, we do not lost the old one
-            f = open(self.path+'.tmp', 'wb')
+            f = open(self.path + '.tmp', 'wb')
 
             # We get interesting retention data from the daemon it self
             all_data = daemon.get_retention_data()
@@ -84,7 +84,7 @@ class Pickle_retention_generic(BaseModule):
             f.close()
 
             # Now move the .tmp fiel to the real path
-            shutil.move(self.path+'.tmp', self.path)
+            shutil.move(self.path + '.tmp', self.path)
         except IOError, exp:
             log_mgr.log("Error: retention file creation failed, %s" % str(exp))
             return

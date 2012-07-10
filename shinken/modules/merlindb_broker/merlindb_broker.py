@@ -468,7 +468,7 @@ class Merlindb_broker(BaseModule):
     # We call functions like manage_ TYPEOFBROK _brok that return us queries
     def manage_brok(self, b):
         type = b.type
-        manager = 'manage_'+type+'_brok'
+        manager = 'manage_' + type + '_brok'
         #print "(Merlin) I search manager:", manager
         if hasattr(self, manager):
             new_b = self.preprocess(type, b)

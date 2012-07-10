@@ -4408,7 +4408,7 @@ for objtype in ['Host', 'Service', 'Contact', 'Command', 'Timeperiod', 'Downtime
     cls = [t[1] for t in table_class_map.values() if t[0] == objtype][0]
     setattr(cls, 'livestatus_attributes', [])
     for attribute in livestatus_attribute_map[objtype]:
-        entry =  livestatus_attribute_map[objtype][attribute]
+        entry = livestatus_attribute_map[objtype][attribute]
         if 'function' in entry:
             setattr(cls, 'lsm_'+attribute, entry['function'])
             if 'datatype' in entry:

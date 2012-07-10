@@ -357,7 +357,7 @@ class IPint:
         # strHex        0x7F000001   0x20010658022ACAFE0200C0FFFE8D08FA
         # strDec        2130706433   42540616829182469433547974687817795834
 
-    def strBin(self, wantprefixlen = None):
+    def strBin(self, wantprefixlen=None):
         """Return a string representation as a binary value.
 
         >>> print(IP('127.0.0.1').strBin())
@@ -377,7 +377,7 @@ class IPint:
         ret = _intToBin(self.ip)
         return  '0' * (bits - len(ret)) + ret + self._printPrefix(wantprefixlen)
 
-    def strCompressed(self, wantprefixlen = None):
+    def strCompressed(self, wantprefixlen=None):
         """Return a string representation in compressed format using '::' Notation.
 
         >>> IP('127.0.0.1').strCompressed()
@@ -422,7 +422,7 @@ class IPint:
             else:
                 return self.strNormal(0) + self._printPrefix(wantprefixlen)
 
-    def strNormal(self, wantprefixlen = None):
+    def strNormal(self, wantprefixlen=None):
         """Return a string representation in the usual format.
 
         >>> print(IP('127.0.0.1').strNormal())
@@ -443,7 +443,7 @@ class IPint:
 
         return ret + self._printPrefix(wantprefixlen)
 
-    def strFullsize(self, wantprefixlen = None):
+    def strFullsize(self, wantprefixlen=None):
         """Return a string representation in the non-mangled format.
 
         >>> print(IP('127.0.0.1').strFullsize())
@@ -457,7 +457,7 @@ class IPint:
 
         return intToIp(self.ip, self._ipversion).lower() + self._printPrefix(wantprefixlen)
 
-    def strHex(self, wantprefixlen = None):
+    def strHex(self, wantprefixlen=None):
         """Return a string representation in hex format in lower case.
 
         >>> IP('127.0.0.1').strHex()
@@ -474,7 +474,7 @@ class IPint:
             x = x[:-1]
         return x.lower() + self._printPrefix(wantprefixlen)
 
-    def strDec(self, wantprefixlen = None):
+    def strDec(self, wantprefixlen=None):
         """Return a string representation in decimal format.
 
         >>> print(IP('127.0.0.1').strDec())
@@ -486,7 +486,7 @@ class IPint:
         if self.WantPrefixLen == None and wantprefixlen == None:
             wantprefixlen = 0
 
-        x =  str(self.ip)
+        x = str(self.ip)
         if x[-1] == 'L':
             x = x[:-1]
         return x + self._printPrefix(wantprefixlen)
@@ -1084,7 +1084,7 @@ def _parseAddressIPv6(ipstr):
             if text[pos:pos+2] == "::":
                 index += pos
             else:
-                index += pos+1
+                index += pos + 1
 
             if index == len(ipstr):
                 # Invalid IPv6, eg. '1::2:'
@@ -1350,7 +1350,7 @@ def _checkPrefix(ip, prefixlen, version):
         zbits = bits + 1
     else:
         zbits = _count0Bits(ip)
-    if zbits <  bits - prefixlen:
+    if zbits < bits - prefixlen:
         return 0
     else:
         return 1

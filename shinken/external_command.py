@@ -316,7 +316,7 @@ class ExternalCommandManager:
 
         # Only log if we are in the Arbiter
         if self.mode == 'dispatcher' and self.conf.log_external_commands:
-            logger.log('EXTERNAL COMMAND: '+command.rstrip())
+            logger.log('EXTERNAL COMMAND: ' + command.rstrip())
         r = self.get_command_and_args(command)
         if r is not None:
             is_global = r['global']
@@ -426,7 +426,7 @@ class ExternalCommandManager:
         tmp_host = ''
         try:
             for elt in elts[1:]:
-                logger.debug("Searching for a new arg: %s (%d)" %(elt, i))
+                logger.debug("Searching for a new arg: %s (%d)" % (elt, i))
                 val = elt.strip()
                 if val.endswith('\n'):
                     val = val[:-1]

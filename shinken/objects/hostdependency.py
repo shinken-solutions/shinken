@@ -62,7 +62,7 @@ class Hostdependency(Item):
         host_name = 'unknown'
         if getattr(self, 'host_name', None):
             host_name = getattr(getattr(self, 'host_name'), 'host_name', 'unknown')
-        return dependent_host_name+'/'+host_name
+        return dependent_host_name + '/' + host_name
 
 
 class Hostdependencies(Items):

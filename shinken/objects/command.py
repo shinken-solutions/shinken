@@ -100,7 +100,7 @@ class Command(Item):
         data = {'id': self.id}
 
         self.fill_data_brok_from(data, 'full_status')
-        b = Brok('initial_'+my_type+'_status', data)
+        b = Brok('initial_' + my_type + '_status', data)
         return b
 
     def fill_data_brok_from(self, data, brok_type):

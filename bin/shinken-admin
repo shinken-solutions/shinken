@@ -235,26 +235,26 @@ class ShinkenAdmin(cmd.Cmd):
             print "Usage: showconfig objecttype [objectname]"
             print "Example: showconfig poller poller-1"
         else:
-            type=line
+            type = line
             self.look_connexion()
 
             # get properties from link classes
             if type == 'arbiter':
                 o = ArbiterLink()
                 cfglink = 'arbiters'
-            elif type =='scheduler':
+            elif type == 'scheduler':
                 o = SchedulerLink()
                 cfglink = 'schedulers'
-            elif type =='poller':
+            elif type == 'poller':
                 o = PollerLink()
                 cfglink = 'pollers'
-            elif type =='broker':
+            elif type == 'broker':
                 o = BrokerLink()
                 cfglink = 'brokers'
-            elif type =='reactionner':
+            elif type == 'reactionner':
                 o = ReactionnerLink()
                 cfglink = 'reactionners'
-            elif type =='receiver':
+            elif type == 'receiver':
                 o = ReceiverLink()
                 cfglink = 'receivers'
             else:
@@ -271,12 +271,12 @@ class ShinkenAdmin(cmd.Cmd):
                 print "| {0:8} | {1:30} | {2:60} |".format("Default", "Directive", "Value" )
                 print "+%s+" % ("-".center(106, '-'))
                 for key in o.properties.keys():
-                    elts=None
-                    default=u""
+                    elts = None
+                    default = u""
                     if hasattr(d, key):
                         o = getattr(d, key)
                         if isinstance(o, list):
-                            eltl=[]
+                            eltl = []
                             for elt in getattr(d, key):
                                 if isinstance(elt, str):
                                     eltl.append(unicode(elt))
@@ -287,8 +287,8 @@ class ShinkenAdmin(cmd.Cmd):
                             elts = unicode(getattr(d, key))
                     else:
                         # TODO: get default parameters
-                        default=u"D"
-                        elts="TODO: get default value"
+                        default = u"D"
+                        elts = "TODO: get default value"
                     if elts:
                         print u"| {0:8} | {1:30} | {2:60} |".format(default, unicode(key), elts)
                 print "+%s+" % ("-".center(106, '-'))
@@ -305,35 +305,35 @@ class ShinkenAdmin(cmd.Cmd):
             print "Cannot connect to the arbiter, bail out"
             return
 
-        args     = line.strip().split(' ')
+        args = line.strip().split(' ')
         if len(args) > 2 or args[0] == '':
             print "Invalid number of arguments"
             return
 
-        daemon   = '*' if len(args) < 2 else args[0]
+        daemon = '*' if len(args) < 2 else args[0]
         try:
             loglevel = logger.get_level_id(args[-1])
         except KeyError:
             print "Invalid '%s' log level. Must be one of DEBUG, INFO, WARNING, ERROR, CRITICAL" % args[-1]
             return
 
-        conf     = self.arb.get_config()
+        conf = self.arb.get_config()
 
         # find matching daemons
         matches = []
 
         for type in sat_types:
-            sats  = self.arb.get_satellite_list(type)
-            sconf = getattr(conf, type+'s')
+            sats = self.arb.get_satellite_list(type)
+            sconf = getattr(conf, type + 's')
 
             matches.extend([{
                 'type': type,
-                'name': getattr(c, type+'_name'),
+                'name': getattr(c, type + '_name'),
                 'address': c.address,
                 'port': c.port
             } for c in sconf if
                 c.alive is True and
-                (daemon == '*' or getattr(c, type+'_name') == daemon)
+                (daemon == '*' or getattr(c, type + '_name') == daemon)
             ])
 
         if len(matches) == 0:
@@ -341,7 +341,7 @@ class ShinkenAdmin(cmd.Cmd):
 
         for m in matches:
             print "Setting loglevel %s to *%s* daemon" % (args[-1], m['name'])
-            uri  = pyro.create_uri(m['address'], m['port'], "ForArbiter", False)
+            uri = pyro.create_uri(m['address'], m['port'], "ForArbiter", False)
             conn = pyro.getProxy(uri)
 
             try:

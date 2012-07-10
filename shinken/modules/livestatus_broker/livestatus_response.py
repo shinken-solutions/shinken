@@ -53,7 +53,7 @@ class LiveStatusResponse:
 
     separators = map(lambda x: chr(int(x)), [10, 59, 44, 124])
 
-    def __init__(self, responseheader = 'off', outputformat = 'csv', keepalive = 'off', columnheaders = 'off', separators = separators):
+    def __init__(self, responseheader='off', outputformat='csv', keepalive='off', columnheaders='off', separators=separators):
         self.responseheader = responseheader
         self.outputformat = outputformat
         self.keepalive = keepalive
@@ -95,7 +95,7 @@ class LiveStatusResponse:
                 # Construct one line of output for each object found
                 l = []
                 for c in columns:
-                    attribute = 'lsm_'+c
+                    attribute = 'lsm_' + c
                     try:
                         value = getattr(item, attribute)(self.query)
                     except Exception:
@@ -142,7 +142,7 @@ class LiveStatusResponse:
             for item in result:
                 rows = []
                 for c in columns:
-                    attribute = 'lsm_'+c
+                    attribute = 'lsm_' + c
                     try:
                         value = getattr(item, attribute)(self.query)
                     except Exception, exp:

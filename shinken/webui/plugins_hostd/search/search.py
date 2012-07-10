@@ -135,7 +135,7 @@ def search_categories():
         pos = tree
         name = ''
         for cat in cats:
-            name += '/'+cat
+            name += '/' + cat
             print "Doing cat", cat
             # If not already declared, add my node
             if cat not in pos['sons']:

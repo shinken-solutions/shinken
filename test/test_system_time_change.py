@@ -49,8 +49,8 @@ class TestSystemTimeChange(ShinkenTest):
         now_str = time.asctime(time.localtime(now))
         print "Now:", now
         print "Now:", time.asctime(time.localtime(now))
-        tomorow = time.asctime(time.localtime(now+86400))
-        yesterday = time.asctime(time.localtime(now-86400))
+        tomorow = time.asctime(time.localtime(now + 86400))
+        yesterday = time.asctime(time.localtime(now - 86400))
 
         # Simulate a change now, because by default the value is 1970
         host.last_state_change = now

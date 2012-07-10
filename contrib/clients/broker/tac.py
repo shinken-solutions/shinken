@@ -33,7 +33,7 @@ class TacModel:
     def get_data_hosts(self):
         q = GetRequest()
         r = GetResponse()
-        q.table=Table.hosts
+        q.table = Table.hosts
         q.stats = [ StatRequest("state", "=", "0"),
              StatRequest("state", "=", "1"),
              StatRequest("state", "=", "2"),
@@ -46,7 +46,7 @@ class TacModel:
     def get_data_services(self):
         q = GetRequest()
         r = GetResponse()
-        q.table=Table.services
+        q.table = Table.services
         q.stats = [ StatRequest("state", "=", "0"),
              StatRequest("state", "=", "1"),
              StatRequest("state", "=", "2"),
@@ -98,7 +98,7 @@ class TacView(urwid.WidgetWrap):
         self.health_services.set_completion(
             100 * int(services[0]) / (int(services[0]) + int(services[1]) + int(services[2]) + int(services[3])))
 
-        self.last_update.set_text(('button', "Last Updated: %s" %  time.strftime('%d/%m/%y %H:%M:%S', time.localtime())))
+        self.last_update.set_text(('button', "Last Updated: %s" % time.strftime('%d/%m/%y %H:%M:%S', time.localtime())))
 
     def main_window(self):
         self.last_update = urwid.Text(('button', "Last Updated: %s" % "Never"))
@@ -144,7 +144,7 @@ class TacView(urwid.WidgetWrap):
             urwid.LineBox(urwid.Pile([
                 self.last_update,
                 urwid.Text(('button', "Updated every %s seconds" % REFRESH_INTERVAL))])),
-            urwid.Divider(bottom = 2),
+            urwid.Divider(bottom=2),
             network,
             urwid.Divider(),
             urwid.Text(('header', "Hosts")),
@@ -185,7 +185,7 @@ class TacController:
         data['services'] = self.model.get_data_services()
         return data
 
-    def refresh(self, loop = None, user_data = None):
+    def refresh(self, loop=None, user_data=None):
         self.view.update()
         self.refresh_alarm = self.loop.set_alarm_in(REFRESH_INTERVAL, self.refresh)
 
@@ -193,5 +193,5 @@ class TacController:
 def main():
     TacController().main()
 
-if '__main__'==__name__:
+if '__main__' == __name__:
     main()

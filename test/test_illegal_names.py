@@ -37,7 +37,7 @@ class TestConfig(ShinkenTest):
 
         # Now change the name with incorrect caract
         for c in illegal_caracts:
-            host.host_name = 'test_host_0'+c
+            host.host_name = 'test_host_0' + c
             # and Now I want an incorrect here
             self.assert_(host.is_correct() == False)
 

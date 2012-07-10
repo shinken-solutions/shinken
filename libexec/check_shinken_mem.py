@@ -74,8 +74,8 @@ def main():
             assert False, "unknown options"
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-w', '--warning', default = '80')
-    parser.add_argument('-c', '--critical', default = '90' )
+    parser.add_argument('-w', '--warning', default='80')
+    parser.add_argument('-c', '--critical', default='90' )
     args = parser.parse_args()
     critical = args.critical
     warning = args.warning
@@ -86,13 +86,13 @@ def main():
     pmemUsage = str(pmemUsage)
 
     if pmemUsage >= cmem:
-        print 'CRITICAL - Memory usage : '+pmemUsage+'% |mem='+pmemUsage
+        print 'CRITICAL - Memory usage : ' + pmemUsage + '% |mem=' + pmemUsage
         sys.exit(2)
     elif pmemUsage >= wmem:
-        print 'WARNING - Memory usage : '+pmemUsage+'% |mem='+pmemUsage
+        print 'WARNING - Memory usage : ' + pmemUsage + '% |mem=' + pmemUsage
         sys.exit(1)
     else:
-        print 'OK - Memory usage : '+pmemUsage+'% |mem='+pmemUsage
+        print 'OK - Memory usage : ' + pmemUsage + '% |mem=' + pmemUsage
         sys.exit(0)
 
 if __name__ == "__main__":

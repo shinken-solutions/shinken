@@ -64,14 +64,14 @@ def cleanup():
 
     subprocess.Popen(["lcrash", "--keep-fs", "-d", rootdir], stdout=open('/dev/null'), stderr=subprocess.STDOUT)
     for prefix in ('pc1', 'pc2', 'nat'):
-        for f in glob.glob(os.path.join(rootdir, prefix+'.*')):
+        for f in glob.glob(os.path.join(rootdir, prefix + '.*')):
             os.remove(f)
 
 
 class TestNat(unittest.TestCase):
     def setUp(self):
         self.testdir = os.path.dirname(os.path.abspath(sys.argv[0]))
-        self.files   = dict()
+        self.files = dict()
 
         # copying netkit configuration file to project root directory
         root = os.path.join(self.testdir, 'etc', 'netkit')

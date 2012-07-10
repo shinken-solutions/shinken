@@ -152,7 +152,7 @@ class MacroResolver(Borg):
                 prop = macros[macro]
                 value = self.get_value_from_element(o, prop)
                 #print "Value: %s" % value
-                env['NAGIOS_'+macro] = value
+                env['NAGIOS_' + macro] = value
             if hasattr(o, 'customs'):
                 # make NAGIOS__HOSTMACADDR from _MACADDR
                 for cmacro in o.customs:
@@ -181,7 +181,7 @@ class MacroResolver(Borg):
             macros = self.get_macros(c_line)
 
             # We can get out if we do not have macros this loop
-            still_got_macros = (len(macros)!=0)
+            still_got_macros = (len(macros) != 0)
             #print "Still go macros:", still_got_macros
 
             # Put in the macros the type of macro for all macros
@@ -205,14 +205,14 @@ class MacroResolver(Borg):
                                 macros[macro]['val'] = self.delete_unwanted_caracters(macros[macro]['val'])
                 if macros[macro]['type'] == 'CUSTOM':
                     cls_type = macros[macro]['class']
-                    macro_name = re.split('_'+cls_type, macro)[1].upper()
+                    macro_name = re.split('_' + cls_type, macro)[1].upper()
                     # Ok, we've got the macro like MAC_ADDRESS for _HOSTMAC_ADDRESS
                     # Now we get the element in data that have the type HOST
                     # and we check if it gots the custom value
                     for elt in data:
                         if elt is not None and elt.__class__.my_type.upper() == cls_type:
-                            if '_'+macro_name in elt.customs:
-                                macros[macro]['val'] = elt.customs['_'+macro_name]
+                            if '_' + macro_name in elt.customs:
+                                macros[macro]['val'] = elt.customs['_' + macro_name]
                 if macros[macro]['type'] == 'ONDEMAND':
                     macros[macro]['val'] = self.resolve_ondemand(macro, data)
 

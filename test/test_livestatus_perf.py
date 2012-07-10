@@ -1156,9 +1156,9 @@ ResponseHeader: fixed16
 
 
 def isprime(startnumber):
-    startnumber*=1.0
-    for divisor in range(2, int(startnumber**0.5)+1):
-        if startnumber/divisor==int(startnumber/divisor):
+    startnumber *= 1.0
+    for divisor in range(2, int(startnumber ** 0.5) + 1):
+        if startnumber / divisor == int(startnumber / divisor):
             return False
     return True
 
@@ -1170,8 +1170,8 @@ class PerfTest(ShinkenTest):
         self.livestatus_broker.db.close()
         if os.path.exists(self.livelogs):
             os.remove(self.livelogs)
-        if os.path.exists(self.livelogs+"-journal"):
-            os.remove(self.livelogs+"-journal")
+        if os.path.exists(self.livelogs + "-journal"):
+            os.remove(self.livelogs + "-journal")
         if os.path.exists(self.livestatus_broker.pnp_path):
             shutil.rmtree(self.livestatus_broker.pnp_path)
         self.livestatus_broker = None
@@ -1240,7 +1240,7 @@ class PerfTest(ShinkenTest):
         nonok.extend([[c, 2, "C"] for c in crit_services if crit_services.index(c) in primes])
         lenc = len(nonok) - lenw
         nonok.extend([[h, 2, "D"] for h in down_hosts if down_hosts.index(h) in primes])
-        lenh = len(nonok) -lenc - lenw
+        lenh = len(nonok) - lenc - lenw
         print "%d hosts are hard/down" % lenh
         print "%d services are in a hard/warning state" % lenw
         print "%d services are in a hard/critical state" % lenc

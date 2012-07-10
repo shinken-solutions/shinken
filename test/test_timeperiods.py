@@ -122,7 +122,7 @@ class TestTimeperiods(ShinkenTest):
         print "RES:", t_next_inv
         self.assert_(t_next_inv == "Mon Jul 12 15:00:00 2010")
         # what about a valid time and ask next invalid? Like at 22:00h?
-        print "GO"*10
+        print "GO" * 10
         july_the_12 = time.mktime(time.strptime("12 Jul 2010 22:00:00", "%d %b %Y %H:%M:%S"))
         t_next_inv = t.get_next_invalid_time_from_t(july_the_12)
         t_next_inv = time.asctime(time.localtime(t_next_inv))
@@ -143,7 +143,7 @@ class TestTimeperiods(ShinkenTest):
         self.assert_(t_next == "Mon Jul 12 00:00:00 2010")
 
         # Now look for the never case
-        print "24x7"*10
+        print "24x7" * 10
         t = self.conf.timeperiods.find_by_name('24x7')
         self.assert_(t is not None)
         t_next_inv = t.get_next_invalid_time_from_t(july_the_12)

@@ -97,7 +97,7 @@ def manage_check_ping_command(elt):
         return None
 
     # Percent of ok should be the log of time versus max/2
-    pct = get_logarithmic(v, crit/2)
+    pct = get_logarithmic(v, crit / 2)
     # Now get the color
     # OK: #6f2 (102,255,34) green
     # Warning: #f60 (255,102,0) orange
@@ -129,7 +129,7 @@ def manage_check_tcp_command(elt):
         return None
 
     # Percent of ok should be the log of time versus m.max / 2
-    pct = get_logarithmic(v, m.max/2)
+    pct = get_logarithmic(v, m.max / 2)
 
     # Now get the color
     # OK: #6f2 (102,255,34) green

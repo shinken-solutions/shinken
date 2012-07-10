@@ -66,7 +66,7 @@ def get_instance(plugin):
 class MySQL_importer_arbiter(BaseModule):
     def __init__(self, mod_conf, host, login, password, database, reqlist):
         BaseModule.__init__(self, mod_conf)
-        self.host  = host
+        self.host = host
         self.login = login
         self.password = password
         self.database = database
@@ -76,10 +76,10 @@ class MySQL_importer_arbiter(BaseModule):
     def init(self):
         print "[MySQL Importer Module]: Try to open a MySQL connection to %s" % self.host
         try:
-            self.conn = MySQLdb.connect(host = self.host,
-                        user = self.login,
-                        passwd = self.password,
-                        db = self.database)
+            self.conn = MySQLdb.connect(host=self.host,
+                        user=self.login,
+                        passwd=self.password,
+                        db=self.database)
         except MySQLdb.Error, e:
             print "MySQL Module: Error %d: %s" % (e.args[0], e.args[1])
             raise
@@ -115,7 +115,7 @@ class MySQL_importer_arbiter(BaseModule):
                     h = {}
                     for column in row:
                         if row[column]:
-                            h[column]= row[column]
+                            h[column] = row[column]
                     r[k].append(h)
 
         cursor.close()

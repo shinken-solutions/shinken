@@ -188,13 +188,13 @@ class TestNotif(ShinkenTest):
         # repeat bad checks during the delay time
         # there is 1 action which is the scheduled notification
         #-----------------------------------------------------------------
-        loop=0
+        loop = 0
         while deadline > time.time():
             loop += 1
             self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
             self.show_and_clear_logs()
             self.show_actions()
-            print deadline-time.time()
+            print deadline - time.time()
             ###self.assert_(self.count_actions() == 1)
         #-----------------------------------------------------------------
         # now the delay period is over and the notification can be sent

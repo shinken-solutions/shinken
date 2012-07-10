@@ -117,7 +117,7 @@ class Discoveryrun(MatchingItem):
         self.current_launch.execute()
 
     def check_finished(self):
-        max_output = 10**9
+        max_output = 10 ** 9
         #print "Max output", max_output
         self.current_launch.check_finished(max_output)
 

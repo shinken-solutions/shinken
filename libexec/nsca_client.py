@@ -73,7 +73,7 @@ class NSCA_client():
             data = decrypt_xor(data, iv)
 
         (version, pad1, crc32, timestamp, rc, hostname_dirty, service_dirty, output_dirty, pad2) = struct.unpack("!hhIIh64s128s512sh", data)
-        hostname =  hostname_dirty.partition("\0", 1)[0]
+        hostname = hostname_dirty.partition("\0", 1)[0]
         service = service_dirty.partition("\0", 1)[0]
         output = output_dirty.partition("\0", 1)[0]
         return (timestamp, rc, hostname, service, output)
@@ -117,13 +117,13 @@ class NSCA_client():
 
         version = 0
         pad1 = 0
-        crc32= 0
+        crc32 = 0
         timestamp = int(time.time())
         rc = 2
         hostname_dirty = "moncul"
         service_dirty = "fonctionnne"
         output_dirty = "blablalba"
-        pad2=0
+        pad2 = 0
         '''
         Read the check result
          00-01: Version
@@ -165,7 +165,7 @@ class NSCA_client():
                         databuffer[s] = data
                     if len(databuffer[s]) == 720:
                         # end-of-transmission or an empty line was received
-                        (timestamp, rc, hostname, service, output)=self.read_check_result(databuffer[s], IVs[s])
+                        (timestamp, rc, hostname, service, output) = self.read_check_result(databuffer[s], IVs[s])
                         del databuffer[s]
                         del IVs[s]
                         self.post_command(timestamp, rc, hostname, service, output)

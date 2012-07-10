@@ -106,7 +106,7 @@ class Status_dat_broker(BaseModule):
         # We clean all previous hosts and services from this instance_id
         h_to_del = []
         for h in self.hosts.values():
-            if h.instance_id ==  instance_id:
+            if h.instance_id == instance_id:
                 h_to_del.append(h.id)
 
         for i in h_to_del:
@@ -116,7 +116,7 @@ class Status_dat_broker(BaseModule):
         # same for services
         s_to_del = []
         for s in self.services.values():
-            if s.instance_id ==  instance_id:
+            if s.instance_id == instance_id:
                 s_to_del.append(s.id)
 
         for i in s_to_del:

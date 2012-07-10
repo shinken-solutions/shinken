@@ -227,7 +227,7 @@ class Thrift_status(object, Hooker):
         }
         for objtype in Thrift_status.out_map:
             for attribute in Thrift_status.out_map[objtype]:
-                entry =  Thrift_status.out_map[objtype][attribute]
+                entry = Thrift_status.out_map[objtype][attribute]
                 if objtype in delegate_map:
                     for prefix in delegate_map[objtype]:
                         if attribute.startswith(prefix):

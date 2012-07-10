@@ -46,8 +46,8 @@ class TestConfigBig(TestConfig):
         self.livestatus_broker.db.close()
         if os.path.exists(self.livelogs):
             os.remove(self.livelogs)
-        if os.path.exists(self.livelogs+"-journal"):
-            os.remove(self.livelogs+"-journal")
+        if os.path.exists(self.livelogs + "-journal"):
+            os.remove(self.livelogs + "-journal")
         for arch in os.listdir('tmp/archives'):
             os.remove('tmp/archives/' + arch)
         if os.path.exists(self.livestatus_broker.pnp_path):

@@ -495,9 +495,9 @@ class Daemon(object):
             logger.debug("Using ssl server cert file: %s" % Pyro.config.PYROSSL_CERT)
 
             if self.hard_ssl_name_check:
-                Pyro.config.PYROSSL_POSTCONNCHECK=1
+                Pyro.config.PYROSSL_POSTCONNCHECK = 1
             else:
-                Pyro.config.PYROSSL_POSTCONNCHECK=0
+                Pyro.config.PYROSSL_POSTCONNCHECK = 0
 
         # create the server, but Pyro > 4.8 veersion
         # do not have such objets...

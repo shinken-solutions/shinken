@@ -70,17 +70,17 @@ class Service(SchedulingItem):
     properties = SchedulingItem.properties.copy()
     properties.update({
         'host_name':              StringProp(fill_brok=['full_status', 'check_result', 'next_schedule']),
-        'hostgroup_name':         StringProp(default = '', fill_brok=['full_status']),
-        'service_description':    StringProp(fill_brok= ['full_status', 'check_result', 'next_schedule']),
+        'hostgroup_name':         StringProp(default='', fill_brok=['full_status']),
+        'service_description':    StringProp(fill_brok=['full_status', 'check_result', 'next_schedule']),
         'display_name':           StringProp(default='', fill_brok=['full_status']),
         'servicegroups':          StringProp(default='', fill_brok=['full_status'], brok_transformation=to_list_string_of_names),
         'is_volatile':            BoolProp(default='0', fill_brok=['full_status']),
-        'check_command':          StringProp(fill_brok = ['full_status']),
+        'check_command':          StringProp(fill_brok=['full_status']),
         'initial_state':          CharProp(default='o', fill_brok=['full_status']),
         'max_check_attempts':     IntegerProp(fill_brok=['full_status']),
         'check_interval':         IntegerProp(fill_brok=['full_status']),
         'retry_interval':         IntegerProp(fill_brok=['full_status']),
-        'active_checks_enabled':  BoolProp(default='1', fill_brok= ['full_status'], retention=True),
+        'active_checks_enabled':  BoolProp(default='1', fill_brok=['full_status'], retention=True),
         'passive_checks_enabled': BoolProp(default='1', fill_brok=['full_status'], retention=True),
         'check_period':           StringProp(brok_transformation=to_name_if_possible, fill_brok=['full_status']),
         'obsess_over_service':    BoolProp(default='0', fill_brok=['full_status'], retention=True),
@@ -88,7 +88,7 @@ class Service(SchedulingItem):
         'freshness_threshold':    IntegerProp(default='0', fill_brok=['full_status']),
         'event_handler':          StringProp(default='', fill_brok=['full_status']),
         'event_handler_enabled':  BoolProp(default='0', fill_brok=['full_status'], retention=True),
-        'low_flap_threshold':     IntegerProp(default='-1', fill_brok= ['full_status']),
+        'low_flap_threshold':     IntegerProp(default='-1', fill_brok=['full_status']),
         'high_flap_threshold':    IntegerProp(default='-1', fill_brok=['full_status']),
         'flap_detection_enabled': BoolProp(default='1', fill_brok=['full_status'], retention=True),
         'flap_detection_options': ListProp(default='o,w,c,u', fill_brok=['full_status']),
@@ -153,8 +153,8 @@ class Service(SchedulingItem):
         'last_hard_state':    StringProp(default='PENDING', fill_brok=['full_status'], retention=True),
         'last_hard_state_id': IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         'last_time_ok':       IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
-        'last_time_warning':  IntegerProp(default=0, fill_brok = ['full_status', 'check_result'], retention=True),
-        'last_time_critical': IntegerProp(default=0, fill_brok =['full_status', 'check_result'], retention=True),
+        'last_time_warning':  IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
+        'last_time_critical': IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'last_time_unknown':  IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'duration_sec':       IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         'state_type':         StringProp(default='HARD', fill_brok=['full_status', 'check_result'], retention=True),
@@ -501,7 +501,7 @@ class Service(SchedulingItem):
             entry = host.customs[prop]
             # Look at the list of the key we do NOT want maybe,
             # for _disks it will be _!disks
-            not_entry = host.customs.get('_'+'!'+prop[1:], '').split(',')
+            not_entry = host.customs.get('_' + '!' + prop[1:], '').split(',')
             not_keys = strip_and_uniq(not_entry)
 
             default_value = getattr(self, 'default_value', '')
@@ -525,11 +525,11 @@ class Service(SchedulingItem):
                             if hasattr(self, 'service_description'):
                                 # We want to change all illegal chars to a _ sign. We can't use class.illegal_obj_char
                                 # because in the "explode" phase, we do not have access to this data! :(
-                                safe_key_value = re.sub(r'['+"`~!$%^&*\"|'<>?,()="+']+', '_', key_value[key])
-                                new_s.service_description = self.service_description.replace('$'+key+'$', safe_key_value)
+                                safe_key_value = re.sub(r'[' + "`~!$%^&*\"|'<>?,()=" + ']+', '_', key_value[key])
+                                new_s.service_description = self.service_description.replace('$' + key + '$', safe_key_value)
                         if hasattr(self, 'check_command'):
                             # here we can replace VALUE, VALUE1, VALUE2,...
-                            new_s.check_command = new_s.check_command.replace('$'+key+'$', key_value[key])
+                            new_s.check_command = new_s.check_command.replace('$' + key + '$', key_value[key])
                     # And then add in our list this new service
                     duplicates.append(new_s)
             else:

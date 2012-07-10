@@ -120,7 +120,7 @@ def get_custom(obj_ref, cname, default=None):
         return default
     cname = cname.upper().strip()
     if not cname.startswith('_'):
-        cname = '_'+cname
+        cname = '_' + cname
     return obj.customs.get(cname, default)
 
 
