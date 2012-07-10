@@ -47,17 +47,17 @@ class Downtime:
     # Just to list the properties we will send as pickle
     # so to others daemons, so all but NOT REF
     properties = {
-        'activate_me':  StringProp (default=[]),
+        'activate_me':  StringProp(default=[]),
         'entry_time':   IntegerProp(default=0,  fill_brok=['full_status']),
-        'fixed':        BoolProp   (default=True,  fill_brok=['full_status']),
+        'fixed':        BoolProp(default=True,  fill_brok=['full_status']),
         'start_time':   IntegerProp(default=0,  fill_brok=['full_status']),
         'duration':     IntegerProp(default=0,  fill_brok=['full_status']),
         'trigger_id':   IntegerProp(default=0),
         'end_time':     IntegerProp(default=0,  fill_brok=['full_status']),
         'real_end_time': IntegerProp(default=0),
-        'author':       StringProp (default='',  fill_brok=['full_status']),
-        'comment':      StringProp (default=''),
-        'is_in_effect': BoolProp   (default=False),
+        'author':       StringProp(default='',  fill_brok=['full_status']),
+        'comment':      StringProp(default=''),
+        'is_in_effect': BoolProp(default=False),
         'has_been_triggered': BoolProp(default=False),
         'can_be_deleted': BoolProp(default=False),
 

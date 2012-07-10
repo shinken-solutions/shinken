@@ -40,8 +40,8 @@ class Contactgroup(Itemgroup):
     properties = Itemgroup.properties.copy()
     properties.update({
         'id':                   IntegerProp(default=0, fill_brok=['full_status']),
-        'contactgroup_name':    StringProp (fill_brok=['full_status']),
-        'alias':                StringProp (fill_brok=['full_status']),
+        'contactgroup_name':    StringProp(fill_brok=['full_status']),
+        'alias':                StringProp(fill_brok=['full_status']),
     })
 
     macros = {

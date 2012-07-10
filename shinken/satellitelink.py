@@ -59,14 +59,14 @@ class SatelliteLink(Item):
         'data_timeout':    IntegerProp(default='120', fill_brok=['full_status']),
         'check_interval':  IntegerProp(default='60', fill_brok=['full_status']),
         'max_check_attempts': IntegerProp(default='3', fill_brok=['full_status']),
-        'spare':              BoolProp   (default='0', fill_brok=['full_status']),
-        'manage_sub_realms':  BoolProp   (default='1', fill_brok=['full_status']),
-        'manage_arbiters':    BoolProp   (default='0', fill_brok=['full_status'], to_send=True),
-        'modules':            ListProp   (default='', to_send=True),
+        'spare':              BoolProp(default='0', fill_brok=['full_status']),
+        'manage_sub_realms':  BoolProp(default='1', fill_brok=['full_status']),
+        'manage_arbiters':    BoolProp(default='0', fill_brok=['full_status'], to_send=True),
+        'modules':            ListProp(default='', to_send=True),
         'polling_interval':   IntegerProp(default='1', fill_brok=['full_status'], to_send=True),
-        'use_timezone':       StringProp (default='NOTSET', to_send=True),
-        'realm':              StringProp (default='', fill_brok=['full_status'], brok_transformation=get_obj_name_two_args_and_void),
-        'satellitemap':       DictProp   (default=None, elts_prop=AddrProp, to_send=True, override=True),
+        'use_timezone':       StringProp(default='NOTSET', to_send=True),
+        'realm':              StringProp(default='', fill_brok=['full_status'], brok_transformation=get_obj_name_two_args_and_void),
+        'satellitemap':       DictProp(default=None, elts_prop=AddrProp, to_send=True, override=True),
     })
 
     running_properties = Item.running_properties.copy()

@@ -42,9 +42,9 @@ class Itemgroup(Item):
 
     properties = Item.properties.copy()
     properties.update({
-        'members':              StringProp (fill_brok=['full_status']),
+        'members':              StringProp(fill_brok=['full_status']),
         # Shinken specific
-        'unknown_members':      StringProp (default=[]),
+        'unknown_members':      StringProp(default=[]),
     })
 
     def __init__(self, params={}):

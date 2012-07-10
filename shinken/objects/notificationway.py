@@ -41,15 +41,15 @@ class NotificationWay(Item):
 
     properties = Item.properties.copy()
     properties.update({
-        'notificationway_name':          StringProp (fill_brok=['full_status']),
-        'host_notifications_enabled':    BoolProp   (default='1', fill_brok=['full_status']),
-        'service_notifications_enabled': BoolProp   (default='1', fill_brok=['full_status']),
-        'host_notification_period':      StringProp (fill_brok=['full_status']),
-        'service_notification_period':   StringProp (fill_brok=['full_status']),
-        'host_notification_options':     ListProp   (fill_brok=['full_status']),
-        'service_notification_options':  ListProp   (fill_brok=['full_status']),
-        'host_notification_commands':    StringProp (fill_brok=['full_status']),
-        'service_notification_commands': StringProp (fill_brok=['full_status']),
+        'notificationway_name':          StringProp(fill_brok=['full_status']),
+        'host_notifications_enabled':    BoolProp(default='1', fill_brok=['full_status']),
+        'service_notifications_enabled': BoolProp(default='1', fill_brok=['full_status']),
+        'host_notification_period':      StringProp(fill_brok=['full_status']),
+        'service_notification_period':   StringProp(fill_brok=['full_status']),
+        'host_notification_options':     ListProp(fill_brok=['full_status']),
+        'service_notification_options':  ListProp(fill_brok=['full_status']),
+        'host_notification_commands':    StringProp(fill_brok=['full_status']),
+        'service_notification_commands': StringProp(fill_brok=['full_status']),
         'min_business_impact':           IntegerProp(default = '0', fill_brok=['full_status']),
     })
 

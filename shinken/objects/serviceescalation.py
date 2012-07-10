@@ -36,16 +36,16 @@ class Serviceescalation(Item):
 
     properties = Item.properties.copy()
     properties.update({
-        'host_name':             StringProp (),
-        'hostgroup_name':        StringProp (),
-        'service_description':   StringProp (),
+        'host_name':             StringProp(),
+        'hostgroup_name':        StringProp(),
+        'service_description':   StringProp(),
         'first_notification':    IntegerProp(),
         'last_notification':     IntegerProp(),
         'notification_interval': IntegerProp('30'), # like Nagios value
-        'escalation_period':     StringProp (default=''),
-        'escalation_options':    ListProp   (default='d,u,r,w,c'),
-        'contacts':              StringProp (),
-        'contact_groups':        StringProp (),
+        'escalation_period':     StringProp(default=''),
+        'escalation_options':    ListProp(default='d,u,r,w,c'),
+        'contacts':              StringProp(),
+        'contact_groups':        StringProp(),
     })
 
 

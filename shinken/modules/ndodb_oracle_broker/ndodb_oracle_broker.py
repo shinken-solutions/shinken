@@ -89,7 +89,7 @@ class Ndodb_Oracle_broker(BaseModule):
     def get_host_object_id_by_name(self, host_name):
         query = "SELECT id from objects where name1='%s' and objecttype_id='1'" % host_name
         self.db.execute_query(query)
-        row = self.db.fetchone ()
+        row = self.db.fetchone()
         if row is None or len(row) < 1:
             return 0
         else:
@@ -99,7 +99,7 @@ class Ndodb_Oracle_broker(BaseModule):
     def get_hostgroup_object_id_by_name(self, hostgroup_name):
         query = "SELECT id from objects where name1='%s' and objecttype_id='3'" % hostgroup_name
         self.db.execute_query(query)
-        row = self.db.fetchone ()
+        row = self.db.fetchone()
         if row is None or len(row) < 1:
             return 0
         else:
@@ -109,7 +109,7 @@ class Ndodb_Oracle_broker(BaseModule):
     def get_service_object_id_by_name(self, host_name, service_description):
         query = "SELECT id from objects where name1='%s' and name2='%s' and objecttype_id='2'" % (host_name, service_description)
         self.db.execute_query(query)
-        row = self.db.fetchone ()
+        row = self.db.fetchone()
         if row is None or len(row) < 1:
             return 0
         else:
@@ -119,7 +119,7 @@ class Ndodb_Oracle_broker(BaseModule):
     def get_servicegroup_object_id_by_name(self, servicegroup_name):
         query = "SELECT id from objects where name1='%s' and objecttype_id='4'" % servicegroup_name
         self.db.execute_query(query)
-        row = self.db.fetchone ()
+        row = self.db.fetchone()
         if row is None or len(row) < 1:
             return 0
         else:

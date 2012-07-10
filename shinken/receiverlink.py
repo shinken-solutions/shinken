@@ -35,10 +35,10 @@ class ReceiverLink(SatelliteLink):
     my_type = 'receiver'
     properties = SatelliteLink.properties.copy()
     properties.update({
-        'receiver_name':        StringProp (fill_brok=['full_status'], to_send=True),
+        'receiver_name':      StringProp(fill_brok=['full_status'], to_send=True),
         'port':               IntegerProp(default='7772', fill_brok=['full_status']),
-        'manage_sub_realms':  BoolProp   (default='1', fill_brok=['full_status']),
-        'manage_arbiters':    BoolProp   (default='0', fill_brok=['full_status'], to_send=True),
+        'manage_sub_realms':  BoolProp(default='1', fill_brok=['full_status']),
+        'manage_arbiters':    BoolProp(default='0', fill_brok=['full_status'], to_send=True),
     })
 
     def get_name(self):

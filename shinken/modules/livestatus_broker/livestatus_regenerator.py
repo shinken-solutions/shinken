@@ -143,9 +143,9 @@ class LiveStatusRegenerator(Regenerator):
             [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.services.items.iteritems() for c in v.contacts]
         else:
             # 1. every host contact automatically becomes a service contact
-            [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.services.items.iteritems () for c in v.host.contacts]
+            [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.services.items.iteritems() for c in v.host.contacts]
             # 2. explicit service contacts
-            [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.services.items.iteritems () for c in v.contacts]
+            [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.services.items.iteritems() for c in v.contacts]
         # services without contacts inherit the host's contacts (no matter of strict or loose)
         [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.services.items.iteritems() if not v.contacts for c in v.host.contacts]
         for c in self.services._id_contact_heap.keys():

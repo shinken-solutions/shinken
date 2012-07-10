@@ -42,10 +42,10 @@ class Realm(Itemgroup):
     properties = Itemgroup.properties.copy()
     properties.update({
         'id':            IntegerProp(default=0, fill_brok=['full_status']),
-        'realm_name':    StringProp (fill_brok=['full_status']),
-        'realm_members': StringProp (default=''), # No status_broker_name because it put hosts, not host_name
-        'higher_realms': StringProp (default=''),
-        'default':       BoolProp   (default='0'),
+        'realm_name':    StringProp(fill_brok=['full_status']),
+        'realm_members': StringProp(default=''), # No status_broker_name because it put hosts, not host_name
+        'higher_realms': StringProp(default=''),
+        'default':       BoolProp(default='0'),
         #'alias': {'required':  True, 'fill_brok': ['full_status']},
         #'notes': {'required': False, 'default':'', 'fill_brok': ['full_status']},
         #'notes_url': {'required': False, 'default':'', 'fill_brok': ['full_status']},
@@ -54,7 +54,7 @@ class Realm(Itemgroup):
 
     running_properties = Item.running_properties.copy()
     running_properties.update({
-            'serialized_confs':     StringProp (default={}),
+            'serialized_confs':     StringProp(default={}),
         })
 
 

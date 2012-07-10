@@ -35,15 +35,15 @@ class Hostescalation(Item):
 
     properties = Item.properties.copy()
     properties.update({
-        'host_name':             StringProp (),
-        'hostgroup_name':        StringProp (),
+        'host_name':             StringProp(),
+        'hostgroup_name':        StringProp(),
         'first_notification':    IntegerProp(),
         'last_notification':     IntegerProp(),
         'notification_interval': IntegerProp(default='30'), # like Nagios value
-        'escalation_period':     StringProp (default=''),
-        'escalation_options':    ListProp   (default='d,u,r,w,c'),
-        'contacts':              StringProp (),
-        'contact_groups':        StringProp (),
+        'escalation_period':     StringProp(default=''),
+        'escalation_options':    ListProp(default='d,u,r,w,c'),
+        'contacts':              StringProp(),
+        'contact_groups':        StringProp(),
     })
 
     # For debugging purpose only (nice name)

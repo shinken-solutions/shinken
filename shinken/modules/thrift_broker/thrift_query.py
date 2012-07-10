@@ -194,7 +194,7 @@ class ThriftQuery(Hooker):
     def split_option(self, line, splits=1):
         """Like split_commands, but converts numbers to int data type"""
         #x = [int(i) if i.isdigit() else i for i in [token.strip() for token in re.split(r"[\s]+", line, splits)]]
-        x = map (lambda i: (i.isdigit() and int(i)) or i, [token.strip() for token in re.split(r"[\s]+", line, splits)])
+        x = map(lambda i: (i.isdigit() and int(i)) or i, [token.strip() for token in re.split(r"[\s]+", line, splits)])
         return x
 
 

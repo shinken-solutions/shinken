@@ -107,7 +107,7 @@ class Host(SchedulingItem):
         'action_url':           StringProp(default='', fill_brok=['full_status']),
         'icon_image':           StringProp(default='', fill_brok=['full_status']),
         'icon_image_alt':       StringProp(default='', fill_brok=['full_status']),
-        'icon_set':             StringProp (default='', fill_brok=['full_status']),
+        'icon_set':             StringProp(default='', fill_brok=['full_status']),
         'vrml_image':           StringProp(default='', fill_brok=['full_status']),
         'statusmap_image':      StringProp(default='', fill_brok=['full_status']),
 
@@ -122,18 +122,18 @@ class Host(SchedulingItem):
         # a string from conf_send_preparation
         'realm':                StringProp(default=None, fill_brok=['full_status'], conf_send_preparation=get_obj_name),
         'poller_tag':           StringProp(default='None'),
-        'reactionner_tag':           StringProp(default='None'),
+        'reactionner_tag':      StringProp(default='None'),
         'resultmodulations':    StringProp(default=''),
         'business_impact_modulations': StringProp(default=''),
         'escalations':          StringProp(default='', fill_brok=['full_status']),
         'maintenance_period':   StringProp(default='', brok_transformation=to_name_if_possible, fill_brok=['full_status']),
 
         # Business impact value
-        'business_impact':            IntegerProp(default='2', fill_brok=['full_status']),
+        'business_impact':      IntegerProp(default='2', fill_brok=['full_status']),
 
         # Load some triggers
         'trigger':         StringProp(default=''),
-        'trigger_name':         ListProp   (default=''),
+        'trigger_name':    ListProp(default=''),
 
     })
 

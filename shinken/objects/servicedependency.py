@@ -51,11 +51,11 @@ class Servicedependency(Item):
         'host_name':                     StringProp(),
         'hostgroup_name':                StringProp(default=''),
         'service_description':           StringProp(),
-        'inherits_parent':               BoolProp  (default='0'),
-        'execution_failure_criteria':    ListProp  (default='n'),
-        'notification_failure_criteria': ListProp  (default='n'),
+        'inherits_parent':               BoolProp(default='0'),
+        'execution_failure_criteria':    ListProp(default='n'),
+        'notification_failure_criteria': ListProp(default='n'),
         'dependency_period':             StringProp(default=''),
-    'explode_hostgroup':         BoolProp  (default='0')
+        'explode_hostgroup':             BoolProp(default='0')
     })
 
 

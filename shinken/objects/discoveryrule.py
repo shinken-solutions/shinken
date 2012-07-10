@@ -40,8 +40,8 @@ class Discoveryrule(MatchingItem):
 
     properties = Item.properties.copy()
     properties.update({
-        'discoveryrule_name':    StringProp (),
-        'creation_type':         StringProp (default='service'),
+        'discoveryrule_name':    StringProp(),
+        'creation_type':         StringProp(default='service'),
         'discoveryrule_order':   IntegerProp(default='0'),
         ## 'check_command':         StringProp (),
         ## 'service_description':   StringProp (),

@@ -76,7 +76,7 @@ class MySQL_importer_arbiter(BaseModule):
     def init(self):
         print "[MySQL Importer Module]: Try to open a MySQL connection to %s" % self.host
         try:
-            self.conn = MySQLdb.connect (host = self.host,
+            self.conn = MySQLdb.connect(host = self.host,
                         user = self.login,
                         passwd = self.password,
                         db = self.database)
@@ -95,7 +95,7 @@ class MySQL_importer_arbiter(BaseModule):
         # Create variables for result
         r = {}
 
-        cursor = self.conn.cursor (MySQLdb.cursors.DictCursor)
+        cursor = self.conn.cursor(MySQLdb.cursors.DictCursor)
 
         # For all parameters
         for k, v in self.reqlist.iteritems():
@@ -106,8 +106,8 @@ class MySQL_importer_arbiter(BaseModule):
                 print "[MySQL Importer Module]: getting %s configuration from database" % (k)
 
                 try:
-                    cursor.execute (v)
-                    result_set = cursor.fetchall ()
+                    cursor.execute(v)
+                    result_set = cursor.fetchall()
                 except MySQLdb.Error, e:
                     print "MySQL Module: Error %d: %s" % (e.args[0], e.args[1])
 
@@ -119,8 +119,8 @@ class MySQL_importer_arbiter(BaseModule):
                             h[column]= row[column]
                     r[k].append(h)
 
-        cursor.close ()
-        self.conn.close ()
+        cursor.close()
+        self.conn.close()
         del self.conn
 
         print "[MySQL Importer Module]: Returning to Arbiter the object:", r
