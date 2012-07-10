@@ -291,13 +291,13 @@ class Timeperiod(Item):
                         #t = local_min + 60
                         #print self.get_name(), "TP pas content:", tp.get_name(), time.asctime(time.localtime(local_min))
                         local_min = tp.get_next_invalid_time_from_t(local_min+60)
-                        #if local_min != None:
-                        #    print "Exclude TP proposed new local min", time.asctime(time.localtime(local_min))
-                        #    print local_min
-                            #print "Is it really a invalid date?", tp.is_time_valid(local_min), "if true FUCK"
-                        #print self.get_name(), "Apres content:", tp.get_name(), time.asctime(time.localtime(local_min))
-                    #else:
-                    #    print self.get_name(), "Tp ca lui va", tp.get_name()
+                        ## if local_min != None:
+                        ##     print "Exclude TP proposed new local min", time.asctime(time.localtime(local_min))
+                        ##     print local_min
+                        ## print "Is it really a invalid date?", tp.is_time_valid(local_min), "if true FUCK"
+                        ## print self.get_name(), "Apres content:", tp.get_name(), time.asctime(time.localtime(local_min))
+                    ## else:
+                    ##     print self.get_name(), "Tp ca lui va", tp.get_name()
 
             if local_min is None:
                 still_loop = False
@@ -347,17 +347,17 @@ class Timeperiod(Item):
                 #print self.get_name(), "Dr", dr.__dict__,  "give me next invalid", time.asctime(time.localtime(m))
                 if m is not None:
                     # But maybe it's invalid for this dr, but valid for other ones.
-                    #if not self.is_time_valid(m):
-                        #print "Final: Got a next invalid at", time.asctime(time.localtime(m))
+                    ## if not self.is_time_valid(m):
+                    ##     print "Final: Got a next invalid at", time.asctime(time.localtime(m))
                     dr_mins.append(m)
                     #if not self.is_time_valid(m):
                     #    val_inval.append(m)
                     #else:
                     #    val_valids.append(m)
-                        #print "Add a m", time.asctime(time.localtime(m))
-#                    else:
-#                        print dr.__dict__
-#                        print "FUCK bad result\n\n\n"
+                    #    print "Add a m", time.asctime(time.localtime(m))
+                    #else:
+                    #     print dr.__dict__
+                    #     print "FUCK bad result\n\n\n"
             #print "Inval"
             #for v in val_inval:
             #    print "\t", time.asctime(time.localtime(v))
@@ -674,7 +674,7 @@ class Timeperiod(Item):
         # Now config properties
         for prop, entry in cls.properties.items():
             # Is this property intended for brokking?
-#            if 'fill_brok' in entry:
+            #if 'fill_brok' in entry:
             if brok_type in entry.fill_brok:
                 if hasattr(self, prop):
                     data[prop] = getattr(self, prop)

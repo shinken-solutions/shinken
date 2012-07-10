@@ -291,8 +291,8 @@ class DataManager(object):
     # Return a tree of {'elt': Host, 'fathers': [{}, {}]}
     def get_business_parents(self, obj, levels=3):
         res = {'node': obj, 'fathers': []}
-#        if levels == 0:
-#            return res
+        ## if levels == 0:
+        ##     return res
 
         for i in obj.parent_dependencies:
             # We want to get the levels deep for all elements, but

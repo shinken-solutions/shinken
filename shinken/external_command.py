@@ -796,9 +796,9 @@ class ExternalCommandManager:
     # DISABLE_CONTACT_SVC_NOTIFICATIONS;<contact_name>
     def DISABLE_CONTACT_SVC_NOTIFICATIONS(self, contact):
         if contact.service_notifications_enabled:
-             contact.modified_attributes |= MODATTR_NOTIFICATIONS_ENABLED
-             contact.service_notifications_enabled = False
-             self.sched.get_and_register_status_brok(contact)
+            contact.modified_attributes |= MODATTR_NOTIFICATIONS_ENABLED
+            contact.service_notifications_enabled = False
+            self.sched.get_and_register_status_brok(contact)
 
     # DISABLE_EVENT_HANDLERS
     def DISABLE_EVENT_HANDLERS(self):

@@ -1169,7 +1169,7 @@ ResponseHeader: fixed16"""
 
         request = """GET services\nColumns: comments host_comments host_is_executing is_executing\nFilter: service_description !=\nResponseHeader: fixed16\n"""
         response, _ = self.livestatus_broker.livestatus.handle_request(request)
-#        print response
+        #print response
         good_response = """200           9
 """ + svc_comment_list.replace(" ", "") + """;;0;0
 """
@@ -1355,9 +1355,9 @@ Columns: time state state_type host_name service_description current_host_groups
         time.sleep(1)
         self.scheduler_loop(3, [[host, 0, 'UUP'], [router, 0, 'UP'], [svc, 0, 'OK']], do_sleep=False)
         self.update_broker()
-#        time.sleep(1)
-#        self.scheduler_loop(3, [[host, 0, 'UP'], [router, 2, 'DOWN'], [svc, 0, 'OK']], do_sleep=False)
-#        self.update_broker()
+        ## time.sleep(1)
+        ## self.scheduler_loop(3, [[host, 0, 'UP'], [router, 2, 'DOWN'], [svc, 0, 'OK']], do_sleep=False)
+        ## self.update_broker()
         end = time.time()
 
         # show history for service
@@ -1423,9 +1423,9 @@ And: 2"""
         time.sleep(1)
         self.scheduler_loop(3, [[host, 0, 'UUP'], [router, 0, 'UP'], [svc, 0, 'OK']], do_sleep=False)
         self.update_broker()
-#        time.sleep(1)
-#        self.scheduler_loop(3, [[host, 0, 'UP'], [router, 2, 'DOWN'], [svc, 0, 'OK']], do_sleep=False)
-#        self.update_broker()
+        ## time.sleep(1)
+        ## self.scheduler_loop(3, [[host, 0, 'UP'], [router, 2, 'DOWN'], [svc, 0, 'OK']], do_sleep=False)
+        ## self.update_broker()
         end = time.time()
 
         # show history for service
@@ -1494,9 +1494,9 @@ And: 2"""
         time.sleep(1)
         self.scheduler_loop(3, [[host, 0, 'UUP'], [router, 0, 'UP'], [svc, 0, 'OK']], do_sleep=False)
         self.update_broker()
-#        time.sleep(1)
-#        self.scheduler_loop(3, [[host, 0, 'UP'], [router, 2, 'DOWN'], [svc, 0, 'OK']], do_sleep=False)
-#        self.update_broker()
+        ## time.sleep(1)
+        ## self.scheduler_loop(3, [[host, 0, 'UP'], [router, 2, 'DOWN'], [svc, 0, 'OK']], do_sleep=False)
+        ## self.update_broker()
         end = time.time()
 
         # show history for service
@@ -3153,8 +3153,8 @@ OutputFormat: csv
         #for s in self.livestatus_broker.rg.services:
         #    print s.get_full_name()
         if hasattr(self.livestatus_broker.rg.services, "__iter__") and hasattr(self.livestatus_broker.rg.services, "itersorted"):
-                print "ris__iter__", self.livestatus_broker.rg.services.__iter__
-                print "ris__itersorted__", self.livestatus_broker.rg.services.itersorted
+            print "ris__iter__", self.livestatus_broker.rg.services.__iter__
+            print "ris__itersorted__", self.livestatus_broker.rg.services.itersorted
         i = 0
         while i < 10:
             print self.livestatus_broker.rg.services._id_heap[i]

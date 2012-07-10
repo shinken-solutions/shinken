@@ -43,9 +43,9 @@ class Discoveryrule(MatchingItem):
         'discoveryrule_name':    StringProp (),
         'creation_type':         StringProp (default='service'),
         'discoveryrule_order':   IntegerProp(default='0'),
-#        'check_command':         StringProp (),
-#        'service_description':   StringProp (),
-#        'use':                   StringProp(),
+        ## 'check_command':         StringProp (),
+        ## 'service_description':   StringProp (),
+        ## 'use':                   StringProp(),
     })
 
     running_properties = {

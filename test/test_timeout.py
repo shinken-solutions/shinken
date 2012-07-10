@@ -47,7 +47,7 @@ class TestTimeout(ShinkenTest):
 
         # These queues connect a poller/reactionner with a worker
         to_queue = Queue()
-#        manager = Manager()
+        #manager = Manager()
         from_queue = Queue() #manager.list()
         control_queue = Queue()
 

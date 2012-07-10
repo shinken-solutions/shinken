@@ -149,5 +149,5 @@ class HostsExtInfo(Items):
         properties = ['notes', 'notes_url', 'icon_image', 'icon_image_alt', 'vrml_image', 'statusmap_image']
         # host properties have precedence over hostextinfo properties
         for p in properties:
-           if getattr(host, p) == '' and getattr(extinfo, p) != '':
+            if getattr(host, p) == '' and getattr(extinfo, p) != '':
                 setattr(host, p, getattr(extinfo, p))

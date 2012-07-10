@@ -147,5 +147,5 @@ class ServicesExtInfo(Items):
         properties = ['notes', 'notes_url', 'icon_image', 'icon_image_alt']
         # service properties have precedence over serviceextinfo properties
         for p in properties:
-           if getattr(service, p) == '' and getattr(extinfo, p) != '':
+            if getattr(service, p) == '' and getattr(extinfo, p) != '':
                 setattr(service, p, getattr(extinfo, p))

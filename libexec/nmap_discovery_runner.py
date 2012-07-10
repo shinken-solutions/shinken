@@ -407,9 +407,9 @@ for h in all_hosts:
     #c.fill_system_conf()
     #c.fill_ports_services()
     #c.fill_system_services()
-#    c.write_host_configuration()
+    #c.write_host_configuration()
     #print "Host config", c.get_cfg_for_host()
-#    c.write_services_configuration()
+    #c.write_services_configuration()
     #print "Service config"
     #print c.get_cfg_for_services()
     #print c.__dict__

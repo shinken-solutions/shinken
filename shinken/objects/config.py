@@ -278,7 +278,7 @@ class Config(Item):
         'webui_port':    IntegerProp(default='8080'),
         'webui_host':    StringProp(default='0.0.0.0'),
 
-   }
+    }
 
     macros = {
         'PREFIX':               'prefix',
@@ -297,7 +297,7 @@ class Config(Item):
         'SERVICEPERFDATAFILE':  '',
         'ADMINEMAIL':           '',
         'ADMINPAGER':           ''
-        #'USERn': '$USERn$' # Add at run time
+    #'USERn': '$USERn$' # Add at run time
     }
 
     # We create dict of objects
@@ -409,7 +409,7 @@ class Config(Item):
             res.write(os.linesep)
             res.write('# IMPORTEDFROM=%s' % (file) + os.linesep)
             if self.read_config_silent == 0:
-               logger.debug("[config] opening '%s' configuration file" % file)
+                logger.debug("[config] opening '%s' configuration file" % file)
             try:
                 # Open in Universal way for Windows, Mac, Linux
                 fd = open(file, 'rU')
@@ -449,7 +449,7 @@ class Config(Item):
                         fd.close()
                     except IOError, exp:
                         logger.error("Cannot open config file '%s' for reading: %s" % (cfg_file_name, exp))
-                    # The configuration is invalid because we have a bad file!
+                        # The configuration is invalid because we have a bad file!
                         self.conf_is_correct = False
                 elif re.search("^cfg_dir", line):
                     elts = line.split('=', 1)
@@ -773,7 +773,7 @@ class Config(Item):
 
         #print "Schedulers and satellites"
         # Link all links with realms
-#        self.arbiters.linkify(self.modules)
+        #self.arbiters.linkify(self.modules)
         self.schedulers.linkify(self.realms, self.modules)
         self.brokers.linkify(self.realms, self.modules)
         self.receivers.linkify(self.realms, self.modules)
@@ -1299,7 +1299,7 @@ class Config(Item):
         self.services.create_reversed_list()
         self.servicegroups.create_reversed_list()
         self.timeperiods.create_reversed_list()
-#        self.modules.create_reversed_list()
+        #self.modules.create_reversed_list()
         self.resultmodulations.create_reversed_list()
         self.businessimpactmodulations.create_reversed_list()
         self.escalations.create_reversed_list()

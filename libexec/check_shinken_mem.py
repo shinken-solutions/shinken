@@ -39,7 +39,7 @@ def MemValues():
         if line.split()[0] == 'MemFree:':
             memFree = line.split()[1]
         if line.split()[0] == 'Cached:':
-             memCached = line.split()[1]
+            memCached = line.split()[1]
 
 def percentMem():
     MemValues()
@@ -67,8 +67,8 @@ def main():
             notification = a
         elif o in ("-c", "--critical"):
             notification = a
-	else:
-	    assert False, "unknown options"
+        else:
+            assert False, "unknown options"
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-w', '--warning', default = '80')
@@ -83,14 +83,14 @@ def main():
     pmemUsage = str(pmemUsage)
 
     if pmemUsage >= cmem:
-       print 'CRITICAL - Memory usage : '+pmemUsage+'% |mem='+pmemUsage
-       sys.exit(2)
+        print 'CRITICAL - Memory usage : '+pmemUsage+'% |mem='+pmemUsage
+        sys.exit(2)
     elif pmemUsage >= wmem:
-       print 'WARNING - Memory usage : '+pmemUsage+'% |mem='+pmemUsage
-       sys.exit(1)
+        print 'WARNING - Memory usage : '+pmemUsage+'% |mem='+pmemUsage
+        sys.exit(1)
     else:
-       print 'OK - Memory usage : '+pmemUsage+'% |mem='+pmemUsage
-       sys.exit(0)
+        print 'OK - Memory usage : '+pmemUsage+'% |mem='+pmemUsage
+        sys.exit(0)
 
 if __name__ == "__main__":
     main()

@@ -889,9 +889,9 @@ class Regenerator(object):
 
 ################# Status Update part
 
-    # A scheduler send us a "I'm alive" brok. If we never
-    # heard about this one, we got some problem and we
-    # ask him some initial data :)
+# A scheduler send us a "I'm alive" brok. If we never
+# heard about this one, we got some problem and we
+# ask him some initial data :)
     def manage_update_program_status_brok(self, b):
         data = b.data
         c_id = data['instance_id']

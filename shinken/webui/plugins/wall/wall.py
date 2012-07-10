@@ -101,16 +101,16 @@ def get_page():
 
 
     impacts = all_imp_impacts
-#    for imp in all_imp_impacts:
-#        safe_print("FIND A BAD SERVICE IN IMPACTS", imp.get_dbg_name())
-#        d = {'name': imp.get_full_name().encode('utf8', 'ignore'),
-#             "title": "My Image 3", "thumb": "/static/images/state_flapping.png", "zoom": "/static/images/state_flapping.png",
-#             "html": get_div(imp)}
-#        impacts.append(d)
+    ## for imp in all_imp_impacts:
+    ##     safe_print("FIND A BAD SERVICE IN IMPACTS", imp.get_dbg_name())
+    ##     d = {'name': imp.get_full_name().encode('utf8', 'ignore'),
+    ##          "title": "My Image 3", "thumb": "/static/images/state_flapping.png", "zoom": "/static/images/state_flapping.png",
+    ##          "html": get_div(imp)}
+    ##     impacts.append(d)
 
     # Got in json format
     #j_impacts = json.dumps(impacts)
-#    print "Return impact in json", j_impacts
+    #print "Return impact in json", j_impacts
     all_pbs = app.datamgr.get_all_problems()
     now = time.time()
     # Get only the last 10min errors

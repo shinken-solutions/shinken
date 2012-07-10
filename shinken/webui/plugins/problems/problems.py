@@ -215,9 +215,9 @@ def get_view(page):
     navi = app.helper.get_navi(total, start, step=30)
     items = items[start:end]
 
-#    print "get all problems:", pbs
-#    for pb in pbs:
-#        print pb.get_name()
+    ## print "get all problems:", pbs
+    ## for pb in pbs:
+    ##     print pb.get_name()
     print 'Give filters', filters
     return {'app': app, 'pbs': items, 'user': user, 'navi': navi, 'search': search_str, 'page': page, 'filters': filters, 'bookmarks': bookmarks}
 

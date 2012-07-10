@@ -132,8 +132,8 @@ class Nagios_retention_scheduler(BaseModule):
                 # Get new type
                 elts = re.split('\s', line)
                 tmp_type = elts[0]
-#                tmp_type = tmp_type.split('{')[0]
-#                print "TMP type", tmp_type
+                #tmp_type = tmp_type.split('{')[0]
+                #print "TMP type", tmp_type
             else:
                 if in_define:
                     tmp.append(line)
@@ -143,7 +143,7 @@ class Nagios_retention_scheduler(BaseModule):
         objectscfg[tmp_type].append(tmp)
         objects = {}
 
-#        print "Loaded", objectscfg
+        #print "Loaded", objectscfg
 
         for type in objectscfg:
             objects[type] = []
@@ -174,10 +174,10 @@ class Nagios_retention_scheduler(BaseModule):
         running_properties = cls.running_properties
         for prop, entry in running_properties.items():
             if hasattr(obj, prop) and prop in obj_cfg:
-#                if 'pythonize' in entry:
+                #if 'pythonize' in entry:
                 f = entry.pythonize
                 if f is not None: # mean it's a string
-                        #print "Apply", f, "to the property", prop, "for ", cls.my_type
+                    #print "Apply", f, "to the property", prop, "for ", cls.my_type
                     val = getattr(obj, prop)
                     val = f(val)
                     setattr(obj, prop, val)
@@ -233,34 +233,34 @@ class Nagios_retention_scheduler(BaseModule):
 
 
     def create_and_link_comments(self, raw_objects, all_obj):
-    # first service
+        # first service
         for obj_cfg in raw_objects['servicecomment']:
-        #print "Managing", obj_cfg
+            #print "Managing", obj_cfg
             host_name = obj_cfg['host_name']
             service_description = obj_cfg['service_description']
             srv = all_obj['service'].find_srv_by_name_and_hostname(host_name, service_description)
-        #print "Find my service", srv
+            #print "Find my service", srv
             if srv is not None:
                 cmd = Comment(srv, to_bool(obj_cfg['persistent']), obj_cfg['author'], obj_cfg['comment_data'], 1, int(obj_cfg['entry_type']), int(obj_cfg['source']), to_bool(obj_cfg['expires']), int(obj_cfg['expire_time']))
-            #print "Created cmd", cmd
+                #print "Created cmd", cmd
                 srv.add_comment(cmd)
 
-    # then hosts
+        # then hosts
         for obj_cfg in raw_objects['hostcomment']:
-        #print "Managing", obj_cfg
+            #print "Managing", obj_cfg
             host_name = obj_cfg['host_name']
             hst = all_obj['host'].find_by_name(host_name)
-        #print "Find my host", hst
+            #print "Find my host", hst
             if hst is not None:
                 cmd = Comment(hst, to_bool(obj_cfg['persistent']), obj_cfg['author'], obj_cfg['comment_data'], 1, int(obj_cfg['entry_type']), int(obj_cfg['source']), to_bool(obj_cfg['expires']), int(obj_cfg['expire_time']))
-            #print "Created cmd", cmd
+                #print "Created cmd", cmd
                 hst.add_comment(cmd)
 
 
 
 
     def create_and_link_downtimes(self, raw_objects, all_obj):
-    # first service
+        # first service
         for obj_cfg in raw_objects['servicedowntime']:
             print "Managing", obj_cfg
             host_name = obj_cfg['host_name']
@@ -272,7 +272,7 @@ class Nagios_retention_scheduler(BaseModule):
                 print "Created dwn", dwn
                 srv.add_downtime(dwn)
 
-    # then hosts
+        # then hosts
         for obj_cfg in raw_objects['hostdowntime']:
             print "Managing", obj_cfg
             host_name = obj_cfg['host_name']
@@ -366,7 +366,7 @@ class Nagios_retention_scheduler(BaseModule):
                 if entry.retention:
                     d[prop] = getattr(s, prop)
             all_data['services'][(s.host_name, s.service_description)] = d
-#        all_data = {'hosts': {}, 'services': {}}
+        #all_data = {'hosts': {}, 'services': {}}
 
         sched.restore_retention_data(all_data)
         log_mgr.log("[NagiosRetention] OK we've load data from retention file")

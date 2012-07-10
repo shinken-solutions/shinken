@@ -36,13 +36,13 @@ import ConfigParser
 # Try to see if we are in an android device or not
 is_android = True
 try:
-   import android
+    import android
 except ImportError:
-   is_android = False
+    is_android = False
 
 
 if not is_android:
-   from multiprocessing import Queue, Manager, active_children, cpu_count
+    from multiprocessing import Queue, Manager, active_children, cpu_count
 else:
     from multiprocessing import active_children
 
@@ -113,9 +113,9 @@ class Interface(Pyro.core.ObjBase, object):
 
 # If we are under android, we can't give parameters
 if is_android:
-  DEFAULT_WORK_DIR = '/sdcard/sl4a/scripts/'
+    DEFAULT_WORK_DIR = '/sdcard/sl4a/scripts/'
 else:
-  DEFAULT_WORK_DIR = 'var'
+    DEFAULT_WORK_DIR = 'var'
 
 
 class Daemon(object):
@@ -307,9 +307,9 @@ class Daemon(object):
             logger.debug("Opening pid file: %s" % self.pidfile)
             # Windows do not manage the rw+ mode, so we must open in read mode first, then reopen it write mode...
             if not write and os.path.exists(p):
-               self.fpid = open(p, 'r+')
+                self.fpid = open(p, 'r+')
             else: # If it doesnt exist too, we create it as void
-               self.fpid = open(p, 'w+')
+                self.fpid = open(p, 'w+')
         except Exception, e:
             raise InvalidPidFile(e)
 
@@ -479,7 +479,7 @@ class Daemon(object):
         if is_android:
             self.manager = None
         else:
-           self.manager = Manager()
+            self.manager = Manager()
         # And make the module manager know it
         self.modules_manager.load_manager(self.manager)
 

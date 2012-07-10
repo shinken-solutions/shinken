@@ -54,9 +54,9 @@ class Metric:
             self.critical = guess_int_or_float(r.group(5))
             self.min = guess_int_or_float(r.group(6))
             self.max = guess_int_or_float(r.group(7))
- #       print 'Name', self.name
- #       print "Value", self.value
- #       print "Res", r
+            #print 'Name', self.name
+            #print "Value", self.value
+            #print "Res", r
             print r.groups()
             if self.uom == '%':
                 self.min = 0

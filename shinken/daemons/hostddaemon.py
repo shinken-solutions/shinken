@@ -27,9 +27,9 @@
 # Try to see if we are in an android device or not
 is_android = True
 try:
-   import android
+    import android
 except ImportError:
-   is_android = False
+    is_android = False
 
 
 import sys
@@ -232,20 +232,20 @@ class Hostd(Daemon):
         modules_names = getattr(self.conf, 'hostd_modules', '').split(',')
         modules_names = strip_and_uniq(modules_names)
         for mod_name in modules_names:
-           m = self.conf.modules.find_by_name(mod_name)
-           if not m:
-              logger.error('cannot find module %s' % mod_name)
-              sys.exit(2)
-           self.modules.append(m)
+            m = self.conf.modules.find_by_name(mod_name)
+            if not m:
+                logger.error('cannot find module %s' % mod_name)
+                sys.exit(2)
+            self.modules.append(m)
 
         logger.info("My own modules: " + ','.join([m.get_name() for m in self.modules]))
 
 
         self.override_modules_path = getattr(self.conf, 'override_modules_path', '')
         if self.override_modules_path:
-           # We override the module manager
-           print "Overring module manager"
-           self.modules_manager = ModulesManager('hostd', self.override_modules_path, [])
+            # We override the module manager
+            print "Overring module manager"
+            self.modules_manager = ModulesManager('hostd', self.override_modules_path, [])
 
 
         # we request the instances without them being *started*
@@ -364,7 +364,7 @@ class Hostd(Daemon):
             self.conf.show_errors()
         #    sys.exit("Configuration is incorrect, sorry, I bail out")
         else:
-           logger.info('Things look okay - No serious problems were detected during the pre-flight check')
+            logger.info('Things look okay - No serious problems were detected during the pre-flight check')
 
         # Now clean objects of temporary/unecessary attributes for live work:
         self.conf.clean()
@@ -458,7 +458,7 @@ class Hostd(Daemon):
 
             self.tmp_pack_path = '/tmp/tmp_packs'
             if not os.path.exists(self.tmp_pack_path):
-               os.mkdir(self.tmp_pack_path)
+                os.mkdir(self.tmp_pack_path)
 
             self.do_daemon_init_and_start()
             #self.uri_arb = self.pyro_daemon.register(self.interface, "ForArbiter")
@@ -474,17 +474,17 @@ class Hostd(Daemon):
 
             # create the input queue of all workers
             try:
-               if is_android:
-                  self.workers_queue = Queue()
-               else:
-                  self.workers_queue = self.manager.Queue()
+                if is_android:
+                    self.workers_queue = Queue()
+                else:
+                    self.workers_queue = self.manager.Queue()
             # If we got no /dev/shm on linux, we can got problem here.
             # Must raise with a good message
             except OSError, exp:
-               # We look for the "Function not implemented" under Linux
-               if exp.errno == 38 and os.name == 'posix':
-                  logger.error("Get an exception (%s). If you are under Linux, please check that your /dev/shm directory exists." % (str(exp)))
-                  raise
+                # We look for the "Function not implemented" under Linux
+                if exp.errno == 38 and os.name == 'posix':
+                    logger.error("Get an exception (%s). If you are under Linux, please check that your /dev/shm directory exists." % (str(exp)))
+                    raise
 
 
 
@@ -642,7 +642,7 @@ class Hostd(Daemon):
         from shinken.webui import plugins_hostd as plugins
         plugin_dir = os.path.abspath(os.path.dirname(plugins.__file__))
         if self.override_plugins:
-           plugin_dir = self.override_plugins
+            plugin_dir = self.override_plugins
         print "Loading plugin directory: %s" % plugin_dir
 
         # Load plugin directories
@@ -659,7 +659,7 @@ class Hostd(Daemon):
             # Maybe we want to start a fully new set of pages? If so,
             # load only them
             if self.override_plugins:
-               mod_path = '%s.%s' % (fdir, fdir)
+                mod_path = '%s.%s' % (fdir, fdir)
             print "MOD PATH", mod_path
             try:
                 m = __import__(mod_path, fromlist=[mod_path])
@@ -708,7 +708,7 @@ class Hostd(Daemon):
 
 
             except Exception, exp:
-               logger.log("Loading plugins: %s" % exp)
+                logger.log("Loading plugins: %s" % exp)
 
 
 
@@ -757,16 +757,16 @@ class Hostd(Daemon):
         # Route static files css files
         @route('/static/:path#.+#')
         def server_static(path):
-           # By default give from the root in bottle_dir/htdocs. If the file is missing,
-           # search in the share dir
-           root = os.path.join(bottle_dir, 'htdocs')
-           p = os.path.join(root, path)
-           print "LOOK for FILE EXISTS", p
-           if not os.path.exists(p):
-              root = self.packs_home
-              print "LOOK FOR PATH", path
-              print "No such file, I look in", os.path.join(root, path)
-           return static_file(path, root=root)
+            # By default give from the root in bottle_dir/htdocs. If the file is missing,
+            # search in the share dir
+            root = os.path.join(bottle_dir, 'htdocs')
+            p = os.path.join(root, path)
+            print "LOOK for FILE EXISTS", p
+            if not os.path.exists(p):
+                root = self.packs_home
+                print "LOOK FOR PATH", path
+                print "No such file, I look in", os.path.join(root, path)
+            return static_file(path, root=root)
 
         # And add the favicon ico too
         @route('/favicon.ico')
@@ -876,232 +876,232 @@ class Hostd(Daemon):
 
     # TODO: fix hard coded server/database
     def init_db(self):
-       if not Connection:
-          logger.error('You need the pymongo lib for running skonfui. Please install it')
-          sys.exit(2)
+        if not Connection:
+            logger.error('You need the pymongo lib for running skonfui. Please install it')
+            sys.exit(2)
 
-       con = Connection('localhost')
-       self.db = con.hostd # shinken
+        con = Connection('localhost')
+        self.db = con.hostd # shinken
 
 
     def init_datamanager(self):
-       self.datamgr.load_conf(self.conf)
-       self.datamgr.load_db(self.db)
+        self.datamgr.load_conf(self.conf)
+        self.datamgr.load_db(self.db)
 
 
     def check_auth(self, username, password):
-       password_hash = hashlib.sha512(password).hexdigest()
-       print "Looking for the user", username, "with password hash", password_hash
-       r = self.db.users.find_one({'_id': username, 'pwd_hash': password_hash})
-       print "Is user auth?", r
-       return r is not None
+        password_hash = hashlib.sha512(password).hexdigest()
+        print "Looking for the user", username, "with password hash", password_hash
+        r = self.db.users.find_one({'_id': username, 'pwd_hash': password_hash})
+        print "Is user auth?", r
+        return r is not None
 
 
     def get_user_by_name(self, username):
-       r = self.db.users.find_one({'username': username})
-       return r
+        r = self.db.users.find_one({'username': username})
+        return r
 
     def get_user_by_key(self, api_key):
-       r = self.db.users.find_one({'api_key': api_key})
-       if not r:
-          return None
-       if not r['validated']:
-          return None
-       return r
+        r = self.db.users.find_one({'api_key': api_key})
+        if not r:
+            return None
+        if not r['validated']:
+            return None
+        return r
 
     def get_email_by_name(self, username):
-       r = self.db.users.find_one({'username': username})
-       if not r:
-          return ''
-       return r['email']
+        r = self.db.users.find_one({'username': username})
+        if not r:
+            return ''
+        return r['email']
 
 
     def is_actitaved(self, username):
-       r = self.db.users.find_one({'_id': username})
-       if not r:
-          return False
-       return r['validated']
+        r = self.db.users.find_one({'_id': username})
+        if not r:
+            return False
+        return r['validated']
 
 
     def get_api_key(self, username):
-       r = self.db.users.find_one({'_id': username})
-       if not r:
-          return None
-       return r['api_key']
+        r = self.db.users.find_one({'_id': username})
+        if not r:
+            return None
+        return r['api_key']
 
 
     def get_last_packs(self, nb):
-       return [p for p in self.db.packs.find().limit(nb).sort( 'upload_time', -1 )]
+        return [p for p in self.db.packs.find().limit(nb).sort( 'upload_time', -1 )]
 
 
     def save_user_stats(self, user, stats):
-       stats['user'] = user['username']
-       stats['_id'] = user['username']
-       stats['upload_time'] = int(time.time())
-       stats['state'] = 'pending'
-       print "Saving cfg stats", stats
-       self.db.cfg_stats.save(stats)
+        stats['user'] = user['username']
+        stats['_id'] = user['username']
+        stats['upload_time'] = int(time.time())
+        stats['state'] = 'pending'
+        print "Saving cfg stats", stats
+        self.db.cfg_stats.save(stats)
 
 
     def save_new_pack(self, user, filename, buf):
-       filename = os.path.basename(filename)
-       short_name = filename[:-4]
-       print "Saving a new pack file from a user:", user, filename
-       if not user:
-          return None
-       user_dir = os.path.join(self.tmp_pack_path, user)
-       if not os.path.exists(user_dir):
-          print "Creating the user directory", user_dir
-          os.mkdir(user_dir)
-       p = os.path.join(user_dir, filename)
-       f = open(p, 'w')
-       f.write(buf)
-       f.close()
-       print "File %s is saved" % p
-       _id = uuid.uuid4().get_hex()
-       d = {'_id': _id, 'upload_time': int(time.time()), 'filename': filename, 'filepath': p, 'path': '/unanalysed', 'user':  user,
+        filename = os.path.basename(filename)
+        short_name = filename[:-4]
+        print "Saving a new pack file from a user:", user, filename
+        if not user:
+            return None
+        user_dir = os.path.join(self.tmp_pack_path, user)
+        if not os.path.exists(user_dir):
+            print "Creating the user directory", user_dir
+            os.mkdir(user_dir)
+        p = os.path.join(user_dir, filename)
+        f = open(p, 'w')
+        f.write(buf)
+        f.close()
+        print "File %s is saved" % p
+        _id = uuid.uuid4().get_hex()
+        d = {'_id': _id, 'upload_time': int(time.time()), 'filename': filename, 'filepath': p, 'path': '/unanalysed', 'user':  user,
             'state': 'pending', 'pack_name': short_name, 'moderation_comment': '', 'link_id': _id}
-       # Get all previously sent packs for the same user/filename, and put them as obsolete
-       obs = self.db.packs.find({'filepath': p})
-       for o in obs:
-          print "The pack make obsolete the pack", o
-          o['state'] = 'obsolete'
-          o['obsoleted_by'] = _id
-          self.db.packs.save(o)
-       # Ok now we can save the pack :)
-       print "Saving pending pack", d
-       self.db.packs.save(d)
-       # Now we will unzip and load all data from the pack
-       self.load_pack_file(_id)
+        # Get all previously sent packs for the same user/filename, and put them as obsolete
+        obs = self.db.packs.find({'filepath': p})
+        for o in obs:
+            print "The pack make obsolete the pack", o
+            o['state'] = 'obsolete'
+            o['obsoleted_by'] = _id
+            self.db.packs.save(o)
+        # Ok now we can save the pack :)
+        print "Saving pending pack", d
+        self.db.packs.save(d)
+        # Now we will unzip and load all data from the pack
+        self.load_pack_file(_id)
 
 
     def load_pack_file(self, pack):
-       p = self.db.packs.find_one({'_id': pack})
-       filepath = p['filepath']
-       print "Analysing pack"
-       if not zipfile.is_zipfile(filepath):
-          print "ERROR: the pack %s is not a zip file!" % filepath
-          p['state'] = 'refused'
-          p['moderation_comment'] = 'The pack file is not a zip file'
-          self.db.packs.save(p)
-          return
-       TMP_PATH = tempfile.mkdtemp()
+        p = self.db.packs.find_one({'_id': pack})
+        filepath = p['filepath']
+        print "Analysing pack"
+        if not zipfile.is_zipfile(filepath):
+            print "ERROR: the pack %s is not a zip file!" % filepath
+            p['state'] = 'refused'
+            p['moderation_comment'] = 'The pack file is not a zip file'
+            self.db.packs.save(p)
+            return
+        TMP_PATH = tempfile.mkdtemp()
 
-       path = os.path.join(TMP_PATH, pack)
-       print "UNFLATING PACK INTO", path
-       f = zipfile.ZipFile(filepath)
-       f.extractall(path)
+        path = os.path.join(TMP_PATH, pack)
+        print "UNFLATING PACK INTO", path
+        f = zipfile.ZipFile(filepath)
+        f.extractall(path)
 
-       packs = Packs({})
-       packs.load_file(path)
-       packs = [i for i in packs]
-       if len(packs) > 1:
-          print "ERROR: the pack %s got too much .pack file in it!" % pack
-          p['moderation_comment'] = "ERROR: no valid .pack in the pack"
-          p['state'] = 'refused'
-          self.db.packs.save(p)
-          shutil.rmtree(TMP_PATH)
-          return
+        packs = Packs({})
+        packs.load_file(path)
+        packs = [i for i in packs]
+        if len(packs) > 1:
+            print "ERROR: the pack %s got too much .pack file in it!" % pack
+            p['moderation_comment'] = "ERROR: no valid .pack in the pack"
+            p['state'] = 'refused'
+            self.db.packs.save(p)
+            shutil.rmtree(TMP_PATH)
+            return
 
-       if len(packs) == 0:
-          print "ERROR: no valid .pack in the pack %s" % pack
-          p['state'] = 'refused'
-          p['moderation_comment'] = "ERROR: no valid .pack in the pack"
-          self.db.packs.save(p)
-          shutil.rmtree(TMP_PATH)
-          return
+        if len(packs) == 0:
+            print "ERROR: no valid .pack in the pack %s" % pack
+            p['state'] = 'refused'
+            p['moderation_comment'] = "ERROR: no valid .pack in the pack"
+            self.db.packs.save(p)
+            shutil.rmtree(TMP_PATH)
+            return
 
-       # Now we move the pack to it's final directory
-       dest_path = os.path.join(self.packs_home, pack)
-       print "Will copy the tree in the pack tree", dest_path
-       if os.path.exists(dest_path):
-          shutil.rmtree(dest_path)
-       shutil.copytree(path, dest_path)
+        # Now we move the pack to it's final directory
+        dest_path = os.path.join(self.packs_home, pack)
+        print "Will copy the tree in the pack tree", dest_path
+        if os.path.exists(dest_path):
+            shutil.rmtree(dest_path)
+        shutil.copytree(path, dest_path)
 
-       pck = packs.pop()
-       print "We read pack", pck.__dict__
-       # Now we can update the db pack entry
-       p['pack_name'] = pck.pack_name
-       p['description'] = pck.description
-       p['macros'] = pck.macros
-       p['path'] = pck.path
-       p['templates'] = pck.templates
-       p['services'] = pck.services
-       p['commands'] = pck.commands
+        pck = packs.pop()
+        print "We read pack", pck.__dict__
+        # Now we can update the db pack entry
+        p['pack_name'] = pck.pack_name
+        p['description'] = pck.description
+        p['macros'] = pck.macros
+        p['path'] = pck.path
+        p['templates'] = pck.templates
+        p['services'] = pck.services
+        p['commands'] = pck.commands
 
-       if p['path'] == '/':
-          p['path'] = '/uncategorized'
-       p['doc_link'] = pck.doc_link
-       if p['state'] == 'pending':
-          p['state'] = 'ok'
+        if p['path'] == '/':
+            p['path'] = '/uncategorized'
+        p['doc_link'] = pck.doc_link
+        if p['state'] == 'pending':
+            p['state'] = 'ok'
 
-       # Give a real link name to this pack
-       p['link_id'] = '%s-%s' % (p['user'], p['pack_name'])
-       print "We want to save the object", p
-       self.db.packs.save(p)
-       shutil.rmtree(TMP_PATH)
+        # Give a real link name to this pack
+        p['link_id'] = '%s-%s' % (p['user'], p['pack_name'])
+        print "We want to save the object", p
+        self.db.packs.save(p)
+        shutil.rmtree(TMP_PATH)
 
 
 
 
     def is_name_available(self, username):
-       r = self.db.users.find_one({'_id': username})
-       return r is None
+        r = self.db.users.find_one({'_id': username})
+        return r is None
 
 
     def register_user(self, username, pwdhash, email):
-       ak = uuid.uuid4().get_hex()
-       api_key = uuid.uuid4().get_hex()
-       d = {'_id': username, 'username': username, 'pwd_hash': pwdhash, 'email': email, 'api_key': api_key, 'activating_key': ak, 'validated': False, 'is_admin': False, 'is_moderator': False}
-       print "Saving new user", d
-       self.db.users.save(d)
+        ak = uuid.uuid4().get_hex()
+        api_key = uuid.uuid4().get_hex()
+        d = {'_id': username, 'username': username, 'pwd_hash': pwdhash, 'email': email, 'api_key': api_key, 'activating_key': ak, 'validated': False, 'is_admin': False, 'is_moderator': False}
+        print "Saving new user", d
+        self.db.users.save(d)
 
-       # Now send the mail
-       fromaddr = 'shinken@community.shinken-monitoring.org'
-       toaddrs  = [email]
-       srvuri = 'http://community.shinken-monitoring.org'
-       # Add the From: and To: headers at the start!
-       msg = ("From: %s\r\nSubject: Registering to Shinken community website\r\nTo: %s\r\n\r\n"
+        # Now send the mail
+        fromaddr = 'shinken@community.shinken-monitoring.org'
+        toaddrs  = [email]
+        srvuri = 'http://community.shinken-monitoring.org'
+        # Add the From: and To: headers at the start!
+        msg = ("From: %s\r\nSubject: Registering to Shinken community website\r\nTo: %s\r\n\r\n"
               % (fromaddr, ", ".join(toaddrs)))
-       msg += 'Thanks %s for registering in the Shinken community site and welcome! Please click on the link below to enable your account so you can start to get packs and submit new ones.\n' % username
-       msg += ' %s/validate?activating_key=%s' % (srvuri, ak)
-       print "Message length is " + repr(len(msg))
-       print "MEssage is", msg
-       print "Go to send mail"
-       try:
-          server = smtplib.SMTP('localhost')
-          server.set_debuglevel(1)
-          server.sendmail(fromaddr, toaddrs, msg)
-          server.quit()
-       except Exception, exp:
-          print "FUCK, there was a problem with the email sending!", exp
+        msg += 'Thanks %s for registering in the Shinken community site and welcome! Please click on the link below to enable your account so you can start to get packs and submit new ones.\n' % username
+        msg += ' %s/validate?activating_key=%s' % (srvuri, ak)
+        print "Message length is " + repr(len(msg))
+        print "MEssage is", msg
+        print "Go to send mail"
+        try:
+            server = smtplib.SMTP('localhost')
+            server.set_debuglevel(1)
+            server.sendmail(fromaddr, toaddrs, msg)
+            server.quit()
+        except Exception, exp:
+            print "FUCK, there was a problem with the email sending!", exp
 
 
     def validate_user(self, activating_key):
-       u = self.db.users.find_one({'activating_key': activating_key})
-       print "Try to validate a user with the activated key", activating_key, 'and get', u
-       if not u:
-          return False
-       print "User %s validated"
-       u['validated'] = True
-       self.db.users.save(u)
+        u = self.db.users.find_one({'activating_key': activating_key})
+        print "Try to validate a user with the activated key", activating_key, 'and get', u
+        if not u:
+            return False
+        print "User %s validated"
+        u['validated'] = True
+        self.db.users.save(u)
 
-       return True
+        return True
 
 
     def update_user(self, username, pwd_hash, email):
-       r = self.db.users.find_one({'_id': username})
-       if not r:
-          return
+        r = self.db.users.find_one({'_id': username})
+        if not r:
+            return
 
-       if pwd_hash:
-          r['pwd_hash'] = pwd_hash
+        if pwd_hash:
+            r['pwd_hash'] = pwd_hash
 
-       old_email = r['email']
-       r['email'] = email
-       # If the user changed it's email, put it in validating
-       if old_email != email:
-          r['validated'] = False
+        old_email = r['email']
+        r['email'] = email
+        # If the user changed it's email, put it in validating
+        if old_email != email:
+            r['validated'] = False
 
-       self.db.users.save(r)
+        self.db.users.save(r)
 

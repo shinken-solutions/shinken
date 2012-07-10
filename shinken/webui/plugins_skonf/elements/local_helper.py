@@ -334,7 +334,7 @@ class Helper(object):
                     for (k, v) in tpl.customs.iteritems():
                         print 'My template customs', k, v
                         if k not in customs:
-                           customs[k] = {'from': tname, 'value': '', 'placeholder': v}
+                            customs[k] = {'from': tname, 'value': '', 'placeholder': v}
 
         # Now the item one, will overwrite any entry
         for (k, v) in elt.iteritems():

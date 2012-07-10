@@ -80,9 +80,9 @@ class Glpidb_broker(BaseModule):
                }
            }
         # Last state of check
-#        self.checkstatus = {
-#           '0': None,
-#           }
+        #self.checkstatus = {
+        #    '0': None,
+        #    }
         BaseModule.__init__(self, modconf)
         self.host = host
         self.user = user
@@ -174,8 +174,8 @@ class Glpidb_broker(BaseModule):
         if hasattr(self, manager):
             new_b = self.preprocess(type, b, '1')
             if 'host_name' in new_b.data:
-               if 'plugin_monitoring_services_id' not in new_b.data:
-                  return
+                if 'plugin_monitoring_services_id' not in new_b.data:
+                    return
             f = getattr(self, manager)
             queries = f(new_b)
             # Ok, we've got queries, now: run them!

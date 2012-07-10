@@ -93,13 +93,13 @@ class Receiver(BaseSatellite):
             self.external_commands.append(elt)
 
 
-#    # Get the good tabs for links by the kind. If unknown, return None
-#    def get_links_from_type(self, type):
-#        t = {'scheduler': self.schedulers, 'arbiter': self.arbiters, \
-#             'poller': self.pollers, 'reactionner': self.reactionners}
-#        if type in t:
-#            return t[type]
-#        return None
+    ## # Get the good tabs for links by the kind. If unknown, return None
+    ## def get_links_from_type(self, type):
+    ##     t = {'scheduler': self.schedulers, 'arbiter': self.arbiters, \
+    ##          'poller': self.pollers, 'reactionner': self.reactionners}
+    ##     if type in t:
+    ##         return t[type]
+    ##     return None
 
 
     # Call by arbiter to get our external commands
@@ -217,29 +217,29 @@ class Receiver(BaseSatellite):
 #        self.broks.reverse()
 
         start = time.time()
-#        while len(self.broks) != 0:
-#            now = time.time()
-#            # Do not 'manage' more than 1s, we must get new broks
-#            # every 1s
-#            if now - start > 1:
-#                break
-#
-#            b = self.broks.pop()
-#            # Ok, we can get the brok, and doing something with it
-#            # REF: doc/receiver-modules.png (4-5)
-#            self.manage_brok(b)
-#
-#            nb_broks = len(self.broks)
-#
-#            # Ok we manage brok, but we still want to listen to arbiter
-#            self.watch_for_new_conf(0.0)
-#
-#            # if we got new broks here from arbiter, we should breack the loop
-#            # because such broks will not be managed by the
-#            # external modules before this loop (we pop them!)
-#            if len(self.broks) != nb_broks:
-#                break
-#
+        ## while len(self.broks) != 0:
+        ##     now = time.time()
+        ##     # Do not 'manage' more than 1s, we must get new broks
+        ##     # every 1s
+        ##     if now - start > 1:
+        ##         break
+        ##
+        ##     b = self.broks.pop()
+        ##     # Ok, we can get the brok, and doing something with it
+        ##     # REF: doc/receiver-modules.png (4-5)
+        ##     self.manage_brok(b)
+        ##
+        ##     nb_broks = len(self.broks)
+        ##
+        ##     # Ok we manage brok, but we still want to listen to arbiter
+        ##     self.watch_for_new_conf(0.0)
+        ##
+        ##     # if we got new broks here from arbiter, we should breack the loop
+        ##     # because such broks will not be managed by the
+        ##     # external modules before this loop (we pop them!)
+        ##     if len(self.broks) != nb_broks:
+        ##         break
+
         # Maybe external modules raised 'objets'
         # we should get them
         self.get_objects_from_from_queues()

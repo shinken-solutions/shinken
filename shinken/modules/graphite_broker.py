@@ -91,7 +91,7 @@ class Graphite_broker(BaseModule):
         metrics = [e for e in elts if e != '']
 
         for e in metrics:
- #           print "Graphite: groking: ", e
+            #print "Graphite: groking: ", e
             elts = e.split('=', 1)
             if len(elts) != 2:
                 continue

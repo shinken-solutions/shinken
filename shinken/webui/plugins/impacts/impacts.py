@@ -56,7 +56,7 @@ def show_impacts():
 
     if not user:
         redirect("/user/login")
-#        return {'app': app, 'impacts': {}, 'valid_user': False, 'user': user}
+        #return {'app': app, 'impacts': {}, 'valid_user': False, 'user': user}
 
 
     all_imp_impacts = app.datamgr.get_important_elements()
@@ -66,7 +66,7 @@ def show_impacts():
 
     imp_id = 0
     for imp in all_imp_impacts:
-#        safe_print("FIND A BAD SERVICE IN IMPACTS", imp.get_dbg_name())
+        #safe_print("FIND A BAD SERVICE IN IMPACTS", imp.get_dbg_name())
         imp_id += 1
         impacts[imp_id] = imp
 

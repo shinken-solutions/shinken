@@ -235,18 +235,18 @@ ResponseHeader: fixed16
         now = time.time()
         time_warp(-3600)
         num_logs = 0
-	host.state = 'DOWN'
-	host.state_type = 'SOFT'
-	host.attempt = 1
-	host.output = "i am down"
-	host.raise_alert_log_entry()
-	time.sleep(3600)
-	host.state = 'UP'
-	host.state_type = 'HARD'
-	host.attempt = 1
-	host.output = "i am up"
-	host.raise_alert_log_entry()
-	time.sleep(3600)
+        host.state = 'DOWN'
+        host.state_type = 'SOFT'
+        host.attempt = 1
+        host.output = "i am down"
+        host.raise_alert_log_entry()
+        time.sleep(3600)
+        host.state = 'UP'
+        host.state_type = 'HARD'
+        host.attempt = 1
+        host.output = "i am up"
+        host.raise_alert_log_entry()
+        time.sleep(3600)
         self.update_broker()
         print "-------------------------------------------"
         print "Service.lsm_host_name", Service.lsm_host_name

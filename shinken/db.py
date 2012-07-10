@@ -88,7 +88,7 @@ class DB(object):
             if prop not in where_data:
                 i += 1
                 val = data[prop]
-            # Boolean must be catch, because we want 0 or 1, not True or False
+                # Boolean must be catch, because we want 0 or 1, not True or False
                 if isinstance(val, bool):
                     if val:
                         val = 1

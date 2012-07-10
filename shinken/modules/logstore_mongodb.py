@@ -228,24 +228,24 @@ class LiveStatusLogStoreMongoDB(BaseModule):
             print "This line is invalid", line
 
     def add_filter(self, operator, attribute, reference):
-	if attribute == 'time':
-	    self.mongo_time_filter_stack.put_stack(self.make_mongo_filter(operator, attribute, reference))
-	self.mongo_filter_stack.put_stack(self.make_mongo_filter(operator, attribute, reference))
+        if attribute == 'time':
+            self.mongo_time_filter_stack.put_stack(self.make_mongo_filter(operator, attribute, reference))
+        self.mongo_filter_stack.put_stack(self.make_mongo_filter(operator, attribute, reference))
 
     def add_filter_and(self, andnum):
-	self.mongo_filter_stack.and_elements(andnum)
+        self.mongo_filter_stack.and_elements(andnum)
 
     def add_filter_or(self, ornum):
-	self.mongo_filter_stack.or_elements(ornum)
+        self.mongo_filter_stack.or_elements(ornum)
 
     def add_filter_not(self):
-	self.mongo_filter_stack.not_elements()
+        self.mongo_filter_stack.not_elements()
 
     def get_live_data_log(self):
         """Like get_live_data, but for log objects"""
         # finalize the filter stacks
-	self.mongo_time_filter_stack.and_elements(self.mongo_time_filter_stack.qsize())
-	self.mongo_filter_stack.and_elements(self.mongo_filter_stack.qsize())
+        self.mongo_time_filter_stack.and_elements(self.mongo_time_filter_stack.qsize())
+        self.mongo_filter_stack.and_elements(self.mongo_filter_stack.qsize())
         if self.use_aggressive_sql:
             # Be aggressive, get preselected data from sqlite and do less
             # filtering in python. But: only a subset of Filter:-attributes

@@ -517,7 +517,7 @@ Like temporary attributes such as "imported_from", etc.. """
         if hasattr(cls, 'running_properties'):
             # We've got prop in running_properties too
             for prop, entry in cls.running_properties.items():
-#                if 'fill_brok' in cls.running_properties[prop]:
+                #if 'fill_brok' in cls.running_properties[prop]:
                 if brok_type in entry.fill_brok:
                     data[prop] = self.get_property_value_for_brok(prop, cls.running_properties)
 

@@ -412,13 +412,13 @@ class Merlindb_broker(BaseModule):
 
         # Now get a backend_db of our backend type
         if backend == 'mysql':
-#            from mysql_backend import Mysql_backend
+            #from mysql_backend import Mysql_backend
             from shinken.db_mysql import DBMysql
             print "Creating a mysql backend"
             self.db_backend = DBMysql(host, user, password, database, character_set)
 
         if backend == 'sqlite':
-#            from sqlite_backend import Sqlite_backend
+            #from sqlite_backend import Sqlite_backend
             from shinken.db_sqlite import DBSqlite
             print "Creating a sqlite backend"
             self.db_backend = DBSqlite(self.database_path)
@@ -568,10 +568,10 @@ class Merlindb_broker(BaseModule):
         res = [query]
 
         for cg_name in b.data['contact_groups'].split(','):
-          q_del = "DELETE FROM host_contactgroup WHERE host = '%s' and contactgroup = (SELECT id FROM contactgroup WHERE contactgroup_name = '%s')" % (b.data['id'], cg_name)
-          res.append(q_del)
-          q = "INSERT INTO host_contactgroup (host, contactgroup) VALUES ('%s', (SELECT id FROM contactgroup WHERE contactgroup_name = '%s'))" % (b.data['id'], cg_name)
-          res.append(q)
+            q_del = "DELETE FROM host_contactgroup WHERE host = '%s' and contactgroup = (SELECT id FROM contactgroup WHERE contactgroup_name = '%s')" % (b.data['id'], cg_name)
+            res.append(q_del)
+            q = "INSERT INTO host_contactgroup (host, contactgroup) VALUES ('%s', (SELECT id FROM contactgroup WHERE contactgroup_name = '%s'))" % (b.data['id'], cg_name)
+            res.append(q)
         return res
 
 

@@ -60,9 +60,11 @@ class Downtime:
         'is_in_effect': BoolProp   (default=False),
         'has_been_triggered': BoolProp(default=False),
         'can_be_deleted': BoolProp(default=False),
-# TODO: find a very good way to handle the downtime "ref"
-# ref must effectively not be in properties because it points onto a real object.
-#        'ref':          None
+
+        # TODO: find a very good way to handle the downtime "ref".
+        # ref must effectively not be in properties because it points
+        # onto a real object.
+        #'ref': None
     }
 
 

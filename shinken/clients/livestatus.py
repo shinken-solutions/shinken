@@ -83,9 +83,9 @@ class LSSyncConnection:
 
     def launch_query(self, query):
         if not self.alive:
-           self.connect()
+            self.connect()
         if not query.endswith("\n"):
-           query += "\n"
+            query += "\n"
         query += "OutputFormat: python\nKeepAlive: on\nResponseHeader: fixed16\n\n"
 
         try:

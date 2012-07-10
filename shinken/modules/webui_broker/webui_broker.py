@@ -241,61 +241,61 @@ class Webui_broker(BaseModule, Daemon):
 
         print "Data thread started"
         while True:
-           # DBG: t0 = time.time()
-           # DBG: print "WEBUI :: GET START"
-           l = self.to_q.get()
-           # DBG: t1 = time.time()
-           # DBG: print "WEBUI :: GET FINISH with", len(l), "in ", t1 - t0
+            # DBG: t0 = time.time()
+            # DBG: print "WEBUI :: GET START"
+            l = self.to_q.get()
+            # DBG: t1 = time.time()
+            # DBG: print "WEBUI :: GET FINISH with", len(l), "in ", t1 - t0
 
-           for b in l:
-              # DBG: t0 = time.time()
-              b.prepare()
-              # DBG: time_preparing += time.time() - t0
-              # DBG: if not b.type in times:
-              # DBG:     times[b.type] = 0
-              # For updating, we cannot do it while
-              # answer queries, so wait for no readers
-              # DBG: t0 = time.time()
-              self.wait_for_no_readers()
-              # DBG: time_waiting_no_readers += time.time() - t0
-              try:
-               # print "Got data lock, manage brok"
-                  # DBG: t0 = time.time()
-                  self.rg.manage_brok(b)
-                  # DBG: times[b.type] += time.time() - t0
+            for b in l:
+                # DBG: t0 = time.time()
+                b.prepare()
+                # DBG: time_preparing += time.time() - t0
+                # DBG: if not b.type in times:
+                # DBG:     times[b.type] = 0
+                # For updating, we cannot do it while
+                # answer queries, so wait for no readers
+                # DBG: t0 = time.time()
+                self.wait_for_no_readers()
+                # DBG: time_waiting_no_readers += time.time() - t0
+                try:
+                    # print "Got data lock, manage brok"
+                    # DBG: t0 = time.time()
+                    self.rg.manage_brok(b)
+                    # DBG: times[b.type] += time.time() - t0
 
-                  for mod in self.modules_manager.get_internal_instances():
-                      try:
-                          mod.manage_brok(b)
-                      except Exception, exp:
-                          print exp.__dict__
-                          logger.warning("[%s] The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
-                          logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
-                          logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
-                          self.modules_manager.set_to_restart(mod)
-              except Exception, exp:
-                  msg = Message(id=0, type='ICrash', data={'name': self.get_name(), 'exception': exp, 'trace': traceback.format_exc()})
-                  self.from_q.put(msg)
-                  # wait 2 sec so we know that the broker got our message, and die
-                  time.sleep(2)
-                  # No need to raise here, we are in a thread, exit!
-                  os._exit(2)
-              finally:
-                  # We can remove us as a writer from now. It's NOT an atomic operation
-                  # so we REALLY not need a lock here (yes, I try without and I got
-                  # a not so accurate value there....)
-                  self.global_lock.acquire()
-                  self.nb_writers -= 1
-                  self.global_lock.release()
+                    for mod in self.modules_manager.get_internal_instances():
+                        try:
+                            mod.manage_brok(b)
+                        except Exception, exp:
+                            print exp.__dict__
+                            logger.warning("[%s] The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
+                            logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
+                            logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
+                            self.modules_manager.set_to_restart(mod)
+                except Exception, exp:
+                    msg = Message(id=0, type='ICrash', data={'name': self.get_name(), 'exception': exp, 'trace': traceback.format_exc()})
+                    self.from_q.put(msg)
+                    # wait 2 sec so we know that the broker got our message, and die
+                    time.sleep(2)
+                    # No need to raise here, we are in a thread, exit!
+                    os._exit(2)
+                finally:
+                    # We can remove us as a writer from now. It's NOT an atomic operation
+                    # so we REALLY not need a lock here (yes, I try without and I got
+                    # a not so accurate value there....)
+                    self.global_lock.acquire()
+                    self.nb_writers -= 1
+                    self.global_lock.release()
 
-           # DBG: t2 = time.time()
-           # DBG: print "WEBUI :: MANAGE ALL IN ", t2 - t1
-           # DBG: print '"WEBUI: in Waiting no readers', time_waiting_no_readers
-           # DBG: print 'WEBUI in preparing broks', time_preparing
-           # DBG: print "WEBUI And in times:"
-           # DBG: for (k, v) in times.iteritems():
-           # DBG:     print "WEBUI\t %s: %s" % (k, v)
-           # DBG: print "WEBUI\nWEBUI\n"
+            # DBG: t2 = time.time()
+            # DBG: print "WEBUI :: MANAGE ALL IN ", t2 - t1
+            # DBG: print '"WEBUI: in Waiting no readers', time_waiting_no_readers
+            # DBG: print 'WEBUI in preparing broks', time_preparing
+            # DBG: print "WEBUI And in times:"
+            # DBG: for (k, v) in times.iteritems():
+            # DBG:     print "WEBUI\t %s: %s" % (k, v)
+            # DBG: print "WEBUI\nWEBUI\n"
 
 
     # Here we will load all plugins (pages) under the webui/plugins

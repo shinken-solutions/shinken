@@ -114,7 +114,7 @@ class Command(Item):
         # Now config properties
         for prop, entry in cls.properties.items():
             # Is this property intended for brokking?
-#            if 'fill_brok' in entry[prop]:
+            #if 'fill_brok' in entry[prop]:
             if brok_type in entry.fill_brok:
                 if hasattr(self, prop):
                     data[prop] = getattr(self, prop)
@@ -123,7 +123,7 @@ class Command(Item):
 
 
 
-    # Call by picle for dataify the coment
+    # Call by pickle for dataify the coment
     # because we DO NOT WANT REF in this pickleisation!
     def __getstate__(self):
         cls = self.__class__

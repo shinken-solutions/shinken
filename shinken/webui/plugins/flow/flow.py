@@ -109,7 +109,7 @@ def get_page():
 
     # Got in json format
     #j_impacts = json.dumps(impacts)
-#    print "Return impact in json", j_impacts
+    #print "Return impact in json", j_impacts
     all_pbs = app.datamgr.get_all_problems()
     now = time.time()
     # Get only the last 10min errors

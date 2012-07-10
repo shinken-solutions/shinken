@@ -130,13 +130,13 @@ def dashboard():
         redirect("/mobile/")
         return
 
-	# We want to limit the number of elements
+    # We want to limit the number of elements
     start = int(app.request.GET.get('start', '0'))
     end = int(app.request.GET.get('end', '5'))
 
     all_pbs = app.datamgr.get_all_hosts_and_services()
 
-	# Now sort it!
+    # Now sort it!
     all_pbs.sort(hst_srv_sort)
 
     total = len(all_pbs)

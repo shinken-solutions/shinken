@@ -155,35 +155,35 @@ class BoolProp(Property):
     Boolean values are currently case insensitively defined as 0,
     false, no, off for False, and 1, true, yes, on for True).
     """
-#    @staticmethod
+    #@staticmethod
     def pythonize(self, val):
         return _boolean_states[val.lower()]
 
 
 class IntegerProp(Property):
     """Please Add a Docstring to describe the class here"""
-#    @staticmethod
+    #@staticmethod
     def pythonize(self, val):
         return to_int(val)
 
 
 class FloatProp(Property):
     """Please Add a Docstring to describe the class here"""
-#    @staticmethod
+    #@staticmethod
     def pythonize(self, val):
         return to_float(val)
 
 
 class CharProp(Property):
     """Please Add a Docstring to describe the class here"""
-#    @staticmethod
+    #@staticmethod
     def pythonize(self, val):
         return to_char(val)
 
 
 class StringProp(Property):
     """Please Add a Docstring to describe the class here"""
-#    @staticmethod
+    #@staticmethod
     def pythonize(self, val):
         return val
 
@@ -195,7 +195,7 @@ class ConfigPathProp(StringProp):
 
 class ListProp(Property):
     """Please Add a Docstring to describe the class here"""
-#    @staticmethod
+    #@staticmethod
     def pythonize(self, val):
         return to_split(val)
 
@@ -252,7 +252,7 @@ class AddrProp(Property):
 
         addr = {'address': m.group(1)}
         if m.group(2) is not None:
-           addr['port'] = int(m.group(2))
+            addr['port'] = int(m.group(2))
 
         return addr
 

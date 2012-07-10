@@ -351,8 +351,7 @@ class Host(SchedulingItem):
         'retry_check_interval': 'retry_interval',
         'criticity': 'business_impact',
         'hostgroup': 'hostgroups',
-#        'criticitymodulations': 'business_impact_modulations',
-
+        ## 'criticitymodulations': 'business_impact_modulations',
     }
 
 

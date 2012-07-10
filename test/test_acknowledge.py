@@ -603,13 +603,13 @@ class TestAcks(ShinkenTest):
 
 
     def test_unack_removes_comments(self):
-# critical
-# ACKNOWLEDGE_SVC_PROBLEM;test_host_0;test_ok_0;2;1;1;test_contact_alias;ackweb6
-# ACKNOWLEDGE_SVC_PROBLEM;test_host_0;test_ok_0;2;1;1;test_contact_alias;ackweb6
-# ACKNOWLEDGE_SVC_PROBLEM;test_host_0;test_ok_0;2;1;0;test_contact_alias;acknull
-# now remove the ack
-# the first two comments remain. So persistent not only means "survice a reboot"
-# but also "stay after the ack has been deleted"
+        # critical
+        # ACKNOWLEDGE_SVC_PROBLEM;test_host_0;test_ok_0;2;1;1;test_contact_alias;ackweb6
+        # ACKNOWLEDGE_SVC_PROBLEM;test_host_0;test_ok_0;2;1;1;test_contact_alias;ackweb6
+        # ACKNOWLEDGE_SVC_PROBLEM;test_host_0;test_ok_0;2;1;0;test_contact_alias;acknull
+        # now remove the ack
+        # the first two comments remain. So persistent not only means "survice a reboot"
+        # but also "stay after the ack has been deleted"
         self.print_header()
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")

@@ -55,8 +55,8 @@ class TestService(ShinkenTest):
         svc.__setstate__(state)
         # And it should be the same:then before :)
         for p in cls.properties:
-#            print getattr(svc_copy, p)
-#            print getattr(svc, p)
+            ## print getattr(svc_copy, p)
+            ## print getattr(svc, p)
             self.assert_(getattr(svc_copy, p) == getattr(svc, p))
 
 

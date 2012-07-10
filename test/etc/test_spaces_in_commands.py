@@ -42,8 +42,8 @@ class TestConfig(ShinkenTest):
         host.checks_in_progress = []
         host.act_depend_of = [] # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_port_2")
-        #for a in host.actions:
-            #a.t_to_go = 0
+        ## for a in host.actions:
+        ##     a.t_to_go = 0
         svc.schedule()
         for a in svc.actions:
             a.t_to_go = 0

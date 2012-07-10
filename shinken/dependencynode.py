@@ -276,8 +276,8 @@ class DependencyNodeFactory(object):
                     o = self.eval_cor_patern(tmp, hosts, services)
                     #print "2) I've %s got new sons" % patern , o
                     node.sons.append(o)
-                #else:
-                    #print "Fuck a node son!"
+                ## else:
+                ##     print "Fuck a node son!"
                 tmp = ''
                 continue
 

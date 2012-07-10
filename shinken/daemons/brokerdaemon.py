@@ -159,7 +159,7 @@ class Broker(BaseSatellite):
     # initialize or re-initialize connection with scheduler or
     # arbiter if type == arbiter
     def pynag_con_init(self, id, type='scheduler'):
-            # Get the good links tab for looping..
+        # Get the good links tab for looping..
         links = self.get_links_from_type(type)
         if links is None:
             logger.debug('Type unknown for connection! %s' % type)
@@ -287,7 +287,7 @@ class Broker(BaseSatellite):
     # We get new broks from schedulers
     # REF: doc/broker-modules.png (2)
     def get_new_broks(self, type='scheduler'):
-            # Get the good links tab for looping..
+        # Get the good links tab for looping..
         links = self.get_links_from_type(type)
         if links is None:
             logger.debug('Type unknown for connection! %s' % type)
@@ -375,13 +375,13 @@ class Broker(BaseSatellite):
 
             # We can already got this conf id, but with another address
             if sched_id in self.schedulers:
-               new_addr = conf['schedulers'][sched_id]['address']
-               old_addr = self.schedulers[sched_id]['address']
-               new_port = conf['schedulers'][sched_id]['port']
-               old_port = self.schedulers[sched_id]['port']
-               # Should got all the same to be ok :)
-               if new_addr == old_addr and new_port == old_port:
-                  already_got = True
+                new_addr = conf['schedulers'][sched_id]['address']
+                old_addr = self.schedulers[sched_id]['address']
+                new_port = conf['schedulers'][sched_id]['port']
+                old_port = self.schedulers[sched_id]['port']
+                # Should got all the same to be ok :)
+                if new_addr == old_addr and new_port == old_port:
+                    already_got = True
 
             if already_got:
                 broks = self.schedulers[sched_id]['broks']

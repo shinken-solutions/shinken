@@ -27,9 +27,9 @@
 # Try to see if we are in an android device or not
 is_android = True
 try:
-   import android
+    import android
 except ImportError:
-   is_android = False
+    is_android = False
 
 
 import sys
@@ -226,11 +226,11 @@ class Skonf(Daemon):
         modules_names = self.conf.skonf_modules.split(',')
         modules_names = strip_and_uniq(modules_names)
         for mod_name in modules_names:
-           m = self.conf.modules.find_by_name(mod_name)
-           if not m:
-              logger.error('cannot find module %s' % mod_name)
-              sys.exit(2)
-           self.modules.append(m)
+            m = self.conf.modules.find_by_name(mod_name)
+            if not m:
+                logger.error('cannot find module %s' % mod_name)
+                sys.exit(2)
+            self.modules.append(m)
 
         logger.info("My own modules: " + ','.join([m.get_name() for m in self.modules]))
 
@@ -379,7 +379,7 @@ class Skonf(Daemon):
             self.conf.show_errors()
         #    sys.exit("Configuration is incorrect, sorry, I bail out")
         else:
-           logger.info('Things look okay - No serious problems were detected during the pre-flight check')
+            logger.info('Things look okay - No serious problems were detected during the pre-flight check')
 
         # Now clean objects of temporary/unecessary attributes for live work:
         self.conf.clean()
@@ -480,17 +480,17 @@ class Skonf(Daemon):
 
             # create the input queue of all workers
             try:
-               if is_android:
-                  self.workers_queue = Queue()
-               else:
-                  self.workers_queue = self.manager.Queue()
+                if is_android:
+                    self.workers_queue = Queue()
+                else:
+                    self.workers_queue = self.manager.Queue()
             # If we got no /dev/shm on linux, we can got problem here.
             # Must raise with a good message
             except OSError, exp:
-               # We look for the "Function not implemented" under Linux
-               if exp.errno == 38 and os.name == 'posix':
-                  logger.error("Get an exception (%s). If you are under Linux, please check that your /dev/shm directory exists." % (str(exp)))
-                  raise
+                # We look for the "Function not implemented" under Linux
+                if exp.errno == 38 and os.name == 'posix':
+                    logger.error("Get an exception (%s). If you are under Linux, please check that your /dev/shm directory exists." % (str(exp)))
+                    raise
 
 
 
@@ -712,7 +712,7 @@ class Skonf(Daemon):
 
 
             except Exception, exp:
-               logger.log("Loading plugins: %s" % exp)
+                logger.log("Loading plugins: %s" % exp)
 
 
 
@@ -745,7 +745,7 @@ class Skonf(Daemon):
                 #self.global_lock.acquire()
                 #self.nb_readers -= 1
                 #self.global_lock.release()
-        #print "The lock version is", lock_version
+                #print "The lock version is", lock_version
         return lock_version
 
 
@@ -761,16 +761,16 @@ class Skonf(Daemon):
         # Route static files css files
         @route('/static/:path#.+#')
         def server_static(path):
-           # By default give from the root in bottle_dir/htdocs. If the file is missing,
-           # search in the share dir
-           root = os.path.join(bottle_dir, 'htdocs')
-           p = os.path.join(root, path)
-           print "LOOK for FILE EXISTS", p
-           if not os.path.exists(p):
-              root = self.share_dir
-              print "LOOK FOR PATH", path
-              print "No such file, I look in", os.path.join(root, path)
-           return static_file(path, root=root)
+            # By default give from the root in bottle_dir/htdocs. If the file is missing,
+            # search in the share dir
+            root = os.path.join(bottle_dir, 'htdocs')
+            p = os.path.join(root, path)
+            print "LOOK for FILE EXISTS", p
+            if not os.path.exists(p):
+                root = self.share_dir
+                print "LOOK FOR PATH", path
+                print "No such file, I look in", os.path.join(root, path)
+            return static_file(path, root=root)
 
 
         # And add the favicon ico too
@@ -929,31 +929,31 @@ class Skonf(Daemon):
 
     # TODO: fix hard coded server/database
     def init_db(self):
-       if not Connection:
-          logger.error('You need the pymongo lib for running skonfui. Please install it')
-          sys.exit(2)
+        if not Connection:
+            logger.error('You need the pymongo lib for running skonfui. Please install it')
+            sys.exit(2)
 
-       con = Connection('localhost')
-       self.db = con.shinken
+        con = Connection('localhost')
+        self.db = con.shinken
 
 
     def init_datamanager(self):
-       self.datamgr.load_conf(self.conf)
-       self.datamgr.load_db(self.db)
+        self.datamgr.load_conf(self.conf)
+        self.datamgr.load_db(self.db)
 
 
 
     def get_api_key(self):
-       return str(self.api_key)
+        return str(self.api_key)
 
     # We are asking to a worker .. to work :)
     def ask_new_scan(self, id):
-       msg = Message(id=0, type='ScanAsk', data={'scan_id': id})
-       print "Creating a Message for ScanAsk", msg
-       self.workers_queue.put(msg)
+        msg = Message(id=0, type='ScanAsk', data={'scan_id': id})
+        print "Creating a Message for ScanAsk", msg
+        self.workers_queue.put(msg)
 
 
-        # Will get all label/uri for external UI like PNP or NagVis
+         # Will get all label/uri for external UI like PNP or NagVis
     def get_external_ui_link(self):
         lst = []
         for mod in self.modules_manager.get_internal_instances():
@@ -975,120 +975,120 @@ class Skonf(Daemon):
 
 
     def save_pack(self, buf):
-       print "SAVING A PACK WITH SIZE", len(buf)
-       _tmpfile = tempfile.mktemp()
-       f = open(_tmpfile, 'wb')
-       f.write(buf)
-       f.close()
-       print "We dump the download pack under", _tmpfile
-       print "CHECK if it's a zip file"
-       if not zipfile.is_zipfile(_tmpfile):
-          print "It's not a zip file!"
-          r = {'state': 200, 'text': 'Ok, the pack is downloaded and install. Please restart skonf to use it.'}
-          os.remove(_tmpfile)
-          return r
+        print "SAVING A PACK WITH SIZE", len(buf)
+        _tmpfile = tempfile.mktemp()
+        f = open(_tmpfile, 'wb')
+        f.write(buf)
+        f.close()
+        print "We dump the download pack under", _tmpfile
+        print "CHECK if it's a zip file"
+        if not zipfile.is_zipfile(_tmpfile):
+            print "It's not a zip file!"
+            r = {'state': 200, 'text': 'Ok, the pack is downloaded and install. Please restart skonf to use it.'}
+            os.remove(_tmpfile)
+            return r
 
 
-       TMP_DIR = tempfile.mkdtemp()
-       print "Unflating the pack into", TMP_DIR
-       f = zipfile.ZipFile(_tmpfile)
-       f.extractall(TMP_DIR)
+        TMP_DIR = tempfile.mkdtemp()
+        print "Unflating the pack into", TMP_DIR
+        f = zipfile.ZipFile(_tmpfile)
+        f.extractall(TMP_DIR)
 
-       # The zip file is no more need
-       os.remove(_tmpfile)
+        # The zip file is no more need
+        os.remove(_tmpfile)
 
-       packs = Packs({})
-       packs.load_file(TMP_DIR)
-       packs = [i for i in packs]
-       if len(packs) > 1:
-          r = {'state': 400, 'text': 'ERROR: the pack got too much .pack file in it'}
-          # Clean before exit
-          shutil.rmtree(TMP_DIR)
-          return r
+        packs = Packs({})
+        packs.load_file(TMP_DIR)
+        packs = [i for i in packs]
+        if len(packs) > 1:
+            r = {'state': 400, 'text': 'ERROR: the pack got too much .pack file in it'}
+            # Clean before exit
+            shutil.rmtree(TMP_DIR)
+            return r
 
-       if len(packs) == 0:
-          r = {'state': 400, 'text': 'ERROR: no valid .pack found in the zip file'}
-          # Clean before exit
-          shutil.rmtree(TMP_DIR)
-          return r
+        if len(packs) == 0:
+            r = {'state': 400, 'text': 'ERROR: no valid .pack found in the zip file'}
+            # Clean before exit
+            shutil.rmtree(TMP_DIR)
+            return r
 
-       pack = packs.pop()
-       print "We read pack", pack.__dict__
-       # Now we can update the db pack entry
-       pack_name = pack.pack_name
-       pack_path = pack.path
-       if pack_path == '/':
-          pack_path = '/uncategorized'
+        pack = packs.pop()
+        print "We read pack", pack.__dict__
+        # Now we can update the db pack entry
+        pack_name = pack.pack_name
+        pack_path = pack.path
+        if pack_path == '/':
+            pack_path = '/uncategorized'
 
-       # Now we move the pack to it's final directory
-       dirs = os.path.normpath(pack_path).split('/')
-       dirs = [d for d in dirs if d != '']
-       # We will create all directory until the last one
-       # so we are doing a mkdir -p .....
-       tmp_dir = self.packs_home
-       for d in dirs:
-          _d = os.path.join(tmp_dir, d)
-          print "Look for the directory", _d
-          if not os.path.exists(_d):
-             os.mkdir(_d)
-          tmp_dir = _d
-       # Ok now the last level
-       dest_dir = os.path.join(tmp_dir, pack_name)
-       print "Will copy the tree in the pack tree", dest_dir
+        # Now we move the pack to it's final directory
+        dirs = os.path.normpath(pack_path).split('/')
+        dirs = [d for d in dirs if d != '']
+        # We will create all directory until the last one
+        # so we are doing a mkdir -p .....
+        tmp_dir = self.packs_home
+        for d in dirs:
+            _d = os.path.join(tmp_dir, d)
+            print "Look for the directory", _d
+            if not os.path.exists(_d):
+                os.mkdir(_d)
+            tmp_dir = _d
+        # Ok now the last level
+        dest_dir = os.path.join(tmp_dir, pack_name)
+        print "Will copy the tree in the pack tree", dest_dir
 
-       # If it's already here (previous pack?) clean it
-       if os.path.exists(dest_dir):
-          print "Cleaning the old pack dir", dest_dir
-          shutil.rmtree(dest_dir)
+        # If it's already here (previous pack?) clean it
+        if os.path.exists(dest_dir):
+            print "Cleaning the old pack dir", dest_dir
+            shutil.rmtree(dest_dir)
 
-       # Copying the new pack
-       shutil.copytree(TMP_DIR, dest_dir)
-       shutil.rmtree(TMP_DIR)
+        # Copying the new pack
+        shutil.copytree(TMP_DIR, dest_dir)
+        shutil.rmtree(TMP_DIR)
 
-       # Ok we do not want to let some images or templates dir in it,
-       # so we will move all of them too
-       img_dir = os.path.join(dest_dir, 'images')
-       if os.path.exists(img_dir):
-          print "We got an images source dir, we should move it"
-          for root, dirs, files in os.walk(img_dir):
-             for file in files:
-                src_file = os.path.join(root, file)
-                dst_file = src_file[len(img_dir):]
-                if dst_file.startswith('/'):
-                   dst_file = dst_file[1:]
-                img_dst_dir = os.path.dirname(dst_file)
-                from_share_path = os.path.join('images', img_dst_dir)
-                can_be_copy = expect_file_dirs(self.share_dir, from_share_path)
-                full_dst_file = os.path.join(self.share_dir, from_share_path, file)
-                print "Is the file %s can be copy? %s" % (dst_file, can_be_copy)
-                print "Saving a source file", src_file, 'in', full_dst_file
-                if can_be_copy:
-                   shutil.copy(src_file, full_dst_file)
-                else:
-                   logger.warning('Cannot create the directory %s for a pack install' % os.path.join(self.share_dir, from_share_path))
-
-
-       # Now the template one
-       templates_dir = os.path.join(dest_dir, 'templates')
-       if os.path.exists(templates_dir):
-          print "We got an images source dir, we should move it"
-          for root, dirs, files in os.walk(templates_dir):
-             for file in files:
-                src_file = os.path.join(root, file)
-                dst_file = src_file[len(templates_dir):]
-                if dst_file.startswith('/'):
-                   dst_file = dst_file[1:]
-                tpl_dst_dir = os.path.dirname(dst_file)
-                from_share_path = os.path.join('templates', tpl_dst_dir)
-                can_be_copy = expect_file_dirs(self.share_dir, from_share_path)
-                full_dst_file = os.path.join(self.share_dir, from_share_path, file)
-                print "Is the file %s can be copy? %s" % (dst_file, can_be_copy)
-                print "Saving a source file", src_file, 'in', full_dst_file
-                if can_be_copy:
-                   shutil.copy(src_file, full_dst_file)
-                else:
-                   logger.warning('Cannot create the directory %s for a pack install' % os.path.join(self.share_dir, from_share_path))
+        # Ok we do not want to let some images or templates dir in it,
+        # so we will move all of them too
+        img_dir = os.path.join(dest_dir, 'images')
+        if os.path.exists(img_dir):
+            print "We got an images source dir, we should move it"
+            for root, dirs, files in os.walk(img_dir):
+                for file in files:
+                    src_file = os.path.join(root, file)
+                    dst_file = src_file[len(img_dir):]
+                    if dst_file.startswith('/'):
+                        dst_file = dst_file[1:]
+                    img_dst_dir = os.path.dirname(dst_file)
+                    from_share_path = os.path.join('images', img_dst_dir)
+                    can_be_copy = expect_file_dirs(self.share_dir, from_share_path)
+                    full_dst_file = os.path.join(self.share_dir, from_share_path, file)
+                    print "Is the file %s can be copy? %s" % (dst_file, can_be_copy)
+                    print "Saving a source file", src_file, 'in', full_dst_file
+                    if can_be_copy:
+                        shutil.copy(src_file, full_dst_file)
+                    else:
+                        logger.warning('Cannot create the directory %s for a pack install' % os.path.join(self.share_dir, from_share_path))
 
 
-       r = {'state': 200, 'text': 'Ok, the pack is downloaded and install. Please restart skonf to use it.'}
-       return r
+        # Now the template one
+        templates_dir = os.path.join(dest_dir, 'templates')
+        if os.path.exists(templates_dir):
+            print "We got an images source dir, we should move it"
+            for root, dirs, files in os.walk(templates_dir):
+                for file in files:
+                    src_file = os.path.join(root, file)
+                    dst_file = src_file[len(templates_dir):]
+                    if dst_file.startswith('/'):
+                        dst_file = dst_file[1:]
+                    tpl_dst_dir = os.path.dirname(dst_file)
+                    from_share_path = os.path.join('templates', tpl_dst_dir)
+                    can_be_copy = expect_file_dirs(self.share_dir, from_share_path)
+                    full_dst_file = os.path.join(self.share_dir, from_share_path, file)
+                    print "Is the file %s can be copy? %s" % (dst_file, can_be_copy)
+                    print "Saving a source file", src_file, 'in', full_dst_file
+                    if can_be_copy:
+                        shutil.copy(src_file, full_dst_file)
+                    else:
+                        logger.warning('Cannot create the directory %s for a pack install' % os.path.join(self.share_dir, from_share_path))
+
+
+        r = {'state': 200, 'text': 'Ok, the pack is downloaded and install. Please restart skonf to use it.'}
+        return r

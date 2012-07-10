@@ -707,10 +707,10 @@ def addobject(config, objectype, directive):
 
     # get a dict of directives
     try:
-      directives={}
-      for pair in directive.split(','):
-          (d, v) = pair.split('=')
-          directives[d]=v
+        directives={}
+        for pair in directive.split(','):
+            (d, v) = pair.split('=')
+            directives[d]=v
     except:
         print "An unrecoverable error occured while checking directives"
         sys.exit(2)
@@ -796,10 +796,10 @@ def getdirective(config, objectype, directive, filters):
                 dfilters[k]=v
 
         if config.has_key(objectype):
-#            max=len(config[objectype])
-#            filterok=0
-#            if max > 1 or max == 0:
-#                return (False,"Two many values. Refine your filter")
+            ## max=len(config[objectype])
+            ## filterok=0
+            ## if max > 1 or max == 0:
+            ##     return (False,"Two many values. Refine your filter")
             filterok=0
             for (d, v) in dfilters.items():
                 filterok=filterok+1

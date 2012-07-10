@@ -316,7 +316,7 @@ class Service(SchedulingItem):
         'criticity':    'business_impact',
         'hostgroup':    'hostgroup_name',
         'hostgroups':    'hostgroup_name',
-#        'criticitymodulations':    'business_impact_modulations',
+        ## 'criticitymodulations':    'business_impact_modulations',
     }
 
 #######

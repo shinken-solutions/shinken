@@ -41,13 +41,13 @@ import optparse
 # Try to see if we are in an android device or not
 is_android = True
 try:
-   import android
-   # Add our main script dir
-   if os.path.exists('/sdcard/sl4a/scripts/'):
-       sys.path.append('/sdcard/sl4a/scripts/')
-       os.chdir('/sdcard/sl4a/scripts/')
+    import android
+    # Add our main script dir
+    if os.path.exists('/sdcard/sl4a/scripts/'):
+        sys.path.append('/sdcard/sl4a/scripts/')
+        os.chdir('/sdcard/sl4a/scripts/')
 except ImportError:
-   is_android = False
+    is_android = False
 
 
 try:

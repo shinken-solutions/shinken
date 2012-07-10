@@ -240,7 +240,7 @@ class Helper(object):
                 pd['data']["$color"] = 'Tomato'
             # If OK, show host->service as a green link
             elif elt.__class__.my_type != p.__class__.my_type:
-                 pd['data']["$color"] = 'PaleGreen'
+                pd['data']["$color"] = 'PaleGreen'
             d['adjacencies'].append(pd)
 
         # The sons case is now useful, it will be done by our sons

@@ -75,9 +75,9 @@ def lookup(cls='', name=''):
 def lookup_tag_post(cls=''):
     app.response.content_type = 'application/json'
 
-#    user = app.get_user_auth()
-#    if not user:
-#        return []
+    ## user = app.get_user_auth()
+    ## if not user:
+    ##     return []
     sources = {'host': app.host_templates, 'service': app.service_templates,
                'contact': app.contact_templates, 'timeperiod': app.timeperiod_templates}
 

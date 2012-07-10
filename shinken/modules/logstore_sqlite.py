@@ -296,12 +296,13 @@ class LiveStatusLogStoreSqlite(BaseModule):
                 #tmpconn.prepare_log_db_table()
                 #tmpconn.close()
 
-		dbmodconf = Module({'module_name': 'LogStore',
-		    'module_type': 'logstore_sqlite',
-		    'use_aggressive_sql': '0',
-		    'database_file': archive,
+                dbmodconf = Module({
+                    'module_name': 'LogStore',
+                    'module_type': 'logstore_sqlite',
+                    'use_aggressive_sql': '0',
+                    'database_file': archive,
                     'max_logs_age': '0',
-		})
+                })
                 tmpconn = LiveStatusLogStoreSqlite(dbmodconf)
                 tmpconn.open()
                 tmpconn.close()
