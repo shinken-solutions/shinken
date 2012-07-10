@@ -57,4 +57,3 @@ def get_page():
 #  * optional: you can add 'method': 'POST' so this adress will be only available for
 #    POST calls. By default it's GET. Look at the lookup module for sample about this.
 pages = {get_page: { 'routes': ['/main/', '/main'], 'view': 'main', 'static': True}}
-

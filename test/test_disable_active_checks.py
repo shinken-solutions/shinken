@@ -78,4 +78,3 @@ class TestDisableActiveChecks(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

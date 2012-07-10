@@ -59,4 +59,3 @@ def only_related_to(lst, user):
                 r.add(i)
 
     return list(r)
-

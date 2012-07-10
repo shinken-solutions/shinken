@@ -143,4 +143,3 @@ class TestMaintPeriod(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

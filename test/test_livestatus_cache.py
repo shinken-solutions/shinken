@@ -349,5 +349,3 @@ if __name__ == '__main__':
 
     #allsuite = unittest.TestLoader.loadTestsFromModule(TestConfig)
     #unittest.TextTestRunner(verbosity=2).run(allsuite)
-
-

@@ -82,5 +82,3 @@ class Hack_cmds_pt(BaseModule):
                 #print "[Hack command poller tag] Match! Chaging the poller tag of %s by %s " % (c.command_name, self.poller_tag)
                 c.poller_tag = self.poller_tag
                 self.update_service_and_hosts_commandCall(arb, c, self.poller_tag)
-
-

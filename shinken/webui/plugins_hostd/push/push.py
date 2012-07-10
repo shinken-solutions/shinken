@@ -169,4 +169,3 @@ pages = {push_new_pack: { 'routes': ['/pushpack'], 'method': 'POST', 'view': Non
 
          add_pack_page: { 'routes': ['/addpack'], 'view': 'addpack', 'static': True},
          }
-

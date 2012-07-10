@@ -252,6 +252,3 @@ class Thrift_status(object, Hooker):
 
     def count_event(self, counter):
         self.counters.increment(counter)
-
-
-

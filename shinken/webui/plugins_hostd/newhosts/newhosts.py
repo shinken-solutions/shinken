@@ -158,4 +158,3 @@ pages = {get_newhosts: { 'routes': ['/newhosts'], 'view': 'newhosts', 'static': 
          delete_host: { 'routes': ['/newhosts/delete/:hname'], 'view': None},
          tag_unmanaged: { 'routes': ['/newhosts/tagunmanaged/:hname'], 'view': None},
          }
-

@@ -347,4 +347,3 @@ class Collectd_arbiter(BaseModule):
 
             except ValueError, exp:
                 print "Collectd read error: ", exp
-

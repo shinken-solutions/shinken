@@ -74,4 +74,3 @@ class TestOrphaned(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

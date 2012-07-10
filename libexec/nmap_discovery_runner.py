@@ -422,4 +422,3 @@ try:
     os.unlink(tmppath)
 except Exception:
     pass
-

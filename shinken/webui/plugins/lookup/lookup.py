@@ -77,4 +77,3 @@ def lookup_post():
 pages = {lookup: { 'routes': ['/lookup/:name']},
          lookup_post: { 'routes': ['/lookup'] , 'method': 'POST'}
          }
-

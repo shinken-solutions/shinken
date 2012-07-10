@@ -106,4 +106,3 @@ class TestPollerTagGetchecks(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

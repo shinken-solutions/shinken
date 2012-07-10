@@ -750,4 +750,3 @@ class Arbiter(Daemon):
         external_commands = data['external_commands']
         self.broks.update(broks)
         self.external_commands.extend(external_commands)
-

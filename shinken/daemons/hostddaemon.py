@@ -1104,4 +1104,3 @@ class Hostd(Daemon):
             r['validated'] = False
 
         self.db.users.save(r)
-

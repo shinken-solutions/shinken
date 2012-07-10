@@ -298,4 +298,3 @@ else:
 
         def kill__(self):
             TerminateProcess(int(self.process._handle), -1)
-

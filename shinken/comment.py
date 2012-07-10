@@ -128,4 +128,3 @@ class Comment:
             setattr(self, prop, val)
         if self.id >= cls.id:
             cls.id = self.id + 1
-

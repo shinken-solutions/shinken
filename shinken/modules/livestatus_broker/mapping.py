@@ -4534,4 +4534,3 @@ def find_filter_converter(table, attribute, reverse=False):
 def list_livestatus_attributes(table):
     tableclass = table_class_map[table][0]
     return sorted(livestatus_attribute_map[tableclass].keys())
-

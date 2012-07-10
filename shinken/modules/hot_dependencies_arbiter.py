@@ -269,5 +269,3 @@ class Hot_dependencies_arbiter(BaseModule):
 
                     self.debug('Raising external command %s' % extcmd)
                     arb.add(e)
-
-

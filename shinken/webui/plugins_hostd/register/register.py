@@ -111,4 +111,3 @@ pages = {register: { 'routes': ['/register'], 'view': 'register', 'static': True
          validate: { 'routes': ['/validate'], 'view': 'validate', 'static': True},
          get_api_key: { 'routes': ['/apikey'], 'method': 'POST'},
          }
-

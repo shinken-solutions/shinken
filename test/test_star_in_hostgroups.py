@@ -52,4 +52,3 @@ class TestStarInGroups(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

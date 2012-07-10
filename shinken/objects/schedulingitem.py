@@ -1373,6 +1373,3 @@ class SchedulingItem(Item):
                 t.eval(self)
             except Exception, exp:
                 safe_print("We got an exeception from a trigger on", self.get_full_name(), str(traceback.format_exc()))
-
-
-

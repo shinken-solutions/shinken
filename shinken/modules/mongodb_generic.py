@@ -165,5 +165,3 @@ class Mongodb_generic(BaseModule):
                 u[key] = value
                 print '[Mongodb] Just saving the new key in the user pref'
                 self.db.ui_user_preferences.save(u)
-
-

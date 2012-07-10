@@ -1082,4 +1082,3 @@ class Regenerator(object):
     # A service check update have just arrived, we UPDATE data info with this
     def manage_service_next_schedule_brok(self, b):
         self.manage_service_check_result_brok(b)
-

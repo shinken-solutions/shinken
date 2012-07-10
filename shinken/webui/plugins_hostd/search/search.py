@@ -218,4 +218,3 @@ pages = {search_post: { 'routes': ['/search'] , 'method': 'POST'},
          search_categories: { 'routes': ['/categories'] , 'method': 'POST'},
          search_tags: { 'routes': ['/tags'] , 'method': 'POST'},
          }
-

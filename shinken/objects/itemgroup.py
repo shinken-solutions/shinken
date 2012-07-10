@@ -178,5 +178,3 @@ class Itemgroups(Items):
         if g is None:
             return []
         return getattr(g, 'members', [])
-
-

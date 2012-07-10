@@ -108,4 +108,3 @@ def lookup_tag_post(cls=''):
 pages = {lookup_tag_post: { 'routes': ['/lookup/:cls/tag'] , 'method': 'POST'},
          lookup: { 'routes': ['/lookup/:cls/tag/:name']},
          }
-

@@ -317,4 +317,3 @@ pages = {
     save_object: { 'routes': ['/element/q/:cls/save/:name'], 'method': 'POST'},
     save_new_object: { 'routes': ['/element/q/:cls/save/'], 'method': 'POST'},
     }
-

@@ -197,4 +197,3 @@ self.perf_data = "Moncul c'est du poulet3"
 
 if __name__ == '__main__':
     unittest.main()
-

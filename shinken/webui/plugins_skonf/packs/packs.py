@@ -306,4 +306,3 @@ pages = {get_packs: { 'routes': ['/packs'], 'view': 'packs', 'static': True},
          get_new_packs_result: { 'routes': ['/getpacks/:search#.+#'], 'view': 'getpacks', 'static': True},
          download_pack: { 'routes': ['/download/:uri#.+#'], 'view': None, 'static': True},
          }
-

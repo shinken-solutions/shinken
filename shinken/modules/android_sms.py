@@ -241,5 +241,3 @@ class Android_reactionner(BaseModule):
             timeout -= time.time() - begin
             if timeout < 0:
                 timeout = 1.0
-
-

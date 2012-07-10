@@ -119,4 +119,3 @@ pages = {get_page: { 'routes': ['/user/:username'], 'view': 'user', 'static': Tr
          post_user: { 'routes': ['/user'], 'method': 'POST', 'view': 'user', 'static': True},
          check_key: { 'routes': ['/checkkey/:api_key']},
          }
-

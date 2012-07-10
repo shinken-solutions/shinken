@@ -255,4 +255,3 @@ class AddrProp(Property):
             addr['port'] = int(m.group(2))
 
         return addr
-

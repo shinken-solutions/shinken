@@ -300,4 +300,3 @@ class ModulesManager(object):
                 inst.quit()
 
         self.clear_instances([ inst for inst in self.instances if inst.is_external])
-

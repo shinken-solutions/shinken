@@ -86,4 +86,3 @@ if __name__ == "__main__":
     else:
         print 'OK - Load average : '+load1+','+load5+','+load15+'|load1='+load1+'; load5='+load5+'; load15='+load15
         sys.exit(0)
-

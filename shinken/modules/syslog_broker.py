@@ -60,4 +60,3 @@ class Syslog_broker(BaseModule):
     def manage_log_brok(self, b):
         data = b.data
         syslog.syslog(data['log'].encode('UTF-8'))
-

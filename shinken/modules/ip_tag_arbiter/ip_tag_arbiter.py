@@ -99,7 +99,3 @@ class Ip_Tag_Arbiter(BaseModule):
                     if not hasattr(h, self.property):
                         # Ok, set the value!
                         setattr(h, self.property, self.value)
-
-
-
-

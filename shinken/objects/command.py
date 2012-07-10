@@ -165,4 +165,3 @@ class Commands(Items):
 
     inner_class = Command
     name_property = "command_name"
-

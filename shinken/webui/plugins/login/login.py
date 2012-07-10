@@ -122,4 +122,3 @@ pages = { user_login: { 'routes': ['/user/login', '/user/login/'],
           login_mobile: {'routes': ['/mobile', '/mobile/'],
                     'view': 'login_mobile', 'static': True}
           }
-

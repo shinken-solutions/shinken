@@ -62,6 +62,3 @@ class ThriftCommandQuery(ThriftQuery):
             e = ExternalCommand(self.extcmd)
             self.return_queue.put(e)
             return []
-
-
-

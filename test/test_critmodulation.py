@@ -47,4 +47,3 @@ class TestCritMod(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

@@ -122,4 +122,3 @@ def get_page():
 
 
 pages = {get_page: { 'routes': ['/wall/', '/wall'], 'view': 'wall', 'static': True}}
-

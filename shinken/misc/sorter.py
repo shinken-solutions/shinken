@@ -101,5 +101,3 @@ def last_state_change_earlier(s1, s2):
         return 1
 
     return 0
-
-

@@ -44,4 +44,3 @@ class Testservice_withhost_exclude(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

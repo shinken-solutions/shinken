@@ -153,5 +153,3 @@ class ArbiterLinks(SatelliteLinks):
     # We must have a realm property, so we find our realm
     def linkify(self, modules):
         self.linkify_s_by_plug(modules)
-
-

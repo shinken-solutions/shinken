@@ -138,4 +138,3 @@ class Check(Action):
 
     def set_type_passive(self):
         self.check_type = 1
-

@@ -109,4 +109,3 @@ pages = {get_page: { 'routes': ['/blabla'], 'view': 'blabla', 'static': True},
          form_comment: { 'routes': ['/forms/comment/:name#.+#'], 'view': 'form_comment'},
          form_downtime: { 'routes': ['/forms/downtime/:name#.+#'], 'view': 'form_downtime'},
          }
-

@@ -216,4 +216,3 @@ class AD_Webui(BaseModule):
 
         # No good? so no auth :)
         return False
-

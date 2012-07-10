@@ -110,4 +110,3 @@ class MatchingItem(Item):
         # Ok we match ALL rules in self.matches
         # and NONE of self.not_matches, we can go :)
         return True
-

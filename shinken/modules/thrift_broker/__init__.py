@@ -104,5 +104,3 @@ def get_instance(plugin):
 
     instance = Thrift_broker(plugin, host, port, socket, allowed_hosts, database_file, max_logs_age, pnp_path, debug, debug_queries)
     return instance
-
-

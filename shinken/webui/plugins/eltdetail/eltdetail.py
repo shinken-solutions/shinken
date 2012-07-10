@@ -91,4 +91,3 @@ def show_service(hname, desc):
 pages = {show_host: { 'routes': ['/host/:name'], 'view': 'eltdetail', 'static': True},
          show_service: { 'routes': ['/service/:hname/:desc#.+#'], 'view': 'eltdetail', 'static': True},
          }
-

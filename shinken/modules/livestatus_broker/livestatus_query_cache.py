@@ -166,4 +166,3 @@ class LiveStatusQueryCache(object):
             print obj.state_id, obj.state_type_id, brok.data['state_id'], brok.data['state_type_id']
         except Exception:
             pass
-

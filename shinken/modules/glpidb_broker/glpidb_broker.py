@@ -249,4 +249,3 @@ class Glpidb_broker(BaseModule):
         #print "Update service: ", new_data
         query = self.db_backend.create_update_query(table, new_data, where_clause)
         return [query]
-

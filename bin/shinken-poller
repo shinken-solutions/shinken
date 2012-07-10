@@ -78,4 +78,3 @@ if __name__ == '__main__':
 # For perf tuning:
 #import cProfile
 #cProfile.run('''daemon.main()''', '/tmp/poller.profile')
-

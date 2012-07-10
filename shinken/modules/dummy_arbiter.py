@@ -87,4 +87,3 @@ class Dummy_arbiter(BaseModule):
         e = ExternalCommand('Viva la revolution')
         self.from_q.put(e)
         time.sleep(1)
-

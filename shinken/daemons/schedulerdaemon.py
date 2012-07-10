@@ -397,5 +397,3 @@ class Shinken(BaseSatellite):
             logger.critical("You can log a bug ticket at https://github.com/naparuba/shinken/issues/new to get help")
             logger.critical("Back trace of it: %s" % (traceback.format_exc()))
             raise
-
-

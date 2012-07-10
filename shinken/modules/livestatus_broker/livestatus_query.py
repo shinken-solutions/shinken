@@ -898,5 +898,3 @@ class LiveStatusQuery(object):
             return extract_postproc
         else:
             raise "wrong operation", operator
-
-

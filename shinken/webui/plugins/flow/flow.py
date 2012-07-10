@@ -121,4 +121,3 @@ def get_page():
 
 
 pages = {get_page: { 'routes': ['/flow/'], 'view': 'flow', 'static': True}}
-

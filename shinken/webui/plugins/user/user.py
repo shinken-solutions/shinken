@@ -67,4 +67,3 @@ def save_pref():
 
 
 pages = {save_pref: { 'routes': ['/user/save_pref'], 'method': 'POST'}}
-

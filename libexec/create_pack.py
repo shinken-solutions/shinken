@@ -119,4 +119,3 @@ define service{
 """ % (pack_name, pack_name, pack_name)
 
 create_file(os.path.join('services', 'sample.cfg'), service)
-

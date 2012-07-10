@@ -131,4 +131,3 @@ class Discoveryrule(MatchingItem):
 class Discoveryrules(Items):
     name_property = "discoveryrule_name"
     inner_class = Discoveryrule
-

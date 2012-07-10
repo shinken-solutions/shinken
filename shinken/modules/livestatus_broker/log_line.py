@@ -251,4 +251,3 @@ class Logline(dict):
             setattr(self, 'log_host', None)
             setattr(self, 'log_service', None)
         return self
-

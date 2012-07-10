@@ -75,4 +75,3 @@ class Hack_pt_by_macros(BaseModule):
                 v = s.customs[self.service_macro_name.upper()]
                 s.poller_tag = v
                 s.check_command.poller_tag = v
-

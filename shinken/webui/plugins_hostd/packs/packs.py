@@ -66,4 +66,3 @@ pages = {
     get_pack: { 'routes': ['/pack/:pid'], 'view': 'pack', 'static': True},
     download_pack: { 'routes': ['/getpack/:pid'], 'static': True},
     }
-

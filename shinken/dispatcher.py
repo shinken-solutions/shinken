@@ -547,4 +547,3 @@ class Dispatcher:
                             logger.info('[%s] Dispatch OK of configuration to receiver %s' %(r.get_name(), rec.get_name()))
                         else:
                             logger.warning('[%s] dispatching failed for receiver %s' %(r.get_name(), rec.get_name()))
-

@@ -192,4 +192,3 @@ if __name__ == '__main__':
             print "ERROR: no pack filled"
             sys.exit(2)
         analyse_pack(table, pack)
-

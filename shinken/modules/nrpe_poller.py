@@ -524,5 +524,3 @@ class Nrpe_poller(BaseModule):
             timeout -= time.time() - begin
             if timeout < 0:
                 timeout = 1.0
-
-
