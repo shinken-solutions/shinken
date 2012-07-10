@@ -73,19 +73,17 @@
 .column1 { width: 50%; }
 
 
-<<<<<<< HEAD
+
 #elt_container h2 {
 	font-size: 15px;
 	margin-bottom: 5px;
-=======
-#elt_summary table {
-	width: 100%;
+
 }
 
 #elt_summary table, #elt_summary tr, #elt_summary th, #elt_summary td, #elt_summary tbody{
 	background: none !important;
 	border: none;
->>>>>>> naparuba/master
+
 }
 
 #item_information {
