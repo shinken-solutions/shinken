@@ -236,7 +236,8 @@ class Servicedependencies(Items):
     # We backport service dep to service. So SD is not need anymore
     def linkify_s_by_sd(self):
         for sd in self:
-            if sd.is_tpl(): continue
+            if sd.is_tpl():
+                continue
             dsc = sd.dependent_service_description
             sdval = sd.service_description
             if dsc is not None and sdval is not None:

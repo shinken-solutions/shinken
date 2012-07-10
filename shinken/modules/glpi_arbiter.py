@@ -139,7 +139,7 @@ class Glpi_arbiter(BaseModule):
                  'process_perf_data': host_info['process_perf_data'],
                  'notification_interval': host_info['notification_interval'],
                  'notification_period': host_info['notification_period'],
-                 'notification_options': host_info['notification_options']};
+                 'notification_options': host_info['notification_options']}
             for attribut in attributs:
                 if attribut in host_info:
                     h[attribut] = host_info[attribut]
@@ -160,7 +160,7 @@ class Glpi_arbiter(BaseModule):
         for template_info in all_templates:
             print "\n\n"
             print "Template info in GLPI", template_info
-            h = {'register': '0'};
+            h = {'register': '0'}
             for attribut in attributs:
                 if attribut in template_info:
                     h[attribut] = template_info[attribut]
@@ -190,7 +190,7 @@ class Glpi_arbiter(BaseModule):
         for service_info in all_services:
             print "\n\n"
             print "Service info in GLPI", service_info
-            h = {};
+            h = {}
             for attribut in attributs:
                 if attribut in service_info:
                     h[attribut] = service_info[attribut]

@@ -302,17 +302,20 @@ class ShinkenAdmin(cmd.Cmd):
         '''
         self.look_connexion()
         if not self.arb.reachable:
-            print "Cannot connect to the arbiter, bail out"; return
+            print "Cannot connect to the arbiter, bail out"
+            return
 
         args     = line.strip().split(' ')
         if len(args) > 2 or args[0] == '':
-            print "Invalid number of arguments"; return
+            print "Invalid number of arguments"
+            return
 
         daemon   = '*' if len(args) < 2 else args[0]
         try:
             loglevel = logger.get_level_id(args[-1])
         except KeyError:
-            print "Invalid '%s' log level. Must be one of DEBUG, INFO, WARNING, ERROR, CRITICAL" % args[-1]; return
+            print "Invalid '%s' log level. Must be one of DEBUG, INFO, WARNING, ERROR, CRITICAL" % args[-1]
+            return
 
         conf     = self.arb.get_config()
 

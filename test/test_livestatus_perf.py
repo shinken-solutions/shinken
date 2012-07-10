@@ -1165,7 +1165,7 @@ def isprime(startnumber):
 
 class PerfTest(ShinkenTest):
     def tearDown(self):
-        print "comment me for performance tests";
+        print "comment me for performance tests"
         self.livestatus_broker.db.commit()
         self.livestatus_broker.db.close()
         if os.path.exists(self.livelogs):
@@ -1191,7 +1191,7 @@ class PerfTest(ShinkenTest):
         self.sched.broks = {}
 
     def test_perf(self):
-        print "comment me for performance tests";
+        print "comment me for performance tests"
         self.print_header()
         now = time.time()
         objlist = []

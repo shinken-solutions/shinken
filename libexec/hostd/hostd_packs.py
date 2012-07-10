@@ -27,9 +27,12 @@ logger.set_level(10)
 
 
 class Dummy():
-    def __init__(self): pass
+    def __init__(self):
+        pass
 
-    def add(self, obj): pass
+    def add(self, obj):
+        pass
+
 logger.load_obj(Dummy())
 
 from pymongo.connection import Connection

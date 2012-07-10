@@ -18,9 +18,9 @@ import getopt
 def usage():
     print 'Usage:'
     print sys.argv[0] + ' -w <80> -c <90>'
-    print '   -c (--critical)      Critical tresholds (defaults: 90%)\n';
-    print '   -w (--warning)       Warning tresholds (defaults: 80%)\n';
-    print '   -h (--help)          Usage help\n';
+    print '   -c (--critical)      Critical tresholds (defaults: 90%)\n'
+    print '   -w (--warning)       Warning tresholds (defaults: 80%)\n'
+    print '   -h (--help)          Usage help\n'
 
 #
 # Main

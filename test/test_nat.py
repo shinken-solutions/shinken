@@ -141,7 +141,8 @@ class TestNat(unittest.TestCase):
         f = open(logs[svc].replace('#root#', os.path.join(self.testdir, "..")).replace('#svc#', svc), 'r')
         for line in f.xreadlines():
             if msg in line:
-                f.close(); return True
+                f.close()
+                return True
 
         f.close()
         return False

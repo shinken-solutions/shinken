@@ -1321,8 +1321,10 @@ class Config(Item):
         for x in ( 'servicedependencies', 'hostdependencies', 'arbiters', 'schedulers',
                    'reactionners', 'pollers', 'brokers', 'receivers', 'resultmodulations',
                    'discoveryrules', 'discoveryruns', 'businessimpactmodulations'):
-            try: cur = getattr(self, x)
-            except: continue
+            try:
+                cur = getattr(self, x)
+            except:
+                continue
             if self.read_config_silent == 0:
                 logger.info('Checking %s...' % (x), print_it=True)
             if not cur.is_correct():

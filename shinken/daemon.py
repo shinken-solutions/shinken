@@ -380,7 +380,8 @@ class Daemon(object):
 
         # Iterate through and close all file descriptors.
         for fd in range(0, maxfd):
-            if fd in skip_close_fds: continue
+            if fd in skip_close_fds:
+                continue
             try:
                 os.close(fd)
             except OSError:  # ERROR, fd wasn't open to begin with (ignored)

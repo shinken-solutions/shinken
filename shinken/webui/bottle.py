@@ -43,23 +43,29 @@ from traceback import format_exc
 from urllib import urlencode, quote as urlquote
 from urlparse import urljoin, SplitResult as UrlSplitResult
 
-try: from collections import MutableMapping as DictMixin
+try:
+    from collections import MutableMapping as DictMixin
 except ImportError:  # pragma: no cover
     from UserDict import DictMixin
 
-try: from urlparse import parse_qs
+try:
+    from urlparse import parse_qs
 except ImportError:  # pragma: no cover
     from cgi import parse_qs
 
-try: import cPickle as pickle
+try:
+    import cPickle as pickle
 except ImportError:  # pragma: no cover
     import pickle
 
-try: from json import dumps as json_dumps, loads as json_lds
+try:
+    from json import dumps as json_dumps, loads as json_lds
 except ImportError:  # pragma: no cover
-    try: from simplejson import dumps as json_dumps, loads as json_lds
+    try:
+        from simplejson import dumps as json_dumps, loads as json_lds
     except ImportError:  # pragma: no cover
-        try: from django.utils.simplejson import dumps as json_dumps, loads as json_lds
+        try:
+            from django.utils.simplejson import dumps as json_dumps, loads as json_lds
         except ImportError:  # pragma: no cover
             def json_dumps(data):
                 raise ImportError("JSON support requires Python 2.6 or simplejson.")
@@ -86,6 +92,7 @@ if py3k:  # pragma: no cover
                 the wrapped buffer. This subclass keeps it open. '''
 
             def close(self): pass
+
 else:
     json_loads = json_lds
     from StringIO import StringIO as BytesIO
@@ -111,15 +118,19 @@ tonat.__doc__ = """ Convert anything to native strings """
 
 # Backward compatibility
 def depr(message, critical=False):
-    if critical: raise DeprecationWarning(message)
+    if critical:
+        raise DeprecationWarning(message)
     warnings.warn(message, DeprecationWarning, stacklevel=3)
 
 
 # Small helpers
 def makelist(data):
-    if isinstance(data, (tuple, list, set, dict)): return list(data)
-    elif data: return [data]
-    else: return []
+    if isinstance(data, (tuple, list, set, dict)):
+        return list(data)
+    elif data:
+        return [data]
+    else:
+        return []
 
 
 class DictProperty(object):
@@ -134,17 +145,21 @@ class DictProperty(object):
         return self
 
     def __get__(self, obj, cls):
-        if obj is None: return self
+        if obj is None:
+            return self
         key, storage = self.key, getattr(obj, self.attr)
-        if key not in storage: storage[key] = self.getter(obj)
+        if key not in storage:
+            storage[key] = self.getter(obj)
         return storage[key]
 
     def __set__(self, obj, value):
-        if self.read_only: raise AttributeError("Read-Only property.")
+        if self.read_only:
+            raise AttributeError("Read-Only property.")
         getattr(obj, self.attr)[self.key] = value
 
     def __delete__(self, obj):
-        if self.read_only: raise AttributeError("Read-Only property.")
+        if self.read_only:
+            raise AttributeError("Read-Only property.")
         del getattr(obj, self.attr)[self.key]
 
 
@@ -173,12 +188,14 @@ class HeaderProperty(object):
         self.__doc__ = 'Current value of the %r header.' % name.title()
 
     def __get__(self, obj, cls):
-        if obj is None: return self
+        if obj is None:
+            return self
         value = obj.headers.get(self.name)
         return self.reader(value) if (value and self.reader) else (value or self.default)
 
     def __set__(self, obj, value):
-        if self.writer: value = self.writer(value)
+        if self.writer:
+            value = self.writer(value)
         obj.headers[self.name] = value
 
     def __delete__(self, obj):
@@ -305,7 +322,8 @@ class Router(object):
             token = self.syntax.split(rule)
             parts = [p.replace('\\:', ':') for p in token[::3]]
             names = token[1::3]
-            if len(parts) > len(names): names.append(None)
+            if len(parts) > len(names):
+                names.append(None)
             pairs = zip(parts, names)
             self.named[_name] = (rule, pairs)
         try:
@@ -319,7 +337,8 @@ class Router(object):
         except KeyError, e:
             raise RouteBuildError(*e.args)
 
-        if args: url += ['?', urlencode(args)]
+        if args:
+            url += ['?', urlencode(args)]
         return ''.join(url)
 
     def match(self, environ):
@@ -345,27 +364,36 @@ class Router(object):
         path = environ['PATH_INFO'] or '/'
         # Assume we are in a warm state. Search compiled rules first.
         match = self.static.get(path)
-        if match: return match, {}
+        if match:
+            return match, {}
         for combined, rules in self.dynamic:
             match = combined.match(path)
-            if not match: continue
+            if not match:
+                continue
             gpat, match = rules[match.lastindex - 1]
             return match, gpat(path).groupdict() if gpat else {}
+
         # Lazy-check if we are really in a warm state. If yes, stop here.
-        if self.static or self.dynamic or not self.routes: return None, {}
+        if self.static or self.dynamic or not self.routes:
+            return None, {}
+
         # Cold state: We have not compiled any rules yet. Do so and try again.
         if not environ.get('wsgi.run_once'):
             self._compile()
             return self._match_path(environ)
+
         # For run_once (CGI) environments, don't compile. Just check one by one.
         epath = path.replace(':', '\\:')  # Turn path into its own static rule.
         match = self.routes.get(epath)  # This returns static rule only.
-        if match: return match, {}
+        if match:
+            return match, {}
         for rule in self.rules:
             #: Skip static routes to reduce re.compile() calls.
-            if rule.count(':') < rule.count('\\:'): continue
+            if rule.count(':') < rule.count('\\:'):
+                continue
             match = self._compile_pattern(rule).match(path)
-            if match: return self.routes[rule], match.groupdict()
+            if match:
+                return self.routes[rule], match.groupdict()
         return None, {}
 
     def _compile(self):
@@ -397,9 +425,12 @@ class Router(object):
         ''' Return a regular expression with named groups for each wildcard. '''
         out = ''
         for i, part in enumerate(self.syntax.split(rule)):
-            if i%3 == 0:   out += re.escape(part.replace('\\:', ':'))
-            elif i%3 == 1: out += '(?P<%s>' % part if part else '(?:'
-            else:          out += '%s)' % (part or '[^/]+')
+            if i%3 == 0:
+                out += re.escape(part.replace('\\:', ':'))
+            elif i%3 == 1:
+                out += '(?P<%s>' % part if part else '(?:'
+            else:
+                out += '%s)' % (part or '[^/]+')
         return re.compile('^%s$'%out)
 
 ###############################################################################
@@ -461,7 +492,8 @@ class Bottle(object):
             applied to all routes of this application. A plugin may be a simple
             decorator or an object that implements the :class:`Plugin` API.
         '''
-        if hasattr(plugin, 'setup'): plugin.setup(self)
+        if hasattr(plugin, 'setup'):
+            plugin.setup(self)
         if not callable(plugin) and not hasattr(plugin, 'apply'):
             raise TypeError("Plugins must be callable or implement .apply()")
         self.plugins.append(plugin)
@@ -480,15 +512,19 @@ class Bottle(object):
             or getattr(plugin, 'name', True) == remove:
                 removed.append(plugin)
                 del self.plugins[i]
-                if hasattr(plugin, 'close'): plugin.close()
-        if removed: self.reset()
+                if hasattr(plugin, 'close'):
+                    plugin.close()
+        if removed:
+            self.reset()
         return removed
 
     def reset(self, id=None):
         ''' Reset all routes (force plugins to be re-applied) and clear all
             caches. If an ID is given, only that specific route is affected. '''
-        if id is None: self.ccache.clear()
-        else: self.ccache.pop(id, None)
+        if id is None:
+            self.ccache.clear()
+        else:
+            self.ccache.pop(id, None)
         if DEBUG:
             for route in self.routes:
                 if route['id'] not in self.ccache:
@@ -497,7 +533,8 @@ class Bottle(object):
     def close(self):
         ''' Close the application and all installed plugins. '''
         for plugin in self.plugins:
-            if hasattr(plugin, 'close'): plugin.close()
+            if hasattr(plugin, 'close'):
+                plugin.close()
         self.stopped = True
 
     def match(self, environ):
@@ -528,14 +565,18 @@ class Bottle(object):
         skip    = config['skip']
         try:
             for plugin in reversed(plugins):
-                if True in skip: break
-                if plugin in skip or type(plugin) in skip: continue
-                if getattr(plugin, 'name', True) in skip: continue
+                if True in skip:
+                    break
+                if plugin in skip or type(plugin) in skip:
+                    continue
+                if getattr(plugin, 'name', True) in skip:
+                    continue
                 if hasattr(plugin, 'apply'):
                     wrapped = plugin.apply(wrapped, config)
                 else:
                     wrapped = plugin(wrapped)
-                if not wrapped: break
+                if not wrapped:
+                    break
                 functools.update_wrapper(wrapped, config['callback'])
             return wrapped
         except RouteReset:  # A plugin may have changed the config dict inplace.
@@ -567,7 +608,8 @@ class Bottle(object):
             Any additional keyword arguments are stored as route-specific
             configuration and passed to plugins (see :meth:`Plugin.apply`).
         """
-        if callable(path): path, callback = None, path
+        if callable(path):
+            path, callback = None, path
 
         plugins = makelist(apply)
         skiplist = makelist(skip)
@@ -582,7 +624,8 @@ class Bottle(object):
                     self.routes.append(cfg)
                     cfg['id'] = self.routes.index(cfg)
                     self.router.add(rule, verb, cfg['id'], name=name)
-                    if DEBUG: self.ccache[cfg['id']] = self._build_callback(cfg)
+                    if DEBUG:
+                        self.ccache[cfg['id']] = self._build_callback(cfg)
             return callback
 
         return decorator(callback) if callback else decorator
@@ -645,7 +688,8 @@ class Bottle(object):
         except (KeyboardInterrupt, SystemExit, MemoryError):
             raise
         except Exception, e:
-            if not self.catchall: raise
+            if not self.catchall:
+                raise
             stacktrace = format_exc(10)
             environ['wsgi.errors'].write(stacktrace)
             return HTTPError(500, "Internal Server Error", e, stacktrace)
@@ -727,14 +771,16 @@ class Bottle(object):
             # rfc2616 section 4.3
             if response.status_code in (100, 101, 204, 304)\
             or request.method == 'HEAD':
-                if hasattr(out, 'close'): out.close()
+                if hasattr(out, 'close'):
+                    out.close()
                 out = []
             start_response(response.status_line, list(response.iter_headers()))
             return out
         except (KeyboardInterrupt, SystemExit, MemoryError):
             raise
         except Exception, e:
-            if not self.catchall: raise
+            if not self.catchall:
+                raise
             err = '<h1>Critical error while processing request: %s</h1>' \
                   % environ.get('PATH_INFO', '/')
             if DEBUG:
@@ -880,7 +926,8 @@ class BaseRequest(DictMixin):
         body = BytesIO() if maxread < self.MEMFILE_MAX else TemporaryFile(mode='w+b')
         while maxread > 0:
             part = stream.read(min(maxread, self.MEMFILE_MAX))
-            if not part: break
+            if not part:
+                break
             body.write(part)
             maxread -= len(part)
         self.environ['wsgi.input'] = body
@@ -909,7 +956,8 @@ class BaseRequest(DictMixin):
         post = MultiDict()
         safe_env = {'QUERY_STRING': ''}  # Build a safe environment for cgi
         for key in ('REQUEST_METHOD', 'CONTENT_TYPE', 'CONTENT_LENGTH'):
-            if key in self.environ: safe_env[key] = self.environ[key]
+            if key in self.environ:
+                safe_env[key] = self.environ[key]
         if NCTextIOWrapper:
             fb = NCTextIOWrapper(self.body, encoding='ISO-8859-1', newline='\n')
         else:
@@ -1008,9 +1056,11 @@ class BaseRequest(DictMixin):
             the user field is looked up from the ``REMOTE_USER`` environ
             variable. On any errors, None is returned. """
         basic = parse_auth(self.environ.get('HTTP_AUTHORIZATION', ''))
-        if basic: return basic
+        if basic:
+            return basic
         ruser = self.environ.get('REMOTE_USER')
-        if ruser: return (ruser, None)
+        if ruser:
+            return (ruser, None)
         return None
 
     @property
@@ -1020,7 +1070,8 @@ class BaseRequest(DictMixin):
             work if all proxies support the ```X-Forwarded-For`` header. Note
             that this information can be forged by malicious clients. """
         proxy = self.environ.get('HTTP_X_FORWARDED_FOR')
-        if proxy: return [ip.strip() for ip in proxy.split(',')]
+        if proxy:
+            return [ip.strip() for ip in proxy.split(',')]
         remote = self.environ.get('REMOTE_ADDR')
         return [remote] if remote else []
 
@@ -1131,7 +1182,8 @@ class BaseResponse(object):
             code   = int(status.split()[0])
         else:
             raise ValueError('String status line without a reason phrase.')
-        if not 100 <= code <= 999: raise ValueError('Status code out of range.')
+        if not 100 <= code <= 999:
+            raise ValueError('Status code out of range.')
         self.status_code = code
         self.status_line = status or ('%d Unknown' % code)
 
@@ -1273,7 +1325,8 @@ class JSONPlugin(object):
 
     def apply(self, callback, context):
         dumps = self.json_dumps
-        if not dumps: return callback
+        if not dumps:
+            return callback
 
         def wrapper(*a, **ka):
             rv = callback(*a, **ka)
@@ -1303,7 +1356,8 @@ class HooksPlugin(object):
             raise ValueError("Unknown hook name %s" % name)
         was_empty = self._empty()
         self.hooks[name].append(func)
-        if self.app and was_empty and not self._empty(): self.app.reset()
+        if self.app and was_empty and not self._empty():
+            self.app.reset()
 
     def remove(self, name, func):
         ''' Remove a callback from a hook. '''
@@ -1311,17 +1365,21 @@ class HooksPlugin(object):
             raise ValueError("Unknown hook name %s" % name)
         was_empty = self._empty()
         self.hooks[name].remove(func)
-        if self.app and not was_empty and self._empty(): self.app.reset()
+        if self.app and not was_empty and self._empty():
+            self.app.reset()
 
     def apply(self, callback, context):
-        if self._empty(): return callback
+        if self._empty():
+            return callback
         before_request = self.hooks['before_request']
         after_request  = self.hooks['after_request']
 
         def wrapper(*a, **ka):
-            for hook in before_request: hook()
+            for hook in before_request:
+                hook()
             rv = callback(*a, **ka)
-            for hook in after_request[::-1]: hook()
+            for hook in after_request[::-1]:
+                hook()
             return rv
         return wrapper
 
@@ -1339,11 +1397,13 @@ class TypeFilterPlugin(object):
             raise TypeError("Expected type object, got %s" % type(ftype))
         self.filter = [(t, f) for (t, f) in self.filter if t != ftype]
         self.filter.append((ftype, func))
-        if len(self.filter) == 1 and self.app: self.app.reset()
+        if len(self.filter) == 1 and self.app:
+            self.app.reset()
 
     def apply(self, callback, context):
         filter = self.filter
-        if not filter: return callback
+        if not filter:
+            return callback
 
         def wrapper(*a, **ka):
             rv = callback(*a, **ka)
@@ -1386,13 +1446,16 @@ class _ImportRedirect(object):
         sys.meta_path.append(self)
 
     def find_module(self, fullname, path=None):
-        if '.' not in fullname: return
+        if '.' not in fullname:
+            return
         packname, modname = fullname.rsplit('.', 1)
-        if packname != self.name: return
+        if packname != self.name:
+            return
         return self
 
     def load_module(self, fullname):
-        if fullname in sys.modules: return sys.modules[fullname]
+        if fullname in sys.modules:
+            return sys.modules[fullname]
         packname, modname = fullname.rsplit('.', 1)
         realname = self.impmask % modname
         __import__(realname)
@@ -1461,7 +1524,8 @@ class HeaderDict(MultiDict):
 
     def __init__(self, *a, **ka):
         self.dict = {}
-        if a or ka: self.update(*a, **ka)
+        if a or ka:
+            self.update(*a, **ka)
 
     def __contains__(self, key): return _hkey(key) in self.dict
     def __delitem__(self, key): del self.dict[_hkey(key)]
@@ -1471,9 +1535,11 @@ class HeaderDict(MultiDict):
     def append(self, key, value):
         self.dict.setdefault(_hkey(key), []).append(str(value))
 
-    def replace(self, key, value): self.dict[_hkey(key)] = [str(value)]
+    def replace(self, key, value):
+        self.dict[_hkey(key)] = [str(value)]
 
-    def getall(self, key): return self.dict.get(_hkey(key)) or []
+    def getall(self, key):
+        return self.dict.get(_hkey(key)) or []
 
     def get(self, key, default=None, index=-1):
         return MultiDict.get(self, _hkey(key), default, index)
@@ -1553,13 +1619,15 @@ class WSGIFileWrapper(object):
     def __init__(self, fp, buffer_size=1024*64):
         self.fp, self.buffer_size = fp, buffer_size
         for attr in ('fileno', 'close', 'read', 'readlines'):
-            if hasattr(fp, attr): setattr(self, attr, getattr(fp, attr))
+            if hasattr(fp, attr):
+                setattr(self, attr, getattr(fp, attr))
 
     def __iter__(self):
         read, buff = self.fp.read, self.buffer_size
         while True:
             part = read(buff)
-            if not part: break
+            if not part:
+                break
             yield part
 
 ###############################################################################
@@ -1596,8 +1664,10 @@ def static_file(filename, root, mimetype='auto', download=False):
 
     if mimetype == 'auto':
         mimetype, encoding = mimetypes.guess_type(filename)
-        if mimetype: header['Content-Type'] = mimetype
-        if encoding: header['Content-Encoding'] = encoding
+        if mimetype:
+            header['Content-Type'] = mimetype
+        if encoding:
+            header['Content-Encoding'] = encoding
     elif mimetype:
         header['Content-Type'] = mimetype
 
@@ -1707,11 +1777,14 @@ def path_shift(script_name, path_info, shift=1):
         :return: The modified paths.:param script_name: The SCRIPT_NAME path.:param script_name: The PATH_INFO path.:param shift: The number of path fragments to shift. May be negative to
           change the shift direction. (default: 1)
     '''
-    if shift == 0: return script_name, path_info
+    if shift == 0:
+        return script_name, path_info
     pathlist = path_info.strip('/').split('/')
     scriptlist = script_name.strip('/').split('/')
-    if pathlist and pathlist[0] == '': pathlist = []
-    if scriptlist and scriptlist[0] == '': scriptlist = []
+    if pathlist and pathlist[0] == '':
+        pathlist = []
+    if scriptlist and scriptlist[0] == '':
+        scriptlist = []
     if shift > 0 and shift <= len(pathlist):
         moved = pathlist[:shift]
         scriptlist = scriptlist + moved
@@ -1725,7 +1798,8 @@ def path_shift(script_name, path_info, shift=1):
         raise AssertionError("Cannot shift. Nothing left from %s" % empty)
     new_script_name = '/' + '/'.join(scriptlist)
     new_path_info = '/' + '/'.join(pathlist)
-    if path_info.endswith('/') and pathlist: new_path_info += '/'
+    if path_info.endswith('/') and pathlist:
+        new_path_info += '/'
     return new_script_name, new_path_info
 
 # Decorators
@@ -2151,8 +2225,10 @@ class FileCheckerThread(threading.Thread):
         files = dict()
         for module in sys.modules.values():
             path = getattr(module, '__file__', '')
-            if path[-4:] in ('.pyo', '.pyc'): path = path[:-1]
-            if path and exists(path): files[path] = mtime(path)
+            if path[-4:] in ('.pyo', '.pyc'):
+                path = path[:-1]
+            if path and exists(path):
+                files[path] = mtime(path)
         while not self.status:
             for path, lmtime in files.iteritems():
                 if not exists(path) or mtime(path) > lmtime:
@@ -2184,7 +2260,8 @@ def _reloader_child(server, app, interval):
         pass
     bgcheck.status, status = 5, bgcheck.status
     bgcheck.join()  # bgcheck.status == 5 --> silent exit
-    if status: sys.exit(status)
+    if status:
+        sys.exit(status)
 
 
 def _reloader_observer(server, app, interval):
@@ -2205,13 +2282,15 @@ def _reloader_observer(server, app, interval):
                 os.utime(lockfile, None)  # I am alive!
                 time.sleep(interval)
             if p.poll() != 3:
-                if os.path.exists(lockfile): os.unlink(lockfile)
+                if os.path.exists(lockfile):
+                    os.unlink(lockfile)
                 sys.exit(p.poll())
             elif not server.quiet:
                 print "Reloading server..."
     except KeyboardInterrupt:
         pass
-    if os.path.exists(lockfile): os.unlink(lockfile)
+    if os.path.exists(lockfile):
+        os.unlink(lockfile)
 
 ###############################################################################
 # Template Adapters ############################################################
@@ -2258,7 +2337,8 @@ class BaseTemplate(object):
     def search(cls, name, lookup=[]):
         """ Search name in all directories specified in lookup.
         First without, then with common extensions. Return first hit. """
-        if os.path.isfile(name): return name
+        if os.path.isfile(name):
+            return name
         for spath in lookup:
             fname = os.path.join(spath, name)
             if os.path.isfile(fname):
@@ -2305,7 +2385,8 @@ class MakoTemplate(BaseTemplate):
             self.tpl = Template(uri=self.name, filename=self.filename, lookup=lookup, **options)
 
     def render(self, *args, **kwargs):
-        for dictarg in args: kwargs.update(dictarg)
+        for dictarg in args:
+            kwargs.update(dictarg)
         _defaults = self.defaults.copy()
         _defaults.update(kwargs)
         return self.tpl.render(**_defaults)
@@ -2323,7 +2404,8 @@ class CheetahTemplate(BaseTemplate):
             self.tpl = Template(file=self.filename, **options)
 
     def render(self, *args, **kwargs):
-        for dictarg in args: kwargs.update(dictarg)
+        for dictarg in args:
+            kwargs.update(dictarg)
         self.context.vars.update(self.defaults)
         self.context.vars.update(kwargs)
         out = str(self.tpl)
@@ -2338,15 +2420,18 @@ class Jinja2Template(BaseTemplate):
             raise RuntimeError('The keyword argument `prefix` has been removed. '
                 'Use the full jinja2 environment name line_statement_prefix instead.')
         self.env = Environment(loader=FunctionLoader(self.loader), **kwargs)
-        if filters: self.env.filters.update(filters)
-        if tests: self.env.tests.update(tests)
+        if filters:
+            self.env.filters.update(filters)
+        if tests:
+            self.env.tests.update(tests)
         if self.source:
             self.tpl = self.env.from_string(self.source)
         else:
             self.tpl = self.env.get_template(self.filename)
 
     def render(self, *args, **kwargs):
-        for dictarg in args: kwargs.update(dictarg)
+        for dictarg in args:
+            kwargs.update(dictarg)
         _defaults = self.defaults.copy()
         _defaults.update(kwargs)
         return self.tpl.render(**_defaults)
@@ -2373,7 +2458,8 @@ class SimpleTALTemplate(BaseTemplate):
     def render(self, *args, **kwargs):
         from simpletal import simpleTALES
         from StringIO import StringIO
-        for dictarg in args: kwargs.update(dictarg)
+        for dictarg in args:
+            kwargs.update(dictarg)
         # TODO: maybe reuse a context instead of always creating one
         context = simpleTALES.Context()
         for k, v in self.defaults.items():
@@ -2414,7 +2500,8 @@ class SimpleTemplate(BaseTemplate):
     @classmethod
     def split_comment(cls, code):
         """ Removes comments (#...) from python code. """
-        if '#' not in code: return code
+        if '#' not in code:
+            return code
         #: Remove comments only (leave quoted strings as they are)
         subf = lambda m: '' if m.group(0)[0]=='#' else m.group(0)
         return re.sub(cls.re_pytokens, subf, code)
@@ -2435,18 +2522,25 @@ class SimpleTemplate(BaseTemplate):
         def yield_tokens(line):
             for i, part in enumerate(re.split(r'\{\{(.*?)\}\}', line)):
                 if i % 2:
-                    if part.startswith('!'): yield 'RAW', part[1:]
-                    else: yield 'CMD', part
-                else: yield 'TXT', part
+                    if part.startswith('!'):
+                        yield 'RAW', part[1:]
+                    else:
+                        yield 'CMD', part
+                else:
+                    yield 'TXT', part
 
         def flush():  # Flush the ptrbuffer
-            if not ptrbuffer: return
+            if not ptrbuffer:
+                return
             cline = ''
             for line in ptrbuffer:
                 for token, value in line:
-                    if token == 'TXT': cline += repr(value)
-                    elif token == 'RAW': cline += '_str(%s)' % value
-                    elif token == 'CMD': cline += '_escape(%s)' % value
+                    if token == 'TXT':
+                        cline += repr(value)
+                    elif token == 'RAW':
+                        cline += '_str(%s)' % value
+                    elif token == 'CMD':
+                        cline += '_escape(%s)' % value
                     cline +=  ', '
                 cline = cline[:-2] + '\\\n'
             cline = cline[:-2]
@@ -2466,8 +2560,10 @@ class SimpleTemplate(BaseTemplate):
                         else unicode(line, encoding=self.encoding)
             if lineno <= 2:
                 m = re.search(r"%.*coding[:=]\s*([-\w\.]+)", line)
-                if m: self.encoding = m.group(1)
-                if m: line = line.replace('coding', 'coding (removed)')
+                if m:
+                    self.encoding = m.group(1)
+                if m:
+                    line = line.replace('coding', 'coding (removed)')
             if line.strip()[:2].count('%') == 1:
                 line = line.split('%', 1)[1].lstrip()  # Full line following the %
                 cline = self.split_comment(line).strip()
@@ -2509,13 +2605,15 @@ class SimpleTemplate(BaseTemplate):
         return '\n'.join(codebuffer) + '\n'
 
     def subtemplate(self, _name, _stdout, *args, **kwargs):
-        for dictarg in args: kwargs.update(dictarg)
+        for dictarg in args:
+            kwargs.update(dictarg)
         if _name not in self.cache:
             self.cache[_name] = self.__class__(name=_name, lookup=self.lookup)
         return self.cache[_name].execute(_stdout, kwargs)
 
     def execute(self, _stdout, *args, **kwargs):
-        for dictarg in args: kwargs.update(dictarg)
+        for dictarg in args:
+            kwargs.update(dictarg)
         env = self.defaults.copy()
         env.update({'_stdout': _stdout, '_printlist': _stdout.extend,
                '_include': self.subtemplate, '_str': self._str,
@@ -2532,7 +2630,8 @@ class SimpleTemplate(BaseTemplate):
 
     def render(self, *args, **kwargs):
         """ Render the template using keyword arguments as local variables. """
-        for dictarg in args: kwargs.update(dictarg)
+        for dictarg in args:
+            kwargs.update(dictarg)
         stdout = []
         self.execute(stdout, kwargs)
         return ''.join(stdout)
@@ -2552,14 +2651,16 @@ def template(*args, **kwargs):
         lookup = kwargs.pop('template_lookup', TEMPLATE_PATH)
         if isinstance(tpl, template_adapter):
             TEMPLATES[tpl] = tpl
-            if settings: TEMPLATES[tpl].prepare(**settings)
+            if settings:
+                TEMPLATES[tpl].prepare(**settings)
         elif "\n" in tpl or "{" in tpl or "%" in tpl or '$' in tpl:
             TEMPLATES[tpl] = template_adapter(source=tpl, lookup=lookup, **settings)
         else:
             TEMPLATES[tpl] = template_adapter(name=tpl, lookup=lookup, **settings)
     if not TEMPLATES[tpl]:
         abort(500, 'Template (%s) not found' % tpl)
-    for dictarg in args[1:]: kwargs.update(dictarg)
+    for dictarg in args[1:]:
+        kwargs.update(dictarg)
     return TEMPLATES[tpl].render(kwargs)
 
 mako_template = functools.partial(template, template_adapter=MakoTemplate)

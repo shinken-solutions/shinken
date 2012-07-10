@@ -107,7 +107,7 @@ class BaseModule(object):
         # the queue the module will put its result data
         self.from_q = None
         self.process = None
-        self.illegal_char = compile(r'[^\w]');
+        self.illegal_char = compile(r'[^\w]')
         self.init_try = 0
 
     def init(self):

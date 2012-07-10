@@ -137,7 +137,7 @@ class Graphite_Webui(BaseModule):
         e = e.strftime('%H:%M_%Y%m%d')
 
         # Do we have a template?
-        thefile=self.templates_path+'/'+elt.check_command.get_name().split('!')[0]+'.graph';
+        thefile=self.templates_path+'/'+elt.check_command.get_name().split('!')[0]+'.graph'
         if os.path.isfile(thefile):
             template_html = ''
             with open(thefile, 'r') as template_file:

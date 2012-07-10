@@ -221,7 +221,8 @@ class Contacts(Items):
     # and we want have a list of NotificationWay
     def linkify_with_notificationways(self, notificationways):
         for i in self:
-            if not hasattr(i, 'notificationways'): continue
+            if not hasattr(i, 'notificationways'):
+                continue
             new_notificationways = []
             for nw_name in strip_and_uniq(i.notificationways.split(',')):
                 nw = notificationways.find_by_name(nw_name)

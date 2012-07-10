@@ -145,7 +145,8 @@ class Hostgroups(Itemgroups):
         # Now we explode the realm value if we've got one
         # The group realm must not overide a host one (warning?)
         for hg in self:
-            if not hasattr(hg, 'realm'): continue
+            if not hasattr(hg, 'realm'):
+                continue
 
             r = realms.find_by_name(hg.realm.strip())
             if r is not None:
@@ -158,7 +159,8 @@ class Hostgroups(Itemgroups):
                 continue
 
             for h in hg:
-                if h is None: continue
+                if h is None:
+                    continue
                 if h.realm is None or h.got_default_realm:  # default value not hasattr(h, 'realm'):
                     logger.debug("[hostgroups] apply a realm %s to host %s from a hostgroup rule (%s)" % \
                         (hg.realm.get_name(), h.get_name(), hg.get_name()))

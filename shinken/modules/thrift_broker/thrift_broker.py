@@ -194,7 +194,7 @@ class Thrift_brokerHandler(Hooker):
             result=query.launch_query()
             print query.response
             query.response.outputformat='csv'
-            query.response.format_live_data(result, query.columns, query.aliases);
+            query.response.format_live_data(result, query.columns, query.aliases)
             output, keepalive = query.response.respond()
             print output
             r.result_table = output

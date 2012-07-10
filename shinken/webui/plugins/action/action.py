@@ -33,7 +33,7 @@ import re
 
 # Function handling $NOW$ macro
 def subsNOW():
-    return str(int(time.time()));
+    return str(int(time.time()))
 
 # This dictionnary associate macros with expansion function
 subs = {'$NOW$': subsNOW
