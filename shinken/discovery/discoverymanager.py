@@ -532,9 +532,11 @@ class DiscoveryManager:
                 # Searching same host and update host macros
                 for oname in self.disco_data:
                     dhb = self.disco_data[oname]
+                    # When same host but different properties are detected
                     if dha.name == dhb.name and dha.properties != dhb.properties:
                         for (k,v) in dhb.properties.iteritems():
-                            if k.startswith('_') and dha.properties.has_key(k):
+                            # Merge host macros is their are differents
+                            if k.startswith('_') and dha.properties.has_key(k) and dha.properties[k] != dhb.properties[k]:
                                 dha.data[k] = dha.properties[k] + ',' + v
                                 print('Merged host macro:', k, dha.properties[k])
                                 items_to_del.append(oname)
