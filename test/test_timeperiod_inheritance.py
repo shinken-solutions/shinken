@@ -30,7 +30,6 @@ class TestConfig(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_timeperiod_inheritance.cfg')
 
-
     def test_dummy(self):
         #
         # Config is not correct because of a wrong relative path
@@ -53,4 +52,3 @@ class TestConfig(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

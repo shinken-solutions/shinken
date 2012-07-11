@@ -33,7 +33,6 @@ from shinken.objects.module import Module
 from shinken.modules import nrpe_poller
 from shinken.modules.nrpe_poller import get_instance
 
-
 modconf = Module()
 modconf.module_name = "NrpePoller"
 modconf.module_type = nrpe_poller.properties['type']
@@ -41,12 +40,10 @@ modconf.properties = nrpe_poller.properties.copy()
 
 
 class TestNrpePoller(ShinkenTest):
-
     # Uncomment this is you want to use a specific configuration
     # for your test
     #def setUp(self):
     #    self.setup_with_file('etc/nagios_module_hack_cmd_poller_tag.cfg')
-
 
     def test_nrpe_poller(self):
 
@@ -58,7 +55,6 @@ class TestNrpePoller(ShinkenTest):
         print sl.__dict__
         sl.id = 1
         sl.i_am_dying = False
-
 
         manager = Manager()
         to_queue = manager.Queue()
@@ -106,4 +102,3 @@ class TestNrpePoller(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

@@ -28,11 +28,9 @@
 # a GLPI with webservice (xmlrpc, SOAP is garbage) and take all
 # hosts. Simple way from now
 
-
 import xmlrpclib
 
 from shinken.basemodule import BaseModule
-
 
 properties = {
     'daemons': ['arbiter'],
@@ -53,7 +51,6 @@ def get_instance(plugin):
     return instance
 
 
-
 # Just get hostname from a GLPI webservices
 class Glpi_arbiter(BaseModule):
     def __init__(self, mod_conf, uri, login_name, login_password, tag):
@@ -69,11 +66,10 @@ class Glpi_arbiter(BaseModule):
         self.con = xmlrpclib.ServerProxy(self.uri)
         print "Connection opened"
         print "Authentification in progress"
-        arg = {'login_name': self.login_name , 'login_password': self.login_password}
+        arg = {'login_name': self.login_name, 'login_password': self.login_password}
         res = self.con.glpi.doLogin(arg)
         self.session = res['session']
         print "My session number", self.session
-
 
     # Ok, main function that will load config from GLPI
     def get_objects(self):
@@ -143,28 +139,28 @@ class Glpi_arbiter(BaseModule):
                  'process_perf_data': host_info['process_perf_data'],
                  'notification_interval': host_info['notification_interval'],
                  'notification_period': host_info['notification_period'],
-                 'notification_options': host_info['notification_options']};
+                 'notification_options': host_info['notification_options']}
             for attribut in attributs:
                 if attribut in host_info:
                     h[attribut] = host_info[attribut]
             r['hosts'].append(h)
 
-	 # Get templates
+        # Get templates
         all_templates = self.con.monitoring.shinkenTemplates(arg)
         print "Get all templates", all_templates
         attributs = ['name', 'check_interval', 'retry_interval',
-                     'max_check_attempts','check_period','notification_interval',
-                     'notification_period','notification_options','active_checks_enabled',
-                     'process_perf_data','active_checks_enabled','passive_checks_enabled',
-                     'parallelize_check','obsess_over_service','check_freshness',
-                     'freshness_threshold','notifications_enabled','event_handler_enabled',
-                     'event_handler','flap_detection_enabled','failure_prediction_enabled',
-                     'retain_status_information','retain_nonstatus_information','is_volatile',
+                     'max_check_attempts', 'check_period', 'notification_interval',
+                     'notification_period', 'notification_options', 'active_checks_enabled',
+                     'process_perf_data', 'active_checks_enabled', 'passive_checks_enabled',
+                     'parallelize_check', 'obsess_over_service', 'check_freshness',
+                     'freshness_threshold', 'notifications_enabled', 'event_handler_enabled',
+                     'event_handler', 'flap_detection_enabled', 'failure_prediction_enabled',
+                     'retain_status_information', 'retain_nonstatus_information', 'is_volatile',
                      '_httpstink']
         for template_info in all_templates:
             print "\n\n"
             print "Template info in GLPI", template_info
-            h = {'register': '0'};
+            h = {'register': '0'}
             for attribut in attributs:
                 if attribut in template_info:
                     h[attribut] = template_info[attribut]
@@ -194,7 +190,7 @@ class Glpi_arbiter(BaseModule):
         for service_info in all_services:
             print "\n\n"
             print "Service info in GLPI", service_info
-            h = {};
+            h = {}
             for attribut in attributs:
                 if attribut in service_info:
                     h[attribut] = service_info[attribut]

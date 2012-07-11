@@ -30,7 +30,6 @@ class TestFreshness(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_freshness.cfg')
 
-
     # Check if the check_freshnes is doing it's job
     def test_check_freshness(self):
         self.print_header()
@@ -39,7 +38,7 @@ class TestFreshness(ShinkenTest):
         now = time.time()
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
 
         self.assert_(svc.check_freshness == True)
         #--------------------------------------------------------------
@@ -48,7 +47,7 @@ class TestFreshness(ShinkenTest):
         # We do not want to be just a string but a real command
         print "Additonal freshness latency", svc.__class__.additional_freshness_latency
         self.scheduler_loop(1, [[svc, 0, 'OK | bibi=99%']])
-        print "Addi:", svc.last_state_update, svc.freshness_threshold , svc.check_freshness
+        print "Addi:", svc.last_state_update, svc.freshness_threshold, svc.check_freshness
         # By default check fresh ness is set at false, so no new checks
         self.assert_(len(svc.actions) == 0)
         svc.do_check_freshness()
@@ -57,12 +56,11 @@ class TestFreshness(ShinkenTest):
         # We make it 10s less than it was
         svc.last_state_update = svc.last_state_update - 10
 
-
         #svc.check_freshness = True
         # Now we active it, with a too small value (now - 10s is still higer than now - (1 - 15, the addition time)
         # So still no check
         svc.freshness_threshold = 1
-        print "Addi:", svc.last_state_update, svc.freshness_threshold , svc.check_freshness
+        print "Addi:", svc.last_state_update, svc.freshness_threshold, svc.check_freshness
         svc.do_check_freshness()
         self.assert_(len(svc.actions) == 0)
 
@@ -80,4 +78,3 @@ class TestFreshness(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

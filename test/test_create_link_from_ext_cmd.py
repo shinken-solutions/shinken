@@ -31,7 +31,6 @@ class TestCreateLinkFromExtCmd(ShinkenTest):
     #def setUp(self):
     #    self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
 
-
     def test_simple_host_link(self):
         now = int(time.time())
         h = self.sched.hosts.find_by_name('test_host_0')
@@ -54,4 +53,3 @@ class TestCreateLinkFromExtCmd(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

@@ -30,11 +30,9 @@ class TestBadSatRealmConf(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_bad_sat_realm_conf.cfg')
 
-
     def test_badconf(self):
         self.assert_(not self.conf.conf_is_correct)
 
 
 if __name__ == '__main__':
     unittest.main()
-

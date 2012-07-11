@@ -29,7 +29,6 @@ class TestConfig(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_broken_1.cfg')
 
-
     def test_conf_is_correct(self):
         #
         # Config is not correct because of a wrong relative path
@@ -41,4 +40,3 @@ class TestConfig(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

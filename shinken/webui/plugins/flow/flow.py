@@ -43,7 +43,6 @@ except ImportError:
         raise
 
 
-
 # Get the div for each element
 def get_div(elt):
     icon = app.helper.get_icon_state(elt)
@@ -63,13 +62,13 @@ def get_div(elt):
         %s
           %s
         <div class="item-icon">
-	  <img class="wall-icon" src="%s"></img>
+         <img class="wall-icon" src="%s"></img>
         </div>
         <div class="item-text">
           <span class="state_%s">%s %s</span>
         </div>
-	<div class="item-button">
-	   <a href="%s">%s</a>
+        <div class="item-button">
+         <a href="%s">%s</a>
         </div>
         <div class="recheck-button">
            %s
@@ -77,7 +76,7 @@ def get_div(elt):
         <div class="ack-button">
            %s
         </div>
-        """ % (stars, pulse, icon,  elt.state.lower(), elt.state, elt.get_full_name(), lnk, button, button_recheck, button_ack)
+        """ % (stars, pulse, icon, elt.state.lower(), elt.state, elt.get_full_name(), lnk, button, button_recheck, button_ack)
     s = s.encode('utf8', 'ignore')
     return s
 
@@ -91,13 +90,11 @@ def get_page():
     if not user:
         redirect("/user/login")
 
-
     all_imp_impacts = app.datamgr.get_important_elements()
     all_imp_impacts.sort(hst_srv_sort)
     #all_imp_impacts.sort(hst_srv_sort)
 
     #all_imp_impacts = app.datamgr.get_services() #important_elements()
-
 
     impacts = []
     for imp in all_imp_impacts:
@@ -109,16 +106,14 @@ def get_page():
 
     # Got in json format
     #j_impacts = json.dumps(impacts)
-#    print "Return impact in json", j_impacts
+    #print "Return impact in json", j_impacts
     all_pbs = app.datamgr.get_all_problems()
     now = time.time()
     # Get only the last 10min errors
     all_pbs = [pb for pb in all_pbs if pb.last_state_change > now - 600]
     # And sort it
-    all_pbs.sort(hst_srv_sort) # sort_by_last_state_change)
+    all_pbs.sort(hst_srv_sort)  # sort_by_last_state_change)
 
     return {'app': app, 'user': user, 'impacts': impacts, 'problems': all_pbs}
 
-
-pages = {get_page: { 'routes': ['/flow/'], 'view': 'flow', 'static': True}}
-
+pages = {get_page: {'routes': ['/flow/'], 'view': 'flow', 'static': True}}

@@ -31,10 +31,11 @@ from shinken.webui.bottle import redirect, abort
 ### Will be populated by the UI with it's own value
 app = None
 
+
 # Our page. If the useer call /dummy/TOTO arg1 will be TOTO.
 # if it's /dummy/, it will be 'nothing'
 def register():
-    error= app.request.GET.get('error', '')
+    error = app.request.GET.get('error', '')
     success = app.request.GET.get('success', '')
     return {'app': app, 'user': {}, 'error': error, 'success': success}
 
@@ -82,7 +83,6 @@ def is_name_available():
     return json.dumps(b)
 
 
-
 def get_api_key():
     app.response.content_type = 'application/json'
     login = app.request.forms.get('login', '')
@@ -102,13 +102,9 @@ def get_api_key():
     else:
         abort(401, 'Sorry, you need valid credentials to access to your API key')
 
-
-
-
-pages = {register: { 'routes': ['/register'], 'view': 'register', 'static': True},
-         is_name_available: { 'routes': ['/availability'], 'method': 'POST', 'view': None, 'static': True},
-         do_register: { 'routes': ['/register'], 'method': 'POST', 'view': 'register', 'static': True},
-         validate: { 'routes': ['/validate'], 'view': 'validate', 'static': True},
-         get_api_key: { 'routes': ['/apikey'], 'method': 'POST'},
+pages = {register: {'routes': ['/register'], 'view': 'register', 'static': True},
+         is_name_available: {'routes': ['/availability'], 'method': 'POST', 'view': None, 'static': True},
+         do_register: {'routes': ['/register'], 'method': 'POST', 'view': 'register', 'static': True},
+         validate: {'routes': ['/validate'], 'view': 'validate', 'static': True},
+         get_api_key: {'routes': ['/apikey'], 'method': 'POST'},
          }
-

@@ -30,7 +30,6 @@ class TestNoHostCheck(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_not_execute_host_check.cfg')
 
-
     # We must look taht host checks are disable, and services ones are running
     def test_no_host_check(self):
         #
@@ -74,4 +73,3 @@ class TestNoHostCheck(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

@@ -33,8 +33,9 @@ from item import Item, Items
 
 from shinken.property import StringProp, IntegerProp
 
+
 class Businessimpactmodulation(Item):
-    id = 1 # zero is always special in database, so we do not take risk here
+    id = 1  # zero is always special in database, so we do not take risk here
     my_type = 'businessimpactmodulation'
 
     properties = Item.properties.copy()
@@ -44,21 +45,17 @@ class Businessimpactmodulation(Item):
             'modulation_period':        StringProp(default=None),
     })
 
-
     # For debugging purpose only (nice name)
     def get_name(self):
         return self.business_impact_modulation_name
-
 
 
 class Businessimpactmodulations(Items):
     name_property = "business_impact_modulation_name"
     inner_class = Businessimpactmodulation
 
-
     def linkify(self, timeperiods):
         self.linkify_cm_by_tp(timeperiods)
-
 
     # We just search for each timeperiod the tp
     # and replace the name by the tp

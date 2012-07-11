@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 properties = {
     'daemons': ['broker'],
     'type': 'host_perfdata',
@@ -38,10 +37,9 @@ def get_instance(plugin):
     # First try to import
     try:
         from host_perfdata_broker import Host_perfdata_broker
-    except ImportError , exp:
+    except ImportError, exp:
         print "Warning: the plugin type %s is unavailable: %s" % ('host_perfdata', exp)
         return None
-
 
     # Catch errors
     path = plugin.path

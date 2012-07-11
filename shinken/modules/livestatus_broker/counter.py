@@ -31,6 +31,7 @@ class Counter(dict):
     Methods __init__ and __getitem__ are only needed until that happy day
     when we finally get rid of Python 2.4
     """
+
     def __init__(self, default_factory=None, *a, **kw):
         dict.__init__(self, *a, **kw)
 
@@ -43,4 +44,3 @@ class Counter(dict):
 
     def __missing__(self, key):
         return 0
-

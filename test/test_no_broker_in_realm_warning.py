@@ -30,7 +30,6 @@ class TestWarnAboutNoBrokerInRealm(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_no_broker_in_realm_warning.cfg')
 
-
     def test_no_broker_in_realm_warning(self):
         dist = self.conf.realms.find_by_name("Distant")
         self.assert_(dist is not None)
@@ -41,4 +40,3 @@ class TestWarnAboutNoBrokerInRealm(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

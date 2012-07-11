@@ -26,21 +26,17 @@
 # This Class is an example of an Scheduler module
 # Here for the configuration phase AND running one
 
-
 import cPickle
 import shutil
 
-
 from shinken.basemodule import BaseModule
 from shinken.log import logger
-
 
 # Hack for making 0.5 retetnion file load in a 0.6 version
 # because the commandCall class was moved
 import shinken
 from shinken.commandcall import CommandCall
 shinken.objects.command.CommandCall = CommandCall
-
 
 properties = {
     'daemons': ['scheduler'],
@@ -55,7 +51,6 @@ def get_instance(plugin):
     path = plugin.path
     instance = Pickle_retention_scheduler(plugin, path)
     return instance
-
 
 
 # Just print some stuff
@@ -75,7 +70,7 @@ class Pickle_retention_scheduler(BaseModule):
         try:
             # Open a file near the path, with .tmp extension
             # so in cae or problem, we do not lost the old one
-            f = open(self.path+'.tmp', 'wb')
+            f = open(self.path + '.tmp', 'wb')
             # Just put hosts/services becauses checks and notifications
             # are already link into
             # all_data = {'hosts': sched.hosts, 'services': sched.services}
@@ -90,13 +85,11 @@ class Pickle_retention_scheduler(BaseModule):
             #f.write(s_compress)
             f.close()
             # Now move the .tmp fiel to the real path
-            shutil.move(self.path+'.tmp', self.path)
-        except IOError , exp:
+            shutil.move(self.path + '.tmp', self.path)
+        except IOError, exp:
             log_mgr.log("Error: retention file creation failed, %s" % str(exp))
             return
         log_mgr.log("Updating retention_file %s" % self.path)
-
-
 
     def hook_load_retention(self, daemon):
         return self.load_retention_objects(daemon, logger)
@@ -111,20 +104,20 @@ class Pickle_retention_scheduler(BaseModule):
             f = open(self.path, 'rb')
             all_data = cPickle.load(f)
             f.close()
-        except EOFError , exp:
+        except EOFError, exp:
             print exp
             return False
-        except ValueError , exp:
+        except ValueError, exp:
             print exp
             return False
-        except IOError , exp:
+        except IOError, exp:
             print exp
             return False
-        except IndexError , exp:
+        except IndexError, exp:
             s = "WARNING: Sorry, the ressource file is not compatible"
             log_mgr.log(s)
             return False
-        except TypeError , exp:
+        except TypeError, exp:
             s = "WARNING: Sorry, the ressource file is not compatible"
             log_mgr.log(s)
             return False

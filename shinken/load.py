@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import time
 import math
 
@@ -31,8 +30,6 @@ import math
 #def calc_load_load(load, exp,n):
 #        load = n + exp*(load - n)
 #        return (load, exp)
-
-
 
 class Load:
     """This class is for having a easy Load calculation
@@ -45,11 +42,10 @@ class Load:
     """
 
     def __init__(self, m=1, initial_value=0):
-        self.exp = 0 # first exp
-        self.m = m # Number of minute of the avg
-        self.last_update = 0 # last update of the value
-        self.val = initial_value # first value
-
+        self.exp = 0  # first exp
+        self.m = m  # Number of minute of the avg
+        self.last_update = 0  # last update of the value
+        self.val = initial_value  # first value
 
     def update_load(self, new_val):
         # The first call do not change the value, just tag
@@ -60,14 +56,13 @@ class Load:
         now = time.time()
         try:
             diff = now - self.last_update
-            self.exp = 1/math.exp(diff/ (self.m*60.0))
-            self.val = new_val + self.exp*(self.val - new_val)
+            self.exp = 1 / math.exp(diff / (self.m * 60.0))
+            self.val = new_val + self.exp * (self.val - new_val)
             self.last_update = now
-        except OverflowError: # if the time change without notice, we overflow :(
+        except OverflowError:  # if the time change without notice, we overflow :(
             pass
-        except ZeroDivisionError: # do not care
+        except ZeroDivisionError:  # do not care
             pass
-
 
     def get_load(self):
         return self.val

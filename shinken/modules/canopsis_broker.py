@@ -64,12 +64,12 @@ def get_instance(plugin):
     maxqueuelength  = getattr(plugin, 'maxqueuelength', 10000)
     queue_dump_frequency = getattr(plugin, 'queue_dump_frequency', 300)
 
-    return Canopsis_broker(plugin, host, port, user, password, virtual_host, exchange_name,identifier,maxqueuelength,queue_dump_frequency)
+    return Canopsis_broker(plugin, host, port, user, password, virtual_host, exchange_name, identifier, maxqueuelength, queue_dump_frequency)
 
 
 # Class for the canopsis Broker
 class Canopsis_broker(BaseModule):
-    def __init__(self, modconf, host, port, user, password, virtual_host, exchange_name, identifier,maxqueuelength,queue_dump_frequency):
+    def __init__(self, modconf, host, port, user, password, virtual_host, exchange_name, identifier, maxqueuelength, queue_dump_frequency):
         BaseModule.__init__(self, modconf)
         self.host = host
         self.port = port
@@ -81,7 +81,7 @@ class Canopsis_broker(BaseModule):
         self.maxqueuelength = maxqueuelength
         self.queue_dump_frequency = queue_dump_frequency
 
-        self.canopsis = event2amqp(self.host,self.port,self.user,self.password,self.virtual_host, self.exchange_name, self.identifier,self.maxqueuelength,queue_dump_frequency)
+        self.canopsis = event2amqp(self.host, self.port, self.user, self.password, self.virtual_host, self.exchange_name, self.identifier, self.maxqueuelength, queue_dump_frequency)
 
     # We call functions like manage_ TYPEOFBROK _brok that return us queries
     def manage_brok(self, b):
@@ -97,13 +97,13 @@ class Canopsis_broker(BaseModule):
     def manage_initial_host_status_brok(self, b):
         logger.log("[Canopsis] processing initial_host_status")
 
-        if not hasattr(self,'host_commands'):
+        if not hasattr(self, 'host_commands'):
             self.host_commands = {}
 
-        if not hasattr(self,'host_addresses'):
+        if not hasattr(self, 'host_addresses'):
             self.host_addresses = {}
 
-        if not hasattr(self,'host_max_check_attempts'):
+        if not hasattr(self, 'host_max_check_attempts'):
             self.host_max_check_attempts = {}
 
         # check commands does not appear in check results so build a dict of check_commands
@@ -119,15 +119,14 @@ class Canopsis_broker(BaseModule):
         logger.info("[canopsis] initial host commands: %s " % str(self.host_commands))
         logger.info("[canopsis] initial host addresses: %s " % str(self.host_addresses))
 
-
     def manage_initial_service_status_brok(self, b):
         logger.log("[Canopsis] processing initial_service_status")
 
-        if not hasattr(self,'service_commands'):
+        if not hasattr(self, 'service_commands'):
             logger.log("[Canopsis] creating empty dict in service_commands")
             self.service_commands = {}
 
-        if not hasattr(self,'service_max_check_attempts'):
+        if not hasattr(self, 'service_max_check_attempts'):
             logger.log("[Canopsis] creating empty dict in service_max_check_attempts")
             self.service_max_check_attempts = {}
 
@@ -143,9 +142,8 @@ class Canopsis_broker(BaseModule):
 
         self.service_max_check_attempts[b.data['host_name']][b.data['service_description']] = b.data['max_check_attempts']
 
-
     def manage_host_check_result_brok(self, b):
-        message = self.create_message('component','check',b)
+        message = self.create_message('component', 'check', b)
         if not message:
             logger.info("[Canopsis] Warning: Empty host check message")
         else:
@@ -154,7 +152,7 @@ class Canopsis_broker(BaseModule):
     # A service check has just arrived. Write the performance data to the file
     def manage_service_check_result_brok(self, b):
         try:
-            message = self.create_message('resource','check',b)
+            message = self.create_message('resource', 'check', b)
         except:
             logger.error("[Canopsis] Error: there was an error while trying to create message for service")
 
@@ -163,7 +161,7 @@ class Canopsis_broker(BaseModule):
         else:
             self.push2canopsis(message)
 
-    def create_message(self,source_type,event_type,b):
+    def create_message(self, source_type, event_type, b):
         """
             event_type should be one of the following:
                 - check
@@ -200,24 +198,24 @@ class Canopsis_broker(BaseModule):
         """
         if source_type == 'resource':
             # service
-            specificmessage={
+            specificmessage = {
                 'resource': b.data['service_description'],
                 'command_name': self.service_commands[b.data['host_name']][b.data['service_description']],
                 'max_attempts': self.service_max_check_attempts[b.data['host_name']][b.data['service_description']],
             }
         elif source_type == 'component':
             # host
-            specificmessage={
+            specificmessage = {
                 'resource': None,
                 'command_name': self.host_commands[b.data['host_name']],
                 'max_check_attempts': self.host_max_check_attempts[b.data['host_name']]
             }
         else:
             # WTF?!
-            logger.info("[Canopsis] Invalid source_type %s" %(source_type))
+            logger.info("[Canopsis] Invalid source_type %s" % (source_type))
             return None
 
-        commonmessage={
+        commonmessage = {
             'connector': u'shinken',
             'connector_name': unicode(self.identifier),
             'event_type': event_type,
@@ -236,10 +234,10 @@ class Canopsis_broker(BaseModule):
             'address': self.host_addresses[b.data['host_name']]
         }
 
-        return dict(commonmessage,**specificmessage)
+        return dict(commonmessage, **specificmessage)
 
-    def push2canopsis(self,message):
-        strmessage=str(message)
+    def push2canopsis(self, message):
+        strmessage = str(message)
         self.canopsis.postmessage(message)
         #logger.info("[Canopsis] push2canopsis: %s" % (strmessage))
 
@@ -247,9 +245,10 @@ class Canopsis_broker(BaseModule):
         if self.canopsis:
             self.canopsis.hook_tick(brok)
 
+
 class event2amqp():
 
-    def __init__(self,host,port,user,password,virtual_host, exchange_name,identifier,maxqueuelength,queue_dump_frequency):
+    def __init__(self, host, port, user, password, virtual_host, exchange_name, identifier, maxqueuelength, queue_dump_frequency):
 
         self.host = host
         self.port = port
@@ -273,16 +272,15 @@ class event2amqp():
 
         self.load_queue()
 
-
     def create_connection(self):
-        self.connection_string = "amqp://%s:%s@%s:%s/%s" % (self.user,self.password,self.host,self.port,self.virtual_host)
+        self.connection_string = "amqp://%s:%s@%s:%s/%s" % (self.user, self.password, self.host, self.port, self.virtual_host)
         try:
             self.connection = BrokerConnection(self.connection_string)
             return True
         except:
             func = sys._getframe(1).f_code.co_name
             error = str(sys.exc_info()[0])
-            logger.error("[Canopsis] Unexpected error: %s in %s" % (error,func))
+            logger.error("[Canopsis] Unexpected error: %s in %s" % (error, func))
             return False
 
     def connect(self):
@@ -299,7 +297,7 @@ class event2amqp():
         except:
             func = sys._getframe(1).f_code.co_name
             error = str(sys.exc_info()[0])
-            logger.error("[Canopsis] Unexpected error: %s in %s" % (error,func))
+            logger.error("[Canopsis] Unexpected error: %s in %s" % (error, func))
             return False
 
     def disconnect(self):
@@ -310,7 +308,7 @@ class event2amqp():
         except:
             func = sys._getframe(1).f_code.co_name
             error = str(sys.exc_info()[0])
-            logger.error("[Canopsis] Unexpected error: %s in %s" % (error,func))
+            logger.error("[Canopsis] Unexpected error: %s in %s" % (error, func))
             return False
 
     def connected(self):
@@ -328,16 +326,16 @@ class event2amqp():
         except:
             func = sys._getframe(1).f_code.co_name
             error = str(sys.exc_info()[0])
-            logger.error("[Canopsis] Unexpected error: %s in %s" % (error,func))
+            logger.error("[Canopsis] Unexpected error: %s in %s" % (error, func))
             return False
 
     def get_exchange(self):
         try:
-            self.exchange =  Exchange(self.exchange_name , "topic", durable=True, auto_delete=False)
+            self.exchange = Exchange(self.exchange_name, "topic", durable=True, auto_delete=False)
         except:
             func = sys._getframe(1).f_code.co_name
             error = str(sys.exc_info()[0])
-            logger.error("[Canopsis] Unexpected error: %s in %s" % (error,func))
+            logger.error("[Canopsis] Unexpected error: %s in %s" % (error, func))
             return False
 
     def create_producer(self):
@@ -350,10 +348,10 @@ class event2amqp():
         except:
             func = sys._getframe(1).f_code.co_name
             error = str(sys.exc_info()[0])
-            logger.error("[Canopsis] Unexpected error: %s in %s" % (error,func))
+            logger.error("[Canopsis] Unexpected error: %s in %s" % (error, func))
             return False
 
-    def postmessage(self,message,retry=False):
+    def postmessage(self, message, retry=False):
 
         # process enqueud events if possible
         self.pop_events()
@@ -392,25 +390,25 @@ class event2amqp():
                 return True
             except:
                 logger.error("[Canopsis] Not connected, going to queue messages until connection back")
-                self.queue.append({"key": key,"message": message})
+                self.queue.append({"key": key, "message": message})
                 func = sys._getframe(1).f_code.co_name
                 error = str(sys.exc_info()[0])
-                logger.error("[Canopsis] Unexpected error: %s in %s" % (error,func))
+                logger.error("[Canopsis] Unexpected error: %s in %s" % (error, func))
                 # logger.error(str(traceback.format_exc()))
                 return False
         else:
-            errmsg="[Canopsis] Not connected, going to queue messages until connection back (%s items in queue | max %s)" % (str(len(self.queue)),str(self.maxqueuelength))
+            errmsg = "[Canopsis] Not connected, going to queue messages until connection back (%s items in queue | max %s)" % (str(len(self.queue)), str(self.maxqueuelength))
             logger.info(errmsg)
             #enqueue_cano_event(key,message)
             if len(self.queue) < int(self.maxqueuelength):
-                self.queue.append({"key": key,"message": message})
+                self.queue.append({"key": key, "message": message})
                 logger.info("[Canopsis] Queue length: %d" % len(self.queue))
                 return True
             else:
                 logger.error("[Canopsis] Maximum retention for event queue %s reached" % str(self.maxqueuelength))
                 return False
 
-    def errback(self,exc,interval):
+    def errback(self, exc, interval):
         logger.warning("Couldn't publish message: %r. Retry in %ds" % (exc, interval))
 
     def pop_events(self):
@@ -418,14 +416,14 @@ class event2amqp():
             while len(self.queue) > 0:
                 item = self.queue.pop()
                 try:
-                    logger.info("[Canopsis] Pop item from queue [%s]: %s" % (str(len(self.queue)),str(item)))
+                    logger.info("[Canopsis] Pop item from queue [%s]: %s" % (str(len(self.queue)), str(item)))
                     self.producer.revive(self.channel)
                     self.producer.publish(body=item["message"], compression=None, routing_key=item["key"], exchange=self.exchange_name)
                 except:
                     self.queue.append(item)
                     func = sys._getframe(1).f_code.co_name
                     error = str(sys.exc_info()[0])
-                    logger.error("[Canopsis] Unexpected error: %s in %s" % (error,func))
+                    logger.error("[Canopsis] Unexpected error: %s in %s" % (error, func))
                     return False
         else:
             return False
@@ -443,7 +441,7 @@ class event2amqp():
         return True
 
     def save_queue(self):
-        retentionfile="%s/canopsis.dat" % os.getcwd()
+        retentionfile = "%s/canopsis.dat" % os.getcwd()
         logger.info("[Canopsis] saving to %s" % retentionfile)
         filehandler = open(retentionfile, 'w')
         pickle.dump(self.queue, filehandler)
@@ -452,7 +450,7 @@ class event2amqp():
         return True
 
     def load_queue(self):
-        retentionfile="%s/canopsis.dat" % os.getcwd()
+        retentionfile = "%s/canopsis.dat" % os.getcwd()
         logger.info("[Canopsis] loading from %s" % retentionfile)
         filehandler = open(retentionfile, 'r')
 

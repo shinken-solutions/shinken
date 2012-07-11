@@ -35,7 +35,6 @@ class TestConfig(ShinkenTest):
     def get_host(self):
         return self.sched.hosts.find_by_name("test_host_0")
 
-
     def get_router(self):
         return self.sched.hosts.find_by_name("test_router_0")
 
@@ -44,7 +43,7 @@ class TestConfig(ShinkenTest):
         host = self.get_host()
         router = self.get_router()
 
-        self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [svc, 2, 'BAD | value1=0 value2=0'], ])
+        self.scheduler_loop(2, [[host, 0, 'UP | value1=1 value2=2'], [svc, 2, 'BAD | value1=0 value2=0'],])
         self.assert_(host.state == 'UP')
         self.assert_(host.state_type == 'HARD')
 
@@ -69,4 +68,3 @@ class TestConfig(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

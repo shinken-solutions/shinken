@@ -27,13 +27,11 @@
 # host and service perfdata to a file which can be processes by the
 # npcd daemon (http://pnp4nagios.org). It is a reimplementation of npcdmod.c
 
-
 import shutil
 import os
 import time
 import re
 import codecs
-
 
 from shinken.basemodule import BaseModule
 from shinken.message import Message
@@ -69,7 +67,7 @@ class Npcd_broker(BaseModule):
         self.perfdata_spool_dir = perfdata_spool_dir
         self.perfdata_spool_filename = perfdata_spool_filename
         self.sleep_time = sleep_time
-        self.process_performance_data = True # this can be reset and set by program_status_broks
+        self.process_performance_data = True  # this can be reset and set by program_status_broks
         self.processed_lines = 0
         self.host_commands = {}
         self.service_commands = {}
@@ -82,13 +80,12 @@ class Npcd_broker(BaseModule):
             raise Exception('npcdmod: An error occurred while attempting to process module arguments')
         try:
             # We open the file with line buffering, so we can better watch it with tail -f
-            self.logfile = codecs.open(self.perfdata_file, 'a','utf-8','replace', 1)
+            self.logfile = codecs.open(self.perfdata_file, 'a', 'utf-8', 'replace', 1)
         except:
             print "could not open file %s" % self.perfdata_file
             raise Exception('could not open file %s" % self.perfdata_file')
         # use so we do nto ask a reinit ofan instance too quickly
         self.last_need_data_send = time.time()
-
 
     # Ask for a full reinit of a scheduler because we lost some data.... sorry
     def ask_reinit(self, c_id):
@@ -100,9 +97,6 @@ class Npcd_broker(BaseModule):
             self.from_q.put(msg)
             self.last_need_data_send = time.time()
         return
-
-
-
 
     # Get a brok, parse it, and put in in database
     # We call functions like manage_ TYPEOFBROK _brok that return us queries
@@ -118,7 +112,6 @@ class Npcd_broker(BaseModule):
             print "npcdmod: I can not work with disabled performance data in shinken.cfg."
             print "npcdmod: Please enable it with 'process_performance_data=1' in shinken.cfg"
 
-
     def manage_update_program_status_brok(self, b):
         if self.process_performance_data and not b.data['process_performance_data']:
             self.process_performance_data = False
@@ -127,20 +120,15 @@ class Npcd_broker(BaseModule):
             self.process_performance_data = True
             print "npcdmod: I start processing performance data"
 
-
-
-
     # also manage initial_broks, because of the check_command (which is not part of check_result_broks)
     # save it in service_commands[host/service]
     def manage_initial_host_status_brok(self, b):
         self.host_commands[b.data['host_name']] = b.data['check_command'].call
 
-
     def manage_initial_service_status_brok(self, b):
         if not b.data['host_name'] in self.service_commands:
             self.service_commands[b.data['host_name']] = {}
         self.service_commands[b.data['host_name']][b.data['service_description']] = b.data['check_command'].call
-
 
     # A host check has just arrived. Write the performance data to the file
     def manage_host_check_result_brok(self, b):
@@ -158,7 +146,6 @@ class Npcd_broker(BaseModule):
             b.data['state_type_id'])
         self.logfile.write(line)
         self.processed_lines += 1
-
 
     # A service check has just arrived. Write the performance data to the file
     def manage_service_check_result_brok(self, b):
@@ -179,8 +166,6 @@ class Npcd_broker(BaseModule):
         self.logfile.write(line)
         self.processed_lines += 1
 
-
-
     def process_config_file(self):
         try:
             cfg_file = open(self.config_file)
@@ -194,7 +179,6 @@ class Npcd_broker(BaseModule):
         except:
             return False
 
-
     def rotate(self):
         target = '%s/%s.%s' % (self.perfdata_spool_dir, self.perfdata_spool_filename, int(time.time()))
         try:
@@ -202,12 +186,11 @@ class Npcd_broker(BaseModule):
             if os.path.exists(self.perfdata_file) and os.path.getsize(self.perfdata_file) > 0:
                 print "moving perfdata_file %s (%d lines) to %s" % (self.perfdata_file, self.processed_lines, target)
                 shutil.move(self.perfdata_file, target)
-            self.logfile = codecs.open(self.perfdata_file, 'a','utf-8','replace', 1)
+            self.logfile = codecs.open(self.perfdata_file, 'a', 'utf-8', 'replace', 1)
         except OSError:
             print "could not rotate perfdata_file to %s" % target
             raise
         self.processed_lines = 0
-
 
     # Wait for broks and rotate the perfdata_file in intervals of 15 seconds
     # This version does not use a signal-based timer yet. Rotation is triggered
@@ -217,7 +200,7 @@ class Npcd_broker(BaseModule):
         self.rotate()
         last_rotated = time.time()
         while not self.interrupted:
-            l = self.to_q.get() # can block here :)
+            l = self.to_q.get()  # can block here :)
             for b in l:
                 # unserialize the brok before use it
                 b.prepare()

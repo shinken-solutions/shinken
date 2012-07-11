@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import os
 import time
 import traceback
@@ -37,7 +36,6 @@ from shinken.satellite import BaseSatellite
 from shinken.property import PathProp, IntegerProp
 from shinken.log import logger
 
-
 from shinken.external_command import ExternalCommand
 
 
@@ -50,7 +48,6 @@ class Receiver(BaseSatellite):
         'port':      IntegerProp(default='7773'),
         'local_log': PathProp(default='receiverd.log'),
     })
-
 
     def __init__(self, config_file, is_daemon, do_replace, debug, debug_file):
 
@@ -71,10 +68,9 @@ class Receiver(BaseSatellite):
         self.external_commands = []
 
         # All broks to manage
-        self.broks = [] # broks to manage
+        self.broks = []  # broks to manage
         # broks raised this turn and that need to be put in self.broks
         self.broks_internal_raised = []
-
 
     # Schedulers have some queues. We can simplify call by adding
     # elements into the proper queue just by looking at their type
@@ -92,14 +88,13 @@ class Receiver(BaseSatellite):
             logger.debug("Enqueuing an external command: %s" % str(ExternalCommand.__dict__))
             self.external_commands.append(elt)
 
-
-#    # Get the good tabs for links by the kind. If unknown, return None
-#    def get_links_from_type(self, type):
-#        t = {'scheduler': self.schedulers, 'arbiter': self.arbiters, \
-#             'poller': self.pollers, 'reactionner': self.reactionners}
-#        if type in t:
-#            return t[type]
-#        return None
+    ## # Get the good tabs for links by the kind. If unknown, return None
+    ## def get_links_from_type(self, type):
+    ##     t = {'scheduler': self.schedulers, 'arbiter': self.arbiters, \
+    ##          'poller': self.pollers, 'reactionner': self.reactionners}
+    ##     if type in t:
+    ##         return t[type]
+    ##     return None
 
 
     # Call by arbiter to get our external commands
@@ -107,7 +102,6 @@ class Receiver(BaseSatellite):
         res = self.external_commands
         self.external_commands = []
         return res
-
 
     # Get a brok. Our role is to put it in the modules
     # THEY MUST DO NOT CHANGE data of b!!!
@@ -118,14 +112,13 @@ class Receiver(BaseSatellite):
         for mod in self.modules_manager.get_internal_instances():
             try:
                 mod.manage_brok(b)
-            except Exception , exp:
-                logger.warning("The mod %s raise an exception: %s, I kill it" % (mod.get_name(),str(exp)))
+            except Exception, exp:
+                logger.warning("The mod %s raise an exception: %s, I kill it" % (mod.get_name(), str(exp)))
                 logger.warning("Exception type: %s" % type(exp))
                 logger.warning("Back trace of this kill: %s" % (traceback.format_exc()))
                 to_del.append(mod)
         # Now remove mod that raise an exception
         self.modules_manager.clear_instances(to_del)
-
 
     # Get 'objects' from external modules
     # from now nobody use it, but it can be useful
@@ -141,14 +134,12 @@ class Receiver(BaseSatellite):
                 except Empty:
                     full_queue = False
 
-
     def do_stop(self):
         act = active_children()
         for a in act:
             a.terminate()
             a.join(1)
         super(Receiver, self).do_stop()
-
 
     def setup_new_conf(self):
         conf = self.new_conf
@@ -175,8 +166,6 @@ class Receiver(BaseSatellite):
             logger.info("Setting our timezone to %s" % use_timezone)
             os.environ['TZ'] = use_timezone
             time.tzset()
-
-
 
     def do_loop_turn(self):
         sys.stdout.write(".")
@@ -217,29 +206,29 @@ class Receiver(BaseSatellite):
 #        self.broks.reverse()
 
         start = time.time()
-#        while len(self.broks) != 0:
-#            now = time.time()
-#            # Do not 'manage' more than 1s, we must get new broks
-#            # every 1s
-#            if now - start > 1:
-#                break
-#
-#            b = self.broks.pop()
-#            # Ok, we can get the brok, and doing something with it
-#            # REF: doc/receiver-modules.png (4-5)
-#            self.manage_brok(b)
-#
-#            nb_broks = len(self.broks)
-#
-#            # Ok we manage brok, but we still want to listen to arbiter
-#            self.watch_for_new_conf(0.0)
-#
-#            # if we got new broks here from arbiter, we should breack the loop
-#            # because such broks will not be managed by the
-#            # external modules before this loop (we pop them!)
-#            if len(self.broks) != nb_broks:
-#                break
-#
+        ## while len(self.broks) != 0:
+        ##     now = time.time()
+        ##     # Do not 'manage' more than 1s, we must get new broks
+        ##     # every 1s
+        ##     if now - start > 1:
+        ##         break
+        ##
+        ##     b = self.broks.pop()
+        ##     # Ok, we can get the brok, and doing something with it
+        ##     # REF: doc/receiver-modules.png (4-5)
+        ##     self.manage_brok(b)
+        ##
+        ##     nb_broks = len(self.broks)
+        ##
+        ##     # Ok we manage brok, but we still want to listen to arbiter
+        ##     self.watch_for_new_conf(0.0)
+        ##
+        ##     # if we got new broks here from arbiter, we should breack the loop
+        ##     # because such broks will not be managed by the
+        ##     # external modules before this loop (we pop them!)
+        ##     if len(self.broks) != nb_broks:
+        ##         break
+
         # Maybe external modules raised 'objets'
         # we should get them
         self.get_objects_from_from_queues()
@@ -290,4 +279,3 @@ class Receiver(BaseSatellite):
             logger.critical("You can log a bug ticket at https://github.com/naparuba/shinken/issues/new to get help")
             logger.critical("Back trace of it: %s" % (traceback.format_exc()))
             raise
-

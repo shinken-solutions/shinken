@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import pycurl
 from StringIO import StringIO
 try:
@@ -36,7 +35,6 @@ except ImportError:
     except ImportError:
         print "Error: you need the json or simplejson module"
         raise
-
 
 from shinken.webui.bottle import redirect
 
@@ -52,7 +50,7 @@ def check_api_server(api_key):
     #c.setopt(c.CONNECTTIMEOUT, 5)
     #c.setopt(c.TIMEOUT, 8)
     #c.setopt(c.PROXY, 'http://inthemiddle.com:8080')
-    url = "http://127.0.0.1:7765/checkkey/"+api_key
+    url = "http://127.0.0.1:7765/checkkey/" + api_key
     print "GO TO URL", url
     # Oups, seems that url an unicode are BAD :)
     url = str(url)
@@ -105,7 +103,6 @@ def get_page():
     # user we are loggued with (it's a contact object in fact)
     return {'app': app, 'user': user, 'results': results, 'api_error': api_error}
 
-
 # This is the dict teh webui will try to "load".
 #  *here we register one page with both adresses /dummy/:arg1 and /dummy/, both addresses
 #   will call the function get_page.
@@ -114,5 +111,4 @@ def get_page():
 #    the dummy/htdocs/ directory. Bewere: it will take the plugin name to match.
 #  * optional: you can add 'method': 'POST' so this adress will be only available for
 #    POST calls. By default it's GET. Look at the lookup module for sample about this.
-pages = {get_page: { 'routes': ['/testapi'], 'view': 'testapi', 'static': True}}
-
+pages = {get_page: {'routes': ['/testapi'], 'view': 'testapi', 'static': True}}
