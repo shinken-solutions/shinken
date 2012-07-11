@@ -67,8 +67,8 @@ parser.add_option('--backend', dest="backend",
                   help="Optionnal : Name of a module that will totally manage the object writing/update thing. If you don't know what it means, maybe you should not use this option :)")
 parser.add_option('--modules_path', dest="modules_path",
                   help="Optionnal : Path for the module loading. If you don't know what it means, maybe you should not use this option :)")
-parser.add_option('-f', '--use_final_host', dest="use_final_host", action='store_true',
-                  help="Optionnal : In multiple discovery level, it is the final host name which wins. Make possible merge of multiple IP but same final device)")
+parser.add_option('--merge', dest="merge", action='store_true',
+                  help="Optionnal : In multiple discovery level, it is the final host name which wins. Make possible merge of multiple IP but same final device")
 
 
 
@@ -91,10 +91,10 @@ if not opts.overwrite:
 else:
     overwrite = opts.overwrite
 
-if not opts.use_final_host:
-    use_final_host = False
+if not opts.merge:
+    merge = False
 else:
-    use_final_host = opts.use_final_host
+    merge = opts.merge
 
 if not opts.runners:
     runners = ['*']
@@ -144,7 +144,7 @@ modules_path = opts.modules_path or ''
 
 
 # Get the Manager for all of the discovery thing
-d = DiscoveryManager(cfg_input, macros, overwrite, runners, output_dir=output_dir, dbmod=dbmod, backend=backend, modules_path=modules_path, use_final_host=use_final_host)
+d = DiscoveryManager(cfg_input, macros, overwrite, runners, output_dir=output_dir, dbmod=dbmod, backend=backend, modules_path=modules_path, merge=merge)
 
 # #Ok, let start the plugins that will give us the data
 d.launch_runners()

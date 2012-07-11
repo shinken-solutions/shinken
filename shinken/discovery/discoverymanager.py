@@ -80,12 +80,12 @@ class DiscoveredHost(object):
         'HOSTNAME':          'name',
         }
 
-    def __init__(self, name, rules, runners, use_final_host=False):
+    def __init__(self, name, rules, runners, merge=False):
         self.name = name
         self.data = {}
         self.rules = rules
         self.runners = runners
-        self.use_final_host = use_final_host
+        self.merge = merge
 
         self.matched_rules = []
         self.launched_runners = []
@@ -204,7 +204,7 @@ class DiscoveredHost(object):
 
             # Maybe it's not me?
             if name != self.name:
-                if not self.use_final_host:
+                if not self.merge:
                     print 'Bad data for me? I bail out data!'
                     data = ''
                 else:
@@ -266,7 +266,7 @@ class DiscoveredHost(object):
 
 
 class DiscoveryManager:
-    def __init__(self, path, macros, overwrite, runners, output_dir=None, dbmod='', db_direct_insert=False, only_new_hosts=False, backend=None, modules_path='', use_final_host=False):
+    def __init__(self, path, macros, overwrite, runners, output_dir=None, dbmod='', db_direct_insert=False, only_new_hosts=False, backend=None, modules_path='', merge=False):
         # i am arbiter-like
         self.log = logger
         self.overwrite = overwrite
@@ -276,7 +276,7 @@ class DiscoveryManager:
         self.db_direct_insert = db_direct_insert
         self.only_new_hosts = only_new_hosts
         self.log.load_obj(self)
-        self.use_final_host= use_final_host
+        self.merge= merge
         self.config_files = [path]
         self.conf = Config()
 
@@ -419,7 +419,7 @@ class DiscoveryManager:
             
             # Register the name
             if not name in self.disco_data:
-                self.disco_data[name] = DiscoveredHost(name, self.discoveryrules, self.discoveryruns, use_final_host=self.use_final_host)
+                self.disco_data[name] = DiscoveredHost(name, self.discoveryrules, self.discoveryruns, merge=self.merge)
 
             # Now get key,values
             if not '=' in data:
