@@ -45,7 +45,6 @@ class TestConfigAuth(TestConfig):
         Comment.id = 1
         self.testid = str(os.getpid() + random.randint(1, 1000))
 
-
     def tearDown(self):
         # stop thread
         self.livestatus_broker.interrupted = True
@@ -57,8 +56,8 @@ class TestConfigAuth(TestConfig):
         #self.livestatus_broker.db.close()
         if os.path.exists(self.livelogs):
             os.remove(self.livelogs)
-        if os.path.exists(self.livelogs+"-journal"):
-            os.remove(self.livelogs+"-journal")
+        if os.path.exists(self.livelogs + "-journal"):
+            os.remove(self.livelogs + "-journal")
         if os.path.exists(self.livestatus_broker.pnp_path):
             shutil.rmtree(self.livestatus_broker.pnp_path)
         if os.path.exists('var/nagios.log'):
@@ -90,7 +89,7 @@ class TestConfigAuth(TestConfig):
         original_time_sleep(3)
 
     def query_livestatus(self, ip, port, data):
-        print "Query livestatus on %s:%d" % (ip,port)
+        print "Query livestatus on %s:%d" % (ip, port)
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.settimeout(10)
@@ -160,4 +159,3 @@ if __name__ == '__main__':
 
     #allsuite = unittest.TestLoader.loadTestsFromModule(TestConfig)
     #unittest.TextTestRunner(verbosity=2).run(allsuite)
-

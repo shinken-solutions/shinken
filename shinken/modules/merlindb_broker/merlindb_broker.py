@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import copy
 import time
 
@@ -36,6 +35,7 @@ def get_objs_names(objs):
         s += get_obj_name(o)
     return s
 
+
 def get_obj_name(obj):
     print "ARG", obj
     print "Get name on", obj.get_name()
@@ -46,8 +46,10 @@ def list_to_comma(lst):
     # For ['d', 'r', 'u'] will return d,r,u
     return ','.join(lst)
 
+
 def last_hard_state_to_int(lst):
     return 1
+
 
 # Class for the Merlindb Broker
 # Get broks and puts them in merlin database
@@ -59,14 +61,14 @@ class Merlindb_broker(BaseModule):
             'program_status': {'program_start': {'transform': None},
                                 'pid': {'transform': None},
                                 'last_alive': {'transform': None},
-                                'is_running': { 'transform': None},
+                                'is_running': {'transform': None},
                                 'instance_id': {'transform': None},
                                 },
             # Program status update (every 10s)
             'update_program_status': {'program_start': {'transform': None},
                                 'pid': {'transform': None},
                                 'last_alive': {'transform': None},
-                                'is_running': { 'transform': None},
+                                'is_running': {'transform': None},
                                 'instance_id': {'transform': None},
                                 },
             # Host
@@ -102,14 +104,14 @@ class Merlindb_broker(BaseModule):
                 'last_chk': {'transform': None, 'name': 'last_check'},
                 'next_chk': {'transform': None, 'name': 'next_check'},
                 'attempt': {'transform': None, 'name': 'current_attempt'},
-                'state_id':  {'transform': None, 'name': 'current_state'},
+                'state_id': {'transform': None, 'name': 'current_state'},
                 'state_type_id': {'transform': None, 'name': 'state_type'},
-                'current_event_id':  {'transform': None},
-                'last_event_id':  {'transform': None},
-                'last_state_id':  {'transform': None, 'name': 'last_state'},
-                'last_state_change':  {'transform': None},
-                'last_hard_state_change':  {'transform': None},
-                'last_hard_state':  {'transform': last_hard_state_to_int},
+                'current_event_id': {'transform': None},
+                'last_event_id': {'transform': None},
+                'last_state_id': {'transform': None, 'name': 'last_state'},
+                'last_state_change': {'transform': None},
+                'last_hard_state_change': {'transform': None},
+                'last_hard_state': {'transform': last_hard_state_to_int},
                 'is_flapping': {'transform': None},
                 'flapping_comment_id': {'transform': None},
                 'percent_state_change': {'transform': None},
@@ -158,14 +160,14 @@ class Merlindb_broker(BaseModule):
                 'last_chk': {'transform': None, 'name': 'last_check'},
                 'next_chk': {'transform': None, 'name': 'next_check'},
                 'attempt': {'transform': None, 'name': 'current_attempt'},
-                'state_id':  {'transform': None, 'name': 'current_state'},
+                'state_id': {'transform': None, 'name': 'current_state'},
                 'state_type_id': {'transform': None, 'name': 'state_type'},
-                'current_event_id':  {'transform': None},
-                'last_event_id':  {'transform': None},
-                'last_state_id':  {'transform': None, 'name': 'last_state'},
-                'last_state_change':  {'transform': None},
-                'last_hard_state_change':  {'transform': None},
-                'last_hard_state':  {'transform': last_hard_state_to_int},
+                'current_event_id': {'transform': None},
+                'last_event_id': {'transform': None},
+                'last_state_id': {'transform': None, 'name': 'last_state'},
+                'last_state_change': {'transform': None},
+                'last_hard_state_change': {'transform': None},
+                'last_hard_state': {'transform': last_hard_state_to_int},
                 'is_flapping': {'transform': None},
                 'flapping_comment_id': {'transform': None},
                 'percent_state_change': {'transform': None},
@@ -243,13 +245,13 @@ class Merlindb_broker(BaseModule):
                 'last_chk': {'transform': None, 'name': 'last_check'},
                 'next_chk': {'transform': None, 'name': 'next_check'},
                 'attempt': {'transform': None, 'name': 'current_attempt'},
-                'state_id':  {'transform': None, 'name': 'current_state'},
-                'current_event_id':  {'transform': None},
-                'last_event_id':  {'transform': None},
-                'last_state_id':  {'transform': None, 'name': 'last_state'},
-                'last_state_change':  {'transform': None},
-                'last_hard_state_change':  {'transform': None},
-                'last_hard_state':  {'transform': last_hard_state_to_int},
+                'state_id': {'transform': None, 'name': 'current_state'},
+                'current_event_id': {'transform': None},
+                'last_event_id': {'transform': None},
+                'last_state_id': {'transform': None, 'name': 'last_state'},
+                'last_state_change': {'transform': None},
+                'last_hard_state_change': {'transform': None},
+                'last_hard_state': {'transform': last_hard_state_to_int},
                 'state_type_id': {'transform': None, 'name': 'state_type'},
                 'is_flapping': {'transform': None},
                 'flapping_comment_id': {'transform': None},
@@ -299,13 +301,13 @@ class Merlindb_broker(BaseModule):
                 'last_chk': {'transform': None, 'name': 'last_check'},
                 'next_chk': {'transform': None, 'name': 'next_check'},
                 'attempt': {'transform': None, 'name': 'current_attempt'},
-                'state_id':  {'transform': None, 'name': 'current_state'},
-                'current_event_id':  {'transform': None},
-                'last_event_id':  {'transform': None},
-                'last_state_id':  {'transform': None, 'name': 'last_state'},
-                'last_state_change':  {'transform': None},
-                'last_hard_state_change':  {'transform': None},
-                'last_hard_state':  {'transform': last_hard_state_to_int},
+                'state_id': {'transform': None, 'name': 'current_state'},
+                'current_event_id': {'transform': None},
+                'last_event_id': {'transform': None},
+                'last_state_id': {'transform': None, 'name': 'last_state'},
+                'last_state_change': {'transform': None},
+                'last_hard_state_change': {'transform': None},
+                'last_hard_state': {'transform': last_hard_state_to_int},
                 'state_type_id': {'transform': None, 'name': 'current_state'},
                 'is_flapping': {'transform': None},
                 'flapping_comment_id': {'transform': None},
@@ -412,17 +414,16 @@ class Merlindb_broker(BaseModule):
 
         # Now get a backend_db of our backend type
         if backend == 'mysql':
-#            from mysql_backend import Mysql_backend
+            #from mysql_backend import Mysql_backend
             from shinken.db_mysql import DBMysql
             print "Creating a mysql backend"
             self.db_backend = DBMysql(host, user, password, database, character_set)
 
         if backend == 'sqlite':
-#            from sqlite_backend import Sqlite_backend
+            #from sqlite_backend import Sqlite_backend
             from shinken.db_sqlite import DBSqlite
             print "Creating a sqlite backend"
             self.db_backend = DBSqlite(self.database_path)
-
 
     def preprocess(self, type, brok):
         new_brok = copy.deepcopy(brok)
@@ -456,7 +457,6 @@ class Merlindb_broker(BaseModule):
             print brok.data
         return new_brok
 
-
     # Called by Broker so we can do init stuff
     # TODO: add conf param to get pass with init
     # Conf from arbiter!
@@ -464,12 +464,11 @@ class Merlindb_broker(BaseModule):
         print "I connect to Merlin database"
         self.db_backend.connect_database()
 
-
     # Get a brok, parse it, and put in in database
     # We call functions like manage_ TYPEOFBROK _brok that return us queries
     def manage_brok(self, b):
         type = b.type
-        manager = 'manage_'+type+'_brok'
+        manager = 'manage_' + type + '_brok'
         #print "(Merlin) I search manager:", manager
         if hasattr(self, manager):
             new_b = self.preprocess(type, b)
@@ -480,8 +479,6 @@ class Merlindb_broker(BaseModule):
                 self.db_backend.execute_query(q)
             return
 
-
-
     # Ok, we are at launch and a scheduler want him only, OK...
     # So ca create several queries with all tables we need to delete with
     # our instance_id
@@ -491,14 +488,13 @@ class Merlindb_broker(BaseModule):
         instance_id = b.data['instance_id']
         tables = ['command', 'comment', 'contact', 'contactgroup', 'downtime', 'host',
                   'hostdependency', 'hostescalation', 'hostgroup', 'notification', 'program_status',
-                  'scheduled_downtime', 'service',  'serviceescalation',
+                  'scheduled_downtime', 'service', 'serviceescalation',
                   'servicegroup', 'timeperiod']
         res = []
         for table in tables:
             q = "DELETE FROM %s WHERE instance_id = '%s' " % (table, instance_id)
             res.append(q)
         return res
-
 
     # Program status is .. status of program? :)
     # Like pid, daemon mode, last activity, etc
@@ -507,8 +503,7 @@ class Merlindb_broker(BaseModule):
         instance_id = b.data['instance_id']
         del_query = "DELETE FROM program_status WHERE instance_id = '%s' " % instance_id
         query = self.db_backend.create_insert_query('program_status', b.data)
-        return [del_query,query]
-
+        return [del_query, query]
 
     # Program status is .. status of program? :)
     # Like pid, daemon mode, last activity, etc
@@ -517,8 +512,7 @@ class Merlindb_broker(BaseModule):
         instance_id = b.data['instance_id']
         del_query = "DELETE FROM program_status WHERE instance_id = '%s' " % instance_id
         query = self.db_backend.create_insert_query('program_status', b.data)
-        return [del_query,query]
-
+        return [del_query, query]
 
     # Initial service status is at start. We need an insert because we
     # clean the base
@@ -528,35 +522,30 @@ class Merlindb_broker(BaseModule):
         query = self.db_backend.create_insert_query('service', b.data)
         return [query]
 
-
     # A service check have just arrived, we UPDATE data info with this
     def manage_service_check_result_brok(self, b):
         data = b.data
         b.data['last_update'] = time.time()
         # We just impact the service :)
-        where_clause = {'host_name': data['host_name'] , 'service_description': data['service_description']}
+        where_clause = {'host_name': data['host_name'], 'service_description': data['service_description']}
         query = self.db_backend.create_update_query('service', data, where_clause)
         return [query]
-
 
     # A new service schedule have just arrived, we UPDATE data info with this
     def manage_service_next_schedule_brok(self, b):
         data = b.data
         # We just impact the service :)
-        where_clause = {'host_name': data['host_name'] , 'service_description': data['service_description']}
+        where_clause = {'host_name': data['host_name'], 'service_description': data['service_description']}
         query = self.db_backend.create_update_query('service', data, where_clause)
         return [query]
-
-
 
     # A full service status? Ok, update data
     def manage_update_service_status_brok(self, b):
         data = b.data
         b.data['last_update'] = time.time()
-        where_clause = {'host_name': data['host_name'] , 'service_description': data['service_description']}
+        where_clause = {'host_name': data['host_name'], 'service_description': data['service_description']}
         query = self.db_backend.create_update_query('service', data, where_clause)
         return [query]
-
 
     # A host have just be create, database is clean, we INSERT it
     def manage_initial_host_status_brok(self, b):
@@ -568,12 +557,11 @@ class Merlindb_broker(BaseModule):
         res = [query]
 
         for cg_name in b.data['contact_groups'].split(','):
-          q_del = "DELETE FROM host_contactgroup WHERE host = '%s' and contactgroup = (SELECT id FROM contactgroup WHERE contactgroup_name = '%s')" % (b.data['id'], cg_name)
-          res.append(q_del)
-          q = "INSERT INTO host_contactgroup (host, contactgroup) VALUES ('%s', (SELECT id FROM contactgroup WHERE contactgroup_name = '%s'))" % (b.data['id'], cg_name)
-          res.append(q)
+            q_del = "DELETE FROM host_contactgroup WHERE host = '%s' and contactgroup = (SELECT id FROM contactgroup WHERE contactgroup_name = '%s')" % (b.data['id'], cg_name)
+            res.append(q_del)
+            q = "INSERT INTO host_contactgroup (host, contactgroup) VALUES ('%s', (SELECT id FROM contactgroup WHERE contactgroup_name = '%s'))" % (b.data['id'], cg_name)
+            res.append(q)
         return res
-
 
     # A new host group? Insert it
     # We need to do something for the members prop (host.id, host_name)
@@ -600,7 +588,6 @@ class Merlindb_broker(BaseModule):
             res.append(q)
         return res
 
-
     # same from hostgroup, but with servicegroup
     def manage_initial_servicegroup_status_brok(self, b):
         data = b.data
@@ -623,7 +610,6 @@ class Merlindb_broker(BaseModule):
             res.append(q)
         return res
 
-
     # Same than service result, but for host result
     def manage_host_check_result_brok(self, b):
         b.data['last_update'] = time.time()
@@ -633,7 +619,6 @@ class Merlindb_broker(BaseModule):
         query = self.db_backend.create_update_query('host', data, where_clause)
         return [query]
 
-
     # Same than service result, but for host new scheduling
     def manage_host_next_schedule_brok(self, b):
         data = b.data
@@ -641,7 +626,6 @@ class Merlindb_broker(BaseModule):
         where_clause = {'host_name': data['host_name']}
         query = self.db_backend.create_update_query('host', data, where_clause)
         return [query]
-
 
     # Ok the host is updated
     def manage_update_host_status_brok(self, b):
@@ -652,12 +636,10 @@ class Merlindb_broker(BaseModule):
         query = self.db_backend.create_update_query('host', data, where_clause)
         return [query]
 
-
     # A contact have just be created, database is clean, we INSERT it
     def manage_initial_contact_status_brok(self, b):
         query = self.db_backend.create_insert_query('contact', b.data)
         return [query]
-
 
     # same from hostgroup, but with servicegroup
     def manage_initial_contactgroup_status_brok(self, b):

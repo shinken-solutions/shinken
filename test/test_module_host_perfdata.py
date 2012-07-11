@@ -29,6 +29,7 @@ sys.path.append("../shinken/modules")
 from host_perfdata_broker import *
 from shinken.brok import Brok
 
+
 class TestConfig(ShinkenTest):
     # setUp is inherited from ShinkenTest
 
@@ -67,7 +68,7 @@ class TestConfig(ShinkenTest):
             if b.type == 'host_check_result':
                 sl.manage_brok(b)
         self.sched.broks = {}
-        sl.file.close() # the sl also has an open file handle
+        sl.file.close()  # the sl also has an open file handle
 
         fd = open(mod.path)
         buf = fd.readline()
@@ -86,7 +87,7 @@ class TestConfig(ShinkenTest):
         print sl2.__dict__
         t = int(time.time())
         print "T", t
-        self.scheduler_loop(1, [[svc, 2, 'BAD | value1=0 value2=0'+u'\xf6']])
+        self.scheduler_loop(1, [[svc, 2, 'BAD | value1=0 value2=0' + u'\xf6']])
         # manage all host check result broks
         for b in self.sched.broks.values():
             if b.type == 'host_check_result':
@@ -97,7 +98,7 @@ class TestConfig(ShinkenTest):
         buf = fd.readline().decode('utf8')
 
         #print "BUF:", buf
-        comparison = u'%d\t%s\t%s\t%s\t%s\n' % (t, "test_host_0", 'BAD', 'value1=0 value2=0'+u'\xf6', 'DOWN')
+        comparison = u'%d\t%s\t%s\t%s\t%s\n' % (t, "test_host_0", 'BAD', 'value1=0 value2=0' + u'\xf6', 'DOWN')
         #print "Comparison:", comparison
         self.assert_(buf == comparison)
         fd.close()
@@ -106,4 +107,3 @@ class TestConfig(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

@@ -13,7 +13,6 @@ except ImportError:
         print "Error: you need the json or simplejson module for this script"
         sys.exit(0)
 
-
 print "Argv", sys.argv
 
 # Case 1 mean host0 is the father of host1

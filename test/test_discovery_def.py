@@ -30,7 +30,6 @@ class TestDiscoveryConf(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_discovery_def.cfg')
 
-
     def test_look_for_discorule(self):
         genhttp = self.sched.conf.discoveryrules.find_by_name('GenHttp')
         self.assert_(genhttp != None)
@@ -58,12 +57,11 @@ class TestDiscoveryConf(ShinkenTest):
         l = {'openports': '80'}
         self.assert_(genhttp.is_matching_disco_datas(l) == False)
 
-
         # Now search the NOT rule
         genhttpnowin = self.sched.conf.discoveryrules.find_by_name('GenHttpNotWindows')
 
         # Should manage this
-        l = {'openports': '80', 'os':  'linux'}
+        l = {'openports': '80', 'os': 'linux'}
         self.assert_(genhttpnowin.is_matching_disco_datas(l) == True)
 
         # But NOT this one
@@ -83,8 +81,6 @@ class TestDiscoveryConf(ShinkenTest):
         value = '800'
         self.assert_(genhttpstrict.is_matching(key, value) == False)
 
-
-
     # Look for good definition and call of a discoveryrun
     def test_look_for_discorun(self):
         nmap = self.sched.conf.discoveryruns.find_by_name('nmap')
@@ -102,7 +98,6 @@ class TestDiscoveryConf(ShinkenTest):
         print "Exit status", nmap.current_launch.exit_status
         print "Output", nmap.current_launch.output
         print "LongOutput", nmap.current_launch.long_output
-
 
     def test_look_for_host_discorule(self):
         genhttp = self.sched.conf.discoveryrules.find_by_name('GenHttpHost')
@@ -133,9 +128,6 @@ class TestDiscoveryConf(ShinkenTest):
         print "Writing properties"
         print genhttp.writing_properties
 
-
-
-
     def test_discorun_matches(self):
         linux = self.sched.conf.discoveryruns.find_by_name('linux')
         self.assert_(linux != None)
@@ -160,4 +152,3 @@ class TestDiscoveryConf(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

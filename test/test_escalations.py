@@ -23,7 +23,6 @@
 # This file is used to test host- and service-downtimes.
 #
 
-
 from shinken_test import *
 from shinken_test import original_time_sleep
 
@@ -35,7 +34,6 @@ class TestEscalations(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_escalations.cfg')
 
-
     def test_simple_escalation(self):
         self.print_header()
         # retry_interval 2
@@ -44,14 +42,14 @@ class TestEscalations(ShinkenTest):
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
 
         # To make tests quicker we make notifications send very quickly
         svc.notification_interval = 0.001
 
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
         #--------------------------------------------------------------
         # initialize host/service state
         #--------------------------------------------------------------
@@ -127,7 +125,6 @@ class TestEscalations(ShinkenTest):
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.assert_(self.any_log_match('SERVICE NOTIFICATION: level2.*;CRITICAL;'))
         self.show_and_clear_logs()
-
         # We go 5! we escalade to level3
 
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
@@ -149,9 +146,6 @@ class TestEscalations(ShinkenTest):
         self.assert_(self.any_log_match('SERVICE NOTIFICATION: level3.*;OK;'))
         self.show_and_clear_logs()
 
-
-
-
     def test_time_based_escalation(self):
         self.print_header()
         # retry_interval 2
@@ -160,14 +154,14 @@ class TestEscalations(ShinkenTest):
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0_time")
 
         # To make tests quicker we make notifications send very quickly
         svc.notification_interval = 0.001
 
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
         #--------------------------------------------------------------
         # initialize host/service state
         #--------------------------------------------------------------
@@ -176,7 +170,6 @@ class TestEscalations(ShinkenTest):
         self.scheduler_loop(1, [[svc, 0, 'OK']], do_sleep=True, sleep_time=0.1)
 
         self.assert_(svc.current_notification_number == 0)
-
 
         # We check if we correclty linked our escalations
         tolevel2_time = self.sched.conf.escalations.find_by_name('ToLevel2-time')
@@ -258,7 +251,6 @@ class TestEscalations(ShinkenTest):
             n.t_to_go = time.time()
             n.creation_time = n.creation_time - 3600
 
-
         # One more, we bypass 7200, so now it's level3
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.assert_(self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;'))
@@ -284,9 +276,6 @@ class TestEscalations(ShinkenTest):
         self.assert_(self.any_log_match('SERVICE NOTIFICATION: level3.*;OK;'))
         self.show_and_clear_logs()
 
-
-
-
     # Here we search to know if a escalation really short the notification
     # interval if the escalation if BEFORE the next notification. For example
     # let say we notify one a day, if the escalation if at 4hour, we need
@@ -299,7 +288,7 @@ class TestEscalations(ShinkenTest):
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0_time")
 
         # To make tests quicker we make notifications send very quickly
@@ -307,7 +296,7 @@ class TestEscalations(ShinkenTest):
         svc.notification_interval = 1400
 
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
         #--------------------------------------------------------------
         # initialize host/service state
         #--------------------------------------------------------------
@@ -341,8 +330,7 @@ class TestEscalations(ShinkenTest):
         print "- 1 x BAD get hard -------------------------------------"
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
 
-
-        print "  ** LEVEL1 ** "* 20
+        print "  ** LEVEL1 ** " * 20
         # We check if we really notify the level1
         self.assert_(self.any_log_match('SERVICE NOTIFICATION: level1.*;CRITICAL;'))
         self.show_and_clear_logs()
@@ -361,7 +349,6 @@ class TestEscalations(ShinkenTest):
         cnn = svc.current_notification_number
         print "- 1 x BAD repeat -------------------------------------"
 
-
         # Now we go for the level2 escalation, so we will need to say: he, it's 1 hour since the begining:p
         print "*************Next", svc.notification_interval * svc.__class__.interval_length
 
@@ -379,8 +366,7 @@ class TestEscalations(ShinkenTest):
             n.t_to_go = time.time()
             n.creation_time -= 3600
 
-        print "  ** LEVEL2 ** "* 20
-
+        print "  ** LEVEL2 ** " * 20
 
         # We go in trouble too
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.001)
@@ -427,8 +413,6 @@ class TestEscalations(ShinkenTest):
             self.assert_(self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;'))
             self.show_and_clear_logs()
 
-
-
         # Ok now we get the normal stuff, we do NOT want to raise so soon a
         # notification.
         self.scheduler_loop(2, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
@@ -438,10 +422,9 @@ class TestEscalations(ShinkenTest):
         for n in svc.notifications_in_progress.values():
             print n, n.t_to_go, time.time(), n.t_to_go - time.time()
             # Should be "near" one day now, so 84000s
-            self.assert_( 8300 < abs(n.t_to_go - time.time()) < 85000)
+            self.assert_(8300 < abs(n.t_to_go - time.time()) < 85000)
         # And so no notification
         self.assert_(not self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;'))
-
 
         # Now we recover, it will be fun because all of level{1,2,3} must be send a
         # recovery notif
@@ -451,10 +434,6 @@ class TestEscalations(ShinkenTest):
         self.assert_(self.any_log_match('SERVICE NOTIFICATION: level2.*;OK;'))
         self.assert_(self.any_log_match('SERVICE NOTIFICATION: level3.*;OK;'))
         self.show_and_clear_logs()
-
-
-
-
 
     def test_time_based_escalation_with_short_notif_interval(self):
         self.print_header()
@@ -466,7 +445,6 @@ class TestEscalations(ShinkenTest):
         host.checks_in_progress = []
         host.act_depend_of = [] # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0_time_long_notif_interval")
-
         # For this specific test, notif interval will be something like 10s
         #svc.notification_interval = 0.1
 
@@ -480,7 +458,6 @@ class TestEscalations(ShinkenTest):
         self.scheduler_loop(1, [[svc, 0, 'OK']], do_sleep=True, sleep_time=0.1)
 
         self.assert_(svc.current_notification_number == 0)
-
 
         # We hack the interval_length for short time, like 10s
         svc.__class__.interval_length = 5
@@ -539,7 +516,7 @@ class TestEscalations(ShinkenTest):
 
         # Sleep 1min and look how the notification is going, only 6s because we will go in
         # escalation in 5s (5s = interval_length, 1 for escalation time)
-        print "---"*200
+        print "---" * 200
         print "We wait a bit, but not enough to go in escalation level2"
         original_time_sleep(2)
 
@@ -550,7 +527,7 @@ class TestEscalations(ShinkenTest):
         self.show_and_clear_logs()
         self.show_actions()
 
-        print "---"*200
+        print "---" * 200
         print "OK NOW we will have an escalation!"
         original_time_sleep(5)
 
@@ -574,10 +551,9 @@ class TestEscalations(ShinkenTest):
         # Should be in the escalation ToLevel2-shortinterval
         self.assert_('ToLevel2-shortinterval' in n.already_start_escalations)
 
-
         # Ok we want to be sure we are using the current escalation interval, the 1 interval = 5s
         # So here we should have a new notification for level2
-        print "*--*--"*20
+        print "*--*--" * 20
         print "Ok now another notification during the escalation 2"
         original_time_sleep(10)
 
@@ -587,7 +563,7 @@ class TestEscalations(ShinkenTest):
         self.show_and_clear_logs()
 
         # Ok now go in the Level3 thing
-        print "*--*--"*20
+        print "*--*--" * 20
         print "Ok now goes in level3 too"
         original_time_sleep(10)
 
@@ -611,7 +587,6 @@ class TestEscalations(ShinkenTest):
         self.scheduler_loop(1, [[svc, 2, 'BAD']], do_sleep=True, sleep_time=0.1)
         self.assert_(self.any_log_match('SERVICE NOTIFICATION: level3.*;CRITICAL;'))
         self.show_and_clear_logs()
-
 
         print "Current NOTIFICATION", n.__dict__, n.t_to_go, time.time(), n.t_to_go - time.time(), n.already_start_escalations
 

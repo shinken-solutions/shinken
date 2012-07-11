@@ -35,17 +35,16 @@ try:
 except ImportError:
     fcntl = None
 
-
 from shinken.util import safe_print
 from shinken.log import logger
 
-__all__ = ( 'Action' )
+__all__ = ('Action')
 
 valid_exit_status = (0, 1, 2, 3)
 
 only_copy_prop = ('id', 'status', 'command', 't_to_go', 'timeout', 'env', 'module_type', 'execution_time')
 
-shellchars = ( '!', '$', '^', '&', '*', '(', ')', '~', '[', ']',
+shellchars = ('!', '$', '^', '&', '*', '(', ')', '~', '[', ']',
                    '|', '{', '}', ';', '<', '>', '?', '`')
 
 
@@ -91,7 +90,6 @@ class __Action(object):
 
         return self.execute__()  ## OS specific part
 
-
     def get_outputs(self, out, max_plugins_output_length):
         #print "Get only," , max_plugins_output_length, "bytes"
         # Squize all output after max_plugins_output_length
@@ -115,7 +113,7 @@ class __Action(object):
             # if already in perfdata, direct append
             if in_perfdata:
                 self.perf_data += ' ' + line.strip()
-            else: # not already in? search for the | part :)
+            else:  # not already in? search for the | part :)
                 elts = line.split('|', 1)
                 # The first part will always be long_output
                 long_output.append(elts[0].strip())
@@ -125,8 +123,6 @@ class __Action(object):
         # long_output is all non output and perfline, join with \n
         self.long_output = '\n'.join(long_output)
 
-
-
     def check_finished(self, max_plugins_output_length):
         # We must wait, but checks are variable in time
         # so we do not wait the same for an little check
@@ -135,7 +131,7 @@ class __Action(object):
         self.last_poll = time.time()
 
         if self.process.poll() is None:
-            self.wait_time = min(self.wait_time*2, 0.1)
+            self.wait_time = min(self.wait_time * 2, 0.1)
             #time.sleep(wait_time)
             now = time.time()
 
@@ -160,8 +156,8 @@ class __Action(object):
         # have the fcntl module (Windows, and maybe some special unix like AIX)
         if not fcntl:
             (self.stdoutdata, self.stderrdata) = self.process.communicate()
-        else: # maybe the command was too quick and finish before we an poll it
-              # so we finish the read
+        else:  # maybe the command was too quick and finish before we an poll it
+            # so we finish the read
             self.stdoutdata += no_block_read(self.process.stdout)
             self.stderrdata += no_block_read(self.process.stderr)
 
@@ -190,13 +186,11 @@ class __Action(object):
         self.status = 'done'
         self.execution_time = time.time() - self.check_time
 
-
     def copy_shell__(self, new_i):
         # This will assign the attributes present in 'only_copy_prop' from self to new_i
         for prop in only_copy_prop:
             setattr(new_i, prop, getattr(self, prop))
         return new_i
-
 
     def got_shell_characters(self):
         for c in self.command:
@@ -209,6 +203,7 @@ class __Action(object):
 ## OS specific "execute__" & "kill__" are defined by "Action" class definition:
 
 if os.name != 'nt':
+
 
     class Action(__Action):
 
@@ -247,7 +242,7 @@ if os.name != 'nt':
                     cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                     close_fds=True, shell=force_shell, env=self.local_env,
                     preexec_fn=os.setsid)
-            except OSError , exp:
+            except OSError, exp:
                 logger.error("Fail launching command: %s %s %s" % (self.command, exp, force_shell))
                 # Maybe it's just a shell we try to exec. So we must retry
                 if not force_shell and exp.errno == 8 and exp.strerror == 'Exec format error':
@@ -261,7 +256,6 @@ if os.name != 'nt':
                 if exp.errno == 24 and exp.strerror == 'Too many open files':
                     return 'toomanyopenfiles'
 
-
         def kill__(self):
             # We kill a process group because we launched them with preexec_fn=os.setsid and
             # so we can launch a whole kill tree instead of just the first one
@@ -271,6 +265,7 @@ else:
 
     import ctypes
     TerminateProcess = ctypes.windll.kernel32.TerminateProcess
+
 
     class Action(__Action):
         def execute__(self):
@@ -298,4 +293,3 @@ else:
 
         def kill__(self):
             TerminateProcess(int(self.process._handle), -1)
-

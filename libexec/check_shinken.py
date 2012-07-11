@@ -53,7 +53,6 @@ except ImportError:
     if not hasattr(os, "getuid") or os.getuid() != 0:
         imp.load_module('shinken', *imp.find_module('shinken', [".", ".."]))
 
-
 from optparse import OptionParser
 try:
     import shinken.pyro_wrapper as pyro
@@ -84,7 +83,6 @@ def check_deamons_numbers(result, target):
         print "OK - %d/%d %s(s) UP, with %d/%d spare(s) UP" % (alive_number, total_number, target, alive_spare_number, total_spare_number)
         raise SystemExit, OK
 
-
 # Adding options. None are required, check_shinken will use shinken defaults
 # TODO: Add more control in args problem and usage than the default OptionParser one
 parser = OptionParser()
@@ -95,10 +93,10 @@ parser.add_option('-s', '--ssl', dest='ssl', default=False)
 parser.add_option('-t', '--target', dest='target')
 parser.add_option('-d', '--daemonname', dest='daemon', default='')
 # In HA architectures, a warning should be displayed if there's one daemon down
-parser.add_option('-w','--warning', dest='warning', default = 1, type=int)
+parser.add_option('-w', '--warning', dest='warning', default=1, type=int)
 # If no deamon is left, display a critical (but shinken will be probably dead already)
-parser.add_option('-c', '--critical', dest='critical', default = 0, type=int)
-parser.add_option('-T', '--timeout', dest='timeout', default = 10)
+parser.add_option('-c', '--critical', dest='critical', default=0, type=int)
+parser.add_option('-T', '--timeout', dest='timeout', default=10)
 
 # Retrieving options
 options, args = parser.parse_args()
@@ -115,7 +113,7 @@ elif options.target not in daemon_types:
     parser.print_help()
     raise SystemExit, CRITICAL
 
-uri = pyro.create_uri(options.hostname, options.portnum, PYRO_OBJECT , options.ssl)
+uri = pyro.create_uri(options.hostname, options.portnum, PYRO_OBJECT, options.ssl)
 
 # Set the default socekt connexion to the timeout, by default it's 10s
 socket.setdefaulttimeout(float(options.timeout))

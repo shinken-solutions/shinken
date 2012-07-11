@@ -38,7 +38,6 @@ def get_perfometer_table_values(elt):
     cmd = elt.check_command.call.split('!')[0]
     print "Looking for perfometer value for command", cmd
 
-
     tab = {'check_http': manage_check_http_command,
            'check_ping': manage_check_ping_command,
            'check_tcp': manage_check_tcp_command,
@@ -51,7 +50,6 @@ def get_perfometer_table_values(elt):
 
     r = manage_unknown_command(elt)
     return r
-
 
 
 def manage_check_http_command(elt):
@@ -73,16 +71,15 @@ def manage_check_http_command(elt):
     # OK: #6f2 (102,255,34) green
     # Warning: #f60 (255,102,0) orange
     # Crit: #ff0033 (255,0,51)
-    base_color = {0: (102,255,34), 1: (255,102,0), 2: (255,0,51)}
+    base_color = {0: (102, 255, 34), 1: (255, 102, 0), 2: (255, 0, 51)}
     state_id = get_stateid(elt)
-    color = base_color.get(state_id, (179,196,255))
+    color = base_color.get(state_id, (179, 196, 255))
     s_color = 'RGB(%d,%d,%d)' % color
     lnk = '#'
     metrics = [(s_color, pct), ('white', 100-pct)]
     title = '%ss' % v
     print "HTTP: return", {'lnk': lnk, 'metrics': metrics, 'title': title}
     return {'lnk': lnk, 'metrics': metrics, 'title': title}
-
 
 
 def manage_check_ping_command(elt):
@@ -100,14 +97,14 @@ def manage_check_ping_command(elt):
         return None
 
     # Percent of ok should be the log of time versus max/2
-    pct = get_logarithmic(v, crit/2)
+    pct = get_logarithmic(v, crit / 2)
     # Now get the color
     # OK: #6f2 (102,255,34) green
     # Warning: #f60 (255,102,0) orange
     # Crit: #ff0033 (255,0,51)
-    base_color = {0: (102,255,34), 1: (255,102,0), 2: (255,0,51)}
+    base_color = {0: (102, 255, 34), 1: (255, 102, 0), 2: (255, 0, 51)}
     state_id = get_stateid(elt)
-    color = base_color.get(state_id, (179,196,255))
+    color = base_color.get(state_id, (179, 196, 255))
     s_color = 'RGB(%d,%d,%d)' % color
 
     lnk = '#'
@@ -115,8 +112,6 @@ def manage_check_ping_command(elt):
     title = '%sms' % v
     print "HTTP: return", {'lnk': lnk, 'metrics': metrics, 'title': title}
     return {'lnk': lnk, 'metrics': metrics, 'title': title}
-
-
 
 
 def manage_check_tcp_command(elt):
@@ -134,15 +129,15 @@ def manage_check_tcp_command(elt):
         return None
 
     # Percent of ok should be the log of time versus m.max / 2
-    pct = get_logarithmic(v, m.max/2)
+    pct = get_logarithmic(v, m.max / 2)
 
     # Now get the color
     # OK: #6f2 (102,255,34) green
     # Warning: #f60 (255,102,0) orange
     # Crit: #ff0033 (255,0,51)
-    base_color = {0: (102,255,34), 1: (255,102,0), 2: (255,0,51)}
+    base_color = {0: (102, 255, 34), 1: (255, 102, 0), 2: (255, 0, 51)}
     state_id = get_stateid(elt)
-    color = base_color.get(state_id, (179,196,255))
+    color = base_color.get(state_id, (179, 196, 255))
     s_color = 'RGB(%d,%d,%d)' % color
 
     #pct = 100 * (v / m.max)
@@ -155,8 +150,6 @@ def manage_check_tcp_command(elt):
     title = '%ss' % v
     print "HTTP: return", {'lnk': lnk, 'metrics': metrics, 'title': title}
     return {'lnk': lnk, 'metrics': metrics, 'title': title}
-
-
 
 
 def manage_unknown_command(elt):
@@ -187,7 +180,7 @@ def manage_unknown_command(elt):
     pct = 0
     if m.min and m.max and (m.max - m.min != 0):
         pct = 100 * (v / (m.max - m.min))
-    else: # ok, we will really guess this time...
+    else:  # ok, we will really guess this time...
         # Percent of ok should be time/10s
         pct = 100 * (v / 10)
 
@@ -216,10 +209,10 @@ def get_linear_color(elt, name):
     #  #ffdd65 (255,221,101) ligth wellow for warning
     #  #ff6587 (191,75,101) light red for critical
     #  #b3c4ff (179,196,255) very light blue for unknown
-    base = {0: (102,136,255), 1: (255,221,101), 2: (191,75,101)}
+    base = {0: (102, 136, 255), 1: (255, 221, 101), 2: (191, 75, 101)}
     state_id = get_stateid(elt)
 
-    c = base.get(state_id, (179,196,255))
+    c = base.get(state_id, (179, 196, 255))
 
     # Get a "hash" of the metric name
     h = hash(name) % 25
@@ -233,7 +226,6 @@ def get_linear_color(elt, name):
     return color
 
 
-
 def get_stateid(elt):
     state_id = elt.state_id
 
@@ -242,7 +234,6 @@ def get_stateid(elt):
         state_id = 2
 
     return state_id
-
 
 
 def get_logarithmic(value, half):

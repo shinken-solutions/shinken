@@ -38,25 +38,25 @@ class EventHandler(Action):
     my_type = 'eventhandler'
 
     properties = {
-        'is_a':           StringProp (default='eventhandler'),
-        'type':           StringProp (default=''),
-        '_in_timeout':    StringProp (default=False),
-        'status':         StringProp (default=''),
-        'exit_status':    StringProp (default=3),
-        'output':         StringProp (default=''),
-        'long_output':    StringProp (default=''),
-        't_to_go':        StringProp (default=0),
-        'check_time':     StringProp (default=0),
-        'execution_time': StringProp (default=0),
-        'env':            StringProp (default={}),
-        'perf_data':      StringProp (default=''),
+        'is_a':           StringProp(default='eventhandler'),
+        'type':           StringProp(default=''),
+        '_in_timeout':    StringProp(default=False),
+        'status':         StringProp(default=''),
+        'exit_status':    StringProp(default=3),
+        'output':         StringProp(default=''),
+        'long_output':    StringProp(default=''),
+        't_to_go':        StringProp(default=0),
+        'check_time':     StringProp(default=0),
+        'execution_time': StringProp(default=0),
+        'env':            StringProp(default={}),
+        'perf_data':      StringProp(default=''),
         'sched_id':       IntegerProp(default=0),
         'timeout':        IntegerProp(default=10),
         'check_time':     IntegerProp(default=0),
-        'command':        StringProp (default=''),
-        'module_type':    StringProp (default='fork'),
-        'worker':         StringProp (default='none'),
-        'reactionner_tag':     StringProp (default='None'),
+        'command':        StringProp(default=''),
+        'module_type':    StringProp(default='fork'),
+        'worker':         StringProp(default='none'),
+        'reactionner_tag':     StringProp(default='None'),
     }
 
     # id = 0  #Is common to Actions
@@ -65,7 +65,7 @@ class EventHandler(Action):
         self.is_a = 'eventhandler'
         self.type = ''
         self.status = 'scheduled'
-        if id is None: # id != None is for copy call only
+        if id is None:  # id != None is for copy call only
             self.id = Action.id
             Action.id += 1
         self.ref = ref
@@ -84,16 +84,14 @@ class EventHandler(Action):
         self.worker = 'none'
         self.reactionner_tag = reactionner_tag
 
-
     # return a copy of the check but just what is important for execution
     # So we remove the ref and all
     def copy_shell(self):
         # We create a dummy check with nothing in it, just defaults values
-        return self.copy_shell__( EventHandler('', id=self.id) )
-
+        return self.copy_shell__(EventHandler('', id=self.id))
 
     def get_return_from(self, e):
-        self.exit_status  = e.exit_status
+        self.exit_status = e.exit_status
         self.output = e.output
         self.long_output = getattr(e, 'long_output', '')
         self.check_time = e.check_time
@@ -118,15 +116,11 @@ class EventHandler(Action):
     def is_launchable(self, t):
         return t >= self.t_to_go
 
-
     def __str__(self):
         return "Check %d status:%s command:%s" % (self.id, self.status, self.command)
 
-
     def get_id(self):
         return self.id
-
-
 
     # Call by pickle for dataify the coment
     # because we DO NOT WANT REF in this pickleisation!
@@ -139,7 +133,6 @@ class EventHandler(Action):
                 res[prop] = getattr(self, prop)
 
         return res
-
 
     # Inverted funtion of getstate
     def __setstate__(self, state):

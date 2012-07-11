@@ -1,6 +1,7 @@
 from shinken_test import *
 import datetime
 
+
 def set_to_midnight(dt):
     midnight = datetime.time(0)
     return datetime.datetime.combine(dt.date(), midnight)
@@ -23,6 +24,7 @@ class TestConfig(ShinkenTest):
 
     pass
 
+
 class TestConfigBig(TestConfig):
     def setUp(self):
         start_setUp = time.time()
@@ -44,8 +46,8 @@ class TestConfigBig(TestConfig):
         self.livestatus_broker.db.close()
         if os.path.exists(self.livelogs):
             os.remove(self.livelogs)
-        if os.path.exists(self.livelogs+"-journal"):
-            os.remove(self.livelogs+"-journal")
+        if os.path.exists(self.livelogs + "-journal"):
+            os.remove(self.livelogs + "-journal")
         for arch in os.listdir('tmp/archives'):
             os.remove('tmp/archives/' + arch)
         if os.path.exists(self.livestatus_broker.pnp_path):
@@ -57,8 +59,6 @@ class TestConfigBig(TestConfig):
         if os.path.exists('var/status.dat'):
             os.remove('var/status.dat')
         self.livestatus_broker = None
-
-
 
     def test_stats(self):
         self.print_header()
@@ -265,7 +265,6 @@ Stats: state = 3"""
         numlogs = self.livestatus_broker.db.execute("SELECT count(*) FROM logs")
         print "numlogs is", numlogs
 
-
         # now we have a lot of events
         # find type = HOST ALERT for test_host_005
         request = """GET log
@@ -349,5 +348,3 @@ if __name__ == '__main__':
 
     #allsuite = unittest.TestLoader.loadTestsFromModule(TestConfig)
     #unittest.TextTestRunner(verbosity=2).run(allsuite)
-
-

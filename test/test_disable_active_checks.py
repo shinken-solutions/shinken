@@ -49,8 +49,6 @@ class TestDisableActiveChecks(ShinkenTest):
         print c.__dict__
         print c.status
 
-
-
         self.scheduler_loop(1, [[host, 0, 'I set this host UP | value1=1 value2=2']])
         self.assert_(host.state == 'UP')
         self.assert_(host.state_type == 'HARD')
@@ -78,4 +76,3 @@ class TestDisableActiveChecks(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

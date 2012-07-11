@@ -30,7 +30,6 @@ import copy
 import os
 import time
 
-
 from shinken.external_command import ExternalCommand
 from shinken.util import from_bool_to_int, from_float_to_int, to_int, to_split, get_customs_keys, get_customs_values
 
@@ -38,8 +37,6 @@ from shinken.modules.livestatus_broker.hooker import Hooker
 from shinken.modules.livestatus_broker.mapping import out_map
 from shinken.modules.livestatus_broker.livestatus_counters import LiveStatusCounters
 from shinken.modules.livestatus_broker.log_line import Logline
-
-
 
 
 def join_with_separators(prop, ref, request, *args):
@@ -50,8 +47,6 @@ def join_with_separators(prop, ref, request, *args):
     else:
         return None
     pass
-
-
 
 
 def worst_host_state(state_1, state_2):
@@ -74,8 +69,6 @@ def worst_service_state(state_1, state_2):
     if state_1 == 3 and state_2 != 2:
         return state_1
     return state_2
-
-
 
 
 class Thrift_status(object, Hooker):
@@ -118,11 +111,9 @@ class Thrift_status(object, Hooker):
 
         self.counters = LiveStatusCounters()
 
-
     def row_factory(self, cursor, row):
         """Handler for the sqlite fetch method."""
         return Logline(cursor, row)
-
 
     def handle_request(self, data):
         """Execute the thrift request.
@@ -196,9 +187,6 @@ class Thrift_status(object, Hooker):
         print "DURATION %.4fs" % (time.time() - request.tic)
         return output, keepalive
 
-
-
-
     def create_out_map_delegates(self):
         """Add delegate keys for certain attributes.
 
@@ -239,7 +227,7 @@ class Thrift_status(object, Hooker):
         }
         for objtype in Thrift_status.out_map:
             for attribute in Thrift_status.out_map[objtype]:
-                entry =  Thrift_status.out_map[objtype][attribute]
+                entry = Thrift_status.out_map[objtype][attribute]
                 if objtype in delegate_map:
                     for prefix in delegate_map[objtype]:
                         if attribute.startswith(prefix):
@@ -247,11 +235,5 @@ class Thrift_status(object, Hooker):
                                 entry['delegate'] = delegate_map[objtype][prefix]
                                 entry['as'] = attribute.replace(prefix, '')
 
-
-
-
     def count_event(self, counter):
         self.counters.increment(counter)
-
-
-

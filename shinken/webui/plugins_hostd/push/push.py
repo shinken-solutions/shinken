@@ -45,7 +45,7 @@ def add_pack_page():
 
 def push_new_pack():
 
-    print "FUCK",app.request.forms.__dict__
+    print "FUCK", app.request.forms.__dict__
     key = app.request.forms.get('key')
     data = app.request.files.get('data')
     print "KEY", key
@@ -102,9 +102,8 @@ def push_new_pack():
         return json.dumps({'state': 'error', 'text': 'Sorry you missed a filed'})
 
 
-
 def push_stats():
-    print "FUCK",app.request.forms.__dict__
+    print "FUCK", app.request.forms.__dict__
     key = app.request.forms.get('key')
     data = app.request.files.get('data')
     print "KEY", key
@@ -162,11 +161,8 @@ def push_stats():
         app.response.content_type = 'application/json'
         return json.dumps({'state': 'error', 'text': 'Sorry you missed a filed'})
 
+pages = {push_new_pack: {'routes': ['/pushpack'], 'method': 'POST', 'view': None, 'static': True},
+         push_stats: {'routes': ['/pushstats'], 'method': 'POST', 'view': None, 'static': True},
 
-
-pages = {push_new_pack: { 'routes': ['/pushpack'], 'method': 'POST', 'view': None, 'static': True},
-         push_stats: { 'routes': ['/pushstats'], 'method': 'POST', 'view': None, 'static': True},
-
-         add_pack_page: { 'routes': ['/addpack'], 'view': 'addpack', 'static': True},
+         add_pack_page: {'routes': ['/addpack'], 'view': 'addpack', 'static': True},
          }
-

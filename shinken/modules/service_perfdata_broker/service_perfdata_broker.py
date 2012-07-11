@@ -55,14 +55,13 @@ class Service_perfdata_broker(BaseModule):
 
         self.buffer = []
 
-
     # Called by Broker so we can do init stuff
     # TODO: add conf param to get pass with init
     # Conf from arbiter!
     def init(self):
         print "[%s] I open the service-perfdata file '%s'" % (self.name, self.path)
         # Try to open the file to be sure we can
-        self.file = codecs.open( self.path, self.mode, "utf-8" )
+        self.file = codecs.open(self.path, self.mode, "utf-8")
         self.file.close()
 
     # We've got a 0, 1, 2 or 3 (or something else? ->3
@@ -73,7 +72,6 @@ class Service_perfdata_broker(BaseModule):
             return states[state]
         else:
             return 'UNKNOWN'
-
 
     # A service check have just arrived, we UPDATE data info with this
     def manage_service_check_result_brok(self, b):
@@ -99,7 +97,6 @@ class Service_perfdata_broker(BaseModule):
         #                                  current_state, data['perf_data'] )
         self.buffer.append(s)
 
-
     # Each second the broker say it's a new second. Let use this to
     # dump to the file
     def hook_tick(self, brok):
@@ -112,6 +109,5 @@ class Service_perfdata_broker(BaseModule):
                 self.file.write(s)
             self.file.flush()
             self.file.close()
-        except IOError, exp: # Maybe another tool is just getting it, pass
+        except IOError, exp:  # Maybe another tool is just getting it, pass
             pass
-

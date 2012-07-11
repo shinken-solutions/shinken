@@ -30,7 +30,6 @@ class TestContactgroupWitoutMembers(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_contactgroup_nomembers.cfg')
 
-
     # It seems that a contact group with no member cause some crash for the arbiter.
     # should fix it :)
     def test_contactgroup_nomember(self):
@@ -43,4 +42,3 @@ class TestContactgroupWitoutMembers(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

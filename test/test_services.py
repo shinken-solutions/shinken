@@ -32,7 +32,6 @@ class TestService(ShinkenTest):
     def get_svc(self):
         return self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
 
-
     # Look if get_*_name return the good result
     def test_get_name(self):
         svc = self.get_svc()
@@ -55,10 +54,9 @@ class TestService(ShinkenTest):
         svc.__setstate__(state)
         # And it should be the same:then before :)
         for p in cls.properties:
-#            print getattr(svc_copy, p)
-#            print getattr(svc, p)
+            ## print getattr(svc_copy, p)
+            ## print getattr(svc, p)
             self.assert_(getattr(svc_copy, p) == getattr(svc, p))
-
 
     # Look if it can detect all incorrect cases
     def test_is_correct(self):
@@ -91,7 +89,6 @@ class TestService(ShinkenTest):
         svc.notification_interval = notification_interval
         self.assert_(svc.is_correct() == True)
 
-
     # Look for set/unset impacted states (unknown)
     def test_impact_state(self):
         svc = self.get_svc()
@@ -104,16 +101,12 @@ class TestService(ShinkenTest):
         self.assert_(svc.state == ori_state)
         self.assert_(svc.state_id == ori_state_id)
 
-
-
     # Look for display name setting
     def test_display_name(self):
         svc = self.get_svc()
         print 'Display name', svc.display_name, 'toto'
         print 'Full name', svc.get_full_name()
         self.assert_(svc.display_name == 'test_ok_0')
-
-
 
     def test_set_state_from_exit_status(self):
         svc = self.get_svc()
@@ -149,14 +142,11 @@ class TestService(ShinkenTest):
         self.assert_(svc.is_state('CRITICAL') == True)
         self.assert_(svc.is_state('c') == True)
 
-
-
     def test_business_impact_value(self):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         # This service inherit the improtance value from his father, 5
         print "FUCK", svc.business_impact
         self.assert_(svc.business_impact == 5)
-
 
     # Look if the service is in the servicegroup
     def test_servicegroup(self):
@@ -174,7 +164,7 @@ class TestService(ShinkenTest):
         now = time.time()
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
         #--------------------------------------------------------------
         # initialize host/service state
         #--------------------------------------------------------------
@@ -204,12 +194,10 @@ class TestService(ShinkenTest):
         print "Last hard state id", svc.last_hard_state_id
         self.assert_(svc.last_hard_state_id == 2)
 
-
     # Check if the autoslots are fill like it should
     def test_autoslots(self):
         svc = self.get_svc()
         self.assert_("check_period" not in svc.__dict__)
-
 
     # Check if the parent/childs dependencies are fill like it should
     def test_parent_child_dep_list(self):
@@ -222,5 +210,3 @@ class TestService(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-
-

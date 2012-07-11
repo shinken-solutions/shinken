@@ -35,6 +35,7 @@ name = None
 local_log = None
 human_timestamp_log = False
 
+
 class Log:
     """Please Add a Docstring to describe the class here"""
     NOTSET   = logging.NOTSET
@@ -140,7 +141,6 @@ class Log:
         if local_log is not None:
             logging.log(level, s.strip())
 
-
     def register_local_log(self, path, level=None):
         """The log can also write to a local file if needed
         and return the file descriptor so we can avoid to
@@ -166,7 +166,6 @@ class Log:
         # Return the file descriptor of this file
         return basic_log_handler.stream.fileno()
 
-
     def quit(self):
         """Close the local log file at program exit"""
         global local_log
@@ -174,11 +173,9 @@ class Log:
             self.debug("Closing %s local_log" % str(local_log))
             local_log.close()
 
-
     def set_human_format(self):
         """Set the output as human format"""
         global human_timestamp_log
         human_timestamp_log = True
-
 
 logger = Log()

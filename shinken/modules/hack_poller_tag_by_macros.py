@@ -27,7 +27,6 @@
 # This Class is an example of an Arbiter module
 # Here for the configuration phase AND running one
 
-
 import re
 from shinken.basemodule import BaseModule
 from shinken.log import logger
@@ -47,19 +46,16 @@ def get_instance(plugin):
     return instance
 
 
-
 # Just print some stuff
 class Hack_pt_by_macros(BaseModule):
     def __init__(self, mod_conf):
-        BaseModule.__init__(self,  mod_conf)
+        BaseModule.__init__(self, mod_conf)
         self.host_macro_name = mod_conf.host_macro_name
         self.service_macro_name = mod_conf.service_macro_name
-
 
     # Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
         print "Initilisation of the hack poller tag by macro module"
-
 
     def hook_late_configuration(self, arb):
         logger.info("[HackPollerTagByMacros in hook late config")
@@ -75,4 +71,3 @@ class Hack_pt_by_macros(BaseModule):
                 v = s.customs[self.service_macro_name.upper()]
                 s.poller_tag = v
                 s.check_command.poller_tag = v
-

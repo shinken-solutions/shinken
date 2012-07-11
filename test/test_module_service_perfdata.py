@@ -68,7 +68,7 @@ class TestModSRVPErfdata(ShinkenTest):
             if b.type == 'service_check_result':
                 sl.manage_brok(b)
         self.sched.broks = {}
-        sl.file.close() # the sl has also an open (writing) file handle
+        sl.file.close()  # the sl has also an open (writing) file handle
         # Ok, go for writing
         sl.hook_tick(None)
 
@@ -102,14 +102,11 @@ class TestModSRVPErfdata(ShinkenTest):
         buf = fd.readline().decode('utf8')
         print fd.read()
 
-
-        comparison = u'%d\t%s\t%s\t%s\t%s\t%s\n' % (t, "test_host_0", "test_ok_0", 'BAD', 'value1=0 value2=0'+u'\xf6', 'CRITICAL')
+        comparison = u'%d\t%s\t%s\t%s\t%s\t%s\n' % (t, "test_host_0", "test_ok_0", 'BAD', 'value1=0 value2=0' + u'\xf6', 'CRITICAL')
 
         self.assert_(buf == comparison)
         fd.close()
         os.unlink(mod.path)
-
-
 
         # Now change with a new template, a CENTREON ONE
         mod.template = '$LASTSERVICECHECK$\t$HOSTNAME$\t$SERVICEDESC$\t$LASTSERVICESTATE$\t$SERVICESTATE$\t$SERVICEPERFDATA$\n'
@@ -131,8 +128,7 @@ class TestModSRVPErfdata(ShinkenTest):
         buf = fd.readline().decode('utf8')
         print fd.read()
 
-
-        comparison = u'%d\t%s\t%s\t%s\t%s\t%s\n' % (t, "test_host_0", "test_ok_0", 'CRITICAL', 'CRITICAL', 'value1=0 value2=0'+u'\xf6')
+        comparison = u'%d\t%s\t%s\t%s\t%s\t%s\n' % (t, "test_host_0", "test_ok_0", 'CRITICAL', 'CRITICAL', 'value1=0 value2=0' + u'\xf6')
         #print "BUF", buf
         #print "COM", comparison
         self.assert_(buf == comparison)
@@ -142,4 +138,3 @@ class TestModSRVPErfdata(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

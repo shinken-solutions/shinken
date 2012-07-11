@@ -31,7 +31,6 @@ class TestConfig(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_notif_way.cfg')
 
-
     def test_contact_def(self):
         #
         # Config is not correct because of a wrong relative path
@@ -46,13 +45,10 @@ class TestConfig(ShinkenTest):
         for nw in self.sched.notificationways:
             print "\t", nw.notificationway_name
 
-
-
         email_in_day = self.sched.notificationways.find_by_name('email_in_day')
         self.assert_(email_in_day in contact.notificationways)
         email_s_cmd = email_in_day.service_notification_commands.pop()
         email_h_cmd = email_in_day.host_notification_commands.pop()
-
 
         sms_the_night = self.sched.notificationways.find_by_name('sms_the_night')
         self.assert_(sms_the_night in contact.notificationways)
@@ -63,13 +59,11 @@ class TestConfig(ShinkenTest):
         self.assert_(email_in_day.min_business_impact == 0)
         self.assert_(sms_the_night.min_business_impact == 5)
 
-
         print "Contact notification way(s):"
         for nw in contact.notificationways:
             print "\t", nw.notificationway_name
             for c in nw.service_notification_commands:
                 print "\t\t", c.get_name()
-
 
         contact_simple = self.sched.contacts.find_by_name("test_contact_simple")
         # It's the created notifway for this simple contact
@@ -114,4 +108,3 @@ class TestConfig(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

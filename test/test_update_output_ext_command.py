@@ -36,10 +36,10 @@ class TestUpdateOutputExtCommand(ShinkenTest):
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
 
         cmd = "[%lu] PROCESS_SERVICE_OUTPUT;test_host_0;test_ok_0;My ass is cool | toto=30%%" % now
         self.sched.run_external_command(cmd)
@@ -49,4 +49,3 @@ class TestUpdateOutputExtCommand(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

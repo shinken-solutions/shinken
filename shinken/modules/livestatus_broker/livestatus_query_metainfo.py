@@ -32,8 +32,6 @@ from livestatus_stack import LiveStatusStack
 def has_not_more_than(list1, list2):
     return len(set(list1).difference(set(list2))) == 0
 
-
-
 """
 There are several categories for queries. Their main difference is the kind
 of event which invalidates the corresponding cache.
@@ -92,6 +90,7 @@ class LiveStatusQueryMetainfoFilterStack(LiveStatusStack):
     a and/or-filter-tree, similar to sql.
     It can be used some time for text analysis.
     """
+
     def __init__(self, *args, **kw):
         self.type = 'text'
         self.__class__.__bases__[0].__init__(self, *args, **kw)
@@ -136,6 +135,7 @@ class LiveStatusQueryMetainfo(object):
     It's main purpose is to provide methods which are used to rank the query
     in specific categories.
     """
+
     def __init__(self, data):
         self.data = data
         self.cache_category = CACHE_IMPOSSIBLE
@@ -193,7 +193,7 @@ class LiveStatusQueryMetainfo(object):
             if keyword == 'GET':
                 self.table = self.split_command(line)[1]
                 self.structured_data.append((keyword, self.split_command(line)[1]))
-            elif keyword == 'Columns': # Get the names of the desired columns
+            elif keyword == 'Columns':  # Get the names of the desired columns
                 _, columns = self.split_option_with_columns(line)
                 self.structured_data.append((keyword, columns))
             elif keyword == 'ResponseHeader':
@@ -233,7 +233,7 @@ class LiveStatusQueryMetainfo(object):
                 self.structured_data.append((keyword, ornum))
                 self.metainfo_filter_stack.or_elements(ornum)
             elif keyword == 'Negate':
-                self.structured_data.append((keyword, ))
+                self.structured_data.append((keyword,))
                 self.metainfo_filter_stack.not_elements()
             elif keyword == 'StatsGroupBy':
                 _, columns = self.split_option_with_columns(line)
@@ -277,7 +277,7 @@ class LiveStatusQueryMetainfo(object):
 
     def split_option(self, line, splits=1):
         """Like split_commands, but converts numbers to int data type"""
-        x = map (lambda i: (i.isdigit() and int(i)) or i, [token.strip() for token in re.split(r"[\s]+", line, splits)])
+        x = map(lambda i: (i.isdigit() and int(i)) or i, [token.strip() for token in re.split(r"[\s]+", line, splits)])
         return x
 
     def split_option_with_columns(self, line):
