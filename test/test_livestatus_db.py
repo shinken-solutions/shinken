@@ -300,7 +300,8 @@ Columns: time type options state host_name"""
         print response
         pyresponse = eval(response)
         # ignore these internal logs
-        pyresponse = [l for l in pyresponse if l[1] not in ["Warning ", "Info ", "Debug "]]
+        pyresponse = [l for l in pyresponse if l[1].strip() not in ["Warning", "Info", "Debug"]]
+        print "Raw pyresponse", pyresponse
         print "pyresponse", len(pyresponse)
         print "expect", logs
         self.assert_(len(pyresponse) == logs)
@@ -528,7 +529,7 @@ ResponseHeader: fixed16
         print request
         print response
         pyresponse = eval(response.splitlines()[1])
-        pyresponse = [l for l in pyresponse if l[2] not in ["Warning ", "Info ", "Debug "]]
+        pyresponse = [l for l in pyresponse if l[2].strip() not in ["Warning", "Info", "Debug"]]
         print pyresponse
         self.assert_(len(pyresponse) == 2)
 
