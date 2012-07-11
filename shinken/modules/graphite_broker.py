@@ -50,7 +50,6 @@ def get_instance(mod_conf):
     return instance
 
 
-
 # Class for the Graphite Broker
 # Get broks and send them to a Carbon instance of Graphite
 class Graphite_broker(BaseModule):
@@ -69,17 +68,13 @@ class Graphite_broker(BaseModule):
         self.host_dict = {}
         self.svc_dict = {}
 
-
-
-
     # Called by Broker so we can do init stuff
     # TODO: add conf param to get pass with init
     # Conf from arbiter!
     def init(self):
         print "[%s] I init the graphite server connection to %s:%s" % (self.get_name(), self.host, self.port)
         self.con = socket()
-        self.con.connect( (self.host, self.port))
-
+        self.con.connect((self.host, self.port))
 
     # For a perf_data like /=30MB;4899;4568;1234;0  /var=50MB;4899;4568;1234;0 /toto=
     # return ('/', '30'), ('/var', '50')
@@ -91,7 +86,7 @@ class Graphite_broker(BaseModule):
         metrics = [e for e in elts if e != '']
 
         for e in metrics:
- #           print "Graphite: groking: ", e
+            #print "Graphite: groking: ", e
             elts = e.split('=', 1)
             if len(elts) != 2:
                 continue
@@ -101,38 +96,35 @@ class Graphite_broker(BaseModule):
             # get the first value of ;
             if ';' in raw:
                 elts = raw.split(';')
-                name_value = { name: elts[0], name+'_warn': elts[1], name+'_crit': elts[2] }
+                name_value = {name: elts[0], name + '_warn': elts[1], name + '_crit': elts[2]}
             else:
                 value = raw
-                name_value = { name: raw }
+                name_value = {name: raw}
             # bailout if need
             if name_value[name] == '':
                 continue
 
             # Try to get the int/float in it :)
-            for key,value in name_value.items():
+            for key, value in name_value.items():
                 m = re.search("(-?\d*\.?\d*)(.*)", value)
                 if m:
                     name_value[key] = m.groups(0)[0]
                 else:
                     continue
 #           print "graphite: end of grok:", name, value
-            for key,value in name_value.items():
+            for key, value in name_value.items():
                 res.append((key, value))
         return res
-
 
     # Prepare service custom vars
     def manage_initial_service_status_brok(self, b):
         if '_GRAPHITE_POST' in b.data['customs']:
             self.svc_dict[(b.data['host_name'], b.data['service_description'])] = b.data['customs']
 
-
     # Prepare host custom vars
     def manage_initial_host_status_brok(self, b):
         if '_GRAPHITE_PRE' in b.data['customs']:
             self.host_dict[b.data['host_name']] = b.data['customs']
-
 
     # A service check result brok has just arrived, we UPDATE data info with this
     def manage_service_check_result_brok(self, b):
@@ -176,11 +168,9 @@ class Graphite_broker(BaseModule):
                 if value:
                     lines.append("%s.%s.%s %s %d" % (hname, desc, metric,
                                                      value, check_time))
-            packet = '\n'.join(lines) + '\n' # Be sure we put \n every where
+            packet = '\n'.join(lines) + '\n'  # Be sure we put \n every where
 #            print "Graphite launching:", packet
             self.con.sendall(packet)
-
-
 
     # A host check result brok has just arrived, we UPDATE data info with this
     def manage_host_check_result_brok(self, b):
@@ -218,7 +208,7 @@ class Graphite_broker(BaseModule):
                 if value:
                     lines.append("%s.__HOST__.%s %s %d" % (hname, metric,
                                                            value, check_time))
-            packet = '\n'.join(lines) + '\n' # Be sure we put \n every where
+            packet = '\n'.join(lines) + '\n'  # Be sure we put \n every where
 #            print "Graphite launching:", packet
             self.con.sendall(packet)
 
@@ -245,7 +235,7 @@ class Graphite_broker(BaseModule):
             try:
                 self.con.sendall(packet)
             except IOError, err:
-                logger.error ("Failed sending to the Graphite Carbon instance network socket! IOError:%s" % str(err))
+                logger.error("Failed sending to the Graphite Carbon instance network socket! IOError:%s" % str(err))
                 return
 
             # Flush the buffer after a successful send to Graphite

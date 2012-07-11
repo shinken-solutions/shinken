@@ -58,7 +58,7 @@ try:
     #      '''
     states_list = []
     data = dataArgs()
-    cr = csv.reader(open(sys.argv[1],"rb"))
+    cr = csv.reader(open(sys.argv[1], "rb"))
     for elt in cr:
         trace = State()
         trace.timestamp = long(round(time.time()))

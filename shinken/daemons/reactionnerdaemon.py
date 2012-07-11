@@ -37,13 +37,12 @@
 # The configuration consists of a list of Schedulers for which
 # the Reactionner will launch actions for.
 
-
 from shinken.satellite import Satellite
 from shinken.property import PathProp, IntegerProp
 
 
 class Reactionner(Satellite):
-    do_checks = False # I do not do checks
+    do_checks = False  # I do not do checks
     do_actions = True
 
     properties = Satellite.properties.copy()

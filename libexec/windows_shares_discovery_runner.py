@@ -63,8 +63,6 @@ if opts.password:
 cred = '%s%%%s' % (user, password)
 
 
-
-
 def p_debug(s):
     if debug:
         print "DEBUG"
@@ -77,7 +75,7 @@ try:
         cmd,
         stdout=subprocess.PIPE, stderr=subprocess.PIPE,
         close_fds=True, shell=True)
-except OSError , exp:
+except OSError, exp:
     print "Error in launching command:", cmd, exp
     sys.exit(2)
 
@@ -85,18 +83,18 @@ p_debug("Try to communicate with the subprocess")
 (stdoutdata, stderrdata) = process.communicate()
 
 if process.returncode != 0:
-    print "Error: the share scanner return an error: '%s'" % (stderrdata+stdoutdata)
+    print "Error: the share scanner return an error: '%s'" % (stderrdata + stdoutdata)
     sys.exit(2)
-
 
 disks = []
 printers = []
 
 p_debug("Good return" + stdoutdata)
 
+
 def get_elements(line):
     if line.count('|') < 2:
-        p_debug("Not a good line"+line)
+        p_debug("Not a good line" + line)
         return None
     elts = line.split('|', 2)
     return elts

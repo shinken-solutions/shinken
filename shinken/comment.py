@@ -41,13 +41,11 @@ class Comment:
         'expire_time':  None,
         'can_be_deleted': None,
 
-# TODO: find a very good way to handle the downtime "ref"
-# ref must effectively not be in properties because it points onto a real object.
-#        'ref':  None
+        # TODO: find a very good way to handle the downtime "ref".
+        # ref must effectively not be in properties because it points
+        # onto a real object.
+        #'ref':  None
     }
-
-
-
 
     # Adds a comment to a particular service. If the "persistent" field
     # is set to zero (0), the comment will be deleted the next time
@@ -56,7 +54,7 @@ class Comment:
     def __init__(self, ref, persistent, author, comment, comment_type, entry_type, source, expires, expire_time):
         self.id = self.__class__.id
         self.__class__.id += 1
-        self.ref = ref # pointer to srv or host we are apply
+        self.ref = ref  # pointer to srv or host we are apply
         self.entry_time = int(time.time())
         self.persistent = persistent
         self.author = author
@@ -72,22 +70,19 @@ class Comment:
         self.expire_time = expire_time
         self.can_be_deleted = False
 
-
     def __str__(self):
         return "Comment id=%d %s" % (self.id, self.comment)
-
 
     # Call by pickle for dataify the ackn
     # because we DO NOT WANT REF in this pickleisation!
     def __getstate__(self):
         cls = self.__class__
         # id is not in *_properties
-        res = { 'id': self.id }
+        res = {'id': self.id}
         for prop in cls.properties:
             if hasattr(self, prop):
                 res[prop] = getattr(self, prop)
         return res
-
 
     # Inverted funtion of getstate
     def __setstate__(self, state):
@@ -108,7 +103,6 @@ class Comment:
         if self.id >= cls.id:
             cls.id = self.id + 1
 
-
     # This function is DEPRECATED and will be removed in a future version of
     # Shinken. It should not be useful any more after a first load/save pass.
     # Inverted funtion of getstate
@@ -127,4 +121,3 @@ class Comment:
             setattr(self, prop, val)
         if self.id >= cls.id:
             cls.id = self.id + 1
-

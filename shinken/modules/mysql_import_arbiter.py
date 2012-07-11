@@ -29,13 +29,13 @@ import MySQLdb
 
 from shinken.basemodule import BaseModule
 
-
 properties = {
     'daemons': ['arbiter'],
     'type': 'mysql_import',
     'external': False,
     'phases': ['configuration'],
 }
+
 
 # called by the plugin manager to get a broker
 def get_instance(plugin):
@@ -61,30 +61,29 @@ def get_instance(plugin):
     instance = MySQL_importer_arbiter(plugin, host, login, password, database, reqlist)
     return instance
 
+
 # Retrieve hosts from a MySQL database
 class MySQL_importer_arbiter(BaseModule):
     def __init__(self, mod_conf, host, login, password, database, reqlist):
         BaseModule.__init__(self, mod_conf)
-        self.host  = host
+        self.host = host
         self.login = login
         self.password = password
         self.database = database
         self.reqlist = reqlist
 
-
     # Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
         print "[MySQL Importer Module]: Try to open a MySQL connection to %s" % self.host
         try:
-            self.conn = MySQLdb.connect (host = self.host,
-                        user = self.login,
-                        passwd = self.password,
-                        db = self.database)
+            self.conn = MySQLdb.connect(host=self.host,
+                        user=self.login,
+                        passwd=self.password,
+                        db=self.database)
         except MySQLdb.Error, e:
             print "MySQL Module: Error %d: %s" % (e.args[0], e.args[1])
             raise
         print "[MySQL Importer Module]: Connection opened"
-
 
     # Main function that is called in the CONFIGURATION phase
     def get_objects(self):
@@ -95,10 +94,10 @@ class MySQL_importer_arbiter(BaseModule):
         # Create variables for result
         r = {}
 
-        cursor = self.conn.cursor (MySQLdb.cursors.DictCursor)
+        cursor = self.conn.cursor(MySQLdb.cursors.DictCursor)
 
         # For all parameters
-        for k,v in self.reqlist.iteritems():
+        for k, v in self.reqlist.iteritems():
             r[k] = []
 
             if(v != None):
@@ -106,8 +105,8 @@ class MySQL_importer_arbiter(BaseModule):
                 print "[MySQL Importer Module]: getting %s configuration from database" % (k)
 
                 try:
-                    cursor.execute (v)
-                    result_set = cursor.fetchall ()
+                    cursor.execute(v)
+                    result_set = cursor.fetchall()
                 except MySQLdb.Error, e:
                     print "MySQL Module: Error %d: %s" % (e.args[0], e.args[1])
 
@@ -116,11 +115,11 @@ class MySQL_importer_arbiter(BaseModule):
                     h = {}
                     for column in row:
                         if row[column]:
-                            h[column]= row[column]
+                            h[column] = row[column]
                     r[k].append(h)
 
-        cursor.close ()
-        self.conn.close ()
+        cursor.close()
+        self.conn.close()
         del self.conn
 
         print "[MySQL Importer Module]: Returning to Arbiter the object:", r

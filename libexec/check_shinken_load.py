@@ -18,9 +18,10 @@ import getopt
 def usage():
     print 'Usage:'
     print sys.argv[0] + ' -w <load1,load5,load15> -c <load1,load5,load15>'
-    print '   -c (--critical)      Three critical tresholds (defaults: 4,3,2)\n';
-    print '   -w (--warning)       Three warning tresholds (defaults: 3,2,1)\n';
-    print '   -h (--help)          Usage help\n';
+    print '   -c (--critical)      Three critical tresholds (defaults: 4,3,2)\n'
+    print '   -w (--warning)       Three warning tresholds (defaults: 3,2,1)\n'
+    print '   -h (--help)          Usage help\n'
+
 #
 # Main
 #
@@ -47,14 +48,14 @@ def main():
             notification = a
         elif o in ("-c", "--critical"):
             notification = a
-	else:
-	    assert False , "unknown options"
+        else:
+            assert False, "unknown options"
 
 if __name__ == "__main__":
     main()
     parser = argparse.ArgumentParser()
-    parser.add_argument('-w', '--warning', default = '3,2,1')
-    parser.add_argument('-c', '--critical', default = '4,3,2' )
+    parser.add_argument('-w', '--warning', default='3,2,1')
+    parser.add_argument('-c', '--critical', default='4,3,2')
     args = parser.parse_args()
     critical = args.critical
     warning = args.warning
@@ -78,12 +79,11 @@ if __name__ == "__main__":
 
 
     if load1 >= cload1 or load5 >= cload5 or load15 >= cload15:
-       print 'CRITICAL - Load average : '+load1+','+load5+','+load15+'|load1='+load1+'; load5='+load5+'; load15='+load15
-       sys.exit(2)
+        print 'CRITICAL - Load average : ' + load1 + ',' + load5 + ',' + load15 + '|load1=' + load1 + '; load5=' + load5 + '; load15=' + load15
+        sys.exit(2)
     elif load1 >= wload1 or load5 >= wload5 or load15 >= wload15:
-       print 'WARNING - Load average : '+load1+','+load5+','+load15+'|load1='+load1+'; load5='+load5+'; load15='+load15
-       sys.exit(1)
+        print 'WARNING - Load average : ' + load1 + ',' + load5 + ',' + load15 + '|load1=' + load1 + '; load5=' + load5 + '; load15=' + load15
+        sys.exit(1)
     else:
-       print 'OK - Load average : '+load1+','+load5+','+load15+'|load1='+load1+'; load5='+load5+'; load15='+load15
-       sys.exit(0)
-
+        print 'OK - Load average : ' + load1 + ',' + load5 + ',' + load15 + '|load1=' + load1 + '; load5=' + load5 + '; load15=' + load15
+        sys.exit(0)

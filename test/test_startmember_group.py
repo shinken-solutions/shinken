@@ -29,7 +29,6 @@ class TestStarMemberGroup(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_startmember_group.cfg')
 
-
     # Check if service apply on a hostgroup * is good or not
     def test_starmembergroupdef(self):
         hg = self.sched.conf.hostgroups.find_by_name('ping-servers')
@@ -45,4 +44,3 @@ class TestStarMemberGroup(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

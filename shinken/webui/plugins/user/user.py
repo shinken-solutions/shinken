@@ -35,11 +35,11 @@ except ImportError:
         print "Error: you need the json or simplejson module"
         raise
 
-
 from shinken.webui.bottle import redirect
 
 ### Will be populated by the UI with it's own value
 app = None
+
 
 def save_pref():
     # First we look for the user sid
@@ -65,6 +65,4 @@ def save_pref():
 
     return
 
-
-pages = {save_pref: { 'routes': ['/user/save_pref'], 'method': 'POST'}}
-
+pages = {save_pref: {'routes': ['/user/save_pref'], 'method': 'POST'}}

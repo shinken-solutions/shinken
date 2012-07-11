@@ -30,7 +30,6 @@ class TestConfig(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_spaces_in_commands.cfg')
 
-
     def test_dummy(self):
         #
         # Config is not correct because of a wrong relative path
@@ -40,10 +39,10 @@ class TestConfig(ShinkenTest):
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_port_2")
-        #for a in host.actions:
-            #a.t_to_go = 0
+        ## for a in host.actions:
+        ##     a.t_to_go = 0
         svc.schedule()
         for a in svc.actions:
             a.t_to_go = 0
@@ -56,4 +55,3 @@ class TestConfig(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

@@ -30,7 +30,6 @@
 # The managed_brok function is called by Broker for manage the broks. It calls
 # the manage_*_brok functions that create queries, and then run queries.
 
-
 import copy
 import time
 import sys
@@ -44,9 +43,9 @@ properties = {
 from shinken.basemodule import BaseModule
 from shinken.log import logger
 
+
 def de_unixify(t):
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(t))
-
 
 
 # Class for the Glpidb Broker
@@ -80,9 +79,9 @@ class Glpidb_broker(BaseModule):
                }
            }
         # Last state of check
-#        self.checkstatus = {
-#           '0': None,
-#           }
+        #self.checkstatus = {
+        #    '0': None,
+        #    }
         BaseModule.__init__(self, modconf)
         self.host = host
         self.user = user
@@ -95,17 +94,12 @@ class Glpidb_broker(BaseModule):
         print "Creating a mysql backend"
         self.db_backend = DBMysql(host, user, password, database, character_set)
 
-
-
     # Called by Broker so we can do init stuff
     # TODO: add conf param to get pass with init
     # Conf from arbiter!
     def init(self):
         print "I connect to Glpi database"
         self.db_backend.connect_database()
-
-
-
 
     def preprocess(self, type, brok, checkst):
         new_brok = copy.deepcopy(brok)
@@ -155,14 +149,12 @@ class Glpidb_broker(BaseModule):
             print brok.data
         return new_brok
 
-
-
     # Get a brok, parse it, and put in in database
     # We call functions like manage_ TYPEOFBROK _brok that return us queries
     def manage_brok(self, b):
         type = b.type
         # To update check in glpi_plugin_monitoring_hosts
-        manager = 'manage_'+type+'up_brok'
+        manager = 'manage_' + type + 'up_brok'
         if hasattr(self, manager):
             new_b = self.preprocess(type, b, 0)
             f = getattr(self, manager)
@@ -170,19 +162,18 @@ class Glpidb_broker(BaseModule):
             # Ok, we've got queries, now: run them!
             for q in queries:
                 self.db_backend.execute_query(q)
-        manager = 'manage_'+type+'_brok'
+        manager = 'manage_' + type + '_brok'
         if hasattr(self, manager):
             new_b = self.preprocess(type, b, '1')
             if 'host_name' in new_b.data:
-               if 'plugin_monitoring_services_id' not in new_b.data:
-                  return
+                if 'plugin_monitoring_services_id' not in new_b.data:
+                    return
             f = getattr(self, manager)
             queries = f(new_b)
             # Ok, we've got queries, now: run them!
             for q in queries:
                 self.db_backend.execute_query(q)
             return
-
 
     ## Host result
     ## def manage_host_check_result_brok(self, b):
@@ -249,4 +240,3 @@ class Glpidb_broker(BaseModule):
         #print "Update service: ", new_data
         query = self.db_backend.create_update_query(table, new_data, where_clause)
         return [query]
-

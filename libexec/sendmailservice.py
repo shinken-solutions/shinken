@@ -8,9 +8,10 @@ import getopt
 import argparse
 import smtplib
 
+
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hnsHariotS:v", ["help", "notification", "servicedesc", "hostname", "hostaddress", "servicestate", "shortdatetime", "output", "to", "sender" ])
+        opts, args = getopt.getopt(sys.argv[1:], "hnsHariotS:v", ["help", "notification", "servicedesc", "hostname", "hostaddress", "servicestate", "shortdatetime", "output", "to", "sender"])
     except getopt.GetoptError, err:
         # print help information and exit:
         print str(err)
@@ -44,6 +45,7 @@ def main():
             to = a
         else:
             assert False, "unhandled option"
+
 
 def usage():
     print 'Usage:'
@@ -95,7 +97,7 @@ msg['From'] = sender
 msg['To'] = to
 
 # Create the body of the message (a plain-text and an HTML version).
-html = "<html><head></head><body><strong> ***** Shinken Notification ***** </strong><br><br>\r Notification : "+ notify +"<br><br>\rService : "+ desc +" <br>\r Host : "+ hostname +" <br>\r Address : "+ hostaddress +" <br>\r State : "+ state +"<br><br>\r Date/Time : "+ datetime +" Additional Info : "+ output + "</body></html>"
+html = "<html><head></head><body><strong> ***** Shinken Notification ***** </strong><br><br>\r Notification : " + notify + "<br><br>\rService : " + desc + " <br>\r Host : " + hostname + " <br>\r Address : " + hostaddress + " <br>\r State : " + state + "<br><br>\r Date/Time : " + datetime + " Additional Info : " + output + "</body></html>"
 
 # Record the MIME types of one parts - text/html.
 part1 = MIMEText(html, 'html')

@@ -84,7 +84,6 @@ def get_coffee():
     print get_coffee.__doc__
 
 
-
 def episode_iv():
     hst = 'towel.blinkenlights.nl'
 
@@ -100,7 +99,6 @@ def perdu():
     import urllib
     f = urllib.urlopen("http://www.perdu.com")
     print f.read()
-
 
 
 def myip():

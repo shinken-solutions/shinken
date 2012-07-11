@@ -22,14 +22,12 @@
 # This file is used to test host- and service-downtimes.
 #
 
-
 from shinken_test import *
 
 
 class TestProblemImpact(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_problem_impact.cfg')
-
 
     def test_problems_impacts(self):
         self.print_header()
@@ -92,7 +90,6 @@ class TestProblemImpact(ShinkenTest):
             self.assert_(h.state == 'DOWN')
             self.assert_(h.state_type == 'HARD')
 
-
         #--------------------------------------------------------------
         # Routers get HARD/DOWN
         # should be problems now!
@@ -140,7 +137,6 @@ class TestProblemImpact(ShinkenTest):
                 brk_hst.prepare()
                 self.assert_(h.get_dbg_name() in brk_hst.data['source_problems']['hosts'])
 
-
         #--------------------------------------------------------------
         # One router get UP now
         #--------------------------------------------------------------
@@ -162,7 +158,6 @@ class TestProblemImpact(ShinkenTest):
             # Still impacted by the other server
             self.assert_(s.is_impact == True)
             self.assert_(s.source_problems == [host_router_1])
-
 
         #--------------------------------------------------------------
         # The other router get UP :)
@@ -191,11 +186,6 @@ class TestProblemImpact(ShinkenTest):
         self.assert_(host_router_0.business_impact == 2)
         self.assert_(host_router_1.business_impact == 2)
         # It's done :)
-
-
-
-
-
 
     def test_problems_impacts_with_crit_mod(self):
         self.print_header()
@@ -267,7 +257,6 @@ class TestProblemImpact(ShinkenTest):
         for h in all_routers:
             self.assert_(h.state == 'DOWN')
             self.assert_(h.state_type == 'HARD')
-
 
         #--------------------------------------------------------------
         # Routers get HARD/DOWN
@@ -359,7 +348,6 @@ class TestProblemImpact(ShinkenTest):
             # Still impacted by the other server
             self.assert_(s.is_impact == True)
             self.assert_(s.source_problems == [host_router_1])
-
 
         #--------------------------------------------------------------
         # The other router get UP :)

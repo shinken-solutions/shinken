@@ -30,7 +30,6 @@ class TestDefineWithSpaces(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_define_with_space.cfg')
 
-
     # We got a problem with define    host for example, the type read was "" and not host
     def testdefine_with_spaces(self):
         host = self.sched.hosts.find_by_name("test_host_0")
@@ -39,4 +38,3 @@ class TestDefineWithSpaces(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

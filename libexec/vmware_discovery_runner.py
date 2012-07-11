@@ -40,9 +40,10 @@ except ImportError:
 
 VERSION = '0.1'
 
+
 # Search if we can findthe check_esx3.pl file somewhere
 def search_for_check_esx3():
-    me = os.path.abspath( __file__ )
+    me = os.path.abspath(__file__)
     my_dir = os.path.dirname(me)
     possible_paths = [os.path.join(my_dir, 'check_esx3.pl'),
                       '/var/lib/nagios/check_esx3.pl',
@@ -64,6 +65,7 @@ def search_for_check_esx3():
 def _split_rules(rules):
     return [r.strip() for r in rules.split('|')]
 
+
 # Apply all rules on the objects names
 def _apply_rules(name, rules):
     if 'nofqdn' in rules:
@@ -71,6 +73,7 @@ def _apply_rules(name, rules):
     if 'lower' in rules:
         name = name.lower()
     return name
+
 
 # Get all vmware hosts from a VCenter and return the list
 def get_vmware_hosts(check_esx_path, vcenter, user, password):
@@ -154,11 +157,11 @@ def print_all_links(res, rules):
 
 def write_output(r, path):
     try:
-        f = open(path+'.tmp', 'wb')
+        f = open(path + '.tmp', 'wb')
         buf = json.dumps(r)
         f.write(buf)
         f.close()
-        shutil.move(path+'.tmp', path)
+        shutil.move(path + '.tmp', path)
         print "File %s wrote" % path
     except IOError, exp:
         sys.exit("Error writing the file %s: %s" % (path, exp))
@@ -173,7 +176,6 @@ def main(check_esx_path, vcenter, user, password, rules):
         lst = get_vm_of_host(check_esx_path, vcenter, host, user, password)
         if lst:
             res[host] = lst
-
 
     print_all_links(res, rules)
 
