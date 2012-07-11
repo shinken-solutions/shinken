@@ -18,9 +18,9 @@ import getopt
 def usage():
     print 'Usage:'
     print sys.argv[0] + ' -w <80> -c <90>'
-    print '   -c (--critical)      Critical tresholds (defaults: 90%)\n';
-    print '   -w (--warning)       Warning tresholds (defaults: 80%)\n';
-    print '   -h (--help)          Usage help\n';
+    print '   -c (--critical)      Critical tresholds (defaults: 90%)\n'
+    print '   -w (--warning)       Warning tresholds (defaults: 80%)\n'
+    print '   -h (--help)          Usage help\n'
 
 #
 # Main
@@ -31,6 +31,7 @@ def readLines(filename):
     lines = f.readlines()
     return lines
 
+
 def MemValues():
     global memTotal, memCached, memFree
     for line in readLines('/proc/meminfo'):
@@ -39,11 +40,13 @@ def MemValues():
         if line.split()[0] == 'MemFree:':
             memFree = line.split()[1]
         if line.split()[0] == 'Cached:':
-             memCached = line.split()[1]
+            memCached = line.split()[1]
+
 
 def percentMem():
     MemValues()
     return (((int(memFree) + int(memCached)) * 100) / int(memTotal))
+
 
 def main():
 
@@ -67,12 +70,12 @@ def main():
             notification = a
         elif o in ("-c", "--critical"):
             notification = a
-	else:
-	    assert False , "unknown options"
+        else:
+            assert False, "unknown options"
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-w', '--warning', default = '80')
-    parser.add_argument('-c', '--critical', default = '90' )
+    parser.add_argument('-w', '--warning', default='80')
+    parser.add_argument('-c', '--critical', default='90')
     args = parser.parse_args()
     critical = args.critical
     warning = args.warning
@@ -83,14 +86,14 @@ def main():
     pmemUsage = str(pmemUsage)
 
     if pmemUsage >= cmem:
-       print 'CRITICAL - Memory usage : '+pmemUsage+'% |mem='+pmemUsage
-       sys.exit(2)
+        print 'CRITICAL - Memory usage : ' + pmemUsage + '% |mem=' + pmemUsage
+        sys.exit(2)
     elif pmemUsage >= wmem:
-       print 'WARNING - Memory usage : '+pmemUsage+'% |mem='+pmemUsage
-       sys.exit(1)
+        print 'WARNING - Memory usage : ' + pmemUsage + '% |mem=' + pmemUsage
+        sys.exit(1)
     else:
-       print 'OK - Memory usage : '+pmemUsage+'% |mem='+pmemUsage
-       sys.exit(0)
+        print 'OK - Memory usage : ' + pmemUsage + '% |mem=' + pmemUsage
+        sys.exit(0)
 
 if __name__ == "__main__":
     main()

@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 properties = {
     'daemons': ['broker'],
     'type': 'status_dat',
@@ -40,7 +39,7 @@ def get_instance(plugin):
     # First try to import
     try:
         from status_dat_broker import Status_dat_broker
-    except ImportError , exp:
+    except ImportError, exp:
         print "Warning: the plugin type %s is unavailable: %s" % ('status_dat', exp)
         return None
 

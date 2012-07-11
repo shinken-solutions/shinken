@@ -70,22 +70,17 @@ class Graphite_Webui(BaseModule):
             my_name = socket.gethostname()
             self.uri = self.uri.replace('YOURSERVERNAME', my_name)
 
-
     # Try to connect if we got true parameter
     def init(self):
         pass
-
 
     # To load the webui application
     def load(self, app):
         self.app = app
 
-
-
     # Give the link for the GRAPHITE UI, with a Name
     def get_external_ui_link(self):
         return {'label': 'Graphite', 'uri': self.uri}
-
 
     # For a perf_data like /=30MB;4899;4568;1234;0  /var=50MB;4899;4568;1234;0 /toto=
     # return ('/', '30'), ('/var', '50')
@@ -97,7 +92,7 @@ class Graphite_Webui(BaseModule):
         metrics = [e for e in elts if e != '']
 
         for e in metrics:
- #           print "Graphite: groking: ", e
+            #print "Graphite: groking: ", e
             elts = e.split('=', 1)
             if len(elts) != 2:
                 continue
@@ -106,27 +101,25 @@ class Graphite_Webui(BaseModule):
             # get the first value of ;
             if ';' in raw:
                 elts = raw.split(';')
-                name_value = { name: elts[0], name+'_warn': elts[1], name+'_crit': elts[2] }
+                name_value = {name: elts[0], name + '_warn': elts[1], name + '_crit': elts[2]}
             else:
                 value = raw
-                name_value = { name: raw }
+                name_value = {name: raw}
             # bailout if need
             if name_value[name] == '':
                 continue
 
             # Try to get the int/float in it :)
-            for key,value in name_value.items():
+            for key, value in name_value.items():
                 m = re.search("(\d*\.*\d*)(.*)", value)
                 if m:
                     name_value[key] = m.groups(0)
                 else:
                     continue
 #            print "graphite: got in the end:", name, value
-            for key,value in name_value.items():
+            for key, value in name_value.items():
                 res.append((key, value))
         return res
-
-
 
     # Ask for an host or a service the graph UI that the UI should
     # give to get the graph image link and Graphite page link too.
@@ -144,29 +137,29 @@ class Graphite_Webui(BaseModule):
         e = e.strftime('%H:%M_%Y%m%d')
 
         # Do we have a template?
-        thefile=self.templates_path+'/'+elt.check_command.get_name().split('!')[0]+'.graph';
+        thefile = self.templates_path + '/' + elt.check_command.get_name().split('!')[0] + '.graph'
         if os.path.isfile(thefile):
             template_html = ''
-            with open(thefile,'r') as template_file:
+            with open(thefile, 'r') as template_file:
                 template_html += template_file.read()
             # Read the template file, as template string python object
             template_file.closed
-            html=Template(template_html)
+            html = Template(template_html)
             # Build the dict to instanciate the template string
             values = {}
             if t == 'host':
-                values['host'] = self.illegal_char.sub("_",elt.host_name)
+                values['host'] = self.illegal_char.sub("_", elt.host_name)
                 values['service'] = '__HOST__'
             if t == 'service':
-                values['host'] = self.illegal_char.sub("_",elt.host.host_name)
-                values['service'] = self.illegal_char.sub("_",elt.service_description)
+                values['host'] = self.illegal_char.sub("_", elt.host.host_name)
+                values['service'] = self.illegal_char.sub("_", elt.service_description)
             values['uri'] = self.uri
             # Split, we may have several images.
             for img in html.substitute(values).split('\n'):
                 if not img == "":
                     v = {}
                     v['link'] = self.uri
-                    v['img_src'] = img.replace('"',"'") + "&from=" + d + "&until=" + e
+                    v['img_src'] = img.replace('"', "'") + "&from=" + d + "&until=" + e
                     r.append(v)
             # No need to continue, we have the images already.
             return r
@@ -189,7 +182,7 @@ class Graphite_Webui(BaseModule):
                 if re.search(r'_warn|_crit', metric):
                     continue
                 uri += "&target=%s.__HOST__.%s" % (host_name, metric)
-                uri += "&target=%s.__HOST__.%s" % (host_name, metric+"?????")
+                uri += "&target=%s.__HOST__.%s" % (host_name, metric + "?????")
                 v = {}
                 v['link'] = self.uri
                 v['img_src'] = uri
@@ -215,7 +208,7 @@ class Graphite_Webui(BaseModule):
                 elif value[1] == '%':
                     uri += "&yMin=0&yMax=100"
                 uri += "&target=%s.%s.%s" % (host_name, desc, metric)
-                uri += "&target=%s.%s.%s" % (host_name, desc, metric+"?????")
+                uri += "&target=%s.%s.%s" % (host_name, desc, metric + "?????")
                 v = {}
                 v['link'] = self.uri
                 v['img_src'] = uri

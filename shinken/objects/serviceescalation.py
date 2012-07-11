@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from item import Item, Items
 from escalation import Escalation
 
@@ -31,23 +30,22 @@ from shinken.property import IntegerProp, StringProp, ListProp
 
 
 class Serviceescalation(Item):
-    id = 1 # zero is always special in database, so we do not take risk here
+    id = 1  # zero is always special in database, so we do not take risk here
     my_type = 'serviceescalation'
 
     properties = Item.properties.copy()
     properties.update({
-        'host_name':             StringProp (),
-        'hostgroup_name':        StringProp (),
-        'service_description':   StringProp (),
+        'host_name':             StringProp(),
+        'hostgroup_name':        StringProp(),
+        'service_description':   StringProp(),
         'first_notification':    IntegerProp(),
         'last_notification':     IntegerProp(),
         'notification_interval': IntegerProp('30'), # like Nagios value
-        'escalation_period':     StringProp (default=''),
-        'escalation_options':    ListProp   (default='d,u,r,w,c'),
-        'contacts':              StringProp (),
-        'contact_groups':        StringProp (),
+        'escalation_period':     StringProp(default=''),
+        'escalation_options':    ListProp(default='d,u,r,w,c'),
+        'contacts':              StringProp(),
+        'contact_groups':        StringProp(),
     })
-
 
     # For debugging purpose only (nice name)
     def get_name(self):
@@ -57,7 +55,6 @@ class Serviceescalation(Item):
 class Serviceescalations(Items):
     name_property = ""
     inner_class = Serviceescalation
-
 
     # We look for contacts property in contacts and
     def explode(self, escalations):

@@ -31,7 +31,6 @@ from shinken.webui.bottle import redirect
 app = None
 
 
-
 # Sort hosts and services by impact, states and co
 def hst_srv_sort(s1, s2):
     if s1.business_impact > s2.business_impact:
@@ -48,7 +47,6 @@ def hst_srv_sort(s1, s2):
     return s1.get_full_name() > s2.get_full_name()
 
 
-
 def show_impacts():
     # First we look for the user sid
     # so we bail out if it's a false one
@@ -56,8 +54,7 @@ def show_impacts():
 
     if not user:
         redirect("/user/login")
-#        return {'app': app, 'impacts': {}, 'valid_user': False, 'user': user}
-
+        #return {'app': app, 'impacts': {}, 'valid_user': False, 'user': user}
 
     all_imp_impacts = app.datamgr.get_important_elements()
     all_imp_impacts.sort(hst_srv_sort)
@@ -66,7 +63,7 @@ def show_impacts():
 
     imp_id = 0
     for imp in all_imp_impacts:
-#        safe_print("FIND A BAD SERVICE IN IMPACTS", imp.get_dbg_name())
+        #safe_print("FIND A BAD SERVICE IN IMPACTS", imp.get_dbg_name())
         imp_id += 1
         impacts[imp_id] = imp
 
@@ -76,13 +73,13 @@ def show_impacts():
 def impacts_widget():
     d = show_impacts()
 
-    wid = app.request.GET.get('wid', 'widget_impacts_'+str(int(time.time())))
+    wid = app.request.GET.get('wid', 'widget_impacts_' + str(int(time.time())))
     collapsed = (app.request.GET.get('collapsed', 'False') == 'True')
 
     nb_elements = max(1, int(app.request.GET.get('nb_elements', '5')))
     # Now filter for the good number of impacts to show
     new_impacts = {}
-    for (k,v) in d['impacts'].iteritems():
+    for (k, v) in d['impacts'].iteritems():
         if k <= nb_elements:
             new_impacts[k] = v
     d['impacts'] = new_impacts
@@ -95,9 +92,8 @@ def impacts_widget():
 
     return d
 
-
 widget_desc = '<h3>Impacts</h3>Show an aggregated view of the most business impacts!'
 
-pages = {show_impacts: { 'routes': ['/impacts'], 'view': 'impacts', 'static': True} ,
-         impacts_widget: { 'routes': ['/widget/impacts'], 'view': 'widget_impacts', 'static': True, 'widget': ['dashboard'], 'widget_desc': widget_desc, 'widget_name': 'impacts', 'widget_picture': '/static/impacts/img/widget_impacts.png'},
+pages = {show_impacts: {'routes': ['/impacts'], 'view': 'impacts', 'static': True},
+         impacts_widget: {'routes': ['/widget/impacts'], 'view': 'widget_impacts', 'static': True, 'widget': ['dashboard'], 'widget_desc': widget_desc, 'widget_name': 'impacts', 'widget_picture': '/static/impacts/img/widget_impacts.png'},
          }

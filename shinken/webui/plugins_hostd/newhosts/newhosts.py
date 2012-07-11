@@ -29,13 +29,12 @@ import random
 from shinken.webui.bottle import redirect
 from shinken.util import to_bool
 
-
 # Ask for a random init
 random.seed(time.time())
 
-
 ### Will be populated by the UI with it's own value
 app = None
+
 
 # Our page. If the useer call /dummy/TOTO arg1 will be TOTO.
 # if it's /dummy/, it will be 'nothing'
@@ -53,7 +52,6 @@ def get_newhosts():
     # only one the tempalte will have, so we must give it an app link and the
     # user we are loggued with (it's a contact object in fact)
     return {'app': app, 'user': user}
-
 
 
 def get_launch():
@@ -77,7 +75,6 @@ def get_launch():
     app.ask_new_scan(i)
 
     return {'app': app}
-
 
 
 def get_scans():
@@ -110,7 +107,7 @@ def delete_host(hname):
 
 def tag_unmanaged(hname):
     print "Look for infinite delete for", hname
-    r = app.db.discovered_hosts.update({'_id': hname}, { '$set': { '_discovery_state': 'disabled' }})
+    r = app.db.discovered_hosts.update({'_id': hname}, {'$set': {'_discovery_state': 'disabled'}})
 
 
 def post_validatehost():
@@ -135,12 +132,10 @@ def post_validatehost():
         print "Insert result", r
 
     # Set this host as added in the discovered_hosts as _discovery_state='added'
-    r = app.db.discovered_hosts.update({'_id': _id}, { '$set': { '_discovery_state': 'added' }})
+    r = app.db.discovered_hosts.update({'_id': _id}, {'$set': {'_discovery_state': 'added'}})
     print "result of update", r
 
     return None
-
-
 
 # This is the dict teh webui will try to "load".
 #  *here we register one page with both adresses /dummy/:arg1 and /dummy/, both addresses
@@ -150,12 +145,11 @@ def post_validatehost():
 #    the dummy/htdocs/ directory. Bewere: it will take the plugin name to match.
 #  * optional: you can add 'method': 'POST' so this adress will be only available for
 #    POST calls. By default it's GET. Look at the lookup module for sample about this.
-pages = {get_newhosts: { 'routes': ['/newhosts'], 'view': 'newhosts', 'static': True},
-         get_launch: { 'routes': ['/newhosts/launch'], 'view': 'newhosts_launch', 'static': True, 'method': 'POST'},
-         get_scans: { 'routes': ['/newhosts/scans'], 'view': 'newhosts_scans', 'static': True},
-         get_results: { 'routes': ['/newhosts/results'], 'view': 'newhosts_results', 'static': True},
-         post_validatehost: { 'routes': ['/newhosts/validatehost'], 'view': None, 'method': 'POST'},
-         delete_host: { 'routes': ['/newhosts/delete/:hname'], 'view': None},
-         tag_unmanaged: { 'routes': ['/newhosts/tagunmanaged/:hname'], 'view': None},
+pages = {get_newhosts: {'routes': ['/newhosts'], 'view': 'newhosts', 'static': True},
+         get_launch: {'routes': ['/newhosts/launch'], 'view': 'newhosts_launch', 'static': True, 'method': 'POST'},
+         get_scans: {'routes': ['/newhosts/scans'], 'view': 'newhosts_scans', 'static': True},
+         get_results: {'routes': ['/newhosts/results'], 'view': 'newhosts_results', 'static': True},
+         post_validatehost: {'routes': ['/newhosts/validatehost'], 'view': None, 'method': 'POST'},
+         delete_host: {'routes': ['/newhosts/delete/:hname'], 'view': None},
+         tag_unmanaged: {'routes': ['/newhosts/tagunmanaged/:hname'], 'view': None},
          }
-

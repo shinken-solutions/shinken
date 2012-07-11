@@ -29,7 +29,6 @@ class Testservice_withhost_exclude(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_service_withhost_exclude.cfg')
 
-
     def test_service_withhost_exclude(self):
         #
         # Config is not correct because of a wrong relative path
@@ -44,4 +43,3 @@ class Testservice_withhost_exclude(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

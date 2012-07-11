@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import time
 import os
 import re
@@ -36,6 +35,7 @@ from shinken.log import logger
 objs = {'hosts': [], 'services': []}
 trigger_functions = {}
 
+
 class declared(object):
     def __init__(self, f):
         self.f = f
@@ -43,7 +43,6 @@ class declared(object):
         n = f.func_name
         print "Adding the declared function", n, f
         trigger_functions[n] = f
-
 
     def __call__(self, *args):
         print "Calling", self.f.func_name, 'with', args
@@ -103,7 +102,6 @@ def set_value(obj_ref, output=None, perfdata=None, return_code=None):
             # Ok now this result will be read by scheduler the next loop
 
 
-
 @declared
 def perf(obj_ref, metric_name):
     obj = get_object(obj_ref)
@@ -122,7 +120,7 @@ def get_custom(obj_ref, cname, default=None):
         return default
     cname = cname.upper().strip()
     if not cname.startswith('_'):
-        cname = '_'+cname
+        cname = '_' + cname
     return obj.customs.get(cname, default)
 
 

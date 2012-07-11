@@ -29,7 +29,9 @@
  so we do not have to add manually all properties to the __slots__
  list when we add a new entry"""
 
+
 class AutoSlots(type):
+
     # new is call when we create a new Class
     # that have metaclass = AutoSlots
     # CLS is AutoSlots

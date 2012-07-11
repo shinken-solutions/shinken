@@ -31,9 +31,7 @@ import signal
 import time
 from Queue import Empty
 
-
 from shinken.basemodule import BaseModule
-
 
 properties = {
     'daemons': ['poller'],
@@ -51,20 +49,16 @@ def get_instance(mod_conf):
     return instance
 
 
-
 # Just print some stuff
 class Dummy_poller(BaseModule):
 
     def __init__(self, mod_conf):
         BaseModule.__init__(self, mod_conf)
 
-
     # Called by poller to say 'let's prepare yourself guy'
     def init(self):
         print "Initilisation of the dummy poller module"
         self.i_am_dying = False
-
-
 
     # Get new checks if less than nb_checks_max
     # If no new checks got and no check in queue,
@@ -78,10 +72,9 @@ class Dummy_poller(BaseModule):
                 if msg is not None:
                     self.checks.append(msg.get_data())
                 #print "I", self.id, "I've got a message!"
-        except Empty , exp:
+        except Empty, exp:
             if len(self.checks) == 0:
                 time.sleep(1)
-
 
     # Launch checks that are in status
     # REF: doc/shinken-action-queues.png (4)
@@ -95,8 +88,6 @@ class Dummy_poller(BaseModule):
                 chk.status = 'done'
                 chk.execution_time = 0.1
 
-
-
     # Check the status of checks
     # if done, return message finished :)
     # REF: doc/shinken-action-queues.png (5)
@@ -106,12 +97,11 @@ class Dummy_poller(BaseModule):
             to_del.append(action)
             try:
                 self.returns_queue.put(action)
-            except IOError , exp:
+            except IOError, exp:
                 print "[%d]Exiting: %s" % (self.id, exp)
                 sys.exit(2)
         for chk in to_del:
             self.checks.remove(chk)
-
 
     # id = id of the worker
     # s = Global Queue Master->Slave
@@ -154,5 +144,3 @@ class Dummy_poller(BaseModule):
             timeout -= time.time() - begin
             if timeout < 0:
                 timeout = 1.0
-
-

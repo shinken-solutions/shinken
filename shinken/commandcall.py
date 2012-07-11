@@ -58,7 +58,6 @@ class CommandCall(DummyCommandCall):
         'args':            StringProp(default=[]),
     }
 
-
     def __init__(self, commands, call, poller_tag='None',
                  reactionner_tag='None'):
         self.id = self.__class__.id
@@ -85,7 +84,6 @@ class CommandCall(DummyCommandCall):
                 # from command if not set
                 self.reactionner_tag = self.command.reactionner_tag
 
-
     def get_command_and_args(self):
         """We want to get the command and the args with ! splitting.
         but don't forget to protect against the \! to do not split them
@@ -99,23 +97,18 @@ class CommandCall(DummyCommandCall):
         self.args = [s.replace('___PROTECT_ESCLAMATION___', '!')
                      for s in tab[1:]]
 
-
     def late_linkify_with_command(self, commands):
         c = commands.find_by_name(self.command)
         self.command = c
 
-
     def is_valid(self):
         return self.valid
-
 
     def __str__(self):
         return str(self.__dict__)
 
-
     def get_name(self):
         return self.call
-
 
     def __getstate__(self):
         """Call by pickle for dataify the coment
@@ -142,7 +135,6 @@ class CommandCall(DummyCommandCall):
 
         return res
 
-
     def __setstate__(self, state):
         """Inverted funtion of getstate"""
         cls = self.__class__
@@ -156,7 +148,6 @@ class CommandCall(DummyCommandCall):
         for prop in cls.properties:
             if prop in state:
                 setattr(self, prop, state[prop])
-
 
     def __setstate_pre_1_0__(self, state):
         """In 1.0 we move to a dict save. Before, it was

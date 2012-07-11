@@ -7,8 +7,6 @@
 #
 # J. Gabes
 
-
-
 import time
 import select
 import socket
@@ -23,7 +21,6 @@ def decrypt_xor(data, key):
     return ''.join(crypted)
 
 
-
 # Just print some stuff
 class NSCA_client():
     def __init__(self, host, port, encryption_method, password):
@@ -32,7 +29,6 @@ class NSCA_client():
         self.encryption_method = encryption_method
         self.password = password
         self.rng = random.Random(password)
-
 
     # Ok, main function that is called in the CONFIGURATION phase
     def get_objects(self):
@@ -73,11 +69,11 @@ class NSCA_client():
             return None
 
         if self.encryption_method == 1:
-            data = decrypt_xor(data,self.password)
-            data = decrypt_xor(data,iv)
+            data = decrypt_xor(data, self.password)
+            data = decrypt_xor(data, iv)
 
-        (version, pad1, crc32, timestamp, rc, hostname_dirty, service_dirty, output_dirty, pad2) = struct.unpack("!hhIIh64s128s512sh",data)
-        hostname =  hostname_dirty.partition("\0", 1)[0]
+        (version, pad1, crc32, timestamp, rc, hostname_dirty, service_dirty, output_dirty, pad2) = struct.unpack("!hhIIh64s128s512sh", data)
+        hostname = hostname_dirty.partition("\0", 1)[0]
         service = service_dirty.partition("\0", 1)[0]
         output = output_dirty.partition("\0", 1)[0]
         return (timestamp, rc, hostname, service, output)
@@ -87,9 +83,9 @@ class NSCA_client():
         Send a check result command to the arbiter
         '''
         if len(service) == 0:
-            extcmd = "[%lu] PROCESS_HOST_CHECK_RESULT;%s;%d;%s\n" % (timestamp,hostname,rc,output)
+            extcmd = "[%lu] PROCESS_HOST_CHECK_RESULT;%s;%d;%s\n" % (timestamp, hostname, rc, output)
         else:
-            extcmd = "[%lu] PROCESS_SERVICE_CHECK_RESULT;%s;%s;%d;%s\n" % (timestamp,hostname,service,rc,output)
+            extcmd = "[%lu] PROCESS_SERVICE_CHECK_RESULT;%s;%s;%d;%s\n" % (timestamp, hostname, service, rc, output)
 
         print "want to send", extcmd
 
@@ -115,19 +111,19 @@ class NSCA_client():
         print "got init", init
 
         #init_packet = struct.pack("!128sI",iv,int(time.mktime(time.gmtime())))
-        (iv, t) = struct.unpack("!128sI",init)
+        (iv, t) = struct.unpack("!128sI", init)
         print "IV", iv
         print "T", t
 
         version = 0
         pad1 = 0
-        crc32= 0
+        crc32 = 0
         timestamp = int(time.time())
         rc = 2
         hostname_dirty = "moncul"
         service_dirty = "fonctionnne"
         output_dirty = "blablalba"
-        pad2=0
+        pad2 = 0
         '''
         Read the check result
          00-01: Version
@@ -143,16 +139,15 @@ class NSCA_client():
         print "Create packent len", len(init_packet)
         #(version, pad1, crc32, timestamp, rc, hostname_dirty, service_dirty, output_dirty, pad2) = struct.unpack("!hhIIh64s128s512sh",data)
 
-        data = decrypt_xor(init_packet,iv)
-        data = decrypt_xor(data,self.password)
-
+        data = decrypt_xor(init_packet, iv)
+        data = decrypt_xor(data, self.password)
 
         server.send(data)
         sys.exit(0)
 
         while not self.interrupted:
             print "Loop"
-            inputready,outputready,exceptready = select.select(input,[],[], 1)
+            inputready, outputready, exceptready = select.select(input, [], [], 1)
 
             for s in inputready:
                 if s == server:
@@ -170,18 +165,16 @@ class NSCA_client():
                         databuffer[s] = data
                     if len(databuffer[s]) == 720:
                         # end-of-transmission or an empty line was received
-                        (timestamp, rc, hostname, service, output)=self.read_check_result(databuffer[s],IVs[s])
+                        (timestamp, rc, hostname, service, output) = self.read_check_result(databuffer[s], IVs[s])
                         del databuffer[s]
                         del IVs[s]
-                        self.post_command(timestamp,rc,hostname,service,output)
+                        self.post_command(timestamp, rc, hostname, service, output)
                         try:
                             s.shutdown(2)
-                        except Exception , exp:
+                        except Exception, exp:
                             print exp
                         s.close()
                         input.remove(s)
-
-
 
 nsca = NSCA_client('localhost', 5667, 1, 'helloworld')
 nsca.main()

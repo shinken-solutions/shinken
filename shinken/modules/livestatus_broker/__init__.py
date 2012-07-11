@@ -23,14 +23,12 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 properties = {
     'daemons': ['broker', 'scheduler'],
     'type': 'livestatus',
     'phases': ['running'],
     'external': True,
     }
-
 
 from livestatus_broker import LiveStatus_broker
 # called by the plugin manager to get an instance

@@ -23,11 +23,11 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import socket
 import asyncore
 import time
 from log import logger
+
 
 class LSSyncConnection:
     def __init__(self, addr='127.0.0.1', port=50000, path=None, timeout=10):
@@ -65,7 +65,6 @@ class LSSyncConnection:
                 self.alive = False
                 logger.warning("Connection problem: %s" % str(exp))
 
-
     def read(self, size):
         res = ""
         while size > 0:
@@ -74,18 +73,17 @@ class LSSyncConnection:
 
             if l == 0:
                 logger.warning("0 size read")
-                return res #: TODO raise an error
+                return res  #: TODO raise an error
 
             size = size - l
             res = res + data
         return res
 
-
     def launch_query(self, query):
         if not self.alive:
-           self.connect()
+            self.connect()
         if not query.endswith("\n"):
-           query += "\n"
+            query += "\n"
         query += "OutputFormat: python\nKeepAlive: on\nResponseHeader: fixed16\n\n"
 
         try:
@@ -113,7 +111,6 @@ class LSSyncConnection:
             self.alive = False
             logger.warning("SOCKET ERROR (%s)" % str(exp))
             return None
-
 
     def exec_command(self, command):
         if not self.alive:
@@ -149,7 +146,6 @@ class Query(object):
         # By default, an error :)
         self.return_code = '500'
 
-
     def get(self):
         #print "Someone ask my query", self.q
         self.state = 'PICKUP'
@@ -161,7 +157,6 @@ class Query(object):
         self.state = 'DONE'
         self.duration = time.time() - self.duration
         #print "Got a result", r
-
 
 
 class LSAsynConnection(asyncore.dispatcher):
@@ -187,7 +182,6 @@ class LSAsynConnection(asyncore.dispatcher):
         self.socket.settimeout(timeout)
         self.do_connect()
 
-
         # And our queries
         #q = Query('GET hosts\nColumns name\n')
         self.queries = []
@@ -195,17 +189,14 @@ class LSAsynConnection(asyncore.dispatcher):
 
         self.current = None
 
-
     def stack_query(self, q):
         self.queries.append(q)
-
 
     # Get a query and put it in current
     def get_query(self):
         q = self.queries.pop()
         self.current = q
         return q
-
 
     def do_connect(self):
         if not self.alive:
@@ -221,7 +212,6 @@ class LSAsynConnection(asyncore.dispatcher):
                 logger.warning("Connection problem: %s" % str(exp))
                 self.handle_close()
 
-
     def do_read(self, size):
         res = ""
         while size > 0:
@@ -229,12 +219,11 @@ class LSAsynConnection(asyncore.dispatcher):
             l = len(data)
             if l == 0:
                 logger.warning("0 size read")
-                return res #: TODO raise an error
+                return res  #: TODO raise an error
 
             size = size - l
             res = res + data
         return res
-
 
     def exec_command(self, command):
         if not self.alive:
@@ -248,18 +237,15 @@ class LSAsynConnection(asyncore.dispatcher):
             self.alive = False
             logger.warning("COMMAND EXEC error: %s" % str(exp))
 
-
     def handle_connect(self):
         pass
         #print "In handle_connect"
-
 
     def handle_close(self):
         logger.debug("Closing connection")
         self.current = None
         self.queries = []
         self.close()
-
 
     # Check if we are in timeout. If so, just bailout
     # and set the correct return code from timeout
@@ -274,7 +260,6 @@ class LSAsynConnection(asyncore.dispatcher):
                 rc = 2
             message = 'Error: connection timeout after %d seconds' % self.timeout
             self.set_exit(rc, message)
-
 
     # We got a read for the socket. We do it if we do not already
     # finished. Maybe it's just a SSL handshake continuation, if so
@@ -316,7 +301,6 @@ class LSAsynConnection(asyncore.dispatcher):
         self.results.append(q)
         self.current = None
 
-
     # Did we finished our job?
     def writable(self):
         b = (len(self.queries) != 0 and not self.current)
@@ -327,7 +311,6 @@ class LSAsynConnection(asyncore.dispatcher):
         b = self.current is not None
         #print "Redable", b
         return True
-
 
     # We can write to the socket. If we are in the ssl handshake phase
     # we just continue it and return. If we finished it, we can write our
@@ -344,6 +327,7 @@ class LSAsynConnection(asyncore.dispatcher):
         except socket.error, exp:
             logger.debug("Write fail: %s" % str(exp))
             return
+
         #print "Sent", sent, "data"
 
 
@@ -353,18 +337,15 @@ class LSAsynConnection(asyncore.dispatcher):
         #print "State:", self.current, len(self.queries)
         return self.current == None and len(self.queries) == 0
 
-
     # Will loop over the time until all returns are back
     def wait_returns(self):
         while self.alive and not self.is_finished():
             asyncore.poll(timeout=0.001)
 
-
     def get_returns(self):
         r = self.results
         self.results = self.results[:]
         return r
-
 
     def launch_raw_query(self, query):
         if not self.alive:
@@ -399,7 +380,6 @@ class LSConnectionPool(object):
                 logger.info("Unknown connection type for %s" % s)
 
             self.connections.append(con)
-
 
     def launch_raw_query(self, query):
         for c in self.connections:

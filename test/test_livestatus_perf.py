@@ -20,7 +20,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from shinken_test import *
 import os
 import re
@@ -1157,22 +1156,22 @@ ResponseHeader: fixed16
 
 
 def isprime(startnumber):
-    startnumber*=1.0
-    for divisor in range(2,int(startnumber**0.5)+1):
-        if startnumber/divisor==int(startnumber/divisor):
+    startnumber *= 1.0
+    for divisor in range(2, int(startnumber ** 0.5) + 1):
+        if startnumber / divisor == int(startnumber / divisor):
             return False
     return True
 
 
 class PerfTest(ShinkenTest):
     def tearDown(self):
-        print "comment me for performance tests";
+        print "comment me for performance tests"
         self.livestatus_broker.db.commit()
         self.livestatus_broker.db.close()
         if os.path.exists(self.livelogs):
             os.remove(self.livelogs)
-        if os.path.exists(self.livelogs+"-journal"):
-            os.remove(self.livelogs+"-journal")
+        if os.path.exists(self.livelogs + "-journal"):
+            os.remove(self.livelogs + "-journal")
         if os.path.exists(self.livestatus_broker.pnp_path):
             shutil.rmtree(self.livestatus_broker.pnp_path)
         self.livestatus_broker = None
@@ -1191,10 +1190,8 @@ class PerfTest(ShinkenTest):
             self.livestatus_broker.manage_brok(brok)
         self.sched.broks = {}
 
-
-
     def test_perf(self):
-        print "comment me for performance tests";
+        print "comment me for performance tests"
         self.print_header()
         now = time.time()
         objlist = []
@@ -1243,13 +1240,13 @@ class PerfTest(ShinkenTest):
         nonok.extend([[c, 2, "C"] for c in crit_services if crit_services.index(c) in primes])
         lenc = len(nonok) - lenw
         nonok.extend([[h, 2, "D"] for h in down_hosts if down_hosts.index(h) in primes])
-        lenh = len(nonok) -lenc - lenw
+        lenh = len(nonok) - lenc - lenw
         print "%d hosts are hard/down" % lenh
         print "%d services are in a hard/warning state" % lenw
         print "%d services are in a hard/critical state" % lenc
         self.scheduler_loop(3, nonok)
         self.update_broker()
-        last_host = reduce(lambda x,y: y,self.livestatus_broker.datamgr.rg.hosts)
+        last_host = reduce(lambda x, y: y, self.livestatus_broker.datamgr.rg.hosts)
         #last_service = reduce(lambda x,y:y,self.livestatus_broker.datamgr.rg.services)
 
         elapsed = {}
@@ -1263,7 +1260,7 @@ class PerfTest(ShinkenTest):
             for request in pages[page]:
                 print "+--------------------------\n%s\n--------------------------\n" % request
                 #
-                request = request.replace('omd-live',last_host.host_name)
+                request = request.replace('omd-live', last_host.host_name)
                 request = request.replace('Dummy Service', 'test_ok_19')
                 print "---------------------------\n%s\n--------------------------\n" % request
                 tic = time.time()
@@ -1274,7 +1271,6 @@ class PerfTest(ShinkenTest):
         #for page in sorted(pages.keys()):
         for page in ["thruk_service_detail"]:
             print "%-40s %-10.4f  %s" % (page, elapsed[page], ["%.3f" % f for f in requestelapsed[page]])
-
 
 
 class TestConfigBig(PerfTest):
@@ -1303,6 +1299,7 @@ class TestConfigBig(PerfTest):
             print ref[0].host_name
             ref[0].checks_in_progress
         super(TestConfigBig, self).scheduler_loop(count, reflist, do_sleep, sleep_time)
+
 
 class TestConfigCrazy(PerfTest):
     def setUp(self):
@@ -1336,4 +1333,3 @@ if __name__ == '__main__':
 
     #allsuite = unittest.TestLoader.loadTestsFromModule(TestConfig)
     #unittest.TextTestRunner(verbosity=2).run(allsuite)
-
