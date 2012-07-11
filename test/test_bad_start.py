@@ -48,6 +48,9 @@ daemons_config = {
     Arbiter:    ["../etc/nagios.cfg", "../etc/shinken-specific.cfg"]
 }
 
+HIGH_PORT = 65488
+run = 0   # We will open some ports but not close them (yes it's not good) and
+# so we will open a range from a high port
 
 class template_Test_Daemon_Bad_Start():
 
@@ -64,11 +67,13 @@ class template_Test_Daemon_Bad_Start():
         return cls(daemons_config[cls], False, True, False, None)
 
     def get_daemon(self):
+        global run
         os.chdir(curdir)
         shinken_log.local_log = None  # otherwise get some "trashs" logs..
         d = self.create_daemon()
         d.load_config_file()
-        d.port = 0
+        d.port = HIGH_PORT + run  # random high port, I hope no one is using it :)
+        run += 1
         self.get_login_and_group(d)
         return d
 
