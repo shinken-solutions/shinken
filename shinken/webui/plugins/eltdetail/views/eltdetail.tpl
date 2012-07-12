@@ -129,17 +129,17 @@ Invalid element name
 			</tr>
 		</table>
 
-		<table class="span3">
+		<table class="span3" >
 			<tr>
 		    	<td>Parents:</td>
 		    	%if len(elt.parents) > 0:
-		    	<td>{{elt.alias}}</td>
+                        <td>{{','.join([parent.get_name() for parent in elt.parents])}}</td>
 		    	%else:
 		    	<td>No parents</td>
 		    	%end
 			</tr>
 			<tr>
-		    	<td>Members of:</td>
+		    	<td>Member of:</td>
 		    	%if len(elt.hostgroups) > 0:
 		    	<td>{{','.join([hg.get_name() for hg in elt.hostgroups])}}</td>
 		    	%else:
