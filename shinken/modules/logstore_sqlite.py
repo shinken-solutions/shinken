@@ -156,9 +156,6 @@ class LiveStatusLogStoreSqlite(BaseModule):
             except:
                 pass
 
-    def commit(self):
-        self.dbconn.commit()
-
     def prepare_log_db_table(self):
         # 'attempt', 'class', 'command_name', 'comment', 'contact_name', 'host_name', 'lineno', 'message',
         # 'options', 'plugin_output', 'service_description', 'state', 'state_type', 'time', 'type',
@@ -381,11 +378,16 @@ class LiveStatusLogStoreSqlite(BaseModule):
             self.dbcursor.execute(cmd)
 
     def commit(self):
+        start = time.time()
         while True:
             try:
                 self.dbconn.commit()
                 break
             except sqlite3.OperationalError:
+                # If we wait more than 60s in the loop, maybe we should exit
+                # than do an endless loop
+                if time.time() - start > 60:
+                    raise
                 time.sleep(.01)
 
     def manage_log_brok(self, b):

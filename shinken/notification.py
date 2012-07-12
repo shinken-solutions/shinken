@@ -174,6 +174,7 @@ class Notification(Action):
 
     def get_return_from(self, n):
         self.exit_status = n.exit_status
+        self.execution_time = n.execution_time
         #self.output = c.output
         #self.check_time = c.check_time
         #self.execution_time = c.execution_time
@@ -227,3 +228,5 @@ class Notification(Action):
             self.module_type = 'fork'
         if not hasattr(self, 'active_escalations'):
             self.already_start_escalations = set()
+        if not hasattr(self, 'execution_time'):
+            self.execution_time = 0

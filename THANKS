@@ -72,3 +72,4 @@ To the webui mobile guys: Mael VINCENT, julien Pilou, Gael Millet, Damien Mathie
 To Mathias Fussenegger for his large patch about configuration tab/space resolution.
 To banderas07 and Radu Gheorghe for their works on the escalation notification_interval issue!
 To Simon Rother for discovering a possible race condition.
+To David Laval for his graphite templates on the linux checks
