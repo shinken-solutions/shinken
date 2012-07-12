@@ -79,7 +79,12 @@ def get_depgraph_widget():
     search = app.request.GET.get('search', '').strip()
 
     if not search:
-        search = 'localhost'
+        # Ok look for the first host we can find
+        hosts = app.datamgr.get_hosts()
+        for h in hosts:
+            search = h.get_name()
+            break
+
 
     elts = search.split('/', 1)
     if len(elts) == 1:
