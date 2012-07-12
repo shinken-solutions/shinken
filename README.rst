@@ -98,24 +98,6 @@ And if you do not find it, or need to install a specific version, you can instal
 How to install Shinken
 ======================
 
-
-Preliminary Steps
------------------
-
-* Download and untar shinken.
-
-* Create a user account and a group for shinken on your system (not necessary if using install script)::
-
-   useradd --user-group shinken
-   usermod --lock shinken
-
-Important Note:: NEVER MIX THE DIFFERENT INSTALLATION METHODS. THIS CAUSES PROBLEMS. CHOOSE ONE AND UNINSTALL BEFORE TRYING THE OTHER.
-
-First method: install script (recommended for end users)
-=====================================================
-
-Install
--------
 You can use the install script utility located at the root of the shinken sources.
 The script creates the user and group, installs all dependencies and then it installs shinken. It is compatible with Debian, Ubuntu, Centos/Redhat 5.x and 6.x
 The only requirement is an internet connection for the server on which you want to install shinken. It also allows to modify the installation folder in a configuration file.
@@ -160,66 +142,6 @@ The install script also installs some `init.d` scripts, enables them at boot tim
 
 
 
-Second method: district directory (offline compatible)
-======================================================
-
-Install
--------
-In fact you can install the application by using the `setup.py` script.
-No compilation is needed!
-`setup.py` will install the shinken library in the python path, create the
-`/etc/shinken` and `/var/lib/shinken` directory (you can change them in
-the `setup.cfg` file before launching `setup.py`). You will
-need the `python-setuptools` package for it. Then just run::
-
-  sudo python setup.py install --install-scripts=/usr/bin/
-
-Update
-------
-
-For this way you can launch ::
-    sudo python setup.py update --install-scripts=/usr/bin/
-
-Remove
-------
-There is a script called clean.sh in the source directory for this task.
-It contains relative paths so it should be run from within the source dir.
-Beware, it will delete all Shinken related files!
-
-Running
--------
-The `setup.py` installs some `init.d` scripts, let's use them::
-
-  /etc/init.d/shinken-scheduler start
-  /etc/init.d/shinken-poller start
-  /etc/init.d/shinken-reactionner start
-  /etc/init.d/shinken-broker start
-  /etc/init.d/shinken-arbiter start
-
-
-
-Third method: all in a directory (ugly but quick method ;)
-=====================================================
-
-Install
--------
-After unpacking the tarball move the shinken directory to the desired destination
-and give it to the shinken user::
-
-  mv shinken /usr/local
-  chown -R shinken:shinken /usr/local/shinken
-
-Update / Remove
---------------
-Should be easy here.
-
-Running
--------
-It's easy, there is already a launch script for you::
-
-  shinken/bin/launch_all.sh
-
-
 Where is the configuration?
 ===========================
 
@@ -239,6 +161,7 @@ No, there is no need to change the existing configuration - unless
 you want to add some new hosts and services. Once you are comfortable
 with Shinken you can start to use its unique and powerful features.
 
+
 Learn more about how to use and configure Shinken
 =================================================
 
@@ -246,7 +169,8 @@ Jump to the `Shinken documentation wiki`.
 
 __ http://www.shinken-monitoring.org/wiki/
 
-Known bugs
+
+If you find a bug
 ================================
 
 You can consult the open issues list or submit a new issue at:
