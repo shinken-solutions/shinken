@@ -341,11 +341,15 @@ class Satellite(BaseSatellite):
                         send_ok = con.put_results(ret)
                 # Not connected or sched is gone
                 except (Pyro_exp_pack, KeyError), exp:
-                    logger.debug(str(exp))
+                    logger.debug('manage_returns exception:: %s,%s ' % (type(exp), str(exp)))
+                    try:
+                        logger.debug(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
+                    except:
+                        pass
                     self.pynag_con_init(sched_id)
                     return
                 except AttributeError, exp:  # the scheduler must  not be initialized
-                    logger.debug(str(exp))
+                    logger.debug('manage_returns exception:: %s,%s ' % (type(exp), str(exp)))
                 except Exception, exp:
                     logger.error("A satellite raised an unknown exception: %s (%s)" % (exp, type(exp)))
                     try:
@@ -611,13 +615,20 @@ class Satellite(BaseSatellite):
             # Ok, con is unknown, so we create it
             # Or maybe is the connection lost, we recreate it
             except (Pyro_exp_pack, KeyError), exp:
-                logger.debug(str(exp))
+                logger.debug('get_new_actions exception:: %s,%s ' % (type(exp), str(exp)))
+                try:
+                    logger.debug(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
+                except:
+                    pass
                 self.pynag_con_init(sched_id)
             # scheduler must not be initialized
             # or scheduler must not have checks
             except (AttributeError, Pyro.errors.NamingError), exp:
-                logger.debug(str(exp))
-                pass
+                logger.debug('get_new_actions exception:: %s,%s ' % (type(exp), str(exp)))
+                try:
+                    logger.debug(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
+                except:
+                    pass
             # What the F**k? We do not know what happenned,
             # log the error message if possible.
             except Exception, exp:

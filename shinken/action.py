@@ -64,6 +64,13 @@ def no_block_read(output):
 class __Action(object):
     id = 0
 
+    # Dummy function, only useful for checks
+    def set_type_active(self):
+        pass
+
+    def set_type_passive(self):
+        pass
+
     # Mix the env and the environnment variables
     # into a new local env dict
     # rmq: we cannot just update os.environ because
