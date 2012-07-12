@@ -110,4 +110,5 @@ test_pack_hash_memory.py
 test_triggers.py
 test_update_output_ext_command.py
 test_parse_perfdata.py
+test_servicedependency_complexes.py
 test_livestatus_allowedhosts.py
