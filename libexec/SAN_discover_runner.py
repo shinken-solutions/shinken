@@ -40,7 +40,7 @@ eth_dev_name='eth0'
 #  menu  #
 ##########
 
-parser = optparse.OptionParser('%prog [options] -t targets') 
+parser = optparse.OptionParser('%prog [options] -t target') 
 cmd = { 'ibm_ds' : '/opt/IBM_DS/client/SMcli',
         'example' : '/path/to/cmd',
       }
@@ -55,7 +55,7 @@ parser.add_option('-d', '--debug', action='store_true', dest='debug', help='be m
 
 opts, args = parser.parse_args()
 
-targets = opts.targets
+target = opts.target
 vendor = opts.vendor
 
 if opts.debug:
@@ -70,7 +70,7 @@ def debuging(txt):
 if opts.network:
     network = True
 
-if not opts.targets:
+if not opts.target:
     parser.error('Require at least one ip (option -t)')
 if not opts.vendor:
     parser.error('Require SAN vendor name. [ibm_ds|...]')
@@ -111,7 +111,7 @@ def address_in_network(ip,net):
    netmask = struct.unpack('L',socket.inet_aton(netaddr))[0] & struct.unpack('L',socket.inet_aton(bits))[0]
    return ipaddr & netmask == netmask
 
-### Search for cluster software presents on targets
+### Search for cluster software presents on target
 def set_ip():
     addip = v['add_cmd']
     adding = subprocess.Popen(' '.join(addip), stdout=subprocess.PIPE, shell=True)
