@@ -29,6 +29,7 @@ import traceback
 import cStringIO
 import sys
 import socket
+import tempfile
 from Queue import Empty
 
 try:
@@ -128,6 +129,7 @@ class Scheduler:
         # Some flags
         self.has_full_broks = False  # have a initial_broks in broks queue?
         self.need_dump_memory = False  # set by signal 1
+        self.need_objects_dump = False #set by signal 2
 
         # And a dummy push flavor
         self.push_flavor = 0
@@ -216,6 +218,26 @@ class Scheduler:
     # "But.. On which point it is better than me?"
     def die(self):
         self.must_run = False
+
+    def dump_objects(self):
+        d = tempfile.gettempdir()
+        p = os.path.join(d, 'scheduler-obj-dump-%d' % time.time())
+        print "Opening the DUMP FILE %s" % p
+        try:
+            f = open(p, 'w')
+            f.write('Scheduler DUMP at %d\n' % time.time())
+            for c in self.checks.values():
+                s = 'CHECK: %s:%s:%s:%s:%s:%s\n' % (c.id, c.status, c.t_to_go, c.poller_tag, c.command, c.worker)
+                f.write(s)
+            for a in self.actions.values():
+                s = '%s: %s:%s:%s:%s:%s:%s\n' % (a.__class__.my_type.upper(), a.id, a.status, a.t_to_go, a.reactionner_tag, a.command, a.worker)
+                f.write(s)                
+            for b in self.broks.values():
+                s = 'BROK: %s:%s\n' % (b.id, b.type)
+                f.write(s)
+            f.close()
+        except Exception, exp:
+            print "Error in writing the dump file %s : %s" % (p, str(exp))
 
     # Load the external command
     def load_external_command(self, e):
@@ -585,11 +607,12 @@ class Scheduler:
 
             except KeyError, exp:  # bad number for notif, not that bad
                 #print exp
-                pass
+                logger.warning('put_results:: get unknown notification : %s ' % str(exp))
 
             except AttributeError, exp:  # bad object, drop it
                 #print exp
-                pass
+                logger.warning('put_results:: get bad notification : %s ' % str(exp))
+            
 
 
         elif c.is_a == 'check':
@@ -601,6 +624,8 @@ class Scheduler:
                 self.checks[c.id].status = 'waitconsume'
             except KeyError, exp:
                 pass
+
+
         elif c.is_a == 'eventhandler':
             # It just die
             try:
@@ -611,7 +636,8 @@ class Scheduler:
                                     int(c.execution_time)))
                 self.actions[c.id].status = 'zombie'
             # Maybe we got a return of a old even handler, so we can forget it
-            except KeyError:
+            except KeyError, exp:
+                logger.warning('put_results:: get unknown event handler : %s ' % str(exp))
                 pass
         else:
             logger.error("The received result type in unknown! %s" % str(c.is_a))
@@ -1496,6 +1522,11 @@ class Scheduler:
             if self.need_dump_memory:
                 self.sched_daemon.dump_memory()
                 self.need_dump_memory = False
+
+            if self.need_objects_dump:
+                logger.debug('I need to dump my objects!')
+                self.dump_objects()
+                self.need_objects_dump = False
 
         # WE must save the retention at the quit BY OURSELF
         # because our daemon will not be able to do it for us

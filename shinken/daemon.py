@@ -179,6 +179,9 @@ class Daemon(object):
         # Flag to know if we need to dump memory or not
         self.need_dump_memory = False
 
+        # Flag to dump objects or not
+        self.need_objects_dump = False
+
         # Keep a trace of the local_log file desc if needed
         self.local_log_fd = None
 
@@ -228,6 +231,9 @@ class Daemon(object):
             if self.need_dump_memory:
                 self.dump_memory()
                 self.need_dump_memory = False
+            if self.need_objects_dump:
+                logger.debug('Dumping objects')
+                self.need_objects_dump = False
             # Maybe we ask us to die, if so, do it :)
             if self.interrupted:
                 break
@@ -640,6 +646,8 @@ class Daemon(object):
         logger.debug("I'm process %d and I received signal %s" % (os.getpid(), str(sig)))
         if sig == 10:  # if USR1, ask a memory dump
             self.need_dump_memory = True
+        elif sig == 12: # if USR2, ask objects dump
+            self.need_objects_dump = True
         else:  # Ok, really ask us to die :)
             self.interrupted = True
 
@@ -653,7 +661,7 @@ class Daemon(object):
                 version = ".".join(map(str, sys.version_info[:2]))
                 raise Exception("pywin32 not installed for Python " + version)
         else:
-            for sig in (signal.SIGTERM, signal.SIGINT, signal.SIGUSR1):
+            for sig in (signal.SIGTERM, signal.SIGINT, signal.SIGUSR1, signal.SIGUSR2):
                 signal.signal(sig, func)
 
     def get_header(self):
