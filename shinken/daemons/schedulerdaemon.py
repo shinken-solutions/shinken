@@ -28,6 +28,7 @@ import time
 import traceback
 import cPickle
 
+
 from shinken.scheduler import Scheduler
 from shinken.macroresolver import MacroResolver
 from shinken.external_command import ExternalCommandManager
@@ -163,6 +164,7 @@ class Shinken(BaseSatellite):
                 self.pyro_daemon.unregister(self.ichecks)
         super(Shinken, self).do_stop()
 
+
     def compensate_system_time_change(self, difference):
         """ Compensate a system time change of difference for all hosts/services/checks/notifs """
         logger.warning("A system time change of %d has been detected. Compensating..." % difference)
@@ -227,9 +229,12 @@ class Shinken(BaseSatellite):
                     c.t_to_go = new_t
 
     def manage_signal(self, sig, frame):
+        print "MANAGE SIGNAL", sig
         # If we got USR1, just dump memory
         if sig == 10:
             self.sched.need_dump_memory = True
+        elif sig == 12: #usr2, dump objects
+            self.sched.need_objects_dump = True
         else:  # if not, die :)
             self.sched.die()
             self.must_run = False

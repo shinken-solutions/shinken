@@ -341,11 +341,15 @@ class Satellite(BaseSatellite):
                         send_ok = con.put_results(ret)
                 # Not connected or sched is gone
                 except (Pyro_exp_pack, KeyError), exp:
-                    logger.debug(str(exp))
+                    logger.debug('manage_returns exception:: %s,%s ' % (type(exp), str(exp)))
+                    try:
+                        logger.debug(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
+                    except:
+                        pass
                     self.pynag_con_init(sched_id)
                     return
                 except AttributeError, exp:  # the scheduler must  not be initialized
-                    logger.debug(str(exp))
+                    logger.debug('manage_returns exception:: %s,%s ' % (type(exp), str(exp)))
                 except Exception, exp:
                     logger.error("A satellite raised an unknown exception: %s (%s)" % (exp, type(exp)))
                     try:
@@ -522,10 +526,21 @@ class Satellite(BaseSatellite):
         # I want at least min_workers or wish_workers (the biggest)
         # but not more than max_workers
         while len(self.workers) < self.min_workers \
-                    or (wish_worker > len(self.workers) \
-                            and len(self.workers) < self.max_workers):
+                  or (wish_worker > len(self.workers) \
+                      and len(self.workers) < self.max_workers):
+            to_del = []
             for mod in self.q_by_mod:
-                self.create_and_launch_worker(module_name=mod)
+                try:
+                    self.create_and_launch_worker(module_name=mod)
+                # Maybe this modules is not a true worker one.
+                # if so, just delete if from q_by_mod
+                except NotWorkerMod:
+                    to_del.append(mod)
+
+            for mod in to_del:
+                logger.debug("The module %s is not a worker one, I remove it from the worker list" % mod)
+                del self.q_by_mod[mod]
+
         # TODO: if len(workers) > 2*wish, maybe we can kill a worker?
 
 
@@ -611,13 +626,20 @@ class Satellite(BaseSatellite):
             # Ok, con is unknown, so we create it
             # Or maybe is the connection lost, we recreate it
             except (Pyro_exp_pack, KeyError), exp:
-                logger.debug(str(exp))
+                logger.debug('get_new_actions exception:: %s,%s ' % (type(exp), str(exp)))
+                try:
+                    logger.debug(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
+                except:
+                    pass
                 self.pynag_con_init(sched_id)
             # scheduler must not be initialized
             # or scheduler must not have checks
             except (AttributeError, Pyro.errors.NamingError), exp:
-                logger.debug(str(exp))
-                pass
+                logger.debug('get_new_actions exception:: %s,%s ' % (type(exp), str(exp)))
+                try:
+                    logger.debug(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
+                except:
+                    pass
             # What the F**k? We do not know what happenned,
             # log the error message if possible.
             except Exception, exp:

@@ -143,7 +143,7 @@ class Servicedependencies(Items):
                         continue
                     hnames.extend(hg.members.split(','))
 
-            if not hasattr(sd, 'host_name') and hasattr(sd, 'hostgroup_name'):
+            if not hasattr(sd, 'host_name'):
                 sd.host_name = ''
 
             if sd.host_name != '':

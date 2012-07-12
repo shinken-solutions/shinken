@@ -129,17 +129,17 @@ Invalid element name
 			</tr>
 		</table>
 
-		<table class="span3">
+		<table class="span3" >
 			<tr>
 		    	<td>Parents:</td>
 		    	%if len(elt.parents) > 0:
-		    	<td>{{elt.alias}}</td>
+                        <td>{{','.join([parent.get_name() for parent in elt.parents])}}</td>
 		    	%else:
 		    	<td>No parents</td>
 		    	%end
 			</tr>
 			<tr>
-		    	<td>Members of:</td>
+		    	<td>Member of:</td>
 		    	%if len(elt.hostgroups) > 0:
 		    	<td>{{','.join([hg.get_name() for hg in elt.hostgroups])}}</td>
 		    	%else:
@@ -303,15 +303,15 @@ Invalid element name
 	</tr>
 	<tr>
 	  <td class="column1">Last Check Time</td>
-	  <td><span class="quickinfo" data-original-title='Last check was at {{time.asctime(time.localtime(elt.last_chk))}}'>was {{helper.print_duration(elt.last_chk)}}</span></td>
+	  <td><span class="quickinfo" data-original-title='Last check was at {{helper.print_date(elt.last_chk)}}'>was {{helper.print_duration(elt.last_chk)}}</span></td>
 	</tr>
 	<tr>
 	  <td class="column1">Next Scheduled Active Check</td>
-	  <td><span class="quickinfo" data-original-title='Next active check at {{time.asctime(time.localtime(elt.next_chk))}}'>{{helper.print_duration(elt.next_chk)}}</span></td>
+	  <td><span class="quickinfo" data-original-title='Next active check at {{helper.print_date(elt.next_chk)}}'>{{helper.print_duration(elt.next_chk)}}</span></td>
 	</tr>
 	<tr>
 	  <td class="column1">Last State Change</td>
-	  <td>{{time.asctime(time.localtime(elt.last_state_change))}}</td>
+	  <td>{{helper.print_date(elt.last_state_change)}}</td>
 	</tr>
       </table>
 
