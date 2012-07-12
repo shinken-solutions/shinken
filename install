@@ -248,7 +248,7 @@ function setdirectives(){
 
 function create_user(){
     cadre "Creating user" green
-    if [ ! -z "$(cat /etc/passwd | grep $SKUSER)" ]
+    if grep -q "^${SKUSER}:" /etc/passwd;
     then
         cecho " > User $SKUSER already exists" yellow
     else
