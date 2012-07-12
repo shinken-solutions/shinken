@@ -451,6 +451,28 @@ do_restart_() {
     return $rc
 }
 
+do_reload_() {
+    mod="$1"
+    echo "Reloading $mod"
+    if [ "$mod" = "arbiter" ]; then
+        do_check_ "$mod"
+        checkrc=$?
+        if [ $checkrc -ne 0 ]; then
+           return 1
+        fi
+    fi
+    stopoutput=$(do_stop "$mod")
+    startoutput=$(do_start "$mod")
+    rc=$?
+    if [ $rc -eq 0 ]; then
+        echo_success
+    else
+        log_failure_msg "$startoutput"
+        echo_failure
+    fi
+    return $rc
+}
+
 do_status_() {
     mod=$1
     echo  "Checking status of $mod"
@@ -504,7 +526,7 @@ case "$CMD" in
     start|stop|restart|status)
         do_cmd_on "$CMD" "$SUBMODULES"
         ;;
-    check|checkconfig)
+    check|checkconfig|reload)
         do_cmd_on "$CMD" "arbiter"
         ;;
     *)
