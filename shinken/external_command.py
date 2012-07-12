@@ -885,11 +885,12 @@ class ExternalCommandManager:
             self.sched.get_and_register_status_brok(host)
 
     # DISABLE_HOST_FRESHNESS_CHECKS
-    def DISABLE_HOST_FRESHNESS_CHECKS(self, host):
-        if host.check_freshness:
-            host.modified_attributes |= MODATTR_FRESHNESS_CHECKS_ENABLED
-            host.check_freshness = False
-            self.sched.get_and_register_status_brok(host)
+    def DISABLE_HOST_FRESHNESS_CHECKS(self):
+        if self.conf.check_host_freshness:
+            self.conf.modified_attributes |= MODATTR_FRESHNESS_CHECKS_ENABLED
+            self.conf.check_host_freshness = False
+            self.conf.explode_global_conf()
+            self.sched.get_and_register_update_program_status_brok()
 
     # DISABLE_HOST_NOTIFICATIONS;<host_name>
     def DISABLE_HOST_NOTIFICATIONS(self, host):
@@ -1125,10 +1126,11 @@ class ExternalCommandManager:
 
     # ENABLE_HOST_FRESHNESS_CHECKS
     def ENABLE_HOST_FRESHNESS_CHECKS(self):
-        if not host.check_freshness:
-            host.modified_attributes |= MODATTR_FRESHNESS_CHECKS_ENABLED
-            host.check_freshness = True
-            self.sched.get_and_register_status_brok(host)
+        if not self.conf.check_host_freshness:
+            self.conf.modified_attributes |= MODATTR_FRESHNESS_CHECKS_ENABLED
+            self.conf.check_host_freshness = True
+            self.conf.explode_global_conf()
+            self.sched.get_and_register_update_program_status_brok()
 
     # ENABLE_HOST_NOTIFICATIONS;<host_name>
     def ENABLE_HOST_NOTIFICATIONS(self, host):
