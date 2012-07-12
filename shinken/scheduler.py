@@ -1265,6 +1265,12 @@ class Scheduler:
         broks = []
         now = time.time()
 
+        # Look for in objects comments, and look if we alrady got them
+        for elt in [y for y in [x for x in self.hosts] + [x for x in self.services]]:
+            for c in elt.comments:
+                if not c.id in self.comments:
+                    self.comments[c.id] = c
+
         # Check maintenance periods
         for elt in [y for y in [x for x in self.hosts] + [x for x in self.services] if y.maintenance_period is not None]:
             if not hasattr(elt, 'in_maintenance'):
