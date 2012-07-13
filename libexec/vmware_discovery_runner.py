@@ -40,8 +40,8 @@ except ImportError:
 VERSION = '0.1'
 
 
-# Search if we can findthe check_esx3.pl file somewhere
 def search_for_check_esx3():
+    """Search for the check_esx3.pl file."""
     me = os.path.abspath(__file__)
     my_dir = os.path.dirname(me)
     possible_paths = [os.path.join(my_dir, 'check_esx3.pl'),
@@ -60,13 +60,13 @@ def search_for_check_esx3():
     return None
 
 
-# Split and clean the rules from a string to a list
 def _split_rules(rules):
+    """Split and clean the rules from a string to a list"""
     return [r.strip() for r in rules.split('|')]
 
 
-# Apply all rules on the objects names
 def _apply_rules(name, rules):
+    """Apply rules on the objects names"""
     if 'nofqdn' in rules:
         name = name.split('.', 1)[0]
     if 'lower' in rules:
@@ -74,8 +74,10 @@ def _apply_rules(name, rules):
     return name
 
 
-# Get all vmware hosts from a VCenter and return the list
 def get_vmware_hosts(check_esx_path, vcenter, user, password):
+    """
+    Get a list of all hosts from a VCenter.
+    """
     list_host_cmd = [check_esx_path, '-D', vcenter, '-u', user, '-p', password,
                      '-l', 'runtime', '-s', 'listhost']
 
@@ -104,8 +106,8 @@ def get_vmware_hosts(check_esx_path, vcenter, user, password):
     return hosts
 
 
-# For a specific host, ask all VM on it to the VCenter
 def get_vm_of_host(check_esx_path, vcenter, host, user, password):
+    """Get a list of all virtual machines on a specific host."""
     print "Listing host", host
     list_vm_cmd = [check_esx_path, '-D', vcenter, '-H', host,
                    '-u', user, '-p', password,
@@ -138,8 +140,8 @@ def get_vm_of_host(check_esx_path, vcenter, host, user, password):
     return lst
 
 
-# Create all tuples of the links for the hosts
 def print_all_links(res, rules):
+    """Create all tuples of the links for the hosts"""
     r = []
     for host in res:
         host_name = _apply_rules(host, rules)
