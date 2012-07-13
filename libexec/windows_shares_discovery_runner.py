@@ -29,6 +29,14 @@ def p_debug(s):
     if debug:
         print "DEBUG:", s
 
+def get_elements(line):
+    elts = line.split('|', 2)
+    if len(elts) < 2:
+        p_debug("Not a good line: %r" % line)
+        return None
+    return elts
+
+
 parser = optparse.OptionParser(
     "%prog [options] -H HOSTADRESS -u DOMAIN\\USER -p PASSWORD",
     version="%prog " + VERSION)
@@ -77,13 +85,6 @@ printers = []
 
 p_debug("Good return" + stdoutdata)
 
-
-def get_elements(line):
-    if line.count('|') < 2:
-        p_debug("Not a good line" + line)
-        return None
-    elts = line.split('|', 2)
-    return elts
 
 for line in stdoutdata.splitlines():
     line = line.strip()
