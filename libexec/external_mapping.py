@@ -44,8 +44,7 @@ import optparse
 try:
     import json
 except ImportError:
-    # For old Python version, load
-    # simple json (it can be hard json?! It's 2 functions guy!)
+    # For old Python version, load simple json
     try:
         import simplejson as json
     except ImportError:
@@ -80,7 +79,6 @@ def main(input_file, output_file):
     jsonmappingfile.close()
 
 if __name__ == "__main__":
-    # Manage the options
     parser = optparse.OptionParser(
         version="Shinken external flat mapping file to json mapping %s" % VERSION)
     parser.add_option("-o", "--output", dest='output_file',
