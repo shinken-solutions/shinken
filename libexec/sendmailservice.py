@@ -22,18 +22,28 @@ Date/Time: %(datetime)s
 Additional Info: %(output)s
 """
 
-HTML_template = """<html>
+HTML_template = '''<html>
 <head></head><body>
+<style type="text/css">
+.recovery { color:ForestGreen }
+.acknowledgement { color:ForestGreen }
+.problem { color: red }
+.ok { color:ForestGreen }
+.critical { color:red }
+.warning { color:orange }
+.unknown { color:gray }
+.bold { font-weight:bold }
+</style>
 <strong> ***** Shinken Notification ***** </strong><br><br>
-Notification: %(notify)s<br><br>
+Notification: <span class="%(notify)s bold">%(notify)s</span><br><br>
+State: <span class="%(state)s bold">%(state)s</span><br><br>
 Service: %(service)s <br>
 Host: %(hostname)s <br>
 Address: %(hostaddress)s <br>
-State: %(state)s <br><br>
 Date/Time: %(datetime)s<br>
 Additional Info : %(output)s
 </body></html>
-"""
+'''
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-n', '--notification', default='unknown', dest='notify')
