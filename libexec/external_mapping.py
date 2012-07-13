@@ -15,17 +15,26 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-# This program transforms a flat dependency file into a json one so it can be loaded in
-# hot_dependencies_arbiter module
-# The input file format is :
-# host1 : vm1
-# host2 : vm2
-# ...
-# You can now get a live update of your dependency tree in shinken for your xen/virtualbox/qemu
-# All you have to do is finding a way to modify this flat file when you do a live migration
-# for example, you can use a script like this in your crontab
-# dsh -Mc -g mydom0group 'xm list | awk "/vm-/ { print \$1 }"' > /tmp/shinken_flat_mapping
-#
+"""
+This program transforms a flat dependency file into a json one so it
+can be loaded in hot_dependencies_arbiter module
+
+The input file format is:
+  host1 ":" vm1
+  host2 ":" vm2
+  ...
+
+You can now get a live update of your dependency tree in shinken for
+your xen/virtualbox/qemu. All you have to do is finding a way to
+modify this flat file when you do a live migration.
+
+For example, you can use a script like this in your crontab::
+
+  dsh -Mc -g mydom0group 'xm list' | \
+      awk "/vm-/ { print \$1 }"' > /tmp/shinken_flat_mapping
+
+"""
+
 
 import os
 import sys
