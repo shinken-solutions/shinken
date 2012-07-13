@@ -54,7 +54,7 @@ if opts.user:
     if user.count('\\') == 1:
         user = user.replace('\\', '\\\\')
 
-debug = opts.debug is not None
+debug = opts.debug
 
 password = ''
 if opts.password:
