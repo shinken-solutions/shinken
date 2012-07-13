@@ -16,7 +16,8 @@ import random
 
 def decrypt_xor(data, key):
     keylen = len(key)
-    crypted = [chr(ord(data[i]) ^ ord(key[i % keylen])) for i in xrange(len(data))]
+    crypted = [chr(ord(data[i]) ^ ord(key[i % keylen]))
+               for i in xrange(len(data))]
     return ''.join(crypted)
 
 
@@ -39,7 +40,6 @@ class NSCA_client():
         h = {'name': 'dummy host from dummy arbiter module',
              'register': '0',
              }
-
         r['hosts'].append(h)
         print "[Dummy] Returning to Arbiter the hosts:", r
         return r
@@ -74,7 +74,8 @@ class NSCA_client():
             data = decrypt_xor(data, self.password)
             data = decrypt_xor(data, iv)
 
-        (version, pad1, crc32, timestamp, rc, hostname_dirty, service_dirty, output_dirty, pad2) = struct.unpack("!hhIIh64s128s512sh", data)
+        (version, pad1, crc32, timestamp, rc, hostname_dirty, service_dirty,
+         output_dirty, pad2) = struct.unpack("!hhIIh64s128s512sh", data)
         hostname = hostname_dirty.partition("\0", 1)[0]
         service = service_dirty.partition("\0", 1)[0]
         output = output_dirty.partition("\0", 1)[0]
@@ -85,9 +86,11 @@ class NSCA_client():
         Send a check result command to the arbiter
         '''
         if len(service) == 0:
-            extcmd = "[%lu] PROCESS_HOST_CHECK_RESULT;%s;%d;%s\n" % (timestamp, hostname, rc, output)
+            extcmd = ("[%lu] PROCESS_HOST_CHECK_RESULT;%s;%d;%s\n"
+                      % (timestamp, hostname, rc, output))
         else:
-            extcmd = "[%lu] PROCESS_SERVICE_CHECK_RESULT;%s;%s;%d;%s\n" % (timestamp, hostname, service, rc, output)
+            extcmd = ("[%lu] PROCESS_SERVICE_CHECK_RESULT;%s;%s;%d;%s\n"
+                      % (timestamp, hostname, service, rc, output))
 
         print "want to send", extcmd
 
@@ -139,9 +142,13 @@ class NSCA_client():
          204-715: output of the plugin
          716-720: padding
         '''
-        init_packet = struct.pack("!hhIIh64s128s512sh", version, pad1, crc32, timestamp, rc, hostname_dirty, service_dirty, output_dirty, pad2)
+        init_packet = struct.pack(
+            "!hhIIh64s128s512sh",
+            version, pad1, crc32, timestamp, rc, hostname_dirty,
+            service_dirty, output_dirty, pad2)
         print "Create packent len", len(init_packet)
-        #(version, pad1, crc32, timestamp, rc, hostname_dirty, service_dirty, output_dirty, pad2) = struct.unpack("!hhIIh64s128s512sh",data)
+        #(version, pad1, crc32, timestamp, rc, hostname_dirty, service_dirty,
+        # output_dirty, pad2) = struct.unpack("!hhIIh64s128s512sh",data)
 
         data = decrypt_xor(init_packet, iv)
         data = decrypt_xor(data, self.password)
@@ -172,7 +179,8 @@ class NSCA_client():
                         (timestamp, rc, hostname, service, output) = self.read_check_result(databuffer[s], IVs[s])
                         del databuffer[s]
                         del IVs[s]
-                        self.post_command(timestamp, rc, hostname, service, output)
+                        self.post_command(timestamp, rc, hostname, service,
+                                          output)
                         try:
                             s.shutdown(2)
                         except Exception, exp:
