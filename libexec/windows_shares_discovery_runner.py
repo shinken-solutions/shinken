@@ -87,14 +87,11 @@ p_debug("Good return" + stdoutdata)
 
 
 for line in stdoutdata.splitlines():
-    line = line.strip()
-    elts = get_elements(line)
-    # Avoid strange line
+    elts = get_elements(line.strip())
+    # Skip strange lines
     if not elts:
         continue
-    typ = elts[0]
-    sharename = elts[1]
-    desc = elts[2]
+    typ, sharename, desc = elts
     if typ == 'Printer':
         printers.append(sharename)
     if typ == 'Disk' and not sharename.endswith('$'):
