@@ -2160,8 +2160,8 @@ function install_check_mongodb(){
 function install_IBM_DS() {
     cadre "Install check_IBM_DS_health.sh and check_IBM_DS_performance.pl plugins" green
 
-    SMcli_bin=$(which SMcli)
-    if [ $? -ne 0 ]
+    SMcli_bin="/opt/IBM_DS/client/SMcli"
+    if [ -x $SMcli_bin ]
     then
         cecho "You do not have Storage Manager installed. Go on:" red
         cecho "http://www-933.ibm.com/support/fixcentral/swg/selectFixes?parent=Entry-level+disk+systems&product=ibm/Storage_Disk/DS3500&release=All&platform=All&function=all#Storage%20Manager" red
