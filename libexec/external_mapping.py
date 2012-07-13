@@ -24,7 +24,8 @@ The input file format is:
   host2 ":" vm2
   ...
 
-Spaces around host- and vm-names will be stripped.
+Spaces around host- and vm-names will be stripped. Lines starting with
+a `#` will be ignored.
 
 You can now get a live update of your dependency tree in shinken for
 your xen/virtualbox/qemu. All you have to do is finding a way to
@@ -66,8 +67,9 @@ def main(input_file, output_file):
     flatmappingfile = open(input_file)
     try:
         for line in flatmappingfile:
-            parts = line.rstrip('\n\r').split(':')
-            v = (('host', parts[0]), ('host', parts[1]))
+            if line.startswith('#'):
+                # this is a comment line, skip it
+                continue
             parts = line.split(':')
             v = (('host', parts[0].strip()), ('host', parts[1].strip()))
             r.append(v)

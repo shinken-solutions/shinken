@@ -97,6 +97,17 @@ class TestExternalMapping(unittest.TestCase):
                           [["host", "yourhost"], ["host", "vm1"]],
                           [["host", "theirhost"], ["host", "xen3"]]])
 
+    def test_comment_line(self):
+        lines = [
+            'myhost:vm1',
+            '# this is a comment',
+            'yourhost:vm1',
+            ]
+        result = self.__run(lines)
+        self.assertEqual(result,
+                         [[["host", "myhost"], ["host", "vm1"]],
+                          [["host", "yourhost"], ["host", "vm1"]]])
+
 
 if __name__ == '__main__':
     unittest.main()
