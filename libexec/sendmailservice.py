@@ -27,17 +27,14 @@ if __name__ == "__main__":
     group.add_argument('--port', default=smtplib.SMTP_PORT, type=int)
     args = parser.parse_args()
 
-    to = args.to
-    sender = args.sender
-
     subject = ("** %(notify)s alert - %(hostname)s/%(service)s is %(state)s **"
                % vars(args))
 
 ## Create message container - the correct MIME type is multipart/alternative.
 msg = MIMEMultipart('alternative')
 msg['Subject'] = subject
-msg['From'] = sender
-msg['To'] = to
+msg['From'] = args.sender
+msg['To'] = args.to
 
 # Create the body of the message (a plain-text and an HTML version).
 html = """<html>
@@ -65,5 +62,5 @@ msg.attach(part1)
 s = smtplib.SMTP(args.server, args.port)
 # sendmail function takes 3 arguments: sender's address, recipient's address
 # and message to send - here it is sent as one string.
-s.sendmail(sender, to, msg.as_string())
+s.sendmail(args.sender, args.to, msg.as_string())
 s.quit()
