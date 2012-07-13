@@ -73,7 +73,13 @@ msg['To'] = args.to
 #
 # According to RFC 2046, the last part of a multipart message, in this
 # case the HTML message, is best and preferred.
+#
+# :fixme: need to encode the body if not ascii, see
+# http://mg.pov.lt/blog/unicode-emails-in-python.html for a nice
+# solution.
+#
 msg.attach(MIMEText(TEXT_template % vars(args), 'plain'))
+# :fixme: need to html-escape all values and encode the body
 msg.attach(MIMEText(HTML_template % vars(args), 'html'))
 
 # Send the message via local SMTP server.
