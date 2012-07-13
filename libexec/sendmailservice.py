@@ -10,6 +10,18 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+TEXT_template = """***** Shinken Notification *****
+
+Notification: %(notify)s
+
+Service: %(service)s
+Host: %(hostname)s
+Address: %(hostaddress)s
+State: %(state)s
+Date/Time: %(datetime)s
+Additional Info: %(output)s
+"""
+
 HTML_template = """<html>
 <head></head><body>
 <strong> ***** Shinken Notification ***** </strong><br><br>
@@ -49,15 +61,18 @@ msg['From'] = args.sender
 msg['To'] = args.to
 
 # Create the body of the message (a plain-text and an HTML version).
+text = TEXT_template % vars(args)
 html = HTML_template % vars(args)
 
 # Record the MIME types of one parts - text/html.
-part1 = MIMEText(html, 'html')
+part1 = MIMEText(text, 'plain')
+part2 = MIMEText(html, 'html')
 
 # Attach parts into message container.
 # According to RFC 2046, the last part of a multipart message, in this case
 # the HTML message, is best and preferred.
 msg.attach(part1)
+msg.attach(part2)
 
 # Send the message via local SMTP server.
 s = smtplib.SMTP(args.server, args.port)
