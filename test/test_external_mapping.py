@@ -85,6 +85,18 @@ class TestExternalMapping(unittest.TestCase):
         result = self.__run(lines)
         self.assertEqual(result, [])
 
+    def test_spaces_around_names(self):
+        lines = [
+            '   myhost   :    vm1   ',
+            'yourhost :vm1',
+            'theirhost:  xen3   ',
+            ]
+        result = self.__run(lines)
+        self.assertEqual(result,
+                         [[["host", "myhost"], ["host", "vm1"]],
+                          [["host", "yourhost"], ["host", "vm1"]],
+                          [["host", "theirhost"], ["host", "xen3"]]])
+
 
 if __name__ == '__main__':
     unittest.main()

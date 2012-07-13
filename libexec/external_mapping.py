@@ -24,6 +24,8 @@ The input file format is:
   host2 ":" vm2
   ...
 
+Spaces around host- and vm-names will be stripped.
+
 You can now get a live update of your dependency tree in shinken for
 your xen/virtualbox/qemu. All you have to do is finding a way to
 modify this flat file when you do a live migration.
@@ -51,7 +53,7 @@ except ImportError:
         raise SystemExit("Error: you need the json or simplejson module "
                          "for this script")
 
-VERSION = '0.2'
+VERSION = '0.1'
 
 
 def main(input_file, output_file):
@@ -66,6 +68,8 @@ def main(input_file, output_file):
         for line in flatmappingfile:
             parts = line.rstrip('\n\r').split(':')
             v = (('host', parts[0]), ('host', parts[1]))
+            parts = line.split(':')
+            v = (('host', parts[0].strip()), ('host', parts[1].strip()))
             r.append(v)
     finally:
         flatmappingfile.close()
