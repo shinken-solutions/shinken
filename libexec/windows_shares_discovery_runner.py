@@ -32,11 +32,11 @@ parser = optparse.OptionParser(
 
 parser.add_option('-H', dest="hostname",
                   help="Hostname to scan")
-parser.add_option('-u', '--user', dest="user",
+parser.add_option('-u', '--user',
                   help="Username to scan with. Default to 'guest'")
-parser.add_option('-p', '--password', dest="password",
+parser.add_option('-p', '--password',
                   help="Password of your user. Default to ''")
-parser.add_option('-d', "--debug", dest="debug", action='store_true',
+parser.add_option('-d', "--debug", action='store_true',
                   help="Debug mode")
 
 opts, args = parser.parse_args()
