@@ -30,7 +30,7 @@ parser = optparse.OptionParser(
     "%prog [options] -H HOSTADRESS -u DOMAIN\\USER -p PASSWORD",
     version="%prog " + VERSION)
 
-parser.add_option('-H', dest="hostname",
+parser.add_option('-H', "--hostname",
                   help="Hostname to scan")
 parser.add_option('-u', '--user',
                   help="Username to scan with. Default to 'guest'")
