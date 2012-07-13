@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+#
 # Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
@@ -53,11 +54,9 @@ password = opts.password
 
 cred = '%s%%%s' % (user, password)
 
-
 def p_debug(s):
     if debug:
-        print "DEBUG"
-        print s
+        print "DEBUG:", s
 
 cmd = "smbclient --user=%s --grepable -L %s" % (cred, hostname)
 p_debug("Launching command, %s" % cmd)
