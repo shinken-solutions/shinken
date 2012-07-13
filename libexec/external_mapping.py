@@ -49,7 +49,8 @@ except ImportError:
     try:
         import simplejson as json
     except ImportError:
-        sys.exit("Error: you need the json or simplejson module for this script")
+        raise SystemExit("Error: you need the json or simplejson module "
+                         "for this script")
 
 VERSION = '0.1'
 
