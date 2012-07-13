@@ -88,7 +88,7 @@ def get_vmware_hosts(check_esx_path, vcenter, user, password):
 
     print "Exit status", p.returncode
     if p.returncode == 2:
-        print "Error: the check_esx3.pl return in error:", output
+        print "Error: check_esx3.pl returnes an error:", output
         raise SystemExit(2)
 
     parts = output[0].split(':')
@@ -118,7 +118,7 @@ def get_vm_of_host(check_esx_path, vcenter, host, user, password):
 
     print "Exit status", p.returncode
     if p.returncode == 2:
-        print "Error: the check_esx3.pl return in error:", output
+        print "Error: check_esx3.pl returnes an error:", output
         raise SystemExit(2)
 
     parts = output[0].split(':')
@@ -163,7 +163,7 @@ def write_output(r, path):
         f.write(buf)
         f.close()
         shutil.move(path + '.tmp', path)
-        print "File %s wrote" % path
+        print "File %s written" % path
     except IOError, exp:
         raise SystemExit("Error writing the file %s: %s" % (path, exp))
 
