@@ -55,9 +55,11 @@ if __name__ == "__main__":
     parser.add_option("-P", "--port", type="int", default='5667',
                       help="NSCA server port (default: %default)")
     parser.add_option("-e", "--encryption", default='1',
-                      help="Encryption mode used by NSCA server (default %default)")
+                      help=("Encryption mode used by NSCA server "
+                            "(default: %default)"))
     parser.add_option("-p", "--password", default='helloworld',
-                      help="Password for encryption, should be the same as NSCA server (default: %default)")
+                      help=("Password for encryption, should be the same as "
+                            "NSCA server (default: %default)"))
     parser.add_option("-d", "--delimiter", default='\t',
                       help="Argument delimiter (default: %default)")
 
