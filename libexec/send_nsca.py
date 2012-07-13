@@ -38,8 +38,7 @@ def main(hostname, port, encryption, password, to_send):
 if __name__ == "__main__":
     parser = optparse.OptionParser(
                       version="Python NSCA client version %s" % VERSION)
-    parser.add_option("-H", "--hostname", dest='hostname',
-                      default='localhost',
+    parser.add_option("-H", "--hostname", default='localhost',
                       help="NSCA server IP (default: %default)")
     parser.add_option("-P", "--port", type="int", default='5667',
                       help="NSCA server port (default: %default)")
