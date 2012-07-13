@@ -11,7 +11,6 @@ import time
 import select
 import socket
 import struct
-import sys
 import random
 
 
@@ -143,7 +142,7 @@ class NSCA_client():
         data = decrypt_xor(data, self.password)
 
         server.send(data)
-        sys.exit(0)
+        raise SystemExit(0)
 
         while not self.interrupted:
             print "Loop"
