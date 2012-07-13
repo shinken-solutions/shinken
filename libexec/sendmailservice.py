@@ -8,61 +8,7 @@ import getopt
 import argparse
 import smtplib
 
-
-def main():
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], "hnsHariotS:v", ["help", "notification", "servicedesc", "hostname", "hostaddress", "servicestate", "shortdatetime", "output", "to", "sender"])
-    except getopt.GetoptError, err:
-        # print help information and exit:
-        print str(err)
-        usage()
-        sys.exit(2)
-    output = None
-    verbose = False
-    for o, a in opts:
-        if o == "-v":
-            verbose = True
-        elif o in ("-h", "--help"):
-            usage()
-            sys.exit()
-        elif o in ("-n", "--notification"):
-            notification = a
-        elif o in ("-s", "--servicedesc"):
-            servicedesc = a
-        elif o in ("-H", "--hostname"):
-            hostname = a
-        elif o in ("-a", "--hostaddress"):
-            hostaddress = a
-        elif o in ("-r", "--servicestate"):
-            servicestate = a
-        elif o in ("-i", "--shortdatetime"):
-            shortdatetime = a
-        elif o in ("-o", "--output"):
-            serviceoutput = a
-        elif o in ("-t", "--to"):
-            to = a
-        elif o in ("-S", "--sender"):
-            to = a
-        else:
-            assert False, "unhandled option"
-
-
-def usage():
-    print 'Usage:'
-    print sys.argv[0] + ' -s <service name> -n <notification type> -H <hostname> -a <address> -i <date> -o <service output> -t <email>'
-    print '-s --servicedesc: service description'
-    print '-n --notification: notification type'
-    print '-H --hostname: hostname'
-    print '-a --hostaddress: host address'
-    print '-r --servicestate: service state'
-    print '-i --shortdatetime: date'
-    print '-o --output: service output'
-    print '-t --to: email send to'
-    print '-S --sender: email from'
-
 if __name__ == "__main__":
-    main()
-
     parser = argparse.ArgumentParser()
     parser.add_argument('-n', '--notification')
     parser.add_argument('-s', '--servicedesc')
