@@ -91,7 +91,7 @@ if __name__ == "__main__":
                       help="Path of the generated json mapping file.")
     parser.add_option("-i", "--input", dest='input_file',
                       default='/tmp/shinken_flat_mapping',
-                      help="Path oh the flat mapping file")
+                      help="Path of the flat mapping input file.")
 
     opts, args = parser.parse_args()
     if args:
