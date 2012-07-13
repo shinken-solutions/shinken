@@ -31,10 +31,21 @@ except ImportError:
 VERSION = '0.1'
 
 
-def main(hostname, port, encryption, password, to_send):
+def main(hostname, port, encryption, password):
     notif = NSCANotifier(hostname, port, encryption, password)
-    for ts in to_send:
-        notif.svc_result(ts[0], ts[1], ts[2], ts[3])
+
+    for line in sys.stdin.readlines():
+        line = line.rstrip()
+        if not line:
+            continue
+        notif = line.split(opts.delimiter)
+        if len(notif) == 3:
+            # only host, rc, output
+            notif.insert(1, '')  # insert service
+        # line consists of host, service, rc, output
+        assert len(notif) == 4
+        notif.svc_result(*notif)
+
 
 if __name__ == "__main__":
     parser = optparse.OptionParser(
@@ -55,17 +66,4 @@ if __name__ == "__main__":
     if args:
         parser.error("does not take any positional arguments")
 
-    notif_to_send = []
-
-    for line in sys.stdin.readlines():
-        line = line.rstrip()
-        if not len(line) == 0:
-            if line.count(opts.delimiter) == 2:
-                notif_svc = ''
-                notif_host, notif_rc, notif_output = line.split(opts.delimiter)
-            else:
-                notif_host, notif_svc, notif_rc, notif_output = line.split(opts.delimiter)
-            notif_to_send.append([notif_host, notif_svc, notif_rc, notif_output])
-
-    #print notif_to_send
-    main(opts.hostname, opts.port, opts.encryption, opts.password, notif_to_send)
+    main(opts.hostname, opts.port, opts.encryption, opts.password)
