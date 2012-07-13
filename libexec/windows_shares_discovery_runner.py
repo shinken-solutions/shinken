@@ -32,9 +32,9 @@ parser = optparse.OptionParser(
 
 parser.add_option('-H', "--hostname",
                   help="Hostname to scan")
-parser.add_option('-u', '--user',
-                  help="Username to scan with. Default to 'guest'")
-parser.add_option('-p', '--password',
+parser.add_option('-u', '--user', default='guest',
+                  help="Username to scan with. Default to '%default'")
+parser.add_option('-p', '--password', default='',
                   help="Password of your user. Default to ''")
 parser.add_option('-d', "--debug", action='store_true',
                   help="Debug mode")
@@ -45,20 +45,11 @@ if not opts.hostname:
     parser.error("Requires one host to scan (option -H)")
 
 hostname = opts.hostname
-
-user = 'guest'
-if opts.user:
-    user = opts.user
-    # Maybe we got credentials like DOMAIN\user. We must protect the
-    # the \ with another one
-    if user.count('\\') == 1:
-        user = user.replace('\\', '\\\\')
-
+# The username may contain a domains like in `DOMAIN\user`. We must
+# protect the the `\` with another one for the command-line call.
+user = opts.user.replace('\\', '\\\\')
 debug = opts.debug
-
-password = ''
-if opts.password:
-    password = opts.password
+password = opts.password
 
 cred = '%s%%%s' % (user, password)
 
