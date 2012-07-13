@@ -23,7 +23,7 @@
 #########################################################
 
 #SMcli location
-COMMAND=/opt/IBM_DS/client/SMcli
+COMMAND="sudo /opt/IBM_DS/client/SMcli"
 ARG=""
 
 # Define Nagios return codes
