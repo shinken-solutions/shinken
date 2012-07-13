@@ -21,8 +21,8 @@ def decrypt_xor(data, key):
     return ''.join(crypted)
 
 
-# Just print some stuff
 class NSCA_client():
+
     def __init__(self, host, port, encryption_method, password):
         self.host = host
         self.port = port
