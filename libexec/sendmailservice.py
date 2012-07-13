@@ -35,24 +35,23 @@ Additional Info : %(output)s
 </body></html>
 """
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-n', '--notification', dest='notify')
-    parser.add_argument('-s', '--servicedesc', dest='service')
-    parser.add_argument('-H', '--hostname')
-    parser.add_argument('-a', '--hostaddress')
-    parser.add_argument('-r', '--servicestate', dest='state')
-    parser.add_argument('-i', '--shortdatetime', dest='datetime')
-    parser.add_argument('-o', '--output')
-    group = parser.add_argument_group('Mail options')
-    group.add_argument('-t', '--to')
-    group.add_argument('-S', '--sender')
-    group.add_argument('--server', default='localhost')
-    group.add_argument('--port', default=smtplib.SMTP_PORT, type=int)
-    args = parser.parse_args()
+parser = argparse.ArgumentParser()
+parser.add_argument('-n', '--notification', dest='notify')
+parser.add_argument('-s', '--servicedesc', dest='service')
+parser.add_argument('-H', '--hostname')
+parser.add_argument('-a', '--hostaddress')
+parser.add_argument('-r', '--servicestate', dest='state')
+parser.add_argument('-i', '--shortdatetime', dest='datetime')
+parser.add_argument('-o', '--output')
+group = parser.add_argument_group('Mail options')
+group.add_argument('-t', '--to')
+group.add_argument('-S', '--sender')
+group.add_argument('--server', default='localhost')
+group.add_argument('--port', default=smtplib.SMTP_PORT, type=int)
+args = parser.parse_args()
 
-    subject = ("** %(notify)s alert - %(hostname)s/%(service)s is %(state)s **"
-               % vars(args))
+subject = ("** %(notify)s alert - %(hostname)s/%(service)s is %(state)s **"
+           % vars(args))
 
 ## Create message container - the correct MIME type is multipart/alternative.
 msg = MIMEMultipart('alternative')
