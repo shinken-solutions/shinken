@@ -10,7 +10,7 @@
 ###############################################################
 #For SNMPv3 we created a default user using the command :
 #net-snmp-config --create-snmpv3-user -a "mypassword" myuser
-#Here the user name is myuser and his password is mypassword
+#Here the user name is myuser and password is mypassword
 
 
 ### modules import
@@ -42,7 +42,7 @@ hostname = opts.hostname
 os = opts.os
 
 if not opts.hostname:
-    parser.error("Requires one host and his os to scan (option -H)")
+    parser.error("Requires one host and its os to scan (option -H)")
 
 if not opts.os:
     parser.error("Requires the os host(option -O)")
