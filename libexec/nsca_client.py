@@ -188,5 +188,26 @@ class NSCA_client():
                         s.close()
                         input.remove(s)
 
-nsca = NSCA_client('localhost', 5667, 1, 'helloworld')
-nsca.main()
+if __name__ == "__main__":
+    parser = optparse.OptionParser(
+                      version="Python NSCA client version %s" % VERSION)
+    parser.add_option("-H", "--hostname", default='localhost',
+                      help="NSCA server IP (default: %default)")
+    parser.add_option("-P", "--port", type="int", default='5667',
+                      help="NSCA server port (default: %default)")
+    parser.add_option("-e", "--encryption", default='1',
+                      help=("Encryption mode used by NSCA server "
+                            "(default: %default)"))
+    parser.add_option("-p", "--password", default='helloworld',
+                      help=("Password for encryption, should be the same as "
+                            "NSCA server (default: %default)"))
+    parser.add_option("-d", "--delimiter", default='\t',
+                      help="Argument delimiter (defaults to the tab-character)")
+
+    opts, args = parser.parse_args()
+
+    if args:
+        parser.error("does not take any positional arguments")
+
+    nsca = NSCA_client(opts.hostname, opts.port, opts.encryption, opts.password)
+    nsca.main()
