@@ -48,7 +48,7 @@ if __name__ == "__main__":
     parser.add_option("-p", "--password", default='helloworld',
                       help="Password for encryption, should be the same as NSCA server (default: %default)")
     parser.add_option("-d", "--delimiter", default='\t',
-                      help="Argument delimiter (defaults: %default)")
+                      help="Argument delimiter (default: %default)")
 
     opts, args = parser.parse_args()
 
