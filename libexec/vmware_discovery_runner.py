@@ -219,7 +219,8 @@ if __name__ == "__main__":
         # Not given, try to find one
         p = search_for_check_esx3()
         if p is None:
-            parser.error("Sorry, I cannot find check_esx3.pl, please specify it with -x")
+            parser.error("Sorry, I cannot find check_esx3.pl, please specify "
+                         "it with -x")
         #else set it :)
         opts.check_esx_path = p
 
