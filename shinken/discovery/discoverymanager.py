@@ -106,6 +106,7 @@ class DiscoveredHost(object):
             d = copy.copy(self.data)
 
         d['host_name'] = self.name
+        d['address'] = self.data['ip']
 
         self.matched_rules.sort(by_order)
         
