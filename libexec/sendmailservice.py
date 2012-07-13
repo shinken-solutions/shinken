@@ -13,12 +13,12 @@ from email.mime.text import MIMEText
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('-n', '--notification')
-    parser.add_argument('-s', '--servicedesc')
+    parser.add_argument('-n', '--notification', dest='notify')
+    parser.add_argument('-s', '--servicedesc', dest='service')
     parser.add_argument('-H', '--hostname')
     parser.add_argument('-a', '--hostaddress')
-    parser.add_argument('-r', '--servicestate')
-    parser.add_argument('-i', '--shortdatetime')
+    parser.add_argument('-r', '--servicestate', dest='state')
+    parser.add_argument('-i', '--shortdatetime', dest='datetime')
     parser.add_argument('-o', '--output')
     group = parser.add_argument_group('Mail options')
     group.add_argument('-t', '--to')
@@ -27,16 +27,11 @@ if __name__ == "__main__":
     group.add_argument('--port', default=smtplib.SMTP_PORT, type=int)
     args = parser.parse_args()
 
-    notify = args.notification
-    desc = args.servicedesc
-    hostname = args.hostname
-    hostaddress = args.hostaddress
-    state = args.servicestate
-    datetime = args.shortdatetime
-    output = args.output
     to = args.to
     sender = args.sender
 
+    subject = ("** %(notify)s alert - %(hostname)s/%(service)s is %(state)s **"
+               % vars(args))
 
 ## Create message container - the correct MIME type is multipart/alternative.
 msg = MIMEMultipart('alternative')
@@ -45,7 +40,18 @@ msg['From'] = sender
 msg['To'] = to
 
 # Create the body of the message (a plain-text and an HTML version).
-html = "<html><head></head><body><strong> ***** Shinken Notification ***** </strong><br><br>\r Notification : " + notify + "<br><br>\rService : " + desc + " <br>\r Host : " + hostname + " <br>\r Address : " + hostaddress + " <br>\r State : " + state + "<br><br>\r Date/Time : " + datetime + " Additional Info : " + output + "</body></html>"
+html = """<html>
+<head></head><body>
+<strong> ***** Shinken Notification ***** </strong><br><br>
+Notification: %(notify)s<br><br>
+Service: %(service)s <br>
+Host: %(hostname)s <br>
+Address: %(hostaddress)s <br>
+State: %(state)s <br><br>
+Date/Time: %(datetime)s<br>
+Additional Info : %(output)s
+</body></html>
+""" % vars(args)
 
 # Record the MIME types of one parts - text/html.
 part1 = MIMEText(html, 'html')
