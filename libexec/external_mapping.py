@@ -51,7 +51,7 @@ except ImportError:
         raise SystemExit("Error: you need the json or simplejson module "
                          "for this script")
 
-VERSION = '0.1'
+VERSION = '0.2'
 
 
 def main(input_file, output_file):
@@ -61,22 +61,21 @@ def main(input_file, output_file):
             print "Nothing to do"
             return True
     r = []
-    flatmappingfile = open(input_file, 'rb')
+    flatmappingfile = open(input_file)
+    try:
+        for line in flatmappingfile:
+            parts = line.rstrip('\n\r').split(':')
+            v = (('host', parts[0]), ('host', parts[1]))
+            r.append(v)
+    finally:
+        flatmappingfile.close()
 
-    for ligne in flatmappingfile:
-        ligne = ligne.rstrip('\n\r')
-        parts = ligne.split(':')
-        host = parts[0]
-        vm = parts[1]
-        v = (('host', host), ('host', vm))
-        r.append(v)
+    jsonmappingfile = open(output_file, 'w')
+    try:
+        json.dump(r, jsonmappingfile)
+    finally:
+        jsonmappingfile.close()
 
-    flatmappingfile.close()
-
-    jsonmappingfile = open(output_file, 'wb')
-    buf = json.dumps(r)
-    jsonmappingfile.write(buf)
-    jsonmappingfile.close()
 
 if __name__ == "__main__":
     parser = optparse.OptionParser(
@@ -92,4 +91,4 @@ if __name__ == "__main__":
     if args:
         parser.error("does not take any positional arguments")
 
-    main(**opts.__dict__)
+    main(**vars(opts))
