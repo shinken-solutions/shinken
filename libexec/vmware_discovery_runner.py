@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+#
 # Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
@@ -31,8 +32,7 @@ from subprocess import Popen, PIPE
 try:
     import json
 except ImportError:
-    # For old Python version, load
-    # simple json (it can be hard json?! It's 2 functions guy!)
+    # For old Python version, load simple json
     try:
         import simplejson as json
     except ImportError:
@@ -183,9 +183,7 @@ def main(check_esx_path, vcenter, user, password, rules):
     print "Finished!"
 
 
-# Here we go!
 if __name__ == "__main__":
-    # Manage the options
     parser = optparse.OptionParser(
         version="Shinken VMware links dumping script version %s" % VERSION)
     parser.add_option("-x", "--esx3-path", dest='check_esx_path',
