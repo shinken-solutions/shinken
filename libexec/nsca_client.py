@@ -29,8 +29,11 @@ class NSCA_client():
         self.password = password
         self.rng = random.Random(password)
 
-    # Ok, main function that is called in the CONFIGURATION phase
     def get_objects(self):
+        """
+        This is the main function that is called in the CONFIGURATION
+        phase.
+        """
         print "[Dummy] ask me for objects to return"
         r = {'hosts': []}
         h = {'name': 'dummy host from dummy arbiter module',
@@ -92,8 +95,10 @@ class NSCA_client():
         #self.from_q.put(e)
 
 
-    # When you are in "external" mode, that is the main loop of your process
     def main(self):
+        """
+        This is the main loop of the process when in 'external' mode.
+        """
         #self.set_exit_handler()
         self.interrupted = False
         backlog = 5
