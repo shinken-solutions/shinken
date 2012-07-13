@@ -54,7 +54,7 @@ except ImportError:
         raise SystemExit("Error: you need the json or simplejson module "
                          "for this script")
 
-VERSION = '0.1'
+VERSION = '0.2'
 
 
 def main(input_file, output_file):
