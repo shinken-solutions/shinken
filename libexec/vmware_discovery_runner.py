@@ -190,7 +190,7 @@ if __name__ == "__main__":
                       default='/usr/local/nagios/libexec/check_esx3.pl',
                       help="Full path of the check_esx3.pl script (default: %default)")
     parser.add_option("-V", "--vcenter", '--Vcenter',
-                      help="tThe IP/DNS address of your Vcenter host.")
+                      help="The IP/DNS address of your Vcenter host.")
     parser.add_option("-u", "--user",
                       help="User name to connect to this Vcenter")
     parser.add_option("-p", "--password",
