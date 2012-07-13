@@ -21,7 +21,6 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import optparse
-import os
 import subprocess
 
 VERSION = '1.0'
