@@ -20,6 +20,8 @@ if __name__ == "__main__":
     group = parser.add_argument_group('Mail options')
     group.add_argument('-t', '--to')
     group.add_argument('-S', '--sender')
+    group.add_argument('--server', default='localhost')
+    group.add_argument('--port', default=smtplib.SMTP_PORT, type=int)
     args = parser.parse_args()
 
     notify = args.notification
@@ -55,7 +57,7 @@ part1 = MIMEText(html, 'html')
 msg.attach(part1)
 
 # Send the message via local SMTP server.
-s = smtplib.SMTP('localhost')
+s = smtplib.SMTP(args.server, args.port)
 # sendmail function takes 3 arguments: sender's address, recipient's address
 # and message to send - here it is sent as one string.
 s.sendmail(sender, to, msg.as_string())
