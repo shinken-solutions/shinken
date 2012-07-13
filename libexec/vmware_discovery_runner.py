@@ -158,7 +158,7 @@ def print_all_links(res, rules):
 
 def write_output(r, path):
     try:
-        f = open(path + '.tmp', 'wb')
+        f = open(path + '.tmp', 'w')
         buf = json.dumps(r)
         f.write(buf)
         f.close()
