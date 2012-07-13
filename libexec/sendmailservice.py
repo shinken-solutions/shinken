@@ -17,8 +17,9 @@ if __name__ == "__main__":
     parser.add_argument('-r', '--servicestate')
     parser.add_argument('-i', '--shortdatetime')
     parser.add_argument('-o', '--output')
-    parser.add_argument('-t', '--to')
-    parser.add_argument('-S', '--sender')
+    group = parser.add_argument_group('Mail options')
+    group.add_argument('-t', '--to')
+    group.add_argument('-S', '--sender')
     args = parser.parse_args()
 
     notify = args.notification
