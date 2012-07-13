@@ -22,7 +22,6 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import shlex
 import shutil
 import optparse
 from subprocess import Popen, PIPE
