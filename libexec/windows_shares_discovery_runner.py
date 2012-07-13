@@ -48,21 +48,19 @@ if not opts.hostname:
     parser.error("Requires one host to scan (option -H)")
 
 hostname = opts.hostname
-# The username may contain a domains like in `DOMAIN\user`. We must
-# protect the the `\` with another one for the command-line call.
-user = opts.user.replace('\\', '\\\\')
+user = opts.user
 debug = opts.debug
 password = opts.password
 
 cred = '%s%%%s' % (user, password)
 
-cmd = "smbclient --user=%s --grepable -L %s" % (cred, hostname)
-p_debug("Launching command, %s" % cmd)
+cmd = ["smbclient", '--user', cred, '--grepable', '-L', hostname]
+p_debug("Launching command %s" % cmd)
 try:
     process = subprocess.Popen(
         cmd,
         stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-        close_fds=True, shell=True)
+        close_fds=True)
 except OSError, exp:
     print "Error in launching command:", cmd, exp
     raise SystemExit(2)
