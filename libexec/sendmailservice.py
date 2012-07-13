@@ -10,6 +10,18 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+HTML_template = """<html>
+<head></head><body>
+<strong> ***** Shinken Notification ***** </strong><br><br>
+Notification: %(notify)s<br><br>
+Service: %(service)s <br>
+Host: %(hostname)s <br>
+Address: %(hostaddress)s <br>
+State: %(state)s <br><br>
+Date/Time: %(datetime)s<br>
+Additional Info : %(output)s
+</body></html>
+"""
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -37,18 +49,7 @@ msg['From'] = args.sender
 msg['To'] = args.to
 
 # Create the body of the message (a plain-text and an HTML version).
-html = """<html>
-<head></head><body>
-<strong> ***** Shinken Notification ***** </strong><br><br>
-Notification: %(notify)s<br><br>
-Service: %(service)s <br>
-Host: %(hostname)s <br>
-Address: %(hostaddress)s <br>
-State: %(state)s <br><br>
-Date/Time: %(datetime)s<br>
-Additional Info : %(output)s
-</body></html>
-""" % vars(args)
+html = HTML_template % vars(args)
 
 # Record the MIME types of one parts - text/html.
 part1 = MIMEText(html, 'html')
