@@ -21,7 +21,6 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import optparse
-import sys
 import os
 import subprocess
 
@@ -67,14 +66,14 @@ try:
         close_fds=True, shell=True)
 except OSError, exp:
     print "Error in launching command:", cmd, exp
-    sys.exit(2)
+    raise SystemExit(2)
 
 p_debug("Try to communicate with the subprocess")
 (stdoutdata, stderrdata) = process.communicate()
 
 if process.returncode != 0:
     print "Error: the share scanner return an error: '%s'" % (stderrdata + stdoutdata)
-    sys.exit(2)
+    raise SystemExit(2)
 
 disks = []
 printers = []
