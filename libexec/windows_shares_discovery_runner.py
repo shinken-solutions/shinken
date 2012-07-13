@@ -25,6 +25,10 @@ import subprocess
 
 VERSION = '1.0'
 
+def p_debug(s):
+    if debug:
+        print "DEBUG:", s
+
 parser = optparse.OptionParser(
     "%prog [options] -H HOSTADRESS -u DOMAIN\\USER -p PASSWORD",
     version="%prog " + VERSION)
@@ -51,10 +55,6 @@ debug = opts.debug
 password = opts.password
 
 cred = '%s%%%s' % (user, password)
-
-def p_debug(s):
-    if debug:
-        print "DEBUG:", s
 
 cmd = "smbclient --user=%s --grepable -L %s" % (cred, hostname)
 p_debug("Launching command, %s" % cmd)
