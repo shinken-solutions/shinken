@@ -83,9 +83,11 @@ if __name__ == "__main__":
     # Manage the options
     parser = optparse.OptionParser(
         version="Shinken external flat mapping file to json mapping %s" % VERSION)
-    parser.add_option("-o", "--output", dest='output_file', default='/tmp/external_mapping_file.json',
+    parser.add_option("-o", "--output", dest='output_file',
+                      default='/tmp/external_mapping_file.json',
                       help="Path of the generated json mapping file.")
-    parser.add_option("-i", "--input", dest='input_file', default='/tmp/shinken_flat_mapping',
+    parser.add_option("-i", "--input", dest='input_file',
+                      default='/tmp/shinken_flat_mapping',
                       help="Path oh the flat mapping file")
 
     opts, args = parser.parse_args()
