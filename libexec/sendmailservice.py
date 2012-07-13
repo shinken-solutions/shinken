@@ -61,18 +61,11 @@ msg['From'] = args.sender
 msg['To'] = args.to
 
 # Create the body of the message (a plain-text and an HTML version).
-text = TEXT_template % vars(args)
-html = HTML_template % vars(args)
-
-# Record the MIME types of one parts - text/html.
-part1 = MIMEText(text, 'plain')
-part2 = MIMEText(html, 'html')
-
-# Attach parts into message container.
-# According to RFC 2046, the last part of a multipart message, in this case
-# the HTML message, is best and preferred.
-msg.attach(part1)
-msg.attach(part2)
+#
+# According to RFC 2046, the last part of a multipart message, in this
+# case the HTML message, is best and preferred.
+msg.attach(MIMEText(TEXT_template % vars(args), 'plain'))
+msg.attach(MIMEText(HTML_template % vars(args), 'html'))
 
 # Send the message via local SMTP server.
 s = smtplib.SMTP(args.server, args.port)
