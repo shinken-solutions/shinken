@@ -102,9 +102,9 @@ for line in stdoutdata.splitlines():
 
 
 if len(disks) > 0:
-    print "%s::shares_detected=1"
+    print "%s::shares_detected=1" % hostname
     print "%s::_shares=%s" % (hostname, ','.join(disks))
 
 if len(printers) > 0:
-    print "%s::printers_detected=1"
+    print "%s::printers_detected=1" % hostname
     print "%s::_printers=%s" % (hostname, ','.join(printers))
