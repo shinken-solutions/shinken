@@ -36,7 +36,7 @@ parser.add_option('-u', '--user', dest="user",
                   help="Username to scan with. Default to 'guest'")
 parser.add_option('-p', '--password', dest="password",
                   help="Password of your user. Default to ''")
-parser.add_option('-d', dest="debug", action='store_true',
+parser.add_option('-d', "--debug", dest="debug", action='store_true',
                   help="Debug mode")
 
 opts, args = parser.parse_args()
