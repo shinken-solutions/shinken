@@ -61,7 +61,7 @@ if __name__ == "__main__":
                       help=("Password for encryption, should be the same as "
                             "NSCA server (default: %default)"))
     parser.add_option("-d", "--delimiter", default='\t',
-                      help="Argument delimiter (default: %default)")
+                      help="Argument delimiter (defaults to the tab-character)")
 
     opts, args = parser.parse_args()
 
