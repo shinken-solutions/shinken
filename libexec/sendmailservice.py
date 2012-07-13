@@ -7,6 +7,9 @@ import os
 import getopt
 import argparse
 import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -34,10 +37,6 @@ if __name__ == "__main__":
     to = args.to
     sender = args.sender
 
-    subject = "** " + notify + " alert - " + hostname + "/" + desc + " is " + state + " **"
-
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 
 ## Create message container - the correct MIME type is multipart/alternative.
 msg = MIMEMultipart('alternative')
