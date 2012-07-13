@@ -23,8 +23,8 @@ import sys
 import optparse
 
 try:
-    from pynsca import NSCANotifier
     import pynsca
+    from pynsca import NSCANotifier
 except ImportError:
     raise SystemExit("Error: you need the pynsca module for this script")
 
