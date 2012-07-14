@@ -28,7 +28,6 @@ import logging
 from logging.handlers import TimedRotatingFileHandler
 
 from brok import Brok
-from util import if_else
 
 obj = None
 name = None
@@ -110,11 +109,17 @@ class Log:
         if format is None:
             lvlname = logging.getLevelName(level)
 
-            fmt = u'[%%(date)s] %s%%(name)s%%(msg)s\n' % (if_else(display_level, '%(level)s: ', ''))
+            if display_level:
+                fmt = u'[%(date)s] %(level)s: %(name)s%(msg)s\n'
+            else:
+                fmt = u'[%(date)s] %(name)s%(msg)s\n'
+
             args = {
-                'date': if_else(human_timestamp_log, time.asctime(time.localtime(time.time())), int(time.time())),
+                'date': (human_timestamp_log
+                         and time.asctime(time.localtime(time.time()))
+                         or int(time.time())),
                 'level': lvlname.capitalize(),
-                'name': if_else(name is None, '', '[%s] ' % name),
+                'name': name and ('[%s] ' % name) or '',
                 'msg': message
             }
             s = fmt % args
