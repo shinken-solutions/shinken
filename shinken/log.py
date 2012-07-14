@@ -115,8 +115,7 @@ class Log:
                 fmt = u'[%(date)s] %(name)s%(msg)s\n'
 
             args = {
-                'date': (human_timestamp_log
-                         and time.asctime(time.localtime(time.time()))
+                'date': (human_timestamp_log and time.asctime()
                          or int(time.time())),
                 'level': lvlname.capitalize(),
                 'name': name and ('[%s] ' % name) or '',
