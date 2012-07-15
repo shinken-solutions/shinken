@@ -21,22 +21,17 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys
 import os
+import argparse
 
 
-def usage():
-    print "%s pack_name path" % sys.argv[0]
-    sys.exit(1)
+parser = argparse.ArgumentParser()
+parser.add_argument('pack_name')
+parser.add_argument('path')
+args = parser.parse_args()
 
-
-if len(sys.argv) < 2:
-    usage()
-
-pack_name = sys.argv[1]
-path = sys.argv[2]
-
-pack_path = os.path.join(path, pack_name)
+pack_name = args.pack_name
+pack_path = os.path.join(args.path, pack_name)
 
 
 def create_file(f_name, content):
