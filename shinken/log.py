@@ -179,9 +179,14 @@ class Log:
             self.debug("Closing %s local_log" % str(local_log))
             local_log.close()
 
-    def set_human_format(self):
-        """Set the output as human format"""
+    def set_human_format(self, on=True):
+        """
+        Set the output as human format.
+
+        If the optional parameter `on` is False, the timestamp format
+        will be reset to the default format.
+        """
         global human_timestamp_log
-        human_timestamp_log = True
+        human_timestamp_log = bool(on)
 
 logger = Log()
