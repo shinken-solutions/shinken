@@ -26,7 +26,7 @@ Invalid element name
 %end
 
 
-%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(), js=['eltdetail/js/jquery.color.js', 'eltdetail/js/jquery.Jcrop.js', 'eltdetail/js/iphone-style-checkboxes.js', 'eltdetail/js/hide.js', 'eltdetail/js/dollar.js', 'eltdetail/js/gesture.js', 'eltdetail/js/graphs.js', 'eltdetail/js/tags.js', 'eltdetail/js/depgraph.js'], css=['eltdetail/css/iphonebuttons.css', 'eltdetail/css/eltdetail.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css', 'eltdetail/css/jquery.Jcrop.css'], top_right_banner_state=top_right_banner_state , user=user, app=app, refresh=True
+%rebase layout title=elt_type.capitalize() + ' detail about ' + elt.get_full_name(), js=['eltdetail/js/jquery.color.js', 'eltdetail/js/jquery.Jcrop.js', 'eltdetail/js/iphone-style-checkboxes.js', 'eltdetail/js/hide.js', 'eltdetail/js/dollar.js', 'eltdetail/js/gesture.js', 'eltdetail/js/graphs.js', 'eltdetail/js/tags.js', 'eltdetail/js/depgraph.js'], css=['eltdetail/css/iphonebuttons.css_', 'eltdetail/css/eltdetail.css', 'eltdetail/css/hide.css', 'eltdetail/css/gesture.css', 'eltdetail/css/jquery.Jcrop.css'], top_right_banner_state=top_right_banner_state , user=user, app=app, refresh=True
 
 %# " We will save our element name so gesture functions will be able to call for the good elements."
 <script type="text/javascript">
@@ -188,42 +188,42 @@ $(document).ready(function(){
 	<script type="text/javascript">
 	$(document).ready(function() {
 		$('#btn-checks').iphoneStyle({
+			resizeContainer: false,
+			resizeHandle: false,
 			onChange : function(elt, b){toggle_checks("{{elt.get_full_name()}}", !b);}
 		}
 		);
 
 		$('#btn-not').iphoneStyle({
+			resizeContainer: false,
+			resizeHandle: false,
 			onChange : function(elt, b){toggle_notifications("{{elt.get_full_name()}}", !b);}
 		}
 		);
 
 		$('#btn-evt').iphoneStyle({
+			resizeContainer: false,
+			resizeHandle: false,
 			onChange : function(elt, b){toggle_event_handlers("{{elt.get_full_name()}}", !b);}
 		}
 		);
 
 		$('#btn-flp').iphoneStyle({
+			resizeContainer: false,
+			resizeHandle: false,
 			onChange : function(elt, b){toggle_flap_detection("{{elt.get_full_name()}}", !b);}
+
 		}
 		);
 	}); 
 	</script>
 
 	<div class="span12 row-fluid hide">
-		<form class="well form-inline span6">
-			<div class="row-fluid">
-				<div class="span3"> Active/passive checks  <input {{chk_state}} class="iphone" type="checkbox" id='btn-checks'> </div>
-				<div class="span3"> Notifications <input {{not_state}} class="iphone" type="checkbox" id='btn-not'> </div>
-				<div class="span3"> Event handler  <input {{evt_state}} class="iphone" type="checkbox" id='btn-evt'> </div>
-				<div class="span3"> Flap detection <input {{flp_state}} class="iphone" type="checkbox" id='btn-flp'> </div>
-			</div>
-		</form>
-
 		<div class="span5 well">
 			<div class="btn-toolbar">
-				<div class="btn-group">
+				<div class="btn-group ">
 					<a id='btn_show_gesture' href="#" onclick="$('#gesture_panel').toggle();" class='btn' title="Show gesture panel"> <i class="icon-ok"></i> Show gesture panel</a>
-					<a href="/depgraph/{{elt.get_full_name()}}" class='btn' title="Impact map of {{elt.get_full_name()}}"> <i class="icon-map-marker"></i> Show impact map</a>
+					
 				</div>
 
 				<div class="btn-group">
@@ -311,7 +311,7 @@ $(document).ready(function(){
 					<h3>Additonal Informations</h3>
 					<table class="table">
 						<tr>
-							<td class="column1">Performance Data</td>
+							<td class="column1"><b>Performance Data</b></td>
 							%# "If there any perf data?"
 							%if len(elt.perf_data) > 0:
 							<td>{{elt.perf_data}}</td>
@@ -320,19 +320,37 @@ $(document).ready(function(){
 							%end
 						</tr>
 						<tr>		
-							<td class="column1">Next Active Check:</td>
+							<td class="column1"><b>Next Active Check:</b></td>
 							<td><span class="quickinfo" data-original-title='Next active check at {{time.asctime(time.localtime(elt.next_chk))}}'>{{helper.print_duration(elt.next_chk)}}</span></td>
 						</tr>
 						<tr>			
-							<td class="column1">Last Notification</td>
+							<td class="column1"><b>Last Notification</b></td>
 							<td>{{helper.print_date(elt.last_notification)}} (notification {{elt.current_notification_number}})</td>
 						</tr>
-						<tr>										
-							<td class="column1">Current Attempt</td>
+						<tr>
+							<td class="column1"><b>Current Attempt</b></td>
 							<td>{{elt.attempt}}/{{elt.max_check_attempts}} ({{elt.state_type}} state)</td>
 						</tr>
 					</table>
 					<hr>
+					<table class="table">
+						<tr>
+							<td class="column1"><b>Active/passive checks</b></td>
+							<td><input {{chk_state}} class="iphone" type="checkbox" id='btn-checks'></td>
+						</tr>
+						<tr>		
+							<td class="column1"><b>Notifications</b></td>
+							<td><input {{not_state}} class="iphone" type="checkbox" id='btn-not'></td>
+						</tr>
+						<tr>			
+							<td class="column1"><b>Event handler</b></td>
+							<td><input {{evt_state}} class="iphone" type="checkbox" id='btn-evt'></td>
+						</tr>
+						<tr>
+							<td class="column1"><b>Flap detection</b></td>
+							<td><input {{flp_state}} class="iphone" type="checkbox" id='btn-flp'></td>
+						</tr>
+					</table>
 				</div>
 
 				<div class="tab-pane fade" id="commands">
@@ -383,6 +401,7 @@ $(document).ready(function(){
 				<li><a href="#downtimes" data-toggle="tab">Downtimes</a></li>
 				<li><a href="#graphs" data-toggle="tab" id='tab_to_graphs'>Graphs</a></li>
 				<li><a href="#depgraph" data-toggle="tab" id='tab_to_depgraph'>Impact graph</a></li>
+				<li><a href="/depgraph/{{elt.get_full_name()}}" title="Impact map of {{elt.get_full_name()}}">Impact map</a></li>
 			</ul>
 			<div class="tab-content">
 				<!-- Tab Summary Start-->
@@ -680,20 +699,10 @@ $(document).ready(function(){
 				</div>
 			</div>
 			<!-- Tab Dep graph End -->
-
-
-
 		</div>
 		<!-- Detail info box end -->
-
 	</div>
-
-
-
 	<!-- Le Ende -->
-
-
-
 	<!--</div>-->
 </div>
 
