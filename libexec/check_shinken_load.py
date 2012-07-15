@@ -9,9 +9,7 @@
 import os
 import argparse
 
-def main(): pass
-
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-w', '--warning', default='3,2,1')
     parser.add_argument('-c', '--critical', default='4,3,2')
@@ -37,3 +35,7 @@ if __name__ == "__main__":
         print ('OK - Load average : %s,%s,%s|load1=%s;load5=%s;load15=%s'
                % (load1, load5, load15, load1, load5, load15))
         raise SystemExit(0)
+
+
+if __name__ == "__main__":
+    main()
