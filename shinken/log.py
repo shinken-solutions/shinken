@@ -44,6 +44,9 @@ class Log:
     ERROR    = logging.ERROR
     CRITICAL = logging.CRITICAL
 
+    def __init__(self):
+        self._level = logging.NOTSET
+
     def load_obj(self, object, name_=None):
         """ We load the object where we will put log broks
         with the 'add' method
@@ -53,7 +56,6 @@ class Log:
         obj = object
         name = name_
 
-        self._level = logging.NOTSET
 
     @staticmethod
     def get_level_id(lvlName):
