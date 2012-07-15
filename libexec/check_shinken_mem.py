@@ -27,6 +27,7 @@ def MemValues():
             memFree = line.split()[1]
         if line.startswith('Cached:'):
             memCached = line.split()[1]
+    # :fixme: fails if one of these lines is missing in /proc/meminfo
     return memTotal, memCached, memFree
 
 
