@@ -1,6 +1,6 @@
-#!/bin/bash
-
-# Copyright (C) 2009-2011:
+#!/bin/sh
+#
+# Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -22,9 +22,9 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-DIR=$(cd $(dirname "$0"); pwd)
-BIN=$DIR"/../bin"
-ETC=$DIR"/../etc"
+DIR="$(cd $(dirname "$0"); pwd)"
+BIN="$DIR"/../bin
+ETC="$DIR"/../etc
 
 echo "Launching Poller (which launches checks)"
-$BIN/shinken-poller -d -c $ETC/pollerd.ini
+"$BIN"/shinken-poller -d -c "$ETC"/pollerd.ini

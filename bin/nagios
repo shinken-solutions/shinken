@@ -1,7 +1,6 @@
 #!/bin/bash
-
-
-# Copyright (C) 2009-2011:
+#
+# Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -25,7 +24,7 @@
 
 # Wrapper script to call Arbiter instead of Nagios bin
 
-DIR=`/usr/bin/dirname $0`
+DIR=$(dirname "$0")
 
 # search for an argument -v so i konw if we want to do a config check
 
