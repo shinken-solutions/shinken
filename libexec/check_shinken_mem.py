@@ -22,11 +22,11 @@ def readLines(filename):
 def MemValues():
     global memTotal, memCached, memFree
     for line in readLines('/proc/meminfo'):
-        if line.split()[0] == 'MemTotal:':
+        if line.startswith('MemTotal:'):
             memTotal = line.split()[1]
-        if line.split()[0] == 'MemFree:':
+        if line.startswith('MemFree:'):
             memFree = line.split()[1]
-        if line.split()[0] == 'Cached:':
+        if line.startswith('Cached:'):
             memCached = line.split()[1]
 
 
