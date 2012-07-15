@@ -15,6 +15,11 @@ import argparse
 
 
 def MemValues():
+    """
+    Read total mem, free mem and cached from /proc/meminfo
+
+    This is linux-only.
+    """
     global memTotal, memCached, memFree
     for line in open('/proc/meminfo').readlines():
         if line.startswith('MemTotal:'):
