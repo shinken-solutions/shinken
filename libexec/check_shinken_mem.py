@@ -13,15 +13,10 @@ import argparse
 #
 
 
-def readLines(filename):
-    f = open(filename, "r")
-    lines = f.readlines()
-    return lines
-
 
 def MemValues():
     global memTotal, memCached, memFree
-    for line in readLines('/proc/meminfo'):
+    for line in open('/proc/meminfo').readlines():
         if line.startswith('MemTotal:'):
             memTotal = line.split()[1]
         if line.startswith('MemFree:'):
