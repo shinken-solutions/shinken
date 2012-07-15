@@ -9,50 +9,10 @@
 import sys
 import os
 import argparse
-import getopt
 
-#
-# Usage
-#
-
-def usage():
-    print 'Usage:'
-    print sys.argv[0] + ' -w <load1,load5,load15> -c <load1,load5,load15>'
-    print '   -c (--critical)      Three critical tresholds (defaults: 4,3,2)\n'
-    print '   -w (--warning)       Three warning tresholds (defaults: 3,2,1)\n'
-    print '   -h (--help)          Usage help\n'
-
-#
-# Main
-#
-
-def main():
-
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], "hwc:v", ["help", "warning", "critical"])
-    except getopt.GetoptError, err:
-        # print help information and exit:
-        print str(err)
-        usage()
-        sys.exit(2)
-    output = None
-    verbose = False
-
-    for o, a in opts:
-        if o == "-v":
-            verbose = True
-        elif o in ("-h", "--help"):
-            usage()
-            sys.exit()
-        elif o in ("-w", "--warning"):
-            notification = a
-        elif o in ("-c", "--critical"):
-            notification = a
-        else:
-            assert False, "unknown options"
+def main(): pass
 
 if __name__ == "__main__":
-    main()
     parser = argparse.ArgumentParser()
     parser.add_argument('-w', '--warning', default='3,2,1')
     parser.add_argument('-c', '--critical', default='4,3,2')

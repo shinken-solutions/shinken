@@ -9,22 +9,9 @@
 import sys
 import os
 import argparse
-import getopt
 
 #
-# Usage
-#
 
-def usage():
-    print 'Usage:'
-    print sys.argv[0] + ' -w <80> -c <90>'
-    print '   -c (--critical)      Critical tresholds (defaults: 90%)\n'
-    print '   -w (--warning)       Warning tresholds (defaults: 80%)\n'
-    print '   -h (--help)          Usage help\n'
-
-#
-# Main
-#
 
 def readLines(filename):
     f = open(filename, "r")
@@ -49,30 +36,6 @@ def percentMem():
 
 
 def main():
-
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], "hwc:v", ["help", "warning", "critical"])
-    except getopt.GetoptError, err:
-        # print help information and exit:
-        print str(err)
-        usage()
-        sys.exit(2)
-    output = None
-    verbose = False
-
-    for o, a in opts:
-        if o == "-v":
-            verbose = True
-        elif o in ("-h", "--help"):
-            usage()
-            sys.exit()
-        elif o in ("-w", "--warning"):
-            notification = a
-        elif o in ("-c", "--critical"):
-            notification = a
-        else:
-            assert False, "unknown options"
-
     parser = argparse.ArgumentParser()
     parser.add_argument('-w', '--warning', default='80')
     parser.add_argument('-c', '--critical', default='90')
