@@ -49,14 +49,14 @@ def main():
     pmemUsage = str(pmemUsage)
 
     if pmemUsage >= cmem:
-        print 'CRITICAL - Memory usage : ' + pmemUsage + '% |mem=' + pmemUsage
-        sys.exit(2)
+        print ('CRITICAL - Memory usage: %2.1f%% |mem=%s' % (pmemUsage, pmemUsage))
+        raise SystemExit(2)
     elif pmemUsage >= wmem:
-        print 'WARNING - Memory usage : ' + pmemUsage + '% |mem=' + pmemUsage
-        sys.exit(1)
+        print ('WARNING - Memory usage: %2.1f%% |mem=%s' % (pmemUsage, pmemUsage))
+        raise SystemExit(1)
     else:
-        print 'OK - Memory usage : ' + pmemUsage + '% |mem=' + pmemUsage
-        sys.exit(0)
+        print ('OK - Memory usage: %2.1f%% |mem=%s' % (pmemUsage, pmemUsage))
+        raise SystemExit(0)
 
 if __name__ == "__main__":
     main()

@@ -6,7 +6,6 @@
 # Script init
 #
 
-import sys
 import os
 import argparse
 
@@ -39,11 +38,14 @@ if __name__ == "__main__":
 
 
     if load1 >= cload1 or load5 >= cload5 or load15 >= cload15:
-        print 'CRITICAL - Load average : ' + load1 + ',' + load5 + ',' + load15 + '|load1=' + load1 + '; load5=' + load5 + '; load15=' + load15
-        sys.exit(2)
+        print ('CRITICAL - Load average : %s,%s,%s|load1=%s;load5=%s;load15=%s'
+               % (load1, load5, load15, load1, load5, load15))
+        raise SystemExit(2)
     elif load1 >= wload1 or load5 >= wload5 or load15 >= wload15:
-        print 'WARNING - Load average : ' + load1 + ',' + load5 + ',' + load15 + '|load1=' + load1 + '; load5=' + load5 + '; load15=' + load15
-        sys.exit(1)
+        print ('WARNING - Load average : %s,%s,%s|load1=%s;load5=%s;load15=%s'
+               % (load1, load5, load15, load1, load5, load15))
+        raise SystemExit(1)
     else:
-        print 'OK - Load average : ' + load1 + ',' + load5 + ',' + load15 + '|load1=' + load1 + '; load5=' + load5 + '; load15=' + load15
-        sys.exit(0)
+        print ('OK - Load average : %s,%s,%s|load1=%s;load5=%s;load15=%s'
+               % (load1, load5, load15, load1, load5, load15))
+        raise SystemExit(0)
