@@ -63,11 +63,19 @@ except ImportError, exp:
 
 def check_deamons_numbers(result, target):
     total_number = len(result)
-    alive_number = len([e for e in result.values() if e['alive']])
-    total_spare_number = len([e for e in result.values() if e['spare']])
-    alive_spare_number = len([e for e in result.values() if e['spare'] and e['alive']])
+    alive_number = total_spare_number = alive_spare_number = 0
+    dead_list = []
+    for n, e in result.iteritems():
+        if e['spare']:
+            total_spare_number += 1
+        if e['alive']:
+            alive_number += 1
+            if e['spare']:
+                alive_spare_number += 1
+        else:
+            dead_list.append(n)
     dead_number = total_number - alive_number
-    dead_list = ','.join([n for n in result if not result[n]['alive']])
+    dead_list = ','.join(dead_list)
 
     # TODO: perfdata to graph deamons would be nice (in big HA architectures)
     # if alive_number <= critical, then we have a big problem
