@@ -30,7 +30,7 @@ def MemValues():
     return memTotal, memCached, memFree
 
 
-def percentMem():
+def percentFreeMem():
     memTotal, memCached, memFree = MemValues()
     return (((int(memFree) + int(memCached)) * 100) / int(memTotal))
 
@@ -44,8 +44,7 @@ def main():
     warning = args.warning
     cmem = str(critical)
     wmem = str(warning)
-    pmemFree = percentMem()
-    pmemUsage = 100 - pmemFree
+    pmemUsage = 100 - percentFreeMem()
     pmemUsage = str(pmemUsage)
 
     if pmemUsage >= cmem:
