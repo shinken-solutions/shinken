@@ -105,7 +105,7 @@ parser.add_option('-w', '--warning', dest='warning', default=1, type=int)
 # If no deamon is left, display a critical (but shinken will be
 # probably dead already)
 parser.add_option('-c', '--critical', dest='critical', default=0, type=int)
-parser.add_option('-T', '--timeout', dest='timeout', default=10)
+parser.add_option('-T', '--timeout', dest='timeout', default=10, type=float)
 
 # Retrieving options
 options, args = parser.parse_args()
@@ -132,7 +132,7 @@ socket.setdefaulttimeout(float(options.timeout))
 con = None
 try:
     con = Pyro.core.getProxyForURI(uri)
-    pyro.set_timeout(con, float(options.timeout))
+    pyro.set_timeout(con, options.timeout)
 except Exception, exp:
     print "CRITICAL : the Arbiter is not reachable : (%s)." % exp
     raise SystemExit(CRITICAL)
