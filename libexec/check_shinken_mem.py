@@ -37,20 +37,19 @@ def percentFreeMem():
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-w', '--warning', default='80')
-    parser.add_argument('-c', '--critical', default='90')
+    parser.add_argument('-w', '--warning', default='80', type=int)
+    parser.add_argument('-c', '--critical', default='90', type=int)
     args = parser.parse_args()
+
     critical = args.critical
     warning = args.warning
-    cmem = str(critical)
-    wmem = str(warning)
-    pmemUsage = 100 - percentFreeMem()
-    pmemUsage = str(pmemUsage)
 
-    if pmemUsage >= cmem:
+    pmemUsage = 100 - percentFreeMem()
+
+    if pmemUsage >= critical:
         print ('CRITICAL - Memory usage: %2.1f%% |mem=%s' % (pmemUsage, pmemUsage))
         raise SystemExit(2)
-    elif pmemUsage >= wmem:
+    elif pmemUsage >= warning:
         print ('WARNING - Memory usage: %2.1f%% |mem=%s' % (pmemUsage, pmemUsage))
         raise SystemExit(1)
     else:
