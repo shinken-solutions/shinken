@@ -1,17 +1,14 @@
 #!/usr/bin/env python
-#   Autor: David Hannequin <david.hannequin@gmail.com>
-#   Date: 29 Nov 2011
-
 #
-# Script init
+#   Autors: David Hannequin <david.hannequin@gmail.com>,
+#           Hartmut Goebel <h.goebel@crazy-compilers.com>
+#   Date: 2012-07-12
+#
+# Requires: Python >= 2.7 or Python plus argparse
+# Platform: Linux
 #
 
-import sys
-import os
 import argparse
-
-#
-
 
 
 def MemValues():
