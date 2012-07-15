@@ -20,7 +20,6 @@ def MemValues():
 
     This is linux-only.
     """
-    global memTotal, memCached, memFree
     for line in open('/proc/meminfo').readlines():
         if line.startswith('MemTotal:'):
             memTotal = line.split()[1]
@@ -28,10 +27,11 @@ def MemValues():
             memFree = line.split()[1]
         if line.startswith('Cached:'):
             memCached = line.split()[1]
+    return memTotal, memCached, memFree
 
 
 def percentMem():
-    MemValues()
+    memTotal, memCached, memFree = MemValues()
     return (((int(memFree) + int(memCached)) * 100) / int(memTotal))
 
 
