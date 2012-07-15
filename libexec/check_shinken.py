@@ -20,12 +20,10 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
-
-################################################
-# check_shinken.py:
-#    This check is getting daemons state from
-#    a arbiter connection.
-################################################
+"""
+check_shinken.py:
+    This check is getting daemons state from a arbiter connection.
+"""
 
 import os
 import sys
