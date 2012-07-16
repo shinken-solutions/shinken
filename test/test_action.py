@@ -72,7 +72,7 @@ class TestAction(ShinkenTest):
         self.assert_(a.output == "Hi, I'm for testing only. Please do not use me directly, really")
         self.assert_(a.perf_data == "Hip=99% Bob=34mm")
 
-    def test_environnement_variables(self):
+    def test_environment_variables(self):
         a = Action()
         a.timeout = 10
         if os.name == 'nt':
