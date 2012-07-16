@@ -223,8 +223,8 @@
     };
     iOSCheckbox.defaults = {
       duration: 200,
-      checkedLabel: 'ON',
-      uncheckedLabel: 'OFF',
+      checkedLabel: 'Active',
+      uncheckedLabel: 'Inactive',
       resizeHandle: true,
       resizeContainer: true,
       disabledClass: 'iPhoneCheckDisabled',
