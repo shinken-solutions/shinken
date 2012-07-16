@@ -52,6 +52,7 @@ class TestAction(ShinkenTest):
                 print "COMMAND TIMEOUT AT 20s"
                 return
 
+
     def test_action(self):
         a = Action()
         a.timeout = 10
@@ -72,29 +73,82 @@ class TestAction(ShinkenTest):
         self.assert_(a.output == "Hi, I'm for testing only. Please do not use me directly, really")
         self.assert_(a.perf_data == "Hip=99% Bob=34mm")
 
-    def test_environnement_variables(self):
-        a = Action()
-        a.timeout = 10
+    def test_echo_environment_variables(self):
         if os.name == 'nt':
             return
-        else:
-            a.command = "/usr/bin/env"
+
+        a = Action()
+        a.timeout = 10
+        a.env = {}  # :fixme: this sould be pre-set in Action.__init__()
+
+        a.command = "echo $TITI"
+
+        self.assertNotIn('TITI', a.get_local_environnement())
+        a.env = {'TITI': 'est en vacance'}
+        self.assertIn('TITI', a.get_local_environnement())
+        self.assertEqual(a.get_local_environnement()['TITI'],
+                         'est en vacance' )
+        a.execute()
+        self.wait_finished(a)
+        self.assertEqual(a.output, 'est en vacance')
+
+    def test_grep_for_environment_variables(self):
+        if os.name == 'nt':
+            return
+
+        a = Action()
+        a.timeout = 10
+        a.env = {}  # :fixme: this sould be pre-set in Action.__init__()
+
+        a.command = "/usr/bin/env | grep TITI"
+
+        self.assertNotIn('TITI', a.get_local_environnement())
+        a.env = {'TITI': 'est en vacance'}
+        self.assertIn('TITI', a.get_local_environnement())
+        self.assertEqual(a.get_local_environnement()['TITI'],
+                         'est en vacance' )
+        a.execute()
+        self.wait_finished(a)
+        self.assertEqual(a.output, 'TITI=est en vacance')
+
+    def test_environment_variables(self):
+
+        class ActionWithoutPerfData(Action):
+            def get_outputs(self, out, max_len):
+                # do not cut the outputs into perf_data to avoid
+                # problems with enviroments containing a dash like in
+                # `LESSOPEN=|/usr/bin/lesspipe.sh %s`
+                self.output = out
+
+        if os.name == 'nt':
+            return
+
+        a = ActionWithoutPerfData()
+        a.timeout = 10
+        a.command = "/usr/bin/env"
+
+        a.env = {}  # :fixme: this sould be pre-set in Action.__init__()
+        self.assertNotIn('TITI', a.get_local_environnement())
+
         a.env = {'TITI': 'est en vacance'}
 
         self.assert_(a.got_shell_characters() == False)
 
+        self.assertIn('TITI', a.get_local_environnement())
+        self.assertEqual(a.get_local_environnement()['TITI'],
+                         'est en vacance' )
         a.execute()
 
         self.assert_(a.status == 'launched')
         # Give also the max output we want for the command
-        self.wait_finished(a)
-        print "Output", a.long_output, a.output
+        self.wait_finished(a, size=20*1024)
         titi_found = False
-        for l in a.long_output.splitlines():
+        for l in a.output.splitlines():
             if l == 'TITI=est en vacance':
                 titi_found = True
+        self.assertTrue(titi_found)
 
-        self.assert_(titi_found == True)
+
 
     # Some commands are shell without bangs! (like in Centreon...)
     # We can show it in the launch, and it should be managed
