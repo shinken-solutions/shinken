@@ -21,6 +21,7 @@
 #
 # This file is used to test reading and processing of config files
 #
+import os
 import sys
 from shinken_test import *
 
@@ -28,10 +29,13 @@ from shinken_test import *
 class TestConfigWithSymlinks(ShinkenTest):
 
     def setUp(self):
+        if os.name == 'nt':
+            return
         self.setup_with_file('etc/nagios_conf_in_symlinks.cfg')
 
     def test_symlinks(self):
-        
+        if os.name == 'nt':
+            return
         if sys.version_info < (2 , 6):
             print "************* WARNING********"*200
             print "On python 2.4 and 2.5, the symlinks following is NOT managed"
