@@ -1,6 +1,6 @@
-#!/bin/bash
-
-# Copyright (C) 2009-2011:
+#!/bin/sh
+#
+# Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -22,10 +22,10 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-DIR=$(cd $(dirname "$0"); pwd)
-BIN=$DIR"/../bin"
-ETC=$DIR"/../etc"
+DIR="$(cd $(dirname "$0"); pwd)"
+BIN="$DIR"/../bin
+ETC="$DIR"/../etc
 DEBUG_PATH="/tmp/reactionner.debug"
 
 echo "Launching Reactionner (which sends notifications) in debug mode to the file $DEBUG_PATH"
-$BIN/shinken-reactionner -d -c $ETC/reactionnerd.ini --debug $DEBUG_PATH
+"$BIN"/shinken-reactionner -d -c "$ETC"/reactionnerd.ini --debug "$DEBUG_PATH"
