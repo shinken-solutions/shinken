@@ -991,6 +991,7 @@ class Items(object):
         for gn, val in groupsname2hostsnames.items():
             gn = gn.replace('-', HostGroup_Name_Parse_Ctx.minus_sign_in_name)
             gn = gn.replace('print', HostGroup_Name_Parse_Ctx.print_in_name)
+            gn = gn.replace(' ', HostGroup_Name_Parse_Ctx.space_in_name)
             newgroupname2hostnames[gn] = val
 
         set_res = []
@@ -1062,6 +1063,7 @@ class HostGroup_Name_Parse_Ctx(object):
     catch_all_name = "__ALLELEMENTS__"
     minus_sign_in_name = "__MINUSSIGN_IN_NAME__"
     print_in_name = "__PRINT_IN_NAME__"
+    space_in_name = '__SPACE_IN_NAME__'
 
     # flags:
     empty_item_ok = 0
@@ -1391,6 +1393,8 @@ parse_res must be the 'full_res' attribute of a 'HostGroup_Name_Parse_Ctx' objec
             parse_res = HostGroup_Name_Parse_Ctx.catch_all_name
         if 'print' in parse_res:
             parse_res = parse_res.replace('print', HostGroup_Name_Parse_Ctx.print_in_name)
+        if ' ' in parse_res:
+            parse_res = parse_res.replace(' ', HostGroup_Name_Parse_Ctx.space_in_name)
         return parse_res
 
     # nearly trivial case, parse_res is here a list of objects:

@@ -1,12 +1,7 @@
 #!/usr/bin/env python
-
-# -*- coding: utf-8 -*-
-
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
-#    Gregory Starck, g.starck@gmail.com
-#    Hartmut Goebel, h.goebel@goebel-consult.de
 #
 # This file is part of Shinken.
 #
@@ -23,24 +18,25 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-"""
-This file is to be imported by every Shinken service component:
-Arbiter, Scheduler, etc. It just checks for the main requirement of
-Shinken.
-"""
+#
+# This file is used to test reading and processing of config files
+#
 
-import sys
-
-VERSION = "1.0.1"
+from shinken_test import *
 
 
-# Make sure people are using Python 2.4 or higher
-if sys.version_info < (2, 4):
-    sys.exit("Shinken requires as a minimum Python 2.4.x, sorry")
-elif sys.version_info >= (3,):
-    sys.exit("Shinken is not yet compatible with Python 3.x, sorry")
+class TestHostGroupWithSpace(ShinkenTest):
 
-try:
-    import shinken.pyro_wrapper
-except ImportError:
-    sys.exit("Shinken requires the Python Pyro module. Please install it.")
+    def setUp(self):
+        self.setup_with_file('etc/nagios_hostgroup_with_space.cfg')
+
+
+    def test_hostgroup_with_space(self):
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_With Spaces")
+        self.assert_(svc is not None)
+
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", 'test_With anoter Spaces')
+        self.assert_(svc is not None)
+
+if __name__ == '__main__':
+    unittest.main()
