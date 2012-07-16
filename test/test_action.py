@@ -72,6 +72,25 @@ class TestAction(ShinkenTest):
         self.assert_(a.output == "Hi, I'm for testing only. Please do not use me directly, really")
         self.assert_(a.perf_data == "Hip=99% Bob=34mm")
 
+    def test_echo_environment_variables(self):
+        if os.name == 'nt':
+            return
+
+        a = Action()
+        a.timeout = 10
+        a.env = {}  # :fixme: this sould be pre-set in Action.__init__()
+
+        a.command = "echo $TITI"
+
+        self.assertNotIn('TITI', a.get_local_environnement())
+        a.env = {'TITI': 'est en vacance'}
+        self.assertIn('TITI', a.get_local_environnement())
+        self.assertEqual(a.get_local_environnement()['TITI'],
+                         'est en vacance' )
+        a.execute()
+        self.wait_finished(a)
+        self.assertEqual(a.output, 'est en vacance')
+
     def test_environment_variables(self):
         a = Action()
         a.timeout = 10
