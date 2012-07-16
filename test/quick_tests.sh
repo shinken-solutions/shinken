@@ -150,6 +150,7 @@ launch_and_assert test_triggers.py
 launch_and_assert test_update_output_ext_command.py
 launch_and_assert test_livestatus_allowedhosts.py
 launch_and_assert test_hostgroup_with_space.py
+launch_and_assert test_conf_in_symlinks.py
 launch_and_assert test_servicedependency_complexes.py
 
 launch_and_assert test_maintenance_period.py
