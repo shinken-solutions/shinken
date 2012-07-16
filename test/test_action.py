@@ -91,6 +91,25 @@ class TestAction(ShinkenTest):
         self.wait_finished(a)
         self.assertEqual(a.output, 'est en vacance')
 
+    def test_grep_for_environment_variables(self):
+        if os.name == 'nt':
+            return
+
+        a = Action()
+        a.timeout = 10
+        a.env = {}  # :fixme: this sould be pre-set in Action.__init__()
+
+        a.command = "/usr/bin/env | grep TITI"
+
+        self.assertNotIn('TITI', a.get_local_environnement())
+        a.env = {'TITI': 'est en vacance'}
+        self.assertIn('TITI', a.get_local_environnement())
+        self.assertEqual(a.get_local_environnement()['TITI'],
+                         'est en vacance' )
+        a.execute()
+        self.wait_finished(a)
+        self.assertEqual(a.output, 'TITI=est en vacance')
+
     def test_environment_variables(self):
         a = Action()
         a.timeout = 10
