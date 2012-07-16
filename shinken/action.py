@@ -24,7 +24,6 @@
 
 import os
 import time
-import copy
 import shlex
 import sys
 import subprocess
@@ -87,7 +86,10 @@ class __Action(object):
         Note: We cannot just update the global os.environ because this
         would effect all other checks.
         """
-        local_env = copy.copy(os.environ)
+        # Do not use copy.copy() here, as the resulting copy still
+        # changes the real environment (it is still a os._Environment
+        # instance).
+        local_env = os.environ.copy()
         for p in self.env:
             local_env[p] = self.env[p].encode('utf8')
         return local_env
