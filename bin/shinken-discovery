@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2009-2012:
+# Copyright (C) 2009-2012 :
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -21,6 +21,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+
 import optparse
 import sys
 import cPickle
@@ -39,11 +40,13 @@ except ImportError:
 
 from shinken.discovery.discoverymanager import DiscoveryManager
 
+
 VERSION = '1.0.1'
-if os.name != 'nt':
+if os.name != 'nt': 
     DEFAULT_CFG = '/etc/shinken/discovery.cfg'
 else:
     DEFAULT_CFG = 'c:\\shinken\\etc\\discovery.cfg'
+
 
 parser = optparse.OptionParser(
     "%prog [options] -c discovery_config -o config_output -m list of macros",
@@ -59,21 +62,25 @@ parser.add_option('-r', '--runners', dest="runners",
 parser.add_option('-m', '--macros', dest="macros",
                   help="List of macros (like NMAPTARGETS=192.168.0.0/24). Should be the last argument")
 parser.add_option('--db', dest="dbmod",
-                  help="Optionnal: Name of the database module to use.")
+                  help="Optionnal : Name of the database module to use.")
 parser.add_option('--backend', dest="backend",
-                  help="Optionnal: Name of a module that will totally manage the object writing/update thing. If you don't know what it means, maybe you should not use this option :)")
+                  help="Optionnal : Name of a module that will totally manage the object writing/update thing. If you don't know what it means, maybe you should not use this option :)")
 parser.add_option('--modules_path', dest="modules_path",
-                  help="Optionnal: Path for the module loading. If you don't know what it means, maybe you should not use this option :)")
+                  help="Optionnal : Path for the module loading. If you don't know what it means, maybe you should not use this option :)")
+parser.add_option('--merge', dest="merge", action='store_true',
+                  help="Optionnal : In multiple discovery level, it is the final host name which wins. Make possible merge of multiple IP but same final device")
+
+
 
 opts, args = parser.parse_args()
 
 raw_macros = []
-macros = []
+macros=[]
 
 if not opts.cfg_input:
     if not os.path.exists(DEFAULT_CFG):
         parser.error("Requires a discovery configuration file, discovery.cfg (option -c/--cfg-input)")
-    else:  # take the default file
+    else : # take the default file
         opts.cfg_input = DEFAULT_CFG
 
 if not opts.output_dir and not opts.dbmod and not opts.backend:
@@ -83,6 +90,11 @@ if not opts.overwrite:
     overwrite = False
 else:
     overwrite = opts.overwrite
+
+if not opts.merge:
+    merge = False
+else:
+    merge = opts.merge
 
 if not opts.runners:
     runners = ['*']
@@ -104,7 +116,7 @@ for m in raw_macros:
     if len(elts) < 2:
         print "The macro '%s' is malformed. I bail out" % m
         sys.exit(2)
-    macros.append((elts[0], '='.join(elts[1:])))
+    macros.append( (elts[0], '='.join(elts[1:])))
 
 print "Got macros", macros
 
@@ -122,6 +134,7 @@ print "Got macros", macros
 #            if h.get_name() == parent:
 #                print "Houray, we find our parent", self.h.get_name(), "->", h.get_name()
 #                self.parents.append(h.get_name())
+        
 
 cfg_input = opts.cfg_input
 output_dir = opts.output_dir
@@ -129,10 +142,11 @@ overwrite = opts.overwrite
 dbmod = opts.dbmod
 modules_path = opts.modules_path or ''
 
-# Get the Manager for all of the discovery thing
-d = DiscoveryManager(cfg_input, macros, overwrite, runners, output_dir=output_dir, dbmod=dbmod, backend=backend, modules_path=modules_path)
 
-# Ok, let start the plugins that will give us the data
+# Get the Manager for all of the discovery thing
+d = DiscoveryManager(cfg_input, macros, overwrite, runners, output_dir=output_dir, dbmod=dbmod, backend=backend, modules_path=modules_path, merge=merge)
+
+# #Ok, let start the plugins that will give us the data
 d.launch_runners()
 d.wait_for_runners_ends()
 
