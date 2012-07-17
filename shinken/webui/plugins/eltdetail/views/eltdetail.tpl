@@ -401,7 +401,7 @@ $(document).ready(function(){
 				<li><a href="#downtimes" data-toggle="tab">Downtimes</a></li>
 				<li><a href="#graphs" data-toggle="tab" id='tab_to_graphs'>Graphs</a></li>
 				<li><a href="#depgraph" data-toggle="tab" id='tab_to_depgraph'>Impact graph</a></li>
-				<li><a href="/depgraph/{{elt.get_full_name()}}" title="Impact map of {{elt.get_full_name()}}">Impact map</a></li>
+				<!--<li><a href="/depgraph/{{elt.get_full_name()}}" title="Impact map of {{elt.get_full_name()}}">Impact map</a></li> -->
 			</ul>
 			<div class="tab-content">
 				<!-- Tab Summary Start-->
