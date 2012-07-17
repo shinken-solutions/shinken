@@ -24,8 +24,8 @@ that method as well when you update or remove your installation.
 
 The recommended method is the "install script" which tries to
 do all the necessary steps for you. You can choose that one if your OS is
-compatible with it. If you choose it, you can skip/skim
- over the requirements section and come back to it later if needed.
+compatible with it. If you choose it, you can skip/skim over
+the requirements section and come back to it later if needed.
 
 However, it is recommended to check any requirement manually to confirm they are installed correctly.
 
