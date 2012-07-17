@@ -176,7 +176,7 @@ with Shinken you can start to use its unique and powerful features.
 Learn more about how to use and configure Shinken
 =================================================
 
-Jump to the `Shinken documentation wiki`.
+Jump to the `Shinken documentation wiki`__.
 
 __ http://www.shinken-monitoring.org/wiki/
 
