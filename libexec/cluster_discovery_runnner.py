@@ -1,17 +1,35 @@
 #!/usr/bin/env python
-#First of all, the fs_discovery_runner.py script get the list 
-#of the files systems back from the nmap device list with SNMP 
-#protocol. The OID used by SNMP to recover datas is particular
-#to each OS type.
-#And then it converts the listed files systems writing and
-#display it on the standard output.
-#For example : / will be translate into _root and /var will be
-#translate into _var
+# Copyright (C) 2009-2012:
+#    Camille, VACQUIE
+#    Romain, FORLOT, romain.forlot@sydel.fr
+# 
+# This file is part of Shinken.
+#
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+#
 ###############################################################
-#For SNMPv3 we created a default user using the command :
-#net-snmp-config --create-snmpv3-user -a "mypassword" myuser
-#Here the user name is myuser and his password is mypassword
-
+#
+# cluster_discovery_runner.py script simply try to get informations
+# from HACMP mib and failback on Safekit mib. SNMP for both product
+# need to be activated. For Safekit, add a proxy into snmpd conf to
+# include its mib into the master agent netsnmp.
+#
+# For SNMPv3 we created a default user using the command :
+# net-snmp-config --create-snmpv3-user -a "mypassword" myuser
+# Here the user name is myuser and his password is mypassword
+#
+###############################################################
 
 ### modules import
 import netsnmp
