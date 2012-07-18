@@ -11,18 +11,18 @@ import time
 import select
 import socket
 import struct
-import sys
 import random
 
 
 def decrypt_xor(data, key):
     keylen = len(key)
-    crypted = [chr(ord(data[i]) ^ ord(key[i % keylen])) for i in xrange(len(data))]
+    crypted = [chr(ord(data[i]) ^ ord(key[i % keylen]))
+               for i in xrange(len(data))]
     return ''.join(crypted)
 
 
-# Just print some stuff
 class NSCA_client():
+
     def __init__(self, host, port, encryption_method, password):
         self.host = host
         self.port = port
@@ -30,14 +30,16 @@ class NSCA_client():
         self.password = password
         self.rng = random.Random(password)
 
-    # Ok, main function that is called in the CONFIGURATION phase
     def get_objects(self):
+        """
+        This is the main function that is called in the CONFIGURATION
+        phase.
+        """
         print "[Dummy] ask me for objects to return"
         r = {'hosts': []}
         h = {'name': 'dummy host from dummy arbiter module',
              'register': '0',
              }
-
         r['hosts'].append(h)
         print "[Dummy] Returning to Arbiter the hosts:", r
         return r
@@ -72,7 +74,8 @@ class NSCA_client():
             data = decrypt_xor(data, self.password)
             data = decrypt_xor(data, iv)
 
-        (version, pad1, crc32, timestamp, rc, hostname_dirty, service_dirty, output_dirty, pad2) = struct.unpack("!hhIIh64s128s512sh", data)
+        (version, pad1, crc32, timestamp, rc, hostname_dirty, service_dirty,
+         output_dirty, pad2) = struct.unpack("!hhIIh64s128s512sh", data)
         hostname = hostname_dirty.partition("\0", 1)[0]
         service = service_dirty.partition("\0", 1)[0]
         output = output_dirty.partition("\0", 1)[0]
@@ -83,9 +86,11 @@ class NSCA_client():
         Send a check result command to the arbiter
         '''
         if len(service) == 0:
-            extcmd = "[%lu] PROCESS_HOST_CHECK_RESULT;%s;%d;%s\n" % (timestamp, hostname, rc, output)
+            extcmd = ("[%lu] PROCESS_HOST_CHECK_RESULT;%s;%d;%s\n"
+                      % (timestamp, hostname, rc, output))
         else:
-            extcmd = "[%lu] PROCESS_SERVICE_CHECK_RESULT;%s;%s;%d;%s\n" % (timestamp, hostname, service, rc, output)
+            extcmd = ("[%lu] PROCESS_SERVICE_CHECK_RESULT;%s;%s;%d;%s\n"
+                      % (timestamp, hostname, service, rc, output))
 
         print "want to send", extcmd
 
@@ -93,8 +98,10 @@ class NSCA_client():
         #self.from_q.put(e)
 
 
-    # When you are in "external" mode, that is the main loop of your process
     def main(self):
+        """
+        This is the main loop of the process when in 'external' mode.
+        """
         #self.set_exit_handler()
         self.interrupted = False
         backlog = 5
@@ -135,15 +142,19 @@ class NSCA_client():
          204-715: output of the plugin
          716-720: padding
         '''
-        init_packet = struct.pack("!hhIIh64s128s512sh", version, pad1, crc32, timestamp, rc, hostname_dirty, service_dirty, output_dirty, pad2)
+        init_packet = struct.pack(
+            "!hhIIh64s128s512sh",
+            version, pad1, crc32, timestamp, rc, hostname_dirty,
+            service_dirty, output_dirty, pad2)
         print "Create packent len", len(init_packet)
-        #(version, pad1, crc32, timestamp, rc, hostname_dirty, service_dirty, output_dirty, pad2) = struct.unpack("!hhIIh64s128s512sh",data)
+        #(version, pad1, crc32, timestamp, rc, hostname_dirty, service_dirty,
+        # output_dirty, pad2) = struct.unpack("!hhIIh64s128s512sh",data)
 
         data = decrypt_xor(init_packet, iv)
         data = decrypt_xor(data, self.password)
 
         server.send(data)
-        sys.exit(0)
+        raise SystemExit(0)
 
         while not self.interrupted:
             print "Loop"
@@ -168,7 +179,8 @@ class NSCA_client():
                         (timestamp, rc, hostname, service, output) = self.read_check_result(databuffer[s], IVs[s])
                         del databuffer[s]
                         del IVs[s]
-                        self.post_command(timestamp, rc, hostname, service, output)
+                        self.post_command(timestamp, rc, hostname, service,
+                                          output)
                         try:
                             s.shutdown(2)
                         except Exception, exp:
@@ -176,5 +188,26 @@ class NSCA_client():
                         s.close()
                         input.remove(s)
 
-nsca = NSCA_client('localhost', 5667, 1, 'helloworld')
-nsca.main()
+if __name__ == "__main__":
+    parser = optparse.OptionParser(
+                      version="Python NSCA client version %s" % VERSION)
+    parser.add_option("-H", "--hostname", default='localhost',
+                      help="NSCA server IP (default: %default)")
+    parser.add_option("-P", "--port", type="int", default='5667',
+                      help="NSCA server port (default: %default)")
+    parser.add_option("-e", "--encryption", default='1',
+                      help=("Encryption mode used by NSCA server "
+                            "(default: %default)"))
+    parser.add_option("-p", "--password", default='helloworld',
+                      help=("Password for encryption, should be the same as "
+                            "NSCA server (default: %default)"))
+    parser.add_option("-d", "--delimiter", default='\t',
+                      help="Argument delimiter (defaults to the tab-character)")
+
+    opts, args = parser.parse_args()
+
+    if args:
+        parser.error("does not take any positional arguments")
+
+    nsca = NSCA_client(opts.hostname, opts.port, opts.encryption, opts.password)
+    nsca.main()

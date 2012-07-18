@@ -1,0 +1,10 @@
+{
+"name":"HACMP",
+
+"description":"IBM HACMP cluster solution monitoring",
+
+"path":"/cluster",
+
+"macros":{ }	 
+
+}

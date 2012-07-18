@@ -332,6 +332,7 @@ class Host(SchedulingItem):
         'HOSTACTIONURL':     'action_url',
         'HOSTNOTESURL':      'notes_url',
         'HOSTNOTES':         'notes',
+        'HOSTREALM':         'get_realm', 
         'TOTALHOSTSERVICES': 'get_total_services',
         'TOTALHOSTSERVICESOK': 'get_total_services_ok',
         'TOTALHOSTSERVICESWARNING': 'get_total_services_warning',
@@ -402,6 +403,10 @@ class Host(SchedulingItem):
         # Ok now we manage special cases...
         if self.notifications_enabled and self.contacts == []:
             logger.warning("The host %s has no contacts nor contact_groups in (%s)" % (self.get_name(), source))
+
+        if getattr(self, 'event_handler', None) and not self.event_handler.is_valid():
+            logger.info("%s: my event_handler %s is invalid" % (self.get_name(), self.event_handler.command))
+            state = False
 
         if getattr(self, 'check_command', None) is None:
             logger.info("%s: I've got no check_command" % self.get_name())

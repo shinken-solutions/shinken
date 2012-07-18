@@ -400,6 +400,11 @@ class Service(SchedulingItem):
         if getattr(self, 'display_name', '') == '':
             self.display_name = getattr(self, 'service_description', '')
 
+        # If we got an event handler, it should be valid
+        if getattr(self, 'event_handler', None) and not self.event_handler.is_valid():
+            logger.info("%s: my event_handler %s is invalid" % (self.get_name(), self.event_handler.command))
+            state = False
+
         if not hasattr(self, 'check_command'):
             logger.info("%s: I've got no check_command" % self.get_name())
             state = False

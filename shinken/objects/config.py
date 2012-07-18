@@ -30,6 +30,7 @@
  use it too (but far less)"""
 
 import re
+import sys
 import string
 import copy
 import os
@@ -457,8 +458,12 @@ class Config(Item):
                     # Look for .pack file into it :)
                     self.packs_dirs.append(cfg_dir_name)
 
-                    # Now walk for it
-                    for root, dirs, files in os.walk(cfg_dir_name):
+                    # Now walk for it.
+                    # BEWARE : we can follow simlinks only for python 2.6 and higher
+                    args = {}
+                    if sys.version_info >= (2, 6):
+                        args['followlinks'] = True
+                    for root, dirs, files in os.walk(cfg_dir_name, **args):
                         for file in files:
                             if re.search("\.cfg$", file):
                                 if self.read_config_silent == 0:
