@@ -1,0 +1,11 @@
+{
+"name":"cups",
+
+"description":"cups pack, will check presence of cups server on a linux host ",
+
+"path":"/printers",
+
+"macros":{ }
+
+
+}
