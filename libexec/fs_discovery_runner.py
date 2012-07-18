@@ -50,6 +50,7 @@ parser = optparse.OptionParser('%prog [options] -H HOSTADRESS -C SNMPCOMMUNITYRE
 # user name and password are defined in /var/lib/net-snmp/snmpd.conf
 # default parameters are defined in /usr/local/shinken/etc/resource.cfg
 parser.add_option("-H", "--hostname", dest="hostname", help="Hostname to scan")
+parser.add_option("-m", "--mode", dest="mode", help="Discovery mode : [ macros | tags ]. Macros will creates host macros and tags will add tags for each fs detected.")
 parser.add_option("-C", "--community", dest="community", help="Community to scan (default:public)")
 parser.add_option("-O", "--os", dest="os", help="OS from scanned host")
 parser.add_option("-V", "--version", dest="version", type=int, help="Version number for SNMP (1, 2 or 3; default:1)")
@@ -64,8 +65,15 @@ opts, args = parser.parse_args()
 hostname = opts.hostname
 os = opts.os
 
+mode = { 'macros' : '_fs',
+         'tags' : 'fs',
+}
+
 if not opts.hostname:
     parser.error("Requires one host and its os to scan (option -H)")
+
+if not opts.mode:
+    parser.error("Requires mode. Please choose between macros or tags")
 
 if not opts.os:
     parser.error("Requires the os host(option -O)")
@@ -124,7 +132,7 @@ def get_fs_discovery_output(liste):
         if elt == '_':# if _ is the only detected character
             elt = re.sub(r'^_$', '_root', elt)# so we replace _ with _root
         fsTbl.append(elt)
-    print "%s::fs_name=%s"%(hostname, ','.join(fsTbl))# display like in the nmap model
+    print "%s::%s=%s"%(hostname, mode[opts.mode], ','.join(fsTbl))# display like in the nmap model
 
 ###############
 #  execution  #
