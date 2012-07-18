@@ -2766,6 +2766,24 @@ function install_check_snmp_bandwidth(){
     cp $filename $LIBEXEC/$script
 }
 
+function install_check_snmp_netint(){
+    cadre "Install install_check_snmp_netint" green
+
+    cd $TMP
+
+    filename="check_snmp_netint.pl"
+    cecho " > Downloading check_snmp_netint" green
+    wget $WGETPROXY $CHECKSNMPNETINT -O ${filename} >> ${LOGFILE} 2>&1
+    if [ $? -ne 0 ]
+    then
+        cecho " > Error while downloading $script" red
+        exit 2
+    fi
+
+    cecho " > install check_snmp_netint" green
+    install -b -g $SKGROUP -o $SKUSER -m 0755 -t $TARGET/libexec check_snmp_netint.pl >> $TMP/shinken.install.log 2>&1
+}
+
 function nconf-import-packs(){
     manageparameters 'quiet'
     packs=$TARGET/etc/packs
@@ -2899,6 +2917,7 @@ echo "Usage: install -k | -i | -u [addonname] | -b | -r backupname | -l | -c | -
                                check_netapp2
                                check_mem (local enhanced memory check plugin)
                                check_snmp_bandwidth (check bandwidth usage with snmp)
+                               check_snmp_netint (enhanced version of check_snmp_int plugins)
                                check_IBM
                                check_IBM_DS
     -a | --addon            Install addons. Argument should be one of the following:
@@ -3005,6 +3024,10 @@ do
             elif [ "$OPTARG" == "check_snmp_bandwidth" ]
             then
                 install_check_snmp_bandwidth
+                exit 0
+            elif [ "$OPTARG" == "check_snmp_netint" ]
+            then
+                install_check_snmp_netint
                 exit 0
             elif [ "$OPTARG" == "check_IBM" ]
             then
