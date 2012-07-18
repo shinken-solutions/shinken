@@ -10,7 +10,7 @@ sudo rm -fr /var/lib/shinken
 sudo rm -fr /var/log/shinken
 sudo rm -fr /etc/default/shinken
 
-rm -fr build dist Shinken.egg-info
+sudo rm -fr build dist Shinken.egg-info
 rm -fr test/var/*.pid
 rm -fr var/*.debug
 rm -fr var/*.log*

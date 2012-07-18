@@ -471,7 +471,10 @@ class Dispatcher:
                                     #print "Got 1", nospare[idx:]
                                     #print "Got 2", nospare[:-idx+1]
                                     new_satellites = nospare[idx:]
-                                    new_satellites.extend(nospare[:-idx+1])
+                                    for _b in nospare[:-idx+1]:
+                                        if _b not in new_satellites:
+                                            new_satellites.append(_b)
+                                    #new_satellites.extend(nospare[:-idx+1])
                                     #print "New satellites", cfg_id, new_satellites
                                     #for s in new_satellites:
                                     #    print "New satellites", cfg_id, s.get_name()

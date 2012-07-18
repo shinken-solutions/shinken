@@ -490,6 +490,7 @@ config_objects_file = (
                         'templates.cfg',
                         'dependencies.cfg',
                         'timeperiods.cfg',
+                        'time_templates.cfg',
                         'contacts.cfg',
                         'discovery_rules.cfg',
                         'hosts/localhost.cfg',
