@@ -63,6 +63,21 @@ class TestConfig(ShinkenTest):
         print com
         self.assert_(com == 'plugins/nothing 1')
 
+
+
+    # Here call with a special macro HOSTREALM
+    def test_special_macros_realm(self):
+        mr = self.get_mr()
+        (svc, hst) = self.get_hst_svc()
+        data = svc.get_data_for_checks()
+        hst.state = 'UP'
+        dummy_call = "special_macro!$HOSTREALM$"
+        cc = CommandCall(self.conf.commands, dummy_call)
+        com = mr.resolve_command(cc, data)
+        print com
+        self.assert_(com == 'plugins/nothing Default')
+
+
     # For output macro we want to delete all illegal macro caracter
     def test_illegal_macro_output_chars(self):
         "$HOSTOUTPUT$, $HOSTPERFDATA$, $HOSTACKAUTHOR$, $HOSTACKCOMMENT$, $SERVICEOUTPUT$, $SERVICEPERFDATA$, $SERVICEACKAUTHOR$, and $SERVICEACKCOMMENT$ "

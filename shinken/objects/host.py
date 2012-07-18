@@ -332,6 +332,7 @@ class Host(SchedulingItem):
         'HOSTACTIONURL':     'action_url',
         'HOSTNOTESURL':      'notes_url',
         'HOSTNOTES':         'notes',
+        'HOSTREALM':         'get_realm', 
         'TOTALHOSTSERVICES': 'get_total_services',
         'TOTALHOSTSERVICESOK': 'get_total_services_ok',
         'TOTALHOSTSERVICESWARNING': 'get_total_services_warning',
