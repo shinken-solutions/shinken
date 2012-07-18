@@ -24,8 +24,8 @@ that method as well when you update or remove your installation.
 
 The recommended method is the "install script" which tries to
 do all the necessary steps for you. You can choose that one if your OS is
-compatible with it. If you choose it, you can skip/skim
- over the requirements section and come back to it later if needed.
+compatible with it. If you choose it, you can skip/skim over
+the requirements section and come back to it later if needed.
 
 However, it is recommended to check any requirement manually to confirm they are installed correctly.
 
@@ -104,9 +104,20 @@ The only requirement is an internet connection for the server on which you want 
 
 If you want shinken installed in seconds (default in /usr/local/shinken), just run ::
 
-  install -i
+1 - `Download`__ and extract the Shinken archive
 
-see install.d/README file for further information.
+__ http://www.shinken-monitoring.org/download/
+
+2 - cd into the resulting folder
+
+3 - run the installation script with the -i (install shinken) option
+
+  ./install -i
+
+See the install.d/README file for further information on installing plugins and web frontends.
+
+Typical minimum installation using check scripts defined in Shinken, Shinken WebUI and PNP4Nagios for metrics.
+ie. ./install -i && ./install -p nagios-plugins && ./install -p check_mem && ./install -p manubulon && ./install -p pnp4nagios
 
 Update
 ------
@@ -165,7 +176,7 @@ with Shinken you can start to use its unique and powerful features.
 Learn more about how to use and configure Shinken
 =================================================
 
-Jump to the `Shinken documentation wiki`.
+Jump to the `Shinken documentation wiki`__.
 
 __ http://www.shinken-monitoring.org/wiki/
 

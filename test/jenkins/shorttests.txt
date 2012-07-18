@@ -111,4 +111,7 @@ test_triggers.py
 test_update_output_ext_command.py
 test_parse_perfdata.py
 test_servicedependency_complexes.py
+test_hostgroup_with_space.py
+test_conf_in_symlinks.py
+test_uknown_event_handler.py
 test_livestatus_allowedhosts.py
