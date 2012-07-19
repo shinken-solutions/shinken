@@ -52,14 +52,12 @@ def get_instance(plugin):
     return instance
 
 
-
 # Just print some stuff
 class Mongodb_retention_scheduler(BaseModule):
     def __init__(self, modconf, uri, database):
         BaseModule.__init__(self, modconf)
         self.uri = uri
         self.database = database
-
 
     # Called by Scheduler to say 'let's prepare yourself guy'
     def init(self):
@@ -69,7 +67,6 @@ class Mongodb_retention_scheduler(BaseModule):
         self.db = getattr(self.con, self.database)
         self.hosts_fs = GridFS(self.db, collection='retention_hosts')
         self.services_fs = GridFS(self.db, collection='retention_services')
-
 
     # Ok, main function that is called in the retention creation pass
     def hook_save_retention(self, daemon):
@@ -105,10 +102,7 @@ class Mongodb_retention_scheduler(BaseModule):
             self.services_fs.delete(key)
             fd = self.services_fs.put(val, _id=key, filename=key)
 
-
         log_mgr.log("Retention information updated in Mongodb")
-
-
 
     # Should return if it succeed in the retention load or not
     def hook_load_retention(self, daemon):
@@ -149,7 +143,6 @@ class Mongodb_retention_scheduler(BaseModule):
             if val is not None:
                 val = cPickle.loads(val)
                 ret_services[(s.host.host_name, s.service_description)] = val
-
 
         all_data = {'hosts': ret_hosts, 'services': ret_services}
 

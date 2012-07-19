@@ -40,7 +40,6 @@ sys.path.append("../../../shinken")
 #import shinken
 from shinken.modules.livestatus_broker.livestatus_db import LiveStatusDb
 
-
 parser = optparse.OptionParser(
     "%prog [options] -d database [-a archive]")
 parser.add_option('-d', '--database', action='store',

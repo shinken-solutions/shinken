@@ -7,107 +7,84 @@ import os
 import getopt
 import argparse
 import smtplib
-
-def main():
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], "hnsHariotS:v", ["help", "notification", "servicedesc", "hostname", "hostaddress", "servicestate", "shortdatetime", "output", "to", "sender" ])
-    except getopt.GetoptError, err:
-        # print help information and exit:
-        print str(err)
-        usage()
-        sys.exit(2)
-    output = None
-    verbose = False
-    for o, a in opts:
-        if o == "-v":
-            verbose = True
-        elif o in ("-h", "--help"):
-            usage()
-            sys.exit()
-        elif o in ("-n", "--notification"):
-            notification = a
-        elif o in ("-s", "--servicedesc"):
-            servicedesc = a
-        elif o in ("-H", "--hostname"):
-            hostname = a
-        elif o in ("-a", "--hostaddress"):
-            hostaddress = a
-        elif o in ("-r", "--servicestate"):
-            servicestate = a
-        elif o in ("-i", "--shortdatetime"):
-            shortdatetime = a
-        elif o in ("-o", "--output"):
-            serviceoutput = a
-        elif o in ("-t", "--to"):
-            to = a
-        elif o in ("-S", "--sender"):
-            to = a
-        else:
-            assert False, "unhandled option"
-
-def usage():
-    print 'Usage:'
-    print sys.argv[0] + ' -s <service name> -n <notification type> -H <hostname> -a <address> -i <date> -o <service output> -t <email>'
-    print '-s --servicedesc: service description'
-    print '-n --notification: notification type'
-    print '-H --hostname: hostname'
-    print '-a --hostaddress: host address'
-    print '-r --servicestate: service state'
-    print '-i --shortdatetime: date'
-    print '-o --output: service output'
-    print '-t --to: email send to'
-    print '-S --sender: email from'
-
-if __name__ == "__main__":
-    main()
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-n', '--notification')
-    parser.add_argument('-s', '--servicedesc')
-    parser.add_argument('-H', '--hostname')
-    parser.add_argument('-a', '--hostaddress')
-    parser.add_argument('-r', '--servicestate')
-    parser.add_argument('-i', '--shortdatetime')
-    parser.add_argument('-o', '--output')
-    parser.add_argument('-t', '--to')
-    parser.add_argument('-S', '--sender')
-    args = parser.parse_args()
-
-    notify = args.notification
-    desc = args.servicedesc
-    hostname = args.hostname
-    hostaddress = args.hostaddress
-    state = args.servicestate
-    datetime = args.shortdatetime
-    output = args.output
-    to = args.to
-    sender = args.sender
-
-    subject = "** " + notify + " alert - " + hostname + "/" + desc + " is " + state + " **"
-
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+
+TEXT_template = """***** Shinken Notification *****
+
+Notification: %(notify)s
+
+Service: %(service)s
+Host: %(hostname)s
+Address: %(hostaddress)s
+State: %(state)s
+Date/Time: %(datetime)s
+Additional Info: %(output)s
+"""
+
+HTML_template = '''<html>
+<head></head><body>
+<style type="text/css">
+.recovery { color:ForestGreen }
+.acknowledgement { color:ForestGreen }
+.problem { color: red }
+.ok { color:ForestGreen }
+.critical { color:red }
+.warning { color:orange }
+.unknown { color:gray }
+.bold { font-weight:bold }
+</style>
+<strong> ***** Shinken Notification ***** </strong><br><br>
+Notification: <span class="%(notify)s bold">%(notify)s</span><br><br>
+State: <span class="%(state)s bold">%(state)s</span><br><br>
+Service: %(service)s <br>
+Host: %(hostname)s <br>
+Address: %(hostaddress)s <br>
+Date/Time: %(datetime)s<br>
+Additional Info : %(output)s
+</body></html>
+'''
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-n', '--notification', default='unknown', dest='notify')
+parser.add_argument('-s', '--servicedesc', default='unknown', dest='service')
+parser.add_argument('-H', '--hostname', default='unknown')
+parser.add_argument('-a', '--hostaddress', default='unknown')
+parser.add_argument('-r', '--servicestate', default='unknown', dest='state')
+parser.add_argument('-i', '--shortdatetime', default='unknown', dest='datetime')
+parser.add_argument('-o', '--output', default='')
+group = parser.add_argument_group('Mail options')
+group.add_argument('-t', '--to')
+group.add_argument('-S', '--sender')
+group.add_argument('--server', default='localhost')
+group.add_argument('--port', default=smtplib.SMTP_PORT, type=int)
+args = parser.parse_args()
+
+subject = ("** %(notify)s alert - %(hostname)s/%(service)s is %(state)s **"
+           % vars(args))
 
 ## Create message container - the correct MIME type is multipart/alternative.
 msg = MIMEMultipart('alternative')
 msg['Subject'] = subject
-msg['From'] = sender
-msg['To'] = to
+msg['From'] = args.sender
+msg['To'] = args.to
 
 # Create the body of the message (a plain-text and an HTML version).
-html = "<html><head></head><body><strong> ***** Shinken Notification ***** </strong><br><br>\r Notification : "+ notify +"<br><br>\rService : "+ desc +" <br>\r Host : "+ hostname +" <br>\r Address : "+ hostaddress +" <br>\r State : "+ state +"<br><br>\r Date/Time : "+ datetime +" Additional Info : "+ output + "</body></html>"
-
-# Record the MIME types of one parts - text/html.
-part1 = MIMEText(html, 'html')
-
-# Attach parts into message container.
-# According to RFC 2046, the last part of a multipart message, in this case
-# the HTML message, is best and preferred.
-msg.attach(part1)
+#
+# According to RFC 2046, the last part of a multipart message, in this
+# case the HTML message, is best and preferred.
+#
+# :fixme: need to encode the body if not ascii, see
+# http://mg.pov.lt/blog/unicode-emails-in-python.html for a nice
+# solution.
+#
+msg.attach(MIMEText(TEXT_template % vars(args), 'plain'))
+# :fixme: need to html-escape all values and encode the body
+msg.attach(MIMEText(HTML_template % vars(args), 'html'))
 
 # Send the message via local SMTP server.
-s = smtplib.SMTP('localhost')
+s = smtplib.SMTP(args.server, args.port)
 # sendmail function takes 3 arguments: sender's address, recipient's address
 # and message to send - here it is sent as one string.
-s.sendmail(sender, to, msg.as_string())
+s.sendmail(args.sender, args.to, msg.as_string())
 s.quit()

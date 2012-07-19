@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import os
 import time
 
@@ -59,6 +58,7 @@ MODATTR_NOTIFICATION_TIMEPERIOD = 65536
 """ TODO: Add some comment about this class for the doc"""
 class ExternalCommand:
     my_type = 'externalcommand'
+
     def __init__(self, cmd_line):
         self.cmd_line = cmd_line
 
@@ -73,14 +73,14 @@ class ExternalCommandManager:
         'CHANGE_CONTACT_HOST_NOTIFICATION_TIMEPERIOD': {'global': True, 'args': ['contact', 'time_period']},
         'ADD_SVC_COMMENT': {'global': False, 'args': ['service', 'to_bool', 'author', None]},
         'ADD_HOST_COMMENT': {'global': False, 'args': ['host', 'to_bool', 'author', None]},
-        'ACKNOWLEDGE_SVC_PROBLEM': {'global': False, 'args': ['service' , 'to_int', 'to_bool', 'to_bool', 'author', None]},
+        'ACKNOWLEDGE_SVC_PROBLEM': {'global': False, 'args': ['service', 'to_int', 'to_bool', 'to_bool', 'author', None]},
         'ACKNOWLEDGE_HOST_PROBLEM': {'global': False, 'args': ['host', 'to_int', 'to_bool', 'to_bool', 'author', None]},
-        'ACKNOWLEDGE_SVC_PROBLEM_EXPIRE': {'global': False, 'args': ['service' , 'to_int', 'to_bool', 'to_bool', 'to_int', 'author', None]},
+        'ACKNOWLEDGE_SVC_PROBLEM_EXPIRE': {'global': False, 'args': ['service', 'to_int', 'to_bool', 'to_bool', 'to_int', 'author', None]},
         'ACKNOWLEDGE_HOST_PROBLEM_EXPIRE': {'global': False, 'args': ['host', 'to_int', 'to_bool', 'to_bool', 'to_int', 'author', None]},
         'CHANGE_CONTACT_SVC_NOTIFICATION_TIMEPERIOD': {'global': True, 'args': ['contact', 'time_period']},
-        'CHANGE_CUSTOM_CONTACT_VAR': {'global': True, 'args': ['contact', None,None]},
-        'CHANGE_CUSTOM_HOST_VAR': {'global': False, 'args': ['host', None,None]},
-        'CHANGE_CUSTOM_SVC_VAR': {'global': False, 'args': ['service', None,None]},
+        'CHANGE_CUSTOM_CONTACT_VAR': {'global': True, 'args': ['contact', None, None]},
+        'CHANGE_CUSTOM_HOST_VAR': {'global': False, 'args': ['host', None, None]},
+        'CHANGE_CUSTOM_SVC_VAR': {'global': False, 'args': ['service', None, None]},
         'CHANGE_GLOBAL_HOST_EVENT_HANDLER': {'global': True, 'args': ['command']},
         'CHANGE_GLOBAL_SVC_EVENT_HANDLER': {'global': True, 'args': ['command']},
         'CHANGE_HOST_CHECK_COMMAND': {'global': False, 'args': ['host', 'command']},
@@ -194,14 +194,14 @@ class ExternalCommandManager:
         'REMOVE_SVC_ACKNOWLEDGEMENT': {'global': False, 'args': ['service']},
         'RESTART_PROGRAM': {'global': True, 'args': []},
         'SAVE_STATE_INFORMATION': {'global': True, 'args': []},
-        'SCHEDULE_AND_PROPAGATE_HOST_DOWNTIME': {'global': False, 'args': ['host', 'to_int', 'to_int', 'to_bool', 'to_int', 'to_int', 'author',None]},
+        'SCHEDULE_AND_PROPAGATE_HOST_DOWNTIME': {'global': False, 'args': ['host', 'to_int', 'to_int', 'to_bool', 'to_int', 'to_int', 'author', None]},
         'SCHEDULE_AND_PROPAGATE_TRIGGERED_HOST_DOWNTIME': {'global': False, 'args': ['host', 'to_int', 'to_int', 'to_bool', 'to_int', 'to_int', 'author', None]},
         'SCHEDULE_CONTACT_DOWNTIME': {'global': True, 'args': ['contact', 'to_int', 'to_int', 'author', None]},
         'SCHEDULE_FORCED_HOST_CHECK': {'global': False, 'args': ['host', 'to_int']},
         'SCHEDULE_FORCED_HOST_SVC_CHECKS': {'global': False, 'args': ['host', 'to_int']},
         'SCHEDULE_FORCED_SVC_CHECK': {'global': False, 'args': ['service', 'to_int']},
-        'SCHEDULE_HOSTGROUP_HOST_DOWNTIME': {'global': True, 'args': ['host_group', 'to_int', 'to_int', 'to_bool', 'to_int', 'to_int', 'author',None]},
-        'SCHEDULE_HOSTGROUP_SVC_DOWNTIME': {'global': True, 'args': ['host_group', 'to_int', 'to_int', 'to_bool', 'to_int', 'to_int', 'author',None]},
+        'SCHEDULE_HOSTGROUP_HOST_DOWNTIME': {'global': True, 'args': ['host_group', 'to_int', 'to_int', 'to_bool', 'to_int', 'to_int', 'author', None]},
+        'SCHEDULE_HOSTGROUP_SVC_DOWNTIME': {'global': True, 'args': ['host_group', 'to_int', 'to_int', 'to_bool', 'to_int', 'to_int', 'author', None]},
         'SCHEDULE_HOST_CHECK': {'global': False, 'args': ['host', 'to_int']},
         'SCHEDULE_HOST_DOWNTIME': {'global': False, 'args': ['host', 'to_int', 'to_int', 'to_bool', 'to_int', 'to_int', 'author', None]},
         'SCHEDULE_HOST_SVC_CHECKS': {'global': False, 'args': ['host', 'to_int']},
@@ -239,7 +239,6 @@ class ExternalCommandManager:
         'ADD_SIMPLE_POLLER': {'global': True, 'internal': True, 'args': [None, None, None, None]},
     }
 
-
     def __init__(self, conf, mode):
         self.mode = mode
         self.conf = conf
@@ -260,14 +259,11 @@ class ExternalCommandManager:
         # it can get it
         self.current_timestamp = 0
 
-
     def load_scheduler(self, scheduler):
         self.sched = scheduler
 
-
     def load_arbiter(self, arbiter):
         self.arbiter = arbiter
-
 
     def open(self):
         # At the first open del and create the fifo
@@ -280,12 +276,11 @@ class ExternalCommandManager:
                 try:
                     os.mkfifo(self.pipe_path, 0660)
                     open(self.pipe_path, 'w+', os.O_NONBLOCK)
-                except OSError , exp:
+                except OSError, exp:
                     self.error("Pipe creation failed (%s): %s" % (self.pipe_path, str(exp)))
                     return None
         self.fifo = os.open(self.pipe_path, os.O_NONBLOCK)
         return self.fifo
-
 
     def get(self):
         buf = os.read(self.fifo, 8096)
@@ -308,7 +303,6 @@ class ExternalCommandManager:
             os.close(self.fifo)
         return r
 
-
     def resolve_command(self, excmd):
         # Maybe the command is invalid. Bailout
         try:
@@ -322,7 +316,7 @@ class ExternalCommandManager:
 
         # Only log if we are in the Arbiter
         if self.mode == 'dispatcher' and self.conf.log_external_commands:
-            logger.log('EXTERNAL COMMAND: '+command.rstrip())
+            logger.log('EXTERNAL COMMAND: ' + command.rstrip())
         r = self.get_command_and_args(command)
         if r is not None:
             is_global = r['global']
@@ -335,8 +329,6 @@ class ExternalCommandManager:
             else:
                 command = r['cmd']
                 self.dispatch_global_command(command)
-
-
 
     # Ok the command is not for every one, so we search
     # by the hostname which scheduler have the host. Then send
@@ -370,12 +362,11 @@ class ExternalCommandManager:
                 #sched.run_external_command(command)
                 sched.external_commands.append(command)
 
-
     # We need to get the first part, the command name
     def get_command_and_args(self, command):
         #safe_print("Trying to resolve", command)
         command = command.rstrip()
-        elts = command.split(';') # danger!!! passive checkresults with perfdata
+        elts = command.split(';')  # danger!!! passive checkresults with perfdata
         part1 = elts[0]
 
         elts2 = part1.split(' ')
@@ -390,7 +381,7 @@ class ExternalCommandManager:
             return None
         # Ok we remove the [ ]
         ts = ts[1:-1]
-        try: # is an int or not?
+        try:  # is an int or not?
             self.current_timestamp = int(ts)
         except ValueError:
             logger.debug("Malformed command '%s'" % command)
@@ -425,7 +416,6 @@ class ExternalCommandManager:
                 logger.debug("Command '%s' is a global one, we resent it to all schedulers" % c_name)
                 return {'global': True, 'cmd': command}
 
-
         #print "Is global?", c_name, entry['global']
         #print "Mode:", self.mode
         #print "This command have arguments:", entry['args'], len(entry['args'])
@@ -436,7 +426,7 @@ class ExternalCommandManager:
         tmp_host = ''
         try:
             for elt in elts[1:]:
-                logger.debug("Searching for a new arg: %s (%d)" %(elt, i))
+                logger.debug("Searching for a new arg: %s (%d)" % (elt, i))
                 val = elt.strip()
                 if val.endswith('\n'):
                     val = val[:-1]
@@ -519,7 +509,7 @@ class ExternalCommandManager:
                     s = self.services.find_srv_by_name_and_hostname(tmp_host, srv_name)
                     if s is not None:
                         args.append(s)
-                    else: # error, must be logged
+                    else:  # error, must be logged
                         logger.warning("A command was received for service '%s' on host '%s', but the service could not be found!" % (srv_name, tmp_host))
 
         except IndexError:
@@ -535,14 +525,12 @@ class ExternalCommandManager:
             logger.debug("Sorry, the arguments are not corrects (%s)" % str(args))
             return None
 
-
-
     # CHANGE_CONTACT_MODSATTR;<contact_name>;<value>
-    def CHANGE_CONTACT_MODSATTR(self, contact, value): # TODO
+    def CHANGE_CONTACT_MODSATTR(self, contact, value):  # TODO
         contact.modified_service_attributes = long(value)
 
     # CHANGE_CONTACT_MODHATTR;<contact_name>;<value>
-    def CHANGE_CONTACT_MODHATTR(self, contact, value): # TODO
+    def CHANGE_CONTACT_MODHATTR(self, contact, value):  # TODO
         contact.modified_host_attributes = long(value)
 
     # CHANGE_CONTACT_MODATTR;<contact_name>;<value>
@@ -623,7 +611,7 @@ class ExternalCommandManager:
         self.sched.get_and_register_status_brok(host)
 
     # CHANGE_HOST_CHECK_TIMEPERIOD;<host_name>;<timeperiod>
-    def CHANGE_HOST_CHECK_TIMEPERIOD(self, host, timeperiod): # TODO is timeperiod a string or a Timeperiod object?
+    def CHANGE_HOST_CHECK_TIMEPERIOD(self, host, timeperiod):  # TODO is timeperiod a string or a Timeperiod object?
         host.modified_attributes |= MODATTR_CHECK_TIMEPERIOD
         host.check_period = timeperiod
         self.sched.get_and_register_status_brok(host)
@@ -751,7 +739,6 @@ class ExternalCommandManager:
         if downtime_id in self.sched.contact_downtimes:
             self.sched.contact_downtimes[downtime_id].cancel()
 
-
     # DEL_HOST_COMMENT;<comment_id>
     def DEL_HOST_COMMENT(self, comment_id):
         if comment_id in self.sched.comments:
@@ -796,9 +783,9 @@ class ExternalCommandManager:
     # DISABLE_CONTACT_SVC_NOTIFICATIONS;<contact_name>
     def DISABLE_CONTACT_SVC_NOTIFICATIONS(self, contact):
         if contact.service_notifications_enabled:
-             contact.modified_attributes |= MODATTR_NOTIFICATIONS_ENABLED
-             contact.service_notifications_enabled = False
-             self.sched.get_and_register_status_brok(contact)
+            contact.modified_attributes |= MODATTR_NOTIFICATIONS_ENABLED
+            contact.service_notifications_enabled = False
+            self.sched.get_and_register_status_brok(contact)
 
     # DISABLE_EVENT_HANDLERS
     def DISABLE_EVENT_HANDLERS(self):
@@ -834,8 +821,6 @@ class ExternalCommandManager:
                     host.is_flapping = False
                     host.flapping_changes = []
                     self.sched.get_and_register_status_brok(host)
-
-
 
     # DISABLE_HOSTGROUP_HOST_CHECKS;<hostgroup_name>
     def DISABLE_HOSTGROUP_HOST_CHECKS(self, hostgroup):
@@ -900,11 +885,12 @@ class ExternalCommandManager:
             self.sched.get_and_register_status_brok(host)
 
     # DISABLE_HOST_FRESHNESS_CHECKS
-    def DISABLE_HOST_FRESHNESS_CHECKS(self, host):
-        if host.check_freshness:
-            host.modified_attributes |= MODATTR_FRESHNESS_CHECKS_ENABLED
-            host.check_freshness = False
-            self.sched.get_and_register_status_brok(host)
+    def DISABLE_HOST_FRESHNESS_CHECKS(self):
+        if self.conf.check_host_freshness:
+            self.conf.modified_attributes |= MODATTR_FRESHNESS_CHECKS_ENABLED
+            self.conf.check_host_freshness = False
+            self.conf.explode_global_conf()
+            self.sched.get_and_register_update_program_status_brok()
 
     # DISABLE_HOST_NOTIFICATIONS;<host_name>
     def DISABLE_HOST_NOTIFICATIONS(self, host):
@@ -1140,10 +1126,11 @@ class ExternalCommandManager:
 
     # ENABLE_HOST_FRESHNESS_CHECKS
     def ENABLE_HOST_FRESHNESS_CHECKS(self):
-        if not host.check_freshness:
-            host.modified_attributes |= MODATTR_FRESHNESS_CHECKS_ENABLED
-            host.check_freshness = True
-            self.sched.get_and_register_status_brok(host)
+        if not self.conf.check_host_freshness:
+            self.conf.modified_attributes |= MODATTR_FRESHNESS_CHECKS_ENABLED
+            self.conf.check_host_freshness = True
+            self.conf.explode_global_conf()
+            self.sched.get_and_register_update_program_status_brok()
 
     # ENABLE_HOST_NOTIFICATIONS;<host_name>
     def ENABLE_HOST_NOTIFICATIONS(self, host):
@@ -1296,8 +1283,6 @@ class ExternalCommandManager:
     def PROCESS_HOST_OUTPUT(self, host, plugin_output):
         self.PROCESS_HOST_CHECK_RESULT(host, host.state_id, plugin_output)
 
-
-
     # PROCESS_SERVICE_CHECK_RESULT;<host_name>;<service_description>;<return_code>;<plugin_output>
     def PROCESS_SERVICE_CHECK_RESULT(self, service, return_code, plugin_output):
         # raise a PASSIVE check only if needed
@@ -1330,7 +1315,6 @@ class ExternalCommandManager:
     # PROCESS_SERVICE_CHECK_RESULT;<host_name>;<service_description>;<plugin_output>
     def PROCESS_SERVICE_OUTPUT(self, service, plugin_output):
         self.PROCESS_SERVICE_CHECK_RESULT(service, service.state_id, plugin_output)
-
 
     # READ_STATE_INFORMATION
     def READ_STATE_INFORMATION(self):
@@ -1584,17 +1568,14 @@ class ExternalCommandManager:
             self.conf.explode_global_conf()
             self.sched.get_and_register_update_program_status_brok()
 
-
     ### Now the shinken specific ones
     # LAUNCH_SVC_EVENT_HANDLER;<host_name>;<service_description>
     def LAUNCH_SVC_EVENT_HANDLER(self, service):
         service.get_event_handlers(externalcmd=True)
 
-
     # LAUNCH_SVC_EVENT_HANDLER;<host_name>;<service_description>
     def LAUNCH_HOST_EVENT_HANDLER(self, host):
         host.get_event_handlers(externalcmd=True)
-
 
     # ADD_SIMPLE_HOST_DEPENDENCY;<host_name>;<host_name>
     def ADD_SIMPLE_HOST_DEPENDENCY(self, son, father):
@@ -1610,7 +1591,6 @@ class ExternalCommandManager:
             self.sched.get_and_register_status_brok(son)
             self.sched.get_and_register_status_brok(father)
 
-
     # ADD_SIMPLE_HOST_DEPENDENCY;<host_name>;<host_name>
     def DEL_HOST_DEPENDENCY(self, son, father):
         if son.is_linked_with_host(father):
@@ -1623,7 +1603,6 @@ class ExternalCommandManager:
             son.del_host_act_dependency(father)
             self.sched.get_and_register_status_brok(son)
             self.sched.get_and_register_status_brok(father)
-
 
     # ADD_SIMPLE_POLLER;realm_name;poller_name;address;port
     def ADD_SIMPLE_POLLER(self, realm_name, poller_name, address, port):

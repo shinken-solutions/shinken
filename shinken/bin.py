@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 """
 This file is to be imported by every Shinken service component:
 Arbiter, Scheduler, etc. It just checks for the main requirement of
@@ -33,6 +32,7 @@ Shinken.
 import sys
 
 VERSION = "1.0.1"
+
 
 # Make sure people are using Python 2.4 or higher
 if sys.version_info < (2, 4):

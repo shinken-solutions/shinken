@@ -33,7 +33,6 @@ from shinken.objects.module import Module
 from shinken.modules import named_pipe
 from shinken.modules.named_pipe import Named_Pipe_arbiter, get_instance
 
-
 modconf = Module()
 modconf.module_name = "NamedPipe"
 modconf.module_type = named_pipe.properties['type']
@@ -41,7 +40,6 @@ modconf.properties = named_pipe.properties.copy()
 
 
 class TestModuleNamedPipe(ShinkenTest):
-
     # Uncomment this is you want to use a specific configuration
     # for your test
     #def setUp(self):
@@ -113,4 +111,3 @@ class TestModuleNamedPipe(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

@@ -30,6 +30,7 @@ app = None
 import time
 from shinken.external_command import ExternalCommand, ExternalCommandManager
 
+
 # Our page
 def get_page(cmd=None):
 
@@ -39,7 +40,6 @@ def get_page(cmd=None):
 
     if not user:
         return {'status': 401, 'text': 'Invalid session'}
-
 
     now = int(time.time())
     print "Ask us an /action page", cmd
@@ -64,7 +64,4 @@ def get_page(cmd=None):
 
     return {'status': 200, 'text': 'Command launched'}
 
-
-
-pages = {get_page: { 'routes': ['/action/:cmd#.+#']}}
-
+pages = {get_page: {'routes': ['/action/:cmd#.+#']}}

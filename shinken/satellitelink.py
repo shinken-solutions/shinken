@@ -23,9 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-
 import time
 import socket
 
@@ -49,7 +46,6 @@ class SatelliteLink(Item):
     Arbiter with Conf Dispatcher.
 
     """
-
     # id = 0 each Class will have it's own id
 
     properties = Item.properties.copy()
@@ -59,14 +55,14 @@ class SatelliteLink(Item):
         'data_timeout':    IntegerProp(default='120', fill_brok=['full_status']),
         'check_interval':  IntegerProp(default='60', fill_brok=['full_status']),
         'max_check_attempts': IntegerProp(default='3', fill_brok=['full_status']),
-        'spare':              BoolProp   (default='0', fill_brok=['full_status']),
-        'manage_sub_realms':  BoolProp   (default='1', fill_brok=['full_status']),
-        'manage_arbiters':    BoolProp   (default='0', fill_brok=['full_status'], to_send=True),
-        'modules':            ListProp   (default='', to_send=True),
+        'spare':              BoolProp(default='0', fill_brok=['full_status']),
+        'manage_sub_realms':  BoolProp(default='1', fill_brok=['full_status']),
+        'manage_arbiters':    BoolProp(default='0', fill_brok=['full_status'], to_send=True),
+        'modules':            ListProp(default='', to_send=True),
         'polling_interval':   IntegerProp(default='1', fill_brok=['full_status'], to_send=True),
-        'use_timezone':       StringProp (default='NOTSET', to_send=True),
-        'realm':              StringProp (default='', fill_brok=['full_status'], brok_transformation=get_obj_name_two_args_and_void),
-        'satellitemap':       DictProp   (default=None, elts_prop=AddrProp, to_send=True, override=True),
+        'use_timezone':       StringProp(default='NOTSET', to_send=True),
+        'realm':              StringProp(default='', fill_brok=['full_status'], brok_transformation=get_obj_name_two_args_and_void),
+        'satellitemap':       DictProp(default=None, elts_prop=AddrProp, to_send=True, override=True),
     })
 
     running_properties = Item.running_properties.copy()
@@ -80,7 +76,6 @@ class SatelliteLink(Item):
         'managed_confs':        StringProp(default={}),
     })
 
-
     def __init__(self, *args, **kwargs):
         super(SatelliteLink, self).__init__(*args, **kwargs)
 
@@ -93,7 +88,6 @@ class SatelliteLink(Item):
             except:
                 pass
 
-
     def set_arbiter_satellitemap(self, satellitemap):
         """
             arb_satmap is the satellitemap in current context:
@@ -103,7 +97,6 @@ class SatelliteLink(Item):
         """
         self.arb_satmap = {'address': self.address, 'port': self.port}
         self.arb_satmap.update(satellitemap)
-
 
     def create_connection(self):
         try:
@@ -123,8 +116,6 @@ class SatelliteLink(Item):
             socket.setdefaulttimeout(None)
             self.con = None
             logger.error("Creating connection for %s: %s" % (self.get_name(), str(exp)))
-
-
 
     def put_conf(self, conf):
 
@@ -147,13 +138,11 @@ class SatelliteLink(Item):
             logger.error(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
             return False
 
-
     # Get and clean all of our broks
     def get_all_broks(self):
         res = self.broks
         self.broks = []
         return res
-
 
     # Set alive, reachable, and reset attemps.
     # If we change state, raise a status brok update
@@ -169,7 +158,6 @@ class SatelliteLink(Item):
             b = self.get_update_status_brok()
             self.broks.append(b)
 
-
     def set_dead(self):
         was_alive = self.alive
         self.alive = False
@@ -181,7 +169,6 @@ class SatelliteLink(Item):
             logger.warning("Setting the satellite %s to a dead state." % self.get_name())
             b = self.get_update_status_brok()
             self.broks.append(b)
-
 
     # Go in reachable=False and add a failed attempt
     # if we reach the max, go dead
@@ -196,7 +183,6 @@ class SatelliteLink(Item):
         # check when we just go HARD (dead)
         if self.attempt == self.max_check_attempts:
             self.set_dead()
-
 
     # Update satellite info each self.check_interval seconds
     # so we smooth arbiter actions for just useful actions
@@ -218,12 +204,10 @@ class SatelliteLink(Item):
         b = self.get_update_status_brok()
         self.broks.append(b)
 
-
     # The elements just got a new conf_id, we put it in our list
     # because maybe the satellite is too busy to answer now
     def known_conf_managed_push(self, cfg_id, push_flavor):
         self.managed_confs[cfg_id] = push_flavor
-
 
     def ping(self):
         print "Pinging %s" % self.get_name(),
@@ -244,10 +228,8 @@ class SatelliteLink(Item):
             else:
                 self.add_failed_check_attempt()
         except Pyro_exp_pack, exp:
-            print # flush previous print
+            print  # flush previous print
             self.add_failed_check_attempt(reason=str(exp))
-
-
 
     def wait_new_conf(self):
         if self.con is None:
@@ -258,8 +240,6 @@ class SatelliteLink(Item):
         except Pyro_exp_pack, exp:
             self.con = None
             return False
-
-
 
     # To know if the satellite have a conf (magic_hash = None)
     # OR to know if the satellite have THIS conf (magic_hash != None)
@@ -286,7 +266,6 @@ class SatelliteLink(Item):
             self.con = None
             return False
 
-
     # To know if a receiver got a conf or not
     def got_conf(self):
         if self.con is None:
@@ -307,7 +286,6 @@ class SatelliteLink(Item):
             self.con = None
             return False
 
-
     def remove_from_conf(self, sched_id):
         if self.con is None:
             self.create_connection()
@@ -322,7 +300,6 @@ class SatelliteLink(Item):
         except Pyro_exp_pack, exp:
             self.con = None
             return False
-
 
     def update_managed_list(self):
         if self.con is None:
@@ -350,7 +327,6 @@ class SatelliteLink(Item):
             #print "[%s]What i managed: Got exception: %s %s %s" % (self.get_name(), exp, type(exp), exp.__dict__)
             self.managed_confs = {}
 
-
     # Return True if the satelltie said to managed a configuration
     def do_i_manage(self, cfg_id, push_flavor):
         # If not even the cfg_id in the managed_conf, baid out
@@ -359,7 +335,6 @@ class SatelliteLink(Item):
 
         # maybe it's in but with a false push_flavor. check it :)
         return self.managed_confs[cfg_id] == push_flavor
-
 
     def push_broks(self, broks):
         if self.con is None:
@@ -375,7 +350,6 @@ class SatelliteLink(Item):
         except Pyro_exp_pack, exp:
             self.con = None
             return False
-
 
     def get_external_commands(self):
         if self.con is None:
@@ -400,8 +374,6 @@ class SatelliteLink(Item):
             self.con = None
             return []
 
-
-
     def prepare_for_conf(self):
         self.cfg = {'global': {}, 'schedulers': {}, 'arbiters': {}}
         properties = self.__class__.properties
@@ -416,10 +388,8 @@ class SatelliteLink(Item):
         for prop in params:
             self.cfg['global'][prop] = params[prop]
 
-
     def get_my_type(self):
         return self.__class__.my_type
-
 
     # Here for poller and reactionner. Scheduler have its own function
     def give_satellite_cfg(self):
@@ -431,8 +401,6 @@ class SatelliteLink(Item):
                 'passive': self.passive,
                 'poller_tags': getattr(self, 'poller_tags', []),
                 'reactionner_tags': getattr(self, 'reactionner_tags', [])}
-
-
 
     # Call by pickle for dataify the downtime
     # because we DO NOT WANT REF in this pickleisation!
@@ -450,7 +418,6 @@ class SatelliteLink(Item):
                     res[prop] = getattr(self, prop)
         return res
 
-
     # Inverted function of getstate
     def __setstate__(self, state):
         cls = self.__class__
@@ -466,7 +433,6 @@ class SatelliteLink(Item):
         self.con = None
 
 
-
 class SatelliteLinks(Items):
     """Please Add a Docstring to describe the class here"""
 
@@ -478,7 +444,6 @@ class SatelliteLinks(Items):
         self.linkify_s_by_p(realms)
         self.linkify_s_by_plug(modules)
 
-
     def linkify_s_by_p(self, realms):
         for s in self:
             p_name = s.realm.strip()
@@ -486,7 +451,7 @@ class SatelliteLinks(Items):
             if p_name == '':
                 p = realms.get_default()
                 s.realm = p
-            else: # find the realm one
+            else:  # find the realm one
                 p = realms.find_by_name(p_name)
                 s.realm = p
             # Check if what we get is OK or not
@@ -496,7 +461,6 @@ class SatelliteLinks(Items):
                 err = "The %s %s got a unknown realm '%s'" % (s.__class__.my_type, s.get_name(), p_name)
                 s.configuration_errors.append(err)
                 #print err
-
 
     def linkify_s_by_plug(self, modules):
         for s in self:

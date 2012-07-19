@@ -4,19 +4,19 @@
      Gregory Starck, g.starck@gmail.com
      Hartmut Goebel, h.goebel@goebel-consult.de
      Andreas Karfusehr, andreas@karfusehr.de
-
+ 
  This file is part of Shinken.
-
+ 
  Shinken is free software: you can redistribute it and/or modify
  it under the terms of the GNU Affero General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
-
+ 
  Shinken is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU Affero General Public License for more details.
-
+ 
  You should have received a copy of the GNU Affero General Public License
  along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -55,15 +55,15 @@ var Log = {
 function dump(arr, level) {
     var dumped_text = "";
     if(!level) level = 0;
-
+    
     //The padding given at the beginning of the line.
     var level_padding = "";
     for(var j=0;j<level+1;j++) level_padding += "    ";
-
-    if(typeof(arr) == 'object') { //Array/Hashes/Objects
+    
+    if(typeof(arr) == 'object') { //Array/Hashes/Objects 
 	for(var item in arr) {
 	    var value = arr[item];
-
+	    
 	    if(typeof(value) == 'object') { //If it is an array,
 		dumped_text += level_padding + "'" + item + "' ...\n";
 		dumped_text += dump(value,level+1);
@@ -79,12 +79,16 @@ function dump(arr, level) {
 
 
 
-function init_graph(){
+function init_graph(root, jsgraph, width, height, inject) {
+	
+    //console.log("root : " + root +"\n width : "+ width + "\n height : " + height + "\n inject : " + inject);
+	
     if(typeof $jit === "undefined"){
 	console.log('Warning : there is no $jit, I postpone my init for 1s');
 	// Still not load $jit? racing problems are a nightmare :)
 	// Ok, we retry in the next second...
-	setTimeout('init_graph()',1000);
+	setTimeout(function(){init_graph(root,jsgraph,width,height,inject)},1000);
+	
 	return;
     }
 
@@ -96,7 +100,7 @@ function init_graph(){
     //"dim" parameters globally defined in the
     //RGraph constructor.
 
-
+    
     /* Ok, for the circles, w need a particules system, and not recreate them too
      much, but only once by iem, enven when it move! */
     var particles;
@@ -104,7 +108,7 @@ function init_graph(){
     var particles = [];
     var particules_by_name = {};//new Hash();
 
-    // Main printing loop for particules, graph is print only when need,
+    // Main printing loop for particules, graph is print only when need, 
     // but particules are print each loop
     function loop() {
 	for (i = 0, len = particles.length; i < len; i++) {
@@ -116,10 +120,10 @@ function init_graph(){
 	    }
 
 	    var lp = { x: particle.position.x, y: particle.position.y };
-
+	    
 	    // Offset the angle to keep the spin going
 	    particle.angle += particle.speed;
-
+	    
 	    // Apply position
 	    particle.position.x = particle.shift.x + Math.cos(i + particle.angle) * (particle.orbit);
 	    particle.position.y = particle.shift.y + Math.sin(i + particle.angle) * (particle.orbit);
@@ -143,7 +147,7 @@ function init_graph(){
 	    var anti3_x = particle.shift.x + Math.cos(i + particle.angle + 5*Math.PI/3) * (particle.orbit);
 	    var anti3_y = particle.shift.y + Math.sin(i + particle.angle + 5*Math.PI/3) * (particle.orbit);
 
-
+	    
 	    // Compute a local size to make a up/down size effect
 	    var local_size = (Math.cos(particle.angle) - Math.sin(particle.angle) + 2 * particle.size) / 2;
 	    local_size = particle.size;
@@ -194,7 +198,7 @@ function init_graph(){
 	    p.angle = 0;
 	    p.size = 1 * (1 + (size - 2 / 5));
 	    p.active = true;
-	}else{ // New particule :)
+	}else{ // New particule :) 
 	    var color_code = 'gray';
 	    if(color == 'red'){
 		color_code = '#E60000';
@@ -215,7 +219,7 @@ function init_graph(){
 		fillColor: color_code,
 		orbit: 20 * (1 + ((size - 2) / 4 )) // make the orbit bigger for important elements
 	    };
-
+	
 	    particles.push( particle );
 	    particules_by_name[name] = particle;
 	}
@@ -242,9 +246,9 @@ function init_graph(){
 	// For distant service, we should tag them with no label
 	// but important one should be still tags of course.
 	// should saw root problem too
-	if (node._depth == 0) {
+	if (node._depth == 0) { 
 	} else if(node._depth == 1 ){
-	}else if(node._depth >= 2){
+	}else if(node._depth >= 2){  
 	    if (elt_type == 'service' && business_impact <= 2 ){
 		if(state_id == 0 || !is_problem){
 		    b = false;
@@ -253,7 +257,7 @@ function init_graph(){
 	}
 //	alert('Should be print '+node.id+ ' '+b);
 	return b;
-
+	
     }
 
 
@@ -264,7 +268,7 @@ function init_graph(){
 	    'custom': {
 		'render': function(node, canvas) {
 
-		    /*First we need to know where the node is, so we can draw
+		    /*First we need to know where the node is, so we can draw 
 		     in the correct place for the GLOBAL canvas*/
 		    var pos = node.getPos().getc();
 		    var size = 24;
@@ -288,7 +292,7 @@ function init_graph(){
 		    // save it
 		    context = ctx;
 		    img = new Image();
-
+		    
 		    /* We can have some missing data, so just add dummy info */
 		    if (typeof(node.data.img_src) == 'undefined'){
 			img.src = '/static/images/state_ok.png';
@@ -296,7 +300,7 @@ function init_graph(){
 			img.src = node.data.img_src;
 			size = size * (1 + (node.data.business_impact - 2)/3);
 		    }
-
+		    
 		    var elt_type = 'service';
 		    /* We can have some missing data, so just add dummy info */
                     if (typeof(node.data.elt_type) != 'undefined'){
@@ -306,7 +310,7 @@ function init_graph(){
 		    /* We scale the image. Thanks html5 canvas.*/
 		    img.width = size;
 		    img.height = size;
-
+		    
 		    /* If we got a value for the circle */
 		    if (typeof(node.data.img_src) != 'undefined'){
 			color = node.data.circle;
@@ -314,7 +318,7 @@ function init_graph(){
 			    create_or_update_particule(node.id, pos.x, pos.y, color, node.data.business_impact - 1);
 			}else{
 			    // If we didn't print the circle, we can add one for the
-			    // root, so the user will show it.
+			    // root, so the user will show it. 
 			    // DO NOT PUT THE node.id here, because we need this particule to folow the root
 			    // whatever its name is ;)
 			    if(node.id == rgraph.root){
@@ -322,126 +326,130 @@ function init_graph(){
 			    }
 			}
 		    }
-
+		    
 		    //Ok, we draw the image, and we set it in the middle ofthe node :)
 		    ctx.drawImage(img, pos.x-size/2, pos.y-size/2, img.width, img.height);
 		}
 	    }
 	    });
 
-
     //init RGraph
     var rgraph = new $jit.RGraph({
-	    'injectInto': /*'infovis'*/depgraph_injectInto,
-	    'width'     : /*700*/depgraph_width,
-	    'height'    : /*700*/depgraph_height,
-	    //Optional: Add a background canvas
-	    //that draws some concentric circles.
-	    'background': false,
-	    //Add navigation capabilities:
-	    //zooming by scrolling and panning.
-	    Navigation: {
-		enable: true,
-		panning: true,
-		zooming: 20
-	    },
-	    //Nodes and Edges parameters
-	    //can be overridden if defined in
-	    //the JSON input data.
-	    //This way we can define different node
-	    //types individually.
-	    Node: {
-		color: 'green',
-		'overridable': true,
-		type : 'custom',
-	    },
-	    Edge: {
-		color: 'SeaGreen',
-		lineWidth : 0.5,
-		'overridable': true,
-	    },
-
-	    //Add tooltips
-	    Tips: {
-		enable: true,
-		onShow: function(tip, node) {
-		    var html = "<div class=\"tip-title border\">" + node.data.infos + "</div>";
-		    tip.innerHTML = html;
-		}
-	    },
-
-	    //Set polar interpolation.
-	    //Default's linear.
-	    interpolation: 'polar',
-	    //Change the transition effect from linear
-	    //to elastic.
-	    //transition: $jit.Trans.Elastic.ea
-	    //Change other animation parameters.
-	    duration:1000,
-	    fps: 30,
-	    //Change father-child distance.
-	    levelDistance: 75,
-	    //This method is called right before plotting
-	    //an edge. This method is useful to change edge styles
-	    //individually.
-	    onBeforePlotLine: function(adj){
-		src = adj.nodeFrom;
-		dst = adj.nodeTo;
-
-		// If one of the line border is a no print node
-		// print this line in very few pixels
-		if(!should_be_print(src) || !should_be_print(dst)){
-		    adj.data.$lineWidth = 0.3;
-		}else{
-		    adj.data.$lineWidth = 2;
-		}
-	    },
-
-	    onBeforeCompute: function(node){
-		Log.write("Focusing on " + node.name + "...");
-
-
-		// Make right column relations list.
-		var html = node.data.infos;
-		$jit.id('inner-details').innerHTML = html;
-	    },
-	    //Add node click handler and some styles.
-	    //This method is called only once for each node/label crated.
-	    onCreateLabel: function(domElement, node){
-		domElement.innerHTML = node.name;
-		domElement.onclick = function () {
-		    rgraph.onClick(node.id, {
-			    hideLabels: false,
-			    onComplete: function() {
-				Log.write(" ");
-			    }
-			});
-		};
-		var style = domElement.style;
-		style.cursor = 'pointer';
-		style.fontSize = "0.8em";
-		style.color = "#000";
-	    },
-	    //This method is called when rendering/moving a label.
-	    //This is method is useful to make some last minute changes
-	    //to node labels like adding some position offset.
-	    onPlaceLabel: function(domElement, node){
-		var style = domElement.style;
-		var left = parseInt(style.left);
-		var w = domElement.offsetWidth;
-		style.left = (left - w / 2) + 'px';
-
-		// If the node should not be print
-		// do not print it :)
-		if(!should_be_print(node)){
-		    style.display = 'none';
-		}
+	'injectInto': /*'infovis'*/'infovis-'+inject,
+	'width'     : /*700*/width,
+	'height'    : /*700*/height,
+	//Optional: Add a background canvas
+	//that draws some concentric circles.
+	'background': false,
+	//Add navigation capabilities:
+	//zooming by scrolling and panning.
+	Navigation: {
+	    enable: true,
+	    panning: true,
+	    zooming: 20
+	},
+	//Nodes and Edges parameters
+	//can be overridden if defined in
+	//the JSON input data.
+	//This way we can define different node
+	//types individually.
+	Node: {
+	    color: 'green',
+	    'overridable': true,
+	    type : 'custom',
+	},
+	Edge: {
+	    color: 'SeaGreen',
+	    lineWidth : 0.5,
+	    'overridable': true,
+	},
+	
+	//Add tooltips
+	Tips: {
+	    enable: true,
+	    onShow: function(tip, node) {
+		var html = "<div class=\"tip-title border\">" + node.data.infos + "</div>";
+		tip.innerHTML = html;
 	    }
-	});
+	},
+	
+	//Set polar interpolation.
+	//Default's linear.
+	interpolation: 'polar',
+	//Change the transition effect from linear
+	//to elastic.
+	//transition: $jit.Trans.Elastic.ea
+	//Change other animation parameters.
+	duration:1000,
+	fps: 30,
+	//Change father-child distance.
+	levelDistance: 75,
+	//This method is called right before plotting
+	//an edge. This method is useful to change edge styles
+	//individually.
+	onBeforePlotLine: function(adj){
+	    src = adj.nodeFrom;
+	    dst = adj.nodeTo;
+
+	    // If one of the line border is a no print node
+	    // print this line in very few pixels
+	    if(!should_be_print(src) || !should_be_print(dst)){
+		adj.data.$lineWidth = 0.3;
+	    }else{
+		adj.data.$lineWidth = 2;
+	    }
+	},
+
+	onBeforeCompute: function(node){
+	    Log.write("Focusing on " + node.name + "...");
+
+	    
+	    // Make right column relations list.
+	    var html = node.data.infos;
+
+	    //alert(html);		
+	    $jit.id('inner-details-'+inject).innerHTML = html;
+	    /*var details = $('#'+'inner-details-'+inject);
+	      console.log(details);*/
+
+	},
+	//Add node click handler and some styles.
+	//This method is called only once for each node/label crated.
+	onCreateLabel: function(domElement, node){
+	    domElement.innerHTML = node.name;
+	    domElement.onclick = function () {
+		rgraph.onClick(node.id, {
+		    hideLabels: false,
+		    onComplete: function() {
+			Log.write(" ");
+		    }
+		});
+	    };
+	    var style = domElement.style;
+	    style.cursor = 'pointer';
+	    style.fontSize = "0.8em";
+	    style.color = "#000";
+	},
+	//This method is called when rendering/moving a label.
+	//This is method is useful to make some last minute changes
+	//to node labels like adding some position offset.
+	onPlaceLabel: function(domElement, node){
+	    var style = domElement.style;
+	    var left = parseInt(style.left);
+	    var w = domElement.offsetWidth;
+	    style.left = (left - w / 2) + 'px';
+
+	    // If the node should not be print
+	    // do not print it :)
+	    if(!should_be_print(node)){
+		style.display = 'none';
+	    }
+	}
+    });
     //load graph.
-    /*alert('Loading graph'+json_graph);*/
-    rgraph.loadJSON(json_graph, 1);
-    rgraph.root =  graph_root;
+    //alert('Loading graph'+jsgraph);
+    rgraph.loadJSON(jsgraph, 1);
+    rgraph.root = root;
 
 
     //compute positions and plot
@@ -453,15 +461,15 @@ function init_graph(){
 
     Log.write('');
 
-
+    
     //create_or_update_particule('moncul', 100,100, 'green', 1);
-
+    
     /*windowResizeHandler();*/
     //loop();
-
+    
     setInterval( loop, 1000 / 60 );
 
 };
 
 
-$(document).ready(init_graph);
+

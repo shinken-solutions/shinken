@@ -30,12 +30,12 @@
 # The managed_brok function is called by Broker for manage the broks. It calls
 # the manage_*_brok functions that create queries, and then run queries.
 
-
 import copy
 import time
 
 from shinken.basemodule import BaseModule
 from shinken.db_oracle import DBOracle
+
 
 def de_unixify(t):
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(t))
@@ -58,21 +58,19 @@ class Ndodb_Oracle_broker(BaseModule):
         self.password = password
         self.database = database
 
-
     # Called by Broker so we can do init stuff
     # TODO: add conf param to get pass with init
     # Conf from arbiter!
     def init(self):
         print "I connect to NDO database with Oracle"
-        self.db = DBOracle(self.user, self.password, self.database, table_prefix = '')
+        self.db = DBOracle(self.user, self.password, self.database, table_prefix='')
         self.db.connect_database()
-
 
     # Get a brok, parse it, and put in in database
     # We call functions like manage_ TYPEOFBROK _brok that return us queries
     def manage_brok(self, b):
         type = b.type
-        manager = 'manage_'+type+'_brok'
+        manager = 'manage_' + type + '_brok'
         #print "(Ndo) I search manager:", manager
         if self.has(manager):
             f = getattr(self, manager)
@@ -83,49 +81,41 @@ class Ndodb_Oracle_broker(BaseModule):
             return
         #print "(ndodb)I don't manage this brok type", b
 
-
-
-
     def get_host_object_id_by_name(self, host_name):
         query = "SELECT id from objects where name1='%s' and objecttype_id='1'" % host_name
         self.db.execute_query(query)
-        row = self.db.fetchone ()
+        row = self.db.fetchone()
         if row is None or len(row) < 1:
             return 0
         else:
             return row[0]
-
 
     def get_hostgroup_object_id_by_name(self, hostgroup_name):
         query = "SELECT id from objects where name1='%s' and objecttype_id='3'" % hostgroup_name
         self.db.execute_query(query)
-        row = self.db.fetchone ()
+        row = self.db.fetchone()
         if row is None or len(row) < 1:
             return 0
         else:
             return row[0]
-
 
     def get_service_object_id_by_name(self, host_name, service_description):
         query = "SELECT id from objects where name1='%s' and name2='%s' and objecttype_id='2'" % (host_name, service_description)
         self.db.execute_query(query)
-        row = self.db.fetchone ()
+        row = self.db.fetchone()
         if row is None or len(row) < 1:
             return 0
         else:
             return row[0]
-
 
     def get_servicegroup_object_id_by_name(self, servicegroup_name):
         query = "SELECT id from objects where name1='%s' and objecttype_id='4'" % servicegroup_name
         self.db.execute_query(query)
-        row = self.db.fetchone ()
+        row = self.db.fetchone()
         if row is None or len(row) < 1:
             return 0
         else:
             return row[0]
-
-
 
     # Ok, we are at launch and a scheduler want him only, OK...
     # So ca create several queries with all tables we need to delete with
@@ -136,16 +126,15 @@ class Ndodb_Oracle_broker(BaseModule):
         instance_id = b.data['instance_id']
         tables = ['commands', 'contacts', 'contactgroups', 'hosts',
                   'hostescalations', 'hostgroups', 'notifications',
-                  'services',  'serviceescalations', 'programstatus',
+                  'services', 'serviceescalations', 'programstatus',
                   'servicegroups', 'timeperiods', 'hostgroup_members',
                   'contactgroup_members', 'objects', 'hoststatus',
                   'servicestatus']
         res = []
         for table in tables:
-            q = "DELETE FROM %s WHERE instance_id = '%s' " % (''+table, instance_id)
+            q = "DELETE FROM %s WHERE instance_id = '%s' " % ('' + table, instance_id)
             res.append(q)
         return res
-
 
     # Program status is .. status of program? :)
     # Like pid, daemon mode, last activity, etc
@@ -175,7 +164,6 @@ class Ndodb_Oracle_broker(BaseModule):
         query = self.db.create_insert_query('programstatus', new_b.data)
         return [query]
 
-
     # TODO: fill nagios_instances
     def manage_update_program_status_brok(self, b):
         new_b = copy.deepcopy(b)
@@ -200,8 +188,6 @@ class Ndodb_Oracle_broker(BaseModule):
         where_clause = {'instance_id': new_b.data['instance_id']}
         query = self.db.create_update_query('programstatus', new_b.data, where_clause)
         return [query]
-
-
 
     # A host have just be create, database is clean, we INSERT it
     def manage_initial_host_status_brok(self, b):
@@ -244,12 +230,11 @@ class Ndodb_Oracle_broker(BaseModule):
                            'current_state': data['state_id'], 'state_type': data['state_type_id'],
                            'passive_checks_enabled': data['passive_checks_enabled'], 'event_handler_enabled': data['event_handler_enabled'],
                            'active_checks_enabled': data['active_checks_enabled'], 'notifications_enabled': data['notifications_enabled'],
-                           'obsess_over_host': data['obsess_over_host'],'process_performance_data': data['process_perf_data']
+                           'obsess_over_host': data['obsess_over_host'], 'process_performance_data': data['process_perf_data']
         }
-        hoststatus_query = self.db.create_insert_query('hoststatus' , hoststatus_data)
+        hoststatus_query = self.db.create_insert_query('hoststatus', hoststatus_data)
 
         return [query, hoststatus_query]
-
 
     # A host have just be create, database is clean, we INSERT it
     def manage_initial_service_status_brok(self, b):
@@ -294,13 +279,11 @@ class Ndodb_Oracle_broker(BaseModule):
                               'current_state': data['state_id'], 'state_type': data['state_type_id'],
                               'passive_checks_enabled': data['passive_checks_enabled'], 'event_handler_enabled': data['event_handler_enabled'],
                               'active_checks_enabled': data['active_checks_enabled'], 'notifications_enabled': data['notifications_enabled'],
-                              'obsess_over_service': data['obsess_over_service'],'process_performance_data': data['process_perf_data']
+                              'obsess_over_service': data['obsess_over_service'], 'process_performance_data': data['process_perf_data']
         }
-        servicestatus_query = self.db.create_insert_query('servicestatus' , servicestatus_data)
+        servicestatus_query = self.db.create_insert_query('servicestatus', servicestatus_data)
 
         return [query, servicestatus_query]
-
-
 
     # A new host group? Insert it
     # We need to do something for the members prop (host.id, host_name)
@@ -317,7 +300,7 @@ class Ndodb_Oracle_broker(BaseModule):
 
         hostgroup_id = self.get_hostgroup_object_id_by_name(data['hostgroup_name'])
 
-        hostgroups_data = {'id': data['id'], 'instance_id':  data['instance_id'],
+        hostgroups_data = {'id': data['id'], 'instance_id': data['instance_id'],
                            'config_type': 0, 'hostgroup_object_id': hostgroup_id,
                            'alias': data['alias']
             }
@@ -334,8 +317,6 @@ class Ndodb_Oracle_broker(BaseModule):
             res.append(q)
         return res
 
-
-
     # A new host group? Insert it
     # We need to do something for the members prop (host.id, host_name)
     # They are for host_hostgroup table, with just host.id hostgroup.id
@@ -351,8 +332,7 @@ class Ndodb_Oracle_broker(BaseModule):
 
         servicegroup_id = self.get_servicegroup_object_id_by_name(data['servicegroup_name'])
 
-
-        servicegroups_data = {'id': data['id'], 'instance_id':  data['instance_id'],
+        servicegroups_data = {'id': data['id'], 'instance_id': data['instance_id'],
                            'config_type': 0, 'servicegroup_object_id': servicegroup_id,
                            'alias': data['alias']
             }
@@ -368,7 +348,6 @@ class Ndodb_Oracle_broker(BaseModule):
             q = self.db.create_insert_query('servicegroup_members', servicegroup_members_data)
             res.append(q)
         return res
-
 
     # Same than service result, but for host result
     def manage_host_check_result_brok(self, b):
@@ -394,10 +373,9 @@ class Ndodb_Oracle_broker(BaseModule):
                            'execution_time': data['execution_time'], 'latency': data['latency'],
                            'output': data['output'], 'perfdata': data['perf_data']
         }
-        hoststatus_query = self.db.create_update_query('hoststatus' , hoststatus_data, where_clause)
+        hoststatus_query = self.db.create_update_query('hoststatus', hoststatus_data, where_clause)
 
         return [query, hoststatus_query]
-
 
     # Same than service result, but for host result
     def manage_service_check_result_brok(self, b):
@@ -425,11 +403,9 @@ class Ndodb_Oracle_broker(BaseModule):
                            'output': data['output'], 'perfdata': data['perf_data']
         }
 
-        servicestatus_query = self.db.create_update_query('servicestatus' , servicestatus_data, where_clause)
+        servicestatus_query = self.db.create_update_query('servicestatus', servicestatus_data, where_clause)
 
         return [query, servicestatus_query]
-
-
 
     # Ok the host is updated
     def manage_update_host_status_brok(self, b):
@@ -450,7 +426,6 @@ class Ndodb_Oracle_broker(BaseModule):
         query = self.db.create_update_query('host', hosts_data, where_clause)
         return [query]
 
-
     # A host have just be create, database is clean, we INSERT it
     def manage_initial_contact_status_brok(self, b):
         new_b = copy.deepcopy(b)
@@ -469,15 +444,13 @@ class Ndodb_Oracle_broker(BaseModule):
         query = self.db.create_insert_query('contacts', contacts_data)
         return [query]
 
-
-
     # A new host group? Insert it
     # We need to do something for the members prop (host.id, host_name)
     # They are for host_hostgroup table, with just host.id hostgroup.id
     def manage_initial_contactgroup_status_brok(self, b):
         data = b.data
 
-        contactgroups_data = {'id': data['id'], 'instance_id':  data['instance_id'],
+        contactgroups_data = {'id': data['id'], 'instance_id': data['instance_id'],
                            'config_type': 0, 'contactgroup_object_id': data['id'],
                            'alias': data['alias']
             }

@@ -23,9 +23,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from shinken.util import safe_print
 from shinken.misc.datamanager import DataManager
+
 
 class FakeRegenerator(object):
     def __init__(self):
@@ -57,7 +57,7 @@ class DataManagerSKonf(DataManager):
             if hasattr(o, prop):
                 d[prop] = getattr(o, prop)
         customs = getattr(o, 'customs', {})
-        for (k,v) in customs.iteritems():
+        for (k, v) in customs.iteritems():
             print "SET CUSTOM", k, v
             d[k] = v
         # Inner object are NOT ediable by skonf!
@@ -70,10 +70,8 @@ class DataManagerSKonf(DataManager):
 
         return d
 
-
     def load_db(self, db):
         self.db = db
-
 
     def get_in_db(self, table, key, value):
         col = getattr(self.db, table)
@@ -82,14 +80,12 @@ class DataManagerSKonf(DataManager):
         print "Founded", r
         return r
 
-
     def get_all_in_db(self, table):
         col = getattr(self.db, table)
         print "GET ALL FROM", table, col
         r = col.find({})
         print "Founded", r
         return r
-
 
     def get_generics(self, table, key):
         r = []
@@ -107,7 +103,6 @@ class DataManagerSKonf(DataManager):
                 r.append(i)
         return r
 
-
     # Merge internal and db hosts in the same list
     def get_hosts(self):
         return self.get_generics('hosts', 'host_name')
@@ -124,7 +119,6 @@ class DataManagerSKonf(DataManager):
     def get_services(self):
         return self.get_generics('services', '_')
 
-
     # Get a specific object
     def get_contact(self, cname):
         for c in self.rg.contacts:
@@ -137,7 +131,6 @@ class DataManagerSKonf(DataManager):
         r = self.get_in_db('contacts', 'contact_name', cname)
         return r
 
-
     def get_host(self, hname):
         for c in self.rg.hosts:
             print "DUMP RAW HOST", c, c.__dict__
@@ -149,7 +142,6 @@ class DataManagerSKonf(DataManager):
         r = self.get_in_db('hosts', 'host_name', hname)
         return r
 
-
     def get_command(self, cname):
         for c in self.rg.commands:
             print "DUMP RAW COMMAND", c, c.__dict__
@@ -160,7 +152,6 @@ class DataManagerSKonf(DataManager):
             return r
         r = self.get_in_db('commands', 'command_name', cname)
         return r
-
 
     def get_timeperiod(self, cname):
         for c in self.rg.timeperiods:
@@ -185,7 +176,6 @@ class DataManagerSKonf(DataManager):
         print "OK search the service uuid", name, "in the database"
         r = self.get_in_db('services', '_id', name)
         return r
-
 
     def build_pack_tree(self, packs):
 
@@ -218,13 +208,11 @@ class DataManagerSKonf(DataManager):
         print "The whole pack tree", t
         return t
 
-
     def get_pack_tree(self, packs):
         t = self.build_pack_tree(packs)
         r = self._get_pack_tree(t)
         print "RETURN WHOLE PACK TREE", r
         return r
-
 
     def _get_pack_tree(self, tree):
         print "__get_pack_tree:: for", tree
@@ -241,7 +229,6 @@ class DataManagerSKonf(DataManager):
             return 0
         sons.sort(_sort)
 
-
         res = []
         if name != '':
             res.append({'type': 'new_tree', 'name': name})
@@ -255,8 +242,6 @@ class DataManagerSKonf(DataManager):
             res.append({'type': 'end_tree', 'name': name})
         print "RETURN PARTIAL", res
         return res
-
-
 
     # We got a pack name, we look for all objects, and search where this
     # host template name is used
@@ -288,7 +273,7 @@ class DataManagerSKonf(DataManager):
                 if tname in elts:
                     print "FOUND A SERVICE THAT MA5TCH", s.get('service_description', '')
                     services.append(s)
-            res.append( (tpl, services) )
+            res.append((tpl, services))
 
         return res
 

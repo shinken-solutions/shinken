@@ -22,14 +22,13 @@
 # This file is used to test acknowledge of problems
 #
 
-
 from shinken_test import *
+
 
 class TestConfig(ShinkenTest):
 
     def setUp(self):
         self.setup_with_file('etc/nagios_obsess.cfg')
-
 
     def test_ocsp(self):
         self.print_header()
@@ -39,10 +38,10 @@ class TestConfig(ShinkenTest):
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
         #--------------------------------------------------------------
         # initialize host/service state
         #--------------------------------------------------------------
@@ -95,7 +94,6 @@ class TestConfig(ShinkenTest):
         self.assert_(svc.obsess_over_service)
         self.assert_(not svc.__class__.obsess_over)
 
-
     def test_ochp(self):
         self.print_header()
         # retry_interval 2
@@ -104,10 +102,10 @@ class TestConfig(ShinkenTest):
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         router = self.sched.hosts.find_by_name("test_router_0")
         router.checks_in_progress = []
-        router.act_depend_of = [] # ignore the router
+        router.act_depend_of = []  # ignore the router
         #--------------------------------------------------------------
         # initialize host/service state
         #--------------------------------------------------------------

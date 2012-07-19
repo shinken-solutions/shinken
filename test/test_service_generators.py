@@ -29,15 +29,14 @@ class TestConfig(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_service_generators.cfg')
 
-
     def test_service_generators(self):
 
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         router = self.sched.hosts.find_by_name("test_router_0")
         router.checks_in_progress = []
-        router.act_depend_of = [] # ignore the router
+        router.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
 
         print "All service of", "test_host_0"
@@ -66,17 +65,14 @@ class TestConfig(ShinkenTest):
         # and the tricky last one (with no value :) )
         self.assert_(svc_g.check_command.args == ['G', '38%', '24%'])
 
-
-
-
     def test_service_generators_not(self):
 
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         router = self.sched.hosts.find_by_name("test_router_0")
         router.checks_in_progress = []
-        router.act_depend_of = [] # ignore the router
+        router.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
 
         print "All service of", "test_host_0"
@@ -95,20 +91,18 @@ class TestConfig(ShinkenTest):
         self.assert_(svc_f is None)
         self.assert_(svc_g is not None)
 
-
-
     def test_service_generators_key_generator(self):
 
         host = self.sched.hosts.find_by_name("sw_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
 
         print "All service of", "sw_0"
         for s in host.services:
             print s.get_name()
 
         # We ask for our 6*46 + 6 services with our ports :)
-        # _ports			 Unit [1-6] Port [0-46]$(80%!90%)$,Unit [1-6] Port 47$(80%!90%)$
+        # _ports  Unit [1-6] Port [0-46]$(80%!90%)$,Unit [1-6] Port 47$(80%!90%)$
         for unit_id in xrange(1, 7):
             for port_id in xrange(0, 47):
                 n = "Unit %d Port %d" % (unit_id, port_id)
@@ -122,13 +116,11 @@ class TestConfig(ShinkenTest):
             svc = self.sched.services.find_srv_by_name_and_hostname("sw_0", 'Generated Service ' + n)
             self.assert_(svc is not None)
 
-
-
     def test_service_generators_array(self):
 
         host = self.sched.hosts.find_by_name("sw_1")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
 
         print "All service of", "sw_1"
         for s in host.services:
@@ -153,4 +145,3 @@ class TestConfig(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

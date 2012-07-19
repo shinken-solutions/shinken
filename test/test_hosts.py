@@ -32,7 +32,6 @@ class TestConfig(ShinkenTest):
     def get_hst(self):
         return self.sched.hosts.find_by_name("test_host_0")
 
-
     # Look if get_*_name return the good result
     def test_get_name(self):
         hst = self.get_hst()
@@ -55,10 +54,9 @@ class TestConfig(ShinkenTest):
         hst.__setstate__(state)
         # And it should be the same:then before :)
         for p in cls.properties:
-#            print getattr(hst_copy, p)
-#            print getattr(hst, p)
+            ## print getattr(hst_copy, p)
+            ## print getattr(hst, p)
             self.assert_(getattr(hst_copy, p) == getattr(hst, p))
-
 
     # Look if it can detect all incorrect cases
     def test_is_correct(self):
@@ -90,8 +88,6 @@ class TestConfig(ShinkenTest):
         self.assert_(hst.is_correct() == False)
         hst.notification_interval = notification_interval
         self.assert_(hst.is_correct() == True)
-
-
 
     # Look for set/unset impacted states (unknown)
     def test_impact_state(self):
@@ -147,14 +143,12 @@ class TestConfig(ShinkenTest):
         self.assert_(hst.is_state('DOWN') == True)
         self.assert_(hst.is_state('d') == True)
 
-
     def test_hostgroup(self):
         hg = self.sched.hostgroups.find_by_name("hostgroup_01")
         self.assert_(hg is not None)
         h = self.sched.hosts.find_by_name('test_host_0')
         self.assert_(h in hg.members)
         self.assert_(hg in h.hostgroups)
-
 
     def test_childs(self):
         h = self.sched.hosts.find_by_name('test_host_0')
@@ -175,4 +169,3 @@ class TestConfig(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

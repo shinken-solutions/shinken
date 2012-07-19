@@ -33,20 +33,19 @@ from IPy import IP
 from shinken.basemodule import BaseModule
 from shinken.log import logger
 
+
 # Just print some stuff
 class Ip_Tag_Arbiter(BaseModule):
     def __init__(self, mod_conf, ip_range, prop, value, method):
-        BaseModule.__init__(self,  mod_conf)
+        BaseModule.__init__(self, mod_conf)
         self.ip_range = IP(ip_range)
         self.property = prop
         self.value = value
         self.method = method
 
-
     # Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
         print "Initilisation of the ip range tagguer module"
-
 
     def hook_early_configuration(self, arb):
         logger.info("[IpTag] in hook late config")
@@ -99,7 +98,3 @@ class Ip_Tag_Arbiter(BaseModule):
                     if not hasattr(h, self.property):
                         # Ok, set the value!
                         setattr(h, self.property, self.value)
-
-
-
-

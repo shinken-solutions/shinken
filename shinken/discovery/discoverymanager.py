@@ -106,7 +106,9 @@ class DiscoveredHost(object):
             d = copy.copy(self.data)
 
         d['host_name'] = self.name
-        d['address'] = self.data['ip']
+        # Set address directive if an ip exists
+        if self.data.has_key('ip'):
+            d['address'] = self.data['ip']
 
         self.matched_rules.sort(by_order)
         

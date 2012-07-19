@@ -35,6 +35,7 @@ import codecs
 
 from shinken.basemodule import BaseModule
 
+
 # Class for the Merlindb Broker
 # Get broks and puts them in merlin database
 class Host_perfdata_broker(BaseModule):
@@ -52,14 +53,12 @@ class Host_perfdata_broker(BaseModule):
         if not self.template.endswith('\n'):
             self.template += '\n'
 
-
     # Called by Broker so we can do init stuff
     # TODO: add conf param to get pass with init
     # Conf from arbiter!
     def init(self):
         print "I open the host-perfdata file '%s'" % self.path
-        self.file = codecs.open( self.path, self.mode, "utf-8" )
-
+        self.file = codecs.open(self.path, self.mode, "utf-8")
 
     # We've got a 0, 1, 2 or 3 (or something else? ->3
     # And want a real OK, WARNING, CRITICAL, etc...
@@ -69,7 +68,6 @@ class Host_perfdata_broker(BaseModule):
             return states[state]
         else:
             return 'UNKNOWN'
-
 
     # A service check have just arrived, we UPDATE data info with this
     def manage_host_check_result_brok(self, b):

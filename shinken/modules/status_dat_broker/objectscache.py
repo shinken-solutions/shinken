@@ -38,7 +38,8 @@ from shinken.objects import Contactgroup
 from shinken.objects import Timeperiod
 from shinken.objects import Command
 
-from shinken.util import from_bool_to_string,from_list_to_split
+from shinken.util import from_bool_to_string, from_list_to_split
+
 
 # This is a dirty hack. Service.get_name only returns service_description.
 # For the servicegroup config we need more. host_name + service_description
@@ -52,7 +53,8 @@ class ObjectsCacheFile:
     # required:
     # depythonize:
     # default:
-    out_map = {Host: {
+    out_map = {
+        Host: {
             'host_name': {'required': True},
             'alias': {'required': False},
             'address': {'required': True},
@@ -176,52 +178,50 @@ class ObjectsCacheFile:
         },
 
 
-#               Scheduler: {
-#            'modified_host_attributes': {'prop': None, 'default': '0'},
-#            'modified_service_attributes': {'prop': None, 'default': '0'},
-#            'nagios_pid': {'prop': None, 'default': '0'},
-#            'daemon_mode': {'prop': None, 'default': '0'},
-#            'program_start': {'prop': None, 'default': '0'},
-#            'last_command_check': {'prop': None, 'default': '0'},
-#            'last_log_rotation': {'prop': None, 'default': '0'},
-#            'enable_notifications': {'prop': None, 'default': '0'},
-#            'active_service_checks_enabled': {'prop': None, 'default': '0'},
-#            'passive_service_checks_enabled': {'prop': None, 'default': '0'},
-#            'active_host_checks_enabled': {'prop': None, 'default': '0'},
-#            'passive_host_checks_enabled': {'prop': None, 'default': '0'},
-#            'enable_event_handlers': {'prop': None, 'default': '0'},
-#            'obsess_over_services': {'prop': None, 'default': '0'},
-#            'obsess_over_hosts': {'prop': None, 'default': '0'},
-#            'check_service_freshness': {'prop': None, 'default': '0'},
-#            'check_host_freshness': {'prop': None, 'default': '0'},
-#            'enable_flap_detection': {'prop': None, 'default': '0'},
-#            'enable_failure_prediction': {'prop': None, 'default': '0'},
-#            'process_performance_data': {'prop': None, 'default': '0'},
-#            'global_host_event_handler': {'prop': None, 'default': '0'},
-#            'global_service_event_handler': {'prop': None, 'default': '0'},
-#            'next_comment_id': {'prop': None, 'default': '0'},
-#            'next_downtime_id': {'prop': None, 'default': '0'},
-#            'next_event_id': {'prop': None, 'default': '0'},
-#            'next_problem_id': {'prop': None, 'default': '0'},
-#            'next_notification_id': {'prop': None, 'default': '0'},
-#            'total_external_command_buffer_slots': {'prop': None, 'default': '0'},
-#            'used_external_command_buffer_slots': {'prop': None, 'default': '0'},
-#            'high_external_command_buffer_slots': {'prop': None, 'default': '0'},
-#            'active_scheduled_host_check_stats': {'prop': None, 'default': '0'},
-#            'active_ondemand_host_check_stats': {'prop': None, 'default': '0'},
-#            'passive_host_check_stats': {'prop': None, 'default': '0'},
-#            'active_scheduled_service_check_stats': {'prop': None, 'default': '0'},
-#            'active_ondemand_service_check_stats': {'prop': None, 'default': '0'},
-#            'passive_service_check_stats': {'prop': None, 'default': '0'},
-#            'cached_host_check_stats': {'prop': None, 'default': '0'},
-#            'cached_service_check_stats': {'prop': None, 'default': '0'},
-#            'external_command_stats': {'prop': None, 'default': '0'},
-#            'parallel_host_check_stats': {'prop': None, 'default': '0'},
-#            'serial_host_check_stats': {'prop': None, 'default': '0'}
-#            }
+        ## Scheduler: {
+        ##     'modified_host_attributes': {'prop': None, 'default': '0'},
+        ##     'modified_service_attributes': {'prop': None, 'default': '0'},
+        ##     'nagios_pid': {'prop': None, 'default': '0'},
+        ##     'daemon_mode': {'prop': None, 'default': '0'},
+        ##     'program_start': {'prop': None, 'default': '0'},
+        ##     'last_command_check': {'prop': None, 'default': '0'},
+        ##     'last_log_rotation': {'prop': None, 'default': '0'},
+        ##     'enable_notifications': {'prop': None, 'default': '0'},
+        ##     'active_service_checks_enabled': {'prop': None, 'default': '0'},
+        ##     'passive_service_checks_enabled': {'prop': None, 'default': '0'},
+        ##     'active_host_checks_enabled': {'prop': None, 'default': '0'},
+        ##     'passive_host_checks_enabled': {'prop': None, 'default': '0'},
+        ##     'enable_event_handlers': {'prop': None, 'default': '0'},
+        ##     'obsess_over_services': {'prop': None, 'default': '0'},
+        ##     'obsess_over_hosts': {'prop': None, 'default': '0'},
+        ##     'check_service_freshness': {'prop': None, 'default': '0'},
+        ##     'check_host_freshness': {'prop': None, 'default': '0'},
+        ##     'enable_flap_detection': {'prop': None, 'default': '0'},
+        ##     'enable_failure_prediction': {'prop': None, 'default': '0'},
+        ##     'process_performance_data': {'prop': None, 'default': '0'},
+        ##     'global_host_event_handler': {'prop': None, 'default': '0'},
+        ##     'global_service_event_handler': {'prop': None, 'default': '0'},
+        ##     'next_comment_id': {'prop': None, 'default': '0'},
+        ##     'next_downtime_id': {'prop': None, 'default': '0'},
+        ##     'next_event_id': {'prop': None, 'default': '0'},
+        ##     'next_problem_id': {'prop': None, 'default': '0'},
+        ##     'next_notification_id': {'prop': None, 'default': '0'},
+        ##     'total_external_command_buffer_slots': {'prop': None, 'default': '0'},
+        ##     'used_external_command_buffer_slots': {'prop': None, 'default': '0'},
+        ##     'high_external_command_buffer_slots': {'prop': None, 'default': '0'},
+        ##     'active_scheduled_host_check_stats': {'prop': None, 'default': '0'},
+        ##     'active_ondemand_host_check_stats': {'prop': None, 'default': '0'},
+        ##     'passive_host_check_stats': {'prop': None, 'default': '0'},
+        ##     'active_scheduled_service_check_stats': {'prop': None, 'default': '0'},
+        ##     'active_ondemand_service_check_stats': {'prop': None, 'default': '0'},
+        ##     'passive_service_check_stats': {'prop': None, 'default': '0'},
+        ##     'cached_host_check_stats': {'prop': None, 'default': '0'},
+        ##     'cached_service_check_stats': {'prop': None, 'default': '0'},
+        ##     'external_command_stats': {'prop': None, 'default': '0'},
+        ##     'parallel_host_check_stats': {'prop': None, 'default': '0'},
+        ##     'serial_host_check_stats': {'prop': None, 'default': '0'}
+        ## }
     }
-
-
 
     def __init__(self, path, hosts, services, contacts, hostgroups, servicegroups, contactgroups, timeperiods, commands):
         #self.conf = scheduler.conf
@@ -235,7 +235,6 @@ class ObjectsCacheFile:
         self.contactgroups = contactgroups
         self.timeperiods = timeperiods
         self.commands = commands
-
 
     def create_output(self, elt):
         import sys
@@ -267,8 +266,8 @@ class ObjectsCacheFile:
                             if isinstance(value, list):
                                 # depythonize's argument might be an attribute or a method
                                 # example: members is an array of hosts and we want get_name() of each element
-                                value = [getattr(item, str(f))() for item in value if callable(getattr(item, str(f))) ] \
-                                      + [getattr(item, str(f)) for item in value if not callable(getattr(item, str(f))) ]
+                                value = [getattr(item, str(f))() for item in value if callable(getattr(item, str(f)))] \
+                                      + [getattr(item, str(f)) for item in value if not callable(getattr(item, str(f)))]
                                 # at least servicegroups are nested [host,service],.. The need some flattening
                                 value = ','.join(['%s' % y for x in value if isinstance(x, list) for y in x] + \
                                     ['%s' % x for x in value if not isinstance(x, list)])
@@ -293,7 +292,6 @@ class ObjectsCacheFile:
                     output += u'\t' + display + u'\t' + unicode(value) + u'\n'
 
         return output
-
 
     def create_or_update(self):
 
@@ -352,5 +350,5 @@ class ObjectsCacheFile:
             os.close(temp_fh)
             os.chmod(temp_objects_cache_file, 0640)
             os.rename(temp_objects_cache_file, self.path)
-        except OSError , exp:
+        except OSError, exp:
             return exp

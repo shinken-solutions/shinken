@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import select
 import errno
 import time
@@ -33,13 +32,15 @@ from log import logger
 try:
     import Pyro
     import Pyro.core
-except ImportError: # ok, no Pyro3, maybe 4
+except ImportError:  # ok, no Pyro3, maybe 4
     import Pyro4 as Pyro
 
 
 
 """ This class is a wrapper for managing Pyro 3 and 4 version """
 class InvalidWorkDir(Exception): pass
+
+
 class PortNotFree(Exception): pass
 
 PYRO_VERSION = 'UNKNOWN'
@@ -56,6 +57,7 @@ try:
     Pyro.errors.CommunicationError = Pyro.errors.ProtocolError
     Pyro.errors.TimeoutError = Pyro.errors.ProtocolError
 
+
     class Pyro3Daemon(Pyro.core.Daemon):
         pyro_version = 3
         protocol = 'PYROLOC'
@@ -67,7 +69,7 @@ try:
                 return
             try:
                 Pyro.core.initServer()
-            except (OSError, IOError), e: # must be problem with workdir:
+            except (OSError, IOError), e:  # must be problem with workdir:
                 raise InvalidWorkDir(e)
             # Set the protocol as asked (ssl or not)
             if use_ssl:
@@ -115,10 +117,12 @@ try:
         else:
             return "PYROLOCSSL://%s:%d/%s" % (address, port, obj_name)
 
+
     # Timeout way is also changed between 3 and 4
     # it's a method in 3, a property in 4
     def set_timeout(con, timeout):
         con._setTimeout(timeout)
+
 
     def getProxy(uri):
         return Pyro.core.getProxyForURI(uri)
@@ -127,7 +131,6 @@ try:
     # Shutdown in 3 take True as arg
     def shutdown(con):
         con.shutdown(True)
-
 
     PyroClass = Pyro3Daemon
 
@@ -154,10 +157,10 @@ except AttributeError, exp:
     if hasattr(socket, 'MSG_WAITALL'):
         del socket.MSG_WAITALL
 
+
     class Pyro4Daemon(Pyro.core.Daemon):
         pyro_version = 4
         protocol = 'PYRO'
-
 
         def __init__(self, host, port, use_ssl=False):
             self.port = port
@@ -208,7 +211,6 @@ except AttributeError, exp:
                     # must be a problem with pyro workdir:
                     raise InvalidWorkDir(e)
 
-
         # Get the server socket but not if disabled
         def get_sockets(self):
             if self.port == 0:
@@ -217,7 +219,6 @@ except AttributeError, exp:
                 return self.sockets()
             else:
                 return self.sockets
-
 
         def handleRequests(self, s):
             if PYRO_VERSION in old_versions:
@@ -237,14 +238,13 @@ except AttributeError, exp:
     def getProxy(uri):
         return Pyro.core.Proxy(uri)
 
+
     # Shutdown in 4 do not take arg
     def shutdown(con):
         con.shutdown()
         con.close()
 
-
     PyroClass = Pyro4Daemon
-
 
 
 class ShinkenPyroDaemon(PyroClass):
@@ -259,9 +259,6 @@ class ShinkenPyroDaemon(PyroClass):
                 return []
             raise
         return ins
-
-
-
 
 # Common exceptions to be catch
 Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \

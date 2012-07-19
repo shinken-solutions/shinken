@@ -30,7 +30,6 @@ class TestSchedCleanQueues(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_clean_sched_queues.cfg')
 
-
     # Try to generate a bunch of external commands
     # and see if they are drop like it should
     def test_sched_clean_queues(self):
@@ -38,13 +37,13 @@ class TestSchedCleanQueues(ShinkenTest):
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         router = self.sched.hosts.find_by_name("test_router_0")
         router.checks_in_progress = []
-        router.act_depend_of = [] # ignore the router
+        router.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
 
         #host.__class__.obsess_over = True
         #host.obsess_over_host = True
@@ -76,7 +75,6 @@ class TestSchedCleanQueues(ShinkenTest):
         print len(self.sched.actions)
         self.assert_(len(self.sched.actions) < 30)
 
-
         #####  And now broks
         l = []
         for i in xrange(1, 1001):
@@ -95,4 +93,3 @@ class TestSchedCleanQueues(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

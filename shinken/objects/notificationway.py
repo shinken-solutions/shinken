@@ -23,34 +23,31 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 from item import Item, Items
 
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 from shinken.log import logger
 
-
-_special_properties = ( 'service_notification_commands', 'host_notification_commands',
-                        'service_notification_period', 'host_notification_period' )
+_special_properties = ('service_notification_commands', 'host_notification_commands',
+                        'service_notification_period', 'host_notification_period')
 
 
 class NotificationWay(Item):
-    id = 1 # zero is always special in database, so we do not take risk here
+    id = 1  # zero is always special in database, so we do not take risk here
     my_type = 'notificationway'
 
     properties = Item.properties.copy()
     properties.update({
-        'notificationway_name':          StringProp (fill_brok=['full_status']),
-        'host_notifications_enabled':    BoolProp   (default='1', fill_brok=['full_status']),
-        'service_notifications_enabled': BoolProp   (default='1', fill_brok=['full_status']),
-        'host_notification_period':      StringProp (fill_brok=['full_status']),
-        'service_notification_period':   StringProp (fill_brok=['full_status']),
-        'host_notification_options':     ListProp   (fill_brok=['full_status']),
-        'service_notification_options':  ListProp   (fill_brok=['full_status']),
-        'host_notification_commands':    StringProp (fill_brok=['full_status']),
-        'service_notification_commands': StringProp (fill_brok=['full_status']),
-        'min_business_impact':           IntegerProp(default = '0', fill_brok=['full_status']),
+        'notificationway_name':          StringProp(fill_brok=['full_status']),
+        'host_notifications_enabled':    BoolProp(default='1', fill_brok=['full_status']),
+        'service_notifications_enabled': BoolProp(default='1', fill_brok=['full_status']),
+        'host_notification_period':      StringProp(fill_brok=['full_status']),
+        'service_notification_period':   StringProp(fill_brok=['full_status']),
+        'host_notification_options':     ListProp(fill_brok=['full_status']),
+        'service_notification_options':  ListProp(fill_brok=['full_status']),
+        'host_notification_commands':    StringProp(fill_brok=['full_status']),
+        'service_notification_commands': StringProp(fill_brok=['full_status']),
+        'min_business_impact':           IntegerProp(default='0', fill_brok=['full_status']),
     })
 
     running_properties = Item.running_properties.copy()
@@ -59,16 +56,14 @@ class NotificationWay(Item):
     # so from Nagios2 format, to Nagios3 ones.
     # Or Shinken deprecated names like criticity
     old_properties = {
-        'min_criticity':    'min_business_impact',
+        'min_criticity': 'min_business_impact',
     }
-
 
     macros = {}
 
     # For debugging purpose only (nice name)
     def get_name(self):
         return self.notificationway_name
-
 
     # Search for notification_options with state and if t is
     # in service_notification_period
@@ -107,7 +102,6 @@ class NotificationWay(Item):
 
         return False
 
-
     # Search for notification_options with state and if t is in
     # host_notification_period
     def want_host_notification(self, t, state, type, business_impact, cmd=None):
@@ -143,15 +137,12 @@ class NotificationWay(Item):
 
         return False
 
-
     # Call to get our commands to launch a Notification
     def get_notification_commands(self, type):
         # service_notification_commands for service
-        notif_commands_prop = type+'_notification_commands'
+        notif_commands_prop = type + '_notification_commands'
         notif_commands = getattr(self, notif_commands_prop)
         return notif_commands
-
-
 
     # Check is required prop are set:
     # contacts OR contactgroups is need
@@ -161,8 +152,8 @@ class NotificationWay(Item):
 
         # A null notif way is a notif way that will do nothing (service = n, hot =n)
         is_null_notifway = False
-        if hasattr(self, 'service_notification_options') and self.service_notification_options==['n']:
-            if hasattr(self, 'host_notification_options') and self.host_notification_options==['n']:
+        if hasattr(self, 'service_notification_options') and self.service_notification_options == ['n']:
+            if hasattr(self, 'host_notification_options') and self.host_notification_options == ['n']:
                 is_null_notifway = True
                 return True
 
@@ -170,7 +161,7 @@ class NotificationWay(Item):
             if prop not in _special_properties:
                 if not hasattr(self, prop) and entry.required:
                     logger.warning("[notificationway::%s] %s property not set" % (self.get_name(), prop))
-                    state = False # Bad boy...
+                    state = False  # Bad boy...
 
         # Ok now we manage special cases...
         # Service part
@@ -209,8 +200,6 @@ class NotificationWay(Item):
 
         return state
 
-
-
     # In the scheduler we need to relink the commandCall with
     # the real commands
     def late_linkify_nw_by_commands(self, commands):
@@ -218,7 +207,6 @@ class NotificationWay(Item):
         for prop in props:
             for cc in getattr(self, prop, []):
                 cc.late_linkify_with_command(commands)
-
 
 
 class NotificationWays(Items):
@@ -230,7 +218,6 @@ class NotificationWays(Items):
         self.linkify_with_timeperiods(timeperiods, 'host_notification_period')
         self.linkify_command_list_with_commands(commands, 'service_notification_commands')
         self.linkify_command_list_with_commands(commands, 'host_notification_commands')
-
 
     def new_inner_member(self, name=None, params={}):
         if name is None:

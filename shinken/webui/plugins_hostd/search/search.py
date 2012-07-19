@@ -37,12 +37,12 @@ except ImportError:
         print "Error: you need the json or simplejson module"
         raise
 
-
 from shinken.webui.bottle import redirect, abort, static_file
 
 # HACK
 import socket
 SRV = socket.gethostname()
+
 
 def give_pack(p):
     d = {}
@@ -107,9 +107,6 @@ def do_search(search):
     return json.dumps(res)
 
 
-
-
-
 def search_categories():
     app.response.content_type = 'application/json'
 
@@ -123,7 +120,6 @@ def search_categories():
     if not root:
         print "Lookup categories but missing root!"
         return json.dumps([])
-
 
     print "Lookup for categories from root", root, "in pack"
 
@@ -139,7 +135,7 @@ def search_categories():
         pos = tree
         name = ''
         for cat in cats:
-            name += '/'+cat
+            name += '/' + cat
             print "Doing cat", cat
             # If not already declared, add my node
             if cat not in pos['sons']:
@@ -153,7 +149,6 @@ def search_categories():
     print "Tree", tree
 
     return json.dumps(tree)
-
 
 
 def tag_sort(t1, t2):
@@ -181,7 +176,6 @@ def search_tags():
     if not nb or nb > 50:
         print "Sorry, your tag ask is too big"
         return json.dumps([])
-
 
     print "Lookup for %s tags" % nb
 
@@ -211,11 +205,8 @@ def search_tags():
 
     return json.dumps(res)
 
-
-
-pages = {search_post: { 'routes': ['/search'] , 'method': 'POST'},
-         search_get: { 'routes': ['/search/:q']},
-         search_categories: { 'routes': ['/categories'] , 'method': 'POST'},
-         search_tags: { 'routes': ['/tags'] , 'method': 'POST'},
+pages = {search_post: {'routes': ['/search'], 'method': 'POST'},
+         search_get: {'routes': ['/search/:q']},
+         search_categories: {'routes': ['/categories'], 'method': 'POST'},
+         search_tags: {'routes': ['/tags'], 'method': 'POST'},
          }
-

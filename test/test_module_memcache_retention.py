@@ -32,7 +32,6 @@ from shinken.objects.module import Module
 from shinken.modules import memcache_retention_scheduler
 from shinken.modules.memcache_retention_scheduler import get_instance
 
-
 modconf = Module()
 modconf.module_name = "MemcacheRetention"
 modconf.module_type = memcache_retention_scheduler.properties['type']
@@ -64,7 +63,7 @@ class TestConfig(ShinkenTest):
         svc = self.sched.hosts.find_by_name("test_host_0")
         self.assert_(svc.state == 'PENDING')
         print "State", svc.state
-        svc.state = 'UP' # was PENDING in the save time
+        svc.state = 'UP'  # was PENDING in the save time
 
         r = sl.hook_load_retention(self.sched)
         self.assert_(r == True)
@@ -87,4 +86,3 @@ class TestConfig(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

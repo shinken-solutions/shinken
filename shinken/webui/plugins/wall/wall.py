@@ -43,7 +43,6 @@ except ImportError:
         raise
 
 
-
 # Sort hosts and services by impact, states and co
 def sort_by_last_state_change(s1, s2):
     if s1.last_state_change > s2.last_state_change:
@@ -69,16 +68,16 @@ def get_div(elt):
         %s
           %s
         <div class="item-icon">
-	  <img class="wall-icon" src="%s"></img>
+         <img class="wall-icon" src="%s"></img>
         </div>
         <div class="item-text">
           <span class="state_%s">%s <br/> %s</span>
         </div>
-	<div class="item-button">
-	<a href="%s">%s</a>
+        <div class="item-button">
+         <a href="%s">%s</a>
         </div>
 
-        """ % (stars, pulse, icon,  elt.state.lower(), elt.state, elt.get_full_name(), lnk, button)# stars, button)
+        """ % (stars, pulse, icon, elt.state.lower(), elt.state, elt.get_full_name(), lnk, button)# stars, button)
     s = s.encode('utf8', 'ignore')
     return s
 
@@ -92,34 +91,30 @@ def get_page():
     if not user:
         redirect("/user/login")
 
-
     all_imp_impacts = app.datamgr.get_important_elements()
     all_imp_impacts.sort(hst_srv_sort)
     #all_imp_impacts.sort(hst_srv_sort)
 
     #all_imp_impacts = app.datamgr.get_services() #important_elements()
 
-
     impacts = all_imp_impacts
-#    for imp in all_imp_impacts:
-#        safe_print("FIND A BAD SERVICE IN IMPACTS", imp.get_dbg_name())
-#        d = {'name': imp.get_full_name().encode('utf8', 'ignore'),
-#             "title": "My Image 3", "thumb": "/static/images/state_flapping.png", "zoom": "/static/images/state_flapping.png",
-#             "html": get_div(imp)}
-#        impacts.append(d)
+    ## for imp in all_imp_impacts:
+    ##     safe_print("FIND A BAD SERVICE IN IMPACTS", imp.get_dbg_name())
+    ##     d = {'name': imp.get_full_name().encode('utf8', 'ignore'),
+    ##          "title": "My Image 3", "thumb": "/static/images/state_flapping.png", "zoom": "/static/images/state_flapping.png",
+    ##          "html": get_div(imp)}
+    ##     impacts.append(d)
 
     # Got in json format
     #j_impacts = json.dumps(impacts)
-#    print "Return impact in json", j_impacts
+    #print "Return impact in json", j_impacts
     all_pbs = app.datamgr.get_all_problems()
     now = time.time()
     # Get only the last 10min errors
     all_pbs = [pb for pb in all_pbs if pb.last_state_change > now - 600]
     # And sort it
-    all_pbs.sort(hst_srv_sort) # sort_by_last_state_change)
+    all_pbs.sort(hst_srv_sort)  # sort_by_last_state_change)
 
     return {'app': app, 'user': user, 'impacts': impacts, 'problems': all_pbs}
 
-
-pages = {get_page: { 'routes': ['/wall/', '/wall'], 'view': 'wall', 'static': True}}
-
+pages = {get_page: {'routes': ['/wall/', '/wall'], 'view': 'wall', 'static': True}}

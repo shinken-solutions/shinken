@@ -17,8 +17,7 @@
 #                    * more comments on code
 #
 #   06.02.2012 - 1.2 * added patch from user "cseres", better SMcli output parsing
-#   09.07.2012 - 1.3 * added possibility to check with storage array name
-#                    * Clear SMcli output by SMcli argument
+#   13.07.2012 - 1.3 * call to sudo to execute SMcli.
 #
 #########################################################
 
@@ -96,7 +95,14 @@ done
 #
 
 ##execute SMcli
+<<<<<<< HEAD
 RESULT=$($COMMAND $ARG -S -c "show storageSubsystem healthStatus;")
+=======
+RESULT=$($COMMAND $CTRLA_IP $CTRLB_IP -c "show storageSubsystem healthStatus;")
+
+##filter unnecessary SMcli output
+RESULT=$(echo $RESULT |sed 's/Performing syntax check...//g' | sed 's/Syntax check complete.//g' | sed 's/Executing script...//g' | sed 's/Script execution complete.//g'| sed 's/SMcli completed successfully.//g' )
+>>>>>>> upstream/master
 
 ##check SMcli output to identfy error and report back to Nagios
 case "$RESULT" in

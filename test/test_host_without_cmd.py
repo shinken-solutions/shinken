@@ -29,7 +29,6 @@ class TestConfig(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_host_without_cmd.cfg')
 
-
     def test_host_is_pending(self):
         self.print_header()
         # first of all, a host without check_command must be valid
@@ -43,7 +42,7 @@ class TestConfig(ShinkenTest):
         # scheduler.schedule() always schedules a check, even for this
         # kind of hosts
         #host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         host.checks_in_progress = []
         host.in_checking = False
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
@@ -66,4 +65,3 @@ class TestConfig(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

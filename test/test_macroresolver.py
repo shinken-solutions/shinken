@@ -27,6 +27,7 @@ from shinken.macroresolver import MacroResolver
 from shinken.commandcall import CommandCall
 from shinken.objects import Command
 
+
 class TestConfig(ShinkenTest):
     # setUp is inherited from ShinkenTest
 
@@ -48,7 +49,6 @@ class TestConfig(ShinkenTest):
         print com
         self.assert_(com == "plugins/test_servicecheck.pl --type=ok --failchance=5% --previous-state=PENDING --state-duration=0 --total-critical-on-host=0 --total-warning-on-host=0 --hostname test_host_0 --servicedesc test_ok_0 --custom custvalue")
 
-
     # Here call with a special macro TOTALHOSTSUP
     # but call it as arg. So will need 2 pass in macro resolver
     # at last to resolv it.
@@ -63,6 +63,21 @@ class TestConfig(ShinkenTest):
         print com
         self.assert_(com == 'plugins/nothing 1')
 
+
+
+    # Here call with a special macro HOSTREALM
+    def test_special_macros_realm(self):
+        mr = self.get_mr()
+        (svc, hst) = self.get_hst_svc()
+        data = svc.get_data_for_checks()
+        hst.state = 'UP'
+        dummy_call = "special_macro!$HOSTREALM$"
+        cc = CommandCall(self.conf.commands, dummy_call)
+        com = mr.resolve_command(cc, data)
+        print com
+        self.assert_(com == 'plugins/nothing Default')
+
+
     # For output macro we want to delete all illegal macro caracter
     def test_illegal_macro_output_chars(self):
         "$HOSTOUTPUT$, $HOSTPERFDATA$, $HOSTACKAUTHOR$, $HOSTACKCOMMENT$, $SERVICEOUTPUT$, $SERVICEPERFDATA$, $SERVICEACKAUTHOR$, and $SERVICEACKCOMMENT$ "
@@ -75,12 +90,11 @@ class TestConfig(ShinkenTest):
         dummy_call = "special_macro!$HOSTOUTPUT$"
 
         for c in illegal_macro_output_chars:
-            hst.output = 'monculcestdupoulet'+c
+            hst.output = 'monculcestdupoulet' + c
             cc = CommandCall(self.conf.commands, dummy_call)
             com = mr.resolve_command(cc, data)
             print com
             self.assert_(com == 'plugins/nothing monculcestdupoulet')
-
 
     def test_env_macros(self):
         mr = self.get_mr()
@@ -94,7 +108,6 @@ class TestConfig(ShinkenTest):
         self.assert_(env['NAGIOS_SERVICEPERCENTCHANGE'] == '0.0')
         self.assert_(env['NAGIOS__SERVICECUSTNAME'] == 'custvalue')
         self.assert_(env['NAGIOS__HOSTOSTYPE'] == 'gnulinux')
-
 
     def test_resource_file(self):
         mr = self.get_mr()
@@ -124,4 +137,3 @@ class TestConfig(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

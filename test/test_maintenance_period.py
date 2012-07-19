@@ -57,7 +57,6 @@ class TestMaintPeriod(ShinkenTest):
         # This one got nothing :)
         self.assert_(svc3.maintenance_period is None)
 
-
     def test_check_enter_downtime(self):
         test_router_0 = self.sched.hosts.find_by_name("test_router_0")
         test_host_0 = self.sched.hosts.find_by_name("test_host_0")
@@ -143,4 +142,3 @@ class TestMaintPeriod(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

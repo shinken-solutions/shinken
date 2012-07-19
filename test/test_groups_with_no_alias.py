@@ -30,7 +30,6 @@ class TestGroupwithNoAlias(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_groups_with_no_alias.cfg')
 
-
     def test_look_for_alias(self):
         #
         # Config is not correct because of a wrong relative path
@@ -51,4 +50,3 @@ class TestGroupwithNoAlias(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

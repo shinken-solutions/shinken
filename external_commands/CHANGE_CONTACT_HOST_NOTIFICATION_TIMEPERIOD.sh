@@ -4,7 +4,7 @@
 # CHANGE_CONTACT_HOST_NOTIFICATION_TIMEPERIOD command to Nagios.
 # Adjust variables to fit your environment as necessary.
 
-now=`date +%s`
-commandfile='/tmp/my_fifo'
+now=$(date +%s)
+commandfile='/usr/local/shinken/var/rw/nagios.cmd'
 
-/usr/bin/printf "[%lu] CHANGE_CONTACT_HOST_NOTIFICATION_TIMEPERIOD;dbrosseau;24x7\n" $now > $commandfile
+printf "[%lu] CHANGE_CONTACT_HOST_NOTIFICATION_TIMEPERIOD;dbrosseau;24x7\n" $now > $commandfile

@@ -59,16 +59,13 @@ class Passwd_Webui(BaseModule):
         BaseModule.__init__(self, modconf)
         self.passwd = modconf.passwd
 
-
     # Try to connect if we got true parameter
     def init(self):
         print "Trying to initalize the Apache/Passwd file"
 
-
     # To load the webui application
     def load(self, app):
         self.app = app
-
 
     def check_auth(self, user, password):
         try:

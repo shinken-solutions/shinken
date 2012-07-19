@@ -34,7 +34,7 @@ class TestConfig(ShinkenTest):
 
         creation_tab = {'scheduler_name': 'scheduler-1', 'address': '0.0.0.0', 'spare': '0', 'port': '9999', 'check_interval': '1', 'realm': 'Default'}
         s = SchedulerLink(creation_tab)
-        s.last_check = time.time()-100
+        s.last_check = time.time() - 100
         s.timeout = 3
         s.check_interval = 1
         s.data_timeout = 120
@@ -54,28 +54,28 @@ class TestConfig(ShinkenTest):
         self.assert_(s.reachable == False)
 
         # Now make bad ping, sould be unreach and dead (but not dead
-        s.last_check = time.time()-100
+        s.last_check = time.time() - 100
         s.ping()
         self.assert_(s.attempt == 2)
         self.assert_(s.alive == True)
         self.assert_(s.reachable == False)
 
         # Now make bad ping, sould be unreach and dead (but not dead
-        s.last_check = time.time()-100
+        s.last_check = time.time() - 100
         s.ping()
         self.assert_(s.attempt == 3)
         self.assert_(s.alive == True)
         self.assert_(s.reachable == False)
 
         # Ok, this time we go DEAD!
-        s.last_check = time.time()-100
+        s.last_check = time.time() - 100
         s.ping()
         self.assert_(s.attempt == 4)
         self.assert_(s.alive == False)
         self.assert_(s.reachable == False)
 
         # Now set a OK ping (false because we won't open the port here...)
-        s.last_check = time.time()-100
+        s.last_check = time.time() - 100
         s.set_alive()
         self.assert_(s.attempt == 0)
         self.assert_(s.alive == True)
@@ -85,4 +85,3 @@ class TestConfig(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

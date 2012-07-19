@@ -23,8 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 """ Config is the class to read, load and manipulate the user
  configuration. It read a main cfg (nagios.cfg) and get all informations
  from it. It create objects, make link between them, clean them, and cut
@@ -32,6 +30,7 @@
  use it too (but far less)"""
 
 import re
+import sys
 import string
 import copy
 import os
@@ -79,8 +78,7 @@ from shinken.log import logger
 from shinken.property import UnusedProp, BoolProp, IntegerProp, CharProp, StringProp, LogLevelProp
 from shinken.daemon import get_cur_user, get_cur_group
 
-
-no_longer_used_txt   = 'This parameter is not longer take from the main file, but must be defined in the status_dat broker module instead. But Shinken will create you one if there are no present and use this parameter in it, so no worry.'
+no_longer_used_txt = 'This parameter is not longer take from the main file, but must be defined in the status_dat broker module instead. But Shinken will create you one if there are no present and use this parameter in it, so no worry.'
 not_interresting_txt = 'We do not think such an option is interesting to manage.'
 
 
@@ -278,7 +276,7 @@ class Config(Item):
         'webui_port':    IntegerProp(default='8080'),
         'webui_host':    StringProp(default='0.0.0.0'),
 
-   }
+    }
 
     macros = {
         'PREFIX':               'prefix',
@@ -297,7 +295,7 @@ class Config(Item):
         'SERVICEPERFDATAFILE':  '',
         'ADMINEMAIL':           '',
         'ADMINPAGER':           ''
-        #'USERn': '$USERn$' # Add at run time
+    #'USERn': '$USERn$' # Add at run time
     }
 
     # We create dict of objects
@@ -358,7 +356,6 @@ class Config(Item):
         self.packs_dirs = []
         self.packs = Packs({})
 
-
     def get_name(self):
         return 'global configuration file'
 
@@ -370,14 +367,13 @@ class Config(Item):
         properties = self.__class__.properties
         macros = self.__class__.macros
         for macro_name in self.resource_macros_names:
-            properties['$'+macro_name+'$'] = StringProp(default='')
-            macros[macro_name] = '$'+macro_name+'$'
-
+            properties['$' + macro_name + '$'] = StringProp(default='')
+            macros[macro_name] = '$' + macro_name + '$'
 
     def load_params(self, params):
         for elt in params:
             elts = elt.split('=', 1)
-            if len(elts) == 1: # error, there is no = !
+            if len(elts) == 1:  # error, there is no = !
                 self.conf_is_correct = False
                 logger.error("[config] the parameter %s is malformed! (no = sign)" % elts[0])
             else:
@@ -390,14 +386,11 @@ class Config(Item):
                     macro_name = elts[0][1:-1]
                     self.resource_macros_names.append(macro_name)
 
-
-
     def _cut_line(self, line):
         #punct = '"#$%&\'()*+/<=>?@[\\]^`{|}~'
-        tmp = re.split("[" + string.whitespace + "]+" , line, 1)
+        tmp = re.split("[" + string.whitespace + "]+", line, 1)
         r = [elt for elt in tmp if elt != '']
         return r
-
 
     def read_config(self, files):
         # just a first pass to get the cfg_file and all files in a buf
@@ -409,7 +402,7 @@ class Config(Item):
             res.write(os.linesep)
             res.write('# IMPORTEDFROM=%s' % (file) + os.linesep)
             if self.read_config_silent == 0:
-               logger.debug("[config] opening '%s' configuration file" % file)
+                logger.debug("[config] opening '%s' configuration file" % file)
             try:
                 # Open in Universal way for Windows, Mac, Linux
                 fd = open(file, 'rU')
@@ -449,7 +442,7 @@ class Config(Item):
                         fd.close()
                     except IOError, exp:
                         logger.error("Cannot open config file '%s' for reading: %s" % (cfg_file_name, exp))
-                    # The configuration is invalid because we have a bad file!
+                        # The configuration is invalid because we have a bad file!
                         self.conf_is_correct = False
                 elif re.search("^cfg_dir", line):
                     elts = line.split('=', 1)
@@ -465,8 +458,12 @@ class Config(Item):
                     # Look for .pack file into it :)
                     self.packs_dirs.append(cfg_dir_name)
 
-                    # Now walk for it
-                    for root, dirs, files in os.walk(cfg_dir_name):
+                    # Now walk for it.
+                    # BEWARE : we can follow simlinks only for python 2.6 and higher
+                    args = {}
+                    if sys.version_info >= (2, 6):
+                        args['followlinks'] = True
+                    for root, dirs, files in os.walk(cfg_dir_name, **args):
                         for file in files:
                             if re.search("\.cfg$", file):
                                 if self.read_config_silent == 0:
@@ -501,7 +498,6 @@ class Config(Item):
         return res
 #        self.read_config_buf(res)
 
-
     def read_config_buf(self, buf):
         params = []
         types = ['void', 'timeperiod', 'command', 'contactgroup', 'hostgroup',
@@ -510,7 +506,7 @@ class Config(Item):
                  'reactionner', 'broker', 'receiver', 'poller', 'realm', 'module',
                  'resultmodulation', 'escalation', 'serviceescalation', 'hostescalation',
                  'discoveryrun', 'discoveryrule', 'businessimpactmodulation',
-                 'hostextinfo','serviceextinfo']
+                 'hostextinfo', 'serviceextinfo']
         objectscfg = {}
         for t in types:
             objectscfg[t] = []
@@ -557,7 +553,7 @@ class Config(Item):
                     objectscfg[tmp_type] = []
                 objectscfg[tmp_type].append(tmp)
                 tmp = []
-                tmp.append("imported_from "+ filefrom)
+                tmp.append("imported_from " + filefrom)
                 # Get new type
                 elts = re.split('\s', line)
                 # Maybe there was space before and after the type
@@ -588,7 +584,7 @@ class Config(Item):
                 tmp = {}
                 for line in items:
                     elts = self._cut_line(line)
-                    if elts !=  []:
+                    if elts != []:
                         prop = elts[0]
                         value = ' '.join(elts[1:])
                         tmp[prop] = value
@@ -596,7 +592,6 @@ class Config(Item):
                     objects[type].append(tmp)
 
         return objects
-
 
     # We need to have some ghost objects like
     # the check_command bp_rule for business
@@ -608,7 +603,6 @@ class Config(Item):
         raw_objects['command'].append(host_up)
         echo_obj = {'command_name': '_echo', 'command_line': '_echo'}
         raw_objects['command'].append(echo_obj)
-
 
     # We've got raw objects in string, now create real Instances
     def create_objects(self, raw_objects):
@@ -625,7 +619,6 @@ class Config(Item):
         for t in types_creations:
             if t not in early_created_types:
                 self.create_objects_for_type(raw_objects, t)
-
 
     def create_objects_for_type(self, raw_objects, type):
         types_creations = self.__class__.types_creations
@@ -647,8 +640,6 @@ class Config(Item):
             lst.append(o)
         # we create the objects Class and we set it in prop
         setattr(self, prop, clss(lst))
-
-
 
     # Here arbiter and modules objects should be prepare and link
     # before all others types
@@ -679,18 +670,15 @@ class Config(Item):
         self.arbiters.linkify(self.modules)
         self.modules.linkify()
 
-
     # We will load all triggers .trig files from all triggers_dir
     def load_triggers(self):
         for p in self.triggers_dirs:
             self.triggers.load_file(p)
 
-
     # We will load all packs .pack files from all packs_dirs
     def load_packs(self):
         for p in self.packs_dirs:
             self.packs.load_file(p)
-
 
     # We use linkify to make the config more efficient: elements will be
     # linked, like pointers. For example, a host will have it's service,
@@ -773,7 +761,7 @@ class Config(Item):
 
         #print "Schedulers and satellites"
         # Link all links with realms
-#        self.arbiters.linkify(self.modules)
+        #self.arbiters.linkify(self.modules)
         self.schedulers.linkify(self.realms, self.modules)
         self.brokers.linkify(self.realms, self.modules)
         self.receivers.linkify(self.realms, self.modules)
@@ -783,7 +771,6 @@ class Config(Item):
         # Ok, now update all realms with backlinks of
         # satellites
         self.realms.prepare_for_satellites_conf()
-
 
     # In the scheduler we need to relink the commandCall with
     # the real commands
@@ -799,8 +786,6 @@ class Config(Item):
         self.services.late_linkify_s_by_commands(self.commands)
         self.contacts.late_linkify_c_by_commands(self.commands)
 
-
-
     # Some properties are dangerous to be send like that
     # like realms linked in hosts. Realms are too big to send (too linked)
     # We are also pre-serializing the confs so the sending pahse will
@@ -815,7 +800,6 @@ class Config(Item):
                 r.serialized_confs[i] = cPickle.dumps(conf, cPickle.HIGHEST_PROTOCOL)
                 logger.debug("[config] time to serialize the conf %s:%s is %s" % (r.get_name(), i, time.time() - t0))
 
-
     def dump(self):
         print "Slots", Service.__slots__
         print 'Hosts:'
@@ -824,7 +808,6 @@ class Config(Item):
         print 'Services:'
         for s in self.services:
             print '\t', s.get_name(), s.contacts
-
 
     # It's used to change Nagios2 names to Nagios3 ones
     # For hosts and services
@@ -835,15 +818,13 @@ class Config(Item):
         self.notificationways.old_properties_names_to_new()
         self.contacts.old_properties_names_to_new()
 
-
     # It's used to warn about useless parameter and print why it's not use.
     def notice_about_useless_parameters(self):
         if not self.disable_old_nagios_parameters_whining:
             properties = self.__class__.properties
             for prop, entry in properties.items():
                 if isinstance(entry, UnusedProp):
-                    logger.info("The parameter %s is useless and can be removed from the configuration (Reason: %s)" %  (prop, entry.text))
-
+                    logger.info("The parameter %s is useless and can be removed from the configuration (Reason: %s)" % (prop, entry.text))
 
     # It's used to raise warning if the user got parameter
     # that we do not manage from now
@@ -866,7 +847,6 @@ class Config(Item):
 
             logger.info("Please look if you really need it. If so, please register at the devel mailing list (%s) and ask for it or propose us a patch :)" % mailing_list_uri)
             print "\n"
-
 
     # Use to fill groups values on hosts and create new services
     # (for host group ones)
@@ -909,7 +889,6 @@ class Config(Item):
         #print "Realms"
         self.realms.explode()
 
-
     # Remove elements will the same name, so twins :)
     # In fact only services should be acceptable with twins
     def remove_twins(self):
@@ -924,7 +903,6 @@ class Config(Item):
     def apply_dependencies(self):
         self.hosts.apply_dependencies()
         self.services.apply_dependencies()
-
 
     # Use to apply inheritance (template and implicit ones)
     # So elements wil have their configured properties
@@ -952,12 +930,10 @@ class Config(Item):
         self.hostescalations.apply_inheritance()
         self.escalations.apply_inheritance()
 
-
     # Use to apply implicit inheritance
     def apply_implicit_inheritance(self):
         #print "Services"
         self.services.apply_implicit_inheritance(self.hosts)
-
 
     # will fill properties for elements so they will have all theirs properties
     def fill_default(self):
@@ -1011,7 +987,6 @@ class Config(Item):
     def fill_predictive_missing_parameters(self):
         self.hosts.fill_predictive_missing_parameters()
 
-
     # Will check if a realm is defined, if not
     # Create a new one (default) and tag everyone that do not have
     # a realm prop to be put in this realm
@@ -1028,7 +1003,6 @@ class Config(Item):
                     if not hasattr(elt, 'realm'):
                         elt.realm = 'Default'
                         logger.info("Tagging %s with realm %s" % (elt.get_name(), default.get_name()), print_it=False)
-
 
     # If a satellite is missing, we add them in the localhost
     # with defaults values
@@ -1055,7 +1029,6 @@ class Config(Item):
                             'manage_arbiters': '1'})
             self.brokers = BrokerLinks([b])
 
-
     # Return if one broker got a module of type: mod_type
     def got_broker_module_type_defined(self, mod_type):
         for b in self.brokers:
@@ -1063,7 +1036,6 @@ class Config(Item):
                 if hasattr(m, 'module_type') and m.module_type == mod_type:
                     return True
         return False
-
 
     # return if one scheduler got a module of type: mod_type
     def got_scheduler_module_type_defined(self, mod_type):
@@ -1079,7 +1051,7 @@ class Config(Item):
     def got_arbiter_module_type_defined(self, mod_type):
         for a in self.arbiters:
             # Do like the linkify will do after....
-            for m in getattr(a , 'modules', '').split(','):
+            for m in getattr(a, 'modules', '').split(','):
                 # So look at what the arbiter try to call as module
                 m = m.strip()
                 # Ok, now look in modules...
@@ -1091,9 +1063,6 @@ class Config(Item):
                             return True
         return False
 
-
-
-
     # Will ask for each host/service if the
     # check_command is a bp rule. If so, it will create
     # a tree structures with the rules
@@ -1101,12 +1070,10 @@ class Config(Item):
         self.hosts.create_business_rules(self.hosts, self.services)
         self.services.create_business_rules(self.hosts, self.services)
 
-
     # Will fill dep list for business rules
     def create_business_rules_dependencies(self):
         self.hosts.create_business_rules_dependencies()
         self.services.create_business_rules_dependencies()
-
 
     # It's used to hack some old Nagios parameters like
     # log_file or status_file: if they are present in
@@ -1128,7 +1095,7 @@ class Config(Item):
 
             # We need to create the modue on the fly?
             if not got_status_dat_module:
-                data = { 'object_cache_file': self.object_cache_file,
+                data = {'object_cache_file': self.object_cache_file,
                         'status_file': self.status_file,
                         'module_name': 'Status-Dat-Autogenerated',
                          'module_type': 'status_dat'}
@@ -1217,10 +1184,9 @@ class Config(Item):
         if mod_to_add_to_schedulers != []:
             logger.warning("I autogenerated some Scheduler modules, please look at your configuration")
             for m in mod_to_add_to_schedulers:
-                logger.warning("The module %s is autogenerated" %  m.module_name)
+                logger.warning("The module %s is autogenerated" % m.module_name)
                 for b in self.schedulers:
                     b.modules.append(m)
-
 
     # It's used to hack some old Nagios parameters like
     # but for the arbiter, so very early in the run
@@ -1253,8 +1219,6 @@ class Config(Item):
                     a.modules = ','.join([getattr(a, 'modules', ''), data['module_name']])
                 self.modules.items[mod.id] = mod
 
-
-
     # Set our timezone value and give it too to unset satellites
     def propagate_timezone_option(self):
         if self.use_timezone != '':
@@ -1267,8 +1231,6 @@ class Config(Item):
                 for s in t:
                     if s.use_timezone == 'NOTSET':
                         setattr(s, 'use_timezone', self.use_timezone)
-
-
 
     # Link templates with elements
     def linkify_templates(self):
@@ -1286,8 +1248,6 @@ class Config(Item):
         self.serviceescalations.linkify_templates()
         self.hostescalations.linkify_templates()
 
-
-
     # Reversed list is a dist with name for quick search by name
     def create_reversed_list(self):
         """ Create quick search lists for objects """
@@ -1299,7 +1259,7 @@ class Config(Item):
         self.services.create_reversed_list()
         self.servicegroups.create_reversed_list()
         self.timeperiods.create_reversed_list()
-#        self.modules.create_reversed_list()
+        #self.modules.create_reversed_list()
         self.resultmodulations.create_reversed_list()
         self.businessimpactmodulations.create_reversed_list()
         self.escalations.create_reversed_list()
@@ -1312,7 +1272,6 @@ class Config(Item):
         # we search for hosts, then for services
         # it's quicker than search in all services
         self.services.optimize_service_search(self.hosts)
-
 
     # Some parameters are just not managed like O*HP commands
     # and regexp capabilities
@@ -1330,7 +1289,6 @@ class Config(Item):
         #    logger.error("the ocsp_command parameter is not managed.")
         #    r &= False
         return r
-
 
     # check if elements are correct or not (fill with defaults, etc)
     # Warning: this function call be called from a Arbiter AND
@@ -1350,7 +1308,7 @@ class Config(Item):
 
         for x in ('hosts', 'hostgroups', 'contacts', 'contactgroups', 'notificationways',
                   'escalations', 'services', 'servicegroups', 'timeperiods', 'commands',
-                  'hostsextinfo','servicesextinfo'):
+                  'hostsextinfo', 'servicesextinfo'):
             if self.read_config_silent == 0:
                 logger.info('Checking %s...' % (x), print_it=True)
             cur = getattr(self, x)
@@ -1365,11 +1323,13 @@ class Config(Item):
             r = False
             logger.error("Hosts: detected loop in parents ; conf incorrect")
 
-        for x in ( 'servicedependencies', 'hostdependencies', 'arbiters', 'schedulers',
+        for x in ('servicedependencies', 'hostdependencies', 'arbiters', 'schedulers',
                    'reactionners', 'pollers', 'brokers', 'receivers', 'resultmodulations',
                    'discoveryrules', 'discoveryruns', 'businessimpactmodulations'):
-            try: cur = getattr(self, x)
-            except: continue
+            try:
+                cur = getattr(self, x)
+            except:
+                continue
             if self.read_config_silent == 0:
                 logger.info('Checking %s...' % (x), print_it=True)
             if not cur.is_correct():
@@ -1399,8 +1359,8 @@ class Config(Item):
                 pollers_tag.add(t)
         if not hosts_tag.issubset(pollers_tag):
             for tag in hosts_tag.difference(pollers_tag):
-                logger.error("Hosts exist with poller_tag %s but no poller got this tag" %  tag )
-                self.add_error("Error: hosts exist with poller_tag %s but no poller got this tag" %  tag )
+                logger.error("Hosts exist with poller_tag %s but no poller got this tag" % tag)
+                self.add_error("Error: hosts exist with poller_tag %s but no poller got this tag" % tag)
                 r = False
 
         # Check that all hosts involved in business_rules are from the same realm
@@ -1411,12 +1371,11 @@ class Config(Item):
                     for elt in e.business_rule.list_all_elements():
                         elt_r = elt.get_realm().realm_name
                         if not elt_r == e_r:
-                            logger.error("Business_rule '%s' got hosts from another realm: %s" %  (e.get_full_name(), elt_r) )
-                            self.add_error("Error: Business_rule '%s' got hosts from another realm: %s" %  (e.get_full_name(), elt_r) )
+                            logger.error("Business_rule '%s' got hosts from another realm: %s" % (e.get_full_name(), elt_r))
+                            self.add_error("Error: Business_rule '%s' got hosts from another realm: %s" % (e.get_full_name(), elt_r))
                             r = False
 
         self.conf_is_correct = r
-
 
     # We've got strings (like 1) but we want python elements, like True
     def pythonize(self):
@@ -1445,7 +1404,6 @@ class Config(Item):
         self.brokers.pythonize()
         self.receivers.pythonize()
 
-
     # Explode parameters like cached_service_check_horizon in the
     # Service class in a cached_check_horizon manner, o*hp commands
     # , etc
@@ -1455,7 +1413,6 @@ class Config(Item):
                 ReceiverLink, ArbiterLink, HostExtInfo]
         for cls in clss:
             cls.load_global_conf(self)
-
 
     # Clean useless elements like templates because they are not needed anymore
     def remove_templates(self):
@@ -1467,7 +1424,6 @@ class Config(Item):
         self.timeperiods.remove_templates()
         self.discoveryrules.remove_templates()
         self.discoveryruns.remove_templates()
-
 
     # We will compute simple element md5hash, so we can know
     # if they changed or not between the restart
@@ -1482,7 +1438,6 @@ class Config(Item):
         self.discoveryrules.pythonize()
         self.discoveryruns.pythonize()
 
-
     # Add an error in the configuration error list so we can print them
     # all in one place
     def add_error(self, txt):
@@ -1493,12 +1448,10 @@ class Config(Item):
         self.is_correct = False
         self.conf_is_correct = False
 
-
     # Now it's time to show all configuration errors
     def show_errors(self):
         for err in self.configuration_errors:
             logger.info(err, print_it=True)
-
 
     # Create packs of hosts and services so in a pack,
     # all dependencies are resolved
@@ -1542,20 +1495,20 @@ class Config(Item):
         # link them too
         for s in [s for s in self.services if s.got_business_rule]:
             for e in s.business_rule.list_all_elements():
-                if hasattr(e, 'host'): # if it's a service
-                    if e.host != s.host: # do not an host with itself
+                if hasattr(e, 'host'):  # if it's a service
+                    if e.host != s.host:  # do not an host with itself
                         links.add((e.host, s.host))
-                else: # it's already a host
+                else:  # it's already a host
                     if e != s.host:
                         links.add((e, s.host))
 
         # Same for hosts of course
         for h in [h for h in self.hosts if h.got_business_rule]:
             for e in h.business_rule.list_all_elements():
-                if hasattr(e, 'host'): # if it's a service
+                if hasattr(e, 'host'):  # if it's a service
                     if e.host != h:
                         links.add((e.host, h))
-                else: # e is a host
+                else:  # e is a host
                     if e != h:
                         links.add((e, h))
 
@@ -1593,10 +1546,10 @@ class Config(Item):
                     else:
                         err = '   the host %s is in the realm %s' % (h.get_name(), h.realm.get_name())
                         self.add_error(err)
-            if len(tmp_realms) == 1: # Ok, good
-                r = tmp_realms.pop() # There is just one element
+            if len(tmp_realms) == 1:  # Ok, good
+                r = tmp_realms.pop()  # There is just one element
                 r.packs.append(pack)
-            elif len(tmp_realms) == 0: # Hum.. no realm value? So default Realm
+            elif len(tmp_realms) == 0:  # Hum.. no realm value? So default Realm
                 if default_realm is not None:
                     default_realm.packs.append(pack)
                 else:
@@ -1630,12 +1583,12 @@ class Config(Item):
             for pack in r.packs:
                 nb_elements += len(pack)
                 nb_elements_all_realms += len(pack)
-            logger.info("Number of hosts in the realm %s: %d (distributed in %d linked packs)" %(r.get_name(), nb_elements, len(r.packs)), print_it=True)
+            logger.info("Number of hosts in the realm %s: %d (distributed in %d linked packs)" % (r.get_name(), nb_elements, len(r.packs)), print_it=True)
 
             if nb_schedulers == 0 and nb_elements != 0:
-                err = "Error: The realm %s have hosts but no scheduler!" %r.get_name()
+                err = "Error: The realm %s have hosts but no scheduler!" % r.get_name()
                 self.add_error(err)
-                r.packs = [] # Dumb pack
+                r.packs = []  # Dumb pack
                 continue
 
             packindex = 0
@@ -1695,7 +1648,7 @@ class Config(Item):
                 if valid_value and old_pack in packindices:
                     #print 'Use a old id for pack', old_pack, [h.get_name() for h in pack]
                     i = old_pack
-                else: # take a new one
+                else:  # take a new one
                     #print 'take a new id for pack', [h.get_name() for h in pack]
                     i = rr.next()
 
@@ -1712,18 +1665,14 @@ class Config(Item):
             except Exception, exp:
                 logger.log('Warning: cannot save the distribution file %s: %s' % (self.pack_distribution_file, str(exp)))
 
-
-
             # Now in packs we have the number of packs [h1, h2, etc]
             # equal to the number of schedulers.
             r.packs = packs
         logger.info("Number of hosts in all the realm  %d" % nb_elements_all_realms, print_it=True)
         logger.info("Number of hosts %d" % len(self.hosts), print_it=True)
         if len(self.hosts) != nb_elements_all_realms:
-            logger.info("There are %d hosts defined, and %d hosts dispatched in the realms. Some hosts have been ignored" %( len(self.hosts), nb_elements_all_realms), print_it=True)
-            self.add_error("There are %d hosts defined, and %d hosts dispatched in the realms. Some hosts have been ignored" %( len(self.hosts), nb_elements_all_realms))
-
-
+            logger.info("There are %d hosts defined, and %d hosts dispatched in the realms. Some hosts have been ignored" % (len(self.hosts), nb_elements_all_realms), print_it=True)
+            self.add_error("There are %d hosts defined, and %d hosts dispatched in the realms. Some hosts have been ignored" % (len(self.hosts), nb_elements_all_realms))
 
     # Use the self.conf and make nb_parts new confs.
     # nbparts is equal to the number of schedulerlink
@@ -1772,8 +1721,8 @@ class Config(Item):
             for sg in self.servicegroups:
                 new_servicegroups.append(sg.copy_shell())
             cur_conf.servicegroups = Servicegroups(new_servicegroups)
-            cur_conf.hosts = [] # will be fill after
-            cur_conf.services = [] # will be fill after
+            cur_conf.hosts = []  # will be fill after
+            cur_conf.services = []  # will be fill after
             # The elements of the others conf will be tag here
             cur_conf.other_elements = {}
             # if a scheduler have accepted the conf
@@ -1842,7 +1791,7 @@ class Config(Item):
         # so they are not tagged)
         for i in self.confs:
             for h in self.confs[i].hosts:
-                for j in [j for j in self.confs if j != i]: # So other than i
+                for j in [j for j in self.confs if j != i]:  # So other than i
                     self.confs[i].other_elements[h.get_name()] = i
 
         # We tag conf with instance_id
@@ -1856,9 +1805,8 @@ def lazy():
     # let's compute the "USER" properties and macros..
     for n in xrange(1, 256):
         n = str(n)
-        Config.properties['$USER'+str(n)+'$'] = StringProp(default='')
-        Config.macros['USER'+str(n)] = '$USER'+n+'$'
+        Config.properties['$USER' + str(n) + '$'] = StringProp(default='')
+        Config.macros['USER' + str(n)] = '$USER' + n + '$'
 
 lazy()
 del lazy
-

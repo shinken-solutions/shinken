@@ -23,10 +23,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 from shinken.satellitelink import SatelliteLink, SatelliteLinks
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
+
 
 class PollerLink(SatelliteLink):
     """This class is the link between Arbiter and Poller. With it, arbiter
@@ -51,9 +50,9 @@ class PollerLink(SatelliteLink):
     def get_name(self):
         return self.poller_name
 
-
     def register_to_my_realm(self):
         self.realm.pollers.append(self)
+
 
 class PollerLinks(SatelliteLinks):
     """Please Add a Docstring to describe the class here"""

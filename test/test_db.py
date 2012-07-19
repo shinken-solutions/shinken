@@ -26,22 +26,22 @@
 from shinken_test import *
 from shinken.db import DB
 
+
 class TestConfig(ShinkenTest):
     # setUp is inherited from ShinkenTest
 
-
     def create_db(self):
-        self.db = DB(table_prefix = 'test_')
+        self.db = DB(table_prefix='test_')
 
     def test_create_insert_query(self):
         self.create_db()
         data = {'id': "1", "is_master": True, 'plop': "master of the universe"}
-        q = self.db.create_insert_query('instances' , data)
+        q = self.db.create_insert_query('instances', data)
         self.assert_(q == "INSERT INTO test_instances  (is_master , id , plop  ) VALUES ('1' , '1' , 'master of the universe'  )")
 
         # Now some UTF8 funny characters
         data = {'id': "1", "is_master": True, 'plop': u'£°é§'}
-        q = self.db.create_insert_query('instances' , data)
+        q = self.db.create_insert_query('instances', data)
         #print "Q", q
         c = u"INSERT INTO test_instances  (is_master , id , plop  ) VALUES ('1' , '1' , '£°é§'  )"
         print type(q), type(c)
@@ -49,12 +49,11 @@ class TestConfig(ShinkenTest):
 
         self.assert_(q == c)
 
-
     def test_update_query(self):
         self.create_db()
         data = {'id': "1", "is_master": True, 'plop': "master of the universe"}
         where = {'id': "1", "is_master": True}
-        q = self.db.create_update_query('instances' , data, where)
+        q = self.db.create_update_query('instances', data, where)
         # beware of the last space
         print "Q", q
         self.assert_(q == "UPDATE test_instances set plop='master of the universe'  WHERE is_master='1' and id='1' ")
@@ -62,7 +61,7 @@ class TestConfig(ShinkenTest):
         # Now some UTF8 funny characters
         data = {'id': "1", "is_master": True, 'plop': u'£°é§'}
         where = {'id': "£°é§", "is_master": True}
-        q = self.db.create_update_query('instances' , data, where)
+        q = self.db.create_update_query('instances', data, where)
         #print "Q", q
         c = u"UPDATE test_instances set plop='£°é§'  WHERE is_master='1' and id='£°é§'"
         self.assert_(q.strip() == c.strip())
@@ -72,4 +71,3 @@ class TestConfig(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

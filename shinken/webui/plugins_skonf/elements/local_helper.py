@@ -25,6 +25,7 @@
 
 from shinken.util import strip_and_uniq
 
+
 def find(value, lst, key):
     print 'Finding the value', value
     print 'And in the list', lst, 'and key', key
@@ -38,6 +39,7 @@ def find(value, lst, key):
         if v == value:
             return i
     return None
+
 
 # We will find in lst elements with the key that match elt.prop values (it's a list
 # of elements wit the keys in lst[key])
@@ -59,7 +61,7 @@ def find_several(lst, elt, prop, key):
         if v is None:
             continue
         v = v.strip()
-        print 'MAtch with db',v
+        print 'MAtch with db', v
         if v  in values:
             res.append(dbi)
     print "Return find_several::", res
@@ -69,7 +71,6 @@ def find_several(lst, elt, prop, key):
 class Helper(object):
     def __init__(self, app):
         self.app = app
-
 
     # Return a simple string input
     def get_string_input(self, elt, prop, name, span='span10', innerspan='span2', inputsize='', placeholder='', popover=None, editable=''):
@@ -85,7 +86,6 @@ class Helper(object):
                <script>properties.push({'name': '%s', 'type': 'string'});</script>
             ''' % (span, innerspan, name, editable, inputsize, prop, elt.get(prop, ''), placeholder, editable, p, prop)
         return s
-
 
     def get_bool_input(self, elt, prop, name, editable=''):
         # Ok, let's try to see the value in db first
@@ -106,15 +106,13 @@ class Helper(object):
            <span class="help-inline span2"> %s </span>
 
         <script>properties.push({'name': '%s', 'type': 'bool'});</script>
-	<div class="btn-group span9 %s" data-toggle="buttons-radio">
-	  <button class="btn %s %s" type="button" name="%s" value="1" >On</button>
-	  <button class="btn %s %s" type="button" name="%s" value="0" >Off</button>
-	  <button class="btn %s %s" type="button" name="%s" value="" >Unset</button>
-	</div>
+        <div class="btn-group span9 %s" data-toggle="buttons-radio">
+          <button class="btn %s %s" type="button" name="%s" value="1" >On</button>
+          <button class="btn %s %s" type="button" name="%s" value="0" >Off</button>
+          <button class="btn %s %s" type="button" name="%s" value="" >Unset</button>
+        </div>
         </span>''' % (name, prop, editable, on, editable, prop, off, editable, prop, unset, editable, prop)
         return s
-
-
 
     def get_percent_input(self, elt, prop, name, editable='', placeholder='', popover=None):
         # Ok, let's try to see the value in db first
@@ -140,9 +138,8 @@ class Helper(object):
            <div id='slider_%s' class='%s slider span5' data-log='#slider_log_%s' data-prop='%s' data-min=0 data-max=100 data-unit='%%' data-value=0 data-active=%s></div>
            <a id='btn-slider_%s' href='javascript:toggle_slider("%s");' class='btn btn-mini %s'>Set/Unset</a>
            %s
-        </span>''' % (name, prop, prop, placeholder ,prop, editable, prop, prop, active, prop, prop, editable, p)
+        </span>''' % (name, prop, prop, placeholder, prop, editable, prop, prop, active, prop, prop, editable, p)
         return s
-
 
     def get_select_input(self, elt, prop, name, cls, key, editable=''):
         t = getattr(self.app.db, cls)
@@ -178,7 +175,6 @@ class Helper(object):
             ''' % (name, select_part, prop)
         return s
 
-
     def get_command_input(self, elt, prop, name, cls, key, editable=''):
         t = getattr(self.app.db, cls)
         tps = list(t.find({}))
@@ -187,10 +183,10 @@ class Helper(object):
         args = ''
         # We split on the first ! of the data
         if value is not None:
-            elts = value.split('!',1)
+            elts = value.split('!', 1)
             value = elts[0]
             if len(elts) > 1:
-                args = '!'+elts[1]
+                args = '!' + elts[1]
 
         elt_tp = find(value, tps, key)
         print 'Find a matching element for me?', elt.get(prop), elt_tp
@@ -221,7 +217,6 @@ class Helper(object):
                <script>properties.push({'name': '%s', 'type': 'command'});</script>
             ''' % (name, select_part, editable, prop, args, editable, prop)
         return s
-
 
     def get_multiselect_input(self, elt, prop, name, cls, key, editable=''):
         t = getattr(self.app.db, cls)
@@ -255,8 +250,6 @@ class Helper(object):
             ''' % (name, select_part, prop)
         return s
 
-
-
     def get_poller_tag_input(self, elt, prop, name, editable=''):
         value = elt.get(prop, None)
         all_poller_tags = set()
@@ -285,8 +278,6 @@ class Helper(object):
                <script>properties.push({'name': '%s', 'type': 'select'});</script>
             ''' % (name, select_part, prop)
         return s
-
-
 
     def get_realm_input(self, elt, prop, name, editable=''):
 
@@ -317,7 +308,6 @@ class Helper(object):
             ''' % (name, select_part, prop)
         return s
 
-
     def get_customs_inputs(self, app, elt, editable=''):
         print "CUSTOM OF", elt
         s = ''
@@ -331,13 +321,13 @@ class Helper(object):
             for tpl in app.host_templates.values():
                 tname = getattr(tpl, 'name', None)
                 if tname == t:
-                    for (k,v) in tpl.customs.iteritems():
+                    for (k, v) in tpl.customs.iteritems():
                         print 'My template customs', k, v
                         if k not in customs:
-                           customs[k] = {'from': tname, 'value': '', 'placeholder': v}
+                            customs[k] = {'from': tname, 'value': '', 'placeholder': v}
 
         # Now the item one, will overwrite any entry
-        for (k,v) in elt.iteritems():
+        for (k, v) in elt.iteritems():
             if k.startswith('_') and k != '_id':
                 customs[k] = {'from': '__ITEM__', 'value': v, 'placeholder': ''}
 
@@ -345,8 +335,6 @@ class Helper(object):
         sorted_names = [k for k in customs]
         sorted_names.sort()
         print 'Sorted names', sorted_names
-
-
 
         s += "<span class='span12'><a class='btn btn-success pull-right %s' href='javascript:add_macro();'><i class='icon-plus icon-white'></i> Add macro</a></span>" % editable
         s += "<span id='new_macros' class='span12'></span>"
@@ -378,8 +366,8 @@ class Helper(object):
                             break
 
                 if ctype == 'percent':
-                    s+= self.get_percent_input(elt, k, k[1:], editable=editable, placeholder=v['placeholder'], popover=popover)
-                else: # if not known, apply string
-                    s+= self.get_string_input(elt, k, k[1:], editable=editable, placeholder=v['placeholder'], popover=popover)
+                    s += self.get_percent_input(elt, k, k[1:], editable=editable, placeholder=v['placeholder'], popover=popover)
+                else:  # if not known, apply string
+                    s += self.get_string_input(elt, k, k[1:], editable=editable, placeholder=v['placeholder'], popover=popover)
 
         return s

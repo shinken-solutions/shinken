@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+#
 # Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
@@ -21,8 +22,6 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import sys
-import shlex
 import shutil
 import optparse
 from subprocess import Popen, PIPE
@@ -31,18 +30,19 @@ from subprocess import Popen, PIPE
 try:
     import json
 except ImportError:
-    # For old Python version, load
-    # simple json (it can be hard json?! It's 2 functions guy!)
+    # For old Python version, load simple json
     try:
         import simplejson as json
     except ImportError:
-        sys.exit("Error: you need the json or simplejson module for this script")
+        raise SystemExit("Error: you need the json or simplejson module "
+                         "for this script")
 
 VERSION = '0.1'
 
-# Search if we can findthe check_esx3.pl file somewhere
+
 def search_for_check_esx3():
-    me = os.path.abspath( __file__ )
+    """Search for the check_esx3.pl file."""
+    me = os.path.abspath(__file__)
     my_dir = os.path.dirname(me)
     possible_paths = [os.path.join(my_dir, 'check_esx3.pl'),
                       '/var/lib/nagios/check_esx3.pl',
@@ -60,20 +60,24 @@ def search_for_check_esx3():
     return None
 
 
-# Split and clean the rules from a string to a list
 def _split_rules(rules):
+    """Split and clean the rules from a string to a list"""
     return [r.strip() for r in rules.split('|')]
 
-# Apply all rules on the objects names
+
 def _apply_rules(name, rules):
+    """Apply rules on the objects names"""
     if 'nofqdn' in rules:
         name = name.split('.', 1)[0]
     if 'lower' in rules:
         name = name.lower()
     return name
 
-# Get all vmware hosts from a VCenter and return the list
+
 def get_vmware_hosts(check_esx_path, vcenter, user, password):
+    """
+    Get a list of all hosts from a VCenter.
+    """
     list_host_cmd = [check_esx_path, '-D', vcenter, '-u', user, '-p', password,
                      '-l', 'runtime', '-s', 'listhost']
 
@@ -84,8 +88,8 @@ def get_vmware_hosts(check_esx_path, vcenter, user, password):
 
     print "Exit status", p.returncode
     if p.returncode == 2:
-        print "Error: the check_esx3.pl return in error:", output
-        sys.exit(2)
+        print "Error: check_esx3.pl returnes an error:", output
+        raise SystemExit(2)
 
     parts = output[0].split(':')
     hsts_raw = parts[1].split('|')[0]
@@ -102,8 +106,8 @@ def get_vmware_hosts(check_esx_path, vcenter, user, password):
     return hosts
 
 
-# For a specific host, ask all VM on it to the VCenter
 def get_vm_of_host(check_esx_path, vcenter, host, user, password):
+    """Get a list of all virtual machines on a specific host."""
     print "Listing host", host
     list_vm_cmd = [check_esx_path, '-D', vcenter, '-H', host,
                    '-u', user, '-p', password,
@@ -114,8 +118,8 @@ def get_vm_of_host(check_esx_path, vcenter, host, user, password):
 
     print "Exit status", p.returncode
     if p.returncode == 2:
-        print "Error: the check_esx3.pl return in error:", output
-        sys.exit(2)
+        print "Error: check_esx3.pl returnes an error:", output
+        raise SystemExit(2)
 
     parts = output[0].split(':')
     # Maybe we got a 'CRITICAL - There are no VMs.' message,
@@ -136,8 +140,8 @@ def get_vm_of_host(check_esx_path, vcenter, host, user, password):
     return lst
 
 
-# Create all tuples of the links for the hosts
 def print_all_links(res, rules):
+    """Create all tuples of the links for the hosts"""
     r = []
     for host in res:
         host_name = _apply_rules(host, rules)
@@ -154,14 +158,14 @@ def print_all_links(res, rules):
 
 def write_output(r, path):
     try:
-        f = open(path+'.tmp', 'wb')
+        f = open(path + '.tmp', 'w')
         buf = json.dumps(r)
         f.write(buf)
         f.close()
-        shutil.move(path+'.tmp', path)
-        print "File %s wrote" % path
+        shutil.move(path + '.tmp', path)
+        print "File %s written" % path
     except IOError, exp:
-        sys.exit("Error writing the file %s: %s" % (path, exp))
+        raise SystemExit("Error writing the file %s: %s" % (path, exp))
 
 
 def main(check_esx_path, vcenter, user, password, rules):
@@ -174,23 +178,20 @@ def main(check_esx_path, vcenter, user, password, rules):
         if lst:
             res[host] = lst
 
-
     print_all_links(res, rules)
 
     #write_output(r, output)
     print "Finished!"
 
 
-# Here we go!
 if __name__ == "__main__":
-    # Manage the options
     parser = optparse.OptionParser(
         version="Shinken VMware links dumping script version %s" % VERSION)
     parser.add_option("-x", "--esx3-path", dest='check_esx_path',
                       default='/usr/local/nagios/libexec/check_esx3.pl',
                       help="Full path of the check_esx3.pl script (default: %default)")
     parser.add_option("-V", "--vcenter", '--Vcenter',
-                      help="tThe IP/DNS address of your Vcenter host.")
+                      help="The IP/DNS address of your Vcenter host.")
     parser.add_option("-u", "--user",
                       help="User name to connect to this Vcenter")
     parser.add_option("-p", "--password",
@@ -218,7 +219,8 @@ if __name__ == "__main__":
         # Not given, try to find one
         p = search_for_check_esx3()
         if p is None:
-            parser.error("Sorry, I cannot find check_esx3.pl, please specify it with -x")
+            parser.error("Sorry, I cannot find check_esx3.pl, please specify "
+                         "it with -x")
         #else set it :)
         opts.check_esx_path = p
 

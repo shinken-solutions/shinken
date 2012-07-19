@@ -25,10 +25,10 @@
 from shinken_test import *
 from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp
 
+
 class TestConfig(ShinkenTest):
     def setUp(self):
         pass
-
 
     # Test the bool property class
     def test_bool_property(self):
@@ -55,4 +55,3 @@ class TestConfig(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

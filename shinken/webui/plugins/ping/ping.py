@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from shinken.webui.bottle import redirect
 
 ### Will be populated by the UI with it's own value
@@ -35,6 +34,7 @@ def forge_response(callback, status, text):
         return "%s({'status':%s,'text':'%s'})" % (callback, status, text)
     else:
         return "{'status':%s,'text':'%s'}" % (status, text)
+
 
 # We will always answser pong to a ping.
 def get_ping():
@@ -57,9 +57,6 @@ def get_gotfirstdata():
     else:
         return forge_response(callback, 200, '0')
 
-
-
-pages = {get_ping: { 'routes': ['/ping']},
-         get_gotfirstdata: { 'routes': ['/gotfirstdata']},
+pages = {get_ping: {'routes': ['/ping']},
+         get_gotfirstdata: {'routes': ['/gotfirstdata']},
          }
-

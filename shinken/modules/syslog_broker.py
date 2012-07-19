@@ -49,7 +49,6 @@ def get_instance(plugin):
     return instance
 
 
-
 # Class for the Merlindb Broker
 # Get broks and puts them in merlin database
 class Syslog_broker(BaseModule):
@@ -60,4 +59,3 @@ class Syslog_broker(BaseModule):
     def manage_log_brok(self, b):
         data = b.data
         syslog.syslog(data['log'].encode('UTF-8'))
-

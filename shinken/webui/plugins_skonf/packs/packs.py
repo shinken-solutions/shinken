@@ -37,13 +37,11 @@ except ImportError:
         print "Error: you need the json or simplejson module"
         raise
 
-
 from local_helper import print_cat_tree
 from shinken.webui.bottle import redirect
 
 ### Will be populated by the UI with it's own value
 app = None
-
 
 
 # Our page. If the useer call /dummy/TOTO arg1 will be TOTO.
@@ -86,8 +84,8 @@ def get_new_packs():
     c.setopt(c.TIMEOUT, 8)
     if app.http_proxy:
         c.setopt(c.PROXY, app.http_proxy)
-    c.setopt(c.URL, app.community_uri+"/categories")
-    c.setopt(c.HTTPPOST,[ ("root", '/'), ('api_key', api_key)])
+    c.setopt(c.URL, app.community_uri + "/categories")
+    c.setopt(c.HTTPPOST, [("root", '/'), ('api_key', api_key)])
     c.setopt(c.VERBOSE, 1)
     response = StringIO()
     c.setopt(c.WRITEFUNCTION, response.write)
@@ -108,7 +106,6 @@ def get_new_packs():
     except Exception, exp:
         api_error = str(exp)
 
-
     raw_tags = []
     status_code = 500
     # Then the tags, like 30
@@ -118,8 +115,8 @@ def get_new_packs():
     c.setopt(c.TIMEOUT, 8)
     if app.http_proxy:
         c.setopt(c.PROXY, app.http_proxy)
-    c.setopt(c.URL, app.community_uri+"/tags")
-    c.setopt(c.HTTPPOST,[ ("nb", '50'), ('api_key', api_key)])
+    c.setopt(c.URL, app.community_uri + "/tags")
+    c.setopt(c.HTTPPOST, [("nb", '50'), ('api_key', api_key)])
     c.setopt(c.VERBOSE, 1)
     response = StringIO()
     c.setopt(c.WRITEFUNCTION, response.write)
@@ -147,7 +144,7 @@ def get_new_packs():
     i = 0
     for (name, occ) in raw_tags:
         i += 1
-        size = 1 + float(i)/nb_tags
+        size = 1 + float(i) / nb_tags
         new_tags[name] = {'name': name, 'size': size, 'occ': occ}
 
     # Sort by name
@@ -163,7 +160,7 @@ def get_new_packs():
     # we return values for the template (view). But beware, theses values are the
     # only one the tempalte will have, so we must give it an app link and the
     # user we are loggued with (it's a contact object in fact)
-    return {'app': app, 'user': user, 'error': error, 'api_error': api_error, 'results': None, 'search': None, 'categories': categories, 'tags': tags,  'print_cat_tree': print_cat_tree}
+    return {'app': app, 'user': user, 'error': error, 'api_error': api_error, 'results': None, 'search': None, 'categories': categories, 'tags': tags, 'print_cat_tree': print_cat_tree}
 
 
 def launch_search(search):
@@ -182,8 +179,8 @@ def launch_search(search):
     c.setopt(c.TIMEOUT, 8)
     if app.http_proxy:
         c.setopt(c.PROXY, app.http_proxy)
-    c.setopt(c.URL, app.community_uri+"/search")
-    c.setopt(c.HTTPPOST,[ ("search", search), ('api_key', api_key)])
+    c.setopt(c.URL, app.community_uri + "/search")
+    c.setopt(c.HTTPPOST, [("search", search), ('api_key', api_key)])
 
     #c.setopt(c.HTTPPOST, [("file1", (c.FORM_FILE, str(zip_file_p)))])
     c.setopt(c.VERBOSE, 1)
@@ -204,11 +201,9 @@ def launch_search(search):
     except Exception, exp:
         error = str(exp)
 
-
     print "status code: %s" % status_code
     print "Json loaded", results, error
     return (results, error)
-
 
 
 def get_new_packs_result(search):
@@ -227,7 +222,7 @@ def get_new_packs_result(search):
     else:
         error = 'You forgot the search entry'
 
-    print "get_new_packs_result::",results, error
+    print "get_new_packs_result::", results, error
     # we return values for the template (view). But beware, theses values are the
     # only one the tempalte will have, so we must give it an app link and the
     # user we are loggued with (it's a contact object in fact)
@@ -251,12 +246,11 @@ def get_new_packs_result_post():
     else:
         error = 'You forgot the search entry'
 
-    print "get_new_packs_result_post::",results, error
+    print "get_new_packs_result_post::", results, error
     # we return values for the template (view). But beware, theses values are the
     # only one the tempalte will have, so we must give it an app link and the
     # user we are loggued with (it's a contact object in fact)
     return {'app': app, 'user': user, 'error': error, 'api_error': api_error, 'results': results, 'search': search, 'categories': None, 'tags': None}
-
 
 
 def download_pack(uri):
@@ -291,19 +285,16 @@ def download_pack(uri):
 
         print "WE get a file os the size", len(buf)
     except Exception, exp:
-        r = {'state': 500, 'text': 'ERROR: '+str(exp)}
+        r = {'state': 500, 'text': 'ERROR: ' + str(exp)}
         return json.dumps(r)
 
     r = app.save_pack(buf)
     print "RETURN", r
     return json.dumps(r)
 
-
-
-pages = {get_packs: { 'routes': ['/packs'], 'view': 'packs', 'static': True},
-         get_new_packs: { 'routes': ['/getpacks'], 'view': 'getpacks', 'static': True},
-         get_new_packs_result_post: { 'routes': ['/getpacks'], 'method': 'POST', 'view': 'getpacks', 'static': True},
-         get_new_packs_result: { 'routes': ['/getpacks/:search#.+#'], 'view': 'getpacks', 'static': True},
-         download_pack: { 'routes': ['/download/:uri#.+#'], 'view': None, 'static': True},
+pages = {get_packs: {'routes': ['/packs'], 'view': 'packs', 'static': True},
+         get_new_packs: {'routes': ['/getpacks'], 'view': 'getpacks', 'static': True},
+         get_new_packs_result_post: {'routes': ['/getpacks'], 'method': 'POST', 'view': 'getpacks', 'static': True},
+         get_new_packs_result: {'routes': ['/getpacks/:search#.+#'], 'view': 'getpacks', 'static': True},
+         download_pack: {'routes': ['/download/:uri#.+#'], 'view': None, 'static': True},
          }
-

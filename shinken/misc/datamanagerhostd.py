@@ -23,9 +23,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from shinken.util import safe_print
 from shinken.misc.datamanagerskonf import DataManagerSKonf
+
 
 class FakeRegenerator(object):
     def __init__(self):
@@ -39,7 +39,6 @@ class DataManagerHostd(DataManagerSKonf):
             r.append(i)
         return r
 
-
     def get_packs(self):
         return self.get_generics('packs', 'pack_name')
 
@@ -51,7 +50,6 @@ class DataManagerHostd(DataManagerSKonf):
     def get_pack_by_id(self, pid):
         r = self.get_in_db('packs', '_id', pid)
         return r
-
 
     def get_pack_by_user_packname(self, username, packname):
         value = '%s-%s' % (username, packname)
@@ -89,7 +87,6 @@ class DataManagerHostd(DataManagerSKonf):
         print "The whole pack tree", t
         return t
 
-
     def get_pack_tree(self):
         packs = self.get_packs()
         packs = [p for p in packs if p['state'] in ['ok', 'pending']]
@@ -98,7 +95,6 @@ class DataManagerHostd(DataManagerSKonf):
         r = self._get_pack_tree(t)
         print "RETURN WHOLE PACK TREE", r
         return r
-
 
     def _get_pack_tree(self, tree):
         print "__get_pack_tree:: for", tree
@@ -115,7 +111,6 @@ class DataManagerHostd(DataManagerSKonf):
             return 0
         sons.sort(_sort)
 
-
         res = []
         if name != '':
             res.append({'type': 'new_tree', 'name': name})
@@ -129,8 +124,6 @@ class DataManagerHostd(DataManagerSKonf):
             res.append({'type': 'end_tree', 'name': name})
         print "RETURN PARTIAL", res
         return res
-
-
 
     # We got a pack name, we look for all objects, and search where this
     # host template name is used
@@ -164,7 +157,7 @@ class DataManagerHostd(DataManagerSKonf):
                 if tname in elts:
                     print "FOUND A SERVICE THAT MA5TCH", s.get('service_description', '')
                     services.append(s)
-            res.append( (tpl, services) )
+            res.append((tpl, services))
 
         return res
 

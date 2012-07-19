@@ -26,7 +26,6 @@
 # This Class is an example of an Scheduler module
 # Here for the configuration phase AND running one
 
-
 import redis
 import cPickle
 
@@ -48,7 +47,6 @@ def get_instance(plugin):
     return instance
 
 
-
 # Just print some stuff
 class Redis_retention_scheduler(BaseModule):
     def __init__(self, modconf, server):
@@ -60,7 +58,6 @@ class Redis_retention_scheduler(BaseModule):
         print "Initilisation of the redis module"
         #self.return_queue = self.properties['from_queue']
         self.mc = redis.Redis(self.server)
-
 
     # Ok, main function that is called in the retention creation pass
     def hook_save_retention(self, daemon):
@@ -89,8 +86,6 @@ class Redis_retention_scheduler(BaseModule):
             self.mc.set(key, val)
         log_mgr.log("Retention information updated in Redis")
 
-
-
     # Should return if it succeed in the retention load or not
     def hook_load_retention(self, daemon):
         log_mgr = logger
@@ -108,7 +103,7 @@ class Redis_retention_scheduler(BaseModule):
             val = self.mc.get(key)
             if val is not None:
                 # redis get unicode, but we send string, so we are ok
-#                val = str(unicode(val))
+                #val = str(unicode(val))
                 val = cPickle.loads(val)
                 ret_hosts[h.host_name] = val
 
@@ -119,10 +114,9 @@ class Redis_retention_scheduler(BaseModule):
             #print "Using key", key
             val = self.mc.get(key)
             if val is not None:
-#                val = str(unicode(val))
+                #val = str(unicode(val))
                 val = cPickle.loads(val)
                 ret_services[(s.host.host_name, s.service_description)] = val
-
 
         all_data = {'hosts': ret_hosts, 'services': ret_services}
 

@@ -27,7 +27,6 @@
 # This Class is an example of an Scheduler module
 # Here for the configuration phase AND running one
 
-
 import memcache
 import cPickle
 
@@ -48,7 +47,6 @@ def get_instance(modconf):
     return instance
 
 
-
 # Just print some stuff
 class Memcache_retention_scheduler(BaseModule):
     def __init__(self, mod_conf):
@@ -61,7 +59,6 @@ class Memcache_retention_scheduler(BaseModule):
         print "Initilisation of the memcache module"
         #self.return_queue = self.properties['from_queue']
         self.mc = memcache.Client(['%s:%s' % (self.server, self.port)], debug=0)
-
 
     # Ok, main function that is called in the retention creation pass
     def hook_save_retention(self, daemon):
@@ -92,8 +89,6 @@ class Memcache_retention_scheduler(BaseModule):
             val = cPickle.dumps(s)
             self.mc.set(key, val)
         log_mgr.log("Retention information updated in Memcache")
-
-
 
     # Should return if it succeed in the retention load or not
     def hook_load_retention(self, daemon):
@@ -130,7 +125,6 @@ class Memcache_retention_scheduler(BaseModule):
 
         # Ok, now comme load them scheduler :)
         daemon.restore_retention_data(all_data)
-
 
         log_mgr.log("[MemcacheRetention] OK we've load data from memcache server")
 

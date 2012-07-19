@@ -168,13 +168,13 @@ class TSCA_arbiter(BaseModule):
     def main(self):
         self.set_exit_handler()
         try:
-                handler = StateServiceHandler(self)
-                processor = StateService.Processor(handler)
-                transport = TSocket.TServerSocket("0.0.0.0", 9090)
-                tfactory = TTransport.TBufferedTransportFactory()
-                pfactory = TBinaryProtocol.TBinaryProtocolFactory()
-                # In order to accept multiple simultaneous clients, we use TThreadedServer
-                server = TServer.TThreadedServer(processor, transport, tfactory, pfactory)
-                server.serve()
+            handler = StateServiceHandler(self)
+            processor = StateService.Processor(handler)
+            transport = TSocket.TServerSocket("0.0.0.0", 9090)
+            tfactory = TTransport.TBufferedTransportFactory()
+            pfactory = TBinaryProtocol.TBinaryProtocolFactory()
+            # In order to accept multiple simultaneous clients, we use TThreadedServer
+            server = TServer.TThreadedServer(processor, transport, tfactory, pfactory)
+            server.serve()
         except:
-                print "Error while trying to launch TSCA module"
+            print "Error while trying to launch TSCA module"

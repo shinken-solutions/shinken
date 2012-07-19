@@ -30,14 +30,17 @@ import asyncore
 import getopt
 sys.path.append("..")
 sys.path.append("../..")
-from livestatus import LSAsynConnection,Query
+from livestatus import LSAsynConnection, Query
 
 """ Benchmark of the livestatus broker"""
 
+
 class QueryGenerator(object):
     """Generate a livestatus query"""
+
     def get(self):
         pass
+
 
 class SimpleQueryGenerator(QueryGenerator):
     def __init__(self, querys, name="sqg"):
@@ -46,25 +49,28 @@ class SimpleQueryGenerator(QueryGenerator):
         self.i = 0
 
     def get(self):
-        query=self.querys[self.i]
-        query_class="%s-%s" % (self.name,self.i)
-        self.i+=1
+        query = self.querys[self.i]
+        query_class = "%s-%s" % (self.name, self.i)
+        self.i += 1
         if self.i >= len(self.querys):
-            self.i=0
-        return (query_class,query)
+            self.i = 0
+        return (query_class, query)
+
 
 class FileQueryGenerator(SimpleQueryGenerator):
     def __init__(self, filename):
-        f = open(filename,"r")
+        f = open(filename, "r")
         querys = []
         for query in f:
-            query = query.replace("\\n","\n")
+            query = query.replace("\\n", "\n")
             querys.append(query)
         SimpleQueryGenerator.__init__(self, querys, filename)
+
 
 def usage():
     print " -n requests     Number of requests to perform [Default: 10]"
     print " -c concurrency  Number of multiple requests to make [Default: 1]"
+
 
 def mean(numberList):
     if len(numberList) == 0:
@@ -73,16 +79,18 @@ def mean(numberList):
     floatNums = [float(x) for x in numberList]
     return sum(floatNums) / len(numberList)
 
+
 def median(numberList):
     sorted_values = sorted(numberList)
 
     if len(sorted_values) % 2 == 1:
-        return sorted_values[(len(sorted_values)+1)/2-1]
+        return sorted_values[(len(sorted_values) + 1) / 2 - 1]
     else:
-        lower = sorted_values[len(sorted_values)/2-1]
-        upper = sorted_values[len(sorted_values)/2]
+        lower = sorted_values[len(sorted_values) / 2 - 1]
+        upper = sorted_values[len(sorted_values) / 2]
 
     return (float(lower + upper)) / 2
+
 
 def run(url, requests, concurrency, qg):
     if (concurrency > requests):
@@ -99,16 +107,16 @@ def run(url, requests, concurrency, qg):
     else:
         return
 
-    for x in xrange(0,concurrency):
-        conns.append(LSAsynConnection(addr=addr,port=port))
-        (query_class, query_str)=qg.get()
-        q=Query(query_str)
+    for x in xrange(0, concurrency):
+        conns.append(LSAsynConnection(addr=addr, port=port))
+        (query_class, query_str) = qg.get()
+        q = Query(query_str)
         q.query_class = query_class
         conns[x].stack_query(q)
 
     print "Start queries"
     t = time.time()
-    while remaining>0:
+    while remaining > 0:
         asyncore.poll(timeout=1)
         for c in conns:
             if c.is_finished():
@@ -127,11 +135,11 @@ def run(url, requests, concurrency, qg):
                     sys.stdout.flush()
 
                 # Run another query
-                (query_class, query_str)=qg.get()
-                q=Query(query_str)
+                (query_class, query_str) = qg.get()
+                q = Query(query_str)
                 q.query_class = query_class
                 c.stack_query(q)
-    running_time=time.time() - t
+    running_time = time.time() - t
     print "End queries"
 
     print "\n==============="
@@ -140,7 +148,8 @@ def run(url, requests, concurrency, qg):
     print "Running time is %04f s" % running_time
     print "Query Class          nb  min      max       mean     median"
     for query_class, durations in queries_durations.items():
-        print "%s %03d %03f %03f %03f %03f" % (query_class.ljust(20),len(durations),min(durations),max(durations),mean(durations),median(durations))
+        print "%s %03d %03f %03f %03f %03f" % (query_class.ljust(20), len(durations), min(durations), max(durations), mean(durations), median(durations))
+
 
 def main(argv):
     # Defaults values
@@ -165,12 +174,12 @@ def main(argv):
     if len(args) >= 1:
         url = args[0]
 
-    print "Running %s queries on %s" % (requests,url)
+    print "Running %s queries on %s" % (requests, url)
     print "Concurrency level %s " % (concurrency)
 
     qg = FileQueryGenerator("thruk_tac.queries")
 
-    run(url,requests,concurrency,qg)
+    run(url, requests, concurrency, qg)
 
 if __name__ == "__main__":
     main(sys.argv[1:])

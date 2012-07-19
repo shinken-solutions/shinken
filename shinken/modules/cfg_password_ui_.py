@@ -52,17 +52,13 @@ class Cfg_Password_Webui(BaseModule):
     def __init__(self, modconf):
         BaseModule.__init__(self, modconf)
 
-
-
     # Try to connect if we got true parameter
     def init(self):
         print "Trying to initalize the CFG/Password auth"
 
-
     # To load the webui application
     def load(self, app):
         self.app = app
-
 
     def check_auth(self, user, password):
         c = self.app.datamgr.get_contact(user)

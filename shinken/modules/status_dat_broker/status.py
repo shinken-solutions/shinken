@@ -31,13 +31,14 @@ import tempfile
 
 from shinken.util import from_bool_to_string
 
+
 class StatusFile:
     out_map = {
         'Host': {
             'host_name': {}, # 'host_name',
             'modified_attributes': {'prop': None, 'default': '0'},
             'check_command': {'depythonize': 'get_name'},
-            'check_period': {'prop': 'check_period' , 'depythonize': 'get_name'},
+            'check_period': {'prop': 'check_period', 'depythonize': 'get_name'},
             'notification_period': {'prop': 'notification_period', 'depythonize': 'get_name'},
             'check_interval': {},
             'retry_interval': {},
@@ -60,7 +61,7 @@ class StatusFile:
             'next_check': {'prop': 'next_chk'},
             'check_options': {'prop': None, 'default': '0'},
             'current_attempt': {'prop': 'attempt'},
-            'max_attempts':  {'prop': 'max_check_attempts'},
+            'max_attempts': {'prop': 'max_check_attempts'},
             'current_event_id': {'prop': None, 'default': '0'},
             'last_event_id': {'prop': None, 'default': '0'},
             'state_type': {'prop': 'state_type_id', 'default': '0'},
@@ -231,8 +232,6 @@ class StatusFile:
         },
     }
 
-
-
     def __init__(self, path, configs, hosts, services, contacts):
         #self.conf = scheduler.conf
         #self.scheduler = scheduler
@@ -241,7 +240,6 @@ class StatusFile:
         self.hosts = hosts
         self.services = services
         self.contacts = contacts
-
 
     def create_output(self, elt):
         output = ''
@@ -280,7 +278,6 @@ class StatusFile:
                 output += '\t' + display + '=' + unicode(value) + '\n'
 
         return output
-
 
     def create_or_update(self):
 
@@ -348,5 +345,5 @@ class StatusFile:
             os.close(temp_fh)
             os.chmod(temp_status_file, 0640)
             os.rename(temp_status_file, self.path)
-        except OSError , exp:
+        except OSError, exp:
             return exp

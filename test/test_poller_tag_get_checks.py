@@ -29,14 +29,13 @@ class TestPollerTagGetchecks(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_poller_tag_get_checks.cfg')
 
-
     def test_good_checks_get_only_tags_with_specific_tags(self):
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
 
         # schedule the host so it will have a check :)
         # and for ce the execution now
@@ -66,14 +65,13 @@ class TestPollerTagGetchecks(ShinkenTest):
             # Should be the host one only
             self.assert_(c.command.startswith('plugins/test_hostcheck.pl'))
 
-
     def test_good_checks_get_only_tags_with_specific_module_types(self):
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
 
         # schedule the host so it will have a check :)
         # and for ce the execution now
@@ -88,7 +86,6 @@ class TestPollerTagGetchecks(ShinkenTest):
             a.t_to_go = 0
         # the scheduler need to get this new checks in its own queues
         self.sched.get_new_actions()
-
 
         # Ask for badly named module type
         untaggued_checks = self.sched.get_to_run_checks(True, False, poller_tags=['None'], module_types=['fork'])
@@ -106,4 +103,3 @@ class TestPollerTagGetchecks(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

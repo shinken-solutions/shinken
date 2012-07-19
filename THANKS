@@ -70,3 +70,7 @@ To Timo Veith for this work on the Wiki refactoring!
 To Lars Hansson for this patches about cfg password module and Apache one
 To the webui mobile guys: Mael VINCENT, julien Pilou, Gael Millet, Damien Mathieu and hugo Viricel for their new webui mobile ui.
 To Mathias Fussenegger for his large patch about configuration tab/space resolution.
+To banderas07 and Radu Gheorghe for their works on the escalation notification_interval issue!
+To Simon Rother for discovering a possible race condition.
+To David Laval for his graphite templates on the linux checks
+To nerocide for his bug report about bad event handler catch

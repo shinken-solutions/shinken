@@ -24,10 +24,6 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
-
-
-
 class Graph:
     """Graph is a class to make graph things like DFS checks or accessibility
     Why use an atomic bomb when a little hammer is enough?
@@ -37,11 +33,9 @@ class Graph:
     def __init__(self):
         self.nodes = {}
 
-
     # Do not call twice...
     def add_node(self, node):
         self.nodes[node] = []
-
 
     # Just loop over nodes
     def add_nodes(self, nodes):
@@ -59,7 +53,6 @@ class Graph:
         # If from_node does not exist, add it with its son
         except KeyError, exp:
             self.nodes[from_node] = [to_node]
-
 
     # Return all nodes that are in a loop. So if return [], no loop
     def loop_check(self):
@@ -82,7 +75,6 @@ class Graph:
             del node.dfs_loop_status
 
         return in_loop
-
 
     # DFS_UNCHECKED default value
     # DFS_TEMPORARY_CHECKED check just one time
@@ -121,7 +113,6 @@ class Graph:
         if root.dfs_loop_status == 'DFS_TEMPORARY_CHECKED':
             root.dfs_loop_status = 'DFS_OK'
 
-
     # Get accessibility packs of the graph: in one pack,
     # element are related in a way. Between packs, there is no relation
     # at all.
@@ -143,7 +134,6 @@ class Graph:
             del node.dfs_loop_status
 
         return packs
-
 
     # Return all my children, and all my grandchildren
     def dfs_get_all_childs(self, root):

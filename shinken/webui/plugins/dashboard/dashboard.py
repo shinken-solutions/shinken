@@ -35,10 +35,9 @@ except ImportError:
         print "Error: you need the json or simplejson module"
         raise
 
-
-
 ### Will be populated by the UI with it's own value
 app = None
+
 
 # Our page
 def get_page():
@@ -83,16 +82,12 @@ def get_page():
         w['options'] = json.dumps(options)
         args = {'wid': i, 'collapsed': collapsed}
         args.update(options)
-        w['options_uri'] = '&'.join( '%s=%s' % (k, v) for (k, v) in args.iteritems())
+        w['options_uri'] = '&'.join('%s=%s' % (k, v) for (k, v) in args.iteritems())
         widgets.append(w)
 
     print "Give widgets", widgets
     return {'app': app, 'user': user, 'widgets': widgets}
 
-
-
-
-pages = {get_page: { 'routes': ['/dashboard'], 'view': 'dashboard', 'static': True},
+pages = {get_page: {'routes': ['/dashboard'], 'view': 'dashboard', 'static': True},
 #         get_all: { 'routes': ['/dashboard/fullscreen'], 'view': 'fullscreen', 'static': True},
          }
-

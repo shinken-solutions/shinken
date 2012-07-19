@@ -25,6 +25,7 @@
 from shinken_test import *
 import os
 
+
 class TestConfig(ShinkenTest):
     # setUp is inherited from ShinkenTest
 
@@ -34,7 +35,6 @@ class TestConfig(ShinkenTest):
         fd = open(self.conf.command_file, 'wb')
         fd.write(s)
         fd.close()
-
 
     def test_external_comand(self):
         now = time.time()
@@ -48,7 +48,7 @@ class TestConfig(ShinkenTest):
         excmd = '[%d] PROCESS_HOST_CHECK_RESULT;test_host_0;2;Bob is not happy' % int(time.time())
         self.sched.run_external_command(excmd)
         self.scheduler_loop(1, [])
-        self.scheduler_loop(1, []) # Need 2 run for get then consume)
+        self.scheduler_loop(1, [])  # Need 2 run for get then consume)
         self.assert_(host.state == 'DOWN')
         self.assert_(host.output == 'Bob is not happy')
 
@@ -56,7 +56,7 @@ class TestConfig(ShinkenTest):
         excmd = '[%d] PROCESS_HOST_CHECK_RESULT;test_host_0;2;Bob is not happy|rtt=9999' % int(time.time())
         self.sched.run_external_command(excmd)
         self.scheduler_loop(1, [])
-        self.scheduler_loop(1, []) # Need 2 run for get then consume)
+        self.scheduler_loop(1, [])  # Need 2 run for get then consume)
         self.assert_(host.state == 'DOWN')
         self.assert_(host.output == 'Bob is not happy')
         self.assert_(host.perf_data == 'rtt=9999')
@@ -67,7 +67,7 @@ class TestConfig(ShinkenTest):
         excmd = '[%d] PROCESS_HOST_CHECK_RESULT;test_host_0;2;Bob is not happy|rtt=9999;5;10;0;10000' % int(time.time())
         self.sched.run_external_command(excmd)
         self.scheduler_loop(1, [])
-        self.scheduler_loop(1, []) # Need 2 run for get then consume)
+        self.scheduler_loop(1, [])  # Need 2 run for get then consume)
         self.assert_(host.state == 'DOWN')
         self.assert_(host.output == 'Bob is not happy')
         print "perf (%s)" % host.perf_data
@@ -77,7 +77,7 @@ class TestConfig(ShinkenTest):
         excmd = '[%d] PROCESS_SERVICE_CHECK_RESULT;test_host_0;test_ok_0;1;Bobby is not happy|rtt=9999;5;10;0;10000' % int(time.time())
         self.sched.run_external_command(excmd)
         self.scheduler_loop(1, [])
-        self.scheduler_loop(1, []) # Need 2 run for get then consume)
+        self.scheduler_loop(1, [])  # Need 2 run for get then consume)
         self.assert_(svc.state == 'WARNING')
         self.assert_(svc.output == 'Bobby is not happy')
         print "perf (%s)" % svc.perf_data
@@ -95,7 +95,7 @@ class TestConfig(ShinkenTest):
         excmd = '[%d] PROCESS_HOST_CHECK_RESULT;test_router_0;2;Bob is not happy|rtt=9999;5;10;0;10000' % past
         self.sched.run_external_command(excmd)
         self.scheduler_loop(1, [])
-        self.scheduler_loop(1, []) # Need 2 run for get then consume)
+        self.scheduler_loop(1, [])  # Need 2 run for get then consume)
         self.assert_(router.state == 'DOWN')
         self.assert_(router.output == 'Bob is not happy')
         print "perf (%s)" % router.perf_data
@@ -108,7 +108,7 @@ class TestConfig(ShinkenTest):
         excmd = '[%d] PROCESS_HOST_CHECK_RESULT;test_router_0;2;Bob is not happy|rtt=9999;5;10;0;10000' % very_past
         self.sched.run_external_command(excmd)
         self.scheduler_loop(1, [])
-        self.scheduler_loop(1, []) # Need 2 run for get then consume)
+        self.scheduler_loop(1, [])  # Need 2 run for get then consume)
         self.assert_(router.state == 'DOWN')
         self.assert_(router.output == 'Bob is not happy')
         print "perf (%s)" % router.perf_data
@@ -121,4 +121,3 @@ class TestConfig(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

@@ -62,16 +62,14 @@ class TestConfigAuth(TestConfig):
         host = self.sched.hosts.find_by_name("dbsrv1")
         host.__class__.use_aggressive_host_checking = 1
 
-
-
     def tearDown(self):
         self.stop_nagios()
         self.livestatus_broker.db.commit()
         self.livestatus_broker.db.close()
         if os.path.exists(self.livelogs):
             os.remove(self.livelogs)
-        if os.path.exists(self.livelogs+"-journal"):
-            os.remove(self.livelogs+"-journal")
+        if os.path.exists(self.livelogs + "-journal"):
+            os.remove(self.livelogs + "-journal")
         if os.path.exists(self.livestatus_broker.pnp_path):
             shutil.rmtree(self.livestatus_broker.pnp_path)
         if os.path.exists('var/nagios.log'):
@@ -81,8 +79,6 @@ class TestConfigAuth(TestConfig):
         if os.path.exists('var/status.dat'):
             os.remove('var/status.dat')
         self.livestatus_broker = None
-
-
 
     """
 dbsrv1  adm(adm1,adm2,adm3)
@@ -157,7 +153,6 @@ www1    adm(adm1,adm2,adm3) web(web1,web2) winadm(bill,steve)
         #print "rg is", self.livestatus_broker.datamgr.rg.hostgroups._id_contact_heap
         for contact in sorted(self.livestatus_broker.datamgr.rg.hostgroups._id_contact_heap.keys()):
             print "%-10s %s" % (contact, self.livestatus_broker.datamgr.rg.hostgroups._id_contact_heap[contact])
-
 
     def test_host_authorization(self):
         self.print_header()
@@ -409,7 +404,6 @@ KeepAlive: on
         print pyresponse
         self.assert_(len(pyresponse) == 1)
 
-
     def test_group_authorization_strict(self):
         self.print_header()
         now = time.time()
@@ -467,7 +461,7 @@ KeepAlive: on
         self.assert_(len(pyresponse) == 6)
 
         print "now check servicesbygroup"
-        request= """GET servicesbygroup
+        request = """GET servicesbygroup
 Columns: servicegroup_name host_name service_description
 AuthUser: oradba1
 OutputFormat: python
@@ -483,7 +477,7 @@ oracle;dbsrv3;app_db_oracle_check_connect
         print response
         # assert len 6
 
-        request= """GET hostsbygroup
+        request = """GET hostsbygroup
 Columns:  hostgroup_name host_name
 OutputFormat: python
 AuthUser: web1
@@ -500,7 +494,7 @@ windows;www2
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
 
-        request= """GET servicesbyhostgroup
+        request = """GET servicesbyhostgroup
 Columns: hostgroup_name host_name service_description
 AuthUser: oradba1
 OutputFormat: csv
@@ -576,4 +570,3 @@ if __name__ == '__main__':
 
     #allsuite = unittest.TestLoader.loadTestsFromModule(TestConfig)
     #unittest.TextTestRunner(verbosity=2).run(allsuite)
-

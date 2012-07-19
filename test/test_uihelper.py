@@ -25,10 +25,10 @@
 from shinken_test import *
 from shinken.modules.webui_broker.helper import helper
 
+
 class TestUIHelper(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
-
 
     def test_duration_print(self):
         now = time.time()
@@ -40,8 +40,6 @@ class TestUIHelper(ShinkenTest):
         s = helper.print_duration(0)
         print "Res", s
         self.assert_(s == 'N/A')
-
-
 
         # Get the Now
         s = helper.print_duration(now)
@@ -58,7 +56,6 @@ class TestUIHelper(ShinkenTest):
         s = helper.print_duration(now - 2, just_duration=True)
         print "Res", s
         self.assert_(s == '2s')
-
 
         # Got 2minutes
         s = helper.print_duration(now - 120)
@@ -146,8 +143,6 @@ class TestUIHelper(ShinkenTest):
         print "Res", s
         self.assert_(s == 'in 2M 2w')
 
-
-
     def test_dep_graph(self):
         now = time.time()
 
@@ -161,7 +156,6 @@ class TestUIHelper(ShinkenTest):
         all_elts = helper.get_all_linked_elts(host)
         print "All elts", all_elts
 
-
     # Try the navi pages helper
     def test_navi(self):
         res = helper.get_navi(135, 60, step=30)
@@ -171,18 +165,15 @@ class TestUIHelper(ShinkenTest):
             print "Is okk?", i, i in g
         self.assert_(res == g)
 
-
         res = helper.get_navi(135, 90, step=30)
         print "Res 2", res
         g = [(u'\xc2\xab First', 0, 30, False), ('...', None, None, False), ('3', 60, 90, False), ('4', 90, 120, True), ('5', 120, 150, False)]
         self.assert_(res == g)
 
-
         res = helper.get_navi(2035, 1500, step=100)
         print "REs3", res
         g = [(u'\xc2\xab First', 0, 100, False), ('...', None, None, False), ('15', 1400, 1500, False), ('16', 1500, 1600, True), ('17', 1600, 1700, False), ('...', None, None, False), (u'Last \xc2\xbb', 2000, 2100, False)]
         self.assert_(res == g)
-
 
         # Now the case just one page
         res = helper.get_navi(25, 0, step=30)
@@ -199,4 +190,3 @@ class TestUIHelper(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

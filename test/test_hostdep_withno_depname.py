@@ -30,7 +30,6 @@ class TestHostDepWithNodepname(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_hostdep_withno_depname.cfg')
 
-
     def test_hostdep_withno_depname(self):
         #
         # Config is not correct because of a wrong relative path
@@ -45,9 +44,8 @@ class TestHostDepWithNodepname(ShinkenTest):
         print h2.act_depend_of
         self.assert_(len(h2.act_depend_of) > 0)
         l = h2.act_depend_of[0]
-        h = l[0] # the host that h2 depend on
+        h = l[0]  # the host that h2 depend on
         self.assert_(h is host)
 
 if __name__ == '__main__':
     unittest.main()
-

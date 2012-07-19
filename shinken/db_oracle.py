@@ -45,6 +45,7 @@ OperationalError_exp = None
 
 class DBOracle(DB):
     """ TODO: Add some comment about this class for the doc"""
+
     def __init__(self, user, password, database, table_prefix=''):
         self.user = user
         self.password = password

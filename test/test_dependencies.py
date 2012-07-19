@@ -26,12 +26,10 @@ from shinken_test import *
 sys.setcheckinterval(10000)
 
 
-
 class TestConfig(ShinkenTest):
 
     def setUp(self):
         self.setup_with_file('etc/nagios_dependencies.cfg')
-
 
     def test_service_dependencies(self):
         self.print_header()
@@ -40,11 +38,11 @@ class TestConfig(ShinkenTest):
         test_host_1 = self.sched.hosts.find_by_name("test_host_1")
         test_host_0.checks_in_progress = []
         test_host_1.checks_in_progress = []
-        test_host_0.act_depend_of = [] # ignore the router
-        test_host_1.act_depend_of = [] # ignore the router
+        test_host_0.act_depend_of = []  # ignore the router
+        test_host_1.act_depend_of = []  # ignore the router
         router = self.sched.hosts.find_by_name("test_router_0")
         router.checks_in_progress = []
-        router.act_depend_of = [] # ignore other routers
+        router.act_depend_of = []  # ignore other routers
         test_host_0_test_ok_0 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         test_host_0_test_ok_1 = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_1")
         test_host_1_test_ok_0 = self.sched.services.find_srv_by_name_and_hostname("test_host_1", "test_ok_0")
@@ -80,11 +78,10 @@ class TestConfig(ShinkenTest):
         self.assert_(len(test_host_0_test_ok_1.chk_depend_of) == 1)
         self.assert_(len(test_host_1_test_ok_0.chk_depend_of) == 0)
         self.assert_(len(test_host_1_test_ok_1.chk_depend_of) == 1)
-        self.assert_(len(test_host_0_test_ok_0.act_depend_of) == 1) # same, plus the host
+        self.assert_(len(test_host_0_test_ok_0.act_depend_of) == 1)  # same, plus the host
         self.assert_(len(test_host_0_test_ok_1.act_depend_of) == 2)
         self.assert_(len(test_host_1_test_ok_0.act_depend_of) == 1)
         self.assert_(len(test_host_1_test_ok_1.act_depend_of) == 2)
-
 
     def test_host_dependencies(self):
         self.print_header()
@@ -98,7 +95,6 @@ class TestConfig(ShinkenTest):
         host_B = self.sched.hosts.find_by_name("test_host_B")
         host_C = self.sched.hosts.find_by_name("test_host_C")
         host_D = self.sched.hosts.find_by_name("test_host_D")
-
 
         # the most important: test_ok_0 is in the chk_depend_of-list of test_ok_1
         #self.assert_(host_A in [x[0] for x in host_C.chk_depend_of])
@@ -130,7 +126,6 @@ class TestConfig(ShinkenTest):
         self.assert_([['d', 'u']] == [x[1] for x in host_B.act_depend_of if x[0] is host_A])
         self.assert_([['n']] == [x[1] for x in host_B.chk_depend_of if x[0] is host_A])
 
-
     def test_host_inherits_dependencies(self):
         self.print_header()
         now = time.time()
@@ -154,6 +149,7 @@ class TestConfig(ShinkenTest):
         self.assert_(host_A in [x[0] for x in host_C.act_depend_of])
         self.assert_(host_B in [x[0] for x in host_C.act_depend_of])
         self.assert_(host_C in [x[0] for x in host_D.act_depend_of])
+
         # and through inherits_parent....
         #self.assert_(host_A in [x[0] for x in host_D.act_depend_of])
         #self.assert_(host_B in [x[0] for x in host_D.act_depend_of])
@@ -170,8 +166,6 @@ class TestConfig(ShinkenTest):
         print "Dep: ", svc_son.act_depend_of
         self.assert_([['u', 'c', 'w']] == [x[1] for x in svc_son.act_depend_of if x[0] is svc_parent])
 
-
-
     def test_host_non_inherits_dependencies(self):
         #
         #   A  <------  B  <--
@@ -183,7 +177,6 @@ class TestConfig(ShinkenTest):
         host_C = self.sched.hosts.find_by_name("test_host_C")
         host_D = self.sched.hosts.find_by_name("test_host_D")
         host_E = self.sched.hosts.find_by_name("test_host_E")
-
 
         print "A depends on", ",".join([x[0].get_name() for x in host_A.chk_depend_of])
         print "B depends on", ",".join([x[0].get_name() for x in host_B.chk_depend_of])
@@ -208,4 +201,3 @@ if __name__ == '__main__':
     command = """unittest.main()"""
     unittest.main()
     #cProfile.runctx( command, globals(), locals(), filename="Thruk.profile" )
-

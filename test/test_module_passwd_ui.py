@@ -38,7 +38,6 @@ if not sys.version_info > (2, 5):
     else:
         sys.exit(0)
 
-
 from shinken.log import logger
 from shinken.objects.module import Module
 from shinken.modules import passwd_ui
@@ -82,4 +81,3 @@ class TestConfig(ShinkenTest):
 if __name__ == '__main__':
     if sys.version_info > (2, 5):
         unittest.main()
-

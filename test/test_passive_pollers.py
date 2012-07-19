@@ -26,6 +26,7 @@ from shinken_test import *
 
 
 class GoodArbiter(ArbiterLink):
+
     # To lie about satellites
     def ping(self):
         print "Dummy OK for", self.get_name()
@@ -39,6 +40,7 @@ class GoodArbiter(ArbiterLink):
 
 
 class GoodScheduler(SchedulerLink):
+
     # To lie about satellites
     def ping(self):
         print "Dummy OK for", self.get_name()
@@ -59,7 +61,9 @@ class BadScheduler(SchedulerLink):
     def have_conf(self, i):
         return False
 
+
 class GoodPoller(PollerLink):
+
     # To lie about satellites
     def ping(self):
         print "Dummy OK for", self.get_name()
@@ -74,7 +78,9 @@ class BadPoller(PollerLink):
         print "Dummy bad ping", self.get_name()
         self.add_failed_check_attempt()
 
+
 class GoodReactionner(ReactionnerLink):
+
     # To lie about satellites
     def ping(self):
         print "Dummy OK for", self.get_name()
@@ -82,13 +88,16 @@ class GoodReactionner(ReactionnerLink):
 
     def put_conf(self, conf):
         return True
+
 
 class BadReactionner(ReactionnerLink):
     def ping(self):
         print "Dummy bad ping", self.get_name()
         self.add_failed_check_attempt()
 
+
 class GoodBroker(BrokerLink):
+
     # To lie about satellites
     def ping(self):
         print "Dummy OK for", self.get_name()
@@ -96,6 +105,7 @@ class GoodBroker(BrokerLink):
 
     def put_conf(self, conf):
         return True
+
 
 class BadBroker(BrokerLink):
     def ping(self):
@@ -106,7 +116,6 @@ class BadBroker(BrokerLink):
 class TestPassivePoller(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_passive_pollers.cfg')
-
 
     def test_simple_passive_pollers(self):
         print "The dispatcher", self.dispatcher
@@ -293,4 +302,3 @@ class TestPassivePoller(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

@@ -23,15 +23,14 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 from itemgroup import Itemgroup, Itemgroups
 
 from shinken.property import StringProp
 from shinken.log import logger
 
+
 class Hostgroup(Itemgroup):
-    id = 1 # zero is always a little bit special... like in database
+    id = 1  # zero is always a little bit special... like in database
     my_type = 'hostgroup'
 
     properties = Itemgroup.properties.copy()
@@ -52,21 +51,17 @@ class Hostgroup(Itemgroup):
         'HOSTGROUPACTIONURL': 'action_url'
     }
 
-
     def get_name(self):
         return self.hostgroup_name
 
-
     def get_hosts(self):
         return getattr(self, 'members', '')
-
 
     def get_hostgroup_members(self):
         if self.has('hostgroup_members'):
             return self.hostgroup_members.split(',')
         else:
             return []
-
 
     # We fillfull properties with template ones if need
     # Because hostgroup we call may not have it's members
@@ -98,9 +93,8 @@ class Hostgroup(Itemgroup):
         return self.get_hosts()
 
 
-
 class Hostgroups(Itemgroups):
-    name_property = "hostgroup_name" # is used for finding hostgroups
+    name_property = "hostgroup_name"  # is used for finding hostgroups
     inner_class = Hostgroup
 
     def get_members_by_name(self, hgname):
@@ -109,11 +103,9 @@ class Hostgroups(Itemgroups):
             return []
         return hg.get_hosts()
 
-
     def linkify(self, hosts=None, realms=None):
         self.linkify_hg_by_hst(hosts)
         self.linkify_hg_by_realms(realms)
-
 
     # We just search for each hostgroup the id of the hosts
     # and replace the name by the id
@@ -136,7 +128,6 @@ class Hostgroups(Itemgroups):
             # Make members uniq
             new_mbrs = list(set(new_mbrs))
 
-
             # We find the id, we remplace the names
             hg.replace_members(new_mbrs)
 
@@ -146,7 +137,6 @@ class Hostgroups(Itemgroups):
                 # and be sure we are uniq in it
                 h.hostgroups = list(set(h.hostgroups))
 
-
     # More than an explode function, but we need to already
     # have members so... Will be really linkify just after
     # And we explode realm in ours members, but do not overide
@@ -155,7 +145,8 @@ class Hostgroups(Itemgroups):
         # Now we explode the realm value if we've got one
         # The group realm must not overide a host one (warning?)
         for hg in self:
-            if not hasattr(hg, 'realm'): continue
+            if not hasattr(hg, 'realm'):
+                continue
 
             r = realms.find_by_name(hg.realm.strip())
             if r is not None:
@@ -168,8 +159,9 @@ class Hostgroups(Itemgroups):
                 continue
 
             for h in hg:
-                if h is None: continue
-                if h.realm is None or h.got_default_realm: # default value not hasattr(h, 'realm'):
+                if h is None:
+                    continue
+                if h.realm is None or h.got_default_realm:  # default value not hasattr(h, 'realm'):
                     logger.debug("[hostgroups] apply a realm %s to host %s from a hostgroup rule (%s)" % \
                         (hg.realm.get_name(), h.get_name(), hg.get_name()))
                     h.realm = hg.realm
@@ -178,18 +170,16 @@ class Hostgroups(Itemgroups):
                         logger.warning("[hostgroups] host %s it not in the same realm than it's hostgroup %s" % \
                             (h.get_name(), hg.get_name()))
 
-
     # Add a host string to a hostgroup member
     # if the host group do not exist, create it
     def add_member(self, hname, hgname):
         hg = self.find_by_name(hgname)
         # if the id do not exist, create the hg
         if hg is None:
-            hg = Hostgroup({'hostgroup_name': hgname, 'alias': hgname, 'members':  hname})
+            hg = Hostgroup({'hostgroup_name': hgname, 'alias': hgname, 'members': hname})
             self.add(hg)
         else:
             hg.add_string_member(hname)
-
 
     # Use to fill members with hostgroup_members
     def explode(self):

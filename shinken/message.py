@@ -24,9 +24,6 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
-
-
 class Message:
     """This is a simple message class for communications between actionners and
     workers
@@ -38,24 +35,20 @@ class Message:
     _data = None
     _from = None
 
-
     def __init__(self, id, type, data=None, source=None):
         self._type = type
         self._data = data
         self._from = id
         self.source = source
 
-
     def get_type(self):
         return self._type
-
 
     def get_data(self):
         return self._data
 
     def get_from(self):
         return self._from
-
 
     def str(self):
         return "Message from %d (%s), Type: %s Data: %s" % (self._from, self.source, self._type, self._data)

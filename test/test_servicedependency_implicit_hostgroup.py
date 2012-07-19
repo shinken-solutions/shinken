@@ -29,7 +29,6 @@ class TestServiceDepAndGroups(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_servicedependency_implicit_hostgroup.cfg')
 
-
     def test_implicithostgroups(self):
         #
         # Config is not correct because of a wrong relative path
@@ -50,23 +49,20 @@ class TestServiceDepAndGroups(ShinkenTest):
         svc_snmp2 = self.sched.services.find_srv_by_name_and_hostname("test_router_0", "SNMP")
         self.assert_(svc_snmp2 is not None)
 
-        svc_postfix_fathers = [ c[0].get_full_name() for c in svc_postfix.act_depend_of]
+        svc_postfix_fathers = [c[0].get_full_name() for c in svc_postfix.act_depend_of]
         print svc_postfix_fathers
         # Should be [u'test_router_0/SNMP', u'test_host_0/SNMP', u'test_host_0']
         self.assert_('test_router_0/SNMP' in svc_postfix_fathers)
         self.assert_('test_host_0/SNMP' in svc_postfix_fathers)
 
         # Now look for the routers services
-        svc_cpu_fathers = [ c[0].get_full_name() for c in svc_cpu.act_depend_of]
+        svc_cpu_fathers = [c[0].get_full_name() for c in svc_cpu.act_depend_of]
         print svc_cpu_fathers
         # Should be [u'test_router_0/SNMP', u'test_host_0/SNMP', u'test_host_0']
         self.assert_('test_router_0/SNMP' in svc_cpu_fathers)
         self.assert_('test_host_0/SNMP' in svc_cpu_fathers)
 
-
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
-
-
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
 
     def test_implicithostnames(self):
         #
@@ -84,13 +80,13 @@ class TestServiceDepAndGroups(ShinkenTest):
         svc_cpu = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "CPU_BYSSH")
         self.assert_(svc_cpu is not None)
 
-        svc_postfix_fathers = [ c[0].get_full_name() for c in svc_postfix.act_depend_of]
+        svc_postfix_fathers = [c[0].get_full_name() for c in svc_postfix.act_depend_of]
         print svc_postfix_fathers
         # Should be [u'test_router_0/SNMP', u'test_host_0/SNMP', u'test_host_0']
         self.assert_('test_host_0/SSH' in svc_postfix_fathers)
 
         # Now look for the routers services
-        svc_cpu_fathers = [ c[0].get_full_name() for c in svc_cpu.act_depend_of]
+        svc_cpu_fathers = [c[0].get_full_name() for c in svc_cpu.act_depend_of]
         print svc_cpu_fathers
         # Should be [u'test_router_0/SNMP', u'test_host_0/SNMP', u'test_host_0']
         self.assert_('test_host_0/SSH' in svc_cpu_fathers)
@@ -99,4 +95,3 @@ class TestServiceDepAndGroups(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

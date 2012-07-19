@@ -15,17 +15,29 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-# This program transforms a flat dependency file into a json one so it can be loaded in
-# hot_dependencies_arbiter module
-# The input file format is :
-# host1 : vm1
-# host2 : vm2
-# ...
-# You can now get a live update of your dependency tree in shinken for your xen/virtualbox/qemu
-# All you have to do is finding a way to modify this flat file when you do a live migration
-# for example, you can use a script like this in your crontab
-# dsh -Mc -g mydom0group 'xm list | awk "/vm-/ { print \$1 }"' > /tmp/shinken_flat_mapping
-#
+"""
+This program transforms a flat dependency file into a json one so it
+can be loaded in hot_dependencies_arbiter module
+
+The input file format is:
+  host1 ":" vm1
+  host2 ":" vm2
+  ...
+
+Spaces around host- and vm-names will be stripped. Lines starting with
+a `#` will be ignored.
+
+You can now get a live update of your dependency tree in shinken for
+your xen/virtualbox/qemu. All you have to do is finding a way to
+modify this flat file when you do a live migration.
+
+For example, you can use a script like this in your crontab::
+
+  dsh -Mc -g mydom0group 'xm list' | \
+      awk "/vm-/ { print \$1 }"' > /tmp/shinken_flat_mapping
+
+"""
+
 
 import os
 import sys
@@ -35,14 +47,15 @@ import optparse
 try:
     import json
 except ImportError:
-    # For old Python version, load
-    # simple json (it can be hard json?! It's 2 functions guy!)
+    # For old Python version, load simple json
     try:
         import simplejson as json
     except ImportError:
-        sys.exit("Error: you need the json or simplejson module for this script")
+        raise SystemExit("Error: you need the json or simplejson module "
+                         "for this script")
 
-VERSION = '0.1'
+VERSION = '0.2'
+
 
 def main(input_file, output_file):
     # Check if input_file is newer than output_file
@@ -51,34 +64,37 @@ def main(input_file, output_file):
             print "Nothing to do"
             return True
     r = []
-    flatmappingfile = open(input_file,'rb')
+    flatmappingfile = open(input_file)
+    try:
+        for line in flatmappingfile:
+            if line.startswith('#'):
+                # this is a comment line, skip it
+                continue
+            parts = line.split(':')
+            v = (('host', parts[0].strip()), ('host', parts[1].strip()))
+            r.append(v)
+    finally:
+        flatmappingfile.close()
 
-    for ligne in flatmappingfile:
-        ligne = ligne.rstrip('\n\r')
-        parts = ligne.split(':')
-        host = parts[0]
-        vm = parts[1]
-        v = (('host', host),('host', vm))
-        r.append(v)
+    jsonmappingfile = open(output_file, 'w')
+    try:
+        json.dump(r, jsonmappingfile)
+    finally:
+        jsonmappingfile.close()
 
-    flatmappingfile.close()
-
-    jsonmappingfile = open(output_file,'wb')
-    buf=json.dumps(r)
-    jsonmappingfile.write(buf)
-    jsonmappingfile.close()
 
 if __name__ == "__main__":
-    # Manage the options
     parser = optparse.OptionParser(
         version="Shinken external flat mapping file to json mapping %s" % VERSION)
-    parser.add_option("-o", "--output",dest='output_file',default='/tmp/external_mapping_file.json',
+    parser.add_option("-o", "--output", dest='output_file',
+                      default='/tmp/external_mapping_file.json',
                       help="Path of the generated json mapping file.")
-    parser.add_option("-i", "--input", dest='input_file', default='/tmp/shinken_flat_mapping',
-                      help="Path oh the flat mapping file")
+    parser.add_option("-i", "--input", dest='input_file',
+                      default='/tmp/shinken_flat_mapping',
+                      help="Path of the flat mapping input file.")
 
     opts, args = parser.parse_args()
     if args:
         parser.error("does not take any positional arguments")
 
-    main(**opts.__dict__)
+    main(**vars(opts))

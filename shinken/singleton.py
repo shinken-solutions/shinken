@@ -24,8 +24,6 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
-
 class Singleton(type):
     """The classic Singleton class. So all instance of this class will be the same
     instance in fact.

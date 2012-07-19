@@ -1,6 +1,6 @@
-#!/bin/bash
-
-# Copyright (C) 2009-2011:
+#!/bin/sh
+#
+# Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -22,16 +22,21 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-DIR=$(cd $(dirname "$0"); pwd)
-BIN=$DIR"/../bin"
-ETC=$DIR"/../etc"
+DIR="$(cd $(dirname "$0"); pwd)"
+BIN="$DIR"/../bin
+ETC="$DIR"/../etc
 
 echo "Stopping broker"
 
-parent=`cat $DIR/../var/brokerd.pid`
+parent=$(cat "$DIR"/../var/brokerd.pid)
+
+kill $parent
+sleep 1
 
 # kill parent and childs broker processes
-for brokerpid in $(ps -aef | grep $parent | grep "shinken-broker" | awk '{print $2}')
+for brokerpid in $(ps -f --ppid $parent | grep "shinken-broker" | awk '{print $2}')
 do
+    echo "KILLING BROKER PROCESS" $brokerpid
     kill $brokerpid
 done
+

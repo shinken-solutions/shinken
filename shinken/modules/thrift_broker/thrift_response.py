@@ -29,6 +29,7 @@ try:
 except ImportError:
     import simplejson as json
 
+
 class ThriftResponse:
 
     """A class which represents the response to a thrift request.
@@ -42,7 +43,7 @@ class ThriftResponse:
 
     separators = map(lambda x: chr(int(x)), [10, 59, 44, 124])
 
-    def __init__(self, responseheader = 'off', outputformat = 'csv', keepalive = 'off', columnheaders = 'off', separators = separators):
+    def __init__(self, responseheader='off', outputformat='csv', keepalive='off', columnheaders='off', separators=separators):
         self.responseheader = responseheader
         self.outputformat = outputformat
         self.keepalive = keepalive
@@ -51,13 +52,11 @@ class ThriftResponse:
         self.output = ''
         pass
 
-
     def __str__(self):
         output = "ThriftResponse:\n"
         for attr in ["responseheader", "outputformat", "keepalive", "columnheaders", "separators"]:
             output += "response %s: %s\n" % (attr, getattr(self, attr))
         return output
-
 
     def respond(self):
         if self.responseheader == 'fixed16':
@@ -66,7 +65,6 @@ class ThriftResponse:
             self.output = '%3d %11d\n' % (statuscode, responselength) + self.output
 
         return self.output, self.keepalive
-
 
     def format_live_data(self, result, columns, aliases):
         lines = []
@@ -112,4 +110,4 @@ class ThriftResponse:
             else:
                 lines.insert(0, columns)
         #self.output = self.separators[0].join(lines)
-        self.output=lines
+        self.output = lines

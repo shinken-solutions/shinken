@@ -23,20 +23,18 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from item import Item, Items
 
 from shinken.util import strip_and_uniq
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 from shinken.log import logger
 
-
-_special_properties = ( 'contacts', 'contact_groups', 'first_notification_time', 'last_notification_time' )
-_special_properties_time_based = ( 'contacts', 'contact_groups', 'first_notification', 'last_notification' )
+_special_properties = ('contacts', 'contact_groups', 'first_notification_time', 'last_notification_time')
+_special_properties_time_based = ('contacts', 'contact_groups', 'first_notification', 'last_notification')
 
 
 class Escalation(Item):
-    id = 1 # zero is always special in database, so we do not take risk here
+    id = 1  # zero is always special in database, so we do not take risk here
     my_type = 'escalation'
 
     properties = Item.properties.copy()
@@ -46,7 +44,7 @@ class Escalation(Item):
         'last_notification':    IntegerProp(),
         'first_notification_time': IntegerProp(),
         'last_notification_time': IntegerProp(),
-        'notification_interval': IntegerProp('30'), # like Nagios value
+        'notification_interval': IntegerProp('-1'), # by default don't use escalation one, but object one
         'escalation_period':    StringProp(default=''),
         'escalation_options':   ListProp(default='d,u,r,w,c'),
         'contacts':             StringProp(),
@@ -55,13 +53,12 @@ class Escalation(Item):
 
     running_properties = Item.running_properties.copy()
     running_properties.update({
-        'time_based':           BoolProp(default=False),
+        'time_based': BoolProp(default=False),
     })
 
     # For debugging purpose only (nice name)
     def get_name(self):
         return self.escalation_name
-
 
     # Return True if:
     # *time in in escalation_period or we do not have escalation_period
@@ -107,7 +104,6 @@ class Escalation(Item):
         # Ok, I do not see why not escalade. So it's True :)
         return True
 
-
     # t = the reference time
     def get_next_notif_time(self, t_wished, status, creation_time, interval):
         small_states = {'WARNING': 'w', 'UNKNOWN': 'u', 'CRITICAL': 'c',
@@ -136,7 +132,6 @@ class Escalation(Item):
         # Ok so I ask for my start as a possibility for the next notification time
         return start
 
-
     # Check is required prop are set:
     # template are always correct
     # contacts OR contactgroups is need
@@ -148,14 +143,14 @@ class Escalation(Item):
         if hasattr(self, 'first_notification_time') or hasattr(self, 'last_notification_time'):
             self.time_based = True
             special_properties = _special_properties_time_based
-        else: # classic ones
+        else:  # classic ones
             special_properties = _special_properties
 
         for prop, entry in cls.properties.items():
             if prop not in special_properties:
                 if not hasattr(self, prop) and entry.required:
                     logger.info('%s: I do not have %s' % (self.get_name(), prop))
-                    state = False # Bad boy...
+                    state = False  # Bad boy...
 
         # Raised all previously saw errors like unknown contacts and co
         if self.configuration_errors != []:
@@ -176,7 +171,7 @@ class Escalation(Item):
             if not hasattr(self, 'last_notification_time'):
                 logger.info('%s: I do not have last_notification_time' % self.get_name())
                 state = False
-        else: # we check classical properties
+        else:  # we check classical properties
             if not hasattr(self, 'first_notification'):
                 logger.info('%s: I do not have first_notification' % self.get_name())
                 state = False
@@ -185,7 +180,6 @@ class Escalation(Item):
                 state = False
 
         return state
-
 
 
 class Escalations(Items):
@@ -198,10 +192,8 @@ class Escalations(Items):
         self.linkify_es_by_s(services)
         self.linkify_es_by_h(hosts)
 
-
     def add_escalation(self, es):
         self.items[es.id] = es
-
 
     # Will register esclations into service.escalations
     def linkify_es_by_s(self, services):
@@ -212,8 +204,8 @@ class Escalations(Items):
             es_hname, sdesc = es.host_name, es.service_description
             if '' in (es_hname.strip(), sdesc.strip()):
                 continue
-            for hname in strip_and_uniq( es_hname.split(',') ):
-                for sname in strip_and_uniq( sdesc.split(',') ):
+            for hname in strip_and_uniq(es_hname.split(',')):
+                for sname in strip_and_uniq(sdesc.split(',')):
                     s = services.find_srv_by_name_and_hostname(hname, sname)
                     if s is not None:
                         #print "Linking service", s.get_name(), 'with me', es.get_name()

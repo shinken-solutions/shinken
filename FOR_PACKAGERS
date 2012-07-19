@@ -12,6 +12,50 @@ You will need Python >=2.4 (for 2.4 and 2.5 you will need the multiprocessing pa
 You will need the pyro lib too. It must already have a package. If not, take if from pypi (easy_install)
 
 
+
+=== First install, to skip the install script ===
+
+* Create a user account and a group for shinken on your system (not necessary if using install script)::
+
+   useradd --user-group shinken
+   usermod --lock shinken
+
+Install
+-------
+In fact you can install the application by using the `setup.py` script.
+No compilation is needed!
+`setup.py` will install the shinken library in the python path, create the
+`/etc/shinken` and `/var/lib/shinken` directory (you can change them in
+the `setup.cfg` file before launching `setup.py`). You will
+need the `python-setuptools` package for it. Then just run::
+
+  sudo python setup.py install --install-scripts=/usr/bin/
+
+Update
+------
+
+For this way you can launch ::
+    sudo python setup.py update --install-scripts=/usr/bin/
+
+Remove
+------
+There is a script called clean.sh in the source directory for this task.
+It contains relative paths so it should be run from within the source dir.
+Beware, it will delete all Shinken related files!
+
+Running
+-------
+The `setup.py` installs some `init.d` scripts, let's use them::
+
+  /etc/init.d/shinken-scheduler start
+  /etc/init.d/shinken-poller start
+  /etc/init.d/shinken-reactionner start
+  /etc/init.d/shinken-broker start
+  /etc/init.d/shinken-arbiter start
+
+
+
+
 === Create the Package ===
 
 You can change the place you want to put etc and var in the file setup_parameters.cfg. You can also change

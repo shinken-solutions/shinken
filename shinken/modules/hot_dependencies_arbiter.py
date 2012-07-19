@@ -28,7 +28,6 @@
 # with all links between objects. Update them (create/delete) at the
 # launch or at fly
 
-
 import time
 import os
 import subprocess
@@ -47,7 +46,6 @@ except ImportError:
 
 from shinken.basemodule import BaseModule
 from shinken.external_command import ExternalCommand
-
 
 properties = {
     'daemons': ['arbiter'],
@@ -69,7 +67,6 @@ def get_instance(plugin):
     return instance
 
 
-
 # Get hosts and/or services dep by launching a command
 # or read a flat file as json format that got theses links
 class Hot_dependencies_arbiter(BaseModule):
@@ -87,21 +84,17 @@ class Hot_dependencies_arbiter(BaseModule):
         self.mapping_command_timeout = mapping_command_timeout
         self.in_debug = in_debug
 
-
     # Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
         print "I open the HOT dependency module"
         # Remember what we add
 
-
     def _is_file_existing(self):
         return os.path.exists(self.mapping_file)
-
 
     def debug(self, s):
         if self.in_debug:
             print "[HotDependency] %s " % s
-
 
     # Look is the mapping filechanged since the last lookup
     def _is_mapping_file_changed(self):
@@ -110,10 +103,9 @@ class Hot_dependencies_arbiter(BaseModule):
             if last_update > self.last_update:
                 self.last_update = last_update
                 return True
-        except OSError, exp: # Maybe the file got problem, we bypaass here
+        except OSError, exp:  # Maybe the file got problem, we bypaass here
             self.debug(str(exp))
         return False
-
 
     # Read the mapping file and update our internal mappings
     def _update_mapping(self):
@@ -126,8 +118,7 @@ class Hot_dependencies_arbiter(BaseModule):
         self.mapping = set()
         for e in mapping:
             son, father = e
-            self.mapping.add( (tuple(son), tuple(father)) )
-
+            self.mapping.add((tuple(son), tuple(father)))
 
     # Maybe the file is updated, but the mapping is the same
     # if not, look at addition and remove objects
@@ -149,9 +140,8 @@ class Hot_dependencies_arbiter(BaseModule):
                 self.mapping_command,
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 close_fds=do_close_fd, shell=True)
-        except OSError , exp:
+        except OSError, exp:
             self.error("Fail Launching the command %s: %s" % (self.mapping_command, exp))
-
 
     # Look if the command is finished or not
     def _watch_command_finished(self):
@@ -167,7 +157,6 @@ class Hot_dependencies_arbiter(BaseModule):
             if self.process.returncode != 0:
                 self.debug("The command return in error: %s \n %s" % (stderrdata, stdoutdata))
             self.process = None
-
 
     def tick_external_command(self):
         now = int(time.time())
@@ -216,8 +205,6 @@ class Hot_dependencies_arbiter(BaseModule):
                 else:
                     self.debug("Missing one of %s %s" % (son_name, father_name))
 
-
-
     def hook_tick(self, arb):
         now = int(time.time())
         self.tick_external_command()
@@ -244,7 +231,7 @@ class Hot_dependencies_arbiter(BaseModule):
                 if son_type == 'host' and father_type == 'host':
                     # We just raise the external command, arbiter will do the job
                     # to dispatch them
-                    extcmd = "[%lu] ADD_SIMPLE_HOST_DEPENDENCY;%s;%s\n" % (now,son_name, father_name)
+                    extcmd = "[%lu] ADD_SIMPLE_HOST_DEPENDENCY;%s;%s\n" % (now, son_name, father_name)
                     e = ExternalCommand(extcmd)
 
                     self.debug('Raising external command: %s' % extcmd)
@@ -264,10 +251,8 @@ class Hot_dependencies_arbiter(BaseModule):
                 if son_type == 'host' and father_type == 'host':
                     # We just raise the external command, arbiter will do the job
                     # to dispatch them
-                    extcmd = "[%lu] DEL_HOST_DEPENDENCY;%s;%s\n" % (now,son_name, father_name)
+                    extcmd = "[%lu] DEL_HOST_DEPENDENCY;%s;%s\n" % (now, son_name, father_name)
                     e = ExternalCommand(extcmd)
 
                     self.debug('Raising external command %s' % extcmd)
                     arb.add(e)
-
-

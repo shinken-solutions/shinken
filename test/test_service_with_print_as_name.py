@@ -29,7 +29,6 @@ class TestServiceWithPrintName(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_service_with_print_as_name.cfg')
 
-
     def test_service_with_print_as_name(self):
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "print")
         self.assert_(svc is not None)
@@ -37,4 +36,3 @@ class TestServiceWithPrintName(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

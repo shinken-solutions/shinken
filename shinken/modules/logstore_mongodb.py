@@ -25,7 +25,6 @@
 
 # import von modules/livestatus_logstore
 
-
 """
 This class is for attaching a mongodb database to a livestatus broker module.
 It is one possibility for an exchangeable storage for log broks
@@ -49,7 +48,6 @@ except ImportError:
     ReadPreference = None
 from pymongo.errors import AutoReconnect
 
-
 from shinken.basemodule import BaseModule
 from shinken.objects.module import Module
 from shinken.log import logger
@@ -68,10 +66,10 @@ def get_instance(plugin):
     instance = LiveStatusLogStoreMongoDB(plugin)
     return instance
 
+
 def row_factory(cursor, row):
     """Handler for the sqlite fetch method."""
     return Logline(cursor.description, row)
-
 
 CONNECTED = 1
 DISCONNECTED = 2
@@ -174,7 +172,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
             today0000 = datetime.datetime(today.year, today.month, today.day, 0, 0, 0)
             today0005 = datetime.datetime(today.year, today.month, today.day, 0, 5, 0)
             oldest = today0000 - datetime.timedelta(days=self.max_logs_age)
-            self.db[self.collection].remove({ u'time': { '$lt': time.mktime(oldest.timetuple()) }}, safe=True)
+            self.db[self.collection].remove({u'time': {'$lt': time.mktime(oldest.timetuple())}}, safe=True)
 
             if now < time.mktime(today0005.timetuple()):
                 nextrotation = today0005
@@ -228,24 +226,24 @@ class LiveStatusLogStoreMongoDB(BaseModule):
             print "This line is invalid", line
 
     def add_filter(self, operator, attribute, reference):
-	if attribute == 'time':
-	    self.mongo_time_filter_stack.put_stack(self.make_mongo_filter(operator, attribute, reference))
-	self.mongo_filter_stack.put_stack(self.make_mongo_filter(operator, attribute, reference))
+        if attribute == 'time':
+            self.mongo_time_filter_stack.put_stack(self.make_mongo_filter(operator, attribute, reference))
+        self.mongo_filter_stack.put_stack(self.make_mongo_filter(operator, attribute, reference))
 
     def add_filter_and(self, andnum):
-	self.mongo_filter_stack.and_elements(andnum)
+        self.mongo_filter_stack.and_elements(andnum)
 
     def add_filter_or(self, ornum):
-	self.mongo_filter_stack.or_elements(ornum)
+        self.mongo_filter_stack.or_elements(ornum)
 
     def add_filter_not(self):
-	self.mongo_filter_stack.not_elements()
+        self.mongo_filter_stack.not_elements()
 
     def get_live_data_log(self):
         """Like get_live_data, but for log objects"""
         # finalize the filter stacks
-	self.mongo_time_filter_stack.and_elements(self.mongo_time_filter_stack.qsize())
-	self.mongo_filter_stack.and_elements(self.mongo_filter_stack.qsize())
+        self.mongo_time_filter_stack.and_elements(self.mongo_time_filter_stack.qsize())
+        self.mongo_filter_stack.and_elements(self.mongo_filter_stack.qsize())
         if self.use_aggressive_sql:
             # Be aggressive, get preselected data from sqlite and do less
             # filtering in python. But: only a subset of Filter:-attributes
@@ -263,14 +261,14 @@ class LiveStatusLogStoreMongoDB(BaseModule):
         # We can apply the filterstack here as well. we have columns and filtercolumns.
         # the only additional step is to enrich log lines with host/service-attributes
         # A timerange can be useful for a faster preselection of lines
-        filter_element = eval('{ '+mongo_filter+' }')
+        filter_element = eval('{ ' + mongo_filter + ' }')
         print "mongo filter is", filter_element
         dbresult = []
         columns = ['logobject', 'attempt', 'logclass', 'command_name', 'comment', 'contact_name', 'host_name', 'lineno', 'message', 'options', 'plugin_output', 'service_description', 'state', 'state_type', 'time', 'type']
         if not self.is_connected == CONNECTED:
             print "sorry, not connected"
         else:
-            dbresult = [Logline([(c, ) for c in columns], [x[col] for col in columns]) for x in self.db[self.collection].find(filter_element).sort([(u'time', pymongo.ASCENDING), (u'lineno', pymongo.ASCENDING)])]
+            dbresult = [Logline([(c,) for c in columns], [x[col] for col in columns]) for x in self.db[self.collection].find(filter_element).sort([(u'time', pymongo.ASCENDING), (u'lineno', pymongo.ASCENDING)])]
         return dbresult
 
     def make_mongo_filter(self, operator, attribute, reference):
@@ -297,7 +295,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
             if reference == '':
                 return '\'%s\' : \'\'' % (attribute,)
             else:
-                return '\'%s\' : { \'$regex\' : %s, \'$options\' : \'i\' }' % (attribute, '^'+reference+'$')
+                return '\'%s\' : { \'$regex\' : %s, \'$options\' : \'i\' }' % (attribute, '^' + reference + '$')
 
         def match_nocase_filter():
             return '\'%s\' : { \'$regex\' : %s, \'$options\' : \'i\' }' % (attribute, reference)
@@ -322,16 +320,16 @@ class LiveStatusLogStoreMongoDB(BaseModule):
 
         def not_match_filter():
             # http://myadventuresincoding.wordpress.com/2011/05/19/mongodb-negative-regex-query-in-mongo-shell/
-            return '\'%s\' : { \'$regex\' : %s }' % (attribute, '^((?!'+reference+').)')
+            return '\'%s\' : { \'$regex\' : %s }' % (attribute, '^((?!' + reference + ').)')
 
         def ne_nocase_filter():
             if reference == '':
                 return '\'%s\' : \'\'' % (attribute,)
             else:
-                return '\'%s\' : { \'$regex\' : %s, \'$options\' : \'i\' }' % (attribute, '^((?!'+reference+').)')
+                return '\'%s\' : { \'$regex\' : %s, \'$options\' : \'i\' }' % (attribute, '^((?!' + reference + ').)')
 
         def not_match_nocase_filter():
-            return '\'%s\' : { \'$regex\' : %s, \'$options\' : \'i\' }' % (attribute, '^((?!'+reference+').)')
+            return '\'%s\' : { \'$regex\' : %s, \'$options\' : \'i\' }' % (attribute, '^((?!' + reference + ').)')
 
         def no_filter():
             return '\'time\' : { \'$exists\' : True }'
@@ -362,7 +360,6 @@ class LiveStatusLogStoreMongoDB(BaseModule):
             return ne_nocase_filter
         elif operator == '!~~':
             return not_match_nocase_filter
-
 
 
 class LiveStatusMongoStack(LiveStatusStack):

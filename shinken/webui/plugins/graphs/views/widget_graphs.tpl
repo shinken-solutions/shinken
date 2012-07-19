@@ -1,4 +1,3 @@
-
 %import time
 %now = time.time()
 %helper = app.helper
@@ -10,7 +9,9 @@
     <span>No element selected!</span>
 %else:
 
-  %uris = app.get_graph_uris(elt, now - 3600*4, now)
+  <!-- Reduce the time range of the dashboard graph. Last hour.
+   and specify the source  : dashboard !-->
+  %uris = app.get_graph_uris(elt, now - 3600, now, 'dashboard')
   %if len(uris) == 0:
     <span>No graph for this element</span>
   %end

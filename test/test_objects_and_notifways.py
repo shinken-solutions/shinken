@@ -29,7 +29,6 @@ class TestObjectsAndNotifWays(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_objects_and_notifways.cfg')
 
-
     # We got strange "objects" for some contacts property when we are using notif ways
     # and asking for  broks. Search why
     def test_dummy(self):
@@ -41,7 +40,7 @@ class TestObjectsAndNotifWays(ShinkenTest):
         b = c_normal.get_initial_status_brok()
         b.prepare()
         print "B normal", b
-        self.assert_(b.data['host_notification_options'] ==  u'd,u,r,f,s')
+        self.assert_(b.data['host_notification_options'] == u'd,u,r,f,s')
         b2 = c_nw.get_initial_status_brok()
         b2.prepare()
         print "B nw", b2
@@ -50,4 +49,3 @@ class TestObjectsAndNotifWays(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

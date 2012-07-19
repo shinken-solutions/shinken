@@ -25,6 +25,7 @@
 
 from shinken_test import *
 
+
 class TestPlusInInheritance(ShinkenTest):
 
     def setUp(self):
@@ -45,5 +46,3 @@ class TestPlusInInheritance(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-
-

@@ -51,7 +51,6 @@ if __name__ == '__main__':
     parser.add_option('-u', '--user', dest='username',
                       help='Username')
 
-
     opts, args = parser.parse_args()
 
     host = opts.host or 'localhost'

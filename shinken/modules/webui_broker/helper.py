@@ -5,7 +5,7 @@
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
 #    Hartmut Goebel, h.goebel@goebel-consult.de
-# 	 Andreas Karfusehr, andreas@karfusehr.de
+#    Andreas Karfusehr, andreas@karfusehr.de
 #
 # This file is part of Shinken.
 #
@@ -50,7 +50,6 @@ class Helper(object):
     def gogo(self):
         return 'HELLO'
 
-
     def act_inactive(self, b):
         if b:
             return 'Active'
@@ -78,7 +77,6 @@ class Helper(object):
         if t == 0 or t == None:
             return 'N/A'
         return time.asctime(time.localtime(t))
-
 
     # For a time, print something like
     # 10m 37s  (just duration = True)
@@ -153,10 +151,9 @@ class Helper(object):
 
         # Now manage the future or not print
         if in_future:
-            return 'in '+' '.join(duration)
-        else: # past :)
+            return 'in ' + ' '.join(duration)
+        else:  # past :)
             return ' '.join(duration) + ' ago'
-
 
     # Need to create a X level higer and lower to the element
     def create_json_dep_graph(self, elt, levels=3):
@@ -207,13 +204,12 @@ class Helper(object):
 
         # Set the right info panel
         d['data']['infos'] = r'''%s <h2 class="%s"><img style="width: 64px; height:64px" src="%s"/> %s: %s</h2>
-		       <p>since %s</p>
-		       <div style="float:right;"> <a href="%s">%s</a></div>'''  % (
+                   <p>since %s</p>
+                   <div style="float:right;"> <a href="%s">%s</a></div>''' % (
             '<img src="/static/img/icons/star.png" alt="star">' * (elt.business_impact - 2),
             elt.state.lower(), self.get_icon_state(elt), elt.state, elt.get_full_name(),
             self.print_duration(elt.last_state_change, just_duration=True, x_elts=2),
             self.get_link_dest(elt), self.get_button('Go to details', img='/static/images/search.png'))
-
 
         d['data']['elt_type'] = elt.__class__.my_type
         d['data']['is_problem'] = elt.is_problem
@@ -240,13 +236,12 @@ class Helper(object):
                 pd['data']["$color"] = 'Tomato'
             # If OK, show host->service as a green link
             elif elt.__class__.my_type != p.__class__.my_type:
-                 pd['data']["$color"] = 'PaleGreen'
+                pd['data']["$color"] = 'PaleGreen'
             d['adjacencies'].append(pd)
 
         # The sons case is now useful, it will be done by our sons
         # that will link us
         return d
-
 
     # Return all linked elements of this elt, and 2 level
     # higer and lower :)
@@ -269,7 +264,6 @@ class Helper(object):
         safe_print("get_all_linked_elts::Give elements", my)
         return my
 
-
     # Return a button with text, image, id and class (if need)
     def get_button(self, text, img=None, id=None, cls=None):
         #s = '<div class="buttons">\n'
@@ -285,11 +279,10 @@ class Helper(object):
         if img:
             s += '<img src="%s" alt=""/>\n' % img
         s += "%s" % text
-        s+= ''' </div>
+        s += ''' </div>
             </div>\n'''
 
         return s
-
 
     # For and host, return the services sorted by business
     # impact, then state, then desc
@@ -297,7 +290,6 @@ class Helper(object):
         t = copy.copy(host.services)
         t.sort(hst_srv_sort)
         return t
-
 
     def get_input_bool(self, b, id=None):
         id_s = ''
@@ -307,7 +299,6 @@ class Helper(object):
             return """<input type="checkbox" checked="checked" %s/>\n""" % id_s
         else:
             return """<input type="checkbox" %s />\n""" % id_s
-
 
     def print_business_rules_mobile(self, tree, level=0, source_problems=[]):
         safe_print("Should print tree", tree)
@@ -335,7 +326,7 @@ class Helper(object):
             if tree_is_good:
                 display = 'none'
                 img = 'expand.png'
-            else: # we will already show the tree, and use a reduce image
+            else:  # we will already show the tree, and use a reduce image
                 display = 'block'
                 img = 'reduce.png'
 
@@ -343,7 +334,7 @@ class Helper(object):
 
             for n in fathers:
                 sub_node = n['node']
-                sub_s = self.print_business_rules_mobile(n, level=level+1,source_problems=source_problems)
+                sub_s = self.print_business_rules_mobile(n, level=level+1, source_problems=source_problems)
                 s += '<li class="%s">%s</li>' % (self.get_small_icon_state(sub_node), sub_s)
             s += "</ul>"
         safe_print("Returing s:", s)
@@ -376,7 +367,7 @@ class Helper(object):
             if tree_is_good:
                 display = 'none'
                 img = 'expand.png'
-            else: # we will already show the tree, and use a reduce image
+            else:  # we will already show the tree, and use a reduce image
                 display = 'block'
                 img = 'reduce.png'
 
@@ -388,7 +379,7 @@ class Helper(object):
 
             for n in fathers:
                 sub_node = n['node']
-                sub_s = self.print_business_rules(n, level=level+1,source_problems=source_problems)
+                sub_s = self.print_business_rules(n, level=level+1, source_problems=source_problems)
                 s += '<li class="%s">%s</li>' % (self.get_small_icon_state(sub_node), sub_s)
             s += "</ul>"
         safe_print("Returing s:", s)
@@ -417,7 +408,7 @@ class Helper(object):
             if tree_is_good:
                 display = 'none'
                 img = 'expand.png'
-            else: # we will already show the tree, and use a reduce image
+            else:  # we will already show the tree, and use a reduce image
                 display = 'block'
                 img = 'reduce.png'
 
@@ -438,7 +429,7 @@ class Helper(object):
     # Get the small state for host/service icons
     # and satellites ones
     def get_small_icon_state(self, obj):
-        if obj.__class__.my_type in ['service', 'host' ]:
+        if obj.__class__.my_type in ['service', 'host']:
             if obj.state == 'PENDING':
                 return 'unknown'
             if obj.state == 'OK':
@@ -465,7 +456,6 @@ class Helper(object):
             return 'ok'
         return 'unknown'
 
-
     # For an object, give it's business impact as text
     # and stars if need
     def get_business_impact_text(self, obj):
@@ -476,7 +466,6 @@ class Helper(object):
 
         res = "%s %s" % (txts.get(obj.business_impact, 'Unknown'), stars)
         return res
-
 
     # We will outpout as a ul/li list the impacts of this
     def got_impacts_list_as_li(self, obj):
@@ -492,7 +481,6 @@ class Helper(object):
         t = copy.copy(obj.impacts)
         t.sort(hst_srv_sort)
         return t
-
 
     def get_link(self, obj, short=False, mobile=False):
         if obj.__class__.my_type == 'service':
@@ -521,7 +509,6 @@ class Helper(object):
         # if not service, host
         return '<a href="/mobile/host/%s" rel="external"> %s </a>' % (obj.get_full_name(), obj.get_full_name())
 
-
     # Give only the /service/blabla or /host blabla string, like for buttons inclusion
     def get_link_dest(self, obj):
         return "/%s/%s" % (obj.__class__.my_type, obj.get_full_name())
@@ -531,7 +518,6 @@ class Helper(object):
         if obj.__class__.my_type == 'service':
             return self.get_link(obj.host)
         return self.get_link(obj)
-
 
     # For an object, return the path of the icons
     def get_icon_state(self, obj):
@@ -559,14 +545,13 @@ class Helper(object):
             res.append((u'\xc2\xab First', 0, step, False))
             res.append(('...', None, None, False))
 
-
         print "Range,", current_page - 1, current_page + 1
         for i in xrange(current_page - 1, current_page + 2):
             if i < 0:
                 continue
             print "Doing PAGE", i
             is_current = (i == current_page)
-            start = int(i*step)
+            start = int(i * step)
             # Maybe we are generating a page too high, bail out
             if start > total:
                 continue
@@ -575,8 +560,8 @@ class Helper(object):
             res.append(('%d' % (i+1), start, end, is_current))
 
         if current_page < nb_pages - 2:
-            start = int((nb_pages - 1)*step)
-            end = int(nb_pages*step)
+            start = int((nb_pages - 1) * step)
+            end = int(nb_pages * step)
             res.append(('...', None, None, False))
             res.append((u'Last \xc2\xbb', start, end, False))
 
@@ -586,7 +571,6 @@ class Helper(object):
         print "Res", res
 
         return res
-
 
     # Get a perfometer part for html printing
     def get_perfometer(self, elt):
@@ -618,18 +602,15 @@ class Helper(object):
             return s
         return '\n'
 
-
-
     # TODO: Will look at the string s, and return a clean output without
     # danger for the browser
     def strip_html_output(self, s):
         return s
 
-
     # We want the html id of an hostor a service. It's basically
     # the full_name with / changed as -- (because in html, / is not valid :) )
     def get_html_id(self, elt):
-        return elt.get_full_name().replace('/','--').replace(' ','_')
+        return elt.get_full_name().replace('/', '--').replace(' ', '_')
 
     # URI with spaces are BAD, must change them with %20
     def get_uri_name(self, elt):
@@ -638,8 +619,5 @@ class Helper(object):
     # say if this user can launch an action or not
     def can_action(self, user):
         return user.is_admin or user.can_submit_commands
-
-
-
 
 helper = Helper()

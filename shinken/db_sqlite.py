@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from db import DB
 from shinken.log import logger
 import sqlite3
@@ -31,6 +30,7 @@ import sqlite3
 
 class DBSqlite(DB):
     """DBSqlite is a sqlite access database class"""
+
     def __init__(self, db_path, table_prefix=''):
         self.table_prefix = table_prefix
         self.db_path = db_path

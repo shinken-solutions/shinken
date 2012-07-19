@@ -29,7 +29,6 @@ class TestNullInheritance(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_nullinheritance.cfg')
 
-
     # We search to see if null as value really delete the inheritance
     # of a property
     def test_null_inheritance(self):
@@ -39,4 +38,3 @@ class TestNullInheritance(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import os
 
 properties = {
@@ -38,7 +37,7 @@ def get_instance(plugin):
     # Try to import all need modules
     try:
         from ndodb_oracle_broker import Ndodb_Oracle_broker
-    except ImportError , exp:
+    except ImportError, exp:
         print "Warning: the plugin type ndodb_oracle is unavailable: %s" % exp
         return None
     print "Get a ndoDB broker for plugin %s" % plugin.get_name()

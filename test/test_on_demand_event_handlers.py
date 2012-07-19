@@ -22,14 +22,13 @@
 # This file is used to test acknowledge of problems
 #
 
-
 from shinken_test import *
+
 
 class TestConfig(ShinkenTest):
 
     def setUp(self):
         self.setup_with_file('etc/nagios_on_demand_event_handlers.cfg')
-
 
     def test_on_demand_eh(self):
         self.print_header()
@@ -39,10 +38,10 @@ class TestConfig(ShinkenTest):
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
         #--------------------------------------------------------------
         # initialize host/service state
         #--------------------------------------------------------------

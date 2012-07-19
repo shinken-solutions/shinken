@@ -32,7 +32,6 @@ from shinken.objects.module import Module
 from shinken.modules import pickle_retention_file_generic
 from shinken.modules.pickle_retention_file_generic import get_instance
 
-
 modconf = Module()
 modconf.module_name = "PickleRetentionGeneric"
 modconf.module_type = pickle_retention_file_generic.properties['type']
@@ -77,7 +76,7 @@ class TestPickleRetentionBroker(ShinkenTest):
         # Now we clean the source, like if we restart
         arbiter.broks.clear()
 
-        self.assert_(len(arbiter.broks)==0)
+        self.assert_(len(arbiter.broks) == 0)
 
         r = sl.hook_load_retention(arbiter)
         print len(old_broks), len(arbiter.broks)
@@ -99,4 +98,3 @@ class TestPickleRetentionBroker(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

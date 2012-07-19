@@ -30,7 +30,6 @@ class TestCssInCommands(ShinkenTest):
     def setUp(self):
         self.setup_with_file('etc/nagios_css_in_command.cfg')
 
-
     def test_dummy(self):
         r = self.conf.conf_is_correct
         self.assert_(r)
@@ -39,4 +38,3 @@ class TestCssInCommands(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

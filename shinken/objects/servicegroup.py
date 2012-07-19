@@ -23,15 +23,14 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 from itemgroup import Itemgroup, Itemgroups
 
 from shinken.property import StringProp
 from shinken.log import logger
 
+
 class Servicegroup(Itemgroup):
-    id = 1 # zero is always a little bit special... like in database
+    id = 1  # zero is always a little bit special... like in database
     my_type = 'servicegroup'
 
     properties = Itemgroup.properties.copy()
@@ -52,24 +51,20 @@ class Servicegroup(Itemgroup):
         'SERVICEGROUPACTIONURL': 'action_url'
     }
 
-
     def get_services(self):
         if self.has('members'):
             return self.members
         else:
             return ''
 
-
     def get_name(self):
         return self.servicegroup_name
-
 
     def get_servicegroup_members(self):
         if self.has('servicegroup_members'):
             return self.servicegroup_members.split(',')
         else:
             return []
-
 
     # We fillfull properties with template ones if need
     # Because hostgroup we call may not have it's members
@@ -106,14 +101,12 @@ class Servicegroup(Itemgroup):
             return ''
 
 
-
 class Servicegroups(Itemgroups):
-    name_property = "servicegroup_name" # is used for finding servicegroup
+    name_property = "servicegroup_name"  # is used for finding servicegroup
     inner_class = Servicegroup
 
     def linkify(self, services):
         self.linkify_sg_by_srv(services)
-
 
     # We just search for each host the id of the host
     # and replace the name by the id
@@ -152,18 +145,16 @@ class Servicegroups(Itemgroups):
                 # and make this uniq
                 s.servicegroups = list(set(s.servicegroups))
 
-
     # Add a service string to a service member
     # if the service group do not exist, create it
     def add_member(self, cname, sgname):
         sg = self.find_by_name(sgname)
         # if the id do not exist, create the cg
         if sg is None:
-            sg = Servicegroup({'servicegroup_name': sgname, 'alias': sgname, 'members':  cname})
+            sg = Servicegroup({'servicegroup_name': sgname, 'alias': sgname, 'members': cname})
             self.add(sg)
         else:
             sg.add_string_member(cname)
-
 
     # Use to fill members with contactgroup_members
     def explode(self):

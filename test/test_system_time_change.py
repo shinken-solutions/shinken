@@ -25,6 +25,7 @@
 from shinken_test import *
 import commands
 
+
 class TestSystemTimeChange(ShinkenTest):
     # setUp is inherited from ShinkenTest
 
@@ -35,8 +36,6 @@ class TestSystemTimeChange(ShinkenTest):
         #a = commands.getstatusoutput(cmd)
         # Check the time is set correctly!
         #self.assert_(a[0] == 0)
-
-
 
     def test_system_time_change(self):
         #
@@ -50,8 +49,8 @@ class TestSystemTimeChange(ShinkenTest):
         now_str = time.asctime(time.localtime(now))
         print "Now:", now
         print "Now:", time.asctime(time.localtime(now))
-        tomorow = time.asctime(time.localtime(now+86400))
-        yesterday = time.asctime(time.localtime(now-86400))
+        tomorow = time.asctime(time.localtime(now + 86400))
+        yesterday = time.asctime(time.localtime(now - 86400))
 
         # Simulate a change now, because by default the value is 1970
         host.last_state_change = now
@@ -117,4 +116,3 @@ class TestSystemTimeChange(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

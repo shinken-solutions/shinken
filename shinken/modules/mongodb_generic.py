@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken. If not, see <http://www.gnu.org/licenses/>.
 
-
 """
 This module job is to get configuration data (mostly hosts) from a mongodb database.
 """
@@ -35,7 +34,6 @@ from pymongo.connection import Connection
 
 from shinken.basemodule import BaseModule
 
-
 properties = {
     'daemons': ['arbiter', 'webui', 'skonf'],
     'type': 'mongodb',
@@ -43,25 +41,26 @@ properties = {
     'phases': ['configuration'],
 }
 
+
 # called by the plugin manager to get a module instance
 def get_instance(plugin):
     print "[MongoDB Module]: Get Mongodb instance for plugin %s" % plugin.get_name()
-    uri   = plugin.uri
+    uri = plugin.uri
     database = plugin.database
 
     instance = Mongodb_generic(plugin, uri, database)
     return instance
 
+
 # Retrieve hosts from a Mongodb
 class Mongodb_generic(BaseModule):
     def __init__(self, mod_conf, uri, database):
         BaseModule.__init__(self, mod_conf)
-        self.uri        = uri
-        self.database   = database
+        self.uri = uri
+        self.database = database
         # Some used varaible init
         self.con = None
         self.db = None
-
 
     # Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
@@ -73,8 +72,6 @@ class Mongodb_generic(BaseModule):
             print "Mongodb Module: Error %s:" % e
             raise
         print "[Mongodb Module]: Connection OK"
-
-
 
 ################################ Arbiter part #################################
 
@@ -90,7 +87,7 @@ class Mongodb_generic(BaseModule):
         for t in tables:
             r[t] = []
 
-            cur = getattr(self.db, t).find({ '_state': { '$ne': 'disabled' } })
+            cur = getattr(self.db, t).find({'_state': {'$ne': 'disabled'}})
             for h in cur:
                 print "DBG: mongodb: get an ", t, h
                 # We remove a mongodb specific property, the _id
@@ -101,10 +98,6 @@ class Mongodb_generic(BaseModule):
                 r[t].append(h)
 
         return r
-
-
-
-
 
 #################################### WebUI parts ############################
     # We will get in the mongodb database the user preference entry, adn get the key
@@ -128,7 +121,6 @@ class Mongodb_generic(BaseModule):
 
         return e.get(key)
 
-
     # Same but for saving
     def set_ui_user_preference(self, user, key, value):
         if not self.db:
@@ -146,13 +138,13 @@ class Mongodb_generic(BaseModule):
         if not u:
             # no collection for this user? create a new one
             print "[Mongodb] No user entry for %s, I create a new one" % user.get_name()
-            self.db.ui_user_preferences.save({ '_id': user.get_name(), key: value})
+            self.db.ui_user_preferences.save({'_id': user.get_name(), key: value})
         else:
             # found a collection for this user
             print "[Mongodb] user entry found for %s" % user.get_name()
 
         print '[Mongodb]: saving user pref', "'$set': { %s: %s }" % (key, value)
-        r = self.db.ui_user_preferences.update({ '_id': user.get_name()}, { '$set': { key: value }})
+        r = self.db.ui_user_preferences.update({'_id': user.get_name()}, {'$set': {key: value}})
         print "[Mongodb] Return from update", r
         # Mayeb there was no doc there, if so, create an empty one
         if not r:
@@ -160,10 +152,8 @@ class Mongodb_generic(BaseModule):
             u = self.db.ui_user_preferences.find_one({'_id': user.get_name()})
             if not u:
                 print "[Mongodb] No user entry for %s, I create a new one" % user.get_name()
-                self.db.ui_user_preferences.save({ '_id': user.get_name(), key: value})
-            else: # ok, it was just the key that was missing, just update it and save it
+                self.db.ui_user_preferences.save({'_id': user.get_name(), key: value})
+            else:  # ok, it was just the key that was missing, just update it and save it
                 u[key] = value
                 print '[Mongodb] Just saving the new key in the user pref'
                 self.db.ui_user_preferences.save(u)
-
-

@@ -37,7 +37,6 @@ from shinken.objects.module import Module
 from shinken.modules import hot_dependencies_arbiter
 from shinken.modules.hot_dependencies_arbiter import Hot_dependencies_arbiter, get_instance
 
-
 modconf = Module()
 modconf.module_name = "PickleRetention"
 modconf.module_type = hot_dependencies_arbiter.properties['type']
@@ -55,6 +54,7 @@ except ImportError:
     except ImportError:
         print "Error: you need the json or simplejson module for this script"
         sys.exit(0)
+
 
 class TestModuleHotDep(ShinkenTest):
 
@@ -79,7 +79,6 @@ class TestModuleHotDep(ShinkenTest):
         self.assert_(host2.is_linked_with_host(host0) == False)
         self.assert_(host2.is_linked_with_host(host1) == False)
         self.assert_(host1.is_linked_with_host(host2) == False)
-
 
         # get our modules
         mod = sl = Hot_dependencies_arbiter(modconf, 'tmp/vmware_mapping_file.json', "", 30, 300)
@@ -133,9 +132,6 @@ class TestModuleHotDep(ShinkenTest):
         # Ok, we can delete the retention file
         os.unlink(mod.mapping_file)
 
-
-
-
     # We are trying to see if we can have good data with 2 commands call
     # CASE1: link between host0 and 1
     # then after some second,:
@@ -159,7 +155,6 @@ class TestModuleHotDep(ShinkenTest):
         self.assert_(host2.is_linked_with_host(host0) == False)
         self.assert_(host2.is_linked_with_host(host1) == False)
         self.assert_(host1.is_linked_with_host(host2) == False)
-
 
         # get our modules
         mod = None
@@ -221,7 +216,6 @@ class TestModuleHotDep(ShinkenTest):
         self.assert_(host1.is_linked_with_host(host0) == False)
         self.assert_(host1.is_linked_with_host(host2) == True)
 
-
         # Ok, we can delete the retention file
         os.unlink(mod.mapping_file)
 
@@ -230,4 +224,3 @@ class TestModuleHotDep(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

@@ -23,8 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 from Queue import Empty
 
 # In android, we sgould use threads, not process
@@ -53,7 +51,6 @@ import signal
 from shinken.worker import Worker
 
 
-
 class SkonfUIWorker(Worker):
     """SkonfuiWorker class is a sub one for the Worker one of the poller/reactionners
      it just take it's jobs from the mongodb, instead of the queues()
@@ -70,11 +67,9 @@ class SkonfUIWorker(Worker):
     def add_database_data(self, server):
         self.database_server = server
 
-
     def connect_database(self):
         con = Connection('localhost')
         self.db = con.shinken
-
 
     def get_scan_data(self):
         print "Info: I ask for a scan with the id", self.scan_asked
@@ -85,7 +80,6 @@ class SkonfUIWorker(Worker):
             print "No scan found with id", scan_id
             return
         self.scan = cur[0]
-
 
     def launch_scan(self):
         print "Info: I try to launch scan", self.scan
@@ -110,7 +104,6 @@ class SkonfUIWorker(Worker):
         runners = ['nmap']
         output_dir = None
         dbmod = 'Mongodb'
-
 
         # By default I want only hosts I never see
         # TODO: make this an option
@@ -137,11 +130,6 @@ class SkonfUIWorker(Worker):
 
         # Set the scan as done :)
         self.db.scans.update({'_id': scan_id}, {'$set': {'state': 'done'}})
-
-
-
-
-
 
     # id = id of the worker
     # s = Global Queue Master->Slave

@@ -27,8 +27,8 @@ import os
 import re
 import sys
 
-
 from thrift_broker import Thrift_broker, properties
+
 
 # called by the plugin manager to get a broker
 def get_instance(plugin):
@@ -38,7 +38,7 @@ def get_instance(plugin):
     # First try to import
     try:
         from thrift_broker import Thrift_broker
-    except ImportError , exp:
+    except ImportError, exp:
         print "Warning: the plugin type %s is unavailable: %s" % ('thrift', exp)
         return None
 
@@ -104,5 +104,3 @@ def get_instance(plugin):
 
     instance = Thrift_broker(plugin, host, port, socket, allowed_hosts, database_file, max_logs_age, pnp_path, debug, debug_queries)
     return instance
-
-

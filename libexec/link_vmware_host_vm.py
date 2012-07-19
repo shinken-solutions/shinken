@@ -45,6 +45,7 @@ VERSION = '0.1'
 def _split_rules(rules):
     return [r.strip() for r in rules.split('|')]
 
+
 # Apply all rules on the objects names
 def _apply_rules(name, rules):
     if 'nofqdn' in rules:
@@ -52,6 +53,7 @@ def _apply_rules(name, rules):
     if 'lower' in rules:
         name = name.lower()
     return name
+
 
 # Get all vmware hosts from a VCenter and return the list
 def get_vmware_hosts(check_esx_path, vcenter, user, password):
@@ -109,18 +111,18 @@ def create_all_links(res, rules):
             # First we apply rules on the names
             host_name = _apply_rules(host, rules)
             vm_name = _apply_rules(vm, rules)
-            v = (('host', host_name),('host', vm_name))
+            v = (('host', host_name), ('host', vm_name))
             r.append(v)
     return r
 
 
 def write_output(r, path):
     try:
-        f = open(path+'.tmp', 'wb')
+        f = open(path + '.tmp', 'wb')
         buf = json.dumps(r)
         f.write(buf)
         f.close()
-        shutil.move(path+'.tmp', path)
+        shutil.move(path + '.tmp', path)
         print "File %s wrote" % path
     except IOError, exp:
         sys.exit("Error writing the file %s: %s" % (path, exp))

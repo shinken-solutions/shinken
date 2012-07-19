@@ -27,7 +27,6 @@ from shinken_test import *
 #time.time = original_time_time
 #time.sleep = original_time_sleep
 
-
 class TestDowntime(ShinkenTest):
 
     def test_schedule_fixed_svc_downtime(self):
@@ -46,7 +45,7 @@ class TestDowntime(ShinkenTest):
         self.sched.run_external_command(cmd)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
         time.sleep(20)
         self.scheduler_loop(1, [[svc, 0, 'OK']])
 
@@ -129,7 +128,7 @@ class TestDowntime(ShinkenTest):
         self.sched.run_external_command(cmd)
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
         time.sleep(20)
         #----------------------------------------------------------------
         # check if a downtime object exists (scheduler and service)
@@ -213,7 +212,6 @@ class TestDowntime(ShinkenTest):
         self.show_logs()
         self.show_actions()
 
-
     def test_schedule_fixed_host_downtime(self):
         self.print_header()
         # schedule a 2-minute downtime
@@ -225,10 +223,10 @@ class TestDowntime(ShinkenTest):
         # no notification must be found in broks
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
         print "test_schedule_fixed_host_downtime initialized"
         self.show_logs()
         self.show_actions()
@@ -245,7 +243,7 @@ class TestDowntime(ShinkenTest):
         self.sched.run_external_command(cmd)
         self.sched.update_downtimes_and_comments()
         print "Launch scheduler loop"
-        self.scheduler_loop(1,[], do_sleep=False) # push the downtime notification
+        self.scheduler_loop(1, [], do_sleep=False)  # push the downtime notification
         self.show_actions()
         print "Launch worker loop"
         #self.worker_loop()
@@ -270,7 +268,7 @@ class TestDowntime(ShinkenTest):
         print "*****************************************************************************************************************************************************************Log matching:", self.get_log_match("STARTED*")
         self.assert_(self.count_logs() == 2)    # start downt, notif downt
         #sys.exit(1)
-        self.assert_(self.count_actions() == 2) # notif" down
+        self.assert_(self.count_actions() == 2)  # notif" down
         self.clear_logs()
         self.clear_actions()
         #----------------------------------------------------------------
@@ -281,21 +279,21 @@ class TestDowntime(ShinkenTest):
         self.show_logs()
         self.show_actions()
         self.assert_(self.count_logs() == 2)    # soft1, evt1
-        self.assert_(self.count_actions() == 1) # evt1
+        self.assert_(self.count_actions() == 1)  # evt1
         self.clear_logs()
         #--
         self.scheduler_loop(1, [[host, 2, 'DOWN']])
         self.show_logs()
         self.show_actions()
         self.assert_(self.count_logs() == 2)    # soft2, evt2
-        self.assert_(self.count_actions() == 1) # evt2
+        self.assert_(self.count_actions() == 1)  # evt2
         self.clear_logs()
         #--
         self.scheduler_loop(1, [[host, 2, 'DOWN']])
         self.show_logs()
         self.show_actions()
         self.assert_(self.count_logs() == 2)    # hard3, evt3
-        self.assert_(self.count_actions() == 2) # evt3, notif"
+        self.assert_(self.count_actions() == 2)  # evt3, notif"
         self.clear_logs()
         #--
         # we have a notification, but this is blocked. it will stay in
@@ -306,8 +304,8 @@ class TestDowntime(ShinkenTest):
         print "DBG2: host", host.state, host.state_type
         self.show_logs()
         self.show_actions()
-        self.assert_(self.count_logs() == 0)    #
-        self.assert_(self.count_actions() == 1) # notif"
+        self.assert_(self.count_logs() == 0)     #
+        self.assert_(self.count_actions() == 1)  # notif"
         self.clear_logs()
         #----------------------------------------------------------------
         # the host comes UP again
@@ -319,19 +317,18 @@ class TestDowntime(ShinkenTest):
         self.show_logs()
         self.show_actions()
         self.assert_(self.count_logs() == 2)    # hard3ok, evtok
-        self.assert_(self.count_actions() == 2) # evtok, notif"
+        self.assert_(self.count_actions() == 2)  # evtok, notif"
         self.clear_logs()
         self.clear_actions()
-
 
     def test_schedule_fixed_host_downtime_with_service(self):
         self.print_header()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
         host.notification_interval = 0
         svc.notification_interval = 0
         self.show_logs()
@@ -346,7 +343,7 @@ class TestDowntime(ShinkenTest):
         cmd = "[%lu] SCHEDULE_HOST_DOWNTIME;test_host_0;%d;%d;1;0;%d;lausser;blablub" % (now, now, now + duration, duration)
         self.sched.run_external_command(cmd)
         self.sched.update_downtimes_and_comments()
-        self.scheduler_loop(1,[], do_sleep=False) # push the downtime notification
+        self.scheduler_loop(1, [], do_sleep=False)  # push the downtime notification
         #self.worker_loop() # push the downtime notification
         time.sleep(10)
         #----------------------------------------------------------------
@@ -413,9 +410,6 @@ class TestDowntime(ShinkenTest):
         self.assert_(self.log_match(1, 'HOST DOWNTIME ALERT.*STOPPED'))
         self.clear_logs()
         self.clear_actions()
-
-
-
         # todo
         # checks return 1=warn. this means normally up
         # set use_aggressive_host_checking which treats warn as down
@@ -427,7 +421,6 @@ class TestDowntime(ShinkenTest):
         # check for notifications
 
         # host is down and in downtime. what about service eventhandlers?
-
 
     def test_notification_after_cancel_flexible_svc_downtime(self):
         # schedule flexible downtime

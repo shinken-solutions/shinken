@@ -50,7 +50,6 @@ try:
 except Exception:
     has_pymongo = False
 
-
 sys.setcheckinterval(10000)
 
 
@@ -62,8 +61,8 @@ class TestConfig(ShinkenTest):
         self.shutdown_livestatus()
         if os.path.exists(self.livelogs):
             os.remove(self.livelogs)
-        if os.path.exists(self.livelogs+"-journal"):
-            os.remove(self.livelogs+"-journal")
+        if os.path.exists(self.livelogs + "-journal"):
+            os.remove(self.livelogs + "-journal")
         if os.path.exists(self.livestatus_broker.pnp_path):
             shutil.rmtree(self.livestatus_broker.pnp_path)
         if os.path.exists('var/nagios.log'):
@@ -91,7 +90,7 @@ class TestConfig(ShinkenTest):
         dbmodconf = Module({'module_name': 'LogStore',
             'module_type': 'logstore_mongodb',
             'mongodb_uri': "mongodb://127.0.0.1:27017",
-            'database': 'testtest'+self.testid,
+            'database': 'testtest' + self.testid,
         })
         modconf.modules = [dbmodconf]
         self.livestatus_broker = LiveStatus_broker(modconf)
@@ -110,7 +109,7 @@ class TestConfig(ShinkenTest):
             if inst.properties["type"].startswith('logstore'):
                 f = getattr(inst, 'load', None)
                 if f and callable(f):
-                    f(self.livestatus_broker) #!!! NOT self here !!!!
+                    f(self.livestatus_broker)  # !!! NOT self here !!!!
                 break
         for s in self.livestatus_broker.debug_output:
             print "errors during load", s
@@ -146,7 +145,6 @@ class TestConfig(ShinkenTest):
                 return True
         return False
 
-
     def update_broker(self, dodeepcopy=False):
         # The brok should be manage in the good order
         ids = self.sched.broks.keys()
@@ -160,7 +158,6 @@ class TestConfig(ShinkenTest):
                 brok = copy.deepcopy(brok)
             self.livestatus_broker.manage_brok(brok)
         self.sched.broks = {}
-
 
 
 class TestConfigSmall(TestConfig):
@@ -183,7 +180,6 @@ class TestConfigSmall(TestConfig):
         host = self.sched.hosts.find_by_name("test_host_0")
         host.__class__.use_aggressive_host_checking = 1
 
-
     def write_logs(self, host, loops=0):
         for loop in range(0, loops):
             host.state = 'DOWN'
@@ -197,7 +193,6 @@ class TestConfigSmall(TestConfig):
             host.output = "i am down"
             host.raise_alert_log_entry()
             self.update_broker()
-
 
     def test_hostsbygroup(self):
         if not has_pymongo:
@@ -235,18 +230,18 @@ ResponseHeader: fixed16
         now = time.time()
         time_warp(-3600)
         num_logs = 0
-	host.state = 'DOWN'
-	host.state_type = 'SOFT'
-	host.attempt = 1
-	host.output = "i am down"
-	host.raise_alert_log_entry()
-	time.sleep(3600)
-	host.state = 'UP'
-	host.state_type = 'HARD'
-	host.attempt = 1
-	host.output = "i am up"
-	host.raise_alert_log_entry()
-	time.sleep(3600)
+        host.state = 'DOWN'
+        host.state_type = 'SOFT'
+        host.attempt = 1
+        host.output = "i am down"
+        host.raise_alert_log_entry()
+        time.sleep(3600)
+        host.state = 'UP'
+        host.state_type = 'HARD'
+        host.attempt = 1
+        host.output = "i am up"
+        host.raise_alert_log_entry()
+        time.sleep(3600)
         self.update_broker()
         print "-------------------------------------------"
         print "Service.lsm_host_name", Service.lsm_host_name
@@ -261,7 +256,6 @@ Filter: time <= """ + str(int(now + 3600)) + """
 Columns: time type options state host_name"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-
 
 
 class TestConfigBig(TestConfig):
@@ -282,7 +276,6 @@ class TestConfigBig(TestConfig):
         # but still get DOWN state
         host = self.sched.hosts.find_by_name("test_host_000")
         host.__class__.use_aggressive_host_checking = 1
-
 
     def init_livestatus(self):
         self.livelogs = "bigbigbig"
@@ -320,7 +313,7 @@ class TestConfigBig(TestConfig):
             if inst.properties["type"].startswith('logstore'):
                 f = getattr(inst, 'load', None)
                 if f and callable(f):
-                    f(self.livestatus_broker) #!!! NOT self here !!!!
+                    f(self.livestatus_broker)  # !!! NOT self here !!!!
                 break
         for s in self.livestatus_broker.debug_output:
             print "errors during load", s
@@ -343,7 +336,6 @@ class TestConfigBig(TestConfig):
 
     def count_log_broks(self):
         return len([brok for brok in self.sched.broks.values() if brok.type == 'log'])
-
 
     def test_a_long_history(self):
         if not has_pymongo:
@@ -559,8 +551,8 @@ OutputFormat: json"""
         print "whole database", numlogs, min(times), max(times)
         numlogs = self.livestatus_broker.db.conn.bigbigbig.logs.find({
             '$and': [
-                {'time': { '$gt': min(times)} },
-                {'time': { '$lte': max(times)} }
+                {'time': {'$gt': min(times)}},
+                {'time': {'$lte': max(times)}}
             ]}).count()
         now = max(times)
         daycount = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -568,8 +560,8 @@ OutputFormat: json"""
             one_day_earlier = now - 3600*24
             numlogs = self.livestatus_broker.db.conn.bigbigbig.logs.find({
                 '$and': [
-                    {'time': { '$gt': one_day_earlier} },
-                    {'time': { '$lte': now} }
+                    {'time': {'$gt': one_day_earlier}},
+                    {'time': {'$lte': now}}
                 ]}).count()
             daycount[day] = numlogs
             print "day -%02d %d..%d - %d" % (day, one_day_earlier, now, numlogs)
@@ -580,8 +572,8 @@ OutputFormat: json"""
             one_day_earlier = now - 3600*24
             numlogs = self.livestatus_broker.db.conn.bigbigbig.logs.find({
                 '$and': [
-                    {'time': { '$gt': one_day_earlier} },
-                    {'time': { '$lte': now} }
+                    {'time': {'$gt': one_day_earlier}},
+                    {'time': {'$lte': now}}
                 ]}).count()
             print "day -%02d %d..%d - %d" % (day, one_day_earlier, now, numlogs)
             now = one_day_earlier
@@ -612,4 +604,3 @@ if __name__ == '__main__':
     command = """unittest.main()"""
     unittest.main()
     #cProfile.runctx( command, globals(), locals(), filename="/tmp/livestatus.profile" )
-

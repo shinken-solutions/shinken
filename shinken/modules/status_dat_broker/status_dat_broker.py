@@ -34,7 +34,6 @@ import sys
 import os
 import Queue
 
-
 # And now include from this global directory
 from shinken.objects import *
 from shinken.objects import Host
@@ -51,6 +50,7 @@ from status import StatusFile
 from objectscache import ObjectsCacheFile
 
 from shinken.basemodule import BaseModule
+
 
 # Class for the Merlindb Broker
 # Get broks and puts them in merlin database
@@ -87,7 +87,6 @@ class Status_dat_broker(BaseModule):
 
         self.number_of_objects = 0
 
-
     def manage_program_status_brok(self, b):
         data = b.data
         c_id = data['instance_id']
@@ -98,7 +97,6 @@ class Status_dat_broker(BaseModule):
         #print "CFG:", c
         self.configs[c_id] = c
 
-
     def manage_clean_all_my_instance_id_brok(self, b):
         data = b.data
         instance_id = data['instance_id']
@@ -108,7 +106,7 @@ class Status_dat_broker(BaseModule):
         # We clean all previous hosts and services from this instance_id
         h_to_del = []
         for h in self.hosts.values():
-            if h.instance_id ==  instance_id:
+            if h.instance_id == instance_id:
                 h_to_del.append(h.id)
 
         for i in h_to_del:
@@ -118,22 +116,18 @@ class Status_dat_broker(BaseModule):
         # same for services
         s_to_del = []
         for s in self.services.values():
-            if s.instance_id ==  instance_id:
+            if s.instance_id == instance_id:
                 s_to_del.append(s.id)
 
         for i in s_to_del:
             #print "Deleting previous service %d" % i
             del self.services[i]
 
-
-
     def manage_initial_host_status_brok(self, b):
         data = b.data
         h_id = data['id']
-
         #print 'DBG: Creacting host with with brok:', b.id
         #print "Creating host:", h_id, b.__dict__
-
 
         h = Host({})
         for prop in data:
@@ -157,7 +151,6 @@ class Status_dat_broker(BaseModule):
         self.hosts[h_id] = h
         self.number_of_objects += 1
 
-
     def manage_initial_hostgroup_status_brok(self, b):
         data = b.data
         hg_id = data['id']
@@ -174,7 +167,6 @@ class Status_dat_broker(BaseModule):
         #print "HG:", hg
         self.hostgroups[hg_id] = hg
         self.number_of_objects += 1
-
 
     def manage_initial_service_status_brok(self, b):
         data = b.data
@@ -200,8 +192,6 @@ class Status_dat_broker(BaseModule):
         self.services[s_id] = s
         self.number_of_objects += 1
 
-
-
     def manage_initial_servicegroup_status_brok(self, b):
         data = b.data
         sg_id = data['id']
@@ -219,7 +209,6 @@ class Status_dat_broker(BaseModule):
         self.servicegroups[sg_id] = sg
         self.number_of_objects += 1
 
-
     def manage_initial_contact_status_brok(self, b):
         data = b.data
         c_id = data['id']
@@ -227,11 +216,9 @@ class Status_dat_broker(BaseModule):
         c = Contact({})
         self.update_element(c, data)
 
-
         #print "C:", c
         self.contacts[c_id] = c
         self.number_of_objects += 1
-
 
     def manage_initial_contactgroup_status_brok(self, b):
         data = b.data
@@ -250,7 +237,6 @@ class Status_dat_broker(BaseModule):
         self.contactgroups[cg_id] = cg
         self.number_of_objects += 1
 
-
     def manage_initial_timeperiod_status_brok(self, b):
         data = b.data
         tp_id = data['id']
@@ -261,7 +247,6 @@ class Status_dat_broker(BaseModule):
         self.timeperiods[tp_id] = tp
         self.number_of_objects += 1
 
-
     def manage_initial_command_status_brok(self, b):
         data = b.data
         c_id = data['id']
@@ -271,7 +256,6 @@ class Status_dat_broker(BaseModule):
         #print "CMD:", c
         self.commands[c_id] = c
         self.number_of_objects += 1
-
 
     # A service check have just arrived, we UPDATE data info with this
     def manage_service_check_result_brok(self, b):
@@ -285,7 +269,6 @@ class Status_dat_broker(BaseModule):
     # A service check update have just arrived, we UPDATE data info with this
     def manage_service_next_schedule_brok(self, b):
         self.manage_service_check_result_brok(b)
-
 
     # In fact, an update of a service is like a check return
     def manage_update_service_status_brok(self, b):
@@ -302,8 +285,6 @@ class Status_dat_broker(BaseModule):
             for dtc in s.downtimes + s.comments:
                 dtc.ref = s
 
-
-
     def manage_host_check_result_brok(self, b):
         data = b.data
         h = self.find_host(data['host_name'])
@@ -315,7 +296,6 @@ class Status_dat_broker(BaseModule):
     # this brok should arrive within a second after the host_check_result_brok
     def manage_host_next_schedule_brok(self, b):
         self.manage_host_check_result_brok(b)
-
 
     # In fact, an update of a host is like a check return
     def manage_update_host_status_brok(self, b):
@@ -333,9 +313,6 @@ class Status_dat_broker(BaseModule):
             for dtc in h.downtimes + h.comments:
                 dtc.ref = h
 
-
-
-
     # The contacts must not be duplicated
     def get_contacts(self, cs):
         r = []
@@ -348,7 +325,6 @@ class Status_dat_broker(BaseModule):
                     print "Error: search for a contact %s that do not exists!" % c.get_name()
         return r
 
-
     # The timeperiods must not be duplicated
     def get_timeperiod(self, t):
         if t is not None:
@@ -360,13 +336,11 @@ class Status_dat_broker(BaseModule):
         else:
             return None
 
-
     def find_host(self, host_name):
         for h in self.hosts.values():
             if h.host_name == host_name:
                 return h
         return None
-
 
     def find_service(self, host_name, service_description):
         for s in self.services.values():
@@ -374,20 +348,17 @@ class Status_dat_broker(BaseModule):
                 return s
         return None
 
-
     def find_timeperiod(self, timeperiod_name):
         for t in self.timeperiods.values():
             if t.timeperiod_name == timeperiod_name:
                 return t
         return None
 
-
     def find_contact(self, contact_name):
         for c in self.contacts.values():
             if c.contact_name == contact_name:
                 return c
         return None
-
 
     def update_element(self, e, data):
         #print "........%s........" % type(e)
@@ -397,7 +368,6 @@ class Status_dat_broker(BaseModule):
             #else:
             #    print "%-20s\t%s\t->\t%s" % (prop, "-", data[prop])
             setattr(e, prop, data[prop])
-
 
     def main(self):
         self.set_exit_handler()

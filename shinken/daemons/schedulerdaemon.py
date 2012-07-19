@@ -23,11 +23,11 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import os
 import time
 import traceback
 import cPickle
+
 
 from shinken.scheduler import Scheduler
 from shinken.macroresolver import MacroResolver
@@ -37,7 +37,6 @@ from shinken.property import PathProp, IntegerProp
 import shinken.pyro_wrapper as pyro
 from shinken.log import logger
 from shinken.satellite import BaseSatellite, IForArbiter as IArb, Interface
-
 
 # Interface for Workers
 
@@ -49,9 +48,8 @@ They connect here and see if they are still OK with our running_id, if not, they
     def get_running_id(self):
         return self.running_id
 
-
     # poller or reactionner ask us actions
-    def get_checks(self , do_checks=False, do_actions=False, poller_tags=['None'], \
+    def get_checks(self, do_checks=False, do_actions=False, poller_tags=['None'], \
                        reactionner_tags=['None'], worker_name='none', \
                        module_types=['fork']):
         #print "We ask us checks"
@@ -124,7 +122,6 @@ HE got user entry, so we must listen him carefully and give information he want,
         super(IForArbiter, self).wait_new_conf()
 
 
-
 # The main app class
 class Shinken(BaseSatellite):
 
@@ -134,7 +131,6 @@ class Shinken(BaseSatellite):
         'port':      IntegerProp(default='7768'),
         'local_log': PathProp(default='schedulerd.log'),
     })
-
 
     # Create the shinken class:
     # Create a Pyro server (port = arvg 1)
@@ -159,7 +155,6 @@ class Shinken(BaseSatellite):
         # from now only pollers
         self.pollers = {}
         self.reactionners = {}
-
 
     def do_stop(self):
         if self.pyro_daemon:
@@ -233,16 +228,17 @@ class Shinken(BaseSatellite):
                 else:
                     c.t_to_go = new_t
 
-
     def manage_signal(self, sig, frame):
+        print "MANAGE SIGNAL", sig
         # If we got USR1, just dump memory
         if sig == 10:
             self.sched.need_dump_memory = True
-        else: # if not, die :)
+        elif sig == 12: #usr2, dump objects
+            self.sched.need_objects_dump = True
+        else:  # if not, die :)
             self.sched.die()
             self.must_run = False
             Daemon.manage_signal(self, sig, frame)
-
 
     def do_loop_turn(self):
         # Ok, now the conf
@@ -253,7 +249,6 @@ class Shinken(BaseSatellite):
         self.setup_new_conf()
         logger.debug("Configuration Loaded")
         self.sched.run()
-
 
     def setup_new_conf(self):
         pk = self.new_conf
@@ -294,7 +289,7 @@ class Shinken(BaseSatellite):
             self.pollers[pol_id] = p
 
             if p['name'] in override_conf['satellitemap']:
-                p = dict(p) # make a copy
+                p = dict(p)  # make a copy
                 p.update(override_conf['satellitemap'][p['name']])
 
             uri = pyro.create_uri(p['address'], p['port'], 'Schedulers', self.use_ssl)
@@ -374,7 +369,6 @@ class Shinken(BaseSatellite):
         # and set ourself in it
         self.schedulers = {self.conf.instance_id: self.sched}
 
-
     # Give the arbiter the data about what I manage
     # for me it's just my instance_id and my push flavor
     def what_i_managed(self):
@@ -382,7 +376,6 @@ class Shinken(BaseSatellite):
             return {self.conf.instance_id: self.conf.push_flavor}
         else:
             return {}
-
 
     # our main function, launch after the init
     def main(self):
@@ -397,5 +390,3 @@ class Shinken(BaseSatellite):
             logger.critical("You can log a bug ticket at https://github.com/naparuba/shinken/issues/new to get help")
             logger.critical("Back trace of it: %s" % (traceback.format_exc()))
             raise
-
-

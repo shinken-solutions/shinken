@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import types
 from shinken.objects import Contact
 from shinken.objects import NotificationWay
@@ -143,9 +142,9 @@ class LiveStatusRegenerator(Regenerator):
             [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.services.items.iteritems() for c in v.contacts]
         else:
             # 1. every host contact automatically becomes a service contact
-            [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.services.items.iteritems () for c in v.host.contacts]
+            [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.services.items.iteritems() for c in v.host.contacts]
             # 2. explicit service contacts
-            [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.services.items.iteritems () for c in v.contacts]
+            [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.services.items.iteritems() for c in v.contacts]
         # services without contacts inherit the host's contacts (no matter of strict or loose)
         [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.services.items.iteritems() if not v.contacts for c in v.host.contacts]
         for c in self.services._id_contact_heap.keys():
@@ -210,7 +209,6 @@ class LiveStatusRegenerator(Regenerator):
         # Everything is new now. We should clean the cache
         self.cache.wipeout()
 
-
     def manage_initial_contact_status_brok(self, b):
         """overwrite it, because the original method deletes some values"""
         data = b.data
@@ -248,7 +246,6 @@ class LiveStatusRegenerator(Regenerator):
             # With commands
             self.linkify_commands(nw, 'host_notification_commands')
             self.linkify_commands(nw, 'service_notification_commands')
-
 
             # Now link timeperiods
             self.linkify_a_timeperiod(nw, 'host_notification_period')

@@ -26,10 +26,7 @@
 # This Class is an example of an Scheduler module
 # Here for the configuration phase AND running one
 
-
-
 from shinken.basemodule import BaseModule
-
 
 properties = {
     'daemons': ['scheduler'],
@@ -44,7 +41,6 @@ def get_instance(mod_conf):
     print "Get a Dummy scheduler module for plugin %s" % mod_conf.get_name()
     instance = Dummy_scheduler(mod_conf, foo="bar")
     return instance
-
 
 
 # Just print some stuff
@@ -63,7 +59,6 @@ class Dummy_scheduler(BaseModule):
     # Ok, main function that is called in the retention creation pass
     def update_retention_objects(self, sched, log_mgr):
         print "[Dummy] asking me to update the retention objects"
-
 
     # Should return if it succeed in the retention load or not
     def load_retention_objects(self, sched, log_mrg):
