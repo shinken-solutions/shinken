@@ -91,7 +91,7 @@ Under other distributions, you can search for it::
 
   yum search pyro
 
-And if you do not find it, or need to install a specific version, you can install it from PyPI::
+If you do not find it, or need to install a specific version, you can install it from PyPI::
 
   easy_install pyro
 
