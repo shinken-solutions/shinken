@@ -17,20 +17,21 @@ supports Python, which includes Windows and GNU/Linux.
 Requirements
 ============
 
-There are common and conditional requirements for the three installation
-methods which are described below. Keep in mind that you should not mix the methods.
-Thus if you installed with the first method, you have to use
+There are mandatory and conditional requirements for the installation
+methods which are described below. Keep in mind that you use an alternate installation method 
+(setup.py or simple extraction to a folder), you have to use
 that method as well when you update or remove your installation.
 
-The recommended method is the "install script" which tries to
-do all the necessary steps for you. You can choose that one if your OS is
-compatible with it. If you choose it, you can skip/skim over
-the requirements section and come back to it later if needed.
+The recommended installation method is the "install script" which tries to
+do all the necessary steps for you. Use it if your OS is
+compatible with it. 
 
-However, it is recommended to check any requirement manually to confirm they are installed correctly.
+You can skip/skim over the requirements section and come back to it later
+if using the installation script. However, it is recommended to check any 
+requirement manually to confirm they are installed correctly.
 
 
-Common Requirements
+Mandatory Requirements
 -------------------
 
 `shinken` requires
@@ -102,7 +103,7 @@ You can use the install script utility located at the root of the shinken source
 The script creates the user and group, installs all dependencies and then it installs shinken. It is compatible with Debian, Ubuntu, Centos/Redhat 5.x and 6.x
 The only requirement is an internet connection for the server on which you want to install shinken. It also allows to modify the installation folder in a configuration file.
 
-If you want shinken installed in seconds (default in /usr/local/shinken), just run ::
+If you want shinken installed in seconds (default in /usr/local/shinken) ::
 
 1 - `Download`__ and extract the Shinken archive
 
