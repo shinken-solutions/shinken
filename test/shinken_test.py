@@ -411,5 +411,19 @@ class ShinkenTest(unittest.TestCase):
         #--- livestatus_broker.do_main
 
 
+# Hook for old python some test
+if not hasattr(ShinkenTest, 'assertNotIn'):
+    def assertNotIn(self, member, container, msg=None):
+       self.assertTrue(member not in container)
+    ShinkenTest.assertNotIn = assertNotIn
+        
+
+if not hasattr(ShinkenTest, 'assertIn'):
+    def assertIn(self, member, container, msg=None):
+        self.assertTrue(member in container)
+    ShinkenTest.assertIn = assertIn
+                   
+
+
 if __name__ == '__main__':
     unittest.main()

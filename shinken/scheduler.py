@@ -1130,6 +1130,7 @@ class Scheduler:
                           self.hosts, self.hostgroups,
                           self.services, self.servicegroups)
 
+        self.conf.skip_initial_broks = getattr(self.conf,'skip_initial_broks', False)
         logger.debug("Skipping initial broks? %s" % str(self.conf.skip_initial_broks))
         if not self.conf.skip_initial_broks:
             for tab in initial_status_types:
