@@ -31,6 +31,12 @@ function declare_bookmark(name, uri){
     bookmarks.push(b);
 }
 
+function declare_bookmarksro(name, uri){
+    console.log('declaring Common bookmark '+name+' at uri '+uri);
+    var b = {'name' : name, 'uri' : uri};
+    bookmarksro.push(b);
+}
+
 
 function refresh_bookmarks(){
     if(bookmarks.length == 0){
@@ -48,6 +54,25 @@ function refresh_bookmarks(){
     });
     $('#bookmarks').html(s);
 }
+
+function refresh_bookmarksro(){
+
+    if(bookmarksro.length == 0){
+        $('#bookmarksro').html('<h4>No common bookmarks</h4>')
+        return;
+    }
+
+    sro = '<h3>Common bookmarks</h3> <ul class="unstyled">'
+    $.each(bookmarksro, function(idx, b){
+        l = '<span><a href="'+b.uri+'"><i class="icon-tag"></i> '+b.name+'</a></span>';
+        sro+= '<li>'+l+'</li>';
+    });
+    $('#bookmarksro').html(sro);
+
+}
+
+
+
 
 // We want to delete one specific bookmark by it's name
 function delete_bookmark(name){
