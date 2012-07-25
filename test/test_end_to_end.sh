@@ -558,6 +558,60 @@ echo "Now we clean it"
 ./clean.sh
 
 
+
+echo "####################################################################################"
+echo "#                                                                                  #"
+echo "#                              Passive Arbiter                                     #"
+echo "#                                                                                  #"
+echo "####################################################################################"
+
+echo "Now we can start some launch tests"
+localize_config etc/nagios.cfg test/etc/test_stack2/shinken-specific-passive-arbiter.cfg
+test/bin/launch_all_debug5.sh
+globalize_config etc/nagios.cfg test/etc/test_stack2/shinken-specific-passive-arbiter.cfg
+
+
+echo "Now checking for existing apps"
+
+echo "we can sleep 5sec for conf dispatching and so good number of process"
+sleep 10
+
+# The number of process changed, we mush look for it
+
+# Standard launch process packets
+NB_SCHEDULERS=4
+# 5 for stack 1, and 5 for stack 2
+NB_POLLERS=$((2 + $NB_CPUS + 2 + $NB_CPUS))
+# 2 for stack1, Only 1 for stack 2 because it is not active
+NB_REACTIONNERS=5
+# 2 for stack 1, 1 for stack2 (no livestatus nor log worker launch)
+NB_BROKERS=5
+# Still oen receiver
+NB_RECEIVERS=2
+# still 1
+NB_ARBITERS=3
+
+# Now check if the run looks good with var in the direct directory
+check_good_run var var var
+
+echo "All launch of LB daemons is OK"
+
+
+# Now look if it's also good in the log file too
+string_in_file "Dispatch OK of conf in scheduler scheduler-Master-2" $VAR/nagios.log
+string_in_file "Dispatch OK of conf in scheduler scheduler-Master-1" $VAR/nagios.log
+string_in_file "OK, no more reactionner sent need" $VAR/nagios.log
+string_in_file "OK, no more poller sent need" $VAR/nagios.log
+string_in_file "OK, no more broker sent need" $VAR/nagios.log
+
+# And the string so the spare is taking the control
+string_in_file "I (Arbiter-spare) take the lead" $VAR/nagios.log
+
+echo "Now we clean it"
+./clean.sh
+
+
+
 echo ""
 echo ""
 echo "All check are OK. Congrats! You can go take a Beer ;)"

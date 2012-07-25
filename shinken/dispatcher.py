@@ -128,8 +128,8 @@ class Dispatcher:
                 elt.need_conf = True
 
         for arb in self.arbiters:
-            # If not me...
-            if arb != self.arbiter:
+            # If not me, but not the master too
+            if arb != self.arbiter and arb.spare:
                 arb.update_infos()
                 #print "Arb", arb.get_name(), "alive?", arb.alive, arb.__dict__
 
@@ -138,7 +138,7 @@ class Dispatcher:
     # the result goes into self.dispatch_ok
     # TODO: finish need conf
     def check_dispatch(self):
-        # Check if the other arbiter has a conf
+        # Check if the other arbiter has a conf, but only if I am a master
         for arb in self.arbiters:
             # If not me and I'm a master
             if arb != self.arbiter and self.arbiter and not self.arbiter.spare:
