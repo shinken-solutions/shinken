@@ -349,6 +349,7 @@ $(function(){
     <script>
       $(function(){
       refresh_bookmarks();
+      refresh_bookmarksro();
     });</script>
 
   </div>
