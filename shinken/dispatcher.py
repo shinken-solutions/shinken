@@ -189,7 +189,7 @@ class Dispatcher:
             for cfg_id in r.confs:
                 push_flavor = r.confs[cfg_id].push_flavor
                 try:
-                    for kind in ('reactionner', 'poller', 'broker'):
+                    for kind in ('reactionner', 'poller', 'broker', 'receiver'):
                         # We must have the good number of satellite or we are not happy
                         # So we are sure to raise a dispatch every loop a satellite is missing
                         if len(r.to_satellites_managed_by[kind][cfg_id]) < r.get_nb_of_must_have_satellites(kind):
@@ -218,6 +218,7 @@ class Dispatcher:
 
                             #wim = satellite.managed_confs # what_i_managed()
                             #print "%s [%s]Look at what manage the %s %s (alive? %s, reachable? %s): %s (look for %s)" % (int(time.time()), r.get_name(), kind, satellite.get_name(), satellite.alive, satellite.reachable, wim, cfg_id)
+                            #print satellite.alive, satellite.reachable, satellite.do_i_manage(cfg_id, push_flavor)
                             if not satellite.alive or (satellite.reachable and not satellite.do_i_manage(cfg_id, push_flavor)):
                                 logger.warning('[%s] The %s %s seems to be down, I must re-dispatch its role to someone else.' % (r.get_name(), kind, satellite.get_name()))
                                 self.dispatch_ok = False  # so we will redispatch all
@@ -361,7 +362,7 @@ class Dispatcher:
                             # need_loop = False
                             # The conf does not need to be dispatch
                             cfg_id = conf.id
-                            for kind in ('reactionner', 'poller', 'broker'):
+                            for kind in ('reactionner', 'poller', 'broker', 'receiver'):
                                 r.to_satellites[kind][cfg_id] = None
                                 r.to_satellites_need_dispatch[kind][cfg_id] = False
                                 r.to_satellites_managed_by[kind][cfg_id] = []
@@ -408,7 +409,7 @@ class Dispatcher:
 
                         # Now we generate the conf for satellites:
                         cfg_id = conf.id
-                        for kind in ('reactionner', 'poller', 'broker'):
+                        for kind in ('reactionner', 'poller', 'broker', 'receiver'):
                             r.to_satellites[kind][cfg_id] = sched.give_satellite_cfg()
                             r.to_satellites_need_dispatch[kind][cfg_id] = True
                             r.to_satellites_managed_by[kind][cfg_id] = []
@@ -444,7 +445,7 @@ class Dispatcher:
                     cfg_id = cfg.id
                     # flavor if the push number of this configuration send to a scheduler
                     flavor = cfg.push_flavor
-                    for kind in ('reactionner', 'poller', 'broker'):
+                    for kind in ('reactionner', 'poller', 'broker', 'receiver'):
                         if r.to_satellites_need_dispatch[kind][cfg_id]:
                             cfg_for_satellite_part = r.to_satellites[kind][cfg_id]
 
@@ -486,7 +487,7 @@ class Dispatcher:
                             for satellite in satellites:
                                 satellite_string += '%s (spare:%s), ' % (satellite.get_name(), str(satellite.spare))
                             logger.info(satellite_string)
-
+                            
                             # Now we dispatch cfg to every one ask for it
                             nb_cfg_sent = 0
                             for satellite in satellites:
@@ -522,6 +523,12 @@ class Dispatcher:
                                         # broker, so here it's done, we are happy.
                                         if kind == "broker":
                                             break
+
+                                        #If receiver, we must send the hostnames of this configuration
+                                        if kind == 'receiver':
+                                            hnames = [h.get_name() for h in cfg.hosts]
+                                            print "Will send", hnames, "to the receiver", satellite.get_name()
+                                            satellite.push_host_names(cfg_id, hnames)
                             # else:
                             #    #I've got enough satellite, the next one are spare for me
                             if nb_cfg_sent == r.get_nb_of_must_have_satellites(kind):

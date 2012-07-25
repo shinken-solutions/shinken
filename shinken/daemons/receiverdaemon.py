@@ -31,7 +31,16 @@ import sys
 from multiprocessing import active_children
 from Queue import Empty
 
-from shinken.satellite import BaseSatellite
+
+try:
+    import shinken.pyro_wrapper as pyro
+except ImportError:
+    sys.exit("Shinken require the Python Pyro module. Please install it.")
+
+Pyro = pyro.Pyro
+PYRO_VERSION = pyro.PYRO_VERSION
+
+from shinken.satellite import Satellite
 
 from shinken.property import PathProp, IntegerProp
 from shinken.log import logger
@@ -40,9 +49,9 @@ from shinken.external_command import ExternalCommand
 
 
 # Our main APP class
-class Receiver(BaseSatellite):
+class Receiver(Satellite):
 
-    properties = BaseSatellite.properties.copy()
+    properties = Satellite.properties.copy()
     properties.update({
         'pidfile':   PathProp(default='receiverd.pid'),
         'port':      IntegerProp(default='7773'),
@@ -72,6 +81,10 @@ class Receiver(BaseSatellite):
         # broks raised this turn and that need to be put in self.broks
         self.broks_internal_raised = []
 
+        self.host_assoc = {}
+        self.direct_routing = False
+
+
     # Schedulers have some queues. We can simplify call by adding
     # elements into the proper queue just by looking at their type
     # Brok -> self.broks
@@ -88,20 +101,21 @@ class Receiver(BaseSatellite):
             logger.debug("Enqueuing an external command: %s" % str(ExternalCommand.__dict__))
             self.external_commands.append(elt)
 
-    ## # Get the good tabs for links by the kind. If unknown, return None
-    ## def get_links_from_type(self, type):
-    ##     t = {'scheduler': self.schedulers, 'arbiter': self.arbiters, \
-    ##          'poller': self.pollers, 'reactionner': self.reactionners}
-    ##     if type in t:
-    ##         return t[type]
-    ##     return None
-
 
     # Call by arbiter to get our external commands
     def get_external_commands(self):
         res = self.external_commands
         self.external_commands = []
         return res
+
+
+    def push_host_names(self, sched_id, hnames):
+        print "I RECEIVED the hosts", hnames, "for the scheduler", sched_id
+        print "AND I GOT SCHEDULERS", self.schedulers
+        for h in hnames:
+            self.host_assoc[h] = sched_id
+        print self.host_assoc
+
 
     # Get a brok. Our role is to put it in the modules
     # THEY MUST DO NOT CHANGE data of b!!!
@@ -120,6 +134,7 @@ class Receiver(BaseSatellite):
         # Now remove mod that raise an exception
         self.modules_manager.clear_instances(to_del)
 
+
     # Get 'objects' from external modules
     # from now nobody use it, but it can be useful
     # for a moduel like livestatus to raise external
@@ -134,6 +149,7 @@ class Receiver(BaseSatellite):
                 except Empty:
                     full_queue = False
 
+
     def do_stop(self):
         act = active_children()
         for a in act:
@@ -141,10 +157,12 @@ class Receiver(BaseSatellite):
             a.join(1)
         super(Receiver, self).do_stop()
 
+
     def setup_new_conf(self):
         conf = self.new_conf
         self.new_conf = None
         self.cur_conf = conf
+        print "DUMP CONF", conf
         # Got our name from the globals
         if 'receiver_name' in conf['global']:
             name = conf['global']['receiver_name']
@@ -152,6 +170,53 @@ class Receiver(BaseSatellite):
             name = 'Unnamed receiver'
         self.name = name
         self.log.load_obj(self, name)
+        self.direct_routing = conf['global']['direct_routing']
+
+        g_conf = conf['global']
+
+        # If we've got something in the schedulers, we do not want it anymore
+        for sched_id in conf['schedulers']:
+
+            already_got = False
+
+            # We can already got this conf id, but with another address
+            if sched_id in self.schedulers:
+                new_addr = conf['schedulers'][sched_id]['address']
+                old_addr = self.schedulers[sched_id]['address']
+                new_port = conf['schedulers'][sched_id]['port']
+                old_port = self.schedulers[sched_id]['port']
+                # Should got all the same to be ok :)
+                if new_addr == old_addr and new_port == old_port:
+                    already_got = True
+
+            if already_got:
+                logger.info("[%s] We already got the conf %d (%s)" % (self.name, sched_id, conf['schedulers'][sched_id]['name']))
+                wait_homerun = self.schedulers[sched_id]['wait_homerun']
+                actions = self.schedulers[sched_id]['actions']
+
+            s = conf['schedulers'][sched_id]
+            self.schedulers[sched_id] = s
+
+            if s['name'] in g_conf['satellitemap']:
+                s.update(g_conf['satellitemap'][s['name']])
+            uri = pyro.create_uri(s['address'], s['port'], 'Checks', self.use_ssl)
+
+            self.schedulers[sched_id]['uri'] = uri
+            if already_got:
+                self.schedulers[sched_id]['wait_homerun'] = wait_homerun
+                self.schedulers[sched_id]['actions'] = actions
+            else:
+                self.schedulers[sched_id]['wait_homerun'] = {}
+                self.schedulers[sched_id]['actions'] = {}
+            self.schedulers[sched_id]['running_id'] = 0
+            self.schedulers[sched_id]['active'] = s['active']
+
+            # Do not connect if we are a passive satellite
+            if self.direct_routing and not already_got:
+                # And then we connect to it :)
+                self.pynag_con_init(sched_id)
+
+
 
         logger.debug("[%s] Sending us configuration %s" % (self.name, conf))
 
@@ -166,6 +231,7 @@ class Receiver(BaseSatellite):
             logger.info("Setting our timezone to %s" % use_timezone)
             os.environ['TZ'] = use_timezone
             time.tzset()
+
 
     def do_loop_turn(self):
         sys.stdout.write(".")

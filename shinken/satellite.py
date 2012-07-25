@@ -116,6 +116,7 @@ class IForArbiter(Interface):
         self.app.schedulers.clear()
         self.app.cur_conf = None
 
+
     # <WTF??> Inconsistent comments!
     # methods are only used by the arbiter or the broker?
     # NB: following methods are only used by broker
@@ -125,13 +126,20 @@ class IForArbiter(Interface):
         self.app.add_broks_to_queue(broks.values())
         return True
 
+
     # The arbiter ask us our external commands in queue
     def get_external_commands(self):
         return self.app.get_external_commands()
 
+
     ### NB: only useful for receiver
     def got_conf(self):
         return self.app.cur_conf != None
+
+
+    # Use by the receivers to got the host names managed by the schedulers
+    def push_host_names(self, sched_id, hnames):
+        self.app.push_host_names(sched_id, hnames)
 
 
 class ISchedulers(Interface):
