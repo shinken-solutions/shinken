@@ -1,4 +1,3 @@
-
 %import time
 %now = time.time()
 %helper = app.helper
@@ -68,9 +67,13 @@
 
 	// List of the bookmarks
 	var bookmarks = [];
+	var bookmarksro = [];
 	%for b in bookmarks:
 	declare_bookmark("{{!b['name']}}","{{!b['uri']}}");
 	%end
+	%for b in bookmarksro:
+        declare_bookmarksro("{{!b['name']}}","{{!b['uri']}}");
+        %end
 
 </script>
 
@@ -342,10 +345,11 @@ $(function(){
 
     <p>&nbsp;</p>
     <div id='bookmarks'></div>
-
+    <div id='bookmarksro'></div>
     <script>
       $(function(){
       refresh_bookmarks();
+      refresh_bookmarksro();
     });</script>
 
   </div>
