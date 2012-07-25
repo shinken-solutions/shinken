@@ -418,6 +418,12 @@ if not hasattr(ShinkenTest, 'assertNotIn'):
     ShinkenTest.assertNotIn = assertNotIn
         
 
+if not hasattr(ShinkenTest, 'assertIn'):
+    def assertIn(self, member, container, msg=None):
+        self.assertTrue(member in container)
+    ShinkenTest.assertIn = assertIn
+                   
+
 
 if __name__ == '__main__':
     unittest.main()
