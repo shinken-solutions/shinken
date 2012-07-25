@@ -241,16 +241,18 @@ class ExternalCommandManager:
 
     def __init__(self, conf, mode):
         self.mode = mode
-        self.conf = conf
-        self.hosts = conf.hosts
-        self.services = conf.services
-        self.contacts = conf.contacts
-        self.hostgroups = conf.hostgroups
-        self.commands = conf.commands
-        self.servicegroups = conf.servicegroups
-        self.contactgroups = conf.contactgroups
-        self.timeperiods = conf.timeperiods
-        self.pipe_path = conf.command_file
+        if conf:
+            self.conf = conf
+            self.hosts = conf.hosts
+            self.services = conf.services
+            self.contacts = conf.contacts
+            self.hostgroups = conf.hostgroups
+            self.commands = conf.commands
+            self.servicegroups = conf.servicegroups
+            self.contactgroups = conf.contactgroups
+            self.timeperiods = conf.timeperiods
+            self.pipe_path = conf.command_file
+        
         self.fifo = None
         self.cmd_fragments = ''
         if self.mode == 'dispatcher':
@@ -264,6 +266,10 @@ class ExternalCommandManager:
 
     def load_arbiter(self, arbiter):
         self.arbiter = arbiter
+
+    def load_receiver(self, receiver):
+        self.receiver = receiver
+
 
     def open(self):
         # At the first open del and create the fifo
@@ -281,6 +287,7 @@ class ExternalCommandManager:
                     return None
         self.fifo = os.open(self.pipe_path, os.O_NONBLOCK)
         return self.fifo
+
 
     def get(self):
         buf = os.read(self.fifo, 8096)
@@ -302,6 +309,7 @@ class ExternalCommandManager:
             # re-opened in the main loop.
             os.close(self.fifo)
         return r
+
 
     def resolve_command(self, excmd):
         # Maybe the command is invalid. Bailout
@@ -330,11 +338,23 @@ class ExternalCommandManager:
                 command = r['cmd']
                 self.dispatch_global_command(command)
 
+
     # Ok the command is not for every one, so we search
     # by the hostname which scheduler have the host. Then send
     # the command
     def search_host_and_dispatch(self, host_name, command):
         logger.debug("Calling search_host_and_dispatch for %s" % host_name)
+
+        # If we are a receiver, just look in the receiver 
+        if self.mode == 'receiver':
+            print "Finding a scheduler for the command", host_name, command
+            sched = self.receiver.get_sched_from_hname(host_name)
+            print "Found the scheduler?", sched
+            if sched:
+                print "found! we push"
+                sched['external_commands'].append(command)
+            return
+        
         host_found = False
         for cfg in self.confs.values():
             if cfg.hosts.find_by_name(host_name) is not None:
@@ -361,6 +381,7 @@ class ExternalCommandManager:
             if sched.alive:
                 #sched.run_external_command(command)
                 sched.external_commands.append(command)
+
 
     # We need to get the first part, the command name
     def get_command_and_args(self, command):
@@ -438,7 +459,7 @@ class ExternalCommandManager:
                     #safe_print("Search for a arg", type_searched)
 
                     if type_searched == 'host':
-                        if self.mode == 'dispatcher':
+                        if self.mode == 'dispatcher' or self.mode == 'receiver':
                             self.search_host_and_dispatch(val, command)
                             return None
                         h = self.hosts.find_by_name(val)

@@ -45,7 +45,7 @@ from shinken.satellite import Satellite
 from shinken.property import PathProp, IntegerProp
 from shinken.log import logger
 
-from shinken.external_command import ExternalCommand
+from shinken.external_command import ExternalCommand, ExternalCommandManager
 
 
 # Our main APP class
@@ -75,6 +75,8 @@ class Receiver(Satellite):
         # Can have a queue of external_commands give by modules
         # will be taken by arbiter to process
         self.external_commands = []
+        # and the unprocessed one, a buffer
+        self.unprocessed_external_commands = []
 
         # All broks to manage
         self.broks = []  # broks to manage
@@ -99,7 +101,7 @@ class Receiver(Satellite):
             return
         elif cls_type == 'externalcommand':
             logger.debug("Enqueuing an external command: %s" % str(ExternalCommand.__dict__))
-            self.external_commands.append(elt)
+            self.unprocessed_external_commands.append(elt)
 
 
     # Call by arbiter to get our external commands
@@ -115,6 +117,12 @@ class Receiver(Satellite):
         for h in hnames:
             self.host_assoc[h] = sched_id
         print self.host_assoc
+
+
+    def get_sched_from_hname(self, hname):
+        i = self.host_assoc.get(hname, None)
+        e = self.schedulers.get(i, None)
+        return e
 
 
     # Get a brok. Our role is to put it in the modules
@@ -193,21 +201,27 @@ class Receiver(Satellite):
                 logger.info("[%s] We already got the conf %d (%s)" % (self.name, sched_id, conf['schedulers'][sched_id]['name']))
                 wait_homerun = self.schedulers[sched_id]['wait_homerun']
                 actions = self.schedulers[sched_id]['actions']
+                external_commands = self.schedulers[sched_id]['external_commands']
+                con = self.schedulers[sched_id]['con']
 
             s = conf['schedulers'][sched_id]
             self.schedulers[sched_id] = s
 
             if s['name'] in g_conf['satellitemap']:
                 s.update(g_conf['satellitemap'][s['name']])
-            uri = pyro.create_uri(s['address'], s['port'], 'Checks', self.use_ssl)
+            uri = pyro.create_uri(s['address'], s['port'], 'ForArbiter', self.use_ssl)
 
             self.schedulers[sched_id]['uri'] = uri
             if already_got:
                 self.schedulers[sched_id]['wait_homerun'] = wait_homerun
                 self.schedulers[sched_id]['actions'] = actions
+                self.schedulers[sched_id]['external_commands'] = external_commands
+                self.schedulers[sched_id]['con'] = con
             else:
                 self.schedulers[sched_id]['wait_homerun'] = {}
                 self.schedulers[sched_id]['actions'] = {}
+                self.schedulers[sched_id]['external_commands'] = []
+                self.schedulers[sched_id]['con'] = None
             self.schedulers[sched_id]['running_id'] = 0
             self.schedulers[sched_id]['active'] = s['active']
 
@@ -231,6 +245,48 @@ class Receiver(Satellite):
             logger.info("Setting our timezone to %s" % use_timezone)
             os.environ['TZ'] = use_timezone
             time.tzset()
+
+
+        # Now create the external commander. It's just here to dispatch
+        # the commands to schedulers
+        e = ExternalCommandManager(None, 'receiver')
+        e.load_receiver(self)
+        self.external_command = e
+
+
+
+    # Take all external commands, make packs and send them to
+    # the schedulers
+    def push_external_commands_to_schedulers(self):
+        print "IN push_external_commands_to_schedulers ::"
+        # If we are not in a direct routing mode, just bailout after
+        # faking resolving the commands
+        if not self.direct_routing:
+            self.external_commands.extend(self.unprocessed_external_commands)
+            self.unprocessed_external_commands = []
+            return
+        
+        # Now get all external commands and put them into the
+        # good schedulers
+        for ext_cmd in self.unprocessed_external_commands:
+            self.external_command.resolve_command(ext_cmd)
+            self.external_commands.append(ext_cmd)
+        # And clean the previous one
+        self.unprocessed_external_commands = []
+        
+        # Now for all alive schedulers, send the commands
+        for sched_id in self.schedulers:
+            sched = self.schedulers[sched_id]
+            cmds = sched['external_commands']
+            con = sched.get('con', None)
+            if not con:
+                print "The scheduler is not connected", sched
+            # If there are commands and the scheduler is alive
+            if len(cmds) > 0 and con:
+                logger.debug("Sending %d commands to scheduler %s" % (len(cmds), sched))
+                con.run_external_commands(cmds)
+            # clean them
+            self.schedulers[sched_id]['external_commands'] = []
 
 
     def do_loop_turn(self):
@@ -298,6 +354,8 @@ class Receiver(Satellite):
         # Maybe external modules raised 'objets'
         # we should get them
         self.get_objects_from_from_queues()
+
+        self.push_external_commands_to_schedulers()
 
         # Maybe we do not have something to do, so we wait a little
         if len(self.broks) == 0:
