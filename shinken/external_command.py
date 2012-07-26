@@ -325,7 +325,12 @@ class ExternalCommandManager:
         # Only log if we are in the Arbiter
         if self.mode == 'dispatcher' and self.conf.log_external_commands:
             logger.log('EXTERNAL COMMAND: ' + command.rstrip())
-        r = self.get_command_and_args(command)
+        r = self.get_command_and_args(command, excmd)
+
+        # If we are a receiver, bail out here
+        if self.mode == 'receiver':
+            return
+        
         if r is not None:
             is_global = r['global']
             if not is_global:
@@ -342,7 +347,7 @@ class ExternalCommandManager:
     # Ok the command is not for every one, so we search
     # by the hostname which scheduler have the host. Then send
     # the command
-    def search_host_and_dispatch(self, host_name, command):
+    def search_host_and_dispatch(self, host_name, command, extcmd):
         logger.debug("Calling search_host_and_dispatch for %s" % host_name)
 
         # If we are a receiver, just look in the receiver 
@@ -352,7 +357,7 @@ class ExternalCommandManager:
             print "Found the scheduler?", sched
             if sched:
                 print "found! we push"
-                sched['external_commands'].append(command)
+                sched['external_commands'].append(extcmd)
             return
         
         host_found = False
@@ -383,8 +388,8 @@ class ExternalCommandManager:
                 sched.external_commands.append(command)
 
 
-    # We need to get the first part, the command name
-    def get_command_and_args(self, command):
+    # We need to get the first part, the command name, and the reference ext command object
+    def get_command_and_args(self, command, extcmd=None):
         #safe_print("Trying to resolve", command)
         command = command.rstrip()
         elts = command.split(';')  # danger!!! passive checkresults with perfdata
@@ -460,7 +465,7 @@ class ExternalCommandManager:
 
                     if type_searched == 'host':
                         if self.mode == 'dispatcher' or self.mode == 'receiver':
-                            self.search_host_and_dispatch(val, command)
+                            self.search_host_and_dispatch(val, command, extcmd)
                             return None
                         h = self.hosts.find_by_name(val)
                         if h is not None:
@@ -1627,7 +1632,7 @@ class ExternalCommandManager:
 
     # ADD_SIMPLE_POLLER;realm_name;poller_name;address;port
     def ADD_SIMPLE_POLLER(self, realm_name, poller_name, address, port):
-        logger.debug("I need to add the poller (%s, %s, %s, %d)" % (realm_name, poller_name, address, port))
+        logger.debug("I need to add the poller (%s, %s, %s, %s)" % (realm_name, poller_name, address, port))
 
         # First we look for the realm
         r = self.conf.realms.find_by_name(realm_name)

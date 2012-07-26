@@ -40,6 +40,8 @@ except ImportError:
 Pyro = pyro.Pyro
 PYRO_VERSION = pyro.PYRO_VERSION
 
+from shinken.pyro_wrapper import Pyro_exp_pack
+
 from shinken.satellite import Satellite
 
 from shinken.property import PathProp, IntegerProp
@@ -271,23 +273,54 @@ class Receiver(Satellite):
         for ext_cmd in self.unprocessed_external_commands:
             self.external_command.resolve_command(ext_cmd)
             self.external_commands.append(ext_cmd)
+        
         # And clean the previous one
         self.unprocessed_external_commands = []
         
         # Now for all alive schedulers, send the commands
         for sched_id in self.schedulers:
             sched = self.schedulers[sched_id]
-            cmds = sched['external_commands']
+            extcmds = sched['external_commands']
+            cmds = [extcmd.cmd_line for extcmd in extcmds]
             con = sched.get('con', None)
+            sent = False
             if not con:
                 print "The scheduler is not connected", sched
             # If there are commands and the scheduler is alive
             if len(cmds) > 0 and con:
                 logger.debug("Sending %d commands to scheduler %s" % (len(cmds), sched))
-                con.run_external_commands(cmds)
-            # clean them
-            self.schedulers[sched_id]['external_commands'] = []
+                try:
+                    con.run_external_commands(cmds)
+                    sent = True
+                # Not connected or sched is gone
+                except (Pyro_exp_pack, KeyError), exp:
+                    logger.debug('manage_returns exception:: %s,%s ' % (type(exp), str(exp)))
+                    try:
+                        logger.debug(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
+                    except:
+                        pass
+                    self.pynag_con_init(sched_id)
+                    return
+                except AttributeError, exp:  # the scheduler must  not be initialized
+                    logger.debug('manage_returns exception:: %s,%s ' % (type(exp), str(exp)))
+                except Exception, exp:
+                    logger.error("A satellite raised an unknown exception: %s (%s)" % (exp, type(exp)))
+                    try:
+                        logger.debug(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
+                    except:
+                        pass
+                    raise
 
+            # If we sent or not the commands, just clean the scheduler list.
+            self.schedulers[sched_id]['external_commands'] = []
+            
+            # If we sent them, remove the commands of this scehduler of the arbiter list
+            if sent:
+                print "DUMP?", cmds, self.external_commands
+                # and remove them from the list for the arbiter (if not, we will send it twice
+                for extcmd in extcmds:
+                    self.external_commands.remove(extcmd)
+            
 
     def do_loop_turn(self):
         sys.stdout.write(".")
