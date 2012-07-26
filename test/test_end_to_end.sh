@@ -35,7 +35,7 @@ echo "NB CPUS: " $NB_CPUS
 
 # check for a process existance with good number
 function check_process_nb {
-    NB=`ps -ef | grep python | grep -v grep | grep "shinken-"$1 | wc -l`
+    NB=`ps -ef | grep -v grep | grep "shinken-"$1 | wc -l`
     if [ $NB != "$2" ]
     then
 	echo "Error: There is not enough $1 launched (only $NB)."

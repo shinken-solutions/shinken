@@ -423,8 +423,10 @@ class Satellite(BaseSatellite):
                     target = module.work
             if target is None:
                 return
+        # We want to give to the Worker the name of the daemon (poller or reactionner)
+        cls_name = self.__class__.__name__.lower()
         w = Worker(1, q, self.returns_queue, self.processes_by_worker, \
-                   mortal=mortal, max_plugins_output_length=self.max_plugins_output_length, target=target)
+                   mortal=mortal, max_plugins_output_length=self.max_plugins_output_length, target=target, loaded_into=cls_name)
         w.module_name = module_name
         # save this worker
         self.workers[w.id] = w
