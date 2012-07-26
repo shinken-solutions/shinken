@@ -114,11 +114,8 @@ class Receiver(Satellite):
 
 
     def push_host_names(self, sched_id, hnames):
-        print "I RECEIVED the hosts", hnames, "for the scheduler", sched_id
-        print "AND I GOT SCHEDULERS", self.schedulers
         for h in hnames:
             self.host_assoc[h] = sched_id
-        print self.host_assoc
 
 
     def get_sched_from_hname(self, hname):
@@ -172,7 +169,6 @@ class Receiver(Satellite):
         conf = self.new_conf
         self.new_conf = None
         self.cur_conf = conf
-        print "DUMP CONF", conf
         # Got our name from the globals
         if 'receiver_name' in conf['global']:
             name = conf['global']['receiver_name']
@@ -260,7 +256,6 @@ class Receiver(Satellite):
     # Take all external commands, make packs and send them to
     # the schedulers
     def push_external_commands_to_schedulers(self):
-        print "IN push_external_commands_to_schedulers ::"
         # If we are not in a direct routing mode, just bailout after
         # faking resolving the commands
         if not self.direct_routing:
@@ -316,7 +311,6 @@ class Receiver(Satellite):
             
             # If we sent them, remove the commands of this scehduler of the arbiter list
             if sent:
-                print "DUMP?", cmds, self.external_commands
                 # and remove them from the list for the arbiter (if not, we will send it twice
                 for extcmd in extcmds:
                     self.external_commands.remove(extcmd)
