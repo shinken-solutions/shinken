@@ -27,33 +27,17 @@ body {
 	background: #232426 !important;
 	padding-top: 0px !important;
 	color: #ededef;
+
 }
 
 p {
 	color: #535456;
-	
 	text-align: center;
 	font-family: Century Gothic, sans-serif;
 }
-#dash-header {
-	width: 101%;
-	background-color: #343434;
-	border-bottom-color: #2C2C2C solid 2px;
-	margin-left: 0 !important;
-	margin-bottom: 20px;
-}
 
-#dash-header ul {
-	padding: 5px 0 5px 0;
-	margin-bottom: 0px;
-	line-height: 25px;
-	font-size: 16px;
-}
-
-#dash-header li {
-	display: inline;
-	list-style-type: none;
-	padding-right: 20px;
+hr { /* Yes this is a workaround*/
+	display: none;
 }
 
 .hell {
@@ -72,33 +56,12 @@ p {
 	vertical-align: middle;
 }
 
-
-
-#show-time {
-	min-width: 35px;
+#footer p{
+	text-align: right;
+	font-size: 1.5em;
 }
 
-.jetpack {
-	font-size: 0.5em;
-}
 
-.btn-dash {
-	font-size: 2.5em;
-}
-
-.icon-home {
-  background-image: url("/static/img/icons/icon-home.png");
-  background-position: center;
-  height: 30px;
-  width: 30px;
-}
-
-.icon-plus-dash {
-  background-image: url("/static/img/icons/icon-plus-dash.png");
-  background-position: center;
-  height: 30px;
-  width: 30px;
-}
 
 #clock {
 	color: #FFFFFF;
@@ -106,7 +69,62 @@ p {
 	font-size: 10em;
 }
 
+
+
 #date {
 	color: #535456;
 	font-size: 1.5em;
+}
+
+ul#Navigation {
+    margin: 0; padding: 0.8em;
+    text-align: center;
+  }
+
+ul#Navigation li {
+    list-style: none;
+    display: inline;
+    margin: 0.4em; padding: 0;
+    width: 300px;
+
+    z-index: 1;
+  }
+
+/*  Badger styles
+    ------------------------------------------------------- */
+
+.badger-big {
+  background-color: #999999;
+  border-radius: 3px 3px 3px 3px;
+  color: #FFFFFF;
+  font-size: 3.5em;
+  font-weight: bold;
+  padding: 1px 3px 2px;
+  text-transform: uppercase;
+  position: relative;
+  bottom: 1.15em;
+  right: 25px;
+  z-index: 666;
+  
+}
+
+.badger-critical {
+  /*background-color: #e10000;*/
+  background-color: rgb(255,0,0); opacity: 0.85;
+  border-radius: 3px 3px 3px 3px;
+  color: #FFFFFF;
+}
+
+.badger-warning {
+  /*background-color: #e10000;*/
+  background-color: rgb(255,153,0); opacity: 0.85;
+  border-radius: 3px 3px 3px 3px;
+  color: #FFFFFF;
+}
+
+.badger-ok {
+  background-color: #7AB317;
+  background-image: -moz-linear-gradient(center top , #7AB317, #669900);
+  border-radius: 3px 3px 3px 3px;
+  color: #FFFFFF;
 }
