@@ -196,6 +196,8 @@ class Npcd_broker(BaseModule):
     # This version does not use a signal-based timer yet. Rotation is triggered
     # by a constant flow of status update broks
     def main(self):
+        self.set_proctitle(self.name)
+
         self.set_exit_handler()
         self.rotate()
         last_rotated = time.time()

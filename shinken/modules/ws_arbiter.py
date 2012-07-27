@@ -117,6 +117,9 @@ class Ws_arbiter(BaseModule):
     def main(self):
         global app
 
+        # Change process name (seen in ps or top)
+        self.set_proctitle(self.name)
+
         # It's an external module, so we need to be sure that we manage
         # the signals
         self.set_exit_handler()

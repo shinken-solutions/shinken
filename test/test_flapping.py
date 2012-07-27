@@ -82,7 +82,7 @@ class TestFlapping(ShinkenTest):
             print "In flapping?", svc.is_flapping
         self.assert_(not svc.is_flapping)
         self.assert_(self.any_log_match('SERVICE FLAPPING ALERT.*;STOPPED'))
-        self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;FLAPPINGSTART'))
+        self.assert_(self.any_log_match('SERVICE NOTIFICATION.*;FLAPPINGSTOP'))
 
         ############ Now get back in flap, and try the exteral commands change
 

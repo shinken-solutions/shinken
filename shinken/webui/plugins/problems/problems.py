@@ -84,6 +84,12 @@ def get_view(page):
         app.set_user_preference(user, 'bookmarks', '[]')
         bookmarks_r = '[]'
     bookmarks = json.loads(bookmarks_r)
+    bookmarks_ro = app.get_common_preference('bookmarks')
+    if not bookmarks_ro:
+        bookmarks_ro = '[]'
+
+    bookmarksro = json.loads(bookmarks_ro)
+    bookmarks = json.loads(bookmarks_r)
 
     items = []
     if page == 'problems':
@@ -212,7 +218,7 @@ def get_view(page):
     ## for pb in pbs:
     ##     print pb.get_name()
     print 'Give filters', filters
-    return {'app': app, 'pbs': items, 'user': user, 'navi': navi, 'search': search_str, 'page': page, 'filters': filters, 'bookmarks': bookmarks}
+    return {'app': app, 'pbs': items, 'user': user, 'navi': navi, 'search': search_str, 'page': page, 'filters': filters, 'bookmarks': bookmarks, 'bookmarksro': bookmarksro }
 
 
 # Our page

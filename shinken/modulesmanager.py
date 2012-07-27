@@ -159,6 +159,8 @@ class ModulesManager(object):
             try:
                 mod_conf.properties = module.properties.copy()
                 inst = module.get_instance(mod_conf)
+                # Give the module the data to which module it is load from
+                inst.set_loaded_into(self.modules_type)
                 if inst is None:  # None = Bad thing happened :)
                     logger.info("get_instance for module %s returned None!" % (mod_conf.get_name()))
                     continue

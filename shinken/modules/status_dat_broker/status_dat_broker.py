@@ -370,6 +370,7 @@ class Status_dat_broker(BaseModule):
             setattr(e, prop, data[prop])
 
     def main(self):
+        self.set_proctitle(self.name)
         self.set_exit_handler()
         last_generation = time.time()
         objects_cache_written = False
