@@ -43,7 +43,6 @@ function AddWidget(url, placeId){
     // We create a container before the AJAX request to display the widgets in the right order.
     id_widget += 1;
     container_object = $('<div id="widget-cell-' + id_widget + '"></div>').appendTo('#' + placeId);
-    //container_object = $('#' + placeId);
 
     $.ajax({
         url: url,
