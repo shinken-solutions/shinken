@@ -74,6 +74,7 @@ class Webui_broker(BaseModule, Daemon):
         self.port = int(getattr(modconf, 'port', '7767'))
         self.host = getattr(modconf, 'host', '0.0.0.0')
         self.auth_secret = getattr(modconf, 'auth_secret').encode('utf8', 'replace')
+        self.play_sound = to_bool(getattr(modconf, 'play_sound', '0'))
         self.http_backend = getattr(modconf, 'http_backend', 'auto')
         self.login_text = getattr(modconf, 'login_text', None)
         self.allow_html_output = to_bool(getattr(modconf, 'allow_html_output', '0'))
