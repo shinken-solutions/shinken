@@ -109,6 +109,9 @@ class BaseModule(object):
         self.process = None
         self.illegal_char = compile(r'[^\w]')
         self.init_try = 0
+        # We want to know where we are load from? (broker, scheduler, etc)
+        self.loaded_into = 'unknown'
+
 
     def init(self):
         """Handle this module "post" init ; just before it'll be started.
@@ -116,6 +119,11 @@ class BaseModule(object):
         or whatever the module will need.
         """
         pass
+
+
+    def set_loaded_into(self, daemon_name):
+        self.loaded_into = daemon_name
+
 
     def create_queues(self, manager=None):
         """The manager is None on android, but a true Manager() elsewhere
@@ -132,6 +140,7 @@ class BaseModule(object):
             self.from_q = manager.Queue()
             self.to_q = manager.Queue()
 
+
     def clear_queues(self, manager):
         """Release the resources associated to the queues of this instance"""
         for q in (self.to_q, self.from_q):
@@ -145,6 +154,7 @@ class BaseModule(object):
             #    q._callmethod('close')
             #    q._callmethod('join_thread')
         self.to_q = self.from_q = None
+
 
     # Start this module process if it's external. if not -> donothing
     def start(self):
@@ -168,6 +178,7 @@ class BaseModule(object):
         self.process = p
         self.properties['process'] = p  # TODO: temporary
         logger.info("%s is now started ; pid=%d" % (self.name, p.pid))
+
 
     def __kill(self):
         """Sometime terminate() is not enough, we must "help"
@@ -200,14 +211,17 @@ class BaseModule(object):
     def get_name(self):
         return self.name
 
+
     def has(self, prop):
         """The classic has: do we have a prop or not?"""
         return hasattr(self, prop)
+
 
     # For in scheduler modules, we will not send all broks to external
     # modules, only what they really want
     def want_brok(self, b):
         return True
+
 
     def manage_brok(self, brok):
         """Request the module to manage the given brok.
@@ -244,8 +258,17 @@ class BaseModule(object):
         """
         raise NotImplementedError()
 
+    def set_proctitle(self, name):
+        try:
+            from setproctitle import setproctitle
+            setproctitle("shinken-%s module: %s" % (self.loaded_into, name))
+        except:
+            pass
+
     def main(self):
         """module "main" method. Only used by external modules."""
+        self.set_proctitle(self.name)
+
         self.set_signal_handler()
         logger.info("[%s[%d]]: Now running.." % (self.name, os.getpid()))
         while not self.interrupted:
