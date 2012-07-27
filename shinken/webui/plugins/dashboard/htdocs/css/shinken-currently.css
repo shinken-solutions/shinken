@@ -61,15 +61,11 @@ hr { /* Yes this is a workaround*/
 	font-size: 1.5em;
 }
 
-
-
 #clock {
 	color: #FFFFFF;
 	line-height: 100%;
 	font-size: 10em;
 }
-
-
 
 #date {
 	color: #535456;
@@ -77,16 +73,18 @@ hr { /* Yes this is a workaround*/
 }
 
 ul#Navigation {
-    margin: 0; padding: 0.8em;
+  margin-top: 20em; 
+    margin-left: 35%;
+    padding: 0.8em;
     text-align: center;
   }
 
 ul#Navigation li {
     list-style: none;
     display: inline;
-    margin: 0.4em; padding: 0;
-    width: 300px;
+    margin: 0.4em;
 
+    padding: 0;
     z-index: 1;
   }
 
@@ -102,10 +100,9 @@ ul#Navigation li {
   padding: 1px 3px 2px;
   text-transform: uppercase;
   position: relative;
-  bottom: 1.15em;
-  right: 25px;
+  bottom: 2.15em;
+  left: 0.8em;
   z-index: 666;
-  
 }
 
 .badger-critical {
@@ -127,4 +124,39 @@ ul#Navigation li {
   background-image: -moz-linear-gradient(center top , #7AB317, #669900);
   border-radius: 3px 3px 3px 3px;
   color: #FFFFFF;
+}
+
+.badger-title {
+  -webkit-transform: rotate(-90deg); 
+  -moz-transform: rotate(-90deg); 
+  display: block;
+  position: relative;
+  right: 3.2em;
+  bottom: 2.6em;
+
+  color: #FFFFFF;
+  text-align: center;
+  font-family: Century Gothic, sans-serif;
+  font-size: 1.5em;
+  
+  z-index: 666;
+}
+
+.rotate {
+  -moz-transform: scale(1) rotate(270deg) translateX(0px) translateY(0px) skewX(0deg) skewY(0deg);
+    -webkit-transform: scale(1) rotate(270deg) translateX(0px) translateY(0px) skewX(0deg) skewY(0deg);
+        -o-transform: scale(1) rotate(270deg) translateX(0px) translateY(0px) skewX(0deg) skewY(0deg);
+        -ms-transform: scale(1) rotate(270deg) translateX(0px) translateY(0px) skewX(0deg) skewY(0deg);
+        transform: scale(1) rotate(270deg) translateX(0px) translateY(0px) skewX(0deg) skewY(0deg);
+}
+
+.box_rotate {
+  -webkit-transform: rotate(75deg);  /* Saf3.1+, Chrome */
+     -moz-transform: rotate(75deg);  /* Firefox 3.5-15 */
+      -ms-transform: rotate(75deg);  /* IE9 */
+       -o-transform: rotate(75deg);  /* Opera 10.5 */
+          transform: rotate(75deg);  /* Firefox 16+ */
+             filter: progid:DXImageTransform.Microsoft.Matrix(/* IE6–IE9 */
+                     M11=0.9914448613738104, M12=-0.13052619222005157,M21=0.13052619222005157, M22=0.9914448613738104, sizingMethod='auto expand');
+               zoom: 1;
 }
