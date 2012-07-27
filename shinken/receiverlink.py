@@ -23,8 +23,19 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+
+import shinken.pyro_wrapper as pyro
+Pyro = pyro.Pyro
+PYRO_VERSION = pyro.PYRO_VERSION
+
+
 from shinken.satellitelink import SatelliteLink, SatelliteLinks
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
+
+# Pack of common Pyro exceptions
+Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
+                    Pyro.errors.CommunicationError, \
+                    Pyro.errors.DaemonError)
 
 
 class ReceiverLink(SatelliteLink):
@@ -38,13 +49,34 @@ class ReceiverLink(SatelliteLink):
         'port':               IntegerProp(default='7772', fill_brok=['full_status']),
         'manage_sub_realms':  BoolProp(default='1', fill_brok=['full_status']),
         'manage_arbiters':    BoolProp(default='0', fill_brok=['full_status'], to_send=True),
+        'direct_routing':     BoolProp(default='0', fill_brok=['full_status'], to_send=True),
     })
+
 
     def get_name(self):
         return self.receiver_name
 
+
     def register_to_my_realm(self):
         self.realm.receivers.append(self)
+
+
+    def push_host_names(self, sched_id, hnames):
+        try:
+            if self.con is None:
+                self.create_connection()
+            print " (%s)" % self.uri
+
+            # If the connection failed to initialize, bail out
+            if self.con is None:
+                self.add_failed_check_attempt()
+                return
+
+            r = self.con.push_host_names(sched_id, hnames)
+        except Pyro_exp_pack, exp:
+            print  # flush previous print
+            self.add_failed_check_attempt(reason=str(exp))
+
 
 
 class ReceiverLinks(SatelliteLinks):

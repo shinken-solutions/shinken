@@ -162,6 +162,8 @@ class LiveStatus_broker(BaseModule, Daemon):
         os.dup2(fdtemp, 2)  # standard error (2)
 
     def main(self):
+        self.set_proctitle(self.name)
+
         self.log = logger
         self.log.load_obj(self)
         # Daemon like init

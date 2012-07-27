@@ -116,6 +116,7 @@ class IForArbiter(Interface):
         self.app.schedulers.clear()
         self.app.cur_conf = None
 
+
     # <WTF??> Inconsistent comments!
     # methods are only used by the arbiter or the broker?
     # NB: following methods are only used by broker
@@ -125,13 +126,20 @@ class IForArbiter(Interface):
         self.app.add_broks_to_queue(broks.values())
         return True
 
+
     # The arbiter ask us our external commands in queue
     def get_external_commands(self):
         return self.app.get_external_commands()
 
+
     ### NB: only useful for receiver
     def got_conf(self):
         return self.app.cur_conf != None
+
+
+    # Use by the receivers to got the host names managed by the schedulers
+    def push_host_names(self, sched_id, hnames):
+        self.app.push_host_names(sched_id, hnames)
 
 
 class ISchedulers(Interface):
@@ -415,8 +423,10 @@ class Satellite(BaseSatellite):
                     target = module.work
             if target is None:
                 return
+        # We want to give to the Worker the name of the daemon (poller or reactionner)
+        cls_name = self.__class__.__name__.lower()
         w = Worker(1, q, self.returns_queue, self.processes_by_worker, \
-                   mortal=mortal, max_plugins_output_length=self.max_plugins_output_length, target=target)
+                   mortal=mortal, max_plugins_output_length=self.max_plugins_output_length, target=target, loaded_into=cls_name)
         w.module_name = module_name
         # save this worker
         self.workers[w.id] = w

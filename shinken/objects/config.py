@@ -290,7 +290,7 @@ class Config(Item):
         'TEMPPATH':             '',
         'LOGFILE':              '',
         'RESOURCEFILE':         '',
-        'COMMANDFILE':          '',
+        'COMMANDFILE':          'command_file',
         'HOSTPERFDATAFILE':     '',
         'SERVICEPERFDATAFILE':  '',
         'ADMINEMAIL':           '',
