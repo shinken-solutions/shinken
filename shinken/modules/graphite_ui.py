@@ -152,8 +152,15 @@ class Graphite_Webui(BaseModule):
         e = datetime.fromtimestamp(graphend)
         e = e.strftime('%H:%M_%Y%m%d')
 
-        # Do we have a template?
-        thefile = self.templates_path + '/' + elt.check_command.get_name().split('!')[0] + '.graph'
+        # Do we have a template for the given source?
+        thesourcefile = self.templates_path + '/' + source + '/' + elt.check_command.get_name().split('!')[0] + '.graph'
+
+        if os.path.isfile(thesourcefile):
+            thefile = thesourcefile
+        else:
+            # If not try to use the one for the parent folder
+            thefile = self.templates_path + '/' + elt.check_command.get_name().split('!')[0] + '.graph'
+
         if os.path.isfile(thefile):
             template_html = ''
             with open(thefile, 'r') as template_file:
