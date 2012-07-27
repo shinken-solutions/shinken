@@ -368,6 +368,9 @@ $(function(){
     %# " We try to make only importants things shown on same output "
     %last_output = ''
     %nb_same_output = 0
+    %if app.datamgr.get_nb_problems() > 0 and page == 'problems' and app.play_sound:
+       <EMBED src="/static/sound/alert.wav" autostart=true loop=false volume=100 hidden=true>
+    %end
 
     %for pb in pbs:
 
