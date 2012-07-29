@@ -24,12 +24,10 @@
 
 import time, sys
 
-sys.path.append("..")
-sys.path.append("../shinken")
+from shinken_test import *
 
 import shinken
 from shinken.objects import *
-from shinken_test import *
 from shinken.misc.regenerator import Regenerator
 
 
