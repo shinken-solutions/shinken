@@ -43,29 +43,29 @@ class MacroResolver(Borg):
     my_type = 'macroresolver'
     # Global macros
     macros = {
-        'TOTALHOSTSUP':         'get_total_hosts_up',
-        'TOTALHOSTSDOWN':       'get_total_hosts_down',
-        'TOTALHOSTSUNREACHABLE': 'get_total_hosts_unreacheable',
-        'TOTALHOSTSDOWNUNHANDLED': 'get_total_hosts_unhandled',
-        'TOTALHOSTSUNREACHABLEUNHANDLED': 'get_total_hosts_unreacheable_unhandled',
-        'TOTALHOSTPROBLEMS':    'get_total_host_problems',
-        'TOTALHOSTPROBLEMSUNHANDLED': 'get_total_host_problems_unhandled',
-        'TOTALSERVICESOK':      'get_total_service_ok',
-        'TOTALSERVICESWARNING': 'get_total_services_warning',
-        'TOTALSERVICESCRITICAL': 'get_total_services_critical',
-        'TOTALSERVICESUNKNOWN': 'get_total_services_unknown',
-        'TOTALSERVICESWARNINGUNHANDLED': 'get_total_services_warning_unhandled',
-        'TOTALSERVICESCRITICALUNHANDLED': 'get_total_services_critical_unhandled',
-        'TOTALSERVICESUNKNOWNUNHANDLED': 'get_total_services_unknown_unhandled',
-        'TOTALSERVICEPROBLEMS': 'get_total_service_problems',
-        'TOTALSERVICEPROBLEMSUNHANDLED': 'get_total_service_problems_unhandled',
-        'LONGDATETIME':         'get_long_date_time',
-        'SHORTDATETIME':        'get_short_date_time',
-        'DATE':                 'get_date',
-        'TIME':                 'get_time',
-        'TIMET':                'get_timet',
-        'PROCESSSTARTTIME':     'get_process_start_time',
-        'EVENTSTARTTIME':       'get_events_start_time',
+        'TOTALHOSTSUP':         '_get_total_hosts_up',
+        'TOTALHOSTSDOWN':       '_get_total_hosts_down',
+        'TOTALHOSTSUNREACHABLE': '_get_total_hosts_unreacheable',
+        'TOTALHOSTSDOWNUNHANDLED': '_get_total_hosts_unhandled',
+        'TOTALHOSTSUNREACHABLEUNHANDLED': '_get_total_hosts_unreacheable_unhandled',
+        'TOTALHOSTPROBLEMS':    '_get_total_host_problems',
+        'TOTALHOSTPROBLEMSUNHANDLED': '_get_total_host_problems_unhandled',
+        'TOTALSERVICESOK':      '_get_total_service_ok',
+        'TOTALSERVICESWARNING': '_get_total_services_warning',
+        'TOTALSERVICESCRITICAL': '_get_total_services_critical',
+        'TOTALSERVICESUNKNOWN': '_get_total_services_unknown',
+        'TOTALSERVICESWARNINGUNHANDLED': '_get_total_services_warning_unhandled',
+        'TOTALSERVICESCRITICALUNHANDLED': '_get_total_services_critical_unhandled',
+        'TOTALSERVICESUNKNOWNUNHANDLED': '_get_total_services_unknown_unhandled',
+        'TOTALSERVICEPROBLEMS': '_get_total_service_problems',
+        'TOTALSERVICEPROBLEMSUNHANDLED': '_get_total_service_problems_unhandled',
+        'LONGDATETIME':         '_get_long_date_time',
+        'SHORTDATETIME':        '_get_short_date_time',
+        'DATE':                 '_get_date',
+        'TIME':                 '_get_time',
+        'TIMET':                '_get_timet',
+        'PROCESSSTARTTIME':     '_get_process_start_time',
+        'EVENTSTARTTIME':       '_get_events_start_time',
     }
 
     # This must be called ONCE. It just put links for elements
@@ -342,74 +342,74 @@ class MacroResolver(Borg):
         return ''
 
     # Get Fri 15 May 11:42:39 CEST 2009
-    def get_long_date_time(self):
+    def _get_long_date_time(self):
         return time.strftime("%a %d %b %H:%M:%S %Z %Y", time.localtime()).decode('UTF-8', 'ignore')
 
     # Get 10-13-2000 00:30:28
-    def get_short_date_time(self):
+    def _get_short_date_time(self):
         return time.strftime("%d-%m-%Y %H:%M:%S", time.localtime())
 
     # Get 10-13-2000
-    def get_date(self):
+    def _get_date(self):
         return time.strftime("%d-%m-%Y", time.localtime())
 
     # Get 00:30:28
-    def get_time(self):
+    def _get_time(self):
         return time.strftime("%H:%M:%S", time.localtime())
 
     # Get epoch time
-    def get_timet(self):
+    def _get_timet(self):
         return str(int(time.time()))
 
-    def get_total_hosts_up(self):
+    def _get_total_hosts_up(self):
         return len([h for h in self.hosts if h.state == 'UP'])
 
-    def get_total_hosts_down(self):
+    def _get_total_hosts_down(self):
         return len([h for h in self.hosts if h.state == 'DOWN'])
 
-    def get_total_hosts_unreacheable(self):
+    def _get_total_hosts_unreacheable(self):
         return len([h for h in self.hosts if h.state == 'UNREACHABLE'])
 
     # TODO
-    def get_total_hosts_unreacheable_unhandled(self):
+    def _get_total_hosts_unreacheable_unhandled(self):
         return 0
 
-    def get_total_host_problems(self):
+    def _get_total_hosts_problems(self):
         return len([h for h in self.hosts if h.is_problem])
 
-    def get_total_host_problems_unhandled(self):
+    def _get_total_hosts_problems_unhandled(self):
         return 0
 
-    def get_total_service_ok(self):
+    def _get_total_service_ok(self):
         return len([s for s in self.services if s.state == 'OK'])
 
-    def get_total_services_warning(self):
+    def _get_total_services_warning(self):
         return len([s for s in self.services if s.state == 'WARNING'])
 
-    def get_total_services_critical(self):
+    def _get_total_services_critical(self):
         return len([s for s in self.services if s.state == 'CRITICAL'])
 
-    def get_total_services_unknown(self):
+    def _get_total_services_unknown(self):
         return len([s for s in self.services if s.state == 'UNKNOWN'])
 
     # TODO
-    def get_total_services_warning_unhandled(self):
+    def _get_total_services_warning_unhandled(self):
         return 0
 
-    def get_total_services_critical_unhandled(self):
+    def _get_total_services_critical_unhandled(self):
         return 0
 
-    def get_total_services_unknown_unhandled(self):
+    def _get_total_services_unknown_unhandled(self):
         return 0
 
-    def get_total_service_problems(self):
+    def _get_total_service_problems(self):
         return len([s for s in self.services if s.is_problem])
 
-    def get_total_service_problems_unhandled(self):
+    def _get_total_service_problems_unhandled(self):
         return 0
 
-    def get_process_start_time(self):
+    def _get_process_start_time(self):
         return 0
 
-    def get_events_start_time(self):
+    def _get_events_start_time(self):
         return 0
