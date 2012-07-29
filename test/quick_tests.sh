@@ -23,24 +23,22 @@ DIR=$(cd $(dirname "$0"); pwd)
 cd $DIR
 echo "$PWD"
 
-# delete the resul of nosetest, for coverage
+# delete the result of nosetest, for coverage
 rm -f nosetests.xml
 rm -f coverage.xml
 rm -f .coverage
 
 function launch_and_assert {
     SCRIPT=$1
-#    nosetests -v -s --with-xunit --with-coverage ./$SCRIPT
+    #nosetests -v -s --with-xunit --with-coverage ./$SCRIPT
     python ./$SCRIPT
-    if [ $? != 0 ]
-	then
+    if [ $? != 0 ] ; then
 	echo "Error: the test $SCRIPT failed"
 	exit 2
     fi
 }
 
 # Launching only quick tests for quick regression check
-#for ii in `ls -1 test_*py`; do echo "Launching Test $ii" && python $ii; done
 launch_and_assert test_system_time_change.py
 launch_and_assert test_services.py
 launch_and_assert test_hosts.py
