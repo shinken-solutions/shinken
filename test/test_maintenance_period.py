@@ -104,9 +104,9 @@ class TestMaintPeriod(ShinkenTest):
         # it is now 10 seconds before the full minute. run for 30 seconds
         # in 1-second-intervals. this should be enough to trigger the downtime
         # in 10 seconds from now the downtime starts
-        print "scheduler_loop start", time.asctime(time.localtime(time.time()))
+        print "scheduler_loop start", time.asctime()
         self.scheduler_loop(30, [[svc3, 0, 'OK']], do_sleep=True, sleep_time=1)
-        print "scheduler_loop end  ", time.asctime(time.localtime(time.time()))
+        print "scheduler_loop end  ", time.asctime()
 
         self.assert_(hasattr(svc3, 'in_maintenance'))
         self.assert_(len(self.sched.downtimes) == 1)

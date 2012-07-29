@@ -28,7 +28,6 @@ import logging
 from logging.handlers import TimedRotatingFileHandler
 
 from brok import Brok
-from util import if_else
 
 obj = None
 name = None
@@ -45,6 +44,9 @@ class Log:
     ERROR    = logging.ERROR
     CRITICAL = logging.CRITICAL
 
+    def __init__(self):
+        self._level = logging.NOTSET
+
     def load_obj(self, object, name_=None):
         """ We load the object where we will put log broks
         with the 'add' method
@@ -54,7 +56,6 @@ class Log:
         obj = object
         name = name_
 
-        self._level = logging.NOTSET
 
     @staticmethod
     def get_level_id(lvlName):
@@ -110,11 +111,16 @@ class Log:
         if format is None:
             lvlname = logging.getLevelName(level)
 
-            fmt = u'[%%(date)s] %s%%(name)s%%(msg)s\n' % (if_else(display_level, '%(level)s: ', ''))
+            if display_level:
+                fmt = u'[%(date)s] %(level)s: %(name)s%(msg)s\n'
+            else:
+                fmt = u'[%(date)s] %(name)s%(msg)s\n'
+
             args = {
-                'date': if_else(human_timestamp_log, time.asctime(time.localtime(time.time())), int(time.time())),
+                'date': (human_timestamp_log and time.asctime()
+                         or int(time.time())),
                 'level': lvlname.capitalize(),
-                'name': if_else(name is None, '', '[%s] ' % name),
+                'name': name and ('[%s] ' % name) or '',
                 'msg': message
             }
             s = fmt % args
@@ -173,9 +179,14 @@ class Log:
             self.debug("Closing %s local_log" % str(local_log))
             local_log.close()
 
-    def set_human_format(self):
-        """Set the output as human format"""
+    def set_human_format(self, on=True):
+        """
+        Set the output as human format.
+
+        If the optional parameter `on` is False, the timestamp format
+        will be reset to the default format.
+        """
         global human_timestamp_log
-        human_timestamp_log = True
+        human_timestamp_log = bool(on)
 
 logger = Log()
