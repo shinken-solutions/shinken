@@ -343,19 +343,19 @@ class MacroResolver(Borg):
 
     # Get Fri 15 May 11:42:39 CEST 2009
     def _get_long_date_time(self):
-        return time.strftime("%a %d %b %H:%M:%S %Z %Y", time.localtime()).decode('UTF-8', 'ignore')
+        return time.strftime("%a %d %b %H:%M:%S %Z %Y").decode('UTF-8', 'ignore')
 
     # Get 10-13-2000 00:30:28
     def _get_short_date_time(self):
-        return time.strftime("%d-%m-%Y %H:%M:%S", time.localtime())
+        return time.strftime("%d-%m-%Y %H:%M:%S")
 
     # Get 10-13-2000
     def _get_date(self):
-        return time.strftime("%d-%m-%Y", time.localtime())
+        return time.strftime("%d-%m-%Y")
 
     # Get 00:30:28
     def _get_time(self):
-        return time.strftime("%H:%M:%S", time.localtime())
+        return time.strftime("%H:%M:%S")
 
     # Get epoch time
     def _get_timet(self):
