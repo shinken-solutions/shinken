@@ -92,7 +92,7 @@ class TestLevels(unittest.TestCase):
 
 class TestBasics(unittest.TestCase):
 
-    def test_human_timestamp_format(self):
+    def test_setting_and_unsetting_human_timestamp_format(self):
         # :hack: logging.human_timestamp_log is a global variable
         self.assertEqual(logging.human_timestamp_log, False)
         logger.set_human_format()
@@ -202,6 +202,7 @@ class TestDefaultLoggingMethods(unittest.TestCase, LogCollectMixin):
         self.assertEqual(len(lines), 0)
 
     def test_human_timestamp_format(self):
+        "test output using the human timestamp format"
         logger.set_level(logger.INFO)
         logger.set_human_format(True)
         msgs, lines = self._put_log(logger.info, 'Some ] log-message')
@@ -214,11 +215,12 @@ class TestDefaultLoggingMethods(unittest.TestCase, LogCollectMixin):
         logger.set_human_format(False)
 
     def test_reset_human_timestamp_format(self):
-        # ensure human timestamp format is set and working
+        "test output after switching of the human timestamp format"
+        # ensure the human timestamp format is set, ...
         self.test_human_timestamp_format()
-        # turn of human timestamp format
+        # ... then turn it off
         logger.set_human_format(False)
-        # test for normal format
+        # test whether the normal format is used again
         self.test_basic_logging_info()
 
 
@@ -317,11 +319,12 @@ class TestWithLocalLogging(unittest.TestCase, LogCollectMixin):
         logger.set_human_format(False)
 
     def _test_reset_human_timestamp_format(self):
-        # ensure human timestamp format is set and working
+        "test output after switching of the human timestamp format"
+        # ensure the human timestamp format is set, ...
         self.test_human_timestamp_format()
-        # turn of human timestamp format
+        # ... then turn it off
         logger.set_human_format(False)
-        # test for normal format
+        # test whether the normal format is used again
         self.test_basic_logging_info()
 
 
