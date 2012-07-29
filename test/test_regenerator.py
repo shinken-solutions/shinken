@@ -22,12 +22,11 @@
 # This file is used to test reading and processing of config files
 #
 
-import time, sys
+import time
 
-from shinken_test import *
+from shinken_test import ShinkenTest, unittest
 
-import shinken
-from shinken.objects import *
+from shinken.objects import Service
 from shinken.misc.regenerator import Regenerator
 
 
