@@ -100,7 +100,7 @@ class MacroResolver(Borg):
     # And create a dict with it:
     # val: value, not set here
     # type: type of macro, like class one, or ARGN one
-    def get_macros(self, s):
+    def _get_macros(self, s):
         #if s in self.cache:
         #    return self.cache[s]
 
@@ -122,7 +122,7 @@ class MacroResolver(Borg):
     # Get a value from a propertie of a element
     # Prop can be a function or a propertie
     # So we call it or not
-    def get_value_from_element(self, elt, prop):
+    def _get_value_from_element(self, elt, prop):
         try:
             value = getattr(elt, prop)
             if callable(value):
@@ -134,7 +134,7 @@ class MacroResolver(Borg):
             return ''
 
     # For some macros, we need to delete unwanted caracters
-    def delete_unwanted_caracters(self, s):
+    def _delete_unwanted_caracters(self, s):
         for c in self.illegal_macro_output_chars:
             s = s.replace(c, '')
         return s
@@ -153,7 +153,7 @@ class MacroResolver(Borg):
 
                 #print "Macro in %s: %s" % (o.__class__, macro)
                 prop = macros[macro]
-                value = self.get_value_from_element(o, prop)
+                value = self._get_value_from_element(o, prop)
                 env['NAGIOS_%s' % macro] = value
             if hasattr(o, 'customs'):
                 # make NAGIOS__HOSTMACADDR from _MACADDR
@@ -181,19 +181,19 @@ class MacroResolver(Borg):
         while still_got_macros:
             nb_loop += 1
             # Ok, we want the macros in the command line
-            macros = self.get_macros(c_line)
+            macros = self._get_macros(c_line)
 
             # We can get out if we do not have macros this loop
             still_got_macros = (len(macros) != 0)
             #print "Still go macros:", still_got_macros
 
             # Put in the macros the type of macro for all macros
-            self.get_type_of_macro(macros, clss)
+            self._get_type_of_macro(macros, clss)
             # Now we get values from elements
             for macro in macros:
                 # If type ARGN, look at ARGN cutting
                 if macros[macro]['type'] == 'ARGN' and args is not None:
-                    macros[macro]['val'] = self.resolve_argn(macro, args)
+                    macros[macro]['val'] = self._resolve_argn(macro, args)
                     macros[macro]['type'] = 'resolved'
                 # If class, get value from properties
                 if macros[macro]['type'] == 'class':
@@ -201,11 +201,11 @@ class MacroResolver(Borg):
                     for elt in data:
                         if elt is not None and elt.__class__ == cls:
                             prop = cls.macros[macro]
-                            macros[macro]['val'] = self.get_value_from_element(elt, prop)
+                            macros[macro]['val'] = self._get_value_from_element(elt, prop)
                             # Now check if we do not have a 'output' macro. If so, we must
                             # delete all special caracters that can be dangerous
                             if macro in self.output_macros:
-                                macros[macro]['val'] = self.delete_unwanted_caracters(macros[macro]['val'])
+                                macros[macro]['val'] = self._delete_unwanted_caracters(macros[macro]['val'])
                 if macros[macro]['type'] == 'CUSTOM':
                     cls_type = macros[macro]['class']
                     macro_name = re.split('_' + cls_type, macro)[1].upper()
@@ -217,7 +217,7 @@ class MacroResolver(Borg):
                             if '_' + macro_name in elt.customs:
                                 macros[macro]['val'] = elt.customs['_' + macro_name]
                 if macros[macro]['type'] == 'ONDEMAND':
-                    macros[macro]['val'] = self.resolve_ondemand(macro, data)
+                    macros[macro]['val'] = self._resolve_ondemand(macro, data)
 
             # We resolved all we can, now replace the macro in the command call
             for macro in macros:
@@ -248,7 +248,7 @@ class MacroResolver(Borg):
     # _HOSTTOTO -> HOST CUSTOM MACRO TOTO
     # $SERVICESTATEID:srv-1:Load$ -> MACRO SERVICESTATEID of
     # the service Load of host srv-1
-    def get_type_of_macro(self, macros, clss):
+    def _get_type_of_macro(self, macros, clss):
         for macro in macros:
             # ARGN Macros
             if re.match('ARG\d', macro):
@@ -282,7 +282,7 @@ class MacroResolver(Borg):
                     continue
 
     # Resolve MACROS for the ARGN
-    def resolve_argn(self, macro, args):
+    def _resolve_argn(self, macro, args):
         # first, get the number of args
         id = None
         r = re.search('ARG(?P<id>\d+)', macro)
@@ -294,7 +294,7 @@ class MacroResolver(Borg):
                 return ''
 
     # Resolve on-demand macro, quite hard in fact
-    def resolve_ondemand(self, macro, data):
+    def _resolve_ondemand(self, macro, data):
         #print "\nResolving macro", macro
         elts = macro.split(':')
         nb_parts = len(elts)
@@ -316,7 +316,7 @@ class MacroResolver(Borg):
             if s is not None:
                 cls = s.__class__
                 prop = cls.macros[macro_name]
-                val = self.get_value_from_element(s, prop)
+                val = self._get_value_from_element(s, prop)
                 #print "Got val:", val
                 return val
         # Ok, service was easy, now hard part
@@ -336,7 +336,7 @@ class MacroResolver(Borg):
                     prop = cls.macros[macro_name]
                     i = list.find_by_name(elt_name)
                     if i is not None:
-                        val = self.get_value_from_element(i, prop)
+                        val = self._get_value_from_element(i, prop)
             #print "Got val:", val
             return val
         return ''
