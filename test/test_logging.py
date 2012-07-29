@@ -318,7 +318,7 @@ class TestWithLocalLogging(unittest.TestCase, LogCollectMixin):
         time.strptime(local_log[0].split(' Info: ', 1)[0], '[%a %b %d %H:%M:%S %Y]')
         logger.set_human_format(False)
 
-    def _test_reset_human_timestamp_format(self):
+    def test_reset_human_timestamp_format(self):
         "test output after switching of the human timestamp format"
         # ensure the human timestamp format is set, ...
         self.test_human_timestamp_format()
