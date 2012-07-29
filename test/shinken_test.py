@@ -13,10 +13,8 @@ import re
 import random
 import unittest
 
-sys.path.append("..")
-sys.path.append("../shinken")
-#sys.path.append("../bin")
-#sys.path.append(os.path.abspath("bin"))
+# import the shinken library from the parent directory
+import __import_shinken ; del __import_shinken
 
 import shinken
 from shinken.objects.config import Config
