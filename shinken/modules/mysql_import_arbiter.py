@@ -25,9 +25,13 @@
 # This module imports hosts and services configuration from a MySQL Database
 # Queries for getting hosts and services are pulled from shinken-specific.cfg configuration file.
 
-import MySQLdb
+try:
+    import MySQLdb
+except ImportError:
+    MySQLdb = None
 
 from shinken.basemodule import BaseModule
+from shinken.log import logger
 
 properties = {
     'daemons': ['arbiter'],
@@ -39,7 +43,9 @@ properties = {
 
 # called by the plugin manager to get a broker
 def get_instance(plugin):
-    print "[MySQL Importer Module]: Get MySQL importer instance for plugin %s" % plugin.get_name()
+    logger.debug("[MySQL Importer Module]: Get MySQL importer instance for plugin %s" % plugin.get_name())
+    if not MySQLdb:
+        raise Exception('Missing module python-mysqldb. Please install it.')
     host = plugin.host
     login = plugin.login
     password = plugin.password

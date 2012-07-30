@@ -39,8 +39,11 @@ import traceback
 from shinken.basemodule import BaseModule
 from shinken.log import logger
 
-from kombu import BrokerConnection
-from kombu import Producer, Consumer, Exchange, Queue
+try:
+    from kombu import BrokerConnection
+    from kombu import Producer, Consumer, Exchange, Queue
+except ImportError:
+    BrokerConnection = None
 
 properties = {
     'daemons': ['broker'],
@@ -53,7 +56,8 @@ properties = {
 # called by the plugin manager to get a broker
 def get_instance(plugin):
     # logger.info("Info","Get a canopsis broker for plugin %s" % (str(plugin.get_name())))
-
+    if not BrokerConnection:
+        raise Exception('Missing module python-kombu, please install it.')
     host            = getattr(plugin, 'host', None)
     port            = getattr(plugin, 'port', None)
     user            = getattr(plugin, 'user', None)

@@ -27,11 +27,11 @@ from shinken_test import *
 # we have an external process, so we must un-fake time functions
 time.time = original_time_time
 time.sleep = original_time_sleep
-from worker import Worker
+from shinken.worker import Worker
 from multiprocessing import Queue, Manager
-from objects.service import Service
-from objects.host import Host
-from objects.contact import Contact
+from shinken.objects.service import Service
+from shinken.objects.host import Host
+from shinken.objects.contact import Contact
 modconf = Module()
 
 

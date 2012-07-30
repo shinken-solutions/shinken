@@ -522,7 +522,7 @@ class ExternalCommandManager:
                         if tmp_host[-1] == '\n':
                             tmp_host = tmp_host[:-1]
                         if self.mode == 'dispatcher':
-                            self.search_host_and_dispatch(tmp_host, command)
+                            self.search_host_and_dispatch(tmp_host, command, extcmd)
                             return None
 
                     i += 1

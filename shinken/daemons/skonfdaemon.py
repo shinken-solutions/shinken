@@ -42,7 +42,7 @@ import tempfile
 import zipfile
 import shutil
 
-from shinken.objects import Config
+from shinken.objects.config import Config
 from shinken.external_command import ExternalCommandManager
 from shinken.dispatcher import Dispatcher
 from shinken.daemon import Daemon, Interface
