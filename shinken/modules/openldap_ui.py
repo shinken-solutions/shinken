@@ -85,16 +85,6 @@ class OpenLDAP_Webui(BaseModule):
         self.app = app
 
 
-    #Get a brok, parse it, and put in in database
-    #We call functions like manage_ TYPEOFBROK _brok that return us queries
-    def manage_brok(self, b):
-        type = b.type
-        manager = 'manage_'+type+'_brok'
-        f = getattr(self, manager, None)
-        if f:
-            f(b)
-
-
     # Give the entry for a contact
     def find_contact_entry(self, contact):
         if not self.active:
