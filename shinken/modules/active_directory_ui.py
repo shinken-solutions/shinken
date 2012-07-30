@@ -28,9 +28,14 @@ This class is for linking the WebUI with active directory,
 like check passwords, or get photos.
 """
 
-import ldap
 import os
 
+try:
+    import ldap
+except ImportError:
+    ldap = None
+
+from shinken.log import logger
 from shinken.basemodule import BaseModule
 
 print "Loaded AD module"
@@ -43,8 +48,9 @@ properties = {
 
 # called by the plugin manager
 def get_instance(plugin):
-    print "Get an Active Directory UI module for plugin %s" % plugin.get_name()
-
+    logger.debug("Get an Active Directory UI module for plugin %s" % plugin.get_name())
+    if not ldap:
+        raise Exception('The module python-ldap is not found. Please install it.')
     instance = AD_Webui(plugin)
     return instance
 
