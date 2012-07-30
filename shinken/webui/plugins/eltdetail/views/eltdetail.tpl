@@ -595,12 +595,14 @@ $(document).ready(function(){
 		      			%uris_1d = app.get_graph_uris(elt, lastday, now)
 		      			%uris_1w = app.get_graph_uris(elt, lastweek, now)
 		      			%uris_1m = app.get_graph_uris(elt, lastmonth, now)
+		      			%uris_1y = app.get_graph_uris(elt, lastyear, now)
 
 		      			<!-- Use of javascript to change the content of a div!-->										
 		      			<div class='span2'><a onclick="setHTML(html_4h,{{fourhours}});" class=""> 4 hours</a></div>
 		      			<div class='span2'><a onclick="setHTML(html_1d,{{lastday}});" class=""> 1 day</a></div>
 		      			<div class='span2'><a onclick="setHTML(html_1w,{{lastweek}});" class=""> 1 week</a></div>
 		      			<div class='span2'><a onclick="setHTML(html_1m,{{lastmonth}});" class=""> 1 month</a></div>
+		      			<div class='span2'><a onclick="setHTML(html_1y,{{lastyear}});" class=""> 1 year</a></div>
 
 
 		      		</div>
@@ -627,6 +629,8 @@ $(document).ready(function(){
 		      		html_1d='<p>';
 		      		html_1w='<p>';
 		      		html_1m='<p>';
+		      		html_1y='<p>';
+
 		      		%for g in uris_4h:
 		      		%img_src = g['img_src']
 		      		%link = g['link']
@@ -668,6 +672,18 @@ $(document).ready(function(){
 		      		html_1m = html_1m + '<a href="javascript:graph_zoom(\'/{{elt_type}}/{{elt.get_full_name()}}?\')" class="btn"><i class="icon-zoom-in"></i> Zoom</a>';
 		      		html_1m = html_1m + '<br>';
 		      		%end
+
+		      		%for g in uris_1y:
+		      		%img_src = g['img_src']
+		      		%link = g['link']
+		      		var img_src="{{img_src}}";
+		      		html_1y = html_1y + '<img src="'+ img_src.replace("'","\'") +'" class="jcropelt"/>';
+		      		html_1y = html_1y + '<a href="{{link}}" class="btn"><i class="icon-plus"></i> Show more</a>';
+		      		html_1y = html_1y + '<a href="javascript:graph_zoom(\'/{{elt_type}}/{{elt.get_full_name()}}?\')" class="btn"><i class="icon-zoom-in"></i> Zoom</a>';
+		      		html_1y = html_1y + '<br>';
+		      		%end
+
+
 		      		</script>
 
 		      		<div class='row-fluid well span8 jcrop'>

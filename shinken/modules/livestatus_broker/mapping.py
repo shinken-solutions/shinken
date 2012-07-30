@@ -3605,7 +3605,7 @@ livestatus_attribute_map = {
         },
         'program_start': {
             'description': 'The time of the last program start as UNIX timestamp',
-            'function': lambda item, req: 0,  # REPAIRME
+            'function': lambda item, req: item.program_start,
             'datatype': int,
         },
         'program_version': {

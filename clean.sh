@@ -13,6 +13,7 @@ sudo rm -fr /etc/default/shinken
 sudo rm -fr build dist Shinken.egg-info
 rm -fr test/var/*.pid
 rm -fr var/*.debug
+rm -fr var/archives/*
 rm -fr var/*.log*
 rm -fr var/*.pid
 rm -fr var/service-perfdata

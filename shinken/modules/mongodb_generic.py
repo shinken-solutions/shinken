@@ -30,9 +30,13 @@ This module job is to get configuration data (mostly hosts) from a mongodb datab
 # This module imports hosts and services configuration from a MySQL Database
 # Queries for getting hosts and services are pulled from shinken-specific.cfg configuration file.
 
-from pymongo.connection import Connection
+try:
+    from pymongo.connection import Connection
+except ImportError:
+    Connection = None
 
 from shinken.basemodule import BaseModule
+from shinken.log import logger
 
 properties = {
     'daemons': ['arbiter', 'webui', 'skonf'],
@@ -44,7 +48,9 @@ properties = {
 
 # called by the plugin manager to get a module instance
 def get_instance(plugin):
-    print "[MongoDB Module]: Get Mongodb instance for plugin %s" % plugin.get_name()
+    logger.debug("[MongoDB Module]: Get Mongodb instance for plugin %s" % plugin.get_name())
+    if not Connection:
+        raise Exception('Cannot find the module python-pymongo. Please install it.')
     uri = plugin.uri
     database = plugin.database
 

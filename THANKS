@@ -74,3 +74,4 @@ To banderas07 and Radu Gheorghe for their works on the escalation notification_i
 To Simon Rother for discovering a possible race condition.
 To David Laval for his graphite templates on the linux checks
 To nerocide for his bug report about bad event handler catch
+To Mathieu.md for his new shinken-specific.cfg file with more comments :)

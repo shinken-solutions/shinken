@@ -26,7 +26,6 @@
 import copy
 import time
 import sys
-import _mysql_exceptions
 
 properties = {
     'daemons': ['broker'],
@@ -34,7 +33,12 @@ properties = {
     'phases': ['running'],
     }
 
-from shinken.db_mysql import DBMysql
+try:
+    import _mysql_exceptions
+    from shinken.db_mysql import DBMysql
+except ImportError:
+    _mysql_exceptions = None
+    
 from shinken.basemodule import BaseModule
 from shinken.log import logger
 

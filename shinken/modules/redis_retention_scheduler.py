@@ -26,7 +26,10 @@
 # This Class is an example of an Scheduler module
 # Here for the configuration phase AND running one
 
-import redis
+try:
+    import redis
+except ImportError:
+    redis = None
 import cPickle
 
 from shinken.basemodule import BaseModule
@@ -41,7 +44,9 @@ properties = {
 
 # called by the plugin manager to get a broker
 def get_instance(plugin):
-    print "Get a redis retention scheduler module for plugin %s" % plugin.get_name()
+    logger.debug("Get a redis retention scheduler module for plugin %s" % plugin.get_name())
+    if not redis:
+        raise Exception('Missing the module python-redis. Please install it.')
     server = plugin.server
     instance = Redis_retention_scheduler(plugin, server)
     return instance

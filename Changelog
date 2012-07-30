@@ -1,26 +1,51 @@
 ########################
 Shinken ChangeLog
 #######################
+1.2 - TBD
+------------------
+	CORE ENHANCEMENTS
+	* Add: issue #349 (from David Guenault) Installation script now has a backup repository for installing MK Multisite.
+
+	CORE FIXES
+
+	MODULE ENHANCEMENTS
+	* Add: (from: xkilian and Thibault Cohen) Graphite broker supports pickle protocol, bulk updates and buffers output when it can't connect to Carbon daemons
+	* Add: (from: Thibault Cohen and ???) Graphite broker replaces invalid caracters by _ and supports negative values
+	* Add: (from: xkilian and Thibault Cohen) Graphite broker adds _PRE_GRAPHITE and _POST_GRAPHITE host or service macros to each dot delimited data name
+	* Add: (from: Claneys Skyne) Create additionnal data points for warning and critical thresholds per data value
+	* Add: (from Romain Forlot) Compile regex
+
+	MODULE FIXES
+	* Fix: issue #450 (from vaxvms) removed thrift broker, similar to Livestatus, as it is unmaintained.
+	* Fix: MerlinDB for Ninja UI, removed documentation and marked as deprecated, as it is unmaintained.
+
+	UI ENHANCEMENTS
+
+	UI FIXES
+
+	DOCUMENTATION
+	* Add: (from xkilian, MathieuMD,  Claneys Skyne, H4wkmoon, etc.) Wiki documentation in-depth renewal of Getting Started pages for new users
+	* Add: Monitoring Pack documentation, modules, installation, FAQ , diagrams, scaling shinken, dev+user resources, etc.
 
 1.0.1 - 13/03/2012
 ------------------
 	CORE FIXES
 	* Fix: recovery contacts were lost after a restart
-	* Fix: allow } in commands if it's not alone in the line.
-	* Fix: (from Laurent Ollagnier) typo on mysql pack
-	* Fix: issue #214 (shinken-admin catch backtrce for lost connections)
+	* Fix: allow } in commands if it's not alone in the line
+	* Fix: (from: Laurent Ollagnier) typo on mysql pack
+	* Fix: issue #214 (shinken-admin catches backtrace for lost connections)
 	* Fix: inheritance with +
-	* Fix: ticket #213 This will manage cases where an ctive satellite die and there is no spare. It's useful for pollers where spare is not so interesting.
-	* Fix: (reported by: H4wkmoon) time change compensation lead to a scheduler crash when objets don't got check perdios or notification periods.
-	* Fix: manage LARGE output from sub commands (>64k). Only woks under Unix from now, because it use the fcntl module
-	* Fix: (reported by: Unicow) bug in escalations, there was too much escalations raised.
-	* Fix: (from Arthur Gautier) fix buildpath
+	* Fix: ticket #213 This will manage cases where an active satellite dies and there is no spare. It's useful for pollers where spare is not so interesting.
+	* Fix: (reported by: H4wkmoon) time change compensation lead to a scheduler crash when objets don't get check perdios or notification periods.
+	* Fix: manage LARGE output from sub commands (>64k). Only works under Unix for now, because it uses the fcntl module
+	* Fix: (reported by: Unicow) bug in escalations, there were too many escalations raised
+	* Fix: (from: Arthur Gautier) fix buildpath
 	* Fix: (From: Thomas Meson) Various fixes in setup.py and add missing files to build the package
 
-	MODULES ENHANCEMENTS
-	* Add: lof of GLPI module enhancements, with new properties managed
+	MODULE ENHANCEMENTS
+	* Add: many GLPI module enhancements, with new properties managed
 
-	MODULES FIXES
+	MODULE FIXES
 	* Fix: check_esx3 install under ubuntu 32bits edition
 	* Fix: multisite layout, add custom links
 	* Fix: workaround problem with official pyro3 under Debian squeeze. Use pyro4 instead of the official one
