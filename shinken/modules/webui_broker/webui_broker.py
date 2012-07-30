@@ -74,6 +74,7 @@ class Webui_broker(BaseModule, Daemon):
         self.port = int(getattr(modconf, 'port', '7767'))
         self.host = getattr(modconf, 'host', '0.0.0.0')
         self.auth_secret = getattr(modconf, 'auth_secret').encode('utf8', 'replace')
+        self.play_sound = to_bool(getattr(modconf, 'play_sound', '0'))
         self.http_backend = getattr(modconf, 'http_backend', 'auto')
         self.login_text = getattr(modconf, 'login_text', None)
         self.allow_html_output = to_bool(getattr(modconf, 'allow_html_output', '0'))
@@ -125,6 +126,8 @@ class Webui_broker(BaseModule, Daemon):
         return self.rg.want_brok(b)
 
     def main(self):
+        self.set_proctitle(self.name)
+
         self.log = logger
         self.log.load_obj(self)
 
@@ -526,8 +529,27 @@ class Webui_broker(BaseModule, Daemon):
         #safe_print("Will return", uris)
         # Ok if we got a real contact, and if a module auth it
         return uris
+        
+    def get_common_preference(self, key, default=None):
+        safe_print("Checking common preference for", key)
 
-    # Try to got for an element the graphs uris from modules
+        for mod in self.modules_manager.get_internal_instances():
+            try:
+                print 'Try to get pref %s from %s' % (key, mod.get_name())
+                f = getattr(mod, 'get_ui_common_preference', None)
+                if f and callable(f):
+                    r = f(key)
+                    return r
+            except Exception, exp:
+                print exp.__dict__
+                logger.log("[%s] Warning: The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
+                logger.log("[%s] Exception type: %s" % (self.name, type(exp)))
+                logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
+                self.modules_manager.set_to_restart(mod)
+        print 'get_common_preference :: Nothing return, I send none'
+        return default
+
+# Try to got for an element the graphs uris from modules
     def get_user_preference(self, user, key, default=None):
         safe_print("Checking user preference for", user.get_name(), key)
 

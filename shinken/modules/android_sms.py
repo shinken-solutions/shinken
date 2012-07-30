@@ -28,7 +28,10 @@ for send SMS, and will use android lib for this.
 """
 
 # very important: import android stuff
-import android
+try:
+    import android
+except ImportError:
+    android = None
 
 import sys
 import signal
@@ -37,6 +40,7 @@ from Queue import Empty
 
 from shinken.basemodule import BaseModule
 from shinken.external_command import ExternalCommand
+from shinken.log import logger
 
 properties = {
     'daemons': ['reactionner'],
@@ -49,7 +53,9 @@ properties = {
 
 # called by the plugin manager to get a worker
 def get_instance(mod_conf):
-    print "Get an Android reactionner module for plugin %s" % mod_conf.get_name()
+    logger.debug("Get an Android reactionner module for plugin %s" % mod_conf.get_name())
+    if not android:
+        raise Exception('This is not an Android device.')
     instance = Android_reactionner(mod_conf)
     return instance
 
@@ -194,6 +200,8 @@ class Android_reactionner(BaseModule):
     # c = Control Queue for the worker
     def work(self, s, returns_queue, c):
         print "Module Android started!"
+        self.set_proctitle(self.name)
+
         self.android = android.Android()
         timeout = 1.0
         self.checks = []

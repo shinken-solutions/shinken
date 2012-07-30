@@ -29,9 +29,12 @@ This is a scheduler module to save host/sevice retention data into a mongodb dat
 
 import cPickle
 
-from pymongo.connection import Connection
-import gridfs
-from gridfs import GridFS
+try:
+    from pymongo.connection import Connection
+    import gridfs
+    from gridfs import GridFS
+except ImportError:
+    Connection = None
 
 from shinken.basemodule import BaseModule
 from shinken.log import logger
@@ -45,7 +48,9 @@ properties = {
 
 # Called by the plugin manager to get a broker
 def get_instance(plugin):
-    print "Get a Mongodb retention scheduler module for plugin %s" % plugin.get_name()
+    logger.debug("Get a Mongodb retention scheduler module for plugin %s" % plugin.get_name())
+    if not Connection:
+        raise Exception('Cannot find the module python-pymongo or python-gridfs. Please install both.')
     uri = plugin.uri
     database = plugin.database
     instance = Mongodb_retention_scheduler(plugin, uri, database)

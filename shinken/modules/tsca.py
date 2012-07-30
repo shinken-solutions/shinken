@@ -26,21 +26,22 @@
 # This Class implement the Thrift Service Check Acceptor, an NSCA inspired
 # interface to submiet checks results
 
-# This text is print at the import
-print "Detected module: TSCA module for Arbiter/receiver"
-
 import os
 import sys
 import time
 
 # Thrift Specificities
 sys.path.append(os.path.abspath(__file__).rsplit("/", 3)[0] + "/thrift/gen-py")
-from org.shinken_monitoring.tsca import StateService
-from org.shinken_monitoring.tsca.ttypes import *
-from thrift.transport import TSocket
-from thrift.transport import TTransport
-from thrift.protocol import TBinaryProtocol
-from thrift.server import TServer
+try:
+    from org.shinken_monitoring.tsca import StateService
+    from org.shinken_monitoring.tsca.ttypes import *
+    from thrift.transport import TSocket
+    from thrift.transport import TTransport
+    from thrift.protocol import TBinaryProtocol
+    from thrift.server import TServer
+except ImportError:
+    TServer = None
+    
 from shinken.basemodule import BaseModule
 from shinken.external_command import ExternalCommand
 
@@ -54,7 +55,9 @@ properties = {
 
 # called by the plugin manager to get a broker
 def get_instance(plugin):
-    print "Get a TSCA arbiter module for plugin %s" % plugin.get_name()
+    logger.debug("Get a TSCA arbiter module for plugin %s" % plugin.get_name())
+    if not TServer:
+        raise Exception('Module python-thrift not found. Please install it.')
 
     if hasattr(plugin, 'host'):
         if plugin.host == '*':
@@ -166,6 +169,8 @@ class TSCA_arbiter(BaseModule):
 
     # When you are in "external" mode, that is the main loop of your process
     def main(self):
+        self.set_proctitle(self.name)
+
         self.set_exit_handler()
         try:
             handler = StateServiceHandler(self)

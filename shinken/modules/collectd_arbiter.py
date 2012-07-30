@@ -297,6 +297,7 @@ class Collectd_arbiter(BaseModule):
 
     # When you are in "external" mode, that is the main loop of your process
     def main(self):
+        self.set_proctitle(self.name)
         self.set_exit_handler()
 
         last_check = 0.0

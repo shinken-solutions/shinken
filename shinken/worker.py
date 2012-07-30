@@ -60,7 +60,7 @@ class Worker:
     _timeout = None
     _c = None
 
-    def __init__(self, id, s, returns_queue, processes_by_worker, mortal=True, timeout=300, max_plugins_output_length=8192, target=None):
+    def __init__(self, id, s, returns_queue, processes_by_worker, mortal=True, timeout=300, max_plugins_output_length=8192, target=None, loaded_into='unknown'):
         self.id = self.__class__.id
         self.__class__.id += 1
 
@@ -77,6 +77,9 @@ class Worker:
         self.returns_queue = returns_queue
         self.max_plugins_output_length = max_plugins_output_length
         self.i_am_dying = False
+        # Keep a trace where the worker is launch from (poller or reactionner?)
+        self.loaded_into = loaded_into
+        
 
     def is_mortal(self):
         return self._mortal
@@ -213,6 +216,9 @@ class Worker:
         # but on android, we are a thread, so don't do it
         if not is_android:
             signal.signal(signal.SIGTERM, signal.SIG_DFL)
+
+        self.set_proctitle()
+
         timeout = 1.0
         self.checks = []
         self.returns_queue = returns_queue
@@ -261,3 +267,11 @@ class Worker:
             timeout -= time.time() - begin
             if timeout < 0:
                 timeout = 1.0
+
+    def set_proctitle(self):
+        try:
+            from setproctitle import setproctitle
+            setproctitle("shinken-%s worker" % self.loaded_into)
+        except:
+            pass
+

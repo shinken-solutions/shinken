@@ -44,7 +44,7 @@ from shinken.objects import Contact
 from shinken.objects import Contactgroup
 from shinken.objects import Timeperiod
 from shinken.objects import Command
-from shinken.objects import Config
+from shinken.objects.config import Config
 # And now include from this directory
 from status import StatusFile
 from objectscache import ObjectsCacheFile
@@ -370,6 +370,7 @@ class Status_dat_broker(BaseModule):
             setattr(e, prop, data[prop])
 
     def main(self):
+        self.set_proctitle(self.name)
         self.set_exit_handler()
         last_generation = time.time()
         objects_cache_written = False

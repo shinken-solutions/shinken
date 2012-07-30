@@ -30,7 +30,7 @@ import traceback
 from Queue import Empty
 import socket
 
-from shinken.objects import Config
+from shinken.objects.config import Config
 from shinken.external_command import ExternalCommandManager
 from shinken.dispatcher import Dispatcher
 from shinken.daemon import Daemon, Interface
@@ -439,6 +439,7 @@ class Arbiter(Daemon):
 
         logger.info("Configuration Loaded", print_it=True)
 
+
     def launch_analyse(self):
         try:
             import json
@@ -466,6 +467,7 @@ class Arbiter(Daemon):
         print "Saving stats data", s
         f.write(s)
         f.close()
+
 
     # Main loop function
     def main(self):
@@ -511,20 +513,18 @@ class Arbiter(Daemon):
             else:
                 arb.is_me = lambda: False  # and we know who we are not, just keep it.
 
+
     def do_loop_turn(self):
         # If I am a spare, I wait for the master arbiter to send me
         # true conf.
         if self.me.spare:
-            self.wait_for_initial_conf()
-            if not self.new_conf:
-                return
-            self.setup_new_conf()
-            logger.debug("I must wait now")
+            logger.debug("I wait for master")
             self.wait_for_master_death()
 
         if self.must_run:
             # Main loop
             self.run()
+
 
     # Get 'objects' from external modules
     # It can be used to get external commands for example
@@ -542,6 +542,7 @@ class Arbiter(Daemon):
                 except (IOError, EOFError), exp:
                     logger.warning("An external module queue got a problem '%s'" % str(exp))
                     break
+
 
     # We wait (block) for arbiter to send us something
     def wait_for_master_death(self):
@@ -577,9 +578,10 @@ class Arbiter(Daemon):
             # Now check if master is dead or not
             now = time.time()
             if now - self.last_master_speack > master_timeout:
-                logger.info("Master is dead!!!")
+                logger.info("Master is dead!!! I (%s) take the lead" % self.me.get_name())
                 self.must_run = True
                 break
+
 
     # Take all external commands, make packs and send them to
     # the schedulers
@@ -598,11 +600,13 @@ class Arbiter(Daemon):
             # clean them
             sched.external_commands = []
 
+
     # We will log if there are time period activations
     # change as NOTICE in logs.
     def check_and_log_tp_activation_change(self):
         for tp in self.conf.timeperiods:
             tp.check_and_log_activation_change()
+
 
     # Main function
     def run(self):
@@ -707,10 +711,12 @@ class Arbiter(Daemon):
                 self.dump_memory()
                 self.need_dump_memory = False
 
+
     def get_daemons(self, daemon_type):
         """ Returns the daemons list defined in our conf for the given type """
         # shouldn't the 'daemon_types' (whatever it is above) be always present?
         return getattr(self.conf, daemon_type + 's', None)
+
 
     # Helper functions for retention modules
     # So we give our broks and external commands
@@ -719,6 +725,7 @@ class Arbiter(Daemon):
         r['broks'] = self.broks
         r['external_commands'] = self.external_commands
         return r
+
 
     # Get back our data from a retention module
     def restore_retention_data(self, data):

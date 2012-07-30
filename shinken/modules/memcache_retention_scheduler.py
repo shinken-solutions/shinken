@@ -26,8 +26,11 @@
 
 # This Class is an example of an Scheduler module
 # Here for the configuration phase AND running one
+try:
+    import memcache
+except ImportError:
+    memcache = None
 
-import memcache
 import cPickle
 
 from shinken.basemodule import BaseModule
@@ -42,7 +45,9 @@ properties = {
 
 # called by the plugin manager to get a broker
 def get_instance(modconf):
-    print "Get a memcache retention scheduler module for plugin %s" % modconf.get_name()
+    logger.log("Get a memcache retention scheduler module for plugin %s" % modconf.get_name())
+    if not memcache:
+        raise Exception('Missing module python-memcache. Please install it.')
     instance = Memcache_retention_scheduler(modconf)
     return instance
 
