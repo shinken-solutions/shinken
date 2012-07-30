@@ -26,16 +26,16 @@
 import time
 
 # Import all obejcts we will need
-from shinken.objects import Host, Hosts
-from shinken.objects import Hostgroup, Hostgroups
-from shinken.objects import Service, Services
-from shinken.objects import Servicegroup, Servicegroups
-from shinken.objects import Contact, Contacts
-from shinken.objects import Contactgroup, Contactgroups
-from shinken.objects import NotificationWay, NotificationWays
-from shinken.objects import Timeperiod, Timeperiods
-from shinken.objects import Command, Commands
-from shinken.objects import Config
+from shinken.objects.host import Host, Hosts
+from shinken.objects.hostgroup import Hostgroup, Hostgroups
+from shinken.objects.service import Service, Services
+from shinken.objects.servicegroup import Servicegroup, Servicegroups
+from shinken.objects.contact import Contact, Contacts
+from shinken.objects.contactgroup import Contactgroup, Contactgroups
+from shinken.objects.notificationway import NotificationWay, NotificationWays
+from shinken.objects.timeperiod import Timeperiod, Timeperiods
+from shinken.objects.command import Command, Commands
+from shinken.objects.config import Config
 from shinken.schedulerlink import SchedulerLink, SchedulerLinks
 from shinken.reactionnerlink import ReactionnerLink, ReactionnerLinks
 from shinken.pollerlink import PollerLink, PollerLinks
