@@ -25,7 +25,7 @@
 
 from item import Item, Items
 from shinken.brok import Brok
-from shinken.property import StringProp
+from shinken.property import StringProp, IntegerProp
 from shinken.autoslots import AutoSlots
 
 
@@ -51,6 +51,7 @@ class Command(Item):
         'poller_tag':   StringProp(default='None'),
         'reactionner_tag':   StringProp(default='None'),
         'module_type':  StringProp(default=None),
+        'timeout':      IntegerProp(default='-1'),
     })
 
     def __init__(self, params={}):
@@ -68,6 +69,9 @@ class Command(Item):
                 self.customs[key.upper()] = params[key]
             else:
                 setattr(self, key, params[key])
+
+        if not hasattr(self, 'timeout'):
+            self.timeout = '-1'
 
         if not hasattr(self, 'poller_tag'):
             self.poller_tag = 'None'
@@ -89,6 +93,7 @@ class Command(Item):
 
     def pythonize(self):
         self.command_name = self.command_name.strip()
+        self.timeout = int(self.timeout)
 
     def __str__(self):
         return str(self.__dict__)
