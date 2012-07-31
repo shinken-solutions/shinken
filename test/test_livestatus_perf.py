@@ -1300,7 +1300,7 @@ class TestConfigBig(PerfTest):
             ref[0].checks_in_progress
         super(TestConfigBig, self).scheduler_loop(count, reflist, do_sleep, sleep_time)
 
-
+'''
 class TestConfigCrazy(PerfTest):
     def setUp(self):
         print "comment me for performance tests"
@@ -1323,7 +1323,7 @@ class TestConfigCrazy(PerfTest):
 
     def scheduler_loop(self, count, reflist, do_sleep=False, sleep_time=61):
         super(TestConfigCrazy, self).scheduler_loop(count, reflist, do_sleep, sleep_time)
-
+'''
 
 if __name__ == '__main__':
     #import cProfile
