@@ -2024,6 +2024,72 @@ function do_skmacro(){
 }
 
 
+function install_notify_by_xmpp(){
+    XMPP_CONFIG_FILE="$LIBEXEC/notify_by_xmpp.ini"
+    cadre "Install notifiy_by_xmpp addon" green
+
+    cecho " > Checking for python-xmpp" green
+    case $CODE in
+        DEBIAN)
+            if [ -z "$(dpkg -l | grep ^ii.*python-xmpp)" ]
+            then
+                cecho " -> python-xmpp not found. Going to install" yellow
+                apt-get update >> ${LOGFILE} 2>&1
+                apt-get install -y python-xmpp >> ${LOGFILE} 2>&1
+            fi
+            ;;
+        *)
+            cecho " > Unsupported distro" red
+            exit 2
+            ;;
+    esac
+
+    cecho " > Configuring the XMPP account that will be used to send the notifications" green
+    cecho " -> The credentials will be written in plain text in $XMPP_CONFIG_FILE" yellow
+    while true
+    do
+        creads " -> Please provide the XMPP address (for ex. monitoring@jabber.org):" yellow
+        XMPP_ADDRESS=$readvalue
+        if [ -z "$XMPP_ADDRESS" ]
+        then
+            cecho " --> the address should not be empty" red
+        else
+            if [[ $XMPP_ADDRESS =~ @ ]]
+            then
+                XMPP_ACCOUNT=$(echo $XMPP_ADDRESS | cut -d@ -f1)
+                XMPP_SERVER=$(echo $XMPP_ADDRESS | cut -d@ -f2)
+                break
+            else
+                cecho " --> the adress should be like account_name@server_name" red
+            fi
+        fi
+    done
+    
+    while true
+    do
+        creads " -> Please provide the password of this account:" yellow
+        XMPP_PASSWORD_1=$readvalue
+        creads " -> Please confirm the password:" yellow
+        XMPP_PASSWORD_2=$readvalue
+        if [ -z "$XMPP_PASSWORD_1" ] || [ -z "$XMPP_PASSWORD_2" ]
+        then
+            cecho " --> passwords should not be empty" red
+        else
+            if [ "$XMPP_PASSWORD_1" != "$XMPP_PASSWORD_2" ]
+            then
+                cecho " --> passwords does not match" red
+            else
+                break
+            fi
+        fi
+    done
+
+    cecho " > Writing credentials in $XMPP_CONFIG_FILE" green
+    sed -i "s/^server=.*$/server=$XMPP_SERVER/g" $XMPP_CONFIG_FILE
+    sed -i "s/^#username=.*$/username=$XMPP_ACCOUNT/g" $XMPP_CONFIG_FILE
+    sed -i "s/^#password=.*$/password=$XMPP_PASSWORD_1/g" $XMPP_CONFIG_FILE
+}
+
 #################################
 ### PLUGINS INSTALLATION PART ###
 #################################
@@ -2907,6 +2973,7 @@ echo "Usage: install -k | -i | -u [addonname] | -b | -r backupname | -l | -c | -
                                nagvis
                                mongodb
                                nconf (experimental)
+                               notify_by_xmpp
     --nconf-import-packs    Import shinken packs into nconf (experimental). This require nconf to be installed
     --register              Register on community (experimental)
     -h | --help             Show help"
@@ -3047,6 +3114,10 @@ do
             then
                 #cecho " > Not implemented yet"
                 install_nconf
+                exit 0
+            elif [ "$OPTARG" == "notify_by_xmpp" ]
+            then
+                install_notify_by_xmpp
                 exit 0
             else
                 cecho " > Unknown addon $OPTARG" red
