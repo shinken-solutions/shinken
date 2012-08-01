@@ -2832,6 +2832,27 @@ function install_check_snmp_bandwidth(){
     cp $filename $LIBEXEC/$script
 }
 
+function install_check_rsync(){
+    cadre "Install the rsync check plugin" green
+
+    cd $TMP
+    cecho " > Getting check_rsync" green
+    wget $WGETPROXY "$CHECKRSYNC" -O check_rsync >> ${LOGFILE} 2>&1
+    if [ $? -ne 0 ]
+    then
+        cecho " -> Error while downloading $script" red
+        exit 2
+    fi
+
+    cecho " > Installing check_rsync" green
+    mv check_rsync $LIBEXEC/check_rsync
+    chmod +x $LIBEXEC/check_rsync
+    chown $SKUSER:$SKGROUP $LIBEXEC/check_rsync
+
+    cecho " > Configuring check_rsync" green
+    sed -i "s#/usr/local/nagios/libexec#$LIBEXEC#g" $LIBEXEC/check_rsync
+}
+
 function nconf-import-packs(){
     manageparameters 'quiet'
     packs=$TARGET/etc/packs
@@ -2967,6 +2988,7 @@ echo "Usage: install -k | -i | -u [addonname] | -b | -r backupname | -l | -c | -
                                check_snmp_bandwidth (check bandwidth usage with snmp)
                                check_IBM
                                check_IBM_DS
+                               check_rsync
     -a | --addon            Install addons. Argument should be one of the following:
                                pnp4nagios
                                multisite
@@ -3080,6 +3102,10 @@ do
             elif [ "$OPTARG" == "check_IBM_DS" ]
             then
                 install_IBM_DS
+                exit 0
+            elif [ "$OPTARG" == "check_rsync" ]
+            then
+                install_check_rsync
                 exit 0
             fi
             ;;
