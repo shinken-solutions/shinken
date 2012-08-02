@@ -47,6 +47,8 @@ def get_page():
     if not user:
         redirect("/user/login")
 
+    has_user_pref_mod = app.has_user_preference_module()
+
     # Look for the widgets as the json entry
     s = app.get_user_preference(user, 'widgets')
     print "Loaded widgets", s, type(s)
@@ -86,7 +88,7 @@ def get_page():
         widgets.append(w)
 
     print "Give widgets", widgets
-    return {'app': app, 'user': user, 'widgets': widgets}
+    return {'app': app, 'user': user, 'widgets': widgets, 'has_user_pref_mod' : has_user_pref_mod}
 
 pages = {get_page: {'routes': ['/dashboard'], 'view': 'dashboard', 'static': True},
 #         get_all: { 'routes': ['/dashboard/fullscreen'], 'view': 'fullscreen', 'static': True},
