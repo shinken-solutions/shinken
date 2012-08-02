@@ -1666,7 +1666,7 @@ function install_pnp4nagios(){
 }
 
 function uninstall_pnp4nagios(){
-    cadre "Uninnstall pnp4nagios addon" green
+    cadre "Uninstall pnp4nagios addon" green
     manageparameters "quiet"
 
     if [ -d "$PNPPREFIX" ]
@@ -1782,7 +1782,7 @@ function install_mysql(){
             fi
             ;;
         Fedora)
-            cecho " > Unsuported" red
+            cecho " > Unsupported" red
             exit 2
             ;;
         DEBIAN)
@@ -2023,6 +2023,72 @@ function do_skmacro(){
 
 }
 
+
+function install_notify_by_xmpp(){
+    XMPP_CONFIG_FILE="$LIBEXEC/notify_by_xmpp.ini"
+    cadre "Install notifiy_by_xmpp addon" green
+
+    cecho " > Checking for python-xmpp" green
+    case $CODE in
+        DEBIAN)
+            if [ -z "$(dpkg -l | grep ^ii.*python-xmpp)" ]
+            then
+                cecho " -> python-xmpp not found. Going to install" yellow
+                apt-get update >> ${LOGFILE} 2>&1
+                apt-get install -y python-xmpp >> ${LOGFILE} 2>&1
+            fi
+            ;;
+        *)
+            cecho " > Unsupported distro" red
+            exit 2
+            ;;
+    esac
+
+    cecho " > Configuring the XMPP account that will be used to send the notifications" green
+    cecho " -> The credentials will be written in plain text in $XMPP_CONFIG_FILE" yellow
+    while true
+    do
+        creads " -> Please provide the XMPP address (for ex. monitoring@jabber.org):" yellow
+        XMPP_ADDRESS=$readvalue
+        if [ -z "$XMPP_ADDRESS" ]
+        then
+            cecho " --> the address should not be empty" red
+        else
+            if [[ $XMPP_ADDRESS =~ @ ]]
+            then
+                XMPP_ACCOUNT=$(echo $XMPP_ADDRESS | cut -d@ -f1)
+                XMPP_SERVER=$(echo $XMPP_ADDRESS | cut -d@ -f2)
+                break
+            else
+                cecho " --> the adress should be like account_name@server_name" red
+            fi
+        fi
+    done
+    
+    while true
+    do
+        creads " -> Please provide the password of this account:" yellow
+        XMPP_PASSWORD_1=$readvalue
+        creads " -> Please confirm the password:" yellow
+        XMPP_PASSWORD_2=$readvalue
+        if [ -z "$XMPP_PASSWORD_1" ] || [ -z "$XMPP_PASSWORD_2" ]
+        then
+            cecho " --> passwords should not be empty" red
+        else
+            if [ "$XMPP_PASSWORD_1" != "$XMPP_PASSWORD_2" ]
+            then
+                cecho " --> passwords does not match" red
+            else
+                break
+            fi
+        fi
+    done
+
+    cecho " > Writing credentials in $XMPP_CONFIG_FILE" green
+    sed -i "s/^server=.*$/server=$XMPP_SERVER/g" $XMPP_CONFIG_FILE
+    sed -i "s/^#username=.*$/username=$XMPP_ACCOUNT/g" $XMPP_CONFIG_FILE
+    sed -i "s/^#password=.*$/password=$XMPP_PASSWORD_1/g" $XMPP_CONFIG_FILE
+}
 
 #################################
 ### PLUGINS INSTALLATION PART ###
@@ -2782,6 +2848,26 @@ function install_check_snmp_netint(){
 
     cecho " > install check_snmp_netint" green
     install -b -g $SKGROUP -o $SKUSER -m 0755 -t $TARGET/libexec check_snmp_netint.pl >> $TMP/shinken.install.log 2>&1
+
+function install_check_rsync(){
+    cadre "Install the rsync check plugin" green
+
+    cd $TMP
+    cecho " > Getting check_rsync" green
+    wget $WGETPROXY "$CHECKRSYNC" -O check_rsync >> ${LOGFILE} 2>&1
+    if [ $? -ne 0 ]
+    then
+        cecho " -> Error while downloading $script" red
+        exit 2
+    fi
+
+    cecho " > Installing check_rsync" green
+    mv check_rsync $LIBEXEC/check_rsync
+    chmod +x $LIBEXEC/check_rsync
+    chown $SKUSER:$SKGROUP $LIBEXEC/check_rsync
+
+    cecho " > Configuring check_rsync" green
+    sed -i "s#/usr/local/nagios/libexec#$LIBEXEC#g" $LIBEXEC/check_rsync
 }
 
 function nconf-import-packs(){
@@ -2920,12 +3006,14 @@ echo "Usage: install -k | -i | -u [addonname] | -b | -r backupname | -l | -c | -
                                check_snmp_netint (enhanced version of check_snmp_int plugins)
                                check_IBM
                                check_IBM_DS
+                               check_rsync
     -a | --addon            Install addons. Argument should be one of the following:
                                pnp4nagios
                                multisite
                                nagvis
                                mongodb
                                nconf (experimental)
+                               notify_by_xmpp
     --nconf-import-packs    Import shinken packs into nconf (experimental). This require nconf to be installed
     --register              Register on community (experimental)
     -h | --help             Show help"
@@ -3037,6 +3125,10 @@ do
             then
                 install_IBM_DS
                 exit 0
+            elif [ "$OPTARG" == "check_rsync" ]
+            then
+                install_check_rsync
+                exit 0
             fi
             ;;
         -a|--addon)
@@ -3070,6 +3162,10 @@ do
             then
                 #cecho " > Not implemented yet"
                 install_nconf
+                exit 0
+            elif [ "$OPTARG" == "notify_by_xmpp" ]
+            then
+                install_notify_by_xmpp
                 exit 0
             else
                 cecho " > Unknown addon $OPTARG" red
