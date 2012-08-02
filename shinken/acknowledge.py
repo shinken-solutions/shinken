@@ -24,7 +24,6 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
 class Acknowledge:
     """
     Allows you to acknowledge the current problem for the specified service.
@@ -43,7 +42,6 @@ class Acknowledge:
         'author': None,
         'comment': None,
         }
-
     # If the "sticky" option is set to one (1), the acknowledgement
     # will remain until the service returns to an OK state. Otherwise
     # the acknowledgement will automatically be removed when the
@@ -61,7 +59,7 @@ class Acknowledge:
     # next time Shinken restarts. "persistent" not only means "survive
     # restarts", but also
     #
-    # => End of comment Missing !!
+    # => End of comment Missing!!
     # </WTF??>
 
     def __init__(self, ref, sticky, notify, persistent,

@@ -14,7 +14,7 @@
 
 /* problem impact panel */
 .problems-panel {
-    height: 600px; 
+    height: 600px;
     width: 550px;
     background: white;
     position: relative;
@@ -235,7 +235,7 @@
 .impact-rows {
     position: relative;
     margin-top: 20px;
-    
+
     z-index: 1;
     outline: none;
 /*    left: 20px;*/
@@ -328,7 +328,7 @@ cursor: pointer;
 
 
 /* OK/UP */
-.divstate0, .divhstate0, .sivstate0 a, .sivhstate0 a { 
+.divstate0, .divhstate0, .sivstate0 a, .sivhstate0 a {
   background-color: #0b3; color: #fff;
   border-top-right-radius: 6px;
   border-bottom-right-radius: 6px;
@@ -339,7 +339,7 @@ cursor: pointer;
     white-space: nowrap;
 }
 /* WARN */
-.divstate1, .divstate1 a { 
+.divstate1, .divstate1 a {
   background-color: #ff0; color: #000;
   border-top-right-radius: 6px;
   border-bottom-right-radius: 6px;
@@ -348,7 +348,7 @@ cursor: pointer;
 }
 
 /* CRIT/DOWN */
-.div state2, .divhstate1, .divstate2 a, .divhstate2 a { 
+.div state2, .divhstate1, .divstate2 a, .divhstate2 a {
   background-color: #FA5858; color: #fff;
   border-top-right-radius: 6px;
   border-bottom-right-radius: 6px;
@@ -357,7 +357,7 @@ cursor: pointer;
 }
 
 /* UNKNOWN / UNREACH */
-.divstate3, .divhstate2, .divstate3 a, .divhstate2 a { 
+.divstate3, .divhstate2, .divstate3 a, .divhstate2 a {
   background-color: #f80; color: #fff;
   border-top-right-radius: 6px;
   border-bottom-right-radius: 6px;
@@ -432,7 +432,7 @@ cursor: pointer;
     color: #FFFFFF;
 }
 
-.msgBoxContent{ 
+.msgBoxContent{
     float:left;
     max-width: 80%;
     font-size:12px;

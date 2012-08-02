@@ -1,0 +1,6 @@
+
+echo "deb http://ftp.fr.debian.org/debian/ testing main contrib non-free" > /etc/apt/sources.list
+
+# specific uperto
+echo "Acquire::http::Proxy \"http://172.16.86.100:8080\";" > /etc/apt/apt.conf
+echo "nameserver 192.168.30.3" >> /etc/resolv.conf

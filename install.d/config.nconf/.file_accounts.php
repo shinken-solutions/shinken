@@ -5,7 +5,7 @@
 # To disable a user, rows can be commented out with "#"
 #
 # :: is the delimiter of the fields
-# Do NOT use :: (2 colons) in a data field (as name or password etc.) !
+# Do NOT use :: (2 colons) in a data field (as name or password etc.)!
 #
 #username::password::authorization(user|admin)::[user's full name (optional)]::
 admin::nconf::admin::Administrator::

@@ -29,28 +29,32 @@ This is a scheduler module to save host/sevice retention data into a mongodb dat
 
 import cPickle
 
-from pymongo.connection import Connection
-import gridfs
-from gridfs import GridFS
+try:
+    from pymongo.connection import Connection
+    import gridfs
+    from gridfs import GridFS
+except ImportError:
+    Connection = None
 
 from shinken.basemodule import BaseModule
 from shinken.log import logger
 
 properties = {
-    'daemons' : ['scheduler'],
-    'type' : 'mongodb_retention',
-    'external' : False,
+    'daemons': ['scheduler'],
+    'type': 'mongodb_retention',
+    'external': False,
     }
 
 
 # Called by the plugin manager to get a broker
 def get_instance(plugin):
-    print "Get a Mongodb retention scheduler module for plugin %s" % plugin.get_name()
+    logger.debug("Get a Mongodb retention scheduler module for plugin %s" % plugin.get_name())
+    if not Connection:
+        raise Exception('Cannot find the module python-pymongo or python-gridfs. Please install both.')
     uri = plugin.uri
     database = plugin.database
     instance = Mongodb_retention_scheduler(plugin, uri, database)
     return instance
-
 
 
 # Just print some stuff
@@ -59,7 +63,6 @@ class Mongodb_retention_scheduler(BaseModule):
         BaseModule.__init__(self, modconf)
         self.uri = uri
         self.database = database
-
 
     # Called by Scheduler to say 'let's prepare yourself guy'
     def init(self):
@@ -70,18 +73,17 @@ class Mongodb_retention_scheduler(BaseModule):
         self.hosts_fs = GridFS(self.db, collection='retention_hosts')
         self.services_fs = GridFS(self.db, collection='retention_services')
 
-
     # Ok, main function that is called in the retention creation pass
     def hook_save_retention(self, daemon):
         log_mgr = logger
         print "[MongodbRetention] asking me to update the retention objects"
 
         all_data = daemon.get_retention_data()
-        
+
         hosts = all_data['hosts']
         services = all_data['services']
-        
-        #Now the flat file method
+
+        # Now the flat file method
         for h_name in hosts:
             h = hosts[h_name]
             key = "HOST-%s" % h_name
@@ -105,10 +107,7 @@ class Mongodb_retention_scheduler(BaseModule):
             self.services_fs.delete(key)
             fd = self.services_fs.put(val, _id=key, filename=key)
 
-
         log_mgr.log("Retention information updated in Mongodb")
-
-
 
     # Should return if it succeed in the retention load or not
     def hook_load_retention(self, daemon):
@@ -117,7 +116,7 @@ class Mongodb_retention_scheduler(BaseModule):
         # Now the new redis way :)
         log_mgr.log("MongodbRetention] asking me to load the retention objects")
 
-        #We got list of loaded data from retention uri
+        # We got list of loaded data from retention uri
         ret_hosts = {}
         ret_services = {}
 
@@ -130,14 +129,14 @@ class Mongodb_retention_scheduler(BaseModule):
                 # Go in the next host object
                 continue
             val = fd.read()
-            
+
             if val is not None:
                 val = cPickle.loads(val)
                 ret_hosts[h.host_name] = val
 
         for s in daemon.services:
             key = "SERVICE-%s,%s" % (s.host.host_name, s.service_description)
-            #space are not allowed in memcache key.. so change it by SPACE token
+            # space are not allowed in memcache key.. so change it by SPACE token
             key = key.replace(' ', 'SPACE')
             try:
                 fd = self.services_fs.get_last_version(key)
@@ -150,8 +149,7 @@ class Mongodb_retention_scheduler(BaseModule):
                 val = cPickle.loads(val)
                 ret_services[(s.host.host_name, s.service_description)] = val
 
-        
-        all_data = {'hosts' : ret_hosts, 'services' : ret_services}
+        all_data = {'hosts': ret_hosts, 'services': ret_services}
 
         # Ok, now comme load them scheduler :)
         daemon.restore_retention_data(all_data)

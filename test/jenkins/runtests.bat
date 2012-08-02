@@ -1,4 +1,4 @@
-:: Copyright (C) 2009-2011 :
+:: Copyright (C) 2009-2011:
 ::     Gabes Jean, naparuba@gmail.com
 ::     Gerhard Lausser, Gerhard.Lausser@consol.de
 ::
@@ -37,7 +37,7 @@ SET PYTHONTOOLS=C:\Python%PYTHONVERS%\Scripts
 SET PATH=%PYTHONBIN%;%PYTHONTOOLS%;%PATH%
 
 REM This script is located in test/jenkins but needs to be run from test.
-REM Find out the script's directory and then go to the dir one level above. 
+REM Find out the script's directory and then go to the dir one level above.
 CD %~dp0\..
 
 REM Clean up leftovers from a former run
@@ -74,7 +74,7 @@ IF NOT ERRORLEVEL 0 ECHO PYLINT HAD A PROBLEM
 GOTO :EOF [Return to Main]
 
 REM Here is where the tests actually run
-:FUNC1 
+:FUNC1
 ECHO I RUN %1
 IF %COVERAGE% == NOCOVERAGE IF %PYLINT% == NOPYLINT %PYTHONTOOLS%\nosetests -v -s --with-xunit %1
 IF %COVERAGE% == COVERAGE %PYTHONTOOLS%\nosetests -v -s --with-xunit --with-coverage %1

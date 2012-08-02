@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2009-2011 :
+# Copyright (C) 2009-2011:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -23,13 +23,13 @@
 
 '''
  This class is the application that launches checks
- The poller listens to the Arbiter for the configuration sent through 
+ The poller listens to the Arbiter for the configuration sent through
  the given port as first argument.
- The configuration sent by the arbiter specifies from which schedulers the 
+ The configuration sent by the arbiter specifies from which schedulers the
  poller will take its checks.
- When the poller is already launched and has its own conf, it keeps on 
+ When the poller is already launched and has its own conf, it keeps on
  listening the arbiter (one a timeout)
- In case the arbiter has a new conf to send, the poller forget its old 
+ In case the arbiter has a new conf to send, the poller forget its old
  schedulers (and the associated checks) and take the new ones instead.
 '''
 
@@ -47,10 +47,8 @@ except ImportError:
     import imp
     imp.load_module('shinken', *imp.find_module('shinken', [os.path.realpath("."), os.path.realpath(".."), os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "..")]))
 
-
 from shinken.daemons.pollerdaemon import Poller
 from shinken.bin import VERSION
-
 
 parser = optparse.OptionParser(
     "%prog [options]", version="%prog " + VERSION)
@@ -75,7 +73,6 @@ if __name__ == '__main__':
     daemon = Poller(debug=opts.debug_file is not None, **opts.__dict__)
     daemon.main()
 
-# For perf tuning :
+# For perf tuning:
 #import cProfile
 #cProfile.run('''daemon.main()''', '/tmp/poller.profile')
-

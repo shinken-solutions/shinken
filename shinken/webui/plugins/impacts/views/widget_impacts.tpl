@@ -19,7 +19,7 @@
 %end
 
 %for impact in impacts:
-  
+
   <div class="tableCriticity pull-left row-fluid">
     <div class='img_status pull-left' style='width: 64px;'>
       <div class="big-pulse aroundpulse">
@@ -30,15 +30,15 @@
 	<img style="width: 64px;height: 64px;" src="{{helper.get_icon_state(impact)}}" />
       </div>
     </div>
-    
-    
+
+
     <span class="alert-small alert-{{impact.state.lower()}}">{{impact.state}}</span> for {{!helper.get_link(impact)}}
     <div class='pull-right'>
       %for j in range(0, impact.business_impact-2):
       <img src='/static/images/star.png' alt="star">
       %end
     </div>
-    
-  </div>  
+
+  </div>
   <div style="clear:both;"/>
 %end

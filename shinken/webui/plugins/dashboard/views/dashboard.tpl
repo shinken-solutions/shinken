@@ -10,6 +10,13 @@
   widget_context = 'dashboard';
 </script>
 
+<!-- Maybe the admin didn't add a user preference module, or the module is dead, if so, warn about it -->
+%if not has_user_pref_mod:
+   <div class='span12 alert alert-critical'>
+     Error : you didn't defined a WebUI module for saving user preference like the Mongodb one. You won't be able to use this page!
+   </div>
+%end
+
 
 <div class='span12'>
   <div id='loading' class='pull-left'> <img src='/static/images/spinner.gif'> Loading widgets</div>
@@ -50,12 +57,12 @@
     %end
     </div>
 
-    
+
 
 </div>
 
 <script >$(function(){
-  $(".slidelink").pageslide({ direction: "left", modal : true});
+  $(".slidelink").pageslide({ direction: "left", modal: true});
   });
 </script>
 
@@ -68,7 +75,7 @@
          %if 'base_url' in w and 'position' in w:
             %uri = w['base_url'] + "?" + w['options_uri']
             AddWidget("{{!uri}}", "{{w['position']}}");
-            var w = {'id' : "{{w['id']}}", 'base_url' : "{{w['base_url']}}", 'position' : "{{w['position']}}", 'options' : JSON.parse('{{w['options']}}')};
+            var w = {'id': "{{w['id']}}", 'base_url': "{{w['base_url']}}", 'position': "{{w['position']}}", 'options': JSON.parse('{{w['options']}}')};
             widgets.push(w);
          %end
       %end

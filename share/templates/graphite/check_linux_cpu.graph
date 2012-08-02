@@ -1,0 +1,1 @@
+$uri/render/?width=586&height=308&target=alias(legendValue($host.$service.cpu_prct_used%2C%22last%22)%2C%22CPU load%22)&fgcolor=000000&bgcolor=FFFFFF)&yMin=0

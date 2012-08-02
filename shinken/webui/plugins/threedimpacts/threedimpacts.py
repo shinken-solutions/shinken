@@ -28,6 +28,7 @@ from shinken.webui.bottle import redirect
 ### Will be populated by the UI with it's own value
 app = None
 
+
 # Sort hosts and services by impact, states and co
 def hst_srv_sort(s1, s2):
     if s1.business_impact > s2.business_impact:
@@ -44,7 +45,6 @@ def hst_srv_sort(s1, s2):
     return s1.get_full_name() > s2.get_full_name()
 
 
-
 def show_3dimpacts():
     # First we look for the user sid
     # so we bail out if it's a false one
@@ -52,14 +52,11 @@ def show_3dimpacts():
 
     if not user:
         redirect("/user/login")
-#        return {'app' : app, 'impacts' : [], 'valid_user' : False}
+#        return {'app': app, 'impacts': [], 'valid_user': False}
 
     all_imp_impacts = app.datamgr.get_important_elements()
     all_imp_impacts.sort(hst_srv_sort)
 
+    return {'app': app, 'impacts': all_imp_impacts, 'valid_user': True}
 
-    return {'app' : app, 'impacts' : all_imp_impacts, 'valid_user' : True}
-
-
-
-pages = {show_3dimpacts : { 'routes' : ['/3dimpacts'], 'view' : 'threedimpacts', 'static' : True}}
+pages = {show_3dimpacts: {'routes': ['/3dimpacts'], 'view': 'threedimpacts', 'static': True}}

@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import time
 import os
 import re
@@ -36,21 +35,18 @@ from shinken.objects.item import Item, Items
 from shinken.property import BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 from shinken.log import logger
 
+
 class Pack(Item):
-    id = 1 # 0 is always special in database, so we do not take risk here
+    id = 1  # zero is always special in database, so we do not take risk here
     my_type = 'pack'
 
     properties = Item.properties.copy()
-    properties.update({'pack_name':     StringProp(fill_brok=['full_status']),
-                       })
+    properties.update({'pack_name': StringProp(fill_brok=['full_status'])})
 
     running_properties = Item.running_properties.copy()
-    running_properties.update({
-            'macros':        StringProp(default={}),
-    })
+    running_properties.update({'macros': StringProp(default={})})
 
-
-    #For debugging purpose only (nice name)
+    # For debugging purpose only (nice name)
     def get_name(self):
         try:
             return self.pack_name
@@ -58,13 +54,10 @@ class Pack(Item):
             return 'UnnamedPack'
 
 
-
-
 class Packs(Items):
     name_property = "pack_name"
     inner_class = Pack
 
-        
     # We will dig into the path and load all .trig files
     def load_file(self, path):
         # Now walk for it
@@ -82,12 +75,11 @@ class Packs(Items):
                         # ok, skip this one
                         continue
                     self.create_pack(buf, file[:-5])
-        
 
     # Create a pack from the string buf, and get a real object from it
     def create_pack(self, buf, name):
         if not json:
-            logger.warning("[Pack] cannot load the pack file '%s' : missing json lib" % name)
+            logger.warning("[Pack] cannot load the pack file '%s': missing json lib" % name)
             return
         # Ok, go compile the code
         try:
@@ -109,6 +101,4 @@ class Packs(Items):
             # Ok, add it
             self[p.id] = p
         except ValueError, exp:
-            logger.error("[Pack] error in loading pack file '%s' : '%s'" % (name, exp))
-            
-
+            logger.error("[Pack] error in loading pack file '%s': '%s'" % (name, exp))

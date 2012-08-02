@@ -24,65 +24,64 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This Class is a plugin for the Shinken Broker. It is in charge
-#to brok information into the glpi database. for the moment
-#only Mysql is supported. This code is __imported__ from Broker.
-#The managed_brok function is called by Broker for manage the broks. It calls
-#the manage_*_brok functions that create queries, and then run queries.
-
+# This Class is a plugin for the Shinken Broker. It is in charge
+# to brok information into the glpi database. for the moment
+# only Mysql is supported. This code is __imported__ from Broker.
+# The managed_brok function is called by Broker for manage the broks. It calls
+# the manage_*_brok functions that create queries, and then run queries.
 
 import copy
 import time
 import sys
 
 properties = {
-    'daemons' : ['broker'],
-    'type' : 'glpidb',
-    'phases' : ['running'],
+    'daemons': ['broker'],
+    'type': 'glpidb',
+    'phases': ['running'],
     }
 
 from shinken.basemodule import BaseModule
 from shinken.log import logger
 
+
 def de_unixify(t):
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(t))
 
 
-
-#Class for the Glpidb Broker
-#Get broks and puts them in merlin database
+# Class for the Glpidb Broker
+# Get broks and puts them in merlin database
 class Glpidb_broker(BaseModule):
     def __init__(self, modconf, host=None, user=None, password=None, database=None, character_set=None, database_path=None):
-        #Mapping for name of data, rename attributes and transform function
+        # Mapping for name of data, rename attributes and transform function
         self.mapping = {
-           #Host
-           'host_check_result' : {
-               'plugin_monitoring_services_id' : {'transform' : None},
-               'event' : {'transform' : None},
-               'perf_data' : {'transform' : None},
-               'output' : {'transform' : None},
-               'state' : {'transform' : None},
-               'latency' : {'transform' : None},
-               'execution_time' : {'transform' : None},
-               'state_type' : {'transform' : None},
+           # Host
+           'host_check_result': {
+               'plugin_monitoring_services_id': {'transform': None},
+               'event': {'transform': None},
+               'perf_data': {'transform': None},
+               'output': {'transform': None},
+               'state': {'transform': None},
+               'latency': {'transform': None},
+               'execution_time': {'transform': None},
+               'state_type': {'transform': None},
                },
-           #Service
-           'service_check_result' : {
-               'plugin_monitoring_services_id' : {'transform' : None},
-               'plugin_monitoring_servicescatalogs_id' : {'transform' : None},
-               'event' : {'transform' : None},
-               'perf_data' : {'transform' : None},
-               'output' : {'transform' : None},
-               'state' : {'transform' : None},
-               'latency' : {'transform' : None},
-               'execution_time' : {'transform' : None},
-               'state_type' : {'transform' : None},
+           # Service
+           'service_check_result': {
+               'plugin_monitoring_services_id': {'transform': None},
+               'plugin_monitoring_servicescatalogs_id': {'transform': None},
+               'event': {'transform': None},
+               'perf_data': {'transform': None},
+               'output': {'transform': None},
+               'state': {'transform': None},
+               'latency': {'transform': None},
+               'execution_time': {'transform': None},
+               'state_type': {'transform': None},
                }
            }
         # Last state of check
-#        self.checkstatus = {
-#           '0' : None,
-#           }
+        #self.checkstatus = {
+        #    '0': None,
+        #    }
         BaseModule.__init__(self, modconf)
         self.host = host
         self.user = user
@@ -90,28 +89,23 @@ class Glpidb_broker(BaseModule):
         self.database = database
         self.character_set = character_set
         self.database_path = database_path
-        
+
         from shinken.db_mysql import DBMysql
         print "Creating a mysql backend"
         self.db_backend = DBMysql(host, user, password, database, character_set)
 
-
-
-    #Called by Broker so we can do init stuff
-    #TODO : add conf param to get pass with init
-    #Conf from arbiter!
+    # Called by Broker so we can do init stuff
+    # TODO: add conf param to get pass with init
+    # Conf from arbiter!
     def init(self):
         print "I connect to Glpi database"
         self.db_backend.connect_database()
 
-
-
-
     def preprocess(self, type, brok, checkst):
-        new_brok = copy.deepcopy(brok)        
-        #Only preprocess if we can apply a mapping
+        new_brok = copy.deepcopy(brok)
+        # Only preprocess if we can apply a mapping
         if type in self.mapping:
-            #print "brok data : ", brok.data
+            #print "brok data: ", brok.data
             try:
                 s = brok.data['service_description'].split('-')
                 try:
@@ -125,13 +119,13 @@ class Glpidb_broker(BaseModule):
                     s = brok.data['host_name'].split('-')
                     new_brok.data['plugin_monitoring_services_id'] = s[1]
                     new_brok.data['event'] = brok.data['output']
-                except: 
+                except:
                     pass
             to_del = []
             to_add = []
             mapping = self.mapping[brok.type]
             for prop in new_brok.data:
-            #ex : 'name' : 'program_start_time', 'transform'
+            # ex: 'name': 'program_start_time', 'transform'
                 if prop in mapping:
                     #print "Got a prop to change", prop
                     val = new_brok.data[prop]
@@ -155,81 +149,78 @@ class Glpidb_broker(BaseModule):
             print brok.data
         return new_brok
 
-
-
-    #Get a brok, parse it, and put in in database
-    #We call functions like manage_ TYPEOFBROK _brok that return us queries
+    # Get a brok, parse it, and put in in database
+    # We call functions like manage_ TYPEOFBROK _brok that return us queries
     def manage_brok(self, b):
         type = b.type
         # To update check in glpi_plugin_monitoring_hosts
-        manager = 'manage_'+type+'up_brok'
+        manager = 'manage_' + type + 'up_brok'
         if hasattr(self, manager):
             new_b = self.preprocess(type, b, 0)
             f = getattr(self, manager)
             queries = f(new_b)
-            #Ok, we've got queries, now : run them!
-            for q in queries :
+            # Ok, we've got queries, now: run them!
+            for q in queries:
                 self.db_backend.execute_query(q)
-        manager = 'manage_'+type+'_brok'
+        manager = 'manage_' + type + '_brok'
         if hasattr(self, manager):
             new_b = self.preprocess(type, b, '1')
             if 'host_name' in new_b.data:
-               if 'plugin_monitoring_services_id' not in new_b.data:
-                  return
+                if 'plugin_monitoring_services_id' not in new_b.data:
+                    return
             f = getattr(self, manager)
             queries = f(new_b)
-            #Ok, we've got queries, now : run them!
-            for q in queries :
+            # Ok, we've got queries, now: run them!
+            for q in queries:
                 self.db_backend.execute_query(q)
             return
 
+    ## Host result
+    ## def manage_host_check_result_brok(self, b):
+    ##     logger.info("GLPI: data in DB %s " % b)
+    ##     b.data['date'] = time.strftime('%Y-%m-%d %H:%M:%S')
+    ##     query = self.db_backend.create_insert_query('glpi_plugin_monitoring_serviceevents', b.data)
+    ##     return [query]
 
-    #Host result
-    #def manage_host_check_result_brok(self, b):
-        #logger.info("GLPI : data in DB %s " % b)
-        #b.data['date'] = time.strftime('%Y-%m-%d %H:%M:%S')
-        #query = self.db_backend.create_insert_query('glpi_plugin_monitoring_serviceevents', b.data)
-        #return [query]
 
+    ## Host result
+    ## def manage_host_check_resultup_brok(self, b):
+    ##     logger.info("GLPI: data in DB %s " % b)
+    ##     new_data = copy.deepcopy(b.data)
+    ##     new_data['last_check'] = time.strftime('%Y-%m-%d %H:%M:%S')
+    ##     new_data['id'] = b.data['plugin_monitoring_services_id']
+    ##     del new_data['plugin_monitoring_services_id']
+    ##     del new_data['perf_data']
+    ##     del new_data['output']
+    ##     del new_data['latency']
+    ##     del new_data['execution_time']
+    ##     where_clause = {'id': new_data['id']}
+    ##     query = self.db_backend.create_update_query('glpi_plugin_monitoring_services', new_data, where_clause)
+    ##     return [query]
 
-    #Host result
-    #def manage_host_check_resultup_brok(self, b):
-        #logger.info("GLPI : data in DB %s " % b)
-        #new_data = copy.deepcopy(b.data)
-        #new_data['last_check'] = time.strftime('%Y-%m-%d %H:%M:%S')
-        #new_data['id'] = b.data['plugin_monitoring_services_id']
-        #del new_data['plugin_monitoring_services_id']
-        #del new_data['perf_data']
-        #del new_data['output']
-        #del new_data['latency']
-        #del new_data['execution_time']
-        #where_clause = {'id' : new_data['id']}
-        #query = self.db_backend.create_update_query('glpi_plugin_monitoring_services', new_data, where_clause)
-        #return [query]
-
-    #Service result
+    # Service result
     def manage_service_check_result_brok(self, b):
-        #logger.info("GLPI : data in DB %s " % b)
+        #logger.info("GLPI: data in DB %s " % b)
         try:
             b.data['plugin_monitoring_servicescatalogs_id']
             return ''
         except:
             b.data['date'] = time.strftime('%Y-%m-%d %H:%M:%S')
-            #print "Add event service : ", b.data
+            #print "Add event service: ", b.data
             query = self.db_backend.create_insert_query('glpi_plugin_monitoring_serviceevents', b.data)
             return [query]
         return ''
 
-    #Service result
+    # Service result
     def manage_service_check_resultup_brok(self, b):
         """If a host is defined locally (in shinken) and not in GLPI,
-           we must not edit GLPI datas !
+           we must not edit GLPI datas!
         """
         if 'plugin_monitoring_servicescatalogs_id' not in b.data and\
            'plugin_monitoring_services_id'         not in b.data:
             return list()
 
-        logger.info("GLPI : data in DB %s " % b.data)
+        logger.info("GLPI: data in DB %s " % b.data)
         new_data = copy.deepcopy(b.data)
         new_data['last_check'] = time.strftime('%Y-%m-%d %H:%M:%S')
         del new_data['perf_data']
@@ -245,8 +236,7 @@ class Glpidb_broker(BaseModule):
             del new_data['plugin_monitoring_services_id']
             table = 'glpi_plugin_monitoring_services'
 
-        where_clause = {'id' : new_data['id']}
-        #print "Update service : ", new_data
+        where_clause = {'id': new_data['id']}
+        #print "Update service: ", new_data
         query = self.db_backend.create_update_query(table, new_data, where_clause)
         return [query]
-        

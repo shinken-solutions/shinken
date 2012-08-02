@@ -47,6 +47,8 @@ except ImportError:
 from shinken.log import logger
 from shinken.objects import *
 from shinken.macroresolver import MacroResolver
+from shinken.modulesmanager import ModulesManager
+
 
 
 def get_uuid(self):
@@ -78,11 +80,12 @@ class DiscoveredHost(object):
         'HOSTNAME':          'name',
         }
 
-    def __init__(self, name, rules, runners):
+    def __init__(self, name, rules, runners, merge=False):
         self.name = name
         self.data = {}
         self.rules = rules
         self.runners = runners
+        self.merge = merge
 
         self.matched_rules = []
         self.launched_runners = []
@@ -103,6 +106,9 @@ class DiscoveredHost(object):
             d = copy.copy(self.data)
 
         d['host_name'] = self.name
+        # Set address directive if an ip exists
+        if self.data.has_key('ip'):
+            d['address'] = self.data['ip']
 
         self.matched_rules.sort(by_order)
         
@@ -201,7 +207,12 @@ class DiscoveredHost(object):
 
             # Maybe it's not me?
             if name != self.name:
-                print 'Bad data for me? I quit!'
+                if not self.merge:
+                    print 'Bad data for me? I bail out data!'
+                    data = ''
+                else:
+                    print 'Bad data for me? Let\'s switch !'
+                    self.name = name
 
             # Now get key,values
             if not '=' in data:
@@ -258,7 +269,7 @@ class DiscoveredHost(object):
 
 
 class DiscoveryManager:
-    def __init__(self, path, macros, overwrite, runners, output_dir=None, dbmod='', db_direct_insert=False, only_new_hosts=False):
+    def __init__(self, path, macros, overwrite, runners, output_dir=None, dbmod='', db_direct_insert=False, only_new_hosts=False, backend=None, modules_path='', merge=False):
         # i am arbiter-like
         self.log = logger
         self.overwrite = overwrite
@@ -268,8 +279,13 @@ class DiscoveryManager:
         self.db_direct_insert = db_direct_insert
         self.only_new_hosts = only_new_hosts
         self.log.load_obj(self)
+        self.merge= merge
         self.config_files = [path]
         self.conf = Config()
+
+        # For specific backend, to override the classic file/db behavior
+        self.backend = backend
+        self.modules_path = modules_path
 
         buf = self.conf.read_config(self.config_files)
         
@@ -308,6 +324,7 @@ class DiscoveryManager:
         self.disco_matches = {}
 
         self.init_database()
+        self.init_backend()
 
 
     def add(self, obj):
@@ -337,6 +354,25 @@ class DiscoveryManager:
                 except Exception, exp:
                     logger.error('Database init : %s' % exp)
 
+
+    # We try to init the backend if we got one
+    def init_backend(self):
+        if not self.backend:
+            return
+
+        print "Doing backend init"
+        for mod in self.conf.modules:
+            if getattr(mod, 'module_name', '') == self.backend:
+                print "We found our backend", mod.get_name()
+                self.backend = mod
+        if not self.backend:
+            print "ERROR : cannot find the module %s" % self.backend
+            sys.exit(2)
+        self.modules_manager = ModulesManager('discovery', self.modules_path, [])
+        self.modules_manager.set_modules([mod])
+        self.modules_manager.load_and_init()
+        self.backend = self.modules_manager.instances[0]
+        print "We got our backend!", self.backend
 
 
 
@@ -386,7 +422,7 @@ class DiscoveryManager:
             
             # Register the name
             if not name in self.disco_data:
-                self.disco_data[name] = DiscoveredHost(name, self.discoveryrules, self.discoveryruns)
+                self.disco_data[name] = DiscoveredHost(name, self.discoveryrules, self.discoveryruns, merge=self.merge)
 
             # Now get key,values
             if not '=' in data:
@@ -487,6 +523,39 @@ class DiscoveryManager:
 
     # Write all configuration we've got
     def write_config(self):
+        # Store host to del in a separate array to remove them after look over items
+        items_to_del = []
+        still_duplicate_items = True
+        while still_duplicate_items:
+            for name in self.disco_data:
+                if name in items_to_del:
+                    continue
+                print('Search same host to merge.')
+                dha = self.disco_data[name]
+                # Searching same host and update host macros
+                for oname in self.disco_data:
+                    dhb = self.disco_data[oname]
+                    # When same host but different properties are detected
+                    if dha.name == dhb.name and dha.properties != dhb.properties:
+                        for (k,v) in dhb.properties.iteritems():
+                            # Merge host macros is their are differents
+                            if k.startswith('_') and dha.properties.has_key(k) and dha.properties[k] != dhb.properties[k]:
+                                dha.data[k] = dha.properties[k] + ',' + v
+                                print('Merged host macro:', k, dha.properties[k])
+                                items_to_del.append(oname)
+
+                        print('Merged '+ oname + ' in ' + name)
+                        dha.update_properties()
+                    else:
+                        still_duplicate_items = False
+                        
+        # Removing merged element
+        for item in items_to_del:
+            print('Deleting '+item)
+            del self.disco_data[item]
+
+        # New loop to reflect changes in self.disco_data since it isn't possible
+        # to modify a dict object when reading it.
         for name in self.disco_data:
             print "Writing", name, "configuration"
             self.write_host_config(name)
@@ -498,16 +567,21 @@ class DiscoveryManager:
         dh = self.disco_data[host]
 
         d = dh.get_final_properties()
+        final_host = dh.name
+
         print "Will generate an host", d
-        
         # Maybe we do not got a directory output, but
         # a bdd one.
         if self.output_dir:
-            self.write_host_config_to_file(host, d)
+            self.write_host_config_to_file(final_host, d)
 
         # Maybe we want a database insert
         if self.db:
-            self.write_host_config_to_db(host, d)
+            self.write_host_config_to_db(final_host, d)
+
+        
+        if self.backend:
+            self.backend.write_host_config_to_db(final_host, d)
             
         
     # Will wrote all properties/values of d for the host

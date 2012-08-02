@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -23,22 +23,20 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 from Queue import Empty
 
 # In android, we sgould use threads, not process
 is_android = True
 try:
-   import android
+    import android
 except ImportError:
-   is_android = False
+    is_android = False
 
 if not is_android:
-   from multiprocessing import Process, Queue
+    from multiprocessing import Process, Queue
 else:
-   from Queue import Queue
-   from threading import Thread as Process
+    from Queue import Queue
+    from threading import Thread as Process
 
 # Mongodb lib
 try:
@@ -53,13 +51,12 @@ import signal
 from shinken.worker import Worker
 
 
-
 class SkonfUIWorker(Worker):
     """SkonfuiWorker class is a sub one for the Worker one of the poller/reactionners
      it just take it's jobs from the mongodb, instead of the queues()
-    
+
     """
-    
+
     id = 0
     _process = None
     _mortal = None
@@ -68,80 +65,71 @@ class SkonfUIWorker(Worker):
     _c = None
 
     def add_database_data(self, server):
-       self.database_server = server
-
+        self.database_server = server
 
     def connect_database(self):
-       con = Connection('localhost')
-       self.db = con.shinken
-
+        con = Connection('localhost')
+        self.db = con.shinken
 
     def get_scan_data(self):
-       print "Info : I ask for a scan with the id", self.scan_asked
-       scan_id = self.scan_asked.get('scan_id')
-       # I search the scan entry in the asked_scans table
-       cur = self.db.scans.find({'_id' : scan_id})
-       if cur.count() == 0:
-          print "No scan found with id", scan_id
-          return
-       self.scan = cur[0]
-       
+        print "Info: I ask for a scan with the id", self.scan_asked
+        scan_id = self.scan_asked.get('scan_id')
+        # I search the scan entry in the asked_scans table
+        cur = self.db.scans.find({'_id': scan_id})
+        if cur.count() == 0:
+            print "No scan found with id", scan_id
+            return
+        self.scan = cur[0]
 
     def launch_scan(self):
-       print "Info : I try to launch scan", self.scan
-       scan_id = self.scan.get('_id')
-       nmap = self.scan.get('use_nmap')
-       vmware = self.scan.get('use_vmware')
-       names = self.scan.get('names')
-       state = self.scan.get('state')
-       
-       print "Info : IN SCAN WORKER:",nmap, vmware, names, state
-       
-       # Updating the scan entry state
-       self.db.scans.update({'_id' : scan_id}, { '$set': { 'state' : 'preparing' }})
-       
-       from shinken.discovery.discoverymanager import DiscoveryManager
-       
-       elts = names.splitlines()
-       targets = ' '.join(elts)
-       print "Info : Launching Nmap with targets", targets
-       macros = [('NMAPTARGETS', targets)]
-       overwrite = False
-       runners = ['nmap']
-       output_dir = None
-       dbmod = 'Mongodb'
+        print "Info: I try to launch scan", self.scan
+        scan_id = self.scan.get('_id')
+        nmap = self.scan.get('use_nmap')
+        vmware = self.scan.get('use_vmware')
+        names = self.scan.get('names')
+        state = self.scan.get('state')
 
-       
-       # By default I want only hosts I never see
-       # TODO : make this an option
-       d = DiscoveryManager('/home/shinken/shinken/etc/discovery.cfg', macros, overwrite, runners, output_dir=output_dir, dbmod=dbmod, only_new_hosts=True)
+        print "Info: IN SCAN WORKER:", nmap, vmware, names, state
 
-       # Set the scan as launched state
-       self.db.scans.update( {'_id' : scan_id}, { '$set': { 'state' : 'launched' }})
+        # Updating the scan entry state
+        self.db.scans.update({'_id': scan_id}, {'$set': {'state': 'preparing'}})
 
-       # #Ok, let start the plugins that will give us the data
-       d.launch_runners()
-       d.wait_for_runners_ends()
+        from shinken.discovery.discoverymanager import DiscoveryManager
 
-       # We get the results, now we can reap the data
-       d.get_runners_outputs()
-       
-       # and parse them
-       d.read_disco_buf()
-       
-       # Now look for rules
-       d.match_rules()
-       
-       # Ok, we know what to create, now do it!
-       d.write_config()
+        elts = names.splitlines()
+        targets = ' '.join(elts)
+        print "Info: Launching Nmap with targets", targets
+        macros = [('NMAPTARGETS', targets)]
+        overwrite = False
+        runners = ['nmap']
+        output_dir = None
+        dbmod = 'Mongodb'
 
-       # Set the scan as done :)
-       self.db.scans.update({'_id' : scan_id}, { '$set': { 'state' : 'done' }})
+        # By default I want only hosts I never see
+        # TODO: make this an option
+        d = DiscoveryManager('/home/shinken/shinken/etc/discovery.cfg', macros, overwrite, runners, output_dir=output_dir, dbmod=dbmod, only_new_hosts=True)
 
+        # Set the scan as launched state
+        self.db.scans.update({'_id': scan_id}, {'$set': {'state': 'launched'}})
 
+        # #Ok, let start the plugins that will give us the data
+        d.launch_runners()
+        d.wait_for_runners_ends()
 
-       
-    
+        # We get the results, now we can reap the data
+        d.get_runners_outputs()
+
+        # and parse them
+        d.read_disco_buf()
+
+        # Now look for rules
+        d.match_rules()
+
+        # Ok, we know what to create, now do it!
+        d.write_config()
+
+        # Set the scan as done :)
+        self.db.scans.update({'_id': scan_id}, {'$set': {'state': 'done'}})
 
     # id = id of the worker
     # s = Global Queue Master->Slave
@@ -152,7 +140,7 @@ class SkonfUIWorker(Worker):
         ## restore default signal handler for the workers:
         # but on android, we are a thread, so don't do it
         if not is_android:
-           signal.signal(signal.SIGTERM, signal.SIG_DFL)
+            signal.signal(signal.SIGTERM, signal.SIG_DFL)
         timeout = 1.0
         self.scan_asked = None
         self.scan = None
@@ -166,30 +154,30 @@ class SkonfUIWorker(Worker):
             begin = time.time()
             msg = None
             cmsg = None
-            
+
             # If we are dying (big problem!) we do not
             # take new jobs, we just finished the current one
             if not self.i_am_dying:
-               try:
+                try:
                 #print "I", self.id, "wait for a message"
-                  msg = self.s.get(block=False)
-                  print "Info : I", self.id, "I've got a message!", msg                  
-                  if msg is not None and msg.get_type() == 'ScanAsk':
-                     self.scan_asked = msg.get_data()
-                     self.get_scan_data()
-                     self.launch_scan()
-               except Empty , exp:
-                  print "Info : UI worker go to sleep", self.id
-                  time.sleep(1)
+                    msg = self.s.get(block=False)
+                    print "Info: I", self.id, "I've got a message!", msg
+                    if msg is not None and msg.get_type() == 'ScanAsk':
+                        self.scan_asked = msg.get_data()
+                        self.get_scan_data()
+                        self.launch_scan()
+                except Empty, exp:
+                    print "Info: UI worker go to sleep", self.id
+                    time.sleep(1)
 
             # Now get order from master
             try:
-               cmsg = c.get(block=False)
-               if cmsg.get_type() == 'Die':
-                  print "Info : [%d]Dad say we are dying..." % self.id
-                  break
-               
-            except :
+                cmsg = c.get(block=False)
+                if cmsg.get_type() == 'Die':
+                    print "Info: [%d]Dad say we are dying..." % self.id
+                    break
+
+            except:
                 pass
 
             # Manage a possible time change (our evant will be change with the diff)

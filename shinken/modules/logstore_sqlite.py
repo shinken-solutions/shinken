@@ -25,7 +25,6 @@
 
 # import von modules/livestatus_logstore
 
-
 """
 This class is for attaching a sqlite database to a livestatus broker module.
 It is one possibility for an exchangeable storage for log broks
@@ -42,31 +41,30 @@ from livestatus_broker.mapping import LOGCLASS_ALERT, LOGCLASS_PROGRAM, LOGCLASS
 old_implementation = False
 try:
     import sqlite3
-except ImportError: # python 2.4 do not have it
+except ImportError:  # python 2.4 do not have it
     try:
-        import pysqlite2.dbapi2 as sqlite3 # but need the pysqlite2 install from http://code.google.com/p/pysqlite/downloads/list
-    except ImportError: # python 2.4 do not have it
-        import sqlite as sqlite3 # one last try
+        import pysqlite2.dbapi2 as sqlite3  # but need the pysqlite2 install from http://code.google.com/p/pysqlite/downloads/list
+    except ImportError:  # python 2.4 do not have it
+        import sqlite as sqlite3  # one last try
         old_implementation = True
-
-
 
 from shinken.basemodule import BaseModule
 from shinken.objects.module import Module
 
 properties = {
-    'daemons' : ['livestatus'],
-    'type' : 'logstore_sqlite',
-    'external' : False,
-    'phases' : ['running'],
+    'daemons': ['livestatus'],
+    'type': 'logstore_sqlite',
+    'external': False,
+    'phases': ['running'],
     }
 
 
-#called by the plugin manager
+# called by the plugin manager
 def get_instance(plugin):
     print "Get an LogStore Sqlite module for plugin %s" % plugin.get_name()
     instance = LiveStatusLogStoreSqlite(plugin)
     return instance
+
 
 def row_factory(cursor, row):
     """Handler for the sqlite fetch method."""
@@ -89,9 +87,9 @@ class LiveStatusLogStoreSqlite(BaseModule):
         except:
             os.mkdir(self.archive_path)
         max_logs_age = getattr(modconf, 'max_logs_age', '365')
-        maxmatch = re.match(r'^(\d+)([dwm]*)$', max_logs_age)
+        maxmatch = re.match(r'^(\d+)([dwmy]*)$', max_logs_age)
         if maxmatch is None:
-            print 'Warning : wrong format for max_logs_age. Must be <number>[d|w|m|y] or <number> and not %s' % max_logs_age
+            print 'Warning: wrong format for max_logs_age. Must be <number>[d|w|m|y] or <number> and not %s' % max_logs_age
             return None
         else:
             if not maxmatch.group(2):
@@ -115,7 +113,6 @@ class LiveStatusLogStoreSqlite(BaseModule):
         # Now sleep one second, so that won't get lineno collisions with the last second
         time.sleep(1)
         Logline.lineno = 0
-
 
     def load(self, app):
         self.app = app
@@ -158,9 +155,6 @@ class LiveStatusLogStoreSqlite(BaseModule):
                 os.removedirs(self.archive_path)
             except:
                 pass
-
-    def commit(self):
-        self.dbconn.commit()
 
     def prepare_log_db_table(self):
         # 'attempt', 'class', 'command_name', 'comment', 'contact_name', 'host_name', 'lineno', 'message',
@@ -206,7 +200,6 @@ class LiveStatusLogStoreSqlite(BaseModule):
             # See you tomorrow
             self.next_log_db_rotate = time.mktime(nextrotation.timetuple())
             print "next rotation at %s " % time.asctime(time.localtime(self.next_log_db_rotate))
-
 
     def log_db_historic_contents(self):
         """
@@ -296,12 +289,13 @@ class LiveStatusLogStoreSqlite(BaseModule):
                 #tmpconn.prepare_log_db_table()
                 #tmpconn.close()
 
-		dbmodconf = Module({'module_name' : 'LogStore',
-		    'module_type' : 'logstore_sqlite',
-		    'use_aggressive_sql' : '0',
-		    'database_file' : archive,
-                    'max_logs_age' : '0',
-		})
+                dbmodconf = Module({
+                    'module_name': 'LogStore',
+                    'module_type': 'logstore_sqlite',
+                    'use_aggressive_sql': '0',
+                    'database_file': archive,
+                    'max_logs_age': '0',
+                })
                 tmpconn = LiveStatusLogStoreSqlite(dbmodconf)
                 tmpconn.open()
                 tmpconn.close()
@@ -321,7 +315,7 @@ class LiveStatusLogStoreSqlite(BaseModule):
             try:
                 self.execute('VACUUM')
             except sqlite3.DatabaseError, exp:
-                print "WARNING : it seems your database is corrupted. Please recreate it"
+                print "WARNING: it seems your database is corrupted. Please recreate it"
             self.commit()
 
     def execute(self, cmd, values=None, row_factory=None):
@@ -383,13 +377,17 @@ class LiveStatusLogStoreSqlite(BaseModule):
         else:
             self.dbcursor.execute(cmd)
 
-
     def commit(self):
+        start = time.time()
         while True:
             try:
                 self.dbconn.commit()
                 break
-            except OperationalError:
+            except sqlite3.OperationalError:
+                # If we wait more than 60s in the loop, maybe we should exit
+                # than do an endless loop
+                if time.time() - start > 60:
+                    raise
                 time.sleep(.01)
 
     def manage_log_brok(self, b):
@@ -405,7 +403,7 @@ class LiveStatusLogStoreSqlite(BaseModule):
             print "DATABASE ERROR!!!!!!!!!!!!!!!!!"
         except Exception, exp:
             print "Unexpected in manage_log_brok:", exp
-        #FIXME need access to this#self.livestatus.count_event('log_message')
+        # FIXME need access to this #self.livestatus.count_event('log_message')
 
     def add_filter(self, operator, attribute, reference):
         if attribute == 'time':
@@ -468,7 +466,6 @@ class LiveStatusLogStoreSqlite(BaseModule):
             dbresult.extend(selectresult)
         return dbresult
 
-
     def select_live_data_log(self, filter_clause, filter_values, handle, archive, fromtime, totime):
         dbresult = []
         try:
@@ -494,53 +491,53 @@ class LiveStatusLogStoreSqlite(BaseModule):
             if reference == '':
                 return ['%s IS NULL' % attribute, ()]
             else:
-                return ['%s = ?' % attribute, (reference, )]
+                return ['%s = ?' % attribute, (reference,)]
 
         def match_filter():
             # sqlite matches case-insensitive by default. We make
             # no difference between case-sensitive and case-insensitive
             # here. The python filters will care for the correct
             # matching later.
-            return ['%s LIKE ?' % attribute, ('%'+reference+'%', )]
+            return ['%s LIKE ?' % attribute, ('%' + reference + '%',)]
 
         def eq_nocase_filter():
             if reference == '':
                 return ['%s IS NULL' % attribute, ()]
             else:
-                return ['%s = ?' % attribute.lower(), (reference.lower(), )]
+                return ['%s = ?' % attribute.lower(), (reference.lower(),)]
 
         def match_nocase_filter():
-            return ['%s LIKE ?' % attribute, ('%'+reference+'%', )]
+            return ['%s LIKE ?' % attribute, ('%' + reference + '%',)]
 
         def lt_filter():
-            return ['%s < ?' % attribute, (reference, )]
+            return ['%s < ?' % attribute, (reference,)]
 
         def gt_filter():
-            return ['%s > ?' % attribute, (reference, )]
+            return ['%s > ?' % attribute, (reference,)]
 
         def le_filter():
-            return ['%s <= ?' % attribute, (reference, )]
+            return ['%s <= ?' % attribute, (reference,)]
 
         def ge_filter():
-            return ['%s >= ?' % attribute, (reference, )]
+            return ['%s >= ?' % attribute, (reference,)]
 
         def ne_filter():
             if reference == '':
                 return ['%s IS NOT NULL' % attribute, ()]
             else:
-                return ['%s != ?' % attribute, (reference, )]
+                return ['%s != ?' % attribute, (reference,)]
 
         def not_match_filter():
-            return ['NOT %s LIKE ?' % attribute, ('%'+reference+'%', )]
+            return ['NOT %s LIKE ?' % attribute, ('%' + reference + '%',)]
 
         def ne_nocase_filter():
             if reference == '':
                 return ['NOT %s IS NULL' % attribute, ()]
             else:
-                return ['NOT %s = ?' % attribute.lower(), (reference.lower(), )]
+                return ['NOT %s = ?' % attribute.lower(), (reference.lower(),)]
 
         def not_match_nocase_filter():
-            return ['NOT %s LIKE ?' % attribute, ('%'+reference+'%', )]
+            return ['NOT %s LIKE ?' % attribute, ('%' + reference + '%',)]
 
         def no_filter():
             return ['1 = 1', ()]
@@ -573,8 +570,6 @@ class LiveStatusLogStoreSqlite(BaseModule):
             return not_match_nocase_filter
 
 
-
-
 class LiveStatusSqlStack(LiveStatusStack):
 
     def __init__(self, *args, **kw):
@@ -598,8 +593,8 @@ class LiveStatusSqlStack(LiveStatusStack):
             # Make a combined anded function
             # Put it on the stack
             and_clause = '(' + (' AND ').join([x()[0] for x in filters]) + ')'
-            and_values = reduce(lambda x, y: x+y, [ x()[1] for x in filters ])
-            and_filter = lambda : [and_clause, and_values]
+            and_values = reduce(lambda x, y: x + y, [x()[1] for x in filters])
+            and_filter = lambda: [and_clause, and_values]
             #  print "and_elements", and_clause, and_values
             self.put_stack(and_filter)
 
@@ -609,15 +604,15 @@ class LiveStatusSqlStack(LiveStatusStack):
             filters = []
             for _ in range(num):
                 filters.append(self.get_stack())
-            or_clause = '(' + (' OR ').join([ x()[0] for x in filters ]) + ')'
-            or_values = reduce(lambda x, y: x+y, [ x()[1] for x in filters ])
-            or_filter = lambda : [or_clause, or_values]
+            or_clause = '(' + (' OR ').join([x()[0] for x in filters]) + ')'
+            or_values = reduce(lambda x, y: x + y, [x()[1] for x in filters])
+            or_filter = lambda: [or_clause, or_values]
             #  print "or_elements", or_clause
             self.put_stack(or_filter)
 
     def get_stack(self):
         """Return the top element from the stack or a filter which is always true"""
         if self.qsize() == 0:
-            return lambda : ["1 = ?", [1]]
+            return lambda: ["1 = ?", [1]]
         else:
             return self.get()

@@ -27,7 +27,6 @@
 # This Class is an NSCA Arbiter module
 # Here for the configuration phase AND running one
 
-
 import time
 import select
 import socket
@@ -97,6 +96,7 @@ def get_instance(plugin):
 
 class NSCA_arbiter(BaseModule):
     """Please Add a Docstring to describe the class here"""
+
     def __init__(self, modconf, host, port, encryption_method, password, max_packet_age):
         BaseModule.__init__(self, modconf)
         self.host = host
@@ -109,8 +109,8 @@ class NSCA_arbiter(BaseModule):
     def send_init_packet(self, sock):
         '''
         Build an init packet
-         00-127  : IV
-         128-131 : unix timestamp
+         00-127: IV
+         128-131: unix timestamp
         '''
         iv = ''.join([chr(self.rng.randrange(256)) for i in xrange(128)])
         init_packet = struct.pack("!128sI", iv, int(time.time()))
@@ -178,9 +178,10 @@ class NSCA_arbiter(BaseModule):
         else:
             self.post_command(timestamp, rc, hostname, service, output)
 
-
     # When you are in "external" mode, that is the main loop of your process
     def main(self):
+        self.set_proctitle(self.name)
+
         self.set_exit_handler()
         backlog = 5
         size = 8192

@@ -11,7 +11,7 @@
 %end
 
 %for pb in pbs:
-  
+
 <div class="tableCriticity pull-left row-fluid">
   <div class='img_status pull-left'>
     <div class="aroundpulse">
@@ -22,7 +22,7 @@
       <img src="{{helper.get_icon_state(pb)}}" />
     </div>
   </div>
-  
+
 
     <span class="alert-small alert-{{pb.state.lower()}}">{{pb.state}}</span> for {{!helper.get_link(pb)}}
     <div class='pull-right'>
@@ -31,8 +31,8 @@
     %end
     </div>
 
-</div>  
+</div>
 <div style="clear:both;"/>
 %end
 
-  
+

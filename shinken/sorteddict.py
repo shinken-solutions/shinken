@@ -6,7 +6,7 @@
 # Copyright (c) 2010 Jan Kaliszewski (zuo)
 #
 # The MIT License:
-#  
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -58,7 +58,7 @@ class SortedDict(dict):
     def __repr__(self):
         return 'SortedDict({%s})' % ', '.join('%r: %r' % item
                                               for item in self.iteritems())
-                                              
+
     @dictdoc
     def __str__(self):
         return repr(self)

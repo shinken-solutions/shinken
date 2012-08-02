@@ -1,54 +1,19 @@
+%rebase layout_mobile globals(), title="Tactical view", js=['mobile/js/mobile_main.js'], css=['mobile/css/main.css'], menu_part='', back_hide=True
 
-%rebase layout_mobile globals(), title="Tactical view", js=['mobile/js/mobile_main.js'], css=['mobile/css/main.css']
+%overall_itproblem = app.datamgr.get_nb_all_problems()
 
-<div id="all">
-<div> <h1> Shinken </h1> </div>
+<div id="main" data-theme="a">
 
-<h2>End users apps</h2>
-
-%bad_business = [i for i in impacts if i.state_id != 0]
-
-
-%# """ All business apps are OK """
-%if len(bad_business) == 0:
-
-    <a href="#" onclick="slide_and_go('/mobile/impacts');">
-      <img src="/static/images/state_ok.png">
-      <img src="/static/images/next.png"/>
-    </a>
-%# """ Are, some business apps are bad!"""
-%else:
-
-    <a href="#" onclick="slide_and_go('/mobile/impacts');">
-      <img src="/static/images/state_critical.png" >
-      <img src="/static/images/next.png"/>
-    </a>
-    <ul>
-    %for imp in bad_business:
-         <li class="{{imp.state.lower()}}">{{imp.get_full_name()}} is {{imp.state}}</li>
-    %end
-    </ul>    
-%end
-
-
-<h2>Pure IT problems</h2>
-%if len(problems) == 0:
-    <a href="#" onclick="slide_and_go('/mobile/problems');">
-      <img src="/static/images/state_ok.png" >
-      <img src="/static/images/next.png"/>
-    </a>
-%else:
-    <a href="#" onclick="slide_and_go('/mobile/problems');">
-      <img src="/static/images/state_warning.png" >
-      <img src="/static/images/next.png"/>
-    </a>
-    %nb_high_critical = len([pb for pb in problems if pb.business_impact > 2 and pb.state in ['DOWN', 'CRITICAL'] ])
-    %nb_high_warn = len([pb for pb in problems if pb.business_impact > 2 and pb.state in ['WARNING']])
-    %nb_low_critical = len([pb for pb in problems if pb.business_impact <= 2 and pb.state in ['DOWN', 'CRITICAL'] ])
-    %nb_low_warn = len([pb for pb in problems if pb.business_impact <= 2 and pb.state in ['WARNING']])
-    <br/>
-    <p>Production : {{nb_high_critical}} Criticals, {{nb_high_warn}} Warnings.</p>
-    <p>Lower      : {{nb_low_critical}} Criticals, {{nb_low_warn}} Warnings.</p>
-%end
-
+	<ul data-role="listview" data-inset="true" data-theme="a">
+		<li><a href="/mobile/dashboard">Dashboard</a>
+			<span class="ui-li-count ui-btn-up-c ui-btn-corner-all">{{len([pb for pb in problems if pb.state in ['DOWN', 'CRITICAL']])}} Critical</span>
+		</li>
+		%if overall_itproblem > 0:
+			<li><a href="/mobile/problems">Problems<span class="ui-li-count ui-btn-up-c ui-btn-corner-all">{{app.datamgr.get_nb_all_problems()}}</span></a></li>
+			<li><a href="/mobile/impacts">Impact</a></li>
+		%end
+		<li><a href="/mobile/log">Log</a></li>
+		<li><a href="/mobile/wall">Wall</a></li>
+		<li><a href="/mobile/system">System state</a></li>
+	</ul>
 </div>

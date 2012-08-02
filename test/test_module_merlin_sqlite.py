@@ -1,22 +1,22 @@
-#!/usr/bin/env python2.6
-#Copyright (C) 2009-2010 :
+#!/usr/bin/env python
+# Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
 #
@@ -30,12 +30,11 @@ from shinken.modules.merlindb_broker import get_instance
 
 
 class TestConfig(ShinkenTest):
-    #setUp is in shinken_test
+    # setUp is inherited from ShinkenTest
 
-    #Change ME :)
     def test_simplelog(self):
         print self.conf.modules
-        #get our modules
+        # get our modules
         mod = None
         for m in self.conf.modules:
             if m.module_name == 'ToMerlindb_Sqlite':
@@ -45,12 +44,11 @@ class TestConfig(ShinkenTest):
         self.assert_(mod.module_type == 'merlindb')
         self.assert_(mod.backend == 'sqlite')
 
-
         md = get_instance(mod)
         print "TOTO", md.db_backend.__dict__
 
         md.init()
-        b = Brok('clean_all_my_instance_id', {'instance_id' : 0})
+        b = Brok('clean_all_my_instance_id', {'instance_id': 0})
         md.manage_brok(b)
         r = md.db_backend.db_cursor.execute("SELECT count(*) from timeperiod WHERE instance_id = '0'")
         self.assert_(r.fetchall() == [(0,)])
@@ -61,4 +59,3 @@ class TestConfig(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

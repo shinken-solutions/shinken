@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2009-2011 :
+# Copyright (C) 2009-2011:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -22,15 +22,15 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
- This class is an application that launches actions like 
+ This class is an application that launches actions like
  notifications or event handlers
- The reactionner listens to the Arbiter for the configuration sent through 
+ The reactionner listens to the Arbiter for the configuration sent through
  the given port as first argument.
- The configuration sent by the arbiter specifies from which schedulers the 
+ The configuration sent by the arbiter specifies from which schedulers the
  will take actions.
- When the reactionner is already launched and has its own conf, it keeps 
+ When the reactionner is already launched and has its own conf, it keeps
  on listening the arbiter (one a timeout)
- In case the arbiter has a new conf to send, the reactionner forget its old 
+ In case the arbiter has a new conf to send, the reactionner forget its old
  schedulers (and the associated actions) and take the new ones instead.
 '''
 
@@ -41,13 +41,13 @@ import optparse
 # Try to see if we are in an android device or not
 is_android = True
 try:
-   import android
-   # Add our main script dir
-   if os.path.exists('/sdcard/sl4a/scripts/'):
-       sys.path.append('/sdcard/sl4a/scripts/')
-       os.chdir('/sdcard/sl4a/scripts/')
+    import android
+    # Add our main script dir
+    if os.path.exists('/sdcard/sl4a/scripts/'):
+        sys.path.append('/sdcard/sl4a/scripts/')
+        os.chdir('/sdcard/sl4a/scripts/')
 except ImportError:
-   is_android = False
+    is_android = False
 
 
 try:
@@ -59,8 +59,6 @@ except ImportError:
     # Submodules will then be loaded from there, too.
     import imp
     imp.load_module('shinken', *imp.find_module('shinken', [os.path.realpath("."), os.path.realpath(".."), os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "..")]))
-
-
 
 from shinken.daemons.reactionnerdaemon import Reactionner
 from shinken.bin import VERSION

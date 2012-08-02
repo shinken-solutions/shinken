@@ -23,18 +23,16 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 """ This Class is the service one, s it manage all service specific thing.
 If you look at the scheduling part, look at the scheduling item class"""
 
 import time
+import re
 
 try:
     from ClusterShell.NodeSet import NodeSet, NodeSetParseRangeError
 except ImportError:
     NodeSet = None
-
 
 from shinken.objects.item import Items
 from shinken.objects.schedulingitem import SchedulingItem
@@ -63,56 +61,56 @@ class Service(SchedulingItem):
     my_type = 'service'
 
     # properties defined by configuration
-    # required : is required in conf
-    # default : default value if no set in conf
-    # pythonize : function to call when transfort string to python object
-    # fill_brok : if set, send to broker. there are two categories:
+    # required: is required in conf
+    # default: default value if no set in conf
+    # pythonize: function to call when transfort string to python object
+    # fill_brok: if set, send to broker. there are two categories:
     #  full_status for initial and update status, check_result for check results
-    # no_slots : do not take this property for __slots__
+    # no_slots: do not take this property for __slots__
     properties = SchedulingItem.properties.copy()
     properties.update({
-        'host_name':              StringProp (fill_brok=['full_status', 'check_result', 'next_schedule']),
-        'hostgroup_name':         StringProp (default = '', fill_brok=['full_status']),
-        'service_description':    StringProp (fill_brok= ['full_status', 'check_result', 'next_schedule']),
-        'display_name':           StringProp (default='', fill_brok=['full_status']),
-        'servicegroups':          StringProp (default='', fill_brok=['full_status'], brok_transformation=to_list_string_of_names),
-        'is_volatile':            BoolProp   (default='0', fill_brok=['full_status']),
-        'check_command':          StringProp (fill_brok = ['full_status']),
-        'initial_state':          CharProp   (default='o', fill_brok=['full_status']),
+        'host_name':              StringProp(fill_brok=['full_status', 'check_result', 'next_schedule']),
+        'hostgroup_name':         StringProp(default='', fill_brok=['full_status']),
+        'service_description':    StringProp(fill_brok=['full_status', 'check_result', 'next_schedule']),
+        'display_name':           StringProp(default='', fill_brok=['full_status']),
+        'servicegroups':          StringProp(default='', fill_brok=['full_status'], brok_transformation=to_list_string_of_names),
+        'is_volatile':            BoolProp(default='0', fill_brok=['full_status']),
+        'check_command':          StringProp(fill_brok=['full_status']),
+        'initial_state':          CharProp(default='o', fill_brok=['full_status']),
         'max_check_attempts':     IntegerProp(fill_brok=['full_status']),
         'check_interval':         IntegerProp(fill_brok=['full_status']),
         'retry_interval':         IntegerProp(fill_brok=['full_status']),
-        'active_checks_enabled':  BoolProp   (default='1', fill_brok= ['full_status'], retention=True),
-        'passive_checks_enabled': BoolProp   (default='1', fill_brok=['full_status'], retention=True),
-        'check_period':           StringProp (brok_transformation=to_name_if_possible, fill_brok=['full_status']),
-        'obsess_over_service':    BoolProp   (default='0', fill_brok=['full_status'], retention=True),
-        'check_freshness':        BoolProp   (default='0', fill_brok=['full_status']),
+        'active_checks_enabled':  BoolProp(default='1', fill_brok=['full_status'], retention=True),
+        'passive_checks_enabled': BoolProp(default='1', fill_brok=['full_status'], retention=True),
+        'check_period':           StringProp(brok_transformation=to_name_if_possible, fill_brok=['full_status']),
+        'obsess_over_service':    BoolProp(default='0', fill_brok=['full_status'], retention=True),
+        'check_freshness':        BoolProp(default='0', fill_brok=['full_status']),
         'freshness_threshold':    IntegerProp(default='0', fill_brok=['full_status']),
-        'event_handler':          StringProp (default='', fill_brok=['full_status']),
-        'event_handler_enabled':  BoolProp   (default='0',fill_brok=['full_status'], retention=True),
-        'low_flap_threshold':     IntegerProp(default='-1', fill_brok= ['full_status']),
+        'event_handler':          StringProp(default='', fill_brok=['full_status']),
+        'event_handler_enabled':  BoolProp(default='0', fill_brok=['full_status'], retention=True),
+        'low_flap_threshold':     IntegerProp(default='-1', fill_brok=['full_status']),
         'high_flap_threshold':    IntegerProp(default='-1', fill_brok=['full_status']),
-        'flap_detection_enabled': BoolProp   (default='1', fill_brok=['full_status'], retention=True),
-        'flap_detection_options': ListProp   (default='o,w,c,u', fill_brok=['full_status']),
-        'process_perf_data':      BoolProp   (default='1', fill_brok=['full_status'], retention=True),
+        'flap_detection_enabled': BoolProp(default='1', fill_brok=['full_status'], retention=True),
+        'flap_detection_options': ListProp(default='o,w,c,u', fill_brok=['full_status']),
+        'process_perf_data':      BoolProp(default='1', fill_brok=['full_status'], retention=True),
         'retain_status_information': BoolProp(default='1', fill_brok=['full_status']),
         'retain_nonstatus_information': BoolProp(default='1', fill_brok=['full_status']),
         'notification_interval':  IntegerProp(default='60', fill_brok=['full_status']),
-        'first_notification_delay':IntegerProp(default='0', fill_brok=['full_status']),
-        'notification_period':    StringProp (brok_transformation=to_name_if_possible, fill_brok=['full_status']),
-        'notification_options':   ListProp   (default='w,u,c,r,f,s',fill_brok=['full_status']),
-        'notifications_enabled':  BoolProp   (default='1', fill_brok=['full_status']),
-        'contacts':               StringProp (default='', brok_transformation=to_list_of_names, fill_brok=['full_status']),
-        'contact_groups':         StringProp (default='', fill_brok=['full_status']),
-        'stalking_options':       ListProp   (default='', fill_brok=['full_status']),
-        'notes':                  StringProp (default='', fill_brok=['full_status']),
-        'notes_url':              StringProp (default='', fill_brok=['full_status']),
-        'action_url':             StringProp (default='', fill_brok=['full_status']),
-        'icon_image':             StringProp (default='', fill_brok=['full_status']),
-        'icon_image_alt':         StringProp (default='', fill_brok=['full_status']),
-        'icon_set':               StringProp (default='', fill_brok=['full_status']),
+        'first_notification_delay': IntegerProp(default='0', fill_brok=['full_status']),
+        'notification_period':    StringProp(brok_transformation=to_name_if_possible, fill_brok=['full_status']),
+        'notification_options':   ListProp(default='w,u,c,r,f,s', fill_brok=['full_status']),
+        'notifications_enabled':  BoolProp(default='1', fill_brok=['full_status'], retention=True),
+        'contacts':               StringProp(default='', brok_transformation=to_list_of_names, fill_brok=['full_status']),
+        'contact_groups':         StringProp(default='', fill_brok=['full_status']),
+        'stalking_options':       ListProp(default='', fill_brok=['full_status']),
+        'notes':                  StringProp(default='', fill_brok=['full_status']),
+        'notes_url':              StringProp(default='', fill_brok=['full_status']),
+        'action_url':             StringProp(default='', fill_brok=['full_status']),
+        'icon_image':             StringProp(default='', fill_brok=['full_status']),
+        'icon_image_alt':         StringProp(default='', fill_brok=['full_status']),
+        'icon_set':               StringProp(default='', fill_brok=['full_status']),
         'failure_prediction_enabled': BoolProp(default='0', fill_brok=['full_status']),
-        'parallelize_check':       BoolProp  (default='1', fill_brok=['full_status']),
+        'parallelize_check':       BoolProp(default='1', fill_brok=['full_status']),
 
         # Shinken specific
         'poller_tag':              StringProp(default='None'),
@@ -130,8 +128,8 @@ class Service(SchedulingItem):
         'business_impact':         IntegerProp(default='2', fill_brok=['full_status']),
 
         # Load some triggers
-        'trigger'        :         StringProp(default=''),
-        'trigger_name'   :         ListProp   (default=''),
+        'trigger':         StringProp(default=''),
+        'trigger_name':    ListProp(default=''),
     })
 
     # properties used in the running state
@@ -140,46 +138,46 @@ class Service(SchedulingItem):
         'modified_attributes': IntegerProp(default=0L, fill_brok=['full_status'], retention=True),
         'last_chk':           IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'next_chk':           IntegerProp(default=0, fill_brok=['full_status', 'next_schedule'], retention=True),
-        'in_checking':        BoolProp   (default=False, fill_brok=['full_status', 'check_result', 'next_schedule'], retention=True),
-        'latency':            FloatProp  (default=0, fill_brok=['full_status', 'check_result'], retention=True,),
-        'attempt':            IntegerProp(default=0, fill_brok=['full_status', 'check_result'],retention=True),
-        'state':              StringProp (default='PENDING', fill_brok=['full_status', 'check_result'], retention=True),
+        'in_checking':        BoolProp(default=False, fill_brok=['full_status', 'check_result', 'next_schedule'], retention=True),
+        'latency':            FloatProp(default=0, fill_brok=['full_status', 'check_result'], retention=True,),
+        'attempt':            IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
+        'state':              StringProp(default='PENDING', fill_brok=['full_status', 'check_result'], retention=True),
         'state_id':           IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'current_event_id':   IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'last_event_id':      IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
-        'last_state':         StringProp (default='PENDING', fill_brok=['full_status', 'check_result'], retention=True),
-        'last_state_type':    StringProp (default='HARD', fill_brok=['full_status', 'check_result'], retention=True),
+        'last_state':         StringProp(default='PENDING', fill_brok=['full_status', 'check_result'], retention=True),
+        'last_state_type':    StringProp(default='HARD', fill_brok=['full_status', 'check_result'], retention=True),
         'last_state_id':      IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
-        'last_state_change':  FloatProp (default=0.0, fill_brok=['full_status', 'check_result'], retention=True),
+        'last_state_change':  FloatProp(default=0.0, fill_brok=['full_status', 'check_result'], retention=True),
         'last_hard_state_change': FloatProp(default=0.0, fill_brok=['full_status', 'check_result'], retention=True),
-        'last_hard_state':    StringProp (default='PENDING', fill_brok=['full_status'], retention=True),
+        'last_hard_state':    StringProp(default='PENDING', fill_brok=['full_status'], retention=True),
         'last_hard_state_id': IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         'last_time_ok':       IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
-        'last_time_warning':  IntegerProp(default=0, fill_brok = ['full_status', 'check_result'], retention=True),
-        'last_time_critical': IntegerProp(default=0, fill_brok =['full_status', 'check_result'], retention=True),
+        'last_time_warning':  IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
+        'last_time_critical': IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'last_time_unknown':  IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'duration_sec':       IntegerProp(default=0, fill_brok=['full_status'], retention=True),
-        'state_type':         StringProp (default='HARD', fill_brok=['full_status', 'check_result'], retention=True),
+        'state_type':         StringProp(default='HARD', fill_brok=['full_status', 'check_result'], retention=True),
         'state_type_id':      IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
-        'output':             StringProp (default='', fill_brok=['full_status', 'check_result'], retention=True),
-        'long_output':        StringProp (default='', fill_brok=['full_status', 'check_result'], retention=True),
-        'is_flapping':        BoolProp   (default=False, fill_brok=['full_status'], retention=True),
+        'output':             StringProp(default='', fill_brok=['full_status', 'check_result'], retention=True),
+        'long_output':        StringProp(default='', fill_brok=['full_status', 'check_result'], retention=True),
+        'is_flapping':        BoolProp(default=False, fill_brok=['full_status'], retention=True),
         #  dependencies for actions like notif of event handler,
         # so AFTER check return
-        'act_depend_of':      ListProp   (default=[]),
+        'act_depend_of': ListProp(default=[]),
         # dependencies for checks raise, so BEFORE checks
-        'chk_depend_of':      ListProp   (default=[]),
+        'chk_depend_of': ListProp(default=[]),
         # elements that depend of me, so the reverse than just uppper
-        'act_depend_of_me':   ListProp   (default=[]),
+        'act_depend_of_me': ListProp(default=[]),
         # elements that depend of me
-        'chk_depend_of_me':   ListProp   (default=[]),
+        'chk_depend_of_me': ListProp(default=[]),
 
         'last_state_update':  FloatProp(default=0.0, fill_brok=['full_status'], retention=True),
         'checks_in_progress': ListProp(default=[]), # no brok because checks are too linked
         'notifications_in_progress': ListProp(default={}, retention=True), # no broks because notifications are too linked
-        'downtimes':          ListProp  (default=[], fill_brok=['full_status'], retention=True),
-        'comments':           ListProp (default=[], fill_brok=['full_status'], retention=True),
-        'flapping_changes':   ListProp (default=[], fill_brok=['full_status'], retention=True),
+        'downtimes':          ListProp(default=[], fill_brok=['full_status'], retention=True),
+        'comments':           ListProp(default=[], fill_brok=['full_status'], retention=True),
+        'flapping_changes':   ListProp(default=[], fill_brok=['full_status'], retention=True),
         'flapping_comment_id': IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         'percent_state_change': FloatProp(default=0.0, fill_brok=['full_status', 'check_result'], retention=True),
         'problem_has_been_acknowledged': BoolProp(default=False, fill_brok=['full_status'], retention=True),
@@ -192,7 +190,7 @@ class Service(SchedulingItem):
         'current_problem_id': IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'execution_time':     FloatProp(default=0.0, fill_brok=['full_status', 'check_result'], retention=True),
         'last_notification':  FloatProp(default=0.0, fill_brok=['full_status'], retention=True),
-        'current_notification_number': IntegerProp(default=0, fill_brok=['full_status'],retention=True),
+        'current_notification_number': IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         'current_notification_id': IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         'check_flapping_recovery_notification': BoolProp(default=True, fill_brok=['full_status'], retention=True),
         'scheduled_downtime_depth': IntegerProp(default=0, fill_brok=['full_status'], retention=True),
@@ -202,28 +200,28 @@ class Service(SchedulingItem):
         'end_time':           IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'early_timeout':      IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
         'return_code':        IntegerProp(default=0, fill_brok=['full_status', 'check_result'], retention=True),
-        'perf_data':          StringProp (default='', fill_brok=['full_status', 'check_result'], retention=True),
-        'last_perf_data':     StringProp (default='', retention=True),
-        'host':               StringProp (default=None),
-        'customs':            ListProp   (default={}, fill_brok=['full_status']),
-        # Warning : for the notified_contacts retention save, we save only the names of the contacts, and we should RELINK
+        'perf_data':          StringProp(default='', fill_brok=['full_status', 'check_result'], retention=True),
+        'last_perf_data':     StringProp(default='', retention=True),
+        'host':               StringProp(default=None),
+        'customs':            ListProp(default={}, fill_brok=['full_status']),
+        # Warning: for the notified_contacts retention save, we save only the names of the contacts, and we should RELINK
         # them when we load it.
-        'notified_contacts':  ListProp  (default=set(), retention=True, retention_preparation=to_list_of_names), # use for having all contacts we have notified
+        'notified_contacts':  ListProp(default=set(), retention=True, retention_preparation=to_list_of_names), # use for having all contacts we have notified
         'in_scheduled_downtime': BoolProp(default=False, fill_brok=['full_status'], retention=True),
         'in_scheduled_downtime_during_last_check': BoolProp(default=False, retention=True),
-        'actions':            ListProp   (default=[]), #put here checks and notif raised
-        'broks':              ListProp   (default=[]), #and here broks raised
+        'actions':            ListProp(default=[]), # put here checks and notif raised
+        'broks':              ListProp(default=[]), # and here broks raised
 
 
         # Problem/impact part
-        'is_problem':         BoolProp   (default=False, fill_brok=['full_status']),
-        'is_impact':          BoolProp   (default=False, fill_brok=['full_status']),
+        'is_problem':         BoolProp(default=False, fill_brok=['full_status']),
+        'is_impact':          BoolProp(default=False, fill_brok=['full_status']),
         # the save value of our business_impact for "problems"
         'my_own_business_impact':   IntegerProp(default=-1, fill_brok=['full_status']),
         # list of problems that make us an impact
-        'source_problems':    ListProp   (default=[], fill_brok=['full_status'], brok_transformation=to_svc_hst_distinct_lists),
+        'source_problems':    ListProp(default=[], fill_brok=['full_status'], brok_transformation=to_svc_hst_distinct_lists),
         # list of the impact I'm the cause of
-        'impacts':            ListProp   (default=[], fill_brok=['full_status'], brok_transformation=to_svc_hst_distinct_lists),
+        'impacts':            ListProp(default=[], fill_brok=['full_status'], brok_transformation=to_svc_hst_distinct_lists),
         # keep a trace of the old state before being an impact
         'state_before_impact': StringProp(default='PENDING'),
         # keep a trace of the old state id before being an impact
@@ -232,13 +230,13 @@ class Service(SchedulingItem):
         'state_changed_since_impact': BoolProp(default=False),
 
         # Easy Service dep definition
-        'service_dependencies': ListProp(default=''),# TODO: find a way to brok it?
+        'service_dependencies': ListProp(default=''), # TODO: find a way to brok it?
 
-        #BUSINESS CORRELATOR PART
+        # BUSINESS CORRELATOR PART
         # Say if we are business based rule or not
-        'got_business_rule':  BoolProp (default=False, fill_brok=['full_status']),
+        'got_business_rule': BoolProp(default=False, fill_brok=['full_status']),
         # Our Dependency node for the business rule
-        'business_rule':      StringProp(default=None),
+        'business_rule': StringProp(default=None),
 
         # Here it's the elements we are depending on
         # so our parents as network relation, or a host
@@ -246,7 +244,7 @@ class Service(SchedulingItem):
         # or even if we are businesss based.
         'parent_dependencies': StringProp(default=set(), brok_transformation=to_svc_hst_distinct_lists, fill_brok=['full_status']),
         # Here it's the guys that depend on us. So it's the total
-        # opposite of the parent_dependencies 
+        # opposite of the parent_dependencies
         'child_dependencies': StringProp(brok_transformation=to_svc_hst_distinct_lists, default=set(), fill_brok=['full_status']),
 
         # Manage the unknown/unreach during hard state
@@ -255,10 +253,10 @@ class Service(SchedulingItem):
         'state_before_hard_unknown_reach_phase': StringProp(default='OK', retention=True),
 
         # Set if the element just change its father/son topology
-        'topology_change' : BoolProp(default=False, fill_brok=['full_status']),
-        
+        'topology_change': BoolProp(default=False, fill_brok=['full_status']),
+
         # Trigger list
-        'triggers'        :  StringProp(default=[])
+        'triggers': StringProp(default=[])
 
     })
 
@@ -311,22 +309,22 @@ class Service(SchedulingItem):
     # Or Shinken deprecated names like criticity
     old_properties = {
         'normal_check_interval':    'check_interval',
-        'retry_check_interval' :    'retry_interval',
-        'criticity'            :    'business_impact',
-        'hostgroup'            :    'hostgroup_name',
-        'hostgroups'            :    'hostgroup_name',
-#        'criticitymodulations' :    'business_impact_modulations',
+        'retry_check_interval':    'retry_interval',
+        'criticity':    'business_impact',
+        'hostgroup':    'hostgroup_name',
+        'hostgroups':    'hostgroup_name',
+        ## 'criticitymodulations':    'business_impact_modulations',
     }
 
-####### 
-#                   __ _                       _   _             
-#                  / _(_)                     | | (_)            
-#   ___ ___  _ __ | |_ _  __ _ _   _ _ __ __ _| |_ _  ___  _ __  
-#  / __/ _ \| '_ \|  _| |/ _` | | | | '__/ _` | __| |/ _ \| '_ \ 
+#######
+#                   __ _                       _   _
+#                  / _(_)                     | | (_)
+#   ___ ___  _ __ | |_ _  __ _ _   _ _ __ __ _| |_ _  ___  _ __
+#  / __/ _ \| '_ \|  _| |/ _` | | | | '__/ _` | __| |/ _ \| '_ \
 # | (_| (_) | | | | | | | (_| | |_| | | | (_| | |_| | (_) | | | |
 #  \___\___/|_| |_|_| |_|\__, |\__,_|_|  \__,_|\__|_|\___/|_| |_|
-#                         __/ |                                  
-#                        |___/                                   
+#                         __/ |
+#                        |___/
 ######
 
     # Give a nice name output
@@ -337,11 +335,9 @@ class Service(SchedulingItem):
             return self.name
         return 'SERVICE-DESCRIPTION-MISSING'
 
-
     # Get the servicegroups names
     def get_groupnames(self):
         return ','.join([sg.get_name() for sg in self.servicegroups])
-
 
     # Need the whole name for debugin purpose
     def get_dbg_name(self):
@@ -350,11 +346,9 @@ class Service(SchedulingItem):
     def get_full_name(self):
         return "%s/%s" % (self.host.host_name, self.service_description)
 
-
     # Get our realm, so in fact our host one
     def get_realm(self):
         return self.host.get_realm()
-
 
     def get_hostgroups(self):
         return self.host.hostgroups
@@ -366,7 +360,7 @@ class Service(SchedulingItem):
     # template are always correct
     # contacts OR contactgroups is need
     def is_correct(self):
-        state = True # guilty or not? :)
+        state = True
         cls = self.__class__
 
         source = getattr(self, 'imported_from', 'unknown')
@@ -375,13 +369,13 @@ class Service(SchedulingItem):
         hname = getattr(self, 'host_name', 'unamed')
 
         special_properties = ('check_period', 'notification_interval', 'host_name',
-                              'hostgroup_name', 'notification_period' )
+                              'hostgroup_name', 'notification_period')
 
         for prop, entry in cls.properties.items():
             if prop not in special_properties:
                 if not hasattr(self, prop) and entry.required:
                     logger.error("The service %s on host '%s' do not have %s" % (desc, hname, prop))
-                    state = False # Bad boy...
+                    state = False  # Bad boy...
 
         # Then look if we have some errors in the conf
         # Juts print warnings, but raise errors
@@ -394,7 +388,7 @@ class Service(SchedulingItem):
             for err in self.configuration_errors:
                 logger.info(err)
 
-        #If no notif period, set it to None, mean 24x7
+        # If no notif period, set it to None, mean 24x7
         if not hasattr(self, 'notification_period'):
             self.notification_period = None
 
@@ -406,23 +400,28 @@ class Service(SchedulingItem):
         if getattr(self, 'display_name', '') == '':
             self.display_name = getattr(self, 'service_description', '')
 
+        # If we got an event handler, it should be valid
+        if getattr(self, 'event_handler', None) and not self.event_handler.is_valid():
+            logger.info("%s: my event_handler %s is invalid" % (self.get_name(), self.event_handler.command))
+            state = False
+
         if not hasattr(self, 'check_command'):
-            logger.info("%s : I've got no check_command" % self.get_name())
+            logger.info("%s: I've got no check_command" % self.get_name())
             state = False
         # Ok got a command, but maybe it's invalid
         else:
             if not self.check_command.is_valid():
-                logger.info("%s : my check_command %s is invalid" % (self.get_name(), self.check_command.command))
+                logger.info("%s: my check_command %s is invalid" % (self.get_name(), self.check_command.command))
                 state = False
             if self.got_business_rule:
                 if not self.business_rule.is_valid():
-                    logger.info("%s : my business rule is invalid" % (self.get_name(),))
+                    logger.info("%s: my business rule is invalid" % (self.get_name(),))
                     for bperror in self.business_rule.configuration_errors:
-                        logger.info("%s : %s" % (self.get_name(), bperror))
+                        logger.info("%s: %s" % (self.get_name(), bperror))
                     state = False
         if not hasattr(self, 'notification_interval') \
                 and  self.notifications_enabled == True:
-            logger.info("%s : I've got no notification_interval but I've got notifications enabled" % self.get_name())
+            logger.info("%s: I've got no notification_interval but I've got notifications enabled" % self.get_name())
             state = False
         if self.host is None:
             logger.info("The service '%s' got a unknown host_name '%s'." % (desc, self.host_name))
@@ -432,11 +431,9 @@ class Service(SchedulingItem):
         if hasattr(self, 'service_description'):
             for c in cls.illegal_object_name_chars:
                 if c in self.service_description:
-                    logger.info("%s : My service_description got the caracter %s that is not allowed." % (self.get_name(), c))
+                    logger.info("%s: My service_description got the caracter %s that is not allowed." % (self.get_name(), c))
                     state = False
         return state
-
-
 
     # The service is dependent of his father dep
     # Must be AFTER linkify
@@ -445,33 +442,30 @@ class Service(SchedulingItem):
         # and do not have timeperiod, and follow parents dep
         if self.host is not None:
             # I add the dep in MY list
-            self.act_depend_of.append( (self.host,
+            self.act_depend_of.append((self.host,
                                         ['d', 'u', 's', 'f'],
                                         'network_dep',
-                                        None, True) )
+                                        None, True))
             # I add the dep in Daddy list
-            self.host.act_depend_of_me.append( (self,
+            self.host.act_depend_of_me.append((self,
                                                 ['d', 'u', 's', 'f'],
                                                 'network_dep',
-                                                None, True) )
+                                                None, True))
 
             # And the parent/child dep lists too
             self.host.register_son_in_parent_child_dependencies(self)
 
-
     # Register the dependency between 2 service for action (notification etc)
     def add_service_act_dependency(self, srv, status, timeperiod, inherits_parent):
         # first I add the other the I depend on in MY list
-        self.act_depend_of.append( (srv, status, 'logic_dep',
-                                    timeperiod, inherits_parent) )
+        self.act_depend_of.append((srv, status, 'logic_dep',
+                                    timeperiod, inherits_parent))
         # then I register myself in the other service dep list
-        srv.act_depend_of_me.append( (self, status, 'logic_dep',
-                                      timeperiod, inherits_parent) )
+        srv.act_depend_of_me.append((self, status, 'logic_dep',
+                                      timeperiod, inherits_parent))
 
         # And the parent/child dep lists too
         srv.register_son_in_parent_child_dependencies(self)
-
-
 
     # Register the dependency between 2 service for action (notification etc)
     # but based on a BUSINESS rule, so on fact:
@@ -480,27 +474,23 @@ class Service(SchedulingItem):
     # on the database service with the srv=ERP service
     def add_business_rule_act_dependency(self, srv, status, timeperiod, inherits_parent):
         # I only register so he know that I WILL be a inpact
-        self.act_depend_of_me.append( (srv, status, 'business_dep',
-                                      timeperiod, inherits_parent) )
+        self.act_depend_of_me.append((srv, status, 'business_dep',
+                                      timeperiod, inherits_parent))
 
         # And the parent/child dep lists too
         self.register_son_in_parent_child_dependencies(srv)
 
-
-
     # Register the dependency between 2 service for checks
     def add_service_chk_dependency(self, srv, status, timeperiod, inherits_parent):
         # first I add the other the I depend on in MY list
-        self.chk_depend_of.append( (srv, status, 'logic_dep',
-                                    timeperiod, inherits_parent) )
+        self.chk_depend_of.append((srv, status, 'logic_dep',
+                                    timeperiod, inherits_parent))
         # then I register myself in the other service dep list
-        srv.chk_depend_of_me.append( (self, status, 'logic_dep',
-                                      timeperiod, inherits_parent) )
+        srv.chk_depend_of_me.append((self, status, 'logic_dep',
+                                      timeperiod, inherits_parent))
 
         # And the parent/child dep lists too
         srv.register_son_in_parent_child_dependencies(self)
-
-
 
     # For a given host, look for all copy we must
     # create for for_each property
@@ -512,28 +502,39 @@ class Service(SchedulingItem):
 
         # If I do not have the property, we bail out
         if prop in host.customs:
+            # Get the list entry, and the not one if there is one
             entry = host.customs[prop]
+            # Look at the list of the key we do NOT want maybe,
+            # for _disks it will be _!disks
+            not_entry = host.customs.get('_' + '!' + prop[1:], '').split(',')
+            not_keys = strip_and_uniq(not_entry)
 
             default_value = getattr(self, 'default_value', '')
             # Transform the generator string to a list
             # Missing values are filled with the default value
             (key_values, errcode) = get_key_value_sequence(entry, default_value)
-            
+
             if key_values:
                 for key_value in key_values:
                     key = key_value['KEY']
+                    # Maybe this key is in the NOT list, if so, skip it
+                    if key in not_keys:
+                        continue
                     value = key_value['VALUE']
                     new_s = self.copy()
                     new_s.host_name = host.get_name()
-                    if self.is_tpl(): # if template, the new one is not
+                    if self.is_tpl():  # if template, the new one is not
                         new_s.register = 1
                     for key in key_value:
                         if key == 'KEY':
                             if hasattr(self, 'service_description'):
-                                new_s.service_description = self.service_description.replace('$'+key+'$', key_value[key])
+                                # We want to change all illegal chars to a _ sign. We can't use class.illegal_obj_char
+                                # because in the "explode" phase, we do not have access to this data! :(
+                                safe_key_value = re.sub(r'[' + "`~!$%^&*\"|'<>?,()=" + ']+', '_', key_value[key])
+                                new_s.service_description = self.service_description.replace('$' + key + '$', safe_key_value)
                         if hasattr(self, 'check_command'):
                             # here we can replace VALUE, VALUE1, VALUE2,...
-                            new_s.check_command = new_s.check_command.replace('$'+key+'$', key_value[key])
+                            new_s.check_command = new_s.check_command.replace('$' + key + '$', key_value[key])
                     # And then add in our list this new service
                     duplicates.append(new_s)
             else:
@@ -552,25 +553,21 @@ class Service(SchedulingItem):
                     host.configuration_errors.append(err)
         return duplicates
 
-
-
-
 #####
-#                         _             
-#                        (_)            
-#  _ __ _   _ _ __  _ __  _ _ __   __ _ 
+#                         _
+#                        (_)
+#  _ __ _   _ _ __  _ __  _ _ __   __ _
 # | '__| | | | '_ \| '_ \| | '_ \ / _` |
 # | |  | |_| | | | | | | | | | | | (_| |
 # |_|   \__,_|_| |_|_| |_|_|_| |_|\__, |
 #                                  __/ |
-#                                 |___/ 
+#                                 |___/
 ####
 
 
-    # Set unreachable : our host is DOWN, but it mean nothing for a service
+    # Set unreachable: our host is DOWN, but it mean nothing for a service
     def set_unreachable(self):
         pass
-
 
     # We just go an impact, so we go unreachable
     # but only if it's enable in the configuration
@@ -583,9 +580,8 @@ class Service(SchedulingItem):
             self.state_id_before_impact = self.state_id
             # this flag will know if we overide the impact state
             self.state_changed_since_impact = False
-            self.state = 'UNKNOWN'# exit code UNDETERMINED
+            self.state = 'UNKNOWN'  # exit code UNDETERMINED
             self.state_id = 3
-
 
     # Ok, we are no more an impact, if no news checks
     # overide the impact state, we came back to old
@@ -597,13 +593,11 @@ class Service(SchedulingItem):
             self.state = self.state_before_impact
             self.state_id = self.state_id_before_impact
 
-
     # Set state with status return by the check
     # and update flapping state
     def set_state_from_exit_status(self, status):
         now = time.time()
         self.last_state_update = now
-
 
         # we should put in last_state the good last state:
         # if not just change the state by an problem/impact
@@ -616,7 +610,7 @@ class Service(SchedulingItem):
                 and self.is_impact \
                 and not self.state_changed_since_impact:
             self.last_state = self.state_before_impact
-        else: # standard case
+        else:  # standard case
             self.last_state = self.state
 
         if status == 0:
@@ -640,7 +634,7 @@ class Service(SchedulingItem):
             self.last_time_unknown = int(self.last_state_update)
             state_code = 'u'
         else:
-            self.state = 'CRITICAL'# exit code UNDETERMINED
+            self.state = 'CRITICAL'  # exit code UNDETERMINED
             self.state_id = 2
             self.last_time_critical = int(self.last_state_update)
             state_code = 'c'
@@ -652,7 +646,6 @@ class Service(SchedulingItem):
             self.last_state_change = self.last_state_update
 
         self.duration_sec = now - self.last_state_change
-
 
     # Return True if status is the state (like OK) or small form like 'o'
     def is_state(self, status):
@@ -669,18 +662,16 @@ class Service(SchedulingItem):
             return True
         return False
 
-
     # The last time when the state was not OK
     def last_time_non_ok_or_up(self):
         non_ok_times = filter(lambda x: x > self.last_time_ok, [self.last_time_warning,
                                                                 self.last_time_critical,
                                                                 self.last_time_unknown])
         if len(non_ok_times) == 0:
-            last_time_non_ok = 0 # program_start would be better
+            last_time_non_ok = 0  # program_start would be better
         else:
             last_time_non_ok = min(non_ok_times)
         return last_time_non_ok
-
 
     # Add a log entry with a SERVICE ALERT like:
     # SERVICE ALERT: server;Load;UNKNOWN;HARD;1;I don't know what to say...
@@ -691,7 +682,6 @@ class Service(SchedulingItem):
                                                          self.state_type,
                                                          self.attempt,
                                                          self.output))
-
 
     # If the configuration allow it, raise an initial log like
     # CURRENT SERVICE STATE: server;Load;UNKNOWN;HARD;1;I don't know what to say...
@@ -704,14 +694,12 @@ class Service(SchedulingItem):
                                                          self.attempt,
                                                          self.output))
 
-
     # Add a log entry with a Freshness alert like:
     # Warning: The results of host 'Server' are stale by 0d 0h 0m 58s (threshold=0d 1h 0m 0s).
     # I'm forcing an immediate check of the host.
     def raise_freshness_log_entry(self, t_stale_by, t_threshold):
         logger.warning("The results of service '%s' on host '%s' are stale by %s (threshold=%s).  I'm forcing an immediate check of the service." \
                       % (self.get_name(), self.host.get_name(), format_t_into_dhms_format(t_stale_by), format_t_into_dhms_format(t_threshold)))
-
 
     # Raise a log entry with a Notification alert like
     # SERVICE NOTIFICATION: superadmin;server;Load;OK;notify-by-rss;no output
@@ -730,7 +718,6 @@ class Service(SchedulingItem):
                                                                     self.get_name(), state,
                                                                     command.get_name(), self.output))
 
-
     # Raise a log entry with a Eventhandler alert like
     # SERVICE EVENT HANDLER: test_host_0;test_ok_0;OK;SOFT;4;eventhandler
     def raise_event_handler_log_entry(self, command):
@@ -742,13 +729,11 @@ class Service(SchedulingItem):
                                                                      self.attempt,
                                                                      command.get_name()))
 
-
     # Raise a log entry with FLAPPING START alert like
     # SERVICE FLAPPING ALERT: server;LOAD;STARTED; Service appears to have started flapping (50.6% change >= 50.0% threshold)
     def raise_flapping_start_log_entry(self, change_ratio, threshold):
         logger.log("SERVICE FLAPPING ALERT: %s;%s;STARTED; Service appears to have started flapping (%.1f%% change >= %.1f%% threshold)" % \
                       (self.host.get_name(), self.get_name(), change_ratio, threshold))
-
 
     # Raise a log entry with FLAPPING STOP alert like
     # SERVICE FLAPPING ALERT: server;LOAD;STOPPED; Service appears to have stopped flapping (23.0% change < 25.0% threshold)
@@ -756,12 +741,10 @@ class Service(SchedulingItem):
         logger.log("SERVICE FLAPPING ALERT: %s;%s;STOPPED; Service appears to have stopped flapping (%.1f%% change < %.1f%% threshold)" % \
                       (self.host.get_name(), self.get_name(), change_ratio, threshold))
 
-
     # If there is no valid time for next check, raise a log entry
     def raise_no_next_check_log_entry(self):
         logger.warning("I cannot schedule the check for the service '%s' on host '%s' because there is not future valid time" % \
                       (self.get_name(), self.host.get_name()))
-
 
     # Raise a log entry when a downtime begins
     # SERVICE DOWNTIME ALERT: test_host_0;test_ok_0;STARTED; Service has entered a period of scheduled downtime
@@ -769,13 +752,11 @@ class Service(SchedulingItem):
         logger.log("SERVICE DOWNTIME ALERT: %s;%s;STARTED; Service has entered a period of scheduled downtime" % \
                       (self.host.get_name(), self.get_name()))
 
-
     # Raise a log entry when a downtime has finished
     # SERVICE DOWNTIME ALERT: test_host_0;test_ok_0;STOPPED; Service has exited from a period of scheduled downtime
     def raise_exit_downtime_log_entry(self):
         logger.log("SERVICE DOWNTIME ALERT: %s;%s;STOPPED; Service has exited from a period of scheduled downtime" % \
                       (self.host.get_name(), self.get_name()))
-
 
     # Raise a log entry when a downtime prematurely ends
     # SERVICE DOWNTIME ALERT: test_host_0;test_ok_0;CANCELLED; Service has entered a period of scheduled downtime
@@ -783,8 +764,7 @@ class Service(SchedulingItem):
         logger.log("SERVICE DOWNTIME ALERT: %s;%s;CANCELLED; Scheduled downtime for service has been cancelled." % \
                       (self.host.get_name(), self.get_name()))
 
-
-    # Is stalking ?
+    # Is stalking?
     # Launch if check is waitconsume==first time
     # and if c.status is in self.stalking_options
     def manage_stalking(self, c):
@@ -798,42 +778,35 @@ class Service(SchedulingItem):
                 need_stalk = True
             elif c.exit_status == 3 and 'u' in self.stalking_options:
                 need_stalk = True
-            
+
             if c.output == self.output:
                 need_stalk = False
         if need_stalk:
-            logger.info("Stalking %s : %s" % (self.get_name(), c.output))
-
+            logger.info("Stalking %s: %s" % (self.get_name(), c.output))
 
     # Give data for checks's macros
     def get_data_for_checks(self):
         return [self.host, self]
 
-
     # Give data for evetn handlers's macros
     def get_data_for_event_handler(self):
         return [self.host, self]
-
 
     # Give data for notifications'n macros
     def get_data_for_notifications(self, contact, n):
         return [self.host, self, contact, n]
 
-
     # See if the notification is launchable (time is OK and contact is OK too)
     def notification_is_blocked_by_contact(self, n, contact):
         return not contact.want_service_notification(self.last_chk, self.state, n.type, self.business_impact, n.command_call)
 
-
     def get_duration_sec(self):
         return str(int(self.duration_sec))
-
 
     def get_duration(self):
         m, s = divmod(self.duration_sec, 60)
         h, m = divmod(m, 60)
         return "%02dh %02dm %02ds" % (h, m, s)
-
 
     def get_ack_author_name(self):
         if self.acknowledgement is None:
@@ -845,10 +818,8 @@ class Service(SchedulingItem):
             return ''
         return self.acknowledgement.comment
 
-
     def get_check_command(self):
         return self.check_command.get_name()
-
 
     # Check if a notification for this service is suppressed at this time
     def notification_is_blocked_by_item(self, type, t_wished = None):
@@ -903,8 +874,8 @@ class Service(SchedulingItem):
         if self.host.scheduled_downtime_depth > 0:
             return True
 
-        # Block if in a scheduled downtime and a problem arises
-        if self.scheduled_downtime_depth > 0 and type in ('PROBLEM', 'RECOVERY'):
+        # Block if in a scheduled downtime and a problem arises, or flapping event
+        if self.scheduled_downtime_depth > 0 and type in ('PROBLEM', 'RECOVERY', 'FLAPPINGSTART', 'FLAPPINGSTOP', 'FLAPPINGDISABLED'):
             return True
 
         # Block if the status is SOFT
@@ -925,9 +896,6 @@ class Service(SchedulingItem):
 
         return False
 
-
-
-
     # Get a oc*p command if item has obsess_over_*
     # command. It must be enabled locally and globally
     def get_obsessive_compulsive_processor_command(self):
@@ -944,13 +912,12 @@ class Service(SchedulingItem):
         self.actions.append(e)
 
 
-
-
 # Class for list of services. It's mainly, mainly for configuration part
 class Services(Items):
-    inner_class = Service # use for know what is in items
+    inner_class = Service  # use for know what is in items
+
     # Create the reversed list for speedup search by host_name/name
-    # We also tag service already in list : they are twins. It'a a bad things.
+    # We also tag service already in list: they are twins. It'a a bad things.
     # Hostgroups service have an ID higer thant host service. So it we tag
     # an id that already are in the list, this service is already
     # exist, and is a host,
@@ -971,9 +938,7 @@ class Services(Items):
         # search, so we del it
         del self.reversed_list
 
-
-
-    # TODO : finish serach to use reversed
+    # TODO: finish serach to use reversed
     # Search a service id by it's name and host_name
     def find_srv_id_by_name_and_hostname(self, host_name, name):
         # key = (host_name, name)
@@ -992,7 +957,6 @@ class Services(Items):
                     return s.id
         return None
 
-
     # Search a service by it's name and hot_name
     def find_srv_by_name_and_hostname(self, host_name, name):
         if hasattr(self, 'hosts'):
@@ -1006,7 +970,6 @@ class Services(Items):
             return self.items[id]
         else:
             return None
-
 
     # Make link between elements:
     # service -> host
@@ -1032,13 +995,11 @@ class Services(Items):
         self.linkify_with_escalations(escalations)
         self.linkify_with_triggers(triggers)
 
-
     # We can link services with hosts so
     # We can search in O(hosts) instead
     # of O(services) for common cases
     def optimize_service_search(self, hosts):
         self.hosts = hosts
-
 
     # We just search for each host the id of the host
     # and replace the name by the id
@@ -1057,13 +1018,12 @@ class Services(Items):
                 # Let the host know we are his service
                 if s.host is not None:
                     hst.add_service_link(s)
-                else: # Ok, the host do not exists!
-                    err = "Error : the service '%s' do not have a host_name not hostgroup_name" % (self.get_name())
+                else:  # Ok, the host do not exists!
+                    err = "Error: the service '%s' do not have a host_name not hostgroup_name" % (self.get_name())
                     s.configuration_errors.append(err)
                     continue
-            except AttributeError , exp:
-                pass # Will be catch at the is_correct moment
-
+            except AttributeError, exp:
+                pass  # Will be catch at the is_correct moment
 
     # We look for servicegroups property in services and
     # link them
@@ -1079,11 +1039,9 @@ class Services(Items):
                         if sg is not None:
                             new_servicegroups.append(sg)
                         else:
-                            err = "Error : the servicegroup '%s' of the service '%s' is unknown" % (sg_name, s.get_dbg_name())
+                            err = "Error: the servicegroup '%s' of the service '%s' is unknown" % (sg_name, s.get_dbg_name())
                             s.configuration_errors.append(err)
                 s.servicegroups = new_servicegroups
-
-
 
     # In the scheduler we need to relink the commandCall with
     # the real commands
@@ -1095,27 +1053,24 @@ class Services(Items):
                 if cc:
                     cc.late_linkify_with_command(commands)
 
-
     # Delete services by ids
     def delete_services_by_id(self, ids):
         for id in ids:
             del self[id]
 
-
     # Apply implicit inheritance for special properties:
     # contact_groups, notification_interval , notification_period
     # So service will take info from host if necessery
     def apply_implicit_inheritance(self, hosts):
-        for prop in ( 'contacts', 'contact_groups', 'notification_interval',
+        for prop in ('contacts', 'contact_groups', 'notification_interval',
                       'notification_period', 'resultmodulations', 'business_impact_modulations', 'escalations',
-                      'poller_tag', 'reactionner_tag', 'check_period', 'business_impact', 'maintenance_period' ):
+                      'poller_tag', 'reactionner_tag', 'check_period', 'business_impact', 'maintenance_period'):
             for s in self:
                 if not s.is_tpl():
                     if not hasattr(s, prop) and hasattr(s, 'host_name'):
                         h = hosts.find_by_name(s.host_name)
                         if h is not None and hasattr(h, prop):
                             setattr(s, prop, getattr(h, prop))
-
 
     # Apply inheritance for all properties
     def apply_inheritance(self, hosts):
@@ -1129,24 +1084,22 @@ class Services(Items):
         for s in self:
             s.get_customs_properties_by_inheritance(self)
 
-
     # Create dependencies for services (daddy ones)
     def apply_dependencies(self):
         for s in self:
             s.fill_daddy_dependency()
 
-
-    # Add in our queue a service create from another. Special case :
-    # is a template : so hname is a name of template, so need to get all
+    # Add in our queue a service create from another. Special case:
+    # is a template: so hname is a name of template, so need to get all
     # hosts that inherit from it.
     def copy_create_service_from_another(self, hosts, s, hname):
         for_hosts_to_create = []
-        # if we are not a template, it's easy : copy for all host_name
+        # if we are not a template, it's easy: copy for all host_name
         # because they are our final host_name after all
         if not s.is_tpl():
             for_hosts_to_create.append(hname)
         else:
-            # But for template it's more tricky : it's a template name
+            # But for template it's more tricky: it's a template name
             # we've got, not a real host_name/ So we must get a list of host_name
             # that use this template
             # Use the complex expression manager for it, it will call find_hosts_that_use_template
@@ -1161,7 +1114,7 @@ class Services(Items):
             def _loop(name):
                 new_s = s.copy()
                 new_s.host_name = name
-                if s.is_tpl(): #  if template, the new one is not
+                if s.is_tpl():  # if template, the new one is not
                     new_s.register = 1
                 self.items[new_s.id] = new_s
         else:
@@ -1173,8 +1126,8 @@ class Services(Items):
                 if h is not None:
                     for new_s in s.duplicate(h):
                         self.items[new_s.id] = new_s
-                else: # TODO : raise an error?
-                    err = 'Error : The hostname %s is unknown for the service %s!' % (name, s.get_name())
+                else:  # TODO: raise an error?
+                    err = 'Error: The hostname %s is unknown for the service %s!' % (name, s.get_name())
                     s.configuration_errors.append(err)
 
         # Now really create the services
@@ -1187,7 +1140,6 @@ class Services(Items):
         # The "old" services will be removed. All services with
         # more than one host or a host group will be in it
         srv_to_remove = []
-
 
         # items::explode_trigger_string_into_triggers
         self.explode_trigger_string_into_triggers(triggers)
@@ -1206,8 +1158,8 @@ class Services(Items):
 
         for id in service_to_check:
             s = self.items[id]
-            duplicate_for_hosts = [] # get the list of our host_names if more than 1
-            not_hosts = [] # the list of !host_name so we remove them after
+            duplicate_for_hosts = []  # get the list of our host_names if more than 1
+            not_hosts = []  # the list of !host_name so we remove them after
 
             # If do not have an host_name, just delete it
             if not hasattr(s, 'host_name'):
@@ -1230,12 +1182,12 @@ class Services(Items):
                         # the not list
                         if len(hname) > 0 and hname[0] == '!':
                             not_hosts.append(hname[1:])
-                        else: # the standard list
+                        else:  # the standard list
                             duplicate_for_hosts.append(hname)
 
-                    # remove duplicate items from duplicate_for_hosts: 
+                    # remove duplicate items from duplicate_for_hosts:
                     duplicate_for_hosts = list(set(duplicate_for_hosts))
-                    
+
                     # Ok now we clean the duplicate_for_hosts with all hosts
                     # of the not
                     for hname in not_hosts:
@@ -1252,8 +1204,8 @@ class Services(Items):
                     if not s.is_tpl() and s.configuration_errors == []:
                         srv_to_remove.append(id)
 
-                else: # Maybe the hnames was full of same host, so we must reset the name
-                    for hname in hnames: # So even if len == 0, we are protected
+                else:  # Maybe the hnames was full of same host, so we must reset the name
+                    for hname in hnames:  # So even if len == 0, we are protected
                         s.host_name = hname
 
         # We clean all service that was for multiple hosts.
@@ -1262,9 +1214,9 @@ class Services(Items):
         # Servicegroups property need to be fullfill for got the informations
         # And then just register to this service_group
         for s in self:
-            if not s.is_tpl() and hasattr(s,'service_description'):
+            if not s.is_tpl() and hasattr(s, 'service_description'):
                 sname = s.service_description
-                shname = getattr(s ,'host_name', '')
+                shname = getattr(s, 'host_name', '')
                 if hasattr(s, 'servicegroups'):
                     sgs = s.servicegroups.split(',')
                     for sg in sgs:
@@ -1284,9 +1236,9 @@ class Services(Items):
                         i = 0
                         hname = ''
                         for elt in sdeps:
-                            if i % 2 == 0: # host
+                            if i % 2 == 0:  # host
                                 hname = elt
-                            else: # description
+                            else:  # description
                                 desc = elt
                                 # we can register it (s) (depend on) -> (hname, desc)
                                 # If we do not have enouth data for s, it's no use
@@ -1294,14 +1246,11 @@ class Services(Items):
                                     servicedependencies.add_service_dependency(s.host_name, s.service_description, hname, desc)
                             i += 1
 
-
-
     # Will create all business tree for the
     # services
     def create_business_rules(self, hosts, services):
         for s in self:
             s.create_business_rules(hosts, services)
-
 
     # Will link all business service/host with theirs
     # dep for problem/impact link

@@ -53,12 +53,12 @@ class LiveStatusWaitQuery(LiveStatusQuery):
         WaitCondition statements are written into the metafilter string as if they
         were ordinary Filter:-statements. (metafilter is then used for a MetaData object)
 
-        """ 
+        """
         metafilter = ""
         for line in data.splitlines():
             line = line.strip()
             # Tools like NagVis send KEYWORK:option, and we prefer to have
-            # a space following the :
+            # a space following the:
             if ':' in line and not ' ' in line:
                 line = line.replace(':', ': ')
             keyword = line.split(' ')[0].rstrip(':')
@@ -148,7 +148,7 @@ class LiveStatusWaitQuery(LiveStatusQuery):
                 self.wait_timeout = int(self.wait_timeout) / 1000
             else:
                 # This line is not valid or not implemented
-                print "Received a line of input which i can't handle : '%s'" % line
+                print "Received a line of input which i can't handle: '%s'" % line
                 pass
         # Make columns unique
         self.filtercolumns = list(set(self.filtercolumns))

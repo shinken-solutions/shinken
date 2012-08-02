@@ -34,16 +34,14 @@ except ImportError:
     try:
         import simplejson as json
     except ImportError:
-        print "Error : you need the json or simplejson module"
+        print "Error: you need the json or simplejson module"
         raise
-
 
 from local_helper import print_cat_tree
 from shinken.webui.bottle import redirect
 
 ### Will be populated by the UI with it's own value
 app = None
-
 
 
 # Our page. If the useer call /dummy/TOTO arg1 will be TOTO.
@@ -60,7 +58,7 @@ def get_packs():
     # we return values for the template (view). But beware, theses values are the
     # only one the tempalte will have, so we must give it an app link and the
     # user we are loggued with (it's a contact object in fact)
-    return {'app' : app, 'user' : user}
+    return {'app': app, 'user': user}
 
 
 def get_new_packs():
@@ -77,55 +75,66 @@ def get_new_packs():
     categories = ''
     error = ''
     api_error = ''
+    status_code = 500
+
     # Get the categories
     c = pycurl.Curl()
     c.setopt(c.POST, 1)
-    #c.setopt(c.CONNECTTIMEOUT, 5)
-    #c.setopt(c.TIMEOUT, 8)
-    #c.setopt(c.PROXY, 'http://inthemiddle.com:8080')
-    c.setopt(c.URL, "http://127.0.0.1:7765/categories")
-    c.setopt(c.HTTPPOST,[ ("root", '/'), ('api_key', api_key)])    
+    c.setopt(c.CONNECTTIMEOUT, 5)
+    c.setopt(c.TIMEOUT, 8)
+    if app.http_proxy:
+        c.setopt(c.PROXY, app.http_proxy)
+    c.setopt(c.URL, app.community_uri + "/categories")
+    c.setopt(c.HTTPPOST, [("root", '/'), ('api_key', api_key)])
     c.setopt(c.VERBOSE, 1)
     response = StringIO()
     c.setopt(c.WRITEFUNCTION, response.write)
-    r = c.perform()
-    response.seek(0)
-    status_code = c.getinfo(pycurl.HTTP_CODE)
-    
-    # We only parse the json if we got 
-    if status_code == 200:
-        categories = json.loads(response.read().replace('\\/', '/'))
-    else:
-        api_error = response.read()
+    try:
+        r = c.perform()
+        response.seek(0)
+        status_code = c.getinfo(pycurl.HTTP_CODE)
 
-    print "status code: %s" % status_code
-    c.close()
-    print "Json loaded", categories
+        # We only parse the json if we got
+        if status_code == 200:
+            categories = json.loads(response.read().replace('\\/', '/'))
+        else:
+            api_error = response.read()
 
+        print "status code: %s" % status_code
+        c.close()
+        print "Json loaded", categories
+    except Exception, exp:
+        api_error = str(exp)
 
     raw_tags = []
+    status_code = 500
     # Then the tags, like 30
     c = pycurl.Curl()
     c.setopt(c.POST, 1)
-    #c.setopt(c.CONNECTTIMEOUT, 5)
-    #c.setopt(c.TIMEOUT, 8)
-    #c.setopt(c.PROXY, 'http://inthemiddle.com:8080')
-    c.setopt(c.URL, "http://127.0.0.1:7765/tags")
-    c.setopt(c.HTTPPOST,[ ("nb", '50'), ('api_key', api_key)])
+    c.setopt(c.CONNECTTIMEOUT, 5)
+    c.setopt(c.TIMEOUT, 8)
+    if app.http_proxy:
+        c.setopt(c.PROXY, app.http_proxy)
+    c.setopt(c.URL, app.community_uri + "/tags")
+    c.setopt(c.HTTPPOST, [("nb", '50'), ('api_key', api_key)])
     c.setopt(c.VERBOSE, 1)
     response = StringIO()
     c.setopt(c.WRITEFUNCTION, response.write)
-    r = c.perform()
-    response.seek(0)
-    status_code = c.getinfo(pycurl.HTTP_CODE)
-    # We only parse the json if we got 
-    if status_code == 200:
-        raw_tags = json.loads(response.read().replace('\\/', '/'))
-    else:
-        api_error = response.read()
-    print "status code: %s" % status_code
-    c.close()
-    print "Json loaded", categories
+    try:
+        r = c.perform()
+        response.seek(0)
+        status_code = c.getinfo(pycurl.HTTP_CODE)
+        # We only parse the json if we got
+        if status_code == 200:
+            raw_tags = json.loads(response.read().replace('\\/', '/'))
+        else:
+            api_error = response.read()
+        print "status code: %s" % status_code
+        c.close()
+        print "Json loaded", categories
+    except Exception, exp:
+        api_error = str(exp)
+
     # We want small before
     raw_tags.reverse()
 
@@ -135,28 +144,29 @@ def get_new_packs():
     i = 0
     for (name, occ) in raw_tags:
         i += 1
-        size = 1 + float(i)/nb_tags
-        new_tags[name] = {'name' : name, 'size' : size, 'occ' : occ}
+        size = 1 + float(i) / nb_tags
+        new_tags[name] = {'name': name, 'size': size, 'occ': occ}
 
     # Sort by name
     names = new_tags.keys()
     names.sort()
-    
+
     tags = []
     for name in names:
         tags.append(new_tags[name])
 
     error = ''
-    
+
     # we return values for the template (view). But beware, theses values are the
     # only one the tempalte will have, so we must give it an app link and the
     # user we are loggued with (it's a contact object in fact)
-    return {'app':app, 'user':user, 'error':error, 'api_error':api_error, 'results':None, 'search':None, 'categories' : categories, 'tags':tags,  'print_cat_tree':print_cat_tree}
+    return {'app': app, 'user': user, 'error': error, 'api_error': api_error, 'results': None, 'search': None, 'categories': categories, 'tags': tags, 'print_cat_tree': print_cat_tree}
 
 
 def launch_search(search):
     error = ''
     results = ''
+    status_code = 500
 
     # We need an api_key to launc hthe query
     api_key = app.get_api_key()
@@ -165,32 +175,35 @@ def launch_search(search):
 
     c = pycurl.Curl()
     c.setopt(c.POST, 1)
-    #c.setopt(c.CONNECTTIMEOUT, 5)
-    #c.setopt(c.TIMEOUT, 8)
-    #c.setopt(c.PROXY, 'http://inthemiddle.com:8080')
-    c.setopt(c.URL, "http://127.0.0.1:7765/search")
-    c.setopt(c.HTTPPOST,[ ("search", search), ('api_key', api_key)])
-    
+    c.setopt(c.CONNECTTIMEOUT, 5)
+    c.setopt(c.TIMEOUT, 8)
+    if app.http_proxy:
+        c.setopt(c.PROXY, app.http_proxy)
+    c.setopt(c.URL, app.community_uri + "/search")
+    c.setopt(c.HTTPPOST, [("search", search), ('api_key', api_key)])
+
     #c.setopt(c.HTTPPOST, [("file1", (c.FORM_FILE, str(zip_file_p)))])
     c.setopt(c.VERBOSE, 1)
 
     response = StringIO()
     c.setopt(c.WRITEFUNCTION, response.write)
-    r = c.perform()
-    response.seek(0)
-    status_code = c.getinfo(pycurl.HTTP_CODE)
-    # We only parse the json if we got 
-    if status_code == 200:
-        results = json.loads(response.read().replace('\\/', '/'))
-    else:
-        error = response.read().replace('\\/', '/')
+    try:
+        r = c.perform()
+        response.seek(0)
+        status_code = c.getinfo(pycurl.HTTP_CODE)
+        # We only parse the json if we got
+        if status_code == 200:
+            results = json.loads(response.read().replace('\\/', '/'))
+        else:
+            error = response.read().replace('\\/', '/')
 
-    c.close()
+        c.close()
+    except Exception, exp:
+        error = str(exp)
 
     print "status code: %s" % status_code
     print "Json loaded", results, error
     return (results, error)
-
 
 
 def get_new_packs_result(search):
@@ -209,11 +222,11 @@ def get_new_packs_result(search):
     else:
         error = 'You forgot the search entry'
 
-    print "get_new_packs_result::",results, error
+    print "get_new_packs_result::", results, error
     # we return values for the template (view). But beware, theses values are the
     # only one the tempalte will have, so we must give it an app link and the
     # user we are loggued with (it's a contact object in fact)
-    return {'app':app, 'user':user, 'error':error, 'api_error':api_error, 'results':results, 'search':search, 'categories':None, 'tags':None}
+    return {'app': app, 'user': user, 'error': error, 'api_error': api_error, 'results': results, 'search': search, 'categories': None, 'tags': None}
 
 
 def get_new_packs_result_post():
@@ -233,12 +246,11 @@ def get_new_packs_result_post():
     else:
         error = 'You forgot the search entry'
 
-    print "get_new_packs_result_post::",results, error
+    print "get_new_packs_result_post::", results, error
     # we return values for the template (view). But beware, theses values are the
     # only one the tempalte will have, so we must give it an app link and the
     # user we are loggued with (it's a contact object in fact)
-    return {'app':app, 'user':user, 'error':error, 'api_error':api_error, 'results':results, 'search':search, 'categories':None, 'tags':None}
-
+    return {'app': app, 'user': user, 'error': error, 'api_error': api_error, 'results': results, 'search': search, 'categories': None, 'tags': None}
 
 
 def download_pack(uri):
@@ -248,37 +260,41 @@ def download_pack(uri):
     # so we bail out if it's a false one
     user = app.get_user_auth()
     if not user:
-        r = {'state' : 401, 'text' : 'Sorry you are not logged!'}
-        return json.dumps(r)            
+        r = {'state': 401, 'text': 'Sorry you are not logged!'}
+        return json.dumps(r)
 
     print "We are asked to download", uri
     c = pycurl.Curl()
     c.setopt(c.HTTPGET, 1)
+    c.setopt(c.CONNECTTIMEOUT, 5)
+    c.setopt(c.TIMEOUT, 8)
+    if app.http_proxy:
+        c.setopt(c.PROXY, app.http_proxy)
     c.setopt(c.URL, uri)
     response = StringIO()
     c.setopt(c.WRITEFUNCTION, response.write)
-    c.perform()
-    c.close()
-    response.seek(0)
-    buf = response.read(5000000)
-    add = response.read(1)
-    if add:
-        r = {'state' : 400, 'text' : 'Sorry the file is too big!'}
-        return json.dumps(r)            
+    try:
+        c.perform()
+        c.close()
+        response.seek(0)
+        buf = response.read(5000000)
+        add = response.read(1)
+        if add:
+            r = {'state': 400, 'text': 'Sorry the file is too big!'}
+            return json.dumps(r)
 
-    print "WE get a file os the size", len(buf)
-    
-    
+        print "WE get a file os the size", len(buf)
+    except Exception, exp:
+        r = {'state': 500, 'text': 'ERROR: ' + str(exp)}
+        return json.dumps(r)
+
     r = app.save_pack(buf)
     print "RETURN", r
     return json.dumps(r)
 
-    
-
-pages = {get_packs : { 'routes' : ['/packs'], 'view' : 'packs', 'static' : True},
-         get_new_packs : { 'routes' : ['/getpacks'], 'view' : 'getpacks', 'static' : True},
-         get_new_packs_result_post : { 'routes' : ['/getpacks'], 'method' : 'POST', 'view' : 'getpacks', 'static' : True},
-         get_new_packs_result : { 'routes' : ['/getpacks/:search#.+#'], 'view' : 'getpacks', 'static' : True},
-         download_pack : { 'routes' : ['/download/:uri#.+#'], 'view':None, 'static' : True},
+pages = {get_packs: {'routes': ['/packs'], 'view': 'packs', 'static': True},
+         get_new_packs: {'routes': ['/getpacks'], 'view': 'getpacks', 'static': True},
+         get_new_packs_result_post: {'routes': ['/getpacks'], 'method': 'POST', 'view': 'getpacks', 'static': True},
+         get_new_packs_result: {'routes': ['/getpacks/:search#.+#'], 'view': 'getpacks', 'static': True},
+         download_pack: {'routes': ['/download/:uri#.+#'], 'view': None, 'static': True},
          }
-

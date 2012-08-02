@@ -1,503 +1,528 @@
 ########################
 Shinken ChangeLog
 #######################
+1.2 - TBD
+------------------
+	CORE ENHANCEMENTS
+	* Add: issue #349 (from David Guenault) Installation script now has a backup repository for installing MK Multisite.
+
+	CORE FIXES
+
+	MODULE ENHANCEMENTS
+	* Add: (from: xkilian and Thibault Cohen) Graphite broker supports pickle protocol, bulk updates and buffers output when it can't connect to Carbon daemons
+	* Add: (from: Thibault Cohen and ???) Graphite broker replaces invalid caracters by _ and supports negative values
+	* Add: (from: xkilian and Thibault Cohen) Graphite broker adds _PRE_GRAPHITE and _POST_GRAPHITE host or service macros to each dot delimited data name
+	* Add: (from: Claneys Skyne) Create additionnal data points for warning and critical thresholds per data value
+	* Add: (from Romain Forlot) Compile regex
+
+	MODULE FIXES
+	* Fix: issue #450 (from vaxvms) removed thrift broker, similar to Livestatus, as it is unmaintained.
+	* Fix: MerlinDB for Ninja UI, removed documentation and marked as deprecated, as it is unmaintained.
+
+	UI ENHANCEMENTS
+
+	UI FIXES
+
+	DOCUMENTATION
+	* Add: (from xkilian, MathieuMD,  Claneys Skyne, H4wkmoon, etc.) Wiki documentation in-depth renewal of Getting Started pages for new users
+	* Add: Monitoring Pack documentation, modules, installation, FAQ , diagrams, scaling shinken, dev+user resources, etc.
 
 1.0.1 - 13/03/2012
 ------------------
 	CORE FIXES
-	* Fix : recovery contacts were lost after a restart
-	* Fix : allow } in commands if it's not alone in the line.
-	* Fix : (from Laurent Ollagnier) typo on mysql pack
-	* Fix : issue #214 (shinken-admin catch backtrce for lost connections)
-	* Fix : inheritance with +
-	* Fix : ticket #213 This will manage cases where an ctive satellite die and there is no spare. It's useful for pollers where spare is not so interesting.
-	* Fix : (reported by : H4wkmoon) time change compensation lead to a scheduler crash when objets don't got check perdios or notification periods.
-	* Fix : manage LARGE output from sub commands (>64k). Only woks under Unix from now, because it use the fcntl module
-	* Fix : (reported by : Unicow) bug in escalations, there was too much escalations raised.
-	* Fix : (from Arthur Gautier) fix buildpath
-	* Fix : (From : Thomas Meson) Various fixes in setup.py and add missing files to build the package
+	* Fix: recovery contacts were lost after a restart
+	* Fix: allow } in commands if it's not alone in the line
+	* Fix: (from: Laurent Ollagnier) typo on mysql pack
+	* Fix: issue #214 (shinken-admin catches backtrace for lost connections)
+	* Fix: inheritance with +
+	* Fix: ticket #213 This will manage cases where an active satellite dies and there is no spare. It's useful for pollers where spare is not so interesting.
+	* Fix: (reported by: H4wkmoon) time change compensation lead to a scheduler crash when objets don't get check perdios or notification periods.
+	* Fix: manage LARGE output from sub commands (>64k). Only works under Unix for now, because it uses the fcntl module
+	* Fix: (reported by: Unicow) bug in escalations, there were too many escalations raised
+	* Fix: (from: Arthur Gautier) fix buildpath
+	* Fix: (From: Thomas Meson) Various fixes in setup.py and add missing files to build the package
 
-	MODULES ENHANCEMENTS
-	* Add : lof of GLPI module enhancements, with new properties managed
-	
-	MODULES FIXES
-	* Fix : check_esx3 install under ubuntu 32bits edition
-	* Fix : multisite layout, add custom links
-	* Fix : workaround problem with official pyro3 under Debian squeeze. Use pyro4 instead of the official one
-	* FIX : #210 added test of parent target folder. if it does not exist then create it
-	* Fix : HTML in sendmails
-	* Fix : a bug in livestatus attribute action_url_expanded.
-	* Fix : (reported by : Jonathan Gaulupeau) ip_tag was launch too late to access check_command objets.
-	* Fix : (By : zllak) ndodb_mysql_broker module was not working on python2.5
-	* Fix : Fix a bug in livestatus Service.contact_groups
+	MODULE ENHANCEMENTS
+	* Add: many GLPI module enhancements, with new properties managed
+
+	MODULE FIXES
+	* Fix: check_esx3 install under ubuntu 32bits edition
+	* Fix: multisite layout, add custom links
+	* Fix: workaround problem with official pyro3 under Debian squeeze. Use pyro4 instead of the official one
+	* FIX: #210 added test of parent target folder. if it does not exist then create it
+	* Fix: HTML in sendmails
+	* Fix: a bug in livestatus attribute action_url_expanded.
+	* Fix: (reported by: Jonathan Gaulupeau) ip_tag was launch too late to access check_command objets.
+	* Fix: (By: zllak) ndodb_mysql_broker module was not working on python2.5
+	* Fix: Fix a bug in livestatus Service.contact_groups
 
 	UI FIXES
-	* Fix : Sort alphabeticaly in WebUI
-	
-	
+	* Fix: Sort alphabeticaly in WebUI
+
+
 1.0 - 28/02/2012
 ------------------
 	CORE ENHANCEMENTS
-	* Add : shinken.sh script and skonf.py with a LOT of features for setup and configuration management.
-	* Add : better logging for warnings for host, service and npcd configuration
-	* Add : poller daemon will use all available CPUs by default
-	* Add : poller daemon can now load standard external modules like namedPipe to get external commands from it
-	* Add : brok queue watchdog for satellites, activated for Broker by default at 100000 broks to kill/restart the module..
-	* Add : if the run/var directories are missing, try to create them in the init.d script.
-	* Add : service templates can now be applied on a host template
-	* Add : reactionner can run under android
-	* Add : android SMS module
-	* Add : imlemented a check for dead queue threads. When detected restarts the thread
-	* Add : mail python script
-	* Add : better error text when the pickle load gets an error
-	* Add : manage connexion timeouts in the broker and Pyro4
-	* Add : $$ are now interpreted as $ in macro solving
-	* Add : (reported by : sduchesneau) check_shinken.py now has a timeout. It is set by default at 10s
-	* Add : business rules now support the NOT operand
-	* Add : send broks in external modules as a biglist instead of n broks. It's more efficient (X3 perf for this, can be huge time for huge conf)	
-	* Add : templates for monitoring common devices and services are now included
-	* Add : manage \; to be changed in ; without cutting the rest of the line to be removed as a comment
-	* Add : (reported by : foobar1111) arbiter only matched hostname, and not fqdn. Now it will try fqdn and then the hostname.
-	* Add : retention is now enabled by default at installation time (Pickle)
-	* Add : (From Michael Leinartas) man pages updates
-	* Add : '+' in discovery rule management, so you can 'add' something, like a template
-	* Add : using an undefined template in the configuration is no longer a critical error, just a warning.
+	* Add: shinken.sh script and skonf.py with a LOT of features for setup and configuration management.
+	* Add: better logging for warnings for host, service and npcd configuration
+	* Add: poller daemon will use all available CPUs by default
+	* Add: poller daemon can now load standard external modules like namedPipe to get external commands from it
+	* Add: brok queue watchdog for satellites, activated for Broker by default at 100000 broks to kill/restart the module..
+	* Add: if the run/var directories are missing, try to create them in the init.d script.
+	* Add: service templates can now be applied on a host template
+	* Add: reactionner can run under android
+	* Add: android SMS module
+	* Add: imlemented a check for dead queue threads. When detected restarts the thread
+	* Add: mail python script
+	* Add: better error text when the pickle load gets an error
+	* Add: manage connexion timeouts in the broker and Pyro4
+	* Add: $$ are now interpreted as $ in macro solving
+	* Add: (reported by: sduchesneau) check_shinken.py now has a timeout. It is set by default at 10s
+	* Add: business rules now support the NOT operand
+	* Add: send broks in external modules as a biglist instead of n broks. It's more efficient (X3 perf for this, can be huge time for huge conf)
+	* Add: templates for monitoring common devices and services are now included
+	* Add: manage \; to be changed in ; without cutting the rest of the line to be removed as a comment
+	* Add: (reported by: foobar1111) arbiter only matched hostname, and not fqdn. Now it will try fqdn and then the hostname.
+	* Add: retention is now enabled by default at installation time (Pickle)
+	* Add: (From Michael Leinartas) man pages updates
+	* Add: '+' in discovery rule management, so you can 'add' something, like a template
+	* Add: using an undefined template in the configuration is no longer a critical error, just a warning.
                 So the user can just 'tag' hosts first and then create the template
-	* Add : Sebastien Coavoux conducted a large code review! :)
-	* Add : xkilian reviewed and corrected many many pages of the wiki documentation and a few english fixes in the distribution :)
-	* Add : skonf daemon preview. It is not yet meant for production, but is included to get feedback
-	* Add : mongodb insert capabilities for the discovery
-	* Add : TIMEPERIOD TRANSITION logs from the Arbiter to get timeperiods transition output 
-	* Add : is_admin property is now available for contacts
-	* Add : make the nmap discovery do tcp and udp scan
-	* Add : (Victor Igumnov) installation for Solaris
-	
+	* Add: Sebastien Coavoux conducted a large code review! :)
+	* Add: xkilian reviewed and corrected many many pages of the wiki documentation and a few english fixes in the distribution :)
+	* Add: skonf daemon preview. It is not yet meant for production, but is included to get feedback
+	* Add: mongodb insert capabilities for the discovery
+	* Add: TIMEPERIOD TRANSITION logs from the Arbiter to get timeperiods transition output
+	* Add: is_admin property is now available for contacts
+	* Add: make the nmap discovery do tcp and udp scan
+	* Add: (Victor Igumnov) installation for Solaris
+
 	CORE FIXES
-	* Fix : use StringIO to read configuration files into a string (much faster with lots of config files)
-	* Fix : (reported by : lminoza) bug in inheritance if templates give only a + elements, should continue to loop and not stop here.
-	* Fix : keep multiple spaces in config files. (check_command!"args   " were stripped)
-	* Fix : pyro 4.10 management
-	* Fix : (reported by : MINOZA, Landy) multi-layer management for service template on host template. So if you apply a service on layer 3 and your host inherit from layer1->layer2
-	* Fix : (reported by : Thibaut Notteboom) catch ConnectionClosedError on poller/reactionner connections
-	* Fix : A better safe_print
-	* Fix : lot of encoding stuff!
-	* FIX : proxy support and python-setuptools installation on RHEL/CENTOS 6
-	* Fix : (reproted by : darkweaver87) somethimes we got a malformed external command. If so, bailout and warn in debug mode.
-	* Fix : when there is a dispatching problem, the arbiter send and send again the same configuration to satellites.
-	* Fix : crash bug when timezone set in config file
-	* Fix : make all log pass the utf8 management
-	* Fix : use auto-generated, absolute path for README (Daniel Widerin)
+	* Fix: use StringIO to read configuration files into a string (much faster with lots of config files)
+	* Fix: (reported by: lminoza) bug in inheritance if templates give only a + elements, should continue to loop and not stop here.
+	* Fix: keep multiple spaces in config files. (check_command!"args   " were stripped)
+	* Fix: pyro 4.10 management
+	* Fix: (reported by: MINOZA, Landy) multi-layer management for service template on host template. So if you apply a service on layer 3 and your host inherit from layer1->layer2
+	* Fix: (reported by: Thibaut Notteboom) catch ConnectionClosedError on poller/reactionner connections
+	* Fix: A better safe_print
+	* Fix: lot of encoding stuff!
+	* FIX: proxy support and python-setuptools installation on RHEL/CENTOS 6
+	* Fix: (reproted by: darkweaver87) somethimes we got a malformed external command. If so, bailout and warn in debug mode.
+	* Fix: when there is a dispatching problem, the arbiter send and send again the same configuration to satellites.
+	* Fix: crash bug when timezone set in config file
+	* Fix: make all log pass the utf8 management
+	* Fix: use auto-generated, absolute path for README (Daniel Widerin)
 	* Fix: last line of email notification must finish by a \n otherwise it will not be sent (Laurent Ollagnier)
 	* Fix: (from rootix2) catch case where service do not have imported_from from modules.
-	* Fix : (reported by : Venelin Petkov) print in hostgroup names was a problem.
-	* Fix : if a scheduler restarted, we got problem because the arbiter did not resend it the configuration
-	* Fix : "host_notification_period" and "service_notification_period" defined twice in the contact definition (Fournet Matthieu)
-	* Fix : (reported by : Httqm) default notification_interval was one minute, 1hour is better.
-	* Fix : (reported by : sprudhomme) longoutput parsing and perfdata did not follow nagios way.
-	* Fix : change sourceforgetrac with github in tracebacks.
-	* Fix : (reported by : lminoza) too many notifications for a contact with multiple notification methods, all where sent when only some would pass filter.
-	* Fix : (reported by : puisea) kill all sub process action tree on unix
-	* Fix : flaw on multiple date and multiple timerange
-	* Fix : if missing alias in objects, put the name if available
-	* Fix : (reported by : denetariko) manage spaces before and after type name in define line
-	* Fix : (reported by: Steve Kieu) missing get_name() method for config
-	* Fix : (reported by : Mihai Efrim) flapping notifications
-	
-	
+	* Fix: (reported by: Venelin Petkov) print in hostgroup names was a problem.
+	* Fix: if a scheduler restarted, we got problem because the arbiter did not resend it the configuration
+	* Fix: "host_notification_period" and "service_notification_period" defined twice in the contact definition (Fournet Matthieu)
+	* Fix: (reported by: Httqm) default notification_interval was one minute, 1hour is better.
+	* Fix: (reported by: sprudhomme) longoutput parsing and perfdata did not follow nagios way.
+	* Fix: change sourceforgetrac with github in tracebacks.
+	* Fix: (reported by: lminoza) too many notifications for a contact with multiple notification methods, all where sent when only some would pass filter.
+	* Fix: (reported by: puisea) kill all sub process action tree on unix
+	* Fix: flaw on multiple date and multiple timerange
+	* Fix: if missing alias in objects, put the name if available
+	* Fix: (reported by: denetariko) manage spaces before and after type name in define line
+	* Fix: (reported by: Steve Kieu) missing get_name() method for config
+	* Fix: (reported by: Mihai Efrim) flapping notifications
 
-	
+
+
+
 	MODULE ENHANCEMENTS
-	* Add : rewrite the LiveStatus module, performance boost and simpler. Thanks Gerhard for this huge undertaking!
-	* Add : two new modules for storing livestatus logs. sqlite and mongodb
-	* Add : graphite module for the Broker to export performance data to a Graphite time series database.
-	* Add : module to deal with flat file dependencies
-	* Add : mongodb module for the arbiter, to load hosts object from it
-	* Add : mongodb retention module
-	* Add : the Service-perfdata module now open/close the perfdata file each second. So it's compatible with tools like Centreon that move it
-	* Add : macros supported in skonf. Lots of bug fixes
-	* Add : merlindb now inserts host_contactgroups
-	* Add : NDO Nagios/Shinken mix in database (Sebastien Coavoux)
-	* Add : port option for the mysql connexion with NDO
-	* Add : ip_tag module that can change configuration properties based on the host IP address or IP address range.
-	* Add : simulation mode for the nmap disco wrapper, so we can ask for xml output from users, and then simulate it easily.
-	* Add : new process for nmap discovery output. There is no longer a big mapping pass. It will output what it can, and it's for the discovery_rule to do this job now, 
+	* Add: rewrite the LiveStatus module, performance boost and simpler. Thanks Gerhard for this huge undertaking!
+	* Add: two new modules for storing livestatus logs. sqlite and mongodb
+	* Add: graphite module for the Broker to export performance data to a Graphite time series database.
+	* Add: module to deal with flat file dependencies
+	* Add: mongodb module for the arbiter, to load hosts object from it
+	* Add: mongodb retention module
+	* Add: the Service-perfdata module now open/close the perfdata file each second. So it's compatible with tools like Centreon that move it
+	* Add: macros supported in skonf. Lots of bug fixes
+	* Add: merlindb now inserts host_contactgroups
+	* Add: NDO Nagios/Shinken mix in database (Sebastien Coavoux)
+	* Add: port option for the mysql connexion with NDO
+	* Add: ip_tag module that can change configuration properties based on the host IP address or IP address range.
+	* Add: simulation mode for the nmap disco wrapper, so we can ask for xml output from users, and then simulate it easily.
+	* Add: new process for nmap discovery output. There is no longer a big mapping pass. It will output what it can, and it's for the discovery_rule to do this job now,
                 it's far more a BIG thanks to all folks that send me sample xml output :)
-	* Add : enhanced capabilities for the mysql import module (OlivierHa)
+	* Add: enhanced capabilities for the mysql import module (OlivierHa)
 
 	MODULE FIXES
-	* Fix : useless and dangerous str in redis module.
-	* FIX : htpasswd.users file was not correctly updated at installation
-	* Fix : (reported by : DGuenault) hack_poller_tag_by_macros was not applying poller_tag to commands, only root objects
-	* Fix : memcache and redis retention modules. They were loading notifications->contacts->commands but this class got slots but no __getstate__
-	* Fix : (reported by : sprudhomme): long_output in ndo for 1.4b9 version
-	* Fix : NSCA, a loop when the client initiate the socket closing
+	* Fix: useless and dangerous str in redis module.
+	* FIX: htpasswd.users file was not correctly updated at installation
+	* Fix: (reported by: DGuenault) hack_poller_tag_by_macros was not applying poller_tag to commands, only root objects
+	* Fix: memcache and redis retention modules. They were loading notifications->contacts->commands but this class got slots but no __getstate__
+	* Fix: (reported by: sprudhomme): long_output in ndo for 1.4b9 version
+	* Fix: NSCA, a loop when the client initiate the socket closing
 
 	UI
-	* Add : now page rendering can be launched in parallel, and so page can now call 'long' queries without breaking all. But during a long query, we still cannot eat broks.
-	* Fix : the WebUI now exits when the brok thread encounters a problem
-	* Add : UI PNP module
-	* Add : if contact is not is_admin, then the /problems view only shows its related elements (if he is a contact of the elemetn, of an impact or a source problems one).
-	* Add : add graph time selection in the detail page
-	* Add : Graphite graph backend
-	* Add : /mobile part
-	* Add : External Authentification for WebUI (SSO) (olivierHa)
-	* Add : tips on the eltgraph view
-	* Fix : acknowledge typo
-	* Fix : Change the scale of the impact view divs
-	* Fix : UI page navigation should not propose page too high if not need
-	* Add : gesture canvas as smaller and visible
-	* Add : address to the eltdetail.tpl
-	* Fix : utf8 names in the UI
-	* Add : allow_html_output parameter for the WebUI
-	* Add : generic perfometer manager for the UI
-	* Fix : search button (Thanx to pydubreucq)
-	* Add : make all nodes apears in the dep graph, but hidden one in very smalls
-	* Add : perfometer image hovering with the graph module like PNP
-	* Add : password iphone like in the login screen
-	* Add : an orange outline to see where the focus is on input
-	
-	
-	
+	* Add: now page rendering can be launched in parallel, and so page can now call 'long' queries without breaking all. But during a long query, we still cannot eat broks.
+	* Fix: the WebUI now exits when the brok thread encounters a problem
+	* Add: UI PNP module
+	* Add: if contact is not is_admin, then the /problems view only shows its related elements (if he is a contact of the elemetn, of an impact or a source problems one).
+	* Add: add graph time selection in the detail page
+	* Add: Graphite graph backend
+	* Add: /mobile part
+	* Add: External Authentification for WebUI (SSO) (olivierHa)
+	* Add: tips on the eltgraph view
+	* Fix: acknowledge typo
+	* Fix: Change the scale of the impact view divs
+	* Fix: UI page navigation should not propose page too high if not need
+	* Add: gesture canvas as smaller and visible
+	* Add: address to the eltdetail.tpl
+	* Fix: utf8 names in the UI
+	* Add: allow_html_output parameter for the WebUI
+	* Add: generic perfometer manager for the UI
+	* Fix: search button (Thanx to pydubreucq)
+	* Add: make all nodes apears in the dep graph, but hidden one in very smalls
+	* Add: perfometer image hovering with the graph module like PNP
+	* Add: password iphone like in the login screen
+	* Add: an orange outline to see where the focus is on input
+
+
+
 0.8 - 17/10/2011
 ------------------
 	CORE ENHANCEMENTS
-	* Add : WebUI broker module. More info in the UI changelog part.
-	* Add : (by : Vincent Riquer) no_event_handlers_during_downtimes parameter to choose between nagios and shinken behavior to (not) run event handlers during a downtime.
-	* Add : added RUN var relocation in shinken default file
-	* Add : support for serviceextinfo
-	* Add : support for hostextinfo
-	* Add : a workdir parameter in the nagios.cfg file for set the arbiter working directory
-	* Add : modules for modules. Will be useful for the global configuration in the WebUI (it's a module, but will need additonnal modules)
-	* Add : alternative installation method in contrib
-	* Add : shinken-admin command that can connect to an arbiter and ask daemons status.
-	* Add : discovery runners timeout parameter. Set by default at one hour.
-	* Add : rename criticity into business_impact for hosts and services. Criticity is automatically mapped into business_impact in the configuration reading, and rename min_criticity into min_business_impact for contacts and notifways. And keep a mapping for old conf.
-	* Add : if set to 0, min_workers will set the pollers/reactionners to use ALL cpus of the server.
-	* Add : business modulation objects.
-	* Add : new tests for A,B,Cof: rules and a fix for the default return logic.
-	* Add : arbiter ask one a check_interval the managed conf for satellites. Makes for smoother decisions.
+	* Add: WebUI broker module. More info in the UI changelog part.
+	* Add: (by: Vincent Riquer) no_event_handlers_during_downtimes parameter to choose between nagios and shinken behavior to (not) run event handlers during a downtime.
+	* Add: added RUN var relocation in shinken default file
+	* Add: support for serviceextinfo
+	* Add: support for hostextinfo
+	* Add: a workdir parameter in the nagios.cfg file for set the arbiter working directory
+	* Add: modules for modules. Will be useful for the global configuration in the WebUI (it's a module, but will need additonnal modules)
+	* Add: alternative installation method in contrib
+	* Add: shinken-admin command that can connect to an arbiter and ask daemons status.
+	* Add: discovery runners timeout parameter. Set by default at one hour.
+	* Add: rename criticity into business_impact for hosts and services. Criticity is automatically mapped into business_impact in the configuration reading, and rename min_criticity into min_business_impact for contacts and notifways. And keep a mapping for old conf.
+	* Add: if set to 0, min_workers will set the pollers/reactionners to use ALL cpus of the server.
+	* Add: business modulation objects.
+	* Add: new tests for A,B,Cof: rules and a fix for the default return logic.
+	* Add: arbiter ask one a check_interval the managed conf for satellites. Makes for smoother decisions.
 
-	
+
 	CORE FIXES
-	* Fix : BugFix Pyro4 compatibility
-	* fix : try to fix bad notification output make scehduler crash.
-	* Fix : (Seb-Solon) catch incomplet service group members
-	* Fix : bad message for arbiter in HA without host_name value.
-	* Fix : (reported by: fraggod): inline comment in boolean cause an arbiter crash when lookup conf.
-	* Fix : (reported by titilambert) bug about linkify and templates, so need to clean search lists after remove templates.
-	* Fix : (reported by Vincent Riquer ) Pyro got problem in connect() and so need a low socket timeout by default.
-	* Fix : (reported by : grim) manage flap_detection_enabled and enable_flap_detection
-	* Fix : when disable active check was done, the pending check was still executed, so the effect was not immediate. Now we change it as a dumym check with curretn value the value of the host/service.
-	* Fix : external_command.py where the config setting log_external_commands was ignored
-	* Fix : (reported by : obiouane) missing object value is now reported correctly.
-	* Fix : (Etienne Obriot) multiple = in macos values
-	* Fix : a bug in config.py where resource macros containing a "=" were not correctly processed. Thanks Etienne
-	* Fix : (reported by Seb-Solon) custome macros get problems in notifications. 
-	* Fix : (reported by : Michael Grundmann) a service for a void hostgroup and a host exclusion was reporting a bad conf instead if forgot this service.
-	* Fix : (Reported by : Dirk Hallanzy) was not launching under XP due to some pid file creation bad mode.
-	* Fix : (reported by : Vincent Riquer) now a spare broker can be send to sleep again by the arbiter. It will clean its queues and stop modules.
-	* Fix : arbiter crash with a spare and the new smoothing wat i managed behavior.
-	* Fix : Change default check/eventhandler/notification timeouts and flap thresholds to make nagios more compatible to shinken.
-	* fix : Better handling of check timeouts (there was an empty output)
-	* fix : Log notification and eventhandler timeouts
-	* Fix : (reported by : Denis GERMAIN) service with no description cause an host problem in linking phase. 
-	* Fix : (reported by : Seb-Solon) manage utf8 in host and service perfdata.
-	* Fix : protect broker agains module taht ask for full instance init about unknown scheduler.
-	* Fix : (reported by Markus Elger) add next schedule date in the retention data.
-	* Fix : (reported by : Olivier Hanesse) bad realm configuration was not detected for satellites.
-	* Fix : (reported by :Markus Elger) bad host count in realms.
-	* Fix : (reported by :Markus Elger) bad host reaml conf were not detected.
+	* Fix: BugFix Pyro4 compatibility
+	* fix: try to fix bad notification output make scehduler crash.
+	* Fix: (Seb-Solon) catch incomplet service group members
+	* Fix: bad message for arbiter in HA without host_name value.
+	* Fix: (reported by: fraggod): inline comment in boolean cause an arbiter crash when lookup conf.
+	* Fix: (reported by titilambert) bug about linkify and templates, so need to clean search lists after remove templates.
+	* Fix: (reported by Vincent Riquer ) Pyro got problem in connect() and so need a low socket timeout by default.
+	* Fix: (reported by: grim) manage flap_detection_enabled and enable_flap_detection
+	* Fix: when disable active check was done, the pending check was still executed, so the effect was not immediate. Now we change it as a dumym check with curretn value the value of the host/service.
+	* Fix: external_command.py where the config setting log_external_commands was ignored
+	* Fix: (reported by: obiouane) missing object value is now reported correctly.
+	* Fix: (Etienne Obriot) multiple = in macos values
+	* Fix: a bug in config.py where resource macros containing a "=" were not correctly processed. Thanks Etienne
+	* Fix: (reported by Seb-Solon) custome macros get problems in notifications.
+	* Fix: (reported by: Michael Grundmann) a service for a void hostgroup and a host exclusion was reporting a bad conf instead if forgot this service.
+	* Fix: (Reported by: Dirk Hallanzy) was not launching under XP due to some pid file creation bad mode.
+	* Fix: (reported by: Vincent Riquer) now a spare broker can be send to sleep again by the arbiter. It will clean its queues and stop modules.
+	* Fix: arbiter crash with a spare and the new smoothing wat i managed behavior.
+	* Fix: Change default check/eventhandler/notification timeouts and flap thresholds to make nagios more compatible to shinken.
+	* fix: Better handling of check timeouts (there was an empty output)
+	* fix: Log notification and eventhandler timeouts
+	* Fix: (reported by: Denis GERMAIN) service with no description cause an host problem in linking phase.
+	* Fix: (reported by: Seb-Solon) manage utf8 in host and service perfdata.
+	* Fix: protect broker agains module taht ask for full instance init about unknown scheduler.
+	* Fix: (reported by Markus Elger) add next schedule date in the retention data.
+	* Fix: (reported by: Olivier Hanesse) bad realm configuration was not detected for satellites.
+	* Fix: (reported by:Markus Elger) bad host count in realms.
+	* Fix: (reported by:Markus Elger) bad host reaml conf were not detected.
 
-	
+
 	MODULES ENHANCEMENTS
-	* Add : module for autotagging poller_tag from a custom macro.
-	* Add : create the simple-log archive dir automatically if it doesn't exist
-	* Add : Initial import of the thrift broker with a sample client in python
-	* Add : Initial import of TSCA, Thrift Service Check Acceptor
-	* Add : Module arbiter load all configuration from GLPI (plugin monitoring) bywebservice
-	* Add : a new module to import configuration data (hosts/services) from a MySQL database
-	* NDO/MySQL :
-	* Add : current_notification_number in the ndo module.
-	* Add : last_notification in ndo module.
-	* Add : last_state_change to the ndo module.
-	* Add : add the is_flapping data to broks and update teh ndo module so it update the value.
-	* Add : percent_state_change as check_result brok and in the ndo module.
-	* LIVESTATUS :
-	* Add : Derive the archives filenames from the main livestatus db
-	* Add : Rewrite the livestatus sqlite code. Now there is one database file with logging events for each day.
-	* !!  : If you have a huge livestatus.db it is recommended to stop shinken and run the script contrib/livestatus/splitlivelogs.py
-	* Add : the livestatus sqlite db will now be opened in do_start() instead of init(). Now only the livestatus process has an open filehandle. (the main broker process had one too)
-	* Add : Make the livestatus socket world read/writable
-	* Add : the REUSEADDR flag to livestatus's socket. Thanks Olivier Hanesse
-	* Add : performance improvement for livestatus queries with Limit:
+	* Add: module for autotagging poller_tag from a custom macro.
+	* Add: create the simple-log archive dir automatically if it doesn't exist
+	* Add: Initial import of the thrift broker with a sample client in python
+	* Add: Initial import of TSCA, Thrift Service Check Acceptor
+	* Add: Module arbiter load all configuration from GLPI (plugin monitoring) bywebservice
+	* Add: a new module to import configuration data (hosts/services) from a MySQL database
+	* NDO/MySQL:
+	* Add: current_notification_number in the ndo module.
+	* Add: last_notification in ndo module.
+	* Add: last_state_change to the ndo module.
+	* Add: add the is_flapping data to broks and update teh ndo module so it update the value.
+	* Add: percent_state_change as check_result brok and in the ndo module.
+	* LIVESTATUS:
+	* Add: Derive the archives filenames from the main livestatus db
+	* Add: Rewrite the livestatus sqlite code. Now there is one database file with logging events for each day.
+	*!!: If you have a huge livestatus.db it is recommended to stop shinken and run the script contrib/livestatus/splitlivelogs.py
+	* Add: the livestatus sqlite db will now be opened in do_start() instead of init(). Now only the livestatus process has an open filehandle. (the main broker process had one too)
+	* Add: Make the livestatus socket world read/writable
+	* Add: the REUSEADDR flag to livestatus's socket. Thanks Olivier Hanesse
+	* Add: performance improvement for livestatus queries with Limit:
 
-	
+
 
 	MODULES FIXES
-	* Fix : important bugfix in ncpdmod
-	* Fix : Livestatus path database
-	* Fix : string comparison for livestatus. None is equivalent to empty string
-	* Fix : collumn name change in merlin ds.
-	* Fix : (reported by: Seb-Solon) bad contact group insert in objects in NDO
-	* Fix : (reported by: seb-solon) bad contact group id in NDO
-	* Fix : (seb-solon) ndo contacts were not registered with the good id.
-	* Fix : add the flap_detection_enabled in the ndo status tables too. (I love duplicate data...)
-	* Fix : the ndo module with is_flapping value for update states.
-	* Fix : (reported by : Ronny Lindner & Markus Elger) LiveStatus crash in log parsing.
-	* Fix : (reported by : Ronny Lindner) fix status.dat module with utf8 characters
-	* Fix : (reported by : Olivier Hanesse) nrpe module did not tag the check_time value for checks, and so pnp and other tools were not happy. BP rules were alike.
-	* Fix : (reported by Markus Elger) LiveStatus module did not clean previously added elements before recreating them. 
+	* Fix: important bugfix in ncpdmod
+	* Fix: Livestatus path database
+	* Fix: string comparison for livestatus. None is equivalent to empty string
+	* Fix: collumn name change in merlin ds.
+	* Fix: (reported by: Seb-Solon) bad contact group insert in objects in NDO
+	* Fix: (reported by: seb-solon) bad contact group id in NDO
+	* Fix: (seb-solon) ndo contacts were not registered with the good id.
+	* Fix: add the flap_detection_enabled in the ndo status tables too. (I love duplicate data...)
+	* Fix: the ndo module with is_flapping value for update states.
+	* Fix: (reported by: Ronny Lindner & Markus Elger) LiveStatus crash in log parsing.
+	* Fix: (reported by: Ronny Lindner) fix status.dat module with utf8 characters
+	* Fix: (reported by: Olivier Hanesse) nrpe module did not tag the check_time value for checks, and so pnp and other tools were not happy. BP rules were alike.
+	* Fix: (reported by Markus Elger) LiveStatus module did not clean previously added elements before recreating them.
 
 
 	UI
-	* Add : Andreas to main contributors :)
-	* Add : welcome text and error text in the login page.
-	* Add : make appears on the dep graph only interesting elements, so near the root or hosts or service in real problems. Far more redable with huge conf.
-	* Add : default http backend auto, so if a better one (paste, cehrrypy) is founded, use it instead of the simple swsgi.
-	* Add : less info in the detail page, with a moee button for rarely used infos.
-	* Add : dock effect for actions buttons on /problems.
-	* Add : /system page with satellites info in it.
-	* Add : search form in the problems page, with autocompletion. Search problems and impacts names too.
-	* Add : new way of handling cookies. Now it's a crypted way, and so stateless. Needto remove all session file thing so.
-	* Add : in cfg file password for users, or AD or apache passwd file
-	* Add : AD module that will get user photos from Ldap.
-	* Add : icon sets : network_service, servers., disk, database
-	* Add : gesture management for the detail page.
-	* Add : parallax effect in the top right banner to see huge impacts
-	* Add : make known bad nodes shown in the dep tree, so the admin don't even have to expand and find the bad thing that cause him a problem. Lasy admin mdoe on :)
-	* Add : swtich buttons for ths hostdetail page for enable/disable things.
-	* Add : if you change host topology (new dependency like fror VMotion), the UI is updated too.
+	* Add: Andreas to main contributors :)
+	* Add: welcome text and error text in the login page.
+	* Add: make appears on the dep graph only interesting elements, so near the root or hosts or service in real problems. Far more redable with huge conf.
+	* Add: default http backend auto, so if a better one (paste, cehrrypy) is founded, use it instead of the simple swsgi.
+	* Add: less info in the detail page, with a moee button for rarely used infos.
+	* Add: dock effect for actions buttons on /problems.
+	* Add: /system page with satellites info in it.
+	* Add: search form in the problems page, with autocompletion. Search problems and impacts names too.
+	* Add: new way of handling cookies. Now it's a crypted way, and so stateless. Needto remove all session file thing so.
+	* Add: in cfg file password for users, or AD or apache passwd file
+	* Add: AD module that will get user photos from Ldap.
+	* Add: icon sets: network_service, servers., disk, database
+	* Add: gesture management for the detail page.
+	* Add: parallax effect in the top right banner to see huge impacts
+	* Add: make known bad nodes shown in the dep tree, so the admin don't even have to expand and find the bad thing that cause him a problem. Lasy admin mdoe on :)
+	* Add: swtich buttons for ths hostdetail page for enable/disable things.
+	* Add: if you change host topology (new dependency like fror VMotion), the UI is updated too.
 
 
 
-	
+
 0.6 - 03/05/2011
 ------------------
 ENHANCEMENTS
-	* Add : discovery script and rule engine
-	* Enh : lot of code clean from Gregory Starck, big Thanks :)
-	* Add : manage several brokers by realm
-	* Add : LiveStatus Wait commands
-	* Add : Recevier daemon, for distributed realms in distant LAN
-	* Add : passive poller for DMZ management
-	* Add : (David Guenault) a way for people that install shinken lib in non standard place (like /opt) to get it working for python path.
-	* Add : poller and reactionner modules
-	* Add : nrpe poller module for tuning nrpe calls without having to 'forks'
-	* Add : human_timestamp_log option so the log will output time as human readable format.
-	* Add : make the local log rotate with the logging module, max keep file at 5.
-	* Add : the crash catching in the log for all daemons
-	* Add : enable by default local log, should be enable by default, and if the admin want it down, he can.
-	* Add : (Eric Beaulieu) Windows installation script
-	* Add : Thte configuration is read as UTF8
-	* Add : round robin dispatching way between the worker of a module for the satellites.
-	* Add : set a check_interval to satellites, so we do not try every second to ping them, each a minute is quite enouth.
-	* Add : sending USR1 do a memory dump of the daemon
-	* Add : Manage Pyro4.2 and higer.
-	* Add : manage no notification period for hosts and services
-	* Add : print the sleep_time as a load average, so will smooth in one minute average, so is a good scheduler load indicator
-	* Add : force LANG=us and UTF8 in init scripts. No sense admin can set another langage for system and hope for tools to work.
-	* Add : print the latencies for scheduler in 95percentile way
-	* Add : when a hook point failed set the module to restart, not to kill, even external ones
-	* Add : support for multisite's double-requests (extcmd+query) to the livestatus module
-	* Add : now the nagios.cmd named pipe reading is an external module
-	* Add : statistics for the livestatus module (multisite needs it)
-	* Add : retention modules for broker and arbiter
-	* Add : reationner tag, like poller tag, but for reactionner
-	* Add : (Denis GERMAIN) check_shinken plugin and interface in the arbiter to get data.
-	* Add : (Rémi BUISSON) common init script for easy launch
-	* Add : sendmailhost.pl + sendmailservices.pl in libexec.
-	* Add : hot poller addition commands
-	* Add : automatic VMware host-> VM dependencies modules, with VMotion support
-	* Add : "Unknown phase", so limit useless notifications
+	* Add: discovery script and rule engine
+	* Enh: lot of code clean from Gregory Starck, big Thanks :)
+	* Add: manage several brokers by realm
+	* Add: LiveStatus Wait commands
+	* Add: Recevier daemon, for distributed realms in distant LAN
+	* Add: passive poller for DMZ management
+	* Add: (David Guenault) a way for people that install shinken lib in non standard place (like /opt) to get it working for python path.
+	* Add: poller and reactionner modules
+	* Add: nrpe poller module for tuning nrpe calls without having to 'forks'
+	* Add: human_timestamp_log option so the log will output time as human readable format.
+	* Add: make the local log rotate with the logging module, max keep file at 5.
+	* Add: the crash catching in the log for all daemons
+	* Add: enable by default local log, should be enable by default, and if the admin want it down, he can.
+	* Add: (Eric Beaulieu) Windows installation script
+	* Add: Thte configuration is read as UTF8
+	* Add: round robin dispatching way between the worker of a module for the satellites.
+	* Add: set a check_interval to satellites, so we do not try every second to ping them, each a minute is quite enouth.
+	* Add: sending USR1 do a memory dump of the daemon
+	* Add: Manage Pyro4.2 and higer.
+	* Add: manage no notification period for hosts and services
+	* Add: print the sleep_time as a load average, so will smooth in one minute average, so is a good scheduler load indicator
+	* Add: force LANG=us and UTF8 in init scripts. No sense admin can set another langage for system and hope for tools to work.
+	* Add: print the latencies for scheduler in 95percentile way
+	* Add: when a hook point failed set the module to restart, not to kill, even external ones
+	* Add: support for multisite's double-requests (extcmd+query) to the livestatus module
+	* Add: now the nagios.cmd named pipe reading is an external module
+	* Add: statistics for the livestatus module (multisite needs it)
+	* Add: retention modules for broker and arbiter
+	* Add: reationner tag, like poller tag, but for reactionner
+	* Add: (Denis GERMAIN) check_shinken plugin and interface in the arbiter to get data.
+	* Add: (Rémi BUISSON) common init script for easy launch
+	* Add: sendmailhost.pl + sendmailservices.pl in libexec.
+	* Add: hot poller addition commands
+	* Add: automatic VMware host-> VM dependencies modules, with VMotion support
+	* Add: "Unknown phase", so limit useless notifications
 
 
 FIXES
-	* Fix :the livestatus module so that multiple external commands in one request are possible. (thruk uses this for mass operations)
-	* Fix :the livestatus, so that host_name and service_description are shown correctly for downtiems and comments.
-	* Fix : (reported by : Raynald de Lahondès) for python2.7, if shell launch, do not go in shlex split pass.
-	* Fix : catch an exception when deregistering Pyro. (When the scheduler was started as the only process and no communication happened
-	* Fix : Add the path of the current script (ex: bin/shinken-arbiter) and ".." to the list of paths where Python looks for shinken modules.
-	* Fix : default config had duplicate command name define: check_http
-	* Fix : clean Command(s) now subclass Item(s) as any "shinken.objects"
-	* Fix : (reported by : Raynald de Lahondès) if a hostgroup member got no host defined, create a dummy service for no host, so failed.
-	* Fix : bad UTC hour for scheduler.
-	* Fix : in a rare case, the picle need to call the __init__ of notification before the __get_state__, but it will call it without args.
-	* Fix : (reported by : Raynald de Lahondès) bad hostdep definition (link host) was badly detected.
-	* Fix : utf8 management in the db class.
-	* Fix : the * member was wrong in service calling hostgroup of this kind.
-	* Fix : the schedule immediate check now work without having to force it.
-	* Fix : correct the check launch under python2.7 with utf8 char.
-	* Fix : (reported by : Denis GERMAIN) set by default retention update inverval to 60 minutes.
-	* Fix : bad sys.path management for ndo module
-	* Fix : too much loop in daemons! do_loop_tunr must WAIT a little! To managed in the main_loop part I think.
-	* Fix : if the scheduler gotthe same conf but got a wait a new one before, it do a zombie scheduler then....
-	* Fix : (reported by : Hienz Michael) do not close local file in the daemon pass.
-	* Fix : (Raynald de Lahondès) setup.py for bsd systems.
-	* Fix : service without host will be just droped, like Nagios.
-	* Fix : Nagios allow elements without contacts. Do alike.
-	* Fix : add protection against adding again and again the same actions ifthe scheduler ask it, like for orphaned checks.
-	* Fix : sys.path management, not far more clear and error proof
-	* Fix : (reported by : capibaru) add a strip pass before loading cfg files.
-	* Fix : raise only one log for orphaned instead of xK useless logs.
-	* Fix : (Venelin Petkov) missing customs on services copy of a based one (multiple hosts, hostgroups, etc)
-	* Fix : (reported by : Ronny Lindner) manage the not host expressions for services.
+	* Fix:the livestatus module so that multiple external commands in one request are possible. (thruk uses this for mass operations)
+	* Fix:the livestatus, so that host_name and service_description are shown correctly for downtiems and comments.
+	* Fix: (reported by: Raynald de Lahondès) for python2.7, if shell launch, do not go in shlex split pass.
+	* Fix: catch an exception when deregistering Pyro. (When the scheduler was started as the only process and no communication happened
+	* Fix: Add the path of the current script (ex: bin/shinken-arbiter) and ".." to the list of paths where Python looks for shinken modules.
+	* Fix: default config had duplicate command name define: check_http
+	* Fix: clean Command(s) now subclass Item(s) as any "shinken.objects"
+	* Fix: (reported by: Raynald de Lahondès) if a hostgroup member got no host defined, create a dummy service for no host, so failed.
+	* Fix: bad UTC hour for scheduler.
+	* Fix: in a rare case, the picle need to call the __init__ of notification before the __get_state__, but it will call it without args.
+	* Fix: (reported by: Raynald de Lahondès) bad hostdep definition (link host) was badly detected.
+	* Fix: utf8 management in the db class.
+	* Fix: the * member was wrong in service calling hostgroup of this kind.
+	* Fix: the schedule immediate check now work without having to force it.
+	* Fix: correct the check launch under python2.7 with utf8 char.
+	* Fix: (reported by: Denis GERMAIN) set by default retention update inverval to 60 minutes.
+	* Fix: bad sys.path management for ndo module
+	* Fix: too much loop in daemons! do_loop_tunr must WAIT a little! To managed in the main_loop part I think.
+	* Fix: if the scheduler gotthe same conf but got a wait a new one before, it do a zombie scheduler then....
+	* Fix: (reported by: Hienz Michael) do not close local file in the daemon pass.
+	* Fix: (Raynald de Lahondès) setup.py for bsd systems.
+	* Fix: service without host will be just droped, like Nagios.
+	* Fix: Nagios allow elements without contacts. Do alike.
+	* Fix: add protection against adding again and again the same actions ifthe scheduler ask it, like for orphaned checks.
+	* Fix: sys.path management, not far more clear and error proof
+	* Fix: (reported by: capibaru) add a strip pass before loading cfg files.
+	* Fix: raise only one log for orphaned instead of xK useless logs.
+	* Fix: (Venelin Petkov) missing customs on services copy of a based one (multiple hosts, hostgroups, etc)
+	* Fix: (reported by: Ronny Lindner) manage the not host expressions for services.
 
 
 0.5.1 - 19/01/2011
 ------------------
 ENHANCEMENTS
-	*Add : Business rules
-	*Add : Downtime for contacts
-	*Add : Escalations based on time, with notification period shorting capabilities
-	*Add : options allowed_hosts and max_logs_age to the livestatus broker
-	*Add : some rarely used operators to the livestatus module (!>=)
-	*Add : SSL connections between daemons with certificates and a CA
-	*Add : module exception/kill catch in the scheduler.
-	*Add : use the binary format for the pickle, so it take less space.
-	*Add : (Hartmut Goebel) use universal open way for conf reading.
-	*Add : support for unix sockets to the livestatus module
-	*Add : criticity value for host/services, with problem/impacts max criticity management
-	*Add : min_criticity definition in cotnact and notificationways.
-	*Add : pylint and coverage pass in the integration server
-	*Add : the new column pnpgraph_present to the livestatus module
-	*Add : now create the pickle retention file with a .tmp, so in case of problem, we do not lost the old one.
-	*Add : event handlers command can now be send by external commands
+	*Add: Business rules
+	*Add: Downtime for contacts
+	*Add: Escalations based on time, with notification period shorting capabilities
+	*Add: options allowed_hosts and max_logs_age to the livestatus broker
+	*Add: some rarely used operators to the livestatus module (!>=)
+	*Add: SSL connections between daemons with certificates and a CA
+	*Add: module exception/kill catch in the scheduler.
+	*Add: use the binary format for the pickle, so it take less space.
+	*Add: (Hartmut Goebel) use universal open way for conf reading.
+	*Add: support for unix sockets to the livestatus module
+	*Add: criticity value for host/services, with problem/impacts max criticity management
+	*Add: min_criticity definition in cotnact and notificationways.
+	*Add: pylint and coverage pass in the integration server
+	*Add: the new column pnpgraph_present to the livestatus module
+	*Add: now create the pickle retention file with a .tmp, so in case of problem, we do not lost the old one.
+	*Add: event handlers command can now be send by external commands
 
 FIXES
-	*Fix : (Laurent Guyon) select with no timeout in NSCA arbiter module.
-	*Fix : shinken init script: enable use of another "default" shinken file than hardcoded one by env variable.
-	*Fix : (current_service_groups needs to return an empty list instead of string) in the livestatus module
-	*Fix : 'setup.py -h install' now also exit
-	*Fix : () crash for some bad conf, should raise a message instead.
-	*Fix : missing check for no args in 'shinken' init script
-	*Fix : a bug in livestatus Servicegroup.members, minor cosmetics, test case for thruk
-	*Fix : a bug in host.parents livestatus representation to make thruk happy
-	*Fix : check for /dev/shm access for the satellites.
-	*Clean : Redesign of the livestatus module
-	*Fix : testing with multisite and thruk
+	*Fix: (Laurent Guyon) select with no timeout in NSCA arbiter module.
+	*Fix: shinken init script: enable use of another "default" shinken file than hardcoded one by env variable.
+	*Fix: (current_service_groups needs to return an empty list instead of string) in the livestatus module
+	*Fix: 'setup.py -h install' now also exit
+	*Fix: () crash for some bad conf, should raise a message instead.
+	*Fix: missing check for no args in 'shinken' init script
+	*Fix: a bug in livestatus Servicegroup.members, minor cosmetics, test case for thruk
+	*Fix: a bug in host.parents livestatus representation to make thruk happy
+	*Fix: check for /dev/shm access for the satellites.
+	*Clean: Redesign of the livestatus module
+	*Fix: testing with multisite and thruk
 	*Clean: factorized .is_correct() call for all object types & added log to see more clearly wherer the error is.
 	*Clean: factorization/simplification of code in action.py (and related) for spawning checks processes.+ clean of old deprecated commented code (& "related" too).
-	*Fix : downtime and comment are now pickle in a dict, not a list.	
-	*Fix : pickle pass for look at tyype, so downtime and comment from 0.4 still ok.
-	*Fix : acknoledge got too much information in the pickle pass, making the pickle save very very huge. Now fit from 100Mo to..2Mo :)
-	*Clean : big clean of hasattr->getattr with default value
-	*Clean : repalce dict for properties with real objects
-	*Fix : Implement in_check_period/in_notification_period for livestatus to make multisite happy
-	*Fix : Remove a leftover atribute from timeperiod&daterange
-	*Fix : Transmit dateranges in timeperiod-full_status-broks
-	*Fix : Replaced the deprecated StatsGroupBy, implemented Stats: for log entries, making Multisite happy with shinken-livestatus
-	*Fix : manage the 'null' for inheritance.
-	*Fix : add timeout to the status_dat module so that the status.dat is written even if no broks are sent.
-	*Fix : escalations were offset of notif number by -1.
-	*Fix : Replace Queue with an own implementation of LifoQueue for Python 2.4 (livestatus)
-	*Fix : Fallback to sqlite 1.x for Python 2.4 (livestatus)
-	*Fix : bug in the table structure where logging messages are kept (livestatus)
-	*Fix : problem/impacts should be list, not string.
-	*Fix : missing customs values in host/service tables in livestatus and Thruk was not happy.
-	*Fix : is_impact/is_problem got bad format in lviestatus tables.
-	*Fix : (Kristoffer Moegle) missing check in generic object configuration module.
-	*Fix : a bug in livestatus. Catch the exception if a peer is not listening for the response
-	*Fix : support for hosts without check_command (assumed to be always up)
-	*Fix : hostgroup realm assoc was broken. Now it's tested.
-	*Fix : (Maximilien Bersoult) fix mysql_db module search path.
-	*Fix : bug in compensate time when thecore got event handler
-	*Fix : a bug in the npcd module (spoolfile timestamp extension was float, not int)
-	*Fix : windows registry paths.
-	*Fix : problem with Nagios retention that was not happy about host properties type.
-	*Fix : pickle/nagios retention was loading a retention host/service in the comment.ref link!
-	*Fix : now only previously notified contacts are send for recovery notifications.
-	*Fix : bug in NDO module for hostgroups
-	*Fix : (0.5.1) bugs in LiveStatus module for Service get_full_name call and queries with no space after :
+	*Fix: downtime and comment are now pickle in a dict, not a list.
+	*Fix: pickle pass for look at tyype, so downtime and comment from 0.4 still ok.
+	*Fix: acknoledge got too much information in the pickle pass, making the pickle save very very huge. Now fit from 100Mo to..2Mo :)
+	*Clean: big clean of hasattr->getattr with default value
+	*Clean: repalce dict for properties with real objects
+	*Fix: Implement in_check_period/in_notification_period for livestatus to make multisite happy
+	*Fix: Remove a leftover atribute from timeperiod&daterange
+	*Fix: Transmit dateranges in timeperiod-full_status-broks
+	*Fix: Replaced the deprecated StatsGroupBy, implemented Stats: for log entries, making Multisite happy with shinken-livestatus
+	*Fix: manage the 'null' for inheritance.
+	*Fix: add timeout to the status_dat module so that the status.dat is written even if no broks are sent.
+	*Fix: escalations were offset of notif number by -1.
+	*Fix: Replace Queue with an own implementation of LifoQueue for Python 2.4 (livestatus)
+	*Fix: Fallback to sqlite 1.x for Python 2.4 (livestatus)
+	*Fix: bug in the table structure where logging messages are kept (livestatus)
+	*Fix: problem/impacts should be list, not string.
+	*Fix: missing customs values in host/service tables in livestatus and Thruk was not happy.
+	*Fix: is_impact/is_problem got bad format in lviestatus tables.
+	*Fix: (Kristoffer Moegle) missing check in generic object configuration module.
+	*Fix: a bug in livestatus. Catch the exception if a peer is not listening for the response
+	*Fix: support for hosts without check_command (assumed to be always up)
+	*Fix: hostgroup realm assoc was broken. Now it's tested.
+	*Fix: (Maximilien Bersoult) fix mysql_db module search path.
+	*Fix: bug in compensate time when thecore got event handler
+	*Fix: a bug in the npcd module (spoolfile timestamp extension was float, not int)
+	*Fix: windows registry paths.
+	*Fix: problem with Nagios retention that was not happy about host properties type.
+	*Fix: pickle/nagios retention was loading a retention host/service in the comment.ref link!
+	*Fix: now only previously notified contacts are send for recovery notifications.
+	*Fix: bug in NDO module for hostgroups
+	*Fix: (0.5.1) bugs in LiveStatus module for Service get_full_name call and queries with no space after:
 
 0.4 - 08/12/2010
 ------------------
 ENHANCEMENTS
-	*Add : Service generators
-	*Add : "Limit :" in livestatus
-	*Add : the scheduler now save retention data before stop or take a new conf
-	*Add : the broker clean quit the modules before quitting
-	*Add : better output to know which external process for the broker is who in the log
-	*Add : NodeSet lib use if available for the [X-Y] keys in service generators.
-	*Add : retention modules, Memcache, Redis or simple file.
-	*Add : lot of tests, even a end_to_end one for Ha and load balanced installations
-	*Add : user can put what he want as MACRO in resources.cfg
-	*Add : lot of log output, and clean a lot of others
-	*Add : conf sample for PNP integration.
-	*Add : (Nicolas Dupeux) add a NSCA server module for the Arbiter! (only XOR and none encryption from now)
-	*Add : now the retention_update_interval parameter is managed.
-	*Add : the ! character before a host_name is now managed in the services. (even if host was defined in a hostgroup). And with test.
-	*Add : perfdata command management for host/service
-	*Add : manage modules in the Arbtier and in the schedulers
-	*Add : nowthe whole documentation is done in the wiki
-	*Add : obsess_over_host/service and executing oc*p_commands like eventhandlers
-	*Add : "templates" and modes and more for service/host perf data module.
-	*Add : now host with no address are fill with host_name for this value.
-	*Add : timeperiod inheritance
-	*Add : Allow "members *" in a hostgroup definition
-	*Add : manage inherit_parents for dependencies.
-	*Add : system time change catch for satellites.
-	*Add : enable_environment_macros now create or not the env dict for checks
-	*Add : O*HP command management
+	*Add: Service generators
+	*Add: "Limit:" in livestatus
+	*Add: the scheduler now save retention data before stop or take a new conf
+	*Add: the broker clean quit the modules before quitting
+	*Add: better output to know which external process for the broker is who in the log
+	*Add: NodeSet lib use if available for the [X-Y] keys in service generators.
+	*Add: retention modules, Memcache, Redis or simple file.
+	*Add: lot of tests, even a end_to_end one for Ha and load balanced installations
+	*Add: user can put what he want as MACRO in resources.cfg
+	*Add: lot of log output, and clean a lot of others
+	*Add: conf sample for PNP integration.
+	*Add: (Nicolas Dupeux) add a NSCA server module for the Arbiter! (only XOR and none encryption from now)
+	*Add: now the retention_update_interval parameter is managed.
+	*Add: the! character before a host_name is now managed in the services. (even if host was defined in a hostgroup). And with test.
+	*Add: perfdata command management for host/service
+	*Add: manage modules in the Arbtier and in the schedulers
+	*Add: nowthe whole documentation is done in the wiki
+	*Add: obsess_over_host/service and executing oc*p_commands like eventhandlers
+	*Add: "templates" and modes and more for service/host perf data module.
+	*Add: now host with no address are fill with host_name for this value.
+	*Add: timeperiod inheritance
+	*Add: Allow "members *" in a hostgroup definition
+	*Add: manage inherit_parents for dependencies.
+	*Add: system time change catch for satellites.
+	*Add: enable_environment_macros now create or not the env dict for checks
+	*Add: O*HP command management
 
 FIXES
-	*Fix : Some missing properties in the livestatus tables
-	*Fix : Some missing properties in the NDO/Mysql export
-	*Fix : parents property was not stripped(), and a error value was not catched as error
-	*fix : missing some errors catch in contact definitions
-	*Fix : Nagios allow contact_name to miss if there is an alias
-	*Fix : Nagios allow a contact with no 'action' if his options are n/n
-	*Fix : Resolv macro can loop forever with special output. Now limit it at 32 loop max!
-	*Fix : the env_macros were enable if we use the tweaks, not good. And they are REALLY CPU killers.
-	*Fix : LiveStatus : do not close the socket before we are sure the other peer send us nothing. If so, we can close it.
-	*Fix : solve a case where config files do not end with a line return and will mix parameters.
-	*Fix : broker spare not look at pollers/reactionners when he come active.
-	*Fix : now the poller/reactionner REALLY raise broks to the broker (it was clear before...)
-	*Fix : bug in the Broker that make in some cases broks lost for extarnal modules if they come from the arbiter. (like logs)
-	*Fix : add a workaround to the livestatus module so it can handle requests from thruk 0.71.1 (which uses strange Stats: requests)
-	*Fix : rename all 'binaries' without the .py extention so distrib will be happy.
-	*Fix : livestatus work now with Python 2.4
-	*Fix : (Hermann Lauer) important bug in status.dat (and in fact all other 'external modules') that make the brok not manage in the good order in some case or Arbtier restart. Thanks a lot to Hermann Lauer that help me a LOT with all the debug logs!
-	*Fix : (Zoran Zaric) big indentation cleanup
-	*Fix : error handling in timeperiod inheritance
-	*Fix : clean on the default configuration
-	*Fix : manage additional_freshness_latency parameter with a test for check_freshness now.
-	*Fix : setup.py can create a zip file (egg) for the librairy under Centos. It's not a good thing. It should avoid it
-	*Fix : From Nicolas Dupeux : error in livestatus split.
-	*Fix : From Nicolas Dupeux : fix typos in host code
+	*Fix: Some missing properties in the livestatus tables
+	*Fix: Some missing properties in the NDO/Mysql export
+	*Fix: parents property was not stripped(), and a error value was not catched as error
+	*fix: missing some errors catch in contact definitions
+	*Fix: Nagios allow contact_name to miss if there is an alias
+	*Fix: Nagios allow a contact with no 'action' if his options are n/n
+	*Fix: Resolv macro can loop forever with special output. Now limit it at 32 loop max!
+	*Fix: the env_macros were enable if we use the tweaks, not good. And they are REALLY CPU killers.
+	*Fix: LiveStatus: do not close the socket before we are sure the other peer send us nothing. If so, we can close it.
+	*Fix: solve a case where config files do not end with a line return and will mix parameters.
+	*Fix: broker spare not look at pollers/reactionners when he come active.
+	*Fix: now the poller/reactionner REALLY raise broks to the broker (it was clear before...)
+	*Fix: bug in the Broker that make in some cases broks lost for extarnal modules if they come from the arbiter. (like logs)
+	*Fix: add a workaround to the livestatus module so it can handle requests from thruk 0.71.1 (which uses strange Stats: requests)
+	*Fix: rename all 'binaries' without the .py extention so distrib will be happy.
+	*Fix: livestatus work now with Python 2.4
+	*Fix: (Hermann Lauer) important bug in status.dat (and in fact all other 'external modules') that make the brok not manage in the good order in some case or Arbtier restart. Thanks a lot to Hermann Lauer that help me a LOT with all the debug logs!
+	*Fix: (Zoran Zaric) big indentation cleanup
+	*Fix: error handling in timeperiod inheritance
+	*Fix: clean on the default configuration
+	*Fix: manage additional_freshness_latency parameter with a test for check_freshness now.
+	*Fix: setup.py can create a zip file (egg) for the librairy under Centos. It's not a good thing. It should avoid it
+	*Fix: From Nicolas Dupeux: error in livestatus split.
+	*Fix: From Nicolas Dupeux: fix typos in host code
 
-	
-	
+
+
 
 0.3 - 06/10/2010
 ------------------
 ENHANCEMENTS
-	*Add : complex hostgroup amtching with & ( ) | !
-	*Add : resultmodulation code and tests
-	*Add : brok information about problem/impacts
-	*Add : livestatus export about problem/impacts
-	*Add : clean quit on daemons (pid file and sub processes)
-	*Add : maintenance_period parameter in hosts and services
-	*Add : even more unit test cases
-	*Add : now external commands raised in livestatus module are taken by the arbiter
-	*Add : satellites states are now exported by livestatus
-	*Add : arbiter module managment
-	*Add : GLPI import arbiter module :)
-	*Add : notificationways for contacts
-	*Add : warning about unmanaged parameters
-	*Add : log rotation and syslog managment
+	*Add: complex hostgroup amtching with & ( ) |!
+	*Add: resultmodulation code and tests
+	*Add: brok information about problem/impacts
+	*Add: livestatus export about problem/impacts
+	*Add: clean quit on daemons (pid file and sub processes)
+	*Add: maintenance_period parameter in hosts and services
+	*Add: even more unit test cases
+	*Add: now external commands raised in livestatus module are taken by the arbiter
+	*Add: satellites states are now exported by livestatus
+	*Add: arbiter module managment
+	*Add: GLPI import arbiter module :)
+	*Add: notificationways for contacts
+	*Add: warning about unmanaged parameters
+	*Add: log rotation and syslog managment
 
 
 FIXES
-	*Fix : install crash is now catch with Pyro 4 in Centos (python 2.4)
-	*Fix : host/service dep where not filled with default properties
-	*Fix : catch realm configuration errors
-	*Fix : but in status.dat about parents printing
-	*Fix : problem with the Collums talbe in livestatus module
-	*Fix : next valid time was one minute delay for cases with excludes
-	*Fix : livestatus export in json was bad for service group members
-	*Fix : bug in windows check launch
-	*Clean : dispatcher code about useless options
-	*Clean : tests cases setUp
+	*Fix: install crash is now catch with Pyro 4 in Centos (python 2.4)
+	*Fix: host/service dep where not filled with default properties
+	*Fix: catch realm configuration errors
+	*Fix: but in status.dat about parents printing
+	*Fix: problem with the Collums talbe in livestatus module
+	*Fix: next valid time was one minute delay for cases with excludes
+	*Fix: livestatus export in json was bad for service group members
+	*Fix: bug in windows check launch
+	*Clean: dispatcher code about useless options
+	*Clean: tests cases setUp
 
 
 0.2 - 06/09/2010
@@ -516,7 +541,7 @@ ENHANCEMENTS
 	*Add a problem/incident change states when apply. But it do not interfer with the standard check way of doing (or at least should not).
 	*Add some LSB init.d scripts
 	*Add max_plugins_output_length parameter to limit the checks output size.
-	*"Hack" the old nagios parameters : now status_file and nagios_log are catched. If the user defined them, but do not defined the good broker modules, we create them "on the fly". I hope one day we will remove it...
+	*"Hack" the old nagios parameters: now status_file and nagios_log are catched. If the user defined them, but do not defined the good broker modules, we create them "on the fly". I hope one day we will remove it...
 	*Nested macros are managed (like USERN in ARGN macro).
 	*Add a pass about changing Nagios2 properties to Nagios3 ones.
 	*Add json outputformat to the livestatus module
@@ -525,11 +550,11 @@ ENHANCEMENTS
 	*Redesign of the notifications (far easier to understand than the old async way)
 	*Notice about unused parameters and explain why it can be removed from conf.
 	*Catch non standard return code in actions.py so we can add stderr to the output for such cases.
-	*Now arbiter host_name property is not mandatory. But WARNING : for a multiple arbiter conf, it must be set.
+	*Now arbiter host_name property is not mandatory. But WARNING: for a multiple arbiter conf, it must be set.
 	*Updated cfg documentation (Author: Luke L <lukehasnoname@gmail.com>)
 	*Add documentation about date range format because it was not documented.
 	*Update the nagios to shinken migration file
-	*Change the way broks are send from Arbiter to Broker : before, the Broker connect to the Arbiter, take broks like for schedulers. But Arbiter also connect to broker. That's a nightmare about hangout. Now, Arbiter push the broks. It's far more easy and efficient.
+	*Change the way broks are send from Arbiter to Broker: before, the Broker connect to the Arbiter, take broks like for schedulers. But Arbiter also connect to broker. That's a nightmare about hangout. Now, Arbiter push the broks. It's far more easy and efficient.
 	*Add template handling to servicedependencies
 	*Add test_dependencies as the regression test
 	*Less status_dat verbosity :)
@@ -552,38 +577,38 @@ ENHANCEMENTS
 	*repository cosmetics (Luke L)
 
 FIXES
-	*Fix : now merlin is correctly filled with update program value
-	*Bug Fix : ndo do not have command_file, so do not export it.
-	*Bug fix : retention load was loading not good tab (impacts ones) and so cause problem with remove (not the good object!) (nicolas.dupeux)
+	*Fix: now merlin is correctly filled with update program value
+	*Bug Fix: ndo do not have command_file, so do not export it.
+	*Bug fix: retention load was loading not good tab (impacts ones) and so cause problem with remove (not the good object!) (nicolas.dupeux)
 	*Fix a bug in ACKNOWLEDGE_SVC_PROBLEM ext. command. Sticky can be 0/1/2, not bool
 	*Bug fix in find_day_by_weekday_offset.
-	*Bug Fix : when a date was calcl before teh ref time for a weekday it was not recalculated, so problem.
-	*Bug Fix : error in get_end_of_day. It was given the first secon of the next day, so some exclude make problem with it.
-	*Bug Fix : shell like commands where not good :(. Thanks to Gilles Seban for pointing it and to Hiren Patel for giving a list of shell caracters (so we know if we should use shell or not :) )
+	*Bug Fix: when a date was calcl before teh ref time for a weekday it was not recalculated, so problem.
+	*Bug Fix: error in get_end_of_day. It was given the first secon of the next day, so some exclude make problem with it.
+	*Bug Fix: shell like commands where not good :(. Thanks to Gilles Seban for pointing it and to Hiren Patel for giving a list of shell caracters (so we know if we should use shell or not :) )
 	*Bug fix: external commands to send checks should work now
-	*Bug fix : Arbiter do not more crash when scheduler is down and broker is up (not initialized make a missign parameter)
-	*Bug Fix : cehck orphaned was badly status set. Thanks Pylint.
-	*Bug fix : host in unreach were set DOWN un state, but unreach in state_id. Now it say clearly it's UNREACHABLE.
+	*Bug fix: Arbiter do not more crash when scheduler is down and broker is up (not initialized make a missign parameter)
+	*Bug Fix: cehck orphaned was badly status set. Thanks Pylint.
+	*Bug fix: host in unreach were set DOWN un state, but unreach in state_id. Now it say clearly it's UNREACHABLE.
 	*Bug: retention was loading services objects from retention file. It's not good at all.
 	*Fix a and -> or bug in the dependancies
 	*Fix a bug in livestatus. state_type is now a number instead of HARD/SOFT
 	*Fix a bug in the livestatus module. Eventhandler command is now serializable
 	*Fix a bug in execute_unix. If there is an exception during plugin execution, use it's string representation as plugin_output
 	*Fix a bug in the livestatus module. Multiline input is now possible
-	*Bug : patch from David GUÉNAULT about stopping all brokers
+	*Bug: patch from David GUÉNAULT about stopping all brokers
 	*Correct launched/lanched type everywhere (Grégory Starck)
 	*Fixed scheduler.add so that master notifications (without contact) don't create a status brok
 	*Patch from Nicolas DUPEUX about typo correction in service.py
 	*Reduce CPU comsumption of livestatus broker (thanks flox for the patch)
 	*Fix a bug in the npcdmod test case
-	*Fix : configurations files can be mix if the previous do not finished with a line return (Sebastian Reimers)
+	*Fix: configurations files can be mix if the previous do not finished with a line return (Sebastian Reimers)
 	*Fix: Correct a bad default arbiter pid configuration (Sebastian Reimers)
 	*Bug fix a missing save of shinken-reactionner.py about path in relative mode
 	*Global external commands now create an update_program_status_brok instead of program_status_brok
 	*Fix a bug in the status_dat_broker (incorrect servicegroup-definition in objects.cache)
-	*Fix : add Gerhard in print screen :)
+	*Fix: add Gerhard in print screen :)
 	*Bug Fix: add duplication check for elements (and groups). Only service is allowed to have duplicated (will Warning, but no error).
-	*Bug Fix : patch from Nicolas Dupeux. Thruk socket shutdowns are now handled in an exception
+	*Bug Fix: patch from Nicolas Dupeux. Thruk socket shutdowns are now handled in an exception
 	*Bux Fix (Sven Velt): patch about recursive dir load and check timeperiod typo
 	*NO MORE nap in code, now all are shinken :)
 

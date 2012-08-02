@@ -23,11 +23,11 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from shinken.webui.bottle import redirect
 
 ### Will be populated by the UI with it's own value
 app = None
+
 
 # Our page. If the useer call /dummy/TOTO arg1 will be TOTO.
 # if it's /dummy/, it will be 'nothing'
@@ -40,7 +40,6 @@ def get_page():
         redirect("/user/login")
         return
 
-    return {'app' : app, 'user' : user}
+    return {'app': app, 'user': user}
 
-pages = {get_page : { 'routes' : ['/worldmap'], 'view' : 'worldmap', 'static' : True}}
-
+pages = {get_page: {'routes': ['/worldmap'], 'view': 'worldmap', 'static': True}}

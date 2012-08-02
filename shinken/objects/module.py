@@ -23,28 +23,27 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from item import Item, Items
 
 from shinken.property import StringProp, ListProp
 from shinken.util import strip_and_uniq
 from shinken.log import logger
 
+
 class Module(Item):
-    id = 1#0 is always special in database, so we do not take risk here
+    id = 1  # zero is always special in database, so we do not take risk here
     my_type = 'module'
 
     properties = Item.properties.copy()
     properties.update({
         'module_name': StringProp(),
         'module_type': StringProp(),
-        'modules'    : ListProp(default=''),
+        'modules': ListProp(default=''),
     })
 
     macros = {}
 
-
-    #For debugging purpose only (nice name)
+    # For debugging purpose only (nice name)
     def get_name(self):
         return self.module_name
 
@@ -55,7 +54,6 @@ class Modules(Items):
 
     def linkify(self):
         self.linkify_s_by_plug()
-
 
     def linkify_s_by_plug(self):
         for s in self:
@@ -74,11 +72,11 @@ class Modules(Items):
                 if plug is not None:
                     new_modules.append(plug)
                 else:
-                    logger.error("[module] unknown %s module from %s" % (plug_name, s.get_name()))
+                    err = "[module] unknown %s module from %s" % (plug_name, s.get_name())
+                    logger.error(err)
                     s.configuration_errors.append(err)
             s.modules = new_modules
 
-
-    #We look for contacts property in contacts and
+    # We look for contacts property in contacts and
     def explode(self):
         pass

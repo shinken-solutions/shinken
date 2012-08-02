@@ -11,7 +11,7 @@
 /* ----------------------------------------------------------------
  *  Top navigation
  * ----------------------------------------------------------------*/
- 
+
 #nav{
 	/*margin: 0;
 	padding: 0;*/
@@ -21,7 +21,7 @@
 
 #nav ul{
 	margin: 0;
-	margin-left: 15px; 
+	margin-left: 15px;
 	float: left;
 	padding-left: 8px;
 	background: #222222;
@@ -74,7 +74,7 @@
 	color: #787878;
 	font-size: 13px;
 	padding-top: 14px;
-	
+
 }
 
 #nav_left li:hover{
@@ -113,7 +113,7 @@ ul.qtabs li {
 }
 .qtcurrent {
 	position:relative;
-	overflow:hidden; 
+	overflow:hidden;
 }
 /* End Common Styles */
 
@@ -149,7 +149,7 @@ ul.qtabs li {
 }
 div.current-basic {
 	clear: both;
-	border-width: 1px 1px 1px; 
+	border-width: 1px 1px 1px;
 	border-style: solid;
 	border-color: #E3E3E5;
 	/*width: 490px;*/
@@ -180,7 +180,7 @@ div.current-basic {
 }
 div.current-round1 {
 	clear:both;
-	border-width: 3px 1px 1px; 
+	border-width: 3px 1px 1px;
 	border-style:solid;
 	border-color: #666666;
 	width: 450px;
@@ -197,7 +197,7 @@ div.current-round1 {
 }
 .qthead-lft-blue1 ul.qtabs {
 	margin: 0;
-	
+
 }
 .qthead-lft-blue1 ul.qtabs li {
 	float: none;

@@ -1,17 +1,17 @@
 %global with_python3 1
 
-Name:           python-pyro 
+Name:           python-pyro
 Version:        4.3
 Release:        2%{?dist}
 Summary:        PYthon Remote Objects
 
 Group:          Development/Languages
-License:        MIT 
+License:        MIT
 URL:            http://www.xs4all.nl/~irmen/pyro4/index.html
 Source0:        http://www.xs4all.nl/~irmen/pyro4/download/Pyro4-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildArch:      noarch 
+BuildArch:      noarch
 BuildRequires:  python-devel
 BuildRequires:  python-setuptools
 %if 0%{?with_python3}
@@ -66,7 +66,7 @@ find examples -type f -exec sed -i 's/\r//' {} \;
 sed -i 's/\r//' README.txt LICENSE
 popd
 %endif # with_python3
- 
+
 %files
 %defattr(-,root,root,-)
 %doc docs/* examples README.txt LICENSE
@@ -92,7 +92,7 @@ popd
 - Update from upstream
 
 * Tue Oct 12 2010 David Hannequin <david.hannequin@gmail.com> 4.0-3
-- package for Fedora 13 
+- package for Fedora 13
 
 * Mon Oct 11 2010 David Hannequin <david.hannequin@gmail.com> 4.0-2
 - Delete clean section

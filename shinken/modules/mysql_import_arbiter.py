@@ -21,25 +21,31 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with Shinken.  If not, see <http://www.gnu.org/licenses/>. 
-#This module imports hosts and services configuration from a MySQL Database
-#Queries for getting hosts and services are pulled from shinken-specific.cfg configuration file.
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# This module imports hosts and services configuration from a MySQL Database
+# Queries for getting hosts and services are pulled from shinken-specific.cfg configuration file.
 
-import MySQLdb
+try:
+    import MySQLdb
+except ImportError:
+    MySQLdb = None
 
 from shinken.basemodule import BaseModule
-
+from shinken.log import logger
 
 properties = {
-    'daemons' : ['arbiter'],
-    'type' : 'mysql_import',
-    'external' : False,
-    'phases' : ['configuration'],
+    'daemons': ['arbiter'],
+    'type': 'mysql_import',
+    'external': False,
+    'phases': ['configuration'],
 }
 
-#called by the plugin manager to get a broker
+
+# called by the plugin manager to get a broker
 def get_instance(plugin):
-    print "[MySQL Importer Module] : Get MySQL importer instance for plugin %s" % plugin.get_name()
+    logger.debug("[MySQL Importer Module]: Get MySQL importer instance for plugin %s" % plugin.get_name())
+    if not MySQLdb:
+        raise Exception('Missing module python-mysqldb. Please install it.')
     host = plugin.host
     login = plugin.login
     password = plugin.password
@@ -61,67 +67,66 @@ def get_instance(plugin):
     instance = MySQL_importer_arbiter(plugin, host, login, password, database, reqlist)
     return instance
 
-#Retrieve hosts from a MySQL database
+
+# Retrieve hosts from a MySQL database
 class MySQL_importer_arbiter(BaseModule):
     def __init__(self, mod_conf, host, login, password, database, reqlist):
         BaseModule.__init__(self, mod_conf)
-        self.host  = host
+        self.host = host
         self.login = login
         self.password = password
         self.database = database
         self.reqlist = reqlist
 
-
-    #Called by Arbiter to say 'let's prepare yourself guy'
+    # Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
-        print "[MySQL Importer Module] : Try to open a MySQL connection to %s" % self.host
+        print "[MySQL Importer Module]: Try to open a MySQL connection to %s" % self.host
         try:
-            self.conn = MySQLdb.connect (host = self.host,
-                        user = self.login,
-                        passwd = self.password,
-                        db = self.database)
+            self.conn = MySQLdb.connect(host=self.host,
+                        user=self.login,
+                        passwd=self.password,
+                        db=self.database)
         except MySQLdb.Error, e:
-            print "MySQL Module : Error %d: %s" % (e.args[0], e.args[1])
+            print "MySQL Module: Error %d: %s" % (e.args[0], e.args[1])
             raise
-        print "[MySQL Importer Module] : Connection opened"
- 
- 
-    #Main function that is called in the CONFIGURATION phase
+        print "[MySQL Importer Module]: Connection opened"
+
+    # Main function that is called in the CONFIGURATION phase
     def get_objects(self):
         if not hasattr(self, 'conn'):
-            print "[MySQL Importer Module] : Problem during init phase"
+            print "[MySQL Importer Module]: Problem during init phase"
             return {}
- 
-        #Create variables for result
+
+        # Create variables for result
         r = {}
- 
-        cursor = self.conn.cursor (MySQLdb.cursors.DictCursor)
- 
-        #For all parameters
-        for k,v in self.reqlist.iteritems():
+
+        cursor = self.conn.cursor(MySQLdb.cursors.DictCursor)
+
+        # For all parameters
+        for k, v in self.reqlist.iteritems():
             r[k] = []
- 
+
             if(v != None):
                 result_set = {}
-                print "[MySQL Importer Module] : getting %s configuration from database" % (k)
+                print "[MySQL Importer Module]: getting %s configuration from database" % (k)
 
                 try:
-                    cursor.execute (v)
-                    result_set = cursor.fetchall ()
+                    cursor.execute(v)
+                    result_set = cursor.fetchall()
                 except MySQLdb.Error, e:
-                    print "MySQL Module : Error %d: %s" % (e.args[0], e.args[1])
+                    print "MySQL Module: Error %d: %s" % (e.args[0], e.args[1])
 
-                #Create set whith result
+                # Create set whith result
                 for row in result_set:
                     h = {}
                     for column in row:
                         if row[column]:
-                            h[column]= row[column]
+                            h[column] = row[column]
                     r[k].append(h)
 
-        cursor.close ()
-        self.conn.close ()
+        cursor.close()
+        self.conn.close()
         del self.conn
- 
-        print "[MySQL Importer Module] : Returning to Arbiter the object:", r
+
+        print "[MySQL Importer Module]: Returning to Arbiter the object:", r
         return r

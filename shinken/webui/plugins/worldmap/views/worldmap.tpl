@@ -30,15 +30,15 @@ initialize = function(){
     mapTypeId : google.maps.MapTypeId.TERRAIN, // Choose between HYBRID, ROADMAP, SATELLITE, TERRAIN
     maxZoom   : 20
   };
-  
+
   map      = new google.maps.Map(document.getElementById('map'), myOptions);
-  
+
   var marker = new google.maps.Marker({
     position : latHome,
     map      : map,
     title    : "Home"
   });
-  
+
   var contentMarker = [
       '<div id="innermap">',
        "<h3>It's my home!</h3><p>",
@@ -49,11 +49,11 @@ initialize = function(){
     content  : contentMarker,
     position : latHome
   });
-  
+
   google.maps.event.addListener(marker, 'click', function() {
     infoWindow.open(map, marker);
   });
-  
+
 };
 
 initialize();

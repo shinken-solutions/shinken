@@ -23,48 +23,42 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-#This Class is an example of an Scheduler module
-#Here for the configuration phase AND running one
+# This Class is an example of an Scheduler module
+# Here for the configuration phase AND running one
 
 import sys
 import signal
 import time
 from Queue import Empty
 
-
 from shinken.basemodule import BaseModule
 
-
 properties = {
-    'daemons' : ['poller'],
-    'type' : 'dummy_poller',
-    'external' : False,
+    'daemons': ['poller'],
+    'type': 'dummy_poller',
+    'external': False,
     # To be a real worker module, you must set this
-    'worker_capable' : True,
+    'worker_capable': True,
 }
 
 
-#called by the plugin manager to get a broker
+# called by the plugin manager to get a broker
 def get_instance(mod_conf):
     print "Get a Dummy poller module for plugin %s" % mod_conf.get_name()
     instance = Dummy_poller(mod_conf)
     return instance
 
 
-
-#Just print some stuff
+# Just print some stuff
 class Dummy_poller(BaseModule):
-    
+
     def __init__(self, mod_conf):
         BaseModule.__init__(self, mod_conf)
-
 
     # Called by poller to say 'let's prepare yourself guy'
     def init(self):
         print "Initilisation of the dummy poller module"
         self.i_am_dying = False
-
-
 
     # Get new checks if less than nb_checks_max
     # If no new checks got and no check in queue,
@@ -78,15 +72,14 @@ class Dummy_poller(BaseModule):
                 if msg is not None:
                     self.checks.append(msg.get_data())
                 #print "I", self.id, "I've got a message!"
-        except Empty , exp:
+        except Empty, exp:
             if len(self.checks) == 0:
                 time.sleep(1)
-
 
     # Launch checks that are in status
     # REF: doc/shinken-action-queues.png (4)
     def launch_new_checks(self):
-        #queue
+        # queue
         for chk in self.checks:
             if chk.status == 'queue':
                 print "Dummy (bad) check for", chk.command
@@ -94,8 +87,6 @@ class Dummy_poller(BaseModule):
                 chk.get_outputs('All is NOT SO well', 8012)
                 chk.status = 'done'
                 chk.execution_time = 0.1
-
-
 
     # Check the status of checks
     # if done, return message finished :)
@@ -106,18 +97,17 @@ class Dummy_poller(BaseModule):
             to_del.append(action)
             try:
                 self.returns_queue.put(action)
-            except IOError , exp:
+            except IOError, exp:
                 print "[%d]Exiting: %s" % (self.id, exp)
                 sys.exit(2)
         for chk in to_del:
             self.checks.remove(chk)
 
-
-    #id = id of the worker
-    #s = Global Queue Master->Slave
-    #m = Queue Slave->Master
-    #return_queue = queue managed by manager
-    #c = Control Queue for the worker
+    # id = id of the worker
+    # s = Global Queue Master->Slave
+    # m = Queue Slave->Master
+    # return_queue = queue managed by manager
+    # c = Control Queue for the worker
     def work(self, s, returns_queue, c):
         print "Module Dummy started!"
         ## restore default signal handler for the workers:
@@ -148,11 +138,9 @@ class Dummy_poller(BaseModule):
                 if cmsg.get_type() == 'Die':
                     print "[%d]Dad say we are diing..." % self.id
                     break
-            except :
+            except:
                 pass
 
             timeout -= time.time() - begin
             if timeout < 0:
                 timeout = 1.0
-
-

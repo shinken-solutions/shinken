@@ -1,6 +1,10 @@
 #!/bin/sh
 
-cd test
-echo `pwd`
-#python test_problem_impact.py
-for ii in `ls -1 test_*py`; do echo "Launching Test $ii" && python $ii; done
+DIR=$(cd $(dirname "$0"); pwd)
+cd $DIR
+echo "$PWD"
+
+for ii in $(ls -1 test_*py) ; do
+    echo "Launching Test $ii"
+    python $ii
+done

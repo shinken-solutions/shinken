@@ -4,19 +4,19 @@
      Gregory Starck, g.starck@gmail.com
      Hartmut Goebel, h.goebel@goebel-consult.de
      Andreas Karfusehr, andreas@karfusehr.de
- 
+
  This file is part of Shinken.
- 
+
  Shinken is free software: you can redistribute it and/or modify
  it under the terms of the GNU Affero General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
- 
+
  Shinken is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU Affero General Public License for more details.
- 
+
  You should have received a copy of the GNU Affero General Public License
  along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -25,7 +25,7 @@
    appears the actiosn buttons with a smoot way (opacity)*/
 
 $(document).ready(function(){
-    
+
     /* We must avoid $$() call for IE, so call a standad way*/
     var switches = $('.switches');
     var host_services = $('.host-services');
@@ -60,7 +60,7 @@ $(document).ready(function(){
 function show_hidden_impacts_or_services() {
 
     var imp_srv_s = $('.hidden_impacts_services');
-    
+
     imp_srv_s.css('display','block');
     imp_srv_s.animate({'opacity' : 1});
 

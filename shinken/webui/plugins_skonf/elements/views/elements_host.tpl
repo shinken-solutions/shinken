@@ -38,7 +38,7 @@ var new_properties = [];
       <li><a href="#depedencies" data-toggle="tab">Dependencies</a></li>
       <li><a href="#advanced" data-toggle="tab">Advanced</a></li>
     </ul>
-    
+
     <div class="tab-content">
       <!-- Tab Generic Stop-->
       <div class="tab-pane active" id="generic">
@@ -50,7 +50,7 @@ var new_properties = [];
 	<span class="span10">
 	  <span class="help-inline span1">Tags </span>
 	  <input id='use' class='to_use_complete offset1' data-use='{{elt.get('use', '')}}' data-cls='host' name="use" type="text" tabindex="2"/>
-	  <script>properties.push({'name' : 'use', 'type' : 'use_tags'});</script>
+	  <script>properties.push({'name': 'use', 'type': 'use_tags'});</script>
 	</span>
 	{{!helper.get_select_input(elt, 'maintenance_period', 'Maintenance Period', 'timeperiods', 'timeperiod_name', editable=editable)}}
 	{{!helper.get_select_input(elt, 'check_period', 'Check Period', 'timeperiods', 'timeperiod_name', editable=editable)}}
@@ -97,7 +97,7 @@ var new_properties = [];
 	{{!helper.get_poller_tag_input(elt, 'poller_tag', 'Monitored from', editable=editable)}}
 	{{!helper.get_realm_input(elt, 'realm', 'Realm', editable=editable)}}
 
-	{{!helper.get_bool_input(elt, 'obsess_over_host', 'Obsess Over Host', editable=editable)}}	
+	{{!helper.get_bool_input(elt, 'obsess_over_host', 'Obsess Over Host', editable=editable)}}
 	{{!helper.get_bool_input(elt, 'check_freshness', 'Check Freshness', editable=editable)}}
 	{{!helper.get_string_input(elt, 'freshness_threshold', 'Freshness Threshold seconds', editable=editable)}}
 	{{!helper.get_bool_input(elt, 'flap_detection_enabled', 'Flap Detection Enabled', editable=editable)}}
@@ -115,8 +115,8 @@ var new_properties = [];
 
     </div>
 
-    
-    
+
+
     <!--{{elt}} -->
 
   </form>

@@ -1,9 +1,9 @@
-# Enable retention for all daemons 
+# Enable retention for all daemons
 setconfigfile __ETC__/shinken-specific.cfg
 getdirective modules from scheduler where scheduler_name=scheduler-1
 setparam modules=LAST,PickleRetention from scheduler where scheduler_name=scheduler-1
-getdirective modules from broker where broker_name=broker-1
-setparam modules=LAST,PickleRetentionBroker from broker where broker_name=broker-1
+#getdirective modules from broker where broker_name=broker-1
+#setparam modules=LAST,PickleRetentionBroker from broker where broker_name=broker-1
 getdirective modules from arbiter where arbiter_name=Arbiter-Master
 setparam modules=LAST,PickleRetentionArbiter from arbiter where arbiter_name=Arbiter-Master
 writeconfig

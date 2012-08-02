@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -28,12 +28,12 @@ import logging
 from logging.handlers import TimedRotatingFileHandler
 
 from brok import Brok
-from util import if_else
 
 obj = None
 name = None
 local_log = None
 human_timestamp_log = False
+
 
 class Log:
     """Please Add a Docstring to describe the class here"""
@@ -44,6 +44,9 @@ class Log:
     ERROR    = logging.ERROR
     CRITICAL = logging.CRITICAL
 
+    def __init__(self):
+        self._level = logging.NOTSET
+
     def load_obj(self, object, name_=None):
         """ We load the object where we will put log broks
         with the 'add' method
@@ -53,8 +56,7 @@ class Log:
         obj = object
         name = name_
 
-        self._level = logging.NOTSET
-    
+
     @staticmethod
     def get_level_id(lvlName):
         """Convert a level name (string) to its integer value
@@ -62,7 +64,7 @@ class Log:
            Raise KeyError when name not found
         """
         return logging._levelNames[lvlName]
-    
+
     # We can have level as an int (logging.INFO) or a string INFO
     # if string, try to get the int value
     def set_level(self, level):
@@ -109,12 +111,17 @@ class Log:
         if format is None:
             lvlname = logging.getLevelName(level)
 
-            fmt = u'[%%(date)s] %s%%(name)s%%(msg)s\n' % (if_else(display_level, '%(level)s : ', ''))
+            if display_level:
+                fmt = u'[%(date)s] %(level)s: %(name)s%(msg)s\n'
+            else:
+                fmt = u'[%(date)s] %(name)s%(msg)s\n'
+
             args = {
-                'date' : if_else(human_timestamp_log, time.asctime(time.localtime(time.time())), int(time.time())),
+                'date': (human_timestamp_log and time.asctime()
+                         or int(time.time())),
                 'level': lvlname.capitalize(),
-                'name' : if_else(name is None, '', '[%s] ' % name),
-                'msg'  : message
+                'name': name and ('[%s] ' % name) or '',
+                'msg': message
             }
             s = fmt % args
         else:
@@ -139,7 +146,6 @@ class Log:
         # If we want a local log write, do it
         if local_log is not None:
             logging.log(level, s.strip())
-
 
     def register_local_log(self, path, level=None):
         """The log can also write to a local file if needed
@@ -166,7 +172,6 @@ class Log:
         # Return the file descriptor of this file
         return basic_log_handler.stream.fileno()
 
-
     def quit(self):
         """Close the local log file at program exit"""
         global local_log
@@ -174,11 +179,14 @@ class Log:
             self.debug("Closing %s local_log" % str(local_log))
             local_log.close()
 
+    def set_human_format(self, on=True):
+        """
+        Set the output as human format.
 
-    def set_human_format(self):
-        """Set the output as human format"""
+        If the optional parameter `on` is False, the timestamp format
+        will be reset to the default format.
+        """
         global human_timestamp_log
-        human_timestamp_log = True
-
+        human_timestamp_log = bool(on)
 
 logger = Log()

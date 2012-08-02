@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -22,6 +22,48 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+
+def episode_iv():
+    hst = 'towel.blinkenlights.nl'
+
+    from telnetlib import Telnet
+
+    t = Telnet(hst)
+    while True:
+        buf = t.read_until('mesfesses', 0.1)
+        print buf
+
+
+def perdu():
+    import urllib
+    f = urllib.urlopen("http://www.perdu.com")
+    print f.read()
+
+
+def myip():
+    import urllib
+    f = urllib.urlopen("http://whatismyip.org/")
+    print f.read()
+
+
+def naheulbeuk():
+    import os
+    import urllib2
+    from cStringIO import StringIO
+
+    from PIL import Image
+    import aalib
+
+    if os.getenv('TERM') == 'linux':
+        screen = aalib.LinuxScreen
+    else:
+        screen = aalib.AnsiScreen
+    screen = screen(width=128, height=128)
+    fp = StringIO(urllib2.urlopen('http://www.penofchaos.com/warham/bd/images/NBK-win7portrait-Nain02.JPG').read())
+    image = Image.open(fp).convert('L').resize(screen.virtual_size)
+    screen.put_image((0, 0), image)
+    print screen.render()
+                    
 
 
 def dark():
@@ -83,27 +125,3 @@ def get_coffee():
 """
     print get_coffee.__doc__
 
-
-
-def episode_iv():
-    hst = 'towel.blinkenlights.nl'
-
-    from telnetlib import Telnet
-
-    t = Telnet(hst)
-    while True:
-        buf = t.read_until('mesfesses', 0.1)
-        print buf
-
-
-def perdu():
-    import urllib
-    f = urllib.urlopen("http://www.perdu.com")
-    print f.read()
-
-
-
-def myip():
-    import urllib
-    f = urllib.urlopen("http://whatismyip.org/")
-    print f.read()

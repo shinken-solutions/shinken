@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -23,10 +23,10 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import time
 from shinken.comment import Comment
 from shinken.property import BoolProp, IntegerProp, StringProp
+from shinken.brok import Brok
 
 """ Schedules downtime for a specified service. If the "fixed" argument is set
  to one (1), downtime will start and end at the times specified by the
@@ -43,39 +43,40 @@ from shinken.property import BoolProp, IntegerProp, StringProp
 class Downtime:
     id = 1
 
-    #Just to list the properties we will send as pickle
-    #so to others daemons, so all but NOT REF
+    # Just to list the properties we will send as pickle
+    # so to others daemons, so all but NOT REF
     properties = {
-        'activate_me':  StringProp (default=[]),
-        'entry_time':   IntegerProp(default=0 ,  fill_brok=['full_status']),
-        'fixed':        BoolProp   (default=True,  fill_brok=['full_status']),
+        'activate_me':  StringProp(default=[]),
+        'entry_time':   IntegerProp(default=0,  fill_brok=['full_status']),
+        'fixed':        BoolProp(default=True,  fill_brok=['full_status']),
         'start_time':   IntegerProp(default=0,  fill_brok=['full_status']),
         'duration':     IntegerProp(default=0,  fill_brok=['full_status']),
         'trigger_id':   IntegerProp(default=0),
         'end_time':     IntegerProp(default=0,  fill_brok=['full_status']),
         'real_end_time': IntegerProp(default=0),
-        'author':       StringProp (default='',  fill_brok=['full_status']),
-        'comment':      StringProp (default=''),
-        'is_in_effect': BoolProp   (default=False),
+        'author':       StringProp(default='',  fill_brok=['full_status']),
+        'comment':      StringProp(default=''),
+        'is_in_effect': BoolProp(default=False),
         'has_been_triggered': BoolProp(default=False),
         'can_be_deleted': BoolProp(default=False),
-# TODO: find a very good way to handle the downtime "ref"
-# ref must effectively not be in properties because it points onto a real object.
-#        'ref':          None
-    }
 
+        # TODO: find a very good way to handle the downtime "ref".
+        # ref must effectively not be in properties because it points
+        # onto a real object.
+        #'ref': None
+    }
 
     def __init__(self, ref, start_time, end_time, fixed, trigger_id, duration, author, comment):
         self.id = self.__class__.id
         self.__class__.id += 1
-        self.ref = ref # pointer to srv or host we are apply
-        self.activate_me = [] # The other downtimes i need to activate
+        self.ref = ref  # pointer to srv or host we are apply
+        self.activate_me = []  # The other downtimes i need to activate
         self.entry_time = int(time.time())
         self.fixed = fixed
         self.start_time = start_time
         self.duration = duration
         self.trigger_id = trigger_id
-        if self.trigger_id != 0: # triggered plus fixed makes no sense
+        if self.trigger_id != 0:  # triggered plus fixed makes no sense
             self.fixed = False
         self.end_time = end_time
         if fixed:
@@ -91,10 +92,9 @@ class Downtime:
         self.author = author
         self.comment = comment
         self.is_in_effect = False    # fixed: start_time has been reached, flexible: non-ok checkresult
-        self.has_been_triggered = False # another downtime has triggered me
+        self.has_been_triggered = False  # another downtime has triggered me
         self.can_be_deleted = False
         self.add_automatic_comment()
-
 
     def __str__(self):
         if self.is_in_effect == True:
@@ -107,14 +107,11 @@ class Downtime:
             type = "flexible"
         return "%s %s Downtime id=%d %s - %s" % (active, type, self.id, time.ctime(self.start_time), time.ctime(self.end_time))
 
-
     def trigger_me(self, other_downtime):
         self.activate_me.append(other_downtime)
 
-
     def in_scheduled_downtime(self):
         return self.is_in_effect
-
 
     # The referenced host/service object enters now a (or another) scheduled
     # downtime. Write a log message only if it was not already in a downtime
@@ -132,7 +129,6 @@ class Downtime:
         for dt in self.activate_me:
             res.extend(dt.enter())
         return res
-
 
     # The end of the downtime was reached.
     def exit(self):
@@ -158,7 +154,6 @@ class Downtime:
         self.ref.in_scheduled_downtime_during_last_check = True
         return res
 
-
     # A scheduled downtime was prematurely cancelled
     def cancel(self):
         res = []
@@ -177,7 +172,6 @@ class Downtime:
             res.extend(dt.cancel())
         return res
 
-
     # Scheduling a downtime creates a comment automatically
     def add_automatic_comment(self):
         if self.fixed == True:
@@ -195,10 +189,9 @@ class Downtime:
         self.extra_comment = c
         self.ref.add_comment(c)
 
-
     def del_automatic_comment(self):
         # Extra comment can be None if we load it from a old version of Shinken
-        # TODO : remove it in a future version when every one got upgrade
+        # TODO: remove it in a future version when every one got upgrade
         if self.extra_comment is not None:
             self.extra_comment.can_be_deleted = True
         #self.ref.del_comment(self.comment_id)
@@ -214,7 +207,6 @@ class Downtime:
                 if brok_type in entry['fill_brok']:
                     data[prop] = getattr(self, prop)
 
-
     # Get a brok with initial status
     def get_initial_status_brok(self):
         data = {'id': self.id}
@@ -223,29 +215,27 @@ class Downtime:
         b = Brok('downtime_raise', data)
         return b
 
-
     # Call by pickle for dataify the downtime
     # because we DO NOT WANT REF in this pickleisation!
     def __getstate__(self):
         cls = self.__class__
         # id is not in *_properties
-        res = { 'id' : self.id }
+        res = {'id': self.id}
         for prop in cls.properties:
             if hasattr(self, prop):
                 res[prop] = getattr(self, prop)
         return res
 
-
     # Inverted funtion of getstate
     def __setstate__(self, state):
         cls = self.__class__
-        
+
         # Maybe it's not a dict but a list like in the old 0.4 format
         # so we should call the 0.4 function for it
         if isinstance(state, list):
             self.__setstate_deprecated__(state)
-            return 
-            
+            return
+
         self.id = state['id']
         for prop in cls.properties:
             if prop in state:
@@ -257,16 +247,16 @@ class Downtime:
     # This function is DEPRECATED and will be removed in a future version of
     # Shinken. It should not be useful any more after a first load/save pass.
 
-    #Inversed funtion of getstate
+    # Inversed funtion of getstate
     def __setstate_deprecated__(self, state):
         cls = self.__class__
-        #Check if the len of this state is like the previous,
+        # Check if the len of this state is like the previous,
         # if not, we will do errors!
         # -1 because of the 'id' prop
         if len(cls.properties) != (len(state) - 1):
             print "Passing downtime"
             return
-        
+
         self.id = state.pop()
         for prop in cls.properties:
             val = state.pop()

@@ -4,19 +4,19 @@
      Gregory Starck, g.starck@gmail.com
      Hartmut Goebel, h.goebel@goebel-consult.de
      Andreas Karfusehr, andreas@karfusehr.de
- 
+
  This file is part of Shinken.
- 
+
  Shinken is free software: you can redistribute it and/or modify
  it under the terms of the GNU Affero General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
- 
+
  Shinken is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU Affero General Public License for more details.
- 
+
  You should have received a copy of the GNU Affero General Public License
  along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -39,7 +39,7 @@ if(!Array.indexOf){
 
 /**
  * Description: Add a remvoe finction to the lists....
- *  WTF javascript don't have this? Please guys, at least good 
+ *  WTF javascript don't have this? Please guys, at least good
  *  list and dict functions.... you want us to manage memory soon?
  * Example: lst.remove(value)
  */
@@ -86,6 +86,14 @@ $(function(){
     $(".quickinfo").tooltip({placement: 'bottom'});
 });
 
+/**
+ * Description:
+ * Example: <div class="quickinfo"> Lorem Ipsum </div>
+ */
+
+$(function(){
+    $(".quickinforight").tooltip({placement: 'right'});
+});
 
 /*
  * How to code whithout a good print function?
@@ -94,15 +102,15 @@ $(function(){
 function dump(arr,level) {
     var dumped_text = "";
     if(!level) level = 0;
-    
+
     //The padding given at the beginning of the line.
     var level_padding = "";
     for(var j=0;j<level+1;j++) level_padding += "    ";
-    
-    if(typeof(arr) == 'object') { //Array/Hashes/Objects 
+
+    if(typeof(arr) == 'object') { //Array/Hashes/Objects
 	for(var item in arr) {
 	    var value = arr[item];
-	    
+
 	    if(typeof(value) == 'object') { //If it is an array,
 		dumped_text += level_padding + "'" + item + "' ...\n";
 		dumped_text += dump(value,level+1);

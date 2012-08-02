@@ -1,54 +1,50 @@
-#!/usr/bin/env python2.6
-#Copyright (C) 2009-2010 :
+#!/usr/bin/env python
+# Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 #
 # This file is used to test reading and processing of config files
 #
 
-#It's ugly I know....
 from shinken_test import *
 
 
 class TestSrvTplOnHostTpl(ShinkenTest):
-    #setUp is in shinken_test
     def setUp(self):
         self.setup_with_file('etc/nagios_service_tpl_on_host_tpl.cfg')
 
-    
     # Look is a service template apply on a host one will
     # make hosts that inherit from it got such service
-    def test_service_tpl_on_host_tpl(self):        
+    def test_service_tpl_on_host_tpl(self):
         # In fact the whole thing will be to have the service defined :)
         host = self.sched.hosts.find_by_name("test_host_0")
         print "All the test_host_0 services"
         for s in host.services:
             print s.get_dbg_name()
-        
+
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "Service_Template_Description")
         self.assert_(svc is not None)
-
 
     # And look for multy layer template too. Like a service is apply on
     # layer1, that use layer2. And srv is apply on layer2
     def test_service_tpl_on_host_tpl_n_layers(self):
-        
+
         host = self.sched.hosts.find_by_name("host_multi_layers")
         print "All the test_host_0 services"
         for s in host.services:
@@ -56,7 +52,6 @@ class TestSrvTplOnHostTpl(ShinkenTest):
 
         svc = self.sched.services.find_srv_by_name_and_hostname("host_multi_layers", "srv_multi_layer")
         self.assert_(svc is not None)
-
 
     # And look for multy layer template too. Like a service is apply on
     # layer1, that use layer2. And srv is apply on layer2
@@ -111,4 +106,3 @@ class TestSrvTplOnHostTpl(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

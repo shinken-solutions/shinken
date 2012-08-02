@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -23,39 +23,35 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from shinken.satellitelink import SatelliteLink, SatelliteLinks
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 
 
 class ReactionnerLink(SatelliteLink):
     """Please Add a Docstring to describe the class here"""
-    
-    
+
     id = 0
     my_type = 'reactionner'
     properties = SatelliteLink.properties.copy()
     properties.update({
-        'reactionner_name': StringProp(fill_brok=['full_status'], to_send=True), 
+        'reactionner_name': StringProp(fill_brok=['full_status'], to_send=True),
         'port':             IntegerProp(default='7769', fill_brok=['full_status']),
-        'passive' :         BoolProp(default='0', fill_brok=['full_status'], to_send=True),
+        'passive':          BoolProp(default='0', fill_brok=['full_status'], to_send=True),
         'min_workers':      IntegerProp(default='1', fill_brok=['full_status'], to_send=True),
         'max_workers':      IntegerProp(default='30', fill_brok=['full_status'], to_send=True),
         'processes_by_worker': IntegerProp(default='256', fill_brok=['full_status'], to_send=True),
         'reactionner_tags':      ListProp(default='None', to_send=True),
     })
-    
+
     def get_name(self):
         return self.reactionner_name
-
 
     def register_to_my_realm(self):
         self.realm.reactionners.append(self)
 
 
-
-class ReactionnerLinks(SatelliteLinks):#(Items):
+class ReactionnerLinks(SatelliteLinks): # (Items):
     """Please Add a Docstring to describe the class here"""
-    
+
     name_property = "reactionner_name"
     inner_class = ReactionnerLink

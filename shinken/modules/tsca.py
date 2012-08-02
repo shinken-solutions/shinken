@@ -23,24 +23,25 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-#This Class implement the Thrift Service Check Acceptor, an NSCA inspired
+# This Class implement the Thrift Service Check Acceptor, an NSCA inspired
 # interface to submiet checks results
-
-#This text is print at the import
-print "Detected module : TSCA module for Arbiter/receiver"
 
 import os
 import sys
 import time
 
-#Thrift Specificities
+# Thrift Specificities
 sys.path.append(os.path.abspath(__file__).rsplit("/", 3)[0] + "/thrift/gen-py")
-from org.shinken_monitoring.tsca import StateService
-from org.shinken_monitoring.tsca.ttypes import *
-from thrift.transport import TSocket
-from thrift.transport import TTransport
-from thrift.protocol import TBinaryProtocol
-from thrift.server import TServer
+try:
+    from org.shinken_monitoring.tsca import StateService
+    from org.shinken_monitoring.tsca.ttypes import *
+    from thrift.transport import TSocket
+    from thrift.transport import TTransport
+    from thrift.protocol import TBinaryProtocol
+    from thrift.server import TServer
+except ImportError:
+    TServer = None
+    
 from shinken.basemodule import BaseModule
 from shinken.external_command import ExternalCommand
 
@@ -52,9 +53,11 @@ properties = {
     }
 
 
-#called by the plugin manager to get a broker
+# called by the plugin manager to get a broker
 def get_instance(plugin):
-    print "Get a TSCA arbiter module for plugin %s" % plugin.get_name()
+    logger.debug("Get a TSCA arbiter module for plugin %s" % plugin.get_name())
+    if not TServer:
+        raise Exception('Module python-thrift not found. Please install it.')
 
     if hasattr(plugin, 'host'):
         if plugin.host == '*':
@@ -76,7 +79,7 @@ def get_instance(plugin):
     return instance
 
 
-#Used by Thrift to handle client
+# Used by Thrift to handle client
 class StateServiceHandler:
     def __init__(self, tsca_arbiter):
         self.state_list = []
@@ -108,7 +111,7 @@ class StateServiceHandler:
             self.currentlySendingData = False
 
 
-#Just print some stuff
+# Just print some stuff
 class TSCA_arbiter(BaseModule):
     def __init__(self, modconf, host, port, max_packet_age):
         BaseModule.__init__(self, modconf)
@@ -116,7 +119,7 @@ class TSCA_arbiter(BaseModule):
         self.port = port
         self.max_packet_age = max_packet_age
 
-    #Ok, main function that is called in the CONFIGURATION phase
+    # Ok, main function that is called in the CONFIGURATION phase
     def get_objects(self):
         print "[Dummy] ask me for objects to return"
         r = {'hosts': []}
@@ -131,11 +134,11 @@ class TSCA_arbiter(BaseModule):
     def read_check_result(self, state):
         '''
          Read the list result
-          Value n1 : Timestamp
-          Value n2 : Hostname
-          Value n3 : Service
-          Value n4 : Return Code
-          Value n5 : Output
+          Value n1: Timestamp
+          Value n2: Hostname
+          Value n3: Service
+          Value n4: Return Code
+          Value n5: Output
         '''
         timestamp = state.timestamp
         hostname = state.hostname
@@ -166,15 +169,17 @@ class TSCA_arbiter(BaseModule):
 
     # When you are in "external" mode, that is the main loop of your process
     def main(self):
+        self.set_proctitle(self.name)
+
         self.set_exit_handler()
         try:
-                handler = StateServiceHandler(self)
-                processor = StateService.Processor(handler)
-                transport = TSocket.TServerSocket("0.0.0.0", 9090)
-                tfactory = TTransport.TBufferedTransportFactory()
-                pfactory = TBinaryProtocol.TBinaryProtocolFactory()
-                # In order to accept multiple simultaneous clients, we use TThreadedServer
-                server = TServer.TThreadedServer(processor, transport, tfactory, pfactory)
-                server.serve()
+            handler = StateServiceHandler(self)
+            processor = StateService.Processor(handler)
+            transport = TSocket.TServerSocket("0.0.0.0", 9090)
+            tfactory = TTransport.TBufferedTransportFactory()
+            pfactory = TBinaryProtocol.TBinaryProtocolFactory()
+            # In order to accept multiple simultaneous clients, we use TThreadedServer
+            server = TServer.TThreadedServer(processor, transport, tfactory, pfactory)
+            server.serve()
         except:
-                print "Error while trying to launch TSCA module"
+            print "Error while trying to launch TSCA module"

@@ -34,7 +34,7 @@ except ImportError:
     try:
         import simplejson as json
     except ImportError:
-        print "Error : you need the json or simplejson module"
+        print "Error: you need the json or simplejson module"
         raise
 
 
@@ -44,13 +44,13 @@ def lookup(cls='', name=''):
     user = app.get_user_auth()
     if not user:
         return []
-    
-    sources = {'host' : app.host_templates, 'service' : app.service_templates,
-               'contact' : app.contact_templates, 'timeperiod' : app.timeperiod_templates}
+
+    sources = {'host': app.host_templates, 'service': app.service_templates,
+               'contact': app.contact_templates, 'timeperiod': app.timeperiod_templates}
 
     # Look for a valid source
     if cls not in sources:
-        print "Lookup : bad class", cls
+        print "Lookup: bad class", cls
         return []
 
     # And a name not too short
@@ -58,14 +58,13 @@ def lookup(cls='', name=''):
         print "Lookup %s too short, bail out" % name
         return []
 
-
     print "Lookup for", name, "in", cls
     tags = set()
     for h in sources[cls].values():
         print "Template", h
         if hasattr(h, 'name'):
             tags.add(h.name)
-    r  = [n for n in tags if n.startswith(name)]
+    r = [n for n in tags if n.startswith(name)]
 
     print "RES", r
 
@@ -75,15 +74,15 @@ def lookup(cls='', name=''):
 def lookup_tag_post(cls=''):
     app.response.content_type = 'application/json'
 
-#    user = app.get_user_auth()
-#    if not user:
-#        return []
-    sources = {'host' : app.host_templates, 'service' : app.service_templates,
-               'contact' : app.contact_templates, 'timeperiod' : app.timeperiod_templates}
+    ## user = app.get_user_auth()
+    ## if not user:
+    ##     return []
+    sources = {'host': app.host_templates, 'service': app.service_templates,
+               'contact': app.contact_templates, 'timeperiod': app.timeperiod_templates}
 
 
     if cls not in sources:
-        print "Lookup : bad class", cls
+        print "Lookup: bad class", cls
         return []
 
     name = app.request.forms.get('value')
@@ -97,15 +96,12 @@ def lookup_tag_post(cls=''):
         print "Template", h
         if hasattr(h, 'name'):
             tags.add(h.name)
-    r  = [{'id' :n, 'name' :n} for n in tags if n.startswith(name)]
+    r = [{'id': n, 'name': n} for n in tags if n.startswith(name)]
 
     print "RES", r
 
     return json.dumps(r)
 
-
-
-pages = {lookup_tag_post : { 'routes' : ['/lookup/:cls/tag'] , 'method' : 'POST'},
-         lookup : { 'routes' : ['/lookup/:cls/tag/:name']},
+pages = {lookup_tag_post: {'routes': ['/lookup/:cls/tag'], 'method': 'POST'},
+         lookup: {'routes': ['/lookup/:cls/tag/:name']},
          }
-

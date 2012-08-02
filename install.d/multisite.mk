@@ -20,8 +20,8 @@ admin_users = [ "nagiosadmin" ]
 # connection to the local host is done.
 #sites = {
 #   # connect to local Nagios
-#   "local" : {
-#        "alias" : "Munich"
+#   "local": {
+#        "alias": "Munich"
 #   },
 #
 #   # connect to remote site (e.g. local OMD site 'paris')
@@ -39,7 +39,7 @@ admin_users = [ "nagiosadmin" ]
 #    },
 #}
 
-# 
+#
 # NagVis
 #
 # The NagVis-Snapin needs to know the URL to nagvis.
@@ -64,9 +64,9 @@ nagvis_base_url = '/nagvis'
 #  ( "critical", "critical.wav" ),
 #  ( "unknown", "unknown.wav" ),
 #  ( "warning", "warning.wav" ),
-#  ( None,      "ok.wav" ), 
+#  ( None,      "ok.wav" ),
 # ]
-# Note: this example has not sound for unreachable hosts. 
+# Note: this example has not sound for unreachable hosts.
 # set sound_url to another url, if you place your sound
 # files elsewhere:
 # sound_url = "http://otherhost/path/to/sound/"
@@ -100,7 +100,7 @@ custom_links['user'] = custom_links['guest'] + [
         ( "Multisite",     "http://mathias-kettner.de/checkmk_multisite.html" ),
         ( "MK Livestatus", "http://mathias-kettner.de/checkmk_livestatus.html" ),
         ( "Check_MK",      "http://mathias-kettner.de/check_mk.html" ),
-        ( "Shinken",        "http://www.shinken-monitoring.org/" ), 
+        ( "Shinken",        "http://www.shinken-monitoring.org/" ),
         ( "PNP4Nagios",    "http://pnp4nagios.org/" ),
         ( "NagVis",        "http://nagvis.org/" ),
         ( "RRDTool",       "http://oss.oetiker.ch/rrdtool/" ),
@@ -141,12 +141,12 @@ show_livestatus_errors = True
 # Default is to show at most 80 items.
 # quicksearch_dropdown_limit = 80
 
-#   __        ___  _____ ___  
-#   \ \      / / \|_   _/ _ \ 
+#   __        ___  _____ ___
+#   \ \      / / \|_   _/ _ \
 #    \ \ /\ / / _ \ | || | | |
 #     \ V  V / ___ \| || |_| |
-#      \_/\_/_/   \_\_| \___/ 
-#                             
+#      \_/\_/_/   \_\_| \___/
+#
 # Check_MK's Web Administration Tool
 
 # Declare files in conf.d/ to be editable with WATO. Please make
@@ -154,7 +154,7 @@ show_livestatus_errors = True
 # touch /etc/check_mk/conf.d/network.mk
 # chgrp www /etc/check_mk/conf.d/network.mk
 # chmod 664 /etc/check_mk/conf.d/network.mk
-# 
+#
 # config_files = [
 #   ("network.mk",    "Network, Infrastructure", [ "admin", "user" ] ),
 #   ("datacenter.mk", "Servers in Datacenter",   [ "admin" ]),
@@ -176,7 +176,7 @@ show_livestatus_errors = True
 #       ( None,   "simple walk (SNMP v1)"),
 #       ( "bulk", "Bulkwalk (SNMP v2c)" ),
 #    ]),
-# 
+#
 # ]
 
 sites = {

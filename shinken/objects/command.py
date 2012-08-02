@@ -23,19 +23,18 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 from item import Item, Items
 from shinken.brok import Brok
-from shinken.property import StringProp
+from shinken.property import StringProp, IntegerProp
 from shinken.autoslots import AutoSlots
 
 
-# Ok, slots are fun : you cannot set the __autoslots__
+# Ok, slots are fun: you cannot set the __autoslots__
 # on the same class you use, fun isn't it? So we define*
 # a dummy useless class to get such :)
 class DummyCommand(object):
     pass
+
 
 class Command(Item):
     # AutoSlots create the __slots__ with properties and
@@ -52,13 +51,14 @@ class Command(Item):
         'poller_tag':   StringProp(default='None'),
         'reactionner_tag':   StringProp(default='None'),
         'module_type':  StringProp(default=None),
+        'timeout':      IntegerProp(default='-1'),
     })
 
     def __init__(self, params={}):
         setattr(self, 'id', self.__class__.id)
         #self.id = self.__class__.id
         self.__class__.id += 1
-        
+
         self.init_running_properties()
 
         self.customs = {}
@@ -69,13 +69,16 @@ class Command(Item):
                 self.customs[key.upper()] = params[key]
             else:
                 setattr(self, key, params[key])
-        
+
+        if not hasattr(self, 'timeout'):
+            self.timeout = '-1'
+
         if not hasattr(self, 'poller_tag'):
             self.poller_tag = 'None'
         if not hasattr(self, 'reactionner_tag'):
             self.reactionner_tag = 'None'
         if not hasattr(self, 'module_type'):
-            # If the command satr with a _, set the module_type
+            # If the command start with a _, set the module_type
             # as the name of the command, without the _
             if getattr(self, 'command_line', '').startswith('_'):
                 module_type = getattr(self, 'command_line', '').split(' ')[0]
@@ -85,36 +88,32 @@ class Command(Item):
             else:
                 self.module_type = 'fork'
 
-
     def get_name(self):
         return self.command_name
 
-
     def pythonize(self):
         self.command_name = self.command_name.strip()
-
+        self.timeout = int(self.timeout)
 
     def __str__(self):
         return str(self.__dict__)
 
-
-    #Get a brok with initial status
+    # Get a brok with initial status
     def get_initial_status_brok(self):
         cls = self.__class__
         my_type = cls.my_type
-        data = {'id' : self.id}
+        data = {'id': self.id}
 
         self.fill_data_brok_from(data, 'full_status')
-        b = Brok('initial_'+my_type+'_status', data)
+        b = Brok('initial_' + my_type + '_status', data)
         return b
-
 
     def fill_data_brok_from(self, data, brok_type):
         cls = self.__class__
-        #Now config properties
+        # Now config properties
         for prop, entry in cls.properties.items():
-            #Is this property intended for brokking?
-#            if 'fill_brok' in entry[prop]:
+            # Is this property intended for brokking?
+            #if 'fill_brok' in entry[prop]:
             if brok_type in entry.fill_brok:
                 if hasattr(self, prop):
                     data[prop] = getattr(self, prop)
@@ -123,18 +122,17 @@ class Command(Item):
 
 
 
-    #Call by picle for dataify the coment
-    #because we DO NOT WANT REF in this pickleisation!
+    # Call by pickle for dataify the coment
+    # because we DO NOT WANT REF in this pickleisation!
     def __getstate__(self):
         cls = self.__class__
         # id is not in *_properties
-        res = {'id' : self.id}
+        res = {'id': self.id}
         for prop in cls.properties:
             if hasattr(self, prop):
                 res[prop] = getattr(self, prop)
 
         return res
-
 
     # Inversed funtion of getstate
     def __setstate__(self, state):
@@ -149,7 +147,6 @@ class Command(Item):
             if prop in state:
                 setattr(self, prop, state[prop])
 
-
     # In 1.0 we move to a dict save. Before, it was
     # a tuple save, like
     # ({'id': 11}, {'poller_tag': 'None', 'reactionner_tag': 'None',
@@ -157,7 +154,7 @@ class Command(Item):
     # 'module_type': 'fork', 'command_name': u'notify-by-rss'})
     def __setstate_pre_1_0__(self, state):
         for d in state:
-            for k,v in d.items():
+            for k, v in d.items():
                 setattr(self, k, v)
 
 
@@ -165,4 +162,3 @@ class Commands(Items):
 
     inner_class = Command
     name_property = "command_name"
-

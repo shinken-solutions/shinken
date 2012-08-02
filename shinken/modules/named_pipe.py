@@ -24,9 +24,8 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This Class is an example of an Arbiter module
-#Here for the configuration phase AND running one
-
+# This Class is an example of an Arbiter module
+# Here for the configuration phase AND running one
 
 import os
 import time
@@ -36,34 +35,33 @@ from shinken.basemodule import BaseModule
 from shinken.external_command import ExternalCommand
 
 properties = {
-    'daemons' : ['arbiter', 'receiver', 'poller'],
-    'type' : 'named_pipe',
-    'external' : True,
-    'worker_capable' : False,
+    'daemons': ['arbiter', 'receiver', 'poller'],
+    'type': 'named_pipe',
+    'external': True,
+    'worker_capable': False,
     }
 
-#called by the plugin manager to get a broker
+
+# called by the plugin manager to get a broker
 def get_instance(plugin):
     print "Get a Named pipe module for plugin %s" % plugin.get_name()
 
     try:
         path = plugin.command_file
     except AttributeError:
-        print "Error : the plugin '%s' do not have a command_file property"
+        print "Error: the plugin '%s' do not have a command_file property"
         raise
     instance = Named_Pipe_arbiter(plugin, path)
     return instance
 
 
-#Just print some stuff
+# Just print some stuff
 class Named_Pipe_arbiter(BaseModule):
     def __init__(self, modconf, path):
         BaseModule.__init__(self, modconf)
         self.pipe_path = path
         self.fifo = None
         self.cmd_fragments = ''
-        
-
 
     def open(self):
         # At the first open del and create the fifo
@@ -78,14 +76,13 @@ class Named_Pipe_arbiter(BaseModule):
                         os.mkdir(os.path.dirname(self.pipe_path))
                     os.mkfifo(self.pipe_path, 0660)
                     open(self.pipe_path, 'w+', os.O_NONBLOCK)
-                except OSError , exp:
-                    print "Error : pipe creation failed (",self.pipe_path,')', exp, os.getcwd()
+                except OSError, exp:
+                    print "Error: pipe creation failed (", self.pipe_path, ')', exp, os.getcwd()
                     return None
         print "[%s] Trying to open the named pipe '%s'" % (self.get_name(), self.pipe_path)
         self.fifo = os.open(self.pipe_path, os.O_NONBLOCK)
         print "[%s] The named pipe '%s' is open" % (self.get_name(), self.pipe_path)
         return self.fifo
-
 
     def get(self):
         buf = os.read(self.fifo, 8096)
@@ -108,21 +105,20 @@ class Named_Pipe_arbiter(BaseModule):
             os.close(self.fifo)
         return r
 
-
-
     # When you are in "external" mode, that is the main loop of your process
     def main(self):
+        self.set_proctitle(self.name)
         self.set_exit_handler()
-        
+
         self.open()
-        
+
         input = [self.fifo]
 
         while not self.interrupted:
             if input == []:
                 time.sleep(1)
                 continue
-            inputready,outputready,exceptready = select.select(input,[],[], 1)
+            inputready, outputready, exceptready = select.select(input, [], [], 1)
             for s in inputready:
                 ext_cmds = self.get()
 
@@ -132,6 +128,6 @@ class Named_Pipe_arbiter(BaseModule):
                 else:
                     self.fifo = self.open()
                     if self.fifo is not None:
-                        input = [ self.fifo ]
+                        input = [self.fifo]
                     else:
                         input = []

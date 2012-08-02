@@ -34,13 +34,13 @@ var new_properties = [];
       <li class="active"><a href="#generic" data-toggle="tab">Generic</a></li>
       <li><a href="#advanced" data-toggle="tab">Advanced</a></li>
     </ul>
-    
+
     <div class="tab-content">
       <!-- Tab Generic Stop-->
       <div class="tab-pane active" id="generic">
-	
+
 	{{!helper.get_string_input(elt, 'timeperiod_name', 'Name', span='span5', popover='Name of the timeperiod. Should be unique.', editable=editable)}}
-	
+
 	{{!helper.get_string_input(elt, 'monday', 'Monday', span='span10', inputsize='input-xxlarge', editable=editable)}}
 	{{!helper.get_string_input(elt, 'tuesday', 'Tuesday', span='span10', inputsize='input-xxlarge', editable=editable)}}
 	{{!helper.get_string_input(elt, 'wednesday', 'Wednesday', span='span10', inputsize='input-xxlarge', editable=editable)}}
@@ -64,8 +64,8 @@ var new_properties = [];
 
     </div>
 
-    
-    
+
+
     <!--{{elt}} -->
 
   </form>

@@ -23,30 +23,30 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from item import Item, Items
 from escalation import Escalation
 
 from shinken.property import IntegerProp, StringProp, ListProp
 
+
 class Hostescalation(Item):
-    id = 1 #0 is always special in database, so we do not take risk here
+    id = 1  # zero is always special in database, so we do not take risk here
     my_type = 'hostescalation'
 
     properties = Item.properties.copy()
     properties.update({
-        'host_name':             StringProp (),
-        'hostgroup_name':        StringProp (),
+        'host_name':             StringProp(),
+        'hostgroup_name':        StringProp(),
         'first_notification':    IntegerProp(),
         'last_notification':     IntegerProp(),
         'notification_interval': IntegerProp(default='30'), # like Nagios value
-        'escalation_period':     StringProp (default=''),
-        'escalation_options':    ListProp   (default='d,u,r,w,c'),
-        'contacts':              StringProp (),
-        'contact_groups':        StringProp (),
+        'escalation_period':     StringProp(default=''),
+        'escalation_options':    ListProp(default='d,u,r,w,c'),
+        'contacts':              StringProp(),
+        'contact_groups':        StringProp(),
     })
 
-    #For debugging purpose only (nice name)
+    # For debugging purpose only (nice name)
     def get_name(self):
         return ''
 
@@ -55,14 +55,13 @@ class Hostescalations(Items):
     name_property = ""
     inner_class = Hostescalation
 
-
-    #We look for contacts property in contacts and
+    # We look for contacts property in contacts and
     def explode(self, escalations):
-        #Now we explode all escalations (host_name, service_description) to escalations
+        # Now we explode all escalations (host_name, service_description) to escalations
         for es in self:
             properties = es.__class__.properties
             name = getattr(es, 'host_name', getattr(es, 'hostgroup_name', ''))
-            creation_dict = {'escalation_name' : 'Generated-Hostescalation-%d-%s' % (es.id, name)}
+            creation_dict = {'escalation_name': 'Generated-Hostescalation-%d-%s' % (es.id, name)}
             for prop in properties:
                 if hasattr(es, prop):
                     creation_dict[prop] = getattr(es, prop)

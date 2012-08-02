@@ -4,7 +4,7 @@
 {
 	margin: 0;
 	padding: 0;
-	
+
 	font-family: verdana, arial, sans-serif;
 	font-size: 11px;
 	line-height: 15px;
@@ -18,19 +18,19 @@ body
 {
 	margin: 20px auto;
 	padding: 20px;
-	
+
 	width: 250px;
 	border: 1px solid #509bba;
 }
 
-h1 
+h1
 {
 	margin-bottom: 15px;
-	
+
 	font-size: 20px;
 	line-height: 22px;
 	font-weight: normal;
-	
+
 	color: #509bba;
 }
 
@@ -41,7 +41,7 @@ h1
 dl.accordion
 {
 	width: 250px;
-	
+
 	border-left: 1px solid #e6e2af;
 	border-right: 1px solid #e6e2af;
 	border-bottom: 1px solid #e6e2af;
@@ -54,12 +54,12 @@ dl.accordion dt
 	position: relative;
 	height: 20px;
 	padding: 5px 0 2px 25px;
-	
+
 	font-weight: bold;
-	
+
 	color: white;
 	background: #00506c url(icon_accordion_closed.png) no-repeat;
-	
+
 	cursor: pointer;
 	border-top: 1px solid #e6e2af;
 }
@@ -93,7 +93,7 @@ dl.accordion dd
 
 dl.accordion dd.sub_accordion
 {
-	
+
 }
 
 dl.accordion dd.accordion_content

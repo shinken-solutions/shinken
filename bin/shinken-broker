@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2009-2011 :
+# Copyright (C) 2009-2011:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -23,13 +23,13 @@
 
 '''
  This class is an interface for the Broker
- The broker listens to the Arbiter for the configuration sent through 
+ The broker listens to the Arbiter for the configuration sent through
  the given port as first argument.
- The configuration sent by the arbiter specifies from which schedulers 
+ The configuration sent by the arbiter specifies from which schedulers
  the broker will take broks.
- When the broker is already launched and has its own conf, it keeps on 
+ When the broker is already launched and has its own conf, it keeps on
  listening the arbiter (one a timeout)
- In case the arbiter has a new conf to send, the broker forget its old 
+ In case the arbiter has a new conf to send, the broker forget its old
  schedulers (and their associated broks) and take the new ones instead.
 '''
 
@@ -46,7 +46,6 @@ except ImportError:
     # Submodules will then be loaded from there, too.
     import imp
     imp.load_module('shinken', *imp.find_module('shinken', [os.path.realpath("."), os.path.realpath(".."), os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "..")]))
-
 
 from shinken.daemons.brokerdaemon import Broker
 from shinken.bin import VERSION
@@ -74,6 +73,6 @@ if __name__ == '__main__':
     daemon = Broker(debug=opts.debug_file is not None, **opts.__dict__)
     daemon.main()
 
-# For perf tuning: 
+# For perf tuning:
 #import cProfile
 #cProfile.run('''daemon.main()''', '/tmp/broker.profile')

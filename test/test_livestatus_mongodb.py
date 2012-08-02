@@ -1,24 +1,24 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#Copyright (C) 2009-2010 :
+# Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
 #
@@ -50,7 +50,6 @@ try:
 except Exception:
     has_pymongo = False
 
-
 sys.setcheckinterval(10000)
 
 
@@ -62,8 +61,8 @@ class TestConfig(ShinkenTest):
         self.shutdown_livestatus()
         if os.path.exists(self.livelogs):
             os.remove(self.livelogs)
-        if os.path.exists(self.livelogs+"-journal"):
-            os.remove(self.livelogs+"-journal")
+        if os.path.exists(self.livelogs + "-journal"):
+            os.remove(self.livelogs + "-journal")
         if os.path.exists(self.livestatus_broker.pnp_path):
             shutil.rmtree(self.livestatus_broker.pnp_path)
         if os.path.exists('var/nagios.log'):
@@ -79,7 +78,7 @@ class TestConfig(ShinkenTest):
 
     def init_livestatus(self):
         self.livelogs = 'tmp/livelogs.db' + self.testid
-        modconf = Module({'module_name' : 'LiveStatus',
+        modconf = Module({'module_name': 'LiveStatus',
             'module_type': 'livestatus',
             'port': str(50000 + os.getpid()),
             'pnp_path': 'tmp/pnp4nagios_test' + self.testid,
@@ -88,10 +87,10 @@ class TestConfig(ShinkenTest):
             'name': 'test', #?
         })
 
-        dbmodconf = Module({'module_name' : 'LogStore',
+        dbmodconf = Module({'module_name': 'LogStore',
             'module_type': 'logstore_mongodb',
             'mongodb_uri': "mongodb://127.0.0.1:27017",
-            'database': 'testtest'+self.testid,
+            'database': 'testtest' + self.testid,
         })
         modconf.modules = [dbmodconf]
         self.livestatus_broker = LiveStatus_broker(modconf)
@@ -110,7 +109,7 @@ class TestConfig(ShinkenTest):
             if inst.properties["type"].startswith('logstore'):
                 f = getattr(inst, 'load', None)
                 if f and callable(f):
-                    f(self.livestatus_broker) #!!! NOT self here !!!!
+                    f(self.livestatus_broker)  # !!! NOT self here !!!!
                 break
         for s in self.livestatus_broker.debug_output:
             print "errors during load", s
@@ -146,9 +145,8 @@ class TestConfig(ShinkenTest):
                 return True
         return False
 
-
     def update_broker(self, dodeepcopy=False):
-        #The brok should be manage in the good order
+        # The brok should be manage in the good order
         ids = self.sched.broks.keys()
         ids.sort()
         for brok_id in ids:
@@ -160,7 +158,6 @@ class TestConfig(ShinkenTest):
                 brok = copy.deepcopy(brok)
             self.livestatus_broker.manage_brok(brok)
         self.sched.broks = {}
-
 
 
 class TestConfigSmall(TestConfig):
@@ -183,7 +180,6 @@ class TestConfigSmall(TestConfig):
         host = self.sched.hosts.find_by_name("test_host_0")
         host.__class__.use_aggressive_host_checking = 1
 
-
     def write_logs(self, host, loops=0):
         for loop in range(0, loops):
             host.state = 'DOWN'
@@ -197,7 +193,6 @@ class TestConfigSmall(TestConfig):
             host.output = "i am down"
             host.raise_alert_log_entry()
             self.update_broker()
-
 
     def test_hostsbygroup(self):
         if not has_pymongo:
@@ -235,18 +230,18 @@ ResponseHeader: fixed16
         now = time.time()
         time_warp(-3600)
         num_logs = 0
-	host.state = 'DOWN'
-	host.state_type = 'SOFT'
-	host.attempt = 1
-	host.output = "i am down"
-	host.raise_alert_log_entry()
-	time.sleep(3600)
-	host.state = 'UP'
-	host.state_type = 'HARD'
-	host.attempt = 1
-	host.output = "i am up"
-	host.raise_alert_log_entry()
-	time.sleep(3600)
+        host.state = 'DOWN'
+        host.state_type = 'SOFT'
+        host.attempt = 1
+        host.output = "i am down"
+        host.raise_alert_log_entry()
+        time.sleep(3600)
+        host.state = 'UP'
+        host.state_type = 'HARD'
+        host.attempt = 1
+        host.output = "i am up"
+        host.raise_alert_log_entry()
+        time.sleep(3600)
         self.update_broker()
         print "-------------------------------------------"
         print "Service.lsm_host_name", Service.lsm_host_name
@@ -261,7 +256,6 @@ Filter: time <= """ + str(int(now + 3600)) + """
 Columns: time type options state host_name"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-            
 
 
 class TestConfigBig(TestConfig):
@@ -283,25 +277,24 @@ class TestConfigBig(TestConfig):
         host = self.sched.hosts.find_by_name("test_host_000")
         host.__class__.use_aggressive_host_checking = 1
 
-
     def init_livestatus(self):
         self.livelogs = "bigbigbig"
-        modconf = Module({'module_name' : 'LiveStatus',
-            'module_type' : 'livestatus',
-            'port' : str(50000 + os.getpid()),
-            'pnp_path' : 'tmp/livestatus_broker.pnp_path_test' + self.testid,
-            'host' : '127.0.0.1',
-            'socket' : 'live',
-            'name' : 'test', #?
+        modconf = Module({'module_name': 'LiveStatus',
+            'module_type': 'livestatus',
+            'port': str(50000 + os.getpid()),
+            'pnp_path': 'tmp/livestatus_broker.pnp_path_test' + self.testid,
+            'host': '127.0.0.1',
+            'socket': 'live',
+            'name': 'test', #?
         })
 
-        dbmodconf = Module({'module_name' : 'LogStore',
-            'module_type' : 'logstore_mongodb',
-            'database' : 'bigbigbig',
-            'mongodb_uri' : "mongodb://127.0.0.1:27017",
-            #'mongodb_uri' : "mongodb://10.0.12.50:27017,10.0.12.51:27017",
-        #    'replica_set' : 'livestatus',
-            'max_logs_age' : '7',
+        dbmodconf = Module({'module_name': 'LogStore',
+            'module_type': 'logstore_mongodb',
+            'database': 'bigbigbig',
+            'mongodb_uri': "mongodb://127.0.0.1:27017",
+            #'mongodb_uri': "mongodb://10.0.12.50:27017,10.0.12.51:27017",
+        #    'replica_set': 'livestatus',
+            'max_logs_age': '7',
         })
         modconf.modules = [dbmodconf]
         self.livestatus_broker = LiveStatus_broker(modconf)
@@ -320,7 +313,7 @@ class TestConfigBig(TestConfig):
             if inst.properties["type"].startswith('logstore'):
                 f = getattr(inst, 'load', None)
                 if f and callable(f):
-                    f(self.livestatus_broker) #!!! NOT self here !!!!
+                    f(self.livestatus_broker)  # !!! NOT self here !!!!
                 break
         for s in self.livestatus_broker.debug_output:
             print "errors during load", s
@@ -343,7 +336,6 @@ class TestConfigBig(TestConfig):
 
     def count_log_broks(self):
         return len([brok for brok in self.sched.broks.values() if brok.type == 'log'])
-
 
     def test_a_long_history(self):
         if not has_pymongo:
@@ -558,18 +550,18 @@ OutputFormat: json"""
         times = [x['time'] for x in self.livestatus_broker.db.conn.bigbigbig.logs.find()]
         print "whole database", numlogs, min(times), max(times)
         numlogs = self.livestatus_broker.db.conn.bigbigbig.logs.find({
-            '$and' : [
-                {'time' : { '$gt' : min(times)} },
-                {'time' : { '$lte' : max(times)} }
+            '$and': [
+                {'time': {'$gt': min(times)}},
+                {'time': {'$lte': max(times)}}
             ]}).count()
         now = max(times)
         daycount = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         for day in xrange(25):
             one_day_earlier = now - 3600*24
             numlogs = self.livestatus_broker.db.conn.bigbigbig.logs.find({
-                '$and' : [
-                    {'time' : { '$gt' : one_day_earlier} },
-                    {'time' : { '$lte' : now} }
+                '$and': [
+                    {'time': {'$gt': one_day_earlier}},
+                    {'time': {'$lte': now}}
                 ]}).count()
             daycount[day] = numlogs
             print "day -%02d %d..%d - %d" % (day, one_day_earlier, now, numlogs)
@@ -579,9 +571,9 @@ OutputFormat: json"""
         for day in xrange(25):
             one_day_earlier = now - 3600*24
             numlogs = self.livestatus_broker.db.conn.bigbigbig.logs.find({
-                '$and' : [
-                    {'time' : { '$gt' : one_day_earlier} },
-                    {'time' : { '$lte' : now} }
+                '$and': [
+                    {'time': {'$gt': one_day_earlier}},
+                    {'time': {'$lte': now}}
                 ]}).count()
             print "day -%02d %d..%d - %d" % (day, one_day_earlier, now, numlogs)
             now = one_day_earlier
@@ -595,10 +587,20 @@ OutputFormat: json"""
         time.time = fake_time_time
         time.sleep = fake_time_sleep
 
+    def test_max_logs_age(self):
+        if not has_pymongo:
+            return
+        dbmodconf = Module({'module_name': 'LogStore',
+            'module_type': 'logstore_mongodb',
+            'database': 'bigbigbig',
+            'mongodb_uri': "mongodb://127.0.0.1:27017",
+            'max_logs_age': '7y',
+        })
+        self.assert_(dbmodconf.max_logs_age == 7*365)
+
 
 if __name__ == '__main__':
     #import cProfile
     command = """unittest.main()"""
     unittest.main()
     #cProfile.runctx( command, globals(), locals(), filename="/tmp/livestatus.profile" )
-

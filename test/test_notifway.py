@@ -1,22 +1,22 @@
-#!/usr/bin/env python2.6
-#Copyright (C) 2009-2010 :
+#!/usr/bin/env python
+# Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 #
 # This file is used to test reading and processing of config files
@@ -28,12 +28,9 @@ from shinken_test import unittest, ShinkenTest
 
 
 class TestConfig(ShinkenTest):
-    #setUp is in shinken_test
     def setUp(self):
         self.setup_with_file('etc/nagios_notif_way.cfg')
 
-
-    #Change ME :)
     def test_contact_def(self):
         #
         # Config is not correct because of a wrong relative path
@@ -44,34 +41,29 @@ class TestConfig(ShinkenTest):
         contact = self.sched.contacts.find_by_name("test_contact")
         print "The contact", contact.__dict__
 
-        print "All notification Way :"
+        print "All notification Way:"
         for nw in self.sched.notificationways:
             print "\t", nw.notificationway_name
-
-
 
         email_in_day = self.sched.notificationways.find_by_name('email_in_day')
         self.assert_(email_in_day in contact.notificationways)
         email_s_cmd = email_in_day.service_notification_commands.pop()
         email_h_cmd = email_in_day.host_notification_commands.pop()
-        
 
         sms_the_night = self.sched.notificationways.find_by_name('sms_the_night')
         self.assert_(sms_the_night in contact.notificationways)
         sms_s_cmd = sms_the_night.service_notification_commands.pop()
         sms_h_cmd = sms_the_night.host_notification_commands.pop()
-        
+
         # And check the criticity values
         self.assert_(email_in_day.min_business_impact == 0)
         self.assert_(sms_the_night.min_business_impact == 5)
-        
 
-        print "Contact notification way(s) :"
+        print "Contact notification way(s):"
         for nw in contact.notificationways:
             print "\t", nw.notificationway_name
             for c in nw.service_notification_commands:
                 print "\t\t", c.get_name()
-
 
         contact_simple = self.sched.contacts.find_by_name("test_contact_simple")
         # It's the created notifway for this simple contact
@@ -111,9 +103,8 @@ class TestConfig(ShinkenTest):
 
         # We take the EMAIL test because SMS got the night ony, so we take a very low value for criticity here
         self.assert_(email_in_day.want_service_notification(now, 'WARNING', 'PROBLEM', -1) == False)
-        
+
 
 
 if __name__ == '__main__':
     unittest.main()
-

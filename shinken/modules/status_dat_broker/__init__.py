@@ -23,28 +23,27 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 properties = {
-    'daemons' : ['broker'],
-    'type' : 'status_dat',
-    'external' : True,
-    'phases' : ['running'],
+    'daemons': ['broker'],
+    'type': 'status_dat',
+    'external': True,
+    'phases': ['running'],
     }
 
 
-#called by the plugin manager to get a broker
+# called by the plugin manager to get a broker
 def get_instance(plugin):
     print "Get a Status Dat broker for plugin %s" % plugin.get_name()
 
     print plugin.__dict__
-    #First try to import
+    # First try to import
     try:
         from status_dat_broker import Status_dat_broker
-    except ImportError , exp:
-        print "Warning : the plugin type %s is unavalable : %s" % ('status_dat', exp)
+    except ImportError, exp:
+        print "Warning: the plugin type %s is unavailable: %s" % ('status_dat', exp)
         return None
 
-    #Catch errors
+    # Catch errors
     path = plugin.status_file
     opath = plugin.object_cache_file
     update_interval = int(plugin.status_update_interval)

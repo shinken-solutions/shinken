@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from shinken.action import Action
 from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp
 from shinken.property import CharProp, StringProp, ListProp
@@ -31,7 +30,7 @@ from shinken.autoslots import AutoSlots
 
 
 class Check(Action):
-    """ ODO : Add some comment about this class for the doc"""
+    """ ODO: Add some comment about this class for the doc"""
     # AutoSlots create the __slots__ with properties and
     # running_properties names
     __metaclass__ = AutoSlots
@@ -54,17 +53,19 @@ class Check(Action):
         'check_time':   IntegerProp(default=0),
         'execution_time': IntegerProp(default=0),
         'perf_data':    StringProp(default=''),
+        'check_type':   IntegerProp(default=0),
         'poller_tag':   StringProp(default='None'),
         'reactionner_tag':   StringProp(default='None'),
         'env':          StringProp(default={}),
         'internal':     BoolProp(default=False),
         'module_type':  StringProp(default='fork'),
         'worker':       StringProp(default='none'),
+        'from_trigger': BoolProp(default=False),
     }
 
     def __init__(self, status, command, ref, t_to_go, dep_check=None, id=None,
                  timeout=10, poller_tag='None', reactionner_tag='None',
-                 env={}, module_type='fork'):
+                 env={}, module_type='fork', from_trigger=False):
 
         self.is_a = 'check'
         self.type = ''
@@ -89,6 +90,7 @@ class Check(Action):
         self.check_time = 0
         self.execution_time = 0
         self.perf_data = ''
+        self.check_type = 0  # which kind of check result? 0=active 1=passive
         self.poller_tag = poller_tag
         self.reactionner_tag = reactionner_tag
         self.module_type = module_type
@@ -100,6 +102,7 @@ class Check(Action):
             self.internal = True
         else:
             self.internal = False
+        self.from_trigger = from_trigger
 
     def copy_shell(self):
         """return a copy of the check but just what is important for execution
@@ -126,3 +129,9 @@ class Check(Action):
 
     def get_id(self):
         return self.id
+
+    def set_type_active(self):
+        self.check_type = 0
+
+    def set_type_passive(self):
+        self.check_type = 1

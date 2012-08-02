@@ -1,4 +1,4 @@
-# Enable retention for all daemons 
+# Enable retention for all daemons
 setconfigfile __ETC__/shinken-specific.cfg
 getdirective modules from scheduler where scheduler_name=scheduler-1
 setparam modules=LAST,MongodbRetention from scheduler where scheduler_name=scheduler-1

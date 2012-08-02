@@ -34,6 +34,7 @@ import time
 import re
 import json
 
+
 # Our page
 def get_page():
     return get_view('problems')
@@ -42,9 +43,6 @@ def get_page():
 # Our page
 def get_all():
     return get_view('all')
-    
-
-
 
 
 # Our View code. We will get different data from all and /problems
@@ -56,7 +54,7 @@ def get_view(page):
         redirect("/user/login")
 
     print 'DUMP COMMON GET', app.request.GET.__dict__
- 
+
     # We want to limit the number of elements
     start = int(app.request.GET.get('start', '0'))
     end = int(app.request.GET.get('end', '30'))
@@ -86,33 +84,39 @@ def get_view(page):
         app.set_user_preference(user, 'bookmarks', '[]')
         bookmarks_r = '[]'
     bookmarks = json.loads(bookmarks_r)
+    bookmarks_ro = app.get_common_preference('bookmarks')
+    if not bookmarks_ro:
+        bookmarks_ro = '[]'
+
+    bookmarksro = json.loads(bookmarks_ro)
+    bookmarks = json.loads(bookmarks_r)
 
     items = []
     if page == 'problems':
         items = app.datamgr.get_all_problems(to_sort=False, get_acknowledged=True)
     elif page == 'all':
         items = app.datamgr.get_all_hosts_and_services()
-    else: #WTF?!?
+    else:  # WTF?!?
         redirect("/problems")
-    
+
     # Filter with the user interests
     items = only_related_to(items, user)
-    
+
     # Ok, if need, appli the search filter
     for s in search:
         s = s.strip()
         if not s:
             continue
-            
+
         print "SEARCHING FOR", s
         print "Before filtering", len(items)
-        
+
         elts = s.split(':', 1)
         t = 'hst_srv'
         if len(elts) > 1:
             t = elts[0]
             s = elts[1]
-            
+
         print 'Search for type %s and patern %s' % (t, s)
         if not t in filters:
             filters[t] = []
@@ -151,58 +155,53 @@ def get_view(page):
         if t == 'htag':
             print 'Add a htag filter', s
             items = [i for i in items if s in i.get_host_tags()]
-            
+
         if t == 'ack':
             print "Got an ack filter", s
             if s == 'false':
                 # First look for hosts, so ok for services, but remove problem_has_been_acknowledged elements
-                items = [i for i in items if i.__class__.my_type=='service' or not i.problem_has_been_acknowledged]
+                items = [i for i in items if i.__class__.my_type == 'service' or not i.problem_has_been_acknowledged]
                 # Now ok for hosts, but look for services, and service hosts
-                items = [i for i in items if i.__class__.my_type=='host' or (not i.problem_has_been_acknowledged and not i.host.problem_has_been_acknowledged)]
+                items = [i for i in items if i.__class__.my_type == 'host' or (not i.problem_has_been_acknowledged and not i.host.problem_has_been_acknowledged)]
             if s == 'true':
                 # First look for hosts, so ok for services, but remove problem_has_been_acknowledged elements
-                items = [i for i in items if i.__class__.my_type=='service' or i.problem_has_been_acknowledged]
+                items = [i for i in items if i.__class__.my_type == 'service' or i.problem_has_been_acknowledged]
                 # Now ok for hosts, but look for services, and service hosts
-                items = [i for i in items if i.__class__.my_type=='host' or (i.problem_has_been_acknowledged or i.host.problem_has_been_acknowledged)]
+                items = [i for i in items if i.__class__.my_type == 'host' or (i.problem_has_been_acknowledged or i.host.problem_has_been_acknowledged)]
 
         if t == 'downtime':
             print "Got an downtime filter", s
             if s == 'false':
                 # First look for hosts, so ok for services, but remove problem_has_been_acknowledged elements
-                items = [i for i in items if i.__class__.my_type=='service' or not i.in_scheduled_downtime]
+                items = [i for i in items if i.__class__.my_type == 'service' or not i.in_scheduled_downtime]
                 # Now ok for hosts, but look for services, and service hosts
-                items = [i for i in items if i.__class__.my_type=='host' or (not i.in_scheduled_downtime and not i.host.in_scheduled_downtime)]
+                items = [i for i in items if i.__class__.my_type == 'host' or (not i.in_scheduled_downtime and not i.host.in_scheduled_downtime)]
             if s == 'true':
                 # First look for hosts, so ok for services, but remove problem_has_been_acknowledged elements
-                items = [i for i in items if i.__class__.my_type=='service' or i.in_scheduled_downtime]
+                items = [i for i in items if i.__class__.my_type == 'service' or i.in_scheduled_downtime]
                 # Now ok for hosts, but look for services, and service hosts
-                items = [i for i in items if i.__class__.my_type=='host' or (i.in_scheduled_downtime or i.host.in_scheduled_downtime)]
+                items = [i for i in items if i.__class__.my_type == 'host' or (i.in_scheduled_downtime or i.host.in_scheduled_downtime)]
 
-        print "After filtering for",t, s,'we got', len(items)                
-            
+        print "After filtering for", t, s, 'we got', len(items)
+
     # If we are in the /problems and we do not have an ack filter
     # we apply by default the ack:false one
-    print "Late problem filtering?",  page == 'problems', len(filters['ack']) == 0
+    print "Late problem filtering?", page == 'problems', len(filters['ack']) == 0
     if page == 'problems' and len(filters['ack']) == 0:
         # First look for hosts, so ok for services, but remove problem_has_been_acknowledged elements
-        items = [i for i in items if i.__class__.my_type=='service' or not i.problem_has_been_acknowledged]
+        items = [i for i in items if i.__class__.my_type == 'service' or not i.problem_has_been_acknowledged]
         # Now ok for hosts, but look for services, and service hosts
-        items = [i for i in items if i.__class__.my_type=='host' or (not i.problem_has_been_acknowledged and not i.host.problem_has_been_acknowledged)]
-
+        items = [i for i in items if i.__class__.my_type == 'host' or (not i.problem_has_been_acknowledged and not i.host.problem_has_been_acknowledged)]
 
     # If we are in the /problems and we do not have an ack filter
     # we apply by default the ack:false one
-    print "Late problem filtering?",  page == 'problems', len(filters['downtime']) == 0
+    print "Late problem filtering?", page == 'problems', len(filters['downtime']) == 0
     if page == 'problems' and len(filters['downtime']) == 0:
         # First look for hosts, so ok for services, but remove problem_has_been_acknowledged elements
-        items = [i for i in items if i.__class__.my_type=='service' or not i.in_scheduled_downtime]
+        items = [i for i in items if i.__class__.my_type == 'service' or not i.in_scheduled_downtime]
         # Now ok for hosts, but look for services, and service hosts
-        items = [i for i in items if i.__class__.my_type=='host' or (not i.in_scheduled_downtime and not i.host.in_scheduled_downtime)]
-            
+        items = [i for i in items if i.__class__.my_type == 'host' or (not i.in_scheduled_downtime and not i.host.in_scheduled_downtime)]
 
-
-
-        
     # Now sort it!
     items.sort(hst_srv_sort)
 
@@ -215,18 +214,16 @@ def get_view(page):
     navi = app.helper.get_navi(total, start, step=30)
     items = items[start:end]
 
-#    print "get all problems:", pbs
-#    for pb in pbs :
-#        print pb.get_name()
+    ## print "get all problems:", pbs
+    ## for pb in pbs:
+    ##     print pb.get_name()
     print 'Give filters', filters
-    return {'app' : app, 'pbs' : items, 'user' : user, 'navi' : navi, 'search' : search_str, 'page' : page, 'filters' : filters, 'bookmarks':bookmarks}
-
-
+    return {'app': app, 'pbs': items, 'user': user, 'navi': navi, 'search': search_str, 'page': page, 'filters': filters, 'bookmarks': bookmarks, 'bookmarksro': bookmarksro }
 
 
 # Our page
 def get_pbs_widget():
-    
+
     user = app.get_user_auth()
     if not user:
         redirect("/user/login")
@@ -236,7 +233,7 @@ def get_pbs_widget():
     search = app.request.GET.get('search', '')
 
     pbs = app.datamgr.get_all_problems(to_sort=False)
-    
+
     # Filter with the user interests
     pbs = only_related_to(pbs, user)
 
@@ -269,36 +266,25 @@ def get_pbs_widget():
 
     pbs = pbs[:nb_elements]
 
-    wid = app.request.GET.get('wid', 'widget_problems_'+str(int(time.time())))
+    wid = app.request.GET.get('wid', 'widget_problems_' + str(int(time.time())))
     collapsed = (app.request.GET.get('collapsed', 'False') == 'True')
 
-    options = {'search' : {'value' : search, 'type' : 'text', 'label' : 'Filter by name'},
-               'nb_elements' : {'value' : nb_elements, 'type' : 'int', 'label' : 'Max number of elements to show'},
+    options = {'search': {'value': search, 'type': 'text', 'label': 'Filter by name'},
+               'nb_elements': {'value': nb_elements, 'type': 'int', 'label': 'Max number of elements to show'},
                }
 
     title = 'IT problems'
     if search:
         title = 'IT problems (%s)' % search
 
-
-    return {'app' : app, 'pbs' : pbs, 'user' : user, 'search' : search, 'page' : 'problems',
-            'wid' : wid, 'collapsed' : collapsed, 'options' : options, 'base_url' : '/widget/problems', 'title' : title,
+    return {'app': app, 'pbs': pbs, 'user': user, 'search': search, 'page': 'problems',
+            'wid': wid, 'collapsed': collapsed, 'options': options, 'base_url': '/widget/problems', 'title': title,
             }
-
-
-
-
-
-
-
-
-
-
 
 
 # Our page
 def get_last_errors_widget():
-    
+
     user = app.get_user_auth()
     if not user:
         redirect("/user/login")
@@ -307,28 +293,24 @@ def get_last_errors_widget():
     nb_elements = max(0, int(app.request.GET.get('nb_elements', '10')))
 
     pbs = app.datamgr.get_problems_time_sorted()
-    
+
     # Filter with the user interests
     pbs = only_related_to(pbs, user)
 
     # Keep only nb_elements
     pbs = pbs[:nb_elements]
 
-    wid = app.request.GET.get('wid', 'widget_last_problems_'+str(int(time.time())))
+    wid = app.request.GET.get('wid', 'widget_last_problems_' + str(int(time.time())))
     collapsed = (app.request.GET.get('collapsed', 'False') == 'True')
 
-    options = {'nb_elements' : {'value' : nb_elements, 'type' : 'int', 'label' : 'Max number of elements to show'},
+    options = {'nb_elements': {'value': nb_elements, 'type': 'int', 'label': 'Max number of elements to show'},
                }
 
     title = 'Last IT problems'
 
-    return {'app' : app, 'pbs' : pbs, 'user' : user, 'page' : 'problems',
-            'wid' : wid, 'collapsed' : collapsed, 'options' : options, 'base_url' : '/widget/last_problems', 'title' : title,
+    return {'app': app, 'pbs': pbs, 'user': user, 'page': 'problems',
+            'wid': wid, 'collapsed': collapsed, 'options': options, 'base_url': '/widget/last_problems', 'title': title,
             }
-
-
-
-
 
 widget_desc = '''<h3>IT problems</h3>
 Show the most impacting IT problems
@@ -338,10 +320,8 @@ last_widget_desc = '''<h3>Last IT problems</h3>
 Show the IT problems sorted by time
 '''
 
-
-pages = {get_page : { 'routes' : ['/problems'], 'view' : 'problems', 'static' : True},
-         get_all : { 'routes' : ['/all'], 'view' : 'problems', 'static' : True},
-         get_pbs_widget : {'routes' : ['/widget/problems'], 'view' : 'widget_problems', 'static' : True, 'widget' : ['dashboard'], 'widget_desc' : widget_desc, 'widget_name' : 'problems', 'widget_picture' : '/static/problems/img/widget_problems.png'},
-         get_last_errors_widget : {'routes' : ['/widget/last_problems'], 'view' : 'widget_last_problems', 'static' : True, 'widget' : ['dashboard'], 'widget_desc' : last_widget_desc, 'widget_name' : 'last_problems', 'widget_picture' : '/static/problems/img/widget_problems.png'},
+pages = {get_page: {'routes': ['/problems'], 'view': 'problems', 'static': True},
+         get_all: {'routes': ['/all'], 'view': 'problems', 'static': True},
+         get_pbs_widget: {'routes': ['/widget/problems'], 'view': 'widget_problems', 'static': True, 'widget': ['dashboard'], 'widget_desc': widget_desc, 'widget_name': 'problems', 'widget_picture': '/static/problems/img/widget_problems.png'},
+         get_last_errors_widget: {'routes': ['/widget/last_problems'], 'view': 'widget_last_problems', 'static': True, 'widget': ['dashboard'], 'widget_desc': last_widget_desc, 'widget_name': 'last_problems', 'widget_picture': '/static/problems/img/widget_problems.png'},
          }
-

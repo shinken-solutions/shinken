@@ -23,9 +23,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from shinken.util import safe_print
 from shinken.misc.datamanagerskonf import DataManagerSKonf
+
 
 class FakeRegenerator(object):
     def __init__(self):
@@ -38,7 +38,6 @@ class DataManagerHostd(DataManagerSKonf):
         for i in self.get_all_in_db(table):
             r.append(i)
         return r
-        
 
     def get_packs(self):
         return self.get_generics('packs', 'pack_name')
@@ -51,7 +50,6 @@ class DataManagerHostd(DataManagerSKonf):
     def get_pack_by_id(self, pid):
         r = self.get_in_db('packs', '_id', pid)
         return r
-
 
     def get_pack_by_user_packname(self, username, packname):
         value = '%s-%s' % (username, packname)
@@ -71,7 +69,7 @@ class DataManagerHostd(DataManagerSKonf):
                 print "In the level", d, " and the context", pos
                 sons = pos[1]
                 print "Get the sons to add me", sons
-                
+
                 if not d in [s[0] for s in sons]:
                     print "Add a new level"
                     print "Get the sons to add me", sons
@@ -82,14 +80,13 @@ class DataManagerHostd(DataManagerSKonf):
                     if s[0] == d:
                         print "We found our new position", s
                         pos = s
-                        
+
             # Now add our pack to this entry
             print "Add pack to the level", pos[0]
             pos[2].append(p)
         print "The whole pack tree", t
         return t
-                    
-    
+
     def get_pack_tree(self):
         packs = self.get_packs()
         packs = [p for p in packs if p['state'] in ['ok', 'pending']]
@@ -99,14 +96,13 @@ class DataManagerHostd(DataManagerSKonf):
         print "RETURN WHOLE PACK TREE", r
         return r
 
-        
     def _get_pack_tree(self, tree):
         print "__get_pack_tree:: for", tree
         name = tree[0]
         sons = tree[1]
         packs = tree[2]
 
-        #Sort our sons by they names
+        # Sort our sons by they names
         def _sort(e1, e2):
             if e1[0] < e2[0]:
                 return -1
@@ -115,22 +111,19 @@ class DataManagerHostd(DataManagerSKonf):
             return 0
         sons.sort(_sort)
 
-
         res = []
         if name != '':
-            res.append({'type' : 'new_tree', 'name' : name})
+            res.append({'type': 'new_tree', 'name': name})
         for p in packs:
-            res.append({'type' : 'pack', 'pack' : p})
-            
+            res.append({'type': 'pack', 'pack': p})
+
         for s in sons:
             r = self._get_pack_tree(s)
             res.extend(r)
         if name != '':
-            res.append({'type' : 'end_tree', 'name' : name})
+            res.append({'type': 'end_tree', 'name': name})
         print "RETURN PARTIAL", res
         return res
-
-
 
     # We got a pack name, we look for all objects, and search where this
     # host template name is used
@@ -164,8 +157,8 @@ class DataManagerHostd(DataManagerSKonf):
                 if tname in elts:
                     print "FOUND A SERVICE THAT MA5TCH", s.get('service_description', '')
                     services.append(s)
-            res.append( (tpl, services) )
-            
+            res.append((tpl, services))
+
         return res
 
 datamgr = DataManagerHostd()

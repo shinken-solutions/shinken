@@ -20,15 +20,15 @@ window.addEvent('domready', function(){
 
 	var postprocessing = { enabled : true };
 	var all_items = new Array();
-			
+
 	var radius = 2;
 	var theta = 45;
 	var theta_offset = 0.01;
-			
+
 	var active_object = null;
-			
+
 	var PI2 = Math.PI * 2;
-			
+
 	/* Let create and init all things*/
 	init();
 	/* And start the animation loop*/
@@ -67,7 +67,7 @@ window.addEvent('domready', function(){
 		    fragmentShader: document.getElementById( 'fragmentShader' ).textContent
 
 		} );
-				
+
 	    uniforms_crit = {
 
 		fogDensity: { type: "f", value: 0.45 },
@@ -98,12 +98,12 @@ window.addEvent('domready', function(){
 		}else{
 		    mat = material;
 		}
-		
-		mesh = new THREE.Mesh( new THREE.SphereGeometry( 0.2, 30, 30 ), [ mat ] );			
-          
+
+		mesh = new THREE.Mesh( new THREE.SphereGeometry( 0.2, 30, 30 ), [ mat ] );
+
 		// We setup some flags
 		mesh.fixed = false; //Is in a fixed forefront position?
-          
+
 		mesh.id = i;
 		/* There are shepre and text :)*/
 		mesh.is_sphere = true;
@@ -123,28 +123,28 @@ window.addEvent('domready', function(){
 		textMesh.scale.x = 0.005;
 		textMesh.scale.y = 0.005;
 		textMesh.scale.z = 0.0001;
-        
+
 		// Now put it below the mesh
 		mesh.y_offset = 0.3;
-          
+
 		textMesh.position.x = mesh.position.x;
 		textMesh.position.y = mesh.position.y - mesh.y_offset;
 		textMesh.position.z = mesh.position.z;
-          
+
 		mesh.text = textMesh;
-          
+
 		// We put good position values
 		update_mesh(mesh);
-          
+
 		scene.addObject( textMesh);
-          
+
 		// Make sure the info panel is hide!
 		objinfo = document.getElementById('objinfo-'+i);
 		new Fx.Tween(objinfo, {property: 'opacity'}).start(0);
 
-          
-          
-          
+
+
+
 	    }
 
 	    renderer = new THREE.WebGLRenderer( { antialias: true } );
@@ -194,19 +194,19 @@ window.addEvent('domready', function(){
 	    if ( intersects.length > 0 ) {
 		//alert("move from"+intersects[ 0 ].object.position.x+"to"+Math.random());
 		var object = intersects[ 0 ].object;
-          
+
 		// We only act if it's a sphere
 		if(!object.is_sphere){
 		    return;
 		}
-          
+
 		if(active_object != null && active_object != object){
 		    toggle_object(active_object);
 		}
 		// Ok, change the state of this object
         	toggle_object(object);
         	// Only set active if it's really active
-        	
+
 
 	    }
 
@@ -225,12 +225,12 @@ window.addEvent('domready', function(){
 			    /*x: object.save_position_x,
 			      y: object.save_position_y,
 			      z: object.save_position_z*/}, 1000 ).easing( TWEEN.Easing.Cubic.EaseInOut).start();
-              
+
 		new TWEEN.Tween( object.scale).to( {
 			x : object.scale.x / 3,
 			    y : object.scale.y / 3,
 			    z : object.scale.z / 3,}, 1000 ).easing( TWEEN.Easing.Cubic.EaseInOut).start();
-            
+
 		// Get back the text near us
 		new TWEEN.Tween( object ).to( {y_offset : object.y_offset / 3}, 1000 ).easing( TWEEN.Easing.Cubic.EaseInOut).start();
 		//And smaller
@@ -238,15 +238,15 @@ window.addEvent('domready', function(){
 			x : object.text.scale.x / 3,
 			    y : object.text.scale.y / 3,
 			    z : object.text.scale.z / 3,}, 1000 ).easing( TWEEN.Easing.Cubic.EaseInOut).start();
-          
+
 		// There is no more active object
 		active_object = null;
-            
-            
+
+
 		// Make the objinfo panel disapear
 		objinfo = document.getElementById('objinfo-'+object.id);
 		new Fx.Tween(objinfo, {property: 'opacity'}).start(0);
-          
+
 	    }else{ // Not already in front. go in front
 		// Save the original position
 		object.save_position_x = object.position.x;
@@ -261,7 +261,7 @@ window.addEvent('domready', function(){
 			x : object.scale.x * 3,
 			    y : object.scale.y * 3,
 			    z : object.scale.z * 3,}, 1000 ).easing( TWEEN.Easing.Cubic.EaseInOut).start();
-            
+
 		// Put the text far away from us
 		new TWEEN.Tween( object ).to( {y_offset : object.y_offset * 3}, 1000 ).easing( TWEEN.Easing.Cubic.EaseInOut).start();
 		// And bigger
@@ -269,14 +269,14 @@ window.addEvent('domready', function(){
 			x : object.text.scale.x * 3,
 			    y : object.text.scale.y * 3,
 			    z : object.text.scale.z * 3,}, 1000 ).easing( TWEEN.Easing.Cubic.EaseInOut).start();
-            
+
 		// It's now the new active object
 		active_object = object;
-            
+
 		objinfo = document.getElementById('objinfo-'+object.id);
 		//objinfo.style.display = 'block';
 		new Fx.Tween(objinfo, {property: 'opacity'}).start(1);
-            
+
 	    }
 
 	    // Inverse the Object state
@@ -353,7 +353,7 @@ window.addEvent('domready', function(){
 	function animate() {
 
 	    requestAnimationFrame( animate );
-    
+
 	    /* move objects */
 	    for ( var i = 0; i < all_items.length; i ++ ) {
 		mesh = all_items[i];
@@ -375,7 +375,7 @@ window.addEvent('domready', function(){
 
 	function update_mesh(mesh){
 	    var off = mesh.id + 1;
-	    if(!mesh.fixed){              
+	    if(!mesh.fixed){
 		mesh.position.x = Math.cos(theta+off)*0.95;
 		mesh.position.y = Math.sin(theta/2+off)/5;
 		mesh.position.z = Math.sin(theta+off)/2;

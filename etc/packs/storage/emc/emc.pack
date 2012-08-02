@@ -1,13 +1,13 @@
 {
-"name" : "emc",
+"name": "emc",
 
-"description" : "Checks for Clariion storage box",
+"description": "Checks for Clariion storage box",
 
 "path":"storage/",
 
-"templates" : ["emc-clariion"],
+"templates": ["emc-clariion"],
 
-"macros":{}	 
+"macros":{}
 
 
 }

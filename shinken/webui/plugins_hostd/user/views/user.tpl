@@ -1,8 +1,9 @@
 %import hashlib
 
-%rebase layout_hostd globals(), js=['user/js/user.js']
-
 %uname = view_user.get('username')
+%rebase layout_hostd globals(), js=['user/js/user.js'], title='User %s' % uname
+
+
 
 %# We need to know if the user asking the page is the user or if it's a public view
 %private_access = (user  == view_user)
@@ -45,7 +46,7 @@
 
 %if private_access:
 <div class='well span8'>
-  <h4> API KEY : </h4> <h3>{{user.get('api_key')}}</h3>
+  <h4> API KEY: </h4> <h3>{{user.get('api_key')}}</h3>
 </div>
 
 
@@ -76,7 +77,7 @@
   No refused packs
   %else:
     %for p in refused_packs:
-      <span class='span8 alert alert-error'> {{p.get('filename')}} is refused. Reason : {{p.get('moderation_comment', 'none')}}.</span>
+      <span class='span8 alert alert-error'> {{p.get('filename')}} is refused. Reason: {{p.get('moderation_comment', 'none')}}.</span>
     %end
   %end
 </div>

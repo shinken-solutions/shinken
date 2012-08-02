@@ -23,14 +23,12 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 properties = {
     'daemons': ['broker', 'scheduler'],
     'type': 'livestatus',
     'phases': ['running'],
     'external': True,
     }
-
 
 from livestatus_broker import LiveStatus_broker
 # called by the plugin manager to get an instance
@@ -39,11 +37,11 @@ from livestatus_broker import LiveStatus_broker
 def get_instance(plugin):
     print "Get a Livestatus instance for plugin %s" % plugin.get_name()
 
-    #First try to import
+    # First try to import
     try:
         from livestatus_broker import LiveStatus_broker
     except ImportError, exp:
-        print "Warning : the plugin type %s is unavalable : %s" % ('livestatus', exp)
+        print "Warning: the plugin type %s is unavailable: %s" % ('livestatus', exp)
         return None
 
     instance = LiveStatus_broker(plugin)

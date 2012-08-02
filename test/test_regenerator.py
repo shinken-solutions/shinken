@@ -1,46 +1,38 @@
-#!/usr/bin/env python2.6
-#Copyright (C) 2009-2010 :
+#!/usr/bin/env python
+# Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 #
 # This file is used to test reading and processing of config files
 #
 
-import time, sys
+import time
 
+from shinken_test import ShinkenTest, unittest
 
-sys.path.append("..")
-sys.path.append("../shinken")
-
-#It's ugly I know....
-import shinken
-from shinken.objects import *
-from shinken_test import *
+from shinken.objects import Service
 from shinken.misc.regenerator import Regenerator
 
 
 class TestRegenerator(ShinkenTest):
-    #Uncomment this is you want to use a specific configuration
-    #for your test
     def setUp(self):
         self.setup_with_file('etc/nagios_regenerator.cfg')
-
 
     def look_for_same_values(self):
         # Look at Regenerator values
@@ -62,16 +54,13 @@ class TestRegenerator(ShinkenTest):
                 same_pbs = i.get_name() in [j.get_name() for j in orig_h.source_problems]
                 self.assert_(same_pbs)
 
-            
-                
-
         print "Services:", self.rg.services.__dict__
         for s in self.rg.services:
             orig_s = self.sched.services.find_srv_by_name_and_hostname(s.host.host_name, s.service_description)
             print s.state, orig_s.state
             self.assert_(s.state == orig_s.state)
             self.assert_(s.state_type == orig_s.state_type)
-            #Look for same impacts too
+            # Look for same impacts too
             for i in s.impacts:
                 print "Got impact", i.get_name()
                 same_impacts = i.get_name() in [j.get_name() for j in orig_s.impacts]
@@ -83,16 +72,13 @@ class TestRegenerator(ShinkenTest):
                 self.assert_(same_pbs)
             # Look for same host
             self.assert_(s.host.get_name() == orig_s.host.get_name())
-        
 
-    
-    #Change ME :)
     def test_regenerator(self):
         #
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        #for h in self.sched.hosts:
+        # for h in self.sched.hosts:
         #    h.realm = h.realm.get_name()
         self.sched.conf.skip_initial_broks = False
         self.sched.fill_initial_broks()
@@ -113,17 +99,16 @@ class TestRegenerator(ShinkenTest):
 
         self.look_for_same_values()
 
-
         print "Get the hosts and services"
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         router = self.sched.hosts.find_by_name("test_router_0")
         router.checks_in_progress = []
-        router.act_depend_of = [] # ignore the router
+        router.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
         self.scheduler_loop(3, [[host, 2, 'DOWN | value1=1 value2=2'], [router, 0, 'UP | rtt=10'], [svc, 2, 'BAD | value1=0 value2=0']])
         self.assert_(host.state == 'DOWN')
         self.assert_(host.state_type == 'HARD')
@@ -144,7 +129,6 @@ class TestRegenerator(ShinkenTest):
 
         print 'Time', t1 - t0
 
-        
         b = svc.get_initial_status_brok()
         b.prepare()
         print "GO BENCH!"
@@ -157,7 +141,7 @@ class TestRegenerator(ShinkenTest):
                 setattr(s, prop, value)
         t1 = time.time()
         print "Bench end:", t1 - t0
-        
+
         times = {}
         sizes = {}
         import cPickle
@@ -176,33 +160,30 @@ class TestRegenerator(ShinkenTest):
                     tmp = cPickle.dumps(data[prop], 0)
                     sizes[prop] += len(tmp)
                     times[prop] += time.time() - t0
-        
+
         print "Times"
-        for (k,v) in times.iteritems():
-            print "\t%s : %s" % (k, v)
+        for (k, v) in times.iteritems():
+            print "\t%s: %s" % (k, v)
         print "\n\n"
         print "Sizes"
-        for (k,v) in sizes.iteritems():
-            print "\t%s : %s" % (k, v)
+        for (k, v) in sizes.iteritems():
+            print "\t%s: %s" % (k, v)
         print "\n"
         print "total time", time.time() - start
 
-
-
-    #Change ME :)
     def test_regenerator_load_from_scheduler(self):
         #
         # Config is not correct because of a wrong relative path
         # in the main config file
         #
-        #for h in self.sched.hosts:
+        # for h in self.sched.hosts:
         #    h.realm = h.realm.get_name()
-        
+
         self.rg = Regenerator()
         self.rg.load_from_scheduler(self.sched)
-        
+
         self.sched.conf.skip_initial_broks = False
-        self.sched.fill_initial_broks()        
+        self.sched.fill_initial_broks()
         # Got the initial creation ones
         ids = self.sched.broks.keys()
         ids.sort()
@@ -215,12 +196,11 @@ class TestRegenerator(ShinkenTest):
         t1 = time.time()
         print 'First inc', t1 - t0, len(self.sched.broks)
         self.sched.broks.clear()
-        
+
         self.look_for_same_values()
-        
-        
-        
+
+
+
 
 if __name__ == '__main__':
     unittest.main()
-

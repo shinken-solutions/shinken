@@ -1,10 +1,10 @@
 /*
     Copyright (C) 2008, 2009 Charles Ying. All Rights Reserved.
-    
+
     This distribution is released under the BSD license.
 
     http://css-vfx.googlecode.com/
-    
+
     See the README for documentation and license.
 */
 
@@ -30,7 +30,7 @@
     position: absolute;
     left: 50%;
     top: 50%;
-    
+
     -webkit-transform-style: preserve-3d;
     -webkit-transform: translate3d(0, 0, 0);
 

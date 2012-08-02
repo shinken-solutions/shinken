@@ -1,3 +1,31 @@
+/**
+* Copyright (C) 2009-2012:
+*    Gabes Jean, naparuba@gmail.com
+*    Gerhard Lausser, Gerhard.Lausser@consol.de
+*    Gregory Starck, g.starck@gmail.com
+*    Hartmut Goebel, h.goebel@goebel-consult.de
+*    Andreas Karfusehr, andreas@karfusehr.de
+*
+* This file is part of Shinken.
+*
+* Shinken is free software: you can redistribute it and/or modify
+* it under the terms of the GNU Affero General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* Shinken is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU Affero General Public License for more details.
+*
+* You should have received a copy of the GNU Affero General Public License
+* along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+*
+**/
+
+/*  Special Shinken styles
+    ------------------------------------------------------- */
+
 .min-height {
   min-height: 600px;
 }
@@ -45,7 +73,7 @@
 }
 
 .no-maxwidth{
-  max-width: none !important; 
+  max-width: none !important;
 }
 
 .quickinfo{
@@ -74,14 +102,14 @@
   height: 25px;
   width: 25px;
   margin-right: 2px;
-  vertical-align: -3px; 
+  vertical-align: -3px;
 }
 
 .imgsize4 {
   height: 48px;
   width: 48px;
   margin-right: 10px;
-  vertical-align: -3px; 
+  vertical-align: -3px;
 }
 
 
@@ -103,6 +131,13 @@
   border-color: rgba(0, 0, 0, 0.15);
 }
 
+/*  Alert styles => BTN Color
+    ------------------------------------------------------- */
+.alert {
+  color: #FFFFFF;
+  text-align: center;
+}
+
 .alert-small {
   background-color: #999999;
   border-radius: 3px 3px 3px 3px;
@@ -112,54 +147,81 @@
   padding: 2px 4px 3px;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
 }
+.trim-Yes, .trim-No {
+  color: #FFFFFF;
+  text-transform: uppercase;
+} 
 
-.alert-critical, .alert-down {
-    color: #FFFFFF;
-    background-color: #e10000;
-    background-image: -webkit-gradient(linear, left top, left bottom, from(#e10000), to(#bd0000)); /* Saf4+, Chrome */
-    background-image: -webkit-linear-gradient(top, #e10000, #bd0000); /* Chrome 10+, Saf5.1+, iOS 5+ */
-    background-image:    -moz-linear-gradient(top, #e10000, #bd0000); /* FF3.6 */
-    background-image:     -ms-linear-gradient(top, #e10000, #bd0000); /* IE10 */
-    background-image:      -o-linear-gradient(top, #e10000, #bd0000); /* Opera 11.10+ */
-    background-image:         linear-gradient(top, #e10000, #bd0000);
-            filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#e10000', EndColorStr='#bd0000'); /* IE6-IE9 */
+.alert-critical, .alert-down, .trim-Yes {
+  background-color: #da4f49;
+  background-image: -moz-linear-gradient(top, #ee5f5b, #bd362f);
+  background-image: -ms-linear-gradient(top, #ee5f5b, #bd362f);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ee5f5b), to(#bd362f));
+  background-image: -webkit-linear-gradient(top, #ee5f5b, #bd362f);
+  background-image: -o-linear-gradient(top, #ee5f5b, #bd362f);
+  background-image: linear-gradient(top, #ee5f5b, #bd362f);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ee5f5b', endColorstr='#bd362f', GradientType=0);
+  border-color: #bd362f #bd362f #802420;
+  border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+  filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
 }
+
+.alert-critical:hover, .alert-down:hover, .trim-Yes:hover { color: #FFFFFF; background-color: #bd362f;}
 
 .alert-warning {
-    color: #FFFFFF;
-    background-color: #71DB65;
-    background-image: -webkit-gradient(linear, left top, left bottom, from(#FF9900), to(#ff5f00)); /* Saf4+, Chrome */
-    background-image: -webkit-linear-gradient(top, #FF9900, #ff5f00); /* Chrome 10+, Saf5.1+, iOS 5+ */
-    background-image:    -moz-linear-gradient(top, #FF9900, #ff5f00); /* FF3.6 */
-    background-image:     -ms-linear-gradient(top, #FF9900, #ff5f00); /* IE10 */
-    background-image:      -o-linear-gradient(top, #FF9900, #ff5f00); /* Opera 11.10+ */
-    background-image:         linear-gradient(top, #FF9900, #ff5f00);
-            filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#FF9900', EndColorStr='#ff5f00'); /* IE6-IE9 */
+  background-color: #faa732;
+  background-image: -moz-linear-gradient(top, #fbb450, #f89406);
+  background-image: -ms-linear-gradient(top, #fbb450, #f89406);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#fbb450), to(#f89406));
+  background-image: -webkit-linear-gradient(top, #fbb450, #f89406);
+  background-image: -o-linear-gradient(top, #fbb450, #f89406);
+  background-image: linear-gradient(top, #fbb450, #f89406);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fbb450', endColorstr='#f89406', GradientType=0);
+  border-color: #f89406 #f89406 #ad6704;
+  border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+  filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
 }
 
-.alert-good, .alert-up, .alert-ok {
-    color: #FFFFFF;
-    background-color: #7AB317;
-    background-image: -webkit-gradient(linear, left top, left bottom, from(#7AB317), to(#669900)); /* Saf4+, Chrome */
-    background-image: -webkit-linear-gradient(top, #7AB317, #669900); /* Chrome 10+, Saf5.1+, iOS 5+ */
-    background-image:    -moz-linear-gradient(top, #7AB317, #669900); /* FF3.6 */
-    background-image:     -ms-linear-gradient(top, #7AB317, #669900); /* IE10 */
-    background-image:      -o-linear-gradient(top, #7AB317, #669900); /* Opera 11.10+ */
-    background-image:         linear-gradient(top, #7AB317, #669900);
-            filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#e10000', EndColorStr='#669900'); /* IE6-IE9 */
+.alert-warning:hover { background-color: #f89406; }
+
+.alert-good, .alert-up, .alert-ok, .trim-No {
+  background-color: #5bb75b;
+  background-image: -moz-linear-gradient(top, #62c462, #51a351);
+  background-image: -ms-linear-gradient(top, #62c462, #51a351);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#62c462), to(#51a351));
+  background-image: -webkit-linear-gradient(top, #62c462, #51a351);
+  background-image: -o-linear-gradient(top, #62c462, #51a351);
+  background-image: linear-gradient(top, #62c462, #51a351);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#62c462', endColorstr='#51a351', GradientType=0);
+  border-color: #51a351 #51a351 #387038;
+  border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+  filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
 }
 
-.alert-unknown, .alert-unreachable {
-    color: #FFFFFF;
-    background-color: #71DB65;
-    background-image: -webkit-gradient(linear, left top, left bottom, from(#71DB65), to(#7AB317)); /* Saf4+, Chrome */
-    background-image: -webkit-linear-gradient(top, #71DB65, #7AB317); /* Chrome 10+, Saf5.1+, iOS 5+ */
-    background-image:    -moz-linear-gradient(top, #71DB65, #7AB317); /* FF3.6 */
-    background-image:     -ms-linear-gradient(top, #71DB65, #7AB317); /* IE10 */
-    background-image:      -o-linear-gradient(top, #71DB65, #7AB317); /* Opera 11.10+ */
-    background-image:         linear-gradient(top, #71DB65, #7AB317);
-            filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#71DB65', EndColorStr='#7AB317'); /* IE6-IE9 */
+.alert-good:hover, .alert-up:hover, .alert-ok:hover, .trim-No:hover { color: #FFFFFF; background-color: #51a351; }
+
+.alert-unknown, .alert-unreachable, .alert-pending {
+  background-color: #49afcd;
+  background-image: -moz-linear-gradient(top, #5bc0de, #2f96b4);
+  background-image: -ms-linear-gradient(top, #5bc0de, #2f96b4);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#5bc0de), to(#2f96b4));
+  background-image: -webkit-linear-gradient(top, #5bc0de, #2f96b4);
+  background-image: -o-linear-gradient(top, #5bc0de, #2f96b4);
+  background-image: linear-gradient(top, #5bc0de, #2f96b4);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#5bc0de', endColorstr='#2f96b4', GradientType=0);
+  border-color: #2f96b4 #2f96b4 #1f6377;
+  border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+  filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
 }
+
+.alert-unknown:hover, .alert-unreachable:hover, .alert-pending:hover { color: #FFFFFF ;background-color: #2f96b4; }
+
+/*  Badger styles
+    ------------------------------------------------------- */
 
 .badger {
   background-color: #999999;
@@ -189,16 +251,23 @@
   color: #FFFFFF;
 }
 
+.badger-ok {
+  background-color: #7AB317;
+  background-image: -moz-linear-gradient(center top , #7AB317, #669900);
+  border-radius: 3px 3px 3px 3px;
+  color: #FFFFFF;
+}
+
 h1 {
   font-size: 26px;
 }
 
 h1, h2, h3, h4 {
-color: #787878;
+  color: #787878;
 }
 
 /* To tag potential long div, and cut them if too long with '...'*/
-.cut_long{
+.cut_long {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -229,6 +298,6 @@ a.disabled-link:hover {
 /* In the top menu, there is too much margin on the left part,
  bootstrap put a left margin of 10, I prefer 0*/
 .navbar .nav.pull-right {
-margin-left: 0px;
-margin-right: 0;
+  margin-left: 0px;
+  margin-right: 0;
 }

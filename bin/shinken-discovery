@@ -63,6 +63,12 @@ parser.add_option('-m', '--macros', dest="macros",
                   help="List of macros (like NMAPTARGETS=192.168.0.0/24). Should be the last argument")
 parser.add_option('--db', dest="dbmod",
                   help="Optionnal : Name of the database module to use.")
+parser.add_option('--backend', dest="backend",
+                  help="Optionnal : Name of a module that will totally manage the object writing/update thing. If you don't know what it means, maybe you should not use this option :)")
+parser.add_option('--modules_path', dest="modules_path",
+                  help="Optionnal : Path for the module loading. If you don't know what it means, maybe you should not use this option :)")
+parser.add_option('--merge', dest="merge", action='store_true',
+                  help="Optionnal : In multiple discovery level, it is the final host name which wins. Make possible merge of multiple IP but same final device")
 
 
 
@@ -77,13 +83,18 @@ if not opts.cfg_input:
     else : # take the default file
         opts.cfg_input = DEFAULT_CFG
 
-if not opts.output_dir and not opts.dbmod:
+if not opts.output_dir and not opts.dbmod and not opts.backend:
     parser.error("Requires one output directory (option -o/--dir-output) or database output (option --db)")
 
 if not opts.overwrite:
     overwrite = False
 else:
     overwrite = opts.overwrite
+
+if not opts.merge:
+    merge = False
+else:
+    merge = opts.merge
 
 if not opts.runners:
     runners = ['*']
@@ -95,6 +106,8 @@ if opts.macros:
 
 if args:
     raw_macros.extend(args)
+
+backend = opts.backend or None
 
 print "Macros", raw_macros
 
@@ -127,11 +140,11 @@ cfg_input = opts.cfg_input
 output_dir = opts.output_dir
 overwrite = opts.overwrite
 dbmod = opts.dbmod
-
+modules_path = opts.modules_path or ''
 
 
 # Get the Manager for all of the discovery thing
-d = DiscoveryManager(cfg_input, macros, overwrite, runners, output_dir=output_dir, dbmod=dbmod)
+d = DiscoveryManager(cfg_input, macros, overwrite, runners, output_dir=output_dir, dbmod=dbmod, backend=backend, modules_path=modules_path, merge=merge)
 
 # #Ok, let start the plugins that will give us the data
 d.launch_runners()

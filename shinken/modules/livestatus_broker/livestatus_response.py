@@ -29,7 +29,7 @@ try:
 except ImportError:
     try:
         from simplejson import dumps, loads, JSONEncoder
-        # ujson's dumps() cannot handle a separator parameter, which is 
+        # ujson's dumps() cannot handle a separator parameter, which is
         # needed to avoid unnecessary spaces in the json output
         # That's why simplejson and json manipulate the encoder class
         JSONEncoder.item_separator = ','
@@ -38,6 +38,7 @@ except ImportError:
         from json import dumps, loads, JSONEncoder
         JSONEncoder.item_separator = ','
         JSONEncoder.key_separator = ':'
+
 
 class LiveStatusResponse:
 
@@ -51,8 +52,8 @@ class LiveStatusResponse:
     """
 
     separators = map(lambda x: chr(int(x)), [10, 59, 44, 124])
-    
-    def __init__(self, responseheader = 'off', outputformat = 'csv', keepalive = 'off', columnheaders = 'off', separators = separators):
+
+    def __init__(self, responseheader='off', outputformat='csv', keepalive='off', columnheaders='off', separators=separators):
         self.responseheader = responseheader
         self.outputformat = outputformat
         self.keepalive = keepalive
@@ -61,7 +62,6 @@ class LiveStatusResponse:
         self.statuscode = 200
         self.output = ''
         pass
-
 
     def __str__(self):
         output = "LiveStatusResponse:\n"
@@ -95,7 +95,7 @@ class LiveStatusResponse:
                 # Construct one line of output for each object found
                 l = []
                 for c in columns:
-                    attribute = 'lsm_'+c
+                    attribute = 'lsm_' + c
                     try:
                         value = getattr(item, attribute)(self.query)
                     except Exception:
@@ -142,7 +142,7 @@ class LiveStatusResponse:
             for item in result:
                 rows = []
                 for c in columns:
-                    attribute = 'lsm_'+c
+                    attribute = 'lsm_' + c
                     try:
                         value = getattr(item, attribute)(self.query)
                     except Exception, exp:

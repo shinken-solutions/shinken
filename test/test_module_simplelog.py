@@ -1,22 +1,22 @@
-#!/usr/bin/env python2.6
-#Copyright (C) 2009-2010 :
+#!/usr/bin/env python
+# Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
 #
@@ -31,12 +31,11 @@ from shinken.modules.simplelog_broker import get_instance
 
 
 class TestConfig(ShinkenTest):
-    #setUp is in shinken_test
+    # setUp is inherited from ShinkenTest
 
-    #Change ME :)
     def test_simplelog(self):
         print self.conf.modules
-        #get our modules
+        # get our modules
         mod = None
         for m in self.conf.modules:
             if m.module_type == 'simple_log':
@@ -45,21 +44,21 @@ class TestConfig(ShinkenTest):
         self.assert_(mod.path == 'tmp/nagios.log')
         self.assert_(mod.module_name == 'Simple-log')
 
-        try :
+        try:
             os.unlink(mod.path)
-        except :
+        except:
             pass
 
         sl = get_instance(mod)
         print sl
-        #Hack here :(
+        # Hack here :(
         sl.properties = {}
         sl.properties['to_queue'] = None
         sl.init()
-        b = Brok('log', {'log' : "look at my ass.\n"})
+        b = Brok('log', {'log': "look at my ass.\n"})
         b.prepare()
         sl.manage_brok(b)
-        b = Brok('log', {'log' : "look at my ass again.\n"})
+        b = Brok('log', {'log': "look at my ass again.\n"})
         b.prepare()
         sl.manage_brok(b)
         sl.file.close()
@@ -74,4 +73,3 @@ class TestConfig(ShinkenTest):
 
 if __name__ == '__main__':
     unittest.main()
-

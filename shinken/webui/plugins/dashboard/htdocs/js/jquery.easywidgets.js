@@ -2,7 +2,7 @@
  * Easy Widgets 2.0 for jQuery and jQuery UI
  *
  * David Esperalta <http://www.davidesperalta.com/>
- * 
+ *
  * More information, examples and latest version in the website:
  * <http://www.bitacora.davidesperalta.com/archives/projects/easywidgets/>
  *
@@ -18,7 +18,7 @@
     ///////////////////////////
     // Public plugin methods //
     ///////////////////////////
-    
+
     /**
      * Main public method of plugin
      *
@@ -90,7 +90,7 @@
      * This public method can be use to fix the widgets on document, in other
      * words, disable the widgets, because the user cant move this after the
      * widgets as been disables.
-     * 
+     *
      * @access public
      * @see EnableEasyWidgets()
      * @param settings Array with the plugin settings
@@ -412,7 +412,7 @@
      * not provided, and also the settings that you provide.
      *
      * In other words, the plugin merge your own settings with plugin defaults.
-     * 
+     *
      */
     $.fn.EasyWidgets.defaults = {
 
@@ -660,7 +660,7 @@
     //////////////////////////////
     // Private plugin functions //
     //////////////////////////////
-    
+
     /**
      * Initialize the widgets
      *
@@ -817,7 +817,7 @@
      * @see PrepareSortablePlaces()
      * @see WidgetsPositionsChange()
      * @return Boolean True in every case
-     * 
+     *
      */
     function RepositionedWidgets(settings){
 	var s = settings;
@@ -877,7 +877,7 @@
      * @see PrepareSortablePlaces()
      * @param settings Array with the plugin settings
      * @return Boolean True in every case
-     * 
+     *
      */
     function MakeWidgetsSortables(settings){
 	var sortables = GetSortableItems(settings);
@@ -1008,7 +1008,7 @@
 	//SHINKEN : I don't know why, but the first sortable
 	// call is ok, but the next ones are bad. So don't delete them at all.
 	//$(s.selectors.places).sortable('destroy');
-	
+
 	$(s.selectors.places).sortable({
 	    items: sortableItems,
 	    containment: 'document',
@@ -1302,7 +1302,7 @@
 	}
 	return true;
     }
-    
+
     /**
      * Prepare a widget remove menu link
      *
@@ -1583,7 +1583,7 @@
      *
      */
     function ApplyEffect(jqObj, effect, duration, show){
-	var n = 'none', 
+	var n = 'none',
         f = 'fade',
         s = 'slide';
 	if(!show){

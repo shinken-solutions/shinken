@@ -1,30 +1,29 @@
-#!/usr/bin/env python2.6
-#Copyright (C) 2009-2010 :
+#!/usr/bin/env python
+# Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 #
 # This file is used to test acknowledge of problems
 #
 
-
-#It's ugly I know....
 from shinken_test import *
+
 
 class TestAcks(ShinkenTest):
 
@@ -36,10 +35,10 @@ class TestAcks(ShinkenTest):
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
         #--------------------------------------------------------------
         # initialize host/service state
         #--------------------------------------------------------------
@@ -90,7 +89,6 @@ class TestAcks(ShinkenTest):
         self.sched.update_downtimes_and_comments()
         self.assert_(len(svc.comments) == 1)
 
-
         #--------------------------------------------------------------
         # service reaches hard;2
         # a notification must have been created but blocked
@@ -112,23 +110,22 @@ class TestAcks(ShinkenTest):
         print "- 1 x OK recover"
         self.show_logs()
         self.show_actions()
-        self.assert_(self.count_logs() == 2) # alert, eventhndlr
-        self.assert_(self.count_actions() == 2) # evt, master notif
+        self.assert_(self.count_logs() == 2)  # alert, eventhndlr
+        self.assert_(self.count_actions() == 2)  # evt, master notif
         self.assert_(not svc.problem_has_been_acknowledged)
         self.assert_(svc.current_notification_number == 0)
         self.show_and_clear_logs()
         self.show_and_clear_actions()
-
 
     def test_ack_hard_service(self):
         self.print_header()
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
         #--------------------------------------------------------------
         # initialize host/service state
         #--------------------------------------------------------------
@@ -198,7 +195,7 @@ class TestAcks(ShinkenTest):
         self.assert_(self.log_match(1, 'SERVICE NOTIFICATION'))
         self.assert_(self.log_match(2, 'SERVICE NOTIFICATION'))
         self.assert_(self.count_logs() == 2)
-        self.assert_(self.count_actions() == 2) # master sched, contact zombie
+        self.assert_(self.count_actions() == 2)  # master sched, contact zombie
         self.assert_(svc.current_notification_number == 4)
         self.show_and_clear_logs()
         self.show_actions()
@@ -213,13 +210,12 @@ class TestAcks(ShinkenTest):
         print "- 1 x OK recover"
         self.show_logs()
         self.show_actions()
-        self.assert_(self.count_logs() == 3) # alert, eventhndlr, notif
-        self.assert_(self.count_actions() == 3) # evt, master notif, notif
+        self.assert_(self.count_logs() == 3)  # alert, eventhndlr, notif
+        self.assert_(self.count_actions() == 3)  # evt, master notif, notif
         self.assert_(not svc.problem_has_been_acknowledged)
         self.assert_(svc.current_notification_number == 0)
         self.show_and_clear_logs()
         self.show_and_clear_actions()
-
 
     def test_ack_nonsticky_changing_service(self):
         # acknowledge is not sticky
@@ -229,10 +225,10 @@ class TestAcks(ShinkenTest):
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
         #--------------------------------------------------------------
         # initialize host/service state
         #--------------------------------------------------------------
@@ -295,7 +291,7 @@ class TestAcks(ShinkenTest):
         self.assert_(self.log_match(2, 'SERVICE NOTIFICATION'))
         self.assert_(self.log_match(3, 'SERVICE NOTIFICATION'))
         self.assert_(self.count_logs() == 3)
-        self.assert_(self.count_actions() == 2) # master sched, contact zombie
+        self.assert_(self.count_actions() == 2)  # master sched, contact zombie
         self.assert_(svc.current_notification_number == 4)
         self.show_and_clear_logs()
         self.show_actions()
@@ -308,13 +304,12 @@ class TestAcks(ShinkenTest):
         print "- 1 x OK recover"
         self.show_logs()
         self.show_actions()
-        self.assert_(self.count_logs() == 3) # alert, eventhndlr, notification
-        self.assert_(self.count_actions() == 3) # evt, master notif, contact notif
+        self.assert_(self.count_logs() == 3)  # alert, eventhndlr, notification
+        self.assert_(self.count_actions() == 3)  # evt, master notif, contact notif
         self.assert_(not svc.problem_has_been_acknowledged)
         self.assert_(svc.current_notification_number == 0)
         self.show_and_clear_logs()
         self.show_and_clear_actions()
-
 
     def test_ack_sticky_changing_service(self):
         # acknowledge is sticky
@@ -324,10 +319,10 @@ class TestAcks(ShinkenTest):
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
         #--------------------------------------------------------------
         # initialize host/service state
         #--------------------------------------------------------------
@@ -387,7 +382,7 @@ class TestAcks(ShinkenTest):
         self.show_logs()
         self.show_actions()
         self.assert_(self.log_match(1, 'SERVICE ALERT.*WARNING'))
-        self.assert_(self.count_logs() == 1) # alert
+        self.assert_(self.count_logs() == 1)  # alert
         self.assert_(svc.current_notification_number == 2)
         self.show_and_clear_logs()
         self.show_actions()
@@ -402,14 +397,13 @@ class TestAcks(ShinkenTest):
         print "- 1 x OK recover"
         self.show_logs()
         self.show_actions()
-        self.assert_(self.count_logs() == 3) # alert, eventhndlr, notification
-        self.assert_(self.count_actions() == 3) # evt, master notif, contact notif
+        self.assert_(self.count_logs() == 3)  # alert, eventhndlr, notification
+        self.assert_(self.count_actions() == 3)  # evt, master notif, contact notif
         self.assert_(not svc.problem_has_been_acknowledged)
         self.assert_(svc.current_notification_number == 0)
         self.assert_(len(svc.comments) == 0)
         self.show_and_clear_logs()
         self.show_and_clear_actions()
-
 
     def test_ack_soft_host(self):
         self.print_header()
@@ -419,10 +413,10 @@ class TestAcks(ShinkenTest):
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
         #--------------------------------------------------------------
         # initialize host/service state
         #--------------------------------------------------------------
@@ -498,23 +492,22 @@ class TestAcks(ShinkenTest):
         print "- 1 x OK recover"
         self.show_logs()
         self.show_actions()
-        self.assert_(self.count_logs() == 2) # alert, eventhndlr, notification
-        self.assert_(self.count_actions() == 2) # evt, master notif, contact notif
+        self.assert_(self.count_logs() == 2)  # alert, eventhndlr, notification
+        self.assert_(self.count_actions() == 2)  # evt, master notif, contact notif
         self.assert_(not host.problem_has_been_acknowledged)
         self.assert_(host.current_notification_number == 0)
         self.show_and_clear_logs()
         self.show_and_clear_actions()
-
 
     def test_ack_hard_host(self):
         self.print_header()
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
         #--------------------------------------------------------------
         # initialize host/service state
         #--------------------------------------------------------------
@@ -582,7 +575,7 @@ class TestAcks(ShinkenTest):
         self.assert_(self.log_match(1, 'HOST NOTIFICATION'))
         self.assert_(self.log_match(2, 'HOST NOTIFICATION'))
         self.assert_(self.count_logs() == 2)
-        self.assert_(self.count_actions() == 2) # master sched, contact zombie
+        self.assert_(self.count_actions() == 2)  # master sched, contact zombie
         self.assert_(host.current_notification_number == 4)
         self.show_and_clear_logs()
         self.show_actions()
@@ -595,30 +588,29 @@ class TestAcks(ShinkenTest):
         print "- 1 x OK recover"
         self.show_logs()
         self.show_actions()
-        self.assert_(self.count_logs() == 3) # alert, eventhndlr, notification
-        self.assert_(self.count_actions() == 3) # evt, master notif, contact notif
+        self.assert_(self.count_logs() == 3)  # alert, eventhndlr, notification
+        self.assert_(self.count_actions() == 3)  # evt, master notif, contact notif
         self.assert_(not host.problem_has_been_acknowledged)
         self.assert_(host.current_notification_number == 0)
         self.show_and_clear_logs()
         self.show_and_clear_actions()
 
-
     def test_unack_removes_comments(self):
-# critical
-# ACKNOWLEDGE_SVC_PROBLEM;test_host_0;test_ok_0;2;1;1;test_contact_alias;ackweb6
-# ACKNOWLEDGE_SVC_PROBLEM;test_host_0;test_ok_0;2;1;1;test_contact_alias;ackweb6
-# ACKNOWLEDGE_SVC_PROBLEM;test_host_0;test_ok_0;2;1;0;test_contact_alias;acknull
-# now remove the ack
-# the first two comments remain. So persistent not only means "survice a reboot"
-# but also "stay after the ack has been deleted"
+        # critical
+        # ACKNOWLEDGE_SVC_PROBLEM;test_host_0;test_ok_0;2;1;1;test_contact_alias;ackweb6
+        # ACKNOWLEDGE_SVC_PROBLEM;test_host_0;test_ok_0;2;1;1;test_contact_alias;ackweb6
+        # ACKNOWLEDGE_SVC_PROBLEM;test_host_0;test_ok_0;2;1;0;test_contact_alias;acknull
+        # now remove the ack
+        # the first two comments remain. So persistent not only means "survice a reboot"
+        # but also "stay after the ack has been deleted"
         self.print_header()
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
         #--------------------------------------------------------------
         # initialize host/service state
         #--------------------------------------------------------------

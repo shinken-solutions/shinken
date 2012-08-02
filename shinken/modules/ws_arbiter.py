@@ -26,14 +26,11 @@
 # This Class is an Arbiter module for having a webservice
 # wher you can push external commands
 
-
 import os
 import sys
 import select
 import time
-
 ######################## WIP   don't launch it!
-
 
 from shinken.basemodule import BaseModule
 from shinken.external_command import ExternalCommand
@@ -41,22 +38,21 @@ from shinken.log import logger
 
 from shinken.webui.bottle import Bottle, run, static_file, view, route, request, response, abort, parse_auth
 
-
-
 properties = {
-    'daemons' : ['arbiter', 'receiver'],
-    'type' : 'ws_arbiter',
-    'external' : True,
+    'daemons': ['arbiter', 'receiver'],
+    'type': 'ws_arbiter',
+    'external': True,
     }
 
-#called by the plugin manager to get a broker
+
+# called by the plugin manager to get a broker
 def get_instance(plugin):
     instance = Ws_arbiter(plugin)
     return instance
 
-
 # Main app var. Will be fill with our running module instance
 app = None
+
 
 def get_page():
     # We get all value we want
@@ -68,7 +64,7 @@ def get_page():
 
     # We check for auth if it's not anonymously allowed
     if app.username != 'anonymous':
-        basic = parse_auth(request.environ.get('HTTP_AUTHORIZATION',''))
+        basic = parse_auth(request.environ.get('HTTP_AUTHORIZATION', ''))
         # Maybe the user not even ask for user/pass. If so, bail out
         if not basic:
             abort(401, 'Authentication required')
@@ -77,7 +73,7 @@ def get_page():
             abort(403, 'Authentication denied')
 
     # Ok, here it's an anonymouscall, or a registred one, but mayeb teh query is false
-    if time_stamp==0 or not host_name or not output or return_code == -1:
+    if time_stamp == 0 or not host_name or not output or return_code == -1:
         abort(400, "Incorrect syntax")
 
     # Maybe we got an host, maybe a service :)
@@ -92,7 +88,7 @@ def get_page():
     app.from_q.put(ext)
 
     # OK here it's ok, it will return a 200 code
-    
+
 
 
 # This module will open an HTTP service, where a user can send a command, like a check
@@ -106,7 +102,7 @@ class Ws_arbiter(BaseModule):
             self.port = int(getattr(modconf, 'port', '7760'))
             self.host = getattr(modconf, 'host', '0.0.0.0')
         except AttributeError:
-            print "Error : the module '%s' do not have a property"
+            print "Error: the module '%s' do not have a property"
             raise
 
     # We initialise the HTTP part. It's a simple wsgi backend
@@ -117,11 +113,13 @@ class Ws_arbiter(BaseModule):
         # And we link our page
         route('/push_check_result', callback=get_page, method='POST')
 
-
     # When you are in "external" mode, that is the main loop of your process
     def main(self):
         global app
-        
+
+        # Change process name (seen in ps or top)
+        self.set_proctitle(self.name)
+
         # It's an external module, so we need to be sure that we manage
         # the signals
         self.set_exit_handler()
@@ -140,7 +138,7 @@ class Ws_arbiter(BaseModule):
         # Main blocking loop
         while not self.interrupted:
             input = [self.srv.socket]
-            inputready,_,_ = select.select(input,[],[], 1)
+            inputready, _, _ = select.select(input, [], [], 1)
             for s in inputready:
                 # If it's a web request, ask the webserver to do it
                 if s == self.srv.socket:

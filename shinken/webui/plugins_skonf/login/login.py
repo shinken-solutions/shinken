@@ -28,6 +28,7 @@ from shinken.webui.bottle import redirect
 ### Will be populated by the UI with it's own value
 app = None
 
+
 # Our page
 def get_page():
     return user_login()
@@ -41,7 +42,7 @@ def user_login():
     err = app.request.GET.get('error', None)
     login_text = app.login_text
 
-    return {'error': err, 'login_text' : login_text}
+    return {'error': err, 'login_text': login_text}
 
 
 def user_login_redirect():
@@ -76,7 +77,7 @@ def user_auth():
     else:
         redirect("/user/login?error=Invalid user or Password")
 
-    return {'app' : app, 'is_auth' : is_auth}
+    return {'app': app, 'is_auth': is_auth}
 
 
 # manage the /. If the user is known, go to problems page.
@@ -100,7 +101,6 @@ def get_root():
         redirect("/user/login")
 
 
-
 def login_mobile():
     user = app.get_user_auth()
     if user:
@@ -109,18 +109,16 @@ def login_mobile():
     err = app.request.GET.get('error', None)
     login_text = app.login_text
 
-    return {'error': err, 'login_text' : login_text}
-        
+    return {'error': err, 'login_text': login_text}
 
-pages = { user_login : { 'routes' : ['/user/login', '/user/login/'], 
-                         'view' : 'login', 'static' : True},
-          user_login_redirect : { 'routes' : ['/login'] , 'static' : True},
-          user_auth : { 'routes' : ['/user/auth'], 
-                        'view' : 'auth', 
-                        'method' : 'POST', 'static' : True},
-          user_logout : { 'routes' : ['/user/logout', '/logout'] , 'static' : True},
-          get_root : {'routes' : ['/'], 'static' : True},
-          login_mobile : {'routes' : ['/mobile', '/mobile/'], 
-                    'view' : 'login_mobile', 'static' : True}
+pages = {user_login: {'routes': ['/user/login', '/user/login/'],
+                         'view': 'login', 'static': True},
+          user_login_redirect: {'routes': ['/login'], 'static': True},
+          user_auth: {'routes': ['/user/auth'],
+                        'view': 'auth',
+                        'method': 'POST', 'static': True},
+          user_logout: {'routes': ['/user/logout', '/logout'], 'static': True},
+          get_root: {'routes': ['/'], 'static': True},
+          login_mobile: {'routes': ['/mobile', '/mobile/'],
+                    'view': 'login_mobile', 'static': True}
           }
-

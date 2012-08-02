@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-
-# Copyright (C) 2009-2011 :
+#
+# Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -20,26 +20,58 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Requires: Python >= 2.7 or Python plus argparse
+#
 
-import sys
 import os
+import argparse
 
 
+HOST_TEMPLATE = """
+define host{
+   name            %s
+   use             generic-host
+   check_command   check_ping
+   register        0
+}
+"""
 
-def usage():
-    print "%s pack_name path" % sys.argv[0]
-    sys.exit(1)
+MACROS_TEMPLATE = """
+#Uncomment the line and change the name and value
+#$SAMPLEMACRO$=value
+"""
 
+DISCOVERY_TEMPLATE = """
+# Sample discovery rule. Uncomment it and edit the filter
+define discoveryrule {
+       discoveryrule_name       %s
+       creation_type            host
+       # Sample filter for getting port 80
+       #openports                ^80$
+       FILTER                   VALUE
+       +use                     %s
+}
+"""
 
-if len(sys.argv) < 2:
-    usage()
+COMMANDS_TEMPLATE = """
+# EDIT the command with the real one you want
+define command {
+       command_name  check_%s
+       command_line  $PLUGINSDIR$/check_%s -H $HOSTADDRESS$
+}
+"""
 
-
-
-pack_name = sys.argv[1]
-path = sys.argv[2]
-
-pack_path = os.path.join(path, pack_name)
+SERVICE_TEMPLATE = """
+# This is a sample service, please change it!
+define service{
+   service_description    Sample-%s
+   use                    generic-service
+   register               0
+   host_name              %s
+   check_command          check_%s
+}
+"""
 
 
 def create_file(f_name, content):
@@ -51,6 +83,14 @@ def create_file(f_name, content):
         f.close()
 
 
+parser = argparse.ArgumentParser()
+parser.add_argument('pack_name')
+parser.add_argument('path')
+args = parser.parse_args()
+
+pack_name = args.pack_name
+pack_path = os.path.join(args.path, pack_name)
+
 
 if not os.path.exists(pack_path):
     print "Creating", pack_path
@@ -58,65 +98,21 @@ if not os.path.exists(pack_path):
     os.mkdir(os.path.join(pack_path, 'services'))
 
 # Now the templates.cfg creation
-templates = """
-define host{
-   name				%s
-   use				generic-host
-   check_command           	check_ping
-   register			0
-}
-""" % pack_name
-
+templates = HOST_TEMPLATE % args.pack_name
 create_file('templates.cfg', templates)
 
-
 # Now the macros
-macros = """
-#Uncomment the line and change the name and value
-#$SAMPLEMACRO$=value
-"""
-
+macros = MACROS_TEMPLATE
 create_file('macros.cfg', macros)
 
 # Now the sample discovery file
-discovery = """
-# Sample discovery rule. Uncomment it and edit the filter
-define discoveryrule {
-       discoveryrule_name       %s
-       creation_type            host
-       # Sample filter for getting port 80
-       #openports                ^80$
-       FILTER                   VALUE 
-       +use                     %s
-}
-""" % (pack_name, pack_name)
-
+discovery = DISCOVERY_TEMPLATE % (pack_name, pack_name)
 create_file('discovery.cfg', discovery)
 
-
 # Now the commands
-commands = """
-# EDIT the command with the real one you want
-define command {
-       command_name     check_%s
-       command_line	$PLUGINSDIR$/check_%s -H $HOSTADDRESS$
-}
-""" % (pack_name, pack_name)
-
+commands = COMMANDS_TEMPLATE % (pack_name, pack_name)
 create_file('commands.cfg', commands)
 
-
 # And a sample service
-service = """
-# This is a sample service, please change it!
-define service{
-   service_description    Sample-%s
-   use                    generic-service
-   register               0
-   host_name	          %s
-   check_command          check_%s
-}
-""" % (pack_name, pack_name, pack_name)
-
+service = SERVICE_TEMPLATE % (pack_name, pack_name, pack_name)
 create_file(os.path.join('services', 'sample.cfg'), service)
-

@@ -1,6 +1,6 @@
-#!/bin/bash
-
-# Copyright (C) 2009-2011 :
+#!/bin/sh
+#
+# Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -22,14 +22,18 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-DIR=$(cd $(dirname "$0"); pwd)
-BIN=$DIR"/../bin"
-ETC=$DIR"/../etc"
+DIR="$(cd $(dirname "$0"); pwd)"
+BIN="$DIR"/../bin
+ETC="$DIR"/../etc
 DEBUG_PATH="/tmp/arbiter.debug"
 
-# needed because arbiter doesn't have a default 'workdir' "properties" attribute:
-cd "$DIR/../var"
-echo "Launching Arbiter (which reads configuration and dispatches it) in debug mode to the file $DEBUG_PATH"
-$BIN/shinken-arbiter -d -c $ETC/nagios.cfg -c $ETC/shinken-specific.cfg -c $ETC/sample.cfg --debug $DEBUG_PATH -p /tmp/arbiter.profile
+# Need to change directory to .../var because arbiter doesn't have a
+# default 'workdir' "properties" attribute:.
+cd "$DIR"/../var
 
+echo "Launching Arbiter (which reads configuration and dispatches it) " \
+    "in debug mode to the file $DEBUG_PATH"
 
+"$BIN"/shinken-arbiter -d \
+    -c "$ETC"/nagios.cfg -c "$ETC"/shinken-specific.cfg -c "$ETC"/sample.cfg \
+    --debug "$DEBUG_PATH" -p /tmp/arbiter.profile

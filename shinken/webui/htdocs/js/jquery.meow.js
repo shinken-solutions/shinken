@@ -52,7 +52,7 @@
       this.timestamp = new Date().getTime(); // used to identify this meow and timeout
       this.hovered = false;         // whether mouse is over or not
       this.manifest = {};           // stores the DOM object of this meow
-      
+
       if (meows.size() <= 0) {
         meow_area = 'meows-' + new Date().getTime();
         $('body').prepend($(document.createElement('div')).attr({id: meow_area, 'class': 'meows'}));
@@ -60,7 +60,7 @@
           options.beforeCreateFirst.call(that);
         }
       }
-      
+
       if (typeof options.title === 'string') {
         this.title = options.title;
       }
@@ -97,7 +97,7 @@
       } else {
         this.duration = options.duration || 5000;
       }
-      
+
       // Call callback if it's defined (this = meow object)
       if (typeof options.beforeCreate === 'function') {
         options.beforeCreate.call(that);
@@ -112,14 +112,14 @@
         .fadeIn(400));
 
       this.manifest = $('#meow-' + this.timestamp.toString());
-      
+
       // Add title if it's defined
       if (typeof this.title === 'string') {
         this.manifest.find('.inner').prepend(
           $(document.createElement('h1')).text(this.title)
         );
       }
-      
+
       // Add icon if it's defined
       if (typeof that.icon === 'string') {
         this.manifest.find('.inner').prepend(
@@ -128,7 +128,7 @@
           )
         );
       }
-      
+
       // Add close button if the meow isn't uncloseable
       // TODO: this close button needs to be much prettier
       if (options.closeable !== false) {
@@ -157,7 +157,7 @@
           that.manifest.addClass('hover');
         }
       });
-      
+
       // Add a timeout if the duration isn't Infinity
       if (this.duration !== Infinity) {
         this.timeout = setTimeout(function () {

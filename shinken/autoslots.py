@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -22,14 +22,16 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-"""The AutoSlots Class is a MetaClass : it manages how other classes
+"""The AutoSlots Class is a MetaClass: it manages how other classes
  are created (Classes, not instances of theses classes).
  Here it's role is to create the __slots__ list of the class with
  all properties of Class.properties and Class.running_properties
  so we do not have to add manually all properties to the __slots__
  list when we add a new entry"""
 
+
 class AutoSlots(type):
+
     # new is call when we create a new Class
     # that have metaclass = AutoSlots
     # CLS is AutoSlots

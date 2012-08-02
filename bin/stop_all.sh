@@ -1,6 +1,6 @@
-#!/bin/bash
-
-# Copyright (C) 2009-2011 :
+#!/bin/sh
+#
+# Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -22,13 +22,11 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-DIR=$(cd $(dirname "$0"); pwd)
-echo $DIR
+DIR="$(cd $(dirname "$0"); pwd)"
 
-
-$DIR/stop_scheduler.sh
-$DIR/stop_poller.sh
-$DIR/stop_reactionner.sh
-$DIR/stop_broker.sh
-$DIR/stop_receiver.sh
-$DIR/stop_arbiter.sh
+"$DIR"/stop_scheduler.sh
+"$DIR"/stop_poller.sh
+"$DIR"/stop_reactionner.sh
+"$DIR"/stop_broker.sh
+"$DIR"/stop_receiver.sh
+"$DIR"/stop_arbiter.sh

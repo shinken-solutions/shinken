@@ -1,24 +1,24 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#Copyright (C) 2009-2010 :
+# Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
 #
@@ -46,7 +46,6 @@ time.time = original_time_time
 time.sleep = original_time_sleep
 
 
-
 class TestConfig(ShinkenTest):
     def contains_line(self, text, pattern):
         regex = re.compile(pattern)
@@ -55,27 +54,24 @@ class TestConfig(ShinkenTest):
                 return True
         return False
 
-
     def scheduler_loop(self, count, reflist, do_sleep=False, sleep_time=61):
         super(TestConfig, self).scheduler_loop(count, reflist, do_sleep, sleep_time)
         if self.nagios_installed() and hasattr(self, 'nagios_started'):
             self.nagios_loop(1, reflist)
-  
 
     def update_broker(self, dodeepcopy=False):
-        #The brok should be manage in the good order
+        # The brok should be manage in the good order
         ids = self.sched.broks.keys()
         ids.sort()
         for brok_id in ids:
             brok = self.sched.broks[brok_id]
-            #print "Managing a brok type", brok.type, "of id", brok_id
-            #if brok.type == 'update_service_status':
+            # print "Managing a brok type", brok.type, "of id", brok_id
+            # if brok.type == 'update_service_status':
             #    print "Problem?", brok.data['is_problem']
             if dodeepcopy:
                 brok = copy.deepcopy(brok)
             self.livestatus_broker.manage_brok(brok)
         self.sched.broks = {}
-
 
     def lines_equal(self, text1, text2):
         # gets two multiline strings and compares the contents
@@ -87,15 +83,15 @@ class TestConfig(ShinkenTest):
         text2 = text2.replace("200           1", "200           0")
         text1 = text1.rstrip()
         text2 = text2.rstrip()
-        #print "text1 //%s//" % text1
-        #print "text2 //%s//" % text2
+        # print "text1 //%s//" % text1
+        # print "text2 //%s//" % text2
         sorted1 = "\n".join(sorted(text1.split("\n")))
         sorted2 = "\n".join(sorted(text2.split("\n")))
         len1 = len(text1.split("\n"))
         len2 = len(text2.split("\n"))
-        #print "%s == %s text cmp %s" % (len1, len2, sorted1 == sorted2)
-        #print "text1 //%s//" % sorted(text1.split("\n"))
-        #print "text2 //%s//" % sorted(text2.split("\n"))
+        # print "%s == %s text cmp %s" % (len1, len2, sorted1 == sorted2)
+        # print "text1 //%s//" % sorted(text1.split("\n"))
+        # print "text2 //%s//" % sorted(text2.split("\n"))
         if sorted1 == sorted2 and len1 == len2:
             return True
         else:
@@ -108,11 +104,10 @@ class TestConfig(ShinkenTest):
             [line for line in sorted(text1.split("\n"))]
             data1 = [[sorted(c.split(',')) for c in columns] for columns in [line.split(';') for line in sorted(text1.split("\n")) if line]]
             data2 = [[sorted(c.split(',')) for c in columns] for columns in [line.split(';') for line in sorted(text2.split("\n")) if line]]
-            #print "text1 //%s//" % data1
-            #print "text2 //%s//" % data2
-            # cmp is clever enough to handle nested arrays 
+            # print "text1 //%s//" % data1
+            # print "text2 //%s//" % data2
+            # cmp is clever enough to handle nested arrays
             return cmp(data1, data2) == 0
-            
 
     def show_broks(self, title):
         print
@@ -126,7 +121,6 @@ class TestConfig(ShinkenTest):
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
 
-
     def nagios_installed(self, path='/usr/local/nagios/bin/nagios', livestatus='/usr/local/nagios/lib/mk-livestatus/livestatus.o'):
         return False
         raise
@@ -136,7 +130,6 @@ class TestConfig(ShinkenTest):
             return True
         else:
             return False
-
 
     # shinkenize_nagios_config('nagios_1r_1h_1s')
     # We assume that there is a nagios_1r_1h_1s.cfg and a nagios_1r_1h_1s directory for the objects
@@ -195,7 +188,6 @@ class TestConfig(ShinkenTest):
                 newconfig.close()
         return new_configname
 
-    
     def start_nagios(self, config):
         if os.path.exists('var/spool/checkresults'):
             # Cleanup leftover checkresults
@@ -214,7 +206,6 @@ class TestConfig(ShinkenTest):
         self.nagios_started = time.time()
         time.sleep(2)
 
-
     def stop_nagios(self):
         if self.nagios_installed():
             print "i stop nagios!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
@@ -231,7 +222,6 @@ class TestConfig(ShinkenTest):
                     shutil.rmtree('etc/' + self.nagios_config)
                 if os.path.exists('etc/nagios_' + self.nagios_config + '.cfg'):
                     os.remove('etc/nagios_' + self.nagios_config + '.cfg')
-
 
     def ask_nagios(self, request):
         if time.time() - self.nagios_started < 2:
@@ -252,8 +242,7 @@ class TestConfig(ShinkenTest):
             unixcat.kill()
         print "unixcat says", out
         return out
-        
-    
+
     def nagios_loop(self, count, reflist, do_sleep=False, sleep_time=61):
         now = time.time()
         buffer = open('var/pipebuffer', 'w')
@@ -275,14 +264,12 @@ class TestConfig(ShinkenTest):
         fifo.close()
         time.sleep(5)
 
-
     def nagios_extcmd(self, cmd):
         fifo = open('var/nagios.cmd', 'w')
         fifo.write(cmd)
         fifo.flush()
         fifo.close()
         time.sleep(5)
-
 
 
 class TestConfigSmall(TestConfig):
@@ -298,8 +285,6 @@ class TestConfigSmall(TestConfig):
         self.nagios_path = None
         self.livestatus_path = None
         self.nagios_config = None
-
-
 
     def tearDown(self):
         self.stop_nagios()
@@ -317,8 +302,6 @@ class TestConfigSmall(TestConfig):
             os.remove('var/status.dat')
         self.livestatus_broker = None
 
-
-
     def test_host_wait(self):
         self.print_header()
         if self.nagios_installed():
@@ -326,13 +309,13 @@ class TestConfigSmall(TestConfig):
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         router = self.sched.hosts.find_by_name("test_router_0")
         router.checks_in_progress = []
-        router.act_depend_of = [] # ignore the router
+        router.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
         self.scheduler_loop(2, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 2, 'BAD']])
         self.update_broker(True)
         print ".#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#."
@@ -400,12 +383,11 @@ ColumnHeaders: off
         result = wait.condition_fulfilled()
         # not yet...the plugin must run first
         self.assert_(not result)
-
-        #result = query.launch_query()
-        #response = query.response
-        #response.format_live_data(result, query.columns, query.aliases)
-        #output, keepalive = response.respond()
-        #print "output is", output
+        # result = query.launch_query()
+        # response = query.response
+        # response.format_live_data(result, query.columns, query.aliases)
+        # output, keepalive = response.respond()
+        # print "output is", output
 
         time.sleep(1)
         result = wait.condition_fulfilled()
@@ -421,7 +403,7 @@ ColumnHeaders: off
 
         time.sleep(1)
         result = wait.condition_fulfilled()
-        # the plugin has run 
+        # the plugin has run
         print "must not be empty", result
         self.assert_(result)
 
@@ -438,13 +420,13 @@ ColumnHeaders: off
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
-        host.act_depend_of = [] # ignore the router
+        host.act_depend_of = []  # ignore the router
         router = self.sched.hosts.find_by_name("test_router_0")
         router.checks_in_progress = []
-        router.act_depend_of = [] # ignore the router
+        router.act_depend_of = []  # ignore the router
         svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
         svc.checks_in_progress = []
-        svc.act_depend_of = [] # no hostchecks on critical checkresults
+        svc.act_depend_of = []  # no hostchecks on critical checkresults
         self.scheduler_loop(2, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 2, 'BAD']])
         self.update_broker(True)
         print ".#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#.#."
@@ -474,8 +456,7 @@ COMMAND [1303425876] SCHEDULE_FORCED_HOST_CHECK;test_host_0;1303425870
 
 
 if __name__ == '__main__':
-    #import cProfile
+    # import cProfile
     command = """unittest.main()"""
     unittest.main()
-    #cProfile.runctx( command, globals(), locals(), filename="/tmp/livestatus.profile" )
-
+    # cProfile.runctx( command, globals(), locals(), filename="/tmp/livestatus.profile" )

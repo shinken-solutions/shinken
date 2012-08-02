@@ -1,9 +1,9 @@
 # Enable and configure ndo mysql broker module
-# Arguments are :
-# ARG1 : host
-# ARG2 : database
-# ARG3 : login
-# ARG4 : password
+# Arguments are:
+# ARG1: host
+# ARG2: database
+# ARG3: login
+# ARG4: password
 setconfigfile /opt/shinken/etc/shinken-specific.cfg
 getdirective modules from broker where broker_name=broker-1
 setparam modules=LAST,ToNdodb_Mysql from broker where broker_name=broker-1

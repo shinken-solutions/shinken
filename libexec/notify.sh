@@ -1,6 +1,7 @@
-#!/bin/bash
+#!/bin/sh
 
-echo "" >> ~/notify.log
-echo `date` >> ~/notify.log
-echo $* >> ~/notify.log
+exec >> ~/notify.log
 
+echo
+date
+echo $*

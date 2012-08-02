@@ -34,7 +34,7 @@ except ImportError:
     try:
         import simplejson as json
     except ImportError:
-        print "Error : you need the json or simplejson module"
+        print "Error: you need the json or simplejson module"
         raise
 
 
@@ -50,7 +50,7 @@ def lookup(name=''):
         return []
 
     hnames = (h.host_name for h in app.datamgr.get_hosts())
-    r  = [n for n in hnames if n.startswith(name)]
+    r = [n for n in hnames if n.startswith(name)]
 
     return json.dumps(r)
 
@@ -68,13 +68,10 @@ def lookup_post():
         return []
 
     hnames = (h.host_name for h in app.datamgr.get_hosts())
-    r  = [n for n in hnames if n.startswith(name)]
+    r = [n for n in hnames if n.startswith(name)]
 
     return json.dumps(r)
 
-
-
-pages = {lookup : { 'routes' : ['/lookup/:name']},
-         lookup_post : { 'routes' : ['/lookup'] , 'method' : 'POST'}
+pages = {lookup: {'routes': ['/lookup/:name']},
+         lookup_post: {'routes': ['/lookup'], 'method': 'POST'}
          }
-

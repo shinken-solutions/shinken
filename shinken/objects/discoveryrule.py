@@ -23,29 +23,28 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import re
 from copy import copy
 
 from item import Item, Items
 from shinken.objects.matchingitem import MatchingItem
 from service import Service
-from host import Host 
+from host import Host
 from shinken.property import StringProp, ListProp, IntegerProp
 
 
 class Discoveryrule(MatchingItem):
-    id = 1 #0 is always special in database, so we do not take risk here
+    id = 1  # zero is always special in database, so we do not take risk here
     my_type = 'discoveryrule'
 
     properties = Item.properties.copy()
     properties.update({
-        'discoveryrule_name':    StringProp (),
-        'creation_type':         StringProp (default='service'),
+        'discoveryrule_name':    StringProp(),
+        'creation_type':         StringProp(default='service'),
         'discoveryrule_order':   IntegerProp(default='0'),
-#        'check_command':         StringProp (),
-#        'service_description':   StringProp (),
-#        'use':                   StringProp(),
+        ## 'check_command':         StringProp (),
+        ## 'service_description':   StringProp (),
+        ## 'use':                   StringProp(),
     })
 
     running_properties = {
@@ -54,35 +53,34 @@ class Discoveryrule(MatchingItem):
 
     macros = {}
 
-
-    # The init of a discovery will set the property of 
+    # The init of a discovery will set the property of
     # Discoveryrule.properties as in setattr, but all others
     # will be in a list because we need to have all names
     # and not lost all in __dict__
     def __init__(self, params={}):
         cls = self.__class__
-        
+
         # We have our own id of My Class type :)
         # use set attr for going into the slots
         # instead of __dict__ :)
         setattr(self, 'id', cls.id)
         cls.id += 1
 
-        self.matches = {} # for matching rules
-        self.not_matches = {} # for rules that should NOT match
+        self.matches = {}  # for matching rules
+        self.not_matches = {}  # for rules that should NOT match
         self.writing_properties = {}
 
         # Get the properties of the Class we want
         if not 'creation_type' in params:
             params['creation_type'] = 'service'
 
-        map = {'service' : Service, 'host' : Host}
-        t =  params['creation_type']
+        map = {'service': Service, 'host': Host}
+        t = params['creation_type']
         if not t in map:
             return
         tcls = map[t]
 
-        # In my own property : 
+        # In my own property:
         #  -> in __dict__
         # In the properties of the 'creation_type' Class:
         #  -> in self.writing_properties
@@ -99,7 +97,7 @@ class Discoveryrule(MatchingItem):
             else:
                 if key.startswith('!'):
                     key = key.split('!')[1]
-                    self.not_matches[key] = params['!'+key]
+                    self.not_matches[key] = params['!' + key]
                 else:
                     self.matches[key] = params[key]
 
@@ -115,6 +113,7 @@ class Discoveryrule(MatchingItem):
                 setattr(self, prop, copy(val))
             else:
                 setattr(self, prop, val)
+
             # each istance to have his own running prop!
 
 
@@ -126,9 +125,6 @@ class Discoveryrule(MatchingItem):
             return "UnnamedDiscoveryRule"
 
 
-
-
 class Discoveryrules(Items):
     name_property = "discoveryrule_name"
     inner_class = Discoveryrule
-

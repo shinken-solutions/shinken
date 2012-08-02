@@ -4,19 +4,19 @@
      Gregory Starck, g.starck@gmail.com
      Hartmut Goebel, h.goebel@goebel-consult.de
      Andreas Karfusehr, andreas@karfusehr.de
- 
+
  This file is part of Shinken.
- 
+
  Shinken is free software: you can redistribute it and/or modify
  it under the terms of the GNU Affero General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
- 
+
  Shinken is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU Affero General Public License for more details.
- 
+
  You should have received a copy of the GNU Affero General Public License
  along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -106,7 +106,7 @@ function try_to_fix(name) {
 
 
 
- 
+
 function do_acknowledge(name, text, user){
     var elts = get_elements(name);
     var url = '/action/ACKNOWLEDGE_'+elts.type+'_PROBLEM/'+elts.nameslash+'/1/0/1/'+user+'/'+text;
@@ -134,9 +134,9 @@ function submit_check(name, return_code, output){
 
 /* The command that will launch an event handler */
 function recheck_now(name) {
-    var elts = get_elements(name);    
+    var elts = get_elements(name);
     //alert('Try to fix' + hname);
-    var now = Math.round(new Date().getTime()/1000.0);
+    var now = '$NOW$';
     var url = '/action/SCHEDULE_'+elts.type+'_CHECK/'+elts.nameslash+'/'+now;
     // We can launch it :)
     launch(url);

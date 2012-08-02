@@ -1,11 +1,11 @@
 {
-"name" : "mysql",
+"name": "mysql",
 
-"description" : "MySQL database checks, like connected users, locks or data size",
+"description": "MySQL database checks, like connected users, locks or data size",
 
 "path":"databases/",
 
-"macros":{}	 
+"macros":{}
 
 
 }

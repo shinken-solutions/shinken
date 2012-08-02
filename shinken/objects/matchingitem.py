@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 '''
  This is a utility class for factorizing matching functions for
  discovery runners and rules.
@@ -33,7 +32,9 @@ import re
 
 from item import Item
 
+
 class MatchingItem(Item):
+
     # Try to see if the key,value is matching one or
     # our rule. If value got ',' we must look for each value
     # If one match, we quit
@@ -53,7 +54,7 @@ class MatchingItem(Item):
             matchings = [mt.strip() for mt in m.split(',')]
         else:
             matchings = [m]
-        
+
         # Split the alue by , too
         values = value.split(',')
         for m in matchings:
@@ -63,14 +64,13 @@ class MatchingItem(Item):
                     return True
         return False
 
-
     # Look if we match all discovery data or not
     # a disco data look as a list of (key, values)
     def is_matching_disco_datas(self, datas):
         # If we got not data, no way we can match
         if len(datas) == 0:
             return False
-        
+
         # First we look if it's possible to match
         # we must match All self.matches things
         for m in self.matches:
@@ -110,4 +110,3 @@ class MatchingItem(Item):
         # Ok we match ALL rules in self.matches
         # and NONE of self.not_matches, we can go :)
         return True
-

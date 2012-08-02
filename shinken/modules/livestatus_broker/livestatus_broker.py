@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 """
 This Class is a plugin for the Shinken Broker. It is in charge
 to get broks, recreate real objects and present them through
@@ -49,11 +48,10 @@ from shinken.modulesmanager import ModulesManager
 from shinken.objects.module import Module
 from shinken.daemon import Daemon
 from shinken.misc.datamanager import datamgr
-#Local import
+# Local import
 from livestatus import LiveStatus
 from livestatus_regenerator import LiveStatusRegenerator
 from livestatus_query_cache import LiveStatusQueryCache
-
 
 
 # Class for the LiveStatus Broker
@@ -81,8 +79,8 @@ class LiveStatus_broker(BaseModule, Daemon):
         ips = [ip.strip() for ip in self.allowed_hosts.split(',') if ip]
         self.allowed_hosts = [ip for ip in ips if re.match(r'^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$', ip)]
         if len(ips) != len(self.allowed_hosts):
-            print "Warning : the list of allowed hosts is invalid", ips
-            print "Warning : the list of allowed hosts is invalid", self.allowed_hosts
+            print "Warning: the list of allowed hosts is invalid", ips
+            print "Warning: the list of allowed hosts is invalid", self.allowed_hosts
             raise
         self.pnp_path = getattr(modconf, 'pnp_path', '')
         self.debug = getattr(modconf, 'debug', None)
@@ -111,7 +109,6 @@ class LiveStatus_broker(BaseModule, Daemon):
         # data from scheduler before main() if in scheduler of course
         self.rg = LiveStatusRegenerator(self.service_authorization_strict, self.group_authorization_strict)
 
-
     def add_compatibility_sqlite_module(self):
         if len([m for m in self.modules_manager.instances if m.properties['type'].startswith('logstore_')]) == 0:
             #  this shinken-specific.cfg does not use the new submodules
@@ -123,9 +120,8 @@ class LiveStatus_broker(BaseModule, Daemon):
             self.modules_manager.load_and_init()
             self.modules_manager.instances[0].load(self)
 
-
     # Called by Broker so we can do init stuff
-    # TODO : add conf param to get pass with init
+    # TODO: add conf param to get pass with init
     # Conf from arbiter!
     def init(self):
         print "Init of the Livestatus '%s'" % self.name
@@ -134,9 +130,8 @@ class LiveStatus_broker(BaseModule, Daemon):
         m.output_macros = ['HOSTOUTPUT', 'HOSTPERFDATA', 'HOSTACKAUTHOR', 'HOSTACKCOMMENT', 'SERVICEOUTPUT', 'SERVICEPERFDATA', 'SERVICEACKAUTHOR', 'SERVICEACKCOMMENT']
         self.rg.load_external_queue(self.from_q)
 
-
     # This is called only when we are in a scheduler
-    # and just before we are started. So we can gain time, and 
+    # and just before we are started. So we can gain time, and
     # just load all scheduler objects without fear :) (we
     # will be in another process, so we will be able to hack objects
     # if need)
@@ -144,11 +139,9 @@ class LiveStatus_broker(BaseModule, Daemon):
         print "pre_scheduler_mod_start::", sched.__dict__
         self.rg.load_from_scheduler(sched)
 
-
     # In a scheduler we will have a filter of what we really want as a brok
     def want_brok(self, b):
         return self.rg.want_brok(b)
-
 
     def prepare_pnp_path(self):
         if not self.pnp_path:
@@ -160,7 +153,6 @@ class LiveStatus_broker(BaseModule, Daemon):
         if self.pnp_path and not self.pnp_path.endswith('/'):
             self.pnp_path += '/'
 
-
     def set_debug(self):
         fdtemp = os.open(self.debug, os.O_CREAT | os.O_WRONLY | os.O_APPEND)
         ## We close out and err
@@ -169,8 +161,9 @@ class LiveStatus_broker(BaseModule, Daemon):
         os.dup2(fdtemp, 1)  # standard output (1)
         os.dup2(fdtemp, 2)  # standard error (2)
 
-
     def main(self):
+        self.set_proctitle(self.name)
+
         self.log = logger
         self.log.load_obj(self)
         # Daemon like init
@@ -213,20 +206,18 @@ class LiveStatus_broker(BaseModule, Daemon):
             time.sleep(2)
             raise
 
-
     # A plugin send us en external command. We just put it
     # in the good queue
     def push_external_command(self, e):
         print "Livestatus: got an external command", e.__dict__
         self.from_q.put(e)
 
-
     # Real main function
     def do_main(self):
         # Maybe we got a debug dump to do
         if self.debug:
             self.set_debug()
-        #I register my exit function
+        # I register my exit function
         self.set_exit_handler()
         print "Go run"
 
@@ -245,7 +236,7 @@ class LiveStatus_broker(BaseModule, Daemon):
 
         # Check if some og the required directories exist
         #if not os.path.exists(bottle.TEMPLATE_PATH[0]):
-        #    logger.log('ERROR : the view path do not exist at %s' % bottle.TEMPLATE_PATH)
+        #    logger.log('ERROR: the view path do not exist at %s' % bottle.TEMPLATE_PATH)
         #    sys.exit(2)
 
         self.load_plugins()
@@ -261,7 +252,6 @@ class LiveStatus_broker(BaseModule, Daemon):
             self.lql_thread.join()
         else:
             self.manage_lql_thread()
-
 
     # It's the thread function that will get broks
     # and update data. Will lock the whole thing
@@ -285,7 +275,7 @@ class LiveStatus_broker(BaseModule, Daemon):
                         except Exception, exp:
                             print exp.__dict__
                             logger.warning("[%s] The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
-                            logger.debug("[%s] Exception type : %s" % (self.name, type(exp)))
+                            logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
                             logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                             self.modules_manager.set_to_restart(mod)
                 except Exception, exp:
@@ -307,13 +297,11 @@ class LiveStatus_broker(BaseModule, Daemon):
                     self.nb_writers -= 1
                     self.global_lock.release()
 
-
     # Here we will load all plugins (pages) under the webui/plugins
     # directory. Each one can have a page, views and htdocs dir that we must
     # route correctly
     def load_plugins(self):
         pass
-
 
     # It will say if we can launch a page rendering or not.
     # We can only if there is no writer running from now
@@ -331,7 +319,6 @@ class LiveStatus_broker(BaseModule, Daemon):
             # Before checking again, we should wait a bit
             # like 1ms
             time.sleep(0.001)
-
 
     # It will say if we can launch a brok management or not
     # We can only if there is no readers running from now
@@ -356,7 +343,6 @@ class LiveStatus_broker(BaseModule, Daemon):
                 print "WARNING: we are in lock/read since more than 30s!"
                 start = time.time()
 
-
     def manage_brok(self, brok):
         """We use this method mostly for the unit tests"""
         brok.prepare()
@@ -367,10 +353,9 @@ class LiveStatus_broker(BaseModule, Daemon):
             except Exception, exp:
                 print exp.__dict__
                 logger.warning("[%s] The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
-                logger.debug("[%s] Exception type : %s" % (self.name, type(exp)))
+                logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
                 logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)
-
 
     def do_stop(self):
         print "[liveStatus] So I quit"
@@ -437,8 +422,8 @@ class LiveStatus_broker(BaseModule, Daemon):
                                 mod.manage_brok(b)
                             except Exception, exp:
                                 print exp.__dict__
-                                logger.warning("[%s] Warning : The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
-                                logger.debug("[%s] Exception type : %s" % (self.name, type(exp)))
+                                logger.warning("[%s] Warning: The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
+                                logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
                                 logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                                 self.modules_manager.set_to_restart(mod)
                 except Queue.Empty:
@@ -447,7 +432,7 @@ class LiveStatus_broker(BaseModule, Daemon):
                     if hasattr(os, 'errno') and e.errno != os.errno.EINTR:
                         raise
                 except Exception, exp:
-                    print "Error : got an exeption (bad code?)", exp, exp.__dict__, type(exp)
+                    print "Error: got an exeption (bad code?)", exp, exp.__dict__, type(exp)
                     raise
                 time.sleep(0.01)
 
@@ -530,7 +515,7 @@ class LiveStatus_broker(BaseModule, Daemon):
                         client, address = s.accept()
                         if isinstance(address, tuple):
                             client_ip, _ = address
-                            if self.allowed_hosts and address not in self.allowed_hosts:
+                            if self.allowed_hosts and client_ip not in self.allowed_hosts:
                                 print "Connection attempt from illegal ip address", client_ip
                                 try:
                                     #client.send('Buh!\n')

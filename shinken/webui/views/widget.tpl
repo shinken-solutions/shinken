@@ -29,8 +29,8 @@
 <script type="text/javascript">
 $(document).ready(function(){
 
-  var w = {'id' : '{{wid}}', 'base_url' : '{{base_url}}', 'collapsed' : {{collapsed_j}}, 'position' : 'widget-place-1',
-          'options' : {'key' : 'value'}};
+  var w = {'id': '{{wid}}', 'base_url': '{{base_url}}', 'collapsed': {{collapsed_j}}, 'position': 'widget-place-1',
+          'options': {'key': 'value'}};
 
 
   %for (k, v) in options.iteritems():
@@ -87,7 +87,7 @@ $(document).ready(function(){
            <label></label>
            <span class="help-inline">{{label}}</span>
 	 %end
-	 
+
 	 %# """ Manage the differents types of values"""
          %if t in ['text', 'int', 'hst_srv']:
             <input name='{{k}}' value='{{value}}' id='input-{{wid}}-{{k}}'/>
@@ -116,7 +116,7 @@ $(document).ready(function(){
 	 %end
 
       %end
-  
+
      <label></label>
      <a class="widget-close-editbox btn btn-success" onclick="submit_{{wid}}_form();" title="Save changes"><i class="icon-search icon-white"></i> Save changes</a>
 
@@ -124,7 +124,7 @@ $(document).ready(function(){
 
   </div>
   <div class="widget-content">
-    
+
     %include
 
   </div>

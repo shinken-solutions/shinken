@@ -1,9 +1,9 @@
 This is a first attempt to make nconf working with shinken
 The patch is about shinken engine recognition by nconf 1.3.0-0
 
-first install nconf the classical way and then :
+first install nconf the classical way and then:
 
 cd /var/www/nconf/include/ajax
 patch -p0 < /path/to/patch/exec_generate_config.php.patch
 
-Do not forget to edit/replace the deployment.ini file located in config folder ! 
+Do not forget to edit/replace the deployment.ini file located in config folder!

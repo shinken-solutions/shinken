@@ -35,20 +35,21 @@ except ImportError:
     # There is no crypt module on Windows systems
     import fcrypt as crypt
 
+from shinken.misc.md5crypt import apache_md5_crypt
 from shinken.basemodule import BaseModule
 
 print "Loaded Apache/Passwd module"
 
 properties = {
-    'daemons' : ['webui'],
-    'type' : 'passwd_webui'
+    'daemons': ['webui', 'skonf'],
+    'type': 'passwd_webui'
     }
 
 
-#called by the plugin manager
+# called by the plugin manager
 def get_instance(plugin):
     print "Get an Apache/Passwd UI module for plugin %s" % plugin.get_name()
-    
+
     instance = Passwd_Webui(plugin)
     return instance
 
@@ -58,16 +59,13 @@ class Passwd_Webui(BaseModule):
         BaseModule.__init__(self, modconf)
         self.passwd = modconf.passwd
 
-
     # Try to connect if we got true parameter
     def init(self):
         print "Trying to initalize the Apache/Passwd file"
-        
 
     # To load the webui application
     def load(self, app):
         self.app = app
-
 
     def check_auth(self, user, password):
         try:
@@ -82,19 +80,28 @@ class Passwd_Webui(BaseModule):
                 elts = line.split(':')
                 name = elts[0]
                 hash = elts[1]
-                salt = hash[:2]
+                if hash[:5] == '$apr1':
+                    h = hash.split('$')
+                    magic = h[1]
+                    salt = h[2]
+                else:
+                    magic = None
+                    salt = hash[:2]
                 print "PASSWD:", name, hash, salt
                 # If we match the user, look at the crypt
                 if name == user:
-                    compute_hash = crypt.crypt(password, salt)
+                    if magic == 'apr1':
+                        compute_hash = apache_md5_crypt(password, salt)
+                    else:
+                        compute_hash = crypt.crypt(password, salt)
                     print "Computed hash", compute_hash
                     if compute_hash == hash:
-                        print "PASSWD : it's good!"
+                        print "PASSWD: it's good!"
                         return True
                 else:
                     print "PASSWD: bad user", name, user
         except Exception, exp:
-            print "Checking auth in passwd %s failed : %s " % (self.passwd, exp)
+            print "Checking auth in passwd %s failed: %s " % (self.passwd, exp)
             return False
         finally:
             try:

@@ -1,6 +1,6 @@
 /*
 ---
-description: TabPane Class 
+description: TabPane Class
 
 license: MIT-style
 
@@ -11,8 +11,8 @@ version: 0.1
 requires:
   core/1.2.4:
   - Class
-  - Class.Extras 
-  - Element 
+  - Class.Extras
+  - Element
   - Element.Event
   - Selectors
   more/1.2.4:
@@ -23,7 +23,7 @@ provides: TabPane
 */
 
 var TabPane = new Class({
-    
+
     Implements: [Events, Options],
 
     options: {
@@ -61,18 +61,18 @@ var TabPane = new Class({
             tab.addClass(this.options.activeClass);
             content.setStyle('display', 'block');
             this.fireEvent('change', index);
-        } 
+        }
     },
 
     closeTab: function(index) {
         var tabs     = this.container.getElements(this.options.tabSelector);
-        var selected = tabs.indexOf(this.container.getElement('.' + this.options.activeClass)); // is always equals to index 
-        
+        var selected = tabs.indexOf(this.container.getElement('.' + this.options.activeClass)); // is always equals to index
+
         tabs[index].destroy();
         this.container.getElements(this.options.contentSelector)[index].destroy();
         this.fireEvent('close', index);
 
-        // 'intelligently' selecting a tab is sadly not possible, the tab has already been switched before this method is called 
+        // 'intelligently' selecting a tab is sadly not possible, the tab has already been switched before this method is called
         this.showTab(index == tabs.length - 1 ? selected - 1 : selected);
     }
 

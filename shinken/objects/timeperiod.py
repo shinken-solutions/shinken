@@ -24,54 +24,65 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
-#Calendar date: '(\d{4})-(\d{2})-(\d{2}) - (\d{4})-(\d{2})-(\d{2}) / (\d+) ([0-9:, -]+)' => len = 8  => CALENDAR_DATE
-#               '(\d{4})-(\d{2})-(\d{2}) / (\d+) ([0-9:, -]+)' => len = 5 => CALENDAR_DATE
-#               '(\d{4})-(\d{2})-(\d{2}) - (\d{4})-(\d{2})-(\d{2}) ([0-9:, -]+)' => len = 7 => CALENDAR_DATE
-#               '(\d{4})-(\d{2})-(\d{2}) ([0-9:, -]+)' => len = 4 => CALENDAR_DATE
+# Calendar date
+# -------------
+#  '(\d{4})-(\d{2})-(\d{2}) - (\d{4})-(\d{2})-(\d{2}) / (\d+) ([0-9:, -]+)'
+#   => len = 8  => CALENDAR_DATE
 #
-#Month week day:'([a-z]*) (\d+) ([a-z]*) - ([a-z]*) (\d+) ([a-z]*) / (\d+) ([0-9:, -]+)' => len = 8 => MONTH WEEK DAY
-#               ex: wednesday 1 january - thursday 2 july / 3
+#  '(\d{4})-(\d{2})-(\d{2}) / (\d+) ([0-9:, -]+)'
+#   => len = 5 => CALENDAR_DATE
 #
-#               '([a-z]*) (\d+) - ([a-z]*) (\d+) / (\d+) ([0-9:, -]+)' => len = 6
-#               ex: february 1 - march 15 / 3 => MONTH DATE
-#               ex: monday 2 - thusday 3 / 2 => WEEK DAY
-#               ex: day 2 - day 6 / 3 => MONTH DAY
+#  '(\d{4})-(\d{2})-(\d{2}) - (\d{4})-(\d{2})-(\d{2}) ([0-9:, -]+)'
+#   => len = 7 => CALENDAR_DATE
 #
-#               '([a-z]*) (\d+) - (\d+) / (\d+) ([0-9:, -]+)' => len = 6
-#               ex: february 1 - 15 / 3 => MONTH DATE
-#               ex: thursday 2 - 4 => WEEK DAY
-#               ex: day 1 - 4 => MONTH DAY
+#  '(\d{4})-(\d{2})-(\d{2}) ([0-9:, -]+)'
+#   => len = 4 => CALENDAR_DATE
 #
-#               '([a-z]*) (\d+) ([a-z]*) - ([a-z]*) (\d+) ([a-z]*) ([0-9:, -]+)' => len = 7
-#               ex: wednesday 1 january - thursday 2 july => MONTH WEEK DAY
+# Month week day
+# --------------
+#  '([a-z]*) (\d+) ([a-z]*) - ([a-z]*) (\d+) ([a-z]*) / (\d+) ([0-9:, -]+)'
+#  => len = 8 => MONTH WEEK DAY
+#  e.g.: wednesday 1 january - thursday 2 july / 3
 #
-#               '([a-z]*) (\d+) - (\d+) ([0-9:, -]+)' => len = 7
-#               ex: thursday 2 - 4 => WEEK DAY
-#               ex: february 1 - 15 / 3 => MONTH DATE
-#               ex: day 1 - 4 => MONTH DAY
+#  '([a-z]*) (\d+) - ([a-z]*) (\d+) / (\d+) ([0-9:, -]+)' => len = 6
+#  e.g.: february 1 - march 15 / 3 => MONTH DATE
+#  e.g.: monday 2 - thusday 3 / 2 => WEEK DAY
+#  e.g.: day 2 - day 6 / 3 => MONTH DAY
 #
-#               '([a-z]*) (\d+) - ([a-z]*) (\d+) ([0-9:, -]+)' => len = 5
-#               ex: february 1 - march 15  => MONTH DATE
-#               ex: monday 2 - thusday 3  => WEEK DAY
-#               ex: day 2 - day 6  => MONTH DAY
+#  '([a-z]*) (\d+) - (\d+) / (\d+) ([0-9:, -]+)' => len = 6
+#  e.g.: february 1 - 15 / 3 => MONTH DATE
+#  e.g.: thursday 2 - 4 => WEEK DAY
+#  e.g.: day 1 - 4 => MONTH DAY
 #
-#               '([a-z]*) (\d+) ([0-9:, -]+)' => len = 3
-#               ex: february 3 => MONTH DATE
-#               ex: thursday 2 => WEEK DAY
-#               ex: day 3 => MONTH DAY
+#  '([a-z]*) (\d+) ([a-z]*) - ([a-z]*) (\d+) ([a-z]*) ([0-9:, -]+)' => len = 7
+#  e.g.: wednesday 1 january - thursday 2 july => MONTH WEEK DAY
 #
-#               '([a-z]*) (\d+) ([a-z]*) ([0-9:, -]+)' => len = 4
-#               ex: thusday 3 february => MONTH WEEK DAY
+#  '([a-z]*) (\d+) - (\d+) ([0-9:, -]+)' => len = 7
+#  e.g.: thursday 2 - 4 => WEEK DAY
+#  e.g.: february 1 - 15 / 3 => MONTH DATE
+#  e.g.: day 1 - 4 => MONTH DAY
 #
-#               '([a-z]*) ([0-9:, -]+)' => len = 6
-#               ex: thusday => normal values
+#  '([a-z]*) (\d+) - ([a-z]*) (\d+) ([0-9:, -]+)' => len = 5
+#  e.g.: february 1 - march 15  => MONTH DATE
+#  e.g.: monday 2 - thusday 3  => WEEK DAY
+#  e.g.: day 2 - day 6  => MONTH DAY
 #
-#Types: CALENDAR_DATE
-#       MONTH WEEK DAY
-#       WEEK DAY
-#       MONTH DATE
-#       MONTH DAY
+#  '([a-z]*) (\d+) ([0-9:, -]+)' => len = 3
+#  e.g.: february 3 => MONTH DATE
+#  e.g.: thursday 2 => WEEK DAY
+#  e.g.: day 3 => MONTH DAY
+#
+#  '([a-z]*) (\d+) ([a-z]*) ([0-9:, -]+)' => len = 4
+#  e.g.: thusday 3 february => MONTH WEEK DAY
+#
+#  '([a-z]*) ([0-9:, -]+)' => len = 6
+#  e.g.: thusday => normal values
+#
+# Types: CALENDAR_DATE
+#        MONTH WEEK DAY
+#        WEEK DAY
+#        MONTH DATE
+#        MONTH DAY
 #
 
 import time
@@ -92,18 +103,17 @@ class Timeperiod(Item):
 
     properties = Item.properties.copy()
     properties.update({
-        'timeperiod_name':  StringProp (fill_brok=['full_status']),
-        'alias':            StringProp (default='',fill_brok=['full_status']),
-        'use':              StringProp (default=''),
+        'timeperiod_name':  StringProp(fill_brok=['full_status']),
+        'alias':            StringProp(default='', fill_brok=['full_status']),
+        'use':              StringProp(default=''),
         'register':         IntegerProp(default='1'),
 
         # These are needed if a broker module calls methods on timeperiod objects
-        'dateranges':       ListProp   (fill_brok=['full_status'], default=[]),
-        'exclude':          ListProp   (fill_brok=['full_status'], default=[]),
-        'is_active':        BoolProp   (default='0')
+        'dateranges':       ListProp(fill_brok=['full_status'], default=[]),
+        'exclude':          ListProp(fill_brok=['full_status'], default=[]),
+        'is_active':        BoolProp(default='0')
     })
     running_properties = Item.running_properties.copy()
-
 
     def __init__(self, params={}):
         self.id = Timeperiod.id
@@ -118,30 +128,26 @@ class Timeperiod(Item):
             if key in ['name', 'alias', 'timeperiod_name', 'exclude', 'use', 'register', 'imported_from']:
                 setattr(self, key, params[key])
             else:
-                self.unresolved.append(key+' '+params[key])
+                self.unresolved.append(key + ' ' + params[key])
 
-        self.cache = {} #For tunning purpose only
-        self.invalid_cache = {} #same but for invalid search
+        self.cache = {}  # For tunning purpose only
+        self.invalid_cache = {}  # same but for invalid search
         self.configuration_errors = []
         self.configuration_warnings = []
         # By default the tp is None so we know we just start
         self.is_active = None
         self.tags = set()
 
-
     def get_name(self):
         return getattr(self, 'timeperiod_name', 'unknown_timeperiod')
 
-
-    #We fillfull properties with template ones if need
-    #for the unresolved values (like sunday ETCETC)
+    # We fillfull properties with template ones if need
+    # for the unresolved values (like sunday ETCETC)
     def get_unresolved_properties_by_inheritance(self, items):
-        #Ok, I do not have prop, Maybe my templates do?
-        #Same story for plus
+        # Ok, I do not have prop, Maybe my templates do?
+        # Same story for plus
         for i in self.templates:
             self.unresolved.extend(i.unresolved)
-
-
 
     def is_time_valid(self, t):
         if self.has('exclude'):
@@ -153,19 +159,16 @@ class Timeperiod(Item):
                 return True
         return False
 
-
-    #will give the first time > t which is valid
+    # will give the first time > t which is valid
     def get_min_from_t(self, t):
         mins_incl = []
         for dr in self.dateranges:
             mins_incl.append(dr.get_min_from_t(t))
         return min(mins_incl)
 
-
-    #will give the first time > t which is not valid
+    # will give the first time > t which is not valid
     def get_not_in_min_from_t(self, f):
         pass
-
 
     def find_next_valid_time_from_cache(self, t):
         try:
@@ -173,24 +176,22 @@ class Timeperiod(Item):
         except KeyError:
             return None
 
-
     def find_next_invalid_time_from_cache(self, t):
         try:
             return self.invalid_cache[t]
         except KeyError:
             return None
 
-
     # will look for active/un-active change. And log it
     # [1327392000] TIMEPERIOD TRANSITION: <name>;<from>;<to>
-    # from is -1 on startup.  to is 1 if the timeperiod starts 
+    # from is -1 on startup.  to is 1 if the timeperiod starts
     # and 0 if it ends.
     def check_and_log_activation_change(self):
         now = int(time.time())
-        
+
         was_active = self.is_active
         self.is_active = self.is_time_valid(now)
-        
+
         # If we got a change, log it!
         if self.is_active != was_active:
             _from = 0
@@ -205,7 +206,6 @@ class Timeperiod(Item):
 
             # Now raise the log
             logger.log('TIMEPERIOD TRANSITION: %s;%d;%d' % (self.get_name(), _from, _to))
-        
 
     # clean the get_next_valid_time_from_t cache
     # The entries are a dict on t. t < now are useless
@@ -228,13 +228,10 @@ class Timeperiod(Item):
         for t in t_to_del:
             del self.invalid_cache[t]
 
-
-
     def get_next_valid_time_from_t(self, t):
-        #first find from cache
+        # first find from cache
         t = int(t)
         original_t = t
-
         #print self.get_name(), "Check valid time for", time.asctime(time.localtime(t))
 
         res_from_cache = self.find_next_valid_time_from_cache(t)
@@ -244,10 +241,10 @@ class Timeperiod(Item):
         still_loop = True
 
         local_min = None
-        #Loop for all minutes...
+        # Loop for all minutes...
         while still_loop:
             #print self.get_name(), '\nLoop'
-            #Ok, not in cache...
+            # Ok, not in cache...
             dr_mins = []
             for dr in self.dateranges:
                 dr_mins.append(dr.get_next_valid_time_from_t(t))
@@ -256,10 +253,10 @@ class Timeperiod(Item):
             #for o in dr_mins:
             #    print "FUCK",time.asctime(time.localtime(o)), "\n"
 
-            #Min but not the None valus...
+            # Min but not the None valus...
             try:
                 local_min = min([d for d in dr_mins if d is not None])
-            except ValueError: #dr_mins if full of None, not good
+            except ValueError:  # dr_mins if full of None, not good
                 local_min = None
 
             #if local_min != None:
@@ -267,12 +264,12 @@ class Timeperiod(Item):
             #    print "Proposed local min", time.asctime(time.localtime(local_min))
 
 
-            #We do not loop unless the local_min is not valid
+            # We do not loop unless the local_min is not valid
             still_loop = False
 
-            #if we've got a real value, we check it with the exclude
+            # if we've got a real value, we check it with the exclude
             if local_min is not None:
-                #Now check if local_min is not valid
+                # Now check if local_min is not valid
                 for tp in self.exclude:
                     #print self.get_name(), "Check in TP"
                     if tp.is_time_valid(local_min):
@@ -280,19 +277,19 @@ class Timeperiod(Item):
                         #t = local_min + 60
                         #print self.get_name(), "TP pas content:", tp.get_name(), time.asctime(time.localtime(local_min))
                         local_min = tp.get_next_invalid_time_from_t(local_min+60)
-                        #if local_min != None:
-                        #    print "Exclude TP proposed new local min", time.asctime(time.localtime(local_min))
-                        #    print local_min
-                            #print "Is it really a invalid date?", tp.is_time_valid(local_min), "if true FUCK"
-                        #print self.get_name(), "Apres content:", tp.get_name(), time.asctime(time.localtime(local_min))
-                    #else:
-                    #    print self.get_name(), "Tp ca lui va", tp.get_name()
+                        ## if local_min != None:
+                        ##     print "Exclude TP proposed new local min", time.asctime(time.localtime(local_min))
+                        ##     print local_min
+                        ## print "Is it really a invalid date?", tp.is_time_valid(local_min), "if true FUCK"
+                        ## print self.get_name(), "Apres content:", tp.get_name(), time.asctime(time.localtime(local_min))
+                    ## else:
+                    ##     print self.get_name(), "Tp ca lui va", tp.get_name()
 
             if local_min is None:
                 still_loop = False
             else:
                 t = local_min
-                #No loop more than one year
+                # No loop more than one year
                 if t > original_t + 3600*24*366 + 1:
                     still_loop = False
                     local_min = None
@@ -300,7 +297,6 @@ class Timeperiod(Item):
         # Ok, we update the cache...
         self.cache[original_t] = local_min
         return local_min
-
 
     def get_next_invalid_time_from_t(self, t):
         #print '\n\n', self.get_name(), 'search for next invalid from', time.asctime(time.localtime(t))
@@ -313,21 +309,21 @@ class Timeperiod(Item):
         if res_from_cache is not None:
             return res_from_cache
 
-        #Then look, maybe t is already invalid
+        # Then look, maybe t is already invalid
         if not self.is_time_valid(t):
             return t
 
         local_min = t
         res = None
-        #Loop for all minutes...
+        # Loop for all minutes...
         while still_loop:
             #print "Invalid loop with", time.asctime(time.localtime(local_min))
 
             dr_mins = []
             #val_valids = []
             #val_inval = []
-            #But maybe we can find a better solution with next invalid of standart dateranges
-            #print self.get_name(), "After valid of exclude, local_min =", time.asctime(time.localtime(local_min))
+            # But maybe we can find a better solution with next invalid of standart dateranges
+            # print self.get_name(), "After valid of exclude, local_min =", time.asctime(time.localtime(local_min))
             for dr in self.dateranges:
                 #print self.get_name(), "Search a next invalid from DR", time.asctime(time.localtime(local_min))
                 #print dr.__dict__
@@ -336,17 +332,17 @@ class Timeperiod(Item):
                 #print self.get_name(), "Dr", dr.__dict__,  "give me next invalid", time.asctime(time.localtime(m))
                 if m is not None:
                     # But maybe it's invalid for this dr, but valid for other ones.
-                    #if not self.is_time_valid(m):
-                        #print "Final : Got a next invalid at", time.asctime(time.localtime(m))
+                    ## if not self.is_time_valid(m):
+                    ##     print "Final: Got a next invalid at", time.asctime(time.localtime(m))
                     dr_mins.append(m)
                     #if not self.is_time_valid(m):
                     #    val_inval.append(m)
                     #else:
                     #    val_valids.append(m)
-                        #print "Add a m", time.asctime(time.localtime(m))
-#                    else:
-#                        print dr.__dict__
-#                        print "FUCK bad result\n\n\n"
+                    #    print "Add a m", time.asctime(time.localtime(m))
+                    #else:
+                    #     print dr.__dict__
+                    #     print "FUCK bad result\n\n\n"
             #print "Inval"
             #for v in val_inval:
             #    print "\t", time.asctime(time.localtime(v))
@@ -364,20 +360,20 @@ class Timeperiod(Item):
                 #    local_min = local_min_valid
                 #else:
                 #    local_min = min(dr_mins)
-                #print "UPDATE After dr : found invalid local min:", time.asctime(time.localtime(local_min)), "is valid", self.is_time_valid(local_min)
+                #print "UPDATE After dr: found invalid local min:", time.asctime(time.localtime(local_min)), "is valid", self.is_time_valid(local_min)
 
-            #print self.get_name(), 'Invalid: local min', local_min#time.asctime(time.localtime(local_min))
+            #print self.get_name(), 'Invalid: local min', local_min #time.asctime(time.localtime(local_min))
             # We do not loop unless the local_min is not valid
             if not self.is_time_valid(local_min):
                 still_loop = False
-            else: # continue until we reach too far..., in one minute
+            else:  # continue until we reach too far..., in one minute
                 # After one month, go quicker...
                 if local_min > original_t + 3600*24*30:
                     local_min += 3600
-                else: # else search for 1min precision
+                else:  # else search for 1min precision
                     local_min += 60
                 # after one year, stop.
-                if local_min > original_t + 3600*24*366 + 1:#60*24*366 + 1:
+                if local_min > original_t + 3600*24*366 + 1:  # 60*24*366 + 1:
                     still_loop = False
             #print "Loop?", still_loop
             # if we've got a real value, we check it with the exclude
@@ -387,15 +383,15 @@ class Timeperiod(Item):
                     #print self.get_name(),"we check for invalid", time.asctime(time.localtime(local_min)), 'with tp', tp.name
                     if tp.is_time_valid(local_min):
                         still_loop = True
-                        #local_min + 60
+                        # local_min + 60
                         local_min = tp.get_next_invalid_time_from_t(local_min+60)
-                        #No loop more than one year
+                        # No loop more than one year
                         if local_min > original_t + 60*24*366 + 1:
                             still_loop = False
                             res = None
 
-            if not still_loop:#We find a possible value
-                #We take the result the minimal possible
+            if not still_loop:  # We find a possible value
+                # We take the result the minimal possible
                 if res is None or local_min < res:
                     res = local_min
 
@@ -404,40 +400,36 @@ class Timeperiod(Item):
         self.invalid_cache[original_t] = local_min
         return local_min
 
-
     def has(self, prop):
         return hasattr(self, prop)
 
-
-    #We are correct only if our daterange are
-    #and if we have no unmatch entries
+    # We are correct only if our daterange are
+    # and if we have no unmatch entries
     def is_correct(self):
         b = True
         for dr in self.dateranges:
             b &= dr.is_correct()
 
-        #Even one invalid is non correct
+        # Even one invalid is non correct
         for e in self.invalid_entries:
             b = False
             logger.error("[timeperiod::%s] invalid entry '%s'" % (self.get_name(), e))
         return b
 
-
     def __str__(self):
         s = ''
-        s += str(self.__dict__)+'\n'
+        s += str(self.__dict__) + '\n'
         for elt in self.dateranges:
             s += str(elt)
-            (start,end) = elt.get_start_and_end_time()
+            (start, end) = elt.get_start_and_end_time()
             start = time.asctime(time.localtime(start))
             end = time.asctime(time.localtime(end))
-            s += "\nStart and end:"+str((start, end))
+            s += "\nStart and end:" + str((start, end))
         s += '\nExclude'
         for elt in self.exclude:
             s += str(elt)
 
         return s
-
 
     def resolve_daterange(self, dateranges, entry):
         #print "Trying to resolve ", entry
@@ -492,15 +484,15 @@ class Timeperiod(Item):
                 ewday = t1
                 swday_offset = smday
                 ewday_offset = emday
-                dateranges.append(WeekDayDaterange(0, 0, 0, swday, swday_offset, 0,0,0, ewday, ewday_offset, skip_interval, other))
+                dateranges.append(WeekDayDaterange(0, 0, 0, swday, swday_offset, 0, 0, 0, ewday, ewday_offset, skip_interval, other))
                 return
             elif t0 in Daterange.months and t1 in Daterange.months:
                 smon = t0
                 emon = t1
-                dateranges.append(MonthDateDaterange(0, smon, smday, 0,0,0,emon,emday,0,0,skip_interval,other))
+                dateranges.append(MonthDateDaterange(0, smon, smday, 0, 0, 0, emon, emday, 0, 0, skip_interval, other))
                 return
             elif t0 == 'day' and t1 == 'day':
-                dateranges.append(MonthDayDaterange(0,0,smday,0,0,0,0,emday, 0,0,skip_interval, other))
+                dateranges.append(MonthDayDaterange(0, 0, smday, 0, 0, 0, 0, emday, 0, 0, skip_interval, other))
                 return
 
         res = re.search('([a-z]*) ([\d-]+) - ([\d-]+) / (\d+)[\s\t]*([0-9:, -]+)', entry)
@@ -512,17 +504,16 @@ class Timeperiod(Item):
                 swday_offset = smday
                 ewday = swday
                 ewday_offset = emday
-                dateranges.append(WeekDayDaterange(0, 0, 0, swday, swday_offset, 0,0,0, ewday, ewday_offset, skip_interval, other))
+                dateranges.append(WeekDayDaterange(0, 0, 0, swday, swday_offset, 0, 0, 0, ewday, ewday_offset, skip_interval, other))
                 return
             elif t0 in Daterange.months:
                 smon = t0
                 emon = smon
-                dateranges.append(MonthDateDaterange(0, smon, smday, 0,0,0,emon,emday,0,0,skip_interval, other))
+                dateranges.append(MonthDateDaterange(0, smon, smday, 0, 0, 0, emon, emday, 0, 0, skip_interval, other))
                 return
             elif t0 == 'day':
-                dateranges.append(MonthDayDaterange(0,0,smday,0,0,0,0,emday,0,0,skip_interval,other))
+                dateranges.append(MonthDayDaterange(0, 0, smday, 0, 0, 0, 0, emday, 0, 0, skip_interval, other))
                 return
-
 
         res = re.search('([a-z]*) ([\d-]+) ([a-z]*) - ([a-z]*) ([\d-]+) ([a-z]*) [\s\t]*([0-9:, -]+)', entry)
         if res is not None:
@@ -531,7 +522,6 @@ class Timeperiod(Item):
             #print "Debug:", (swday, swday_offset, smon, ewday, ewday_offset, emon, other)
             dateranges.append(MonthWeekDayDaterange(0, smon, 0, swday, swday_offset, 0, emon, 0, ewday, ewday_offset, 0, other))
             return
-
 
         res = re.search('([a-z]*) ([\d-]+) - ([\d-]+)[\s\t]*([0-9:, -]+)', entry)
         if res is not None:
@@ -542,15 +532,15 @@ class Timeperiod(Item):
                 swday_offset = smday
                 ewday = swday
                 ewday_offset = emday
-                dateranges.append(WeekDayDaterange(0, 0, 0, swday, swday_offset, 0,0,0, ewday, ewday_offset, 0, other))
+                dateranges.append(WeekDayDaterange(0, 0, 0, swday, swday_offset, 0, 0, 0, ewday, ewday_offset, 0, other))
                 return
             elif t0 in Daterange.months:
                 smon = t0
                 emon = smon
-                dateranges.append(MonthDateDaterange(0, smon, smday, 0,0,0,emon,emday,0,0, 0, other))
+                dateranges.append(MonthDateDaterange(0, smon, smday, 0, 0, 0, emon, emday, 0, 0, 0, other))
                 return
             elif t0 == 'day':
-                dateranges.append(MonthDayDaterange(0,0,smday,0,0,0,0,emday,0,0,0,other))
+                dateranges.append(MonthDayDaterange(0, 0, smday, 0, 0, 0, 0, emday, 0, 0, 0, other))
                 return
 
         res = re.search('([a-z]*) ([\d-]+) - ([a-z]*) ([\d-]+)[\s\t]*([0-9:, -]+)', entry)
@@ -562,28 +552,28 @@ class Timeperiod(Item):
                 ewday = t1
                 swday_offset = smday
                 ewday_offset = emday
-                dateranges.append(WeekDayDaterange(0, 0, 0, swday, swday_offset, 0,0,0, ewday, ewday_offset, 0, other))
+                dateranges.append(WeekDayDaterange(0, 0, 0, swday, swday_offset, 0, 0, 0, ewday, ewday_offset, 0, other))
                 return
             elif t0 in Daterange.months and t1 in Daterange.months:
                 smon = t0
                 emon = t1
-                dateranges.append(MonthDateDaterange(0, smon, smday, 0,0,0,emon,emday,0,0, 0,other))
+                dateranges.append(MonthDateDaterange(0, smon, smday, 0, 0, 0, emon, emday, 0, 0, 0, other))
                 return
             elif t0 == 'day' and t1 == 'day':
-                dateranges.append(MonthDayDaterange(0,0,smday,0,0,0,0,emday, 0,0, 0, other))
+                dateranges.append(MonthDayDaterange(0, 0, smday, 0, 0, 0, 0, emday, 0, 0, 0, other))
                 return
 
         res = re.search('([a-z]*) ([\d-]+) ([a-z]*)[\s\t]*([0-9:, -]+)', entry)
         if res is not None:
             #print "Good catch 11"
-            (t0, swday_offset, t1,other) = res.groups()
+            (t0, swday_offset, t1, other) = res.groups()
             if t0 in Daterange.weekdays and t1 in Daterange.months:
                 swday = t0
                 smon = t1
                 emon = smon
                 ewday = swday
                 ewday_offset = swday_offset
-                dateranges.append(MonthWeekDayDaterange(0, smon, 0, swday, swday_offset,0,emon,0,ewday,ewday_offset,0,other))
+                dateranges.append(MonthWeekDayDaterange(0, smon, 0, swday, swday_offset, 0, emon, 0, ewday, ewday_offset, 0, other))
                 return
 
         res = re.search('([a-z]*) ([\d-]+)[\s\t]+([0-9:, -]+)', entry)
@@ -595,17 +585,17 @@ class Timeperiod(Item):
                 swday_offset = smday
                 ewday = swday
                 ewday_offset = swday_offset
-                dateranges.append(WeekDayDaterange(0,0,0,swday,swday_offset,0,0,0,ewday,ewday_offset,0,other))
+                dateranges.append(WeekDayDaterange(0, 0, 0, swday, swday_offset, 0, 0, 0, ewday, ewday_offset, 0, other))
                 return
             if t0 in Daterange.months:
                 smon = t0
                 emon = smon
                 emday = smday
-                dateranges.append(MonthDateDaterange(0, smon, smday, 0,0,0,emon,emday,0,0, 0,other))
+                dateranges.append(MonthDateDaterange(0, smon, smday, 0, 0, 0, emon, emday, 0, 0, 0, other))
                 return
             if t0 == 'day':
                 emday = smday
-                dateranges.append(MonthDayDaterange(0,0,smday,0,0,0,0,emday, 0,0, 0, other))
+                dateranges.append(MonthDayDaterange(0, 0, smday, 0, 0, 0, 0, emday, 0, 0, 0, other))
                 return
 
         res = re.search('([a-z]*)[\s\t]+([0-9:, -]+)', entry)
@@ -619,20 +609,17 @@ class Timeperiod(Item):
         logger.info("[timeentry::%s] no match for %s" % (self.get_name(), entry))
         self.invalid_entries.append(entry)
 
-
     def apply_inheritance(self):
         pass
 
-
-    #create daterange from unresolved param
+    # create daterange from unresolved param
     def explode(self, timeperiods):
         for entry in self.unresolved:
             #print "Revolving entry", entry
             self.resolve_daterange(self.dateranges, entry)
         self.unresolved = []
 
-
-    #Will make tp in exclude with id of the timeperiods
+    # Will make tp in exclude with id of the timeperiods
     def linkify(self, timeperiods):
         new_exclude = []
         if self.has('exclude') and self.exclude != '':
@@ -647,7 +634,6 @@ class Timeperiod(Item):
                     logger.error("[timeentry::%s] unknown %s timeperiod" % (self.get_name(), tp_name))
         self.exclude = new_exclude
 
-
     def check_exclude_rec(self):
         if self.rec_tag:
             logger.error("[timeentry::%s] is in a loop in exclude parameter" % self.get_name())
@@ -657,66 +643,59 @@ class Timeperiod(Item):
             tp.check_exclude_rec()
         return True
 
-
     def fill_data_brok_from(self, data, brok_type):
         cls = self.__class__
-        #Now config properties
+        # Now config properties
         for prop, entry in cls.properties.items():
-            #Is this property intended for brokking?
-#            if 'fill_brok' in entry:
+            # Is this property intended for brokking?
+            #if 'fill_brok' in entry:
             if brok_type in entry.fill_brok:
                 if hasattr(self, prop):
                     data[prop] = getattr(self, prop)
                 elif entry.has_default:
                     data[prop] = entry.default
 
-
-    #Get a brok with initial status
+    # Get a brok with initial status
     def get_initial_status_brok(self):
         cls = self.__class__
         my_type = cls.my_type
-        data = {'id' : self.id}
+        data = {'id': self.id}
 
         self.fill_data_brok_from(data, 'full_status')
-        b = Brok('initial_'+my_type+'_status', data)
+        b = Brok('initial_' + my_type + '_status', data)
         return b
-
 
 
 class Timeperiods(Items):
     name_property = "timeperiod_name"
     inner_class = Timeperiod
 
-
     def explode(self):
         for id in self.items:
             tp = self.items[id]
             tp.explode(self)
-
 
     def linkify(self):
         for id in self.items:
             tp = self.items[id]
             tp.linkify(self)
 
-
     def apply_inheritance(self):
-        #The only interesting property to inherit is exclude
+        # The only interesting property to inherit is exclude
         self.apply_partial_inheritance('exclude')
         for i in self:
             i.get_customs_properties_by_inheritance(self)
 
-        #And now apply inheritance for unresolved properties
-        #like the dateranges in fact
+        # And now apply inheritance for unresolved properties
+        # like the dateranges in fact
         for tp in self:
             tp.get_unresolved_properties_by_inheritance(self.items)
 
-
-    #check for loop in definition
+    # check for loop in definition
     def is_correct(self):
         r = True
-        #We do not want a same hg to be explode again and again
-        #so we tag it
+        # We do not want a same hg to be explode again and again
+        # so we tag it
         for tp in self.items.values():
             tp.rec_tag = False
 
@@ -725,14 +704,13 @@ class Timeperiods(Items):
                 tmp_tp.rec_tag = False
             r &= tp.check_exclude_rec()
 
-        #We clean the tags
+        # We clean the tags
         for tp in self.items.values():
             del tp.rec_tag
 
-        #And check all timeperiods for correct (sounday is false)
+        # And check all timeperiods for correct (sounday is false)
         for tp in self:
             r &= tp.is_correct()
-
 
         return r
 
@@ -785,12 +763,12 @@ if __name__ == '__main__':
         #print "Is valid NOW?", t.is_time_valid(now)
         t_next = t.get_next_valid_time_from_t(now + 5*60)
         if t_next is not None:
-            print "Get next valid for now + 5 min ==>", time.asctime(time.localtime(t_next)),"<=="
+            print "Get next valid for now + 5 min ==>", time.asctime(time.localtime(t_next)), "<=="
         else:
             print "===> No future time!!!"
         #print "End date:", t.get_end_time()
         #print "Next valid", time.asctime(time.localtime(t.get_next_valid_time()))
-        print str(t)+'\n\n'
+        print str(t) + '\n\n'
 
     print "*************************************************************"
     t3 = Timeperiod()
@@ -803,14 +781,13 @@ if __name__ == '__main__':
     t2.resolve_daterange(t2.dateranges, 'day 1 - 10 12:00-17:00')
     t2.exclude = [t3]
 
-
     t = Timeperiod()
     t.timeperiod_name = 't'
     t.resolve_daterange(t.dateranges, 'day 1 - 10 14:00-15:00')
     t.exclude = [t2]
 
-    print "Mon T", str(t)+'\n\n'
+    print "Mon T", str(t) + '\n\n'
     t_next = t.get_next_valid_time_from_t(now)
     t_no_next = t.get_next_invalid_time_from_t(now)
-    print "Get next valid for now ==>", time.asctime(time.localtime(t_next)),"<=="
-    print "Get next invalid for now ==>", time.asctime(time.localtime(t_no_next)),"<=="
+    print "Get next valid for now ==>", time.asctime(time.localtime(t_next)), "<=="
+    print "Get next invalid for now ==>", time.asctime(time.localtime(t_no_next)), "<=="

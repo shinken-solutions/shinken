@@ -1,6 +1,6 @@
 # disable npcd
-# Arguments are :
-# ARG2 : broker name to apply module removal
+# Arguments are:
+# ARG2: broker name to apply module removal
 setconfigfile __ETC__/shinken-specific.cfg
 removemodule NPCDMOD from broker where broker_name = ARG1
 writeconfig

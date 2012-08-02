@@ -6,11 +6,11 @@
     top: 0;
     height: 100%;
     z-index: 2000;
-    
+
     /* Specify the width of your pageslide here */
     width: 360px;
     padding: 20px;
-    
+
     /* These styles are optional, and describe how the pageslide will look */
     background-color: #333;
     color: #FFF;

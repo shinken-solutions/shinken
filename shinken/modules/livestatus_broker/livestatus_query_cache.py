@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import re
 import time
 from heapq import nsmallest
@@ -35,15 +34,17 @@ from counter import Counter
 class LFUCacheMiss(Exception):
     pass
 
+
 class LFU(object):
     """
     This class implements a dictionary which has a limited number of elements.
     Whenever the maximum number of elements is reached during a write operation
     the element which was read least times is deleted.
-    It was inspired by 
+    It was inspired by
     http://code.activestate.com/recipes/498245-lru-and-lfu-cache-decorators/
     but LFU is much more simpler.
     """
+
     def __init__(self, maxsize=100):
         self.storage = {}
         self.maxsize = maxsize
@@ -83,7 +84,7 @@ class LFU(object):
         for k in self.storage:
             text += 'key %10s (%d used)\n' % (str(k), self.use_count[k])
         return text
-        
+
 
 class LiveStatusQueryCache(object):
     """
@@ -166,4 +167,3 @@ class LiveStatusQueryCache(object):
             print obj.state_id, obj.state_type_id, brok.data['state_id'], brok.data['state_type_id']
         except Exception:
             pass
-

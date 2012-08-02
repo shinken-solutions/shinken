@@ -35,17 +35,17 @@ def add_pack_page():
     # First we look for the user sid
     # so we bail out if it's a false one
     user = app.get_user_auth()
-    
+
     if not user:
         redirect("/user/login")
         return
 
-    return {'app' : app, 'user' : user}
+    return {'app': app, 'user': user}
 
 
 def push_new_pack():
 
-    print "FUCK",app.request.forms.__dict__
+    print "FUCK", app.request.forms.__dict__
     key = app.request.forms.get('key')
     data = app.request.files.get('data')
     print "KEY", key
@@ -86,25 +86,24 @@ def push_new_pack():
                 abort(400, 'Sorry your file is too big!')
             else:
                 app.response.content_type = 'application/json'
-                return json.dumps({'state' : 'error', 'text': 'Sorry your file is too big!'})
+                return json.dumps({'state': 'error', 'text': 'Sorry your file is too big!'})
         uname = user.get('username')
         app.save_new_pack(uname, filename, raw)
         if is_cli:
             return "Hello %s! You uploaded %s (%d bytes)." % (uname, filename, len(raw))
         else:
             app.response.content_type = 'application/json'
-            return json.dumps({'state' : 'ok', 'text' : "Hello %s! You uploaded %s (%d bytes)." % (key, filename, len(raw))})
+            return json.dumps({'state': 'ok', 'text': "Hello %s! You uploaded %s (%d bytes)." % (key, filename, len(raw))})
     print "You missed a field."
     if is_cli:
         abort(400, 'You missed a field.')
     else:
         app.response.content_type = 'application/json'
-        return json.dumps({'state' : 'error', 'text': 'Sorry you missed a filed'})
-
+        return json.dumps({'state': 'error', 'text': 'Sorry you missed a filed'})
 
 
 def push_stats():
-    print "FUCK",app.request.forms.__dict__
+    print "FUCK", app.request.forms.__dict__
     key = app.request.forms.get('key')
     data = app.request.files.get('data')
     print "KEY", key
@@ -145,7 +144,7 @@ def push_stats():
                 abort(400, 'Sorry your file is too big!')
             else:
                 app.response.content_type = 'application/json'
-                return json.dumps({'state' : 'error', 'text': 'Sorry your file is too big!'})
+                return json.dumps({'state': 'error', 'text': 'Sorry your file is too big!'})
         uname = user.get('username')
         stats = json.loads(raw)
         print "WE READ A STATS DATA for user", user, "STATS:", stats
@@ -154,19 +153,16 @@ def push_stats():
             return "Hello %s! You uploaded %s (%d bytes)." % (uname, filename, len(raw))
         else:
             app.response.content_type = 'application/json'
-            return json.dumps({'state' : 'ok', 'text' : "Hello %s! You uploaded %s (%d bytes)." % (key, filename, len(raw))})
+            return json.dumps({'state': 'ok', 'text': "Hello %s! You uploaded %s (%d bytes)." % (key, filename, len(raw))})
     print "You missed a field."
     if is_cli:
         abort(400, 'You missed a field.')
     else:
         app.response.content_type = 'application/json'
-        return json.dumps({'state' : 'error', 'text': 'Sorry you missed a filed'})
+        return json.dumps({'state': 'error', 'text': 'Sorry you missed a filed'})
 
+pages = {push_new_pack: {'routes': ['/pushpack'], 'method': 'POST', 'view': None, 'static': True},
+         push_stats: {'routes': ['/pushstats'], 'method': 'POST', 'view': None, 'static': True},
 
-
-pages = {push_new_pack : { 'routes' : ['/pushpack'], 'method' : 'POST', 'view' : None, 'static' : True},
-         push_stats : { 'routes' : ['/pushstats'], 'method' : 'POST', 'view' : None, 'static' : True},
-         
-         add_pack_page : { 'routes' : ['/addpack'], 'view' : 'addpack', 'static' : True},
+         add_pack_page: {'routes': ['/addpack'], 'view': 'addpack', 'static': True},
          }
-

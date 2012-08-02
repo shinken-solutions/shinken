@@ -25,11 +25,35 @@
 ### Will be populated by the UI with it's own value
 app = None
 
-
-
 # We will need external commands here
 import time
 from shinken.external_command import ExternalCommand, ExternalCommandManager
+import re
+
+
+# Function handling $NOW$ macro
+def subsNOW():
+    return str(int(time.time()))
+
+# This dictionnary associate macros with expansion function
+subs = {'$NOW$': subsNOW
+        # Add new macros here
+       }
+
+
+# Expand macro in a string. It returns the string with macros defined in subs dictionary expanded
+def expand_macros(cmd=None):
+    macros = re.findall(r'(\$\w+\$)', cmd)
+    cmd_expanded = cmd
+    for macro in macros:
+        subfunc = subs.get(macro)
+        if subfunc is None:
+            print "Macro ", macro, " is unknown, do nothing"
+            continue
+        print "Expand macro ", macro, " in '", cmd_expanded, "'"
+        cmd_expanded = cmd_expanded.replace(macro, subfunc())
+
+    return cmd_expanded
 
 
 def forge_response(callback, status, text):
@@ -38,6 +62,7 @@ def forge_response(callback, status, text):
     else:
         return "{'status':%s,'text':'%s'}" % (status, text)
 
+
 # Our page
 def get_page(cmd=None):
 
@@ -45,11 +70,11 @@ def get_page(cmd=None):
 
     print app.request.query.__dict__
     callback = app.request.query.get('callback', None)
-    
+
     # First we look for the user sid
     # so we bail out if it's a false one
     user = app.get_user_auth()
-    
+
     # Maybe the user is not known at all
     if not user:
         return forge_response(callback, 401, 'Invalid session')
@@ -65,14 +90,18 @@ def get_page(cmd=None):
     cmd_args = elts[1:]
     print "Got command", cmd_name
     print "And args", cmd_args
-    
+
     # Check if the command exist in the external command list
     if cmd_name not in ExternalCommandManager.commands:
-        return forge_response(callback, 404,'Unknown command %s' % cmd_name)
+        return forge_response(callback, 404, 'Unknown command %s' % cmd_name)
 
     extcmd = '[%d] %s' % (now, ';'.join(elts))
     print "Got the; form", extcmd
-    
+
+    # Expand macros
+    extcmd = expand_macros(extcmd)
+    print "Got after macro expansion", extcmd
+
     # Ok, if good, we can launch the command
     extcmd = extcmd.decode('utf8', 'replace')
     e = ExternalCommand(extcmd)
@@ -81,7 +110,4 @@ def get_page(cmd=None):
 
     return forge_response(callback, 200, 'Command launched')
 
-
-
-pages = {get_page : { 'routes' : ['/action/:cmd#.+#']}}
-
+pages = {get_page: {'routes': ['/action/:cmd#.+#']}}

@@ -28,7 +28,7 @@ import sys
 try:
     python_version = sys.version_info
 except:
-    python_version = (1,5)
+    python_version = (1, 5)
 if python_version < (2, 4):
     sys.exit("Shinken require as a minimum Python 2.4.x, sorry")
 elif python_version >= (3,):
@@ -56,7 +56,6 @@ from distutils.command.install import install as _install
 from distutils.util import change_root
 from distutils.errors import DistutilsOptionError
 
-
 # We try to see if we are in a full install or an update process
 is_update = False
 if 'update' in sys.argv:
@@ -69,7 +68,7 @@ if 'update' in sys.argv:
 # shinken lib and scripts
 if 'install' in sys.argv and not '-f' in sys.argv:
     sys.argv.append('-f')
-    
+
 is_install = 'install' in sys.argv
 
 
@@ -86,6 +85,7 @@ class build(_build):
     user_options = _build.user_options + [
         ('build-config', None, 'directory to build the config files to'),
         ]
+
     def initialize_options(self):
         _build.initialize_options(self)
         self.build_config = None
@@ -98,24 +98,24 @@ class build(_build):
 
 class install(_install):
     sub_commands = _install.sub_commands + [
-        ( 'install_config', None ),
+        ('install_config', None),
     ]
     user_options = _install.user_options + [
-        ( 'etc-path=', None, 'read-only single-machine data' ),
-        ( 'var-path=', None, 'modifiable single-machine data' ),
-        ( 'run-path=', None, 'PID files' ),
-        ( 'log-path=', None, 'LOG files' ),
-        ( 'plugins-path=', None, 'program executables' ),
-        ( 'owner=', None, ( 
+        ('etc-path=', None, 'read-only single-machine data'),
+        ('var-path=', None, 'modifiable single-machine data'),
+        ('run-path=', None, 'PID files'),
+        ('log-path=', None, 'LOG files'),
+        ('plugins-path=', None, 'program executables'),
+        ('owner=', None, (
                 'change owner for etc/*, var, run and log folders (default: %s)' % DEFAULT_OWNER
             )
         ),
-        ( 'group=', None, (
+        ('group=', None, (
                 'change group for etc/*, var, run and log folders (default: %s)' % DEFAULT_GROUP
             )
         ),
     ]
-    
+
     def initialize_options(self):
         _install.initialize_options(self)
         self.etc_path = None
@@ -146,15 +146,15 @@ class install(_install):
         if self.root:
             for attr in ('etc_path', 'var_path', 'plugins_path', 'run_path', 'log_path'):
                 setattr(self, attr, change_root(self.root, getattr(self, attr)))
-            
+
 
 class build_config(Command):
     description = "build the shinken config files"
 
     user_options = [
-        ( 'build-dir=', None, "directory to build the config files to"),
+        ('build-dir=', None, "directory to build the config files to"),
     ]
-    
+
     def initialize_options (self):
         self.build_dir = None
         self.build_base = None
@@ -168,7 +168,7 @@ class build_config(Command):
 
         self.owner = None
         self.group = None
-        
+
     def finalize_options (self):
         self.set_undefined_options('build',
                                    ('build_base', 'build_base'),
@@ -188,7 +188,6 @@ class build_config(Command):
         )
         if self.build_dir is None:
             self.build_dir = os.path.join(self.build_base, 'etc')
-        
 
     def run(self):
         if not self.dry_run:
@@ -198,7 +197,7 @@ class build_config(Command):
             self.generate_default_shinken_file()
             self.update_configfiles()
             self.copy_objects_file()
-        
+
     def generate_default_shinken_file(self):
         # The default file must have good values for the directories:
         # etc, var and where to push scripts that launch the app.
@@ -227,8 +226,8 @@ class build_config(Command):
         for name in config_objects_file:
             inname = os.path.join('etc', name)
             outname = os.path.join(self.build_dir, name)
-            log.info('Copying data files in : %s out : %s' % (inname,outname))
-            append_file_with(inname, outname,"")
+            log.info('Copying data files in: %s out: %s' % (inname, outname))
+            append_file_with(inname, outname, "")
         # Creating some needed directories
         discovery_dir = os.path.join(self.build_dir + "/objects/discovery")
         if not os.path.exists(discovery_dir):
@@ -236,13 +235,11 @@ class build_config(Command):
         for dirname in [self.var_path, self.run_path, self.log_path, discovery_dir]:
             if self.build_base:
                 if not is_install:
-                    dirname = os.path.join(self.build_base, os.path.relpath(dirname,'/'))#dirname)
+                    dirname = os.path.join(self.build_base, os.path.relpath(dirname, '/')) #dirname)
                 else:
                     dirname = os.path.join(self.build_base, dirname)
             if not os.path.exists(dirname):
                 os.makedirs(dirname)
-
-
 
     def update_configfiles(self):
         # Here, even with --root we should change the file with good values
@@ -250,19 +247,19 @@ class build_config(Command):
 
         # Open a /etc/*d.ini file and change the ../var occurence with a
         # good value from the configuration file
-        
+
         for (dname, name) in daemon_ini_files:
             inname = os.path.join('etc', name)
             outname = os.path.join(self.build_dir, name)
-            log.info('updating path in %s : to "%s"' % (outname, self.var_path))
-            
+            log.info('updating path in %s: to "%s"' % (outname, self.var_path))
+
             # but we have to force the user/group & workdir values still:
             append_file_with(inname, outname, """
 user=%s
 group=%s
 workdir=%s
 pidfile=%s/%sd.pid
-""" % ( self.owner, self.group, self.var_path, self.run_path, dname))
+""" % (self.owner, self.group, self.var_path, self.run_path, dname))
 
         # And now the resource.cfg path with the value of libexec path
         # Replace the libexec path by the one in the parameter file
@@ -280,17 +277,16 @@ pidfile=%s/%sd.pid
             inname = os.path.join('etc', name)
             outname = os.path.join(self.build_dir, name)
             log.info('updating path in %s', outname)
-            
-            
-            ## but we HAVE to set the shinken_user & shinken_group to thoses requested :
+
+            ## but we HAVE to set the shinken_user & shinken_group to thoses requested:
             append_file_with(inname, outname, """
 shinken_user=%s
 shinken_group=%s
 lock_file=%s/arbiterd.pid
 local_log=%s/arbiterd.log
-""" % ( self.owner, self.group, self.run_path, self.log_path )
+""" % (self.owner, self.group, self.run_path, self.log_path)
             )
-        
+
         # UPDATE Shinken-specific.cfg files too
         for name in additionnal_config_files:
             inname = os.path.join('etc', name)
@@ -309,10 +305,10 @@ class install_config(Command):
     description = "install the shinken config files"
 
     user_options = [
-        ( 'install-dir=', 'd', "directory to install config files to" ),
-        ( 'build-dir=',   'b', "build directory (where to install from)" ),
-        ( 'force',        'f', "force installation (overwrite existing files)"),
-        ( 'skip-build',   None, "skip the build steps" ),
+        ('install-dir=', 'd', "directory to install config files to"),
+        ('build-dir=',   'b', "build directory (where to install from)"),
+        ('force',        'f', "force installation (overwrite existing files)"),
+        ('skip-build',   None, "skip the build steps"),
     ]
 
     boolean_options = ['force', 'skip-build']
@@ -325,16 +321,16 @@ class install_config(Command):
         self.group = None
 
         self.root = None
-        self.etc_path = None  # typically /etc on Posix systems 
-        self.var_path = None # typically /var on Posix systems 
-        self.run_path = None  # typically /etc on Posix systems 
-        self.log_path = None # typically /var on Posix systems 
+        self.etc_path = None  # typically /etc on Posix systems
+        self.var_path = None  # typically /var on Posix systems
+        self.run_path = None  # typically /etc on Posix systems
+        self.log_path = None  # typically /var on Posix systems
         self.plugins_path = None    # typically /libexec on Posix systems
 
     def finalize_options(self):
         self.set_undefined_options(
             'build',
-                ( 'build_config', 'build_dir' ),
+                ('build_config', 'build_dir'),
         )
         self.set_undefined_options(
             'install',
@@ -373,7 +369,6 @@ class install_config(Command):
             self.recursive_chown(self.run_path, uid, gid, self.owner, self.group)
             self.recursive_chown(self.log_path, uid, gid, self.owner, self.group)
 
-
     def get_inputs (self):
         return self.distribution.configs or []
 
@@ -407,10 +402,12 @@ class install_config(Command):
                                        "Maybe you should create this group"
                                        % group_name)
 
+
 def ensure_dir_exist(f):
     dirname = os.path.dirname(f)
     if not os.path.exists(dirname):
         os.makedirs(dirname)
+
 
 def append_file_with(infilename, outfilename, append_string):
     f = open(infilename)
@@ -425,10 +422,10 @@ def append_file_with(infilename, outfilename, append_string):
 
 def gen_data_files(*dirs):
     results = []
-    
+
     for src_dir in dirs:
         #print "Getting all files from", src_dir
-        for root,dirs,files in os.walk(src_dir):
+        for root, dirs, files in os.walk(src_dir):
             for file in files:
                 results.append(os.path.join(root, file))
     return results
@@ -493,6 +490,7 @@ config_objects_file = (
                         'templates.cfg',
                         'dependencies.cfg',
                         'timeperiods.cfg',
+                        'time_templates.cfg',
                         'contacts.cfg',
                         'discovery_rules.cfg',
                         'hosts/localhost.cfg',
@@ -518,7 +516,6 @@ config_objects_file_extended.extend(srv_pack_files)
 config_objects_file = tuple(config_objects_file_extended)
 print config_objects_file
 
-
 # daemon configs
 daemon_ini_files = (('broker', 'brokerd.ini'),
                     ('broker', 'brokerd-windows.ini'),
@@ -532,24 +529,21 @@ daemon_ini_files = (('broker', 'brokerd.ini'),
                     ('scheduler', 'schedulerd-windows.ini'),
                     )
 
-
-
-resource_cfg_files = ('resource.cfg', )
+resource_cfg_files = ('resource.cfg',)
 
 # Ok, for the webui files it's a bit tricky. we need to add all of them in
 #the package_data of setup(), but from a point of view of the
 # module shinken, so the directory shinken... but without movingfrom pwd!
-# so : sorry for the replace, really... I HATE SETUP()!
+# so: sorry for the replace, really... I HATE SETUP()!
 full_path_webui_files = gen_data_files('shinken/webui')
 webui_files = [s.replace('shinken/webui/', 'webui/') for s in full_path_webui_files]
 
-package_data = ['*.py','modules/*.py','modules/*/*.py']
+package_data = ['*.py', 'modules/*.py', 'modules/*/*.py']
 package_data.extend(webui_files)
-
 
 #By default we add all init.d scripts and some dummy files
 data_files = [
-    (   
+    (
         os.path.join('/etc', 'init.d'),
         ['bin/init.d/shinken',
          'bin/init.d/shinken-arbiter',
@@ -568,38 +562,36 @@ data_files = [
 
 # If not update, we install configuration files too
 if not is_update:
-                
+
     data_files.append(
         (os.path.join(etc_root, 'default',),
-         ['build/bin/default/shinken' ]
+         ['build/bin/default/shinken']
          ))
-
-
 #print "DATA", data_files
-    
+
 print "All package _data"
 if __name__ == "__main__":
-    
+
     setup(
-        cmdclass = {
+        cmdclass={
             'build': build,
             'install': install,
             'build_config': build_config,
             'install_config': install_config
         },
-      
-        name = "Shinken",
-        version = "1.0.1",
-        packages = find_packages(),
-        package_data = {'' : package_data},
-        description = "Shinken is a monitoring tool compatible with Nagios configuration and plugins",
+
+        name="Shinken",
+        version="1.0.1",
+        packages=find_packages(),
+        package_data={'': package_data},
+        description="Shinken is a monitoring tool compatible with Nagios configuration and plugins",
         long_description=read('README'),
-        author = "Gabes Jean",
-        author_email = "naparuba@gmail.com",
-        license = "GNU Affero General Public License",
-        url = "http://www.shinken-monitoring.org",
+        author="Gabes Jean",
+        author_email="naparuba@gmail.com",
+        license="GNU Affero General Public License",
+        url="http://www.shinken-monitoring.org",
         zip_safe=False,
-        classifiers = [
+        classifiers=[
             'Development Status :: 5 - Production/Stable',
             'Environment :: Console',
             'Intended Audience :: System Administrators',
@@ -611,15 +603,17 @@ if __name__ == "__main__":
             'Topic :: System :: Monitoring',
             'Topic :: System :: Networking :: Monitoring',
         ],
-    
-        install_requires = [
+
+        install_requires=[
             required_pkgs
         ],
-    
-        scripts = glob('bin/shinken-[!_]*'),
+        extras_require={
+            'setproctitle': ['setproctitle']
+        },
+
+        scripts=glob('bin/shinken-[!_]*'),
 
         data_files=data_files,
     )
-
 
 print "Shinken setup done"

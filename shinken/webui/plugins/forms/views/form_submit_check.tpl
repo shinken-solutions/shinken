@@ -34,7 +34,7 @@
     </select>
     <span class="help-inline">Status</span>
 
-    <input type="text" name='output' class="span3" placeholder="Output…">  
+    <input type="text" name='output' class="span3" placeholder="Output…">
     <span class="help-inline">Text output</span>
 
 </form>

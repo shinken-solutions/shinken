@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import types
 from shinken.objects import Contact
 from shinken.objects import NotificationWay
@@ -33,7 +32,7 @@ from livestatus_query_metainfo import HINT_NONE, HINT_SINGLE_HOST, HINT_SINGLE_H
 
 
 def itersorted(self, hints=None):
-    #print "hints is", hints
+    # print "hints is", hints
     if hints == None:
         # return all items
         for _, hid in self._id_heap:
@@ -41,7 +40,7 @@ def itersorted(self, hints=None):
     elif hints['target'] == HINT_SINGLE_HOST:
         try:
             host_id = self._id_by_host_name_heap[hints['host_name']]
-            if 'authuser' in hints and host.id in self._id_contact_heap[hints['authuser']]:
+            if 'authuser' in hints and host_id in self._id_contact_heap[hints['authuser']]:
                 yield self.items[host_id]
             elif 'authuser' not in hints:
                 yield self.items[host_id]
@@ -64,7 +63,7 @@ def itersorted(self, hints=None):
     elif hints['target'] == HINT_SINGLE_SERVICE:
         try:
             service_id = self._id_by_service_name_heap[hints['host_name'] + '/' + hints['service_description']]
-            if 'authuser' in hints and service.id in self._id_contact_heap[hints['authuser']]:
+            if 'authuser' in hints and service_id in self._id_contact_heap[hints['authuser']]:
                 yield self.items[service_id]
             elif 'authuser' not in hints:
                 yield self.items[service_id]
@@ -92,7 +91,7 @@ class LiveStatusRegenerator(Regenerator):
 
     def all_done_linking(self, inst_id):
         """In addition to the original all_done_linking our items will get sorted"""
-        
+
         # We will relink all objects if need. If we are in a scheduler, this function will just bailout
         # because it's not need :)
         super(self.__class__, self).all_done_linking(inst_id)
@@ -115,6 +114,8 @@ class LiveStatusRegenerator(Regenerator):
         self.contactgroups._id_heap.sort(key=lambda x: x[0])
         setattr(self.commands, '_id_heap', [(get_obj_full_name(v), k) for (k, v) in self.commands.items.iteritems()])
         self.commands._id_heap.sort(key=lambda x: x[0])
+        setattr(self.timeperiods, '_id_heap', [(get_obj_full_name(v), k) for (k, v) in self.timeperiods.items.iteritems()])
+        self.timeperiods._id_heap.sort(key=lambda x: x[0])
         # Then install a method for accessing the lists' elements in sorted order
         setattr(self.services, '__itersorted__', types.MethodType(itersorted, self.services))
         setattr(self.hosts, '__itersorted__', types.MethodType(itersorted, self.hosts))
@@ -122,9 +123,10 @@ class LiveStatusRegenerator(Regenerator):
         setattr(self.servicegroups, '__itersorted__', types.MethodType(itersorted, self.servicegroups))
         setattr(self.hostgroups, '__itersorted__', types.MethodType(itersorted, self.hostgroups))
         setattr(self.contactgroups, '__itersorted__', types.MethodType(itersorted, self.contactgroups))
-        setattr(self.commands, '__itersorted__', types.MethodType(itersorted, self.contactgroups))
+        setattr(self.commands, '__itersorted__', types.MethodType(itersorted, self.commands))
+        setattr(self.timeperiods, '__itersorted__', types.MethodType(itersorted, self.timeperiods))
 
-        # Speedup authUser requests by populating _id_contact_heap with contact-names as key and 
+        # Speedup authUser requests by populating _id_contact_heap with contact-names as key and
         # an array with the associated host and service ids
         setattr(self.hosts, '_id_contact_heap', dict())
         setattr(self.services, '_id_contact_heap', dict())
@@ -140,9 +142,9 @@ class LiveStatusRegenerator(Regenerator):
             [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.services.items.iteritems() for c in v.contacts]
         else:
             # 1. every host contact automatically becomes a service contact
-            [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.services.items.iteritems () for c in v.host.contacts]
+            [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.services.items.iteritems() for c in v.host.contacts]
             # 2. explicit service contacts
-            [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.services.items.iteritems () for c in v.contacts]
+            [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.services.items.iteritems() for c in v.contacts]
         # services without contacts inherit the host's contacts (no matter of strict or loose)
         [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.services.items.iteritems() if not v.contacts for c in v.host.contacts]
         for c in self.services._id_contact_heap.keys():
@@ -176,7 +178,7 @@ class LiveStatusRegenerator(Regenerator):
                     servicegroup_service_ids = set([h.id for h in v.members])
                     # if all of the servicegroup_service_ids are in contact_service_ids
                     # then the servicegroup belongs to the contact
-                    #print "%-10s %-15s %s <= %s" % (c, v.get_name(), servicegroup_service_ids, contact_service_ids)
+                    # print "%-10s %-15s %s <= %s" % (c, v.get_name(), servicegroup_service_ids, contact_service_ids)
                     if servicegroup_service_ids <= contact_service_ids:
                         self.servicegroups._id_contact_heap.setdefault(c, []).append((v.get_name(), v.id))
         else:
@@ -197,16 +199,15 @@ class LiveStatusRegenerator(Regenerator):
         # For services: _id_by_host_name_heap = {'name1':[id1, id2,...], 'name2': [id6, id7,...],...} = hostname maps to list of service_ids
         # For services: _id_by_service_name_heap = {'name1':id1, 'name2': id6,...} = full_service_description maps to service_id
         setattr(self.hosts, '_id_by_host_name_heap', dict([(get_obj_full_name(v), k) for (k, v) in self.hosts.items.iteritems()]))
-        setattr(self.services, '_id_by_service_name_heap', dict([(get_obj_full_name(v), k) for (k, v) in self.services.items.iteritems()])) 
+        setattr(self.services, '_id_by_service_name_heap', dict([(get_obj_full_name(v), k) for (k, v) in self.services.items.iteritems()]))
         setattr(self.services, '_id_by_host_name_heap', dict())
         [self.services._id_by_host_name_heap.setdefault(get_obj_full_name(v.host), []).append(k) for (k, v) in self.services.items.iteritems()]
-        #print self.services._id_by_host_name_heap
+        # print self.services._id_by_host_name_heap
         for hn in self.services._id_by_host_name_heap.keys():
             self.services._id_by_host_name_heap[hn].sort(key=lambda x: get_obj_full_name(self.services[x]))
 
         # Everything is new now. We should clean the cache
         self.cache.wipeout()
-
 
     def manage_initial_contact_status_brok(self, b):
         """overwrite it, because the original method deletes some values"""
@@ -245,7 +246,6 @@ class LiveStatusRegenerator(Regenerator):
             # With commands
             self.linkify_commands(nw, 'host_notification_commands')
             self.linkify_commands(nw, 'service_notification_commands')
-
 
             # Now link timeperiods
             self.linkify_a_timeperiod(nw, 'host_notification_period')

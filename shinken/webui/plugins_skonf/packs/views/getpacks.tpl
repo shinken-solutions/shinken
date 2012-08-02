@@ -19,11 +19,11 @@ function submit(){
 
 
 %if api_error:
-    <div class='alert alert-error span5 offset2'> 
+    <div class='alert alert-error span5 offset2'>
       Oups! There was a problem with the API server connexion
       <br/>
       <div id='api_error' class='hide'>{{api_error}}</div>
-      <a href='javascript:$("#api_error").show()' class='btn btn-warning'> <i class="icon-remove"></i> Show the error</a>
+      <a href="javascript:$('#api_error').show()" class='btn btn-warning'> <i class="icon-remove"></i> Show the error</a>
       <a href='/testapi' class='btn btn-success'> <i class="icon-upload"></i> Try an API server connexion</a>
     </div>
 %end
@@ -34,10 +34,10 @@ function submit(){
     <span class="add-on"><i class="icon-search"></i></span><input type="textarea" name='search' class="span4" placeholder="Search">
   </div>
   <a href='javascript:submit();' class='btn'> Search</a>
-    
+
 </form>
 
-<span class='span12'> 
+<span class='span12'>
 %if tags:
   <div id='tagCloud' class='well'>
     <h2> Tags</h2>
@@ -80,14 +80,14 @@ function submit(){
 	  %src = p.get('img', '')
 	  <img class="imgsize3" onerror="$(this).hide()" src="{{src}}"/> {{p.get('pack_name', 'unknown')}}
 	</span>
-	<span>Provide host tags :
+	<span>Provide host tags:
 	  <ul>
 	  %for t in p.get('templates', []):
 	    <li>{{t}}</li>
 	  %end
 	  </ul>
 	</span>
-	<span>Description : {{p.get('description', '')}}
+	<span>Description: {{p.get('description', '')}}
 	</span>
 	<span id='loading-{{pid}}' class='pull-right hide'>
 	  <img src='/static/images/spinner.gif'>

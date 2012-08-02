@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 LOGCLASS_INFO = 0          # all messages not in any other class
 LOGCLASS_ALERT = 1         # alerts: the change service/host state
 LOGCLASS_PROGRAM = 2       # important programm events (restart, ...)
@@ -79,19 +78,19 @@ class Logline(dict):
                     'RECOVERY': 0
                 }
                 host_states = {
-                    'UP' :0,
+                    'UP': 0,
                     'DOWN': 1,
                     'UNREACHABLE': 2,
                     'UNKNOWN': 3,
                     'RECOVERY': 0
                 }
-    
+
                 # type is 0:info, 1:state, 2:program, 3:notification, 4:passive, 5:command
                 logobject = LOGOBJECT_INFO
                 logclass = LOGCLASS_INVALID
                 attempt, state = [0] * 2
                 command_name, comment, contact_name, host_name, message, options, plugin_output, service_description, state_type = [''] * 9
-                time= line[1:11]
+                time = line[1:11]
                 first_type_pos = line.find(' ') + 1
                 last_type_pos = line.find(':')
                 first_detail_pos = last_type_pos + 2
@@ -120,7 +119,7 @@ class Logline(dict):
                     logobject = LOGOBJECT_SERVICE
                     logclass = LOGCLASS_ALERT
                     host_name, service_description, state_type, comment = options.split(';', 3)
-    
+
                 elif type == 'CURRENT HOST STATE':
                     logobject = LOGOBJECT_HOST
                     logclass = LOGCLASS_STATE
@@ -142,14 +141,14 @@ class Logline(dict):
                     logobject = LOGOBJECT_HOST
                     logclass = LOGCLASS_ALERT
                     host_name, state_type, comment = options.split(';', 2)
-    
+
                 elif type == 'SERVICE NOTIFICATION':
                     # tust_cuntuct;test_host_0;test_ok_0;CRITICAL;notify-service;i am CRITICAL  <-- normal
                     # SERVICE NOTIFICATION: test_contact;test_host_0;test_ok_0;DOWNTIMESTART (OK);notify-service;OK
                     logobject = LOGOBJECT_SERVICE
                     logclass = LOGCLASS_NOTIFICATION
                     contact_name, host_name, service_description, state_type, command_name, check_plugin_output = options.split(';', 5)
-                    if '(' in state_type: # downtime/flapping/etc-notifications take the type UNKNOWN
+                    if '(' in state_type:  # downtime/flapping/etc-notifications take the type UNKNOWN
                         state_type = 'UNKNOWN'
                     state = service_states[state_type]
                 elif type == 'HOST NOTIFICATION':
@@ -160,7 +159,7 @@ class Logline(dict):
                     if '(' in state_type:
                         state_type = 'UNKNOWN'
                     state = host_states[state_type]
-    
+
                 elif type == 'PASSIVE SERVICE CHECK':
                     logobject = LOGOBJECT_SERVICE
                     logclass = LOGCLASS_PASSIVECHECK
@@ -174,12 +173,12 @@ class Logline(dict):
                     logobject = LOGOBJECT_SERVICE
                     host_name, service_description, state, state_type, attempt, command_name = options.split(';', 5)
                     state = service_states[state]
-    
+
                 elif type == 'HOST EVENT HANDLER':
                     logobject = LOGOBJECT_HOST
                     host_name, state, state_type, attempt, command_name = options.split(';', 4)
                     state = host_states[state]
-    
+
                 elif type == 'EXTERNAL COMMAND':
                     logobject = LOGOBJECT_INFO
                     logclass = LOGCLASS_COMMAND
@@ -215,13 +214,12 @@ class Logline(dict):
                 setattr(self, 'time', int(time))
                 setattr(self, 'type', type)
 
-
     def as_tuple(self):
         return tuple([str(getattr(self, col)) for col in Logline.columns])
-            
+
     def as_dict(self):
         return dict(zip(Logline.columns, [getattr(self, col) for col in Logline.columns]))
-            
+
     def __str__(self):
         return "line: %s" % self.message
 
@@ -251,4 +249,3 @@ class Logline(dict):
             setattr(self, 'log_host', None)
             setattr(self, 'log_service', None)
         return self
-

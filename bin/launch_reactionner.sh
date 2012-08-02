@@ -1,7 +1,6 @@
-#!/bin/bash
-
-
-# Copyright (C) 2009-2011 :
+#!/bin/sh
+#
+# Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -23,9 +22,9 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-DIR=$(cd $(dirname "$0"); pwd)
-BIN=$DIR"/../bin"
-ETC=$DIR"/../etc"
+DIR="$(cd $(dirname "$0"); pwd)"
+BIN="$DIR"/../bin
+ETC="$DIR"/../etc
 
 echo "Launching Reactionner (which sends notifications)"
-$BIN/shinken-reactionner -d -c $ETC/reactionnerd.ini
+"$BIN"/shinken-reactionner -d -c "$ETC"/reactionnerd.ini

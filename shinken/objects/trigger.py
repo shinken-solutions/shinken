@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import time
 import os
 import re
@@ -32,95 +31,52 @@ from shinken.objects.item import Item, Items
 from shinken.misc.perfdata import PerfDatas
 from shinken.property import BoolProp, IntegerProp, FloatProp, CharProp, StringProp, ListProp
 from shinken.log import logger
-
-objs = {'hosts' : [], 'services' : []}
-
-def critical(obj, output):
-    logger.debug("[trigger::%s] I am in critical for object" % obj.get_name())
-    now = time.time()
-    cls = obj.__class__
-    i = obj.launch_check(now, force=True)
-    for chk in obj.actions:
-        if chk.id == i:
-            logger.debug("[trigger] I founded the check I want to change")
-            c = chk
-            # Now we 'transform the check into a result'
-            # So exit_status, output and status is eaten by the host
-            c.exit_status = 2
-            c.get_outputs(output, obj.max_plugins_output_length)
-            c.status = 'waitconsume'
-            c.check_time = now
-            #self.sched.nb_check_received += 1
-            # Ok now this result will be read by scheduler the next loop
-
-
-def perf(obj, name):
-    p = PerfDatas(obj.perf_data)
-    if name in p:
-        logger.debug("[trigger] I found the perfdata")
-        return p[name].value
-    logger.debug("[trigger] I am in perf command")
-    return 1
-
-
-def get_object(name):
-    if not '/' in name:
-        return objs['hosts'].find_by_name(name)
-    else:
-        elts = name.split('/', 1)
-        return objs['services'].find_srv_by_name_and_hostname(elts[0], elts[1])
-        
+from shinken.trigger_functions import objs, trigger_functions
+#objs = {'hosts': [], 'services': []}
 
 
 class Trigger(Item):
-    id = 1 # 0 is always special in database, so we do not take risk here
+    id = 1  # zero is always special in database, so we do not take risk here
     my_type = 'trigger'
 
     properties = Item.properties.copy()
-    properties.update({'trigger_name':     StringProp(fill_brok=['full_status']),
-                       'code_src':        StringProp(default='', fill_brok=['full_status']),
+    properties.update({'trigger_name': StringProp(fill_brok=['full_status']),
+                       'code_src': StringProp(default='', fill_brok=['full_status'])
                        })
 
     running_properties = Item.running_properties.copy()
-    running_properties.update({
-            'code_bin':        StringProp(default=None),
-    })
+    running_properties.update({'code_bin': StringProp(default=None)})
 
-
-    #For debugging purpose only (nice name)
+    # For debugging purpose only (nice name)
     def get_name(self):
         try:
             return self.trigger_name
         except AttributeError:
             return 'UnnamedTrigger'
-
-
 #    def __init__(self, ref, code):
 #        self.ref = ref
 #        self.code = code.replace(r'\n', '\n').replace(r'\t', '\t')
 
-
     def compile(self):
-        logger.debug("[trigger::%s] compiling trigger" %  self.get_name())
-        self.code_bin = compile(self.code_src, "<irc>", "exec")        
-
+        logger.debug("[trigger::%s] compiling trigger" % self.get_name())
+        self.code_bin = compile(self.code_src, "<irc>", "exec")
 
     # ctx is the object we are evaluating the code. In the code
     # it will be "self".
     def eval(myself, ctx):
-        logger.debug("[trigger::%s] running following code: %s" % (myself.get_name(), myself.code_src))
+        logger.debug("[trigger::%s] running following code: %s" % \
+                     (myself.get_name(), myself.code_src))
         self = ctx
 
-        locals()['perf'] = perf
-        locals()['critical'] = critical
-        locals()['get_object'] = get_object
+        # Ok we can declare for this trigger call our functions
+        for (n, f) in trigger_functions.iteritems():
+            locals()[n] = f
 
-        code = myself.code_bin#compile(myself.code_bin, "<irc>", "exec")
+        code = myself.code_bin  # Comment? => compile(myself.code_bin, "<irc>", "exec")
         exec code in dict(locals())
 
-
     def __getstate__(self):
-        return {'trigger_name' : self.trigger_name, 'code_src' : self.code_src}
+        return {'trigger_name': self.trigger_name, 'code_src': self.code_src}
 
     def __setstate__(self, d):
         self.trigger_name = d['trigger_name']
@@ -131,7 +87,6 @@ class Triggers(Items):
     name_property = "trigger_name"
     inner_class = Trigger
 
-        
     # We will dig into the path and load all .trig files
     def load_file(self, path):
         # Now walk for it
@@ -149,23 +104,20 @@ class Triggers(Items):
                         # ok, skip this one
                         continue
                     self.create_trigger(buf, file[:-5])
-        
 
     # Create a trigger from the string src, and with the good name
     def create_trigger(self, src, name):
         # Ok, go compile the code
         logger.debug("[trigger] creating a trigger named %s" % name)
-        t = Trigger({'trigger_name' : name, 'code_src' : src})
+        t = Trigger({'trigger_name': name, 'code_src': src})
         t.compile()
         # Ok, add it
         self[t.id] = t
         return t
 
-
     def compile(self):
         for i in self:
             i.compile()
-
 
     def load_objects(self, conf):
         logger.debug("[trigger] loading objects in the triggers")

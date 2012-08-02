@@ -1,47 +1,44 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#Copyright (C) 2009-2010 :
+# Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #
-#This file is part of Shinken.
+# This file is part of Shinken.
 #
-#Shinken is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# Shinken is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#Shinken is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU Affero General Public License for more details.
+# Shinken is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 #
 # This file is used to test reading and processing of config files
 #
 
-#It's ugly I know....
 from shinken_test import *
 # we have an external process, so we must un-fake time functions
 time.time = original_time_time
 time.sleep = original_time_sleep
-from worker import Worker
+from shinken.worker import Worker
 from multiprocessing import Queue, Manager
-from objects.service import Service
-from objects.host import Host
-from objects.contact import Contact
+from shinken.objects.service import Service
+from shinken.objects.host import Host
+from shinken.objects.contact import Contact
 modconf = Module()
 
+
 class TestTimeout(ShinkenTest):
-    #Uncomment this is you want to use a specific configuration
-    #foreyour test
     def setUp(self):
         self.setup_with_file('etc/nagios_check_timeout.cfg')
 
-    
     def test_notification_timeout(self):
         if os.name == 'nt':
             return
@@ -50,14 +47,13 @@ class TestTimeout(ShinkenTest):
 
         # These queues connect a poller/reactionner with a worker
         to_queue = Queue()
-#        manager = Manager()
-        from_queue = Queue()#manager.list()
+        #manager = Manager()
+        from_queue = Queue() #manager.list()
         control_queue = Queue()
-
 
         # This testscript plays the role of the reactionner
         # Now "fork" a worker
-        w = Worker(1,to_queue,from_queue,1)
+        w = Worker(1, to_queue, from_queue, 1)
         w.id = 1
         w.i_am_dying = False
 
@@ -85,7 +81,7 @@ class TestTimeout(ShinkenTest):
         w.c = control_queue
         # Now we simulate the Worker's work() routine. We can't call it
         # as w.work() because it is an endless loop
-        for i in xrange(1,10):
+        for i in xrange(1, 10):
             w.get_new_checks()
             # During the first loop the sleeping command is launched
             w.launch_new_checks()
@@ -108,9 +104,32 @@ class TestTimeout(ShinkenTest):
         self.sched.actions[n.id] = n
         self.sched.put_results(o)
         self.show_logs()
-        self.assert_(self.any_log_match("Warning : Contact mr.schinken service notification command 'libexec/sleep_command.sh 7 ' timed out after 2 seconds"))
+        self.assert_(self.any_log_match("Warning: Contact mr.schinken service notification command 'libexec/sleep_command.sh 7 ' timed out after 2 seconds"))
+
+
+
+    def test_notification_timeout_on_command(self):
+        #
+        # Config is not correct because of a wrong relative path
+        # in the main config file
+        #
+        print "Get the hosts and services"
+        now = time.time()
+        host = self.sched.hosts.find_by_name("test_host_0")
+        host.checks_in_progress = []
+        host.act_depend_of = []  # ignore the router
+        router = self.sched.hosts.find_by_name("test_router_0")
+        router.checks_in_progress = []
+        router.act_depend_of = []  # ignore the router
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        print svc.checks_in_progress
+        cs = svc.checks_in_progress
+        self.assert_(len(cs) == 1)
+        c = cs.pop()
+        print c
+        print c.timeout
+        self.assert_(c.timeout == 5)
 
 
 if __name__ == '__main__':
     unittest.main()
-

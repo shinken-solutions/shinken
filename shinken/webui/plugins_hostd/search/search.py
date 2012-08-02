@@ -34,15 +34,15 @@ except ImportError:
     try:
         import simplejson as json
     except ImportError:
-        print "Error : you need the json or simplejson module"
+        print "Error: you need the json or simplejson module"
         raise
-
 
 from shinken.webui.bottle import redirect, abort, static_file
 
 # HACK
 import socket
 SRV = socket.gethostname()
+
 
 def give_pack(p):
     d = {}
@@ -51,7 +51,7 @@ def give_pack(p):
     d['pack_name'] = p['pack_name']
     d['description'] = p.get('description', '')
     d['templates'] = p.get('templates', [])
-    # TODO : manage a real server?
+    # TODO: manage a real server?
     d['img'] = 'http://%s:7765/static/%s/images/sets/%s/tag.png' % (SRV, p['_id'], d['pack_name'])
     d['install'] = 'http://%s:7765/getpack/%s' % (SRV, p['_id'])
     return d
@@ -81,18 +81,18 @@ def search_get(q):
 
 
 def do_search(search):
-    if not search  or len(search) < 2 :
+    if not search  or len(search) < 2:
         print "Lookup %s too short or missing filter, I bail out" % search
         return json.dumps([])
 
     print "Lookup for", search, "in pack"
-    # TODO : less PERFORMANCE KILLER QUERY!
+    # TODO: less PERFORMANCE KILLER QUERY!
     packs = app.datamgr.get_packs()
     res = []
     for p in packs:
         if p.get('state') not in ['ok', 'pending']:
             continue
-        
+
         if search and search in p['pack_name'] or search in p.get('description', ''):
             d = give_pack(p)
             res.append(d)
@@ -105,9 +105,6 @@ def do_search(search):
                 res.append(d)
             continue
     return json.dumps(res)
-
-
-
 
 
 def search_categories():
@@ -124,36 +121,34 @@ def search_categories():
         print "Lookup categories but missing root!"
         return json.dumps([])
 
-
     print "Lookup for categories from root", root, "in pack"
 
-    # TODO : less PERFORMANCE KILLER QUERY!
+    # TODO: less PERFORMANCE KILLER QUERY!
     packs = app.datamgr.get_packs()
-    tree = {'name' : '/', 'nb' : 0, 'sons' : {}}
+    tree = {'name': '/', 'nb': 0, 'sons': {}}
     for p in packs:
         if p.get('state') not in ['ok', 'pending']:
             continue
-        
+
         cats = p.get('path', '').split('/')
         cats = [c for c in cats if c != '']
         pos = tree
         name = ''
         for cat in cats:
-            name += '/'+cat
+            name += '/' + cat
             print "Doing cat", cat
             # If not already declared, add my node
             if cat not in pos['sons']:
-                pos['sons'][cat] = {'name' : name, 'nb' : 0, 'sons' : {}}
+                pos['sons'][cat] = {'name': name, 'nb': 0, 'sons': {}}
             pos['sons'][cat]['nb'] += 1
             # Now go deeper in the tree :)
             print "Were I came from", pos
             pos = pos['sons'][cat]
             print "My new pos", pos
-        
-    print "Tree", tree
-        
-    return json.dumps(tree)
 
+    print "Tree", tree
+
+    return json.dumps(tree)
 
 
 def tag_sort(t1, t2):
@@ -173,7 +168,7 @@ def search_tags():
     api_key = app.request.forms.get('api_key')
     if not api_key or not app.get_user_by_key(api_key):
         abort(401, 'You need a valid API KEY to query. Please register')
-    
+
     nb = app.request.forms.get('nb')
     if nb:
         nb = int(nb)
@@ -182,16 +177,15 @@ def search_tags():
         print "Sorry, your tag ask is too big"
         return json.dumps([])
 
-
     print "Lookup for %s tags" % nb
 
-    # TODO : less PERFORMANCE KILLER QUERY!
+    # TODO: less PERFORMANCE KILLER QUERY!
     packs = app.datamgr.get_packs()
     all_tags = {}
     for p in packs:
         if p.get('state') not in ['ok', 'pending']:
             continue
-        
+
         tags = p.get('path', '').split('/')
         tags = [c for c in tags if c != '']
         tags.append(p.get('pack_name'))
@@ -205,17 +199,14 @@ def search_tags():
     flat_tags.sort(tag_sort)
 
     print "FLAT TAGS", flat_tags, len(flat_tags)
-    
+
     # Take the last nb ones
     res = flat_tags[:nb]
 
     return json.dumps(res)
 
-
-
-pages = {search_post : { 'routes' : ['/search'] , 'method' : 'POST'},
-         search_get : { 'routes' : ['/search/:q']},
-         search_categories : { 'routes' : ['/categories'] , 'method' : 'POST'},
-         search_tags : { 'routes' : ['/tags'] , 'method' : 'POST'},
+pages = {search_post: {'routes': ['/search'], 'method': 'POST'},
+         search_get: {'routes': ['/search/:q']},
+         search_categories: {'routes': ['/categories'], 'method': 'POST'},
+         search_tags: {'routes': ['/tags'], 'method': 'POST'},
          }
-

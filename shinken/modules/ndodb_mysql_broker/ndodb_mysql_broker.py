@@ -23,11 +23,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import copy
 import time
 import sys
-import _mysql_exceptions
 
 properties = {
     'daemons': ['broker'],
@@ -35,8 +33,12 @@ properties = {
     'phases': ['running'],
     }
 
-
-from shinken.db_mysql import DBMysql
+try:
+    import _mysql_exceptions
+    from shinken.db_mysql import DBMysql
+except ImportError:
+    _mysql_exceptions = None
+    
 from shinken.basemodule import BaseModule
 from shinken.log import logger
 
@@ -82,7 +84,6 @@ class Ndodb_Mysql_broker(BaseModule):
         self.centreon_version = False
         self.synchronize_database_id = int(conf.synchronize_database_id)
 
-
     # Called by Broker so we can do init stuff
     # TODO: add conf param to get pass with init
     # Conf from arbiter!
@@ -124,7 +125,6 @@ class Ndodb_Mysql_broker(BaseModule):
 
         # Todo list to manage brok
         self.todo = []
-
 
     # Get a brok, parse it, and put in in database
     # We call functions like manage_ TYPEOFBROK _brok that return us queries
@@ -168,8 +168,6 @@ class Ndodb_Mysql_broker(BaseModule):
                 self.db.execute_query(q)
             return
 
-
-
     # Create the database connection
     # Exception is raised if a arg is bad.
     def connect_database(self):
@@ -181,7 +179,6 @@ class Ndodb_Mysql_broker(BaseModule):
                 "Please check the arguments!" % \
                 exp)
             raise
-
 
     # Query the database to get the proper instance_id
     def get_instance_id(self, name):
@@ -207,8 +204,6 @@ class Ndodb_Mysql_broker(BaseModule):
         else:
             return row2[0]
 
-
-
     def convert_id(self, brok_id, name):
         # Look if we have already encountered this id
         if brok_id in self.database_id_cache:
@@ -225,8 +220,6 @@ class Ndodb_Mysql_broker(BaseModule):
             # cache this!
             self.database_id_cache[brok_id] = data_id
             return data_id
-
-
 
     def get_host_object_id_by_name_sync(self, host_name, instance_id):
         # First look in cache.
@@ -248,8 +241,6 @@ class Ndodb_Mysql_broker(BaseModule):
             self.hosts_cache_sync[instance_id][host_name] = row[0]
             return row[0]
 
-
-
     def get_contact_object_id_by_name_sync(self, contact_name, instance_id):
         query = u"SELECT object_id from %sobjects where " \
                  "name1='%s' and objecttype_id='10' and instance_id='%s'" % \
@@ -260,8 +251,6 @@ class Ndodb_Mysql_broker(BaseModule):
             return 0
         else:
             return row[0]
-
-
 
     def get_hostgroup_object_id_by_name_sync(self, hostgroup_name, instance_id):
         query = u"SELECT object_id from %sobjects where " \
@@ -274,8 +263,6 @@ class Ndodb_Mysql_broker(BaseModule):
         else:
             return row[0]
 
-
-
     def get_max_hostgroup_id_sync(self):
         query = u"SELECT max(hostgroup_id) + 1 from %shostgroups" % self.prefix
         self.db.execute_query(query)
@@ -284,8 +271,6 @@ class Ndodb_Mysql_broker(BaseModule):
             return 0
         else:
             return row[0]
-
-
 
     def get_service_object_id_by_name_sync(self, host_name, service_description, instance_id):
 
@@ -308,7 +293,6 @@ class Ndodb_Mysql_broker(BaseModule):
             self.services_cache_sync[instance_id][(host_name, service_description)] = row[0]
             return row[0]
 
-
     def get_servicegroup_object_id_by_name_sync(self, servicegroup_name, instance_id):
         query = u"SELECT object_id from %sobjects where " \
                 "name1='%s' and objecttype_id='4' and instance_id='%s'" % \
@@ -320,7 +304,6 @@ class Ndodb_Mysql_broker(BaseModule):
         else:
             return row[0]
 
-
     def get_max_servicegroup_id_sync(self):
         query = u"SELECT max(servicegroup_id) + 1 from %sservicegroups" % self.prefix
         self.db.execute_query(query)
@@ -329,7 +312,6 @@ class Ndodb_Mysql_broker(BaseModule):
             return 0
         else:
             return row[0]
-
 
     def get_contactgroup_object_id_by_name_sync(self, contactgroup_name, instance_id):
         query = u"SELECT object_id from %sobjects where " \
@@ -342,8 +324,6 @@ class Ndodb_Mysql_broker(BaseModule):
         else:
             return row[0]
 
-
-
     def get_max_contactgroup_id_sync(self):
         query = u"SELECT max(contactgroup_id) + 1 from %scontactgroups" % self.prefix
         self.db.execute_query(query)
@@ -352,8 +332,6 @@ class Ndodb_Mysql_broker(BaseModule):
             return 0
         else:
             return row[0]
-
-
 
     # Ok, we are at launch time and a scheduler want him only, OK...
     # So create several queries with all tables we need to delete with
@@ -383,8 +361,6 @@ class Ndodb_Mysql_broker(BaseModule):
 
         return res
 
-
-
     # Program status is .. status of program?:)
     # Like pid, daemon mode, last activity, etc
     # We aleady clean database, so insert
@@ -399,7 +375,7 @@ class Ndodb_Mysql_broker(BaseModule):
         query_instance = self.db.create_insert_query(
             'instances', \
             {
-            'instance_name': new_b.data['instance_name'],\
+            'instance_name': new_b.data['instance_name'], \
             'instance_description': new_b.data['instance_name'], \
             'instance_id': new_b.data['instance_id']
             }
@@ -426,8 +402,6 @@ class Ndodb_Mysql_broker(BaseModule):
             new_b.data[name] = val
         query = self.db.create_insert_query('programstatus', new_b.data)
         return [query_delete_instance, query_instance, query]
-
-
 
     # TODO: fill nagios_instances
     def manage_update_program_status_brok(self, b):
@@ -456,8 +430,6 @@ class Ndodb_Mysql_broker(BaseModule):
             'programstatus', new_b.data, where_clause
             )
         return [query]
-
-
 
     # A host has just been created, database is clean, we INSERT it
     def manage_initial_host_status_brok(self, b):
@@ -549,8 +521,6 @@ class Ndodb_Mysql_broker(BaseModule):
 
         return [query, hoststatus_query]
 
-
-
     # A service have just been created, database is clean, we INSERT it
     def manage_initial_service_status_brok(self, b):
         #new_b = copy.deepcopy(b)
@@ -576,7 +546,6 @@ class Ndodb_Mysql_broker(BaseModule):
 
         # TODO: Include with the service cache.
         self.mapping_service_id[data['id']] = service_id
-
 
         #print "DATA:", data
         #print "HOST ID:", host_id
@@ -654,7 +623,6 @@ class Ndodb_Mysql_broker(BaseModule):
 
         return [query, servicestatus_query]
 
-
     # A new host group? Insert it
     # We need to do something for the members prop (host.id, host_name)
     # They are for host_hostgroup table, with just host.id hostgroup.id
@@ -707,8 +675,6 @@ class Ndodb_Mysql_broker(BaseModule):
             res.append(q)
         return res
 
-
-
     # A new service group? Insert it
     # We need to do something for the members prop (serv.id, service_name)
     # They are for service_hostgroup table, with just
@@ -730,8 +696,6 @@ class Ndodb_Mysql_broker(BaseModule):
             data['servicegroup_name'], data['instance_id']
             )
         svcgp_id = self.get_max_servicegroup_id_sync()
-
-
 
         servicegroups_data = {
             'servicegroup_id': svcgp_id,
@@ -757,8 +721,6 @@ class Ndodb_Mysql_broker(BaseModule):
             q = self.db.create_insert_query('servicegroup_members', servicegroup_members_data)
             res.append(q)
         return res
-
-
 
     # Same than service result, but for host result
     def manage_host_check_result_brok(self, b):
@@ -810,8 +772,6 @@ class Ndodb_Mysql_broker(BaseModule):
 
         return [query, hoststatus_query]
 
-
-
     # The next schedule got it's own brok. got it and just update the
     # next_check with it
     def manage_host_next_schedule_brok(self, b):
@@ -828,8 +788,6 @@ class Ndodb_Mysql_broker(BaseModule):
 
         return [hoststatus_query]
 
-
-
     # Same than host result, but for service result
     def manage_service_check_result_brok(self, b):
         data = b.data
@@ -839,7 +797,6 @@ class Ndodb_Mysql_broker(BaseModule):
             data['service_description'], \
             data['instance_id']
             )
-
 
         # Only the service is impacted
         where_clause = {'service_object_id': service_id}
@@ -891,8 +848,6 @@ class Ndodb_Mysql_broker(BaseModule):
 
         return [query, servicestatus_query]
 
-
-
     # The next schedule got it's own brok. got it and just update the
     # next_check with it
     def manage_service_next_schedule_brok(self, b):
@@ -903,7 +858,6 @@ class Ndodb_Mysql_broker(BaseModule):
             data['service_description'],
             data['instance_id']
             )
-
 
         # Only the service is impacted
         where_clause = {'service_object_id': service_id}
@@ -918,14 +872,11 @@ class Ndodb_Mysql_broker(BaseModule):
 
         return [servicestatus_query]
 
-
-
     # Ok the host is updated
     def manage_update_host_status_brok(self, b):
         data = b.data
 
         host_id = self.get_host_object_id_by_name_sync(data['host_name'], data['instance_id'])
-
 
         hosts_data = {
             'instance_id': data['instance_id'],
@@ -997,8 +948,6 @@ class Ndodb_Mysql_broker(BaseModule):
 
         return [query, hoststatus_query]
 
-
-
     # Ok the service is updated
     def manage_update_service_status_brok(self, b):
         data = b.data
@@ -1008,7 +957,6 @@ class Ndodb_Mysql_broker(BaseModule):
             data['service_description'],
             data['instance_id']
             )
-
 
         services_data = {
             'instance_id': data['instance_id'],
@@ -1088,9 +1036,6 @@ class Ndodb_Mysql_broker(BaseModule):
 
         return [query, servicestatus_query]
 
-
-
-
     # A host have just be create, database is clean, we INSERT it
     def manage_initial_contact_status_brok(self, b):
         data = b.data
@@ -1123,8 +1068,6 @@ class Ndodb_Mysql_broker(BaseModule):
         #print "HOST DATA", hosts_data
         query = self.db.create_insert_query('contacts', contacts_data)
         return [query]
-
-
 
     # A new contact group? Insert it
     def manage_initial_contactgroup_status_brok(self, b):
@@ -1172,8 +1115,6 @@ class Ndodb_Mysql_broker(BaseModule):
             res.append(q)
         return res
 
-
-
     # A notification have just be created, we INSERT it
     def manage_notification_raise_brok(self, b):
 
@@ -1190,13 +1131,13 @@ class Ndodb_Mysql_broker(BaseModule):
             object_id = self.get_host_object_id_by_name_sync(data['host_name'], data['instance_id'])
             notification_type = 0
 
-        # TODO : Fill all fields
-        # Missing fields : notification_reason, start_time_usec, end_time_usec,
+        # TODO: Fill all fields
+        # Missing fields: notification_reason, start_time_usec, end_time_usec,
         # output, escalated.
         # Maybe some field are not really interesting :)
-        # TO FIX : output is empty
-        # TO FIX : end_time and start time are equal to 0 (back in the 70's !!)
-        # TO FIX : state is equal to 0
+        # TO FIX: output is empty
+        # TO FIX: end_time and start time are equal to 0 (back in the 70's!!)
+        # TO FIX: state is equal to 0
         notification_data = {
             'instance_id': data['instance_id'],
             'start_time': de_unixify(data['start_time']),

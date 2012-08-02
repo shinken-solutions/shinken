@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import time
 from livestatus_counters import LiveStatusCounters
 from livestatus_request import LiveStatusRequest
@@ -35,6 +34,7 @@ class LiveStatus(object):
     """A class that represents the status of all objects in the broker
 
     """
+
     def __init__(self, datamgr, query_cache, db, pnp_path, return_queue):
         self.datamgr = datamgr
         self.query_cache = query_cache

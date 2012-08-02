@@ -18,24 +18,29 @@ except ImportError:
     imp.load_module('shinken', *imp.find_module('shinken', [os.path.realpath("."), os.path.realpath(".."), os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "..")]))
     from shinken.bin import VERSION
 
-from shinken.objects.pack import Pack,Packs
+from shinken.objects.pack import Pack, Packs
 
 from shinken.log import logger
 from shinken.objects.config import Config
 
-
 logger.set_level(10)
-class Dummy():
-    def __init__(self): pass
-    def add(self, obj) : pass
-logger.load_obj(Dummy())
 
+
+class Dummy():
+    def __init__(self):
+        pass
+
+    def add(self, obj):
+        pass
+
+logger.load_obj(Dummy())
 
 from pymongo.connection import Connection
 
 VERSION = '0.1'
 TMP_PATH = '/tmp/pack_analysing'
-PACKS_HOME= '/opt/packs'
+PACKS_HOME = '/opt/packs'
+
 
 def do_list(table):
     search = table.find()
@@ -50,32 +55,31 @@ def check_tmp():
 
 
 def refuse_pack(table, pack, comment):
-    u = table.find_one({'_id' : pack})
+    u = table.find_one({'_id': pack})
     if not u:
-        print 'ERROR : cannot find pack %s' % pack
+        print 'ERROR: cannot find pack %s' % pack
         sys.exit(2)
     u['state'] = 'refused'
     u['moderation_comment'] = comment
     table.save(u)
-    print "OK : pack %s is refused" % pack
+    print "OK: pack %s is refused" % pack
 
 
 def delete_pack(table, pack):
-    u = table.find_one({'_id' : pack})
+    u = table.find_one({'_id': pack})
     if not u:
-        print 'ERROR : cannot find pack %s' % pack
+        print 'ERROR: cannot find pack %s' % pack
         sys.exit(2)
-    table.remove({'_id' : pack})
-    print "OK : pack %s is removed" % pack
-
+    table.remove({'_id': pack})
+    print "OK: pack %s is removed" % pack
 
 
 def analyse_pack(table, pack):
-    p = table.find_one({'_id' : pack})
+    p = table.find_one({'_id': pack})
     filepath = p['filepath']
     print "Analysing pack"
     if not zipfile.is_zipfile(filepath):
-        print "ERROR : the pack %s is not a zip file!" % filepath
+        print "ERROR: the pack %s is not a zip file!" % filepath
         sys.exit(2)
 
     check_tmp()
@@ -88,16 +92,16 @@ def analyse_pack(table, pack):
     packs.load_file(path)
     packs = [i for i in packs]
     if len(packs) > 1:
-        print "ERROR : the pack %s got too much .pack file in it!" % pack
-        p['moderation_comment'] = "ERROR : no valid .pack in the pack"
+        print "ERROR: the pack %s got too much .pack file in it!" % pack
+        p['moderation_comment'] = "ERROR: no valid .pack in the pack"
         p['state'] = 'refused'
         table.save(p)
         sys.exit(2)
 
     if len(packs) == 0:
-        print "ERROR : no valid .pack in the pack %s" % pack
+        print "ERROR: no valid .pack in the pack %s" % pack
         p['state'] = 'refused'
-        p['moderation_comment'] = "ERROR : no valid .pack in the pack"
+        p['moderation_comment'] = "ERROR: no valid .pack in the pack"
         table.save(p)
         sys.exit(2)
 
@@ -107,7 +111,7 @@ def analyse_pack(table, pack):
     if os.path.exists(dest_path):
         shutil.rmtree(dest_path)
     shutil.copytree(path, dest_path)
-    
+
     pck = packs.pop()
     print "We read pack", pck.__dict__
     # Now we can update the db pack entry
@@ -123,12 +127,12 @@ def analyse_pack(table, pack):
         p['state'] = 'ok'
     print "We want to save the object", p
     table.save(p)
-    
 
-    
+
+
 
 if __name__ == '__main__':
-    
+
     parser = optparse.OptionParser(
         """%prog [options] [-H server] [-d database]""",
         version="%prog " + VERSION)
@@ -148,7 +152,6 @@ if __name__ == '__main__':
                       help='Set a comment')
     parser.add_option('--analyse', dest='do_analyse', action='store_true',
                       help='Analyse a pack')
-
 
     opts, args = parser.parse_args()
 
@@ -175,21 +178,20 @@ if __name__ == '__main__':
     if opts.do_refuse:
         mode = 'refuse'
         if not pack:
-            print "ERROR : no pack filled"
+            print "ERROR: no pack filled"
             sys.exit(2)
         refuse_pack(table, pack, comment)
 
     if opts.do_delete:
         mode = 'delete'
         if not pack:
-            print "ERROR : no pack filled"
+            print "ERROR: no pack filled"
             sys.exit(2)
         delete_pack(table, pack)
 
     if opts.do_analyse:
         mode = 'delete'
         if not pack:
-            print "ERROR : no pack filled"
+            print "ERROR: no pack filled"
             sys.exit(2)
         analyse_pack(table, pack)
-

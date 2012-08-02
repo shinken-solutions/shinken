@@ -23,19 +23,21 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import sys
 
-from ndodb_mysql_broker import Ndodb_Mysql_broker, properties
+from ndodb_mysql_broker import Ndodb_Mysql_broker, properties, _mysql_exceptions
 from shinken.log import logger
 
 
-#called by the plugin manager to get a instance
+# called by the plugin manager to get a instance
 def get_instance(mod_conf):
 
-    logger.info("Get a ndoDB instance for plugin %s" % mod_conf.get_name())
+    logger.debug("Get a ndoDB instance for plugin %s" % mod_conf.get_name())
 
-    # Default behavior : character_set is utf8 and synchro is turned off
+    if not _mysql_exceptions:
+        raise Exception('Cannot load module python-mysqldb. Please install it.')
+
+    # Default behavior: character_set is utf8 and synchro is turned off
     if not hasattr(mod_conf, 'character_set'):
         mod_conf.character_set = 'utf8'
     if not hasattr(mod_conf, 'synchronize_database_id'):

@@ -26,6 +26,7 @@
 
 class LiveStatusConstraints:
     """ Represent the constraints applied on a livestatus request """
+
     def __init__(self, filter_func, without_filter, authuser):
         self.filter_func = filter_func
         self.without_filter = without_filter

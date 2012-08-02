@@ -2,7 +2,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -23,11 +23,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 """ This python module contains the class BaseModule
 that shinken modules will subclass
 """
-
 
 import os
 import signal
@@ -35,11 +33,10 @@ import time
 from re import compile
 from multiprocessing import Queue, Process
 
-
 from shinken.log import logger
 
 # TODO: use a class for defining the module "properties" instead of
-# plain dict ??  Like:
+# plain dict??  Like:
 '''
 class ModuleProperties(object):
     def __init__(self, type, phases, external=False)
@@ -47,7 +44,7 @@ class ModuleProperties(object):
         self.phases = phases
         self.external = external
 '''
-# and  have the new modules instanciate this like follow :
+# and  have the new modules instanciate this like follow:
 '''
 properties = ModuleProperties('the_module_type', the_module_phases, is_mod_ext)
 '''
@@ -58,18 +55,18 @@ properties = {
     # name of the module type ; to distinguish between them:
     'type': None,
 
-    # is the module "external" (external means here a daemon module) ?
+    # is the module "external" (external means here a daemon module)?
     'external': True,
 
-    # Possible configuration phases where the module is involved :
+    # Possible configuration phases where the module is involved:
     'phases': ['configuration', 'late_configuration', 'running', 'retention'],
     }
 
 
 class ModulePhases:
-    """TODO : Add some comment about this class for the doc"""
+    """TODO: Add some comment about this class for the doc"""
     # TODO: why not use simply integers instead of string
-    # to represent the different phases ??
+    # to represent the different phases??
     CONFIGURATION = 1
     LATE_CONFIGURATION = 2
     RUNNING = 4
@@ -86,6 +83,7 @@ class BaseModule(object):
        informations in different format.
      - ...
      """
+
     def __init__(self, mod_conf):
         """Instanciate a new module.
         There can be many instance of the same type.
@@ -109,8 +107,10 @@ class BaseModule(object):
         # the queue the module will put its result data
         self.from_q = None
         self.process = None
-        self.illegal_char = compile(r'[^\w]');
+        self.illegal_char = compile(r'[^\w]')
         self.init_try = 0
+        # We want to know where we are load from? (broker, scheduler, etc)
+        self.loaded_into = 'unknown'
 
 
     def init(self):
@@ -119,6 +119,10 @@ class BaseModule(object):
         or whatever the module will need.
         """
         pass
+
+
+    def set_loaded_into(self, daemon_name):
+        self.loaded_into = daemon_name
 
 
     def create_queues(self, manager=None):
@@ -191,7 +195,6 @@ class BaseModule(object):
             if self.process.is_alive():
                 os.kill(self.process.pid, 9)
 
-
     def stop_process(self):
         """Request the module process to stop and release it"""
         if self.process:
@@ -204,14 +207,13 @@ class BaseModule(object):
                 self.__kill()
             self.process = None
 
-
-    ## TODO: are these 2 methods really needed ?
+    ## TODO: are these 2 methods really needed?
     def get_name(self):
         return self.name
 
 
     def has(self, prop):
-        """The classic has : do we have a prop or not ?"""
+        """The classic has: do we have a prop or not?"""
         return hasattr(self, prop)
 
 
@@ -231,10 +233,8 @@ class BaseModule(object):
             brok.prepare()
             return manage(brok)
 
-
     def manage_signal(self, sig, frame):
         self.interrupted = True
-
 
     def set_signal_handler(self, sigs=None):
         if sigs is None:
@@ -245,7 +245,6 @@ class BaseModule(object):
 
     set_exit_handler = set_signal_handler
 
-
     def do_stop(self):
         """Called just before the module will exit
         Put in this method all you need to cleanly
@@ -253,16 +252,23 @@ class BaseModule(object):
         """
         pass
 
-
     def do_loop_turn(self):
         """For external modules only:
         implement in this method the body of you main loop
         """
         raise NotImplementedError()
 
+    def set_proctitle(self, name):
+        try:
+            from setproctitle import setproctitle
+            setproctitle("shinken-%s module: %s" % (self.loaded_into, name))
+        except:
+            pass
 
     def main(self):
         """module "main" method. Only used by external modules."""
+        self.set_proctitle(self.name)
+
         self.set_signal_handler()
         logger.info("[%s[%d]]: Now running.." % (self.name, os.getpid()))
         while not self.interrupted:
@@ -270,5 +276,5 @@ class BaseModule(object):
         self.do_stop()
         logger.info("[%s]: exiting now.." % (self.name))
 
-    # TODO: apparently some modules would uses "work" as the main method ??
+    # TODO: apparently some modules would uses "work" as the main method??
     work = main

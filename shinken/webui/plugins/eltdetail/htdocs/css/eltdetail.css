@@ -1,5 +1,30 @@
+/**
+* Copyright (C) 2009-2012:
+*    Gabes Jean, naparuba@gmail.com
+*    Gerhard Lausser, Gerhard.Lausser@consol.de
+*    Gregory Starck, g.starck@gmail.com
+*    Hartmut Goebel, h.goebel@goebel-consult.de
+*    Andreas Karfusehr, andreas@karfusehr.de
+*
+* This file is part of Shinken.
+*
+* Shinken is free software: you can redistribute it and/or modify
+* it under the terms of the GNU Affero General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* Shinken is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU Affero General Public License for more details.
+*
+* You should have received a copy of the GNU Affero General Public License
+* along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+*
+**/
+
 #content_container {
-	padding-top: 10px;
+	padding-bottom: 15px;
 }
 
 #event_command {
@@ -10,17 +35,13 @@
 #event_box {
 	margin-top: 15px;
 	background: #FAFAFA;
-	border: 1px solid #E3E3E5;	
+	border: 1px solid #E3E3E5;
 	-moz-border-radius-top: 6px; /* FF1-3.6 */
 	-webkit-border-radius: 6px; /* Saf3-4, iOS 1-3.2, Android <1.6 */
     border-top-left-radius: 6px; /* Opera 10.5, IE9, Saf5, Chrome, FF4, iOS 4, Android 2.1+ */
-    border-top-right-radius: 6px; /* Opera 10.5, IE9, Saf5, Chrome, FF4, iOS 4, Android 2.1+ */      
-	/* useful if you don't want a bg color from leaking outside the border: */        
+    border-top-right-radius: 6px; /* Opera 10.5, IE9, Saf5, Chrome, FF4, iOS 4, Android 2.1+ */
+	/* useful if you don't want a bg color from leaking outside the border: */
 	-moz-background-clip: padding; -webkit-background-clip: padding-box; background-clip: padding-box;
-}
-
-#event_command {
-	float:right;
 }
 
 #event_container h3 {
@@ -32,8 +53,8 @@
 	-moz-border-radius-top: 6px; /* FF1-3.6 */
 	-webkit-border-radius: 6px; /* Saf3-4, iOS 1-3.2, Android <1.6 */
     border-top-left-radius: 6px; /* Opera 10.5, IE9, Saf5, Chrome, FF4, iOS 4, Android 2.1+ */
-    border-top-right-radius: 6px; /* Opera 10.5, IE9, Saf5, Chrome, FF4, iOS 4, Android 2.1+ */      
-	/* useful if you don't want a bg color from leaking outside the border: */        
+    border-top-right-radius: 6px; /* Opera 10.5, IE9, Saf5, Chrome, FF4, iOS 4, Android 2.1+ */
+	/* useful if you don't want a bg color from leaking outside the border: */
 	-moz-background-clip: padding; -webkit-background-clip: padding-box; background-clip: padding-box;
 }
 
@@ -44,32 +65,25 @@
 	padding-left: 10px;
 }
 
+/*
+    Special elt view classes 
+*/
+
+.verticaltabs-container td { border-top: none; }
+.column1 { width: 50%; }
+
+
+
 #elt_container h2 {
 	font-size: 15px;
 	margin-bottom: 5px;
-}
 
-#elt_container p {
-	margin-left: 8px
-}
-
-#command_container {
-	margin-top: 20px;
-	margin-bottom: 20px;
-}
-
-#elt_summary {
-	padding: 15px;
-	width: 96%;
-}
-
-#elt_summary table {
-	width: 100%;
 }
 
 #elt_summary table, #elt_summary tr, #elt_summary th, #elt_summary td, #elt_summary tbody{
 	background: none !important;
-	border: none;	
+	border: none;
+
 }
 
 #item_information {
@@ -84,6 +98,7 @@
 /*
 *
 */
+
 #demo {
     margin-top: 20px;
     }
@@ -113,7 +128,7 @@ li.tab.active {
 li.tab span{
         padding-bottom: 10px;
         vertical-align:middle;
-} 
+}
 
 div.content {
     margin: 0 0 1em 0;
@@ -226,7 +241,7 @@ div.content {
 .log-text {
 	margin-bottom: 5px;
 	width: 100%;
-	
+
 }
 
 .log-meta {
@@ -308,7 +323,7 @@ div.content {
 
 
 /*
- * 
+ *
  */
 
 #gesture_slide {
@@ -321,3 +336,229 @@ div.marginbottom {
     margin-bottom: 10px;
 }
 
+/***
+    The Magical CSS URL: https://github.com/entropillc/bootstrap-verticaltabs / bootstrap-verticaltabs.css
+*/
+
+.verticaltabs-container {
+  position: relative;
+  /*min-width: 460px;*/
+  min-height: 460px;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.verticaltabs-container > .nav-tabs {
+  display: block;
+  position: relative;
+  left: 100%; 
+  width: 1000%;
+  -webkit-transform-origin: 0 0;
+  -moz-transform-origin: 0 0;
+  -ms-transform-origin: 0 0;
+  -o-transform-origin: 0 0;
+  transform-origin: 0 0;
+  -webkit-transform: translateX(-24px) rotate(90deg);
+  -moz-transform: translateX(-24px) rotate(90deg);
+  -ms-transform: translateX(-24px) rotate(90deg);
+  -o-transform: translateX(-24px) rotate(90deg);
+  transform: translateX(-24px) rotate(90deg);
+}
+
+.verticaltabs-container > .tab-content {
+  position: absolute;
+  top: 0;
+  right: 58px;
+  bottom: 0;
+  left: 0;
+  width: auto;
+  height: auto;
+}
+
+
+
+/*
+  Button showdown
+*/
+
+.iPhoneCheckContainer {
+  position: relative;
+  height: 27px;
+  width: 130px;
+  cursor: pointer;
+  overflow: hidden;
+  font-size: 11.05px;
+    font-weight: bold;
+      text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+
+  -webkit-border-radius: 3px; /* Saf3-4, iOS 1-3.2, Android ≤1.6 */
+          border-radius: 3px; /* Opera 10.5, IE9, Saf5, Chrome, FF4+, iOS 4, Android 2.1+ */
+
+  /* useful if you don't want a bg color from leaking outside the border: */
+  -moz-background-clip: padding; -webkit-background-clip: padding-box; background-clip: padding-box;
+ }
+  .iPhoneCheckContainer input {
+    position: absolute;
+    top: 5px;
+    left: 30px;
+    filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
+    opacity: 0; }
+  .iPhoneCheckContainer label {
+    white-space: nowrap;
+    font-size: 12px;
+    line-height: 17px;
+    font-weight: bold;
+    font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+    cursor: pointer;
+    display: block;
+    height: 27px;
+    position: absolute;
+    width: auto;
+    top: 0;
+    padding-top: 5px;
+    overflow: hidden; }
+  .iPhoneCheckContainer, .iPhoneCheckContainer label {
+    user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none; }
+
+.iPhoneCheckDisabled {
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
+  opacity: 0.5; }
+
+label.iPhoneCheckLabelOn {
+  color: white;
+  /*background: url('/static/eltdetail/images/on.png?1284697268') no-repeat;*/
+  background-color: #5bb75b;
+  background-image: -moz-linear-gradient(top, #62c462, #51a351);
+  background-image: -ms-linear-gradient(top, #62c462, #51a351);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#62c462), to(#51a351));
+  background-image: -webkit-linear-gradient(top, #62c462, #51a351);
+  background-image: -o-linear-gradient(top, #62c462, #51a351);
+  background-image: linear-gradient(top, #62c462, #51a351);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#62c462', endColorstr='#51a351', GradientType=0);
+  border-color: #51a351 #51a351 #387038;
+  border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+  filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
+
+  /*text-shadow: 0px 0px 2px rgba(0, 0, 0, 0.6);*/
+  left: 0;
+  padding-top: 5px; }
+  label.iPhoneCheckLabelOn span {
+    padding-left: 8px; }
+label.iPhoneCheckLabelOff {
+  color: #FFFFFF;
+  background-color: #FFFFFF;
+  background-image: -moz-linear-gradient(top, #ee5f5b, #bd362f);
+  background-image: -ms-linear-gradient(top, #ee5f5b, #bd362f);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ee5f5b), to(#bd362f));
+  background-image: -webkit-linear-gradient(top, #ee5f5b, #bd362f);
+  background-image: -o-linear-gradient(top, #ee5f5b, #bd362f);
+  background-image: linear-gradient(top, #ee5f5b, #bd362f);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ee5f5b', endColorstr='#bd362f', GradientType=0);
+  border-color: #bd362f #bd362f #802420;
+  border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+  filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
+  /*text-shadow: 0px 0px 2px rgba(255, 255, 255, 0.6);*/
+  text-align: right;
+  right: 0; }
+  label.iPhoneCheckLabelOff span {
+    padding-right: 8px; }
+
+.iPhoneCheckHandle {
+  display: block;
+  height: 27px;
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  background: url('/static/eltdetail/images/slider_left.png') no-repeat;
+  padding-left: 3px; }
+
+.iPhoneCheckHandleRight {
+  height: 100%;
+  width: 100%;
+  padding-right: 3px;
+  background: url('/static/eltdetail/images/slider_right.png') no-repeat right 0; }
+
+.iPhoneCheckHandleCenter {
+  height: 100%;
+  width: 100%;
+  background: url('/static/eltdetail/images/slider_center.png'); }
+
+.iOSCheckContainer {
+  position: relative;
+  height: 27px;
+  cursor: pointer;
+  overflow: hidden; }
+  .iOSCheckContainer input {
+    position: absolute;
+    top: 5px;
+    left: 30px;
+    filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
+    opacity: 0; }
+  .iOSCheckContainer label {
+    white-space: nowrap;
+    font-size: 17px;
+    line-height: 17px;
+    font-weight: bold;
+    font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+    cursor: pointer;
+    display: block;
+    height: 27px;
+    position: absolute;
+    width: auto;
+    top: 0;
+    padding-top: 5px;
+    overflow: hidden; }
+  .iOSCheckContainer, .iOSCheckContainer label {
+    user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none; }
+
+.iOSCheckDisabled {
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
+  opacity: 0.5; }
+
+label.iOSCheckLabelOn {
+  color: white;
+  background: url('images/ios-style-checkboxes/on.png') no-repeat;
+  text-shadow: 0px 0px 2px rgba(0, 0, 0, 0.6);
+  left: 0;
+  padding-top: 5px; }
+  label.iOSCheckLabelOn span {
+    padding-left: 8px; }
+label.iOSCheckLabelOff {
+  color: #8b8b8b;
+  background: url('images/ios-style-checkboxes/off.png') no-repeat right 0;
+  text-shadow: 0px 0px 2px rgba(255, 255, 255, 0.6);
+  text-align: right;
+  right: 0; }
+  label.iOSCheckLabelOff span {
+    padding-right: 8px; }
+
+.iOSCheckHandle {
+  display: block;
+  height: 27px;
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  background: url('images/ios-style-checkboxes/slider_left.png') no-repeat;
+  padding-left: 3px; }
+
+.iOSCheckHandleRight {
+  height: 100%;
+  width: 100%;
+  padding-right: 3px;
+  background: url('images/ios-style-checkboxes/slider_right.png') no-repeat right 0; }
+
+.iOSCheckHandleCenter {
+  height: 100%;
+  width: 100%;
+  background: url('images/ios-style-checkboxes/slider_center.png'); }

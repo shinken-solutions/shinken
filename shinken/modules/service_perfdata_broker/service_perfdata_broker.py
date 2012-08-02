@@ -24,20 +24,20 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This Class is a plugin for the Shinken Broker. It is in charge
-#to brok information of the service perfdata into the file
-#var/service-perfdata
-#So it just manage the service_check_return
-#Maybe one day host data will be usefull too
-#It will need just a new file, and a new manager :)
+# This Class is a plugin for the Shinken Broker. It is in charge
+# to brok information of the service perfdata into the file
+# var/service-perfdata
+# So it just manage the service_check_return
+# Maybe one day host data will be usefull too
+# It will need just a new file, and a new manager :)
 
 import codecs
 
 from shinken.basemodule import BaseModule
 
 
-#Class for the Merlindb Broker
-#Get broks and puts them in merlin database
+# Class for the Merlindb Broker
+# Get broks and puts them in merlin database
 class Service_perfdata_broker(BaseModule):
     def __init__(self, modconf, path, mode, template):
         BaseModule.__init__(self, modconf)
@@ -55,40 +55,38 @@ class Service_perfdata_broker(BaseModule):
 
         self.buffer = []
 
-
-    #Called by Broker so we can do init stuff
-    #TODO : add conf param to get pass with init
-    #Conf from arbiter!
+    # Called by Broker so we can do init stuff
+    # TODO: add conf param to get pass with init
+    # Conf from arbiter!
     def init(self):
         print "[%s] I open the service-perfdata file '%s'" % (self.name, self.path)
-        #Try to open the file to be sure we can
-        self.file = codecs.open( self.path, self.mode, "utf-8" )
+        # Try to open the file to be sure we can
+        self.file = codecs.open(self.path, self.mode, "utf-8")
         self.file.close()
 
-    #We've got a 0, 1, 2 or 3 (or something else? ->3
-    #And want a real OK, WARNING, CRITICAL, etc...
+    # We've got a 0, 1, 2 or 3 (or something else? ->3
+    # And want a real OK, WARNING, CRITICAL, etc...
     def resolve_service_state(self, state):
-        states = {0 : 'OK', 1 : 'WARNING', 2 : 'CRITICAL', 3 : 'UNKNOWN'}
+        states = {0: 'OK', 1: 'WARNING', 2: 'CRITICAL', 3: 'UNKNOWN'}
         if state in states:
             return states[state]
         else:
             return 'UNKNOWN'
 
-
-    #A service check have just arrived, we UPDATE data info with this
+    # A service check have just arrived, we UPDATE data info with this
     def manage_service_check_result_brok(self, b):
         data = b.data
-        #The original model
-        #"$TIMET\t$HOSTNAME\t$SERVICEDESC\t$OUTPUT\t$SERVICESTATE\t$PERFDATA\n"
+        # The original model
+        # "$TIMET\t$HOSTNAME\t$SERVICEDESC\t$OUTPUT\t$SERVICESTATE\t$PERFDATA\n"
         current_state = self.resolve_service_state(data['state_id'])
         macros = {
-            '$LASTSERVICECHECK$' : int(data['last_chk']),
-            '$HOSTNAME$' : data['host_name'],
-            '$SERVICEDESC$' : data['service_description'],
-            '$SERVICEOUTPUT$' : data['output'],
-            '$SERVICESTATE$' : current_state,
-            '$SERVICEPERFDATA$' : data['perf_data'],
-            '$LASTSERVICESTATE$' : data['last_state'],
+            '$LASTSERVICECHECK$': int(data['last_chk']),
+            '$HOSTNAME$': data['host_name'],
+            '$SERVICEDESC$': data['service_description'],
+            '$SERVICEOUTPUT$': data['output'],
+            '$SERVICESTATE$': current_state,
+            '$SERVICEPERFDATA$': data['perf_data'],
+            '$LASTSERVICESTATE$': data['last_state'],
             }
         s = self.template
         for m in macros:
@@ -99,11 +97,10 @@ class Service_perfdata_broker(BaseModule):
         #                                  current_state, data['perf_data'] )
         self.buffer.append(s)
 
-
     # Each second the broker say it's a new second. Let use this to
     # dump to the file
     def hook_tick(self, brok):
-        #Go to write it :)
+        # Go to write it :)
         buf = self.buffer
         self.buffer = []
         try:
@@ -112,6 +109,5 @@ class Service_perfdata_broker(BaseModule):
                 self.file.write(s)
             self.file.flush()
             self.file.close()
-        except IOError, exp: # Maybe another tool is just getting it, pass
+        except IOError, exp:  # Maybe another tool is just getting it, pass
             pass
-            

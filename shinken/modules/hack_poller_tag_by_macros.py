@@ -24,42 +24,38 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This Class is an example of an Arbiter module
-#Here for the configuration phase AND running one
-
+# This Class is an example of an Arbiter module
+# Here for the configuration phase AND running one
 
 import re
 from shinken.basemodule import BaseModule
 from shinken.log import logger
 
 properties = {
-    'daemons' : ['arbiter'],
-    'type' : 'hack_poller_tag_by_macros',
-    'external' : False,
-    'phases' : ['late_configuration'],
+    'daemons': ['arbiter'],
+    'type': 'hack_poller_tag_by_macros',
+    'external': False,
+    'phases': ['late_configuration'],
     }
 
 
-#called by the plugin manager to get a broker
+# called by the plugin manager to get a broker
 def get_instance(plugin):
     print "Get a Hack pollertag by macros module for plugin %s" % plugin.get_name()
     instance = Hack_pt_by_macros(plugin)
     return instance
 
 
-
-#Just print some stuff
+# Just print some stuff
 class Hack_pt_by_macros(BaseModule):
     def __init__(self, mod_conf):
-        BaseModule.__init__(self,  mod_conf)
+        BaseModule.__init__(self, mod_conf)
         self.host_macro_name = mod_conf.host_macro_name
         self.service_macro_name = mod_conf.service_macro_name
 
-
-    #Called by Arbiter to say 'let's prepare yourself guy'
+    # Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
         print "Initilisation of the hack poller tag by macro module"
-        
 
     def hook_late_configuration(self, arb):
         logger.info("[HackPollerTagByMacros in hook late config")
@@ -75,4 +71,3 @@ class Hack_pt_by_macros(BaseModule):
                 v = s.customs[self.service_macro_name.upper()]
                 s.poller_tag = v
                 s.check_command.poller_tag = v
-                

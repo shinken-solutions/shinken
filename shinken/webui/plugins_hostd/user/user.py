@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import hashlib
 try:
     import json
@@ -33,14 +32,14 @@ except ImportError:
     try:
         import simplejson as json
     except ImportError:
-        print "Error : you need the json or simplejson module"
+        print "Error: you need the json or simplejson module"
         raise
-
 
 from shinken.webui.bottle import redirect, abort
 
 ### Will be populated by the UI with it's own value
 app = None
+
 
 # Our page. If the useer call /dummy/TOTO arg1 will be TOTO.
 # if it's /dummy/, it will be 'nothing'
@@ -48,41 +47,40 @@ def get_page(username):
     # First we look for the user sid
     # so we bail out if it's a false one
     user = app.get_user_auth()
-    
+
     if not user:
         redirect("/user/login")
         return
 
     #uname = user.get('username')
     view_user = app.get_user_by_name(username)
-    cur = app.db.packs.find({'user' : username, 'state' : 'ok'})
+    cur = app.db.packs.find({'user': username, 'state': 'ok'})
     validated_packs = [p for p in cur]
 
     # Only show pending and refused packs if YOU are the user
     pending_packs = []
     refused_packs = []
     if user == view_user:
-        cur = app.db.packs.find({'user' : username, 'state' : 'pending'})
+        cur = app.db.packs.find({'user': username, 'state': 'pending'})
         pending_packs = [p for p in cur]
 
-        cur = app.db.packs.find({'user' : username, 'state' : 'refused'})
+        cur = app.db.packs.find({'user': username, 'state': 'refused'})
         refused_packs = [p for p in cur]
 
-
-    return {'app' : app, 'user' : user, 'view_user' : view_user, 'validated_packs' : validated_packs, 'pending_packs' : pending_packs,
-            'refused_packs' : refused_packs}
+    return {'app': app, 'user': user, 'view_user': view_user, 'validated_packs': validated_packs, 'pending_packs': pending_packs,
+            'refused_packs': refused_packs}
 
 
 def post_user():
     # First we look for the user sid
     # so we bail out if it's a false one
     user = app.get_user_auth()
-    
+
     if not user:
         redirect("/user/login")
         return
 
-    # Take the user that send the post and not the 
+    # Take the user that send the post and not the
     # form value for secutiry reason of course :)
     username = user.get('username')
     email = app.request.forms.get('email')
@@ -93,30 +91,23 @@ def post_user():
         password_hash = hashlib.sha512(password).hexdigest()
     if password != password2:
         abort(400, 'Wrong password')
-    
+
     print "Get a user %s update with email %s and hash %s" % (username, email, password_hash)
 
     app.update_user(username, password_hash, email)
     return
-
-    
 
 
 def check_key(api_key):
     user = app.get_user_by_key(api_key)
     app.response.content_type = 'application/json'
     if not user:
-        r = {'state' : 401, 'text' : 'Sorry this key is invalid!'}
+        r = {'state': 401, 'text': 'Sorry this key is invalid!'}
         return json.dumps(r)
-    r = {'state' : 200, 'text' : 'Congrats! Connexion is OK!'}
+    r = {'state': 200, 'text': 'Congrats! Connexion is OK!'}
     return json.dumps(r)
 
-
-
-
-
-pages = {get_page : { 'routes' : ['/user/:username'], 'view' : 'user', 'static' : True},
-         post_user : { 'routes' : ['/user'], 'method' : 'POST', 'view' : 'user', 'static' : True},
-         check_key : { 'routes' : ['/checkkey/:api_key']},
+pages = {get_page: {'routes': ['/user/:username'], 'view': 'user', 'static': True},
+         post_user: {'routes': ['/user'], 'method': 'POST', 'view': 'user', 'static': True},
+         check_key: {'routes': ['/checkkey/:api_key']},
          }
-

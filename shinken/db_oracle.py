@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -23,7 +23,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-#Failed to import will be catch by __init__.py
+# Failed to import will be catch by __init__.py
 from cx_Oracle import connect as connect_function
 from cx_Oracle import IntegrityError as IntegrityError_exp
 from cx_Oracle import ProgrammingError as ProgrammingError_exp
@@ -44,7 +44,8 @@ OperationalError_exp = None
 
 
 class DBOracle(DB):
-    """ TODO : Add some comment about this class for the doc"""
+    """ TODO: Add some comment about this class for the doc"""
+
     def __init__(self, user, password, database, table_prefix=''):
         self.user = user
         self.password = password
@@ -53,7 +54,7 @@ class DBOracle(DB):
 
     def connect_database(self):
         """Create the database connection
-        TODO : finish (begin :) ) error catch and conf parameters...
+        TODO: finish (begin :) ) error catch and conf parameters...
         """
 
         connstr = '%s/%s@%s' % (self.user, self.password, self.database)
@@ -71,24 +72,24 @@ class DBOracle(DB):
             self.db_cursor.execute(query)
             self.db.commit()
         except IntegrityError_exp, exp:
-            print "[DBOracle] Warning : a query raise an integrity error :" \
+            print "[DBOracle] Warning: a query raise an integrity error:" \
                   " %s, %s" % (query, exp)
         except ProgrammingError_exp, exp:
-            print "[DBOracle] Warning : a query raise a programming error :" \
+            print "[DBOracle] Warning: a query raise a programming error:" \
                   " %s, %s" % (query, exp)
         except DatabaseError_exp, exp:
-            print "[DBOracle] Warning : a query raise a database error :" \
+            print "[DBOracle] Warning: a query raise a database error:" \
                   " %s, %s" % (query, exp)
         except InternalError_exp, exp:
-            print "[DBOracle] Warning : a query raise an internal error :" \
+            print "[DBOracle] Warning: a query raise an internal error:" \
                   " %s, %s" % (query, exp)
         except DataError_exp, exp:
-            print "[DBOracle] Warning : a query raise a data error :" \
+            print "[DBOracle] Warning: a query raise a data error:" \
                   " %s, %s" % (query, exp)
         except OperationalError_exp, exp:
-            print "[DBOracle] Warning : a query raise an operational error :" \
+            print "[DBOracle] Warning: a query raise an operational error:" \
                   " %s, %s" % (query, exp)
         except Exception, exp:
-            print "[DBOracle] Warning : a query raise an unknow error :" \
+            print "[DBOracle] Warning: a query raise an unknow error:" \
                   " %s, %s" % (query, exp)
             print exp.__dict__

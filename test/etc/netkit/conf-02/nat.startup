@@ -1,0 +1,10 @@
+
+# extra rules
+#   arbiter -> broker
+iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 17772 -j DNAT --to 10.0.0.24:7772
+#   broker  -> scheduler
+iptables -t nat -A PREROUTING -i eth1 -p tcp --dport 17768 -j DNAT --to 192.168.10.42:7768
+#   broker  -> poller
+iptables -t nat -A PREROUTING -i eth1 -p tcp --dport 17771 -j DNAT --to 192.168.10.42:7771
+#   broker  -> reactionner
+iptables -t nat -A PREROUTING -i eth1 -p tcp --dport 17769 -j DNAT --to 192.168.10.42:7769

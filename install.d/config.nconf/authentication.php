@@ -4,13 +4,13 @@
 ##
 
 #
-# Enable or disable user authentication. 
-# If disabled, no login is prompted to access the GUI and all features will be available (admin privs). 
+# Enable or disable user authentication.
+# If disabled, no login is prompted to access the GUI and all features will be available (admin privs).
 #
 define('AUTH_ENABLED', '0');
 
 #
-# How to authenticate, if authentication is enabled. 
+# How to authenticate, if authentication is enabled.
 # possible values: [file|sql|ldap|ad_ldap]
 #
 define('AUTH_TYPE', "file");
@@ -28,7 +28,7 @@ define('BASICAUTH_REALM',  "NConf Basic Auth");
 
 #
 # Defines the user name in the history table and in the welcome message.
-#If set to "0", the username will be used. If set to "1", the real name will be fetched, depending on which AUTH_TYPE you selected. 
+#If set to "0", the username will be used. If set to "1", the real name will be fetched, depending on which AUTH_TYPE you selected.
 #
 define('AUTH_FEEDBACK_AS_WELCOME_NAME', '1');
 
@@ -97,10 +97,10 @@ define('AD_USER_GROUP',         "CN=sysadmin");
 # the "contact" class (refer to the documentation for more details).
 # Feel free to define your own queries, if you want to access any other existing user database.
 
-# 
+#
 # if query matches, user will get limited access, for "normal users"
 # !!!USERNAME!!! and !!!PASSWORD!!! will be replaced with the username and password from login page
-# 
+#
 define('AUTH_SQLQUERY_USER',     '
 SELECT attr_value AS username, id_item AS user_id
   FROM ConfigAttrs,ConfigValues,ConfigItems
@@ -128,7 +128,7 @@ SELECT attr_value AS username, id_item AS user_id
 ');
 
 #
-#  ::OPTIONAL:: Define ADMIN access here :
+#  ::OPTIONAL:: Define ADMIN access here:
 # if query matches, user will get FULL ADMIN access, for Administrators
 #
 define('AUTH_SQLQUERY_ADMIN',     '

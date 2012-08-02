@@ -1,4 +1,4 @@
-%rebase layout title='Shinken UI login', print_header=False, js=['login/js/jQuery.dPassword.js', 'login/js/detectmobilebrowser.js'], css=['login/css/login.css']
+%rebase layout title='Shinken UI login', print_header=False, js=['login/js/detectmobilebrowser.js'], css=['login/css/login.css']
 
 <script type="text/javascript">
 // If we are a mobile device, go in the /mobile part :)
@@ -11,7 +11,7 @@
 </script>
 
 <div id="login_container" class="span9">
-  
+
   %if login_text:
   <p><span id="login-text"> {{login_text}}</span></p>
   %end
@@ -32,15 +32,10 @@
         <label>Name</label>
         <input class="span6" name="login" type="text">
         <label>Password</label>
-        <input class="span6" id="password" name="password" type="password"> 
+        <input class="span6" id="password" name="password" type="password">
         <br>
         <button class="btn" type="submit" href="javascript: submitform()">Login</button>
       </form>
     </div>
   </div>
-  <script type="text/javascript">
-    $(document).ready( function() {
-      $('input:password').dPassword();
-    });
-  </script>
 </div>

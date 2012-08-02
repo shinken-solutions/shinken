@@ -11,11 +11,11 @@
 				<tr>
 					<th>Program Version</th>
 					<th>Program Start Time</th>
-				</tr>							
+				</tr>
 				<tr>
 				  <td><a class="quickinfo" href="#">{{VERSION}}</a></td>
 				  <td> <a href="#" class="quickinfo" data-original-title="{{helper.print_date(app.datamgr.get_program_start())}}">{{helper.print_duration(app.datamgr.get_program_start())}}</a></td>
-				</tr>							
+				</tr>
 			</tbody>
 		</table>
 	<!-- stats overview end -->
@@ -30,16 +30,16 @@
 	%for (sat_type, sats) in types:
 		<li class="span2">
 		<a  class="box_round_small">
-			<div class="modul_name box_halfround_small"><h3>{{sat_type.capitalize()}} :</h3></div>
+			<div class="modul_name box_halfround_small"><h3>{{sat_type.capitalize()}}:</h3></div>
 				%for s in sats:
 				<dl>
-				
+
 					<dt>State</dt>
-					<dd>	     
+					<dd>
 	      				%if not s.alive:
 	      					<span class="pulse"></span>
 	      				%end
-	      				<img style="width: 16px; height : 16px;" src="{{helper.get_icon_state(s)}}" alt="stateicon"/>
+					<img style="width: 16px; height: 16px;" src="{{helper.get_icon_state(s)}}" alt="stateicon"/>
 	      			</dd>
 					<dt>Name</dt>
 					<dd>{{s.get_name()}}</dd>
@@ -51,7 +51,7 @@
 					<dd title='{{helper.print_date(s.last_check)}}'>{{helper.print_duration(s.last_check, just_duration=True, x_elts=2)}}</dd>
 					<dt>Realm</dt>
 					<dd>{{s.realm}}</dd>
-				
+
 				</dl>
 				%# end of this satellite type
  				%end
@@ -65,7 +65,7 @@
 		%types = [ ('scheduler', schedulers), ('poller', pollers), ('broker', brokers), ('reactionner', reactionners), ('receiver', receivers)]
 
 		%for (sat_type, sats) in types:
-		<h3> {{sat_type.capitalize()}} : </h3>
+		<h3> {{sat_type.capitalize()}}: </h3>
 
 		<table class="table table-striped table-bordered table-condensed">
 		%for s in sats:
@@ -86,7 +86,7 @@
 
 			<span class="pulse"></span>
 			%end
-			<img style="width: 16px; height : 16px;" src="{{helper.get_icon_state(s)}}" />
+			<img style="width: 16px; height: 16px;" src="{{helper.get_icon_state(s)}}" />
 			</div>
 			</td>
 			<td> {{s.get_name()}}</td>
@@ -103,4 +103,4 @@
 %end
 
 </div>
-</div>	
+</div>

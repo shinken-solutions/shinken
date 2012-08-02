@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import os
 
 from shinken.bin import VERSION
@@ -54,6 +53,7 @@ class Problem:
         self.source = source
         self.impacts = impacts
 
+
 def modified_attributes_names(self):
     names_list = []
     names = {
@@ -79,6 +79,7 @@ def modified_attributes_names(self):
         if self.modified_attributes & attr:
             names_list.append(names[attr])
     return names_list
+
 
 def join_with_separators(request, *args):
     if request.response.outputformat == 'csv':
@@ -164,14 +165,13 @@ def get_livestatus_full_name(item, req):
             return item.host_name
         pass
 
-
 # description (optional): no need to explain this
 # prop (optional): the property of the object. If this is missing, the key is the property
 # type (mandatory): int, float, string, list
-# depythonize : use it if the property needs to be post-processed.
-# fulldepythonize : the same, but the postprocessor takes three arguments. property, object, request
-# delegate : get the property of a different object
-# as : use it together with delegate, if the property of the other object has another name
+# depythonize: use it if the property needs to be post-processed.
+# fulldepythonize: the same, but the postprocessor takes three arguments. property, object, request
+# delegate: get the property of a different object
+# as: use it together with delegate, if the property of the other object has another name
 
 # description
 # function: a lambda with 2 parameters (host/service/comment.., request)
@@ -507,12 +507,12 @@ livestatus_attribute_map = {
         },
         'modified_attributes': {
             'description': 'A bitmask specifying which attributes have been modified',
-            'function': lambda item, req: item.modified_attributes,  # CONTROLME 
+            'function': lambda item, req: item.modified_attributes,  # CONTROLME
             'datatype': int,
         },
         'modified_attributes_list': {
             'description': 'A list of all modified attributes',
-            'function': lambda item, req: modified_attributes_names(self),  # CONTROLME
+            'function': lambda item, req: modified_attributes_names(item),  # CONTROLME
             'datatype': list,
         },
         'name': {
@@ -681,7 +681,7 @@ livestatus_attribute_map = {
         'state': {
             'description': 'The current state of the host (0: up, 1: down, 2: unreachable)',
             'function': lambda item, req: item.state_id,
-            #'function' : i_am_state,
+            #'function': i_am_state,
             'datatype': int,
         },
         'state_type': {
@@ -3605,7 +3605,7 @@ livestatus_attribute_map = {
         },
         'program_start': {
             'description': 'The time of the last program start as UNIX timestamp',
-            'function': lambda item, req: 0,  # REPAIRME
+            'function': lambda item, req: item.program_start,
             'datatype': int,
         },
         'program_version': {
@@ -4341,9 +4341,8 @@ table_class_map = {
     'brokers': ('BrokerLink', BrokerLink),
     'problems': ('Problem', Problem),
     'columns': ('Config', Config),  # just a dummy
-    None: ('', type('commandclass', (object, ), {'lsm_columns': []})),
+    None: ('', type('commandclass', (object,), {'lsm_columns': []})),
 }
-
 
 """Build the new livestatus-methods and add delegate keys for certain attributes.
 
@@ -4370,39 +4369,46 @@ the object represented by log_host.
 def host_redirect_factory(attribute):
     """attribute already comes with lsm_"""
     return lambda item, req: getattr(item.host, attribute)(req)
-    
+
+
 def ref_redirect_factory(attribute):
     return lambda item, req: getattr(item.ref, attribute)(req)
-    
+
+
 def log_service_redirect_factory(attribute):
     return lambda item, req: getattr(item.log_service, attribute)(req)
-    
+
+
 def log_host_redirect_factory(attribute):
     return lambda item, req: getattr(item.log_host, attribute)(req)
+
 
 def log_contact_redirect_factory(attribute):
     return lambda item, req: getattr(item.log_contact, attribute)(req)
 
+
 def hostgroup_redirect_factory(attribute):
     return lambda item, req: getattr(item.hostgroup, attribute)(req)
-    
+
+
 def servicegroup_redirect_factory(attribute):
     return lambda item, req: getattr(item.servicegroup, attribute)(req)
-    
+
+
 def catchall_factory(name, req):
     def method(*args):
         print "tried to handle unknown method " + name
         if args:
             print "it had arguments: " + str(args)
     return method
-    
+
 
 #print "FINISHING THE ATTRIBUTE MAPPING>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
 for objtype in ['Host', 'Service', 'Contact', 'Command', 'Timeperiod', 'Downtime', 'Comment', 'Hostgroup', 'Servicegroup', 'Contactgroup', 'SchedulerLink', 'PollerLink', 'ReactionnerLink', 'BrokerLink', 'Problem', 'Logline', 'Config']:
     cls = [t[1] for t in table_class_map.values() if t[0] == objtype][0]
     setattr(cls, 'livestatus_attributes', [])
     for attribute in livestatus_attribute_map[objtype]:
-        entry =  livestatus_attribute_map[objtype][attribute]
+        entry = livestatus_attribute_map[objtype][attribute]
         if 'function' in entry:
             setattr(cls, 'lsm_'+attribute, entry['function'])
             if 'datatype' in entry:
@@ -4443,7 +4449,7 @@ for objtype in ['Host', 'Service', 'Contact', 'Command', 'Timeperiod', 'Downtime
             pass
             # let the lambda return a default value
             # setattr(cls, 'lsm_'+attribute, lambda item, req: 0)
-            # getattr(cls, 'lsm_'+attribute).im_func.datatype = ?
+            # getattr(cls, 'lsm_'+attribute).im_func.datatype =?
         # _Every_ attribute _must_ have a description
         getattr(cls, 'lsm_'+attribute).im_func.description = entry['description']
     if objtype == 'Host':
@@ -4499,15 +4505,12 @@ for objtype in ['Host', 'Service', 'Contact', 'Command', 'Timeperiod', 'Downtime
     cls.lsm_columns = []
     for attribute in sorted([x for x in livestatus_attribute_map[objtype]]):
         cls.lsm_columns.append(attribute)
-    
+
 #print "FINISHED THE ATTRIBUTE MAPPING<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
-     
-
-
 
 def find_filter_converter(table, attribute, reverse=False):
     """Return a function which converts a string to the attribute's data type"""
-   
+
     tableclass = table_class_map[table][1]
     # attribute already has a lsm-prefix
     function = getattr(tableclass, attribute, None)
@@ -4534,4 +4537,3 @@ def find_filter_converter(table, attribute, reverse=False):
 def list_livestatus_attributes(table):
     tableclass = table_class_map[table][0]
     return sorted(livestatus_attribute_map[tableclass].keys())
-

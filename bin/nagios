@@ -1,7 +1,6 @@
 #!/bin/bash
-
-
-# Copyright (C) 2009-2011 :
+#
+# Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -25,14 +24,14 @@
 
 # Wrapper script to call Arbiter instead of Nagios bin
 
-DIR=`/usr/bin/dirname $0`
+DIR=$(dirname "$0")
 
-# search for an argument -v so i konw if we want to do a config check 
+# search for an argument -v so i konw if we want to do a config check
 
 function pythonver(){
 	versions="2.4 2.5 2.6 2.7"
 	LASTFOUND=""
-	# is there any python here ?
+	# is there any python here?
 	for v in $versions
 	do
 		which python$v > /dev/null 2>&1
@@ -47,14 +46,14 @@ function pythonver(){
 		which python > /dev/null 2>&1
 		if [ $? -ne 0 ]
 		then
-			echo "No python interpreter found !"
+			echo "No python interpreter found!"
 			exit 2
 		else
 			echo "python found"
 			LASTFOUND=$(which python)
 		fi
 	fi
-	PY=$LASTFOUND		
+	PY=$LASTFOUND
 }
 
 
@@ -71,7 +70,7 @@ function usage(){
 	echo "  -s, --test-scheduling        Not used "
 	echo "  -x, --dont-verify-paths      Not used"
 	echo "  -p, --precache-objects       Not used"
-	echo "  -u, --use-precached-objects  Not used" 
+	echo "  -u, --use-precached-objects  Not used"
 	echo "  -d, --daemon                 Not used"
 }
 
@@ -79,7 +78,7 @@ if [ -z "$1" ]
 then
 	usage
 	exit 0
-fi	
+fi
 
 while getopts "v:sxpud" opt; do
 	echo "$opt $OPTARG"
@@ -94,27 +93,27 @@ while getopts "v:sxpud" opt; do
 			else
 				# well shinken arbiter does not act really as nagios so we need to provide at least a -c argument for configfile
 				$PY $DIR/shinken-arbiter.py -v -c $OPTARG
-				exit $? 
+				exit $?
 			fi
 			;;
 		s)
-			echo "Hey ! you are on shinken here !"
+			echo "Hey! you are on shinken here!"
 			exit 2
 			;;
 		x)
-			echo "Hey ! you are on shinken here !"
+			echo "Hey! you are on shinken here!"
 			exit 2
 			;;
 		p)
-			echo "Hey ! you are on shinken here !"
+			echo "Hey! you are on shinken here!"
 			exit 2
 			;;
 		u)
-			echo "Hey ! you are on shinken here !"
+			echo "Hey! you are on shinken here!"
 			exit 2
 			;;
 		d)
-			echo "Hey ! you are on shinken here !"
+			echo "Hey! you are on shinken here!"
 			exit 2
 			;;
 		*)

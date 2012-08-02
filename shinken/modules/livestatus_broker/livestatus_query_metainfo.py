@@ -32,8 +32,6 @@ from livestatus_stack import LiveStatusStack
 def has_not_more_than(list1, list2):
     return len(set(list1).difference(set(list2))) == 0
 
-
-
 """
 There are several categories for queries. Their main difference is the kind
 of event which invalidates the corresponding cache.
@@ -88,10 +86,11 @@ HINT_SINGLE_SERVICE = 3
 
 class LiveStatusQueryMetainfoFilterStack(LiveStatusStack):
     """
-    This is a filterstack which produces a text representation of 
+    This is a filterstack which produces a text representation of
     a and/or-filter-tree, similar to sql.
     It can be used some time for text analysis.
     """
+
     def __init__(self, *args, **kw):
         self.type = 'text'
         self.__class__.__bases__[0].__init__(self, *args, **kw)
@@ -131,11 +130,12 @@ class LiveStatusQueryMetainfo(object):
     """
     This class implements a more "machine-readable" form of a livestatus query.
     The lines of a query text are split up in a list of tuples,
-    where the first element is the lql statement and the remaining elements 
+    where the first element is the lql statement and the remaining elements
     are columns, attributes, operators etc.
     It's main purpose is to provide methods which are used to rank the query
     in specific categories.
     """
+
     def __init__(self, data):
         self.data = data
         self.cache_category = CACHE_IMPOSSIBLE
@@ -186,14 +186,14 @@ class LiveStatusQueryMetainfo(object):
         for line in data.splitlines():
             line = line.strip()
             # Tools like NagVis send KEYWORK:option, and we prefer to have
-            # a space following the :
+            # a space following the:
             if ':' in line and not ' ' in line:
                 line = line.replace(':', ': ')
             keyword = line.split(' ')[0].rstrip(':')
             if keyword == 'GET':
                 self.table = self.split_command(line)[1]
                 self.structured_data.append((keyword, self.split_command(line)[1]))
-            elif keyword == 'Columns': # Get the names of the desired columns
+            elif keyword == 'Columns':  # Get the names of the desired columns
                 _, columns = self.split_option_with_columns(line)
                 self.structured_data.append((keyword, columns))
             elif keyword == 'ResponseHeader':
@@ -233,7 +233,7 @@ class LiveStatusQueryMetainfo(object):
                 self.structured_data.append((keyword, ornum))
                 self.metainfo_filter_stack.or_elements(ornum)
             elif keyword == 'Negate':
-                self.structured_data.append((keyword, ))
+                self.structured_data.append((keyword,))
                 self.metainfo_filter_stack.not_elements()
             elif keyword == 'StatsGroupBy':
                 _, columns = self.split_option_with_columns(line)
@@ -265,7 +265,7 @@ class LiveStatusQueryMetainfo(object):
                 _, self.client_localtime = self.split_option(line)
                 # NO # self.structured_data.append((keyword, client_localtime))
             else:
-                print "Received a line of input which i can't handle : '%s'" % line
+                print "Received a line of input which i can't handle: '%s'" % line
                 self.structured_data.append((keyword, 'Received a line of input which i can\'t handle: %s' % line))
             self.keyword_counter[keyword] += 1
         self.metainfo_filter_stack.and_elements(self.metainfo_filter_stack.qsize())
@@ -277,7 +277,7 @@ class LiveStatusQueryMetainfo(object):
 
     def split_option(self, line, splits=1):
         """Like split_commands, but converts numbers to int data type"""
-        x = map (lambda i: (i.isdigit() and int(i)) or i, [token.strip() for token in re.split(r"[\s]+", line, splits)])
+        x = map(lambda i: (i.isdigit() and int(i)) or i, [token.strip() for token in re.split(r"[\s]+", line, splits)])
         return x
 
     def split_option_with_columns(self, line):
@@ -311,7 +311,7 @@ class LiveStatusQueryMetainfo(object):
         logline_elements.extend(['current_host_groups', 'current_service_groups'])
         if self.table == 'log':
             limits = sorted([(f[2], int(f[3])) for f in self.structured_data if f[0] == 'Filter' and f[1] == 'time'], key=lambda x: x[1])
-             
+
             if len(limits) == 2 and limits[1][1] <= int(time.time()) and limits[0][0].startswith('>') and limits[1][0].startswith('<'):
                 if has_not_more_than(self.columns, logline_elements):
                     return True

@@ -22,7 +22,7 @@
     <div class='address cut-long pull-left'>{{getattr(h, 'address', '')}}&nbsp;</div>
     <div class='realm cut-long pull-left'>{{getattr(h, 'realm', '')}}&nbsp;</div>
     <div class='poller_tag cut-long pull-left'>{{getattr(h, 'poller_tag', '')}}&nbsp;</div>
-    
+
     <div class='use pull-left'>
       %for u in getattr(h, 'use', '').split(','):
       <span class='label'><img class='imgsize1' onerror="$(this).hide()" src="/static/images/sets/{{u}}/tag.png" />{{u}}</span>

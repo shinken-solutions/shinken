@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# Copyright (C) 2009-2011 :
+# Copyright (C) 2009-2011:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -30,7 +30,7 @@
 # Short-Description: Shinken poller daemon
 # Description:       Shinken is a monitoring tool and the Poller
 #                    is one of its daemon. This one gets the configuration from the arbiter
-#                    His purpose is to actually do the checks ordered by the schedulers, 
+#                    His purpose is to actually do the checks ordered by the schedulers,
 #                    and then sends the results to the schedulers specified in the
 #                    configuration
 ### END INIT INFO

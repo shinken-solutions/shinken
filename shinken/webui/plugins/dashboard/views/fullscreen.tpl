@@ -1,24 +1,24 @@
-%rebase layout globals(), js=['dashboard/js/widgets.js', 'dashboard/js/jquery.easywidgets.js', 'dashboard/js/jquery.jclock.js',], css=['dashboard/css/widget.css', 'dashboard/css/dashboard.css', 'dashboard/css/fullscreen.css'], title='Dashboard', menu_part='/dashboard', print_header=False, print_footer=False
+%rebase layout globals(), js=['dashboard/js/widgets.js', 'dashboard/js/jquery.easywidgets.js', 'dashboard/js/jquery.jclock.js'], css=['dashboard/css/fullscreen-widget.css', 'dashboard/css/dashboard.css', 'dashboard/css/fullscreen.css'], title='Dashboard', menu_part='/dashboard', print_header=False, print_footer=False
 
 %from shinken.bin import VERSION
 %helper = app.helper
 
-
-
-<script>
+<script type="text/javascript">
   /* We are saving the global context for theses widgets */
   widget_context = 'dashboard';
 </script>
+
 <script type="text/javascript">
     $(function($) {
       var options = {
-        format: '%I:%M %p', // 12-hour with am/pm 
+        format: '%I:%M %p', // 12-hour with am/pm
       }
       $('.jclock').jclock(options);
     });
 </script>
+
 <script type="text/javascript">
-    car settimmer = 0;
+    var settimmer = 0;
     $(function(){
             window.setInterval(function() {
                 var timeCounter = $("span[id=show-time]").html();
@@ -31,37 +31,28 @@
 <!-- Dashboard Header START -->
 <div id="dash-header" class="span12">
   <ul class="span9 pull-left">
-    <li></li>
+
     <li></li>
   </ul>
-  <ul class="span3 pull-right">
+  <ul class="span2 pull-right">
     <li style="width: 150px;"><span class="jclock clock"></span></li>
-    <li><span id="show-time" class="clock">62</span> </li>
+    <li> <span id="show-time" class="clock">62</span> </li>
+    <li> <a id='small_show_panel' href="#pageslide" class="slidelink"></a></li>
+    <li> <a href="/dashboard"  class="icon-home"></a></li>
   </ul>
 </div>
 <!-- Dashboard Header END -->
 
 <!-- Jet Pack Area START -->
 <div class="span12">
-  <p style="width: 96.5%" class="btn btn-large btn-success no-leftmergin"><span class="pull-left"><i class="icon-fire icon-white"></i> <b>Nothing To Do Here / <span class="jetpack">Jet Pack Guy</span></b></span></p>
+  <p style="width: 96.5%" class="btn btn-dash btn-success no-leftmergin"><span class="pull-left"><i class="icon-fire icon-white"></i> <b>Nothing To Do Here / <span class="jetpack">Jet Pack Guy</span></b></span></p>
 </div>
 <!-- Jet Pack Area END -->
 
 <div class='span12'>
   <div id='loading' class='pull-left'> <img src='/static/images/spinner.gif'> Loading widgets</div>
-  %# If we got no widget, we should put the button at the center fo the screen
-  %small_show_panel_s = ''
-  %if len(widgets) == 0:
-     %small_show_panel_s = 'hide'
-  %end
-  <a id='small_show_panel' href="#pageslide" class="slidelink btn btn-success pull-right {{small_show_panel_s}}"><i class="icon-plus"></i> Add a new widget</a>
-  %# Go in the center of the page!
-  <span class="page-center center" id='center-button'>
-    <h3>You don't have any widget yet?</h3>
-  <a href="#pageslide" class="slidelink btn btn-large btn-success at-center"><i class="icon-plus"></i> Add a new widget</a>
-  </span>
-
 </div>
+
 <div id="pageslide" style="display:none">
     <div class='row'>
       <h2 class='pull-left'>Widgets available</h2>
@@ -85,13 +76,10 @@
     </div>
     %end
     </div>
-
-    
-
 </div>
 
 <script >$(function(){
-  $(".slidelink").pageslide({ direction: "left", modal : true});
+  $(".slidelink").pageslide({ direction: "left", modal: true});
   });
 </script>
 
@@ -104,7 +92,7 @@
          %if 'base_url' in w and 'position' in w:
             %uri = w['base_url'] + "?" + w['options_uri']
             AddWidget("{{!uri}}", "{{w['position']}}");
-            var w = {'id' : "{{w['id']}}", 'base_url' : "{{w['base_url']}}", 'position' : "{{w['position']}}", 'options' : JSON.parse('{{w['options']}}')};
+            var w = {'id': "{{w['id']}}", 'base_url': "{{w['base_url']}}", 'position': "{{w['position']}}", 'options': JSON.parse('{{w['options']}}')};
             widgets.push(w);
          %end
       %end

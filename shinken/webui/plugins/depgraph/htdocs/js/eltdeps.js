@@ -79,12 +79,16 @@ function dump(arr, level) {
 
 
 
-function init_graph(){
+function init_graph(root, jsgraph, width, height, inject) {
+	
+    //console.log("root : " + root +"\n width : "+ width + "\n height : " + height + "\n inject : " + inject);
+	
     if(typeof $jit === "undefined"){
 	console.log('Warning : there is no $jit, I postpone my init for 1s');
 	// Still not load $jit? racing problems are a nightmare :)
 	// Ok, we retry in the next second...
-	setTimeout('init_graph()',1000);
+	setTimeout(function(){init_graph(root,jsgraph,width,height,inject)},1000);
+	
 	return;
     }
 
@@ -329,119 +333,123 @@ function init_graph(){
 	    }
 	    });
 
-
     //init RGraph
     var rgraph = new $jit.RGraph({
-	    'injectInto': /*'infovis'*/depgraph_injectInto,
-	    'width'     : /*700*/depgraph_width,
-	    'height'    : /*700*/depgraph_height,
-	    //Optional: Add a background canvas
-	    //that draws some concentric circles.
-	    'background': false,
-	    //Add navigation capabilities:
-	    //zooming by scrolling and panning.
-	    Navigation: {
-		enable: true,
-		panning: true,
-		zooming: 20
-	    },
-	    //Nodes and Edges parameters
-	    //can be overridden if defined in
-	    //the JSON input data.
-	    //This way we can define different node
-	    //types individually.
-	    Node: {
-		color: 'green',
-		'overridable': true,
-		type : 'custom',
-	    },
-	    Edge: {
-		color: 'SeaGreen',
-		lineWidth : 0.5,
-		'overridable': true,
-	    },
+	'injectInto': /*'infovis'*/'infovis-'+inject,
+	'width'     : /*700*/width,
+	'height'    : /*700*/height,
+	//Optional: Add a background canvas
+	//that draws some concentric circles.
+	'background': false,
+	//Add navigation capabilities:
+	//zooming by scrolling and panning.
+	Navigation: {
+	    enable: true,
+	    panning: true,
+	    zooming: 20
+	},
+	//Nodes and Edges parameters
+	//can be overridden if defined in
+	//the JSON input data.
+	//This way we can define different node
+	//types individually.
+	Node: {
+	    color: 'green',
+	    'overridable': true,
+	    type : 'custom',
+	},
+	Edge: {
+	    color: 'SeaGreen',
+	    lineWidth : 0.5,
+	    'overridable': true,
+	},
 	
-	    //Add tooltips
-	    Tips: {
-		enable: true,
-		onShow: function(tip, node) {
-		    var html = "<div class=\"tip-title border\">" + node.data.infos + "</div>";
-		    tip.innerHTML = html;
-		}
-	    },
-	    
-	    //Set polar interpolation.
-	    //Default's linear.
-	    interpolation: 'polar',
-	    //Change the transition effect from linear
-	    //to elastic.
-	    //transition: $jit.Trans.Elastic.ea
-	    //Change other animation parameters.
-	    duration:1000,
-	    fps: 30,
-	    //Change father-child distance.
-	    levelDistance: 75,
-	    //This method is called right before plotting
-	    //an edge. This method is useful to change edge styles
-	    //individually.
-	    onBeforePlotLine: function(adj){
-		src = adj.nodeFrom;
-		dst = adj.nodeTo;
-
-		// If one of the line border is a no print node
-		// print this line in very few pixels
-		if(!should_be_print(src) || !should_be_print(dst)){
-		    adj.data.$lineWidth = 0.3;
-		}else{
-		    adj.data.$lineWidth = 2;
-		}
-	    },
-
-	    onBeforeCompute: function(node){
-		Log.write("Focusing on " + node.name + "...");
-
-		
-		// Make right column relations list.
-		var html = node.data.infos;
-		$jit.id('inner-details').innerHTML = html;
-	    },
-	    //Add node click handler and some styles.
-	    //This method is called only once for each node/label crated.
-	    onCreateLabel: function(domElement, node){
-		domElement.innerHTML = node.name;
-		domElement.onclick = function () {
-		    rgraph.onClick(node.id, {
-			    hideLabels: false,
-			    onComplete: function() {
-				Log.write(" ");
-			    }
-			});
-		};
-		var style = domElement.style;
-		style.cursor = 'pointer';
-		style.fontSize = "0.8em";
-		style.color = "#000";
-	    },
-	    //This method is called when rendering/moving a label.
-	    //This is method is useful to make some last minute changes
-	    //to node labels like adding some position offset.
-	    onPlaceLabel: function(domElement, node){
-		var style = domElement.style;
-		var left = parseInt(style.left);
-		var w = domElement.offsetWidth;
-		style.left = (left - w / 2) + 'px';
-
-		// If the node should not be print
-		// do not print it :)
-		if(!should_be_print(node)){
-		    style.display = 'none';
-		}
+	//Add tooltips
+	Tips: {
+	    enable: true,
+	    onShow: function(tip, node) {
+		var html = "<div class=\"tip-title border\">" + node.data.infos + "</div>";
+		tip.innerHTML = html;
 	    }
-	});
+	},
+	
+	//Set polar interpolation.
+	//Default's linear.
+	interpolation: 'polar',
+	//Change the transition effect from linear
+	//to elastic.
+	//transition: $jit.Trans.Elastic.ea
+	//Change other animation parameters.
+	duration:1000,
+	fps: 30,
+	//Change father-child distance.
+	levelDistance: 75,
+	//This method is called right before plotting
+	//an edge. This method is useful to change edge styles
+	//individually.
+	onBeforePlotLine: function(adj){
+	    src = adj.nodeFrom;
+	    dst = adj.nodeTo;
+
+	    // If one of the line border is a no print node
+	    // print this line in very few pixels
+	    if(!should_be_print(src) || !should_be_print(dst)){
+		adj.data.$lineWidth = 0.3;
+	    }else{
+		adj.data.$lineWidth = 2;
+	    }
+	},
+
+	onBeforeCompute: function(node){
+	    Log.write("Focusing on " + node.name + "...");
+
+	    
+	    // Make right column relations list.
+	    var html = node.data.infos;
+
+	    //alert(html);		
+	    $jit.id('inner-details-'+inject).innerHTML = html;
+	    /*var details = $('#'+'inner-details-'+inject);
+	      console.log(details);*/
+
+	},
+	//Add node click handler and some styles.
+	//This method is called only once for each node/label crated.
+	onCreateLabel: function(domElement, node){
+	    domElement.innerHTML = node.name;
+	    domElement.onclick = function () {
+		rgraph.onClick(node.id, {
+		    hideLabels: false,
+		    onComplete: function() {
+			Log.write(" ");
+		    }
+		});
+	    };
+	    var style = domElement.style;
+	    style.cursor = 'pointer';
+	    style.fontSize = "0.8em";
+	    style.color = "#000";
+	},
+	//This method is called when rendering/moving a label.
+	//This is method is useful to make some last minute changes
+	//to node labels like adding some position offset.
+	onPlaceLabel: function(domElement, node){
+	    var style = domElement.style;
+	    var left = parseInt(style.left);
+	    var w = domElement.offsetWidth;
+	    style.left = (left - w / 2) + 'px';
+
+	    // If the node should not be print
+	    // do not print it :)
+	    if(!should_be_print(node)){
+		style.display = 'none';
+	    }
+	}
+    });
     //load graph.
-    /*alert('Loading graph'+json_graph);*/
-    rgraph.loadJSON(json_graph, 1);
-    rgraph.root =  graph_root;
+    //alert('Loading graph'+jsgraph);
+    rgraph.loadJSON(jsgraph, 1);
+    rgraph.root = root;
 
 
     //compute positions and plot
@@ -464,4 +472,4 @@ function init_graph(){
 };
 
 
-$(document).ready(init_graph);
+

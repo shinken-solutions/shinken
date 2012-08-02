@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright (C) 2009-2011 :
+# Copyright (C) 2009-2011:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -21,10 +21,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import os
-import cmd 
-import sys 
+import cmd
+import sys
 import time
 
 try:
@@ -37,7 +36,6 @@ except ImportError:
     import imp
     imp.load_module('shinken', *imp.find_module('shinken', [os.path.realpath("."), os.path.realpath(".."), os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "..")]))
 
-
 from shinken.bin import VERSION
 
 try:
@@ -47,13 +45,13 @@ except ImportError:
 from shinken.arbiterlink import ArbiterLink
 Pyro = pyro.Pyro
 
+
 class Dummy:
     def add(self, o):
         pass
 
 from shinken.log import logger
 logger.load_obj(Dummy())
-
 
 sat_types = ['arbiter', 'scheduler', 'poller', 'reactionner',
              'receiver', 'broker']
@@ -64,33 +62,31 @@ def get_since(t):
     if t == 0:
         return "never"
     return "%ds ago" % (int(now - t))
-    
+
 
 class ShinkenAdmin(cmd.Cmd):
-    prompt = "> " 
-    
+    prompt = "> "
+
     def __init__(self):
         cmd.Cmd.__init__(self)
         self.arb = None
-    
+
     # If we got no connections, connect with a standard localhost one
     def look_connexion(self):
         if not self.arb:
             self.do_connect('')
-        self.arb.ping()        
-
+        self.arb.ping()
 
     def emptyline(self):
         return
-            
 
     def do_connect(self, line):
         '''
         Connect to an arbiter daemon
-        Syntax : connect [host]:[port]
-        Ex : for Connecting to server, port 7770
+        Syntax: connect [host]:[port]
+        Ex: for Connecting to server, port 7770
         > connect server:7770
-        Ex : connect to localhost, port 7770
+        Ex: connect to localhost, port 7770
         > connect
         '''
         line = line.strip()
@@ -107,7 +103,7 @@ class ShinkenAdmin(cmd.Cmd):
         #port = int(port)
         print "Connection to %s:%s" % (addr, port)
         ArbiterLink.use_ssl = False
-        self.arb = ArbiterLink({'arbiter_name': 'unnamed arbiter', 'address' : addr, 'port' : port})
+        self.arb = ArbiterLink({'arbiter_name': 'unnamed arbiter', 'address': addr, 'port': port})
         self.arb.fill_default()
         self.arb.pythonize()
         self.arb.update_infos()
@@ -115,7 +111,6 @@ class ShinkenAdmin(cmd.Cmd):
             print "Connection OK"
         else:
             print "Connection problem"
-
 
     def do_status(self, line):
         '''
@@ -129,7 +124,7 @@ class ShinkenAdmin(cmd.Cmd):
             return
 
         data = self.arb.get_all_states()
-        
+
         arbs = data['arbiter']
 
         print "+-----------------------------------------------------------------+"
@@ -147,7 +142,7 @@ class ShinkenAdmin(cmd.Cmd):
             print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} | {5:11} |".format(s.scheduler_name, s.address, s.port,
                                     s.alive, s.reachable, get_since(s.last_check))
         print "+-------------------------------------------------------------------------------+"
-       
+
         print "+-------------------------------------------------------------------------------+"
         print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} | {5:11} |".format("Poller", "address", "port", "alive", "reachable", "last_check")
         print "+-------------------------------------------------------------------------------+"
@@ -156,7 +151,6 @@ class ShinkenAdmin(cmd.Cmd):
                                                             s.alive, s.reachable, get_since(s.last_check))
         print "+-------------------------------------------------------------------------------+"
 
-            
         print "+-------------------------------------------------------------------------------+"
         print "| {0:15} | {1:15} | {2:5} | {3:5} | {4:11} | {5:11} |".format("Reactionner", "address", "port", "alive", "reachable", "last_check")
         print "+-------------------------------------------------------------------------------+"
@@ -181,7 +175,6 @@ class ShinkenAdmin(cmd.Cmd):
                                     s.alive, s.reachable, get_since(s.last_check))
         print "+-------------------------------------------------------------------------------+"
 
-        
     def do_getconf(self, line):
         '''
         Get the data in the arbiter for a table and some properties
@@ -193,13 +186,9 @@ class ShinkenAdmin(cmd.Cmd):
             return
 
         data = self.arb.get_objects_properties('hosts', 'host_name', 'check_interval')
-        
+
         for l in data:
             print ' '.join(['%s' % i for i in l])
-
-        
-
-
 
     def do_gethostname(self, line):
         '''
@@ -209,16 +198,13 @@ class ShinkenAdmin(cmd.Cmd):
         import socket
         print socket.gethostname()
 
-
     def do_EOF(self, line):
         return self.do_quit('')
 
+    def do_quit(self, line):
+        print "",
+        return True
 
-    def do_quit(self,line): 
-        print "", 
-        return True 
-
-    
     def do_easter(self, line):
         '''
         Surprise. Look closer to the code to know what to launch with it.
@@ -232,81 +218,80 @@ class ShinkenAdmin(cmd.Cmd):
     def do_showconfig(self, line):
         '''
         Display daemon configuration
-        The column Default show that we are using default values when D is present 
-        Ex : show config poller will display configuration for all pollers
+        The column Default show that we are using default values when D is present
+        Ex: show config poller will display configuration for all pollers
         '''
         from shinken.objects import Config
 
         from shinken.arbiterlink import ArbiterLink
-        from shinken.schedulerlink import SchedulerLink 
-        from shinken.pollerlink import PollerLink 
-        from shinken.reactionnerlink import ReactionnerLink 
-        from shinken.brokerlink import BrokerLink 
-        from shinken.receiverlink import ReceiverLink 
+        from shinken.schedulerlink import SchedulerLink
+        from shinken.pollerlink import PollerLink
+        from shinken.reactionnerlink import ReactionnerLink
+        from shinken.brokerlink import BrokerLink
+        from shinken.receiverlink import ReceiverLink
 
 
         if line == "help" or line == "":
-            print "Usage : showconfig objecttype [objectname]"
-            print "Example : showconfig poller poller-1"
+            print "Usage: showconfig objecttype [objectname]"
+            print "Example: showconfig poller poller-1"
         else:
-            type=line
+            type = line
             self.look_connexion()
 
             # get properties from link classes
-            if type == 'arbiter': 
+            if type == 'arbiter':
                 o = ArbiterLink()
                 cfglink = 'arbiters'
-            elif type =='scheduler': 
+            elif type == 'scheduler':
                 o = SchedulerLink()
                 cfglink = 'schedulers'
-            elif type =='poller': 
+            elif type == 'poller':
                 o = PollerLink()
                 cfglink = 'pollers'
-            elif type =='broker': 
+            elif type == 'broker':
                 o = BrokerLink()
                 cfglink = 'brokers'
-            elif type =='reactionner': 
+            elif type == 'reactionner':
                 o = ReactionnerLink()
                 cfglink = 'reactionners'
-            elif type =='receiver': 
+            elif type == 'receiver':
                 o = ReceiverLink()
                 cfglink = 'receivers'
-            else: 
-                print "Unknown object type : %s" % (type)
+            else:
+                print "Unknown object type: %s" % (type)
                 return False
 
             cfg = self.arb.get_config()
-            dlinks = getattr(cfg,cfglink)
+            dlinks = getattr(cfg, cfglink)
 
             for d in dlinks:
-                print "+%s+" % ("-".center(86,'-'))
-                print "| Config for : {0:71} |".format(type)
-                print "+%s+" % ("-".center(106,'-'))                
-                print "| {0:8} | {1:30} | {2:60} |".format("Default","Directive","Value" )
-                print "+%s+" % ("-".center(106,'-'))                
+                print "+%s+" % ("-".center(86, '-'))
+                print "| Config for: {0:71} |".format(type)
+                print "+%s+" % ("-".center(106, '-'))
+                print "| {0:8} | {1:30} | {2:60} |".format("Default", "Directive", "Value")
+                print "+%s+" % ("-".center(106, '-'))
                 for key in o.properties.keys():
-                    elts=None
-                    default=u""
-                    if hasattr(d,key):
-                        o = getattr(d,key)
-                        if isinstance(o,list):
-                            eltl=[]
-                            for elt in getattr(d,key):
-                                if isinstance(elt,str):
+                    elts = None
+                    default = u""
+                    if hasattr(d, key):
+                        o = getattr(d, key)
+                        if isinstance(o, list):
+                            eltl = []
+                            for elt in getattr(d, key):
+                                if isinstance(elt, str):
                                     eltl.append(unicode(elt))
                                 else:
                                     eltl.append(unicode(elt.get_name()))
                             elts = u", ".join(eltl)
                         else:
-                            elts = unicode(getattr(d,key))
+                            elts = unicode(getattr(d, key))
                     else:
-                        # TODO : get default parameters
-                        default=u"D"
-                        elts="TODO : get default value"
+                        # TODO: get default parameters
+                        default = u"D"
+                        elts = "TODO: get default value"
                     if elts:
-                        print u"| {0:8} | {1:30} | {2:60} |".format(default,unicode(key),elts)
-                print "+%s+" % ("-".center(106,'-'))                
-
+                        print u"| {0:8} | {1:30} | {2:60} |".format(default, unicode(key), elts)
+                print "+%s+" % ("-".center(106, '-'))
 
     def do_setloglevel(self, line):
         '''
@@ -317,35 +302,38 @@ class ShinkenAdmin(cmd.Cmd):
         '''
         self.look_connexion()
         if not self.arb.reachable:
-            print "Cannot connect to the arbiter, bail out"; return
+            print "Cannot connect to the arbiter, bail out"
+            return
 
-        args     = line.strip().split(' ')
+        args = line.strip().split(' ')
         if len(args) > 2 or args[0] == '':
-            print "Invalid number of arguments"; return
+            print "Invalid number of arguments"
+            return
 
-        daemon   = '*' if len(args) < 2 else args[0]
+        daemon = '*' if len(args) < 2 else args[0]
         try:
             loglevel = logger.get_level_id(args[-1])
         except KeyError:
-            print "Invalid '%s' log level. Must be one of DEBUG, INFO, WARNING, ERROR, CRITICAL" % args[-1]; return
+            print "Invalid '%s' log level. Must be one of DEBUG, INFO, WARNING, ERROR, CRITICAL" % args[-1]
+            return
 
-        conf     = self.arb.get_config()
+        conf = self.arb.get_config()
 
         # find matching daemons
         matches = []
 
         for type in sat_types:
-            sats  = self.arb.get_satellite_list(type)
-            sconf = getattr(conf, type+'s')
+            sats = self.arb.get_satellite_list(type)
+            sconf = getattr(conf, type + 's')
 
             matches.extend([{
-                'type'   : type,
-                'name'   : getattr(c, type+'_name'),
+                'type': type,
+                'name': getattr(c, type + '_name'),
                 'address': c.address,
-                'port'   : c.port
+                'port': c.port
             } for c in sconf if
                 c.alive is True and
-                (daemon == '*' or getattr(c, type+'_name') == daemon)
+                (daemon == '*' or getattr(c, type + '_name') == daemon)
             ])
 
         if len(matches) == 0:
@@ -353,7 +341,7 @@ class ShinkenAdmin(cmd.Cmd):
 
         for m in matches:
             print "Setting loglevel %s to *%s* daemon" % (args[-1], m['name'])
-            uri  = pyro.create_uri(m['address'], m['port'], "ForArbiter", False)
+            uri = pyro.create_uri(m['address'], m['port'], "ForArbiter", False)
             conn = pyro.getProxy(uri)
 
             try:
@@ -361,8 +349,7 @@ class ShinkenAdmin(cmd.Cmd):
             except:
                 print "Cannot reach %s daemon!" % m['name']
 
+intro = 'Available functions:\n# connect [localhost:7770] \n# status\n# gethostname\n# help [function]\n# showconfig [daemon type]\n# setloglevel [daemon-name] loglevel\n# quit'
 
-intro = 'Available functions :\n# connect [localhost:7770] \n# status\n# gethostname\n# help [function]\n# showconfig [daemon type]\n# setloglevel [daemon-name] loglevel\n# quit'
-
-if __name__ == "__main__": 
+if __name__ == "__main__":
     ShinkenAdmin().cmdloop(intro)

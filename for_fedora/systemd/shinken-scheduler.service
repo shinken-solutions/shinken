@@ -1,5 +1,5 @@
 [Unit]
-Description=Shinken Scheduler 
+Description=Shinken Scheduler
 After=syslog.target
 
 [Service]

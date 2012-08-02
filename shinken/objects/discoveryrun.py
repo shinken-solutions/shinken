@@ -35,13 +35,13 @@ from shinken.macroresolver import MacroResolver
 
 
 class Discoveryrun(MatchingItem):
-    id = 1 #0 is always special in database, so we do not take risk here
+    id = 1  # zero is always special in database, so we do not take risk here
     my_type = 'discoveryrun'
 
     properties = Item.properties.copy()
     properties.update({
-        'discoveryrun_name':            StringProp (),
-        'discoveryrun_command':         StringProp (),
+        'discoveryrun_name': StringProp(),
+        'discoveryrun_command': StringProp(),
     })
 
     running_properties = Item.running_properties.copy()
@@ -49,23 +49,23 @@ class Discoveryrun(MatchingItem):
         'current_launch': StringProp(default=None),
     })
 
-    # The init of a discovery will set the property of 
+    # The init of a discovery will set the property of
     # Discoveryrun.properties as in setattr, but all others
     # will be in a list because we need to have all names
     # and not lost all in __dict__
     def __init__(self, params={}):
         cls = self.__class__
-        
+
         # We have our own id of My Class type :)
         # use set attr for going into the slots
         # instead of __dict__ :)
         setattr(self, 'id', cls.id)
         cls.id += 1
 
-        self.matches = {} # for matching rules
-        self.not_matches = {} # for rules that should NOT match
+        self.matches = {}  # for matching rules
+        self.not_matches = {}  # for rules that should NOT match
 
-        # In my own property : 
+        # In my own property:
         #  -> in __dict__
         # if not, in matches or not match (if key starts
         # with a !, it's a not rule)
@@ -93,6 +93,7 @@ class Discoveryrun(MatchingItem):
                 setattr(self, prop, copy(val))
             else:
                 setattr(self, prop, val)
+
             # each istance to have his own running prop!
 
 
@@ -103,12 +104,10 @@ class Discoveryrun(MatchingItem):
         except AttributeError:
             return "UnnamedDiscoveryRun"
 
-
     # A Run that is first level means that it do not have
     # any matching filter
     def is_first_level(self):
         return len(self.not_matches) + len(self.matches) == 0
-
 
     # Get an eventhandler object and launch it
     def launch(self, ctx=[], timeout=300):
@@ -117,12 +116,10 @@ class Discoveryrun(MatchingItem):
         self.current_launch = EventHandler(cmd, timeout=timeout)
         self.current_launch.execute()
 
-
     def check_finished(self):
-        max_output = 10**9
+        max_output = 10 ** 9
         #print "Max output", max_output
         self.current_launch.check_finished(max_output)
-
 
     # Look if the current launch is done or not
     def is_finished(self):
@@ -132,19 +129,15 @@ class Discoveryrun(MatchingItem):
             return True
         return False
 
-        
     # we use an EventHandler object, so we have output with a single line
     # and longoutput with the rest. We just need to return all
     def get_output(self):
         return '\n'.join([self.current_launch.output, self.current_launch.long_output])
 
-        
-
 
 class Discoveryruns(Items):
     name_property = "discoveryrun_name"
     inner_class = Discoveryrun
-
 
     def linkify(self, commands):
         for r in self:

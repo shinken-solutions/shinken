@@ -24,19 +24,20 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This Class is a plugin for the Shinken Broker. It is in charge
-#to brok information of the service perfdata into the file
-#var/service-perfdata
-#So it just manage the service_check_return
-#Maybe one day host data will be usefull too
-#It will need just a new file, and a new manager :)
+# This Class is a plugin for the Shinken Broker. It is in charge
+# to brok information of the service perfdata into the file
+# var/service-perfdata
+# So it just manage the service_check_return
+# Maybe one day host data will be usefull too
+# It will need just a new file, and a new manager :)
 
 import codecs
 
 from shinken.basemodule import BaseModule
 
-#Class for the Merlindb Broker
-#Get broks and puts them in merlin database
+
+# Class for the Merlindb Broker
+# Get broks and puts them in merlin database
 class Host_perfdata_broker(BaseModule):
     def __init__(self, modconf, path, mode, template):
         BaseModule.__init__(self, modconf)
@@ -44,7 +45,7 @@ class Host_perfdata_broker(BaseModule):
         self.mode = mode
         self.template = template
 
-        #Make some raw change
+        # Make some raw change
         self.template = self.template.replace(r'\t', '\t')
         self.template = self.template.replace(r'\n', '\n')
 
@@ -52,38 +53,35 @@ class Host_perfdata_broker(BaseModule):
         if not self.template.endswith('\n'):
             self.template += '\n'
 
-
-    #Called by Broker so we can do init stuff
-    #TODO : add conf param to get pass with init
-    #Conf from arbiter!
+    # Called by Broker so we can do init stuff
+    # TODO: add conf param to get pass with init
+    # Conf from arbiter!
     def init(self):
         print "I open the host-perfdata file '%s'" % self.path
-        self.file = codecs.open( self.path, self.mode, "utf-8" )
+        self.file = codecs.open(self.path, self.mode, "utf-8")
 
-
-    #We've got a 0, 1, 2 or 3 (or something else? ->3
-    #And want a real OK, WARNING, CRITICAL, etc...
+    # We've got a 0, 1, 2 or 3 (or something else? ->3
+    # And want a real OK, WARNING, CRITICAL, etc...
     def resolve_host_state(self, state):
-        states = {0 : 'UP', 1 : 'DOWN', 2 : 'DOWN', 3 : 'UNKNOWN'}
+        states = {0: 'UP', 1: 'DOWN', 2: 'DOWN', 3: 'UNKNOWN'}
         if state in states:
             return states[state]
         else:
             return 'UNKNOWN'
 
-
-    #A service check have just arrived, we UPDATE data info with this
+    # A service check have just arrived, we UPDATE data info with this
     def manage_host_check_result_brok(self, b):
         data = b.data
-        #The original model
-        #"$TIMET\t$HOSTNAME\t$OUTPUT\t$SERVICESTATE\t$PERFDATA\n"
+        # The original model
+        # "$TIMET\t$HOSTNAME\t$OUTPUT\t$SERVICESTATE\t$PERFDATA\n"
         current_state = self.resolve_host_state(data['state_id'])
         macros = {
-            '$LASTHOSTCHECK$' : int(data['last_chk']),
-            '$HOSTNAME$' : data['host_name'],
-            '$HOSTOUTPUT$' : data['output'],
-            '$HOSTSTATE$' : current_state,
-            '$HOSTPERFDATA$' : data['perf_data'],
-            '$LASTHOSTSTATE$' : data['last_state'],
+            '$LASTHOSTCHECK$': int(data['last_chk']),
+            '$HOSTNAME$': data['host_name'],
+            '$HOSTOUTPUT$': data['output'],
+            '$HOSTSTATE$': current_state,
+            '$HOSTPERFDATA$': data['perf_data'],
+            '$LASTHOSTSTATE$': data['last_state'],
             }
         s = self.template
         for m in macros:

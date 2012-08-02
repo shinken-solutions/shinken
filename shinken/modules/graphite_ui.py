@@ -34,20 +34,20 @@ import os
 
 from string import Template
 from shinken.basemodule import BaseModule
-from datetime import date
+from datetime import datetime
 
-#print "Loaded AD module"
+# print "Loaded AD module"
 
 properties = {
-    'daemons' : ['webui'],
-    'type' : 'graphite_webui'
+    'daemons': ['webui'],
+    'type': 'graphite_webui'
     }
 
 
-#called by the plugin manager
+# called by the plugin manager
 def get_instance(plugin):
     print "Get an GRAPITE UI module for plugin %s" % plugin.get_name()
-    
+
     instance = Graphite_Webui(plugin)
     return instance
 
@@ -70,22 +70,17 @@ class Graphite_Webui(BaseModule):
             my_name = socket.gethostname()
             self.uri = self.uri.replace('YOURSERVERNAME', my_name)
 
-
     # Try to connect if we got true parameter
     def init(self):
         pass
-
 
     # To load the webui application
     def load(self, app):
         self.app = app
 
-
-
     # Give the link for the GRAPHITE UI, with a Name
     def get_external_ui_link(self):
-        return {'label' : 'Graphite', 'uri' : self.uri}
-
+        return {'label': 'Graphite', 'uri': self.uri}
 
     # For a perf_data like /=30MB;4899;4568;1234;0  /var=50MB;4899;4568;1234;0 /toto=
     # return ('/', '30'), ('/var', '50')
@@ -94,10 +89,10 @@ class Graphite_Webui(BaseModule):
         s = perf_data.strip()
         # Get all metrics non void
         elts = s.split(' ')
-        metrics = [e for e in elts if e != ''] 
+        metrics = [e for e in elts if e != '']
 
         for e in metrics:
- #           print "Graphite : groking : ", e
+            #print "Graphite: groking: ", e
             elts = e.split('=', 1)
             if len(elts) != 2:
                 continue
@@ -106,71 +101,94 @@ class Graphite_Webui(BaseModule):
             # get the first value of ;
             if ';' in raw:
                 elts = raw.split(';')
-                name_value = { name : elts[0], name+'_warn' : elts[1], name+'_crit' : elts[2] }
+                name_value = {name: elts[0], name + '_warn': elts[1], name + '_crit': elts[2]}
             else:
                 value = raw
-                name_value = { name : raw }
+                name_value = {name: raw}
             # bailout if need
             if name_value[name] == '':
                 continue
 
             # Try to get the int/float in it :)
-            for key,value in name_value.items():
+            for key, value in name_value.items():
                 m = re.search("(\d*\.*\d*)(.*)", value)
                 if m:
                     name_value[key] = m.groups(0)
                 else:
                     continue
-#            print "graphite : got in the end :", name, value
-            for key,value in name_value.items():
+#            print "graphite: got in the end:", name, value
+            for key, value in name_value.items():
                 res.append((key, value))
         return res
-        
+
+    # Private function to replace the fontsize uri parameter by the correct value
+    # or add it if not present.
+    def _replaceFontSize ( self, url, newsize ):
+
+    # Do we have fontSize in the url alreadu, or not ?
+        if re.search('fontSize=',url) is None:
+            url = url + '&fontSize=' + newsize
+        else:
+            url = re.sub(r'(fontSize=)[^\&]+',r'\g<1>' + newsize , url);
+        return url
+
+
 
 
     # Ask for an host or a service the graph UI that the UI should
     # give to get the graph image link and Graphite page link too.
-    def get_graph_uris(self, elt, graphstart, graphend):
+    def get_graph_uris(self, elt, graphstart, graphend, source = 'detail'):
+        # Ugly to hard-code such values. But where else should I put them ?
+        fontsize={ 'detail': '8', 'dashboard': '18'}
         if not elt:
             return []
 
         t = elt.__class__.my_type
         r = []
 
+        # Format the start & end time (and not only the date)
+        d = datetime.fromtimestamp(graphstart)
+        d = d.strftime('%H:%M_%Y%m%d')
+        e = datetime.fromtimestamp(graphend)
+        e = e.strftime('%H:%M_%Y%m%d')
 
-        # Do we have a template ?
-        if os.path.isfile(self.templates_path+'/'+elt.check_command.get_name().split('!')[0]):
+        filename = elt.check_command.get_name().split('!')[0] + '.graph'
+
+        # Do we have a template for the given source?
+        thefile = os.path.join(self.templates_path, source, filename)
+
+        # If not try to use the one for the parent folder
+        if not os.path.isfile(thefile):
+            thefile = os.path.join(self.templates_path, filename)
+
+        if os.path.isfile(thefile):
             template_html = ''
-            with open(self.templates_path+'/'+elt.check_command.get_name().split('!')[0],'r') as template_file:
+            with open(thefile, 'r') as template_file:
                 template_html += template_file.read()
             # Read the template file, as template string python object
             template_file.closed
-            html=Template(template_html)
+            html = Template(template_html)
             # Build the dict to instanciate the template string
             values = {}
-            values['graphstart'] = graphstart
-            values['graphend'] = graphend 
             if t == 'host':
-                values['host'] = self.illegal_char.sub("_",elt.host_name)
+                values['host'] = self.illegal_char.sub("_", elt.host_name)
                 values['service'] = '__HOST__'
             if t == 'service':
-                values['host'] = self.illegal_char.sub("_",elt.host.host_name)
-                values['service'] = self.illegal_char.sub("_",elt.service_description)
+                values['host'] = self.illegal_char.sub("_", elt.host.host_name)
+                values['service'] = self.illegal_char.sub("_", elt.service_description)
             values['uri'] = self.uri
             # Split, we may have several images.
             for img in html.substitute(values).split('\n'):
                 if not img == "":
                     v = {}
                     v['link'] = self.uri
-                    v['img_src'] = img.replace('"',"'")
+                    v['img_src'] = img.replace('"', "'") + "&from=" + d + "&until=" + e
+                    v['img_src'] = self._replaceFontSize(v['img_src'], fontsize[source])
                     r.append(v)
-            # No need to continue, we have the images already.      					
+            # No need to continue, we have the images already.
             return r
-             
-        # If no template is present, then the usual way
-        d = date.fromtimestamp(graphstart)
-        d = d.strftime('%H:%M_%Y%m%d')
 
+        # If no template is present, then the usual way
 
         if t == 'host':
             couples = self.get_metric_and_value(elt.perf_data)
@@ -184,14 +202,14 @@ class Graphite_Webui(BaseModule):
 
             # Send a bulk of all metrics at once
             for (metric, _) in couples:
-                uri = self.uri + 'render/?width=586&height=308&lineMode=connected&from=' + d
+                uri = self.uri + 'render/?width=586&height=308&lineMode=connected&from=' + d + "&until=" + e
                 if re.search(r'_warn|_crit', metric):
                     continue
                 uri += "&target=%s.__HOST__.%s" % (host_name, metric)
-                uri += "&target=%s.__HOST__.%s" % (host_name, metric+"?????")
                 v = {}
                 v['link'] = self.uri
                 v['img_src'] = uri
+                v['img_src'] = self._replaceFontSize(v['img_src'], fontsize[source])
                 r.append(v)
 
             return r
@@ -205,19 +223,19 @@ class Graphite_Webui(BaseModule):
             # Remove all non alpha numeric character
             desc = self.illegal_char.sub('_', elt.service_description)
             host_name = self.illegal_char.sub('_', elt.host.host_name)
-            
+
             # Send a bulk of all metrics at once
             for (metric, value) in couples:
-                uri = self.uri + 'render/?width=586&height=308&lineMode=connected&from=' + d
+                uri = self.uri + 'render/?width=586&height=308&lineMode=connected&from=' + d + "&until=" + e
                 if re.search(r'_warn|_crit', metric):
                     continue
                 elif value[1] == '%':
-                    uri += "&yMin=0&yMax=100" 
+                    uri += "&yMin=0&yMax=100"
                 uri += "&target=%s.%s.%s" % (host_name, desc, metric)
-                uri += "&target=%s.%s.%s" % (host_name, desc, metric+"?????")
                 v = {}
                 v['link'] = self.uri
                 v['img_src'] = uri
+                v['img_src'] = self._replaceFontSize(v['img_src'], fontsize[source])
                 r.append(v)
             return r
 

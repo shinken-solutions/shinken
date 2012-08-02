@@ -2,7 +2,7 @@
 
 # -*- mode: python ; coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -32,16 +32,14 @@ __all__ = ['UnusedProp', 'BoolProp', 'IntegerProp', 'FloatProp',
            'CharProp', 'StringProp', 'ListProp',
            'FULL_STATUS', 'CHECK_RESULT']
 
-# Suggestion 
+# Suggestion
 # Is this useful? see above
 __author__ = "Hartmut Goebel <h.goebel@goebel-consult.de>"
 __copyright__ = "Copyright 2010-2011 by Hartmut Goebel <h.goebel@goebel-consult.de>"
 __licence__ = "GNU Affero General Public License version 3 (AGPL v3)"
 
-
 FULL_STATUS = 'full_status'
 CHECK_RESULT = 'check_result'
-
 
 none_object = object()
 
@@ -54,21 +52,19 @@ class Property(object):
 
 
     """
-    
-    
-    
+
     def __init__(self, default=none_object, class_inherit=None,
                  unmanaged=False, help='', no_slots=False,
                  fill_brok=None, conf_send_preparation=None,
                  brok_transformation=None, retention=False,
                  retention_preparation=None, to_send=False,
                  override=False, managed=True):
-                     
+
         """
         `default`: default value to be used if this property is not set.
                    If default is None, this property is required.
 
-        `class_inherit`: List of 2-tuples, (Service, 'blabla') : must
+        `class_inherit`: List of 2-tuples, (Service, 'blabla'): must
                    set this property to the Service class with name
                    blabla. if (Service, None): must set this property
                    to the Service class with same name
@@ -80,7 +76,7 @@ class Property(object):
                      FULL_STATUS for initial and update status,
                      CHECK_RESULT for check results
         `retention`: if set, we will save this property in the retention files
-        `retention_preparation`: function, if set, will go this function before 
+        `retention_preparation`: function, if set, will go this function before
                      being save to the retention data
 
         Only for the inital call:
@@ -91,17 +87,17 @@ class Property(object):
                      be send like that.
 
         brok_transformation: if set, will call the function with the
-                     value of the property when flattening 
+                     value of the property when flattening
                      data is necessary (like realm_name instead of
                      the realm object).
 
-        override : for scheduler, if the property must override the
+        override: for scheduler, if the property must override the
                      value of the configuration we send it
 
-        managed : property that is managed in Nagios but not in Shinken
+        managed: property that is managed in Nagios but not in Shinken
 
         """
-        
+
         self.default = default
         self.has_default = (default is not none_object)
         self.required = not self.has_default
@@ -126,9 +122,9 @@ class UnusedProp(Property):
 
     This is just to warn the user that the option he uses is no more used
     in Shinken.
-    
+
     """
-    
+
     # Since this property is not used, there is no use for other
     # parameters than 'text'.
     # 'text' a some usage text if present, will print it to explain
@@ -144,7 +140,6 @@ class UnusedProp(Property):
         self.unused = True
         self.managed = True
 
-
 _boolean_states = {'1': True, 'yes': True, 'true': True, 'on': True,
                    '0': False, 'no': False, 'false': False, 'off': False}
 
@@ -155,61 +150,73 @@ class BoolProp(Property):
     Boolean values are currently case insensitively defined as 0,
     false, no, off for False, and 1, true, yes, on for True).
     """
-#    @staticmethod
+
+    #@staticmethod
     def pythonize(self, val):
         return _boolean_states[val.lower()]
 
 
 class IntegerProp(Property):
     """Please Add a Docstring to describe the class here"""
-#    @staticmethod
+
+    #@staticmethod
     def pythonize(self, val):
         return to_int(val)
 
 
 class FloatProp(Property):
     """Please Add a Docstring to describe the class here"""
-#    @staticmethod
+
+    #@staticmethod
     def pythonize(self, val):
         return to_float(val)
 
 
 class CharProp(Property):
     """Please Add a Docstring to describe the class here"""
-#    @staticmethod
+
+    #@staticmethod
     def pythonize(self, val):
         return to_char(val)
 
 
 class StringProp(Property):
     """Please Add a Docstring to describe the class here"""
-#    @staticmethod
+
+    #@staticmethod
     def pythonize(self, val):
         return val
+
 
 class PathProp(StringProp):
     """ A string property representing a "running" (== VAR) file path """
 
+
 class ConfigPathProp(StringProp):
     """ A string property representing a config file path """
 
+
 class ListProp(Property):
     """Please Add a Docstring to describe the class here"""
-#    @staticmethod
+
+    #@staticmethod
     def pythonize(self, val):
         return to_split(val)
 
+
 class LogLevelProp(StringProp):
     """ A string property representing a logging level """
+
     def pythonize(self, val):
         return logger.get_level_id(val)
+
 
 class DictProp(Property):
     def __init__(self, elts_prop=None, *args, **kwargs):
         """Dictionary of values.
              If elts_prop is not None, must be a Property subclass
              All dict values will be casted as elts_prop values when pythonized
-            
+
             elts_prop = Property of dict members
         """
         super(DictProp, self).__init__(*args, **kwargs)
@@ -219,6 +226,7 @@ class DictProp(Property):
         self.elts_prop = elts_prop()
 
     def pythonize(self, val):
+
         #import traceback; traceback.print_stack()
         def split(kv):
             m = re.match("^\s*([^\s]+)\s*=\s*([^\s]+)\s*$", kv)
@@ -226,7 +234,7 @@ class DictProp(Property):
                 raise ValueError
 
             return (
-                m.group(1), 
+                m.group(1),
                 # >2.4 only. we keep it for later. m.group(2) if self.elts_prop is None else self.elts_prop.pythonize(m.group(2))
                 (self.elts_prop.pythonize(m.group(2)), m.group(2))[self.elts_prop is None]
             )
@@ -237,6 +245,7 @@ class DictProp(Property):
         # val is in the form "key1=addr:[port],key2=addr:[port],..."
         print ">>>", dict([split(kv) for kv in to_split(val)])
         return dict([split(kv) for kv in to_split(val)])
+
 
 class AddrProp(Property):
     """Address property (host + port)"""
@@ -252,7 +261,6 @@ class AddrProp(Property):
 
         addr = {'address': m.group(1)}
         if m.group(2) is not None:
-           addr['port'] = int(m.group(2))
+            addr['port'] = int(m.group(2))
 
         return addr
-

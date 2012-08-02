@@ -8,7 +8,7 @@
 
 %rebase widget globals(), css=['problems/css/accordion.css', 'problems/css/pagenavi.css', 'problems/css/perfometer.css', 'problems/css/img_hovering.css'], js=['problems/js/img_hovering.js']
 
-%#rebase layout globals(), title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/img_hovering.js', 'problems/js/accordion.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css', 'problems/css/perfometer.css', 'problems/css/img_hovering.css'], refresh=True, menu_part='/'+page, user=user 
+%#rebase layout globals(), title='All problems', top_right_banner_state=top_right_banner_state, js=['problems/js/img_hovering.js', 'problems/js/accordion.js'], css=['problems/css/accordion.css', 'problems/css/pagenavi.css', 'problems/css/perfometer.css', 'problems/css/img_hovering.css'], refresh=True, menu_part='/'+page, user=user
 
 
 %if len(pbs) == 0:
@@ -16,7 +16,7 @@
 %end
 
 %for pb in pbs:
-  
+
 <div class="tableCriticity pull-left row-fluid">
   <div class='img_status pull-left'>
     <div class="aroundpulse">
@@ -27,7 +27,7 @@
       <img src="{{helper.get_icon_state(pb)}}" />
     </div>
   </div>
-  
+
 
     <span class="alert-small alert-{{pb.state.lower()}}">{{pb.state}}</span> for {{!helper.get_link(pb)}}
     <div class='pull-right'>
@@ -36,8 +36,8 @@
     %end
     </div>
 
-</div>  
+</div>
 <div style="clear:both;"/>
 %end
 
-  
+

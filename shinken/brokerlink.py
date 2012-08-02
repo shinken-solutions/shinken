@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -23,13 +23,12 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from shinken.satellitelink import SatelliteLink, SatelliteLinks
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 
 
 class BrokerLink(SatelliteLink):
-    """TODO : Add some comment about this class for the doc"""
+    """TODO: Add some comment about this class for the doc"""
     id = 0
     my_type = 'broker'
     properties = SatelliteLink.properties.copy()
@@ -46,6 +45,6 @@ class BrokerLink(SatelliteLink):
 
 
 class BrokerLinks(SatelliteLinks):
-    """TODO : Add some comment about this class for the doc"""
+    """TODO: Add some comment about this class for the doc"""
     name_property = "broker_name"
     inner_class = BrokerLink

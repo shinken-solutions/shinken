@@ -24,10 +24,9 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This Class is a plugin for the Shinken Arbiter. It read a json file
-# with all links between objects. Update them (create/delete) at the 
+# This Class is a plugin for the Shinken Arbiter. It read a json file
+# with all links between objects. Update them (create/delete) at the
 # launch or at fly
-
 
 import time
 import os
@@ -36,28 +35,27 @@ import subprocess
 # the simplejson if failed (python2.4)
 try:
     import json
-except ImportError: 
-    # For old Python version, load 
+except ImportError:
+    # For old Python version, load
     # simple json (it can be hard json?! It's 2 functions guy!)
     try:
         import simplejson as json
     except ImportError:
-        print "Error : you need the json or simplejson module for this script"
+        print "Error: you need the json or simplejson module for this script"
         raise
 
 from shinken.basemodule import BaseModule
 from shinken.external_command import ExternalCommand
 
-
 properties = {
-    'daemons' : ['arbiter'],
-    'type' : 'hot_dependencies',
-    'external' : False,
-    'phases' : ['late_configuration'],
+    'daemons': ['arbiter'],
+    'type': 'hot_dependencies',
+    'external': False,
+    'phases': ['late_configuration'],
     }
 
 
-#called by the plugin manager to get a broker
+# called by the plugin manager to get a broker
 def get_instance(plugin):
     print "Get a Hot dependencies module for arbiter with plugin %s" % plugin.get_name()
     mapping_file = getattr(plugin, 'mapping_file', '')
@@ -67,7 +65,6 @@ def get_instance(plugin):
     in_debug = getattr(plugin, 'debug', '0') == '1'
     instance = Hot_dependencies_arbiter(plugin, mapping_file, mapping_command, mapping_command_interval, mapping_command_timeout, in_debug)
     return instance
-
 
 
 # Get hosts and/or services dep by launching a command
@@ -87,21 +84,17 @@ class Hot_dependencies_arbiter(BaseModule):
         self.mapping_command_timeout = mapping_command_timeout
         self.in_debug = in_debug
 
-        
-    #Called by Arbiter to say 'let's prepare yourself guy'
+    # Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
         print "I open the HOT dependency module"
         # Remember what we add
-        
 
     def _is_file_existing(self):
         return os.path.exists(self.mapping_file)
 
-
     def debug(self, s):
         if self.in_debug:
             print "[HotDependency] %s " % s
-            
 
     # Look is the mapping filechanged since the last lookup
     def _is_mapping_file_changed(self):
@@ -110,10 +103,9 @@ class Hot_dependencies_arbiter(BaseModule):
             if last_update > self.last_update:
                 self.last_update = last_update
                 return True
-        except OSError, exp : # Maybe the file got problem, we bypaass here
+        except OSError, exp:  # Maybe the file got problem, we bypaass here
             self.debug(str(exp))
         return False
-
 
     # Read the mapping file and update our internal mappings
     def _update_mapping(self):
@@ -126,8 +118,7 @@ class Hot_dependencies_arbiter(BaseModule):
         self.mapping = set()
         for e in mapping:
             son, father = e
-            self.mapping.add( (tuple(son), tuple(father)) )
-
+            self.mapping.add((tuple(son), tuple(father)))
 
     # Maybe the file is updated, but the mapping is the same
     # if not, look at addition and remove objects
@@ -136,7 +127,7 @@ class Hot_dependencies_arbiter(BaseModule):
         removed = self.last_mapping - self.mapping
 
         return additions, removed
-        
+
     # Launch the external command to generate the file
     def _launch_command(self):
         self.debug("Launching command %s" % self.mapping_command)
@@ -149,9 +140,8 @@ class Hot_dependencies_arbiter(BaseModule):
                 self.mapping_command,
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 close_fds=do_close_fd, shell=True)
-        except OSError , exp:
-            self.error("Fail Launching the command %s : %s" % (self.mapping_command, exp))
-
+        except OSError, exp:
+            self.error("Fail Launching the command %s: %s" % (self.mapping_command, exp))
 
     # Look if the command is finished or not
     def _watch_command_finished(self):
@@ -165,9 +155,8 @@ class Hot_dependencies_arbiter(BaseModule):
             # it's finished! Cool
             (stdoutdata, stderrdata) = self.process.communicate()
             if self.process.returncode != 0:
-                self.debug("The command return in error : %s \n %s" % (stderrdata, stdoutdata))
+                self.debug("The command return in error: %s \n %s" % (stderrdata, stdoutdata))
             self.process = None
-
 
     def tick_external_command(self):
         now = int(time.time())
@@ -184,12 +173,12 @@ class Hot_dependencies_arbiter(BaseModule):
             # We got one in progress, we should look if it's finished or not
             self._watch_command_finished()
 
-    #Ok, main function that will load dep from a json file
+    # Ok, main function that will load dep from a json file
     def hook_late_configuration(self, arb):
         # We will return external commands to the arbiter, so
         # it can just manage it easily and in a generic way
         ext_cmds = []
-        
+
         # If the file do not exist, we launch the command
         # and we bail out
         if not self._is_file_existing():
@@ -216,8 +205,6 @@ class Hot_dependencies_arbiter(BaseModule):
                 else:
                     self.debug("Missing one of %s %s" % (son_name, father_name))
 
-
-
     def hook_tick(self, arb):
         now = int(time.time())
         self.tick_external_command()
@@ -228,8 +215,8 @@ class Hot_dependencies_arbiter(BaseModule):
             self.debug("The mapping file changed, I update it")
             self._update_mapping()
             additions, removed = self._got_mapping_changes()
-            self.debug("Additions : %s" % additions)
-            self.debug("Remove : %s " % removed)
+            self.debug("Additions: %s" % additions)
+            self.debug("Remove: %s " % removed)
             for father_k, son_k in additions:
                 son_type, son_name = son_k
                 father_type, father_name = father_k
@@ -244,10 +231,10 @@ class Hot_dependencies_arbiter(BaseModule):
                 if son_type == 'host' and father_type == 'host':
                     # We just raise the external command, arbiter will do the job
                     # to dispatch them
-                    extcmd = "[%lu] ADD_SIMPLE_HOST_DEPENDENCY;%s;%s\n" % (now,son_name, father_name)
+                    extcmd = "[%lu] ADD_SIMPLE_HOST_DEPENDENCY;%s;%s\n" % (now, son_name, father_name)
                     e = ExternalCommand(extcmd)
 
-                    self.debug('Raising external command : %s' % extcmd)
+                    self.debug('Raising external command: %s' % extcmd)
                     arb.add(e)
             # And now the deletion part
             for father_k, son_k in removed:
@@ -264,10 +251,8 @@ class Hot_dependencies_arbiter(BaseModule):
                 if son_type == 'host' and father_type == 'host':
                     # We just raise the external command, arbiter will do the job
                     # to dispatch them
-                    extcmd = "[%lu] DEL_HOST_DEPENDENCY;%s;%s\n" % (now,son_name, father_name)
+                    extcmd = "[%lu] DEL_HOST_DEPENDENCY;%s;%s\n" % (now, son_name, father_name)
                     e = ExternalCommand(extcmd)
 
                     self.debug('Raising external command %s' % extcmd)
                     arb.add(e)
-
-                

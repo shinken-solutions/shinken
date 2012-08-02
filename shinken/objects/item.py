@@ -23,13 +23,11 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 """ This class is a base class for nearly all configuration
  elements like service, hosts or contacts.
 """
 import time
-import hashlib, cPickle # for hashing compute
+import hashlib, cPickle  # for hashing compute
 from copy import copy
 
 from shinken.graph import Graph
@@ -42,31 +40,30 @@ from shinken.comment import Comment
 from shinken.log import logger
 
 
-
 class Item(object):
-    
+
     properties = {
         'imported_from':            StringProp(default='unknown'),
         'use':                      ListProp(default=''),
         'name':                     StringProp(default=''),
-        
-        # TODO : find why we can't uncomment this line below.
+
+        # TODO: find why we can't uncomment this line below.
         #'register':                 BoolProp(default='1'),
     }
-    
+
     running_properties = {
         # All errors and warning raised during the configuration parsing
         # and that will raised real warning/errors during the is_correct
         'configuration_warnings':   ListProp(default=[]),
         'configuration_errors':     ListProp(default=[]),
-        'hash'                  :   StringProp(default=''),
+        'hash':   StringProp(default=''),
         # We save all template we asked us to load from
-        'tags'                  :   ListProp(default=set(), fill_brok=['full_status']),
+        'tags': ListProp(default=set(), fill_brok=['full_status']),
     }
-    
+
     macros = {
     }
-    
+
     def __init__(self, params={}):
         # We have our own id of My Class type :)
         # use set attr for going into the slots
@@ -75,37 +72,27 @@ class Item(object):
         self.id = cls.id
         cls.id += 1
 
-        self.customs = {} # for custom variables
-        self.plus = {} # for value with a +
+        self.customs = {}  # for custom variables
+        self.plus = {}  # for value with a +
 
         self.init_running_properties()
-        
+
         # [0] = +  -> new key-plus
         # [0] = _  -> new custom entry in UPPER case
         for key in params:
-            if len(params[key]) >= 1 and params[key][0]  == '+':
-                # Special case : a _MACRO can be a plus. so add to plus
+            if len(params[key]) >= 1 and params[key][0] == '+':
+                # Special case: a _MACRO can be a plus. so add to plus
                 # but upper the key for the macro name
                 if key[0] == "_":
-                    self.plus[key.upper()] = params[key][1:] # we remove the +
+                    self.plus[key.upper()] = params[key][1:]  # we remove the +
                 else:
-                    self.plus[key] = params[key][1:] # we remove the +
+                    self.plus[key] = params[key][1:]  # we remove the +
             elif key[0] == "_":
                 custom_name = key.upper()
                 self.customs[custom_name] = params[key]
             else:
                 setattr(self, key, params[key])
 
-        self.arb_satmap = {'address': '0.0.0.0', 'port': 0}
-        if hasattr(self, 'address'):
-            self.arb_satmap['address'] = self.address
-        if hasattr(self, 'port'):
-            try:
-                self.arb_satmap['port']    = int(self.port)
-            except:
-                pass
-
-    
     def init_running_properties(self):
         for prop, entry in self.__class__.running_properties.items():
             # Copy is slow, so we check type
@@ -118,11 +105,10 @@ class Item(object):
                 setattr(self, prop, val)
             # each instance to have his own running prop!
 
-
     def copy(self):
         """ Return a copy of the item, but give him a new id """
         cls = self.__class__
-        i = cls({})# Dummy item but with it's own running properties
+        i = cls({})  # Dummy item but with it's own running properties
         for prop in cls.properties:
             if hasattr(self, prop):
                 val = getattr(self, prop)
@@ -131,20 +117,17 @@ class Item(object):
         i.customs = copy(self.customs)
         return i
 
-
     def clean(self):
         """ Clean useless things not requested once item has been fully initialized&configured.
 Like temporary attributes such as "imported_from", etc.. """
-        for name in ( 'imported_from', 'use', 'plus', 'templates', ): 
+        for name in ('imported_from', 'use', 'plus', 'templates',):
             try:
                 delattr(self, name)
             except AttributeError:
                 pass
 
-
     def __str__(self):
-        return str(self.__dict__)+'\n'
-
+        return str(self.__dict__) + '\n'
 
     def is_tpl(self):
         """ Return if the elements is a template """
@@ -152,7 +135,6 @@ Like temporary attributes such as "imported_from", etc.. """
             return self.register == '0'
         except Exception, exp:
             return False
-
 
     # If a prop is absent and is not required, put the default value
     def fill_default(self):
@@ -163,23 +145,22 @@ Like temporary attributes such as "imported_from", etc.. """
             if not hasattr(self, prop) and entry.has_default:
                 setattr(self, prop, entry.default)
 
-
     # We load every useful parameter so no need to access global conf later
     # Must be called after a change in a global conf parameter
     def load_global_conf(cls, conf):
         """ Used to put global values in the sub Class like
         hosts or services """
-        # conf have properties, if 'enable_notifications' :
-        # { [...] 'class_inherit' : [(Host, None), (Service, None),
+        # conf have properties, if 'enable_notifications':
+        # { [...] 'class_inherit': [(Host, None), (Service, None),
         #  (Contact, None)]}
         # get the name and put the value if None, put the Name
-        # (not None) if not (not clear ?)
+        # (not None) if not (not clear?)
         for prop, entry in conf.properties.items():
             # If we have a class_inherit, and the arbiter really send us it
             # if 'class_inherit' in entry and hasattr(conf, prop):
             if hasattr(conf, prop):
                 for (cls_dest, change_name) in entry.class_inherit:
-                    if cls_dest == cls:# ok, we've got something to get
+                    if cls_dest == cls:  # ok, we've got something to get
                         value = getattr(conf, prop)
                         if change_name is None:
                             setattr(cls, prop, value)
@@ -188,7 +169,6 @@ Like temporary attributes such as "imported_from", etc.. """
 
     # Make this method a classmethod
     load_global_conf = classmethod(load_global_conf)
-
 
     # Use to make python properties
     def pythonize(self):
@@ -199,7 +179,7 @@ Like temporary attributes such as "imported_from", etc.. """
                 setattr(self, prop, new_val)
             except AttributeError, exp:
                 #print exp
-                pass # Will be catch at the is_correct moment
+                pass  # Will be catch at the is_correct moment
             except KeyError, exp:
                 #print "Missing prop value", exp
                 err = "the property '%s' of '%s' do not have value" % (prop, self.get_name())
@@ -222,13 +202,11 @@ Like temporary attributes such as "imported_from", etc.. """
         # and put again our id
         self.id = i
 
-
     def get_templates(self):
         if hasattr(self, 'use') and self.use != '':
             return self.use.split(',')
         else:
             return []
-
 
     # We fillfull properties with template ones if need
     def get_property_by_inheritance(self, items, prop):
@@ -238,7 +216,7 @@ Like temporary attributes such as "imported_from", etc.. """
             value = getattr(self, prop)
             # Maybe this value is 'null'. If so, we should NOT inherit
             # and just delete this entry, and hope of course.
-            # Keep "null" values, because in "inheritance chaining" they must 
+            # Keep "null" values, because in "inheritance chaining" they must
             # be passed from one level to the next.
             #if value == 'null':
             #    delattr(self, prop)
@@ -285,9 +263,9 @@ Like temporary attributes such as "imported_from", etc.. """
         # Maybe templates only give us + values, so we didn't quit, but we already got a
         # self.prop value after all
         template_with_only_plus = hasattr(self, prop)
-        
+
         # I do not have endingprop, my templates too... Maybe a plus?
-        # warning : if all my templates gave me '+' values, do not forgot to
+        # warning: if all my templates gave me '+' values, do not forgot to
         # add the already set self.prop value
         if self.has_plus(prop):
             if template_with_only_plus:
@@ -298,14 +276,13 @@ Like temporary attributes such as "imported_from", etc.. """
             # We must say it's a '+' value, so our son will now that it must
             # still loop
             if self.is_tpl():
-                value = '+'+value
+                value = '+' + value
             setattr(self, prop, value)
 
             return value
 
         # Not even a plus... so None :)
         return None
-
 
     # We fillfull properties with template ones if need
     def get_customs_properties_by_inheritance(self, items):
@@ -333,7 +310,6 @@ Like temporary attributes such as "imported_from", etc.. """
             self.customs[prop] = cust_in_plus[prop]
         return self.customs
 
-
     def has_plus(self, prop):
         try:
             self.plus[prop]
@@ -341,27 +317,24 @@ Like temporary attributes such as "imported_from", etc.. """
             return False
         return True
 
-
     def get_all_plus_and_delete(self):
         res = {}
-        props = self.plus.keys() # we delete entries, so no for ... in ...
+        props = self.plus.keys()  # we delete entries, so no for ... in ...
         for prop in props:
             res[prop] = self.get_plus_and_delete(prop)
         return res
-
 
     def get_plus_and_delete(self, prop):
         val = self.plus[prop]
         del self.plus[prop]
         return val
 
-
     # Check is required prop are set:
     # template are always correct
     def is_correct(self):
         state = True
         properties = self.__class__.properties
-        
+
         # Raised all previously saw errors like unknown contacts and co
         if self.configuration_errors != []:
             state = False
@@ -374,7 +347,6 @@ Like temporary attributes such as "imported_from", etc.. """
                 state = False
 
         return state
-
 
     # This function is used by service and hosts
     # to transform Nagios2 parameters to Nagios3
@@ -390,10 +362,8 @@ Like temporary attributes such as "imported_from", etc.. """
                 value = getattr(self, old_name)
                 setattr(self, new_name, value)
 
-
     def add_downtime(self, downtime):
         self.downtimes.append(downtime)
-
 
     def del_downtime(self, downtime_id):
         d_to_del = None
@@ -404,10 +374,8 @@ Like temporary attributes such as "imported_from", etc.. """
         if d_to_del is not None:
             self.downtimes.remove(d_to_del)
 
-
     def add_comment(self, comment):
         self.comments.append(comment)
-
 
     def del_comment(self, comment_id):
         c_to_del = None
@@ -417,7 +385,6 @@ Like temporary attributes such as "imported_from", etc.. """
                 c.can_be_deleted = True
         if c_to_del is not None:
             self.comments.remove(c_to_del)
-
 
     def acknowledge_problem(self, sticky, notify, persistent, author, comment, end_time=0):
         if self.state != self.ok_up:
@@ -432,20 +399,18 @@ Like temporary attributes such as "imported_from", etc.. """
             self.acknowledgement = a
             if self.my_type == 'host':
                 comment_type = 1
-            else :
+            else:
                 comment_type = 2
             c = Comment(self, persistent, author, comment,
                         comment_type, 4, 0, False, 0)
             self.add_comment(c)
             self.broks.append(self.get_update_status_brok())
 
-
     # Look if we got an ack that is too old with an expire date and should
     # be delete
     def check_for_expire_acknowledge(self):
         if self.acknowledgement and self.acknowledgement.end_time != 0 and self.acknowledgement.end_time < time.time():
             self.unacknowledge_problem()
-
 
     #  Delete the acknowledgement object and reset the flag
     #  but do not remove the associated comment.
@@ -462,7 +427,6 @@ Like temporary attributes such as "imported_from", etc.. """
                     self.del_comment(c.id)
             self.broks.append(self.get_update_status_brok())
 
-
     # Check if we have an acknowledgement and if this is marked as sticky.
     # This is needed when a non-ok state changes
     def unacknowledge_problem_if_not_sticky(self):
@@ -470,9 +434,8 @@ Like temporary attributes such as "imported_from", etc.. """
             if not self.acknowledgement.sticky:
                 self.unacknowledge_problem()
 
-
     # Will flatten some parameters taggued by the 'conf_send_preparation'
-    #property because they are too "linked" to be send like that (like realms)
+    # property because they are too "linked" to be send like that (like realms)
     def prepare_for_conf_sending(self):
         cls = self.__class__
 
@@ -493,9 +456,6 @@ Like temporary attributes such as "imported_from", etc.. """
                         val = f(getattr(self, prop))
                         setattr(self, prop, val)
 
-
-
-
     # Get the property for an object, with good value
     # and brok_transformation if need
     def get_property_value_for_brok(self, prop, tab):
@@ -511,7 +471,6 @@ Like temporary attributes such as "imported_from", etc.. """
 
         return value
 
-
     # Fill data with info of item by looking at brok_type
     # in props of properties or running_propterties
     def fill_data_brok_from(self, data, brok_type):
@@ -526,32 +485,29 @@ Like temporary attributes such as "imported_from", etc.. """
         if hasattr(cls, 'running_properties'):
             # We've got prop in running_properties too
             for prop, entry in cls.running_properties.items():
-#                if 'fill_brok' in cls.running_properties[prop]:
+                #if 'fill_brok' in cls.running_properties[prop]:
                 if brok_type in entry.fill_brok:
                     data[prop] = self.get_property_value_for_brok(prop, cls.running_properties)
-
 
     # Get a brok with initial status
     def get_initial_status_brok(self):
         cls = self.__class__
         my_type = cls.my_type
-        data = {'id' : self.id}
+        data = {'id': self.id}
 
         self.fill_data_brok_from(data, 'full_status')
-        b = Brok('initial_'+my_type+'_status', data)
+        b = Brok('initial_' + my_type + '_status', data)
         return b
-
 
     # Get a brok with update item status
     def get_update_status_brok(self):
         cls = self.__class__
         my_type = cls.my_type
 
-        data = {'id' : self.id}
+        data = {'id': self.id}
         self.fill_data_brok_from(data, 'full_status')
-        b = Brok('update_'+my_type+'_status', data)
+        b = Brok('update_' + my_type + '_status', data)
         return b
-
 
     # Get a brok with check_result
     def get_check_result_brok(self):
@@ -560,9 +516,8 @@ Like temporary attributes such as "imported_from", etc.. """
 
         data = {}
         self.fill_data_brok_from(data, 'check_result')
-        b = Brok(my_type+'_check_result', data)
+        b = Brok(my_type + '_check_result', data)
         return b
-
 
     # Get brok about the new schedule (next_check)
     def get_next_schedule_brok(self):
@@ -571,9 +526,8 @@ Like temporary attributes such as "imported_from", etc.. """
 
         data = {}
         self.fill_data_brok_from(data, 'next_schedule')
-        b = Brok(my_type+'_next_schedule', data)
+        b = Brok(my_type + '_next_schedule', data)
         return b
-
 
     # Link one command property to a class (for globals like oc*p_command)
     def linkify_one_command_with_commands(self, commands, prop):
@@ -592,21 +546,18 @@ Like temporary attributes such as "imported_from", etc.. """
             else:
                 setattr(self, prop, None)
 
-    
     # We look at the 'trigger' prop and we create a trigger for it
     def explode_trigger_string_into_triggers(self, triggers):
         src = getattr(self, 'trigger', '')
         if src:
             # Change on the fly the characters
             src = src.replace(r'\n', '\n').replace(r'\t', '\t')
-            t = triggers.create_trigger(src, 'inner-trigger-'+self.__class__.my_type+''+str(self.id))
+            t = triggers.create_trigger(src, 'inner-trigger-' + self.__class__.my_type + '' + str(self.id))
             if t:
                 logger.debug("[item::%s] go link the trigger %s" % (self.get_name(), str(t.__dict__)))
                 # Maybe the trigger factory give me a already existing trigger,
                 # so my name can be dropped
                 self.triggers.append(t.get_name())
-        
-
 
     # Link with triggers. Can be with a "in source" trigger, or a file name
     def linkify_with_triggers(self, triggers):
@@ -623,10 +574,6 @@ Like temporary attributes such as "imported_from", etc.. """
                 self.configuration_errors.append('the %s %s does have a unknown trigger_name "%s"' % (self.__class__.my_type, self.get_full_name(), tname))
         self.triggers = new_triggers
 
-        
-            
-        
-
 
 class Items(object):
     def __init__(self, items):
@@ -639,37 +586,30 @@ class Items(object):
         # We should keep a graph of templates relations
         self.templates_graph = Graph()
 
-
     def __iter__(self):
         return self.items.itervalues()
-
 
     def __len__(self):
         return len(self.items)
 
-
     def __delitem__(self, key):
         try:
             del self.items[key]
-        except KeyError: #we don't want it, we do not have it. All is perfect
+        except KeyError:  # we don't want it, we do not have it. All is perfect
             pass
 
     def __setitem__(self, key, value):
         self.items[key] = value
 
-
     def __getitem__(self, key):
         return self.items[key]
-
 
     def __contains__(self, key):
         return key in self.items
 
-
     def compute_hash(self):
         for i in self:
             i.compute_hash()
-
 
     # We create the reversed list so search will be faster
     # We also create a twins list with id of twins (not the original
@@ -686,14 +626,13 @@ class Items(object):
                 else:
                     self.twins.append(id)
 
-
     def find_id_by_name(self, name):
         if hasattr(self, 'reversed_list'):
             if name in self.reversed_list:
                 return self.reversed_list[name]
             else:
                 return None
-        else: # ok, an early ask, with no reversed list from now...
+        else:  # ok, an early ask, with no reversed list from now...
             name_property = self.__class__.name_property
             for i in self:
                 if hasattr(i, name_property):
@@ -702,7 +641,6 @@ class Items(object):
                         return i.id
             return None
 
-
     def find_by_name(self, name):
         id = self.find_id_by_name(name)
         if id is not None:
@@ -710,18 +648,15 @@ class Items(object):
         else:
             return None
 
-
     # It's used to change old Nagios2 names to
     # Nagios3 ones
     def old_properties_names_to_new(self):
         for i in self:
             i.old_properties_names_to_new()
 
-
     def pythonize(self):
         for id in self.items:
             self.items[id].pythonize()
-
 
     def create_tpl_list(self):
         for id in self.items:
@@ -729,13 +664,11 @@ class Items(object):
             if i.is_tpl():
                 self.templates[id] = i
 
-
     def find_tpl_by_name(self, name):
         for i in self.templates.values():
             if hasattr(i, 'name') and i.name == name:
                 return i
         return None
-
 
     # We will link all templates, and create the template
     # graph too
@@ -756,7 +689,7 @@ class Items(object):
                 if t is not None:
                     # add the template object to us
                     new_tpls.append(t)
-                else: # not find? not good!
+                else:  # not find? not good!
                     err = "the template '%s' defined for '%s' is unknown" % (tpl, i.get_name())
                     i.configuration_warnings.append(err)
             i.templates = new_tpls
@@ -769,7 +702,6 @@ class Items(object):
         for tpl in self.templates.values():
             for father in tpl.templates:
                 self.templates_graph.add_edge(father, tpl)
-
 
     def is_correct(self):
         # we are ok at the begining. Hope we still ok at the end...
@@ -807,19 +739,17 @@ class Items(object):
             if not i.is_correct():
                 n = getattr(i, 'imported_from', "unknown source")
                 logger.error("[items] In %s is incorrect ; from %s" % (i.get_name(), n))
-                r = False        
-        
-        return r
+                r = False
 
+        return r
 
     def remove_templates(self):
         """ Remove useless templates (& properties) of our items ; otherwise we could get errors on config.is_correct() """
-        tpls = [ i for i in self if i.is_tpl() ]
+        tpls = [i for i in self if i.is_tpl()]
         for i in tpls:
             del self[i.id]
         del self.templates
         del self.templates_graph
-
 
     def clean(self):
         """ Request to remove the unecessary attributes/others from our items """
@@ -832,14 +762,12 @@ class Items(object):
         for i in self:
             i.fill_default()
 
-
     def __str__(self):
         s = ''
         cls = self.__class__
         for id in self.items:
             s = s + str(cls) + ':' + str(id) + str(self.items[id]) + '\n'
         return s
-
 
     # Inheritance forjust a property
     def apply_partial_inheritance(self, prop):
@@ -853,7 +781,6 @@ class Items(object):
                 except:
                     pass
 
-
     def apply_inheritance(self):
         # We check for all Class properties if the host has it
         # if not, it check all host templates for a value
@@ -862,7 +789,6 @@ class Items(object):
             self.apply_partial_inheritance(prop)
         for i in self:
             i.get_customs_properties_by_inheritance(self)
-
 
     # We remove twins
     # Remember: item id respect the order of conf. So if and item
@@ -879,7 +805,7 @@ class Items(object):
             i = self.items[id]
             type = i.__class__.my_type
             logger.warning("[items] %s.%s is already defined" % (type, i.get_name()))
-            del self[id] # bye bye
+            del self[id]  # bye bye
         # do not remove twins, we should look in it, but just void it
         self.twins = []
         #del self.twins #no more need
@@ -899,14 +825,13 @@ class Items(object):
                         c = contacts.find_by_name(c_name)
                         if c is not None:
                             new_contacts.append(c)
-                        # Else : Add in the errors tab.
+                        # Else: Add in the errors tab.
                         # will be raised at is_correct
                         else:
                             err = "the contact '%s' defined for '%s' is unknown" % (c_name, i.get_name())
                             i.configuration_errors.append(err)
                 # Get the list, but first make elements uniq
                 i.contacts = list(set(new_contacts))
-
 
     # Make link between an object and its escalations
     def linkify_with_escalations(self, escalations):
@@ -919,11 +844,10 @@ class Items(object):
                     es = escalations.find_by_name(es_name)
                     if es is not None:
                         new_escalations.append(es)
-                    else: # Escalation not find, not good!
+                    else:  # Escalation not find, not good!
                         err = "the escalation '%s' defined for '%s' is unknown" % (es_name, i.get_name())
                         i.configuration_errors.append(err)
                 i.escalations = new_escalations
-
 
     # Make link between item and it's resultmodulations
     def linkify_with_resultmodulations(self, resultmodulations):
@@ -942,7 +866,6 @@ class Items(object):
                         continue
                 i.resultmodulations = new_resultmodulations
 
-
     # Make link between item and it's business_impact_modulations
     def linkify_with_business_impact_modulations(self, business_impact_modulations):
         for i in self:
@@ -959,25 +882,6 @@ class Items(object):
                         i.configuration_errors.append(err)
                         continue
                 i.business_impact_modulations = new_business_impact_modulations
-
-
-
-    # Make link between item and it's resultmodulations
-    def linkify_with_resultmodulations(self, resultmodulations):
-        for i in self:
-            if hasattr(i, 'resultmodulations'):
-                resultmodulations_tab = i.resultmodulations.split(',')
-                resultmodulations_tab = strip_and_uniq(resultmodulations_tab)
-                new_resultmodulations = []
-                for rm_name in resultmodulations_tab:
-                    rm = resultmodulations.find_by_name(rm_name)
-                    if rm is not None:
-                        new_resultmodulations.append(rm)
-                    else: # TODO WHAT?
-                        pass
-                i.resultmodulations = new_resultmodulations
-
-
 
     # If we've got a contact_groups properties, we search for all
     # theses groups and ask them their contacts, and then add them
@@ -997,7 +901,7 @@ class Items(object):
                     # We add contacts into our contacts
                     if cnames != []:
                         if hasattr(i, 'contacts'):
-                            i.contacts += ','+cnames
+                            i.contacts += ',' + cnames
                         else:
                             i.contacts = cnames
 
@@ -1021,7 +925,6 @@ class Items(object):
                 # Got a real one, just set it :)
                 setattr(i, prop, tp)
 
-
     # Link one command property
     def linkify_one_command_with_commands(self, commands, prop):
         for i in self:
@@ -1039,9 +942,8 @@ class Items(object):
                     # TODO: catch None?
                     setattr(i, prop, cmdCall)
                 else:
-                    
-                    setattr(i, prop, None)
 
+                    setattr(i, prop, None)
 
     # Link a command list (commands with , between) in real CommandCalls
     def linkify_command_list_with_commands(self, commands, prop):
@@ -1062,26 +964,24 @@ class Items(object):
                             cmdCall = CommandCall(commands, com)
                         # TODO: catch None?
                         com_list.append(cmdCall)
-                    else: # TODO: catch?
+                    else:  # TODO: catch?
                         pass
                 setattr(i, prop, com_list)
-
 
     # Link with triggers. Can be with a "in source" trigger, or a file name
     def linkify_with_triggers(self, triggers):
         for i in self:
             i.linkify_with_triggers(triggers)
 
-
     def evaluate_hostgroup_expression(self, expr, hosts, hostgroups, look_in='hostgroups'):
         begin = 0
         end = len(expr)
-        ctxres = hg_name_parse_EXPR(expr, begin, end) 
+        ctxres = hg_name_parse_EXPR(expr, begin, end)
         if ctxres.rc:
-            err = "the syntax of %s is invalid : %s" % (expr, ctxres.reason)
+            err = "the syntax of %s is invalid: %s" % (expr, ctxres.reason)
             self.configuration_errors.append(err)
             return []
-        
+
         str_setexpr = hg_name_rebuild_str(ctxres.full_res)
         # We must protect the eval() against some names that will be match as
         # Python things like - or print and not real names. So we "change" them with __OTHERNAME__
@@ -1091,6 +991,7 @@ class Items(object):
         for gn, val in groupsname2hostsnames.items():
             gn = gn.replace('-', HostGroup_Name_Parse_Ctx.minus_sign_in_name)
             gn = gn.replace('print', HostGroup_Name_Parse_Ctx.print_in_name)
+            gn = gn.replace(' ', HostGroup_Name_Parse_Ctx.space_in_name)
             newgroupname2hostnames[gn] = val
 
         set_res = []
@@ -1104,7 +1005,6 @@ class Items(object):
             self.configuration_errors.append(err)
 
         return list(set_res)
-
 
     # If we've got a hostgroup_name property, we search for all
     # theses groups and ask them their hosts, and then add them
@@ -1140,13 +1040,12 @@ class Items(object):
                             #print "DBG in item.explode_host_groups_into_hosts , added '%s' to group '%s'" % (newhost, i)
                     else:
                         hnames_list.append(h)
-            
+
             i.host_name = ','.join(list(set(hnames_list)))
 
             # Ok, enven with all of it, there is still no host, put it as a template
             if i.host_name == '':
                 i.register = '0'
-
 
     # Take our trigger strings and create true objects with it
     def explode_trigger_string_into_triggers(self, triggers):
@@ -1155,42 +1054,39 @@ class Items(object):
 
 
 class HostGroup_Name_Parse_Ctx(object):
-    
-        
-    hgn_chars_separator = ( '|', ',', '&', '^', )
-    specials_hostgroup_name_chars = ( '*', '(', ')', '!', ) + hgn_chars_separator
-    
-    space_chars = ( ' ', '\t', )
-    # no group should be named like that :
+
+    hgn_chars_separator = ('|', ',', '&', '^',)
+    specials_hostgroup_name_chars = ('*', '(', ')', '!',) + hgn_chars_separator
+
+    space_chars = (' ', '\t',)
+    # no group should be named like that:
     catch_all_name = "__ALLELEMENTS__"
     minus_sign_in_name = "__MINUSSIGN_IN_NAME__"
     print_in_name = "__PRINT_IN_NAME__"
-       
-    
+    space_in_name = '__SPACE_IN_NAME__'
+
     # flags:
     empty_item_ok = 0
-     
+
     def __init__(self, expr, flags=None):
         if flags is None:
             flags = []
-        
+
         self.expr = expr
         self.flags = flags
         self.last_is_expr = False
         self.prev_res = None
-        self.res_i = 0 
+        self.res_i = 0
         self.rc = 0
         self.reason = ""
         self.pos_res = []
         self.neg_res = []
         self.full_res = None
-        
 
     def __str__(self):
         return "< prev_item='%s' last_is_expr=%s res_i=%d rc=%d >" % (self.prev_res, self.last_is_expr, self.res_i, self.rc)
 
     __repr__ = __str__
-
 
 
 def skip_space(expr, begin, end):
@@ -1224,27 +1120,27 @@ def find_matching_closing(expr, begin, end):
 def hg_name_parse_item(ctx, expr, begin, end):
     if ctx.last_is_expr:
         ctx.rc = -1
-        ctx.reason = "2 consecutive items without valid separator : '%s' and '%s ..'" % (ctx.prev_res, expr[begin:begin+10])
+        ctx.reason = "2 consecutive items without valid separator: '%s' and '%s ..'" % (ctx.prev_res, expr[begin:begin+10])
         return None
-    
+
     i = s = skip_space(expr, begin, end)
     while i < end:
         c = expr[i]
         if c in HostGroup_Name_Parse_Ctx.specials_hostgroup_name_chars:
             break
         i += 1
-    
+
     if i == s:
         if HostGroup_Name_Parse_Ctx.empty_item_ok in ctx.flags:
             ctx.res_i = i
             return "set([])"
-            
+
         ctx.rc = -1
         ctx.reason = "Invalid item: size is zero, near '%s'." % (expr[i:i+10])
         return None
-    
+
     ctx.res_i = i
-    # returns the stripped version of the item :
+    # returns the stripped version of the item:
     res = expr[s:i].strip()
     ctx.prev_res = res
     ctx.last_is_expr = True
@@ -1259,7 +1155,8 @@ def hg_name_parse_single_expr(ctx, expr, begin, end):
     else:
         res = hg_name_parse_item(ctx, expr, i, end)
     return res
-    
+
+
 def hg_name_parse_all(ctx, expr, begin, end):
     if ctx.last_is_expr:
         ctx.rc = -1
@@ -1267,8 +1164,8 @@ def hg_name_parse_all(ctx, expr, begin, end):
         return
     ctx.pos_res.append("*")
     ctx.last_is_expr = True
-    ctx.res_i = begin + 1 # just skip the '*'
-    
+    ctx.res_i = begin + 1  # just skip the '*'
+
 
 def hg_name_parse_expr_operator(ctx, expr, begin, end):
     op = expr[begin]
@@ -1277,10 +1174,10 @@ def hg_name_parse_expr_operator(ctx, expr, begin, end):
         ctx.reason = "%s must follow a valid expression, near '%s'" % (op, expr[begin:begin+10])
     ctx.pos_res.append(op)
     ctx.last_is_expr = False
-    ctx.res_i = begin + 1 # just skip the operator
+    ctx.res_i = begin + 1  # just skip the operator
 
 
-def hg_name_parse_or(ctx, expr, begin, end): # '|' or ','
+def hg_name_parse_or(ctx, expr, begin, end):  # '|' or ','
     if not ctx.last_is_expr:
         ctx.rc = -1
         ctx.reason = "'%s' must follow a valid expression, near '%s'" % (expr[0], expr[0:10])
@@ -1295,7 +1192,7 @@ def hg_name_parse_not(ctx, expr, begin, end):
     i = s = skip_space(expr, begin, end)
     if i >= end:
         ctx.rc = -1
-        ctx.reason = "'!' must be followed by an expression !"
+        ctx.reason = "'!' must be followed by an expression!"
         return
     c = expr[i]
     if c not in tabs_hg_name_list_operators:
@@ -1304,11 +1201,11 @@ def hg_name_parse_not(ctx, expr, begin, end):
                 break
             i += 1
 
-        if i == s: # bad
+        if i == s:  # bad
             ctx.rc = -1
             ctx.reason = "Invalid item after '!', near '%s'" % (expr[s:s+10])
             return
-        
+
         res = hg_name_parse_item(ctx, expr, s, i)
     else:
         if c != '(':
@@ -1318,7 +1215,7 @@ def hg_name_parse_not(ctx, expr, begin, end):
         n = find_matching_closing(expr, s, end)
         if n is None:
             ctx.rc = -1
-            ctx.reason = "Near '%s' : ( An unmatched left parenthesis creates an unresolved tension that will stay with you all day." % (expr[i:10])
+            ctx.reason = "Near '%s': ( An unmatched left parenthesis creates an unresolved tension that will stay with you all day." % (expr[i:10])
             return
         n += s
         subctx = hg_name_parse_EXPR(expr, s, n, ctx.flags)
@@ -1338,15 +1235,15 @@ def hg_name_parse_not(ctx, expr, begin, end):
 def parse_neg_or_not__(ctx, expr, begin, end):
     begin += 1
     if not ctx.last_is_expr:
-        # "! X" case :
+        # "! X" case:
         res = hg_name_parse_not(ctx, expr, begin, end)
     else:
-        # "A ! B" case :
+        # "A ! B" case:
         ctx.pos_res.append("-")
         ctx.last_is_expr = False
         res = hg_name_parse_single_expr(ctx, expr, begin, end)
     return res
-    
+
 
 def hg_name_parse_subexpr(ctx, expr, begin, end):
     if ctx.last_is_expr:
@@ -1357,7 +1254,7 @@ def hg_name_parse_subexpr(ctx, expr, begin, end):
     i2e = find_matching_closing(expr, i2s, end)
     if i2e is None:
         ctx.rc = -1
-        ctx.reason = "Near '%s' : ( An unmatched left parenthesis creates an unresolved tension that will stay with you all day." % (expr[begin:begin+10])        
+        ctx.reason = "Near '%s': ( An unmatched left parenthesis creates an unresolved tension that will stay with you all day." % (expr[begin:begin+10])
         return
     subctx = hg_name_parse_EXPR(expr, i2s, i2e, ctx.flags)
     if subctx.rc:
@@ -1368,7 +1265,6 @@ def hg_name_parse_subexpr(ctx, expr, begin, end):
     ctx.last_is_expr = True
     ctx.prev_res = subctx.prev_res
     return subctx.full_res
-
 
 tabs_hg_name_list_operators = {
     '*': hg_name_parse_all,
@@ -1382,7 +1278,7 @@ tabs_hg_name_list_operators = {
 
 
 def hg_name_parse_expr(ctx, expr, begin, end):
-    """ Parse a hostgroup_name expression, 
+    """ Parse a hostgroup_name expression,
 If parse successfull:
     ctx.rc == 0
     ctx.full_res is the tuple result.
@@ -1399,12 +1295,12 @@ A "sub-parse_expr_result" is either:
     while i < end:
 
         c = expr[i]
-        
+
         handler = tabs_hg_name_list_operators.get(c, hg_name_parse_item)
         res = handler(ctx, expr, i, end)
         if ctx.rc:
             break
-        
+
         if res is not None:
             ctx.pos_res.append(res)
 
@@ -1413,6 +1309,7 @@ A "sub-parse_expr_result" is either:
             if expr[i] not in HostGroup_Name_Parse_Ctx.space_chars:
                 break
             i += 1
+
 
 # Return a set with ALL hosts (used in ! expressions)
 def get_all_host_names_set(hosts):
@@ -1437,23 +1334,23 @@ def hg_name_get_groupnames(all_res, hosts, hostgroups, res=None, look_in='hostgr
         if isinstance(tok, list):
             hg_name_get_groupnames(tok, hosts, hostgroups, res, look_in)
             continue
-        
+
         save_tok = tok
-        if tok in HostGroup_Name_Parse_Ctx.specials_hostgroup_name_chars + ( '-', ):
+        if tok in HostGroup_Name_Parse_Ctx.specials_hostgroup_name_chars + ('-',):
             if tok != '*':
                 continue
             tok = HostGroup_Name_Parse_Ctx.catch_all_name
-        
-        if tok in res: # we already got it, good.
+
+        if tok in res:  # we already got it, good.
             continue
-        
+
         if save_tok == '*':
             elts = get_all_host_names_set(hosts)
         else:
             members = []
-            # We got 2 possibilities : hostgroups or templates
+            # We got 2 possibilities: hostgroups or templates
             if look_in == 'hostgroups':
-                # we got a group name :
+                # we got a group name:
                 members = hostgroups.get_members_by_name(tok)
             else:  # == templates
                 # It's a dict of template.
@@ -1467,20 +1364,21 @@ def hg_name_get_groupnames(all_res, hosts, hostgroups, res=None, look_in='hostgr
             else:
                 elts = members.split(',')
             elts = strip_and_uniq(elts)
-            
-            # the "host_name" members of a hostgroup can also be '*' :
+
+            # the "host_name" members of a hostgroup can also be '*':
             if '*' in elts:
-                tok = HostGroup_Name_Parse_Ctx.catch_all_name 
+                tok = HostGroup_Name_Parse_Ctx.catch_all_name
                 if tok in res:
                     elts = res[tok]
-                else: 
-                    elts = get_all_host_names_set(hosts)    
+                else:
+                    elts = get_all_host_names_set(hosts)
                 # the original tok must still be set:
-                res[save_tok] = elts 
+                res[save_tok] = elts
 
         res[tok] = set(elts)
 
     return res
+
 
 def hg_name_rebuild_str(parse_res):
     """ Rebuild a hostgroup_name expression based on 'parse_res'.
@@ -1495,31 +1393,33 @@ parse_res must be the 'full_res' attribute of a 'HostGroup_Name_Parse_Ctx' objec
             parse_res = HostGroup_Name_Parse_Ctx.catch_all_name
         if 'print' in parse_res:
             parse_res = parse_res.replace('print', HostGroup_Name_Parse_Ctx.print_in_name)
+        if ' ' in parse_res:
+            parse_res = parse_res.replace(' ', HostGroup_Name_Parse_Ctx.space_in_name)
         return parse_res
-    
+
     # nearly trivial case, parse_res is here a list of objects:
     if isinstance(parse_res, list):
         if len(parse_res) == 0:
             return "set([])"
-        return " ".join( hg_name_rebuild_str(i) for i in parse_res )
-    
-    # "base" case :
+        return " ".join(hg_name_rebuild_str(i) for i in parse_res)
+
+    # "base" case:
     # assert( isinstance(parse_res, tuple) )
     # parse_res[0] is the positive results.   == hosts to include.
     # parse_res[1] is the "negative" results. == hosts to NOT include.
     # assert( isinstance(parse_res[0], list) )
     # assert( isinstance(parse_res[1], list) )
-    posres = " ".join( hg_name_rebuild_str(i) for i in parse_res[0] )
-    negres = " ".join( hg_name_rebuild_str(i) for i in parse_res[1] )
-    
+    posres = " ".join(hg_name_rebuild_str(i) for i in parse_res[0])
+    negres = " ".join(hg_name_rebuild_str(i) for i in parse_res[1])
+
     posres.strip()
     negres.strip()
-    
+
     lenpos = len(posres)
     lenneg = len(negres)
     if lenpos == 0 and lenneg == 0:   # bouhhh
         return "set([])"
-    
+
     res = "( "
     if lenpos == 0:
         res += "set([])"
@@ -1527,9 +1427,9 @@ parse_res must be the 'full_res' attribute of a 'HostGroup_Name_Parse_Ctx' objec
         res += " ( " + posres + " ) "
     if lenneg > 0:
         res += " - ( " + negres + " )"
-        
+
     res += " )"
-    
+
     return res
 
 
@@ -1539,5 +1439,5 @@ def hg_name_parse_EXPR(expr, begin, end, flags=None):
     for g in ctx.pos_res, ctx.neg_res:
         if len(g) and g[-1] == '|':
             del g[-1]
-    ctx.full_res = ( ctx.pos_res, ctx.neg_res, )
+    ctx.full_res = (ctx.pos_res, ctx.neg_res,)
     return ctx

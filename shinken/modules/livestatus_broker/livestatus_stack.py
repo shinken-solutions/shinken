@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import Queue
 
 
@@ -52,6 +51,7 @@ class MyLifoQueue(Queue.Queue):
 
 class TopBaseLiveStatusStack(object):
     pass
+
 
 class LiveStatusStack(TopBaseLiveStatusStack):
     """A Lifo queue for filter functions.
@@ -92,6 +92,7 @@ class LiveStatusStack(TopBaseLiveStatusStack):
             filters = []
             for _ in range(num):
                 filters.append(self.get_stack())
+
             # Take from the stack:
             # Make a combined anded function
             # Put it on the stack
@@ -108,13 +109,13 @@ class LiveStatusStack(TopBaseLiveStatusStack):
                 return not failed
             self.put_stack(and_filter)
 
-
     def or_elements(self, num):
         """Take num filters from the stack, or them and put the result back"""
         if num > 1:
             filters = []
             for _ in range(num):
                 filters.append(self.get_stack())
+
             def or_filter(ref):
                 myfilters = filters
                 failed = True
@@ -128,14 +129,12 @@ class LiveStatusStack(TopBaseLiveStatusStack):
                 return not failed
             self.put_stack(or_filter)
 
-
     def get_stack(self):
         """Return the top element from the stack or a filter which is always true"""
         if self.qsize() == 0:
-            return lambda x : True
+            return lambda x: True
         else:
             return self.get()
-
 
     def put_stack(self, element):
         """Wrapper for a stack put operation which corresponds to get_stack"""

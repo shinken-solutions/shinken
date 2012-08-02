@@ -23,8 +23,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 import os
 import time
 
@@ -32,24 +30,21 @@ from shinken.basemodule import BaseModule
 from shinken.external_command import ExternalCommand
 
 properties = {
-    'daemons' : ['arbiter', 'receiver'],
-    'type' : 'collectd',
-    'external' : True,
+    'daemons': ['arbiter', 'receiver'],
+    'type': 'collectd',
+    'external': True,
     }
 
-#called by the plugin manager to get a broker
+
+# called by the plugin manager to get a broker
 def get_instance(plugin):
     instance = Collectd_arbiter(plugin)
     return instance
-
-
 
 import socket
 import struct
 import time
 from StringIO import StringIO
-
-
 
 DEFAULT_PORT = 25826
 DEFAULT_MULTICAST_IP = "239.192.74.66"
@@ -65,11 +60,9 @@ TYPE_TYPE_INSTANCE   = 0x0005
 TYPE_VALUES          = 0x0006
 TYPE_INTERVAL        = 0x0007
 
-
 # DS kinds
-DS_TYPE_COUNTER      = 0
-DS_TYPE_GAUGE        = 1
-
+DS_TYPE_COUNTER = 0
+DS_TYPE_GAUGE = 1
 
 header = struct.Struct("!2H")
 number = struct.Struct("!Q")
@@ -77,7 +70,8 @@ short  = struct.Struct("!H")
 double = struct.Struct("<d")
 
 elements = {}
-    
+
+
 def decode_values(pktype, plen, buf):
     nvalues = short.unpack_from(buf, header.size)[0]
     off = header.size + short.size + nvalues
@@ -90,7 +84,7 @@ def decode_values(pktype, plen, buf):
         return []
 
     result = []
-    for dstype in map(ord, buf[header.size+short.size:off]):
+    for dstype in map(ord, buf[header.size + short.size:off]):
         if dstype == DS_TYPE_COUNTER:
             v = (dstype, number.unpack_from(buf, off)[0])
             result.append(v)
@@ -114,17 +108,16 @@ def decode_number(pktype, pklen, buf):
 def decode_string(msgtype, pklen, buf):
     return buf[header.size:pklen-1]
 
-
 # Mapping of message types to decoding functions.
 decoder_mapping = {
-    TYPE_VALUES         : decode_values,
-    TYPE_TIME           : decode_number,
-    TYPE_INTERVAL       : decode_number,
-    TYPE_HOST           : decode_string,
-    TYPE_PLUGIN         : decode_string,
+    TYPE_VALUES: decode_values,
+    TYPE_TIME: decode_number,
+    TYPE_INTERVAL: decode_number,
+    TYPE_HOST: decode_string,
+    TYPE_PLUGIN: decode_string,
     TYPE_PLUGIN_INSTANCE: decode_string,
-    TYPE_TYPE           : decode_string,
-    TYPE_TYPE_INSTANCE  : decode_string,
+    TYPE_TYPE: decode_string,
+    TYPE_TYPE_INSTANCE: decode_string,
 }
 
 
@@ -145,8 +138,6 @@ def decode_packet(buf):
         off += pklen
 
 
-
-
 class Data(list, object):
     def __init__(self, **kw):
         self.time = 0
@@ -157,21 +148,19 @@ class Data(list, object):
         self.typeinstance = ''
         self.values = []
 
-
     def __str__(self):
-        return "[%i] %s %s" % (self.time, self.values)
-
+        return "[%i] %s" % (self.time, self.values)
 
     def get_srv_desc(self):
         r = self.plugin
         if self.plugininstance:
-            r += '_'+self.plugininstance
+            r += '_' + self.plugininstance
         return r
-    
+
     def get_metric_name(self):
         r = self.type
         if self.typeinstance:
-            r += '_'+self.typeinstance
+            r += '_' + self.typeinstance
         return r
 
     def get_metric_value(self):
@@ -206,9 +195,6 @@ class CollectdServer(object):
     host = None
     port = DEFAULT_PORT
 
-
-
-
     def __init__(self, host=None, port=DEFAULT_PORT, multicast=False):
         if host is None:
             multicast = True
@@ -217,6 +203,7 @@ class CollectdServer(object):
         self.host = host
         self.port = port
 
+        print "[Collectd] Opening socket"
         family, socktype, proto, _, sockaddr = socket.getaddrinfo(
                 None if multicast else self.host, self.port,
                 socket.AF_UNSPEC, socket.SOCK_DGRAM, 0, socket.AI_PASSIVE)[0]
@@ -224,16 +211,16 @@ class CollectdServer(object):
         self._sock = socket.socket(family, socktype, proto)
         self._sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self._sock.bind(sockaddr)
+        print "[Collectd] Socket open"
 
         if multicast:
             if hasattr(socket, "SO_REUSEPORT"):
                 self._sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
 
             val = struct.pack("4sl", socket.inet_aton(self.host), socket.INADDR_ANY)
-            
+
             self._sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, val)
             self._sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, 0)
-
 
     def interpret_opcodes(self, iterable):
         d = Data()
@@ -246,7 +233,7 @@ class CollectdServer(object):
             elif kind == TYPE_HOST:
                 d.host = data
             elif kind == TYPE_PLUGIN:
-                d.plugin  = data
+                d.plugin = data
             elif kind == TYPE_PLUGIN_INSTANCE:
                 d.plugininstance = data
             elif kind == TYPE_TYPE:
@@ -257,17 +244,13 @@ class CollectdServer(object):
                 d.values = data
                 yield d
 
-
-
     def receive(self):
         return self._sock.recv(BUFFER_SIZE)
-
 
     def decode(self, buf=None):
         if buf is None:
             buf = self.receive()
         return decode_packet(buf)
-
 
     def read(self, iterable=None):
         if iterable is None:
@@ -289,8 +272,6 @@ class Element(object):
     def add_perf_data(self, mname, mvalue):
         self.perf_datas[mname] = mvalue
         self.got_new_data = True
-        
-        
 
     def get_command(self):
         if len(self.perf_datas) == 0:
@@ -302,24 +283,23 @@ class Element(object):
         now = int(time.time())
         if now > self.last_update + self.interval:
             r = '[%d] PROCESS_SERVICE_OUTPUT;%s;%s;CollectD| ' % (now, self.host_name, self.sdesc)
-            for (k,v) in self.perf_datas.iteritems():
+            for (k, v) in self.perf_datas.iteritems():
                 r += '%s=%s ' % (k, v)
             print 'Updating', (self.host_name, self.sdesc)
             self.perf_datas.clear()
             self.last_update = now
             return r
-        
 
 
 class Collectd_arbiter(BaseModule):
     def __init__(self, modconf):
         BaseModule.__init__(self, modconf)
 
-
     # When you are in "external" mode, that is the main loop of your process
     def main(self):
+        self.set_proctitle(self.name)
         self.set_exit_handler()
-        
+
         last_check = 0.0
 
         cs = CollectdServer()
@@ -338,11 +318,10 @@ class Collectd_arbiter(BaseModule):
                     print item, item.__dict__
                     n = item.get_name()
                     if n and n not in elements:
-                        e = Element(item.host, item.get_srv_desc(), item.interval)                
+                        e = Element(item.host, item.get_srv_desc(), item.interval)
                         elements[n] = e
                     e = elements[n]
                     e.add_perf_data(item.get_metric_name(), item.get_metric_value())
 
             except ValueError, exp:
-                print "Collectd read error : ", exp
-
+                print "Collectd read error: ", exp

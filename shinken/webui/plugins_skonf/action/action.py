@@ -30,6 +30,7 @@ app = None
 import time
 from shinken.external_command import ExternalCommand, ExternalCommandManager
 
+
 # Our page
 def get_page(cmd=None):
 
@@ -38,8 +39,7 @@ def get_page(cmd=None):
     user = app.get_user_auth()
 
     if not user:
-        return {'status' : 401, 'text' : 'Invalid session'}
-
+        return {'status': 401, 'text': 'Invalid session'}
 
     now = int(time.time())
     print "Ask us an /action page", cmd
@@ -48,23 +48,20 @@ def get_page(cmd=None):
     cmd_args = elts[1:]
     print "Got command", cmd_name
     print "And args", cmd_args
-    
+
     # Check if the command exist in the external command list
     if cmd_name not in ExternalCommandManager.commands:
-        return {'status' : 404, 'text' : 'Unknown command %s' % cmd_name}
+        return {'status': 404, 'text': 'Unknown command %s' % cmd_name}
 
     extcmd = '[%d] %s' % (now, ';'.join(elts))
     print "Got the; form", extcmd
-    
+
     # Ok, if good, we can launch the command
     extcmd = extcmd.decode('utf8', 'replace')
     e = ExternalCommand(extcmd)
     print "Creating the command", e.__dict__
     app.push_external_command(e)
 
-    return {'status' : 200, 'text' : 'Command launched'}
+    return {'status': 200, 'text': 'Command launched'}
 
-
-
-pages = {get_page : { 'routes' : ['/action/:cmd#.+#']}}
-
+pages = {get_page: {'routes': ['/action/:cmd#.+#']}}

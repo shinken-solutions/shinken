@@ -12,9 +12,9 @@
  *     - Host header				#host_header
  *     - Host more					#host_more
  *  + Elements:
- *     - Headlines 
- *     - 
- *     - Tables				
+ *     - Headlines
+ *     -
+ *     - Tables
  *  + Classes
  *     - General				 	-> http://css3please.com/
  *     - Images
@@ -97,7 +97,7 @@ body {
 
 #login_footer a {
 	color: #BCBCBC;
-	text-decoration: none; 
+	text-decoration: none;
 }
 
 /* ----------------------------------------------------------------
@@ -124,10 +124,10 @@ body {
 /* ----------------------------------------------------------------
  *  Special: Host more
  * ----------------------------------------------------------------*/
- 
+
 #host_more h3, #host_more table {
 	margin-left: 10px;
-} 
+}
 
 /* ----------------------------------------------------------------
  *  Special: Business impact preview
@@ -212,7 +212,7 @@ table tr td {
 	padding: 4px;
 	text-align: left;
 	vertical-align: top;
-    border-bottom: 1px solid #E3E3E5;   
+    border-bottom: 1px solid #E3E3E5;
 }
 
 table tr.altrow td {
@@ -273,9 +273,9 @@ td.actions a {
   -moz-border-radius: 12px; /* FF1-3.6 */
   -webkit-border-radius: 12px; /* Saf3-4, iOS 1-3.2, Android <1.6 */
           border-radius: 12px; /* Opera 10.5, IE9, Saf5, Chrome, FF4, iOS 4, Android 2.1+ */
-          
-  /* useful if you don't want a bg color from leaking outside the border: */        
-  -moz-background-clip: padding; -webkit-background-clip: padding-box; background-clip: padding-box; 
+
+  /* useful if you don't want a bg color from leaking outside the border: */
+  -moz-background-clip: padding; -webkit-background-clip: padding-box; background-clip: padding-box;
 }
 
 .border_right {
@@ -294,18 +294,18 @@ td.actions a {
 	width: 80px;
 	float: right;
 }
- 
+
 .img_stars {
 	height: 11px;
 	margin-top: 2px;
 	margin-right: 4px;
-} 
+}
 
 .img_stars_bi {
 	height: 13px;
 	margin-top: 2px;
 	margin-right: 4px;
-} 
+}
 
 .img_stars_header {
 	height: 16px;
@@ -318,13 +318,13 @@ td.actions a {
 	background: url("../img/icons/warning.png") no-repeat scroll transparent;
 	background-position: 4px;
     padding-left: 24px;
-} 
+}
 
 .icon_tick {
 	background: url("../img/icons/tick.png") no-repeat scroll transparent;
 	background-position: 4px;
     padding-left: 24px;
-} 
+}
 
 .icon_cross {
 	background: url("../img/icons/cross.png") no-repeat scroll transparent;
@@ -368,9 +368,9 @@ td.actions a {
 
 /*
  * Dummy elements
- * 
+ *
  */
- 
+
 #dummy_box {
 	height: 100px;
 }

@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -26,6 +26,7 @@
 
 class DB(object):
     """DB is a generic class for SQL Database"""
+
     def __init__(self, table_prefix=''):
         self.table_prefix = table_prefix
 
@@ -88,7 +89,7 @@ class DB(object):
             if prop not in where_data:
                 i += 1
                 val = data[prop]
-            # Boolean must be catch, because we want 0 or 1, not True or False
+                # Boolean must be catch, because we want 0 or 1, not True or False
                 if isinstance(val, bool):
                     if val:
                         val = 1

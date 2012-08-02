@@ -1,11 +1,11 @@
 {
-"name" : "printer-hp",
+"name": "printer-hp",
 
-"description" : "Checks for HP Jetdirect compatible printers",
+"description": "Checks for HP Jetdirect compatible printers",
 
 "path":"printers/hp/",
 
-"macros":{}	 
+"macros":{}
 
 
 }

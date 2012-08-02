@@ -24,9 +24,8 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This Class is an example of an Scheduler module
-#Here for the configuration phase AND running one
-
+# This Class is an example of an Scheduler module
+# Here for the configuration phase AND running one
 
 import cPickle
 import shutil
@@ -41,15 +40,14 @@ import shinken
 from shinken.commandcall import CommandCall
 shinken.objects.command.CommandCall = CommandCall
 
-
 properties = {
-    'daemons' : ['broker', 'arbiter', 'scheduler' ],
-    'type' : 'pickle_retention_file_generic',
-    'external' : False,
+    'daemons': ['broker', 'arbiter', 'scheduler'],
+    'type': 'pickle_retention_file_generic',
+    'external': False,
     }
 
 
-#called by the plugin manager to get a broker
+# called by the plugin manager to get a broker
 def get_instance(plugin):
     print "Get a pickle retention generic module for plugin %s" % plugin.get_name()
     path = plugin.path
@@ -57,27 +55,26 @@ def get_instance(plugin):
     return instance
 
 
-
 # Just print some stuff
 class Pickle_retention_generic(BaseModule):
     def __init__(self, modconf, path):
         BaseModule.__init__(self, modconf)
         self.path = path
-    
+
     # Ok, main function that is called in the retention creation pass
     def hook_save_retention(self, daemon):
         log_mgr = logger
         logger.info("[PickleRetentionGeneric] asking me to update the retention objects")
 
-        #Now the flat file method
+        # Now the flat file method
         try:
             # Open a file near the path, with .tmp extension
             # so in cae or problem, we do not lost the old one
-            f = open(self.path+'.tmp', 'wb')
-            
+            f = open(self.path + '.tmp', 'wb')
+
             # We get interesting retention data from the daemon it self
             all_data = daemon.get_retention_data()
-            
+
             # And we save it on file :)
 
             #s = cPickle.dumps(all_data)
@@ -85,40 +82,39 @@ class Pickle_retention_generic(BaseModule):
             cPickle.dump(all_data, f, protocol=cPickle.HIGHEST_PROTOCOL)
             #f.write(s_compress)
             f.close()
-            
+
             # Now move the .tmp fiel to the real path
-            shutil.move(self.path+'.tmp', self.path)
-        except IOError , exp:
+            shutil.move(self.path + '.tmp', self.path)
+        except IOError, exp:
             log_mgr.log("Error: retention file creation failed, %s" % str(exp))
             return
         log_mgr.log("Updating retention_file %s" % self.path)
 
-
-    #Should return if it succeed in the retention load or not
+    # Should return if it succeed in the retention load or not
     def hook_load_retention(self, daemon):
         log_mgr = logger
 
-        #Now the old flat file way :(
+        # Now the old flat file way :(
         log_mgr.log("[PickleRetentionGeneric]Reading from retention_file %s" % self.path)
         try:
             f = open(self.path, 'rb')
             all_data = cPickle.load(f)
             f.close()
-        except EOFError , exp:
+        except EOFError, exp:
             print exp
             return False
-        except ValueError , exp:
+        except ValueError, exp:
             print exp
             return False
-        except IOError , exp:
+        except IOError, exp:
             print exp
             return False
-        except IndexError , exp:
-            s = "WARNING: Sorry, the ressource file is not compatible : %s" % traceback.format_exc()
+        except IndexError, exp:
+            s = "WARNING: Sorry, the ressource file is not compatible: %s" % traceback.format_exc()
             log_mgr.log(s)
             return False
-        except TypeError , exp:
-            s = "WARNING: Sorry, the ressource file is not compatible : %s" % traceback.format_exc()
+        except TypeError, exp:
+            s = "WARNING: Sorry, the ressource file is not compatible: %s" % traceback.format_exc()
             log_mgr.log(s)
             return False
 
@@ -126,5 +122,5 @@ class Pickle_retention_generic(BaseModule):
         daemon.restore_retention_data(all_data)
 
         log_mgr.log("[PickleRetentionGeneric] OK we've load data from retention file")
-        
+
         return True

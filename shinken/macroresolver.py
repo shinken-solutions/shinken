@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -24,11 +24,11 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This class revolv Macro in commands by looking at the macros list
-#in Class of elements. It give a propertie that call be callable or not.
-#It not callable, it's a simple properties and remplace the macro with the value
-#If callable, it's a method that is call for getting the value. for exemple, to
-#get the number of service in a host, you call a method to get the
+# This class revolv Macro in commands by looking at the macros list
+# in Class of elements. It give a propertie that call be callable or not.
+# It not callable, it's a simple properties and remplace the macro with the value
+# If callable, it's a method that is call for getting the value. for exemple, to
+# get the number of service in a host, you call a method to get the
 # len(host.services)
 
 import re
@@ -40,9 +40,8 @@ from shinken.borg import Borg
 class MacroResolver(Borg):
     """Please Add a Docstring to describe the class here"""
 
-
     my_type = 'macroresolver'
-    #Global macros
+    # Global macros
     macros = {
         'TOTALHOSTSUP':         'get_total_hosts_up',
         'TOTALHOSTSDOWN':       'get_total_hosts_down',
@@ -69,7 +68,6 @@ class MacroResolver(Borg):
         'EVENTSTARTTIME':       'get_events_start_time',
     }
 
-
     # This must be called ONCE. It just put links for elements
     # by scheduler
     def init(self, conf):
@@ -93,14 +91,15 @@ class MacroResolver(Borg):
         self.lists_on_demand.append(self.contactgroups)
         self.illegal_macro_output_chars = conf.illegal_macro_output_chars
         self.output_macros = ['HOSTOUTPUT', 'HOSTPERFDATA', 'HOSTACKAUTHOR', 'HOSTACKCOMMENT', 'SERVICEOUTPUT', 'SERVICEPERFDATA', 'SERVICEACKAUTHOR', 'SERVICEACKCOMMENT']
+
         # Try cache :)
         #self.cache = {}
 
 
     # Return all macros of a string, so cut the $
     # And create a dict with it:
-    # val : value, not set here
-    # type : type of macro, like class one, or ARGN one
+    # val: value, not set here
+    # type: type of macro, like class one, or ARGN one
     def get_macros(self, s):
         #if s in self.cache:
         #    return self.cache[s]
@@ -113,13 +112,12 @@ class MacroResolver(Borg):
             if elt == '$':
                 in_macro = not in_macro
             elif in_macro:
-                macros[elt] = {'val' : '', 'type' : 'unknown'}
+                macros[elt] = {'val': '', 'type': 'unknown'}
 
         #self.cache[s] = macros
         if '' in macros:
             del macros['']
         return macros
-
 
     # Get a value from a propertie of a element
     # Prop can be a function or a propertie
@@ -131,17 +129,15 @@ class MacroResolver(Borg):
                 return unicode(value())
             else:
                 return unicode(value)
-        except AttributeError , exp:
+        except AttributeError, exp:
             # Return no value
             return ''
-
 
     # For some macros, we need to delete unwanted caracters
     def delete_unwanted_caracters(self, s):
         for c in self.illegal_macro_output_chars:
             s = s.replace(c, '')
         return s
-
 
     # return a dict with all environement variable came from
     # the macros of the datas object
@@ -152,25 +148,24 @@ class MacroResolver(Borg):
             cls = o.__class__
             macros = cls.macros
             for macro in macros:
-#                 print "Macro in %s : %s" % (o.__class__, macro)
+                #print "Macro in %s: %s" % (o.__class__, macro)
                 prop = macros[macro]
                 value = self.get_value_from_element(o, prop)
-#                        print "Value: %s" % value
-                env['NAGIOS_'+macro] = value
+                #print "Value: %s" % value
+                env['NAGIOS_' + macro] = value
             if hasattr(o, 'customs'):
                 # make NAGIOS__HOSTMACADDR from _MACADDR
                 for cmacro in o.customs:
                     env['NAGIOS__' + o.__class__.__name__.upper() + cmacro[1:].upper()] = o.customs[cmacro]
         return env
 
-
     # This function will look at elements in data (and args if it filled)
     # to replace the macros in c_line with real value.
     def resolve_simple_macros_in_string(self, c_line, data, args=None):
         # Now we prepare the classes for looking at the class.macros
-        data.append(self) # For getting global MACROS
+        data.append(self)  # For getting global MACROS
         if hasattr(self, 'conf'):
-            data.append(self.conf) # For USERN macros
+            data.append(self.conf)  # For USERN macros
         clss = [d.__class__ for d in data]
 
         # we should do some loops for nested macros
@@ -186,7 +181,7 @@ class MacroResolver(Borg):
             macros = self.get_macros(c_line)
 
             # We can get out if we do not have macros this loop
-            still_got_macros = (len(macros)!=0)
+            still_got_macros = (len(macros) != 0)
             #print "Still go macros:", still_got_macros
 
             # Put in the macros the type of macro for all macros
@@ -204,20 +199,20 @@ class MacroResolver(Borg):
                         if elt is not None and elt.__class__ == cls:
                             prop = cls.macros[macro]
                             macros[macro]['val'] = self.get_value_from_element(elt, prop)
-                            #N ow check if we do not have a 'output' macro. If so, we must
+                            # Now check if we do not have a 'output' macro. If so, we must
                             # delete all special caracters that can be dangerous
                             if macro in self.output_macros:
                                 macros[macro]['val'] = self.delete_unwanted_caracters(macros[macro]['val'])
                 if macros[macro]['type'] == 'CUSTOM':
                     cls_type = macros[macro]['class']
-                    macro_name = re.split('_'+cls_type, macro)[1].upper()
+                    macro_name = re.split('_' + cls_type, macro)[1].upper()
                     # Ok, we've got the macro like MAC_ADDRESS for _HOSTMAC_ADDRESS
                     # Now we get the element in data that have the type HOST
                     # and we check if it gots the custom value
                     for elt in data:
                         if elt is not None and elt.__class__.my_type.upper() == cls_type:
-                            if '_'+macro_name in elt.customs:
-                                macros[macro]['val'] = elt.customs['_'+macro_name]
+                            if '_' + macro_name in elt.customs:
+                                macros[macro]['val'] = elt.customs['_' + macro_name]
                 if macros[macro]['type'] == 'ONDEMAND':
                     macros[macro]['val'] = self.resolve_ondemand(macro, data)
 
@@ -229,7 +224,7 @@ class MacroResolver(Borg):
             # We replace $$ by a big dirty thing to be sur to not misinterpret it
             c_line = c_line.replace("$$", "DOUBLEDOLLAR")
 
-            if nb_loop > 32: #too mouch loop, we exit
+            if nb_loop > 32:  # too mouch loop, we exit
                 still_got_macros = False
 
         # We now replace the big dirty token we made by only a simple $
@@ -238,13 +233,11 @@ class MacroResolver(Borg):
         #print "Retuning c_line", c_line.strip()
         return c_line.strip()
 
-
     # Resolve a command with macro by looking at data classes.macros
     # And get macro from item properties.
     def resolve_command(self, com, data):
         c_line = com.command.command_line
         return self.resolve_simple_macros_in_string(c_line, data, args=com.args)
-
 
     # For all Macros in macros, set the type by looking at the
     # MACRO name (ARGN? -> argn_type,
@@ -268,7 +261,7 @@ class MacroResolver(Borg):
             elif re.match('_SERVICE\w', macro):
                 macros[macro]['type'] = 'CUSTOM'
                 macros[macro]['class'] = 'SERVICE'
-                # value of macro : re.split('_HOST', '_HOSTMAC_ADDRESS')[1]
+                # value of macro: re.split('_HOST', '_HOSTMAC_ADDRESS')[1]
                 continue
             elif re.match('_CONTACT\w', macro):
                 macros[macro]['type'] = 'CUSTOM'
@@ -285,10 +278,9 @@ class MacroResolver(Borg):
                     macros[macro]['class'] = cls
                     continue
 
-
     # Resolve MACROS for the ARGN
     def resolve_argn(self, macro, args):
-        #first, get the number of args
+        # first, get the number of args
         id = None
         r = re.search('ARG(?P<id>\d+)', macro)
         if r is not None:
@@ -297,7 +289,6 @@ class MacroResolver(Borg):
                 return args[id]
             except IndexError:
                 return ''
-
 
     # Resolve on-demand macro, quite hard in fact
     def resolve_ondemand(self, macro, data):
@@ -329,7 +320,7 @@ class MacroResolver(Borg):
         else:
             val = ''
             elt_name = elts[1]
-            # Special case : elt_name can be void
+            # Special case: elt_name can be void
             # so it's the host where it apply
             if elt_name == '':
                 for elt in data:
@@ -347,31 +338,25 @@ class MacroResolver(Borg):
             return val
         return ''
 
-
     # Get Fri 15 May 11:42:39 CEST 2009
     def get_long_date_time(self):
         return time.strftime("%a %d %b %H:%M:%S %Z %Y", time.localtime()).decode('UTF-8', 'ignore')
-
 
     # Get 10-13-2000 00:30:28
     def get_short_date_time(self):
         return time.strftime("%d-%m-%Y %H:%M:%S", time.localtime())
 
-
     # Get 10-13-2000
     def get_date(self):
         return time.strftime("%d-%m-%Y", time.localtime())
-
 
     # Get 00:30:28
     def get_time(self):
         return time.strftime("%H:%M:%S", time.localtime())
 
-
     # Get epoch time
     def get_timet(self):
         return str(int(time.time()))
-
 
     def get_total_hosts_up(self):
         return len([h for h in self.hosts if h.state == 'UP'])
@@ -382,10 +367,9 @@ class MacroResolver(Borg):
     def get_total_hosts_unreacheable(self):
         return len([h for h in self.hosts if h.state == 'UNREACHABLE'])
 
-    #TODO
+    # TODO
     def get_total_hosts_unreacheable_unhandled(self):
         return 0
-
 
     def get_total_host_problems(self):
         return len([h for h in self.hosts if h.is_problem])
@@ -405,7 +389,7 @@ class MacroResolver(Borg):
     def get_total_services_unknown(self):
         return len([s for s in self.services if s.state == 'UNKNOWN'])
 
-    #TODO
+    # TODO
     def get_total_services_warning_unhandled(self):
         return 0
 

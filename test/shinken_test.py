@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python
 
 #
 # This file is used to test host- and service-downtimes.
@@ -13,11 +13,8 @@ import re
 import random
 import unittest
 
-sys.path.append("..")
-sys.path.append("../shinken")
-#sys.path.append("../bin")
-#sys.path.append(os.path.abspath("bin"))
-
+# import the shinken library from the parent directory
+import __import_shinken ; del __import_shinken
 
 import shinken
 from shinken.objects.config import Config
@@ -47,7 +44,6 @@ from shinken.daemons.schedulerdaemon import Shinken
 from shinken.daemons.brokerdaemon import Broker
 from shinken.daemons.arbiterdaemon import Arbiter
 
-
 from shinken.modules import livestatus_broker
 from shinken.modules.livestatus_broker import LiveStatus_broker
 from shinken.modules.livestatus_broker.livestatus import LiveStatus
@@ -69,6 +65,7 @@ time.my_offset = 0
 time.my_starttime = time.time()
 time.my_oldtime = time.time
 
+
 def my_time_time():
     now = time.my_oldtime() + time.my_offset
     return now
@@ -76,11 +73,13 @@ def my_time_time():
 original_time_time = time.time
 time.time = my_time_time
 
+
 def my_time_sleep(delay):
     time.my_offset += delay
 
 original_time_sleep = time.sleep
 time.sleep = my_time_sleep
+
 
 def time_warp(duration):
     time.my_offset += duration
@@ -151,12 +150,12 @@ class ShinkenTest(unittest.TestCase):
         self.conf.prepare_for_sending()
         self.conf.show_errors()
         self.dispatcher = Dispatcher(self.conf, self.me)
-        
+
         scheddaemon = Shinken(None, False, False, False, None)
         self.sched = Scheduler(scheddaemon)
-        
+
         scheddaemon.sched = self.sched
-                
+
         m = MacroResolver()
         m.init(self.conf)
         self.sched.load_conf(self.conf, in_test=True)
@@ -169,7 +168,6 @@ class ShinkenTest(unittest.TestCase):
 
         self.sched.schedule()
 
-
     def add(self, b):
         if isinstance(b, Brok):
             self.broks[b.id] = b
@@ -177,18 +175,17 @@ class ShinkenTest(unittest.TestCase):
         if isinstance(b, ExternalCommand):
             self.sched.run_external_command(b.cmd_line)
 
-
     def fake_check(self, ref, exit_status, output="OK"):
         #print "fake", ref
         now = time.time()
         ref.schedule(force=True)
-        #now checks are schedule and we get them in
-        #the action queue
+        # now checks are schedule and we get them in
+        # the action queue
         check = ref.actions.pop()
         self.sched.add(check)  # check is now in sched.checks[]
         # fake execution
         check.check_time = now
-        
+
         # and lie about when we will launch it because
         # if not, the schedule call for ref
         # will not really reschedule it because there
@@ -200,7 +197,6 @@ class ShinkenTest(unittest.TestCase):
         check.execution_time = 0.001
         check.status = 'waitconsume'
         self.sched.waiting_results.append(check)
-
 
     def scheduler_loop(self, count, reflist, do_sleep=False, sleep_time=61):
         for ref in reflist:
@@ -225,7 +221,6 @@ class ShinkenTest(unittest.TestCase):
             if do_sleep:
                 time.sleep(sleep_time)
 
-
     def worker_loop(self):
         self.sched.delete_zombie_checks()
         self.sched.delete_zombie_actions()
@@ -244,7 +239,6 @@ class ShinkenTest(unittest.TestCase):
         self.show_actions()
         #print "------------ worker loop end ----------------"
 
-
     def show_logs(self):
         print "--- logs <<<----------------------------------"
         for brok in sorted(self.sched.broks.values(), lambda x, y: x.id - y.id):
@@ -252,7 +246,6 @@ class ShinkenTest(unittest.TestCase):
                 brok.prepare()
                 print "LOG:", brok.data['log']
         print "--- logs >>>----------------------------------"
-
 
     def show_actions(self):
         print "--- actions <<<----------------------------------"
@@ -267,24 +260,19 @@ class ShinkenTest(unittest.TestCase):
                 print "EVENTHANDLER:", a
         print "--- actions >>>----------------------------------"
 
-
     def show_and_clear_logs(self):
         self.show_logs()
         self.clear_logs()
-
 
     def show_and_clear_actions(self):
         self.show_actions()
         self.clear_actions()
 
-
     def count_logs(self):
         return len([b for b in self.sched.broks.values() if b.type == 'log'])
 
-
     def count_actions(self):
         return len(self.sched.actions.values())
-
 
     def clear_logs(self):
         id_to_del = []
@@ -294,10 +282,8 @@ class ShinkenTest(unittest.TestCase):
         for id in id_to_del:
             del self.sched.broks[id]
 
-
     def clear_actions(self):
         self.sched.actions = {}
-
 
     def log_match(self, index, pattern):
         # log messages are counted 1...n, so index=1 for the first message
@@ -315,7 +301,6 @@ class ShinkenTest(unittest.TestCase):
                     lognum += 1
         return False
 
-
     def any_log_match(self, pattern):
         regex = re.compile(pattern)
         for brok in sorted(self.sched.broks.values(), lambda x, y: x.id - y.id):
@@ -324,7 +309,6 @@ class ShinkenTest(unittest.TestCase):
                 if re.search(regex, brok.data['log']):
                     return True
         return False
-
 
     def get_log_match(self, pattern):
         regex = re.compile(pattern)
@@ -335,20 +319,14 @@ class ShinkenTest(unittest.TestCase):
                     res.append(brok.data['log'])
         return res
 
-
-
     def print_header(self):
         print "#" * 80 + "\n" + "#" + " " * 78 + "#"
         print "#" + string.center(self.id(), 78) + "#"
         print "#" + " " * 78 + "#\n" + "#" * 80 + "\n"
 
-
-
-
     def xtest_conf_is_correct(self):
         self.print_header()
         self.assert_(self.conf.conf_is_correct)
-
 
     def find_modules_path(self):
         """ Find the absolute path of the shinken module directory and returns it.  """
@@ -365,32 +343,32 @@ class ShinkenTest(unittest.TestCase):
         # We got one of the files of
         parent_path = os.path.dirname(os.path.dirname(modulespath))
         modulespath = os.path.join(parent_path, 'shinken', 'modules')
-        print("Using modules path : %s" % (modulespath))
+        print("Using modules path: %s" % (modulespath))
 
         return modulespath
 
     def do_load_modules(self):
         self.modules_manager.load_and_init()
-        self.log.log("I correctly loaded the modules : [%s]" % (','.join([inst.get_name() for inst in self.modules_manager.instances])))
+        self.log.log("I correctly loaded the modules: [%s]" % (','.join([inst.get_name() for inst in self.modules_manager.instances])))
 
-
-
-    def init_livestatus(self):
+    def init_livestatus(self, modconf=None):
         self.livelogs = 'tmp/livelogs.db' + self.testid
-        modconf = Module({'module_name' : 'LiveStatus', 
-            'module_type' : 'livestatus',
-            'port' : str(50000 + os.getpid()),
-            'pnp_path' : 'tmp/pnp4nagios_test' + self.testid,
-            'host' : '127.0.0.1',
-            'socket' : 'live',
-            'name' : 'test', #?
-        })
 
-        dbmodconf = Module({'module_name' : 'LogStore', 
-            'module_type' : 'logstore_sqlite',
-            'use_aggressive_sql' : "0",
-            'database_file' : self.livelogs,
-            'archive_path' : os.path.join(os.path.dirname(self.livelogs), 'archives'),
+        if modconf is None:
+            modconf = Module({'module_name': 'LiveStatus',
+                'module_type': 'livestatus',
+                'port': str(50000 + os.getpid()),
+                'pnp_path': 'tmp/pnp4nagios_test' + self.testid,
+                'host': '127.0.0.1',
+                'socket': 'live',
+                'name': 'test', #?
+            })
+
+        dbmodconf = Module({'module_name': 'LogStore',
+            'module_type': 'logstore_sqlite',
+            'use_aggressive_sql': "0",
+            'database_file': self.livelogs,
+            'archive_path': os.path.join(os.path.dirname(self.livelogs), 'archives'),
         })
         modconf.modules = [dbmodconf]
         self.livestatus_broker = LiveStatus_broker(modconf)
@@ -409,7 +387,7 @@ class ShinkenTest(unittest.TestCase):
             if inst.properties["type"].startswith('logstore'):
                 f = getattr(inst, 'load', None)
                 if f and callable(f):
-                    f(self.livestatus_broker) #!!! NOT self here !!!!
+                    f(self.livestatus_broker)  # !!! NOT self here !!!!
                 break
         for s in self.livestatus_broker.debug_output:
             print "errors during load", s
@@ -429,6 +407,20 @@ class ShinkenTest(unittest.TestCase):
         #--- livestatus_broker.do_main
         self.livestatus_broker.db.open()
         #--- livestatus_broker.do_main
+
+
+# Hook for old python some test
+if not hasattr(ShinkenTest, 'assertNotIn'):
+    def assertNotIn(self, member, container, msg=None):
+       self.assertTrue(member not in container)
+    ShinkenTest.assertNotIn = assertNotIn
+        
+
+if not hasattr(ShinkenTest, 'assertIn'):
+    def assertIn(self, member, container, msg=None):
+        self.assertTrue(member in container)
+    ShinkenTest.assertIn = assertIn
+                   
 
 
 if __name__ == '__main__':

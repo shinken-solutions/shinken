@@ -316,8 +316,8 @@
 
     var boundx = $img.width(),
         boundy = $img.height(),
-        
-        
+
+
         $div = $('<div />').width(boundx).height(boundy).addClass(cssClass('holder')).css({
         position: 'relative',
         backgroundColor: options.bgColor
@@ -331,21 +331,21 @@
     var $img2 = $('<img />')
         .attr('src', $img.attr('src')).css(img_css).width(boundx).height(boundy),
 
-        $img_holder = $('<div />') 
+        $img_holder = $('<div />')
         .width(pct(100)).height(pct(100)).css({
           zIndex: 310,
           position: 'absolute',
           overflow: 'hidden'
         }).append($img2),
 
-        $hdl_holder = $('<div />') 
-        .width(pct(100)).height(pct(100)).css('zIndex', 320), 
+        $hdl_holder = $('<div />')
+        .width(pct(100)).height(pct(100)).css('zIndex', 320),
 
-        $sel = $('<div />') 
+        $sel = $('<div />')
         .css({
           position: 'absolute',
           zIndex: 300
-        }).insertBefore($img).append($img_holder, $hdl_holder); 
+        }).insertBefore($img).append($img_holder, $hdl_holder);
 
     if (ie6mode) {
       $sel.css({
@@ -371,7 +371,7 @@
     // }}}
     // }}}
     // Internal Modules {{{
-    // Touch Module {{{ 
+    // Touch Module {{{
     var Touch = (function () {
       // Touch support detection function adapted (under MIT License)
       // from code by Jeffrey Sambells - http://github.com/iamamused/
@@ -507,8 +507,8 @@
         // This function could use some optimization I think...
         var aspect = options.aspectRatio,
             min_x = options.minSize[0] / xscale,
-            
-            
+
+
             //min_y = options.minSize[1]/yscale,
             max_x = options.maxSize[0] / xscale,
             max_y = options.maxSize[1] / yscale,
@@ -953,7 +953,7 @@
       {
         seehandles = false;
         $hdl_holder.hide();
-      } 
+      }
       //}}}
       function animMode(v) //{{{
       {
@@ -962,13 +962,13 @@
         } else {
           enableHandles();
         }
-      } 
+      }
       //}}}
       function done() //{{{
       {
         animMode(false);
         refresh();
-      } 
+      }
       //}}}
       /* Insert draggable elements {{{*/
 
@@ -998,7 +998,7 @@
         createHandles(['sw', 'nw', 'ne', 'se']);
       }
 
-      
+
       //}}}
 
       var $track = newTracker().mousedown(createDragger('move')).css({
@@ -1035,7 +1035,7 @@
         done: done
       };
     }());
-    
+
     //}}}
     // Tracker Module {{{
     var Tracker = (function () {
@@ -1053,7 +1053,7 @@
             .bind('mousemove',trackMove)
             .bind('mouseup',trackUp);
         }
-      } 
+      }
       //}}}
       function toBack() //{{{
       {
@@ -1065,13 +1065,13 @@
             .unbind('mousemove', trackMove)
             .unbind('mouseup', trackUp);
         }
-      } 
+      }
       //}}}
       function trackMove(e) //{{{
       {
         onMove(mouseAbs(e));
         return false;
-      } 
+      }
       //}}}
       function trackUp(e) //{{{
       {

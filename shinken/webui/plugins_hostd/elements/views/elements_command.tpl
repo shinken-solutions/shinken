@@ -34,7 +34,7 @@ var new_properties = [];
       <li class="active"><a href="#generic" data-toggle="tab">Generic</a></li>
       <li><a href="#advanced" data-toggle="tab">Advanced</a></li>
     </ul>
-    
+
     <div class="tab-content">
       <!-- Tab Generic Stop-->
       <div class="tab-pane active" id="generic">
@@ -58,8 +58,8 @@ var new_properties = [];
 
     </div>
 
-    
-    
+
+
     <!--{{elt}} -->
 
   </form>

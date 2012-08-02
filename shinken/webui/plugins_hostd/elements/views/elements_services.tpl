@@ -12,13 +12,13 @@
   %hname = h.get_name()
   %sid = h.customs.get('_ID', 'unknown')
   <div class='object_{{elt_type}} span12'>
-    
+
     <div class='host_name cut-long pull-left'><a href='/elements/services/{{sid}}'>{{hname}}</a></div>
     <div class='display_name cut-long pull-left'>{{getattr(h, 'display_name', '')}}&nbsp;</div>
     <div class='address cut-long pull-left'>{{getattr(h, 'address', '')}}&nbsp;</div>
     <div class='realm cut-long pull-left'>{{getattr(h, 'realm', '')}}&nbsp;</div>
     <div class='poller_tag cut-long pull-left'>{{getattr(h, 'poller_tag', '')}}&nbsp;</div>
-    
+
     <div class='use pull-left'>
       %for u in getattr(h, 'use', '').split(','):
       <span class='label'><img class='imgsize1' onerror="$(this).hide()" src="/static/images/sets/{{u}}/tag.png" />{{u}}</span>

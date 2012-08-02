@@ -8,14 +8,14 @@
 <script type="text/javascript">
   window.location.replace("/login");
 </script>
-%# " And if the javascript is not follow? not a problem, we gave no data here." 
+%# " And if the javascript is not follow? not a problem, we gave no data here."
 %end
 
 
 
 		<div id="container"></div>
 
-		%# " all_impacts is what the 3dmanager.js will take it's impacts " 
+		%# " all_impacts is what the 3dmanager.js will take it's impacts "
 		%imp_id = 0
 		%for imp in impacts:
 
@@ -23,9 +23,9 @@
 		  %# "Now we add this impact in our all_impacts array to give"
 		  %# "3d manager true objects"
 		   <script type="text/javascript">
-		     var current_impact = {'name' : '{{imp.get_full_name()}}',
-		     'state' : '{{imp.state.lower()}}',
-		     'business_impact' : {{imp.business_impact}}
+		     var current_impact = {'name': '{{imp.get_full_name()}}',
+		     'state': '{{imp.state.lower()}}',
+		     'business_impact': {{imp.business_impact}}
 		     };
 		     all_impacts.push(current_impact);
                    </script>
@@ -33,7 +33,7 @@
 		       %for i in range(2, imp.business_impact):
 		         <img src="static/images/star.png">
 		       %end
-			 <h2 class="state_{{imp.state.lower()}}"><img style="width : 64px; height:64px" src="{{helper.get_icon_state(imp)}}" />{{imp.state}}: {{imp.get_full_name()}}</h2>
+			 <h2 class="state_{{imp.state.lower()}}"><img style="width: 64px; height:64px" src="{{helper.get_icon_state(imp)}}" />{{imp.state}}: {{imp.get_full_name()}}</h2>
 		       <p>since {{helper.print_duration(imp.last_state_change, just_duration=True, x_elts=2)}}</p>
 		       <div style="float:right;"> <a href="{{!helper.get_link_dest(imp)}}">{{!helper.get_button('Go to details', img='/static/images/search.png')}}</a></div>
 		   </div></div>
@@ -41,8 +41,8 @@
 		%end
 
 		<div id="info">You can click on an object to get more information.</div>
-		
-		
+
+
 
 		<script id="fragmentShader" type="x-shader/x-fragment">
 

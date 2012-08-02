@@ -30,7 +30,7 @@
 	    </ul>
 	  </li>
 	</ul>
-	
+
 	<ul class="nav">
 	  %menu = [ ('/dashboard', 'Dashboard'), ('/impacts','Impacts'), ('/problems','IT problems'), ('/all', 'All'), ('/wall', 'Wall')]
           %for (key, value) in menu:
@@ -42,7 +42,7 @@
             %end
          %end
 	</ul>
-	
+
 	<ul class="nav">
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown"> System <b class="caret"></b></a>
@@ -53,15 +53,15 @@
           </li>
         </ul>
 
-	
+
         %if user is not None:
-        <div class="nav-controll"> 
-          <ul class="nav pull-right"> 
+        <div class="nav-controll">
+          <ul class="nav pull-right">
             <li class="divider-vertical"></li>
         %if app:
           %overall_itproblem = app.datamgr.get_overall_it_state()
             %if overall_itproblem == 0:
-              <li><a href="/problems" class="quickinfo" data-original-title='IT Problems'><i class="icon-itproblem"></i><span class="pulsate badger">OK!</span> </a></li>
+              <li><a href="/problems" class="quickinfo" data-original-title='IT Problems'><i class="icon-itproblem"></i><span class="pulsate badger badger-ok">OK!</span> </a></li>
             %elif overall_itproblem == 1:
               <li><a href="/problems" class="quickinfo" data-original-title='IT Problems'><i class="icon-itproblem"></i><span class="pulsate badger badger-warning">{{app.datamgr.get_nb_all_problems()}}</span> </a></li>
             %elif overall_itproblem == 2:

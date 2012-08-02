@@ -1,6 +1,6 @@
-#!/bin/bash
-
-# Copyright (C) 2009-2011 :
+#!/bin/sh
+#
+# Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -22,16 +22,16 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-DIR=$(cd $(dirname "$0"); pwd)
-echo $DIR
+DIR="$(cd $(dirname "$0"); pwd)"
+echo "$DIR"
 
-cd $DIR/..
+cd "$DIR/.."
 
 export LANG=us_US.UTF-8
 
-$DIR/launch_scheduler_debug.sh
-$DIR/launch_poller_debug.sh
-$DIR/launch_reactionner_debug.sh
-$DIR/launch_broker_debug.sh
-$DIR/launch_receiver_debug.sh
-$DIR/launch_arbiter_debug.sh
+"$DIR"/launch_scheduler_debug.sh
+"$DIR"/launch_poller_debug.sh
+"$DIR"/launch_reactionner_debug.sh
+"$DIR"/launch_broker_debug.sh
+"$DIR"/launch_receiver_debug.sh
+"$DIR"/launch_arbiter_debug.sh

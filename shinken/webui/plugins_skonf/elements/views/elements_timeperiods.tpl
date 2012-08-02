@@ -11,12 +11,12 @@
   %for h in elts:
   %hname = h.get_name()
   <div class='object_{{elt_type}} span12'>
-    
+
     <div class='host_name cut-long pull-left'><a href='/elements/timeperiods/{{hname}}'>{{hname}}</a></div>
     <div class='poller_tag cut-long pull-left'>{{getattr(h, 'poller_tag', '')}}&nbsp;</div>
     <div class='reactionner_tag cut-long pull-left'>{{getattr(h, 'reactionner_tag', '')}}&nbsp;</div>
     <div class='module_type cut-long pull-left'>{{getattr(h, 'module_type', '')}}&nbsp;</div>
-    
+
     <div class='status pull-left'>
       %state = h.customs.get('_STATE', 'enabled')
       %editable = ''

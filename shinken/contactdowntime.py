@@ -3,7 +3,7 @@
 # -*- coding: utf-8 -*-
 
 
-# Copyright (C) 2009-2012 :
+# Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
 #     Gregory Starck, g.starck@gmail.com
@@ -24,11 +24,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 import time
 
-""" TODO : Add some comment about this class for the doc"""
+""" TODO: Add some comment about this class for the doc"""
 class ContactDowntime:
     id = 1
 
@@ -50,15 +48,13 @@ class ContactDowntime:
         'can_be_deleted': None,
         }
 
-
-
     # Schedule a contact downtime. It's far more easy than a host/service
     # one because we got a beginning, and an end. That's all for running.
     # got also an author and a comment for logging purpose.
     def __init__(self, ref, start_time, end_time, author, comment):
         self.id = self.__class__.id
         self.__class__.id += 1
-        self.ref = ref #pointer to srv or host we are apply
+        self.ref = ref  # pointer to srv or host we are apply
         self.start_time = start_time
         self.end_time = end_time
         self.author = author
@@ -83,30 +79,24 @@ class ContactDowntime:
         if was_is_in_effect and not self.is_in_effect:
             self.exit()
 
-
     def in_scheduled_downtime(self):
         return self.is_in_effect
-
 
     # The referenced host/service object enters now a (or another) scheduled
     # downtime. Write a log message only if it was not already in a downtime
     def enter(self):
         self.ref.raise_enter_downtime_log_entry()
 
-
     # The end of the downtime was reached.
     def exit(self):
         self.ref.raise_exit_downtime_log_entry()
         self.can_be_deleted = True
-
 
     # A scheduled downtime was prematurely cancelled
     def cancel(self):
         self.is_in_effect = False
         self.ref.raise_cancel_downtime_log_entry()
         self.can_be_deleted = True
-
-
 
     # Call by pickle for dataify the coment
     # because we DO NOT WANT REF in this pickleisation!
@@ -121,7 +111,6 @@ class ContactDowntime:
         # By check at properties in the same order
         res.reverse()
         return res
-
 
     # Inverted funtion of getstate
     def __setstate__(self, state):

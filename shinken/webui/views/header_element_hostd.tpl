@@ -28,12 +28,12 @@
           <li><a href="/addpack">Upload a pack</a></li>
         </ul>
 
-	
+
 	%if not user : user = {}
 	%print "USER IS", user
-        %if True: 
-        <div class="nav-controll"> 
-          <ul class="nav pull-right"> 
+        %if True:
+        <div class="nav-controll">
+          <ul class="nav pull-right">
             <li class="divider-vertical"></li>
 
            <!-- <li><a href="#" class="quickinfo" data-original-title='Settings'><i class="icon-setting"></i></a></li>-->

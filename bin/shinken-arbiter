@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2009-2011 :
+# Copyright (C) 2009-2011:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
 #    Gregory Starck, g.starck@gmail.com
@@ -21,16 +21,14 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
 """
 This is the class of the Arbiter. Its role is to read configuration,
 cut it, and send it to other elements like schedulers, reactionners
-or pollers. It is also responsible for the high avaibility feature. 
-For example, if a scheduler dies, it sends the late scheduler's conf 
+or pollers. It is also responsible for the high avaibility feature.
+For example, if a scheduler dies, it sends the late scheduler's conf
 to another scheduler available.
 It also reads orders form users (nagios.cmd) and sends them to schedulers.
 """
-
 
 import os
 import sys
@@ -47,7 +45,7 @@ if os.name != 'nt':
     # on the Python version and the process limit "stack size".
     # The factors used were acquired by testing a broad range of installations
     stacksize_soft, stacksize_hard = resource.getrlimit(3)
-    if sys.version_info < (2,6):
+    if sys.version_info < (2, 6):
         sys.setrecursionlimit(int(stacksize_soft * 0.65 + 1100))
     elif sys.version_info < (3,):
         sys.setrecursionlimit(int(stacksize_soft * 1.9 + 3200))
@@ -63,14 +61,14 @@ except ImportError:
     # Submodules will then be loaded from there, too.
     import imp
     imp.load_module('shinken', *imp.find_module('shinken', [os.path.realpath("."), os.path.realpath(".."), os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "..")]))
-    
+
 from shinken.bin import VERSION
 from shinken.pyro_wrapper import PYRO_VERSION
 from shinken.daemons.arbiterdaemon import Arbiter
 
 parser = optparse.OptionParser(
     "%prog [options] -c configfile [-c additional_config_file]",
-    version="%prog : " + VERSION + "     with pyro : " + PYRO_VERSION)
+    version="%prog: " + VERSION + "     with pyro: " + PYRO_VERSION)
 parser.add_option('-c', '--config', action='append',
                   dest="config_files", metavar="CONFIG-FILE",
                   help=('Config file (your nagios.cfg). Multiple -c can be '
@@ -94,7 +92,6 @@ parser.add_option("-a", "--analyse",
                   dest="analyse",
                   help="Dump an analyse statistics file, for support")
 
-
 opts, args = parser.parse_args()
 
 
@@ -109,6 +106,6 @@ if __name__ == '__main__':
     if not opts.profile:
         daemon.main()
     else:
-        # For perf tuning :
+        # For perf tuning:
         import cProfile
         cProfile.run('''daemon.main()''', opts.profile)

@@ -27,38 +27,42 @@ This module is an android reactionner module. I will get actions
 for send SMS, and will use android lib for this.
 """
 
-# very important : import android stuff
-import android
+# very important: import android stuff
+try:
+    import android
+except ImportError:
+    android = None
 
 import sys
 import signal
 import time
 from Queue import Empty
 
-
 from shinken.basemodule import BaseModule
 from shinken.external_command import ExternalCommand
+from shinken.log import logger
 
 properties = {
-    'daemons' : ['reactionner'],
-    'type' : 'android_sms',
-    'external' : False,
+    'daemons': ['reactionner'],
+    'type': 'android_sms',
+    'external': False,
     # To be a real worker module, you must set this
-    'worker_capable' : True,
+    'worker_capable': True,
 }
 
 
 # called by the plugin manager to get a worker
 def get_instance(mod_conf):
-    print "Get an Android reactionner module for plugin %s" % mod_conf.get_name()
+    logger.debug("Get an Android reactionner module for plugin %s" % mod_conf.get_name())
+    if not android:
+        raise Exception('This is not an Android device.')
     instance = Android_reactionner(mod_conf)
     return instance
 
 
-
-#Just print some stuff
+# Just print some stuff
 class Android_reactionner(BaseModule):
-    
+
     def __init__(self, mod_conf):
         BaseModule.__init__(self, mod_conf)
         self.i_am_dying = False
@@ -66,9 +70,6 @@ class Android_reactionner(BaseModule):
     # Called by poller to say 'let's prepare yourself guy'
     def init(self):
         print "Initilisation of the android module"
-        
-
-
 
     # Get new checks if less than nb_checks_max
     # If no new checks got and no check in queue,
@@ -82,10 +83,9 @@ class Android_reactionner(BaseModule):
                 if msg is not None:
                     self.checks.append(msg.get_data())
                 #print "I", self.id, "I've got a message!"
-        except Empty , exp:
+        except Empty, exp:
             if len(self.checks) == 0:
                 time.sleep(1)
-
 
     # Launch checks that are in status
     # REF: doc/shinken-action-queues.png (4)
@@ -93,7 +93,7 @@ class Android_reactionner(BaseModule):
         for chk in self.checks:
             if chk.status == 'queue':
                 print "Launchng SMS for command %s" % chk.command
-                
+
                 elts = chk.command.split(' ')
 
                 # Check the command call first
@@ -125,8 +125,6 @@ class Android_reactionner(BaseModule):
                 chk.status = 'done'
                 chk.execution_time = 0.01
 
-
-
     # Check the status of checks
     # if done, return message finished :)
     # REF: doc/shinken-action-queues.png (5)
@@ -137,18 +135,17 @@ class Android_reactionner(BaseModule):
             try:
                 # Under android we got a queue here
                 self.returns_queue.put(action)
-            except IOError , exp:
+            except IOError, exp:
                 print "[%d]Exiting: %s" % (self.id, exp)
                 sys.exit(2)
         for chk in to_del:
             self.checks.remove(chk)
 
-    
     # We will read unread SMS and raise ACK if we read
     # something like 'ack host/service'
     def read_and_parse_sms(self):
         # Get only unread SMS of the inbox
-        SMSmsgs = self.android.smsGetMessages(True, 'inbox').result 
+        SMSmsgs = self.android.smsGetMessages(True, 'inbox').result
         to_mark = []
         cmds = []
         for message in SMSmsgs:
@@ -160,7 +157,7 @@ class Android_reactionner(BaseModule):
             print message
             if body.startswith(('ack', 'Ack', 'ACK')):
                 elts = body.split(' ')
-        
+
                 if len(elts) <= 1:
                     print "Bad message length"
                     continue
@@ -192,19 +189,19 @@ class Android_reactionner(BaseModule):
             try:
                 # Under android we got a queue here
                 self.returns_queue.put(cmd)
-            except IOError , exp:
+            except IOError, exp:
                 print "[%d]Exiting: %s" % (self.id, exp)
                 sys.exit(2)
-        
 
-
-    #id = id of the worker
-    #s = Global Queue Master->Slave
-    #m = Queue Slave->Master
-    #return_queue = queue managed by manager
-    #c = Control Queue for the worker
+    # id = id of the worker
+    # s = Global Queue Master->Slave
+    # m = Queue Slave->Master
+    # return_queue = queue managed by manager
+    # c = Control Queue for the worker
     def work(self, s, returns_queue, c):
         print "Module Android started!"
+        self.set_proctitle(self.name)
+
         self.android = android.Android()
         timeout = 1.0
         self.checks = []
@@ -235,11 +232,9 @@ class Android_reactionner(BaseModule):
                 if cmsg.get_type() == 'Die':
                     print "[%d]Dad say we are diing..." % self.id
                     break
-            except :
+            except:
                 pass
 
             timeout -= time.time() - begin
             if timeout < 0:
                 timeout = 1.0
-
-
