@@ -1166,6 +1166,7 @@ def isprime(startnumber):
 class PerfTest(ShinkenTest):
     def tearDown(self):
         print "comment me for performance tests"
+        return 
         self.livestatus_broker.db.commit()
         self.livestatus_broker.db.close()
         if os.path.exists(self.livelogs):
@@ -1192,6 +1193,7 @@ class PerfTest(ShinkenTest):
 
     def test_perf(self):
         print "comment me for performance tests"
+        return
         self.print_header()
         now = time.time()
         objlist = []
@@ -1233,6 +1235,7 @@ class PerfTest(ShinkenTest):
         nonok.extend([[w, 1, "W"] for w in warn_services])
         nonok.extend([[c, 2, "C"] for c in crit_services])
         nonok.extend([[h, 2, "D"] for h in down_hosts])
+        print "NONOK", nonok
         self.scheduler_loop(1, nonok)
         nonok = []
         nonok.extend([[w, 1, "W"] for w in warn_services if warn_services.index(w) in primes])
@@ -1300,7 +1303,7 @@ class TestConfigBig(PerfTest):
             ref[0].checks_in_progress
         super(TestConfigBig, self).scheduler_loop(count, reflist, do_sleep, sleep_time)
 
-
+'''
 class TestConfigCrazy(PerfTest):
     def setUp(self):
         print "comment me for performance tests"
@@ -1323,7 +1326,7 @@ class TestConfigCrazy(PerfTest):
 
     def scheduler_loop(self, count, reflist, do_sleep=False, sleep_time=61):
         super(TestConfigCrazy, self).scheduler_loop(count, reflist, do_sleep, sleep_time)
-
+'''
 
 if __name__ == '__main__':
     #import cProfile

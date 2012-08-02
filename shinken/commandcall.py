@@ -24,7 +24,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 from shinken.autoslots import AutoSlots
-from shinken.property import StringProp, BoolProp
+from shinken.property import StringProp, BoolProp, IntegerProp
 
 
 class DummyCommandCall(object):
@@ -56,6 +56,7 @@ class CommandCall(DummyCommandCall):
         'module_type':     StringProp(default='fork'),
         'valid':           BoolProp(default=False),
         'args':            StringProp(default=[]),
+        'timeout':         IntegerProp(default='-1'),
     }
 
     def __init__(self, commands, call, poller_tag='None',
@@ -63,6 +64,7 @@ class CommandCall(DummyCommandCall):
         self.id = self.__class__.id
         self.__class__.id += 1
         self.call = call
+        self.timeout = -1
         # Now split by ! and get command and args
         self.get_command_and_args()
         self.command = commands.find_by_name(self.command.strip())
@@ -76,6 +78,7 @@ class CommandCall(DummyCommandCall):
             self.poller_tag = poller_tag  # from host/service
             self.reactionner_tag = reactionner_tag
             self.module_type = self.command.module_type
+            self.timeout = int(self.command.timeout)
             if self.valid and poller_tag is 'None':
                 # from command if not set
                 self.poller_tag = self.command.poller_tag

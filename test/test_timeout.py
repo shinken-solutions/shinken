@@ -107,5 +107,29 @@ class TestTimeout(ShinkenTest):
         self.assert_(self.any_log_match("Warning: Contact mr.schinken service notification command 'libexec/sleep_command.sh 7 ' timed out after 2 seconds"))
 
 
+
+    def test_notification_timeout_on_command(self):
+        #
+        # Config is not correct because of a wrong relative path
+        # in the main config file
+        #
+        print "Get the hosts and services"
+        now = time.time()
+        host = self.sched.hosts.find_by_name("test_host_0")
+        host.checks_in_progress = []
+        host.act_depend_of = []  # ignore the router
+        router = self.sched.hosts.find_by_name("test_router_0")
+        router.checks_in_progress = []
+        router.act_depend_of = []  # ignore the router
+        svc = self.sched.services.find_srv_by_name_and_hostname("test_host_0", "test_ok_0")
+        print svc.checks_in_progress
+        cs = svc.checks_in_progress
+        self.assert_(len(cs) == 1)
+        c = cs.pop()
+        print c
+        print c.timeout
+        self.assert_(c.timeout == 5)
+
+
 if __name__ == '__main__':
     unittest.main()

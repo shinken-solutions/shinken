@@ -1110,6 +1110,7 @@ class SchedulingItem(Item):
         else:
             # downtime/flap/etc do not change the notification number
             next_notif_nb = self.current_notification_number
+
         n = Notification(type, 'scheduled', 'VOID', None, self, None, t, \
             timeout=cls.notification_timeout, \
             notif_nb=next_notif_nb)
@@ -1208,14 +1209,20 @@ class SchedulingItem(Item):
             if not cls.use_large_installation_tweaks and cls.enable_environment_macros:
                 env = m.get_env_macros(data)
 
+            # By default we take the global timeout, but we use the command one if it
+            # define it (by default it's -1)
+            timeout = cls.check_timeout
+            if self.check_command.timeout != -1:
+                timeout = self.check_command.timeout
+
             # Make the Check object and put the service in checking
             # Make the check inherit poller_tag from the command
             # And reactionner_tag too
             c = Check('scheduled', command_line, self, t, ref_check, \
-                          timeout=cls.check_timeout, \
-                          poller_tag=self.check_command.poller_tag, \
-                          env=env, \
-                          module_type=self.check_command.module_type)
+                      timeout=timeout, \
+                      poller_tag=self.check_command.poller_tag, \
+                      env=env, \
+                      module_type=self.check_command.module_type)
 
             # We keep a trace of all checks in progress
             # to know if we are in checking_or not
