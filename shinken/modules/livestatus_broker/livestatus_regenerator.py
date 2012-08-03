@@ -36,7 +36,8 @@ def itersorted(self, hints=None):
     if hints == None:
         # return all items
         for _, hid in self._id_heap:
-            yield self.items[hid]
+            if hid in self.items:
+                yield self.items[hid]
     elif hints['target'] == HINT_SINGLE_HOST:
         try:
             host_id = self._id_by_host_name_heap[hints['host_name']]
@@ -75,12 +76,14 @@ def itersorted(self, hints=None):
             # return only items belonging to this contact
             # for the moment. will be a cache cascade soon
             for _, hid in self._id_contact_heap[hints['authuser']]:
-                yield self.items[hid]
+                if hid in self.items:
+                    yield self.items[hid]
         # if authuser and authuser not in self._id_contact_heap:
         # we do nothing, so the caller gets an empty list
     else:
         for _, hid in self._id_heap:
-            yield self.items[hid]
+            if hid in self.items:
+                yield self.items[hid]
 
 
 class LiveStatusRegenerator(Regenerator):
