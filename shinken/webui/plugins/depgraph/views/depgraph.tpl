@@ -9,27 +9,24 @@
 
 Invalid element
 
-%# " If we got auth problem, we bail out"
-%if not valid_user:
-<script type="text/javascript">
-  window.location.replace("/login");
-</script>
-%# " And if the javascript is not follow? not a problem, we gave no data here."
-%end
-
-
 %else:
 
 %helper = app.helper
 %datamgr = app.datamgr
 
 
-%rebase layout globals(), title='Dependencies graph of ' + elt.get_full_name(),  js=['depgraph/js/jit-yc.js', 'depgraph/js/excanvas.js', 'depgraph/js/eltdeps.js'],  css=['depgraph/css/eltdeps.css'],  print_menu=False, refresh=True
+%rebase layout globals(), title='Dependencies graph of ' + elt.get_full_name(),  refresh=True
 
 
+<script src='/static/depgraph/js/eltdeps.js'></script>
 
 
 <script type="text/javascript">
+  loadjscssfile('/static/depgraph/css/eltdeps_widget.css', 'css');
+  loadjscssfile('/static/depgraph/css/eltdeps.css', 'css');
+  loadjscssfile('/static/depgraph/js/jit-yc.js', 'js');
+  loadjscssfile('/static/depgraph/js/excanvas.js', 'js');
+
 
   // Now we hook teh global search thing
   $('.typeahead').typeahead({
@@ -45,16 +42,14 @@ Invalid element
     }
   });
 
-
-$(document).ready(init_graph('{{elt.get_full_name()}}', {{!helper.create_json_dep_graph(elt, levels=4)}},700, 700,'{{helper.get_html_id(elt)}}'));
+  $(document).ready(init_graph('{{elt.get_full_name()}}', {{!helper.create_json_dep_graph(elt, levels=4)}}, 700, 700,'{{helper.get_html_id(elt)}}'));
 
 </script>
 
-
-<div id="infovis-{{helper.get_html_id(elt)}}"> </div>
 <div id="right-container" class="border">
-  <div id="inner-details-{{helper.get_html_id(elt)}}">
+<div id="inner-details-{{helper.get_html_id(elt)}}"></div>
 </div>
+<div id="infovis-{{helper.get_html_id(elt)}}"> </div>
 
 <div id="log">Loading element informations...</div>
 
