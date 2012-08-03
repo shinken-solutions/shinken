@@ -31,6 +31,7 @@ It is one possibility for an exchangeable storage for log broks
 """
 
 import os
+import sys
 import time
 import datetime
 import re
@@ -80,7 +81,9 @@ class LiveStatusLogStoreSqlite(BaseModule):
     def __init__(self, modconf):
         BaseModule.__init__(self, modconf)
         self.plugins = []
-        self.database_file = getattr(modconf, 'database_file', os.path.join(os.path.abspath('.'), 'var', 'livestatus.db'))
+        # Change. The var folder is not defined based upon '.', but upon ../var from the process name (shinken-broker)
+        # When the database_file variable, the defaukt variable was calculated from '.'... Depending on where you were when you ran the commmand the behavior changed.
+        self.database_file = getattr(modconf, 'database_file', os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), '..','var', 'livestatus.db'))
         self.archive_path = getattr(modconf, 'archive_path', os.path.join(os.path.dirname(self.database_file), 'archives'))
         try:
             os.stat(self.archive_path)
