@@ -1164,18 +1164,20 @@ def isprime(startnumber):
 
 
 class PerfTest(ShinkenTest):
-    def tearDown(self):
-        print "comment me for performance tests"
-        return 
-        self.livestatus_broker.db.commit()
-        self.livestatus_broker.db.close()
-        if os.path.exists(self.livelogs):
-            os.remove(self.livelogs)
-        if os.path.exists(self.livelogs + "-journal"):
-            os.remove(self.livelogs + "-journal")
-        if os.path.exists(self.livestatus_broker.pnp_path):
-            shutil.rmtree(self.livestatus_broker.pnp_path)
-        self.livestatus_broker = None
+    # Un comment for performance tests, and if you put the good files and
+    # setup. Do not need to launch in an automatic way
+    
+    ## def tearDown(self):
+    ##     print "comment me for performance tests"
+    ##     self.livestatus_broker.db.commit()
+    ##     self.livestatus_broker.db.close()
+    ##     if os.path.exists(self.livelogs):
+    ##         os.remove(self.livelogs)
+    ##     if os.path.exists(self.livelogs + "-journal"):
+    ##         os.remove(self.livelogs + "-journal")
+    ##     if os.path.exists(self.livestatus_broker.pnp_path):
+    ##         shutil.rmtree(self.livestatus_broker.pnp_path)
+    ##     self.livestatus_broker = None
 
     def update_broker(self, dodeepcopy=False):
         # The brok should be manage in the good order
@@ -1191,89 +1193,90 @@ class PerfTest(ShinkenTest):
             self.livestatus_broker.manage_brok(brok)
         self.sched.broks = {}
 
-    def test_perf(self):
-        print "comment me for performance tests"
-        return
-        self.print_header()
-        now = time.time()
-        objlist = []
-        for host in self.sched.hosts:
-            host.checks_in_progress = []
-            objlist.append([host, 0, 'UP'])
-        for service in self.sched.services:
-            service.checks_in_progress = []
-            objlist.append([service, 0, 'OK'])
-        self.scheduler_loop(1, objlist)
-        num_hosts = len(self.sched.hosts)
-        primes = [num for num in xrange(0, 9999) if isprime(num)]
-        down_hosts = [h for h in [self.sched.hosts.find_by_name("test_host_%04d" % num) for num in xrange(0, num_hosts) if num in primes] if h != None]
-        # None? Because num_hosts also includes routers, so we might reach
-        # a numerical region where there are no hosts any more
-        crit_services = []
-        warn_services = []
-        for num in [x for x in xrange(int(num_hosts / 100), int(num_hosts / 50)) if x in primes]:
-            crit_services.append(self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_01"))
-            crit_services.append(self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_05"))
-            crit_services.append(self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_11"))
-        for num in [x for x in xrange(int(num_hosts / 50) + 1, int(num_hosts / 5)) if x in primes]:
-            warn_services.append(self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_19"))
-            if not self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_19"):
-                print "deppserv", "test_host_%04d test_ok_19" % num
+    ##If you want to launch a one-shot performance test, uncomment this
 
-        for num in [x for x in xrange(int(num_hosts / 5), int(num_hosts / 2)) if x in primes]:
-            if not self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_03"):
-                print "deppserv", "test_host_%04d test_ok_03" % num
-            warn_services.append(self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_03"))
-            if not self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_07"):
-                print "deppserv", "test_host_%04d test_ok_07" % num
-            warn_services.append(self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_07"))
-            crit_services.append(self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_13"))
-            crit_services.append(self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_17"))
-        print "%d services are in a warning state" % len(warn_services)
-        print "%d services are in a critical state" % len(crit_services)
-        nonok = []
-        nonok.extend([[w, 1, "W"] for w in warn_services])
-        nonok.extend([[c, 2, "C"] for c in crit_services])
-        nonok.extend([[h, 2, "D"] for h in down_hosts])
-        print "NONOK", nonok
-        self.scheduler_loop(1, nonok)
-        nonok = []
-        nonok.extend([[w, 1, "W"] for w in warn_services if warn_services.index(w) in primes])
-        lenw = len(nonok)
-        nonok.extend([[c, 2, "C"] for c in crit_services if crit_services.index(c) in primes])
-        lenc = len(nonok) - lenw
-        nonok.extend([[h, 2, "D"] for h in down_hosts if down_hosts.index(h) in primes])
-        lenh = len(nonok) - lenc - lenw
-        print "%d hosts are hard/down" % lenh
-        print "%d services are in a hard/warning state" % lenw
-        print "%d services are in a hard/critical state" % lenc
-        self.scheduler_loop(3, nonok)
-        self.update_broker()
-        last_host = reduce(lambda x, y: y, self.livestatus_broker.datamgr.rg.hosts)
-        #last_service = reduce(lambda x,y:y,self.livestatus_broker.datamgr.rg.services)
+    ## def test_perf(self):
+    ##     print "comment me for performance tests"
+    ##     self.print_header()
+    ##     now = time.time()
+    ##     objlist = []
+    ##     for host in self.sched.hosts:
+    ##         host.checks_in_progress = []
+    ##         objlist.append([host, 0, 'UP'])
+    ##     for service in self.sched.services:
+    ##         service.checks_in_progress = []
+    ##         objlist.append([service, 0, 'OK'])
+    ##     self.scheduler_loop(1, objlist)
+    ##     num_hosts = len(self.sched.hosts)
+    ##     primes = [num for num in xrange(0, 9999) if isprime(num)]
+    ##     down_hosts = [h for h in [self.sched.hosts.find_by_name("test_host_%04d" % num) for num in xrange(0, num_hosts) if num in primes] if h != None]
+    ##     # None? Because num_hosts also includes routers, so we might reach
+    ##     # a numerical region where there are no hosts any more
+    ##     crit_services = []
+    ##     warn_services = []
+    ##     for num in [x for x in xrange(int(num_hosts / 100), int(num_hosts / 50)) if x in primes]:
+    ##         crit_services.append(self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_01"))
+    ##         crit_services.append(self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_05"))
+    ##         crit_services.append(self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_11"))
+    ##     for num in [x for x in xrange(int(num_hosts / 50) + 1, int(num_hosts / 5)) if x in primes]:
+    ##         warn_services.append(self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_19"))
+    ##         if not self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_19"):
+    ##             print "deppserv", "test_host_%04d test_ok_19" % num
 
-        elapsed = {}
-        requestelapsed = {}
-        for page in pages:
-            print "oage is", page
-            if page != "thruk_service_detail":
-                continue
-            elapsed[page] = 0
-            requestelapsed[page] = []
-            for request in pages[page]:
-                print "+--------------------------\n%s\n--------------------------\n" % request
-                #
-                request = request.replace('omd-live', last_host.host_name)
-                request = request.replace('Dummy Service', 'test_ok_19')
-                print "---------------------------\n%s\n--------------------------\n" % request
-                tic = time.time()
-                response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-                tac = time.time()
-                elapsed[page] += (tac - tic)
-                requestelapsed[page].append(tac - tic)
-        #for page in sorted(pages.keys()):
-        for page in ["thruk_service_detail"]:
-            print "%-40s %-10.4f  %s" % (page, elapsed[page], ["%.3f" % f for f in requestelapsed[page]])
+    ##     for num in [x for x in xrange(int(num_hosts / 5), int(num_hosts / 2)) if x in primes]:
+    ##         if not self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_03"):
+    ##             print "deppserv", "test_host_%04d test_ok_03" % num
+    ##         warn_services.append(self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_03"))
+    ##         if not self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_07"):
+    ##             print "deppserv", "test_host_%04d test_ok_07" % num
+    ##         warn_services.append(self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_07"))
+    ##         crit_services.append(self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_13"))
+    ##         crit_services.append(self.sched.services.find_srv_by_name_and_hostname("test_host_%04d" % num, "test_ok_17"))
+    ##     print "%d services are in a warning state" % len(warn_services)
+    ##     print "%d services are in a critical state" % len(crit_services)
+    ##     nonok = []
+    ##     nonok.extend([[w, 1, "W"] for w in warn_services])
+    ##     nonok.extend([[c, 2, "C"] for c in crit_services])
+    ##     nonok.extend([[h, 2, "D"] for h in down_hosts])
+    ##     print "NONOK", nonok
+    ##     self.scheduler_loop(1, nonok)
+    ##     nonok = []
+    ##     nonok.extend([[w, 1, "W"] for w in warn_services if warn_services.index(w) in primes])
+    ##     lenw = len(nonok)
+    ##     nonok.extend([[c, 2, "C"] for c in crit_services if crit_services.index(c) in primes])
+    ##     lenc = len(nonok) - lenw
+    ##     nonok.extend([[h, 2, "D"] for h in down_hosts if down_hosts.index(h) in primes])
+    ##     lenh = len(nonok) - lenc - lenw
+    ##     print "%d hosts are hard/down" % lenh
+    ##     print "%d services are in a hard/warning state" % lenw
+    ##     print "%d services are in a hard/critical state" % lenc
+    ##     self.scheduler_loop(3, nonok)
+    ##     self.update_broker()
+    ##     last_host = reduce(lambda x, y: y, self.livestatus_broker.datamgr.rg.hosts)
+    ##     #last_service = reduce(lambda x,y:y,self.livestatus_broker.datamgr.rg.services)
+
+    ##     elapsed = {}
+    ##     requestelapsed = {}
+    ##     for page in pages:
+    ##         print "oage is", page
+    ##         if page != "thruk_service_detail":
+    ##             continue
+    ##         elapsed[page] = 0
+    ##         requestelapsed[page] = []
+    ##         for request in pages[page]:
+    ##             print "+--------------------------\n%s\n--------------------------\n" % request
+    ##             #
+    ##             request = request.replace('omd-live', last_host.host_name)
+    ##             request = request.replace('Dummy Service', 'test_ok_19')
+    ##             print "---------------------------\n%s\n--------------------------\n" % request
+    ##             tic = time.time()
+    ##             response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+    ##             tac = time.time()
+    ##             elapsed[page] += (tac - tic)
+    ##             requestelapsed[page].append(tac - tic)
+    ##     #for page in sorted(pages.keys()):
+    ##     for page in ["thruk_service_detail"]:
+    ##         print "%-40s %-10.4f  %s" % (page, elapsed[page], ["%.3f" % f for f in requestelapsed[page]])
 
 
 class TestConfigBig(PerfTest):
@@ -1303,30 +1306,33 @@ class TestConfigBig(PerfTest):
             ref[0].checks_in_progress
         super(TestConfigBig, self).scheduler_loop(count, reflist, do_sleep, sleep_time)
 
-'''
-class TestConfigCrazy(PerfTest):
-    def setUp(self):
-        print "comment me for performance tests"
-        self.setup_with_file('etc/nagios_50r_5000h_100000s.cfg')
-        # ...test_router_49
-        # ...test_host_4999
-        self.testid = str(os.getpid() + random.randint(1, 1000))
-        self.init_livestatus()
 
-        self.sched.conf.skip_initial_broks = False
-        self.sched.fill_initial_broks()
-        self.update_broker()
-        self.nagios_path = None
-        self.livestatus_path = None
-        self.nagios_config = None
-        # add use_aggressive_host_checking so we can mix exit codes 1 and 2
-        # but still get DOWN state
-        host = self.sched.hosts.find_by_name("test_host_0000")
-        host.__class__.use_aggressive_host_checking = 1
+## I don't know why, but the nagios_50r_5000h_100000s.cfg file is missing.
+## Should be related to an old and precific test. If someone got this file, it can enable the test
 
-    def scheduler_loop(self, count, reflist, do_sleep=False, sleep_time=61):
-        super(TestConfigCrazy, self).scheduler_loop(count, reflist, do_sleep, sleep_time)
-'''
+## class TestConfigCrazy(PerfTest):
+##     def setUp(self):
+##         print "comment me for performance tests"
+##         self.setup_with_file('etc/nagios_50r_5000h_100000s.cfg')
+##         # ...test_router_49
+##         # ...test_host_4999
+##         self.testid = str(os.getpid() + random.randint(1, 1000))
+##         self.init_livestatus()
+
+##         self.sched.conf.skip_initial_broks = False
+##         self.sched.fill_initial_broks()
+##         self.update_broker()
+##         self.nagios_path = None
+##         self.livestatus_path = None
+##         self.nagios_config = None
+##         # add use_aggressive_host_checking so we can mix exit codes 1 and 2
+##         # but still get DOWN state
+##         host = self.sched.hosts.find_by_name("test_host_0000")
+##         host.__class__.use_aggressive_host_checking = 1
+
+##     def scheduler_loop(self, count, reflist, do_sleep=False, sleep_time=61):
+##         super(TestConfigCrazy, self).scheduler_loop(count, reflist, do_sleep, sleep_time)
+
 
 if __name__ == '__main__':
     #import cProfile
