@@ -174,6 +174,8 @@ class __Action(object):
                 self.status = 'timeout'
                 self.execution_time = now - self.check_time
                 self.exit_status = 3
+                # Do not keep a pointer to the process
+                del self.process
                 return
             return
 

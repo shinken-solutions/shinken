@@ -152,15 +152,14 @@ class Graphite_Webui(BaseModule):
         e = datetime.fromtimestamp(graphend)
         e = e.strftime('%H:%M_%Y%m%d')
 
-        # Do we have a template?
-        # Do we have a template for the given source?
-        thesourcefile = os.path.join(self.templates_path ,  source , elt.check_command.get_name().split('!')[0] + '.graph')
+        filename = elt.check_command.get_name().split('!')[0] + '.graph'
 
-        if os.path.isfile(thesourcefile):
-                thefile = thesourcefile
-        else:
-                # If not try to use the one for the parent folder
-                thefile = os.path.join(self.templates_path ,  elt.check_command.get_name().split('!')[0] + '.graph')
+        # Do we have a template for the given source?
+        thefile = os.path.join(self.templates_path, source, filename)
+
+        # If not try to use the one for the parent folder
+        if not os.path.isfile(thefile):
+            thefile = os.path.join(self.templates_path, filename)
 
         if os.path.isfile(thefile):
             template_html = ''
@@ -184,7 +183,7 @@ class Graphite_Webui(BaseModule):
                     v = {}
                     v['link'] = self.uri
                     v['img_src'] = img.replace('"', "'") + "&from=" + d + "&until=" + e
-                    v['img_src'] = self._replaceFontSize(v['img_src'] , fontsize[source])
+                    v['img_src'] = self._replaceFontSize(v['img_src'], fontsize[source])
                     r.append(v)
             # No need to continue, we have the images already.
             return r
@@ -207,11 +206,10 @@ class Graphite_Webui(BaseModule):
                 if re.search(r'_warn|_crit', metric):
                     continue
                 uri += "&target=%s.__HOST__.%s" % (host_name, metric)
-                uri += "&target=%s.__HOST__.%s" % (host_name, metric + "?????")
                 v = {}
                 v['link'] = self.uri
                 v['img_src'] = uri
-                v['img_src'] = self._replaceFontSize(v['img_src'] , fontsize[source])
+                v['img_src'] = self._replaceFontSize(v['img_src'], fontsize[source])
                 r.append(v)
 
             return r
@@ -234,11 +232,10 @@ class Graphite_Webui(BaseModule):
                 elif value[1] == '%':
                     uri += "&yMin=0&yMax=100"
                 uri += "&target=%s.%s.%s" % (host_name, desc, metric)
-                uri += "&target=%s.%s.%s" % (host_name, desc, metric + "?????")
                 v = {}
                 v['link'] = self.uri
                 v['img_src'] = uri
-                v['img_src'] = self._replaceFontSize(v['img_src'] , fontsize[source])
+                v['img_src'] = self._replaceFontSize(v['img_src'], fontsize[source])
                 r.append(v)
             return r
 

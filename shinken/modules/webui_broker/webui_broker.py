@@ -549,7 +549,18 @@ class Webui_broker(BaseModule, Daemon):
         print 'get_common_preference :: Nothing return, I send none'
         return default
 
-# Try to got for an element the graphs uris from modules
+
+    # Maybe a page want to warn if there is no module that is able to give user preference?
+    def has_user_preference_module(self):
+        for mod in self.modules_manager.get_internal_instances():
+            f = getattr(mod, 'get_ui_user_preference', None)
+            if f and callable(f):
+                return True
+        return False
+        
+
+
+    # Try to got for an element the graphs uris from modules
     def get_user_preference(self, user, key, default=None):
         safe_print("Checking user preference for", user.get_name(), key)
 
