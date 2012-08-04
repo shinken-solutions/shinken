@@ -245,6 +245,13 @@ class DataManager(object):
         # Ok, now return the max of hosts and services states
         return max(h_state, s_state)
 
+    # Sum of all Services
+    def get_len_service_state(self):
+        res = []
+      # res.extend([s for s in self.rg.services if s.state not in ['OK', 'PENDING'] and not s.is_impact])
+        res.extend([s for s in self.rg.services])
+        return len(res)       
+
     # For all business impacting elements, and give the worse state
     # if warning or critical
     def get_len_overall_state(self):
