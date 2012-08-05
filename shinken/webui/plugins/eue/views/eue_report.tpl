@@ -109,18 +109,22 @@
             %   poster=data_scenario["screenshot"]
             %end
             <div class="span1">
+                %if data_scenario["screenshot"]:
                 <a href="/eue_media/{{data_scenario["screenshot"]}}" class="lightbox"><img src="/eue_media/{{data_scenario["screenshot"]}}" width="100" height="60" alt=""/></a>
+                %end
             </div>
         </div>
     </div>
 %end
-<div class="row well">
-    <div class="span12 offset4">
-        <video id="replay" class="video-js vjs-default-skin" controls preload="auto" width="640" height="480" poster="/eue_media/{{poster}}" data-setup="{}">
-          <source src="/eue_media/{{eue_data["video"]}}" type='video/ogg'>
-        </video>
+    %if eue_data["video"]:
+    <div class="row well">
+        <div class="span12 offset4">
+            <video id="replay" class="video-js vjs-default-skin" controls preload="auto" width="640" height="480" poster="/eue_media/{{poster}}" data-setup="{}">
+              <source src="/eue_media/{{eue_data["video"]}}" type='video/ogg'>
+            </video>
+        </div>
     </div>
-</div>
+    %end
 <script type="text/javascript">
     $(function() {
         $('a.lightbox').lightBox(); // Select all links with lightbox class
