@@ -1,0 +1,73 @@
+==== EXPERIMENTAL ====
+
+How to install prerequisites for the eue plugin
+
+Just some words about cucumber and watir-webdriver. Those tools are for functional testing of (web) applications. They are rock solid and does the job like a charm. If you are not familiar with them just take the time to read the docs before anything else. 
+
+	Cucumber : http://cukes.info/
+	watir-webdriver : http://watirwebdriver.com/
+
+First you need a complete ruby stack (yeah i know it's ruby ... ) and a browser.
+
+	sudo apt-get install ruby rubygems ruby-dev libxml2-dev libxslt-dev libssl-dev build-essential firefox xvfb
+
+Then it is time to install some ruby gems
+
+	sudo gem update
+	sudo gem install rubygems-update
+	sudo update_rubygems
+	sudo gem install --no-ri --no-rdoc watir-webdriver
+	sudo gem install --no-ri --no-rdoc cucumber 
+	sudo gem install --no-ri --no-rdoc rspec
+	sudo gem install --no-ri --no-rdoc headless
+	sudo gem install --no-ri --no-rdoc mongo
+
+And that's it !
+
+Configuring a dedicated poller 
+
+If you just want to test it on a single shinken server, you must dedicate the poller to eue. What you have to do is to make sure that one and only one check is made at a time. Otherwise the  metrics should not be accurates. 
+
+Edit shinken-specific.cfg and modify the poller definition so it will match the following options 
+
+	max_workers 1 
+	min_workers 1 
+	processes_by_worker 1 
+
+Ok time to define a new check command. Everything is under libexec/eue and the required command line is : 
+
+	/usr/bin/cucumber --format Eue::Shinken /path/to/shinken/libexec/eue/yourfeature.feature. 
+
+yourfeature.feature is the feature test case you want to run (there is an example named glpi.feature that check the glpi demo site). Create a new command like this one 
+
+	define command {
+	       command_name             check_eue
+	       command_line             /usr/bin/cucumber --format Eue::Shinken $PLUGINSDIR$/eue/$ARG1$.feature
+	}
+
+The create the required service (for exemple for GLPI)
+
+	define service{
+	        service_description             Application GLPI authentification 
+	        use                             local-service
+	        host_name                       localhost
+	        check_command                   check_eue!glpi 
+	}
+
+Every feature test is associated to a configuration file featurename.ini. Do not modify the content unless you know what you are doing. The only thing you should modify is the application name and the robot details: 
+
+	[application]
+	name=Application GLPI
+
+	[robot]
+	env=prod
+	name=poller-eue-spain
+	os=linux
+	localization=spain
+
+Others parameters are experimental and should not be customized at the moment
+
+That's it, you are ready to do functional monitoring of your (web) applications ! 
+
+
+
