@@ -44,7 +44,7 @@ except ImportError:
 ### Will be populated by the UI with it's own value
 app = None
 ### TODO make this configurable START
-media_path = '/usr/local/shinken/var/screenshots'
+media_path = '/usr/local/shinken/var/medias'
 mongo_host = "localhost"
 mongo_port = 27017
 ### TODO make this configurable END
@@ -169,6 +169,7 @@ def create_media(media):
     return True
 
 def eue_media(media):
+    user = checkauth()    
     create_media(media)
     return static_file(media,root=media_path)
 
