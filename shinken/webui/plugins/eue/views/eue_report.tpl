@@ -42,7 +42,7 @@
     <div class="span12">
         <div class="span8">
             <h3>
-                {{eue_data["application"]}} : {{eue_data["feature"]}}
+                {{eue_data["application"]}} : <a href="/eue_feature_history/{{eue_data["key"]}}">{{eue_data["feature"]}}</a>
             </h3>
             <div class="span8"><span id="durations"></span></div>
             <div class="span8"><span id="states"></span></div>

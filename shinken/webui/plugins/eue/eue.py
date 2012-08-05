@@ -25,6 +25,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
+import datetime
 try:
     from shinken.webui.bottle import redirect
     from shinken.webui.bottle import static_file
@@ -84,38 +85,6 @@ def getdb(dbname):
         db
     )
 
-# def get_history(eueid):
-#     message,db = getdb('shinken')
-#     if not db:
-#         return []
-
-#     parts = eueid.split(".")
-#     parts.pop(0)
-#     id =  ".".join(parts)
-
-#     records=[]
-#     for feature in db.eue.find({'key': { '$regex': id } }).sort("start_time",1).limit(100):
-#         date = feature["start_time"]
-#         failed = 0
-#         succeed = 0
-#         duration = 0
-#         total = 0
-#         for scenario,scenario_data in feature["scenarios"].items():
-#             if scenario_data["status"] == 0:
-#                 succeed += 1
-#             else:
-#                 failed += 1
-
-#         total = succeed + failed
-#         records.append({
-#             "date" : int(date),
-#             "duration" : scenario_data["duration"],
-#             "succeed" : succeed,
-#             "failed" : failed,
-#             "total" : total
-#         })
-
-#     return records 
 
 def sparkline_data(eueid):
     message,db = getdb('shinken')
@@ -150,6 +119,77 @@ def sparkline_data(eueid):
         "states":",".join(states),
         "message":""
     }
+
+
+def feature_history(eueid):
+    user = checkauth()    
+    message,db = getdb('shinken')
+    message,db2 = getdb('shinken')
+
+    application = ""
+    feature = ""
+    platform = []
+    history = []
+    message = ""
+
+    if not db:
+        return {
+            "message":message,
+            "application":"",
+            "feature":"",
+            "platform":"",
+            "history":[]
+        }
+
+    parts = eueid.split(".")
+    parts.pop(0)
+    id =  ".".join(parts)
+
+    # global application feature for this specific platform
+    capplication = db2.eue.find({"key":eueid})[0]
+
+    application = capplication["application"]
+    feature_name = capplication["feature"]
+    description = capplication["description"]
+    platform = capplication["platform"]
+
+    # history
+    history=[]
+    for feature in db.eue.find({'key': { '$regex': id } }).sort("start_time",-1).limit(50):
+        date = feature["start_time"]
+        failed = 0
+        succeed = 0
+        duration = 0
+        state = 0
+        total = 0
+        for scenario,scenario_data in feature["scenarios"].items():
+            duration += scenario_data["duration"]
+            if scenario_data["status"] == 0:
+                succeed += 1
+            else:
+                state = 2                
+                failed += 1
+
+        total = succeed + failed
+        history.append({
+            "date" : datetime.datetime.fromtimestamp(int(date)).strftime('%Y-%m-%d %H:%M:%S'),
+            "key": feature["key"],
+            "duration" : duration,
+            "state" : state,
+            "succeed" : succeed,
+            "failed" : failed,
+            "total" : total
+        })
+
+    return {
+        "application":application,
+        "feature":feature_name,
+        "description":description,
+        "platform":platform,
+        "history":history,
+        "message":""
+    }
+
 
 
 def create_media(media):
@@ -188,24 +228,6 @@ def featuresbyapplication(application_code):
         "features" : result,
         "message" : ""
     }
-
-# def eue_application(application):
-#     message,db = getdb('shinken')
-#     if not db:
-#         return {
-#             "features":None,
-#             "message":message
-#         }
-
-#     cfeatures = featuresbyapplication(application)
-
-#     for feature in cfeatures:
-#         db.eue.find
-
-#     return {
-#         "features":features,
-#         "message":None
-#     }
 
 def reporting(eueid=""):
 
@@ -247,7 +269,8 @@ def reporting(eueid=""):
 
 pages = {
     reporting: {'routes': ['/eue_report/:eueid'], 'view': 'eue_report', 'static': True},
-    eue_media: {'routes': ['/eue_media/:media'], 'view': None,'static': True},
+    feature_history: {'routes': ['/eue_feature_history/:eueid'], 'view': 'eue_feature_history','static': True},
+    eue_media: {'routes': ['/eue_media/:media'], 'view': None,'static': True}
     # eue_application: {'routes': ['/eue_application/:application'], 'view': 'eue_application','static': True}
 }
 
