@@ -148,7 +148,7 @@ def sparkline_data(eueid):
     return {
         "durations":",".join(durations),
         "states":",".join(states),
-        message:""
+        "message":""
     }
 
 
