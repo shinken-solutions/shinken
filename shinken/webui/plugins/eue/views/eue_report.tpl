@@ -8,10 +8,12 @@
 %total_succeed = 0
 %total_failed = 0
 %total = 0
-%total_time = 0
+%total_time = 0.0
+%duration = ""
 %human_date = datetime.datetime.fromtimestamp(eue_data["start_time"]).strftime('%Y-%m-%d %H:%M:%S')
 
 %for scenario,scenario_data in eue_data["scenarios"].items():
+%   total_time += scenario_data["duration"]
 %   if int(scenario_data["status"]) != 0:
 %       total_failed += 1
 %   else:
@@ -20,7 +22,7 @@
 %end
 
 %total = total_succeed + total_failed
-
+%duration = "%.2f" % total_time
 
 %succeedmetrics = []
 %failedmetrics = []
@@ -33,6 +35,8 @@
 
 %poster=""
 
+%flag = eue_data["platform"]["localization"].capitalize()
+
 <!-- Log Contaier START -->
 <div class="row well">
     <div class="span12">
@@ -42,6 +46,28 @@
             </h3>
             <div class="span8"><span id="durations"></span></div>
             <div class="span8"><span id="states"></span></div>
+            <div class="span8">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>OS</th><th>Browser</th><th>Localization</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <img alt="Feature run on {{eue_data["platform"]["os"]}} platform" src="/static/eue/img/os/{{eue_data["platform"]["os"]}}.png" style="width:32px;"/>
+                            </td>
+                            <td>
+                                <img alt="Feature run on {{eue_data["platform"]["browser"]}} browser" src="/static/eue/img/browser/{{eue_data["platform"]["browser"]}}.png" style="width:32px;"/>
+                            </td>
+                            <td>
+                                <img alt="Feature run in {{flag}}" src="/static/eue/img/flag/{{flag}}.png" style="width:32px;"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
         <div class="span3 offset1">
             <table class=" well table table-condensed">
@@ -49,7 +75,8 @@
                     <tr><td><i class="icon-calendar"/></i> Date :</td><td><span class="">{{human_date}}</span></td></tr>
                     <tr><td><i class="icon-ok"/></i>Succeed :</td><td><span class="badge badge-success">{{total_succeed}}</span></td></tr>
                     <tr><td><i class="icon-remove"/></i>Failed :</td><td><span class="badge badge-important">{{total_failed}}</span></td></tr>                            
-                    <tr><td><i class="icon-list-alt"/></i>Total :</td><td><span class="badge badge-info">{{total}}</span></td></tr>                                                        
+                    <tr><td><i class="icon-list-alt"/></i>Total :</td><td><span class="badge badge-info">{{total}}</span></td></tr>
+                    <tr><td><i class="icon-time"/></i>Duration :</td><td><span>{{duration}}s</span></td></tr>                                                                            
                 </tbody>
             </table>
         </div>
