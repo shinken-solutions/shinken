@@ -27,7 +27,6 @@ module Eue
           end
 
           @@params = IniFile.new(base_path+"/#{project}.ini", :parameter => '=')
-          puts @@params
           @@connection = nil
           @@db = nil
           @@collection = nil
