@@ -28,7 +28,7 @@
 #This Class is an example of an Scheduler module
 #Here for the configuration phase AND running one
 
-
+import os
 import sys
 import signal
 import time
@@ -41,13 +41,15 @@ from datetime import datetime, timedelta
 
 
 import memcache
-from configobj import ConfigObj
+from configobj import ConfigObj, Section
 from pysnmp.carrier.asynsock.dispatch import AsynsockDispatcher
 from pysnmp.carrier.asynsock.dgram import udp
 from pyasn1.codec.ber import encoder, decoder
 from pysnmp.proto.api import v2c
 
 from Queue import Empty
+
+from shinken.log import logger
 from shinken.basemodule import BaseModule
 
 STATE_OK = 0
@@ -78,7 +80,7 @@ RECEIVED_REQUESTS = 0
 OIDS = []
 CONFIG = None
 
-MC_SERVER = memcache.Client(['127.0.0.1:11211'], debug=0)
+#MC_SERVER = memcache.Client(['127.0.0.1:11211'], debug=0)
 
 properties = {
     'daemons' : ['poller'],
@@ -141,8 +143,8 @@ class SnmpObject(object):
         """Prepare output
         """
         global CONFIG
-        if 'ds_type' in CONFIG['DATASOURCE'][self.snmp_type]:
-            ds_type = CONFIG['DATASOURCE'][self.snmp_type]['ds_type']
+        if 'ds_type' in CONFIG['DATASOURCE']['TYPE'][self.snmp_type]:
+            ds_type = CONFIG['DATASOURCE']['TYPE'][self.snmp_type]['ds_type']
         else:
             ds_type = CONFIG['DATASOURCE']['ds_type']
 
@@ -153,9 +155,9 @@ class SnmpObject(object):
             msg = 'OK: %(name)s' % datas
             self.append_msg(msg)
         elif ds_type == 'DERIVE':
-            datas['unit'] = CONFIG['DATASOURCE'][self.snmp_type]['unit']
+            datas['unit'] = CONFIG['DATASOURCE']['TYPE'][self.snmp_type]['unit']
             datas['status_name'] = IF_STATUS[self.datas['status']]
-            datas['ds_max'] = CONFIG['DATASOURCE'][self.snmp_type]['ds_max']
+            datas['ds_max'] = CONFIG['DATASOURCE']['TYPE'][self.snmp_type]['ds_max']
 
             if not self.old_date:
                 msg = 'Waiting data'
@@ -180,8 +182,8 @@ class SnmpObject(object):
 
         elif ds_type == 'INT':
             datas['name'] = self.datas['fileName']
-            datas['unit'] = CONFIG['DATASOURCE'][self.snmp_type]['unit']
-            datas['out'] = CONFIG['DATASOURCE'][self.snmp_type]['out']
+            datas['unit'] = CONFIG['DATASOURCE']['TYPE'][self.snmp_type]['unit']
+            datas['out'] = CONFIG['DATASOURCE']['TYPE'][self.snmp_type]['out']
 
             size = "%0.2f" % self.datas['fileSize']
             datas['size'] = eval(datas['out'].replace("$FileSize", size))
@@ -198,28 +200,25 @@ class SNMPAsyncClient(object):
     """SNMP asynchron Client.
     Launch async SNMP request
     """
-    def __init__(self, address, host, community, version, datasource,
-                          update, data_type, instance):
+    def __init__(self, host, community, version,
+                 data_type, instance, memcached):
 
-        self.address = address
         self.hostname = host
         self.community = community
         self.data_type = data_type
         self.version = version
-        self.datasource = datasource
-        self.update = update
         self.data_type = data_type
         self.instance = instance
         self.state = 'creation'
         self.start_time = time.time()
-
+        self.memcached = memcached
 
         self.timeout = 30
 
         # check_data validity
         if not self.find_data():
             objs_key = ",".join((self.hostname, self.data_type))
-            objs = MC_SERVER.get(objs_key)
+            objs = self.memcached.get(objs_key)
             if objs:
                 # Save old data
                 for inst, obj in objs.items():
@@ -228,13 +227,17 @@ class SNMPAsyncClient(object):
                     obj.old_datas = obj.datas.copy()
                     objs[obj.instance] = obj
 
-                MC_SERVER.set(objs_key, objs)
+                self.memcached.set(objs_key, objs)
 
             # SNMP table header
             self.oids = [oid[1:] for oid in OIDS.values()]
             self.headVars = []
             for oid in self.oids:
-                oid = tuple(int(i) for i in oid.split("."))
+                oid = oid % {'instance': '$_inst'}
+                try:
+                    oid = tuple(int(i) for i in oid.split("."))
+                except ValueError:
+                    continue
                 self.headVars.append(v2c.ObjectIdentifier(oid))
 
             # Build PDU
@@ -262,15 +265,15 @@ class SNMPAsyncClient(object):
                                             udp.domainName,
                                             (self.address, 161))
             transportDispatcher.jobStarted(1)
-            try:
-                transportDispatcher.runDispatcher()
-            except Exception, e:
-                self.set_exit("REQUEST ERROR: " + str(e), rc=3)
+#            try:
+            transportDispatcher.runDispatcher()
+#            except Exception, e:
+#                self.set_exit("REQUEST ERROR: " + str(e), rc=3)
             transportDispatcher.closeDispatcher()
 
     def find_data(self):
         objs_key = ",".join((self.hostname, self.data_type))
-        objs = MC_SERVER.get(objs_key)
+        objs = self.memcached.get(objs_key)
 
         if not(objs and self.instance in objs):
             #print "NOT FOUND : " + self.hostname + "_" + str(self.data_type) + "_" + str(self.update)
@@ -303,10 +306,10 @@ class SNMPAsyncClient(object):
         if not headVars:
             headVars=self.headVars
 
-        snmp_types = [d for d, v in CONFIG['DATASOURCE'].items() if isinstance(v, dict) ]
+        snmp_types = [d for d, v in CONFIG['DATASOURCE']['TYPE'].items() if isinstance(v, Section) ]
         # Revers OIDS => name
 #        OIDS = dict([(name, tuple(oid.split(".")[1:])) for name, oid in CONFIG['OID'].items()])
-        OIDS = dict([(name, oid[1:]) for name, oid in CONFIG['OID'].items()])
+        OIDS = dict([(name, oid[1:]) for name, oid in CONFIG['DATASOURCE']['TYPE'].items() if not isinstance(oid, Section)])
         reversed_oids = dict([(v,k) for k,v in OIDS.iteritems()])
 
         while wholeMsg:
@@ -327,15 +330,15 @@ class SNMPAsyncClient(object):
                         if oid[:-1].prettyPrint() in reversed_oids:
                             fetched_data = "$" + reversed_oids[oid[:-1].prettyPrint()]
                             for snmp_type in snmp_types:
-                                if "".join(CONFIG['DATASOURCE'][snmp_type].values()).find(fetched_data) != -1:
+                                if "".join(CONFIG['DATASOURCE']['TYPE'][snmp_type].values()).find(fetched_data) != -1:
                                     guessed_snmp_type = snmp_type
                                     break;
 
-                            for key, value in CONFIG['DATASOURCE'][snmp_type].items():
+                            for key, value in CONFIG['DATASOURCE']['TYPE'][snmp_type].items():
                                 if value.startswith(fetched_data):
                                     instance = str(oid[-1])
                                     obj_key = ",".join((self.hostname, guessed_snmp_type))
-                                    snmp_dict = MC_SERVER.get(obj_key)
+                                    snmp_dict = self.memcached.get(obj_key)
 
                                     if not snmp_dict:
                                         snmp_dict = {}
@@ -352,7 +355,7 @@ class SNMPAsyncClient(object):
                                         snmp_object.datas[key] = val.prettyPrint()
                 
                                     snmp_dict[instance] = snmp_object
-                                    MC_SERVER.set(obj_key, snmp_dict)
+                                    self.memcached.set(obj_key, snmp_dict)
 
 #                            if ".".join(name.prettyPrint().split(".")[:-1]) in self.oids:
     #                            print('from: %s, %s = %s' % (transportAddress,
@@ -376,6 +379,8 @@ class SNMPAsyncClient(object):
 
 
                 self.find_data()
+
+
 #                self.set_exit(snmp_dict[int(self.instance)])
 
                 # Generate request for next row
@@ -401,7 +406,6 @@ class SNMPAsyncClient(object):
 
 def parse_args(cmd_args):
     #Default params
-    address = None
     host = None
     community = 'public'
     version = '2c'
@@ -412,15 +416,14 @@ def parse_args(cmd_args):
     #Manage the options
     try:
         options, args = getopt.getopt(cmd_args,
-                        'I:H:C:V:d:i:u:w:c:t:',
+                        'H:C:V:i:u:w:c:t:',
                         ['hostname=', 'community=', 'snmp-version=',
-                         'datasource=', 'update-time=', 'type=',
-                         'host-address=', 'help', 'version', 'instance=',
-                         'warning=', 'critical='])
+                         'type=', 'help', 'version',
+                         'instance=', 'warning=', 'critical='])
     except getopt.GetoptError, err:
         # If we got problem, bail out
-        return (address, host, community, version, datasource,
-                update, data_type, instance)
+        return (host, community, version,
+                data_type, instance)
     #print  "Opts", opts, "Args", args
     for option_name, value in options:
         if option_name in ("-H", "--hostname"):
@@ -431,21 +434,15 @@ def parse_args(cmd_args):
             critical = value
         elif option_name in ("-C", "--community"):
             community = value
-        elif option_name in ("-I", "--host-address"):
-            address = value
-        elif option_name in ("-d", "--datasource"):
-            datasource = value
         elif option_name in ("-t", "--type"):
             data_type = value
         elif option_name in ("-i", "--instance"):
             instance = value
         elif option_name in ("-V", "--snmp-version"):
             version = value
-        elif option_name in ("-u", "--uptime"):
-            update_time = int(value)
 
-    return (address, hostname, community, version, datasource,
-            update_time, data_type, instance)
+    return (hostname, community, version,
+            data_type, instance)
 
 
 class Snmp_poller(BaseModule):
@@ -453,15 +450,38 @@ class Snmp_poller(BaseModule):
     """
     def __init__(self, mod_conf):
         BaseModule.__init__(self, mod_conf)
+        self.datasource_file = getattr(mod_conf, 'datasource_file', None)
+        self.memcached_host = getattr(mod_conf, 'memcached_host', "127.0.0.1")
+        self.memcached_port = getattr(mod_conf, 'memcached_port', 11211)
 
+        # Kill snmp booster if config_file is not set
     def init(self):
         """Called by poller to say 'let's prepare yourself guy'"""
         print "Initialization of the snmp poller module"
-        global OIDS
-        global CONFIG
         self.i_am_dying = False
-        CONFIG = ConfigObj('/opt/shinken/shinken/plugins/config.ini')
-        OIDS = dict([(name, oid) for name, oid in CONFIG['OID'].items()])
+
+        # Config validation
+        if self.datasource_file == None:
+            logger.error("Please set config_file parameter")
+            self.i_am_dying = True
+            return
+
+        # Prepare memcached connection
+        memcached_address = "%s:%s" % (self.memcached_host, self.memcached_port)
+        self.memcached = memcache.Client([memcached_address], debug=0)
+        # Check if memcached server is available
+        if not self.memcached.get_stats():
+            logger.error("Memcache server (%s) is not reachable" % memcached_address)
+            self.i_am_dying = True
+            return
+            
+        # Read datasource file
+        self.datasource = ConfigObj(self.datasource_file,
+                                    interpolation='template')
+        # Store config in memcache
+        self.memcached.set('datasource', self.datasource)
+
+#        OIDS = dict([(name, oid) for name, oid in self.config['DATASOURCE']['TYPE'].items() if not isinstance(oid, Section)])
 
     def get_new_checks(self):
         """ Get new checks if less than nb_checks_max
@@ -502,24 +522,24 @@ class Snmp_poller(BaseModule):
                 if len(clean_command) > 1:
                     # we do not want the first member, check_snmp thing
                     args = parse_args(clean_command[1:])
-                    (address, host, community, version, datasource,
-                              update, data_type, instance) = args
+                    (host, community, version,
+                          data_type, instance) = args
                     #print args
                 else:
                     # Set an error so we will quit tis check
                     command = None
 
                 # If we do not have the good args, we bail out for this check
-                if address is None or host is None:
+                if host is None:
                     chk.status = 'done'
                     chk.exit_status = 2
-                    chk.get_outputs('Error : the parameters host or address are not correct.', 8012)
+                    chk.get_outputs("Error : `host' parameter is not correct.", 8012)
                     chk.execution_time = 0.0
                     continue
                 
                 # Ok we are good, we go on
-                n = SNMPAsyncClient(address, host, community, version, datasource,
-                                    update, data_type, instance)
+                n = SNMPAsyncClient(host, community, version,
+                                    data_type, instance, self.memcached)
                 chk.con = n
 
 
