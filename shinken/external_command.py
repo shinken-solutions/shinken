@@ -531,6 +531,11 @@ class ExternalCommandManager:
                     srv_name = elt
                     if srv_name[-1] == '\n':
                         srv_name = srv_name[:-1]
+                    # If we are in a receiver, bailout now.
+                    if self.mode == 'receiver':
+                        self.search_host_and_dispatch(tmp_host, command, extcmd)
+                        return None
+
                     #safe_print("Got service full", tmp_host, srv_name)
                     s = self.services.find_srv_by_name_and_hostname(tmp_host, srv_name)
                     if s is not None:

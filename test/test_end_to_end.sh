@@ -669,7 +669,9 @@ string_in_file "OK, no more receiver sent need" $VAR/nagios.log
 now=$(date +%s)
 
 printf "[111] ADD_SIMPLE_POLLER;All;newpoller;localhost;8771\n" > $CMD_FILE
+printf "[111] PROCESS_SERVICE_CHECK_RESULT;localhost;LocalDisks;2;Oh yes\n" > $CMD_FILE
 printf "[111] PROCESS_HOST_CHECK_RESULT;localhost;2;Oh yes\n" > $CMD_FILE
+
 
 sleep 3
 
