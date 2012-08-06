@@ -78,6 +78,15 @@ function dump(arr, level) {
 }
 
 
+var rgraph = null;
+
+
+function change_rgraph_root(root){
+    rgraph.onClick(root, {  
+	Move: {  
+	}  
+    });
+}
 
 function init_graph(root, jsgraph, width, height, inject) {
 	
@@ -334,7 +343,7 @@ function init_graph(root, jsgraph, width, height, inject) {
 	    });
 
     //init RGraph
-    var rgraph = new $jit.RGraph({
+    /*var */rgraph = new $jit.RGraph({
 	'injectInto': /*'infovis'*/'infovis-'+inject,
 	'width'     : /*700*/width,
 	'height'    : /*700*/height,

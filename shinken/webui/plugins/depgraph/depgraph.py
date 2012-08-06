@@ -40,13 +40,16 @@ def depgraph_host(name):
 
     # Ok we are in a detail page but the user ask for a specific search
     search = app.request.GET.get('global_search', None)
+    loop = bool(int(app.request.GET.get('loop', '0')))
+    loop_time = int(app.request.GET.get('loop_time', '10'))
+    
     if search:
         new_h = app.datamgr.get_host(search)
         if new_h:
             redirect("/depgraph/" + search)
 
     h = app.datamgr.get_host(name)
-    return {'app': app, 'elt': h, 'user': user, 'valid_user': True}
+    return {'app': app, 'elt': h, 'user': user, 'valid_user': True, 'loop' : loop, 'loop_time' : loop_time}
 
 
 def depgraph_srv(hname, desc):
@@ -57,6 +60,9 @@ def depgraph_srv(hname, desc):
     if not user:
         return {'app': app, 'elt': None, 'valid_user': False}
 
+    loop = bool(int(app.request.GET.get('loop', '0')))
+    loop_time = int(app.request.GET.get('loop_time', '10'))
+
     # Ok we are in a detail page but the user ask for a specific search
     search = app.request.GET.get('global_search', None)
     if search:
@@ -65,7 +71,7 @@ def depgraph_srv(hname, desc):
             redirect("/depgraph/" + search)
 
     s = app.datamgr.get_service(hname, desc)
-    return {'app': app, 'elt': s, 'user': user, 'valid_user': True}
+    return {'app': app, 'elt': s, 'user': user, 'valid_user': True, 'loop' : loop, 'loop_time' : loop_time}
 
 
 def get_depgraph_widget():

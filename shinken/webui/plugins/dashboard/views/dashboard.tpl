@@ -10,6 +10,13 @@
   widget_context = 'dashboard';
 </script>
 
+<!-- Maybe the admin didn't add a user preference module, or the module is dead, if so, warn about it -->
+%if not has_user_pref_mod:
+   <div class='span12 alert alert-critical'>
+     Error : you didn't defined a WebUI module for saving user preference like the Mongodb one. You won't be able to use this page!
+   </div>
+%end
+
 
 <div class='span12'>
   <div id='loading' class='pull-left'> <img src='/static/images/spinner.gif'> Loading widgets</div>

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
@@ -159,30 +160,30 @@ class TestUIHelper(ShinkenTest):
     # Try the navi pages helper
     def test_navi(self):
         res = helper.get_navi(135, 60, step=30)
-        print "Res 1", res
-        g = [(u'\xc2\xab First', 0, 30, False), ('...', None, None, False), ('2', 30, 60, False), ('3', 60, 90, True), ('4', 90, 120, False), ('...', None, None, False), (u'Last \xc2\xbb', 120, 150, False)]
+        #print "Res 1", res
+        g = [(u'« First', 0, 30, False), ('...', None, None, False), ('2', 30, 60, False), ('3', 60, 90, True), ('4', 90, 120, False), ('...', None, None, False), (u'Last »', 120, 150, False)]
         for i in res:
             print "Is okk?", i, i in g
         self.assert_(res == g)
 
         res = helper.get_navi(135, 90, step=30)
-        print "Res 2", res
-        g = [(u'\xc2\xab First', 0, 30, False), ('...', None, None, False), ('3', 60, 90, False), ('4', 90, 120, True), ('5', 120, 150, False)]
+        #print "Res 2", res
+        g = [(u'« First', 0, 30, False), ('...', None, None, False), ('3', 60, 90, False), ('4', 90, 120, True), ('5', 120, 150, False)]
         self.assert_(res == g)
 
         res = helper.get_navi(2035, 1500, step=100)
-        print "REs3", res
-        g = [(u'\xc2\xab First', 0, 100, False), ('...', None, None, False), ('15', 1400, 1500, False), ('16', 1500, 1600, True), ('17', 1600, 1700, False), ('...', None, None, False), (u'Last \xc2\xbb', 2000, 2100, False)]
+        #print "REs3", res
+        g = [(u'« First', 0, 100, False), ('...', None, None, False), ('15', 1400, 1500, False), ('16', 1500, 1600, True), ('17', 1600, 1700, False), ('...', None, None, False), (u'Last »', 2000, 2100, False)]
         self.assert_(res == g)
 
         # Now the case just one page
         res = helper.get_navi(25, 0, step=30)
-        print "Res 4", res
+        #print "Res 4", res
         self.assert_(res == None)
 
         # Now just two pages
         res = helper.get_navi(50, 0, step=30)
-        print "Res 5", res
+        #print "Res 5", res
         g = [('1', 0.0, 30.0, True), ('2', 30.0, 60.0, False)]
         self.assert_(res == g)
 

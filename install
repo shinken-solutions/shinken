@@ -252,7 +252,7 @@ function create_user(){
     then
         cecho " > User $SKUSER already exists" yellow
     else
-            useradd -s /bin/bash $SKUSER -m -d /home/$SKUSER
+            useradd -r -s /bin/bash $SKUSER -m -d /home/$SKUSER
     fi
         usermod -G $SKGROUP $SKUSER
 }
@@ -3012,6 +3012,14 @@ echo "Usage: install -k | -i | -u [addonname] | -b | -r backupname | -l | -c | -
     -h | --help             Show help"
 }
 
+function trapmsg(){
+    # signal was caught
+    echo
+    cecho "An interupt signal was caught." red
+    cecho "This script will keep running to not leave the system in an inconsistent state." red
+    echo
+}
+
 # remove last install log file
 if [ -f ${LOGFILE} ]
 then
@@ -3035,6 +3043,8 @@ fi
 
 set -- $options
 
+# catch ctrl-c
+trap trapmsg INT TERM
 
 while [ $# -gt 0 ]
 do
