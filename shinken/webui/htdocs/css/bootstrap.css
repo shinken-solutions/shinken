@@ -1112,6 +1112,19 @@ table .span12 {
   width: 924px;
   margin-left: 0;
 }
+
+table .header {
+  text-align: left !important;
+  color: #787878;
+  margin-left: 8px;
+  line-height: 27px;
+  font-size: 15px;
+  font-weight: bold;
+}
+table .odd {
+  background-color: #f9f9f9;
+}
+
 [class^="icon-"] {
   display: inline-block;
   width: 14px;

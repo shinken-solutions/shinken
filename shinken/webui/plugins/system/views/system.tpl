@@ -61,6 +61,8 @@
  	%end
 	</ul>
 -->
+
+<!--
 	<div style="well span12">
 		%types = [ ('scheduler', schedulers), ('poller', pollers), ('broker', brokers), ('reactionner', reactionners), ('receiver', receivers)]
 
@@ -70,6 +72,7 @@
 		<table class="table table-striped table-bordered table-condensed">
 		%for s in sats:
 			<!--<th> </th>-->
+<!--
 			<th> State</th>
 			<th> Name</th>
 			<th>Alive</th>
@@ -78,7 +81,7 @@
 			<th>Realm</th>
 
 			<tr>
-			<!--<td> <img src="/static/images/untick.png" style="cursor:pointer;" onclick="add_remove_elements('{{s.get_name()}}')" id="selector-{{s.get_name()}}" > </td>-->
+<!--
 			<td> <div class="aroundpulse">
 
 			%# " We put a 'pulse' around the elements if it's an important one "
@@ -103,4 +106,35 @@
 %end
 
 </div>
+-->
+
+
+    <div style="well span12">
+		<table class="table table-bordered table-condensed">
+    		%types = [ ('scheduler', schedulers), ('poller', pollers), ('broker', brokers), ('reactionner', reactionners), ('receiver', receivers)]
+	    	%for (sat_type, sats) in types:
+            <tr><th class="header" colspan="6">{{sat_type.capitalize()}}:</th></tr>
+
+                %for s in sats:
+		        <tr class="odd"><th> State</th><th> Name</th><th>Alive</th><th>Attempts</th><th>Last check</th><th>Realm</th></tr>
+    			<tr>
+			        <td>
+        			<!--<td> <img src="/static/images/untick.png" style="cursor:pointer;" onclick="add_remove_elements('{{s.get_name()}}')" id="selector-{{s.get_name()}}" > </td>-->
+			        <div class="aroundpulse">
+	    		        %# " We put a 'pulse' around the elements if it's an important one "
+            			%if not s.alive:
+		                	<span class="pulse"></span>
+        		    	%end
+		        	    <img style="width: 16px; height: 16px;" src="{{helper.get_icon_state(s)}}" />
+        			</div></td>
+        			<td> {{s.get_name()}}</td>
+        			<td> {{s.alive}}</td>
+        			<td> {{s.attempt}}/{{s.max_check_attempts}}</td>
+		        	<td title='{{helper.print_date(s.last_check)}}'>{{helper.print_duration(s.last_check, just_duration=True, x_elts=2)}}</td>
+        			<td>{{s.realm}}</td>
+		    	</tr>
+                %end
+            %end
+        </table>
+    </div>
 </div>
