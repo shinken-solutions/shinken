@@ -3078,7 +3078,7 @@ OutputFormat: csv
         i = 0
         while i < 10:
             print self.livestatus_broker.rg.services._id_heap[i]
-            idx = self.livestatus_broker.rg.services._id_heap[i][1]
+            idx = self.livestatus_broker.rg.services._id_heap[i]
             print self.livestatus_broker.rg.services[idx].get_full_name()
             i += 1
         i = 0

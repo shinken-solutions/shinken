@@ -32,55 +32,60 @@ from livestatus_query_metainfo import HINT_NONE, HINT_SINGLE_HOST, HINT_SINGLE_H
 
 
 def itersorted(self, hints=None):
-    # print "hints is", hints
+    preselected_ids = []
+    preselection = False
     if hints == None:
         # return all items
-        for _, hid in self._id_heap:
-            yield self.items[hid]
+        hints = {}
     elif hints['target'] == HINT_SINGLE_HOST:
         try:
             host_id = self._id_by_host_name_heap[hints['host_name']]
-            if 'authuser' in hints and host_id in self._id_contact_heap[hints['authuser']]:
-                yield self.items[host_id]
-            elif 'authuser' not in hints:
-                yield self.items[host_id]
-        except Exception:
-            # This host (or authuser) is unknown
+            preselected_ids = [host_id]
+            preselection = True
+        except Exception, exp:
+            # This host is unknown
             pass
     elif hints['target'] == HINT_SINGLE_HOST_SERVICES:
         try:
             service_ids = self._id_by_host_name_heap[hints['host_name']]
-            if 'authuser' in hints:
-                for service_id in service_ids:
-                    if service_id in self._id_contact_heap[hints['authuser']]:
-                        yield self.items[service_id]
-            else:
-                for service_id in service_ids:
-                    yield self.items[service_id]
-        except Exception:
+            preselected_ids = service_ids
+            preselection = True
+        except Exception, exp:
             # This service is unknown
             pass
     elif hints['target'] == HINT_SINGLE_SERVICE:
         try:
             service_id = self._id_by_service_name_heap[hints['host_name'] + '/' + hints['service_description']]
-            if 'authuser' in hints and service_id in self._id_contact_heap[hints['authuser']]:
-                yield self.items[service_id]
-            elif 'authuser' not in hints:
-                yield self.items[service_id]
+            preselected_ids = [service_id]
+            preselection = True
         except Exception:
             # This service is unknown
             pass
-    elif 'authuser' in hints:
-        if hints['authuser'] in self._id_contact_heap:
-            # return only items belonging to this contact
-            # for the moment. will be a cache cascade soon
-            for _, hid in self._id_contact_heap[hints['authuser']]:
-                yield self.items[hid]
-        # if authuser and authuser not in self._id_contact_heap:
-        # we do nothing, so the caller gets an empty list
+
+    if 'authuser' in hints:
+        print "simple authuser", hints
+        print "with a hint", self._id_contact_heap
+        if preselection:
+            try:
+                for id in [pid for pid in preselected_ids if pid in self._id_contact_heap[hints['authuser']]]:
+                    yield self.items[id]
+            except Exception:
+                # this hints['authuser'] was not in self._id_contact_heap
+                # we do nothing, so the caller gets an empty list
+                pass
+        else:
+            try:
+                for id in self._id_contact_heap[hints['authuser']]:
+                    yield self.items[id]
+            except Exception:
+                pass
     else:
-        for _, hid in self._id_heap:
-            yield self.items[hid]
+        if preselection:
+            for id in preselected_ids:
+                yield self.items[id]
+        else:
+            for id in self._id_heap:
+                yield self.items[id]
 
 
 class LiveStatusRegenerator(Regenerator):
@@ -100,22 +105,22 @@ class LiveStatusRegenerator(Regenerator):
         safe_print("SORTING HOSTS AND SERVICES")
         # First install a new attribute _id_heap, which holds the
         # item ids in sorted order
-        setattr(self.services, '_id_heap', [(get_obj_full_name(v), k) for (k, v) in self.services.items.iteritems()])
-        self.services._id_heap.sort(key=lambda x: x[0])
-        setattr(self.hosts, '_id_heap', [(get_obj_full_name(v), k) for (k, v) in self.hosts.items.iteritems()])
-        self.hosts._id_heap.sort(key=lambda x: x[0])
-        setattr(self.contacts, '_id_heap', [(get_obj_full_name(v), k) for (k, v) in self.contacts.items.iteritems()])
-        self.contacts._id_heap.sort(key=lambda x: x[0])
-        setattr(self.servicegroups, '_id_heap', [(get_obj_full_name(v), k) for (k, v) in self.servicegroups.items.iteritems()])
-        self.servicegroups._id_heap.sort(key=lambda x: x[0])
-        setattr(self.hostgroups, '_id_heap', [(get_obj_full_name(v), k) for (k, v) in self.hostgroups.items.iteritems()])
-        self.hostgroups._id_heap.sort(key=lambda x: x[0])
-        setattr(self.contactgroups, '_id_heap', [(get_obj_full_name(v), k) for (k, v) in self.contactgroups.items.iteritems()])
-        self.contactgroups._id_heap.sort(key=lambda x: x[0])
-        setattr(self.commands, '_id_heap', [(get_obj_full_name(v), k) for (k, v) in self.commands.items.iteritems()])
-        self.commands._id_heap.sort(key=lambda x: x[0])
-        setattr(self.timeperiods, '_id_heap', [(get_obj_full_name(v), k) for (k, v) in self.timeperiods.items.iteritems()])
-        self.timeperiods._id_heap.sort(key=lambda x: x[0])
+        setattr(self.services, '_id_heap', self.services.items.keys())
+        self.services._id_heap.sort(key=lambda x: get_obj_full_name(self.services.items[x]))
+        setattr(self.hosts, '_id_heap', self.hosts.items.keys())
+        self.hosts._id_heap.sort(key=lambda x: get_obj_full_name(self.hosts.items[x]))
+        setattr(self.contacts, '_id_heap', self.contacts.items.keys())
+        self.contacts._id_heap.sort(key=lambda x: get_obj_full_name(self.contacts.items[x]))
+        setattr(self.servicegroups, '_id_heap', self.servicegroups.items.keys())
+        self.servicegroups._id_heap.sort(key=lambda x: get_obj_full_name(self.servicegroups.items[x]))
+        setattr(self.hostgroups, '_id_heap', self.hostgroups.items.keys())
+        self.hostgroups._id_heap.sort(key=lambda x: get_obj_full_name(self.hostgroups.items[x]))
+        setattr(self.contactgroups, '_id_heap', self.contactgroups.items.keys())
+        self.contactgroups._id_heap.sort(key=lambda x: get_obj_full_name(self.contactgroups.items[x]))
+        setattr(self.commands, '_id_heap', self.commands.items.keys())
+        self.commands._id_heap.sort(key=lambda x: get_obj_full_name(self.commands.items[x]))
+        setattr(self.timeperiods, '_id_heap', self.timeperiods.items.keys())
+        self.timeperiods._id_heap.sort(key=lambda x: get_obj_full_name(self.timeperiods.items[x]))
         # Then install a method for accessing the lists' elements in sorted order
         setattr(self.services, '__itersorted__', types.MethodType(itersorted, self.services))
         setattr(self.hosts, '__itersorted__', types.MethodType(itersorted, self.hosts))
@@ -133,31 +138,31 @@ class LiveStatusRegenerator(Regenerator):
         setattr(self.hostgroups, '_id_contact_heap', dict())
         setattr(self.servicegroups, '_id_contact_heap', dict())
 
-        [self.hosts._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.hosts.items.iteritems() for c in v.contacts]
+        [self.hosts._id_contact_heap.setdefault(get_obj_full_name(c), []).append(k) for (k, v) in self.hosts.items.iteritems() for c in v.contacts]
         for c in self.hosts._id_contact_heap.keys():
-            self.hosts._id_contact_heap[c].sort(key=lambda x: x[0])
+            self.hosts._id_contact_heap[c].sort(key=lambda x: get_obj_full_name(self.hosts.items[x]))
 
         # strict: one must be an explicity contact of a service in order to see it.
         if self.service_authorization_strict:
-            [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.services.items.iteritems() for c in v.contacts]
+            [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append(k) for (k, v) in self.services.items.iteritems() for c in v.contacts]
         else:
             # 1. every host contact automatically becomes a service contact
-            [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.services.items.iteritems() for c in v.host.contacts]
+            [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append(k) for (k, v) in self.services.items.iteritems() for c in v.host.contacts]
             # 2. explicit service contacts
-            [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.services.items.iteritems() for c in v.contacts]
+            [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append(k) for (k, v) in self.services.items.iteritems() for c in v.contacts]
         # services without contacts inherit the host's contacts (no matter of strict or loose)
-        [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.services.items.iteritems() if not v.contacts for c in v.host.contacts]
+        [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append(k) for (k, v) in self.services.items.iteritems() if not v.contacts for c in v.host.contacts]
         for c in self.services._id_contact_heap.keys():
             # remove duplicates
             self.services._id_contact_heap[c] = list(set(self.services._id_contact_heap[c]))
-            self.services._id_contact_heap[c].sort(key=lambda x: x[0])
+            self.services._id_contact_heap[c].sort(key=lambda x: get_obj_full_name(self.services.items[x]))
 
 
         if self.group_authorization_strict:
             for c in self.hosts._id_contact_heap.keys():
                 # only host contacts can be hostgroup-contacts at all
                 # now, which hosts does the contact know?
-                contact_host_ids = set([h[1] for h in self.hosts._id_contact_heap[c]])
+                contact_host_ids = set([h for h in self.hosts._id_contact_heap[c]])
                 for (k, v) in self.hostgroups.items.iteritems():
                     # now look if c is contact of all v.members
                     # we already know the hosts for which c is a contact
@@ -166,11 +171,11 @@ class LiveStatusRegenerator(Regenerator):
                     # if all of the hostgroup_host_ids are in contact_host_ids
                     # then the hostgroup belongs to the contact
                     if hostgroup_host_ids <= contact_host_ids:
-                        self.hostgroups._id_contact_heap.setdefault(c, []).append((v.get_name(), v.id))
+                        self.hostgroups._id_contact_heap.setdefault(c, []).append(v.id)
             for c in self.services._id_contact_heap.keys():
                 # only service contacts can be servicegroup-contacts at all
                 # now, which service does the contact know?
-                contact_service_ids = set([h[1] for h in self.services._id_contact_heap[c]])
+                contact_service_ids = set([h for h in self.services._id_contact_heap[c]])
                 for (k, v) in self.servicegroups.items.iteritems():
                     # now look if c is contact of all v.members
                     # we already know the services for which c is a contact
@@ -180,19 +185,19 @@ class LiveStatusRegenerator(Regenerator):
                     # then the servicegroup belongs to the contact
                     # print "%-10s %-15s %s <= %s" % (c, v.get_name(), servicegroup_service_ids, contact_service_ids)
                     if servicegroup_service_ids <= contact_service_ids:
-                        self.servicegroups._id_contact_heap.setdefault(c, []).append((v.get_name(), v.id))
+                        self.servicegroups._id_contact_heap.setdefault(c, []).append(v.id)
         else:
             # loose: a contact of a member becomes contact of the whole group
-            [self.hostgroups._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.hostgroups.items.iteritems() for h in v.members for c in h.contacts]
-            [self.servicegroups._id_contact_heap.setdefault(get_obj_full_name(c), []).append((get_obj_full_name(v), k)) for (k, v) in self.servicegroups.items.iteritems() for s in v.members for c in s.contacts] # todo: look at mk-livestatus. what about service's host contacts?
+            [self.hostgroups._id_contact_heap.setdefault(get_obj_full_name(c), []).append(k) for (k, v) in self.hostgroups.items.iteritems() for h in v.members for c in h.contacts]
+            [self.servicegroups._id_contact_heap.setdefault(get_obj_full_name(c), []).append(k) for (k, v) in self.servicegroups.items.iteritems() for s in v.members for c in s.contacts] # todo: look at mk-livestatus. what about service's host contacts?
         for c in self.hostgroups._id_contact_heap.keys():
             # remove duplicates
             self.hostgroups._id_contact_heap[c] = list(set(self.hostgroups._id_contact_heap[c]))
-            self.hostgroups._id_contact_heap[c].sort(key=lambda x: x[0])
+            self.hostgroups._id_contact_heap[c].sort(key=lambda x: get_obj_full_name(self.hostgroups.items[x]))
         for c in self.servicegroups._id_contact_heap.keys():
             # remove duplicates
             self.servicegroups._id_contact_heap[c] = list(set(self.servicegroups._id_contact_heap[c]))
-            self.servicegroups._id_contact_heap[c].sort(key=lambda x: x[0])
+            self.servicegroups._id_contact_heap[c].sort(key=lambda x: get_obj_full_name(self.servicegroups.items[x]))
 
         # Add another helper structure which allows direct lookup by name
         # For hosts: _id_by_host_name_heap = {'name1':id1, 'name2': id2,...}
