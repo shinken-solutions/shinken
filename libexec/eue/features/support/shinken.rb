@@ -141,7 +141,7 @@ module Eue
         fsgrid.open(screenshot_file, "w") do |f|
           f.write image
         end         
-        #File.delete(screenshot)
+        File.delete(screenshot)
         return screenshot_file      
       end
 
