@@ -28,12 +28,13 @@ from shinken.objects import Contact
 from shinken.objects import NotificationWay
 from shinken.misc.regenerator import Regenerator
 from shinken.util import safe_print, get_obj_full_name
-from livestatus_query_metainfo import HINT_NONE, HINT_SINGLE_HOST, HINT_SINGLE_HOST_SERVICES, HINT_SINGLE_SERVICE
+from livestatus_query_metainfo import HINT_NONE, HINT_SINGLE_HOST, HINT_SINGLE_HOST_SERVICES, HINT_SINGLE_SERVICE, HINT_RANDOM_SERVICES
 
 
 def itersorted(self, hints=None):
     preselected_ids = []
     preselection = False
+    #print "hint is", hints["target"]
     if hints == None:
         # return all items
         hints = {}
@@ -59,7 +60,13 @@ def itersorted(self, hints=None):
             preselected_ids = [service_id]
             preselection = True
         except Exception:
-            # This service is unknown
+            pass
+    elif hints['target'] == HINT_RANDOM_SERVICES:
+        try:
+            service_ids = [self._id_by_service_name_heap[host_name + '/' + service_description] for host_name, service_description in hints['host_names_service_descriptions']]
+            preselected_ids = service_ids
+            preselection = True
+        except Exception:
             pass
 
     if 'authuser' in hints:
