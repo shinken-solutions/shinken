@@ -24,6 +24,22 @@ function save_bookmarks(){
     refresh_bookmarks();
 }
 
+function save_bookmarksro(){
+    console.log('Need to save common bookmarks list'+JSON.stringify(bookmarks));
+    $.post("/user/save_common_pref", { 'key' : 'bookmarks', 'value' : JSON.stringify(bookmarksro)});
+
+    // And refresh it
+    refresh_bookmarksro();
+}
+
+function push_to_common_bookmarks(name,uri) {
+    console.log('Pushing a bookmark to common ones');
+    var b = {'name' : name, 'uri' : uri};
+    bookmarksro.push(b);
+    save_bookmarksro();
+
+}
+
 
 function declare_bookmark(name, uri){
     console.log('declaring bookmark '+name+' at uri '+uri);
@@ -37,20 +53,24 @@ function declare_bookmarksro(name, uri){
     bookmarksro.push(b);
 }
 
-
 function refresh_bookmarks(){
     if(bookmarks.length == 0){
-	$('#bookmarks').html('<h4>No bookmarks</h4>')
-	return;
+        $('#bookmarks').html('<h4>No bookmarks</h4>')
+        return;
     }
 
     s = '<h3>Your bookmarks</h3> <ul class="unstyled">'
     $.each(bookmarks, function(idx, b){
-	l = '<span><a href="'+b.uri+'"><i class="icon-tag"></i> '+b.name+'</a></span>';
-	fun = "delete_bookmark('"+b.name+"');";
+        l = '<span><a href="'+b.uri+'"><i class="icon-tag"></i> '+b.name+'</a></span>';
+        fun = "delete_bookmark('"+b.name+"');";
         c = '<span><a href="javascript:'+fun+'" class="close">&times;</a></span>';
+        if (advfct == 1) {
+                fun2 = "push_to_common_bookmarks('"+b.name+"','"+b.uri+"');";
+                c2 = '<span><a href="javascript:'+fun2+'" class="close">&plus;</a></span>';
+        }
+        else { c2 =""; }
 
-	s+= '<li>'+l+c+'</li>';
+        s+= '<li>'+l+c+c2+'</li>';
     });
     $('#bookmarks').html(s);
 }
@@ -65,7 +85,13 @@ function refresh_bookmarksro(){
     sro = '<h3>Common bookmarks</h3> <ul class="unstyled">'
     $.each(bookmarksro, function(idx, b){
         l = '<span><a href="'+b.uri+'"><i class="icon-tag"></i> '+b.name+'</a></span>';
-        sro+= '<li>'+l+'</li>';
+        if (advfct == 1) {
+                fun = "delete_bookmarkro('"+b.name+"');";
+                c = '<span><a href="javascript:'+fun+'" class="close">&times;</a></span>';
+        }
+        else { c =""; }
+        sro+= '<li>'+l+c+'</li>';
+
     });
     $('#bookmarksro').html(sro);
 
@@ -85,3 +111,16 @@ function delete_bookmark(name){
     bookmarks = new_bookmarks;
     save_bookmarks();
 }
+
+function delete_bookmarkro(name){
+    new_bookmarksro = [];
+    $.each(bookmarksro, function(idx, b){
+        if(b.name != name){
+            new_bookmarksro.push(b);
+        }
+    });
+    bookmarksro = new_bookmarksro;
+    save_bookmarksro();
+}
+
+

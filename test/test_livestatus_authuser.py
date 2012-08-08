@@ -105,9 +105,10 @@ www1    adm(adm1,adm2,adm3) web(web1,web2)
     app_web_apache_check_http      web(web1,web2) cc(cc1,cc2,cc3)
     app_web_apache_check_errorlog  web(web1,web2)
 
-www1    adm(adm1,adm2,adm3) web(web1,web2) winadm(bill,steve)
+www2    adm(adm1,adm2,adm3) web(web1,web2) winadm(bill,steve)
     app_web_apache_check_http      web(web1,web2) cc(cc1,cc2,cc3)
     app_web_apache_check_errorlog  web(web1,web2)
+    os_windows_check_autosvc
     """
 
     def test_host_itersorted(self):
@@ -122,25 +123,33 @@ www1    adm(adm1,adm2,adm3) web(web1,web2) winadm(bill,steve)
 
         self.update_broker()
         #self.livestatus_broker.datamgr.rg.all_done_linking(1)
-        print "rg is", self.livestatus_broker.datamgr.rg.hosts
         print "rg is", self.livestatus_broker.datamgr.rg.hosts._id_contact_heap
         allhosts = sorted([h.get_full_name() for h in self.livestatus_broker.datamgr.rg.hosts.__itersorted__()])
         print allhosts
         self.assert_(allhosts == ["dbsrv1", "dbsrv2", "dbsrv3", "dbsrv4", "dbsrv5", "www1", "www2"])
-        orahosts = sorted([h.get_full_name() for h in self.livestatus_broker.datamgr.rg.hosts.__itersorted__("oradba1")])
+        hint = {"target": 0, "authuser": "oradba1"}
+        orahosts = sorted([h.get_full_name() for h in self.livestatus_broker.datamgr.rg.hosts.__itersorted__(hint)])
         print orahosts
-        self.assert_(orahosts == ["dbsrv1", "dbsrv2", "dbsrv3"])
-        myhosts = sorted([h.get_full_name() for h in self.livestatus_broker.datamgr.rg.hosts.__itersorted__("mydba2")])
+        self.assert_(orahosts == [u"dbsrv3"])
+        hint = {"target": 0, "authuser": "mydba2"}
+        myhosts = sorted([h.get_full_name() for h in self.livestatus_broker.datamgr.rg.hosts.__itersorted__(hint)])
         print myhosts
         self.assert_(myhosts == ["dbsrv4", "dbsrv5"])
         print "rg is", self.livestatus_broker.datamgr.rg.services
         print "rg is", self.livestatus_broker.datamgr.rg.services._id_contact_heap
-        admservices = sorted([s.get_full_name() for s in self.livestatus_broker.datamgr.rg.services.__itersorted__("adm")])
-        print admservices
-        self.assert_(myhosts == ["dbsrv4", "dbsrv5"])
-        winhosts = sorted([s.get_name() for s in self.livestatus_broker.datamgr.rg.hostgroups.__itersorted__("bill")])
+        # unknown user
+        hint = {"target": 0, "authuser": "adm0"}
+        admservices = sorted([s.get_full_name() for s in self.livestatus_broker.datamgr.rg.services.__itersorted__(hint)])
+        self.assert_(len(admservices) == 0)
+        # known user which is a contact to all hosts
+        hint = {"target": 0, "authuser": "adm1"}
+        admservices = sorted([s.get_full_name() for s in self.livestatus_broker.datamgr.rg.services.__itersorted__(hint)])
+        self.assert_(len(admservices) == 15) #all services
+        hint = {"target": 0, "authuser": "bill"} # bill->www2->windows
+        print "rg is", self.livestatus_broker.datamgr.rg.hostgroups._id_contact_heap
+        winhosts = sorted([s.get_name() for s in self.livestatus_broker.datamgr.rg.hostgroups.__itersorted__(hint)])
         print winhosts
-        self.assert_(myhosts == ["dbsrv4", "dbsrv5"])
+        self.assert_(winhosts == ["windows"])
         print "rg is", self.livestatus_broker.datamgr.rg.hostgroups
         self.livestatus_broker.datamgr.rg.group_authorization_strict = False
         self.livestatus_broker.datamgr.rg.all_done_linking(1)
@@ -174,9 +183,7 @@ KeepAlive: on
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         pyresponse = eval(response)
-        self.assert_(len(pyresponse) == 3)
-        self.assert_("dbsrv1" in [h[0] for h in pyresponse])
-        self.assert_("dbsrv2" in [h[0] for h in pyresponse])
+        self.assert_(len(pyresponse) == 1)
         self.assert_("dbsrv3" in [h[0] for h in pyresponse])
 
         request = """GET hosts
@@ -213,6 +220,7 @@ KeepAlive: on
 """
         # all because bill is host contact (via cgroup winadm), 2xapp_web, 1xos_windows
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+        print "rg is", self.livestatus_broker.datamgr.rg.services._id_contact_heap["bill"]
         print response
         pyresponse = eval(response)
         print pyresponse

@@ -182,3 +182,25 @@ class Mongodb_generic(BaseModule):
                 u[key] = value
                 print '[Mongodb] Just saving the new key in the user pref'
                 self.db.ui_user_preferences.save(u)
+
+    def set_ui_common_preference(self, key, value):
+        if not self.db:
+            print "[Mongodb]: error Problem during init phase"
+            return None
+
+        # check a collection exist for this user
+        u = self.db.ui_user_preferences.find_one({'_id': 'shinken-global'})
+
+        if not u:
+            # no collection for this user? create a new one
+            print "[Mongodb] No common entry, I create a new one"
+            r = self.db.ui_user_preferences.save({'_id': 'shinken-global', key: value})
+        else:
+            # found a collection for this user
+            print "[Mongodb] common entry found. Updating"
+            r = self.db.ui_user_preferences.update({'_id': 'shinken-global'}, {'$set': {key: value}})
+
+        if not r:
+            print "[Mongodb]: error Problem during update/insert phase"
+            return None
+

@@ -82,6 +82,7 @@ HINT_NONE = 0
 HINT_SINGLE_HOST = 1
 HINT_SINGLE_HOST_SERVICES = 2
 HINT_SINGLE_SERVICE = 3
+HINT_RANDOM_SERVICES = 4
 
 
 class LiveStatusQueryMetainfoFilterStack(LiveStatusStack):
@@ -157,7 +158,7 @@ class LiveStatusQueryMetainfo(object):
         text = "table %s\n" % self.table
         text += "columns %s\n" % self.columns
         text += "stats_columns %s\n" % self.stats_columns
-        text += "filter_columns %s\n" % self.filter_columns
+        text += "filter_columns %s\n" % list(set(self.filter_columns))
         text += "is_stats %s\n" % self.is_stats
         text += "is_cacheable %s\n" % str(self.cache_category != CACHE_IMPOSSIBLE)
         return text
@@ -223,6 +224,9 @@ class LiveStatusQueryMetainfo(object):
                     reference = ''
                 self.metainfo_filter_stack.put_stack(self.make_text_filter(operator, attribute, reference))
                 if reference != '_REALNAME':
+                    if attribute.startswith(self.table.rstrip('s') + '_'):
+                        # simplify the filters. GET services,service_description -> GET services,description
+                        attribute = attribute.replace(self.table.rstrip('s') + '_', '')
                     self.structured_data.append((keyword, attribute, operator, reference))
             elif keyword == 'And':
                 _, andnum = self.split_option(line)
@@ -339,10 +343,11 @@ class LiveStatusQueryMetainfo(object):
             self.cache_category = CACHE_SERVICE_STATS
         else:
             pass
-            print "i cannot cache this", self
+            #print "i cannot cache this", self
 
         # Initial implementation only respects the = operator (~ may be an option in the future)
         eq_filters = sorted([str(f[1]) for f in self.structured_data if (f[0] == 'Filter' and f[2] == '=')])
+        unique_eq_filters = sorted({}.fromkeys(eq_filters).keys())
         if [f for f in self.structured_data if f[0] == 'Negate']:
             # HANDS OFF!!!!
             # This might be something like:
@@ -363,9 +368,42 @@ class LiveStatusQueryMetainfo(object):
                 self.query_hints['target'] = HINT_SINGLE_HOST_SERVICES
                 self.query_hints['host_name'] = [f[3] for f in self.structured_data if (f[0] == 'Filter' and f[2] == '=')][0]
                 # this helps: multisite_host_detail
-            elif eq_filters == ['description', 'host_name'] or eq_filters == ['host_name', 'service_description']:
+            elif eq_filters == ['description', 'host_name']:
                 # We want one specific service
                 self.query_hints['target'] = HINT_SINGLE_SERVICE
                 self.query_hints['host_name'] = [f[3] for f in self.structured_data if (f[0] == 'Filter' and f[1] == 'host_name' and f[2] == '=')][0]
-                self.query_hints['service_description'] = [f[3] for f in self.structured_data if (f[0] == 'Filter' and f[1].endswith('description') and f[2] == '=')][0]
+                self.query_hints['service_description'] = [f[3] for f in self.structured_data if (f[0] == 'Filter' and f[1] == 'description' and f[2] == '=')][0]
                 # this helps: multisite_service_detail, thruk_service_detail, nagvis_service_icon
+            elif unique_eq_filters ==  ['description', 'host_name']:
+                # we want a lot of services in the format
+                # Filter: host_name
+                # Filter: service_description
+                # And: 2
+                services = []
+                only_services = True
+                try:
+                    for i, _ in enumerate(self.structured_data):
+                        if self.structured_data[i][0] == 'Filter' and self.structured_data[i][1] == 'host_name':
+                            if self.structured_data[i+1][0] == 'Filter' and self.structured_data[i+1][1] == 'description' and self.structured_data[i+2][0] == 'And' and self.structured_data[i+2][1] == 2:
+                                services.append((self.structured_data[i][3], self.structured_data[i+1][3]))
+                            elif self.structured_data[i-1][0] == 'Filter' and self.structured_data[i-1][1] == 'description' and self.structured_data[i+1][0] == 'And' and self.structured_data[i+1][1] == 2:
+                                services.append((self.structured_data[i][3], self.structured_data[i-1][3]))
+                            else:
+                                only_services = False
+                                break
+                except Exception, exp:
+                    only_services = False
+                if only_services:
+                    if len(services) == len(filter(lambda x: x[0] == 'Filter' and x[1] == 'description', self.structured_data)):
+#len([None for stmt in self.structured_data if stmt[0] == 'Filter' and stmt[1] == 'description']):
+                        services = set(services)
+                        hosts = set([svc[0] for svc in services])
+                        # num_hosts < num_services / 2
+                        # hint : hosts_names
+                        if len(hosts) == 1:
+                            self.query_hints['target'] = HINT_SINGLE_HOST_SERVICES
+                            self.query_hints['host_name'] = hosts[0]
+                        else:
+                            self.query_hints['target'] = HINT_RANDOM_SERVICES
+                            self.query_hints['host_names_service_descriptions'] = services
+

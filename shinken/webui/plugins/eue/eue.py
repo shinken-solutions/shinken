@@ -29,11 +29,13 @@ import datetime
 try:
     from shinken.webui.bottle import redirect
     from shinken.webui.bottle import static_file
+    from shinken.webui.bottle import response
     from shinken.log import logger
 except ImportError:
     print "Outside of bottle"
 
 import os
+import mimetypes
 # Mongodb lib
 try:
     from pymongo.connection import Connection
@@ -209,9 +211,38 @@ def create_media(media):
     return True
 
 def eue_media(media):
+
     user = checkauth()    
-    create_media(media)
-    return static_file(media,root=media_path)
+
+    header = dict()
+
+    parts = media.split(".")
+    ext = parts[len(parts)-1]
+
+    if ext == ".ogg":
+        mt = "application/ogg"
+    elif ext == ".png":
+        mt = "image/png"
+    else:
+        mt = "binary/octet-stream"
+
+    response.set_header('Content-Type', mt)
+
+    message,db = getdb('euemedia')
+    if not db:
+        return False
+
+    fs = gridfs.GridFS(db)
+
+    fh = fs.get_last_version(media)
+
+    response.set_header('Content-Length', fh.length)
+
+    data = fh.read()
+
+    return data
+
+
 
 def featuresbyapplication(application_code):
     message,db = getdb('shinken')
