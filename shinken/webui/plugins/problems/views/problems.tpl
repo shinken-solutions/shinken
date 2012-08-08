@@ -68,6 +68,14 @@
 	// List of the bookmarks
 	var bookmarks = [];
 	var bookmarksro = [];
+
+        // Ok not the best way to restrict the admin functions to admin, but I can't find another way around.
+        %if user.is_admin:
+        var advfct=1;
+        %else:
+        var advcft=0;
+        %end
+
 	%for b in bookmarks:
 	declare_bookmark("{{!b['name']}}","{{!b['uri']}}");
 	%end
