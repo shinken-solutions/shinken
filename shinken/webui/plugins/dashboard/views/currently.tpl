@@ -106,7 +106,7 @@ $(function($) {
     <span class="badger-title">Impacts</span>
     %if app:
 
-<span class="pulsate badger-big badger-critical">{{app.datamgr.get_nb_all_problems()}}%</span>
+<span class="pulsate badger-big badger-critical">{{app.datamgr.get_per_service_state()}}%</span>
     %end
   </li>
 </ul>
