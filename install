@@ -1993,6 +1993,18 @@ function install_nconf(){
     echo "cfg_dir=global" >> $TARGET/etc/nagios.cfg
     echo "cfg_dir=Default_collector" >> $TARGET/etc/nagios.cfg
 
+    # restart apache for dependencies
+    case $CODE in
+        REDHAT|Fedora)
+            chkconfig httpd on >> ${LOGFILE} 2>&1
+            chkconfig --add httpd  >> ${LOGFILE} 2>&1
+            /etc/init.d/httpd restart >> ${LOGFILE} 2>&1
+            ;;
+        DEBIAN)
+            /etc/init.d/apache2 restart >> ${LOGFILE} 2>&1
+            ;;
+    esac
+
     # automaticaly fill default response
     cecho " > Set default answers on web installer" green
     sed -i "s#\$nagios_bin =.*#\$nagios_bin = \""$TARGET"/bin/nagios\";#g" $NCONFTARGET/INSTALL.php
@@ -2000,8 +2012,8 @@ function install_nconf(){
     sed -i "s#\"user_name\"#\"nconf\"#g" $NCONFTARGET/INSTALL.php
     sed -i "s#\"password\",#\""$NCONFP"\",#g" $NCONFTARGET/INSTALL.php
 
-    cecho " > Nconf is installed, you must go to http://yourhost/nconf and finalize installation" green
-    cecho " > mysql credentials and database are:" green
+    cecho " > Nconf is installed, you must go to http://yourhost/nconf and finalize installation" yellow
+    cecho " > mysql credentials and database are:" yellow
     cecho " --> user: nconf" yellow
     cecho " --> password: $NCONFP" yellow
     cecho " --> database: nconf" yellow
