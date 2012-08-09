@@ -1017,6 +1017,7 @@ class SchedulingItem(Item):
     # And because we are just launching the notification, we can say
     # that this contact have been notified
     def update_notification_command(self, n):
+        cls = self.__class__
         m = MacroResolver()
         data = self.get_data_for_notifications(n.contact, n)
         n.command = m.resolve_command(n.command_call, data)
