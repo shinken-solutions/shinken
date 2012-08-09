@@ -39,8 +39,8 @@
      *
      */
     $.fn.EasyWidgets = function(settings){
-	InitializeWidgets(settings, false);
-	return true;
+        InitializeWidgets(settings, false);
+        return true;
     };
 
     /**
@@ -66,22 +66,22 @@
      *
      */
     $.fn.AddEasyWidget = function(html, placeId, settings){
-	var canAdd = true;
-	var widget = $(html);
-	var s = $.extend(true, $.fn.EasyWidgets.defaults, settings);
-	if($.isFunction(s.callbacks.onAddQuery)){
-	    canAdd = s.callbacks.onAddQuery(widget, placeId);
-	}
-	if(canAdd){
-	    $('#'+placeId).append(html);
-	    if($.isFunction(s.callbacks.onAdd)){
-		s.callbacks.onAdd(widget, placeId);
-	    }
-	    InitializeWidgets(s, true);
-	    return true;
-	}else{
-	    return false;
-	}
+        var canAdd = true;
+        var widget = $(html);
+        var s = $.extend(true, $.fn.EasyWidgets.defaults, settings);
+        if($.isFunction(s.callbacks.onAddQuery)){
+            canAdd = s.callbacks.onAddQuery(widget, placeId);
+        }
+        if(canAdd){
+            $('#'+placeId).append(html);
+            if($.isFunction(s.callbacks.onAdd)){
+                s.callbacks.onAdd(widget, placeId);
+            }
+            InitializeWidgets(s, true);
+            return true;
+        }else{
+            return false;
+        }
     };
 
     /**
@@ -98,27 +98,27 @@
      *
      */
     $.fn.DisableEasyWidgets = function(settings){
-	var canDisable = true;
-	var s = $.extend(true, $.fn.EasyWidgets.defaults, settings);
-	if($.isFunction(s.callbacks.onDisableQuery)){
-	    canDisable = s.callbacks.onDisableQuery();
-	}
-	if(canDisable){
-	    $(s.selectors.places).sortable('disable');
-	    $(s.selectors.widget).each(function(){
-		var widget = $(this);
-		if(widget.hasClass(s.options.movable)){
-		    widget.find(s.selectors.header).css('cursor', 'default');
-		}
-	    });
-	    if($.isFunction(s.callbacks.onDisable)){
-		s.callbacks.onDisable();
-	    }
-	    SetCookie(s.cookies.disableName, 1, s);
-	    return true;
-	}else{
-	    return false;
-	}
+        var canDisable = true;
+        var s = $.extend(true, $.fn.EasyWidgets.defaults, settings);
+        if($.isFunction(s.callbacks.onDisableQuery)){
+            canDisable = s.callbacks.onDisableQuery();
+        }
+        if(canDisable){
+            $(s.selectors.places).sortable('disable');
+            $(s.selectors.widget).each(function(){
+                var widget = $(this);
+                if(widget.hasClass(s.options.movable)){
+                    widget.find(s.selectors.header).css('cursor', 'default');
+                }
+            });
+            if($.isFunction(s.callbacks.onDisable)){
+                s.callbacks.onDisable();
+            }
+            SetCookie(s.cookies.disableName, 1, s);
+            return true;
+        }else{
+            return false;
+        }
     };
 
     /**
@@ -138,29 +138,29 @@
      *
      */
     $.fn.EnableEasyWidgets = function(settings){
-	var canEnable = true;
-	var s = $.extend(true, $.fn.EasyWidgets.defaults, settings);
-	if($.isFunction(s.callbacks.onEnableQuery)){
-	    canEnable = s.callbacks.onEnableQuery();
-	}
-	if(canEnable){
-	    $(s.selectors.places).sortable('enable');
-	    $(s.selectors.widget).each(function(){
-		var widget = $(this);
-		if(widget.hasClass(s.options.movable)){
-		    widget.find(s.selectors.header).css('cursor', 'move');
-		}
-	    });
-	    if($.isFunction(s.callbacks.onEnable)){
-		s.callbacks.onEnable();
-	    }
-	    if(s.behaviour.useCookies){
-		SetCookie(s.cookies.disableName, 0, s);
-	    }
-	    return true;
-	}else{
-	    return false;
-	}
+        var canEnable = true;
+        var s = $.extend(true, $.fn.EasyWidgets.defaults, settings);
+        if($.isFunction(s.callbacks.onEnableQuery)){
+            canEnable = s.callbacks.onEnableQuery();
+        }
+        if(canEnable){
+            $(s.selectors.places).sortable('enable');
+            $(s.selectors.widget).each(function(){
+                var widget = $(this);
+                if(widget.hasClass(s.options.movable)){
+                    widget.find(s.selectors.header).css('cursor', 'move');
+                }
+            });
+            if($.isFunction(s.callbacks.onEnable)){
+                s.callbacks.onEnable();
+            }
+            if(s.behaviour.useCookies){
+                SetCookie(s.cookies.disableName, 0, s);
+            }
+            return true;
+        }else{
+            return false;
+        }
     };
 
     /**
@@ -186,30 +186,30 @@
      *
      */
     $.fn.HideEasyWidgets = function(settings){
-	var s = $.extend(true, $.fn.EasyWidgets.defaults, settings);
-	$(s.selectors.widget+':visible').each(function(){
-	    var canHide = true;
-	    var thisWidget = $(this);
-	    var thisWidgetId = thisWidget.attr('id');
-	    if($.isFunction(s.callbacks.onHideQuery)){
-		canHide = s.callbacks.onHideQuery(thisWidget);
-	    }
-	    if(canHide){
-		ApplyEffect(
-		    thisWidget,
-		    s.effects.widgetHide,
-		    s.effects.effectDuration,
-		    false
-		);
-		if(s.behaviour.useCookies && thisWidgetId){
-		    UpdateCookie(thisWidgetId, s.cookies.closeName, s);
-		}
-		if($.isFunction(s.callbacks.onHide)){
-		    s.callbacks.onHide(thisWidget);
-		}
-	    }
-	});
-	return true;
+        var s = $.extend(true, $.fn.EasyWidgets.defaults, settings);
+        $(s.selectors.widget+':visible').each(function(){
+            var canHide = true;
+            var thisWidget = $(this);
+            var thisWidgetId = thisWidget.attr('id');
+            if($.isFunction(s.callbacks.onHideQuery)){
+                canHide = s.callbacks.onHideQuery(thisWidget);
+            }
+            if(canHide){
+                ApplyEffect(
+                    thisWidget,
+                    s.effects.widgetHide,
+                    s.effects.effectDuration,
+                    false
+                );
+                if(s.behaviour.useCookies && thisWidgetId){
+                    UpdateCookie(thisWidgetId, s.cookies.closeName, s);
+                }
+                if($.isFunction(s.callbacks.onHide)){
+                    s.callbacks.onHide(thisWidget);
+                }
+            }
+        });
+        return true;
     };
 
     /**
@@ -235,31 +235,31 @@
      *
      */
     $.fn.ShowEasyWidgets = function(settings){
-	var s = $.extend(true, $.fn.EasyWidgets.defaults, settings);
-	$(s.selectors.widget+':hidden').each(function(){
-	    var canShow = true;
-	    var widget = $(this);
-	    var widgetId = widget.attr('id');
-	    var haveId = ($.trim(widgetId) != '');
-	    if($.isFunction(s.callbacks.onShowQuery)){
-		canShow = s.callbacks.onShowQuery(widget);
-	    }
-	    if(canShow){
-		ApplyEffect(
-		    widget,
-		    s.effects.widgetShow,
-		    s.effects.effectDuration,
-		    true
-		);
-		if(haveId && s.behaviour.useCookies){
-		    CleanCookie(widgetId, s.cookies.closeName, s);
-		}
-		if($.isFunction(s.callbacks.onShow)){
-		    s.callbacks.onShow(widget);
-		}
-	    }
-	});
-	return true;
+        var s = $.extend(true, $.fn.EasyWidgets.defaults, settings);
+        $(s.selectors.widget+':hidden').each(function(){
+            var canShow = true;
+            var widget = $(this);
+            var widgetId = widget.attr('id');
+            var haveId = ($.trim(widgetId) != '');
+            if($.isFunction(s.callbacks.onShowQuery)){
+                canShow = s.callbacks.onShowQuery(widget);
+            }
+            if(canShow){
+                ApplyEffect(
+                    widget,
+                    s.effects.widgetShow,
+                    s.effects.effectDuration,
+                    true
+                );
+                if(haveId && s.behaviour.useCookies){
+                    CleanCookie(widgetId, s.cookies.closeName, s);
+                }
+                if($.isFunction(s.callbacks.onShow)){
+                    s.callbacks.onShow(widget);
+                }
+            }
+        });
+        return true;
     };
 
     /**
@@ -286,33 +286,33 @@
      *
      */
     $.fn.ShowEasyWidget = function(widgetId, settings){
-	var canShow = true;
-	var widget = $('#'+widgetId);
-	if(widget.css('display') == 'none'){
-	    var s = $.extend(true, $.fn.EasyWidgets.defaults, settings);
-	    if($.isFunction(s.callbacks.onShowQuery)){
-		canShow = s.callbacks.onShowQuery(widget);
-	    }
-	    if(canShow){
-		ApplyEffect(
-		    widget,
-		    s.effects.widgetShow,
-		    s.effects.effectDuration,
-		    true
-		);
-		if(s.behaviour.useCookies){
-		    CleanCookie(widgetId, s.cookies.closeName, s);
-		}
-		if($.isFunction(s.callbacks.onShow)){
-		    s.callbacks.onShow(widget);
-		}
-		return true;
-	    }else{
-		return false;
-	    }
-	}else{
-	    return false;
-	}
+        var canShow = true;
+        var widget = $('#'+widgetId);
+        if(widget.css('display') == 'none'){
+            var s = $.extend(true, $.fn.EasyWidgets.defaults, settings);
+            if($.isFunction(s.callbacks.onShowQuery)){
+                canShow = s.callbacks.onShowQuery(widget);
+            }
+            if(canShow){
+                ApplyEffect(
+                    widget,
+                    s.effects.widgetShow,
+                    s.effects.effectDuration,
+                    true
+                );
+                if(s.behaviour.useCookies){
+                    CleanCookie(widgetId, s.cookies.closeName, s);
+                }
+                if($.isFunction(s.callbacks.onShow)){
+                    s.callbacks.onShow(widget);
+                }
+                return true;
+            }else{
+                return false;
+            }
+        }else{
+            return false;
+        }
     };
 
     /**
@@ -339,64 +339,64 @@
      *
      */
     $.fn.HideEasyWidget = function(widgetId, settings){
-	var canHide = true;
-	var widget = $('#'+widgetId);
-	if(widget.css('display') != 'none'){
-	    var s = $.extend(true, $.fn.EasyWidgets.defaults, settings);
-	    if($.isFunction(s.callbacks.onHideQuery)){
-		canHide = s.callbacks.onHideQuery(widget);
-	    }
-	    if(canHide){
-		ApplyEffect(
-		    widget,
-		    s.effects.widgetHide,
-		    s.effects.effectDuration,
-		    false
-		);
-		if(s.behaviour.useCookies){
-		    UpdateCookie(widgetId, s.cookies.closeName, s);
-		}
-		if($.isFunction(s.callbacks.onHide)){
-		    s.callbacks.onHide(widget);
-		}
-		return true;
-	    }else{
-		return false;
-	    }
-	}else{
-	    return false;
-	}
+        var canHide = true;
+        var widget = $('#'+widgetId);
+        if(widget.css('display') != 'none'){
+            var s = $.extend(true, $.fn.EasyWidgets.defaults, settings);
+            if($.isFunction(s.callbacks.onHideQuery)){
+                canHide = s.callbacks.onHideQuery(widget);
+            }
+            if(canHide){
+                ApplyEffect(
+                    widget,
+                    s.effects.widgetHide,
+                    s.effects.effectDuration,
+                    false
+                );
+                if(s.behaviour.useCookies){
+                    UpdateCookie(widgetId, s.cookies.closeName, s);
+                }
+                if($.isFunction(s.callbacks.onHide)){
+                    s.callbacks.onHide(widget);
+                }
+                return true;
+            }else{
+                return false;
+            }
+        }else{
+            return false;
+        }
     };
 
     $.fn.GetEasyWidgetPositions = function(){
-	var s = $.fn.EasyWidgets.defaults;//settings;
+        var s = $.fn.EasyWidgets.defaults;//settings;
 
-	var positions = '';
-	$(s.selectors.places).each(function(){
-	    var widgets = '';
-	    var place = $(this);
-	    var places = place.attr('id') + '=';
-	    place.children(s.selectors.widget).each(function(){
-		var widget = this;
-		var widgetId = widget.id;
-		var haveId = ($.trim(widgetId) != '');
-		if(haveId){
-		    if(widgets == ''){
-			widgets += widgetId;
-		    }else{
-			widgets += ',' + widgetId;
-		    }
-		}
-	    });
-	    places += widgets;
-	    if(positions == ''){
-		positions += places;
-	    }else{
-		positions += '|' + places;
-	    }
-	});
-	console.log('Give positions'+positions);
-	return positions;
+        var positions = '';
+        $(s.selectors.places).each(function(){
+            var widgets = '';
+            var place = $(this);
+            var places = place.attr('id') + '=';
+            place.find(s.selectors.widget).each(function(){
+                var widget = this;
+                var widgetId = widget.id;
+                var haveId = ($.trim(widgetId) != '');
+                if(haveId){
+                    if(widgets == ''){
+                        widgets += widgetId;
+                    }else{
+                        widgets += ',' + widgetId;
+                    }
+                }
+            });
+            places += widgets;
+            if(positions == ''){
+                positions += places;
+            }else{
+                positions += '|' + places;
+            }
+        });
+        console.log('Give positions'+positions);
+        return positions;
     };
 
     /////////////////////////////
@@ -416,245 +416,245 @@
      */
     $.fn.EasyWidgets.defaults = {
 
-	// Behaviour of the plugin
-	behaviour : {
+        // Behaviour of the plugin
+        behaviour : {
 
-	    // Miliseconds delay between mousedown and drag start
-	    dragDelay : 100,
+            // Miliseconds delay between mousedown and drag start
+            dragDelay : 100,
 
-	    // Miliseconds delay between mouseup and drag stop
-	    dragRevert : 100,
+            // Miliseconds delay between mouseup and drag stop
+            dragRevert : 100,
 
-	    // Determinme the opacity of Widget when start drag
-	    dragOpacity : 0.8,
+            // Determinme the opacity of Widget when start drag
+            dragOpacity : 0.8,
 
-	    // Cookies (require Cookie plugin) to store positions and states
-	    useCookies : false
-	},
+            // Cookies (require Cookie plugin) to store positions and states
+            useCookies : false
+        },
 
-	// Some effects that can be apply sometimes
-	effects : {
+        // Some effects that can be apply sometimes
+        effects : {
 
-	    // Miliseconds for effects duration
-	    effectDuration : 500,
+            // Miliseconds for effects duration
+            effectDuration : 500,
 
-	    // Can be none, slide or fade
-	    widgetShow : 'none',
-	    widgetHide : 'none',
-	    widgetClose : 'none',
-	    widgetExtend : 'none',
-	    widgetCollapse : 'none',
-	    widgetOpenEdit : 'none',
-	    widgetCloseEdit : 'none',
-	    widgetCancelEdit : 'none'
-	},
+            // Can be none, slide or fade
+            widgetShow : 'none',
+            widgetHide : 'none',
+            widgetClose : 'none',
+            widgetExtend : 'none',
+            widgetCollapse : 'none',
+            widgetOpenEdit : 'none',
+            widgetCloseEdit : 'none',
+            widgetCancelEdit : 'none'
+        },
 
-	// Only for the optional cookie feature
-	cookies : {
+        // Only for the optional cookie feature
+        cookies : {
 
-	    // Cookie path
-	    path : '',
+            // Cookie path
+            path : '',
 
-	    // Cookie domain
-	    domain : '',
+            // Cookie domain
+            domain : '',
 
-	    // Cookie expiration time in days
-	    expires : 90,
+            // Cookie expiration time in days
+            expires : 90,
 
-	    // Store a secure cookie?
-	    secure : false,
+            // Store a secure cookie?
+            secure : false,
 
-	    // Cookie name for close Widgets
-	    closeName : 'ew-close',
+            // Cookie name for close Widgets
+            closeName : 'ew-close',
 
-	    // Cookie name for disable all Widgets
-	    disableName : 'ew-disable',
+            // Cookie name for disable all Widgets
+            disableName : 'ew-disable',
 
-	    // Cookie name for positined Widgets
-	    positionName : 'ew-position',
+            // Cookie name for positined Widgets
+            positionName : 'ew-position',
 
-	    // Cookie name for collapsed Widgets
-	    collapseName : 'ew-collapse'
-	},
+            // Cookie name for collapsed Widgets
+            collapseName : 'ew-collapse'
+        },
 
-	// Options name to use in the HTML markup
-	options : {
+        // Options name to use in the HTML markup
+        options : {
 
-	    // To recognize a movable Widget
-	    movable : 'movable',
+            // To recognize a movable Widget
+            movable : 'movable',
 
-	    // To recognize a editable Widget
-	    editable : 'editable',
+            // To recognize a editable Widget
+            editable : 'editable',
 
-	    // To recognize a collapse Widget
-	    collapse : 'collapsed',
+            // To recognize a collapse Widget
+            collapse : 'collapsed',
 
-	    // To recognize a removable Widget
-	    removable : 'removable',
+            // To recognize a removable Widget
+            removable : 'removable',
 
-	    // To recognize a collapsable Widget
-	    collapsable : 'collapsable',
+            // To recognize a collapsable Widget
+            collapsable : 'collapsable',
 
-	    // To recognize Widget that require confirmation when remove
-	    closeConfirm : 'closeconfirm'
-	},
+            // To recognize Widget that require confirmation when remove
+            closeConfirm : 'closeconfirm'
+        },
 
-	// Callbacks functions
-	callbacks : {
+        // Callbacks functions
+        callbacks : {
 
-	    // When a Widget is added on demand, send the widget object and place ID
-	    onAdd : null,
+            // When a Widget is added on demand, send the widget object and place ID
+            onAdd : null,
 
-	    // When a editbox is closed, send the link and the widget objects
-	    onEdit : null,
+            // When a editbox is closed, send the link and the widget objects
+            onEdit : null,
 
-	    // When a Widget is show, send the widget object
-	    onShow : null,
+            // When a Widget is show, send the widget object
+            onShow : null,
 
-	    // When a Widget is hide, send the widget object
-	    onHide : null,
+            // When a Widget is hide, send the widget object
+            onHide : null,
 
-	    // When a Widget is closed, send the link and the widget objects
-	    onClose : null,
+            // When a Widget is closed, send the link and the widget objects
+            onClose : null,
 
-	    // When Widgets are enabled using the appropiate public method
-	    onEnable : null,
+            // When Widgets are enabled using the appropiate public method
+            onEnable : null,
 
-	    // When a Widget is extend, send the link and the widget objects
-	    onExtend : null,
+            // When a Widget is extend, send the link and the widget objects
+            onExtend : null,
 
-	    // When Widgets are disabled using the appropiate public method
-	    onDisable : null,
+            // When Widgets are disabled using the appropiate public method
+            onDisable : null,
 
-	    // When a editbox is closed, send a ui object, see jQuery::sortable()
-	    onDragStop : null,
+            // When a editbox is closed, send a ui object, see jQuery::sortable()
+            onDragStop : null,
 
-	    // When a Widget is collapse, send the link and the widget objects
-	    onCollapse : null,
+            // When a Widget is collapse, send the link and the widget objects
+            onCollapse : null,
 
-	    // When a Widget is try to added, send the widget object and place ID
-	    onAddQuery : null,
+            // When a Widget is try to added, send the widget object and place ID
+            onAddQuery : null,
 
-	    // When a editbox is try to close, send the link and the widget objects
-	    onEditQuery : null,
+            // When a editbox is try to close, send the link and the widget objects
+            onEditQuery : null,
 
-	    // When a Widget is try to show, send the widget object
-	    onShowQuery : null,
+            // When a Widget is try to show, send the widget object
+            onShowQuery : null,
 
-	    // When a Widget is try to hide, send the widget object
-	    onHideQuery : null,
+            // When a Widget is try to hide, send the widget object
+            onHideQuery : null,
 
-	    // When a Widget is try to close, send the link and the widget objects
-	    onCloseQuery : null,
+            // When a Widget is try to close, send the link and the widget objects
+            onCloseQuery : null,
 
-	    // When a editbox is cancel (close), send the link and the widget objects
-	    onCancelEdit : null,
+            // When a editbox is cancel (close), send the link and the widget objects
+            onCancelEdit : null,
 
-	    // When Widgets are enabled using the appropiate public method
-	    onEnableQuery : null,
+            // When Widgets are enabled using the appropiate public method
+            onEnableQuery : null,
 
-	    // When a Widget is try to expand, send the link and the widget objects
-	    onExtendQuery : null,
+            // When a Widget is try to expand, send the link and the widget objects
+            onExtendQuery : null,
 
-	    // When Widgets are disabled using the appropiate public method
-	    onDisableQuery : null,
+            // When Widgets are disabled using the appropiate public method
+            onDisableQuery : null,
 
-	    // When a Widget is try to expand, send the link and the widget objects
-	    onCollapseQuery : null,
+            // When a Widget is try to expand, send the link and the widget objects
+            onCollapseQuery : null,
 
-	    // When a editbox is try to cancel, send the link and the widget objects
-	    onCancelEditQuery : null,
+            // When a editbox is try to cancel, send the link and the widget objects
+            onCancelEditQuery : null,
 
-	    // When one Widget is repositioned, send the positions serialization
-	    onChangePositions : null,
+            // When one Widget is repositioned, send the positions serialization
+            onChangePositions : null,
 
-	    // When Widgets need repositioned, get the serialization positions
-	    onRefreshPositions : null
-	},
+            // When Widgets need repositioned, get the serialization positions
+            onRefreshPositions : null
+        },
 
-	// Selectors in HTML markup. All can be change by you, but not all is
-	// used in the HTML markup. For example, the "editLink" or "closeLink"
-	// is prepared by the plugin for every Widget.
-	selectors : {
+        // Selectors in HTML markup. All can be change by you, but not all is
+        // used in the HTML markup. For example, the "editLink" or "closeLink"
+        // is prepared by the plugin for every Widget.
+        selectors : {
 
-	    // Container of a Widget (into another element that use as place)
-	    // The container can be "div" or "li", for example. In the first case
-	    // use another "div" as place, and a "ul" in the case of "li".
-	    container : 'div',
+            // Container of a Widget (into another element that use as place)
+            // The container can be "div" or "li", for example. In the first case
+            // use another "div" as place, and a "ul" in the case of "li".
+            container : 'div',
 
-	    // Class identifier for a Widget
-	    widget : '.widget',
+            // Class identifier for a Widget
+            widget : '.widget',
 
-	    // Class identifier for a Widget place (parents of Widgets)
-	    places : '.widget-place',
+            // Class identifier for a Widget place (parents of Widgets)
+            places : '.widget-place',
 
-	    // Class identifier for a Widget header (handle)
-	    header : '.widget-header',
+            // Class identifier for a Widget header (handle)
+            header : '.widget-header',
 
-	    // Class for the Widget header menu
-	    widgetMenu : '.widget-menu',
+            // Class for the Widget header menu
+            widgetMenu : '.widget-menu',
 
-	    // Class identifier for Widget editboxes
-	    editbox : '.widget-editbox',
+            // Class identifier for Widget editboxes
+            editbox : '.widget-editbox',
 
-	    // Class identifier for Widget content
-	    content : '.widget-content',
+            // Class identifier for Widget content
+            content : '.widget-content',
 
-	    // Class identifier for editbox close link or button, for example
-	    closeEdit : '.widget-close-editbox',
+            // Class identifier for editbox close link or button, for example
+            closeEdit : '.widget-close-editbox',
 
-	    // Class identifier for a Widget edit link
-	    editLink : '.widget-editlink',
+            // Class identifier for a Widget edit link
+            editLink : '.widget-editlink',
 
-	    // Class identifier for a Widget close link
-	    closeLink : '.widget-closelink',
+            // Class identifier for a Widget close link
+            closeLink : '.widget-closelink',
 
-	    // Class identifier for Widgets placehoders
-	    placeHolder : 'widget-placeholder',
+            // Class identifier for Widgets placehoders
+            placeHolder : 'widget-placeholder',
 
-	    // Class identifier for a Widget collapse link
-	    collapseLink : '.widget-collapselink'
-	},
+            // Class identifier for a Widget collapse link
+            collapseLink : '.widget-collapselink'
+        },
 
-	// To be translate the plugin into another languages
-	// But this variables can be used to show images instead
-	// links text, if you preffer. In this case set the HTML
-	// of the IMG elements.
-	i18n : {
+        // To be translate the plugin into another languages
+        // But this variables can be used to show images instead
+        // links text, if you preffer. In this case set the HTML
+        // of the IMG elements.
+        i18n : {
 
-	    // Widget edit link text
-	    editText : 'Edit',
+            // Widget edit link text
+            editText : 'Edit',
 
-	    // Widget close link text
-	    closeText : 'Close',
+            // Widget close link text
+            closeText : 'Close',
 
-	    // Widget extend link text
-	    extendText : 'Extend',
+            // Widget extend link text
+            extendText : 'Extend',
 
-	    // Widget collapse link text
-	    collapseText : 'Collapse',
+            // Widget collapse link text
+            collapseText : 'Collapse',
 
-	    // Widget cancel edit link text
-	    cancelEditText : 'Cancel',
+            // Widget cancel edit link text
+            cancelEditText : 'Cancel',
 
-	    // Widget edition link title
-	    editTitle : 'Edit this widget',
+            // Widget edition link title
+            editTitle : 'Edit this widget',
 
-	    // Widget close link title
-	    closeTitle : 'Close this widget',
+            // Widget close link title
+            closeTitle : 'Close this widget',
 
-	    // Widget confirmation dialog message
-	    confirmMsg : 'Remove this widget?',
+            // Widget confirmation dialog message
+            confirmMsg : 'Remove this widget?',
 
-	    // Widget cancel edit link title
-	    cancelEditTitle : 'Cancel edition',
+            // Widget cancel edit link title
+            cancelEditTitle : 'Cancel edition',
 
-	    // Widget extend link title
-	    extendTitle : 'Extend this widget',
+            // Widget extend link title
+            extendTitle : 'Extend this widget',
 
-	    // Widget collapse link title
-	    collapseTitle : 'Collapse this widget'
-	}
+            // Widget collapse link title
+            collapseTitle : 'Collapse this widget'
+        }
     };
 
     //////////////////////////////
@@ -680,18 +680,18 @@
      *
      */
     function InitializeWidgets(
-	settings, widgetOnDemand){
-	var b = widgetOnDemand;
-	var d = $.fn.EasyWidgets.defaults;
-	var s = $.extend(true, d, settings);
-	$(s.selectors.widget).each(function(){
+        settings, widgetOnDemand){
+        var b = widgetOnDemand;
+        var d = $.fn.EasyWidgets.defaults;
+        var s = $.extend(true, d, settings);
+        $(s.selectors.widget).each(function(){
 
-	    PrepareWidgetBehaviour($(this),b,s);
-	});
-	RepositionedWidgets(s);
-	MakeWidgetsSortables(s);
-	CleanWidgetsCookies(s,b);
-	return true;
+            PrepareWidgetBehaviour($(this),b,s);
+        });
+        RepositionedWidgets(s);
+        MakeWidgetsSortables(s);
+        CleanWidgetsCookies(s,b);
+        return true;
     }
 
     /**
@@ -731,42 +731,42 @@
      *
      */
     function PrepareWidgetBehaviour(widget, widgetOnDemand, settings){
-	var s = settings;
-	var widgetMenu = widget.find(s.selectors.widgetMenu);
-	if(widgetMenu.html() == null){
-	    var widgetId = widget.attr('id');
-	    var haveId = ($.trim(widgetId) != '');
-	    widget.find(s.selectors.editbox).hide();
-	    if(widgetOnDemand && haveId && s.behaviour.useCookies){
-		// Force this widget out of closed widgets cookie
-		// because in other case is possible that widget
-		// are added, but in fact not show in the document
-		CleanCookie(widgetId, s.cookies.closeName, s);
-	    }
-	    if(!widgetOnDemand && haveId && s.behaviour.useCookies
-	       && GetCookie(s.cookies.closeName) != null){
-		var cookieValue = GetCookie(s.cookies.closeName);
-		if(cookieValue.indexOf(widgetId) != -1){
-		    // But in case of not on demand widget, is possible
-		    // to hide the widget, if is present in the appropiate
-		    // related cookie
-		    widget.hide();
-		}
-	    }
-	    var menuWrap = '<span class="' + s.selectors
-		.widgetMenu.replace(/\./, '') + '"></span>';
-	    widget.find(s.selectors.header).append(menuWrap);
-	    // Now this menu is a valid wrap to add the links
-	    widgetMenu = widget.find(s.selectors.widgetMenu);
-	    // The order of this function call is important
-	    // because determine the order of links appear
-	    AddWidgetCollapseLink(widget, widgetMenu, s);
-	    AddWidgetEditLink(widget, widgetMenu, s);
-	    AddWidgetRemoveLink(widget, widgetMenu, s);
-	    return true;
-	}else{
-	    return false;
-	}
+        var s = settings;
+        var widgetMenu = widget.find(s.selectors.widgetMenu);
+        if(widgetMenu.html() == null){
+            var widgetId = widget.attr('id');
+            var haveId = ($.trim(widgetId) != '');
+            widget.find(s.selectors.editbox).hide();
+            if(widgetOnDemand && haveId && s.behaviour.useCookies){
+                // Force this widget out of closed widgets cookie
+                // because in other case is possible that widget
+                // are added, but in fact not show in the document
+                CleanCookie(widgetId, s.cookies.closeName, s);
+            }
+            if(!widgetOnDemand && haveId && s.behaviour.useCookies
+               && GetCookie(s.cookies.closeName) != null){
+                var cookieValue = GetCookie(s.cookies.closeName);
+                if(cookieValue.indexOf(widgetId) != -1){
+                    // But in case of not on demand widget, is possible
+                    // to hide the widget, if is present in the appropiate
+                    // related cookie
+                    widget.hide();
+                }
+            }
+            var menuWrap = '<span class="' + s.selectors
+                .widgetMenu.replace(/\./, '') + '"></span>';
+            widget.find(s.selectors.header).append(menuWrap);
+            // Now this menu is a valid wrap to add the links
+            widgetMenu = widget.find(s.selectors.widgetMenu);
+            // The order of this function call is important
+            // because determine the order of links appear
+            AddWidgetCollapseLink(widget, widgetMenu, s);
+            AddWidgetEditLink(widget, widgetMenu, s);
+            AddWidgetRemoveLink(widget, widgetMenu, s);
+            return true;
+        }else{
+            return false;
+        }
     }
 
     /**
@@ -820,45 +820,45 @@
      *
      */
     function RepositionedWidgets(settings){
-	var s = settings;
-	var positions = '';
-	if($.isFunction(s.callbacks.onRefreshPositions)){
-	    positions = s.callbacks.onRefreshPositions();
-	}
-	// Only if not provide a string widget positions,
-	// use cookies and the appropiate cookie is not empty
-	if(($.trim(positions) == '') && s.behaviour.useCookies
-	   && GetCookie(s.cookies.positionName) != null){
-	    // We get the widgets positions from the cookie
-	    positions = GetCookie(s.cookies.positionName)
-	}
-	if($.trim(positions) != ''){
-	    // Get the widgets places IDs and widgets IDs
-	    var places = positions.split('|');
-	    var totalPlaces = places.length;
-	    for(var i = 0; i < totalPlaces; i++){
-		// Every part contain a place ID and possible widgets IDs
-		var place = places[i].split('=');
-		// Validate (more or less) the format of the part that must
-		// contain two element: A place ID and one or more widgets IDs
-		if(place.length == 2){
-		    // Subpart one: the place ID
-		    var placeSel = '#'+place[0];
-		    // Subpart two: one or more widgets IDs
-		    var widgets = place[1].split(',');
-		    var totalWidgets = widgets.length;
-		    // Here we have a place and one or more widgets IDs
-		    for(var j = 0; j < totalWidgets; j++){
-			if($.trim(widgets[j]) != ''){
-			    // So, append every widget in the appropiate place
-			    var widgetSel = '#'+widgets[j];
-			    $(widgetSel).appendTo(placeSel);
-			}
-		    }
-		}
-	    }
-	}
-	return true;
+        var s = settings;
+        var positions = '';
+        if($.isFunction(s.callbacks.onRefreshPositions)){
+            positions = s.callbacks.onRefreshPositions();
+        }
+        // Only if not provide a string widget positions,
+        // use cookies and the appropiate cookie is not empty
+        if(($.trim(positions) == '') && s.behaviour.useCookies
+           && GetCookie(s.cookies.positionName) != null){
+            // We get the widgets positions from the cookie
+            positions = GetCookie(s.cookies.positionName)
+        }
+        if($.trim(positions) != ''){
+            // Get the widgets places IDs and widgets IDs
+            var places = positions.split('|');
+            var totalPlaces = places.length;
+            for(var i = 0; i < totalPlaces; i++){
+                // Every part contain a place ID and possible widgets IDs
+                var place = places[i].split('=');
+                // Validate (more or less) the format of the part that must
+                // contain two element: A place ID and one or more widgets IDs
+                if(place.length == 2){
+                    // Subpart one: the place ID
+                    var placeSel = '#'+place[0];
+                    // Subpart two: one or more widgets IDs
+                    var widgets = place[1].split(',');
+                    var totalWidgets = widgets.length;
+                    // Here we have a place and one or more widgets IDs
+                    for(var j = 0; j < totalWidgets; j++){
+                        if($.trim(widgets[j]) != ''){
+                            // So, append every widget in the appropiate place
+                            var widgetSel = '#'+widgets[j];
+                            $(widgetSel).appendTo(placeSel);
+                        }
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     /**
@@ -880,10 +880,10 @@
      *
      */
     function MakeWidgetsSortables(settings){
-	var sortables = GetSortableItems(settings);
-	PrepareSortableHeaders(sortables, settings);
-	PrepareSortablePlaces(sortables, settings);
-	return true;
+        var sortables = GetSortableItems(settings);
+        PrepareSortableHeaders(sortables, settings);
+        PrepareSortablePlaces(sortables, settings);
+        return true;
     }
 
     /**
@@ -899,43 +899,43 @@
      *
      */
     function GetSortableItems(settings){
-	var fixesSel = '';
-	var s = settings;
-	// Iterate all the widgets in document
-	$(s.selectors.widget).each(function(count){
-	    // When found a not movable widget
-	    if(!$(this).hasClass(s.options.movable)){
-		// Try to get the widget ID
-		if(!this.id){
-		    // And if not found prepare a special one
-		    this.id = 'fixed-widget-id-' + count;
-		}
-		// Because this widget (fixed) not can be
-		// put as a sortable item, so, add to the
-		// fixed widgets selector, to use bellow
-		if(fixesSel == ''){
-		    fixesSel += '#'+this.id;
-		}else{
-		    fixesSel += ',' + '#'+this.id;
-		}
-	    }
-	});
-	// We prepare now the widget that cannot be put as
-	// sortable items, because are fixed widgets. We cannot
-	// use directly the fixed widgets selectors, because is
-	// no one fixed widget is found the selector is like this:
-	// :not(), that is, a emtpy "not selector", and this cause
-	// problems with jQuery version 1.3
-	var notFixes = '';
-	if($.trim(fixesSel) == ''){
-	    // So, if no fixed widgets are found, dont use the not selector
-	    notFixes = '> '+s.selectors.container;
-	}else{
-	    // Use only in case that one or more fixed widgets are found
-	    notFixes = '> '+s.selectors.container+':not(' + fixesSel + ')';
-	}
-	// Its all. Return not fixed widgets and places as sortable items
-	return $(notFixes, s.selectors.places);
+        var fixesSel = '';
+        var s = settings;
+        // Iterate all the widgets in document
+        $(s.selectors.widget).each(function(count){
+            // When found a not movable widget
+            if(!$(this).hasClass(s.options.movable)){
+                // Try to get the widget ID
+                if(!this.id){
+                    // And if not found prepare a special one
+                    this.id = 'fixed-widget-id-' + count;
+                }
+                // Because this widget (fixed) not can be
+                // put as a sortable item, so, add to the
+                // fixed widgets selector, to use bellow
+                if(fixesSel == ''){
+                    fixesSel += '#'+this.id;
+                }else{
+                    fixesSel += ',' + '#'+this.id;
+                }
+            }
+        });
+        // We prepare now the widget that cannot be put as
+        // sortable items, because are fixed widgets. We cannot
+        // use directly the fixed widgets selectors, because is
+        // no one fixed widget is found the selector is like this:
+        // :not(), that is, a emtpy "not selector", and this cause
+        // problems with jQuery version 1.3
+        var notFixes = '';
+        if($.trim(fixesSel) == ''){
+            // So, if no fixed widgets are found, dont use the not selector
+            notFixes = '> '+s.selectors.container;
+        }else{
+            // Use only in case that one or more fixed widgets are found
+            notFixes = '> '+s.selectors.container+':not(' + fixesSel + ')';
+        }
+        // Its all. Return not fixed widgets and places as sortable items
+        return $(notFixes, s.selectors.places);
     }
 
     /**
@@ -961,26 +961,26 @@
      *
      */
     function PrepareSortableHeaders(sortableItems, settings){
-	var s = settings;
-	sortableItems.find(s.selectors.header).css({
-	    cursor: 'move'
-	}).mousedown(function(e){
-	    var header = $(this);
-	    var widget = header.parent();
-	    sortableItems.css({width:''});
-	    widget.css({
-		width: widget.width() + 'px'
-	    });
-	}).mouseup(function(){
-	    var header = $(this);
-	    var widget = header.parent();
-	    if(!widget.hasClass('dragging')){
-		widget.css({width:''});
-	    }else{
-		$(s.selectors.places).sortable('disable');
-	    }
-	});
-	return true;
+        var s = settings;
+        sortableItems.find(s.selectors.header).css({
+            cursor: 'move'
+        }).mousedown(function(e){
+            var header = $(this);
+            var widget = header.parent();
+            sortableItems.css({width:''});
+            widget.css({
+                width: widget.width() + 'px'
+            });
+        }).mouseup(function(){
+            var header = $(this);
+            var widget = header.parent();
+            if(!widget.hasClass('dragging')){
+                widget.css({width:''});
+            }else{
+                $(s.selectors.places).sortable('disable');
+            }
+        });
+        return true;
     }
 
     /**
@@ -1003,43 +1003,43 @@
      *
      */
     function PrepareSortablePlaces(sortableItems, settings){
-	var s = settings;
+        var s = settings;
 
-	//SHINKEN : I don't know why, but the first sortable
-	// call is ok, but the next ones are bad. So don't delete them at all.
-	//$(s.selectors.places).sortable('destroy');
+        //SHINKEN : I don't know why, but the first sortable
+        // call is ok, but the next ones are bad. So don't delete them at all.
+        //$(s.selectors.places).sortable('destroy');
 
-	$(s.selectors.places).sortable({
-	    items: sortableItems,
-	    containment: 'document',
-	    forcePlaceholderSize: true,
-	    handle: s.selectors.header,
-	    delay: s.behaviour.dragDelay,
-	    revert: s.behaviour.dragRevert,
-	    opacity: s.behaviour.dragOpacity,
-	    connectWith: $(s.selectors.places),
-	    placeholder: s.selectors.placeHolder,
-	    start : function(e, ui){
-//		alert('start drag');
-		$(ui.helper).addClass('dragging');
-		return true;
-	    },
-	    stop : function(e, ui){
-		WidgetsPositionsChange(s);
-		$(ui.item).css({width : ''});
-		$(ui.item).removeClass('dragging');
-		$(s.selectors.places).sortable('enable');
-		if($.isFunction(s.callbacks.onDragStop)){
-		    s.callbacks.onDragStop(e, ui);
-		}
-		return true;
-	    }
-	});
-	// Ok, we take this place to disable widgets based on certain cookie
-	if(s.behaviour.useCookies && (GetCookie(s.cookies.disableName) == 1)){
-	    $.fn.DisableEasyWidgets(s);
-	}
-	return true;
+        $(s.selectors.places).sortable({
+            items: sortableItems,
+            containment: 'document',
+            forcePlaceholderSize: true,
+            handle: s.selectors.header,
+            delay: s.behaviour.dragDelay,
+            revert: s.behaviour.dragRevert,
+            opacity: s.behaviour.dragOpacity,
+            connectWith: $(s.selectors.places),
+            placeholder: s.selectors.placeHolder,
+            start : function(e, ui){
+//              alert('start drag');
+                $(ui.helper).addClass('dragging');
+                return true;
+            },
+            stop : function(e, ui){
+                WidgetsPositionsChange(s);
+                $(ui.item).css({width : ''});
+                $(ui.item).removeClass('dragging');
+                $(s.selectors.places).sortable('enable');
+                if($.isFunction(s.callbacks.onDragStop)){
+                    s.callbacks.onDragStop(e, ui);
+                }
+                return true;
+            }
+        });
+        // Ok, we take this place to disable widgets based on certain cookie
+        if(s.behaviour.useCookies && (GetCookie(s.cookies.disableName) == 1)){
+            $.fn.DisableEasyWidgets(s);
+        }
+        return true;
     }
 
     /**
@@ -1066,52 +1066,52 @@
      *
      */
     function WidgetsPositionsChange(settings){
-	var s = settings;
-	var positions = '';
-	$(s.selectors.places).each(function(){
-	    var widgets = '';
-	    var place = $(this);
-	    var places = place.attr('id') + '=';
-	    place.children(s.selectors.widget).each(function(){
-		var widget = this;
-		var widgetId = widget.id;
-		var haveId = ($.trim(widgetId) != '');
-		if(haveId){
-		    if(widgets == ''){
-			widgets += widgetId;
-		    }else{
-			widgets += ',' + widgetId;
-		    }
-		}
-	    });
-	    places += widgets;
-	    if(positions == ''){
-		positions += places;
-	    }else{
-		positions += '|' + places;
-	    }
-	});
-	// You can save the positions string in a database, for example,
-	// using the "onChangePositions()" plugin callback. So, when the
-	// "onRefreshPositions()" callback is executed, you can retrieve
-	// the string and returnt it: so the plugin use this string to
-	// repositioned the widgets.
-	if($.isFunction(s.callbacks.onChangePositions)){
-	    s.callbacks.onChangePositions(positions);
-	}
-	// @todo Maybe we only put the positions on the cookie
-	// if the user font use the "onChangePositions()" callback, because
-	// at this time, ever if no use the cookie value (the user provide)
-	// the positions from "onRefreshPositions()" callback) the positions
-	// are saved in the cookie...
-	if(s.behaviour.useCookies){
-	    // However, you need to use the cookies feature
-	    // to make possible the widgets repositioned
-	    if(GetCookie(s.cookies.positionName) != positions){
-		SetCookie(s.cookies.positionName, positions, s);
-	    }
-	}
-	return true;
+        var s = settings;
+        var positions = '';
+        $(s.selectors.places).each(function(){
+            var widgets = '';
+            var place = $(this);
+            var places = place.attr('id') + '=';
+            place.children(s.selectors.widget).each(function(){
+                var widget = this;
+                var widgetId = widget.id;
+                var haveId = ($.trim(widgetId) != '');
+                if(haveId){
+                    if(widgets == ''){
+                        widgets += widgetId;
+                    }else{
+                        widgets += ',' + widgetId;
+                    }
+                }
+            });
+            places += widgets;
+            if(positions == ''){
+                positions += places;
+            }else{
+                positions += '|' + places;
+            }
+        });
+        // You can save the positions string in a database, for example,
+        // using the "onChangePositions()" plugin callback. So, when the
+        // "onRefreshPositions()" callback is executed, you can retrieve
+        // the string and returnt it: so the plugin use this string to
+        // repositioned the widgets.
+        if($.isFunction(s.callbacks.onChangePositions)){
+            s.callbacks.onChangePositions(positions);
+        }
+        // @todo Maybe we only put the positions on the cookie
+        // if the user font use the "onChangePositions()" callback, because
+        // at this time, ever if no use the cookie value (the user provide)
+        // the positions from "onRefreshPositions()" callback) the positions
+        // are saved in the cookie...
+        if(s.behaviour.useCookies){
+            // However, you need to use the cookies feature
+            // to make possible the widgets repositioned
+            if(GetCookie(s.cookies.positionName) != positions){
+                SetCookie(s.cookies.positionName, positions, s);
+            }
+        }
+        return true;
     }
 
     /**
@@ -1126,95 +1126,95 @@
      *
      */
     function AddWidgetCollapseLink(widget, widgetMenu, settings){
-	var s = settings;
-	var link = '';
-	var widgetId = widget.attr('id');
-	var haveId = $.trim(widgetId) != '';
-	var content = widget.find(s.selectors.content);
-	if(widget.hasClass(s.options.collapsable)){
-	    if(widget.hasClass(s.options.collapse)){
-		link = MenuLink(
-		    s.i18n.extendText,
-		    s.i18n.extendTitle,
-		    s.selectors.collapseLink
-		);
-		content.hide();
-	    }else{
-		link = MenuLink(
-		    s.i18n.collapseText,
-		    s.i18n.collapseTitle,
-		    s.selectors.collapseLink
-		);
-	    }
-	    if(haveId && s.behaviour.useCookies &&
-	       GetCookie(s.cookies.collapseName) != null){
-		var cookieValue = GetCookie(s.cookies.collapseName);
-		if(cookieValue.indexOf(widgetId) != -1){
-		    link = MenuLink(
-			s.i18n.extendText,
-			s.i18n.extendTitle,
-			s.selectors.collapseLink
-		    );
-		    content.hide();
-		}
-	    }
-	    $(link).mousedown(function(e){
-		e.stopPropagation();
-	    }).click(function(){
-		var canExtend = true;
-		var canCollapse = true;
-		var link = $(this);
-		var widget = link.parents(s.selectors.widget);
-		var widgetId = widget.attr('id');
-		var haveId = $.trim(widgetId) != '';
-		var content = widget.find(s.selectors.content);
-		var contentVisible = content.css('display') != 'none';
-		link.blur();
-		if(contentVisible){
-		    if($.isFunction(s.callbacks.onCollapseQuery)){
-			canCollapse = s.callbacks.onCollapseQuery(link,widget);
-		    }
-		    if(canCollapse){
-			ApplyEffect(
-			    content,
-			    s.effects.widgetCollapse,
-			    s.effects.effectDuration,
-			    false
-			);
-			link.html(s.i18n.extendText);
-			link.attr('title', s.i18n.extendTitle);
-			if(s.behaviour.useCookies && widgetId){
-			    UpdateCookie(widgetId, s.cookies.collapseName, s);
-			}
-			if($.isFunction(s.callbacks.onCollapse)){
-			    s.callbacks.onCollapse(link, widget);
-			}
-		    }
-		}else{
-		    if($.isFunction(s.callbacks.onExtendQuery)){
-			canExtend = s.callbacks.onExtendQuery(link, widget);
-		    }
-		    if(canExtend){
-			link.html(s.i18n.collapseText);
-			link.attr('title', s.i18n.collapseTitle);
-			ApplyEffect(
-			    content,
-			    s.effects.widgetExtend,
-			    s.effects.effectDuration,
-			    true
-			);
-			if(haveId && s.behaviour.useCookies){
-			    CleanCookie(widgetId, s.cookies.collapseName, s);
-			}
-			if($.isFunction(s.callbacks.onExtend)){
-			    s.callbacks.onExtend(link, widget);
-			}
-		    }
-		}
-		return false;
-	    }).appendTo(widgetMenu);
-	}
-	return true;
+        var s = settings;
+        var link = '';
+        var widgetId = widget.attr('id');
+        var haveId = $.trim(widgetId) != '';
+        var content = widget.find(s.selectors.content);
+        if(widget.hasClass(s.options.collapsable)){
+            if(widget.hasClass(s.options.collapse)){
+                link = MenuLink(
+                    s.i18n.extendText,
+                    s.i18n.extendTitle,
+                    s.selectors.collapseLink
+                );
+                content.hide();
+            }else{
+                link = MenuLink(
+                    s.i18n.collapseText,
+                    s.i18n.collapseTitle,
+                    s.selectors.collapseLink
+                );
+            }
+            if(haveId && s.behaviour.useCookies &&
+               GetCookie(s.cookies.collapseName) != null){
+                var cookieValue = GetCookie(s.cookies.collapseName);
+                if(cookieValue.indexOf(widgetId) != -1){
+                    link = MenuLink(
+                        s.i18n.extendText,
+                        s.i18n.extendTitle,
+                        s.selectors.collapseLink
+                    );
+                    content.hide();
+                }
+            }
+            $(link).mousedown(function(e){
+                e.stopPropagation();
+            }).click(function(){
+                var canExtend = true;
+                var canCollapse = true;
+                var link = $(this);
+                var widget = link.parents(s.selectors.widget);
+                var widgetId = widget.attr('id');
+                var haveId = $.trim(widgetId) != '';
+                var content = widget.find(s.selectors.content);
+                var contentVisible = content.css('display') != 'none';
+                link.blur();
+                if(contentVisible){
+                    if($.isFunction(s.callbacks.onCollapseQuery)){
+                        canCollapse = s.callbacks.onCollapseQuery(link,widget);
+                    }
+                    if(canCollapse){
+                        ApplyEffect(
+                            content,
+                            s.effects.widgetCollapse,
+                            s.effects.effectDuration,
+                            false
+                        );
+                        link.html(s.i18n.extendText);
+                        link.attr('title', s.i18n.extendTitle);
+                        if(s.behaviour.useCookies && widgetId){
+                            UpdateCookie(widgetId, s.cookies.collapseName, s);
+                        }
+                        if($.isFunction(s.callbacks.onCollapse)){
+                            s.callbacks.onCollapse(link, widget);
+                        }
+                    }
+                }else{
+                    if($.isFunction(s.callbacks.onExtendQuery)){
+                        canExtend = s.callbacks.onExtendQuery(link, widget);
+                    }
+                    if(canExtend){
+                        link.html(s.i18n.collapseText);
+                        link.attr('title', s.i18n.collapseTitle);
+                        ApplyEffect(
+                            content,
+                            s.effects.widgetExtend,
+                            s.effects.effectDuration,
+                            true
+                        );
+                        if(haveId && s.behaviour.useCookies){
+                            CleanCookie(widgetId, s.cookies.collapseName, s);
+                        }
+                        if($.isFunction(s.callbacks.onExtend)){
+                            s.callbacks.onExtend(link, widget);
+                        }
+                    }
+                }
+                return false;
+            }).appendTo(widgetMenu);
+        }
+        return true;
     }
 
     /**
@@ -1229,78 +1229,78 @@
      *
      */
     function AddWidgetEditLink(widget, widgetMenu, settings){
-	var s = settings;
-	var link = '';
-	if(widget.hasClass(s.options.editable)){
-	    link = MenuLink(
-		s.i18n.editText,
-		s.i18n.editTitle,
-		s.selectors.editLink
-	    );
-	    widget.find(s.selectors.closeEdit).click(function(e){
-		var link = $(this);
-		var widget = link.parents(s.selectors.widget);
-		var editbox = widget.find(s.selectors.editbox);
-		var editLink = widget.find(s.selectors.editLink);
-		link.blur();
-		ApplyEffect(
-		    editbox,
-		    s.effects.widgetCloseEdit,
-		    s.effects.effectDuration,
-		    false
-		);
-		editLink.html(s.i18n.editText);
-		editLink.attr('title', s.i18n.editTitle);
-		return false;
-	    });
-	    $(link).mousedown(function(e){
-		e.stopPropagation();
-	    }).click(function(){
-		var link = $(this);
-		var canShow = canHide = true;
-		var widget = link.parents(s.selectors.widget);
-		var editbox = widget.find(s.selectors.editbox);
-		var editboxVisible = editbox.css('display') != 'none';
-		link.blur();
-		if(editboxVisible){
-		    if($.isFunction(s.callbacks.onCancelEditQuery)){
-			canHide = s.callbacks.onCancelEditQuery(link, widget);
-		    }
-		    if(canHide){
-			ApplyEffect(
-			    editbox,
-			    s.effects.widgetCancelEdit,
-			    s.effects.effectDuration,
-			    false
-			);
-			link.html(s.i18n.editText);
-			link.attr('title', s.i18n.editTitle);
-			if($.isFunction(s.callbacks.onCancelEdit)){
-			    s.callbacks.onCancelEdit(link, widget);
-			}
-		    }
-		}else{
-		    if($.isFunction(s.callbacks.onEditQuery)){
-			canShow = s.callbacks.onEditQuery(link, widget);
-		    }
-		    if(canShow){
-			link.html(s.i18n.cancelEditText);
-			link.attr('title', s.i18n.cancelEditTitle);
-			ApplyEffect(
-			    editbox,
-			    s.effects.widgetOpenEdit,
-			    s.effects.effectDuration,
-			    true
-			);
-			if($.isFunction(s.callbacks.onEdit)){
-			    s.callbacks.onEdit(link, widget);
-			}
-		    }
-		}
-		return false;
-	    }).appendTo(widgetMenu);
-	}
-	return true;
+        var s = settings;
+        var link = '';
+        if(widget.hasClass(s.options.editable)){
+            link = MenuLink(
+                s.i18n.editText,
+                s.i18n.editTitle,
+                s.selectors.editLink
+            );
+            widget.find(s.selectors.closeEdit).click(function(e){
+                var link = $(this);
+                var widget = link.parents(s.selectors.widget);
+                var editbox = widget.find(s.selectors.editbox);
+                var editLink = widget.find(s.selectors.editLink);
+                link.blur();
+                ApplyEffect(
+                    editbox,
+                    s.effects.widgetCloseEdit,
+                    s.effects.effectDuration,
+                    false
+                );
+                editLink.html(s.i18n.editText);
+                editLink.attr('title', s.i18n.editTitle);
+                return false;
+            });
+            $(link).mousedown(function(e){
+                e.stopPropagation();
+            }).click(function(){
+                var link = $(this);
+                var canShow = canHide = true;
+                var widget = link.parents(s.selectors.widget);
+                var editbox = widget.find(s.selectors.editbox);
+                var editboxVisible = editbox.css('display') != 'none';
+                link.blur();
+                if(editboxVisible){
+                    if($.isFunction(s.callbacks.onCancelEditQuery)){
+                        canHide = s.callbacks.onCancelEditQuery(link, widget);
+                    }
+                    if(canHide){
+                        ApplyEffect(
+                            editbox,
+                            s.effects.widgetCancelEdit,
+                            s.effects.effectDuration,
+                            false
+                        );
+                        link.html(s.i18n.editText);
+                        link.attr('title', s.i18n.editTitle);
+                        if($.isFunction(s.callbacks.onCancelEdit)){
+                            s.callbacks.onCancelEdit(link, widget);
+                        }
+                    }
+                }else{
+                    if($.isFunction(s.callbacks.onEditQuery)){
+                        canShow = s.callbacks.onEditQuery(link, widget);
+                    }
+                    if(canShow){
+                        link.html(s.i18n.cancelEditText);
+                        link.attr('title', s.i18n.cancelEditTitle);
+                        ApplyEffect(
+                            editbox,
+                            s.effects.widgetOpenEdit,
+                            s.effects.effectDuration,
+                            true
+                        );
+                        if($.isFunction(s.callbacks.onEdit)){
+                            s.callbacks.onEdit(link, widget);
+                        }
+                    }
+                }
+                return false;
+            }).appendTo(widgetMenu);
+        }
+        return true;
     }
 
     /**
@@ -1315,47 +1315,47 @@
      *
      */
     function AddWidgetRemoveLink(widget, widgetMenu, settings){
-	var s = settings;
-	var link = '';
-	if(widget.hasClass(s.options.removable)){
-	    link = MenuLink(
-		s.i18n.closeText,
-		s.i18n.closeTitle,
-		s.selectors.closeLink
-	    );
-	    $(link).mousedown(function(e){
-		e.stopPropagation();
-	    }).click(function(){
-		var link = $(this);
-		var canRemove = true;
-		var widget = link.parents(s.selectors.widget);
-		var widgetId = widget.attr('id');
-		var haveId = ($.trim(widgetId) != '');
-		link.blur();
-		if($.isFunction(s.callbacks.onCloseQuery)){
-		    canRemove = s.callbacks.onCloseQuery(link, widget);
-		}
-		if(canRemove){
-		    if(!widget.hasClass(s.options.closeConfirm)
-		       || confirm(s.i18n.confirmMsg)){
-			if(haveId && s.behaviour.useCookies){
-			    UpdateCookie(widgetId, s.cookies.closeName, s);
-			}
-			ApplyEffect(
-			    widget,
-			    s.effects.widgetClose,
-			    s.effects.effectDuration,
-			    false
-			);
-			if($.isFunction(s.callbacks.onClose)){
-			    s.callbacks.onClose(link, widget);
-			}
-		    }
-		}
-		return false;
-	    }).appendTo(widgetMenu);
-	}
-	return true;
+        var s = settings;
+        var link = '';
+        if(widget.hasClass(s.options.removable)){
+            link = MenuLink(
+                s.i18n.closeText,
+                s.i18n.closeTitle,
+                s.selectors.closeLink
+            );
+            $(link).mousedown(function(e){
+                e.stopPropagation();
+            }).click(function(){
+                var link = $(this);
+                var canRemove = true;
+                var widget = link.parents(s.selectors.widget);
+                var widgetId = widget.attr('id');
+                var haveId = ($.trim(widgetId) != '');
+                link.blur();
+                if($.isFunction(s.callbacks.onCloseQuery)){
+                    canRemove = s.callbacks.onCloseQuery(link, widget);
+                }
+                if(canRemove){
+                    if(!widget.hasClass(s.options.closeConfirm)
+                       || confirm(s.i18n.confirmMsg)){
+                        if(haveId && s.behaviour.useCookies){
+                            UpdateCookie(widgetId, s.cookies.closeName, s);
+                        }
+                        ApplyEffect(
+                            widget,
+                            s.effects.widgetClose,
+                            s.effects.effectDuration,
+                            false
+                        );
+                        if($.isFunction(s.callbacks.onClose)){
+                            s.callbacks.onClose(link, widget);
+                        }
+                    }
+                }
+                return false;
+            }).appendTo(widgetMenu);
+        }
+        return true;
     }
 
     /**
@@ -1389,44 +1389,44 @@
      *
      */
     function CleanWidgetsCookies(settings, widgetOnDemand){
-	var s = settings;
-	var cleanCookies = !widgetOnDemand && s.behaviour.useCookies
-	    && (Math.ceil(Math.random() * 3) == 1);
-	if(cleanCookies){
-	    var i = j = 0;
-	    var cookies = new Array(
-		s.cookies.closeName,
-		s.cookies.collapseName
-	    );
-	    var cookiesLen = cookies.length;
-	    var widgetsIds = new Array();
-	    $(s.selectors.widget).each(function(count){
-		var widgetId = $(this).attr('id');
-		if($.trim(widgetId) != ''){
-		    widgetsIds[count] = widgetId;
-		}
-	    });
-	    for(i = 0; i < cookiesLen; i++){
-		if(GetCookie(cookies[i])){
-		    var widgetId = '';
-		    var cleanValue = '';
-		    var storedValue = GetCookie(cookies[i]).split(',');
-		    var storedWidgets = storedValue.length;
-		    for(j = 0; j < storedWidgets; j++){
-			widgetId = $.trim(storedValue[j]);
-			if($.inArray(widgetId, widgetsIds) != -1){
-			    if($.trim(cleanValue) == ''){
-				cleanValue += widgetId;
-			    }else{
-				cleanValue += ','+widgetId;
-			    }
-			}
-		    }
-		    SetCookie(cookies[i], cleanValue, s);
-		}
-	    }
-	}
-	return true;
+        var s = settings;
+        var cleanCookies = !widgetOnDemand && s.behaviour.useCookies
+            && (Math.ceil(Math.random() * 3) == 1);
+        if(cleanCookies){
+            var i = j = 0;
+            var cookies = new Array(
+                s.cookies.closeName,
+                s.cookies.collapseName
+            );
+            var cookiesLen = cookies.length;
+            var widgetsIds = new Array();
+            $(s.selectors.widget).each(function(count){
+                var widgetId = $(this).attr('id');
+                if($.trim(widgetId) != ''){
+                    widgetsIds[count] = widgetId;
+                }
+            });
+            for(i = 0; i < cookiesLen; i++){
+                if(GetCookie(cookies[i])){
+                    var widgetId = '';
+                    var cleanValue = '';
+                    var storedValue = GetCookie(cookies[i]).split(',');
+                    var storedWidgets = storedValue.length;
+                    for(j = 0; j < storedWidgets; j++){
+                        widgetId = $.trim(storedValue[j]);
+                        if($.inArray(widgetId, widgetsIds) != -1){
+                            if($.trim(cleanValue) == ''){
+                                cleanValue += widgetId;
+                            }else{
+                                cleanValue += ','+widgetId;
+                            }
+                        }
+                    }
+                    SetCookie(cookies[i], cleanValue, s);
+                }
+            }
+        }
+        return true;
     }
 
     /**
@@ -1440,21 +1440,21 @@
      *
      */
     function GetCookie(name){
-	var result = null;
-	if(document.cookie && $.trim(document.cookie) != ''){
-	    var cookies = document.cookie.split(';');
-	    var cookiesLen = cookies.length;
-	    if(cookiesLen > 0){
-		for(var i = 0; i < cookiesLen; i++){
-		    var cookie = $.trim(cookies[i]);
-		    if (cookie.substring(0, name.length + 1) == (name + '=')){
-			result = decodeURIComponent(cookie.substring(name.length + 1));
-			break;
-		    }
-		}
-	    }
-	}
-	return result;
+        var result = null;
+        if(document.cookie && $.trim(document.cookie) != ''){
+            var cookies = document.cookie.split(';');
+            var cookiesLen = cookies.length;
+            if(cookiesLen > 0){
+                for(var i = 0; i < cookiesLen; i++){
+                    var cookie = $.trim(cookies[i]);
+                    if (cookie.substring(0, name.length + 1) == (name + '=')){
+                        result = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     /**
@@ -1470,27 +1470,27 @@
      *
      */
     function SetCookie(name, value, settings){
-	var s = settings;
-	var expires = '';
-	var nType = 'number';
-	if(s.cookies.expires && (typeof s.cookies.expires
-				 == nType) || s.cookies.expires.toUTCString){
-	    var date = null;
-	    if(typeof s.cookies.expires == nType){
-		date = new Date();
-		date.setTime(date.getTime() + (s.cookies.expires*24*60*60*1000));
-	    }else{
-		date = s.cookies.expires;
-	    }
-	    // use expires attribute, max-age is not supported by IE
-	    expires = '; expires=' + date.toUTCString();
-	}
-	var path = s.cookies.path ? '; path=' + s.cookies.path : '';
-	var domain = s.cookies.domain ? '; domain=' + s.cookies.domain : '';
-	var secure = s.cookies.secure ? '; secure' : '';
-	document.cookie = [name, '=', encodeURIComponent(value),
-			   expires, path, domain, secure].join('');
-	return true;
+        var s = settings;
+        var expires = '';
+        var nType = 'number';
+        if(s.cookies.expires && (typeof s.cookies.expires
+                                 == nType) || s.cookies.expires.toUTCString){
+            var date = null;
+            if(typeof s.cookies.expires == nType){
+                date = new Date();
+                date.setTime(date.getTime() + (s.cookies.expires*24*60*60*1000));
+            }else{
+                date = s.cookies.expires;
+            }
+            // use expires attribute, max-age is not supported by IE
+            expires = '; expires=' + date.toUTCString();
+        }
+        var path = s.cookies.path ? '; path=' + s.cookies.path : '';
+        var domain = s.cookies.domain ? '; domain=' + s.cookies.domain : '';
+        var secure = s.cookies.secure ? '; secure' : '';
+        document.cookie = [name, '=', encodeURIComponent(value),
+                           expires, path, domain, secure].join('');
+        return true;
     }
 
     /**
@@ -1512,16 +1512,16 @@
      *
      */
     function CleanCookie(widgetId, cookieName, settings){
-	var value = GetCookie(cookieName);
-	if(value != null){
-	    if(value.indexOf(widgetId) != -1){
-		value = value.replace(','+widgetId, '');
-		value = value.replace(widgetId+',', '');
-		value = value.replace(widgetId, '');
-	    }
-	    SetCookie(cookieName, value, settings);
-	}
-	return true;
+        var value = GetCookie(cookieName);
+        if(value != null){
+            if(value.indexOf(widgetId) != -1){
+                value = value.replace(','+widgetId, '');
+                value = value.replace(widgetId+',', '');
+                value = value.replace(widgetId, '');
+            }
+            SetCookie(cookieName, value, settings);
+        }
+        return true;
     }
 
     /**
@@ -1543,14 +1543,14 @@
      *
      */
     function UpdateCookie(widgetId, cookieName, settings){
-	var value = GetCookie(cookieName);
-	if(value == null){
-	    value = widgetId;
-	}else if(value.indexOf(widgetId) == -1){
-	    value = value+','+widgetId;
-	}
-	SetCookie(cookieName, value, settings);
-	return true;
+        var value = GetCookie(cookieName);
+        if(value == null){
+            value = widgetId;
+        }else if(value.indexOf(widgetId) == -1){
+            value = value+','+widgetId;
+        }
+        SetCookie(cookieName, value, settings);
+        return true;
     }
 
     /**
@@ -1564,11 +1564,11 @@
      *
      */
     function MenuLink(text, title, aClass){
-	var l = '<a href="#" title="TITLE" class="CLASS">TEXT</a>';
-	l = l.replace(/TEXT/g, text);
-	l = l.replace(/TITLE/g, title);
-	l = l.replace(/CLASS/g, aClass.replace(/\./, ''));
-	return l;
+        var l = '<a href="#" title="TITLE" class="CLASS">TEXT</a>';
+        l = l.replace(/TEXT/g, text);
+        l = l.replace(/TITLE/g, title);
+        l = l.replace(/CLASS/g, aClass.replace(/\./, ''));
+        return l;
     }
 
     /**
@@ -1583,26 +1583,28 @@
      *
      */
     function ApplyEffect(jqObj, effect, duration, show){
-	var n = 'none',
+        var n = 'none',
         f = 'fade',
         s = 'slide';
-	if(!show){
-	    if(effect == n){
-		jqObj.hide();
-	    }else if(effect == f){
-		jqObj.fadeOut(duration);
-	    }else if(effect == s){
-		jqObj.slideUp(duration);
-	    }
-	}else{
-	    if(effect == n){
-		jqObj.show();
-	    }else if(effect == f){
-		jqObj.fadeIn(duration);
-	    }else if(effect == s){
-		jqObj.slideDown(duration);
-	    }
-	}
-	return true;
+        if(!show){
+            jqObj.data('deleted', 1);
+            if(effect == n){
+                jqObj.hide();
+            }else if(effect == f){
+                jqObj.fadeOut(duration);
+            }else if(effect == s){
+                jqObj.slideUp(duration);
+            }
+        }else{
+            jqObj.data('deleted', 0);
+            if(effect == n){
+                jqObj.show();
+            }else if(effect == f){
+                jqObj.fadeIn(duration);
+            }else if(effect == s){
+                jqObj.slideDown(duration);
+            }
+        }
+        return true;
     }
 })(jQuery);
