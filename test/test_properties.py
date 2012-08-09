@@ -1,7 +1,8 @@
 #!/usr/bin/env python
-# Copyright (C) 2009-2010:
+# Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
+#    Hartmut Goebel, h.goebel@goebel-consult.de
 #
 # This file is part of Shinken.
 #
@@ -18,39 +19,29 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-#
-# This file is used to test reading and processing of config files
-#
+"""
+Test shinken.property
+"""
 
-from shinken_test import *
+import unittest
+
+import __import_shinken
 from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp
 
 
-class TestConfig(ShinkenTest):
-    def setUp(self):
-        pass
+class TestBoolProp(unittest.TestCase):
+    """Test the BoolProp class"""
 
-    # Test the bool property class
-    def test_bool_property(self):
-        p = BoolProp(default='1', class_inherit=[('Host', 'accept_passive_checks')])
-        print p.__dict__
-        s = "1"
-        val = p.pythonize(s)
-        print s, val
-        self.assert_(val == True)
-        s = "0"
-        val = p.pythonize(s)
-        print s, val
-        self.assert_(val == False)
+    def test_pythonize(self):
+        p = BoolProp()
+        self.assertEqual(p.pythonize("1"), True)
+        self.assertEqual(p.pythonize("0"), False)
 
-        # Now a service one
+    def test_fill_brok(self):
+        p = BoolProp()
+        self.assertNotIn('full_status', p.fill_brok)
         p = BoolProp(default='0', fill_brok=['full_status'])
-        print p.__dict__
-        s = "1"
-        val = p.pythonize(s)
-        print s, val
-        self.assert_(val == True)
-        self.assert_('full_status' in p.fill_brok)
+        self.assertIn('full_status', p.fill_brok)
 
 
 if __name__ == '__main__':
