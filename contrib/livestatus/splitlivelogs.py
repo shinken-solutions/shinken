@@ -25,8 +25,6 @@ split up the contents in single datafiles (1 for each day of data found).
 
 import sys
 import optparse
-import time
-import datetime
 import os
 
 sys.path.append("..")
@@ -57,7 +55,6 @@ if not opts.archive_path:
     opts.archive_path = os.path.join(os.path.dirname(opts.database), 'archives')
     pass
 
-exit
 # Protect for windows multiprocessing that will RELAUNCH all
 if __name__ == '__main__':
     if os.path.exists(opts.database):
