@@ -7,13 +7,14 @@ Shinken ChangeLog
 	* Add: issue #349 (from David Guenault) Installation script now has a backup repository for installing MK Multisite.
 
 	CORE FIXES
+        * Fix: (from raphaeltr) Typo in mysql monitoring pack command arguments
 
 	MODULE ENHANCEMENTS
 	* Add: (from: xkilian and Thibault Cohen) Graphite broker supports pickle protocol, bulk updates and buffers output when it can't connect to Carbon daemons
 	* Add: (from: Thibault Cohen and ???) Graphite broker replaces invalid caracters by _ and supports negative values
 	* Add: (from: xkilian and Thibault Cohen) Graphite broker adds _PRE_GRAPHITE and _POST_GRAPHITE host or service macros to each dot delimited data name
-	* Add: (from: Claneys Skyne) Create additionnal data points for warning and critical thresholds per data value
-	* Add: (from Romain Forlot) Compile regex
+	* Add: (from: Claneys Skyne) Graphite broker Create additionnal data points for warning and critical thresholds per data value
+	* Add: (from Romain Forlot) Graphite broker Compile regex
 
 	MODULE FIXES
 	* Fix: issue #450 (from vaxvms) removed thrift broker, similar to Livestatus, as it is unmaintained.
