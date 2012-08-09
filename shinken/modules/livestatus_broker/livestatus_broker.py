@@ -85,6 +85,7 @@ class LiveStatus_broker(BaseModule, Daemon):
         self.pnp_path = getattr(modconf, 'pnp_path', '')
         self.debug = getattr(modconf, 'debug', None)
         self.debug_queries = (getattr(modconf, 'debug_queries', '0') == '1')
+        self.debug_queries = True
         self.use_query_cache = (getattr(modconf, 'query_cache', '0') == '1')
         if getattr(modconf, 'service_authorization', 'loose') == 'strict':
             self.service_authorization_strict = True
@@ -678,4 +679,4 @@ class LiveStatus_broker(BaseModule, Daemon):
     def write_protocol(self, request, response):
         if self.debug_queries:
             print "REQUEST>>>>>\n" + request + "\n\n"
-            print "RESPONSE<<<<\n" + response + "\n\n"
+            #print "RESPONSE<<<<\n" + response + "\n\n"
