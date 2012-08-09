@@ -70,6 +70,10 @@ class Graphite_Webui(BaseModule):
             my_name = socket.gethostname()
             self.uri = self.uri.replace('YOURSERVERNAME', my_name)
 
+        # optional "sub-folder" in graphite to hold the data of a specific host
+        self.graphite_data_path = self.illegal_char.sub('_',
+                                    getattr(modconf, 'graphite_data_path', ''))
+
     # Try to connect if we got true parameter
     def init(self):
         pass
@@ -205,7 +209,11 @@ class Graphite_Webui(BaseModule):
                 uri = self.uri + 'render/?width=586&height=308&lineMode=connected&from=' + d + "&until=" + e
                 if re.search(r'_warn|_crit', metric):
                     continue
-                uri += "&target=%s.__HOST__.%s" % (host_name, metric)
+                if self.graphite_data_path:
+                    uri += "&target=%s.%s.__HOST__.%s" % (
+                        host_name, self.graphite_data_path, metric)
+                else:
+                    uri += "&target=%s.__HOST__.%s" % (host_name, metric)
                 v = {}
                 v['link'] = self.uri
                 v['img_src'] = uri
@@ -231,7 +239,12 @@ class Graphite_Webui(BaseModule):
                     continue
                 elif value[1] == '%':
                     uri += "&yMin=0&yMax=100"
-                uri += "&target=%s.%s.%s" % (host_name, desc, metric)
+                if self.graphite_data_path:
+                    uri += "&target=%s.%s.%s.%s" % (host_name,
+                                                    self.graphite_data_path,
+                                                    desc, metric)
+                else:
+                    uri += "&target=%s.%s.%s" % (host_name, desc, metric)
                 v = {}
                 v['link'] = self.uri
                 v['img_src'] = uri
