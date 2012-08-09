@@ -91,31 +91,31 @@
           <span class="help-inline">{{label}}</span>
         %end
 
-	    %# """ Manage the differents types of values"""
+        %# """ Manage the differents types of values"""
         %if t in ['text', 'int', 'hst_srv']:
           <input name='{{k}}' value='{{value}}' id='input-{{wid}}-{{k}}'/>
-	      %if t == 'hst_srv':
-	        <script>link_elt_typeahead('input-{{wid}}-{{k}}');</script>
-  	      %end
-	    %end
-	    %if t == 'hidden':
-	      <input type="hidden" name='{{k}}' value='{{value}}'/>
+          %if t == 'hst_srv':
+            <script>link_elt_typeahead('input-{{wid}}-{{k}}');</script>
+          %end
         %end
-	    %if t in ['select']:
-	      %values = v.get('values', [])
-	      <select name='{{k}}'>
-	      %for sub_val in values:
-	        <option value="{{sub_val}}">{{sub_val}}</option>
+        %if t == 'hidden':
+          <input type="hidden" name='{{k}}' value='{{value}}'/>
+        %end
+        %if t in ['select']:
+          %values = v.get('values', [])
+          <select name='{{k}}'>
+          %for sub_val in values:
+            <option value="{{sub_val}}">{{sub_val}}</option>
           %end
           </select>
-	    %end
-	    %if t == 'bool':
-	      %checked = ''
+        %end
+        %if t == 'bool':
+          %checked = ''
           %if value:
-	        %checked = 'checked'
-	      %end
+            %checked = 'checked'
+          %end
           <input name='{{k}}' type="checkbox" {{checked}}/>
-	    %end
+        %end
       %end
 
       <label></label>
