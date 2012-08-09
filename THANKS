@@ -1,14 +1,14 @@
-To Fronteau Romuald for it's logo :)
-To Gerhard Lausser for it's cfg_dir patch and trailing \ patch, members patchs too :)
+To Fronteau Romuald for the logo :)
+To Gerhard Lausser for patches, features and the Python Livestatus API
 To Icinga guys for theirs sql files!
 To David Walsh for mootools!
 To Haypo for the Ipy lib!
 To Maximilien Bersoult for it's setup.py
 To Sebastian Reimers for being the first to add a ticket in the Trac, and hunting a lot of bugs :)
 To Luke L for reading and correcting the website and the documentation :p
-To Nicolas DUPEUX for his patch about typos, adn the NSCA daemon
+To Nicolas Dupeux for patches, bug fixes, bug reports and the NSCA daemon
 To Gregory Starck for his patch about worker typo, and pyro hooks
-To David GUÉNAULT for his patch about stoping (all) brokers, and design advices
+To David Guénault for the installer, patches, bug fixes, WebUI and more
 To David Hannequin for his bug reports and his packages :)
 To Danijel Tasov for his repositiry cosmetics patch
 To Zoran Zaric for his help on website corrections and for help file typos
@@ -19,9 +19,9 @@ To Michael Jeanson for the first Shinken Ubuntu LTS package!
 To Andreas Karfusehr for his proposition of donation of a Board licence :)
 To Hermann Lauer for his help on the hard brok order bug in status.dat!
 To Andreas Ericsson for his ideas for service generators
-To DEGREMONT Aurelien for his code about NodeSet and how to manage the multiple paterns
-To Петров Иван to say us we got a huge bug on windows
-To Hartmut Goebel for is advice on code quality, and for the patches :)
+To Degremont Aurelien for his code about NodeSet and how to manage the multiple paterns
+To Петров Иван to identify a huge bug on windows
+To Hartmut Goebel for his advice on code quality, and for the patches :)
 To Gregory Ranchy for his help on the official doc
 To Kristoffer Moegle for this patch on arbiter configuration module
 To Eric Beaulieu for his help on the ssl certificates, and for the Windows installation script :)
@@ -29,20 +29,20 @@ To Laurent Guyon, our best bug hunter :)
 To Alan Brenner for his SSL core for the NRPE module
 To Venelin Petkov for this bug report about missing customs on services, and the 'print' in name bug problem :)
 To Papp Tamas for his bug report of bad python version under ubuntu (and debian)
-To Rémi BUISSON for his bug report about bad etc/default/shinken file :)
+To Rémi Buisson for his bug report about bad etc/default/shinken file :)
 To Julien Toscano for his bug report about bad launch_all.sh launch.
 To Raynald de Lahondès and the Sibio team for the FreeBSD testing, Tuto and the host dep bug report!
 To Hienz Michael for the bug report about bad local_file :)
 To Ronny Lindner for the bug report about non host expressions for services
-To Olivier Hanesse for his bug report about fixed 60s interval in checks
+To Olivier Hanesse bug reports, patches and new features
 To Markus Elger for this bug report about no schedule retention data
 To Vincent Riquer for his bug report about HA installation and sapre broker that stay alive
 To Michael Grundmann for his bug report about service host exclusion and void hostgroup
 To Jan Kaliszewski for his implementation of sorted dicts
-To Claneys Skyne for his typo report
+To Claneys Skyne bug reports and patches
 To Etienne Obriot for his patch about multiple = in macos values
 To obiouane for his bug report about missing object value
-To Thibault Cohen for his bug report about linkify and templates
+To Thibault Cohen for his patches and bug reports
 To Carmelle Monkoun for the bug report about Pyro4.8
 To Bruno Clermont for the fix in bottle call and the typos
 To Stéphane Duchesneau for his work on the setup.py file and log/run driectories.
@@ -63,15 +63,16 @@ To Mocnik Matjaz for his dump of Allied equipement
 To Daniel Roche for his bug report for hostdeps and multiple names
 To Guillaume Bour (Uperto) for his numerous patches!
 To Raphael Doursenaud for his patch about SNI option in https pack
-To FORLOT Romain for his patch about IBM DS checks
-To Michael COQUARD for this patch about setup.py and build path
+To Forlot Romain for his multiple patches
+To Michael Coquard for his patch about setup.py and build path
 To Akiooutori for his bug report about pyro missing SOCK_REUSE parameter in some os
 To Timo Veith for this work on the Wiki refactoring!
 To Lars Hansson for this patches about cfg password module and Apache one
-To the webui mobile guys: Mael VINCENT, julien Pilou, Gael Millet, Damien Mathieu and hugo Viricel for their new webui mobile ui.
+To the webui mobile guys: Mael Vincent, julien Pilou, Gael Millet, Damien Mathieu and hugo Viricel for their new webui mobile ui.
 To Mathias Fussenegger for his large patch about configuration tab/space resolution.
 To banderas07 and Radu Gheorghe for their works on the escalation notification_interval issue!
 To Simon Rother for discovering a possible race condition.
 To David Laval for his graphite templates on the linux checks
 To nerocide for his bug report about bad event handler catch
-To Mathieu.md for his new shinken-specific.cfg file with more comments :)
+To Mathieu.md for multiple configuration file updates
+To raphaeltr for a typo patch on a monitoring pack
