@@ -68,6 +68,11 @@ class Graphite_broker(BaseModule):
         self.host_dict = {}
         self.svc_dict = {}
 
+        # optional "sub-folder" in graphite to hold the data of a specific host
+        self.graphite_data_path = self.illegal_char.sub('_',
+                                   getattr(modconf, 'graphite_data_path', ''))
+
+
     # Called by Broker so we can do init stuff
     # TODO: add conf param to get pass with init
     # Conf from arbiter!
@@ -153,11 +158,16 @@ class Graphite_broker(BaseModule):
 
 #        print "Graphite:", hname, desc, check_time, perf_data
 
+        if self.graphite_data_path:
+            path = '.'.join((hname, self.graphite_data_path, desc))
+        else:
+            path = '.'.join((hname, desc))
+
         if self.use_pickle:
             # Buffer the performance data lines
             for (metric, value) in couples:
                 if value:
-                    self.buffer.append(("%s.%s.%s" % (hname, desc, metric),
+                    self.buffer.append(("%s.%s" % (path, metric),
                                        ("%d" % check_time,
                                         "%s" % value)))
 
@@ -166,8 +176,8 @@ class Graphite_broker(BaseModule):
             # Send a bulk of all metrics at once
             for (metric, value) in couples:
                 if value:
-                    lines.append("%s.%s.%s %s %d" % (hname, desc, metric,
-                                                     value, check_time))
+                    lines.append("%s.%s %s %d" % (path, metric,
+                                                  value, check_time))
             packet = '\n'.join(lines) + '\n'  # Be sure we put \n every where
 #            print "Graphite launching:", packet
             self.con.sendall(packet)
@@ -193,11 +203,16 @@ class Graphite_broker(BaseModule):
 
  #       print "Graphite:", hname, check_time, perf_data
 
+        if self.graphite_data_path:
+            path = '.'.join((hname, self.graphite_data_path))
+        else:
+            path = hname
+
         if self.use_pickle:
             # Buffer the performance data lines
             for (metric, value) in couples:
                 if value:
-                    self.buffer.append(("%s.__HOST__.%s" % (hname, metric),
+                    self.buffer.append(("%s.__HOST__.%s" % (path, metric),
                                        ("%d" % check_time,
                                         "%s" % value)))
 
@@ -206,7 +221,7 @@ class Graphite_broker(BaseModule):
             # Send a bulk of all metrics at once
             for (metric, value) in couples:
                 if value:
-                    lines.append("%s.__HOST__.%s %s %d" % (hname, metric,
+                    lines.append("%s.__HOST__.%s %s %d" % (path, metric,
                                                            value, check_time))
             packet = '\n'.join(lines) + '\n'  # Be sure we put \n every where
 #            print "Graphite launching:", packet
