@@ -76,3 +76,4 @@ To David Laval for his graphite templates on the linux checks
 To nerocide for his bug report about bad event handler catch
 To Mathieu.md for multiple configuration file updates
 To raphaeltr for a typo patch on a monitoring pack
+To Jan Ulferts for his patch about env macros fix on notifications
