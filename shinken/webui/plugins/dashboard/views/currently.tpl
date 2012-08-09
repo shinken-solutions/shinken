@@ -60,11 +60,11 @@ $(function($) {
       %if app:
       %overall_itproblem = app.datamgr.get_overall_it_state()
       %if overall_itproblem == 0:
-      <span class="pulsate badger-big badger-ok">OK!</span>
+      <span class=" badger-big badger-ok">OK!</span>
       %elif overall_itproblem == 1:
-      <span class="pulsate badger-big badger-warning">{{app.datamgr.get_nb_all_problems()}}</span>
+      <span class="badger-big badger-warning">{{app.datamgr.get_nb_all_problems()}}</span>
       %elif overall_itproblem == 2:
-      <span class="pulsate badger-big badger-critical">{{app.datamgr.get_nb_all_problems()}}</span>
+      <span class=" badger-big badger-critical">{{app.datamgr.get_nb_all_problems()}}</span>
       %end
       %end
     </li>
@@ -85,9 +85,9 @@ $(function($) {
     %if app:
     %overall_state = app.datamgr.get_overall_state()
     %if overall_state == 2:
-    <span class="pulsate badger-big badger-critical">{{app.datamgr.get_len_overall_state()}}</span>
+    <span class="badger-big badger-critical">{{app.datamgr.get_len_overall_state()}}</span>
     %elif overall_state == 1:
-    <span class="pulsate badger-big badger-critical">{{app.datamgr.get_len_overall_state()}}</span>
+    <span class="badger-big badger-critical">{{app.datamgr.get_len_overall_state()}}</span>
     %end
     %end
   </li>
@@ -100,13 +100,13 @@ $(function($) {
       %if app:
       %service_state = app.datamgr.get_per_service_state()
       %if service_state <= 0:
-      <span class="pulsate badger-big badger-critical">{{app.datamgr.get_per_service_state()}}%</span>
+      <span class="badger-big badger-critical">{{app.datamgr.get_per_service_state()}}%</span>
       %elif service_state <= 33:
-      <span class="pulsate badger-big badger-critical">{{app.datamgr.get_per_service_state()}}%</span>
+      <span class="badger-big badger-critical">{{app.datamgr.get_per_service_state()}}%</span>
       %elif service_state <= 66:
-      <span class="pulsate badger-big badger-warning">{{app.datamgr.get_per_service_state()}}%</span>
+      <span class="badger-big badger-warning">{{app.datamgr.get_per_service_state()}}%</span>
       %elif service_state <= 100:
-      <span class="pulsate badger-big badger-ok">{{app.datamgr.get_per_service_state()}}%</span>
+      <span class="badger-big badger-ok">{{app.datamgr.get_per_service_state()}}%</span>
       %end
       %end
 </li>
