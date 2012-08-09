@@ -250,7 +250,7 @@ class DataManager(object):
         all_services = self.rg.services
         problem_services = []
         problem_services.extend([s for s in self.rg.services if s.state not in ['OK', 'PENDING'] and not s.is_impact])
-        return (len(problem_services) *100)/len(all_services)
+        return (100-(len(problem_services) *100)/len(all_services))
               
 
     # For all business impacting elements, and give the worse state
