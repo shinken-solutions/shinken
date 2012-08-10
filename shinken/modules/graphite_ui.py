@@ -166,7 +166,7 @@ class Graphite_Webui(BaseModule):
             with open(thefile, 'r') as template_file:
                 template_html += template_file.read()
             # Read the template file, as template string python object
-            template_file.closed
+           
             html = Template(template_html)
             # Build the dict to instanciate the template string
             values = {}
