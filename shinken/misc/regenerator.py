@@ -252,7 +252,6 @@ class Regenerator(object):
         # Link SERVICEGROUPS with services
         for sg in inp_servicegroups:
             new_members = []
-            print sg.members
             for (i, sname) in sg.members:
                 if i not in inp_services:
                     continue

@@ -101,7 +101,7 @@ def sparkline_data(eueid):
     parts = eueid.split(".")
     parts.pop(0)
     regex = "\d\.%s" % ("\.".join(parts))
-    features = db.eue.find({'key':{'$regex' : regex }},sort=[("start_time",1)],limit=50)
+    features = db.eue.find({'key':{'$regex' : regex }},sort=[("start_time",-1)],limit=50)
 
     durations = []
     states = []
@@ -115,6 +115,9 @@ def sparkline_data(eueid):
                 gstate = -1
         durations.append(str(gduration))
         states.append(str(gstate))
+
+    durations.reverse()
+    states.reverse()
 
     return {
         "durations":",".join(durations),
@@ -298,10 +301,49 @@ def reporting(eueid=""):
     }
 
 
+#### WIDGET ######
+def eue_widget():
+    user = app.get_user_auth()
+
+    if not user:
+        redirect("/user/login")
+
+    wid = app.request.GET.get('wid', 'widget_system_' + str(int(time.time())))
+    collapsed = (app.request.GET.get('collapsed', 'False') == 'True')
+
+    got_childs = (app.request.GET.get('got_childs', 'False') == 'True')
+    key = app.request.GET.get('key', 1)
+
+    options = {}
+
+    problems = {}
+
+    message,db = getdb('shinken')
+    if not db:
+        return {
+            'app': app, 'user': user, 'wid': wid,
+            'collapsed': collapsed, 'options': options,
+            'base_url': '/widget/eue', 'title': 'Eue problems',
+            'problems':problems        
+        }
+
+
+
+
+    return {'app': app, 'user': user, 'wid': wid,
+            'collapsed': collapsed, 'options': options,
+            'base_url': '/widget/eue', 'title': 'Eue problems',
+            'problems':problems
+    }
+
+
+widget_desc = '''<h3>Eue problems</h3>'''
+
 pages = {
     reporting: {'routes': ['/eue_report/:eueid'], 'view': 'eue_report', 'static': True},
     feature_history: {'routes': ['/eue_feature_history/:eueid'], 'view': 'eue_feature_history','static': True},
-    eue_media: {'routes': ['/eue_media/:media'], 'view': None,'static': True}
+    eue_media: {'routes': ['/eue_media/:media'], 'view': None,'static': True},
+    eue_widget: {'routes': ['/widget/eue'], 'view': 'eue_widget', 'static': True, 'widget': ['dashboard'], 'widget_desc': widget_desc, 'widget_name': 'eue', 'widget_picture': '/static/eue/img/widget_eue.png'}
     # eue_application: {'routes': ['/eue_application/:application'], 'view': 'eue_application','static': True}
 }
 

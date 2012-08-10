@@ -79,10 +79,15 @@ The service is therefore tagged with a hint type, helping an upper layer to limi
 the number of objects to process.
 """
 HINT_NONE = 0
-HINT_SINGLE_HOST = 1
-HINT_SINGLE_HOST_SERVICES = 2
-HINT_SINGLE_SERVICE = 3
-HINT_RANDOM_SERVICES = 4
+HINT_HOST = 1
+HINT_HOSTS = 2
+HINT_SERVICES_BY_HOST = 3
+HINT_SERVICE = 4
+HINT_SERVICES_BY_HOSTS = 5
+HINT_SERVICES = 6
+HINT_HOSTS_BY_GROUP = 7
+HINT_SERVICES_BY_HOSTGROUP = 8
+HINT_SERVICES_BY_GROUP = 9
 
 
 class LiveStatusQueryMetainfoFilterStack(LiveStatusStack):
@@ -224,9 +229,7 @@ class LiveStatusQueryMetainfo(object):
                     reference = ''
                 self.metainfo_filter_stack.put_stack(self.make_text_filter(operator, attribute, reference))
                 if reference != '_REALNAME':
-                    if attribute.startswith(self.table.rstrip('s') + '_'):
-                        # simplify the filters. GET services,service_description -> GET services,description
-                        attribute = attribute.replace(self.table.rstrip('s') + '_', '')
+                    attribute = self.strip_table_from_column(attribute)
                     self.structured_data.append((keyword, attribute, operator, reference))
             elif keyword == 'And':
                 _, andnum = self.split_option(line)
@@ -346,8 +349,13 @@ class LiveStatusQueryMetainfo(object):
             #print "i cannot cache this", self
 
         # Initial implementation only respects the = operator (~ may be an option in the future)
+        all_filters = sorted([str(f[1]) for f in self.structured_data if (f[0] == 'Filter')])
         eq_filters = sorted([str(f[1]) for f in self.structured_data if (f[0] == 'Filter' and f[2] == '=')])
         unique_eq_filters = sorted({}.fromkeys(eq_filters).keys())
+        ge_contains_filters = sorted([str(f[1]) for f in self.structured_data if (f[0] == 'Filter' and f[2] == '>=')])
+        unique_ge_contains_filters = sorted({}.fromkeys(ge_contains_filters).keys())
+        #print "ge_contains_filters", ge_contains_filters
+        #print "unique_ge_contains_filters", unique_ge_contains_filters
         if [f for f in self.structured_data if f[0] == 'Negate']:
             # HANDS OFF!!!!
             # This might be something like:
@@ -355,27 +363,95 @@ class LiveStatusQueryMetainfo(object):
             # Using hints to preselect the hosts/services will result in
             # absolutely wrong results.
             pass
-        elif self.table == 'hosts':
-            # Do we have exactly 1 Filter, which is 'name' or 'host_name'?
-            if eq_filters == ['name'] or eq_filters == ['host_name']:
-                self.query_hints['target'] = HINT_SINGLE_HOST
-                self.query_hints['host_name'] = [f[3] for f in self.structured_data if (f[0] == 'Filter' and f[2] == '=')][0]
+        elif self.table == 'hosts' or self.table == 'hostsbygroup':
+            # Do we have exactly 1 Filter, which is 'name'?
+            if eq_filters == ['name']:
+                if len(eq_filters) == len([f for f in self.structured_data if (f[0] == 'Filter' and f[1] == 'name')]):
+                    self.query_hints['target'] = HINT_HOST
+                    self.query_hints['host_name'] = [f[3] for f in self.structured_data if (f[0] == 'Filter' and f[2] == '=')][0]
                 # this helps: thruk_host_detail, thruk_host_status_detail, thruk_service_detail, nagvis_host_icon
-        elif self.table == 'services':
+            elif unique_eq_filters ==  ['name']:
+                # we want a lot of services selected by
+                # Filter: host_name
+                # Filter: host_name
+                # ...
+                # Or: n
+                hosts = []
+                only_hosts = True
+                try:
+                    num_hosts = 0
+                    for i, _ in enumerate(self.structured_data):
+                        if self.structured_data[i][0] == 'Filter' and self.structured_data[i][1] == 'host_name':
+                            if self.structured_data[i+1][0] == 'Filter' and self.structured_data[i+1][1] == 'host_name':
+                                num_hosts += 1
+                                hosts.append(self.structured_data[i][3])
+                            elif self.structured_data[i+1][0] == 'Or' and self.structured_data[i+1][1] == num_hosts + 1:
+                                num_hosts += 1
+                                hosts.append(self.structured_data[i][3])
+                                only_hosts = True
+                            else:
+                                only_hosts = False
+                except Exception, exp:
+                    only_hosts = False
+                if only_hosts:
+                    if len(hosts) == len(filter(lambda x: x[0] == 'Filter' and x[1] == 'host_name', self.structured_data)):
+                        hosts = list(set(hosts))
+                        hosts.sort()
+                        self.query_hints['target'] = HINT_HOSTS
+                        self.query_hints['host_name'] = hosts
+                # this helps: nagvis host icons
+            elif ge_contains_filters == ['groups']:
+                # we want the all the hosts in a hostgroup
+                if len(ge_contains_filters) == len([f for f in self.structured_data if (f[0] == 'Filter' and (f[1] == 'groups' or f[1] == 'name'))]):
+                    self.query_hints['target'] = HINT_HOSTS_BY_GROUP
+                    self.query_hints['hostgroup_name'] = [f[3] for f in self.structured_data if (f[0] == 'Filter' and f[2] == '>=')][0]
+                # this helps: nagvis hostgroup
+        elif self.table == 'services' or self.table == 'servicesbygroup' or self.table == 'servicesbyhostgroup':
             if eq_filters == ['host_name']:
-                # Do we have exactly 1 Filter, which is 'name'?
+                # Do we have exactly 1 Filter, which is 'host_name'?
                 # In this case, we want the services of this single host
-                self.query_hints['target'] = HINT_SINGLE_HOST_SERVICES
-                self.query_hints['host_name'] = [f[3] for f in self.structured_data if (f[0] == 'Filter' and f[2] == '=')][0]
+                if len(eq_filters) == len([f for f in self.structured_data if (f[0] == 'Filter' and f[1] == 'host_name')]):
+                    self.query_hints['target'] = HINT_SERVICES_BY_HOST
+                    self.query_hints['host_name'] = [f[3] for f in self.structured_data if (f[0] == 'Filter' and f[2] == '=')][0]
                 # this helps: multisite_host_detail
             elif eq_filters == ['description', 'host_name']:
                 # We want one specific service
-                self.query_hints['target'] = HINT_SINGLE_SERVICE
+                self.query_hints['target'] = HINT_SERVICE
                 self.query_hints['host_name'] = [f[3] for f in self.structured_data if (f[0] == 'Filter' and f[1] == 'host_name' and f[2] == '=')][0]
                 self.query_hints['service_description'] = [f[3] for f in self.structured_data if (f[0] == 'Filter' and f[1] == 'description' and f[2] == '=')][0]
                 # this helps: multisite_service_detail, thruk_service_detail, nagvis_service_icon
+            elif unique_eq_filters ==  ['host_name']:
+                # we want a lot of services selected by
+                # Filter: host_name
+                # Filter: host_name
+                # ...
+                # Or: n
+                hosts = []
+                only_hosts = True
+                try:
+                    num_hosts = 0
+                    for i, _ in enumerate(self.structured_data):
+                        if self.structured_data[i][0] == 'Filter' and self.structured_data[i][1] == 'host_name':
+                            if self.structured_data[i+1][0] == 'Filter' and self.structured_data[i+1][1] == 'host_name':
+                                num_hosts += 1
+                                hosts.append(self.structured_data[i][3])
+                            elif self.structured_data[i+1][0] == 'Or' and self.structured_data[i+1][1] == num_hosts + 1:
+                                num_hosts += 1
+                                hosts.append(self.structured_data[i][3])
+                                only_hosts = True
+                            else:
+                                only_hosts = False
+                except Exception, exp:
+                    only_hosts = False
+                if only_hosts:
+                    if len(hosts) == len(filter(lambda x: x[0] == 'Filter' and x[1] == 'host_name', self.structured_data)):
+                        hosts = list(set(hosts))
+                        hosts.sort()
+                        self.query_hints['target'] = HINT_SERVICES_BY_HOSTS
+                        self.query_hints['host_name'] = hosts
+                # this helps: nagvis host icons
             elif unique_eq_filters ==  ['description', 'host_name']:
-                # we want a lot of services in the format
+                # we want a lot of services selected by
                 # Filter: host_name
                 # Filter: service_description
                 # And: 2
@@ -401,9 +477,25 @@ class LiveStatusQueryMetainfo(object):
                         # num_hosts < num_services / 2
                         # hint : hosts_names
                         if len(hosts) == 1:
-                            self.query_hints['target'] = HINT_SINGLE_HOST_SERVICES
+                            self.query_hints['target'] = HINT_SERVICES_BY_HOST
                             self.query_hints['host_name'] = hosts[0]
                         else:
-                            self.query_hints['target'] = HINT_RANDOM_SERVICES
+                            self.query_hints['target'] = HINT_SERVICES
                             self.query_hints['host_names_service_descriptions'] = services
+            elif ge_contains_filters == ['groups']:
+                # we want the all the services in a servicegroup
+                #print self.structured_data
+                if len(ge_contains_filters) == len([f for f in self.structured_data if (f[0] == 'Filter' and (f[1] == 'groups' or f[1] == 'description'))]):
+                    self.query_hints['target'] = HINT_SERVICES_BY_GROUP
+                    self.query_hints['servicegroup_name'] = [f[3] for f in self.structured_data if (f[0] == 'Filter' and f[2] == '>=')][0]
+                # this helps: nagvis servicegroup
+            elif ge_contains_filters == ['host_groups']:
+                # we want the services of all the hosts in a hostgroup
+                pass
+                # Do we have exactly 1 Filter, which is 'host_name'?
+                # In this case, we want the services of this single host
+                if len(ge_contains_filters) == len([f for f in self.structured_data if (f[0] == 'Filter' and f[1].startswith('host'))]):
+                    self.query_hints['target'] = HINT_SERVICES_BY_HOSTGROUP
+                    self.query_hints['hostgroup_name'] = [f[3] for f in self.structured_data if (f[0] == 'Filter' and f[2] == '>=')][0]
+                # this helps: nagvis hostgroup
 
