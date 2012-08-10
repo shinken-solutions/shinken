@@ -117,14 +117,20 @@ class SQLite_generic(BaseModule):
         return res[0]
 
     # Same but for saving
-    def set_ui_user_preference(self, user, key, value):
-        if not self.db:
-            print "[SQLite]: error Problem during init phase"
-            return None
+    def set_ui_common_preference(self, key, value):
+        return self._set_ui_user_preference('shinken-global', key, value)
 
+    def set_ui_user_preference(self, user, key, value):
         if not user:
             print '[SQLite]: error get_ui_user_preference::no user'
             return None
 
-        self.db.execute("INSERT OR REPLACE INTO ui_preferences (user, key, value) VALUES (?,?,?)", (user.get_name(), key, value))
+        return self._set_ui_user_preference(user.get_name(), key, value)
+
+    def _set_ui_user_preference(self, user, key, value):
+        if not self.db:
+            print "[SQLite]: error Problem during init phase"
+            return None
+
+        self.db.execute("INSERT OR REPLACE INTO ui_preferences (user, key, value) VALUES (?,?,?)", (user, key, value))
         self.db.commit()
