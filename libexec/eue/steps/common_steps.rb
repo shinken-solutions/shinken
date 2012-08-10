@@ -1,3 +1,6 @@
+Soit /^la page d'accueil de "(.*?)"$/ do |arg1|
+end
+
 Quand /^je clique sur le lien "([^"]*)"$/ do |arg1|
 	if @browser.link(:text => arg1).exists?
 		@browser.link(:text => arg1).click

@@ -24,11 +24,12 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import types
+import time
 from shinken.objects import Contact
 from shinken.objects import NotificationWay
 from shinken.misc.regenerator import Regenerator
 from shinken.util import safe_print, get_obj_full_name
-from livestatus_query_metainfo import HINT_NONE, HINT_SINGLE_HOST, HINT_SINGLE_HOST_SERVICES, HINT_SINGLE_SERVICE, HINT_RANDOM_SERVICES
+from livestatus_query_metainfo import HINT_NONE, HINT_HOST, HINT_HOSTS, HINT_SERVICES_BY_HOST, HINT_SERVICE, HINT_SERVICES_BY_HOSTS, HINT_SERVICES, HINT_HOSTS_BY_GROUP, HINT_SERVICES_BY_GROUP, HINT_SERVICES_BY_HOSTGROUP
 
 
 def itersorted(self, hints=None):
@@ -38,40 +39,68 @@ def itersorted(self, hints=None):
     if hints == None:
         # return all items
         hints = {}
-    elif hints['target'] == HINT_SINGLE_HOST:
+    elif hints['target'] == HINT_HOST:
         try:
-            host_id = self._id_by_host_name_heap[hints['host_name']]
-            preselected_ids = [host_id]
+            preselected_ids = [self._id_by_host_name_heap[hints['host_name']]]
             preselection = True
         except Exception, exp:
             # This host is unknown
             pass
-    elif hints['target'] == HINT_SINGLE_HOST_SERVICES:
+    elif hints['target'] == HINT_HOSTS:
         try:
-            service_ids = self._id_by_host_name_heap[hints['host_name']]
-            preselected_ids = service_ids
+            preselected_ids = [self._id_by_host_name_heap[h] for h in hints['host_name'] if h in self._id_by_host_name_heap]
+            preselection = True
+        except Exception, exp:
+            # This host is unknown
+            pass
+    elif hints['target'] == HINT_HOSTS_BY_GROUP:
+        try:
+            preselected_ids = self._id_by_hostgroup_name_heap[hints['hostgroup_name']]
             preselection = True
         except Exception, exp:
             # This service is unknown
             pass
-    elif hints['target'] == HINT_SINGLE_SERVICE:
+    elif hints['target'] == HINT_SERVICES_BY_HOST:
         try:
-            service_id = self._id_by_service_name_heap[hints['host_name'] + '/' + hints['service_description']]
-            preselected_ids = [service_id]
+            preselected_ids = self._id_by_host_name_heap[hints['host_name']]
+            preselection = True
+        except Exception, exp:
+            # This service is unknown
+            pass
+    elif hints['target'] == HINT_SERVICE:
+        try:
+            preselected_ids = [self._id_by_service_name_heap[hints['host_name'] + '/' + hints['service_description']]]
             preselection = True
         except Exception:
             pass
-    elif hints['target'] == HINT_RANDOM_SERVICES:
+    elif hints['target'] == HINT_SERVICES:
         try:
-            service_ids = [self._id_by_service_name_heap[host_name + '/' + service_description] for host_name, service_description in hints['host_names_service_descriptions']]
-            preselected_ids = service_ids
+            preselected_ids = [self._id_by_service_name_heap[host_name + '/' + service_description] for host_name, service_description in hints['host_names_service_descriptions'] if host_name + '/' + service_description in self._id_by_service_name_heap]
+            preselection = True
+        except Exception, exp:
+            print "HINT_SERVICESexc", exp
+            pass
+    elif hints['target'] == HINT_SERVICES_BY_HOSTS:
+        try:
+            preselected_ids = [id for h in hints['host_name'] if h in self._id_by_host_name_heap for id in self._id_by_host_name_heap[h]]
             preselection = True
         except Exception:
             pass
-
+    elif hints['target'] == HINT_SERVICES_BY_GROUP:
+        try:
+            preselected_ids = self._id_by_servicegroup_name_heap[hints['servicegroup_name']]
+            preselection = True
+        except Exception, exp:
+            # This service is unknown
+            pass
+    elif hints['target'] == HINT_SERVICES_BY_HOSTGROUP:
+        try:
+            preselected_ids = self._id_by_hostgroup_name_heap[hints['hostgroup_name']]
+            preselection = True
+        except Exception, exp:
+            # This service is unknown
+            pass
     if 'authuser' in hints:
-        print "simple authuser", hints
-        print "with a hint", self._id_contact_heap
         if preselection:
             try:
                 for id in [pid for pid in preselected_ids if pid in self._id_contact_heap[hints['authuser']]]:
@@ -217,6 +246,29 @@ class LiveStatusRegenerator(Regenerator):
         # print self.services._id_by_host_name_heap
         for hn in self.services._id_by_host_name_heap.keys():
             self.services._id_by_host_name_heap[hn].sort(key=lambda x: get_obj_full_name(self.services[x]))
+
+        # Add another helper structure which allows direct lookup by name
+        # For hostgroups: _id_by_hostgroup_name_heap = {'name1':id1, 'name2': id2,...}
+        # For servicegroups: _id_by_servicegroup_name_heap = {'name1':id1, 'name2': id2,...}
+        setattr(self.hostgroups, '_id_by_hostgroup_name_heap', dict([(get_obj_full_name(v), k) for (k, v) in self.hostgroups.items.iteritems()]))
+        setattr(self.servicegroups, '_id_by_servicegroup_name_heap', dict([(get_obj_full_name(v), k) for (k, v) in self.servicegroups.items.iteritems()]))
+
+        # For hosts: key is a hostgroup_name, value is an array with all host_ids of the hosts in this group
+        setattr(self.hosts, '_id_by_hostgroup_name_heap', dict())
+        [self.hosts._id_by_hostgroup_name_heap.setdefault(get_obj_full_name(hg), []).append(k) for (k, v) in self.hosts.items.iteritems() for hg in v.hostgroups]
+        # For services: key is a servicegroup_name, value is an array with all service_ids of the services in this group
+        setattr(self.services, '_id_by_servicegroup_name_heap', dict())
+        [self.services._id_by_servicegroup_name_heap.setdefault(get_obj_full_name(sg), []).append(k) for (k, v) in self.services.items.iteritems() for sg in v.servicegroups]
+        # For services: key is a hostgroup_name, value is an array with all service_ids of the hosts in this group
+        setattr(self.services, '_id_by_hostgroup_name_heap', dict())
+        [self.services._id_by_hostgroup_name_heap.setdefault(get_obj_full_name(hg), []).append(k) for (k, v) in self.services.items.iteritems() for hg in v.host.hostgroups]
+
+
+
+        # print self.services._id_by_host_name_heap
+        for hn in self.services._id_by_host_name_heap.keys():
+            self.services._id_by_host_name_heap[hn].sort(key=lambda x: get_obj_full_name(self.services[x]))
+
 
         # Everything is new now. We should clean the cache
         self.cache.wipeout()
