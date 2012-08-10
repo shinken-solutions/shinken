@@ -10,10 +10,18 @@ function add_new_bookmark(page){
     console.log('With the URI'+uri);
 
     var b = {'name' : name, 'uri' : uri};
-    bookmarks.push(b);
-
+// Do not save the bm if there is already one with this name
+    var names =new Array();
+    $.each(bookmarks, function(idx, bm){
+        names.push(bm.name);
+        });
+    if (names.indexOf(name)==-1) {
     // Ok we can save bookmarks in our preferences
-    save_bookmarks();
+        bookmarks.push(b);
+        save_bookmarks();
+    }
+    else { alert('This bookmark name already exists !');}
+
 }
 
 function save_bookmarks(){
@@ -35,8 +43,17 @@ function save_bookmarksro(){
 function push_to_common_bookmarks(name,uri) {
     console.log('Pushing a bookmark to common ones');
     var b = {'name' : name, 'uri' : uri};
-    bookmarksro.push(b);
-    save_bookmarksro();
+// Do not save the bm if there is already one with this name
+    var names =new Array();
+    $.each(bookmarksro, function(idx, bm){
+        names.push(bm.name);
+        });
+    if (names.indexOf(name)==-1) {
+    // Ok we can save bookmarks in our preferences
+        bookmarksro.push(b);
+        save_bookmarksro();
+    }
+    else { alert('This Common bookmark name already exists !');}
 
 }
 
