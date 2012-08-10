@@ -69,8 +69,8 @@ class Graphite_broker(BaseModule):
         self.svc_dict = {}
 
         # optional "sub-folder" in graphite to hold the data of a specific host
-        self.graphite_data_path = self.illegal_char.sub('_',
-                                   getattr(modconf, 'graphite_data_path', ''))
+        self.graphite_data_source = self.illegal_char.sub('_',
+                                   getattr(modconf, 'graphite_data_source', ''))
 
 
     # Called by Broker so we can do init stuff
@@ -158,8 +158,8 @@ class Graphite_broker(BaseModule):
 
 #        print "Graphite:", hname, desc, check_time, perf_data
 
-        if self.graphite_data_path:
-            path = '.'.join((hname, self.graphite_data_path, desc))
+        if self.graphite_data_source:
+            path = '.'.join((hname, self.graphite_data_source, desc))
         else:
             path = '.'.join((hname, desc))
 
@@ -203,8 +203,8 @@ class Graphite_broker(BaseModule):
 
  #       print "Graphite:", hname, check_time, perf_data
 
-        if self.graphite_data_path:
-            path = '.'.join((hname, self.graphite_data_path))
+        if self.graphite_data_source:
+            path = '.'.join((hname, self.graphite_data_source))
         else:
             path = hname
 
