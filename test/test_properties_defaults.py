@@ -224,6 +224,25 @@ class TestConfig(unittest.TestCase, PropertiesTester):
         self.item = Config()
 
 
+class TestCommand(unittest.TestCase, PropertiesTester):
+
+    unused_props = []
+
+    without_default = ['command_name', 'command_line']
+
+    properties = dict([
+        ('imported_from', 'unknown'),
+        ('use', ''),
+        ('name', ''),
+        ('poller_tag', 'None'),
+        ('reactionner_tag', 'None'),
+        ('module_type', None),
+        ('timeout', '-1'),
+        ])
+
+    def setUp(self):
+        from shinken.objects.command import Command
+        self.item = Command()
 
 if __name__ == '__main__':
     unittest.main()
