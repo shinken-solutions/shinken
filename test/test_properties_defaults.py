@@ -432,5 +432,27 @@ class TestHostextinfo(unittest.TestCase, PropertiesTester):
         self.item = HostExtInfo()
 
 
+class TestHostgroup(unittest.TestCase, PropertiesTester):
+
+    unused_props = []
+
+    without_default = ['members', 'hostgroup_name', 'alias']
+
+    properties = dict([
+        ('imported_from', 'unknown'),
+        ('use', ''),
+        ('name', ''),
+        ('unknown_members', []),
+        ('id', 0),
+        ('notes', ''),
+        ('notes_url', ''),
+        ('action_url', ''),
+        ])
+
+    def setUp(self):
+        from shinken.objects.hostgroup import Hostgroup
+        self.item = Hostgroup()
+
+
 if __name__ == '__main__':
     unittest.main()
