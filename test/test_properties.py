@@ -76,5 +76,19 @@ class TestBoolProp(unittest.TestCase, PropertyTests):
         self.assertEqual(p.pythonize("off"), False)
 
 
+class TestStringProp(unittest.TestCase, PropertyTests):
+    """Test the StringProp class"""
+
+    prop_class = StringProp
+
+    def test_pythonize(self):
+        p = self.prop_class()
+        self.assertEqual(p.pythonize("1"), "1")
+        self.assertEqual(p.pythonize("yes"), "yes")
+        self.assertEqual(p.pythonize("0"), "0")
+        self.assertEqual(p.pythonize("no"), "no")
+
+
+
 if __name__ == '__main__':
     unittest.main()
