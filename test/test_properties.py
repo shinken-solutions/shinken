@@ -29,20 +29,25 @@ import __import_shinken
 from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp
 
 
-class TestBoolProp(unittest.TestCase):
+class PropertyTests:
+    """Common tests for all property classes"""
+
+    def test_fill_brok(self):
+        p = self.prop_class()
+        self.assertNotIn('full_status', p.fill_brok)
+        p = self.prop_class(default='0', fill_brok=['full_status'])
+        self.assertIn('full_status', p.fill_brok)
+
+
+class TestBoolProp(unittest.TestCase, PropertyTests):
     """Test the BoolProp class"""
+
+    prop_class = BoolProp
 
     def test_pythonize(self):
         p = BoolProp()
         self.assertEqual(p.pythonize("1"), True)
         self.assertEqual(p.pythonize("0"), False)
-
-    def test_fill_brok(self):
-        p = BoolProp()
-        self.assertNotIn('full_status', p.fill_brok)
-        p = BoolProp(default='0', fill_brok=['full_status'])
-        self.assertIn('full_status', p.fill_brok)
-
 
 if __name__ == '__main__':
     unittest.main()
