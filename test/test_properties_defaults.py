@@ -581,5 +581,27 @@ class TestPack(unittest.TestCase, PropertiesTester):
         self.item = Pack()
 
 
+class TestRealm(unittest.TestCase, PropertiesTester):
+
+    unused_props = []
+
+    without_default = ['members', 'realm_name']
+
+    properties = dict([
+        ('imported_from', 'unknown'),
+        ('use', ''),
+        ('name', ''),
+        ('unknown_members', []),
+        ('id', 0),
+        ('realm_members', ''),
+        ('higher_realms', ''),
+        ('default', '0'),
+        ])
+
+    def setUp(self):
+        from shinken.objects.realm import Realm
+        self.item = Realm()
+
+
 if __name__ == '__main__':
     unittest.main()
