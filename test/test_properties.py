@@ -88,6 +88,18 @@ class TestIntegerProp(unittest.TestCase, PropertyTests):
         self.assertEqual(p.pythonize("1000.33"), 1000)
 
 
+class TestFloatProp(unittest.TestCase, PropertyTests):
+    """Test the FloatProp class"""
+
+    prop_class = shinken.property.FloatProp
+
+    def test_pythonize(self):
+        p = self.prop_class()
+        self.assertEqual(p.pythonize("1"), 1.0)
+        self.assertEqual(p.pythonize("0"), 0.0)
+        self.assertEqual(p.pythonize("1000.33"), 1000.33)
+
+
 class TestStringProp(unittest.TestCase, PropertyTests):
     """Test the StringProp class"""
 
