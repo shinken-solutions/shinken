@@ -603,5 +603,25 @@ class TestRealm(unittest.TestCase, PropertiesTester):
         self.item = Realm()
 
 
+class TestResultmodulation(unittest.TestCase, PropertiesTester):
+
+    unused_props = []
+
+    without_default = ['resultmodulation_name']
+
+    properties = dict([
+        ('imported_from', 'unknown'),
+        ('use', ''),
+        ('name', ''),
+        ('exit_codes_match', ''),
+        ('exit_code_modulation', None),
+        ('modulation_period', None),
+        ])
+
+    def setUp(self):
+        from shinken.objects.resultmodulation import Resultmodulation
+        self.item = Resultmodulation()
+
+
 if __name__ == '__main__':
     unittest.main()
