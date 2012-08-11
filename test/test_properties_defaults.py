@@ -244,5 +244,23 @@ class TestCommand(unittest.TestCase, PropertiesTester):
         from shinken.objects.command import Command
         self.item = Command()
 
+class TestContactgroup(unittest.TestCase, PropertiesTester):
+
+    unused_props = []
+
+    without_default = ['members', 'contactgroup_name', 'alias']
+
+    properties = dict([
+        ('imported_from', 'unknown'),
+        ('use', ''),
+        ('name', ''),
+        ('unknown_members', []),
+        ('id', 0),
+        ])
+
+    def setUp(self):
+        from shinken.objects.contactgroup import Contactgroup
+        self.item = Contactgroup()
+
 if __name__ == '__main__':
     unittest.main()
