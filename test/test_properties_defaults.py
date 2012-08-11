@@ -692,5 +692,27 @@ class TestServiceextinfo(unittest.TestCase, PropertiesTester):
         self.item = ServiceExtInfo()
 
 
+class TestServicegroup(unittest.TestCase, PropertiesTester):
+
+    unused_props = []
+
+    without_default = ['members', 'servicegroup_name', 'alias']
+
+    properties = dict([
+        ('imported_from', 'unknown'),
+        ('use', ''),
+        ('name', ''),
+        ('unknown_members', []),
+        ('id', 0),
+        ('notes', ''),
+        ('notes_url', ''),
+        ('action_url', ''),
+        ])
+
+    def setUp(self):
+        from shinken.objects.servicegroup import Servicegroup
+        self.item = Servicegroup()
+
+
 if __name__ == '__main__':
     unittest.main()
