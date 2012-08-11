@@ -360,5 +360,28 @@ class TestEscalation(unittest.TestCase, PropertiesTester):
         self.item = Escalation()
 
 
+class TestHostdependency(unittest.TestCase, PropertiesTester):
+
+    unused_props = []
+
+    without_default = ['dependent_host_name', 'host_name']
+
+    properties = dict([
+        ('imported_from', 'unknown'),
+        ('use', ''),
+        ('name', ''),
+        ('dependent_hostgroup_name', ''),
+        ('hostgroup_name', ''),
+        ('inherits_parent', '0'),
+        ('execution_failure_criteria', 'n'),
+        ('notification_failure_criteria', 'n'),
+        ('dependency_period', ''),
+        ])
+
+    def setUp(self):
+        from shinken.objects.hostdependency import Hostdependency
+        self.item = Hostdependency()
+
+
 if __name__ == '__main__':
     unittest.main()
