@@ -319,6 +319,21 @@ class TestDiscoveryrule(unittest.TestCase, PropertiesTester):
         from shinken.objects.discoveryrule import Discoveryrule
         self.item = Discoveryrule()
 
+class TestDiscoveryrun(unittest.TestCase, PropertiesTester):
+
+    unused_props = []
+
+    without_default = ['discoveryrun_name', 'discoveryrun_command']
+
+    properties = dict([
+        ('imported_from', 'unknown'),
+        ('use', ''),
+        ('name', ''),
+        ])
+
+    def setUp(self):
+        from shinken.objects.discoveryrun import Discoveryrun
+        self.item = Discoveryrun()
 
 if __name__ == '__main__':
     unittest.main()
