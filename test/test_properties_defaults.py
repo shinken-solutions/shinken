@@ -522,5 +522,23 @@ class TestHost(unittest.TestCase, PropertiesTester):
         self.item = Host()
 
 
+class TestModule(unittest.TestCase, PropertiesTester):
+
+    unused_props = []
+
+    without_default = ['module_name', 'module_type']
+
+    properties = dict([
+        ('imported_from', 'unknown'),
+        ('use', ''),
+        ('name', ''),
+        ('modules', ''),
+        ])
+
+    def setUp(self):
+        from shinken.objects.module import Module
+        self.item = Module()
+
+
 if __name__ == '__main__':
     unittest.main()
