@@ -564,5 +564,22 @@ class TestNotificationway(unittest.TestCase, PropertiesTester):
         self.item = NotificationWay()
 
 
+class TestPack(unittest.TestCase, PropertiesTester):
+
+    unused_props = []
+
+    without_default = ['pack_name']
+
+    properties = dict([
+        ('imported_from', 'unknown'),
+        ('use', ''),
+        ('name', ''),
+        ])
+
+    def setUp(self):
+        from shinken.objects.pack import Pack
+        self.item = Pack()
+
+
 if __name__ == '__main__':
     unittest.main()
