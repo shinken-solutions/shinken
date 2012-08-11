@@ -301,5 +301,24 @@ class TestContact(unittest.TestCase, PropertiesTester):
         from shinken.objects.contact import Contact
         self.item = Contact()
 
+class TestDiscoveryrule(unittest.TestCase, PropertiesTester):
+
+    unused_props = []
+
+    without_default = ['discoveryrule_name']
+
+    properties = dict([
+        ('imported_from', 'unknown'),
+        ('use', ''),
+        ('name', ''),
+        ('creation_type', 'service'),
+        ('discoveryrule_order', '0'),
+        ])
+
+    def setUp(self):
+        from shinken.objects.discoveryrule import Discoveryrule
+        self.item = Discoveryrule()
+
+
 if __name__ == '__main__':
     unittest.main()
