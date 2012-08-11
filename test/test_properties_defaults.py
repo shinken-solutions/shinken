@@ -44,8 +44,8 @@ class PropertiesTester(object):
         for name in self.without_default:
             self.assertIn(name, item.properties,
                           msg='property %r not found in %s' % (name, self.item.my_type))
-            self.assertIs(item.properties[name], none_object,
-                          msg='property %r is not `none_object`' % name)
+            self.assertIs(item.properties[name].default, none_object,
+                          msg='property %r is not `none_object` but %r' % (name, item.properties[name]))
             self.assertTrue(item.properties[name].required)
 
     def test_default_values(self):
