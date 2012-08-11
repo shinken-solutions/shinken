@@ -76,6 +76,18 @@ class TestBoolProp(unittest.TestCase, PropertyTests):
         self.assertEqual(p.pythonize("off"), False)
 
 
+class TestIntegerProp(unittest.TestCase, PropertyTests):
+    """Test the IntegerProp class"""
+
+    prop_class = shinken.property.IntegerProp
+
+    def test_pythonize(self):
+        p = self.prop_class()
+        self.assertEqual(p.pythonize("1"), 1)
+        self.assertEqual(p.pythonize("0"), 0)
+        self.assertEqual(p.pythonize("1000.33"), 1000)
+
+
 class TestStringProp(unittest.TestCase, PropertyTests):
     """Test the StringProp class"""
 
