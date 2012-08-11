@@ -540,5 +540,29 @@ class TestModule(unittest.TestCase, PropertiesTester):
         self.item = Module()
 
 
+class TestNotificationway(unittest.TestCase, PropertiesTester):
+
+    unused_props = []
+
+    without_default = [
+        'notificationway_name',
+        'host_notification_period', 'service_notification_period',
+        'host_notification_options', 'service_notification_options',
+        'host_notification_commands', 'service_notification_commands']
+
+    properties = dict([
+        ('imported_from', 'unknown'),
+        ('use', ''),
+        ('name', ''),
+        ('host_notifications_enabled', '1'),
+        ('service_notifications_enabled', '1'),
+        ('min_business_impact', '0'),
+        ])
+
+    def setUp(self):
+        from shinken.objects.notificationway import NotificationWay
+        self.item = NotificationWay()
+
+
 if __name__ == '__main__':
     unittest.main()
