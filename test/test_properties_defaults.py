@@ -454,5 +454,73 @@ class TestHostgroup(unittest.TestCase, PropertiesTester):
         self.item = Hostgroup()
 
 
+class TestHost(unittest.TestCase, PropertiesTester):
+
+    unused_props = []
+
+    without_default = [
+        'host_name', 'alias', 'address',
+        'max_check_attempts', 'check_period', 'notification_period']
+
+    properties = dict([
+        ('imported_from', 'unknown'),
+        ('use', ''),
+        ('name', ''),
+        ('display_name', ''),
+        ('parents', ''),
+        ('hostgroups', ''),
+        ('check_command', '_internal_host_up'),
+        ('initial_state', 'u'),
+        ('check_interval', '0'),
+        ('retry_interval', '0'),
+        ('active_checks_enabled', '1'),
+        ('passive_checks_enabled', '1'),
+        ('obsess_over_host', '0'),
+        ('check_freshness', '0'),
+        ('freshness_threshold', '0'),
+        ('event_handler', ''),
+        ('event_handler_enabled', '0'),
+        ('low_flap_threshold', '25'),
+        ('high_flap_threshold', '50'),
+        ('flap_detection_enabled', '1'),
+        ('flap_detection_options', 'o,d,u'),
+        ('process_perf_data', '1'),
+        ('retain_status_information', '1'),
+        ('retain_nonstatus_information', '1'),
+        ('contacts', ''),
+        ('contact_groups', ''),
+        ('notification_interval', '60'),
+        ('first_notification_delay', '0'),
+        ('notification_options', 'd,u,r,f'),
+        ('notifications_enabled', '1'),
+        ('stalking_options', ''),
+        ('notes', ''),
+        ('notes_url', ''),
+        ('action_url', ''),
+        ('icon_image', ''),
+        ('icon_image_alt', ''),
+        ('icon_set', ''),
+        ('vrml_image', ''),
+        ('statusmap_image', ''),
+        ('2d_coords', ''),
+        ('3d_coords', ''),
+        ('failure_prediction_enabled', '0'),
+        ('realm', None),
+        ('poller_tag', 'None'),
+        ('reactionner_tag', 'None'),
+        ('resultmodulations', ''),
+        ('business_impact_modulations', ''),
+        ('escalations', ''),
+        ('maintenance_period', ''),
+        ('business_impact', '2'),
+        ('trigger', ''),
+        ('trigger_name', ''),
+        ])
+
+    def setUp(self):
+        from shinken.objects.host import Host
+        self.item = Host()
+
+
 if __name__ == '__main__':
     unittest.main()
