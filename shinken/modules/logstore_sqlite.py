@@ -426,7 +426,7 @@ class LiveStatusLogStoreSqlite(BaseModule):
     def get_live_data_log(self):
         """Like get_live_data, but for log objects"""
         # finalize the filter stacks
-        #self.sql_time_filter_stack.and_elements(self.sql_time_filter_stack.qsize())
+        self.sql_time_filter_stack.and_elements(self.sql_time_filter_stack.qsize())
         self.sql_filter_stack.and_elements(self.sql_filter_stack.qsize())
         if self.use_aggressive_sql:
             # Be aggressive, get preselected data from sqlite and do less
