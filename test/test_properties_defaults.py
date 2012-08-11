@@ -262,5 +262,44 @@ class TestContactgroup(unittest.TestCase, PropertiesTester):
         from shinken.objects.contactgroup import Contactgroup
         self.item = Contactgroup()
 
+class TestContact(unittest.TestCase, PropertiesTester):
+
+    unused_props = []
+
+    without_default = [
+        'contact_name',
+        'host_notification_period', 'service_notification_period',
+        'host_notification_options', 'service_notification_options',
+        'host_notification_commands', 'service_notification_commands'
+        ]
+
+    properties = dict([
+        ('imported_from', 'unknown'),
+        ('use', ''),
+        ('name', ''),
+        ('alias', 'none'),
+        ('contactgroups', ''),
+        ('host_notifications_enabled', '1'),
+        ('service_notifications_enabled', '1'),
+        ('min_business_impact', '0'),
+        ('email', 'none'),
+        ('pager', 'none'),
+        ('address1', 'none'),
+        ('address2', 'none'),
+        ('address3', 'none'),
+        ('address4', 'none'),
+        ('address5', 'none'),
+        ('address6', 'none'),
+        ('can_submit_commands', '0'),
+        ('is_admin', '0'),
+        ('retain_status_information', '1'),
+        ('notificationways', ''),
+        ('password', 'NOPASSWORDSET'),
+        ])
+
+    def setUp(self):
+        from shinken.objects.contact import Contact
+        self.item = Contact()
+
 if __name__ == '__main__':
     unittest.main()
