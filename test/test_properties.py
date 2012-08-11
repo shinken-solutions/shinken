@@ -144,6 +144,17 @@ class TestConfigPathProp(TestStringProp):
     # any relevant change. So no further tests are implemented here.
 
 
+class TestListProp(unittest.TestCase, PropertyTests):
+    """Test the ListProp class"""
+
+    prop_class = shinken.property.ListProp
+
+    def test_pythonize(self):
+        p = self.prop_class()
+        self.assertEqual(p.pythonize(""), [])
+        self.assertEqual(p.pythonize("1,2,3"), ["1", "2", "3"])
+
+
 
 if __name__ == '__main__':
     unittest.main()
