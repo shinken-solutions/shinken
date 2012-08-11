@@ -714,5 +714,70 @@ class TestServicegroup(unittest.TestCase, PropertiesTester):
         self.item = Servicegroup()
 
 
+class TestService(unittest.TestCase, PropertiesTester):
+
+    unused_props = []
+
+    without_default = [
+        'host_name', 'service_description',
+        'check_command', 'max_check_attempts', 'check_interval',
+        'retry_interval', 'check_period', 'notification_period']
+
+    properties = dict([
+        ('imported_from', 'unknown'),
+        ('use', ''),
+        ('name', ''),
+        ('hostgroup_name', ''),
+        ('display_name', ''),
+        ('servicegroups', ''),
+        ('is_volatile', '0'),
+        ('initial_state', 'o'),
+        ('active_checks_enabled', '1'),
+        ('passive_checks_enabled', '1'),
+        ('obsess_over_service', '0'),
+        ('check_freshness', '0'),
+        ('freshness_threshold', '0'),
+        ('event_handler', ''),
+        ('event_handler_enabled', '0'),
+        ('low_flap_threshold', '-1'),
+        ('high_flap_threshold', '-1'),
+        ('flap_detection_enabled', '1'),
+        ('flap_detection_options', 'o,w,c,u'),
+        ('process_perf_data', '1'),
+        ('retain_status_information', '1'),
+        ('retain_nonstatus_information', '1'),
+        ('notification_interval', '60'),
+        ('first_notification_delay', '0'),
+        ('notification_options', 'w,u,c,r,f,s'),
+        ('notifications_enabled', '1'),
+        ('contacts', ''),
+        ('contact_groups', ''),
+        ('stalking_options', ''),
+        ('notes', ''),
+        ('notes_url', ''),
+        ('action_url', ''),
+        ('icon_image', ''),
+        ('icon_image_alt', ''),
+        ('icon_set', ''),
+        ('failure_prediction_enabled', '0'),
+        ('parallelize_check', '1'),
+        ('poller_tag', 'None'),
+        ('reactionner_tag', 'None'),
+        ('resultmodulations', ''),
+        ('business_impact_modulations', ''),
+        ('escalations', ''),
+        ('maintenance_period', ''),
+        ('duplicate_foreach', ''),
+        ('default_value', ''),
+        ('business_impact', '2'),
+        ('trigger', ''),
+        ('trigger_name', ''),
+        ])
+
+    def setUp(self):
+        from shinken.objects.service import Service
+        self.item = Service()
+
+
 if __name__ == '__main__':
     unittest.main()
