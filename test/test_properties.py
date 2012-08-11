@@ -26,8 +26,8 @@ Test shinken.property
 import unittest
 
 import __import_shinken
-from shinken.property import UnusedProp, BoolProp, IntegerProp, \
-     FloatProp, CharProp, StringProp, Property, none_object
+import shinken.property
+from shinken.property import none_object
 
 
 class PropertyTests:
@@ -60,10 +60,10 @@ class PropertyTests:
 class TestBoolProp(unittest.TestCase, PropertyTests):
     """Test the BoolProp class"""
 
-    prop_class = BoolProp
+    prop_class = shinken.property.BoolProp
 
     def test_pythonize(self):
-        p = BoolProp()
+        p = self.prop_class()
         # allowed strings for `True`
         self.assertEqual(p.pythonize("1"), True)
         self.assertEqual(p.pythonize("yes"), True)
@@ -79,7 +79,7 @@ class TestBoolProp(unittest.TestCase, PropertyTests):
 class TestStringProp(unittest.TestCase, PropertyTests):
     """Test the StringProp class"""
 
-    prop_class = StringProp
+    prop_class = shinken.property.StringProp
 
     def test_pythonize(self):
         p = self.prop_class()
