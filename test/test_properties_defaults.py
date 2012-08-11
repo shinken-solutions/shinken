@@ -779,5 +779,28 @@ class TestService(unittest.TestCase, PropertiesTester):
         self.item = Service()
 
 
+class TestTimeperiod(unittest.TestCase, PropertiesTester):
+
+    unused_props = []
+
+    without_default = ['timeperiod_name']
+
+    properties = dict([
+        ('imported_from', 'unknown'),
+        ('use', ''),
+        ('name', ''),
+        ('alias', ''),
+        ('use', ''),
+        ('register', '1'),
+        ('dateranges', []),
+        ('exclude', []),
+        ('is_active', '0'),
+        ])
+
+    def setUp(self):
+        from shinken.objects.timeperiod import Timeperiod
+        self.item = Timeperiod()
+
+
 if __name__ == '__main__':
     unittest.main()
