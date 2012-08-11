@@ -126,6 +126,24 @@ class TestCharProp(unittest.TestCase, PropertyTests):
         ## self.assertEqual(p.pythonize(""), "")
 
 
+class TestPathProp(TestStringProp):
+    """Test the PathProp class"""
+
+    prop_class = shinken.property.PathProp
+
+    # As of now, PathProp is a subclass of StringProp without any
+    # relevant change. So no further tests are implemented here.
+
+
+class TestConfigPathProp(TestStringProp):
+    """Test the ConfigPathProp class"""
+
+    prop_class = shinken.property.ConfigPathProp
+
+    # As of now, ConfigPathProp is a subclass of StringProp without
+    # any relevant change. So no further tests are implemented here.
+
+
 
 if __name__ == '__main__':
     unittest.main()
