@@ -802,5 +802,23 @@ class TestTimeperiod(unittest.TestCase, PropertiesTester):
         self.item = Timeperiod()
 
 
+class TestTrigger(unittest.TestCase, PropertiesTester):
+
+    unused_props = []
+
+    without_default = ['trigger_name']
+
+    properties = dict([
+        ('imported_from', 'unknown'),
+        ('use', ''),
+        ('name', ''),
+        ('code_src', ''),
+        ])
+
+    def setUp(self):
+        from shinken.objects.trigger import Trigger
+        self.item = Trigger()
+
+
 if __name__ == '__main__':
     unittest.main()
