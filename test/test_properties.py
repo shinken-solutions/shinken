@@ -155,6 +155,24 @@ class TestListProp(unittest.TestCase, PropertyTests):
         self.assertEqual(p.pythonize("1,2,3"), ["1", "2", "3"])
 
 
+class TestLogLevelProp(unittest.TestCase, PropertyTests):
+    """Test the LogLevelProp class"""
+
+    prop_class = shinken.property.LogLevelProp
+
+    def test_pythonize(self):
+        p = self.prop_class()
+        self.assertEqual(p.pythonize("NOTSET"), 0)
+        self.assertEqual(p.pythonize("DEBUG"), 10)
+        self.assertEqual(p.pythonize("INFO"), 20)
+        self.assertEqual(p.pythonize("WARN"), 30)
+        self.assertEqual(p.pythonize("WARNING"), 30)
+        self.assertEqual(p.pythonize("ERROR"), 40)
+        ## 'FATAL' is not defined in std-module `logging._levelNames`
+        #self.assertEqual(p.pythonize("FATAL"), 50)
+        self.assertEqual(p.pythonize("CRITICAL"), 50)
+
+
 
 if __name__ == '__main__':
     unittest.main()
