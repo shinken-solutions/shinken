@@ -27,7 +27,6 @@ import unittest
 
 import __import_shinken
 from shinken.property import UnusedProp, none_object
-from shinken.objects.config import Config
 import shinken.daemon
 
 
@@ -221,6 +220,7 @@ class TestConfig(unittest.TestCase, PropertiesTester):
         ])
 
     def setUp(self):
+        from shinken.objects.config import Config
         self.item = Config()
 
 
