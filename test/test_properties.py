@@ -173,6 +173,48 @@ class TestLogLevelProp(unittest.TestCase, PropertyTests):
         self.assertEqual(p.pythonize("CRITICAL"), 50)
 
 
+class TestAddrProp(unittest.TestCase, PropertyTests):
+    """Test the AddrProp class"""
+
+    prop_class = shinken.property.AddrProp
+
+    def test_pythonize_with_IPv4_addr(self):
+        p = self.prop_class()
+        self.assertEqual(p.pythonize("192.168.10.11:445"),
+                         {'address': "192.168.10.11",
+                          'port': 445})
+        # no colon, no port
+        self.assertEqual(p.pythonize("192.168.10.11"),
+                         {'address': "192.168.10.11"})
+        # colon but no port number
+        self.assertRaises(ValueError, p.pythonize, "192.168.10.11:")
+        # only colon, no addr, no port number
+        self.assertRaises(ValueError, p.pythonize, ":")
+        # no address, only port number
+        self.assertEqual(p.pythonize(":445"),
+                         {'address': "",
+                          'port': 445})
+
+    def test_pythonize_with_hostname(self):
+        p = self.prop_class()
+        self.assertEqual(p.pythonize("host_123:445"),
+                         {'address': "host_123",
+                          'port': 445})
+        # no colon, no port
+        self.assertEqual(p.pythonize("host_123"),
+                         {'address': "host_123"})
+        # colon but no port number
+        self.assertRaises(ValueError, p.pythonize, "host_123:")
+        # only colon, no addr, no port number
+        self.assertRaises(ValueError, p.pythonize, ":")
+        # no address, only port number
+        self.assertEqual(p.pythonize(":445"),
+                         {'address': "",
+                          'port': 445})
+
+    # :fixme: IPv6 addresses are no tested since they are not parsed
+    # correcly
+
 
 if __name__ == '__main__':
     unittest.main()
