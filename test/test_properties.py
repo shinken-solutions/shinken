@@ -26,7 +26,8 @@ Test shinken.property
 import unittest
 
 import __import_shinken
-from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp
+from shinken.property import UnusedProp, BoolProp, IntegerProp, \
+     FloatProp, CharProp, StringProp, Property, none_object
 
 
 class PropertyTests:
