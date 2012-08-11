@@ -244,6 +244,7 @@ class TestCommand(unittest.TestCase, PropertiesTester):
         from shinken.objects.command import Command
         self.item = Command()
 
+
 class TestContactgroup(unittest.TestCase, PropertiesTester):
 
     unused_props = []
@@ -261,6 +262,7 @@ class TestContactgroup(unittest.TestCase, PropertiesTester):
     def setUp(self):
         from shinken.objects.contactgroup import Contactgroup
         self.item = Contactgroup()
+
 
 class TestContact(unittest.TestCase, PropertiesTester):
 
@@ -301,6 +303,7 @@ class TestContact(unittest.TestCase, PropertiesTester):
         from shinken.objects.contact import Contact
         self.item = Contact()
 
+
 class TestDiscoveryrule(unittest.TestCase, PropertiesTester):
 
     unused_props = []
@@ -319,6 +322,7 @@ class TestDiscoveryrule(unittest.TestCase, PropertiesTester):
         from shinken.objects.discoveryrule import Discoveryrule
         self.item = Discoveryrule()
 
+
 class TestDiscoveryrun(unittest.TestCase, PropertiesTester):
 
     unused_props = []
@@ -334,6 +338,27 @@ class TestDiscoveryrun(unittest.TestCase, PropertiesTester):
     def setUp(self):
         from shinken.objects.discoveryrun import Discoveryrun
         self.item = Discoveryrun()
+
+
+class TestEscalation(unittest.TestCase, PropertiesTester):
+
+    unused_props = []
+
+    without_default = ['escalation_name', 'first_notification', 'last_notification', 'first_notification_time', 'last_notification_time', 'contacts', 'contact_groups']
+
+    properties = dict([
+        ('imported_from', 'unknown'),
+        ('use', ''),
+        ('name', ''),
+        ('notification_interval', '-1'),
+        ('escalation_period', ''),
+        ('escalation_options', 'd,u,r,w,c'),
+        ])
+
+    def setUp(self):
+        from shinken.objects.escalation import Escalation
+        self.item = Escalation()
+
 
 if __name__ == '__main__':
     unittest.main()
