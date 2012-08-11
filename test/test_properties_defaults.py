@@ -407,5 +407,30 @@ class TestHostescalation(unittest.TestCase, PropertiesTester):
         self.item = Hostescalation()
 
 
+class TestHostextinfo(unittest.TestCase, PropertiesTester):
+
+    unused_props = []
+
+    without_default = ['host_name']
+
+    properties = dict([
+        ('imported_from', 'unknown'),
+        ('use', ''),
+        ('name', ''),
+        ('notes', ''),
+        ('notes_url', ''),
+        ('icon_image', ''),
+        ('icon_image_alt', ''),
+        ('vrml_image', ''),
+        ('statusmap_image', ''),
+        ('2d_coords', ''),
+        ('3d_coords', ''),
+        ])
+
+    def setUp(self):
+        from shinken.objects.hostextinfo import HostExtInfo
+        self.item = HostExtInfo()
+
+
 if __name__ == '__main__':
     unittest.main()
