@@ -32,11 +32,28 @@ from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharP
 class PropertyTests:
     """Common tests for all property classes"""
 
+    def test_no_default_value(self):
+        p = self.prop_class()
+        self.assertIs(p.default, none_object)
+        self.assertFalse(p.has_default)
+        self.assertTrue(p.required)
+
+    def test_default_value(self):
+        default_value = object()
+        p = self.prop_class(default=default_value)
+        self.assertIs(p.default, default_value)
+        self.assertTrue(p.has_default)
+        self.assertFalse(p.required)
+
     def test_fill_brok(self):
         p = self.prop_class()
         self.assertNotIn('full_status', p.fill_brok)
         p = self.prop_class(default='0', fill_brok=['full_status'])
         self.assertIn('full_status', p.fill_brok)
+
+    def test_unused(self):
+        p = self.prop_class()
+        self.assertFalse(p.unused)
 
 
 class TestBoolProp(unittest.TestCase, PropertyTests):
