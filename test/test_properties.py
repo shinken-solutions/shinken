@@ -173,6 +173,17 @@ class TestLogLevelProp(unittest.TestCase, PropertyTests):
         self.assertEqual(p.pythonize("CRITICAL"), 50)
 
 
+## :todo: fix DictProp error if no `elts_prop` are passed
+## class TestDictProp(unittest.TestCase, PropertyTests):
+##     """Test the DictProp class"""
+##
+##     prop_class = shinken.property.DictProp
+##
+##     def test_pythonize(self):
+##         p = self.prop_class()
+##         self.assertEqual(p.pythonize(""), "")
+
+
 class TestAddrProp(unittest.TestCase, PropertyTests):
     """Test the AddrProp class"""
 
