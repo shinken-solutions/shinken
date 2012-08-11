@@ -113,6 +113,19 @@ class TestStringProp(unittest.TestCase, PropertyTests):
         self.assertEqual(p.pythonize("no"), "no")
 
 
+class TestCharProp(unittest.TestCase, PropertyTests):
+    """Test the CharProp class"""
+
+    prop_class = shinken.property.CharProp
+
+    def test_pythonize(self):
+        p = self.prop_class()
+        self.assertEqual(p.pythonize("c"), "c")
+        self.assertEqual(p.pythonize("cxxxx"), "c")
+        # this raises IndexError. is this intented?
+        ## self.assertEqual(p.pythonize(""), "")
+
+
 
 if __name__ == '__main__':
     unittest.main()
