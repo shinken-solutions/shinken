@@ -647,5 +647,29 @@ class TestServicedependency(unittest.TestCase, PropertiesTester):
         self.item = Servicedependency()
 
 
+class TestServiceescalation(unittest.TestCase, PropertiesTester):
+
+    unused_props = []
+
+    without_default = [
+        'host_name', 'hostgroup_name',
+        'service_description',
+        'first_notification', 'last_notification',
+        'contacts', 'contact_groups']
+
+    properties = dict([
+        ('imported_from', 'unknown'),
+        ('use', ''),
+        ('name', ''),
+        ('notification_interval', '30'),
+        ('escalation_period', ''),
+        ('escalation_options', 'd,u,r,w,c'),
+        ])
+
+    def setUp(self):
+        from shinken.objects.serviceescalation import Serviceescalation
+        self.item = Serviceescalation()
+
+
 if __name__ == '__main__':
     unittest.main()
