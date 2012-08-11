@@ -671,5 +671,26 @@ class TestServiceescalation(unittest.TestCase, PropertiesTester):
         self.item = Serviceescalation()
 
 
+class TestServiceextinfo(unittest.TestCase, PropertiesTester):
+
+    unused_props = []
+
+    without_default = ['host_name', 'service_description']
+
+    properties = dict([
+        ('imported_from', 'unknown'),
+        ('use', ''),
+        ('name', ''),
+        ('notes', ''),
+        ('notes_url', ''),
+        ('icon_image', ''),
+        ('icon_image_alt', ''),
+        ])
+
+    def setUp(self):
+        from shinken.objects.serviceextinfo import ServiceExtInfo
+        self.item = ServiceExtInfo()
+
+
 if __name__ == '__main__':
     unittest.main()
