@@ -63,8 +63,17 @@ class TestBoolProp(unittest.TestCase, PropertyTests):
 
     def test_pythonize(self):
         p = BoolProp()
+        # allowed strings for `True`
         self.assertEqual(p.pythonize("1"), True)
+        self.assertEqual(p.pythonize("yes"), True)
+        self.assertEqual(p.pythonize("true"), True)
+        self.assertEqual(p.pythonize("on"), True)
+        # allowed strings for `False`
         self.assertEqual(p.pythonize("0"), False)
+        self.assertEqual(p.pythonize("no"), False)
+        self.assertEqual(p.pythonize("false"), False)
+        self.assertEqual(p.pythonize("off"), False)
+
 
 if __name__ == '__main__':
     unittest.main()
