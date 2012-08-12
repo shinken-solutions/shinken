@@ -71,8 +71,8 @@ class Graphite_Webui(BaseModule):
             self.uri = self.uri.replace('YOURSERVERNAME', my_name)
 
         # optional "sub-folder" in graphite to hold the data of a specific host
-        self.graphite_data_path = self.illegal_char.sub('_',
-                                    getattr(modconf, 'graphite_data_path', ''))
+        self.graphite_data_source = self.illegal_char.sub('_',
+                                    getattr(modconf, 'graphite_data_source', ''))
 
     # Try to connect if we got true parameter
     def init(self):
@@ -209,9 +209,9 @@ class Graphite_Webui(BaseModule):
                 uri = self.uri + 'render/?width=586&height=308&lineMode=connected&from=' + d + "&until=" + e
                 if re.search(r'_warn|_crit', metric):
                     continue
-                if self.graphite_data_path:
+                if self.graphite_data_source:
                     uri += "&target=%s.%s.__HOST__.%s" % (
-                        host_name, self.graphite_data_path, metric)
+                        host_name, self.graphite_data_source, metric)
                 else:
                     uri += "&target=%s.__HOST__.%s" % (host_name, metric)
                 v = {}
@@ -239,9 +239,9 @@ class Graphite_Webui(BaseModule):
                     continue
                 elif value[1] == '%':
                     uri += "&yMin=0&yMax=100"
-                if self.graphite_data_path:
+                if self.graphite_data_source:
                     uri += "&target=%s.%s.%s.%s" % (host_name,
-                                                    self.graphite_data_path,
+                                                    self.graphite_data_source,
                                                     desc, metric)
                 else:
                     uri += "&target=%s.%s.%s" % (host_name, desc, metric)
