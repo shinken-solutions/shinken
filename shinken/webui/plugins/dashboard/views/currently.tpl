@@ -31,7 +31,7 @@ $(function($) {
 <!-- Jet Pack Area END -->
 
 <div class="span12"> 
-  <ul id="Navigation" class="span6 wtf">
+  <ul id="Navigation" class="span8 wtf">
     <li class="span3">
       <svg version="1.0" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="100px" height="85px" viewBox="0 0 100 83.419" enable-background="new 0 0 100 83.419" fill ="#FFFFFF" xml:space="preserve">
         <path fill-opacity="0.875" d="M68.2,55.555l4.742,4.792c6.451-6.143,10.461-14.861,10.461-24.532c0-9.521-3.901-18.122-10.184-24.25
@@ -107,6 +107,25 @@ $(function($) {
       <span class="badger-big badger-warning">{{app.datamgr.get_per_service_state()}}%</span>
       %elif service_state <= 100:
       <span class="badger-big badger-ok">{{app.datamgr.get_per_service_state()}}%</span>
+      %end
+      %end
+</li>
+  <li class="span3">
+    <svg version="1.0" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+    width="100px" height="82.922px" viewBox="0 0 100 82.922" enable-background="new 0 0 100 82.922" fill="#FFFFFF" xml:space="preserve">
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M17.15,47.28V85.2l31.601,13.543v-37.92L17.15,47.28z M84,45.437  L49.653,60.823v37.92L84,83.357V45.437z M61.458,2.445l-33.466,14.83v32.759l9.043,3.747l-0.022-22.753  c0,0,12.31-5.395,24.445-10.691V2.445z M22.575,15.695L22.56,47.784l4.507,1.865V17.485L22.575,15.695z M22.936,14.311l4.484,1.791  l32.759-14.28L55.665,0L22.936,14.311z M38.818,54.525l4.5,1.866V35.543l-4.492-1.791L38.818,54.525z M44.243,56.775l5.41,2.242  l28.057-12.52V20.502l-33.467,14.83V56.775z M39.188,32.368l4.484,1.791l32.76-14.28l-4.515-1.821L39.188,32.368z"/>
+  </svg>
+  <span class="badger-title">Hosts UP</span>
+      %if app:
+      %service_state = app.datamgr.get_per_hosts_state()
+      %if service_state <= 0:
+      <span class="badger-big badger-critical">{{app.datamgr.get_per_hosts_state()}}%</span>
+      %elif service_state <= 33:
+      <span class="badger-big badger-critical">{{app.datamgr.get_per_hosts_state()}}%</span>
+      %elif service_state <= 66:
+      <span class="badger-big badger-warning">{{app.datamgr.get_per_hosts_state()}}%</span>
+      %elif service_state <= 100:
+      <span class="badger-big badger-ok">{{app.datamgr.get_per_hosts_state()}}%</span>
       %end
       %end
 </li>
