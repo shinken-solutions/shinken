@@ -2050,6 +2050,13 @@ function install_notify_by_xmpp(){
                 apt-get install -y python-xmpp >> ${LOGFILE} 2>&1
             fi
             ;;
+        REDHAT|Fedora)
+            if [ -z "$(rpm -q python-xmpp)"  ]
+            then
+                cecho " -> python-xmpp not found. Going to install" yellow
+                yum install -y python-xmpp >> ${LOGFILE} 2>&1
+            fi
+            ;;
         *)
             cecho " > Unsupported distro" red
             exit 2
