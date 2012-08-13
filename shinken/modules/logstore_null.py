@@ -59,10 +59,6 @@ class LiveStatusLogStoreNull(BaseModule):
         BaseModule.__init__(self, modconf)
         self.plugins = []
 
-        # Now sleep one second, so that won't get lineno collisions with the last second
-        time.sleep(1)
-        Logline.lineno = 0
-
     def load(self, app):
         self.app = app
 

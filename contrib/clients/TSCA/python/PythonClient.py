@@ -73,4 +73,4 @@ try:
     transport.close()
 
 except Thrift.TException, tx:
-    print '%s' % (tx.message)
+    print '%s' % tx.message

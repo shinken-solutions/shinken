@@ -26,7 +26,7 @@ var widgets = [];
 
 var id_widget = 0;
 var nb_widgets_loading = 0;
-
+var new_widget = false;
 
 // Now try to load widgets in a dynamic way
 function AddWidget(url, placeId){
@@ -49,7 +49,6 @@ function AddWidget(url, placeId){
         context: container_object,
         success: function(html){
             $.fn.AddEasyWidget(html, this.attr('id'), {});
-            this.children().unwrap();
         },
         error: function(xhr) {
             this.html('Error loading this widget!');
@@ -71,7 +70,7 @@ function AddWidget(url, placeId){
 function AddNewWidget(url, placeId){
     AddWidget(url, placeId);
     console.log('Add new widget');
-    saveWidgets();
+    new_widget = true;
 }
 
 function find_widget(name){
@@ -95,7 +94,7 @@ function saveWidgets(){
     var save_widgets_list = false;
     $('.widget').each(function(idx, w){
         // If the widget is closed, don't save it
-        if($(this).css('display') == 'none'){return;}
+        if( $(this).data('deleted') === 1){ return; }
 
         //id = w.id;
         var widget = find_widget(w.id);
@@ -155,14 +154,14 @@ $(function(){
 
     // Very basic usage
     var easy_widget_mgr = $.fn.EasyWidgets({
-	    i18n : {
+        i18n : {
             editText : '<i class="icon-edit"></i>',/*<img src="./edit.png" alt="Edit" width="16" height="16" />',*/
             closeText : '<i class="icon-remove"></i>',
             collapseText : '<i class="icon-chevron-up"></i>',
             cancelEditText : '<i class="icon-edit"></i>',
             extendText : '<i class="icon-chevron-down"></i>',
-	    },
-	    effects : {
+        },
+        effects : {
             effectDuration : 100,
             widgetShow : 'slide',
             widgetHide : 'slide',
@@ -172,8 +171,8 @@ $(function(){
             widgetOpenEdit : 'slide',
             widgetCloseEdit : 'slide',
             widgetCancelEdit : 'slide'
-	    },
-	    callbacks : {
+        },
+        callbacks : {
             onCollapse : function(link, widget){
                 var w = find_widget(widget.attr('id'));
                 if(w != -1){
@@ -181,7 +180,6 @@ $(function(){
                     w.collapsed = true;
                 }
                 saveWidgets();
-                //save_state = true;
             },
             onExtend : function(link, widget){
                 console.log('onentend callback :: Link: ' + link + ' - Widget: ' + widget.attr('id'));
@@ -208,6 +206,6 @@ $(function(){
                 console.log('We are changing position of '+positions);
                 saveWidgets();
             }
-	    }
-	});
+        }
+    });
 });
