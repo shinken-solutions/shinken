@@ -281,6 +281,9 @@ class Receiver(Satellite):
             sent = False
             if not con:
                 print "The scheduler is not connected", sched
+                self.pynag_con_init(sched_id)
+                con = sched.get('con', None)
+            
             # If there are commands and the scheduler is alive
             if len(cmds) > 0 and con:
                 logger.debug("Sending %d commands to scheduler %s" % (len(cmds), sched))

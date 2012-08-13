@@ -57,7 +57,7 @@ try:
     from shinken.pyro_wrapper import Pyro
 except ImportError, exp:
     print ('CRITICAL : check_shinken requires the Python Pyro module.'
-           'Please install it. (%s)' % exp
+           'Please install it. (%s)' % exp)
     raise SystemExit(CRITICAL)
 
 
@@ -123,7 +123,7 @@ options.helpme = False
 # Check for required option target
 if not getattr(options, 'target'):
     print ('CRITICAL - target is not specified; '
-           'You must specify which daemons you want to check!'
+           'You must specify which daemons you want to check!')
     parser.print_help()
     raise SystemExit(CRITICAL)
 elif options.target not in daemon_types:
@@ -189,7 +189,7 @@ else:
 
     # Now we have all data
     if result:
-        count_deamons_numbers(result, options.target)
+        check_deamons_numbers(result, options.target)
     else:
         print 'UNKNOWN - Arbiter could not retrieve status for', options.target
         raise SystemExit(UNKNOWN)

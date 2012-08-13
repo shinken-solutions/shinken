@@ -15,6 +15,7 @@ Shinken ChangeLog
 	* Add: (from: xkilian and Thibault Cohen) Graphite broker adds _PRE_GRAPHITE and _POST_GRAPHITE host or service macros to each dot delimited data name
 	* Add: (from: Claneys Skyne) Graphite broker Create additionnal data points for warning and critical thresholds per data value
 	* Add: (from Romain Forlot) Graphite broker Compile regex
+        * Add: (from: bclermont) Graphite broker add graphite_data_source variable between hostname and service name in data to Graphite
 
 	MODULE FIXES
 	* Fix: issue #450 (from vaxvms) removed thrift broker, similar to Livestatus, as it is unmaintained.
