@@ -2860,7 +2860,7 @@ function install_check_snmp_netint(){
 
     cecho " > install check_snmp_netint" green
     install -b -g $SKGROUP -o $SKUSER -m 0755 -t $TARGET/libexec check_snmp_netint.pl >> $TMP/shinken.install.log 2>&1
-
+}
 function install_check_rsync(){
     cadre "Install the rsync check plugin" green
 
