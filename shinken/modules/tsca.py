@@ -41,9 +41,10 @@ try:
     from thrift.server import TServer
 except ImportError:
     TServer = None
-    
+
 from shinken.basemodule import BaseModule
 from shinken.external_command import ExternalCommand
+from shinken.log import logger
 
 properties = {
     'daemons': ['arbiter', 'receiver'],
