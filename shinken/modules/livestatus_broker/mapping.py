@@ -4288,7 +4288,7 @@ livestatus_attribute_map = {
         },
         'options': {
             'description': 'The part of the message after the \':\'',
-            'function': lambda item, req: item.options,
+            'function': lambda item, req: item.message.partition(":")[2].lstrip(),
         },
         'plugin_output': {
             'description': 'The output of the check, if any is associated with the message',

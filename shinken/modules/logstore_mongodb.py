@@ -264,7 +264,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
         filter_element = eval('{ ' + mongo_filter + ' }')
         print "mongo filter is", filter_element
         dbresult = []
-        columns = ['logobject', 'attempt', 'logclass', 'command_name', 'comment', 'contact_name', 'host_name', 'lineno', 'message', 'options', 'plugin_output', 'service_description', 'state', 'state_type', 'time', 'type']
+        columns = ['logobject', 'attempt', 'logclass', 'command_name', 'comment', 'contact_name', 'host_name', 'lineno', 'message', 'plugin_output', 'service_description', 'state', 'state_type', 'time', 'type']
         if not self.is_connected == CONNECTED:
             print "sorry, not connected"
         else:
