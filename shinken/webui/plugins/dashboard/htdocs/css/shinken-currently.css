@@ -74,19 +74,42 @@ hr { /* Yes this is a workaround*/
 
 ul#Navigation {
   margin-top: 20em; 
-    margin-left: 15%;
-    padding: 0.8em;
-    text-align: center;
-  }
+  margin-left: 15%;
+  padding: 0.8em;
+  text-align: center;
+}
 
 ul#Navigation li {
-    list-style: none;
-    display: inline;
-    margin: 0.4em;
+  list-style: none;
+  display: inline;
+  margin: 0.4em;
+  padding: 0;
+  z-index: 1;
+}
 
-    padding: 0;
-    z-index: 1;
-  }
+/*  Title styles
+    ------------------------------------------------------- */
+
+.itproblem {
+  bottom: 3.2em;
+}
+
+.impacts {
+  bottom: 3.2em;
+  letter-spacing: 3px;
+}
+
+.services {
+  bottom: 3.1em;
+  letter-spacing: 1px;
+  right: 2.6em !important;
+}
+
+.hosts {
+  bottom: 3.3em;
+  letter-spacing: 2px;
+  right: 2.6em !important;
+}
 
 /*  Badger styles
     ------------------------------------------------------- */
@@ -106,14 +129,12 @@ ul#Navigation li {
 }
 
 .badger-critical {
-  /*background-color: #e10000;*/
   background-color: rgb(255,0,0); opacity: 0.85;
   border-radius: 3px 3px 3px 3px;
   color: #FFFFFF;
 }
 
 .badger-warning {
-  /*background-color: #e10000;*/
   background-color: rgb(255,153,0); opacity: 0.85;
   border-radius: 3px 3px 3px 3px;
   color: #FFFFFF;
@@ -131,8 +152,7 @@ ul#Navigation li {
   -moz-transform: rotate(-90deg); 
   display: block;
   position: relative;
-  right: 3.2em;
-  bottom: 2.6em;
+  right: 3.4em;
 
   color: #FFFFFF;
   text-align: center;
