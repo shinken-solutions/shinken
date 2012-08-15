@@ -324,6 +324,7 @@ $(document).ready(function(){
 				<div class="tab-pane fade" id="additonal">
 					<h3>Additonal Informations</h3>
 					<table class="table">
+						<tbody>
 						<tr>
 							<td class="column1"><b>Performance Data</b></td>
 							%# "If there any perf data?"
@@ -331,6 +332,7 @@ $(document).ready(function(){
 							<td>{{elt.perf_data}}</td>
 							%else:
 							<td>&nbsp;</td>
+							<!-- <td class="wrap">Loremipsumdolorsitamet,consetetursadipscingelitr,Loremipsumdolorsi</td> -->
 							%end
 						</tr>
 						<tr>		
@@ -339,12 +341,13 @@ $(document).ready(function(){
 						</tr>
 						<tr>			
 							<td class="column1"><b>Last Notification</b></td>
-							<td>{{helper.print_date(elt.last_notification)}} (notification {{elt.current_notification_number}})</td>
+							<td class="wrap">{{helper.print_date(elt.last_notification)}} (notification {{elt.current_notification_number}})</td>
 						</tr>
 						<tr>
 							<td class="column1"><b>Current Attempt</b></td>
-							<td>{{elt.attempt}}/{{elt.max_check_attempts}} ({{elt.state_type}} state)</td>
+							<td class="wrap">{{elt.attempt}}/{{elt.max_check_attempts}} ({{elt.state_type}} state)</td>
 						</tr>
+						</tbody>
 					</table>
 					<hr>
 					<table class="table">
@@ -393,7 +396,7 @@ $(document).ready(function(){
 
 				<div class="tab-pane fade" id="gesture">
 					<h3>Gesture</h3>
-					<canvas id="canvas" width="350%" height="200" class="grid_10" style="border: 1px solid black;"></canvas>
+					<canvas id="canvas" width="100" height="200" class="grid_10" style="border: 1px solid black;"></canvas>
 					<div class="gesture_button">
 						<img title="By keeping a left click pressed and drawing a check, you will launch an acknowledgement." alt="gesture acknowledge" src="/static/eltdetail/images/gesture-check.png"/> Acknowledge
 					</div>
