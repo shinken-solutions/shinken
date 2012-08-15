@@ -270,6 +270,20 @@ $(document).ready(function(){
 					<h3>Service Information:</h3>
 					%end:
 
+					<script type="text/javascript">
+					$().ready(function() {
+						$('.truncate').jTruncate({
+							length: 85,
+							minTrail: 0,
+							moreText: "[see all]",
+							lessText: "[hide extra]",
+							ellipsisText: " (truncated)",
+							moreAni: "fast",
+							lessAni: 2000
+						});
+					});
+					</script>
+
 					<table class="table">
 						<tr>
 							<td class="column1"><b>Status:</b></td>
@@ -285,7 +299,7 @@ $(document).ready(function(){
 						</tr>
 					</table>
 					<hr>
-					<div> <b><i>{{elt.output}}</i></b> </div>
+					<div class="truncate"> <b><i>{{elt.output}}</i></b> </div>
 					<hr>
 					<table class="table">
 						<tr>
