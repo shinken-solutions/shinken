@@ -2,6 +2,7 @@
 # This is a list of testscripts which usually
 # take less than 5 minutes to complete
 ###############################################
+test_properties_defaults.py
 test_services.py
 test_hosts.py
 test_host_missing_adress.py
