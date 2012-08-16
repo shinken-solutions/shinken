@@ -71,9 +71,8 @@
 
 .verticaltabs-container td { border-top: none; }
 .column1 { width: 50%;}
-.column2 { width: 50%; display: block; word-wrap: break-word;}
-.foo {width: 100% !important;display: block;}
-.bar{width: 100% !important;display: block;}
+.column2 { width: auto; display: block; word-wrap: break-word;}
+.tabletop {width: 100% !important;display: block;}
 
 #elt_container h2 {
 	font-size: 15px;

@@ -322,17 +322,30 @@ $(document).ready(function(){
 				</div>
 
 				<div class="tab-pane fade" id="additonal">
+					<script type="text/javascript">
+					$().ready(function() {
+						$('.truncate_perf').jTruncate({
+							length: 50,
+							minTrail: 0,
+							moreText: "[see all]",
+							lessText: "[hide extra]",
+							ellipsisText: " <b>(truncated)</b>",
+							moreAni: "fast",
+							lessAni: 2000
+						});
+					});
+					</script>
+
 					<h3>Additonal Informations</h3>
-					<table class="table bar">
-						<tbody class="foo">
-						<tr class="bar">
+					<table class="table tabletop">
+						<tbody class="tabletop">
+						<tr class="tabletop">
 							<td class="column1"><b>Performance Data</b></td>
 							%# "If there any perf data?"
 							%if len(elt.perf_data) > 0:
-							<td>{{elt.perf_data}}</td>
+							<td class="column2 truncate_perf">{{elt.perf_data}}</td>
 							%else:
-							<!-- <td>&nbsp;</td> -->
-							<td class="column2">Loremipsumdolorsitamet,consetetursadipscingelitr,Loremipsumdolorsi</td>
+							<td class="column2 truncate_perf">&nbsp;</td>
 							%end
 						</tr>
 						<tr>		
