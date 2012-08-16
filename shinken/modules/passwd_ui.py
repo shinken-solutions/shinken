@@ -38,7 +38,7 @@ except ImportError:
 from shinken.misc.md5crypt import apache_md5_crypt
 from shinken.basemodule import BaseModule
 
-print "Loaded Apache/Passwd module"
+logger.info("Loading the Apache/Passwd module")
 
 properties = {
     'daemons': ['webui', 'skonf'],

@@ -36,7 +36,7 @@ from string import Template
 from shinken.basemodule import BaseModule
 from datetime import datetime
 
-# print "Loaded AD module"
+logger.info ("Loading the graphite_ui module"
 
 properties = {
     'daemons': ['webui'],

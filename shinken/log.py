@@ -112,7 +112,7 @@ class Log:
             lvlname = logging.getLevelName(level)
 
             if display_level:
-                fmt = u'[%(date)s] %(level)s: %(name)s%(msg)s\n'
+                fmt = u'[%(date)s] %(level)-8s: %(name)s%(msg)s\n'
             else:
                 fmt = u'[%(date)s] %(name)s%(msg)s\n'
 

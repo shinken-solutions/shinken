@@ -27,7 +27,7 @@ import os
 
 from shinken.basemodule import BaseModule
 
-print "Loaded OpenLDAP module"
+logger.info("Loading the OpenLDAP module")
 
 properties = {
     'daemons' : ['webui'],
