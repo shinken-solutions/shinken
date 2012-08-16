@@ -25,6 +25,7 @@ like check passwords, or get photos.
 import ldap
 import os
 
+from shinken.log import logger
 from shinken.basemodule import BaseModule
 
 logger.info("Loading the OpenLDAP module")

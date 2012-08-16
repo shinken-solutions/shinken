@@ -30,6 +30,7 @@ for mainly get graphs and links.
 
 import socket
 
+from shinken.log import logger
 from shinken.basemodule import BaseModule
 
 logger.info("Loading the pnp_ui module")

@@ -30,6 +30,7 @@ This class is for looking in the configuration for auth
 import os
 #import crypt
 
+from shinken.log import logger
 from shinken.basemodule import BaseModule
 
 logger.info("Loading the Apache/Passwd module")
