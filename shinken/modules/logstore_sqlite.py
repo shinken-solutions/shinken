@@ -107,6 +107,7 @@ class LiveStatusLogStoreSqlite(BaseModule):
             elif maxmatch.group(2) == 'y':
                 self.max_logs_age = int(maxmatch.group(1)) * 365
         self.use_aggressive_sql = (getattr(modconf, 'use_aggressive_sql', '0') == '1')
+        self.read_only = (getattr(modconf, 'read_only', '0') == '1')
 
         # This stack is used to create a full-blown select-statement
         self.sql_filter_stack = LiveStatusSqlStack()
@@ -161,6 +162,8 @@ class LiveStatusLogStoreSqlite(BaseModule):
                 pass
 
     def prepare_log_db_table(self):
+        if self.read_only:
+            return
         # 'attempt', 'class', 'command_name', 'comment', 'contact_name', 'host_name', 'lineno', 'message',
         # 'plugin_output', 'service_description', 'state', 'state_type', 'time', 'type',
         cmd = "CREATE TABLE IF NOT EXISTS logs(logobject INT, attempt INT, class INT, command_name VARCHAR(64), comment VARCHAR(256), contact_name VARCHAR(64), host_name VARCHAR(64), lineno INT, message VARCHAR(512), plugin_output VARCHAR(256), service_description VARCHAR(64), state INT, state_type VARCHAR(10), time INT, type VARCHAR(64))"
@@ -183,6 +186,8 @@ class LiveStatusLogStoreSqlite(BaseModule):
         because in a distributed environment even after 00:00 (on the broker host)
         we might receive data from other hosts with a timestamp dating from yesterday.
         """
+        if self.read_only:
+            return
         now = time.time()
         if self.next_log_db_commit <= now:
             self.commit()
@@ -278,6 +283,8 @@ class LiveStatusLogStoreSqlite(BaseModule):
         In order to limit the datafile's sizes we flush logs dating from
         before today/00:00 to their own datafiles.
         """
+        if self.read_only:
+            return
         try:
             os.stat(self.archive_path)
         except:
@@ -395,6 +402,8 @@ class LiveStatusLogStoreSqlite(BaseModule):
                 time.sleep(.01)
 
     def manage_log_brok(self, b):
+        if self.read_only:
+            return
         data = b.data
         line = data['log']
         try:
