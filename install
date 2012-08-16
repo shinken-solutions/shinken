@@ -1052,8 +1052,8 @@ function restore(){
 
     # Keep Shinken original files as samples conf files and restore.
     cp -Rfp -b -S ".example" $BACKUPDIR/bck-shinken.$1/etc/* $ETC/
-    cp -Rfp -b -S ".example" $BACKUPDIR/bck-shinken.$1/var/* $VAR/
-    cp -Rfp -b -S ".example" $BACKUPDIR/bck-shinken.$1/libexec/* $LIBEXEC/
+    cp -Rfp $BACKUPDIR/bck-shinken.$1/var/* $VAR/
+    cp -Rfp $BACKUPDIR/bck-shinken.$1/libexec/* $LIBEXEC/
 
     cecho " > Restoration done. Original files was kept with '.example' suffix, use 'diff' to check differences between your files and original." green
 }
