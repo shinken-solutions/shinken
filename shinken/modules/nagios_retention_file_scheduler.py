@@ -283,10 +283,10 @@ class Nagios_retention_scheduler(BaseModule):
             logger.error('Failed to load retention file %s with error %s' % (self.path,exp))
             return False
         except ValueError, exp:
-            logger.error('ValueError reading the retention file with error %s' % (exp)
+            logger.error('ValueError reading the retention file with error %s' % (exp))
             return False
         except IOError, exp:
-            logger.error('IOError reading the retention file with error %s' % (exp)
+            logger.error('IOError reading the retention file with error %s' % (exp))
             return False
         except IndexError, exp:
             s = "Sorry, the ressource file is not compatible"
