@@ -323,29 +323,29 @@ $(document).ready(function(){
 
 				<div class="tab-pane fade" id="additonal">
 					<h3>Additonal Informations</h3>
-					<table class="table">
-						<tbody>
-						<tr>
+					<table class="table bar">
+						<tbody class="foo">
+						<tr class="bar">
 							<td class="column1"><b>Performance Data</b></td>
 							%# "If there any perf data?"
 							%if len(elt.perf_data) > 0:
 							<td>{{elt.perf_data}}</td>
 							%else:
-							<td>&nbsp;</td>
-							<!-- <td class="wrap">Loremipsumdolorsitamet,consetetursadipscingelitr,Loremipsumdolorsi</td> -->
+							<!-- <td>&nbsp;</td> -->
+							<td class="column2">Loremipsumdolorsitamet,consetetursadipscingelitr,Loremipsumdolorsi</td>
 							%end
 						</tr>
 						<tr>		
 							<td class="column1"><b>Next Active Check:</b></td>
-							<td><span class="quickinfo" data-original-title='Next active check at {{time.asctime(time.localtime(elt.next_chk))}}'>{{helper.print_duration(elt.next_chk)}}</span></td>
+							<td class="column2"><span class="quickinfo" data-original-title='Next active check at {{time.asctime(time.localtime(elt.next_chk))}}'>{{helper.print_duration(elt.next_chk)}}</span></td>
 						</tr>
 						<tr>			
 							<td class="column1"><b>Last Notification</b></td>
-							<td class="wrap">{{helper.print_date(elt.last_notification)}} (notification {{elt.current_notification_number}})</td>
+							<td class="column2">{{helper.print_date(elt.last_notification)}} (notification {{elt.current_notification_number}})</td>
 						</tr>
 						<tr>
 							<td class="column1"><b>Current Attempt</b></td>
-							<td class="wrap">{{elt.attempt}}/{{elt.max_check_attempts}} ({{elt.state_type}} state)</td>
+							<td class="column2">{{elt.attempt}}/{{elt.max_check_attempts}} ({{elt.state_type}} state)</td>
 						</tr>
 						</tbody>
 					</table>
