@@ -178,7 +178,7 @@ except AttributeError, exp:
             if PYRO_VERSION in old_versions:
                 Pyro.config.SERVERTYPE = "select"
             elif PYRO_VERSION in bad_versions:
-                print "Your pyro version (%s) is not supported. Please downgrade it (4.12)" % PYRO_VERSION
+                logger.error("Your pyro version (%s) is not supported. Please downgrade it (4.12)" % PYRO_VERSION)
                 exit(1)
             else:
                 Pyro.config.SERVERTYPE = "multiplex"

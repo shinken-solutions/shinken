@@ -222,7 +222,7 @@ class Scheduler:
     def dump_objects(self):
         d = tempfile.gettempdir()
         p = os.path.join(d, 'scheduler-obj-dump-%d' % time.time())
-        print "Opening the DUMP FILE %s" % p
+        logger.info('Opening the DUMP FILE %s' % (p))
         try:
             f = open(p, 'w')
             f.write('Scheduler DUMP at %d\n' % time.time())
@@ -237,7 +237,7 @@ class Scheduler:
                 f.write(s)
             f.close()
         except Exception, exp:
-            print "Error in writing the dump file %s : %s" % (p, str(exp))
+            logger.error("Error in writing the dump file %s : %s" % (p, str(exp)))
 
     # Load the external command
     def load_external_command(self, e):
@@ -606,11 +606,9 @@ class Scheduler:
                     logger.warning("The notification command '%s' raised an error (exit code=%d): '%s'" % (c.command, c.exit_status, c.output))
 
             except KeyError, exp:  # bad number for notif, not that bad
-                #print exp
                 logger.warning('put_results:: get unknown notification : %s ' % str(exp))
 
             except AttributeError, exp:  # bad object, drop it
-                #print exp
                 logger.warning('put_results:: get bad notification : %s ' % str(exp))
             
 

@@ -33,7 +33,7 @@ import socket
 from shinken.log import logger
 from shinken.basemodule import BaseModule
 
-logger.info("Loading the pnp_ui module")
+logger.info("Initializing the pnp_ui module")
 
 properties = {
     'daemons': ['webui'],

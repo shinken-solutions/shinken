@@ -45,7 +45,7 @@ properties = {
 
 # called by the plugin manager to get a broker
 def get_instance(modconf):
-    logger.log("Get a memcache retention scheduler module for plugin %s" % modconf.get_name())
+    logger.info("Get a memcache retention scheduler module for plugin %s" % modconf.get_name())
     if not memcache:
         raise Exception('Missing module python-memcache. Please install it.')
     instance = Memcache_retention_scheduler(modconf)

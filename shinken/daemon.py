@@ -248,7 +248,7 @@ class Daemon(object):
         pass
 
     def dump_memory(self):
-        logger.info("I dump my memory, it can ask some seconds to do")
+        logger.info("I dump my memory, it can take a minute")
 
 
         try:
@@ -675,7 +675,7 @@ class Daemon(object):
 
     def print_header(self):
         for line in self.get_header():
-            print line
+            logger.info(line)
 
 # Wait up to timeout to handle the pyro daemon requests.
 # If suppl_socks is given it also looks for activity on that list of fd.
@@ -761,7 +761,7 @@ class Daemon(object):
                 try:
                     f(self)
                 except Exception, exp:
-                    logger.warning('The instance %s raise an exception %s. I disable, and set it to restart later' % (inst.get_name(), str(exp)))
+                    logger.warning('The instance %s raised an exception %s. I disabled it, and set it to restart later' % (inst.get_name(), str(exp)))
                     self.modules_manager.set_to_restart(inst)
 
     # Dummy function for daemons. Get all retention data

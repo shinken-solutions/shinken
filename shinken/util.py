@@ -35,6 +35,8 @@ except ImportError:
     NodeSet = None
 
 from shinken.macroresolver import MacroResolver
+from shinken.log import logger
+
 #from memoized import memoized
 try:
     stdout_encoding = sys.stdout.encoding
