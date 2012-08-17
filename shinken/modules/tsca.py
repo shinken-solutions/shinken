@@ -106,7 +106,7 @@ class StateServiceHandler:
                     try:
                         self.tsca_arbiter.post_command(timestamp, rc, hostname, service, output)
                     except:
-                        print "Error while sending a check result command to the arbiter"
+                        logger.error("Failed sending a check result command to the arbiter")
                         pass
                 self.state_list.pop(0)
             self.currentlySendingData = False
@@ -122,14 +122,14 @@ class TSCA_arbiter(BaseModule):
 
     # Ok, main function that is called in the CONFIGURATION phase
     def get_objects(self):
-        print "[Dummy] ask me for objects to return"
+        logger.info "dummy ask me for objects to return"
         r = {'hosts': []}
         h = {'name': 'dummy host from dummy arbiter module',
              'register': '0',
              }
 
         r['hosts'].append(h)
-        print "[Dummy] Returning to Arbiter the hosts:", r
+        logger.info "dummy returning to Arbiter the hosts:", r
         return r
 
     def read_check_result(self, state):
@@ -150,9 +150,9 @@ class TSCA_arbiter(BaseModule):
         current_time = time.time()
         check_result_age = current_time - timestamp
         if timestamp > current_time:
-            print "Dropping packet with future timestamp."
+            logger.warning("Dropping packet with future timestamp.")
         elif check_result_age > self.max_packet_age:
-            print "Dropping packet with stale timestamp - packet was %s seconds old." % check_result_age
+            logger.warning("Dropping packet with stale timestamp - packet was %s seconds old." % check_result_age)
         else:
             return (timestamp, rc, hostname, service, output)
 
@@ -183,4 +183,4 @@ class TSCA_arbiter(BaseModule):
             server = TServer.TThreadedServer(processor, transport, tfactory, pfactory)
             server.serve()
         except:
-            print "Error while trying to launch TSCA module"
+            logger.error("Error while trying to launch TSCA module")

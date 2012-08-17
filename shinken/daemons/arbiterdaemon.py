@@ -444,10 +444,10 @@ class Arbiter(Daemon):
         try:
             import json
         except ImportError:
-            print "Error: json is need for statistics file saving. Please update your python version to 2.6"
+            logger.error("Error: json is need for statistics file saving. Please update your python version to 2.6")
             sys.exit(2)
 
-        print "We are doing an statistic analyse dump on the file", self.analyse
+        logger.info("We are doing an statistic analysis on the dump file" % self.analyse)
         stats = {}
         types = ['hosts', 'services', 'contacts', 'timeperiods', 'commands', 'arbiters',
                  'schedulers', 'pollers', 'reactionners', 'brokers', 'receivers', 'modules',
@@ -456,15 +456,15 @@ class Arbiter(Daemon):
             lst = getattr(self.conf, t)
             nb = len([i for i in lst])
             stats['nb_' + t] = nb
-            print "Got", nb, "for", t
+            logger.info("Got %s for %s" % (nb, t))
 
         max_srv_by_host = max([len(h.services) for h in self.conf.hosts])
-        print "Max srv by host", max_srv_by_host
+        logger.info("Max srv by host" % max_srv_by_host)
         stats['max_srv_by_host'] = max_srv_by_host
 
         f = open(self.analyse, 'w')
         s = json.dumps(stats)
-        print "Saving stats data", s
+        logger.info("Saving stats data to a file" % s)
         f.write(s)
         f.close()
 
@@ -540,7 +540,7 @@ class Arbiter(Daemon):
                 # Maybe the queue had problems
                 # log it and quit it
                 except (IOError, EOFError), exp:
-                    logger.warning("An external module queue got a problem '%s'" % str(exp))
+                    logger.error("An external module queue got a problem '%s'" % str(exp))
                     break
 
 

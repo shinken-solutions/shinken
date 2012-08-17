@@ -824,7 +824,7 @@ class Config(Item):
             properties = self.__class__.properties
             for prop, entry in properties.items():
                 if isinstance(entry, UnusedProp):
-                    logger.info("The parameter %s is useless and can be removed from the configuration (Reason: %s)" % (prop, entry.text))
+                    logger.warning("The parameter %s is useless and can be removed from the configuration (Reason: %s)" % (prop, entry.text))
 
     # It's used to raise warning if the user got parameter
     # that we do not manage from now
@@ -845,7 +845,7 @@ class Config(Item):
             for s in unmanaged:
                 logger.info(s)
 
-            logger.info("Unmanaged configuration staement, do you really need it? Ask for it on the developer mailinglist %s or submit a pull request on the Shinken github " % mailing_list_uri)
+            logger.warning("Unmanaged configuration staement, do you really need it? Ask for it on the developer mailinglist %s or submit a pull request on the Shinken github " % mailing_list_uri)
 
     # Use to fill groups values on hosts and create new services
     # (for host group ones)
@@ -995,7 +995,7 @@ class Config(Item):
             # so all hosts without realm wil be link with it
             default = Realm({'realm_name': 'Default', 'default': '1'})
             self.realms = Realms([default])
-            logger.info("No realms defined, I add one at %s" % default.get_name(), print_it=False)
+            logger.warning("No realms defined, I add one at %s" % default.get_name(), print_it=False)
             lists = [self.pollers, self.brokers, self.reactionners, self.receivers, self.schedulers]
             for l in lists:
                 for elt in l:
@@ -1303,7 +1303,7 @@ class Config(Item):
             logger.info('Checking global parameters...', print_it=True)
         if not self.check_error_on_hard_unmanaged_parameters():
             r = False
-            logger.info("Check global parameters failed", print_it=True)
+            logger.error("Check global parameters failed", print_it=True)
 
         for x in ('hosts', 'hostgroups', 'contacts', 'contactgroups', 'notificationways',
                   'escalations', 'services', 'servicegroups', 'timeperiods', 'commands',
@@ -1313,7 +1313,7 @@ class Config(Item):
             cur = getattr(self, x)
             if not cur.is_correct():
                 r = False
-                logger.info("\t%s conf incorrect!!" % (x), print_it=True)
+                logger.error("\t%s conf incorrect!!" % (x), print_it=True)
             if self.read_config_silent == 0:
                 logger.info('\tChecked %d %s' % (len(cur), x), print_it=True)
 
@@ -1450,7 +1450,7 @@ class Config(Item):
     # Now it's time to show all configuration errors
     def show_errors(self):
         for err in self.configuration_errors:
-            logger.info(err, print_it=True)
+            logger.error(err, print_it=True)
 
     # Create packs of hosts and services so in a pack,
     # all dependencies are resolved
@@ -1585,7 +1585,7 @@ class Config(Item):
             logger.info("Number of hosts in the realm %s: %d (distributed in %d linked packs)" % (r.get_name(), nb_elements, len(r.packs)), print_it=True)
 
             if nb_schedulers == 0 and nb_elements != 0:
-                err = "Error: The realm %s have hosts but no scheduler!" % r.get_name()
+                err = "The realm %s have hosts but no scheduler!" % r.get_name()
                 self.add_error(err)
                 r.packs = []  # Dumb pack
                 continue

@@ -39,7 +39,7 @@ from shinken.notification import Notification
 from shinken.macroresolver import MacroResolver
 from shinken.eventhandler import EventHandler
 from shinken.dependencynode import DependencyNodeFactory
-from shinken.util import safe_print
+from shinken.log import logger
 
 # on system time change just reevaluate the following attributes:
 on_time_change_update = ('last_notification', 'last_state_change', 'last_hard_state_change')
@@ -1332,4 +1332,4 @@ class SchedulingItem(Item):
             try:
                 t.eval(self)
             except Exception, exp:
-                safe_print("We got an exeception from a trigger on", self.get_full_name(), str(traceback.format_exc()))
+                logger.error("We got an exeception from a trigger on %s for %s" % (self.get_full_name(), str(traceback.format_exc())))
