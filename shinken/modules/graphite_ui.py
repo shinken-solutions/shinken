@@ -212,8 +212,10 @@ class Graphite_Webui(BaseModule):
                 if self.graphite_data_source:
                     uri += "&target=%s.%s.__HOST__.%s" % (
                         host_name, self.graphite_data_source, metric)
+                    uri += "&target=%s.%s.__HOST__.%s" % (host_name, self.graphite_data_source, metric + "?????")
                 else:
                     uri += "&target=%s.__HOST__.%s" % (host_name, metric)
+                    uri += "&target=%s.__HOST__.%s" % (host_name, metric + "?????")
                 v = {}
                 v['link'] = self.uri
                 v['img_src'] = uri
@@ -243,8 +245,10 @@ class Graphite_Webui(BaseModule):
                     uri += "&target=%s.%s.%s.%s" % (host_name,
                                                     self.graphite_data_source,
                                                     desc, metric)
+                    uri += "&target=%s.%s.%s.%s" % (host_name, self.graphite_data_source, desc, metric + "?????")
                 else:
                     uri += "&target=%s.%s.%s" % (host_name, desc, metric)
+                    uri += "&target=%s.%s.%s" % (host_name, desc, metric + "?????")
                 v = {}
                 v['link'] = self.uri
                 v['img_src'] = uri
