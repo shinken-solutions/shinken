@@ -30,9 +30,10 @@ This class is for looking in the configuration for auth
 import os
 #import crypt
 
+from shinken.log import logger
 from shinken.basemodule import BaseModule
 
-print "Loaded Apache/Passwd module"
+logger.info("Initializing the Apache/Passwd module")
 
 properties = {
     'daemons': ['webui', 'skonf'],

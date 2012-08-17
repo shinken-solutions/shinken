@@ -74,7 +74,7 @@ class TestLevels(unittest.TestCase):
     def test_default_level(self):
         logger = Log()
         # :fixme: `_level` is private, needs an official accessor
-        self.assertEqual(logger._level, logger.NOTSET)
+        self.assertEqual(logger._level, logger.INFO)
 
     def test_set_level(self):
         logger.set_level(logger.WARNING)

@@ -31,6 +31,7 @@ PYRO_VERSION = pyro.PYRO_VERSION
 
 from shinken.satellitelink import SatelliteLink, SatelliteLinks
 from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
+from shinken.log import logger
 
 # Pack of common Pyro exceptions
 Pyro_exp_pack = (Pyro.errors.ProtocolError, Pyro.errors.URIError, \
@@ -65,7 +66,7 @@ class ReceiverLink(SatelliteLink):
         try:
             if self.con is None:
                 self.create_connection()
-            print " (%s)" % self.uri
+            logger.info(" (%s)" % self.uri)
 
             # If the connection failed to initialize, bail out
             if self.con is None:
@@ -74,7 +75,6 @@ class ReceiverLink(SatelliteLink):
 
             r = self.con.push_host_names(sched_id, hnames)
         except Pyro_exp_pack, exp:
-            print  # flush previous print
             self.add_failed_check_attempt(reason=str(exp))
 
 

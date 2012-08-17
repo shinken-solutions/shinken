@@ -30,9 +30,10 @@ for mainly get graphs and links.
 
 import socket
 
+from shinken.log import logger
 from shinken.basemodule import BaseModule
 
-# print "Loaded AD module"
+logger.info("Initializing the pnp_ui module")
 
 properties = {
     'daemons': ['webui'],
@@ -42,7 +43,7 @@ properties = {
 
 # called by the plugin manager
 def get_instance(plugin):
-    print "Get an PNP UI module for plugin %s" % plugin.get_name()
+    logger.info("Get an PNP UI module for plugin %s" % plugin.get_name())
 
     instance = PNP_Webui(plugin)
     return instance

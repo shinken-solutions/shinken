@@ -99,7 +99,7 @@ class Canopsis_broker(BaseModule):
             self.manage_initial_service_status_brok(b)
 
     def manage_initial_host_status_brok(self, b):
-        logger.log("[Canopsis] processing initial_host_status")
+        logger.info("[Canopsis] processing initial_host_status")
 
         if not hasattr(self, 'host_commands'):
             self.host_commands = {}
@@ -124,24 +124,24 @@ class Canopsis_broker(BaseModule):
         logger.info("[canopsis] initial host addresses: %s " % str(self.host_addresses))
 
     def manage_initial_service_status_brok(self, b):
-        logger.log("[Canopsis] processing initial_service_status")
+        logger.info("[Canopsis] processing initial_service_status")
 
         if not hasattr(self, 'service_commands'):
-            logger.log("[Canopsis] creating empty dict in service_commands")
+            logger.info("[Canopsis] creating empty dict in service_commands")
             self.service_commands = {}
 
         if not hasattr(self, 'service_max_check_attempts'):
-            logger.log("[Canopsis] creating empty dict in service_max_check_attempts")
+            logger.info("[Canopsis] creating empty dict in service_max_check_attempts")
             self.service_max_check_attempts = {}
 
         if not b.data['host_name'] in self.service_commands:
-            logger.log("[Canopsis] creating empty dict for host %s service_commands" % b.data['host_name'])
+            logger.info("[Canopsis] creating empty dict for host %s service_commands" % b.data['host_name'])
             self.service_commands[b.data['host_name']] = {}
 
         self.service_commands[b.data['host_name']][b.data['service_description']] = b.data['check_command'].call
 
         if not b.data['host_name'] in self.service_max_check_attempts:
-            logger.log("[Canopsis] creating empty dict for host %s service_max_check_attempts" % b.data['host_name'])
+            logger.info("[Canopsis] creating empty dict for host %s service_max_check_attempts" % b.data['host_name'])
             self.service_max_check_attempts[b.data['host_name']] = {}
 
         self.service_max_check_attempts[b.data['host_name']][b.data['service_description']] = b.data['max_check_attempts']

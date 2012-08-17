@@ -32,11 +32,12 @@ import re
 import socket
 import os
 
+from shinken.log import logger
 from string import Template
 from shinken.basemodule import BaseModule
 from datetime import datetime
 
-# print "Loaded AD module"
+logger.info("Initializing the graphite_ui module")
 
 properties = {
     'daemons': ['webui'],
