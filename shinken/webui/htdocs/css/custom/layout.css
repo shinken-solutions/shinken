@@ -301,3 +301,7 @@ a.disabled-link:hover {
   margin-left: 0px;
   margin-right: 0;
 }
+
+.row-fluid .offset1 {
+  margin-left: 3%;
+}
