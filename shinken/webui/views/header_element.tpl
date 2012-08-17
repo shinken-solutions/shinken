@@ -58,6 +58,14 @@
     <div class="nav-controll">
       <ul class="nav pull-right">
         <li class="divider-vertical"></li>
+
+        %# Check for the selected element, if there is one
+        %if menu_part == '/dashboard':
+        <li><a href="/dashboard/currently"><i class="icon-itproblem"></i></a></li>
+        %else:
+        <li></li>
+        %end
+
         %if app:
         %overall_itproblem = app.datamgr.get_overall_it_state()
         %if overall_itproblem == 0:
