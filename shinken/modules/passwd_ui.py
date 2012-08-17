@@ -35,10 +35,11 @@ except ImportError:
     # There is no crypt module on Windows systems
     import fcrypt as crypt
 
+from shinken.log import logger
 from shinken.misc.md5crypt import apache_md5_crypt
 from shinken.basemodule import BaseModule
 
-print "Loaded Apache/Passwd module"
+logger.info("Loading the Apache/Passwd module")
 
 properties = {
     'daemons': ['webui', 'skonf'],

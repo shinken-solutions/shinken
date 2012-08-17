@@ -61,12 +61,12 @@ class IForArbiter(Interface):
 
     # The master arbiter asks me not to run!
     def do_not_run(self):
-        # If i'm the master, then F**K YOU!
+        # If i'm the master, ignore the command
         if self.app.is_master:
-            logger.debug("Some f***ing idiot asks me not to run. I'm a proud master, so I decide to run anyway")
+            logger.debug("Received message to not run. I am the Master, ignore and continue running.")
         # Else, I'm just a spare, so I listen to my master
         else:
-            logger.debug("Someone asks me not to run")
+            logger.debug("Received message to not run. I am the spare, stopping.")
             self.app.last_master_speack = time.time()
             self.app.must_run = False
 
@@ -276,7 +276,7 @@ class Arbiter(Daemon):
                 try:
                     r = inst.get_objects()
                 except Exception, exp:
-                    logger.debug("The instance %s raise an exception %s. I bypass it" % (inst.get_name(), str(exp)))
+                    logger.debug("Instance %s raised an exception %s. Log and continu running" % (inst.get_name(), str(exp)))
                     continue
 
                 types_creations = self.conf.types_creations
@@ -383,7 +383,7 @@ class Arbiter(Daemon):
         #    sys.exit("Configuration is incorrect, sorry, I bail out")
 
         # REF: doc/shinken-conf-dispatching.png (2)
-        logger.info("Cutting the hosts and services into parts", print_it=True)
+        logger.info("Cutting the hosts and services into parts")
         self.confs = self.conf.cut_into_parts()
 
         # The conf can be incorrect here if the cut into parts see errors like
@@ -394,7 +394,7 @@ class Arbiter(Daemon):
             logger.error(err)
             sys.exit(err)
 
-        logger.info('Things look okay - No serious problems were detected during the pre-flight check', print_it=True)
+        logger.info('Things look okay - No serious problems were detected during the pre-flight check')
 
         # Clean objects of temporary/unecessary attributes for live work:
         self.conf.clean()
@@ -437,7 +437,7 @@ class Arbiter(Daemon):
         self.host = self.me.address
         self.port = self.me.port
 
-        logger.info("Configuration Loaded", print_it=True)
+        logger.info("Configuration Loaded")
 
 
     def launch_analyse(self):

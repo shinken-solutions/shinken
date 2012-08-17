@@ -25,9 +25,10 @@ like check passwords, or get photos.
 import ldap
 import os
 
+from shinken.log import logger
 from shinken.basemodule import BaseModule
 
-print "Loaded OpenLDAP module"
+logger.info("Loading the OpenLDAP module")
 
 properties = {
     'daemons' : ['webui'],

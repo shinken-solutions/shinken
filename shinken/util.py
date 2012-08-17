@@ -40,7 +40,7 @@ try:
     stdout_encoding = sys.stdout.encoding
     safe_stdout = (stdout_encoding == 'UTF-8')
 except Exception, exp:
-    print "Error: Encoding detection error", exp
+    logger.error('Encoding detection error= %s' % (exp))
     safe_stdout = False
 
 
@@ -569,7 +569,7 @@ def expect_file_dirs(root, path):
     tmp_dir = root
     for d in dirs:
         _d = os.path.join(tmp_dir, d)
-        print "Look for the directory existence", _d
+        logger.info ('Verify the existence of file %s' % (_d))
         if not os.path.exists(_d):
             try:
                 os.mkdir(_d)

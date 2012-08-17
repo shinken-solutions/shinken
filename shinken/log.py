@@ -46,7 +46,7 @@ class Log:
     CRITICAL = logging.CRITICAL
 
     def __init__(self):
-        self._level = logging.NOTSET
+        self._level = logging.ERROR
 
     def load_obj(self, object, name_=None):
         """ We load the object where we will put log broks
@@ -114,7 +114,7 @@ class Log:
             lvlname = logging.getLevelName(level)
 
             if display_level:
-                fmt = u'[%(date)s] %(level)s: %(name)s%(msg)s\n'
+                fmt = u'[%(date)s] %(level)-8s: %(name)s%(msg)s\n'
             else:
                 fmt = u'[%(date)s] %(name)s%(msg)s\n'
 
