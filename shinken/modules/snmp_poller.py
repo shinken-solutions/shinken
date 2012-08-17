@@ -56,10 +56,10 @@ from shinken.macroresolver import MacroResolver
 
 
 properties = {
-    'daemons': ['poller', 'scheduler'],
+    'daemons': ['poller', 'scheduler', 'arbiter'],
     'type': 'snmp_poller',
     'external': False,
-    'phases': ['running', ],
+    'phases': ['running', 'late_configuration'],
     # To be a real worker module, you must set this
     'worker_capable': True,
     }
@@ -71,26 +71,343 @@ def get_instance(mod_conf):
     instance = Snmp_poller(mod_conf)
     return instance
 
+def rpn_calculator(rpn_list):
+    try:
+        st = []
+        for el in rpn_list:
+            if el is None:
+                continue
+            if hasattr(operator, str(el)):
+                y, x = st.pop(),st.pop()
+                z = getattr(operator, el)(x, y)
+            else:
+                z = float(el)
+            st.append(z)
+
+        assert len(st) <= 1
+
+        if len(st) == 1:
+            return(st.pop())
+
+    except Exception, e:
+        print('Calc Error: ' + str(e) + str(rpn_list))
+        return "Calc error"
+
+class SNMPHost(object):
+    def __init__(self, host, community, version):
+        self.host = host
+        self.community = community
+        self.version = version
+        self.frequences = {}
+
+    def update_service(self, service):
+        if service.check_interval in self.frequences:
+            # interval found
+            if not service.key in self.frequences[service.check_interval].services:
+                # service not found
+                self.frequences[service.check_interval].services[service.key] = service
+            else:
+                # service found dot nothing
+                pass
+            # TODO search service in other interval !!!
+        else:
+            # Interval not found
+            self.frequences[service.check_interval] = {}
+            # Create new freq
+            new_freq = SNMPFrequence(service.check_interval)
+            new_freq.services[service.key] = service
+            self.frequences[service.check_interval] = new_freq
+
+    def find_frenquences(self, service_key):
+        tmp = dict([(key, interval) for interval,f in self.frequences.items() for key in f.services.keys()])
+        if service_key in tmp:
+            return tmp[service_key]
+        else:
+            # TODO
+            # Not found ???
+            return None
+
+    def get_oids_by_interval(self, interval):
+        return dict([(snmpoid.oid, snmpoid) for s in self.frequences[interval].services.values() for snmpoid in s.oids.values()])
+
+    def format_output(self, frequence, key):
+        m, r = self.frequences[frequence].format_output(key)
+        return m, r
+
+class SNMPFrequence(object):
+    def __init__(self, frequence):
+        self.frequence = frequence
+        self.check_time = None
+        self.old_check_time = None
+        self.services = {}
+        self.forced = None
+
+    def format_output(self, key):
+        return self.services[key].format_output(self.check_time, self.old_check_time)
+
+class SNMPService(object):
+    def __init__(self, service, host, triggergroup, dstemplate, instance):
+        self.host = host
+        self.check_interval = service.check_interval
+        self.triggergroup = triggergroup
+        self.triggers = {}
+        self.dstemplate = dstemplate
+        self.instance = instance
+        self.oids = {}
+        self.key = (dstemplate, instance, triggergroup)
+
+    def format_output(self, check_time, old_check_time):
+        for snmpoid in self.oids.values():
+            snmpoid.format_output(check_time, old_check_time)
+
+        rc = self.get_trigger_result()
+        
+        perf = " ".join([snmpoid.perf for snmpoid in self.oids.values() if snmpoid.perf != ''])
+        out = " ".join([snmpoid.out for snmpoid in self.oids.values() if snmpoid.out != ''])
+        
+        if not perf: 
+            message = self.dstemplate + ": " + " - ".join([str(snmpoid.out) for snmpoid in self.oids.values()])
+        else:
+            rc = self.get_trigger_result()
+            message = self.dstemplate + " " + perf
+            message = message + "|" + perf
+
+        return message, rc
+
+    def get_trigger_result(self):
+        errors = {'critical': 2,
+                  'warning' : 1,
+                  'ok'      : 0}
+
+        try:
+            for error_name in ['critical', 'warning']:
+                error_code = errors[error_name]
+                for trigger_name, trigger in self.triggers.items():
+                    rpn_list = []
+                    if error_name in trigger: 
+                        for el in trigger[error_name]:
+                            # function ?
+                            tmp = el.split(".")
+                            if len(tmp) > 1:
+                                # detect oid with function
+                                ds, fct = tmp
+                                if self.oids[ds].out is None:
+                                    return int(trigger['default_status'])
+                                fct, args = fct.split("(")
+                                if hasattr(self.oids[ds], fct):
+                                    if args == ')':
+                                        value = getattr(self.oids[ds], fct)()
+                                    else:
+                                        args = args[:-1]
+                                        args = args.split(",")
+                                        value = getattr(self.oids[ds], fct)(**args)
+                                else:
+                                    # TODO
+                                    print "NOT FUNCTION FOUND: `%s'" % fct
+                            elif el in self.oids:
+                                # detect oid
+                                value = self.oids[ds].value
+                            else:
+                                value = el
+                            rpn_list.append(value)
+
+                        error = rpn_calculator(rpn_list)
+                        if error:
+                            return error_code
+            return errors['ok']
+        except Exception, e:
+            return int(trigger['default_status'])
+
+    def set_triggers(self, datasource):
+        if self.triggergroup in datasource['TRIGGERGROUP']:
+            triggers = datasource['TRIGGERGROUP'][self.triggergroup]
+            # if triggers is a str
+            if isinstance(triggers, str):
+                # Transform to list
+                triggers = [triggers,]
+            for trigger_name in triggers:
+                if trigger_name in datasource['TRIGGER']:
+                    self.triggers[trigger_name] = {}
+                    if 'warning' in datasource['TRIGGER'][trigger_name]:
+                        self.triggers[trigger_name]['warning'] = datasource['TRIGGER'][trigger_name]['warning']
+                    if 'critical' in datasource['TRIGGER'][trigger_name]:
+                        self.triggers[trigger_name]['critical'] = datasource['TRIGGER'][trigger_name]['critical']
+                    if 'default_status' in datasource['TRIGGER'][trigger_name]:
+                        self.triggers[trigger_name]['default_status'] = datasource['TRIGGER'][trigger_name]['default_status']
+                    elif 'default_status' in datasource['TRIGGER']:
+                        self.triggers[trigger_name]['default_status'] = datasource['TRIGGER']['default_status']
+
+    def find_oids(self, datasource):
+        ds = datasource['DSTEMPLATE'][self.dstemplate]['ds']
+        if isinstance(ds, str):
+            ds = [ds,]
+
+        for source in ds:
+            try:
+                oid = datasource['DATASOURCE'][source]['ds_oid']
+            except:
+                # TODO
+                print "ERROR: OID not found"
+                pass
+            oid = oid % self.__dict__
+            # Search type
+            ds_type = None
+            if 'ds_type' in datasource['DATASOURCE'][source]:
+                ds_type = datasource['DATASOURCE'][source]['ds_type']
+            elif 'ds_type' in datasource['DATASOURCE']:
+                ds_type = datasource['DATASOURCE']['ds_type']
+            else:
+                # TODO
+                ds_type = 'TEXT'
+                print "ERROR : ds_type not found"
+            # Search name
+            name = source
+            if 'ds_name' in datasource['DATASOURCE'][source]:
+                name = datasource['DATASOURCE'][source]['ds_name']
+            elif 'ds_name' in datasource['DATASOURCE']:
+                name = datasource['DATASOURCE']['ds_name']
+            # Search unit
+            unit = ''
+            if 'ds_unit' in datasource['DATASOURCE'][source]:
+                unit = datasource['DATASOURCE'][source]['ds_unit']
+            elif 'ds_unit' in datasource['DATASOURCE']:
+                unit = datasource['DATASOURCE']['ds_unit']
+            # Search ds_min
+            ds_min = ''
+            if 'ds_min' in datasource['DATASOURCE'][source]:
+                ds_min = datasource['DATASOURCE'][source]['ds_min']
+            elif 'ds_min' in datasource['DATASOURCE']:
+                ds_min = datasource['DATASOURCE']['ds_min']
+            # Search ds_max
+            ds_max = ''
+            if 'ds_max' in datasource['DATASOURCE'][source]:
+                ds_max = datasource['DATASOURCE'][source]['ds_max']
+            elif 'ds_max' in datasource['DATASOURCE']:
+                ds_max = datasource['DATASOURCE']['ds_max']
+            # Search calc
+            calc = None
+            if 'ds_calc' in datasource['DATASOURCE'][source]:
+                calc = datasource['DATASOURCE'][source]['ds_calc']
+            elif 'ds_calc' in datasource['DATASOURCE']:
+                calc = datasource['DATASOURCE']['ds_calc']
+            # Search limit
+            limit = ''
+            if 'ds_limit' in datasource['DATASOURCE'][source]:
+                limit = datasource['DATASOURCE'][source]['ds_limit']
+            elif 'ds_limit' in datasource['DATASOURCE']:
+                limit = datasource['DATASOURCE']['ds_limit']
+
+            snmp_oid = SNMPOid(oid, ds_type, name, ds_max, ds_min, unit, calc, limit)
+            self.oids[source] = snmp_oid
+
+
+class SNMPOid(object):
+    def __init__(self, oid, ds_type, name, ds_max='', ds_min='', unit='', calc=None, limit=''):
+        self.oid = oid
+        self.type_ = ds_type
+        self.name = name
+        self.max_ = ds_max
+        self.min_ = ds_min
+        self.unit = unit
+        self.calc = calc
+        self.limit = limit
+        self.out = None
+        self.value = None
+        self.old_value = None
+        self.perf = ""
+
+    def prct(self):
+        return float(self.out) * 100 / float(self.max_)
+
+    def last(self):
+        return self.out
+
+    def calculation(self, value):
+        return rpn_calculator([value,] + self.calc)
+
+    def format_output(self, check_time, old_check_time):
+        getattr(self, 'format_' + self.type_.lower() + '_output')(check_time, old_check_time)
+
+    def format_text_output(self, check_time, old_check_time):
+        """ Format output for text type
+        """
+        self.value = "%(value)s" % self.__dict__
+        self.out = "%(name)s: %(value)s" % self.__dict__
+
+    def format_derive_output(self, check_time, old_check_time):
+        """ Format output for derive type
+        """
+        if self.old_value == None:
+            # Need more data to get derive
+            self.value = "Waiting data"
+            self.perf = ''
+        else:
+            value = self.value
+            # detect counter reset
+            if self.value < self.old_value:
+                # Counter reseted
+                value = (float(self.limit) - float(self.old_value)) + float(value)
+            # Make calculation
+            if self.calc:
+                value = self.calculation(value)
+                old_value = self.calculation(self.old_value)
+
+            # Get derive
+            t_delta = check_time - old_check_time
+            if t_delta.seconds == 0:
+                print "t_deltat_deltat_deltat_deltat_delta == 0:", t_delta
+            else:
+                d_delta = float(value) - float(old_value)
+                value = d_delta / t_delta.seconds
+                value = "%0.2f" % value
+                self.out = value
+                self.perf = "%(name)s=%(out)s%(unit)s;;%(min_)s;%(max_)s" % self.__dict__
+
+    def format_counter_output(self, check_time, old_check_time):
+        """ Format output for counter type
+        """
+        value = self.value
+        # detect counter reset
+        if self.value < self.old_value:
+            # Counter reseted
+            value = (self.limit - self.old_value) + value
+        # Make calculation
+        if self.calc:
+            value = self.calculation(value)
+            old_value = self.calculation(self.old_value)
+        self.out = value
+
+    def format_gauge_output(self, check_time, old_check_time):
+        """ Format output for gauge type
+        # Make calculation
+        """
+        value = self.value
+        if self.calc:
+            value = self.calculation(self.value)
+            old_value = self.calculation(self.old_value)
+        self.out = value
+        self.perf = "%(name)s=%(out)s%(unit)s;;%(min_)s;%(max_)s" % self.__dict__
+
 
 class SNMPAsyncClient(object):
     """SNMP asynchron Client.
     Launch async SNMP request
     """
     def __init__(self, host, community, version, datasource,
-                 warning, critical, inverse, interval_length,
-                 data_type, instance, memcached):
+                 triggergroup, dstemplate, instance, memcached_address):
 
         self.hostname = host
         self.community = community
         self.version = version
-        self.data_type = data_type
+        self.dstemplate = dstemplate
         self.instance = instance
-        self.warning = warning
-        self.critical = critical
-        self.inverse = inverse
-        self.interval_length = interval_length
+        self.triggergroup = triggergroup
+        self.serv_key = (dstemplate, instance, triggergroup)
 
-        self.memcached = memcached
+        self.interval_length = 60
+
+#        self.memcached = memcached
+        self.memcached = memcache.Client([memcached_address], debug=0)
         self.datasource = datasource
 
         self.check_interval = None
@@ -98,66 +415,53 @@ class SNMPAsyncClient(object):
         self.start_time = datetime.now()
         self.timeout = 5
 
+        self.obj = None
+
         # Check if obj is in memcache
         self.obj_key = str(self.hostname)
         try:
+            # LOCKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
             self.obj = self.memcached.get(self.obj_key)
         except ValueError, e:
             self.set_exit("Memcached error: `%s'"
                           % self.memcached.get(self.obj_key),
                           rc=3)
             return
-        if not self.obj:
+        if not isinstance(self.obj, SNMPHost):
+            print "Host not found in memcache", self.hostname, self.obj
             self.set_exit("Host not found in memcache: `%s'" % self.hostname,
                           rc=3)
             return
 
-        # check if datatype is in datasource
-        if not self.data_type in self.datasource['DATASOURCE']['TYPE']:
-            self.set_exit("Type: `%s' not found in datatype" % self.data_type,
-                          rc=3)
-            return
-        # check if at least one oid is define in the datasource
-        # for this datatype
-        self.oids = self.datasource['DATASOURCE']['TYPE'][data_type]['OIDS']
-        if len(self.oids) == 0:
-            self.set_exit("No oid(s) define for datatype: `%s'"
-                          % self.data_type,
-                          rc=3)
-            return
         # Find service check_interval
-        tmp_oid = self.oids.values()[0] % self.__dict__
-        tmp_dict = {'instance': instance}
-        for interval, el in self.obj.items():
-            if el and 'OIDS' in el and tmp_oid in el['OIDS'].keys():
-                self.check_interval = interval
-                break
-
+        self.check_interval = self.obj.find_frenquences(self.serv_key)
         if self.check_interval is None:
             # Possible ???
             self.set_exit("Interval not found in memcache", rc=3)
             return
 
         # Check if the check is forced
-        if self.obj[self.check_interval]['forced']:
-            self.obj[self.check_interval]['forced'] = False
-            self.memcached.set(self.obj_key, self.obj)
-            # Check forced
+        if self.obj.frequences[self.check_interval].forced:
+            # Check forced !!
+            self.obj.frequences[self.check_interval].forced = False
             data_validity = False
         # Check datas validity
-        elif self.obj[self.check_interval]['check_time'] is None:
+        elif self.obj.frequences[self.check_interval].check_time is None:
             # Datas not valid : no data
             data_validity = False
         else:
             td = timedelta(seconds=(self.check_interval
                                     *
                                     self.interval_length))
-            data_valid = self.obj[self.check_interval]['check_time'] + td \
+            data_valid = self.obj.frequences[self.check_interval].check_time + td \
                                                         > self.start_time
             if data_valid:
+                pass
                 # Datas valid
+                #TODO
                 data_validity = True
-                message, rc = self.format_output()
+                message, rc = self.obj.format_output(self.check_interval, self.serv_key)
+                #message, rc = self.format_output()
                 message = "From cache: " + message
                 self.set_exit(message, rc=rc)
                 self.is_done()
@@ -167,63 +471,69 @@ class SNMPAsyncClient(object):
                 data_validity = False
 
         # Save old datas
-        self.obj[self.check_interval]['old_check_time'] = \
-                                self.obj[self.check_interval]['check_time']
-        self.obj[self.check_interval]['old_OIDS'] = \
-                                self.obj[self.check_interval]['OIDS']
-        self.memcached.set(self.obj_key, self.obj)
+        self.obj.frequences[self.check_interval].old_check_time = \
+                                self.obj.frequences[self.check_interval].check_time
+        for oid in self.obj.frequences[self.check_interval].services[self.serv_key].oids.values():
+            oid.old_value = oid.value
+
+        self.memcached.set(self.obj_key, self.obj, time=604800)
+        # UNLOCKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
 
         # Get all oids which have to be checked
-        self.oids_to_check = self.obj[self.check_interval]['OIDS'].keys()
+        self.oids_to_check = self.obj.get_oids_by_interval(self.check_interval)
+        if self.oids_to_check == {}:
+            print "No OID foundNo OID foundNo OID foundNo OID foundNo OID foundNo OID foundNo OID foundNo OID found", self.serv_key
+            print self.obj.frequences[self.check_interval].services
+            self.set_exit("No OID found" + " - " + self.obj_key + " - "+ str(self.serv_key), rc=3)
+            return
 
-        if not False:
-            # SNMP table header
-            tmp_oids = [oid[1:] for oid in self.oids_to_check]
-            self.headVars = []
-            for oid in tmp_oids:
-                # TODO: FIX IT =>
-                # Launch :  snmpbulkget .1.3.6.1.2.1.2.2.1.8
-                #     to get.1.3.6.1.2.1.2.2.1.8.2
-                # Because : snmpbulkget .1.3.6.1.2.1.2.2.1.8.2
-                #     returns value only for .1.3.6.1.2.1.2.2.1.8.3
-                oid = oid.rsplit(".", 1)[0]
-                try:
-                    oid = tuple(int(i) for i in oid.split("."))
-                except ValueError:
-                    continue
-                self.headVars.append(v2c.ObjectIdentifier(oid))
-
-            # Build PDU
-            self.reqPDU = v2c.GetBulkRequestPDU()
-            v2c.apiBulkPDU.setDefaults(self.reqPDU)
-            v2c.apiBulkPDU.setNonRepeaters(self.reqPDU, 0)
-            v2c.apiBulkPDU.setMaxRepetitions(self.reqPDU, 25)
-            v2c.apiBulkPDU.setVarBinds(self.reqPDU,
-                                       [(x, v2c.null) for x in self.headVars])
-
-            # Build message
-            self.reqMsg = v2c.Message()
-            v2c.apiMessage.setDefaults(self.reqMsg)
-            v2c.apiMessage.setCommunity(self.reqMsg, self.community)
-            v2c.apiMessage.setPDU(self.reqMsg, self.reqPDU)
-
-            self.startedAt = time.time()
-
-            transportDispatcher = AsynsockDispatcher()
-            transportDispatcher.registerTransport(udp.domainName,
-                                    udp.UdpSocketTransport().openClientMode())
-
-            transportDispatcher.registerRecvCbFun(self.callback)
-            transportDispatcher.registerTimerCbFun(self.callback_timer)
-            transportDispatcher.sendMessage(encoder.encode(self.reqMsg),
-                                            udp.domainName,
-                                            (self.hostname, 161))
-            transportDispatcher.jobStarted(1)
+        # SNMP table header
+        tmp_oids = [oid[1:] for oid in self.oids_to_check]
+        self.headVars = []
+        for oid in tmp_oids:
+            # TODO: FIX IT =>
+            # Launch :  snmpbulkget .1.3.6.1.2.1.2.2.1.8
+            #     to get.1.3.6.1.2.1.2.2.1.8.2
+            # Because : snmpbulkget .1.3.6.1.2.1.2.2.1.8.2
+            #     returns value only for .1.3.6.1.2.1.2.2.1.8.3
+            oid = oid.rsplit(".", 1)[0]
             try:
-                transportDispatcher.runDispatcher()
-            except Exception, e:
-                self.set_exit("Request error on dispatcher: " + str(e), rc=3)
-            transportDispatcher.closeDispatcher()
+                oid = tuple(int(i) for i in oid.split("."))
+            except ValueError:
+                continue
+            self.headVars.append(v2c.ObjectIdentifier(oid))
+
+        # Build PDU
+        self.reqPDU = v2c.GetBulkRequestPDU()
+        v2c.apiBulkPDU.setDefaults(self.reqPDU)
+        v2c.apiBulkPDU.setNonRepeaters(self.reqPDU, 0)
+        v2c.apiBulkPDU.setMaxRepetitions(self.reqPDU, 25)
+        v2c.apiBulkPDU.setVarBinds(self.reqPDU,
+                                   [(x, v2c.null) for x in self.headVars])
+
+        # Build message
+        self.reqMsg = v2c.Message()
+        v2c.apiMessage.setDefaults(self.reqMsg)
+        v2c.apiMessage.setCommunity(self.reqMsg, self.community)
+        v2c.apiMessage.setPDU(self.reqMsg, self.reqPDU)
+
+        self.startedAt = time.time()
+
+        transportDispatcher = AsynsockDispatcher()
+        transportDispatcher.registerTransport(udp.domainName,
+                                udp.UdpSocketTransport().openClientMode())
+
+        transportDispatcher.registerRecvCbFun(self.callback)
+        transportDispatcher.registerTimerCbFun(self.callback_timer)
+        transportDispatcher.sendMessage(encoder.encode(self.reqMsg),
+                                        udp.domainName,
+                                        (self.hostname, 161))
+        transportDispatcher.jobStarted(1)
+        try:
+            transportDispatcher.runDispatcher()
+        except Exception, e:
+            self.set_exit("Request error on dispatcher: " + str(e), rc=3)
+        transportDispatcher.closeDispatcher()
 
     def callback(self, transportDispatcher, transportDomain, transportAddress,
                  wholeMsg, reqPDU=None, headVars=None):
@@ -258,15 +568,32 @@ class SNMPAsyncClient(object):
                             oid_dict[oid] = str(val)
 
                 if len(self.oids_to_check) > len(oid_dict):
+                    print "self.oids_to_check", self.oids_to_check
+                    print "oid_dict", oid_dict
                     self.set_exit("Oids missing in SNMP response: %s" %
                                           str(errorStatus),
                                   rc=3)
                     return wholeMsg
 
-                self.obj[self.check_interval]['check_time'] = self.start_time
-                self.obj[self.check_interval]['OIDS'] = oid_dict
+                # LOCKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
+                try:
+                    self.obj = self.memcached.get(self.obj_key)
+                except ValueError, e:
+                    print "Callback Memcached error:, Callback Memcached error: Callback Memcached error:Callback Memcached error:"
+                    self.set_exit("Memcached error: `%s'"
+                                  % self.memcached.get(self.obj_key),
+                                  rc=3)
+                    return
+                self.oids_to_check = self.obj.get_oids_by_interval(self.check_interval)
+                for oid, value in oid_dict.items():
+                    self.oids_to_check[oid].value = str(value)
+
+                self.obj.frequences[self.check_interval].check_time = self.start_time
+                
                 # save data
-                self.memcached.set(self.obj_key, self.obj)
+                self.memcached.set(self.obj_key, self.obj, time=604800)
+                # UNLOCKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
+
 
                 transportDispatcher.jobFinished(1)
 
@@ -284,7 +611,8 @@ class SNMPAsyncClient(object):
                 self.startedAt = time.time()
 
         # Prepare output
-        message, rc = self.format_output()
+#        message, rc = self.format_output()
+        message, rc = self.obj.format_output(self.check_interval, self.serv_key)
         self.set_exit(message, rc=rc)
         self.is_done()
 
@@ -299,6 +627,21 @@ class SNMPAsyncClient(object):
     def is_done(self):
         return self.state == 'received'
 
+    # Check if we are in timeout. If so, just bailout
+    # and set the correct return code from timeout
+    # case
+    def look_for_timeout(self):
+        now = datetime.now()
+        t_delta = now - self.start_time
+        if t_delta.seconds > self.timeout:
+        # TODO add `unknown_on_timeout` option
+#            if self.unknown_on_timeout:
+#                rc = 3
+#            else:
+            rc = 3
+            message = 'Error : connection timeout after %d seconds' % self.timeout
+            self.set_exit(message, rc)
+
     def set_exit(self, message, rc=3):
         self.rc = rc
         self.execution_time = datetime.now() - self.start_time
@@ -306,285 +649,90 @@ class SNMPAsyncClient(object):
         self.message = message
         self.state = 'received'
 
-    def format_output(self):
-        # Get datasource type : DELTA, TEXT or INT
-        if 'ds_type' in self.datasource['DATASOURCE']['TYPE'][self.data_type]:
-            ds_type = self.datasource['DATASOURCE']['TYPE'][self.data_type]['ds_type']
-        elif 'ds_type' in self.datasource['DATASOURCE']:
-            ds_type = self.datasource['DATASOURCE']['ds_type']
-        else:
-            ds_type = 'TEXT'
-
-        message, rc = getattr(self, 'format_' + ds_type.lower() + '_output')()
-        return message, rc
-
-    def define_rc(self, value):
-        """ Set return code
-        """
-        # Get operator
-        if self.inverse:
-            comp = operator.le
-        else:
-            comp = operator.ge
-        # Get return code
-        if self.critical and self.warning:
-            if comp(value, self.critical):
-                rc = 2
-            elif comp(value, self.warning):
-                rc = 1
-            else:
-                rc = 0
-        else:
-            # no warning or critical defined
-            rc = 0
-        return rc
-
-    def format_text_output(self):
-        """ Format output for text type
-        """
-        message = self.get_name()
-        rc = 0
-        return u"%s" % message, rc
-
-    def format_delta_output(self):
-        """ Format output for delta type
-        """
-        rc = 3
-        name = self.get_name()
-        unit = self.get_unit()
-        ds_min = self.get_ds_min()
-        ds_max = self.get_ds_max()
-        calc = self.get_calc()
-
-        # Search out
-        if not 'out' in self.datasource['DATASOURCE']['TYPE'][self.data_type]['OIDS']:
-            return ("Missing `out' parameter in"
-                    "datasource for type `%s'" % self.data_type)
-        else:
-            out_oid = self.datasource['DATASOURCE']['TYPE'][self.data_type]['OIDS']['out']
-            out_oid = out_oid % self.__dict__
-            # Get datas in memcached
-            if out_oid in self.obj[self.check_interval]['OIDS']:
-                out = self.obj[self.check_interval]['OIDS'][out_oid]
-            else:
-                # Possible ???
-                return "Data not find in memcached", rc
-            # Get old datas
-            if self.obj[self.check_interval]['old_OIDS']:
-                if out_oid in self.obj[self.check_interval]['old_OIDS']:
-                    old_out = self.obj[self.check_interval]['old_OIDS'][out_oid]
-                else:
-                    return "Waiting for old data1", rc
-            else:
-                return "Waiting for old data2", rc
-            if old_out is None:
-                return "Waiting for old data3", rc
-            # Get times
-            check_time = self.obj[self.check_interval]['check_time']
-            old_check_time = self.obj[self.check_interval]['old_check_time']
-            # Calculation
-            t_delta = check_time - old_check_time
-            d_delta = float(out) - float(old_out)
-            value = d_delta / t_delta.seconds
-            # Datasource calculation
-            if calc != '':
-                ns = vars(math).copy()
-                ns['__builtins__'] = None
-                calc = calc.replace('out', str(value))
-                value = eval(calc, ns)
-            # Prepare message
-            perf = u"%s=%0.2f%s;;;%s;%s" % (name, value, unit, ds_min, ds_max)
-            message = u"%s: %0.2f%s" % (name, value, unit)
-            # Set return code
-            rc = self.define_rc(value)
-
-        return message + " | " + perf, rc
-
-    def format_int_output(self):
-        """ for type for int type
-        """
-        return self.format_float_ouput()
-
-    def format_float_ouput(self):
-        """ for type for int/float type
-        """
-        rc = 3
-        name = self.get_name()
-        unit = self.get_unit()
-        ds_min = self.get_ds_min()
-        ds_max = self.get_ds_max()
-        calc = self.get_calc()
-        # Search out
-        if not 'out' in self.datasource['DATASOURCE']['TYPE'][self.data_type]['OIDS']:
-            return ("Missing `out' parameter in"
-                    "datasource for type `%s'" % self.data_type, rc)
-        else:
-            out_oid = self.datasource['DATASOURCE']['TYPE'][self.data_type]['OIDS']['out']
-            out_oid = out_oid % self.__dict__
-            # Get datas in memcached
-            if out_oid in self.obj[self.check_interval]['OIDS']:
-                value = self.obj[self.check_interval]['OIDS'][out_oid]
-            else:
-                return "Data not find in memcached", rc
-            # Calculation
-            if calc != '':
-                ns = vars(math).copy()
-                ns['__builtins__'] = None
-                calc = calc.replace('out', str(value))
-                value = eval(calc, ns)
-
-            perf = u"%s=%0.2f%s;;;%s;%s" % (name, value, unit, ds_min, ds_max)
-            message = u"%s: %0.2f%s" % (name, value, unit)
-            # Set return code
-            rc = self.define_rc(value)
-
-        return message + " | " + perf, rc
-
-    def get_name(self):
-        """ Get oid value from datasource
-        """
-        name = 'No name found'
-        if 'name' in self.datasource['DATASOURCE']['TYPE'][self.data_type]['OIDS']:
-            oid = self.datasource['DATASOURCE']['TYPE'][self.data_type]['OIDS']['name']
-            oid = oid % self.__dict__
-            if oid in self.obj[self.check_interval]['OIDS']:
-                name = self.obj[self.check_interval]['OIDS'][oid]
-            else:
-                name = oid
-        return name
-
-    # unit, ds_max, ds_min, calc could be grouped
-    def get_unit(self):
-        """ Get unit from datasource
-        """
-        unit = ''
-        # Search unit
-        if 'unit' in self.datasource['DATASOURCE']['TYPE'][self.data_type]:
-            unit = self.datasource['DATASOURCE']['TYPE'][self.data_type]['unit']
-        elif 'unit' in self.datasource['DATASOURCE']:
-            unit = self.datasource['DATASOURCE']['unit']
-        return unit
-
-    def get_ds_min(self):
-        """ Get ds_min from datasource
-        """
-        ds_min = ''
-        # Search ds_min
-        if 'ds_min' in self.datasource['DATASOURCE']['TYPE'][self.data_type]:
-            ds_min = self.datasource['DATASOURCE']['TYPE'][self.data_type]['ds_min']
-        elif 'ds_min' in self.datasource['DATASOURCE']:
-            ds_min = self.datasource['DATASOURCE']['ds_min']
-        return ds_min
-
-    def get_ds_max(self):
-        """ Get ds_max from datasource
-        """
-        ds_max = ''
-        # Search ds_max
-        if 'ds_max' in self.datasource['DATASOURCE']['TYPE'][self.data_type]:
-            ds_max = self.datasource['DATASOURCE']['TYPE'][self.data_type]['ds_max']
-        elif 'ds_max' in self.datasource['DATASOURCE']:
-            ds_max = self.datasource['DATASOURCE']['ds_max']
-        return ds_max
-
-    def get_calc(self):
-        """ Get calc from datasource
-        """
-        calc = ''
-        # Search calc
-        if 'calc' in self.datasource['DATASOURCE']['TYPE'][self.data_type]:
-            calc = self.datasource['DATASOURCE']['TYPE'][self.data_type]['calc']
-        elif 'calc' in self.datasource['DATASOURCE']:
-            ds_max = self.datasource['DATASOURCE']['calc']
-        return calc
-
 
 def parse_args(cmd_args):
     #Default params
     host = None
     community = 'public'
     version = '2c'
-    datasource = None
-    update = 300
-    data_type = None
+    dstemplate = None
+    triggergroup = None
     instance = 0
-    critical = None
-    warning = None
-    inverse = False
+
     #Manage the options
     try:
         options, args = getopt.getopt(cmd_args,
-                        'H:C:V:i:u:w:c:t:I',
+                        'H:C:V:i:t:T:',
                         ['hostname=', 'community=', 'snmp-version=',
-                         'type=', 'help', 'version', 'inverse',
-                         'instance=', 'warning=', 'critical='])
+                         'dstemplate=', 'help', 'version',
+                         'instance=', ])
     except getopt.GetoptError, err:
         # If we got problem, bail out
         return (host, community, version,
-                data_type, instance)
-    #print  "Opts", opts, "Args", args
+                triggergroup, dstemplate, instance)
     for option_name, value in options:
         if option_name in ("-H", "--hostname"):
-            hostname = value
-        elif option_name in ("-w", "--warning"):
-            warning = float(value)
-        elif option_name in ("-c", "--critical"):
-            critical = float(value)
+            host = value
         elif option_name in ("-C", "--community"):
             community = value
-        elif option_name in ("-I", "--inverse"):
-            inverse = True
-        elif option_name in ("-t", "--type"):
-            data_type = value
+        elif option_name in ("-t", "--dstemplate"):
+            dstemplate = value
+        elif option_name in ("-T", "--triggergroup"):
+            triggergroup = value
         elif option_name in ("-i", "--instance"):
             instance = value
         elif option_name in ("-V", "--snmp-version"):
             version = value
 
-    return (hostname, community, version,
-            warning, critical, inverse,
-            data_type, instance)
+    return (host, community, version,
+            triggergroup, dstemplate, instance)
 
 
 class Snmp_poller(BaseModule):
-    """Just print some stuff
+    """ SNMP Poller module class
+        Improve SNMP checks
     """
     def __init__(self, mod_conf):
         BaseModule.__init__(self, mod_conf)
         self.datasource_file = getattr(mod_conf, 'datasource_file', None)
         self.memcached_host = getattr(mod_conf, 'memcached_host', "127.0.0.1")
         self.memcached_port = getattr(mod_conf, 'memcached_port', 11211)
-        self.interval_length = None
+        self.memcached_address = "%s:%s" % (self.memcached_host,
+                                       self.memcached_port)
 
-        # Kill snmp booster if config_file is not set
+        # Called by poller to say 'let's prepare yourself guy'
     def init(self):
         """Called by poller to say 'let's prepare yourself guy'"""
         print "Initialization of the snmp poller module"
         self.i_am_dying = False
 
-        # Config validation
         if self.datasource_file is None:
+            # Kill snmp booster if config_file is not set
             logger.error("Please set config_file parameter")
             self.i_am_dying = True
             return
 
         # Prepare memcached connection
-        memcached_address = "%s:%s" % (self.memcached_host,
-                                       self.memcached_port)
-        self.memcached = memcache.Client([memcached_address], debug=0)
+        self.memcached = memcache.Client([self.memcached_address], debug=0)
         # Check if memcached server is available
         if not self.memcached.get_stats():
             logger.error("Memcache server (%s) "
-                         "is not reachable" % memcached_address)
+                         "is not reachable" % self.memcached_address)
             self.i_am_dying = True
             return
 
         # Read datasource file
-        self.datasource = ConfigObj(self.datasource_file,
-                                    interpolation='template')
+        # Config validation
+        try:
+            self.datasource = ConfigObj(self.datasource_file,
+                                        interpolation='template')
+        except Exception, e:
+            logger.error("Readin datasource file error: `%s'" % str(e))
+            self.i_am_dying = True
+            return
+
         # Store config in memcache
-        self.memcached.set('datasource', self.datasource)
-        self.interval_length = self.memcached.get('interval_length')
+        self.memcached.set('datasource', self.datasource, time=604800)
 
     def get_new_checks(self):
         """ Get new checks if less than nb_checks_max
@@ -611,7 +759,6 @@ class Snmp_poller(BaseModule):
         """ Launch checks that are in status
             REF: doc/shinken-action-queues.png (4)
         """
-        self.interval_length = self.memcached.get('interval_length')
         for chk in self.checks:
             now = time.time()
             if chk.status == 'queue':
@@ -628,27 +775,20 @@ class Snmp_poller(BaseModule):
                     # we do not want the first member, check_snmp thing
                     args = parse_args(clean_command[1:])
                     (host, community, version,
-                     warning, critical, inverse,
-                     data_type, instance) = args
-                    #print args
-                else:
-                    # Set an error so we will quit tis check
-                    command = None
+                     triggergroup, dstemplate, instance) = args
 
                 # If we do not have the good args, we bail out for this check
                 if host is None:
                     chk.status = 'done'
                     chk.exit_status = 2
-                    chk.get_outputs("Error : `host' parameter is not correct.",
-                                    8012)
+                    chk.get_outputs('Error : the parameters host or command are not correct.', 8012)
                     chk.execution_time = 0.0
                     continue
 
                 # Ok we are good, we go on
                 n = SNMPAsyncClient(host, community, version, self.datasource,
-                                    warning, critical, inverse,
-                                    self.interval_length,
-                                    data_type, instance, self.memcached)
+                                    triggergroup, dstemplate, instance,
+                                    self.memcached_address)
                 chk.con = n
 
     # Check the status of checks
@@ -658,9 +798,9 @@ class Snmp_poller(BaseModule):
         to_del = []
 
         # First look for checks in timeout
-#        for c in self.checks:
-#            if c.status == 'launched':
-                #c.con.look_for_timeout()
+        for c in self.checks:
+            if c.status == 'launched':
+                c.con.look_for_timeout()
 
         # Now we look for finished checks
         for c in self.checks:
@@ -674,15 +814,11 @@ class Snmp_poller(BaseModule):
                     sys.exit(2)
                 continue
             # Then we check for good checks
-            #if c.status == 'launched' and c.con.is_done():
             if c.status == 'launched' and c.con.is_done():
                 n = c.con
                 c.status = 'done'
                 c.exit_status = getattr(n, 'rc', 3)
-                c.get_outputs(getattr(n,
-                                      'message',
-                                      'Error in launching command.'),
-                              8012)
+                c.get_outputs(str(getattr(n, 'message', 'Error in launching command.')), 8012)
                 c.execution_time = getattr(n, 'execution_time', 0.0)
 
                 # unlink our object from the original check
@@ -702,11 +838,11 @@ class Snmp_poller(BaseModule):
         for chk in to_del:
             self.checks.remove(chk)
 
-    #id = id of the worker
-    #s = Global Queue Master->Slave
-    #m = Queue Slave->Master
-    #return_queue = queue managed by manager
-    #c = Control Queue for the worker
+    # id = id of the worker
+    # s = Global Queue Master->Slave
+    # m = Queue Slave->Master
+    # return_queue = queue managed by manager
+    # c = Control Queue for the worker
     def work(self, s, returns_queue, c):
         print "[Snmp] Module SNMP started!"
         ## restore default signal handler for the workers:
@@ -749,8 +885,6 @@ class Snmp_poller(BaseModule):
                 timeout = 1.0
 
     def hook_add_actions(self, sche):
-        if self.interval_length != sche.conf.interval_length:
-            self.memcached.set('interval_length', sche.conf.interval_length)
         # TODO split and put one part in arbiter... ???
         for s in sche.services:
             for a in s.actions:
@@ -767,90 +901,124 @@ class Snmp_poller(BaseModule):
                         # we do not want the first member, check_snmp thing
                         args = parse_args(clean_command[1:])
                         (host, community, version,
-                        critical, warning, inverse,
-                              data_type, instance) = args
-                        tmp_dict = {'instance': instance}
+                         triggergroup, dstemplate, instance) = args
 
-                        # Get related OIDs for this service
-                        oids = self.datasource['DATASOURCE']['TYPE'][data_type]['OIDS']
-                        if len(oids) == 0:
+#                        tmp_dict = {'instance': instance}
+#
+#                        # Get related OIDs for this service
+#                        oids = [self.datasource['DATASOURCE'][ds]['ds_oid']
+#                                for ds in self.datasource['DSTEMPLATE'][dstemplate]['ds']]
+#                        if len(oids) == 0:
                             # No oids define for this data_type in datasource..
-                            continue
-                        # Get key from memcached
-                        obj_key = str(s.host_name)
+#                            continue
+#                        # Get key from memcached
+                        obj_key = str(host)
                         # looking for old datas
                         obj = self.memcached.get(obj_key)
 
                         # Don't force check on first launch
                         forced = False
-                        if s.last_chk != 0:
-                            if s.state_type == 'SOFT':
-                                # Detect if the checked is forced by an error
-                                t = timedelta(seconds=(s.retry_interval *
-                                                            s.interval_length))
-                                forced = obj[s.check_interval]['check_time'] \
-                                                        + td > datetime.now()
-                            else:
-                                # Detect if the checked is forced by an UI/Com
-                                forced = (s.next_chk - s.last_chk) < \
-                                         s.check_interval * s.interval_length
-                            # TODO: what append if is forced
-                            # by an interface en SOFT type ?
-
-                        if obj:
+#                        print "Detecting forcing"#
+                        if not obj is None:
                             # Host found
+#                            new_serv = SNMPService(s, obj, triggergroup, dstemplate, instance)
+#                            new_serv.find_oids(self.datasource)
+#                            new_serv.set_triggers(self.datasource)
+#                            obj.update_service(new_serv)
                             # try to find if this oid is already in memcache
-                            tmp_key = oids.keys()[0]
-                            tmp_oid = oids[tmp_key] % tmp_dict
-                            obj_oids = dict([(oid, i) for i in obj.keys()
-                                            for oid in obj[i]['OIDS'].keys()])
-                            if not tmp_oid in obj_oids:
-                                # No OID for this check_interval
-                                if not s.check_interval in obj:
-                                    obj[s.check_interval] = {
-                                          'check_time': None,
-                                          'OIDS': dict([(oid % tmp_dict, None)
-                                                    for oid in oids.values()]),
-                                          'old_check_time': None,
-                                          'old_OIDS': None,
-                                          'forced': forced,
-                                        }
-                                # New OID
-                                else:
-                                    for oid in oids.values():
-                                        if not oid in obj[s.check_interval]['OIDS']:
-                                            obj[s.check_interval]['OIDS'][oid % tmp_dict] = None
-
-                                self.memcached.set(obj_key, obj)
-                            else:
-                                # OID is already in memcache
-                                # Check if check_interval didn't change
-                                for oid in oids.values():
-                                    oid = oid % tmp_dict
-                                    if not oid in obj[s.check_interval]:
-                                        # oid isNOT in good check_interval dict
-                                        # => We need to deplace it
-                                        old_interval = obj_oids[oid]
-                                        obj[s.check_interval]['OIDS'][oid] = \
-                                                obj[old_interval]['OIDS'][oid]
+                            if not s.check_interval in obj.frequences:
+                                print "NOTFOUDNDDD", obj_key, s.service_description
+                                # Waiting arbiter
+                                continue
+                            if not obj.frequences[s.check_interval].check_time is None:
+                                # Forced or not forced check ??
+                                if s.last_chk != 0: 
+                                    if s.state_type == 'SOFT':
+                                        # Detect if the checked is forced by an error
+                                        t_delta = timedelta(seconds=(s.retry_interval *
+                                                                     s.interval_length))
+                                        forced = obj.frequences[s.check_interval].check_time \
+                                                                + t_delta > datetime.now()
                                     else:
-                                        # oid is in good check_interval dict
-                                        # => do nothing
-                                        pass
-                            if forced:
-                                # Set forced
-                                obj[s.check_interval]['forced'] = forced
-                                self.memcached.set(obj_key, obj)
-                        else:
-                            # No old datas for this host
-                            new_obj = {s.check_interval:
-                                        {'check_time': None,
-                                          'OIDS': dict([(oid % tmp_dict, None)
-                                                   for oid in oids.values()]),
-                                          'old_check_time': None,
-                                          'old_OIDS': None,
-                                          'forced': forced,
-                                        }
-                                      }
-                            # Save new host in memcache
-                            self.memcached.set(obj_key, new_obj)
+                                        # Detect if the checked is forced by an UI/Com
+                                        forced = (s.next_chk - s.last_chk) < \
+                                                 s.check_interval * s.interval_length
+                                    # TODO: what append if is forced
+                                    # by an interface en SOFT type ?
+                                if forced:
+                                    # Set forced
+                                    print "FORCED", obj_key, s.service_description
+                                    obj.frequences[s.check_interval].forced = forced
+
+                            self.memcached.set(obj_key, obj, time=604800)
+#                        else:
+#                            # No old datas for this host
+#                            new_obj = SNMPHost(host, community, version)
+#                            new_serv = SNMPService(s, new_obj, triggergroup, dstemplate, instance)
+#                            new_serv.find_oids(self.datasource)
+#                            new_serv.set_triggers(self.datasource)
+#                            new_obj.update_service(new_serv)
+#                            # Save new host in memcache
+#                            self.memcached.set(obj_key, new_obj, time=604800)
+
+    def hook_late_configuration(self, arb):
+        print "SNMPBOOSSTER", datetime.now()
+        for s in arb.conf.services:
+            if s.check_command.command.module_type == 'snmp_poller':
+                c = s.check_command.command
+                m = MacroResolver()
+                m.init(arb.conf)
+                data = s.get_data_for_checks()
+                command_line = m.resolve_command(s.check_command, data)
+
+
+
+                # Clean command
+                clean_command = shlex.split(command_line.encode('utf8',
+                                                            'ignore'))
+                # If the command doesn't seem good
+                if len(clean_command) <= 1:
+                    # TODO Bad command ???
+                    continue
+
+                # we do not want the first member, check_snmp thing
+                args = parse_args(clean_command[1:])
+                (host, community, version,
+                 triggergroup, dstemplate, instance) = args
+
+                tmp_dict = {'instance': instance}
+
+                # Get related OIDs for this service
+#                oids = [self.datasource['DATASOURCE'][ds]['ds_oid']
+#                        for ds in self.datasource['DSTEMPLATE'][dstemplate]['ds']]
+#                if len(oids) == 0:
+                    # No oids define for this data_type in datasource..
+#                    continue
+                # Get key from memcached
+                obj_key = str(host)
+                # looking for old datas
+                obj = self.memcached.get(obj_key)
+#                print "obj", obj
+
+                # Don't force check on first launch
+                if not obj is None:
+                    # Host found
+                    new_serv = SNMPService(s, obj, triggergroup, dstemplate, instance)
+                    new_serv.find_oids(self.datasource)
+                    new_serv.set_triggers(self.datasource)
+                    obj.update_service(new_serv)
+                    obj.frequences[s.check_interval].forced = False
+                    print "R", obj_key, self.memcached.set(obj_key, obj, time=604800)
+                else:
+                    # No old datas for this host
+                    new_obj = SNMPHost(host, community, version)
+                    new_serv = SNMPService(s, new_obj, triggergroup, dstemplate, instance)
+                    new_serv.find_oids(self.datasource)
+                    new_serv.set_triggers(self.datasource)
+                    new_obj.update_service(new_serv)
+                    # Save new host in memcache
+                    print "N", obj_key, self.memcached.set(obj_key, new_obj, time=604800)
+
+
+
+        print "ENNDSNMPBOOSSTER", datetime.now()
