@@ -217,7 +217,7 @@ $(document).ready(function(){
 		);
 	}); 
 	</script>
-
+<!--
 	<div class="span12 row-fluid hide">
 		<div class="span5 well">
 			<div class="btn-toolbar">
@@ -250,7 +250,7 @@ $(document).ready(function(){
 			</div>
 		</div>
 	</div>
-
+-->
 	<!-- Le Anfang -->
 	<div class="span12">
 		<!-- Start Host/Services-->
