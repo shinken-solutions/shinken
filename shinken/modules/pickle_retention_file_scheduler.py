@@ -106,20 +106,10 @@ class Pickle_retention_scheduler(BaseModule):
             f = open(self.path, 'rb')
             all_data = cPickle.load(f)
             f.close()
-        except EOFError, exp:
+        except (EOFError, ValueError, IOError), exp:
             print exp
             return False
-        except ValueError, exp:
-            print exp
-            return False
-        except IOError, exp:
-            print exp
-            return False
-        except IndexError, exp:
-            s = "WARNING: Sorry, the ressource file is not compatible"
-            log_mgr.log(s)
-            return False
-        except TypeError, exp:
+        except (IndexError, TypeError), exp:
             s = "WARNING: Sorry, the ressource file is not compatible"
             log_mgr.log(s)
             return False
