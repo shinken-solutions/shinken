@@ -445,7 +445,7 @@ class event2amqp():
         return True
 
     def save_queue(self):
-        retentionfile = "%s/canopsis.dat" % os.getcwd()
+        retentionfile = "%s/canopsis.dat" % os.getcwd() #:fixme: use path.join
         logger.info("[Canopsis] saving to %s" % retentionfile)
         filehandler = open(retentionfile, 'w')
         pickle.dump(self.queue, filehandler)
