@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+#
 # Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
@@ -18,16 +19,14 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+"""
+Test the named pipe arbiter module.
+"""
 
-#
-# This file is used to test reading and processing of config files
-#
-
-import os, sys, time, platform
+import os, time, platform
 
 from shinken_test import unittest, ShinkenTest
 
-from shinken.log import logger
 from shinken.objects.module import Module
 
 from shinken.modules import named_pipe
@@ -40,20 +39,16 @@ modconf.properties = named_pipe.properties.copy()
 
 
 class TestModuleNamedPipe(ShinkenTest):
-    # Uncomment this is you want to use a specific configuration
-    # for your test
-    #def setUp(self):
-    #    self.setup_with_file('etc/nagios_module_hot_dependencies_arbiter.cfg')
+    # setUp is inherited from ShinkenTest
 
     def test_read_named_pipe(self):
 
         # Ok, windows do not have named pipe, we know...
-        # cygwin cannow write from two sides at the same time
+        # cygwin cannot write from two sides at the same time
         if os.name == 'nt' or platform.system().startswith('CYGWIN'):
             return
 
         now = int(time.time())
-        print self.conf.modules
 
         host0 = self.sched.conf.hosts.find_by_name('test_host_0')
         self.assert_(host0 is not None)
@@ -66,13 +61,10 @@ class TestModuleNamedPipe(ShinkenTest):
         except:
             pass
 
-        print "Instance", sl
-
         # Hack here :(
         sl.properties = {}
         sl.properties['to_queue'] = None
         sl.init()
-        l = logger
 
         #sl.main()
         sl.open()
@@ -80,29 +72,21 @@ class TestModuleNamedPipe(ShinkenTest):
         # Now us we wrote in it
         f = open('tmp/nagios.cmd', 'w')
         t = "[%lu] PROCESS_HOST_CHECK_RESULT;dc1;2;yoyo est mort\n" % now
-
-        s = ''
-        for i in xrange(1, 1000):
-            s += t
-
-        print "Len s", len(s)
-
-        f.write(s)
+        for i in xrange(999):
+            f.write(t)
         f.flush()
         f.close()
+
         total_cmd = 0
-        for i in xrange(1, 100):
+        for i in xrange(99):
             ext_cmds = sl.get()
-            print "got ext_cmd", len(ext_cmds)
             total_cmd += len(ext_cmds)
             if len(ext_cmds) == 0:
                 sl.open()
             else:
                 cmd = ext_cmds.pop()
-        print "Total", total_cmd
-        self.assert_(total_cmd == 999)
-        print cmd.__dict__
-        self.assert_(cmd.cmd_line.strip() == t.strip())
+        self.assertEqual(total_cmd, 999)
+        self.assertEqual(cmd.cmd_line.strip(), t.strip())
 
         # Ok, we can delete the retention file
         os.unlink('tmp/nagios.cmd')
