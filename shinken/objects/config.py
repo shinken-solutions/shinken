@@ -74,7 +74,7 @@ from shinken.brokerlink import BrokerLink, BrokerLinks
 from shinken.receiverlink import ReceiverLink, ReceiverLinks
 from shinken.pollerlink import PollerLink, PollerLinks
 from shinken.graph import Graph
-from shinken.log import logger
+from shinken.log import logger, console_logger
 from shinken.property import UnusedProp, BoolProp, IntegerProp, CharProp, StringProp, LogLevelProp
 from shinken.daemon import get_cur_user, get_cur_group
 
@@ -434,7 +434,7 @@ class Config(Item):
                     try:
                         fd = open(cfg_file_name, 'rU')
                         if self.read_config_silent == 0:
-                            logger.info("Processing object config file '%s'" % cfg_file_name, print_it=True)
+                            console_logger.info("Processing object config file '%s'" % cfg_file_name)
                         res.write(os.linesep + '# IMPORTEDFROM=%s' % (cfg_file_name) + os.linesep)
                         res.write(fd.read().decode('utf8', 'replace'))
                         # Be sure to add a line return so we won't mix files
@@ -467,7 +467,7 @@ class Config(Item):
                         for file in files:
                             if re.search("\.cfg$", file):
                                 if self.read_config_silent == 0:
-                                    logger.info("Processing object config file '%s'" % os.path.join(root, file), print_it=True)
+                                    console_logger.info("Processing object config file '%s'" % os.path.join(root, file))
                                 try:
                                     res.write(os.linesep + '# IMPORTEDFROM=%s' % (os.path.join(root, file)) + os.linesep)
                                     fd = open(os.path.join(root, file), 'rU')
@@ -1296,27 +1296,27 @@ class Config(Item):
     # does not have the satellites.
     def is_correct(self):
         """ Check if all elements got a good configuration """
-        logger.info('Running pre-flight check on configuration data...', print_it=True)
+        console_logger.info('Running pre-flight check on configuration data...')
         r = self.conf_is_correct
 
         # Globally unamanged parameters
         if self.read_config_silent == 0:
-            logger.info('Checking global parameters...', print_it=True)
+            console_logger.info('Checking global parameters...')
         if not self.check_error_on_hard_unmanaged_parameters():
             r = False
-            logger.info("Check global parameters failed", print_it=True)
+            console_logger.info("Check global parameters failed")
 
         for x in ('hosts', 'hostgroups', 'contacts', 'contactgroups', 'notificationways',
                   'escalations', 'services', 'servicegroups', 'timeperiods', 'commands',
                   'hostsextinfo', 'servicesextinfo'):
             if self.read_config_silent == 0:
-                logger.info('Checking %s...' % (x), print_it=True)
+                console_logger.info('Checking %s...' % (x))
             cur = getattr(self, x)
             if not cur.is_correct():
                 r = False
-                logger.info("\t%s conf incorrect!!" % (x), print_it=True)
+                console_logger.info("\t%s conf incorrect!!" % (x))
             if self.read_config_silent == 0:
-                logger.info('\tChecked %d %s' % (len(cur), x), print_it=True)
+                console_logger.info('\tChecked %d %s' % (len(cur), x))
 
         # Hosts got a special check for loops
         if not self.hosts.no_loop_in_parents():
@@ -1331,12 +1331,12 @@ class Config(Item):
             except:
                 continue
             if self.read_config_silent == 0:
-                logger.info('Checking %s...' % (x), print_it=True)
+                console_logger.info('Checking %s...' % (x))
             if not cur.is_correct():
                 r = False
-                logger.error("\t%s conf incorrect!!" % (x), print_it=True)
+                console_logger.error("\t%s conf incorrect!!" % (x))
             if self.read_config_silent == 0:
-                logger.info('\tChecked %d %s' % (len(cur), x), print_it=True)
+                console_logger.info('\tChecked %d %s' % (len(cur), x))
 
         # Look that all scheduler got a broker that will take brok.
         # If there are no, raise an Error
@@ -1451,7 +1451,7 @@ class Config(Item):
     # Now it's time to show all configuration errors
     def show_errors(self):
         for err in self.configuration_errors:
-            logger.info(err, print_it=True)
+            console_logger.info(err)
 
     # Create packs of hosts and services so in a pack,
     # all dependencies are resolved
@@ -1583,7 +1583,7 @@ class Config(Item):
             for pack in r.packs:
                 nb_elements += len(pack)
                 nb_elements_all_realms += len(pack)
-            logger.info("Number of hosts in the realm %s: %d (distributed in %d linked packs)" % (r.get_name(), nb_elements, len(r.packs)), print_it=True)
+            console_logger.info("Number of hosts in the realm %s: %d (distributed in %d linked packs)" % (r.get_name(), nb_elements, len(r.packs)))
 
             if nb_schedulers == 0 and nb_elements != 0:
                 err = "Error: The realm %s have hosts but no scheduler!" % r.get_name()
@@ -1609,7 +1609,7 @@ class Config(Item):
             # send the hosts in the same "pack"
             assoc = {}
             if os.path.exists(self.pack_distribution_file):
-                logger.log('INFO: Trying to open the distribution file %s' % self.pack_distribution_file, print_it=True)
+                console_logger.info('Trying to open the distribution file %s' % self.pack_distribution_file)
                 try:
                     f = open(self.pack_distribution_file, 'rb')
                     assoc = cPickle.load(f)
@@ -1668,10 +1668,10 @@ class Config(Item):
             # Now in packs we have the number of packs [h1, h2, etc]
             # equal to the number of schedulers.
             r.packs = packs
-        logger.info("Number of hosts in all the realm  %d" % nb_elements_all_realms, print_it=True)
-        logger.info("Number of hosts %d" % len(self.hosts), print_it=True)
+        console_logger.info("Number of hosts in all the realm  %d" % nb_elements_all_realms)
+        console_logger.info("Number of hosts %d" % len(self.hosts))
         if len(self.hosts) != nb_elements_all_realms:
-            logger.info("There are %d hosts defined, and %d hosts dispatched in the realms. Some hosts have been ignored" % (len(self.hosts), nb_elements_all_realms), print_it=True)
+            console_logger.info("There are %d hosts defined, and %d hosts dispatched in the realms. Some hosts have been ignored" % (len(self.hosts), nb_elements_all_realms))
             self.add_error("There are %d hosts defined, and %d hosts dispatched in the realms. Some hosts have been ignored" % (len(self.hosts), nb_elements_all_realms))
 
     # Use the self.conf and make nb_parts new confs.
@@ -1728,7 +1728,7 @@ class Config(Item):
             # if a scheduler have accepted the conf
             cur_conf.is_assigned = False
 
-        logger.info("Creating packs for realms", print_it=True)
+        console_logger.info("Creating packs for realms")
 
         # Just create packs. There can be numerous ones
         # In pack we've got hosts and service
