@@ -1,7 +1,6 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
-
+#
 # Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
@@ -45,22 +44,25 @@ properties = {
     }
 
 
-# called by the plugin manager to get a broker
 def get_instance(plugin):
+    """
+    Called by the plugin manager to get a broker
+    """
     print "Get a pickle retention scheduler module for plugin %s" % plugin.get_name()
     path = plugin.path
     instance = Pickle_retention_scheduler(plugin, path)
     return instance
 
 
-# Just print some stuff
 class Pickle_retention_scheduler(BaseModule):
     def __init__(self, modconf, path):
         BaseModule.__init__(self, modconf)
         self.path = path
 
-    # Ok, main function that is called in the retention creation pass
     def hook_save_retention(self, daemon):
+        """
+        main function that is called in the retention creation pass
+        """
         self.update_retention_objects(daemon, logger)
 
     # The real function, this wall module will be soonly removed
@@ -69,7 +71,7 @@ class Pickle_retention_scheduler(BaseModule):
         # Now the flat file method
         try:
             # Open a file near the path, with .tmp extension
-            # so in cae or problem, we do not lost the old one
+            # so in case of a problem, we do not lose the old one
             f = open(self.path + '.tmp', 'wb')
             # Just put hosts/services becauses checks and notifications
             # are already link into
@@ -84,7 +86,7 @@ class Pickle_retention_scheduler(BaseModule):
             cPickle.dump(all_data, f, protocol=cPickle.HIGHEST_PROTOCOL)
             #f.write(s_compress)
             f.close()
-            # Now move the .tmp fiel to the real path
+            # Now move the .tmp file to the real path
             shutil.move(self.path + '.tmp', self.path)
         except IOError, exp:
             log_mgr.log("Error: retention file creation failed, %s" % str(exp))

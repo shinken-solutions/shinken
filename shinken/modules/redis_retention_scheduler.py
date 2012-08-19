@@ -1,7 +1,6 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
-
+#
 # Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
@@ -42,8 +41,10 @@ properties = {
     }
 
 
-# called by the plugin manager to get a broker
 def get_instance(plugin):
+    """
+    Called by the plugin manager to get a broker
+    """
     logger.debug("Get a redis retention scheduler module for plugin %s" % plugin.get_name())
     if not redis:
         raise Exception('Missing the module python-redis. Please install it.')
@@ -52,20 +53,23 @@ def get_instance(plugin):
     return instance
 
 
-# Just print some stuff
 class Redis_retention_scheduler(BaseModule):
     def __init__(self, modconf, server):
         BaseModule.__init__(self, modconf)
         self.server = server
 
-    # Called by Scheduler to say 'let's prepare yourself guy'
     def init(self):
+        """
+        Called by Scheduler to say 'let's prepare yourself guy'
+        """
         print "Initilisation of the redis module"
         #self.return_queue = self.properties['from_queue']
         self.mc = redis.Redis(self.server)
 
-    # Ok, main function that is called in the retention creation pass
     def hook_save_retention(self, daemon):
+        """
+        main function that is called in the retention creation pass
+        """
         log_mgr = logger
         print "[RedisRetention] asking me to update the retention objects"
 

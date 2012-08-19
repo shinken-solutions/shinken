@@ -1,7 +1,6 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
-
+#
 # Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
@@ -46,8 +45,10 @@ properties = {
     }
 
 
-# Called by the plugin manager to get a broker
 def get_instance(plugin):
+    """
+    Called by the plugin manager to get a broker
+    """
     logger.debug("Get a Mongodb retention scheduler module for plugin %s" % plugin.get_name())
     if not Connection:
         raise Exception('Cannot find the module python-pymongo or python-gridfs. Please install both.')
@@ -57,15 +58,16 @@ def get_instance(plugin):
     return instance
 
 
-# Just print some stuff
 class Mongodb_retention_scheduler(BaseModule):
     def __init__(self, modconf, uri, database):
         BaseModule.__init__(self, modconf)
         self.uri = uri
         self.database = database
 
-    # Called by Scheduler to say 'let's prepare yourself guy'
     def init(self):
+        """
+        Called by Scheduler to say 'let's prepare yourself guy'
+        """
         print "Initilisation of the mongodb module"
         self.con = Connection(self.uri)
         # Open a gridfs connection
@@ -73,8 +75,10 @@ class Mongodb_retention_scheduler(BaseModule):
         self.hosts_fs = GridFS(self.db, collection='retention_hosts')
         self.services_fs = GridFS(self.db, collection='retention_services')
 
-    # Ok, main function that is called in the retention creation pass
     def hook_save_retention(self, daemon):
+        """
+        main function that is called in the retention creation pass
+        """
         log_mgr = logger
         print "[MongodbRetention] asking me to update the retention objects"
 

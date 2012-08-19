@@ -1,7 +1,6 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
-
+#
 # Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
@@ -26,6 +25,7 @@
 
 # This Class is an example of an Scheduler module
 # Here for the configuration phase AND running one
+
 try:
     import memcache
 except ImportError:
@@ -43,8 +43,10 @@ properties = {
     }
 
 
-# called by the plugin manager to get a broker
 def get_instance(modconf):
+    """
+    Called by the plugin manager to get a broker
+    """
     logger.log("Get a memcache retention scheduler module for plugin %s" % modconf.get_name())
     if not memcache:
         raise Exception('Missing module python-memcache. Please install it.')
@@ -52,21 +54,24 @@ def get_instance(modconf):
     return instance
 
 
-# Just print some stuff
 class Memcache_retention_scheduler(BaseModule):
     def __init__(self, mod_conf):
         BaseModule.__init__(self, mod_conf)
         self.server = mod_conf.server
         self.port = mod_conf.port
 
-    # Called by Scheduler to say 'let's prepare yourself guy'
     def init(self):
+        """
+        Called by Scheduler to say 'let's prepare yourself guy'
+        """
         print "Initilisation of the memcache module"
         #self.return_queue = self.properties['from_queue']
         self.mc = memcache.Client(['%s:%s' % (self.server, self.port)], debug=0)
 
-    # Ok, main function that is called in the retention creation pass
     def hook_save_retention(self, daemon):
+        """
+        main function that is called in the retention creation pass
+        """
         log_mgr = logger
         print "[MemcacheRetention] asking me to update the retention objects"
 
@@ -100,7 +105,6 @@ class Memcache_retention_scheduler(BaseModule):
         log_mgr = logger
         print "[MemcacheRetention] asking me to load the retention objects"
 
-        # Now the old flat file way :(
         log_mgr.log("[MemcacheRetention] asking me to load the retention objects")
 
         # We got list of loaded data from retention server

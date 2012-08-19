@@ -1,7 +1,6 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
-
+#
 # Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
@@ -45,22 +44,25 @@ properties = {
 }
 
 
-# called by the plugin manager to get a broker
 def get_instance(plugin):
+    """
+    Called by the plugin manager to get a broker
+    """
     print "Get a Nagios3 retention scheduler module for plugin %s" % plugin.get_name()
     path = plugin.path
     instance = Nagios_retention_scheduler(plugin, path)
     return instance
 
 
-# Just print some stuff
 class Nagios_retention_scheduler(BaseModule):
     def __init__(self, mod_conf, path):
         BaseModule.__init__(self, mod_conf)
         self.path = path
 
-    # Ok, main function that is called in the retention creation pass
     def hook_save_retention(self, daemon):
+        """
+        main function that is called in the retention creation pass
+        """
         logger.info("[NagiosRetention] asking me to update the retention objects, but I won't do it.")
 
     def _cut_line(self, line):
@@ -154,8 +156,10 @@ class Nagios_retention_scheduler(BaseModule):
 
         return objects
 
-    # We've got raw objects in string, now create real Instances
     def create_objects(self, raw_objects, types_creations):
+        """
+        Create real Instances from raw objects in string.
+        """
         all_obj = {}
         for t in types_creations:
             all_obj[t] = self.create_objects_for_type(raw_objects, t, types_creations)
