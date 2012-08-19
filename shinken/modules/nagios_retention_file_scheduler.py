@@ -48,7 +48,7 @@ def get_instance(plugin):
     """
     Called by the plugin manager to get a broker
     """
-    print "Get a Nagios3 retention scheduler module for plugin %s" % plugin.get_name()
+    logger.debug("Get a Nagios3 retention scheduler module for plugin %s" % plugin.get_name())
     path = plugin.path
     instance = Nagios_retention_scheduler(plugin, path)
     return instance
@@ -275,26 +275,23 @@ class Nagios_retention_scheduler(BaseModule):
 
     # Should return if it succeed in the retention load or not
     def hook_load_retention(self, sched):
-        log_mgr = logger
-        print "[NagiosRetention] asking me to load the retention file"
+        logger.debug("[NagiosRetention] asking me to load the retention file")
 
         # Now the old flat file way :(
-        log_mgr.log("[NagiosRetention]Reading from retention_file %s" % self.path)
+        logger.info("[NagiosRetention]Reading from retention_file %s" % self.path)
         try:
             f = open(self.path)
             buf = f.read()
             f.close()
         except (EOFError, ValueError, IOError), exp:
-            print exp
+            logger.warning(repr(exp))
             return False
         except (IndexError, TypeError), exp:
-            s = "WARNING: Sorry, the ressource file is not compatible"
-            log_mgr.log(s)
+            logger.warning("Sorry, the ressource file is not compatible")
             return False
 
-        print "Fin read config"
+        logger.debug("Finished reading config")
         raw_objects = self.read_retention_buf(buf)
-        print "Fun raw"
 
         types_creations = {'timeperiod': (Timeperiod, Timeperiods, 'timeperiods'),
                    'service': (Service, Services, 'services'),
@@ -344,6 +341,6 @@ class Nagios_retention_scheduler(BaseModule):
         #all_data = {'hosts': {}, 'services': {}}
 
         sched.restore_retention_data(all_data)
-        log_mgr.log("[NagiosRetention] OK we've load data from retention file")
+        logger.info("[NagiosRetention] Retention objects loaded successfully.")
 
         return True

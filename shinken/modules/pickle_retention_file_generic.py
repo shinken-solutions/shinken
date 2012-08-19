@@ -50,7 +50,7 @@ def get_instance(plugin):
     """
     Called by the plugin manager to get a broker
     """
-    print "Get a pickle retention generic module for plugin %s" % plugin.get_name()
+    logger.debug("Get a pickle retention generic module for plugin %s" % plugin.get_name())
     path = plugin.path
     instance = Pickle_retention_generic(plugin, path)
     return instance
@@ -65,8 +65,7 @@ class Pickle_retention_generic(BaseModule):
         """
         main function that is called in the retention creation pass
         """
-        log_mgr = logger
-        logger.info("[PickleRetentionGeneric] asking me to update the retention objects")
+        logger.debug("[PickleRetentionGeneric] asking me to update the retention objects")
 
         # Now the flat file method
         try:
@@ -84,31 +83,29 @@ class Pickle_retention_generic(BaseModule):
             # Now move the .tmp file to the real path
             shutil.move(self.path + '.tmp', self.path)
         except IOError, exp:
-            log_mgr.log("Error: retention file creation failed, %s" % str(exp))
+            logger.error("Creating retention file failed %s" % str(exp))
             return
-        log_mgr.log("Updating retention_file %s" % self.path)
+        logger.info("Updating retention_file %s" % self.path)
 
     # Should return if it succeed in the retention load or not
     def hook_load_retention(self, daemon):
-        log_mgr = logger
 
+        logger.debug("[PickleRetentionGeneric]Reading from retention_file %s" % self.path)
         # Now the old flat file way :(
-        log_mgr.log("[PickleRetentionGeneric]Reading from retention_file %s" % self.path)
         try:
             f = open(self.path, 'rb')
             all_data = cPickle.load(f)
             f.close()
         except (EOFError, ValueError, IOError), exp:
-            print exp
+            logger.warning(repr(exp))
             return False
         except (IndexError, TypeError), exp:
-            s = "WARNING: Sorry, the ressource file is not compatible: %s" % traceback.format_exc()
-            log_mgr.log(s)
+            logger.warning("Sorry, the ressource file is not compatible")
             return False
 
         # Ok, we send back the data to the daemon
         daemon.restore_retention_data(all_data)
 
-        log_mgr.log("[PickleRetentionGeneric] OK we've load data from retention file")
+        logger.info("[PickleRetentionGeneric] Retention objects loaded successfully.")
 
         return True

@@ -68,7 +68,7 @@ class Mongodb_retention_scheduler(BaseModule):
         """
         Called by Scheduler to say 'let's prepare yourself guy'
         """
-        print "Initilisation of the mongodb module"
+        logger.debug("Initilisation of the mongodb  module")
         self.con = Connection(self.uri)
         # Open a gridfs connection
         self.db = getattr(self.con, self.database)
@@ -79,8 +79,7 @@ class Mongodb_retention_scheduler(BaseModule):
         """
         main function that is called in the retention creation pass
         """
-        log_mgr = logger
-        print "[MongodbRetention] asking me to update the retention objects"
+        logger.debug("[MongodbRetention] asking me to update the retention objects")
 
         all_data = daemon.get_retention_data()
 
@@ -111,14 +110,13 @@ class Mongodb_retention_scheduler(BaseModule):
             self.services_fs.delete(key)
             fd = self.services_fs.put(val, _id=key, filename=key)
 
-        log_mgr.log("Retention information updated in Mongodb")
+        logger.info("Retention information updated in Mongodb")
 
     # Should return if it succeed in the retention load or not
     def hook_load_retention(self, daemon):
-        log_mgr = logger
 
         # Now the new redis way :)
-        log_mgr.log("MongodbRetention] asking me to load the retention objects")
+        logger.debug("MongodbRetention] asking me to load the retention objects")
 
         # We got list of loaded data from retention uri
         ret_hosts = {}
@@ -158,6 +156,6 @@ class Mongodb_retention_scheduler(BaseModule):
         # Ok, now comme load them scheduler :)
         daemon.restore_retention_data(all_data)
 
-        log_mgr.log("[MongodbRetention] OK we've load data from Mongodb server")
+        logger.info("[MongodbRetention] Retention objects loaded successfully.")
 
         return True
