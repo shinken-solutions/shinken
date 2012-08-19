@@ -652,7 +652,7 @@ class Config(Item):
         self.modules.create_reversed_list()
 
         if len(self.arbiters) == 0:
-            logger.warning("There is no arbiter, I add one in localhost:7770", print_it=False)
+            logger.warning("There is no arbiter, I add one in localhost:7770")
             a = ArbiterLink({'arbiter_name': 'Default-Arbiter',
                              'host_name': socket.gethostname(),
                              'address': 'localhost', 'port': '7770',
@@ -996,34 +996,34 @@ class Config(Item):
             # so all hosts without realm wil be link with it
             default = Realm({'realm_name': 'Default', 'default': '1'})
             self.realms = Realms([default])
-            logger.info("The is no defined realms, so I add a new one %s" % default.get_name(), print_it=False)
+            logger.info("The is no defined realms, so I add a new one %s" % default.get_name())
             lists = [self.pollers, self.brokers, self.reactionners, self.receivers, self.schedulers]
             for l in lists:
                 for elt in l:
                     if not hasattr(elt, 'realm'):
                         elt.realm = 'Default'
-                        logger.info("Tagging %s with realm %s" % (elt.get_name(), default.get_name()), print_it=False)
+                        logger.info("Tagging %s with realm %s" % (elt.get_name(), default.get_name()))
 
     # If a satellite is missing, we add them in the localhost
     # with defaults values
     def fill_default_satellites(self):
         if len(self.schedulers) == 0:
-            logger.warning("There is no scheduler, I add one in localhost:7768", print_it=False)
+            logger.warning("There is no scheduler, I add one in localhost:7768")
             s = SchedulerLink({'scheduler_name': 'Default-Scheduler',
                                'address': 'localhost', 'port': '7768'})
             self.schedulers = SchedulerLinks([s])
         if len(self.pollers) == 0:
-            logger.warning("There is no poller, I add one in localhost:7771", print_it=False)
+            logger.warning("There is no poller, I add one in localhost:7771")
             p = PollerLink({'poller_name': 'Default-Poller',
                             'address': 'localhost', 'port': '7771'})
             self.pollers = PollerLinks([p])
         if len(self.reactionners) == 0:
-            logger.warning("There is no reactionner, I add one in localhost:7769", print_it=False)
+            logger.warning("There is no reactionner, I add one in localhost:7769")
             r = ReactionnerLink({'reactionner_name': 'Default-Reactionner',
                                  'address': 'localhost', 'port': '7769'})
             self.reactionners = ReactionnerLinks([r])
         if len(self.brokers) == 0:
-            logger.warning("There is no broker, I add one in localhost:7772", print_it=False)
+            logger.warning("There is no broker, I add one in localhost:7772")
             b = BrokerLink({'broker_name': 'Default-Broker',
                             'address': 'localhost', 'port': '7772',
                             'manage_arbiters': '1'})
