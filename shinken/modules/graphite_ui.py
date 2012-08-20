@@ -210,10 +210,10 @@ class Graphite_Webui(BaseModule):
                 if re.search(r'_warn|_crit', metric):
                     continue
                 if self.graphite_data_source:
-                    uri += "&target=%s.%s.__HOST__.%s" % (
-                        host_name, self.graphite_data_source, metric)
+                    target = "&target=%s.%s.__HOST__.%s" % (host_name, self.graphite_data_source, metric)
                 else:
-                    uri += "&target=%s.__HOST__.%s" % (host_name, metric)
+                    target = "&target=%s.__HOST__.%s" % (host_name, metric)
+                uri += target + target + "?????"
                 v = {}
                 v['link'] = self.uri
                 v['img_src'] = uri
@@ -240,11 +240,12 @@ class Graphite_Webui(BaseModule):
                 elif value[1] == '%':
                     uri += "&yMin=0&yMax=100"
                 if self.graphite_data_source:
-                    uri += "&target=%s.%s.%s.%s" % (host_name,
+                    target = "&target=%s.%s.%s.%s" % (host_name,
                                                     self.graphite_data_source,
                                                     desc, metric)
                 else:
-                    uri += "&target=%s.%s.%s" % (host_name, desc, metric)
+                    target = "&target=%s.%s.%s" % (host_name, desc, metric)
+                uri += target + target + "?????"
                 v = {}
                 v['link'] = self.uri
                 v['img_src'] = uri
