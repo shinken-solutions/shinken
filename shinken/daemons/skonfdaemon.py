@@ -684,7 +684,7 @@ class Skonf(Daemon):
 
 
             except Exception, exp:
-                logger.log("Loading plugins: %s" % exp)
+                logger.info("Loading plugins: %s" % exp)
 
     def add_static(self, fdir, m_dir):
         static_route = '/static/' + fdir + '/:path#.+#'
@@ -907,30 +907,30 @@ class Skonf(Daemon):
                     lst.append(r)
             except Exception, exp:
                 print exp.__dict__
-                logger.log("[%s] Warning: The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
-                logger.log("[%s] Exception type: %s" % (self.name, type(exp)))
-                logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
+                logger.warning("[%s] The module %s raised an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
+                logger.warning("[%s] Exception type: %s" % (self.name, type(exp)))
+                logger.warning("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)
 
         safe_print("Will return external_ui_link::", lst)
         return lst
 
     def save_pack(self, buf):
-        print "SAVING A PACK WITH SIZE", len(buf)
+        logger.info("Saving a new pack")
         _tmpfile = tempfile.mktemp()
         f = open(_tmpfile, 'wb')
         f.write(buf)
         f.close()
-        print "We dump the download pack under", _tmpfile
-        print "CHECK if it's a zip file"
+        logger.debug("Saving a pack of size %s in %s" % (len(buf), _tmpfile))
+        logger.debug("Validate if pack is a .zip")
         if not zipfile.is_zipfile(_tmpfile):
-            print "It's not a zip file!"
-            r = {'state': 200, 'text': 'Ok, the pack is downloaded and install. Please restart skonf to use it.'}
+            logger.error("Pack is not a .zip, bailing out")
+            r = {'state': 400, 'text': 'ERROR: The pack is not a .zip file, something is wrong bailing out.'}
             os.remove(_tmpfile)
             return r
 
         TMP_DIR = tempfile.mkdtemp()
-        print "Unflating the pack into", TMP_DIR
+        logger.info("Extracting the pack into %s" % (TMP_DIR))
         f = zipfile.ZipFile(_tmpfile)
         f.extractall(TMP_DIR)
 
@@ -941,19 +941,21 @@ class Skonf(Daemon):
         packs.load_file(TMP_DIR)
         packs = [i for i in packs]
         if len(packs) > 1:
-            r = {'state': 400, 'text': 'ERROR: the pack got too much .pack file in it'}
+            r = {'state': 400, 'text': 'ERROR: the pack has too many .pack files in it'}
+            logger.error("Tried to extract a pack that has too many .pack files in it")
             # Clean before exit
             shutil.rmtree(TMP_DIR)
             return r
 
         if len(packs) == 0:
             r = {'state': 400, 'text': 'ERROR: no valid .pack found in the zip file'}
+            logger.error("No valid .pack found in the zip file")
             # Clean before exit
             shutil.rmtree(TMP_DIR)
             return r
 
         pack = packs.pop()
-        print "We read pack", pack.__dict__
+        logger.debug("We read pack %s" % pack.__dict__)
         # Now we can update the db pack entry
         pack_name = pack.pack_name
         pack_path = pack.path
@@ -968,17 +970,17 @@ class Skonf(Daemon):
         tmp_dir = self.packs_home
         for d in dirs:
             _d = os.path.join(tmp_dir, d)
-            print "Look for the directory", _d
+            logger.debug("Look for the directory %s" % _d)
             if not os.path.exists(_d):
                 os.mkdir(_d)
             tmp_dir = _d
         # Ok now the last level
         dest_dir = os.path.join(tmp_dir, pack_name)
-        print "Will copy the tree in the pack tree", dest_dir
+        logger.debug("Will copy the tree in the pack tree %s" % dest_dir)
 
         # If it's already here (previous pack?) clean it
         if os.path.exists(dest_dir):
-            print "Cleaning the old pack dir", dest_dir
+            logger.debug("Cleaning the old pack dir" % dest_dir)
             shutil.rmtree(dest_dir)
 
         # Copying the new pack
@@ -989,7 +991,7 @@ class Skonf(Daemon):
         # so we will move all of them too
         img_dir = os.path.join(dest_dir, 'images')
         if os.path.exists(img_dir):
-            print "We got an images source dir, we should move it"
+            logger.debug("We got an images source dir, we should move it")
             for root, dirs, files in os.walk(img_dir):
                 for file in files:
                     src_file = os.path.join(root, file)
@@ -1000,17 +1002,17 @@ class Skonf(Daemon):
                     from_share_path = os.path.join('images', img_dst_dir)
                     can_be_copy = expect_file_dirs(self.share_dir, from_share_path)
                     full_dst_file = os.path.join(self.share_dir, from_share_path, file)
-                    print "Is the file %s can be copy? %s" % (dst_file, can_be_copy)
-                    print "Saving a source file", src_file, 'in', full_dst_file
+                    logger.debug("Can the file %s can be copied? %s" % (dst_file, can_be_copy))
+                    logger.debug("Saving a source file %s in %s" % (src_file, full_dst_file))
                     if can_be_copy:
                         shutil.copy(src_file, full_dst_file)
                     else:
-                        logger.warning('Cannot create the directory %s for a pack install' % os.path.join(self.share_dir, from_share_path))
+                        logger.warning('Could not create the directory %s for the pack installation' % os.path.join(self.share_dir, from_share_path))
 
         # Now the template one
         templates_dir = os.path.join(dest_dir, 'templates')
         if os.path.exists(templates_dir):
-            print "We got an images source dir, we should move it"
+            logger.debug("We got an images source dir, we should move it")
             for root, dirs, files in os.walk(templates_dir):
                 for file in files:
                     src_file = os.path.join(root, file)
@@ -1021,12 +1023,12 @@ class Skonf(Daemon):
                     from_share_path = os.path.join('templates', tpl_dst_dir)
                     can_be_copy = expect_file_dirs(self.share_dir, from_share_path)
                     full_dst_file = os.path.join(self.share_dir, from_share_path, file)
-                    print "Is the file %s can be copy? %s" % (dst_file, can_be_copy)
-                    print "Saving a source file", src_file, 'in', full_dst_file
+                    logger.debug("Can the file %s can be copied? %s" % (dst_file, can_be_copy))
+                    logger.debug("Saving a source file %s in %s" % (src_file, full_dst_file))
                     if can_be_copy:
                         shutil.copy(src_file, full_dst_file)
                     else:
-                        logger.warning('Cannot create the directory %s for a pack install' % os.path.join(self.share_dir, from_share_path))
+                        logger.warning('Could not create the directory %s for a pack installation' % os.path.join(self.share_dir, from_share_path))
 
-        r = {'state': 200, 'text': 'Ok, the pack is downloaded and install. Please restart skonf to use it.'}
+        r = {'state': 200, 'text': 'The pack was downloaded and installed. Please restart skonf to use it.'}
         return r

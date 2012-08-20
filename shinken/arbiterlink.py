@@ -57,7 +57,7 @@ class ArbiterLink(SatelliteLink):
 
         for prop, entry in cls.properties.items():
             if not hasattr(self, prop) and entry.required:
-                # This sould raise an error afterwards?
+                # This should raise an error afterwards?
                 # Log the issue
                 logger.warning("%s arbiterlink is missing %s property" % (self.get_name(), prop))
                 self.debug("%s arbiterlink is missing %s property" % (self.get_name(), prop))

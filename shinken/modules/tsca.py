@@ -122,14 +122,14 @@ class TSCA_arbiter(BaseModule):
 
     # Ok, main function that is called in the CONFIGURATION phase
     def get_objects(self):
-        logger.info "dummy ask me for objects to return"
+        logger.info("dummy ask me for objects to return")
         r = {'hosts': []}
         h = {'name': 'dummy host from dummy arbiter module',
              'register': '0',
              }
 
         r['hosts'].append(h)
-        logger.info "dummy returning to Arbiter the hosts:", r
+        logger.info("dummy returning to Arbiter the hosts:" % r)
         return r
 
     def read_check_result(self, state):

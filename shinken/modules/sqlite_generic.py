@@ -52,7 +52,7 @@ properties = {
 
 # called by the plugin manager to get a module instance
 def get_instance(plugin):
-    logger.debug("[SQLite Module]: Get instance for plugin %s" % plugin.get_name())
+    logger.debug("Get instance for plugin %s" % plugin.get_name())
     if 'sqlite3' not in sys.modules:
         raise Exception('Cannot find the sqlite module. Please install it.')
     uri      = plugin.uri
@@ -70,13 +70,13 @@ class SQLite_generic(BaseModule):
     # Called by Arbiter to say 'let's prepare yourself guy'
     #TODO: create database & tables if not exists
     def init(self):
-        logger.info("[SQLite Module]: Try to open SQLite database at %s" % (self.uri))
+        logger.info("Try to open SQLite database at %s" % (self.uri))
         try:
             self.db = sqlite3.connect(self.uri, check_same_thread=False)
         except Exception, e:
-            logger.error("SQLitedb Module: Error %s:" % e)
+            logger.error("Error %s:" % e)
             raise
-        logger.info("[SQLite Module]: Opened connection to SQLite database OK"
+        logger.info("Opened connection to SQLite database OK")
 
         # initiate database tables if not exists
         self.db.execute("""CREATE TABLE IF NOT EXISTS ui_preferences (
@@ -94,11 +94,11 @@ class SQLite_generic(BaseModule):
     # Query user preference entre from database
     def get_ui_user_preference(self, user, key):
         if not self.db:
-            logger.error("[SQLite]: Problem during init phase")
+            logger.error("Problem during init phase")
             return None
 
         if not user:
-            logger.error("[SQLite]: error get_ui_user_preference::no user")
+            logger.error("error get_ui_user_preference::no user")
             return None
 
         return self._get_ui_user_preference(user.get_name(), key)
@@ -111,7 +111,7 @@ class SQLite_generic(BaseModule):
 
         # Maybe it's a new entryor missing this parameter, bail out
         if res is None:
-            logger.warning('[SQLite] no key or invalid one')
+            logger.warning('no key or invalid one')
             return None
 
         return res[0]
@@ -122,14 +122,14 @@ class SQLite_generic(BaseModule):
 
     def set_ui_user_preference(self, user, key, value):
         if not user:
-            logger.warning('[SQLite]: get_ui_user_preference::no user')
+            logger.warning('get_ui_user_preference::no user')
             return None
 
         return self._set_ui_user_preference(user.get_name(), key, value)
 
     def _set_ui_user_preference(self, user, key, value):
         if not self.db:
-            logger.error("[SQLite]: Problem during init phase")
+            logger.error("Problem during init phase")
             return None
 
         self.db.execute("INSERT OR REPLACE INTO ui_preferences (user, key, value) VALUES (?,?,?)", (user, key, value))

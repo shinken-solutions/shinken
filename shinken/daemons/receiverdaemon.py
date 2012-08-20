@@ -280,7 +280,7 @@ class Receiver(Satellite):
             con = sched.get('con', None)
             sent = False
             if not con:
-                print "The scheduler is not connected", sched
+                logger.warning("The scheduler is not connected" % sched)
                 self.pynag_con_init(sched_id)
                 con = sched.get('con', None)
             

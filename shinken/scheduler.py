@@ -330,10 +330,10 @@ class Scheduler:
                 try:
                     f(self)
                 except Exception, exp:
-                    logger.warning("The instance %s raise an exception %s. I disable it and set it to restart it later" % (inst.get_name(), str(exp)))
+                    logger.error("The instance %s raise an exception %s. I disable it and set it to restart it later" % (inst.get_name(), str(exp)))
                     output = cStringIO.StringIO()
                     traceback.print_exc(file=output)
-                    logger.warning("Back trace of this remove: %s" % (output.getvalue()))
+                    logger.error("Exception trace follows: %s" % (output.getvalue()))
                     output.close()
                     self.sched_daemon.modules_manager.set_to_restart(inst)
 

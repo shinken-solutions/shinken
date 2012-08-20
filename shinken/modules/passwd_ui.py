@@ -25,7 +25,7 @@
 
 """
 This class is for looking in a apache passwd file
-for auth
+to authenticate a user supplied password.
 """
 
 import os
@@ -49,7 +49,7 @@ properties = {
 
 # called by the plugin manager
 def get_instance(plugin):
-    print "Get an Apache/Passwd UI module for plugin %s" % plugin.get_name()
+    logger.info("Instantiate an Apache/Passwd UI module for plugin %s" % plugin.get_name())
 
     instance = Passwd_Webui(plugin)
     return instance
@@ -62,7 +62,7 @@ class Passwd_Webui(BaseModule):
 
     # Try to connect if we got true parameter
     def init(self):
-        print "Trying to initalize the Apache/Passwd file"
+        logger.debug("Connection test to the Apache/Passwd file")
 
     # To load the webui application
     def load(self, app):
@@ -88,21 +88,21 @@ class Passwd_Webui(BaseModule):
                 else:
                     magic = None
                     salt = hash[:2]
-                print "PASSWD:", name, hash, salt
+                logger.debug("PASSWD: %s %s %s" % (name, hash, salt))
                 # If we match the user, look at the crypt
                 if name == user:
                     if magic == 'apr1':
                         compute_hash = apache_md5_crypt(password, salt)
                     else:
                         compute_hash = crypt.crypt(password, salt)
-                    print "Computed hash", compute_hash
+                    # print "Computed hash", compute_hash
                     if compute_hash == hash:
-                        print "PASSWD: it's good!"
+                        logger.info("Authentication success")
                         return True
                 else:
-                    print "PASSWD: bad user", name, user
+                    logger.info("Authentication failed" % (name, user))
         except Exception, exp:
-            print "Checking auth in passwd %s failed: %s " % (self.passwd, exp)
+            logger.warning("Authentication against apache passwd file failed: %s " % (exp))
             return False
         finally:
             try:
@@ -111,5 +111,5 @@ class Passwd_Webui(BaseModule):
                 pass
 
         # At the end, we are not happy, so we return False
-        print "PASSWD: return false"
+        logger.debug("Failed to authenticate user, return false")
         return False

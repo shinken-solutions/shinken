@@ -197,7 +197,7 @@ class BaseSatellite(Daemon):
 
     def do_stop(self):
         if self.pyro_daemon and self.interface:
-            logger.debug("Stopping all network connections")
+            logger.info("[%s] Stopping all network connections" % self.name)
             self.pyro_daemon.unregister(self.interface)
         super(BaseSatellite, self).do_stop()
 
@@ -262,8 +262,8 @@ class Satellite(BaseSatellite):
             sch_con = sched['con'] = Pyro.core.getProxyForURI(uri)
             socket.setdefaulttimeout(None)
         except Pyro_exp_pack, exp:
-            # But the multiprocessing module is not copatible with it!
-            # so we must disable it imadiatly after
+            # But the multiprocessing module is not compatible with it!
+            # so we must disable it immediately after
             socket.setdefaulttimeout(None)
             logger.warning("[%s] Scheduler %s is not initialized or has network problem: %s" % (self.name, sname, str(exp)))
             sched['con'] = None
@@ -349,19 +349,19 @@ class Satellite(BaseSatellite):
                         send_ok = con.put_results(ret)
                 # Not connected or sched is gone
                 except (Pyro_exp_pack, KeyError), exp:
-                    logger.debug('manage_returns exception:: %s,%s ' % (type(exp), str(exp)))
+                    logger.error('manage_returns exception:: %s,%s ' % (type(exp), str(exp)))
                     try:
-                        logger.debug(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
+                        logger.error(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
                     except:
                         pass
                     self.pynag_con_init(sched_id)
                     return
                 except AttributeError, exp:  # the scheduler must  not be initialized
-                    logger.debug('manage_returns exception:: %s,%s ' % (type(exp), str(exp)))
+                    logger.error('manage_returns exception:: %s,%s ' % (type(exp), str(exp)))
                 except Exception, exp:
                     logger.error("A satellite raised an unknown exception: %s (%s)" % (exp, type(exp)))
                     try:
-                        logger.debug(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
+                        logger.error(''.join(PYRO_VERSION < "4.0" and Pyro.util.getPyroTraceback(exp) or Pyro.util.getPyroTraceback()))
                     except:
                         pass
                     raise
@@ -407,7 +407,7 @@ class Satellite(BaseSatellite):
         except OSError, exp:
             # We look for the "Function not implemented" under Linux
             if exp.errno == 38 and os.name == 'posix':
-                logger.error("Got an exception (%s). If you are under Linux, please check that your /dev/shm directory exists." % (str(exp)))
+                logger.critical("Got an exception (%s). If you are under Linux, please check that your /dev/shm directory exists and is read-write." % (str(exp)))
             raise
 
         # If we are in the fork module, we do not specify a target
@@ -441,7 +441,7 @@ class Satellite(BaseSatellite):
     # The main stop of this daemon. Stop all workers
     # modules and sockets
     def do_stop(self):
-        logger.info("Stopping all workers")
+        logger.info("[%s] Stopping all workers" % (self.name))
         for w in self.workers.values():
             try:
                 w.terminate()
@@ -451,7 +451,6 @@ class Satellite(BaseSatellite):
                 pass
         # Close the pyro server socket if it was opened
         if self.pyro_daemon:
-            logger.info("Stopping all network connections")
             if self.brok_interface:
                 self.pyro_daemon.unregister(self.brok_interface)
             if self.scheduler_interface:
@@ -548,7 +547,7 @@ class Satellite(BaseSatellite):
                     to_del.append(mod)
 
             for mod in to_del:
-                logger.debug("The module %s is not a worker one, I remove it from the worker list" % mod)
+                logger.debug("[%s] The module %s is not a worker one, I remove it from the worker list" % (self.name,mod))
                 del self.q_by_mod[mod]
 
         # TODO: if len(workers) > 2*wish, maybe we can kill a worker?
@@ -970,7 +969,7 @@ class Satellite(BaseSatellite):
             # Now main loop
             self.do_mainloop()
         except Exception, exp:
-            logger.error("I got an unrecoverable error. I have to exit")
-            logger.error("You can log a bug ticket at https://github.com/naparuba/shinken/issues/new to get help")
-            logger.error("Back trace of it: %s" % (traceback.format_exc()))
+            logger.critical("I got an unrecoverable error. I have to exit")
+            logger.critical("You can log a bug ticket at https://github.com/naparuba/shinken/issues/new to get help")
+            logger.critical("Back trace of it: %s" % (traceback.format_exc()))
             raise
