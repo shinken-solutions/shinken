@@ -61,14 +61,13 @@ class Memcache_retention_scheduler(BaseModule):
 
     # Called by Scheduler to say 'let's prepare yourself guy'
     def init(self):
-        print "Initilisation of the memcache module"
+        logger.info("Initilisation of the memcache module")
         #self.return_queue = self.properties['from_queue']
         self.mc = memcache.Client(['%s:%s' % (self.server, self.port)], debug=0)
 
     # Ok, main function that is called in the retention creation pass
     def hook_save_retention(self, daemon):
-        log_mgr = logger
-        print "[MemcacheRetention] asking me to update the retention objects"
+        logger.info("[MemcacheRetention] asking me to update the retention objects")
 
         all_data = daemon.get_retention_data()
 
@@ -93,15 +92,14 @@ class Memcache_retention_scheduler(BaseModule):
             #print "Using key", key
             val = cPickle.dumps(s)
             self.mc.set(key, val)
-        log_mgr.log("Retention information updated in Memcache")
+        logger.info("Retention information updated in Memcache")
 
     # Should return if it succeed in the retention load or not
     def hook_load_retention(self, daemon):
-        log_mgr = logger
-        print "[MemcacheRetention] asking me to load the retention objects"
+        logger.info("[MemcacheRetention] asking me to load the retention objects")
 
         # Now the old flat file way :(
-        log_mgr.log("[MemcacheRetention] asking me to load the retention objects")
+        logger.info("[MemcacheRetention] asking me to load the retention objects")
 
         # We got list of loaded data from retention server
         ret_hosts = {}
@@ -131,6 +129,6 @@ class Memcache_retention_scheduler(BaseModule):
         # Ok, now comme load them scheduler :)
         daemon.restore_retention_data(all_data)
 
-        log_mgr.log("[MemcacheRetention] OK we've load data from memcache server")
+        logger.info("[MemcacheRetention] OK we've load data from memcache server")
 
         return True

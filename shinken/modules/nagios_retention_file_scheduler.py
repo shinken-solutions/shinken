@@ -348,6 +348,6 @@ class Nagios_retention_scheduler(BaseModule):
         #all_data = {'hosts': {}, 'services': {}}
 
         sched.restore_retention_data(all_data)
-        log_mgr.log("[NagiosRetention] OK we've load data from retention file")
+        logger.info("[NagiosRetention] OK we've load data from retention file")
 
         return True
