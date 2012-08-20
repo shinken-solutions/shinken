@@ -46,7 +46,7 @@ class Log:
     CRITICAL = logging.CRITICAL
 
     def __init__(self):
-        self._level = logging.ERROR
+        self._level = logging.WARNING
 
     def load_obj(self, object, name_=None):
         """ We load the object where we will put log broks
@@ -61,10 +61,15 @@ class Log:
     @staticmethod
     def get_level_id(lvlName):
         """Convert a level name (string) to its integer value
-
-           Raise KeyError when name not found
+           and vice-versa. Input a level and it will return a name.
+           Raise KeyError when name or level not found
         """
         return logging._levelNames[lvlName]
+
+    # We can have level as an int (logging.INFO) or a string INFO
+    # if string, try to get the int value
+    def get_level(self):
+        return logging.getLogger().getEffectiveLevel()
 
     # We can have level as an int (logging.INFO) or a string INFO
     # if string, try to get the int value
