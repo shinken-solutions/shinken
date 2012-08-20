@@ -184,7 +184,6 @@ class LiveStatus_broker(BaseModule, Daemon):
             print s
         del self.debug_output
         self.add_compatibility_sqlite_module()
-        self.log = logger
         self.datamgr = datamgr
         datamgr.load(self.rg)
         self.query_cache = LiveStatusQueryCache()
@@ -237,7 +236,7 @@ class LiveStatus_broker(BaseModule, Daemon):
 
         # Check if some og the required directories exist
         #if not os.path.exists(bottle.TEMPLATE_PATH[0]):
-        #    logger.log('ERROR: the view path do not exist at %s' % bottle.TEMPLATE_PATH)
+        #    logger.error('The view path do not exist at %s' % bottle.TEMPLATE_PATH)
         #    sys.exit(2)
 
         self.load_plugins()

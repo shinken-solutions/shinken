@@ -792,10 +792,10 @@ class Config(Item):
     # be quicker.
     def prepare_for_sending(self):
         self.hosts.prepare_for_sending()
-        logger.log('[Arbiter] Serializing the configurations...')
+        logger.info('[Arbiter] Serializing the configurations...')
         for r in self.realms:
             for (i, conf) in r.confs.iteritems():
-                logger.log('[%s] Serializing the configuration %d' % (r.get_name(), i))
+                logger.debug('[%s] Serializing the configuration %d' % (r.get_name(), i))
                 t0 = time.time()
                 r.serialized_confs[i] = cPickle.dumps(conf, cPickle.HIGHEST_PROTOCOL)
                 logger.debug("[config] time to serialize the conf %s:%s is %s" % (r.get_name(), i, time.time() - t0))
@@ -1583,7 +1583,9 @@ class Config(Item):
             for pack in r.packs:
                 nb_elements += len(pack)
                 nb_elements_all_realms += len(pack)
-            console_logger.info("Number of hosts in the realm %s: %d (distributed in %d linked packs)" % (r.get_name(), nb_elements, len(r.packs)))
+            console_logger.info("Number of hosts in the realm %s: %d "
+                                "(distributed in %d linked packs)"
+                                % (r.get_name(), nb_elements, len(r.packs)))
 
             if nb_schedulers == 0 and nb_elements != 0:
                 err = "Error: The realm %s have hosts but no scheduler!" % r.get_name()
@@ -1609,7 +1611,8 @@ class Config(Item):
             # send the hosts in the same "pack"
             assoc = {}
             if os.path.exists(self.pack_distribution_file):
-                console_logger.info('Trying to open the distribution file %s' % self.pack_distribution_file)
+                console_logger.info('Trying to open the distribution file %s'
+                                    % self.pack_distribution_file)
                 try:
                     f = open(self.pack_distribution_file, 'rb')
                     assoc = cPickle.load(f)
@@ -1658,21 +1661,28 @@ class Config(Item):
                     assoc[elt.get_name()] = i
 
             try:
-                logger.log('INFO: Trying to save the distribution file %s' % self.pack_distribution_file)
+                logger.info('Trying to save the distribution file %s' % self.pack_distribution_file)
                 f = open(self.pack_distribution_file, 'wb')
                 cPickle.dump(assoc, f)
                 f.close()
             except Exception, exp:
-                logger.log('Warning: cannot save the distribution file %s: %s' % (self.pack_distribution_file, str(exp)))
+                logger.warning('Can not save the distribution file %s: %s' % (self.pack_distribution_file, str(exp)))
 
             # Now in packs we have the number of packs [h1, h2, etc]
             # equal to the number of schedulers.
             r.packs = packs
-        console_logger.info("Number of hosts in all the realm  %d" % nb_elements_all_realms)
+        console_logger.info("Number of hosts in all the realm  %d"
+                            % nb_elements_all_realms)
         console_logger.info("Number of hosts %d" % len(self.hosts))
         if len(self.hosts) != nb_elements_all_realms:
-            console_logger.info("There are %d hosts defined, and %d hosts dispatched in the realms. Some hosts have been ignored" % (len(self.hosts), nb_elements_all_realms))
-            self.add_error("There are %d hosts defined, and %d hosts dispatched in the realms. Some hosts have been ignored" % (len(self.hosts), nb_elements_all_realms))
+            console_logger.info("There are %d hosts defined, and %d hosts "
+                                "dispatched in the realms. Some hosts have "
+                                "been ignored"
+                                % (len(self.hosts), nb_elements_all_realms))
+            self.add_error("There are %d hosts defined, and %d hosts "
+                           "dispatched in the realms. Some hosts have "
+                           "been ignored"
+                           % (len(self.hosts), nb_elements_all_realms))
 
     # Use the self.conf and make nb_parts new confs.
     # nbparts is equal to the number of schedulerlink
