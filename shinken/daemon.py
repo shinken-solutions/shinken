@@ -142,7 +142,7 @@ class Daemon(object):
         'ca_cert':       StringProp(default='etc/certs/ca.pem'),
         'server_cert':   StringProp(default='etc/certs/server.pem'),
         'use_local_log': BoolProp(default='1'),
-        'log_level': LogLevelProp(default='INFO'),
+        'log_level':     LogLevelProp(default='WARNING'),
         'hard_ssl_name_check':    BoolProp(default='0'),
         'idontcareaboutsecurity': BoolProp(default='0'),
         'spare':         BoolProp(default='0'),
@@ -207,8 +207,9 @@ class Daemon(object):
             if not hasattr(self, 'sched'):
                 self.hook_point('save_retention')
             # And we quit
-            logger.info('Stopping all modules')
+            logger.debug('Stopping all modules')
             self.modules_manager.stop_all()
+            logger.debug('Stopping inter-process message (PYRO)')
         if self.pyro_daemon:
             pyro.shutdown(self.pyro_daemon)
         logger.quit()
@@ -216,7 +217,7 @@ class Daemon(object):
     def request_stop(self):
         self.unlink()
         self.do_stop()
-        logger.debug("Exiting")
+        logger.info("Stopping daemon. Exiting")
         sys.exit(0)
 
     def do_loop_turn(self):
@@ -241,7 +242,7 @@ class Daemon(object):
 
     def do_load_modules(self):
         self.modules_manager.load_and_init()
-        self.log.info("I correctly loaded the modules: [%s]" % (','.join([inst.get_name() for inst in self.modules_manager.instances])))
+        logger.info("I correctly loaded the modules: [%s]" % (','.join([inst.get_name() for inst in self.modules_manager.instances])))
 
     # Dummy method for adding broker to this daemon
     def add(self, elt):
@@ -430,7 +431,7 @@ class Daemon(object):
             # if it's not then something wrong can already be on the way so let's wait max 3 secs here.
             pid, status = os.waitpid(pid, 0)
             if status != 0:
-                logger.error("Something wierd happened with/during second fork: status=", status)
+                logger.error("Something weird happened with/during second fork: status=", status)
             os._exit(status != 0)
 
         # halfway to daemonize..
@@ -449,7 +450,8 @@ class Daemon(object):
         del self.fpid
         self.pid = os.getpid()
         logger.debug("We are now fully daemonized :) pid=%d" % self.pid)
-        # We can now output some previouly silented debug ouput
+        # We can now output some previously silenced debug ouput
+        logger.debug("Printing stored debug messages prior to our daemonization")
         for s in self.debug_output:
             logger.debug(s)
         del self.debug_output
@@ -461,7 +463,11 @@ class Daemon(object):
         if use_pyro:
             self.setup_pyro_daemon()
         # Setting log level
-        logger.set_level(self.log_level)
+        # Debug level by making sure the daemons are using the correct level and that default level is set.
+        #logger.error("Logger class effective level is: %d  Setting to %d" % (logger.get_level(), self.log_level))
+        self.log.set_level(self.log_level)
+        #logger.error("Logger class effective level is now: %d " % (logger.get_level()))
+        
         # Then start to log all in the local file if asked so
         self.register_local_log()
         if self.is_daemon:
