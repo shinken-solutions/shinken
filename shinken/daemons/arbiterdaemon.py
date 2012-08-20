@@ -276,7 +276,7 @@ class Arbiter(Daemon):
                 try:
                     r = inst.get_objects()
                 except Exception, exp:
-                    logger.debug("Instance %s raised an exception %s. Log and continu running" % (inst.get_name(), str(exp)))
+                    logger.error("Instance %s raised an exception %s. Log and continu running" % (inst.get_name(), str(exp)))
                     continue
 
                 types_creations = self.conf.types_creations
@@ -414,8 +414,7 @@ class Arbiter(Daemon):
 
         # Ok, here we must check if we go on or not.
         # TODO: check OK or not
-        # TODO: I don't know why conf.log_level is string, not an int
-        self.log_level = logger.get_level_id(self.conf.log_level)
+        self.log_level = self.conf.log_level
         self.use_local_log = self.conf.use_local_log
         self.local_log = self.conf.local_log
         self.pidfile = os.path.abspath(self.conf.lock_file)
@@ -497,7 +496,7 @@ class Arbiter(Daemon):
         except Exception, exp:
             logger.critical("I got an unrecoverable error. I have to exit")
             logger.critical("You can log a bug ticket at https://github.com/naparuba/shinken/issues/new to get help")
-            logger.critical("Back trace of it: %s" % (traceback.format_exc()))
+            logger.critical("Exception trace follows: %s" % (traceback.format_exc()))
             raise
 
     def setup_new_conf(self):
