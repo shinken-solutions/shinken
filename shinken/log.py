@@ -206,6 +206,7 @@ class __ConsoleLogger:
         self._log(Log.DEBUG, msg, *args, **kwargs)
 
     def info(self, msg, *args, **kwargs):
+        kwargs.setdefault('display_level', False)
         self._log(Log.INFO, msg, *args, **kwargs)
 
     def warning(self, msg, *args, **kwargs):
