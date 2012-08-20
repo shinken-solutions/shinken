@@ -31,6 +31,8 @@ from shinken.log import logger
 
 class Hostdependency(Item):
     id = 0
+    my_type = 'hostdependency'
+
     # F is dep of D
     # host_name                      Host B
     #       service_description             Service D
