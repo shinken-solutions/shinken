@@ -61,13 +61,12 @@ class Redis_retention_scheduler(BaseModule):
 
     # Called by Scheduler to say 'let's prepare yourself guy'
     def init(self):
-        logger.info("[RedisRetention] Initialisation of the redis module"
+        logger.info("[RedisRetention] Initialisation of the redis module")
         #self.return_queue = self.properties['from_queue']
         self.mc = redis.Redis(self.server)
 
     # Ok, main function that is called in the retention creation pass
     def hook_save_retention(self, daemon):
-        log_mgr = logger
         logger.info("[RedisRetention] Asking me to update the retention objects")
 
         all_data = daemon.get_retention_data()
