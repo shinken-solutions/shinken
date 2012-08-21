@@ -1,7 +1,8 @@
 #!/usr/bin/env python
-# Copyright (C) 2009-2010:
+# Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
+#    Hartmut Goebel, h.goebel@goebel-consult.de
 #
 # This file is part of Shinken.
 #
@@ -18,39 +19,212 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-#
-# This file is used to test reading and processing of config files
-#
+"""
+Test shinken.property
+"""
 
-from shinken_test import *
-from shinken.property import UnusedProp, BoolProp, IntegerProp, FloatProp, CharProp, StringProp
+import unittest
+
+import __import_shinken
+import shinken.property
+from shinken.property import none_object
 
 
-class TestConfig(ShinkenTest):
-    def setUp(self):
-        pass
+class PropertyTests:
+    """Common tests for all property classes"""
 
-    # Test the bool property class
-    def test_bool_property(self):
-        p = BoolProp(default='1', class_inherit=[('Host', 'accept_passive_checks')])
-        print p.__dict__
-        s = "1"
-        val = p.pythonize(s)
-        print s, val
-        self.assert_(val == True)
-        s = "0"
-        val = p.pythonize(s)
-        print s, val
-        self.assert_(val == False)
+    def test_no_default_value(self):
+        p = self.prop_class()
+        self.assertIs(p.default, none_object)
+        self.assertFalse(p.has_default)
+        self.assertTrue(p.required)
 
-        # Now a service one
-        p = BoolProp(default='0', fill_brok=['full_status'])
-        print p.__dict__
-        s = "1"
-        val = p.pythonize(s)
-        print s, val
-        self.assert_(val == True)
-        self.assert_('full_status' in p.fill_brok)
+    def test_default_value(self):
+        default_value = object()
+        p = self.prop_class(default=default_value)
+        self.assertIs(p.default, default_value)
+        self.assertTrue(p.has_default)
+        self.assertFalse(p.required)
+
+    def test_fill_brok(self):
+        p = self.prop_class()
+        self.assertNotIn('full_status', p.fill_brok)
+        p = self.prop_class(default='0', fill_brok=['full_status'])
+        self.assertIn('full_status', p.fill_brok)
+
+    def test_unused(self):
+        p = self.prop_class()
+        self.assertFalse(p.unused)
+
+
+class TestBoolProp(unittest.TestCase, PropertyTests):
+    """Test the BoolProp class"""
+
+    prop_class = shinken.property.BoolProp
+
+    def test_pythonize(self):
+        p = self.prop_class()
+        # allowed strings for `True`
+        self.assertEqual(p.pythonize("1"), True)
+        self.assertEqual(p.pythonize("yes"), True)
+        self.assertEqual(p.pythonize("true"), True)
+        self.assertEqual(p.pythonize("on"), True)
+        # allowed strings for `False`
+        self.assertEqual(p.pythonize("0"), False)
+        self.assertEqual(p.pythonize("no"), False)
+        self.assertEqual(p.pythonize("false"), False)
+        self.assertEqual(p.pythonize("off"), False)
+
+
+class TestIntegerProp(unittest.TestCase, PropertyTests):
+    """Test the IntegerProp class"""
+
+    prop_class = shinken.property.IntegerProp
+
+    def test_pythonize(self):
+        p = self.prop_class()
+        self.assertEqual(p.pythonize("1"), 1)
+        self.assertEqual(p.pythonize("0"), 0)
+        self.assertEqual(p.pythonize("1000.33"), 1000)
+
+
+class TestFloatProp(unittest.TestCase, PropertyTests):
+    """Test the FloatProp class"""
+
+    prop_class = shinken.property.FloatProp
+
+    def test_pythonize(self):
+        p = self.prop_class()
+        self.assertEqual(p.pythonize("1"), 1.0)
+        self.assertEqual(p.pythonize("0"), 0.0)
+        self.assertEqual(p.pythonize("1000.33"), 1000.33)
+
+
+class TestStringProp(unittest.TestCase, PropertyTests):
+    """Test the StringProp class"""
+
+    prop_class = shinken.property.StringProp
+
+    def test_pythonize(self):
+        p = self.prop_class()
+        self.assertEqual(p.pythonize("1"), "1")
+        self.assertEqual(p.pythonize("yes"), "yes")
+        self.assertEqual(p.pythonize("0"), "0")
+        self.assertEqual(p.pythonize("no"), "no")
+
+
+class TestCharProp(unittest.TestCase, PropertyTests):
+    """Test the CharProp class"""
+
+    prop_class = shinken.property.CharProp
+
+    def test_pythonize(self):
+        p = self.prop_class()
+        self.assertEqual(p.pythonize("c"), "c")
+        self.assertEqual(p.pythonize("cxxxx"), "c")
+        # this raises IndexError. is this intented?
+        ## self.assertEqual(p.pythonize(""), "")
+
+
+class TestPathProp(TestStringProp):
+    """Test the PathProp class"""
+
+    prop_class = shinken.property.PathProp
+
+    # As of now, PathProp is a subclass of StringProp without any
+    # relevant change. So no further tests are implemented here.
+
+
+class TestConfigPathProp(TestStringProp):
+    """Test the ConfigPathProp class"""
+
+    prop_class = shinken.property.ConfigPathProp
+
+    # As of now, ConfigPathProp is a subclass of StringProp without
+    # any relevant change. So no further tests are implemented here.
+
+
+class TestListProp(unittest.TestCase, PropertyTests):
+    """Test the ListProp class"""
+
+    prop_class = shinken.property.ListProp
+
+    def test_pythonize(self):
+        p = self.prop_class()
+        self.assertEqual(p.pythonize(""), [])
+        self.assertEqual(p.pythonize("1,2,3"), ["1", "2", "3"])
+
+
+class TestLogLevelProp(unittest.TestCase, PropertyTests):
+    """Test the LogLevelProp class"""
+
+    prop_class = shinken.property.LogLevelProp
+
+    def test_pythonize(self):
+        p = self.prop_class()
+        self.assertEqual(p.pythonize("NOTSET"), 0)
+        self.assertEqual(p.pythonize("DEBUG"), 10)
+        self.assertEqual(p.pythonize("INFO"), 20)
+        self.assertEqual(p.pythonize("WARN"), 30)
+        self.assertEqual(p.pythonize("WARNING"), 30)
+        self.assertEqual(p.pythonize("ERROR"), 40)
+        ## 'FATAL' is not defined in std-module `logging._levelNames`
+        #self.assertEqual(p.pythonize("FATAL"), 50)
+        self.assertEqual(p.pythonize("CRITICAL"), 50)
+
+
+## :todo: fix DictProp error if no `elts_prop` are passed
+## class TestDictProp(unittest.TestCase, PropertyTests):
+##     """Test the DictProp class"""
+##
+##     prop_class = shinken.property.DictProp
+##
+##     def test_pythonize(self):
+##         p = self.prop_class()
+##         self.assertEqual(p.pythonize(""), "")
+
+
+class TestAddrProp(unittest.TestCase, PropertyTests):
+    """Test the AddrProp class"""
+
+    prop_class = shinken.property.AddrProp
+
+    def test_pythonize_with_IPv4_addr(self):
+        p = self.prop_class()
+        self.assertEqual(p.pythonize("192.168.10.11:445"),
+                         {'address': "192.168.10.11",
+                          'port': 445})
+        # no colon, no port
+        self.assertEqual(p.pythonize("192.168.10.11"),
+                         {'address': "192.168.10.11"})
+        # colon but no port number
+        self.assertRaises(ValueError, p.pythonize, "192.168.10.11:")
+        # only colon, no addr, no port number
+        self.assertRaises(ValueError, p.pythonize, ":")
+        # no address, only port number
+        self.assertEqual(p.pythonize(":445"),
+                         {'address': "",
+                          'port': 445})
+
+    def test_pythonize_with_hostname(self):
+        p = self.prop_class()
+        self.assertEqual(p.pythonize("host_123:445"),
+                         {'address': "host_123",
+                          'port': 445})
+        # no colon, no port
+        self.assertEqual(p.pythonize("host_123"),
+                         {'address': "host_123"})
+        # colon but no port number
+        self.assertRaises(ValueError, p.pythonize, "host_123:")
+        # only colon, no addr, no port number
+        self.assertRaises(ValueError, p.pythonize, ":")
+        # no address, only port number
+        self.assertEqual(p.pythonize(":445"),
+                         {'address': "",
+                          'port': 445})
+
+    # :fixme: IPv6 addresses are no tested since they are not parsed
+    # correcly
 
 
 if __name__ == '__main__':
