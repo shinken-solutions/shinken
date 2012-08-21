@@ -55,7 +55,7 @@ class Dummy_broker(BaseModule):
 
       
     # An host check have just arrived, we UPDATE data info with this                                                                                                      
-    def manage_brok(self, b):
-        #Do things
-        pass
+#    def manage_brok(self, b):
+#        #Do things
+#        pass
     
