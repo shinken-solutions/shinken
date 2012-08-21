@@ -677,7 +677,7 @@ class Hostd(Daemon):
 
 
             except Exception, exp:
-                logger.log("Loading plugins: %s" % exp)
+                logger.info("Loading plugins: %s" % exp)
 
     def add_static(self, fdir, m_dir):
         static_route = '/static/' + fdir + '/:path#.+#'
