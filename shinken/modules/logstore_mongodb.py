@@ -89,7 +89,10 @@ class LiveStatusLogStoreMongoDB(BaseModule):
         self.mongodb_uri = getattr(modconf, 'mongodb_uri', None)
         self.replica_set = getattr(modconf, 'replica_set', None)
         if self.replica_set and not ReplicaSetConnection:
-            logger.log('Error: cannot initialize LogStoreMongoDB module with replica_set because your pymongo lib is too old. Please install it with a 2.x+ version from https://github.com/mongodb/mongo-python-driver/downloads')
+            logger.error('Can not initialize LogStoreMongoDB module with '
+                         'replica_set because your pymongo lib is too old. '
+                         'Please install it with a 2.x+ version from '
+                         'https://github.com/mongodb/mongo-python-driver/downloads')
             return None
         self.database = getattr(modconf, 'database', 'logs')
         self.collection = getattr(modconf, 'collection', 'logs')
