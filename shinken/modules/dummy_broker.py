@@ -37,7 +37,7 @@ properties = {
 # called by the plugin manager to get a broker
 def get_instance(mod_conf):
     print "Get a Dummy broker module for plugin %s" % mod_conf.get_name()
-    instance = Dummy_broker(mod_conf, foo="bar")
+    instance = Dummy_broker(mod_conf)
     return instance
 
 
@@ -46,7 +46,7 @@ class Dummy_broker(BaseModule):
 
     def __init__(self, mod_conf, foo):
         BaseModule.__init__(self, mod_conf)
-        self.myfoo = foo
+
 
     # Called by Broker to say 'let's prepare yourself guy'
     def init(self):
