@@ -1,7 +1,6 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
-
+#
 # Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
@@ -42,9 +41,11 @@ properties = {
     }
 
 
-# called by the plugin manager to get a broker
 def get_instance(plugin):
-    logger.info("[RedisRetention] Get a redis retention scheduler module for plugin %s" % plugin.get_name())
+    """
+    Called by the plugin manager to get a broker
+    """
+    logger.debug("Get a redis retention scheduler module for plugin %s" % plugin.get_name())
     if not redis:
         logger.error('Missing the module python-redis. Please install it.')
         raise Exception
@@ -53,21 +54,24 @@ def get_instance(plugin):
     return instance
 
 
-# Just print some stuff
 class Redis_retention_scheduler(BaseModule):
     def __init__(self, modconf, server):
         BaseModule.__init__(self, modconf)
         self.server = server
 
-    # Called by Scheduler to say 'let's prepare yourself guy'
     def init(self):
+        """
+        Called by Scheduler to say 'let's prepare yourself guy'
+        """
         logger.info("[RedisRetention] Initialisation of the redis module")
         #self.return_queue = self.properties['from_queue']
         self.mc = redis.Redis(self.server)
 
-    # Ok, main function that is called in the retention creation pass
     def hook_save_retention(self, daemon):
-        logger.info("[RedisRetention] Asking me to update the retention objects")
+        """
+        main function that is called in the retention creation pass
+        """
+        logger.debug("[RedisRetention] asking me to update the retention objects")
 
         all_data = daemon.get_retention_data()
 
@@ -95,7 +99,7 @@ class Redis_retention_scheduler(BaseModule):
     def hook_load_retention(self, daemon):
 
         # Now the new redis way :)
-        logger.info("[RedisRetention] Asking me to load the retention objects")
+        logger.debug("[RedisRetention] asking me to load the retention objects")
 
         # We got list of loaded data from retention server
         ret_hosts = {}
@@ -127,6 +131,6 @@ class Redis_retention_scheduler(BaseModule):
         # Ok, now comme load them scheduler :)
         daemon.restore_retention_data(all_data)
 
-        logger.info("[RedisRetention] OK we've load data from redis server")
+        logger.info("[RedisRetention] Retention objects loaded successfully.")
 
         return True

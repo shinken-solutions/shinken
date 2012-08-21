@@ -1,7 +1,6 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
-
+#
 # Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
@@ -45,22 +44,25 @@ properties = {
 }
 
 
-# called by the plugin manager to get a broker
 def get_instance(plugin):
-    logger.info('Get a Nagios3 retention scheduler module for plugin %s' % (plugin.get_name()))
+    """
+    Called by the plugin manager to get a broker
+    """
+    logger.debug("Get a Nagios3 retention scheduler module for plugin %s" % plugin.get_name())
     path = plugin.path
     instance = Nagios_retention_scheduler(plugin, path)
     return instance
 
 
-# Just print some stuff
 class Nagios_retention_scheduler(BaseModule):
     def __init__(self, mod_conf, path):
         BaseModule.__init__(self, mod_conf)
         self.path = path
 
-    # Ok, main function that is called in the retention creation pass
     def hook_save_retention(self, daemon):
+        """
+        main function that is called in the retention creation pass
+        """
         logger.info("[NagiosRetention] asking me to update the retention objects, but I won't do it.")
 
     def _cut_line(self, line):
@@ -154,8 +156,10 @@ class Nagios_retention_scheduler(BaseModule):
 
         return objects
 
-    # We've got raw objects in string, now create real Instances
     def create_objects(self, raw_objects, types_creations):
+        """
+        Create real Instances from raw objects in string.
+        """
         all_obj = {}
         for t in types_creations:
             all_obj[t] = self.create_objects_for_type(raw_objects, t, types_creations)
@@ -271,33 +275,21 @@ class Nagios_retention_scheduler(BaseModule):
 
     # Should return if it succeed in the retention load or not
     def hook_load_retention(self, sched):
-        logger.info("[NagiosRetention] asking me to load the retention file")
+        logger.debug("[NagiosRetention] asking me to load the retention file")
 
         # Now the old flat file way :(
-        logger.info('[NagiosRetention]Reading from retention_file %s' % (self.path))
+        logger.info("[NagiosRetention]Reading from retention_file %s" % self.path)
         try:
             f = open(self.path)
             buf = f.read()
             f.close()
-        except EOFError, exp:
-            logger.error('Failed to load retention file %s with error %s' % (self.path,exp))
+        except (EOFError, ValueError, IOError), exp:
+            logger.warning(repr(exp))
             return False
-        except ValueError, exp:
-            logger.error('ValueError reading the retention file with error %s' % (exp))
+        except (IndexError, TypeError), exp:
+            logger.warning("Sorry, the ressource file is not compatible")
             return False
-        except IOError, exp:
-            logger.error('IOError reading the retention file with error %s' % (exp))
-            return False
-        except IndexError, exp:
-            s = "Sorry, the ressource file is not compatible"
-            logger.error(s)
-            return False
-        except TypeError, exp:
-            s = "Sorry, the ressource file is not compatible"
-            logger.warning(s)
-            return False
-        logger.info('[NagiosRetention]Finished trying to load retention_file %s' % (self.path))
-
+        logger.debug("Finished reading config")
         raw_objects = self.read_retention_buf(buf)
 
         types_creations = {'timeperiod': (Timeperiod, Timeperiods, 'timeperiods'),
@@ -348,6 +340,6 @@ class Nagios_retention_scheduler(BaseModule):
         #all_data = {'hosts': {}, 'services': {}}
 
         sched.restore_retention_data(all_data)
-        logger.info("[NagiosRetention] OK we've load data from retention file")
+        logger.info("[NagiosRetention] Retention objects loaded successfully.")
 
         return True

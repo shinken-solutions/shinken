@@ -198,3 +198,35 @@ class Log:
         human_timestamp_log = bool(on)
 
 logger = Log()
+
+class __ConsoleLogger:
+    """
+    This wrapper class for logging and printing messages to stdout, too.
+
+    :fixme: Implement this using an additional stream-handler, as soon
+    as the logging system is based on the standard Pytthon logging
+    module.
+    """
+    def debug(self, msg, *args, **kwargs):
+        self._log(Log.DEBUG, msg, *args, **kwargs)
+
+    def info(self, msg, *args, **kwargs):
+        kwargs.setdefault('display_level', False)
+        self._log(Log.INFO, msg, *args, **kwargs)
+
+    def warning(self, msg, *args, **kwargs):
+        self._log(Log.WARNING, msg, *args, **kwargs)
+
+    def error(self, msg, *args, **kwargs):
+        self._log(Log.ERROR, msg, *args, **kwargs)
+
+    def critical(self, msg, *args, **kwargs):
+        self._log(Log.CRITICAL, msg, *args, **kwargs)
+
+    def _log(self, *args, **kwargs):
+        # if `print_it` is not passed as an argument, set it to `true`
+        kwargs.setdefault('print_it', True)
+        logger._log(*args, **kwargs)
+
+
+console_logger = __ConsoleLogger()

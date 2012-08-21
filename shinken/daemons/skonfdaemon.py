@@ -907,9 +907,9 @@ class Skonf(Daemon):
                     lst.append(r)
             except Exception, exp:
                 print exp.__dict__
-                logger.warning("[%s] The module %s raised an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
-                logger.warning("[%s] Exception type: %s" % (self.name, type(exp)))
-                logger.warning("Back trace of this kill: %s" % (traceback.format_exc()))
+                logger.warning("[%s] The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
+                logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
+                logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)
 
         safe_print("Will return external_ui_link::", lst)

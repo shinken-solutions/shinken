@@ -1,7 +1,6 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
-
+#
 # Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
@@ -26,6 +25,7 @@
 
 # This Class is an example of an Scheduler module
 # Here for the configuration phase AND running one
+
 try:
     import memcache
 except ImportError:
@@ -43,31 +43,36 @@ properties = {
     }
 
 
-# called by the plugin manager to get a broker
 def get_instance(modconf):
-    logger.info("Get a memcache retention scheduler module for plugin %s" % modconf.get_name())
+    """
+    Called by the plugin manager to get a broker
+    """
+    logger.debug("Get a memcache retention scheduler module for plugin %s" % modconf.get_name())
     if not memcache:
         raise Exception('Missing module python-memcache. Please install it.')
     instance = Memcache_retention_scheduler(modconf)
     return instance
 
 
-# Just print some stuff
 class Memcache_retention_scheduler(BaseModule):
     def __init__(self, mod_conf):
         BaseModule.__init__(self, mod_conf)
         self.server = mod_conf.server
         self.port = mod_conf.port
 
-    # Called by Scheduler to say 'let's prepare yourself guy'
     def init(self):
-        logger.info("Initilisation of the memcache module")
+        """
+        Called by Scheduler to say 'let's prepare yourself guy'
+        """
+        logger.debug("Initilisation of the memcache module")
         #self.return_queue = self.properties['from_queue']
         self.mc = memcache.Client(['%s:%s' % (self.server, self.port)], debug=0)
 
-    # Ok, main function that is called in the retention creation pass
     def hook_save_retention(self, daemon):
-        logger.info("[MemcacheRetention] asking me to update the retention objects")
+        """
+        main function that is called in the retention creation pass
+        """
+        logger.debug("[MemcacheRetention] asking me to update the retention objects")
 
         all_data = daemon.get_retention_data()
 
@@ -96,10 +101,7 @@ class Memcache_retention_scheduler(BaseModule):
 
     # Should return if it succeed in the retention load or not
     def hook_load_retention(self, daemon):
-        logger.info("[MemcacheRetention] asking me to load the retention objects")
-
-        # Now the old flat file way :(
-        logger.info("[MemcacheRetention] asking me to load the retention objects")
+        logger.debug("[MemcacheRetention] asking me to load the retention objects")
 
         # We got list of loaded data from retention server
         ret_hosts = {}
@@ -129,6 +131,6 @@ class Memcache_retention_scheduler(BaseModule):
         # Ok, now comme load them scheduler :)
         daemon.restore_retention_data(all_data)
 
-        logger.info("[MemcacheRetention] OK we've load data from memcache server")
+        logger.info("[MemcacheRetention] Retention objects loaded successfully.")
 
         return True
