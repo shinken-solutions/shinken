@@ -102,7 +102,7 @@ class Ws_arbiter(BaseModule):
             self.port = int(getattr(modconf, 'port', '7760'))
             self.host = getattr(modconf, 'host', '0.0.0.0')
         except AttributeError:
-            print "Error: the module '%s' do not have a property"
+            logger.error("[WS Arbiter] Error: the module '%s' do not have a property" % mod_conf.get_name())
             raise
 
     # We initialise the HTTP part. It's a simple wsgi backend
