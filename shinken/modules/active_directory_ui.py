@@ -142,7 +142,7 @@ class AD_Webui(BaseModule):
         cname = contact.get_name()
         email = contact.email
         searchFilter = self.search_format % (cname, email)
-        logger.info("[Active Directory UI] Filter %s" % searchFilter)
+        logger.info("[Active Directory UI] Filter %s" % str(searchFilter))
         try:
             ldap_result_id = self.con.search(self.basedn, searchScope, searchFilter, self.retrieveAttributes)
             result_set = []
@@ -162,7 +162,7 @@ class AD_Webui(BaseModule):
                     logger.info("[Active Directory UI] Find account principalname %s" % account_name)
                     return elts
         except ldap.LDAPError, e:
-            logger.error("[Active Directory UI] Ldap error: %s, %s" % (e, e.__dict__))
+            logger.error("[Active Directory UI] Ldap error: %s, %s" % (e, str(e.__dict__)))
             return None
         # Always clean on exit
         finally:
@@ -198,7 +198,7 @@ class AD_Webui(BaseModule):
                     f.close()
                     logger.info("[Active Directory UI] Photo wrote for %s" % c.get_name())
                 except Exception, exp:
-                    logger.error("[Active Directory UI] Cannot write %s : %s" % (p, exp))
+                    logger.error("[Active Directory UI] Cannot write %s : %s" % (p, str(exp)))
             except KeyError:
                 logger.warning("[Active Directory UI] No photo for %s" % c.get_name())
 
@@ -241,7 +241,7 @@ class AD_Webui(BaseModule):
             logger.info("[Active Directory UI] AD/Ldap Connection done with user %s and password %s" % (user, password))
             return True
         except ldap.LDAPError, exp:
-            logger.error("[Active Directory UI] Ldap auth error: %s" % exp)
+            logger.error("[Active Directory UI] Ldap auth error: %s" % str(exp))
 
         # The local_con will automatically close this connection when
         # the object will be deleted, so no close need

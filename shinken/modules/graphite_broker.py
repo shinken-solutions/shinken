@@ -77,7 +77,7 @@ class Graphite_broker(BaseModule):
     # TODO: add conf param to get pass with init
     # Conf from arbiter!
     def init(self):
-        logger.info("[%s] I init the graphite server connection to %s:%s" % (self.get_name(), self.host, self.port))
+        logger.info("[%s] I init the graphite server connection to %s:%d" % (self.get_name(), str(self.host), self.port))
         self.con = socket()
         self.con.connect((self.host, self.port))
 
@@ -91,7 +91,7 @@ class Graphite_broker(BaseModule):
         metrics = [e for e in elts if e != '']
 
         for e in metrics:
-            logger.debug("[Graphite broker] Groking: %s" % e)
+            logger.debug("[Graphite broker] Groking: %s" % str(e))
             elts = e.split('=', 1)
             if len(elts) != 2:
                 continue
@@ -117,7 +117,7 @@ class Graphite_broker(BaseModule):
                     name_value[key] = m.groups(0)[0]
                 else:
                     continue
-           logger.debug("[Graphite broker] End of grok: %s, %s" % (name, value))
+            logger.debug("[Graphite broker] End of grok: %s, %s" % (name, str(value)))
             for key, value in name_value.items():
                 res.append((key, value))
         return res
@@ -157,7 +157,7 @@ class Graphite_broker(BaseModule):
 
         check_time = int(data['last_chk'])
 
-        logger.debug("[Graphite broker] Hostname: %s, Desc: %s, check time: %s, perfdata: %s" % (hname, desc, check_time, perf_data))
+        logger.debug("[Graphite broker] Hostname: %s, Desc: %s, check time: %d, perfdata: %s" % (hname, desc, check_time, str(perf_data)))
 
         if self.graphite_data_source:
             path = '.'.join((hname, self.graphite_data_source, desc))
@@ -202,7 +202,7 @@ class Graphite_broker(BaseModule):
 
         check_time = int(data['last_chk'])
 
-        logger.debug("[Graphite broker] Hostname %s, check time: %s, perfdata: %s" % (hname, check_time, perf_data))
+        logger.debug("[Graphite broker] Hostname %s, check time: %d, perfdata: %s" % (hname, check_time, str(perf_data)))
 
         if self.graphite_data_source:
             path = '.'.join((hname, self.graphite_data_source))
