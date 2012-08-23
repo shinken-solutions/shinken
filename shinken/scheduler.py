@@ -113,8 +113,7 @@ class Scheduler:
         self.nb_check_received = 0
 
         # Log init
-        self.log = logger
-        self.log.load_obj(self)
+        logger.load_obj(self)
 
         self.instance_id = 0  # Temporary set. Will be erase later
 

@@ -930,7 +930,7 @@ class Satellite(BaseSatellite):
     def main(self):
         try:
             for line in self.get_header():
-                self.log.info(line)
+                logger.info(line)
 
             self.load_config_file()
 

@@ -175,7 +175,7 @@ class Receiver(Satellite):
         else:
             name = 'Unnamed receiver'
         self.name = name
-        self.log.load_obj(self, name)
+        logger.load_obj(self, name)
         self.direct_routing = conf['global']['direct_routing']
 
         g_conf = conf['global']
@@ -400,7 +400,7 @@ class Receiver(Satellite):
             self.load_config_file()
 
             for line in self.get_header():
-                self.log.info(line)
+                logger.info(line)
 
             logger.info("[Receiver] Using working directory: %s" % os.path.abspath(self.workdir))
 

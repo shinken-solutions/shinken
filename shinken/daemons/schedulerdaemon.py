@@ -333,7 +333,7 @@ class Shinken(BaseSatellite):
         self.uri2 = self.pyro_daemon.register(self.ibroks, "Broks")
         logger.debug("The Broks Interface uri is: %s" % self.uri2)
 
-        logger.debug("Loading configuration..")
+        logger.info("Loading configuration.")
         self.conf.explode_global_conf()
 
         # we give sched it's conf

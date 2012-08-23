@@ -46,7 +46,7 @@ class Log:
     CRITICAL = logging.CRITICAL
 
     def __init__(self):
-        self._level = logging.WARNING
+        self._level = logging.NOTSET
 
     def load_obj(self, object, name_=None):
         """ We load the object where we will put log broks

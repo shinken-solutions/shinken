@@ -41,7 +41,7 @@ class declared(object):
         self.f = f
         global functions
         n = f.func_name
-        logger.debug("Initializing function %s %s" % (n, f))
+        #logger.debug("Initializing function %s %s" % (n, f))
         trigger_functions[n] = f
 
     def __call__(self, *args):
@@ -200,7 +200,7 @@ def get_objects(ref):
             sdesc = sdesc.replace('*', '.*')
             p = re.compile(sdesc)
             for s in h.services:
-                logger.debug("[trigger] Compare %s with %" % (s.service_description, sdesc))
+                logger.debug("[trigger] Compare %s with %s" % (s.service_description, sdesc))
                 if p.search(s.service_description):
                     services.append(s)
 

@@ -224,7 +224,7 @@ class Arbiter(Daemon):
         return daemon_type + 's'
 
     def load_config_file(self):
-        logger.debug("Loading configuration")
+        logger.info("Loading configuration")
         # REF: doc/shinken-conf-dispatching.png (1)
         buf = self.conf.read_config(self.config_files)
         raw_objects = self.conf.read_config_buf(buf)
@@ -473,7 +473,7 @@ class Arbiter(Daemon):
         try:
             # Log will be broks
             for line in self.get_header():
-                self.log.info(line)
+                logger.info(line)
 
             self.load_config_file()
 

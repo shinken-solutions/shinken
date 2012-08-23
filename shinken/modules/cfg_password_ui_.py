@@ -33,8 +33,6 @@ import os
 from shinken.log import logger
 from shinken.basemodule import BaseModule
 
-logger.info("Initializing the Apache/Passwd module")
-
 properties = {
     'daemons': ['webui', 'skonf'],
     'type': 'cfg_password_webui'

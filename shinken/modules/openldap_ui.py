@@ -28,13 +28,10 @@ import os
 from shinken.log import logger
 from shinken.basemodule import BaseModule
 
-logger.info("Initializing the OpenLDAP module")
-
 properties = {
     'daemons' : ['webui'],
     'type' : 'openldap_webui'
     }
-
 
 #called by the plugin manager
 def get_instance(plugin):

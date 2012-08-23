@@ -39,8 +39,6 @@ from shinken.log import logger
 from shinken.misc.md5crypt import apache_md5_crypt
 from shinken.basemodule import BaseModule
 
-logger.info("Initializing the Apache/Passwd module")
-
 properties = {
     'daemons': ['webui', 'skonf'],
     'type': 'passwd_webui'

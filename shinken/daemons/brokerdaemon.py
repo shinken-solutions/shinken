@@ -350,7 +350,7 @@ class Broker(BaseSatellite):
         else:
             name = 'Unnamed broker'
         self.name = name
-        self.log.load_obj(self, name)
+        logger.load_obj(self, name)
 
         logger.debug("[%s] Sending us configuration %s" % (self.name, conf))
         # If we've got something in the schedulers, we do not
@@ -637,7 +637,7 @@ class Broker(BaseSatellite):
             self.load_config_file()
 
             for line in self.get_header():
-                self.log.info(line)
+                logger.info(line)
 
             logger.info("[Broker] Using working directory: %s" % os.path.abspath(self.workdir))
 

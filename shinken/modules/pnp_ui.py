@@ -33,13 +33,10 @@ import socket
 from shinken.log import logger
 from shinken.basemodule import BaseModule
 
-logger.info("Initializing the pnp_ui module")
-
 properties = {
     'daemons': ['webui'],
     'type': 'pnp_webui'
     }
-
 
 # called by the plugin manager
 def get_instance(plugin):
