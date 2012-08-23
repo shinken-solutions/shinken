@@ -128,6 +128,9 @@ class TestBusinesscorrel(ShinkenTest):
         state = bp_rule.get_state()
         self.assert_(state == 1)
 
+
+
+
     # We will try a simple bd1 AND db2
     def test_simple_and_business_correlator(self):
         #
