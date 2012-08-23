@@ -79,8 +79,8 @@ class LiveStatus_broker(BaseModule, Daemon):
         ips = [ip.strip() for ip in self.allowed_hosts.split(',') if ip]
         self.allowed_hosts = [ip for ip in ips if re.match(r'^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$', ip)]
         if len(ips) != len(self.allowed_hosts):
-            print "Warning: the list of allowed hosts is invalid", ips
-            print "Warning: the list of allowed hosts is invalid", self.allowed_hosts
+            logger.warning("[Livestatus Broker] Warning: the list of allowed hosts is invalid. %s" % str(ips))
+            logger.warning("[Livestatus Broker] Warning: the list of allowed hosts is invalid. %s" % str(self.allowed_hosts))
             raise
         self.pnp_path = getattr(modconf, 'pnp_path', '')
         self.debug = getattr(modconf, 'debug', None)
@@ -125,7 +125,7 @@ class LiveStatus_broker(BaseModule, Daemon):
     # TODO: add conf param to get pass with init
     # Conf from arbiter!
     def init(self):
-        print "Init of the Livestatus '%s'" % self.name
+        logger.info("[Livestatus Broker] Init of the Livestatus '%s'" % self.name)
         self.prepare_pnp_path()
         m = MacroResolver()
         m.output_macros = ['HOSTOUTPUT', 'HOSTPERFDATA', 'HOSTACKAUTHOR', 'HOSTACKCOMMENT', 'SERVICEOUTPUT', 'SERVICEPERFDATA', 'SERVICEACKAUTHOR', 'SERVICEACKCOMMENT']
@@ -137,7 +137,7 @@ class LiveStatus_broker(BaseModule, Daemon):
     # will be in another process, so we will be able to hack objects
     # if need)
     def hook_pre_scheduler_mod_start(self, sched):
-        print "pre_scheduler_mod_start::", sched.__dict__
+        logger.info("[Livestatus Broker] pre_scheduler_mod_start::" % str(sched.__dict__))
         self.rg.load_from_scheduler(sched)
 
     # In a scheduler we will have a filter of what we really want as a brok
@@ -148,9 +148,9 @@ class LiveStatus_broker(BaseModule, Daemon):
         if not self.pnp_path:
             self.pnp_path = False
         elif not os.access(self.pnp_path, os.R_OK):
-            print "PNP perfdata path %s is not readable" % self.pnp_path
+            logger.warning("[Livestatus Broker] PNP perfdata path %s is not readable" % self.pnp_path)
         elif not os.access(self.pnp_path, os.F_OK):
-            print "PNP perfdata path %s does not exist" % self.pnp_path
+            logger.warning("[Livestatus Broker] PNP perfdata path %s does not exist" % self.pnp_path)
         if self.pnp_path and not self.pnp_path.endswith('/'):
             self.pnp_path += '/'
 
@@ -181,7 +181,7 @@ class LiveStatus_broker(BaseModule, Daemon):
                     f(self)
                 break
         for s in self.debug_output:
-            print s
+            logger.debug("[Livestatus Broker] %s" % s)
         del self.debug_output
         self.add_compatibility_sqlite_module()
         self.datamgr = datamgr
@@ -209,7 +209,7 @@ class LiveStatus_broker(BaseModule, Daemon):
     # A plugin send us en external command. We just put it
     # in the good queue
     def push_external_command(self, e):
-        print "Livestatus: got an external command", e.__dict__
+        logger.info("[Livestatus Broker] Got an external command: %s" % str(e.__dict__))
         self.from_q.put(e)
 
     # Real main function
@@ -219,7 +219,7 @@ class LiveStatus_broker(BaseModule, Daemon):
             self.set_debug()
         # I register my exit function
         self.set_exit_handler()
-        print "Go run"
+        logger.info("[Livestatus Broker] Go run")
 
         # Open the logging database
         self.db = self.modules_manager.instances[0]
@@ -243,7 +243,7 @@ class LiveStatus_broker(BaseModule, Daemon):
 
         if self.use_threads:
             # Launch the data thread"
-            print "Starting Livestatus application"
+            logger.info("[Livestatus Broker] Starting Livestatus application")
             self.data_thread = threading.Thread(None, self.manage_brok_thread, 'datathread')
             self.data_thread.start()
             self.lql_thread = threading.Thread(None, self.manage_lql_thread, 'lqlthread')
@@ -257,7 +257,7 @@ class LiveStatus_broker(BaseModule, Daemon):
     # and update data. Will lock the whole thing
     # while updating
     def manage_brok_thread(self):
-        print "Data thread started"
+        logger.info("[Livestatus Broker] Data thread started")
         while True:
             l = self.to_q.get()
             for b in l:
@@ -267,13 +267,13 @@ class LiveStatus_broker(BaseModule, Daemon):
                 # answer queries, so wait for no readers
                 self.wait_for_no_readers()
                 try:
-                    #print "Got data lock, manage brok"
+                    logger.debug("[Livestatus Broker] Got data lock, manage brok")
                     self.rg.manage_brok(b)
                     for mod in self.modules_manager.get_internal_instances():
                         try:
                             mod.manage_brok(b)
                         except Exception, exp:
-                            print exp.__dict__
+                            logger.debug("[Livestatus Broker] %s" % str(exp.__dict__))
                             logger.warning("[%s] The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
                             logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
                             logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
@@ -340,7 +340,7 @@ class LiveStatus_broker(BaseModule, Daemon):
             # We should warn if we cannot update broks
             # for more than 30s because it can be not good
             if time.time() - start > 30:
-                print "WARNING: we are in lock/read since more than 30s!"
+                logger.warning("[Livestatus Broker] WARNING: we are in lock/read since more than 30s!")
                 start = time.time()
 
     def manage_brok(self, brok):
@@ -351,14 +351,14 @@ class LiveStatus_broker(BaseModule, Daemon):
             try:
                 mod.manage_brok(brok)
             except Exception, exp:
-                print exp.__dict__
+                logger.debug("[Livestatus Broker] %s" % str(exp.__dict__))
                 logger.warning("[%s] The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
                 logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
                 logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)
 
     def do_stop(self):
-        print "[liveStatus] So I quit"
+        logger.info("[Livestatus Broker] So I quit")
         for s in self.input:
             try:
                 s.shutdown()
@@ -375,7 +375,7 @@ class LiveStatus_broker(BaseModule, Daemon):
     # and update data. Will lock the whole thing
     # while updating
     def manage_lql_thread(self):
-        print "Livestatus query thread started"
+        logger.info("[Livestatus Broker] Livestatus query thread started")
         # This is the main object of this broker where the action takes place
         self.livestatus = LiveStatus(self.datamgr, self.query_cache, self.db, self.pnp_path, self.from_q)
 
@@ -389,7 +389,7 @@ class LiveStatus_broker(BaseModule, Daemon):
             server.bind((self.host, self.port))
             server.listen(backlog)
             self.listeners.append(server)
-            print "listening on tcp port", self.port
+            logger.info("[Livestatus Broker] listening on tcp port: %d" % self.port)
         if self.socket:
             if os.path.exists(self.socket):
                 os.remove(self.socket)
@@ -402,7 +402,7 @@ class LiveStatus_broker(BaseModule, Daemon):
             sock.bind(self.socket)
             sock.listen(backlog)
             self.listeners.append(sock)
-            print "listening on unix socket", self.socket
+            logger.info("[Livestatus Broker] listening on unix socket: %s" % str(self.socket))
         self.input = self.listeners[:]
         open_connections = {}
 
@@ -421,7 +421,7 @@ class LiveStatus_broker(BaseModule, Daemon):
                             try:
                                 mod.manage_brok(b)
                             except Exception, exp:
-                                print exp.__dict__
+                                logger.debug("[Livestatus Broker] %s" % str(exp.__dict__))
                                 logger.warning("[%s] Warning: The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
                                 logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
                                 logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
@@ -432,7 +432,10 @@ class LiveStatus_broker(BaseModule, Daemon):
                     if hasattr(os, 'errno') and e.errno != os.errno.EINTR:
                         raise
                 except Exception, exp:
-                    print "Error: got an exeption (bad code?)", exp, exp.__dict__, type(exp)
+                    logger.debug("[Livestatus Broker] %s" % str(exp.__dict__))
+                    logger.error("[%s] Warning: The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
+                    logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
+                    logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                     raise
                 time.sleep(0.01)
 
@@ -516,7 +519,7 @@ class LiveStatus_broker(BaseModule, Daemon):
                         if isinstance(address, tuple):
                             client_ip, _ = address
                             if self.allowed_hosts and client_ip not in self.allowed_hosts:
-                                print "Connection attempt from illegal ip address", client_ip
+                                logger.warning("[Livestatus Broker] Connection attempt from illegal ip address %s"% str(client_ip))
                                 try:
                                     #client.send('Buh!\n')
                                     client.shutdown(2)
@@ -548,7 +551,7 @@ class LiveStatus_broker(BaseModule, Daemon):
                                 # don't know yet how to handle this case
                                 pass
                             else:
-                                print "other error", errno
+                                logger.error("[Livestatus Broker] other error" % str(errno))
 
                         # These two flags decide whether the databuffer is
                         # passed to the livestatus module for execution
@@ -601,14 +604,14 @@ class LiveStatus_broker(BaseModule, Daemon):
                             # This code should never be executed
                             if not data:
                                 if open_connections[socketid]['buffer']:
-                                    print "undef state nodata buffer", open_connections[socketid]['state']
+                                    logger.error("[Livestatus Broker] undef state nodata buffer %s" % open_connections[socketid]['state'])
                                 else:
-                                    print "undef state nodata nobuffer", open_connections[socketid]['state']
+                                    logger.error("[Livestatus Broker] undef state nodata nobuffer %s" % open_connections[socketid]['state'])
                             else:
                                 if open_connections[socketid]['buffer']:
-                                    print "undef state data buffer", open_connections[socketid]['state']
+                                    logger.error("[Livestatus Broker] undef state data buffer %s" % open_connections[socketid]['state'])
                                 else:
-                                    print "undef state data nobuffer", open_connections[socketid]['state']
+                                    logger.error("[Livestatus Broker] undef state data nobuffer %s" % open_connections[socketid]['state'])
 
                         if handle_it:
                             open_connections[socketid]['buffer'] = open_connections[socketid]['buffer'].rstrip()
@@ -647,7 +650,7 @@ class LiveStatus_broker(BaseModule, Daemon):
 
                 # Now the work is done. Cleanup
                 for socketid in open_connections:
-                    print "connection %d is idle since %d seconds (%s)\n" % (socketid, now - open_connections[socketid]['lastseen'], open_connections[socketid]['state'])
+                    logger.info("[Livestatus Broker] Connection %d is idle since %d seconds (%s)\n" % (socketid, now - open_connections[socketid]['lastseen'], open_connections[socketid]['state']))
                     if now - open_connections[socketid]['lastseen'] > 300:
                         # After 5 minutes of inactivity we close connections
                         open_connections[socketid]['keepalive'] = False
@@ -665,13 +668,13 @@ class LiveStatus_broker(BaseModule, Daemon):
                             kick_socket.shutdown(2)
                             del open_connections[socketid]
                             self.input.remove(kick_socket)
-                            print "shutdown socket", socketid
+                            logger.info("[Livestatus Broker] Shutdown socket %d" % socketid)
                         except Exception, exp:
-                            print exp
+                            logger.warning("[Livestatus Broker] Closing socket failed: %s" % exp)
                             kick_socket.close()
                             del open_connections[socketid]
                             self.input.remove(kick_socket)
-                            print "closed socket", socketid
+                            logger.info("[Livestatus Broker] Closed socket %d" % socketid)
 
         self.do_stop()
 

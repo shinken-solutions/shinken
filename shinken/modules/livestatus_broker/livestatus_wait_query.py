@@ -26,6 +26,7 @@
 import time
 import os
 
+from shinken.log import logger
 from livestatus_query import LiveStatusQuery
 from livestatus_response import LiveStatusResponse
 from livestatus_constraints import LiveStatusConstraints
@@ -125,7 +126,7 @@ class LiveStatusWaitQuery(LiveStatusQuery):
                     if self.table == 'log':
                         self.db.add_filter(operator, attribute, reference)
                 else:
-                    print "illegal operation", operator
+                    logger.warning("[Livestatus Wait Query] Illegal operation: %s" % str(operator))
                     pass  # illegal operation
             elif keyword == 'WaitConditionAnd':
                 _, andnum = self.split_option(line)
@@ -148,7 +149,7 @@ class LiveStatusWaitQuery(LiveStatusQuery):
                 self.wait_timeout = int(self.wait_timeout) / 1000
             else:
                 # This line is not valid or not implemented
-                print "Received a line of input which i can't handle: '%s'" % line
+                logger.warning("[Livestatus Wait Query] Received a line of input which i can't handle: '%s'" % line)
                 pass
         # Make columns unique
         self.filtercolumns = list(set(self.filtercolumns))
@@ -188,10 +189,8 @@ class LiveStatusWaitQuery(LiveStatusQuery):
                 result = self.get_live_data()
         except Exception, e:
             import traceback
-            print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-            print e
+            logger.error("[Livestatus Wait Query]  Error: %s" % e)
             traceback.print_exc(32)
-            print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
             result = []
         return result
 

@@ -44,6 +44,7 @@ from shinken.reactionnerlink import ReactionnerLink
 from shinken.brokerlink import BrokerLink
 from shinken.receiverlink import ReceiverLink
 from shinken.pollerlink import PollerLink
+from shinken.log import logger
 from log_line import LOGCLASS_INFO, LOGCLASS_ALERT, LOGCLASS_PROGRAM, LOGCLASS_NOTIFICATION, LOGCLASS_PASSIVECHECK, LOGCLASS_COMMAND, LOGCLASS_STATE, LOGCLASS_INVALID, LOGCLASS_ALL, LOGOBJECT_INFO, LOGOBJECT_HOST, LOGOBJECT_SERVICE, LOGOBJECT_CONTACT, Logline, LoglineWrongFormat
 from shinken.external_command import MODATTR_NONE, MODATTR_NOTIFICATIONS_ENABLED, MODATTR_ACTIVE_CHECKS_ENABLED, MODATTR_PASSIVE_CHECKS_ENABLED, MODATTR_EVENT_HANDLER_ENABLED, MODATTR_FLAP_DETECTION_ENABLED, MODATTR_FAILURE_PREDICTION_ENABLED, MODATTR_PERFORMANCE_DATA_ENABLED, MODATTR_OBSESSIVE_HANDLER_ENABLED, MODATTR_EVENT_HANDLER_COMMAND, MODATTR_CHECK_COMMAND, MODATTR_NORMAL_CHECK_INTERVAL, MODATTR_RETRY_CHECK_INTERVAL, MODATTR_MAX_CHECK_ATTEMPTS, MODATTR_FRESHNESS_CHECKS_ENABLED, MODATTR_CHECK_TIMEPERIOD, MODATTR_CUSTOM_VARIABLE, MODATTR_NOTIFICATION_TIMEPERIOD
 
@@ -86,7 +87,7 @@ def join_with_separators(request, *args):
         try:
             return request.response.separators[3].join([str(arg) for arg in args])
         except Exception, e:
-            print "rumms", e
+            logger.error("[Livestatus Broker Mapping] Bang Error: %s" % e)
     elif request.response.outputformat == 'json' or request.response.outputformat == 'python':
         return args
     else:
@@ -4397,9 +4398,9 @@ def servicegroup_redirect_factory(attribute):
 
 def catchall_factory(name, req):
     def method(*args):
-        print "tried to handle unknown method " + name
+        logger.info("[Livestatus Broker Mapping] Tried to handle unknown method %s" % name)
         if args:
-            print "it had arguments: " + str(args)
+            logger.info("[Livestatus Broker Mapping] It had arguments: %s" % str(args))
     return method
 
 

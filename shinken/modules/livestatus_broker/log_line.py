@@ -37,6 +37,7 @@ LOGOBJECT_HOST = 1
 LOGOBJECT_SERVICE = 2
 LOGOBJECT_CONTACT = 3
 
+from shinken.log import logger
 
 class LoglineWrongFormat(Exception):
     pass
@@ -55,7 +56,7 @@ class Logline(dict):
     def __init__(self, sqlite_cursor=None, sqlite_row=None, line=None, srcdict=None):
         if srcdict != None:
             for col in Logline.columns:
-                print "set ", col, srcdict[col]
+                logger.info("[Livestatus Log Lines] Set %s, %s"% (col, srcdict[col]))
                 setattr(self, col, srcdict[col])
         elif sqlite_cursor != None and sqlite_row != None:
             for idx, col in enumerate(sqlite_cursor):
@@ -67,7 +68,7 @@ class Logline(dict):
             line = line.encode('UTF-8').rstrip()
             # [1278280765] SERVICE ALERT: test_host_0
             if line[0] != '[' and line[11] != ']':
-                print "INVALID line", line
+                logger.warning("[Livestatus Log Lines] Invalid line: %s" % line)
                 raise LoglineWrongFormat
             else:
                 service_states = {
@@ -193,8 +194,8 @@ class Logline(dict):
                     logobject = LOGOBJECT_INFO
                     logclass = LOGCLASS_PROGRAM
                 else:
+                    logger.debug("[Livestatus Log Lines] Does not match")
                     pass
-                    #print "does not match"
 
                 Logline.id += 1
                 self.lineno = Logline.id
@@ -235,14 +236,14 @@ class Logline(dict):
             try:
                 setattr(self, 'log_host', datamgr.get_host(self.host_name))
             except Exception, e:
-                print "du scheiss host", e
+                logger.error("[Livestatus Log Lines] Error on host: %s" % e)
                 pass
         elif hasattr(self, 'logobject') and self.logobject == LOGOBJECT_SERVICE:
             try:
                 setattr(self, 'log_host', datamgr.get_host(self.host_name))
                 setattr(self, 'log_service', datamgr.get_service(self.host_name, self.service_description))
             except Exception, e:
-                print "du scheiss svc", e
+                logger.error("[Livestatus Log Lines] Error on service: %s" % e)
                 pass
         else:
             setattr(self, 'log_host', None)
