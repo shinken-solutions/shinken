@@ -38,7 +38,7 @@ except ImportError:
 from shinken.log import logger
 from shinken.basemodule import BaseModule
 
-print "Loaded AD module"
+logger.info("[Active Directory UI] Loaded AD module")
 
 properties = {
     'daemons': ['webui', 'skonf'],
@@ -48,7 +48,7 @@ properties = {
 
 # called by the plugin manager
 def get_instance(plugin):
-    logger.debug("Get an Active Directory/OpenLdap UI module for plugin %s" % plugin.get_name())
+    logger.debug("[Active Directory UI] Get an Active Directory/OpenLdap UI module for plugin %s" % plugin.get_name())
     if not ldap:
         raise Exception('The module python-ldap is not found. Please install it.')
     instance = AD_Webui(plugin)
@@ -102,15 +102,15 @@ class AD_Webui(BaseModule):
 #        self.connect()
 
     def connect(self):
-        logger.debug("Trying to initalize the AD/Ldap connection")
+        logger.debug("[Active Directory UI] Trying to initalize the AD/Ldap connection")
         self.con = ldap.initialize(self.ldap_uri)
         self.con.set_option(ldap.OPT_REFERRALS, 0)
 
-        print "Trying to connect to AD/Ldap", self.ldap_uri, self.username, self.password, self.basedn
+        logger.debug("[Active Directory UI] Trying to connect to AD/Ldap %s with user %s and password %s on baseDN %s" % (self.ldap_uri, self.username, self.password, self.basedn))
         # Any errors will throw an ldap.LDAPError exception
         # or related exception so you can ignore the result
         self.con.simple_bind_s(self.username, self.password)
-        print "AD/Ldap Connection done"
+        logger.info("[Active Directory UI] AD/Ldap Connection done")
 
 
     def disconnect(self):
@@ -134,7 +134,7 @@ class AD_Webui(BaseModule):
         # available, so we will get a drop after one day...
         self.connect()
 
-        print "AD/LDAP: search for contact", contact.get_name()
+        logger.info("[Active Directory UI] AD/LDAP: search for contact %s" % contact.get_name())
         searchScope = ldap.SCOPE_SUBTREE
         ## retrieve all attributes
         #retrieveAttributes = ["userPrincipalName", "thumbnailPhoto", "samaccountname", "email"]
@@ -142,14 +142,14 @@ class AD_Webui(BaseModule):
         cname = contact.get_name()
         email = contact.email
         searchFilter = self.search_format % (cname, email)
-        print "Filter", searchFilter
+        logger.info("[Active Directory UI] Filter %s" % str(searchFilter))
         try:
             ldap_result_id = self.con.search(self.basedn, searchScope, searchFilter, self.retrieveAttributes)
             result_set = []
             while 1:
                 result_type, result_data = self.con.result(ldap_result_id, 0)
                 if (result_data == []):
-                    print "No result for", cname
+                    logger.warning("[Active Directory UI] No result for %s" % cname)
                     return None
 
                 if result_type == ldap.RES_SEARCH_ENTRY:
@@ -159,10 +159,10 @@ class AD_Webui(BaseModule):
                     except Exception:
                         account_name = str(result_data[0])
                     # Got a result, try to get photo to write file
-                    print "Find account printicpalname", account_name
+                    logger.info("[Active Directory UI] Find account principalname %s" % account_name)
                     return elts
         except ldap.LDAPError, e:
-            print "Ldap error", e, e.__dict__
+            logger.error("[Active Directory UI] Ldap error: %s, %s" % (e, str(e.__dict__)))
             return None
         # Always clean on exit
         finally:
@@ -172,20 +172,20 @@ class AD_Webui(BaseModule):
     def manage_initial_broks_done_brok(self, b):
         if self.con is None:
             return
-        print "AD/LDAP: manage_initial_broks_done_brok, go for pictures"
+        logger.info("[Active Directory UI] AD/LDAP: manage_initial_broks_done_brok, go for pictures")
 
         searchScope = ldap.SCOPE_SUBTREE
         ## retrieve all attributes - again adjust to your needs - see documentation for more options
         #retrieveAttributes = ["userPrincipalName", "thumbnailPhoto", "samaccountname", "email"]
 
-        print "Contacts?", len(self.app.datamgr.get_contacts())
+        logger.info("[Active Directory UI] Contacts? %d" % len(self.app.datamgr.get_contacts()))
 
         for c in self.app.datamgr.get_contacts():
-            print "Doing photo lookup for contact", c.get_name()
+            logger.debug("[Active Directory UI] Doing photo lookup for contact: %s" % c.get_name())
             elts = self.find_contact_entry(c)
 
             if elts is None:
-                print "No ldap entry for", c.get_name()
+                logger.warning("[Active Directory UI] No ldap entry for %s" % c.get_name())
                 continue
 
             # Ok, try to get photo from the entry
@@ -196,11 +196,11 @@ class AD_Webui(BaseModule):
                     f = open(p, 'wb')
                     f.write(photo)
                     f.close()
-                    print "Phto wrote for", c.get_name()
+                    logger.info("[Active Directory UI] Photo wrote for %s" % c.get_name())
                 except Exception, exp:
-                    print "Cannot write", p, ":", exp
+                    logger.error("[Active Directory UI] Cannot write %s : %s" % (p, str(exp)))
             except KeyError:
-                print "No photo for", c.get_name()
+                logger.warning("[Active Directory UI] No photo for %s" % c.get_name())
 
     # Try to auth a user in the ldap dir
     def check_auth(self, user, password):
@@ -208,12 +208,12 @@ class AD_Webui(BaseModule):
         if not self.ldap_uri:
             return False
 
-        print "Trying to auth by ldap", user, password
+        logger.debug("[Active Directory UI] Trying to auth by ldap with user %s and password %s" % (user, password))
 
         c = self.app.datamgr.get_contact(user)
 
         if not c:
-            print "AD/Ldap: invalid user (not founded)", user
+            logger.warning("[Active Directory UI] AD/Ldap: invalid user %s (not founded)" % user)
             return False
 
         # first we need to find the principalname of this entry
@@ -228,7 +228,7 @@ class AD_Webui(BaseModule):
             else: # For openldap, use the full DN
                 account_name = elts[self.auth_key]
         except KeyError:
-            print "Cannot find the %s entry, so use the user entry" % self.auth_key
+            logger.warning("[Active Directory UI] Cannot find the %s entry, so use the user entry" % self.auth_key)
             account_name = user
 
         local_con = ldap.initialize(self.ldap_uri)
@@ -238,10 +238,10 @@ class AD_Webui(BaseModule):
         # or related exception so you can ignore the result
         try:
             local_con.simple_bind_s(account_name, password)
-            print "AD/Ldap Connection done with", user, password
+            logger.info("[Active Directory UI] AD/Ldap Connection done with user %s and password %s" % (user, password))
             return True
         except ldap.LDAPError, exp:
-            print "Ldap auth error:", exp
+            logger.error("[Active Directory UI] Ldap auth error: %s" % str(exp))
 
         # The local_con will automatically close this connection when
         # the object will be deleted, so no close need
