@@ -91,21 +91,21 @@ class Glpidb_broker(BaseModule):
         self.database_path = database_path
 
         from shinken.db_mysql import DBMysql
-        print "Creating a mysql backend"
+        logger.info("[GLPIdb Broker] Creating a mysql backend")
         self.db_backend = DBMysql(host, user, password, database, character_set)
 
     # Called by Broker so we can do init stuff
     # TODO: add conf param to get pass with init
     # Conf from arbiter!
     def init(self):
-        print "I connect to Glpi database"
+        logger.info("[GLPIdb Broker] I connect to Glpi database")
         self.db_backend.connect_database()
 
     def preprocess(self, type, brok, checkst):
         new_brok = copy.deepcopy(brok)
         # Only preprocess if we can apply a mapping
         if type in self.mapping:
-            #print "brok data: ", brok.data
+            logger.debug("[GLPIdb Broker] brok data: %s" % str(brok.data))
             try:
                 s = brok.data['service_description'].split('-')
                 try:
@@ -127,10 +127,10 @@ class Glpidb_broker(BaseModule):
             for prop in new_brok.data:
             # ex: 'name': 'program_start_time', 'transform'
                 if prop in mapping:
-                    #print "Got a prop to change", prop
+                    logger.debug("[GLPIdb Broker] Got a prop to change: %s" % prop)
                     val = new_brok.data[prop]
                     if mapping[prop]['transform'] is not None:
-                        print "Call function for", type, prop
+                        logger.info("[GLPIdb Broker] Call function for type %s and prop %s" % (type, prop))
                         f = mapping[prop]['transform']
                         val = f(val)
                     name = prop
@@ -200,13 +200,13 @@ class Glpidb_broker(BaseModule):
 
     # Service result
     def manage_service_check_result_brok(self, b):
-        #logger.info("GLPI: data in DB %s " % b)
+        logger.debug("[GLPIdb Broker] Data in DB %s" % b)
         try:
             b.data['plugin_monitoring_servicescatalogs_id']
             return ''
         except:
             b.data['date'] = time.strftime('%Y-%m-%d %H:%M:%S')
-            #print "Add event service: ", b.data
+            logger.debug("[GLPIdb Broker] Add event service: %s" % str(b.data))
             query = self.db_backend.create_insert_query('glpi_plugin_monitoring_serviceevents', b.data)
             return [query]
         return ''
@@ -220,7 +220,7 @@ class Glpidb_broker(BaseModule):
            'plugin_monitoring_services_id'         not in b.data:
             return list()
 
-        logger.info("GLPI: data in DB %s " % b.data)
+        logger.info("GLPI: data in DB %s " % str(b.data))
         new_data = copy.deepcopy(b.data)
         new_data['last_check'] = time.strftime('%Y-%m-%d %H:%M:%S')
         del new_data['perf_data']
@@ -237,6 +237,6 @@ class Glpidb_broker(BaseModule):
             table = 'glpi_plugin_monitoring_services'
 
         where_clause = {'id': new_data['id']}
-        #print "Update service: ", new_data
+        logger.debug("[GLPIdb Broker] Update service: " % str(new_data))
         query = self.db_backend.create_update_query(table, new_data, where_clause)
         return [query]
