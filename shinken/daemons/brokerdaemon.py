@@ -219,7 +219,7 @@ class Broker(BaseSatellite):
             links[id]['con'] = None
             return
 #        except Pyro.errors.NamingError, exp:
-#            logger.log("[%s] the %s '%s' is not initialized: %s" % (self.name, type, links[id]['name'], str(exp)))
+#            logger.info("[%s] the %s '%s' is not initialized: %s" % (self.name, type, links[id]['name'], str(exp)))
 #            links[id]['con'] = None
 #            return
         except KeyError, exp:

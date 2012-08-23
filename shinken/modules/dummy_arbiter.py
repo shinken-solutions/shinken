@@ -35,7 +35,6 @@ properties = {
     'daemons': ['arbiter'],
     'type': 'dummy_arbiter',
     'external': True,
-    'phases': ['configuration', 'late_configuration', 'running'],
     }
 
 
@@ -48,9 +47,8 @@ def get_instance(plugin):
 
 # Just print some stuff
 class Dummy_arbiter(BaseModule):
-    if False:  ## useless to define this:
-        def __init__(self, mod_conf):
-            BaseModule.__init__(mod_conf)
+    def __init__(self, mod_conf):
+        BaseModule.__init__(mod_conf)
 
     # Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
