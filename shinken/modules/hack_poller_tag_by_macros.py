@@ -41,7 +41,7 @@ properties = {
 
 # called by the plugin manager to get a broker
 def get_instance(plugin):
-    print "Get a Hack pollertag by macros module for plugin %s" % plugin.get_name()
+    logger.info("[Hack poller tag by macros] Get a Hack pollertag by macros module for plugin %s" % plugin.get_name())
     instance = Hack_pt_by_macros(plugin)
     return instance
 
@@ -55,7 +55,7 @@ class Hack_pt_by_macros(BaseModule):
 
     # Called by Arbiter to say 'let's prepare yourself guy'
     def init(self):
-        print "Initilisation of the hack poller tag by macro module"
+        logger.info("[Hack poller tag by macros] Initilisation of the hack poller tag by macro module")
 
     def hook_late_configuration(self, arb):
         logger.info("[HackPollerTagByMacros in hook late config")
