@@ -26,6 +26,7 @@
 # This Class is an example of a broker  module
 
 from shinken.basemodule import BaseModule
+from shinken.log import logger
 
 properties = {
     'daemons': ['broker'],
@@ -36,7 +37,7 @@ properties = {
 
 # called by the plugin manager to get a broker
 def get_instance(mod_conf):
-    print "Get a Dummy broker module for plugin %s" % mod_conf.get_name()
+    logger.info("[Dummy Broker] Get a Dummy broker module for plugin %s" % mod_conf.get_name())
     instance = Dummy_broker(mod_conf)
     return instance
 
@@ -50,7 +51,7 @@ class Dummy_broker(BaseModule):
 
     # Called by Broker to say 'let's prepare yourself guy'
     def init(self):
-        print "Initilisation of the dummy broker module"
+        logger.info("[Dummy Broker] Initilisation of the dummy broker module")
 
 
       

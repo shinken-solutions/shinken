@@ -27,6 +27,7 @@
 # Here for the configuration phase AND running one
 
 from shinken.basemodule import BaseModule
+from shinken.log import logger
 
 properties = {
     'daemons': ['scheduler'],
@@ -38,7 +39,7 @@ properties = {
 
 # called by the plugin manager to get a broker
 def get_instance(mod_conf):
-    print "Get a Dummy scheduler module for plugin %s" % mod_conf.get_name()
+    logger.info("[Dummy Scheduler] Get a Dummy scheduler module for plugin %s" % mod_conf.get_name())
     instance = Dummy_scheduler(mod_conf, foo="bar")
     return instance
 
@@ -52,17 +53,17 @@ class Dummy_scheduler(BaseModule):
 
     # Called by Scheduler to say 'let's prepare yourself guy'
     def init(self):
-        print "Initilisation of the dummy scheduler module"
+        logger.info("[Dummy Scheduler] Initilisation of the dummy scheduler module")
         # self.return_queue = self.properties['from_queue']
 
 
     # Ok, main function that is called in the retention creation pass
     def update_retention_objects(self, sched, log_mgr):
-        print "[Dummy] asking me to update the retention objects"
+        logger.info("[Dummy Scheduler] Asking me to update the retention objects")
 
     # Should return if it succeed in the retention load or not
     def load_retention_objects(self, sched, log_mrg):
-        print "[Dummy] asking me to load the retention objects"
+        logger.info("[Dummy Scheduler] Asking me to load the retention objects")
         return False
 
 # From now external is not used in the scheduler job
