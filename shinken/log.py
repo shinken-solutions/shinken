@@ -119,14 +119,14 @@ class Log:
             lvlname = logging.getLevelName(level)
 
             if display_level:
-                fmt = u'[%(date)s] %(level)-8s: %(name)s%(msg)s\n'
+                fmt = u'[%(date)s] %(level)-9s %(name)s%(msg)s\n'
             else:
                 fmt = u'[%(date)s] %(name)s%(msg)s\n'
 
             args = {
                 'date': (human_timestamp_log and time.asctime()
                          or int(time.time())),
-                'level': lvlname.capitalize(),
+                'level': lvlname.capitalize()+' :',
                 'name': name and ('[%s] ' % name) or '',
                 'msg': message
             }
