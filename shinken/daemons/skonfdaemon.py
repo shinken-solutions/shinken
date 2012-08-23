@@ -184,6 +184,8 @@ class Skonf(Daemon):
 
         self.datamgr = datamgr
 
+        
+
     # Use for adding things like broks
     def add(self, b):
         if isinstance(b, Brok):
@@ -199,6 +201,15 @@ class Skonf(Daemon):
         buf = self.conf.read_config(self.config_files)
         raw_objects = self.conf.read_config_buf(buf)
 
+        # Look for the discovery.cfg configuration file
+        self.discovery_cfg = self.conf.discovery_cfg
+        if not os.path.exists(self.discovery_cfg):
+            self.discovery_cfg = os.path.join(os.path.dirname(self.config_files[0]), self.discovery_cfg)
+        # If it still don't exists, there is a huge problem!
+        if not os.path.exists(self.discovery_cfg):
+            logger.error('The discovery configuration file is missing. Please fill the discovery_cfg value.')
+            sys.exit(2)
+        
         print "Opening local log file"
 
         # First we need to get arbiters and modules first
@@ -865,6 +876,7 @@ class Skonf(Daemon):
         w = SkonfUIWorker(1, self.workers_queue, self.returns_queue, 1, mortal=False, max_plugins_output_length=1, target=None)
         w.module_name = 'skonfuiworker'
         w.add_database_data('localhost')
+        w.discovery_cfg = self.discovery_cfg
 
         # save this worker
         self.workers[w.id] = w
