@@ -198,6 +198,7 @@ class Daemon(object):
 
         os.umask(UMASK)
         self.set_exit_handler()
+
     # At least, lose the local log file if needed
     def do_stop(self):
         if self.modules_manager:
