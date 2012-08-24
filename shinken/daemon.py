@@ -465,9 +465,9 @@ class Daemon(object):
         if use_pyro:
             self.setup_pyro_daemon()
         # Setting log level
-        logger.error("Current logging level is %d :  and configuration log level is : %d" % (logger.get_level(), self.log_level))
+        #logger.error("Current logging level is %d :  and configuration log level is : %d" % (logger.get_level(), self.log_level))
         logger.set_level(self.log_level)
-        logger.error("Logging level is now %d : " % (logger.get_level()))
+        #logger.error("Logging level is now %d : " % (logger.get_level()))
         
         # Then start to log all in the local file if asked so
         self.register_local_log()

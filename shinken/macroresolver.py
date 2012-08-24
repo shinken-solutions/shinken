@@ -148,6 +148,9 @@ class MacroResolver(Borg):
             cls = o.__class__
             macros = cls.macros
             for macro in macros:
+                if macro.startswith("USER"):
+                        break
+
                 #print "Macro in %s: %s" % (o.__class__, macro)
                 prop = macros[macro]
                 value = self.get_value_from_element(o, prop)

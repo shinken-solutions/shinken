@@ -30,6 +30,33 @@ $(document).ready(function(){
     $('.chevron-up').hide();
 });
 
+
+/*
+  Look for Shift key up and down
+*/
+is_shift_pressed = false;
+function shift_pressed(){
+    is_shift_pressed = true;
+}
+
+function shift_released(){
+    is_shift_pressed = false;
+}
+
+$(document).bind('keydown', 'shift', shift_pressed);
+$(document).bind('keyup', 'shift', shift_released);
+
+/*
+  If we keep the shift pushed and hovering over selections, it
+  select the elements. Easier for massive selection :)
+*/
+function hovering_selection(name){
+    if(is_shift_pressed){
+	add_element(name);
+    }
+}
+
+
 /* And if the user lick on the good image, we untoggle them. */
 function show_detail(name){
     var myFx = $('#'+name).slideToggle();
@@ -111,10 +138,10 @@ function unselect_all_problems(){
 /* We keep an array of all selected elements */
 var selected_elements = [];
 
-
 function add_remove_elements(name){
     // Maybe the actions are not allwoed. If so, don't act
     if(!actions_enabled){return;}
+
 
     //alert(selected_elements.indexOf(name));
     if( selected_elements.indexOf(name) != -1 ){
