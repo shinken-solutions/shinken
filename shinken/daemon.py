@@ -493,6 +493,10 @@ class Daemon(object):
 
         # The SSL part
         if ssl_conf.use_ssl:
+            # Maybe this Pyro version do not manage SSL, if so, bailout
+            if not hasattr(Pyro.config, 'PYROSSL_CERTDIR'):
+                logger.error('Sorry, this Pyro version do not manage SSL.')
+                sys.exit(2)
             Pyro.config.PYROSSL_CERTDIR = os.path.abspath(ssl_conf.certs_dir)
             logger.debug("Using ssl certificate directory: %s" % Pyro.config.PYROSSL_CERTDIR)
             Pyro.config.PYROSSL_CA_CERT = os.path.abspath(ssl_conf.ca_cert)
