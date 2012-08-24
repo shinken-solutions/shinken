@@ -100,14 +100,17 @@ class TestConfig(ShinkenTest):
         mr = self.get_mr()
         (svc, hst) = self.get_hst_svc()
         data = svc.get_data_for_checks()
+        data.append(self.conf)
 
         env = mr.get_env_macros(data)
-        print "Env:", env
+        print "Env:", env        
         self.assert_(env != {})
         self.assert_(env['NAGIOS_HOSTNAME'] == 'test_host_0')
         self.assert_(env['NAGIOS_SERVICEPERCENTCHANGE'] == '0.0')
         self.assert_(env['NAGIOS__SERVICECUSTNAME'] == 'custvalue')
         self.assert_(env['NAGIOS__HOSTOSTYPE'] == 'gnulinux')
+        self.assert_('NAGIOS_USER1' not in env)
+
 
     def test_resource_file(self):
         mr = self.get_mr()
