@@ -1017,6 +1017,7 @@ class SchedulingItem(Item):
         for es in self.escalations:
             if es.is_eligible(n.t_to_go, self.state, n.notif_nb, in_notif_time, cls.interval_length):
                 return True
+
         return False
 
     # Give for a notification the next notification time
