@@ -1332,4 +1332,4 @@ class SchedulingItem(Item):
             try:
                 t.eval(self)
             except Exception, exp:
-                logger.error("We got an exeception from a trigger on %s for %s" % (self.get_full_name(), str(traceback.format_exc())))
+                logger.error("We got an exeception from a trigger on %s for %s" % (self.get_full_name().decode('utf8', 'ignore'), str(traceback.format_exc())))

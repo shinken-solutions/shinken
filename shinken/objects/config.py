@@ -106,7 +106,7 @@ class Config(Item):
         'local_log':                StringProp(default='arbiterd.log'),
         'log_file':                 UnusedProp(text=no_longer_used_txt),
         'object_cache_file':        UnusedProp(text=no_longer_used_txt),
-        'precached_object_file':    UnusedProp(text='Shinken does use precached_object_files. Skipping.'),
+        'precached_object_file':    UnusedProp(text='Shinken does not use precached_object_files. Skipping.'),
         'resource_file':            StringProp(default='/tmp/ressources.txt'),
         'temp_file':                UnusedProp(text='Temporary files are not used in the shinken architecture. Skipping'),
         'status_file':              UnusedProp(text=no_longer_used_txt),
