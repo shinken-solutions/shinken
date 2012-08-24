@@ -98,7 +98,7 @@ class Passwd_Webui(BaseModule):
                         logger.info("Authentication success")
                         return True
                 else:
-                    logger.info("Authentication failed" % (name, user))
+                    logger.debug("Authentication failed invalid name: %s %s" % (name, user))
         except Exception, exp:
             logger.warning("Authentication against apache passwd file failed: %s " % (exp))
             return False
@@ -109,5 +109,5 @@ class Passwd_Webui(BaseModule):
                 pass
 
         # At the end, we are not happy, so we return False
-        logger.debug("Failed to authenticate user, return false")
+        logger.warning("Failed to authenticate user, return false")
         return False
