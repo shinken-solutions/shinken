@@ -403,6 +403,7 @@ class Skonf(Daemon):
         self.idontcareaboutsecurity = self.conf.idontcareaboutsecurity
         self.user = self.conf.shinken_user
         self.group = self.conf.shinken_group
+        self.daemon_enabled = self.conf.daemon_enabled
 
         # If the user set a workdir, let use it. If not, use the
         # pidfile directory
@@ -456,6 +457,10 @@ class Skonf(Daemon):
                 self.log.info(line)
 
             self.load_config_file()
+
+            # Look if we are enabled or not. If ok, start the daemon mode
+            self.look_for_early_exit()
+
             self.load_web_configuration()
 
             self.do_daemon_init_and_start()

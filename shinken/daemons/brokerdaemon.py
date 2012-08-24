@@ -641,6 +641,8 @@ class Broker(BaseSatellite):
 
             logger.info("[Broker] Using working directory: %s" % os.path.abspath(self.workdir))
 
+            # Look if we are enabled or not. If ok, start the daemon mode
+            self.look_for_early_exit()
             self.do_daemon_init_and_start()
 
             self.uri2 = self.pyro_daemon.register(self.interface, "ForArbiter")

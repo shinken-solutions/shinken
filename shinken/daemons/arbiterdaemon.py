@@ -424,6 +424,7 @@ class Arbiter(Daemon):
         self.idontcareaboutsecurity = self.conf.idontcareaboutsecurity
         self.user = self.conf.shinken_user
         self.group = self.conf.shinken_group
+        self.daemon_enabled = self.conf.daemon_enabled
 
         # If the user sets a workdir, lets use it. If not, use the
         # pidfile directory
@@ -481,7 +482,10 @@ class Arbiter(Daemon):
 
             self.load_config_file()
 
+            # Look if we are enabled or not. If ok, start the daemon mode
+            self.look_for_early_exit()
             self.do_daemon_init_and_start()
+            
             self.uri_arb = self.pyro_daemon.register(self.interface, "ForArbiter")
 
             # ok we are now fully daemonized (if requested)

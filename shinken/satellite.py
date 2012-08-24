@@ -935,6 +935,8 @@ class Satellite(BaseSatellite):
 
             self.load_config_file()
 
+            # Look if we are enabled or not. If ok, start the daemon mode
+            self.look_for_early_exit()
             self.do_daemon_init_and_start()
 
             self.do_post_daemon_init()

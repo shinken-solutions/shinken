@@ -145,6 +145,7 @@ class Daemon(object):
         'log_level': LogLevelProp(default='INFO'),
         'hard_ssl_name_check':    BoolProp(default='0'),
         'idontcareaboutsecurity': BoolProp(default='0'),
+        'daemon_enabled':BoolProp(default='1'),
         'spare':         BoolProp(default='0'),
         'max_queue_size': IntegerProp(default='0'),
     }
@@ -198,6 +199,7 @@ class Daemon(object):
         os.umask(UMASK)
         self.set_exit_handler()
 
+
     # At least, lose the local log file if needed
     def do_stop(self):
         if self.modules_manager:
@@ -213,14 +215,24 @@ class Daemon(object):
             pyro.shutdown(self.pyro_daemon)
         logger.quit()
 
+
     def request_stop(self):
         self.unlink()
         self.do_stop()
         logger.debug("Exiting")
         sys.exit(0)
 
+
+    # Maybe this daemon is configured to NOT run, if so, bailout
+    def look_for_early_exit(self):
+        if not self.daemon_enabled:
+            logger.info('This daemon is disabled in configuration. Bailing out')
+            self.request_stop()
+
+
     def do_loop_turn(self):
         raise NotImplementedError()
+
 
     # Main loop for nearly all daemon
     # the scheduler is not managed by it :'(
