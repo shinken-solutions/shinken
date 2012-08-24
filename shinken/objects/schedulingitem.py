@@ -277,11 +277,15 @@ class SchedulingItem(Item):
             b = self.get_update_status_brok()
             self.broks.append(b)
 
-    # call recursively by potentials impacts so they
+    # Call recursively by potentials impacts so they
     # update their source_problems list. But do not
     # go below if the problem is not a real one for me
     # like If I've got multiple parents for examples
     def register_a_problem(self, pb):
+        # Maybe we already have this problem? If so, bailout too
+        if pb in self.source_problems:
+            return []
+
         now = time.time()
         was_an_impact = self.is_impact
         # Our father already look of he impacts us. So if we are here,
