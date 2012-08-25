@@ -928,7 +928,12 @@ function sinstall(){
     enableretention
     enable_initd
 
-    install_mongodb
+    if [[ $NOMONGO -eq 1 ]]
+    then
+        cecho " > Skip mongo installation" green
+    else
+        install_mongodb
+    fi
 
     if [ "$LOGSTORE" == "mongo" ]
     then
@@ -1327,7 +1332,18 @@ function install_mongodb(){
                 cecho " > Start mongodb server" green
                 /etc/init.d/mongod start >> ${LOGFILE} 2>&1
             else
-                cecho "Already installed" yellow
+                # check if mongo is installed
+                exist=$(rpm -qa | grep mongo-10gen)
+                if [[ -z "$exist" ]]
+                then
+                    cecho " > Installing mongodb server" green
+                    yum -y install $MONGOPKGS >> ${LOGFILE} 2>&1
+                    enable_rhel_service mongod
+                    cecho " > Start mongodb server" green
+                    /etc/init.d/mongod start >> ${LOGFILE} 2>&1
+                else
+                    cecho "Already installed" yellow
+                fi
             fi
             ;;
         Fedora)
@@ -1762,12 +1778,12 @@ function install_mysql(){
     cecho " > Checking for mysql server" green
     case $CODE in
         REDHAT)
-            if [ -z "$(rpm -qa | grep mysql-server)"
-                ]
+            if [[ -z "$(rpm -qa | grep mysql-server)" ]]
             then
                 cecho " --> mysql-server not found. Going to install" yellow
                 yum install -y mysql-server >> ${LOGFILE} 2>&1
                 enable_rhel_service mysqld
+                /etc/init.d/mysqld start
                 while true
                 do
                     creads " --> Please provide a password for root user: " yellow
@@ -3196,7 +3212,7 @@ do
             ;;
         -i|--install)
             FROMSRC=1
-            sinstall
+            sinstall 
             fixHtpasswdPath
             exit 0
             ;;
