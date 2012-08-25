@@ -188,6 +188,7 @@ class TestConfig(unittest.TestCase, PropertiesTester):
         ('use_true_regexp_matching', None),
         ('broker_module', ''),
         ('modified_attributes', 0L),
+        ('daemon_enabled', '1'),
 
         # Shinken specific
         ('idontcareaboutsecurity', '0'),
