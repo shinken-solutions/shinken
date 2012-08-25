@@ -31,7 +31,7 @@ import sys
 import time
 
 # Thrift Specificities
-sys.path.append(os.path.abspath(__file__).rsplit("/", 3)[0] + "/thrift/gen-py")
+sys.path.append(os.path.dirname(__file__)+"/gen-py/")
 try:
     from org.shinken_monitoring.tsca import StateService
     from org.shinken_monitoring.tsca.ttypes import *
@@ -45,40 +45,6 @@ except ImportError:
 from shinken.basemodule import BaseModule
 from shinken.external_command import ExternalCommand
 from shinken.log import logger
-
-properties = {
-    'daemons': ['arbiter', 'receiver'],
-    'type': 'tsca_server',
-    'external': True,
-    'phases': ['running'],
-    }
-
-
-# called by the plugin manager to get a broker
-def get_instance(plugin):
-    logger.debug("Get a TSCA arbiter module for plugin %s" % plugin.get_name())
-    if not TServer:
-        raise Exception('Module python-thrift not found. Please install it.')
-
-    if hasattr(plugin, 'host'):
-        if plugin.host == '*':
-            host = ''
-        else:
-            host = plugin.host
-    else:
-        host = '127.0.0.1'
-    if hasattr(plugin, 'port'):
-        port = int(plugin.port)
-    else:
-        port = 9090
-    if hasattr(plugin, 'max_packet_age'):
-        max_packet_age = min(plugin.max_packet_age, 900)
-    else:
-        max_packet_age = 30
-
-    instance = TSCA_arbiter(plugin, host, port, max_packet_age)
-    return instance
-
 
 # Used by Thrift to handle client
 class StateServiceHandler:
