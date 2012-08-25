@@ -2130,6 +2130,52 @@ function install_notify_by_xmpp(){
 ### PLUGINS INSTALLATION PART ###
 #################################
 
+# CUCUMBER
+function install_cucumber(){
+    if [[ "$CODE" == "REDHAT" ]]
+    then
+        if [[ ! -f /etc/yum.repos.d/dag.repo ]]
+        then
+            cecho " > Enable dag repository for ffmpeg" green
+            cp $myscripts/install.d/dag.repo /etc/yum.repos.d
+            yum clean all >> ${LOGFILE} 2>&1
+        fi
+        cecho " > Installing eue dependencies" green
+        for p in $EUEYUMPKG
+        do 
+            cecho " --> Installing $p" green
+            yum install -y $p >> ${LOGFILE} 2>&1
+            if [[ $? -ne 0 ]]
+            then
+                cecho " ----> There was a problem installing $p" red
+            fi
+        done
+    elif [[ "$CODE" == "DEBIAN" ]]
+    then
+        cecho " > Unsuported at the moment ...." red
+        exit 2
+    else
+        cecho " > Unsupported distribution" red
+        exit 2
+    fi
+
+    cecho " --> Installing ruby gems" green
+    for g in $EUEGEMS
+    do
+        gem=$(echo $g | awk -F: '{print $1}')
+        gemver=$(echo $g | awk -F: '{print $2}')
+        cecho " ----> Installing gem ${gem} version ${gemver}" green
+        gem install --no-ri --no-rdoc $gem --version $gemver >> ${LOGFILE} 2>&1
+        if [[ $? -ne 0 ]]
+        then
+            cecho " ------> There was a problem installing gem ${gem} version ${gemver}" red
+        fi
+    done
+
+   
+ 
+}
+
 # CAPTURE_PLUGIN
 function install_capture_plugin(){
     cadre "Install capture_plugin" green
@@ -3034,6 +3080,7 @@ echo "Usage: install -k | -i | -u [addonname] | -b | -r backupname | -l | -c | -
                                notify_by_xmpp
     --nconf-import-packs    Import shinken packs into nconf (experimental). This require nconf to be installed
     --register              Register on community (experimental)
+    --enableeue             Enable application performance monitoring stack (experimental)
     -h | --help             Show help"
 }
 
@@ -3059,7 +3106,7 @@ fi
 
 # options may be followed by one colon to indicate they have a required argument
 
-if ! options=$(getopt -u -o kiu::br:lce:p:a:h -l register,nconf-import-packs,kill,install,uninstall::,backup,restore:,listbackups,compresslogs,enabledaemons:,plugin:,addon:,help -- "$@")
+if ! options=$(getopt -u -o kiu::br:lce:p:a:h -l register,nconf-import-packs,kill,install,uninstall::,backup,restore:,listbackups,compresslogs,enabledaemons:,plugin:,addon:,enableeue,help -- "$@")
 then
     # something went wrong, getopt will put out an error message for us
     exit 2
@@ -3294,6 +3341,10 @@ do
             ;;
         --register)
             register
+            exit 0
+            ;;
+        --enableeue)
+            install_cucumber
             exit 0
             ;;
         (--)
