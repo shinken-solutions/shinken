@@ -87,6 +87,10 @@ Under ubuntu, you can grab the Pyro module with::
 
   sudo apt-get install pyro
 
+Under fedora, you can grab the Pyro module with::
+
+  sudo yum install python-pyro
+
 Under other distributions, you can search for it::
 
   yum search pyro
