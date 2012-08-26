@@ -26,18 +26,23 @@
 
 import time
 import datetime
+import json
+import os
+import mimetypes
+import math
+
 try:
     from shinken.webui.bottle import redirect
     from shinken.webui.bottle import static_file
     from shinken.webui.bottle import response
+    from shinken.webui.bottle import get, post, request    
     from shinken.log import logger
 except ImportError:
     print "Outside of bottle"
 
-import os
-import mimetypes
 # Mongodb lib
 try:
+    import pymongo
     from pymongo.connection import Connection
     import gridfs
 except ImportError:
@@ -60,7 +65,6 @@ def checkauth():
         redirect("/user/login")
     else:
         return user
-
 
 def getdb(dbname):
     con = None
@@ -143,12 +147,37 @@ def feature_history(eueid):
             "application":"",
             "feature":"",
             "platform":"",
-            "history":[]
+            "filters":None,
+            "history":[],
+            "lastts" : None,
+            "itempsperpage" : None
         }
 
     parts = eueid.split(".")
     parts.pop(0)
     id =  ".".join(parts)
+
+    # base search parameters
+    filters = {
+        'key': { '$regex': id }
+    }
+
+    if app.request.GET.get('optionsStates', "both") == "failed":
+        filters["state"] = 2
+    elif app.request.GET.get('optionsStates', "both") == "succeed":
+        filters["state"] = 0
+
+    daterange = app.request.GET.get('daterangevalue',"4h")
+    if daterange == "4h":
+        daterangets = 4*60*60*1000
+    elif daterange == "1h":
+        daterangets = 1*60*60*1000
+    elif daterange == "1d":
+        daterangets = 24*60*60*1000
+    elif daterange == "1w":
+        daterangets = 7*24*60*60*1000
+    else:
+        daterangets = None
 
     # global application feature for this specific platform
     capplication = db2.eue.find({"key":eueid})[0]
@@ -160,7 +189,38 @@ def feature_history(eueid):
 
     # history
     history=[]
-    for feature in db.eue.find({'key': { '$regex': id } }).sort("start_time",-1).limit(50):
+    morris = []
+
+    # for pagination
+    itempsperpage = app.request.GET.get('itempsperpage', 20)
+    
+    # sort = app.request.GET.get("sort", "desc")
+    # if sort == "desc":
+    #     sortdirection = pymongo.DESCENDING
+    # else:
+    #     sortdirection = pymongo.ASCENDING
+
+    lastts = app.request.GET.get('lastts', None)
+    direction = app.request.GET.get('direction', "next")
+    # if app.request.GET.get('direction', None) == "prev":
+    #     diroperator = "$gt"
+    # else:
+    #     diroperator = "$lt"
+
+    # if lastts:
+    #     if sortdirection == pymongo.DESCENDING:
+    #         filters["start_time"] = {diroperator:int(lastts)}
+    #     elif sortdirection == pymongo.ASCENDING:
+    #         filters["start_time"] = {diroperator:int(lastts)}
+
+    if direction == "next":
+        result = db.eue.find(filters).sort("start_time",-1).limit(itempsperpage)
+    else:
+        result = db.eue.find(filters).sort("start_time",1).limit(itempsperpage).sort("start_time",-1)
+
+    date = None
+
+    for feature in result:
         date = feature["start_time"]
         failed = 0
         succeed = 0
@@ -176,7 +236,11 @@ def feature_history(eueid):
                 failed += 1
 
         total = succeed + failed
-        history.append({
+
+        morris.append({"period":int(date)*1000,"duration":"%0.2f" % float(duration)})
+
+        data = {
+            "timestamp" : int(date),
             "date" : datetime.datetime.fromtimestamp(int(date)).strftime('%Y-%m-%d %H:%M:%S'),
             "key": feature["key"],
             "duration" : duration,
@@ -184,7 +248,11 @@ def feature_history(eueid):
             "succeed" : succeed,
             "failed" : failed,
             "total" : total
-        })
+        }
+
+        history.append(data)
+
+    lastts = date
 
     return {
         "application":application,
@@ -192,7 +260,12 @@ def feature_history(eueid):
         "description":description,
         "platform":platform,
         "history":history,
-        "message":""
+        "message":"",
+        "filters" : filters,
+        "lastts" : int(lastts),
+        "itempsperpage":itempsperpage,
+        "eueid":eueid,
+        "morris" : json.dumps(morris,indent=4)
     }
 
 
@@ -326,8 +399,6 @@ def eue_widget():
             'base_url': '/widget/eue', 'title': 'Eue problems',
             'problems':problems        
         }
-
-
 
 
     return {'app': app, 'user': user, 'wid': wid,

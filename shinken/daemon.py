@@ -145,6 +145,7 @@ class Daemon(object):
         'log_level':     LogLevelProp(default='WARNING'),
         'hard_ssl_name_check':    BoolProp(default='0'),
         'idontcareaboutsecurity': BoolProp(default='0'),
+        'daemon_enabled':BoolProp(default='1'),
         'spare':         BoolProp(default='0'),
         'max_queue_size': IntegerProp(default='0'),
     }
@@ -199,6 +200,7 @@ class Daemon(object):
         os.umask(UMASK)
         self.set_exit_handler()
 
+
     # At least, lose the local log file if needed
     def do_stop(self):
         if self.modules_manager:
@@ -215,6 +217,7 @@ class Daemon(object):
             pyro.shutdown(self.pyro_daemon)
         logger.quit()
 
+
     def request_stop(self):
         self.unlink()
         self.do_stop()
@@ -222,8 +225,17 @@ class Daemon(object):
         print ("Stopping daemon. Exiting", )
         sys.exit(0)
 
+
+    # Maybe this daemon is configured to NOT run, if so, bailout
+    def look_for_early_exit(self):
+        if not self.daemon_enabled:
+            logger.info('This daemon is disabled in configuration. Bailing out')
+            self.request_stop()
+
+
     def do_loop_turn(self):
         raise NotImplementedError()
+
 
     # Main loop for nearly all daemon
     # the scheduler is not managed by it :'(
@@ -501,6 +513,10 @@ class Daemon(object):
 
         # The SSL part
         if ssl_conf.use_ssl:
+            # Maybe this Pyro version do not manage SSL, if so, bailout
+            if not hasattr(Pyro.config, 'PYROSSL_CERTDIR'):
+                logger.error('Sorry, this Pyro version do not manage SSL.')
+                sys.exit(2)
             Pyro.config.PYROSSL_CERTDIR = os.path.abspath(ssl_conf.certs_dir)
             logger.debug("Using ssl certificate directory: %s" % Pyro.config.PYROSSL_CERTDIR)
             Pyro.config.PYROSSL_CA_CERT = os.path.abspath(ssl_conf.ca_cert)

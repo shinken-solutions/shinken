@@ -398,6 +398,8 @@ class Receiver(Satellite):
     def main(self):
         try:
             self.load_config_file()
+            # Look if we are enabled or not. If ok, start the daemon mode
+            self.look_for_early_exit()
 
             for line in self.get_header():
                 logger.info(line)
