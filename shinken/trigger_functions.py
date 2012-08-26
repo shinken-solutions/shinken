@@ -41,11 +41,11 @@ class declared(object):
         self.f = f
         global functions
         n = f.func_name
-        print "Adding the declared function", n, f
+        #logger.debug("Initializing function %s %s" % (n, f))
         trigger_functions[n] = f
 
     def __call__(self, *args):
-        print "Calling", self.f.func_name, 'with', args
+        logger.debug("Calling %s with arguments %s" % (self.f.func_name, args))
         return self.f(*args)
 
 
@@ -57,7 +57,7 @@ def critical(obj, output):
     i = obj.launch_check(now, force=True)
     for chk in obj.actions:
         if chk.id == i:
-            logger.debug("[trigger] I founded the check I want to change")
+            logger.debug("[trigger] I found the check I want to change")
             c = chk
             # Now we 'transform the check into a result'
             # So exit_status, output and status is eaten by the host
@@ -78,7 +78,7 @@ def set_value(obj_ref, output=None, perfdata=None, return_code=None):
     perfdata = perfdata or obj.perfdata
     return_code = return_code or obj.state_id
 
-    print "Will set", output, perfdata, return_code, "for the object", obj.get_full_name()
+    logger.debug("[trigger] Setting %s %s %s for object %s" % (output, perfdata, return_code, obj.get_full_name()))
 
     if perfdata:
         output = output + ' | ' + perfdata
@@ -88,7 +88,7 @@ def set_value(obj_ref, output=None, perfdata=None, return_code=None):
     i = obj.launch_check(now, force=True)
     for chk in obj.actions:
         if chk.id == i:
-            logger.debug("[trigger] I founded the check I want to change")
+            logger.debug("[trigger] I found the check I want to change")
             c = chk
             # Now we 'transform the check into a result'
             # So exit_status, output and status is eaten by the host
@@ -169,7 +169,7 @@ def get_objects(ref):
         elts = name.split('/', 1)
         hname = elts[0]
         sdesc = elts[1]
-    print "Look for", hname, sdesc
+    logger.debug("[trigger get_objects] Look for %s %s" % (hname, sdesc))
     res = []
     hosts = []
     services = []
@@ -183,7 +183,7 @@ def get_objects(ref):
         hname = hname.replace('*', '.*')
         p = re.compile(hname)
         for h in objs['hosts']:
-            print "Compare", hname, "with", h.get_name()
+            logger.debug("[trigger] Compare %s with %s" % (hname, h.get_name()))
             if p.search(h.get_name()):
                 hosts.append(h)
 
@@ -200,9 +200,9 @@ def get_objects(ref):
             sdesc = sdesc.replace('*', '.*')
             p = re.compile(sdesc)
             for s in h.services:
-                print "Compare", s.service_description, "with", sdesc
+                logger.debug("[trigger] Compare %s with %s" % (s.service_description, sdesc))
                 if p.search(s.service_description):
                     services.append(s)
 
-    print "Found services", services
+    logger.debug("Found the following services: %s" % (services))
     return services

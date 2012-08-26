@@ -38,7 +38,6 @@ except ImportError:
 from shinken.log import logger
 from shinken.basemodule import BaseModule
 
-logger.info("[Active Directory UI] Loaded AD module")
 
 properties = {
     'daemons': ['webui', 'skonf'],

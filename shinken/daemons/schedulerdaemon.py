@@ -75,7 +75,7 @@ They connect here and see if they are still OK with our running_id, if not, they
 
 class IBroks(Interface):
     """ Interface for Brokers:
-They connect here and get all broks (data for brokers). datas must be ORDERED! (initial status BEFORE uodate...) """
+They connect here and get all broks (data for brokers). Data must be ORDERED! (initial status BEFORE uodate...) """
 
     # poller or reactionner ask us actions
     def get_broks(self):
@@ -97,8 +97,9 @@ They connect here and get all broks (data for brokers). datas must be ORDERED! (
 
 
 class IForArbiter(IArb):
-    """ Interface for Arbiter, our big MASTER. We ask him a conf and after we listen for him.
-HE got user entry, so we must listen him carefully and give information he want, maybe for another scheduler """
+    """ Interface for Arbiter. We ask him a for a conf and after that listen for instructions
+        from the arbiter. The arbiter is the interface to the administrator, so we must listen
+        carefully and give him the information he wants. Which could be for another scheduler """
 
     # arbiter is send us a external coomand.
     # it can send us global command, or specific ones
@@ -109,15 +110,14 @@ HE got user entry, so we must listen him carefully and give information he want,
         self.app.sched.die()
         super(IForArbiter, self).put_conf(conf)
 
-    # Call by arbiter if it thinks we are running but we must do not (like
+    # Call by arbiter if it thinks we are running but we must not (like
     # if I was a spare that take a conf but the master returns, I must die
-    # and wait a new conf)
+    # and wait for a new conf)
     # Us: No please...
     # Arbiter: I don't care, hasta la vista baby!
-    # Us: ... <- Nothing! We are die! you don't follow
-    # anything or what??
+    # Us: ... <- Nothing! We are dead! you didn't follow or what??
     def wait_new_conf(self):
-        logger.debug("Arbiter want me to wait a new conf")
+        logger.debug("Arbiter wants me to wait for a new configuration")
         self.app.sched.die()
         super(IForArbiter, self).wait_new_conf()
 
@@ -229,7 +229,7 @@ class Shinken(BaseSatellite):
                     c.t_to_go = new_t
 
     def manage_signal(self, sig, frame):
-        print "MANAGE SIGNAL", sig
+        logger.warning("Received a SIGNAL %s" % sig)
         # If we got USR1, just dump memory
         if sig == 10:
             self.sched.need_dump_memory = True
@@ -245,9 +245,9 @@ class Shinken(BaseSatellite):
         self.wait_for_initial_conf()
         if not self.new_conf:
             return
-        logger.debug("Ok we've got conf")
+        logger.info("New configuration received")
         self.setup_new_conf()
-        logger.debug("Configuration Loaded")
+        logger.info("New configuration loaded")
         self.sched.run()
 
     def setup_new_conf(self):
@@ -333,7 +333,7 @@ class Shinken(BaseSatellite):
         self.uri2 = self.pyro_daemon.register(self.ibroks, "Broks")
         logger.debug("The Broks Interface uri is: %s" % self.uri2)
 
-        logger.debug("Loading configuration..")
+        logger.info("Loading configuration.")
         self.conf.explode_global_conf()
 
         # we give sched it's conf

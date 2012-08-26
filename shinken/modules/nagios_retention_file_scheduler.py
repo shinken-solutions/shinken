@@ -252,25 +252,25 @@ class Nagios_retention_scheduler(BaseModule):
     def create_and_link_downtimes(self, raw_objects, all_obj):
         # first service
         for obj_cfg in raw_objects['servicedowntime']:
-            print "Managing", obj_cfg
+            #print "Managing", obj_cfg
             host_name = obj_cfg['host_name']
             service_description = obj_cfg['service_description']
             srv = all_obj['service'].find_srv_by_name_and_hostname(host_name, service_description)
-            print "Find my service", srv
+            #print "Find my service", srv
             if srv is not None:
                 dwn = Downtime(srv, int(obj_cfg['start_time']), int(obj_cfg['end_time']), to_bool(obj_cfg['fixed']), int(obj_cfg['triggered_by']), int(obj_cfg['duration']), obj_cfg['author'], obj_cfg['comment'])
-                print "Created dwn", dwn
+                #print "Created dwn", dwn
                 srv.add_downtime(dwn)
 
         # then hosts
         for obj_cfg in raw_objects['hostdowntime']:
-            print "Managing", obj_cfg
+            #print "Managing", obj_cfg
             host_name = obj_cfg['host_name']
             hst = all_obj['host'].find_by_name(host_name)
-            print "Find my host", hst
+            #print "Find my host", hst
             if hst is not None:
                 dwn = Downtime(hst, int(obj_cfg['start_time']), int(obj_cfg['end_time']), to_bool(obj_cfg['fixed']), int(obj_cfg['triggered_by']), int(obj_cfg['duration']), obj_cfg['author'], obj_cfg['comment'])
-                print "Created dwn", dwn
+                #print "Created dwn", dwn
                 hst.add_downtime(dwn)
 
     # Should return if it succeed in the retention load or not
@@ -289,7 +289,6 @@ class Nagios_retention_scheduler(BaseModule):
         except (IndexError, TypeError), exp:
             logger.warning("Sorry, the ressource file is not compatible")
             return False
-
         logger.debug("Finished reading config")
         raw_objects = self.read_retention_buf(buf)
 
@@ -314,7 +313,7 @@ class Nagios_retention_scheduler(BaseModule):
 
         all_obj = self.create_objects(raw_objects, types_creations)
 
-        print "Got all obj", all_obj
+        logger.info('Received all obj %s' % (all_obj))
 
         self.create_and_link_comments(raw_objects, all_obj)
 

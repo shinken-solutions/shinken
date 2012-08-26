@@ -100,15 +100,15 @@ class Config(Item):
     properties = {
         'prefix':                   StringProp(default='/usr/local/shinken/'),
         'workdir':                  StringProp(default=''),
-        'config_base_dir':         StringProp(default=''), # will be set when we will load a file
+        'config_base_dir':          StringProp(default=''), # will be set when we will load a file
         'use_local_log':            BoolProp(default='1'),
-        'log_level':                LogLevelProp(default=logger.INFO),
+        'log_level':                LogLevelProp(default='WARNING'),
         'local_log':                StringProp(default='arbiterd.log'),
         'log_file':                 UnusedProp(text=no_longer_used_txt),
         'object_cache_file':        UnusedProp(text=no_longer_used_txt),
-        'precached_object_file':    UnusedProp(text='Shinken is faster enough to do not need precached object file.'),
+        'precached_object_file':    UnusedProp(text='Shinken does not use precached_object_files. Skipping.'),
         'resource_file':            StringProp(default='/tmp/ressources.txt'),
-        'temp_file':                UnusedProp(text=' temporary files are not used in the shinken architecture.'),
+        'temp_file':                UnusedProp(text='Temporary files are not used in the shinken architecture. Skipping'),
         'status_file':              UnusedProp(text=no_longer_used_txt),
         'status_update_interval':   UnusedProp(text=no_longer_used_txt),
         'shinken_user':             StringProp(default=get_cur_user()),
@@ -403,7 +403,7 @@ class Config(Item):
             res.write(os.linesep)
             res.write('# IMPORTEDFROM=%s' % (file) + os.linesep)
             if self.read_config_silent == 0:
-                logger.debug("[config] opening '%s' configuration file" % file)
+                logger.info("[config] opening '%s' configuration file" % file)
             try:
                 # Open in Universal way for Windows, Mac, Linux
                 fd = open(file, 'rU')
@@ -435,7 +435,7 @@ class Config(Item):
                     try:
                         fd = open(cfg_file_name, 'rU')
                         if self.read_config_silent == 0:
-                            console_logger.info("Processing object config file '%s'" % cfg_file_name)
+                            logger.info("Processing object config file '%s'" % cfg_file_name)
                         res.write(os.linesep + '# IMPORTEDFROM=%s' % (cfg_file_name) + os.linesep)
                         res.write(fd.read().decode('utf8', 'replace'))
                         # Be sure to add a line return so we won't mix files
@@ -468,7 +468,7 @@ class Config(Item):
                         for file in files:
                             if re.search("\.cfg$", file):
                                 if self.read_config_silent == 0:
-                                    console_logger.info("Processing object config file '%s'" % os.path.join(root, file))
+                                    logger.info("Processing object config file '%s'" % os.path.join(root, file))
                                 try:
                                     res.write(os.linesep + '# IMPORTEDFROM=%s' % (os.path.join(root, file)) + os.linesep)
                                     fd = open(os.path.join(root, file), 'rU')
@@ -825,7 +825,7 @@ class Config(Item):
             properties = self.__class__.properties
             for prop, entry in properties.items():
                 if isinstance(entry, UnusedProp):
-                    logger.info("The parameter %s is useless and can be removed from the configuration (Reason: %s)" % (prop, entry.text))
+                    logger.warning("The parameter %s is useless and can be removed from the configuration (Reason: %s)" % (prop, entry.text))
 
     # It's used to raise warning if the user got parameter
     # that we do not manage from now
@@ -846,8 +846,7 @@ class Config(Item):
             for s in unmanaged:
                 logger.info(s)
 
-            logger.info("Please look if you really need it. If so, please register at the devel mailing list (%s) and ask for it or propose us a patch :)" % mailing_list_uri)
-            print "\n"
+            logger.warning("Unmanaged configuration staement, do you really need it? Ask for it on the developer mailinglist %s or submit a pull request on the Shinken github " % mailing_list_uri)
 
     # Use to fill groups values on hosts and create new services
     # (for host group ones)
@@ -997,7 +996,7 @@ class Config(Item):
             # so all hosts without realm wil be link with it
             default = Realm({'realm_name': 'Default', 'default': '1'})
             self.realms = Realms([default])
-            logger.info("The is no defined realms, so I add a new one %s" % default.get_name())
+            logger.warning("No realms defined, I add one at %s" % default.get_name())
             lists = [self.pollers, self.brokers, self.reactionners, self.receivers, self.schedulers]
             for l in lists:
                 for elt in l:
@@ -1009,22 +1008,22 @@ class Config(Item):
     # with defaults values
     def fill_default_satellites(self):
         if len(self.schedulers) == 0:
-            logger.warning("There is no scheduler, I add one in localhost:7768")
+            logger.warning("No scheduler defined, I add one at localhost:7768")
             s = SchedulerLink({'scheduler_name': 'Default-Scheduler',
                                'address': 'localhost', 'port': '7768'})
             self.schedulers = SchedulerLinks([s])
         if len(self.pollers) == 0:
-            logger.warning("There is no poller, I add one in localhost:7771")
+            logger.warning("No poller defined, I add one at localhost:7771")
             p = PollerLink({'poller_name': 'Default-Poller',
                             'address': 'localhost', 'port': '7771'})
             self.pollers = PollerLinks([p])
         if len(self.reactionners) == 0:
-            logger.warning("There is no reactionner, I add one in localhost:7769")
+            logger.warning("No reactionner defined, I add one at localhost:7769")
             r = ReactionnerLink({'reactionner_name': 'Default-Reactionner',
                                  'address': 'localhost', 'port': '7769'})
             self.reactionners = ReactionnerLinks([r])
         if len(self.brokers) == 0:
-            logger.warning("There is no broker, I add one in localhost:7772")
+            logger.warning("No broker defined, I add one at localhost:7772")
             b = BrokerLink({'broker_name': 'Default-Broker',
                             'address': 'localhost', 'port': '7772',
                             'manage_arbiters': '1'})
@@ -1215,7 +1214,7 @@ class Config(Item):
         if mod_to_add != []:
             logger.warning("I autogenerated some Arbiter modules, please look at your configuration")
             for (mod, data) in mod_to_add:
-                logger.warning("The module %s is autogenerated" % data['module_name'])
+                logger.warning("Module %s was autogenerated" % data['module_name'])
                 for a in self.arbiters:
                     a.modules = ','.join([getattr(a, 'modules', ''), data['module_name']])
                 self.modules.items[mod.id] = mod
@@ -1281,13 +1280,13 @@ class Config(Item):
     def check_error_on_hard_unmanaged_parameters(self):
         r = True
         if self.use_regexp_matching:
-            logger.error("The use_regexp_matching parameter is not managed.")
+            logger.error("use_regexp_matching parameter is not managed.")
             r &= False
         #if self.ochp_command != '':
-        #    logger.error("the ochp_command parameter is not managed.")
+        #    logger.error("ochp_command parameter is not managed.")
         #    r &= False
         #if self.ocsp_command != '':
-        #    logger.error("the ocsp_command parameter is not managed.")
+        #    logger.error("ocsp_command parameter is not managed.")
         #    r &= False
         return r
 
@@ -1297,27 +1296,27 @@ class Config(Item):
     # does not have the satellites.
     def is_correct(self):
         """ Check if all elements got a good configuration """
-        console_logger.info('Running pre-flight check on configuration data...')
+        logger.info('Running pre-flight check on configuration data...')
         r = self.conf_is_correct
 
-        # Globally unamanged parameters
+        # Globally unmanged parameters
         if self.read_config_silent == 0:
-            console_logger.info('Checking global parameters...')
+            logger.info('Checking global parameters...')
         if not self.check_error_on_hard_unmanaged_parameters():
             r = False
-            console_logger.info("Check global parameters failed")
+            logger.error("Check global parameters failed")
 
         for x in ('hosts', 'hostgroups', 'contacts', 'contactgroups', 'notificationways',
                   'escalations', 'services', 'servicegroups', 'timeperiods', 'commands',
                   'hostsextinfo', 'servicesextinfo'):
             if self.read_config_silent == 0:
-                console_logger.info('Checking %s...' % (x))
+                logger.info('Checking %s...' % (x))
             cur = getattr(self, x)
             if not cur.is_correct():
                 r = False
-                console_logger.info("\t%s conf incorrect!!" % (x))
+                logger.error("\t%s conf incorrect!!" % (x))
             if self.read_config_silent == 0:
-                console_logger.info('\tChecked %d %s' % (len(cur), x))
+                logger.info('\tChecked %d %s' % (len(cur), x))
 
         # Hosts got a special check for loops
         if not self.hosts.no_loop_in_parents():
@@ -1332,12 +1331,12 @@ class Config(Item):
             except:
                 continue
             if self.read_config_silent == 0:
-                console_logger.info('Checking %s...' % (x))
+                logger.info('Checking %s...' % (x))
             if not cur.is_correct():
                 r = False
-                console_logger.error("\t%s conf incorrect!!" % (x))
+                logger.error("\t%s conf incorrect!!" % (x))
             if self.read_config_silent == 0:
-                console_logger.info('\tChecked %d %s' % (len(cur), x))
+                logger.info('\tChecked %d %s' % (len(cur), x))
 
         # Look that all scheduler got a broker that will take brok.
         # If there are no, raise an Error
@@ -1452,7 +1451,7 @@ class Config(Item):
     # Now it's time to show all configuration errors
     def show_errors(self):
         for err in self.configuration_errors:
-            console_logger.info(err)
+            logger.error(err)
 
     # Create packs of hosts and services so in a pack,
     # all dependencies are resolved
@@ -1584,12 +1583,12 @@ class Config(Item):
             for pack in r.packs:
                 nb_elements += len(pack)
                 nb_elements_all_realms += len(pack)
-            console_logger.info("Number of hosts in the realm %s: %d "
+            logger.info("Number of hosts in the realm %s: %d "
                                 "(distributed in %d linked packs)"
                                 % (r.get_name(), nb_elements, len(r.packs)))
 
             if nb_schedulers == 0 and nb_elements != 0:
-                err = "Error: The realm %s have hosts but no scheduler!" % r.get_name()
+                err = "The realm %s have hosts but no scheduler!" % r.get_name()
                 self.add_error(err)
                 r.packs = []  # Dumb pack
                 continue
@@ -1612,7 +1611,7 @@ class Config(Item):
             # send the hosts in the same "pack"
             assoc = {}
             if os.path.exists(self.pack_distribution_file):
-                console_logger.info('Trying to open the distribution file %s'
+                logger.debug('Trying to open the distribution file %s'
                                     % self.pack_distribution_file)
                 try:
                     f = open(self.pack_distribution_file, 'rb')
@@ -1662,21 +1661,21 @@ class Config(Item):
                     assoc[elt.get_name()] = i
 
             try:
-                logger.info('Trying to save the distribution file %s' % self.pack_distribution_file)
+                logger.info('Saving the distribution file %s' % self.pack_distribution_file)
                 f = open(self.pack_distribution_file, 'wb')
                 cPickle.dump(assoc, f)
                 f.close()
             except Exception, exp:
-                logger.warning('Can not save the distribution file %s: %s' % (self.pack_distribution_file, str(exp)))
+                logger.warning('Could not save the distribution file %s: %s' % (self.pack_distribution_file, str(exp)))
 
             # Now in packs we have the number of packs [h1, h2, etc]
             # equal to the number of schedulers.
             r.packs = packs
-        console_logger.info("Number of hosts in all the realm  %d"
+        logger.info("Number of hosts in all the realm  %d"
                             % nb_elements_all_realms)
-        console_logger.info("Number of hosts %d" % len(self.hosts))
+        logger.info("Number of hosts %d" % len(self.hosts))
         if len(self.hosts) != nb_elements_all_realms:
-            console_logger.info("There are %d hosts defined, and %d hosts "
+            logger.warning("There are %d hosts defined, and %d hosts "
                                 "dispatched in the realms. Some hosts have "
                                 "been ignored"
                                 % (len(self.hosts), nb_elements_all_realms))
@@ -1739,7 +1738,7 @@ class Config(Item):
             # if a scheduler have accepted the conf
             cur_conf.is_assigned = False
 
-        console_logger.info("Creating packs for realms")
+        logger.info("Creating packs for realms")
 
         # Just create packs. There can be numerous ones
         # In pack we've got hosts and service

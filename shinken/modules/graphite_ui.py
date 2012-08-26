@@ -32,12 +32,12 @@ import re
 import socket
 import os
 
+from shinken.log import logger
 from string import Template
 from shinken.basemodule import BaseModule
 from datetime import datetime
 from shinken.log import logger
 
-# print "Loaded AD module"
 
 properties = {
     'daemons': ['webui'],

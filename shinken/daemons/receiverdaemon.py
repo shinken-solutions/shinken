@@ -175,7 +175,7 @@ class Receiver(Satellite):
         else:
             name = 'Unnamed receiver'
         self.name = name
-        self.log.load_obj(self, name)
+        logger.load_obj(self, name)
         self.direct_routing = conf['global']['direct_routing']
 
         g_conf = conf['global']
@@ -280,7 +280,7 @@ class Receiver(Satellite):
             con = sched.get('con', None)
             sent = False
             if not con:
-                print "The scheduler is not connected", sched
+                logger.warning("The scheduler is not connected" % sched)
                 self.pynag_con_init(sched_id)
                 con = sched.get('con', None)
             
@@ -402,7 +402,7 @@ class Receiver(Satellite):
             self.look_for_early_exit()
 
             for line in self.get_header():
-                self.log.info(line)
+                logger.info(line)
 
             logger.info("[Receiver] Using working directory: %s" % os.path.abspath(self.workdir))
 

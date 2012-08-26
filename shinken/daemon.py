@@ -142,7 +142,7 @@ class Daemon(object):
         'ca_cert':       StringProp(default='etc/certs/ca.pem'),
         'server_cert':   StringProp(default='etc/certs/server.pem'),
         'use_local_log': BoolProp(default='1'),
-        'log_level': LogLevelProp(default='INFO'),
+        'log_level':     LogLevelProp(default='WARNING'),
         'hard_ssl_name_check':    BoolProp(default='0'),
         'idontcareaboutsecurity': BoolProp(default='0'),
         'daemon_enabled':BoolProp(default='1'),
@@ -171,8 +171,9 @@ class Daemon(object):
         self.pyro_daemon = None
 
         # Log init
-        self.log = logger
-        self.log.load_obj(self)
+        #self.log = logger
+        #self.log.load_obj(self)
+        logger.load_obj(self)
 
         self.new_conf = None  # used by controller to push conf
         self.cur_conf = None
@@ -209,8 +210,9 @@ class Daemon(object):
             if not hasattr(self, 'sched'):
                 self.hook_point('save_retention')
             # And we quit
-            logger.info('Stopping all modules')
+            print('Stopping all modules')
             self.modules_manager.stop_all()
+            print('Stopping inter-process message (PYRO)')
         if self.pyro_daemon:
             pyro.shutdown(self.pyro_daemon)
         logger.quit()
@@ -219,7 +221,8 @@ class Daemon(object):
     def request_stop(self):
         self.unlink()
         self.do_stop()
-        logger.debug("Exiting")
+        # Brok facilities are no longer available simply print the message to STDOUT
+        print ("Stopping daemon. Exiting", )
         sys.exit(0)
 
 
@@ -253,14 +256,14 @@ class Daemon(object):
 
     def do_load_modules(self):
         self.modules_manager.load_and_init()
-        self.log.info("I correctly loaded the modules: [%s]" % (','.join([inst.get_name() for inst in self.modules_manager.instances])))
+        logger.info("I correctly loaded the modules: [%s]" % (','.join([inst.get_name() for inst in self.modules_manager.instances])))
 
     # Dummy method for adding broker to this daemon
     def add(self, elt):
         pass
 
     def dump_memory(self):
-        logger.info("I dump my memory, it can ask some seconds to do")
+        logger.info("I dump my memory, it can take a minute")
 
 
         try:
@@ -285,7 +288,7 @@ class Daemon(object):
             os.chdir(self.workdir)
         except Exception, e:
             raise InvalidWorkDir(e)
-        logger.debug("Successfully changed to workdir: %s" % (self.workdir))
+        self.debug_output.append("Successfully changed to workdir: %s" % (self.workdir))
 
     def unlink(self):
         logger.debug("Unlinking %s" % self.pidfile)
@@ -299,7 +302,8 @@ class Daemon(object):
         # The arbiter doesn't have such attribute
         if hasattr(self, 'use_local_log') and self.use_local_log:
             try:
-                self.local_log_fd = self.log.register_local_log(self.local_log)
+                #self.local_log_fd = self.log.register_local_log(self.local_log)
+                self.local_log_fd = logger.register_local_log(self.local_log)
             except IOError, exp:
                 logger.error("Opening the log file '%s' failed with '%s'" % (self.local_log, exp))
                 sys.exit(2)
@@ -313,14 +317,14 @@ class Daemon(object):
             # We get the access rights, and we check them
             mode = stat.S_IMODE(os.lstat(shm_path)[stat.ST_MODE])
             if not mode & stat.S_IWUSR or not mode & stat.S_IRUSR:
-                logger.error("The directory %s is not writable or readable. Please launch as root chmod 777 %s" % (shm_path, shm_path))
+                logger.critical("The directory %s is not writable or readable. Please make it read writable: %s" % (shm_path, shm_path))
                 sys.exit(2)
 
     def __open_pidfile(self, write=False):
         ## if problem on opening or creating file it'll be raised to the caller:
         try:
             p = os.path.abspath(self.pidfile)
-            logger.debug("Opening pid file: %s" % self.pidfile)
+            self.debug_output.append("Opening pid file: %s" % self.pidfile)
             # Windows do not manage the rw+ mode, so we must open in read mode first, then reopen it write mode...
             if not write and os.path.exists(p):
                 self.fpid = open(p, 'r+')
@@ -363,7 +367,7 @@ class Daemon(object):
         if not self.do_replace:
             raise SystemExit, "valid pidfile exists and not forced to replace.  Exiting."
 
-        logger.debug("Replacing previous instance %d" % pid)
+        self.debug_output.append("Replacing previous instance %d" % pid)
         try:
             os.kill(pid, 3)
         except os.error, e:
@@ -412,7 +416,7 @@ class Daemon(object):
         if skip_close_fds is None:
             skip_close_fds = tuple()
 
-        logger.debug("Redirecting stdout and stderr as necessary..")
+        self.debug_output.append("Redirecting stdout and stderr as necessary..")
         if self.debug:
             fdtemp = os.open(self.debug_file, os.O_CREAT | os.O_WRONLY | os.O_TRUNC)
         else:
@@ -433,7 +437,7 @@ class Daemon(object):
             # In the father: we check if our child exit correctly
             # it has to write the pid of our futur little child..
             def do_exit(sig, frame):
-                logger.error("Timeout waiting child while it should have quickly returned ; something wierd happened")
+                logger.error("Timeout waiting child while it should have quickly returned ; something weird happened")
                 os.kill(pid, 9)
                 sys.exit(1)
             # wait the child process to check its return status:
@@ -442,7 +446,7 @@ class Daemon(object):
             # if it's not then something wrong can already be on the way so let's wait max 3 secs here.
             pid, status = os.waitpid(pid, 0)
             if status != 0:
-                logger.error("Something wierd happened with/during second fork: status=", status)
+                logger.error("Something weird happened with/during second fork: status=", status)
             os._exit(status != 0)
 
         # halfway to daemonize..
@@ -460,8 +464,9 @@ class Daemon(object):
         self.fpid.close()
         del self.fpid
         self.pid = os.getpid()
-        logger.debug("We are now fully daemonized :) pid=%d" % self.pid)
-        # We can now output some previouly silented debug ouput
+        self.debug_output.append("We are now fully daemonized :) pid=%d" % self.pid)
+        # We can now output some previously silenced debug ouput
+        logger.warning("Printing stored debug messages prior to our daemonization")
         for s in self.debug_output:
             logger.debug(s)
         del self.debug_output
@@ -473,7 +478,10 @@ class Daemon(object):
         if use_pyro:
             self.setup_pyro_daemon()
         # Setting log level
+        #logger.error("Current logging level is %d :  and configuration log level is : %d" % (logger.get_level(), self.log_level))
         logger.set_level(self.log_level)
+        #logger.error("Logging level is now %d : " % (logger.get_level()))
+        
         # Then start to log all in the local file if asked so
         self.register_local_log()
         if self.is_daemon:
@@ -609,6 +617,7 @@ class Daemon(object):
 
         uid = self.find_uid_from_name()
         gid = self.find_gid_from_name()
+
         if uid is None or gid is None:
             logger.error("uid or gid is none. Exiting")
             sys.exit(2)
@@ -691,7 +700,7 @@ class Daemon(object):
 
     def print_header(self):
         for line in self.get_header():
-            print line
+            logger.info(line)
 
 # Wait up to timeout to handle the pyro daemon requests.
 # If suppl_socks is given it also looks for activity on that list of fd.
@@ -777,7 +786,7 @@ class Daemon(object):
                 try:
                     f(self)
                 except Exception, exp:
-                    logger.warning('The instance %s raise an exception %s. I disable, and set it to restart later' % (inst.get_name(), str(exp)))
+                    logger.warning('The instance %s raised an exception %s. I disabled it, and set it to restart later' % (inst.get_name(), str(exp)))
                     self.modules_manager.set_to_restart(inst)
 
     # Dummy function for daemons. Get all retention data

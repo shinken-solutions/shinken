@@ -102,13 +102,13 @@ class Ws_arbiter(BaseModule):
             self.port = int(getattr(modconf, 'port', '7760'))
             self.host = getattr(modconf, 'host', '0.0.0.0')
         except AttributeError:
-            logger.error("[WS Arbiter] Error: the module '%s' do not have a property" % mod_conf.get_name())
+            logger.error("[Ws_arbiter] The module is missing a property, check module declaration in shinken-specific.cfg")
             raise
 
     # We initialise the HTTP part. It's a simple wsgi backend
     # with a select hack so we can still exit if someone ask it
     def init_http(self):
-        logger.info("Starting WS arbiter http socket")
+        logger.info("[Ws_arbiter] Starting WS arbiter http socket")
         self.srv = run(host=self.host, port=self.port, server='wsgirefselect')
         # And we link our page
         route('/push_check_result', callback=get_page, method='POST')

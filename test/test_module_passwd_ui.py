@@ -40,6 +40,7 @@ if not sys.version_info > (2, 5):
 from shinken.objects.module import Module
 from shinken.modules import passwd_ui
 from shinken.modules.passwd_ui import get_instance
+from shinken.log import logger
 
 
 if sys.version_info > (2, 5):

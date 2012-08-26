@@ -61,12 +61,12 @@ class IForArbiter(Interface):
 
     # The master arbiter asks me not to run!
     def do_not_run(self):
-        # If i'm the master, then F**K YOU!
+        # If i'm the master, ignore the command
         if self.app.is_master:
-            logger.debug("Some f***ing idiot asks me not to run. I'm a proud master, so I decide to run anyway")
+            logger.debug("Received message to not run. I am the Master, ignore and continue running.")
         # Else, I'm just a spare, so I listen to my master
         else:
-            logger.debug("Someone asks me not to run")
+            logger.debug("Received message to not run. I am the spare, stopping.")
             self.app.last_master_speack = time.time()
             self.app.must_run = False
 
@@ -224,7 +224,7 @@ class Arbiter(Daemon):
         return daemon_type + 's'
 
     def load_config_file(self):
-        logger.debug("Loading configuration")
+        logger.info("Loading configuration")
         # REF: doc/shinken-conf-dispatching.png (1)
         buf = self.conf.read_config(self.config_files)
         raw_objects = self.conf.read_config_buf(buf)
@@ -276,7 +276,7 @@ class Arbiter(Daemon):
                 try:
                     r = inst.get_objects()
                 except Exception, exp:
-                    logger.debug("The instance %s raise an exception %s. I bypass it" % (inst.get_name(), str(exp)))
+                    logger.error("Instance %s raised an exception %s. Log and continu running" % (inst.get_name(), str(exp)))
                     continue
 
                 types_creations = self.conf.types_creations
@@ -384,7 +384,6 @@ class Arbiter(Daemon):
 
         # REF: doc/shinken-conf-dispatching.png (2)
         logger.info("Cutting the hosts and services into parts")
-        print "Cutting the hosts and services into parts"
         self.confs = self.conf.cut_into_parts()
 
         # The conf can be incorrect here if the cut into parts see errors like
@@ -395,8 +394,7 @@ class Arbiter(Daemon):
             logger.error(err)
             sys.exit(err)
 
-        logger.info('Things look okay - No serious problems were detected during the pre-flight check.')
-        print 'Things look okay - No serious problems were detected during the pre-flight check.'
+        logger.info('Things look okay - No serious problems were detected during the pre-flight check')
 
         # Clean objects of temporary/unecessary attributes for live work:
         self.conf.clean()
@@ -416,8 +414,7 @@ class Arbiter(Daemon):
 
         # Ok, here we must check if we go on or not.
         # TODO: check OK or not
-        # TODO: I don't know why conf.log_level is string, not an int
-        self.log_level = logger.get_level_id(self.conf.log_level)
+        self.log_level = self.conf.log_level
         self.use_local_log = self.conf.use_local_log
         self.local_log = self.conf.local_log
         self.pidfile = os.path.abspath(self.conf.lock_file)
@@ -441,17 +438,16 @@ class Arbiter(Daemon):
         self.port = self.me.port
 
         logger.info("Configuration Loaded")
-        print "Configuration Loaded"
 
 
     def launch_analyse(self):
         try:
             import json
         except ImportError:
-            print "Error: json is need for statistics file saving. Please update your python version to 2.6"
+            logger.error("Error: json is need for statistics file saving. Please update your python version to 2.6")
             sys.exit(2)
 
-        print "We are doing an statistic analyse dump on the file", self.analyse
+        logger.info("We are doing an statistic analysis on the dump file" % self.analyse)
         stats = {}
         types = ['hosts', 'services', 'contacts', 'timeperiods', 'commands', 'arbiters',
                  'schedulers', 'pollers', 'reactionners', 'brokers', 'receivers', 'modules',
@@ -460,15 +456,15 @@ class Arbiter(Daemon):
             lst = getattr(self.conf, t)
             nb = len([i for i in lst])
             stats['nb_' + t] = nb
-            print "Got", nb, "for", t
+            logger.info("Got %s for %s" % (nb, t))
 
         max_srv_by_host = max([len(h.services) for h in self.conf.hosts])
-        print "Max srv by host", max_srv_by_host
+        logger.info("Max srv by host" % max_srv_by_host)
         stats['max_srv_by_host'] = max_srv_by_host
 
         f = open(self.analyse, 'w')
         s = json.dumps(stats)
-        print "Saving stats data", s
+        logger.info("Saving stats data to a file" % s)
         f.write(s)
         f.close()
 
@@ -478,7 +474,7 @@ class Arbiter(Daemon):
         try:
             # Log will be broks
             for line in self.get_header():
-                self.log.info(line)
+                logger.info(line)
 
             self.load_config_file()
 
@@ -504,7 +500,7 @@ class Arbiter(Daemon):
         except Exception, exp:
             logger.critical("I got an unrecoverable error. I have to exit")
             logger.critical("You can log a bug ticket at https://github.com/naparuba/shinken/issues/new to get help")
-            logger.critical("Back trace of it: %s" % (traceback.format_exc()))
+            logger.critical("Exception trace follows: %s" % (traceback.format_exc()))
             raise
 
     def setup_new_conf(self):
@@ -547,7 +543,7 @@ class Arbiter(Daemon):
                 # Maybe the queue had problems
                 # log it and quit it
                 except (IOError, EOFError), exp:
-                    logger.warning("An external module queue got a problem '%s'" % str(exp))
+                    logger.error("An external module queue got a problem '%s'" % str(exp))
                     break
 
 
