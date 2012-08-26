@@ -177,7 +177,7 @@ except AttributeError, exp:
                 if hasattr(socket, 'MSG_WAITALL'):
                     del socket.MSG_WAITALL
             elif PYRO_VERSION in bad_versions:
-                print "Your pyro version (%s) is not supported. Please downgrade/upgrade it to (4.14)" % PYRO_VERSION
+                logger.error("Your pyro version (%s) is not supported. Please downgrade it (4.12)" % PYRO_VERSION)
                 exit(1)
             else:
                 Pyro.config.SERVERTYPE = "multiplex"

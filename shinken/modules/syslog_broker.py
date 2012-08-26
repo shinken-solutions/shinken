@@ -30,6 +30,7 @@
 import syslog
 
 from shinken.basemodule import BaseModule
+from shinken.log import logger
 
 properties = {
     'daemons': ['broker'],
@@ -41,7 +42,7 @@ properties = {
 
 # called by the plugin manager to get a broker
 def get_instance(plugin):
-    print "Get a Syslog broker for plugin %s" % plugin.get_name()
+    logger.info("Get a Syslog broker for plugin %s" % plugin.get_name())
 
     #Catch errors
     #path = plugin.path

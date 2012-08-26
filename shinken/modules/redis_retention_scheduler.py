@@ -47,7 +47,8 @@ def get_instance(plugin):
     """
     logger.debug("Get a redis retention scheduler module for plugin %s" % plugin.get_name())
     if not redis:
-        raise Exception('Missing the module python-redis. Please install it.')
+        logger.error('Missing the module python-redis. Please install it.')
+        raise Exception
     server = plugin.server
     instance = Redis_retention_scheduler(plugin, server)
     return instance
@@ -62,7 +63,7 @@ class Redis_retention_scheduler(BaseModule):
         """
         Called by Scheduler to say 'let's prepare yourself guy'
         """
-        print "Initilisation of the redis module"
+        logger.debug("[RedisRetention] Initialisation of the redis module")
         #self.return_queue = self.properties['from_queue']
         self.mc = redis.Redis(self.server)
 

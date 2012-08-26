@@ -27,7 +27,7 @@
 import time, calendar
 
 from shinken.util import get_sec_from_morning, get_day, get_start_of_day, get_end_of_day
-
+from shinken.log import logger
 
 # Get the day number (like 27 in July tuesday 27 2010 for call:
 # 2010, july, tuesday, -1 (last tuesday of july 2010)
@@ -172,7 +172,7 @@ class Daterange:
     get_weekday_by_id = classmethod(get_weekday_by_id)
 
     def get_start_and_end_time(self, ref=None):
-        print "Not implemented"
+        logger.warning("Calling function get_start_and_end_time which is not implemented")
 
     def is_time_valid(self, t):
         #print "****Look for time valid for", time.asctime(time.localtime(t))
@@ -410,7 +410,7 @@ class StandardDaterange(Daterange):
     def is_correct(self):
         b = self.day in Daterange.weekdays
         if not b:
-            print "Error: %s is not a valid day" % self.day
+            logger.error("Error: %s is not a valid day" % self.day)
         return b
 
     def get_start_and_end_time(self, ref=None):
@@ -435,11 +435,11 @@ class MonthWeekDayDaterange(Daterange):
         b = True
         b &= self.swday in Daterange.weekdays
         if not b:
-            print "Error: %s is not a valid day" % self.swday
+            logger.error("Error: %s is not a valid day" % self.swday)
 
         b &= self.ewday in Daterange.weekdays
         if not b:
-            print "Error: %s is not a valid day" % self.ewday
+            logger.error("Error: %s is not a valid day" % self.ewday)
 
         return b
 

@@ -352,11 +352,11 @@ class ExternalCommandManager:
 
         # If we are a receiver, just look in the receiver 
         if self.mode == 'receiver':
-            print "Finding a scheduler for the command", host_name, command
+            logger.info("Receiver looking a scheduler for the external command %s %s" % (host_name, command))
             sched = self.receiver.get_sched_from_hname(host_name)
-            print "Found the scheduler?", sched
+            logger.debug("Receiver found a scheduler: %s" % (sched))
             if sched:
-                print "found! we push"
+                logger.info("Receiver pushing external command to scheduler %s" % (sched))
                 sched['external_commands'].append(extcmd)
             return
         
@@ -1679,6 +1679,6 @@ if __name__ == '__main__':
         os.umask(0)
         os.mkfifo(FIFO_PATH, 0660)
         my_fifo = open(FIFO_PATH, 'w+')
-        print "my_fifo:", my_fifo
+        logger.debug("my_fifo: %s" % (my_fifo))
 
-    print open(FIFO_PATH, 'r').readline()
+    logger.debug(open(FIFO_PATH, 'r').readline())
