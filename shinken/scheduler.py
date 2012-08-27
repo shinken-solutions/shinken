@@ -1339,6 +1339,7 @@ class Scheduler:
     # Main actions reaper function: it get all new checks,
     # notification and event handler from hosts and services
     def get_new_actions(self):
+        self.hook_point('get_new_actions')
         # ask for service and hosts their next check
         for type_tab in [self.services, self.hosts]:
             for i in type_tab:
