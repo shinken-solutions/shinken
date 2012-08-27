@@ -148,15 +148,18 @@ class MacroResolver(Borg):
             cls = o.__class__
             macros = cls.macros
             for macro in macros:
+                if macro.startswith("USER"):
+                    break
+
                 #print "Macro in %s: %s" % (o.__class__, macro)
                 prop = macros[macro]
                 value = self.get_value_from_element(o, prop)
-                #print "Value: %s" % value
-                env['NAGIOS_' + macro] = value
+                env['NAGIOS_%s' % macro] = value
             if hasattr(o, 'customs'):
                 # make NAGIOS__HOSTMACADDR from _MACADDR
                 for cmacro in o.customs:
                     env['NAGIOS__' + o.__class__.__name__.upper() + cmacro[1:].upper()] = o.customs[cmacro]
+
         return env
 
     # This function will look at elements in data (and args if it filled)

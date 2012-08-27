@@ -542,9 +542,9 @@ class Webui_broker(BaseModule, Daemon):
                     return r
             except Exception, exp:
                 print exp.__dict__
-                logger.log("[%s] Warning: The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
-                logger.log("[%s] Exception type: %s" % (self.name, type(exp)))
-                logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
+                logger.warning("[%s] The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
+                logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
+                logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)
         print 'get_common_preference :: Nothing return, I send none'
         return default
@@ -573,9 +573,9 @@ class Webui_broker(BaseModule, Daemon):
                     return r
             except Exception, exp:
                 print exp.__dict__
-                logger.log("[%s] Warning: The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
-                logger.log("[%s] Exception type: %s" % (self.name, type(exp)))
-                logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
+                logger.warning("[%s] The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
+                logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
+                logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)
         print 'get_user_preference :: Nothing return, I send non'
         return default
@@ -592,9 +592,9 @@ class Webui_broker(BaseModule, Daemon):
                     f(user, key, value)
             except Exception, exp:
                 print exp.__dict__
-                logger.log("[%s] Warning: The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
-                logger.log("[%s] Exception type: %s" % (self.name, type(exp)))
-                logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
+                logger.warning("[%s] The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
+                logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
+                logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)
                 
     def set_common_preference(self, key, value):
@@ -608,9 +608,9 @@ class Webui_broker(BaseModule, Daemon):
                     f(key, value)
             except Exception, exp:
                 print exp.__dict__
-                logger.log("[%s] Warning: The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
-                logger.log("[%s] Exception type: %s" % (self.name, type(exp)))
-                logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
+                logger.warning("[%s] The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
+                logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
+                logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)
 
 
@@ -633,9 +633,9 @@ class Webui_broker(BaseModule, Daemon):
                     lst.append(r)
             except Exception, exp:
                 print exp.__dict__
-                logger.log("[%s] Warning: The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
-                logger.log("[%s] Exception type: %s" % (self.name, type(exp)))
-                logger.log("Back trace of this kill: %s" % (traceback.format_exc()))
+                logger.warning("[%s] Warning: The mod %s raise an exception: %s, I'm tagging it to restart later" % (self.name, mod.get_name(), str(exp)))
+                logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
+                logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                 self.modules_manager.set_to_restart(mod)
 
         safe_print("Will return external_ui_link::", lst)

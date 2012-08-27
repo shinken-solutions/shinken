@@ -219,7 +219,7 @@ class Broker(BaseSatellite):
             links[id]['con'] = None
             return
 #        except Pyro.errors.NamingError, exp:
-#            logger.log("[%s] the %s '%s' is not initialized: %s" % (self.name, type, links[id]['name'], str(exp)))
+#            logger.info("[%s] the %s '%s' is not initialized: %s" % (self.name, type, links[id]['name'], str(exp)))
 #            links[id]['con'] = None
 #            return
         except KeyError, exp:
@@ -350,7 +350,7 @@ class Broker(BaseSatellite):
         else:
             name = 'Unnamed broker'
         self.name = name
-        self.log.load_obj(self, name)
+        logger.load_obj(self, name)
 
         logger.debug("[%s] Sending us configuration %s" % (self.name, conf))
         # If we've got something in the schedulers, we do not
@@ -637,10 +637,12 @@ class Broker(BaseSatellite):
             self.load_config_file()
 
             for line in self.get_header():
-                self.log.info(line)
+                logger.info(line)
 
             logger.info("[Broker] Using working directory: %s" % os.path.abspath(self.workdir))
 
+            # Look if we are enabled or not. If ok, start the daemon mode
+            self.look_for_early_exit()
             self.do_daemon_init_and_start()
 
             self.uri2 = self.pyro_daemon.register(self.interface, "ForArbiter")

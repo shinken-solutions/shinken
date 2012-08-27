@@ -57,15 +57,16 @@ class ArbiterLink(SatelliteLink):
 
         for prop, entry in cls.properties.items():
             if not hasattr(self, prop) and entry.required:
-                # This sould raise an error afterwards?
-                # If so, logger.log it!
-                self.debug("%s arbiterlink have not %s property" % (self.get_name(), prop))
+                # This should raise an error afterwards?
+                # Log the issue
+                logger.warning("%s arbiterlink is missing %s property" % (self.get_name(), prop))
+                self.debug("%s arbiterlink is missing %s property" % (self.get_name(), prop))
                 state = False  # Bad boy...
         return state
 
-    # Look for ourself as an arbiter. Should be our fqdn name, or if not, our hostname one
+    # Look for ourself as an arbiter. Should be our fqdn name, or if not, our hostname
     def is_me(self):
-        logger.info("And arbiter is launched with the hostname:%s from an arbiter point of view of addr:%s" % (self.host_name, socket.getfqdn()), print_it=False)
+        logger.info("And arbiter is launched with the hostname:%s from an arbiter point of view of addr:%s" % (self.host_name, socket.getfqdn()))
         return self.host_name == socket.getfqdn() or self.host_name == socket.gethostname()
 
     def give_satellite_cfg(self):

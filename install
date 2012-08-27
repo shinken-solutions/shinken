@@ -164,6 +164,15 @@ function remove(){
     return 0
 }
 
+function enable_rhel_service(){
+    service=$1
+    if [ $CODE == "REDHAT" ]
+    then
+        chkconfig --add $service >> ${LOGFILE} 2>&1
+        chkconfig $ervice on >> ${LOGFILE} 2>&1
+    fi
+}
+
 function purgeSQLITE(){
     cadre "Purge livestatus db logs" green
     if [ ! -f $TARGET/var/livestatus.db ]
@@ -252,7 +261,7 @@ function create_user(){
     then
         cecho " > User $SKUSER already exists" yellow
     else
-            useradd -r -s /bin/bash $SKUSER -m -d /home/$SKUSER
+            useradd -r -s /bin/bash $SKUSER -m
     fi
         usermod -G $SKGROUP $SKUSER
 }
@@ -675,6 +684,7 @@ function relocate(){
     done
 
     # relocate nagios plugin path
+    cecho " > relocate nagios plugin path" green
     sed -i "s#/usr/lib/nagios/plugins#$TARGET/libexec#g" $ETC/resource.cfg
     sed -i "s#/usr/local/shinken/libexec#$TARGET/libexec#g" $ETC/resource.cfg
     # relocate default /usr/local/shinken path
@@ -775,8 +785,7 @@ function enable_initd(){
     cecho " > Enabling $DIST startup script" green
     case $CODE in
         REDHAT)
-            chkconfig --add shinken
-            chkconfig shinken on
+            enable_rhel_service shinken
             ;;
         Fedora)
             systemctl --system daemon-reload
@@ -919,7 +928,12 @@ function sinstall(){
     enableretention
     enable_initd
 
-    install_mongodb
+    if [[ $NOMONGO -eq 1 ]]
+    then
+        cecho " > Skip mongo installation" green
+    else
+        install_mongodb
+    fi
 
     if [ "$LOGSTORE" == "mongo" ]
     then
@@ -1314,12 +1328,22 @@ function install_mongodb(){
                 cecho " > Installing mongodb server" green
                 yum -y install $MONGOPKGS >> ${LOGFILE} 2>&1
                 cecho " > Enable mongodb startup scripts" green
-                chkconfig --add mongod >> ${LOGFILE} 2>&1
-                chkconfig mongod on >> ${LOGFILE} 2>&1
+                enable_rhel_service mongod
                 cecho " > Start mongodb server" green
                 /etc/init.d/mongod start >> ${LOGFILE} 2>&1
             else
-                cecho "Already installed" yellow
+                # check if mongo is installed
+                exist=$(rpm -qa | grep mongo-10gen)
+                if [[ -z "$exist" ]]
+                then
+                    cecho " > Installing mongodb server" green
+                    yum -y install $MONGOPKGS >> ${LOGFILE} 2>&1
+                    enable_rhel_service mongod
+                    cecho " > Start mongodb server" green
+                    /etc/init.d/mongod start >> ${LOGFILE} 2>&1
+                else
+                    cecho "Already installed" yellow
+                fi
             fi
             ;;
         Fedora)
@@ -1576,10 +1600,10 @@ function install_multisite(){
         echo "Defaults:$HTTPDUSER!requiretty" >> /etc/sudoers
         echo "$HTTPDUSER ALL = (root) NOPASSWD: $MKPREFIX/check_mk --automation *" >> /etc/sudoers
     fi
-    if [ $movepnp -eq 1 ]
-    then
-        mv $PNPPREFIX $PNPPREFIX.MK
-    fi
+#    if [ $movepnp -eq 1 ]
+#    then
+#        mv $PNPPREFIX $PNPPREFIX.MK
+#    fi
 }
 
 # pnp4nagios
@@ -1650,6 +1674,8 @@ function install_pnp4nagios(){
             cecho " > Fix htpasswd.users path" green
             sed -i "s#/usr/local/nagios/etc/htpasswd.users#$ETC/htpasswd.users#g" /etc/httpd/conf.d/pnp4nagios.conf
             /etc/init.d/httpd restart >> ${LOGFILE} 2>&1
+            cecho " > Enable npcd startup" green
+            enable_rhel_service npcd
             ;;
         DEBIAN)
             cecho " > Fix htpasswd.users path" green
@@ -1752,13 +1778,12 @@ function install_mysql(){
     cecho " > Checking for mysql server" green
     case $CODE in
         REDHAT)
-            if [ -z "$(rpm -qa | grep mysql-server)"
-                ]
+            if [[ -z "$(rpm -qa | grep mysql-server)" ]]
             then
                 cecho " --> mysql-server not found. Going to install" yellow
                 yum install -y mysql-server >> ${LOGFILE} 2>&1
-                chkconfig mysqld on >> ${LOGFILE} 2>&1
-                /etc/init.d/mysqld start >> ${LOGFILE} 2>&1
+                enable_rhel_service mysqld
+                /etc/init.d/mysqld start
                 while true
                 do
                     creads " --> Please provide a password for root user: " yellow
@@ -1877,7 +1902,7 @@ function install_nconf(){
             REDHAT|Fedora)
                 cecho " > Installing prerequisites" green
                 yum -y install $NCONFYUMPKG >> ${LOGFILE} 2>&1
-                chkconfig httpd on >> ${LOGFILE} 2>&1
+                enable_rhel_service httpd
                 /etc/init.d/httpd restart >> ${LOGFILE} 2>&1
                 ;;
             DEBIAN)
@@ -1996,8 +2021,7 @@ function install_nconf(){
     # restart apache for dependencies
     case $CODE in
         REDHAT|Fedora)
-            chkconfig httpd on >> ${LOGFILE} 2>&1
-            chkconfig --add httpd  >> ${LOGFILE} 2>&1
+            enable_rhel_service httpd
             /etc/init.d/httpd restart >> ${LOGFILE} 2>&1
             ;;
         DEBIAN)
@@ -2112,6 +2136,52 @@ function install_notify_by_xmpp(){
 #################################
 ### PLUGINS INSTALLATION PART ###
 #################################
+
+# CUCUMBER
+function install_cucumber(){
+    if [[ "$CODE" == "REDHAT" ]]
+    then
+        if [[ ! -f /etc/yum.repos.d/dag.repo ]]
+        then
+            cecho " > Enable dag repository for ffmpeg" green
+            cp $myscripts/install.d/dag.repo /etc/yum.repos.d
+            yum clean all >> ${LOGFILE} 2>&1
+        fi
+        cecho " > Installing eue dependencies" green
+        for p in $EUEYUMPKG
+        do 
+            cecho " --> Installing $p" green
+            yum install -y $p >> ${LOGFILE} 2>&1
+            if [[ $? -ne 0 ]]
+            then
+                cecho " ----> There was a problem installing $p" red
+            fi
+        done
+    elif [[ "$CODE" == "DEBIAN" ]]
+    then
+        cecho " > Unsuported at the moment ...." red
+        exit 2
+    else
+        cecho " > Unsupported distribution" red
+        exit 2
+    fi
+
+    cecho " --> Installing ruby gems" green
+    for g in $EUEGEMS
+    do
+        gem=$(echo $g | awk -F: '{print $1}')
+        gemver=$(echo $g | awk -F: '{print $2}')
+        cecho " ----> Installing gem ${gem} version ${gemver}" green
+        gem install --no-ri --no-rdoc $gem --version $gemver >> ${LOGFILE} 2>&1
+        if [[ $? -ne 0 ]]
+        then
+            cecho " ------> There was a problem installing gem ${gem} version ${gemver}" red
+        fi
+    done
+
+   
+ 
+}
 
 # CAPTURE_PLUGIN
 function install_capture_plugin(){
@@ -3035,6 +3105,7 @@ echo "Usage: install -k | -i | -u [addonname] | -b | -r backupname | -l | -c | -
                                notify_by_xmpp
     --nconf-import-packs    Import shinken packs into nconf (experimental). This require nconf to be installed
     --register              Register on community (experimental)
+    --enableeue             Enable application performance monitoring stack (experimental)
     -h | --help             Show help"
 }
 
@@ -3060,7 +3131,7 @@ fi
 
 # options may be followed by one colon to indicate they have a required argument
 
-if ! options=$(getopt -u -o kiu::br:lce:p:a:h -l register,nconf-import-packs,kill,install,uninstall::,backup,restore:,listbackups,compresslogs,enabledaemons:,plugin:,addon:,help -- "$@")
+if ! options=$(getopt -u -o kiu::br:lce:p:a:h -l register,nconf-import-packs,kill,install,uninstall::,backup,restore:,listbackups,compresslogs,enabledaemons:,plugin:,addon:,enableeue,help -- "$@")
 then
     # something went wrong, getopt will put out an error message for us
     exit 2
@@ -3217,7 +3288,7 @@ do
             ;;
         -i|--install)
             FROMSRC=1
-            sinstall
+            sinstall 
             fixHtpasswdPath
             exit 0
             ;;
@@ -3299,6 +3370,10 @@ do
             ;;
         --register)
             register
+            exit 0
+            ;;
+        --enableeue)
+            install_cucumber
             exit 0
             ;;
         (--)

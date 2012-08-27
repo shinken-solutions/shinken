@@ -1,7 +1,6 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
-
+#
 # Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
@@ -45,31 +44,34 @@ properties = {
     }
 
 
-# called by the plugin manager to get a broker
 def get_instance(plugin):
-    print "Get a pickle retention scheduler module for plugin %s" % plugin.get_name()
+    """
+    Called by the plugin manager to get a broker
+    """
+    logger.debug("Get a pickle retention scheduler module for plugin %s" % plugin.get_name())
     path = plugin.path
     instance = Pickle_retention_scheduler(plugin, path)
     return instance
 
 
-# Just print some stuff
 class Pickle_retention_scheduler(BaseModule):
     def __init__(self, modconf, path):
         BaseModule.__init__(self, modconf)
         self.path = path
 
-    # Ok, main function that is called in the retention creation pass
     def hook_save_retention(self, daemon):
-        self.update_retention_objects(daemon, logger)
+        """
+        main function that is called in the retention creation pass
+        """
+        self.update_retention_objects(daemon)
 
     # The real function, this wall module will be soonly removed
-    def update_retention_objects(self, sched, log_mgr):
-        print "[PickleRetention] asking me to update the retention objects"
+    def update_retention_objects(self, sched):
+        logger.debug("[PickleRetention] asking me to update the retention objects")
         # Now the flat file method
         try:
             # Open a file near the path, with .tmp extension
-            # so in cae or problem, we do not lost the old one
+            # so in case of a problem, we do not lose the old one
             f = open(self.path + '.tmp', 'wb')
             # Just put hosts/services becauses checks and notifications
             # are already link into
@@ -84,47 +86,36 @@ class Pickle_retention_scheduler(BaseModule):
             cPickle.dump(all_data, f, protocol=cPickle.HIGHEST_PROTOCOL)
             #f.write(s_compress)
             f.close()
-            # Now move the .tmp fiel to the real path
+            # Now move the .tmp file to the real path
             shutil.move(self.path + '.tmp', self.path)
         except IOError, exp:
-            log_mgr.log("Error: retention file creation failed, %s" % str(exp))
+            logger.error("Retention file creation failed, %s" % str(exp))
             return
-        log_mgr.log("Updating retention_file %s" % self.path)
+        logger.info("Updating retention_file %s" % self.path)
 
     def hook_load_retention(self, daemon):
-        return self.load_retention_objects(daemon, logger)
+        return self.load_retention_objects(daemon)
 
     # Should return if it succeed in the retention load or not
-    def load_retention_objects(self, sched, log_mgr):
-        print "[PickleRetention] asking me to load the retention objects"
+    def load_retention_objects(self, sched):
+        logger.debug("[PickleRetention] asking me to load the retention objects")
 
         # Now the old flat file way :(
-        log_mgr.log("[PickleRetention]Reading from retention_file %s" % self.path)
+        logger.debug("[PickleRetention]Reading from retention_file %s" % self.path)
         try:
             f = open(self.path, 'rb')
             all_data = cPickle.load(f)
             f.close()
-        except EOFError, exp:
-            print exp
+        except (EOFError, ValueError, IOError), exp:
+            logger.warning(repr(exp))
             return False
-        except ValueError, exp:
-            print exp
-            return False
-        except IOError, exp:
-            print exp
-            return False
-        except IndexError, exp:
-            s = "WARNING: Sorry, the ressource file is not compatible"
-            log_mgr.log(s)
-            return False
-        except TypeError, exp:
-            s = "WARNING: Sorry, the ressource file is not compatible"
-            log_mgr.log(s)
+        except (IndexError, TypeError), exp:
+            logger.warning("Sorry, the ressource file is not compatible")
             return False
 
         # call the scheduler helper function for restoring values
         sched.restore_retention_data(all_data)
 
-        log_mgr.log("[PickleRetention] OK we've load data from retention file")
+        logger.info("[PickleRetention] Retention objects loaded successfully.")
 
         return True

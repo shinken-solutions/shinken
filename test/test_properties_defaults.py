@@ -98,7 +98,7 @@ class TestConfig(unittest.TestCase, PropertiesTester):
         ('workdir', ''),
         ('config_base_dir', ''),
         ('use_local_log', '1'),
-        ('log_level', 20),
+        ('log_level', 'WARNING'),
         ('local_log', 'arbiterd.log'),
         ('resource_file', '/tmp/ressources.txt'),
         ('shinken_user', shinken.daemon.get_cur_user()),
@@ -188,6 +188,7 @@ class TestConfig(unittest.TestCase, PropertiesTester):
         ('use_true_regexp_matching', None),
         ('broker_module', ''),
         ('modified_attributes', 0L),
+        ('daemon_enabled', '1'),
 
         # Shinken specific
         ('idontcareaboutsecurity', '0'),

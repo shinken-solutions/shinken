@@ -61,10 +61,15 @@ class Log:
     @staticmethod
     def get_level_id(lvlName):
         """Convert a level name (string) to its integer value
-
-           Raise KeyError when name not found
+           and vice-versa. Input a level and it will return a name.
+           Raise KeyError when name or level not found
         """
         return logging._levelNames[lvlName]
+
+    # We can have level as an int (logging.INFO) or a string INFO
+    # if string, try to get the int value
+    def get_level(self):
+        return logging.getLogger().getEffectiveLevel()
 
     # We can have level as an int (logging.INFO) or a string INFO
     # if string, try to get the int value
@@ -114,14 +119,14 @@ class Log:
             lvlname = logging.getLevelName(level)
 
             if display_level:
-                fmt = u'[%(date)s] %(level)s: %(name)s%(msg)s\n'
+                fmt = u'[%(date)s] %(level)-9s %(name)s%(msg)s\n'
             else:
                 fmt = u'[%(date)s] %(name)s%(msg)s\n'
 
             args = {
                 'date': (human_timestamp_log and time.asctime()
                          or int(time.time())),
-                'level': lvlname.capitalize(),
+                'level': lvlname.capitalize()+' :',
                 'name': name and ('[%s] ' % name) or '',
                 'msg': message
             }
@@ -193,3 +198,35 @@ class Log:
         human_timestamp_log = bool(on)
 
 logger = Log()
+
+class __ConsoleLogger:
+    """
+    This wrapper class for logging and printing messages to stdout, too.
+
+    :fixme: Implement this using an additional stream-handler, as soon
+    as the logging system is based on the standard Pytthon logging
+    module.
+    """
+    def debug(self, msg, *args, **kwargs):
+        self._log(Log.DEBUG, msg, *args, **kwargs)
+
+    def info(self, msg, *args, **kwargs):
+        kwargs.setdefault('display_level', False)
+        self._log(Log.INFO, msg, *args, **kwargs)
+
+    def warning(self, msg, *args, **kwargs):
+        self._log(Log.WARNING, msg, *args, **kwargs)
+
+    def error(self, msg, *args, **kwargs):
+        self._log(Log.ERROR, msg, *args, **kwargs)
+
+    def critical(self, msg, *args, **kwargs):
+        self._log(Log.CRITICAL, msg, *args, **kwargs)
+
+    def _log(self, *args, **kwargs):
+        # if `print_it` is not passed as an argument, set it to `true`
+        kwargs.setdefault('print_it', True)
+        logger._log(*args, **kwargs)
+
+
+console_logger = __ConsoleLogger()

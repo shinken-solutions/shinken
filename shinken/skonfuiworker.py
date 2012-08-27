@@ -107,7 +107,7 @@ class SkonfUIWorker(Worker):
 
         # By default I want only hosts I never see
         # TODO: make this an option
-        d = DiscoveryManager('/home/shinken/shinken/etc/discovery.cfg', macros, overwrite, runners, output_dir=output_dir, dbmod=dbmod, only_new_hosts=True)
+        d = DiscoveryManager(self.discovery_cfg, macros, overwrite, runners, output_dir=output_dir, dbmod=dbmod, only_new_hosts=True)
 
         # Set the scan as launched state
         self.db.scans.update({'_id': scan_id}, {'$set': {'state': 'launched'}})

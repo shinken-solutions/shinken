@@ -29,7 +29,7 @@ from MySQLdb import ProgrammingError
 import _mysql_exceptions
 
 from shinken.db import DB
-
+from shinken.log import logger
 
 class DBMysql(DB):
     """DBMysql is a MySQL access database class"""
@@ -74,8 +74,8 @@ class DBMysql(DB):
             self.db_cursor.execute(query)
             self.db.commit()
         except IntegrityError, exp:
-            print "[MysqlDB] Warning: a query raise an integrity error:" \
-                  " %s, %s" % (query, exp)
+            logger.warning("[MysqlDB] A query raised an integrity error:" \
+                  " %s, %s" % (query, exp))
         except ProgrammingError, exp:
-            print "[MysqlDB] Warning: a query raise a programming error:" \
-                  " %s, %s" % (query, exp)
+            logger.warning("[MysqlDB] A query raised a programming error:" \
+                  " %s, %s" % (query, exp))
