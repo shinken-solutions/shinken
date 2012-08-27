@@ -454,7 +454,7 @@ class Skonf(Daemon):
         try:
             # Log will be broks
             for line in self.get_header():
-                self.log.info(line)
+                logger.info(line)
 
             self.load_config_file()
 
@@ -621,17 +621,33 @@ class Skonf(Daemon):
         self.init_datamanager()
 
         # Launch the data thread"
-        self.workersmanager_thread = threading.Thread(None, self.workersmanager, 'httpthread')
-        self.workersmanager_thread.start()
+        #self.workersmanager_thread = threading.Thread(None, self.workersmanager, 'httpthread')
+        #self.workersmanager_thread.start()
         # TODO: look for alive and killing
 
         print "Starting SkonfUI app"
         srv = run(host=self.http_host, port=self.http_port, server=self.http_backend)
 
+
     def workersmanager(self):
         while True:
             print "Workers manager thread"
             time.sleep(1)
+
+
+    # We are stopping the daemon. So stop sub workers, and exit
+    def do_stop(self):
+        logger.info("[%s] Stopping all workers" % (self.name))
+        for w in self.workers.values():
+            try:
+                w.terminate()
+                w.join(timeout=1)
+            # A already dead worker or in a worker
+            except (AttributeError, AssertionError):
+                pass
+        # Call the generic daemon part
+        super(Skonf, self).do_stop()
+
 
     # Here we will load all plugins (pages) under the webui/plugins
     # directory. Each one can have a page, views and htdocs dir that we must

@@ -49,7 +49,7 @@ import sys
 import signal
 
 from shinken.worker import Worker
-
+from shinken.discovery.discoverymanager import DiscoveryManager
 
 class SkonfUIWorker(Worker):
     """SkonfuiWorker class is a sub one for the Worker one of the poller/reactionners
@@ -64,12 +64,15 @@ class SkonfUIWorker(Worker):
     _timeout = None
     _c = None
 
+
     def add_database_data(self, server):
         self.database_server = server
+
 
     def connect_database(self):
         con = Connection('localhost')
         self.db = con.shinken
+
 
     def get_scan_data(self):
         print "Info: I ask for a scan with the id", self.scan_asked
@@ -84,24 +87,21 @@ class SkonfUIWorker(Worker):
     def launch_scan(self):
         print "Info: I try to launch scan", self.scan
         scan_id = self.scan.get('_id')
-        nmap = self.scan.get('use_nmap')
-        vmware = self.scan.get('use_vmware')
         names = self.scan.get('names')
         state = self.scan.get('state')
+        runners = self.scan.get('runners')
 
-        print "Info: IN SCAN WORKER:", nmap, vmware, names, state
+        print "Info: IN SCAN WORKER:", runners, names, state
 
         # Updating the scan entry state
         self.db.scans.update({'_id': scan_id}, {'$set': {'state': 'preparing'}})
 
-        from shinken.discovery.discoverymanager import DiscoveryManager
 
         elts = names.splitlines()
         targets = ' '.join(elts)
         print "Info: Launching Nmap with targets", targets
         macros = [('NMAPTARGETS', targets)]
         overwrite = False
-        runners = ['nmap']
         output_dir = None
         dbmod = 'Mongodb'
 
@@ -130,6 +130,7 @@ class SkonfUIWorker(Worker):
 
         # Set the scan as done :)
         self.db.scans.update({'_id': scan_id}, {'$set': {'state': 'done'}})
+
 
     # id = id of the worker
     # s = Global Queue Master->Slave

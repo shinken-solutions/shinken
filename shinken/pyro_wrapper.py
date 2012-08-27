@@ -247,7 +247,10 @@ except AttributeError, exp:
 
 
 class ShinkenPyroDaemon(PyroClass):
-    """Please Add a Docstring to describe the class here"""
+    """Class for wrapping select calls for Pyro"""
+    locationStr = '__NOTSET__'  # To by pass a bug in Pyro, this should be set in __init__, but
+                                # if we try to print an uninitialized object, it's not happy
+    objectsById = []            # Same here...
 
     def get_socks_activity(self, timeout):
         try:

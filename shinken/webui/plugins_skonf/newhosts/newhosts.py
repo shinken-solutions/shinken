@@ -60,17 +60,24 @@ def get_launch():
 
     print "Got forms in /newhosts/launch page"
     names = app.request.forms.get('names', '')
-    use_nmap = to_bool(app.request.forms.get('use_nmap', '0'))
-    use_vmware = to_bool(app.request.forms.get('use_vmware', '0'))
 
+    runners = []
+    for (k,v) in app.request.forms.iteritems():
+        print "DUMP OF K, V FOR LAUNCH", k, v
+        print k.startswith('enable-runner-')
+        if k.startswith('enable-runner-'):
+            r_name = k[len('enable-runner-'):]
+            print "NAME", r_name, v, to_bool(v)
+            if to_bool(v):
+                runners.append(r_name)
+
+    print "Selected runners", runners
     print "Got in request form"
     print names
-    print 'nmap?', use_nmap
-    print 'vmware?', use_vmware
 
     # We are putting a ask ask in the database
     i = random.randint(1, 65535)
-    scan_ask = {'_id': i, 'names': names, 'use_nmap': use_nmap, 'use_vmware': use_vmware, 'state': 'pending', 'creation': int(time.time())}
+    scan_ask = {'_id': i, 'names': names, 'runners': runners, 'state': 'pending', 'creation': int(time.time())}
     print "Saving", scan_ask, "in", app.db.scans
     r = app.db.scans.save(scan_ask)
     # We just want the id as string, not the object

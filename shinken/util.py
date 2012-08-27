@@ -155,7 +155,7 @@ def to_best_int_float(val):
 
 # bool('0') = true, so...
 def to_bool(val):
-    if val == '1':
+    if val == '1' or val == 'on' or val == 'true' or val == 'True':
         return True
     else:
         return False
