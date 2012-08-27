@@ -83,8 +83,6 @@ class TestLevels(unittest.TestCase):
     def test_set_level_non_integer_raises(self):
         logger = Log()
         self.assertRaises(TypeError, logger.set_level, 1.0)
-        # Why raise if there is an easy way to give the value like this string?
-        #self.assertRaises(TypeError, logger.set_level, 'INFO')
 
     def test_load_obj_must_not_change_level(self):
         logger = Log()
