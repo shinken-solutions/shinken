@@ -1,13 +1,82 @@
 ########################
 Shinken ChangeLog
 #######################
-1.2 - TBD
+1.2 - 31/08/2012
 ------------------
 	CORE ENHANCEMENTS
-	* Add: issue #349 (from David Guenault) Installation script now has a backup repository for installing MK Multisite.
+	* Add : Skonf daemon, as a configuration UI over the discovery lib
+	* Add : Triggers to the scheduler. This code is launched after each "check"
+	* Add : issue #349 (from David Guenault) Installation script now has a backup repository for installing MK Multisite.
+	* Add : option to skip mongo installation. Usefull for poller installation that does not need mongo to be installed.
+	* Add : daemon_enabled option for ini and nagios.cfg files to disable a daemon from running.
+	* Add : (by Hartmut Goebel and Xkillian) huge work to replace old log code by a logging based one, print to logger, adjust levels, messages, typos
+	* Add : (by Hartmut Goebel) huge code cleaning
+	* Add : install script available on the install.shinken-monitoring.org address.
+	* Add : make the daemon and the module names appears on the process line (setproctitle mode)
+	* Add : receiver can now send directly commands to schedulers. (direct_routing)
+	* Add : HOSTREALM macro for host/service.
+	* Add : 'address' directive into generated host by discovery
+	* Add : (reported by : Mathias Fussenegger) enhance the README, to just put install script way. Put other methods in the packagers and dev files.
+	* Add : reload option for the init script. Fix #385
+	* Add : install script: trap signals INT, TERM with a cleanup function
+	* Add : USR2 signal management for the scheduler to dump objects (checks, notification, event handlers and broks)
+	* Add : Reorganize Configuration file in sections. More consistent layout. Clarify the role and scope of shinken-specific.cfg.
+	* Add : Use the new folder "graphite" for graphite templates. Existing templates should be prefixed with .graph, and move to that folder.
+	* Add : the not list for services generators. So the primary list can be automatically generated, and the user can just maintain the not one.
+	* Add : (from Lars Hansson) manage Apache2 htpasswd crypt pass.
+	* Add : Allow running shinken satellites in a NATted environment
+	* Add : shinken-packs to easily create .zip pack files
+	* Add : Hostd daemon, for running community.shinken-monitoring.org website
+	* Add : multi-layers discovery, with rules on runners.
+	* Add : discoveryrule_order so the admin can manage the template order in a more easy way than with the order in the file
+	* Add : support for Linux Mint
+	* Add : nmap discovery speedup, and skonf scan part.
+	* Add : support to explode_hostgroup directive
+	* Add : new external command, PROCESS_SERVICE_OUTPUT and host, same than check_result for passive, but with no return code.
+	* Add : configurable logging level (per daemon)
+	* Add : now passive checks take their timestamp from the external command instead of the received time.
+	* Add : pre-serialize the configurations in the arbiter before going in daemon, and so kill the previous instance. (startup boost)
+	* Add : brok time part boost, with less useless objects sent, like contacts, timeperiods or commands. (big startup boost)
+	* Add : host pack dispatching history is saved in a pickle file, so we will be able to push same objects in hte same scheduler
+	* Add : arbiter -p options for dumping profile
+
 
 	CORE FIXES
         * Fix: (from raphaeltr) Typo in mysql monitoring pack command arguments
+	* Fix : Fix minor installation issues on centos/redhat. Mainly on services activation and pnp
+	* Fix : escalation issue when we restart the scheduler during the escalation process. Should fix #525
+	* Fix : potential endless loop on bp_rule + parent relation ship, and problem/impact setting. Fix #198
+	* Fix : bad characters in external commands make logging not happy at all. Fix #498
+	* Fix : bad start for arbiter with Pyro4 and enable_ssl=1.
+	* Fix : issue #272 where the shinken user home was forced to be in /home and that make some system not eligible to install.
+	* Fix : Pyro 4.14 issue, where we remove every where the MSG_WAITALL for all where it was useful only for first Pyro4 version. Fix #345
+	* Fix : Update format of log message to be less prone to breaking
+	* Fix : $USERn$ macros aren't published in env anymore
+	* Fix : Nconf installation : apache was not restarted after dependency installation.
+	* Fix : (reported by : D.Durieux) remove the self.process link for a killed action, because such object cant be pickle.
+	* Fix : spare arbiter now take the lead is the master is never start. Fix #231
+	* Fix : (reported by Sven) the configuration loader was not following symlinks. BEWARE : on python 2.4 and 2.5 it is NOT managed.
+	* Fix : (reported by : Sven) space in hostgroups problems. Fix #452
+	* Fix : (reported by : Nicolas DUPEUX) : bad DISABLE_HOST_FRESHNESS_CHECKS and ENABLE_HOST_FRESHNESS_CHECKS code fix #376
+	* Fix : (reported by : Chettor) #342 comments from downtime and ack where not put in the global list, and so not removed
+	* Fix : catch a case where service dep got no hostname nor hostgroup_name.
+	* Fix : issue with retention and notification that make notification not sent.
+	* Fix : (reported by banderas07, analysed by : Radu Gheorghe) :  #401 escalation notification_interval issue
+	* Fix : disable 'FLAPPINGSTART', 'FLAPPINGSTOP', 'FLAPPINGDISABLED' notifications during downtimes.
+	* Fix : issue #404 to treat Tracebacks correctly for Pyro3 and Pyro4.
+	* Fix : Op5 guys changed the name of check_esx3.pl to check_vmware_api.pl so now we host a copy of the plugin to workaround problems
+	* Fix : (Reported by : Morkxy, fixed by : Lars Hansson) change deprecated md5 by haslib.
+	* Fix : add a check_type attribute for checks
+	* Fix : remove illegal char from service_description when duplicated
+	* Fix : wrong name for mongodb debian packages
+	* Fix : CHANGE_HOST_CHECK_TIMEPERIOD apply to a host not a service
+	* Fix : (from : CHAMLEY Stephane) add notifications_enabled to the retention data.
+	* Fix : (reported by : Nicolas DUPEUX) #244 missing from_q property for regenerator.
+	* Fix : (reported by : Akiooutori) fix #325 (missing SOCK_REUSE in some pyro versions) .
+	* Fix : (From : Michael COQUARD) setup.py build with simple user.
+	* Fix : missing mongo dependency for debian like distro < 6
+	* Fix : mongodb 10gen repo configuration path was not found on redhat/centos
+
 
 	MODULE ENHANCEMENTS
 	* Add: (from: xkilian and Thibault Cohen) Graphite broker supports pickle protocol, bulk updates and buffers output when it can't connect to Carbon daemons
@@ -16,18 +85,63 @@ Shinken ChangeLog
 	* Add: (from: Claneys Skyne) Graphite broker Create additionnal data points for warning and critical thresholds per data value
 	* Add: (from Romain Forlot) Graphite broker Compile regex
         * Add: (from: bclermont) Graphite broker add graphite_data_source variable between hostname and service name in data to Graphite
+	* Add : a read_only option to logstore_sqlite
+	* Add : Finalyse the time filter to avoid loading all the logs database in use_aggressive_sql=0 mode
+	* Add : Added more hints for the livestatus query metadata resulting in massive speedup for nagvis
+	* Add : Creating new authentification module for OpenLDAP directory service
+	* Add : most modules do not raise Warning if the module need (like python-ldap for active directory, etc) but instead raise a real Exception
+	* Add : collectd template with trigger sample.
+	* Add : First working version of canopsis broker module
+	* Add : trying cjson import to improve LS output performance
+	* Add : NDO add table prefix as a parameter.
+	* Fix : do not push back monitoring status in GLPI database when the host configuration do not come from GLPI
+	* Fix a bug in livestatus module and add the attribute host.event_handler (needed by Thruk)
 
 	MODULE FIXES
-	* Fix: issue #450 (from vaxvms) removed thrift broker, similar to Livestatus, as it is unmaintained.
-	* Fix: MerlinDB for Ninja UI, removed documentation and marked as deprecated, as it is unmaintained.
+	* Fix : issue #450 (from vaxvms) removed thrift broker, similar to Livestatus, as it is unmaintained.
+	* Fix : MerlinDB for Ninja UI, removed documentation and marked as deprecated, as it is unmaintained.
+	* Fix : (from : Frédéric Pégé) make the sqlite db files put in a good default place, in devel mode or init.d mode.
+	* Fix : the program_start attribute in livestatus status table
+	* Fix : (reported by : Nicolas DUPEUX) remove a useless method in logstore_sqlite, and add a protection against end less loop. Fix #374
+	* Fix : Livestatus allowed_hosts options does not work
+	* Fix : Call the right function for !=~ LQL filter (livestatus)
 
 	UI ENHANCEMENTS
+	* Add : UI /detail full rewirte. Thanks Andreas!!
+	* Add : UI new dashboard!
+	* Add : (from Mael VINCENT, julien pilou, Gael Millet, Damien Mathieu and hugo viricel) new /mobile part!
+	* Add : Enable easy activation of application monitoring performance feature. Use ./install --enableeue to enable eue feature
+	* Add : WebUI in a /problem page a user can now press the sift key and over the selection tick to select them. It make easier for massive selection
+	* Add : UI sqlite backend to save common preferences
+	* Add : the page to save common prefs
+	* Add : webui, /depgraph, now add a loop and loop_time option, to make the graph root change between important elements.
+	* Add : sound on new non-acknowledge IT problem (disabled by default)
+	* Add : UI /detail now dep graph is also print on a tab, so this feature will be more visible.
+	* Add : UI /problems add the downtime filtering.
+	* Add : UI /problems filtering by ack state.
 
 	UI FIXES
+	* Fix : (reported by : Vincent Riquer) WEBUI do not print 1970 for 0 time, but N/A instead. issue fix #241
+
+	DEFAULT PACKS
+	* Fix : The check_mysql_health plugin need a : sign after the thresholds for greater is better metrics.
+	* Fix : generic corrupted block oracle database check
+	* Add : commands for notification by XMPP (Jabber)
+	* Add : a basic rsync check template in the network/services pack.
+	* Add : macros for Basic HTTP authentification in the HTTP(S) services templates.
+	* Fix : call sudo to execute SMcli into IBM_DS plugins
+	* Add : discovery packs for ibm storage management and beginning of clustering solutions discovery
+	* Add : cluster discovery for Safekit and HACMP.
+	* Add : snmp plugins for AIX to monitor VG, inode, HACMP and Safekit
+	* Add : first 2nd level real discovery script, here for listing windows shares, like shares or printers. It auto-hide the $ ones.
+	* Add : (Camille Vacquie): AIX service pack
+	* Add : SNI support to https and https certificate checks
+	* Add : pack/os/linux - check_linux_network_usage - use last_perfdata to determin bandwidth
 
 	DOCUMENTATION
 	* Add: (from xkilian, MathieuMD,  Claneys Skyne, H4wkmoon, etc.) Wiki documentation in-depth renewal of Getting Started pages for new users
 	* Add: Monitoring Pack documentation, modules, installation, FAQ , diagrams, scaling shinken, dev+user resources, etc.
+	* Add : dummy_broker module example.
 
 1.0.1 - 13/03/2012
 ------------------
