@@ -2924,6 +2924,24 @@ function install_check_snmp_bandwidth(){
     cp $filename $LIBEXEC/$script
 }
 
+function install_check_snmp_netint(){
+    cadre "Install install_check_snmp_netint" green
+
+    cd $TMP
+
+    filename="check_snmp_netint.pl"
+    cecho " > Downloading check_snmp_netint" green
+    wget $WGETPROXY $CHECKSNMPNETINT -O ${filename} >> ${LOGFILE} 2>&1
+    if [ $? -ne 0 ]
+    then
+        cecho " > Error while downloading $script" red
+        exit 2
+    fi
+
+    cecho " > install check_snmp_netint" green
+    install -b -g $SKGROUP -o $SKUSER -m 0755 -t $TARGET/libexec check_snmp_netint.pl >> $TMP/shinken.install.log 2>&1
+}
+
 function install_check_rsync(){
     cadre "Install the rsync check plugin" green
 
