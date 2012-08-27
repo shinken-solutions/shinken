@@ -31,7 +31,6 @@ class Singleton(type):
     """
 
     def __init__(cls, name, bases, dict):
-        print "Info: Singleton Init"
         super(Singleton, cls).__init__(name, bases, dict)
         cls.instance = None
 

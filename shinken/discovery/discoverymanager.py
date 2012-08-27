@@ -46,6 +46,7 @@ except ImportError:
 
 from shinken.log import logger
 from shinken.objects import *
+from shinken.objects.config import Config
 from shinken.macroresolver import MacroResolver
 from shinken.modulesmanager import ModulesManager
 

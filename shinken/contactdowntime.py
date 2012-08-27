@@ -25,6 +25,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
+from shinken.log import logger
 
 """ TODO: Add some comment about this class for the doc"""
 class ContactDowntime:
@@ -69,7 +70,7 @@ class ContactDowntime:
         now = time.time()
         was_is_in_effect = self.is_in_effect
         self.is_in_effect = (self.start_time <= now <= self.end_time)
-        print "CHECK ACTIVATION:", self.is_in_effect
+        logger.info("CHECK ACTIVATION:%s" % (self.is_in_effect))
 
         # Raise a log entry when we get in the downtime
         if not was_is_in_effect and self.is_in_effect:

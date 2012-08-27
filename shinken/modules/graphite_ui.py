@@ -32,11 +32,12 @@ import re
 import socket
 import os
 
+from shinken.log import logger
 from string import Template
 from shinken.basemodule import BaseModule
 from datetime import datetime
+from shinken.log import logger
 
-# print "Loaded AD module"
 
 properties = {
     'daemons': ['webui'],
@@ -46,7 +47,7 @@ properties = {
 
 # called by the plugin manager
 def get_instance(plugin):
-    print "Get an GRAPITE UI module for plugin %s" % plugin.get_name()
+    logger.debug("[Graphite UI]Get an GRAPITE UI module for plugin %s" % plugin.get_name())
 
     instance = Graphite_Webui(plugin)
     return instance
@@ -96,7 +97,7 @@ class Graphite_Webui(BaseModule):
         metrics = [e for e in elts if e != '']
 
         for e in metrics:
-            #print "Graphite: groking: ", e
+            logger.debug("[Graphite UI] groking: %s" % e)
             elts = e.split('=', 1)
             if len(elts) != 2:
                 continue
@@ -120,7 +121,7 @@ class Graphite_Webui(BaseModule):
                     name_value[key] = m.groups(0)
                 else:
                     continue
-#            print "graphite: got in the end:", name, value
+            logger.debug("[Graphite UI] Got in the end: %s, %s" % (name, value))
             for key, value in name_value.items():
                 res.append((key, value))
         return res

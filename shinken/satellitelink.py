@@ -210,11 +210,11 @@ class SatelliteLink(Item):
         self.managed_confs[cfg_id] = push_flavor
 
     def ping(self):
-        print "Pinging %s" % self.get_name(),
+        logger.info("Pinging %s" % self.get_name())
         try:
             if self.con is None:
                 self.create_connection()
-            print " (%s)" % self.uri
+            logger.info(" (%s)" % (self.uri))
 
             # If the connection failed to initialize, bail out
             if self.con is None:
@@ -228,7 +228,6 @@ class SatelliteLink(Item):
             else:
                 self.add_failed_check_attempt()
         except Pyro_exp_pack, exp:
-            print  # flush previous print
             self.add_failed_check_attempt(reason=str(exp))
 
     def wait_new_conf(self):
@@ -460,7 +459,6 @@ class SatelliteLinks(Items):
             else:
                 err = "The %s %s got a unknown realm '%s'" % (s.__class__.my_type, s.get_name(), p_name)
                 s.configuration_errors.append(err)
-                #print err
 
     def linkify_s_by_plug(self, modules):
         for s in self:

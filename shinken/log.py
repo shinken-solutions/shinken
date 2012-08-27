@@ -61,10 +61,15 @@ class Log:
     @staticmethod
     def get_level_id(lvlName):
         """Convert a level name (string) to its integer value
-
-           Raise KeyError when name not found
+           and vice-versa. Input a level and it will return a name.
+           Raise KeyError when name or level not found
         """
         return logging._levelNames[lvlName]
+
+    # We can have level as an int (logging.INFO) or a string INFO
+    # if string, try to get the int value
+    def get_level(self):
+        return logging.getLogger().getEffectiveLevel()
 
     # We can have level as an int (logging.INFO) or a string INFO
     # if string, try to get the int value
@@ -114,14 +119,14 @@ class Log:
             lvlname = logging.getLevelName(level)
 
             if display_level:
-                fmt = u'[%(date)s] %(level)s: %(name)s%(msg)s\n'
+                fmt = u'[%(date)s] %(level)-9s %(name)s%(msg)s\n'
             else:
                 fmt = u'[%(date)s] %(name)s%(msg)s\n'
 
             args = {
                 'date': (human_timestamp_log and time.asctime()
                          or int(time.time())),
-                'level': lvlname.capitalize(),
+                'level': lvlname.capitalize()+' :',
                 'name': name and ('[%s] ' % name) or '',
                 'msg': message
             }

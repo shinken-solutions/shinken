@@ -31,7 +31,7 @@ import sys
 import time
 
 # Thrift Specificities
-sys.path.append(os.path.abspath(__file__).rsplit("/", 3)[0] + "/thrift/gen-py")
+sys.path.append(os.path.dirname(__file__)+"/gen-py/")
 try:
     from org.shinken_monitoring.tsca import StateService
     from org.shinken_monitoring.tsca.ttypes import *
@@ -45,40 +45,6 @@ except ImportError:
 from shinken.basemodule import BaseModule
 from shinken.external_command import ExternalCommand
 from shinken.log import logger
-
-properties = {
-    'daemons': ['arbiter', 'receiver'],
-    'type': 'tsca_server',
-    'external': True,
-    'phases': ['running'],
-    }
-
-
-# called by the plugin manager to get a broker
-def get_instance(plugin):
-    logger.debug("Get a TSCA arbiter module for plugin %s" % plugin.get_name())
-    if not TServer:
-        raise Exception('Module python-thrift not found. Please install it.')
-
-    if hasattr(plugin, 'host'):
-        if plugin.host == '*':
-            host = ''
-        else:
-            host = plugin.host
-    else:
-        host = '127.0.0.1'
-    if hasattr(plugin, 'port'):
-        port = int(plugin.port)
-    else:
-        port = 9090
-    if hasattr(plugin, 'max_packet_age'):
-        max_packet_age = min(plugin.max_packet_age, 900)
-    else:
-        max_packet_age = 30
-
-    instance = TSCA_arbiter(plugin, host, port, max_packet_age)
-    return instance
-
 
 # Used by Thrift to handle client
 class StateServiceHandler:
@@ -106,7 +72,7 @@ class StateServiceHandler:
                     try:
                         self.tsca_arbiter.post_command(timestamp, rc, hostname, service, output)
                     except:
-                        print "Error while sending a check result command to the arbiter"
+                        logger.error("Failed sending a check result command to the arbiter")
                         pass
                 self.state_list.pop(0)
             self.currentlySendingData = False
@@ -122,14 +88,14 @@ class TSCA_arbiter(BaseModule):
 
     # Ok, main function that is called in the CONFIGURATION phase
     def get_objects(self):
-        print "[Dummy] ask me for objects to return"
+        logger.info("dummy ask me for objects to return")
         r = {'hosts': []}
         h = {'name': 'dummy host from dummy arbiter module',
              'register': '0',
              }
 
         r['hosts'].append(h)
-        print "[Dummy] Returning to Arbiter the hosts:", r
+        logger.info("dummy returning to Arbiter the hosts:" % r)
         return r
 
     def read_check_result(self, state):
@@ -150,9 +116,9 @@ class TSCA_arbiter(BaseModule):
         current_time = time.time()
         check_result_age = current_time - timestamp
         if timestamp > current_time:
-            print "Dropping packet with future timestamp."
+            logger.warning("Dropping packet with future timestamp.")
         elif check_result_age > self.max_packet_age:
-            print "Dropping packet with stale timestamp - packet was %s seconds old." % check_result_age
+            logger.warning("Dropping packet with stale timestamp - packet was %s seconds old." % check_result_age)
         else:
             return (timestamp, rc, hostname, service, output)
 
@@ -183,4 +149,4 @@ class TSCA_arbiter(BaseModule):
             server = TServer.TThreadedServer(processor, transport, tfactory, pfactory)
             server.serve()
         except:
-            print "Error while trying to launch TSCA module"
+            logger.error("Error while trying to launch TSCA module")

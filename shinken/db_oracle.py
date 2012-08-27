@@ -33,6 +33,7 @@ from cx_Oracle import DataError as DataError_exp
 from cx_Oracle import OperationalError as OperationalError_exp
 
 from shinken.db import DB
+from shinken.log import logger
 
 connect_function = None
 IntegrityError_exp = None
@@ -44,7 +45,7 @@ OperationalError_exp = None
 
 
 class DBOracle(DB):
-    """ TODO: Add some comment about this class for the doc"""
+    """Manage connection and query execution against Oracle databases."""
 
     def __init__(self, user, password, database, table_prefix=''):
         self.user = user
@@ -64,32 +65,31 @@ class DBOracle(DB):
         self.db_cursor.arraysize = 50
 
     def execute_query(self, query):
-        """ Just run the query
-        TODO: finish catch
+        """ Execute a query against an Oracle database.
         """
-        print "[DBOracle] I run Oracle query", query, "\n"
+        logger.debug("[DBOracle] Execute Oracle query %s\n" % (query))
         try:
             self.db_cursor.execute(query)
             self.db.commit()
         except IntegrityError_exp, exp:
-            print "[DBOracle] Warning: a query raise an integrity error:" \
-                  " %s, %s" % (query, exp)
+            logger.warning("[DBOracle] Warning: a query raise an integrity error:" \
+                  " %s, %s" % (query, exp))
         except ProgrammingError_exp, exp:
-            print "[DBOracle] Warning: a query raise a programming error:" \
-                  " %s, %s" % (query, exp)
+            logger.warning("[DBOracle] Warning: a query raise a programming error:" \
+                  " %s, %s" % (query, exp))
         except DatabaseError_exp, exp:
-            print "[DBOracle] Warning: a query raise a database error:" \
-                  " %s, %s" % (query, exp)
+            logger.warning("[DBOracle] Warning: a query raise a database error:" \
+                  " %s, %s" % (query, exp))
         except InternalError_exp, exp:
-            print "[DBOracle] Warning: a query raise an internal error:" \
-                  " %s, %s" % (query, exp)
+            logger.warning("[DBOracle] Warning: a query raise an internal error:" \
+                  " %s, %s" % (query, exp))
         except DataError_exp, exp:
-            print "[DBOracle] Warning: a query raise a data error:" \
-                  " %s, %s" % (query, exp)
+            logger.warning("[DBOracle] Warning: a query raise a data error:" \
+                  " %s, %s" % (query, exp))
         except OperationalError_exp, exp:
-            print "[DBOracle] Warning: a query raise an operational error:" \
-                  " %s, %s" % (query, exp)
+            logger.warning("[DBOracle] Warning: a query raise an operational error:" \
+                  " %s, %s" % (query, exp))
         except Exception, exp:
-            print "[DBOracle] Warning: a query raise an unknow error:" \
-                  " %s, %s" % (query, exp)
-            print exp.__dict__
+            logger.warning("[DBOracle] Warning: a query raise an unknow error:" \
+                  " %s, %s" % (query, exp))
+            logger.warning(exp.__dict__)
