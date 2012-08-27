@@ -1,5 +1,5 @@
 
-%rebase layout_skonf globals(), js=['newhosts/js/newhosts.js']
+%rebase layout_skonf globals(), js=['newhosts/js/newhosts.js'], title='Discover new hosts'
 
 <script type="text/javascript">
   function submitform() {

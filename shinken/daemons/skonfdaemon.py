@@ -357,22 +357,24 @@ class Skonf(Daemon):
         logger.info("Configuration Loaded")
         print ""
 
+
     def load_web_configuration(self):
         self.plugins = []
 
-        self.http_port = 7766  # int(getattr(modconf, 'port', '7767'))
-        self.http_host = '0.0.0.0'  # getattr(modconf, 'host', '0.0.0.0')
-        self.auth_secret = 'CHANGE_ME'.encode('utf8', 'replace')  # getattr(modconf, 'auth_secret').encode('utf8', 'replace')
-        self.http_backend = 'auto'  # getattr(modconf, 'http_backend', 'auto')
+        self.http_port = int(getattr(self.conf, 'http_port', '7766'))
+        self.http_host = getattr(self.conf,'http_host', '0.0.0.0')
+        self.auth_secret = getattr(self.conf, 'auth_secret', 'CHANGE_ME').encode('utf8', 'replace')
+        self.http_backend = getattr(self.conf, 'http_backend', 'auto')
         self.login_text = None  # getattr(modconf, 'login_text', None)
         self.allow_html_output = False  # to_bool(getattr(modconf, 'allow_html_output', '0'))
-        self.remote_user_enable = '0'  # getattr(modconf, 'remote_user_enable', '0')
-        self.remote_user_variable = 'X_REMOTE_USER'  # getattr(modconf, 'remote_user_variable', 'X_REMOTE_USER')
+        self.remote_user_enable = getattr(self.conf, 'remote_user_enable', '0')
+        self.remote_user_variable = getattr(self.conf, 'remote_user_variable', 'X_REMOTE_USER')
 
         # Load the photo dir and make it a absolute path
         self.photo_dir = 'photos'  # getattr(modconf, 'photo_dir', 'photos')
         self.photo_dir = os.path.abspath(self.photo_dir)
         print "Webui: using the backend", self.http_backend
+
 
     # We check if the photo directory exists. If not, try to create it
     def check_photo_dir(self):

@@ -1,5 +1,5 @@
 
-%rebase layout_skonf globals(), css=['main/css/main.css']
+%rebase layout_skonf globals(), css=['main/css/main.css'], title= 'sKonf UI'
 
 <div class='row'>
   <div class='offset1 span5 front_panel'>
