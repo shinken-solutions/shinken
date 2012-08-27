@@ -68,9 +68,12 @@ class SkonfUIWorker(Worker):
     def add_database_data(self, server):
         self.database_server = server
 
+    def add_discovery_backend_module(self, discovery_backend_module):
+        self.discovery_backend_module = discovery_backend_module
+
 
     def connect_database(self):
-        con = Connection('localhost')
+        con = Connection(self.database_server)
         self.db = con.shinken
 
 
@@ -83,6 +86,7 @@ class SkonfUIWorker(Worker):
             print "No scan found with id", scan_id
             return
         self.scan = cur[0]
+
 
     def launch_scan(self):
         print "Info: I try to launch scan", self.scan
@@ -103,7 +107,7 @@ class SkonfUIWorker(Worker):
         macros = [('NMAPTARGETS', targets)]
         overwrite = False
         output_dir = None
-        dbmod = 'Mongodb'
+        dbmod = self.discovery_backend_module
 
         # By default I want only hosts I never see
         # TODO: make this an option
@@ -168,7 +172,7 @@ class SkonfUIWorker(Worker):
                         self.get_scan_data()
                         self.launch_scan()
                 except Empty, exp:
-                    print "Info: UI worker go to sleep", self.id
+                    #print "Info: UI worker go to sleep", self.id
                     time.sleep(1)
 
             # Now get order from master

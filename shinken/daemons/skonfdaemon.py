@@ -243,31 +243,6 @@ class Skonf(Daemon):
             if f and callable(f):
                 f(self)
 
-        """        # Call modules that manage this read configuration pass
-        self.hook_point('read_configuration')
-
-        # Now we ask for configuration modules if they
-        # got items for us
-        for inst in self.modules_manager.instances:
-            if 'configuration' in inst.phases:
-                try:
-                    r = inst.get_objects()
-                except Exception, exp:
-                    print "The instance %s raise an exception %s. I bypass it" % (inst.get_name(), str(exp))
-                    continue
-
-                types_creations = self.conf.types_creations
-                for k in types_creations:
-                    (cls, clss, prop) = types_creations[k]
-                    if prop in r:
-                        for x in r[prop]:
-                            # test if raw_objects[k] is already set - if not, add empty array
-                            if not k in raw_objects:
-                                raw_objects[k] = []
-                            # now append the object
-                            raw_objects[k].append(x)
-                        print "Added %i objects to %s from module %s" % (len(r[prop]), k, inst.get_name())
-        """
 
         ### Resume standard operations ###
         self.conf.create_objects(raw_objects)
@@ -327,49 +302,8 @@ class Skonf(Daemon):
         #self.conf.pythonize()
         super(Config, self.conf).pythonize()
 
-        # Linkify objects each others
-        #self.conf.linkify()
-
-        # applying dependencies
-        #self.conf.apply_dependencies()
-
-        # Hacking some global parameter inherited from Nagios to create
-        # on the fly some Broker modules like for status.dat parameters
-        # or nagios.log one if there are no already available
-        #self.conf.hack_old_nagios_parameters()
-
-        # Raise warning about curently unmanaged parameters
-        #if self.verify_only:
-        #    self.conf.warn_about_unmanaged_parameters()
-
-        # Exlode global conf parameters into Classes
-        #self.conf.explode_global_conf()
-
-        # set ourown timezone and propagate it to other satellites
-        #self.conf.propagate_timezone_option()
-
-        # Look for business rules, and create the dep tree
-        #self.conf.create_business_rules()
-        # And link them
-        #self.conf.create_business_rules_dependencies()
-
-        # Warn about useless parameters in Shinken
-        #if self.verify_only:
-        #    self.conf.notice_about_useless_parameters()
-
         # Manage all post-conf modules
         self.hook_point('late_configuration')
-
-        # Correct conf?
-        #self.conf.is_correct()
-
-        #If the conf is not correct, we must get out now
-        #if not self.conf.conf_is_correct:
-        #    sys.exit("Configuration is incorrect, sorry, I bail out")
-
-        # REF: doc/shinken-conf-dispatching.png (2)
-        #logger.info("Cutting the hosts and services into parts")
-        #self.confs = self.conf.cut_into_parts()
 
         # The conf can be incorrect here if the cut into parts see errors like
         # a realm with hosts and not schedulers for it
@@ -404,6 +338,7 @@ class Skonf(Daemon):
         self.user = self.conf.shinken_user
         self.group = self.conf.shinken_group
         self.daemon_enabled = self.conf.daemon_enabled
+        self.discovery_backend_module = self.conf.discovery_backend_module
 
         # If the user set a workdir, let use it. If not, use the
         # pidfile directory
@@ -897,6 +832,7 @@ class Skonf(Daemon):
         w = SkonfUIWorker(1, self.workers_queue, self.returns_queue, 1, mortal=False, max_plugins_output_length=1, target=None)
         w.module_name = 'skonfuiworker'
         w.add_database_data('localhost')
+        w.add_discovery_backend_module(self.discovery_backend_module)
         w.discovery_cfg = self.discovery_cfg
 
         # save this worker
