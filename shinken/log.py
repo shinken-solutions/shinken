@@ -232,3 +232,6 @@ class __ConsoleLogger:
 
 
 console_logger = __ConsoleLogger()
+
+def send_result(result, *args):
+    console_logger.info(result)

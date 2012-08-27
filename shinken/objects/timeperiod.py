@@ -94,7 +94,7 @@ from shinken.daterange import Daterange, CalendarDaterange, StandardDaterange, M
 from shinken.daterange import MonthDateDaterange, WeekDayDaterange, MonthDayDaterange
 from shinken.brok import Brok
 from shinken.property import IntegerProp, StringProp, ListProp, BoolProp
-from shinken.log import logger, console_logger
+from shinken.log import logger, send_result
 
 
 class Timeperiod(Item):
@@ -204,9 +204,9 @@ class Timeperiod(Item):
             if self.is_active:
                 _to = 1
 
-            # Now raise the log
-            console_logger.info('TIMEPERIOD TRANSITION: %s;%d;%d'
-                                % (self.get_name(), _from, _to))
+            # Now send the result
+            send_result('TIMEPERIOD TRANSITION: %s;%d;%d'
+                        % (self.get_name(), _from, _to))
 
     # clean the get_next_valid_time_from_t cache
     # The entries are a dict on t. t < now are useless
