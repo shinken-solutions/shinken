@@ -93,18 +93,8 @@ class TestLevels(unittest.TestCase):
 
 class TestBasics(unittest.TestCase):
 
-    def test_setting_and_unsetting_human_timestamp_format(self):
-        # :hack: logging.human_timestamp_log is a global variable
-        logger = Log()
-        self.assertEqual(logging.human_timestamp_log, False)
-        logger.set_human_format()
-        self.assertEqual(logging.human_timestamp_log, True)
-        logger.set_human_format(False)
-        self.assertEqual(logging.human_timestamp_log, False)
-        logger.set_human_format(True)
-        self.assertEqual(logging.human_timestamp_log, True)
-        logger.set_human_format(False)
-        self.assertEqual(logging.human_timestamp_log, False)
+    # no basiscs to test now
+    pass
 
 
 class LogCollectMixin:
@@ -147,13 +137,6 @@ class LogCollectMixin:
 
 class TestDefaultLoggingMethods(unittest.TestCase, LogCollectMixin):
 
-    def test_basic_logging_log(self):
-        logger = self._prepare_logging()
-        msgs, lines = self._put_log(logger.log, 'Some log-message')
-        self.assertEqual(len(msgs), 1)
-        self.assertEqual(len(lines), 1)
-        self.assertRegexpMatches(msgs[0], r'^\[\d+\] Some log-message\n$')
-        self.assertRegexpMatches(lines[0], r'^\[\d+\] Some log-message$')
 
     def test_basic_logging_debug_does_not_send_broks(self):
         logger = self._prepare_logging()
@@ -266,13 +249,6 @@ class TestWithLocalLogging(unittest.TestCase, LogCollectMixin):
         logger.register_local_log(logfile_name)
         self.assertEqual(logger._level, logger.ERROR)
 
-    def test_basic_logging_log(self):
-        logger = self._prepare_logging()
-        msgs, lines, local_log = self._put_log(logger.log, 'Some log-message')
-        self.assertEqual(len(msgs), 1)
-        self.assertEqual(len(lines), 1)
-        self.assertEqual(len(local_log), 1)
-        self.assertRegexpMatches(local_log[0], r' \[\d+\] Some log-message\n$')
 
     def test_basic_logging_debug_does_not_send_broks(self):
         logger = self._prepare_logging()
