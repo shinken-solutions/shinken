@@ -26,6 +26,7 @@
 import time
 import logging
 import sys
+from logging import Handler, Formatter, StreamHandler
 from logging.handlers import TimedRotatingFileHandler
 
 from brok import Brok
@@ -56,7 +57,7 @@ local_log = None
 human_timestamp_log = False
 
 
-class Log:
+class Log(logging.Logger):
     """Shinken logger class, wrapping access to Python logging standard library."""
     "Store the numeric value from python logging class"
     NOTSET   = logging.NOTSET
@@ -66,12 +67,12 @@ class Log:
     ERROR    = logging.ERROR
     CRITICAL = logging.CRITICAL
 
-    def __init__(self):
-        self._level = logging.NOTSET
-        self.display_time = True
-        self.display_level = True
-        self.log_colors = {Log.WARNING:'yellow', Log.CRITICAL:'magenta', Log.ERROR:'red'}
 
+    def __init__(self, name='shinken', level=NOTSET):
+        logging.Logger.__init__(self, name, level)
+        self.display_time = True                                                                                                                                                            
+        self.display_level = True                                                                                                                                                           
+        self.log_colors = {Log.WARNING:'yellow', Log.CRITICAL:'magenta', Log.ERROR:'red'}    
 
     def load_obj(self, object, name_=None):
         """ We load the object where we will put log broks
@@ -109,102 +110,6 @@ class Log:
         self._level = level
         logging.getLogger().setLevel(level)
 
-
-    def set_display_time(self, b):
-        self.display_time = b
-
-    def set_display_level(self, b):
-        self.display_level = b
-
-    def debug(self, msg, *args, **kwargs):
-        self._log(logging.DEBUG, msg, *args, **kwargs)
-
-    def info(self, msg, *args, **kwargs):
-        self._log(logging.INFO, msg, *args, **kwargs)
-
-    def warning(self, msg, *args, **kwargs):
-        self._log(logging.WARNING, msg, *args, **kwargs)
-
-    def error(self, msg, *args, **kwargs):
-        self._log(logging.ERROR, msg, *args, **kwargs)
-
-    def critical(self, msg, *args, **kwargs):
-        self._log(logging.CRITICAL, msg, *args, **kwargs)
-
-    def log(self, message, format=None, print_it=True):
-        """Old log method, kept for NAGIOS compatibility
-        What strings should not use the new format ??"""
-        self._log(logging.INFO, message, format, print_it, display_level=False)
-
-    def _log(self, level, message, format=None, print_it=True, display_level=True):
-        """We enter a log message, we format it, and we add the log brok"""
-        global obj
-        global name
-        global local_log
-        global human_timestamp_log
-
-        # ignore messages when message level is lower than Log level
-        if level < self._level:
-            return
-
-        # display the level only if we ask locally and globaly
-        display_level = display_level & self.display_level
-
-        # We format the log in UTF-8
-        if isinstance(message, str):
-            message = message.decode('UTF-8', 'replace')
-
-        if format is None:
-            lvlname = logging.getLevelName(level)
-
-            if display_level:
-                if self.display_time:
-                    fmt = u'[%(date)s] %(level)-9s %(name)s%(msg)s\n'
-                else:
-                    fmt = u'%(level)-9s %(name)s%(msg)s\n'
-            else:
-                if self.display_time:
-                    fmt = u'[%(date)s] %(name)s%(msg)s\n'
-                else:
-                    fmt = u'%(name)s%(msg)s\n'
-
-            args = {
-                'date': (human_timestamp_log and time.asctime()
-                         or int(time.time())),
-                'level': lvlname.capitalize()+' :',
-                'name': name and ('[%s] ' % name) or '',
-                'msg': message
-            }
-            s = fmt % args
-        else:
-            s = format % message
-
-        if print_it and len(s) > 1:            
-            # Take a color so we can print if it's a TTY
-            if is_tty():
-                color = self.log_colors.get(level, None)
-            else:
-                color = None
-            
-            # Print to standard output.
-            # If the daemon is launched with a non UTF8 shell
-            # we can have problems in printing, work around it.
-            try:
-                cprint(s[:-1], color)
-            except UnicodeEncodeError:
-                print s.encode('ascii', 'ignore')
-
-
-        # We create the brok and load the log message
-        # DEBUG level logs are logged by the daemon locally
-        # and must not be forwarded to other satellites, or risk overloading them.
-        if level != logging.DEBUG and obj and hasattr(obj, 'add'):
-            b = Brok('log', {'log': s})
-            obj.add(b)
-
-        # If local logging is enabled, log to the defined handler, file.
-        if local_log is not None:
-            logging.log(level, s.strip())
 
 
     def register_local_log(self, path, level=None):
