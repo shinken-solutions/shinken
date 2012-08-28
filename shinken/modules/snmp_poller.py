@@ -100,6 +100,53 @@ def rpn_calculator(rpn_list):
                                                          str(rpn_list)))
         return "Calc error"
 
+def parse_args(cmd_args):
+    #Default params
+    host = None
+    community = 'public'
+    version = '2c'
+    dstemplate = None
+    triggergroup = None
+    instance = 0
+    instance_name = None
+
+    #Manage the options
+    try:
+        options, args = getopt.getopt(cmd_args,
+                        'H:C:V:i:t:T:n:',
+                        ['hostname=', 'community=', 'snmp-version=',
+                         'dstemplate=', 'help', 'version',
+                         'instance=', 'instance-name=' ])
+    except getopt.GetoptError, err:
+        # If we got problem, bail out
+        return (host, community, version,
+                triggergroup, dstemplate, instance)
+    for option_name, value in options:
+        if option_name in ("-H", "--hostname"):
+            host = value
+        elif option_name in ("-C", "--community"):
+            community = value
+        elif option_name in ("-t", "--dstemplate"):
+            dstemplate = value
+        elif option_name in ("-T", "--triggergroup"):
+            triggergroup = value
+        elif option_name in ("-i", "--instance"):
+            instance = value
+        elif option_name in ("-V", "--snmp-version"):
+            version = value
+        elif option_name in ("-n", "--instance-name"):
+            instance_name = value
+
+    if instance:
+        res = re.search("map\((.*),(.*)\)", instance)
+        if res:
+            instance_name = res.groups()[1]
+
+    return (host, community, version,
+            triggergroup, dstemplate, instance,
+            instance_name)
+
+
 class SNMPHost(object):
     """ Host with SNMP checks
         frequences = {
@@ -925,53 +972,6 @@ class SNMPAsyncClient(object):
             transportDispatcher.jobFinished(1)
 
 
-def parse_args(cmd_args):
-    #Default params
-    host = None
-    community = 'public'
-    version = '2c'
-    dstemplate = None
-    triggergroup = None
-    instance = 0
-    instance_name = None
-
-    #Manage the options
-    try:
-        options, args = getopt.getopt(cmd_args,
-                        'H:C:V:i:t:T:n:',
-                        ['hostname=', 'community=', 'snmp-version=',
-                         'dstemplate=', 'help', 'version',
-                         'instance=', 'instance-name=' ])
-    except getopt.GetoptError, err:
-        # If we got problem, bail out
-        return (host, community, version,
-                triggergroup, dstemplate, instance)
-    for option_name, value in options:
-        if option_name in ("-H", "--hostname"):
-            host = value
-        elif option_name in ("-C", "--community"):
-            community = value
-        elif option_name in ("-t", "--dstemplate"):
-            dstemplate = value
-        elif option_name in ("-T", "--triggergroup"):
-            triggergroup = value
-        elif option_name in ("-i", "--instance"):
-            instance = value
-        elif option_name in ("-V", "--snmp-version"):
-            version = value
-        elif option_name in ("-n", "--instance-name"):
-            instance_name = value
-
-    if instance:
-        res = re.search("map\((.*),(.*)\)", instance)
-        if res:
-            instance_name = res.groups()[1]
-
-    return (host, community, version,
-            triggergroup, dstemplate, instance,
-            instance_name)
-
-
 class Snmp_poller(BaseModule):
     """ SNMP Poller module class
         Improve SNMP checks
@@ -1010,13 +1010,17 @@ class Snmp_poller(BaseModule):
         try:
             self.datasource = ConfigObj(self.datasource_file,
                                         interpolation='template')
+            # Store config in memcache
+            self.memcached.set('datasource', self.datasource, time=604800)
         except Exception, e:
-            logger.error("Readin datasource file error: `%s'" % str(e))
-            self.i_am_dying = True
-            return
+            logger.error("Reading datasource file error: `%s'" % str(e))
+            # Try to get it from memcache
+            self.datasource = self.memcached.get('datasource')
+            if self.datasource is None:
+                logger.error("Datasource not found in your hard disk and in memcached")
+                self.i_am_dying = True
+                return
 
-        # Store config in memcache
-        self.memcached.set('datasource', self.datasource, time=604800)
 
     def get_new_checks(self):
         """ Get new checks if less than nb_checks_max
