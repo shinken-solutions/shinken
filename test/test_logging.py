@@ -268,7 +268,6 @@ class TestWithLocalLogging(unittest.TestCase, LogCollectMixin):
         self.assertEqual(len(msgs), 1)
         self.assertEqual(len(lines), 0)
         self.assertEqual(len(local_log), 1)
-        print >> sys.stderr, local_log[0]
         self.assertRegexpMatches(local_log[0],
             r'^\[\d+\] ERROR:\s+Some log-message\n$')
 
