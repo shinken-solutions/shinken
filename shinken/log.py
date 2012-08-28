@@ -137,7 +137,6 @@ class Log(logging.Logger):
             for handler in self.handlers:
                 handler.setFormatter(defaultFormatter)
 
-logger = Log()
 
 class __ConsoleLogger:
     """
@@ -168,6 +167,15 @@ class __ConsoleLogger:
         kwargs.setdefault('print_it', True)
         logger._log(*args, **kwargs)
 
+
+#--- create the main logger ---
+# Restore original logger-class after creation, since this is the only
+# logger of class `Log`,
+lc = logging.getLoggerClass()
+logging.setLoggerClass(Log)
+logger = logging.getLogger('shinken')
+logging.setLoggerClass(lc)
+del lc
 
 console_logger = __ConsoleLogger()
 
