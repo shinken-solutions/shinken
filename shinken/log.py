@@ -23,6 +23,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+import sys
 import time
 import logging
 from logging import Handler, Formatter, StreamHandler
@@ -138,36 +139,6 @@ class Log(logging.Logger):
                 handler.setFormatter(defaultFormatter)
 
 
-class __ConsoleLogger:
-    """
-    This wrapper class for logging and printing messages to stdout, too.
-
-    :fixme: Implement this using an additional stream-handler, as soon
-    as the logging system is based on the standard Pytthon logging
-    module.
-    """
-    def debug(self, msg, *args, **kwargs):
-        self._log(Log.DEBUG, msg, *args, **kwargs)
-
-    def info(self, msg, *args, **kwargs):
-        kwargs.setdefault('display_level', False)
-        self._log(Log.INFO, msg, *args, **kwargs)
-
-    def warning(self, msg, *args, **kwargs):
-        self._log(Log.WARNING, msg, *args, **kwargs)
-
-    def error(self, msg, *args, **kwargs):
-        self._log(Log.ERROR, msg, *args, **kwargs)
-
-    def critical(self, msg, *args, **kwargs):
-        self._log(Log.CRITICAL, msg, *args, **kwargs)
-
-    def _log(self, *args, **kwargs):
-        # if `print_it` is not passed as an argument, set it to `true`
-        kwargs.setdefault('print_it', True)
-        logger._log(*args, **kwargs)
-
-
 #--- create the main logger ---
 # Restore original logger-class after creation, since this is the only
 # logger of class `Log`,
@@ -177,7 +148,8 @@ logger = logging.getLogger('shinken')
 logging.setLoggerClass(lc)
 del lc
 
-console_logger = __ConsoleLogger()
+console_logger = logging.getLogger('shinken.console')
+console_logger.addHandler(StreamHandler(sys.stdout))
 
 def send_result(result, *args):
     console_logger.info(result)
