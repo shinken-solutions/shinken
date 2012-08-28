@@ -30,7 +30,6 @@ from logging.handlers import TimedRotatingFileHandler
 
 from brok import Brok
 
-human_timestamp_log = False
 
 _brokhandler_ = None
 
@@ -38,6 +37,8 @@ _brokhandler_ = None
 brokFormatter = Formatter('[%(created)i] %(levelname)s: %(message)s')
 brokFormatter_named = Formatter('[%(created)i] %(levelname)s: [%(name)s] %(message)s')
 defaultFormatter = Formatter('[%(created)i] %(levelname)s: %(message)s')
+humanFormatter = Formatter('[%(asctime)s] %(levelname)s: %(message)s',
+                           '%a %b %d %H:%M:%S %Y')
 
 
 class BrokHandler(Handler):
@@ -136,8 +137,12 @@ class Log(logging.Logger):
         If the optional parameter `on` is False, the timestamp format
         will be reset to the default format.
         """
-        global human_timestamp_log
-        human_timestamp_log = bool(on)
+        if on:
+            for handler in self.handlers:
+                handler.setFormatter(humanFormatter)
+        else:
+            for handler in self.handlers:
+                handler.setFormatter(defaultFormatter)
 
 logger = Log()
 
