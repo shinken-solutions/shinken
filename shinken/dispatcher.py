@@ -527,7 +527,7 @@ class Dispatcher:
                                         #If receiver, we must send the hostnames of this configuration
                                         if kind == 'receiver':
                                             hnames = [h.get_name() for h in cfg.hosts]
-                                            logger.debug("[%s] Sending hostnames %s to the receiver %s" % (r.get_name(), hnames, satellite.get_name()))
+                                            logger.debug("[%s] Sending %s hostnames to the receiver %s" % (r.get_name(), len(hnames), satellite.get_name()))
                                             satellite.push_host_names(cfg_id, hnames)
                             # else:
                             #    #I've got enough satellite, the next ones are considered spares
