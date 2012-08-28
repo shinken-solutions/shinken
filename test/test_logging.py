@@ -200,7 +200,6 @@ class TestDefaultLoggingMethods(unittest.TestCase, LogCollectMixin):
         self.assertRegexpMatches(msgs[0],
             r'^\[[^\]]+] Info :\s+Some \] log-message\n$')
         time.strptime(msgs[0].split(' Info :    ', 1)[0], '[%a %b %d %H:%M:%S %Y]')
-        time.strptime(msgs[0].split(' Info :    ', 1)[0], '[%a %b %d %H:%M:%S %Y]')
         logger.set_human_format(False)
 
     def test_reset_human_timestamp_format(self):
