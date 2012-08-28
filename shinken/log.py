@@ -30,10 +30,38 @@ from logging.handlers import TimedRotatingFileHandler
 
 from brok import Brok
 
-obj = None
-name = None
 human_timestamp_log = False
+
+_brokhandler_ = None
+
+
+brokFormatter = Formatter('[%(created)i] %(levelname)s: %(message)s')
+brokFormatter_named = Formatter('[%(created)i] %(levelname)s: [%(name)s] %(message)s')
 defaultFormatter = Formatter('[%(created)i] %(levelname)s: %(message)s')
+
+
+class BrokHandler(Handler):
+    """
+    This log handler is forwarding log messages as broks to the broker.
+
+    Only messages of level higher than DEBUG are send to other
+    satellite to not risk overloading them.
+    """
+
+    def __init__(self, broker, name=None):
+        # Only messages of levelINFO or higher are passed on to the
+        # broker. If the Logger level is higher then INFO, the logger
+        # already skips the entry.
+        Handler.__init__(self, logging.INFO)
+        self._broker = broker
+
+    def emit(self, record):
+        try:
+            msg = self.format(record)
+            brok = Brok('log', {'log': msg + '\n'})
+            self._broker.add(brok)
+        except:
+            self.handleError(record)
 
 
 class Log(logging.Logger):
@@ -54,10 +82,14 @@ class Log(logging.Logger):
         """ We load the object where we will put log broks
         with the 'add' method
         """
-        global obj
-        global name
-        obj = object
-        name = name_
+        global _brokhandler_
+        _brokhandler_ = BrokHandler(object)
+        if name_:
+            self.name = name_
+            _brokhandler_.setFormatter(brokFormatter_named)
+        else:
+            _brokhandler_.setFormatter(brokFormatter)
+        self.addHandler(_brokhandler_)
 
 
     @staticmethod
