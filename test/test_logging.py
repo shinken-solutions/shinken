@@ -72,13 +72,12 @@ class TestLevels(unittest.TestCase):
 
     def test_default_level(self):
         logger = Log()
-        # :fixme: `_level` is private, needs an official accessor
-        self.assertEqual(logger._level, logger.NOTSET)
+        self.assertEqual(logger.level, logger.NOTSET)
 
     def test_set_level(self):
         logger = Log()
         logger.set_level(logger.WARNING)
-        self.assertEqual(logger._level, logger.WARNING)
+        self.assertEqual(logger.level, logger.WARNING)
 
     def test_set_level_non_integer_raises(self):
         logger = Log()
@@ -89,7 +88,7 @@ class TestLevels(unittest.TestCase):
         # argl, load_obj() unsets the level! save and restore it
         logger.set_level(logger.CRITICAL)
         logger.load_obj(Dummy())
-        self.assertEqual(logger._level, logger.CRITICAL)
+        self.assertEqual(logger.level, logger.CRITICAL)
 
 class TestBasics(unittest.TestCase):
 
@@ -242,12 +241,12 @@ class TestWithLocalLogging(unittest.TestCase, LogCollectMixin):
     def test_register_local_log_keeps_level(self):
         logger = self._prepare_logging()
         logger.set_level(logger.ERROR)
-        self.assertEqual(logger._level, logger.ERROR)
+        self.assertEqual(logger.level, logger.ERROR)
         logfile = NamedTemporaryFile("w", delete=False)
         logfile.close()
         logfile_name = logfile.name
         logger.register_local_log(logfile_name)
-        self.assertEqual(logger._level, logger.ERROR)
+        self.assertEqual(logger.level, logger.ERROR)
 
 
     def test_basic_logging_debug_does_not_send_broks(self):
