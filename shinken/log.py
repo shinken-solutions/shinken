@@ -32,8 +32,8 @@ from brok import Brok
 
 obj = None
 name = None
-local_log = None
 human_timestamp_log = False
+defaultFormatter = Formatter('[%(created)i] %(levelname)s: %(message)s')
 
 
 class Log(logging.Logger):
@@ -86,36 +86,16 @@ class Log(logging.Logger):
 
 
     def register_local_log(self, path, level=None):
-        """The shiken logging wrapper can write to a local file if needed
-        and return the file descriptor so we can avoid to
-        close it.
         """
-        global local_log
+        Add logging to a local log-file.
 
+        The file will be rotated once a day
+        """
+        handler = TimedRotatingFileHandler(path, 'midnight', backupCount=5)
         if level is not None:
-            self._level = level
-
-        # Open the log and set to rotate once a day
-        basic_log_handler = TimedRotatingFileHandler(path,
-                                                     'midnight',
-                                                     backupCount=5)
-        basic_log_handler.setLevel(self._level)
-        basic_log_formatter = logging.Formatter('%(asctime)s %(message)s')
-        basic_log_handler.setFormatter(basic_log_formatter)
-        logger = logging.getLogger()
-        logger.addHandler(basic_log_handler)
-        logger.setLevel(self._level)
-        local_log = basic_log_handler
-
-        # Return the file descriptor of this file
-        return basic_log_handler.stream.fileno()
-
-    def quit(self):
-        """Close the local log file at program exit"""
-        global local_log
-        if local_log:
-            self.debug("Closing %s local_log" % str(local_log))
-            local_log.close()
+            handler.setLevel(level)
+        handler.setFormatter(defaultFormatter)
+        self.addHandler(handler)
 
     def set_human_format(self, on=True):
         """
