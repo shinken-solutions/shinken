@@ -800,6 +800,12 @@ class Config(Item):
                 t0 = time.time()
                 r.serialized_confs[i] = cPickle.dumps(conf, cPickle.HIGHEST_PROTOCOL)
                 logger.debug("[config] time to serialize the conf %s:%s is %s" % (r.get_name(), i, time.time() - t0))
+        # Now pickle the whole conf, for easy and quick spare send
+        t0 = time.time()
+        whole_conf_pack = cPickle.dumps(self, cPickle.HIGHEST_PROTOCOL)
+        logger.debug("[config] time to serialize the global conf : %s" % (time.time() - t0))
+        self.whole_conf_pack = whole_conf_pack
+        
 
     def dump(self):
         print "Slots", Service.__slots__

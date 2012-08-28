@@ -143,7 +143,7 @@ class Dispatcher:
             # If not me and I'm a master
             if arb != self.arbiter and self.arbiter and not self.arbiter.spare:
                 if not arb.have_conf(self.conf.magic_hash):
-                    arb.put_conf(self.conf)
+                    arb.put_conf(self.conf.whole_conf_pack)
                 else:
                     # Ok, it already has the conf. I remember that
                     # it does not have to run, I'm still alive!
