@@ -106,16 +106,9 @@ class Log(logging.Logger):
     def get_level(self):
         return logging.getLogger().getEffectiveLevel()
 
-    # We can have level as an int (logging.INFO) or a string INFO
-    # if string, try to get the int value
+    # :todo: remove this alias
     def set_level(self, level):
-        if not isinstance(level, int):
-            level = getattr(logging, level, None)
-            if not level or not isinstance(level, int):
-                raise TypeError('log level must be an integer')
-
-        self._level = level
-        logging.getLogger().setLevel(level)
+        self.setLevel(level)
 
 
     def register_local_log(self, path, level=None):
