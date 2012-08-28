@@ -312,9 +312,7 @@ class TestWithLocalLogging(unittest.TestCase, LogCollectMixin):
         # timestamp. As it is yet unclear, whether this intended or
         # not, we test it, too.
         times = local_log[0].split(' INFO:', 1)[0]
-        time1, time2 = times.rsplit('[', 1)
-        time.strptime(time1.rsplit(',')[0], '%Y-%m-%d %H:%M:%S')
-        time.strptime(time2, '%a %b %d %H:%M:%S %Y]')
+        time.strptime(times, '[%a %b %d %H:%M:%S %Y]')
         logger.set_human_format(False)
 
     def test_reset_human_timestamp_format(self):
