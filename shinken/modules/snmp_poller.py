@@ -25,9 +25,6 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This Class is an example of an Scheduler module
-#Here for the configuration phase AND running one
-
 import os
 import re
 import sys
@@ -35,6 +32,7 @@ import signal
 import time
 import socket
 import struct
+import copy
 import binascii
 import getopt
 import shlex
@@ -43,14 +41,19 @@ import math
 from datetime import datetime, timedelta
 from Queue import Empty
 
-import memcache
-from configobj import ConfigObj, Section
-from pysnmp.carrier.asynsock.dispatch import AsynsockDispatcher
-from pysnmp.carrier.asynsock.dgram import udp
-from pyasn1.codec.ber import encoder, decoder
-from pysnmp.proto.api import v2c
-
 from shinken.log import logger
+
+try:
+    import memcache
+    from configobj import ConfigObj, Section
+    from pysnmp.carrier.asynsock.dispatch import AsynsockDispatcher
+    from pysnmp.carrier.asynsock.dgram import udp
+    from pyasn1.codec.ber import encoder, decoder
+    from pysnmp.proto.api import v2c
+except ImportError, e:
+    logger.error("SNMP Booster : Import error. Maybe one of this module is missing: memcache, configobj, pysnmp")
+    raise ImportError(e)
+
 from shinken.basemodule import BaseModule
 from shinken.check import Check
 from shinken.macroresolver import MacroResolver
@@ -68,11 +71,13 @@ properties = {
 
 def get_instance(mod_conf):
     """called by the plugin manager to get a poller"""
-    print "Get a snmp poller module for plugin %s" % mod_conf.get_name()
+    logger.info("Get a snmp poller module for plugin %s" % mod_conf.get_name())
     instance = Snmp_poller(mod_conf)
     return instance
 
 def rpn_calculator(rpn_list):
+    """ Reverse Polish notation calculator
+    """
     try:
         st = []
         for el in rpn_list:
@@ -91,26 +96,46 @@ def rpn_calculator(rpn_list):
             return(st.pop())
 
     except Exception, e:
-        print('Calc Error: ' + str(e) + str(rpn_list))
+        logger.error('RPN calculation Error: %s - %s' % (str(e),
+                                                         str(rpn_list)))
         return "Calc error"
 
 class SNMPHost(object):
+    """ Host with SNMP checks
+        frequences = {
+                    '1' : <SNMPFrequence>
+                    '5' : <SNMPFrequence>
+                     }
+        instances = {
+                    'wlan': 1,
+                    'eth0': 0,
+                    }
+    """
     def __init__(self, host, community, version):
         self.host = host
         self.community = community
         self.version = version
+        # frequences == check_intervals
+        # frequences dict : sort services by check_interval
         self.frequences = {}
+        # instance mapping
         self.instances = {}
 
     def update_service(self, service):
+        """ Add or modify a service in service list
+        """
         if service.check_interval in self.frequences:
             # interval found
             if not service.key in self.frequences[service.check_interval].services:
                 # service not found
                 self.frequences[service.check_interval].services[service.key] = service
             else:
-                # service found dot nothing
-                pass
+                # service found, check if it needs update
+                if not self.frequences[service.check_interval].services[service.key] == service:
+                    self.frequences[service.check_interval].services[service.key] = service
+                else:
+                    # no changes
+                    pass
             # TODO search service in other interval !!!
         else:
             # Interval not found
@@ -120,50 +145,104 @@ class SNMPHost(object):
             new_freq.services[service.key] = service
             self.frequences[service.check_interval] = new_freq
 
-    def find_frenquences(self, service_key):
+    def find_frequences(self, service_key):
+        """ search service frequence
+            get a service key and return its frequence
+        """
         tmp = dict([(key, interval) for interval,f in self.frequences.items() for key in f.services.keys()])
         if service_key in tmp:
             return tmp[service_key]
         else:
-            # TODO
-            # Not found ???
+            logger.error('No frequences found for this key: %s' % service_key)
             return None
 
-    def get_oids_by_interval(self, interval):
+    def get_oids_by_frequence(self, interval):
+        """ Return all oids from an frequence
+        """
         return dict([(snmpoid.oid, snmpoid) for s in self.frequences[interval].services.values() for snmpoid in s.oids.values()])
 
     def get_oids_for_instance_mapping(self, interval, datasource):
+        """ Return all oids from an frequence in order to map instances
+        """
         base_oids = {}
         for s in self.frequences[interval].services.values():
-            if hasattr(s.instance, 'find') and s.instance.startswith("map("):
-                base_oid_name = s.instance[4:-1]
-                if base_oid_name in datasource['MAPPING']:
-                    oid = datasource['MAPPING'][base_oid_name]['base_oid']
-                    base_oids[oid] = s.instance
+            if s.instance:
+                res = re.search("map\((.*),(.*)\)", s.instance)
+                if res:
+                    base_oid_name = res.groups()[0]
+                    if base_oid_name in datasource['MAP']:
+                        oid = datasource['MAP'][base_oid_name]['base_oid']
+                        base_oids[oid] = s.instance
 
         return base_oids
 
+    def get_oids_for_limits(self, interval, datasource):
+        """ Return all oids from an frequence in order to get data max values
+        """
+        max_oids = []
+        for s in self.frequences[interval].services.values():
+            for snmpoid in s.oids.values():
+                if snmpoid.max_ and not isinstance(snmpoid.max_, float):
+                    oid_max, _ = snmpoid.max_.rsplit(".", 1)
+                    max_oids.append(oid_max)
+
+        return max_oids
+
     def format_output(self, frequence, key):
+        """ Prepare service output 
+        """
         m, r = self.frequences[frequence].format_output(key)
         return m, r
 
     def map_instances(self, frequence):
+        """ Map instances
+        """
         for s in self.frequences[frequence].services.values():
             s.map_instances(self.instances)
 
+    def set_limits(self, frequence, limits):
+        """ Set data max values
+        """ 
+        for s in self.frequences[frequence].services.values():
+            s.set_limits(limits)
+
+    def __eq__(self, other):
+        """ equal reimplementation
+        """
+        if isinstance(other, SNMPHost):
+            result = []
+            result.append(self.community == other.community)
+            result.append(self.version == other.version)
+            return all(result)
+        return NotImplemented
 
 class SNMPFrequence(object):
+    """ Frequence 
+        services = {
+                    '(interface, map(interface,eth0), eth0)' : <SNMPService>
+                    '(interface, map(interface,eth1), eth1)' : <SNMPService>
+                     }
+    """
     def __init__(self, frequence):
         self.frequence = frequence
         self.check_time = None
         self.old_check_time = None
+        # List services
         self.services = {}
         self.forced = None
 
     def format_output(self, key):
+        """ Prepare service output 
+        """
         return self.services[key].format_output(self.check_time, self.old_check_time)
 
 class SNMPService(object):
+    """ SNMP service
+        oids = {
+               'SysContact' : <SNMPOid>,
+               'SysName' : <SNMPOid>
+               }
+    """
     def __init__(self, service, host, triggergroup, dstemplate, instance, instance_name):
         self.host = host
         self.check_interval = service.check_interval
@@ -171,28 +250,43 @@ class SNMPService(object):
         self.triggers = {}
         self.dstemplate = dstemplate
         self.instance = instance
+        self.raw_instance = instance
         self.instance_name = instance_name
         self.oids = {}
         self.key = (dstemplate, instance, instance_name)
 
+    def set_limits(self, limits):
+        """ Set data max values
+        """
+        for snmpoid in self.oids.values():
+            if snmpoid.max_ in limits:
+                snmpoid.max_ = float(limits[snmpoid.max_])
+
     def map_instances(self, instances):
+        """ Map instances
+        """
         if self.instance_name in instances:
             # Set instance
             self.instance = instances[self.instance_name]
             for snmpoid in self.oids.values():
                 snmpoid.oid = re.sub("map\(.*\)", self.instance, snmpoid.oid)
-            return True
-        return False
+                if snmpoid.max_ and isinstance(snmpoid.max_, str):
+                    snmpoid.max_ = snmpoid.max_ % self.__dict__
+                
+            return True # useless
+        return False # useless
 
     def format_output(self, check_time, old_check_time):
+        """ Prepare service output 
+        """
         for snmpoid in self.oids.values():
             snmpoid.format_output(check_time, old_check_time)
 
-        # Get return code
+        # Get return code from trigger
         rc = self.get_trigger_result()
-        # Get perf
+        # Get perf from all oids
         perf = " ".join([snmpoid.perf for snmpoid in self.oids.values() if snmpoid.perf])
-        # Get output
+        # Get output from all oids
         out = " - ".join([snmpoid.out for snmpoid in self.oids.values() if snmpoid.out])
         # Get name
         if self.instance_name:
@@ -211,6 +305,8 @@ class SNMPService(object):
         return message, rc
 
     def get_trigger_result(self):
+        """ Get return code from trigger calculator
+        """
         errors = {'critical': 2,
                   'warning' : 1,
                   'ok'      : 0}
@@ -238,8 +334,9 @@ class SNMPService(object):
                                         args = args.split(",")
                                         value = getattr(self.oids[ds], fct)(**args)
                                 else:
-                                    # TODO
-                                    print "NOT FUNCTION FOUND: `%s'" % fct
+                                    logger.error("Trigger function not found: %s" % fct)
+                                    # return UNKNOW
+                                    return 3
                             elif el in self.oids:
                                 # detect oid
                                 value = self.oids[ds].value
@@ -252,12 +349,12 @@ class SNMPService(object):
                             return error_code
             return errors['ok']
         except Exception, e:
-            # TODO
-            print "ERROR", str(e)
-            self.out = "Error calculating return code" 
+            logger.error("Get Trigger  error: %s" % str(e))
             return int(trigger['default_status'])
 
     def set_triggers(self, datasource):
+        """ Prepare trigger from triggroup and trigges definition
+        """
         if self.triggergroup in datasource['TRIGGERGROUP']:
             triggers = datasource['TRIGGERGROUP'][self.triggergroup]
             # if triggers is a str
@@ -276,7 +373,9 @@ class SNMPService(object):
                     elif 'default_status' in datasource['TRIGGER']:
                         self.triggers[trigger_name]['default_status'] = datasource['TRIGGER']['default_status']
 
-    def find_oids(self, datasource):
+    def set_oids(self, datasource):
+        """ Get datas from datasource and set SNMPOid dict
+        """
         ds = datasource['DSTEMPLATE'][self.dstemplate]['ds']
         if isinstance(ds, str):
             ds = [ds,]
@@ -285,9 +384,8 @@ class SNMPService(object):
             try:
                 oid = datasource['DATASOURCE'][source]['ds_oid']
             except:
-                # TODO
-                print "ERROR: OID not found"
-                pass
+                logger.error("ds_oid not found for source: %s" % source)
+                return
 
             # Determining oid
             oid = oid % self.__dict__
@@ -298,9 +396,8 @@ class SNMPService(object):
             elif 'ds_type' in datasource['DATASOURCE']:
                 ds_type = datasource['DATASOURCE']['ds_type']
             else:
-                # TODO
                 ds_type = 'TEXT'
-                print "ERROR : ds_type not found"
+                logger.info("ds_type not found for source: %s. TEXT type selected" % source)
             # Search name
             name = source
             if 'ds_name' in datasource['DATASOURCE'][source]:
@@ -325,33 +422,54 @@ class SNMPService(object):
                 ds_max = datasource['DATASOURCE'][source]['ds_max']
             elif 'ds_max' in datasource['DATASOURCE']:
                 ds_max = datasource['DATASOURCE']['ds_max']
+            try:
+                ds_max = float(ds_max)
+            except:
+                pass
             # Search calc
             calc = None
             if 'ds_calc' in datasource['DATASOURCE'][source]:
                 calc = datasource['DATASOURCE'][source]['ds_calc']
             elif 'ds_calc' in datasource['DATASOURCE']:
                 calc = datasource['DATASOURCE']['ds_calc']
-            # Search limit
-            limit = ''
-            if 'ds_limit' in datasource['DATASOURCE'][source]:
-                limit = datasource['DATASOURCE'][source]['ds_limit']
-            elif 'ds_limit' in datasource['DATASOURCE']:
-                limit = datasource['DATASOURCE']['ds_limit']
 
-            snmp_oid = SNMPOid(oid, ds_type, name, ds_max, ds_min, unit, calc, limit)
+            snmp_oid = SNMPOid(oid, ds_type, name, ds_max, ds_min, unit, calc)
             self.oids[source] = snmp_oid
+
+    def __eq__(self, other):
+        """ equal reimplementation
+        """
+        if isinstance(other, SNMPService):
+            result = []
+            result.append(self.host == other.host)
+            result.append(self.triggergroup == other.triggergroup)
+            result.append(self.triggers == other.triggers)
+            result.append(self.dstemplate == other.dstemplate)
+            result.append(self.instance_name == other.instance_name)
+            result.append(self.raw_instance == other.instance)
+            for key, snmpoid in self.oids.items():
+                if not key in other.oids:
+                    result.append(False)
+                else:
+                    result.append(other.oids[key] == snmpoid)
+            return all(result)
+        return NotImplemented
 
 
 class SNMPOid(object):
-    def __init__(self, oid, ds_type, name, ds_max='', ds_min='', unit='', calc=None, limit=''):
+    """ OID created from datasource
+        contains oids, values, max, ...
+    """
+    def __init__(self, oid, ds_type, name, ds_max='', ds_min='', unit='', calc=None):
         self.oid = oid
+        self.raw_oid = oid
         self.type_ = ds_type
         self.name = name
         self.max_ = ds_max
+        self.raw_max_ = ds_max
         self.min_ = ds_min
         self.unit = unit
         self.calc = calc
-        self.limit = limit
         # Message printed
         self.out = None
         # Raw value (before calculation)
@@ -365,6 +483,9 @@ class SNMPOid(object):
         self.perf = ""
 
     # Zabbix functions
+    def diff(self):
+        return self.raw_value == self.raw_old_value
+
     def prct(self):
         return float(self.value) * 100 / float(self.max_)
 
@@ -373,9 +494,13 @@ class SNMPOid(object):
     # End zabbix functions
 
     def calculation(self, value):
+        """ Get result from self.calc
+        """
         return rpn_calculator([value,] + self.calc)
 
     def format_output(self, check_time, old_check_time):
+        """ Prepare service output 
+        """
         getattr(self, 'format_' + self.type_.lower() + '_output')(check_time, old_check_time)
 
     def format_text_output(self, check_time, old_check_time):
@@ -384,7 +509,12 @@ class SNMPOid(object):
         self.value = "%(raw_value)s" % self.__dict__
         self.out = "%(name)s: %(value)s%(unit)s" % self.__dict__
 
-    def format_derive_output(self, check_time, old_check_time):
+    def format_derive64_output(self, check_time, old_check_time):
+        """ Format output for derive64 type
+        """
+        self.format_derive_output(self, check_time, old_check_time, limit=18446744073709551615)
+
+    def format_derive_output(self, check_time, old_check_time, limit=4294967295):
         """ Format output for derive type
         """
         if self.raw_old_value == None:
@@ -396,14 +526,12 @@ class SNMPOid(object):
             # detect counter reset
             if self.raw_value < self.raw_old_value:
                 # Counter reseted
-                raw_value = (float(self.limit) - float(self.raw_old_value)) + float(raw_value)
-                print "Counter resetedCounter resetedCounter resetedCounter resetedCounter resetedCounter reseted", self.limit, self.raw_old_value, raw_value
+                raw_value = (float(limit) - float(self.raw_old_value)) + float(raw_value)
 
             # Get derive
             t_delta = check_time - old_check_time
             if t_delta.seconds == 0:
-                print "HOW ??? is it possible ?"
-                print "t_deltat_deltat_deltat_deltat_delta == 0:", t_delta
+                logger.info("Time delta is 0s. We can not get derive for this OID %s" % self.oid)
             else:
                 d_delta = float(raw_value) - float(self.raw_old_value)
                 value = d_delta / t_delta.seconds
@@ -418,7 +546,12 @@ class SNMPOid(object):
                 self.out = "%(name)s: %(value)0.2f%(unit)s" % self.__dict__
                 self.perf = "%(name)s=%(value)0.2f%(unit)s;;%(min_)s;%(max_)s" % self.__dict__
 
-    def format_counter_output(self, check_time, old_check_time):
+    def format_counter64_output(self, check_time, old_check_time):
+        """ Format output for counter64 type
+        """
+        self.format_counter_output(self, check_time, old_check_time, limit=18446744073709551615)
+
+    def format_counter_output(self, check_time, old_check_timei, limit=4294967295):
         """ Format output for counter type
         """
         if self.raw_value == None:
@@ -430,7 +563,7 @@ class SNMPOid(object):
             # detect counter reset
             if self.raw_value < self.raw_old_value:
                 # Counter reseted
-                raw_value = (self.limit - self.old_value) + raw_value
+                raw_value = (limit - self.old_value) + raw_value
             # Make calculation
             if self.calc:
                 self.value = self.calculation(raw_value)
@@ -460,6 +593,20 @@ class SNMPOid(object):
             self.out = "%(name)s: %(value)0.2f%(unit)s" % self.__dict__
             self.perf = "%(name)s=%(out)s%(unit)s;;%(min_)s;%(max_)s" % self.__dict__
 
+    def __eq__(self, other):
+        """ equal reimplementation
+        """
+        if isinstance(other, SNMPOid):
+            result = []
+            result.append(self.raw_oid == other.raw_oid)
+            result.append(self.type_ == other.type_)
+            result.append(self.name == other.name)
+            result.append(self.raw_max_ == other.raw_max_)
+            result.append(self.min_ == other.min_)
+            result.append(self.calc == other.calc)
+            return all(result)
+        return NotImplemented
+
 
 class SNMPAsyncClient(object):
     """SNMP asynchron Client.
@@ -479,7 +626,7 @@ class SNMPAsyncClient(object):
 
         self.interval_length = 60
 
-        self.memcached = memcache.Client([memcached_address], debug=0)
+        self.memcached = memcache.Client(['127.0.0.1:11212', memcached_address], debug=0)
         self.datasource = datasource
 
         self.check_interval = None
@@ -500,15 +647,16 @@ class SNMPAsyncClient(object):
                           rc=3)
             return
         if not isinstance(self.obj, SNMPHost):
-            print "Host not found in memcache", self.hostname, self.obj
+            logger.error('Host not found in memcache: %s' % self.hostname)
             self.set_exit("Host not found in memcache: `%s'" % self.hostname,
                           rc=3)
             return
 
         # Find service check_interval
-        self.check_interval = self.obj.find_frenquences(self.serv_key)
+        self.check_interval = self.obj.find_frequences(self.serv_key)
         if self.check_interval is None:
             # Possible ???
+            logger.error('Interval not found in memcache: %s' % self.check_interval)
             self.set_exit("Interval not found in memcache", rc=3)
             return
 
@@ -532,16 +680,20 @@ class SNMPAsyncClient(object):
             # Datas not valid : no data
             data_validity = False
         else:
+            # Compare last check time and check_interval and now
             td = timedelta(seconds=(self.check_interval
                                     *
                                     self.interval_length))
+            # Just to be sure to invalidate datas ...
+            mini_td = timedelta(seconds=(5))
             data_valid = self.obj.frequences[self.check_interval].check_time + td \
-                                                        > self.start_time
+                                                        > self.start_time - mini_td
             if data_valid:
                 # Datas valid
                 data_validity = True
                 message, rc = self.obj.format_output(self.check_interval, self.serv_key)
-                message = "From cache: " + message
+                logger.info('FROM CACHE : Return code: %s - Message: %s' % (rc, message))
+#                message = "From cache: " + message
                 self.set_exit(message, rc=rc)
                 return
             else:
@@ -550,7 +702,8 @@ class SNMPAsyncClient(object):
 
         # Save old datas
         self.obj.frequences[self.check_interval].old_check_time = \
-                                self.obj.frequences[self.check_interval].check_time
+                                copy.copy(self.obj.frequences[self.check_interval].check_time)
+        self.obj.frequences[self.check_interval].check_time = self.start_time
         for oid in self.obj.frequences[self.check_interval].services[self.serv_key].oids.values():
             oid.old_value = oid.value
             oid.raw_old_value = oid.raw_value
@@ -559,8 +712,9 @@ class SNMPAsyncClient(object):
         # UNLOCKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
 
         # Get all oids which have to be checked
-        self.oids_to_check = self.obj.get_oids_by_interval(self.check_interval)
+        self.oids_to_check = self.obj.get_oids_by_frequence(self.check_interval)
         if self.oids_to_check == {}:
+            logger.error('No OID found - %s - %s' % (self.obj_key, str(self.serv_key)))
             self.set_exit("No OID found" + " - " + self.obj_key + " - "+ str(self.serv_key), rc=3)
             return
 
@@ -568,7 +722,7 @@ class SNMPAsyncClient(object):
         tmp_oids = [oid[1:] for oid in self.oids_to_check]
         self.headVars = []
         for oid in tmp_oids:
-            # TODO: FIX IT =>
+            # TODO: FIND SOMETHING BETTER ??
             # Launch :  snmpbulkget .1.3.6.1.2.1.2.2.1.8
             #     to get.1.3.6.1.2.1.2.2.1.8.2
             # Because : snmpbulkget .1.3.6.1.2.1.2.2.1.8.2
@@ -577,20 +731,33 @@ class SNMPAsyncClient(object):
             try:
                 oid = tuple(int(i) for i in oid.split("."))
             except ValueError:
-                # TODO
+                logger.info("Bad format for this oid: %s" % oid)
                 continue
             self.headVars.append(v2c.ObjectIdentifier(oid))
 
-        # Mapping
+        # Prepare SNMP oid for mapping
         self.mapping_oids = self.obj.get_oids_for_instance_mapping(self.check_interval, self.datasource)
         tmp_oids = [oid[1:] for oid in self.mapping_oids]
         for oid in tmp_oids:
             try:
                 oid = tuple(int(i) for i in oid.split("."))
             except ValueError:
-                # TODO
+                logger.info("Bad format for this oid: %s" % oid)
                 continue
             self.headVars.append(v2c.ObjectIdentifier(oid))
+
+        # Prepare SNMP oid for limits
+        self.limit_oids = self.obj.get_oids_for_limits(self.check_interval, self.datasource)
+        tmp_oids = [oid[1:] for oid in self.limit_oids]
+        for oid in tmp_oids:
+            try:
+                oid = tuple(int(i) for i in oid.split("."))
+            except ValueError, e:
+                logger.info("Bad format for this oid: %s" % oid)
+                continue
+            self.headVars.append(v2c.ObjectIdentifier(oid))
+  
+        self.limits_done = not bool(self.limit_oids)
 
         # Build PDU
         self.reqPDU = v2c.GetBulkRequestPDU()
@@ -621,6 +788,7 @@ class SNMPAsyncClient(object):
         try:
             transportDispatcher.runDispatcher()
         except Exception, e:
+            logger.error('Request error on dispatcher: %s' % str(e))
             self.set_exit("Request error on dispatcher: " + str(e), rc=3)
         transportDispatcher.closeDispatcher()
 
@@ -650,6 +818,7 @@ class SNMPAsyncClient(object):
                 oid_dict = {}
                 oid_list = []
                 mapping_instance = {}
+                limits_dict = {}
                 for tableRow in varBindTable:
                     for oid, val in tableRow:
                         oid = "." + oid.prettyPrint()
@@ -657,26 +826,22 @@ class SNMPAsyncClient(object):
                         if oid in self.oids_to_check:
                             # Get values
                             oid_dict[oid] = str(val)
-                        if any([oid.startswith(m_oid + ".") for m_oid in self.mapping_oids]):
+                        elif any([oid.startswith(m_oid + ".") for m_oid in self.mapping_oids]):
                             # Get mapping
                             for m_oid in self.mapping_oids:
                                 if oid.startswith(m_oid + "."):
                                     instance = oid.replace(m_oid + ".", "")
                                     mapping_instance[str(val)] = instance
-
-#                if len(self.oids_to_check) > len(oid_dict):
-#                    print "self.oids_to_check", self.oids_to_check
-#                    print "oid_dict", oid_dict
-#                    self.set_exit("Oids missing in SNMP response: %s" %
-#                                          str(errorStatus),
-#                                  rc=3)
-#                    return wholeMsg
+                        elif any([oid.startswith(l_oid + ".") for l_oid in self.limit_oids]):
+                            for l_oid in self.limit_oids:
+                                if oid.startswith(l_oid + "."):
+                                    limits_dict[oid] = str(val)
 
                 # LOCKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
                 try:
                     self.obj = self.memcached.get(self.obj_key)
                 except ValueError, e:
-                    print "Callback Memcached error:, Callback Memcached error: Callback Memcached error:Callback Memcached error:"
+                    logger.error('Memcached error while getting: `%s' % self.obj_key)
                     self.set_exit("Memcached error: `%s'"
                                   % self.memcached.get(self.obj_key),
                                   3, transportDispatcher)
@@ -685,25 +850,26 @@ class SNMPAsyncClient(object):
                 # MAPPING
                 if not self.mapping_done:
                     self.obj.instances = mapping_instance
-                    s = self.obj.frequences[self.check_interval].services[self.serv_key]
-                    mapping = self.obj.map_instances(self.check_interval)
+                    s = self.obj.frequences[self.check_interval].services[self.serv_key] # useless
+                    mapping = self.obj.map_instances(self.check_interval) # mapping = useless
                     self.memcached.set(self.obj_key, self.obj, time=604800)
                     self.set_exit("MAPPING waiting next check", 3, transportDispatcher)
                     return
 
+                # set Limits
+                if not self.limits_done:
+                    self.obj.set_limits(self.check_interval, limits_dict)
+                    self.memcached.set(self.obj_key, self.obj, time=604800)
+
                 # Save values
-                self.oids_to_check = self.obj.get_oids_by_interval(self.check_interval)
+                self.oids_to_check = self.obj.get_oids_by_frequence(self.check_interval)
                 for oid, value in oid_dict.items():
                     self.oids_to_check[oid].raw_value = str(value)
 
-                self.obj.frequences[self.check_interval].check_time = self.start_time
-                
                 # save data
                 self.memcached.set(self.obj_key, self.obj, time=604800)
 
-
                 # UNLOCKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
-#                transportDispatcher.jobFinished(1)
 
                 # Generate request for next row
                 aBP.setVarBinds(self.reqPDU,
@@ -719,8 +885,9 @@ class SNMPAsyncClient(object):
                 self.startedAt = time.time()
 
         # Prepare output
-#        message, rc = self.format_output()
         message, rc = self.obj.format_output(self.check_interval, self.serv_key)
+    
+        logger.info('Return code: %s - Message: %s' % (rc, message))
         self.set_exit(message, rc, transportDispatcher)
 
         return wholeMsg
@@ -754,7 +921,6 @@ class SNMPAsyncClient(object):
         self.execution_time = self.execution_time.seconds
         self.message = message
         self.state = 'received'
-#        print "message", message
         if transportDispatcher:
             transportDispatcher.jobFinished(1)
 
@@ -796,6 +962,11 @@ def parse_args(cmd_args):
         elif option_name in ("-n", "--instance-name"):
             instance_name = value
 
+    if instance:
+        res = re.search("map\((.*),(.*)\)", instance)
+        if res:
+            instance_name = res.groups()[1]
+
     return (host, community, version,
             triggergroup, dstemplate, instance,
             instance_name)
@@ -826,7 +997,7 @@ class Snmp_poller(BaseModule):
             return
 
         # Prepare memcached connection
-        self.memcached = memcache.Client([self.memcached_address], debug=0)
+        self.memcached = memcache.Client(['127.0.0.1:11212', self.memcached_address], debug=0)
         # Check if memcached server is available
         if not self.memcached.get_stats():
             logger.error("Memcache server (%s) "
@@ -855,7 +1026,6 @@ class Snmp_poller(BaseModule):
         """
         try:
             while(True):
-                #print "I", self.id, "wait for a message"
                 try:
                     msg = self.s.get(block=False)
                 except IOError, e:
@@ -863,7 +1033,6 @@ class Snmp_poller(BaseModule):
                     msg = None
                 if msg is not None:
                     self.checks.append(msg.get_data())
-                #print "I", self.id, "I've got a message!"
         except Empty, exp:
             if len(self.checks) == 0:
                 time.sleep(1)
@@ -997,8 +1166,9 @@ class Snmp_poller(BaseModule):
             if timeout < 0:
                 timeout = 1.0
 
-    def hook_add_actions(self, sche):
-        # TODO split and put one part in arbiter... ???
+    def hook_get_new_actions(self, sche):
+        """ Detect of forced checks
+        """
         for s in sche.services:
             for a in s.actions:
                 if isinstance(a, Check):
@@ -1008,7 +1178,7 @@ class Snmp_poller(BaseModule):
                                                                     'ignore'))
                         # If the command doesn't seem good
                         if len(clean_command) <= 1:
-                            # TODO Bad command ???
+                            logger.error("Bad command detected: %s", a.command)
                             continue
 
                         # we do not want the first member, check_snmp thing
@@ -1027,41 +1197,32 @@ class Snmp_poller(BaseModule):
                             # Host found
                             # try to find if this oid is already in memcache
                             if not s.check_interval in obj.frequences:
-                                print "NOTFOUDNDDD", obj_key, s.service_description
+                                logger.error("check_interval not found in frequence list -"
+                                             "host: %s - check_interval: %s" % (obj_key, s.check_interval))
                                 # possible ??
                                 continue
                             if not obj.frequences[s.check_interval].check_time is None:
                                 # Forced or not forced check ??
-#                                if s.last_chk != 0: 
                                 if True:
                                     if s.state_type == 'SOFT':
                                         forced = True
-                                        # Detect if the checked is forced by an error
-                                        # needed ???
-#                                        t_delta = timedelta(seconds=(s.retry_interval *
-#                                                                     s.interval_length))
-#                                        t_delta = t_delta + timedelta(5)
-#                                        forced = obj.frequences[s.check_interval].check_time \
-#                                                                + t_delta > datetime.now()
                                     else:
                                         # Detect if the checked is forced by an UI/Com
-                                        # TODO Add/remove 5 seconds
                                         forced = (s.next_chk - s.last_chk) < \
                                                  s.check_interval * s.interval_length
-                                    # TODO: what append if is forced
-                                    # by an interface en SOFT type ?
                                 if forced:
                                     # Set forced
-                                    print "FORCED", obj_key, s.service_description
+                                    logger.info("Forced check for this host/service: %s/%s" % (obj_key, s.service_description))
                                     obj.frequences[s.check_interval].forced = forced
 
                             self.memcached.set(obj_key, obj, time=604800)
                         else:
                             # Host Not found
-                            # TODO
-                            pass
+                            logger.error("Host not found: %s" % obj_key)
 
     def hook_late_configuration(self, arb):
+        """ Read config and fill memcached
+        """
         for s in arb.conf.services:
             if s.check_command.command.module_type == 'snmp_poller':
                 c = s.check_command.command
@@ -1075,7 +1236,7 @@ class Snmp_poller(BaseModule):
                                                             'ignore'))
                 # If the command doesn't seem good
                 if len(clean_command) <= 1:
-                    # TODO Bad command ???
+                    logger.error("Bad command detected: %s", a.command)
                     continue
 
                 # we do not want the first member, check_snmp thing
@@ -1089,11 +1250,15 @@ class Snmp_poller(BaseModule):
                 obj = self.memcached.get(obj_key)
 
                 # Don't force check on first launch
-                # MERGE WITH OLD DATA BEFORE ARBITER RESTART
                 if not obj is None:
                     # Host found
+                    new_obj = SNMPHost(host, community, version)
+                    if not obj == new_obj:
+                        # Update host
+                        obj.community = new_obj.community
+                        obj.version = new_obj.version
                     new_serv = SNMPService(s, obj, triggergroup, dstemplate, instance, instance_name)
-                    new_serv.find_oids(self.datasource)
+                    new_serv.set_oids(self.datasource)
                     new_serv.set_triggers(self.datasource)
                     obj.update_service(new_serv)
                     obj.frequences[s.check_interval].forced = False
@@ -1102,7 +1267,7 @@ class Snmp_poller(BaseModule):
                     # No old datas for this host
                     new_obj = SNMPHost(host, community, version)
                     new_serv = SNMPService(s, new_obj, triggergroup, dstemplate, instance, instance_name)
-                    new_serv.find_oids(self.datasource)
+                    new_serv.set_oids(self.datasource)
                     new_serv.set_triggers(self.datasource)
                     new_obj.update_service(new_serv)
                     # Save new host in memcache
