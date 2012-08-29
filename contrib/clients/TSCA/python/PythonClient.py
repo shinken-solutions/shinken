@@ -21,10 +21,15 @@
 import csv
 import time
 import sys
-sys.path.append('../../../../thrift/gen-py')
+sys.path.append('gen-py')
 
-from org.shinken_monitoring.tsca import StateService
-from org.shinken_monitoring.tsca.ttypes import *
+try:
+    from org.shinken_monitoring.tsca import StateService
+    from org.shinken_monitoring.tsca.ttypes import *
+except:
+    print "Can't import tsca stub."
+    print "Have you run thrift --gen py ../../../../shinken/modules/tsca/tsca.thrift ?"
+    sys.exit(1)
 
 from thrift import Thrift
 from thrift.transport import TSocket

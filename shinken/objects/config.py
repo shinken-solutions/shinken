@@ -1450,8 +1450,6 @@ class Config(Item):
         err = txt
         self.configuration_errors.append(err)
 
-        # Possible typo between those 2 variables?
-        self.is_correct = False
         self.conf_is_correct = False
 
     # Now it's time to show all configuration errors
