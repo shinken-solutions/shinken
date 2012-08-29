@@ -21,7 +21,7 @@
   <description>Thrift Tutorial</description>
 
   <property name="src" location="src" />
-  <property name="gen" location="../../../../thrift/gen-java" />
+  <property name="gen" location="gen-java" />
   <property name="build" location="build" />
 
   <path id="libs.classpath">
