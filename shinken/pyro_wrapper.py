@@ -26,6 +26,7 @@
 import select
 import errno
 import time
+import socket
 from log import logger
 
 # Try to import Pyro (3 or 4.1) and if not, Pyro4 (4.2 and 4.3)
@@ -173,7 +174,6 @@ except AttributeError, exp:
                 # Hack for Pyro 4 first versions: with it, there is
                 # no more way to send huge packet!
                 # This hack fails with PYRO 4.14!!!
-                import socket
                 if hasattr(socket, 'MSG_WAITALL'):
                     del socket.MSG_WAITALL
             elif PYRO_VERSION in bad_versions:

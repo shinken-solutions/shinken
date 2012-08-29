@@ -15,7 +15,7 @@
               %end
 
               <li class="nav-header">System</li>
-              %menu = [ ('/system', 'System'), ('/system/log', 'Event Log') ]
+              %menu = [ ('/system', 'System')]
               %for (key, value) in menu:
 
               %# Check for the selected element, if there is one
