@@ -142,7 +142,7 @@ class TSCA_arbiter(BaseModule):
         try:
             handler = StateServiceHandler(self)
             processor = StateService.Processor(handler)
-            transport = TSocket.TServerSocket("0.0.0.0", 9090)
+            transport = TSocket.TServerSocket(self.host, self.port)
             tfactory = TTransport.TBufferedTransportFactory()
             pfactory = TBinaryProtocol.TBinaryProtocolFactory()
             # In order to accept multiple simultaneous clients, we use TThreadedServer
