@@ -24,7 +24,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 # This Class implement the Thrift Service Check Acceptor, an NSCA inspired
-# interface to submiet checks results
+# interface to submit checks results
 
 import os
 import sys
