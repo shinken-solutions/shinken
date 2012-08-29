@@ -690,7 +690,7 @@ class Satellite(BaseSatellite):
         self.external_commands = self.external_commands[:]
 
     def do_loop_turn(self):
-        logger.info("Loop turn")
+        logger.debug("Loop turn")
         # Maybe the arbiter ask us to wait for a new conf
         # If true, we must restart all...
         if self.cur_conf is None:
@@ -718,7 +718,7 @@ class Satellite(BaseSatellite):
                 self.setup_new_conf()
             self.timeout = self.timeout - (end - begin)
 
-        logger.info(" ======================== ")
+        logger.debug(" ======================== ")
 
         self.timeout = self.polling_interval
 
