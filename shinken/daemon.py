@@ -623,6 +623,15 @@ class Daemon(object):
         if uid is None or gid is None:
             logger.error("uid or gid is none. Exiting")
             sys.exit(2)
+            
+        # Maybe the os module got the initgroups function. If so, try to call it.
+        # Do this when we are still root
+        if hasattr(os, 'initgroups'):
+            logger.info('Trying to initialize additonnal groups for the daemon')
+            try:
+                os.initgroups(self.user, gid)
+            except OSError, e:
+                logger.warning('Cannot call the additonnal groups setting with initgroups (%s)' % e.strerror)
         try:
             # First group, then user :)
             os.setregid(gid, gid)
