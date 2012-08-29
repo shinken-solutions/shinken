@@ -1254,25 +1254,32 @@ class Snmp_poller(BaseModule):
                 obj = self.memcached.get(obj_key)
 
                 # Don't force check on first launch
-                if not obj is None:
-                    # Host found
-                    new_obj = SNMPHost(host, community, version)
-                    if not obj == new_obj:
-                        # Update host
-                        obj.community = new_obj.community
-                        obj.version = new_obj.version
-                    new_serv = SNMPService(s, obj, triggergroup, dstemplate, instance, instance_name)
-                    new_serv.set_oids(self.datasource)
-                    new_serv.set_triggers(self.datasource)
-                    obj.update_service(new_serv)
-                    obj.frequences[s.check_interval].forced = False
-                    self.memcached.set(obj_key, obj, time=604800)
-                else:
-                    # No old datas for this host
-                    new_obj = SNMPHost(host, community, version)
-                    new_serv = SNMPService(s, new_obj, triggergroup, dstemplate, instance, instance_name)
-                    new_serv.set_oids(self.datasource)
-                    new_serv.set_triggers(self.datasource)
-                    new_obj.update_service(new_serv)
-                    # Save new host in memcache
-                    self.memcached.set(obj_key, new_obj, time=604800)
+                try:
+                    if not obj is None:
+                        # Host found
+                        new_obj = SNMPHost(host, community, version)
+                        if not obj == new_obj:
+                            # Update host
+                            obj.community = new_obj.community
+                            obj.version = new_obj.version
+                        new_serv = SNMPService(s, obj, triggergroup, dstemplate, instance, instance_name)
+                        new_serv.set_oids(self.datasource)
+                        new_serv.set_triggers(self.datasource)
+                        obj.update_service(new_serv)
+                        obj.frequences[s.check_interval].forced = False
+                        self.memcached.set(obj_key, obj, time=604800)
+                    else:
+                        # No old datas for this host
+                        new_obj = SNMPHost(host, community, version)
+                        new_serv = SNMPService(s, new_obj, triggergroup, dstemplate, instance, instance_name)
+                        new_serv.set_oids(self.datasource)
+                        new_serv.set_triggers(self.datasource)
+                        new_obj.update_service(new_serv)
+                        # Save new host in memcache
+                        self.memcached.set(obj_key, new_obj, time=604800)
+              except:
+                  message = ("Host %s - Service %s will not work. "
+                             "There is a problem in your datasource configuration "
+                             "or in your services"
+                             "configuration" % (obj_key, s.service_description)
+                  logger.error(message)
