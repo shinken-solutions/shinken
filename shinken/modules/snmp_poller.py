@@ -1277,7 +1277,7 @@ class Snmp_poller(BaseModule):
                         new_obj.update_service(new_serv)
                         # Save new host in memcache
                         self.memcached.set(obj_key, new_obj, time=604800)
-              except Exception, e:
-                  message = ("Error adding : Host %s - Service %s"
+                except Exception, e:
+                    message = ("Error adding : Host %s - Service %s"
                              "Error: %s" % (obj_key, s.service_description, str(e)))
-                  logger.error(message)
+                    logger.error(message)
