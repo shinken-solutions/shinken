@@ -410,7 +410,7 @@ class LiveStatusLogStoreSqlite(BaseModule):
             logline = Logline(line=line)
             values = logline.as_tuple()
             if logline.logclass != LOGCLASS_INVALID:
-                self.execute('INSERT INTO LOGS VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', values)
+                self.execute('INSERT INTO LOGS VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', values)
         except LiveStatusLogStoreError, exp:
             print "An error occurred:", exp.args[0]
             print "DATABASE ERROR!!!!!!!!!!!!!!!!!"
