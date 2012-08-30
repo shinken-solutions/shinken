@@ -206,11 +206,17 @@ class NSCA_arbiter(BaseModule):
                     input.append(client)
                 else:
                     # handle all other sockets
-                    data = s.recv(size)
+                    try:
+                        data = s.recv(size)
+                    except:
+                        continue
                     if len(data) == 0:
-                        # Closed socket
-                        del databuffer[s]
-                        del IVs[s]
+                        try:
+                            # Closed socket
+                            del databuffer[s]
+                            del IVs[s]
+                        except:
+                            pass
                         s.close()
                         input.remove(s)
                         continue
