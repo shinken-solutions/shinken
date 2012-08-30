@@ -64,6 +64,7 @@ brokFormatter_named = Formatter('[%(created)i] %(levelname)s: [%(name)s] %(messa
 defaultFormatter = Formatter('[%(created)i] %(levelname)s: %(message)s')
 humanFormatter = Formatter('[%(asctime)s] %(levelname)s: %(message)s',
                            '%a %b %d %H:%M:%S %Y')
+CONSOLE_FORMAT = '[%(asctime)s] %(levelname)s: %(message)s'
 
 class BrokHandler(Handler):
     """
@@ -173,7 +174,10 @@ logging.setLoggerClass(Log)
 logger = logging.getLogger('shinken')
 
 console_logger = logging.getLogger('shinken.console')
-console_logger.addHandler(StreamHandler(sys.stdout))
+sh = StreamHandler(sys.stdout)
+sh.setFormatter(Formatter(CONSOLE_FORMAT))
+console_logger.addHandler(sh)
+del sh
 
 def send_result(result, *args):
     console_logger.info(result)
