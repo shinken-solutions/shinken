@@ -213,6 +213,104 @@ class TestDefaultLoggingMethods(unittest.TestCase, LogCollectMixin):
         self.test_basic_logging_info()
 
 
+class TestConsoleLogger(unittest.TestCase, LogCollectMixin):
+
+    def _prepare_logging(self):
+        self._collector = Collector()
+        self._stdout = sys.stdout
+        sys.stdout = StringIO()
+        logging.logger.load_obj(self._collector)
+        console_logger = logging.console_logger
+        assert console_logger.handlers[0].stream is self._stdout
+        console_logger.handlers[0].stream = sys.stdout
+        return logging.logger, console_logger
+
+    def _get_logging_output(self):
+        logger = logging.console_logger
+        assert logger.handlers[0].stream is sys.stdout
+        msgs, lines = super(TestConsoleLogger, self)._get_logging_output()
+        logger.handlers[0].stream = self._stdout
+        return msgs, lines
+
+    def test_basic_logging_debug_does_not_send_broks(self):
+        logger, console_logger = self._prepare_logging()
+        console_logger.setLevel(logging.DEBUG)
+        msgs, lines = self._put_log(console_logger.debug, 'Some log-message')
+        self.assertEqual(len(msgs), 0)
+        self.assertEqual(len(lines), 1)
+
+    def test_basic_logging_info(self):
+        logger, console_logger = self._prepare_logging()
+        console_logger.setLevel(logging.INFO)
+        msgs, lines = self._put_log(console_logger.info, 'Some log-message')
+        self.assertEqual(len(msgs), 1)
+        self.assertEqual(len(lines), 1)
+        self.assertRegexpMatches(lines[0], r'^\[.+?\] INFO:\s+Some log-message$')
+
+    def test_basic_logging_warning(self):
+        logger, console_logger = self._prepare_logging()
+        console_logger.setLevel(logging.WARNING)
+        msgs, lines = self._put_log(console_logger.warning, 'Some log-message')
+        self.assertEqual(len(msgs), 1)
+        self.assertEqual(len(lines), 1)
+        self.assertRegexpMatches(msgs[0], r'^\[\d+\] WARNING:\s+Some log-message\n$')
+        self.assertRegexpMatches(lines[0], r'^\[.+?\] WARNING:\s+Some log-message$')
+
+
+    def test_basic_logging_error(self):
+        logger, console_logger = self._prepare_logging()
+        console_logger.setLevel(logging.ERROR)
+        msgs, lines = self._put_log(console_logger.error, 'Some log-message')
+        self.assertEqual(len(msgs), 1)
+        self.assertEqual(len(lines), 1)
+        self.assertRegexpMatches(msgs[0], r'^\[\d+\] ERROR:\s+Some log-message\n$')
+        self.assertRegexpMatches(lines[0], r'^\[.+?\] ERROR:\s+Some log-message$')
+
+    def test_basic_logging_critical(self):
+        logger, console_logger = self._prepare_logging()
+        msgs, lines = self._put_log(console_logger.critical, 'Some log-message')
+        self.assertEqual(len(msgs), 1)
+        self.assertEqual(len(lines), 1)
+        self.assertRegexpMatches(msgs[0], r'^\[\d+\] CRITICAL:\s+Some log-message\n$')
+        self.assertRegexpMatches(lines[0], r'^\[.+?\] CRITICAL:\s+Some log-message$')
+
+    def test_level_is_higher_then_the_one_set(self):
+        logger, console_logger = self._prepare_logging()
+        # just test two samples
+        console_logger.setLevel(logging.CRITICAL)
+        msgs, lines = self._put_log(console_logger.error, 'Some log-message')
+        self.assertEqual(len(msgs), 0)
+        self.assertEqual(len(lines), 0)
+
+        # need to prepare again to have stdout=StringIO()
+        logger, console_logger = self._prepare_logging()
+        console_logger.setLevel(logging.INFO)
+        msgs, lines = self._put_log(console_logger.debug, 'Some log-message$')
+        self.assertEqual(len(msgs), 0)
+        self.assertEqual(len(lines), 0)
+
+    def test_human_timestamp_format(self):
+        "test output using the human timestamp format"
+        logger, console_logger = self._prepare_logging()
+        console_logger.setLevel(logging.INFO)
+        logger.set_human_format(True)
+        msgs, lines = self._put_log(console_logger.info, 'Some ] log-message')
+        self.assertRegexpMatches(msgs[0],
+            r'^\[.+?\] INFO:\s+Some \] log-message\n$')
+        time.strptime(msgs[0].split(' INFO:', 1)[0], '[%a %b %d %H:%M:%S %Y]')
+        logger.set_human_format(False)
+
+    def test_reset_human_timestamp_format(self):
+        "test output after switching of the human timestamp format"
+        logger, console_logger = self._prepare_logging()
+        # ensure the human timestamp format is set, ...
+        self.test_human_timestamp_format()
+        # ... then turn it off
+        logger.set_human_format(False)
+        # test whether the normal format is used again
+        self.test_basic_logging_info()
+
+
 class TestWithLocalLogging(unittest.TestCase, LogCollectMixin):
 
     def _prepare_logging(self):
