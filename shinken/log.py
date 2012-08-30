@@ -121,13 +121,6 @@ class Log(logging.Logger):
         """
         return logging._levelNames[lvlName]
 
-
-    # We can have level as an int (logging.INFO) or a string INFO
-    # if string, try to get the int value
-    def get_level(self):
-        return logging.getLogger().getEffectiveLevel()
-
-
     def register_local_log(self, path, level=None):
         """The shinken logging wrapper can write to a local file if needed
         and return the file descriptor so we can avoid to
