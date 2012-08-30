@@ -51,7 +51,7 @@ try:
     from pyasn1.codec.ber import encoder, decoder
     from pysnmp.proto.api import v2c
 except ImportError, e:
-    logger.error("SNMP Booster : Import error. Maybe one of this module is missing: memcache, configobj, pysnmp")
+    logger.error("[SnmpBooster] Import error. Maybe one of this module is missing: memcache, configobj, pysnmp")
     raise ImportError(e)
 
 from shinken.basemodule import BaseModule
@@ -71,7 +71,7 @@ properties = {
 
 def get_instance(mod_conf):
     """called by the plugin manager to get a poller"""
-    logger.info("Get a snmp poller module for plugin %s" % mod_conf.get_name())
+    logger.info("[SnmpBooster] Get a snmp poller module for plugin %s" % mod_conf.get_name())
     instance = Snmp_poller(mod_conf)
     return instance
 
@@ -96,7 +96,7 @@ def rpn_calculator(rpn_list):
             return(st.pop())
 
     except Exception, e:
-        logger.error('RPN calculation Error: %s - %s' % (str(e),
+        logger.error('[SnmpBooster] RPN calculation Error: %s - %s' % (str(e),
                                                          str(rpn_list)))
         return "Calc error"
 
@@ -115,12 +115,15 @@ def parse_args(cmd_args):
         options, args = getopt.getopt(cmd_args,
                         'H:C:V:i:t:T:n:',
                         ['hostname=', 'community=', 'snmp-version=',
-                         'dstemplate=', 'help', 'version',
+                         'dstemplate=', 'triggergroup=',
                          'instance=', 'instance-name=' ])
     except getopt.GetoptError, err:
+        # TODO later - Use argparse
         # If we got problem, bail out
+        logger.error("[SnmpBooster] Error in command: definition %s" % str(err))
         return (host, community, version,
-                triggergroup, dstemplate, instance)
+                    triggergroup, dstemplate, instance,
+                    instance_name,)
     for option_name, value in options:
         if option_name in ("-H", "--hostname"):
             host = value
@@ -136,6 +139,14 @@ def parse_args(cmd_args):
             version = value
         elif option_name in ("-n", "--instance-name"):
             instance_name = value
+
+    if instance and (instance.startswith('-') or instance.lower() == 'none'):
+        instance = None
+    if dstemplate and (dstemplate.startswith('-') or dstemplate.lower() == 'none'):
+        dstemplate = None
+        logger.error("[SnmpBooster] Dstemplate is not define in the command line")
+    if triggergroup and (triggergroup.startswith('-') or triggergroup.lower() == 'none'):
+        triggergroup = None
 
     if instance:
         res = re.search("map\((.*),(.*)\)", instance)
@@ -200,7 +211,7 @@ class SNMPHost(object):
         if service_key in tmp:
             return tmp[service_key]
         else:
-            logger.error('No frequences found for this key: %s' % service_key)
+            logger.error('[SnmpBooster] No frequences found for this key: %s' % service_key)
             return None
 
     def get_oids_by_frequence(self, interval):
@@ -220,6 +231,8 @@ class SNMPHost(object):
                     if base_oid_name in datasource['MAP']:
                         oid = datasource['MAP'][base_oid_name]['base_oid']
                         base_oids[oid] = s.instance
+                    else:
+                        logger.error("[SnmpBooster] Map name `%s' not found in datasource INI file" % base_oid_name)
 
         return base_oids
 
@@ -381,7 +394,7 @@ class SNMPService(object):
                                         args = args.split(",")
                                         value = getattr(self.oids[ds], fct)(**args)
                                 else:
-                                    logger.error("Trigger function not found: %s" % fct)
+                                    logger.error("[SnmpBooster] Trigger function not found: %s" % fct)
                                     # return UNKNOW
                                     return 3
                             elif el in self.oids:
@@ -396,7 +409,7 @@ class SNMPService(object):
                             return error_code
             return errors['ok']
         except Exception, e:
-            logger.error("Get Trigger  error: %s" % str(e))
+            logger.error("[SnmpBooster] Get Trigger  error: %s" % str(e))
             return int(trigger['default_status'])
 
     def set_triggers(self, datasource):
@@ -425,13 +438,13 @@ class SNMPService(object):
         """
         ds = datasource['DSTEMPLATE'][self.dstemplate]['ds']
         if isinstance(ds, str):
-            ds = [ds,]
+            ds = [d.strip() for d in ds.split(",")]
 
         for source in ds:
             try:
                 oid = datasource['DATASOURCE'][source]['ds_oid']
             except:
-                logger.error("ds_oid not found for source: %s" % source)
+                logger.error("[SnmpBooster] ds_oid not found for source: %s" % source)
                 return
 
             # Determining oid
@@ -444,7 +457,7 @@ class SNMPService(object):
                 ds_type = datasource['DATASOURCE']['ds_type']
             else:
                 ds_type = 'TEXT'
-                logger.info("ds_type not found for source: %s. TEXT type selected" % source)
+                logger.info("[SnmpBooster] ds_type not found for source: %s. TEXT type selected" % source)
             # Search name
             name = source
             if 'ds_name' in datasource['DATASOURCE'][source]:
@@ -566,7 +579,7 @@ class SNMPOid(object):
         """
         if self.raw_old_value == None:
             # Need more data to get derive
-            self.out = "Waiting data"
+            self.out = "Waiting an additional check to calculate derive"
             self.perf = ''
         else:
             raw_value = self.raw_value
@@ -578,7 +591,7 @@ class SNMPOid(object):
             # Get derive
             t_delta = check_time - old_check_time
             if t_delta.seconds == 0:
-                logger.info("Time delta is 0s. We can not get derive for this OID %s" % self.oid)
+                logger.error("[SnmpBooster] Time delta is 0s. We can not get derive for this OID %s" % self.oid)
             else:
                 d_delta = float(raw_value) - float(self.raw_old_value)
                 value = d_delta / t_delta.seconds
@@ -694,7 +707,7 @@ class SNMPAsyncClient(object):
                           rc=3)
             return
         if not isinstance(self.obj, SNMPHost):
-            logger.error('Host not found in memcache: %s' % self.hostname)
+            logger.error('[SnmpBooster] Host not found in memcache: %s' % self.hostname)
             self.set_exit("Host not found in memcache: `%s'" % self.hostname,
                           rc=3)
             return
@@ -703,7 +716,7 @@ class SNMPAsyncClient(object):
         self.check_interval = self.obj.find_frequences(self.serv_key)
         if self.check_interval is None:
             # Possible ???
-            logger.error('Interval not found in memcache: %s' % self.check_interval)
+            logger.error('[SnmpBooster] Interval not found in memcache: %s' % self.check_interval)
             self.set_exit("Interval not found in memcache", rc=3)
             return
 
@@ -739,7 +752,7 @@ class SNMPAsyncClient(object):
                 # Datas valid
                 data_validity = True
                 message, rc = self.obj.format_output(self.check_interval, self.serv_key)
-                logger.info('FROM CACHE : Return code: %s - Message: %s' % (rc, message))
+                logger.info('[SnmpBooster] FROM CACHE : Return code: %s - Message: %s' % (rc, message))
 #                message = "From cache: " + message
                 self.set_exit(message, rc=rc)
                 return
@@ -761,12 +774,13 @@ class SNMPAsyncClient(object):
         # Get all oids which have to be checked
         self.oids_to_check = self.obj.get_oids_by_frequence(self.check_interval)
         if self.oids_to_check == {}:
-            logger.error('No OID found - %s - %s' % (self.obj_key, str(self.serv_key)))
+            logger.error('[SnmpBooster] No OID found - %s - %s' % (self.obj_key, str(self.serv_key)))
             self.set_exit("No OID found" + " - " + self.obj_key + " - "+ str(self.serv_key), rc=3)
             return
 
         # SNMP table header
         tmp_oids = [oid[1:] for oid in self.oids_to_check]
+        print tmp_oids
         self.headVars = []
         for oid in tmp_oids:
             # TODO: FIND SOMETHING BETTER ??
@@ -778,32 +792,35 @@ class SNMPAsyncClient(object):
             try:
                 oid = tuple(int(i) for i in oid.split("."))
             except ValueError:
-                logger.info("Bad format for this oid: %s" % oid)
+                logger.info("[SnmpBooster] Bad format for this oid: %s" % oid)
                 continue
             self.headVars.append(v2c.ObjectIdentifier(oid))
 
         # Prepare SNMP oid for mapping
         self.mapping_oids = self.obj.get_oids_for_instance_mapping(self.check_interval, self.datasource)
         tmp_oids = [oid[1:] for oid in self.mapping_oids]
+        print tmp_oids
         for oid in tmp_oids:
             try:
                 oid = tuple(int(i) for i in oid.split("."))
             except ValueError:
-                logger.info("Bad format for this oid: %s" % oid)
+                logger.info("[SnmpBooster] Bad format for this oid: %s" % oid)
                 continue
             self.headVars.append(v2c.ObjectIdentifier(oid))
 
         # Prepare SNMP oid for limits
         self.limit_oids = self.obj.get_oids_for_limits(self.check_interval, self.datasource)
         tmp_oids = [oid[1:] for oid in self.limit_oids]
+        print tmp_oids
         for oid in tmp_oids:
             try:
                 oid = tuple(int(i) for i in oid.split("."))
             except ValueError, e:
-                logger.info("Bad format for this oid: %s" % oid)
+                logger.info("[SnmpBooster] Bad format for this oid: %s" % oid)
                 continue
             self.headVars.append(v2c.ObjectIdentifier(oid))
   
+
         self.limits_done = not bool(self.limit_oids)
 
         # Build PDU
@@ -835,8 +852,8 @@ class SNMPAsyncClient(object):
         try:
             transportDispatcher.runDispatcher()
         except Exception, e:
-            logger.error('Request error on dispatcher: %s' % str(e))
-            self.set_exit("Request error on dispatcher: " + str(e), rc=3)
+            logger.error('[SnmpBooster] SNMP Request error: %s' % str(e))
+            self.set_exit("SNMP Request error: " + str(e), rc=3)
         transportDispatcher.closeDispatcher()
 
     def callback(self, transportDispatcher, transportDomain, transportAddress,
@@ -857,7 +874,8 @@ class SNMPAsyncClient(object):
                 # Check for SNMP errors reported
                 errorStatus = aBP.getErrorStatus(self.rspPDU)
                 if errorStatus and errorStatus != 2:
-                    self.set_exit("REQUEST ERROR: " + str(errorStatus), rc=3)
+                    logger.error('[SnmpBooster] SNMP Request error: %s' % str(errorStatus))
+                    self.set_exit("SNMP Request error: " + str(errorStatus), rc=3)
                     return wholeMsg
                 # Format var-binds table
                 varBindTable = aBP.getVarBindTable(self.reqPDU, self.rspPDU)
@@ -878,7 +896,8 @@ class SNMPAsyncClient(object):
                             for m_oid in self.mapping_oids:
                                 if oid.startswith(m_oid + "."):
                                     instance = oid.replace(m_oid + ".", "")
-                                    mapping_instance[str(val)] = instance
+                                    val = re.sub("[,:/ ]", "_", str(val))
+                                    mapping_instance[val] = instance
                         elif any([oid.startswith(l_oid + ".") for l_oid in self.limit_oids]):
                             for l_oid in self.limit_oids:
                                 if oid.startswith(l_oid + "."):
@@ -888,7 +907,7 @@ class SNMPAsyncClient(object):
                 try:
                     self.obj = self.memcached.get(self.obj_key)
                 except ValueError, e:
-                    logger.error('Memcached error while getting: `%s' % self.obj_key)
+                    logger.error('[SnmpBooster] Memcached error while getting: `%s' % self.obj_key)
                     self.set_exit("Memcached error: `%s'"
                                   % self.memcached.get(self.obj_key),
                                   3, transportDispatcher)
@@ -900,7 +919,7 @@ class SNMPAsyncClient(object):
                     s = self.obj.frequences[self.check_interval].services[self.serv_key] # useless
                     mapping = self.obj.map_instances(self.check_interval) # mapping = useless
                     self.memcached.set(self.obj_key, self.obj, time=604800)
-                    self.set_exit("MAPPING waiting next check", 3, transportDispatcher)
+                    self.set_exit("Instance mapping completed. Expect results at next check", 3, transportDispatcher)
                     return
 
                 # set Limits
@@ -927,21 +946,21 @@ class SNMPAsyncClient(object):
                                                 transportAddress)
 
                 if time.time() - self.startedAt > self.timeout:
-                    self.set_exit("Request timed out", 3, transportDispatcher)
+                    self.set_exit("SNMP Request timed out", 3, transportDispatcher)
 
                 self.startedAt = time.time()
 
         # Prepare output
         message, rc = self.obj.format_output(self.check_interval, self.serv_key)
     
-        logger.info('Return code: %s - Message: %s' % (rc, message))
+        logger.info('[SnmpBooster] Return code: %s - Message: %s' % (rc, message))
         self.set_exit(message, rc, transportDispatcher)
 
         return wholeMsg
 
     def callback_timer(self, timeNow):
         if timeNow - self.startedAt > self.timeout:
-            self.set_exit("Request timed out", rc=3)
+            self.set_exit("SNMP Request timed out", rc=3)
             return
 
     def is_done(self):
@@ -978,6 +997,7 @@ class Snmp_poller(BaseModule):
     """
     def __init__(self, mod_conf):
         BaseModule.__init__(self, mod_conf)
+        self.version = "1.0"
         self.datasource_file = getattr(mod_conf, 'datasource_file', None)
         self.memcached_host = getattr(mod_conf, 'memcached_host', "127.0.0.1")
         self.memcached_port = getattr(mod_conf, 'memcached_port', 11211)
@@ -987,12 +1007,12 @@ class Snmp_poller(BaseModule):
         # Called by poller to say 'let's prepare yourself guy'
     def init(self):
         """Called by poller to say 'let's prepare yourself guy'"""
-        print "Initialization of the snmp poller module"
+        logger.info("[SnmpBooster] Initialization of the SNMP Booster %s" % self.version)
         self.i_am_dying = False
 
         if self.datasource_file is None:
             # Kill snmp booster if config_file is not set
-            logger.error("Please set config_file parameter")
+            logger.error("[SnmpBooster] Please set config_file parameter")
             self.i_am_dying = True
             return
 
@@ -1000,7 +1020,7 @@ class Snmp_poller(BaseModule):
         self.memcached = memcache.Client(['127.0.0.1:11212', self.memcached_address], debug=0)
         # Check if memcached server is available
         if not self.memcached.get_stats():
-            logger.error("Memcache server (%s) "
+            logger.error("[SnmpBooster] Memcache server (%s) "
                          "is not reachable" % self.memcached_address)
             self.i_am_dying = True
             return
@@ -1012,12 +1032,15 @@ class Snmp_poller(BaseModule):
                                         interpolation='template')
             # Store config in memcache
             self.memcached.set('datasource', self.datasource, time=604800)
+        # TODO
+        # raise if reading error
+
         except Exception, e:
-            logger.error("Reading datasource file error: `%s'" % str(e))
+            logger.error("[SnmpBooster] Reading datasource file error: `%s'" % str(e))
             # Try to get it from memcache
             self.datasource = self.memcached.get('datasource')
             if self.datasource is None:
-                logger.error("Datasource not found in your hard disk and in memcached")
+                logger.error("[SnmpBooster] Datasource not found in your hard disk and in memcached")
                 self.i_am_dying = True
                 return
 
@@ -1096,7 +1119,7 @@ class Snmp_poller(BaseModule):
                 try:
                     self.returns_queue.put(c)
                 except IOError, exp:
-                    print "[%d]Exiting: %s" % (self.id, exp)
+                    logger.critical("[SnmpBooster] [%d]Exiting: %s" % (self.id, exp))
                     sys.exit(2)
                 continue
             # Then we check for good checks
@@ -1117,7 +1140,7 @@ class Snmp_poller(BaseModule):
                 try:
                     self.returns_queue.put(c)
                 except IOError, exp:
-                    print "[%d]Exiting: %s" % (self.id, exp)
+                    logger.critical("[SnmpBooster] [%d]Exiting: %s" % (self.id, exp))
                     sys.exit(2)
 
         # And delete finished checks
@@ -1130,7 +1153,7 @@ class Snmp_poller(BaseModule):
     # return_queue = queue managed by manager
     # c = Control Queue for the worker
     def work(self, s, returns_queue, c):
-        print "[Snmp] Module SNMP started!"
+        logger.info("[SnmpBooster] Module SNMP Booster started!")
         ## restore default signal handler for the workers:
         signal.signal(signal.SIGTERM, signal.SIG_DFL)
         timeout = 1.0
@@ -1158,7 +1181,7 @@ class Snmp_poller(BaseModule):
             try:
                 cmsg = c.get(block=False)
                 if cmsg.get_type() == 'Die':
-                    print "[%d]Dad say we are diing..." % self.id
+                    logger.info("[SnmpBooster] [%d]Dad say we are diing..." % self.id)
                     break
             except:
                 pass
@@ -1182,7 +1205,7 @@ class Snmp_poller(BaseModule):
                                                                     'ignore'))
                         # If the command doesn't seem good
                         if len(clean_command) <= 1:
-                            logger.error("Bad command detected: %s", a.command)
+                            logger.error("[SnmpBooster] Bad command detected: %s", a.command)
                             continue
 
                         # we do not want the first member, check_snmp thing
@@ -1201,7 +1224,7 @@ class Snmp_poller(BaseModule):
                             # Host found
                             # try to find if this oid is already in memcache
                             if not s.check_interval in obj.frequences:
-                                logger.error("check_interval not found in frequence list -"
+                                logger.error("[SnmpBooster] check_interval not found in frequence list -"
                                              "host: %s - check_interval: %s" % (obj_key, s.check_interval))
                                 # possible ??
                                 continue
@@ -1216,13 +1239,13 @@ class Snmp_poller(BaseModule):
                                                  s.check_interval * s.interval_length
                                 if forced:
                                     # Set forced
-                                    logger.info("Forced check for this host/service: %s/%s" % (obj_key, s.service_description))
+                                    logger.info("[SnmpBooster] Forced check for this host/service: %s/%s" % (obj_key, s.service_description))
                                     obj.frequences[s.check_interval].forced = forced
 
                             self.memcached.set(obj_key, obj, time=604800)
                         else:
                             # Host Not found
-                            logger.error("Host not found: %s" % obj_key)
+                            logger.error("[SnmpBooster] Host not found: %s" % obj_key)
 
     def hook_late_configuration(self, arb):
         """ Read config and fill memcached
@@ -1240,7 +1263,7 @@ class Snmp_poller(BaseModule):
                                                             'ignore'))
                 # If the command doesn't seem good
                 if len(clean_command) <= 1:
-                    logger.error("Bad command detected: %s", a.command)
+                    logger.error("[SnmpBooster] Bad command detected: %s", a.command)
                     continue
 
                 # we do not want the first member, check_snmp thing
@@ -1278,6 +1301,6 @@ class Snmp_poller(BaseModule):
                         # Save new host in memcache
                         self.memcached.set(obj_key, new_obj, time=604800)
                 except Exception, e:
-                    message = ("Error adding : Host %s - Service %s"
-                             "Error: %s" % (obj_key, s.service_description, str(e)))
+                    message = ("[SnmpBooster] Error adding : Host %s - Service %s - "
+                               "Error related to: %s" % (obj_key, s.service_description, str(e)))
                     logger.error(message)
