@@ -301,12 +301,6 @@ class LiveStatusQueryMetainfo(object):
         else:
             return re.sub(re.sub('s$', '', self.table) + '_', '', column, 1)
 
-    def columns(self):
-        try:
-            return set([l for l in self.structured_data if l[0] == 'Columns'][1])
-        except Exception:
-            return set([])
-
     def is_a_closed_chapter(self):
         """
         When the query is asking for log events from a time interval in the
