@@ -96,10 +96,6 @@ class Log(logging.Logger):
     def get_level(self):
         return logging.getLogger().getEffectiveLevel()
 
-    # :todo: remove this alias
-    def set_level(self, level):
-        self.setLevel(level)
-
 
     def register_local_log(self, path, level=None):
         """

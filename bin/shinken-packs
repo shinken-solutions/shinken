@@ -52,7 +52,7 @@ except ImportError:
 from shinken.log import logger, DEBUG
 from shinken.objects.config import Config
 
-logger.set_level(DEBUG)
+logger.setLevel(DEBUG)
 
 
 class Dummy():
