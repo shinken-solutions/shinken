@@ -211,7 +211,7 @@ class SNMPHost(object):
         if service_key in tmp:
             return tmp[service_key]
         else:
-            logger.error('[SnmpBooster] No frequences found for this key: %s' % service_key)
+            logger.error('[SnmpBooster] No frequences found for this key: %s' % str(service_key))
             return None
 
     def get_oids_by_frequence(self, interval):
@@ -753,7 +753,7 @@ class SNMPAsyncClient(object):
                 # Datas valid
                 data_validity = True
                 message, rc = self.obj.format_output(self.check_interval, self.serv_key)
-                logger.info('[SnmpBooster] FROM CACHE : Return code: %s - Message: %s' % (rc, message))
+#                logger.info('[SnmpBooster] FROM CACHE : Return code: %s - Message: %s' % (rc, message))
 #                message = "From cache: " + message
                 self.set_exit(message, rc=rc)
                 return
@@ -776,7 +776,7 @@ class SNMPAsyncClient(object):
         self.headVars = []
         # Prepare SNMP oid for mapping
         self.mapping_oids = self.obj.get_oids_for_instance_mapping(self.check_interval, self.datasource)
-        tmp_oids = [oid[1:] for oid in self.mapping_oids]
+        tmp_oids = list(set([oid[1:] for oid in self.mapping_oids]))
         for oid in tmp_oids:
             try:
                 oid = tuple(int(i) for i in oid.split("."))
@@ -789,7 +789,7 @@ class SNMPAsyncClient(object):
         if not self.mapping_oids:
             # Prepare SNMP oid for limits
             self.limit_oids = self.obj.get_oids_for_limits(self.check_interval, self.datasource)
-            tmp_oids = [oid[1:] for oid in self.limit_oids]
+            tmp_oids = list(set([oid[1:] for oid in self.limit_oids]))
             for oid in tmp_oids:
                 try:
                     oid = tuple(int(i) for i in oid.split("."))
@@ -810,14 +810,15 @@ class SNMPAsyncClient(object):
                 return
 
             # SNMP table header
-            tmp_oids = [oid[1:] for oid in self.oids_to_check]
+            tmp_oids = list(set([oid[1:].rsplit(".", 1)[0] for oid in self.oids_to_check]))
+#            print "TABLE", len(tmp_oids)
             for oid in tmp_oids:
                 # TODO: FIND SOMETHING BETTER ??
                 # Launch :  snmpbulkget .1.3.6.1.2.1.2.2.1.8
                 #     to get.1.3.6.1.2.1.2.2.1.8.2
                 # Because : snmpbulkget .1.3.6.1.2.1.2.2.1.8.2
                 #     returns value only for .1.3.6.1.2.1.2.2.1.8.3
-                oid = oid.rsplit(".", 1)[0]
+#                oid = oid.rsplit(".", 1)[0]
                 try:
                     oid = tuple(int(i) for i in oid.split("."))
                 except ValueError:
@@ -855,11 +856,11 @@ class SNMPAsyncClient(object):
                                         udp.domainName,
                                         (self.hostname, 161))
         transportDispatcher.jobStarted(1)
-        try:
-            transportDispatcher.runDispatcher()
-        except Exception, e:
-            logger.error('[SnmpBooster] SNMP Request error: %s' % str(e))
-            self.set_exit("SNMP Request error: " + str(e), rc=3)
+        #try:
+        transportDispatcher.runDispatcher()
+        #except Exception, e:
+#        logger.error('[SnmpBooster] SNMP Request error: %s' % str(e))
+#        self.set_exit("SNMP Request error: " + str(e), rc=3)
         transportDispatcher.closeDispatcher()
 
     def callback(self, transportDispatcher, transportDomain, transportAddress,
@@ -888,6 +889,9 @@ class SNMPAsyncClient(object):
                 # Report SNMP table
                 mapping_instance = {}
                 for tableRow in varBindTable:
+                    # VERIFIER QUE tableRow est dans la liste des tables que l on doit repecurere
+                    # Si elle n'est pas dedans :
+                    #    continue ou return ????
                     for oid, val in tableRow:
                         oid = "." + oid.prettyPrint()
                         if oid in self.oids_to_check:
@@ -905,6 +909,26 @@ class SNMPAsyncClient(object):
                             for l_oid in self.limit_oids:
                                 if oid.startswith(l_oid + "."):
                                     self.results_limits_dict[oid] = str(val)
+                    # SNPNEXT NEEDED ????
+                    if self.mapping_done:
+                        # trier `oids' par table, puis par oid => A faire avant le dispatcher
+                        # oids = {'.1.3.6.1.2.1.2.2.1.11' : { '.1.3.6.1.2.1.2.2.1.11.10016': VALUE }, ... }
+                        oids = set(self.oids_to_check.keys() + self.limit_oids)
+                        results_oids = set(self.results_oid_dict.keys() + self.results_limits_dict.keys())
+                        if oids != results_oids:
+                            # SNMP next needed
+                            aBP.setVarBinds(self.reqPDU,
+                                    [(x, v2c.null) for x, y in tableRow])
+                            aBP.setRequestID(self.reqPDU, v2c.getNextRequestID())
+                            transportDispatcher.sendMessage(encoder.encode(self.reqMsg),
+                                                    transportDomain,
+                                                    transportAddress)
+                            print oids - results_oids
+                            print "OIDS", len(oids)
+                            print "RES", len(results_oids)
+                            print "NEXT!!!"
+                            return wholeMsg
+
 
                 # LOCKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
                 try:
@@ -914,19 +938,6 @@ class SNMPAsyncClient(object):
                     self.set_exit("Memcached error: `%s'"
                                   % self.memcached.get(self.obj_key),
                                   3, transportDispatcher)
-                    return wholeMsg
-
-                # Check if snmp next is needed
-                oids = set(self.oids_to_check.keys() + self.limit_oids)
-                results_oids = set(self.results_oid_dict.keys() + self.results_limits_dict.keys())
-                if oids != results_oids:
-                     # SNMP next needed
-                    aBP.setVarBinds(self.reqPDU,
-                                [(x, v2c.null) for x, y in varBindTable[-1]])
-                    aBP.setRequestID(self.reqPDU, v2c.getNextRequestID())
-                    transportDispatcher.sendMessage(encoder.encode(self.reqMsg),
-                                                transportDomain,
-                                                transportAddress)
                     return wholeMsg
 
                 # MAPPING
@@ -948,6 +959,24 @@ class SNMPAsyncClient(object):
                     logger.info("[SnmpBooster] - Instance mapping completed. Expect results at next check")
                     self.set_exit("Instance mapping completed. Expect results at next check", 3, transportDispatcher)
                     return
+            
+                if False:
+                    # Check if snmp next is needed
+                    oids = set(self.oids_to_check.keys() + self.limit_oids)
+                    results_oids = set(self.results_oid_dict.keys() + self.results_limits_dict.keys())
+                    if oids != results_oids:
+                         # SNMP next needed
+                        aBP.setVarBinds(self.reqPDU,
+                                    [(x, v2c.null) for x, y in varBindTable[-1]])
+                        aBP.setRequestID(self.reqPDU, v2c.getNextRequestID())
+                        transportDispatcher.sendMessage(encoder.encode(self.reqMsg),
+                                                    transportDomain,
+                                                    transportAddress)
+                        print oids - results_oids
+                        print "OIDS", len(oids)
+                        print "RES", len(results_oids)
+                        print "NEXT!!!"
+                        return wholeMsg
 
                 # set Limits
                 if not self.limits_done:
