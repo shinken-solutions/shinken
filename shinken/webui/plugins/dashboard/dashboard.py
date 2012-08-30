@@ -90,6 +90,17 @@ def get_page():
     print "Give widgets", widgets
     return {'app': app, 'user': user, 'widgets': widgets, 'has_user_pref_mod' : has_user_pref_mod}
 
+def get_currently():
+    
+    user = app.get_user_auth()
+
+    if not user:
+        redirect("/user/login")
+        return
+
+
+    return {'app': app, 'user': user}
+
 pages = {get_page: {'routes': ['/dashboard'], 'view': 'dashboard', 'static': True},
-#         get_all: { 'routes': ['/dashboard/fullscreen'], 'view': 'fullscreen', 'static': True},
+         get_currently: { 'routes': ['/dashboard/currently'], 'view': 'currently', 'static': True},
          }

@@ -45,7 +45,7 @@ properties = {
 
 # Called by the plugin manager to get a broker
 def get_instance(mod_conf):
-    print "Get a graphite data module for plugin %s" % mod_conf.get_name()
+    logger.info("[Graphite broker] Get a graphite data module for plugin %s" % mod_conf.get_name())
     instance = Graphite_broker(mod_conf)
     return instance
 
@@ -68,11 +68,16 @@ class Graphite_broker(BaseModule):
         self.host_dict = {}
         self.svc_dict = {}
 
+        # optional "sub-folder" in graphite to hold the data of a specific host
+        self.graphite_data_source = self.illegal_char.sub('_',
+                                   getattr(modconf, 'graphite_data_source', ''))
+
+
     # Called by Broker so we can do init stuff
     # TODO: add conf param to get pass with init
     # Conf from arbiter!
     def init(self):
-        print "[%s] I init the graphite server connection to %s:%s" % (self.get_name(), self.host, self.port)
+        logger.info("[Graphite broker] I init the %s server connection to %s:%d" % (self.get_name(), str(self.host), self.port))
         self.con = socket()
         self.con.connect((self.host, self.port))
 
@@ -86,7 +91,7 @@ class Graphite_broker(BaseModule):
         metrics = [e for e in elts if e != '']
 
         for e in metrics:
-            #print "Graphite: groking: ", e
+            logger.debug("[Graphite broker] Groking: %s" % str(e))
             elts = e.split('=', 1)
             if len(elts) != 2:
                 continue
@@ -111,7 +116,7 @@ class Graphite_broker(BaseModule):
                     name_value[key] = m.groups(0)[0]
                 else:
                     continue
-#           print "graphite: end of grok:", name, value
+            logger.debug("[Graphite broker] End of grok: %s, %s" % (name, str(value)))
             for key, value in name_value.items():
                 res.append((key, value))
         return res
@@ -151,13 +156,18 @@ class Graphite_broker(BaseModule):
 
         check_time = int(data['last_chk'])
 
-#        print "Graphite:", hname, desc, check_time, perf_data
+        logger.debug("[Graphite broker] Hostname: %s, Desc: %s, check time: %d, perfdata: %s" % (hname, desc, check_time, str(perf_data)))
+
+        if self.graphite_data_source:
+            path = '.'.join((hname, self.graphite_data_source, desc))
+        else:
+            path = '.'.join((hname, desc))
 
         if self.use_pickle:
             # Buffer the performance data lines
             for (metric, value) in couples:
                 if value:
-                    self.buffer.append(("%s.%s.%s" % (hname, desc, metric),
+                    self.buffer.append(("%s.%s" % (path, metric),
                                        ("%d" % check_time,
                                         "%s" % value)))
 
@@ -166,10 +176,10 @@ class Graphite_broker(BaseModule):
             # Send a bulk of all metrics at once
             for (metric, value) in couples:
                 if value:
-                    lines.append("%s.%s.%s %s %d" % (hname, desc, metric,
-                                                     value, check_time))
+                    lines.append("%s.%s %s %d" % (path, metric,
+                                                  value, check_time))
             packet = '\n'.join(lines) + '\n'  # Be sure we put \n every where
-#            print "Graphite launching:", packet
+            logger.debug("[Graphite broker] Launching: %s", packet)
             self.con.sendall(packet)
 
     # A host check result brok has just arrived, we UPDATE data info with this
@@ -191,13 +201,18 @@ class Graphite_broker(BaseModule):
 
         check_time = int(data['last_chk'])
 
- #       print "Graphite:", hname, check_time, perf_data
+        logger.debug("[Graphite broker] Hostname %s, check time: %d, perfdata: %s" % (hname, check_time, str(perf_data)))
+
+        if self.graphite_data_source:
+            path = '.'.join((hname, self.graphite_data_source))
+        else:
+            path = hname
 
         if self.use_pickle:
             # Buffer the performance data lines
             for (metric, value) in couples:
                 if value:
-                    self.buffer.append(("%s.__HOST__.%s" % (hname, metric),
+                    self.buffer.append(("%s.__HOST__.%s" % (path, metric),
                                        ("%d" % check_time,
                                         "%s" % value)))
 
@@ -206,10 +221,10 @@ class Graphite_broker(BaseModule):
             # Send a bulk of all metrics at once
             for (metric, value) in couples:
                 if value:
-                    lines.append("%s.__HOST__.%s %s %d" % (hname, metric,
+                    lines.append("%s.__HOST__.%s %s %d" % (path, metric,
                                                            value, check_time))
             packet = '\n'.join(lines) + '\n'  # Be sure we put \n every where
-#            print "Graphite launching:", packet
+            logger.debug("[Graphite broker] Launching: %s" % packet)
             self.con.sendall(packet)
 
     def hook_tick(self, brok):
@@ -235,7 +250,7 @@ class Graphite_broker(BaseModule):
             try:
                 self.con.sendall(packet)
             except IOError, err:
-                logger.error("Failed sending to the Graphite Carbon instance network socket! IOError:%s" % str(err))
+                logger.error("[Graphite broker] Failed sending to the Graphite Carbon instance network socket! IOError:%s" % str(err))
                 return
 
             # Flush the buffer after a successful send to Graphite

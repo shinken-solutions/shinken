@@ -1,4 +1,27 @@
-
+/**
+* Copyright (C) 2009-2012:
+*    Gabes Jean, naparuba@gmail.com
+*    Gerhard Lausser, Gerhard.Lausser@consol.de
+*    Gregory Starck, g.starck@gmail.com
+*    Hartmut Goebel, h.goebel@goebel-consult.de
+*    Andreas Karfusehr, andreas@karfusehr.de
+*
+* This file is part of Shinken.
+*
+* Shinken is free software: you can redistribute it and/or modify
+* it under the terms of the GNU Affero General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* Shinken is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU Affero General Public License for more details.
+*
+* You should have received a copy of the GNU Affero General Public License
+* along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
+*
+**/
 
 /* The panel that will contain all problem panels*/
 .problems-panels {
@@ -18,8 +41,7 @@
     width: 550px;
     background: white;
     position: relative;
-    /* by default it's hidden*/
-    left: -450px;
+    left: -450px; /* by default it's hidden*/
     top: 5px;
     z-index: 3;
     /*max-width: 575px;
@@ -31,7 +53,7 @@
     overflow: hidden;
     opacity : 0;
     padding: 10px 20px;
-    width: 60%;
+    width: 85%;
 }
 
 
@@ -287,19 +309,13 @@
 
 /* Global container */
 #impact-container {
-/*    width: 92%;
-    margin-left: 4%;
-    margin-right: 4%;*/
-    /*min-width: 920px;
-    max-width: 1040px;*/
-    /*margin: 5px 40px;*/
     margin-top : 5px;
     position: relative;
     z-index: 1;
     border-radius: 5px;
     overflow: hidden;
     text-align: left;
-    background: #DDEEF6;
+    background: #F5F5F5;
 }
 
 
@@ -323,7 +339,7 @@
 }
 
 .pblink {
-cursor: pointer;
+    cursor: pointer;
 }
 
 
@@ -382,15 +398,6 @@ cursor: pointer;
     cursor: pointer;
     font-size: 13px;
 }
-
-
-
-
-
-
-
-
-
 
 /* Message box part */
 /* Message Boxes */
@@ -460,7 +467,7 @@ cursor: pointer;
 /* From Meatball css */
 /* branding
 ----------------------------------------------- */
-h1#branding {
+/*h1#branding {
     font-weight:normal;
     font-size:3em;
     text-align:left;
@@ -476,4 +483,4 @@ margin: 0 0 10px 0;
 border-bottom: 1px solid #CCC;
 background: #EDF4F5;
 font-size: 19px;
-}
+}*/

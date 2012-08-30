@@ -89,7 +89,7 @@ class Logline(dict):
                 logobject = LOGOBJECT_INFO
                 logclass = LOGCLASS_INVALID
                 attempt, state = [0] * 2
-                command_name, comment, contact_name, host_name, message, options, plugin_output, service_description, state_type = [''] * 9
+                command_name, comment, contact_name, host_name, message, plugin_output, service_description, state_type = [''] * 8
                 time = line[1:11]
                 first_type_pos = line.find(' ') + 1
                 last_type_pos = line.find(':')
@@ -206,7 +206,7 @@ class Logline(dict):
                 setattr(self, 'contact_name', contact_name)
                 setattr(self, 'host_name', host_name)
                 setattr(self, 'message', message)
-                setattr(self, 'options', options)
+                setattr(self, 'options', '') # Fix a mismatch of number of fields with old databases and new ones
                 setattr(self, 'plugin_output', plugin_output)
                 setattr(self, 'service_description', service_description)
                 setattr(self, 'state', state)

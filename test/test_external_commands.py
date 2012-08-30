@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
@@ -116,7 +117,15 @@ class TestConfig(ShinkenTest):
         print "Is the last check agree?", very_past, router.last_chk
         self.assert_(past == router.last_chk)
 
-
+        # Now with crappy characters, like é
+        host = self.sched.hosts.find_by_name("test_router_0")
+        excmd = '[%d] PROCESS_HOST_CHECK_RESULT;test_router_0;2;Bob got a crappy character  é   and so is not not happy|rtt=9999' % int(time.time())
+        self.sched.run_external_command(excmd)
+        self.scheduler_loop(2, [])
+        self.assert_(host.state == 'DOWN')
+        self.assert_(host.output == u'Bob got a crappy character  é   and so is not not happy')
+        self.assert_(host.perf_data == 'rtt=9999')
+        
 
 
 if __name__ == '__main__':

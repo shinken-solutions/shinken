@@ -39,7 +39,7 @@ from shinken.notification import Notification
 from shinken.macroresolver import MacroResolver
 from shinken.eventhandler import EventHandler
 from shinken.dependencynode import DependencyNodeFactory
-from shinken.util import safe_print
+from shinken.log import logger
 
 # on system time change just reevaluate the following attributes:
 on_time_change_update = ('last_notification', 'last_state_change', 'last_hard_state_change')
@@ -277,11 +277,15 @@ class SchedulingItem(Item):
             b = self.get_update_status_brok()
             self.broks.append(b)
 
-    # call recursively by potentials impacts so they
+    # Call recursively by potentials impacts so they
     # update their source_problems list. But do not
     # go below if the problem is not a real one for me
     # like If I've got multiple parents for examples
     def register_a_problem(self, pb):
+        # Maybe we already have this problem? If so, bailout too
+        if pb in self.source_problems:
+            return []
+
         now = time.time()
         was_an_impact = self.is_impact
         # Our father already look of he impacts us. So if we are here,
@@ -994,9 +998,12 @@ class SchedulingItem(Item):
     # And because we are just launching the notification, we can say
     # that this contact have been notified
     def update_notification_command(self, n):
+        cls = self.__class__
         m = MacroResolver()
         data = self.get_data_for_notifications(n.contact, n)
         n.command = m.resolve_command(n.command_call, data)
+        if not cls.use_large_installation_tweaks and cls.enable_environment_macros:
+            n.env = m.get_env_macros(data)
 
     # See if an escalation is eligible at t and notif nb=n
     def is_escalable(self, n):
@@ -1010,6 +1017,7 @@ class SchedulingItem(Item):
         for es in self.escalations:
             if es.is_eligible(n.t_to_go, self.state, n.notif_nb, in_notif_time, cls.interval_length):
                 return True
+
         return False
 
     # Give for a notification the next notification time
@@ -1329,4 +1337,4 @@ class SchedulingItem(Item):
             try:
                 t.eval(self)
             except Exception, exp:
-                safe_print("We got an exeception from a trigger on", self.get_full_name(), str(traceback.format_exc()))
+                logger.error("We got an exeception from a trigger on %s for %s" % (self.get_full_name().decode('utf8', 'ignore'), str(traceback.format_exc())))

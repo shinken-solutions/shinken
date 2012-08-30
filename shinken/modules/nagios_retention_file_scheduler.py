@@ -1,7 +1,6 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
-
+#
 # Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
@@ -45,22 +44,25 @@ properties = {
 }
 
 
-# called by the plugin manager to get a broker
 def get_instance(plugin):
-    print "Get a Nagios3 retention scheduler module for plugin %s" % plugin.get_name()
+    """
+    Called by the plugin manager to get a broker
+    """
+    logger.debug("Get a Nagios3 retention scheduler module for plugin %s" % plugin.get_name())
     path = plugin.path
     instance = Nagios_retention_scheduler(plugin, path)
     return instance
 
 
-# Just print some stuff
 class Nagios_retention_scheduler(BaseModule):
     def __init__(self, mod_conf, path):
         BaseModule.__init__(self, mod_conf)
         self.path = path
 
-    # Ok, main function that is called in the retention creation pass
     def hook_save_retention(self, daemon):
+        """
+        main function that is called in the retention creation pass
+        """
         logger.info("[NagiosRetention] asking me to update the retention objects, but I won't do it.")
 
     def _cut_line(self, line):
@@ -154,8 +156,10 @@ class Nagios_retention_scheduler(BaseModule):
 
         return objects
 
-    # We've got raw objects in string, now create real Instances
     def create_objects(self, raw_objects, types_creations):
+        """
+        Create real Instances from raw objects in string.
+        """
         all_obj = {}
         for t in types_creations:
             all_obj[t] = self.create_objects_for_type(raw_objects, t, types_creations)
@@ -248,59 +252,45 @@ class Nagios_retention_scheduler(BaseModule):
     def create_and_link_downtimes(self, raw_objects, all_obj):
         # first service
         for obj_cfg in raw_objects['servicedowntime']:
-            print "Managing", obj_cfg
+            #print "Managing", obj_cfg
             host_name = obj_cfg['host_name']
             service_description = obj_cfg['service_description']
             srv = all_obj['service'].find_srv_by_name_and_hostname(host_name, service_description)
-            print "Find my service", srv
+            #print "Find my service", srv
             if srv is not None:
                 dwn = Downtime(srv, int(obj_cfg['start_time']), int(obj_cfg['end_time']), to_bool(obj_cfg['fixed']), int(obj_cfg['triggered_by']), int(obj_cfg['duration']), obj_cfg['author'], obj_cfg['comment'])
-                print "Created dwn", dwn
+                #print "Created dwn", dwn
                 srv.add_downtime(dwn)
 
         # then hosts
         for obj_cfg in raw_objects['hostdowntime']:
-            print "Managing", obj_cfg
+            #print "Managing", obj_cfg
             host_name = obj_cfg['host_name']
             hst = all_obj['host'].find_by_name(host_name)
-            print "Find my host", hst
+            #print "Find my host", hst
             if hst is not None:
                 dwn = Downtime(hst, int(obj_cfg['start_time']), int(obj_cfg['end_time']), to_bool(obj_cfg['fixed']), int(obj_cfg['triggered_by']), int(obj_cfg['duration']), obj_cfg['author'], obj_cfg['comment'])
-                print "Created dwn", dwn
+                #print "Created dwn", dwn
                 hst.add_downtime(dwn)
 
     # Should return if it succeed in the retention load or not
     def hook_load_retention(self, sched):
-        log_mgr = logger
-        print "[NagiosRetention] asking me to load the retention file"
+        logger.debug("[NagiosRetention] asking me to load the retention file")
 
         # Now the old flat file way :(
-        log_mgr.log("[NagiosRetention]Reading from retention_file %s" % self.path)
+        logger.info("[NagiosRetention]Reading from retention_file %s" % self.path)
         try:
             f = open(self.path)
             buf = f.read()
             f.close()
-        except EOFError, exp:
-            print exp
+        except (EOFError, ValueError, IOError), exp:
+            logger.warning(repr(exp))
             return False
-        except ValueError, exp:
-            print exp
+        except (IndexError, TypeError), exp:
+            logger.warning("Sorry, the ressource file is not compatible")
             return False
-        except IOError, exp:
-            print exp
-            return False
-        except IndexError, exp:
-            s = "WARNING: Sorry, the ressource file is not compatible"
-            log_mgr.log(s)
-            return False
-        except TypeError, exp:
-            s = "WARNING: Sorry, the ressource file is not compatible"
-            log_mgr.log(s)
-            return False
-
-        print "Fin read config"
+        logger.debug("Finished reading config")
         raw_objects = self.read_retention_buf(buf)
-        print "Fun raw"
 
         types_creations = {'timeperiod': (Timeperiod, Timeperiods, 'timeperiods'),
                    'service': (Service, Services, 'services'),
@@ -323,7 +313,7 @@ class Nagios_retention_scheduler(BaseModule):
 
         all_obj = self.create_objects(raw_objects, types_creations)
 
-        print "Got all obj", all_obj
+        logger.info('Received all obj %s' % (all_obj))
 
         self.create_and_link_comments(raw_objects, all_obj)
 
@@ -350,6 +340,6 @@ class Nagios_retention_scheduler(BaseModule):
         #all_data = {'hosts': {}, 'services': {}}
 
         sched.restore_retention_data(all_data)
-        log_mgr.log("[NagiosRetention] OK we've load data from retention file")
+        logger.info("[NagiosRetention] Retention objects loaded successfully.")
 
         return True

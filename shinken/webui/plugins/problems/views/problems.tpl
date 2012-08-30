@@ -68,6 +68,14 @@
 	// List of the bookmarks
 	var bookmarks = [];
 	var bookmarksro = [];
+
+        // Ok not the best way to restrict the admin functions to admin, but I can't find another way around.
+        %if user.is_admin:
+        var advfct=1;
+        %else:
+        var advcft=0;
+        %end
+
 	%for b in bookmarks:
 	declare_bookmark("{{!b['name']}}","{{!b['uri']}}");
 	%end
@@ -232,28 +240,6 @@ $(function(){
       %end
     </div>
 
-    <div class='span1'>
-      <div class="btn-group pull-right">
-	<button class="btn"> <i class="icon-cog"></i> </button>
-	<button class="btn dropdown-toggle" data-toggle="dropdown">
-	  <span class="caret"></span>
-	</button>
-	<ul class="dropdown-menu">
-	  <li>
-	    <form class='form_in_dropdown'>
-	      <label> Number of elements to show </label>
-	      <select name='nb_elements'>
-		%t = [30, 50, 100, 200, 500, 1000, '5000', '10000', 'All']
-		%for v in t:
-		  <option value={{v}}>{{v}}</option>
-		%end
-	      </select>
-	    </form>
-	  </li>
-	</ul>
-      </div>
-
-    </div>
 </div>
 
 
@@ -398,7 +384,7 @@ $(function(){
       %end
 	  <div class="tableCriticity pull-left">
 
-	    <div class='tick pull-left' style="cursor:pointer;" onclick="add_remove_elements('{{helper.get_html_id(pb)}}')"><img id='selector-{{helper.get_html_id(pb)}}' class='img_tick' src='/static/images/tick.png' /></div>
+	    <div class='tick pull-left' style="cursor:pointer;" onmouseover="hovering_selection('{{helper.get_html_id(pb)}}')" onclick="add_remove_elements('{{helper.get_html_id(pb)}}')"><img id='selector-{{helper.get_html_id(pb)}}' class='img_tick' src='/static/images/tick.png' /></div>
 	      <div class='img_status pull-left'>
 		<div class="aroundpulse">
 		    %# " We put a 'pulse' around the elements if it's an important one "

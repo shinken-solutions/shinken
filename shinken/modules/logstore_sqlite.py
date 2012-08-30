@@ -31,6 +31,7 @@ It is one possibility for an exchangeable storage for log broks
 """
 
 import os
+import sys
 import time
 import datetime
 import re
@@ -80,7 +81,10 @@ class LiveStatusLogStoreSqlite(BaseModule):
     def __init__(self, modconf):
         BaseModule.__init__(self, modconf)
         self.plugins = []
-        self.database_file = getattr(modconf, 'database_file', os.path.join(os.path.abspath('.'), 'var', 'livestatus.db'))
+        # Change. The var folder is not defined based upon '.', but upon ../var from the process name (shinken-broker)
+        # When the database_file variable, the defaukt variable was calculated from '.'... Depending on where you were 
+        # when you ran the commmand the behavior changed.
+        self.database_file = getattr(modconf, 'database_file', os.path.join(os.path.abspath('.'), 'livestatus.db'))
         self.archive_path = getattr(modconf, 'archive_path', os.path.join(os.path.dirname(self.database_file), 'archives'))
         try:
             os.stat(self.archive_path)
@@ -103,6 +107,7 @@ class LiveStatusLogStoreSqlite(BaseModule):
             elif maxmatch.group(2) == 'y':
                 self.max_logs_age = int(maxmatch.group(1)) * 365
         self.use_aggressive_sql = (getattr(modconf, 'use_aggressive_sql', '0') == '1')
+        self.read_only = (getattr(modconf, 'read_only', '0') == '1')
 
         # This stack is used to create a full-blown select-statement
         self.sql_filter_stack = LiveStatusSqlStack()
@@ -121,7 +126,7 @@ class LiveStatusLogStoreSqlite(BaseModule):
         self.old_implementation = old_implementation
 
     def open(self):
-        print "open LiveStatusLogStoreSqlite ok"
+        print "Openning LiveStatusLogStoreSqlite ok : %s" % self.database_file
         self.dbconn = sqlite3.connect(self.database_file, check_same_thread=False)
         # Get no problem for utf8 insert
         self.dbconn.text_factory = str
@@ -157,8 +162,10 @@ class LiveStatusLogStoreSqlite(BaseModule):
                 pass
 
     def prepare_log_db_table(self):
+        if self.read_only:
+            return
         # 'attempt', 'class', 'command_name', 'comment', 'contact_name', 'host_name', 'lineno', 'message',
-        # 'options', 'plugin_output', 'service_description', 'state', 'state_type', 'time', 'type',
+        # 'plugin_output', 'service_description', 'state', 'state_type', 'time', 'type',
         cmd = "CREATE TABLE IF NOT EXISTS logs(logobject INT, attempt INT, class INT, command_name VARCHAR(64), comment VARCHAR(256), contact_name VARCHAR(64), host_name VARCHAR(64), lineno INT, message VARCHAR(512), options VARCHAR(512), plugin_output VARCHAR(256), service_description VARCHAR(64), state INT, state_type VARCHAR(10), time INT, type VARCHAR(64))"
         self.execute(cmd)
         cmd = "CREATE INDEX IF NOT EXISTS logs_time ON logs (time)"
@@ -179,6 +186,8 @@ class LiveStatusLogStoreSqlite(BaseModule):
         because in a distributed environment even after 00:00 (on the broker host)
         we might receive data from other hosts with a timestamp dating from yesterday.
         """
+        if self.read_only:
+            return
         now = time.time()
         if self.next_log_db_commit <= now:
             self.commit()
@@ -274,6 +283,8 @@ class LiveStatusLogStoreSqlite(BaseModule):
         In order to limit the datafile's sizes we flush logs dating from
         before today/00:00 to their own datafiles.
         """
+        if self.read_only:
+            return
         try:
             os.stat(self.archive_path)
         except:
@@ -391,6 +402,8 @@ class LiveStatusLogStoreSqlite(BaseModule):
                 time.sleep(.01)
 
     def manage_log_brok(self, b):
+        if self.read_only:
+            return
         data = b.data
         line = data['log']
         try:
@@ -422,7 +435,7 @@ class LiveStatusLogStoreSqlite(BaseModule):
     def get_live_data_log(self):
         """Like get_live_data, but for log objects"""
         # finalize the filter stacks
-        #self.sql_time_filter_stack.and_elements(self.sql_time_filter_stack.qsize())
+        self.sql_time_filter_stack.and_elements(self.sql_time_filter_stack.qsize())
         self.sql_filter_stack.and_elements(self.sql_filter_stack.qsize())
         if self.use_aggressive_sql:
             # Be aggressive, get preselected data from sqlite and do less

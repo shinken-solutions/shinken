@@ -12,7 +12,7 @@
 
 <!-- Maybe the admin didn't add a user preference module, or the module is dead, if so, warn about it -->
 %if not has_user_pref_mod:
-   <div class='span12 alert alert-critical'>
+   <div class="span11 alert alert-critical offset1">
      Error : you didn't defined a WebUI module for saving user preference like the Mongodb one. You won't be able to use this page!
    </div>
 %end
@@ -75,8 +75,6 @@
          %if 'base_url' in w and 'position' in w:
             %uri = w['base_url'] + "?" + w['options_uri']
             AddWidget("{{!uri}}", "{{w['position']}}");
-            var w = {'id': "{{w['id']}}", 'base_url': "{{w['base_url']}}", 'position': "{{w['position']}}", 'options': JSON.parse('{{w['options']}}')};
-            widgets.push(w);
          %end
       %end
   });

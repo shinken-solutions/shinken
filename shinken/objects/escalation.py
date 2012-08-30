@@ -44,7 +44,9 @@ class Escalation(Item):
         'last_notification':    IntegerProp(),
         'first_notification_time': IntegerProp(),
         'last_notification_time': IntegerProp(),
-        'notification_interval': IntegerProp('-1'), # by default don't use escalation one, but object one
+        # by default don't use the notification_interval defined in
+        # the escalation, but the one defined by the object
+        'notification_interval': IntegerProp(default='-1'),
         'escalation_period':    StringProp(default=''),
         'escalation_options':   ListProp(default='d,u,r,w,c'),
         'contacts':             StringProp(),

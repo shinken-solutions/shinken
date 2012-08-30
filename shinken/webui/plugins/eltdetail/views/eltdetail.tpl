@@ -296,14 +296,15 @@ $(document).ready(function(){
 							<td class="column1"><b>Last State Change</b></td>
 							<td>{{time.asctime(time.localtime(elt.last_state_change))}}</td>
 						</tr>
-						<tr>			
-							<td class="column1"><b>Check Latency / Duration</b></td>
-							<td>{{'%.2f' % elt.latency}} / {{'%.2f' % elt.execution_time}} seconds</td>
-						</tr>
 						<tr>										
 							<td class="column1"><b>Current Attempt</b></td>
 							<td>{{elt.attempt}}/{{elt.max_check_attempts}} ({{elt.state_type}} state)</td>
 						</tr>
+						<tr>		
+							<td class="column1"><b>Next Active Check:</b></td>
+							<td><span class="quickinfo" data-original-title='Next active check at {{time.asctime(time.localtime(elt.next_chk))}}'>{{helper.print_duration(elt.next_chk)}}</span></td>
+						</tr>
+
 					</table>
 				</div>
 
@@ -319,10 +320,11 @@ $(document).ready(function(){
 							<td>&nbsp;</td>
 							%end
 						</tr>
-						<tr>		
-							<td class="column1"><b>Next Active Check:</b></td>
-							<td><span class="quickinfo" data-original-title='Next active check at {{time.asctime(time.localtime(elt.next_chk))}}'>{{helper.print_duration(elt.next_chk)}}</span></td>
+						<tr>			
+							<td class="column1"><b>Check Latency / Duration</b></td>
+							<td>{{'%.2f' % elt.latency}} / {{'%.2f' % elt.execution_time}} seconds</td>
 						</tr>
+
 						<tr>			
 							<td class="column1"><b>Last Notification</b></td>
 							<td>{{helper.print_date(elt.last_notification)}} (notification {{elt.current_notification_number}})</td>

@@ -24,10 +24,7 @@
 
 import optparse
 import sys
-import cPickle
 import os
-import re
-import time
 
 try:
     import shinken

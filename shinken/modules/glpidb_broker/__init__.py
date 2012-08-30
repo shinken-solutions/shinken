@@ -25,7 +25,9 @@
 
 
 # This text is print at the import
-print "I am GlpiDB Broker"
+from shinken.log import logger
+
+logger.info("Loading the Glpi broker module")
 
 properties = {
     'daemons': ['broker'],

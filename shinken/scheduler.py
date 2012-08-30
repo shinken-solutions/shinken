@@ -113,8 +113,7 @@ class Scheduler:
         self.nb_check_received = 0
 
         # Log init
-        self.log = logger
-        self.log.load_obj(self)
+        logger.load_obj(self)
 
         self.instance_id = 0  # Temporary set. Will be erase later
 
@@ -222,7 +221,7 @@ class Scheduler:
     def dump_objects(self):
         d = tempfile.gettempdir()
         p = os.path.join(d, 'scheduler-obj-dump-%d' % time.time())
-        print "Opening the DUMP FILE %s" % p
+        logger.info('Opening the DUMP FILE %s' % (p))
         try:
             f = open(p, 'w')
             f.write('Scheduler DUMP at %d\n' % time.time())
@@ -237,7 +236,7 @@ class Scheduler:
                 f.write(s)
             f.close()
         except Exception, exp:
-            print "Error in writing the dump file %s : %s" % (p, str(exp))
+            logger.error("Error in writing the dump file %s : %s" % (p, str(exp)))
 
     # Load the external command
     def load_external_command(self, e):
@@ -330,10 +329,10 @@ class Scheduler:
                 try:
                     f(self)
                 except Exception, exp:
-                    logger.warning("The instance %s raise an exception %s. I disable it and set it to restart it later" % (inst.get_name(), str(exp)))
+                    logger.error("The instance %s raise an exception %s. I disable it and set it to restart it later" % (inst.get_name(), str(exp)))
                     output = cStringIO.StringIO()
                     traceback.print_exc(file=output)
-                    logger.warning("Back trace of this remove: %s" % (output.getvalue()))
+                    logger.error("Exception trace follows: %s" % (output.getvalue()))
                     output.close()
                     self.sched_daemon.modules_manager.set_to_restart(inst)
 
@@ -606,11 +605,9 @@ class Scheduler:
                     logger.warning("The notification command '%s' raised an error (exit code=%d): '%s'" % (c.command, c.exit_status, c.output))
 
             except KeyError, exp:  # bad number for notif, not that bad
-                #print exp
                 logger.warning('put_results:: get unknown notification : %s ' % str(exp))
 
             except AttributeError, exp:  # bad object, drop it
-                #print exp
                 logger.warning('put_results:: get bad notification : %s ' % str(exp))
             
 
@@ -1342,6 +1339,7 @@ class Scheduler:
     # Main actions reaper function: it get all new checks,
     # notification and event handler from hosts and services
     def get_new_actions(self):
+        self.hook_point('get_new_actions')
         # ask for service and hosts their next check
         self.hook_point('add_actions')
         for type_tab in [self.services, self.hosts]:

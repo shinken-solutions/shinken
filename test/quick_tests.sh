@@ -40,6 +40,7 @@ function launch_and_assert {
 
 # Launching only quick tests for quick regression check
 launch_and_assert test_logging.py
+launch_and_assert test_properties_defaults.py
 launch_and_assert test_system_time_change.py
 launch_and_assert test_services.py
 launch_and_assert test_hosts.py
@@ -153,6 +154,7 @@ launch_and_assert test_conf_in_symlinks.py
 launch_and_assert test_uknown_event_handler.py
 launch_and_assert test_servicedependency_complexes.py
 launch_and_assert test_timeout.py
+launch_and_assert test_python_crash_with_recursive_bp_rules.py
 
 launch_and_assert test_maintenance_period.py
 # Live status is a bit longer than the previous, so we put it at the end.

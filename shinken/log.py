@@ -36,7 +36,8 @@ human_timestamp_log = False
 
 
 class Log:
-    """Please Add a Docstring to describe the class here"""
+    """Shinken logger class, wrapping access to Python logging standard library."""
+    "Store the numeric value from python logging class"
     NOTSET   = logging.NOTSET
     DEBUG    = logging.DEBUG
     INFO     = logging.INFO
@@ -60,16 +61,23 @@ class Log:
     @staticmethod
     def get_level_id(lvlName):
         """Convert a level name (string) to its integer value
-
-           Raise KeyError when name not found
+           and vice-versa. Input a level and it will return a name.
+           Raise KeyError when name or level not found
         """
         return logging._levelNames[lvlName]
 
     # We can have level as an int (logging.INFO) or a string INFO
     # if string, try to get the int value
+    def get_level(self):
+        return logging.getLogger().getEffectiveLevel()
+
+    # We can have level as an int (logging.INFO) or a string INFO
+    # if string, try to get the int value
     def set_level(self, level):
         if not isinstance(level, int):
-            raise TypeError('log level must be an integer')
+            level = getattr(logging, level, None)
+            if not level or not isinstance(level, int):
+                raise TypeError('log level must be an integer')
 
         self._level = level
         logging.getLogger().setLevel(level)
@@ -90,7 +98,8 @@ class Log:
         self._log(logging.CRITICAL, msg, *args, **kwargs)
 
     def log(self, message, format=None, print_it=True):
-        """Old log method, kept for NAGIOS compatibility"""
+        """Old log method, kept for NAGIOS compatibility
+        What strings should not use the new format ??"""
         self._log(logging.INFO, message, format, print_it, display_level=False)
 
     def _log(self, level, message, format=None, print_it=True, display_level=True):
@@ -112,14 +121,14 @@ class Log:
             lvlname = logging.getLevelName(level)
 
             if display_level:
-                fmt = u'[%(date)s] %(level)s: %(name)s%(msg)s\n'
+                fmt = u'[%(date)s] %(level)-9s %(name)s%(msg)s\n'
             else:
                 fmt = u'[%(date)s] %(name)s%(msg)s\n'
 
             args = {
                 'date': (human_timestamp_log and time.asctime()
                          or int(time.time())),
-                'level': lvlname.capitalize(),
+                'level': lvlname.capitalize()+' :',
                 'name': name and ('[%s] ' % name) or '',
                 'msg': message
             }
@@ -128,29 +137,30 @@ class Log:
             s = format % message
 
         if print_it and len(s) > 1:
+            # Print to standard output.
             # If the daemon is launched with a non UTF8 shell
-            # we can have problems in printing
+            # we can have problems in printing, work around it.
             try:
                 print s[:-1]
             except UnicodeEncodeError:
                 print s.encode('ascii', 'ignore')
 
 
-        # We create and add the brok but not for debug that don't need
-        # to do a brok for it, and so go in all satellites. Debug
-        # should keep locally
+        # We create the brok and load the log message
+        # DEBUG level logs are logged by the daemon locally
+        # and must not be forwarded to other satelittes, or risk overloading them.
         if level != logging.DEBUG:
             b = Brok('log', {'log': s})
             obj.add(b)
 
-        # If we want a local log write, do it
+        # If local logging is enabled, log to the defined handler, file.
         if local_log is not None:
             logging.log(level, s.strip())
 
     def register_local_log(self, path, level=None):
-        """The log can also write to a local file if needed
+        """The shiken logging wrapper can write to a local file if needed
         and return the file descriptor so we can avoid to
-        close it
+        close it.
         """
         global local_log
 
@@ -190,3 +200,35 @@ class Log:
         human_timestamp_log = bool(on)
 
 logger = Log()
+
+class __ConsoleLogger:
+    """
+    This wrapper class for logging and printing messages to stdout, too.
+
+    :fixme: Implement this using an additional stream-handler, as soon
+    as the logging system is based on the standard Pytthon logging
+    module.
+    """
+    def debug(self, msg, *args, **kwargs):
+        self._log(Log.DEBUG, msg, *args, **kwargs)
+
+    def info(self, msg, *args, **kwargs):
+        kwargs.setdefault('display_level', False)
+        self._log(Log.INFO, msg, *args, **kwargs)
+
+    def warning(self, msg, *args, **kwargs):
+        self._log(Log.WARNING, msg, *args, **kwargs)
+
+    def error(self, msg, *args, **kwargs):
+        self._log(Log.ERROR, msg, *args, **kwargs)
+
+    def critical(self, msg, *args, **kwargs):
+        self._log(Log.CRITICAL, msg, *args, **kwargs)
+
+    def _log(self, *args, **kwargs):
+        # if `print_it` is not passed as an argument, set it to `true`
+        kwargs.setdefault('print_it', True)
+        logger._log(*args, **kwargs)
+
+
+console_logger = __ConsoleLogger()

@@ -2,6 +2,8 @@
 # This is a list of testscripts which usually
 # take less than 5 minutes to complete
 ###############################################
+test_logging.py
+test_properties_defaults.py
 test_services.py
 test_hosts.py
 test_host_missing_adress.py
@@ -114,4 +116,5 @@ test_servicedependency_complexes.py
 test_hostgroup_with_space.py
 test_conf_in_symlinks.py
 test_uknown_event_handler.py
+test_python_crash_with_recursive_bp_rules.py
 test_livestatus_allowedhosts.py

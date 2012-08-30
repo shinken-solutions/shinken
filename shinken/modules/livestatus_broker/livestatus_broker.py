@@ -85,6 +85,7 @@ class LiveStatus_broker(BaseModule, Daemon):
         self.pnp_path = getattr(modconf, 'pnp_path', '')
         self.debug = getattr(modconf, 'debug', None)
         self.debug_queries = (getattr(modconf, 'debug_queries', '0') == '1')
+        self.debug_queries = True
         self.use_query_cache = (getattr(modconf, 'query_cache', '0') == '1')
         if getattr(modconf, 'service_authorization', 'loose') == 'strict':
             self.service_authorization_strict = True
@@ -183,7 +184,6 @@ class LiveStatus_broker(BaseModule, Daemon):
             print s
         del self.debug_output
         self.add_compatibility_sqlite_module()
-        self.log = logger
         self.datamgr = datamgr
         datamgr.load(self.rg)
         self.query_cache = LiveStatusQueryCache()
@@ -236,7 +236,7 @@ class LiveStatus_broker(BaseModule, Daemon):
 
         # Check if some og the required directories exist
         #if not os.path.exists(bottle.TEMPLATE_PATH[0]):
-        #    logger.log('ERROR: the view path do not exist at %s' % bottle.TEMPLATE_PATH)
+        #    logger.error('The view path do not exist at %s' % bottle.TEMPLATE_PATH)
         #    sys.exit(2)
 
         self.load_plugins()
@@ -678,4 +678,4 @@ class LiveStatus_broker(BaseModule, Daemon):
     def write_protocol(self, request, response):
         if self.debug_queries:
             print "REQUEST>>>>>\n" + request + "\n\n"
-            print "RESPONSE<<<<\n" + response + "\n\n"
+            #print "RESPONSE<<<<\n" + response + "\n\n"

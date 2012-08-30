@@ -38,7 +38,7 @@ Mandatory Requirements
 
 * `Python`__ 2.4 or higher (Python 2.6 or higher is recommended if you want to use the Web interface)
 * `setuptools`__ or `distribute` Python package for installation (see below)
-* `pyro`__ Python package version less then 4.14 for all and not 3.x for debian squeeze
+* `pyro`__ Python package 3.x or 4.x (caveat: not 3.x for debian squeeze)
 * `multiprocessing`__ Python package when using Python 2.4 or 2.5
   (`multiprocessing` is already included in Python 2.6 and higher)
 
@@ -57,7 +57,7 @@ If you plan to use the `livestatus` module or the web interface, you will also
 need the following Python packages.
 
 * `simplejson`__
-* `ujson`__  (ujson is used in Livestatus for its speed)
+* `ujson`__  (ujson is used in Livestatus for added speed)
 * `pysqlite`__
 
 __ http://pypi.python.org/pypi/simplejson/
@@ -86,6 +86,10 @@ Pyro
 Under ubuntu, you can grab the Pyro module with::
 
   sudo apt-get install pyro
+
+Under fedora, you can grab the Pyro module with::
+
+  sudo yum install python-pyro
 
 Under other distributions, you can search for it::
 

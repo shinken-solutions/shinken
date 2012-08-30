@@ -29,7 +29,7 @@ import os
 from livestatus_query import LiveStatusQuery
 from livestatus_response import LiveStatusResponse
 from livestatus_constraints import LiveStatusConstraints
-from livestatus_query_metainfo import LiveStatusQueryMetainfo, HINT_SINGLE_HOST, HINT_SINGLE_SERVICE
+from livestatus_query_metainfo import LiveStatusQueryMetainfo
 
 
 class LiveStatusWaitQuery(LiveStatusQuery):

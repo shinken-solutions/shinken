@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+#
 # Copyright (C) 2009-2010:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
@@ -18,17 +19,15 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-
-#
-# This file is used to test reading and processing of config files
-#
+"""
+Test generic pickle retention.
+"""
 
 import os
 import time
 
 from shinken_test import unittest, ShinkenTest
 
-from shinken.log import logger
 from shinken.objects.module import Module
 from shinken.modules import pickle_retention_file_scheduler
 from shinken.modules.pickle_retention_file_scheduler import get_instance
@@ -40,26 +39,24 @@ modconf.modules = []
 modconf.properties = pickle_retention_file_scheduler.properties.copy()
 
 
-class TestConfig(ShinkenTest):
+class TestPickleRetention(ShinkenTest):
     # setUp is inherited from ShinkenTest
 
     def test_pickle_retention(self):
-        print self.conf.modules
         now = time.time()
         # get our modules
-        mod = pickle_retention_file_scheduler.Pickle_retention_scheduler(modconf, 'tmp/retention-test.dat')
+        mod = pickle_retention_file_scheduler.Pickle_retention_scheduler(
+            modconf, 'tmp/retention-test.dat')
         try:
             os.unlink(mod.path)
         except:
             pass
 
         sl = get_instance(mod)
-        print "Instance", sl
         # Hack here :(
         sl.properties = {}
         sl.properties['to_queue'] = None
         sl.init()
-        l = logger
 
         in_the_future = now + 500
         # Now we change thing
@@ -67,16 +64,15 @@ class TestConfig(ShinkenTest):
         # We want it to go in the future
         svc.next_chk = in_the_future
 
-        # By default in the conf, the active checsk are active
-        self.assert_(svc.active_checks_enabled == True)
-        # and passive one too
-        self.assert_(svc.passive_checks_enabled == True)
+        # By default in the conf, both the active and passive checks
+        # are enabled
+        self.assertTrue(svc.active_checks_enabled)
+        self.assertTrue(svc.passive_checks_enabled)
 
         # update the hosts and service in the scheduler in the retention-file
         sl.hook_save_retention(self.sched)
 
-        self.assert_(svc.state == 'PENDING')
-        print "State", svc.state
+        self.assertEqual(svc.state, 'PENDING')
         svc.state = 'UP'  # was PENDING in the save time
 
         # We try to change active state change too
@@ -87,24 +83,20 @@ class TestConfig(ShinkenTest):
         svc.next_chk = now - 3000
 
         r = sl.hook_load_retention(self.sched)
-        self.assert_(r == True)
+        self.assertTrue(r)
 
-        # Now look at checks active or not
-        # Should be back as normal values :)
-        self.assert_(svc.active_checks_enabled == True)
-        # and passive one too
-        self.assert_(svc.passive_checks_enabled == True)
-
-        print "Fuck after load, will go in", svc.next_chk - now
+        # Both the active and passive checks should be back as default
+        # values (enabled).
+        self.assertTrue(svc.active_checks_enabled)
+        self.assertTrue(svc.passive_checks_enabled)
 
         # Should be ok, because we load it from retention
-        self.assert_(svc.next_chk == in_the_future)
+        self.assertEqual(svc.next_chk, in_the_future)
 
         # search if the host is not changed by the loading thing
         svc2 = self.sched.hosts.find_by_name("test_host_0")
-        self.assert_(svc == svc2)
-
-        self.assert_(svc.state == 'PENDING')
+        self.assertEqual(svc, svc2)
+        self.assertEqual(svc.state, 'PENDING')
 
         # Ok, we can delete the retention file
         os.unlink(mod.path)
@@ -112,13 +104,11 @@ class TestConfig(ShinkenTest):
         # Lie about us in checking or not
         svc.in_checking = False
         diff = svc.next_chk - now
-        print "Fuck Ok go for a enw scheduling!", diff
         # should be near 500 seconds ahead
         self.assert_(499 < diff < 501)
 
         # Now we reschedule it, should be our time_to_go
         svc.schedule()
-        print "Fuck after a reschedule", svc.next_chk - now
         # should be the same value in the future, we want to keep it
         diff = svc.next_chk - now
         self.assert_(499 < diff < 501)
@@ -127,17 +117,15 @@ class TestConfig(ShinkenTest):
         self.scheduler_loop(10, [[svc, 2, 'CRITICAL | bibi=99%']])
         # update the hosts and service in the scheduler in the retention-file
         save_notified_contacts = svc2.notified_contacts
-        print "Save notif contacts", save_notified_contacts
         sl.hook_save_retention(self.sched)
 
         r = sl.hook_load_retention(self.sched)
-        self.assert_(r == True)
+        self.assertTrue(r)
 
-        print "Notif?", svc2.notified_contacts
         # We should got our contacts, and still the true objects
         self.assert_(len(svc2.notified_contacts) > 0)
         for c in svc2.notified_contacts:
-            self.assert_(c in save_notified_contacts)
+            self.assertIn(c, save_notified_contacts)
 
 
 

@@ -26,6 +26,7 @@
 import select
 import errno
 import time
+import socket
 from log import logger
 
 # Try to import Pyro (3 or 4.1) and if not, Pyro4 (4.2 and 4.3)
@@ -148,16 +149,9 @@ except AttributeError, exp:
     old_versions = ["4.1", "4.2", "4.3", "4.4"]
 
     # Version not supported for now, we have to work on it
-    bad_versions = ["4.14"]
+    bad_versions = []
 
-    # Hack for Pyro 4: with it, there is
-    # no more way to send huge packet!
-    # This hack fails with PYRO 4.14!!!
-    import socket
-    if hasattr(socket, 'MSG_WAITALL'):
-        del socket.MSG_WAITALL
-
-
+    
     class Pyro4Daemon(Pyro.core.Daemon):
         pyro_version = 4
         protocol = 'PYRO'
@@ -177,8 +171,13 @@ except AttributeError, exp:
             max_try = 35
             if PYRO_VERSION in old_versions:
                 Pyro.config.SERVERTYPE = "select"
+                # Hack for Pyro 4 first versions: with it, there is
+                # no more way to send huge packet!
+                # This hack fails with PYRO 4.14!!!
+                if hasattr(socket, 'MSG_WAITALL'):
+                    del socket.MSG_WAITALL
             elif PYRO_VERSION in bad_versions:
-                print "Your pyro version (%s) is not supported. Please downgrade it (4.12)" % PYRO_VERSION
+                logger.error("Your pyro version (%s) is not supported. Please downgrade it (4.12)" % PYRO_VERSION)
                 exit(1)
             else:
                 Pyro.config.SERVERTYPE = "multiplex"
@@ -248,7 +247,10 @@ except AttributeError, exp:
 
 
 class ShinkenPyroDaemon(PyroClass):
-    """Please Add a Docstring to describe the class here"""
+    """Class for wrapping select calls for Pyro"""
+    locationStr = '__NOTSET__'  # To by pass a bug in Pyro, this should be set in __init__, but
+                                # if we try to print an uninitialized object, it's not happy
+    objectsById = []            # Same here...
 
     def get_socks_activity(self, timeout):
         try:

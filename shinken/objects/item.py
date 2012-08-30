@@ -554,7 +554,6 @@ Like temporary attributes such as "imported_from", etc.. """
             src = src.replace(r'\n', '\n').replace(r'\t', '\t')
             t = triggers.create_trigger(src, 'inner-trigger-' + self.__class__.my_type + '' + str(self.id))
             if t:
-                logger.debug("[item::%s] go link the trigger %s" % (self.get_name(), str(t.__dict__)))
                 # Maybe the trigger factory give me a already existing trigger,
                 # so my name can be dropped
                 self.triggers.append(t.get_name())
@@ -568,7 +567,6 @@ Like temporary attributes such as "imported_from", etc.. """
         for tname in self.triggers:
             t = triggers.find_by_name(tname)
             if t:
-                logger.debug("[item::%s] go link the trigger %s" % (self.get_name(), str(t.__dict__)))
                 new_triggers.append(t)
             else:
                 self.configuration_errors.append('the %s %s does have a unknown trigger_name "%s"' % (self.__class__.my_type, self.get_full_name(), tname))

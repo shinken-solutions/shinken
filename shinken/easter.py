@@ -23,6 +23,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+from shinken.log import logger
+
 def episode_iv():
     hst = 'towel.blinkenlights.nl'
 
@@ -31,19 +33,19 @@ def episode_iv():
     t = Telnet(hst)
     while True:
         buf = t.read_until('mesfesses', 0.1)
-        print buf
+        logger.info(buf)
 
 
 def perdu():
     import urllib
     f = urllib.urlopen("http://www.perdu.com")
-    print f.read()
+    logger.info(f.read())
 
 
 def myip():
     import urllib
     f = urllib.urlopen("http://whatismyip.org/")
-    print f.read()
+    logger.info(f.read())
 
 
 def naheulbeuk():
@@ -62,7 +64,7 @@ def naheulbeuk():
     fp = StringIO(urllib2.urlopen('http://www.penofchaos.com/warham/bd/images/NBK-win7portrait-Nain02.JPG').read())
     image = Image.open(fp).convert('L').resize(screen.virtual_size)
     screen.put_image((0, 0), image)
-    print screen.render()
+    logger.info(screen.render())
                     
 
 
@@ -92,7 +94,7 @@ def dark():
                          '-'
 
 """
-    print dark.__doc__
+    logger.info(dark.__doc__)
 
 
 def get_coffee():
@@ -123,5 +125,5 @@ def get_coffee():
 
 
 """
-    print get_coffee.__doc__
+    logger.info(get_coffee.__doc__)
 

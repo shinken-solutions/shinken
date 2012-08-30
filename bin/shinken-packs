@@ -29,15 +29,12 @@ Warning: THIS IS A PREVIEW, and uglu code that looks as a script.
 
 import optparse
 import sys
-import cPickle
 import os
 import re
-import time
 import tempfile
 import json
 import shutil
 import zipfile
-import glob
 import pycurl
 from StringIO import StringIO
 
@@ -52,11 +49,10 @@ except ImportError:
     imp.load_module('shinken', *imp.find_module('shinken', [os.path.realpath("."), os.path.realpath(".."), os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "..")]))
     from shinken.bin import VERSION
 
-from shinken.objects.pack import Pack, Packs
 from shinken.log import logger
 from shinken.objects.config import Config
 
-logger.set_level(10)
+logger.set_level(logger.DEBUG)
 
 
 class Dummy():
@@ -172,7 +168,6 @@ def create_pack(pack_file, p_dest_dir, share_dir):
     for root, dirs, files in os.walk(src_dir):
         for file in files:
             if re.search("\.cfg$", file):
-                p = file
                 base = root[len(src_dir):].strip()
                 if base.startswith('/'):
                     base = base[1:]
@@ -291,7 +286,7 @@ def push_pack(zip_file_p, api_key, uri, proxy):
 
     #c.setopt(c.HTTPPOST, [("file1", (c.FORM_FILE, str(zip_file_p)))])
     #c.setopt(c.VERBOSE, 1)
-    r = c.perform()
+    c.perform()
     print "status code: %s" % c.getinfo(pycurl.HTTP_CODE)
     c.close()
     print "Thanks :) "
@@ -321,7 +316,7 @@ def register(login, password, email, uri, proxy):
     #c.setopt(c.VERBOSE, 1)
     response = StringIO()
     c.setopt(c.WRITEFUNCTION, response.write)
-    r = c.perform()
+    c.perform()
     response.seek(0)
     status_code = c.getinfo(pycurl.HTTP_CODE)
     # We only parse the json if we got
@@ -369,7 +364,7 @@ def getkey(login, password, uri, proxy):
     #c.setopt(c.VERBOSE, 1)
     response = StringIO()
     c.setopt(c.WRITEFUNCTION, response.write)
-    r = c.perform()
+    c.perform()
     response.seek(0)
     status_code = c.getinfo(pycurl.HTTP_CODE)
     # We only parse the json if we got
@@ -413,7 +408,7 @@ def analyse(api_key, stats_file, uri, proxy):
 
     #c.setopt(c.HTTPPOST, [("file1", (c.FORM_FILE, str(zip_file_p)))])
     c.setopt(c.VERBOSE, 1)
-    r = c.perform()
+    c.perform()
     print "status code: %s" % c.getinfo(pycurl.HTTP_CODE)
     c.close()
     print "that's it ;)"

@@ -33,6 +33,7 @@ import select
 
 from shinken.basemodule import BaseModule
 from shinken.external_command import ExternalCommand
+from shinken.log import logger
 
 properties = {
     'daemons': ['arbiter', 'receiver', 'poller'],
@@ -44,7 +45,7 @@ properties = {
 
 # called by the plugin manager to get a broker
 def get_instance(plugin):
-    print "Get a Named pipe module for plugin %s" % plugin.get_name()
+    logger.info("Get a Named pipe module for plugin %s" % plugin.get_name())
 
     try:
         path = plugin.command_file
@@ -77,11 +78,11 @@ class Named_Pipe_arbiter(BaseModule):
                     os.mkfifo(self.pipe_path, 0660)
                     open(self.pipe_path, 'w+', os.O_NONBLOCK)
                 except OSError, exp:
-                    print "Error: pipe creation failed (", self.pipe_path, ')', exp, os.getcwd()
+                    logger.error("Error: pipe creation failed ( %s ) %s %s" % (self.pipe_path, exp, os.getcwd()))
                     return None
-        print "[%s] Trying to open the named pipe '%s'" % (self.get_name(), self.pipe_path)
+        logger.info("[%s] Trying to open the named pipe '%s'" % (self.get_name(), self.pipe_path))
         self.fifo = os.open(self.pipe_path, os.O_NONBLOCK)
-        print "[%s] The named pipe '%s' is open" % (self.get_name(), self.pipe_path)
+        logger.info("[%s] The named pipe '%s' is open" % (self.get_name(), self.pipe_path))
         return self.fifo
 
     def get(self):

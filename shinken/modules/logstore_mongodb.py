@@ -62,7 +62,7 @@ properties = {
 
 # called by the plugin manager
 def get_instance(plugin):
-    print "Get an LogStore MongoDB module for plugin %s" % plugin.get_name()
+    logger.info("Get an LogStore MongoDB module for plugin %s" % plugin.get_name())
     instance = LiveStatusLogStoreMongoDB(plugin)
     return instance
 
@@ -89,7 +89,10 @@ class LiveStatusLogStoreMongoDB(BaseModule):
         self.mongodb_uri = getattr(modconf, 'mongodb_uri', None)
         self.replica_set = getattr(modconf, 'replica_set', None)
         if self.replica_set and not ReplicaSetConnection:
-            logger.log('Error: cannot initialize LogStoreMongoDB module with replica_set because your pymongo lib is too old. Please install it with a 2.x+ version from https://github.com/mongodb/mongo-python-driver/downloads')
+            logger.error('[LogStoreMongoDB] Can not initialize LogStoreMongoDB module with '
+                         'replica_set because your pymongo lib is too old. '
+                         'Please install it with a 2.x+ version from '
+                         'https://github.com/mongodb/mongo-python-driver/downloads')
             return None
         self.database = getattr(modconf, 'database', 'logs')
         self.collection = getattr(modconf, 'collection', 'logs')
@@ -97,7 +100,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
         max_logs_age = getattr(modconf, 'max_logs_age', '365')
         maxmatch = re.match(r'^(\d+)([dwmy]*)$', max_logs_age)
         if maxmatch is None:
-            print 'Warning: wrong format for max_logs_age. Must be <number>[d|w|m|y] or <number> and not %s' % max_logs_age
+            logger.warning('[LogStoreMongoDB] Wrong format for max_logs_age. Must be <number>[d|w|m|y] or <number> and not %s' % max_logs_age)
             return None
         else:
             if not maxmatch.group(2):
@@ -148,14 +151,14 @@ class LiveStatusLogStoreMongoDB(BaseModule):
             self.next_log_db_rotate = time.time()
         except AutoReconnect, exp:
             # now what, ha?
-            print "LiveStatusLogStoreMongoDB.AutoReconnect", exp
+            logger.error("[LogStoreMongoDB] LiveStatusLogStoreMongoDB.AutoReconnect %s" % (exp))
             # The mongodb is hopefully available until this module is restarted
             raise LiveStatusLogStoreError
         except Exception, exp:
             # If there is a replica_set, but the host is a simple standalone one
             # we get a "No suitable hosts found" here.
             # But other reasons are possible too.
-            print "Could not open the database", exp
+            logger.error("[LogStoreMongoDB] Could not open the database" % exp)
             raise LiveStatusLogStoreError
 
     def close(self):
@@ -181,7 +184,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
 
             # See you tomorrow
             self.next_log_db_rotate = time.mktime(nextrotation.timetuple())
-            print "next rotation at %s " % time.asctime(time.localtime(self.next_log_db_rotate))
+            logger.info("[LogStoreMongoDB] Next log rotation at %s " % time.asctime(time.localtime(self.next_log_db_rotate)))
 
     def manage_log_brok(self, b):
         data = b.data
@@ -203,7 +206,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
                     except AutoReconnect, exp:
                         self.is_connected = SWITCHING
                     except Exception, exp:
-                        print "Got an exception inserting the backlog", str(exp)
+                        logger.error("[LogStoreMongoDB] Got an exception inserting the backlog" % str(exp))
             except AutoReconnect, exp:
                 if self.is_connected != SWITCHING:
                     self.is_connected = SWITCHING
@@ -219,11 +222,10 @@ class LiveStatusLogStoreMongoDB(BaseModule):
                 self.backlog.append(values)
             except Exception, exp:
                 self.is_connected = DISCONNECTED
-                print "An error occurred:", exp
-                print "DATABASE ERROR!!!!!!!!!!!!!!!!!"
+                logger.error("[LogStoreMongoDB] Databased error occurred:" % exp)
             # FIXME need access to this #self.livestatus.count_event('log_message')
         else:
-            print "This line is invalid", line
+            logger.info("[LogStoreMongoDB] This line is invalid: %s" % line)
 
     def add_filter(self, operator, attribute, reference):
         if attribute == 'time':
@@ -257,16 +259,16 @@ class LiveStatusLogStoreMongoDB(BaseModule):
             mongo_filter_func = self.mongo_time_filter_stack.get_stack()
         result = []
         mongo_filter = mongo_filter_func()
-        print "mongo filter is", mongo_filter
+        logger.debug("[LogStoreMongoDB] Mongo filter is" % mongo_filter)
         # We can apply the filterstack here as well. we have columns and filtercolumns.
         # the only additional step is to enrich log lines with host/service-attributes
         # A timerange can be useful for a faster preselection of lines
         filter_element = eval('{ ' + mongo_filter + ' }')
-        print "mongo filter is", filter_element
+        logger.debug("[LogStoreMongoDB] Mongo filter is" % filter_element)
         dbresult = []
-        columns = ['logobject', 'attempt', 'logclass', 'command_name', 'comment', 'contact_name', 'host_name', 'lineno', 'message', 'options', 'plugin_output', 'service_description', 'state', 'state_type', 'time', 'type']
+        columns = ['logobject', 'attempt', 'logclass', 'command_name', 'comment', 'contact_name', 'host_name', 'lineno', 'message', 'plugin_output', 'service_description', 'state', 'state_type', 'time', 'type']
         if not self.is_connected == CONNECTED:
-            print "sorry, not connected"
+            logger.warning("[LogStoreMongoDB] sorry, not connected")
         else:
             dbresult = [Logline([(c,) for c in columns], [x[col] for col in columns]) for x in self.db[self.collection].find(filter_element).sort([(u'time', pymongo.ASCENDING), (u'lineno', pymongo.ASCENDING)])]
         return dbresult
@@ -407,9 +409,9 @@ class LiveStatusMongoStack(LiveStatusStack):
             # Take from the stack:
             # Make a combined anded function
             # Put it on the stack
-            print "filter is", filters
+            logger.debug("[LogStoreMongoDB] Filter is" % filters)
             and_clause = lambda: '\'$and\' : [%s]' % ', '.join('{ ' + x() + ' }' for x in filters)
-            print "and_elements", and_clause
+            logger.debug("[LogStoreMongoDB] and_elements" % and_clause)
             self.put_stack(and_clause)
 
     def or_elements(self, num):
@@ -419,7 +421,7 @@ class LiveStatusMongoStack(LiveStatusStack):
             for _ in range(num):
                 filters.append(self.get_stack())
             or_clause = lambda: '\'$or\' : [%s]' % ', '.join('{ ' + x() + ' }' for x in filters)
-            print "or_elements", or_clause
+            logger.debug("[LogStoreMongoDB] or_elements"% or_clause)
             self.put_stack(or_clause)
 
     def get_stack(self):

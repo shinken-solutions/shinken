@@ -57,6 +57,7 @@ class CommandCall(DummyCommandCall):
         'valid':           BoolProp(default=False),
         'args':            StringProp(default=[]),
         'timeout':         IntegerProp(default='-1'),
+        'late_relink_done':BoolProp(default=False),
     }
 
     def __init__(self, commands, call, poller_tag='None',
@@ -68,6 +69,7 @@ class CommandCall(DummyCommandCall):
         # Now split by ! and get command and args
         self.get_command_and_args()
         self.command = commands.find_by_name(self.command.strip())
+        self.late_relink_done = False  # To do not relink again and again the same commandcall
         if self.command is not None:
             self.valid = True
         else:
@@ -100,7 +102,11 @@ class CommandCall(DummyCommandCall):
         self.args = [s.replace('___PROTECT_ESCLAMATION___', '!')
                      for s in tab[1:]]
 
+    # If we didn't already lately relink us, do it
     def late_linkify_with_command(self, commands):
+        if self.late_relink_done:
+            return
+        self.late_relink_done = True
         c = commands.find_by_name(self.command)
         self.command = c
 

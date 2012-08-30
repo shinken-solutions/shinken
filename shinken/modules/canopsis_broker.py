@@ -99,7 +99,7 @@ class Canopsis_broker(BaseModule):
             self.manage_initial_service_status_brok(b)
 
     def manage_initial_host_status_brok(self, b):
-        logger.log("[Canopsis] processing initial_host_status")
+        logger.info("[Canopsis] processing initial_host_status")
 
         if not hasattr(self, 'host_commands'):
             self.host_commands = {}
@@ -119,29 +119,29 @@ class Canopsis_broker(BaseModule):
         # max_check_attempts does not appear in check results so build a dict of max_check_attempts
         self.host_max_check_attempts[b.data['host_name']] = b.data['max_check_attempts']
 
-        logger.info("[canopsis] initial host max attempts: %s " % str(self.host_max_check_attempts))
-        logger.info("[canopsis] initial host commands: %s " % str(self.host_commands))
-        logger.info("[canopsis] initial host addresses: %s " % str(self.host_addresses))
+        logger.debug("[canopsis] initial host max attempts: %s " % str(self.host_max_check_attempts))
+        logger.debug("[canopsis] initial host commands: %s " % str(self.host_commands))
+        logger.debug("[canopsis] initial host addresses: %s " % str(self.host_addresses))
 
     def manage_initial_service_status_brok(self, b):
-        logger.log("[Canopsis] processing initial_service_status")
+        logger.debug("[Canopsis] processing initial_service_status")
 
         if not hasattr(self, 'service_commands'):
-            logger.log("[Canopsis] creating empty dict in service_commands")
+            logger.debug("[Canopsis] creating empty dict in service_commands")
             self.service_commands = {}
 
         if not hasattr(self, 'service_max_check_attempts'):
-            logger.log("[Canopsis] creating empty dict in service_max_check_attempts")
+            logger.debug("[Canopsis] creating empty dict in service_max_check_attempts")
             self.service_max_check_attempts = {}
 
         if not b.data['host_name'] in self.service_commands:
-            logger.log("[Canopsis] creating empty dict for host %s service_commands" % b.data['host_name'])
+            logger.debug("[Canopsis] creating empty dict for host %s service_commands" % b.data['host_name'])
             self.service_commands[b.data['host_name']] = {}
 
         self.service_commands[b.data['host_name']][b.data['service_description']] = b.data['check_command'].call
 
         if not b.data['host_name'] in self.service_max_check_attempts:
-            logger.log("[Canopsis] creating empty dict for host %s service_max_check_attempts" % b.data['host_name'])
+            logger.debug("[Canopsis] creating empty dict for host %s service_max_check_attempts" % b.data['host_name'])
             self.service_max_check_attempts[b.data['host_name']] = {}
 
         self.service_max_check_attempts[b.data['host_name']][b.data['service_description']] = b.data['max_check_attempts']
@@ -149,7 +149,7 @@ class Canopsis_broker(BaseModule):
     def manage_host_check_result_brok(self, b):
         message = self.create_message('component', 'check', b)
         if not message:
-            logger.info("[Canopsis] Warning: Empty host check message")
+            logger.warning("[Canopsis] Warning: Empty host check message")
         else:
             self.push2canopsis(message)
 
@@ -161,7 +161,7 @@ class Canopsis_broker(BaseModule):
             logger.error("[Canopsis] Error: there was an error while trying to create message for service")
 
         if not message:
-            logger.info("[Canopsis] Warning: Empty service check message")
+            logger.warning("[Canopsis] Warning: Empty service check message")
         else:
             self.push2canopsis(message)
 
@@ -216,7 +216,7 @@ class Canopsis_broker(BaseModule):
             }
         else:
             # WTF?!
-            logger.info("[Canopsis] Invalid source_type %s" % (source_type))
+            logger.warning("[Canopsis] Invalid source_type %s" % (source_type))
             return None
 
         commonmessage = {
@@ -243,7 +243,7 @@ class Canopsis_broker(BaseModule):
     def push2canopsis(self, message):
         strmessage = str(message)
         self.canopsis.postmessage(message)
-        #logger.info("[Canopsis] push2canopsis: %s" % (strmessage))
+        #logger.debug("[Canopsis] push2canopsis: %s" % (strmessage))
 
     def hook_tick(self, brok):
         if self.canopsis:
@@ -386,8 +386,8 @@ class event2amqp():
 
         # publish message
         if self.connected():
-            logger.info("[Canopsis] using routing key %s" % key)
-            logger.info("[Canopsis] sending %s" % str(message))
+            logger.debug("[Canopsis] using routing key %s" % key)
+            logger.debug("[Canopsis] sending %s" % str(message))
             try:
                 self.producer.revive(self.channel)
                 self.producer.publish(body=message, compression=None, routing_key=key, exchange=self.exchange_name)
@@ -402,11 +402,11 @@ class event2amqp():
                 return False
         else:
             errmsg = "[Canopsis] Not connected, going to queue messages until connection back (%s items in queue | max %s)" % (str(len(self.queue)), str(self.maxqueuelength))
-            logger.info(errmsg)
+            logger.error(errmsg)
             #enqueue_cano_event(key,message)
             if len(self.queue) < int(self.maxqueuelength):
                 self.queue.append({"key": key, "message": message})
-                logger.info("[Canopsis] Queue length: %d" % len(self.queue))
+                logger.debug("[Canopsis] Queue length: %d" % len(self.queue))
                 return True
             else:
                 logger.error("[Canopsis] Maximum retention for event queue %s reached" % str(self.maxqueuelength))
@@ -420,7 +420,7 @@ class event2amqp():
             while len(self.queue) > 0:
                 item = self.queue.pop()
                 try:
-                    logger.info("[Canopsis] Pop item from queue [%s]: %s" % (str(len(self.queue)), str(item)))
+                    logger.debug("[Canopsis] Pop item from queue [%s]: %s" % (str(len(self.queue)), str(item)))
                     self.producer.revive(self.channel)
                     self.producer.publish(body=item["message"], compression=None, routing_key=item["key"], exchange=self.exchange_name)
                 except:
@@ -445,7 +445,7 @@ class event2amqp():
         return True
 
     def save_queue(self):
-        retentionfile = "%s/canopsis.dat" % os.getcwd()
+        retentionfile = "%s/canopsis.dat" % os.getcwd() #:fixme: use path.join
         logger.info("[Canopsis] saving to %s" % retentionfile)
         filehandler = open(retentionfile, 'w')
         pickle.dump(self.queue, filehandler)

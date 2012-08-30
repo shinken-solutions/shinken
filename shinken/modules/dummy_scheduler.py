@@ -57,11 +57,11 @@ class Dummy_scheduler(BaseModule):
 
 
     # Ok, main function that is called in the retention creation pass
-    def update_retention_objects(self, sched, log_mgr):
+    def update_retention_objects(self, sched):
         print "[Dummy] asking me to update the retention objects"
 
     # Should return if it succeed in the retention load or not
-    def load_retention_objects(self, sched, log_mrg):
+    def load_retention_objects(self, sched):
         print "[Dummy] asking me to load the retention objects"
         return False
 
