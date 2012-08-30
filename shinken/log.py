@@ -27,6 +27,7 @@ import time
 import logging
 import sys
 from logging import Handler, Formatter, StreamHandler
+from logging import NOTSET, DEBUG, INFO, WARNING, ERROR, CRITICAL
 from logging.handlers import TimedRotatingFileHandler
 
 from brok import Brok
@@ -90,14 +91,6 @@ class BrokHandler(Handler):
 
 class Log(logging.Logger):
     """Shinken logger class, wrapping access to Python logging standard library."""
-    "Store the numeric value from python logging class"
-    NOTSET   = logging.NOTSET
-    DEBUG    = logging.DEBUG
-    INFO     = logging.INFO
-    WARNING  = logging.WARNING
-    ERROR    = logging.ERROR
-    CRITICAL = logging.CRITICAL
-
 
     def __init__(self, name='shinken', level=NOTSET):
         logging.Logger.__init__(self, name, level)
