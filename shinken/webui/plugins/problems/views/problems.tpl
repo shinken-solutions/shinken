@@ -106,7 +106,6 @@
     new_filters = [];
     current_filters = [];
 </script>
-{{app.max_output_length}}
 <div id="pageslide" style="display:none">
   <div class='row'>
     <span class='span8'><h2>Filtering options</h2></span>
