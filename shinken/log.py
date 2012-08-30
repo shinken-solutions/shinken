@@ -24,7 +24,7 @@
 
 import sys
 import logging
-from logging import Handler, Formatter, StreamHandler
+from logging import Handler, Formatter, StreamHandler, getLevelName
 from logging import NOTSET, DEBUG, INFO, WARNING, ERROR, CRITICAL
 from logging.handlers import TimedRotatingFileHandler
 
@@ -82,14 +82,6 @@ class Log(logging.Logger):
             _brokhandler_.setFormatter(brokFormatter)
         self.addHandler(_brokhandler_)
 
-
-    @staticmethod
-    def get_level_id(lvlName):
-        """Convert a level name (string) to its integer value
-           and vice-versa. Input a level and it will return a name.
-           Raise KeyError when name or level not found
-        """
-        return logging._levelNames[lvlName]
 
     def register_local_log(self, path, level=None):
         """

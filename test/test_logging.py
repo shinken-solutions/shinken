@@ -54,8 +54,7 @@ class Collector:
 
 class TestLevels(unittest.TestCase):
 
-    def test_get_level_id(self):
-        logger = Log('shinken')
+    def test_getLevelName(self):
         for name , level in (
             ('NOTSET',   logging.NOTSET),
             ('DEBUG',    logging.DEBUG),
@@ -64,11 +63,7 @@ class TestLevels(unittest.TestCase):
             ('ERROR',    logging.ERROR),
             ('CRITICAL', logging.CRITICAL),
             ):
-            self.assertEqual(logger.get_level_id(level), name)
-
-    def test_get_level_id_unknown_level_raises(self):
-        self.assertRaises(KeyError, logger.get_level_id, 'MYLEVEL')
-        logger = Log('shinken')
+            self.assertEqual(logging.getLevelName(level), name)
 
     def test_default_level(self):
         logger = Log('shinken')
