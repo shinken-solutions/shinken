@@ -57,12 +57,12 @@ class TestLevels(unittest.TestCase):
     def test_get_level_id(self):
         logger = Log()
         for name , level in (
-            ('NOTSET',   logger.NOTSET),
-            ('DEBUG',    logger.DEBUG),
-            ('INFO',     logger.INFO),
-            ('WARNING',  logger.WARNING),
-            ('ERROR',    logger.ERROR),
-            ('CRITICAL', logger.CRITICAL),
+            ('NOTSET',   logging.NOTSET),
+            ('DEBUG',    logging.DEBUG),
+            ('INFO',     logging.INFO),
+            ('WARNING',  logging.WARNING),
+            ('ERROR',    logging.ERROR),
+            ('CRITICAL', logging.CRITICAL),
             ):
             self.assertEqual(logger.get_level_id(level), name)
 
@@ -72,23 +72,23 @@ class TestLevels(unittest.TestCase):
 
     def test_default_level(self):
         logger = Log()
-        self.assertEqual(logger.level, logger.NOTSET)
+        self.assertEqual(logger.level, logging.NOTSET)
 
-    def test_set_level(self):
+    def test_setLevel(self):
         logger = Log()
-        logger.set_level(logger.WARNING)
-        self.assertEqual(logger.level, logger.WARNING)
+        logger.setLevel(logging.WARNING)
+        self.assertEqual(logger.level, logging.WARNING)
 
-    def test_set_level_non_integer_raises(self):
+    def test_setLevel_non_integer_raises(self):
         logger = Log()
-        self.assertRaises(TypeError, logger.set_level, 1.0)
+        self.assertRaises(TypeError, logger.setLevel, 1.0)
 
     def test_load_obj_must_not_change_level(self):
         logger = Log()
         # argl, load_obj() unsets the level! save and restore it
-        logger.set_level(logger.CRITICAL)
+        logger.setLevel(logging.CRITICAL)
         logger.load_obj(Dummy())
-        self.assertEqual(logger.level, logger.CRITICAL)
+        self.assertEqual(logger.level, logging.CRITICAL)
 
 class TestBasics(unittest.TestCase):
 
@@ -139,14 +139,14 @@ class TestDefaultLoggingMethods(unittest.TestCase, LogCollectMixin):
 
     def test_basic_logging_debug_does_not_send_broks(self):
         logger = self._prepare_logging()
-        logger.set_level(logger.DEBUG)
+        logger.setLevel(logging.DEBUG)
         msgs, lines = self._put_log(logger.debug, 'Some log-message')
         self.assertEqual(len(msgs), 0)
         self.assertEqual(len(lines), 0)
 
     def test_basic_logging_info(self):
         logger = self._prepare_logging()
-        logger.set_level(logger.INFO)
+        logger.setLevel(logging.INFO)
         msgs, lines = self._put_log(logger.info, 'Some log-message')
         self.assertEqual(len(msgs), 1)
         self.assertEqual(len(lines), 0)
@@ -154,7 +154,7 @@ class TestDefaultLoggingMethods(unittest.TestCase, LogCollectMixin):
 
     def test_basic_logging_warning(self):
         logger = self._prepare_logging()
-        logger.set_level(logger.WARNING)
+        logger.setLevel(logging.WARNING)
         msgs, lines = self._put_log(logger.warning, 'Some log-message')
         self.assertEqual(len(msgs), 1)
         self.assertEqual(len(lines), 0)
@@ -163,7 +163,7 @@ class TestDefaultLoggingMethods(unittest.TestCase, LogCollectMixin):
 
     def test_basic_logging_error(self):
         logger = self._prepare_logging()
-        logger.set_level(logger.ERROR)
+        logger.setLevel(logging.ERROR)
         msgs, lines = self._put_log(logger.error, 'Some log-message')
         self.assertEqual(len(msgs), 1)
         self.assertEqual(len(lines), 0)
@@ -179,14 +179,14 @@ class TestDefaultLoggingMethods(unittest.TestCase, LogCollectMixin):
     def test_level_is_higher_then_the_one_set(self):
         logger = self._prepare_logging()
         # just test two samples
-        logger.set_level(logger.CRITICAL)
+        logger.setLevel(logging.CRITICAL)
         msgs, lines = self._put_log(logger.error, 'Some log-message')
         self.assertEqual(len(msgs), 0)
         self.assertEqual(len(lines), 0)
 
         # need to prepare again to have stdout=StringIO()
         logger = self._prepare_logging()
-        logger.set_level(logger.INFO)
+        logger.setLevel(logging.INFO)
         msgs, lines = self._put_log(logger.debug, 'Some log-message$')
         self.assertEqual(len(msgs), 0)
         self.assertEqual(len(lines), 0)
@@ -194,7 +194,7 @@ class TestDefaultLoggingMethods(unittest.TestCase, LogCollectMixin):
     def test_human_timestamp_format(self):
         "test output using the human timestamp format"
         logger = self._prepare_logging()
-        logger.set_level(logger.INFO)
+        logger.setLevel(logging.INFO)
         logger.set_human_format(True)
         msgs, lines = self._put_log(logger.info, 'Some ] log-message')
         self.assertRegexpMatches(msgs[0],
@@ -232,18 +232,18 @@ class TestWithLocalLogging(unittest.TestCase, LogCollectMixin):
 
     def test_register_local_log_keeps_level(self):
         logger = self._prepare_logging()
-        logger.set_level(logger.ERROR)
-        self.assertEqual(logger.level, logger.ERROR)
+        logger.setLevel(logging.ERROR)
+        self.assertEqual(logger.level, logging.ERROR)
         logfile = NamedTemporaryFile("w", delete=False)
         logfile.close()
         logfile_name = logfile.name
         logger.register_local_log(logfile_name)
-        self.assertEqual(logger.level, logger.ERROR)
+        self.assertEqual(logger.level, logging.ERROR)
 
 
     def test_basic_logging_debug_does_not_send_broks(self):
         logger = self._prepare_logging()
-        logger.set_level(logger.DEBUG)
+        logger.setLevel(logging.DEBUG)
         msgs, lines, local_log = self._put_log(logger.debug, 'Some log-message')
         self.assertEqual(len(msgs), 0)
         self.assertEqual(len(lines), 0)
@@ -253,7 +253,7 @@ class TestWithLocalLogging(unittest.TestCase, LogCollectMixin):
 
     def test_basic_logging_info(self):
         logger = self._prepare_logging()
-        logger.set_level(logger.INFO)
+        logger.setLevel(logging.INFO)
         msgs, lines, local_log = self._put_log(logger.info, 'Some log-message')
         self.assertEqual(len(msgs), 1)
         self.assertEqual(len(lines), 0)
@@ -263,7 +263,7 @@ class TestWithLocalLogging(unittest.TestCase, LogCollectMixin):
 
     def test_basic_logging_error(self):
         logger = self._prepare_logging()
-        logger.set_level(logger.ERROR)
+        logger.setLevel(logging.ERROR)
         msgs, lines, local_log = self._put_log(logger.error, 'Some log-message')
         self.assertEqual(len(msgs), 1)
         self.assertEqual(len(lines), 0)
@@ -273,7 +273,7 @@ class TestWithLocalLogging(unittest.TestCase, LogCollectMixin):
 
     def test_basic_logging_critical(self):
         logger = self._prepare_logging()
-        logger.set_level(logger.CRITICAL)
+        logger.setLevel(logging.CRITICAL)
         msgs, lines, local_log = self._put_log(logger.critical, 'Some log-message')
         self.assertEqual(len(msgs), 1)
         self.assertEqual(len(lines), 0)
@@ -284,7 +284,7 @@ class TestWithLocalLogging(unittest.TestCase, LogCollectMixin):
     def test_level_is_higher_then_the_one_set(self):
         logger = self._prepare_logging()
         # just test two samples
-        logger.set_level(logger.CRITICAL)
+        logger.setLevel(logging.CRITICAL)
         msgs, lines, local_log = self._put_log(logger.debug, 'Some log-message')
         self.assertEqual(len(msgs), 0)
         self.assertEqual(len(lines), 0)
@@ -292,7 +292,7 @@ class TestWithLocalLogging(unittest.TestCase, LogCollectMixin):
 
         # need to prepare again to have stdout=StringIO() and a local log file
         logger = self._prepare_logging()
-        logger.set_level(logger.INFO)
+        logger.setLevel(logging.INFO)
         msgs, lines, local_log = self._put_log(logger.debug, 'Some log-message')
         self.assertEqual(len(msgs), 0)
         self.assertEqual(len(lines), 0)
@@ -301,7 +301,7 @@ class TestWithLocalLogging(unittest.TestCase, LogCollectMixin):
 
     def test_human_timestamp_format(self):
         logger = self._prepare_logging()
-        logger.set_level(logger.INFO)
+        logger.setLevel(logging.INFO)
         logger.set_human_format(True)
         msgs, lines, local_log = self._put_log(logger.info, 'Some ] log-message')
         self.assertEqual(len(local_log), 1)
@@ -340,7 +340,7 @@ class TestNamedCollector(unittest.TestCase, LogCollectMixin):
 
     def test_basic_logging_info(self):
         logger = self._prepare_logging()
-        logger.set_level(logger.INFO)
+        logger.setLevel(logging.INFO)
         msgs, lines = self._put_log(logger.info, 'Some log-message')
         self.assertEqual(len(msgs), 1)
         self.assertEqual(len(lines), 0)
@@ -349,7 +349,7 @@ class TestNamedCollector(unittest.TestCase, LogCollectMixin):
 
     def test_human_timestamp_format(self):
         logger = self._prepare_logging()
-        logger.set_level(logger.INFO)
+        logger.setLevel(logging.INFO)
         logger.set_human_format(True)
         msgs, lines = self._put_log(logger.info, 'Some ] log-message')
         self.assertRegexpMatches(msgs[0],
