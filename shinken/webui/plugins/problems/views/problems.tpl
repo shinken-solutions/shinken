@@ -409,9 +409,9 @@ $(function(){
 		%# "We put a title (so a tip) on the output onlly if need"
 		%if len(pb.output) > 100:
 		   %if app.allow_html_output:
-		      <div class='output pull-left' rel="tooltip" data-original-title="{{pb.output}}"> {{!helper.strip_html_output(pb.output[:app.max_ouptput_length])}}</div>
+		      <div class='output pull-left' rel="tooltip" data-original-title="{{pb.output}}"> {{!helper.strip_html_output(pb.output[:app.max_output_length])}}</div>
 		   %else:
-		      <div class='output pull-left' rel="tooltip" data-original-title="{{pb.output}}"> {{pb.output[:app.max_ouptput_length]}}</div>
+		      <div class='output pull-left' rel="tooltip" data-original-title="{{pb.output}}"> {{pb.output[:app.max_output_length]}}</div>
 		   %end
 		%else:
 		   %if app.allow_html_output:
