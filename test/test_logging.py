@@ -55,7 +55,7 @@ class Collector:
 class TestLevels(unittest.TestCase):
 
     def test_get_level_id(self):
-        logger = Log()
+        logger = Log('shinken')
         for name , level in (
             ('NOTSET',   logging.NOTSET),
             ('DEBUG',    logging.DEBUG),
@@ -67,24 +67,24 @@ class TestLevels(unittest.TestCase):
             self.assertEqual(logger.get_level_id(level), name)
 
     def test_get_level_id_unknown_level_raises(self):
-        logger = Log()
         self.assertRaises(KeyError, logger.get_level_id, 'MYLEVEL')
+        logger = Log('shinken')
 
     def test_default_level(self):
-        logger = Log()
+        logger = Log('shinken')
         self.assertEqual(logger.level, logging.NOTSET)
 
     def test_setLevel(self):
-        logger = Log()
+        logger = Log('shinken')
         logger.setLevel(logging.WARNING)
         self.assertEqual(logger.level, logging.WARNING)
 
     def test_setLevel_non_integer_raises(self):
-        logger = Log()
+        logger = Log('shinken')
         self.assertRaises(TypeError, logger.setLevel, 1.0)
 
     def test_load_obj_must_not_change_level(self):
-        logger = Log()
+        logger = Log('shinken')
         # argl, load_obj() unsets the level! save and restore it
         logger.setLevel(logging.CRITICAL)
         logger.load_obj(Dummy())
@@ -116,7 +116,7 @@ class LogCollectMixin:
         self._collector = Collector()
         self._stdout = sys.stdout
         sys.stdout = StringIO()
-        logger = Log()
+        logger = Log('shinken')
         logger.load_obj(self._collector)
         return logger
 
@@ -431,7 +431,7 @@ class TestNamedCollector(unittest.TestCase, LogCollectMixin):
         self._collector = Collector()
         self._stdout = sys.stdout
         sys.stdout = StringIO()
-        logger = Log()
+        logger = Log('shinken')
         logger.load_obj(self._collector, 'Tiroler Schinken')
         return logger
 
