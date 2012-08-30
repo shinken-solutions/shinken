@@ -1,7 +1,6 @@
 #!/usr/bin/env python
-
 # -*- coding: utf-8 -*-
-
+#
 # Copyright (C) 2009-2012:
 #     Gabes Jean, naparuba@gmail.com
 #     Gerhard Lausser, Gerhard.Lausser@consol.de
@@ -24,7 +23,6 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
-import time
 import logging
 from logging import Handler, Formatter, StreamHandler
 from logging import NOTSET, DEBUG, INFO, WARNING, ERROR, CRITICAL
@@ -70,9 +68,6 @@ class BrokHandler(Handler):
 
 class Log(logging.Logger):
     """Shinken logger class, wrapping access to Python logging standard library."""
-
-    def __init__(self, name='shinken', level=NOTSET):
-        logging.Logger.__init__(self, name, level)
 
     def load_obj(self, object, name_=None):
         """ We load the object where we will put log broks
