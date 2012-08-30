@@ -37,7 +37,7 @@ Shinken ChangeLog
 	* Add : now passive checks take their timestamp from the external command instead of the received time.
 	* Add : pre-serialize the configurations in the arbiter before going in daemon, and so kill the previous instance. (startup boost)
 	* Add : brok time part boost, with less useless objects sent, like contacts, timeperiods or commands. (big startup boost)
-	* Add : host pack dispatching history is saved in a pickle file, so we will be able to push same objects in hte same scheduler
+	* Add : host pack dispatching history is saved in a pickle file, so we will be able to push same objects in the same scheduler
 	* Add : arbiter -p options for dumping profile
 
 
@@ -94,8 +94,6 @@ Shinken ChangeLog
 	* Add : First working version of canopsis broker module
 	* Add : trying cjson import to improve LS output performance
 	* Add : NDO add table prefix as a parameter.
-	* Fix : do not push back monitoring status in GLPI database when the host configuration do not come from GLPI
-	* Fix a bug in livestatus module and add the attribute host.event_handler (needed by Thruk)
 
 	MODULE FIXES
 	* Fix : issue #450 (from vaxvms) removed thrift broker, similar to Livestatus, as it is unmaintained.
@@ -105,9 +103,12 @@ Shinken ChangeLog
 	* Fix : (reported by : Nicolas DUPEUX) remove a useless method in logstore_sqlite, and add a protection against end less loop. Fix #374
 	* Fix : Livestatus allowed_hosts options does not work
 	* Fix : Call the right function for !=~ LQL filter (livestatus)
+	* Fix : do not push back monitoring status in GLPI database when the host configuration do not come from GLPI
+	* Fix : a bug in livestatus module and add the attribute host.event_handler (needed by Thruk)
+
 
 	UI ENHANCEMENTS
-	* Add : UI /detail full rewirte. Thanks Andreas!!
+	* Add : UI /detail full rewrite. Thanks Andreas!!
 	* Add : UI new dashboard!
 	* Add : (from Mael VINCENT, julien pilou, Gael Millet, Damien Mathieu and hugo viricel) new /mobile part!
 	* Add : Enable easy activation of application monitoring performance feature. Use ./install --enableeue to enable eue feature
@@ -124,12 +125,6 @@ Shinken ChangeLog
 	* Fix : (reported by : Vincent Riquer) WEBUI do not print 1970 for 0 time, but N/A instead. issue fix #241
 
 	DEFAULT PACKS
-	* Fix : The check_mysql_health plugin need a : sign after the thresholds for greater is better metrics.
-	* Fix : generic corrupted block oracle database check
-	* Add : commands for notification by XMPP (Jabber)
-	* Add : a basic rsync check template in the network/services pack.
-	* Add : macros for Basic HTTP authentification in the HTTP(S) services templates.
-	* Fix : call sudo to execute SMcli into IBM_DS plugins
 	* Add : discovery packs for ibm storage management and beginning of clustering solutions discovery
 	* Add : cluster discovery for Safekit and HACMP.
 	* Add : snmp plugins for AIX to monitor VG, inode, HACMP and Safekit
@@ -137,10 +132,16 @@ Shinken ChangeLog
 	* Add : (Camille Vacquie): AIX service pack
 	* Add : SNI support to https and https certificate checks
 	* Add : pack/os/linux - check_linux_network_usage - use last_perfdata to determin bandwidth
+	* Add : commands for notification by XMPP (Jabber)
+	* Add : a basic rsync check template in the network/services pack.
+	* Add : macros for Basic HTTP authentification in the HTTP(S) services templates.
+	* Fix : The check_mysql_health plugin need a : sign after the thresholds for greater is better metrics.
+	* Fix : generic corrupted block oracle database check
+	* Fix : call sudo to execute SMcli into IBM_DS plugins
 
 	DOCUMENTATION
-	* Add: (from xkilian, MathieuMD,  Claneys Skyne, H4wkmoon, etc.) Wiki documentation in-depth renewal of Getting Started pages for new users
-	* Add: Monitoring Pack documentation, modules, installation, FAQ , diagrams, scaling shinken, dev+user resources, etc.
+	* Add : (from xkilian, MathieuMD,  Claneys Skyne, H4wkmoon, etc.) Wiki documentation in-depth renewal of Getting Started pages for new users
+	* Add : Monitoring Pack documentation, modules, installation, FAQ , diagrams, scaling shinken, dev+user resources, etc.
 	* Add : dummy_broker module example.
 
 1.0.1 - 13/03/2012
