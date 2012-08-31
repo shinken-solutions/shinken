@@ -207,7 +207,9 @@ class SNMPHost(object):
         """ search service frequence
             get a service key and return its frequence
         """
-        tmp = dict([(key, interval) for interval,f in self.frequences.items() for key in f.services.keys()])
+        tmp = dict([(key, interval)
+                    for interval,f in self.frequences.items()
+                    for key in f.services.keys()])
         if service_key in tmp:
             return tmp[service_key]
         else:
@@ -217,7 +219,10 @@ class SNMPHost(object):
     def get_oids_by_frequence(self, interval):
         """ Return all oids from an frequence
         """
-        return dict([(snmpoid.oid, snmpoid) for s in self.frequences[interval].services.values() for snmpoid in s.oids.values()])
+        return dict([(snmpoid.oid, snmpoid)
+                    for s in self.frequences[interval].services.values()
+                    for snmpoid in s.oids.values()
+                    if s.instance != "NOTFOUND"])
 
     def get_oids_for_instance_mapping(self, interval, datasource):
         """ Return all oids from an frequence in order to map instances
@@ -309,7 +314,7 @@ class SNMPService(object):
         self.triggergroup = triggergroup
         self.triggers = {}
         self.dstemplate = dstemplate
-        self.instance = instance
+        self.instance = instance # If = 'NOTFOUND' means mapping failed
         self.raw_instance = instance
         self.instance_name = instance_name
         self.oids = {}
@@ -325,6 +330,7 @@ class SNMPService(object):
     def map_instances(self, instances):
         """ Map instances
         """
+        # CHANGE IF FOR REGEXP
         if self.instance_name in instances:
             # Set instance
             self.instance = instances[self.instance_name]
@@ -355,6 +361,10 @@ class SNMPService(object):
             name = self.instance
         else:
             name = self.dstemplate
+
+        if self.instance == "NOTFOUND":
+            out = "Instance mapping not found. Please check your config"
+            rc = 3
         
         if not perf: 
             message = "%s: %s" % (name, out)
@@ -733,7 +743,6 @@ class SNMPAsyncClient(object):
             # Check forced !!
             self.obj.frequences[self.check_interval].forced = False
             data_validity = False
-
         elif not self.mapping_done:
             data_validity = False
         # Check datas validity
@@ -754,7 +763,7 @@ class SNMPAsyncClient(object):
                 data_validity = True
                 message, rc = self.obj.format_output(self.check_interval, self.serv_key)
 #                logger.info('[SnmpBooster] FROM CACHE : Return code: %s - Message: %s' % (rc, message))
-#                message = "From cache: " + message
+                message = "FROM CACHE: " + message
                 self.set_exit(message, rc=rc)
                 return
             else:
@@ -765,9 +774,11 @@ class SNMPAsyncClient(object):
         self.obj.frequences[self.check_interval].old_check_time = \
                                 copy.copy(self.obj.frequences[self.check_interval].check_time)
         self.obj.frequences[self.check_interval].check_time = self.start_time
-        for oid in self.obj.frequences[self.check_interval].services[self.serv_key].oids.values():
-            oid.old_value = oid.value
-            oid.raw_old_value = oid.raw_value
+        #for oid in self.obj.frequences[self.check_interval].services[self.serv_key].oids.values():
+        for service in self.obj.frequences[self.check_interval].services.values():
+            for snmpoid in service.oids.values():
+                snmpoid.old_value = snmpoid.value
+                snmpoid.raw_old_value = snmpoid.raw_value
 
         self.memcached.set(self.obj_key, self.obj, time=604800)
         # UNLOCKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
@@ -811,7 +822,6 @@ class SNMPAsyncClient(object):
 
             # SNMP table header
             tmp_oids = list(set([oid[1:].rsplit(".", 1)[0] for oid in self.oids_to_check]))
-#            print "TABLE", len(tmp_oids)
             for oid in tmp_oids:
                 # TODO: FIND SOMETHING BETTER ??
                 # Launch :  snmpbulkget .1.3.6.1.2.1.2.2.1.8
@@ -876,7 +886,6 @@ class SNMPAsyncClient(object):
             self.rspMsg, wholeMsg = decoder.decode(wholeMsg,
                                                    asn1Spec=v2c.Message())
             self.rspPDU = v2c.apiMessage.getPDU(self.rspMsg)
-
             if aBP.getRequestID(self.reqPDU) == aBP.getRequestID(self.rspPDU):
                 # Check for SNMP errors reported
                 errorStatus = aBP.getErrorStatus(self.rspPDU)
@@ -909,25 +918,25 @@ class SNMPAsyncClient(object):
                             for l_oid in self.limit_oids:
                                 if oid.startswith(l_oid + "."):
                                     self.results_limits_dict[oid] = str(val)
-                    # SNPNEXT NEEDED ????
-                    if self.mapping_done:
-                        # trier `oids' par table, puis par oid => A faire avant le dispatcher
-                        # oids = {'.1.3.6.1.2.1.2.2.1.11' : { '.1.3.6.1.2.1.2.2.1.11.10016': VALUE }, ... }
-                        oids = set(self.oids_to_check.keys() + self.limit_oids)
-                        results_oids = set(self.results_oid_dict.keys() + self.results_limits_dict.keys())
-                        if oids != results_oids:
-                            # SNMP next needed
-                            aBP.setVarBinds(self.reqPDU,
-                                    [(x, v2c.null) for x, y in tableRow])
-                            aBP.setRequestID(self.reqPDU, v2c.getNextRequestID())
-                            transportDispatcher.sendMessage(encoder.encode(self.reqMsg),
-                                                    transportDomain,
-                                                    transportAddress)
-                            print oids - results_oids
-                            print "OIDS", len(oids)
-                            print "RES", len(results_oids)
-                            print "NEXT!!!"
-                            return wholeMsg
+                # SNPNEXT NEEDED ????
+                if self.mapping_done:
+                    # trier `oids' par table, puis par oid => A faire avant le dispatcher
+                    # oids = {'.1.3.6.1.2.1.2.2.1.11' : { '.1.3.6.1.2.1.2.2.1.11.10016': VALUE }, ... }
+                    oids = set(self.oids_to_check.keys() + self.limit_oids)
+                    results_oids = set(self.results_oid_dict.keys() + self.results_limits_dict.keys())
+                    # PAS DE FRANCAIS !!!
+                    restant = oids - results_oids
+                    #COMMENTTTTTTTTTTT
+                    tableRow = [oid.rsplit(".", 1)[0] + "." + str(int(oid.rsplit(".", 1)[1]) - 1)  for oid in restant]
+                    if oids != results_oids:
+                        # SNMP next needed
+                        aBP.setVarBinds(self.reqPDU,
+                                [(x, v2c.null) for x in tableRow])
+                        aBP.setRequestID(self.reqPDU, v2c.getNextRequestID())
+                        transportDispatcher.sendMessage(encoder.encode(self.reqMsg),
+                                                transportDomain,
+                                                transportAddress)
+                        return wholeMsg
 
 
                 # LOCKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
@@ -945,8 +954,17 @@ class SNMPAsyncClient(object):
                     self.obj.instances = mapping_instance
                     mapping = self.obj.map_instances(self.check_interval) # mapping = useless
                     s = self.obj.frequences[self.check_interval].services[self.serv_key] # useless
+                    self.memcached.set(self.obj_key, self.obj, time=604800)
                     if s.instance.startswith("map("):
+                        result_oids_mapping = set([".%s" % str(o).rsplit(".",1)[0] for t in varBindTable for o, _ in t])
+                        if not result_oids_mapping.intersection(set(self.mapping_oids.keys())):
+                            s.instance = "NOTFOUND"
+                            self.memcached.set(self.obj_key, self.obj, time=604800)
+                            logger.info("[SnmpBooster] - Instance mapping not found. Please check your config")
+                            self.set_exit("%s: Instance mapping not found. Please check your config" % s.instance_name, 3, transportDispatcher)
+                            return
                         # MAPPING NOT FINISHED
+                        # STOP IF OID NOT IN MAPPPING OIDS
                         aBP.setVarBinds(self.reqPDU,
                                     [(x, v2c.null) for x, y in varBindTable[-1]])
                         aBP.setRequestID(self.reqPDU, v2c.getNextRequestID())
@@ -955,29 +973,10 @@ class SNMPAsyncClient(object):
                                                     transportAddress)
                         return wholeMsg
 
-                    self.memcached.set(self.obj_key, self.obj, time=604800)
                     logger.info("[SnmpBooster] - Instance mapping completed. Expect results at next check")
                     self.set_exit("Instance mapping completed. Expect results at next check", 3, transportDispatcher)
                     return
             
-                if False:
-                    # Check if snmp next is needed
-                    oids = set(self.oids_to_check.keys() + self.limit_oids)
-                    results_oids = set(self.results_oid_dict.keys() + self.results_limits_dict.keys())
-                    if oids != results_oids:
-                         # SNMP next needed
-                        aBP.setVarBinds(self.reqPDU,
-                                    [(x, v2c.null) for x, y in varBindTable[-1]])
-                        aBP.setRequestID(self.reqPDU, v2c.getNextRequestID())
-                        transportDispatcher.sendMessage(encoder.encode(self.reqMsg),
-                                                    transportDomain,
-                                                    transportAddress)
-                        print oids - results_oids
-                        print "OIDS", len(oids)
-                        print "RES", len(results_oids)
-                        print "NEXT!!!"
-                        return wholeMsg
-
                 # set Limits
                 if not self.limits_done:
                     self.obj.set_limits(self.check_interval, self.results_limits_dict)
