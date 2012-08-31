@@ -52,8 +52,6 @@ __ http://pypi.python.org/pypi/multiprocessing/
 __ http://pypi.python.org/pypi/pymongo/
 __ http://pycurl.sourceforge.net/
 
-* python-devel Package
-
 
 Conditional Requirements
 ------------------------
