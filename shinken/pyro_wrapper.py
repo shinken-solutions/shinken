@@ -150,6 +150,7 @@ except AttributeError, exp:
     
     # Version not supported for now, we have to work on it
     bad_versions = []
+    last_known_working_version = "4.14"
     msg_waitall_issue_versions = ["4.1", "4.2", "4.3", "4.4", "4.5", "4.6", "4.7", '4.8',
                                   '4.9', '4.10', '4.11', '4.12', '4.13']
     
@@ -179,7 +180,7 @@ except AttributeError, exp:
             if PYRO_VERSION in old_versions:
                 Pyro.config.SERVERTYPE = "select"
             elif PYRO_VERSION in bad_versions:
-                logger.error("Your pyro version (%s) is not supported. Please downgrade it (4.12)" % PYRO_VERSION)
+                logger.error("Your pyro version (%s) is not supported. Please install version (%s) " % (PYRO_VERSION, last_known_working_version))
                 exit(1)
             else:
                 Pyro.config.SERVERTYPE = "multiplex"
