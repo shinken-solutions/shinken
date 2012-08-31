@@ -147,10 +147,11 @@ except AttributeError, exp:
     Pyro.config.HMAC_KEY = "NOTSET"
 
     old_versions = ["4.1", "4.2", "4.3", "4.4"]
-
+    
     # Version not supported for now, we have to work on it
     bad_versions = []
-
+    msg_waitall_issue_versions = ["4.1", "4.2", "4.3", "4.4", "4.5", "4.6", "4.7", '4.8',
+                                  '4.9', '4.10', '4.11', '4.12', '4.13']
     
     class Pyro4Daemon(Pyro.core.Daemon):
         pyro_version = 4
@@ -162,6 +163,12 @@ except AttributeError, exp:
             if self.port == 0:
                 return
 
+            # Some version with Pyro got problems with the socket.MSG_WAITALL
+            # It was "solved" in 4.14. But before this, just delete it
+            if PYRO_VERSION in msg_waitall_issue_versions:
+                if hasattr(socket, 'MSG_WAITALL'):
+                    del socket.MSG_WAITALL
+                                        
             # Pyro 4 is by default a thread, should do select
             # (I hate threads!)
             # And of course the name changed since 4.5...
@@ -171,11 +178,6 @@ except AttributeError, exp:
             max_try = 35
             if PYRO_VERSION in old_versions:
                 Pyro.config.SERVERTYPE = "select"
-                # Hack for Pyro 4 first versions: with it, there is
-                # no more way to send huge packet!
-                # This hack fails with PYRO 4.14!!!
-                if hasattr(socket, 'MSG_WAITALL'):
-                    del socket.MSG_WAITALL
             elif PYRO_VERSION in bad_versions:
                 logger.error("Your pyro version (%s) is not supported. Please downgrade it (4.12)" % PYRO_VERSION)
                 exit(1)
