@@ -406,6 +406,10 @@ class LiveStatusLogStoreSqlite(BaseModule):
             return
         data = b.data
         line = data['log']
+        if re.match("^\[[0-9]*\] [A-Z][a-z]*.:", line):
+            # Match log which NOT have to be stored
+            # print "Unexpected in manage_log_brok", line
+            return 
         try:
             logline = Logline(line=line)
             values = logline.as_tuple()
