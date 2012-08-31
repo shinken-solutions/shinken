@@ -125,7 +125,7 @@ class Timeperiod(Item):
         self.plus = {}
         self.invalid_entries = []
         for key in params:
-            if key in ['name', 'alias', 'timeperiod_name', 'exclude', 'use', 'register', 'imported_from']:
+            if key in ['name', 'alias', 'timeperiod_name', 'exclude', 'use', 'register', 'imported_from', 'is_active', 'dateranges']:
                 setattr(self, key, params[key])
             else:
                 self.unresolved.append(key + ' ' + params[key])
