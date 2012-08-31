@@ -414,6 +414,7 @@ class SNMPService(object):
                                 value = el
                             rpn_list.append(value)
 
+                        print 'TRIGGER', rpn_list
                         error = rpn_calculator(rpn_list)
                         if error:
                             return error_code
@@ -553,10 +554,12 @@ class SNMPOid(object):
         self.perf = ""
 
     # Zabbix functions
+    # AMELIORER LES MESSAGES D ERREUR SUR LE CALCUL DU TRIGGER
     def diff(self):
         return self.raw_value == self.raw_old_value
 
     def prct(self):
+        print float(self.value) * 100 / float(self.max_)
         return float(self.value) * 100 / float(self.max_)
 
     def last(self):
@@ -603,7 +606,10 @@ class SNMPOid(object):
             if t_delta.seconds == 0:
                 logger.error("[SnmpBooster] Time delta is 0s. We can not get derive for this OID %s" % self.oid)
             else:
-                d_delta = float(raw_value) - float(self.raw_old_value)
+                if self.raw_value < self.raw_old_value:
+                    d_delta = float(raw_value)
+                else:
+                    d_delta = float(raw_value) - float(self.raw_old_value)
                 value = d_delta / t_delta.seconds
                 value = "%0.2f" % value
                 # Make calculation
@@ -799,7 +805,7 @@ class SNMPAsyncClient(object):
         self.limit_oids = []
         if not self.mapping_oids:
             # Prepare SNMP oid for limits
-            self.limit_oids = self.obj.get_oids_for_limits(self.check_interval, self.datasource)
+            self.limit_oids = list(set(self.obj.get_oids_for_limits(self.check_interval, self.datasource)))
             tmp_oids = list(set([oid[1:] for oid in self.limit_oids]))
             for oid in tmp_oids:
                 try:
