@@ -215,7 +215,6 @@ class Daemon(object):
             print('Stopping inter-process message (PYRO)')
         if self.pyro_daemon:
             pyro.shutdown(self.pyro_daemon)
-        logger.quit()
 
 
     def request_stop(self):
