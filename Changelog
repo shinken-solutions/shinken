@@ -7,11 +7,11 @@ Shinken ChangeLog
 	* Add : Skonf daemon, as a configuration UI over the discovery lib
 	* Add : Triggers to the scheduler. This code is launched after each "check"
 	* Add : issue #349 (from David Guenault) Installation script now has a backup repository for installing MK Multisite.
-	* Add : option to skip mongo installation. Usefull for poller installation that does not need mongo to be installed.
+	* Add : option to skip mongo installation. Useful for poller installation that does not need mongo to be installed.
 	* Add : daemon_enabled option for ini and nagios.cfg files to disable a daemon from running.
-	* Add : (by Hartmut Goebel and Xkillian) huge work to replace old log code by a logging based one, print to logger, adjust levels, messages, typos
+	* Add : (by Hartmut Goebel and xkilian) huge work to replace old log code by a logging based one, print to logger, adjust levels, messages, typos
 	* Add : (by Hartmut Goebel) huge code cleaning
-	* Add : install script available on the install.shinken-monitoring.org address.
+	* Add : install script available at the install.shinken-monitoring.org address.
 	* Add : make the daemon and the module names appears on the process line (setproctitle mode)
 	* Add : receiver can now send directly commands to schedulers. (direct_routing)
 	* Add : HOSTREALM macro for host/service.
@@ -34,15 +34,17 @@ Shinken ChangeLog
 	* Add : support to explode_hostgroup directive
 	* Add : new external command, PROCESS_SERVICE_OUTPUT and host, same than check_result for passive, but with no return code.
 	* Add : configurable logging level (per daemon)
+        * Add : shinken-admin can now change logging levels during runtime (Guillaume Bour)
 	* Add : now passive checks take their timestamp from the external command instead of the received time.
 	* Add : pre-serialize the configurations in the arbiter before going in daemon, and so kill the previous instance. (startup boost)
 	* Add : brok time part boost, with less useless objects sent, like contacts, timeperiods or commands. (big startup boost)
 	* Add : host pack dispatching history is saved in a pickle file, so we will be able to push same objects in the same scheduler
 	* Add : arbiter -p options for dumping profile
+        * Add : (thibault cohen) Added hook in Scheduler daemon to permit the use of the Shinken SNMP poller module, SnmpBooster.
 
 
 	CORE FIXES
-        * Fix: (from raphaeltr) Typo in mysql monitoring pack command arguments
+        * Fix : (from raphaeltr) Typo in mysql monitoring pack command arguments
 	* Fix : Fix minor installation issues on centos/redhat. Mainly on services activation and pnp
 	* Fix : escalation issue when we restart the scheduler during the escalation process. Should fix #525
 	* Fix : potential endless loop on bp_rule + parent relation ship, and problem/impact setting. Fix #198
@@ -87,30 +89,32 @@ Shinken ChangeLog
         * Add: (from: bclermont) Graphite broker add graphite_data_source variable between hostname and service name in data to Graphite
 	* Add : a read_only option to logstore_sqlite
 	* Add : Finalyse the time filter to avoid loading all the logs database in use_aggressive_sql=0 mode
-	* Add : Added more hints for the livestatus query metadata resulting in massive speedup for nagvis
+	* Add : Added more hints for the livestatus query metadata resulting in massive speedup for Nagvis, Multisite, Thruk
 	* Add : Creating new authentification module for OpenLDAP directory service
-	* Add : most modules do not raise Warning if the module need (like python-ldap for active directory, etc) but instead raise a real Exception
-	* Add : collectd template with trigger sample.
-	* Add : First working version of canopsis broker module
-	* Add : trying cjson import to improve LS output performance
+	* Add : Most modules do not raise Warning if the module need (like python-ldap for active directory, etc) but instead raise a real Exception
+	* Add : Collectd template with trigger sample.
+	* Add : First working version of Canopsis broker module
+	* Add : Use usjon optional import to improve LS output performance
 	* Add : NDO add table prefix as a parameter.
+        * Add : (Thibault Cohen) Livestatus will now only store STATE messages and no longer any general logs in logstores
+        * Add : (Nicolas Dupeux) TSCA module documentation updated and files consolidated in modules sections of the code
 
 	MODULE FIXES
 	* Fix : issue #450 (from vaxvms) removed thrift broker, similar to Livestatus, as it is unmaintained.
 	* Fix : MerlinDB for Ninja UI, removed documentation and marked as deprecated, as it is unmaintained.
 	* Fix : (from : Frédéric Pégé) make the sqlite db files put in a good default place, in devel mode or init.d mode.
 	* Fix : the program_start attribute in livestatus status table
-	* Fix : (reported by : Nicolas DUPEUX) remove a useless method in logstore_sqlite, and add a protection against end less loop. Fix #374
+	* Fix : (reported by : Nicolas Dupeux) remove a useless method in logstore_sqlite, and add a protection against endless loops. Fix #374
 	* Fix : Livestatus allowed_hosts options does not work
 	* Fix : Call the right function for !=~ LQL filter (livestatus)
-	* Fix : do not push back monitoring status in GLPI database when the host configuration do not come from GLPI
+	* Fix : do not push back monitoring status in GLPI database when the host configuration does not come from GLPI
 	* Fix : a bug in livestatus module and add the attribute host.event_handler (needed by Thruk)
 
 
 	UI ENHANCEMENTS
 	* Add : UI /detail full rewrite. Thanks Andreas!!
 	* Add : UI new dashboard!
-	* Add : (from Mael VINCENT, julien pilou, Gael Millet, Damien Mathieu and hugo viricel) new /mobile part!
+	* Add : (from Mael Vincent, julien pilou, Gael Millet, Damien Mathieu and hugo viricel) new /mobile part!
 	* Add : Enable easy activation of application monitoring performance feature. Use ./install --enableeue to enable eue feature
 	* Add : WebUI in a /problem page a user can now press the sift key and over the selection tick to select them. It make easier for massive selection
 	* Add : UI sqlite backend to save common preferences
@@ -122,7 +126,8 @@ Shinken ChangeLog
 	* Add : UI /problems filtering by ack state.
 
 	UI FIXES
-	* Fix : (reported by : Vincent Riquer) WEBUI do not print 1970 for 0 time, but N/A instead. issue fix #241
+	* Fix : (reported by : Vincent Riquer) WebUI do not print 1970 for 0 time, but N/A instead. issue fix #241
+        * Fix : (reported by : xkilian) WebUI would not display names containing dots.
 
 	DEFAULT PACKS
 	* Add : discovery packs for ibm storage management and beginning of clustering solutions discovery
