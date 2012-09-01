@@ -23,7 +23,7 @@
 #
 
 from shinken_test import *
-
+import shinken.log as logging
 
 class GoodArbiter(ArbiterLink):
 
@@ -299,6 +299,11 @@ class TestDispatcher(ShinkenTest):
         # the conf should not be in a good shape
         self.assert_(self.dispatcher.dispatch_ok == False)
 
+        # The messages below are issued with level `warning`. So
+        # ensure the log-level is high enough.
+        self.assertEqual(shinken.log.logger.getEffectiveLevel(),
+                         shinken.log.WARNING)
+
         # Now we really dispatch them!
         self.dispatcher.dispatch()
         self.assert_(self.any_log_match('Dispatch OK of conf in scheduler scheduler-all-1'))
@@ -489,12 +494,16 @@ class TestDispatcherMultiBroker(ShinkenTest):
         # the conf should not be in a good shape
         self.assert_(self.dispatcher.dispatch_ok == False)
 
+        # The messages below are issued with level `warning`. So
+        # ensure the log-level is high enough.
+        self.assertEqual(shinken.log.logger.getEffectiveLevel(),
+                         shinken.log.WARNING)
+
         # Now we really dispatch them!
         self.dispatcher.dispatch()
         self.assert_(self.any_log_match('Dispatch OK of conf in scheduler scheduler-all-1'))
         self.assert_(self.any_log_match('Dispatch OK of configuration 0 to reactionner reactionner-all-1'))
         self.assert_(self.any_log_match('Dispatch OK of configuration 0 to poller poller-all-1'))
-
         self.assert_(self.any_log_match('Dispatch OK of configuration 1 to broker broker-all-1'))
         self.assert_(self.any_log_match('Dispatch OK of configuration 0 to broker broker-all-2'))
         self.clear_logs()
