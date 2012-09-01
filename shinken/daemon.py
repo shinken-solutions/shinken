@@ -293,7 +293,6 @@ class Daemon(object):
             except:
                 pass
             self.http_daemon.shutdown()
-        logger.quit()
 
 
     def request_stop(self):
