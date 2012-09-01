@@ -23,6 +23,7 @@
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
+import time
 import logging
 from logging import Handler, Formatter, StreamHandler, getLevelName
 from logging import NOTSET, DEBUG, INFO, WARNING, ERROR, CRITICAL
@@ -126,4 +127,7 @@ console_logger.addHandler(sh)
 del sh
 
 def send_result(result, *args):
-    console_logger.info(result)
+    logger.debug(result)
+    msg = "[%d] %s\n" % (time.time(), result)
+    brok = Brok('log', {'log': msg})
+    _brokhandler_._broker.add(brok)
