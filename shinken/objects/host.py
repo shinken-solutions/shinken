@@ -418,7 +418,7 @@ class Host(SchedulingItem):
                 state = False
             if self.got_business_rule:
                 if not self.business_rule.is_valid():
-                    logger.info("%s: my business rule is invalid" % (self.get_name(),))
+                    logger.error("%s: my business rule is invalid" % (self.get_name(),))
                     for bperror in self.business_rule.configuration_errors:
                         logger.error("[host::%s] %s" % (self.get_name(), bperror))
                     state = False
