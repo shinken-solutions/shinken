@@ -51,7 +51,7 @@ class BrokHandler(Handler):
     """
 
     def __init__(self, broker, name=None):
-        # Only messages of levelINFO or higher are passed on to the
+        # Only messages of level INFO or higher are passed on to the
         # broker. If the Logger level is higher then INFO, the logger
         # already skips the entry.
         Handler.__init__(self, logging.INFO)
