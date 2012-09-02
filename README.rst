@@ -65,13 +65,14 @@ need the following Python packages.
 * `kombu`__ required by the Canopsis hypervisor and reporting module
 * `python-ldap`__ for active directory authentication (needed by Shinken WebUI ActiveDir_UI module)
 
-* Python 2.7 Required for developers to run the test suite, shinken/test/
+* `Python 2.7`__ is required for developers to run the test suite, shinken/test/
 
 __ http://pypi.python.org/pypi/simplejson/
 __ http://pypi.python.org/pypi/ujson/
 __ http://code.google.com/p/pysqlite/
 __ http://pypi.python.org/pypi/kombu/2.4.5
 __ http://pypi.python.org/pypi/python-ldap/
+__ http://www.python.org/download/
 
 Installing/Checking Common Requirements on Windows
 ==================================================
