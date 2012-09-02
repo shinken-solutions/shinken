@@ -32,7 +32,7 @@ requirement manually to confirm they are installed correctly.
 
 
 Mandatory Requirements
--------------------
+----------------------
 
 `shinken` requires
 
