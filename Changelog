@@ -1,6 +1,14 @@
 ########################
 Shinken ChangeLog
 #######################
+1.2.1 - 0x/09/2012
+------------------
+	DEFAULT PACKS
+	* Fix : check_mongodb invalid option -C Thanks jhurliman
+
+	MODULE FIXES
+	* Fix : graphite_broker typo in logger call (Reported by pushou)
+
 1.2 - 31/08/2012
 ------------------
 	CORE ENHANCEMENTS
