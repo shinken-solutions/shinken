@@ -32,16 +32,16 @@
       </ul>
 
       <ul class="nav">
-       %menu = [ ('/dashboard', 'Dashboard'), ('/impacts','Impacts'), ('/problems','IT problems'), ('/all', 'All'), ('/wall', 'Wall')]
-       %for (key, value) in menu:
-       %# Check for the selected element, if there is one
-       %if menu_part == key:
-       <li class="active"><a href="{{key}}">{{value}}</a></li>
-       %else:
-       <li><a href="{{key}}">{{value}}</a></li>
-       %end
-       %end
-     </ul>
+        %menu = [ ('/dashboard', 'Dashboard'), ('/impacts','Impacts'), ('/problems','IT problems'), ('/all', 'All'), ('/wall', 'Wall')]
+        %for (key, value) in menu:
+        %# Check for the selected element, if there is one
+        %if menu_part == key:
+        <li class="active"><a href="{{key}}">{{value}}</a></li>
+        %else:
+        <li><a href="{{key}}">{{value}}</a></li>
+        %end
+        %end
+      </ul>
 
      <ul class="nav">
       <li class="dropdown">
@@ -58,7 +58,6 @@
     <div class="nav-controll">
       <ul class="nav pull-right">
         <li class="divider-vertical"></li>
-
         %# Check for the selected element, if there is one
         %if menu_part == '/dashboard':
         <li><a href="/dashboard/currently"><i class="icon-itproblem"></i></a></li>
@@ -101,8 +100,13 @@
     <ul class="nav pull-right">
       <li class="divider-vertical"></li>
     </ul>
+<script>  
+$(function ()  
+{ $("#searchhelp").popover({trigger: 'focus', placement:'bottom'});  
+});  
+</script>  
     <form name='global_search' class="navbar-search pull-right" action='#'>
-      <input type="text" class="search-query typeahead" autocomplete="off" placeholder="Search" name="global_search">
+      <input type="text" class="search-query typeahead" autocomplete="off" placeholder="Search" name="global_search"> <a href="http://www.shinken-monitoring.org/wiki/start" target="_blank"> <i class="icon-question-sign icon-white topmmargin1"></i> </a>   
     </form>
     %end
   </div><!--/.nav-collapse -->
