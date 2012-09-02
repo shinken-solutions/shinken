@@ -131,7 +131,6 @@ class LogCollectMixin:
 
 class TestDefaultLoggingMethods(unittest.TestCase, LogCollectMixin):
 
-
     def test_basic_logging_debug_does_not_send_broks(self):
         logger = self._prepare_logging()
         logger.setLevel(logging.DEBUG)
@@ -185,27 +184,6 @@ class TestDefaultLoggingMethods(unittest.TestCase, LogCollectMixin):
         msgs, lines = self._put_log(logger.debug, 'Some log-message$')
         self.assertEqual(len(msgs), 0)
         self.assertEqual(len(lines), 0)
-
-    def test_human_timestamp_format(self):
-        "test output using the human timestamp format"
-        logger = self._prepare_logging()
-        logger.setLevel(logging.INFO)
-        logger.set_human_format(True)
-        msgs, lines = self._put_log(logger.info, 'Some ] log-message')
-        self.assertRegexpMatches(msgs[0],
-            r'^\[[^\]]+] INFO:\s+Some \] log-message\n$')
-        time.strptime(msgs[0].split(' INFO:', 1)[0], '[%a %b %d %H:%M:%S %Y]')
-        logger.set_human_format(False)
-
-    def test_reset_human_timestamp_format(self):
-        "test output after switching of the human timestamp format"
-        logger = self._prepare_logging()
-        # ensure the human timestamp format is set, ...
-        self.test_human_timestamp_format()
-        # ... then turn it off
-        logger.set_human_format(False)
-        # test whether the normal format is used again
-        self.test_basic_logging_info()
 
 
 class TestConsoleLogger(unittest.TestCase, LogCollectMixin):
@@ -283,27 +261,6 @@ class TestConsoleLogger(unittest.TestCase, LogCollectMixin):
         msgs, lines = self._put_log(console_logger.debug, 'Some log-message$')
         self.assertEqual(len(msgs), 0)
         self.assertEqual(len(lines), 0)
-
-    def test_human_timestamp_format(self):
-        "test output using the human timestamp format"
-        logger, console_logger = self._prepare_logging()
-        console_logger.setLevel(logging.INFO)
-        logger.set_human_format(True)
-        msgs, lines = self._put_log(console_logger.info, 'Some ] log-message')
-        self.assertRegexpMatches(msgs[0],
-            r'^\[.+?\] INFO:\s+Some \] log-message\n$')
-        time.strptime(msgs[0].split(' INFO:', 1)[0], '[%a %b %d %H:%M:%S %Y]')
-        logger.set_human_format(False)
-
-    def test_reset_human_timestamp_format(self):
-        "test output after switching of the human timestamp format"
-        logger, console_logger = self._prepare_logging()
-        # ensure the human timestamp format is set, ...
-        self.test_human_timestamp_format()
-        # ... then turn it off
-        logger.set_human_format(False)
-        # test whether the normal format is used again
-        self.test_basic_logging_info()
 
 
 class TestWithLocalLogging(unittest.TestCase, LogCollectMixin):
@@ -392,32 +349,6 @@ class TestWithLocalLogging(unittest.TestCase, LogCollectMixin):
         self.assertEqual(len(local_log), 0)
 
 
-    def test_human_timestamp_format(self):
-        logger = self._prepare_logging()
-        logger.setLevel(logging.INFO)
-        logger.set_human_format(True)
-        msgs, lines, local_log = self._put_log(logger.info, 'Some ] log-message')
-        self.assertEqual(len(local_log), 1)
-        self.assertRegexpMatches(local_log[0],
-            r'^\[[^\]]+] INFO:\s+Some \] log-message\n$')
-        # :fixme: Currently, the local log gets prefixed another
-        # timestamp. As it is yet unclear, whether this intended or
-        # not, we test it, too.
-        times = local_log[0].split(' INFO:', 1)[0]
-        time.strptime(times, '[%a %b %d %H:%M:%S %Y]')
-        logger.set_human_format(False)
-
-    def test_reset_human_timestamp_format(self):
-        "test output after switching of the human timestamp format"
-        logger = self._prepare_logging()
-        # ensure the human timestamp format is set, ...
-        self.test_human_timestamp_format()
-        # ... then turn it off
-        logger.set_human_format(False)
-        # test whether the normal format is used again
-        self.test_basic_logging_info()
-
-
 class TestNamedCollector(unittest.TestCase, LogCollectMixin):
 
     # :todo: add a test for the local log file, too
@@ -439,28 +370,6 @@ class TestNamedCollector(unittest.TestCase, LogCollectMixin):
         self.assertEqual(len(lines), 0)
         self.assertRegexpMatches(msgs[0],
              r'^\[\d+\] INFO:\s+\[Tiroler Schinken\] Some log-message\n$')
-
-    def test_human_timestamp_format(self):
-        logger = self._prepare_logging()
-        logger.setLevel(logging.INFO)
-        logger.set_human_format(True)
-        msgs, lines = self._put_log(logger.info, 'Some ] log-message')
-        self.assertRegexpMatches(msgs[0],
-            r'^\[[^\]]+] INFO:\s+\[Tiroler Schinken\] Some \] log-message\n$')
-        time.strptime(msgs[0].split(' INFO:', 1)[0], '[%a %b %d %H:%M:%S %Y]')
-        self.assertRegexpMatches(lines[0],
-            r'^\[[^\]]+] INFO:\s+\[Tiroler Schinken\] Some \] log-message$')
-        time.strptime(msgs[0].split(' INFO:', 1)[0], '[%a %b %d %H:%M:%S %Y]')
-        logger.set_human_format(False)
-
-    def test_reset_human_timestamp_format(self):
-        logger = self._prepare_logging()
-        # ensure human timestamp format is set and working
-        self.test_human_timestamp_format()
-        # turn of human timestamp format
-        logger.set_human_format(False)
-        # test for normal format
-        self.test_basic_logging_info()
 
 
 if __name__ == '__main__':

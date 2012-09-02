@@ -621,8 +621,6 @@ class Arbiter(Daemon):
             if arb.is_me():
                 self.me = arb
 
-        if self.conf.human_timestamp_log:
-            logger.set_human_format()
         logger.info("Begin to dispatch configurations to satellites")
         self.dispatcher = Dispatcher(self.conf, self.me)
         self.dispatcher.check_alive()

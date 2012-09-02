@@ -89,7 +89,7 @@ class TestConfig(unittest.TestCase, PropertiesTester):
         'free_child_process_memory', 'child_processes_fork_twice',
         'admin_email', 'admin_pager', 'event_broker_options',
         'debug_file', 'debug_level', 'debug_verbosity',
-        'max_debug_file_size']
+        'max_debug_file_size', 'human_timestamp_log']
 
     without_default = []
 
@@ -206,8 +206,6 @@ class TestConfig(unittest.TestCase, PropertiesTester):
         ('ca_cert', 'etc/certs/ca.pem'),
         ('server_cert', 'etc/certs/server.pem'),
         ('hard_ssl_name_check', '0'),
-
-        ('human_timestamp_log', '0'),
 
         # Discovery part
         ('strip_idname_fqdn', '1'),

@@ -38,8 +38,6 @@ _brokhandler_ = None
 brokFormatter = Formatter('[%(created)i] %(levelname)s: %(message)s')
 brokFormatter_named = Formatter('[%(created)i] %(levelname)s: [%(name)s] %(message)s')
 defaultFormatter = Formatter('[%(created)i] %(levelname)s: %(message)s')
-humanFormatter = Formatter('[%(asctime)s] %(levelname)s: %(message)s',
-                           '%a %b %d %H:%M:%S %Y')
 CONSOLE_FORMAT = '[%(asctime)s] %(levelname)s: %(message)s'
 
 
@@ -95,20 +93,6 @@ class Log(logging.Logger):
             handler.setLevel(level)
         handler.setFormatter(defaultFormatter)
         self.addHandler(handler)
-
-    def set_human_format(self, on=True):
-        """
-        Set the output as human format.
-
-        If the optional parameter `on` is False, the timestamp format
-        will be reset to the default format.
-        """
-        if on:
-            for handler in self.handlers:
-                handler.setFormatter(humanFormatter)
-        else:
-            for handler in self.handlers:
-                handler.setFormatter(defaultFormatter)
 
 
 #--- create the main logger ---

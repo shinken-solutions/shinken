@@ -574,10 +574,6 @@ class Hostd(Daemon):
 
     # Main function
     def run(self):
-        if self.conf.human_timestamp_log:
-            logger.set_human_format()
-
-        # Ok start to work :)
         self.check_photo_dir()
 
         self.request = request
