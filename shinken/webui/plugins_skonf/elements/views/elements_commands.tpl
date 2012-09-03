@@ -1,5 +1,5 @@
 
-%rebase layout_skonf globals(), css=['elements/css/hosts.css'], js=['elements/js/hosts.js']
+%rebase layout_skonf globals(), css=['elements/css/hosts.css'], js=['elements/js/hosts.js'], title='All commands'
 
 
 <div class='span2 pull-right'>

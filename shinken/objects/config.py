@@ -800,6 +800,12 @@ class Config(Item):
                 t0 = time.time()
                 r.serialized_confs[i] = cPickle.dumps(conf, cPickle.HIGHEST_PROTOCOL)
                 logger.debug("[config] time to serialize the conf %s:%s is %s" % (r.get_name(), i, time.time() - t0))
+        # Now pickle the whole conf, for easy and quick spare send
+        t0 = time.time()
+        whole_conf_pack = cPickle.dumps(self, cPickle.HIGHEST_PROTOCOL)
+        logger.debug("[config] time to serialize the global conf : %s" % (time.time() - t0))
+        self.whole_conf_pack = whole_conf_pack
+        
 
     def dump(self):
         print "Slots", Service.__slots__
@@ -1444,8 +1450,6 @@ class Config(Item):
         err = txt
         self.configuration_errors.append(err)
 
-        # Possible typo between those 2 variables?
-        self.is_correct = False
         self.conf_is_correct = False
 
     # Now it's time to show all configuration errors

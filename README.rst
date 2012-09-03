@@ -32,13 +32,16 @@ requirement manually to confirm they are installed correctly.
 
 
 Mandatory Requirements
--------------------
+----------------------
 
 `shinken` requires
 
-* `Python`__ 2.4 or higher (Python 2.6 or higher is recommended if you want to use the Web interface)
+* `Python`__ 2.4 or higher (Python 2.6 or higher is required if you want to use the Web interface)
 * `setuptools`__ or `distribute` Python package for installation (see below)
 * `pyro`__ Python package 3.x or 4.x (caveat: not 3.x for debian squeeze)
+* `pymongo`__ Python Package >= 2.1 for the Shinken WebUI
+* `pycurl`__ Python package for Shinken Skonf configuration pack management
+
 * `multiprocessing`__ Python package when using Python 2.4 or 2.5
   (`multiprocessing` is already included in Python 2.6 and higher)
 
@@ -46,8 +49,8 @@ __ http://www.python.org/download/
 __ http://pypi.python.org/pypi/setuptools/
 __ http://pypi.python.org/pypi/Pyro4
 __ http://pypi.python.org/pypi/multiprocessing/
-
-* python-devel Package
+__ http://pypi.python.org/pypi/pymongo/
+__ http://pycurl.sourceforge.net/
 
 
 Conditional Requirements
@@ -56,13 +59,20 @@ Conditional Requirements
 If you plan to use the `livestatus` module or the web interface, you will also
 need the following Python packages.
 
-* `simplejson`__
+* `simplejson`__ only if python 2.5 used
 * `ujson`__  (ujson is used in Livestatus for added speed)
 * `pysqlite`__
+* `kombu`__ required by the Canopsis hypervisor and reporting module
+* `python-ldap`__ for active directory authentication (needed by Shinken WebUI ActiveDir_UI module)
+
+* `Python `__ 2.7 is required for developers to run the test suite, shinken/test/
 
 __ http://pypi.python.org/pypi/simplejson/
 __ http://pypi.python.org/pypi/ujson/
 __ http://code.google.com/p/pysqlite/
+__ http://pypi.python.org/pypi/kombu/2.4.5
+__ http://pypi.python.org/pypi/python-ldap/
+__ http://www.python.org/download/
 
 Installing/Checking Common Requirements on Windows
 ==================================================

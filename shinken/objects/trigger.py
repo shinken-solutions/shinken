@@ -53,19 +53,13 @@ class Trigger(Item):
             return self.trigger_name
         except AttributeError:
             return 'UnnamedTrigger'
-#    def __init__(self, ref, code):
-#        self.ref = ref
-#        self.code = code.replace(r'\n', '\n').replace(r'\t', '\t')
 
     def compile(self):
-        logger.debug("[trigger::%s] compiling trigger" % self.get_name())
         self.code_bin = compile(self.code_src, "<irc>", "exec")
 
     # ctx is the object we are evaluating the code. In the code
     # it will be "self".
     def eval(myself, ctx):
-        logger.debug("[trigger::%s] running following code: %s" % \
-                     (myself.get_name(), myself.code_src))
         self = ctx
 
         # Ok we can declare for this trigger call our functions
@@ -97,7 +91,6 @@ class Triggers(Items):
                     try:
                         fd = open(p, 'rU')
                         buf = fd.read()
-                        logger.debug("[trigger] reading trigger: %s" % buf)
                         fd.close()
                     except IOError, exp:
                         logger.error("Cannot open trigger file '%s' for reading: %s" % (p, exp))
@@ -108,7 +101,6 @@ class Triggers(Items):
     # Create a trigger from the string src, and with the good name
     def create_trigger(self, src, name):
         # Ok, go compile the code
-        logger.debug("[trigger] creating a trigger named %s" % name)
         t = Trigger({'trigger_name': name, 'code_src': src})
         t.compile()
         # Ok, add it
@@ -120,7 +112,6 @@ class Triggers(Items):
             i.compile()
 
     def load_objects(self, conf):
-        logger.debug("[trigger] loading objects in the triggers")
         global objs
         objs['hosts'] = conf.hosts
         objs['services'] = conf.services

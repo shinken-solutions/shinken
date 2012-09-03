@@ -143,7 +143,7 @@ class Dispatcher:
             # If not me and I'm a master
             if arb != self.arbiter and self.arbiter and not self.arbiter.spare:
                 if not arb.have_conf(self.conf.magic_hash):
-                    arb.put_conf(self.conf)
+                    arb.put_conf(self.conf.whole_conf_pack)
                 else:
                     # Ok, it already has the conf. I remember that
                     # it does not have to run, I'm still alive!
@@ -527,7 +527,7 @@ class Dispatcher:
                                         #If receiver, we must send the hostnames of this configuration
                                         if kind == 'receiver':
                                             hnames = [h.get_name() for h in cfg.hosts]
-                                            logger.debug("[%s] Sending hostnames %s to the receiver %s" % (r.get_name(), hnames, satellite.get_name()))
+                                            logger.debug("[%s] Sending %s hostnames to the receiver %s" % (r.get_name(), len(hnames), satellite.get_name()))
                                             satellite.push_host_names(cfg_id, hnames)
                             # else:
                             #    #I've got enough satellite, the next ones are considered spares

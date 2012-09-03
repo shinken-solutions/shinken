@@ -2055,7 +2055,9 @@ function do_skmacro(){
     export PYTHONPATH="$TARGET"
     export SHINKEN="$PYTHONPATH"
     export SKTOOLS="$PYTHONPATH/install.d/tools"
+
     $PY $SKTOOLS/skonf.py -a macros -f $SKTOOLS/macros/$macro -d $args  >> ${LOGFILE} 2>&1
+
 
 }
 
@@ -2172,9 +2174,21 @@ function install_cucumber(){
         fi
     done
 
-   
- 
+    cecho " --> Alter max_ouput_length for webui" green
+    do_skmacro set_webui_ouptput_length.macro 200 
+  
+    cecho " --> Deploy example eue service" green
+    IP=$(ifconfig  | grep adr | awk -F: '{print $2}' | awk '{print $1}' | head -n 1)
+    cp $TARGET/etc/sample/services/eue_glpi.cfg $TARGET/etc/services/
+    cp $TARGET/libexec/eue/glpi.ini.in $TARGET/libexec/eue/glpi.ini
+    sed -i "s/@@IPWEBUI@@/"$IP"/g" $TARGET/libexec/eue/glpi.ini
+
+    cecho " --> restart shinken" green
+    /etc/init.d/shinken restart
 }
+
+
+
 
 # CAPTURE_PLUGIN
 function install_capture_plugin(){
@@ -3081,6 +3095,7 @@ echo "Usage: install -k | -i | -u [addonname] | -b | -r backupname | -l | -c | -
                                 broker
                                 reactionner
                                 receiver
+                                skonf
     -p | --plugin           Install plugins. Argument should be one of the following:
                                check_esx3
                                nagios-plugins

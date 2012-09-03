@@ -243,31 +243,6 @@ class Skonf(Daemon):
             if f and callable(f):
                 f(self)
 
-        """        # Call modules that manage this read configuration pass
-        self.hook_point('read_configuration')
-
-        # Now we ask for configuration modules if they
-        # got items for us
-        for inst in self.modules_manager.instances:
-            if 'configuration' in inst.phases:
-                try:
-                    r = inst.get_objects()
-                except Exception, exp:
-                    print "The instance %s raise an exception %s. I bypass it" % (inst.get_name(), str(exp))
-                    continue
-
-                types_creations = self.conf.types_creations
-                for k in types_creations:
-                    (cls, clss, prop) = types_creations[k]
-                    if prop in r:
-                        for x in r[prop]:
-                            # test if raw_objects[k] is already set - if not, add empty array
-                            if not k in raw_objects:
-                                raw_objects[k] = []
-                            # now append the object
-                            raw_objects[k].append(x)
-                        print "Added %i objects to %s from module %s" % (len(r[prop]), k, inst.get_name())
-        """
 
         ### Resume standard operations ###
         self.conf.create_objects(raw_objects)
@@ -327,49 +302,8 @@ class Skonf(Daemon):
         #self.conf.pythonize()
         super(Config, self.conf).pythonize()
 
-        # Linkify objects each others
-        #self.conf.linkify()
-
-        # applying dependencies
-        #self.conf.apply_dependencies()
-
-        # Hacking some global parameter inherited from Nagios to create
-        # on the fly some Broker modules like for status.dat parameters
-        # or nagios.log one if there are no already available
-        #self.conf.hack_old_nagios_parameters()
-
-        # Raise warning about curently unmanaged parameters
-        #if self.verify_only:
-        #    self.conf.warn_about_unmanaged_parameters()
-
-        # Exlode global conf parameters into Classes
-        #self.conf.explode_global_conf()
-
-        # set ourown timezone and propagate it to other satellites
-        #self.conf.propagate_timezone_option()
-
-        # Look for business rules, and create the dep tree
-        #self.conf.create_business_rules()
-        # And link them
-        #self.conf.create_business_rules_dependencies()
-
-        # Warn about useless parameters in Shinken
-        #if self.verify_only:
-        #    self.conf.notice_about_useless_parameters()
-
         # Manage all post-conf modules
         self.hook_point('late_configuration')
-
-        # Correct conf?
-        #self.conf.is_correct()
-
-        #If the conf is not correct, we must get out now
-        #if not self.conf.conf_is_correct:
-        #    sys.exit("Configuration is incorrect, sorry, I bail out")
-
-        # REF: doc/shinken-conf-dispatching.png (2)
-        #logger.info("Cutting the hosts and services into parts")
-        #self.confs = self.conf.cut_into_parts()
 
         # The conf can be incorrect here if the cut into parts see errors like
         # a realm with hosts and not schedulers for it
@@ -404,6 +338,7 @@ class Skonf(Daemon):
         self.user = self.conf.shinken_user
         self.group = self.conf.shinken_group
         self.daemon_enabled = self.conf.daemon_enabled
+        self.discovery_backend_module = self.conf.discovery_backend_module
 
         # If the user set a workdir, let use it. If not, use the
         # pidfile directory
@@ -422,22 +357,24 @@ class Skonf(Daemon):
         logger.info("Configuration Loaded")
         print ""
 
+
     def load_web_configuration(self):
         self.plugins = []
 
-        self.http_port = 7766  # int(getattr(modconf, 'port', '7767'))
-        self.http_host = '0.0.0.0'  # getattr(modconf, 'host', '0.0.0.0')
-        self.auth_secret = 'CHANGE_ME'.encode('utf8', 'replace')  # getattr(modconf, 'auth_secret').encode('utf8', 'replace')
-        self.http_backend = 'auto'  # getattr(modconf, 'http_backend', 'auto')
+        self.http_port = int(getattr(self.conf, 'http_port', '7766'))
+        self.http_host = getattr(self.conf,'http_host', '0.0.0.0')
+        self.auth_secret = getattr(self.conf, 'auth_secret', 'CHANGE_ME').encode('utf8', 'replace')
+        self.http_backend = getattr(self.conf, 'http_backend', 'auto')
         self.login_text = None  # getattr(modconf, 'login_text', None)
         self.allow_html_output = False  # to_bool(getattr(modconf, 'allow_html_output', '0'))
-        self.remote_user_enable = '0'  # getattr(modconf, 'remote_user_enable', '0')
-        self.remote_user_variable = 'X_REMOTE_USER'  # getattr(modconf, 'remote_user_variable', 'X_REMOTE_USER')
+        self.remote_user_enable = getattr(self.conf, 'remote_user_enable', '0')
+        self.remote_user_variable = getattr(self.conf, 'remote_user_variable', 'X_REMOTE_USER')
 
         # Load the photo dir and make it a absolute path
         self.photo_dir = 'photos'  # getattr(modconf, 'photo_dir', 'photos')
         self.photo_dir = os.path.abspath(self.photo_dir)
         print "Webui: using the backend", self.http_backend
+
 
     # We check if the photo directory exists. If not, try to create it
     def check_photo_dir(self):
@@ -454,7 +391,7 @@ class Skonf(Daemon):
         try:
             # Log will be broks
             for line in self.get_header():
-                self.log.info(line)
+                logger.info(line)
 
             self.load_config_file()
 
@@ -621,17 +558,33 @@ class Skonf(Daemon):
         self.init_datamanager()
 
         # Launch the data thread"
-        self.workersmanager_thread = threading.Thread(None, self.workersmanager, 'httpthread')
-        self.workersmanager_thread.start()
+        #self.workersmanager_thread = threading.Thread(None, self.workersmanager, 'httpthread')
+        #self.workersmanager_thread.start()
         # TODO: look for alive and killing
 
         print "Starting SkonfUI app"
         srv = run(host=self.http_host, port=self.http_port, server=self.http_backend)
 
+
     def workersmanager(self):
         while True:
             print "Workers manager thread"
             time.sleep(1)
+
+
+    # We are stopping the daemon. So stop sub workers, and exit
+    def do_stop(self):
+        logger.info("[%s] Stopping all workers" % (self.name))
+        for w in self.workers.values():
+            try:
+                w.terminate()
+                w.join(timeout=1)
+            # A already dead worker or in a worker
+            except (AttributeError, AssertionError):
+                pass
+        # Call the generic daemon part
+        super(Skonf, self).do_stop()
+
 
     # Here we will load all plugins (pages) under the webui/plugins
     # directory. Each one can have a page, views and htdocs dir that we must
@@ -881,6 +834,7 @@ class Skonf(Daemon):
         w = SkonfUIWorker(1, self.workers_queue, self.returns_queue, 1, mortal=False, max_plugins_output_length=1, target=None)
         w.module_name = 'skonfuiworker'
         w.add_database_data('localhost')
+        w.add_discovery_backend_module(self.discovery_backend_module)
         w.discovery_cfg = self.discovery_cfg
 
         # save this worker

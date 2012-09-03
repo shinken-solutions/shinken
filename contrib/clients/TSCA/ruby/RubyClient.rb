@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-$:.push('../../../../thrift/gen-rb')
+$:.push('gen-rb')
 $:.unshift '../../../lib/rb/lib'
 
 require 'csv'

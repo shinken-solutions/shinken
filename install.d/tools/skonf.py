@@ -690,7 +690,6 @@ def control(authfile, action):
 def writeconfig(config, configfile):
     bck = "%s.%d" % (configfile, time.time())
     os.rename(configfile, bck)
-
     fd = open(configfile, 'w')
     objects = ["arbiter", "poller", "scheduler", "broker", "reactionner", "receiver", "module", "realm"]
     for (t, s) in config.items():
