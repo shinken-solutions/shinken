@@ -65,7 +65,7 @@ need the following Python packages.
 * `kombu`__ required by the Canopsis hypervisor and reporting module
 * `python-ldap`__ for active directory authentication (needed by Shinken WebUI ActiveDir_UI module)
 
-* `Python `__ 2.7 is required for developers to run the test suite, shinken/test/
+* `Python`__ 2.7 is required for developers to run the test suite, shinken/test/
 
 __ http://pypi.python.org/pypi/simplejson/
 __ http://pypi.python.org/pypi/ujson/
@@ -132,7 +132,7 @@ __ http://www.shinken-monitoring.org/download/
 See the install.d/README file for further information on installing plugins and web frontends.
 
 Typical minimum installation using check scripts defined in Shinken, Shinken WebUI and PNP4Nagios for metrics.
-ie. ./install -i && ./install -p nagios-plugins && ./install -p check_mem && ./install -p manubulon && ./install -p pnp4nagios
+ie. ./install -i && ./install -p nagios-plugins && ./install -p check_mem && ./install -p manubulon && ./install -a pnp4nagios
 
 Update
 ------
