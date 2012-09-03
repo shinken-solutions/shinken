@@ -548,7 +548,7 @@ class Service(SchedulingItem):
                     logger.warning(err)
                     host.configuration_errors.append(err)
                 elif errcode == GET_KEY_VALUE_SEQUENCE_ERROR_NODE:
-                    err = "The custom property '%s 'of the host '%s' has an invalid node range %s" % (self.duplicate_foreach.strip(), host.get_name(), entry, self.service_description)
+                    err = "The custom property '%s 'of the host '%s' has an invalid node range %s" % (self.duplicate_foreach.strip(), host.get_name(), entry)
                     logger.warning(err)
                     host.configuration_errors.append(err)
         return duplicates

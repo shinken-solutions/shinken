@@ -180,7 +180,7 @@ class Graphite_broker(BaseModule):
                     lines.append("%s.%s %s %d" % (path, metric,
                                                   value, check_time))
             packet = '\n'.join(lines) + '\n'  # Be sure we put \n every where
-            logger.debug("[Graphite broker] Launching: %s", packet)
+            logger.debug("[Graphite broker] Launching: %s" % packet)
             self.con.sendall(packet)
 
     # A host check result brok has just arrived, we UPDATE data info with this

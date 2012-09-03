@@ -9,7 +9,7 @@ library to the classic python way (in site-package).
 === Requirements ===
 You will need Python >=2.4 (for 2.4 and 2.5 you will need the multiprocessing package from http://pypi.python.org/pypi/multiprocessing/ too)
 
-You will need the pyro lib too. It must already have a package. If not, take if from pypi (easy_install)
+You will need the pyro lib too. It must already have a package. If not, take it from pypi (easy_install)
 
 
 

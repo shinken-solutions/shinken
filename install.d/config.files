@@ -28,3 +28,7 @@ shinken-specific-windows.cfg
 shinken-specific-windows.cfg.orig
 templates.cfg
 timeperiods.cfg
+skonf.cfg
+discovery.cfg
+discovery_rules.cfg
+discovery_runs.cfg

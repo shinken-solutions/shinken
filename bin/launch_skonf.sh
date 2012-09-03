@@ -23,16 +23,12 @@
 
 
 DIR="$(cd $(dirname "$0"); pwd)"
-echo "Going to dir $DIR"
+BIN="$DIR"/../bin
+ETC="$DIR"/../etc
 
-cd "$DIR"/..
+# Need to change directory to .../var because skonf doesn't have a
+# default 'workdir' "properties" attribute:.
+cd "$DIR/../var"
 
-export LANG=us_US.UTF-8
-
-"$DIR"/launch_skonf.sh
-"$DIR"/launch_scheduler.sh
-"$DIR"/launch_poller.sh
-"$DIR"/launch_reactionner.sh
-"$DIR"/launch_broker.sh
-"$DIR"/launch_receiver.sh
-"$DIR"/launch_arbiter.sh
+echo "Launching Skonf (Web interface to discover and configure hosts and services)"
+"$BIN"/shinken-skonf -d -c "$ETC"/skonf.cfg

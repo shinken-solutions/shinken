@@ -80,9 +80,9 @@ class Named_Pipe_arbiter(BaseModule):
                 except OSError, exp:
                     logger.error("Error: pipe creation failed ( %s ) %s %s" % (self.pipe_path, exp, os.getcwd()))
                     return None
-        logger.error("[%s] Trying to open the named pipe '%s'" % (self.get_name(), self.pipe_path))
+        logger.info("[%s] Trying to open the named pipe '%s'" % (self.get_name(), self.pipe_path))
         self.fifo = os.open(self.pipe_path, os.O_NONBLOCK)
-        logger.error("[%s] The named pipe '%s' is open" % (self.get_name(), self.pipe_path))
+        logger.info("[%s] The named pipe '%s' is open" % (self.get_name(), self.pipe_path))
         return self.fifo
 
     def get(self):

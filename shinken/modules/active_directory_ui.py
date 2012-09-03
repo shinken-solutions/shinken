@@ -153,6 +153,8 @@ class AD_Webui(BaseModule):
 
                 if result_type == ldap.RES_SEARCH_ENTRY:
                     (_, elts) = result_data[0]
+                    if self.mode =='openldap':
+                        elts['dn'] = str(result_data[0][0])
                     try:
                         account_name = elts[self.name_id][0]
                     except Exception:

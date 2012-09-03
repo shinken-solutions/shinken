@@ -477,10 +477,12 @@ class Daemon(object):
         self.check_parallel_run()
         if use_pyro:
             self.setup_pyro_daemon()
+
         # Setting log level
-        #logger.error("Current logging level is %d :  and configuration log level is : %d" % (logger.get_level(), self.log_level))
         logger.set_level(self.log_level)
-        #logger.error("Logging level is now %d : " % (logger.get_level()))
+        # Force the debug level if the daemon is said to start with such level
+        if self.debug:
+            logger.set_level('DEBUG')
         
         # Then start to log all in the local file if asked so
         self.register_local_log()
@@ -621,6 +623,15 @@ class Daemon(object):
         if uid is None or gid is None:
             logger.error("uid or gid is none. Exiting")
             sys.exit(2)
+            
+        # Maybe the os module got the initgroups function. If so, try to call it.
+        # Do this when we are still root
+        if hasattr(os, 'initgroups'):
+            logger.info('Trying to initialize additonnal groups for the daemon')
+            try:
+                os.initgroups(self.user, gid)
+            except OSError, e:
+                logger.warning('Cannot call the additonnal groups setting with initgroups (%s)' % e.strerror)
         try:
             # First group, then user :)
             os.setregid(gid, gid)

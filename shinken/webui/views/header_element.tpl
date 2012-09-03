@@ -48,7 +48,7 @@
         <a href="#" class="dropdown-toggle" data-toggle="dropdown"> System <b class="caret"></b></a>
         <ul class="dropdown-menu">
           <li><a href="/system">Shinken state</a></li>
-          <li><a href="/system/log">System logs</a></li>
+          <!-- Comment until the page is done <li><a href="/system/log">System logs</a></li> -->
         </ul>
       </li>
     </ul>
