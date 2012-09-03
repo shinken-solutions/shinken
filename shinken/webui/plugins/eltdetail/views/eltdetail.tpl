@@ -77,10 +77,23 @@ $(document).ready(function(){
   <div id="content_container" class="span12">
   	<h1 class="span6 no-leftmargin state_{{elt.state.lower()}} icon_down"> <img class="imgsize3" alt="icon state" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h1> 
   	%if elt.action_url != '':
-  	<td><a href="{{elt.action_url}}" target=_blank><img src=/static/eltdetail/images/gear.png></a></td>
-  	%end
-<!-- Gear.png can be find here : http://cdn1.iconfinder.com/data/icons/nuove/128x128/actions/gear.png --!>
+    	%action_urls = elt.action_url.split('|')
+		%if len(action_urls) > 0:
+			%for triplet in action_urls:
+				%if len(triplet.split(',')) == 3:
+					%( action_url, icon, alt) = triplet.split(',')
+					<a href="{{action_url}}" target=_blank><img src={{icon}} alt="{{alt}}"></a>
+				%else:
+					%if len(triplet.split(',')) == 1:
+						<a href="{{triplet}}" target=_blank><img src=/static/eltdetail/images/gear.png alt="Gear.png mising"></a>
+        <!-- Gear.png can be find here : http://cdn1.iconfinder.com/data/icons/nuove/128x128/actions/gear.png --!>
 	<!-- and resized -->
+					%end
+				%end
+			%end
+		%end
+  	%end
+
 
 	<div class="span6">
 		<span class='pull-right' id='host_tags'>
