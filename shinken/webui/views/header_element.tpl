@@ -100,13 +100,14 @@
     <ul class="nav pull-right">
       <li class="divider-vertical"></li>
     </ul>
-<script>  
-$(function ()  
-{ $("#searchhelp").popover({trigger: 'focus', placement:'bottom'});  
-});  
-</script>  
+    <script>  
+      $(function ()  
+      { $("#searchhelp").popover({trigger: 'click', placement:'bottom'});  
+      });  
+    </script>  
     <form name='global_search' class="navbar-search pull-right" action='#'>
-      <input type="text" class="search-query typeahead" autocomplete="off" placeholder="Search" name="global_search"> <a href="http://www.shinken-monitoring.org/wiki/start" target="_blank"> <i class="icon-question-sign icon-white topmmargin1"></i> </a>   
+      <input type="text" class="search-query typeahead" autocomplete="off" placeholder="Search" name="global_search">
+      <a id="searchhelp" class="" data-content="And here's some amazing content. It's very engaging. right?" rel="popover" href="#" data-original-title="A Title"><i class="icon-question-sign icon-white"></i></a>  
     </form>
     %end
   </div><!--/.nav-collapse -->
