@@ -39,9 +39,7 @@
     <link href="/static/css/custom/deptree.css" rel="stylesheet">
     <link href="/static/css/custom/buttons.css" rel="stylesheet">
     <link href="/static/css/elements/jquery.pageslide.css" rel="stylesheet">
-    <!-- css3 effect for pulse is not available on IE
-	 It's not real comment, if so it will not work.
-      -->
+    <!-- css3 effect for pulse is not available on IE It's not real comment, if so it will not work. -->
 
     <!--[IF !IE]> -->
     <link href="/static/css/elements/pulse.css" rel="stylesheet">
@@ -65,7 +63,6 @@
       }
     </style>
 
-
     <!-- Le javascript
     ================================================== -->
     <!-- WAS Placed at the end of the document so the pages load faster -->
@@ -75,15 +72,6 @@
     <script src="/static/js/jquery-ui-1.8.17.custom.min.js"></script>
     <script src="/static/js/shinkenui.js"></script>
     <script src="/static/js/bootstrap.js"></script>
-   <!-- <script src="/static/js/bootstrap-collapse.js"></script>
-    <script src="/static/js/bootstrap-tab.js"></script>
-    <script src="/static/js/bootstrap-button.js"></script>
-    <script src="/static/js/bootstrap-dropdown.js"></script>
-    <script src="/static/js/bootstrap-tooltip.js"></script>
-    <script src="/static/js/bootstrap-modal.js"></script>
-    <script src="/static/js/bootstrap-popover.js"></script>
-    <script src="/static/js/bootstrap-transition.js"></script> -->
-
     <script src="/static/js/jquery.pageslide.js"></script>
     <!-- Warnign, this version of datepicker came from http://dl.dropbox.com/u/143355/datepicker/datepicker.html -->
     <script src="/static/js/bootstrap-datepicker.js"></script>
@@ -110,7 +98,7 @@
 
   </head>
 
-<body>
+  <body>
 	%if print_header:
 		%include header_element globals()
 	%end

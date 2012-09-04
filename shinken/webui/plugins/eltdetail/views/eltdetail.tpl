@@ -45,7 +45,6 @@ $(document).ready(function(){
     }
 });
 
-
 /* Look at the # part of the URI. If it match a nav name, go for it*/
 $(document).ready(function(){
 	if (window.location.hash.length > 0) {
@@ -99,7 +98,6 @@ $(document).ready(function(){
 			%end
 	  	%end
 	</div>
-
 
 	<div class="span12 no-leftmargin box">	   
 		<table class="span4 no-leftmargin">
@@ -293,7 +291,6 @@ $(document).ready(function(){
 							<td class="column1"><b>Next Active Check:</b></td>
 							<td><span class="quickinfo" data-original-title='Next active check at {{time.asctime(time.localtime(elt.next_chk))}}'>{{helper.print_duration(elt.next_chk)}}</span></td>
 						</tr>
-
 					</table>
 				</div>
 
