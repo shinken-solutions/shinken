@@ -226,7 +226,7 @@ $(document).ready(function(){
 		);
 	}); 
 	</script>
-
+<!--
 	<div class="span12 row-fluid hide">
 		<div class="span5 well">
 			<div class="btn-toolbar">
@@ -259,7 +259,7 @@ $(document).ready(function(){
 			</div>
 		</div>
 	</div>
-
+-->
 	<!-- Le Anfang -->
 	<div class="span12">
 		<!-- Start Host/Services-->
@@ -279,6 +279,20 @@ $(document).ready(function(){
 					<h3>Service Information:</h3>
 					%end:
 
+					<script type="text/javascript">
+					$().ready(function() {
+						$('.truncate').jTruncate({
+							length: 85,
+							minTrail: 0,
+							moreText: "[see all]",
+							lessText: "[hide extra]",
+							ellipsisText: " (truncated)",
+							moreAni: "fast",
+							lessAni: 2000
+						});
+					});
+					</script>
+
 					<table class="table">
 						<tr>
 							<td class="column1"><b>Status:</b></td>
@@ -294,7 +308,7 @@ $(document).ready(function(){
 						</tr>
 					</table>
 					<hr>
-					<div> <b><i>{{elt.output}}</i></b> </div>
+					<div class="truncate"> <b><i>{{elt.output}}</i></b> </div>
 					<hr>
 					<table class="table">
 						<tr>
@@ -318,30 +332,45 @@ $(document).ready(function(){
 				</div>
 
 				<div class="tab-pane fade" id="additonal">
+					<script type="text/javascript">
+					$().ready(function() {
+						$('.truncate_perf').jTruncate({
+							length: 50,
+							minTrail: 0,
+							moreText: "[see all]",
+							lessText: "[hide extra]",
+							ellipsisText: " <b>(truncated)</b>",
+							moreAni: "fast",
+							lessAni: 2000
+						});
+					});
+					</script>
+
 					<h3>Additonal Informations</h3>
-					<table class="table">
-						<tr>
+					<table class="table tabletop">
+						<tbody class="tabletop">
+						<tr class="tabletop">
 							<td class="column1"><b>Performance Data</b></td>
 							%# "If there any perf data?"
 							%if len(elt.perf_data) > 0:
-							<td>{{elt.perf_data}}</td>
+							<td class="column2 truncate_perf">{{elt.perf_data}}</td>
 							%else:
-							<td>&nbsp;</td>
+							<td class="column2 truncate_perf">&nbsp;</td>
 							%end
 						</tr>
 						<tr>			
 							<td class="column1"><b>Check Latency / Duration</b></td>
 							<td>{{'%.2f' % elt.latency}} / {{'%.2f' % elt.execution_time}} seconds</td>
 						</tr>
-
 						<tr>			
 							<td class="column1"><b>Last Notification</b></td>
-							<td>{{helper.print_date(elt.last_notification)}} (notification {{elt.current_notification_number}})</td>
+							<td class="column2">{{helper.print_date(elt.last_notification)}} (notification {{elt.current_notification_number}})</td>
 						</tr>
 						<tr>
 							<td class="column1"><b>Current Attempt</b></td>
-							<td>{{elt.attempt}}/{{elt.max_check_attempts}} ({{elt.state_type}} state)</td>
+							<td class="column2">{{elt.attempt}}/{{elt.max_check_attempts}} ({{elt.state_type}} state)</td>
 						</tr>
+						</tbody>
 					</table>
 					<hr>
 					<table class="table">
@@ -390,7 +419,7 @@ $(document).ready(function(){
 
 				<div class="tab-pane fade" id="gesture">
 					<h3>Gesture</h3>
-					<canvas id="canvas" width="350%" height="200" class="grid_10" style="border: 1px solid black;"></canvas>
+					<canvas id="canvas" width="100" height="200" class="grid_10" style="border: 1px solid black;"></canvas>
 					<div class="gesture_button">
 						<img title="By keeping a left click pressed and drawing a check, you will launch an acknowledgement." alt="gesture acknowledge" src="/static/eltdetail/images/gesture-check.png"/> Acknowledge
 					</div>

@@ -74,14 +74,15 @@
     <script src="/static/js/jquery.js"></script>
     <script src="/static/js/jquery-ui-1.8.17.custom.min.js"></script>
     <script src="/static/js/shinkenui.js"></script>
-    <script src="/static/js/bootstrap-collapse.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+   <!-- <script src="/static/js/bootstrap-collapse.js"></script>
     <script src="/static/js/bootstrap-tab.js"></script>
     <script src="/static/js/bootstrap-button.js"></script>
     <script src="/static/js/bootstrap-dropdown.js"></script>
     <script src="/static/js/bootstrap-tooltip.js"></script>
     <script src="/static/js/bootstrap-modal.js"></script>
     <script src="/static/js/bootstrap-popover.js"></script>
-    <script src="/static/js/bootstrap-transition.js"></script>
+    <script src="/static/js/bootstrap-transition.js"></script> -->
 
     <script src="/static/js/jquery.pageslide.js"></script>
     <!-- Warnign, this version of datepicker came from http://dl.dropbox.com/u/143355/datepicker/datepicker.html -->

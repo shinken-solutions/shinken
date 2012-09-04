@@ -135,6 +135,12 @@
   border-color: rgba(0, 0, 0, 0.15);
 }
 
+.wrap {
+  width: 100% !important;
+  max-width: 100% !important;
+  word-wrap: break-word;
+}
+
 /*  Alert styles => BTN Color
     ------------------------------------------------------- */
 .alert {
