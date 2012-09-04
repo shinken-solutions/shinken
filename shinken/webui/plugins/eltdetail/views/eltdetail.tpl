@@ -193,7 +193,6 @@ $(document).ready(function(){
 	%flp_state = 'unchecked=""'
 	%end
 
-
 	<script type="text/javascript">
 	$(document).ready(function() {
 		$('#btn-checks').iphoneStyle({
@@ -226,40 +225,7 @@ $(document).ready(function(){
 		);
 	}); 
 	</script>
-<!--
-	<div class="span12 row-fluid hide">
-		<div class="span5 well">
-			<div class="btn-toolbar">
-				<div class="btn-group ">
-					<a id='btn_show_gesture' href="#" onclick="$('#gesture_panel').toggle();" class='btn' title="Show gesture panel"> <i class="icon-ok"></i> Show gesture panel</a>
-					
-				</div>
 
-				<div class="btn-group">
-					<a class="btn dropdown-toggle" data-toggle="dropdown" href="#"><span class="pull-left"><i class="icon-cog"></i> {{elt_type.capitalize()}} commands</span> <span class="caret pull-right"></span></a>
-					<ul class="dropdown-menu no-maxwidth">
-						%disabled_s = ''
-						%if not elt.event_handler:
-						%disabled_s = 'disabled-link'
-						%end
-						<li><a class='{{disabled_s}} {{global_disabled}}' href="javascript:try_to_fix('{{elt.get_full_name()}}')"><i class="icon-pencil"></i> Try to fix it!</a></li>
-						%disabled_s = ''
-						%if elt.problem_has_been_acknowledged:
-						%disabled_s = 'disabled-link'
-						%end
-						<li><a class='{{disabled_s}} {{global_disabled}}' href="/forms/acknowledge/{{helper.get_uri_name(elt)}}" data-toggle="modal" data-target="#modal"><i class="icon-ok"></i> Acknowledge it!</a></li>
-						<li><a class='{{global_disabled}}' href="javascript:recheck_now('{{elt.get_full_name()}}')"><i class="icon-repeat"></i> Recheck now</a></li>
-						<li><a class='{{global_disabled}}' href="/forms/submit_check/{{helper.get_uri_name(elt)}}" data-toggle="modal" data-target="#modal"><i class="icon-share-alt"></i> Submit Check Result</a></li>
-						<li><a class='disabled-link {{global_disabled}}' href="#"><i class="icon-comment"></i> Send Custom Notification</a></li>
-						<li><a class='{{global_disabled}}' href="/forms/downtime/{{helper.get_uri_name(elt)}}" data-toggle="modal" data-target="#modal"><i class="icon-fire"></i> Schedule Downtime</a></li>
-						<li class="divider"></li>
-						<li><a class='disabled-link' href="#"><i class="icon-edit"></i> Edit {{elt_type.capitalize()}}</a></li>
-					</ul>
-				</div>
-			</div>
-		</div>
-	</div>
--->
 	<!-- Le Anfang -->
 	<div class="span12">
 		<!-- Start Host/Services-->
