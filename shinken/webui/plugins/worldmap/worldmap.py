@@ -1,7 +1,5 @@
 #!/usr/bin/python
-
 # -*- coding: utf-8 -*-
-
 # Copyright (C) 2009-2012:
 #    Gabes Jean, naparuba@gmail.com
 #    Gerhard Lausser, Gerhard.Lausser@consol.de
@@ -29,17 +27,42 @@ from shinken.webui.bottle import redirect
 app = None
 
 
-# Our page. If the useer call /dummy/TOTO arg1 will be TOTO.
-# if it's /dummy/, it will be 'nothing'
+# Our page. If the user call /worldmap
 def get_page():
     # First we look for the user sid
     # so we bail out if it's a false one
     user = app.get_user_auth()
-
     if not user:
         redirect("/user/login")
         return
 
-    return {'app': app, 'user': user}
+    # We are looking for hosts taht got valid GPS coordonates,
+    # and we just give them to the template to print them.
+    all_hosts = app.datamgr.get_hosts()
+    valid_hosts = []
+    for h in all_hosts:
+        _lat = h.customs.get('_LAT', None)
+        _long = h.customs.get('_LONG', None)
 
+        try:
+            print "Host", h.get_name(), _lat, _long, h.customs
+        except:
+            pass
+        if _lat and _long:
+            try:
+                _lat = float(_lat)
+                _long = float(_long)
+            # Maybe the customs are set, but with invalid float?
+            except ValueError:
+                continue
+            # Look for good range, lat/long must be between -180/180
+            if -180 <= _lat <= 180 and -180 <= _long <= 180:
+                print "GOOD VALUES FOR HOST", h.get_name()
+                valid_hosts.append(h)
+
+    # So now we can just send the valid hosts to the template
+    return {'app': app, 'user': user, 'hosts' : valid_hosts}
+
+
+# We export our properties to the webui
 pages = {get_page: {'routes': ['/worldmap'], 'view': 'worldmap', 'static': True}}
