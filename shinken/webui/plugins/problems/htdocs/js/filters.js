@@ -280,7 +280,6 @@ function add_state_criticity_filter(name){
     f.long_type = 'Criticity';
     f.search = name;
     new_filters.push(f);
-    current_filters.push(f);
     refresh_new_search_div();
 }
 
