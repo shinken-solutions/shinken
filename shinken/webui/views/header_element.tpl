@@ -92,7 +92,7 @@
       <li class="dropdown">
         <a href="#" class="dropdown-toggle" data-toggle="dropdown">Hi {{user.get_name().capitalize()}} <b class="caret"></b></a>
         <ul class="dropdown-menu">
-          <a class='disabled-link' href="#"><i class="icon-pencil"></i> Edit profile</a>
+          <a class="disabled-link" href="#"><i class="icon-pencil"></i> Edit profile</a>
         </ul>
       </li>
     </ul>
@@ -102,12 +102,12 @@
     </ul>
     <script>  
       $(function ()  
-      { $("#searchhelp").popover({trigger: 'click', placement:'bottom'});  
+      { $("#searchhelp").popover({trigger: 'click', placement:'bottom', html: 'true', animation: 'true'});  
       });  
     </script>  
-    <form name="global_search" class="navbar-search pull-right" action='#'>
+    <form name="global_search" class="navbar-search pull-right topmmargin1" action='#'>
       <input type="text" class="search-query typeahead no-bottommargin" autocomplete="off" placeholder="Search" name="global_search">
-      <a id="searchhelp" class="" data-content="And here's some amazing content. It's very engaging. right?" rel="popover" href="#" data-original-title="A Title"><i class="icon-question-sign icon-white"></i></a>  
+      <a id="searchhelp" data-content="<a href='http://www.shinken-monitoring.org/wiki/'>Search documentation</a>" rel="popover" href="#" data-original-title="Help"><i class="icon-question-sign icon-white topmmargin2"></i></a>  
     </form>
     %end
   </div><!--/.nav-collapse -->
