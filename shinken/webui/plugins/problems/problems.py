@@ -61,7 +61,7 @@ def get_view(page):
 
     # We will keep a trace of our filters
     filters = {}
-    ts = ['hst_srv', 'hg', 'realm', 'htag', 'ack', 'downtime']
+    ts = ['hst_srv', 'hg', 'realm', 'htag', 'ack', 'downtime', 'crit']
     for t in ts:
         filters[t] = []
 
@@ -181,6 +181,12 @@ def get_view(page):
                 items = [i for i in items if i.__class__.my_type == 'service' or i.in_scheduled_downtime]
                 # Now ok for hosts, but look for services, and service hosts
                 items = [i for i in items if i.__class__.my_type == 'host' or (i.in_scheduled_downtime or i.host.in_scheduled_downtime)]
+
+        if t == 'crit':
+            print "Add a criticity filter", s
+            items = [i for i in items if (i.__class__.my_type == 'service' and i.state_id == 2) or (i.__class__.my_type == 'host' and i.state_id == 1)]
+
+
 
         print "After filtering for", t, s, 'we got', len(items)
 

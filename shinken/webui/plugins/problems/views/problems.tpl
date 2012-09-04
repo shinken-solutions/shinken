@@ -175,6 +175,16 @@
       <p class='pull-right'><a class='btn btn-success pull-right' href="javascript:save_state_downtime_filter();"> <i class="icon-chevron-right"></i> Add</a></p>
     </form>
 
+    <form name='criticity_filter' class='form-horizontal'>
+      <span class="help-inline">Critical Only</span>
+      %if page=='problems':
+      <input type='checkbox' name='show_critical'></input>
+      %else:
+      <input type='checkbox' name='show_critical' checked></input>
+      %end
+      <p class='pull-right'><a class='btn btn-success pull-right' href="javascript:save_state_criticity_filter();"> <i class="icon-chevron-right"></i> Add</a></p>
+    </form>
+
     <span><p>&nbsp;</p></span>
 
 
@@ -230,7 +240,7 @@ $(function(){
 	    %elif start == None or end == None:
 	    <li class="disabled"> <a href="#">...</a> </li>
 	    %else:
-	    <li><a href='/{{page}}?start={{start}}&end={{end}}' class='page larger'>{{name}}</a></li>
+	    <li><a href='/{{page}}?start={{start}}&end={{end}}&search={{search}}' class='page larger'>{{name}}</a></li>
 	    %end
 	  %end
 	</ul>
@@ -308,6 +318,15 @@ $(function(){
       <span class="filter_delete"><a href='javascript:remove_current_filter("downtime", "{{r}}", "/{{page}}");' class="close">&times;</a></span>
     </li>
     <script>add_active_state_downtime_filter('{{r}}');</script>
+    %end
+
+    %for r in filters['crit']:
+    <li>
+      <span class="filter_color criticity_filter_color">&nbsp;</span>
+      <span class="criticity_filter_name">Criticity: {{r}}</span>
+      <span class="filter_delete"><a href='javascript:remove_current_filter("crit", "{{r}}", "/{{page}}");' class="close">&times;</a></span>
+    </li>
+    <script>add_active_state_criticity_filter('{{r}}');</script>
     %end
 
     </ul>
