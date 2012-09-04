@@ -105,8 +105,8 @@
       { $("#searchhelp").popover({trigger: 'click', placement:'bottom'});  
       });  
     </script>  
-    <form name='global_search' class="navbar-search pull-right" action='#'>
-      <input type="text" class="search-query typeahead" autocomplete="off" placeholder="Search" name="global_search">
+    <form name="global_search" class="navbar-search pull-right" action='#'>
+      <input type="text" class="search-query typeahead no-bottommargin" autocomplete="off" placeholder="Search" name="global_search">
       <a id="searchhelp" class="" data-content="And here's some amazing content. It's very engaging. right?" rel="popover" href="#" data-original-title="A Title"><i class="icon-question-sign icon-white"></i></a>  
     </form>
     %end
