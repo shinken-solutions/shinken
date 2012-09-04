@@ -74,7 +74,7 @@ $(document).ready(function(){
   <div id="content_container" class="span12">
   	<h1 class="span6 no-leftmargin state_{{elt.state.lower()}} icon_down"> <img class="imgsize3" alt="icon state" src="{{helper.get_icon_state(elt)}}" />{{elt.state}}: {{elt.get_full_name()}}</h1> 
 
-	<div class="span6">
+	<div class="span6 no-leftmargin">
 		<span class="pull-right leftmargin" id="host_tags">
 			%tags = elt.get_host_tags()
 			%for t in tags:
@@ -91,7 +91,7 @@ $(document).ready(function(){
 						<a href="{{action_url}}" target=_blank><img src={{icon}} alt="{{alt}}"></a>
 					%else:
 						%if len(triplet.split(',')) == 1:
-							<a href="{{triplet}}" target=_blank><button class="btn btn-small pull-right" type="button"><i class="icon-cog"></i></button></a>
+							<a href="{{triplet}}" target=_blank><button class="btn btn-mini pull-right" type="button"><i class="icon-cog"></i></button></a>
 						%end
 					%end
 				%end
@@ -397,7 +397,7 @@ $(document).ready(function(){
 		</div>
 
 		<!-- Detail info box start -->
-		<div class="span9 tabbable">
+		<div class="span9 tabbable no-leftmargin">
 			<ul class="nav nav-tabs">
 				<li class="active"><a href="#impacts" data-toggle="tab">Impacts</a></li>
 				<li><a href="#comments" data-toggle="tab">Comments</a></li>
