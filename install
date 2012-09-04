@@ -169,7 +169,7 @@ function enable_rhel_service(){
     if [ $CODE == "REDHAT" ]
     then
         chkconfig --add $service >> ${LOGFILE} 2>&1
-        chkconfig $ervice on >> ${LOGFILE} 2>&1
+        chkconfig $service on >> ${LOGFILE} 2>&1
     fi
 }
 
@@ -257,7 +257,7 @@ function setdirectives(){
 
 function create_user(){
     cadre "Creating user" green
-    if grep -q "^${SKUSER}:" /etc/passwd;
+    if [ ! -z "$(cat /etc/passwd | grep $SKUSER)" ]
     then
         cecho " > User $SKUSER already exists" yellow
     else
@@ -2076,13 +2076,6 @@ function install_notify_by_xmpp(){
                 apt-get install -y python-xmpp >> ${LOGFILE} 2>&1
             fi
             ;;
-        REDHAT|Fedora)
-            if [ -z "$(rpm -q python-xmpp)"  ]
-            then
-                cecho " -> python-xmpp not found. Going to install" yellow
-                yum install -y python-xmpp >> ${LOGFILE} 2>&1
-            fi
-            ;;
         *)
             cecho " > Unsupported distro" red
             exit 2
@@ -2329,8 +2322,8 @@ function install_check_mongodb(){
 function install_IBM_DS() {
     cadre "Install check_IBM_DS_health.sh and check_IBM_DS_performance.pl plugins" green
 
-    SMcli_bin="/opt/IBM_DS/client/SMcli"
-    if [ -x $SMcli_bin ]
+    SMcli_bin=$(which SMcli)
+    if [ $? -ne 0 ]
     then
         cecho "You do not have Storage Manager installed. Go on:" red
         cecho "http://www-933.ibm.com/support/fixcentral/swg/selectFixes?parent=Entry-level+disk+systems&product=ibm/Storage_Disk/DS3500&release=All&platform=All&function=all#Storage%20Manager" red
@@ -2356,6 +2349,16 @@ function install_IBM_plugins() {
 
     cecho "Installing plugins..." green
     install -b -g $SKGROUP -o $SKUSER -m 0755 -t $TARGET/libexec check_snmp_systemHealth.pl check_snmp_aixVGstate.pl check_snmp_HACMP.pl check_snmp_Safekit.pl >> $TMP/shinken.install.log 2>&1
+}
+
+function install_HPUX_plugins() {
+    cadre "Install HPUX plugins" green
+
+    cecho "Downloading plugins..." green
+    wget $WGETPROXY $CHECKHPUX >> ${LOGFILE} 2>&1
+
+    cecho "Installing plugins..." green
+    install -b -g $SKGROUP -o $SKUSER -m 0755 -t $TARGET/libexec check_snmp_hpux_storage.pl check_snmp_mem >> $TMP/shinken.install.log 2>&1
 }
 
 # CHECK_NWC_HEALTH
@@ -2952,6 +2955,7 @@ function install_check_snmp_netint(){
     cecho " > install check_snmp_netint" green
     install -b -g $SKGROUP -o $SKUSER -m 0755 -t $TARGET/libexec check_snmp_netint.pl >> $TMP/shinken.install.log 2>&1
 }
+
 function install_check_rsync(){
     cadre "Install the rsync check plugin" green
 
@@ -3110,6 +3114,7 @@ echo "Usage: install -k | -i | -u [addonname] | -b | -r backupname | -l | -c | -
                                check_snmp_netint (enhanced version of check_snmp_int plugins)
                                check_IBM
                                check_IBM_DS
+                               check_HPUX
                                check_rsync
     -a | --addon            Install addons. Argument should be one of the following:
                                pnp4nagios
@@ -3239,6 +3244,10 @@ do
             elif [ "$OPTARG" == "check_IBM_DS" ]
             then
                 install_IBM_DS
+                exit 0
+            elif [ "$OPTARG" == "check_HPUX" ]
+            then
+                install_HPUX_plugins
                 exit 0
             elif [ "$OPTARG" == "check_rsync" ]
             then
