@@ -164,7 +164,10 @@
 .trim-Yes, .trim-No {
   color: #FFFFFF;
   text-transform: uppercase;
+  min-height: 100% !important;
 } 
+
+.alert-down {min-height: 100% !important;}
 
 .alert-critical, .alert-down, .trim-Yes {
   background-color: #da4f49;
