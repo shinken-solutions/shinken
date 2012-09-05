@@ -231,7 +231,7 @@ class TestWithLocalLogging(unittest.TestCase, LogCollectMixin):
     def _prepare_logging(self):
         super(TestWithLocalLogging, self)._prepare_logging()
         # set up a temporary file for logging
-        logfile = NamedTemporaryFile("w", delete=False)
+        logfile = NamedTemporaryFile("w")
         logfile.close()
         self.logfile_name = logfile.name
         logger.register_local_log(logfile.name)
@@ -247,7 +247,7 @@ class TestWithLocalLogging(unittest.TestCase, LogCollectMixin):
     def test_register_local_log_keeps_level(self):
         logger.set_level(logger.ERROR)
         self.assertEqual(logger._level, logger.ERROR)
-        logfile = NamedTemporaryFile("w", delete=False)
+        logfile = NamedTemporaryFile("w")
         logfile.close()
         logfile_name = logfile.name
         logger.register_local_log(logfile_name)
