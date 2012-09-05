@@ -104,7 +104,7 @@ class Graphite_Webui(BaseModule):
             name = self.illegal_char.sub('_', elts[0])
             raw = elts[1]
             # get the first value of ;
-            if ';' in raw:
+            if ';' in raw and len(raw.split(';')) > 3:
                 elts = raw.split(';')
                 name_value = {name: elts[0], name + '_warn': elts[1], name + '_crit': elts[2]}
             else:
