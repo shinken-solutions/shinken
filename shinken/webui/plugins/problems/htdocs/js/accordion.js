@@ -75,6 +75,11 @@ function show_hidden_problems(cls){
 // At start we hide the unselect all button
 $(document).ready(function(){
     $('#unselect_all_btn').hide();
+    if(toolbar_hide){
+        hide_toolbar();
+    }else{
+        $('#show_toolbar_btn').hide();
+    }
 
     // If actions are not allowed, disable the button 'select all'
     if(!actions_enabled){
@@ -226,4 +231,23 @@ function acknowledge_all(user){
 	do_acknowledge(unid_name(name), 'Acknowledge from WebUI.', user);
     });
     flush_selected_elements();
+}
+
+function hide_toolbar(){
+    $('#toolbar').hide();
+    $('#hide_toolbar_btn').hide();
+    $('#show_toolbar_btn').show();
+    save_toolbar('hide');
+}
+
+function show_toolbar(){
+    $('#toolbar').show();
+    $('#hide_toolbar_btn').show();
+    $('#show_toolbar_btn').hide();
+    save_toolbar('show');
+}
+
+function save_toolbar(toolbar){
+    console.log('Need to save toolbar pref '+toolbar);
+    $.post("/user/save_pref", { 'key' : 'toolbar', 'value' : toolbar});
 }

@@ -55,6 +55,21 @@ def get_view(page):
 
     print 'DUMP COMMON GET', app.request.GET.__dict__
 
+
+   # Look for the toolbar pref
+    tool_pref = app.get_user_preference(user, 'toolbar')
+    # If void, create an empty one
+    if not tool_pref:
+        app.set_user_preference(user, 'toolbar', 'show')
+        tool_pref = 'show'
+    toolbar = app.request.GET.get('toolbar', '')
+    print "Toolbar", tool_pref, toolbar
+    if toolbar != tool_pref and len(toolbar) > 0:
+        print "Need to change user prefs for Toolbar", 
+        app.set_user_preference(user, 'toolbar', toolbar)
+    tool_pref = app.get_user_preference(user, 'toolbar')
+
+
     # We want to limit the number of elements
     start = int(app.request.GET.get('start', '0'))
     end = int(app.request.GET.get('end', '30'))
@@ -224,7 +239,7 @@ def get_view(page):
     ## for pb in pbs:
     ##     print pb.get_name()
     print 'Give filters', filters
-    return {'app': app, 'pbs': items, 'user': user, 'navi': navi, 'search': search_str, 'page': page, 'filters': filters, 'bookmarks': bookmarks, 'bookmarksro': bookmarksro }
+    return {'app': app, 'pbs': items, 'user': user, 'navi': navi, 'search': search_str, 'page': page, 'filters': filters, 'bookmarks': bookmarks, 'bookmarksro': bookmarksro, 'toolbar': tool_pref }
 
 
 # Our page
